@@ -70,6 +70,7 @@ ScopeVis::ScopeVis() :
 {
     setObjectName("ScopeVis");
     m_traceDiscreteMemory.resize(GLScopeSettings::m_traceChunkDefaultSize); // arbitrary
+    m_convertBuffers.resize(GLScopeSettings::m_traceChunkDefaultSize);
 
     for (int i = 0; i < (int) Projector::nbProjectionTypes; i++) {
         m_projectorCache[i] = 0.0;
@@ -140,6 +141,7 @@ void ScopeVis::setNbStreams(uint32_t nbStreams)
     if (m_nbStreams != nbStreams)
     {
         m_traceDiscreteMemory.setNbStreams(nbStreams);
+        m_convertBuffers.setNbStreams(nbStreams);
         m_nbStreams = nbStreams;
     }
 }
@@ -415,6 +417,31 @@ void ScopeVis::setMemoryIndex(uint32_t memoryIndex)
 
 void ScopeVis::feed(const std::vector<SampleVector::const_iterator>& vbegin, int nbSamples)
 {
+    std::vector<ComplexVector::const_iterator> vcbegin;
+    std::vector<ComplexVector>& convertBuffers = m_convertBuffers.getBuffers();
+
+    if (nbSamples > (int) m_convertBuffers.size()) {
+        m_convertBuffers.resize(nbSamples);
+    }
+
+    for (unsigned int s = 0; s < vbegin.size(); s++)
+    {
+        std::transform(
+            vbegin[s],
+            vbegin[s] + nbSamples,
+            convertBuffers[s].begin(),
+            [](const Sample& s) -> Complex {
+                return Complex{s.m_real / SDR_RX_SCALEF, s.m_imag / SDR_RX_SCALEF};
+            }
+        );
+        vcbegin.push_back(convertBuffers[s].begin());
+    }
+
+    feed(vcbegin, nbSamples);
+}
+
+void ScopeVis::feed(const std::vector<ComplexVector::const_iterator>& vbegin, int nbSamples)
+{
     if (vbegin.size() == 0) {
         return;
     }
@@ -447,11 +474,11 @@ void ScopeVis::feed(const std::vector<SampleVector::const_iterator>& vbegin, int
         m_triggerLocation = nbSamples;
     }
 
-    SampleVector::const_iterator begin(vbegin[0]);
+    ComplexVector::const_iterator begin(vbegin[0]);
     //const SampleVector::const_iterator end = vbegin[0] + nbSamples;
     int triggerPointToEnd;
     int remainder = nbSamples;
-    std::vector<SampleVector::const_iterator> nvbegin(vbegin);
+    std::vector<ComplexVector::const_iterator> nvbegin(vbegin);
 
     //while (begin < end)
     while (remainder > 0)
@@ -495,11 +522,11 @@ void ScopeVis::processMemoryTrace()
             traceMemoryIndex += GLScopeSettings::m_nbTraceMemories;
         }
 
-        std::vector<SampleVector::const_iterator> mend;
+        std::vector<ComplexVector::const_iterator> mend;
         m_traceDiscreteMemory.getEndPointAt(traceMemoryIndex, mend);
-        std::vector<SampleVector::const_iterator> mbegin(mend.size());
+        std::vector<ComplexVector::const_iterator> mbegin(mend.size());
         TraceBackDiscreteMemory::moveIt(mend, mbegin, -m_traceSize);
-        std::vector<SampleVector::const_iterator> mbegin_tb(mbegin.size());
+        std::vector<ComplexVector::const_iterator> mbegin_tb(mbegin.size());
         TraceBackDiscreteMemory::moveIt(mbegin, mbegin_tb, -m_maxTraceDelay);
         m_nbSamples = m_traceSize + m_maxTraceDelay;
 
@@ -508,9 +535,9 @@ void ScopeVis::processMemoryTrace()
     }
 }
 
-void ScopeVis::processTrace(const std::vector<SampleVector::const_iterator>& vcbegin, int length, int& triggerPointToEnd)
+void ScopeVis::processTrace(const std::vector<ComplexVector::const_iterator>& vcbegin, int length, int& triggerPointToEnd)
 {
-    std::vector<SampleVector::const_iterator> vbegin(vcbegin);
+    std::vector<ComplexVector::const_iterator> vbegin(vcbegin);
     int firstRemainder = length;
 
     // memory storage
@@ -579,7 +606,7 @@ void ScopeVis::processTrace(const std::vector<SampleVector::const_iterator>& vcb
             }
 
             uint32_t triggerStreamIndex = triggerCondition->m_triggerData.m_streamIndex;
-            const Sample& s = *vbegin[triggerStreamIndex];
+            const Complex& s = *vbegin[triggerStreamIndex];
 
             if (m_triggerComparator.triggered(s, *triggerCondition)) // matched the current trigger
             {
@@ -625,9 +652,9 @@ void ScopeVis::processTrace(const std::vector<SampleVector::const_iterator>& vcb
     {
         int remainder;
         int count = firstRemainder; // number of samples in traceback buffer past the current point
-        std::vector<SampleVector::const_iterator> mend;
+        std::vector<ComplexVector::const_iterator> mend;
         m_traceDiscreteMemory.getCurrent(mend);
-        std::vector<SampleVector::const_iterator> mbegin(mend.size());
+        std::vector<ComplexVector::const_iterator> mbegin(mend.size());
         TraceBackDiscreteMemory::moveIt(mend, mbegin, -count);
 
         if (m_traceStart) // start of trace processing
@@ -644,14 +671,14 @@ void ScopeVis::processTrace(const std::vector<SampleVector::const_iterator>& vcb
 
             if (m_maxTraceDelay > 0)
             { // trace back
-                std::vector<SampleVector::const_iterator> tbegin(mbegin.size());
+                std::vector<ComplexVector::const_iterator> tbegin(mbegin.size());
                 TraceBackDiscreteMemory::moveIt(mbegin, tbegin, - m_preTriggerDelay - m_maxTraceDelay);
                 processTraces(tbegin, m_maxTraceDelay, true);
             }
 
             if (m_preTriggerDelay > 0)
             { // pre-trigger
-                std::vector<SampleVector::const_iterator> tbegin(mbegin.size());
+                std::vector<ComplexVector::const_iterator> tbegin(mbegin.size());
                 TraceBackDiscreteMemory::moveIt(mbegin, tbegin, -m_preTriggerDelay);
                 processTraces(tbegin, m_preTriggerDelay);
             }
@@ -727,16 +754,13 @@ bool ScopeVis::nextTrigger()
     }
 }
 
-int ScopeVis::processTraces(const std::vector<SampleVector::const_iterator>& vcbegin, int ilength, bool traceBack)
+int ScopeVis::processTraces(const std::vector<ComplexVector::const_iterator>& vcbegin, int ilength, bool traceBack)
 {
-    std::vector<SampleVector::const_iterator> vbegin(vcbegin);
+    std::vector<ComplexVector::const_iterator> vbegin(vcbegin);
     uint32_t shift = (m_timeOfsProMill / 1000.0) * m_traceSize;
     uint32_t length = m_traceSize / m_timeBase;
     int remainder = ilength;
-
-    if (m_spectrumVis) {
-        m_spectrumVis->feed(vcbegin[0], vcbegin[0] + ilength, false); // TODO: use spectrum stream index
-    }
+    m_spectrumVis->feed(vcbegin[0], vcbegin[0] + ilength, false);
 
     while ((remainder > 0) && (m_nbSamples > 0))
     {
@@ -797,8 +821,8 @@ int ScopeVis::processTraces(const std::vector<SampleVector::const_iterator>& vcb
                 }
                 else if (projectionType == Projector::ProjectionMagDB)
                 {
-                    Real re = vbegin[streamIndex]->m_real / SDR_RX_SCALEF;
-                    Real im = vbegin[streamIndex]->m_imag / SDR_RX_SCALEF;
+                    Real re = vbegin[streamIndex]->real();
+                    Real im = vbegin[streamIndex]->imag();
                     double magsq = re*re + im*im;
                     float pdB = log10f(magsq) * 10.0f;
                     float p = pdB - (100.0f * itData->m_ofs);

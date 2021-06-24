@@ -151,6 +151,7 @@ public:
     void getZoomedPSDCopy(std::vector<Real>& copy) const;
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
+    void feed(const ComplexVector::const_iterator& begin, const ComplexVector::const_iterator& end, bool positiveOnly);
     virtual void feed(const Complex *begin, unsigned int length); //!< direct FFT feed
 	void feedTriggered(const SampleVector::const_iterator& triggerPoint, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();
@@ -243,6 +244,7 @@ private:
 
 	QMutex m_mutex;
 
+    void processFFT(bool positiveOnly);
     void setRunning(bool running) { m_running = running; }
     void applySettings(const SpectrumSettings& settings, bool force = false);
     void handleConfigureDSP(uint64_t centerFrequency, int sampleRate);

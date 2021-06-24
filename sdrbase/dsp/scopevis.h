@@ -432,6 +432,7 @@ public:
     uint32_t getNbTraces() const { return m_traces.size(); }
 
     void feed(const std::vector<SampleVector::const_iterator>& vbegin, int nbSamples);
+    void feed(const std::vector<ComplexVector::const_iterator>& vbegin, int nbSamples);
     //virtual void start();
     //virtual void stop();
     bool handleMessage(const Message& message);
@@ -510,7 +511,7 @@ private:
     /**
      * Complex trace stuff
      */
-    typedef DoubleBufferSimple<Sample> TraceBuffer;
+    typedef DoubleBufferSimple<Complex> TraceBuffer;
 
     struct TraceBackBuffer
     {
@@ -528,7 +529,7 @@ private:
     	    m_traceBuffer.reset();
     	}
 
-    	void write(const SampleVector::const_iterator begin, int nbSamples) {
+    	void write(const ComplexVector::const_iterator begin, int nbSamples) {
     		m_traceBuffer.write(begin, nbSamples);
     	}
 
@@ -536,7 +537,7 @@ private:
     		return m_traceBuffer.absoluteFill();
     	}
 
-        void current(SampleVector::iterator& it) {
+        void current(ComplexVector::iterator& it) {
             m_traceBuffer.getCurrent(it);
         }
 
@@ -578,24 +579,57 @@ private:
             }
         }
 
-        void setEndPoint(const SampleVector::const_iterator& endPoint) {
+        void setEndPoint(const ComplexVector::const_iterator& endPoint) {
             m_endPoint = endPoint;
         }
 
-        SampleVector::const_iterator getEndPoint() {
+        ComplexVector::const_iterator getEndPoint() {
             return m_endPoint;
         }
 
-        void getEndPoint(SampleVector::const_iterator& it) {
+        void getEndPoint(ComplexVector::const_iterator& it) {
             it = m_endPoint;
         }
 
     private:
-    	SampleVector::const_iterator m_endPoint;
+    	ComplexVector::const_iterator m_endPoint;
     };
 
     typedef std::vector<TraceBackBuffer> TraceBackBufferStream;
 
+    struct ConvertBuffers
+    {
+        ConvertBuffers(uint32_t nbStreams = 1) :
+            m_convertBuffers(nbStreams)
+        {}
+
+        void setNbStreams(uint32_t nbStreams)
+        {
+            m_convertBuffers.resize(nbStreams);
+            resize(m_size);
+        }
+
+        void resize(unsigned int size)
+        {
+            for (unsigned int s = 0; s < m_convertBuffers.size(); s++) {
+                m_convertBuffers[s].resize(size);
+            }
+
+            m_size = size;
+        }
+
+        unsigned int size() const {
+            return m_size;
+        }
+
+        std::vector<ComplexVector>& getBuffers() {
+            return m_convertBuffers;
+        }
+
+    private:
+        unsigned int m_size;
+        std::vector<ComplexVector> m_convertBuffers;
+    };
     struct TraceBackDiscreteMemory
     {
     	/**
@@ -747,20 +781,20 @@ private:
         /**
          * Get current point at current memory position (first stream)
          */
-        void getCurrent(SampleVector::iterator& it) {
+        void getCurrent(ComplexVector::iterator& it) {
             current().current(it);
         }
 
         /**
          * Get current points at current memory position
          */
-        void getCurrent(std::vector<SampleVector::const_iterator>& vit)
+        void getCurrent(std::vector<ComplexVector::const_iterator>& vit)
         {
             vit.clear();
 
             for (unsigned int is = 0; is < m_traceBackBuffersStreams.size(); is++)
             {
-                SampleVector::iterator it;
+                ComplexVector::iterator it;
                 current(is).current(it);
                 vit.push_back(it);
             }
@@ -769,14 +803,14 @@ private:
         /**
          * Set end point at current memory position (first stream)
          */
-        void setCurrentEndPoint(const SampleVector::iterator& it) {
+        void setCurrentEndPoint(const ComplexVector::iterator& it) {
             current().setEndPoint(it);
         }
 
         /**
          * Set end points at current memory position
          */
-        void setCurrentEndPoint(const std::vector<SampleVector::const_iterator>& vit)
+        void setCurrentEndPoint(const std::vector<ComplexVector::const_iterator>& vit)
         {
             for (unsigned int is = 0; is < vit.size(); is++)
             {
@@ -791,20 +825,20 @@ private:
         /**
          * Get end point at given memory position (first stream)
          */
-        void getEndPointAt(int index, SampleVector::const_iterator& mend) {
+        void getEndPointAt(int index, ComplexVector::const_iterator& mend) {
             at(index).getEndPoint(mend);
         }
 
         /**
          * Get end points at given memory position
          */
-        void getEndPointAt(int index, std::vector<SampleVector::const_iterator>& vend)
+        void getEndPointAt(int index, std::vector<ComplexVector::const_iterator>& vend)
         {
             vend.clear();
 
             for (unsigned int is = 0; is < m_traceBackBuffersStreams.size(); is++)
             {
-                SampleVector::const_iterator mend;
+                ComplexVector::const_iterator mend;
                 at(index, is).getEndPoint(mend);
                 vend.push_back(mend);
             }
@@ -813,14 +847,14 @@ private:
         /**
          * Write trace at current memory position (first stream)
          */
-        void writeCurrent(const SampleVector::const_iterator& begin, int length) {
+        void writeCurrent(const ComplexVector::const_iterator& begin, int length) {
             current().write(begin, length);
         }
 
         /**
          * Write traces at current memory position
          */
-        void writeCurrent(const std::vector<SampleVector::const_iterator>& vbegin, int length)
+        void writeCurrent(const std::vector<ComplexVector::const_iterator>& vbegin, int length)
         {
             for (unsigned int i = 0; i < vbegin.size(); i++) {
                 current().write(vbegin[i], length);
@@ -830,14 +864,14 @@ private:
         /**
          * Move buffer iterator by a certain amount (first stream)
          */
-        static void moveIt(const SampleVector::const_iterator& x, SampleVector::const_iterator& y, int amount) {
+        static void moveIt(const ComplexVector::const_iterator& x, ComplexVector::const_iterator& y, int amount) {
             y = x + amount;
         }
 
         /**
          * Move buffers iterators by a certain amount
          */
-        static void moveIt(const std::vector<SampleVector::const_iterator>& vx, std::vector<SampleVector::const_iterator>& vy, int amount)
+        static void moveIt(const std::vector<ComplexVector::const_iterator>& vx, std::vector<ComplexVector::const_iterator>& vy, int amount)
         {
             for (unsigned int i = 0; i < vx.size(); i++)
             {
@@ -1083,7 +1117,7 @@ private:
             computeLevels();
         }
 
-        bool triggered(const Sample& s, TriggerCondition& triggerCondition)
+        bool triggered(const Complex& s, TriggerCondition& triggerCondition)
         {
             if (triggerCondition.m_triggerData.m_triggerLevel != m_level)
             {
@@ -1194,7 +1228,8 @@ private:
     int m_triggerLocation;                         //!< Trigger location from end point
     int m_sampleRate;                              //!< Actual sample rate being used
     int m_liveSampleRate;                          //!< Sample rate in live mode
-    TraceBackDiscreteMemory m_traceDiscreteMemory; //!< Complex trace memory for triggered states TODO: vectorize when more than on input is allowed
+    TraceBackDiscreteMemory m_traceDiscreteMemory; //!< Complex trace memory
+    ConvertBuffers m_convertBuffers;               //!< Sample to Complex conversions
     bool m_freeRun;                                //!< True if free running (trigger globally disabled)
     int m_maxTraceDelay;                           //!< Maximum trace delay
     TriggerComparator m_triggerComparator;         //!< Compares sample level to trigger level
@@ -1227,7 +1262,7 @@ private:
     /**
      * Process a sample trace which length is at most the trace length (m_traceSize)
      */
-    void processTrace(const std::vector<SampleVector::const_iterator>& vbegin, int length, int& triggerPointToEnd);
+    void processTrace(const std::vector<ComplexVector::const_iterator>& vbegin, int length, int& triggerPointToEnd);
 
     /**
      * process a trace in memory at current trace index in memory
@@ -1239,7 +1274,7 @@ private:
      * - if finished it returns the number of unprocessed samples left in the buffer
      * - if not finished it returns -1
      */
-    int processTraces(const std::vector<SampleVector::const_iterator>& vbegin, int length, bool traceBack = false);
+    int processTraces(const std::vector<ComplexVector::const_iterator>& vbegin, int length, bool traceBack = false);
 
     /**
      * Get maximum trace delay

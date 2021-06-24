@@ -41,6 +41,7 @@ typedef qint16 FixReal;
 
 typedef float Real;
 typedef std::complex<Real> Complex;
+typedef std::vector<Complex> ComplexVector;
 
 #pragma pack(push, 1)
 struct Sample
