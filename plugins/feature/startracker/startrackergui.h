@@ -36,6 +36,8 @@ class FeatureUISet;
 class StarTracker;
 class QNetworkAccessManager;
 class QNetworkReply;
+class GraphicsViewZoom;
+class QGraphicsPixmapItem;
 
 namespace Ui {
     class StarTrackerGUI;
@@ -86,14 +88,22 @@ private:
     QNetworkRequest m_networkRequest;
     HttpDownloadManagerGUI m_dlm;
 
+    // Solar flux plot
     double m_solarFlux; // 10.7cm/2800MHz
     bool m_solarFluxesValid;
     int m_solarFluxes[8]; // Frequency (MHz), flux density (sfu)
     const int m_solarFluxFrequencies[8] = {245, 410, 610, 1415, 2695, 4995, 8800, 15400};
 
+    // Sky temperature
     QList<QImage> m_images;
     QList<FITS> m_temps;
     FITS m_spectralIndex;
+
+    // Galactic line of sight
+    QList<QPixmap> m_milkyWayImages;
+    GraphicsViewZoom* m_zoom;
+    QList<QGraphicsPixmapItem *> m_milkyWayItems;
+    QGraphicsLineItem* m_lineOfSight;
 
     explicit StarTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent = nullptr);
     virtual ~StarTrackerGUI();
@@ -111,6 +121,8 @@ private:
     void plotElevationPolarChart();
     void plotSkyTemperatureChart();
     void plotSolarFluxChart();
+    void plotGalacticLineOfSight();
+    void createGalacticLineOfSightScene();
     void plotChart();
     void removeAllAxes();
     double convertSolarFluxUnits(double sfu);
@@ -121,6 +133,7 @@ private:
     void raDecChanged();
     void updateChartSubSelect();
     void updateSolarFlux(bool all);
+    void updateGalacticCoords();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);
@@ -151,6 +164,8 @@ private slots:
     void autoUpdateSolarFlux();
     void on_downloadSolarFlux_clicked();
     void on_darkTheme_clicked(bool checked);
+    void on_zoomIn_clicked();
+    void on_zoomOut_clicked();
     void networkManagerFinished(QNetworkReply *reply);
     void downloadFinished(const QString& filename, bool success);
 };

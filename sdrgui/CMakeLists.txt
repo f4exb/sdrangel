@@ -45,6 +45,7 @@ set(sdrgui_SOURCES
     gui/glshadertvarray.cpp
     gui/glspectrum.cpp
     gui/glspectrumgui.cpp
+    gui/graphicsviewzoom.cpp
     gui/httpdownloadmanagergui.cpp
     gui/indicator.cpp
     gui/levelmeter.cpp
@@ -131,6 +132,7 @@ set(sdrgui_HEADERS
     gui/glshadertextured.h
     gui/glspectrum.h
     gui/glspectrumgui.h
+    gui/graphicsviewzoom.h
     gui/httpdownloadmanagergui.h
     gui/indicator.h
     gui/levelmeter.h
