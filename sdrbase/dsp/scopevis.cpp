@@ -760,7 +760,10 @@ int ScopeVis::processTraces(const std::vector<ComplexVector::const_iterator>& vc
     uint32_t shift = (m_timeOfsProMill / 1000.0) * m_traceSize;
     uint32_t length = m_traceSize / m_timeBase;
     int remainder = ilength;
-    m_spectrumVis->feed(vcbegin[0], vcbegin[0] + ilength, false);
+
+    if (m_spectrumVis) {
+        m_spectrumVis->feed(vcbegin[0], vcbegin[0] + ilength, false);
+    }
 
     while ((remainder > 0) && (m_nbSamples > 0))
     {
