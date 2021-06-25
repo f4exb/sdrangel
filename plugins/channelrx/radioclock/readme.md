@@ -12,7 +12,7 @@ If you'd like other transmitters to be supported (such as WWVB), please upload a
 
 Typically, it will take two minutes before the time is able to be displayed (up to one minute to find the minute marker, then another minute to receive the timecode).
 
-Although the atomic clocks used to transmit the timecode are extremely accurate, propagation, SDR data transfer and demodulation delays limit accuracy of the displayed time to around 1 second. 
+Although the atomic clocks used to transmit the timecode are extremely accurate, propagation, SDR data transfer and demodulation delays limit accuracy of the displayed time to around 1 second.
 
 <h2>Interface</h2>
 
@@ -76,3 +76,22 @@ Displays the demodulator status. This can be:
 The date and time fields are only valid when the status indicates OK.
 
 If while in the OK state several second markers are not detected, the status will return to Looking for minute marker.
+
+<h3>Waveforms</h3>
+
+The scope shows how various variables within the demodulator vary with time. These can be used to help debug operation of the demodulator.
+
+The signals available include:
+
+- IQ - IQ data at channel sample rate (1kHz).
+- MagSq - Magnitude squared (power) of received signal after being filtered with a moving average filter.
+- TH - Current threshold, which is moving average of MagSq - TH setting.
+- FM - Output of FM demodulator for TDF demodulator only.
+- Data - Demodulated data. For MSF/DCF77, this data=MagSq>TH.
+- Samp - Indicates when data is sampled (either for the second marker or for a timecode data bit).
+- GotMM - Indicates whether the minute marker has been received. Cleared when synchronization to second marker is lost.
+
+As an example of how this can be used, we can plot the MagSq as X and the calculated TH as Y, which can help to set the value of the
+TH setting to an approproate level.
+
+![Radio clock plugin GUI](../../../doc/img/RadioClock_waveforms.png)

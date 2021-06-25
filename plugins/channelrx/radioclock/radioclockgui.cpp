@@ -176,18 +176,6 @@ void RadioClockGUI::on_timezone_currentIndexChanged(int index)
     applySettings();
 }
 
-void RadioClockGUI::on_channel1_currentIndexChanged(int index)
-{
-    m_settings.m_scopeCh1 = index;
-    applySettings();
-}
-
-void RadioClockGUI::on_channel2_currentIndexChanged(int index)
-{
-    m_settings.m_scopeCh2 = index;
-    applySettings();
-}
-
 void RadioClockGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
@@ -259,10 +247,11 @@ RadioClockGUI::RadioClockGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
 
     m_scopeVis = m_radioClock->getScopeSink();
     m_scopeVis->setGLScope(ui->glScope);
-    m_scopeVis->setNbStreams(1);
+    m_scopeVis->setNbStreams(7);
     m_scopeVis->setLiveRate(1000);
     ui->glScope->connectTimer(MainCore::instance()->getMasterTimer());
     ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
+    ui->scopeGUI->setStreams(QStringList({"IQ", "MagSq", "TH", "FM", "Data", "Samp", "GotMM"}));
 
     ui->status->setText("Looking for minute marker");
 
@@ -341,9 +330,6 @@ void RadioClockGUI::displaySettings()
     ui->timezone->setCurrentIndex((int)m_settings.m_timezone);
 
     displayStreamIndex();
-
-    ui->channel1->setCurrentIndex(m_settings.m_scopeCh1);
-    ui->channel2->setCurrentIndex(m_settings.m_scopeCh2);
 
     blockApplySettings(false);
 }

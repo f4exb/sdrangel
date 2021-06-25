@@ -66,14 +66,22 @@ void RadioClockSink::sampleToScope(Complex sample)
 {
     if (m_scopeSink)
     {
-        Real r = std::real(sample) * SDR_RX_SCALEF;
-        Real i = std::imag(sample) * SDR_RX_SCALEF;
-        SampleVector m_sampleBuffer1;
-        m_sampleBuffer1.push_back(Sample(r, i));
-        std::vector<SampleVector::const_iterator> vbegin;
-        vbegin.push_back(m_sampleBuffer1.begin());
-        m_scopeSink->feed(vbegin, m_sampleBuffer1.end() - m_sampleBuffer1.begin());
-        m_sampleBuffer1.clear();
+        ComplexVector m_sampleBuffer[7];
+        m_sampleBuffer[0].push_back(sample);
+        m_sampleBuffer[1].push_back(Complex(m_magsq, 0.0f));
+        m_sampleBuffer[2].push_back(Complex(m_threshold, 0.0f));
+        m_sampleBuffer[3].push_back(Complex(m_fmDemodMovingAverage.asDouble(), 0.0f));
+        m_sampleBuffer[4].push_back(Complex(m_data, 0.0f));
+        m_sampleBuffer[5].push_back(Complex(m_sample, 0.0f));
+        m_sampleBuffer[6].push_back(Complex(m_gotMinuteMarker, 0.0f));
+        std::vector<ComplexVector::const_iterator> vbegin;
+        for (int i = 0; i < 7; i++) {
+            vbegin.push_back(m_sampleBuffer[i].begin());
+        }
+        m_scopeSink->feed(vbegin, m_sampleBuffer[0].end() - m_sampleBuffer[0].begin());
+        for (int i = 0; i < 7; i++) {
+            m_sampleBuffer[i].clear();
+        }
     }
 }
 
@@ -596,63 +604,8 @@ void RadioClockSink::processOneSample(Complex &ci)
         msf60();
     }
 
-    // Select signals to feed to scope
-    Complex scopeSample;
-    switch (m_settings.m_scopeCh1)
-    {
-    case 0:
-        scopeSample.real(ci.real() / SDR_RX_SCALEF);
-        break;
-    case 1:
-        scopeSample.real(magsq * 1e6);
-        break;
-    case 2:
-        scopeSample.real(m_magsq * 1e6);
-        break;
-    case 3:
-        scopeSample.real(m_threshold * 1e6);
-        break;
-    case 4:
-        scopeSample.real(m_fmDemodMovingAverage.asDouble());
-        break;
-    case 5:
-        scopeSample.real(m_data);
-        break;
-    case 6:
-        scopeSample.real(m_sample);
-        break;
-    case 7:
-        scopeSample.real(m_gotMinuteMarker);
-        break;
-    }
-    switch (m_settings.m_scopeCh2)
-    {
-    case 0:
-        scopeSample.imag(ci.imag() / SDR_RX_SCALEF);
-        break;
-    case 1:
-        scopeSample.imag(magsq * 1e6);
-        break;
-    case 2:
-        scopeSample.imag(m_magsq * 1e6);
-        break;
-    case 3:
-        scopeSample.imag(m_threshold * 1e6);
-        break;
-    case 4:
-        scopeSample.imag(m_fmDemodMovingAverage.asDouble());
-        break;
-    case 5:
-        scopeSample.imag(m_data);
-        break;
-    case 6:
-        scopeSample.imag(m_sample);
-        break;
-    case 7:
-        scopeSample.imag(m_gotMinuteMarker);
-        break;
-    }
-    sampleToScope(scopeSample);
+    // Feed signals to scope
+    sampleToScope(Complex(re, im));
 }
 
 void RadioClockSink::applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force)
