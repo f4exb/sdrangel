@@ -37,8 +37,6 @@ void RadioClockSettings::resetToDefaults()
     m_threshold = 5;
     m_modulation = MSF;
     m_timezone = BROADCAST;
-    m_scopeCh1 = 2;
-    m_scopeCh2 = 3;
     m_rgbColor = QColor(102, 0, 0).rgb();
     m_title = "Radio Clock";
     m_streamIndex = 0;
@@ -58,8 +56,6 @@ QByteArray RadioClockSettings::serialize() const
     s.writeFloat(4, m_threshold);
     s.writeS32(5, (int)m_modulation);
     s.writeS32(6, (int)m_timezone);
-    s.writeS32(10, m_scopeCh1);
-    s.writeS32(11, m_scopeCh2);
     s.writeU32(12, m_rgbColor);
     s.writeString(13, m_title);
     if (m_channelMarker) {
@@ -97,8 +93,6 @@ bool RadioClockSettings::deserialize(const QByteArray& data)
         d.readFloat(4, &m_threshold, 30);
         d.readS32(5, (int *)&m_modulation, DCF77);
         d.readS32(6, (int *)&m_timezone, BROADCAST);
-        d.readS32(10, &m_scopeCh1, 2);
-        d.readS32(11, &m_scopeCh2, 3);
         d.readU32(12, &m_rgbColor, QColor(102, 0, 0).rgb());
         d.readString(13, &m_title, "Radio Clock");
         d.readBlob(14, &bytetmp);

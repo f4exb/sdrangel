@@ -89,8 +89,6 @@ private slots:
     void on_threshold_valueChanged(int value);
     void on_modulation_currentIndexChanged(int index);
     void on_timezone_currentIndexChanged(int index);
-    void on_channel1_currentIndexChanged(int index);
-    void on_channel2_currentIndexChanged(int index);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void handleInputMessages();

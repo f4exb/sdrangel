@@ -41,8 +41,6 @@ struct RadioClockSettings
         LOCAL,
         UTC
     } m_timezone;
-    int m_scopeCh1;
-    int m_scopeCh2;
 
     quint32 m_rgbColor;
     QString m_title;
