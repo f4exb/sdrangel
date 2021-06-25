@@ -62,7 +62,19 @@ Clears the current image and restarts the decoder. The decoder must be reset bet
 
 Saves the current image to disk. Images can be saved in PNG, JPEG, BMP, PPM, XBM or XPM formats.
 
-<h3>10: Channel selection</h3>
+<h3>10: Zoom in</h3>
+
+Zooms in to the image. You can also zoom in with the scroll wheel.
+
+<h3>11: Zoom out</h3>
+
+Zooms out from the image. You can also zoom out with the scroll wheel.
+
+<h3>12: Zoom image to fit</h3>
+
+Zooms so that the image fits in to the available space.
+
+<h3>13: Channel selection</h3>
 
 Selects whether:
 
@@ -70,29 +82,29 @@ Selects whether:
    - only channel A is displayed
    - only channel B is displayed
 
-<h3>11: Crop noise</h3>
+<h3>14: Crop noise</h3>
 
 When checked, noise is cropped from the top and bottom of the image. This is noise that is typically the result of the satellite being at a low elevation.
 
-<h3>12: Apply denoise filter</h3>
+<h3>15: Apply denoise filter</h3>
 
 When checked, a denoise filter is applied to the received image.
 
-<h3>13: Apply linear equalisation</h3>
+<h3>16: Apply linear equalisation</h3>
 
 When checked, linear equalisation is performed, which can enhance the contrast. The equalisation is performed separately on each channel.
 
-<h3>14: Apply histogram equalisation</h3>
+<h3>17: Apply histogram equalisation</h3>
 
 When checked, histogram equalisation is performed, which can enhance the contrast. The equalisation is performed separately on each channel.
 
-<h3>15: Overlay precipitation</h3>
+<h3>18: Overlay precipitation</h3>
 
 When checked, precipitation is detected from the IR channel and overlayed on both channels using a colour palette.
 
 This option will not work if linear or histogram equalisation has been applied.
 
-<h3>16: Pass direction</h3>
+<h3>19: Pass direction</h3>
 
 The pass direction check button should be set to match the direction of the satellite pass.
 i.e. select down arrow for satellite passing from the North to the South and the up arrow for the satellite passing from the South to the North.
