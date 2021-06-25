@@ -23,6 +23,7 @@
 #include <QRegExp>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QGraphicsScene>
 
 #include <QtCharts/QChartView>
 #include <QtCharts/QLineSeries>
@@ -33,6 +34,7 @@
 #include "feature/featurewebapiutils.h"
 #include "gui/basicfeaturesettingsdialog.h"
 #include "gui/dmsspinbox.h"
+#include "gui/graphicsviewzoom.h"
 #include "mainwindow.h"
 #include "device/deviceuiset.h"
 #include "util/units.h"
@@ -169,7 +171,9 @@ StarTrackerGUI::StarTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet,
     m_temps{FITS(":/startracker/startracker/150mhz_ra_dec.fits"),
         FITS(":/startracker/startracker/408mhz_ra_dec.fits"),
         FITS(":/startracker/startracker/1420mhz_ra_dec.fits")},
-    m_spectralIndex(":/startracker/startracker/408mhz_ra_dec_spectral_index.fits")
+    m_spectralIndex(":/startracker/startracker/408mhz_ra_dec_spectral_index.fits"),
+    m_milkyWayImages{QPixmap(":/startracker/startracker/milkyway.png"),
+        QPixmap(":/startracker/startracker/milkywayannotated.png")}
 {
     ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose, true);
@@ -191,6 +195,12 @@ StarTrackerGUI::StarTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet,
     connect(ui->azimuth, SIGNAL(valueChanged(double)), this, SLOT(on_azimuth_valueChanged(double)));
     ui->azimuth->setRange(0, 360.0);
     ui->elevation->setRange(-90.0, 90.0);
+    ui->galacticLongitude->setRange(0, 360.0);
+    ui->galacticLatitude->setRange(-90.0, 90.0);
+    ui->galacticLatitude->setButtonSymbols(QAbstractSpinBox::NoButtons);
+    ui->galacticLongitude->setButtonSymbols(QAbstractSpinBox::NoButtons);
+    ui->galacticLatitude->setText("");
+    ui->galacticLongitude->setText("");
 
     // Intialise chart
     m_chart.legend()->hide();
@@ -280,6 +290,9 @@ StarTrackerGUI::StarTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet,
     connect(&m_solarFluxTimer, SIGNAL(timeout()), this, SLOT(autoUpdateSolarFlux()));
     m_solarFluxTimer.start(1000*60*60*24); // Update every 24hours
     autoUpdateSolarFlux();
+
+    createGalacticLineOfSightScene();
+    plotChart();
 }
 
 StarTrackerGUI::~StarTrackerGUI()
@@ -307,10 +320,13 @@ void StarTrackerGUI::displaySettings()
     ui->target->setCurrentIndex(ui->target->findText(m_settings.m_target));
     ui->azimuth->setUnits((DMSSpinBox::DisplayUnits)m_settings.m_azElUnits);
     ui->elevation->setUnits((DMSSpinBox::DisplayUnits)m_settings.m_azElUnits);
+    ui->galacticLatitude->setUnits((DMSSpinBox::DisplayUnits)m_settings.m_azElUnits);
+    ui->galacticLongitude->setUnits((DMSSpinBox::DisplayUnits)m_settings.m_azElUnits);
     if (m_settings.m_target == "Custom RA/Dec")
     {
         ui->rightAscension->setText(m_settings.m_ra);
         ui->declination->setText(m_settings.m_dec);
+        updateGalacticCoords();
     }
     else if (m_settings.m_target == "Custom Az/El")
     {
@@ -401,10 +417,21 @@ void StarTrackerGUI::on_longitude_valueChanged(double value)
     plotChart();
 }
 
+void StarTrackerGUI::updateGalacticCoords()
+{
+    float ra = Astronomy::raToDecimal(m_settings.m_ra);
+    float dec = Astronomy::decToDecimal(m_settings.m_dec);
+    double l, b;
+    Astronomy::equatorialToGalactic(ra, dec, l, b);
+    ui->galacticLatitude->setValue(b);
+    ui->galacticLongitude->setValue(l);
+}
+
 void StarTrackerGUI::on_rightAscension_editingFinished()
 {
     m_settings.m_ra = ui->rightAscension->text();
     applySettings();
+    updateGalacticCoords();
     plotChart();
 }
 
@@ -412,6 +439,7 @@ void StarTrackerGUI::on_declination_editingFinished()
 {
     m_settings.m_dec = ui->declination->text();
     applySettings();
+    updateGalacticCoords();
     plotChart();
 }
 
@@ -602,6 +630,8 @@ void StarTrackerGUI::on_displaySettings_clicked()
         applySettings();
         ui->elevation->setUnits((DMSSpinBox::DisplayUnits)m_settings.m_azElUnits);
         ui->azimuth->setUnits((DMSSpinBox::DisplayUnits)m_settings.m_azElUnits);
+        ui->galacticLatitude->setUnits((DMSSpinBox::DisplayUnits)m_settings.m_azElUnits);
+        ui->galacticLongitude->setUnits((DMSSpinBox::DisplayUnits)m_settings.m_azElUnits);
         displaySolarFlux();
         if (ui->chartSelect->currentIndex() == 1)
             plotChart();
@@ -639,21 +669,34 @@ void StarTrackerGUI::plotChart()
 {
     if (ui->chartSelect->currentIndex() == 0)
     {
-        if (ui->chartSubSelect->currentIndex() == 0)
+        if (ui->chartSubSelect->currentIndex() == 0) {
             plotElevationLineChart();
-        else
+        } else {
             plotElevationPolarChart();
+        }
     }
     else if (ui->chartSelect->currentIndex() == 1)
+    {
         plotSolarFluxChart();
+    }
     else if (ui->chartSelect->currentIndex() == 2)
+    {
         plotSkyTemperatureChart();
+    }
+    else if (ui->chartSelect->currentIndex() == 3)
+    {
+        plotGalacticLineOfSight();
+    }
 }
 
 void StarTrackerGUI::raDecChanged()
 {
-    if (ui->chartSelect->currentIndex() == 2)
+    updateGalacticCoords();
+    if (ui->chartSelect->currentIndex() == 2) {
         plotSkyTemperatureChart();
+    } else if (ui->chartSelect->currentIndex() == 3) {
+        plotGalacticLineOfSight();
+    }
 }
 
 void StarTrackerGUI::on_frequency_valueChanged(int value)
@@ -679,6 +722,12 @@ void StarTrackerGUI::on_beamwidth_valueChanged(double value)
 
 void StarTrackerGUI::plotSolarFluxChart()
 {
+    ui->chart->setVisible(true);
+    ui->image->setVisible(false);
+    ui->darkTheme->setVisible(true);
+    ui->zoomIn->setVisible(false);
+    ui->zoomOut->setVisible(false);
+
     m_solarFluxChart.removeAllSeries();
     if (m_solarFluxesValid)
     {
@@ -830,8 +879,91 @@ QColor StarTrackerGUI::getSeriesColor(int series)
     }
 }
 
+void StarTrackerGUI::createGalacticLineOfSightScene()
+{
+    m_zoom = new GraphicsViewZoom(ui->image); // Deleted automatically when view is deleted
+
+    QGraphicsScene *scene = new QGraphicsScene(ui->image);
+    scene->setBackgroundBrush(QBrush(Qt::black));
+
+    // Milkyway images
+    for (int i = 0; i < m_milkyWayImages.size(); i++)
+    {
+        m_milkyWayItems.append(scene->addPixmap(m_milkyWayImages[i]));
+        m_milkyWayItems[i]->setPos(0, 0);
+        m_milkyWayItems[i]->setVisible(i == 0);
+    }
+
+    // Line of sight
+    QPen pen(QColor(255, 0, 0), 4, Qt::SolidLine);
+    m_lineOfSight = scene->addLine(511, 708, 511, 708, pen);
+
+    ui->image->setScene(scene);
+    ui->image->show();
+}
+
+void StarTrackerGUI::plotGalacticLineOfSight()
+{
+    if (!ui->image->isVisible())
+    {
+        // Start zoomed out
+        ui->image->fitInView(m_milkyWayItems[0], Qt::KeepAspectRatio);
+    }
+
+    // Draw top-down image of Milky Way
+    ui->chart->setVisible(false);
+    ui->image->setVisible(true);
+    ui->darkTheme->setVisible(false);
+    ui->zoomIn->setVisible(true);
+    ui->zoomOut->setVisible(true);
+
+    // Select which Milky Way image to show
+    int imageIdx = ui->chartSubSelect->currentIndex();
+    for (int i = 0; i < m_milkyWayItems.size(); i++) {
+        m_milkyWayItems[i]->setVisible(i == imageIdx);
+    }
+
+    // Calculate Galactic longitude we're observing
+    float ra = Astronomy::raToDecimal(m_settings.m_ra);
+    float dec = Astronomy::decToDecimal(m_settings.m_dec);
+    double l, b;
+    Astronomy::equatorialToGalactic(ra, dec, l, b);
+
+    //l = ui->azimuth->value(); // For testing, just use azimuth
+
+    // Calculate length of line, as Sun is not at centre
+    // we assume end point lies on an ellipse, with Sun at foci
+    // See https://en.wikipedia.org/wiki/Ellipse Polar form relative to focus
+    QPointF sun(511, 708); // Location of Sun on Milky Way image
+    float a = sun.x() - 112; // semi-major axis
+    float c = sun.y() - sun.x(); // linear eccentricity
+    float e = c / a; // eccentricity
+    float r = a * (1.0f - e*e) / (1.0f - e * cos(Units::degreesToRadians(l)));
+
+    // Draw line from Sun along observation galactic longitude
+    QTransform rotation = QTransform().translate(sun.x(), -sun.y()).rotate(l).translate(-sun.x(), sun.y());  // Flip Y
+    QPointF point = rotation.map(QPointF(511, -sun.y() + r));
+    m_lineOfSight->setLine(sun.x(), sun.y(), point.x(), -point.y());
+}
+
+void StarTrackerGUI::on_zoomIn_clicked()
+{
+    m_zoom->gentleZoom(1.25);
+}
+
+void StarTrackerGUI::on_zoomOut_clicked()
+{
+    m_zoom->gentleZoom(0.75);
+}
+
 void StarTrackerGUI::plotSkyTemperatureChart()
 {
+    ui->chart->setVisible(true);
+    ui->image->setVisible(false);
+    ui->darkTheme->setVisible(false);
+    ui->zoomIn->setVisible(false);
+    ui->zoomOut->setVisible(false);
+
     bool galactic = (ui->chartSubSelect->currentIndex() & 1) == 1;
 
     m_chart.removeAllSeries();
@@ -1072,10 +1204,13 @@ void StarTrackerGUI::plotAreaChanged(const QRectF &plotArea)
 
     // Scale the image to fit plot area
     int imageIdx = ui->chartSubSelect->currentIndex();
-    if (imageIdx == 6)
+    if (imageIdx == -1) {
+        return;
+    } else if (imageIdx == 6) {
         imageIdx = 2;
-    else if (imageIdx == 7)
+    } else if (imageIdx == 7) {
         imageIdx = 3;
+    }
     QImage image = m_images[imageIdx].scaled(QSize(width, height), Qt::IgnoreAspectRatio);
     QImage translated(viewW, viewH, QImage::Format_ARGB32);
     translated.fill(Qt::white);
@@ -1100,6 +1235,12 @@ void StarTrackerGUI::removeAllAxes()
 // Plot target elevation angle over the day
 void StarTrackerGUI::plotElevationLineChart()
 {
+    ui->chart->setVisible(true);
+    ui->image->setVisible(false);
+    ui->darkTheme->setVisible(true);
+    ui->zoomIn->setVisible(false);
+    ui->zoomOut->setVisible(false);
+
     QChart *oldChart = m_azElLineChart;
 
     m_azElLineChart = new QChart();
@@ -1217,6 +1358,12 @@ void StarTrackerGUI::plotElevationLineChart()
 // Plot target elevation angle over the day
 void StarTrackerGUI::plotElevationPolarChart()
 {
+    ui->chart->setVisible(true);
+    ui->image->setVisible(false);
+    ui->darkTheme->setVisible(true);
+    ui->zoomIn->setVisible(false);
+    ui->zoomOut->setVisible(false);
+
     QChart *oldChart = m_azElPolarChart;
 
     m_azElPolarChart = new QPolarChart();
@@ -1447,6 +1594,11 @@ void StarTrackerGUI::on_chartSelect_currentIndexChanged(int index)
         ui->chartSubSelect->addItem("Custom Galactic");
         ui->chartSubSelect->setCurrentIndex(2);
         updateChartSubSelect();
+    }
+    else if (index == 3)
+    {
+        ui->chartSubSelect->addItem("Milky Way");
+        ui->chartSubSelect->addItem("Milky Way annotated");
     }
     ui->chartSubSelect->blockSignals(oldState);
     plotChart();

@@ -3,11 +3,13 @@
 <h2>Introduction</h2>
 
 The Star Tracker feature plugin is for use in radio astronomy and EME (Earth-Moon-Earth) communication.
-It calculates the azimuth and elevation of celestial objects and can send them to the Rotator Controller or other plugins to point an antenna at that object.
-It can plot drift scan paths in both equatorial and galactic charts.
-The overhead position of the Sun, Moon and selected star can be displayed on the Map Feature.
-It can display local Sidereal time, solar flux density and sky temperature.
-The plugin can communicate with Stellarium, allowing Stellarium to control SDRangel as though it was a telescope and for the direction the antenna is pointing to be displayed in Stellarium.
+
+* It calculates the azimuth and elevation of celestial objects and can send them to the Rotator Controller or other plugins to point an antenna at that object.
+* It can plot drift scan paths in both equatorial and galactic charts.
+* The overhead position of the Sun, Moon and selected star can be displayed on the Map Feature.
+* It can display local Sidereal time, solar flux density and sky temperature.
+* It can plot the line of sight through the Milky Way.
+* The plugin can communicate with Stellarium, allowing Stellarium to control SDRangel as though it was a telescope and for the direction the antenna is pointing to be displayed in Stellarium.
 
 <h2>Settings</h2>
 
@@ -128,6 +130,14 @@ When target is set to Custom Az/El, you specify the elevation in degrees of the 
 
 For all other target settings, this displays the calculated elevation (angle in degrees - 0 to horizon and 90 to zenith) to the object.
 
+<h3>18: b - Galactic latitude</h3>
+
+Displays the calculated galactic latitude (angle in degrees, positive to the North of the galactic plane) to the object.
+
+<h3>19: l - Galactic longitude</h3>
+
+Displays the calculated galactic longitude (angle in degrees, Eastward from the galactic centre) to the object.
+
 <h2>Plots</h2>
 
 <h3>Light or dark theme</h3>
@@ -150,7 +160,7 @@ The Solar flux vs frequency plot, shows the solar flux density data from the Lea
 
 <h3>Sky temperature</h3>
 
-![Star Tracker sky temperature](../../../doc/img/StarTracker_skytemp.png)
+![Star Tracker sky temperature equatorial](../../../doc/img/StarTracker_skytemp.png)  ![Star Tracker sky temperature galactic](../../../doc/img/StarTracker_skytemp_galactic.png)
 
 Background sky temperature maps are available for display at 150MHz, 408MHz and 1420MHz, in both equatorial and galactic coordinates.
 For these first six temperature maps, the temperature reported, which is in Kelvin, is for the single pixel corresponding to the target coordinates.
@@ -169,6 +179,19 @@ This assumes the azimuth and elevation will be held constant and the path shows 
 To setup a drift scan through a particular target object, first set the target (11) to that object. This will set the azimuth and elevation to point at the object.
 You may want to set the Time (8) to Custom and a few hours in the future, so that the elevation is at a maximum when pointing at the target.
 Then switch the target to Custom Az/El and Time back to Now, and the drift scan path that sweeps through the object will displayed.
+
+<h3>Galactic line of sight</h3>
+
+Displays a top down image of the Milky Way and draws a line from the Sun along the galactic longitude through the target object.
+This can be useful to help identify spiral arms in hydrogen line observations.
+
+![Galactic line of sight](../../../doc/img/StarTracker_milkyway.png)
+
+Two images of the Milky Way are availble: a purely graphical image and one annotated with the names of the major spiral arms and a grid with distance and galactic longitude.
+
+![Galactic line of sight](../../../doc/img/StarTracker_milkywayannotated.png)
+
+The image can be zoomed in to or out from using the mouse wheel or the buttons. Hold CTRL to pan with the mouse wheel.
 
 <h2>Map</h2>
 
@@ -215,6 +238,8 @@ Solar radio flux measurements at 245, 410, 610, 1415, 2695, 4995, 8800 and 15400
 150MHz (Landecker and Wielebinski) and 1420MHz (Stockert and Villa-Elisa) All Sky images from MPIfR's (Max-Planck-Institut Fur Radioastronomie) Survey Sampler: https://www3.mpifr-bonn.mpg.de/survey.html
 
 408MHz (Haslam) destriped (Platania) All Sky image and spectral index (Platania) from Strasbourg astronomical Data Center: http://cdsarc.u-strasbg.fr/viz-bin/cat/J/A+A/410/847
+
+Milky Way image from NASA/JPL-Caltech: https://photojournal.jpl.nasa.gov/catalog/PIA10748
 
 Icons are by Adnen Kadri and Erik Madsen, from the Noun Project Noun Project: https://thenounproject.com/
 

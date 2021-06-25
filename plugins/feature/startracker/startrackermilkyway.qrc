@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="/startracker/">
+    <file>startracker/milkyway.png</file>
+    <file>startracker/milkywayannotated.png</file>
+  </qresource>
+</RCC>

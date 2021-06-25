@@ -32,6 +32,7 @@ if(NOT SERVER_MODE)
         startracker150mhz.qrc
         startracker408mhz.qrc
         startracker1420mhz.qrc
+        startrackermilkyway.qrc
     )
     set(startracker_HEADERS
         ${startracker_HEADERS}
