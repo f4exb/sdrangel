@@ -292,6 +292,7 @@ StarTrackerGUI::StarTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet,
     autoUpdateSolarFlux();
 
     createGalacticLineOfSightScene();
+    plotChart();
 }
 
 StarTrackerGUI::~StarTrackerGUI()
