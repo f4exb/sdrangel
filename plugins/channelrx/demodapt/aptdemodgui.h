@@ -42,6 +42,9 @@ class DeviceUISet;
 class BasebandSampleSink;
 class APTDemod;
 class APTDemodGUI;
+class QGraphicsScene;
+class QGraphicsPixmapItem;
+class GraphicsViewZoom;
 
 namespace Ui {
     class APTDemodGUI;
@@ -79,6 +82,9 @@ private:
 
     QImage m_image;
     QPixmap m_pixmap;
+    QGraphicsScene* m_scene;
+    QGraphicsPixmapItem* m_pixmapItem;
+    GraphicsViewZoom* m_zoom;
 
     explicit APTDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
     virtual ~APTDemodGUI();
@@ -107,6 +113,10 @@ private slots:
     void on_showSettings_clicked();
     void on_resetDecoder_clicked();
     void on_saveImage_clicked();
+    void on_zoomIn_clicked();
+    void on_zoomOut_clicked();
+    void on_zoomAll_clicked(bool checked=false);
+    void on_image_zoomed();
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void handleInputMessages();

@@ -25,9 +25,10 @@
 #include <QAction>
 #include <QRegExp>
 #include <QFileDialog>
+#include <QGraphicsScene>
+#include <QGraphicsPixmapItem>
 
 #include "aptdemodgui.h"
-#include "util/ax25.h"
 
 #include "device/deviceuiset.h"
 #include "dsp/dspengine.h"
@@ -42,6 +43,7 @@
 #include "gui/devicestreamselectiondialog.h"
 #include "dsp/dspengine.h"
 #include "gui/crightclickenabler.h"
+#include "gui/graphicsviewzoom.h"
 #include "channel/channelwebapiutils.h"
 #include "maincore.h"
 
@@ -101,7 +103,20 @@ bool APTDemodGUI::handleMessage(const Message& message)
         const APTDemod::MsgImage& imageMsg = (APTDemod::MsgImage&) message;
         m_image = imageMsg.getImage();
         m_pixmap.convertFromImage(m_image);
-        ui->image->setPixmap(m_pixmap);
+        if (m_pixmapItem != nullptr)
+        {
+            m_pixmapItem->setPixmap(m_pixmap);
+            if (ui->zoomAll->isChecked()) {
+                ui->image->fitInView(m_pixmapItem, Qt::KeepAspectRatio);
+            }
+        }
+        else
+        {
+            m_pixmapItem = m_scene->addPixmap(m_pixmap);
+            m_pixmapItem->setPos(0, 0);
+            ui->image->fitInView(m_pixmapItem, Qt::KeepAspectRatio);
+        }
+
         QStringList imageTypes = imageMsg.getImageTypes();
         if (imageTypes.size() == 0)
         {
@@ -171,7 +186,19 @@ bool APTDemodGUI::handleMessage(const Message& message)
         }
 
         m_pixmap.convertFromImage(m_image);
-        ui->image->setPixmap(m_pixmap);
+        if (m_pixmapItem != nullptr)
+        {
+            m_pixmapItem->setPixmap(m_pixmap);
+            if (ui->zoomAll->isChecked()) {
+                ui->image->fitInView(m_pixmapItem, Qt::KeepAspectRatio);
+            }
+        }
+        else
+        {
+            m_pixmapItem = m_scene->addPixmap(m_pixmap);
+            m_pixmapItem->setPos(0, 0);
+            ui->image->fitInView(m_pixmapItem, Qt::KeepAspectRatio);
+        }
 
         return true;
     }
@@ -302,7 +329,9 @@ void APTDemodGUI::on_startStop_clicked(bool checked)
 
 void APTDemodGUI::on_resetDecoder_clicked()
 {
-    ui->image->setPixmap(QPixmap());
+    if (m_pixmapItem != nullptr) {
+        m_pixmapItem->setPixmap(QPixmap());
+    }
     ui->imageContainer->setWindowTitle("Received image");
     // Send message to reset decoder
     m_aptDemod->getInputMessageQueue()->push(APTDemod::MsgResetDecoder::create());
@@ -330,6 +359,30 @@ void APTDemodGUI::on_saveImage_clicked()
                 QMessageBox::critical(this, "APT Demodulator", QString("Failed to save image to %1").arg(fileNames[0]));
         }
     }
+}
+
+void APTDemodGUI::on_zoomIn_clicked()
+{
+    m_zoom->gentleZoom(1.25);
+    ui->zoomAll->setChecked(false);
+}
+
+void APTDemodGUI::on_zoomOut_clicked()
+{
+    m_zoom->gentleZoom(0.75);
+    ui->zoomAll->setChecked(false);
+}
+
+void APTDemodGUI::on_zoomAll_clicked(bool checked)
+{
+    if (checked && (m_pixmapItem != nullptr)) {
+        ui->image->fitInView(m_pixmapItem, Qt::KeepAspectRatio);
+    }
+}
+
+void APTDemodGUI::on_image_zoomed()
+{
+    ui->zoomAll->setChecked(false);
 }
 
 void APTDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
@@ -389,7 +442,9 @@ APTDemodGUI::APTDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_deviceUISet(deviceUISet),
     m_channelMarker(this),
     m_doApplySettings(true),
-    m_tickCount(0)
+    m_tickCount(0),
+    m_scene(nullptr),
+    m_pixmapItem(nullptr)
 {
     ui->setupUi(this);
 
@@ -424,6 +479,13 @@ APTDemodGUI::APTDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+
+    m_zoom = new GraphicsViewZoom(ui->image); // Deleted automatically when view is deleted
+    connect(m_zoom, SIGNAL(zoomed()), this, SLOT(on_image_zoomed()));
+
+    m_scene = new QGraphicsScene(ui->image);
+    ui->image->setScene(m_scene);
+    ui->image->show();
 
     displaySettings();
     applySettings(true);
