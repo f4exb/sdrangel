@@ -1876,33 +1876,49 @@ void GLScope::setYScale(ScaleEngine &scale, uint32_t highlightedTraceIndex)
         break;
     case Projector::ProjectionMagLin:
     case Projector::ProjectionMagSq:
-        if (amp_range < 1e-6) {
+        if (amp_range < 1e-9) {
+            scale.setRange(Unit::None, amp_ofs * 1e12, amp_range * 1e12 + amp_ofs * 1e12);
+        } else if (amp_range < 1e-6) {
             scale.setRange(Unit::None, amp_ofs * 1e9, amp_range * 1e9 + amp_ofs * 1e9);
         } else if (amp_range < 1e-3) {
             scale.setRange(Unit::None, amp_ofs * 1e6, amp_range * 1e6 + amp_ofs * 1e6);
         } else if (amp_range < 1.0) {
             scale.setRange(Unit::None, amp_ofs * 1e3, amp_range * 1e3 + amp_ofs * 1e3);
+        } else if (amp_range < 1e3) {
+            scale.setRange(Unit::None, amp_ofs * 1e0, amp_range * 1e0 + amp_ofs * 1e0);
+        } else if (amp_range < 1e6) {
+            scale.setRange(Unit::None, amp_ofs * 1e3, amp_range * 1e3 + amp_ofs * 1e3);
+        } else if (amp_range < 1e9) {
+            scale.setRange(Unit::None, amp_ofs * 1e6, amp_range * 1e6 + amp_ofs * 1e6);
         } else {
-            scale.setRange(Unit::None, amp_ofs, amp_range + amp_ofs);
+            scale.setRange(Unit::None, amp_ofs * 1e9, amp_range * 1e9 + amp_ofs * 1e9);
         }
         break;
-    case Projector::ProjectionPhase: // Phase or frequency
+    case Projector::ProjectionPhase: // Phase or frequency (should be +/- 1)
     case Projector::ProjectionDOAP:
     case Projector::ProjectionDOAN:
     case Projector::ProjectionDPhase:
-        scale.setRange(Unit::None, -1.0 / traceData.m_amp + amp_ofs, 1.0 / traceData.m_amp + amp_ofs);
-        break;
+        // scale.setRange(Unit::None, -1.0 / traceData.m_amp + amp_ofs, 1.0 / traceData.m_amp + amp_ofs);
+        // break;
     case Projector::ProjectionReal: // Linear generic
     case Projector::ProjectionImag:
     default:
-        if (amp_range < 1e-6) {
-            scale.setRange(Unit::None, -amp_range * 5e8 + amp_ofs * 1e9, amp_range * 5e8 + amp_ofs * 1e9);
+        if (amp_range < 1e-9) {
+            scale.setRange(Unit::None, -amp_range * 5e11  + amp_ofs * 1e12, amp_range * 5e11  + amp_ofs * 1e12);
+        } else if (amp_range < 1e-6) {
+            scale.setRange(Unit::None, -amp_range * 5e8  + amp_ofs * 1e9, amp_range * 5e8  + amp_ofs * 1e9);
         } else if (amp_range < 1e-3) {
-            scale.setRange(Unit::None, -amp_range * 5e5 + amp_ofs * 1e6, amp_range * 5e5 + amp_ofs * 1e6);
+            scale.setRange(Unit::None, -amp_range * 5e5  + amp_ofs * 1e6, amp_range * 5e5  + amp_ofs * 1e6);
         } else if (amp_range < 1.0) {
-            scale.setRange(Unit::None, -amp_range * 5e2 + amp_ofs * 1e3, amp_range * 5e2 + amp_ofs * 1e3);
+            scale.setRange(Unit::None, -amp_range * 5e2  + amp_ofs * 1e3, amp_range * 5e2  + amp_ofs * 1e3);
+        } else if (amp_range < 1e3) {
+            scale.setRange(Unit::None, -amp_range * 5e-1 + amp_ofs * 1e0, amp_range * 5e-1 + amp_ofs * 1e0);
+        } else if (amp_range < 1e6) {
+            scale.setRange(Unit::None, -amp_range * 5e-4 + amp_ofs * 1e3, amp_range * 5e-4 + amp_ofs * 1e3);
+        } else if (amp_range < 1e9) {
+            scale.setRange(Unit::None, -amp_range * 5e-7 + amp_ofs * 1e6, amp_range * 5e-7 + amp_ofs * 1e6);
         } else {
-            scale.setRange(Unit::None, -amp_range * 0.5 + amp_ofs, amp_range * 0.5 + amp_ofs);
+            scale.setRange(Unit::None, -amp_range * 5e-10 + amp_ofs * 1e9, amp_range * 5e-10 + amp_ofs * 1e9);
         }
         break;
     }

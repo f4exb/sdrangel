@@ -53,6 +53,8 @@ ChannelReport:
       $ref: "/doc/swagger/include/NoiseFigure.yaml#/NoiseFigureReport"
     SSBDemodReport:
       $ref: "/doc/swagger/include/SSBDemod.yaml#/SSBDemodReport"
+    RadioClockReport:
+      $ref: "/doc/swagger/include/RadioClock.yaml#/RadioClockReport"
     RemoteSourceReport:
       $ref: "/doc/swagger/include/RemoteSource.yaml#/RemoteSourceReport"
     PacketModReport:

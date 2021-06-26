@@ -370,12 +370,10 @@ IEEE_802_15_4_ModGUI::IEEE_802_15_4_ModGUI(PluginAPI* pluginAPI, DeviceUISet *de
     GLScopeSettings::TraceData traceDataI, traceDataQ;
     traceDataI.m_projectionType = Projector::ProjectionReal;
     traceDataI.m_amp = 1.0;      // for -1 to +1
-    traceDataI.m_ampIndex = 0;
     traceDataI.m_ofs = 0.0;      // vertical offset
     traceDataI.m_ofsCoarse = 0;
     traceDataQ.m_projectionType = Projector::ProjectionImag;
     traceDataQ.m_amp = 1.0;
-    traceDataQ.m_ampIndex = 0;
     traceDataQ.m_ofs = 0.0;
     traceDataQ.m_ofsCoarse = 0;
     ui->scopeGUI->changeTrace(0, traceDataI);

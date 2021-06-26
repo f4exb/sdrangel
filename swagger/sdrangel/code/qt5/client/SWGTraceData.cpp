@@ -36,8 +36,6 @@ SWGTraceData::SWGTraceData() {
     m_input_index_isSet = false;
     amp = 0.0f;
     m_amp_isSet = false;
-    amp_index = 0;
-    m_amp_index_isSet = false;
     ofs = 0.0f;
     m_ofs_isSet = false;
     ofs_coarse = 0;
@@ -82,8 +80,6 @@ SWGTraceData::init() {
     m_input_index_isSet = false;
     amp = 0.0f;
     m_amp_isSet = false;
-    amp_index = 0;
-    m_amp_index_isSet = false;
     ofs = 0.0f;
     m_ofs_isSet = false;
     ofs_coarse = 0;
@@ -132,7 +128,6 @@ SWGTraceData::cleanup() {
 
 
 
-
     if(text_overlay != nullptr) { 
         delete text_overlay;
     }
@@ -157,8 +152,6 @@ SWGTraceData::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&input_index, pJson["inputIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&amp, pJson["amp"], "float", "");
-    
-    ::SWGSDRangel::setValue(&amp_index, pJson["ampIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&ofs, pJson["ofs"], "float", "");
     
@@ -215,9 +208,6 @@ SWGTraceData::asJsonObject() {
     }
     if(m_amp_isSet){
         obj->insert("amp", QJsonValue(amp));
-    }
-    if(m_amp_index_isSet){
-        obj->insert("ampIndex", QJsonValue(amp_index));
     }
     if(m_ofs_isSet){
         obj->insert("ofs", QJsonValue(ofs));
@@ -303,16 +293,6 @@ void
 SWGTraceData::setAmp(float amp) {
     this->amp = amp;
     this->m_amp_isSet = true;
-}
-
-qint32
-SWGTraceData::getAmpIndex() {
-    return amp_index;
-}
-void
-SWGTraceData::setAmpIndex(qint32 amp_index) {
-    this->amp_index = amp_index;
-    this->m_amp_index_isSet = true;
 }
 
 float
@@ -470,9 +450,6 @@ SWGTraceData::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_amp_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_amp_index_isSet){
             isObjectUpdated = true; break;
         }
         if(m_ofs_isSet){

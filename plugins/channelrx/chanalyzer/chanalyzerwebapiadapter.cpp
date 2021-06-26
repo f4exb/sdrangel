@@ -87,7 +87,6 @@ void ChannelAnalyzerWebAPIAdapter::webapiFormatChannelSettings(
         swgScope->getTracesData()->append(new SWGSDRangel::SWGTraceData);
         swgScope->getTracesData()->back()->setStreamIndex(traceIt->m_streamIndex);
         swgScope->getTracesData()->back()->setAmp(traceIt->m_amp);
-        swgScope->getTracesData()->back()->setAmpIndex(traceIt->m_ampIndex);
         swgScope->getTracesData()->back()->setHasTextOverlay(traceIt->m_hasTextOverlay ? 1 : 0);
         swgScope->getTracesData()->back()->setStreamIndex(traceIt->m_streamIndex);
         swgScope->getTracesData()->back()->setOfs(traceIt->m_ofs);
@@ -271,9 +270,6 @@ void ChannelAnalyzerWebAPIAdapter::webapiUpdateChannelSettings(
                     }
                     if (channelSettingsKeys.contains(QString("scopeConfig.tracesData[%1].amp").arg(i))) {
                         scopeSettings.m_tracesData.back().m_amp = traceData->getAmp();
-                    }
-                    if (channelSettingsKeys.contains(QString("scopeConfig.tracesData[%1].ampIndex").arg(i))) {
-                        scopeSettings.m_tracesData.back().m_ampIndex = traceData->getAmpIndex();
                     }
                     if (channelSettingsKeys.contains(QString("scopeConfig.tracesData[%1].hasTextOverlay").arg(i))) {
                         scopeSettings.m_tracesData.back().m_hasTextOverlay = traceData->getHasTextOverlay() != 0;

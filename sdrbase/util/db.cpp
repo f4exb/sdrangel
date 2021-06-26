@@ -35,3 +35,9 @@ double CalcDb::powerFromdB(double powerdB)
 {
     return pow(10.0, powerdB / 10.0);
 }
+
+double CalcDb::frexp10(double arg, int *exp)
+{
+   *exp = (arg == 0) ? 0 : 1 + (int)std::floor(std::log10(std::fabs(arg) ) );
+   return arg * std::pow(10 , -(*exp));
+}

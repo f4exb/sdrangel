@@ -54,9 +54,6 @@ public:
     float getAmp();
     void setAmp(float amp);
 
-    qint32 getAmpIndex();
-    void setAmpIndex(qint32 amp_index);
-
     float getOfs();
     void setOfs(float ofs);
 
@@ -114,9 +111,6 @@ private:
 
     float amp;
     bool m_amp_isSet;
-
-    qint32 amp_index;
-    bool m_amp_index_isSet;
 
     float ofs;
     bool m_ofs_isSet;

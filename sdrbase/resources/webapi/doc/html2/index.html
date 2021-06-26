@@ -3072,6 +3072,9 @@ margin-bottom: 20px;
     "SSBDemodReport" : {
       "$ref" : "#/definitions/SSBDemodReport"
     },
+    "RadioClockReport" : {
+      "$ref" : "#/definitions/RadioClockReport"
+    },
     "RemoteSourceReport" : {
       "$ref" : "#/definitions/RemoteSourceReport"
     },
@@ -3217,6 +3220,9 @@ margin-bottom: 20px;
     },
     "PacketModSettings" : {
       "$ref" : "#/definitions/PacketModSettings"
+    },
+    "RadioClockSettings" : {
+      "$ref" : "#/definitions/RadioClockSettings"
     },
     "RemoteSinkSettings" : {
       "$ref" : "#/definitions/RemoteSinkSettings"
@@ -8784,6 +8790,78 @@ margin-bottom: 20px;
     }
   }
 };
+            defs.RadioClockReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power received in channel (dB)"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    },
+    "date" : {
+      "type" : "string"
+    },
+    "time" : {
+      "type" : "string"
+    }
+  },
+  "description" : "RadioClock"
+};
+            defs.RadioClockSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "channel center frequency shift from baseband center in Hz"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "channel RF bandwidth in Hz"
+    },
+    "threshold" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "modulation" : {
+      "type" : "integer",
+      "description" : "0 - MSF, 1 - DCF77, 2 - TDF"
+    },
+    "timezone" : {
+      "type" : "integer",
+      "description" : "0 - Broadcast, 1 - Local, 2 - UTC"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "RadioClock"
+};
             defs.Range = {
   "properties" : {
     "min" : {
@@ -10807,10 +10885,6 @@ margin-bottom: 20px;
       "type" : "number",
       "format" : "float",
       "description" : "Amplification factor"
-    },
-    "ampIndex" : {
-      "type" : "integer",
-      "description" : "Index in list of amplification factors"
     },
     "ofs" : {
       "type" : "number",
@@ -46776,7 +46850,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-06-14T15:03:45.792+02:00
+              Generated 2021-06-26T10:56:36.867+02:00
             </div>
           </div>
       </div>

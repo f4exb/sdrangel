@@ -26,6 +26,7 @@ class SDRBASE_API CalcDb
 public:
 	static double dbPower(double magsq, double floor = 1e-12);
 	static double powerFromdB(double powerdB);
+	static double frexp10(double arg, int *exp);
 };
 
 #endif /* INCLUDE_UTIL_DB_H_ */

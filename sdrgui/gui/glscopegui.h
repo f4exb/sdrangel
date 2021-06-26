@@ -155,8 +155,6 @@ private:
     int m_ctlTraceIndex;    //!< controlled trace index
     int m_ctlTriggerIndex;  //!< controlled trigger index
 
-    static const double amps[27];
-
     void applySettings(const GLScopeSettings& settings, bool force = false);
     void displaySettings();
     // First row
@@ -222,6 +220,8 @@ private slots:
     void on_traceStream_currentIndexChanged(int index);
     void on_traceMode_currentIndexChanged(int index);
     void on_amp_valueChanged(int value);
+    void on_ampCoarse_valueChanged(int value);
+    void on_ampExp_valueChanged(int value);
     void on_ofsCoarse_valueChanged(int value);
     void on_ofsFine_valueChanged(int value);
     void on_traceDelayCoarse_valueChanged(int value);

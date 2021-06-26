@@ -92,7 +92,7 @@ QByteArray GLScopeSettings::serialize() const
         }
 
         s.writeS32(20 + 16*i, (int) traceDataIt->m_projectionType);
-        s.writeU32(21 + 16*i, traceDataIt->m_ampIndex);
+        s.writeFloat(21 + 16*i, traceDataIt->m_amp);
         s.writeS32(22 + 16*i, traceDataIt->m_ofsCoarse);
         s.writeS32(23 + 16*i, traceDataIt->m_ofsFine);
         s.writeS32(24 + 16*i, traceDataIt->m_traceDelayCoarse);
@@ -168,9 +168,7 @@ bool GLScopeSettings::deserialize(const QByteArray& data)
 
             d.readS32(20 + 16*iTrace, &intValue, 0);
             m_tracesData.back().m_projectionType = (Projector::ProjectionType) intValue;
-            d.readU32(21 + 16*iTrace, &uintValue, 0);
-            m_tracesData.back().m_ampIndex = uintValue;
-            m_tracesData.back().m_amp = 0.2 / AMPS[m_tracesData.back().m_ampIndex < 27 ? m_tracesData.back().m_ampIndex : 26];
+            d.readFloat(21 + 16*iTrace, &m_tracesData.back().m_amp, 1.0f);
             d.readS32(22 + 16*iTrace, &intValue, 0);
             m_tracesData.back().m_ofsCoarse = intValue;
             d.readS32(23 + 16*iTrace, &intValue, 0);

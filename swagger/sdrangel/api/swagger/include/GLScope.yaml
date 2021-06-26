@@ -14,9 +14,6 @@ TraceData:
       description: Amplification factor
       type: number
       format: float
-    ampIndex:
-      description: Index in list of amplification factors
-      type: integer
     ofs:
       description: Offset factor
       type: number

@@ -79,6 +79,8 @@ ChannelSettings:
       $ref: "/doc/swagger/include/PacketDemod.yaml#/PacketDemodSettings"
     PacketModSettings:
       $ref: "/doc/swagger/include/PacketMod.yaml#/PacketModSettings"
+    RadioClockSettings:
+      $ref: "/doc/swagger/include/RadioClock.yaml#/RadioClockSettings"
     RemoteSinkSettings:
       $ref: "/doc/swagger/include/RemoteSink.yaml#/RemoteSinkSettings"
     RemoteSourceSettings:

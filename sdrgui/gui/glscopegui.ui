@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>758</width>
-    <height>138</height>
+    <height>180</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -642,6 +642,7 @@ kS/s</string>
          </property>
          <property name="font">
           <font>
+           <family>Liberation Sans</family>
            <pointsize>10</pointsize>
           </font>
          </property>
@@ -700,6 +701,7 @@ kS/s</string>
          </property>
          <property name="font">
           <font>
+           <family>Liberation Sans</family>
            <pointsize>10</pointsize>
           </font>
          </property>
@@ -833,39 +835,166 @@ kS/s</string>
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="ampText">
-       <property name="minimumSize">
-        <size>
-         <width>36</width>
-         <height>0</height>
-        </size>
+      <layout class="QVBoxLayout" name="ampLayout">
+       <property name="leftMargin">
+        <number>6</number>
        </property>
-       <property name="toolTip">
-        <string>Vertical range value</string>
+       <property name="rightMargin">
+        <number>6</number>
        </property>
-       <property name="text">
-        <string>000</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QSlider" name="amp">
-       <property name="toolTip">
-        <string>Vertical range</string>
-       </property>
-       <property name="maximum">
-        <number>26</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
+       <item>
+        <layout class="QHBoxLayout" name="ampMantissaLayout">
+         <property name="leftMargin">
+          <number>6</number>
+         </property>
+         <property name="topMargin">
+          <number>6</number>
+         </property>
+         <property name="rightMargin">
+          <number>6</number>
+         </property>
+         <property name="bottomMargin">
+          <number>6</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="ampText">
+           <property name="minimumSize">
+            <size>
+             <width>36</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Vertical range value</string>
+           </property>
+           <property name="text">
+            <string>1.000</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSlider" name="amp">
+           <property name="toolTip">
+            <string>Vertical range (fine)</string>
+           </property>
+           <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="maximum">
+            <number>999</number>
+           </property>
+           <property name="pageStep">
+            <number>1</number>
+           </property>
+           <property name="value">
+            <number>0</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDial" name="ampCoarse">
+           <property name="maximumSize">
+            <size>
+             <width>24</width>
+             <height>24</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Vertical range (coarse)</string>
+           </property>
+           <property name="minimum">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <number>9</number>
+           </property>
+           <property name="pageStep">
+            <number>1</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="ampExponentLayout">
+         <property name="leftMargin">
+          <number>6</number>
+         </property>
+         <property name="topMargin">
+          <number>6</number>
+         </property>
+         <property name="rightMargin">
+          <number>6</number>
+         </property>
+         <property name="bottomMargin">
+          <number>6</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="ampExpText">
+           <property name="minimumSize">
+            <size>
+             <width>36</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Vertical range value</string>
+           </property>
+           <property name="text">
+            <string>e+0</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSlider" name="ampExp">
+           <property name="toolTip">
+            <string>Vertical range exponent</string>
+           </property>
+           <property name="minimum">
+            <number>-10</number>
+           </property>
+           <property name="maximum">
+            <number>10</number>
+           </property>
+           <property name="pageStep">
+            <number>1</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="ampMultiplierText">
+           <property name="minimumSize">
+            <size>
+             <width>20</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Vertical range value</string>
+           </property>
+           <property name="text">
+            <string>-</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
      </item>
      <item>
       <widget class="Line" name="line_8">
@@ -1315,6 +1444,7 @@ kS/s</string>
          </property>
          <property name="font">
           <font>
+           <family>Liberation Sans</family>
            <pointsize>10</pointsize>
           </font>
          </property>
@@ -1373,6 +1503,7 @@ kS/s</string>
          </property>
          <property name="font">
           <font>
+           <family>Liberation Sans</family>
            <pointsize>10</pointsize>
           </font>
          </property>

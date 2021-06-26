@@ -24,18 +24,7 @@
 #include "glscope.h"
 #include "ui_glscopegui.h"
 #include "util/simpleserializer.h"
-
-const double GLScopeGUI::amps[27] = {
-        2e-1, 1e-1, 5e-2,
-        2e-2, 1e-2, 5e-3,
-        2e-3, 1e-3, 5e-4,
-        2e-4, 1e-4, 5e-5,
-        2e-5, 1e-5, 5e-6,
-        2e-6, 1e-6, 5e-7,
-        2e-7, 1e-7, 5e-8,
-        2e-8, 1e-8, 5e-9,
-        2e-9, 1e-9, 5e-10,
-};
+#include "util/db.h"
 
 GLScopeGUI::GLScopeGUI(QWidget* parent) :
     QWidget(parent),
@@ -198,7 +187,7 @@ QByteArray GLScopeGUI::serialize() const
     for (; traceDataIt != tracesData.end(); ++traceDataIt, i++)
     {
         s.writeS32(20 + 16*i, (int) traceDataIt->m_projectionType);
-        s.writeU32(21 + 16*i, traceDataIt->m_ampIndex);
+        s.writeFloat(21 + 16*i, traceDataIt->m_amp);
         s.writeS32(22 + 16*i, traceDataIt->m_ofsCoarse);
         s.writeS32(23 + 16*i, traceDataIt->m_ofsFine);
         s.writeS32(24 + 16*i, traceDataIt->m_traceDelayCoarse);
@@ -287,25 +276,29 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
             float r, g, b;
 
             d.readS32(20 + 16*iTrace, &intValue, 0);
-            ui->traceMode->setCurrentIndex(intValue);
-            d.readU32(21 + 16*iTrace, &uintValue, 0);
-            ui->amp->setValue(uintValue);
+            traceData.m_projectionType = (Projector::ProjectionType) intValue;
+            d.readFloat(21 + 16*iTrace, &traceData.m_amp, 1.0f);
             d.readS32(22 + 16*iTrace, &intValue, 0);
-            ui->ofsCoarse->setValue(intValue);
+            traceData.m_ofsCoarse = intValue;
             d.readS32(23 + 16*iTrace, &intValue, 0);
-            ui->ofsFine->setValue(intValue);
+            traceData.m_ofsFine = intValue;
             d.readS32(24 + 16*iTrace, &intValue, 0);
-            ui->traceDelayCoarse->setValue(intValue);
+            traceData.m_traceDelayCoarse = intValue;
             d.readS32(25 + 16*iTrace, &intValue, 0);
-            ui->traceDelayFine->setValue(intValue);
+            traceData.m_traceDelayFine = intValue;
             d.readFloat(26 + 16*iTrace, &r, 1.0f);
             d.readFloat(27 + 16*iTrace, &g, 1.0f);
             d.readFloat(28 + 16*iTrace, &b, 1.0f);
-            m_focusedTraceColor.setRgbF(r, g, b);
+            traceData.m_traceColorR = r;
+            traceData.m_traceColorG = g;
+            traceData.m_traceColorB = b;
+            traceData.m_traceColor.setRedF(r);
+            traceData.m_traceColor.setGreenF(g);
+            traceData.m_traceColor.setBlueF(b);
             d.readU32(29 + 16*iTrace, &uintValue, 0);
-            ui->traceStream->setCurrentIndex(uintValue);
+            traceData.m_streamIndex = uintValue;
 
-            fillTraceData(traceData);
+            setTraceUI(traceData);
 
             if (iTrace < tracesData.size()) // change existing traces
             {
@@ -872,6 +865,20 @@ void GLScopeGUI::on_amp_valueChanged(int value)
     changeCurrentTrace();
 }
 
+void GLScopeGUI::on_ampCoarse_valueChanged(int value)
+{
+    (void) value;
+    setAmpScaleDisplay();
+    changeCurrentTrace();
+}
+
+void GLScopeGUI::on_ampExp_valueChanged(int value)
+{
+    (void) value;
+    setAmpScaleDisplay();
+    changeCurrentTrace();
+}
+
 void GLScopeGUI::on_ofsCoarse_valueChanged(int value)
 {
     (void) value;
@@ -1223,31 +1230,38 @@ void GLScopeGUI::setTimeOfsDisplay()
 void GLScopeGUI::setAmpScaleDisplay()
 {
     Projector::ProjectionType projectionType = (Projector::ProjectionType) ui->traceMode->currentIndex();
-    double ampValue = amps[ui->amp->value()];
+    double amp  = (ui->amp->value() / 1000.0) + ui->ampCoarse->value();
+    int ampExp = ui->ampExp->value();
+    double ampValue = amp * pow(10.0, ampExp);
+    ui->ampText->setText(tr("%1").arg(amp, 0, 'f', 3));
 
     if (projectionType == Projector::ProjectionMagDB)
     {
-        double displayValue = ampValue*500.0f;
-
-        if (displayValue < 10.0f) {
-            ui->ampText->setText(tr("%1\ndB").arg(displayValue, 0, 'f', 2));
-        }
-        else {
-            ui->ampText->setText(tr("%1\ndB").arg(displayValue, 0, 'f', 1));
-        }
+        ui->ampExpText->setText(tr("e%1%2").arg(ampExp+2 < 0 ? "" : "+").arg(ampExp+2));
+        ui->ampMultiplierText->setText("-");
     }
     else
     {
-        double a = ampValue*10.0f;
+        ui->ampExpText->setText(tr("e%1%2").arg(ampExp < 0 ? "" : "+").arg(ampExp));
+        double ampValue2 = 2.0 * ampValue;
 
-        if(a < 0.000001)
-            ui->ampText->setText(tr("%1\nn").arg(a * 1000000000.0));
-        else if(a < 0.001)
-            ui->ampText->setText(tr("%1\nµ").arg(a * 1000000.0));
-        else if(a < 1.0)
-            ui->ampText->setText(tr("%1\nm").arg(a * 1000.0));
-        else
-            ui->ampText->setText(tr("%1").arg(a * 1.0));
+        if (ampValue2 < 1e-9) {
+            ui->ampMultiplierText->setText("p");
+        } else if (ampValue2 < 1e-6) {
+            ui->ampMultiplierText->setText("n");
+        } else if (ampValue2 < 1e-3) {
+            ui->ampMultiplierText->setText("µ");
+        } else if (ampValue2 < 1e0) {
+            ui->ampMultiplierText->setText("m");
+        } else if (ampValue2 <= 1e3) {
+            ui->ampMultiplierText->setText("-");
+        } else if (ampValue2 <= 1e6) {
+            ui->ampMultiplierText->setText("k");
+        } else if (ampValue2 <= 1e9) {
+            ui->ampMultiplierText->setText("M");
+        } else {
+            ui->ampMultiplierText->setText("G");
+        }
     }
 }
 
@@ -1477,10 +1491,11 @@ void GLScopeGUI::fillTraceData(GLScopeSettings::TraceData& traceData)
 {
     traceData.m_streamIndex = ui->traceStream->currentIndex();
     traceData.m_projectionType = (Projector::ProjectionType) ui->traceMode->currentIndex();
-    traceData.m_hasTextOverlay = (traceData.m_projectionType == Projector::ProjectionMagDB) || (traceData.m_projectionType == Projector::ProjectionMagSq);
+    traceData.m_hasTextOverlay = (traceData.m_projectionType == Projector::ProjectionMagDB)
+        || (traceData.m_projectionType == Projector::ProjectionMagSq);
     traceData.m_textOverlay.clear();
-    traceData.m_amp = 0.2 / amps[ui->amp->value()];
-    traceData.m_ampIndex = ui->amp->value();
+    double ampValue = ((ui->amp->value() / 1000.0) + ui->ampCoarse->value()) * pow(10.0, ui->ampExp->value());
+    traceData.m_amp = 1.0 / ampValue;
 
     traceData.m_ofsCoarse = ui->ofsCoarse->value();
     traceData.m_ofsFine = ui->ofsFine->value();
@@ -1522,7 +1537,15 @@ void GLScopeGUI::setTraceUI(const GLScopeSettings::TraceData& traceData)
 
     ui->traceStream->setCurrentIndex(traceData.m_streamIndex);
     ui->traceMode->setCurrentIndex((int) traceData.m_projectionType);
-    ui->amp->setValue(traceData.m_ampIndex);
+    double ampValue = 1.0 / traceData.m_amp;
+    int ampExp;
+    double ampMant = CalcDb::frexp10(ampValue, &ampExp) * 10.0;
+    int ampCoarse = (int) ampMant;
+    int ampFine = round((ampMant - ampCoarse) * 1000.0);
+    ampExp -= 1;
+    ui->amp->setValue(ampFine);
+    ui->ampCoarse->setValue(ampCoarse);
+    ui->ampExp->setValue(ampExp);
     setAmpScaleDisplay();
 
     ui->ofsCoarse->setValue(traceData.m_ofsCoarse);
