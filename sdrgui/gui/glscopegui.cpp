@@ -188,8 +188,7 @@ QByteArray GLScopeGUI::serialize() const
     {
         s.writeS32(20 + 16*i, (int) traceDataIt->m_projectionType);
         s.writeFloat(21 + 16*i, traceDataIt->m_amp);
-        s.writeS32(22 + 16*i, traceDataIt->m_ofsCoarse);
-        s.writeS32(23 + 16*i, traceDataIt->m_ofsFine);
+        s.writeFloat(22 + 16*i, traceDataIt->m_ofs);
         s.writeS32(24 + 16*i, traceDataIt->m_traceDelayCoarse);
         s.writeS32(25 + 16*i, traceDataIt->m_traceDelayFine);
         s.writeFloat(26 + 16*i, traceDataIt->m_traceColorR);
@@ -278,10 +277,7 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
             d.readS32(20 + 16*iTrace, &intValue, 0);
             traceData.m_projectionType = (Projector::ProjectionType) intValue;
             d.readFloat(21 + 16*iTrace, &traceData.m_amp, 1.0f);
-            d.readS32(22 + 16*iTrace, &intValue, 0);
-            traceData.m_ofsCoarse = intValue;
-            d.readS32(23 + 16*iTrace, &intValue, 0);
-            traceData.m_ofsFine = intValue;
+            d.readFloat(22 + 16*iTrace, &traceData.m_ofs, 0.0f);
             d.readS32(24 + 16*iTrace, &intValue, 0);
             traceData.m_traceDelayCoarse = intValue;
             d.readS32(25 + 16*iTrace, &intValue, 0);
@@ -893,6 +889,13 @@ void GLScopeGUI::on_ofsFine_valueChanged(int value)
     changeCurrentTrace();
 }
 
+void GLScopeGUI::on_ofsExp_valueChanged(int value)
+{
+    (void) value;
+    setAmpOfsDisplay();
+    changeCurrentTrace();
+}
+
 void GLScopeGUI::on_traceDelayCoarse_valueChanged(int value)
 {
     (void) value;
@@ -1268,35 +1271,14 @@ void GLScopeGUI::setAmpScaleDisplay()
 void GLScopeGUI::setAmpOfsDisplay()
 {
     Projector::ProjectionType projectionType = (Projector::ProjectionType) ui->traceMode->currentIndex();
-    double o = (ui->ofsCoarse->value() * 10.0f) + (ui->ofsFine->value() / 20.0f);
+    double ofs = (ui->ofsFine->value() / 1000.0) + ui->ofsCoarse->value();
+    int ofsExp = ui->ofsExp->value();
+    ui->ofsText->setText(tr("%1").arg(ofs, 0, 'f', 3));
 
-    if (projectionType == Projector::ProjectionMagDB)
-    {
-        ui->ofsText->setText(tr("%1\ndB").arg(o/10.0f - 100.0f, 0, 'f', 1));
-    }
-    else
-    {
-        double a;
-
-        if ((projectionType == Projector::ProjectionMagLin) || (projectionType == Projector::ProjectionMagSq))
-        {
-            a = o/2000.0f;
-        }
-        else
-        {
-            a = o/1000.0f;
-        }
-
-        if(fabs(a) < 1e-9)
-            ui->ofsText->setText(tr("%1\np").arg(a * 1e12));
-        else if(fabs(a) < 1e-6)
-            ui->ofsText->setText(tr("%1\nn").arg(a * 1e9));
-        else if(fabs(a) < 1e-3)
-            ui->ofsText->setText(tr("%1\nµ").arg(a * 1e6));
-        else if(fabs(a) < 1.0f)
-            ui->ofsText->setText(tr("%1\nm").arg(a * 1e3));
-        else
-            ui->ofsText->setText(tr("%1").arg(a * 1.0));
+    if (projectionType == Projector::ProjectionMagDB) {
+        ui->ofsExpText->setText(tr("e%1%2").arg(ofsExp+2 < 0 ? "" : "+").arg(ofsExp+2));
+    } else {
+        ui->ofsExpText->setText(tr("e%1%2").arg(ofsExp < 0 ? "" : "+").arg(ofsExp));
     }
 }
 
@@ -1494,17 +1476,12 @@ void GLScopeGUI::fillTraceData(GLScopeSettings::TraceData& traceData)
     traceData.m_hasTextOverlay = (traceData.m_projectionType == Projector::ProjectionMagDB)
         || (traceData.m_projectionType == Projector::ProjectionMagSq);
     traceData.m_textOverlay.clear();
+
     double ampValue = ((ui->amp->value() / 1000.0) + ui->ampCoarse->value()) * pow(10.0, ui->ampExp->value());
     traceData.m_amp = 1.0 / ampValue;
 
-    traceData.m_ofsCoarse = ui->ofsCoarse->value();
-    traceData.m_ofsFine = ui->ofsFine->value();
-
-    if ((traceData.m_projectionType == Projector::ProjectionMagLin)  || (traceData.m_projectionType == Projector::ProjectionMagSq)) {
-        traceData.m_ofs = ((10.0 * ui->ofsCoarse->value()) + (ui->ofsFine->value() / 20.0)) / 2000.0f;
-    } else {
-        traceData.m_ofs = ((10.0 * ui->ofsCoarse->value()) + (ui->ofsFine->value() / 20.0)) / 1000.0f;
-    }
+    double ofsValue = ((ui->ofsFine->value() / 1000.0) + ui->ofsCoarse->value()) * pow(10.0, ui->ofsExp->value());
+    traceData.m_ofs = ofsValue;
 
     traceData.m_traceDelayCoarse = ui->traceDelayCoarse->value();
     traceData.m_traceDelayFine = ui->traceDelayFine->value();
@@ -1537,6 +1514,7 @@ void GLScopeGUI::setTraceUI(const GLScopeSettings::TraceData& traceData)
 
     ui->traceStream->setCurrentIndex(traceData.m_streamIndex);
     ui->traceMode->setCurrentIndex((int) traceData.m_projectionType);
+
     double ampValue = 1.0 / traceData.m_amp;
     int ampExp;
     double ampMant = CalcDb::frexp10(ampValue, &ampExp) * 10.0;
@@ -1548,8 +1526,15 @@ void GLScopeGUI::setTraceUI(const GLScopeSettings::TraceData& traceData)
     ui->ampExp->setValue(ampExp);
     setAmpScaleDisplay();
 
-    ui->ofsCoarse->setValue(traceData.m_ofsCoarse);
-    ui->ofsFine->setValue(traceData.m_ofsFine);
+    double ofsValue = traceData.m_amp;
+    int ofsExp;
+    double ofsMant = CalcDb::frexp10(ofsValue, &ofsExp) * 10.0;
+    int ofsCoarse = (int) ofsMant;
+    int ofsFine = round((ofsMant - ofsCoarse) * 1000.0);
+    ofsExp -= 1;
+    ui->ofsFine->setValue(ofsFine);
+    ui->ofsCoarse->setValue(ofsCoarse);
+    ui->ofsExp->setValue(ofsExp);
     setAmpOfsDisplay();
 
     ui->traceDelayCoarse->setValue(traceData.m_traceDelayCoarse);

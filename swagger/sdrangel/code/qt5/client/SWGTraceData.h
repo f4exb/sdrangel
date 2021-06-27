@@ -57,12 +57,6 @@ public:
     float getOfs();
     void setOfs(float ofs);
 
-    qint32 getOfsCoarse();
-    void setOfsCoarse(qint32 ofs_coarse);
-
-    qint32 getOfsFine();
-    void setOfsFine(qint32 ofs_fine);
-
     qint32 getTraceDelay();
     void setTraceDelay(qint32 trace_delay);
 
@@ -114,12 +108,6 @@ private:
 
     float ofs;
     bool m_ofs_isSet;
-
-    qint32 ofs_coarse;
-    bool m_ofs_coarse_isSet;
-
-    qint32 ofs_fine;
-    bool m_ofs_fine_isSet;
 
     qint32 trace_delay;
     bool m_trace_delay_isSet;

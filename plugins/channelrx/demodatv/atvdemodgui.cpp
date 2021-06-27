@@ -255,7 +255,6 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
     GLScopeSettings::TraceData traceData;
     traceData.m_amp = 2.0;      // amplification factor
     traceData.m_ofs = 0.5;      // direct offset
-    traceData.m_ofsCoarse = 50; // this is 50 coarse steps
     ui->scopeGUI->changeTrace(0, traceData);
     ui->scopeGUI->focusOnTrace(0); // re-focus to take changes into account in the GUI
     GLScopeSettings::TriggerData triggerData;

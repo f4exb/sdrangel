@@ -90,8 +90,6 @@ void ChannelAnalyzerWebAPIAdapter::webapiFormatChannelSettings(
         swgScope->getTracesData()->back()->setHasTextOverlay(traceIt->m_hasTextOverlay ? 1 : 0);
         swgScope->getTracesData()->back()->setStreamIndex(traceIt->m_streamIndex);
         swgScope->getTracesData()->back()->setOfs(traceIt->m_ofs);
-        swgScope->getTracesData()->back()->setOfsCoarse(traceIt->m_ofsCoarse);
-        swgScope->getTracesData()->back()->setOfsFine(traceIt->m_ofsFine);
         swgScope->getTracesData()->back()->setProjectionType((int) traceIt->m_projectionType);
         swgScope->getTracesData()->back()->setTextOverlay(new QString(traceIt->m_textOverlay));
         swgScope->getTracesData()->back()->setTraceColor(qColorToInt(traceIt->m_traceColor));
@@ -279,12 +277,6 @@ void ChannelAnalyzerWebAPIAdapter::webapiUpdateChannelSettings(
                     }
                     if (channelSettingsKeys.contains(QString("scopeConfig.tracesData[%1].ofs").arg(i))) {
                         scopeSettings.m_tracesData.back().m_ofs = traceData->getOfs();
-                    }
-                    if (channelSettingsKeys.contains(QString("scopeConfig.tracesData[%1].ofsCoarse").arg(i))) {
-                        scopeSettings.m_tracesData.back().m_ofsCoarse = traceData->getOfsCoarse();
-                    }
-                    if (channelSettingsKeys.contains(QString("scopeConfig.tracesData[%1].ofsFine").arg(i))) {
-                        scopeSettings.m_tracesData.back().m_ofsFine = traceData->getOfsFine();
                     }
                     if (channelSettingsKeys.contains(QString("scopeConfig.tracesData[%1].projectionType").arg(i))) {
                         scopeSettings.m_tracesData.back().m_projectionType = (Projector::ProjectionType) traceData->getProjectionType();

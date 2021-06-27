@@ -38,10 +38,6 @@ SWGTraceData::SWGTraceData() {
     m_amp_isSet = false;
     ofs = 0.0f;
     m_ofs_isSet = false;
-    ofs_coarse = 0;
-    m_ofs_coarse_isSet = false;
-    ofs_fine = 0;
-    m_ofs_fine_isSet = false;
     trace_delay = 0;
     m_trace_delay_isSet = false;
     trace_delay_coarse = 0;
@@ -82,10 +78,6 @@ SWGTraceData::init() {
     m_amp_isSet = false;
     ofs = 0.0f;
     m_ofs_isSet = false;
-    ofs_coarse = 0;
-    m_ofs_coarse_isSet = false;
-    ofs_fine = 0;
-    m_ofs_fine_isSet = false;
     trace_delay = 0;
     m_trace_delay_isSet = false;
     trace_delay_coarse = 0;
@@ -126,8 +118,6 @@ SWGTraceData::cleanup() {
 
 
 
-
-
     if(text_overlay != nullptr) { 
         delete text_overlay;
     }
@@ -154,10 +144,6 @@ SWGTraceData::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&amp, pJson["amp"], "float", "");
     
     ::SWGSDRangel::setValue(&ofs, pJson["ofs"], "float", "");
-    
-    ::SWGSDRangel::setValue(&ofs_coarse, pJson["ofsCoarse"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&ofs_fine, pJson["ofsFine"], "qint32", "");
     
     ::SWGSDRangel::setValue(&trace_delay, pJson["traceDelay"], "qint32", "");
     
@@ -211,12 +197,6 @@ SWGTraceData::asJsonObject() {
     }
     if(m_ofs_isSet){
         obj->insert("ofs", QJsonValue(ofs));
-    }
-    if(m_ofs_coarse_isSet){
-        obj->insert("ofsCoarse", QJsonValue(ofs_coarse));
-    }
-    if(m_ofs_fine_isSet){
-        obj->insert("ofsFine", QJsonValue(ofs_fine));
     }
     if(m_trace_delay_isSet){
         obj->insert("traceDelay", QJsonValue(trace_delay));
@@ -303,26 +283,6 @@ void
 SWGTraceData::setOfs(float ofs) {
     this->ofs = ofs;
     this->m_ofs_isSet = true;
-}
-
-qint32
-SWGTraceData::getOfsCoarse() {
-    return ofs_coarse;
-}
-void
-SWGTraceData::setOfsCoarse(qint32 ofs_coarse) {
-    this->ofs_coarse = ofs_coarse;
-    this->m_ofs_coarse_isSet = true;
-}
-
-qint32
-SWGTraceData::getOfsFine() {
-    return ofs_fine;
-}
-void
-SWGTraceData::setOfsFine(qint32 ofs_fine) {
-    this->ofs_fine = ofs_fine;
-    this->m_ofs_fine_isSet = true;
 }
 
 qint32
@@ -453,12 +413,6 @@ SWGTraceData::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_ofs_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_ofs_coarse_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_ofs_fine_isSet){
             isObjectUpdated = true; break;
         }
         if(m_trace_delay_isSet){

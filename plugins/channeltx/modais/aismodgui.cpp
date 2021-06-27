@@ -501,11 +501,9 @@ AISModGUI::AISModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     traceDataI.m_projectionType = Projector::ProjectionReal;
     traceDataI.m_amp = 1.0;      // for -1 to +1
     traceDataI.m_ofs = 0.0;      // vertical offset
-    traceDataI.m_ofsCoarse = 0;
     traceDataQ.m_projectionType = Projector::ProjectionImag;
     traceDataQ.m_amp = 1.0;
     traceDataQ.m_ofs = 0.0;
-    traceDataQ.m_ofsCoarse = 0;
     ui->scopeGUI->changeTrace(0, traceDataI);
     ui->scopeGUI->addTrace(traceDataQ);
     ui->scopeGUI->setDisplayMode(GLScopeSettings::DisplayPol);

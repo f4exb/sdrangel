@@ -18,12 +18,6 @@ TraceData:
       description: Offset factor
       type: number
       format: float
-    ofsCoarse:
-      description: Coarse offset slider value
-      type: integer
-    ofsFine:
-      description: Fine offset slider value
-      type: integer
     traceDelay:
       description: Trace delay in number of samples
       type: integer

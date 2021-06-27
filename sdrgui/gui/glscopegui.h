@@ -224,6 +224,7 @@ private slots:
     void on_ampExp_valueChanged(int value);
     void on_ofsCoarse_valueChanged(int value);
     void on_ofsFine_valueChanged(int value);
+    void on_ofsExp_valueChanged(int value);
     void on_traceDelayCoarse_valueChanged(int value);
     void on_traceDelayFine_valueChanged(int value);
     void on_traceView_toggled(bool checked);

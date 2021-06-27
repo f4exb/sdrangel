@@ -46,8 +46,6 @@ public:
         Projector::ProjectionType m_projectionType; //!< Complex to real projection type
         float m_amp;                     //!< Amplification factor
         float m_ofs;                     //!< Offset factor
-        int m_ofsCoarse;                 //!< Coarse offset slider value
-        int m_ofsFine;                   //!< Fine offset slider value
         int m_traceDelay;                //!< Trace delay in number of samples
         int m_traceDelayCoarse;          //!< Coarse delay slider value
         int m_traceDelayFine;            //!< Fine delay slider value
@@ -81,8 +79,6 @@ public:
             m_projectionType = Projector::ProjectionReal;
             m_amp = 1.0f;
             m_ofs = 0.0f;
-            m_ofsCoarse = 0;
-            m_ofsFine = 0;
             m_traceDelay = 0;
             m_traceDelayCoarse = 0;
             m_traceDelayFine = 0;
