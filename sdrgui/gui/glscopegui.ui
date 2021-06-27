@@ -825,12 +825,18 @@ kS/s</string>
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="ampLabel">
+      <widget class="QPushButton" name="ampReset">
+       <property name="maximumSize">
+        <size>
+         <width>22</width>
+         <height>22</height>
+        </size>
+       </property>
        <property name="toolTip">
-        <string>Vertical range</string>
+        <string>Vertical range reset</string>
        </property>
        <property name="text">
-        <string>A:</string>
+        <string>A</string>
        </property>
       </widget>
      </item>
@@ -952,7 +958,7 @@ kS/s</string>
             </size>
            </property>
            <property name="toolTip">
-            <string>Vertical range value</string>
+            <string>Unit multiplier on vertical scale</string>
            </property>
            <property name="text">
             <string>-</string>
@@ -974,12 +980,18 @@ kS/s</string>
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="ofsLabel">
+      <widget class="QPushButton" name="ofsReset">
+       <property name="maximumSize">
+        <size>
+         <width>22</width>
+         <height>22</height>
+        </size>
+       </property>
        <property name="toolTip">
-        <string>Vertical offset</string>
+        <string>Vertical offset reset</string>
        </property>
        <property name="text">
-        <string>O:</string>
+        <string>O</string>
        </property>
       </widget>
      </item>

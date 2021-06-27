@@ -854,6 +854,16 @@ void GLScopeGUI::on_traceMode_currentIndexChanged(int index)
     changeCurrentTrace();
 }
 
+void GLScopeGUI::on_ampReset_clicked(bool checked)
+{
+    (void) checked;
+    ui->amp->setValue(0);
+    ui->ampCoarse->setValue(1);
+    ui->ampExp->setValue(0);
+    setAmpScaleDisplay();
+    changeCurrentTrace();
+}
+
 void GLScopeGUI::on_amp_valueChanged(int value)
 {
     (void) value;
@@ -872,6 +882,16 @@ void GLScopeGUI::on_ampExp_valueChanged(int value)
 {
     (void) value;
     setAmpScaleDisplay();
+    changeCurrentTrace();
+}
+
+void GLScopeGUI::on_ofsReset_clicked(bool checked)
+{
+    (void) checked;
+    ui->ofsFine->setValue(0);
+    ui->ofsCoarse->setValue(0);
+    ui->ofsExp->setValue(0);
+    setAmpOfsDisplay();
     changeCurrentTrace();
 }
 
@@ -1526,12 +1546,12 @@ void GLScopeGUI::setTraceUI(const GLScopeSettings::TraceData& traceData)
     ui->ampExp->setValue(ampExp);
     setAmpScaleDisplay();
 
-    double ofsValue = traceData.m_amp;
+    double ofsValue = traceData.m_ofs;
     int ofsExp;
     double ofsMant = CalcDb::frexp10(ofsValue, &ofsExp) * 10.0;
     int ofsCoarse = (int) ofsMant;
     int ofsFine = round((ofsMant - ofsCoarse) * 1000.0);
-    ofsExp -= 1;
+    ofsExp -= ofsMant == 0 ? 0 : 1;
     ui->ofsFine->setValue(ofsFine);
     ui->ofsCoarse->setValue(ofsCoarse);
     ui->ofsExp->setValue(ofsExp);

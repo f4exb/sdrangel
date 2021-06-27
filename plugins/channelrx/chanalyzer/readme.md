@@ -312,31 +312,74 @@ This is for future use when more than one incoming complex signals can be applie
 
 <h3>6. Amplitude adjustment</h3>
 
-This slider lets you adjust the amplitude scale. The full scale value appears on the left of the slider. The unit depends on the projection.
+The amplitude range (vertical scale) can be set to any value from 1e-10 to 9.999e+10. Values are entered as mantissa (6.3 and 6.4) and exponent (6.5) values.
+
+I/Q signal range is +/-1 however values larger than 1 are accomodated for the general usage of the scope in other plugins.
+
+When displayed signal can be negative (+/- scale) the range is -range to +range. When displayed signal is positive (ex: magnitudes) the range is 0 to 2&times;range.
+
+![Channel Analyzer NG plugin amplitude scale control](../../../doc/img/ChAnalyzerNG_plugin_ampScale.png)
+
+<h4>6.1. Amplitude scale reset</h4>
+
+Push this button to reset amplitude scale to 1.
+
+<h4>6.2. Mantissa display</h4>
+
+The amplitude range is M&times;10<sup>E</sup>. This displays the M value.
+
+<h4>6.3 Mantissa fine control</h4>
+
+This slider sets the decimal digits of the mantissa from .000 to .999
+
+<h4>6.4 Mantissa coarse control</h4>
+
+This dial button sets the integer part of the mantissa from 1 to 9.
+
+<h4>6.5 Exponent control</h4>
+
+This slider sets the exponent from -10 to +10. The value is displayed at the left of the slider in exponent notation.
+
+<h4>6.6 Unit multiplier on vertical scale</h4>
+
+This displays the unit multiplier for values on the vertical scale of the display.
+
+  - **p**: pico (&times;10<sup>-12</sup>)
+  - **n**: nano (&times;10<sup>-9</sup>)
+  - **&mu;**: micro (&times;10<sup>-6</sup>)
+  - **m**: milli (&times;10<sup>-3</sup>)
+  - **-**: none (&times;1)
+  - **k**: kilo (&times;10<sup>3</sup>)
+  - **M**: mega (&times;10<sup>6</sup>)
+  - **G**: giga (&times;10<sup>9</sup>)
 
 <h3>7. Offset adjustment</h3>
 
-This pair of sliders let you offset the trace vertically. The offset value from reference appears on the left of the slider. The reference is either:
+The amplitude range can be offset by any value from -5&times;10<sup>-10</sup> to 5&times;10<sup>10</sup>.
 
-  - central zero value for Real, Imag, Phi and dPhi projections
-  - bottom zero value for MagLin projection
-  - bottom -200 dB value for MagDB projection
+I/Q signal range is +/-1 however values larger than 1 are accomodated for the general usage of the scope in other plugins.
 
-The top slider is a coarse adjustment. Each step moves the trace by an amount that depends on the projection type:
+![Channel Analyzer NG plugin amplitude offset control](../../../doc/img/ChAnalyzerNG_plugin_ampOffset.png)
 
-  - Real, Imag: 0.01
-  - Mag: 0.005
-  - MagSq: 0.005
-  - MagDB: 1 dB
-  - Phi, dPhi: 0.01
+<h4>7.1. Amplitude offset reset</h4>
 
-The bottom slider is a fine adjustment. Each step moves the trace by an amount that depends on the projection type:
+Push this button to reset amplitude offset to 0.
 
-  - Real, Imag: 50.0E-6
-  - Mag: 25.0sE-6
-  - MagSq: 25.0sE-6
-  - MagDB: 0.01 dB
-  - Phi, dPhi: 50.0E-6
+<h4>7.2. Mantissa display</h4>
+
+The amplitude offset is M&times;10<sup>E</sup>. This displays the M value.
+
+<h4>7.3 Mantissa fine control</h4>
+
+This slider sets the decimal digits of the mantissa from .000 to 0.999 and jump to next unit (so 5.000 can be reached)
+
+<h4>7.4 Mantissa coarse control</h4>
+
+This dial button sets the integer part of the mantissa from -5 to 4.
+
+<h4>7.5 Exponent control</h4>
+
+This slider sets the exponent from -10 to +10. The value is displayed at the left of the slider in exponent notation.
 
 <h3>8. Trace delay adjustment</h3>
 

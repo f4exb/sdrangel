@@ -219,9 +219,11 @@ private slots:
     void on_traceDown_clicked(bool checked);
     void on_traceStream_currentIndexChanged(int index);
     void on_traceMode_currentIndexChanged(int index);
+    void on_ampReset_clicked(bool checked);
     void on_amp_valueChanged(int value);
     void on_ampCoarse_valueChanged(int value);
     void on_ampExp_valueChanged(int value);
+    void on_ofsReset_clicked(bool checked);
     void on_ofsCoarse_valueChanged(int value);
     void on_ofsFine_valueChanged(int value);
     void on_ofsExp_valueChanged(int value);
