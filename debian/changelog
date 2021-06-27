@@ -1,3 +1,17 @@
+sdrangel (6.15.0-1) unstable; urgency=medium
+
+  * New Radio Clock plugin. PRs #394, #936  and #939
+  * Add image zooming to APT demodulator. PR #941
+  * Add Star Tracker galactic line of sight plot. PR #938
+  * Improved packet demod performance. PR #935
+  * Scope GUI: refactor of amplitude scale and offset. Issue #937
+  * Scope: allow complex float possibly unscaled input. Issue #929
+  * Fixed SWGModelFactory so that init() is invoked on complex objects. Fixes #899
+  * Fixed multiple streams input. Fixes #925
+  * Upgraded libairspy to v1.0.10
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 27 Jun 2021 17:12:08 +0200
+
 sdrangel (6.14.0-1) unstable; urgency=medium
 
   * New noise figure Rx channel plugin PR #917 and #919
