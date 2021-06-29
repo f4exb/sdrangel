@@ -172,7 +172,7 @@ Use this button to dismiss the dialog
 
 <h4>1.4 Prefernces - LimeRFE</h4>
 
-Only in Linux and if LimeSuite library is available this opens a dialog to control a LimeRFE device via USB. The details are provided [here](limerfeusbgui.md).
+Only if LimeSuite library is available this opens a dialog to control a LimeRFE device via USB. The details are provided [here](limerfeusbgui.md).
 
 <h4>1.5 Preferences - Devices - User arguments</h4>
 
