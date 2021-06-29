@@ -71,6 +71,7 @@ public:
     void addTXPacket(QByteArray data);
     void encodePacket(uint8_t *packet, int packet_length, uint8_t *crc_start, uint8_t *packet_end);
     void setChannel(ChannelAPI *channel) { m_channel = channel; }
+    int getChannelSampleRate() const { return m_channelSampleRate; }
 
 private:
     int m_channelSampleRate;

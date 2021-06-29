@@ -171,6 +171,7 @@ public:
     double getMagSq() const;
     void setLevelMeter(QObject *levelMeter);
     uint32_t getNumberOfDeviceStreams() const;
+    int getSourceChannelSampleRate() const;
 
     static const char* const m_channelIdURI;
     static const char* const m_channelId;
@@ -197,6 +198,7 @@ private:
     QUdpSocket *m_udpSocket;
 
     void applySettings(const PacketModSettings& settings, bool force = false);
+    void sendSampleRateToDemodAnalyzer();
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const PacketModSettings& settings, bool force);
     void sendChannelSettings(
@@ -217,6 +219,7 @@ private:
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
     void udpRx();
+    void handleChannelMessages();
 };
 
 

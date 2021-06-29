@@ -74,6 +74,7 @@ DABDemod::DABDemod(DeviceAPI *deviceAPI) :
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    connect(&m_channelMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessages()));
 }
 
 DABDemod::~DABDemod()
@@ -257,6 +258,13 @@ bool DABDemod::handleMessage(const Message& cmd)
 
         return true;
     }
+    else if (MainCore::MsgChannelDemodQuery::match(cmd))
+    {
+        qDebug() << "DABDemod::handleMessage: MsgChannelDemodQuery";
+        sendSampleRateToDemodAnalyzer();
+
+        return true;
+    }
     else
     {
         return false;
@@ -342,6 +350,25 @@ bool DABDemod::deserialize(const QByteArray& data)
         MsgConfigureDABDemod *msg = MsgConfigureDABDemod::create(m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
+    }
+}
+
+void DABDemod::sendSampleRateToDemodAnalyzer()
+{
+    QList<MessageQueue*> *messageQueues = MainCore::instance()->getMessagePipes().getMessageQueues(this, "reportdemod");
+
+    if (messageQueues)
+    {
+        QList<MessageQueue*>::iterator it = messageQueues->begin();
+
+        for (; it != messageQueues->end(); ++it)
+        {
+            MainCore::MsgChannelDemodReport *msg = MainCore::MsgChannelDemodReport::create(
+                this,
+                getAudioSampleRate()
+            );
+            (*it)->push(msg);
+        }
     }
 }
 
@@ -549,4 +576,16 @@ void DABDemod::networkManagerFinished(QNetworkReply *reply)
     }
 
     reply->deleteLater();
+}
+
+void DABDemod::handleChannelMessages()
+{
+	Message* message;
+
+	while ((message = m_channelMessageQueue.pop()) != nullptr)
+	{
+		if (handleMessage(*message)) {
+			delete message;
+		}
+	}
 }

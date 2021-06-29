@@ -6,14 +6,18 @@ This plugin can be used to analyze the real demodulated signal from some Rx chan
 
 Rx plugins are:
 
+  - AIS demodulator
   - AM demodulator
+  - DAB demodulator
   - DSD (FM digital voice) demodulator
   - NFM demodulator
+  - Packer demodulator
   - SSB demodulator
   - WFM demodulator
 
 Tx plugins are:
 
+  - AIS modulator
   - AM modulator
   - NFM modulator
   - Packet modulator
@@ -55,7 +59,7 @@ Use this combo to select which channel to use for display. Channel is selected u
 
 <h3>A.4: (Re)apply channel selection</h3>
 
-Applies or re-applies channel selection (A.3) so that the channel gets effectively connected to the analyzer and signal is displayed.
+Applies or re-applies channel selection (A.3) so that the channel gets effectively connected to the analyzer and signal is displayed. This will update the sample rate.
 
 <h3>A.5: Decimation by a power of two</h3>
 

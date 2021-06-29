@@ -37,10 +37,6 @@
 #include <iostream>
 #include <fstream>
 
-#define PACKETDEMOD_CHANNEL_BANDWIDTH 9600
-// Must be integer multiple of m_baud=1200
-#define PACKETDEMOD_CHANNEL_SAMPLE_RATE 38400
-
 class ChannelAPI;
 class PacketDemod;
 

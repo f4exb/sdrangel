@@ -140,6 +140,7 @@ private:
     QNetworkRequest m_networkRequest;
 
     void applySettings(const AMDemodSettings& settings, bool force = false);
+    void sendSampleRateToDemodAnalyzer();
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const AMDemodSettings& settings, bool force);
     void sendChannelSettings(
@@ -157,7 +158,7 @@ private:
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
-
+    void handleChannelMessages();
 };
 
 #endif // INCLUDE_AMDEMOD_H

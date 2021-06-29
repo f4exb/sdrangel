@@ -159,7 +159,7 @@ void PacketDemodBaseband::applySettings(const PacketDemodSettings& settings, boo
 {
     if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
     {
-        m_channelizer->setChannelization(PACKETDEMOD_CHANNEL_SAMPLE_RATE, settings.m_inputFrequencyOffset);
+        m_channelizer->setChannelization(PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE, settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
     }
 

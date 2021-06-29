@@ -369,6 +369,7 @@ public:
     }*/
 
     uint32_t getNumberOfDeviceStreams() const;
+    int getAudioSampleRate() const { return m_basebandSink->getAudioSampleRate(); }
 
     static const char * const m_channelIdURI;
     static const char * const m_channelId;
@@ -385,6 +386,7 @@ private:
     QNetworkRequest m_networkRequest;
 
     void applySettings(const DABDemodSettings& settings, bool force = false);
+    void sendSampleRateToDemodAnalyzer();
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const DABDemodSettings& settings, bool force);
     void webapiFormatChannelSettings(
         QList<QString>& channelSettingsKeys,
@@ -395,7 +397,7 @@ private:
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
-
+    void handleChannelMessages();
 };
 
 #endif // INCLUDE_DABDEMOD_H

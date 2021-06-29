@@ -138,6 +138,7 @@ private:
     QNetworkRequest m_networkRequest;
 
     void applySettings(const PacketDemodSettings& settings, bool force = false);
+    void sendSampleRateToDemodAnalyzer();
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const PacketDemodSettings& settings, bool force);
     void webapiFormatChannelSettings(
         QList<QString>& channelSettingsKeys,
@@ -148,6 +149,7 @@ private:
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
+    void handleChannelMessages();
 
 };
 

@@ -73,6 +73,7 @@ AISMod::AISMod(DeviceAPI *deviceAPI) :
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    connect(&m_channelMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessages()));
 }
 
 AISMod::~AISMod()
@@ -132,6 +133,13 @@ bool AISMod::handleMessage(const Message& cmd)
         DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
         qDebug() << "AISMod::handleMessage: DSPSignalNotification";
         m_basebandSource->getInputMessageQueue()->push(rep);
+        return true;
+    }
+    else if (MainCore::MsgChannelDemodQuery::match(cmd))
+    {
+        qDebug() << "AISMod::handleMessage: MsgChannelDemodQuery";
+        sendSampleRateToDemodAnalyzer();
+
         return true;
     }
     else
@@ -338,6 +346,25 @@ bool AISMod::deserialize(const QByteArray& data)
     m_inputMessageQueue.push(msg);
 
     return success;
+}
+
+void AISMod::sendSampleRateToDemodAnalyzer()
+{
+    QList<MessageQueue*> *messageQueues = MainCore::instance()->getMessagePipes().getMessageQueues(this, "reportdemod");
+
+    if (messageQueues)
+    {
+        QList<MessageQueue*>::iterator it = messageQueues->begin();
+
+        for (; it != messageQueues->end(); ++it)
+        {
+            MainCore::MsgChannelDemodReport *msg = MainCore::MsgChannelDemodReport::create(
+                this,
+                AISModSettings::AISMOD_SAMPLE_RATE
+            );
+            (*it)->push(msg);
+        }
+    }
 }
 
 int AISMod::webapiSettingsGet(
@@ -821,4 +848,16 @@ void AISMod::udpRx()
         MsgTXPacketBytes *msg = MsgTXPacketBytes::create(datagram.data());
         m_basebandSource->getInputMessageQueue()->push(msg);
     }
+}
+
+void AISMod::handleChannelMessages()
+{
+	Message* message;
+
+	while ((message = m_channelMessageQueue.pop()) != nullptr)
+	{
+		if (handleMessage(*message)) {
+			delete message;
+		}
+	}
 }

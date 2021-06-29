@@ -165,6 +165,7 @@ private:
     QNetworkRequest m_networkRequest;
 
     void applySettings(const AISDemodSettings& settings, bool force = false);
+    void sendSampleRateToDemodAnalyzer();
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const AISDemodSettings& settings, bool force);
     void webapiFormatChannelSettings(
         QList<QString>& channelSettingsKeys,
@@ -175,7 +176,7 @@ private:
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
-
+    void handleChannelMessages();
 };
 
 #endif // INCLUDE_AISDEMOD_H

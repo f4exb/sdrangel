@@ -74,6 +74,7 @@ public:
     void setChannel(ChannelAPI *channel);
     double getMagSq() const { return m_sink.getMagSq(); }
     bool isRunning() const { return m_running; }
+    int getAudioSampleRate() const { return m_sink.getAudioSampleRate(); }
 
 private:
     SampleSinkFifo m_sampleFifo;

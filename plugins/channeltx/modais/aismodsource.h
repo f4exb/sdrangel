@@ -43,10 +43,6 @@
 #define AIS_TRAIN       0x55
 #define AIS_FLAG        0x7e
 
-// Sample rate is multiple of 9600 baud rate (use even multiple so Gausian filter has odd number of taps)
-// Is there any benefit to having this higher?
-#define AISMOD_SAMPLE_RATE (9600*6)
-
 class ScopeVis;
 class BasebandSampleSink;
 class ChannelAPI;

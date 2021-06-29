@@ -28,7 +28,7 @@
 #include "channel/channelapi.h"
 
 AISModSource::AISModSource() :
-    m_channelSampleRate(AISMOD_SAMPLE_RATE),
+    m_channelSampleRate(AISModSettings::AISMOD_SAMPLE_RATE),
     m_channelFrequencyOffset(0),
     m_fmPhase(0.0),
     m_spectrumSink(nullptr),
@@ -238,7 +238,7 @@ void AISModSource::modulateSample()
                         {
                             // Wait before retransmitting
                             m_state = wait;
-                            m_waitCounter = m_settings.m_repeatDelay * AISMOD_SAMPLE_RATE;
+                            m_waitCounter = m_settings.m_repeatDelay * AISModSettings::AISMOD_SAMPLE_RATE;
                         }
                         else
                         {
@@ -298,17 +298,17 @@ void AISModSource::applySettings(const AISModSettings& settings, bool force)
     if ((settings.m_bt != m_settings.m_bt) || (settings.m_symbolSpan != m_settings.m_symbolSpan) || (settings.m_baud != m_settings.m_baud) || force)
     {
         qDebug() << "AISModSource::applySettings: Recreating pulse shaping filter: "
-                << " SampleRate:" << AISMOD_SAMPLE_RATE
+                << " SampleRate:" << AISModSettings::AISMOD_SAMPLE_RATE
                 << " bt: " << settings.m_bt
                 << " symbolSpan: " << settings.m_symbolSpan
                 << " baud:" << settings.m_baud;
-        m_pulseShape.create(settings.m_bt, settings.m_symbolSpan, AISMOD_SAMPLE_RATE/settings.m_baud);
+        m_pulseShape.create(settings.m_bt, settings.m_symbolSpan, AISModSettings::AISMOD_SAMPLE_RATE/settings.m_baud);
     }
 
     m_settings = settings;
 
     // Precalculate FM sensensity and linear gain to save doing it in the loop
-    m_samplesPerSymbol = AISMOD_SAMPLE_RATE / m_settings.m_baud;
+    m_samplesPerSymbol = AISModSettings::AISMOD_SAMPLE_RATE / m_settings.m_baud;
     Real modIndex = m_settings.m_fmDeviation / (Real)m_settings.m_baud;
     m_phaseSensitivity = 2.0f * M_PI * modIndex / (Real)m_samplesPerSymbol;
     m_linearGain = powf(10.0f,  m_settings.m_gain/20.0f);
@@ -330,8 +330,8 @@ void AISModSource::applyChannelSettings(int channelSampleRate, int channelFreque
     if ((m_channelSampleRate != channelSampleRate) || force)
     {
         m_interpolatorDistanceRemain = 0;
-        m_interpolatorDistance = (Real) AISMOD_SAMPLE_RATE / (Real) channelSampleRate;
-        m_interpolator.create(48, AISMOD_SAMPLE_RATE, m_settings.m_rfBandwidth / 2.2, 3.0);
+        m_interpolatorDistance = (Real) AISModSettings::AISMOD_SAMPLE_RATE / (Real) channelSampleRate;
+        m_interpolator.create(48, AISModSettings::AISMOD_SAMPLE_RATE, m_settings.m_rfBandwidth / 2.2, 3.0);
     }
 
     m_channelSampleRate = channelSampleRate;

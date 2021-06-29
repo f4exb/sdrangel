@@ -41,9 +41,6 @@
 #include <iostream>
 #include <fstream>
 
-// 6x 9600 baud rate (use even multiple so Gausian filter has odd number of taps)
-#define AISDEMOD_CHANNEL_SAMPLE_RATE 57600
-
 #define AISDEMOD_MAX_BYTES  (3+1+126+2+1+1)
 
 class ChannelAPI;

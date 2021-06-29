@@ -36,7 +36,7 @@
 AISDemodSink::AISDemodSink(AISDemod *aisDemod) :
         m_scopeSink(nullptr),
         m_aisDemod(aisDemod),
-        m_channelSampleRate(AISDEMOD_CHANNEL_SAMPLE_RATE),
+        m_channelSampleRate(AISDemodSettings::AISDEMOD_CHANNEL_SAMPLE_RATE),
         m_channelFrequencyOffset(0),
         m_magsqSum(0.0f),
         m_magsqPeak(0.0f),
@@ -410,13 +410,13 @@ void AISDemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
     if ((m_channelSampleRate != channelSampleRate) || force)
     {
         m_interpolator.create(16, channelSampleRate, m_settings.m_rfBandwidth / 2.2);
-        m_interpolatorDistance = (Real) channelSampleRate / (Real) AISDEMOD_CHANNEL_SAMPLE_RATE;
+        m_interpolatorDistance = (Real) channelSampleRate / (Real) AISDemodSettings::AISDEMOD_CHANNEL_SAMPLE_RATE;
         m_interpolatorDistanceRemain = m_interpolatorDistance;
     }
 
     m_channelSampleRate = channelSampleRate;
     m_channelFrequencyOffset = channelFrequencyOffset;
-    m_samplesPerSymbol = AISDEMOD_CHANNEL_SAMPLE_RATE / m_settings.m_baud;
+    m_samplesPerSymbol = AISDemodSettings::AISDEMOD_CHANNEL_SAMPLE_RATE / m_settings.m_baud;
     qDebug() << "AISDemodSink::applyChannelSettings: m_samplesPerSymbol: " << m_samplesPerSymbol;
 }
 
@@ -428,18 +428,18 @@ void AISDemodSink::applySettings(const AISDemodSettings& settings, bool force)
     if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
     {
         m_interpolator.create(16, m_channelSampleRate, settings.m_rfBandwidth / 2.2);
-        m_interpolatorDistance = (Real) m_channelSampleRate / (Real) AISDEMOD_CHANNEL_SAMPLE_RATE;
+        m_interpolatorDistance = (Real) m_channelSampleRate / (Real) AISDemodSettings::AISDEMOD_CHANNEL_SAMPLE_RATE;
         m_interpolatorDistanceRemain = m_interpolatorDistance;
-        m_lowpass.create(301, AISDEMOD_CHANNEL_SAMPLE_RATE, settings.m_rfBandwidth / 2.0f);
+        m_lowpass.create(301, AISDemodSettings::AISDEMOD_CHANNEL_SAMPLE_RATE, settings.m_rfBandwidth / 2.0f);
     }
     if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force)
     {
-        m_phaseDiscri.setFMScaling(AISDEMOD_CHANNEL_SAMPLE_RATE / (2.0f * settings.m_fmDeviation));
+        m_phaseDiscri.setFMScaling(AISDemodSettings::AISDEMOD_CHANNEL_SAMPLE_RATE / (2.0f * settings.m_fmDeviation));
     }
 
     if ((settings.m_baud != m_settings.m_baud) || force)
     {
-        m_samplesPerSymbol = AISDEMOD_CHANNEL_SAMPLE_RATE / settings.m_baud;
+        m_samplesPerSymbol = AISDemodSettings::AISDEMOD_CHANNEL_SAMPLE_RATE / settings.m_baud;
         qDebug() << "ISDemodSink::applySettings: m_samplesPerSymbol: " << m_samplesPerSymbol << " baud " << settings.m_baud;
         m_pulseShape.create(0.5, 3, m_samplesPerSymbol);
 

@@ -64,6 +64,7 @@ PacketDemod::PacketDemod(DeviceAPI *deviceAPI) :
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    connect(&m_channelMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessages()));
 }
 
 PacketDemod::~PacketDemod()
@@ -177,6 +178,13 @@ bool PacketDemod::handleMessage(const Message& cmd)
 
         return true;
     }
+    else if (MainCore::MsgChannelDemodQuery::match(cmd))
+    {
+        qDebug() << "PacketDemod::handleMessage: MsgChannelDemodQuery";
+        sendSampleRateToDemodAnalyzer();
+
+        return true;
+    }
     else
     {
         return false;
@@ -241,6 +249,25 @@ void PacketDemod::applySettings(const PacketDemodSettings& settings, bool force)
     }
 
     m_settings = settings;
+}
+
+void PacketDemod::sendSampleRateToDemodAnalyzer()
+{
+    QList<MessageQueue*> *messageQueues = MainCore::instance()->getMessagePipes().getMessageQueues(this, "reportdemod");
+
+    if (messageQueues)
+    {
+        QList<MessageQueue*>::iterator it = messageQueues->begin();
+
+        for (; it != messageQueues->end(); ++it)
+        {
+            MainCore::MsgChannelDemodReport *msg = MainCore::MsgChannelDemodReport::create(
+                this,
+                PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE
+            );
+            (*it)->push(msg);
+        }
+    }
 }
 
 QByteArray PacketDemod::serialize() const
@@ -469,4 +496,16 @@ void PacketDemod::networkManagerFinished(QNetworkReply *reply)
     }
 
     reply->deleteLater();
+}
+
+void PacketDemod::handleChannelMessages()
+{
+	Message* message;
+
+	while ((message = m_channelMessageQueue.pop()) != nullptr)
+	{
+		if (handleMessage(*message)) {
+			delete message;
+		}
+	}
 }

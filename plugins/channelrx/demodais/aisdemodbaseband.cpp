@@ -160,7 +160,7 @@ void AISDemodBaseband::applySettings(const AISDemodSettings& settings, bool forc
 {
     if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
     {
-        m_channelizer->setChannelization(AISDEMOD_CHANNEL_SAMPLE_RATE, settings.m_inputFrequencyOffset);
+        m_channelizer->setChannelization(AISDemodSettings::AISDEMOD_CHANNEL_SAMPLE_RATE, settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
     }
 

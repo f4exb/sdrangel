@@ -75,6 +75,7 @@ AMMod::AMMod(DeviceAPI *deviceAPI) :
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    connect(&m_channelMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessages()));
 }
 
 AMMod::~AMMod()
@@ -173,6 +174,13 @@ bool AMMod::handleMessage(const Message& cmd)
         DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
         qDebug() << "AMMod::handleMessage: DSPSignalNotification";
         m_basebandSource->getInputMessageQueue()->push(rep);
+
+        return true;
+    }
+    else if (MainCore::MsgChannelDemodQuery::match(cmd))
+    {
+        qDebug() << "AMMod::handleMessage: MsgChannelDemodQuery";
+        sendSampleRateToDemodAnalyzer();
 
         return true;
     }
@@ -331,6 +339,25 @@ bool AMMod::deserialize(const QByteArray& data)
         MsgConfigureAMMod *msg = MsgConfigureAMMod::create(m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
+    }
+}
+
+void AMMod::sendSampleRateToDemodAnalyzer()
+{
+    QList<MessageQueue*> *messageQueues = MainCore::instance()->getMessagePipes().getMessageQueues(this, "reportdemod");
+
+    if (messageQueues)
+    {
+        QList<MessageQueue*>::iterator it = messageQueues->begin();
+
+        for (; it != messageQueues->end(); ++it)
+        {
+            MainCore::MsgChannelDemodReport *msg = MainCore::MsgChannelDemodReport::create(
+                this,
+                getAudioSampleRate()
+            );
+            (*it)->push(msg);
+        }
     }
 }
 
@@ -693,4 +720,16 @@ int AMMod::getAudioSampleRate() const
 int AMMod::getFeedbackAudioSampleRate() const
 {
     return m_basebandSource->getFeedbackAudioSampleRate();
+}
+
+void AMMod::handleChannelMessages()
+{
+	Message* message;
+
+	while ((message = m_channelMessageQueue.pop()) != nullptr)
+	{
+		if (handleMessage(*message)) {
+			delete message;
+		}
+	}
 }

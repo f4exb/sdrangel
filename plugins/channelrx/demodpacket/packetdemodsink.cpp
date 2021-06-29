@@ -32,7 +32,7 @@
 
 PacketDemodSink::PacketDemodSink(PacketDemod *packetDemod) :
         m_packetDemod(packetDemod),
-        m_channelSampleRate(PACKETDEMOD_CHANNEL_SAMPLE_RATE),
+        m_channelSampleRate(PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE),
         m_channelFrequencyOffset(0),
         m_magsqSum(0.0f),
         m_magsqPeak(0.0f),
@@ -136,7 +136,7 @@ void PacketDemodSink::processOneSample(Complex &ci)
         // Look for edge
         if (sample != m_samplePrev)
         {
-            m_syncCount = PACKETDEMOD_CHANNEL_SAMPLE_RATE/m_settings.m_baud/2;
+            m_syncCount = PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE/m_settings.m_baud/2;
         }
         else
         {
@@ -235,7 +235,7 @@ void PacketDemodSink::processOneSample(Complex &ci)
                         m_bitCount = 0;
                     }
                 }
-                m_syncCount = PACKETDEMOD_CHANNEL_SAMPLE_RATE/m_settings.m_baud;
+                m_syncCount = PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE/m_settings.m_baud;
             }
         }
         m_samplePrev = sample;
@@ -277,7 +277,7 @@ void PacketDemodSink::applyChannelSettings(int channelSampleRate, int channelFre
     if ((m_channelSampleRate != channelSampleRate) || force)
     {
         m_interpolator.create(16, channelSampleRate, m_settings.m_rfBandwidth / 2.2);
-        m_interpolatorDistance = (Real) channelSampleRate / (Real) PACKETDEMOD_CHANNEL_SAMPLE_RATE;
+        m_interpolatorDistance = (Real) channelSampleRate / (Real) PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE;
         m_interpolatorDistanceRemain = m_interpolatorDistance;
     }
 
@@ -293,13 +293,13 @@ void PacketDemodSink::applySettings(const PacketDemodSettings& settings, bool fo
     if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
     {
         m_interpolator.create(16, m_channelSampleRate, settings.m_rfBandwidth / 2.2);
-        m_interpolatorDistance = (Real) m_channelSampleRate / (Real) PACKETDEMOD_CHANNEL_SAMPLE_RATE;
+        m_interpolatorDistance = (Real) m_channelSampleRate / (Real) PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE;
         m_interpolatorDistanceRemain = m_interpolatorDistance;
-        m_lowpass.create(301, PACKETDEMOD_CHANNEL_SAMPLE_RATE, settings.m_rfBandwidth / 2.0f);
+        m_lowpass.create(301, PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE, settings.m_rfBandwidth / 2.0f);
     }
     if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force)
     {
-        m_phaseDiscri.setFMScaling(PACKETDEMOD_CHANNEL_SAMPLE_RATE / (2.0f * settings.m_fmDeviation));
+        m_phaseDiscri.setFMScaling(PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE / (2.0f * settings.m_fmDeviation));
     }
 
     if (force)
@@ -307,7 +307,7 @@ void PacketDemodSink::applySettings(const PacketDemodSettings& settings, bool fo
         delete[] m_f1;
         delete[] m_f0;
         delete[] m_corrBuf;
-        m_correlationLength = PACKETDEMOD_CHANNEL_SAMPLE_RATE/settings.m_baud;
+        m_correlationLength = PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE/settings.m_baud;
         m_f1 = new Complex[m_correlationLength]();
         m_f0 = new Complex[m_correlationLength]();
         m_corrBuf = new Complex[m_correlationLength]();
@@ -319,12 +319,12 @@ void PacketDemodSink::applySettings(const PacketDemodSettings& settings, bool fo
         {
             m_f0[i] = Complex(cos(f0), sin(f0));
             m_f1[i] = Complex(cos(f1), sin(f1));
-            f0 += 2.0f*(Real)M_PI*2200.0f/PACKETDEMOD_CHANNEL_SAMPLE_RATE;
-            f1 += 2.0f*(Real)M_PI*1200.0f/PACKETDEMOD_CHANNEL_SAMPLE_RATE;
+            f0 += 2.0f*(Real)M_PI*2200.0f/PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE;
+            f1 += 2.0f*(Real)M_PI*1200.0f/PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE;
         }
 
-        m_lowpassF1.create(301, PACKETDEMOD_CHANNEL_SAMPLE_RATE, settings.m_baud * 1.1f);
-        m_lowpassF0.create(301, PACKETDEMOD_CHANNEL_SAMPLE_RATE, settings.m_baud * 1.1f);
+        m_lowpassF1.create(301, PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE, settings.m_baud * 1.1f);
+        m_lowpassF0.create(301, PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE, settings.m_baud * 1.1f);
         m_samplePrev = 0;
         m_syncCount = 0;
         m_symbolPrev = 0;

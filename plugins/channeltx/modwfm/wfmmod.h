@@ -267,6 +267,7 @@ private:
     static const int m_levelNbSamples;
 
     void applySettings(const WFMModSettings& settings, bool force = false);
+    void sendSampleRateToDemodAnalyzer();
     void openFileStream();
     void seekFileStream(int seekPercentage);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
@@ -287,6 +288,7 @@ private:
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
+    void handleChannelMessages();
 };
 
 

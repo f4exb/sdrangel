@@ -184,6 +184,7 @@ private:
     QUdpSocket *m_udpSocket;
 
     void applySettings(const AISModSettings& settings, bool force = false);
+    void sendSampleRateToDemodAnalyzer();
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const AISModSettings& settings, bool force);
     void sendChannelSettings(
@@ -204,6 +205,7 @@ private:
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
     void udpRx();
+    void handleChannelMessages();
 };
 
 

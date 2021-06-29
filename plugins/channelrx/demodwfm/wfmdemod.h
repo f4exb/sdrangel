@@ -134,7 +134,7 @@ private:
     static const int m_udpBlockSize;
 
     void applySettings(const WFMDemodSettings& settings, bool force = false);
-
+    void sendSampleRateToDemodAnalyzer();
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const WFMDemodSettings& settings, bool force);
     void sendChannelSettings(
@@ -152,6 +152,7 @@ private:
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
+    void handleChannelMessages();
 };
 
 #endif // INCLUDE_WFMDEMOD_H

@@ -640,6 +640,19 @@ void DABDemodSink::applyAudioSampleRate(int sampleRate)
 
     m_audioFifo.setSize(sampleRate);
 
+    QList<MessageQueue*> *messageQueues = MainCore::instance()->getMessagePipes().getMessageQueues(m_channel, "reportdemod");
+
+    if (messageQueues)
+    {
+        QList<MessageQueue*>::iterator it = messageQueues->begin();
+
+        for (; it != messageQueues->end(); ++it)
+        {
+            MainCore::MsgChannelDemodReport *msg = MainCore::MsgChannelDemodReport::create(m_channel, sampleRate);
+            (*it)->push(msg);
+        }
+    }
+
     m_audioSampleRate = sampleRate;
 }
 

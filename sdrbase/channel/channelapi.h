@@ -28,9 +28,9 @@
 
 #include "export.h"
 #include "pipes/pipeendpoint.h"
+#include "util/messagequeue.h"
 
 class DeviceAPI;
-class MessageQueue;
 
 namespace SWGSDRangel
 {
@@ -64,6 +64,7 @@ public:
 
     virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
     MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
+    MessageQueue *getChannelMessageQueue() { return &m_channelMessageQueue; } //!< Get the queue for plugin communication
 
     /**
      * API adapter for the channel settings GET requests
@@ -130,7 +131,8 @@ public:
     virtual qint64 getStreamCenterFrequency(int streamIndex, bool sinkElseSource) const = 0;
 
 protected:
-    MessageQueue *m_guiMessageQueue;  //!< Input message queue to the GUI
+    MessageQueue *m_guiMessageQueue;    //!< Input message queue to the GUI
+    MessageQueue m_channelMessageQueue; //!< Input message queue for inter plugin communication
 
 private:
     StreamType m_streamType;

@@ -441,6 +441,20 @@ public:
         { }
     };
 
+    class SDRBASE_API MsgChannelDemodQuery : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgChannelDemodQuery* create() {
+            return new MsgChannelDemodQuery();
+        }
+
+    private:
+        MsgChannelDemodQuery() :
+            Message()
+        { }
+    };
+
     class SDRBASE_API MsgChannelDemodReport : public Message {
         MESSAGE_CLASS_DECLARATION
 

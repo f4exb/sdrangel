@@ -516,7 +516,7 @@ AISModGUI::AISModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     ui->scopeGUI->changeTrigger(0, triggerData);
     ui->scopeGUI->focusOnTrigger(0); // re-focus to take changes into account in the GUI
 
-    m_scopeVis->setLiveRate(AISMOD_SAMPLE_RATE);
+    m_scopeVis->setLiveRate(AISModSettings::AISMOD_SAMPLE_RATE);
     //m_scopeVis->setFreeRun(false); // FIXME: add method rather than call m_scopeVis->configure()
 
     m_spectrumVis = m_aisMod->getSpectrumVis();
@@ -524,7 +524,7 @@ AISModGUI::AISModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
     // Extra /2 here because SSB?
     ui->glSpectrum->setCenterFrequency(0);
-    ui->glSpectrum->setSampleRate(AISMOD_SAMPLE_RATE);
+    ui->glSpectrum->setSampleRate(AISModSettings::AISMOD_SAMPLE_RATE);
     ui->glSpectrum->setSsbSpectrum(true);
     ui->glSpectrum->setDisplayCurrent(true);
     ui->glSpectrum->setLsbDisplay(false);

@@ -68,6 +68,7 @@ NFMDemod::NFMDemod(DeviceAPI *devieAPI) :
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    connect(&m_channelMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessages()));
 }
 
 NFMDemod::~NFMDemod()
@@ -132,6 +133,13 @@ bool NFMDemod::handleMessage(const Message& cmd)
 
 	    return true;
 	}
+    else if (MainCore::MsgChannelDemodQuery::match(cmd))
+    {
+        qDebug() << "NFMDemod::handleMessage: MsgChannelDemodQuery";
+        sendSampleRateToDemodAnalyzer();
+
+        return true;
+    }
 	else
 	{
 		return false;
@@ -267,6 +275,25 @@ bool NFMDemod::deserialize(const QByteArray& data)
     m_inputMessageQueue.push(msg);
 
     return success;
+}
+
+void NFMDemod::sendSampleRateToDemodAnalyzer()
+{
+    QList<MessageQueue*> *messageQueues = MainCore::instance()->getMessagePipes().getMessageQueues(this, "reportdemod");
+
+    if (messageQueues)
+    {
+        QList<MessageQueue*>::iterator it = messageQueues->begin();
+
+        for (; it != messageQueues->end(); ++it)
+        {
+            MainCore::MsgChannelDemodReport *msg = MainCore::MsgChannelDemodReport::create(
+                this,
+                getAudioSampleRate()
+            );
+            (*it)->push(msg);
+        }
+    }
 }
 
 int NFMDemod::webapiSettingsGet(
@@ -582,4 +609,16 @@ void NFMDemod::networkManagerFinished(QNetworkReply *reply)
     }
 
     reply->deleteLater();
+}
+
+void NFMDemod::handleChannelMessages()
+{
+	Message* message;
+
+	while ((message = m_channelMessageQueue.pop()) != nullptr)
+	{
+		if (handleMessage(*message)) {
+			delete message;
+		}
+	}
 }

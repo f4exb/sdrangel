@@ -77,6 +77,7 @@ SSBMod::SSBMod(DeviceAPI *deviceAPI) :
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    connect(&m_channelMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessages()));
 }
 
 SSBMod::~SSBMod()
@@ -170,6 +171,13 @@ bool SSBMod::handleMessage(const Message& cmd)
         DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
         qDebug() << "SSBMod::handleMessage: DSPSignalNotification";
         m_basebandSource->getInputMessageQueue()->push(rep);
+
+        return true;
+    }
+    else if (MainCore::MsgChannelDemodQuery::match(cmd))
+    {
+        qDebug() << "SSBMod::handleMessage: MsgChannelDemodQuery";
+        sendSampleRateToDemodAnalyzer();
 
         return true;
     }
@@ -355,6 +363,25 @@ bool SSBMod::deserialize(const QByteArray& data)
         MsgConfigureSSBMod *msg = MsgConfigureSSBMod::create(m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
+    }
+}
+
+void SSBMod::sendSampleRateToDemodAnalyzer()
+{
+    QList<MessageQueue*> *messageQueues = MainCore::instance()->getMessagePipes().getMessageQueues(this, "reportdemod");
+
+    if (messageQueues)
+    {
+        QList<MessageQueue*>::iterator it = messageQueues->begin();
+
+        for (; it != messageQueues->end(); ++it)
+        {
+            MainCore::MsgChannelDemodReport *msg = MainCore::MsgChannelDemodReport::create(
+                this,
+                getAudioSampleRate()
+            );
+            (*it)->push(msg);
+        }
     }
 }
 
@@ -778,4 +805,16 @@ int SSBMod::getFeedbackAudioSampleRate() const
 uint32_t SSBMod::getNumberOfDeviceStreams() const
 {
     return m_deviceAPI->getNbSinkStreams();
+}
+
+void SSBMod::handleChannelMessages()
+{
+	Message* message;
+
+	while ((message = m_channelMessageQueue.pop()) != nullptr)
+	{
+		if (handleMessage(*message)) {
+			delete message;
+		}
+	}
 }

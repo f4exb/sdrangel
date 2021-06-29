@@ -78,6 +78,7 @@ PacketMod::PacketMod(DeviceAPI *deviceAPI) :
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    connect(&m_channelMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessages()));
 }
 
 PacketMod::~PacketMod()
@@ -137,6 +138,13 @@ bool PacketMod::handleMessage(const Message& cmd)
         DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
         qDebug() << "PacketMod::handleMessage: DSPSignalNotification";
         m_basebandSource->getInputMessageQueue()->push(rep);
+
+        return true;
+    }
+    else if (MainCore::MsgChannelDemodQuery::match(cmd))
+    {
+        qDebug() << "PacketMod::handleMessage: MsgChannelDemodQuery";
+        sendSampleRateToDemodAnalyzer();
 
         return true;
     }
@@ -403,6 +411,25 @@ bool PacketMod::deserialize(const QByteArray& data)
     m_inputMessageQueue.push(msg);
 
     return success;
+}
+
+void PacketMod::sendSampleRateToDemodAnalyzer()
+{
+    QList<MessageQueue*> *messageQueues = MainCore::instance()->getMessagePipes().getMessageQueues(this, "reportdemod");
+
+    if (messageQueues)
+    {
+        QList<MessageQueue*>::iterator it = messageQueues->begin();
+
+        for (; it != messageQueues->end(); ++it)
+        {
+            MainCore::MsgChannelDemodReport *msg = MainCore::MsgChannelDemodReport::create(
+                this,
+                getSourceChannelSampleRate()
+            );
+            (*it)->push(msg);
+        }
+    }
 }
 
 int PacketMod::webapiSettingsGet(
@@ -982,6 +1009,11 @@ uint32_t PacketMod::getNumberOfDeviceStreams() const
     return m_deviceAPI->getNbSinkStreams();
 }
 
+int PacketMod::getSourceChannelSampleRate() const
+{
+    return m_basebandSource->getSourceChannelSampleRate();
+}
+
 void PacketMod::openUDP(const PacketModSettings& settings)
 {
     closeUDP();
@@ -1011,4 +1043,16 @@ void PacketMod::udpRx()
         MsgTXPacketBytes *msg = MsgTXPacketBytes::create(datagram.data());
         m_basebandSource->getInputMessageQueue()->push(msg);
     }
+}
+
+void PacketMod::handleChannelMessages()
+{
+	Message* message;
+
+	while ((message = m_channelMessageQueue.pop()) != nullptr)
+	{
+		if (handleMessage(*message)) {
+			delete message;
+		}
+	}
 }

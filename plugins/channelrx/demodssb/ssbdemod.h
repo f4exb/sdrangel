@@ -142,6 +142,7 @@ private:
     QNetworkRequest m_networkRequest;
 
 	void applySettings(const SSBDemodSettings& settings, bool force = false);
+    void sendSampleRateToDemodAnalyzer();
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const SSBDemodSettings& settings, bool force);
     void sendChannelSettings(
@@ -159,6 +160,7 @@ private:
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
+    void handleChannelMessages();
 };
 
 #endif // INCLUDE_SSBDEMOD_H

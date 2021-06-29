@@ -24,6 +24,7 @@
 #include "SWGFeatureActions.h"
 #include "SWGDeviceState.h"
 
+#include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 #include "dsp/datafifo.h"
 #include "dsp/dspdevicesourceengine.h"
@@ -149,6 +150,8 @@ bool DemodAnalyzer::handleMessage(const Message& cmd)
         MsgSelectChannel& cfg = (MsgSelectChannel&) cmd;
         ChannelAPI *selectedChannel = cfg.getChannel();
         setChannel(selectedChannel);
+        MainCore::MsgChannelDemodQuery *msg = MainCore::MsgChannelDemodQuery::create();
+        selectedChannel->getChannelMessageQueue()->push(msg);
 
         return true;
     }
@@ -160,6 +163,10 @@ bool DemodAnalyzer::handleMessage(const Message& cmd)
         if (report.getChannelAPI() == m_selectedChannel)
         {
             m_sampleRate = report.getSampleRate();
+            m_scopeVis.setLiveRate(m_sampleRate);
+
+            DSPSignalNotification *msg = new DSPSignalNotification(0, m_sampleRate);
+            m_spectrumVis.getInputMessageQueue()->push(msg);
 
             if (m_dataFifo) {
                 m_dataFifo->setSize(2*m_sampleRate);

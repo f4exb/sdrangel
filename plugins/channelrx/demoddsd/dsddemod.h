@@ -138,6 +138,7 @@ private:
     static const int m_udpBlockSize;
 
     void applySettings(const DSDDemodSettings& settings, bool force = false);
+    void sendSampleRateToDemodAnalyzer();
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const DSDDemodSettings& settings, bool force);
     void sendChannelSettings(
@@ -155,7 +156,7 @@ private:
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
-
+    void handleChannelMessages();
 };
 
 #endif // INCLUDE_DSDDEMOD_H

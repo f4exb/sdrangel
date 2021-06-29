@@ -64,6 +64,7 @@ AISDemod::AISDemod(DeviceAPI *deviceAPI) :
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    connect(&m_channelMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessages()));
 }
 
 AISDemod::~AISDemod()
@@ -180,6 +181,13 @@ bool AISDemod::handleMessage(const Message& cmd)
 
         return true;
     }
+    else if (MainCore::MsgChannelDemodQuery::match(cmd))
+    {
+        qDebug() << "AISDemod::handleMessage: MsgChannelDemodQuery";
+        sendSampleRateToDemodAnalyzer();
+
+        return true;
+    }
     else
     {
         return false;
@@ -276,6 +284,25 @@ bool AISDemod::deserialize(const QByteArray& data)
         MsgConfigureAISDemod *msg = MsgConfigureAISDemod::create(m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
+    }
+}
+
+void AISDemod::sendSampleRateToDemodAnalyzer()
+{
+    QList<MessageQueue*> *messageQueues = MainCore::instance()->getMessagePipes().getMessageQueues(this, "reportdemod");
+
+    if (messageQueues)
+    {
+        QList<MessageQueue*>::iterator it = messageQueues->begin();
+
+        for (; it != messageQueues->end(); ++it)
+        {
+            MainCore::MsgChannelDemodReport *msg = MainCore::MsgChannelDemodReport::create(
+                this,
+                AISDemodSettings::AISDEMOD_CHANNEL_SAMPLE_RATE
+            );
+            (*it)->push(msg);
+        }
     }
 }
 
@@ -497,4 +524,16 @@ void AISDemod::networkManagerFinished(QNetworkReply *reply)
     }
 
     reply->deleteLater();
+}
+
+void AISDemod::handleChannelMessages()
+{
+	Message* message;
+
+	while ((message = m_channelMessageQueue.pop()) != nullptr)
+	{
+		if (handleMessage(*message)) {
+			delete message;
+		}
+	}
 }

@@ -67,6 +67,7 @@ public:
     int getChannelSampleRate() const;
     void setSpectrumSampleSink(BasebandSampleSink* sampleSink) { m_source.setSpectrumSink(sampleSink); }
     void setChannel(ChannelAPI *channel);
+    int getSourceChannelSampleRate() const { return m_source.getChannelSampleRate(); }
 
 signals:
     /**
