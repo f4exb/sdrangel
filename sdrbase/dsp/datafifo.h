@@ -29,21 +29,13 @@
 
 class SDRBASE_API DataFifo : public QObject {
 	Q_OBJECT
-
-private:
-	QElapsedTimer m_msgRateTimer;
-	int m_suppressed;
-	QByteArray m_data;
-	QMutex m_mutex;
-
-	unsigned int m_size;
-	unsigned int m_fill;
-	unsigned int m_head;
-	unsigned int m_tail;
-
-	void create(unsigned int s);
-
 public:
+	enum DataType
+	{
+		DataTypeI16,  //!< 16 bit signed integer
+		DataTypeCI16  //!< Complex (i.e. Re, Im pair of) 16 bit signed integer
+	};
+
 	DataFifo(QObject* parent = nullptr);
 	DataFifo(int size, QObject* parent = nullptr);
     DataFifo(const DataFifo& other);
@@ -54,18 +46,33 @@ public:
 	inline unsigned int size() const { return m_size; }
 	inline unsigned int fill() { QMutexLocker mutexLocker(&m_mutex); unsigned int fill = m_fill; return fill; }
 
-	unsigned int write(const quint8* data, unsigned int count);
-	unsigned int write(QByteArray::const_iterator begin, QByteArray::const_iterator end);
+	unsigned int write(const quint8* data, unsigned int count, DataType dataType);
+	unsigned int write(QByteArray::const_iterator begin, QByteArray::const_iterator end, DataType dataType);
 
-	unsigned int read(QByteArray::iterator begin, QByteArray::iterator end);
+	unsigned int read(QByteArray::iterator begin, QByteArray::iterator end, DataType& dataType);
 
 	unsigned int readBegin(unsigned int count,
 		QByteArray::iterator* part1Begin, QByteArray::iterator* part1End,
-		QByteArray::iterator* part2Begin, QByteArray::iterator* part2End);
+		QByteArray::iterator* part2Begin, QByteArray::iterator* part2End,
+		DataType& daaType);
 	unsigned int readCommit(unsigned int count);
 
 signals:
 	void dataReady();
+
+private:
+	QElapsedTimer m_msgRateTimer;
+	int m_suppressed;
+	QByteArray m_data;
+	DataType m_currentDataType;
+	QMutex m_mutex;
+
+	unsigned int m_size;
+	unsigned int m_fill;
+	unsigned int m_head;
+	unsigned int m_tail;
+
+	void create(unsigned int s);
 };
 
 #endif // INCLUDE_DATAFIFO_H

@@ -171,9 +171,16 @@ void SSBModSource::modulateSample()
 
     calculateLevel(m_modSample);
 
-    // take projection on real axis
-    m_demodBuffer[m_demodBufferFill] = m_modSample.real() * std::numeric_limits<int16_t>::max();
-    ++m_demodBufferFill;
+    if (m_settings.m_audioBinaural)
+    {
+        m_demodBuffer[m_demodBufferFill++] = m_modSample.real() * std::numeric_limits<int16_t>::max();
+        m_demodBuffer[m_demodBufferFill++] = m_modSample.imag() * std::numeric_limits<int16_t>::max();
+    }
+    else
+    {
+        // take projection on real axis
+        m_demodBuffer[m_demodBufferFill++] = m_modSample.real() * std::numeric_limits<int16_t>::max();
+    }
 
     if (m_demodBufferFill >= m_demodBuffer.size())
     {
@@ -183,8 +190,13 @@ void SSBModSource::modulateSample()
         {
             QList<DataFifo*>::iterator it = dataFifos->begin();
 
-            for (; it != dataFifos->end(); ++it) {
-                (*it)->write((quint8*) &m_demodBuffer[0], m_demodBuffer.size() * sizeof(qint16));
+            for (; it != dataFifos->end(); ++it)
+            {
+                (*it)->write(
+                    (quint8*) &m_demodBuffer[0],
+                    m_demodBuffer.size() * sizeof(qint16),
+                    m_settings.m_audioBinaural ? DataFifo::DataTypeCI16 : DataFifo::DataTypeI16
+                );
             }
         }
 

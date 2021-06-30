@@ -41,6 +41,7 @@ void DataFifo::reset()
 DataFifo::DataFifo(QObject* parent) :
 	QObject(parent),
 	m_data(),
+	m_currentDataType(DataTypeI16),
 	m_mutex(QMutex::Recursive)
 {
 	m_suppressed = -1;
@@ -53,6 +54,7 @@ DataFifo::DataFifo(QObject* parent) :
 DataFifo::DataFifo(int size, QObject* parent) :
 	QObject(parent),
 	m_data(),
+	m_currentDataType(DataTypeI16),
 	m_mutex(QMutex::Recursive)
 {
 	m_suppressed = -1;
@@ -62,6 +64,7 @@ DataFifo::DataFifo(int size, QObject* parent) :
 DataFifo::DataFifo(const DataFifo& other) :
     QObject(other.parent()),
     m_data(other.m_data),
+	m_currentDataType(DataTypeI16),
 	m_mutex(QMutex::Recursive)
 {
   	m_suppressed = -1;
@@ -84,9 +87,19 @@ bool DataFifo::setSize(int size)
 	return m_data.size() == size;
 }
 
-unsigned int DataFifo::write(const quint8* data, unsigned int count)
+unsigned int DataFifo::write(const quint8* data, unsigned int count, DataType dataType)
 {
 	QMutexLocker mutexLocker(&m_mutex);
+
+	if (dataType != m_currentDataType)
+	{
+		m_suppressed = -1;
+		m_fill = 0;
+		m_head = 0;
+		m_tail = 0;
+		m_currentDataType = dataType;
+	}
+
 	unsigned int total;
 	unsigned int remaining;
 	unsigned int len;
@@ -138,9 +151,19 @@ unsigned int DataFifo::write(const quint8* data, unsigned int count)
 	return total;
 }
 
-unsigned int DataFifo::write(QByteArray::const_iterator begin, QByteArray::const_iterator end)
+unsigned int DataFifo::write(QByteArray::const_iterator begin, QByteArray::const_iterator end, DataType dataType)
 {
 	QMutexLocker mutexLocker(&m_mutex);
+
+	if (dataType != m_currentDataType)
+	{
+		m_suppressed = -1;
+		m_fill = 0;
+		m_head = 0;
+		m_tail = 0;
+		m_currentDataType = dataType;
+	}
+
 	unsigned int count = end - begin;
 	unsigned int total;
 	unsigned int remaining;
@@ -191,9 +214,10 @@ unsigned int DataFifo::write(QByteArray::const_iterator begin, QByteArray::const
 	return total;
 }
 
-unsigned int DataFifo::read(QByteArray::iterator begin, QByteArray::iterator end)
+unsigned int DataFifo::read(QByteArray::iterator begin, QByteArray::iterator end, DataType& dataType)
 {
 	QMutexLocker mutexLocker(&m_mutex);
+	dataType = m_currentDataType;
 	unsigned int count = end - begin;
 	unsigned int total;
 	unsigned int remaining;
@@ -223,9 +247,11 @@ unsigned int DataFifo::read(QByteArray::iterator begin, QByteArray::iterator end
 
 unsigned int DataFifo::readBegin(unsigned int count,
 	QByteArray::iterator* part1Begin, QByteArray::iterator* part1End,
-	QByteArray::iterator* part2Begin, QByteArray::iterator* part2End)
+	QByteArray::iterator* part2Begin, QByteArray::iterator* part2End,
+	DataType& dataType)
 {
 	QMutexLocker mutexLocker(&m_mutex);
+	dataType = m_currentDataType;
 	unsigned int total;
 	unsigned int remaining;
 	unsigned int len;

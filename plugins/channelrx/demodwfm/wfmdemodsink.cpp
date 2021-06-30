@@ -149,7 +149,7 @@ void WFMDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
                         QList<DataFifo*>::iterator it = dataFifos->begin();
 
                         for (; it != dataFifos->end(); ++it) {
-                            (*it)->write((quint8*) &m_demodBuffer[0], m_demodBuffer.size() * sizeof(qint16));
+                            (*it)->write((quint8*) &m_demodBuffer[0], m_demodBuffer.size() * sizeof(qint16), DataFifo::DataTypeI16);
                         }
                     }
 

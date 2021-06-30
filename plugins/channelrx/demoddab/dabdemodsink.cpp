@@ -442,7 +442,9 @@ void DABDemodSink::processOneAudioSample(Complex &ci)
         m_audioBufferFill = 0;
     }
 
-    m_demodBuffer[m_demodBufferFill++] = l; // FIXME: What about right channel?
+    m_demodBuffer[m_demodBufferFill++] = l;
+    m_demodBuffer[m_demodBufferFill++] = r;
+
     if (m_demodBufferFill >= m_demodBuffer.size())
     {
         QList<DataFifo*> *dataFifos = MainCore::instance()->getDataPipes().getFifos(m_channel, "demod");
@@ -452,7 +454,7 @@ void DABDemodSink::processOneAudioSample(Complex &ci)
             QList<DataFifo*>::iterator it = dataFifos->begin();
 
             for (; it != dataFifos->end(); ++it) {
-                (*it)->write((quint8*) &m_demodBuffer[0], m_demodBuffer.size() * sizeof(qint16));
+                (*it)->write((quint8*) &m_demodBuffer[0], m_demodBuffer.size() * sizeof(qint16), DataFifo::DataTypeCI16);
             }
         }
 
@@ -477,7 +479,7 @@ DABDemodSink::DABDemodSink(DABDemod *packetDemod) :
 
     m_magsq = 0.0;
 
-    m_demodBuffer.resize(1<<12);
+    m_demodBuffer.resize(1<<13);
     m_demodBufferFill = 0;
 
     applySettings(m_settings, true);

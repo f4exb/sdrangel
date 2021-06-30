@@ -61,10 +61,25 @@ void DemodAnalyzerWorker::stopWork()
     m_running = false;
 }
 
-void DemodAnalyzerWorker::feedPart(const QByteArray::const_iterator& begin, const QByteArray::const_iterator& end)
+void DemodAnalyzerWorker::feedPart(
+    const QByteArray::const_iterator& begin,
+    const QByteArray::const_iterator& end,
+    DataFifo::DataType dataType
+)
 {
-    int countSamples = (end - begin) / sizeof(int16_t);
-    int16_t *s = (int16_t*) begin;
+    int nbBytes;
+
+    switch(dataType)
+    {
+    case DataFifo::DataTypeCI16:
+        nbBytes = 4;
+        break;
+    case DataFifo::DataTypeI16:
+    default:
+        nbBytes = 2;
+    }
+
+    int countSamples = (end - begin) / nbBytes;
 
     if (countSamples > m_sampleBufferSize)
     {
@@ -73,26 +88,8 @@ void DemodAnalyzerWorker::feedPart(const QByteArray::const_iterator& begin, cons
         m_sampleBufferSize = countSamples;
     }
 
-    for(int i = 0; i < countSamples; i++)
-    {
-        double re = s[i] / (double) std::numeric_limits<int16_t>::max();
-        m_magsq = re*re;
-        m_channelPowerAvg(m_magsq);
-
-        if (m_settings.m_log2Decim == 0)
-        {
-            m_sampleBuffer[i].setReal(re * SDR_RX_SCALEF);
-            m_sampleBuffer[i].setImag(0);
-        }
-        else
-        {
-            m_convBuffer[2*i] = s[i];
-            m_convBuffer[2*i+1] = 0;
-
-            if (i == countSamples - 1) {
-                decimate(countSamples);
-            }
-        }
+    for (int i = 0; i < countSamples; i++) {
+        processSample(dataType, begin, countSamples, i);
     }
 
 	if (m_scopeVis)
@@ -211,17 +208,18 @@ void DemodAnalyzerWorker::handleData()
 		QByteArray::iterator part1end;
 		QByteArray::iterator part2begin;
 		QByteArray::iterator part2end;
+        DataFifo::DataType dataType;
 
-        std::size_t count = m_dataFifo->readBegin(m_dataFifo->fill(), &part1begin, &part1end, &part2begin, &part2end);
+        std::size_t count = m_dataFifo->readBegin(m_dataFifo->fill(), &part1begin, &part1end, &part2begin, &part2end, dataType);
 
 		// first part of FIFO data
         if (part1begin != part1end) {
-            feedPart(part1begin, part1end);
+            feedPart(part1begin, part1end, dataType);
         }
 
 		// second part of FIFO data (used when block wraps around)
 		if (part2begin != part2end) {
-            feedPart(part2begin, part2end);
+            feedPart(part2begin, part2end, dataType);
         }
 
 		m_dataFifo->readCommit((unsigned int) count);

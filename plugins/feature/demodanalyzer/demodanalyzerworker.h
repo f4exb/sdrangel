@@ -26,6 +26,7 @@
 
 #include "dsp/dsptypes.h"
 #include "dsp/decimators.h"
+#include "dsp/datafifo.h"
 #include "util/movingaverage.h"
 #include "util/message.h"
 #include "util/messagequeue.h"
@@ -36,8 +37,6 @@ class BasebandSampleSink;
 class ScopeVis;
 class ChannelAPI;
 class Feature;
-class DataFifo;
-
 class DemodAnalyzerWorker : public QObject {
     Q_OBJECT
 public:
@@ -93,7 +92,11 @@ public:
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     void setMessageQueueToFeature(MessageQueue *messageQueue) { m_msgQueueToFeature = messageQueue; }
 
-    void feedPart(const QByteArray::const_iterator& begin, const QByteArray::const_iterator& end);
+    void feedPart(
+        const QByteArray::const_iterator& begin,
+        const QByteArray::const_iterator& end,
+        DataFifo::DataType dataType
+    );
 
     void applySampleRate(int sampleRate);
 	void applySettings(const DemodAnalyzerSettings& settings, bool force = false);
@@ -124,6 +127,63 @@ private:
 
     bool handleMessage(const Message& cmd);
     void decimate(int countSamples);
+
+    inline void processSample(
+        DataFifo::DataType dataType,
+        const QByteArray::const_iterator& begin,
+        int countSamples,
+        int i
+    )
+    {
+        switch(dataType)
+        {
+            case DataFifo::DataTypeI16: {
+                int16_t *s = (int16_t*) begin;
+                double re = s[i] / (double) std::numeric_limits<int16_t>::max();
+                m_magsq = re*re;
+                m_channelPowerAvg(m_magsq);
+
+                if (m_settings.m_log2Decim == 0)
+                {
+                    m_sampleBuffer[i].setReal(re * SDR_RX_SCALEF);
+                    m_sampleBuffer[i].setImag(0);
+                }
+                else
+                {
+                    m_convBuffer[2*i] = s[i];
+                    m_convBuffer[2*i+1] = 0;
+
+                    if (i == countSamples - 1) {
+                        decimate(countSamples);
+                    }
+                }
+            }
+            break;
+            case DataFifo::DataTypeCI16: {
+                int16_t *s = (int16_t*) begin;
+                double re = s[2*i]   / (double) std::numeric_limits<int16_t>::max();
+                double im = s[2*i+1] / (double) std::numeric_limits<int16_t>::max();
+                m_magsq = re*re + im*im;
+                m_channelPowerAvg(m_magsq);
+
+                if (m_settings.m_log2Decim == 0)
+                {
+                    m_sampleBuffer[i].setReal(re * SDR_RX_SCALEF);
+                    m_sampleBuffer[i].setImag(im * SDR_RX_SCALEF);
+                }
+                else
+                {
+                    m_convBuffer[2*i]   = s[2*i];
+                    m_convBuffer[2*i+1] = s[2*i+1];
+
+                    if (i == countSamples - 1) {
+                        decimate(countSamples);
+                    }
+                }
+            }
+            break;
+        }
+    }
 
 private slots:
     void handleInputMessages();

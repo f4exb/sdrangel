@@ -192,6 +192,9 @@ void SSBDemodSink::processOneSample(Complex &ci)
                     m_audioBuffer[m_audioBufferFill].r = (qint16)(z.real() * m_volume);
                     m_audioBuffer[m_audioBufferFill].l = (qint16)(z.imag() * m_volume);
                 }
+
+                m_demodBuffer[m_demodBufferFill++] = z.real();
+                m_demodBuffer[m_demodBufferFill++] = z.imag();
             }
             else
             {
@@ -199,10 +202,8 @@ void SSBDemodSink::processOneSample(Complex &ci)
                 qint16 sample = (qint16)(demod * m_volume);
                 m_audioBuffer[m_audioBufferFill].l = sample;
                 m_audioBuffer[m_audioBufferFill].r = sample;
+                m_demodBuffer[m_demodBufferFill++] = (z.real() + z.imag()) * 0.7;
             }
-
-            m_demodBuffer[m_demodBufferFill] = (z.real() + z.imag()) * 0.7;
-            ++m_demodBufferFill;
 
             if (m_demodBufferFill >= m_demodBuffer.size())
             {
@@ -212,8 +213,13 @@ void SSBDemodSink::processOneSample(Complex &ci)
                 {
                     QList<DataFifo*>::iterator it = dataFifos->begin();
 
-                    for (; it != dataFifos->end(); ++it) {
-                        (*it)->write((quint8*) &m_demodBuffer[0], m_demodBuffer.size() * sizeof(qint16));
+                    for (; it != dataFifos->end(); ++it)
+                    {
+                        (*it)->write(
+                            (quint8*) &m_demodBuffer[0],
+                            m_demodBuffer.size() * sizeof(qint16),
+                            m_audioBinaual ? DataFifo::DataTypeCI16 : DataFifo::DataTypeI16
+                        );
                     }
                 }
 
