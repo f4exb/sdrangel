@@ -18,7 +18,6 @@ add_subdirectory(demodchirpchat)
 add_subdirectory(demodvorsc)
 add_subdirectory(demodpacket)
 add_subdirectory(demodais)
-add_subdirectory(noisefigure)
 add_subdirectory(radioclock)
 
 if(DAB_FOUND AND ZLIB_FOUND AND FAAD_FOUND)
@@ -43,6 +42,10 @@ endif(CODEC2_FOUND)
 
 if (LIBSIGMF_FOUND AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     add_subdirectory(sigmffilesink)
+endif()
+
+if (Boost_FOUND AND Boost_VERSION_STRING VERSION_GREATER_EQUAL "1.70.0")
+    add_subdirectory(noisefigure)
 endif()
 
 if(NOT SERVER_MODE)
