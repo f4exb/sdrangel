@@ -271,8 +271,8 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 
     // Restore window size and position
     QSettings s;
-    restoreGeometry(s.value("mainWindowGeometry").toByteArray());
-    restoreState(s.value("mainWindowState").toByteArray());
+    restoreGeometry(qUncompress(QByteArray::fromBase64(s.value("mainWindowGeometry").toByteArray())));
+    restoreState(qUncompress(QByteArray::fromBase64(s.value("mainWindowState").toByteArray())));
 
     qDebug() << "MainWindow::MainWindow: end";
 }
@@ -856,9 +856,10 @@ void MainWindow::closeEvent(QCloseEvent *closeEvent)
     qDebug("MainWindow::closeEvent");
 
     // Save window size and position
+    // Need to use base64, as it seems binary values aren't saved on Linux
     QSettings s;
-    s.setValue("mainWindowGeometry", saveGeometry());
-    s.setValue("mainWindowState", saveState());
+    s.setValue("mainWindowGeometry", qCompress(saveGeometry()).toBase64());
+    s.setValue("mainWindowState", qCompress(saveState()).toBase64());
 
     savePresetSettings(m_mainCore->m_settings.getWorkingPreset(), 0);
     saveFeatureSetPresetSettings(m_mainCore->m_settings.getWorkingFeatureSetPreset(), 0);
