@@ -269,6 +269,11 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 
     delete splash;
 
+    // Restore window size and position
+    QSettings s;
+    restoreGeometry(s.value("mainWindowGeometry").toByteArray());
+    restoreState(s.value("mainWindowState").toByteArray());
+
     qDebug() << "MainWindow::MainWindow: end";
 }
 
@@ -849,6 +854,11 @@ void MainWindow::createStatusBar()
 void MainWindow::closeEvent(QCloseEvent *closeEvent)
 {
     qDebug("MainWindow::closeEvent");
+
+    // Save window size and position
+    QSettings s;
+    s.setValue("mainWindowGeometry", saveGeometry());
+    s.setValue("mainWindowState", saveState());
 
     savePresetSettings(m_mainCore->m_settings.getWorkingPreset(), 0);
     saveFeatureSetPresetSettings(m_mainCore->m_settings.getWorkingFeatureSetPreset(), 0);
