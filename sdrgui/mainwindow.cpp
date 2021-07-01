@@ -856,7 +856,6 @@ void MainWindow::closeEvent(QCloseEvent *closeEvent)
     qDebug("MainWindow::closeEvent");
 
     // Save window size and position
-    // Need to use base64, as it seems binary values aren't saved on Linux
     QSettings s;
     s.setValue("mainWindowGeometry", qCompress(saveGeometry()).toBase64());
     s.setValue("mainWindowState", qCompress(saveState()).toBase64());
