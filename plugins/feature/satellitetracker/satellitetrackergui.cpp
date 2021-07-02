@@ -313,6 +313,12 @@ void SatelliteTrackerGUI::displaySettings()
     blockApplySettings(true);
     ui->latitude->setValue(m_settings.m_latitude);
     ui->longitude->setValue(m_settings.m_longitude);
+    ui->target->clear();
+
+    for (const QString& s : m_settings.m_satellites) {
+        ui->target->addItem(s);
+    }
+
     ui->target->setCurrentIndex(ui->target->findText(m_settings.m_target));
     if (m_settings.m_dateTime == "")
     {
