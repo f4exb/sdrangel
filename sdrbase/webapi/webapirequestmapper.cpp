@@ -4468,6 +4468,7 @@ bool WebAPIRequestMapper::getFeatureSettings(
         else if (featureSettingsKey == "SatelliteTrackerSettings")
         {
             featureSettings->setSatelliteTrackerSettings(new SWGSDRangel::SWGSatelliteTrackerSettings());
+            featureSettings->getSatelliteTrackerSettings()->init();
             featureSettings->getSatelliteTrackerSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (featureSettingsKey == "SimplePTTSettings")
