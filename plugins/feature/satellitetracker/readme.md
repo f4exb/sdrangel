@@ -197,3 +197,13 @@ SatNogs satellite database https://db.satnogs.org/
 Satellite two-line elements (TLEs) are from Celestrak https://celestrak.com/
 
 Icons are by Freepik from Flaticon https://www.flaticon.com/
+
+<h2>API</h2>
+
+Full details of the API can be found in the Swagger documentation. Here is a quick example of how to set the satellites to track:
+
+    curl -X PATCH "http://127.0.0.1:8091/sdrangel/featureset/0/feature/0/settings" -d '{"featureType": "SatelliteTracker",  "SatelliteTrackerSettings": { "satellites": [ "NOAA 15", "NOAA 19" ] }}'
+
+And how to set the target:
+
+    curl -X PATCH "http://127.0.0.1:8091/sdrangel/featureset/0/feature/0/settings" -d '{"featureType": "SatelliteTracker",  "SatelliteTrackerSettings": { "target": "NOAA 15"  }}'

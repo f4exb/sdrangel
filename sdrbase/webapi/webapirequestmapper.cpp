@@ -4465,6 +4465,11 @@ bool WebAPIRequestMapper::getFeatureSettings(
             featureSettings->setPerTesterSettings(new SWGSDRangel::SWGPERTesterSettings());
             featureSettings->getPerTesterSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (featureSettingsKey == "SatelliteTrackerSettings")
+        {
+            featureSettings->setSatelliteTrackerSettings(new SWGSDRangel::SWGSatelliteTrackerSettings());
+            featureSettings->getSatelliteTrackerSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (featureSettingsKey == "SimplePTTSettings")
         {
             featureSettings->setSimplePttSettings(new SWGSDRangel::SWGSimplePTTSettings());
@@ -4723,6 +4728,7 @@ void WebAPIRequestMapper::resetFeatureSettings(SWGSDRangel::SWGFeatureSettings& 
     featureSettings.setGs232ControllerSettings(nullptr);
     featureSettings.setMapSettings(nullptr);
     featureSettings.setPerTesterSettings(nullptr);
+    featureSettings.setSatelliteTrackerSettings(nullptr);
     featureSettings.setSimplePttSettings(nullptr);
     featureSettings.setStarTrackerSettings(nullptr);
     featureSettings.setRigCtlServerSettings(nullptr);
