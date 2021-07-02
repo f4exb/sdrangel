@@ -265,6 +265,7 @@ const QMap<QString, QString> WebAPIUtils::m_featureTypeToSettingsKey = {
     {"GS232Controller", "GS232ControllerSettings"},
     {"Map", "MapSettings"},
     {"PERTester", "PERTesterSettings"},
+    {"SatelliteTracker", "SatelliteTrackerSettings"},
     {"SimplePTT", "SimplePTTSettings"},
     {"StarTracker", "StarTrackerSettings"},
     {"RigCtlServer", "RigCtlServerSettings"}
@@ -282,6 +283,7 @@ const QMap<QString, QString> WebAPIUtils::m_featureURIToSettingsKey = {
     {"sdrangel.feature.gs232controller", "GS232ControllerSettings"},
     {"sdrangel.feature.map", "MapSettings"},
     {"sdrangel.feature.pertester", "PERTesterSettings"},
+    {"sdrangel.feature.satellitetracker", "SatelliteTrackerSettings"},
     {"sdrangel.feature.simpleptt", "SimplePTTSettings"},
     {"sdrangel.feature.startracker", "StarTrackerSettings"},
     {"sdrangel.feature.rigctlserver", "RigCtlServerSettings"}
