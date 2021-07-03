@@ -4463,6 +4463,7 @@ bool WebAPIRequestMapper::getFeatureSettings(
         else if (featureSettingsKey == "PERTesterSettings")
         {
             featureSettings->setPerTesterSettings(new SWGSDRangel::SWGPERTesterSettings());
+            featureSettings->getPerTesterSettings()->init();
             featureSettings->getPerTesterSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (featureSettingsKey == "SatelliteTrackerSettings")
