@@ -4314,6 +4314,7 @@ bool WebAPIRequestMapper::getDeviceSettings(
             }
 
             deviceSettings->setTestMiSettings(new SWGSDRangel::SWGTestMISettings());
+            deviceSettings->getTestMiSettings()->init();
             deviceSettings->getTestMiSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (deviceSettingsKey == "testMOSyncSettings")
