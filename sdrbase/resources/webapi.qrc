@@ -11,6 +11,9 @@
         <file>webapi/doc/swagger/include/AISMod.yaml</file>
         <file>webapi/doc/swagger/include/AMDemod.yaml</file>
         <file>webapi/doc/swagger/include/AMMod.yaml</file>
+        <file>webapi/doc/swagger/include/AntennaTools.yaml</file>
+        <file>webapi/doc/swagger/include/APRS.yaml</file>
+        <file>webapi/doc/swagger/include/APTDemod.yaml</file>
         <file>webapi/doc/swagger/include/ATVDemod.yaml</file>
         <file>webapi/doc/swagger/include/ATVMod.yaml</file>
         <file>webapi/doc/swagger/include/AudioInput.yaml</file>
@@ -27,8 +30,10 @@
         <file>webapi/doc/swagger/include/ChirpChatMod.yaml</file>
         <file>webapi/doc/swagger/include/Command.yaml</file>
         <file>webapi/doc/swagger/include/CWKeyer.yaml</file>
+        <file>webapi/doc/swagger/include/DABDemod.yaml</file>
         <file>webapi/doc/swagger/include/DATVDemod.yaml</file>
         <file>webapi/doc/swagger/include/DATVMod.yaml</file>
+        <file>webapi/doc/swagger/include/DemodAnalyzer.yaml</file>
         <file>webapi/doc/swagger/include/DSDDemod.yaml</file>
         <file>webapi/doc/swagger/include/DeviceActions.yaml</file>
         <file>webapi/doc/swagger/include/DeviceSettings.yaml</file>
@@ -59,12 +64,15 @@
         <file>webapi/doc/swagger/include/LocalOutput.yaml</file>
         <file>webapi/doc/swagger/include/LocalSink.yaml</file>
         <file>webapi/doc/swagger/include/LocalSource.yaml</file>
+        <file>webapi/doc/swagger/include/Map.yaml</file>
         <file>webapi/doc/swagger/include/MetisMISO.yaml</file>
         <file>webapi/doc/swagger/include/NFMDemod.yaml</file>
         <file>webapi/doc/swagger/include/NFMMod.yaml</file>
         <file>webapi/doc/swagger/include/NoiseFigure.yaml</file>
+        <file>webapi/doc/swagger/include/PacketDemod.yaml</file>
         <file>webapi/doc/swagger/include/PacketMod.yaml</file>
         <file>webapi/doc/swagger/include/Perseus.yaml</file>
+        <file>webapi/doc/swagger/include/PERTester.yaml</file>
         <file>webapi/doc/swagger/include/PlutoSdr.yaml</file>
         <file>webapi/doc/swagger/include/Preferences.yaml</file>
         <file>webapi/doc/swagger/include/Preset.yaml</file>
@@ -75,6 +83,7 @@
         <file>webapi/doc/swagger/include/RemoteInput.yaml</file>
         <file>webapi/doc/swagger/include/RemoteOutput.yaml</file>
         <file>webapi/doc/swagger/include/RigCtlServer.yaml</file>
+        <file>webapi/doc/swagger/include/SatelliteTracker.yaml</file>
         <file>webapi/doc/swagger/include/SDRPlay.yaml</file>
         <file>webapi/doc/swagger/include/SDRPlayV3.yaml</file>
         <file>webapi/doc/swagger/include/SigMFFileInput.yaml</file>
@@ -83,6 +92,7 @@
         <file>webapi/doc/swagger/include/SoapySDR.yaml</file>
         <file>webapi/doc/swagger/include/SSBDemod.yaml</file>
         <file>webapi/doc/swagger/include/SSBMod.yaml</file>
+        <file>webapi/doc/swagger/include/StarTracker.yaml</file>
         <file>webapi/doc/swagger/include/Structs.yaml</file>
         <file>webapi/doc/swagger/include/TestMI.yaml</file>
         <file>webapi/doc/swagger/include/TestMOSync.yaml</file>
