@@ -538,8 +538,11 @@ void AISGUI::updateVessels(AISMessage *ais)
                 if (!destination.isEmpty()) {
                     text.append(QString("Destination: %1").arg(destination));
                 }
-                if (!courseV.isNull()) {
-                    text.append(QString("Course: %1%2").arg(courseV.toFloat()).arg(QChar(0xb0)));
+                if (!courseV.isNull())
+                {
+                    float course = courseV.toFloat();
+                    text.append(QString("Course: %1%2").arg(course).arg(QChar(0xb0)));
+                    swgMapItem->setImageRotation(course);
                 }
                 if (!speedV.isNull()) {
                     text.append(QString("Speed: %1 knts").arg(speedV.toFloat()));
@@ -548,7 +551,7 @@ void AISGUI::updateVessels(AISMessage *ais)
                 {
                     float heading = headingV.toFloat();
                     text.append(QString("Heading: %1%2").arg(heading).arg(QChar(0xb0)));
-                    swgMapItem->setImageRotation(heading);
+                    swgMapItem->setImageRotation(heading); // heading takes precedence over course
                 }
                 if (!shipType.isEmpty()) {
                     text.append(QString("Ship type: %1").arg(shipType));
