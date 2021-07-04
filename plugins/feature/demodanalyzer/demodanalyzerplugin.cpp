@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2020 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -29,7 +29,7 @@
 const PluginDescriptor DemodAnalyzerPlugin::m_pluginDescriptor = {
     DemodAnalyzer::m_featureId,
 	QStringLiteral("Demod Analyzer"),
-	QStringLiteral("6.14.0"),
+	QStringLiteral("6.15.1"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,

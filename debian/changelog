@@ -1,3 +1,17 @@
+sdrangel (6.15.1-1) unstable; urgency=medium
+
+  * Demod Analyzer: fixed sample rate handling. Fixes #931
+  * Enable LimeRFE on Windows. PR #942
+  * Demod Analyzer: allow complex input. Fixes #932
+  * Noise Figure: compile only if Boost >= 1.70.0. Fixes #943
+  * Update airspyhf library to latest version to fix #928. PR #945
+  * Save and restore position and size of main window. Fixes #89. PR #946
+  * SatelliteTracker: Web API fixes. Fixes #948. PR #949
+  * Fixes to web API request mapper. PR #950
+  * Web API doc: added missing doc swagger yaml files
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 04 Jul 2021 03:28:04 +0200
+
 sdrangel (6.15.0-1) unstable; urgency=medium
 
   * New Radio Clock plugin. PRs #394, #936  and #939
