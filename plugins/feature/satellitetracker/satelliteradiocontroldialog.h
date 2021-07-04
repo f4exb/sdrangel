@@ -35,12 +35,11 @@ public:
    SatelliteTrackerSettings *m_settings;
 
 private:
-    void resizeTable();
 
 private slots:
     void accept();
     void on_add_clicked();
-    void on_remove_clicked();
+    void on_tabCloseRequested(int index);
     void on_satelliteSelect_currentIndexChanged(int index);
 
 private:

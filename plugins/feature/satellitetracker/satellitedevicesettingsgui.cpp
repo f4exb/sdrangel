@@ -16,7 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDebug>
-#include <QHBoxLayout>
+#include <QFormLayout>
 #include <QSizePolicy>
 
 #include "satellitedevicesettingsgui.h"
@@ -28,20 +28,25 @@
 #include "plugin/pluginapi.h"
 
 SatelliteDeviceSettingsGUI::SatelliteDeviceSettingsGUI(SatelliteTrackerSettings::SatelliteDeviceSettings *devSettings,
-                                                       QTableWidget *table)
+                                                       QTabWidget *tab, QWidget *parent) :
+    QWidget(parent),
+    m_tab(tab)
 {
     m_devSettings = devSettings;
+
+    QFormLayout *formLayout = new QFormLayout();
 
     // Device set
     m_deviceSetWidget = new QComboBox();
     m_deviceSetWidget->setEditable(true);
-    m_deviceSetWidget->setToolTip(table->horizontalHeaderItem(SAT_DEVICE_COL_DEVICESET)->toolTip());
-    m_deviceSetItem = new QWidget();
-    layout(m_deviceSetItem, m_deviceSetWidget);
+    m_deviceSetWidget->setToolTip("Device set to control");
+    formLayout->addRow("Device set", m_deviceSetWidget);
     addDeviceSets();
     int devSetIdx = m_deviceSetWidget->findText(devSettings->m_deviceSet);
     if (devSetIdx != -1)
+    {
         m_deviceSetWidget->setCurrentIndex(devSetIdx);
+    }
     else
     {
         m_deviceSetWidget->addItem(devSettings->m_deviceSet);
@@ -52,9 +57,8 @@ SatelliteDeviceSettingsGUI::SatelliteDeviceSettingsGUI(SatelliteTrackerSettings:
     m_presetWidget = new QComboBox();
     m_presetWidget->setEditable(false);
     m_presetWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    m_presetWidget->setToolTip(table->horizontalHeaderItem(SAT_DEVICE_COL_PRESET)->toolTip());
-    m_presetItem = new QWidget();
-    layout(m_presetItem, m_presetWidget);
+    m_presetWidget->setToolTip("Preset to load on AOS");
+    formLayout->addRow("Preset", m_presetWidget);
     addPresets(devSettings->m_deviceSet);
 
     const MainSettings& mainSettings = MainCore::instance()->getSettings();
@@ -82,11 +86,10 @@ SatelliteDeviceSettingsGUI::SatelliteDeviceSettingsGUI(SatelliteTrackerSettings:
     }
 
     // Doppler
-    m_dopplerWidget =  new QComboBox();
+    m_dopplerWidget =  new QListView();
     m_dopplerWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    m_dopplerWidget->setToolTip(table->horizontalHeaderItem(SAT_DEVICE_COL_DOPPLER)->toolTip());
-    m_dopplerItem = new QWidget();
-    layout(m_dopplerItem, m_dopplerWidget);
+    m_dopplerWidget->setToolTip("Channels that will have Doppler correction applied");
+    formLayout->addRow("Doppler correction", m_dopplerWidget);
     m_dopplerWidget->setModel(&m_dopplerModel);
     addChannels();
 
@@ -96,64 +99,46 @@ SatelliteDeviceSettingsGUI::SatelliteDeviceSettingsGUI(SatelliteTrackerSettings:
     // Start on AOS
     m_startOnAOSWidget = new QCheckBox();
     m_startOnAOSWidget->setChecked(devSettings->m_startOnAOS);
-    m_startOnAOSWidget->setToolTip(table->horizontalHeaderItem(SAT_DEVICE_COL_START)->toolTip());
-    m_startOnAOSItem = new QWidget();
-    layout(m_startOnAOSItem, m_startOnAOSWidget);
+    m_startOnAOSWidget->setToolTip("Start acquisition on AOS");
+    formLayout->addRow("Start acquisition on AOS", m_startOnAOSWidget);
 
     // Stop on AOS
     m_stopOnLOSWidget = new QCheckBox();
     m_stopOnLOSWidget->setChecked(devSettings->m_stopOnLOS);
-    m_stopOnLOSWidget->setToolTip(table->horizontalHeaderItem(SAT_DEVICE_COL_STOP)->toolTip());
-    m_stopOnLOSItem = new QWidget();
-    layout(m_stopOnLOSItem, m_stopOnLOSWidget);
+    m_stopOnLOSWidget->setToolTip("Stop acquisition on LOS");
+    formLayout->addRow("Stop acquisition on LOS", m_stopOnLOSWidget);
 
     // Start file sink
     m_startStopFileSinkWidget = new QCheckBox();
     m_startStopFileSinkWidget->setChecked(devSettings->m_startStopFileSink);
-    m_startStopFileSinkWidget->setToolTip(table->horizontalHeaderItem(SAT_DEVICE_COL_START_FILE_SINK)->toolTip());
-    m_startStopFileSinkItem = new QWidget();
-    layout(m_startStopFileSinkItem, m_startStopFileSinkWidget);
+    m_startStopFileSinkWidget->setToolTip("Start file sinks recording on AOS and stop recording on LOS");
+    formLayout->addRow("Start/stop file sinks on AOS/LOS", m_startStopFileSinkWidget);
 
     // Frequency override
-    m_frequencyItem = new QTableWidgetItem();
-    m_frequencyItem->setToolTip(table->horizontalHeaderItem(SAT_DEVICE_COL_FREQUENCY)->toolTip());
-    if (devSettings->m_frequency != 0)
-        m_frequencyItem->setData(Qt::DisplayRole, QString("%1").arg(devSettings->m_frequency/1000000.0, 0, 'f', 3, QLatin1Char(' ')));
+    m_frequencyWidget = new QLineEdit();
+    m_frequencyWidget->setToolTip("Override the center frequency in the preset with a value specified here in MHz.\nThis allows a single preset to be shared between different satellites that differ only in frequency.");
+    // FIXME: Set mask for numeric or blank
+    if (devSettings->m_frequency != 0) {
+        m_frequencyWidget->setText(QString("%1").arg(devSettings->m_frequency/1000000.0, 0, 'f', 3, QLatin1Char(' ')));
+    }
+    formLayout->addRow("Override preset frequency (MHz)", m_frequencyWidget);
 
     // AOS command
-    m_aosCommandItem = new QTableWidgetItem();
-    m_aosCommandItem->setText(devSettings->m_aosCommand);
-    m_aosCommandItem->setToolTip(table->horizontalHeaderItem(SAT_DEVICE_COL_AOS_COMMAND)->toolTip());
+    m_aosCommandWidget = new QLineEdit();
+    m_aosCommandWidget->setText(devSettings->m_aosCommand);
+    m_aosCommandWidget->setToolTip("Command to execute on AOS");
+    formLayout->addRow("AOS command", m_aosCommandWidget);
 
     // LOS command
-    m_losCommandItem = new QTableWidgetItem();
-    m_losCommandItem->setText(devSettings->m_losCommand);
-    m_losCommandItem->setToolTip(table->horizontalHeaderItem(SAT_DEVICE_COL_LOS_COMMAND)->toolTip());
+    m_losCommandWidget = new QLineEdit();
+    m_losCommandWidget->setText(devSettings->m_losCommand);
+    m_losCommandWidget->setToolTip("Command to execute on LOS");
+    formLayout->addRow("LOS command", m_losCommandWidget);
 
-    int row = table->rowCount();
-    table->setRowCount(row + 1);
-    table->setCellWidget(row, SAT_DEVICE_COL_DEVICESET, m_deviceSetItem);
-    table->setCellWidget(row, SAT_DEVICE_COL_PRESET, m_presetItem);
-    table->setCellWidget(row, SAT_DEVICE_COL_DOPPLER, m_dopplerItem);
-    table->setCellWidget(row, SAT_DEVICE_COL_START, m_startOnAOSItem);
-    table->setCellWidget(row, SAT_DEVICE_COL_STOP, m_stopOnLOSItem);
-    table->setCellWidget(row, SAT_DEVICE_COL_START_FILE_SINK, m_startStopFileSinkItem);
-    table->setItem(row, SAT_DEVICE_COL_FREQUENCY, m_frequencyItem);
-    table->setItem(row, SAT_DEVICE_COL_AOS_COMMAND, m_aosCommandItem);
-    table->setItem(row, SAT_DEVICE_COL_LOS_COMMAND, m_losCommandItem);
-    table->resizeColumnsToContents();
+    setLayout(formLayout);
 
     connect(m_deviceSetWidget, SIGNAL(currentTextChanged(const QString &)), this, SLOT(on_m_deviceSetWidget_currentTextChanged(const QString &)));
     connect(m_presetWidget, SIGNAL(currentIndexChanged(int)), this, SLOT(on_m_presetWidget_currentIndexChanged(int)));
-}
-
-void SatelliteDeviceSettingsGUI::layout(QWidget *parent, QWidget *child)
-{
-    QHBoxLayout* pLayout = new QHBoxLayout(parent);
-    pLayout->addWidget(child);
-    pLayout->setAlignment(Qt::AlignCenter);
-    pLayout->setContentsMargins(0, 0, 0, 0);
-    parent->setLayout(pLayout);
 }
 
 // Add available devicesets to the combobox
@@ -210,8 +195,9 @@ const Preset* SatelliteDeviceSettingsGUI::getSelectedPreset()
             || ((preset->isSinkPreset() && (m_currentPresets == "T")))
             || ((preset->isMIMOPreset() && (m_currentPresets == "M"))))
         {
-            if (listIdx == presetIdx)
+            if (listIdx == presetIdx) {
                 return preset;
+            }
             presetIdx++;
         }
     }
@@ -247,8 +233,12 @@ void SatelliteDeviceSettingsGUI::on_m_deviceSetWidget_currentTextChanged(const Q
 {
     if (!text.isEmpty())
     {
-        if (text[0] != m_currentPresets)
+        if (text[0] != m_currentPresets) {
             addPresets(text[0]);
+        }
+        // Set name of tab to match
+        int currentTabIndex = m_tab->currentIndex();
+        m_tab->setTabText(currentTabIndex, text);
     }
 }
 
@@ -279,13 +269,14 @@ void SatelliteDeviceSettingsGUI::accept()
     m_devSettings->m_doppler.clear();
     for (int i = 0; i < m_dopplerItems.size(); i++)
     {
-        if (m_dopplerItems[i]->checkState() == Qt::Checked)
+        if (m_dopplerItems[i]->checkState() == Qt::Checked) {
             m_devSettings->m_doppler.append(i);
+        }
     }
     m_devSettings->m_startOnAOS = m_startOnAOSWidget->isChecked();
     m_devSettings->m_stopOnLOS = m_stopOnLOSWidget->isChecked();
     m_devSettings->m_startStopFileSink = m_startStopFileSinkWidget->isChecked();
-    m_devSettings->m_frequency = (quint64)(m_frequencyItem->data(Qt::DisplayRole).toDouble() * 1000000.0);
-    m_devSettings->m_aosCommand = m_aosCommandItem->text();
-    m_devSettings->m_losCommand = m_losCommandItem->text();
+    m_devSettings->m_frequency = (quint64)(m_frequencyWidget->text().toDouble() * 1000000.0);
+    m_devSettings->m_aosCommand = m_aosCommandWidget->text();
+    m_devSettings->m_losCommand = m_losCommandWidget->text();
 }

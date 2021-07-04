@@ -37,13 +37,13 @@ SatelliteRadioControlDialog::SatelliteRadioControlDialog(SatelliteTrackerSetting
 {
     ui->setupUi(this);
 
-    // Must resize before setting m_deviceSettings
-    resizeTable();
-
     m_deviceSettings = m_settings->m_deviceSettings;
 
-    for (int i = 0; i < settings->m_satellites.size(); i++)
+    for (int i = 0; i < settings->m_satellites.size(); i++) {
         ui->satelliteSelect->addItem(settings->m_satellites[i]);
+    }
+
+    connect(ui->tabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(on_tabCloseRequested(int)));
 }
 
 SatelliteRadioControlDialog::~SatelliteRadioControlDialog()
@@ -53,19 +53,11 @@ SatelliteRadioControlDialog::~SatelliteRadioControlDialog()
 
 void SatelliteRadioControlDialog::accept()
 {
-    for (int i = 0; i < m_devSettingsGUIs.size(); i++)
+    for (int i = 0; i < m_devSettingsGUIs.size(); i++) {
         m_devSettingsGUIs[i]->accept();
+    }
     QDialog::accept();
     m_settings->m_deviceSettings = m_deviceSettings;
-}
-
-void SatelliteRadioControlDialog::resizeTable()
-{
-    on_add_clicked();
-    ui->table->resizeColumnsToContents();
-    ui->table->selectRow(0);
-    on_remove_clicked();
-    ui->table->selectRow(-1);
 }
 
 void SatelliteRadioControlDialog::on_add_clicked()
@@ -74,7 +66,9 @@ void SatelliteRadioControlDialog::on_add_clicked()
     if (!name.isEmpty())
     {
         SatelliteTrackerSettings::SatelliteDeviceSettings *devSettings = new SatelliteTrackerSettings::SatelliteDeviceSettings();
-        SatelliteDeviceSettingsGUI *devSettingsGUI = new SatelliteDeviceSettingsGUI(devSettings, ui->table);
+        SatelliteDeviceSettingsGUI *devSettingsGUI = new SatelliteDeviceSettingsGUI(devSettings, ui->tabWidget, ui->tabWidget);
+        int index = ui->tabWidget->addTab(devSettingsGUI, "R0");
+        ui->tabWidget->setCurrentIndex(index);
 
         m_devSettingsGUIs.append(devSettingsGUI);
         QList<SatelliteTrackerSettings::SatelliteDeviceSettings *> *devSettingsList = m_deviceSettings.value(name);
@@ -82,21 +76,15 @@ void SatelliteRadioControlDialog::on_add_clicked()
     }
 }
 
-// Remove selected row
-void SatelliteRadioControlDialog::on_remove_clicked()
+// Remove tab
+void SatelliteRadioControlDialog::on_tabCloseRequested(int index)
 {
-    // Selection mode is single, so only a single row should be returned
-    QModelIndexList indexList = ui->table->selectionModel()->selectedRows();
-    if (!indexList.isEmpty())
-    {
-        int row = indexList.at(0).row();
-        ui->table->removeRow(row);
-        delete m_devSettingsGUIs.takeAt(row);
+    ui->tabWidget->removeTab(index);
+    delete m_devSettingsGUIs.takeAt(index);
 
-        QString name = ui->satelliteSelect->currentText();
-        QList<SatelliteTrackerSettings::SatelliteDeviceSettings *> *devSettingsList = m_deviceSettings.value(name);
-        delete devSettingsList->takeAt(row);
-    }
+    QString name = ui->satelliteSelect->currentText();
+    QList<SatelliteTrackerSettings::SatelliteDeviceSettings *> *devSettingsList = m_deviceSettings.value(name);
+    delete devSettingsList->takeAt(index);
 }
 
 void SatelliteRadioControlDialog::on_satelliteSelect_currentIndexChanged(int index)
@@ -104,23 +92,26 @@ void SatelliteRadioControlDialog::on_satelliteSelect_currentIndexChanged(int ind
     (void) index;
 
     // Save details from current GUI elements
-    for (int i = 0; i < m_devSettingsGUIs.size(); i++)
+    for (int i = 0; i < m_devSettingsGUIs.size(); i++) {
         m_devSettingsGUIs[i]->accept();
+    }
     // Clear GUI
-    ui->table->setRowCount(0);
+    ui->tabWidget->clear();
     qDeleteAll(m_devSettingsGUIs);
     m_devSettingsGUIs.clear();
 
     // Create settings list for newly selected satellite, if one doesn't already exist
     QString name = ui->satelliteSelect->currentText();
-    if (!m_deviceSettings.contains(name))
+    if (!m_deviceSettings.contains(name)) {
          m_deviceSettings.insert(name, new QList<SatelliteTrackerSettings::SatelliteDeviceSettings *>());
+    }
 
     // Add existing settings to GUI
     QList<SatelliteTrackerSettings::SatelliteDeviceSettings *> *devSettingsList = m_deviceSettings.value(name);
     for (int i = 0; i < devSettingsList->size(); i++)
     {
-        SatelliteDeviceSettingsGUI *devSettingsGUI = new SatelliteDeviceSettingsGUI(devSettingsList->at(i), ui->table);
+        SatelliteDeviceSettingsGUI *devSettingsGUI = new SatelliteDeviceSettingsGUI(devSettingsList->at(i), ui->tabWidget, ui->tabWidget);
+        ui->tabWidget->addTab(devSettingsGUI, devSettingsList->at(i)->m_deviceSet);
         m_devSettingsGUIs.append(devSettingsGUI);
     }
 

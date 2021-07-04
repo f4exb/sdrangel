@@ -19,7 +19,10 @@
 #define INCLUDE_FEATURE_SATELLITEDEVICESETTINGSGUI_H
 
 #include <QComboBox>
+#include <QListView>
+#include <QLineEdit>
 #include <QCheckBox>
+#include <QTabWidget>
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QStandardItemModel>
@@ -30,19 +33,18 @@
 
 class SatelliteRadioControlDialog;
 
-class SatelliteDeviceSettingsGUI : public QObject
+class SatelliteDeviceSettingsGUI : public QWidget
 {
     Q_OBJECT
 
 public:
 
-    SatelliteDeviceSettingsGUI(SatelliteTrackerSettings::SatelliteDeviceSettings *devSettings,
-                               QTableWidget *table);
+    explicit SatelliteDeviceSettingsGUI(SatelliteTrackerSettings::SatelliteDeviceSettings *devSettings,
+                               QTabWidget *tab, QWidget *parent = nullptr);
     void accept();
 
 protected:
 
-    void layout(QWidget *parent, QWidget *child);
     void addDeviceSets();
     void addPresets(const QString& deviceSet);
     void addChannels();
@@ -56,21 +58,16 @@ private slots:
 protected:
 
     friend SatelliteRadioControlDialog;
-    QWidget *m_deviceSetItem;
+    QTabWidget *m_tab;
     QComboBox *m_deviceSetWidget;
-    QWidget *m_presetItem;
     QComboBox *m_presetWidget;
-    QWidget *m_dopplerItem;
-    QComboBox *m_dopplerWidget;
-    QWidget *m_startOnAOSItem;
+    QListView *m_dopplerWidget;
     QCheckBox *m_startOnAOSWidget;
-    QWidget *m_stopOnLOSItem;
     QCheckBox *m_stopOnLOSWidget;
-    QWidget *m_startStopFileSinkItem;
     QCheckBox *m_startStopFileSinkWidget;
-    QTableWidgetItem *m_frequencyItem;
-    QTableWidgetItem *m_aosCommandItem;
-    QTableWidgetItem *m_losCommandItem;
+    QLineEdit *m_frequencyWidget;
+    QLineEdit *m_aosCommandWidget;
+    QLineEdit *m_losCommandWidget;
     QChar m_currentPresets;
 
     QStandardItemModel m_dopplerModel;
@@ -78,17 +75,6 @@ protected:
 
     SatelliteTrackerSettings::SatelliteDeviceSettings *m_devSettings;
 
-    enum SatDeviceCol {
-        SAT_DEVICE_COL_DEVICESET,
-        SAT_DEVICE_COL_PRESET,
-        SAT_DEVICE_COL_DOPPLER,
-        SAT_DEVICE_COL_START,
-        SAT_DEVICE_COL_STOP,
-        SAT_DEVICE_COL_START_FILE_SINK,
-        SAT_DEVICE_COL_FREQUENCY,
-        SAT_DEVICE_COL_AOS_COMMAND,
-        SAT_DEVICE_COL_LOS_COMMAND
-    };
 };
 
 #endif // INCLUDE_FEATURE_SATELLITEDEVICESETTINGSGUI_H
