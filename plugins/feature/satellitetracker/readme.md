@@ -44,7 +44,7 @@ Pressing this button displays the SDRangel Control dialog.
 
 This dialog determines the actions the Satellite Tracker will take when AOS or LOS occurs for a satellite. First, select a satellite from the dropdown box. Information about the satellite's transmit and receive modes should appear in the field at the bottom of the dialog, if available in the SatNogs database.
 
-To perform an action on an SDRangel device set on AOS or LOS, press the + button. This will add a row in the table, allowing you to select:
+To perform an action on an SDRangel device set on AOS or LOS, press the "Add device set" button. This will add a new, allowing you to select:
 
 * The device set that will be controlled. This will list all currently open device sets. You can also type the name of a new device set.
 * The preset to load on AOS. This allows preset device settings (E.g. centre frequency) and demodulators to be opened when the satellite becomes visible.
@@ -56,7 +56,7 @@ To perform an action on an SDRangel device set on AOS or LOS, press the + button
 * A command or script to execute on AOS.
 * A command or script to execute on LOS.
 
-Multiple rows can be added, to allow independent control of multiple device sets. To remove a row, select the row by clicking the row number, then press the - button.
+Multiple tabs can be added, to allow independent control of multiple device sets. To remove a tab, click the cross next to the device set name in the tab list.
 
 <h3>6: Show Satellite Selection dialog</h3>
 

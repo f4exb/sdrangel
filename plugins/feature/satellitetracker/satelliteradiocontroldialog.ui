@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>955</width>
-    <height>400</height>
+    <height>771</height>
    </rect>
   </property>
   <property name="font">
@@ -26,98 +26,15 @@
    <item>
     <widget class="QGroupBox" name="groupBox">
      <layout class="QGridLayout" name="gridLayout">
-      <item row="5" column="0">
-       <widget class="QTableWidget" name="table">
-        <property name="selectionMode">
-         <enum>QAbstractItemView::SingleSelection</enum>
+      <item row="7" column="0">
+       <widget class="QLabel" name="satelliteModesLabel">
+        <property name="text">
+         <string>Satellite modes</string>
         </property>
-        <property name="selectionBehavior">
-         <enum>QAbstractItemView::SelectRows</enum>
-        </property>
-        <column>
-         <property name="text">
-          <string>Device set</string>
-         </property>
-         <property name="toolTip">
-          <string>Device set to control</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Preset to load on AOS</string>
-         </property>
-         <property name="toolTip">
-          <string>Preset to load to device set</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Doppler correction</string>
-         </property>
-         <property name="toolTip">
-          <string>Channel numbers that will have Doppler correction applied</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Start on AOS</string>
-         </property>
-         <property name="toolTip">
-          <string>Start acquisition on AOS</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Stop on LOS</string>
-         </property>
-         <property name="toolTip">
-          <string>Stop acquisition on LOS</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Start/stop file sinks</string>
-         </property>
-         <property name="toolTip">
-          <string>Start file sinks recording on AOS and stop recording on LOS</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Override frequency (MHz)</string>
-         </property>
-         <property name="toolTip">
-          <string>Override the center frequency in the preset with a value specified here in MHz.
-This allows a single preset to be shared between different satellites that differ only in frequency.</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>AOS command</string>
-         </property>
-         <property name="toolTip">
-          <string>Command to execute on AOS</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>LOS command</string>
-         </property>
-         <property name="toolTip">
-          <string>Command to execute on LOS</string>
-         </property>
-        </column>
        </widget>
       </item>
-      <item row="8" column="0">
-       <widget class="QTextEdit" name="satelliteModes">
-        <property name="toolTip">
-         <string>Satellite modes from SatNOGS</string>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
+      <item row="5" column="0">
+       <layout class="QHBoxLayout" name="buttonsHorizontalLayout"/>
       </item>
       <item row="1" column="0">
        <layout class="QHBoxLayout" name="satHorizontalLayout">
@@ -139,6 +56,16 @@ This allows a single preset to be shared between different satellites that diffe
          </widget>
         </item>
         <item>
+         <widget class="QPushButton" name="add">
+          <property name="toolTip">
+           <string>Add device set control settings tab</string>
+          </property>
+          <property name="text">
+           <string>Add device set</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <spacer name="satHorizontalSpacer">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -153,47 +80,23 @@ This allows a single preset to be shared between different satellites that diffe
         </item>
        </layout>
       </item>
-      <item row="6" column="0">
-       <layout class="QHBoxLayout" name="buttonsHorizontalLayout">
-        <item>
-         <widget class="QPushButton" name="add">
-          <property name="toolTip">
-           <string>Add device set control</string>
-          </property>
-          <property name="text">
-           <string>+</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="remove">
-          <property name="toolTip">
-           <string>Remove device set control</string>
-          </property>
-          <property name="text">
-           <string>-</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="buttonsHorizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
+      <item row="8" column="0">
+       <widget class="QTextEdit" name="satelliteModes">
+        <property name="toolTip">
+         <string>Satellite modes from SatNOGS</string>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
-      <item row="7" column="0">
-       <widget class="QLabel" name="satelliteModesLabel">
-        <property name="text">
-         <string>Satellite modes</string>
+      <item row="2" column="0">
+       <widget class="QTabWidget" name="tabWidget">
+        <property name="currentIndex">
+         <number>-1</number>
+        </property>
+        <property name="tabsClosable">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -214,9 +117,6 @@ This allows a single preset to be shared between different satellites that diffe
  </widget>
  <tabstops>
   <tabstop>satelliteSelect</tabstop>
-  <tabstop>table</tabstop>
-  <tabstop>add</tabstop>
-  <tabstop>remove</tabstop>
   <tabstop>satelliteModes</tabstop>
  </tabstops>
  <resources>
