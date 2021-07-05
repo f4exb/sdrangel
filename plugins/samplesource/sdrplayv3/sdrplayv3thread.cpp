@@ -18,6 +18,8 @@
 
 #include <stdio.h>
 #include <errno.h>
+#include <chrono>
+#include <thread>
 #include "sdrplayv3thread.h"
 #include "dsp/samplesinkfifo.h"
 
@@ -77,6 +79,18 @@ void SDRPlayV3Thread::setFcPos(int fcPos)
     m_fcPos = fcPos;
 }
 
+void SDRPlayV3Thread::resetRfChanged()
+{
+    m_rfChanged = 0;
+}
+
+bool SDRPlayV3Thread::waitForRfChanged()
+{
+    for (unsigned int i = 0; i < m_rfChangedTimeout && m_rfChanged == 0; i++)
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    return m_rfChanged != 0;
+}
+
 // Don't really need a thread here - just using same structure as other plugins
 void SDRPlayV3Thread::run()
 {
@@ -110,6 +124,9 @@ void SDRPlayV3Thread::callbackHelper(short *xi, short *xq, sdrplay_api_StreamCbP
     (void) reset;
     SDRPlayV3Thread* thread = (SDRPlayV3Thread*) ctx;
     qint16 iq[8192];
+
+    if (params->rfChanged)
+        thread->m_rfChanged = params->rfChanged;
 
     if (thread->m_running)
     {

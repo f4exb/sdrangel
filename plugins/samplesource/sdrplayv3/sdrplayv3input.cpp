@@ -464,8 +464,11 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
                 m_devParams->rxChannelA->tunerParams.bwType = SDRPlayV3Bandwidths::getBandwidthEnum(settings.m_bandwidthIndex);
             else
                 m_devParams->rxChannelB->tunerParams.bwType = SDRPlayV3Bandwidths::getBandwidthEnum(settings.m_bandwidthIndex);
+            m_sdrPlayThread->resetRfChanged();
             if ((err = sdrplay_api_Update(m_dev->dev, m_dev->tuner, sdrplay_api_Update_Tuner_BwType, sdrplay_api_Update_Ext1_None)) != sdrplay_api_Success)
                 qCritical() << "SDRPlayV3Input::applySettings: could not set bandwidth: " << sdrplay_api_GetErrorString(err);
+            if (!m_sdrPlayThread->waitForRfChanged())
+                qCritical() << "SDRPlayV3Input::applySettings: could not set bandwidth: Rf update timed out";
         }
     }
 
@@ -479,8 +482,11 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
                 m_devParams->rxChannelA->tunerParams.ifType = SDRPlayV3IF::getIFEnum(settings.m_ifFrequencyIndex);
             else
                 m_devParams->rxChannelB->tunerParams.ifType = SDRPlayV3IF::getIFEnum(settings.m_ifFrequencyIndex);
+            m_sdrPlayThread->resetRfChanged();
             if ((err = sdrplay_api_Update(m_dev->dev, m_dev->tuner, sdrplay_api_Update_Tuner_IfType, sdrplay_api_Update_Ext1_None)) != sdrplay_api_Success)
                 qCritical() << "SDRPlayV3Input::applySettings: could not set IF frequency: " << sdrplay_api_GetErrorString(err);
+            if (!m_sdrPlayThread->waitForRfChanged())
+                qCritical() << "SDRPlayV3Input::applySettings: could not set IF frequency: Rf update timed out";
         }
     }
 
@@ -714,9 +720,15 @@ bool SDRPlayV3Input::setDeviceCenterFrequency(quint64 freq_hz)
         m_devParams->rxChannelA->tunerParams.rfFreq.rfHz = (double)freq_hz;
     else
         m_devParams->rxChannelB->tunerParams.rfFreq.rfHz = (double)freq_hz;
+    m_sdrPlayThread->resetRfChanged();
     if ((err = sdrplay_api_Update(m_dev->dev, m_dev->tuner, sdrplay_api_Update_Tuner_Frf, sdrplay_api_Update_Ext1_None)) != sdrplay_api_Success)
     {
         qWarning("SDRPlayV3Input::setDeviceCenterFrequency: could not frequency to %llu Hz", freq_hz);
+        return false;
+    }
+    else if (!m_sdrPlayThread->waitForRfChanged())
+    {
+        qWarning() << "SDRPlayV3Input::setDeviceCenterFrequency: could not set frequency: Rf update timed out";
         return false;
     }
     else
