@@ -41,6 +41,9 @@ public:
     void setLog2Decimation(unsigned int log2_decim);
     void setFcPos(int fcPos);
 
+    void resetRfChanged();
+    bool waitForRfChanged();
+
 private:
     QMutex m_startWaitMutex;
     QWaitCondition m_startWaiter;
@@ -53,6 +56,9 @@ private:
     int m_samplerate;
     unsigned int m_log2Decim;
     int m_fcPos;
+
+    int m_rfChanged;
+    static const unsigned int m_rfChangedTimeout = 500;
 
     Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 16, true> m_decimatorsIQ;
 
