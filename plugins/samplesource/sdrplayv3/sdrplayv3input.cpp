@@ -723,7 +723,7 @@ bool SDRPlayV3Input::setDeviceCenterFrequency(quint64 freq_hz)
     m_sdrPlayThread->resetRfChanged();
     if ((err = sdrplay_api_Update(m_dev->dev, m_dev->tuner, sdrplay_api_Update_Tuner_Frf, sdrplay_api_Update_Ext1_None)) != sdrplay_api_Success)
     {
-        qWarning("SDRPlayV3Input::setDeviceCenterFrequency: could not frequency to %llu Hz", freq_hz);
+        qWarning("SDRPlayV3Input::setDeviceCenterFrequency: could not set frequency to %llu Hz", freq_hz);
         return false;
     }
     else if (!m_sdrPlayThread->waitForRfChanged())
