@@ -1956,6 +1956,24 @@ void GLSpectrum::applyChanges()
 	m_q3TickTime.allocate(4*m_timeScale.getTickList().count());
     m_q3TickFrequency.allocate(4*m_frequencyScale.getTickList().count());
     m_q3TickPower.allocate(4*m_powerScale.getTickList().count());
+
+	// Histogram markers
+	for (int i = 0; i < m_histogramMarkers.size(); i++)
+	{
+		m_histogramMarkers[i].m_point.rx() =
+			(m_histogramMarkers[i].m_frequency - m_frequencyScale.getRangeMin()) / m_frequencyScale.getRange();
+		m_histogramMarkers[i].m_point.ry() =
+			(m_powerScale.getRangeMax() - m_histogramMarkers[i].m_power) / m_powerScale.getRange();
+	}
+
+	// Waterfall markers
+	for (int i = 0; i < m_waterfallMarkers.size(); i++)
+	{
+		m_waterfallMarkers[i].m_point.rx() =
+			(m_waterfallMarkers[i].m_frequency - m_frequencyScale.getRangeMin()) / m_frequencyScale.getRange();
+		m_waterfallMarkers[i].m_point.ry() =
+			(m_waterfallMarkers[i].m_time - m_timeScale.getRangeMin()) / m_timeScale.getRange();
+	}
 }
 
 void GLSpectrum::mouseMoveEvent(QMouseEvent* event)
@@ -2294,7 +2312,7 @@ void GLSpectrum::zoom(QWheelEvent *event)
 
 	if ((pwx >= 0.0f) && (pwx <= 1.0f))
 	{
-		if (event->delta() > 0) // zoom in
+		if (event->angleDelta().y() > 0) // zoom in
 		{
 			if (m_frequencyZoomFactor < m_maxFrequencyZoom) {
 				m_frequencyZoomFactor += 0.5f;
@@ -2331,11 +2349,11 @@ void GLSpectrum::zoom(QWheelEvent *event)
 		//qDebug("GLSpectrum::zoom: pwyh: %f pwyw: %f", pwyh, pwyw);
 
 		if ((pwyw >= 0.0f) && (pwyw <= 1.0f)) {
-			timeZoom(event->delta() > 0);
+			timeZoom(event->angleDelta().y() > 0);
 		}
 
 		if ((pwyh >= 0.0f) && (pwyh <= 1.0f) && !m_linear) {
-			powerZoom(pwyh, event->delta() > 0);
+			powerZoom(pwyh, event->angleDelta().y() > 0);
 		}
 	}
 }
@@ -2466,13 +2484,13 @@ void GLSpectrum::channelMarkerMove(QWheelEvent *event, int mul)
             continue;
         }
 
-        if (m_channelMarkerStates[i]->m_rect.contains(event->pos()))
+        if (m_channelMarkerStates[i]->m_rect.contains(event->position().toPoint()))
         {
             int freq = m_channelMarkerStates[i]->m_channelMarker->getCenterFrequency();
 
-            if (event->delta() > 0) {
+            if (event->angleDelta().y() > 0) {
                 freq += 10 * mul;
-            } else if (event->delta() < 0) {
+            } else if (event->angleDelta().y() < 0) {
                 freq -= 10 * mul;
             }
 
