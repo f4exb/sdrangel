@@ -82,6 +82,8 @@ SWGSatelliteTrackerSettings::SWGSatelliteTrackerSettings() {
     m_aos_command_isSet = false;
     los_command = nullptr;
     m_los_command_isSet = false;
+    device_settings = nullptr;
+    m_device_settings_isSet = false;
     title = nullptr;
     m_title_isSet = false;
     rgb_color = 0;
@@ -158,6 +160,8 @@ SWGSatelliteTrackerSettings::init() {
     m_aos_command_isSet = false;
     los_command = new QString("");
     m_los_command_isSet = false;
+    device_settings = new QList<SWGSatelliteDeviceSettingsList*>();
+    m_device_settings_isSet = false;
     title = new QString("");
     m_title_isSet = false;
     rgb_color = 0;
@@ -232,6 +236,13 @@ SWGSatelliteTrackerSettings::cleanup() {
     }
     if(los_command != nullptr) { 
         delete los_command;
+    }
+    if(device_settings != nullptr) { 
+        auto arr = device_settings;
+        for(auto o: *arr) { 
+            delete o;
+        }
+        delete device_settings;
     }
     if(title != nullptr) { 
         delete title;
@@ -311,6 +322,8 @@ SWGSatelliteTrackerSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&los_command, pJson["losCommand"], "QString", "QString");
     
+    
+    ::SWGSDRangel::setValue(&device_settings, pJson["deviceSettings"], "QList", "SWGSatelliteDeviceSettingsList");
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
@@ -421,6 +434,9 @@ SWGSatelliteTrackerSettings::asJsonObject() {
     }
     if(los_command != nullptr && *los_command != QString("")){
         toJsonValue(QString("losCommand"), los_command, obj, QString("QString"));
+    }
+    if(device_settings && device_settings->size() > 0){
+        toJsonArray((QList<void*>*)device_settings, obj, "deviceSettings", "SWGSatelliteDeviceSettingsList");
     }
     if(title != nullptr && *title != QString("")){
         toJsonValue(QString("title"), title, obj, QString("QString"));
@@ -717,6 +733,16 @@ SWGSatelliteTrackerSettings::setLosCommand(QString* los_command) {
     this->m_los_command_isSet = true;
 }
 
+QList<SWGSatelliteDeviceSettingsList*>*
+SWGSatelliteTrackerSettings::getDeviceSettings() {
+    return device_settings;
+}
+void
+SWGSatelliteTrackerSettings::setDeviceSettings(QList<SWGSatelliteDeviceSettingsList*>* device_settings) {
+    this->device_settings = device_settings;
+    this->m_device_settings_isSet = true;
+}
+
 QString*
 SWGSatelliteTrackerSettings::getTitle() {
     return title;
@@ -871,6 +897,9 @@ SWGSatelliteTrackerSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(los_command && *los_command != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(device_settings && (device_settings->size() > 0)){
             isObjectUpdated = true; break;
         }
         if(title && *title != QString("")){

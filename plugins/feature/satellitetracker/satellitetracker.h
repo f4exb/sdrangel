@@ -36,6 +36,7 @@ class QNetworkReply;
 
 namespace SWGSDRangel {
     class SWGDeviceState;
+    class SWGSatelliteDeviceSettingsList;
 }
 
 class SatelliteTracker : public Feature
@@ -191,6 +192,8 @@ private:
     void updateSatellitesReply(QNetworkReply *reply);
     void updateTransmittersReply(QNetworkReply *reply);
     void updateTLEsReply(QNetworkReply *reply);
+    static QList<SWGSDRangel::SWGSatelliteDeviceSettingsList*>* getSWGSatelliteDeviceSettingsList(const SatelliteTrackerSettings& settings);
+    static QHash<QString, QList<SatelliteTrackerSettings::SatelliteDeviceSettings *> *> getSatelliteDeviceSettings(QList<SWGSDRangel::SWGSatelliteDeviceSettingsList*>* list);
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);

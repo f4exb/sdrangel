@@ -92,6 +92,11 @@ SatelliteTrackerSettings:
     losCommand:
       description: "Command to execute on LOS for all satellites"
       type: string
+    deviceSettings:
+      description: "Device set settings to apply on AOS / LOS"
+      type: array
+      items:
+        $ref: "http://swgserver:8081/api/swagger/include/SatelliteTracker.yaml#/SatelliteDeviceSettingsList"
     title:
       type: string
     rgbColor:
@@ -107,3 +112,56 @@ SatelliteTrackerSettings:
       type: integer
     reverseAPIChannelIndex:
       type: integer
+
+SatelliteDeviceSettingsList:
+  description: "List of device set settings for a satellite"
+  properties:
+    satellite:
+      description: "Name of the satellite"
+      type: string
+    deviceSettings:
+      description: "Device set settings"
+      type: array
+      items:
+        $ref: "http://swgserver:8081/api/swagger/include/SatelliteTracker.yaml#/SatelliteDeviceSettings"
+
+SatelliteDeviceSettings:
+  description: "Device set settings"
+  properties:
+    deviceSet:
+      description: "Name of the device set (E.g. R0)"
+      type: string
+    presetGroup:
+      description: "Group for preset to load on AOS"
+      type: string
+    presetFrequency:
+      description: "Frequency of preset to load on AOS"
+      type: integer
+      format: int64
+    presetDescription:
+      description: "Description of preset to load on AOS"
+      type: string
+    doppler:
+      description: "Whether to apply doppler correction to each channel (1 for yes, 0 for no)"
+      type: array
+      items:
+        type: integer
+    startOnAOS:
+      description: "Start acquisition on AOS (1 for yes, 0 for no)"
+      type: integer
+    stopOnLOS:
+      description: "Stop acquisition on LOS (1 for yes, 0 for no)"
+      type: integer
+    startStopFileSinks:
+      description: "Start/stop file sinks on AOS/LOS (1 for yes, 0 for no)"
+      type: integer
+    frequency:
+      description: "Frequency to override in preset"
+      type: integer
+      format: int64
+    aosCommand:
+      description: "Command to execute on AOS"
+      type: string
+    losCommand:
+      description: "Command to execute on LOS"
+      type: string

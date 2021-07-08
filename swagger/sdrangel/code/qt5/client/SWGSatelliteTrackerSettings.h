@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include "SWGSatelliteDeviceSettingsList.h"
 #include <QList>
 #include <QString>
 
@@ -123,6 +124,9 @@ public:
 
     QString* getLosCommand();
     void setLosCommand(QString* los_command);
+
+    QList<SWGSatelliteDeviceSettingsList*>* getDeviceSettings();
+    void setDeviceSettings(QList<SWGSatelliteDeviceSettingsList*>* device_settings);
 
     QString* getTitle();
     void setTitle(QString* title);
@@ -229,6 +233,9 @@ private:
 
     QString* los_command;
     bool m_los_command_isSet;
+
+    QList<SWGSatelliteDeviceSettingsList*>* device_settings;
+    bool m_device_settings_isSet;
 
     QString* title;
     bool m_title_isSet;

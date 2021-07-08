@@ -25,6 +25,8 @@
 #include "SWGFeatureReport.h"
 #include "SWGFeatureActions.h"
 #include "SWGDeviceState.h"
+#include "SWGSatelliteTrackerSettings.h"
+#include "SWGSatelliteDeviceSettings.h"
 
 #include "dsp/dspengine.h"
 #include "util/httpdownloadmanager.h"
@@ -388,6 +390,94 @@ static QStringList convertPtrsToStringList(QList<QString *> *listIn)
     return listOut;
 }
 
+// Convert struct SatelliteDeviceSettings to Swagger
+QList<SWGSDRangel::SWGSatelliteDeviceSettingsList*>* SatelliteTracker::getSWGSatelliteDeviceSettingsList(const SatelliteTrackerSettings& settings)
+{
+    QList <SWGSDRangel::SWGSatelliteDeviceSettingsList*>* deviceSettingsList = new QList<SWGSDRangel::SWGSatelliteDeviceSettingsList*>();
+    QHashIterator<QString, QList<SatelliteTrackerSettings::SatelliteDeviceSettings *> *> i(settings.m_deviceSettings);
+    while (i.hasNext())
+    {
+        i.next();
+        QList<SatelliteTrackerSettings::SatelliteDeviceSettings*>* l = i.value();
+        if (l->size() > 0)
+        {
+            SWGSDRangel::SWGSatelliteDeviceSettingsList* dsl = new SWGSDRangel::SWGSatelliteDeviceSettingsList();
+            dsl->setSatellite(new QString(i.key()));
+            QList<SWGSDRangel::SWGSatelliteDeviceSettings*>* ds = new QList<SWGSDRangel::SWGSatelliteDeviceSettings*>();
+            for (int j = 0; j < l->size(); j++)
+            {
+                SWGSDRangel::SWGSatelliteDeviceSettings* deviceSettings = new SWGSDRangel::SWGSatelliteDeviceSettings();
+                deviceSettings->setDeviceSet(new QString(l->at(j)->m_deviceSet));
+                deviceSettings->setPresetGroup(new QString(l->at(j)->m_presetGroup));
+                deviceSettings->setPresetDescription(new QString(l->at(j)->m_presetDescription));
+                deviceSettings->setPresetFrequency(l->at(j)->m_presetFrequency);
+                QList<qint32>* doppler = new QList<qint32>();
+                for (int k = 0; k < l->at(j)->m_doppler.size(); k++) {
+                    doppler->append(l->at(j)->m_doppler[k]);
+                }
+                deviceSettings->setDoppler(doppler);
+                deviceSettings->setStartOnAos((int)l->at(j)->m_startOnAOS);
+                deviceSettings->setStopOnLos((int)l->at(j)->m_stopOnLOS);
+                deviceSettings->setStartStopFileSinks((int)l->at(j)->m_startStopFileSink);
+                deviceSettings->setFrequency((int)l->at(j)->m_frequency);
+                deviceSettings->setAosCommand(new QString(l->at(j)->m_aosCommand));
+                deviceSettings->setLosCommand(new QString(l->at(j)->m_losCommand));
+                ds->append(deviceSettings);
+            }
+            dsl->setDeviceSettings(ds);
+            deviceSettingsList->append(dsl);
+        }
+    }
+    return deviceSettingsList;
+}
+
+// Convert Swagger device settings to struct SatelliteDeviceSettings
+QHash<QString, QList<SatelliteTrackerSettings::SatelliteDeviceSettings *> *> SatelliteTracker::getSatelliteDeviceSettings(QList<SWGSDRangel::SWGSatelliteDeviceSettingsList*>* list)
+{
+    QHash<QString, QList<SatelliteTrackerSettings::SatelliteDeviceSettings *> *> hash;
+
+    for (int i = 0; i < list->size(); i++)
+    {
+        SWGSDRangel::SWGSatelliteDeviceSettingsList* satList = list->at(i);
+        if (satList->getSatellite())
+        {
+            QString satellite = *satList->getSatellite();
+            QList<SWGSDRangel::SWGSatelliteDeviceSettings*>* swgDeviceSettingsList = satList->getDeviceSettings();
+            if (swgDeviceSettingsList)
+            {
+                QList<SatelliteTrackerSettings::SatelliteDeviceSettings *> *deviceSettingsList = new QList<SatelliteTrackerSettings::SatelliteDeviceSettings *>();
+                for (int j = 0; j < swgDeviceSettingsList->size(); j++)
+                {
+                    SatelliteTrackerSettings::SatelliteDeviceSettings *deviceSettings = new SatelliteTrackerSettings::SatelliteDeviceSettings();
+                    deviceSettings->m_deviceSet = *swgDeviceSettingsList->at(j)->getDeviceSet();
+                    deviceSettings->m_presetGroup = *swgDeviceSettingsList->at(j)->getPresetGroup();
+                    deviceSettings->m_presetFrequency = swgDeviceSettingsList->at(j)->getPresetFrequency();
+                    deviceSettings->m_presetDescription = *swgDeviceSettingsList->at(j)->getPresetDescription();
+                    deviceSettings->m_doppler = *swgDeviceSettingsList->at(j)->getDoppler();
+                    deviceSettings->m_startOnAOS = swgDeviceSettingsList->at(j)->getStartOnAos();
+                    deviceSettings->m_stopOnLOS = swgDeviceSettingsList->at(j)->getStopOnLos();
+                    deviceSettings->m_startStopFileSink = swgDeviceSettingsList->at(j)->getStartStopFileSinks();
+                    deviceSettings->m_frequency = swgDeviceSettingsList->at(j)->getFrequency();
+                    deviceSettings->m_aosCommand = *swgDeviceSettingsList->at(j)->getAosCommand();
+                    deviceSettings->m_losCommand = *swgDeviceSettingsList->at(j)->getLosCommand();
+                    deviceSettingsList->append(deviceSettings);
+                }
+                hash.insert(satellite, deviceSettingsList);
+            }
+            else
+            {
+                qDebug() << "SatelliteTracker::getSatelliteDeviceSettings: No device settings for satellite " << satellite;
+            }
+        }
+        else
+        {
+            qDebug() << "SatelliteTracker::getSatelliteDeviceSettings: No satellite name in device settings";
+        }
+    }
+
+    return hash;
+}
+
 void SatelliteTracker::webapiFormatFeatureSettings(
     SWGSDRangel::SWGFeatureSettings& response,
     const SatelliteTrackerSettings& settings)
@@ -417,6 +507,7 @@ void SatelliteTracker::webapiFormatFeatureSettings(
     response.getSatelliteTrackerSettings()->setPredictionPeriod(settings.m_predictionPeriod);
     response.getSatelliteTrackerSettings()->setPassStartTime(new QString(settings.m_passStartTime.toString()));
     response.getSatelliteTrackerSettings()->setPassFinishTime(new QString(settings.m_passFinishTime.toString()));
+    response.getSatelliteTrackerSettings()->setDeviceSettings(getSWGSatelliteDeviceSettingsList(settings));
 
     if (response.getSatelliteTrackerSettings()->getTitle()) {
         *response.getSatelliteTrackerSettings()->getTitle() = settings.m_title;
@@ -517,6 +608,9 @@ void SatelliteTracker::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("passFinishTime")) {
         settings.m_passFinishTime = QTime::fromString(*response.getSatelliteTrackerSettings()->getPassFinishTime());
+    }
+    if (featureSettingsKeys.contains("deviceSettings")) {
+        settings.m_deviceSettings = getSatelliteDeviceSettings(response.getSatelliteTrackerSettings()->getDeviceSettings());
     }
     if (featureSettingsKeys.contains("title")) {
         settings.m_title = *response.getSatelliteTrackerSettings()->getTitle();
@@ -623,6 +717,9 @@ void SatelliteTracker::webapiReverseSendSettings(QList<QString>& featureSettings
     }
     if (featureSettingsKeys.contains("passFinishTime") || force) {
         swgSatelliteTrackerSettings->setPassFinishTime(new QString(settings.m_passFinishTime.toString()));
+    }
+    if (featureSettingsKeys.contains("deviceSettings") || force) {
+        swgSatelliteTrackerSettings->setDeviceSettings(getSWGSatelliteDeviceSettingsList(settings));
     }
     if (featureSettingsKeys.contains("title") || force) {
         swgSatelliteTrackerSettings->setTitle(new QString(settings.m_title));
