@@ -178,6 +178,7 @@ private:
     struct HistogramMarker {
         QPointF m_point;
         float m_frequency;
+        int m_fftBin;
         float m_power;
         QString m_frequencyStr;
         QString m_powerStr;
@@ -186,6 +187,7 @@ private:
         HistogramMarker() :
             m_point(0, 0),
             m_frequency(0),
+            m_fftBin(0),
             m_power(0),
             m_frequencyStr(),
             m_powerStr(),
@@ -195,6 +197,7 @@ private:
         HistogramMarker(
             const QPointF& point,
             float frequency,
+            int   fftBin,
             float power,
             const QString& frequencyStr,
             const QString& powerStr,
@@ -203,6 +206,7 @@ private:
         ) :
             m_point(point),
             m_frequency(frequency),
+            m_fftBin(fftBin),
             m_power(power),
             m_frequencyStr(frequencyStr),
             m_powerStr(powerStr),
@@ -212,6 +216,7 @@ private:
         HistogramMarker(const HistogramMarker& other) :
             m_point(other.m_point),
             m_frequency(other.m_frequency),
+            m_fftBin(other.m_fftBin),
             m_power(other.m_power),
             m_frequencyStr(other.m_frequencyStr),
             m_powerStr(other.m_powerStr),

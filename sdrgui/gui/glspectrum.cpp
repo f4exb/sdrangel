@@ -1964,6 +1964,8 @@ void GLSpectrum::applyChanges()
 			(m_histogramMarkers[i].m_frequency - m_frequencyScale.getRangeMin()) / m_frequencyScale.getRange();
 		m_histogramMarkers[i].m_point.ry() =
 			(m_powerScale.getRangeMax() - m_histogramMarkers[i].m_power) / m_powerScale.getRange();
+		m_histogramMarkers[i].m_fftBin =
+			(((m_histogramMarkers[i].m_frequency - m_centerFrequency) / (float) m_sampleRate) * m_fftSize) + (m_fftSize / 2);
 	}
 
 	// Waterfall markers
@@ -2147,6 +2149,7 @@ void GLSpectrum::mousePressEvent(QMouseEvent* event)
             pHis.ry() = (ep.y()/height() - m_histogramRect.top()) / m_histogramRect.height();
             float frequency = m_frequencyScale.getRangeMin() + pHis.x()*m_frequencyScale.getRange();
             float power = m_powerScale.getRangeMax() - pHis.y()*m_powerScale.getRange();
+			int fftBin = (((frequency - m_centerFrequency) / (float) m_sampleRate) * m_fftSize) + (m_fftSize / 2);
 
             if ((pHis.x() >= 0) && (pHis.x() <= 1) && (pHis.y() >= 0) && (pHis.y() <= 1))
             {
@@ -2155,6 +2158,7 @@ void GLSpectrum::mousePressEvent(QMouseEvent* event)
                     m_histogramMarkers.push_back(HistogramMarker());
                     m_histogramMarkers.back().m_point = pHis;
                     m_histogramMarkers.back().m_frequency = frequency;
+					m_histogramMarkers.back().m_fftBin = fftBin;
                     m_histogramMarkers.back().m_frequencyStr = displayScaled(
                         frequency,
                         'f',
