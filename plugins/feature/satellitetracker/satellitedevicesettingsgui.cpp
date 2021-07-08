@@ -94,7 +94,14 @@ SatelliteDeviceSettingsGUI::SatelliteDeviceSettingsGUI(SatelliteTrackerSettings:
     addChannels();
 
     for (int i = 0; i < devSettings->m_doppler.size(); i++)
-        m_dopplerItems[devSettings->m_doppler[i]]->setData(Qt::Checked, Qt::CheckStateRole);
+    {
+        int idx = devSettings->m_doppler[i];
+        if (idx < m_dopplerItems.size()) {
+            m_dopplerItems[idx]->setData(Qt::Checked, Qt::CheckStateRole);
+        } else {
+            qDebug() << "SatelliteDeviceSettingsGUI - Doppler index " << idx << " out of range: " << m_dopplerItems.size();
+        }
+    }
 
     // Start on AOS
     m_startOnAOSWidget = new QCheckBox();
