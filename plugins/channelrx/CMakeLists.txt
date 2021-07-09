@@ -18,6 +18,7 @@ add_subdirectory(demodchirpchat)
 add_subdirectory(demodvorsc)
 add_subdirectory(demodpacket)
 add_subdirectory(demodais)
+add_subdirectory(demodpager)
 add_subdirectory(radioclock)
 
 if(DAB_FOUND AND ZLIB_FOUND AND FAAD_FOUND)
