@@ -431,6 +431,16 @@ QList<SWGSDRangel::SWGSatelliteDeviceSettingsList*>* SatelliteTracker::getSWGSat
     return deviceSettingsList;
 }
 
+// Dereference a potentionally null string
+static QString getString(QString *sp)
+{
+    QString s;
+    if (sp != nullptr) {
+        s = *sp;
+    }
+    return s;
+}
+
 // Convert Swagger device settings to struct SatelliteDeviceSettings
 QHash<QString, QList<SatelliteTrackerSettings::SatelliteDeviceSettings *> *> SatelliteTracker::getSatelliteDeviceSettings(QList<SWGSDRangel::SWGSatelliteDeviceSettingsList*>* list)
 {
@@ -449,17 +459,19 @@ QHash<QString, QList<SatelliteTrackerSettings::SatelliteDeviceSettings *> *> Sat
                 for (int j = 0; j < swgDeviceSettingsList->size(); j++)
                 {
                     SatelliteTrackerSettings::SatelliteDeviceSettings *deviceSettings = new SatelliteTrackerSettings::SatelliteDeviceSettings();
-                    deviceSettings->m_deviceSet = *swgDeviceSettingsList->at(j)->getDeviceSet();
-                    deviceSettings->m_presetGroup = *swgDeviceSettingsList->at(j)->getPresetGroup();
+                    deviceSettings->m_deviceSet = getString(swgDeviceSettingsList->at(j)->getDeviceSet());
+                    deviceSettings->m_presetGroup = getString(swgDeviceSettingsList->at(j)->getPresetGroup());
                     deviceSettings->m_presetFrequency = swgDeviceSettingsList->at(j)->getPresetFrequency();
-                    deviceSettings->m_presetDescription = *swgDeviceSettingsList->at(j)->getPresetDescription();
-                    deviceSettings->m_doppler = *swgDeviceSettingsList->at(j)->getDoppler();
+                    deviceSettings->m_presetDescription = getString(swgDeviceSettingsList->at(j)->getPresetDescription());
+                    if (swgDeviceSettingsList->at(j)->getDoppler()) {
+                        deviceSettings->m_doppler = *swgDeviceSettingsList->at(j)->getDoppler();
+                    }
                     deviceSettings->m_startOnAOS = swgDeviceSettingsList->at(j)->getStartOnAos();
                     deviceSettings->m_stopOnLOS = swgDeviceSettingsList->at(j)->getStopOnLos();
                     deviceSettings->m_startStopFileSink = swgDeviceSettingsList->at(j)->getStartStopFileSinks();
                     deviceSettings->m_frequency = swgDeviceSettingsList->at(j)->getFrequency();
-                    deviceSettings->m_aosCommand = *swgDeviceSettingsList->at(j)->getAosCommand();
-                    deviceSettings->m_losCommand = *swgDeviceSettingsList->at(j)->getLosCommand();
+                    deviceSettings->m_aosCommand = getString(swgDeviceSettingsList->at(j)->getAosCommand());
+                    deviceSettings->m_losCommand = getString(swgDeviceSettingsList->at(j)->getLosCommand());
                     deviceSettingsList->append(deviceSettings);
                 }
                 hash.insert(satellite, deviceSettingsList);
