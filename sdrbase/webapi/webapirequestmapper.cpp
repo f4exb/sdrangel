@@ -3961,6 +3961,11 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->setPacketModSettings(new SWGSDRangel::SWGPacketModSettings());
             channelSettings->getPacketModSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "PagerDemodSettings")
+        {
+            channelSettings->setPagerDemodSettings(new SWGSDRangel::SWGPagerDemodSettings());
+            channelSettings->getPagerDemodSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "RadioClockSettings")
         {
             channelSettings->setRadioClockSettings(new SWGSDRangel::SWGRadioClockSettings());
@@ -4659,6 +4664,7 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setNoiseFigureSettings(nullptr);
     channelSettings.setPacketDemodSettings(nullptr);
     channelSettings.setPacketModSettings(nullptr);
+    channelSettings.setPagerDemodSettings(nullptr);
     channelSettings.setRemoteSinkSettings(nullptr);
     channelSettings.setRemoteSourceSettings(nullptr);
     channelSettings.setSsbDemodSettings(nullptr);

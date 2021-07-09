@@ -59,6 +59,8 @@ ChannelReport:
       $ref: "http://swgserver:8081/api/swagger/include/RemoteSource.yaml#/RemoteSourceReport"
     PacketModReport:
       $ref: "http://swgserver:8081/api/swagger/include/PacketMod.yaml#/PacketModReport"
+    PagerDemodReport:
+      $ref: "http://swgserver:8081/api/swagger/include/PagerDemod.yaml#/PagerDemodReport"
     SigMFFileSinkReport:
       $ref: "http://swgserver:8081/api/swagger/include/SigMFFileSink.yaml#/SigMFFileSinkReport"
     SSBModReport:

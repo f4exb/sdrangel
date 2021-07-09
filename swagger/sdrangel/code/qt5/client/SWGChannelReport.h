@@ -43,6 +43,7 @@
 #include "SWGNFMModReport.h"
 #include "SWGNoiseFigureReport.h"
 #include "SWGPacketModReport.h"
+#include "SWGPagerDemodReport.h"
 #include "SWGRadioClockReport.h"
 #include "SWGRemoteSourceReport.h"
 #include "SWGSSBDemodReport.h"
@@ -152,6 +153,9 @@ public:
     SWGPacketModReport* getPacketModReport();
     void setPacketModReport(SWGPacketModReport* packet_mod_report);
 
+    SWGPagerDemodReport* getPagerDemodReport();
+    void setPagerDemodReport(SWGPagerDemodReport* pager_demod_report);
+
     SWGSigMFFileSinkReport* getSigMfFileSinkReport();
     void setSigMfFileSinkReport(SWGSigMFFileSinkReport* sig_mf_file_sink_report);
 
@@ -257,6 +261,9 @@ private:
 
     SWGPacketModReport* packet_mod_report;
     bool m_packet_mod_report_isSet;
+
+    SWGPagerDemodReport* pager_demod_report;
+    bool m_pager_demod_report_isSet;
 
     SWGSigMFFileSinkReport* sig_mf_file_sink_report;
     bool m_sig_mf_file_sink_report_isSet;

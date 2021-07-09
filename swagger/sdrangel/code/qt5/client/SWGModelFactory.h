@@ -182,6 +182,8 @@
 #include "SWGPacketModActions_tx.h"
 #include "SWGPacketModReport.h"
 #include "SWGPacketModSettings.h"
+#include "SWGPagerDemodReport.h"
+#include "SWGPagerDemodSettings.h"
 #include "SWGPerseusReport.h"
 #include "SWGPerseusSettings.h"
 #include "SWGPlutoSdrInputReport.h"
@@ -1117,6 +1119,16 @@ namespace SWGSDRangel {
     }
     if(QString("SWGPacketModSettings").compare(type) == 0) {
       SWGPacketModSettings *obj = new SWGPacketModSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGPagerDemodReport").compare(type) == 0) {
+      SWGPagerDemodReport *obj = new SWGPagerDemodReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGPagerDemodSettings").compare(type) == 0) {
+      SWGPagerDemodSettings *obj = new SWGPagerDemodSettings();
       obj->init();
       return obj;
     }

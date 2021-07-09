@@ -53,6 +53,7 @@
 #include "SWGNoiseFigureSettings.h"
 #include "SWGPacketDemodSettings.h"
 #include "SWGPacketModSettings.h"
+#include "SWGPagerDemodSettings.h"
 #include "SWGRadioClockSettings.h"
 #include "SWGRemoteSinkSettings.h"
 #include "SWGRemoteSourceSettings.h"
@@ -189,6 +190,9 @@ public:
 
     SWGPacketModSettings* getPacketModSettings();
     void setPacketModSettings(SWGPacketModSettings* packet_mod_settings);
+
+    SWGPagerDemodSettings* getPagerDemodSettings();
+    void setPagerDemodSettings(SWGPagerDemodSettings* pager_demod_settings);
 
     SWGRadioClockSettings* getRadioClockSettings();
     void setRadioClockSettings(SWGRadioClockSettings* radio_clock_settings);
@@ -334,6 +338,9 @@ private:
 
     SWGPacketModSettings* packet_mod_settings;
     bool m_packet_mod_settings_isSet;
+
+    SWGPagerDemodSettings* pager_demod_settings;
+    bool m_pager_demod_settings_isSet;
 
     SWGRadioClockSettings* radio_clock_settings;
     bool m_radio_clock_settings_isSet;

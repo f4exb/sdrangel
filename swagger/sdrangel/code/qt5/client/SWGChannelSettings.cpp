@@ -98,6 +98,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_packet_demod_settings_isSet = false;
     packet_mod_settings = nullptr;
     m_packet_mod_settings_isSet = false;
+    pager_demod_settings = nullptr;
+    m_pager_demod_settings_isSet = false;
     radio_clock_settings = nullptr;
     m_radio_clock_settings_isSet = false;
     remote_sink_settings = nullptr;
@@ -200,6 +202,8 @@ SWGChannelSettings::init() {
     m_packet_demod_settings_isSet = false;
     packet_mod_settings = new SWGPacketModSettings();
     m_packet_mod_settings_isSet = false;
+    pager_demod_settings = new SWGPagerDemodSettings();
+    m_pager_demod_settings_isSet = false;
     radio_clock_settings = new SWGRadioClockSettings();
     m_radio_clock_settings_isSet = false;
     remote_sink_settings = new SWGRemoteSinkSettings();
@@ -327,6 +331,9 @@ SWGChannelSettings::cleanup() {
     if(packet_mod_settings != nullptr) { 
         delete packet_mod_settings;
     }
+    if(pager_demod_settings != nullptr) { 
+        delete pager_demod_settings;
+    }
     if(radio_clock_settings != nullptr) { 
         delete radio_clock_settings;
     }
@@ -445,6 +452,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&packet_demod_settings, pJson["PacketDemodSettings"], "SWGPacketDemodSettings", "SWGPacketDemodSettings");
     
     ::SWGSDRangel::setValue(&packet_mod_settings, pJson["PacketModSettings"], "SWGPacketModSettings", "SWGPacketModSettings");
+    
+    ::SWGSDRangel::setValue(&pager_demod_settings, pJson["PagerDemodSettings"], "SWGPagerDemodSettings", "SWGPagerDemodSettings");
     
     ::SWGSDRangel::setValue(&radio_clock_settings, pJson["RadioClockSettings"], "SWGRadioClockSettings", "SWGRadioClockSettings");
     
@@ -590,6 +599,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((packet_mod_settings != nullptr) && (packet_mod_settings->isSet())){
         toJsonValue(QString("PacketModSettings"), packet_mod_settings, obj, QString("SWGPacketModSettings"));
+    }
+    if((pager_demod_settings != nullptr) && (pager_demod_settings->isSet())){
+        toJsonValue(QString("PagerDemodSettings"), pager_demod_settings, obj, QString("SWGPagerDemodSettings"));
     }
     if((radio_clock_settings != nullptr) && (radio_clock_settings->isSet())){
         toJsonValue(QString("RadioClockSettings"), radio_clock_settings, obj, QString("SWGRadioClockSettings"));
@@ -981,6 +993,16 @@ SWGChannelSettings::setPacketModSettings(SWGPacketModSettings* packet_mod_settin
     this->m_packet_mod_settings_isSet = true;
 }
 
+SWGPagerDemodSettings*
+SWGChannelSettings::getPagerDemodSettings() {
+    return pager_demod_settings;
+}
+void
+SWGChannelSettings::setPagerDemodSettings(SWGPagerDemodSettings* pager_demod_settings) {
+    this->pager_demod_settings = pager_demod_settings;
+    this->m_pager_demod_settings_isSet = true;
+}
+
 SWGRadioClockSettings*
 SWGChannelSettings::getRadioClockSettings() {
     return radio_clock_settings;
@@ -1209,6 +1231,9 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(packet_mod_settings && packet_mod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(pager_demod_settings && pager_demod_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(radio_clock_settings && radio_clock_settings->isSet()){
