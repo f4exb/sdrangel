@@ -79,6 +79,8 @@ ChannelSettings:
       $ref: "http://swgserver:8081/api/swagger/include/PacketDemod.yaml#/PacketDemodSettings"
     PacketModSettings:
       $ref: "http://swgserver:8081/api/swagger/include/PacketMod.yaml#/PacketModSettings"
+    PagerDemodSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/PagerDemod.yaml#/PagerDemodSettings"
     RadioClockSettings:
       $ref: "http://swgserver:8081/api/swagger/include/RadioClock.yaml#/RadioClockSettings"
     RemoteSinkSettings:

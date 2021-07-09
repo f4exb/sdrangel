@@ -54,6 +54,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelURIToSettingsKey = {
     {"sdrangel.channel.localsink", "LocalSinkSettings"}, // remap
     {"sdrangel.channel.localsource", "LocalSourceSettings"},
     {"sdrangel.channel.packetdemod", "PacketDemodSettings"},
+    {"sdrangel.channel.pagerdemod", "PagerDemodSettings"},
     {"sdrangel.channeltx.modpacket", "PacketModSettings"},
     {"sdrangel.channeltx.mod802.15.4", "IEEE_802_15_4_ModSettings"},
     {"sdrangel.channel.radioclock", "RadioClockSettings"},
@@ -152,6 +153,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelTypeToSettingsKey = {
     {"NoiseFigure", "NoiseFigureSettings"},
     {"PacketDemod", "PacketDemodSettings"},
     {"PacketMod", "PacketModSettings"},
+    {"PagerDemod", "PagerDemodSettings"},
     {"LocalSink", "LocalSinkSettings"},
     {"LocalSource", "LocalSourceSettings"},
     {"RadioClock", "RadioClockSettings"},
