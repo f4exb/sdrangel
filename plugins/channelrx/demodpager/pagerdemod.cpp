@@ -145,17 +145,13 @@ bool PagerDemod::handleMessage(const Message& cmd)
         // Forward via UDP
         if (m_settings.m_udpEnabled)
         {
-            QString message = QString("%1%2%3%4%5%6%7%8%9").arg(
-                                report.getDateTime().toString(),
-                                '\0',
-                                QString::number(report.getAddress()),
-                                '\0',
-                                QString::number(report.getFunctionBits()),
-                                '\0',
-                                report.getAlphaMessage(),
-                                '\0',
-                                report.getNumericMessage());
-            m_udpSocket.writeDatagram(message.toLatin1(), message.size(),
+            QByteArray message;
+            message.append(report.getDateTime().toString().toLatin1());
+            message.append(QString::number(report.getAddress()).toLatin1());
+            message.append(QString::number(report.getFunctionBits()).toLatin1());
+            message.append(report.getAlphaMessage().toLatin1());
+            message.append(report.getNumericMessage().toLatin1());
+            m_udpSocket.writeDatagram(message.data(), message.size(),
                                 QHostAddress(m_settings.m_udpAddress), m_settings.m_udpPort);
         }
 

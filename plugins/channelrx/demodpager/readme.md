@@ -32,10 +32,10 @@ Adjusts the expected frequency deviation in 0.1 kHz steps from 1 to 6 kHz. POCSA
 
 <h3>6: Mod - Modulation</h3>
 
-Species the pager modulation. Currently only POCSAG is supported.
+Specifies the pager modulation. Currently only POCSAG is supported.
 
 POCSAG uses FSK with 4.5kHz frequency shift, at 512, 1200 or 2400 baud.
-High frequency is typically 0, with low 1, but occasionaly this appears to be reversed, so the demodulator supports either.
+High frequency is typically 0, with low 1, but occasionally this appears to be reversed, so the demodulator supports either.
 Data is framed as specified in ITU-R M.584-2: https://www.itu.int/dms_pubrec/itu-r/rec/m/R-REC-M.584-2-199711-I!!PDF-E.pdf
 
 <h3>7: Baud</h3>
@@ -66,7 +66,7 @@ Pressing this button clears all messages from the table.
 
 When checked, received messages are forwarded to the specified UDP address (12) and port (13).
 
-The messages are forwarded as null termiated ASCII strings, in the format: data time address function alpha numeric
+The messages are forwarded as null terminated ASCII strings, in the format: data time address function alpha numeric
 
 <h3>12: UDP address</h3>
 
@@ -92,4 +92,4 @@ The received messages table displays each pager message received.
 * Even PE - Number of even parity errors detected in the code words of the message.
 * BCH PE - Number of uncorrectable BCH parity errors detected in the code words of the message.
 
-Right clicking on the table header allows you to select which columns to show. The columns can be reorderd by left clicking and dragging the column header. Right clicking on an item in the table allows you to copy the value to the clipboard.
+Right clicking on the table header allows you to select which columns to show. The columns can be reordered by left clicking and dragging the column header. Right clicking on an item in the table allows you to copy the value to the clipboard.

@@ -136,7 +136,6 @@ quint32 PagerDemodSink::reverse(quint32 x)
 quint32 PagerDemodSink::bchEncode(const quint32 cw)
 {
 	quint32 bit = 0;
-	quint32 parity = 0;
 	quint32 localCW = cw & 0xFFFFF800;	// Mask off BCH parity and even parity bits
 	quint32 cwE = localCW;
 
@@ -285,7 +284,6 @@ void PagerDemodSink::decodeBatch()
             else if (addressCodeWord)
             {
                 // Address
-                int checkBits = (m_codeWords[i] >> 1) & 0x3f;
                 m_functionBits = (m_codeWords[i] >> 11) & 0x3;
                 int addressBits = (m_codeWords[i] >> 13) & 0x3ffff;
                 m_address = (addressBits << 3) | frame;
@@ -300,7 +298,6 @@ void PagerDemodSink::decodeBatch()
             else
             {
                 // Message - decode as both numeric and ASCII - not all operators use functionBits to indidcate encoding
-                int checkBits = (m_codeWords[i] >> 1) & 0x3f;
                 int messageBits = (m_codeWords[i] >> 11) & 0xfffff;
                 if (parityError) {
                     m_parityErrors++;
@@ -441,8 +438,8 @@ void PagerDemodSink::processOneSample(Complex &ci)
                 else if (popcount(m_bits ^ PAGERDEMOD_POCSAG_SYNCCODE_INV) >= 29)
                 {
                     quint32 correctedCW;
+                    if (bchDecode(~m_bits, correctedCW) && (correctedCW == PAGERDEMOD_POCSAG_SYNCCODE))
                     {
-                        qDebug() << "Corrected inverted sync codeword";
                         m_gotSOP = true;
                         m_inverted = true;
                     }
