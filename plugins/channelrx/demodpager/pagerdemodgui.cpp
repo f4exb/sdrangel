@@ -314,6 +314,7 @@ void PagerDemodGUI::on_fmDev_valueChanged(int value)
 
 void PagerDemodGUI::on_baud_currentIndexChanged(int index)
 {
+    (void)index;
     m_settings.m_baud = ui->baud->currentText().toInt();
     applySettings();
 }
