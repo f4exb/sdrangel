@@ -130,7 +130,7 @@ void GLScopeGUI::setBuddies(MessageQueue* messageQueue, ScopeVis* scopeVis, GLSc
 
 void GLScopeGUI::setSampleRate(int sampleRate)
 {
-    m_sampleRate = sampleRate;
+    onScopeSampleRateChanged(sampleRate);
 }
 
 void GLScopeGUI::onScopeSampleRateChanged(int sampleRate)

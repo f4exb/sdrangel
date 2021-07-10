@@ -231,6 +231,7 @@ bool ChannelAnalyzerGUI::handleMessage(const Message& message)
     {
         DSPSignalNotification& cmd = (DSPSignalNotification&) message;
         m_basebandSampleRate = cmd.getSampleRate();
+        qDebug("ChannelAnalyzerGUI::handleMessage: DSPSignalNotification: m_basebandSampleRate: %d", m_basebandSampleRate);
         setSinkSampleRate();
     }
 
@@ -470,6 +471,8 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *device
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_channelAnalyzer = (ChannelAnalyzer*) rxChannel;
+    m_basebandSampleRate = m_channelAnalyzer->getChannelSampleRate();
+    qDebug("ChannelAnalyzerGUI::ChannelAnalyzerGUI: m_basebandSampleRate: %d", m_basebandSampleRate);
     m_spectrumVis = m_channelAnalyzer->getSpectrumVis();
 	m_spectrumVis->setGLSpectrum(ui->glSpectrum);
     m_scopeVis = m_channelAnalyzer->getScopeVis();
@@ -557,6 +560,7 @@ void ChannelAnalyzerGUI::setSinkSampleRate()
 	ui->sinkSampleRateText->setText(tr("%1 kS/s").arg(s));
 
 	m_scopeVis->setLiveRate(sinkSampleRate == 0 ? 48000 : sinkSampleRate);
+    ui->scopeGUI->setSampleRate(sinkSampleRate == 0 ? 48000 : sinkSampleRate);
 }
 
 void ChannelAnalyzerGUI::setFiltersUIBoundaries()

@@ -23,6 +23,7 @@
 
 #include "device/deviceapi.h"
 #include "dsp/dspcommands.h"
+#include "dsp/devicesamplesource.h"
 #include "chanalyzer.h"
 
 MESSAGE_CLASS_DEFINITION(ChannelAnalyzer::MsgConfigureChannelAnalyzer, Message)
@@ -38,7 +39,7 @@ ChannelAnalyzer::ChannelAnalyzer(DeviceAPI *deviceAPI) :
 {
     qDebug("ChannelAnalyzer::ChannelAnalyzer");
     setObjectName(m_channelId);
-
+    getChannelSampleRate();
     m_basebandSink = new ChannelAnalyzerBaseband();
     m_basebandSink->moveToThread(&m_thread);
 
@@ -62,6 +63,18 @@ ChannelAnalyzer::~ChannelAnalyzer()
     qDebug("ChannelAnalyzer::~ChannelAnalyzer: done");
 }
 
+int ChannelAnalyzer::getChannelSampleRate()
+{
+    DeviceSampleSource *source = m_deviceAPI->getSampleSource();
+
+    if (source) {
+        m_basebandSampleRate = source->getSampleRate();
+    }
+
+    qDebug("ChannelAnalyzer::getChannelSampleRate: %d", m_basebandSampleRate);
+    return m_basebandSampleRate;
+}
+
 void ChannelAnalyzer::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
     (void) positiveOnly;
@@ -82,6 +95,12 @@ void ChannelAnalyzer::start()
     ChannelAnalyzerBaseband::MsgConfigureChannelAnalyzerBaseband *msg =
         ChannelAnalyzerBaseband::MsgConfigureChannelAnalyzerBaseband::create(m_settings, true);
     m_basebandSink->getInputMessageQueue()->push(msg);
+
+    if (getMessageQueueToGUI())
+    {
+        DSPSignalNotification *notifToGUI = new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency);
+        getMessageQueueToGUI()->push(notifToGUI);
+    }
 }
 
 void ChannelAnalyzer::stop()

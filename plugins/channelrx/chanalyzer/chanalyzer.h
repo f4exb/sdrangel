@@ -63,8 +63,7 @@ public:
     SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
     ScopeVis *getScopeVis() { return &m_scopeVis; }
     void setScopeVis(ScopeVis *scopeVis) { m_basebandSink->setScopeVis(scopeVis); }
-
-    int getChannelSampleRate() const { return m_basebandSink->getChannelSampleRate(); }
+    int getChannelSampleRate();
     int getDecimation() const { return 1<<m_settings.m_log2Decim; }
 	double getMagSq() const { return m_basebandSink->getMagSq(); }
 	double getMagSqAvg() const { return m_basebandSink->getMagSqAvg(); }
