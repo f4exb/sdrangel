@@ -64,6 +64,7 @@ ScopeVis::ScopeVis() :
     m_traceDiscreteMemory(GLScopeSettings::m_nbTraceMemories),
     m_freeRun(true),
     m_maxTraceDelay(0),
+    m_mutex(QMutex::Recursive),
     m_triggerOneShot(false),
     m_triggerWaitForReset(false),
     m_currentTraceMemoryIndex(0)
@@ -943,6 +944,7 @@ bool ScopeVis::handleMessage(const Message& message)
 {
     if (DSPSignalNotification::match(message))
     {
+        QMutexLocker configLocker(&m_mutex);
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
         setLiveRate(notif.getSampleRate());
         qDebug() << "ScopeVis::handleMessage: DSPSignalNotification: m_sampleRate: " << m_sampleRate;
@@ -997,6 +999,7 @@ bool ScopeVis::handleMessage(const Message& message)
     }
     else if (MsgScopeVisFocusOnTrigger::match(message))
     {
+        QMutexLocker configLocker(&m_mutex);
         MsgScopeVisFocusOnTrigger& conf = (MsgScopeVisFocusOnTrigger&) message;
         uint32_t triggerIndex = conf.getTriggerIndex();
         qDebug() << "ScopeVis::handleMessage: MsgScopeVisFocusOnTrigger: " << triggerIndex;
@@ -1040,6 +1043,7 @@ bool ScopeVis::handleMessage(const Message& message)
     }
     else if (MsgScopeVisFocusOnTrace::match(message))
     {
+        QMutexLocker configLocker(&m_mutex);
         MsgScopeVisFocusOnTrace& conf = (MsgScopeVisFocusOnTrace&) message;
         uint32_t traceIndex = conf.getTraceIndex();
         qDebug() << "ScopeVis::handleMessage: MsgScopeVisFocusOnTrace: " << traceIndex;
@@ -1048,6 +1052,7 @@ bool ScopeVis::handleMessage(const Message& message)
     }
     else if (MsgScopeVisNGOneShot::match(message))
     {
+        QMutexLocker configLocker(&m_mutex);
         MsgScopeVisNGOneShot& conf = (MsgScopeVisNGOneShot&) message;
         bool oneShot = conf.getOneShot();
         qDebug() << "ScopeVis::handleMessage: MsgScopeVisNGOneShot: oneShot:" << oneShot;
@@ -1061,6 +1066,7 @@ bool ScopeVis::handleMessage(const Message& message)
     }
     else if (MsgScopeVisNGMemoryTrace::match(message))
     {
+        QMutexLocker configLocker(&m_mutex);
         MsgScopeVisNGMemoryTrace& conf = (MsgScopeVisNGMemoryTrace&) message;
         uint32_t memoryIndex = conf.getMemoryIndex();
         qDebug() << "ScopeVis::handleMessage: MsgScopeVisNGMemoryTrace: " << memoryIndex;
