@@ -79,7 +79,7 @@ QByteArray GLScopeSettings::serialize() const
     s.writeS32(2, m_traceIntensity);
     s.writeS32(3, m_gridIntensity);
     s.writeS32(4, m_time);
-    s.writeS32(5, m_timeOfs);
+    // s.writeS32(5, m_timeOfs);
     s.writeS32(6, m_traceLen);
 
     std::vector<TraceData>::const_iterator traceDataIt = m_tracesData.begin();
@@ -147,7 +147,7 @@ bool GLScopeSettings::deserialize(const QByteArray& data)
         d.readS32(2, &m_traceIntensity, 50);
         d.readS32(3, &m_gridIntensity, 10);
         d.readS32(4, &m_time, 1);
-        d.readS32(5, &m_timeOfs, 0);
+        // d.readS32(5, &m_timeOfs, 0);
         d.readS32(6, &m_traceLen, 1);
         d.readS32(201, &m_trigPre, 0);
 

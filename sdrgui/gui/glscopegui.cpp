@@ -175,7 +175,7 @@ QByteArray GLScopeGUI::serialize() const
     s.writeS32(2, ui->traceIntensity->value());
     s.writeS32(3, ui->gridIntensity->value());
     s.writeS32(4, ui->time->value());
-    s.writeS32(5, ui->timeOfs->value());
+    // s.writeS32(5, ui->timeOfs->value());
     s.writeS32(6, ui->traceLen->value());
 
     // second row - by trace
@@ -248,8 +248,8 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
         ui->gridIntensity->setValue(intValue);
         d.readS32(4, &intValue, 1);
         ui->time->setValue(intValue);
-        d.readS32(5, &intValue, 0);
-        ui->timeOfs->setValue(intValue);
+        // d.readS32(5, &intValue, 0);
+        // ui->timeOfs->setValue(intValue);
         d.readS32(6, &intValue, 1);
         ui->traceLen->setValue(intValue);
 
