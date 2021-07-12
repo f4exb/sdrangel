@@ -31,7 +31,7 @@
 RadioClockSink::RadioClockSink(RadioClock *radioClock) :
         m_scopeSink(nullptr),
         m_radioClock(radioClock),
-        m_channelSampleRate(RADIOCLOCK_CHANNEL_SAMPLE_RATE),
+        m_channelSampleRate(RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE),
         m_channelFrequencyOffset(0),
         m_magsq(0.0),
         m_magsqSum(0.0),
@@ -48,7 +48,7 @@ RadioClockSink::RadioClockSink(RadioClock *radioClock) :
         m_second(0),
         m_zeroCount(0)
 {
-    m_phaseDiscri.setFMScaling(RADIOCLOCK_CHANNEL_SAMPLE_RATE / (2.0f * 20.0/M_PI));
+    m_phaseDiscri.setFMScaling(RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE / (2.0f * 20.0/M_PI));
     applySettings(m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 }
@@ -177,10 +177,10 @@ void RadioClockSink::dcf77()
     // Look for minute marker - 59th second carrier is held high
     if ((m_data == 0) && (m_prevData == 1))
     {
-        if (   (m_highCount <= RADIOCLOCK_CHANNEL_SAMPLE_RATE * 2)
-            && (m_highCount >= RADIOCLOCK_CHANNEL_SAMPLE_RATE * 1.6)
-            && (m_lowCount <= RADIOCLOCK_CHANNEL_SAMPLE_RATE * 0.3)
-            && (m_lowCount >= RADIOCLOCK_CHANNEL_SAMPLE_RATE * 0.1)
+        if (   (m_highCount <= RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE * 2)
+            && (m_highCount >= RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE * 1.6)
+            && (m_lowCount <= RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE * 0.3)
+            && (m_lowCount >= RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE * 0.1)
            )
         {
             qDebug() << "RadioClockSink::dcf77 - Minute marker: (low " << m_lowCount << " high " << m_highCount << ") prev period " << m_periodCount;
@@ -318,8 +318,8 @@ void RadioClockSink::tdf(Complex &ci)
     // Look for minute marker - 59th second is not phase modulated
     if ((m_data == 1) && (m_prevData == 0))
     {
-        if (   (m_zeroCount <= RADIOCLOCK_CHANNEL_SAMPLE_RATE * 2)
-            && (m_zeroCount >= RADIOCLOCK_CHANNEL_SAMPLE_RATE * 1)
+        if (   (m_zeroCount <= RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE * 2)
+            && (m_zeroCount >= RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE * 1)
            )
         {
             qDebug() << "RadioClockSink::tdf - Minute marker: (zero " << m_zeroCount << ") prev period " << m_periodCount;
@@ -455,10 +455,10 @@ void RadioClockSink::msf60()
     // Look for minute marker - 500ms low, then 500ms high
     if ((m_data == 0) && (m_prevData == 1))
     {
-        if (   (m_highCount <= RADIOCLOCK_CHANNEL_SAMPLE_RATE * 0.6)
-            && (m_highCount >= RADIOCLOCK_CHANNEL_SAMPLE_RATE * 0.4)
-            && (m_lowCount <= RADIOCLOCK_CHANNEL_SAMPLE_RATE * 0.6)
-            && (m_lowCount >= RADIOCLOCK_CHANNEL_SAMPLE_RATE * 0.4)
+        if (   (m_highCount <= RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE * 0.6)
+            && (m_highCount >= RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE * 0.4)
+            && (m_lowCount <= RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE * 0.6)
+            && (m_lowCount >= RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE * 0.4)
            )
         {
             qDebug() << "RadioClockSink::msf60 - Minute marker: (low " << m_lowCount << " high " << m_highCount << ") prev period " << m_periodCount;
@@ -623,7 +623,7 @@ void RadioClockSink::applyChannelSettings(int channelSampleRate, int channelFreq
     if ((m_channelSampleRate != channelSampleRate) || force)
     {
         m_interpolator.create(16, channelSampleRate, m_settings.m_rfBandwidth / 2.2);
-        m_interpolatorDistance = (Real) channelSampleRate / (Real) RADIOCLOCK_CHANNEL_SAMPLE_RATE;
+        m_interpolatorDistance = (Real) channelSampleRate / (Real) RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE;
         m_interpolatorDistanceRemain = m_interpolatorDistance;
     }
 
@@ -642,7 +642,7 @@ void RadioClockSink::applySettings(const RadioClockSettings& settings, bool forc
     if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
     {
         m_interpolator.create(16, m_channelSampleRate, settings.m_rfBandwidth / 2.2);
-        m_interpolatorDistance = (Real) m_channelSampleRate / (Real) RADIOCLOCK_CHANNEL_SAMPLE_RATE;
+        m_interpolatorDistance = (Real) m_channelSampleRate / (Real) RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE;
         m_interpolatorDistanceRemain = m_interpolatorDistance;
     }
 

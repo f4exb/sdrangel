@@ -40,8 +40,6 @@
 #include <iostream>
 #include <fstream>
 
-#define RADIOCLOCK_CHANNEL_SAMPLE_RATE 1000
-
 class ChannelAPI;
 class RadioClock;
 class ScopeVis;
@@ -113,7 +111,7 @@ private:
 
     MovingAverageUtil<Real, double, 40> m_movingAverage;    //!< Moving average has sharpest step response of LPFs
 
-    MovingAverageUtil<Real, double, RADIOCLOCK_CHANNEL_SAMPLE_RATE> m_thresholdMovingAverage;  // Average over 1 second
+    MovingAverageUtil<Real, double, RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE> m_thresholdMovingAverage;  // Average over 1 second
 
     int m_data;             //!< Demod data before clocking
     int m_prevData;         //!< Previous value of m_data

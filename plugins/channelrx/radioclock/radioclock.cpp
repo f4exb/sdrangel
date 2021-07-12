@@ -38,6 +38,7 @@
 #include "util/db.h"
 #include "maincore.h"
 #include "radioclocksink.h"
+#include "radioclocksettings.h"
 
 MESSAGE_CLASS_DEFINITION(RadioClock::MsgConfigureRadioClock, Message)
 MESSAGE_CLASS_DEFINITION(RadioClock::MsgDateTime, Message)
@@ -366,7 +367,7 @@ void RadioClock::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respon
     getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
 
     response.getRadioClockReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
-    response.getRadioClockReport()->setChannelSampleRate(RADIOCLOCK_CHANNEL_SAMPLE_RATE);
+    response.getRadioClockReport()->setChannelSampleRate(RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE);
     response.getRadioClockReport()->setDate(new QString(m_dateTime.date().toString()));
     response.getRadioClockReport()->setTime(new QString(m_dateTime.time().toString()));
 }

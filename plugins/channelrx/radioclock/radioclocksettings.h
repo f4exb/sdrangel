@@ -52,6 +52,7 @@ struct RadioClockSettings
     uint16_t m_reverseAPIDeviceIndex;
     uint16_t m_reverseAPIChannelIndex;
     Serializable *m_scopeGUI;
+    static const int RADIOCLOCK_CHANNEL_SAMPLE_RATE = 1000;
 
     RadioClockSettings();
     void resetToDefaults();

@@ -23,6 +23,7 @@
 #include "dsp/downchannelizer.h"
 
 #include "radioclockbaseband.h"
+#include "radioclocksettings.h"
 
 MESSAGE_CLASS_DEFINITION(RadioClockBaseband::MsgConfigureRadioClockBaseband, Message)
 
@@ -159,7 +160,7 @@ void RadioClockBaseband::applySettings(const RadioClockSettings& settings, bool 
 {
     if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
     {
-        m_channelizer->setChannelization(RADIOCLOCK_CHANNEL_SAMPLE_RATE, settings.m_inputFrequencyOffset);
+        m_channelizer->setChannelization(RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE, settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
     }
 
