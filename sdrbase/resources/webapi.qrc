@@ -71,6 +71,7 @@
         <file>webapi/doc/swagger/include/NoiseFigure.yaml</file>
         <file>webapi/doc/swagger/include/PacketDemod.yaml</file>
         <file>webapi/doc/swagger/include/PacketMod.yaml</file>
+        <file>webapi/doc/swagger/include/PagerDemod.yaml</file>
         <file>webapi/doc/swagger/include/Perseus.yaml</file>
         <file>webapi/doc/swagger/include/PERTester.yaml</file>
         <file>webapi/doc/swagger/include/PlutoSdr.yaml</file>
