@@ -639,6 +639,7 @@ private:
             m_traceBackBuffersStreams(nbStreams),
             m_memSize(size),
             m_currentMemIndex(0),
+            m_maxMemIndex(0),
             m_traceSize(0)
     	{
             for (unsigned int s = 0; s < m_traceBackBuffersStreams.size(); s++) {
@@ -691,12 +692,21 @@ private:
             }
 
     	    m_currentMemIndex = nextMemIndex;
+
+            if (m_currentMemIndex > m_maxMemIndex) {
+                m_maxMemIndex = m_currentMemIndex;
+            }
     	}
 
     	/**
     	 * Return current memory index
     	 */
     	uint32_t currentIndex() const { return m_currentMemIndex; }
+
+    	/**
+    	 * Return max memory index processed
+    	 */
+    	uint32_t maxIndex() const { return m_maxMemIndex; }
 
     	/**
     	 * Serializer
@@ -887,6 +897,7 @@ private:
         std::vector<TraceBackBufferStream> m_traceBackBuffersStreams;
         uint32_t m_memSize;
         uint32_t m_currentMemIndex;
+        uint32_t m_maxMemIndex;
         uint32_t m_traceSize;
 
         TraceBackBuffer& current(uint32_t streamIndex = 0) { //!< Return trace at current memory position

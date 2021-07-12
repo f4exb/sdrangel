@@ -228,6 +228,7 @@ void ScopeVis::configure(
 void ScopeVis::addTrace(const GLScopeSettings::TraceData& traceData)
 {
     qDebug() << "ScopeVis::addTrace:"
+            << " m_streamIndex: " << traceData.m_streamIndex
             << " m_amp: " << traceData.m_amp
             << " m_ofs: " << traceData.m_ofs
             << " m_traceDelay: " << traceData.m_traceDelay;
@@ -243,6 +244,7 @@ void ScopeVis::changeTrace(const GLScopeSettings::TraceData& traceData, uint32_t
 {
     qDebug() << "ScopeVis::changeTrace:"
             << " trace: " << traceIndex
+            << " m_streamIndex: " << traceData.m_streamIndex
             << " m_amp: " << traceData.m_amp
             << " m_ofs: " << traceData.m_ofs
             << " m_traceDelay: " << traceData.m_traceDelay;
@@ -475,7 +477,7 @@ void ScopeVis::feed(const std::vector<ComplexVector::const_iterator>& vbegin, in
         m_triggerLocation = nbSamples;
     }
 
-    ComplexVector::const_iterator begin(vbegin[0]);
+    // ComplexVector::const_iterator begin(vbegin[0]);
     //const SampleVector::const_iterator end = vbegin[0] + nbSamples;
     int triggerPointToEnd;
     int remainder = nbSamples;
@@ -515,7 +517,7 @@ void ScopeVis::feed(const std::vector<ComplexVector::const_iterator>& vbegin, in
 
 void ScopeVis::processMemoryTrace()
 {
-    if ((m_currentTraceMemoryIndex > 0) && (m_currentTraceMemoryIndex < GLScopeSettings::m_nbTraceMemories))
+    if ((m_currentTraceMemoryIndex > 0) && (m_currentTraceMemoryIndex <= m_traceDiscreteMemory.maxIndex()))
     {
         int traceMemoryIndex = m_traceDiscreteMemory.currentIndex() - m_currentTraceMemoryIndex; // actual index in memory bank
 
@@ -642,6 +644,7 @@ void ScopeVis::processTrace(const std::vector<ComplexVector::const_iterator>& vc
             for (auto begin : vbegin) {
                 ++begin;
             }
+
             ++processed;
             --firstRemainder;
         } // look for trigger
@@ -1019,7 +1022,7 @@ bool ScopeVis::handleMessage(const Message& message)
         QMutexLocker configLocker(&m_mutex);
         MsgScopeVisChangeTrace& conf = (MsgScopeVisChangeTrace&) message;
         uint32_t traceIndex = conf.getTraceIndex();
-        qDebug() << "ScopeVis::handleMessage: MsgScopeVisRemoveTrace: " << traceIndex;
+        qDebug() << "ScopeVis::handleMessage: MsgScopeVisChangeTrace: " << traceIndex;
         changeTrace(conf.getTraceData(), traceIndex);
         return true;
     }
