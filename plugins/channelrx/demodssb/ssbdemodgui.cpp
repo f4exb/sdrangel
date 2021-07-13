@@ -44,6 +44,8 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data))
     {
+        ui->BW->setMaximum(480);
+        ui->lowCut->setMaximum(480);
         displaySettings();
         applyBandwidths(m_settings.m_spanLog2, true); // does applySettings(true)
         return true;
@@ -51,6 +53,8 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
     else
     {
         m_settings.resetToDefaults();
+        ui->BW->setMaximum(480);
+        ui->lowCut->setMaximum(480);
         displaySettings();
         applyBandwidths(m_settings.m_spanLog2, true); // does applySettings(true)
         return false;
@@ -338,6 +342,8 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_iconDSBLSB.addPixmap(QPixmap("://dsb.png"), QIcon::Normal, QIcon::On);
     m_iconDSBLSB.addPixmap(QPixmap("://lsb.png"), QIcon::Normal, QIcon::Off);
 
+    ui->BW->setMaximum(480);
+    ui->lowCut->setMaximum(480);
 	displaySettings();
 	applyBandwidths(m_settings.m_spanLog2, true); // does applySettings(true)
 }
