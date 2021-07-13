@@ -51,6 +51,10 @@ RadioClockSink::RadioClockSink(RadioClock *radioClock) :
     m_phaseDiscri.setFMScaling(RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE / (2.0f * 20.0/M_PI));
     applySettings(m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
+
+    for (int i = 0; i < 7; i++) {
+        m_sampleBuffer[i].resize(1);
+    }
 }
 
 RadioClockSink::~RadioClockSink()
@@ -66,22 +70,21 @@ void RadioClockSink::sampleToScope(Complex sample)
 {
     if (m_scopeSink)
     {
-        ComplexVector m_sampleBuffer[7];
-        m_sampleBuffer[0].push_back(sample);
-        m_sampleBuffer[1].push_back(Complex(m_magsq, 0.0f));
-        m_sampleBuffer[2].push_back(Complex(m_threshold, 0.0f));
-        m_sampleBuffer[3].push_back(Complex(m_fmDemodMovingAverage.asDouble(), 0.0f));
-        m_sampleBuffer[4].push_back(Complex(m_data, 0.0f));
-        m_sampleBuffer[5].push_back(Complex(m_sample, 0.0f));
-        m_sampleBuffer[6].push_back(Complex(m_gotMinuteMarker, 0.0f));
+        m_sampleBuffer[0][0] = sample;
+        m_sampleBuffer[1][0] = Complex(m_magsq, 0.0f);
+        m_sampleBuffer[2][0] = Complex(m_threshold, 0.0f);
+        m_sampleBuffer[3][0] = Complex(m_fmDemodMovingAverage.asDouble(), 0.0f);
+        m_sampleBuffer[4][0] = Complex(m_data, 0.0f);
+        m_sampleBuffer[5][0] = Complex(m_sample, 0.0f);
+        m_sampleBuffer[6][0] = Complex(m_gotMinuteMarker, 0.0f);
+
         std::vector<ComplexVector::const_iterator> vbegin;
+
         for (int i = 0; i < 7; i++) {
             vbegin.push_back(m_sampleBuffer[i].begin());
         }
-        m_scopeSink->feed(vbegin, m_sampleBuffer[0].end() - m_sampleBuffer[0].begin());
-        for (int i = 0; i < 7; i++) {
-            m_sampleBuffer[i].clear();
-        }
+
+        m_scopeSink->feed(vbegin, 1);
     }
 }
 
