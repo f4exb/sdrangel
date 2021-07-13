@@ -252,6 +252,7 @@ RadioClockGUI::RadioClockGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     ui->glScope->connectTimer(MainCore::instance()->getMasterTimer());
     ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
     ui->scopeGUI->setStreams(QStringList({"IQ", "MagSq", "TH", "FM", "Data", "Samp", "GotMM"}));
+    ui->scopeGUI->setSampleRate(RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE);
 
     ui->status->setText("Looking for minute marker");
 
