@@ -46,14 +46,15 @@ RadioClockSink::RadioClockSink(RadioClock *radioClock) :
         m_periodCount(0),
         m_gotMinuteMarker(false),
         m_second(0),
-        m_zeroCount(0)
+        m_zeroCount(0),
+        m_sampleBufferIndex(0)
 {
     m_phaseDiscri.setFMScaling(RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE / (2.0f * 20.0/M_PI));
     applySettings(m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 
     for (int i = 0; i < 7; i++) {
-        m_sampleBuffer[i].resize(1);
+        m_sampleBuffer[i].resize(m_sampleBufferSize);
     }
 }
 
@@ -70,21 +71,26 @@ void RadioClockSink::sampleToScope(Complex sample)
 {
     if (m_scopeSink)
     {
-        m_sampleBuffer[0][0] = sample;
-        m_sampleBuffer[1][0] = Complex(m_magsq, 0.0f);
-        m_sampleBuffer[2][0] = Complex(m_threshold, 0.0f);
-        m_sampleBuffer[3][0] = Complex(m_fmDemodMovingAverage.asDouble(), 0.0f);
-        m_sampleBuffer[4][0] = Complex(m_data, 0.0f);
-        m_sampleBuffer[5][0] = Complex(m_sample, 0.0f);
-        m_sampleBuffer[6][0] = Complex(m_gotMinuteMarker, 0.0f);
+        m_sampleBuffer[0][m_sampleBufferIndex] = sample;
+        m_sampleBuffer[1][m_sampleBufferIndex] = Complex(m_magsq, 0.0f);
+        m_sampleBuffer[2][m_sampleBufferIndex] = Complex(m_threshold, 0.0f);
+        m_sampleBuffer[3][m_sampleBufferIndex] = Complex(m_fmDemodMovingAverage.asDouble(), 0.0f);
+        m_sampleBuffer[4][m_sampleBufferIndex] = Complex(m_data, 0.0f);
+        m_sampleBuffer[5][m_sampleBufferIndex] = Complex(m_sample, 0.0f);
+        m_sampleBuffer[6][m_sampleBufferIndex] = Complex(m_gotMinuteMarker, 0.0f);
+        m_sampleBufferIndex++;
 
-        std::vector<ComplexVector::const_iterator> vbegin;
+        if (m_sampleBufferIndex == m_sampleBufferSize)
+        {
+            std::vector<ComplexVector::const_iterator> vbegin;
 
-        for (int i = 0; i < 7; i++) {
-            vbegin.push_back(m_sampleBuffer[i].begin());
+            for (int i = 0; i < 7; i++) {
+                vbegin.push_back(m_sampleBuffer[i].begin());
+            }
+
+            m_scopeSink->feed(vbegin, m_sampleBufferSize);
+            m_sampleBufferIndex = 0;
         }
-
-        m_scopeSink->feed(vbegin, 1);
     }
 }
 

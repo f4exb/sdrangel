@@ -139,6 +139,8 @@ private:
     MovingAverageUtil<Real, double, 10> m_fmDemodMovingAverage;
     int m_bits[4];
     ComplexVector m_sampleBuffer[7];
+    static const int m_sampleBufferSize = 60;
+    int m_sampleBufferIndex;
 
     void processOneSample(Complex &ci);
     MessageQueue *getMessageQueueToChannel() { return m_messageQueueToChannel; }
