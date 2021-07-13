@@ -1,3 +1,20 @@
+sdrangel (6.16.0-1) unstable; urgency=medium
+
+  * New Pager demodulator. PR #960
+  * AIS feature: use course if heading is not available
+  * Satellite Tracker: fix table to accomodate Doppler tracking. PR #951. Issue #840
+  * SDRPlayV3: wait for some commands completion. PR #954
+  * Spectrum Markers: make them stick to frequency, power and time distance
+  * Fix handling of Satellite Tracker device settings. PR #959. Issue #953.
+  * Channel Analyzer / Scope: fixed sample rate handling. Fixes #956
+  * ScopeVis: added missing mutex locks in message handling. May fix #955
+  * ScopeVis: do not save / restore time offset in the settings
+  * ScopeVis: fixed multiple stream input. Fixes #872
+  * RadioClock and Pager: some optimizations
+  * SSB demod: fixed bandwidth setting. Fixes #957
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 13 Jul 2021 20:20:58 +0200
+
 sdrangel (6.15.1-1) unstable; urgency=medium
 
   * Demod Analyzer: fixed sample rate handling. Fixes #931
