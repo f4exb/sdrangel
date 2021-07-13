@@ -34,6 +34,7 @@ RadioClockBaseband::RadioClockBaseband(RadioClock *radioClock) :
 {
     qDebug("RadioClockBaseband::RadioClockBaseband");
 
+    m_sink.setScopeSink(&m_scopeSink);
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
     m_channelizer = new DownChannelizer(&m_sink);
 }

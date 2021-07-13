@@ -55,7 +55,6 @@ RadioClock::RadioClock(DeviceAPI *deviceAPI) :
     setObjectName(m_channelId);
 
     m_basebandSink = new RadioClockBaseband(this);
-    m_basebandSink->setScopeSink(&m_scopeSink);
     m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());
     m_basebandSink->setChannel(this);
     m_basebandSink->moveToThread(&m_thread);
@@ -168,6 +167,11 @@ bool RadioClock::handleMessage(const Message& cmd)
     {
         return false;
     }
+}
+
+ScopeVis *RadioClock::getScopeSink()
+{
+    return m_basebandSink->getScopeSink();
 }
 
 void RadioClock::applySettings(const RadioClockSettings& settings, bool force)

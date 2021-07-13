@@ -26,7 +26,6 @@
 #include <QDateTime>
 
 #include "dsp/basebandsamplesink.h"
-#include "dsp/scopevis.h"
 #include "channel/channelapi.h"
 #include "util/message.h"
 
@@ -158,7 +157,7 @@ public:
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response);
 
-    ScopeVis *getScopeSink() { return &m_scopeSink; }
+    ScopeVis *getScopeSink();
     double getMagSq() const { return m_basebandSink->getMagSq(); }
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) {
@@ -178,7 +177,6 @@ private:
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
     qint64 m_centerFrequency;
     QDateTime m_dateTime; //!< Received data and time
-    ScopeVis m_scopeSink;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
