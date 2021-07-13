@@ -140,6 +140,9 @@ private:
 
     QVector<qint16> m_demodBuffer;
     int m_demodBufferFill;
+    ComplexVector m_sampleBuffer;
+    static const int m_sampleBufferSize = PagerDemodSettings::m_channelSampleRate / 20; // 50ms
+    int m_sampleBufferIndex;
 
     void processOneSample(Complex &ci);
     MessageQueue *getMessageQueueToChannel() { return m_messageQueueToChannel; }

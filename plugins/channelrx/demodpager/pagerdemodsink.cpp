@@ -49,7 +49,8 @@ PagerDemodSink::PagerDemodSink(PagerDemod *pagerDemod) :
         m_syncCount(75),
         m_batchNumber(0),
         m_wordCount(0),
-        m_addressValid(0)
+        m_addressValid(0),
+        m_sampleBufferIndex(0)
 {
     m_magsq = 0.0;
 
@@ -58,6 +59,7 @@ PagerDemodSink::PagerDemodSink(PagerDemod *pagerDemod) :
 
     applySettings(m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
+    m_sampleBuffer.resize(m_sampleBufferSize);
 }
 
 PagerDemodSink::~PagerDemodSink()
@@ -68,12 +70,15 @@ void PagerDemodSink::sampleToScope(Complex sample)
 {
     if (m_scopeSink)
     {
-        ComplexVector m_sampleBuffer;
-        m_sampleBuffer.push_back(sample);
-        std::vector<ComplexVector::const_iterator> vbegin;
-        vbegin.push_back(m_sampleBuffer.begin());
-        m_scopeSink->feed(vbegin, m_sampleBuffer.end() - m_sampleBuffer.begin());
-        m_sampleBuffer.clear();
+        m_sampleBuffer[m_sampleBufferIndex++] = sample;
+
+        if (m_sampleBufferIndex == m_sampleBufferSize)
+        {
+            std::vector<ComplexVector::const_iterator> vbegin;
+            vbegin.push_back(m_sampleBuffer.begin());
+            m_scopeSink->feed(vbegin, m_sampleBufferSize);
+            m_sampleBufferIndex = 0;
+        }
     }
 }
 

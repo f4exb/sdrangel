@@ -463,6 +463,7 @@ PagerDemodGUI::PagerDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     m_scopeVis->setLiveRate(PagerDemodSettings::m_channelSampleRate);
     ui->glScope->connectTimer(MainCore::instance()->getMasterTimer());
     ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
+    ui->scopeGUI->setSampleRate(PagerDemodSettings::m_channelSampleRate);
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
