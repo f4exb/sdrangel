@@ -867,7 +867,7 @@ private:
         void writeCurrent(const std::vector<ComplexVector::const_iterator>& vbegin, int length)
         {
             for (unsigned int i = 0; i < vbegin.size(); i++) {
-                current().write(vbegin[i], length);
+                current(i).write(vbegin[i], length);
             }
         }
 
