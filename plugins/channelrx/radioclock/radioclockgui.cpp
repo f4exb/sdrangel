@@ -178,8 +178,18 @@ void RadioClockGUI::on_timezone_currentIndexChanged(int index)
 
 void RadioClockGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
-    (void) widget;
-    (void) rollDown;
+    if (widget == ui->scopeContainer)
+    {
+        if (rollDown)
+        {
+            // Make wide enough for scope controls
+            setMinimumWidth(716);
+        }
+        else
+        {
+            setMinimumWidth(352);
+        }
+    }
 }
 
 void RadioClockGUI::onMenuDialogCalled(const QPoint &p)
