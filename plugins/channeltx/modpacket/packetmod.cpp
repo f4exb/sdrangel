@@ -615,13 +615,13 @@ void PacketMod::webapiUpdateChannelSettings(
         settings.m_reverseAPIChannelIndex = response.getPacketModSettings()->getReverseApiChannelIndex();
     }
     if (channelSettingsKeys.contains("udpEnabled")) {
-        settings.m_udpEnabled = response.getPacketDemodSettings()->getUdpEnabled();
+        settings.m_udpEnabled = response.getPacketModSettings()->getUdpEnabled();
     }
     if (channelSettingsKeys.contains("udpAddress")) {
-        settings.m_udpAddress = *response.getPacketDemodSettings()->getUdpAddress();
+        settings.m_udpAddress = *response.getPacketModSettings()->getUdpAddress();
     }
     if (channelSettingsKeys.contains("udpPort")) {
-        settings.m_udpPort = response.getPacketDemodSettings()->getUdpPort();
+        settings.m_udpPort = response.getPacketModSettings()->getUdpPort();
     }
 }
 
@@ -930,7 +930,7 @@ void PacketMod::webapiFormatChannelSettings(
         swgPacketModSettings->setData(new QString(settings.m_data));
     }
     if (channelSettingsKeys.contains("bpf") || force) {
-        swgPacketModSettings->setBpf(settings.m_preEmphasis ? 1 : 0);
+        swgPacketModSettings->setBpf(settings.m_bpf ? 1 : 0);
     }
     if (channelSettingsKeys.contains("bpfLowCutoff") || force) {
         swgPacketModSettings->setBpfLowCutoff(settings.m_bpfLowCutoff);

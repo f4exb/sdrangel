@@ -347,8 +347,18 @@ void AISDemodGUI::filter()
 
 void AISDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
-    (void) widget;
-    (void) rollDown;
+    if (widget == ui->scopeContainer)
+    {
+        if (rollDown)
+        {
+            // Make wide enough for scope controls
+            setMinimumWidth(716);
+        }
+        else
+        {
+            setMinimumWidth(352);
+        }
+    }
 }
 
 void AISDemodGUI::onMenuDialogCalled(const QPoint &p)

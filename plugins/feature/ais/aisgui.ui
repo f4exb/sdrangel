@@ -35,7 +35,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>GS-232 Rotator Controller</string>
+   <string>AIS</string>
   </property>
   <widget class="QWidget" name="tableContainer" native="true">
    <property name="geometry">

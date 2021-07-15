@@ -476,6 +476,8 @@ PacketModGUI::PacketModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 
     ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
 
+    ui->spectrumContainer->setVisible(false);
+
     displaySettings();
     applySettings();
 }
