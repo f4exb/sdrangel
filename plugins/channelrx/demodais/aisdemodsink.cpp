@@ -31,8 +31,6 @@
 #include "aisdemod.h"
 #include "aisdemodsink.h"
 
-#define AISDEMOD_MINS_MAXS  5
-
 AISDemodSink::AISDemodSink(AISDemod *aisDemod) :
         m_scopeSink(nullptr),
         m_aisDemod(aisDemod),
