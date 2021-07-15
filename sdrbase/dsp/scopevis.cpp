@@ -1149,16 +1149,18 @@ void ScopeVis::updateMaxTraceDelay()
             itData->m_projectionType = Projector::ProjectionReal;
         }
 
-        // WTF is this cache ??? Fixes issue in #872
-        // if (projectorCounts[(int) itData->m_projectionType] > 0)
-        // {
-        //     allocateCache = true;
-        //     (*itCtrl)->m_projector.setCacheMaster(false);
-        // }
-        // else
-        // {
-        //     (*itCtrl)->m_projector.setCacheMaster(true);
-        // }
+        if (m_nbStreams <= 1) // Works only for single stream mode. Fixes #872
+        {
+            if (projectorCounts[(int) itData->m_projectionType] > 0)
+            {
+                allocateCache = true;
+                (*itCtrl)->m_projector.setCacheMaster(false);
+            }
+            else
+            {
+                (*itCtrl)->m_projector.setCacheMaster(true);
+            }
+        }
 
         projectorCounts[(int) itData->m_projectionType]++;
     }
