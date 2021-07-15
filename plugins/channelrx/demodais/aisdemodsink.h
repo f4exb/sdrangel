@@ -125,7 +125,6 @@ private:
     Real *m_train;                      // Training sequence to look for
     int m_correlationLength;
 
-    int m_symbolPrev;
     unsigned char m_bytes[AISDEMOD_MAX_BYTES];
     crc16x25 m_crc;
 
