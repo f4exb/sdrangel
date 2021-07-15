@@ -775,7 +775,7 @@ int ScopeVis::processTraces(const std::vector<ComplexVector::const_iterator>& vc
         std::vector<GLScopeSettings::TraceData>::iterator itData = m_traces.m_tracesData.begin();
         std::vector<float *>::iterator itTrace = m_traces.m_traces[m_traces.currentBufferIndex()].begin();
 
-        for (; itCtl != m_traces.m_tracesControl.end(); ++itCtl, ++itData, ++itTrace)
+        for (unsigned int ti = 0; itCtl != m_traces.m_tracesControl.end(); ++itCtl, ++itData, ++itTrace, ti++)
         {
             if (traceBack && ((remainder) > itData->m_traceDelay)) { // before start of trace
                 continue;
@@ -880,15 +880,15 @@ int ScopeVis::processTraces(const std::vector<ComplexVector::const_iterator>& vc
                            = traceCount - shift;   // display x
                 (*itTrace)[2*traceCount + 1] = v;  // display y
                 traceCount++;
-            }
-        }
+            } // process one sample
+        } // loop on traces
 
         for (unsigned int i = 0; i < vbegin.size(); i++) {
             ++vbegin[i];
         }
         remainder--;
         m_nbSamples--;
-    }
+    } // loop on samples
 
     float traceTime = ((float) m_traceSize) / m_sampleRate;
 
@@ -1149,15 +1149,16 @@ void ScopeVis::updateMaxTraceDelay()
             itData->m_projectionType = Projector::ProjectionReal;
         }
 
-        if (projectorCounts[(int) itData->m_projectionType] > 0)
-        {
-            allocateCache = true;
-            (*itCtrl)->m_projector.setCacheMaster(false);
-        }
-        else
-        {
-            (*itCtrl)->m_projector.setCacheMaster(true);
-        }
+        // WTF is this cache ??? Fixes issue in #872
+        // if (projectorCounts[(int) itData->m_projectionType] > 0)
+        // {
+        //     allocateCache = true;
+        //     (*itCtrl)->m_projector.setCacheMaster(false);
+        // }
+        // else
+        // {
+        //     (*itCtrl)->m_projector.setCacheMaster(true);
+        // }
 
         projectorCounts[(int) itData->m_projectionType]++;
     }
@@ -1169,7 +1170,7 @@ void ScopeVis::updateMaxTraceDelay()
         if (allocateCache) {
             (*itCtrl)->m_projector.setCache(m_projectorCache);
         } else {
-            (*itCtrl)->m_projector.setCache(0);
+            (*itCtrl)->m_projector.setCache(nullptr);
         }
     }
 
