@@ -163,265 +163,108 @@ void GLScopeGUI::onScopePreTriggerChanged(uint32_t preTriggerNbSamples)
 
 void GLScopeGUI::resetToDefaults()
 {
+    m_settings.resetToDefaults();
 }
-
 
 QByteArray GLScopeGUI::serialize() const
 {
-    SimpleSerializer s(1);
-
-    // first row
-    s.writeS32(1, (int) m_glScope->getDisplayMode());
-    s.writeS32(2, ui->traceIntensity->value());
-    s.writeS32(3, ui->gridIntensity->value());
-    s.writeS32(4, ui->time->value());
-    // s.writeS32(5, ui->timeOfs->value());
-    s.writeS32(6, ui->traceLen->value());
-
-    // second row - by trace
-    const std::vector<GLScopeSettings::TraceData>& tracesData = m_scopeVis->getTracesData();
-    std::vector<GLScopeSettings::TraceData>::const_iterator traceDataIt = tracesData.begin();
-    s.writeU32(10, (uint32_t) tracesData.size());
-    int i = 0;
-
-    for (; traceDataIt != tracesData.end(); ++traceDataIt, i++)
-    {
-        s.writeS32(20 + 16*i, (int) traceDataIt->m_projectionType);
-        s.writeFloat(21 + 16*i, traceDataIt->m_amp);
-        s.writeFloat(22 + 16*i, traceDataIt->m_ofs);
-        s.writeS32(24 + 16*i, traceDataIt->m_traceDelayCoarse);
-        s.writeS32(25 + 16*i, traceDataIt->m_traceDelayFine);
-        s.writeFloat(26 + 16*i, traceDataIt->m_traceColorR);
-        s.writeFloat(27 + 16*i, traceDataIt->m_traceColorG);
-        s.writeFloat(28 + 16*i, traceDataIt->m_traceColorB);
-        s.writeU32(29 + 16*i, traceDataIt->m_streamIndex);
-    }
-
-    // third row - by trigger
-    s.writeU32(200, (uint32_t) m_scopeVis->getNbTriggers());
-    s.writeS32(201, ui->trigPre->value());
-
-    for (unsigned int i = 0; i < m_scopeVis->getNbTriggers(); i++)
-    {
-        const GLScopeSettings::TriggerData& triggerData = m_scopeVis->getTriggerData(i);
-        s.writeS32(210 + 16*i, (int) triggerData.m_projectionType);
-        s.writeS32(211 + 16*i, triggerData.m_triggerRepeat);
-        s.writeBool(212 + 16*i, triggerData.m_triggerPositiveEdge);
-        s.writeBool(213 + 16*i, triggerData.m_triggerBothEdges);
-        s.writeS32(214 + 16*i, triggerData.m_triggerLevelCoarse);
-        s.writeS32(215 + 16*i, triggerData.m_triggerLevelFine);
-        s.writeS32(216 + 16*i, triggerData.m_triggerDelayCoarse);
-        s.writeS32(217 + 16*i, triggerData.m_triggerDelayFine);
-        s.writeFloat(218 + 16*i, triggerData.m_triggerColorR);
-        s.writeFloat(219 + 16*i, triggerData.m_triggerColorG);
-        s.writeFloat(220 + 16*i, triggerData.m_triggerColorB);
-        s.writeU32(221 + 16*i, triggerData.m_triggerHoldoff);
-        s.writeU32(222 + 16*i, triggerData.m_streamIndex);
-    }
-
-    return s.final();
+    return m_settings.serialize();
 }
 
 bool GLScopeGUI::deserialize(const QByteArray& data)
 {
-    SimpleDeserializer d(data);
+    bool ret;
 
-    if (!d.isValid()) {
-        resetToDefaults();
-        return false;
-    }
-
-    if (d.getVersion() == 1)
+    if (m_settings.deserialize(data))
     {
-        TraceUIBlocker traceUIBlocker(ui);
-        TrigUIBlocker trigUIBlocker(ui);
-        int intValue;
-        uint32_t uintValue;
-        bool boolValue;
-
-        ui->traceMode->setCurrentIndex(0);
-        d.readS32(1, &intValue, (int) GLScope::DisplayX);
-        GLScopeSettings::DisplayMode displayMode = (GLScopeSettings::DisplayMode) intValue;
-        d.readS32(2, &intValue, 50);
-        ui->traceIntensity->setValue(intValue);
-        d.readS32(3, &intValue, 10);
-        ui->gridIntensity->setValue(intValue);
-        d.readS32(4, &intValue, 1);
-        ui->time->setValue(intValue);
-        // d.readS32(5, &intValue, 0);
-        // ui->timeOfs->setValue(intValue);
-        d.readS32(6, &intValue, 1);
-        ui->traceLen->setValue(intValue);
-
-        // trace stuff
-
-        uint32_t nbTracesSaved;
-        d.readU32(10, &nbTracesSaved, 1);
-        const std::vector<GLScopeSettings::TraceData>& tracesData = m_scopeVis->getTracesData();
-        uint32_t iTrace = tracesData.size();
-
-        qDebug("GLScopeGUI::deserialize: nbTracesSaved: %u tracesData.size(): %lu", nbTracesSaved, tracesData.size());
-
-        while (iTrace > nbTracesSaved) // remove possible traces in excess
-        {
-            ScopeVis::MsgScopeVisRemoveTrace *msg = ScopeVis::MsgScopeVisRemoveTrace::create(iTrace - 1);
-            m_scopeVis->getInputMessageQueue()->push(msg);
-            iTrace--;
-        }
-
-        for (iTrace = 0; iTrace < nbTracesSaved; iTrace++)
-        {
-            GLScopeSettings::TraceData traceData;
-            float r, g, b;
-
-            d.readS32(20 + 16*iTrace, &intValue, 0);
-            traceData.m_projectionType = (Projector::ProjectionType) intValue;
-            d.readFloat(21 + 16*iTrace, &traceData.m_amp, 1.0f);
-            d.readFloat(22 + 16*iTrace, &traceData.m_ofs, 0.0f);
-            d.readS32(24 + 16*iTrace, &intValue, 0);
-            traceData.m_traceDelayCoarse = intValue;
-            d.readS32(25 + 16*iTrace, &intValue, 0);
-            traceData.m_traceDelayFine = intValue;
-            d.readFloat(26 + 16*iTrace, &r, 1.0f);
-            d.readFloat(27 + 16*iTrace, &g, 1.0f);
-            d.readFloat(28 + 16*iTrace, &b, 1.0f);
-            traceData.m_traceColorR = r;
-            traceData.m_traceColorG = g;
-            traceData.m_traceColorB = b;
-            traceData.m_traceColor.setRedF(r);
-            traceData.m_traceColor.setGreenF(g);
-            traceData.m_traceColor.setBlueF(b);
-            d.readU32(29 + 16*iTrace, &uintValue, 0);
-            traceData.m_streamIndex = uintValue;
-
-            setTraceUI(traceData);
-
-            if (iTrace < tracesData.size()) // change existing traces
-            {
-                ScopeVis::MsgScopeVisChangeTrace *msg = ScopeVis::MsgScopeVisChangeTrace::create(traceData, iTrace);
-                m_scopeVis->getInputMessageQueue()->push(msg);
-            }
-            else // add new traces
-            {
-                ScopeVis::MsgScopeVisAddTrace *msg = ScopeVis::MsgScopeVisAddTrace::create(traceData);
-                m_scopeVis->getInputMessageQueue()->push(msg);
-            }
-
-            if (iTrace < m_settings.m_tracesData.size()) {
-                settingsTraceChange(traceData, iTrace);
-            } else {
-                settingsTraceAdd(traceData);
-            }
-        }
-
-        ui->trace->setMaximum(nbTracesSaved-1);
-        ui->trace->setValue(nbTracesSaved-1);
-        m_glScope->setFocusedTraceIndex(nbTracesSaved-1);
-
-        int r,g,b,a;
-        m_focusedTraceColor.getRgb(&r, &g, &b, &a);
-        ui->traceColor->setStyleSheet(tr("QLabel { background-color : rgb(%1,%2,%3); }").arg(r).arg(g).arg(b));
-
-        setTraceIndexDisplay();
-        setAmpScaleDisplay();
-        setAmpOfsDisplay();
-        setTraceDelayDisplay();
-        setDisplayMode(displayMode);
-
-        // trigger stuff
-
-        uint32_t nbTriggersSaved;
-        d.readU32(200, &nbTriggersSaved, 1);
-        uint32_t nbTriggers = m_scopeVis->getNbTriggers();
-        uint32_t iTrigger = nbTriggers;
-
-        d.readS32(201, &intValue, 0);
-        ui->trigPre->setValue(intValue);
-
-        qDebug("GLScopeGUI::deserialize: nbTriggersSaved: %u nbTriggers: %u", nbTriggersSaved, nbTriggers);
-
-        while (iTrigger > nbTriggersSaved) // remove possible triggers in excess
-        {
-            ScopeVis::MsgScopeVisRemoveTrigger *msg = ScopeVis::MsgScopeVisRemoveTrigger::create(iTrigger - 1);
-            m_scopeVis->getInputMessageQueue()->push(msg);
-            iTrigger--;
-        }
-
-        for (iTrigger = 0; iTrigger < nbTriggersSaved; iTrigger++)
-        {
-            GLScopeSettings::TriggerData triggerData;
-            float r, g, b;
-
-            d.readS32(210 + 16*iTrigger, &intValue, 0);
-            ui->trigMode->setCurrentIndex(intValue);
-            d.readS32(211 + 16*iTrigger, &intValue, 1);
-            ui->trigCount->setValue(intValue);
-            d.readBool(212 + 16*iTrigger, &boolValue, true);
-            ui->trigPos->setChecked(boolValue);
-            d.readBool(213 + 16*iTrigger, &boolValue, false);
-            ui->trigBoth->setChecked(boolValue);
-            d.readS32(214 + 16*iTrigger, &intValue, 1);
-            ui->trigLevelCoarse->setValue(intValue);
-            d.readS32(215 + 16*iTrigger, &intValue, 1);
-            ui->trigLevelFine->setValue(intValue);
-            d.readS32(216 + 16*iTrigger, &intValue, 1);
-            ui->trigDelayCoarse->setValue(intValue);
-            d.readS32(217 + 16*iTrigger, &intValue, 1);
-            ui->trigDelayFine->setValue(intValue);
-            d.readFloat(218 + 16*iTrigger, &r, 1.0f);
-            d.readFloat(219 + 16*iTrigger, &g, 1.0f);
-            d.readFloat(220 + 16*iTrigger, &b, 1.0f);
-            m_focusedTriggerColor.setRgbF(r, g, b);
-            d.readU32(221 + 16*iTrigger, &uintValue, 1);
-            ui->trigHoldoff->setValue(uintValue);
-            ui->trigHoldoffText->setText(tr("%1").arg(uintValue));
-            d.readU32(222 + 16*iTrigger, &uintValue, 0);
-            ui->traceStream->setCurrentIndex(uintValue);
-
-            fillTriggerData(triggerData);
-
-            if (iTrigger < nbTriggers) // change existing triggers
-            {
-                ScopeVis::MsgScopeVisChangeTrigger *msg = ScopeVis::MsgScopeVisChangeTrigger::create(triggerData, iTrigger);
-                m_scopeVis->getInputMessageQueue()->push(msg);
-            }
-            else // add new trigers
-            {
-                ScopeVis::MsgScopeVisAddTrigger *msg = ScopeVis::MsgScopeVisAddTrigger::create(triggerData);
-                m_scopeVis->getInputMessageQueue()->push(msg);
-            }
-
-            if (iTrigger < m_settings.m_triggersData.size()) {
-                settingsTriggerChange(triggerData, iTrigger);
-            } else {
-                settingsTriggerAdd(triggerData);
-            }
-
-            if (iTrigger == nbTriggersSaved-1)
-            {
-                m_glScope->setFocusedTriggerData(triggerData);
-            }
-        }
-
-        ui->trig->setMaximum(nbTriggersSaved-1);
-        ui->trig->setValue(nbTriggersSaved-1);
-
-        m_focusedTriggerColor.getRgb(&r, &g, &b, &a);
-        ui->trigColor->setStyleSheet(tr("QLabel { background-color : rgb(%1,%2,%3); }").arg(r).arg(g).arg(b));
-
-        setTrigCountDisplay();
-        setTrigDelayDisplay();
-        setTrigIndexDisplay();
-        setTrigLevelDisplay();
-        setTrigPreDisplay();
-
-        return true;
+        displaySettings();
+        ret = true;
     }
     else
     {
         resetToDefaults();
-        return false;
+        ret = false;
     }
+
+    // trace stuff
+
+    const std::vector<GLScopeSettings::TraceData>& tracesData = m_scopeVis->getTracesData();
+    uint32_t iTrace = tracesData.size();
+    uint32_t nbTracesSaved = m_settings.m_tracesData.size();
+    ui->trace->setMaximum(nbTracesSaved-1);
+
+    while (iTrace > nbTracesSaved) // remove possible traces in excess
+    {
+        ScopeVis::MsgScopeVisRemoveTrace *msg = ScopeVis::MsgScopeVisRemoveTrace::create(iTrace - 1);
+        m_scopeVis->getInputMessageQueue()->push(msg);
+        iTrace--;
+    }
+
+    for (iTrace = 0; iTrace < nbTracesSaved; iTrace++)
+    {
+        GLScopeSettings::TraceData& traceData = m_settings.m_tracesData[iTrace];
+
+        //setTraceUI(traceData);
+        qDebug("GLScopeGUI::deserialize: trace: %u  ui streams: %d current stream: %u",
+            iTrace, ui->traceStream->count(), traceData.m_streamIndex);
+
+        if (iTrace < tracesData.size()) // change existing traces
+        {
+            ScopeVis::MsgScopeVisChangeTrace *msg = ScopeVis::MsgScopeVisChangeTrace::create(traceData, iTrace);
+            m_scopeVis->getInputMessageQueue()->push(msg);
+        }
+        else // add new traces
+        {
+            ScopeVis::MsgScopeVisAddTrace *msg = ScopeVis::MsgScopeVisAddTrace::create(traceData);
+            m_scopeVis->getInputMessageQueue()->push(msg);
+        }
+    }
+
+    setTraceIndexDisplay();
+    setAmpScaleDisplay();
+    setAmpOfsDisplay();
+    setTraceDelayDisplay();
+    setDisplayMode(m_settings.m_displayMode);
+
+    // trigger stuff
+
+    uint32_t nbTriggersSaved = m_settings.m_triggersData.size();
+    uint32_t nbTriggers = m_scopeVis->getNbTriggers();
+    uint32_t iTrigger = nbTriggers;
+    ui->trig->setMaximum(nbTriggersSaved-1);
+
+    while (iTrigger > nbTriggersSaved) // remove possible triggers in excess
+    {
+        ScopeVis::MsgScopeVisRemoveTrigger *msg = ScopeVis::MsgScopeVisRemoveTrigger::create(iTrigger - 1);
+        m_scopeVis->getInputMessageQueue()->push(msg);
+        iTrigger--;
+    }
+
+    for (iTrigger = 0; iTrigger < nbTriggersSaved; iTrigger++)
+    {
+        GLScopeSettings::TriggerData& triggerData = m_settings.m_triggersData[iTrigger];
+
+        if (iTrigger < nbTriggers) // change existing triggers
+        {
+            ScopeVis::MsgScopeVisChangeTrigger *msg = ScopeVis::MsgScopeVisChangeTrigger::create(triggerData, iTrigger);
+            m_scopeVis->getInputMessageQueue()->push(msg);
+        }
+        else // add new trigers
+        {
+            ScopeVis::MsgScopeVisAddTrigger *msg = ScopeVis::MsgScopeVisAddTrigger::create(triggerData);
+            m_scopeVis->getInputMessageQueue()->push(msg);
+        }
+    }
+
+    setTrigCountDisplay();
+    setTrigDelayDisplay();
+    setTrigIndexDisplay();
+    setTrigLevelDisplay();
+    setTrigPreDisplay();
+
+    displaySettings();
+
+    return ret;
 }
 
 void GLScopeGUI::setNbStreams(unsigned int nbStreams)
