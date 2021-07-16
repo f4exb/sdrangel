@@ -41,10 +41,14 @@ AISModSource::AISModSource() :
     m_byteIdx(0),
     m_bitIdx(0),
     m_last5Bits(0),
-    m_bitCount(0)
+    m_bitCount(0),
+    m_scopeSampleBufferIndex(0),
+    m_specSampleBufferIndex(0)
  {
     m_demodBuffer.resize(1<<12);
     m_demodBufferFill = 0;
+    m_scopeSampleBuffer.resize(m_scopeSampleBufferSize);
+    m_specSampleBuffer.resize(m_specSampleBufferSize);
 
     applySettings(m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
@@ -113,9 +117,13 @@ void AISModSource::sampleToSpectrum(Complex sample)
     {
         Real r = std::real(sample) * SDR_TX_SCALEF;
         Real i = std::imag(sample) * SDR_TX_SCALEF;
-        m_sampleBuffer.push_back(Sample(r, i));
-        m_spectrumSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), false);
-        m_sampleBuffer.clear();
+        m_specSampleBuffer[m_specSampleBufferIndex++] = Sample(r, i);
+
+        if (m_specSampleBufferIndex == m_specSampleBufferSize)
+        {
+            m_spectrumSink->feed(m_specSampleBuffer.begin(), m_specSampleBuffer.end(), false);
+            m_specSampleBufferIndex = 0;
+        }
     }
 }
 
@@ -125,11 +133,15 @@ void AISModSource::sampleToScope(Complex sample)
     {
         Real r = std::real(sample) * SDR_RX_SCALEF;
         Real i = std::imag(sample) * SDR_RX_SCALEF;
-        m_sampleBuffer.push_back(Sample(r, i));
-        std::vector<SampleVector::const_iterator> vbegin;
-        vbegin.push_back(m_sampleBuffer.begin());
-        m_scopeSink->feed(vbegin, m_sampleBuffer.end() - m_sampleBuffer.begin());
-        m_sampleBuffer.clear();
+        m_scopeSampleBuffer[m_scopeSampleBufferIndex++] = Sample(r, i);
+
+        if (m_scopeSampleBufferIndex == m_scopeSampleBufferSize)
+        {
+            std::vector<SampleVector::const_iterator> vbegin;
+            vbegin.push_back(m_scopeSampleBuffer.begin());
+            m_scopeSink->feed(vbegin, m_scopeSampleBufferSize);
+            m_scopeSampleBufferIndex = 0;
+        }
     }
 }
 

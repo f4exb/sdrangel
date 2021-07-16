@@ -86,7 +86,12 @@ private:
 
     BasebandSampleSink* m_spectrumSink; // Spectrum GUI to display baseband waveform
     ScopeVis* m_scopeSink;              // Scope GUI to display baseband waveform
-    SampleVector m_sampleBuffer;
+    SampleVector m_specSampleBuffer;
+    int m_specSampleBufferIndex;
+    static const int m_specSampleBufferSize = 1024;
+    SampleVector m_scopeSampleBuffer;
+    int m_scopeSampleBufferIndex;
+    static const int m_scopeSampleBufferSize = 4800;
     Interpolator m_interpolator;        // Interpolator to downsample to 4k in spectrum
     Real m_interpolatorDistance;
     Real m_interpolatorDistanceRemain;

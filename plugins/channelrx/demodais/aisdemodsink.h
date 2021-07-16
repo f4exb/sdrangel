@@ -131,6 +131,10 @@ private:
     QVector<qint16> m_demodBuffer;
     int m_demodBufferFill;
 
+    SampleVector m_sampleBuffer;
+    static const int m_sampleBufferSize = AISDemodSettings::AISDEMOD_CHANNEL_SAMPLE_RATE / 20;
+    int m_sampleBufferIndex;
+
     void processOneSample(Complex &ci);
     MessageQueue *getMessageQueueToChannel() { return m_messageQueueToChannel; }
     void sampleToScope(Complex sample);

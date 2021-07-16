@@ -41,12 +41,14 @@ AISDemodSink::AISDemodSink(AISDemod *aisDemod) :
         m_magsqCount(0),
         m_messageQueueToChannel(nullptr),
         m_rxBuf(nullptr),
-        m_train(nullptr)
+        m_train(nullptr),
+        m_sampleBufferIndex(0)
 {
     m_magsq = 0.0;
 
     m_demodBuffer.resize(1<<12);
     m_demodBufferFill = 0;
+    m_sampleBuffer.resize(m_sampleBufferSize);
 
     applySettings(m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
@@ -64,12 +66,15 @@ void AISDemodSink::sampleToScope(Complex sample)
     {
         Real r = std::real(sample) * SDR_RX_SCALEF;
         Real i = std::imag(sample) * SDR_RX_SCALEF;
-        SampleVector m_sampleBuffer;
-        m_sampleBuffer.push_back(Sample(r, i));
-        std::vector<SampleVector::const_iterator> vbegin;
-        vbegin.push_back(m_sampleBuffer.begin());
-        m_scopeSink->feed(vbegin, m_sampleBuffer.end() - m_sampleBuffer.begin());
-        m_sampleBuffer.clear();
+        m_sampleBuffer[m_sampleBufferIndex++] = Sample(r, i);
+
+        if (m_sampleBufferIndex == m_sampleBufferSize)
+        {
+            std::vector<SampleVector::const_iterator> vbegin;
+            vbegin.push_back(m_sampleBuffer.begin());
+            m_scopeSink->feed(vbegin, m_sampleBufferSize);
+            m_sampleBufferIndex = 0;
+        }
     }
 }
 

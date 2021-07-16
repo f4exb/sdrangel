@@ -32,6 +32,8 @@ IEEE_802_15_4_ModSource::IEEE_802_15_4_ModSource() :
     m_scrambler(0x108, 0x1fe, 1),
     m_spectrumSink(nullptr),
     m_scopeSink(nullptr),
+    m_specSampleBufferIndex(0),
+    m_scopeSampleBufferIndex(0),
     m_magsq(0.0),
     m_levelCalcCount(0),
     m_peakLevel(0.0f),
@@ -48,6 +50,8 @@ IEEE_802_15_4_ModSource::IEEE_802_15_4_ModSource() :
     m_lowpass.create(301, m_channelSampleRate, 22000.0 / 2.0);
     m_pulseShapeI.create(1, 6, m_channelSampleRate/300000, true);
     m_pulseShapeQ.create(1, 6, m_channelSampleRate/300000, true);
+    m_specSampleBuffer.resize(m_specSampleBufferSize);
+    m_scopeSampleBuffer.resize(m_scopeSampleBufferSize);
     applySettings(m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 }
@@ -106,9 +110,14 @@ void IEEE_802_15_4_ModSource::sampleToSpectrum(Complex sample)
         {
             Real r = std::real(out) * SDR_TX_SCALEF;
             Real i = std::imag(out) * SDR_TX_SCALEF;
-            m_sampleBuffer.push_back(Sample(r, i));
-            m_spectrumSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), false);
-            m_sampleBuffer.clear();
+            m_specSampleBuffer[m_specSampleBufferIndex++] = Sample(r, i);
+
+            if (m_specSampleBufferIndex == m_specSampleBufferSize)
+            {
+                m_spectrumSink->feed(m_specSampleBuffer.begin(), m_specSampleBuffer.end(), false);
+                m_specSampleBufferIndex = 0;
+            }
+
             m_interpolatorDistanceRemain += m_interpolatorDistance;
         }
     }
@@ -120,10 +129,15 @@ void IEEE_802_15_4_ModSource::sampleToScope(Complex sample)
     {
         Real r = std::real(sample) * SDR_RX_SCALEF;
         Real i = std::imag(sample) * SDR_RX_SCALEF;
-        m_sampleBuffer.push_back(Sample(r, i));
-        std::vector<SampleVector::const_iterator> vbegin;
-        m_scopeSink->feed(vbegin, m_sampleBuffer.end() - m_sampleBuffer.begin());
-        m_sampleBuffer.clear();
+        m_scopeSampleBuffer[m_scopeSampleBufferIndex++] = Sample(r, i);
+
+        if (m_scopeSampleBufferIndex == m_scopeSampleBufferSize)
+        {
+            std::vector<SampleVector::const_iterator> vbegin;
+            vbegin.push_back(m_scopeSampleBuffer.begin());
+            m_scopeSink->feed(vbegin, m_scopeSampleBufferSize);
+            m_scopeSampleBufferIndex = 0;
+        }
     }
 }
 

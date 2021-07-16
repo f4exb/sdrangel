@@ -85,7 +85,7 @@ private:
     NoiseFigureSettings m_settings;
     ChannelAPI *m_channel;
     int m_channelSampleRate;
-    
+
     int m_fftSequence;
     FFTEngine *m_fft;
     int m_fftCounter;
@@ -106,7 +106,6 @@ private:
 
     void processOneSample(Complex &ci);
     MessageQueue *getMessageQueueToChannel() { return m_messageQueueToChannel; }
-    void sampleToScope(Complex sample);
 };
 
 #endif // INCLUDE_NOISEFIGURESINK_H

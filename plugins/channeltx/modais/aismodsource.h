@@ -90,7 +90,6 @@ private:
 
     BasebandSampleSink* m_spectrumSink; // Spectrum GUI to display baseband waveform
     ScopeVis* m_scopeSink;    // Scope GUI to display baseband waveform
-    SampleVector m_sampleBuffer;
 
     Interpolator m_interpolator;        // Interpolator to channel sample rate
     Real m_interpolatorDistance;
@@ -128,6 +127,14 @@ private:
 
     QVector<qint16> m_demodBuffer;
     int m_demodBufferFill;
+
+    SampleVector m_scopeSampleBuffer;
+    static const int m_scopeSampleBufferSize = AISModSettings::AISMOD_SAMPLE_RATE / 20;
+    int m_scopeSampleBufferIndex;
+
+    SampleVector m_specSampleBuffer;
+    static const int m_specSampleBufferSize = 1024;
+    int m_specSampleBufferIndex;
 
     bool bitsValid();                   // Are there and bits to transmit
     int getBit();                       // Get bit from m_bits
