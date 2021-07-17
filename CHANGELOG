@@ -1,3 +1,13 @@
+sdrangel (6.16.1-1) unstable; urgency=medium
+
+  * AIS: fixed window size when scope is visible. PR #962. Issue #981
+  * Other fixes in AIS demod. PR #962
+  * ScopeVis: allow Projection cache only if in single stream mode. Issue #872
+  * Scope GUI: reworked serialize and deserialize
+  * AIS, IEEE 802.15.4, Pager, Radio Clock: scope and spectrum feed optimization
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 17 Jul 2021 08:23:22 +0200
+
 sdrangel (6.16.0-1) unstable; urgency=medium
 
   * New Pager demodulator. PR #960
