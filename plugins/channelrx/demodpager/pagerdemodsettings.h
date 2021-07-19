@@ -60,6 +60,10 @@ struct PagerDemodSettings
     uint16_t m_reverseAPIChannelIndex;
     Serializable *m_scopeGUI;
 
+    bool m_rightToLeft;                 //!< Whether characters are right to left or left to right
+    QList<qint32> m_sevenbit;
+    QList<qint32> m_unicode;
+
     int m_messageColumnIndexes[PAGERDEMOD_MESSAGE_COLUMNS];//!< How the columns are ordered in the table
     int m_messageColumnSizes[PAGERDEMOD_MESSAGE_COLUMNS];  //!< Size of the columns in the table
 
@@ -71,6 +75,8 @@ struct PagerDemodSettings
     void setScopeGUI(Serializable *scopeGUI) { m_scopeGUI = scopeGUI; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    QByteArray serializeIntList(const QList<qint32>& ints) const;
+    void deserializeIntList(const QByteArray& data, QList<qint32>& ints);
 };
 
 #endif /* INCLUDE_PAGERDEMODSETTINGS_H */

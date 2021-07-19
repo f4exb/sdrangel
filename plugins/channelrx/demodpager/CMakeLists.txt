@@ -27,10 +27,13 @@ if(NOT SERVER_MODE)
         ${demodpager_SOURCES}
         pagerdemodgui.cpp
         pagerdemodgui.ui
+        pagerdemodcharsetdialog.cpp
+        pagerdemodcharsetdialog.ui
     )
     set(demodpager_HEADERS
         ${demodpager_HEADERS}
         pagerdemodgui.h
+        pagerdemodcharsetdialog.h
     )
 
     set(TARGET_NAME demodpager)

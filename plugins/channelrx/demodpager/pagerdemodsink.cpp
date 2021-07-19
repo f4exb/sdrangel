@@ -273,6 +273,21 @@ void PagerDemodSink::decodeBatch()
                 m_numericMessage = m_numericMessage.trimmed(); // Remove trailing spaces
                 if (getMessageQueueToChannel())
                 {
+                    // Convert from 7-bit to UTF-8 using user specified encoding
+                    for (int i = 0; i < m_alphaMessage; i++)
+                    {
+                        QChar c = m_alphaMessage[i];
+                        int idx = m_settings.m_sevenbit.indexOf(c.toLatin1());
+                        if (idx >= 0) {
+                            c = m_settings.m_unicode[idx];
+                        }
+                        m_alphaMessage[i] = c;
+                    }
+                    // Reverse reading order, if required
+                    if (m_settings.m_rightToLeft) {
+                        std::reverse(m_alphaMessage.begin(), m_alphaMessage.end());
+                    }
+                    // Send to channel and GUI
                     PagerDemod::MsgPagerMessage *msg = PagerDemod::MsgPagerMessage::create(m_address, m_functionBits, m_alphaMessage, m_numericMessage, m_parityErrors, m_bchErrors);
                     getMessageQueueToChannel()->push(msg);
                 }

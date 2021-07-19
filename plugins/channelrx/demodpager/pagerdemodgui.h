@@ -105,6 +105,7 @@ private slots:
     void on_fmDev_valueChanged(int value);
     void on_baud_currentIndexChanged(int index);
     void on_decode_currentIndexChanged(int index);
+    void on_charset_clicked();
     void on_filterAddress_editingFinished();
     void on_clearTable_clicked();
     void on_udpEnabled_clicked(bool checked);

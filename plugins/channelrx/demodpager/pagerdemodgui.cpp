@@ -41,6 +41,7 @@
 #include "maincore.h"
 
 #include "pagerdemod.h"
+#include "pagerdemodcharsetdialog.h"
 
 void PagerDemodGUI::resizeTable()
 {
@@ -658,4 +659,13 @@ void PagerDemodGUI::tick()
     }
 
     m_tickCount++;
+}
+
+void PagerDemodGUI::on_charset_clicked()
+{
+    PagerDemodCharsetDialog dialog(&m_settings);
+    if (dialog.exec() == QDialog::Accepted)
+    {
+        applySettings();
+    }
 }

@@ -466,6 +466,20 @@
        </widget>
       </item>
       <item>
+       <widget class="QToolButton" name="charset">
+        <property name="toolTip">
+         <string>Select character encoding</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/keyboard.png</normaloff>:/keyboard.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -614,7 +628,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="clearTable">
+       <widget class="QToolButton" name="clearTable">
         <property name="toolTip">
          <string>Clear messages from table</string>
         </property>
