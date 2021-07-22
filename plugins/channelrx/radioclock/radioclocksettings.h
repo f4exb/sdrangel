@@ -34,7 +34,8 @@ struct RadioClockSettings
     enum Modulation {
         MSF,
         DCF77,
-        TDF
+        TDF,
+        WWVB
     } m_modulation;
     enum DisplayTZ {
         BROADCAST,
@@ -53,6 +54,7 @@ struct RadioClockSettings
     uint16_t m_reverseAPIChannelIndex;
     Serializable *m_scopeGUI;
     static const int RADIOCLOCK_CHANNEL_SAMPLE_RATE = 1000;
+    static const int m_scopeStreams = 8;
 
     RadioClockSettings();
     void resetToDefaults();
@@ -60,6 +62,14 @@ struct RadioClockSettings
     void setScopeGUI(Serializable *scopeGUI) { m_scopeGUI = scopeGUI; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+
+    enum DST {
+        UNKNOWN,
+        IN_EFFECT,
+        NOT_IN_EFFECT,
+        STARTING,
+        ENDING
+    };                              // Daylight savings status
 };
 
 #endif /* INCLUDE_RADIOCLOCKSETTINGS_H */
