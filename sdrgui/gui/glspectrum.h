@@ -175,11 +175,18 @@ private:
 		CSChannel,
 		CSChannelMoving
 	};
+
+    enum HistogramMarkerType {
+        HistogramMarkerTypeManual,
+        HistogramMarkerTypePower
+    };
+
     struct HistogramMarker {
         QPointF m_point;
         float m_frequency;
         int m_fftBin;
         float m_power;
+        HistogramMarkerType m_markerType;
         QString m_frequencyStr;
         QString m_powerStr;
         QString m_deltaFrequencyStr;
@@ -189,6 +196,7 @@ private:
             m_frequency(0),
             m_fftBin(0),
             m_power(0),
+            m_markerType(HistogramMarkerTypeManual),
             m_frequencyStr(),
             m_powerStr(),
             m_deltaFrequencyStr(),
@@ -199,6 +207,7 @@ private:
             float frequency,
             int   fftBin,
             float power,
+            HistogramMarkerType markerType,
             const QString& frequencyStr,
             const QString& powerStr,
             const QString& deltaFrequencyStr,
@@ -208,6 +217,7 @@ private:
             m_frequency(frequency),
             m_fftBin(fftBin),
             m_power(power),
+            m_markerType(markerType),
             m_frequencyStr(frequencyStr),
             m_powerStr(powerStr),
             m_deltaFrequencyStr(deltaFrequencyStr),
@@ -218,6 +228,7 @@ private:
             m_frequency(other.m_frequency),
             m_fftBin(other.m_fftBin),
             m_power(other.m_power),
+            m_markerType(other.m_markerType),
             m_frequencyStr(other.m_frequencyStr),
             m_powerStr(other.m_powerStr),
             m_deltaFrequencyStr(other.m_deltaFrequencyStr),

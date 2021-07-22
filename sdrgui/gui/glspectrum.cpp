@@ -1143,23 +1143,35 @@ void GLSpectrum::drawMarkers()
     // paint histogram markers
     if (m_histogramMarkers.size() > 0)
     {
-        // crosshairs
         for (int i = 0; i < m_histogramMarkers.size(); i++)
         {
+			QPointF ypoint = m_histogramMarkers.at(i).m_point;
+			QString powerStr = m_histogramMarkers.at(i).m_powerStr;
+
+			if (m_histogramMarkers.at(i).m_markerType == HistogramMarkerTypePower)
+			{
+				ypoint.ry() =
+					(m_powerScale.getRangeMax() - m_currentSpectrum[m_histogramMarkers.at(i).m_fftBin]) / m_powerScale.getRange();
+				powerStr = displayScaledF(
+					m_currentSpectrum[m_histogramMarkers.at(i).m_fftBin],
+					m_linear ? 'e' : 'f',
+					m_linear ? 3 : 1,
+					false
+				);
+			}
+
+			// crosshairs
             GLfloat h[] {
                 (float) m_histogramMarkers.at(i).m_point.x(), 0,
                 (float) m_histogramMarkers.at(i).m_point.x(), 1
             };
             m_glShaderSimple.drawSegments(m_glHistogramBoxMatrix, markerColor, h, 2);
             GLfloat v[] {
-                0, (float) m_histogramMarkers.at(i).m_point.y(),
-                1, (float) m_histogramMarkers.at(i).m_point.y()
+                0, (float) ypoint.y(),
+                1, (float) ypoint.y()
             };
             m_glShaderSimple.drawSegments(m_glHistogramBoxMatrix, markerColor, v, 2);
-        }
-        // text
-        for (int i = 0; i < m_histogramMarkers.size(); i++)
-        {
+			// text
             if (i == 0)
             {
                 drawTextOverlay(
@@ -1172,17 +1184,28 @@ void GLSpectrum::drawMarkers()
                     !m_invertedWaterfall && (m_waterfallHeight != 0),
                     m_histogramRect);
                 drawTextOverlay(
-                    m_histogramMarkers.at(i).m_powerStr,
+                    powerStr,
                     QColor(255, 255, 255, 192),
                     m_textOverlayFont,
                     0,
-                    m_histogramMarkers.at(i).m_point.y() * m_histogramRect.height(),
+                    ypoint.y() * m_histogramRect.height(),
                     true,
-                    m_histogramMarkers.at(i).m_point.y() < 0.5f,
+                    ypoint.y() < 0.5f,
                     m_histogramRect);
             }
             else
             {
+				float power0 = m_histogramMarkers.at(0).m_markerType == HistogramMarkerTypePower ?
+					m_currentSpectrum[m_histogramMarkers.at(0).m_fftBin] :
+					m_histogramMarkers.at(0).m_power;
+				float poweri = m_histogramMarkers.at(i).m_markerType == HistogramMarkerTypePower ?
+					m_currentSpectrum[m_histogramMarkers.at(i).m_fftBin] :
+					m_histogramMarkers.at(i).m_power;
+				QString deltaPowerStr = displayScaledF(
+                            poweri - power0,
+                            m_linear ? 'e' : 'f',
+                            m_linear ? 3 : 1,
+                            false);
                 drawTextOverlay(
                     m_histogramMarkers.at(i).m_deltaFrequencyStr,
                     QColor(255, 255, 255, 192),
@@ -1193,13 +1216,13 @@ void GLSpectrum::drawMarkers()
                     (m_invertedWaterfall || (m_waterfallHeight == 0)),
                     m_histogramRect);
                 drawTextOverlay(
-                    m_histogramMarkers.at(i).m_deltaPowerStr,
+                    deltaPowerStr,
                     QColor(255, 255, 255, 192),
                     m_textOverlayFont,
                     m_histogramRect.width(),
-                    m_histogramMarkers.at(i).m_point.y() * m_histogramRect.height(),
+                    ypoint.y() * m_histogramRect.height(),
                     false,
-                    m_histogramMarkers.at(i).m_point.y() < 0.5f,
+                    ypoint.y() < 0.5f,
                     m_histogramRect);
             }
         }
