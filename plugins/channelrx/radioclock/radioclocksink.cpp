@@ -46,14 +46,16 @@ RadioClockSink::RadioClockSink(RadioClock *radioClock) :
         m_periodCount(0),
         m_gotMinuteMarker(false),
         m_second(0),
+        m_dst(RadioClockSettings::UNKNOWN),
         m_zeroCount(0),
-        m_sampleBufferIndex(0)
+        m_sampleBufferIndex(0),
+        m_gotMarker(false)
 {
     m_phaseDiscri.setFMScaling(RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE / (2.0f * 20.0/M_PI));
     applySettings(m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 
-    for (int i = 0; i < 7; i++) {
+    for (int i = 0; i < RadioClockSettings::m_scopeStreams; i++) {
         m_sampleBuffer[i].resize(m_sampleBufferSize);
     }
 }
@@ -78,13 +80,14 @@ void RadioClockSink::sampleToScope(Complex sample)
         m_sampleBuffer[4][m_sampleBufferIndex] = Complex(m_data, 0.0f);
         m_sampleBuffer[5][m_sampleBufferIndex] = Complex(m_sample, 0.0f);
         m_sampleBuffer[6][m_sampleBufferIndex] = Complex(m_gotMinuteMarker, 0.0f);
+        m_sampleBuffer[7][m_sampleBufferIndex] = Complex(m_gotMarker, 0.0f);
         m_sampleBufferIndex++;
 
         if (m_sampleBufferIndex == m_sampleBufferSize)
         {
             std::vector<ComplexVector::const_iterator> vbegin;
 
-            for (int i = 0; i < 7; i++) {
+            for (int i = 0; i < RadioClockSettings::m_scopeStreams; i++) {
                 vbegin.push_back(m_sampleBuffer[i].begin());
             }
 
@@ -139,17 +142,19 @@ int RadioClockSink::bcd(int firstBit, int lastBit)
 }
 
 // Extract binary-coded decimal from time code - MSB first
-int RadioClockSink::bcdMSB(int firstBit, int lastBit)
+int RadioClockSink::bcdMSB(int firstBit, int lastBit, int skipBit1, int skipBit2)
 {
-    const int vals[] = {1, 2, 4, 8, 10, 20, 40, 80};
+    const int vals[] = {1, 2, 4, 8, 10, 20, 40, 80, 100, 200};
     int idx = 0;
     int val = 0;
     for (int i = lastBit; i >= firstBit; i--)
     {
-        if (m_timeCode[i]) {
-            val += vals[idx];
+        if ((i != skipBit1) && (i != skipBit2)) {
+            if (m_timeCode[i]) {
+                val += vals[idx];
+            }
+            idx++;
         }
-        idx++;
     }
     return val;
 }
@@ -264,6 +269,19 @@ void RadioClockSink::dcf77()
                     parityError= "Data parity error";
                 }
 
+                // Daylight savings
+                if (m_timeCode[17] && m_timeCode[16]) {
+                    m_dst = m_dst = RadioClockSettings::ENDING;
+                } else if (m_timeCode[17]) {
+                    m_dst = m_dst = RadioClockSettings::IN_EFFECT;
+                } else if (m_timeCode[18] && m_timeCode[16]) {
+                    m_dst = m_dst = RadioClockSettings::STARTING;
+                } else if (m_timeCode[18]) {
+                    m_dst = RadioClockSettings::NOT_IN_EFFECT;
+                } else {
+                    m_dst = RadioClockSettings::UNKNOWN;
+                }
+
                 if (parityError.isEmpty())
                 {
                     // Bit 17 indicates CEST rather than CET
@@ -289,7 +307,7 @@ void RadioClockSink::dcf77()
 
             if (getMessageQueueToChannel())
             {
-                RadioClock::MsgDateTime *msg = RadioClock::MsgDateTime::create(m_dateTime);
+                RadioClock::MsgDateTime *msg = RadioClock::MsgDateTime::create(m_dateTime, m_dst);
                 getMessageQueueToChannel()->push(msg);
             }
         }
@@ -406,6 +424,19 @@ void RadioClockSink::tdf(Complex &ci)
                 int month = bcd(45, 49);
                 int year = 2000 + bcd(50, 57);
 
+                // Daylight savings
+                if (m_timeCode[17] && m_timeCode[16]) {
+                    m_dst = m_dst = RadioClockSettings::ENDING;
+                } else if (m_timeCode[17]) {
+                    m_dst = m_dst = RadioClockSettings::IN_EFFECT;
+                } else if (m_timeCode[18] && m_timeCode[16]) {
+                    m_dst = m_dst = RadioClockSettings::STARTING;
+                } else if (m_timeCode[18]) {
+                    m_dst = RadioClockSettings::NOT_IN_EFFECT;
+                } else {
+                    m_dst = RadioClockSettings::UNKNOWN;
+                }
+
                 QString parityError;
                 if (!evenParity(21, 27, m_timeCode[28])) {
                     parityError = "Minute parity error";
@@ -442,7 +473,7 @@ void RadioClockSink::tdf(Complex &ci)
 
             if (getMessageQueueToChannel())
             {
-                RadioClock::MsgDateTime *msg = RadioClock::MsgDateTime::create(m_dateTime);
+                RadioClock::MsgDateTime *msg = RadioClock::MsgDateTime::create(m_dateTime, m_dst);
                 getMessageQueueToChannel()->push(msg);
             }
         }
@@ -537,6 +568,17 @@ void RadioClockSink::msf60()
                 int month = bcdMSB(25, 29);
                 int year = 2000 + bcdMSB(17, 24);
 
+                // Daylight savings
+                if (m_timeCodeB[58] && m_timeCodeB[53]) {
+                    m_dst = m_dst = RadioClockSettings::ENDING;
+                } else if (m_timeCodeB[58]) {
+                    m_dst = m_dst = RadioClockSettings::IN_EFFECT;
+                } else if (m_timeCodeB[53]) {
+                    m_dst = m_dst = RadioClockSettings::STARTING;
+                } else {
+                    m_dst = RadioClockSettings::NOT_IN_EFFECT;
+                }
+
                 QString parityError;
                 if (!oddParity(39, 51, m_timeCodeB[57])) {
                     parityError = "Hour/minute parity error";
@@ -573,7 +615,173 @@ void RadioClockSink::msf60()
 
             if (getMessageQueueToChannel())
             {
-                RadioClock::MsgDateTime *msg = RadioClock::MsgDateTime::create(m_dateTime);
+                RadioClock::MsgDateTime *msg = RadioClock::MsgDateTime::create(m_dateTime, m_dst);
+                getMessageQueueToChannel()->push(msg);
+            }
+        }
+        else if (m_periodCount == 1000)
+        {
+            m_periodCount = 0;
+        }
+    }
+
+    m_prevData = m_data;
+}
+
+// USA WWVB 60kHz
+// https://en.wikipedia.org/wiki/WWVB
+void RadioClockSink::wwvb()
+{
+    // WWVB reduces carrier by -17dB
+    // 0.2s reduction is zero bit, 0.5s reduction is one bit
+    // 0.8s reduction is a marker. Seven markers per minute (0, 9, 19, 29, 39, 49, and 59s) and for leap second
+    m_threshold = m_thresholdMovingAverage.asDouble() * m_linearThreshold; // xdB below average
+    m_data = m_magsq > m_threshold;
+
+    // Look for minute marker - two consequtive markers
+    if ((m_data == 0) && (m_prevData == 1))
+    {
+        if (   (m_highCount <= RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE * 0.3)
+            && (m_lowCount >= RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE * 0.7)
+           )
+        {
+            if (m_gotMarker && !m_gotMinuteMarker)
+            {
+                qDebug() << "RadioClockSink::wwvb - Minute marker: (low " << m_lowCount << " high " << m_highCount << ") prev period " << m_periodCount;
+                m_gotMinuteMarker = true;
+                m_second = 1;
+                m_secondMarkers = 1;
+                if (getMessageQueueToChannel()) {
+                    getMessageQueueToChannel()->push(RadioClock::MsgStatus::create("Got minute marker"));
+                }
+            }
+            else
+            {
+                qDebug() << "RadioClockSink::wwvb - Marker: (low " << m_lowCount << " high " << m_highCount << ") prev period " << m_periodCount << " second " << m_second;
+            }
+            m_gotMarker = true;
+            m_periodCount = 0;
+        }
+        else
+        {
+            m_gotMarker = false;
+        }
+        m_lowCount = 0;
+    }
+    else if ((m_data == 1) && (m_prevData == 0))
+    {
+        m_highCount = 0;
+    }
+    else if (m_data == 1)
+    {
+        m_highCount++;
+    }
+    else if (m_data == 0)
+    {
+        m_lowCount++;
+    }
+
+    m_sample = false;
+    if (m_gotMinuteMarker)
+    {
+        m_periodCount++;
+        if (m_periodCount == 100)
+        {
+            // Check we get second marker
+            m_secondMarkers += m_data == 0;
+            // If we see too many 1s instead of 0s, assume we've lost the signal
+            if ((m_second > 10) && (m_secondMarkers / m_second < 0.7))
+            {
+                qDebug() << "RadioClockSink::wwvb - Lost lock: " << m_secondMarkers << m_second;
+                m_gotMinuteMarker = false;
+                if (getMessageQueueToChannel()) {
+                    getMessageQueueToChannel()->push(RadioClock::MsgStatus::create("Looking for minute marker"));
+                }
+            }
+            m_sample = true;
+        }
+        else if (m_periodCount == 350)
+        {
+            // Get data bit A for timecode
+            m_timeCode[m_second] = !m_data; // No carrier = 1, carrier = 0
+            m_sample = true;
+        }
+        else if (m_periodCount == 950)
+        {
+            if (m_second == 59)
+            {
+                // Check markers are decoded as 1s
+                const QList<int> markerBits = {9, 19, 29, 39, 49, 59};
+                int missingMarkers = 0;
+                for (int i = 0; i < markerBits.size(); i++)
+                {
+                    if (m_timeCode[markerBits[i]] != 1)
+                    {
+                        missingMarkers++;
+                        qDebug() << "RadioClockSink::wwvb - Missing marker at bit " << markerBits[i];
+                    }
+                }
+                if (missingMarkers >= 3)
+                {
+                    m_gotMinuteMarker = false;
+                    qDebug() << "RadioClockSink::wwvb - Lost lock: Missing markers: " << missingMarkers;
+                    if (getMessageQueueToChannel()) {
+                        getMessageQueueToChannel()->push(RadioClock::MsgStatus::create("Looking for minute marker"));
+                    }
+                }
+
+                // Check 0s where expected
+                const QList<int> zeroBits = {4, 10, 11, 14, 20, 21, 24, 34, 35, 44, 54};
+                for (int i = 0; i < zeroBits.size(); i++)
+                {
+                    if (m_timeCode[zeroBits[i]] != 0) {
+                        qDebug() << "RadioClockSink::wwvb - Unexpected 1 at bit " << zeroBits[i];
+                    }
+                }
+
+                // Decode timecode to time and date
+                int minute = bcdMSB(1, 8, 4);
+                int hour = bcdMSB(12, 18, 14);
+                int dayOfYear = bcdMSB(22, 33, 24, 29);
+                int year = 2000 + bcdMSB(45, 53, 49);
+
+                // Daylight savings
+                int dst = (m_timeCode[57] << 1) | m_timeCode[58];
+                switch (dst)
+                {
+                case 0:
+                    m_dst = RadioClockSettings::NOT_IN_EFFECT;
+                    break;
+                case 1:
+                    m_dst = RadioClockSettings::ENDING;
+                    break;
+                case 2:
+                    m_dst = RadioClockSettings::STARTING;
+                    break;
+                case 3:
+                    m_dst = RadioClockSettings::IN_EFFECT;
+                    break;
+                }
+
+                // Time is UTC
+                QDate date(year, 1, 1);
+                date = date.addDays(dayOfYear - 1);
+                m_dateTime = QDateTime(date, QTime(hour, minute), Qt::OffsetFromUTC, 0);
+                if (getMessageQueueToChannel()) {
+                    getMessageQueueToChannel()->push(RadioClock::MsgStatus::create("OK"));
+                }
+
+                m_second = 0;
+            }
+            else
+            {
+                m_second++;
+                m_dateTime = m_dateTime.addSecs(1);
+            }
+
+            if (getMessageQueueToChannel())
+            {
+                RadioClock::MsgDateTime *msg = RadioClock::MsgDateTime::create(m_dateTime, m_dst);
                 getMessageQueueToChannel()->push(msg);
             }
         }
@@ -609,6 +817,8 @@ void RadioClockSink::processOneSample(Complex &ci)
         dcf77();
     } else if (m_settings.m_modulation == RadioClockSettings::TDF) {
         tdf(ci);
+    } else if (m_settings.m_modulation == RadioClockSettings::WWVB) {
+        wwvb();
     } else {
         msf60();
     }
@@ -667,6 +877,7 @@ void RadioClockSink::applySettings(const RadioClockSettings& settings, bool forc
         m_highCount = 0;
         m_zeroCount = 0;
         m_second = 0;
+        m_dst = RadioClockSettings::UNKNOWN;
         if (getMessageQueueToChannel()) {
             getMessageQueueToChannel()->push(RadioClock::MsgStatus::create("Looking for minute marker"));
         }

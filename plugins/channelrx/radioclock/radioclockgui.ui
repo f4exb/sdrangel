@@ -368,6 +368,11 @@
           <string>TDF</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>WWVB</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>
@@ -537,6 +542,32 @@
       </item>
       <item>
        <widget class="QLineEdit" name="status">
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Demodulator status</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="dstLabel">
+        <property name="text">
+         <string>Daylight savings</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="dst">
         <property name="minimumSize">
          <size>
           <width>100</width>
