@@ -54,25 +54,33 @@ Specifies how messages are decoded in the Message column in the table:
 
 The table has Numeric and Alphanumeric columns which always display the corresponding decode.
 
-<h3>9: Find</h3>
+<h3>9: Character encoding</h3>
+
+Click to open the character encoding dialog, which allows a mapping from the received 7-bit alphanumeric characters to Unicode.
+
+![Character encoding dialog](../../../doc/img/PagerDemod_plugin_charset.png)
+
+Each row contains a mapping from a 7-bit value to a Unicode code point. Values should be entered in hexideicmal
+
+<h3>10: Find</h3>
 
 Entering a regular expression in the Find field displays only messages where the address matches the given regular expression.
 
-<h3>10: Clear Messages from table</h3>
+<h3>11: Clear Messages from table</h3>
 
 Pressing this button clears all messages from the table.
 
-<h3>11: UDP</h3>
+<h3>12: UDP</h3>
 
 When checked, received messages are forwarded to the specified UDP address (12) and port (13).
 
 The messages are forwarded as null terminated ASCII strings, in the format: data time address function alpha numeric
 
-<h3>12: UDP address</h3>
+<h3>13: UDP address</h3>
 
 IP address of the host to forward received messages to via UDP.
 
-<h3>13: UDP port</h3>
+<h3>14: UDP port</h3>
 
 UDP port number to forward received messages to.
 

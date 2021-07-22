@@ -17,6 +17,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QColor>
+#include <QDataStream>
 
 #include "dsp/dspengine.h"
 #include "util/simpleserializer.h"
@@ -51,6 +52,7 @@ void PagerDemodSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
+    m_rightToLeft = 0;
 
     for (int i = 0; i < PAGERDEMOD_MESSAGE_COLUMNS; i++)
     {
@@ -86,6 +88,9 @@ QByteArray PagerDemodSettings::serialize() const
     s.writeU32(19, m_reverseAPIDeviceIndex);
     s.writeU32(20, m_reverseAPIChannelIndex);
     s.writeBlob(21, m_scopeGUI->serialize());
+    s.writeBool(22, m_rightToLeft);
+    s.writeBlob(23, serializeIntList(m_sevenbit));
+    s.writeBlob(24, serializeIntList(m_unicode));
 
     for (int i = 0; i < PAGERDEMOD_MESSAGE_COLUMNS; i++) {
         s.writeS32(100 + i, m_messageColumnIndexes[i]);
@@ -112,6 +117,7 @@ bool PagerDemodSettings::deserialize(const QByteArray& data)
         QByteArray bytetmp;
         uint32_t utmp;
         QString strtmp;
+        QByteArray blob;
 
         d.readS32(1, &m_inputFrequencyOffset, 0);
         d.readFloat(2, &m_rfBandwidth, 20000.0f);
@@ -154,6 +160,11 @@ bool PagerDemodSettings::deserialize(const QByteArray& data)
             d.readBlob(21, &bytetmp);
             m_scopeGUI->deserialize(bytetmp);
         }
+        d.readBool(22, &m_rightToLeft, false);
+        d.readBlob(23, &blob);
+        deserializeIntList(blob, m_sevenbit);
+        d.readBlob(24, &blob);
+        deserializeIntList(blob, m_unicode);
 
         for (int i = 0; i < PAGERDEMOD_MESSAGE_COLUMNS; i++) {
             d.readS32(100 + i, &m_messageColumnIndexes[i], i);
@@ -171,4 +182,18 @@ bool PagerDemodSettings::deserialize(const QByteArray& data)
     }
 }
 
+QByteArray PagerDemodSettings::serializeIntList(const QList<qint32>& ints) const
+{
+    QByteArray data;
+    QDataStream *stream = new QDataStream(&data,  QIODevice::WriteOnly);
+    (*stream) << ints;
+    delete stream;
+    return data;
+}
 
+void PagerDemodSettings::deserializeIntList(const QByteArray& data, QList<qint32>& ints)
+{
+    QDataStream *stream = new QDataStream(data);
+    (*stream) >> ints;
+    delete stream;
+}
