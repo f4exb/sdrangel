@@ -271,11 +271,11 @@ void RadioClockSink::dcf77()
 
                 // Daylight savings
                 if (m_timeCode[17] && m_timeCode[16]) {
-                    m_dst = m_dst = RadioClockSettings::ENDING;
+                    m_dst = RadioClockSettings::ENDING;
                 } else if (m_timeCode[17]) {
-                    m_dst = m_dst = RadioClockSettings::IN_EFFECT;
+                    m_dst = RadioClockSettings::IN_EFFECT;
                 } else if (m_timeCode[18] && m_timeCode[16]) {
-                    m_dst = m_dst = RadioClockSettings::STARTING;
+                    m_dst = RadioClockSettings::STARTING;
                 } else if (m_timeCode[18]) {
                     m_dst = RadioClockSettings::NOT_IN_EFFECT;
                 } else {
@@ -426,11 +426,11 @@ void RadioClockSink::tdf(Complex &ci)
 
                 // Daylight savings
                 if (m_timeCode[17] && m_timeCode[16]) {
-                    m_dst = m_dst = RadioClockSettings::ENDING;
+                    m_dst = RadioClockSettings::ENDING;
                 } else if (m_timeCode[17]) {
-                    m_dst = m_dst = RadioClockSettings::IN_EFFECT;
+                    m_dst = RadioClockSettings::IN_EFFECT;
                 } else if (m_timeCode[18] && m_timeCode[16]) {
-                    m_dst = m_dst = RadioClockSettings::STARTING;
+                    m_dst = RadioClockSettings::STARTING;
                 } else if (m_timeCode[18]) {
                     m_dst = RadioClockSettings::NOT_IN_EFFECT;
                 } else {
@@ -570,11 +570,11 @@ void RadioClockSink::msf60()
 
                 // Daylight savings
                 if (m_timeCodeB[58] && m_timeCodeB[53]) {
-                    m_dst = m_dst = RadioClockSettings::ENDING;
+                    m_dst = RadioClockSettings::ENDING;
                 } else if (m_timeCodeB[58]) {
-                    m_dst = m_dst = RadioClockSettings::IN_EFFECT;
+                    m_dst = RadioClockSettings::IN_EFFECT;
                 } else if (m_timeCodeB[53]) {
-                    m_dst = m_dst = RadioClockSettings::STARTING;
+                    m_dst = RadioClockSettings::STARTING;
                 } else {
                     m_dst = RadioClockSettings::NOT_IN_EFFECT;
                 }
