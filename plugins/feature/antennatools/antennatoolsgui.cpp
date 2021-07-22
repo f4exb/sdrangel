@@ -157,6 +157,7 @@ void AntennaToolsGUI::displaySettings()
     ui->dishDepth->setValue(m_settings.m_dishDepth);
     ui->dishLengthUnits->setCurrentIndex((int)m_settings.m_dishLengthUnits);
     ui->dishEfficiency->setValue(m_settings.m_dishEfficiency);
+    ui->dishSurfaceError->setValue(m_settings.m_dishSurfaceError);
     blockApplySettings(false);
     calcDipoleLength();
     calcDishFocalLength();
@@ -372,6 +373,17 @@ double AntennaToolsGUI::dishLengthMetres(double length) const
     }
 }
 
+double AntennaToolsGUI::dishMetresToLength(double m) const
+{
+    if (m_settings.m_dishLengthUnits == AntennaToolsSettings::CM) {
+        return m * 100.0;
+    } else if (m_settings.m_dishLengthUnits == AntennaToolsSettings::M) {
+        return m;
+    } else {
+        return Units::metresToFeet(m);
+    }
+}
+
 double AntennaToolsGUI::dishDiameterMetres() const
 {
     return dishLengthMetres(m_settings.m_dishDiameter);
@@ -382,11 +394,16 @@ double AntennaToolsGUI::dishDepthMetres() const
     return dishLengthMetres(m_settings.m_dishDepth);
 }
 
+double AntennaToolsGUI::dishSurfaceErrorMetres() const
+{
+    return dishLengthMetres(m_settings.m_dishSurfaceError);
+}
+
 void AntennaToolsGUI::calcDishFocalLength()
 {
     double d = dishDiameterMetres();
     double focalLength = d * d / (16.0 * dishDepthMetres());
-    ui->dishFocalLength->setValue(focalLength);
+    ui->dishFocalLength->setValue(dishMetresToLength(focalLength));
     double fd = focalLength / d;
     ui->dishFD->setValue(fd);
 }
@@ -401,6 +418,9 @@ void AntennaToolsGUI::calcDishGain()
 {
     double t = M_PI * dishDiameterMetres() / dishLambda();
     double gainDB = 10.0 * log10((m_settings.m_dishEfficiency/100.0) * (t*t));
+    // Adjust for surface error using Ruze's equation
+    t = dishSurfaceErrorMetres() / dishLambda();
+    gainDB = gainDB - 685.81 * t * t;
     ui->dishGain->setValue(gainDB);
 }
 
@@ -454,6 +474,13 @@ void AntennaToolsGUI::on_dishDepth_valueChanged(double value)
 void AntennaToolsGUI::on_dishEfficiency_valueChanged(int value)
 {
     m_settings.m_dishEfficiency = value;
+    applySettings();
+    calcDishGain();
+}
+
+void AntennaToolsGUI::on_dishSurfaceError_valueChanged(double value)
+{
+    m_settings.m_dishSurfaceError= value;
     applySettings();
     calcDishGain();
 }

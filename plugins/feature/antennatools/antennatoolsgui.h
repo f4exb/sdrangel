@@ -76,9 +76,10 @@ private:
     void calcDishGain();
     double dishLambda() const;
     double dishLengthMetres(double length) const;
+    double dishMetresToLength(double m) const;
     double dishDiameterMetres() const;
     double dishDepthMetres() const;
-
+    double dishSurfaceErrorMetres() const;
     double getDeviceSetFrequencyMHz(int index);
 
 private slots:
@@ -94,6 +95,7 @@ private slots:
     void on_dishLengthUnits_currentIndexChanged(int index);
     void on_dishDepth_valueChanged(double value);
     void on_dishEfficiency_valueChanged(int value);
+    void on_dishSurfaceError_valueChanged(double value);
     void onMenuDialogCalled(const QPoint &p);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void handleInputMessages();

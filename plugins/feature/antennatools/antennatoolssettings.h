@@ -41,6 +41,7 @@ struct AntennaToolsSettings
     double m_dishDepth;
     int m_dishEfficiency;
     LengthUnits m_dishLengthUnits;
+    double m_dishSurfaceError;
 
     QString m_title;
     quint32 m_rgbColor;
