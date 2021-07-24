@@ -68,19 +68,23 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        QDateTime getDateTime() const { return m_dateTime; }
 
-        static MsgDateTime* create(QDateTime dateTime)
+        QDateTime getDateTime() const { return m_dateTime; }
+        RadioClockSettings::DST getDST() const { return m_dst; }
+
+        static MsgDateTime* create(QDateTime dateTime, RadioClockSettings::DST dst = RadioClockSettings::DST::UNKNOWN)
         {
-            return new MsgDateTime(dateTime);
+            return new MsgDateTime(dateTime, dst);
         }
 
     private:
         QDateTime m_dateTime;
+        RadioClockSettings::DST m_dst;
 
-        MsgDateTime(QDateTime dateTime) :
+        MsgDateTime(QDateTime dateTime, RadioClockSettings::DST dst) :
             Message(),
-            m_dateTime(dateTime)
+            m_dateTime(dateTime),
+            m_dst(dst)
         {
         }
     };

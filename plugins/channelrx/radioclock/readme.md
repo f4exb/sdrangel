@@ -7,8 +7,9 @@ This plugin can be used to receive the time and date as broadcast on Low Frequen
 * [MSF](https://en.wikipedia.org/wiki/Time_from_NPL_(MSF)) - UK - 60kHz
 * [DCF77](https://en.wikipedia.org/wiki/DCF77) - Germany - 77.5kHz
 * [TDF](https://en.wikipedia.org/wiki/TDF_time_signal) - France - 162kHz
+* [WWVB](https://en.wikipedia.org/wiki/WWVB) - USA - 60kHz
 
-If you'd like other transmitters to be supported (such as WWVB), please upload a .sdriq file to SDRangel's [github issue tracker](https://github.com/f4exb/sdrangel/issues).
+If you'd like other transmitters to be supported, please upload a .sdriq file to SDRangel's [github issue tracker](https://github.com/f4exb/sdrangel/issues).
 
 Typically, it will take two minutes before the time is able to be displayed (up to one minute to find the minute marker, then another minute to receive the timecode).
 
@@ -38,7 +39,7 @@ This specifies the bandwidth of a LPF that is applied to the input signal to lim
 
 <h3>5: TH - Threshold</h3>
 
-For MSF and DCF77, specifies the threshold in dB below the average carrier power level that determines a binary 0 or 1.
+For MSF, DCF77 and WWVB, specifies the threshold in dB below the average carrier power level that determines a binary 0 or 1.
 
 <h3>6: Modulation</h3>
 
@@ -47,12 +48,13 @@ Specifies the modulation and timecode encoding used:
 * MSF - OOK (On-off keying)
 * DCF77 - OOK (On-off keying)
 * TDF - PM (Phase modulation)
+* WWVB - OOK (On-off keying)
 
 <h3>7: Display Time Zone</h3>
 
 Specifies the time zone used to display the received time. This can be:
 
-* Broadcast - the time is displayed as broadcast (which is typically the time zone of the country the signal is broadcast from, adjusted for summer time).
+* Broadcast - the time is displayed as broadcast (which is typically the time zone of the country the signal is broadcast from, adjusted for summer time. WWVB broadcasts UTC).
 * Local - the time is converted to the local time (as determined by your operating system's time zone).
 * UTC - the time is converted to Coordinated Universal Time.
 
@@ -77,6 +79,17 @@ The date and time fields are only valid when the status indicates OK.
 
 If while in the OK state several second markers are not detected, the status will return to Looking for minute marker.
 
+<h3>11: Daylight Savings</h3>
+
+Displays the daylight savings state:
+
+* In effect
+* Not in effect
+* Starting
+* Ending
+
+For MSF, DCF77 and TDF, starting/ending is indicated one hour before the change. For WWVB it is set for the whole day.
+
 <h3>Waveforms</h3>
 
 The scope shows how various variables within the demodulator vary with time. These can be used to help debug operation of the demodulator.
@@ -90,6 +103,7 @@ The signals available include:
 - Data - Demodulated data. For MSF/DCF77, this data=MagSq>TH.
 - Samp - Indicates when data is sampled (either for the second marker or for a timecode data bit).
 - GotMM - Indicates whether the minute marker has been received. Cleared when synchronization to second marker is lost.
+- GotM - Indicates when a marker is detected. For WWVB only.
 
 As an example of how this can be used, we can plot the MagSq as X and the calculated TH as Y, which can help to set the value of the
 TH setting to an approproate level.

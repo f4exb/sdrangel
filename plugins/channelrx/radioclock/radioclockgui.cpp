@@ -104,6 +104,24 @@ bool RadioClockGUI::handleMessage(const Message& message)
         RadioClock::MsgDateTime& report = (RadioClock::MsgDateTime&) message;
         m_dateTime = report.getDateTime();
         displayDateTime();
+        switch (report.getDST())
+        {
+        case RadioClockSettings::UNKNOWN:
+            ui->dst->setText("");
+            break;
+        case RadioClockSettings::NOT_IN_EFFECT:
+            ui->dst->setText("Not in effect");
+            break;
+        case RadioClockSettings::IN_EFFECT:
+            ui->dst->setText("In effect");
+            break;
+        case RadioClockSettings::ENDING:
+            ui->dst->setText("Ending");
+            break;
+        case RadioClockSettings::STARTING:
+            ui->dst->setText("Starting");
+            break;
+        }
         return true;
     }
     else if (RadioClock::MsgStatus::match(message))
@@ -257,11 +275,11 @@ RadioClockGUI::RadioClockGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
 
     m_scopeVis = m_radioClock->getScopeSink();
     m_scopeVis->setGLScope(ui->glScope);
-    m_scopeVis->setNbStreams(7);
+    m_scopeVis->setNbStreams(RadioClockSettings::m_scopeStreams);
     m_scopeVis->setLiveRate(RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE);
     ui->glScope->connectTimer(MainCore::instance()->getMasterTimer());
     ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
-    ui->scopeGUI->setStreams(QStringList({"IQ", "MagSq", "TH", "FM", "Data", "Samp", "GotMM"}));
+    ui->scopeGUI->setStreams(QStringList({"IQ", "MagSq", "TH", "FM", "Data", "Samp", "GotMM", "GotM"}));
     ui->scopeGUI->setSampleRate(RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE);
 
     ui->status->setText("Looking for minute marker");

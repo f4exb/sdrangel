@@ -109,9 +109,9 @@ private:
 
     MessageQueue *m_messageQueueToChannel;
 
-    MovingAverageUtil<Real, double, 40> m_movingAverage;    //!< Moving average has sharpest step response of LPFs
+    MovingAverageUtil<Real, double, 80> m_movingAverage;    //!< Moving average has sharpest step response of LPFs
 
-    MovingAverageUtil<Real, double, RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE> m_thresholdMovingAverage;  // Average over 1 second
+    MovingAverageUtil<Real, double, 10*RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE> m_thresholdMovingAverage;  // Average over 10 seconds (because VVWB markers are 80% off)
 
     int m_data;             //!< Demod data before clocking
     int m_prevData;         //!< Previous value of m_data
@@ -129,6 +129,7 @@ private:
 
     Real m_threshold;       //!< Current threshold for display on scope
     Real m_linearThreshold; //!< settings.m_threshold as a linear value rather than dB
+    RadioClockSettings::DST m_dst; //!< Daylight savings time status
 
     // MSF demod state
     int m_timeCodeB[61];
@@ -138,15 +139,18 @@ private:
     int m_zeroCount;
     MovingAverageUtil<Real, double, 10> m_fmDemodMovingAverage;
     int m_bits[4];
-    ComplexVector m_sampleBuffer[7];
+    ComplexVector m_sampleBuffer[RadioClockSettings::m_scopeStreams];
     static const int m_sampleBufferSize = 60;
     int m_sampleBufferIndex;
+
+    // WWVB state
+    bool m_gotMarker;       //!< Marker in previous second
 
     void processOneSample(Complex &ci);
     MessageQueue *getMessageQueueToChannel() { return m_messageQueueToChannel; }
     void sampleToScope(Complex sample);
     int bcd(int firstBit, int lastBit);
-    int bcdMSB(int firstBit, int lastBit);
+    int bcdMSB(int firstBit, int lastBit, int skipBit1=0, int skipBit2=0);
     int xorBits(int firstBit, int lastBit);
     bool evenParity(int firstBit, int lastBit, int parityBit);
     bool oddParity(int firstBit, int lastBit, int parityBit);
@@ -154,6 +158,7 @@ private:
     void dcf77();
     void tdf(Complex &ci);
     void msf60();
+    void wwvb();
 };
 
 #endif // INCLUDE_RADIOCLOCKSINK_H
