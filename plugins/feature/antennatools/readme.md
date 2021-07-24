@@ -77,11 +77,17 @@ Select how the frequency is chosen:
 
 Specifies the efficiency of the dish in %. When entered, the calculator will calculate the gain (16), according to the entered frequency (7) and dimensions (10 & 11).
 
-<h3>10: Diameter</h3>
+This value should include losses for things like spillover, illumination loss, feed and support blockage, focus errors.
 
-When entering the diameter of the dish, the calculator will calculate the focal length (13), f/D ratio (14), beamwidth (15) and gain (16).
+<h3>10: Surface Error</h3>
 
-<h3>11: Dish Length Units</h3>
+Specifies the RMS surface error of the dish in length units (as determined by (12)).
+
+<h3>11: Diameter</h3>
+
+When entering the diameter of the dish, the calculator will calculate the focal length (14), f/D ratio (15), beamwidth (16) and gain (17).
+
+<h3>12: Dish Length Units</h3>
 
 This field selects the units lengths are entered and displayed in. This can be:
 
@@ -89,28 +95,30 @@ This field selects the units lengths are entered and displayed in. This can be:
 * m - metres.
 * feet - feet.
 
-<h3>12: Depth</h3>
+<h3>13: Depth</h3>
 
-When entering the depth of the dish, the calculator will calculate the focal length (13) and f/D ratio (14).
+When entering the depth of the dish, the calculator will calculate the focal length (14) and f/D ratio (15).
 
-<h3>13: Focal length</h3>
+<h3>14: Focal length</h3>
 
 Displays the calculated focal length.
 
 Focal length is calculated as: f=d^2/(16*D)
 
-<h3>14: f/D Ratio</h3>
+<h3>15: f/D Ratio</h3>
 
 Displays the calculated focal length to diameter ratio.
 
-<h3>15: Beamwidth</h3>
+<h3>16: Beamwidth</h3>
 
 Displays the halfpower (-3dB) beamwidth.
 
 Beamwidth is calculated as: 70*lambda/D.
 
-<h3>16: Gain</h3>
+<h3>17: Gain</h3>
 
 Displays the calculated gain in dB.
 
-The gain is calculated as: 10\*log10(eff/100.0\*(pi*D/lambda)^2)
+The nominal gain is calculated as: g0=10\*log10(eff/100.0\*(pi*D/lambda)^2)
+
+The gain is then adjusted for surface error with Ruze's equation: g=g0-685.81*(e/lambda)^2

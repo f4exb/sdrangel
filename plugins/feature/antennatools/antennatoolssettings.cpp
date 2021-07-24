@@ -41,6 +41,7 @@ void AntennaToolsSettings::resetToDefaults()
     m_dishDepth = 30.0;
     m_dishEfficiency = 60;
     m_dishLengthUnits = CM;
+    m_dishSurfaceError = 0.0;
 
     m_title = "Antenna Tools";
     m_rgbColor = QColor(225, 25, 99).rgb();
@@ -66,6 +67,7 @@ QByteArray AntennaToolsSettings::serialize() const
     s.writeDouble(8, m_dishDepth);
     s.writeS32(9, m_dishEfficiency);
     s.writeS32(10, (int)m_dishLengthUnits);
+    s.writeDouble(18, m_dishSurfaceError);
 
     s.writeString(11, m_title);
     s.writeU32(12, m_rgbColor);
@@ -105,6 +107,7 @@ bool AntennaToolsSettings::deserialize(const QByteArray& data)
         d.readDouble(8, &m_dishDepth, 30.0);
         d.readS32(9, &m_dishEfficiency, 60);
         d.readS32(10, (int*)&m_dishLengthUnits, (int)CM);
+        d.readDouble(18, &m_dishSurfaceError, 0.0);
 
         d.readString(11, &m_title, "Antenna Tools");
         d.readU32(12, &m_rgbColor, QColor(225, 25, 99).rgb());
