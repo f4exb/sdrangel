@@ -1148,7 +1148,7 @@ void GLSpectrum::drawMarkers()
 			QPointF ypoint = m_histogramMarkers.at(i).m_point;
 			QString powerStr = m_histogramMarkers.at(i).m_powerStr;
 
-			if (m_histogramMarkers.at(i).m_markerType == HistogramMarkerTypePower)
+			if (m_histogramMarkers.at(i).m_markerType == SpectrumHistogramMarkerTypePower)
 			{
 				ypoint.ry() =
 					(m_powerScale.getRangeMax() - m_currentSpectrum[m_histogramMarkers.at(i).m_fftBin]) / m_powerScale.getRange();
@@ -1195,10 +1195,10 @@ void GLSpectrum::drawMarkers()
             }
             else
             {
-				float power0 = m_histogramMarkers.at(0).m_markerType == HistogramMarkerTypePower ?
+				float power0 = m_histogramMarkers.at(0).m_markerType == SpectrumHistogramMarkerTypePower ?
 					m_currentSpectrum[m_histogramMarkers.at(0).m_fftBin] :
 					m_histogramMarkers.at(0).m_power;
-				float poweri = m_histogramMarkers.at(i).m_markerType == HistogramMarkerTypePower ?
+				float poweri = m_histogramMarkers.at(i).m_markerType == SpectrumHistogramMarkerTypePower ?
 					m_currentSpectrum[m_histogramMarkers.at(i).m_fftBin] :
 					m_histogramMarkers.at(i).m_power;
 				QString deltaPowerStr = displayScaledF(
@@ -2178,7 +2178,7 @@ void GLSpectrum::mousePressEvent(QMouseEvent* event)
             {
                 if (m_histogramMarkers.size() < 2)
                 {
-                    m_histogramMarkers.push_back(HistogramMarker());
+                    m_histogramMarkers.push_back(SpectrumHistogramMarker());
                     m_histogramMarkers.back().m_point = pHis;
                     m_histogramMarkers.back().m_frequency = frequency;
 					m_histogramMarkers.back().m_fftBin = fftBin;
@@ -2223,7 +2223,7 @@ void GLSpectrum::mousePressEvent(QMouseEvent* event)
             {
                 if (m_waterfallMarkers.size() < 2)
                 {
-                    m_waterfallMarkers.push_back(WaterfallMarker());
+                    m_waterfallMarkers.push_back(SpectrumWaterfallMarker());
                     m_waterfallMarkers.back().m_point = pWat;
                     m_waterfallMarkers.back().m_frequency = frequency;
                     m_waterfallMarkers.back().m_frequencyStr = displayScaled(

@@ -147,6 +147,7 @@ set(sdrgui_HEADERS
     gui/scaleengine.h
     gui/scaledimage.h
     gui/sdrangelsplash.h
+    gui/spectrummarkers.h
     gui/tickedslider.h
     gui/transverterbutton.h
     gui/transverterdialog.h
