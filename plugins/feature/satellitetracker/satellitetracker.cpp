@@ -990,3 +990,19 @@ void SatelliteTracker::updateSatData()
     else
         qDebug() << "SatelliteTracker::updateSatData: update in progress";
 }
+
+// Redirect requests for current time via these methods, so it can be adjusted when testing
+
+QDateTime SatelliteTracker::currentDateTimeUtc()
+{
+    QDateTime now = QDateTime::currentDateTimeUtc();
+    //now = now.addSecs(26*60);
+    return now;
+}
+
+QDateTime SatelliteTracker::currentDateTime()
+{
+    QDateTime now = QDateTime::currentDateTime();
+    //now = now.addSecs(26*60);
+    return now;
+}
