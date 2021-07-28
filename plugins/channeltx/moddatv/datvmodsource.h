@@ -70,6 +70,7 @@ public:
     void seekTsFileStream(int seekPercentage);
     void reportTsFileSourceStreamTiming();
     void reportUDPBitrate();
+    void reportUDPBufferUtilization();
 
 private:
     uint8_t m_mpegTS[188];                                      //!< MPEG transport stream packet
@@ -99,6 +100,7 @@ private:
     uint8_t m_udpBuffer[188*10];
     int m_udpBufferIdx;                                         //!< TS frame index into buffer
     int m_udpBufferCount;                                       //!< Number of TS frames in buffer
+    int m_udpMaxBufferUtilization;
 
     int m_sampleRate;
     int m_channelSampleRate;
@@ -131,6 +133,7 @@ private:
     int getTSBitrate(const QString& filename);
     int getDVBSDataBitrate(const DATVModSettings& settings);
     void checkBitrates();
+    void updateUDPBufferUtilization();
 
     MessageQueue *getMessageQueueToGUI() { return m_messageQueueToGUI; }
 

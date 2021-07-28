@@ -568,6 +568,23 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="Line" name="udpBufferUtilizationLine">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="udpBufferUtilization">
+        <property name="toolTip">
+         <string>Indicates how full the UDP receive buffer is. If this reaches 100%, packets will likely be dropped.</string>
+        </property>
+        <property name="text">
+         <string>0%</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item>

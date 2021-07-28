@@ -108,6 +108,8 @@ struct DATVModSettings
     static DATVModulation mapModulation(const QString& string);
     static QString mapModulation(DATVModulation modulation);
 
+    static const int m_udpBufferSize = 5000000;
+
 };
 
 #endif /* PLUGINS_CHANNELTX_MODDATV_DATVMODSETTINGS_H_ */

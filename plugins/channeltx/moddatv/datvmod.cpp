@@ -52,6 +52,7 @@ MESSAGE_CLASS_DEFINITION(DATVMod::MsgConfigureTsFileName, Message)
 MESSAGE_CLASS_DEFINITION(DATVMod::MsgConfigureTsFileSourceSeek, Message)
 MESSAGE_CLASS_DEFINITION(DATVMod::MsgConfigureTsFileSourceStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(DATVMod::MsgGetUDPBitrate, Message)
+MESSAGE_CLASS_DEFINITION(DATVMod::MsgGetUDPBufferUtilization, Message)
 
 const char* const DATVMod::m_channelIdURI = "sdrangel.channeltx.moddatv";
 const char* const DATVMod::m_channelId = "DATVMod";
@@ -182,6 +183,12 @@ bool DATVMod::handleMessage(const Message& cmd)
     else if (MsgGetUDPBitrate::match(cmd))
     {
         m_basebandSource->getInputMessageQueue()->push(DATVMod::MsgGetUDPBitrate::create());
+
+        return true;
+    }
+    else if (MsgGetUDPBufferUtilization::match(cmd))
+    {
+        m_basebandSource->getInputMessageQueue()->push(DATVMod::MsgGetUDPBufferUtilization::create());
 
         return true;
     }

@@ -22,6 +22,7 @@ MESSAGE_CLASS_DEFINITION(DATVModReport::MsgReportTsFileSourceStreamTiming, Messa
 MESSAGE_CLASS_DEFINITION(DATVModReport::MsgReportTsFileSourceStreamData, Message)
 MESSAGE_CLASS_DEFINITION(DATVModReport::MsgReportRates, Message)
 MESSAGE_CLASS_DEFINITION(DATVModReport::MsgReportUDPBitrate, Message)
+MESSAGE_CLASS_DEFINITION(DATVModReport::MsgReportUDPBufferUtilization, Message)
 
 DATVModReport::DATVModReport()
 { }
