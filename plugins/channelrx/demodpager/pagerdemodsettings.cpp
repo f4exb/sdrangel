@@ -52,7 +52,7 @@ void PagerDemodSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
-    m_rightToLeft = 0;
+    m_reverse = false;
 
     for (int i = 0; i < PAGERDEMOD_MESSAGE_COLUMNS; i++)
     {
@@ -88,7 +88,7 @@ QByteArray PagerDemodSettings::serialize() const
     s.writeU32(19, m_reverseAPIDeviceIndex);
     s.writeU32(20, m_reverseAPIChannelIndex);
     s.writeBlob(21, m_scopeGUI->serialize());
-    s.writeBool(22, m_rightToLeft);
+    s.writeBool(22, m_reverse);
     s.writeBlob(23, serializeIntList(m_sevenbit));
     s.writeBlob(24, serializeIntList(m_unicode));
 
@@ -160,7 +160,7 @@ bool PagerDemodSettings::deserialize(const QByteArray& data)
             d.readBlob(21, &bytetmp);
             m_scopeGUI->deserialize(bytetmp);
         }
-        d.readBool(22, &m_rightToLeft, false);
+        d.readBool(22, &m_reverse, false);
         d.readBlob(23, &blob);
         deserializeIntList(blob, m_sevenbit);
         d.readBlob(24, &blob);

@@ -60,7 +60,7 @@ struct PagerDemodSettings
     uint16_t m_reverseAPIChannelIndex;
     Serializable *m_scopeGUI;
 
-    bool m_rightToLeft;                 //!< Whether characters are right to left or left to right
+    bool m_reverse;                 //!< Whether characters should be reversed, for right-to-left reading order
     QList<qint32> m_sevenbit;
     QList<qint32> m_unicode;
 

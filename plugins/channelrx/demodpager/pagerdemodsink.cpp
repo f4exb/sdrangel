@@ -284,7 +284,7 @@ void PagerDemodSink::decodeBatch()
                         m_alphaMessage[i] = c;
                     }
                     // Reverse reading order, if required
-                    if (m_settings.m_rightToLeft) {
+                    if (m_settings.m_reverse) {
                         std::reverse(m_alphaMessage.begin(), m_alphaMessage.end());
                     }
                     // Send to channel and GUI

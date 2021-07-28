@@ -65,33 +65,13 @@
       </spacer>
      </item>
      <item>
-      <widget class="QLabel" name="readingOrderLabel">
-       <property name="text">
-        <string>Reading Order</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="readingOrder">
-       <property name="minimumSize">
-        <size>
-         <width>100</width>
-         <height>0</height>
-        </size>
-       </property>
+      <widget class="QCheckBox" name="reverse">
        <property name="toolTip">
-        <string>Specify the order in which characters should be displayed</string>
+        <string>Reverse the order of the characters received</string>
        </property>
-       <item>
-        <property name="text">
-         <string>Left-to-right</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Right-to-left</string>
-        </property>
-       </item>
+       <property name="text">
+        <string>Reverse order</string>
+       </property>
       </widget>
      </item>
     </layout>
