@@ -153,6 +153,9 @@ public:
             const QStringList& featureSettingsKeys,
             SWGSDRangel::SWGFeatureSettings& response);
 
+    static QDateTime currentDateTimeUtc();
+    static QDateTime currentDateTime();
+
     static const char* const m_featureIdURI;
     static const char* const m_featureId;
 

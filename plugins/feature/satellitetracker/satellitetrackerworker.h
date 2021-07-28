@@ -48,11 +48,7 @@ public:
         m_satState.m_name = name;
     }
 
-    bool hasAOS()
-    {
-        QDateTime currentTime = QDateTime::currentDateTime();
-        return (m_aos <= currentTime) && (m_los > currentTime);
-    }
+    bool hasAOS();
 
 protected:
     QString m_name;             // Name of the satellite

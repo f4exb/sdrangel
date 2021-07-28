@@ -263,7 +263,7 @@ SatelliteTrackerGUI::SatelliteTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *fea
     ui->passChart->setChart(&m_emptyChart);
     ui->passChart->setRenderHint(QPainter::Antialiasing);
 
-    ui->dateTime->setDateTime(QDateTime::currentDateTime());
+    ui->dateTime->setDateTime(SatelliteTracker::currentDateTime());
 
     // Use My Position from preferences, if none set
     if ((m_settings.m_latitude == 0.0) && (m_settings.m_longitude == 0.0))
@@ -595,7 +595,7 @@ void SatelliteTrackerGUI::updateTimeToAOS()
         ui->aos->setText("Now");
     else if (m_nextTargetAOS.isValid())
     {
-        QDateTime currentTime = QDateTime::currentDateTime();
+        QDateTime currentTime = SatelliteTracker::currentDateTime();
         int secondsToAOS = m_nextTargetAOS.toSecsSinceEpoch() - currentTime.toSecsSinceEpoch();
         if (secondsToAOS > 0)
         {
@@ -824,7 +824,7 @@ void SatelliteTrackerGUI::plotPolarChart()
 
         QDateTime currentTime;
         if (m_settings.m_dateTime == "")
-            currentTime = QDateTime::currentDateTimeUtc();
+            currentTime = SatelliteTracker::currentDateTimeUtc();
         else if (m_settings.m_utc)
             currentTime = QDateTime::fromString(m_settings.m_dateTime, Qt::ISODateWithMs);
         else
@@ -854,7 +854,7 @@ void SatelliteTrackerGUI::plotPolarChart()
         // Possibly geostationary, just plot current position
         QDateTime currentTime;
         if (m_settings.m_dateTime == "")
-            currentTime = QDateTime::currentDateTimeUtc();
+            currentTime = SatelliteTracker::currentDateTimeUtc();
         else if (m_settings.m_utc)
             currentTime = QDateTime::fromString(m_settings.m_dateTime, Qt::ISODateWithMs);
         else
