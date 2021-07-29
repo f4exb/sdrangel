@@ -125,6 +125,27 @@ public:
         { }
     };
 
+    class MsgReportUDPBufferUtilization : public Message
+    {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        float getUtilization() const { return m_utilization; }
+
+        static MsgReportUDPBufferUtilization* create(int utilization)
+        {
+            return new MsgReportUDPBufferUtilization(utilization);
+        }
+
+    protected:
+        float m_utilization;
+
+        MsgReportUDPBufferUtilization(int utilization) :
+            Message(),
+            m_utilization(utilization)
+        { }
+    };
+
 public:
     DATVModReport();
     ~DATVModReport();

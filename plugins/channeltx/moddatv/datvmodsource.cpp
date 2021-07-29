@@ -43,6 +43,11 @@ extern "C"
 #include "datvmodreport.h"
 #include "datvmodsource.h"
 
+#ifdef _WIN32
+#include <winsock.h>
+#pragma comment(lib, "Ws2_32.lib")
+#endif
+
 const int DATVModSource::m_levelNbSamples = 10000; // every 10ms
 
 // Get transport stream bitrate from file
@@ -223,6 +228,7 @@ DATVModSource::DATVModSource() :
     m_udpByteCount(0),
     m_udpBufferIdx(0),
     m_udpBufferCount(0),
+    m_udpMaxBufferUtilization(0),
     m_sampleRate(0),
     m_channelSampleRate(1000000),
     m_channelFrequencyOffset(0),
@@ -337,6 +343,8 @@ void DATVModSource::modulateSample()
                 && ((m_udpSocket != nullptr) && m_udpSocket->hasPendingDatagrams())
             )
             {
+                updateUDPBufferUtilization();
+
                 // Get transport stream packets from UDP - buffer if more than one
                 QNetworkDatagram datagram = m_udpSocket->receiveDatagram();
                 QByteArray ba = datagram.data();
@@ -577,6 +585,28 @@ void DATVModSource::reportUDPBitrate()
     m_udpByteCount = 0;
 }
 
+void DATVModSource::updateUDPBufferUtilization()
+{
+#ifdef _WIN32
+    u_long count;
+    ioctlsocket(m_udpSocket->socketDescriptor(), FIONREAD, &count);
+    if (count > m_udpMaxBufferUtilization) {
+        m_udpMaxBufferUtilization = count;
+    }
+#else
+    // On linux, ioctl(s, SIOCINQ, &count); only returns length of first datagram, so we can't support this
+#endif
+}
+
+void DATVModSource::reportUDPBufferUtilization()
+{
+    // Report maximum utilization since last call
+    updateUDPBufferUtilization();
+    if (getMessageQueueToGUI())
+        getMessageQueueToGUI()->push(DATVModReport::MsgReportUDPBufferUtilization::create(m_udpMaxBufferUtilization / (float)DATVModSettings::m_udpBufferSize * 100.0));
+    m_udpMaxBufferUtilization = 0;
+}
+
 void DATVModSource::applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force)
 {
     qDebug() << "DATVModSource::applyChannelSettings:"
@@ -680,7 +710,7 @@ void DATVModSource::applySettings(const DATVModSettings& settings, bool force)
         {
             m_udpSocket = new QUdpSocket();
             m_udpSocket->bind(QHostAddress(settings.m_udpAddress), settings.m_udpPort);
-            m_udpSocket->setSocketOption(QAbstractSocket::ReceiveBufferSizeSocketOption, 1000000);
+            m_udpSocket->setSocketOption(QAbstractSocket::ReceiveBufferSizeSocketOption, DATVModSettings::m_udpBufferSize);
             m_udpTimingStart = boost::chrono::steady_clock::now();
             m_udpByteCount = 0;
         }

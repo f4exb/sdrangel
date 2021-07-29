@@ -192,6 +192,11 @@ bool DATVModBaseband::handleMessage(const Message& cmd)
         m_source.reportUDPBitrate();
         return true;
     }
+    else if (DATVMod::MsgGetUDPBufferUtilization::match(cmd))
+    {
+        m_source.reportUDPBufferUtilization();
+        return true;
+    }
     else
     {
         return false;

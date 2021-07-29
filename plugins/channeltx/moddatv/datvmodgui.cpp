@@ -98,6 +98,12 @@ DATVModGUI::DATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 
+#ifndef _WIN32
+    // Only currently works on Windows, so hide on other OSes
+    ui->udpBufferUtilization->setVisible(false);
+    ui->udpBufferUtilizationLine->setVisible(false);
+#endif
+
     displaySettings();
     applySettings(true);
     if (!m_settings.m_tsFileName.isEmpty())
@@ -171,6 +177,13 @@ bool DATVModGUI::handleMessage(const Message& message)
     {
         DATVModReport::MsgReportUDPBitrate& report = (DATVModReport::MsgReportUDPBitrate&)message;
         ui->udpBitrate->setText(tr("%1kb/s").arg(report.getBitrate()/1000.0f, 0, 'f', 2));
+        m_tickMsgOutstanding = false;
+        return true;
+    }
+    else if (DATVModReport::MsgReportUDPBufferUtilization::match(message))
+    {
+        DATVModReport::MsgReportUDPBufferUtilization& report = (DATVModReport::MsgReportUDPBufferUtilization&)message;
+        ui->udpBufferUtilization->setText(tr("%1%").arg(report.getUtilization(), 0, 'f', 1));
         m_tickMsgOutstanding = false;
         return true;
     }
@@ -602,6 +615,7 @@ void DATVModGUI::tick()
         {
             m_tickMsgOutstanding = true;
             m_datvMod->getInputMessageQueue()->push(DATVMod::MsgGetUDPBitrate::create());
+            m_datvMod->getInputMessageQueue()->push(DATVMod::MsgGetUDPBufferUtilization::create());
         }
     }
 }

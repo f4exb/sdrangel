@@ -181,6 +181,23 @@ public:
         { }
     };
 
+    class MsgGetUDPBufferUtilization : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+
+        static MsgGetUDPBufferUtilization* create()
+        {
+            return new MsgGetUDPBufferUtilization();
+        }
+
+    private:
+
+        MsgGetUDPBufferUtilization() :
+            Message()
+        { }
+    };
+
     //=================================================================
 
     DATVMod(DeviceAPI *deviceAPI);
