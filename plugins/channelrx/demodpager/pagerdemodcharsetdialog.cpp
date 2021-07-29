@@ -29,7 +29,7 @@ PagerDemodCharsetDialog::PagerDemodCharsetDialog(PagerDemodSettings *settings,
     if (settings->m_sevenbit.size() > 0) {
         ui->preset->setCurrentIndex(2); // User
     }
-    ui->readingOrder->setCurrentIndex(settings->m_rightToLeft ? 1 : 0);
+    ui->reverse->setChecked(settings->m_reverse);
     for (int i = 0; i < settings->m_sevenbit.size(); i++) {
         addRow(settings->m_sevenbit[i], settings->m_unicode[i]);
     }
@@ -52,7 +52,7 @@ void PagerDemodCharsetDialog::accept()
         m_settings->m_sevenbit.append(sevenbit);
         m_settings->m_unicode.append(unicode);
     }
-    m_settings->m_rightToLeft = ui->readingOrder->currentIndex() == 1;
+    m_settings->m_reverse = ui->reverse->isChecked();
     QDialog::accept();
 }
 
@@ -74,14 +74,15 @@ void PagerDemodCharsetDialog::on_remove_clicked()
 void PagerDemodCharsetDialog::on_preset_currentIndexChanged(int index)
 {
     ui->table->setRowCount(0);
-    ui->readingOrder->setCurrentIndex(0);
+    ui->reverse->setChecked(false);
     if (index == 1)
     {
         // Hebrew
-        for (int i = 0; i < 22; i++) {
+        for (int i = 0; i < 22+5; i++) {
             addRow(96 + i, 0x05D0 + i);
         }
-        ui->readingOrder->setCurrentIndex(1);
+        // Even though Hebrew is right-to-left, it seems characters are
+        // transmitted last first, so no need to check reverse
     }
 }
 
