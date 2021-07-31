@@ -28,6 +28,7 @@
 #include "gui/glspectrum.h"
 #include "gui/crightclickenabler.h"
 #include "gui/wsspectrumsettingsdialog.h"
+#include "gui/spectrummarkersdialog.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "ui_glspectrumgui.h"
@@ -328,6 +329,32 @@ void GLSpectrumGUI::on_wsSpectrum_toggled(bool checked)
     {
         SpectrumVis::MsgConfigureWSpectrumOpenClose *msg = SpectrumVis::MsgConfigureWSpectrumOpenClose::create(checked);
         m_spectrumVis->getInputMessageQueue()->push(msg);
+    }
+}
+
+void GLSpectrumGUI::on_markers_clicked(bool checked)
+{
+    (void) checked;
+
+    if (!m_glSpectrum) {
+        return;
+    }
+
+    QList<SpectrumHistogramMarker> histogramMarkers = m_glSpectrum->getHistogramMarkers();
+    QList<SpectrumWaterfallMarker> waterfallMarkers = m_glSpectrum->getWaterfallMarkers();
+    SpectrumMarkersDialog markersDialog(histogramMarkers, waterfallMarkers, this);
+    markersDialog.setCenterFrequency(m_glSpectrum->getCenterFrequency());
+    markersDialog.setPower(m_glSpectrum->getPowerMax() / 2.0f);
+
+    if (markersDialog.exec() == QDialog::Accepted)
+    {
+        if (markersDialog.histogramMarkersChanged()) {
+            m_glSpectrum->setHistogramMarkers(histogramMarkers);
+        }
+
+        if (markersDialog.waterfallMarkersChanged()) {
+            m_glSpectrum->setWaterfallMarkers(waterfallMarkers);
+        }
     }
 }
 

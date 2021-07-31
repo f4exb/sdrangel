@@ -59,6 +59,7 @@ set(sdrgui_SOURCES
     gui/scaleengine.cpp
     gui/scaledimage.cpp
     gui/sdrangelsplash.cpp
+    gui/spectrummarkersdialog.cpp
     gui/tickedslider.cpp
     gui/transverterbutton.cpp
     gui/transverterdialog.cpp
@@ -148,6 +149,7 @@ set(sdrgui_HEADERS
     gui/scaledimage.h
     gui/sdrangelsplash.h
     gui/spectrummarkers.h
+    gui/spectrummarkersdialog.h
     gui/tickedslider.h
     gui/transverterbutton.h
     gui/transverterdialog.h
@@ -205,6 +207,7 @@ set(sdrgui_FORMS
     gui/audioselectdialog.ui
     gui/samplingdevicecontrol.ui
     gui/samplingdevicedialog.ui
+    gui/spectrummarkersdialog.ui
     gui/myposdialog.ui
     gui/transverterdialog.ui
     gui/loggingdialog.ui

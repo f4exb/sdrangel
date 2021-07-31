@@ -40,6 +40,7 @@ struct SpectrumHistogramMarker
     QString m_powerStr;
     QString m_deltaFrequencyStr;
     QString m_deltaPowerStr;
+    static const int m_maxNbOfMarkers = 4;
 
     SpectrumHistogramMarker() :
         m_point(0, 0),
@@ -88,6 +89,7 @@ struct SpectrumWaterfallMarker
     QString m_timeStr;
     QString m_deltaFrequencyStr;
     QString m_deltaTimeStr;
+    static const int m_maxNbOfMarkers = 4;
 
     SpectrumWaterfallMarker() :
         m_point(0, 0),

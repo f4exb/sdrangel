@@ -28,6 +28,7 @@
 #include "dsp/spectrumvis.h"
 #include "gui/glspectrum.h"
 #include "util/messagequeue.h"
+#include "util/db.h"
 
 #include <QDebug>
 
@@ -415,6 +416,31 @@ void GLSpectrum::removeChannelMarker(ChannelMarker* channelMarker)
 	}
 
 	m_mutex.unlock();
+}
+
+void GLSpectrum::setHistogramMarkers(const QList<SpectrumHistogramMarker>& histogramMarkers)
+{
+    m_mutex.lock();
+    m_histogramMarkers = histogramMarkers;
+	updateHistogramMarkers();
+    m_changesPending = true;
+    m_mutex.unlock();
+	update();
+}
+
+void GLSpectrum::setWaterfallMarkers(const QList<SpectrumWaterfallMarker>& waterfallMarkers)
+{
+    m_mutex.lock();
+    m_waterfallMarkers = waterfallMarkers;
+	updateWaterfallMarkers();
+    m_changesPending = true;
+    m_mutex.unlock();
+	update();
+}
+
+float GLSpectrum::getPowerMax() const
+{
+	return m_linear ? m_powerScale.getRangeMax() : CalcDb::powerFromdB(m_powerScale.getRangeMax());
 }
 
 void GLSpectrum::newSpectrum(const Real *spectrum, int nbBins, int fftSize)
@@ -1197,10 +1223,10 @@ void GLSpectrum::drawMarkers()
             {
 				float power0 = m_histogramMarkers.at(0).m_markerType == SpectrumHistogramMarkerTypePower ?
 					m_currentSpectrum[m_histogramMarkers.at(0).m_fftBin] :
-					m_histogramMarkers.at(0).m_power;
+					m_linear ? m_histogramMarkers.at(0).m_power : CalcDb::dbPower(m_histogramMarkers.at(0).m_power);
 				float poweri = m_histogramMarkers.at(i).m_markerType == SpectrumHistogramMarkerTypePower ?
 					m_currentSpectrum[m_histogramMarkers.at(i).m_fftBin] :
-					m_histogramMarkers.at(i).m_power;
+					m_linear ? m_histogramMarkers.at(i).m_power : CalcDb::dbPower(m_histogramMarkers.at(i).m_power);
 				QString deltaPowerStr = displayScaledF(
                             poweri - power0,
                             m_linear ? 'e' : 'f',
@@ -1979,25 +2005,88 @@ void GLSpectrum::applyChanges()
 	m_q3TickTime.allocate(4*m_timeScale.getTickList().count());
     m_q3TickFrequency.allocate(4*m_frequencyScale.getTickList().count());
     m_q3TickPower.allocate(4*m_powerScale.getTickList().count());
+	updateHistogramMarkers();
+	updateWaterfallMarkers();
+} // applyChanges
 
-	// Histogram markers
+void GLSpectrum::updateHistogramMarkers()
+{
 	for (int i = 0; i < m_histogramMarkers.size(); i++)
 	{
+		float powerI = m_linear ? m_histogramMarkers[i].m_power : CalcDb::dbPower(m_histogramMarkers[i].m_power);
 		m_histogramMarkers[i].m_point.rx() =
 			(m_histogramMarkers[i].m_frequency - m_frequencyScale.getRangeMin()) / m_frequencyScale.getRange();
 		m_histogramMarkers[i].m_point.ry() =
-			(m_powerScale.getRangeMax() - m_histogramMarkers[i].m_power) / m_powerScale.getRange();
+			(m_powerScale.getRangeMax() - powerI) / m_powerScale.getRange();
 		m_histogramMarkers[i].m_fftBin =
 			(((m_histogramMarkers[i].m_frequency - m_centerFrequency) / (float) m_sampleRate) * m_fftSize) + (m_fftSize / 2);
-	}
+		m_histogramMarkers[i].m_frequencyStr = displayScaled(
+			m_histogramMarkers[i].m_frequency,
+			'f',
+			getPrecision((m_centerFrequency*1000)/m_sampleRate),
+			false);
+		m_histogramMarkers[i].m_powerStr = displayScaledF(
+			powerI,
+			m_linear ? 'e' : 'f',
+			m_linear ? 3 : 1,
+			false);
 
-	// Waterfall markers
+		if (i > 0)
+		{
+			int64_t deltaFrequency = m_histogramMarkers.at(i).m_frequency - m_histogramMarkers.at(0).m_frequency;
+			m_histogramMarkers.back().m_deltaFrequencyStr = displayScaled(
+				deltaFrequency,
+				'f',
+				getPrecision(deltaFrequency/m_sampleRate),
+				true);
+			float power0 = m_linear ?
+				m_histogramMarkers.at(0).m_power :
+				CalcDb::dbPower(m_histogramMarkers.at(0).m_power);
+			float powerI = m_linear ?
+				m_histogramMarkers.at(i).m_power :
+				CalcDb::dbPower(m_histogramMarkers.at(i).m_power);
+			m_histogramMarkers.back().m_deltaPowerStr = displayScaledF(
+				powerI - power0,
+				m_linear ? 'e' : 'f',
+				m_linear ? 3 : 1,
+				false);
+		}
+	}
+}
+
+void GLSpectrum::updateWaterfallMarkers()
+{
 	for (int i = 0; i < m_waterfallMarkers.size(); i++)
 	{
 		m_waterfallMarkers[i].m_point.rx() =
 			(m_waterfallMarkers[i].m_frequency - m_frequencyScale.getRangeMin()) / m_frequencyScale.getRange();
 		m_waterfallMarkers[i].m_point.ry() =
 			(m_waterfallMarkers[i].m_time - m_timeScale.getRangeMin()) / m_timeScale.getRange();
+		m_waterfallMarkers[i].m_frequencyStr = displayScaled(
+			m_waterfallMarkers[i].m_frequency,
+			'f',
+			getPrecision((m_centerFrequency*1000)/m_sampleRate),
+			false);
+		m_waterfallMarkers[i].m_timeStr = displayScaledF(
+			m_waterfallMarkers[i].m_time,
+			'f',
+			3,
+			true);
+
+		if (i > 0)
+		{
+			int64_t deltaFrequency = m_waterfallMarkers.at(i).m_frequency - m_waterfallMarkers.at(0).m_frequency;
+			m_waterfallMarkers.back().m_deltaFrequencyStr = displayScaled(
+				deltaFrequency,
+				'f',
+				getPrecision(deltaFrequency/m_sampleRate),
+				true);
+			m_waterfallMarkers.back().m_deltaTimeStr = displayScaledF(
+				m_waterfallMarkers.at(i).m_time - m_waterfallMarkers.at(0).m_time,
+				'f',
+				3,
+				true);
+		}
 	}
 }
 
@@ -2171,12 +2260,13 @@ void GLSpectrum::mousePressEvent(QMouseEvent* event)
             pHis.rx() = (ep.x()/width() - m_histogramRect.left()) / m_histogramRect.width();
             pHis.ry() = (ep.y()/height() - m_histogramRect.top()) / m_histogramRect.height();
             float frequency = m_frequencyScale.getRangeMin() + pHis.x()*m_frequencyScale.getRange();
-            float power = m_powerScale.getRangeMax() - pHis.y()*m_powerScale.getRange();
+            float powerVal = m_powerScale.getRangeMax() - pHis.y()*m_powerScale.getRange();
+			float power = m_linear ? powerVal : CalcDb::powerFromdB(powerVal);
 			int fftBin = (((frequency - m_centerFrequency) / (float) m_sampleRate) * m_fftSize) + (m_fftSize / 2);
 
             if ((pHis.x() >= 0) && (pHis.x() <= 1) && (pHis.y() >= 0) && (pHis.y() <= 1))
             {
-                if (m_histogramMarkers.size() < 2)
+                if (m_histogramMarkers.size() < SpectrumHistogramMarker::m_maxNbOfMarkers)
                 {
                     m_histogramMarkers.push_back(SpectrumHistogramMarker());
                     m_histogramMarkers.back().m_point = pHis;
@@ -2189,7 +2279,7 @@ void GLSpectrum::mousePressEvent(QMouseEvent* event)
                         false);
                     m_histogramMarkers.back().m_power = power;
                     m_histogramMarkers.back().m_powerStr = displayScaledF(
-                        power,
+                        powerVal,
                         m_linear ? 'e' : 'f',
                         m_linear ? 3 : 1,
                         false);
@@ -2202,8 +2292,11 @@ void GLSpectrum::mousePressEvent(QMouseEvent* event)
                             'f',
                             getPrecision(deltaFrequency/m_sampleRate),
                             true);
+						float power0 = m_linear ?
+							m_histogramMarkers.at(0).m_power :
+							CalcDb::dbPower(m_histogramMarkers.at(0).m_power);
                         m_histogramMarkers.back().m_deltaPowerStr = displayScaledF(
-                            power - m_histogramMarkers.at(0).m_power,
+                            power - power0,
                             m_linear ? 'e' : 'f',
                             m_linear ? 3 : 1,
                             false);
@@ -2221,7 +2314,7 @@ void GLSpectrum::mousePressEvent(QMouseEvent* event)
 
             if ((pWat.x() >= 0) && (pWat.x() <= 1) && (pWat.y() >= 0) && (pWat.y() <= 1))
             {
-                if (m_waterfallMarkers.size() < 2)
+                if (m_waterfallMarkers.size() < SpectrumWaterfallMarker::m_maxNbOfMarkers)
                 {
                     m_waterfallMarkers.push_back(SpectrumWaterfallMarker());
                     m_waterfallMarkers.back().m_point = pWat;

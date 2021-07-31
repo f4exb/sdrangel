@@ -554,6 +554,21 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="markers">
+       <property name="toolTip">
+        <string>Open spectrum markers dialog</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normalon>:/gridpolar.png</normalon>
+        </iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_3">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>

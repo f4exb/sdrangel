@@ -113,6 +113,8 @@ public:
 	virtual ~GLSpectrum();
 
 	void setCenterFrequency(qint64 frequency);
+    qint64 getCenterFrequency() const { return m_centerFrequency; }
+    float getPowerMax() const;
 	void setSampleRate(qint32 sampleRate);
 	void setTimingRate(qint32 timingRate);
     void setFFTOverlap(int overlap);
@@ -151,6 +153,10 @@ public:
         m_displayStreamIndex = streamIndex;
     }
     void setSpectrumVis(SpectrumVis *spectrumVis) { m_spectrumVis = spectrumVis; }
+    const QList<SpectrumHistogramMarker>& getHistogramMarkers() const { return m_histogramMarkers; }
+    void setHistogramMarkers(const QList<SpectrumHistogramMarker>& histogramMarkers);
+    const QList<SpectrumWaterfallMarker>& getWaterfallMarkers() const { return m_waterfallMarkers; }
+    void setWaterfallMarkers(const QList<SpectrumWaterfallMarker>& waterfallMarkers);
 
 private:
 	struct ChannelMarkerState {
@@ -321,6 +327,8 @@ private:
             bool topHalf,
             const QRectF& glRect);
     void formatTextInfo(QString& info);
+    void updateHistogramMarkers();
+    void updateWaterfallMarkers();
 
 private slots:
 	void cleanup();
