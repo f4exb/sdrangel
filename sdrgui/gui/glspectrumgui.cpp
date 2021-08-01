@@ -340,22 +340,19 @@ void GLSpectrumGUI::on_markers_clicked(bool checked)
         return;
     }
 
-    QList<SpectrumHistogramMarker> histogramMarkers = m_glSpectrum->getHistogramMarkers();
-    QList<SpectrumWaterfallMarker> waterfallMarkers = m_glSpectrum->getWaterfallMarkers();
-    SpectrumMarkersDialog markersDialog(histogramMarkers, waterfallMarkers, this);
+    SpectrumMarkersDialog markersDialog(
+        m_glSpectrum->getHistogramMarkers(),
+        m_glSpectrum->getWaterfallMarkers(),
+        this
+    );
+
     markersDialog.setCenterFrequency(m_glSpectrum->getCenterFrequency());
     markersDialog.setPower(m_glSpectrum->getPowerMax() / 2.0f);
 
-    if (markersDialog.exec() == QDialog::Accepted)
-    {
-        if (markersDialog.histogramMarkersChanged()) {
-            m_glSpectrum->setHistogramMarkers(histogramMarkers);
-        }
+    connect(&markersDialog, SIGNAL(updateHistogram()), this, SLOT(updateHistogramMarkers()));
+    connect(&markersDialog, SIGNAL(updateWaterfall()), this, SLOT(updateWaterfallMarkers()));
 
-        if (markersDialog.waterfallMarkersChanged()) {
-            m_glSpectrum->setWaterfallMarkers(waterfallMarkers);
-        }
-    }
+    markersDialog.exec();
 }
 
 void GLSpectrumGUI::on_refLevel_valueChanged(int value)
@@ -689,5 +686,19 @@ void GLSpectrumGUI::openWebsocketSpectrumSettingsDialog(const QPoint& p)
         m_settings.m_wsSpectrumPort = dialog.getPort();
 
         applySettings();
+    }
+}
+
+void GLSpectrumGUI::updateHistogramMarkers()
+{
+    if (m_glSpectrum) {
+        m_glSpectrum->updateHistogramMarkers();
+    }
+}
+
+void GLSpectrumGUI::updateWaterfallMarkers()
+{
+    if (m_glSpectrum) {
+        m_glSpectrum->updateWaterfallMarkers();
     }
 }

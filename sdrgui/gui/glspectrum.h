@@ -154,9 +154,13 @@ public:
     }
     void setSpectrumVis(SpectrumVis *spectrumVis) { m_spectrumVis = spectrumVis; }
     const QList<SpectrumHistogramMarker>& getHistogramMarkers() const { return m_histogramMarkers; }
+    QList<SpectrumHistogramMarker>& getHistogramMarkers() { return m_histogramMarkers; }
     void setHistogramMarkers(const QList<SpectrumHistogramMarker>& histogramMarkers);
     const QList<SpectrumWaterfallMarker>& getWaterfallMarkers() const { return m_waterfallMarkers; }
+    QList<SpectrumWaterfallMarker>& getWaterfallMarkers() { return m_waterfallMarkers; }
     void setWaterfallMarkers(const QList<SpectrumWaterfallMarker>& waterfallMarkers);
+    void updateHistogramMarkers();
+    void updateWaterfallMarkers();
 
 private:
 	struct ChannelMarkerState {
@@ -327,8 +331,6 @@ private:
             bool topHalf,
             const QRectF& glRect);
     void formatTextInfo(QString& info);
-    void updateHistogramMarkers();
-    void updateWaterfallMarkers();
 
 private slots:
 	void cleanup();

@@ -39,8 +39,6 @@ public:
         QWidget* parent = nullptr
     );
     ~SpectrumMarkersDialog();
-    bool histogramMarkersChanged() const { return m_histogramMarkersChanged; }
-    bool waterfallMarkersChanged() const { return m_waterfallMarkersChanged; }
     void setCenterFrequency(qint64 centerFrequency) { m_centerFrequency = centerFrequency; }
     void setPower(float power) { m_power = power; }
 
@@ -48,8 +46,6 @@ private:
     Ui::SpectrumMarkersDialog* ui;
     QList<SpectrumHistogramMarker>& m_histogramMarkers;
     QList<SpectrumWaterfallMarker>& m_waterfallMarkers;
-    bool m_histogramMarkersChanged;
-    bool m_waterfallMarkersChanged;
     int m_histogramMarkerIndex;
     qint64 m_centerFrequency;
     float m_power;
@@ -64,8 +60,10 @@ private slots:
     void on_markerAdd_clicked(bool checked);
     void on_markerDel_clicked(bool checked);
     void on_powerMode_currentIndexChanged(int index);
-    void accept();
-    void reject();
+
+signals:
+    void updateHistogram();
+    void updateWaterfall();
 };
 
 #endif // SDRBASE_GUI_SPECTRUMMARKERSDIALOG_H_
