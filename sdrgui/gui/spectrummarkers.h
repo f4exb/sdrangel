@@ -23,6 +23,7 @@
 
 #include <QString>
 #include <QPointF>
+#include <QColor>
 
 enum SpectrumHistogramMarkerType {
     SpectrumHistogramMarkerTypeManual,
@@ -36,6 +37,7 @@ struct SpectrumHistogramMarker
     int m_fftBin;
     float m_power;
     SpectrumHistogramMarkerType m_markerType;
+    QColor m_markerColor;
     QString m_frequencyStr;
     QString m_powerStr;
     QString m_deltaFrequencyStr;
@@ -48,6 +50,7 @@ struct SpectrumHistogramMarker
         m_fftBin(0),
         m_power(0),
         m_markerType(SpectrumHistogramMarkerTypeManual),
+        m_markerColor(QColorConstants::White),
         m_frequencyStr(),
         m_powerStr(),
         m_deltaFrequencyStr(),
@@ -60,6 +63,7 @@ struct SpectrumHistogramMarker
         int   fftBin,
         float power,
         SpectrumHistogramMarkerType markerType,
+        QColor markerColor,
         const QString& frequencyStr,
         const QString& powerStr,
         const QString& deltaFrequencyStr,
@@ -70,6 +74,7 @@ struct SpectrumHistogramMarker
         m_fftBin(fftBin),
         m_power(power),
         m_markerType(markerType),
+        m_markerColor(markerColor),
         m_frequencyStr(frequencyStr),
         m_powerStr(powerStr),
         m_deltaFrequencyStr(deltaFrequencyStr),
@@ -85,6 +90,7 @@ struct SpectrumWaterfallMarker
     QPointF m_point;
     float m_frequency;
     float m_time;
+    QColor m_markerColor;
     QString m_frequencyStr;
     QString m_timeStr;
     QString m_deltaFrequencyStr;
@@ -95,6 +101,7 @@ struct SpectrumWaterfallMarker
         m_point(0, 0),
         m_frequency(0),
         m_time(0),
+        m_markerColor(QColorConstants::White),
         m_frequencyStr(),
         m_timeStr(),
         m_deltaFrequencyStr(),
@@ -105,6 +112,7 @@ struct SpectrumWaterfallMarker
         const QPointF& point,
         float frequency,
         float time,
+        QColor markerColor,
         const QString& frequencyStr,
         const QString& timeStr,
         const QString& deltaFrequencyStr,
@@ -113,6 +121,7 @@ struct SpectrumWaterfallMarker
         m_point(point),
         m_frequency(frequency),
         m_time(time),
+        m_markerColor(markerColor),
         m_frequencyStr(frequencyStr),
         m_timeStr(timeStr),
         m_deltaFrequencyStr(deltaFrequencyStr),

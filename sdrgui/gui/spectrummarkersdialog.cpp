@@ -16,6 +16,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QColorDialog>
+
 #include "util/db.h"
 #include "spectrummarkersdialog.h"
 
@@ -68,6 +70,9 @@ void SpectrumMarkersDialog::displayHistogramMarker()
         float powerDB = CalcDb::dbPower(m_histogramMarkers[m_histogramMarkerIndex].m_power);
         ui->fixedPower->setValue(powerDB*10);
         ui->fixedPowerText->setText(QString::number(powerDB, 'f', 1));
+        int r,g,b,a;
+        m_histogramMarkers[m_histogramMarkerIndex].m_markerColor.getRgb(&r, &g, &b, &a);
+        ui->markerColor->setStyleSheet(tr("QLabel { background-color : rgb(%1,%2,%3); }").arg(r).arg(g).arg(b));
     }
 }
 
@@ -79,6 +84,37 @@ void SpectrumMarkersDialog::on_markerFrequency_changed(qint64 value)
 
     m_histogramMarkers[m_histogramMarkerIndex].m_frequency = value;
     emit updateHistogram();
+}
+
+void SpectrumMarkersDialog::on_centerFrequency_clicked()
+{
+    if (m_histogramMarkers.size() == 0) {
+        return;
+    }
+
+    m_histogramMarkers[m_histogramMarkerIndex].m_frequency = m_centerFrequency;
+    displayHistogramMarker();
+    emit updateHistogram();
+}
+
+void SpectrumMarkersDialog::on_markerColor_clicked()
+{
+    if (m_histogramMarkers.size() == 0) {
+        return;
+    }
+
+    QColor newColor = QColorDialog::getColor(
+        m_histogramMarkers[m_histogramMarkerIndex].m_markerColor,
+        this,
+        tr("Select Color for marker"),
+        QColorDialog::DontUseNativeDialog
+    );
+
+    if (newColor.isValid()) // user clicked OK and selected a color
+    {
+        m_histogramMarkers[m_histogramMarkerIndex].m_markerColor = newColor;
+        displayHistogramMarker();
+    }
 }
 
 void SpectrumMarkersDialog::on_fixedPower_valueChanged(int value)
@@ -103,25 +139,25 @@ void SpectrumMarkersDialog::on_marker_valueChanged(int value)
     displayHistogramMarker();
 }
 
-void SpectrumMarkersDialog::on_setReference_clicked(bool checked)
+void SpectrumMarkersDialog::on_setReference_clicked()
 {
-    (void) checked;
-
     if ((m_histogramMarkerIndex == 0) || (m_histogramMarkers.size() < 2)) {
         return;
     }
 
     SpectrumHistogramMarker marker0 = m_histogramMarkers.at(0);
+    QColor color0 = marker0.m_markerColor; // do not exchange colors
+    QColor colorI = m_histogramMarkers[m_histogramMarkerIndex].m_markerColor;
     m_histogramMarkers[0] = m_histogramMarkers[m_histogramMarkerIndex];
+    m_histogramMarkers[0].m_markerColor = color0;
     m_histogramMarkers[m_histogramMarkerIndex] = marker0;
+    m_histogramMarkers[m_histogramMarkerIndex].m_markerColor = colorI;
     displayHistogramMarker();
     emit updateHistogram();
 }
 
-void SpectrumMarkersDialog::on_markerAdd_clicked(bool checked)
+void SpectrumMarkersDialog::on_markerAdd_clicked()
 {
-    (void) checked;
-
     if (m_histogramMarkers.size() == SpectrumHistogramMarker::m_maxNbOfMarkers) {
         return;
     }
@@ -134,10 +170,8 @@ void SpectrumMarkersDialog::on_markerAdd_clicked(bool checked)
     displayHistogramMarker();
 }
 
-void SpectrumMarkersDialog::on_markerDel_clicked(bool checked)
+void SpectrumMarkersDialog::on_markerDel_clicked()
 {
-    (void) checked;
-
     if (m_histogramMarkers.size() == 0) {
         return;
     }

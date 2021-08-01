@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>324</width>
+    <width>364</width>
     <height>125</height>
    </rect>
   </property>
@@ -23,7 +23,7 @@
    <item>
     <layout class="QVBoxLayout" name="MarkerLayout">
      <item>
-      <layout class="QHBoxLayout" name="MarkerPosLayout">
+      <layout class="QHBoxLayout" name="HMarkerPosLayout">
        <item>
         <widget class="QLabel" name="markerFrequencyLabel">
          <property name="text">
@@ -103,10 +103,48 @@
          </property>
         </spacer>
        </item>
+       <item>
+        <widget class="QPushButton" name="centerFrequency">
+         <property name="maximumSize">
+          <size>
+           <width>24</width>
+           <height>24</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Set marker as reference (index 0)</string>
+         </property>
+         <property name="text">
+          <string>C</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="ClickableLabel" name="markerColor">
+         <property name="minimumSize">
+          <size>
+           <width>16</width>
+           <height>16</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16</width>
+           <height>16</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Current marker color (click to change)</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
       </layout>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="OptionsLayout">
+      <layout class="QHBoxLayout" name="HMarkerOptionsLayout">
        <item>
         <widget class="QLabel" name="markerLabel">
          <property name="minimumSize">
@@ -167,7 +205,7 @@
           <string>Set marker as reference (index 0)</string>
          </property>
          <property name="text">
-          <string>R</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
@@ -405,6 +443,11 @@
    <extends>QWidget</extends>
    <header>gui/valuedialz.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ClickableLabel</class>
+   <extends>QLabel</extends>
+   <header>gui/clickablelabel.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

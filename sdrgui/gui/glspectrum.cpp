@@ -1163,8 +1163,7 @@ void GLSpectrum::paintGL()
 
 void GLSpectrum::drawMarkers()
 {
-    QVector4D markerColor(1.0f, 1.0f, 1.0f, 0.3f);
-    QVector4D markerTextColor(1.0f, 1.0f, 1.0f, 0.8f);
+	QVector4D lineColor(1.0f, 1.0f, 1.0f, 0.3f);
 
     // paint histogram markers
     if (m_histogramMarkers.size() > 0)
@@ -1178,7 +1177,9 @@ void GLSpectrum::drawMarkers()
 			{
 				ypoint.ry() =
 					(m_powerScale.getRangeMax() - m_currentSpectrum[m_histogramMarkers.at(i).m_fftBin]) / m_powerScale.getRange();
-				ypoint.ry() = ypoint.ry() > 1 ? 1 : ypoint.ry();
+				ypoint.ry() = ypoint.ry() < 0 ?
+					0 : ypoint.ry() > 1 ?
+						1 : ypoint.ry();
 				powerStr = displayScaledF(
 					m_currentSpectrum[m_histogramMarkers.at(i).m_fftBin],
 					m_linear ? 'e' : 'f',
@@ -1192,18 +1193,19 @@ void GLSpectrum::drawMarkers()
                 (float) m_histogramMarkers.at(i).m_point.x(), 0,
                 (float) m_histogramMarkers.at(i).m_point.x(), 1
             };
-            m_glShaderSimple.drawSegments(m_glHistogramBoxMatrix, markerColor, h, 2);
+            m_glShaderSimple.drawSegments(m_glHistogramBoxMatrix, lineColor, h, 2);
             GLfloat v[] {
                 0, (float) ypoint.y(),
                 1, (float) ypoint.y()
             };
-            m_glShaderSimple.drawSegments(m_glHistogramBoxMatrix, markerColor, v, 2);
+            m_glShaderSimple.drawSegments(m_glHistogramBoxMatrix, lineColor, v, 2);
+			QColor textColor = m_histogramMarkers.at(i).m_markerColor;
 			// text
             if (i == 0)
             {
                 drawTextOverlay(
                     m_histogramMarkers.at(i).m_frequencyStr,
-                    QColor(255, 255, 255, 192),
+                    textColor,
                     m_textOverlayFont,
                     m_histogramMarkers.at(i).m_point.x() * m_histogramRect.width(),
                     (m_invertedWaterfall || (m_waterfallHeight == 0)) ? m_histogramRect.height() : 0,
@@ -1212,7 +1214,7 @@ void GLSpectrum::drawMarkers()
                     m_histogramRect);
                 drawTextOverlay(
                     powerStr,
-                    QColor(255, 255, 255, 192),
+                    textColor,
                     m_textOverlayFont,
                     0,
                     ypoint.y() * m_histogramRect.height(),
@@ -1222,6 +1224,7 @@ void GLSpectrum::drawMarkers()
             }
             else
             {
+				textColor.setAlpha(192);
 				float power0 = m_histogramMarkers.at(0).m_markerType == SpectrumHistogramMarkerTypePower ?
 					m_currentSpectrum[m_histogramMarkers.at(0).m_fftBin] :
 					m_linear ? m_histogramMarkers.at(0).m_power : CalcDb::dbPower(m_histogramMarkers.at(0).m_power);
@@ -1238,7 +1241,7 @@ void GLSpectrum::drawMarkers()
 
                 drawTextOverlay(
                     m_histogramMarkers.at(i).m_deltaFrequencyStr,
-                    QColor(255, 255, 255, 192),
+                    textColor,
                     m_textOverlayFont,
                     m_histogramMarkers.at(i).m_point.x() * m_histogramRect.width(),
                     (m_invertedWaterfall || (m_waterfallHeight == 0)) ? 0 : m_histogramRect.height(),
@@ -1247,7 +1250,7 @@ void GLSpectrum::drawMarkers()
                     m_histogramRect);
                 drawTextOverlay(
                     deltaPowerStr,
-                    QColor(255, 255, 255, 192),
+                    textColor,
                     m_textOverlayFont,
                     m_histogramRect.width(),
                     ypoint.y() * m_histogramRect.height(),
@@ -1268,21 +1271,24 @@ void GLSpectrum::drawMarkers()
                 (float) m_waterfallMarkers.at(i).m_point.x(), 0,
                 (float) m_waterfallMarkers.at(i).m_point.x(), 1
             };
-            m_glShaderSimple.drawSegments(m_glWaterfallBoxMatrix, markerColor, h, 2);
+            m_glShaderSimple.drawSegments(m_glWaterfallBoxMatrix, lineColor, h, 2);
             GLfloat v[] {
                 0, (float) m_waterfallMarkers.at(i).m_point.y(),
                 1, (float) m_waterfallMarkers.at(i).m_point.y()
             };
-            m_glShaderSimple.drawSegments(m_glWaterfallBoxMatrix, markerColor, v, 2);
+            m_glShaderSimple.drawSegments(m_glWaterfallBoxMatrix, lineColor, v, 2);
         }
         // text
         for (int i = 0; i < m_waterfallMarkers.size(); i++)
         {
+			QColor textColor = m_waterfallMarkers.at(i).m_markerColor;
+			textColor.setAlpha(192);
+
             if (i == 0)
             {
                 drawTextOverlay(
                     m_waterfallMarkers.at(i).m_frequencyStr,
-                    QColor(255, 255, 255, 192),
+                    textColor,
                     m_textOverlayFont,
                     m_waterfallMarkers.at(i).m_point.x() * m_waterfallRect.width(),
                     (!m_invertedWaterfall || (m_histogramHeight == 0)) ? m_waterfallRect.height() : 0,
@@ -1291,7 +1297,7 @@ void GLSpectrum::drawMarkers()
                     m_waterfallRect);
                 drawTextOverlay(
                     m_waterfallMarkers.at(i).m_timeStr,
-                    QColor(255, 255, 255, 192),
+                    textColor,
                     m_textOverlayFont,
                     0,
                     m_waterfallMarkers.at(i).m_point.y() * m_waterfallRect.height(),
@@ -1303,7 +1309,7 @@ void GLSpectrum::drawMarkers()
             {
                 drawTextOverlay(
                     m_waterfallMarkers.at(i).m_deltaFrequencyStr,
-                    QColor(255, 255, 255, 192),
+                    textColor,
                     m_textOverlayFont,
                     m_waterfallMarkers.at(i).m_point.x() * m_waterfallRect.width(),
                     (!m_invertedWaterfall || (m_histogramHeight == 0)) ? 0 : m_waterfallRect.height(),
@@ -1312,7 +1318,7 @@ void GLSpectrum::drawMarkers()
                     m_waterfallRect);
                 drawTextOverlay(
                     m_waterfallMarkers.at(i).m_deltaTimeStr,
-                    QColor(255, 255, 255, 192),
+                    textColor,
                     m_textOverlayFont,
                     m_waterfallRect.width(),
                     m_waterfallMarkers.at(i).m_point.y() * m_waterfallRect.height(),

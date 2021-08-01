@@ -54,11 +54,13 @@ private:
 
 private slots:
     void on_markerFrequency_changed(qint64 value);
+    void on_centerFrequency_clicked();
+    void on_markerColor_clicked();
     void on_fixedPower_valueChanged(int value);
     void on_marker_valueChanged(int value);
-    void on_setReference_clicked(bool checked);
-    void on_markerAdd_clicked(bool checked);
-    void on_markerDel_clicked(bool checked);
+    void on_setReference_clicked();
+    void on_markerAdd_clicked();
+    void on_markerDel_clicked();
     void on_powerMode_currentIndexChanged(int index);
 
 signals:
