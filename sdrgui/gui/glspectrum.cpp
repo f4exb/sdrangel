@@ -2024,6 +2024,15 @@ void GLSpectrum::updateHistogramMarkers()
 			(m_powerScale.getRangeMax() - powerI) / m_powerScale.getRange();
 		m_histogramMarkers[i].m_fftBin =
 			(((m_histogramMarkers[i].m_frequency - m_centerFrequency) / (float) m_sampleRate) * m_fftSize) + (m_fftSize / 2);
+		m_histogramMarkers[i].m_point.rx() = m_histogramMarkers[i].m_point.rx() < 0 ?
+			0 : m_histogramMarkers[i].m_point.rx() > 1 ?
+				1 : m_histogramMarkers[i].m_point.rx();
+		m_histogramMarkers[i].m_point.ry() = m_histogramMarkers[i].m_point.ry() < 0 ?
+			0 : m_histogramMarkers[i].m_point.ry() > 1 ?
+				1 : m_histogramMarkers[i].m_point.ry();
+		m_histogramMarkers[i].m_fftBin = m_histogramMarkers[i].m_fftBin < 0 ?
+			0 : m_histogramMarkers[i].m_fftBin > m_fftSize - 1 ?
+				m_fftSize - 1 : m_histogramMarkers[i].m_fftBin;
 		m_histogramMarkers[i].m_frequencyStr = displayScaled(
 			m_histogramMarkers[i].m_frequency,
 			'f',
@@ -2066,6 +2075,12 @@ void GLSpectrum::updateWaterfallMarkers()
 			(m_waterfallMarkers[i].m_frequency - m_frequencyScale.getRangeMin()) / m_frequencyScale.getRange();
 		m_waterfallMarkers[i].m_point.ry() =
 			(m_waterfallMarkers[i].m_time - m_timeScale.getRangeMin()) / m_timeScale.getRange();
+		m_waterfallMarkers[i].m_point.rx() = m_waterfallMarkers[i].m_point.rx() < 0 ?
+			0 : m_waterfallMarkers[i].m_point.rx() > 1 ?
+				1 : m_waterfallMarkers[i].m_point.rx();
+		m_waterfallMarkers[i].m_point.ry() = m_waterfallMarkers[i].m_point.ry() < 0 ?
+			0 : m_waterfallMarkers[i].m_point.ry() > 1 ?
+				1 : m_waterfallMarkers[i].m_point.ry();
 		m_waterfallMarkers[i].m_frequencyStr = displayScaled(
 			m_waterfallMarkers[i].m_frequency,
 			'f',
