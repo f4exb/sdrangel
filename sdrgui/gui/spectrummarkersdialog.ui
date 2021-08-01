@@ -156,6 +156,22 @@
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="setReference">
+         <property name="maximumSize">
+          <size>
+           <width>24</width>
+           <height>24</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Set marker as reference (index 0)</string>
+         </property>
+         <property name="text">
+          <string>R</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <layout class="QVBoxLayout" name="markerAddRemoveLayout">
          <property name="spacing">
           <number>0</number>

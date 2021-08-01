@@ -1178,6 +1178,7 @@ void GLSpectrum::drawMarkers()
 			{
 				ypoint.ry() =
 					(m_powerScale.getRangeMax() - m_currentSpectrum[m_histogramMarkers.at(i).m_fftBin]) / m_powerScale.getRange();
+				ypoint.ry() = ypoint.ry() > 1 ? 1 : ypoint.ry();
 				powerStr = displayScaledF(
 					m_currentSpectrum[m_histogramMarkers.at(i).m_fftBin],
 					m_linear ? 'e' : 'f',
@@ -1227,11 +1228,14 @@ void GLSpectrum::drawMarkers()
 				float poweri = m_histogramMarkers.at(i).m_markerType == SpectrumHistogramMarkerTypePower ?
 					m_currentSpectrum[m_histogramMarkers.at(i).m_fftBin] :
 					m_linear ? m_histogramMarkers.at(i).m_power : CalcDb::dbPower(m_histogramMarkers.at(i).m_power);
-				QString deltaPowerStr = displayScaledF(
-                            poweri - power0,
-                            m_linear ? 'e' : 'f',
-                            m_linear ? 3 : 1,
-                            false);
+				QString deltaPowerStr;
+
+				if (m_linear) {
+					deltaPowerStr = displayScaledF(poweri - power0, 'e', 3, false);
+				} else {
+					deltaPowerStr = QString::number(poweri - power0, 'f', 1);
+				}
+
                 drawTextOverlay(
                     m_histogramMarkers.at(i).m_deltaFrequencyStr,
                     QColor(255, 255, 255, 192),

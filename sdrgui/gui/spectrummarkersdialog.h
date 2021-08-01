@@ -60,8 +60,10 @@ private slots:
     void on_markerFrequency_changed(qint64 value);
     void on_fixedPower_valueChanged(int value);
     void on_marker_valueChanged(int value);
+    void on_setReference_clicked(bool checked);
     void on_markerAdd_clicked(bool checked);
     void on_markerDel_clicked(bool checked);
+    void on_powerMode_currentIndexChanged(int index);
     void accept();
     void reject();
 };
