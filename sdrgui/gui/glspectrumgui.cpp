@@ -348,6 +348,7 @@ void GLSpectrumGUI::on_markers_clicked(bool checked)
 
     markersDialog.setCenterFrequency(m_glSpectrum->getCenterFrequency());
     markersDialog.setPower(m_glSpectrum->getPowerMax() / 2.0f);
+    markersDialog.setTime(m_glSpectrum->getTimeMax() / 2.0f);
 
     connect(&markersDialog, SIGNAL(updateHistogram()), this, SLOT(updateHistogramMarkers()));
     connect(&markersDialog, SIGNAL(updateWaterfall()), this, SLOT(updateWaterfallMarkers()));

@@ -443,6 +443,11 @@ float GLSpectrum::getPowerMax() const
 	return m_linear ? m_powerScale.getRangeMax() : CalcDb::powerFromdB(m_powerScale.getRangeMax());
 }
 
+float GLSpectrum::getTimeMax() const
+{
+	return m_timeScale.getRangeMax();
+}
+
 void GLSpectrum::newSpectrum(const Real *spectrum, int nbBins, int fftSize)
 {
 	QMutexLocker mutexLocker(&m_mutex);

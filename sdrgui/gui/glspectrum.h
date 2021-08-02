@@ -115,6 +115,7 @@ public:
 	void setCenterFrequency(qint64 frequency);
     qint64 getCenterFrequency() const { return m_centerFrequency; }
     float getPowerMax() const;
+    float getTimeMax() const;
 	void setSampleRate(qint32 sampleRate);
 	void setTimingRate(qint32 timingRate);
     void setFFTOverlap(int overlap);

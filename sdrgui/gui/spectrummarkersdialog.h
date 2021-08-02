@@ -41,16 +41,22 @@ public:
     ~SpectrumMarkersDialog();
     void setCenterFrequency(qint64 centerFrequency) { m_centerFrequency = centerFrequency; }
     void setPower(float power) { m_power = power; }
+    void setTime(float time) { m_time = time; }
 
 private:
     Ui::SpectrumMarkersDialog* ui;
     QList<SpectrumHistogramMarker>& m_histogramMarkers;
     QList<SpectrumWaterfallMarker>& m_waterfallMarkers;
     int m_histogramMarkerIndex;
+    int m_waterfallMarkerIndex;
     qint64 m_centerFrequency;
     float m_power;
+    float m_time;
 
     void displayHistogramMarker();
+    void displayWaterfallMarker();
+    void displayTime(float time);
+    float getTime() const;
 
 private slots:
     void on_markerFrequency_changed(qint64 value);
@@ -62,6 +68,16 @@ private slots:
     void on_markerAdd_clicked();
     void on_markerDel_clicked();
     void on_powerMode_currentIndexChanged(int index);
+    void on_wMarkerFrequency_changed(qint64 value);
+    void on_timeCoarse_valueChanged(int value);
+    void on_timeFine_valueChanged(int value);
+    void on_timeExp_valueChanged(int value);
+    void on_wCenterFrequency_clicked();
+    void on_wMarkerColor_clicked();
+    void on_wMarker_valueChanged(int value);
+    void on_wSetReference_clicked();
+    void on_wMarkerAdd_clicked();
+    void on_wMarkerDel_clicked();
 
 signals:
     void updateHistogram();
