@@ -68,6 +68,7 @@ private slots:
     void on_markerAdd_clicked();
     void on_markerDel_clicked();
     void on_powerMode_currentIndexChanged(int index);
+    void on_powerHoldReset_clicked();
     void on_wMarkerFrequency_changed(qint64 value);
     void on_timeCoarse_valueChanged(int value);
     void on_timeFine_valueChanged(int value);

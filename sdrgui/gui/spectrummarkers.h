@@ -27,7 +27,8 @@
 
 enum SpectrumHistogramMarkerType {
     SpectrumHistogramMarkerTypeManual,
-    SpectrumHistogramMarkerTypePower
+    SpectrumHistogramMarkerTypePower,
+    SpectrumHistogramMarkerTypePowerMax
 };
 
 struct SpectrumHistogramMarker
@@ -36,6 +37,8 @@ struct SpectrumHistogramMarker
     float m_frequency;
     int m_fftBin;
     float m_power;
+    bool m_holdReset;
+    float m_powerMax;
     SpectrumHistogramMarkerType m_markerType;
     QColor m_markerColor;
     QString m_frequencyStr;
@@ -49,6 +52,8 @@ struct SpectrumHistogramMarker
         m_frequency(0),
         m_fftBin(0),
         m_power(0),
+        m_holdReset(true),
+        m_powerMax(0),
         m_markerType(SpectrumHistogramMarkerTypeManual),
         m_markerColor(QColorConstants::White),
         m_frequencyStr(),
@@ -62,6 +67,8 @@ struct SpectrumHistogramMarker
         float frequency,
         int   fftBin,
         float power,
+        bool  holdReset,
+        float powerMax,
         SpectrumHistogramMarkerType markerType,
         QColor markerColor,
         const QString& frequencyStr,
@@ -73,6 +80,8 @@ struct SpectrumHistogramMarker
         m_frequency(frequency),
         m_fftBin(fftBin),
         m_power(power),
+        m_holdReset(holdReset),
+        m_powerMax(powerMax),
         m_markerType(markerType),
         m_markerColor(markerColor),
         m_frequencyStr(frequencyStr),

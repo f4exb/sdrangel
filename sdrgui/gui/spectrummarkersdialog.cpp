@@ -250,6 +250,15 @@ void SpectrumMarkersDialog::on_powerMode_currentIndexChanged(int index)
     m_histogramMarkers[m_histogramMarkerIndex].m_markerType = (SpectrumHistogramMarkerType) index;
 }
 
+void SpectrumMarkersDialog::on_powerHoldReset_clicked()
+{
+    if (m_histogramMarkers.size() == 0) {
+        return;
+    }
+
+    m_histogramMarkers[m_histogramMarkerIndex].m_holdReset = true;
+}
+
 void SpectrumMarkersDialog::on_wMarkerFrequency_changed(qint64 value)
 {
     if (m_waterfallMarkers.size() == 0) {

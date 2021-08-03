@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>390</width>
+    <width>418</width>
     <height>201</height>
    </rect>
   </property>
@@ -34,7 +34,7 @@
         <rect>
          <x>0</x>
          <y>10</y>
-         <width>361</width>
+         <width>391</width>
          <height>74</height>
         </rect>
        </property>
@@ -368,6 +368,22 @@
            </widget>
           </item>
           <item>
+           <widget class="QPushButton" name="powerHoldReset">
+            <property name="maximumSize">
+             <size>
+              <width>24</width>
+              <height>24</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Reset power max hold</string>
+            </property>
+            <property name="text">
+             <string>R</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QComboBox" name="powerMode">
             <property name="maximumSize">
              <size>
@@ -382,7 +398,12 @@
             </item>
             <item>
              <property name="text">
-              <string>Pow</string>
+              <string>Cur</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Max</string>
              </property>
             </item>
            </widget>
@@ -449,7 +470,7 @@
         <rect>
          <x>0</x>
          <y>10</y>
-         <width>361</width>
+         <width>391</width>
          <height>93</height>
         </rect>
        </property>

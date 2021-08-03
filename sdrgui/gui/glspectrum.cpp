@@ -1180,13 +1180,36 @@ void GLSpectrum::drawMarkers()
 
 			if (m_histogramMarkers.at(i).m_markerType == SpectrumHistogramMarkerTypePower)
 			{
+				float power = m_currentSpectrum[m_histogramMarkers.at(i).m_fftBin];
 				ypoint.ry() =
-					(m_powerScale.getRangeMax() - m_currentSpectrum[m_histogramMarkers.at(i).m_fftBin]) / m_powerScale.getRange();
+					(m_powerScale.getRangeMax() - power) / m_powerScale.getRange();
 				ypoint.ry() = ypoint.ry() < 0 ?
 					0 : ypoint.ry() > 1 ?
 						1 : ypoint.ry();
 				powerStr = displayScaledF(
-					m_currentSpectrum[m_histogramMarkers.at(i).m_fftBin],
+					power,
+					m_linear ? 'e' : 'f',
+					m_linear ? 3 : 1,
+					false
+				);
+			}
+			else if (m_histogramMarkers.at(i).m_markerType == SpectrumHistogramMarkerTypePowerMax)
+			{
+				float power = m_currentSpectrum[m_histogramMarkers.at(i).m_fftBin];
+
+				if ((m_histogramMarkers.at(i).m_holdReset) || (power > m_histogramMarkers[i].m_powerMax))
+				{
+					m_histogramMarkers[i].m_powerMax = power;
+					m_histogramMarkers[i].m_holdReset = false;
+				}
+
+				ypoint.ry() =
+					(m_powerScale.getRangeMax() - m_histogramMarkers[i].m_powerMax) / m_powerScale.getRange();
+				ypoint.ry() = ypoint.ry() < 0 ?
+					0 : ypoint.ry() > 1 ?
+						1 : ypoint.ry();
+				powerStr = displayScaledF(
+					m_histogramMarkers[i].m_powerMax,
 					m_linear ? 'e' : 'f',
 					m_linear ? 3 : 1,
 					false
@@ -1230,12 +1253,24 @@ void GLSpectrum::drawMarkers()
             else
             {
 				textColor.setAlpha(192);
-				float power0 = m_histogramMarkers.at(0).m_markerType == SpectrumHistogramMarkerTypePower ?
-					m_currentSpectrum[m_histogramMarkers.at(0).m_fftBin] :
-					m_linear ? m_histogramMarkers.at(0).m_power : CalcDb::dbPower(m_histogramMarkers.at(0).m_power);
-				float poweri = m_histogramMarkers.at(i).m_markerType == SpectrumHistogramMarkerTypePower ?
-					m_currentSpectrum[m_histogramMarkers.at(i).m_fftBin] :
-					m_linear ? m_histogramMarkers.at(i).m_power : CalcDb::dbPower(m_histogramMarkers.at(i).m_power);
+				float power0, poweri;
+
+				if (m_histogramMarkers.at(0).m_markerType == SpectrumHistogramMarkerTypePower) {
+					power0 = m_currentSpectrum[m_histogramMarkers.at(0).m_fftBin];
+				} else if (m_histogramMarkers.at(0).m_markerType == SpectrumHistogramMarkerTypePowerMax) {
+					power0 = m_histogramMarkers.at(0).m_powerMax;
+				} else {
+					power0 = m_linear ? m_histogramMarkers.at(0).m_power : CalcDb::dbPower(m_histogramMarkers.at(0).m_power);
+				}
+
+				if (m_histogramMarkers.at(i).m_markerType == SpectrumHistogramMarkerTypePower) {
+					poweri = m_currentSpectrum[m_histogramMarkers.at(i).m_fftBin];
+				} else if (m_histogramMarkers.at(i).m_markerType == SpectrumHistogramMarkerTypePowerMax) {
+					poweri = m_histogramMarkers.at(i).m_powerMax;
+				} else {
+					poweri = m_linear ? m_histogramMarkers.at(i).m_power : CalcDb::dbPower(m_histogramMarkers.at(i).m_power);
+				}
+
 				QString deltaPowerStr;
 
 				if (m_linear) {
