@@ -41,6 +41,7 @@ const float GLSpectrum::m_maxFrequencyZoom = 10.0f;
 
 GLSpectrum::GLSpectrum(QWidget* parent) :
 	QGLWidget(parent),
+	m_markersDisplay(SpectrumSettings::MarkersDisplaySpectrum),
 	m_cursorState(CSNormal),
     m_cursorChannel(0),
 	m_spectrumVis(nullptr),
@@ -1019,7 +1020,9 @@ void GLSpectrum::paintGL()
 		}
 	}
 
-    drawMarkers();
+	if (m_markersDisplay == SpectrumSettings::MarkersDisplaySpectrum) {
+	    drawSpectrumMarkers();
+	}
 
 	// paint waterfall grid
 	if (m_displayWaterfall && m_displayGrid)
@@ -1166,7 +1169,7 @@ void GLSpectrum::paintGL()
 	m_mutex.unlock();
 }
 
-void GLSpectrum::drawMarkers()
+void GLSpectrum::drawSpectrumMarkers()
 {
 	QVector4D lineColor(1.0f, 1.0f, 1.0f, 0.3f);
 
@@ -1175,6 +1178,10 @@ void GLSpectrum::drawMarkers()
     {
         for (int i = 0; i < m_histogramMarkers.size(); i++)
         {
+			if (!m_histogramMarkers.at(i).m_show) {
+				continue;
+			}
+
 			QPointF ypoint = m_histogramMarkers.at(i).m_point;
 			QString powerStr = m_histogramMarkers.at(i).m_powerStr;
 
@@ -1307,6 +1314,10 @@ void GLSpectrum::drawMarkers()
         // crosshairs
         for (int i = 0; i < m_waterfallMarkers.size(); i++)
         {
+			if (!m_waterfallMarkers.at(i).m_show) {
+				continue;
+			}
+
             GLfloat h[] {
                 (float) m_waterfallMarkers.at(i).m_point.x(), 0,
                 (float) m_waterfallMarkers.at(i).m_point.x(), 1
@@ -1317,10 +1328,10 @@ void GLSpectrum::drawMarkers()
                 1, (float) m_waterfallMarkers.at(i).m_point.y()
             };
             m_glShaderSimple.drawSegments(m_glWaterfallBoxMatrix, lineColor, v, 2);
-        }
+        // }
         // text
-        for (int i = 0; i < m_waterfallMarkers.size(); i++)
-        {
+        // for (int i = 0; i < m_waterfallMarkers.size(); i++)
+        // {
 			QColor textColor = m_waterfallMarkers.at(i).m_markerColor;
 			textColor.setAlpha(192);
 

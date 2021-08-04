@@ -41,6 +41,7 @@ struct SpectrumHistogramMarker
     float m_powerMax;
     SpectrumHistogramMarkerType m_markerType;
     QColor m_markerColor;
+    bool m_show;
     QString m_frequencyStr;
     QString m_powerStr;
     QString m_deltaFrequencyStr;
@@ -56,6 +57,7 @@ struct SpectrumHistogramMarker
         m_powerMax(0),
         m_markerType(SpectrumHistogramMarkerTypeManual),
         m_markerColor(QColorConstants::White),
+        m_show(true),
         m_frequencyStr(),
         m_powerStr(),
         m_deltaFrequencyStr(),
@@ -71,6 +73,7 @@ struct SpectrumHistogramMarker
         float powerMax,
         SpectrumHistogramMarkerType markerType,
         QColor markerColor,
+        bool show,
         const QString& frequencyStr,
         const QString& powerStr,
         const QString& deltaFrequencyStr,
@@ -84,6 +87,7 @@ struct SpectrumHistogramMarker
         m_powerMax(powerMax),
         m_markerType(markerType),
         m_markerColor(markerColor),
+        m_show(show),
         m_frequencyStr(frequencyStr),
         m_powerStr(powerStr),
         m_deltaFrequencyStr(deltaFrequencyStr),
@@ -100,6 +104,7 @@ struct SpectrumWaterfallMarker
     float m_frequency;
     float m_time;
     QColor m_markerColor;
+    bool m_show;
     QString m_frequencyStr;
     QString m_timeStr;
     QString m_deltaFrequencyStr;
@@ -111,6 +116,7 @@ struct SpectrumWaterfallMarker
         m_frequency(0),
         m_time(0),
         m_markerColor(QColorConstants::White),
+        m_show(true),
         m_frequencyStr(),
         m_timeStr(),
         m_deltaFrequencyStr(),
@@ -122,6 +128,7 @@ struct SpectrumWaterfallMarker
         float frequency,
         float time,
         QColor markerColor,
+        bool show,
         const QString& frequencyStr,
         const QString& timeStr,
         const QString& deltaFrequencyStr,
@@ -131,6 +138,7 @@ struct SpectrumWaterfallMarker
         m_frequency(frequency),
         m_time(time),
         m_markerColor(markerColor),
+        m_show(show),
         m_frequencyStr(frequencyStr),
         m_timeStr(timeStr),
         m_deltaFrequencyStr(deltaFrequencyStr),

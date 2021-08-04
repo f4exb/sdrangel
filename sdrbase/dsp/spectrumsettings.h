@@ -37,6 +37,12 @@ public:
         AvgModeMax
     };
 
+    enum MarkersDisplay
+    {
+        MarkersDisplayNone,
+        MarkersDisplaySpectrum
+    };
+
 	int m_fftSize;
 	int m_fftOverlap;
 	FFTWindow::Function m_fftWindow;

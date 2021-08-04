@@ -27,11 +27,13 @@
 SpectrumMarkersDialog::SpectrumMarkersDialog(
     QList<SpectrumHistogramMarker>& histogramMarkers,
     QList<SpectrumWaterfallMarker>& waterfallMarkers,
+    SpectrumSettings::MarkersDisplay& markersDisplay,
     QWidget* parent) :
     QDialog(parent),
     ui(new Ui::SpectrumMarkersDialog),
     m_histogramMarkers(histogramMarkers),
     m_waterfallMarkers(waterfallMarkers),
+    m_markersDisplay(markersDisplay),
     m_histogramMarkerIndex(0),
     m_waterfallMarkerIndex(0),
     m_centerFrequency(0),
@@ -44,6 +46,7 @@ SpectrumMarkersDialog::SpectrumMarkersDialog(
     ui->wMarkerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->wMarkerFrequency->setValueRange(false, 10, -9999999999L, 9999999999L);
     ui->wMarker->setMaximum(m_waterfallMarkers.size() - 1);
+    ui->showSelect->setCurrentIndex((int) m_markersDisplay);
     displayHistogramMarker();
     displayWaterfallMarker();
 }
@@ -59,6 +62,7 @@ void SpectrumMarkersDialog::displayHistogramMarker()
         ui->markerFrequency->setEnabled(false);
         ui->powerMode->setEnabled(false);
         ui->fixedPower->setEnabled(false);
+        ui->showMarker->setEnabled(false);
         ui->markerText->setText("-");
         ui->fixedPower->setValue(0);
         ui->fixedPowerText->setText(tr("0.0"));
@@ -69,6 +73,7 @@ void SpectrumMarkersDialog::displayHistogramMarker()
         ui->markerFrequency->setEnabled(true);
         ui->powerMode->setEnabled(true);
         ui->fixedPower->setEnabled(true);
+        ui->showMarker->setEnabled(true);
         ui->markerText->setText(tr("%1").arg(m_histogramMarkerIndex));
         ui->markerFrequency->setValue(m_histogramMarkers[m_histogramMarkerIndex].m_frequency);
         ui->powerMode->setCurrentIndex((int) m_histogramMarkers[m_histogramMarkerIndex].m_markerType);
@@ -78,6 +83,7 @@ void SpectrumMarkersDialog::displayHistogramMarker()
         int r,g,b,a;
         m_histogramMarkers[m_histogramMarkerIndex].m_markerColor.getRgb(&r, &g, &b, &a);
         ui->markerColor->setStyleSheet(tr("QLabel { background-color : rgb(%1,%2,%3); }").arg(r).arg(g).arg(b));
+        ui->showMarker->setChecked(m_histogramMarkers[m_histogramMarkerIndex].m_show);
     }
 }
 
@@ -90,6 +96,7 @@ void SpectrumMarkersDialog::displayWaterfallMarker()
         ui->timeCoarse->setEnabled(false);
         ui->timeFine->setEnabled(false);
         ui->timeExp->setEnabled(false);
+        ui->wShowMarker->setEnabled(false);
         ui->wMarkerText->setText("-");
         ui->timeCoarse->setValue(0);
         ui->timeFine->setValue(0);
@@ -104,6 +111,7 @@ void SpectrumMarkersDialog::displayWaterfallMarker()
         ui->timeCoarse->setEnabled(true);
         ui->timeFine->setEnabled(true);
         ui->timeExp->setEnabled(true);
+        ui->wShowMarker->setEnabled(true);
         ui->wMarkerText->setText(tr("%1").arg(m_waterfallMarkerIndex));
         ui->wMarkerFrequency->setValue(m_waterfallMarkers[m_waterfallMarkerIndex].m_frequency);
         int r,g,b,a;
@@ -173,6 +181,15 @@ void SpectrumMarkersDialog::on_markerColor_clicked()
         m_histogramMarkers[m_histogramMarkerIndex].m_markerColor = newColor;
         displayHistogramMarker();
     }
+}
+
+void SpectrumMarkersDialog::on_showMarker_clicked(bool clicked)
+{
+    if (m_histogramMarkers.size() == 0) {
+        return;
+    }
+
+    m_histogramMarkers[m_histogramMarkerIndex].m_show = clicked;
 }
 
 void SpectrumMarkersDialog::on_fixedPower_valueChanged(int value)
@@ -247,7 +264,15 @@ void SpectrumMarkersDialog::on_powerMode_currentIndexChanged(int index)
         return;
     }
 
-    m_histogramMarkers[m_histogramMarkerIndex].m_markerType = (SpectrumHistogramMarkerType) index;
+    SpectrumHistogramMarkerType newType = (SpectrumHistogramMarkerType) index;
+
+    if ((m_histogramMarkers[m_histogramMarkerIndex].m_markerType != newType)
+       && (newType == SpectrumHistogramMarkerTypePowerMax))
+    {
+        m_histogramMarkers[m_histogramMarkerIndex].m_holdReset = true;
+    }
+
+    m_histogramMarkers[m_histogramMarkerIndex].m_markerType = newType;
 }
 
 void SpectrumMarkersDialog::on_powerHoldReset_clicked()
@@ -338,6 +363,15 @@ void SpectrumMarkersDialog::on_wMarkerColor_clicked()
     }
 }
 
+void SpectrumMarkersDialog::on_wShowMarker_clicked(bool clicked)
+{
+    if (m_waterfallMarkers.size() == 0) {
+        return;
+    }
+
+    m_waterfallMarkers[m_waterfallMarkerIndex].m_show = clicked;
+}
+
 void SpectrumMarkersDialog::on_wMarker_valueChanged(int value)
 {
     if (m_waterfallMarkers.size() == 0) {
@@ -390,4 +424,9 @@ void SpectrumMarkersDialog::on_wMarkerDel_clicked()
         m_waterfallMarkerIndex : m_waterfallMarkerIndex - 1;
     ui->wMarker->setMaximum(m_waterfallMarkers.size() - 1);
     displayWaterfallMarker();
+}
+
+void SpectrumMarkersDialog::on_showSelect_currentIndexChanged(int index)
+{
+    m_markersDisplay = (SpectrumSettings::MarkersDisplay) index;
 }

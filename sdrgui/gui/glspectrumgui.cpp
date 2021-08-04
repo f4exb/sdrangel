@@ -343,6 +343,7 @@ void GLSpectrumGUI::on_markers_clicked(bool checked)
     SpectrumMarkersDialog markersDialog(
         m_glSpectrum->getHistogramMarkers(),
         m_glSpectrum->getWaterfallMarkers(),
+        m_glSpectrum->getMarkersDisplay(),
         this
     );
 

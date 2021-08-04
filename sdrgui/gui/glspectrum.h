@@ -34,6 +34,7 @@
 #include "gui/glshadertextured.h"
 #include "gui/spectrummarkers.h"
 #include "dsp/channelmarker.h"
+#include "dsp/spectrumsettings.h"
 #include "export.h"
 #include "util/incrementalarray.h"
 #include "util/message.h"
@@ -162,6 +163,7 @@ public:
     void setWaterfallMarkers(const QList<SpectrumWaterfallMarker>& waterfallMarkers);
     void updateHistogramMarkers();
     void updateWaterfallMarkers();
+    SpectrumSettings::MarkersDisplay& getMarkersDisplay() {  return m_markersDisplay; }
 
 private:
 	struct ChannelMarkerState {
@@ -190,6 +192,7 @@ private:
 
     QList<SpectrumHistogramMarker> m_histogramMarkers;
     QList<SpectrumWaterfallMarker> m_waterfallMarkers;
+    SpectrumSettings::MarkersDisplay m_markersDisplay;
 
 	CursorState m_cursorState;
 	int m_cursorChannel;
@@ -296,7 +299,7 @@ private:
 	void initializeGL();
 	void resizeGL(int width, int height);
 	void paintGL();
-    void drawMarkers();
+    void drawSpectrumMarkers();
 
 	void stopDrag();
 	void applyChanges();

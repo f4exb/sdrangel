@@ -22,6 +22,7 @@
 #include <QDialog>
 #include <QList>
 
+#include "dsp/spectrumsettings.h"
 #include "gui/spectrummarkers.h"
 #include "export.h"
 
@@ -36,6 +37,7 @@ public:
     explicit SpectrumMarkersDialog(
         QList<SpectrumHistogramMarker>& histogramMarkers,
         QList<SpectrumWaterfallMarker>& waterfallMarkers,
+        SpectrumSettings::MarkersDisplay& markersDisplay,
         QWidget* parent = nullptr
     );
     ~SpectrumMarkersDialog();
@@ -47,6 +49,7 @@ private:
     Ui::SpectrumMarkersDialog* ui;
     QList<SpectrumHistogramMarker>& m_histogramMarkers;
     QList<SpectrumWaterfallMarker>& m_waterfallMarkers;
+    SpectrumSettings::MarkersDisplay& m_markersDisplay;
     int m_histogramMarkerIndex;
     int m_waterfallMarkerIndex;
     qint64 m_centerFrequency;
@@ -62,6 +65,7 @@ private slots:
     void on_markerFrequency_changed(qint64 value);
     void on_centerFrequency_clicked();
     void on_markerColor_clicked();
+    void on_showMarker_clicked(bool clicked);
     void on_fixedPower_valueChanged(int value);
     void on_marker_valueChanged(int value);
     void on_setReference_clicked();
@@ -75,10 +79,12 @@ private slots:
     void on_timeExp_valueChanged(int value);
     void on_wCenterFrequency_clicked();
     void on_wMarkerColor_clicked();
+    void on_wShowMarker_clicked(bool clicked);
     void on_wMarker_valueChanged(int value);
     void on_wSetReference_clicked();
     void on_wMarkerAdd_clicked();
     void on_wMarkerDel_clicked();
+    void on_showSelect_currentIndexChanged(int index);
 
 signals:
     void updateHistogram();
