@@ -71,7 +71,7 @@ func printHeader(header *HeaderStd) {
 	fmt.Println("Sample rate:", header.SampleRate)
 	fmt.Println("Frequency  :", header.CenterFrequency)
 	fmt.Println("Sample Size:", header.SampleSize)
-	tm := time.Unix(header.StartTimestamp, 0)
+	tm := time.Unix(header.StartTimestamp / 1000, header.StartTimestamp % 1000)
 	fmt.Println("Start      :", tm)
 	fmt.Println("CRC32      :", header.CRC32)
 	fmt.Println("CRC32 OK   :", GetCRC(header))
@@ -152,13 +152,13 @@ func main() {
 			if flagSeen["ts"] {
 				t, err := time.Parse(time.RFC3339, *timeStr)
 				if err == nil {
-					headerOrigin.StartTimestamp = t.Unix()
+					headerOrigin.StartTimestamp = t.UnixNano() / int64(time.Millisecond)
 				} else {
 					fmt.Println("Incorrect time specified. Defaulting to now")
-					headerOrigin.StartTimestamp = int64(time.Now().Unix())
+					headerOrigin.StartTimestamp = int64(time.Now().UnixNano() / int64(time.Millisecond))
 				}
 			} else if *timeNow {
-				headerOrigin.StartTimestamp = int64(time.Now().Unix())
+				headerOrigin.StartTimestamp = int64(time.Now().Unix() * 1000)
 			}
 
 			fmt.Println("\nHeader is now")
