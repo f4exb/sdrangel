@@ -233,7 +233,7 @@ private:
 	FileOutputWorker* m_fileOutputWorker;
     QThread m_fileOutputWorkerThread;
 	QString m_deviceDescription;
-	std::time_t m_startingTimeStamp;
+	qint64 m_startingTimeStamp;
 	const QTimer& m_masterTimer;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;

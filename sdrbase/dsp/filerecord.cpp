@@ -183,8 +183,8 @@ void FileRecord::writeHeader()
     Header header;
     header.sampleRate = m_sampleRate;
     header.centerFrequency = m_centerFrequency;
-    std::time_t ts = time(0);
-    header.startTimeStamp = ts + (m_msShift / 1000);
+    qint64 ts = QDateTime::currentMSecsSinceEpoch();
+    header.startTimeStamp = (quint64)(ts + m_msShift);
     header.sampleSize = SDR_RX_SAMP_SZ;
     header.filler = 0;
 
