@@ -8,7 +8,7 @@ The header is composed as follows:
 
   - Sample rate in S/s (4 bytes, 32 bits)
   - Center frequency in Hz (8 bytes, 64 bits)
-  - Start time Unix timestamp epoch in seconds (8 bytes, 64 bits)
+  - Start time Unix timestamp epoch in milliseconds (8 bytes, 64 bits)
   - Sample size as 16 or 24 bits (4 bytes, 32 bits)
   - filler with all zeroes (4 bytes, 32 bits)
   - CRC32 (IEEE) of the 28 bytes above (4 bytes, 32 bits)

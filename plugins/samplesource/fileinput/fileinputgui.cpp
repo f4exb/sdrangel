@@ -367,8 +367,8 @@ void FileInputGUI::updateWithStreamTime()
 	QString s_timems = t.toString("HH:mm:ss.zzz");
 	ui->relTimeText->setText(s_timems);
 
-    qint64 startingTimeStampMsec = m_startingTimeStamp * 1000LL;
-	QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
+    qint64 startingTimeStampMsec = m_startingTimeStamp;
+    QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
     dt = dt.addSecs(t_sec);
     dt = dt.addMSecs(t_msec);
 	QString s_date = dt.toString("yyyy-MM-dd HH:mm:ss.zzz");

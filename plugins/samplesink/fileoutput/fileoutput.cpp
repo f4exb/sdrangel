@@ -19,6 +19,7 @@
 #include <QDebug>
 #include <QNetworkReply>
 #include <QBuffer>
+#include <QDateTime>
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
@@ -74,8 +75,8 @@ void FileOutput::openFileStream()
 	int actualSampleRate = m_settings.m_sampleRate * (1<<m_settings.m_log2Interp);
     header.sampleRate = actualSampleRate;
     header.centerFrequency = m_settings.m_centerFrequency;
-    m_startingTimeStamp = time(0);
-    header.startTimeStamp = m_startingTimeStamp;
+    m_startingTimeStamp = QDateTime::currentMSecsSinceEpoch();
+    header.startTimeStamp = (quint64)m_startingTimeStamp;
     header.sampleSize = SDR_RX_SAMP_SZ;
 
     FileRecord::writeHeader(m_ofstream, header);
