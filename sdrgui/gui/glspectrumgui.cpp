@@ -92,6 +92,7 @@ void GLSpectrumGUI::resetToDefaults()
 
 QByteArray GLSpectrumGUI::serialize() const
 {
+    qDebug("GLSpectrumGUI::serialize: %p", m_glSpectrum);
     return m_settings.serialize();
 }
 

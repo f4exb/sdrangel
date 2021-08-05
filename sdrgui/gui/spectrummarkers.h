@@ -96,6 +96,9 @@ struct SpectrumHistogramMarker
 
     SpectrumHistogramMarker(const SpectrumHistogramMarker& other) = default;
     SpectrumHistogramMarker& operator=(const SpectrumHistogramMarker&) = default;
+
+    QByteArray serialize() const;
+    bool deserialize(const QByteArray& data);
 };
 
 struct SpectrumWaterfallMarker
@@ -147,6 +150,9 @@ struct SpectrumWaterfallMarker
 
     SpectrumWaterfallMarker(const SpectrumWaterfallMarker& other) = default;
     SpectrumWaterfallMarker& operator=(const SpectrumWaterfallMarker&) = default;
+
+    QByteArray serialize() const;
+    bool deserialize(const QByteArray& data);
 };
 
 #endif // INCLUDE_SPECTRUMMARKERS_H
