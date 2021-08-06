@@ -264,10 +264,10 @@ void SpectrumMarkersDialog::on_powerMode_currentIndexChanged(int index)
         return;
     }
 
-    SpectrumHistogramMarkerType newType = (SpectrumHistogramMarkerType) index;
+    SpectrumHistogramMarker::SpectrumMarkerType newType = (SpectrumHistogramMarker::SpectrumMarkerType) index;
 
     if ((m_histogramMarkers[m_histogramMarkerIndex].m_markerType != newType)
-       && (newType == SpectrumHistogramMarkerTypePowerMax))
+       && (newType == SpectrumHistogramMarker::SpectrumMarkerTypePowerMax))
     {
         m_histogramMarkers[m_histogramMarkerIndex].m_holdReset = true;
     }

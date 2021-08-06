@@ -59,6 +59,7 @@ set(sdrgui_SOURCES
     gui/scaleengine.cpp
     gui/scaledimage.cpp
     gui/sdrangelsplash.cpp
+    gui/spectrummarkers.cpp
     gui/spectrummarkersdialog.cpp
     gui/tickedslider.cpp
     gui/transverterbutton.cpp

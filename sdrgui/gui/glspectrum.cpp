@@ -1185,7 +1185,7 @@ void GLSpectrum::drawSpectrumMarkers()
 			QPointF ypoint = m_histogramMarkers.at(i).m_point;
 			QString powerStr = m_histogramMarkers.at(i).m_powerStr;
 
-			if (m_histogramMarkers.at(i).m_markerType == SpectrumHistogramMarkerTypePower)
+			if (m_histogramMarkers.at(i).m_markerType == SpectrumHistogramMarker::SpectrumMarkerTypePower)
 			{
 				float power = m_currentSpectrum[m_histogramMarkers.at(i).m_fftBin];
 				ypoint.ry() =
@@ -1200,7 +1200,7 @@ void GLSpectrum::drawSpectrumMarkers()
 					false
 				);
 			}
-			else if (m_histogramMarkers.at(i).m_markerType == SpectrumHistogramMarkerTypePowerMax)
+			else if (m_histogramMarkers.at(i).m_markerType == SpectrumHistogramMarker::SpectrumMarkerTypePowerMax)
 			{
 				float power = m_currentSpectrum[m_histogramMarkers.at(i).m_fftBin];
 
@@ -1262,17 +1262,17 @@ void GLSpectrum::drawSpectrumMarkers()
 				textColor.setAlpha(192);
 				float power0, poweri;
 
-				if (m_histogramMarkers.at(0).m_markerType == SpectrumHistogramMarkerTypePower) {
+				if (m_histogramMarkers.at(0).m_markerType == SpectrumHistogramMarker::SpectrumMarkerTypePower) {
 					power0 = m_currentSpectrum[m_histogramMarkers.at(0).m_fftBin];
-				} else if (m_histogramMarkers.at(0).m_markerType == SpectrumHistogramMarkerTypePowerMax) {
+				} else if (m_histogramMarkers.at(0).m_markerType == SpectrumHistogramMarker::SpectrumMarkerTypePowerMax) {
 					power0 = m_histogramMarkers.at(0).m_powerMax;
 				} else {
 					power0 = m_linear ? m_histogramMarkers.at(0).m_power : CalcDb::dbPower(m_histogramMarkers.at(0).m_power);
 				}
 
-				if (m_histogramMarkers.at(i).m_markerType == SpectrumHistogramMarkerTypePower) {
+				if (m_histogramMarkers.at(i).m_markerType == SpectrumHistogramMarker::SpectrumMarkerTypePower) {
 					poweri = m_currentSpectrum[m_histogramMarkers.at(i).m_fftBin];
-				} else if (m_histogramMarkers.at(i).m_markerType == SpectrumHistogramMarkerTypePowerMax) {
+				} else if (m_histogramMarkers.at(i).m_markerType == SpectrumHistogramMarker::SpectrumMarkerTypePowerMax) {
 					poweri = m_histogramMarkers.at(i).m_powerMax;
 				} else {
 					poweri = m_linear ? m_histogramMarkers.at(i).m_power : CalcDb::dbPower(m_histogramMarkers.at(i).m_power);

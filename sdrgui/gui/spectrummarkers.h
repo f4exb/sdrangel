@@ -25,21 +25,24 @@
 #include <QPointF>
 #include <QColor>
 
-enum SpectrumHistogramMarkerType {
-    SpectrumHistogramMarkerTypeManual,
-    SpectrumHistogramMarkerTypePower,
-    SpectrumHistogramMarkerTypePowerMax
-};
+#include "export.h"
 
-struct SpectrumHistogramMarker
+struct SDRGUI_API SpectrumHistogramMarker
 {
+    enum SpectrumMarkerType
+    {
+        SpectrumMarkerTypeManual,
+        SpectrumMarkerTypePower,
+        SpectrumMarkerTypePowerMax
+    };
+
     QPointF m_point;
     float m_frequency;
     int m_fftBin;
     float m_power;
     bool m_holdReset;
     float m_powerMax;
-    SpectrumHistogramMarkerType m_markerType;
+    SpectrumMarkerType m_markerType;
     QColor m_markerColor;
     bool m_show;
     QString m_frequencyStr;
@@ -55,8 +58,8 @@ struct SpectrumHistogramMarker
         m_power(0),
         m_holdReset(true),
         m_powerMax(0),
-        m_markerType(SpectrumHistogramMarkerTypeManual),
-        m_markerColor(QColorConstants::White),
+        m_markerType(SpectrumMarkerTypeManual),
+        m_markerColor("white"),
         m_show(true),
         m_frequencyStr(),
         m_powerStr(),
@@ -71,7 +74,7 @@ struct SpectrumHistogramMarker
         float power,
         bool  holdReset,
         float powerMax,
-        SpectrumHistogramMarkerType markerType,
+        SpectrumMarkerType markerType,
         QColor markerColor,
         bool show,
         const QString& frequencyStr,
@@ -101,7 +104,7 @@ struct SpectrumHistogramMarker
     bool deserialize(const QByteArray& data);
 };
 
-struct SpectrumWaterfallMarker
+struct SDRGUI_API SpectrumWaterfallMarker
 {
     QPointF m_point;
     float m_frequency;
@@ -118,7 +121,7 @@ struct SpectrumWaterfallMarker
         m_point(0, 0),
         m_frequency(0),
         m_time(0),
-        m_markerColor(QColorConstants::White),
+        m_markerColor("white"),
         m_show(true),
         m_frequencyStr(),
         m_timeStr(),
