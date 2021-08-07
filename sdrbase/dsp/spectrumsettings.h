@@ -24,6 +24,7 @@
 #include "export.h"
 #include "dsp/dsptypes.h"
 #include "dsp/fftwindow.h"
+#include "dsp/spectrummarkers.h"
 #include "settings/serializable.h"
 
 class SDRBASE_API SpectrumSettings : public Serializable

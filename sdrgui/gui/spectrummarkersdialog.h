@@ -23,7 +23,7 @@
 #include <QList>
 
 #include "dsp/spectrumsettings.h"
-#include "gui/spectrummarkers.h"
+#include "dsp/spectrummarkers.h"
 #include "export.h"
 
 namespace Ui {

@@ -27,7 +27,7 @@
 
 #include "export.h"
 
-struct SDRGUI_API SpectrumHistogramMarker
+struct SDRBASE_API SpectrumHistogramMarker
 {
     enum SpectrumMarkerType
     {
@@ -104,7 +104,7 @@ struct SDRGUI_API SpectrumHistogramMarker
     bool deserialize(const QByteArray& data);
 };
 
-struct SDRGUI_API SpectrumWaterfallMarker
+struct SDRBASE_API SpectrumWaterfallMarker
 {
     QPointF m_point;
     float m_frequency;

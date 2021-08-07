@@ -149,6 +149,7 @@ set(sdrbase_SOURCES
     dsp/devicesamplesink.cpp
     dsp/devicesamplemimo.cpp
     dsp/devicesamplestatic.cpp
+    dsp/spectrummarkers.cpp
     dsp/spectrumvis.cpp
     dsp/wavfilerecord.cpp
 
@@ -299,6 +300,7 @@ set(sdrbase_HEADERS
     dsp/gfft.h
     dsp/glscopesettings.h
     dsp/glspectruminterface.h
+    dsp/spectrummarkers.h
     dsp/spectrumsettings.h
     dsp/goertzel.h
     dsp/hbfilterchainconverter.h

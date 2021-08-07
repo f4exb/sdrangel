@@ -66,7 +66,6 @@ QByteArray SpectrumSettings::serialize() const
 	s.writeS32(3, (int) m_fftWindow);
 	s.writeReal(4, m_refLevel);
 	s.writeReal(5, m_powerRange);
-	s.writeS32(26, m_fpsPeriodMs);
 	s.writeBool(6, m_displayWaterfall);
 	s.writeBool(7, m_invertedWaterfall);
 	s.writeBool(8, m_displayMaxHold);
@@ -86,6 +85,7 @@ QByteArray SpectrumSettings::serialize() const
     s.writeU32(23, m_wsSpectrumPort);
     s.writeBool(24, m_ssb);
     s.writeBool(25, m_usb);
+	s.writeS32(26, m_fpsPeriodMs);
 
 	return s.final();
 }
@@ -110,8 +110,6 @@ bool SpectrumSettings::deserialize(const QByteArray& data)
 		m_fftWindow = (FFTWindow::Function) tmp;
 		d.readReal(4, &m_refLevel, 0);
 		d.readReal(5, &m_powerRange, 100);
-		d.readS32(26, &tmp, 50);
-		m_fpsPeriodMs = tmp < 5 ? 5 : tmp > 500 ? 500 : tmp;
 		d.readBool(6, &m_displayWaterfall, true);
 		d.readBool(7, &m_invertedWaterfall, true);
 		d.readBool(8, &m_displayMaxHold, false);
@@ -135,6 +133,8 @@ bool SpectrumSettings::deserialize(const QByteArray& data)
         m_wsSpectrumPort = utmp < 1024 ? 1024 : utmp > 65535 ? 65535 : utmp;
         d.readBool(24, &m_ssb, false);
         d.readBool(25, &m_usb, true);
+		d.readS32(26, &tmp, 50);
+		m_fpsPeriodMs = tmp < 5 ? 5 : tmp > 500 ? 500 : tmp;
 
 		return true;
 	}

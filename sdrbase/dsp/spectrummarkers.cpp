@@ -48,8 +48,12 @@ bool SpectrumHistogramMarker::deserialize(const QByteArray& data)
 
     if (d.getVersion() == 1)
     {
+        int tmp;
+
         d.readFloat(1, &m_frequency, 0);
         d.readFloat(2, &m_power, 0);
+        d.readS32(3, &tmp, 0);
+        m_markerType = (SpectrumMarkerType) tmp;
         int r, g, b;
         d.readS32(4, &r, 255);
         d.readS32(5, &g, 255);

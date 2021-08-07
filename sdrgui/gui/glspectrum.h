@@ -28,11 +28,11 @@
 #include <QOpenGLVertexArrayObject>
 #include <QMatrix4x4>
 #include <QGLWidget>
-#include "dsp/glspectruminterface.h"
 #include "gui/scaleengine.h"
 #include "gui/glshadersimple.h"
 #include "gui/glshadertextured.h"
-#include "gui/spectrummarkers.h"
+#include "dsp/glspectruminterface.h"
+#include "dsp/spectrummarkers.h"
 #include "dsp/channelmarker.h"
 #include "dsp/spectrumsettings.h"
 #include "export.h"
