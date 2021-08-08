@@ -1171,6 +1171,10 @@ void GLSpectrum::paintGL()
 
 void GLSpectrum::drawSpectrumMarkers()
 {
+	if (!m_currentSpectrum) {
+		return;
+	}
+
 	QVector4D lineColor(1.0f, 1.0f, 1.0f, 0.3f);
 
     // paint histogram markers
@@ -2090,7 +2094,6 @@ void GLSpectrum::updateHistogramMarkers()
 		m_histogramMarkers[i].m_fftBin = m_histogramMarkers[i].m_fftBin < 0 ?
 			0 : m_histogramMarkers[i].m_fftBin > m_fftSize - 1 ?
 				m_fftSize - 1 : m_histogramMarkers[i].m_fftBin;
-		qDebug("GLSpectrum::updateHistogramMarkers: %d: m_fftBin: %d", i, m_histogramMarkers[i].m_fftBin);
 		m_histogramMarkers[i].m_frequencyStr = displayScaled(
 			m_histogramMarkers[i].m_frequency,
 			'f',

@@ -56,8 +56,12 @@ bool SpectrumHistogramMarker::deserialize(const QByteArray& data)
         m_markerType = (SpectrumMarkerType) tmp;
         int r, g, b;
         d.readS32(4, &r, 255);
+        m_markerColor.setRed(r);
         d.readS32(5, &g, 255);
+        m_markerColor.setGreen(g);
         d.readS32(6, &b, 255);
+        m_markerColor.setBlue(b);
+
         d.readBool(7, &m_show);
 
         return true;
@@ -98,8 +102,11 @@ bool SpectrumWaterfallMarker::deserialize(const QByteArray& data)
         d.readFloat(2, &m_time, 0);
         int r, g, b;
         d.readS32(4, &r, 255);
+        m_markerColor.setRed(r);
         d.readS32(5, &g, 255);
+        m_markerColor.setGreen(g);
         d.readS32(6, &b, 255);
+        m_markerColor.setBlue(b);
         d.readBool(7, &m_show);
 
         return true;

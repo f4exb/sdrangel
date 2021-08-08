@@ -70,6 +70,8 @@ public:
     bool m_usb;    //!< USB display with increasing frequencies towads the right - else decreasing frequencies
     QString m_wsSpectrumAddress;
     uint16_t m_wsSpectrumPort;
+	QList<SpectrumHistogramMarker> m_histogramMarkers;
+	QList<SpectrumWaterfallMarker> m_waterfallMarkers;
 	static const int m_log2FFTSizeMin = 6;   // 64
 	static const int m_log2FFTSizeMax = 15;  // 32k
 
@@ -79,6 +81,9 @@ public:
 
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
+
+	QList<SpectrumHistogramMarker>& getHistogramMarkers() { return m_histogramMarkers; }
+	QList<SpectrumWaterfallMarker>& getWaterfallMarkers() { return m_waterfallMarkers; }
 
     static int getAveragingMaxScale(AveragingMode averagingMode); //!< Max power of 10 multiplier to 2,5,10 base ex: 2 -> 2,5,10,20,50,100,200,500,1000
     static int getAveragingValue(int averagingIndex, AveragingMode averagingMode);

@@ -92,6 +92,8 @@ void GLSpectrumGUI::resetToDefaults()
 
 QByteArray GLSpectrumGUI::serialize() const
 {
+    const_cast<GLSpectrumGUI*>(this)->m_settings.getHistogramMarkers() = m_glSpectrum->getHistogramMarkers();
+    const_cast<GLSpectrumGUI*>(this)->m_settings.getWaterfallMarkers() = m_glSpectrum->getWaterfallMarkers();
     return m_settings.serialize();
 }
 
@@ -99,6 +101,8 @@ bool GLSpectrumGUI::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
+        m_glSpectrum->setHistogramMarkers(m_settings.getHistogramMarkers());
+        m_glSpectrum->setWaterfallMarkers(m_settings.getWaterfallMarkers());
         setAveragingCombo();
         displaySettings(); // ends with blockApplySettings(false)
         applySettings();

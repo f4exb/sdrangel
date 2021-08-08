@@ -86,6 +86,17 @@ QByteArray SpectrumSettings::serialize() const
     s.writeBool(24, m_ssb);
     s.writeBool(25, m_usb);
 	s.writeS32(26, m_fpsPeriodMs);
+	s.writeS32(100, m_histogramMarkers.size());
+
+	for (int i = 0; i < m_histogramMarkers.size(); i++) {
+		s.writeBlob(101+i, m_histogramMarkers[i].serialize());
+	}
+
+	s.writeS32(110, m_waterfallMarkers.size());
+
+	for (int i = 0; i < m_waterfallMarkers.size(); i++) {
+		s.writeBlob(111+i, m_waterfallMarkers[i].serialize());
+	}
 
 	return s.final();
 }
@@ -101,6 +112,7 @@ bool SpectrumSettings::deserialize(const QByteArray& data)
 
 	int tmp;
     uint32_t utmp;
+	QByteArray bytetmp;
 
 	if (d.getVersion() == 1)
     {
@@ -135,6 +147,35 @@ bool SpectrumSettings::deserialize(const QByteArray& data)
         d.readBool(25, &m_usb, true);
 		d.readS32(26, &tmp, 50);
 		m_fpsPeriodMs = tmp < 5 ? 5 : tmp > 500 ? 500 : tmp;
+		int histogramMarkersSize;
+
+		d.readS32(100, &histogramMarkersSize, 0);
+		histogramMarkersSize = histogramMarkersSize < 0 ? 0 :
+			histogramMarkersSize > SpectrumHistogramMarker::m_maxNbOfMarkers ?
+				SpectrumHistogramMarker::m_maxNbOfMarkers : histogramMarkersSize;
+		m_histogramMarkers.clear();
+
+		for (int i = 0; i < histogramMarkersSize; i++)
+		{
+			d.readBlob(101+i, &bytetmp);
+			m_histogramMarkers.push_back(SpectrumHistogramMarker());
+			m_histogramMarkers.back().deserialize(bytetmp);
+		}
+
+		int waterfallMarkersSize;
+
+		d.readS32(110, &waterfallMarkersSize, 0);
+		waterfallMarkersSize = waterfallMarkersSize < 0 ? 0 :
+			waterfallMarkersSize > SpectrumWaterfallMarker::m_maxNbOfMarkers ?
+				SpectrumWaterfallMarker::m_maxNbOfMarkers : waterfallMarkersSize;
+		m_waterfallMarkers.clear();
+
+		for (int i = 0; i < waterfallMarkersSize; i++)
+		{
+			d.readBlob(111+i, &bytetmp);
+			m_waterfallMarkers.push_back(SpectrumWaterfallMarker());
+			m_waterfallMarkers.back().deserialize(bytetmp);
+		}
 
 		return true;
 	}
