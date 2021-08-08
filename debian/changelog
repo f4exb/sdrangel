@@ -1,3 +1,16 @@
+sdrangel (6.16.2-1) unstable; urgency=medium
+
+  * Pager demod: Add support for character set mapping. PR #966
+  * Pager demod: Add extra Hebrew charaters. PR #975
+  * Radio Clock: Add support for WWVB and display daylight saving. PR #968
+  * Antenna Tools: various additions and enhancements. PR #970
+  * Satellite Tracker: LOS handling fixes. Issue #893. PR #974
+  * DATV Mod: Add UDP buffer utiliziation in GUI on Windows. PR #976
+  * File record. timestamp resolution to milliseconds. Issue #980. PR #981
+  * Spectrum markers enhancements. Issue #923
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 08 Aug 2021 04:25:47 +0200
+
 sdrangel (6.16.1-1) unstable; urgency=medium
 
   * AIS: fixed window size when scope is visible. PR #962. Issue #981
