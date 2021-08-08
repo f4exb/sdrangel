@@ -17,6 +17,8 @@
 
 #include <QEventLoop>
 #include <QTimer>
+#include <QNetworkInterface>
+#include <QSet>
 
 #include "devicemetisscan.h"
 
@@ -40,21 +42,44 @@ void DeviceMetisScan::scan()
     buffer[2] = (unsigned char) 0x02;
     std::fill(&buffer[3], &buffer[63], 0);
 
-    if (m_udpSocket.writeDatagram((const char*) buffer, sizeof(buffer), QHostAddress::Broadcast, 1024) < 0)
+    QList<QNetworkInterface> ifaces = QNetworkInterface::allInterfaces();
+    QSet<QHostAddress> broadcastAddrs;
+
+    for (int i = 0; i < ifaces.size(); i++)
     {
-        qDebug() << "DeviceMetisScan::scan: discovery writeDatagram failed " << m_udpSocket.errorString();
-        return;
-    }
-    else
-    {
-        qDebug() << "DeviceMetisScan::scan: discovery writeDatagram sent";
+        QList<QNetworkAddressEntry> addrs = ifaces[i].addressEntries();
+
+        for (int j = 0; j < addrs.size(); j++)
+        {
+            if ((addrs[j].ip().protocol() == QAbstractSocket::IPv4Protocol) && (addrs[j].broadcast().toString() != ""))
+            {
+                QHostAddress br = addrs[j].broadcast();
+                broadcastAddrs.insert(br);
+            }
+        }
     }
 
-    // wait for 1 second before returning
+    QSet<QHostAddress>::const_iterator brIt = broadcastAddrs.begin();
+
+    for (; brIt != broadcastAddrs.end(); ++brIt)
+    {
+        if (m_udpSocket.writeDatagram((const char*) buffer, sizeof(buffer), *brIt, 1024) < 0)
+        {
+            qDebug("DeviceMetisScan::scan: discovery writeDatagram to %s failed: %s ",
+                qPrintable(brIt->toString()), qPrintable(m_udpSocket.errorString()));
+            continue;
+        }
+        else
+        {
+            qDebug("DeviceMetisScan::scan: discovery writeDatagram sent to %s", qPrintable(brIt->toString()));
+        }
+    }
+
+    // wait for timeout before returning
     QEventLoop loop;
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), &loop, SLOT(quit()));
-    timer->start(500);
+    timer->start(500); // 500 ms timeout
 
     qDebug() << "DeviceMetisScan::scan: start 0.5 second timeout loop";
     // Execute the event loop here and wait for the timeout to trigger
