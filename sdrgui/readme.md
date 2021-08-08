@@ -487,6 +487,10 @@ The server only sends data. Control including FFT details is done via the REST A
 
 </table>
 
+<h4>3B.7. Spectrum markers dialog</h4>
+
+Opens the [spectrum markers dialog](spectrummarkers.md)
+
 <h3>3C.  Spectrum display control line 3</h3>
 
 ![Spectrum GUI C](../doc/img/MainWindow_spectrum_gui_C.png)
@@ -951,6 +955,10 @@ A status line is displayed at the left of the top margin. It displays the follow
 
 ![Spectrum Markers](../doc/img/Spectrum_Markers.png)
 
+Note that spectrum markers appear only when spectrum display is active (shoes data)
+
+The spectrum markers can be set either with the mouse as explained next or with the [spectrum markers dialog](spectrummarkers.md) that can be opened with the markers button (3B.7).
+
 Use Shift and mouse left click to set a new marker. There is a maximum of two markers with a different status:
   - The first marker will display frequency (2) and power (1) or time (5) on the scale side of the view. Frequency units are the same as displayed in the frequency scale.
   - The second marker will display frequency difference (3 or 6) and power difference (4) or time difference (7) from the first marker on the opposite side of the scales. Difference values may be suffixed with a multiplier character.
@@ -968,8 +976,6 @@ Values may be suffixed by a multiplier character:
   - **G**: giga (times 1e9)
 
 Use mouse right click anywhere in the view to remove the last entered marker. Use shift and mouse right click to remove all markers.
-
-Any change in the spectrum settings is not reflected in the markers. You have to clear them and make a new measurement if any critical setting of the spectrum is changed.
 
 <h4>Mouse scroll wheel</h4>
 
