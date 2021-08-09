@@ -95,6 +95,7 @@ private:
         bool m_oldStateTrigLevelFine;
         bool m_oldStateTrigDelayCoarse;
         bool m_oldStateTrigDelayFine;
+        bool m_oldStateTrigColor;
     };
 
     class TraceUIBlocker
@@ -107,16 +108,21 @@ private:
 
     private:
         Ui::GLScopeGUI *m_ui;
+        bool m_oldStateTraceStream;
         bool m_oldStateTrace;
         bool m_oldStateTraceAdd;
         bool m_oldStateTraceDel;
         bool m_oldStateTraceMode;
         bool m_oldStateAmp;
+        bool m_oldStateAmpCoarse;
+        bool m_oldStateAmpExp;
         bool m_oldStateOfsCoarse;
         bool m_oldStateOfsFine;
+        bool m_oldStateOfsExp;
         bool m_oldStateTraceDelayCoarse;
         bool m_oldStateTraceDelayFine;
         bool m_oldStateTraceColor;
+        bool m_oldStateTraceView;
     };
 
     class MainUIBlocker

@@ -204,10 +204,6 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
     {
         GLScopeSettings::TraceData& traceData = m_settings.m_tracesData[iTrace];
 
-        //setTraceUI(traceData);
-        qDebug("GLScopeGUI::deserialize: trace: %u  ui streams: %d current stream: %u",
-            iTrace, ui->traceStream->count(), traceData.m_streamIndex);
-
         if (iTrace < tracesData.size()) // change existing traces
         {
             ScopeVis::MsgScopeVisChangeTrace *msg = ScopeVis::MsgScopeVisChangeTrace::create(traceData, iTrace);
@@ -1474,8 +1470,6 @@ void GLScopeGUI::applySettings(const GLScopeSettings& settings, bool force)
 
 void GLScopeGUI::displaySettings()
 {
-    TraceUIBlocker traceUIBlocker(ui);
-    TrigUIBlocker trigUIBlocker(ui);
     MainUIBlocker mainUIBlocker(ui);
 
     ui->traceText->setText(m_ctlTraceIndex == 0 ? "X" : QString("Y%1").arg(m_ctlTraceIndex));
@@ -1517,6 +1511,7 @@ GLScopeGUI::TrigUIBlocker::TrigUIBlocker(Ui::GLScopeGUI *ui) :
     m_oldStateTrigLevelFine   = ui->trigLevelFine->blockSignals(true);
     m_oldStateTrigDelayCoarse = ui->trigDelayCoarse->blockSignals(true);
     m_oldStateTrigDelayFine   = ui->trigDelayFine->blockSignals(true);
+    m_oldStateTrigColor       = ui->trigColor->blockSignals(true);
 }
 
 GLScopeGUI::TrigUIBlocker::~TrigUIBlocker()
@@ -1535,21 +1530,27 @@ void GLScopeGUI::TrigUIBlocker::unBlock()
     m_ui->trigLevelFine->blockSignals(m_oldStateTrigLevelFine);
     m_ui->trigDelayCoarse->blockSignals(m_oldStateTrigDelayCoarse);
     m_ui->trigDelayFine->blockSignals(m_oldStateTrigDelayFine);
+    m_ui->trigColor->blockSignals(m_oldStateTrigColor);
 }
 
 GLScopeGUI::TraceUIBlocker::TraceUIBlocker(Ui::GLScopeGUI* ui) :
         m_ui(ui)
 {
-    m_oldStateTrace            = m_ui->trace->blockSignals(true);
-    m_oldStateTraceAdd         = m_ui->traceAdd->blockSignals(true);
-    m_oldStateTraceDel         = m_ui->traceDel->blockSignals(true);
+    m_oldStateTraceStream      = m_ui->traceStream->blockSignals(true);
     m_oldStateTraceMode        = m_ui->traceMode->blockSignals(true);
     m_oldStateAmp              = m_ui->amp->blockSignals(true);
+    m_oldStateAmpCoarse        = m_ui->ampCoarse->blockSignals(true);
+    m_oldStateAmpExp           = m_ui->ampExp->blockSignals(true);
     m_oldStateOfsCoarse        = m_ui->ofsCoarse->blockSignals(true);
     m_oldStateOfsFine          = m_ui->ofsFine->blockSignals(true);
+    m_oldStateOfsExp           = m_ui->ofsExp->blockSignals(true);
     m_oldStateTraceDelayCoarse = m_ui->traceDelayCoarse->blockSignals(true);
     m_oldStateTraceDelayFine   = m_ui->traceDelayFine->blockSignals(true);
     m_oldStateTraceColor       = m_ui->traceColor->blockSignals(true);
+    m_oldStateTraceView        = m_ui->traceView->blockSignals(true);
+    m_oldStateTrace            = m_ui->trace->blockSignals(true);
+    m_oldStateTraceAdd         = m_ui->traceAdd->blockSignals(true);
+    m_oldStateTraceDel         = m_ui->traceDel->blockSignals(true);
 }
 
 GLScopeGUI::TraceUIBlocker::~TraceUIBlocker()
@@ -1559,16 +1560,21 @@ GLScopeGUI::TraceUIBlocker::~TraceUIBlocker()
 
 void GLScopeGUI::TraceUIBlocker::unBlock()
 {
+    m_ui->traceStream->blockSignals(m_oldStateTraceStream);
     m_ui->trace->blockSignals(m_oldStateTrace);
     m_ui->traceAdd->blockSignals(m_oldStateTraceAdd);
     m_ui->traceDel->blockSignals(m_oldStateTraceDel);
     m_ui->traceMode->blockSignals(m_oldStateTraceMode);
     m_ui->amp->blockSignals(m_oldStateAmp);
+    m_ui->ampCoarse->blockSignals(m_oldStateAmpCoarse);
+    m_ui->ampExp->blockSignals(m_oldStateAmpExp);
     m_ui->ofsCoarse->blockSignals(m_oldStateOfsCoarse);
     m_ui->ofsFine->blockSignals(m_oldStateOfsFine);
+    m_ui->ofsExp->blockSignals(m_oldStateOfsExp);
     m_ui->traceDelayCoarse->blockSignals(m_oldStateTraceDelayCoarse);
     m_ui->traceDelayFine->blockSignals(m_oldStateTraceDelayFine);
     m_ui->traceColor->blockSignals(m_oldStateTraceColor);
+    m_ui->traceView->blockSignals(m_oldStateTraceView);
 }
 
 GLScopeGUI::MainUIBlocker::MainUIBlocker(Ui::GLScopeGUI* ui) :

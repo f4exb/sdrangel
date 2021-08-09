@@ -341,7 +341,6 @@ public:
 
     void setGLScope(GLScopeInterface* glScope);
     void setSpectrumVis(SpectrumVis *spectrumVis) { m_spectrumVis = spectrumVis; }
-    void setMessageQueueToGUI(MessageQueue* messageQueue) { m_messageQueueToGUI = messageQueue; }
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
 
     void setLiveRate(int sampleRate);
@@ -996,9 +995,9 @@ private:
         {
             if (m_traces[0].size() < GLScopeSettings::m_maxNbTraces)
             {
-                qDebug("ScopeVis::addTrace");
-                m_traces[0].push_back(0);
-                m_traces[1].push_back(0);
+                qDebug("ScopeVis::Traces::addTrace");
+                m_traces[0].push_back(nullptr);
+                m_traces[1].push_back(nullptr);
                 m_tracesData.push_back(traceData);
                 m_projectionTypes.push_back(traceData.m_projectionType);
                 m_tracesControl.push_back(new TraceControl());
@@ -1025,7 +1024,7 @@ private:
         {
             if (traceIndex < m_tracesControl.size())
             {
-                qDebug("ScopeVis::removeTrace");
+                qDebug("ScopeVis::Traces::removeTrace");
                 m_traces[0].erase(m_traces[0].begin() + traceIndex);
                 m_traces[1].erase(m_traces[1].begin() + traceIndex);
                 m_projectionTypes.erase(m_projectionTypes.begin() + traceIndex);
@@ -1219,7 +1218,6 @@ private:
     SpectrumVis *m_spectrumVis;
     GLScopeSettings m_settings;
     MessageQueue m_inputMessageQueue;
-    MessageQueue *m_messageQueueToGUI;
     uint32_t m_preTriggerDelay;                    //!< Pre-trigger delay in number of samples
     uint32_t m_livePreTriggerDelay;                //!< Pre-trigger delay in number of samples in live mode
     std::vector<TriggerCondition*> m_triggerConditions; //!< Chain of triggers

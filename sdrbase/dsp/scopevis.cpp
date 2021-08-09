@@ -43,7 +43,6 @@ MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisNGMemoryTrace, Message)
 ScopeVis::ScopeVis() :
     m_glScope(nullptr),
     m_spectrumVis(nullptr),
-    m_messageQueueToGUI(nullptr),
     m_preTriggerDelay(0),
     m_livePreTriggerDelay(0),
     m_currentTriggerIndex(0),
@@ -228,6 +227,7 @@ void ScopeVis::configure(
 void ScopeVis::addTrace(const GLScopeSettings::TraceData& traceData)
 {
     qDebug() << "ScopeVis::addTrace:"
+            << " trace: " << m_traces.size()
             << " m_streamIndex: " << traceData.m_streamIndex
             << " m_amp: " << traceData.m_amp
             << " m_ofs: " << traceData.m_ofs
