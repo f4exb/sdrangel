@@ -35,19 +35,18 @@
 #include "dsp/wavfilerecord.h"
 #include "util/db.h"
 
-FileSourceSource::FileSourceSource() :
-	m_fileName("..."),
-	m_sampleSize(0),
-	m_centerFrequency(0),
-    m_frequencyOffset(0),
-    m_fileSampleRate(0),
-    m_samplesCount(0),
-	m_sampleRate(0),
-    m_deviceSampleRate(0),
-	m_recordLengthMuSec(0),
-    m_startingTimeStamp(0),
-    m_running(false),
-    m_guiMessageQueue(nullptr)
+FileSourceSource::FileSourceSource() : m_fileName("..."),
+                                       m_sampleSize(0),
+                                       m_centerFrequency(0),
+                                       m_frequencyOffset(0),
+                                       m_fileSampleRate(0),
+                                       m_samplesCount(0),
+                                       m_sampleRate(0),
+                                       m_deviceSampleRate(0),
+                                       m_recordLengthMuSec(0),
+                                       m_startingDateTime(QDateTime::currentDateTime()),
+                                       m_running(false),
+                                       m_guiMessageQueue(nullptr)
 {
     m_linearGain = 1.0f;
 	m_magsq = 0.0f;
@@ -184,14 +183,14 @@ void FileSourceSource::openFileStream(const QString& fileName)
         {
             // Some WAV files written by SDR tools have auxi header
             m_centerFrequency = header.m_auxi.m_centerFreq;
-            m_startingTimeStamp = header.getStartTime().toMSecsSinceEpoch() / 1000;
+            m_startingDateTime = header.getStartTime();
         }
         else
         {
             // Attempt to extract start time and frequency from filename
             QDateTime startTime;
             if (WavFileRecord::getStartTime(m_fileName, startTime)) {
-                m_startingTimeStamp = startTime.toMSecsSinceEpoch() / 1000;
+                m_startingDateTime = startTime;
             }
             WavFileRecord::getCenterFrequency(m_fileName, m_centerFrequency);
         }
@@ -220,22 +219,22 @@ void FileSourceSource::openFileStream(const QString& fileName)
 		bool crcOK = FileRecord::readHeader(m_ifstream, header);
 		m_fileSampleRate = header.sampleRate;
 		m_centerFrequency = header.centerFrequency;
-		m_startingTimeStamp = header.startTimeStamp;
-		m_sampleSize = header.sampleSize;
-		QString crcHex = QString("%1").arg(header.crc32 , 0, 16);
+        m_startingDateTime = FileRecord::timeStampToDateTime(header.startTimeStamp);
+        m_sampleSize = header.sampleSize;
+        QString crcHex = QString("%1").arg(header.crc32, 0, 16);
 
-	    if (crcOK)
-	    {
-	        qDebug("FileSourceSource::openFileStream: CRC32 OK for header: %s", qPrintable(crcHex));
-	        m_recordLengthMuSec = ((fileSize - sizeof(FileRecord::Header)) * 1000000UL) / ((m_sampleSize == 24 ? 8 : 4) * m_fileSampleRate);
-	    }
-	    else
-	    {
-	        qCritical("FileSourceSource::openFileStream: bad CRC32 for header: %s", qPrintable(crcHex));
+        if (crcOK)
+        {
+            qDebug("FileSourceSource::openFileStream: CRC32 OK for header: %s", qPrintable(crcHex));
+            m_recordLengthMuSec = ((fileSize - sizeof(FileRecord::Header)) * 1000000UL) / ((m_sampleSize == 24 ? 8 : 4) * m_fileSampleRate);
+        }
+        else
+        {
+            qCritical("FileSourceSource::openFileStream: bad CRC32 for header: %s", qPrintable(crcHex));
 	        m_recordLengthMuSec = 0;
-	    }
+        }
 
-		if (getMessageQueueToGUI())
+        if (getMessageQueueToGUI())
         {
 			FileSourceReport::MsgReportHeaderCRC *report = FileSourceReport::MsgReportHeaderCRC::create(crcOK);
 			getMessageQueueToGUI()->push(report);
@@ -246,27 +245,28 @@ void FileSourceSource::openFileStream(const QString& fileName)
 		m_recordLengthMuSec = 0;
 	}
 
-	qDebug() << "FileSourceSource::openFileStream: " << m_fileName.toStdString().c_str()
-			<< " fileSize: " << fileSize << " bytes"
-			<< " length: " << m_recordLengthMuSec << " microseconds"
-			<< " sample rate: " << m_fileSampleRate << " S/s"
-			<< " center frequency: " << m_centerFrequency << " Hz"
-			<< " sample size: " << m_sampleSize << " bits"
-            << " starting TS: " << m_startingTimeStamp << "s";
+    qDebug() << "FileSourceSource::openFileStream: " << m_fileName.toStdString().c_str()
+             << " fileSize: " << fileSize << " bytes"
+             << " length: " << m_recordLengthMuSec << " microseconds"
+             << " sample rate: " << m_fileSampleRate << " S/s"
+             << " center frequency: " << m_centerFrequency << " Hz"
+             << " sample size: " << m_sampleSize << " bits"
+             << " starting TS: " << m_startingDateTime.toMSecsSinceEpoch() << "s";
 
-	if (getMessageQueueToGUI())
+    if (getMessageQueueToGUI())
     {
-	    FileSourceReport::MsgReportFileSourceStreamData *report = FileSourceReport::MsgReportFileSourceStreamData::create(m_fileSampleRate,
-	            m_sampleSize,
-	            m_centerFrequency,
-	            m_startingTimeStamp,
-	            m_recordLengthMuSec); // file stream data
-	    getMessageQueueToGUI()->push(report);
-	}
+        FileSourceReport::MsgReportFileSourceStreamData *report = FileSourceReport::MsgReportFileSourceStreamData::create(m_fileSampleRate,
+                                                                                                                          m_sampleSize,
+                                                                                                                          m_centerFrequency,
+                                                                                                                          m_startingDateTime,
+                                                                                                                          m_recordLengthMuSec); // file stream data
+        getMessageQueueToGUI()->push(report);
+    }
 
-	if (m_recordLengthMuSec == 0) {
-	    m_ifstream.close();
-	}
+    if (m_recordLengthMuSec == 0)
+    {
+        m_ifstream.close();
+    }
 }
 
 void FileSourceSource::seekFileStream(int seekMillis)

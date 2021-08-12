@@ -20,6 +20,7 @@
 
 #include <QObject>
 #include <QMutex>
+#include <QDateTime>
 
 #include "dsp/samplesourcefifo.h"
 #include "util/message.h"
@@ -127,7 +128,7 @@ public:
     quint64 getSamplesCount() const;
 
     uint32_t getFileSampleRate() const { return m_source.getFileSampleRate(); }
-    quint64 getStartingTimeStamp() const { return m_source.getStartingTimeStamp(); }
+    QDateTime getStartingDateTime() const { return m_source.getStartingDateTime(); }
     quint64 getRecordLengthMuSec() const { return m_source.getRecordLengthMuSec(); }
     quint32 getFileSampleSize() const { return m_source.getFileSampleSize(); }
 

@@ -96,11 +96,11 @@ bool FileSourceGUI::handleMessage(const Message& message)
 	{
 		m_fileSampleRate = ((FileSourceReport::MsgReportFileSourceStreamData&)message).getSampleRate();
 		m_fileSampleSize = ((FileSourceReport::MsgReportFileSourceStreamData&)message).getSampleSize();
-		m_startingTimeStamp = ((FileSourceReport::MsgReportFileSourceStreamData&)message).getStartingTimeStamp();
-		m_recordLengthMuSec = ((FileSourceReport::MsgReportFileSourceStreamData&)message).getRecordLengthMuSec();
-		updateWithStreamData();
-		return true;
-	}
+        m_startingDateTime = ((FileSourceReport::MsgReportFileSourceStreamData &)message).getStartingDateTime();
+        m_recordLengthMuSec = ((FileSourceReport::MsgReportFileSourceStreamData &)message).getRecordLengthMuSec();
+        updateWithStreamData();
+        return true;
+    }
 	else if (FileSourceReport::MsgReportFileSourceStreamTiming::match(message))
 	{
 		m_samplesCount = ((FileSourceReport::MsgReportFileSourceStreamTiming&)message).getSamplesCount();
@@ -159,22 +159,21 @@ bool FileSourceGUI::handleMessage(const Message& message)
     }
 }
 
-FileSourceGUI::FileSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent) :
-        ChannelGUI(parent),
-        ui(new Ui::FileSourceGUI),
-        m_pluginAPI(pluginAPI),
-        m_deviceUISet(deviceUISet),
-        m_sampleRate(0),
-        m_shiftFrequencyFactor(0.0),
-        m_fileSampleRate(0),
-        m_fileSampleSize(0),
-        m_recordLengthMuSec(0),
-        m_startingTimeStamp(0),
-        m_samplesCount(0),
-        m_acquisition(false),
-        m_enableNavTime(false),
-        m_doApplySettings(true),
-        m_tickCount(0)
+FileSourceGUI::FileSourceGUI(PluginAPI *pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget *parent) : ChannelGUI(parent),
+                                                                                                                                 ui(new Ui::FileSourceGUI),
+                                                                                                                                 m_pluginAPI(pluginAPI),
+                                                                                                                                 m_deviceUISet(deviceUISet),
+                                                                                                                                 m_sampleRate(0),
+                                                                                                                                 m_shiftFrequencyFactor(0.0),
+                                                                                                                                 m_fileSampleRate(0),
+                                                                                                                                 m_fileSampleSize(0),
+                                                                                                                                 m_recordLengthMuSec(0),
+                                                                                                                                 m_startingDateTime(QDateTime::currentDateTime()),
+                                                                                                                                 m_samplesCount(0),
+                                                                                                                                 m_acquisition(false),
+                                                                                                                                 m_enableNavTime(false),
+                                                                                                                                 m_doApplySettings(true),
+                                                                                                                                 m_tickCount(0)
 {
     (void) channelTx;
 
@@ -274,8 +273,7 @@ void FileSourceGUI::updateWithStreamTime()
 	QString s_timems = t.toString("HH:mm:ss.zzz");
 	ui->relTimeText->setText(s_timems);
 
-    qint64 startingTimeStampMsec = m_startingTimeStamp * 1000LL;
-	QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
+    QDateTime dt = QDateTime(m_startingDateTime);
     dt = dt.addSecs(t_sec);
     dt = dt.addMSecs(t_msec);
 	QString s_date = dt.toString("yyyy-MM-dd HH:mm:ss.zzz");

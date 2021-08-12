@@ -60,22 +60,21 @@ MESSAGE_CLASS_DEFINITION(SigMFFileInput::MsgReportFileInputStreamTiming, Message
 MESSAGE_CLASS_DEFINITION(SigMFFileInput::MsgReportCRC, Message)
 MESSAGE_CLASS_DEFINITION(SigMFFileInput::MsgReportTotalSamplesCheck, Message)
 
-SigMFFileInput::SigMFFileInput(DeviceAPI *deviceAPI) :
-    m_deviceAPI(deviceAPI),
-	m_settings(),
-    m_trackMode(false),
-    m_currentTrackIndex(0),
-    m_recordOpen(false),
-    m_crcAvailable(false),
-    m_crcOK(false),
-    m_recordLengthOK(false),
-	m_fileInputWorker(nullptr),
-	m_deviceDescription(),
-	m_sampleRate(48000),
-	m_sampleBytes(1),
-	m_centerFrequency(0),
-	m_recordLength(0),
-    m_startingTimeStamp(0)
+SigMFFileInput::SigMFFileInput(DeviceAPI *deviceAPI) : m_deviceAPI(deviceAPI),
+                                                       m_settings(),
+                                                       m_trackMode(false),
+                                                       m_currentTrackIndex(0),
+                                                       m_recordOpen(false),
+                                                       m_crcAvailable(false),
+                                                       m_crcOK(false),
+                                                       m_recordLengthOK(false),
+                                                       m_fileInputWorker(nullptr),
+                                                       m_deviceDescription(),
+                                                       m_sampleRate(48000),
+                                                       m_sampleBytes(1),
+                                                       m_centerFrequency(0),
+                                                       m_recordLength(0),
+                                                       m_startingDateTime(QDateTime::currentDateTime())
 {
     m_deviceAPI->setNbSourceStreams(1);
     qDebug("SigMFFileInput::SigMFFileInput: device source engine: %p", m_deviceAPI->getDeviceSourceEngine());
@@ -564,9 +563,9 @@ void SigMFFileInput::setCenterFrequency(qint64 centerFrequency)
     }
 }
 
-quint64 SigMFFileInput::getStartingTimeStamp() const
+QDateTime SigMFFileInput::getStartingDateTime() const
 {
-	return m_startingTimeStamp;
+    return m_startingDateTime;
 }
 
 bool SigMFFileInput::handleMessage(const Message& message)

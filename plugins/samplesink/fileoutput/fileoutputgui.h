@@ -21,6 +21,7 @@
 #include <device/devicegui.h>
 #include <QTimer>
 #include <QWidget>
+#include <QDateTime>
 
 #include "util/messagequeue.h"
 
@@ -61,7 +62,7 @@ private:
     int m_sampleRate;
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
     bool m_generation;
-	std::time_t m_startingTimeStamp;
+	QDateTime m_startingDateTime;
 	int m_samplesCount;
 	std::size_t m_tickCount;
 	int m_lastEngineState;

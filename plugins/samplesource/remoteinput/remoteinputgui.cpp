@@ -43,45 +43,43 @@
 #include "device/deviceuiset.h"
 #include "remoteinputgui.h"
 
-
-RemoteInputGui::RemoteInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
-	DeviceGUI(parent),
-	ui(new Ui::RemoteInputGui),
-	m_deviceUISet(deviceUISet),
-	m_settings(),
-	m_sampleSource(0),
-	m_acquisition(false),
-	m_streamSampleRate(0),
-	m_streamCenterFrequency(0),
-	m_lastEngineState(DeviceAPI::StNotStarted),
-	m_framesDecodingStatus(0),
-	m_bufferLengthInSecs(0.0),
-    m_bufferGauge(-50),
-	m_nbOriginalBlocks(128),
-    m_nbFECBlocks(0),
-    m_sampleBits(16), // assume 16 bits to start with
-    m_sampleBytes(2),
-    m_samplesCount(0),
-    m_tickCount(0),
-    m_addressEdited(false),
-    m_dataPortEdited(false),
-	m_countUnrecoverable(0),
-	m_countRecovered(0),
-    m_doApplySettings(true),
-    m_forceSettings(true),
-    m_txDelay(0.0)
+RemoteInputGui::RemoteInputGui(DeviceUISet *deviceUISet, QWidget *parent) : DeviceGUI(parent),
+                                                                            ui(new Ui::RemoteInputGui),
+                                                                            m_deviceUISet(deviceUISet),
+                                                                            m_settings(),
+                                                                            m_sampleSource(0),
+                                                                            m_acquisition(false),
+                                                                            m_streamSampleRate(0),
+                                                                            m_streamCenterFrequency(0),
+                                                                            m_lastEngineState(DeviceAPI::StNotStarted),
+                                                                            m_startingDateTime(QDateTime::currentDateTime()),
+                                                                            m_framesDecodingStatus(0),
+                                                                            m_bufferLengthInSecs(0.0),
+                                                                            m_bufferGauge(-50),
+                                                                            m_nbOriginalBlocks(128),
+                                                                            m_nbFECBlocks(0),
+                                                                            m_sampleBits(16), // assume 16 bits to start with
+                                                                            m_sampleBytes(2),
+                                                                            m_samplesCount(0),
+                                                                            m_tickCount(0),
+                                                                            m_addressEdited(false),
+                                                                            m_dataPortEdited(false),
+                                                                            m_countUnrecoverable(0),
+                                                                            m_countRecovered(0),
+                                                                            m_doApplySettings(true),
+                                                                            m_forceSettings(true),
+                                                                            m_txDelay(0.0)
 {
     m_paletteGreenText.setColor(QPalette::WindowText, Qt::green);
     m_paletteWhiteText.setColor(QPalette::WindowText, Qt::white);
 
-	m_startingTimeStampms = 0;
-	ui->setupUi(this);
+    ui->setupUi(this);
 
-	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-	ui->centerFrequency->setValueRange(7, 0, 9999999U);
+    ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+    ui->centerFrequency->setValueRange(7, 0, 9999999U);
 
-	ui->centerFrequencyHz->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-	ui->centerFrequencyHz->setValueRange(3, 0, 999U);
+    ui->centerFrequencyHz->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+    ui->centerFrequencyHz->setValueRange(3, 0, 999U);
 
     CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStop);
     connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
@@ -175,20 +173,20 @@ bool RemoteInputGui::handleMessage(const Message& message)
 	}
 	else if (RemoteInput::MsgReportRemoteInputStreamData::match(message))
 	{
-        m_startingTimeStampms = ((RemoteInput::MsgReportRemoteInputStreamData&)message).get_tv_msec();
+        m_startingDateTime = QDateTime::fromMSecsSinceEpoch(((RemoteInput::MsgReportRemoteInputStreamData &)message).get_tv_msec());
 
         qDebug() << "RemoteInputGui::handleMessage: RemoteInput::MsgReportRemoteInputStreamData: "
-                << " : " << m_startingTimeStampms << " ms";
+                 << " : " << m_startingDateTime.toMSecsSinceEpoch() << " ms";
 
         updateWithStreamTime();
         return true;
-	}
-	else if (RemoteInput::MsgReportRemoteInputStreamTiming::match(message))
-	{
-		m_startingTimeStampms = ((RemoteInput::MsgReportRemoteInputStreamTiming&)message).get_tv_msec();
-		m_framesDecodingStatus = ((RemoteInput::MsgReportRemoteInputStreamTiming&)message).getFramesDecodingStatus();
-		m_allBlocksReceived = ((RemoteInput::MsgReportRemoteInputStreamTiming&)message).allBlocksReceived();
-		m_bufferLengthInSecs = ((RemoteInput::MsgReportRemoteInputStreamTiming&)message).getBufferLengthInSecs();
+    }
+    else if (RemoteInput::MsgReportRemoteInputStreamTiming::match(message))
+    {
+        m_startingDateTime = QDateTime::fromMSecsSinceEpoch(((RemoteInput::MsgReportRemoteInputStreamTiming &)message).get_tv_msec());
+        m_framesDecodingStatus = ((RemoteInput::MsgReportRemoteInputStreamTiming &)message).getFramesDecodingStatus();
+        m_allBlocksReceived = ((RemoteInput::MsgReportRemoteInputStreamTiming &)message).allBlocksReceived();
+        m_bufferLengthInSecs = ((RemoteInput::MsgReportRemoteInputStreamTiming &)message).getBufferLengthInSecs();
         m_bufferGauge = ((RemoteInput::MsgReportRemoteInputStreamTiming&)message).getBufferGauge();
         m_minNbBlocks = ((RemoteInput::MsgReportRemoteInputStreamTiming&)message).getMinNbBlocks();
         m_minNbOriginalBlocks = ((RemoteInput::MsgReportRemoteInputStreamTiming&)message).getMinNbOriginalBlocks();
@@ -208,8 +206,8 @@ bool RemoteInputGui::handleMessage(const Message& message)
 
 		updateWithStreamTime();
 		return true;
-	}
-	else if (RemoteInput::MsgStartStop::match(message))
+    }
+    else if (RemoteInput::MsgStartStop::match(message))
     {
 	    RemoteInput::MsgStartStop& notif = (RemoteInput::MsgStartStop&) message;
         blockApplySettings(true);
@@ -454,7 +452,7 @@ void RemoteInputGui::updateWithAcquisition()
 void RemoteInputGui::updateWithStreamTime()
 {
 	bool updateEventCounts = false;
-    QDateTime dt = QDateTime::fromMSecsSinceEpoch(m_startingTimeStampms);
+    QDateTime dt = QDateTime(m_startingDateTime);
     QString s_date = dt.toString("yyyy-MM-dd  HH:mm:ss.zzz");
 	ui->absTimeText->setText(s_date);
 

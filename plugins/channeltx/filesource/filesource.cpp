@@ -471,7 +471,7 @@ void FileSource::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respon
     qint64 t_msec = 0;
     quint64 samplesCount = m_basebandSource->getSamplesCount();
     uint32_t fileSampleRate = m_basebandSource->getFileSampleRate();
-    quint64 startingTimeStamp = m_basebandSource->getStartingTimeStamp();
+    QDateTime startingDateTime = m_basebandSource->getStartingDateTime();
     quint64 fileRecordLength = m_basebandSource->getRecordLengthMuSec() / 1000000UL;
     quint32 fileSampleSize = m_basebandSource->getFileSampleSize();
 
@@ -486,8 +486,7 @@ void FileSource::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respon
     t = t.addMSecs(t_msec);
     response.getFileSourceReport()->setElapsedTime(new QString(t.toString("HH:mm:ss.zzz")));
 
-    qint64 startingTimeStampMsec = startingTimeStamp * 1000LL;
-    QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
+    QDateTime dt = QDateTime(startingDateTime);
     dt = dt.addSecs(t_sec);
     dt = dt.addMSecs(t_msec);
     response.getFileSourceReport()->setAbsoluteTime(new QString(dt.toString("yyyy-MM-dd HH:mm:ss.zzz")));

@@ -119,9 +119,9 @@ public:
     virtual void setSampleRate(int sampleRate);
 	virtual quint64 getCenterFrequency() const;
     virtual void setCenterFrequency(qint64 centerFrequency);
-	std::time_t getStartingTimeStamp() const;
+    QDateTime getStartingDateTime() const;
 
-	virtual bool handleMessage(const Message& message);
+    virtual bool handleMessage(const Message &message);
 
     virtual int webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,

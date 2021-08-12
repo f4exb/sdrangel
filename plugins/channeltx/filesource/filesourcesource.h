@@ -26,6 +26,7 @@
 #include <QString>
 #include <QByteArray>
 #include <QTimer>
+#include <QDateTime>
 
 #include "dsp/channelsamplesource.h"
 #include "util/movingaverage.h"
@@ -77,7 +78,7 @@ public:
     void setRunning(bool running) { m_running = running; }
 
     uint32_t getFileSampleRate() const { return m_fileSampleRate; }
-    quint64 getStartingTimeStamp() const { return m_startingTimeStamp; }
+    QDateTime getStartingDateTime() const { return m_startingDateTime; }
     quint64 getRecordLengthMuSec() const { return m_recordLengthMuSec; }
     quint32 getFileSampleSize() const { return m_sampleSize; }
 
@@ -106,8 +107,8 @@ private:
     uint32_t m_sampleRate;
     uint32_t m_deviceSampleRate;
     quint64 m_recordLengthMuSec; //!< record length in microseconds computed from file size
-    quint64 m_startingTimeStamp;
-	QTimer m_masterTimer;
+    QDateTime m_startingDateTime;
+    QTimer m_masterTimer;
     bool m_running;
 
     double m_linearGain;

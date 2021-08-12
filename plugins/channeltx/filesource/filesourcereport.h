@@ -19,6 +19,8 @@
 #define PLUGINS_CHANNELTX_FILESOURCE_FILESOURCEREPORT_H_
 
 #include <QObject>
+#include <QDateTime>
+
 #include "util/message.h"
 
 class FileSourceReport : public QObject
@@ -51,43 +53,44 @@ public:
 		int getSampleRate() const { return m_sampleRate; }
 		quint32 getSampleSize() const { return m_sampleSize; }
 		quint64 getCenterFrequency() const { return m_centerFrequency; }
-        quint64 getStartingTimeStamp() const { return m_startingTimeStamp; }
+        QDateTime getStartingDateTime() const { return m_startingDateTime; }
         quint64 getRecordLengthMuSec() const { return m_recordLengthMuSec; }
 
-		static MsgReportFileSourceStreamData* create(int sampleRate,
-		        quint32 sampleSize,
-				quint64 centerFrequency,
-                quint64 startingTimeStamp,
-                quint64 recordLengthMuSec)
-		{
-			return new MsgReportFileSourceStreamData(sampleRate, sampleSize, centerFrequency, startingTimeStamp, recordLengthMuSec);
-		}
+        static MsgReportFileSourceStreamData *create(int sampleRate,
+                                                     quint32 sampleSize,
+                                                     quint64 centerFrequency,
+                                                     QDateTime startingDateTime,
+                                                     quint64 recordLengthMuSec)
+        {
+            return new MsgReportFileSourceStreamData(sampleRate, sampleSize, centerFrequency, startingDateTime, recordLengthMuSec);
+        }
 
-	protected:
-		int m_sampleRate;
-		quint32 m_sampleSize;
-		quint64 m_centerFrequency;
-        quint64 m_startingTimeStamp;
+    protected:
+        int m_sampleRate;
+        quint32 m_sampleSize;
+        quint64 m_centerFrequency;
+        QDateTime m_startingDateTime;
         quint64 m_recordLengthMuSec;
 
-		MsgReportFileSourceStreamData(int sampleRate,
-		        quint32 sampleSize,
-				quint64 centerFrequency,
-                quint64 startingTimeStamp,
-                quint64 recordLengthMuSec) :
-			Message(),
-			m_sampleRate(sampleRate),
-			m_sampleSize(sampleSize),
-			m_centerFrequency(centerFrequency),
-			m_startingTimeStamp(startingTimeStamp),
-			m_recordLengthMuSec(recordLengthMuSec)
-		{ }
-	};
+        MsgReportFileSourceStreamData(int sampleRate,
+                                      quint32 sampleSize,
+                                      quint64 centerFrequency,
+                                      QDateTime startingDateTime,
+                                      quint64 recordLengthMuSec) : Message(),
+                                                                   m_sampleRate(sampleRate),
+                                                                   m_sampleSize(sampleSize),
+                                                                   m_centerFrequency(centerFrequency),
+                                                                   m_startingDateTime(startingDateTime),
+                                                                   m_recordLengthMuSec(recordLengthMuSec)
+        {
+        }
+    };
 
-	class MsgReportFileSourceStreamTiming : public Message {
-		MESSAGE_CLASS_DECLARATION
+    class MsgReportFileSourceStreamTiming : public Message
+    {
+        MESSAGE_CLASS_DECLARATION
 
-	public:
+    public:
         quint64 getSamplesCount() const { return m_samplesCount; }
 
         static MsgReportFileSourceStreamTiming* create(quint64 samplesCount)
@@ -102,7 +105,7 @@ public:
 			Message(),
 			m_samplesCount(samplesCount)
 		{ }
-	};
+    };
 
     class MsgPlayPause : public Message {
         MESSAGE_CLASS_DECLARATION

@@ -36,20 +36,19 @@
 #include "device/deviceuiset.h"
 #include "fileoutputgui.h"
 
-FileOutputGui::FileOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
-	DeviceGUI(parent),
-	ui(new Ui::FileOutputGui),
-	m_deviceUISet(deviceUISet),
-	m_doApplySettings(true),
-	m_forceSettings(true),
-	m_settings(),
-    m_deviceSampleSink(0),
-    m_sampleRate(0),
-    m_generation(false),
-	m_startingTimeStamp(0),
-	m_samplesCount(0),
-	m_tickCount(0),
-	m_lastEngineState(DeviceAPI::StNotStarted)
+FileOutputGui::FileOutputGui(DeviceUISet *deviceUISet, QWidget *parent) : DeviceGUI(parent),
+                                                                          ui(new Ui::FileOutputGui),
+                                                                          m_deviceUISet(deviceUISet),
+                                                                          m_doApplySettings(true),
+                                                                          m_forceSettings(true),
+                                                                          m_settings(),
+                                                                          m_deviceSampleSink(0),
+                                                                          m_sampleRate(0),
+                                                                          m_generation(false),
+                                                                          m_startingDateTime(QDateTime::currentDateTime()),
+                                                                          m_samplesCount(0),
+                                                                          m_tickCount(0),
+                                                                          m_lastEngineState(DeviceAPI::StNotStarted)
 {
 	ui->setupUi(this);
 

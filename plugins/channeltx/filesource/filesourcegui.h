@@ -18,6 +18,8 @@
 #ifndef PLUGINS_CHANNELTX_FILESOURCE_FILESOURCEGUI_H_
 #define PLUGINS_CHANNELTX_FILESOURCE_FILESOURCEGUI_H_
 
+#include <QDateTime>
+
 #include "dsp/channelmarker.h"
 #include "channel/channelgui.h"
 #include "util/messagequeue.h"
@@ -59,7 +61,7 @@ private:
     int m_fileSampleRate;
     quint32 m_fileSampleSize;
     quint64 m_recordLengthMuSec;
-    quint64 m_startingTimeStamp;
+    QDateTime m_startingDateTime;
     quint64 m_samplesCount;
     bool m_acquisition;
   	bool m_enableNavTime;

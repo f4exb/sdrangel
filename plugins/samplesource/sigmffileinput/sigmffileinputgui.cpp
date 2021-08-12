@@ -40,26 +40,25 @@
 #include "recordinfodialog.h"
 #include "sigmffileinputgui.h"
 
-SigMFFileInputGUI::SigMFFileInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
-	DeviceGUI(parent),
-	ui(new Ui::SigMFFileInputGUI),
-	m_deviceUISet(deviceUISet),
-	m_settings(),
-    m_currentTrackIndex(0),
-	m_doApplySettings(true),
-	m_sampleSource(0),
-	m_startStop(false),
-    m_trackMode(false),
-	m_metaFileName("..."),
-	m_sampleRate(48000),
-	m_centerFrequency(0),
-	m_recordLength(0),
-	m_startingTimeStamp(0),
-	m_samplesCount(0),
-	m_tickCount(0),
-	m_enableTrackNavTime(false),
-	m_enableFullNavTime(false),
-	m_lastEngineState(DeviceAPI::StNotStarted)
+SigMFFileInputGUI::SigMFFileInputGUI(DeviceUISet *deviceUISet, QWidget *parent) : DeviceGUI(parent),
+                                                                                  ui(new Ui::SigMFFileInputGUI),
+                                                                                  m_deviceUISet(deviceUISet),
+                                                                                  m_settings(),
+                                                                                  m_currentTrackIndex(0),
+                                                                                  m_doApplySettings(true),
+                                                                                  m_sampleSource(0),
+                                                                                  m_startStop(false),
+                                                                                  m_trackMode(false),
+                                                                                  m_metaFileName("..."),
+                                                                                  m_sampleRate(48000),
+                                                                                  m_centerFrequency(0),
+                                                                                  m_recordLength(0),
+                                                                                  m_startingDateTime(QDateTime::currentDateTime()),
+                                                                                  m_samplesCount(0),
+                                                                                  m_tickCount(0),
+                                                                                  m_enableTrackNavTime(false),
+                                                                                  m_enableFullNavTime(false),
+                                                                                  m_lastEngineState(DeviceAPI::StNotStarted)
 {
 	ui->setupUi(this);
 
@@ -232,7 +231,7 @@ bool SigMFFileInputGUI::handleMessage(const Message& message)
         addCaptures(m_captures);
         m_centerFrequency = m_captures.size() > 0 ? m_captures.at(0).m_centerFrequency : 0;
         m_recordLength = m_captures.size() > 0 ? m_captures.at(0).m_length : m_metaInfo.m_totalSamples;
-        m_startingTimeStamp = m_captures.size() > 0 ? m_captures.at(0).m_tsms : 0;
+        m_startingDateTime = QDateTime::fromMSecsSinceEpoch(m_captures.size() > 0 ? m_captures.at(0).m_tsms : 0);
         m_sampleRate = m_metaInfo.m_coreSampleRate;
         m_sampleSize = m_metaInfo.m_dataType.m_sampleBits;
 
@@ -260,7 +259,7 @@ bool SigMFFileInputGUI::handleMessage(const Message& message)
         m_centerFrequency = m_captures.at(m_currentTrackIndex).m_centerFrequency;
         m_sampleRate = m_captures.at(m_currentTrackIndex).m_sampleRate;
         m_recordLength = m_captures.at(m_currentTrackIndex).m_length;
-        m_startingTimeStamp = m_captures.at(m_currentTrackIndex).m_tsms;
+        m_startingDateTime = QDateTime::fromMSecsSinceEpoch(m_captures.at(m_currentTrackIndex).m_tsms);
         m_samplesCount = m_captures.at(m_currentTrackIndex).m_sampleStart;
         m_trackSamplesCount = 0;
         updateWithStreamData();
@@ -602,7 +601,7 @@ void SigMFFileInputGUI::updateWithStreamTime()
     s_timems = t.toString("HH:mm:ss.zzz");
     ui->fullRelTimeText->setText(s_timems);
 
-	QDateTime dt = QDateTime::fromMSecsSinceEpoch(m_startingTimeStamp);
+    QDateTime dt = QDateTime(m_startingDateTime);
     dt = dt.addSecs(track_sec);
     dt = dt.addMSecs(track_msec);
 	QString s_date = dt.toString("yyyy-MM-dd HH:mm:ss.zzz");

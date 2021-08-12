@@ -20,6 +20,7 @@
 
 #include <QTimer>
 #include <QWidget>
+#include <QDateTime>
 
 #include "device/devicegui.h"
 #include "util/messagequeue.h"
@@ -65,9 +66,9 @@ private:
 	quint32 m_sampleSize;
 	quint64 m_centerFrequency;
     quint64 m_recordLength;
-    quint64 m_startingTimeStamp;
-    quint64 m_samplesCount;
-    quint64 m_trackSamplesCount;
+	QDateTime m_startingDateTime;
+	quint64 m_samplesCount;
+	quint64 m_trackSamplesCount;
     quint64 m_trackTimeStart;
     int m_trackNumber;
 	std::size_t m_tickCount;

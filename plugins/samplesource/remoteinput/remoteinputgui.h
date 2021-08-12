@@ -22,6 +22,7 @@
 #include <QElapsedTimer>
 #include <QWidget>
 #include <QNetworkRequest>
+#include <QDateTime>
 
 #include "device/devicegui.h"
 #include "util/messagequeue.h"
@@ -66,7 +67,7 @@ private:
 
     //	int m_sampleRate;
     //	quint64 m_centerFrequency;
-	uint64_t m_startingTimeStampms;
+	QDateTime m_startingDateTime;
 	int m_framesDecodingStatus;
 	bool m_allBlocksReceived;
 	float m_bufferLengthInSecs;

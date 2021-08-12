@@ -22,6 +22,7 @@
 #include <QTimer>
 #include <QThread>
 #include <QNetworkRequest>
+#include <QDateTime>
 
 #include <ctime>
 #include <iostream>
@@ -193,9 +194,9 @@ public:
     virtual void setSampleRate(int sampleRate) { (void) sampleRate; }
 	virtual quint64 getCenterFrequency() const;
     virtual void setCenterFrequency(qint64 centerFrequency);
-	std::time_t getStartingTimeStamp() const;
+    QDateTime getStartingDateTime() const;
 
-	virtual bool handleMessage(const Message& message);
+    virtual bool handleMessage(const Message& message);
 
 	virtual int webapiSettingsGet(
 	            SWGSDRangel::SWGDeviceSettings& response,
@@ -233,8 +234,8 @@ private:
 	FileOutputWorker* m_fileOutputWorker;
     QThread m_fileOutputWorkerThread;
 	QString m_deviceDescription;
-	qint64 m_startingTimeStamp;
-	const QTimer& m_masterTimer;
+    QDateTime m_startingDateTime;
+    const QTimer& m_masterTimer;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 

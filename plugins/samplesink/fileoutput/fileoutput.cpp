@@ -42,13 +42,12 @@ MESSAGE_CLASS_DEFINITION(FileOutput::MsgConfigureFileOutputStreamTiming, Message
 MESSAGE_CLASS_DEFINITION(FileOutput::MsgReportFileOutputGeneration, Message)
 MESSAGE_CLASS_DEFINITION(FileOutput::MsgReportFileOutputStreamTiming, Message)
 
-FileOutput::FileOutput(DeviceAPI *deviceAPI) :
-    m_deviceAPI(deviceAPI),
-	m_settings(),
-	m_fileOutputWorker(nullptr),
-	m_deviceDescription("FileOutput"),
-	m_startingTimeStamp(0),
-	m_masterTimer(deviceAPI->getMasterTimer())
+FileOutput::FileOutput(DeviceAPI *deviceAPI) : m_deviceAPI(deviceAPI),
+                                               m_settings(),
+                                               m_fileOutputWorker(nullptr),
+                                               m_deviceDescription("FileOutput"),
+                                               m_startingDateTime(QDateTime::currentDateTime()),
+                                               m_masterTimer(deviceAPI->getMasterTimer())
 {
     m_deviceAPI->setNbSinkStreams(1);
 }
@@ -75,8 +74,7 @@ void FileOutput::openFileStream()
 	int actualSampleRate = m_settings.m_sampleRate * (1<<m_settings.m_log2Interp);
     header.sampleRate = actualSampleRate;
     header.centerFrequency = m_settings.m_centerFrequency;
-    m_startingTimeStamp = QDateTime::currentMSecsSinceEpoch();
-    header.startTimeStamp = (quint64)m_startingTimeStamp;
+    header.startTimeStamp = m_startingDateTime.toMSecsSinceEpoch();
     header.sampleSize = SDR_RX_SAMP_SZ;
 
     FileRecord::writeHeader(m_ofstream, header);
@@ -209,9 +207,9 @@ void FileOutput::setCenterFrequency(qint64 centerFrequency)
     }
 }
 
-std::time_t FileOutput::getStartingTimeStamp() const
+QDateTime FileOutput::getStartingDateTime() const
 {
-	return m_startingTimeStamp;
+    return m_startingDateTime;
 }
 
 bool FileOutput::handleMessage(const Message& message)

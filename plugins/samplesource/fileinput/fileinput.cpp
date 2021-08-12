@@ -355,7 +355,7 @@ void FileInput::setCenterFrequency(qint64 centerFrequency)
     }
 }
 
-QDateTime FileInput::getStartingTimeStamp() const
+QDateTime FileInput::getStartingDateTime() const
 {
     return m_startingDateTime;
 }

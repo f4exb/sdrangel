@@ -27,6 +27,7 @@
 #include <QTimer>
 #include <QThread>
 #include <QNetworkRequest>
+#include <QDateTime>
 
 #include "dsp/sigmf_forward.h"
 
@@ -400,15 +401,15 @@ public:
     virtual void setSampleRate(int sampleRate) { (void) sampleRate; }
 	virtual quint64 getCenterFrequency() const;
     virtual void setCenterFrequency(qint64 centerFrequency);
-    quint64 getStartingTimeStamp() const;
+    QDateTime getStartingDateTime() const;
 
-	virtual bool handleMessage(const Message& message);
+    virtual bool handleMessage(const Message &message);
 
-	virtual int webapiSettingsGet(
-	            SWGSDRangel::SWGDeviceSettings& response,
-	            QString& errorMessage);
+    virtual int webapiSettingsGet(
+        SWGSDRangel::SWGDeviceSettings &response,
+        QString &errorMessage);
 
-	virtual int webapiSettingsPutPatch(
+    virtual int webapiSettingsPutPatch(
                 bool force,
                 const QStringList& deviceSettingsKeys,
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
@@ -464,8 +465,8 @@ private:
 	unsigned int m_sampleBytes;
 	quint64 m_centerFrequency;
     quint64 m_recordLength; //!< record length in seconds computed from file size
-    quint64 m_startingTimeStamp;
-	QTimer m_masterTimer;
+    QDateTime m_startingDateTime;
+    QTimer m_masterTimer;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 

@@ -295,7 +295,7 @@ public:
     virtual void setSampleRate(int sampleRate) { (void) sampleRate; }
 	virtual quint64 getCenterFrequency() const;
     virtual void setCenterFrequency(qint64 centerFrequency);
-	QDateTime getStartingTimeStamp() const;
+	QDateTime getStartingDateTime() const;
 
 	virtual int webapiSettingsGet(
 		SWGSDRangel::SWGDeviceSettings &response,

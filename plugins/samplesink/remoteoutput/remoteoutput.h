@@ -27,6 +27,7 @@
 #include <QTimer>
 #include <QNetworkRequest>
 #include <QThread>
+#include <QDateTime>
 
 #include "dsp/devicesamplesink.h"
 
@@ -140,9 +141,9 @@ public:
     virtual void setSampleRate(int sampleRate) { (void) sampleRate; }
 	virtual quint64 getCenterFrequency() const;
     virtual void setCenterFrequency(qint64 centerFrequency) { (void) centerFrequency; }
-	std::time_t getStartingTimeStamp() const;
+    QDateTime getStartingDateTime() const;
 
-	virtual bool handleMessage(const Message& message);
+    virtual bool handleMessage(const Message &message);
 
     virtual int webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,
@@ -184,9 +185,9 @@ private:
 	RemoteOutputWorker* m_remoteOutputWorker;
     QThread m_remoteOutputWorkerThread;
 	QString m_deviceDescription;
-	std::time_t m_startingTimeStamp;
-	const QTimer& m_masterTimer;
-	uint32_t m_tickCount;
+    QDateTime m_startingDateTime;
+    const QTimer &m_masterTimer;
+    uint32_t m_tickCount;
     uint32_t m_tickMultiplier;
 
     QNetworkAccessManager *m_networkManager;

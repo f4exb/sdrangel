@@ -26,6 +26,7 @@
 #include <QByteArray>
 #include <QTimer>
 #include <QNetworkRequest>
+#include <QDateTime>
 
 #include "dsp/devicesamplesource.h"
 
@@ -265,10 +266,10 @@ public:
     virtual void setSampleRate(int sampleRate) { (void) sampleRate; }
 	virtual quint64 getCenterFrequency() const;
     virtual void setCenterFrequency(qint64 centerFrequency);
-	std::time_t getStartingTimeStamp() const;
-	bool isStreaming() const;
+    QDateTime getStartingDateTime() const;
+    bool isStreaming() const;
 
-	virtual bool handleMessage(const Message& message);
+    virtual bool handleMessage(const Message &message);
 
     virtual int webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,
@@ -310,7 +311,7 @@ private:
 	RemoteInputUDPHandler* m_remoteInputUDPHandler;
     QString m_remoteAddress;
 	QString m_deviceDescription;
-	std::time_t m_startingTimeStamp;
+    QDateTime m_startingDateTime;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 

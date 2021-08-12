@@ -42,14 +42,13 @@ MESSAGE_CLASS_DEFINITION(RemoteInput::MsgReportRemoteInputStreamData, Message)
 MESSAGE_CLASS_DEFINITION(RemoteInput::MsgReportRemoteInputStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(RemoteInput::MsgStartStop, Message)
 
-RemoteInput::RemoteInput(DeviceAPI *deviceAPI) :
-    m_deviceAPI(deviceAPI),
-    m_sampleRate(48000),
-    m_mutex(QMutex::Recursive),
-    m_settings(),
-	m_remoteInputUDPHandler(nullptr),
-	m_deviceDescription(),
-	m_startingTimeStamp(0)
+RemoteInput::RemoteInput(DeviceAPI *deviceAPI) : m_deviceAPI(deviceAPI),
+                                                 m_sampleRate(48000),
+                                                 m_mutex(QMutex::Recursive),
+                                                 m_settings(),
+                                                 m_remoteInputUDPHandler(nullptr),
+                                                 m_deviceDescription(),
+                                                 m_startingDateTime(QDateTime::currentDateTime())
 {
 	m_sampleFifo.setSize(m_sampleRate * 8);
 	m_remoteInputUDPHandler = new RemoteInputUDPHandler(&m_sampleFifo, m_deviceAPI);
@@ -144,9 +143,9 @@ void RemoteInput::setCenterFrequency(qint64 centerFrequency)
     (void) centerFrequency;
 }
 
-std::time_t RemoteInput::getStartingTimeStamp() const
+QDateTime RemoteInput::getStartingDateTime() const
 {
-	return m_startingTimeStamp;
+    return m_startingDateTime;
 }
 
 bool RemoteInput::isStreaming() const
@@ -248,10 +247,10 @@ void RemoteInput::applySettings(const RemoteInputSettings& settings, bool force)
                 settings.m_iqCorrection ? "true" : "false");
     }
 
-    if ((m_settings.m_dataAddress != settings.m_dataAddress) || 
-        (m_settings.m_dataPort != settings.m_dataPort) || 
-        (m_settings.m_multicastAddress != settings.m_multicastAddress) || 
-        (m_settings.m_multicastJoin != settings.m_multicastJoin) || force) 
+    if ((m_settings.m_dataAddress != settings.m_dataAddress) ||
+        (m_settings.m_dataPort != settings.m_dataPort) ||
+        (m_settings.m_multicastAddress != settings.m_multicastAddress) ||
+        (m_settings.m_multicastJoin != settings.m_multicastJoin) || force)
     {
         m_remoteInputUDPHandler->configureUDPLink(settings.m_dataAddress, settings.m_dataPort, settings.m_multicastAddress, settings.m_multicastJoin);
         m_remoteInputUDPHandler->getRemoteAddress(remoteAddress);

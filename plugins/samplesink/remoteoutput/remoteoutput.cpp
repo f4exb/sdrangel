@@ -44,24 +44,23 @@ MESSAGE_CLASS_DEFINITION(RemoteOutput::MsgConfigureRemoteOutputChunkCorrection, 
 
 const uint32_t RemoteOutput::NbSamplesForRateCorrection = 5000000;
 
-RemoteOutput::RemoteOutput(DeviceAPI *deviceAPI) :
-    m_deviceAPI(deviceAPI),
-	m_settings(),
-	m_centerFrequency(0),
-    m_remoteOutputWorker(nullptr),
-	m_deviceDescription("RemoteOutput"),
-    m_startingTimeStamp(0),
-	m_masterTimer(deviceAPI->getMasterTimer()),
-	m_tickCount(0),
-    m_tickMultiplier(20),
-	m_lastRemoteSampleCount(0),
-	m_lastSampleCount(0),
-	m_lastRemoteTimestampRateCorrection(0),
-	m_lastTimestampRateCorrection(0),
-	m_lastQueueLength(-2),
-	m_nbRemoteSamplesSinceRateCorrection(0),
-	m_nbSamplesSinceRateCorrection(0),
-	m_chunkSizeCorrection(0)
+RemoteOutput::RemoteOutput(DeviceAPI *deviceAPI) : m_deviceAPI(deviceAPI),
+                                                   m_settings(),
+                                                   m_centerFrequency(0),
+                                                   m_remoteOutputWorker(nullptr),
+                                                   m_deviceDescription("RemoteOutput"),
+                                                   m_startingDateTime(QDateTime::currentDateTime()),
+                                                   m_masterTimer(deviceAPI->getMasterTimer()),
+                                                   m_tickCount(0),
+                                                   m_tickMultiplier(20),
+                                                   m_lastRemoteSampleCount(0),
+                                                   m_lastSampleCount(0),
+                                                   m_lastRemoteTimestampRateCorrection(0),
+                                                   m_lastTimestampRateCorrection(0),
+                                                   m_lastQueueLength(-2),
+                                                   m_nbRemoteSamplesSinceRateCorrection(0),
+                                                   m_nbSamplesSinceRateCorrection(0),
+                                                   m_chunkSizeCorrection(0)
 {
     m_deviceAPI->setNbSinkStreams(1);
     m_networkManager = new QNetworkAccessManager();
@@ -182,9 +181,9 @@ quint64 RemoteOutput::getCenterFrequency() const
 	return m_centerFrequency;
 }
 
-std::time_t RemoteOutput::getStartingTimeStamp() const
+QDateTime RemoteOutput::getStartingDateTime() const
 {
-	return m_startingTimeStamp;
+    return m_startingDateTime;
 }
 
 bool RemoteOutput::handleMessage(const Message& message)

@@ -43,45 +43,43 @@
 #include "device/deviceuiset.h"
 #include "localinputgui.h"
 
-
-LocalInputGui::LocalInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
-	DeviceGUI(parent),
-	ui(new Ui::LocalInputGui),
-	m_deviceUISet(deviceUISet),
-	m_settings(),
-	m_sampleSource(0),
-	m_acquisition(false),
-	m_streamSampleRate(0),
-	m_streamCenterFrequency(0),
-	m_lastEngineState(DeviceAPI::StNotStarted),
-	m_framesDecodingStatus(0),
-	m_bufferLengthInSecs(0.0),
-    m_bufferGauge(-50),
-	m_nbOriginalBlocks(128),
-    m_nbFECBlocks(0),
-    m_sampleBits(16), // assume 16 bits to start with
-    m_sampleBytes(2),
-    m_samplesCount(0),
-    m_tickCount(0),
-    m_addressEdited(false),
-    m_dataPortEdited(false),
-	m_countUnrecoverable(0),
-	m_countRecovered(0),
-    m_doApplySettings(true),
-    m_forceSettings(true),
-    m_txDelay(0.0)
+LocalInputGui::LocalInputGui(DeviceUISet *deviceUISet, QWidget *parent) : DeviceGUI(parent),
+                                                                          ui(new Ui::LocalInputGui),
+                                                                          m_deviceUISet(deviceUISet),
+                                                                          m_settings(),
+                                                                          m_sampleSource(0),
+                                                                          m_acquisition(false),
+                                                                          m_streamSampleRate(0),
+                                                                          m_streamCenterFrequency(0),
+                                                                          m_lastEngineState(DeviceAPI::StNotStarted),
+                                                                          m_startingDateTime(QDateTime::currentDateTime()),
+                                                                          m_framesDecodingStatus(0),
+                                                                          m_bufferLengthInSecs(0.0),
+                                                                          m_bufferGauge(-50),
+                                                                          m_nbOriginalBlocks(128),
+                                                                          m_nbFECBlocks(0),
+                                                                          m_sampleBits(16), // assume 16 bits to start with
+                                                                          m_sampleBytes(2),
+                                                                          m_samplesCount(0),
+                                                                          m_tickCount(0),
+                                                                          m_addressEdited(false),
+                                                                          m_dataPortEdited(false),
+                                                                          m_countUnrecoverable(0),
+                                                                          m_countRecovered(0),
+                                                                          m_doApplySettings(true),
+                                                                          m_forceSettings(true),
+                                                                          m_txDelay(0.0)
 {
     m_paletteGreenText.setColor(QPalette::WindowText, Qt::green);
     m_paletteWhiteText.setColor(QPalette::WindowText, Qt::white);
 
-	m_startingTimeStampms = 0;
-	ui->setupUi(this);
+    ui->setupUi(this);
 
-	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-	ui->centerFrequency->setValueRange(7, 0, 9999999U);
+    ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+    ui->centerFrequency->setValueRange(7, 0, 9999999U);
 
-	ui->centerFrequencyHz->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-	ui->centerFrequencyHz->setValueRange(3, 0, 999U);
+    ui->centerFrequencyHz->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+    ui->centerFrequencyHz->setValueRange(3, 0, 999U);
 
     CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStop);
     connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
