@@ -50,16 +50,15 @@ MESSAGE_CLASS_DEFINITION(FileInput::MsgReportFileInputStreamData, Message)
 MESSAGE_CLASS_DEFINITION(FileInput::MsgReportFileInputStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(FileInput::MsgReportHeaderCRC, Message)
 
-FileInput::FileInput(DeviceAPI *deviceAPI) :
-    m_deviceAPI(deviceAPI),
-	m_settings(),
-	m_fileInputWorker(nullptr),
-	m_deviceDescription(),
-	m_sampleRate(48000),
-	m_sampleSize(0),
-	m_centerFrequency(435000000),
-	m_recordLengthMuSec(0),
-    m_startingTimeStamp(0)
+FileInput::FileInput(DeviceAPI *deviceAPI) : m_deviceAPI(deviceAPI),
+                                             m_settings(),
+                                             m_fileInputWorker(nullptr),
+                                             m_deviceDescription(),
+                                             m_sampleRate(48000),
+                                             m_sampleSize(0),
+                                             m_centerFrequency(435000000),
+                                             m_recordLengthMuSec(0),
+                                             m_startingDateTime(QDateTime::currentDateTime())
 {
     m_deviceAPI->setNbSourceStreams(1);
     qDebug("FileInput::FileInput: device source engine: %p", m_deviceAPI->getDeviceSourceEngine());
@@ -110,14 +109,14 @@ void FileInput::openFileStream()
         {
             // Some WAV files written by SDR tools have auxi header
             m_centerFrequency = header.m_auxi.m_centerFreq;
-            m_startingTimeStamp = header.getStartTime().toMSecsSinceEpoch() / 1000;
+            m_startingDateTime = header.getStartTime();
         }
         else
         {
             // Attempt to extract start time and frequency from filename
             QDateTime startTime;
             if (WavFileRecord::getStartTime(m_settings.m_fileName, startTime)) {
-                m_startingTimeStamp = startTime.toMSecsSinceEpoch() / 1000;
+                m_startingDateTime = startTime;
             }
             WavFileRecord::getCenterFrequency(m_settings.m_fileName, m_centerFrequency);
         }
@@ -146,20 +145,20 @@ void FileInput::openFileStream()
 		bool crcOK = FileRecord::readHeader(m_ifstream, header);
 		m_sampleRate = header.sampleRate;
 		m_centerFrequency = header.centerFrequency;
-		m_startingTimeStamp = header.startTimeStamp;
-		m_sampleSize = header.sampleSize;
-		QString crcHex = QString("%1").arg(header.crc32 , 0, 16);
+        m_startingDateTime = FileRecord::timeStampToDateTime(header.startTimeStamp);
+        m_sampleSize = header.sampleSize;
+        QString crcHex = QString("%1").arg(header.crc32, 0, 16);
 
-	    if (crcOK && (m_sampleRate > 0) && (m_sampleSize > 0))
-	    {
-	        qDebug("FileInput::openFileStream: CRC32 OK for header: %s", qPrintable(crcHex));
-	        m_recordLengthMuSec = ((fileSize - sizeof(FileRecord::Header)) * 1000000UL) / ((m_sampleSize == 24 ? 8 : 4) * m_sampleRate);
-	    }
-	    else if (!crcOK)
-	    {
-	        qCritical("FileInput::openFileStream: bad CRC32 for header: %s", qPrintable(crcHex));
+        if (crcOK && (m_sampleRate > 0) && (m_sampleSize > 0))
+        {
+            qDebug("FileInput::openFileStream: CRC32 OK for header: %s", qPrintable(crcHex));
+            m_recordLengthMuSec = ((fileSize - sizeof(FileRecord::Header)) * 1000000UL) / ((m_sampleSize == 24 ? 8 : 4) * m_sampleRate);
+        }
+        else if (!crcOK)
+        {
+            qCritical("FileInput::openFileStream: bad CRC32 for header: %s", qPrintable(crcHex));
 	        m_recordLengthMuSec = 0;
-	    }
+        }
             else
 	    {
 	        qCritical("FileInput::openFileStream: invalid header");
@@ -188,12 +187,12 @@ void FileInput::openFileStream()
     {
         DSPSignalNotification *notif = new DSPSignalNotification(m_sampleRate, m_centerFrequency);
         getMessageQueueToGUI()->push(notif);
-	    MsgReportFileInputStreamData *report = MsgReportFileInputStreamData::create(m_sampleRate,
-	            m_sampleSize,
-	            m_centerFrequency,
-	            m_startingTimeStamp,
-	            m_recordLengthMuSec); // file stream data
-	    getMessageQueueToGUI()->push(report);
+        MsgReportFileInputStreamData *report = MsgReportFileInputStreamData::create(m_sampleRate,
+                                                                                    m_sampleSize,
+                                                                                    m_centerFrequency,
+                                                                                    m_startingDateTime,
+                                                                                    m_recordLengthMuSec); // file stream data
+        getMessageQueueToGUI()->push(report);
 	}
 
 	if (m_recordLengthMuSec == 0) {
@@ -356,9 +355,9 @@ void FileInput::setCenterFrequency(qint64 centerFrequency)
     }
 }
 
-quint64 FileInput::getStartingTimeStamp() const
+QDateTime FileInput::getStartingTimeStamp() const
 {
-	return m_startingTimeStamp;
+    return m_startingDateTime;
 }
 
 bool FileInput::handleMessage(const Message& message)
@@ -655,8 +654,7 @@ void FileInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
     t = t.addMSecs(t_msec);
     response.getFileInputReport()->setElapsedTime(new QString(t.toString("HH:mm:ss.zzz")));
 
-    qint64 startingTimeStampMsec = m_startingTimeStamp * 1000LL;
-    QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
+    QDateTime dt = QDateTime(m_startingDateTime);
     dt = dt.addSecs(t_sec);
     dt = dt.addMSecs(t_msec);
     response.getFileInputReport()->setAbsoluteTime(new QString(dt.toString("yyyy-MM-dd HH:mm:ss.zzz")));

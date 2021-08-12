@@ -206,3 +206,25 @@ void FileRecord::writeHeader(std::ofstream& sampleFile, Header& header)
     header.crc32 = crc32.checksum();
     sampleFile.write((const char *) &header, sizeof(Header));
 }
+
+QDateTime FileRecord::timeStampToDateTime(quint64 timeStamp)
+{
+    /* Roughly the start of this project, rounded down to look nicer. Taken from
+     * git log. */
+    const quint64 EARLIEST_POSSIBLE_TIMESTAMP_IN_MS = 1400000000000;
+
+    /* This heuristic breaks down if given a pre-v6.16.2 FileRecord, that was
+     * created after 46334-03-27. In such a case we would roll-back to
+     * 2014-05-13T16:53:20+00, roughly the date of the earliest commit to this
+     * project. Similarly, given a FileRecord created using v6.16.2 or later
+     * before 2014-05-13T16:53:20+00 this heuristic would falsly convert it to
+     * 1970-01-17T04:53:20+00 (if you happen to find a time-machine that is). */
+    if (timeStamp > EARLIEST_POSSIBLE_TIMESTAMP_IN_MS)
+    {
+        return QDateTime::fromMSecsSinceEpoch((qint64)timeStamp);
+    }
+    else
+    {
+        return QDateTime::fromSecsSinceEpoch((qint64)timeStamp);
+    }
+}

@@ -23,6 +23,7 @@
 #include <iostream>
 #include <fstream>
 #include <ctime>
+#include <QDateTime>
 
 #include "dsp/filerecordinterface.h"
 #include "export.h"
@@ -66,6 +67,25 @@ public:
 
     static bool readHeader(std::ifstream& samplefile, Header& header); //!< returns true if CRC checksum is correct else false
     static void writeHeader(std::ofstream& samplefile, Header& header);
+
+    /**
+     * @brief Convert integer timestamp to #QDateTime object.
+     *
+     * Intended to convert FileRecord#Header#startTimeStamp into an unambigous
+     * #QDateTime format to allow backward compatibility with older file
+     * formats.
+     *
+     * This function relies on heuristics, meaning the output should always be
+     * double-checked by a human observer.
+     *
+     * @param timeStamp
+     * Integer timestamp as either seconds <em>or milliseconds</em> since start
+     * of UNIX epoch.
+     *
+     * @return QDateTime
+     * A new QDateTime object representing the given @p timeStamp.
+     */
+    static QDateTime timeStampToDateTime(quint64 timeStamp);
 
 private:
 	QString m_fileBase;

@@ -28,6 +28,7 @@
 #include <QThread>
 #include <QMutex>
 #include <QNetworkRequest>
+#include <QDateTime>
 
 #include "dsp/devicesamplesource.h"
 #include "fileinputsettings.h"
@@ -205,37 +206,37 @@ public:
 		int getSampleRate() const { return m_sampleRate; }
 		quint32 getSampleSize() const { return m_sampleSize; }
 		quint64 getCenterFrequency() const { return m_centerFrequency; }
-        quint64 getStartingTimeStamp() const { return m_startingTimeStamp; }
-        quint64 getRecordLengthMuSec() const { return m_recordLengthMuSec; }
+		QDateTime getStartingDateTime() const { return m_startingDateTime; }
+		quint64 getRecordLengthMuSec() const { return m_recordLengthMuSec; }
 
-		static MsgReportFileInputStreamData* create(int sampleRate,
-		        quint32 sampleSize,
-				quint64 centerFrequency,
-                quint64 startingTimeStamp,
-                quint64 recordLength)
+		static MsgReportFileInputStreamData *create(int sampleRate,
+													quint32 sampleSize,
+													quint64 centerFrequency,
+													QDateTime startingDateTime,
+													quint64 recordLength)
 		{
-			return new MsgReportFileInputStreamData(sampleRate, sampleSize, centerFrequency, startingTimeStamp, recordLength);
+			return new MsgReportFileInputStreamData(sampleRate, sampleSize, centerFrequency, startingDateTime, recordLength);
 		}
 
 	protected:
 		int m_sampleRate;
 		quint32 m_sampleSize;
 		quint64 m_centerFrequency;
-        quint64 m_startingTimeStamp;
-        quint64 m_recordLengthMuSec;
+		QDateTime m_startingDateTime;
+		quint64 m_recordLengthMuSec;
 
 		MsgReportFileInputStreamData(int sampleRate,
-		        quint32 sampleSize,
-				quint64 centerFrequency,
-                quint64 startingTimeStamp,
-                quint64 recordLengthMuSec) :
-			Message(),
-			m_sampleRate(sampleRate),
-			m_sampleSize(sampleSize),
-			m_centerFrequency(centerFrequency),
-			m_startingTimeStamp(startingTimeStamp),
-			m_recordLengthMuSec(recordLengthMuSec)
-		{ }
+									 quint32 sampleSize,
+									 quint64 centerFrequency,
+									 QDateTime startingDateTime,
+									 quint64 recordLengthMuSec) : Message(),
+																  m_sampleRate(sampleRate),
+																  m_sampleSize(sampleSize),
+																  m_centerFrequency(centerFrequency),
+																  m_startingDateTime(startingDateTime),
+																  m_recordLengthMuSec(recordLengthMuSec)
+		{
+		}
 	};
 
 	class MsgReportFileInputStreamTiming : public Message {
@@ -294,19 +295,19 @@ public:
     virtual void setSampleRate(int sampleRate) { (void) sampleRate; }
 	virtual quint64 getCenterFrequency() const;
     virtual void setCenterFrequency(qint64 centerFrequency);
-    quint64 getStartingTimeStamp() const;
+	QDateTime getStartingTimeStamp() const;
 
 	virtual int webapiSettingsGet(
-	            SWGSDRangel::SWGDeviceSettings& response,
-	            QString& errorMessage);
+		SWGSDRangel::SWGDeviceSettings &response,
+		QString &errorMessage);
 
 	virtual int webapiSettingsPutPatch(
-                bool force,
-                const QStringList& deviceSettingsKeys,
-                SWGSDRangel::SWGDeviceSettings& response, // query + response
-                QString& errorMessage);
+		bool force,
+		const QStringList &deviceSettingsKeys,
+		SWGSDRangel::SWGDeviceSettings &response, // query + response
+		QString &errorMessage);
 
-    virtual int webapiRunGet(
+	virtual int webapiRunGet(
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
 
@@ -340,9 +341,9 @@ public:
 	quint32 m_sampleSize;
 	quint64 m_centerFrequency;
     quint64 m_recordLengthMuSec; //!< record length in microseconds computed from file size
-    quint64 m_startingTimeStamp;
+	QDateTime m_startingDateTime;
 	QTimer m_masterTimer;
-    QNetworkAccessManager *m_networkManager;
+	QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
 	void startWorker();

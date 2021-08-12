@@ -38,22 +38,21 @@
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
 
-FileInputGUI::FileInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
-	DeviceGUI(parent),
-	ui(new Ui::FileInputGUI),
-	m_deviceUISet(deviceUISet),
-	m_settings(),
-	m_doApplySettings(true),
-	m_sampleSource(0),
-	m_acquisition(false),
-	m_sampleRate(0),
-	m_centerFrequency(0),
-	m_recordLengthMuSec(0),
-	m_startingTimeStamp(0),
-	m_samplesCount(0),
-	m_tickCount(0),
-	m_enableNavTime(false),
-	m_lastEngineState(DeviceAPI::StNotStarted)
+FileInputGUI::FileInputGUI(DeviceUISet *deviceUISet, QWidget *parent) : DeviceGUI(parent),
+																		ui(new Ui::FileInputGUI),
+																		m_deviceUISet(deviceUISet),
+																		m_settings(),
+																		m_doApplySettings(true),
+																		m_sampleSource(0),
+																		m_acquisition(false),
+																		m_sampleRate(0),
+																		m_centerFrequency(0),
+																		m_recordLengthMuSec(0),
+																		m_startingDateTime(QDateTime::currentDateTime()),
+																		m_samplesCount(0),
+																		m_tickCount(0),
+																		m_enableNavTime(false),
+																		m_lastEngineState(DeviceAPI::StNotStarted)
 {
 	ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -159,7 +158,7 @@ bool FileInputGUI::handleMessage(const Message& message)
 		m_sampleRate = ((FileInput::MsgReportFileInputStreamData&)message).getSampleRate();
 		m_sampleSize = ((FileInput::MsgReportFileInputStreamData&)message).getSampleSize();
 		m_centerFrequency = ((FileInput::MsgReportFileInputStreamData&)message).getCenterFrequency();
-		m_startingTimeStamp = ((FileInput::MsgReportFileInputStreamData&)message).getStartingTimeStamp();
+		m_startingDateTime = ((FileInput::MsgReportFileInputStreamData &)message).getStartingDateTime();
 		m_recordLengthMuSec = ((FileInput::MsgReportFileInputStreamData&)message).getRecordLengthMuSec();
 		updateWithStreamData();
 		return true;
@@ -367,10 +366,9 @@ void FileInputGUI::updateWithStreamTime()
 	QString s_timems = t.toString("HH:mm:ss.zzz");
 	ui->relTimeText->setText(s_timems);
 
-    qint64 startingTimeStampMsec = m_startingTimeStamp;
-    QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
-    dt = dt.addSecs(t_sec);
-    dt = dt.addMSecs(t_msec);
+	QDateTime dt = QDateTime(m_startingDateTime);
+	dt = dt.addSecs(t_sec);
+	dt = dt.addMSecs(t_msec);
 	QString s_date = dt.toString("yyyy-MM-dd HH:mm:ss.zzz");
 	ui->absTimeText->setText(s_date);
 

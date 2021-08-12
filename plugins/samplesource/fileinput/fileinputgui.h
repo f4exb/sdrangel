@@ -21,6 +21,7 @@
 #include <device/devicegui.h>
 #include <QTimer>
 #include <QWidget>
+#include <QDateTime>
 
 #include "util/messagequeue.h"
 
@@ -61,8 +62,8 @@ private:
 	quint32 m_sampleSize;
 	quint64 m_centerFrequency;
     quint64 m_recordLengthMuSec;
-    quint64 m_startingTimeStamp;
-    quint64 m_samplesCount;
+	QDateTime m_startingDateTime;
+	quint64 m_samplesCount;
 	std::size_t m_tickCount;
 	bool m_enableNavTime;
     int m_deviceSampleRate;
