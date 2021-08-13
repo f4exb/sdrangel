@@ -25,3 +25,20 @@ obj-x86_64-linux-gnu/*
 **/venv*/
 *.pyc
 .DS_Store
+
+### Go ###
+# Binaries for programs and plugins
+/rescuesdriq/*.exe
+/rescuesdriq/*.exe~
+/rescuesdriq/*.dll
+/rescuesdriq/*.so
+/rescuesdriq/*.dylib
+
+# Test binary, built with `go test -c`
+/rescuesdriq/*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+/rescuesdriq/*.out
+
+/rescuesdriq/vendor/
+/rescuesdriq/Godeps/
