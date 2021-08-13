@@ -112,6 +112,7 @@ func main() {
 	sampleSize := flag.Uint("sz", 16, "Sample size (16 or 24)")
 	timeStr := flag.String("ts", "", "start time RFC3339 (ex: 2006-01-02T15:04:05Z)")
 	timeNow := flag.Bool("now", false, "use now for start time")
+	assumeMilliseconds := flag.Bool("msec", false, "assume timestamp read from input file is in milliseconds (by default seconds will be assumed)")
 	blockSize := flag.Uint("bz", 1, "Copy block size in multiple of 4k")
 
 	flag.Parse()
@@ -158,7 +159,9 @@ func main() {
 					headerOrigin.StartTimestamp = int64(time.Now().UnixNano() / int64(time.Millisecond))
 				}
 			} else if *timeNow {
-				headerOrigin.StartTimestamp = int64(time.Now().Unix() * 1000)
+				headerOrigin.StartTimestamp = int64(time.Now().UnixNano() / int64(time.Millisecond))
+			} else if !*assumeMilliseconds {
+				headerOrigin.StartTimestamp = headerOrigin.StartTimestamp * (int64(time.Millisecond) / int64(time.Second))
 			}
 
 			fmt.Println("\nHeader is now")
