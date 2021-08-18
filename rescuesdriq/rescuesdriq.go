@@ -130,6 +130,11 @@ func main() {
 		// make a read buffer
 		reader := bufio.NewReader(fi)
 		var headerOrigin HeaderStd = analyze(reader)
+
+		if !*assumeMilliseconds {
+			headerOrigin.StartTimestamp = headerOrigin.StartTimestamp * (int64(time.Second) / int64(time.Millisecond))
+		}
+
 		printHeader(&headerOrigin)
 
 		if flagSeen["out"] {
@@ -157,8 +162,6 @@ func main() {
 				}
 			} else if *timeNow {
 				headerOrigin.StartTimestamp = int64(time.Now().UnixNano() / int64(time.Millisecond))
-			} else if !*assumeMilliseconds {
-				headerOrigin.StartTimestamp = headerOrigin.StartTimestamp * (int64(time.Second) / int64(time.Millisecond))
 			}
 
 			fmt.Println("\nHeader is now")
