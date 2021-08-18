@@ -84,18 +84,15 @@ func copyContent(reader *bufio.Reader, writer *bufio.Writer, blockSize uint) {
 	for {
 		n, err := reader.Read(p)
 
-		if err != nil {
+		if err == nil || err == io.EOF {
+			writer.Write(p[0:n])
+			sz += int64(n)
 			if err == io.EOF {
-				writer.Write(p[0:n])
-				sz += int64(n)
-				break
-			} else {
-				fmt.Println("An error occurred during content copy. Aborting")
 				break
 			}
 		} else {
-			writer.Write(p)
-			sz += int64(blockSize) * 4096
+			fmt.Println("An error occurred during content copy. Aborting")
+			break
 		}
 
 		fmt.Printf("Wrote %d bytes\r", sz)
