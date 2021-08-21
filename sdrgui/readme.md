@@ -42,7 +42,10 @@ The following items are presented hierarchically from left to right:
   - Device sets:
     - _Add source device set_: adds a new source (receiver) type device set to the device set stack (last position)
     - _Add sink device set_: adds a new sink (transmitter) type device set to the device set stack (last position)
-    - _Remove last device set_: removes the last device set from the device set stack
+    - _Remove last device set_: removes the last device set from the device set stack except the first one
+  - Feature sets:
+    - _Add feature set_: adds a new feature set
+    - _Remove last feature set_: removes the last feature set from the feature set stack except the first one
   - Window: presents the list of dockable windows. Check to make it visible. Uncheck to hide. These windows are:
     - _Sampling devices control_: control of which sampling devices is used and add channels
     - _Sampling devices_: the sampling devices UIs
