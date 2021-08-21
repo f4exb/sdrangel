@@ -130,9 +130,17 @@
     <addaction name="action_LimeRFE"/>
     <addaction name="menuDevices"/>
    </widget>
+   <widget class="QMenu" name="menuFeatureSets">
+    <property name="title">
+     <string>F&amp;eatureSets</string>
+    </property>
+    <addaction name="action_addFeatureSet"/>
+    <addaction name="action_removeLastFeatureSet"/>
+   </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_View"/>
    <addaction name="menu_Devices"/>
+   <addaction name="menuFeatureSets"/>
    <addaction name="menu_Window"/>
    <addaction name="menuPreferences"/>
    <addaction name="menu_Help"/>
@@ -938,6 +946,30 @@
   <action name="action_LimeRFE">
    <property name="text">
     <string>LimeRFE</string>
+   </property>
+  </action>
+  <action name="action_addFeatureSet">
+   <property name="text">
+    <string>Add feature set</string>
+   </property>
+   <property name="font">
+    <font>
+     <family>Liberation Sans</family>
+     <pointsize>9</pointsize>
+     <weight>50</weight>
+     <bold>false</bold>
+    </font>
+   </property>
+  </action>
+  <action name="action_removeLastFeatureSet">
+   <property name="text">
+    <string>Remove last feature set</string>
+   </property>
+   <property name="font">
+    <font>
+     <family>Liberation Sans</family>
+     <pointsize>9</pointsize>
+    </font>
    </property>
   </action>
   <zorder>presetDock</zorder>

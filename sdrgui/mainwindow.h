@@ -186,6 +186,8 @@ private slots:
 	void on_action_addSinkDevice_triggered();
     void on_action_addMIMODevice_triggered();
 	void on_action_removeLastDevice_triggered();
+	void on_action_addFeatureSet_triggered();
+	void on_action_removeLastFeatureSet_triggered();
 	void tabInputViewIndexChanged();
     void tabChannelsIndexChanged();
 	void commandKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifiers, bool release);

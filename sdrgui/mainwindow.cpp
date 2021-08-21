@@ -2213,6 +2213,18 @@ void MainWindow::on_action_removeLastDevice_triggered()
     }
 }
 
+void MainWindow::on_action_addFeatureSet_triggered()
+{
+    addFeatureSet();
+}
+
+void MainWindow::on_action_removeLastFeatureSet_triggered()
+{
+    if (m_featureUIs.size() > 1) {
+        removeFeatureSet(m_featureUIs.size() - 1);
+    }
+}
+
 void MainWindow::tabInputViewIndexChanged()
 {
     int inputViewIndex = ui->tabInputsView->currentIndex();
