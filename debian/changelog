@@ -1,3 +1,11 @@
+sdrangel (6.16.3-1) unstable; urgency=medium
+
+  * Metis scan: scan all network interfaces. Fixes #977
+  * GLScopeGUI: fixed UI. Fixes #969
+  * Fixed rescuesdriq with milliseconds timestamps. Fixes #986. PR #984 and #987
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 21 Aug 2021 09:32:23 +0200
+
 sdrangel (6.16.2-1) unstable; urgency=medium
 
   * Pager demod: Add support for character set mapping. PR #966
