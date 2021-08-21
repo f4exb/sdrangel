@@ -1427,6 +1427,28 @@ int WebAPIAdapter::instanceDeviceSetDelete(
     }
 }
 
+int WebAPIAdapter::instanceFeatureSetPost(
+        SWGSDRangel::SWGSuccessResponse& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    (void) response;
+    error.init();
+    *error.getMessage() = "Not implemented";
+
+    return 501;
+}
+
+int WebAPIAdapter::instanceFeatureSetDelete(
+        SWGSDRangel::SWGSuccessResponse& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    (void) response;
+    error.init();
+    *error.getMessage() = "Not implemented";
+
+    return 501;
+}
+
 int WebAPIAdapter::devicesetGet(
         int deviceSetIndex,
         SWGSDRangel::SWGDeviceSet& response,

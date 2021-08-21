@@ -1873,6 +1873,41 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
 
+  /sdrangel/featureset:
+    x-swagger-router-controller: instance
+    post:
+      description: Add (append) a new feature set
+      operationId: instanceFeatureSetPost
+      tags:
+        - FeatureSet
+      responses:
+        "202":
+          description: Message to add a new feature set was sent successfully
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    delete:
+      description: Remove last feature set. The GUI version does not remove the first feature set.
+      operationId: instanceFeatureSetDelete
+      tags:
+        - FeatureSet
+      responses:
+        "202":
+          description: Message to remove last feature set was sent successfully
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        "404":
+          description: "No more feature sets to be deleted"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
   /sdrangel/featureset/{featureSetIndex}:
     x-swagger-router-controller: featureset
     get:

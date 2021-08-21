@@ -652,5 +652,109 @@ SWGFeatureSetApi::featuresetGetCallback(SWGHttpRequestWorker * worker) {
     }
 }
 
+void
+SWGFeatureSetApi::instanceFeatureSetDelete() {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset");
+
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "DELETE");
+
+
+
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGFeatureSetApi::instanceFeatureSetDeleteCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGFeatureSetApi::instanceFeatureSetDeleteCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGSuccessResponse* output = static_cast<SWGSuccessResponse*>(create(json, QString("SWGSuccessResponse")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit instanceFeatureSetDeleteSignal(output);
+    } else {
+        emit instanceFeatureSetDeleteSignalE(output, error_type, error_str);
+        emit instanceFeatureSetDeleteSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
+SWGFeatureSetApi::instanceFeatureSetPost() {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset");
+
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "POST");
+
+
+
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGFeatureSetApi::instanceFeatureSetPostCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGFeatureSetApi::instanceFeatureSetPostCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGSuccessResponse* output = static_cast<SWGSuccessResponse*>(create(json, QString("SWGSuccessResponse")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit instanceFeatureSetPostSignal(output);
+    } else {
+        emit instanceFeatureSetPostSignalE(output, error_type, error_str);
+        emit instanceFeatureSetPostSignalEFull(worker, error_type, error_str);
+    }
+}
+
 
 }

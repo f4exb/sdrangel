@@ -41,6 +41,8 @@ QString WebAPIAdapterInterface::instancePresetURL = "/sdrangel/preset";
 QString WebAPIAdapterInterface::instancePresetFileURL = "/sdrangel/preset/file";
 QString WebAPIAdapterInterface::instanceDeviceSetsURL = "/sdrangel/devicesets";
 QString WebAPIAdapterInterface::instanceDeviceSetURL = "/sdrangel/deviceset";
+QString WebAPIAdapterInterface::instanceFeatureSetsURL = "/sdrangel/featuresets";
+QString WebAPIAdapterInterface::instanceFeatureSetURL = "/sdrangel/featureset";
 
 std::regex WebAPIAdapterInterface::devicesetURLRe("^/sdrangel/deviceset/([0-9]{1,2})$");
 std::regex WebAPIAdapterInterface::devicesetFocusURLRe("^/sdrangel/deviceset/([0-9]{1,2})/focus$");
