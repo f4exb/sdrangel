@@ -190,6 +190,19 @@ bool MainServer::handleMessage(const Message& cmd)
         }
         return true;
     }
+    else if (MainCore::MsgAddFeatureSet::match(cmd))
+    {
+        addFeatureSet();
+        return true;
+    }
+    else if (MainCore::MsgRemoveLastFeatureSet::match(cmd))
+    {
+        if (m_mainCore->m_featureSets.size() != 0) {
+            removeFeatureSet(m_mainCore->m_featureSets.size() - 1);
+        }
+
+        return true;
+    }
     else if (MainCore::MsgAddChannel::match(cmd))
     {
         MainCore::MsgAddChannel& notif = (MainCore::MsgAddChannel&) cmd;
@@ -679,6 +692,18 @@ void MainServer::deleteChannel(int deviceSetIndex, int channelIndex)
     {
         DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
         deviceSet->deleteChannel(channelIndex);
+    }
+}
+
+void MainServer::addFeatureSet()
+{
+    m_mainCore->appendFeatureSet();
+}
+
+void MainServer::removeFeatureSet(unsigned int featureSetIndex)
+{
+    if (featureSetIndex < m_mainCore->m_featureSets.size()) {
+        m_mainCore->removeFeatureSet(featureSetIndex);
     }
 }
 

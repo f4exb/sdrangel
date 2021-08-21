@@ -1408,11 +1408,9 @@ int WebAPIAdapter::instanceDeviceSetDelete(
         SWGSDRangel::SWGSuccessResponse& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
-#ifdef SERVER_MODE
-    if (m_mainCore->m_deviceSets.size() != 0)
-#else
-    if (m_mainCore->m_deviceSets.size() > 1)
-#endif
+    unsigned int minFeatureSets = QCoreApplication::applicationName() == "SDRangelSrv" ? 0 : 1;
+
+    if (m_mainCore->m_deviceSets.size() > minFeatureSets)
     {
         MainCore::MsgRemoveLastDeviceSet *msg = MainCore::MsgRemoveLastDeviceSet::create();
         m_mainCore->m_mainMessageQueue->push(msg);
@@ -1449,11 +1447,9 @@ int WebAPIAdapter::instanceFeatureSetDelete(
         SWGSDRangel::SWGSuccessResponse& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
-#ifdef SERVER_MODE
-    if (m_mainCore->m_featureSets.size() != 0)
-#else
-    if (m_mainCore->m_featureSets.size() > 1)
-#endif
+    unsigned int minFeatureSets = QCoreApplication::applicationName() == "SDRangelSrv" ? 0 : 1;
+
+    if (m_mainCore->m_featureSets.size() > minFeatureSets)
     {
         MainCore::MsgRemoveLastFeatureSet *msg = MainCore::MsgRemoveLastFeatureSet::create();
         m_mainCore->m_mainMessageQueue->push(msg);

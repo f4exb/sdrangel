@@ -66,6 +66,8 @@ public:
     void changeSampleMIMO(int deviceSetIndex, int selectedDeviceIndex);
     void addChannel(int deviceSetIndex, int selectedChannelIndex);
     void deleteChannel(int deviceSetIndex, int channelIndex);
+    void addFeatureSet();
+    void removeFeatureSet(unsigned int featureSetIndex);
     void addFeature(int featureSetIndex, int selectedFeatureIndex);
     void deleteFeature(int featureSetIndex, int featureIndex);
 
