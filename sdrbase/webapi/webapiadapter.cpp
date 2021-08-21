@@ -1408,7 +1408,11 @@ int WebAPIAdapter::instanceDeviceSetDelete(
         SWGSDRangel::SWGSuccessResponse& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
+#ifdef SERVER_MODE
+    if (m_mainCore->m_deviceSets.size() != 0)
+#else
     if (m_mainCore->m_deviceSets.size() > 1)
+#endif
     {
         MainCore::MsgRemoveLastDeviceSet *msg = MainCore::MsgRemoveLastDeviceSet::create();
         m_mainCore->m_mainMessageQueue->push(msg);
@@ -1431,22 +1435,41 @@ int WebAPIAdapter::instanceFeatureSetPost(
         SWGSDRangel::SWGSuccessResponse& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
-    (void) response;
-    error.init();
-    *error.getMessage() = "Not implemented";
+    (void) error;
+    MainCore::MsgAddFeatureSet *msg = MainCore::MsgAddFeatureSet::create();
+    m_mainCore->m_mainMessageQueue->push(msg);
 
-    return 501;
+    response.init();
+    *response.getMessage() = QString("Message to add a new feature set (MsgAddFeatureSet) was submitted successfully");
+
+    return 202;
 }
 
 int WebAPIAdapter::instanceFeatureSetDelete(
         SWGSDRangel::SWGSuccessResponse& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
-    (void) response;
-    error.init();
-    *error.getMessage() = "Not implemented";
+#ifdef SERVER_MODE
+    if (m_mainCore->m_featureSets.size() != 0)
+#else
+    if (m_mainCore->m_featureSets.size() > 1)
+#endif
+    {
+        MainCore::MsgRemoveLastFeatureSet *msg = MainCore::MsgRemoveLastFeatureSet::create();
+        m_mainCore->m_mainMessageQueue->push(msg);
 
-    return 501;
+        response.init();
+        *response.getMessage() = QString("Message to remove last feature set (MsgRemoveLastFeatureSet) was submitted successfully");
+
+        return 202;
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = "No more feature sets to be removed";
+
+        return 404;
+    }
 }
 
 int WebAPIAdapter::devicesetGet(

@@ -250,8 +250,7 @@ public:
     public:
         int getDirection() const { return m_direction; }
 
-        static MsgAddDeviceSet* create(int direction)
-        {
+        static MsgAddDeviceSet* create(int direction) {
             return new MsgAddDeviceSet(direction);
         }
 
@@ -268,13 +267,40 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        static MsgRemoveLastDeviceSet* create()
-        {
+        static MsgRemoveLastDeviceSet* create() {
             return new MsgRemoveLastDeviceSet();
         }
 
     private:
         MsgRemoveLastDeviceSet() :
+            Message()
+        { }
+    };
+
+    class SDRBASE_API MsgAddFeatureSet : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgAddFeatureSet* create() {
+            return new MsgAddFeatureSet();
+        }
+
+    private:
+        MsgAddFeatureSet() :
+            Message()
+        { }
+    };
+
+    class SDRBASE_API MsgRemoveLastFeatureSet : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgRemoveLastFeatureSet* create() {
+            return new MsgRemoveLastFeatureSet();
+        }
+
+    private:
+        MsgRemoveLastFeatureSet() :
             Message()
         { }
     };
