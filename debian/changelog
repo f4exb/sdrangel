@@ -1,3 +1,11 @@
+sdrangel (6.16.4-1) unstable; urgency=medium
+
+  * API: fixed GET /sdrangel/featuresets
+  * API: implemented POST/DELETE /sdrangel/featureset. Fixes #988.
+  * Implemented multiple feature sets in GUI
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 22 Aug 2021 08:16:44 +0200
+
 sdrangel (6.16.3-1) unstable; urgency=medium
 
   * Metis scan: scan all network interfaces. Fixes #977
