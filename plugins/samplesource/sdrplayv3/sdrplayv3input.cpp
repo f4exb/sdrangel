@@ -944,7 +944,7 @@ void SDRPlayV3Input::webapiReverseSendSettings(QList<QString>& deviceSettingsKey
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(0); // single Rx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
-    swgDeviceSettings->setDeviceHwType(new QString("SDRplay"));
+    swgDeviceSettings->setDeviceHwType(new QString("SDRplayV3"));
     swgDeviceSettings->setSdrPlayV3Settings(new SWGSDRangel::SWGSDRPlayV3Settings());
     SWGSDRangel::SWGSDRPlayV3Settings *swgSDRPlayV3Settings = swgDeviceSettings->getSdrPlayV3Settings();
 
@@ -1029,7 +1029,7 @@ void SDRPlayV3Input::webapiReverseSendStartStop(bool start)
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(0); // single Rx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
-    swgDeviceSettings->setDeviceHwType(new QString("SDRplay"));
+    swgDeviceSettings->setDeviceHwType(new QString("SDRplayV3"));
 
     QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/run")
             .arg(m_settings.m_reverseAPIAddress)
