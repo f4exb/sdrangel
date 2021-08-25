@@ -25,6 +25,7 @@
 #include "SWGBandwidth.h"
 #include "SWGFrequency.h"
 #include <QList>
+#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
@@ -44,6 +45,9 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGSDRPlayV3Report* fromJson(QString &jsonString) override;
 
+    QString* getDeviceType();
+    void setDeviceType(QString* device_type);
+
     QList<SWGBandwidth*>* getBandwidths();
     void setBandwidths(QList<SWGBandwidth*>* bandwidths);
 
@@ -54,6 +58,9 @@ public:
     virtual bool isSet() override;
 
 private:
+    QString* device_type;
+    bool m_device_type_isSet;
+
     QList<SWGBandwidth*>* bandwidths;
     bool m_bandwidths_isSet;
 

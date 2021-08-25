@@ -28,6 +28,8 @@ SWGSDRPlayV3Report::SWGSDRPlayV3Report(QString* json) {
 }
 
 SWGSDRPlayV3Report::SWGSDRPlayV3Report() {
+    device_type = nullptr;
+    m_device_type_isSet = false;
     bandwidths = nullptr;
     m_bandwidths_isSet = false;
     intermediate_frequencies = nullptr;
@@ -40,6 +42,8 @@ SWGSDRPlayV3Report::~SWGSDRPlayV3Report() {
 
 void
 SWGSDRPlayV3Report::init() {
+    device_type = new QString("");
+    m_device_type_isSet = false;
     bandwidths = new QList<SWGBandwidth*>();
     m_bandwidths_isSet = false;
     intermediate_frequencies = new QList<SWGFrequency*>();
@@ -48,6 +52,9 @@ SWGSDRPlayV3Report::init() {
 
 void
 SWGSDRPlayV3Report::cleanup() {
+    if(device_type != nullptr) { 
+        delete device_type;
+    }
     if(bandwidths != nullptr) { 
         auto arr = bandwidths;
         for(auto o: *arr) { 
@@ -75,6 +82,8 @@ SWGSDRPlayV3Report::fromJson(QString &json) {
 
 void
 SWGSDRPlayV3Report::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&device_type, pJson["deviceType"], "QString", "QString");
+    
     
     ::SWGSDRangel::setValue(&bandwidths, pJson["bandwidths"], "QList", "SWGBandwidth");
     
@@ -95,6 +104,9 @@ SWGSDRPlayV3Report::asJson ()
 QJsonObject*
 SWGSDRPlayV3Report::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(device_type != nullptr && *device_type != QString("")){
+        toJsonValue(QString("deviceType"), device_type, obj, QString("QString"));
+    }
     if(bandwidths && bandwidths->size() > 0){
         toJsonArray((QList<void*>*)bandwidths, obj, "bandwidths", "SWGBandwidth");
     }
@@ -103,6 +115,16 @@ SWGSDRPlayV3Report::asJsonObject() {
     }
 
     return obj;
+}
+
+QString*
+SWGSDRPlayV3Report::getDeviceType() {
+    return device_type;
+}
+void
+SWGSDRPlayV3Report::setDeviceType(QString* device_type) {
+    this->device_type = device_type;
+    this->m_device_type_isSet = true;
 }
 
 QList<SWGBandwidth*>*
@@ -130,6 +152,9 @@ bool
 SWGSDRPlayV3Report::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(device_type && *device_type != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(bandwidths && (bandwidths->size() > 0)){
             isObjectUpdated = true; break;
         }

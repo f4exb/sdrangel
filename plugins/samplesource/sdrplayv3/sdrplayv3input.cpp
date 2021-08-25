@@ -937,6 +937,28 @@ void SDRPlayV3Input::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& resp
         response.getSdrPlayV3Report()->getBandwidths()->append(new SWGSDRangel::SWGBandwidth);
         response.getSdrPlayV3Report()->getBandwidths()->back()->setBandwidth(SDRPlayV3Bandwidths::getBandwidth(i));
     }
+
+    switch(getDeviceId())
+    {
+    case SDRPLAY_RSP1_ID:
+        response.getSdrPlayV3Report()->setDeviceType(new QString("RSP1"));
+        break;
+    case SDRPLAY_RSP1A_ID:
+        response.getSdrPlayV3Report()->setDeviceType(new QString("RSP1A"));
+        break;
+    case SDRPLAY_RSP2_ID:
+        response.getSdrPlayV3Report()->setDeviceType(new QString("RSP2"));
+        break;
+    case SDRPLAY_RSPduo_ID:
+        response.getSdrPlayV3Report()->setDeviceType(new QString("RSPduo"));
+        break;
+    case SDRPLAY_RSPdx_ID:
+        response.getSdrPlayV3Report()->setDeviceType(new QString("RSPdx"));
+        break;
+    default:
+        response.getSdrPlayV3Report()->setDeviceType(new QString("Unknown"));
+        break;
+    }
 }
 
 void SDRPlayV3Input::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const SDRPlayV3Settings& settings, bool force)

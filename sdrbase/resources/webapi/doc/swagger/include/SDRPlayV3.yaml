@@ -51,6 +51,9 @@ SDRPlayV3Settings:
 SDRPlayV3Report:
   description: SDRplayV3
   properties:
+    deviceType:
+      type: string
+      description: SDRplay device type. Can be RSP1, RSP1A, RSP2, RSPduo, RSPdx, Unknown
     bandwidths:
       type: array
       items:
