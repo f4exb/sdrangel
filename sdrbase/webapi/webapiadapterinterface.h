@@ -34,6 +34,7 @@ namespace SWGSDRangel
     class SWGInstanceConfigResponse;
     class SWGInstanceDevicesResponse;
     class SWGInstanceChannelsResponse;
+    class SWGInstanceFeaturesResponse;
     class SWGPreferences;
     class SWGLoggingInfo;
     class SWGAudioDevices;
@@ -208,6 +209,20 @@ public:
             SWGSDRangel::SWGErrorResponse& error)
     {
         (void) direction;
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/features (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceFeatures(
+            SWGSDRangel::SWGInstanceFeaturesResponse& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
         (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
@@ -1357,6 +1372,7 @@ public:
     static QString instanceConfigURL;
     static QString instanceDevicesURL;
     static QString instanceChannelsURL;
+    static QString instanceFeaturesURL;
     static QString instanceLoggingURL;
     static QString instanceAudioURL;
     static QString instanceAudioInputParametersURL;

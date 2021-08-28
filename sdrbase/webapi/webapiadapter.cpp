@@ -45,6 +45,7 @@
 #include "SWGInstanceConfigResponse.h"
 #include "SWGInstanceDevicesResponse.h"
 #include "SWGInstanceChannelsResponse.h"
+#include "SWGInstanceFeaturesResponse.h"
 #include "SWGDeviceListItem.h"
 #include "SWGAudioDevices.h"
 #include "SWGLocationInformation.h"
@@ -341,6 +342,37 @@ int WebAPIAdapter::instanceChannels(
         *channels->back()->getIdUri() = channelRegistrations->at(i).m_channelIdURI;
         *channels->back()->getId() = channelRegistrations->at(i).m_channelId;
         channels->back()->setIndex(i);
+    }
+
+    return 200;
+}
+
+int WebAPIAdapter::instanceFeatures(
+            SWGSDRangel::SWGInstanceFeaturesResponse& response,
+            SWGSDRangel::SWGErrorResponse& error)
+{
+    (void) error;
+    response.init();
+    PluginAPI::FeatureRegistrations *featureRegistrations;
+    int nbFeatureDevices;
+
+    featureRegistrations = m_mainCore->m_pluginManager->getFeatureRegistrations();
+    nbFeatureDevices = featureRegistrations->size();
+
+    response.setFeaturecount(nbFeatureDevices);
+    QList<SWGSDRangel::SWGFeatureListItem*> *features = response.getFeatures();
+
+    for (int i = 0; i < nbFeatureDevices; i++)
+    {
+        features->append(new SWGSDRangel::SWGFeatureListItem);
+        features->back()->init();
+        PluginInterface *featureInterface = featureRegistrations->at(i).m_plugin;
+        const PluginDescriptor& pluginDescriptor = featureInterface->getPluginDescriptor();
+        *features->back()->getVersion() = pluginDescriptor.version;
+        *features->back()->getName() = pluginDescriptor.displayedName;
+        *features->back()->getIdUri() = featureRegistrations->at(i).m_featureIdURI;
+        *features->back()->getId() = featureRegistrations->at(i).m_featureId;
+        features->back()->setIndex(i);
     }
 
     return 200;

@@ -185,6 +185,23 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
 
+  /sdrangel/features:
+    x-swagger-router-controller: instance
+    get:
+      description: Get a list of feature plugins available in this instance
+      operationId: instanceFeatures
+      tags:
+        - Instance
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/InstanceFeaturesResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
   /sdrangel/logging:
     x-swagger-router-controller: instance
     get:
@@ -2398,6 +2415,19 @@ definitions:
         items:
           $ref: "#/definitions/ChannelListItem"
 
+  InstanceFeaturesResponse:
+    description: "Summarized information about feature plugins available in this SDRangel instance"
+    required:
+      - featurecount
+    properties:
+      featurecount:
+        description: "Number of plugins available"
+        type: integer
+      features:
+        type: array
+        items:
+          $ref: "#/definitions/FeatureListItem"
+
   ErrorResponse:
     required:
       - message
@@ -2482,6 +2512,27 @@ definitions:
         type: string
       index:
         description: "Index of the channel in the list of registered channels"
+        type: integer
+
+  FeatureListItem:
+    description: "Summarized information about feature plugin"
+    required:
+      - id
+    properties:
+      name:
+        description: "Displayable name of the feature plugin"
+        type: string
+      idURI:
+        description: "Key to identify the feature plugin type in URI form"
+        type: string
+      id:
+        description: "Key to identify the feature plugin type as short object name"
+        type: string
+      version:
+        description: "Feature plugin version number"
+        type: string
+      index:
+        description: "Index of the feature in the list of registered channels"
         type: integer
 
   DeviceSet:

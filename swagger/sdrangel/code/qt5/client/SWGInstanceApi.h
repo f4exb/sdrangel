@@ -27,6 +27,7 @@
 #include "SWGInstanceChannelsResponse.h"
 #include "SWGInstanceConfigResponse.h"
 #include "SWGInstanceDevicesResponse.h"
+#include "SWGInstanceFeaturesResponse.h"
 #include "SWGInstanceSummaryResponse.h"
 #include "SWGLimeRFEDevices.h"
 #include "SWGLimeRFEPower.h"
@@ -76,6 +77,7 @@ public:
     void instanceDeviceSetsGet();
     void instanceDevices(qint32 direction);
     void instanceFeatureSetsGet();
+    void instanceFeatures();
     void instanceLimeRFEConfigGet(QString* serial);
     void instanceLimeRFEConfigPut(SWGLimeRFESettings& body);
     void instanceLimeRFEPowerGet(QString* serial);
@@ -115,6 +117,7 @@ private:
     void instanceDeviceSetsGetCallback (SWGHttpRequestWorker * worker);
     void instanceDevicesCallback (SWGHttpRequestWorker * worker);
     void instanceFeatureSetsGetCallback (SWGHttpRequestWorker * worker);
+    void instanceFeaturesCallback (SWGHttpRequestWorker * worker);
     void instanceLimeRFEConfigGetCallback (SWGHttpRequestWorker * worker);
     void instanceLimeRFEConfigPutCallback (SWGHttpRequestWorker * worker);
     void instanceLimeRFEPowerGetCallback (SWGHttpRequestWorker * worker);
@@ -154,6 +157,7 @@ signals:
     void instanceDeviceSetsGetSignal(SWGDeviceSetList* summary);
     void instanceDevicesSignal(SWGInstanceDevicesResponse* summary);
     void instanceFeatureSetsGetSignal(SWGFeatureSetList* summary);
+    void instanceFeaturesSignal(SWGInstanceFeaturesResponse* summary);
     void instanceLimeRFEConfigGetSignal(SWGLimeRFESettings* summary);
     void instanceLimeRFEConfigPutSignal(SWGSuccessResponse* summary);
     void instanceLimeRFEPowerGetSignal(SWGLimeRFEPower* summary);
@@ -192,6 +196,7 @@ signals:
     void instanceDeviceSetsGetSignalE(SWGDeviceSetList* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceDevicesSignalE(SWGInstanceDevicesResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceFeatureSetsGetSignalE(SWGFeatureSetList* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceFeaturesSignalE(SWGInstanceFeaturesResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceLimeRFEConfigGetSignalE(SWGLimeRFESettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceLimeRFEConfigPutSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceLimeRFEPowerGetSignalE(SWGLimeRFEPower* summary, QNetworkReply::NetworkError error_type, QString& error_str);
@@ -230,6 +235,7 @@ signals:
     void instanceDeviceSetsGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceDevicesSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceFeatureSetsGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceFeaturesSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceLimeRFEConfigGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceLimeRFEConfigPutSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceLimeRFEPowerGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);

@@ -58,6 +58,7 @@ private:
     void instanceConfigService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceDevicesService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceChannelsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void instanceFeaturesService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceLoggingService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceAudioService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceAudioInputParametersService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);

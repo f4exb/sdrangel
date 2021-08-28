@@ -103,6 +103,7 @@
 #include "SWGFeature.h"
 #include "SWGFeatureActions.h"
 #include "SWGFeatureConfig.h"
+#include "SWGFeatureListItem.h"
 #include "SWGFeatureReport.h"
 #include "SWGFeatureSet.h"
 #include "SWGFeatureSetList.h"
@@ -139,6 +140,7 @@
 #include "SWGInstanceChannelsResponse.h"
 #include "SWGInstanceConfigResponse.h"
 #include "SWGInstanceDevicesResponse.h"
+#include "SWGInstanceFeaturesResponse.h"
 #include "SWGInstanceSummaryResponse.h"
 #include "SWGInterferometerSettings.h"
 #include "SWGKiwiSDRReport.h"
@@ -727,6 +729,11 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGFeatureListItem").compare(type) == 0) {
+      SWGFeatureListItem *obj = new SWGFeatureListItem();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGFeatureReport").compare(type) == 0) {
       SWGFeatureReport *obj = new SWGFeatureReport();
       obj->init();
@@ -904,6 +911,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGInstanceDevicesResponse").compare(type) == 0) {
       SWGInstanceDevicesResponse *obj = new SWGInstanceDevicesResponse();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGInstanceFeaturesResponse").compare(type) == 0) {
+      SWGInstanceFeaturesResponse *obj = new SWGInstanceFeaturesResponse();
       obj->init();
       return obj;
     }

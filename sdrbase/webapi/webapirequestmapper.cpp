@@ -30,6 +30,7 @@
 #include "SWGInstanceConfigResponse.h"
 #include "SWGInstanceDevicesResponse.h"
 #include "SWGInstanceChannelsResponse.h"
+#include "SWGInstanceFeaturesResponse.h"
 #include "SWGAudioDevices.h"
 #include "SWGLocationInformation.h"
 #include "SWGDVSerialDevices.h"
@@ -115,6 +116,8 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
             instanceDevicesService(request, response);
         } else if (path == WebAPIAdapterInterface::instanceChannelsURL) {
             instanceChannelsService(request, response);
+        } else if (path == WebAPIAdapterInterface::instanceFeaturesURL) {
+            instanceFeaturesService(request, response);
         } else if (path == WebAPIAdapterInterface::instanceLoggingURL) {
             instanceLoggingService(request, response);
         } else if (path == WebAPIAdapterInterface::instanceAudioURL) {
@@ -405,6 +408,33 @@ void WebAPIRequestMapper::instanceChannelsService(qtwebapp::HttpRequest& request
         }
 
         int status = m_adapter->instanceChannels(direction, normalResponse, errorResponse);
+        response.setStatus(status);
+
+        if (status/100 == 2) {
+            response.write(normalResponse.asJson().toUtf8());
+        } else {
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    else
+    {
+        response.setStatus(405,"Invalid HTTP method");
+        errorResponse.init();
+        *errorResponse.getMessage() = "Invalid HTTP method";
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
+void WebAPIRequestMapper::instanceFeaturesService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGInstanceFeaturesResponse normalResponse;
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
+
+    if (request.getMethod() == "GET")
+    {
+        int status = m_adapter->instanceFeatures(normalResponse, errorResponse);
         response.setStatus(status);
 
         if (status/100 == 2) {
