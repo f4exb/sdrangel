@@ -2366,6 +2366,8 @@ definitions:
         $ref: "#/definitions/LoggingInfo"
       devicesetlist:
         $ref: "#/definitions/DeviceSetList"
+      featuresetlist:
+        $ref: "#/definitions/FeatureSetList"
 
   InstanceConfigResponse:
     description: Preferences, Presets and Commands of the MainSettings saved by Qt

@@ -122,6 +122,9 @@ int WebAPIAdapter::instanceSummary(
     SWGSDRangel::SWGDeviceSetList *deviceSetList = response.getDevicesetlist();
     getDeviceSetList(deviceSetList);
 
+    SWGSDRangel::SWGFeatureSetList *featureSetList = response.getFeaturesetlist();
+    getFeatureSetList(featureSetList);
+
     return 200;
 }
 

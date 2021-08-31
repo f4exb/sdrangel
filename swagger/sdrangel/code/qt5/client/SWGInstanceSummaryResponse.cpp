@@ -48,6 +48,8 @@ SWGInstanceSummaryResponse::SWGInstanceSummaryResponse() {
     m_logging_isSet = false;
     devicesetlist = nullptr;
     m_devicesetlist_isSet = false;
+    featuresetlist = nullptr;
+    m_featuresetlist_isSet = false;
 }
 
 SWGInstanceSummaryResponse::~SWGInstanceSummaryResponse() {
@@ -76,6 +78,8 @@ SWGInstanceSummaryResponse::init() {
     m_logging_isSet = false;
     devicesetlist = new SWGDeviceSetList();
     m_devicesetlist_isSet = false;
+    featuresetlist = new SWGFeatureSetList();
+    m_featuresetlist_isSet = false;
 }
 
 void
@@ -103,6 +107,9 @@ SWGInstanceSummaryResponse::cleanup() {
     }
     if(devicesetlist != nullptr) { 
         delete devicesetlist;
+    }
+    if(featuresetlist != nullptr) { 
+        delete featuresetlist;
     }
 }
 
@@ -136,6 +143,8 @@ SWGInstanceSummaryResponse::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&logging, pJson["logging"], "SWGLoggingInfo", "SWGLoggingInfo");
     
     ::SWGSDRangel::setValue(&devicesetlist, pJson["devicesetlist"], "SWGDeviceSetList", "SWGDeviceSetList");
+    
+    ::SWGSDRangel::setValue(&featuresetlist, pJson["featuresetlist"], "SWGFeatureSetList", "SWGFeatureSetList");
     
 }
 
@@ -182,6 +191,9 @@ SWGInstanceSummaryResponse::asJsonObject() {
     }
     if((devicesetlist != nullptr) && (devicesetlist->isSet())){
         toJsonValue(QString("devicesetlist"), devicesetlist, obj, QString("SWGDeviceSetList"));
+    }
+    if((featuresetlist != nullptr) && (featuresetlist->isSet())){
+        toJsonValue(QString("featuresetlist"), featuresetlist, obj, QString("SWGFeatureSetList"));
     }
 
     return obj;
@@ -287,6 +299,16 @@ SWGInstanceSummaryResponse::setDevicesetlist(SWGDeviceSetList* devicesetlist) {
     this->m_devicesetlist_isSet = true;
 }
 
+SWGFeatureSetList*
+SWGInstanceSummaryResponse::getFeaturesetlist() {
+    return featuresetlist;
+}
+void
+SWGInstanceSummaryResponse::setFeaturesetlist(SWGFeatureSetList* featuresetlist) {
+    this->featuresetlist = featuresetlist;
+    this->m_featuresetlist_isSet = true;
+}
+
 
 bool
 SWGInstanceSummaryResponse::isSet(){
@@ -320,6 +342,9 @@ SWGInstanceSummaryResponse::isSet(){
             isObjectUpdated = true; break;
         }
         if(devicesetlist && devicesetlist->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(featuresetlist && featuresetlist->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

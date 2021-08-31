@@ -23,6 +23,7 @@
 
 
 #include "SWGDeviceSetList.h"
+#include "SWGFeatureSetList.h"
 #include "SWGLoggingInfo.h"
 #include <QString>
 
@@ -74,6 +75,9 @@ public:
     SWGDeviceSetList* getDevicesetlist();
     void setDevicesetlist(SWGDeviceSetList* devicesetlist);
 
+    SWGFeatureSetList* getFeaturesetlist();
+    void setFeaturesetlist(SWGFeatureSetList* featuresetlist);
+
 
     virtual bool isSet() override;
 
@@ -107,6 +111,9 @@ private:
 
     SWGDeviceSetList* devicesetlist;
     bool m_devicesetlist_isSet;
+
+    SWGFeatureSetList* featuresetlist;
+    bool m_featuresetlist_isSet;
 
 };
 
