@@ -1114,6 +1114,12 @@ void SatelliteTrackerGUI::updateTable(SatelliteState *satState)
             SatNogsSatellite *sat = m_satellites.value(satState->m_name);
             items[SAT_COL_NORAD_ID]->setData(Qt::DisplayRole, sat->m_noradCatId);
         }
+
+        // Text alignment
+        for( int col : {SAT_COL_AZ, SAT_COL_EL, SAT_COL_TNE, SAT_COL_DUR, SAT_COL_MAX_EL,
+                        SAT_COL_ALT, SAT_COL_RANGE, SAT_COL_RANGE_RATE, SAT_COL_DOPPLER,
+                        SAT_COL_PATH_LOSS, SAT_COL_DELAY})
+            items[col]->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
     }
     else
     {
