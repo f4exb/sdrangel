@@ -1036,6 +1036,20 @@ public:
     }
 };
 
+
+class NaturallySortedTableWidgetItem : public QTableWidgetItem
+{
+public:
+    bool operator<(const QTableWidgetItem &other) const override
+    {
+        QCollator coll;
+        coll.setNumericMode(true);
+        return coll.compare( text() , other.text() ) < 0;
+    }
+};
+
+
+
 #define SPEED_OF_LIGHT 299792458.0
 
 // Frequency in Hz, speed in m/s
@@ -1071,8 +1085,10 @@ void SatelliteTrackerGUI::updateTable(SatelliteState *satState)
         {
             if ((i == SAT_COL_AOS) || (i == SAT_COL_LOS))
                 items[i] = new DateTimeSortedTableWidgetItem();
-            else
+            else if((i == SAT_COL_NAME) || (i == SAT_COL_NORAD_ID))
                 items[i] = new QTableWidgetItem();
+            else
+                items[i] = new NaturallySortedTableWidgetItem();
             items[i]->setToolTip(ui->satTable->horizontalHeaderItem(i)->toolTip());
             ui->satTable->setItem(row, i, items[i]);
         }
