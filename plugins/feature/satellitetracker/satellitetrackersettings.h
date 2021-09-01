@@ -27,7 +27,7 @@
 
 class Serializable;
 
-#define SAT_COL_COLUMNS 14
+#define SAT_COL_COLUMNS 16
 
 struct SatelliteTrackerSettings
 {
