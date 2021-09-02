@@ -582,6 +582,16 @@
       </column>
       <column>
        <property name="text">
+        <string>Next</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Dur</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
         <string>AOS</string>
        </property>
        <property name="toolTip">

@@ -989,6 +989,8 @@ void SatelliteTrackerGUI::resizeTable()
     ui->satTable->setItem(row, SAT_COL_NAME, new QTableWidgetItem("Satellite123"));
     ui->satTable->setItem(row, SAT_COL_AZ, new QTableWidgetItem("360"));
     ui->satTable->setItem(row, SAT_COL_EL, new QTableWidgetItem("-90"));
+    ui->satTable->setItem(row, SAT_COL_TNE, new QTableWidgetItem("9999:99 AOS"));
+    ui->satTable->setItem(row, SAT_COL_DUR, new QTableWidgetItem("999:99"));
     ui->satTable->setItem(row, SAT_COL_AOS, new QTableWidgetItem("+1 10:17"));
     ui->satTable->setItem(row, SAT_COL_LOS, new QTableWidgetItem("+1 10:17"));
     ui->satTable->setItem(row, SAT_COL_MAX_EL, new QTableWidgetItem("90"));
@@ -1022,6 +1024,19 @@ QString SatelliteTrackerGUI::formatDaysTime(qint64 days, QDateTime dateTime)
         return dt.time().toString(QString("hh:mm %1").arg(days));
 }
 
+
+QString SatelliteTrackerGUI::formatSecondsHHMM(qint64 seconds)
+{
+    char const* sign = "";
+    if(seconds < 0)
+    {
+        sign    = "-";
+        seconds = -seconds;
+    }
+    return QString("%1%2:%3").arg(sign).arg(seconds/60).arg(seconds%60,2,10,QChar('0'));
+}
+
+
 // Table item showing some text, but sorted by datetime set as user data
 class DateTimeSortedTableWidgetItem : public QTableWidgetItem {
 public:
@@ -1035,6 +1050,20 @@ public:
             return false;
     }
 };
+
+
+class NaturallySortedTableWidgetItem : public QTableWidgetItem
+{
+public:
+    bool operator<(const QTableWidgetItem &other) const override
+    {
+        QCollator coll;
+        coll.setNumericMode(true);
+        return coll.compare( text() , other.text() ) < 0;
+    }
+};
+
+
 
 #define SPEED_OF_LIGHT 299792458.0
 
@@ -1071,8 +1100,10 @@ void SatelliteTrackerGUI::updateTable(SatelliteState *satState)
         {
             if ((i == SAT_COL_AOS) || (i == SAT_COL_LOS))
                 items[i] = new DateTimeSortedTableWidgetItem();
-            else
+            else if((i == SAT_COL_NAME) || (i == SAT_COL_NORAD_ID))
                 items[i] = new QTableWidgetItem();
+            else
+                items[i] = new NaturallySortedTableWidgetItem();
             items[i]->setToolTip(ui->satTable->horizontalHeaderItem(i)->toolTip());
             ui->satTable->setItem(row, i, items[i]);
         }
@@ -1083,6 +1114,12 @@ void SatelliteTrackerGUI::updateTable(SatelliteState *satState)
             SatNogsSatellite *sat = m_satellites.value(satState->m_name);
             items[SAT_COL_NORAD_ID]->setData(Qt::DisplayRole, sat->m_noradCatId);
         }
+
+        // Text alignment
+        for( int col : {SAT_COL_AZ, SAT_COL_EL, SAT_COL_TNE, SAT_COL_DUR, SAT_COL_MAX_EL,
+                        SAT_COL_ALT, SAT_COL_RANGE, SAT_COL_RANGE_RATE, SAT_COL_DOPPLER,
+                        SAT_COL_PATH_LOSS, SAT_COL_DELAY})
+            items[col]->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
     }
     else
     {
@@ -1097,9 +1134,14 @@ void SatelliteTrackerGUI::updateTable(SatelliteState *satState)
     if (satState->m_passes.size() > 0)
     {
         // Get number of days to AOS/LOS
-        QDate currentDate = QDate::currentDate();
-        int daysToAOS = currentDate.daysTo(satState->m_passes[0]->m_aos.date());
-        int daysToLOS = currentDate.daysTo(satState->m_passes[0]->m_los.date());
+        QDateTime currentDateTime = QDateTime::currentDateTime();
+        int daysToAOS = currentDateTime.daysTo(satState->m_passes[0]->m_aos);
+        int daysToLOS = currentDateTime.daysTo(satState->m_passes[0]->m_los);
+        if( satState->m_passes[ 0 ]->m_aos > currentDateTime )
+            items[SAT_COL_TNE]->setText(formatSecondsHHMM(currentDateTime.secsTo(satState->m_passes[0]->m_aos))+" AOS");
+        else
+            items[SAT_COL_TNE]->setText(formatSecondsHHMM(currentDateTime.secsTo(satState->m_passes[0]->m_los))+" LOS");
+        items[SAT_COL_DUR]->setText(formatSecondsHHMM(satState->m_passes[0]->m_aos.secsTo(satState->m_passes[0]->m_los)));
         items[SAT_COL_AOS]->setText(formatDaysTime(daysToAOS, satState->m_passes[0]->m_aos));
         items[SAT_COL_AOS]->setData(Qt::UserRole, satState->m_passes[0]->m_aos);
         items[SAT_COL_LOS]->setText(formatDaysTime(daysToLOS, satState->m_passes[0]->m_los));
@@ -1112,6 +1154,8 @@ void SatelliteTrackerGUI::updateTable(SatelliteState *satState)
     }
     else
     {
+        items[SAT_COL_TNE]->setText("");
+        items[SAT_COL_DUR]->setText("");
         items[SAT_COL_AOS]->setText("");
         items[SAT_COL_LOS]->setText("");
         items[SAT_COL_MAX_EL]->setData(Qt::DisplayRole, QVariant());

@@ -84,6 +84,8 @@ private:
         SAT_COL_NAME,
         SAT_COL_AZ,
         SAT_COL_EL,
+        SAT_COL_TNE,
+        SAT_COL_DUR,
         SAT_COL_AOS,
         SAT_COL_LOS,
         SAT_COL_MAX_EL,
@@ -118,6 +120,7 @@ private:
     QAction *createCheckableItem(QString& text, int idx, bool checked);
     void updateTimeToAOS();
     QString formatDaysTime(qint64 days, QDateTime dateTime);
+    QString formatSecondsHHMM(qint64 seconds);
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);
