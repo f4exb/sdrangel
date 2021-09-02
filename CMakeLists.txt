@@ -321,6 +321,8 @@ find_package(Qt5
                  WebSockets
                  Multimedia
                  MultimediaWidgets
+                 Positioning
+                 Charts
                  SerialPort)
 
 # for the server we don't need OpenGL/Qt Quick components
@@ -331,9 +333,7 @@ if (BUILD_GUI)
                     OpenGL
                     Quick
                     QuickWidgets
-                    Positioning
                     Location
-                    Charts
                     TextToSpeech)
 endif()
 
