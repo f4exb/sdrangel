@@ -21,10 +21,10 @@ jobs:
     - uses: actions/stale@v4
       with:
           days-before-stale: 200
-          days-before-close: 5        
+          days-before-close: 5       
           stale-issue-message: 'This issue is going to be closed due to inactivity'
           stale-pr-message: 'This PR is going to be closed due to inactivity'
           stale-issue-label: 'no-issue-activity'
-          exempt-issue-labels: 'feature,enhancement,bug,documentation',
+          exempt-issue-labels: 'feature,enhancement,bug,documentation'
           exempt-all-assignees: true
           stale-pr-label: 'no-pr-activity'
