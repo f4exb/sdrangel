@@ -883,6 +883,57 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
 
+  /sdrangel/featurepresets:
+    x-swagger-router-controller: instance
+    get:
+      description: List all feature presets in the instance
+      operationId: instanceFeaturePresetGet
+      tags:
+        - Instance
+      responses:
+        "200":
+          description: On success return feature preset list
+          schema:
+            $ref: "#/definitions/FeaturePresets"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
+  /sdrangel/featurepreset:
+    x-swagger-router-controller: instance
+    delete:
+      description: Deletes a feature preset
+      operationId: instanceFeaturePresetDelete
+      tags:
+        - Instance
+      consumes:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: delete this feature preset
+          required: true
+          schema:
+            $ref: "#/definitions/FeaturePresetIdentifier"
+      responses:
+        "202":
+          description: On successful sending of the message the selected feature preset identification is returned
+          schema:
+            $ref: "#/definitions/FeaturePresetIdentifier"
+        "400":
+          description: Invalid JSON request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Preset not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
   /sdrangel/devicesets:
     x-swagger-router-controller: instance
     get:
@@ -3030,6 +3081,58 @@ definitions:
         type: string
       preset:
         $ref: "#/definitions/PresetIdentifier"
+
+  FeaturePresets:
+    description: "Feature settings presets"
+    required:
+      - nbGroups
+    properties:
+      nbGroups:
+        description: "Number of preset groups"
+        type: integer
+      groups:
+        type: array
+        items:
+          $ref: "#/definitions/FeaturePresetGroup"
+
+  FeaturePresetGroup:
+    description: "Group of feature presets"
+    required:
+      - groupName
+      - nbPresets
+    properties:
+      groupName:
+        description: "Name of the preset group"
+        type: string
+      nbPresets:
+        description: "Number of presets in the group"
+        type: integer
+      presets:
+        type: array
+        items:
+          $ref: "#/definitions/FeaturePresetItem"
+
+  FeaturePresetItem:
+    description: "Feature settings preset item"
+    required:
+      - description
+    properties:
+      description:
+        description: "Descriptive name of the preset"
+        type: string
+
+  FeaturePresetIdentifier:
+    description: "Feature settings preset item"
+    required:
+      - groupName
+      - description
+    properties:
+      groupName:
+        description: "Name of the feature preset group"
+        type: string
+      description:
+        description: "Descriptive name of the preset"
+        type: string
 
 responses:
 

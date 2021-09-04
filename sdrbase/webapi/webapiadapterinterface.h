@@ -63,6 +63,8 @@ namespace SWGSDRangel
     class SWGChannelReport;
     class SWGChannelActions;
     class SWGSuccessResponse;
+    class SWGFeaturePresets;
+    class SWGFeaturePresetIdentifier;
     class SWGFeatureSetList;
     class SWGFeatureSet;
     class SWGFeatureSettings;
@@ -643,6 +645,34 @@ public:
             SWGSDRangel::SWGErrorResponse& error)
     {
         (void) query;
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/featurepresets (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceFeaturePresetsGet(
+            SWGSDRangel::SWGFeaturePresets& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/featurepreset (DELETE) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceFeaturePresetDelete(
+            SWGSDRangel::SWGFeaturePresetIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
         (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
@@ -1389,6 +1419,8 @@ public:
     static QString instancePresetsURL;
     static QString instancePresetURL;
     static QString instancePresetFileURL;
+    static QString instanceFeaturePresetsURL;
+    static QString instanceFeaturePresetURL;
     static QString instanceDeviceSetsURL;
     static QString instanceDeviceSetURL;
     static QString instanceFeatureSetsURL;

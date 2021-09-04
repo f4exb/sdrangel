@@ -104,6 +104,10 @@
 #include "SWGFeatureActions.h"
 #include "SWGFeatureConfig.h"
 #include "SWGFeatureListItem.h"
+#include "SWGFeaturePresetGroup.h"
+#include "SWGFeaturePresetIdentifier.h"
+#include "SWGFeaturePresetItem.h"
+#include "SWGFeaturePresets.h"
 #include "SWGFeatureReport.h"
 #include "SWGFeatureSet.h"
 #include "SWGFeatureSetList.h"
@@ -731,6 +735,26 @@ namespace SWGSDRangel {
     }
     if(QString("SWGFeatureListItem").compare(type) == 0) {
       SWGFeatureListItem *obj = new SWGFeatureListItem();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGFeaturePresetGroup").compare(type) == 0) {
+      SWGFeaturePresetGroup *obj = new SWGFeaturePresetGroup();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGFeaturePresetIdentifier").compare(type) == 0) {
+      SWGFeaturePresetIdentifier *obj = new SWGFeaturePresetIdentifier();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGFeaturePresetItem").compare(type) == 0) {
+      SWGFeaturePresetItem *obj = new SWGFeaturePresetItem();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGFeaturePresets").compare(type) == 0) {
+      SWGFeaturePresets *obj = new SWGFeaturePresets();
       obj->init();
       return obj;
     }

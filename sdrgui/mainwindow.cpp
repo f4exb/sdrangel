@@ -1054,6 +1054,14 @@ bool MainWindow::handleMessage(const Message& cmd)
         m_mainCore->m_settings.deletePreset(presetToDelete);
         return true;
     }
+    else if (MainCore::MsgDeleteFeatureSetPreset::match(cmd))
+    {
+        MainCore::MsgDeleteFeatureSetPreset& notif = (MainCore::MsgDeleteFeatureSetPreset&) cmd;
+        const FeatureSetPreset *presetToDelete = notif.getPreset();
+        // remove preset from settings
+        m_mainCore->m_settings.deleteFeatureSetPreset(presetToDelete);
+        return true;
+    }
     else if (MainCore::MsgAddDeviceSet::match(cmd))
     {
         MainCore::MsgAddDeviceSet& notif = (MainCore::MsgAddDeviceSet&) cmd;

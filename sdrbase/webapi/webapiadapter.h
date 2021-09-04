@@ -195,6 +195,14 @@ public:
             SWGSDRangel::SWGPresetIdentifier& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int instanceFeaturePresetsGet(
+            SWGSDRangel::SWGFeaturePresets& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceFeaturePresetDelete(
+            SWGSDRangel::SWGFeaturePresetIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
     virtual int instanceDeviceSetsGet(
             SWGSDRangel::SWGDeviceSetList& response,
             SWGSDRangel::SWGErrorResponse& error);

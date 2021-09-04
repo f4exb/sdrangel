@@ -1057,6 +1057,113 @@ SWGInstanceApi::instanceDevicesCallback(SWGHttpRequestWorker * worker) {
 }
 
 void
+SWGInstanceApi::instanceFeaturePresetDelete(SWGFeaturePresetIdentifier& body) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featurepreset");
+
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "DELETE");
+
+
+    
+    QString output = body.asJson();
+    input.request_body.append(output);
+    
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGInstanceApi::instanceFeaturePresetDeleteCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGInstanceApi::instanceFeaturePresetDeleteCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGFeaturePresetIdentifier* output = static_cast<SWGFeaturePresetIdentifier*>(create(json, QString("SWGFeaturePresetIdentifier")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit instanceFeaturePresetDeleteSignal(output);
+    } else {
+        emit instanceFeaturePresetDeleteSignalE(output, error_type, error_str);
+        emit instanceFeaturePresetDeleteSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
+SWGInstanceApi::instanceFeaturePresetGet() {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featurepresets");
+
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "GET");
+
+
+
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGInstanceApi::instanceFeaturePresetGetCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGInstanceApi::instanceFeaturePresetGetCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGFeaturePresets* output = static_cast<SWGFeaturePresets*>(create(json, QString("SWGFeaturePresets")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit instanceFeaturePresetGetSignal(output);
+    } else {
+        emit instanceFeaturePresetGetSignalE(output, error_type, error_str);
+        emit instanceFeaturePresetGetSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
 SWGInstanceApi::instanceFeatureSetsGet() {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/featuresets");

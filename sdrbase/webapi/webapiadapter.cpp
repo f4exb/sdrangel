@@ -71,6 +71,10 @@
 #include "SWGLimeRFEDevices.h"
 #include "SWGLimeRFESettings.h"
 #include "SWGLimeRFEPower.h"
+#include "SWGFeaturePresets.h"
+#include "SWGFeaturePresetGroup.h"
+#include "SWGFeaturePresetItem.h"
+#include "SWGFeaturePresetIdentifier.h"
 #include "SWGFeatureSetList.h"
 #include "SWGFeatureSettings.h"
 #include "SWGFeatureReport.h"
@@ -1401,6 +1405,75 @@ int WebAPIAdapter::instancePresetDelete(
     *response.getName() = selectedPreset->getDescription();
 
     MainCore::MsgDeletePreset *msg = MainCore::MsgDeletePreset::create(const_cast<Preset*>(selectedPreset));
+    m_mainCore->m_mainMessageQueue->push(msg);
+
+    return 202;
+}
+
+int WebAPIAdapter::instanceFeaturePresetsGet(
+        SWGSDRangel::SWGFeaturePresets& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    (void) error;
+    int nbPresets = m_mainCore->m_settings.getFeatureSetPresetCount();
+    int nbGroups = 0;
+    int nbPresetsThisGroup = 0;
+    QString groupName;
+    response.init();
+    QList<SWGSDRangel::SWGFeaturePresetGroup*> *groups = response.getGroups();
+    QList<SWGSDRangel::SWGFeaturePresetItem*> *swgPresets = 0;
+    int i = 0;
+
+    // Presets are sorted by group first
+
+    for (; i < nbPresets; i++)
+    {
+        const FeatureSetPreset *preset = m_mainCore->m_settings.getFeatureSetPreset(i);
+
+        if ((i == 0) || (groupName != preset->getGroup())) // new group
+        {
+            if (i > 0) { groups->back()->setNbPresets(nbPresetsThisGroup); }
+            groups->append(new SWGSDRangel::SWGFeaturePresetGroup);
+            groups->back()->init();
+            groupName = preset->getGroup();
+            *groups->back()->getGroupName() = groupName;
+            swgPresets = groups->back()->getPresets();
+            nbGroups++;
+            nbPresetsThisGroup = 0;
+        }
+
+        swgPresets->append(new SWGSDRangel::SWGFeaturePresetItem);
+        swgPresets->back()->init();
+        *swgPresets->back()->getDescription() = preset->getDescription();
+        nbPresetsThisGroup++;
+    }
+
+    if (i > 0) { groups->back()->setNbPresets(nbPresetsThisGroup); }
+    response.setNbGroups(nbGroups);
+
+    return 200;
+}
+
+int WebAPIAdapter::instanceFeaturePresetDelete(
+        SWGSDRangel::SWGFeaturePresetIdentifier& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    const FeatureSetPreset *selectedPreset = m_mainCore->m_settings.getFeatureSetPreset(*response.getGroupName(),
+            *response.getDescription());
+
+    if (selectedPreset == nullptr)
+    {
+        error.init();
+        *error.getMessage() = QString("There is no feature preset [%1, %2]")
+            .arg(*response.getGroupName())
+            .arg(*response.getDescription());
+        return 404;
+    }
+
+    *response.getGroupName() = selectedPreset->getGroup();
+    *response.getDescription() = selectedPreset->getDescription();
+
+    MainCore::MsgDeleteFeatureSetPreset *msg = MainCore::MsgDeleteFeatureSetPreset::create(const_cast<FeatureSetPreset*>(selectedPreset));
     m_mainCore->m_mainMessageQueue->push(msg);
 
     return 202;

@@ -4835,6 +4835,66 @@ margin-bottom: 20px;
   },
   "description" : "Summarized information about feature plugin"
 };
+            defs.FeaturePresetGroup = {
+  "required" : [ "groupName", "nbPresets" ],
+  "properties" : {
+    "groupName" : {
+      "type" : "string",
+      "description" : "Name of the preset group"
+    },
+    "nbPresets" : {
+      "type" : "integer",
+      "description" : "Number of presets in the group"
+    },
+    "presets" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/FeaturePresetItem"
+      }
+    }
+  },
+  "description" : "Group of feature presets"
+};
+            defs.FeaturePresetIdentifier = {
+  "required" : [ "description", "groupName" ],
+  "properties" : {
+    "groupName" : {
+      "type" : "string",
+      "description" : "Name of the feature preset group"
+    },
+    "description" : {
+      "type" : "string",
+      "description" : "Descriptive name of the preset"
+    }
+  },
+  "description" : "Feature settings preset item"
+};
+            defs.FeaturePresetItem = {
+  "required" : [ "description" ],
+  "properties" : {
+    "description" : {
+      "type" : "string",
+      "description" : "Descriptive name of the preset"
+    }
+  },
+  "description" : "Feature settings preset item"
+};
+            defs.FeaturePresets = {
+  "required" : [ "nbGroups" ],
+  "properties" : {
+    "nbGroups" : {
+      "type" : "integer",
+      "description" : "Number of preset groups"
+    },
+    "groups" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/FeaturePresetGroup"
+      }
+    }
+  },
+  "description" : "Feature settings presets"
+};
             defs.FeatureReport = {
   "required" : [ "featureType" ],
   "discriminator" : "featureType",
@@ -12634,6 +12694,12 @@ margin-bottom: 20px;
                     </li>
                     <li data-group="Instance" data-name="instanceDevices" class="">
                       <a href="#api-Instance-instanceDevices">instanceDevices</a>
+                    </li>
+                    <li data-group="Instance" data-name="instanceFeaturePresetDelete" class="">
+                      <a href="#api-Instance-instanceFeaturePresetDelete">instanceFeaturePresetDelete</a>
+                    </li>
+                    <li data-group="Instance" data-name="instanceFeaturePresetGet" class="">
+                      <a href="#api-Instance-instanceFeaturePresetGet">instanceFeaturePresetGet</a>
                     </li>
                     <li data-group="Instance" data-name="instanceFeatureSetsGet" class="">
                       <a href="#api-Instance-instanceFeatureSetsGet">instanceFeatureSetsGet</a>
@@ -40393,6 +40459,814 @@ except ApiException as e:
                         </article>
                       </div>
                       <hr>
+                    <div id="api-Instance-instanceFeaturePresetDelete">
+                      <article id="api-Instance-instanceFeaturePresetDelete-0" data-group="User" data-name="instanceFeaturePresetDelete" data-version="0">
+                        <div class="pull-left">
+                          <h1>instanceFeaturePresetDelete</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">Deletes a feature preset</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="delete"><code><span class="pln">/sdrangel/featurepreset</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Instance-instanceFeaturePresetDelete-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Instance-instanceFeaturePresetDelete-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Instance-instanceFeaturePresetDelete-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Instance-instanceFeaturePresetDelete-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Instance-instanceFeaturePresetDelete-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Instance-instanceFeaturePresetDelete-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Instance-instanceFeaturePresetDelete-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Instance-instanceFeaturePresetDelete-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Instance-instanceFeaturePresetDelete-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Instance-instanceFeaturePresetDelete-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Instance-instanceFeaturePresetDelete-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Instance-instanceFeaturePresetDelete-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X DELETE "http://localhost/sdrangel/featurepreset"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Instance-instanceFeaturePresetDelete-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.InstanceApi;
+
+import java.io.File;
+import java.util.*;
+
+public class InstanceApiExample {
+
+    public static void main(String[] args) {
+        
+        InstanceApi apiInstance = new InstanceApi();
+        FeaturePresetIdentifier body = ; // FeaturePresetIdentifier | delete this feature preset
+        try {
+            FeaturePresetIdentifier result = apiInstance.instanceFeaturePresetDelete(body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling InstanceApi#instanceFeaturePresetDelete");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Instance-instanceFeaturePresetDelete-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.InstanceApi;
+
+public class InstanceApiExample {
+
+    public static void main(String[] args) {
+        InstanceApi apiInstance = new InstanceApi();
+        FeaturePresetIdentifier body = ; // FeaturePresetIdentifier | delete this feature preset
+        try {
+            FeaturePresetIdentifier result = apiInstance.instanceFeaturePresetDelete(body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling InstanceApi#instanceFeaturePresetDelete");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Instance-instanceFeaturePresetDelete-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Instance-instanceFeaturePresetDelete-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">FeaturePresetIdentifier *body = ; // delete this feature preset
+
+InstanceApi *apiInstance = [[InstanceApi alloc] init];
+
+[apiInstance instanceFeaturePresetDeleteWith:body
+              completionHandler: ^(FeaturePresetIdentifier output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceFeaturePresetDelete-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.InstanceApi()
+
+var body = ; // {FeaturePresetIdentifier} delete this feature preset
+
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.instanceFeaturePresetDelete(body, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Instance-instanceFeaturePresetDelete-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Instance-instanceFeaturePresetDelete-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class instanceFeaturePresetDeleteExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new InstanceApi();
+            var body = new FeaturePresetIdentifier(); // FeaturePresetIdentifier | delete this feature preset
+
+            try
+            {
+                FeaturePresetIdentifier result = apiInstance.instanceFeaturePresetDelete(body);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling InstanceApi.instanceFeaturePresetDelete: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceFeaturePresetDelete-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\InstanceApi();
+$body = ; // FeaturePresetIdentifier | delete this feature preset
+
+try {
+    $result = $api_instance->instanceFeaturePresetDelete($body);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling InstanceApi->instanceFeaturePresetDelete: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceFeaturePresetDelete-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::InstanceApi;
+
+my $api_instance = SWGSDRangel::InstanceApi->new();
+my $body = SWGSDRangel::Object::FeaturePresetIdentifier->new(); # FeaturePresetIdentifier | delete this feature preset
+
+eval { 
+    my $result = $api_instance->instanceFeaturePresetDelete(body => $body);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling InstanceApi->instanceFeaturePresetDelete: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceFeaturePresetDelete-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.InstanceApi()
+body =  # FeaturePresetIdentifier | delete this feature preset
+
+try: 
+    api_response = api_instance.instance_feature_preset_delete(body)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling InstanceApi->instanceFeaturePresetDelete: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+
+
+                            <div class="methodsubtabletitle">Body parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">body <span style="color:red;">*</span></td>
+<td>
+
+
+<script>
+$(document).ready(function() {
+  var schemaWrapper = {
+  "in" : "body",
+  "name" : "body",
+  "description" : "delete this feature preset",
+  "required" : true,
+  "schema" : {
+    "$ref" : "#/definitions/FeaturePresetIdentifier"
+  }
+};
+  var schema = schemaWrapper.schema;
+  if (schema.$ref != null) {
+    schema = defsParser.$refs.get(schema.$ref);
+  } else {
+    schemaWrapper.definitions = Object.assign({}, defs);
+    $RefParser.dereference(schemaWrapper).catch(function(err) {
+      console.log(err);
+    });
+  }
+
+  var view = new JSONSchemaView(schema,2,{isBodyParam: true});
+  var result = $('#d2e199_instanceFeaturePresetDelete_body');
+  result.empty();
+  result.append(view.render());
+});
+</script>
+<div id="d2e199_instanceFeaturePresetDelete_body"></div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 202 - On successful sending of the message the selected feature preset identification is returned </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceFeaturePresetDelete-202-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceFeaturePresetDelete-202-schema">
+                                  <div id='responses-instanceFeaturePresetDelete-202-schema-202' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On successful sending of the message the selected feature preset identification is returned",
+  "schema" : {
+    "$ref" : "#/definitions/FeaturePresetIdentifier"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceFeaturePresetDelete-202-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceFeaturePresetDelete-202-schema-202');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceFeaturePresetDelete-202-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 400 - Invalid JSON request </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceFeaturePresetDelete-400-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceFeaturePresetDelete-400-schema">
+                                  <div id='responses-instanceFeaturePresetDelete-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid JSON request",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceFeaturePresetDelete-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceFeaturePresetDelete-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceFeaturePresetDelete-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - Preset not found </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceFeaturePresetDelete-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceFeaturePresetDelete-404-schema">
+                                  <div id='responses-instanceFeaturePresetDelete-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Preset not found",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceFeaturePresetDelete-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceFeaturePresetDelete-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceFeaturePresetDelete-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceFeaturePresetDelete-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceFeaturePresetDelete-500-schema">
+                                  <div id='responses-instanceFeaturePresetDelete-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceFeaturePresetDelete-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceFeaturePresetDelete-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceFeaturePresetDelete-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceFeaturePresetDelete-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceFeaturePresetDelete-501-schema">
+                                  <div id='responses-instanceFeaturePresetDelete-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceFeaturePresetDelete-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceFeaturePresetDelete-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceFeaturePresetDelete-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-Instance-instanceFeaturePresetGet">
+                      <article id="api-Instance-instanceFeaturePresetGet-0" data-group="User" data-name="instanceFeaturePresetGet" data-version="0">
+                        <div class="pull-left">
+                          <h1>instanceFeaturePresetGet</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">List all feature presets in the instance</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrangel/featurepresets</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Instance-instanceFeaturePresetGet-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Instance-instanceFeaturePresetGet-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Instance-instanceFeaturePresetGet-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Instance-instanceFeaturePresetGet-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Instance-instanceFeaturePresetGet-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Instance-instanceFeaturePresetGet-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Instance-instanceFeaturePresetGet-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Instance-instanceFeaturePresetGet-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Instance-instanceFeaturePresetGet-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Instance-instanceFeaturePresetGet-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Instance-instanceFeaturePresetGet-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Instance-instanceFeaturePresetGet-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/featurepresets"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Instance-instanceFeaturePresetGet-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.InstanceApi;
+
+import java.io.File;
+import java.util.*;
+
+public class InstanceApiExample {
+
+    public static void main(String[] args) {
+        
+        InstanceApi apiInstance = new InstanceApi();
+        try {
+            FeaturePresets result = apiInstance.instanceFeaturePresetGet();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling InstanceApi#instanceFeaturePresetGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Instance-instanceFeaturePresetGet-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.InstanceApi;
+
+public class InstanceApiExample {
+
+    public static void main(String[] args) {
+        InstanceApi apiInstance = new InstanceApi();
+        try {
+            FeaturePresets result = apiInstance.instanceFeaturePresetGet();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling InstanceApi#instanceFeaturePresetGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Instance-instanceFeaturePresetGet-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Instance-instanceFeaturePresetGet-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+InstanceApi *apiInstance = [[InstanceApi alloc] init];
+
+[apiInstance instanceFeaturePresetGetWithCompletionHandler: 
+              ^(FeaturePresets output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceFeaturePresetGet-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.InstanceApi()
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.instanceFeaturePresetGet(callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Instance-instanceFeaturePresetGet-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Instance-instanceFeaturePresetGet-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class instanceFeaturePresetGetExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new InstanceApi();
+
+            try
+            {
+                FeaturePresets result = apiInstance.instanceFeaturePresetGet();
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling InstanceApi.instanceFeaturePresetGet: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceFeaturePresetGet-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\InstanceApi();
+
+try {
+    $result = $api_instance->instanceFeaturePresetGet();
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling InstanceApi->instanceFeaturePresetGet: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceFeaturePresetGet-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::InstanceApi;
+
+my $api_instance = SWGSDRangel::InstanceApi->new();
+
+eval { 
+    my $result = $api_instance->instanceFeaturePresetGet();
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling InstanceApi->instanceFeaturePresetGet: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceFeaturePresetGet-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.InstanceApi()
+
+try: 
+    api_response = api_instance.instance_feature_preset_get()
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling InstanceApi->instanceFeaturePresetGet: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - On success return feature preset list </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceFeaturePresetGet-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceFeaturePresetGet-200-schema">
+                                  <div id='responses-instanceFeaturePresetGet-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On success return feature preset list",
+  "schema" : {
+    "$ref" : "#/definitions/FeaturePresets"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceFeaturePresetGet-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceFeaturePresetGet-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceFeaturePresetGet-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceFeaturePresetGet-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceFeaturePresetGet-500-schema">
+                                  <div id='responses-instanceFeaturePresetGet-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceFeaturePresetGet-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceFeaturePresetGet-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceFeaturePresetGet-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceFeaturePresetGet-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceFeaturePresetGet-501-schema">
+                                  <div id='responses-instanceFeaturePresetGet-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceFeaturePresetGet-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceFeaturePresetGet-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceFeaturePresetGet-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
                     <div id="api-Instance-instanceFeatureSetsGet">
                       <article id="api-Instance-instanceFeatureSetsGet-0" data-group="User" data-name="instanceFeatureSetsGet" data-version="0">
                         <div class="pull-left">
@@ -48111,7 +48985,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-08-31T23:36:40.361+02:00
+              Generated 2021-09-03T22:11:29.377+02:00
             </div>
           </div>
       </div>
