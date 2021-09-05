@@ -66,6 +66,7 @@ std::regex WebAPIAdapterInterface::devicesetChannelActionsURLRe("^/sdrangel/devi
 
 std::regex WebAPIAdapterInterface::featuresetURLRe("^/sdrangel/featureset/([0-9]{1,2})$");
 std::regex WebAPIAdapterInterface::featuresetFeatureURLRe("^/sdrangel/featureset/([0-9]{1,2})/feature$");
+std::regex WebAPIAdapterInterface::featuresetPresetURLRe("^/sdrangel/featureset/([0-9]{1,2})/preset");
 std::regex WebAPIAdapterInterface::featuresetFeatureIndexURLRe("^/sdrangel/featureset/([0-9]{1,2})/feature/([0-9]{1,2})$");
 std::regex WebAPIAdapterInterface::featuresetFeatureRunURLRe("^/sdrangel/featureset/([0-9]{1,2})/feature/([0-9]{1,2})/run$");
 std::regex WebAPIAdapterInterface::featuresetFeatureSettingsURLRe("^/sdrangel/featureset/([0-9]{1,2})/feature/([0-9]{1,2})/settings$");

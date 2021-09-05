@@ -12631,6 +12631,15 @@ margin-bottom: 20px;
                     <li data-group="FeatureSet" data-name="featuresetGet" class="">
                       <a href="#api-FeatureSet-featuresetGet">featuresetGet</a>
                     </li>
+                    <li data-group="FeatureSet" data-name="featuresetPresetPatch" class="">
+                      <a href="#api-FeatureSet-featuresetPresetPatch">featuresetPresetPatch</a>
+                    </li>
+                    <li data-group="FeatureSet" data-name="featuresetPresetPost" class="">
+                      <a href="#api-FeatureSet-featuresetPresetPost">featuresetPresetPost</a>
+                    </li>
+                    <li data-group="FeatureSet" data-name="featuresetPresetPut" class="">
+                      <a href="#api-FeatureSet-featuresetPresetPut">featuresetPresetPut</a>
+                    </li>
                     <li data-group="FeatureSet" data-name="instanceFeatureSetDelete" class="">
                       <a href="#api-FeatureSet-instanceFeatureSetDelete">instanceFeatureSetDelete</a>
                     </li>
@@ -32671,6 +32680,1588 @@ except ApiException as e:
                         </article>
                       </div>
                       <hr>
+                    <div id="api-FeatureSet-featuresetPresetPatch">
+                      <article id="api-FeatureSet-featuresetPresetPatch-0" data-group="User" data-name="featuresetPresetPatch" data-version="0">
+                        <div class="pull-left">
+                          <h1>featuresetPresetPatch</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">Load a preset in a feature set</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="patch"><code><span class="pln">/sdrangel/featureset/{featureSetIndex}/preset</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-FeatureSet-featuresetPresetPatch-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-FeatureSet-featuresetPresetPatch-0-java">Java</a></li>
+                          <li class=""><a href="#examples-FeatureSet-featuresetPresetPatch-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-FeatureSet-featuresetPresetPatch-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-FeatureSet-featuresetPresetPatch-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-FeatureSet-featuresetPresetPatch-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-FeatureSet-featuresetPresetPatch-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-FeatureSet-featuresetPresetPatch-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-FeatureSet-featuresetPresetPatch-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-FeatureSet-featuresetPresetPatch-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-FeatureSet-featuresetPresetPatch-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-FeatureSet-featuresetPresetPatch-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PATCH "http://localhost/sdrangel/featureset/{featureSetIndex}/preset"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-FeatureSet-featuresetPresetPatch-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.FeatureSetApi;
+
+import java.io.File;
+import java.util.*;
+
+public class FeatureSetApiExample {
+
+    public static void main(String[] args) {
+        
+        FeatureSetApi apiInstance = new FeatureSetApi();
+        Integer featureSetIndex = 56; // Integer | Index of feature set in the feature set list
+        FeaturePresetIdentifier body = ; // FeaturePresetIdentifier | Load preset settings to the feature set
+        try {
+            FeaturePresetIdentifier result = apiInstance.featuresetPresetPatch(featureSetIndex, body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling FeatureSetApi#featuresetPresetPatch");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-FeatureSet-featuresetPresetPatch-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.FeatureSetApi;
+
+public class FeatureSetApiExample {
+
+    public static void main(String[] args) {
+        FeatureSetApi apiInstance = new FeatureSetApi();
+        Integer featureSetIndex = 56; // Integer | Index of feature set in the feature set list
+        FeaturePresetIdentifier body = ; // FeaturePresetIdentifier | Load preset settings to the feature set
+        try {
+            FeaturePresetIdentifier result = apiInstance.featuresetPresetPatch(featureSetIndex, body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling FeatureSetApi#featuresetPresetPatch");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-FeatureSet-featuresetPresetPatch-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-FeatureSet-featuresetPresetPatch-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Integer *featureSetIndex = 56; // Index of feature set in the feature set list
+FeaturePresetIdentifier *body = ; // Load preset settings to the feature set
+
+FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
+
+[apiInstance featuresetPresetPatchWith:featureSetIndex
+    body:body
+              completionHandler: ^(FeaturePresetIdentifier output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-FeatureSet-featuresetPresetPatch-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.FeatureSetApi()
+
+var featureSetIndex = 56; // {Integer} Index of feature set in the feature set list
+
+var body = ; // {FeaturePresetIdentifier} Load preset settings to the feature set
+
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.featuresetPresetPatch(featureSetIndex, body, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-FeatureSet-featuresetPresetPatch-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-FeatureSet-featuresetPresetPatch-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class featuresetPresetPatchExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new FeatureSetApi();
+            var featureSetIndex = 56;  // Integer | Index of feature set in the feature set list
+            var body = new FeaturePresetIdentifier(); // FeaturePresetIdentifier | Load preset settings to the feature set
+
+            try
+            {
+                FeaturePresetIdentifier result = apiInstance.featuresetPresetPatch(featureSetIndex, body);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling FeatureSetApi.featuresetPresetPatch: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-FeatureSet-featuresetPresetPatch-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\FeatureSetApi();
+$featureSetIndex = 56; // Integer | Index of feature set in the feature set list
+$body = ; // FeaturePresetIdentifier | Load preset settings to the feature set
+
+try {
+    $result = $api_instance->featuresetPresetPatch($featureSetIndex, $body);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling FeatureSetApi->featuresetPresetPatch: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-FeatureSet-featuresetPresetPatch-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::FeatureSetApi;
+
+my $api_instance = SWGSDRangel::FeatureSetApi->new();
+my $featureSetIndex = 56; # Integer | Index of feature set in the feature set list
+my $body = SWGSDRangel::Object::FeaturePresetIdentifier->new(); # FeaturePresetIdentifier | Load preset settings to the feature set
+
+eval { 
+    my $result = $api_instance->featuresetPresetPatch(featureSetIndex => $featureSetIndex, body => $body);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling FeatureSetApi->featuresetPresetPatch: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-FeatureSet-featuresetPresetPatch-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.FeatureSetApi()
+featureSetIndex = 56 # Integer | Index of feature set in the feature set list
+body =  # FeaturePresetIdentifier | Load preset settings to the feature set
+
+try: 
+    api_response = api_instance.featureset_preset_patch(featureSetIndex, body)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling FeatureSetApi->featuresetPresetPatch: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">featureSetIndex*</td>
+<td>
+
+
+    <div id="d2e199_featuresetPresetPatch_featureSetIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of feature set in the feature set list
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+                            <div class="methodsubtabletitle">Body parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">body <span style="color:red;">*</span></td>
+<td>
+
+
+<script>
+$(document).ready(function() {
+  var schemaWrapper = {
+  "in" : "body",
+  "name" : "body",
+  "description" : "Load preset settings to the feature set",
+  "required" : true,
+  "schema" : {
+    "$ref" : "#/definitions/FeaturePresetIdentifier"
+  }
+};
+  var schema = schemaWrapper.schema;
+  if (schema.$ref != null) {
+    schema = defsParser.$refs.get(schema.$ref);
+  } else {
+    schemaWrapper.definitions = Object.assign({}, defs);
+    $RefParser.dereference(schemaWrapper).catch(function(err) {
+      console.log(err);
+    });
+  }
+
+  var view = new JSONSchemaView(schema,2,{isBodyParam: true});
+  var result = $('#d2e199_featuresetPresetPatch_body');
+  result.empty();
+  result.append(view.render());
+});
+</script>
+<div id="d2e199_featuresetPresetPatch_body"></div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 202 - On successful sending of the message the selected preset identification is returned </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-featuresetPresetPatch-202-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-featuresetPresetPatch-202-schema">
+                                  <div id='responses-featuresetPresetPatch-202-schema-202' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On successful sending of the message the selected preset identification is returned",
+  "schema" : {
+    "$ref" : "#/definitions/FeaturePresetIdentifier"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-featuresetPresetPatch-202-schema-data').val(stringify(schema));
+                                        var result = $('#responses-featuresetPresetPatch-202-schema-202');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-featuresetPresetPatch-202-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 400 - Invalid JSON request </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-featuresetPresetPatch-400-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-featuresetPresetPatch-400-schema">
+                                  <div id='responses-featuresetPresetPatch-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid JSON request",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-featuresetPresetPatch-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-featuresetPresetPatch-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-featuresetPresetPatch-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - No preset or feature set found </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-featuresetPresetPatch-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-featuresetPresetPatch-404-schema">
+                                  <div id='responses-featuresetPresetPatch-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "No preset or feature set found",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-featuresetPresetPatch-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-featuresetPresetPatch-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-featuresetPresetPatch-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-featuresetPresetPatch-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-featuresetPresetPatch-500-schema">
+                                  <div id='responses-featuresetPresetPatch-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-featuresetPresetPatch-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-featuresetPresetPatch-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-featuresetPresetPatch-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-featuresetPresetPatch-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-featuresetPresetPatch-501-schema">
+                                  <div id='responses-featuresetPresetPatch-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-featuresetPresetPatch-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-featuresetPresetPatch-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-featuresetPresetPatch-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-FeatureSet-featuresetPresetPost">
+                      <article id="api-FeatureSet-featuresetPresetPost-0" data-group="User" data-name="featuresetPresetPost" data-version="0">
+                        <div class="pull-left">
+                          <h1>featuresetPresetPost</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">Create a new preset from a feature set settings.</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/sdrangel/featureset/{featureSetIndex}/preset</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-FeatureSet-featuresetPresetPost-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-FeatureSet-featuresetPresetPost-0-java">Java</a></li>
+                          <li class=""><a href="#examples-FeatureSet-featuresetPresetPost-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-FeatureSet-featuresetPresetPost-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-FeatureSet-featuresetPresetPost-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-FeatureSet-featuresetPresetPost-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-FeatureSet-featuresetPresetPost-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-FeatureSet-featuresetPresetPost-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-FeatureSet-featuresetPresetPost-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-FeatureSet-featuresetPresetPost-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-FeatureSet-featuresetPresetPost-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-FeatureSet-featuresetPresetPost-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X POST "http://localhost/sdrangel/featureset/{featureSetIndex}/preset"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-FeatureSet-featuresetPresetPost-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.FeatureSetApi;
+
+import java.io.File;
+import java.util.*;
+
+public class FeatureSetApiExample {
+
+    public static void main(String[] args) {
+        
+        FeatureSetApi apiInstance = new FeatureSetApi();
+        Integer featureSetIndex = 56; // Integer | Index of feature set in the feature set list
+        FeaturePresetIdentifier body = ; // FeaturePresetIdentifier | save feature set settings on a new preset
+        try {
+            PresetIdentifier result = apiInstance.featuresetPresetPost(featureSetIndex, body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling FeatureSetApi#featuresetPresetPost");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-FeatureSet-featuresetPresetPost-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.FeatureSetApi;
+
+public class FeatureSetApiExample {
+
+    public static void main(String[] args) {
+        FeatureSetApi apiInstance = new FeatureSetApi();
+        Integer featureSetIndex = 56; // Integer | Index of feature set in the feature set list
+        FeaturePresetIdentifier body = ; // FeaturePresetIdentifier | save feature set settings on a new preset
+        try {
+            PresetIdentifier result = apiInstance.featuresetPresetPost(featureSetIndex, body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling FeatureSetApi#featuresetPresetPost");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-FeatureSet-featuresetPresetPost-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-FeatureSet-featuresetPresetPost-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Integer *featureSetIndex = 56; // Index of feature set in the feature set list
+FeaturePresetIdentifier *body = ; // save feature set settings on a new preset
+
+FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
+
+[apiInstance featuresetPresetPostWith:featureSetIndex
+    body:body
+              completionHandler: ^(PresetIdentifier output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-FeatureSet-featuresetPresetPost-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.FeatureSetApi()
+
+var featureSetIndex = 56; // {Integer} Index of feature set in the feature set list
+
+var body = ; // {FeaturePresetIdentifier} save feature set settings on a new preset
+
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.featuresetPresetPost(featureSetIndex, body, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-FeatureSet-featuresetPresetPost-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-FeatureSet-featuresetPresetPost-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class featuresetPresetPostExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new FeatureSetApi();
+            var featureSetIndex = 56;  // Integer | Index of feature set in the feature set list
+            var body = new FeaturePresetIdentifier(); // FeaturePresetIdentifier | save feature set settings on a new preset
+
+            try
+            {
+                PresetIdentifier result = apiInstance.featuresetPresetPost(featureSetIndex, body);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling FeatureSetApi.featuresetPresetPost: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-FeatureSet-featuresetPresetPost-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\FeatureSetApi();
+$featureSetIndex = 56; // Integer | Index of feature set in the feature set list
+$body = ; // FeaturePresetIdentifier | save feature set settings on a new preset
+
+try {
+    $result = $api_instance->featuresetPresetPost($featureSetIndex, $body);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling FeatureSetApi->featuresetPresetPost: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-FeatureSet-featuresetPresetPost-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::FeatureSetApi;
+
+my $api_instance = SWGSDRangel::FeatureSetApi->new();
+my $featureSetIndex = 56; # Integer | Index of feature set in the feature set list
+my $body = SWGSDRangel::Object::FeaturePresetIdentifier->new(); # FeaturePresetIdentifier | save feature set settings on a new preset
+
+eval { 
+    my $result = $api_instance->featuresetPresetPost(featureSetIndex => $featureSetIndex, body => $body);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling FeatureSetApi->featuresetPresetPost: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-FeatureSet-featuresetPresetPost-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.FeatureSetApi()
+featureSetIndex = 56 # Integer | Index of feature set in the feature set list
+body =  # FeaturePresetIdentifier | save feature set settings on a new preset
+
+try: 
+    api_response = api_instance.featureset_preset_post(featureSetIndex, body)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling FeatureSetApi->featuresetPresetPost: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">featureSetIndex*</td>
+<td>
+
+
+    <div id="d2e199_featuresetPresetPost_featureSetIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of feature set in the feature set list
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+                            <div class="methodsubtabletitle">Body parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">body <span style="color:red;">*</span></td>
+<td>
+
+
+<script>
+$(document).ready(function() {
+  var schemaWrapper = {
+  "in" : "body",
+  "name" : "body",
+  "description" : "save feature set settings on a new preset",
+  "required" : true,
+  "schema" : {
+    "$ref" : "#/definitions/FeaturePresetIdentifier"
+  }
+};
+  var schema = schemaWrapper.schema;
+  if (schema.$ref != null) {
+    schema = defsParser.$refs.get(schema.$ref);
+  } else {
+    schemaWrapper.definitions = Object.assign({}, defs);
+    $RefParser.dereference(schemaWrapper).catch(function(err) {
+      console.log(err);
+    });
+  }
+
+  var view = new JSONSchemaView(schema,2,{isBodyParam: true});
+  var result = $('#d2e199_featuresetPresetPost_body');
+  result.empty();
+  result.append(view.render());
+});
+</script>
+<div id="d2e199_featuresetPresetPost_body"></div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 202 - On successful sending of the message the created preset identification is returned </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-featuresetPresetPost-202-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-featuresetPresetPost-202-schema">
+                                  <div id='responses-featuresetPresetPost-202-schema-202' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On successful sending of the message the created preset identification is returned",
+  "schema" : {
+    "$ref" : "#/definitions/PresetIdentifier"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-featuresetPresetPost-202-schema-data').val(stringify(schema));
+                                        var result = $('#responses-featuresetPresetPost-202-schema-202');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-featuresetPresetPost-202-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 400 - Invalid JSON request </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-featuresetPresetPost-400-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-featuresetPresetPost-400-schema">
+                                  <div id='responses-featuresetPresetPost-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid JSON request",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-featuresetPresetPost-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-featuresetPresetPost-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-featuresetPresetPost-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - Feature set not found </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-featuresetPresetPost-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-featuresetPresetPost-404-schema">
+                                  <div id='responses-featuresetPresetPost-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Feature set not found",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-featuresetPresetPost-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-featuresetPresetPost-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-featuresetPresetPost-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 409 - Preset already exists </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-featuresetPresetPost-409-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-featuresetPresetPost-409-schema">
+                                  <div id='responses-featuresetPresetPost-409-schema-409' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Preset already exists",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-featuresetPresetPost-409-schema-data').val(stringify(schema));
+                                        var result = $('#responses-featuresetPresetPost-409-schema-409');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-featuresetPresetPost-409-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-featuresetPresetPost-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-featuresetPresetPost-500-schema">
+                                  <div id='responses-featuresetPresetPost-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-featuresetPresetPost-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-featuresetPresetPost-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-featuresetPresetPost-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-featuresetPresetPost-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-featuresetPresetPost-501-schema">
+                                  <div id='responses-featuresetPresetPost-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-featuresetPresetPost-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-featuresetPresetPost-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-featuresetPresetPost-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-FeatureSet-featuresetPresetPut">
+                      <article id="api-FeatureSet-featuresetPresetPut-0" data-group="User" data-name="featuresetPresetPut" data-version="0">
+                        <div class="pull-left">
+                          <h1>featuresetPresetPut</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">Update an existing preset with feature set settings.</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="put"><code><span class="pln">/sdrangel/featureset/{featureSetIndex}/preset</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-FeatureSet-featuresetPresetPut-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-FeatureSet-featuresetPresetPut-0-java">Java</a></li>
+                          <li class=""><a href="#examples-FeatureSet-featuresetPresetPut-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-FeatureSet-featuresetPresetPut-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-FeatureSet-featuresetPresetPut-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-FeatureSet-featuresetPresetPut-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-FeatureSet-featuresetPresetPut-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-FeatureSet-featuresetPresetPut-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-FeatureSet-featuresetPresetPut-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-FeatureSet-featuresetPresetPut-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-FeatureSet-featuresetPresetPut-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-FeatureSet-featuresetPresetPut-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PUT "http://localhost/sdrangel/featureset/{featureSetIndex}/preset"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-FeatureSet-featuresetPresetPut-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.FeatureSetApi;
+
+import java.io.File;
+import java.util.*;
+
+public class FeatureSetApiExample {
+
+    public static void main(String[] args) {
+        
+        FeatureSetApi apiInstance = new FeatureSetApi();
+        Integer featureSetIndex = 56; // Integer | Index of feature set in the feature set list
+        FeaturePresetIdentifier body = ; // FeaturePresetIdentifier | save feature set settings to the preset
+        try {
+            FeaturePresetIdentifier result = apiInstance.featuresetPresetPut(featureSetIndex, body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling FeatureSetApi#featuresetPresetPut");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-FeatureSet-featuresetPresetPut-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.FeatureSetApi;
+
+public class FeatureSetApiExample {
+
+    public static void main(String[] args) {
+        FeatureSetApi apiInstance = new FeatureSetApi();
+        Integer featureSetIndex = 56; // Integer | Index of feature set in the feature set list
+        FeaturePresetIdentifier body = ; // FeaturePresetIdentifier | save feature set settings to the preset
+        try {
+            FeaturePresetIdentifier result = apiInstance.featuresetPresetPut(featureSetIndex, body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling FeatureSetApi#featuresetPresetPut");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-FeatureSet-featuresetPresetPut-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-FeatureSet-featuresetPresetPut-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Integer *featureSetIndex = 56; // Index of feature set in the feature set list
+FeaturePresetIdentifier *body = ; // save feature set settings to the preset
+
+FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
+
+[apiInstance featuresetPresetPutWith:featureSetIndex
+    body:body
+              completionHandler: ^(FeaturePresetIdentifier output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-FeatureSet-featuresetPresetPut-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.FeatureSetApi()
+
+var featureSetIndex = 56; // {Integer} Index of feature set in the feature set list
+
+var body = ; // {FeaturePresetIdentifier} save feature set settings to the preset
+
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.featuresetPresetPut(featureSetIndex, body, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-FeatureSet-featuresetPresetPut-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-FeatureSet-featuresetPresetPut-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class featuresetPresetPutExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new FeatureSetApi();
+            var featureSetIndex = 56;  // Integer | Index of feature set in the feature set list
+            var body = new FeaturePresetIdentifier(); // FeaturePresetIdentifier | save feature set settings to the preset
+
+            try
+            {
+                FeaturePresetIdentifier result = apiInstance.featuresetPresetPut(featureSetIndex, body);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling FeatureSetApi.featuresetPresetPut: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-FeatureSet-featuresetPresetPut-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\FeatureSetApi();
+$featureSetIndex = 56; // Integer | Index of feature set in the feature set list
+$body = ; // FeaturePresetIdentifier | save feature set settings to the preset
+
+try {
+    $result = $api_instance->featuresetPresetPut($featureSetIndex, $body);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling FeatureSetApi->featuresetPresetPut: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-FeatureSet-featuresetPresetPut-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::FeatureSetApi;
+
+my $api_instance = SWGSDRangel::FeatureSetApi->new();
+my $featureSetIndex = 56; # Integer | Index of feature set in the feature set list
+my $body = SWGSDRangel::Object::FeaturePresetIdentifier->new(); # FeaturePresetIdentifier | save feature set settings to the preset
+
+eval { 
+    my $result = $api_instance->featuresetPresetPut(featureSetIndex => $featureSetIndex, body => $body);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling FeatureSetApi->featuresetPresetPut: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-FeatureSet-featuresetPresetPut-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.FeatureSetApi()
+featureSetIndex = 56 # Integer | Index of feature set in the feature set list
+body =  # FeaturePresetIdentifier | save feature set settings to the preset
+
+try: 
+    api_response = api_instance.featureset_preset_put(featureSetIndex, body)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling FeatureSetApi->featuresetPresetPut: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">featureSetIndex*</td>
+<td>
+
+
+    <div id="d2e199_featuresetPresetPut_featureSetIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of feature set in the feature set list
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+                            <div class="methodsubtabletitle">Body parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">body <span style="color:red;">*</span></td>
+<td>
+
+
+<script>
+$(document).ready(function() {
+  var schemaWrapper = {
+  "in" : "body",
+  "name" : "body",
+  "description" : "save feature set settings to the preset",
+  "required" : true,
+  "schema" : {
+    "$ref" : "#/definitions/FeaturePresetIdentifier"
+  }
+};
+  var schema = schemaWrapper.schema;
+  if (schema.$ref != null) {
+    schema = defsParser.$refs.get(schema.$ref);
+  } else {
+    schemaWrapper.definitions = Object.assign({}, defs);
+    $RefParser.dereference(schemaWrapper).catch(function(err) {
+      console.log(err);
+    });
+  }
+
+  var view = new JSONSchemaView(schema,2,{isBodyParam: true});
+  var result = $('#d2e199_featuresetPresetPut_body');
+  result.empty();
+  result.append(view.render());
+});
+</script>
+<div id="d2e199_featuresetPresetPut_body"></div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 202 - On successful sending of the message the selected preset identification is returned </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-featuresetPresetPut-202-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-featuresetPresetPut-202-schema">
+                                  <div id='responses-featuresetPresetPut-202-schema-202' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On successful sending of the message the selected preset identification is returned",
+  "schema" : {
+    "$ref" : "#/definitions/FeaturePresetIdentifier"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-featuresetPresetPut-202-schema-data').val(stringify(schema));
+                                        var result = $('#responses-featuresetPresetPut-202-schema-202');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-featuresetPresetPut-202-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 400 - Invalid JSON request </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-featuresetPresetPut-400-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-featuresetPresetPut-400-schema">
+                                  <div id='responses-featuresetPresetPut-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid JSON request",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-featuresetPresetPut-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-featuresetPresetPut-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-featuresetPresetPut-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - No preset or feature set found </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-featuresetPresetPut-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-featuresetPresetPut-404-schema">
+                                  <div id='responses-featuresetPresetPut-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "No preset or feature set found",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-featuresetPresetPut-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-featuresetPresetPut-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-featuresetPresetPut-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-featuresetPresetPut-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-featuresetPresetPut-500-schema">
+                                  <div id='responses-featuresetPresetPut-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-featuresetPresetPut-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-featuresetPresetPut-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-featuresetPresetPut-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-featuresetPresetPut-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-featuresetPresetPut-501-schema">
+                                  <div id='responses-featuresetPresetPut-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-featuresetPresetPut-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-featuresetPresetPut-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-featuresetPresetPut-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
                     <div id="api-FeatureSet-instanceFeatureSetDelete">
                       <article id="api-FeatureSet-instanceFeatureSetDelete-0" data-group="User" data-name="instanceFeatureSetDelete" data-version="0">
                         <div class="pull-left">
@@ -48985,7 +50576,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-09-03T22:11:29.377+02:00
+              Generated 2021-09-05T21:54:27.642+02:00
             </div>
           </div>
       </div>

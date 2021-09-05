@@ -102,6 +102,7 @@ private:
 
     void featuresetService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void featuresetFeatureService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void featuresetPresetService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void featuresetFeatureIndexService(const std::string& featureSetIndexStr, const std::string& featureIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void featuresetFeatureRunService(const std::string& featureSetIndexStr, const std::string& featureIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void featuresetFeatureSettingsService(const std::string& featureSetIndexStr, const std::string& featureIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
@@ -117,6 +118,7 @@ private:
     bool validateDeviceActions(SWGSDRangel::SWGDeviceActions& deviceActions, QJsonObject& jsonObject, QStringList& deviceActionsKeys);
     bool validateChannelSettings(SWGSDRangel::SWGChannelSettings& channelSettings, QJsonObject& jsonObject, QStringList& channelSettingsKeys);
     bool validateChannelActions(SWGSDRangel::SWGChannelActions& channelActions, QJsonObject& jsonObject, QStringList& channelActionsKeys);
+    bool validateFeaturePresetTransfer(SWGSDRangel::SWGFeaturePresetTransfer& presetTransfer);
     bool validateFeaturePresetIdentifer(SWGSDRangel::SWGFeaturePresetIdentifier& presetIdentifier);
     bool validateFeatureSettings(SWGSDRangel::SWGFeatureSettings& featureSettings, QJsonObject& jsonObject, QStringList& featureSettingsKeys);
     bool validateFeatureActions(SWGSDRangel::SWGFeatureActions& featureActions, QJsonObject& jsonObject, QStringList& featureActionsKeys);

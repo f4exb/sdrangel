@@ -408,6 +408,21 @@ public:
             SWGSDRangel::SWGDeviceState& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int featuresetPresetPatch(
+            int featureSetIndex,
+            SWGSDRangel::SWGFeaturePresetIdentifier& query,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int featuresetPresetPut(
+            int featureSetIndex,
+            SWGSDRangel::SWGFeaturePresetIdentifier& query,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int featuresetPresetPost(
+            int featureSetIndex,
+            SWGSDRangel::SWGFeaturePresetIdentifier& query,
+            SWGSDRangel::SWGErrorResponse& error);
+
     virtual int featuresetFeatureSettingsGet(
             int featureSetIndex,
             int featureIndex,

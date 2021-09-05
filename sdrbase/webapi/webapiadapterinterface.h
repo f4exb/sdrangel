@@ -65,6 +65,7 @@ namespace SWGSDRangel
     class SWGSuccessResponse;
     class SWGFeaturePresets;
     class SWGFeaturePresetIdentifier;
+    class SWGFeaturePresetTransfer;
     class SWGFeatureSetList;
     class SWGFeatureSet;
     class SWGFeatureSettings;
@@ -1319,6 +1320,54 @@ public:
     }
 
     /**
+     * Handler of /sdrangel/featureset/{featuresetIndex}/preset (PATCH) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int featuresetPresetPatch(
+            int featureSetIndex,
+            SWGSDRangel::SWGFeaturePresetIdentifier& query,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) featureSetIndex;
+        (void) query;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/featureset/{featuresetIndex}/preset (PUT) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int featuresetPresetPut(
+            int featureSetIndex,
+            SWGSDRangel::SWGFeaturePresetIdentifier& query,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) featureSetIndex;
+        (void) query;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/featureset/{featuresetIndex}/preset (POST) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int featuresetPresetPost(
+            int featureSetIndex,
+            SWGSDRangel::SWGFeaturePresetIdentifier& query,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) featureSetIndex;
+        (void) query;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
      * Handler of /sdrangel/featureset/{featuresetIndex}/feature/{featureIndex}/settings (GET)
      * returns the Http status code (default 501: not implemented)
      */
@@ -1443,6 +1492,7 @@ public:
     static std::regex devicesetChannelsReportURLRe;
     static std::regex featuresetURLRe;
     static std::regex featuresetFeatureURLRe;
+    static std::regex featuresetPresetURLRe;
     static std::regex featuresetFeatureIndexURLRe;
     static std::regex featuresetFeatureRunURLRe;
     static std::regex featuresetFeatureSettingsURLRe;

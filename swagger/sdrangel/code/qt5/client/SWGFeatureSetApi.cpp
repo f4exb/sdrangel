@@ -653,6 +653,177 @@ SWGFeatureSetApi::featuresetGetCallback(SWGHttpRequestWorker * worker) {
 }
 
 void
+SWGFeatureSetApi::featuresetPresetPatch(qint32 feature_set_index, SWGFeaturePresetIdentifier& body) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset/{featureSetIndex}/preset");
+
+    QString feature_set_indexPathParam("{"); feature_set_indexPathParam.append("featureSetIndex").append("}");
+    fullPath.replace(feature_set_indexPathParam, stringValue(feature_set_index));
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "PATCH");
+
+
+    
+    QString output = body.asJson();
+    input.request_body.append(output);
+    
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGFeatureSetApi::featuresetPresetPatchCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGFeatureSetApi::featuresetPresetPatchCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGFeaturePresetIdentifier* output = static_cast<SWGFeaturePresetIdentifier*>(create(json, QString("SWGFeaturePresetIdentifier")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit featuresetPresetPatchSignal(output);
+    } else {
+        emit featuresetPresetPatchSignalE(output, error_type, error_str);
+        emit featuresetPresetPatchSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
+SWGFeatureSetApi::featuresetPresetPost(qint32 feature_set_index, SWGFeaturePresetIdentifier& body) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset/{featureSetIndex}/preset");
+
+    QString feature_set_indexPathParam("{"); feature_set_indexPathParam.append("featureSetIndex").append("}");
+    fullPath.replace(feature_set_indexPathParam, stringValue(feature_set_index));
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "POST");
+
+
+    
+    QString output = body.asJson();
+    input.request_body.append(output);
+    
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGFeatureSetApi::featuresetPresetPostCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGFeatureSetApi::featuresetPresetPostCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGPresetIdentifier* output = static_cast<SWGPresetIdentifier*>(create(json, QString("SWGPresetIdentifier")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit featuresetPresetPostSignal(output);
+    } else {
+        emit featuresetPresetPostSignalE(output, error_type, error_str);
+        emit featuresetPresetPostSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
+SWGFeatureSetApi::featuresetPresetPut(qint32 feature_set_index, SWGFeaturePresetIdentifier& body) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset/{featureSetIndex}/preset");
+
+    QString feature_set_indexPathParam("{"); feature_set_indexPathParam.append("featureSetIndex").append("}");
+    fullPath.replace(feature_set_indexPathParam, stringValue(feature_set_index));
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "PUT");
+
+
+    
+    QString output = body.asJson();
+    input.request_body.append(output);
+    
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGFeatureSetApi::featuresetPresetPutCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGFeatureSetApi::featuresetPresetPutCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGFeaturePresetIdentifier* output = static_cast<SWGFeaturePresetIdentifier*>(create(json, QString("SWGFeaturePresetIdentifier")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit featuresetPresetPutSignal(output);
+    } else {
+        emit featuresetPresetPutSignalE(output, error_type, error_str);
+        emit featuresetPresetPutSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
 SWGFeatureSetApi::instanceFeatureSetDelete() {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset");

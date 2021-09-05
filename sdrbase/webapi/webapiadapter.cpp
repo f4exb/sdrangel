@@ -75,6 +75,7 @@
 #include "SWGFeaturePresetGroup.h"
 #include "SWGFeaturePresetItem.h"
 #include "SWGFeaturePresetIdentifier.h"
+#include "SWGFeaturePresetTransfer.h"
 #include "SWGFeatureSetList.h"
 #include "SWGFeatureSettings.h"
 #include "SWGFeatureReport.h"
@@ -3163,6 +3164,109 @@ int WebAPIAdapter::featuresetFeatureRunDelete(
         *error.getMessage() = QString("There is no feature set with index %1").arg(featureSetIndex);
         return 404;
     }
+}
+
+int WebAPIAdapter::featuresetPresetPatch(
+        int featureSetIndex,
+        SWGSDRangel::SWGFeaturePresetIdentifier& query,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    int nbFeatureSets = m_mainCore->m_featureSets.size();
+
+    if (featureSetIndex >= nbFeatureSets)
+    {
+        error.init();
+        *error.getMessage() = QString("There is no feature set at index %1. Number of device sets is %2").arg(featureSetIndex).arg(nbFeatureSets);
+        return 404;
+    }
+
+    const FeatureSetPreset *selectedPreset = m_mainCore->m_settings.getFeatureSetPreset(
+            *query.getGroupName(),
+            *query.getDescription());
+
+    if (selectedPreset == 0)
+    {
+        error.init();
+        *error.getMessage() = QString("There is no preset [%1, %2]")
+                .arg(*query.getGroupName())
+                .arg(*query.getDescription());
+        return 404;
+    }
+
+    MainCore::MsgLoadFeatureSetPreset *msg = MainCore::MsgLoadFeatureSetPreset::create(selectedPreset, featureSetIndex);
+    m_mainCore->m_mainMessageQueue->push(msg);
+
+    return 202;
+}
+
+int WebAPIAdapter::featuresetPresetPut(
+        int featureSetIndex,
+        SWGSDRangel::SWGFeaturePresetIdentifier& query,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    int nbFeatureSets = m_mainCore->m_featureSets.size();
+
+    if (featureSetIndex >= nbFeatureSets)
+    {
+        error.init();
+        *error.getMessage() = QString("There is no feature set at index %1. Number of feature sets is %2").arg(featureSetIndex).arg(nbFeatureSets);
+        return 404;
+    }
+
+    const FeatureSetPreset *selectedPreset = m_mainCore->m_settings.getFeatureSetPreset(
+            *query.getGroupName(),
+            *query.getDescription());
+
+    if (selectedPreset == 0)
+    {
+        error.init();
+        *error.getMessage() = QString("There is no preset [%1, %2]")
+                .arg(*query.getGroupName())
+                .arg(*query.getDescription());
+        return 404;
+    }
+
+    MainCore::MsgSaveFeatureSetPreset *msg = MainCore::MsgSaveFeatureSetPreset::create(const_cast<FeatureSetPreset*>(selectedPreset), featureSetIndex, false);
+    m_mainCore->m_mainMessageQueue->push(msg);
+
+    return 202;
+}
+
+int WebAPIAdapter::featuresetPresetPost(
+        int featureSetIndex,
+        SWGSDRangel::SWGFeaturePresetIdentifier& query,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    int nbFeatureSets = m_mainCore->m_featureSets.size();
+
+    if (featureSetIndex >= nbFeatureSets)
+    {
+        error.init();
+        *error.getMessage() = QString("There is no feature set at index %1. Number of feature sets is %2").arg(featureSetIndex).arg(nbFeatureSets);
+        return 404;
+    }
+
+    const FeatureSetPreset *selectedPreset = m_mainCore->m_settings.getFeatureSetPreset(
+            *query.getGroupName(),
+            *query.getDescription());
+
+    if (selectedPreset == 0) // save on a new preset
+    {
+        selectedPreset = m_mainCore->m_settings.newFeatureSetPreset(*query.getGroupName(), *query.getDescription());
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("Preset already exists [%1, %2]")
+                .arg(*query.getGroupName())
+                .arg(*query.getDescription());
+        return 409;
+    }
+
+    MainCore::MsgSaveFeatureSetPreset *msg = MainCore::MsgSaveFeatureSetPreset::create(const_cast<FeatureSetPreset*>(selectedPreset), featureSetIndex, true);
+    m_mainCore->m_mainMessageQueue->push(msg);
+
+    return 202;
 }
 
 int WebAPIAdapter::featuresetFeatureSettingsGet(

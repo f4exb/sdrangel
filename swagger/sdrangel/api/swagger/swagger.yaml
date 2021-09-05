@@ -2040,6 +2040,121 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
 
+  /sdrangel/featureset/{featureSetIndex}/preset:
+    x-swagger-router-controller: featureset
+    patch:
+      description: Load a preset in a feature set
+      operationId: featuresetPresetPatch
+      tags:
+        - FeatureSet
+      consumes:
+        - application/json
+      parameters:
+        - in: path
+          name: featureSetIndex
+          type: integer
+          required: true
+          description: Index of feature set in the feature set list
+        - name: body
+          in: body
+          description: Load preset settings to the feature set
+          required: true
+          schema:
+            $ref: "#/definitions/FeaturePresetIdentifier"
+      responses:
+        "202":
+          description: On successful sending of the message the selected preset identification is returned
+          schema:
+            $ref: "#/definitions/FeaturePresetIdentifier"
+        "400":
+          description: Invalid JSON request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: No preset or feature set found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    put:
+      description: Update an existing preset with feature set settings.
+      operationId: featuresetPresetPut
+      tags:
+        - FeatureSet
+      consumes:
+        - application/json
+      parameters:
+        - in: path
+          name: featureSetIndex
+          type: integer
+          required: true
+          description: Index of feature set in the feature set list
+        - name: body
+          in: body
+          description: save feature set settings to the preset
+          required: true
+          schema:
+            $ref: "#/definitions/FeaturePresetIdentifier"
+      responses:
+        "202":
+          description: On successful sending of the message the selected preset identification is returned
+          schema:
+            $ref: "#/definitions/FeaturePresetIdentifier"
+        "400":
+          description: Invalid JSON request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: No preset or feature set found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    post:
+      description: Create a new preset from a feature set settings.
+      operationId: featuresetPresetPost
+      tags:
+        - FeatureSet
+      consumes:
+        - application/json
+      parameters:
+        - in: path
+          name: featureSetIndex
+          type: integer
+          required: true
+          description: Index of feature set in the feature set list
+        - name: body
+          in: body
+          description: save feature set settings on a new preset
+          required: true
+          schema:
+            $ref: "#/definitions/FeaturePresetIdentifier"
+      responses:
+        "202":
+          description: On successful sending of the message the created preset identification is returned
+          schema:
+            $ref: "#/definitions/PresetIdentifier"
+        "400":
+          description: Invalid JSON request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Feature set not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "409":
+          description: Preset already exists
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
   /sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}:
     x-swagger-router-controller: featureset
     delete:

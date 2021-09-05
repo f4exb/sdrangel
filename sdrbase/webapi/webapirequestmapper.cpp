@@ -55,6 +55,7 @@
 #include "SWGErrorResponse.h"
 #include "SWGFeaturePresets.h"
 #include "SWGFeaturePresetIdentifier.h"
+#include "SWGFeaturePresetTransfer.h"
 #include "SWGFeatureSetList.h"
 #include "SWGFeatureSettings.h"
 #include "SWGFeatureReport.h"
@@ -206,6 +207,8 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
                 featuresetService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::featuresetFeatureURLRe)) {
                 featuresetFeatureService(std::string(desc_match[1]), request, response);
+            } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::featuresetPresetURLRe)) {
+                featuresetPresetService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::featuresetFeatureIndexURLRe)) {
                 featuresetFeatureIndexService(std::string(desc_match[1]), std::string(desc_match[2]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::featuresetFeatureRunURLRe)) {
@@ -2687,6 +2690,147 @@ void WebAPIRequestMapper::featuresetFeatureService(
     }
 }
 
+void WebAPIRequestMapper::featuresetPresetService(
+    const std::string& featureSetIndexStr,
+    qtwebapp::HttpRequest& request,
+    qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
+
+    try
+    {
+        int featureSetIndex = boost::lexical_cast<int>(featureSetIndexStr);
+
+        if (request.getMethod() == "PATCH")
+        {
+            SWGSDRangel::SWGFeaturePresetIdentifier query;
+            QString jsonStr = request.getBody();
+            QJsonObject jsonObject;
+
+            if (parseJsonBody(jsonStr, jsonObject, response))
+            {
+                query.fromJson(jsonStr);
+
+                if (validateFeaturePresetIdentifer(query))
+                {
+                    int status = m_adapter->featuresetPresetPatch(featureSetIndex, query, errorResponse);
+                    response.setStatus(status);
+
+                    if (status/100 == 2) {
+                        response.write(query.asJson().toUtf8());
+                    } else {
+                        response.write(errorResponse.asJson().toUtf8());
+                    }
+                }
+                else
+                {
+                    response.setStatus(400,"Invalid JSON request");
+                    errorResponse.init();
+                    *errorResponse.getMessage() = "Invalid JSON request";
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+            }
+            else
+            {
+                response.setStatus(400,"Invalid JSON format");
+                errorResponse.init();
+                *errorResponse.getMessage() = "Invalid JSON format";
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+        else if (request.getMethod() == "PUT")
+        {
+            SWGSDRangel::SWGFeaturePresetIdentifier query;
+            QString jsonStr = request.getBody();
+            QJsonObject jsonObject;
+
+            if (parseJsonBody(jsonStr, jsonObject, response))
+            {
+                query.fromJson(jsonStr);
+
+                if (validateFeaturePresetIdentifer(query))
+                {
+                    int status = m_adapter->featuresetPresetPut(featureSetIndex, query, errorResponse);
+                    response.setStatus(status);
+
+                    if (status/100 == 2) {
+                        response.write(query.asJson().toUtf8());
+                    } else {
+                        response.write(errorResponse.asJson().toUtf8());
+                    }
+                }
+                else
+                {
+                    response.setStatus(400,"Invalid JSON request");
+                    errorResponse.init();
+                    *errorResponse.getMessage() = "Invalid JSON request";
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+            }
+            else
+            {
+                response.setStatus(400,"Invalid JSON format");
+                errorResponse.init();
+                *errorResponse.getMessage() = "Invalid JSON format";
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+        else if (request.getMethod() == "POST")
+        {
+            SWGSDRangel::SWGFeaturePresetIdentifier query;
+            QString jsonStr = request.getBody();
+            QJsonObject jsonObject;
+
+            if (parseJsonBody(jsonStr, jsonObject, response))
+            {
+                query.fromJson(jsonStr);
+
+                if (validateFeaturePresetIdentifer(query))
+                {
+                    int status = m_adapter->featuresetPresetPost(featureSetIndex, query, errorResponse);
+                    response.setStatus(status);
+
+                    if (status/100 == 2) {
+                        response.write(query.asJson().toUtf8());
+                    } else {
+                        response.write(errorResponse.asJson().toUtf8());
+                    }
+                }
+                else
+                {
+                    response.setStatus(400,"Invalid JSON request");
+                    errorResponse.init();
+                    *errorResponse.getMessage() = "Invalid JSON request";
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+            }
+            else
+            {
+                response.setStatus(400,"Invalid JSON format");
+                errorResponse.init();
+                *errorResponse.getMessage() = "Invalid JSON format";
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+        else
+        {
+            response.setStatus(405,"Invalid HTTP method");
+            errorResponse.init();
+            *errorResponse.getMessage() = "Invalid HTTP method";
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    catch (const boost::bad_lexical_cast &e)
+    {
+        errorResponse.init();
+        *errorResponse.getMessage() = "Wrong integer conversion on index";
+        response.setStatus(400,"Invalid data");
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
 void WebAPIRequestMapper::featuresetFeatureIndexService(
         const std::string& featureSetIndexStr,
         const std::string& featureIndexStr,
@@ -3066,6 +3210,17 @@ bool WebAPIRequestMapper::validatePresetTransfer(SWGSDRangel::SWGPresetTransfer&
 bool WebAPIRequestMapper::validatePresetIdentifer(SWGSDRangel::SWGPresetIdentifier& presetIdentifier)
 {
     return (presetIdentifier.getGroupName() && presetIdentifier.getName() && presetIdentifier.getType());
+}
+
+bool WebAPIRequestMapper::validateFeaturePresetTransfer(SWGSDRangel::SWGFeaturePresetTransfer& presetTransfer)
+{
+    SWGSDRangel::SWGFeaturePresetIdentifier *presetIdentifier = presetTransfer.getPreset();
+
+    if (presetIdentifier == 0) {
+        return false;
+    }
+
+    return validateFeaturePresetIdentifer(*presetIdentifier);
 }
 
 bool WebAPIRequestMapper::validateFeaturePresetIdentifer(SWGSDRangel::SWGFeaturePresetIdentifier& presetIdentifier)
