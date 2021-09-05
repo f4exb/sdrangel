@@ -1,3 +1,16 @@
+sdrangel (6.16.5-1) unstable; urgency=medium
+
+  * API: added PUT, PATCH, POST /sdrangel/featureset/{featureSetIndex}/preset. Issue #998.
+  * API: added GET /sdrangel/featurepresets and DELETE /sdrangel/featurepreset. Issue #998.
+  * API: added feature sets in the instance summary
+  * API: added /sdrangel/features (GET) to get the list of available feature plugins
+  * SDRplay V3: fixes for API
+  * Satellite Tracker: fixed compilation in server mode. Fixes #996
+  * Satellite Tracker: various enhancements. PR #997.
+  * APT demod: API: fixed APT demod settings mappings. Fixes #995
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 05 Sep 2021 20:27:06 +0200
+
 sdrangel (6.16.4-1) unstable; urgency=medium
 
   * API: fixed GET /sdrangel/featuresets
