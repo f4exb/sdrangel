@@ -318,8 +318,8 @@ void StarTracker::webapiFormatFeatureSettings(
     }
 
     response.getStarTrackerSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.getStarTrackerSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIFeatureSetIndex);
-    response.getStarTrackerSettings()->setReverseApiChannelIndex(settings.m_reverseAPIFeatureIndex);
+    response.getStarTrackerSettings()->setReverseApiFeatureSetIndex(settings.m_reverseAPIFeatureSetIndex);
+    response.getStarTrackerSettings()->setReverseApiFeatureIndex(settings.m_reverseAPIFeatureIndex);
 }
 
 void StarTracker::webapiUpdateFeatureSettings(
@@ -390,11 +390,11 @@ void StarTracker::webapiUpdateFeatureSettings(
     if (featureSettingsKeys.contains("reverseAPIPort")) {
         settings.m_reverseAPIPort = response.getStarTrackerSettings()->getReverseApiPort();
     }
-    if (featureSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIFeatureSetIndex = response.getStarTrackerSettings()->getReverseApiDeviceIndex();
+    if (featureSettingsKeys.contains("reverseAPIFeatureSetIndex")) {
+        settings.m_reverseAPIFeatureSetIndex = response.getStarTrackerSettings()->getReverseApiFeatureSetIndex();
     }
-    if (featureSettingsKeys.contains("reverseAPIChannelIndex")) {
-        settings.m_reverseAPIFeatureIndex = response.getStarTrackerSettings()->getReverseApiChannelIndex();
+    if (featureSettingsKeys.contains("reverseAPIFeatureIndex")) {
+        settings.m_reverseAPIFeatureIndex = response.getStarTrackerSettings()->getReverseApiFeatureIndex();
     }
 }
 

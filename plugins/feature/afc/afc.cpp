@@ -394,8 +394,8 @@ void AFC::webapiFormatFeatureSettings(
     }
 
     response.getAfcSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.getAfcSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIFeatureSetIndex);
-    response.getAfcSettings()->setReverseApiChannelIndex(settings.m_reverseAPIFeatureIndex);
+    response.getAfcSettings()->setReverseApiFeatureSetIndex(settings.m_reverseAPIFeatureSetIndex);
+    response.getAfcSettings()->setReverseApiFeatureIndex(settings.m_reverseAPIFeatureIndex);
 }
 
 void AFC::webapiUpdateFeatureSettings(
@@ -439,11 +439,11 @@ void AFC::webapiUpdateFeatureSettings(
     if (featureSettingsKeys.contains("reverseAPIPort")) {
         settings.m_reverseAPIPort = response.getAfcSettings()->getReverseApiPort();
     }
-    if (featureSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIFeatureSetIndex = response.getAfcSettings()->getReverseApiDeviceIndex();
+    if (featureSettingsKeys.contains("reverseAPIFeatureSetIndex")) {
+        settings.m_reverseAPIFeatureSetIndex = response.getAfcSettings()->getReverseApiFeatureSetIndex();
     }
-    if (featureSettingsKeys.contains("reverseAPIChannelIndex")) {
-        settings.m_reverseAPIFeatureIndex = response.getAfcSettings()->getReverseApiChannelIndex();
+    if (featureSettingsKeys.contains("reverseAPIFeatureIndex")) {
+        settings.m_reverseAPIFeatureIndex = response.getAfcSettings()->getReverseApiFeatureIndex();
     }
 }
 

@@ -62,11 +62,11 @@ public:
     qint32 getReverseApiPort();
     void setReverseApiPort(qint32 reverse_api_port);
 
-    qint32 getReverseApiDeviceIndex();
-    void setReverseApiDeviceIndex(qint32 reverse_api_device_index);
+    qint32 getReverseApiFeatureSetIndex();
+    void setReverseApiFeatureSetIndex(qint32 reverse_api_feature_set_index);
 
-    qint32 getReverseApiChannelIndex();
-    void setReverseApiChannelIndex(qint32 reverse_api_channel_index);
+    qint32 getReverseApiFeatureIndex();
+    void setReverseApiFeatureIndex(qint32 reverse_api_feature_index);
 
     SWGGLSpectrum* getSpectrumConfig();
     void setSpectrumConfig(SWGGLSpectrum* spectrum_config);
@@ -96,11 +96,11 @@ private:
     qint32 reverse_api_port;
     bool m_reverse_api_port_isSet;
 
-    qint32 reverse_api_device_index;
-    bool m_reverse_api_device_index_isSet;
+    qint32 reverse_api_feature_set_index;
+    bool m_reverse_api_feature_set_index_isSet;
 
-    qint32 reverse_api_channel_index;
-    bool m_reverse_api_channel_index_isSet;
+    qint32 reverse_api_feature_index;
+    bool m_reverse_api_feature_index_isSet;
 
     SWGGLSpectrum* spectrum_config;
     bool m_spectrum_config_isSet;

@@ -52,10 +52,10 @@ SWGAFCSettings::SWGAFCSettings() {
     m_reverse_api_address_isSet = false;
     reverse_api_port = 0;
     m_reverse_api_port_isSet = false;
-    reverse_api_device_index = 0;
-    m_reverse_api_device_index_isSet = false;
-    reverse_api_channel_index = 0;
-    m_reverse_api_channel_index_isSet = false;
+    reverse_api_feature_set_index = 0;
+    m_reverse_api_feature_set_index_isSet = false;
+    reverse_api_feature_index = 0;
+    m_reverse_api_feature_index_isSet = false;
 }
 
 SWGAFCSettings::~SWGAFCSettings() {
@@ -88,10 +88,10 @@ SWGAFCSettings::init() {
     m_reverse_api_address_isSet = false;
     reverse_api_port = 0;
     m_reverse_api_port_isSet = false;
-    reverse_api_device_index = 0;
-    m_reverse_api_device_index_isSet = false;
-    reverse_api_channel_index = 0;
-    m_reverse_api_channel_index_isSet = false;
+    reverse_api_feature_set_index = 0;
+    m_reverse_api_feature_set_index_isSet = false;
+    reverse_api_feature_index = 0;
+    m_reverse_api_feature_index_isSet = false;
 }
 
 void
@@ -151,9 +151,9 @@ SWGAFCSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&reverse_api_port, pJson["reverseAPIPort"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&reverse_api_device_index, pJson["reverseAPIDeviceIndex"], "qint32", "");
+    ::SWGSDRangel::setValue(&reverse_api_feature_set_index, pJson["reverseAPIFeatureSetIndex"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&reverse_api_channel_index, pJson["reverseAPIChannelIndex"], "qint32", "");
+    ::SWGSDRangel::setValue(&reverse_api_feature_index, pJson["reverseAPIFeatureIndex"], "qint32", "");
     
 }
 
@@ -207,11 +207,11 @@ SWGAFCSettings::asJsonObject() {
     if(m_reverse_api_port_isSet){
         obj->insert("reverseAPIPort", QJsonValue(reverse_api_port));
     }
-    if(m_reverse_api_device_index_isSet){
-        obj->insert("reverseAPIDeviceIndex", QJsonValue(reverse_api_device_index));
+    if(m_reverse_api_feature_set_index_isSet){
+        obj->insert("reverseAPIFeatureSetIndex", QJsonValue(reverse_api_feature_set_index));
     }
-    if(m_reverse_api_channel_index_isSet){
-        obj->insert("reverseAPIChannelIndex", QJsonValue(reverse_api_channel_index));
+    if(m_reverse_api_feature_index_isSet){
+        obj->insert("reverseAPIFeatureIndex", QJsonValue(reverse_api_feature_index));
     }
 
     return obj;
@@ -338,23 +338,23 @@ SWGAFCSettings::setReverseApiPort(qint32 reverse_api_port) {
 }
 
 qint32
-SWGAFCSettings::getReverseApiDeviceIndex() {
-    return reverse_api_device_index;
+SWGAFCSettings::getReverseApiFeatureSetIndex() {
+    return reverse_api_feature_set_index;
 }
 void
-SWGAFCSettings::setReverseApiDeviceIndex(qint32 reverse_api_device_index) {
-    this->reverse_api_device_index = reverse_api_device_index;
-    this->m_reverse_api_device_index_isSet = true;
+SWGAFCSettings::setReverseApiFeatureSetIndex(qint32 reverse_api_feature_set_index) {
+    this->reverse_api_feature_set_index = reverse_api_feature_set_index;
+    this->m_reverse_api_feature_set_index_isSet = true;
 }
 
 qint32
-SWGAFCSettings::getReverseApiChannelIndex() {
-    return reverse_api_channel_index;
+SWGAFCSettings::getReverseApiFeatureIndex() {
+    return reverse_api_feature_index;
 }
 void
-SWGAFCSettings::setReverseApiChannelIndex(qint32 reverse_api_channel_index) {
-    this->reverse_api_channel_index = reverse_api_channel_index;
-    this->m_reverse_api_channel_index_isSet = true;
+SWGAFCSettings::setReverseApiFeatureIndex(qint32 reverse_api_feature_index) {
+    this->reverse_api_feature_index = reverse_api_feature_index;
+    this->m_reverse_api_feature_index_isSet = true;
 }
 
 
@@ -398,10 +398,10 @@ SWGAFCSettings::isSet(){
         if(m_reverse_api_port_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_reverse_api_device_index_isSet){
+        if(m_reverse_api_feature_set_index_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_reverse_api_channel_index_isSet){
+        if(m_reverse_api_feature_index_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

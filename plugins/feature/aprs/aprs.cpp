@@ -297,8 +297,8 @@ void APRS::webapiFormatFeatureSettings(
     }
 
     response.getAprsSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.getAprsSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIFeatureSetIndex);
-    response.getAprsSettings()->setReverseApiChannelIndex(settings.m_reverseAPIFeatureIndex);
+    response.getAprsSettings()->setReverseApiFeatureSetIndex(settings.m_reverseAPIFeatureSetIndex);
+    response.getAprsSettings()->setReverseApiFeatureIndex(settings.m_reverseAPIFeatureIndex);
 }
 
 void APRS::webapiUpdateFeatureSettings(
@@ -336,11 +336,11 @@ void APRS::webapiUpdateFeatureSettings(
     if (featureSettingsKeys.contains("reverseAPIPort")) {
         settings.m_reverseAPIPort = response.getAprsSettings()->getReverseApiPort();
     }
-    if (featureSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIFeatureSetIndex = response.getAprsSettings()->getReverseApiDeviceIndex();
+    if (featureSettingsKeys.contains("reverseAPIFeatureSetIndex")) {
+        settings.m_reverseAPIFeatureSetIndex = response.getAprsSettings()->getReverseApiFeatureSetIndex();
     }
-    if (featureSettingsKeys.contains("reverseAPIChannelIndex")) {
-        settings.m_reverseAPIFeatureIndex = response.getAprsSettings()->getReverseApiChannelIndex();
+    if (featureSettingsKeys.contains("reverseAPIFeatureIndex")) {
+        settings.m_reverseAPIFeatureIndex = response.getAprsSettings()->getReverseApiFeatureIndex();
     }
 }
 

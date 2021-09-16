@@ -420,8 +420,8 @@ void DemodAnalyzer::webapiFormatFeatureSettings(
     }
 
     response.getDemodAnalyzerSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.getDemodAnalyzerSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIFeatureSetIndex);
-    response.getDemodAnalyzerSettings()->setReverseApiChannelIndex(settings.m_reverseAPIFeatureIndex);
+    response.getDemodAnalyzerSettings()->setReverseApiFeatureSetIndex(settings.m_reverseAPIFeatureSetIndex);
+    response.getDemodAnalyzerSettings()->setReverseApiFeatureIndex(settings.m_reverseAPIFeatureIndex);
 }
 
 void DemodAnalyzer::webapiUpdateFeatureSettings(
@@ -447,11 +447,11 @@ void DemodAnalyzer::webapiUpdateFeatureSettings(
     if (featureSettingsKeys.contains("reverseAPIPort")) {
         settings.m_reverseAPIPort = response.getDemodAnalyzerSettings()->getReverseApiPort();
     }
-    if (featureSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIFeatureSetIndex = response.getDemodAnalyzerSettings()->getReverseApiDeviceIndex();
+    if (featureSettingsKeys.contains("reverseAPIFeatureSetIndex")) {
+        settings.m_reverseAPIFeatureSetIndex = response.getDemodAnalyzerSettings()->getReverseApiFeatureSetIndex();
     }
-    if (featureSettingsKeys.contains("reverseAPIChannelIndex")) {
-        settings.m_reverseAPIFeatureIndex = response.getDemodAnalyzerSettings()->getReverseApiChannelIndex();
+    if (featureSettingsKeys.contains("reverseAPIFeatureIndex")) {
+        settings.m_reverseAPIFeatureIndex = response.getDemodAnalyzerSettings()->getReverseApiFeatureIndex();
     }
 }
 

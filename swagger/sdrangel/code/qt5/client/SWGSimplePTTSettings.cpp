@@ -46,10 +46,10 @@ SWGSimplePTTSettings::SWGSimplePTTSettings() {
     m_reverse_api_address_isSet = false;
     reverse_api_port = 0;
     m_reverse_api_port_isSet = false;
-    reverse_api_device_index = 0;
-    m_reverse_api_device_index_isSet = false;
-    reverse_api_channel_index = 0;
-    m_reverse_api_channel_index_isSet = false;
+    reverse_api_feature_set_index = 0;
+    m_reverse_api_feature_set_index_isSet = false;
+    reverse_api_feature_index = 0;
+    m_reverse_api_feature_index_isSet = false;
 }
 
 SWGSimplePTTSettings::~SWGSimplePTTSettings() {
@@ -76,10 +76,10 @@ SWGSimplePTTSettings::init() {
     m_reverse_api_address_isSet = false;
     reverse_api_port = 0;
     m_reverse_api_port_isSet = false;
-    reverse_api_device_index = 0;
-    m_reverse_api_device_index_isSet = false;
-    reverse_api_channel_index = 0;
-    m_reverse_api_channel_index_isSet = false;
+    reverse_api_feature_set_index = 0;
+    m_reverse_api_feature_set_index_isSet = false;
+    reverse_api_feature_index = 0;
+    m_reverse_api_feature_index_isSet = false;
 }
 
 void
@@ -130,9 +130,9 @@ SWGSimplePTTSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&reverse_api_port, pJson["reverseAPIPort"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&reverse_api_device_index, pJson["reverseAPIDeviceIndex"], "qint32", "");
+    ::SWGSDRangel::setValue(&reverse_api_feature_set_index, pJson["reverseAPIFeatureSetIndex"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&reverse_api_channel_index, pJson["reverseAPIChannelIndex"], "qint32", "");
+    ::SWGSDRangel::setValue(&reverse_api_feature_index, pJson["reverseAPIFeatureIndex"], "qint32", "");
     
 }
 
@@ -177,11 +177,11 @@ SWGSimplePTTSettings::asJsonObject() {
     if(m_reverse_api_port_isSet){
         obj->insert("reverseAPIPort", QJsonValue(reverse_api_port));
     }
-    if(m_reverse_api_device_index_isSet){
-        obj->insert("reverseAPIDeviceIndex", QJsonValue(reverse_api_device_index));
+    if(m_reverse_api_feature_set_index_isSet){
+        obj->insert("reverseAPIFeatureSetIndex", QJsonValue(reverse_api_feature_set_index));
     }
-    if(m_reverse_api_channel_index_isSet){
-        obj->insert("reverseAPIChannelIndex", QJsonValue(reverse_api_channel_index));
+    if(m_reverse_api_feature_index_isSet){
+        obj->insert("reverseAPIFeatureIndex", QJsonValue(reverse_api_feature_index));
     }
 
     return obj;
@@ -278,23 +278,23 @@ SWGSimplePTTSettings::setReverseApiPort(qint32 reverse_api_port) {
 }
 
 qint32
-SWGSimplePTTSettings::getReverseApiDeviceIndex() {
-    return reverse_api_device_index;
+SWGSimplePTTSettings::getReverseApiFeatureSetIndex() {
+    return reverse_api_feature_set_index;
 }
 void
-SWGSimplePTTSettings::setReverseApiDeviceIndex(qint32 reverse_api_device_index) {
-    this->reverse_api_device_index = reverse_api_device_index;
-    this->m_reverse_api_device_index_isSet = true;
+SWGSimplePTTSettings::setReverseApiFeatureSetIndex(qint32 reverse_api_feature_set_index) {
+    this->reverse_api_feature_set_index = reverse_api_feature_set_index;
+    this->m_reverse_api_feature_set_index_isSet = true;
 }
 
 qint32
-SWGSimplePTTSettings::getReverseApiChannelIndex() {
-    return reverse_api_channel_index;
+SWGSimplePTTSettings::getReverseApiFeatureIndex() {
+    return reverse_api_feature_index;
 }
 void
-SWGSimplePTTSettings::setReverseApiChannelIndex(qint32 reverse_api_channel_index) {
-    this->reverse_api_channel_index = reverse_api_channel_index;
-    this->m_reverse_api_channel_index_isSet = true;
+SWGSimplePTTSettings::setReverseApiFeatureIndex(qint32 reverse_api_feature_index) {
+    this->reverse_api_feature_index = reverse_api_feature_index;
+    this->m_reverse_api_feature_index_isSet = true;
 }
 
 
@@ -329,10 +329,10 @@ SWGSimplePTTSettings::isSet(){
         if(m_reverse_api_port_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_reverse_api_device_index_isSet){
+        if(m_reverse_api_feature_set_index_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_reverse_api_channel_index_isSet){
+        if(m_reverse_api_feature_index_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

@@ -17,9 +17,9 @@ DemodAnalyzerSettings:
       type: string
     reverseAPIPort:
       type: integer
-    reverseAPIDeviceIndex:
+    reverseAPIFeatureSetIndex:
       type: integer
-    reverseAPIChannelIndex:
+    reverseAPIFeatureIndex:
       type: integer
     spectrumConfig:
       $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"

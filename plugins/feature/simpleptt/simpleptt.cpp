@@ -311,8 +311,8 @@ void SimplePTT::webapiFormatFeatureSettings(
     }
 
     response.getSimplePttSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.getSimplePttSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIFeatureSetIndex);
-    response.getSimplePttSettings()->setReverseApiChannelIndex(settings.m_reverseAPIFeatureIndex);
+    response.getSimplePttSettings()->setReverseApiFeatureSetIndex(settings.m_reverseAPIFeatureSetIndex);
+    response.getSimplePttSettings()->setReverseApiFeatureIndex(settings.m_reverseAPIFeatureIndex);
 }
 
 void SimplePTT::webapiUpdateFeatureSettings(
@@ -347,11 +347,11 @@ void SimplePTT::webapiUpdateFeatureSettings(
     if (featureSettingsKeys.contains("reverseAPIPort")) {
         settings.m_reverseAPIPort = response.getSimplePttSettings()->getReverseApiPort();
     }
-    if (featureSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIFeatureSetIndex = response.getSimplePttSettings()->getReverseApiDeviceIndex();
+    if (featureSettingsKeys.contains("reverseAPIFeatureSetIndex")) {
+        settings.m_reverseAPIFeatureSetIndex = response.getSimplePttSettings()->getReverseApiFeatureSetIndex();
     }
-    if (featureSettingsKeys.contains("reverseAPIChannelIndex")) {
-        settings.m_reverseAPIFeatureIndex = response.getSimplePttSettings()->getReverseApiChannelIndex();
+    if (featureSettingsKeys.contains("reverseAPIFeatureIndex")) {
+        settings.m_reverseAPIFeatureIndex = response.getSimplePttSettings()->getReverseApiFeatureIndex();
     }
 }
 

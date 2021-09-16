@@ -29,7 +29,7 @@ AntennaToolsSettings:
       type: string
     reverseAPIPort:
       type: integer
-    reverseAPIDeviceIndex:
+    reverseAPIFeatureSetIndex:
       type: integer
-    reverseAPIChannelIndex:
+    reverseAPIFeatureIndex:
       type: integer

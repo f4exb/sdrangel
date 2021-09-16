@@ -283,8 +283,8 @@ void RigCtlServer::webapiFormatFeatureSettings(
     }
 
     response.getRigCtlServerSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.getRigCtlServerSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIFeatureSetIndex);
-    response.getRigCtlServerSettings()->setReverseApiChannelIndex(settings.m_reverseAPIFeatureIndex);
+    response.getRigCtlServerSettings()->setReverseApiFeatureSetIndex(settings.m_reverseAPIFeatureSetIndex);
+    response.getRigCtlServerSettings()->setReverseApiFeatureIndex(settings.m_reverseAPIFeatureIndex);
 }
 
 void RigCtlServer::webapiUpdateFeatureSettings(
@@ -322,11 +322,11 @@ void RigCtlServer::webapiUpdateFeatureSettings(
     if (featureSettingsKeys.contains("reverseAPIPort")) {
         settings.m_reverseAPIPort = response.getRigCtlServerSettings()->getReverseApiPort();
     }
-    if (featureSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIFeatureSetIndex = response.getRigCtlServerSettings()->getReverseApiDeviceIndex();
+    if (featureSettingsKeys.contains("reverseAPIFeatureSetIndex")) {
+        settings.m_reverseAPIFeatureSetIndex = response.getRigCtlServerSettings()->getReverseApiFeatureSetIndex();
     }
-    if (featureSettingsKeys.contains("reverseAPIChannelIndex")) {
-        settings.m_reverseAPIFeatureIndex = response.getRigCtlServerSettings()->getReverseApiChannelIndex();
+    if (featureSettingsKeys.contains("reverseAPIFeatureIndex")) {
+        settings.m_reverseAPIFeatureIndex = response.getRigCtlServerSettings()->getReverseApiFeatureIndex();
     }
 }
 

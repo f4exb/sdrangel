@@ -205,8 +205,8 @@ void AntennaTools::webapiFormatFeatureSettings(
     }
 
     response.getAntennaToolsSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.getAntennaToolsSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIFeatureSetIndex);
-    response.getAntennaToolsSettings()->setReverseApiChannelIndex(settings.m_reverseAPIFeatureIndex);
+    response.getAntennaToolsSettings()->setReverseApiFeatureSetIndex(settings.m_reverseAPIFeatureSetIndex);
+    response.getAntennaToolsSettings()->setReverseApiFeatureIndex(settings.m_reverseAPIFeatureIndex);
 }
 
 void AntennaTools::webapiUpdateFeatureSettings(
@@ -247,11 +247,11 @@ void AntennaTools::webapiUpdateFeatureSettings(
     if (featureSettingsKeys.contains("reverseAPIPort")) {
         settings.m_reverseAPIPort = response.getAntennaToolsSettings()->getReverseApiPort();
     }
-    if (featureSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIFeatureSetIndex = response.getAntennaToolsSettings()->getReverseApiDeviceIndex();
+    if (featureSettingsKeys.contains("reverseAPIFeatureSetIndex")) {
+        settings.m_reverseAPIFeatureSetIndex = response.getAntennaToolsSettings()->getReverseApiFeatureSetIndex();
     }
-    if (featureSettingsKeys.contains("reverseAPIChannelIndex")) {
-        settings.m_reverseAPIFeatureIndex = response.getAntennaToolsSettings()->getReverseApiChannelIndex();
+    if (featureSettingsKeys.contains("reverseAPIFeatureIndex")) {
+        settings.m_reverseAPIFeatureIndex = response.getAntennaToolsSettings()->getReverseApiFeatureIndex();
     }
 }
 

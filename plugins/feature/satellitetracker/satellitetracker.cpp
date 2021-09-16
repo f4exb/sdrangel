@@ -537,8 +537,8 @@ void SatelliteTracker::webapiFormatFeatureSettings(
     }
 
     response.getSatelliteTrackerSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.getSatelliteTrackerSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIFeatureSetIndex);
-    response.getSatelliteTrackerSettings()->setReverseApiChannelIndex(settings.m_reverseAPIFeatureIndex);
+    response.getSatelliteTrackerSettings()->setReverseApiFeatureSetIndex(settings.m_reverseAPIFeatureSetIndex);
+    response.getSatelliteTrackerSettings()->setReverseApiFeatureIndex(settings.m_reverseAPIFeatureIndex);
 }
 
 void SatelliteTracker::webapiUpdateFeatureSettings(
@@ -639,11 +639,11 @@ void SatelliteTracker::webapiUpdateFeatureSettings(
     if (featureSettingsKeys.contains("reverseAPIPort")) {
         settings.m_reverseAPIPort = response.getSatelliteTrackerSettings()->getReverseApiPort();
     }
-    if (featureSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIFeatureSetIndex = response.getSatelliteTrackerSettings()->getReverseApiDeviceIndex();
+    if (featureSettingsKeys.contains("reverseAPIFeatureSetIndex")) {
+        settings.m_reverseAPIFeatureSetIndex = response.getSatelliteTrackerSettings()->getReverseApiFeatureSetIndex();
     }
-    if (featureSettingsKeys.contains("reverseAPIChannelIndex")) {
-        settings.m_reverseAPIFeatureIndex = response.getSatelliteTrackerSettings()->getReverseApiChannelIndex();
+    if (featureSettingsKeys.contains("reverseAPIFeatureIndex")) {
+        settings.m_reverseAPIFeatureIndex = response.getSatelliteTrackerSettings()->getReverseApiFeatureIndex();
     }
 }
 

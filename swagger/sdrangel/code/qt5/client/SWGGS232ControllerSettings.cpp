@@ -66,10 +66,10 @@ SWGGS232ControllerSettings::SWGGS232ControllerSettings() {
     m_reverse_api_address_isSet = false;
     reverse_api_port = 0;
     m_reverse_api_port_isSet = false;
-    reverse_api_device_index = 0;
-    m_reverse_api_device_index_isSet = false;
-    reverse_api_channel_index = 0;
-    m_reverse_api_channel_index_isSet = false;
+    reverse_api_feature_set_index = 0;
+    m_reverse_api_feature_set_index_isSet = false;
+    reverse_api_feature_index = 0;
+    m_reverse_api_feature_index_isSet = false;
 }
 
 SWGGS232ControllerSettings::~SWGGS232ControllerSettings() {
@@ -116,10 +116,10 @@ SWGGS232ControllerSettings::init() {
     m_reverse_api_address_isSet = false;
     reverse_api_port = 0;
     m_reverse_api_port_isSet = false;
-    reverse_api_device_index = 0;
-    m_reverse_api_device_index_isSet = false;
-    reverse_api_channel_index = 0;
-    m_reverse_api_channel_index_isSet = false;
+    reverse_api_feature_set_index = 0;
+    m_reverse_api_feature_set_index_isSet = false;
+    reverse_api_feature_index = 0;
+    m_reverse_api_feature_index_isSet = false;
 }
 
 void
@@ -204,9 +204,9 @@ SWGGS232ControllerSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&reverse_api_port, pJson["reverseAPIPort"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&reverse_api_device_index, pJson["reverseAPIDeviceIndex"], "qint32", "");
+    ::SWGSDRangel::setValue(&reverse_api_feature_set_index, pJson["reverseAPIFeatureSetIndex"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&reverse_api_channel_index, pJson["reverseAPIChannelIndex"], "qint32", "");
+    ::SWGSDRangel::setValue(&reverse_api_feature_index, pJson["reverseAPIFeatureIndex"], "qint32", "");
     
 }
 
@@ -281,11 +281,11 @@ SWGGS232ControllerSettings::asJsonObject() {
     if(m_reverse_api_port_isSet){
         obj->insert("reverseAPIPort", QJsonValue(reverse_api_port));
     }
-    if(m_reverse_api_device_index_isSet){
-        obj->insert("reverseAPIDeviceIndex", QJsonValue(reverse_api_device_index));
+    if(m_reverse_api_feature_set_index_isSet){
+        obj->insert("reverseAPIFeatureSetIndex", QJsonValue(reverse_api_feature_set_index));
     }
-    if(m_reverse_api_channel_index_isSet){
-        obj->insert("reverseAPIChannelIndex", QJsonValue(reverse_api_channel_index));
+    if(m_reverse_api_feature_index_isSet){
+        obj->insert("reverseAPIFeatureIndex", QJsonValue(reverse_api_feature_index));
     }
 
     return obj;
@@ -482,23 +482,23 @@ SWGGS232ControllerSettings::setReverseApiPort(qint32 reverse_api_port) {
 }
 
 qint32
-SWGGS232ControllerSettings::getReverseApiDeviceIndex() {
-    return reverse_api_device_index;
+SWGGS232ControllerSettings::getReverseApiFeatureSetIndex() {
+    return reverse_api_feature_set_index;
 }
 void
-SWGGS232ControllerSettings::setReverseApiDeviceIndex(qint32 reverse_api_device_index) {
-    this->reverse_api_device_index = reverse_api_device_index;
-    this->m_reverse_api_device_index_isSet = true;
+SWGGS232ControllerSettings::setReverseApiFeatureSetIndex(qint32 reverse_api_feature_set_index) {
+    this->reverse_api_feature_set_index = reverse_api_feature_set_index;
+    this->m_reverse_api_feature_set_index_isSet = true;
 }
 
 qint32
-SWGGS232ControllerSettings::getReverseApiChannelIndex() {
-    return reverse_api_channel_index;
+SWGGS232ControllerSettings::getReverseApiFeatureIndex() {
+    return reverse_api_feature_index;
 }
 void
-SWGGS232ControllerSettings::setReverseApiChannelIndex(qint32 reverse_api_channel_index) {
-    this->reverse_api_channel_index = reverse_api_channel_index;
-    this->m_reverse_api_channel_index_isSet = true;
+SWGGS232ControllerSettings::setReverseApiFeatureIndex(qint32 reverse_api_feature_index) {
+    this->reverse_api_feature_index = reverse_api_feature_index;
+    this->m_reverse_api_feature_index_isSet = true;
 }
 
 
@@ -563,10 +563,10 @@ SWGGS232ControllerSettings::isSet(){
         if(m_reverse_api_port_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_reverse_api_device_index_isSet){
+        if(m_reverse_api_feature_set_index_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_reverse_api_channel_index_isSet){
+        if(m_reverse_api_feature_index_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);
