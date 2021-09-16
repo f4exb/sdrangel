@@ -43,6 +43,9 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGFeatureSet* fromJson(QString &jsonString) override;
 
+    qint32 getIndex();
+    void setIndex(qint32 index);
+
     qint32 getFeaturecount();
     void setFeaturecount(qint32 featurecount);
 
@@ -53,6 +56,9 @@ public:
     virtual bool isSet() override;
 
 private:
+    qint32 index;
+    bool m_index_isSet;
+
     qint32 featurecount;
     bool m_featurecount_isSet;
 

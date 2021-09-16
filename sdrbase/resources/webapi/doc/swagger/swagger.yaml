@@ -2759,8 +2759,12 @@ definitions:
   FeatureSet:
     description: "Grouping of features"
     required:
+      - index
       - featurecount
     properties:
+      index:
+        description: "Index in the list of feature sets opened in this instance"
+        type: integer
       featurecount:
         description: "Number of features in the set"
         type: integer

@@ -3767,6 +3767,7 @@ void WebAPIAdapter::getFeatureSet(SWGSDRangel::SWGFeatureSet *swgFeatureSet, con
     (void) featureSetIndex; // FIXME: the index should be present in the API FeatureSet structure
     swgFeatureSet->init();
     swgFeatureSet->setFeaturecount(featureSet->getNumberOfFeatures());
+    swgFeatureSet->setIndex(featureSetIndex);
     QList<SWGSDRangel::SWGFeature*> *features = swgFeatureSet->getFeatures();
 
     for (int i = 0; i < featureSet->getNumberOfFeatures(); i++)

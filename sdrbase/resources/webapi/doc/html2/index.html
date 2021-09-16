@@ -4913,8 +4913,12 @@ margin-bottom: 20px;
   "description" : "Base feature report. Only the feature report corresponding to the feature specified in the featureType field is or should be present."
 };
             defs.FeatureSet = {
-  "required" : [ "featurecount" ],
+  "required" : [ "featurecount", "index" ],
   "properties" : {
+    "index" : {
+      "type" : "integer",
+      "description" : "Index in the list of feature sets opened in this instance"
+    },
     "featurecount" : {
       "type" : "integer",
       "description" : "Number of features in the set"
@@ -50576,7 +50580,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-09-05T21:54:27.642+02:00
+              Generated 2021-09-12T20:10:39.058+02:00
             </div>
           </div>
       </div>

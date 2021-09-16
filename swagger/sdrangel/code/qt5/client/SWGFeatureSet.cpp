@@ -28,6 +28,8 @@ SWGFeatureSet::SWGFeatureSet(QString* json) {
 }
 
 SWGFeatureSet::SWGFeatureSet() {
+    index = 0;
+    m_index_isSet = false;
     featurecount = 0;
     m_featurecount_isSet = false;
     features = nullptr;
@@ -40,6 +42,8 @@ SWGFeatureSet::~SWGFeatureSet() {
 
 void
 SWGFeatureSet::init() {
+    index = 0;
+    m_index_isSet = false;
     featurecount = 0;
     m_featurecount_isSet = false;
     features = new QList<SWGFeature*>();
@@ -48,6 +52,7 @@ SWGFeatureSet::init() {
 
 void
 SWGFeatureSet::cleanup() {
+
 
     if(features != nullptr) { 
         auto arr = features;
@@ -69,6 +74,8 @@ SWGFeatureSet::fromJson(QString &json) {
 
 void
 SWGFeatureSet::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&index, pJson["index"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&featurecount, pJson["featurecount"], "qint32", "");
     
     
@@ -89,6 +96,9 @@ SWGFeatureSet::asJson ()
 QJsonObject*
 SWGFeatureSet::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(m_index_isSet){
+        obj->insert("index", QJsonValue(index));
+    }
     if(m_featurecount_isSet){
         obj->insert("featurecount", QJsonValue(featurecount));
     }
@@ -97,6 +107,16 @@ SWGFeatureSet::asJsonObject() {
     }
 
     return obj;
+}
+
+qint32
+SWGFeatureSet::getIndex() {
+    return index;
+}
+void
+SWGFeatureSet::setIndex(qint32 index) {
+    this->index = index;
+    this->m_index_isSet = true;
 }
 
 qint32
@@ -124,6 +144,9 @@ bool
 SWGFeatureSet::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(m_index_isSet){
+            isObjectUpdated = true; break;
+        }
         if(m_featurecount_isSet){
             isObjectUpdated = true; break;
         }
