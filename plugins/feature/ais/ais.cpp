@@ -217,6 +217,8 @@ void AIS::webapiFormatFeatureSettings(
     }
 
     response.getAisSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getAisSettings()->setReverseApiFeatureSetIndex(settings.m_reverseAPIFeatureSetIndex);
+    response.getAisSettings()->setReverseApiFeatureIndex(settings.m_reverseAPIFeatureIndex);
 }
 
 void AIS::webapiUpdateFeatureSettings(
@@ -238,6 +240,12 @@ void AIS::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("reverseAPIPort")) {
         settings.m_reverseAPIPort = response.getAisSettings()->getReverseApiPort();
+    }
+    if (featureSettingsKeys.contains("reverseAPIFeatureSetIndex")) {
+        settings.m_reverseAPIFeatureSetIndex = response.getStarTrackerSettings()->getReverseApiFeatureSetIndex();
+    }
+    if (featureSettingsKeys.contains("reverseAPIFeatureIndex")) {
+        settings.m_reverseAPIFeatureIndex = response.getStarTrackerSettings()->getReverseApiFeatureIndex();
     }
 }
 
