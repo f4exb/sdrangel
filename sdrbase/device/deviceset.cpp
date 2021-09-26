@@ -148,7 +148,7 @@ void DeviceSet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginAPI
         for (int i = 0; i < preset->getChannelCount(); i++)
         {
             const Preset::ChannelConfig& channelConfig = preset->getChannelConfig(i);
-            ChannelAPI *channelAPI;
+            ChannelAPI *channelAPI = nullptr;
 
             // if we have one instance available already, use it
 
