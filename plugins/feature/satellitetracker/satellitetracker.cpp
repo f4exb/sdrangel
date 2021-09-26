@@ -416,9 +416,9 @@ QList<SWGSDRangel::SWGSatelliteDeviceSettingsList*>* SatelliteTracker::getSWGSat
                     doppler->append(l->at(j)->m_doppler[k]);
                 }
                 deviceSettings->setDoppler(doppler);
-                deviceSettings->setStartOnAos((int)l->at(j)->m_startOnAOS);
-                deviceSettings->setStopOnLos((int)l->at(j)->m_stopOnLOS);
-                deviceSettings->setStartStopFileSinks((int)l->at(j)->m_startStopFileSink);
+                deviceSettings->setStartOnAos((int)l->at(j)->m_startOnAOS ? 1 : 0);
+                deviceSettings->setStopOnLos((int)l->at(j)->m_stopOnLOS ? 1 : 0);
+                deviceSettings->setStartStopFileSinks((int)l->at(j)->m_startStopFileSink ? 1 : 0);
                 deviceSettings->setFrequency((int)l->at(j)->m_frequency);
                 deviceSettings->setAosCommand(new QString(l->at(j)->m_aosCommand));
                 deviceSettings->setLosCommand(new QString(l->at(j)->m_losCommand));
@@ -503,15 +503,17 @@ void SatelliteTracker::webapiFormatFeatureSettings(
     response.getSatelliteTrackerSettings()->setDateTime(new QString(settings.m_dateTime));
     response.getSatelliteTrackerSettings()->setMinAosElevation(settings.m_minAOSElevation);
     response.getSatelliteTrackerSettings()->setMinPassElevation(settings.m_minPassElevation);
+    response.getSatelliteTrackerSettings()->setRotatorMaxAzimuth(settings.m_rotatorMaxAzimuth);
+    response.getSatelliteTrackerSettings()->setRotatorMaxElevation(settings.m_rotatorMaxElevation);
     response.getSatelliteTrackerSettings()->setAzElUnits((int)settings.m_azElUnits);
     response.getSatelliteTrackerSettings()->setGroundTrackPoints(settings.m_groundTrackPoints);
     response.getSatelliteTrackerSettings()->setDateFormat(new QString(settings.m_dateFormat));
-    response.getSatelliteTrackerSettings()->setUtc(settings.m_utc);
+    response.getSatelliteTrackerSettings()->setUtc(settings.m_utc ? 1 : 0);
     response.getSatelliteTrackerSettings()->setUpdatePeriod(settings.m_updatePeriod);
     response.getSatelliteTrackerSettings()->setDopplerPeriod(settings.m_dopplerPeriod);
     response.getSatelliteTrackerSettings()->setDefaultFrequency(settings.m_defaultFrequency);
-    response.getSatelliteTrackerSettings()->setDrawOnMap(settings.m_drawOnMap);
-    response.getSatelliteTrackerSettings()->setAutoTarget(settings.m_autoTarget);
+    response.getSatelliteTrackerSettings()->setDrawOnMap(settings.m_drawOnMap ? 1 : 0);
+    response.getSatelliteTrackerSettings()->setAutoTarget(settings.m_autoTarget ? 1 : 0);
     response.getSatelliteTrackerSettings()->setAosSpeech(new QString(settings.m_aosSpeech));
     response.getSatelliteTrackerSettings()->setLosSpeech(new QString(settings.m_losSpeech));
     response.getSatelliteTrackerSettings()->setAosCommand(new QString(settings.m_aosCommand));
@@ -572,6 +574,12 @@ void SatelliteTracker::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("minPassElevation")) {
         settings.m_minPassElevation = response.getSatelliteTrackerSettings()->getMinPassElevation();
+    }
+    if (featureSettingsKeys.contains("rotatorMaxAzimuth")) {
+        settings.m_rotatorMaxAzimuth = response.getSatelliteTrackerSettings()->getRotatorMaxAzimuth();
+    }
+    if (featureSettingsKeys.contains("rotatorMaxElevation")) {
+        settings.m_rotatorMaxElevation = response.getSatelliteTrackerSettings()->getRotatorMaxElevation();
     }
     if (featureSettingsKeys.contains("azElUnits")) {
         settings.m_azElUnits = (SatelliteTrackerSettings::AzElUnits)response.getSatelliteTrackerSettings()->getAzElUnits();
