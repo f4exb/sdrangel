@@ -41,15 +41,12 @@ SatelliteDeviceSettingsGUI::SatelliteDeviceSettingsGUI(SatelliteTrackerSettings:
     m_deviceSetWidget->setEditable(true);
     m_deviceSetWidget->setToolTip("Device set to control");
     formLayout->addRow("Device set", m_deviceSetWidget);
+
     addDeviceSets();
-    int devSetIdx = m_deviceSetWidget->findText(devSettings->m_deviceSet);
-    if (devSetIdx != -1)
-    {
-        m_deviceSetWidget->setCurrentIndex(devSetIdx);
-    }
-    else
-    {
-        m_deviceSetWidget->addItem(devSettings->m_deviceSet);
+
+    if (devSettings->m_deviceSetIndex < m_deviceSetWidget->count()) {
+        m_deviceSetWidget->setCurrentIndex(devSettings->m_deviceSetIndex);
+    } else {
         m_deviceSetWidget->setCurrentIndex(m_deviceSetWidget->count() - 1);
     }
 
@@ -59,19 +56,31 @@ SatelliteDeviceSettingsGUI::SatelliteDeviceSettingsGUI(SatelliteTrackerSettings:
     m_presetWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     m_presetWidget->setToolTip("Preset to load on AOS");
     formLayout->addRow("Preset", m_presetWidget);
-    addPresets(devSettings->m_deviceSet);
 
-    const MainSettings& mainSettings = MainCore::instance()->getSettings();
-    if (!devSettings->m_deviceSet.isEmpty())
+    MainCore *mainCore = MainCore::instance();
+    const std::vector<DeviceSet*>& deviceSets = mainCore->getDeviceSets();
+
+    if (devSettings->m_deviceSetIndex < (int) deviceSets.size())
     {
+        DeviceSet *deviceSet = deviceSets[devSettings->m_deviceSetIndex];
+
+        if (deviceSet->m_deviceSourceEngine) {
+            addPresets("R");
+        } else if (deviceSet->m_deviceSinkEngine) {
+            addPresets("T");
+        } else if (deviceSet->m_deviceMIMOEngine) {
+            addPresets("M");
+        }
+
+        const MainSettings& mainSettings = MainCore::instance()->getSettings();
         int count = mainSettings.getPresetCount();
         int idx = 0;
         for (int i = 0; i < count; i++)
         {
             const Preset *preset = mainSettings.getPreset(i);
-            if (   ((preset->isSourcePreset() && (devSettings->m_deviceSet[0] == "R")))
-                || ((preset->isSinkPreset() && (devSettings->m_deviceSet[0] == "T")))
-                || ((preset->isMIMOPreset() && (devSettings->m_deviceSet[0] == "M"))))
+            if (((preset->isSourcePreset() && (deviceSet->m_deviceSourceEngine)))
+                || ((preset->isSinkPreset() && (deviceSet->m_deviceSinkEngine)))
+                || ((preset->isMIMOPreset() && (deviceSet->m_deviceMIMOEngine))))
             {
                 if (   (devSettings->m_presetGroup == preset->getGroup())
                     && (devSettings->m_presetFrequency == preset->getCenterFrequency())
@@ -96,6 +105,7 @@ SatelliteDeviceSettingsGUI::SatelliteDeviceSettingsGUI(SatelliteTrackerSettings:
     for (int i = 0; i < devSettings->m_doppler.size(); i++)
     {
         int idx = devSettings->m_doppler[i];
+
         if (idx < m_dopplerItems.size()) {
             m_dopplerItems[idx]->setData(Qt::Checked, Qt::CheckStateRole);
         } else {
@@ -158,28 +168,32 @@ void SatelliteDeviceSettingsGUI::addDeviceSets()
     {
         DSPDeviceSourceEngine *deviceSourceEngine =  (*it)->m_deviceSourceEngine;
         DSPDeviceSinkEngine *deviceSinkEngine = (*it)->m_deviceSinkEngine;
+        DSPDeviceMIMOEngine *deviceMIMOEngine = (*it)->m_deviceMIMOEngine;
 
         if (deviceSourceEngine) {
             m_deviceSetWidget->addItem(QString("R%1").arg(deviceIndex), deviceIndex);
         } else if (deviceSinkEngine) {
             m_deviceSetWidget->addItem(QString("T%1").arg(deviceIndex), deviceIndex);
+        } else if (deviceMIMOEngine) {
+            m_deviceSetWidget->addItem(QString("M%1").arg(deviceIndex), deviceIndex);
         }
     }
 }
 
 // Add all available presets for a deviceset to the combobox
-void SatelliteDeviceSettingsGUI::addPresets(const QString& deviceSet)
+void SatelliteDeviceSettingsGUI::addPresets(const QString& deviceSetType)
 {
     m_presetWidget->clear();
     const MainSettings& mainSettings = MainCore::instance()->getSettings();
     int count = mainSettings.getPresetCount();
-    m_currentPresets = deviceSet[0];
+    m_currentPresetType = deviceSetType[0];
+
     for (int i = 0; i < count; i++)
     {
         const Preset *preset = mainSettings.getPreset(i);
-        if (   ((preset->isSourcePreset() && (m_currentPresets == "R")))
-            || ((preset->isSinkPreset() && (m_currentPresets == "T")))
-            || ((preset->isMIMOPreset() && (m_currentPresets == "M"))))
+        if (((preset->isSourcePreset() && (m_currentPresetType == "R")))
+            || ((preset->isSinkPreset() && (m_currentPresetType == "T")))
+            || ((preset->isMIMOPreset() && (m_currentPresetType == "M"))))
         {
             m_presetWidget->addItem(QString("%1: %2 - %3")
                                     .arg(preset->getGroup())
@@ -198,9 +212,9 @@ const Preset* SatelliteDeviceSettingsGUI::getSelectedPreset()
     for (int i = 0; i < count; i++)
     {
         const Preset *preset = mainSettings.getPreset(i);
-        if (   ((preset->isSourcePreset() && (m_currentPresets == "R")))
-            || ((preset->isSinkPreset() && (m_currentPresets == "T")))
-            || ((preset->isMIMOPreset() && (m_currentPresets == "M"))))
+        if (   ((preset->isSourcePreset() && (m_currentPresetType == "R")))
+            || ((preset->isSinkPreset() && (m_currentPresetType == "T")))
+            || ((preset->isMIMOPreset() && (m_currentPresetType == "M"))))
         {
             if (listIdx == presetIdx) {
                 return preset;
@@ -218,13 +232,14 @@ void SatelliteDeviceSettingsGUI::addChannels()
     m_dopplerItems.clear();
     const PluginManager *pluginManager = MainCore::instance()->getPluginManager();
     const Preset* preset = getSelectedPreset();
+
     if (preset != nullptr)
     {
         int channels = preset->getChannelCount();
+
         for (int i = 0; i < channels; i++)
         {
             const Preset::ChannelConfig& channelConfig = preset->getChannelConfig(i);
-
             QStandardItem *item = new QStandardItem();
             item->setText(pluginManager->uriToId(channelConfig.m_channelIdURI));
             item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
@@ -240,9 +255,10 @@ void SatelliteDeviceSettingsGUI::on_m_deviceSetWidget_currentTextChanged(const Q
 {
     if (!text.isEmpty())
     {
-        if (text[0] != m_currentPresets) {
+        if (text[0] != m_currentPresetType) {
             addPresets(text[0]);
         }
+
         // Set name of tab to match
         int currentTabIndex = m_tab->currentIndex();
         m_tab->setTabText(currentTabIndex, text);
@@ -259,8 +275,9 @@ void SatelliteDeviceSettingsGUI::on_m_presetWidget_currentIndexChanged(int index
 // Update devSettings with current GUI values
 void SatelliteDeviceSettingsGUI::accept()
 {
-    m_devSettings->m_deviceSet = m_deviceSetWidget->currentText();
+    m_devSettings->m_deviceSetIndex = m_deviceSetWidget->currentIndex();
     const Preset* preset = getSelectedPreset();
+
     if (preset != nullptr)
     {
         m_devSettings->m_presetGroup = preset->getGroup();
@@ -273,13 +290,16 @@ void SatelliteDeviceSettingsGUI::accept()
         m_devSettings->m_presetFrequency = 0;
         m_devSettings->m_presetDescription = "";
     }
+
     m_devSettings->m_doppler.clear();
+
     for (int i = 0; i < m_dopplerItems.size(); i++)
     {
         if (m_dopplerItems[i]->checkState() == Qt::Checked) {
             m_devSettings->m_doppler.append(i);
         }
     }
+
     m_devSettings->m_startOnAOS = m_startOnAOSWidget->isChecked();
     m_devSettings->m_stopOnLOS = m_stopOnLOSWidget->isChecked();
     m_devSettings->m_startStopFileSink = m_startStopFileSinkWidget->isChecked();

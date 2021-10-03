@@ -111,7 +111,25 @@ void SatelliteRadioControlDialog::on_satelliteSelect_currentIndexChanged(int ind
     for (int i = 0; i < devSettingsList->size(); i++)
     {
         SatelliteDeviceSettingsGUI *devSettingsGUI = new SatelliteDeviceSettingsGUI(devSettingsList->at(i), ui->tabWidget, ui->tabWidget);
-        ui->tabWidget->addTab(devSettingsGUI, devSettingsList->at(i)->m_deviceSet);
+        QString deviceSetString;
+        MainCore *mainCore = MainCore::instance();
+        const std::vector<DeviceSet*>& deviceSets = mainCore->getDeviceSets();
+
+        if (devSettingsList->at(i)->m_deviceSetIndex < (int) deviceSets.size())
+        {
+            const DeviceSet *deviceSet = deviceSets[devSettingsList->at(i)->m_deviceSetIndex];
+
+            if (deviceSet->m_deviceSourceEngine != nullptr) {
+                deviceSetString = tr("R%1").arg(devSettingsList->at(i)->m_deviceSetIndex);
+            } else if (deviceSet->m_deviceSinkEngine != nullptr) {
+                deviceSetString = tr("T%1").arg(devSettingsList->at(i)->m_deviceSetIndex);
+            } else if (deviceSet->m_deviceMIMOEngine != nullptr) {
+                deviceSetString = tr("M%1").arg(devSettingsList->at(i)->m_deviceSetIndex);
+            }
+
+            ui->tabWidget->addTab(devSettingsGUI, deviceSetString);
+        }
+
         m_devSettingsGUIs.append(devSettingsGUI);
     }
 

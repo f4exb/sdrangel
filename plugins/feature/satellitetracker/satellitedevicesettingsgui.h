@@ -68,7 +68,7 @@ protected:
     QLineEdit *m_frequencyWidget;
     QLineEdit *m_aosCommandWidget;
     QLineEdit *m_losCommandWidget;
-    QChar m_currentPresets;
+    QChar m_currentPresetType;
 
     QStandardItemModel m_dopplerModel;
     QList<QStandardItem *> m_dopplerItems;

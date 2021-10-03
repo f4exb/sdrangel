@@ -43,8 +43,8 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGSatelliteDeviceSettings* fromJson(QString &jsonString) override;
 
-    QString* getDeviceSet();
-    void setDeviceSet(QString* device_set);
+    qint32 getDeviceSetIndex();
+    void setDeviceSetIndex(qint32 device_set_index);
 
     QString* getPresetGroup();
     void setPresetGroup(QString* preset_group);
@@ -55,8 +55,8 @@ public:
     QString* getPresetDescription();
     void setPresetDescription(QString* preset_description);
 
-    QList<qint32>* getDoppler();
-    void setDoppler(QList<qint32>* doppler);
+    QList<QString*>* getDoppler();
+    void setDoppler(QList<QString*>* doppler);
 
     qint32 getStartOnAos();
     void setStartOnAos(qint32 start_on_aos);
@@ -80,8 +80,8 @@ public:
     virtual bool isSet() override;
 
 private:
-    QString* device_set;
-    bool m_device_set_isSet;
+    qint32 device_set_index;
+    bool m_device_set_index_isSet;
 
     QString* preset_group;
     bool m_preset_group_isSet;
@@ -92,7 +92,7 @@ private:
     QString* preset_description;
     bool m_preset_description_isSet;
 
-    QList<qint32>* doppler;
+    QList<QString*>* doppler;
     bool m_doppler_isSet;
 
     qint32 start_on_aos;

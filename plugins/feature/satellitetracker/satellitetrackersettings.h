@@ -33,7 +33,7 @@ struct SatelliteTrackerSettings
 {
     struct SatelliteDeviceSettings
     {
-        QString m_deviceSet;            //!< R0, T1...
+        int m_deviceSetIndex;           //!< Device set index in the list of device sets of the SDRangel instance
         QString m_presetGroup;          //!< Preset to load to device set
         quint64 m_presetFrequency;
         QString m_presetDescription;

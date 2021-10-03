@@ -243,7 +243,7 @@ QDataStream& operator>>(QDataStream& in, QList<SatelliteTrackerSettings::Satelli
 
 QDataStream& operator<<(QDataStream& out, const SatelliteTrackerSettings::SatelliteDeviceSettings* settings)
 {
-    out << settings->m_deviceSet;
+    out << settings->m_deviceSetIndex;
     out << settings->m_presetGroup;
     out << settings->m_presetFrequency;
     out << settings->m_presetDescription;
@@ -260,7 +260,7 @@ QDataStream& operator<<(QDataStream& out, const SatelliteTrackerSettings::Satell
 QDataStream& operator>>(QDataStream& in, SatelliteTrackerSettings::SatelliteDeviceSettings*& settings)
 {
     settings = new SatelliteTrackerSettings::SatelliteDeviceSettings();
-    in >> settings->m_deviceSet;
+    in >> settings->m_deviceSetIndex;
     in >> settings->m_presetGroup;
     in >> settings->m_presetFrequency;
     in >> settings->m_presetDescription;
@@ -292,7 +292,7 @@ void SatelliteTrackerSettings::deserializeDeviceSettings(const QByteArray& data,
 
 SatelliteTrackerSettings::SatelliteDeviceSettings::SatelliteDeviceSettings()
 {
-    m_deviceSet = "R0";
+    m_deviceSetIndex = 0;
     m_presetFrequency = 0;
     m_startOnAOS = true;
     m_stopOnLOS = true;

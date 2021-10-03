@@ -544,27 +544,40 @@ void SatelliteTrackerWorker::applyDeviceAOSSettings(const QString& name)
         for (int i = 0; i < m_deviceSettingsList->size(); i++)
         {
             SatelliteTrackerSettings::SatelliteDeviceSettings *devSettings = m_deviceSettingsList->at(i);
-            if (!devSettings->m_presetGroup.isEmpty() && !devSettings->m_deviceSet.isEmpty())
+            if (!devSettings->m_presetGroup.isEmpty())
             {
                 const MainSettings& mainSettings = mainCore->getSettings();
+                const std::vector<DeviceSet*>& deviceSets = mainCore->getDeviceSets();
 
-                QString presetType = QString(devSettings->m_deviceSet[0]);
-                const Preset* preset = mainSettings.getPreset(devSettings->m_presetGroup, devSettings->m_presetFrequency, devSettings->m_presetDescription, presetType);
-                if (preset != nullptr)
+                if (devSettings->m_deviceSetIndex < deviceSets.size())
                 {
-                    qDebug() << "SatelliteTrackerWorker::aos: Loading preset " << preset->getDescription() << " to " << devSettings->m_deviceSet[0];
-                    unsigned int deviceSetIndex = devSettings->m_deviceSet.mid(1).toInt();
-                    std::vector<DeviceSet*>& deviceSets = mainCore->getDeviceSets();
-                    if (deviceSetIndex < deviceSets.size())
+                    const DeviceSet *deviceSet = deviceSets[devSettings->m_deviceSetIndex];
+                    QString presetType;
+                    if (deviceSet->m_deviceSourceEngine != nullptr) {
+                        presetType = "R";
+                    } else if (deviceSet->m_deviceSinkEngine != nullptr) {
+                        presetType = "T";
+                    } else if (deviceSet->m_deviceMIMOEngine != nullptr) {
+                        presetType = "M";
+                    }
+
+                    const Preset* preset = mainSettings.getPreset(devSettings->m_presetGroup, devSettings->m_presetFrequency, devSettings->m_presetDescription, presetType);
+
+                    if (preset != nullptr)
                     {
-                        MainCore::MsgLoadPreset *msg = MainCore::MsgLoadPreset::create(preset, deviceSetIndex);
+                        qDebug() << "SatelliteTrackerWorker::aos: Loading preset " << preset->getDescription() << " to device set at " << devSettings->m_deviceSetIndex;
+                        MainCore::MsgLoadPreset *msg = MainCore::MsgLoadPreset::create(preset, devSettings->m_deviceSetIndex);
                         mainCore->getMainMessageQueue()->push(msg);
                     }
                     else
-                        qWarning() << "SatelliteTrackerWorker::aos: device set " << devSettings->m_deviceSet << " does not exist";
+                    {
+                        qWarning() << "SatelliteTrackerWorker::aos: Unable to get preset: " << devSettings->m_presetGroup << " " << devSettings->m_presetFrequency << " " << devSettings->m_presetDescription;
+                    }
                 }
                 else
-                    qWarning() << "SatelliteTrackerWorker::aos: Unable to get preset: " << devSettings->m_presetGroup << " " << devSettings->m_presetFrequency << " " << devSettings->m_presetDescription;
+                {
+                    qWarning() << "SatelliteTrackerWorker::aos: device set at " << devSettings->m_deviceSetIndex << " does not exist";
+                }
             }
         }
 
@@ -580,8 +593,7 @@ void SatelliteTrackerWorker::applyDeviceAOSSettings(const QString& name)
                 if (devSettings->m_frequency != 0)
                 {
                     qDebug() << "SatelliteTrackerWorker::aos: setting frequency to: " << devSettings->m_frequency;
-                    int deviceSetIndex = devSettings->m_deviceSet.mid(1).toInt();
-                    ChannelWebAPIUtils::setCenterFrequency(deviceSetIndex, devSettings->m_frequency);
+                    ChannelWebAPIUtils::setCenterFrequency(devSettings->m_deviceSetIndex, devSettings->m_frequency);
                 }
 
                 // Execute per satellite program/script
@@ -600,8 +612,7 @@ void SatelliteTrackerWorker::applyDeviceAOSSettings(const QString& name)
                 if (devSettings->m_startOnAOS)
                 {
                     qDebug() << "SatelliteTrackerWorker::aos: starting acqusition";
-                    int deviceSetIndex = devSettings->m_deviceSet.mid(1).toInt();
-                    ChannelWebAPIUtils::run(deviceSetIndex);
+                    ChannelWebAPIUtils::run(devSettings->m_deviceSetIndex);
                 }
             }
 
@@ -622,8 +633,8 @@ void SatelliteTrackerWorker::applyDeviceAOSSettings(const QString& name)
                     for (int j = 0; j < devSettings->m_doppler.size(); j++)
                     {
                         int offset;
-                        int deviceSetIndex = devSettings->m_deviceSet.mid(1).toInt();
-                        if (ChannelWebAPIUtils::getFrequencyOffset(deviceSetIndex, devSettings->m_doppler[j], offset))
+
+                        if (ChannelWebAPIUtils::getFrequencyOffset(devSettings->m_deviceSetIndex, devSettings->m_doppler[j], offset))
                         {
                             satWorkerState->m_initFrequencyOffset.append(offset);
                             qDebug() << "SatelliteTrackerWorker::applyDeviceAOSSettings: Initial frequency offset: " << offset;
@@ -655,8 +666,7 @@ void SatelliteTrackerWorker::applyDeviceAOSSettings(const QString& name)
                     if (devSettings->m_startStopFileSink)
                     {
                         qDebug() << "SatelliteTrackerWorker::aos: starting file sinks";
-                        int deviceSetIndex = devSettings->m_deviceSet.mid(1).toInt();
-                        ChannelWebAPIUtils::startStopFileSinks(deviceSetIndex, true);
+                        ChannelWebAPIUtils::startStopFileSinks(devSettings->m_deviceSetIndex, true);
                     }
                 }
             });
@@ -686,9 +696,9 @@ void SatelliteTrackerWorker::doppler(SatWorkerState *satWorkerState)
             if (devSettings->m_doppler.size() > 0)
             {
                 // Get center frequency for this device
-                int deviceSetIndex = devSettings->m_deviceSet.mid(1).toInt();
                 double centerFrequency;
-                if (ChannelWebAPIUtils::getCenterFrequency(deviceSetIndex, centerFrequency))
+
+                if (ChannelWebAPIUtils::getCenterFrequency(devSettings->m_deviceSetIndex, centerFrequency))
                 {
                     // Calculate frequency delta due to Doppler
                     double c = 299792458.0;
@@ -697,18 +707,14 @@ void SatelliteTrackerWorker::doppler(SatWorkerState *satWorkerState)
                     for (int j = 0; j < devSettings->m_doppler.size(); j++)
                     {
                         // For receive, we subtract, transmit we add
-                        int offset;
-                        if (devSettings->m_deviceSet[0] == "R")
-                            offset = satWorkerState->m_initFrequencyOffset[i] - (int)round(deltaF);
-                        else
-                            offset = satWorkerState->m_initFrequencyOffset[i] + (int)round(deltaF);
+                        int offset = satWorkerState->m_initFrequencyOffset[i] - (int)round(deltaF);
 
-                        if (!ChannelWebAPIUtils::setFrequencyOffset(deviceSetIndex, devSettings->m_doppler[j], offset))
+                        if (!ChannelWebAPIUtils::setFrequencyOffset(devSettings->m_deviceSetIndex, devSettings->m_doppler[j], offset))
                             qDebug() << "SatelliteTrackerWorker::doppler: Failed to set frequency offset";
                     }
                 }
                 else
-                    qDebug() << "SatelliteTrackerWorker::doppler: couldn't get centre frequency for " << devSettings->m_deviceSet;
+                    qDebug() << "SatelliteTrackerWorker::doppler: couldn't get centre frequency for device at " << devSettings->m_deviceSetIndex;
             }
         }
     }
@@ -746,8 +752,7 @@ void SatelliteTrackerWorker::los(SatWorkerState *satWorkerState)
                 if (devSettings->m_startStopFileSink)
                 {
                     qDebug() << "SatelliteTrackerWorker::los: stopping file sinks";
-                    int deviceSetIndex = devSettings->m_deviceSet.mid(1).toInt();
-                    ChannelWebAPIUtils::startStopFileSinks(deviceSetIndex, false);
+                    ChannelWebAPIUtils::startStopFileSinks(devSettings->m_deviceSetIndex, false);
                 }
             }
 
@@ -759,10 +764,9 @@ void SatelliteTrackerWorker::los(SatWorkerState *satWorkerState)
             for (int i = 0; i < m_deviceSettingsList->size(); i++)
             {
                 SatelliteTrackerSettings::SatelliteDeviceSettings *devSettings = m_deviceSettingsList->at(i);
-                if (devSettings->m_stopOnLOS)
-                {
-                    int deviceSetIndex = devSettings->m_deviceSet.mid(1).toInt();
-                    ChannelWebAPIUtils::stop(deviceSetIndex);
+
+                if (devSettings->m_stopOnLOS) {
+                    ChannelWebAPIUtils::stop(devSettings->m_deviceSetIndex);
                 }
             }
 

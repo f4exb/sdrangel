@@ -407,15 +407,14 @@ QList<SWGSDRangel::SWGSatelliteDeviceSettingsList*>* SatelliteTracker::getSWGSat
             for (int j = 0; j < l->size(); j++)
             {
                 SWGSDRangel::SWGSatelliteDeviceSettings* deviceSettings = new SWGSDRangel::SWGSatelliteDeviceSettings();
-                deviceSettings->setDeviceSet(new QString(l->at(j)->m_deviceSet));
+                deviceSettings->setDeviceSetIndex(l->at(j)->m_deviceSetIndex);
                 deviceSettings->setPresetGroup(new QString(l->at(j)->m_presetGroup));
                 deviceSettings->setPresetDescription(new QString(l->at(j)->m_presetDescription));
                 deviceSettings->setPresetFrequency(l->at(j)->m_presetFrequency);
-                QList<qint32>* doppler = new QList<qint32>();
+                deviceSettings->setDoppler(new QList<QString*>());
                 for (int k = 0; k < l->at(j)->m_doppler.size(); k++) {
-                    doppler->append(l->at(j)->m_doppler[k]);
+                    deviceSettings->getDoppler()->append(new QString(QString::number(l->at(j)->m_doppler[k])));
                 }
-                deviceSettings->setDoppler(doppler);
                 deviceSettings->setStartOnAos((int)l->at(j)->m_startOnAOS ? 1 : 0);
                 deviceSettings->setStopOnLos((int)l->at(j)->m_stopOnLOS ? 1 : 0);
                 deviceSettings->setStartStopFileSinks((int)l->at(j)->m_startStopFileSink ? 1 : 0);
@@ -459,12 +458,16 @@ QHash<QString, QList<SatelliteTrackerSettings::SatelliteDeviceSettings *> *> Sat
                 for (int j = 0; j < swgDeviceSettingsList->size(); j++)
                 {
                     SatelliteTrackerSettings::SatelliteDeviceSettings *deviceSettings = new SatelliteTrackerSettings::SatelliteDeviceSettings();
-                    deviceSettings->m_deviceSet = getString(swgDeviceSettingsList->at(j)->getDeviceSet());
+                    deviceSettings->m_deviceSetIndex = swgDeviceSettingsList->at(j)->getDeviceSetIndex();
                     deviceSettings->m_presetGroup = getString(swgDeviceSettingsList->at(j)->getPresetGroup());
                     deviceSettings->m_presetFrequency = swgDeviceSettingsList->at(j)->getPresetFrequency();
                     deviceSettings->m_presetDescription = getString(swgDeviceSettingsList->at(j)->getPresetDescription());
-                    if (swgDeviceSettingsList->at(j)->getDoppler()) {
-                        deviceSettings->m_doppler = *swgDeviceSettingsList->at(j)->getDoppler();
+                    deviceSettings->m_doppler.clear();
+                    if (swgDeviceSettingsList->at(j)->getDoppler())
+                    {
+                        for (auto dopplerStr : *swgDeviceSettingsList->at(j)->getDoppler()) {
+                            deviceSettings->m_doppler.append(dopplerStr->toInt());
+                        }
                     }
                     deviceSettings->m_startOnAOS = swgDeviceSettingsList->at(j)->getStartOnAos();
                     deviceSettings->m_stopOnLOS = swgDeviceSettingsList->at(j)->getStopOnLos();

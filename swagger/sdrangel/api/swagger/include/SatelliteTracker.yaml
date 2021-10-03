@@ -128,9 +128,9 @@ SatelliteDeviceSettingsList:
 SatelliteDeviceSettings:
   description: "Device set settings"
   properties:
-    deviceSet:
-      description: "Name of the device set (E.g. R0)"
-      type: string
+    deviceSetIndex:
+      description: "Index of the device set (E.g. 0)"
+      type: integer
     presetGroup:
       description: "Group for preset to load on AOS"
       type: string
@@ -142,10 +142,10 @@ SatelliteDeviceSettings:
       description: "Description of preset to load on AOS"
       type: string
     doppler:
-      description: "Whether to apply doppler correction to each channel (1 for yes, 0 for no)"
+      description: "Channel which to apply doppler correction (index as string)"
       type: array
       items:
-        type: integer
+        type: string
     startOnAOS:
       description: "Start acquisition on AOS (1 for yes, 0 for no)"
       type: integer

@@ -9976,9 +9976,9 @@ margin-bottom: 20px;
 };
             defs.SatelliteDeviceSettings = {
   "properties" : {
-    "deviceSet" : {
-      "type" : "string",
-      "description" : "Name of the device set (E.g. R0)"
+    "deviceSetIndex" : {
+      "type" : "integer",
+      "description" : "Index of the device set (E.g. 0)"
     },
     "presetGroup" : {
       "type" : "string",
@@ -9995,9 +9995,9 @@ margin-bottom: 20px;
     },
     "doppler" : {
       "type" : "array",
-      "description" : "Whether to apply doppler correction to each channel (1 for yes, 0 for no)",
+      "description" : "Channel which to apply doppler correction (index as string)",
       "items" : {
-        "type" : "integer"
+        "type" : "string"
       }
     },
     "startOnAOS" : {
@@ -50580,7 +50580,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-09-17T00:27:04.059+02:00
+              Generated 2021-10-03T09:59:26.222+02:00
             </div>
           </div>
       </div>

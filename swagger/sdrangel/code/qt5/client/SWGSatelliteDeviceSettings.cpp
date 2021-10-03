@@ -28,15 +28,15 @@ SWGSatelliteDeviceSettings::SWGSatelliteDeviceSettings(QString* json) {
 }
 
 SWGSatelliteDeviceSettings::SWGSatelliteDeviceSettings() {
-    device_set = nullptr;
-    m_device_set_isSet = false;
+    device_set_index = 0;
+    m_device_set_index_isSet = false;
     preset_group = nullptr;
     m_preset_group_isSet = false;
     preset_frequency = 0L;
     m_preset_frequency_isSet = false;
     preset_description = nullptr;
     m_preset_description_isSet = false;
-    doppler = new QList<qint32>();
+    doppler = nullptr;
     m_doppler_isSet = false;
     start_on_aos = 0;
     m_start_on_aos_isSet = false;
@@ -58,15 +58,15 @@ SWGSatelliteDeviceSettings::~SWGSatelliteDeviceSettings() {
 
 void
 SWGSatelliteDeviceSettings::init() {
-    device_set = new QString("");
-    m_device_set_isSet = false;
+    device_set_index = 0;
+    m_device_set_index_isSet = false;
     preset_group = new QString("");
     m_preset_group_isSet = false;
     preset_frequency = 0L;
     m_preset_frequency_isSet = false;
     preset_description = new QString("");
     m_preset_description_isSet = false;
-    doppler = new QList<qint32>();
+    doppler = new QList<QString*>();
     m_doppler_isSet = false;
     start_on_aos = 0;
     m_start_on_aos_isSet = false;
@@ -84,9 +84,7 @@ SWGSatelliteDeviceSettings::init() {
 
 void
 SWGSatelliteDeviceSettings::cleanup() {
-    if(device_set != nullptr) { 
-        delete device_set;
-    }
+
     if(preset_group != nullptr) { 
         delete preset_group;
     }
@@ -94,7 +92,13 @@ SWGSatelliteDeviceSettings::cleanup() {
     if(preset_description != nullptr) { 
         delete preset_description;
     }
-
+    if(doppler != nullptr) { 
+        auto arr = doppler;
+        for(auto o: *arr) { 
+            delete o;
+        }
+        delete doppler;
+    }
 
 
 
@@ -118,7 +122,7 @@ SWGSatelliteDeviceSettings::fromJson(QString &json) {
 
 void
 SWGSatelliteDeviceSettings::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&device_set, pJson["deviceSet"], "QString", "QString");
+    ::SWGSDRangel::setValue(&device_set_index, pJson["deviceSetIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&preset_group, pJson["presetGroup"], "QString", "QString");
     
@@ -127,7 +131,7 @@ SWGSatelliteDeviceSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&preset_description, pJson["presetDescription"], "QString", "QString");
     
     
-    ::SWGSDRangel::setValue(&doppler, pJson["doppler"], "QList", "qint32");
+    ::SWGSDRangel::setValue(&doppler, pJson["doppler"], "QList", "QString");
     ::SWGSDRangel::setValue(&start_on_aos, pJson["startOnAOS"], "qint32", "");
     
     ::SWGSDRangel::setValue(&stop_on_los, pJson["stopOnLOS"], "qint32", "");
@@ -156,8 +160,8 @@ SWGSatelliteDeviceSettings::asJson ()
 QJsonObject*
 SWGSatelliteDeviceSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if(device_set != nullptr && *device_set != QString("")){
-        toJsonValue(QString("deviceSet"), device_set, obj, QString("QString"));
+    if(m_device_set_index_isSet){
+        obj->insert("deviceSetIndex", QJsonValue(device_set_index));
     }
     if(preset_group != nullptr && *preset_group != QString("")){
         toJsonValue(QString("presetGroup"), preset_group, obj, QString("QString"));
@@ -169,7 +173,7 @@ SWGSatelliteDeviceSettings::asJsonObject() {
         toJsonValue(QString("presetDescription"), preset_description, obj, QString("QString"));
     }
     if(doppler && doppler->size() > 0){
-        toJsonArray((QList<void*>*)doppler, obj, "doppler", "");
+        toJsonArray((QList<void*>*)doppler, obj, "doppler", "QString");
     }
     if(m_start_on_aos_isSet){
         obj->insert("startOnAOS", QJsonValue(start_on_aos));
@@ -193,14 +197,14 @@ SWGSatelliteDeviceSettings::asJsonObject() {
     return obj;
 }
 
-QString*
-SWGSatelliteDeviceSettings::getDeviceSet() {
-    return device_set;
+qint32
+SWGSatelliteDeviceSettings::getDeviceSetIndex() {
+    return device_set_index;
 }
 void
-SWGSatelliteDeviceSettings::setDeviceSet(QString* device_set) {
-    this->device_set = device_set;
-    this->m_device_set_isSet = true;
+SWGSatelliteDeviceSettings::setDeviceSetIndex(qint32 device_set_index) {
+    this->device_set_index = device_set_index;
+    this->m_device_set_index_isSet = true;
 }
 
 QString*
@@ -233,12 +237,12 @@ SWGSatelliteDeviceSettings::setPresetDescription(QString* preset_description) {
     this->m_preset_description_isSet = true;
 }
 
-QList<qint32>*
+QList<QString*>*
 SWGSatelliteDeviceSettings::getDoppler() {
     return doppler;
 }
 void
-SWGSatelliteDeviceSettings::setDoppler(QList<qint32>* doppler) {
+SWGSatelliteDeviceSettings::setDoppler(QList<QString*>* doppler) {
     this->doppler = doppler;
     this->m_doppler_isSet = true;
 }
@@ -308,7 +312,7 @@ bool
 SWGSatelliteDeviceSettings::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(device_set && *device_set != QString("")){
+        if(m_device_set_index_isSet){
             isObjectUpdated = true; break;
         }
         if(preset_group && *preset_group != QString("")){
@@ -318,9 +322,6 @@ SWGSatelliteDeviceSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(preset_description && *preset_description != QString("")){
-            isObjectUpdated = true; break;
-        }
-        if(m_doppler_isSet){
             isObjectUpdated = true; break;
         }
         if(doppler && (doppler->size() > 0)){
