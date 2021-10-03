@@ -3757,14 +3757,12 @@ void WebAPIAdapter::getFeatureSetList(SWGSDRangel::SWGFeatureSetList* featureSet
     {
         QList<SWGSDRangel::SWGFeatureSet*> *featureSets = featureSetList->getFeatureSets();
         featureSets->append(new SWGSDRangel::SWGFeatureSet());
-
         getFeatureSet(featureSets->back(), *it, i);
     }
 }
 
 void WebAPIAdapter::getFeatureSet(SWGSDRangel::SWGFeatureSet *swgFeatureSet, const FeatureSet* featureSet, int featureSetIndex)
 {
-    (void) featureSetIndex; // FIXME: the index should be present in the API FeatureSet structure
     swgFeatureSet->init();
     swgFeatureSet->setFeaturecount(featureSet->getNumberOfFeatures());
     swgFeatureSet->setIndex(featureSetIndex);
