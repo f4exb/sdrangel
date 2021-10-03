@@ -141,21 +141,10 @@ void ValueDialZ::setValueRange(bool positiveOnly, uint numDigits, qint64 min, qi
 	m_valueMin = positiveOnly ? (min < 0 ? 0 : min) : min;
 	m_valueMax = positiveOnly ? (max < 0 ? 0 : max) : max;
 
-	if(m_value < m_valueMin)
-	{
+	if(m_value < m_valueMin) {
 		setValue(m_valueMin);
-	}
-	else if(m_value > m_valueMax)
-	{
+	} else if(m_value > m_valueMax) {
 		setValue(m_valueMax);
-	}
-	else
-	{
-	    m_text = formatText(0);
-	    m_textNew = m_text;
-	    m_value = 0;
-	    m_valueNew = m_value;
-	    update();
 	}
 }
 
