@@ -128,6 +128,7 @@ void ValueDialZ::setValue(qint64 value)
 
 	m_animationTimer.start(20);
 	m_textNew = formatText(m_valueNew);
+    emit changed(m_valueNew);
 }
 
 void ValueDialZ::setValueRange(bool positiveOnly, uint numDigits, qint64 min, qint64 max)
@@ -334,7 +335,6 @@ void ValueDialZ::mousePressEvent(QMouseEvent* event)
 
         m_valueNew = (m_value / e) * e;
         setValue(m_valueNew);
-        emit changed(m_valueNew);
         //qDebug("ValueDial::mousePressEvent: Qt::RightButton: i: %d e: %ll new: %ll", i, e, valueNew);
     }
     else if (mouseButton == Qt::LeftButton) // set cursor at current digit
@@ -425,8 +425,7 @@ void ValueDialZ::wheelEvent(QWheelEvent* event)
         }
 
         setValue(m_valueNew);
-        emit changed(m_valueNew);
-	event->accept();
+    	event->accept();
     }
 }
 
@@ -539,7 +538,6 @@ void ValueDialZ::keyPressEvent(QKeyEvent* value)
         }
 
         setValue(m_valueNew);
-        emit changed(m_valueNew);
     }
     else if(value->key() == Qt::Key_Down)
     {
@@ -569,7 +567,6 @@ void ValueDialZ::keyPressEvent(QKeyEvent* value)
         }
 
         setValue(m_valueNew);
-        emit changed(m_valueNew);
     }
 
     if(value->text().length() != 1) {
@@ -581,13 +578,11 @@ void ValueDialZ::keyPressEvent(QKeyEvent* value)
     if ((c == QChar('+')) && (m_cursor == 0) && (m_text[m_cursor] == QChar('-'))) // change sign to positive
     {
         setValue(-m_value);
-        emit changed(m_valueNew);
         update();
     }
     else if ((c == QChar('-')) && (m_cursor == 0) && (m_text[m_cursor] == QChar('+'))) // change sign to negative
     {
         setValue(-m_value);
-        emit changed(m_valueNew);
         update();
     }
     else if ((c >= QChar('0')) && (c <= QChar('9')) && (m_cursor > 0)) // digits
@@ -605,7 +600,6 @@ void ValueDialZ::keyPressEvent(QKeyEvent* value)
         v = value - v * e;
         v += d * e;
         setValue(sign*v);
-        emit changed(m_valueNew);
         m_cursor++;
 
         if (m_text[m_cursor] == m_groupSeparator) {
