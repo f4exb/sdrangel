@@ -57,8 +57,8 @@ public:
     qint32 getTrack();
     void setTrack(qint32 track);
 
-    QString* getTarget();
-    void setTarget(QString* target);
+    QString* getSource();
+    void setSource(QString* source);
 
     qint32 getAzimuthOffset();
     void setAzimuthOffset(qint32 azimuth_offset);
@@ -124,8 +124,8 @@ private:
     qint32 track;
     bool m_track_isSet;
 
-    QString* target;
-    bool m_target_isSet;
+    QString* source;
+    bool m_source_isSet;
 
     qint32 azimuth_offset;
     bool m_azimuth_offset_isSet;

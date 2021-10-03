@@ -133,6 +133,7 @@
 #include "SWGFrequencyRange.h"
 #include "SWGGLScope.h"
 #include "SWGGLSpectrum.h"
+#include "SWGGS232ControllerReport.h"
 #include "SWGGS232ControllerSettings.h"
 #include "SWGGain.h"
 #include "SWGHackRFInputSettings.h"
@@ -880,6 +881,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGGLSpectrum").compare(type) == 0) {
       SWGGLSpectrum *obj = new SWGGLSpectrum();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGGS232ControllerReport").compare(type) == 0) {
+      SWGGS232ControllerReport *obj = new SWGGS232ControllerReport();
       obj->init();
       return obj;
     }

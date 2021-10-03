@@ -184,7 +184,7 @@ void GS232ControllerGUI::displaySettings()
         ui->serialPort->lineEdit()->setText(m_settings.m_serialPort);
     ui->baudRate->setCurrentText(QString("%1").arg(m_settings.m_baudRate));
     ui->track->setChecked(m_settings.m_track);
-    ui->targets->setCurrentIndex(ui->targets->findText(m_settings.m_target));
+    ui->sources->setCurrentIndex(ui->sources->findText(m_settings.m_source));
     ui->azimuthOffset->setValue(m_settings.m_azimuthOffset);
     ui->elevationOffset->setValue(m_settings.m_elevationOffset);
     ui->azimuthMin->setValue(m_settings.m_azimuthMin);
@@ -208,29 +208,33 @@ void GS232ControllerGUI::updateSerialPortList()
 
 void GS232ControllerGUI::updatePipeList()
 {
-    QString currentText = ui->targets->currentText();
-    ui->targets->blockSignals(true);
-    ui->targets->clear();
+    QString currentText = ui->sources->currentText();
+    ui->sources->blockSignals(true);
+    ui->sources->clear();
     QList<PipeEndPoint::AvailablePipeSource>::const_iterator it = m_availablePipes.begin();
 
     for (int i = 0; it != m_availablePipes.end(); ++it, i++)
     {
-        ui->targets->addItem(it->getName());
+        ui->sources->addItem(it->getName());
     }
 
     if (currentText.isEmpty())
     {
         if (m_availablePipes.size() > 0)
-            ui->targets->setCurrentIndex(0);
+            ui->sources->setCurrentIndex(0);
     }
     else
-        ui->targets->setCurrentIndex(ui->targets->findText(currentText));
-    ui->targets->blockSignals(false);
+    {
+        ui->sources->setCurrentIndex(ui->sources->findText(currentText));
+    }
 
-    QString newText = ui->targets->currentText();
+    ui->sources->blockSignals(false);
+
+    QString newText = ui->sources->currentText();
+
     if (currentText != newText)
     {
-       m_settings.m_target = newText;
+       m_settings.m_source = newText;
        ui->targetName->setText("");
        applySettings();
     }
@@ -381,15 +385,19 @@ void GS232ControllerGUI::on_track_stateChanged(int state)
 {
     m_settings.m_track = state == Qt::Checked;
     ui->targetsLabel->setEnabled(m_settings.m_track);
-    ui->targets->setEnabled(m_settings.m_track);
-    if (!m_settings.m_track)
+    ui->sources->setEnabled(m_settings.m_track);
+
+    if (!m_settings.m_track) {
         ui->targetName->setText("");
+    }
+
     applySettings();
 }
 
-void GS232ControllerGUI::on_targets_currentTextChanged(const QString& text)
+void GS232ControllerGUI::on_sources_currentTextChanged(const QString& text)
 {
-    m_settings.m_target = text;
+    qDebug("GS232ControllerGUI::on_sources_currentTextChanged: %s", qPrintable(text));
+    m_settings.m_source = text;
     ui->targetName->setText("");
     applySettings();
 }

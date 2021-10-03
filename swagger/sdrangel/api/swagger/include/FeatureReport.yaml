@@ -11,3 +11,5 @@ FeatureReport:
       $ref: "http://swgserver:8081/api/swagger/include/AFC.yaml#/AFCReport"
     SimplePTTReport:
       $ref: "http://swgserver:8081/api/swagger/include/SimplePTT.yaml#/SimplePTTReport"
+    GS232ControllerReport:
+      $ref: "http://swgserver:8081/api/swagger/include/GS232Controller.yaml#/GS232ControllerReport"

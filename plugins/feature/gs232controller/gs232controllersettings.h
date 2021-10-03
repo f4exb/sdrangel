@@ -33,7 +33,7 @@ struct GS232ControllerSettings
     QString m_serialPort;
     int m_baudRate;
     bool m_track;
-    QString m_target;           // Plugin to get az/el from. E.g: "R0:0 ADSBDemod". Use a string, so can be set via WebAPI
+    QString m_source;           // Plugin to get az/el from. E.g: "R0:0 ADSBDemod". Use a string, so can be set via WebAPI
     int m_azimuthOffset;
     int m_elevationOffset;
     int m_azimuthMin;

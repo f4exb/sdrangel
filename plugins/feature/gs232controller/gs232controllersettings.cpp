@@ -49,7 +49,7 @@ void GS232ControllerSettings::resetToDefaults()
     m_serialPort = "";
     m_baudRate = 9600;
     m_track = false;
-    m_target = "";
+    m_source = "";
     m_title = "GS-232 Rotator Controller";
     m_rgbColor = QColor(225, 25, 99).rgb();
     m_useReverseAPI = false;
@@ -76,7 +76,7 @@ QByteArray GS232ControllerSettings::serialize() const
     s.writeString(3, m_serialPort);
     s.writeS32(4, m_baudRate);
     s.writeBool(5, m_track);
-    s.writeString(6, m_target);
+    s.writeString(6, m_source);
     s.writeString(8, m_title);
     s.writeU32(9, m_rgbColor);
     s.writeBool(10, m_useReverseAPI);
@@ -117,7 +117,7 @@ bool GS232ControllerSettings::deserialize(const QByteArray& data)
         d.readString(3, &m_serialPort, "");
         d.readS32(4, &m_baudRate, 9600);
         d.readBool(5, &m_track, false);
-        d.readString(6, &m_target, "");
+        d.readString(6, &m_source, "");
         d.readString(8, &m_title, "GS-232 Rotator Controller");
         d.readU32(9, &m_rgbColor, QColor(225, 25, 99).rgb());
         d.readBool(10, &m_useReverseAPI, false);

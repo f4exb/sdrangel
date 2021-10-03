@@ -18,8 +18,8 @@ GS232ControllerSettings:
     track:
       description: Track a target where azimuth and elevation are determined by another plugin (1 for yes, 0 for no)
       type: integer
-    target:
-      description: "Identifier of the channel or feature plugin providing target azimuth and elevation (E.g. R0:0 ADSBDemod)"
+    source:
+      description: "Identifier of the channel or feature plugin providing azimuth and elevation (E.g. R0:0 ADSBDemod)"
       type: string
     azimuthOffset:
       description: Azimuth offset in degrees
@@ -60,3 +60,12 @@ GS232ControllerSettings:
       type: integer
     reverseAPIFeatureIndex:
       type: integer
+
+GS232ControllerReport:
+  description: "GS-232 Controller report"
+  properties:
+    sources:
+      description: Names of pipe sources
+      type: array
+      items:
+        type: string

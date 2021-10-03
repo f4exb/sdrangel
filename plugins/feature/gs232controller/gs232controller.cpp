@@ -134,7 +134,7 @@ bool GS232Controller::handleMessage(const Message& cmd)
     }
     else if (MainCore::MsgTargetAzimuthElevation::match(cmd))
     {
-        // New target from another plugin
+        // New source from another plugin
         if ((m_state == StRunning) && m_settings.m_track)
         {
             MainCore::MsgTargetAzimuthElevation& msg = (MainCore::MsgTargetAzimuthElevation&) cmd;
@@ -148,7 +148,7 @@ bool GS232Controller::handleMessage(const Message& cmd)
                 }
                 else
                 {
-                    // No GUI, so save target - applySettings will propagate to worker
+                    // No GUI, so save source - applySettings will propagate to worker
                     SWGSDRangel::SWGTargetAzimuthElevation *swgTarget = msg.getSWGTargetAzimuthElevation();
                     m_settings.m_azimuth = swgTarget->getAzimuth();
                     m_settings.m_elevation = swgTarget->getElevation();
@@ -168,11 +168,12 @@ bool GS232Controller::handleMessage(const Message& cmd)
 
 void GS232Controller::updatePipes()
 {
-    QList<AvailablePipeSource> availablePipes = updateAvailablePipeSources("target", GS232ControllerSettings::m_pipeTypes, GS232ControllerSettings::m_pipeURIs, this);
+    QList<AvailablePipeSource> availablePipes = updateAvailablePipeSources("source", GS232ControllerSettings::m_pipeTypes, GS232ControllerSettings::m_pipeURIs, this);
 
     if (availablePipes != m_availablePipes)
     {
         m_availablePipes = availablePipes;
+
         if (getMessageQueueToGUI())
         {
             MsgReportPipes *msgToGUI = MsgReportPipes::create();
@@ -221,7 +222,7 @@ void GS232Controller::applySettings(const GS232ControllerSettings& settings, boo
             << " m_serialPort: " << settings.m_serialPort
             << " m_baudRate: " << settings.m_baudRate
             << " m_track: " << settings.m_track
-            << " m_target: " << settings.m_target
+            << " m_source: " << settings.m_source
             << " m_title: " << settings.m_title
             << " m_rgbColor: " << settings.m_rgbColor
             << " m_useReverseAPI: " << settings.m_useReverseAPI
@@ -248,18 +249,20 @@ void GS232Controller::applySettings(const GS232ControllerSettings& settings, boo
     if ((m_settings.m_track != settings.m_track) || force) {
         reverseAPIKeys.append("track");
     }
-    if ((m_settings.m_target != settings.m_target)
-        || (!settings.m_target.isEmpty() && (m_selectedPipe == nullptr)) // Change in available pipes
+    if ((m_settings.m_source != settings.m_source)
+        || (!settings.m_source.isEmpty() && (m_selectedPipe == nullptr)) // Change in available pipes
         || force)
     {
-        if (!settings.m_target.isEmpty())
+        if (!settings.m_source.isEmpty())
         {
-            m_selectedPipe = getPipeEndPoint(settings.m_target, m_availablePipes);
-            if (m_selectedPipe == nullptr)
-                qDebug() << "GS232Controller::applySettings: No plugin corresponding to target " << settings.m_target;
+            m_selectedPipe = getPipeEndPoint(settings.m_source, m_availablePipes);
+
+            if (m_selectedPipe == nullptr) {
+                qDebug() << "GS232Controller::applySettings: No plugin corresponding to source " << settings.m_source;
+            }
         }
 
-        reverseAPIKeys.append("target");
+        reverseAPIKeys.append("source");
     }
     if ((m_settings.m_azimuthOffset != settings.m_azimuthOffset) || force) {
         reverseAPIKeys.append("azimuthOffset");
@@ -353,6 +356,17 @@ int GS232Controller::webapiSettingsPutPatch(
     return 200;
 }
 
+int GS232Controller::webapiReportGet(
+    SWGSDRangel::SWGFeatureReport& response,
+    QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setGs232ControllerReport(new SWGSDRangel::SWGGS232ControllerReport());
+    response.getGs232ControllerReport()->init();
+    webapiFormatFeatureReport(response);
+    return 200;
+}
+
 void GS232Controller::webapiFormatFeatureSettings(
     SWGSDRangel::SWGFeatureSettings& response,
     const GS232ControllerSettings& settings)
@@ -362,6 +376,7 @@ void GS232Controller::webapiFormatFeatureSettings(
     response.getGs232ControllerSettings()->setSerialPort(new QString(settings.m_serialPort));
     response.getGs232ControllerSettings()->setBaudRate(settings.m_baudRate);
     response.getGs232ControllerSettings()->setTrack(settings.m_track);
+    response.getGs232ControllerSettings()->setSource(new QString(settings.m_source));
     response.getGs232ControllerSettings()->setAzimuthOffset(settings.m_azimuthOffset);
     response.getGs232ControllerSettings()->setElevationOffset(settings.m_elevationOffset);
     response.getGs232ControllerSettings()->setAzimuthMin(settings.m_azimuthMin);
@@ -409,8 +424,8 @@ void GS232Controller::webapiUpdateFeatureSettings(
     if (featureSettingsKeys.contains("track")) {
         settings.m_track = response.getGs232ControllerSettings()->getTrack() != 0;
     }
-    if (featureSettingsKeys.contains("target")) {
-        settings.m_target = *response.getGs232ControllerSettings()->getTarget();
+    if (featureSettingsKeys.contains("source")) {
+        settings.m_source = *response.getGs232ControllerSettings()->getSource();
     }
     if (featureSettingsKeys.contains("azimuthOffset")) {
         settings.m_azimuthOffset = response.getGs232ControllerSettings()->getAzimuthOffset();
@@ -479,8 +494,8 @@ void GS232Controller::webapiReverseSendSettings(QList<QString>& featureSettingsK
     if (featureSettingsKeys.contains("track") || force) {
         swgGS232ControllerSettings->setTrack(settings.m_track);
     }
-    if (featureSettingsKeys.contains("target") || force) {
-        swgGS232ControllerSettings->setTarget(new QString(settings.m_target));
+    if (featureSettingsKeys.contains("source") || force) {
+        swgGS232ControllerSettings->setSource(new QString(settings.m_source));
     }
     if (featureSettingsKeys.contains("azimuthOffset") || force) {
         swgGS232ControllerSettings->setAzimuthOffset(settings.m_azimuthOffset);
@@ -531,6 +546,15 @@ void GS232Controller::webapiReverseSendSettings(QList<QString>& featureSettingsK
     buffer->setParent(reply);
 
     delete swgFeatureSettings;
+}
+
+void GS232Controller::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response)
+{
+    response.getGs232ControllerReport()->setSources(new QList<QString*>());
+
+    for (int i = 0; i < m_availablePipes.size(); i++) {
+        response.getGs232ControllerReport()->getSources()->append(new QString(m_availablePipes.at(i).getName()));
+    }
 }
 
 void GS232Controller::networkManagerFinished(QNetworkReply *reply)

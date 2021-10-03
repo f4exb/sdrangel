@@ -83,7 +83,7 @@ private slots:
     void on_track_stateChanged(int state);
     void on_azimuth_valueChanged(double value);
     void on_elevation_valueChanged(double value);
-    void on_targets_currentTextChanged(const QString& text);
+    void on_sources_currentTextChanged(const QString& text);
     void on_azimuthOffset_valueChanged(int value);
     void on_elevationOffset_valueChanged(int value);
     void on_azimuthMin_valueChanged(int value);

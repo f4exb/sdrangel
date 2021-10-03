@@ -11,3 +11,5 @@ FeatureReport:
       $ref: "/doc/swagger/include/AFC.yaml#/AFCReport"
     SimplePTTReport:
       $ref: "/doc/swagger/include/SimplePTT.yaml#/SimplePTTReport"
+    GS232ControllerReport:
+      $ref: "/doc/swagger/include/GS232Controller.yaml#/GS232ControllerReport"

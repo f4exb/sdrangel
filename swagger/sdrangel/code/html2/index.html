@@ -4908,6 +4908,9 @@ margin-bottom: 20px;
     },
     "SimplePTTReport" : {
       "$ref" : "#/definitions/SimplePTTReport"
+    },
+    "GS232ControllerReport" : {
+      "$ref" : "#/definitions/GS232ControllerReport"
     }
   },
   "description" : "Base feature report. Only the feature report corresponding to the feature specified in the featureType field is or should be present."
@@ -5769,6 +5772,18 @@ margin-bottom: 20px;
   },
   "description" : "GLSpectrumGUI settings"
 };
+            defs.GS232ControllerReport = {
+  "properties" : {
+    "sources" : {
+      "type" : "array",
+      "description" : "Names of pipe sources",
+      "items" : {
+        "type" : "string"
+      }
+    }
+  },
+  "description" : "GS-232 Controller report"
+};
             defs.GS232ControllerSettings = {
   "properties" : {
     "azimuth" : {
@@ -5793,9 +5808,9 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Track a target where azimuth and elevation are determined by another plugin (1 for yes, 0 for no)"
     },
-    "target" : {
+    "source" : {
       "type" : "string",
-      "description" : "Identifier of the channel or feature plugin providing target azimuth and elevation (E.g. R0:0 ADSBDemod)"
+      "description" : "Identifier of the channel or feature plugin providing azimuth and elevation (E.g. R0:0 ADSBDemod)"
     },
     "azimuthOffset" : {
       "type" : "integer",
@@ -50580,7 +50595,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-10-03T09:59:26.222+02:00
+              Generated 2021-10-03T22:30:03.018+02:00
             </div>
           </div>
       </div>

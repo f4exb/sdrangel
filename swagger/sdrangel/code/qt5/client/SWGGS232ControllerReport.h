@@ -11,20 +11,18 @@
  */
 
 /*
- * SWGFeatureReport.h
+ * SWGGS232ControllerReport.h
  *
- * Base feature report. Only the feature report corresponding to the feature specified in the featureType field is or should be present.
+ * GS-232 Controller report
  */
 
-#ifndef SWGFeatureReport_H_
-#define SWGFeatureReport_H_
+#ifndef SWGGS232ControllerReport_H_
+#define SWGGS232ControllerReport_H_
 
 #include <QJsonObject>
 
 
-#include "SWGAFCReport.h"
-#include "SWGGS232ControllerReport.h"
-#include "SWGSimplePTTReport.h"
+#include <QList>
 #include <QString>
 
 #include "SWGObject.h"
@@ -32,49 +30,31 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGFeatureReport: public SWGObject {
+class SWG_API SWGGS232ControllerReport: public SWGObject {
 public:
-    SWGFeatureReport();
-    SWGFeatureReport(QString* json);
-    virtual ~SWGFeatureReport();
+    SWGGS232ControllerReport();
+    SWGGS232ControllerReport(QString* json);
+    virtual ~SWGGS232ControllerReport();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGFeatureReport* fromJson(QString &jsonString) override;
+    virtual SWGGS232ControllerReport* fromJson(QString &jsonString) override;
 
-    QString* getFeatureType();
-    void setFeatureType(QString* feature_type);
-
-    SWGAFCReport* getAfcReport();
-    void setAfcReport(SWGAFCReport* afc_report);
-
-    SWGSimplePTTReport* getSimplePttReport();
-    void setSimplePttReport(SWGSimplePTTReport* simple_ptt_report);
-
-    SWGGS232ControllerReport* getGs232ControllerReport();
-    void setGs232ControllerReport(SWGGS232ControllerReport* gs232_controller_report);
+    QList<QString*>* getSources();
+    void setSources(QList<QString*>* sources);
 
 
     virtual bool isSet() override;
 
 private:
-    QString* feature_type;
-    bool m_feature_type_isSet;
-
-    SWGAFCReport* afc_report;
-    bool m_afc_report_isSet;
-
-    SWGSimplePTTReport* simple_ptt_report;
-    bool m_simple_ptt_report_isSet;
-
-    SWGGS232ControllerReport* gs232_controller_report;
-    bool m_gs232_controller_report_isSet;
+    QList<QString*>* sources;
+    bool m_sources_isSet;
 
 };
 
 }
 
-#endif /* SWGFeatureReport_H_ */
+#endif /* SWGGS232ControllerReport_H_ */

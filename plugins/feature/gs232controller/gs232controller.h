@@ -126,6 +126,10 @@ public:
             SWGSDRangel::SWGFeatureSettings& response,
             QString& errorMessage);
 
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGFeatureReport& response,
+            QString& errorMessage);
+
     static void webapiFormatFeatureSettings(
         SWGSDRangel::SWGFeatureSettings& response,
         const GS232ControllerSettings& settings);
@@ -153,6 +157,7 @@ private:
     void stop();
     void applySettings(const GS232ControllerSettings& settings, bool force = false);
     void webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const GS232ControllerSettings& settings, bool force);
+    void webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response);
 
 private slots:
     void updatePipes();

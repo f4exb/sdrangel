@@ -34,6 +34,8 @@ SWGFeatureReport::SWGFeatureReport() {
     m_afc_report_isSet = false;
     simple_ptt_report = nullptr;
     m_simple_ptt_report_isSet = false;
+    gs232_controller_report = nullptr;
+    m_gs232_controller_report_isSet = false;
 }
 
 SWGFeatureReport::~SWGFeatureReport() {
@@ -48,6 +50,8 @@ SWGFeatureReport::init() {
     m_afc_report_isSet = false;
     simple_ptt_report = new SWGSimplePTTReport();
     m_simple_ptt_report_isSet = false;
+    gs232_controller_report = new SWGGS232ControllerReport();
+    m_gs232_controller_report_isSet = false;
 }
 
 void
@@ -60,6 +64,9 @@ SWGFeatureReport::cleanup() {
     }
     if(simple_ptt_report != nullptr) { 
         delete simple_ptt_report;
+    }
+    if(gs232_controller_report != nullptr) { 
+        delete gs232_controller_report;
     }
 }
 
@@ -79,6 +86,8 @@ SWGFeatureReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&afc_report, pJson["AFCReport"], "SWGAFCReport", "SWGAFCReport");
     
     ::SWGSDRangel::setValue(&simple_ptt_report, pJson["SimplePTTReport"], "SWGSimplePTTReport", "SWGSimplePTTReport");
+    
+    ::SWGSDRangel::setValue(&gs232_controller_report, pJson["GS232ControllerReport"], "SWGGS232ControllerReport", "SWGGS232ControllerReport");
     
 }
 
@@ -104,6 +113,9 @@ SWGFeatureReport::asJsonObject() {
     }
     if((simple_ptt_report != nullptr) && (simple_ptt_report->isSet())){
         toJsonValue(QString("SimplePTTReport"), simple_ptt_report, obj, QString("SWGSimplePTTReport"));
+    }
+    if((gs232_controller_report != nullptr) && (gs232_controller_report->isSet())){
+        toJsonValue(QString("GS232ControllerReport"), gs232_controller_report, obj, QString("SWGGS232ControllerReport"));
     }
 
     return obj;
@@ -139,6 +151,16 @@ SWGFeatureReport::setSimplePttReport(SWGSimplePTTReport* simple_ptt_report) {
     this->m_simple_ptt_report_isSet = true;
 }
 
+SWGGS232ControllerReport*
+SWGFeatureReport::getGs232ControllerReport() {
+    return gs232_controller_report;
+}
+void
+SWGFeatureReport::setGs232ControllerReport(SWGGS232ControllerReport* gs232_controller_report) {
+    this->gs232_controller_report = gs232_controller_report;
+    this->m_gs232_controller_report_isSet = true;
+}
+
 
 bool
 SWGFeatureReport::isSet(){
@@ -151,6 +173,9 @@ SWGFeatureReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(simple_ptt_report && simple_ptt_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(gs232_controller_report && gs232_controller_report->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

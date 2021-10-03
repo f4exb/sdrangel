@@ -38,8 +38,8 @@ SWGGS232ControllerSettings::SWGGS232ControllerSettings() {
     m_baud_rate_isSet = false;
     track = 0;
     m_track_isSet = false;
-    target = nullptr;
-    m_target_isSet = false;
+    source = nullptr;
+    m_source_isSet = false;
     azimuth_offset = 0;
     m_azimuth_offset_isSet = false;
     elevation_offset = 0;
@@ -88,8 +88,8 @@ SWGGS232ControllerSettings::init() {
     m_baud_rate_isSet = false;
     track = 0;
     m_track_isSet = false;
-    target = new QString("");
-    m_target_isSet = false;
+    source = new QString("");
+    m_source_isSet = false;
     azimuth_offset = 0;
     m_azimuth_offset_isSet = false;
     elevation_offset = 0;
@@ -131,8 +131,8 @@ SWGGS232ControllerSettings::cleanup() {
     }
 
 
-    if(target != nullptr) { 
-        delete target;
+    if(source != nullptr) { 
+        delete source;
     }
 
 
@@ -176,7 +176,7 @@ SWGGS232ControllerSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&track, pJson["track"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&target, pJson["target"], "QString", "QString");
+    ::SWGSDRangel::setValue(&source, pJson["source"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&azimuth_offset, pJson["azimuthOffset"], "qint32", "");
     
@@ -239,8 +239,8 @@ SWGGS232ControllerSettings::asJsonObject() {
     if(m_track_isSet){
         obj->insert("track", QJsonValue(track));
     }
-    if(target != nullptr && *target != QString("")){
-        toJsonValue(QString("target"), target, obj, QString("QString"));
+    if(source != nullptr && *source != QString("")){
+        toJsonValue(QString("source"), source, obj, QString("QString"));
     }
     if(m_azimuth_offset_isSet){
         obj->insert("azimuthOffset", QJsonValue(azimuth_offset));
@@ -342,13 +342,13 @@ SWGGS232ControllerSettings::setTrack(qint32 track) {
 }
 
 QString*
-SWGGS232ControllerSettings::getTarget() {
-    return target;
+SWGGS232ControllerSettings::getSource() {
+    return source;
 }
 void
-SWGGS232ControllerSettings::setTarget(QString* target) {
-    this->target = target;
-    this->m_target_isSet = true;
+SWGGS232ControllerSettings::setSource(QString* source) {
+    this->source = source;
+    this->m_source_isSet = true;
 }
 
 qint32
@@ -521,7 +521,7 @@ SWGGS232ControllerSettings::isSet(){
         if(m_track_isSet){
             isObjectUpdated = true; break;
         }
-        if(target && *target != QString("")){
+        if(source && *source != QString("")){
             isObjectUpdated = true; break;
         }
         if(m_azimuth_offset_isSet){
