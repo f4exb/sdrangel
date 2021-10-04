@@ -69,3 +69,8 @@ GS232ControllerReport:
       type: array
       items:
         type: string
+    serialPorts:
+      description: Available serial ports
+      type: array
+      items:
+        type: string

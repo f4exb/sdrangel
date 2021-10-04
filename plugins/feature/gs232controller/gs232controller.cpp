@@ -21,6 +21,7 @@
 #include <QNetworkReply>
 #include <QBuffer>
 #include <QRegExp>
+#include <QSerialPortInfo>
 
 #include "SWGFeatureSettings.h"
 #include "SWGFeatureReport.h"
@@ -402,6 +403,8 @@ void GS232Controller::webapiFormatFeatureSettings(
     }
 
     response.getGs232ControllerSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getGs232ControllerSettings()->setReverseApiFeatureSetIndex(settings.m_reverseAPIFeatureSetIndex);
+    response.getGs232ControllerSettings()->setReverseApiFeatureIndex(settings.m_reverseAPIFeatureIndex);
 }
 
 void GS232Controller::webapiUpdateFeatureSettings(
@@ -419,7 +422,7 @@ void GS232Controller::webapiUpdateFeatureSettings(
         settings.m_serialPort = *response.getGs232ControllerSettings()->getSerialPort();
     }
     if (featureSettingsKeys.contains("baudRate")) {
-        settings.m_serialPort = response.getGs232ControllerSettings()->getBaudRate();
+        settings.m_baudRate = response.getGs232ControllerSettings()->getBaudRate();
     }
     if (featureSettingsKeys.contains("track")) {
         settings.m_track = response.getGs232ControllerSettings()->getTrack() != 0;
@@ -465,6 +468,12 @@ void GS232Controller::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("reverseAPIPort")) {
         settings.m_reverseAPIPort = response.getGs232ControllerSettings()->getReverseApiPort();
+    }
+    if (featureSettingsKeys.contains("reverseAPIFeatureSetIndex")) {
+        settings.m_reverseAPIFeatureSetIndex = response.getGs232ControllerSettings()->getReverseApiFeatureSetIndex();
+    }
+    if (featureSettingsKeys.contains("reverseAPIFeatureIndex")) {
+        settings.m_reverseAPIFeatureIndex = response.getGs232ControllerSettings()->getReverseApiFeatureIndex();
     }
 }
 
@@ -554,6 +563,16 @@ void GS232Controller::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& r
 
     for (int i = 0; i < m_availablePipes.size(); i++) {
         response.getGs232ControllerReport()->getSources()->append(new QString(m_availablePipes.at(i).getName()));
+    }
+
+    QList<QSerialPortInfo> serialPorts = QSerialPortInfo::availablePorts();
+    QListIterator<QSerialPortInfo> i(serialPorts);
+    response.getGs232ControllerReport()->setSerialPorts(new QList<QString*>());
+
+    while (i.hasNext())
+    {
+        QSerialPortInfo info = i.next();
+        response.getGs232ControllerReport()->getSerialPorts()->append(new QString(info.portName()));
     }
 }
 

@@ -46,12 +46,18 @@ public:
     QList<QString*>* getSources();
     void setSources(QList<QString*>* sources);
 
+    QList<QString*>* getSerialPorts();
+    void setSerialPorts(QList<QString*>* serial_ports);
+
 
     virtual bool isSet() override;
 
 private:
     QList<QString*>* sources;
     bool m_sources_isSet;
+
+    QList<QString*>* serial_ports;
+    bool m_serial_ports_isSet;
 
 };
 

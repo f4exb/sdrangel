@@ -30,6 +30,8 @@ SWGGS232ControllerReport::SWGGS232ControllerReport(QString* json) {
 SWGGS232ControllerReport::SWGGS232ControllerReport() {
     sources = nullptr;
     m_sources_isSet = false;
+    serial_ports = nullptr;
+    m_serial_ports_isSet = false;
 }
 
 SWGGS232ControllerReport::~SWGGS232ControllerReport() {
@@ -40,6 +42,8 @@ void
 SWGGS232ControllerReport::init() {
     sources = new QList<QString*>();
     m_sources_isSet = false;
+    serial_ports = new QList<QString*>();
+    m_serial_ports_isSet = false;
 }
 
 void
@@ -50,6 +54,13 @@ SWGGS232ControllerReport::cleanup() {
             delete o;
         }
         delete sources;
+    }
+    if(serial_ports != nullptr) { 
+        auto arr = serial_ports;
+        for(auto o: *arr) { 
+            delete o;
+        }
+        delete serial_ports;
     }
 }
 
@@ -66,6 +77,8 @@ void
 SWGGS232ControllerReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&sources, pJson["sources"], "QList", "QString");
+    
+    ::SWGSDRangel::setValue(&serial_ports, pJson["serialPorts"], "QList", "QString");
 }
 
 QString
@@ -85,6 +98,9 @@ SWGGS232ControllerReport::asJsonObject() {
     if(sources && sources->size() > 0){
         toJsonArray((QList<void*>*)sources, obj, "sources", "QString");
     }
+    if(serial_ports && serial_ports->size() > 0){
+        toJsonArray((QList<void*>*)serial_ports, obj, "serialPorts", "QString");
+    }
 
     return obj;
 }
@@ -99,12 +115,25 @@ SWGGS232ControllerReport::setSources(QList<QString*>* sources) {
     this->m_sources_isSet = true;
 }
 
+QList<QString*>*
+SWGGS232ControllerReport::getSerialPorts() {
+    return serial_ports;
+}
+void
+SWGGS232ControllerReport::setSerialPorts(QList<QString*>* serial_ports) {
+    this->serial_ports = serial_ports;
+    this->m_serial_ports_isSet = true;
+}
+
 
 bool
 SWGGS232ControllerReport::isSet(){
     bool isObjectUpdated = false;
     do{
         if(sources && (sources->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(serial_ports && (serial_ports->size() > 0)){
             isObjectUpdated = true; break;
         }
     }while(false);
