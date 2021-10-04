@@ -1,3 +1,16 @@
+sdrangel (6.16.6-1) unstable; urgency=medium
+
+  * DeviceSet: Fixed pointer initialization. Fixes #1000
+  * ValueDialZ: removed set value to 0 code if value is in range. Fixes #1004
+  * GS232 Controller API: added serial devices to report + fixes
+  * SatelliteTracker: API: added rotator data
+  * SatelliteTracker: use device set index. API: fixed doppler channels
+  * AIS Feature: fixed feature set index and feature index in API
+  * API: Features: correct feature set and feature indexes
+  * API: added index in FeatureSet structure
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 04 Oct 2021 19:03:07 +0200
+
 sdrangel (6.16.5-1) unstable; urgency=medium
 
   * API: added PUT, PATCH, POST /sdrangel/featureset/{featureSetIndex}/preset. Issue #998.
