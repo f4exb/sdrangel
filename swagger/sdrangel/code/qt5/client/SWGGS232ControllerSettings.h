@@ -78,8 +78,8 @@ public:
     qint32 getElevationMax();
     void setElevationMax(qint32 elevation_max);
 
-    qint32 getTolerance();
-    void setTolerance(qint32 tolerance);
+    float getTolerance();
+    void setTolerance(float tolerance);
 
     qint32 getProtocol();
     void setProtocol(qint32 protocol);
@@ -145,7 +145,7 @@ private:
     qint32 elevation_max;
     bool m_elevation_max_isSet;
 
-    qint32 tolerance;
+    float tolerance;
     bool m_tolerance_isSet;
 
     qint32 protocol;

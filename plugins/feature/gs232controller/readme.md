@@ -2,7 +2,7 @@
 
 <h2>Introduction</h2>
 
-The GS-232 Rotator Controller feature plugin allows SDRangel to send commands to GS-232 rotators. This allows SDRangel to point antennas mounted on a rotator to a specified azimuth and elevation.
+The GS-232 Rotator Controller feature plugin allows SDRangel to send commands to GS-232 and SPID rotators. This allows SDRangel to point antennas mounted on a rotator to a specified azimuth and elevation.
 
 Azimuth and elevation can be set manually by a user in the GUI, via the REST API, or via another plugin, such as the Map Feature, the ADS-B Demodulator, or the Star Tracker.
 
@@ -12,17 +12,19 @@ Azimuth and elevation can be set manually by a user in the GUI, via the REST API
 
 <h3>1: Start/Stop plugin</h3>
 
-This button starts or stops the plugin. When the plugin is stopped, azimuth and elevation commands will not be sent to the GS-232 rotator.
+This button starts or stops the plugin. When the plugin is stopped, azimuth and elevation commands will not be sent to the rotator.
+
+When started, the background will be green if the rotator is pointing at target azimuth and elevation within the specified tolerance. When off target (i.e. while rotating) the background will be yellow.
 
 <h3>2: Azimuth</h3>
 
 Specifies the target azimuth (angle in degrees, clockwise from North) to point the antenna towards. Valid values range from 0 to 450 degrees.
-The value to the right of the target azimuth, is the current azimuth read from the GS-232 rotator.
+The value to the right of the target azimuth, is the current azimuth read from the rotator.
 
 <h3>3: Elevation</h3>
 
 Specifies the target elevation (angle in degrees) to point the antenna towards. Valid values range from 0 to 180 degrees, where 0 and 180 point towards the horizon and 90 degrees to zenith.
-The value to the right of the target elevation, is the current elevation read from the GS-232 rotator.
+The value to the right of the target elevation, is the current elevation read from the rotator.
 
 <h3>4: Track</h3>
 
@@ -52,11 +54,11 @@ If it is set to 2, then a change in azimuth of +-1 degree from the previous azim
 
 <h3>9: Serial Port</h3>
 
-Specifies the serial port (E.g. COM3 on Windows or /dev/ttyS0 on Linux) that will be used to send commands to the GS-232 rotator.
+Specifies the serial port (E.g. COM3 on Windows or /dev/ttyS0 on Linux) that will be used to send commands to the rotator.
 
 <h3>10: Baud rate</h3>
 
-Specifies the baud rate that will be used to send commands to the GS-232 rotator. Typically this is 9600.
+Specifies the baud rate that will be used to send commands to the rotator. Typically this is 9600 for GS-232.
 
 <h3>11: Azimuth Offset</h3>
 

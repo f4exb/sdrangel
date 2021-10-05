@@ -18,7 +18,6 @@
 
 #include <cmath>
 #include <QMessageBox>
-#include <QLineEdit>
 #include <QSerialPortInfo>
 
 #include "SWGTargetAzimuthElevation.h"
@@ -136,7 +135,8 @@ GS232ControllerGUI::GS232ControllerGUI(PluginAPI* pluginAPI, FeatureUISet *featu
     m_pluginAPI(pluginAPI),
     m_featureUISet(featureUISet),
     m_doApplySettings(true),
-    m_lastFeatureState(0)
+    m_lastFeatureState(0),
+    m_lastOnTarget(false)
 {
     ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose, true);
@@ -151,7 +151,7 @@ GS232ControllerGUI::GS232ControllerGUI(PluginAPI* pluginAPI, FeatureUISet *featu
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
     connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
-    m_statusTimer.start(1000);
+    m_statusTimer.start(250);
 
     ui->azimuthCurrentText->setText("-");
     ui->elevationCurrentText->setText("-");
@@ -191,6 +191,7 @@ void GS232ControllerGUI::displaySettings()
     ui->azimuthMax->setValue(m_settings.m_azimuthMax);
     ui->elevationMin->setValue(m_settings.m_elevationMin);
     ui->elevationMax->setValue(m_settings.m_elevationMax);
+    ui->tolerance->setValue(m_settings.m_tolerance);
     blockApplySettings(false);
 }
 
@@ -375,7 +376,7 @@ void GS232ControllerGUI::on_elevationMax_valueChanged(int value)
     applySettings();
 }
 
-void GS232ControllerGUI::on_tolerance_valueChanged(int value)
+void GS232ControllerGUI::on_tolerance_valueChanged(double value)
 {
     m_settings.m_tolerance = value;
     applySettings();
@@ -405,6 +406,7 @@ void GS232ControllerGUI::on_sources_currentTextChanged(const QString& text)
 void GS232ControllerGUI::updateStatus()
 {
     int state = m_gs232Controller->getState();
+    bool onTarget = m_gs232Controller->getOnTarget();
 
     if (m_lastFeatureState != state)
     {
@@ -425,7 +427,12 @@ void GS232ControllerGUI::updateStatus()
                 oldState = ui->startStop->blockSignals(true);
                 ui->startStop->setChecked(true);
                 ui->startStop->blockSignals(oldState);
-                ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
+                if (onTarget) {
+                    ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
+                } else {
+                    ui->startStop->setStyleSheet("QToolButton { background-color : yellow; }");
+                }
+                m_lastOnTarget = onTarget;
                 break;
             case Feature::StError:
                 ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
@@ -436,6 +443,18 @@ void GS232ControllerGUI::updateStatus()
         }
 
         m_lastFeatureState = state;
+    }
+    else if (state == Feature::StRunning)
+    {
+        if (onTarget != m_lastOnTarget)
+        {
+            if (onTarget) {
+                ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
+            } else {
+                ui->startStop->setStyleSheet("QToolButton { background-color : yellow; }");
+            }
+        }
+        m_lastOnTarget = onTarget;
     }
 }
 

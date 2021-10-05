@@ -139,6 +139,8 @@ public:
             const QStringList& featureSettingsKeys,
             SWGSDRangel::SWGFeatureSettings& response);
 
+    bool getOnTarget() const;
+
     static const char* const m_featureIdURI;
     static const char* const m_featureId;
 
@@ -152,6 +154,9 @@ private:
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
+
+    float m_currentAzimuth;
+    float m_currentElevation;
 
     void start();
     void stop();

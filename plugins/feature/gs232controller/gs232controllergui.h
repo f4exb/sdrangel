@@ -57,6 +57,7 @@ private:
     MessageQueue m_inputMessageQueue;
     QTimer m_statusTimer;
     int m_lastFeatureState;
+    bool m_lastOnTarget;
 
     explicit GS232ControllerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent = nullptr);
     virtual ~GS232ControllerGUI();
@@ -90,7 +91,7 @@ private slots:
     void on_azimuthMax_valueChanged(int value);
     void on_elevationMin_valueChanged(int value);
     void on_elevationMax_valueChanged(int value);
-    void on_tolerance_valueChanged(int value);
+    void on_tolerance_valueChanged(double value);
     void updateStatus();
 };
 

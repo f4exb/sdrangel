@@ -40,7 +40,7 @@ struct GS232ControllerSettings
     int m_azimuthMax;
     int m_elevationMin;
     int m_elevationMax;
-    int m_tolerance;
+    float m_tolerance;
     enum Protocol { GS232, SPID } m_protocol;
     QString m_title;
     quint32 m_rgbColor;
@@ -54,6 +54,7 @@ struct GS232ControllerSettings
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void calcTargetAzEl(float& targetAz, float& targetEl) const;
 
     static const QStringList m_pipeTypes;
     static const QStringList m_pipeURIs;

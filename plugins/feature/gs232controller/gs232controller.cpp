@@ -20,7 +20,6 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QBuffer>
-#include <QRegExp>
 #include <QSerialPortInfo>
 
 #include "SWGFeatureSettings.h"
@@ -31,7 +30,6 @@
 
 #include "dsp/dspengine.h"
 #include "device/deviceset.h"
-#include "channel/channelapi.h"
 #include "feature/featureset.h"
 #include "maincore.h"
 
@@ -78,7 +76,6 @@ void GS232Controller::start()
 
     m_worker->reset();
     m_worker->setMessageQueueToFeature(getInputMessageQueue());
-    m_worker->setMessageQueueToGUI(getMessageQueueToGUI());
     bool ok = m_worker->startWork();
     m_state = ok ? StRunning : StError;
     m_thread.start();
@@ -133,6 +130,18 @@ bool GS232Controller::handleMessage(const Message& cmd)
         }
         return true;
     }
+    else if (GS232ControllerReport::MsgReportAzAl::match(cmd))
+    {
+        GS232ControllerReport::MsgReportAzAl& report = (GS232ControllerReport::MsgReportAzAl&) cmd;
+        // Save state for Web report/getOnTarget
+        m_currentAzimuth = report.getAzimuth();
+        m_currentElevation = report.getElevation();
+        // Forward to GUI
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new GS232ControllerReport::MsgReportAzAl(report));
+        }
+        return true;
+    }
     else if (MainCore::MsgTargetAzimuthElevation::match(cmd))
     {
         // New source from another plugin
@@ -167,9 +176,20 @@ bool GS232Controller::handleMessage(const Message& cmd)
     }
 }
 
+// Calculate whether last received az/el was on target
+bool GS232Controller::getOnTarget() const
+{
+    float targetAziumth, targetElevation;
+    m_settings.calcTargetAzEl(targetAziumth, targetElevation);
+    float readTolerance = m_settings.m_tolerance + 0.5f;
+    bool onTarget =   (abs(m_currentAzimuth - targetAziumth) < readTolerance)
+                   && (abs(m_currentElevation - targetElevation) < readTolerance);
+    return onTarget;
+}
+
 void GS232Controller::updatePipes()
 {
-    QList<AvailablePipeSource> availablePipes = updateAvailablePipeSources("source", GS232ControllerSettings::m_pipeTypes, GS232ControllerSettings::m_pipeURIs, this);
+    QList<AvailablePipeSource> availablePipes = updateAvailablePipeSources("target", GS232ControllerSettings::m_pipeTypes, GS232ControllerSettings::m_pipeURIs, this);
 
     if (availablePipes != m_availablePipes)
     {
@@ -574,6 +594,14 @@ void GS232Controller::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& r
         QSerialPortInfo info = i.next();
         response.getGs232ControllerReport()->getSerialPorts()->append(new QString(info.portName()));
     }
+
+    float azimuth, elevation;
+    m_settings.calcTargetAzEl(azimuth, elevation);
+    response.getGs232ControllerReport()->setTargetAzimuth(azimuth);
+    response.getGs232ControllerReport()->setTargetElevation(elevation);
+    response.getGs232ControllerReport()->setCurrentAzimuth(m_currentAzimuth);
+    response.getGs232ControllerReport()->setCurrentElevation(m_currentElevation);
+    response.getGs232ControllerReport()->setOnTarget(getOnTarget());
 }
 
 void GS232Controller::networkManagerFinished(QNetworkReply *reply)
