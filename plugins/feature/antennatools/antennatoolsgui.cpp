@@ -163,6 +163,7 @@ void AntennaToolsGUI::displaySettings()
     calcDishFocalLength();
     calcDishBeamwidth();
     calcDishGain();
+    calcDishEffectiveArea();
 }
 
 void AntennaToolsGUI::leaveEvent(QEvent*)
@@ -410,7 +411,10 @@ void AntennaToolsGUI::calcDishFocalLength()
 
 void AntennaToolsGUI::calcDishBeamwidth()
 {
-    double beamwidth = 70.0 * dishLambda() / dishDiameterMetres();
+    // The constant here depends on the illumination tapering.
+    // 1.15 equals about 10dB: (4.14) in Fundamentals of Radio Astronomy
+    // 1.2 is also a commonly used value: https://www.cv.nrao.edu/~sransom/web/Ch3.html#E96
+    double beamwidth = Units::radiansToDegrees(1.15 * dishLambda() / dishDiameterMetres());
     ui->dishBeamwidth->setValue(beamwidth);
 }
 
@@ -424,12 +428,22 @@ void AntennaToolsGUI::calcDishGain()
     ui->dishGain->setValue(gainDB);
 }
 
+void AntennaToolsGUI::calcDishEffectiveArea()
+{
+    double gainDB = ui->dishGain->value();
+    double g = pow(10.0, gainDB/10.0);
+    double lambda = dishLambda();
+    double ae = g * lambda * lambda / (4.0 * M_PI);
+    ui->dishEffectiveArea->setValue(ae);
+}
+
 void AntennaToolsGUI::on_dishFrequency_valueChanged(double value)
 {
     m_settings.m_dishFrequencyMHz = value;
     applySettings();
     calcDishBeamwidth();
     calcDishGain();
+    calcDishEffectiveArea();
 }
 
 void AntennaToolsGUI::on_dishFrequencySelect_currentIndexChanged(int index)
@@ -453,6 +467,7 @@ void AntennaToolsGUI::on_dishDiameter_valueChanged(double value)
     calcDishFocalLength();
     calcDishBeamwidth();
     calcDishGain();
+    calcDishEffectiveArea();
 }
 
 void AntennaToolsGUI::on_dishLengthUnits_currentIndexChanged(int index)
@@ -462,6 +477,7 @@ void AntennaToolsGUI::on_dishLengthUnits_currentIndexChanged(int index)
     calcDishFocalLength();
     calcDishBeamwidth();
     calcDishGain();
+    calcDishEffectiveArea();
 }
 
 void AntennaToolsGUI::on_dishDepth_valueChanged(double value)
@@ -476,6 +492,7 @@ void AntennaToolsGUI::on_dishEfficiency_valueChanged(int value)
     m_settings.m_dishEfficiency = value;
     applySettings();
     calcDishGain();
+    calcDishEffectiveArea();
 }
 
 void AntennaToolsGUI::on_dishSurfaceError_valueChanged(double value)
@@ -483,6 +500,7 @@ void AntennaToolsGUI::on_dishSurfaceError_valueChanged(double value)
     m_settings.m_dishSurfaceError= value;
     applySettings();
     calcDishGain();
+    calcDishEffectiveArea();
 }
 
 double AntennaToolsGUI::getDeviceSetFrequencyMHz(int index)

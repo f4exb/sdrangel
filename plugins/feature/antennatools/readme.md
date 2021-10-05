@@ -111,9 +111,11 @@ Displays the calculated focal length to diameter ratio.
 
 <h3>16: Beamwidth</h3>
 
-Displays the halfpower (-3dB) beamwidth.
+Displays the halfpower (-3dB) beamwidth in degrees.
 
-Beamwidth is calculated as: 70*lambda/D.
+Beamwidth is calculated as: pi/180*1.15*lambda/D.
+
+Note that the constant 1.15 is dependent upon illumination tapering, which is determined by the feed.
 
 <h3>17: Gain</h3>
 
@@ -122,3 +124,9 @@ Displays the calculated gain in dB.
 The nominal gain is calculated as: g0=10\*log10(eff/100.0\*(pi*D/lambda)^2)
 
 The gain is then adjusted for surface error with Ruze's equation: g=g0-685.81*(e/lambda)^2
+
+<h3>18: Effective area</h3>
+
+Displays the effective area in m^2.
+
+Aeff is calculated as: g*lambda^2/(4*pi)
