@@ -74,6 +74,7 @@ private:
     void calcDishFocalLength();
     void calcDishBeamwidth();
     void calcDishGain();
+    void calcDishEffectiveArea();
     double dishLambda() const;
     double dishLengthMetres(double length) const;
     double dishMetresToLength(double m) const;
