@@ -76,7 +76,7 @@ for:
       - sh: echo 'debconf debconf/frontend select Noninteractive' | sudo debconf-set-selections
       # not sdrplay with soapysdr; libairspyhf-dev is too old (no lna)
       - sh: |
-          sudo apt-get -y install build-essential cmake git \
+          sudo apt-get -y install build-essential cmake git xxd \
             devscripts fakeroot debhelper libfftw3-dev qtbase5-dev libqt5opengl5-dev \
             qttools5-dev qttools5-dev-tools qtmultimedia5-dev libqt5multimedia5-plugins libqt5websockets5-dev \
             libqt5quick5 \
