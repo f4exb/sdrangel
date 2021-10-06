@@ -73,6 +73,7 @@ for:
       - $HOME/external/
     install:
       - sh: sudo apt-get update
+      - sh: echo 'debconf debconf/frontend select Noninteractive' | sudo debconf-set-selections
       # not sdrplay with soapysdr; libairspyhf-dev is too old (no lna)
       - sh: |
           sudo apt-get -y install build-essential cmake git \
