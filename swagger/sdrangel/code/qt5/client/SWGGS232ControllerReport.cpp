@@ -32,6 +32,16 @@ SWGGS232ControllerReport::SWGGS232ControllerReport() {
     m_sources_isSet = false;
     serial_ports = nullptr;
     m_serial_ports_isSet = false;
+    target_azimuth = 0.0f;
+    m_target_azimuth_isSet = false;
+    target_elevation = 0.0f;
+    m_target_elevation_isSet = false;
+    current_azimuth = 0.0f;
+    m_current_azimuth_isSet = false;
+    current_elevation = 0.0f;
+    m_current_elevation_isSet = false;
+    on_target = 0;
+    m_on_target_isSet = false;
 }
 
 SWGGS232ControllerReport::~SWGGS232ControllerReport() {
@@ -44,6 +54,16 @@ SWGGS232ControllerReport::init() {
     m_sources_isSet = false;
     serial_ports = new QList<QString*>();
     m_serial_ports_isSet = false;
+    target_azimuth = 0.0f;
+    m_target_azimuth_isSet = false;
+    target_elevation = 0.0f;
+    m_target_elevation_isSet = false;
+    current_azimuth = 0.0f;
+    m_current_azimuth_isSet = false;
+    current_elevation = 0.0f;
+    m_current_elevation_isSet = false;
+    on_target = 0;
+    m_on_target_isSet = false;
 }
 
 void
@@ -62,6 +82,11 @@ SWGGS232ControllerReport::cleanup() {
         }
         delete serial_ports;
     }
+
+
+
+
+
 }
 
 SWGGS232ControllerReport*
@@ -79,6 +104,16 @@ SWGGS232ControllerReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&sources, pJson["sources"], "QList", "QString");
     
     ::SWGSDRangel::setValue(&serial_ports, pJson["serialPorts"], "QList", "QString");
+    ::SWGSDRangel::setValue(&target_azimuth, pJson["targetAzimuth"], "float", "");
+    
+    ::SWGSDRangel::setValue(&target_elevation, pJson["targetElevation"], "float", "");
+    
+    ::SWGSDRangel::setValue(&current_azimuth, pJson["currentAzimuth"], "float", "");
+    
+    ::SWGSDRangel::setValue(&current_elevation, pJson["currentElevation"], "float", "");
+    
+    ::SWGSDRangel::setValue(&on_target, pJson["onTarget"], "qint32", "");
+    
 }
 
 QString
@@ -100,6 +135,21 @@ SWGGS232ControllerReport::asJsonObject() {
     }
     if(serial_ports && serial_ports->size() > 0){
         toJsonArray((QList<void*>*)serial_ports, obj, "serialPorts", "QString");
+    }
+    if(m_target_azimuth_isSet){
+        obj->insert("targetAzimuth", QJsonValue(target_azimuth));
+    }
+    if(m_target_elevation_isSet){
+        obj->insert("targetElevation", QJsonValue(target_elevation));
+    }
+    if(m_current_azimuth_isSet){
+        obj->insert("currentAzimuth", QJsonValue(current_azimuth));
+    }
+    if(m_current_elevation_isSet){
+        obj->insert("currentElevation", QJsonValue(current_elevation));
+    }
+    if(m_on_target_isSet){
+        obj->insert("onTarget", QJsonValue(on_target));
     }
 
     return obj;
@@ -125,6 +175,56 @@ SWGGS232ControllerReport::setSerialPorts(QList<QString*>* serial_ports) {
     this->m_serial_ports_isSet = true;
 }
 
+float
+SWGGS232ControllerReport::getTargetAzimuth() {
+    return target_azimuth;
+}
+void
+SWGGS232ControllerReport::setTargetAzimuth(float target_azimuth) {
+    this->target_azimuth = target_azimuth;
+    this->m_target_azimuth_isSet = true;
+}
+
+float
+SWGGS232ControllerReport::getTargetElevation() {
+    return target_elevation;
+}
+void
+SWGGS232ControllerReport::setTargetElevation(float target_elevation) {
+    this->target_elevation = target_elevation;
+    this->m_target_elevation_isSet = true;
+}
+
+float
+SWGGS232ControllerReport::getCurrentAzimuth() {
+    return current_azimuth;
+}
+void
+SWGGS232ControllerReport::setCurrentAzimuth(float current_azimuth) {
+    this->current_azimuth = current_azimuth;
+    this->m_current_azimuth_isSet = true;
+}
+
+float
+SWGGS232ControllerReport::getCurrentElevation() {
+    return current_elevation;
+}
+void
+SWGGS232ControllerReport::setCurrentElevation(float current_elevation) {
+    this->current_elevation = current_elevation;
+    this->m_current_elevation_isSet = true;
+}
+
+qint32
+SWGGS232ControllerReport::getOnTarget() {
+    return on_target;
+}
+void
+SWGGS232ControllerReport::setOnTarget(qint32 on_target) {
+    this->on_target = on_target;
+    this->m_on_target_isSet = true;
+}
+
 
 bool
 SWGGS232ControllerReport::isSet(){
@@ -134,6 +234,21 @@ SWGGS232ControllerReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(serial_ports && (serial_ports->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(m_target_azimuth_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_target_elevation_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_current_azimuth_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_current_elevation_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_on_target_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

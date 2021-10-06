@@ -63,13 +63,11 @@ public:
     bool isRunning() const { return m_running; }
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     void setMessageQueueToFeature(MessageQueue *messageQueue) { m_msgQueueToFeature = messageQueue; }
-    void setMessageQueueToGUI(MessageQueue *messageQueue) { m_msgQueueToGUI = messageQueue; }
 
 private:
 
     MessageQueue m_inputMessageQueue;  //!< Queue for asynchronous inbound communication
     MessageQueue *m_msgQueueToFeature; //!< Queue to report channel change to main feature object
-    MessageQueue *m_msgQueueToGUI;
     GS232ControllerSettings m_settings;
     bool m_running;
     QMutex m_mutex;
@@ -85,7 +83,6 @@ private:
 
     bool handleMessage(const Message& cmd);
     void applySettings(const GS232ControllerSettings& settings, bool force = false);
-    MessageQueue *getMessageQueueToGUI() { return m_msgQueueToGUI; }
     void openSerialPort(const GS232ControllerSettings& settings);
     void setAzimuth(float azimuth);
     void setAzimuthElevation(float azimuth, float elevation);

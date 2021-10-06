@@ -63,7 +63,7 @@ void GS232ControllerSettings::resetToDefaults()
     m_azimuthMax = 450;
     m_elevationMin = 0;
     m_elevationMax = 180;
-    m_tolerance = 0;
+    m_tolerance = 0.0f;
     m_protocol = GS232;
 }
 
@@ -90,7 +90,7 @@ QByteArray GS232ControllerSettings::serialize() const
     s.writeS32(18, m_azimuthMax);
     s.writeS32(19, m_elevationMin);
     s.writeS32(20, m_elevationMax);
-    s.writeS32(21, m_tolerance);
+    s.writeFloat(21, m_tolerance);
     s.writeS32(22, (int)m_protocol);
 
     return s.final();
@@ -140,7 +140,7 @@ bool GS232ControllerSettings::deserialize(const QByteArray& data)
         d.readS32(18, &m_azimuthMax, 450);
         d.readS32(19, &m_elevationMin, 0);
         d.readS32(20, &m_elevationMax, 180);
-        d.readS32(21, &m_tolerance, 0);
+        d.readFloat(21, &m_tolerance, 0.0f);
         d.readS32(22, (int*)&m_protocol, GS232);
 
         return true;
@@ -150,4 +150,19 @@ bool GS232ControllerSettings::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void GS232ControllerSettings::calcTargetAzEl(float& targetAz, float& targetEl) const
+{
+    // Apply offset then clamp
+
+    targetAz = m_azimuth;
+    targetAz += m_azimuthOffset;
+    targetAz = std::max(targetAz, (float)m_azimuthMin);
+    targetAz = std::min(targetAz, (float)m_azimuthMax);
+
+    targetEl = m_elevation;
+    targetEl += m_elevationOffset;
+    targetEl = std::max(targetEl, (float)m_elevationMin);
+    targetEl = std::min(targetEl, (float)m_elevationMax);
 }

@@ -52,7 +52,7 @@ SWGGS232ControllerSettings::SWGGS232ControllerSettings() {
     m_elevation_min_isSet = false;
     elevation_max = 0;
     m_elevation_max_isSet = false;
-    tolerance = 0;
+    tolerance = 0.0f;
     m_tolerance_isSet = false;
     protocol = 0;
     m_protocol_isSet = false;
@@ -102,7 +102,7 @@ SWGGS232ControllerSettings::init() {
     m_elevation_min_isSet = false;
     elevation_max = 0;
     m_elevation_max_isSet = false;
-    tolerance = 0;
+    tolerance = 0.0f;
     m_tolerance_isSet = false;
     protocol = 0;
     m_protocol_isSet = false;
@@ -190,7 +190,7 @@ SWGGS232ControllerSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&elevation_max, pJson["elevationMax"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&tolerance, pJson["tolerance"], "qint32", "");
+    ::SWGSDRangel::setValue(&tolerance, pJson["tolerance"], "float", "");
     
     ::SWGSDRangel::setValue(&protocol, pJson["protocol"], "qint32", "");
     
@@ -411,12 +411,12 @@ SWGGS232ControllerSettings::setElevationMax(qint32 elevation_max) {
     this->m_elevation_max_isSet = true;
 }
 
-qint32
+float
 SWGGS232ControllerSettings::getTolerance() {
     return tolerance;
 }
 void
-SWGGS232ControllerSettings::setTolerance(qint32 tolerance) {
+SWGGS232ControllerSettings::setTolerance(float tolerance) {
     this->tolerance = tolerance;
     this->m_tolerance_isSet = true;
 }

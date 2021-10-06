@@ -49,6 +49,21 @@ public:
     QList<QString*>* getSerialPorts();
     void setSerialPorts(QList<QString*>* serial_ports);
 
+    float getTargetAzimuth();
+    void setTargetAzimuth(float target_azimuth);
+
+    float getTargetElevation();
+    void setTargetElevation(float target_elevation);
+
+    float getCurrentAzimuth();
+    void setCurrentAzimuth(float current_azimuth);
+
+    float getCurrentElevation();
+    void setCurrentElevation(float current_elevation);
+
+    qint32 getOnTarget();
+    void setOnTarget(qint32 on_target);
+
 
     virtual bool isSet() override;
 
@@ -58,6 +73,21 @@ private:
 
     QList<QString*>* serial_ports;
     bool m_serial_ports_isSet;
+
+    float target_azimuth;
+    bool m_target_azimuth_isSet;
+
+    float target_elevation;
+    bool m_target_elevation_isSet;
+
+    float current_azimuth;
+    bool m_current_azimuth_isSet;
+
+    float current_elevation;
+    bool m_current_elevation_isSet;
+
+    qint32 on_target;
+    bool m_on_target_isSet;
 
 };
 

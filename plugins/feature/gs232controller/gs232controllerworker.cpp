@@ -20,9 +20,6 @@
 #include <cmath>
 
 #include <QDebug>
-#include <QTcpServer>
-#include <QTcpSocket>
-#include <QEventLoop>
 #include <QTimer>
 #include <QSerialPort>
 #include <QRegularExpression>
@@ -36,7 +33,6 @@ MESSAGE_CLASS_DEFINITION(GS232ControllerReport::MsgReportAzAl, Message)
 
 GS232ControllerWorker::GS232ControllerWorker() :
     m_msgQueueToFeature(nullptr),
-    m_msgQueueToGUI(nullptr),
     m_running(false),
     m_mutex(QMutex::Recursive),
     m_lastAzimuth(-1.0f),
@@ -144,15 +140,8 @@ void GS232ControllerWorker::applySettings(const GS232ControllerSettings& setting
 
     // Apply offset then clamp
 
-    float azimuth = settings.m_azimuth;
-    azimuth += settings.m_azimuthOffset;
-    azimuth = std::max(azimuth, (float)settings.m_azimuthMin);
-    azimuth = std::min(azimuth, (float)settings.m_azimuthMax);
-
-    float elevation = settings.m_elevation;
-    elevation += settings.m_elevationOffset;
-    elevation = std::max(elevation, (float)settings.m_elevationMin);
-    elevation = std::min(elevation, (float)settings.m_elevationMax);
+    float azimuth, elevation;
+    settings.calcTargetAzEl(azimuth, elevation);
 
     // Don't set if within tolerance of last setting
     float azDiff = std::abs(azimuth - m_lastAzimuth);
@@ -270,9 +259,7 @@ void GS232ControllerWorker::readSerialData()
                     QString az = match.captured(1);
                     QString el = match.captured(2);
                     //qDebug() << "GS232ControllerWorker::readSerialData read Az " << az << " El " << el;
-                    if (getMessageQueueToGUI()) {
-                        getMessageQueueToGUI()->push( GS232ControllerReport::MsgReportAzAl::create(az.toFloat(), el.toFloat()));
-                    }
+                    m_msgQueueToFeature->push(GS232ControllerReport::MsgReportAzAl::create(az.toFloat(), el.toFloat()));
                 }
                 else if (response == "\r\n")
                 {
@@ -281,9 +268,7 @@ void GS232ControllerWorker::readSerialData()
                 else
                 {
                     qDebug() << "GS232ControllerWorker::readSerialData - unexpected GS-232 response \"" << response << "\"";
-                    if (m_msgQueueToFeature) {
-                        m_msgQueueToFeature->push(GS232Controller::MsgReportWorker::create(QString("Unexpected GS-232 response: %1").arg(response)));
-                    }
+                    m_msgQueueToFeature->push(GS232Controller::MsgReportWorker::create(QString("Unexpected GS-232 response: %1").arg(response)));
                 }
             }
         }
@@ -300,9 +285,7 @@ void GS232ControllerWorker::readSerialData()
                 az = buf[1] * 100.0 + buf[2] * 10.0 + buf[3] + buf[4] / 10.0 - 360.0;
                 el = buf[6] * 100.0 + buf[7] * 10.0 + buf[8] + buf[9] / 10.0 - 360.0;
                 //qDebug() << "GS232ControllerWorker::readSerialData read Az " << az << " El " << el;
-                if (getMessageQueueToGUI()) {
-                    getMessageQueueToGUI()->push( GS232ControllerReport::MsgReportAzAl::create(az, el));
-                }
+                m_msgQueueToFeature->push(GS232ControllerReport::MsgReportAzAl::create(az, el));
                 if (m_spidStatusSent && m_spidSetSent) {
                     qDebug() << "GS232ControllerWorker::readSerialData - m_spidStatusSent and m_spidSetSent set simultaneously";
                 }
