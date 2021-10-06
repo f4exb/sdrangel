@@ -21,7 +21,8 @@ environment:
                              -DCMAKE_PREFIX_PATH=C:\\Qt\\5.15.2\\msvc2019_64;C:\\Libraries\\boost_1_73_0"
       CMAKE_GENERATOR: Ninja
     - TARGET: ubuntu2004prod
-      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
+      APPVEYOR_BUILD_WORKER_CLOUD: nasrock Docker
+      APPVEYOR_BUILD_WORKER_IMAGE: Linux
       CC:  "gcc-9"
       CXX: "g++-9"
       CMAKE_CUSTOM_OPTIONS: "-DCMAKE_BUILD_TYPE=Release \
