@@ -69,6 +69,7 @@ for:
   - matrix:
       only:
         - TARGET: ubuntu2004prod
+    clone_folder: /home/appveyor/projects    
     cache:
       - $HOME/external/
     install:
