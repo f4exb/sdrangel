@@ -1,3 +1,13 @@
+sdrangel (6.16.7-1) unstable; urgency=medium
+
+  * Antenna Tools update. PR #1005
+  * GS232 Controller Updates fixing data pipe. Fixes #1006. PR #1007
+  * ValueDialZ: more fixes. Complements #1004. PR #1008
+  * Only copy file if different to avoid unnecessary rebuilds. PR #1009
+  * Use on premises BYOC for Ubuntu image build
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 07 Oct 2021 19:29:51s +0200
+
 sdrangel (6.16.6-1) unstable; urgency=medium
 
   * DeviceSet: Fixed pointer initialization. Fixes #1000
