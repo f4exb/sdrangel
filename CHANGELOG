@@ -1,3 +1,14 @@
+sdrangel (6.17.0-1) unstable; urgency=medium
+
+  * New Radioastronomy plugin. PR #1011. Implements #191.
+  * GS232 Controller fix for Mac O/S compilation. Fixes #1010.
+  * FileSink API updates
+  * SigMFFileSink API updates
+  * StarTracker updates for Radioastronomy plugin
+  * ValueDialZ: when setting range fix zero display initial value
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 12 Oct 2021 21:23:16s +0200
+
 sdrangel (6.16.7-1) unstable; urgency=medium
 
   * Antenna Tools update. PR #1005
