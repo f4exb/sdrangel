@@ -26,6 +26,7 @@
 #include "dsp/wavfilerecord.h"
 
 FileSinkSink::FileSinkSink() :
+    m_sinkSampleRate(0),
     m_nbCaptures(0),
     m_preRecordBuffer(48000),
     m_preRecordFill(0),
@@ -50,7 +51,7 @@ void FileSinkSink::startRecording()
     if (m_recordEnabled) // File is open for writing and valid
     {
         // set the length of pre record time
-        qint64 mSShift = (m_preRecordFill * 1000) / m_sinkSampleRate;
+        qint64 mSShift = m_sinkSampleRate == 0 ? 0 : (m_preRecordFill * 1000) / m_sinkSampleRate;
         m_fileSink->setMsShift(-mSShift);
 
         // notify capture start

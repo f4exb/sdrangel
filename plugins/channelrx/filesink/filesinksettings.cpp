@@ -29,7 +29,6 @@ FileSinkSettings::FileSinkSettings()
 
 void FileSinkSettings::resetToDefaults()
 {
-    m_ncoMode = false;
     m_inputFrequencyOffset = 0;
     m_fileRecordName = "";
     m_rgbColor = QColor(140, 4, 4).rgb();
@@ -53,7 +52,6 @@ QByteArray FileSinkSettings::serialize() const
 {
     SimpleSerializer s(1);
     s.writeS32(1, m_inputFrequencyOffset);
-    s.writeBool(2, m_ncoMode);
     s.writeString(3, m_fileRecordName);
     s.writeS32(4, m_streamIndex);
     s.writeU32(5, m_rgbColor);
@@ -96,7 +94,6 @@ bool FileSinkSettings::deserialize(const QByteArray& data)
         QByteArray bytetmp;
 
         d.readS32(1, &m_inputFrequencyOffset, 0);
-        d.readBool(2, &m_ncoMode, false);
         d.readString(3, &m_fileRecordName, "");
         d.readS32(4, &m_streamIndex, 0);
         d.readU32(5, &m_rgbColor, QColor(0, 255, 255).rgb());

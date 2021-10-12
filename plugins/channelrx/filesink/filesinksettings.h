@@ -25,7 +25,6 @@ class Serializable;
 
 struct FileSinkSettings
 {
-    bool m_ncoMode;
     qint32 m_inputFrequencyOffset;
     QString m_fileRecordName;
     quint32 m_rgbColor;
