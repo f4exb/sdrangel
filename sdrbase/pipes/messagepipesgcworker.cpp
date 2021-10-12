@@ -24,26 +24,33 @@
 
 bool MessagePipesGCWorker::MessagePipesGC::existsProducer(const PipeEndPoint *pipeEndPoint)
 {
-    // Not overly sure about casting to both types here, but currently safeish as the
-    // existing functions only use the pointer address - and I presume these
-    // may be pointers to deleted objects anyway?
     return MainCore::instance()->existsChannel((const ChannelAPI *)pipeEndPoint)
         || MainCore::instance()->existsFeature((const Feature *)pipeEndPoint);
 }
 
-bool MessagePipesGCWorker::MessagePipesGC::existsConsumer(const Feature *feature)
+bool MessagePipesGCWorker::MessagePipesGC::existsConsumer(const PipeEndPoint *pipeEndPoint)
 {
-    return MainCore::instance()->existsFeature(feature);
+    return MainCore::instance()->existsChannel((const ChannelAPI *)pipeEndPoint)
+        || MainCore::instance()->existsFeature((const Feature *)pipeEndPoint);
 }
 
 void MessagePipesGCWorker::MessagePipesGC::sendMessageToConsumer(
     const MessageQueue *messageQueue,
     MessagePipesCommon::ChannelRegistrationKey channelKey,
-    Feature *feature)
+    PipeEndPoint *pipeEndPoint)
 {
     MessagePipesCommon::MsgReportChannelDeleted *msg = MessagePipesCommon::MsgReportChannelDeleted::create(
         messageQueue, channelKey);
-    feature->getInputMessageQueue()->push(msg);
+    if (MainCore::instance()->existsFeature((const Feature *)pipeEndPoint)) // Use RTTI instead?
+    {
+        Feature *feature = (Feature *)pipeEndPoint;
+        feature->getInputMessageQueue()->push(msg);
+    }
+    else
+    {
+        ChannelAPI *channel = (ChannelAPI *)pipeEndPoint;
+        channel->getChannelMessageQueue()->push(msg);
+    }
 }
 
 MessagePipesGCWorker::MessagePipesGCWorker() :

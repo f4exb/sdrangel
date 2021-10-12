@@ -30,7 +30,6 @@
 #include "elementpipesregistrations.h"
 
 class PipeEndPoint;
-class Feature;
 class MessagePipesGCWorker;
 class MessageQueue;
 
@@ -43,12 +42,13 @@ public:
     MessagePipes& operator=(const MessagePipes&) = delete;
     ~MessagePipes();
 
-    MessageQueue *registerChannelToFeature(const PipeEndPoint *source, Feature *feature, const QString& type);
-    MessageQueue *unregisterChannelToFeature(const PipeEndPoint *source, Feature *feature, const QString& type);
+    // FIXME: Names of these functions should probably change, as we now support channel or feature at either end
+    MessageQueue *registerChannelToFeature(const PipeEndPoint *source, PipeEndPoint *dest, const QString& type);
+    MessageQueue *unregisterChannelToFeature(const PipeEndPoint *source, PipeEndPoint *dest, const QString& type);
     QList<MessageQueue*>* getMessageQueues(const PipeEndPoint *source, const QString& type);
 
 private:
-    ElementPipesRegistrations<PipeEndPoint, Feature, MessageQueue> m_registrations;
+    ElementPipesRegistrations<PipeEndPoint, PipeEndPoint, MessageQueue> m_registrations;
     QThread m_gcThread; //!< Garbage collector thread
     MessagePipesGCWorker *m_gcWorker; //!< Garbage collector
 

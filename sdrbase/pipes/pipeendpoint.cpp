@@ -31,13 +31,14 @@
 
 MESSAGE_CLASS_DEFINITION(PipeEndPoint::MsgReportPipes, Message)
 
-QList<PipeEndPoint::AvailablePipeSource> PipeEndPoint::updateAvailablePipeSources(QString pipeName, QStringList pipeTypes, QStringList pipeURIs, Feature *destinationFeature)
+QList<PipeEndPoint::AvailablePipeSource> PipeEndPoint::updateAvailablePipeSources(QString pipeName, QStringList pipeTypes, QStringList pipeURIs, PipeEndPoint *destination)
 {
     MainCore *mainCore = MainCore::instance();
     MessagePipes& messagePipes = mainCore->getMessagePipes();
     std::vector<DeviceSet*>& deviceSets = mainCore->getDeviceSets();
     QHash<PipeEndPoint *, AvailablePipeSource> availablePipes;
 
+    // Source is a channel
     int deviceIndex = 0;
     for (std::vector<DeviceSet*>::const_iterator it = deviceSets.begin(); it != deviceSets.end(); ++it, deviceIndex++)
     {
@@ -55,14 +56,30 @@ QList<PipeEndPoint::AvailablePipeSource> PipeEndPoint::updateAvailablePipeSource
                 {
                     if (!availablePipes.contains(channel))
                     {
-                        MessageQueue *messageQueue = messagePipes.registerChannelToFeature(channel, destinationFeature, pipeName);
-                        QObject::connect(
-                            messageQueue,
-                            &MessageQueue::messageEnqueued,
-                            destinationFeature,
-                            [=](){ destinationFeature->handlePipeMessageQueue(messageQueue); },
-                            Qt::QueuedConnection
-                        );
+                        MessageQueue *messageQueue = messagePipes.registerChannelToFeature(channel, destination, pipeName);
+                        if (MainCore::instance()->existsFeature((const Feature *)destination))
+                        {
+                            // Destination is feature
+                            Feature *featureDest = (Feature *)destination;
+                            QObject::connect(
+                                messageQueue,
+                                &MessageQueue::messageEnqueued,
+                                featureDest,
+                                [=](){ featureDest->handlePipeMessageQueue(messageQueue); },
+                                Qt::QueuedConnection
+                            );
+                        }
+                        else
+                        {
+                            // Destination is a channel
+                            // Can't use Qt::QueuedConnection because ChannelAPI isn't a QObject
+                            ChannelAPI *channelDest = (ChannelAPI *)destination;
+                            QObject::connect(
+                                messageQueue,
+                                &MessageQueue::messageEnqueued,
+                                [=](){ channelDest->handlePipeMessageQueue(messageQueue); }
+                            );
+                        }
                     }
 
                     AvailablePipeSource availablePipe =
@@ -79,6 +96,7 @@ QList<PipeEndPoint::AvailablePipeSource> PipeEndPoint::updateAvailablePipeSource
         }
     }
 
+    // Source is a feature
     std::vector<FeatureSet*>& featureSets = mainCore->getFeatureeSets();
     int featureIndex = 0;
     for (std::vector<FeatureSet*>::const_iterator it = featureSets.begin(); it != featureSets.end(); ++it, featureIndex++)
@@ -92,14 +110,30 @@ QList<PipeEndPoint::AvailablePipeSource> PipeEndPoint::updateAvailablePipeSource
             {
                 if (!availablePipes.contains(feature))
                 {
-                    MessageQueue *messageQueue = messagePipes.registerChannelToFeature(feature, destinationFeature, pipeName);
-                    QObject::connect(
-                        messageQueue,
-                        &MessageQueue::messageEnqueued,
-                        destinationFeature,
-                        [=](){ destinationFeature->handlePipeMessageQueue(messageQueue); },
-                        Qt::QueuedConnection
-                    );
+                    MessageQueue *messageQueue = messagePipes.registerChannelToFeature(feature, destination, pipeName);
+                    if (MainCore::instance()->existsFeature((const Feature *)destination))
+                    {
+                        // Destination is feature
+                        Feature *featureDest = (Feature *)destination;
+                        QObject::connect(
+                            messageQueue,
+                            &MessageQueue::messageEnqueued,
+                            featureDest,
+                            [=](){ featureDest->handlePipeMessageQueue(messageQueue); },
+                            Qt::QueuedConnection
+                        );
+                    }
+                    else
+                    {
+                        // Destination is a channel
+                        // Can't use Qt::QueuedConnection because ChannelAPI isn't a QObject
+                        ChannelAPI *channelDest = (ChannelAPI *)destination;
+                        QObject::connect(
+                            messageQueue,
+                            &MessageQueue::messageEnqueued,
+                            [=](){ channelDest->handlePipeMessageQueue(messageQueue); }
+                        );
+                    }
                 }
 
                 AvailablePipeSource availablePipe =
@@ -135,13 +169,17 @@ PipeEndPoint *PipeEndPoint::getPipeEndPoint(const QString name, const QList<Avai
         QString id = re.capturedTexts()[4];
 
         QListIterator<AvailablePipeSource> itr(availablePipeSources);
-        while (itr.hasNext()) {
+        while (itr.hasNext())
+        {
             AvailablePipeSource p = itr.next();
-            if ((p.m_setIndex == setIndex) && (p.m_index == index) && (id == p.m_id))
+            if ((p.m_setIndex == setIndex) && (p.m_index == index) && (id == p.m_id)) {
                 return p.m_source;
+            }
         }
     }
     else
+    {
         qDebug() << "PipeEndPoint::getPipeEndPoint: " << name << " is malformed";
+    }
     return nullptr;
 }

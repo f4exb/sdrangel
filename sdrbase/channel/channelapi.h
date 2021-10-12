@@ -130,6 +130,15 @@ public:
     virtual int getNbSourceStreams() const = 0;
     virtual qint64 getStreamCenterFrequency(int streamIndex, bool sinkElseSource) const = 0;
 
+    void handlePipeMessageQueue(MessageQueue* messageQueue)
+    {
+        Message* message;
+
+        while ((message = messageQueue->pop()) != nullptr) {
+            m_channelMessageQueue.push(message);
+        }
+    }
+
 protected:
     MessageQueue *m_guiMessageQueue;    //!< Input message queue to the GUI
     MessageQueue m_channelMessageQueue; //!< Input message queue for inter plugin communication
