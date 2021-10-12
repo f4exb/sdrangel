@@ -106,7 +106,7 @@ public:
         qint64 minutes = v / (1000*60);
         v = v % (1000*60);
         qint64 seconds = v / (1000);
-        qint64 msec = v % 1000;
+        //qint64 msec = v % 1000;
 
         if (days > 0) {
             return QString("%1%2 %3:%4:%5").arg(neg ? "-" : "").arg(days).arg(hours, 2, 10, QChar('0')).arg(minutes, 2, 10, QChar('0')).arg(seconds, 2, 10, QChar('0'));
@@ -431,6 +431,8 @@ void RadioAstronomyGUI::addToPowerSeries(FFTMeasurement *fft, bool skipCalcs)
             case RadioAstronomySettings::PY_WATTS:
                 power = fft->m_totalPowerWatts;
                 break;
+            default:
+                break;
             }
             break;
         case RadioAstronomySettings::PY_TSYS:
@@ -448,7 +450,11 @@ void RadioAstronomyGUI::addToPowerSeries(FFTMeasurement *fft, bool skipCalcs)
             case RadioAstronomySettings::PY_JANSKY:
                 power = Units::wattsPerMetrePerHertzToJansky(fft->m_flux);
                 break;
+            default:
+                break;
             }
+            break;
+        default:
             break;
         }
         QDateTime dateTime = fft->m_dateTime;
@@ -477,11 +483,11 @@ void RadioAstronomyGUI::addToPowerSeries(FFTMeasurement *fft, bool skipCalcs)
             }
         }
 
-        if (m_settings.m_powerYData == RadioAstronomySettings::PY_TSYS) {
+        if (m_settings.m_powerYUnits == RadioAstronomySettings::PY_KELVIN) {
             m_powerTsys0Series->append(dateTime.toMSecsSinceEpoch(), fft->m_tSys0);
-        } else if (m_settings.m_powerYData == RadioAstronomySettings::PY_DBM) {
+        } else if (m_settings.m_powerYUnits == RadioAstronomySettings::PY_DBM) {
             m_powerTsys0Series->append(dateTime.toMSecsSinceEpoch(), Astronomy::noisePowerdBm(fft->m_tSys0, fft->m_sampleRate));
-        } else if (m_settings.m_powerYData == RadioAstronomySettings::PY_WATTS) {
+        } else if (m_settings.m_powerYUnits == RadioAstronomySettings::PY_WATTS) {
             m_powerTsys0Series->append(dateTime.toMSecsSinceEpoch(), Astronomy::m_boltzmann * fft->m_tSys0 * fft->m_sampleRate);
         }
 
@@ -940,11 +946,6 @@ void RadioAstronomyGUI::updatePipeList()
        m_settings.m_starTracker = newText;
        applySettings();
     }
-}
-
-static bool withinBeam(float a, float b, float beamWidth)
-{
-    return abs(a-b) < beamWidth;
 }
 
 bool RadioAstronomyGUI::handleMessage(const Message& message)
@@ -1981,6 +1982,7 @@ RadioAstronomyGUI::RadioAstronomyGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     m_powerMarkerSeries(nullptr),
     m_powerTsys0Series(nullptr),
     m_powerGaussianSeries(nullptr),
+    m_powerPeakValid(false),
     m_2DChart(nullptr),
     m_2DXAxis(nullptr),
     m_2DYAxis(nullptr),
@@ -2004,7 +2006,6 @@ RadioAstronomyGUI::RadioAstronomyGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     m_fftXAxis(nullptr),
     m_fftYAxis(nullptr),
     m_fftDopplerAxis(nullptr),
-    m_powerPeakValid(false),
     m_powerM1Valid(false),
     m_powerM2Valid(false),
     m_spectrumM1Valid(false),
@@ -2547,7 +2548,6 @@ void RadioAstronomyGUI::tick()
     int nbMagsqSamples;
     m_radioAstronomy->getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
     double powDbAvg = CalcDb::dbPower(magsqAvg);
-    double powDbPeak = CalcDb::dbPower(magsqPeak);
 
     if (m_tickCount % 4 == 0) {
         ui->channelPower->setText(QString::number(powDbAvg, 'f', 1));
@@ -2564,7 +2564,7 @@ void RadioAstronomyGUI::updateRotatorList()
 {
     // Update list of rotators
     std::vector<FeatureSet*> featureSets = MainCore::instance()->getFeatureeSets();
-    for (int i = 0; i < featureSets.size(); i++)
+    for (unsigned int i = 0; i < featureSets.size(); i++)
     {
         FeatureSet* featureSet = featureSets[i];
         for (int j = 0; j < featureSet->getNumberOfFeatures(); j++)
@@ -2752,6 +2752,8 @@ void RadioAstronomyGUI::on_powerChartSelect_currentIndexChanged(int index)
         //ui->powerYUnits->addItem("Watts"); // No watts for now, as range spin boxes can't handle scientific notation
         ui->powerYUnits->addItem("K");
         break;
+    default:
+        break;
     }
     updatePowerMarkerTableVisibility();
     updatePowerChartWidgetsVisibility();
@@ -2806,6 +2808,8 @@ int RadioAstronomyGUI::powerYUnitsToIndex(RadioAstronomySettings::PowerYUnits un
 
 void RadioAstronomyGUI::on_powerYUnits_currentIndexChanged(int index)
 {
+    (void) index;
+
     QString text = ui->powerYUnits->currentText();
     if (text == "dBFS")
     {
@@ -2940,7 +2944,7 @@ QRgb RadioAstronomyGUI::intensityToColor(float intensity)
     QRgb c1, c2;
     float scale;
 
-    if (isnan(intensity)) {
+    if (std::isnan(intensity)) {
         return qRgb(0, 0, 0);
     }
     // Get in range 0-1
@@ -3182,6 +3186,8 @@ void RadioAstronomyGUI::update2DImage(FFTMeasurement* fft, bool skipCalcs)
             case RadioAstronomySettings::PY_KELVIN:
                 intensity = fft->m_tSys;
                 break;
+            default:
+                break;
             }
 
             float newMin = std::min(m_2DMapMin, intensity);
@@ -3366,7 +3372,7 @@ void RadioAstronomyGUI::powerColourAutoscale()
     float newMax = -std::numeric_limits<float>::max();
     for (int i = 0; i < width * height; i++)
     {
-        if (!isnan(m_2DMapIntensity[i]))
+        if (!std::isnan(m_2DMapIntensity[i]))
         {
             newMin = std::min(newMin, m_2DMapIntensity[i]);
             newMax = std::max(newMax, m_2DMapIntensity[i]);
@@ -3528,6 +3534,8 @@ void RadioAstronomyGUI::plotPowerVsTimeChart()
         case RadioAstronomySettings::PY_WATTS:
             m_powerYAxis->setTitleText("Power (Watts)");
             break;
+        default:
+            break;
         }
         break;
     case RadioAstronomySettings::PY_TSYS:
@@ -3547,6 +3555,8 @@ void RadioAstronomyGUI::plotPowerVsTimeChart()
             break;
         case RadioAstronomySettings::PY_JANSKY:
             m_powerYAxis->setTitleText("Flux density (Jy)");
+            break;
+        default:
             break;
         }
         break;
@@ -3999,6 +4009,8 @@ double RadioAstronomyGUI::dopplerToVelocity(double centre, double f, FFTMeasurem
     case RadioAstronomySettings::LSR:
         v -= fft->m_vLSR;
         break;
+    default:
+        break;
     }
     // Make +ve receeding
     return -v;
@@ -4119,7 +4131,6 @@ void RadioAstronomyGUI::plotFFTMeasurement(int index)
             }
 
             double startFreqMHz = fft->m_centerFrequency/1e6 - m_settings.m_spectrumSpan / 2.0;
-            double endFreqMHz = fft->m_centerFrequency/1e6 + m_settings.m_spectrumSpan / 2.0;
 
             spectrumUpdateXRange(fft);
             spectrumUpdateYRange(fft);
@@ -4311,7 +4322,7 @@ void RadioAstronomyGUI::calcVrAndDistanceToPeak(double freq, FFTMeasurement *fft
     QString name = ui->spectrumMarkerTable->item(row, SPECTRUM_MARKER_COL_NAME)->text();
     if (losMarkerEnabled(name))
     {
-        if ((solutions == 0) || isnan(d1))
+        if ((solutions == 0) || std::isnan(d1))
         {
             updateLoSMarker(name, fft->m_l, fft->m_b, 0.0f);
         }
@@ -5900,49 +5911,49 @@ void RadioAstronomyGUI::on_sweepType_currentIndexChanged(int index)
 
 void RadioAstronomyGUI::on_sweep1Start_valueChanged(double value)
 {
-    m_settings.m_sweep1Start = ui->sweep1Start->value();
+    m_settings.m_sweep1Start = value;
     applySettings();
 }
 
 void RadioAstronomyGUI::on_sweep1Stop_valueChanged(double value)
 {
-    m_settings.m_sweep1Stop = ui->sweep1Stop->value();
+    m_settings.m_sweep1Stop = value;
     applySettings();
 }
 
 void RadioAstronomyGUI::on_sweep1Step_valueChanged(double value)
 {
-    m_settings.m_sweep1Step = ui->sweep1Step->value();
+    m_settings.m_sweep1Step = value;
     applySettings();
 }
 
 void RadioAstronomyGUI::on_sweep1Delay_valueChanged(double value)
 {
-    m_settings.m_sweep1Delay = ui->sweep1Delay->value();
+    m_settings.m_sweep1Delay = value;
     applySettings();
 }
 
 void RadioAstronomyGUI::on_sweep2Start_valueChanged(double value)
 {
-    m_settings.m_sweep2Start = ui->sweep2Start->value();
+    m_settings.m_sweep2Start = value;
     applySettings();
 }
 
 void RadioAstronomyGUI::on_sweep2Stop_valueChanged(double value)
 {
-    m_settings.m_sweep2Stop = ui->sweep2Stop->value();
+    m_settings.m_sweep2Stop = value;
     applySettings();
 }
 
 void RadioAstronomyGUI::on_sweep2Step_valueChanged(double value)
 {
-    m_settings.m_sweep2Step = ui->sweep2Step->value();
+    m_settings.m_sweep2Step = value;
     applySettings();
 }
 
 void RadioAstronomyGUI::on_sweep2Delay_valueChanged(double value)
 {
-    m_settings.m_sweep2Delay = ui->sweep2Delay->value();
+    m_settings.m_sweep2Delay = value;
     applySettings();
 }
 

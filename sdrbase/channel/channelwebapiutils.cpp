@@ -106,7 +106,7 @@ bool ChannelWebAPIUtils::getFeatureSettings(unsigned int featureSetIndex, unsign
     if (featureSetIndex < featureSets.size())
     {
         featureSet = featureSets[featureSetIndex];
-        if (featureIndex < featureSet->getNumberOfFeatures())
+        if (featureIndex < (unsigned int)featureSet->getNumberOfFeatures())
         {
             feature = featureSet->getFeatureAt(featureIndex);
             httpRC = feature->webapiSettingsGet(featureSettingsResponse, errorResponse);
@@ -522,7 +522,7 @@ bool ChannelWebAPIUtils::patchDeviceSetting(unsigned int deviceIndex, const QStr
 
             if (httpRC/100 == 2)
             {
-                qDebug("ChannelWebAPIUtils::patchDeviceSetting: set device setting %s OK", setting);
+                qDebug("ChannelWebAPIUtils::patchDeviceSetting: set device setting %s OK", qPrintable(setting));
                 return true;
             }
             else
@@ -534,7 +534,7 @@ bool ChannelWebAPIUtils::patchDeviceSetting(unsigned int deviceIndex, const QStr
         }
         else
         {
-            qWarning("ChannelWebAPIUtils::patchDeviceSetting: no key %s in device settings", setting);
+            qWarning("ChannelWebAPIUtils::patchDeviceSetting: no key %s in device settings", qPrintable(setting));
             return false;
         }
     }
@@ -569,7 +569,7 @@ bool ChannelWebAPIUtils::patchFeatureSetting(unsigned int featureSetIndex, unsig
 
             if (httpRC/100 == 2)
             {
-                qDebug("ChannelWebAPIUtils::patchFeatureSetting: set feature setting %s to %s OK", setting, value);
+                qDebug("ChannelWebAPIUtils::patchFeatureSetting: set feature setting %s to %s OK", qPrintable(setting), value);
                 return true;
             }
             else
@@ -581,7 +581,7 @@ bool ChannelWebAPIUtils::patchFeatureSetting(unsigned int featureSetIndex, unsig
         }
         else
         {
-            qWarning("ChannelWebAPIUtils::patchFeatureSetting: no key %s in feature settings", setting);
+            qWarning("ChannelWebAPIUtils::patchFeatureSetting: no key %s in feature settings", qPrintable(setting));
             return false;
         }
     }
@@ -596,7 +596,6 @@ bool ChannelWebAPIUtils::patchFeatureSetting(unsigned int featureSetIndex, unsig
     SWGSDRangel::SWGFeatureSettings featureSettingsResponse;
     QString errorResponse;
     int httpRC;
-    FeatureSet *featureSet;
     Feature *feature;
 
     if (getFeatureSettings(featureSetIndex, featureIndex, featureSettingsResponse, feature))
@@ -617,19 +616,19 @@ bool ChannelWebAPIUtils::patchFeatureSetting(unsigned int featureSetIndex, unsig
 
             if (httpRC/100 == 2)
             {
-                qDebug("ChannelWebAPIUtils::patchFeatureSetting: set feature setting %s to %f OK", setting, value);
+                qDebug("ChannelWebAPIUtils::patchFeatureSetting: set feature setting %s to %f OK", qPrintable(setting), value);
                 return true;
             }
             else
             {
-                qWarning("ChannelWebAPIUtils::patchFeatureSetting: set feature setting %s to %s error %d: %s",
-                    setting, value, httpRC, qPrintable(*errorResponse2.getMessage()));
+                qWarning("ChannelWebAPIUtils::patchFeatureSetting: set feature setting %s to %f error %d: %s",
+                    qPrintable(setting), value, httpRC, qPrintable(*errorResponse2.getMessage()));
                 return false;
             }
         }
         else
         {
-            qWarning("ChannelWebAPIUtils::patchFeatureSetting: no key %s in feature settings", setting);
+            qWarning("ChannelWebAPIUtils::patchFeatureSetting: no key %s in feature settings", qPrintable(setting));
             return false;
         }
     }
@@ -652,7 +651,7 @@ bool ChannelWebAPIUtils::getFeatureReportValue(unsigned int featureSetIndex, uns
     if (featureSetIndex < featureSets.size())
     {
         featureSet = featureSets[featureSetIndex];
-        if (featureIndex < featureSet->getNumberOfFeatures())
+        if (featureIndex < (unsigned int)featureSet->getNumberOfFeatures())
         {
             feature = featureSet->getFeatureAt(featureIndex);
             httpRC = feature->webapiReportGet(featureReport, errorResponse);
@@ -685,7 +684,7 @@ bool ChannelWebAPIUtils::getFeatureReportValue(unsigned int featureSetIndex, uns
     }
     else
     {
-        qWarning("ChannelWebAPIUtils::getFeatureReportValue: no key %s in feature report", key);
+        qWarning("ChannelWebAPIUtils::getFeatureReportValue: no key %s in feature report", qPrintable(key));
         return false;
     }
 }

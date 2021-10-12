@@ -88,7 +88,7 @@ void OpenWeatherMap::getWeather(float latitude, float longitude)
     query.addQueryItem("appid", m_apiKey);
     url.setQuery(query);
 
-    QNetworkReply *reply = m_networkManager->get(QNetworkRequest(url));
+    m_networkManager->get(QNetworkRequest(url));
 }
 
 void OpenWeatherMap::handleReply(QNetworkReply* reply)

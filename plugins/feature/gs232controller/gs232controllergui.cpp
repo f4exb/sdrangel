@@ -221,8 +221,11 @@ void GS232ControllerGUI::updatePipeList()
 
     if (currentText.isEmpty())
     {
-        if (m_availablePipes.size() > 0)
-            ui->sources->setCurrentIndex(0);
+        // Source feature may be loaded after this, so may not have existed when
+        // displaySettings was called
+        if (m_availablePipes.size() > 0) {
+            ui->sources->setCurrentIndex(ui->sources->findText(m_settings.m_source));
+        }
     }
     else
     {
