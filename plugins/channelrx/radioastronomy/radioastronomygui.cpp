@@ -3560,6 +3560,8 @@ void RadioAstronomyGUI::plotPowerVsTimeChart()
             break;
         }
         break;
+    default:
+        break;
     }
 
     m_powerChart->addAxis(m_powerXAxis, Qt::AlignBottom);
@@ -3950,6 +3952,8 @@ RadioAstronomyGUI::FFTMeasurement* RadioAstronomyGUI::currentFFT()
 
 void RadioAstronomyGUI::on_spectrumYUnits_currentIndexChanged(int index)
 {
+    (void) index;
+
     QString text = ui->spectrumYUnits->currentText();
     if (text == "dBFS")
     {

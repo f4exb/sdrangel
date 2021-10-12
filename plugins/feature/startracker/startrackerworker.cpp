@@ -622,7 +622,6 @@ void StarTrackerWorker::update()
                 swgTarget->setEarthOrbitVelocityBcrs(vOrbit);
                 double vLSRK = Astronomy::sunVelocityLSRK(rd);
                 swgTarget->setSunVelocityLsr(vLSRK);
-                double vCorr = vRot + vOrbit + vLSRK;
                 (*it)->push(MainCore::MsgStarTrackerTarget::create(m_starTracker, swgTarget));
             }
         }
