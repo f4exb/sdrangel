@@ -4427,6 +4427,11 @@ bool WebAPIRequestMapper::getChannelActions(
             channelActions->setPacketModActions(new SWGSDRangel::SWGPacketModActions());
             channelActions->getPacketModActions()->fromJsonObject(actionsJsonObject);
         }
+        else if (channelActionsKey == "SigMFFileSinkActions")
+        {
+            channelActions->setSigMfFileSinkActions(new SWGSDRangel::SWGSigMFFileSinkActions());
+            channelActions->getSigMfFileSinkActions()->fromJsonObject(actionsJsonObject);
+        }
         else
         {
             return false;
