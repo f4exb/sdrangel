@@ -184,7 +184,8 @@ void RadioAstronomyGUI::LABData::read(QFile* file, float l, float b)
         if (!line.startsWith("%") && (line.size() > 0))  // Lines starting with % are comments
         {
             // 4 cols: v_lsr [km/s], T_B [K], freq. [Mhz], wavel. [cm]
-            QStringList cols = line.split(" ", Qt::SkipEmptyParts);
+            line = line.simplified();
+            QStringList cols = line.split(" ");
             if (cols.size() == 4)
             {
                 m_vlsr.append(cols[0].toFloat());
