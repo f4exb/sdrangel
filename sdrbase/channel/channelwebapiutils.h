@@ -20,7 +20,13 @@
 
 #include <QString>
 
+#include "SWGDeviceSettings.h"
+#include "SWGFeatureSettings.h"
+
 #include "export.h"
+
+class DeviceSet;
+class Feature;
 
 class SDRBASE_API ChannelWebAPIUtils
 {
@@ -34,6 +40,14 @@ public:
     static bool startStopFileSinks(unsigned int deviceIndex, bool start);
     static bool satelliteAOS(const QString name, bool northToSouthPass);
     static bool satelliteLOS(const QString name);
+    static bool getDeviceSetting(unsigned int deviceIndex, const QString &setting, int &value);
+    static bool patchDeviceSetting(unsigned int deviceIndex, const QString &setting, int value);
+    static bool patchFeatureSetting(unsigned int featureSetIndex, unsigned int featureIndex, const QString &setting, const QString &value);
+    static bool patchFeatureSetting(unsigned int featureSetIndex, unsigned int featureIndex, const QString &setting, double value);
+    static bool getFeatureReportValue(unsigned int featureSetIndex, unsigned int featureIndex, const QString &key, int &value);
+protected:
+    static bool getDeviceSettings(unsigned int deviceIndex, SWGSDRangel::SWGDeviceSettings &deviceSettingsResponse, DeviceSet *&deviceSet);
+    static bool getFeatureSettings(unsigned int featureSetIndex, unsigned int featureIndex, SWGSDRangel::SWGFeatureSettings &featureSettingsResponse, Feature *&feature);
 };
 
 #endif // SDRBASE_CHANNEL_CHANNELWEBAPIUTILS_H_

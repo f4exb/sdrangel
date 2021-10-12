@@ -27,6 +27,8 @@
 #include "SWGDeviceSet.h"
 #include "SWGChannelActions.h"
 #include "SWGFileSinkActions.h"
+#include "SWGFeatureSettings.h"
+#include "SWGFeatureReport.h"
 
 #include "maincore.h"
 #include "device/deviceset.h"
@@ -37,14 +39,13 @@
 #include "dsp/devicesamplemimo.h"
 #include "webapi/webapiadapterinterface.h"
 #include "webapi/webapiutils.h"
+#include "feature/featureset.h"
+#include "feature/feature.h"
 
-// Get device center frequency
-bool ChannelWebAPIUtils::getCenterFrequency(unsigned int deviceIndex, double &frequencyInHz)
+bool ChannelWebAPIUtils::getDeviceSettings(unsigned int deviceIndex, SWGSDRangel::SWGDeviceSettings &deviceSettingsResponse, DeviceSet *&deviceSet)
 {
-    SWGSDRangel::SWGDeviceSettings deviceSettingsResponse;
     QString errorResponse;
     int httpRC;
-    DeviceSet *deviceSet;
 
     // Get current device settings
     std::vector<DeviceSet*> deviceSets = MainCore::instance()->getDeviceSets();
@@ -74,114 +75,129 @@ bool ChannelWebAPIUtils::getCenterFrequency(unsigned int deviceIndex, double &fr
         }
         else
         {
-            qDebug() << "ChannelWebAPIUtils::getCenterFrequency - not a sample source device " << deviceIndex;
+            qDebug() << "ChannelWebAPIUtils::getDeviceSettings - not a sample source device " << deviceIndex;
             return false;
         }
     }
     else
     {
-        qDebug() << "ChannelWebAPIUtils::getCenterFrequency - no device " << deviceIndex;
+        qDebug() << "ChannelWebAPIUtils::getDeviceSettings - no device " << deviceIndex;
         return false;
     }
 
     if (httpRC/100 != 2)
     {
-        qWarning("ChannelWebAPIUtils::getCenterFrequency: get device frequency error %d: %s",
+        qWarning("ChannelWebAPIUtils::getDeviceSettings: get device settings error %d: %s",
             httpRC, qPrintable(errorResponse));
         return false;
     }
 
-    QJsonObject *jsonObj = deviceSettingsResponse.asJsonObject();
-    return WebAPIUtils::getSubObjectDouble(*jsonObj, "centerFrequency", frequencyInHz);
+    return true;
+}
+
+bool ChannelWebAPIUtils::getFeatureSettings(unsigned int featureSetIndex, unsigned int featureIndex, SWGSDRangel::SWGFeatureSettings &featureSettingsResponse, Feature *&feature)
+{
+    QString errorResponse;
+    int httpRC;
+    FeatureSet *featureSet;
+
+    // Get current feature settings
+    std::vector<FeatureSet*> featureSets = MainCore::instance()->getFeatureeSets();
+    if (featureSetIndex < featureSets.size())
+    {
+        featureSet = featureSets[featureSetIndex];
+        if (featureIndex < featureSet->getNumberOfFeatures())
+        {
+            feature = featureSet->getFeatureAt(featureIndex);
+            httpRC = feature->webapiSettingsGet(featureSettingsResponse, errorResponse);
+        }
+        else
+        {
+            qDebug() << "ChannelWebAPIUtils::getFeatureSettings: no feature " << featureSetIndex << ":" << featureIndex;
+            return false;
+        }
+    }
+    else
+    {
+        qDebug() << "ChannelWebAPIUtils::getFeatureSettings: no feature set " << featureSetIndex;
+        return false;
+    }
+
+    if (httpRC/100 != 2)
+    {
+        qWarning("ChannelWebAPIUtils::getFeatureSettings: get feature settings error %d: %s",
+            httpRC, qPrintable(errorResponse));
+        return false;
+    }
+
+    return true;
+}
+
+
+// Get device center frequency
+bool ChannelWebAPIUtils::getCenterFrequency(unsigned int deviceIndex, double &frequencyInHz)
+{
+    SWGSDRangel::SWGDeviceSettings deviceSettingsResponse;
+    DeviceSet *deviceSet;
+
+    if (getDeviceSettings(deviceIndex, deviceSettingsResponse, deviceSet))
+    {
+        QJsonObject *jsonObj = deviceSettingsResponse.asJsonObject();
+        return WebAPIUtils::getSubObjectDouble(*jsonObj, "centerFrequency", frequencyInHz);
+    }
+    else
+    {
+        return false;
+    }
 }
 
 // Set device center frequency
 bool ChannelWebAPIUtils::setCenterFrequency(unsigned int deviceIndex, double frequencyInHz)
 {
     SWGSDRangel::SWGDeviceSettings deviceSettingsResponse;
-    QString errorResponse;
     int httpRC;
     DeviceSet *deviceSet;
 
-    // Get current device settings
-    std::vector<DeviceSet*> deviceSets = MainCore::instance()->getDeviceSets();
-    if (deviceIndex < deviceSets.size())
+    if (getDeviceSettings(deviceIndex, deviceSettingsResponse, deviceSet))
     {
-        deviceSet = deviceSets[deviceIndex];
-        if (deviceSet->m_deviceSourceEngine)
+        // Patch centerFrequency
+        QJsonObject *jsonObj = deviceSettingsResponse.asJsonObject();
+        double freq;
+        if (WebAPIUtils::getSubObjectDouble(*jsonObj, "centerFrequency", freq))
         {
-            deviceSettingsResponse.setDeviceHwType(new QString(deviceSet->m_deviceAPI->getHardwareId()));
-            deviceSettingsResponse.setDirection(0);
+            WebAPIUtils::setSubObjectDouble(*jsonObj, "centerFrequency", frequencyInHz);
+            QStringList deviceSettingsKeys;
+            deviceSettingsKeys.append("centerFrequency");
+            deviceSettingsResponse.init();
+            deviceSettingsResponse.fromJsonObject(*jsonObj);
+            SWGSDRangel::SWGErrorResponse errorResponse2;
+
             DeviceSampleSource *source = deviceSet->m_deviceAPI->getSampleSource();
-            httpRC = source->webapiSettingsGet(deviceSettingsResponse, errorResponse);
-        }
-        else if (deviceSet->m_deviceSinkEngine)
-        {
-            deviceSettingsResponse.setDeviceHwType(new QString(deviceSet->m_deviceAPI->getHardwareId()));
-            deviceSettingsResponse.setDirection(1);
-            DeviceSampleSink *sink = deviceSet->m_deviceAPI->getSampleSink();
-            httpRC = sink->webapiSettingsGet(deviceSettingsResponse, errorResponse);
-        }
-        else if (deviceSet->m_deviceMIMOEngine)
-        {
-            deviceSettingsResponse.setDeviceHwType(new QString(deviceSet->m_deviceAPI->getHardwareId()));
-            deviceSettingsResponse.setDirection(2);
-            DeviceSampleMIMO *mimo = deviceSet->m_deviceAPI->getSampleMIMO();
-            httpRC = mimo->webapiSettingsGet(deviceSettingsResponse, errorResponse);
+
+            httpRC = source->webapiSettingsPutPatch(false, deviceSettingsKeys, deviceSettingsResponse, *errorResponse2.getMessage());
+
+            if (httpRC/100 == 2)
+            {
+                qDebug("ChannelWebAPIUtils::setCenterFrequency: set device frequency %f OK", frequencyInHz);
+                return true;
+            }
+            else
+            {
+                qWarning("ChannelWebAPIUtils::setCenterFrequency: set device frequency error %d: %s",
+                    httpRC, qPrintable(*errorResponse2.getMessage()));
+                return false;
+            }
         }
         else
         {
-            qDebug() << "ChannelWebAPIUtils::setCenterFrequency: not a sample source device " << deviceIndex;
+            qWarning("ChannelWebAPIUtils::setCenterFrequency: no centerFrequency key in device settings");
             return false;
         }
     }
     else
     {
-        qDebug() << "ChannelWebAPIUtils::setCenterFrequency: no device " << deviceIndex;
         return false;
     }
-
-    if (httpRC/100 != 2)
-    {
-        qWarning("ChannelWebAPIUtils::setCenterFrequency: get device frequency error %d: %s",
-            httpRC, qPrintable(errorResponse));
-        return false;
-    }
-
-    // Patch centerFrequency
-    QJsonObject *jsonObj = deviceSettingsResponse.asJsonObject();
-    double freq;
-    if (WebAPIUtils::getSubObjectDouble(*jsonObj, "centerFrequency", freq))
-    {
-        WebAPIUtils::setSubObjectDouble(*jsonObj, "centerFrequency", frequencyInHz);
-        QStringList deviceSettingsKeys;
-        deviceSettingsKeys.append("centerFrequency");
-        deviceSettingsResponse.init();
-        deviceSettingsResponse.fromJsonObject(*jsonObj);
-        SWGSDRangel::SWGErrorResponse errorResponse2;
-
-        DeviceSampleSource *source = deviceSet->m_deviceAPI->getSampleSource();
-
-        httpRC = source->webapiSettingsPutPatch(false, deviceSettingsKeys, deviceSettingsResponse, *errorResponse2.getMessage());
-
-        if (httpRC/100 == 2)
-        {
-            qDebug("ChannelWebAPIUtils::setCenterFrequency: set device frequency %f OK", frequencyInHz);
-        }
-        else
-        {
-            qWarning("ChannelWebAPIUtils::setCenterFrequency: set device frequency error %d: %s",
-                httpRC, qPrintable(*errorResponse2.getMessage()));
-            return false;
-        }
-    }
-    else
-    {
-        qWarning("ChannelWebAPIUtils::setCenterFrequency: no centerFrequency key in device settings");
-        return false;
-    }
-
-    return true;
 }
 
 // Start acquisition
@@ -461,4 +477,215 @@ bool ChannelWebAPIUtils::satelliteLOS(const QString name)
         }
     }
     return true;
+}
+
+bool ChannelWebAPIUtils::getDeviceSetting(unsigned int deviceIndex, const QString &setting, int &value)
+{
+    SWGSDRangel::SWGDeviceSettings deviceSettingsResponse;
+    DeviceSet *deviceSet;
+
+    if (getDeviceSettings(deviceIndex, deviceSettingsResponse, deviceSet))
+    {
+        QJsonObject *jsonObj = deviceSettingsResponse.asJsonObject();
+        return WebAPIUtils::getSubObjectInt(*jsonObj, setting, value);
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool ChannelWebAPIUtils::patchDeviceSetting(unsigned int deviceIndex, const QString &setting, int value)
+{
+    SWGSDRangel::SWGDeviceSettings deviceSettingsResponse;
+    QString errorResponse;
+    int httpRC;
+    DeviceSet *deviceSet;
+
+    if (getDeviceSettings(deviceIndex, deviceSettingsResponse, deviceSet))
+    {
+        // Patch centerFrequency
+        QJsonObject *jsonObj = deviceSettingsResponse.asJsonObject();
+        int oldValue;
+        if (WebAPIUtils::getSubObjectInt(*jsonObj, setting, oldValue))
+        {
+            WebAPIUtils::setSubObjectInt(*jsonObj, setting, value);
+            QStringList deviceSettingsKeys;
+            deviceSettingsKeys.append(setting);
+            deviceSettingsResponse.init();
+            deviceSettingsResponse.fromJsonObject(*jsonObj);
+            SWGSDRangel::SWGErrorResponse errorResponse2;
+
+            DeviceSampleSource *source = deviceSet->m_deviceAPI->getSampleSource();
+
+            httpRC = source->webapiSettingsPutPatch(false, deviceSettingsKeys, deviceSettingsResponse, *errorResponse2.getMessage());
+
+            if (httpRC/100 == 2)
+            {
+                qDebug("ChannelWebAPIUtils::patchDeviceSetting: set device setting %s OK", setting);
+                return true;
+            }
+            else
+            {
+                qWarning("ChannelWebAPIUtils::patchDeviceSetting: set device setting error %d: %s",
+                    httpRC, qPrintable(*errorResponse2.getMessage()));
+                return false;
+            }
+        }
+        else
+        {
+            qWarning("ChannelWebAPIUtils::patchDeviceSetting: no key %s in device settings", setting);
+            return false;
+        }
+    }
+    else
+    {
+        return false;
+    }
+}
+
+// Set feature setting
+bool ChannelWebAPIUtils::patchFeatureSetting(unsigned int featureSetIndex, unsigned int featureIndex, const QString &setting, const QString &value)
+{
+    SWGSDRangel::SWGFeatureSettings featureSettingsResponse;
+    int httpRC;
+    Feature *feature;
+
+    if (getFeatureSettings(featureSetIndex, featureIndex, featureSettingsResponse, feature))
+    {
+        // Patch settings
+        QJsonObject *jsonObj = featureSettingsResponse.asJsonObject();
+        QString oldValue;
+        if (WebAPIUtils::getSubObjectString(*jsonObj, setting, oldValue))
+        {
+            WebAPIUtils::setSubObjectString(*jsonObj, setting, value);
+            QStringList featureSettingsKeys;
+            featureSettingsKeys.append(setting);
+            featureSettingsResponse.init();
+            featureSettingsResponse.fromJsonObject(*jsonObj);
+            SWGSDRangel::SWGErrorResponse errorResponse2;
+
+            httpRC = feature->webapiSettingsPutPatch(false, featureSettingsKeys, featureSettingsResponse, *errorResponse2.getMessage());
+
+            if (httpRC/100 == 2)
+            {
+                qDebug("ChannelWebAPIUtils::patchFeatureSetting: set feature setting %s to %s OK", setting, value);
+                return true;
+            }
+            else
+            {
+                qWarning("ChannelWebAPIUtils::patchFeatureSetting: set feature setting %s to %s error %d: %s",
+                    setting, value, httpRC, qPrintable(*errorResponse2.getMessage()));
+                return false;
+            }
+        }
+        else
+        {
+            qWarning("ChannelWebAPIUtils::patchFeatureSetting: no key %s in feature settings", setting);
+            return false;
+        }
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool ChannelWebAPIUtils::patchFeatureSetting(unsigned int featureSetIndex, unsigned int featureIndex, const QString &setting, double value)
+{
+    SWGSDRangel::SWGFeatureSettings featureSettingsResponse;
+    QString errorResponse;
+    int httpRC;
+    FeatureSet *featureSet;
+    Feature *feature;
+
+    if (getFeatureSettings(featureSetIndex, featureIndex, featureSettingsResponse, feature))
+    {
+        // Patch settings
+        QJsonObject *jsonObj = featureSettingsResponse.asJsonObject();
+        double oldValue;
+        if (WebAPIUtils::getSubObjectDouble(*jsonObj, setting, oldValue))
+        {
+            WebAPIUtils::setSubObjectDouble(*jsonObj, setting, value);
+            QStringList featureSettingsKeys;
+            featureSettingsKeys.append(setting);
+            featureSettingsResponse.init();
+            featureSettingsResponse.fromJsonObject(*jsonObj);
+            SWGSDRangel::SWGErrorResponse errorResponse2;
+
+            httpRC = feature->webapiSettingsPutPatch(false, featureSettingsKeys, featureSettingsResponse, *errorResponse2.getMessage());
+
+            if (httpRC/100 == 2)
+            {
+                qDebug("ChannelWebAPIUtils::patchFeatureSetting: set feature setting %s to %f OK", setting, value);
+                return true;
+            }
+            else
+            {
+                qWarning("ChannelWebAPIUtils::patchFeatureSetting: set feature setting %s to %s error %d: %s",
+                    setting, value, httpRC, qPrintable(*errorResponse2.getMessage()));
+                return false;
+            }
+        }
+        else
+        {
+            qWarning("ChannelWebAPIUtils::patchFeatureSetting: no key %s in feature settings", setting);
+            return false;
+        }
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool ChannelWebAPIUtils::getFeatureReportValue(unsigned int featureSetIndex, unsigned int featureIndex, const QString &key, int &value)
+{
+    SWGSDRangel::SWGFeatureReport featureReport;
+    QString errorResponse;
+    int httpRC;
+    FeatureSet *featureSet;
+    Feature *feature;
+
+    // Get feature report
+    std::vector<FeatureSet*> featureSets = MainCore::instance()->getFeatureeSets();
+    if (featureSetIndex < featureSets.size())
+    {
+        featureSet = featureSets[featureSetIndex];
+        if (featureIndex < featureSet->getNumberOfFeatures())
+        {
+            feature = featureSet->getFeatureAt(featureIndex);
+            httpRC = feature->webapiReportGet(featureReport, errorResponse);
+        }
+        else
+        {
+            qDebug() << "ChannelWebAPIUtils::getFeatureReportValue: no feature " << featureSetIndex << ":" << featureIndex;
+            return false;
+        }
+    }
+    else
+    {
+        qDebug() << "ChannelWebAPIUtils::getFeatureReportValue: no feature set " << featureSetIndex;
+        return false;
+    }
+
+    if (httpRC/100 != 2)
+    {
+        qWarning("ChannelWebAPIUtils::getFeatureReportValue: get feature report error %d: %s",
+            httpRC, qPrintable(errorResponse));
+        return false;
+    }
+
+    // Get value of requested key
+    QJsonObject *jsonObj = featureReport.asJsonObject();
+    if (WebAPIUtils::getSubObjectInt(*jsonObj, key, value))
+    {
+        // Done
+        return true;
+    }
+    else
+    {
+        qWarning("ChannelWebAPIUtils::getFeatureReportValue: no key %s in feature report", key);
+        return false;
+    }
 }

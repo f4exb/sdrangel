@@ -662,13 +662,13 @@ void StarTracker::networkManagerFinished(QNetworkReply *reply)
 
 void StarTracker::weatherUpdated(float temperature, float pressure, float humidity)
 {
-    if (!isnan(temperature)) {
+    if (!std::isnan(temperature)) {
         m_settings.m_temperature = temperature;
     }
-    if (!isnan(pressure)) {
+    if (!std::isnan(pressure)) {
         m_settings.m_pressure = pressure;
     }
-    if (!isnan(humidity)) {
+    if (!std::isnan(humidity)) {
         m_settings.m_humidity = humidity;
     }
 

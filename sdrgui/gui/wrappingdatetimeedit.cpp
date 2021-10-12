@@ -20,52 +20,61 @@
 WrappingDateTimeEdit::WrappingDateTimeEdit(QWidget *parent) :
     QDateTimeEdit(parent)
 {
+    // We need to set this true in order for stepBy to be called
+    // when minutes are at 59
+    // However, this also causes dates/times to wrap from max to min
+    // which we don't want, so in stepBy, we clip to max/min ourselves
     setWrapping(true);
 }
 
 void WrappingDateTimeEdit::stepBy(int steps)
 {
     if (currentSection() == QDateTimeEdit::MonthSection)
-        setDate(date().addMonths(steps));
+    {
+        clipAndSetDate(date().addMonths(steps));
+    }
     else if (currentSection() == QDateTimeEdit::DaySection)
-        setDate(date().addDays(steps));
+    {
+        clipAndSetDate(date().addDays(steps));
+    }
     else if (currentSection() == QDateTimeEdit::HourSection)
     {
-        QTime t = time();
-        int h = t.hour();
-
-        setTime(time().addSecs(steps*3600));
-
-        if ((h < -steps) && (steps < 0))
-            setDate(date().addDays(-1));
-        else if ((h + steps > 23) && (steps > 0))
-            setDate(date().addDays(1));
+        clipAndSetDateTime(dateTime().addSecs(steps*3600));
     }
     else if (currentSection() == QDateTimeEdit::MinuteSection)
     {
-        QTime t = time();
-        int h = t.hour();
-        int m = t.minute();
-
-        setTime(time().addSecs(steps*60));
-
-        if ((m < -steps) && (steps < 0) && (h == 0))
-            setDate(date().addDays(-1));
-        else if ((m + steps > 59) && (steps > 0) && (h == 23))
-            setDate(date().addDays(1));
+        clipAndSetDateTime(dateTime().addSecs(steps*60));
     }
     else if (currentSection() == QDateTimeEdit::SecondSection)
     {
-        QTime t = time();
-        int h = t.hour();
-        int m = t.minute();
-        int s = t.second();
+        clipAndSetDateTime(dateTime().addSecs(steps));
+    }
+}
 
-        setTime(time().addSecs(steps));
+void WrappingDateTimeEdit::clipAndSetDate(QDate date)
+{
+    QDate max = maximumDate();
+    QDate min = minimumDate();
+    if (date > max) {
+        setDate(max);
+    } else if (date < min) {
+        setDate(min);
+    } else {
+        setDate(date);
+    }
+}
 
-        if ((s < -steps) && (steps < 0) && (h == 0) && (m == 0))
-            setDate(date().addDays(-1));
-        else if ((s + steps > 59) && (steps > 0) && (h == 23) && (m == 59))
-            setDate(date().addDays(1));
+void WrappingDateTimeEdit::clipAndSetDateTime(QDateTime dateTime)
+{
+    // We have set wrapping as described in the constructor, but we don't want
+    // to wrap from max to min, so clip to this outself
+    QDateTime max = maximumDateTime();
+    QDateTime min = minimumDateTime();
+    if (dateTime > max) {
+        setDateTime(max);
+    } else if (dateTime < min) {
+        setDateTime(min);
+    } else {
+        setDateTime(dateTime);
     }
 }

@@ -44,6 +44,7 @@
 #include "SWGNoiseFigureReport.h"
 #include "SWGPacketModReport.h"
 #include "SWGPagerDemodReport.h"
+#include "SWGRadioAstronomyReport.h"
 #include "SWGRadioClockReport.h"
 #include "SWGRemoteSourceReport.h"
 #include "SWGSSBDemodReport.h"
@@ -143,6 +144,9 @@ public:
 
     SWGSSBDemodReport* getSsbDemodReport();
     void setSsbDemodReport(SWGSSBDemodReport* ssb_demod_report);
+
+    SWGRadioAstronomyReport* getRadioAstronomyReport();
+    void setRadioAstronomyReport(SWGRadioAstronomyReport* radio_astronomy_report);
 
     SWGRadioClockReport* getRadioClockReport();
     void setRadioClockReport(SWGRadioClockReport* radio_clock_report);
@@ -252,6 +256,9 @@ private:
 
     SWGSSBDemodReport* ssb_demod_report;
     bool m_ssb_demod_report_isSet;
+
+    SWGRadioAstronomyReport* radio_astronomy_report;
+    bool m_radio_astronomy_report_isSet;
 
     SWGRadioClockReport* radio_clock_report;
     bool m_radio_clock_report_isSet;

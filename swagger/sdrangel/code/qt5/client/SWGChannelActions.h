@@ -28,6 +28,7 @@
 #include "SWGFileSourceActions.h"
 #include "SWGIEEE_802_15_4_ModActions.h"
 #include "SWGPacketModActions.h"
+#include "SWGRadioAstronomyActions.h"
 #include "SWGSigMFFileSinkActions.h"
 #include <QString>
 
@@ -79,6 +80,9 @@ public:
     SWGPacketModActions* getPacketModActions();
     void setPacketModActions(SWGPacketModActions* packet_mod_actions);
 
+    SWGRadioAstronomyActions* getRadioAstronomyActions();
+    void setRadioAstronomyActions(SWGRadioAstronomyActions* radio_astronomy_actions);
+
     SWGSigMFFileSinkActions* getSigMfFileSinkActions();
     void setSigMfFileSinkActions(SWGSigMFFileSinkActions* sig_mf_file_sink_actions);
 
@@ -115,6 +119,9 @@ private:
 
     SWGPacketModActions* packet_mod_actions;
     bool m_packet_mod_actions_isSet;
+
+    SWGRadioAstronomyActions* radio_astronomy_actions;
+    bool m_radio_astronomy_actions_isSet;
 
     SWGSigMFFileSinkActions* sig_mf_file_sink_actions;
     bool m_sig_mf_file_sink_actions_isSet;

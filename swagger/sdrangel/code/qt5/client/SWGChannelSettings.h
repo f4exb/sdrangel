@@ -54,6 +54,7 @@
 #include "SWGPacketDemodSettings.h"
 #include "SWGPacketModSettings.h"
 #include "SWGPagerDemodSettings.h"
+#include "SWGRadioAstronomySettings.h"
 #include "SWGRadioClockSettings.h"
 #include "SWGRemoteSinkSettings.h"
 #include "SWGRemoteSourceSettings.h"
@@ -193,6 +194,9 @@ public:
 
     SWGPagerDemodSettings* getPagerDemodSettings();
     void setPagerDemodSettings(SWGPagerDemodSettings* pager_demod_settings);
+
+    SWGRadioAstronomySettings* getRadioAstronomySettings();
+    void setRadioAstronomySettings(SWGRadioAstronomySettings* radio_astronomy_settings);
 
     SWGRadioClockSettings* getRadioClockSettings();
     void setRadioClockSettings(SWGRadioClockSettings* radio_clock_settings);
@@ -341,6 +345,9 @@ private:
 
     SWGPagerDemodSettings* pager_demod_settings;
     bool m_pager_demod_settings_isSet;
+
+    SWGRadioAstronomySettings* radio_astronomy_settings;
+    bool m_radio_astronomy_settings_isSet;
 
     SWGRadioClockSettings* radio_clock_settings;
     bool m_radio_clock_settings_isSet;
