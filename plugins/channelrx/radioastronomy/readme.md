@@ -88,66 +88,66 @@ Where:
 - tau is the integration time in seconds.
 - deltaG/G is the receiver gain variation.
 
-<h2>Settings</h2>
+<h2>1: Settings</h2>
 
 ![Settings GUI](../../../doc/img/RadioAstronomy_Settings.png)
 
-<h3>1: Frequency shift from center frequency of reception</h3>
+<h3>1.1: Frequency shift from center frequency of reception</h3>
 
 Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Left click on a digit sets the cursor position at this digit.
 Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position.
 Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows.
 Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
-<h3>2: SR - Sample Rate</h3>
+<h3>1.2: SR - Sample Rate</h3>
 
 Sample rate in millions of samples per second. This determines the maximum bandwidth for the radiometer and spectrometer and thus the maximum Doppler shift range.
 Typically this should be set to match SDRangel's baseband sample rate.
 
-<h3>3: BW - RF Bandwidth</h3>
+<h3>1.3: BW - RF Bandwidth</h3>
 
 This specifies the bandwidth of a LPF that is applied to the input signal to limit the RF bandwidth. This can be used to eliminate RFI.
 
-<h3>4: Channel power</h3>
+<h3>1.4: Channel power</h3>
 
 Average total power in dB relative to a +/- 1.0 amplitude signal received in the pass band.
 
-<h3>5: Integration Count</h3>
+<h3>1.5: Integration Count</h3>
 
 Specifies the number of FFTs that are summed in each average. Higher integration counts increase measurement time, but also increase sensitivity (up to the limit imposed by receiver gain variation).
 
-<h3>6: Channels</h3>
+<h3>1.6: Channels</h3>
 
 Specifies the number of channels (FFT bins). A larger number means an increased resolution in the spectrometer,
 however, the sensitivity per bin is decreased for a fixed measurement time.
 
-<h3>7: Window function</h3>
+<h3>1.7: Window function</h3>
 
 A windowing function to be applied before the FFT, to compensate for spectral leakage. This can be either:
 
 - Rec: Rectangular or no windowing function. Use for broadband / continuum sources.
 - Han: Hanning window. Use for narrowband / spectral line sources for better frequency resolution.
 
-<h3>8: Filter</h3>
+<h3>1.8: Filter</h3>
 
 Specifies a list of FFT bins that will have their values replaced with the minimum of other FFTs bins. This can be used to filter inband RFI.
 
-<h3>9: Integration Time</h3>
+<h3>1.9: Integration Time</h3>
 
 Displays in seconds or minutes how long it will take to make a single measurement. This is dependent on the sample rate (2), Integration Count (5) and number of channels (6).
 
-<h3>10: Star Tracker</h3>
+<h3>1.10: Star Tracker</h3>
 
 Specifies the Star Tracker feature that determines the observation target.
 A corresponding Star Tracker feature is required to calculate and display numerous values within the Radio Astronomy plugin and also for performing sweeps.
 
-<h3>11: Rotator</h3>
+<h3>1.11: Rotator</h3>
 
 Specifies the rotator controller feature that is controlling the antenna used for measurements by the Radio Astronomy plugin.
 This setting is used when sweeps are performed, to determine when rotation is complete and the antenna is pointing at the target.
 If no rotator is used (and only drift scans are performed), this can be set to None.
 
-<h3>12: Sensors</h3>
+<h3>1.12: Sensors</h3>
 
 Opens the Sensors dialog.
 
@@ -160,18 +160,18 @@ on the LNA will be dependent upon both, and gain variations limit the benefit of
 
 ![Sensors dialog](../../../doc/img/RadioAstronomy_SensorSettings.png)
 
-<h3>13: Trx/NF</h3>
+<h3>1.13: Trx/NF</h3>
 
 Sets the receiver noise temperature in Kelvin or noise figure (NF) in dB. This is the noise temperature / figure for the combination of the LNA, feed line and SDR (at a specific gain setting).
 The value set here can be measured using SDRangel's [Noise Figure plugin](https://github.com/f4exb/sdrangel/blob/master/plugins/channelrx/noisefigure/readme.md)
 or estimated from datasheet values for the individual components using the [Friis formula](https://en.wikipedia.org/wiki/Friis_formulas_for_noise).
 
-<h3>14: Tcmb</h3>
+<h3>1.14: Tcmb</h3>
 
 Sets the contribution to noise temperature from the Cosmic Microwave Background (CMB). This is 2.73K when an antenna is pointed at the Sky, but may be set to 0K if measurements are made
 where there is no CMB contribution (E.g. if the feedhorn is covered with absorbing foam or a 50Ohm terminator or other noise source is used for calibration).
 
-<h3>15: Tgal</h3>
+<h3>1.15: Tgal</h3>
 
 Sets the contribution to the noise temperature from the Galactic background. This is frequency dependent and varies with direction. It does not include
 the Galactic foreground (i.e. the increased noise temperature when looking in the Galactic plane).
@@ -188,14 +188,14 @@ Where:
 
 Tgal is used in calibration to estimate Tsp.
 
-<h3>16: Tsp</h3>
+<h3>1.16: Tsp</h3>
 
 Sets spillover noise temperature. This is unwanted noise due to thermal ground radiation or other thermal radiation sources such as buildings and trees that can be picked
 up via an antenna's side and back lobes.
 It can be very dependent on azimuth and elevation in urban environments.
 An estimate for Tsp can be made via the hot/cold calibration process.
 
-<h3>17: Tatm</h3>
+<h3>1.17: Tatm</h3>
 
 Contribution to noise temperature due to atmospheric emission. Atmospheric emission is dependent upon frequency, opacity (which is dependent on air temperature, pressure and water vapour) and antenna elevation.
 If the link button to the right is unchecked, a value can be entered manually.
@@ -209,37 +209,37 @@ Where:
 - tau_z is the zenith opacity from (19).
 - el is the elevation of the antenna from (20)
 
-<h3>18: Tair</h3>
+<h3>1.18: Tair</h3>
 
 Tair specifies the surface air temperature at the antenna location in degrees Celsius.
 If the link button to the right is unchecked, a value can be entered manually.
 If the link button is checked, Tair is set to the air temperature value received from the Star Tracker plugin, which itself is periodically downloaded from openweathermap.org for the antenna's location.
 
-<h3>19: tau_z - Zenith Opacity</h3>
+<h3>1.19: tau_z - Zenith Opacity</h3>
 
 tau_z specifies the Zenith opacity. This value determines atmospheric absorption and emission. It is dependent upon air temperature, pressure and water vapour.
 
 The default value of 0.0055 roughly corresponds to clear air as per ITU-R P.372-14 figure 5 at 1.4GHz.
 
-<h3>20: El - Antenna Elevation</h3>
+<h3>1.20: El - Antenna Elevation</h3>
 
 This specifies the antenna elevation in degrees. It is used for calculating atmospheric emission and absorption.
 If the link button to the right is unchecked, a value can be entered manually.
 If the link button is checked, El is automatically set to the elevation received from the Star Tracker plugin.
 
-<h3>21: Tsys0</h3>
+<h3>1.21: Tsys0</h3>
 
 This displays the value of Tsys0, the system noise temperature without an astronomical source, which is calculated as:
 
     Tsys0=Trx+Tcmb+Tgal+Tsp+Tatm.
 
-<h3>22: sigma Tsys0</h3>
+<h3>1.22: sigma Tsys0</h3>
 
 This displays the value of sigma Tsys0, which is the standard deviation / RMS of Tsys0, and gives an indication of the sensitivity. It is calculated as:
 
     sigma_Tsys0 = Tsys0 * sqrt(1/(B*tau) + (deltaG/G)^2)
 
-<h3>24: Baseline</h3>
+<h3>1.24: Baseline</h3>
 
 Specifies the baseline used for calculating Tsource from Tsys. This can be:
 
@@ -247,16 +247,16 @@ Specifies the baseline used for calculating Tsource from Tsys. This can be:
 - Tmin - Tsource = Tsys-Tmin - where Tmin is the minimum in-band temperature.
 - Tcold - Tsource = Tsys-Tcold - where Tcold is the cold calibration spectrum. This can be used for on/off source observations.
 
-<h3>25: delta G / G - Gain Variation</h3>
+<h3>1.25: delta G / G - Gain Variation</h3>
 
 delta G / G specifies the gain variation of the LNA / receiver. Gain variation places a limit on the sensitvity improvement available by increased integration counts.
 This value is only used for the estimation of sigma_Tsys0 and sigma_Ssys0, it does not affect any measurements.
 
-<h3>26: HPBW / Omega A</h3>
+<h3>1.26: HPBW / Omega A</h3>
 
 This displays the antenna half-power (-3dB) beamwidth (HPBW) in degrees or beam solid angle in steradians, as set in the Star Tracker plugins set by (10).
 
-<h3>27: Omega S Type</h3>
+<h3>1.27: Omega S Type</h3>
 
 This sets the type of astronomical source, with respect to its and the antenna beam's angular size:
 
@@ -266,20 +266,20 @@ This sets the type of astronomical source, with respect to its and the antenna b
 - Sun - The source is the Sun and the source angle is set to 0.53 degrees.
 - CasA - The source is Cassiopeia A and the source is set to 0.08333 degrees.
 
-<h3>28: Omega S</h3>
+<h3>1.28: Omega S</h3>
 
 Enter the angle subtended by the astronomical source. This can be a diameter entered in degrees or solid angle in steradians.
 Values for many astronomical sources are available in the [SIMBAD Astronomical Database](http://simbad.u-strasbg.fr/simbad/).
 
-<h3>29: Omega S Units</h3>
+<h3>1.29: Omega S Units</h3>
 
 Select whether Omega S is calculated from a diameter in degrees or solid angle in steradians.
 
-<h3>Run Control</h3>
+<h3>2: Run Control</h3>
 
 ![Run Control GUI](../../../doc/img/RadioAstronomy_RunControl.png)
 
-<h3>Start / Stop</h3>
+<h3>2.1: Start / Stop</h3>
 
 Starts or stops measurements.
 
@@ -287,11 +287,11 @@ The Radio Astronomy plugin has this button in addition to SDRangel's device acqu
 SDR continues to run when measurements are not being taken. This can help to reduce small gain & frequency variations that may occur in a SDR
 when it is turned on from cold.
 
-<h3>Clear Measurements</h3>
+<h3>2.2: Clear Measurements</h3>
 
 Clears all measurements from memory. Calibration data is kept.
 
-<h3>Run Mode</h3>
+<h3>2.3: Run Mode</h3>
 
 The run mode field determines the number of measurements that are made then the Start button is pressed.
 
@@ -299,7 +299,7 @@ The run mode field determines the number of measurements that are made then the 
 - Continuous: Measurements are continuously made until the Stop button is pressed.
 - Sweep: Measurements are made at each of the coordinates specified by the sweep fields.
 
-<h3>Start Time</h3>
+<h3>2.4: Start Time</h3>
 
 The start time field determines when the measurements start after the Start button is pressed:
 
@@ -308,7 +308,7 @@ The start time field determines when the measurements start after the Start butt
 
 Delaying the start of the measurements can be used to ensure that the target has risen to its maximum elevation.
 
-<h3>Sweep Parameters</h3>
+<h3>2.5: Sweep Parameters</h3>
 
 The Sweep Type field determines the coordinates that are swept:
 
@@ -318,60 +318,60 @@ The Sweep Type field determines the coordinates that are swept:
 
 Here are some examples:
 
-Sweep Type: Az/El
-Az Start: 100
-Az Stop: 120
-Az Step: 10
-El Start: 80
-El Stop: 85
-El Step: 5
-Will measure at (Az,El): 100,80 110,80, 120,80 100,85 110,85, 120,85
+    Sweep Type: Az/El
+    Az Start: 100
+    Az Stop: 120
+    Az Step: 10
+    El Start: 80
+    El Stop: 85
+    El Step: 5
+    Will measure at (Az,El): 100,80 110,80, 120,80 100,85 110,85, 120,85
 
-Sweep Type: Az/El
-Az Start: 15
-Az Stop: 345
-Az Step: -15
-El Start: 85
-El Stop: 85
-El Step: 0
-Will measure at (Az,El): 15,85 0,85, 345,85
+    Sweep Type: Az/El
+    Az Start: 15
+    Az Stop: 345
+    Az Step: -15
+    El Start: 85
+    El Stop: 85
+    El Step: 0
+    Will measure at (Az,El): 15,85 0,85, 345,85
 
-Sweep Type: l/b
-l Start: -60
-l Stop: 60
-l Step: 20
-b Start: 0
-b Stop: 0
-b Step: 0
-Will measure at (l,b): 300,0 320,0 340,0 0,0 20,0 40,0, 60,0
+    Sweep Type: l/b
+    l Start: -60
+    l Stop: 60
+    l Step: 20
+    b Start: 0
+    b Stop: 0
+    b Step: 0
+    Will measure at (l,b): 300,0 320,0 340,0 0,0 20,0 40,0, 60,0
 
-Sweep Type: Offset
-Az Start: -5
-Az Stop: 5
-Az Step: 5
-El Start: -5
-El Stop: 5
-El Step: 5
-Target in Star Tracker: Sun
-Will measure at (Az,El): Sun-5,Sun-5 Sun,Sun-5 Sun+5,Sun-5 Sun-5,Sun Sun,Sun Sun+5,Sun Sun-5,Sun+5 Sun,Sun+5 Sun+5,Sun+5
+    Sweep Type: Offset
+    Az Start: -5
+    Az Stop: 5
+    Az Step: 5
+    El Start: -5
+    El Stop: 5
+    El Step: 5
+    Target in Star Tracker: Sun
+    Will measure at (Az,El): Sun-5,Sun-5 Sun,Sun-5 Sun+5,Sun-5 Sun-5,Sun Sun,Sun Sun+5,Sun Sun-5,Sun+5 Sun,Sun+5 Sun+5,Sun+5
 
 The Settle field specifies a delay in seconds after antenna rotation has completed, before the measurement starts.
 
 The Delay field specifies a delay in seconds after a measurement has completed, before the antenna is rotated for the next measurement.
 
-<h3>Status</h3>
+<h3>2.6: Status</h3>
 
 The measurement status bar shows how complete a measurement is in percent.
 
-<h2>Spectrometer</h2>
+<h2>3: Spectrometer</h2>
 
 ![Spectrometer GUI](../../../doc/img/RadioAstronomy_Spectrometer.png)
 
-<h3>Spectrum Selection</h3>
+<h3>3.1: Spectrum Selection</h3>
 
 This combo box selects between the display of measurement spectra and calibration spectra.
 
-<h3>Y Axis Units</h3>
+<h3>3.2: Y Axis Units</h3>
 
 Selects the units for the Y-axis:
 
@@ -381,11 +381,11 @@ Selects the units for the Y-axis:
 - TSys K displays the system noise temperature in Kelvin (requires hot calibration).
 - TSource K displays the astronomical source temperature in Kelvin (requires hot calibration).
 
-<h3>Display Legend</h3>
+<h3>3.3: Display Legend</h3>
 
 Displays a legend at the side of the chart with the colour and name of each series.
 
-<h3>Display LAB Reference Spectrum</h3>
+<h3>3.4: Display LAB Reference Spectrum</h3>
 
 When checked, a reference spectrum from the Leiden/Argentine/Bonn (LAB) Galactic HI survey corresponding to the current Galactic coordinates
 and antenna HPBW will be downloaded and displayed along side the measured spectrum.
@@ -397,7 +397,7 @@ In order to reduce bandwidth to the server supplying this data, it is recommende
 
 If the series does not appear on Windows (and you see "SSL handshake failed" in the log file), you may need to open https://www.astro.uni-bonn.de/hisurvey/euhou/index.php in your Web browser first, so that the certificate for the website is downloaded.
 
-<h3>Calculate and plot distance to HI gas clouds</h3>
+<h3>3.5: Calculate and plot distance to HI gas clouds</h3>
 
 When checked, the marker table will have six additional columns that display estimates of the distance to a HI cloud corresponding to the marker and the tangent point
 along the line of sight.
@@ -416,9 +416,9 @@ The spectrometer GUI will also display two additional fields, R0 and V0,
 which allow you to enter the distance from the Sun to the Galactic centre and the Sun's orbital velocity
 around the Galactic centre, which are used in the above calculations.
 
-![Distance to HI Cloud](../../../doc/img/RadioAstronomy_RadioAstronomy_DistanceToHICloud.png)
+![Distance to HI Cloud](../../../doc/img/RadioAstronomy_DistanceToHICloud.png)
 
-<h3>Display Reference Spectral Line</h3>
+<h3>3.6: Display Reference Spectral Line</h3>
 
 When checked, a horizontal axis showing Doppler shift in km/s is added to the top of the spectrometer chart and a vertical reference spectral line is plotted at 0km/s.
 The rest frequency of the spectral line can be set via the reference spectral line field or manually entered.
@@ -426,69 +426,69 @@ The relationship between the frequency and velocity axes is determined by the se
 
 ![Reference Spectral Line](../../../doc/img/RadioAstronomy_RefLine.png)
 
-<h3>Display Gaussian Fitting Tools</h3>
+<h3>3.7: Display Gaussian Fitting Tools</h3>
 
 When checked, the Gaussian fitting tools are displayed. These allow a Gaussian to be fitted to a spectral peak for kinetic temperature and column density estimation.
 
 ![Gaussian Fit](../../../doc/img/RadioAstronomy_SpectrumGaussian.png)
 
-<h3>Display Markers</h3>
+<h3>3.8: Display Markers</h3>
 
 When checked, the marker table is displayed and the user may place two markers (M1 and M2) on the chart for accurate display of the corresponding values.
 
-<h3>Display Peaks</h3>
+<h3>3.9: Display Peaks</h3>
 
 When checked, the peak table is displayed and the peak Max marker is displayed at the maximum value in the spectrum.
 
-<h3>Reverse X axis</h3>
+<h3>3.10: Reverse X axis</h3>
 
 When checked, the X axis is reversed. This allows switching between an axis that increases with frequency (which is most common in engineering) or increases with velocity (which is most common in radio astronomy).
 
-<h3>Save Charts to an Animation File</h3>
+<h3>3.11: Save Charts to an Animation File</h3>
 
 Click to export all of the spectral measurements to a animated .png file.
 
-<h3>Save Chart to an Image File</h3>
+<h3>3.12: Save Chart to an Image File</h3>
 
 Click to save the current chart to an image file.
 
-<h3>Load Data from a .csv File</h3>
+<h3>3.13: Load Data from a .csv File</h3>
 
 Click to restore data that had been saved to a .csv file. All existing data will be cleared.
 
-<h3>Save Data from a .csv File</h3>
+<h3>3.14: Save Data from a .csv File</h3>
 
 Click to save all data to a .csv file.
 
-<h3>Autoscale</h3>
+<h3>3.15: Autoscale</h3>
 
 When checked, continuously automatically scales both X and Y axis so all data is visible. When unchecked, the axis scales can be set manually.
 
-<h3>Autoscale X</h3>
+<h3>3.16: Autoscale X</h3>
 
 When clicked, automatically scales the X axis so all data is visible.
 
-<h3>Autoscale Y</h3>
+<h3>3.17: Autoscale Y</h3>
 
 When clicked, automatically scales the Y axis so all data is visible.
 
-<h3>Ref</h3>
+<h3>3.18: Ref</h3>
 
 Sets the reference level (maximum value) of the Y axis.
 
-<h3>Range</h3>
+<h3>3.19: Range</h3>
 
 Sets the range of the Y axis.
 
-<h3>CF</h3>
+<h3>3.20: CF</h3>
 
 Sets the centre frequency of the X axis.
 
-<h3>Span</h3>
+<h3>3.21: Span</h3>
 
 Sets the span (range) of the X axis.
 
-<h3>Sel</h3>
+<h3>3.22: Sel</h3>
 
 Selects what is selected when clicking on the chart:
 
@@ -496,11 +496,11 @@ Selects what is selected when clicking on the chart:
 - M2 sets position of marker 2
 - Gaussian sets peak of Gaussian
 
-<h3>Date & Time</h3>
+<h3>3.23: Date & Time</h3>
 
 Allows the user to scroll through and select the recorded spectra, showing the date and time they were measured at.
 
-<h3>Line</h3>
+<h3>3.24: Line</h3>
 
 Specifies the rest frequency of the reference spectral line:
 
@@ -509,7 +509,7 @@ Specifies the rest frequency of the reference spectral line:
 - DI neutral deuterium at 327.384MHz.
 - Custom allows a user-defined frequency in MHz to be entered.
 
-<h3>Reference Frame</h3>
+<h3>3.25: Reference Frame</h3>
 
 Determines the reference frame used for calculating velocities from frequency.
 
@@ -519,31 +519,31 @@ Determines the reference frame used for calculating velocities from frequency.
 
 Professional astronomers tend to plot spectra using the LSR, so any observed Doppler shift can assumed to be due to the source moving.
 
-<h3>R0</h3>
+<h3>3.26: R0</h3>
 
 Specifies the distance of the Sun from the Galactic centre in kpc.
 
-<h3>V0</h3>
+<h3>2.27: V0</h3>
 
 Specifies the orbital velocity of the Sun around the Galactic centre in km/s.
 
-<h3>f0</h3>
+<h3>3.28: f0</h3>
 
 Specifies the frequency of the centre of the Gaussian in MHz.
 
-<h3>a</h3>
+<h3>3.29: a</h3>
 
 Specifies the amplitude of the Gaussian. Units correspond to the Y axis units.
 
-<h3>f</h3>
+<h3>3.30: f</h3>
 
 Specifies the floor (minimum value of the Gaussian). Units correspond to the Y axis units.
 
-<h3>Delta f FHWM</h3>
+<h3>3.31: Delta f FHWM</h3>
 
 Specifies the full-width at half maximum of the Gaussian in Hertz.
 
-<h3>Tk</h3>
+<h3>3.32: Tk</h3>
 
 An estimate of kinetic temperature in Kelvin of a HI cloud whose spectral profile matches the Gaussian.
 
@@ -551,28 +551,28 @@ Note that it's not possible to determine how much spectral broadening is due to 
 how much is due to turbulent velocity, as from a single measurement, there is no way
 to distinguish between the two.
 
-<h3>Vt</h3>
+<h3>3.33: Vt</h3>
 
 An estimate of the turbulent velocity within a HI cloud whose spectral profile matches the Gaussian.
 
-<h3>NH</h3>
+<h3>3.24: NH</h3>
 
 Estimated column density of an optically thin HI cloud whose spectral profile matches the Gaussian,
 measured in HI atoms per square centimetre.
 
-<h3>Marker Table</h3>
+<h3>3.25: Marker Table</h3>
 
 The marker table displays corresponding values for markers that are placed on the chart.
 
-<h2>Radiometer</h2>
+<h2>4: Radiometer</h2>
 
 ![Radiometer GUI](../../../doc/img/RadioAstronomy_Radiometer.png)
 
-<h3>Chart Selection</h3>
+<h3>4.1: Chart Selection</h3>
 
 This field selects between the display of power, temperature and flux in one or two dimensions.
 
-<h3>Y Axis Units</h3>
+<h3>4.2: Y Axis Units</h3>
 
 Selects the units for the Y-axis:
 
@@ -583,79 +583,79 @@ Selects the units for the Y-axis:
 - SFU displays the flux in Solar Flux units (requires hot calibration).
 - Jy displays the flux in Jansky (requires hot calibration).
 
-<h3>Display Legend</h3>
+<h3>4.3: Display Legend</h3>
 
 Displays a legend at the side of the chart with the colour and name of each series.
 
-<h3>Plot Sensor 2</h3>
+<h3>4.4: Plot Sensor 2</h3>
 
 Plot the data recorded for sensor 2 on the chart.
 
-<h3>Plot Sensor 1</h3>
+<h3>4.5: Plot Sensor 1</h3>
 
 Plot the data recorded for sensor 1 on the chart.
 
-<h3>Plot Air Temperature</h3>
+<h3>4.6: Plot Air Temperature</h3>
 
 Plot the surface air temperature data received from Star Tracker on the chart.
 
-<h3>Plot Tsys0</h3>
+<h3>4.7: Plot Tsys0</h3>
 
 Plot Tsys0 on the chart.
 
-<h3>Display Statistics</h3>
+<h3>4.8: Display Statistics</h3>
 
 Displays statistics calculated across all measurements (not just those visible on the chart), including the mean, RMS and standard deviation.
 
-<h3>Display Gaussian Fitting Tools</h3>
+<h3>4.9: Display Gaussian Fitting Tools</h3>
 
 When checked, the Gaussian fitting tools are displayed. These allow a Gaussian to be fitted to the data, allowing measurement of the HPBW of the antenna.
 
-<h3>Display Markers</h3>
+<h3>4.10: Display Markers</h3>
 
 When checked, the marker table is displayed and the user may place two markers (M1 and M2) on the chart for accurate display of the corresponding values from the measurement series.
 
-<h3>Display Peaks</h3>
+<h3>4.11: Display Peaks</h3>
 
 When checked, the marker table is displayed and the peak Max and Min markers are displayed at the maximum and minimum values on the measurement series.
 
-<h3>Save Chart to an Image File</h3>
+<h3>4.12: Save Chart to an Image File</h3>
 
 Click to save the current chart to an image file.
 
-<h3>Save Data to a .csv File</h3>
+<h3>4.14: Save Data to a .csv File</h3>
 
 Click to save data from the Radiometer Data table to a .csv file.
 
-<h3>Autoscale</h3>
+<h3>4.15: Autoscale</h3>
 
 When checked, continuously automatically scales both X and Y axis so all data is visible. When unchecked, the axis scales can be set manually.
 
-<h3>Autoscale X</h3>
+<h3>4.16: Autoscale X</h3>
 
 When clicked, automatically scales the X axis so all data is visible.
 
-<h3>Autoscale Y</h3>
+<h3>4.17: Autoscale Y</h3>
 
 When clicked, automatically scales the Y axis so all data is visible.
 
-<h3>Ref</h3>
+<h3>4.18: Ref</h3>
 
 Sets the reference level (maximum value) of the Y axis.
 
-<h3>Range</h3>
+<h3>4.19: Range</h3>
 
 Sets the range of the Y axis.
 
-<h3>Start</h3>
+<h3>4.20: Start</h3>
 
 Sets the start time of the X axis.
 
-<h3>End</h3>
+<h3>4.21: End</h3>
 
 Sets the end time of the X axis.
 
-<h3>Sel</h3>
+<h3>4.22: Sel</h3>
 
 Selects what is selected when clicking on the chart:
 
@@ -664,81 +664,81 @@ Selects what is selected when clicking on the chart:
 - M2 sets position of marker 2
 - Gaussian sets peak of Gaussian
 
-<h3>Center</h3>
+<h3>4.23: Center</h3>
 
 Specifies the date and time of the center of the Gaussian.
 
-<h3>a</h3>
+<h3>4.24: a</h3>
 
 Specifies the amplitude of the Gaussian. Units correspond to the Y axis units.
 
-<h3>f</h3>
+<h3>4.25: f</h3>
 
 Specifies the floor (minimum value of the Gaussian). Units correspond to the Y axis units.
 
-<h3>Delta t FHWM</h3>
+<h3>4.26: Delta t FHWM</h3>
 
 Specifies the full-width at half maximum of the Gaussian in seconds.
 
-<h3>HPBW</h3>
+<h3>4.27: HPBW</h3>
 
 An estimate of the HPBW in degrees of an antenna whose main lobe corresponds to the Gaussian profile of a drift scan of the Sun, using a linear scale (E.g. Y axis must not be in not dB).
 
 ![Radiometer Gaussian Fit](../../../doc/img/RadioAstronomy_RadiometerGaussian.png)
 
-<h3>Marker Table</h3>
+<h3>4.28: Marker Table</h3>
 
 The marker table displays corresponding values for markers that are placed on the chart.
 
-<h2>Radiometer 2D Map</h2>
+<h2>5: Radiometer 2D Map</h2>
 
 ![Radiometer 2D Map](../../../doc/img/RadioAstronomy_Radiometer2D.png)
 
-<h3>Link Sweep</h3>
+<h3>5.1: Link Sweep</h3>
 
 When checked, the parameters for the 2D Map will be automatically updated based on the Run Control sweep parameters.
 
-<h3>Sweep Type</h3>
+<h3>5.2: Sweep Type</h3>
 
 Sets the coordinates used for the axes of the map.
 
-<h3>Width</h3>
+<h3>5.3: Width</h3>
 
 Width in pixels of the map. Typically there should be one pixel per measurement.
 
-<h3>Height</h3>
+<h3>5.4: Height</h3>
 
 Height in pixels of the map.
 
-<h3>X Range</h3>
+<h3>5.5: X Range</h3>
 
 Specifies the range of the 2D map's horizontal axis. This determines how measurements map to pixels.
 
-<h3>Y Range</h3>
+<h3>5.6: Y Range</h3>
 
 Specifies the range of the 2D map's vertical axis.
 
-<h3>Autoscale</h3>
+<h3>5.7: Autoscale</h3>
 
 Automatically scales the X and Y axes to fit the Radiometer data in the table.
 
-<h3>Colour Autoscale</h3>
+<h3>5.8: Colour Autoscale</h3>
 
 Automatically scales the colour palette to the range of existing values in the Radiometer data table.
 
-<h3>Min</h3>
+<h3>5.9: Min</h3>
 
 Specifies the value that maps to the first colour in the palette. All values lower than this will be clipped to the first colour.
 
-<h3>Max</h3>
+<h3>5.10: Max</h3>
 
 Specifies the value that maps to the last colour in the palette. All values higher than this will be clipped to the last colour.
 
-<h3>Palette</h3>
+<h3>5.11: Palette</h3>
 
 Specifies the palette / gradient used to plot the 2D map. This can either be colour or greyscale. The gradient is applied linearly between the Min and Max values.
 
-<h2>Radiometer Data</h2>
+<h2>6: Radiometer Data</h2>
 
 The Radiometer Data table shows measurement results and settings at the time of measurement in tabular form.
 
@@ -780,7 +780,7 @@ Right clicking on the table shows a popup menu that supports:
 - Deleting the selected rows
 - Applying the current values of Tsys0, baseline and omega S to recalculate Tsource, Tb and Sv.
 
-<h2>Calibration</h2>
+<h2>7: Calibration</h2>
 
 Power measurements in SDRs are typically relative (E.g. dBFS) rather than absolute (E.g. dBm). In order to produce absolute power measurements,
 and thus noise temperature measurements, we need to perform a calibration process that calculates a mapping from the relative power value to an absolute value.
@@ -815,7 +815,7 @@ dependent on the antenna's elevation and azimuth, as this changes the amount of 
 
 ![Calibration Settings dialog](../../../doc/img/RadioAstronomy_Calibration.png)
 
-<h3>Show Calibration Settings Dialog</h3>
+<h3>7.1: Show Calibration Settings Dialog</h3>
 
 When clicked, shows the Calibration Settings dialog.
 
@@ -827,19 +827,19 @@ An example of its use would be to electronically switch in a 50Ohm resistor to t
 
 ![Calibration Settings dialog](../../../doc/img/RadioAstronomy_CalibrationSettings.png)
 
-<h3>Clear Calibration Data</h3>
+<h3>7.2: Clear Calibration Data</h3>
 
 Clears all calibration data.
 
-<h3>Start Hot Calibration</h3>
+<h3>7.3: Start Hot Calibration</h3>
 
 Starts a measurement that will be used as the hot calibration data.
 
-<h3>Start Cold Calibration</h3>
+<h3>7.4: Start Cold Calibration</h3>
 
 Starts a measurement that will be used as the cold calibration data.
 
-<h3>Recalibrate All Measurements</h3>
+<h3>7.5: Recalibrate All Measurements</h3>
 
 When checked, results of a new calibration will be applied to all existing measurements. When unchecked, the calibration will only apply to new measurements.
 
