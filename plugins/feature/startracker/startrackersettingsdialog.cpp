@@ -31,6 +31,8 @@ StarTrackerSettingsDialog::StarTrackerSettingsDialog(StarTrackerSettings *settin
     ui->serverPort->setValue(settings->m_serverPort);
     ui->enableServer->setChecked(settings->m_enableServer);
     ui->refraction->setCurrentIndex(ui->refraction->findText(settings->m_refraction));
+    ui->owmAPIKey->setText(settings->m_owmAPIKey);
+    ui->weatherUpdatePeriod->setValue(settings->m_weatherUpdatePeriod);
     ui->pressure->setValue(settings->m_pressure);
     ui->temperature->setValue(settings->m_temperature);
     ui->humidity->setValue(settings->m_humidity);
@@ -40,7 +42,6 @@ StarTrackerSettingsDialog::StarTrackerSettingsDialog(StarTrackerSettings *settin
     ui->solarFluxUnits->setCurrentIndex((int)settings->m_solarFluxUnits);
     ui->drawSunOnMap->setChecked(settings->m_drawSunOnMap);
     ui->drawMoonOnMap->setChecked(settings->m_drawMoonOnMap);
-    ui->drawStarOnMap->setChecked(settings->m_drawStarOnMap);
 }
 
 StarTrackerSettingsDialog::~StarTrackerSettingsDialog()
@@ -56,6 +57,8 @@ void StarTrackerSettingsDialog::accept()
     m_settings->m_serverPort = (uint16_t)ui->serverPort->value();
     m_settings->m_enableServer = ui->enableServer->isChecked();
     m_settings->m_refraction = ui->refraction->currentText();
+    m_settings->m_owmAPIKey = ui->owmAPIKey->text();
+    m_settings->m_weatherUpdatePeriod = ui->weatherUpdatePeriod->value();
     m_settings->m_pressure = ui->pressure->value();
     m_settings->m_temperature = ui->temperature->value();
     m_settings->m_humidity = ui->humidity->value();

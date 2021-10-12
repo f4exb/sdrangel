@@ -38,11 +38,13 @@ Pressing this button displays a settings dialog, that allows you to set:
 * The epoch used when entering RA and Dec. This can be either J2000 (which is used for most catalogues) or JNOW which is the current date and time.
 * The units used for the display of the calculated azimuth and elevation. This can be either degrees, minutes and seconds or decimal degrees.
 * Whether to correct for atmospheric refraction. You can choose either no correction, the Saemundsson algorithm, typically used for optical astronomy or the more accurate Positional Astronomy Library calculation, which can be used for >250MHz radio frequencies or light. Note that there is only a very minor difference between the two.
-* Air pressure in millibars for use in refraction correction.
-* Air temperature in degrees Celsius for use in refraction correction.
-* Relative humidity in % for use in refraction correction.
-* Height above sea level in metres for use in refraction correction.
-* Temperature lapse rate in Kelvin per kilometre for use in refraction correction.
+* API key for openweathermap.org which is used to download real-time weather (Air temperature, pressure and humidity) for the specified latitude (6) and longitude (7).
+* How often to download weather (in minutes).
+* Air pressure in millibars. This value can be automatically updated from OpenWeatherMap.
+* Air temperature in degrees Celsius. This value can be automatically updated from OpenWeatherMap.
+* Relative humidity in %. This value can be automatically updated from OpenWeatherMap.
+* Height above sea level in metres of the observation point (anntenna location).
+* Temperature lapse rate in Kelvin per kilometre.
 * What data to display for the Solar flux measurement. Data can be selected from 2800 from DRAO or a number of different frequencies from Learmonth. Also, the Learmonth data can be linearly interpolated to the observation frequency set in the main window.
 * The units to display the solar flux in, either Solar Flux Units, Jansky or Wm^-2Hz-1. 1 sfu equals 10,000 Jansky or 10^-22 Wm^-2Hz-1.
 * The update period in seconds, which controls how frequently azimuth and elevation are re-calculated.
@@ -78,7 +80,7 @@ Select a target object to track from the list.
 To manually enter RA (right ascension) and Dec (declination) of an unlisted target, select Custom RA/Dec.
 To allow Stellarium to set the RA and Dec, select Custom RA/Dec, and ensure the Stellarium Server option is checked in the Star Tracker Settings dialog.
 
-| Target           | Type              | Details                                        | Flux density (Jy)                          |
+| Target           | Type              | Details                                        | Flux density (Jy) or Temperature (K)       |
 |------------------|-------------------|------------------------------------------------|---------------------------------------------
 | Sun              | Star              | Targets our Sun                                | 10k-10M (50MHz), 500k-10M (1.4GHz)         |
 | Moon             | Moon              | Targets our Moon                               | 2 (50MHz), 1000 (1.4GHz)                   |
@@ -91,12 +93,17 @@ To allow Stellarium to set the RA and Dec, select Custom RA/Dec, and ensure the 
 | Virgo A (M87)    | Galaxy            |                                                | 2635 (50MHz), 1209 (150MHz), 212 (1.4GHz)  |
 | Custom RA/Dec    |                   | Manually enter RA and Dec                      |                                            |
 | Custom Az/El     |                   | Manually enter azimuth and elevation           |                                            |
+| Custom l/b       |                   | Manually enter Galactic longitude and latitude |                                            |
+| S7               | HI                | IAU secondary calibration region (l=132,b=-1)  | Tb=100 peak                                |
+| S8               | HI                | IAU primary calibration region (l=207,b=-15)   | Tb=72 peak                                 |
+| S9               | HI                | IAU secondary calibration region (l=356,b=-4)  | Tb=85 peak                                 |
 
 References:
 
 * ATNF Pulsar Catalogue - https://www.atnf.csiro.au/research/pulsar/psrcat/
 * Cassiopeia A, Cygnus A, Taurus A, and Virgo A at ultra-low radio frequencies - https://research.chalmers.se/publication/516438/file/516438_Fulltext.pdf
 * Repeating Jansky - https://www.gb.nrao.edu/~fghigo/JanskyAntenna/RepeatingJansky_memo10.pdf
+* Studies of four regions for use as standards in 21CM observations - http://articles.adsabs.harvard.edu/pdf/1973A%26AS....8..505W
 
 <h3>12: Frequency</h3>
 
@@ -110,33 +117,45 @@ Enter the half power (-3dB) beamwidth of your antenna. This value is used for sk
 
 When target is set to Custom RA/Dec, you can specify the right ascension in hours of the target object. This can be specified as a decimal (E.g. 12.23, from 0 to 24) or in hours, minutes and seconds (E.g. 12h05m10.2s or 12 05 10.2). Whether the epoch is J2000 or JNOW can be set in the Star Tracker Settings dialog.
 
-When target is set to Custom Az/El, this will display the corresponding right ascension.
+When target is set to Custom Az/El or Custom l/b, this will display the corresponding right ascension.
 
 <h3>15: Declination</h3>
 
 When target is set to Custom RA/Dec, you can specify the declination in degrees of the target object. This can be specified as a decimal (E.g. 34.6, from -90.0 to 90.0) or in degrees, minutes and seconds (E.g. 34d12m5.6s, 34d12'5.6"  34 12 5.6). Whether the epoch is J2000 or JNOW can be set in the Star Tracker Settings dialog.
 
-When target is set to Custom Az/El, this will display the corresponding declination.
+When target is set to Custom Az/El or Custom l/b, this will display the corresponding declination.
 
 <h3>16: Azimuth</h3>
 
-When target is set to Custom Az/El, you specify the azimuth in degrees of the target object. The corresponding RA/Dec will be calculated and displayed.
+When target is set to Custom Az/El, you specify the azimuth in degrees of the target object. The corresponding RA/Dec and l/b will be calculated and displayed.
 
 For all other target settings, this displays the calculated azimuth (angle in degrees, clockwise from North) to the object.
 
 <h3>17: Elevation</h3>
 
-When target is set to Custom Az/El, you specify the elevation in degrees of the target object. The corresponding RA/Dec will be calculated and displayed.
+When target is set to Custom Az/El, you specify the elevation in degrees of the target object. The corresponding RA/Dec and l/b will be calculated and displayed.
 
 For all other target settings, this displays the calculated elevation (angle in degrees - 0 to horizon and 90 to zenith) to the object.
 
-<h3>18: b - Galactic latitude</h3>
+<h3>18: Az Offset</h3>
 
-Displays the calculated galactic latitude (angle in degrees, positive to the North of the galactic plane) to the object.
+An offset in degrees that is added to the computed target azimuth.
 
-<h3>19: l - Galactic longitude</h3>
+<h3>19: El Offset</h3>
 
-Displays the calculated galactic longitude (angle in degrees, Eastward from the galactic centre) to the object.
+An offset in degrees that is added to the computed target elevation.
+
+<h3>20: l - Galactic Longitude</h3>
+
+When the target is set to Custom l/b, you specify the galactic longitude (angle in degrees, Eastward from the galactic centre) of the target object.
+
+For all other target settings, this sisplays the calculated galactic longitude to the object.
+
+<h3>21: b - Galactic Latitude</h3>
+
+When the target is set to Custom l/b, you specify the galactic lattitude (angle in degrees) of the target object.
+
+For all other target settings, displays the calculated galactic latitude to the object.
 
 <h2>Plots</h2>
 
@@ -169,6 +188,8 @@ This temperature is therefore valid for a beamwidth of less than 1 degree.
 The Star Tracker plugin can also estimate a sky temperature based on the user entered observation frequency and beamwidth.
 To see this figure, which will be typically lower than the above, select one of the last two temperature maps from the right hand combo box.
 
+The position of the Sun and Moon can also be drawn on the chart. Note that the sky temperature estimate does not take these in to account.
+
 <h3>Drift scan path</h3>
 
 When the target (11) is set to Custom Az/El and the Sky temperature plot is displayed, a curve showing the drift scan path over a 24 hour period will be displayed.
@@ -192,6 +213,18 @@ Two images of the Milky Way are availble: a purely graphical image and one annot
 ![Galactic line of sight](../../../doc/img/StarTracker_milkywayannotated.png)
 
 The image can be zoomed in to or out from using the mouse wheel or the buttons. Hold CTRL to pan with the mouse wheel.
+
+<h4>Spiral Arm Animations</h4>
+
+When used with the Radio Astronomy plugin, markers corresponding to the position of HI clouds calculated from a marker on the spectrogram, can be plotted to display the estimated position of the cloud.
+
+An animated PNG file can then be created from multiple plots to show how the markers follow the positions of Milky Way's spiral arms as galactic longitude is varied.
+This process requires a marker to be placed on a peak in the spectrogram and then the ![add to animation](../../../doc/img/StarTracker_add_to_animation.png) button to be pressed to add the current plot to the animation.
+The process then repeats, by selecting the next measurement at a different longitude in the spectrogram and marking the appropriate peak, and then adding it to the animation.
+When all frames have been added, the animation can be saved to a PNG file by pressing ![save animation](../../../doc/img/StarTracker_save_animation.png).
+To start a new animation, press ![clear animation](../../../doc/img/StarTracker_clear_animation.png).
+
+![StarTracker spiral arm](../../../doc/img/StarTracker_spiral_arm.png)
 
 <h2>Map</h2>
 
@@ -241,7 +274,7 @@ Solar radio flux measurements at 245, 410, 610, 1415, 2695, 4995, 8800 and 15400
 
 Milky Way image from NASA/JPL-Caltech: https://photojournal.jpl.nasa.gov/catalog/PIA10748
 
-Icons are by Adnen Kadri and Erik Madsen, from the Noun Project Noun Project: https://thenounproject.com/
+Icons are by Adnen Kadri, iconsphere and Erik Madsen, from the Noun Project Noun Project: https://thenounproject.com/
 
 Icons are by Freepik from Flaticon https://www.flaticon.com/
 

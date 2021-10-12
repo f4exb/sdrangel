@@ -47,6 +47,9 @@ namespace SWGSDRangel
     class SWGChannelSettings;
     class SWGMapItem;
     class SWGTargetAzimuthElevation;
+    class SWGStarTrackerTarget;
+    class SWGStarTrackerDisplaySettings;
+    class SWGStarTrackerDisplayLoSSettings;
 }
 
 class SDRBASE_API MainCore
@@ -619,6 +622,77 @@ public:
             Message(),
             m_pipeSource(pipeSource),
             m_swgTargetAzimuthElevation(swgTargetAzimuthElevation)
+        { }
+    };
+
+    // Messages between Star Tracker and Radio Astronomy plugins
+
+    class SDRBASE_API MsgStarTrackerTarget : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const PipeEndPoint *getPipeSource() const { return m_pipeSource; }
+        SWGSDRangel::SWGStarTrackerTarget *getSWGStarTrackerTarget() const { return m_swgStarTrackerTarget; }
+
+        static MsgStarTrackerTarget* create(const PipeEndPoint *pipeSource, SWGSDRangel::SWGStarTrackerTarget *swgStarTrackerTarget)
+        {
+            return new MsgStarTrackerTarget(pipeSource, swgStarTrackerTarget);
+        }
+
+    private:
+        const PipeEndPoint *m_pipeSource;
+        SWGSDRangel::SWGStarTrackerTarget *m_swgStarTrackerTarget;
+
+        MsgStarTrackerTarget(const PipeEndPoint *pipeSource, SWGSDRangel::SWGStarTrackerTarget *swgStarTrackerTarget) :
+            Message(),
+            m_pipeSource(pipeSource),
+            m_swgStarTrackerTarget(swgStarTrackerTarget)
+        { }
+    };
+
+    class SDRBASE_API MsgStarTrackerDisplaySettings : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const PipeEndPoint *getPipeSource() const { return m_pipeSource; }
+        SWGSDRangel::SWGStarTrackerDisplaySettings *getSWGStarTrackerDisplaySettings() const { return m_swgStarTrackerDisplaySettings; }
+
+        static MsgStarTrackerDisplaySettings* create(const PipeEndPoint *pipeSource, SWGSDRangel::SWGStarTrackerDisplaySettings *swgStarTrackerDisplaySettings)
+        {
+            return new MsgStarTrackerDisplaySettings(pipeSource, swgStarTrackerDisplaySettings);
+        }
+
+    private:
+        const PipeEndPoint *m_pipeSource;
+        SWGSDRangel::SWGStarTrackerDisplaySettings *m_swgStarTrackerDisplaySettings;
+
+        MsgStarTrackerDisplaySettings(const PipeEndPoint *pipeSource, SWGSDRangel::SWGStarTrackerDisplaySettings *swgStarTrackerDisplaySettings) :
+            Message(),
+            m_pipeSource(pipeSource),
+            m_swgStarTrackerDisplaySettings(swgStarTrackerDisplaySettings)
+        { }
+    };
+
+    class SDRBASE_API MsgStarTrackerDisplayLoSSettings : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const PipeEndPoint *getPipeSource() const { return m_pipeSource; }
+        SWGSDRangel::SWGStarTrackerDisplayLoSSettings *getSWGStarTrackerDisplayLoSSettings() const { return m_swgStarTrackerDisplayLoSSettings; }
+
+        static MsgStarTrackerDisplayLoSSettings* create(const PipeEndPoint *pipeSource, SWGSDRangel::SWGStarTrackerDisplayLoSSettings *swgStarTrackerDisplayLoSSettings)
+        {
+            return new MsgStarTrackerDisplayLoSSettings(pipeSource, swgStarTrackerDisplayLoSSettings);
+        }
+
+    private:
+        const PipeEndPoint *m_pipeSource;
+        SWGSDRangel::SWGStarTrackerDisplayLoSSettings *m_swgStarTrackerDisplayLoSSettings;
+
+        MsgStarTrackerDisplayLoSSettings(const PipeEndPoint *pipeSource, SWGSDRangel::SWGStarTrackerDisplayLoSSettings *swgStarTrackerDisplayLoSSettings) :
+            Message(),
+            m_pipeSource(pipeSource),
+            m_swgStarTrackerDisplayLoSSettings(swgStarTrackerDisplayLoSSettings)
         { }
     };
 

@@ -54,6 +54,9 @@ MESSAGE_CLASS_DEFINITION(MainCore::MsgChannelDemodQuery, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgMapItem, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgPacket, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgTargetAzimuthElevation, Message)
+MESSAGE_CLASS_DEFINITION(MainCore::MsgStarTrackerTarget, Message)
+MESSAGE_CLASS_DEFINITION(MainCore::MsgStarTrackerDisplaySettings, Message)
+MESSAGE_CLASS_DEFINITION(MainCore::MsgStarTrackerDisplayLoSSettings, Message)
 
 MainCore::MainCore()
 {

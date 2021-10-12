@@ -48,19 +48,19 @@ public:
 
     FITS(QString resourceName);
 
-    float value(int x, int y);
-    float scaledValue(int x, int y);
-    float scaledWrappedValue(int x, int y);
+    float value(int x, int y) const;
+    float scaledValue(int x, int y) const;
+    float scaledWrappedValue(int x, int y) const;
 
-    double degreesPerPixelH() { return m_cdelta1; }
-    double degreesPerPixelV() { return m_cdelta2; }
-    int width() { return m_width; }
-    int height() { return m_height; }
-    bool valid() { return m_valid; }
+    double degreesPerPixelH() const { return m_cdelta1; }
+    double degreesPerPixelV() const { return m_cdelta2; }
+    int width() const { return m_width; }
+    int height() const { return m_height; }
+    bool valid() const { return m_valid; }
 
 protected:
 
-    int mod(int a, int b);
+    int mod(int a, int b) const;
 };
 
 #endif // INCLUDE_UTIL_FITS_H

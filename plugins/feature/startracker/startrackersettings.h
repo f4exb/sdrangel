@@ -41,7 +41,7 @@ struct StarTrackerSettings
     double m_heightAboveSeaLevel; // In metres
     double m_temperatureLapseRate; // In K/km
     double m_frequency;         // Observation frequency in Hz
-    double m_beamwidth;         // Beamwidth in degrees
+    double m_beamwidth;         // Halfpower beamwidth in degrees
     uint16_t m_serverPort;
     bool m_enableServer;        // Enable Stellarium server
     enum AzElUnits {DMS, DM, D, Decimal} m_azElUnits; // This needs to match DMSSpinBox::DisplayUnits
@@ -60,13 +60,25 @@ struct StarTrackerSettings
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIFeatureSetIndex;
     uint16_t m_reverseAPIFeatureIndex;
-    double m_az;               // Azimuth for Custom Az/El
-    double m_el;               // Elevation for Custom Az/El
+    double m_az;                // Azimuth for Custom Az/El
+    double m_el;                // Elevation for Custom Az/El
+    double m_l;                 // Galactic longitude for Custom l/b
+    double m_b;                 // Galactic lattiude for Custom l/b
+    bool m_link;                // Link settings to Radio Astronomy plugin
+    QString m_owmAPIKey;        // API key for openweathermap.org
+    int m_weatherUpdatePeriod;  // Time in minutes between weather updates
+    double m_azOffset;
+    double m_elOffset;
+    bool m_drawSunOnSkyTempChart;
+    bool m_drawMoonOnSkyTempChart;
 
     StarTrackerSettings();
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+
+    static const QStringList m_pipeTypes;
+    static const QStringList m_pipeURIs;
 };
 
 #endif // INCLUDE_FEATURE_STARTRACKERSETTINGS_H_

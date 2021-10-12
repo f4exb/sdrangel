@@ -28,6 +28,7 @@
 
 #include "SWGTargetAzimuthElevation.h"
 #include "SWGMapItem.h"
+#include "SWGStarTrackerTarget.h"
 
 #include "webapi/webapiadapterinterface.h"
 #include "webapi/webapiutils.h"
@@ -42,6 +43,7 @@
 MESSAGE_CLASS_DEFINITION(StarTrackerWorker::MsgConfigureStarTrackerWorker, Message)
 MESSAGE_CLASS_DEFINITION(StarTrackerReport::MsgReportAzAl, Message)
 MESSAGE_CLASS_DEFINITION(StarTrackerReport::MsgReportRADec, Message)
+MESSAGE_CLASS_DEFINITION(StarTrackerReport::MsgReportGalactic, Message)
 
 StarTrackerWorker::StarTrackerWorker(StarTracker* starTracker, WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_starTracker(starTracker),
@@ -51,7 +53,8 @@ StarTrackerWorker::StarTrackerWorker(StarTracker* starTracker, WebAPIAdapterInte
     m_running(false),
     m_mutex(QMutex::Recursive),
     m_tcpServer(nullptr),
-    m_clientConnection(nullptr)
+    m_clientConnection(nullptr),
+    m_solarFlux(0.0f)
 {
     connect(&m_pollTimer, SIGNAL(timeout()), this, SLOT(update()));
 }
@@ -107,6 +110,12 @@ bool StarTrackerWorker::handleMessage(const Message& cmd)
         applySettings(cfg.getSettings(), cfg.getForce());
         return true;
     }
+    else if (StarTracker::MsgSetSolarFlux::match(cmd))
+    {
+        StarTracker::MsgSetSolarFlux& msg = (StarTracker::MsgSetSolarFlux&) cmd;
+        m_solarFlux = msg.getFlux();
+        return true;
+    }
     else
     {
         return false;
@@ -125,15 +134,27 @@ void StarTrackerWorker::applySettings(const StarTrackerSettings& settings, bool 
             << " m_updatePeriod: " << settings.m_updatePeriod
             << " force: " << force;
 
-    if ((m_settings.m_target != settings.m_target)
+    if (   (m_settings.m_ra != settings.m_ra)
+        || (m_settings.m_dec != settings.m_dec)
         || (m_settings.m_latitude != settings.m_latitude)
         || (m_settings.m_longitude != settings.m_longitude)
+        || (m_settings.m_target != settings.m_target)
         || (m_settings.m_dateTime != settings.m_dateTime)
         || (m_settings.m_refraction != settings.m_refraction)
         || (m_settings.m_pressure != settings.m_pressure)
         || (m_settings.m_temperature != settings.m_temperature)
-        || (m_settings.m_ra != settings.m_ra)
-        || (m_settings.m_dec != settings.m_dec) || force)
+        || (m_settings.m_humidity != settings.m_humidity)
+        || (m_settings.m_heightAboveSeaLevel != settings.m_heightAboveSeaLevel)
+        || (m_settings.m_temperatureLapseRate != settings.m_temperatureLapseRate)
+        || (m_settings.m_frequency != settings.m_frequency)
+        || (m_settings.m_beamwidth != settings.m_beamwidth)
+        || (m_settings.m_az != settings.m_az)
+        || (m_settings.m_el != settings.m_el)
+        || (m_settings.m_l != settings.m_l)
+        || (m_settings.m_b != settings.m_b)
+        || (m_settings.m_azOffset != settings.m_azOffset)
+        || (m_settings.m_elOffset != settings.m_elOffset)
+        || force)
     {
         // Recalculate immediately
         QTimer::singleShot(1, this, &StarTrackerWorker::update);
@@ -283,8 +304,9 @@ void StarTrackerWorker::readStellariumCommand()
                 qDebug() << "StarTrackerWorker: New target from Stellarum: " << m_settings.m_ra << " " << m_settings.m_dec;
 
                 // Forward to GUI for display
-                if (getMessageQueueToGUI())
-                    getMessageQueueToGUI()->push(StarTrackerReport::MsgReportRADec::create(raDeg, decDeg));
+                if (getMessageQueueToGUI()) {
+                    getMessageQueueToGUI()->push(StarTrackerReport::MsgReportRADec::create(raDeg, decDeg, "target"));
+                }
             }
             else
             {
@@ -345,7 +367,7 @@ void StarTrackerWorker::writeStellariumTarget(double ra, double dec)
 }
 
 
-void StarTrackerWorker::updateRaDec(RADec rd, QDateTime dt)
+void StarTrackerWorker::updateRaDec(RADec rd, QDateTime dt, bool lbTarget)
 {
     RADec rdJ2000;
     double jd;
@@ -356,14 +378,15 @@ void StarTrackerWorker::updateRaDec(RADec rd, QDateTime dt)
     // Send to Stellarium
     writeStellariumTarget(rdJ2000.ra, rdJ2000.dec);
     // Send to GUI
-    if (m_settings.m_target == "Sun" || m_settings.m_target == "Moon")
+    if (m_settings.m_target == "Sun" || m_settings.m_target == "Moon" || (m_settings.m_target == "Custom Az/El") || lbTarget)
     {
         if (getMessageQueueToGUI())
         {
-            if (m_settings.m_jnow)
-                getMessageQueueToGUI()->push(StarTrackerReport::MsgReportRADec::create(rd.ra, rd.dec));
-            else
-                getMessageQueueToGUI()->push(StarTrackerReport::MsgReportRADec::create(rdJ2000.ra, rdJ2000.dec));
+            if (m_settings.m_jnow) {
+                getMessageQueueToGUI()->push(StarTrackerReport::MsgReportRADec::create(rd.ra, rd.dec, "target"));
+            } else {
+                getMessageQueueToGUI()->push(StarTrackerReport::MsgReportRADec::create(rdJ2000.ra, rdJ2000.dec, "target"));
+            }
         }
     }
 }
@@ -372,8 +395,7 @@ void StarTrackerWorker::removeFromMap(QString id)
 {
     MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
     QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(m_starTracker, "mapitems");
-    if (mapMessageQueues)
-    {
+    if (mapMessageQueues) {
         sendToMap(mapMessageQueues, id, "", "", 0.0, 0.0);
     }
 }
@@ -438,30 +460,41 @@ void StarTrackerWorker::update()
 {
     AzAlt aa, sunAA, moonAA;
     RADec rd, sunRD, moonRD;
+    double l, b;
+    bool lbTarget = false;
 
     QDateTime dt;
 
     // Get date and time to calculate position at
-    if (m_settings.m_dateTime == "")
+    if (m_settings.m_dateTime == "") {
         dt = QDateTime::currentDateTime();
-    else
+    } else {
         dt = QDateTime::fromString(m_settings.m_dateTime, Qt::ISODateWithMs);
+    }
 
     // Calculate position
-    if ((m_settings.m_target == "Sun") || (m_settings.m_drawSunOnMap))
+    if ((m_settings.m_target == "Sun") || m_settings.m_drawSunOnMap || m_settings.m_drawSunOnSkyTempChart)
+    {
         Astronomy::sunPosition(sunAA, sunRD, m_settings.m_latitude, m_settings.m_longitude, dt);
-    if ((m_settings.m_target == "Moon") || (m_settings.m_drawMoonOnMap))
+        getMessageQueueToGUI()->push(StarTrackerReport::MsgReportRADec::create(sunRD.ra, sunRD.dec, "sun"));
+    }
+    if ((m_settings.m_target == "Moon") || m_settings.m_drawMoonOnMap || m_settings.m_drawMoonOnSkyTempChart)
+    {
         Astronomy::moonPosition(moonAA, moonRD, m_settings.m_latitude, m_settings.m_longitude, dt);
+        getMessageQueueToGUI()->push(StarTrackerReport::MsgReportRADec::create(moonRD.ra, moonRD.dec, "moon"));
+    }
 
     if (m_settings.m_target == "Sun")
     {
-       rd = sunRD;
-       aa = sunAA;
+        rd = sunRD;
+        aa = sunAA;
+        Astronomy::equatorialToGalactic(rd.ra, rd.dec, l, b);
     }
     else if (m_settings.m_target == "Moon")
     {
-       rd = moonRD;
-       aa = moonAA;
+        rd = moonRD;
+        aa = moonAA;
+        Astronomy::equatorialToGalactic(rd.ra, rd.dec, l, b);
     }
     else if (m_settings.m_target == "Custom Az/El")
     {
@@ -469,6 +502,26 @@ void StarTrackerWorker::update()
         aa.alt = m_settings.m_el;
         aa.az = m_settings.m_az;
         rd = Astronomy::azAltToRaDec(aa, m_settings.m_latitude, m_settings.m_longitude, dt);
+        // Precess RA/DEC from Jnow to J2000
+        RADec rd2000 = Astronomy::precess(rd, Astronomy::julianDate(dt), Astronomy::jd_j2000());
+        // Convert to l/b
+        Astronomy::equatorialToGalactic(rd2000.ra, rd2000.dec, l, b);
+        if (!m_settings.m_jnow) {
+            rd = rd2000;
+        }
+    }
+    else if (   (m_settings.m_target == "Custom l/b")
+             || (m_settings.m_target == "S7")
+             || (m_settings.m_target == "S8")
+             || (m_settings.m_target == "S9")
+            )
+    {
+        // Convert l/b to RA/Dec, then Alt/Az
+        l = m_settings.m_l;
+        b = m_settings.m_b;
+        Astronomy::galacticToEquatorial(l, b, rd.ra, rd.dec);
+        aa = Astronomy::raDecToAzAlt(rd, m_settings.m_latitude, m_settings.m_longitude, dt, !m_settings.m_jnow);
+        lbTarget = true;
     }
     else
     {
@@ -476,8 +529,9 @@ void StarTrackerWorker::update()
         rd.ra = Astronomy::raToDecimal(m_settings.m_ra);
         rd.dec = Astronomy::decToDecimal(m_settings.m_dec);
         aa = Astronomy::raDecToAzAlt(rd, m_settings.m_latitude, m_settings.m_longitude, dt, !m_settings.m_jnow);
+        Astronomy::equatorialToGalactic(rd.ra, rd.dec, l, b);
     }
-    updateRaDec(rd, dt);
+    updateRaDec(rd, dt, lbTarget);
 
     // Adjust for refraction
     if (m_settings.m_refraction == "Positional Astronomy Library")
@@ -485,48 +539,100 @@ void StarTrackerWorker::update()
         aa.alt += Astronomy::refractionPAL(aa.alt, m_settings.m_pressure, m_settings.m_temperature, m_settings.m_humidity,
                                             m_settings.m_frequency, m_settings.m_latitude, m_settings.m_heightAboveSeaLevel,
                                             m_settings.m_temperatureLapseRate);
-        if (aa.alt > 90.0)
+        if (aa.alt > 90.0) {
             aa.alt = 90.0f;
+        }
     }
     else if (m_settings.m_refraction == "Saemundsson")
     {
         aa.alt += Astronomy::refractionSaemundsson(aa.alt, m_settings.m_pressure, m_settings.m_temperature);
-        if (aa.alt > 90.0)
+        if (aa.alt > 90.0) {
             aa.alt = 90.0f;
+        }
     }
+
+    // Add user-adjustment
+    aa.alt += m_settings.m_elOffset;
+    aa.az += m_settings.m_azOffset;
 
     // Send to GUI
     if (getMessageQueueToGUI())
     {
-        if (m_settings.m_target == "Custom Az/El") {
-            getMessageQueueToGUI()->push(StarTrackerReport::MsgReportRADec::create(rd.ra, rd.dec));
-        } else {
+        // MsgReportRADec sent in updateRaDec()
+        if (m_settings.m_target != "Custom Az/El") {
             getMessageQueueToGUI()->push(StarTrackerReport::MsgReportAzAl::create(aa.az, aa.alt));
+        }
+        if (!lbTarget) {
+            getMessageQueueToGUI()->push(StarTrackerReport::MsgReportGalactic::create(l, b));
         }
     }
 
-    // Send Az/El to Rotator Controllers
     MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
-    QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(m_starTracker, "target");
-    if (mapMessageQueues)
-    {
-        QList<MessageQueue*>::iterator it = mapMessageQueues->begin();
+    QList<MessageQueue*>* messageQueues;
 
-        for (; it != mapMessageQueues->end(); ++it)
+    // Send Az/El to Rotator Controllers
+    // Unless we're receiving settings to display from a Radio Astronomy plugins
+    if (!m_settings.m_link)
+    {
+        messageQueues = messagePipes.getMessageQueues(m_starTracker, "target");
+        if (messageQueues)
         {
-            SWGSDRangel::SWGTargetAzimuthElevation *swgTarget = new SWGSDRangel::SWGTargetAzimuthElevation();
-            swgTarget->setName(new QString(m_settings.m_target));
-            swgTarget->setAzimuth(aa.az);
-            swgTarget->setElevation(aa.alt);
-            (*it)->push(MainCore::MsgTargetAzimuthElevation::create(m_starTracker, swgTarget));
+            QList<MessageQueue*>::iterator it = messageQueues->begin();
+
+            for (; it != messageQueues->end(); ++it)
+            {
+                SWGSDRangel::SWGTargetAzimuthElevation *swgTarget = new SWGSDRangel::SWGTargetAzimuthElevation();
+                swgTarget->setName(new QString(m_settings.m_target));
+                swgTarget->setAzimuth(aa.az);
+                swgTarget->setElevation(aa.alt);
+                (*it)->push(MainCore::MsgTargetAzimuthElevation::create(m_starTracker, swgTarget));
+            }
+        }
+    }
+
+    // Send Az/El, RA/Dec and Galactic b/l to Radio Astronomy plugins
+    // Unless we're receiving settings to display from a Radio Astronomy plugins
+    if (!m_settings.m_link)
+    {
+        messageQueues = messagePipes.getMessageQueues(m_starTracker, "startracker.target");
+        if (messageQueues)
+        {
+            QList<MessageQueue*>::iterator it = messageQueues->begin();
+
+            for (; it != messageQueues->end(); ++it)
+            {
+                SWGSDRangel::SWGStarTrackerTarget *swgTarget = new SWGSDRangel::SWGStarTrackerTarget();
+                swgTarget->setName(new QString(m_settings.m_target));
+                swgTarget->setAzimuth(aa.az);
+                swgTarget->setElevation(aa.alt);
+                swgTarget->setRa(rd.ra);
+                swgTarget->setDec(rd.dec);
+                swgTarget->setB(b);
+                swgTarget->setL(l);
+                swgTarget->setSolarFlux(m_solarFlux);
+                swgTarget->setAirTemperature(m_settings.m_temperature);
+                double temp;
+                m_starTracker->calcSkyTemperature(m_settings.m_frequency, m_settings.m_beamwidth, rd.ra, rd.dec, temp);
+                swgTarget->setSkyTemperature(temp);
+                swgTarget->setHpbw(m_settings.m_beamwidth);
+                // Calculate velocities
+                double vRot = Astronomy::earthRotationVelocity(rd, m_settings.m_latitude, m_settings.m_longitude, dt);
+                swgTarget->setEarthRotationVelocity(vRot);
+                double vOrbit = Astronomy::earthOrbitVelocityBCRS(rd,dt);
+                swgTarget->setEarthOrbitVelocityBcrs(vOrbit);
+                double vLSRK = Astronomy::sunVelocityLSRK(rd);
+                swgTarget->setSunVelocityLsr(vLSRK);
+                double vCorr = vRot + vOrbit + vLSRK;
+                (*it)->push(MainCore::MsgStarTrackerTarget::create(m_starTracker, swgTarget));
+            }
         }
     }
 
     // Send to Map
     if (m_settings.m_drawSunOnMap || m_settings.m_drawMoonOnMap || m_settings.m_drawStarOnMap)
     {
-        mapMessageQueues = messagePipes.getMessageQueues(m_starTracker, "mapitems");
-        if (mapMessageQueues)
+        messageQueues = messagePipes.getMessageQueues(m_starTracker, "mapitems");
+        if (messageQueues)
         {
             // Different between GMST(Lst at Greenwich) and RA
             double lst = Astronomy::localSiderealTime(dt, 0.0);
@@ -537,7 +643,7 @@ void StarTrackerWorker::update()
             {
                 sunLongitude = Astronomy::lstAndRAToLongitude(lst, sunRD.ra);
                 sunLatitude = sunRD.dec;
-                sendToMap(mapMessageQueues, "Sun", "qrc:///startracker/startracker/sun-40.png", "Sun", sunLatitude, sunLongitude);
+                sendToMap(messageQueues, "Sun", "qrc:///startracker/startracker/sun-40.png", "Sun", sunLatitude, sunLongitude);
             }
             if (m_settings.m_drawMoonOnMap)
             {
@@ -545,7 +651,7 @@ void StarTrackerWorker::update()
                 double moonLatitude = moonRD.dec;
                 double moonRotation;
                 QString phase = moonPhase(sunLongitude, moonLongitude, m_settings.m_latitude, moonRotation);
-                sendToMap(mapMessageQueues, "Moon", QString("qrc:///startracker/startracker/moon-%1-32").arg(phase), "Moon",
+                sendToMap(messageQueues, "Moon", QString("qrc:///startracker/startracker/moon-%1-32").arg(phase), "Moon",
                                 moonLatitude, moonLongitude, moonRotation);
             }
             if ((m_settings.m_drawStarOnMap) && (m_settings.m_target != "Sun") && (m_settings.m_target != "Moon"))
@@ -553,7 +659,7 @@ void StarTrackerWorker::update()
                 double starLongitude = Astronomy::lstAndRAToLongitude(lst, rd.ra);
                 double starLatitude = rd.dec;
                 QString text = m_settings.m_target.startsWith("Custom") ? "Star" : m_settings.m_target;
-                sendToMap(mapMessageQueues, "Star", "qrc:///startracker/startracker/pulsar-32.png", text, starLatitude, starLongitude);
+                sendToMap(messageQueues, "Star", "qrc:///startracker/startracker/pulsar-32.png", text, starLatitude, starLongitude);
             }
         }
     }

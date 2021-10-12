@@ -21,9 +21,11 @@
 
 #include <QThread>
 #include <QNetworkRequest>
+#include <QTimer>
 
 #include "feature/feature.h"
 #include "util/message.h"
+#include "util/fits.h"
 
 #include "startrackersettings.h"
 
@@ -31,6 +33,7 @@ class WebAPIAdapterInterface;
 class StarTrackerWorker;
 class QNetworkAccessManager;
 class QNetworkReply;
+class Weather;
 
 namespace SWGSDRangel {
     class SWGDeviceState;
@@ -81,6 +84,25 @@ public:
         { }
     };
 
+    class MsgSetSolarFlux : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        float getFlux() const { return m_flux; }
+
+        static MsgSetSolarFlux* create(float flux) {
+            return new MsgSetSolarFlux(flux);
+        }
+
+    protected:
+        float m_flux;
+
+        MsgSetSolarFlux(float flux) :
+            Message(),
+            m_flux(flux)
+        { }
+    };
+
     StarTracker(WebAPIAdapterInterface *webAPIAdapterInterface);
     virtual ~StarTracker();
     virtual void destroy() { delete this; }
@@ -94,17 +116,17 @@ public:
 
     virtual int webapiRun(bool run,
             SWGSDRangel::SWGDeviceState& response,
-            QString& errorMessage);
+            QString& errorMessage) override;
 
     virtual int webapiSettingsGet(
             SWGSDRangel::SWGFeatureSettings& response,
-            QString& errorMessage);
+            QString& errorMessage) override;
 
     virtual int webapiSettingsPutPatch(
             bool force,
             const QStringList& featureSettingsKeys,
             SWGSDRangel::SWGFeatureSettings& response,
-            QString& errorMessage);
+            QString& errorMessage) override;
 
     static void webapiFormatFeatureSettings(
         SWGSDRangel::SWGFeatureSettings& response,
@@ -114,6 +136,10 @@ public:
             StarTrackerSettings& settings,
             const QStringList& featureSettingsKeys,
             SWGSDRangel::SWGFeatureSettings& response);
+
+    const FITS *getTempFITS(int index) const { return m_temps[index]; }
+    const FITS *getSpectralIndexFITS() const { return m_spectralIndex; }
+    bool calcSkyTemperature(double frequency, double beamwidth, double ra, double dec, double& temp) const;
 
     static const char* const m_featureIdURI;
     static const char* const m_featureId;
@@ -125,14 +151,24 @@ private:
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
+    QList<AvailablePipeSource> m_availablePipes;
+    QTimer m_updatePipesTimer;
+    Weather *m_weather;
+    float m_solarFlux;
+
+    QList<FITS*> m_temps;
+    FITS *m_spectralIndex;
 
     void start();
     void stop();
     void applySettings(const StarTrackerSettings& settings, bool force = false);
     void webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const StarTrackerSettings& settings, bool force);
+    double applyBeam(const FITS *fits, double beamwidth, double ra, double dec, int& imgX, int& imgY) const;
 
 private slots:
+    void updatePipes();
     void networkManagerFinished(QNetworkReply *reply);
+    void weatherUpdated(float temperature, float pressure, float humidity);
 };
 
 #endif // INCLUDE_FEATURE_STARTRACKER_H_

@@ -51,6 +51,24 @@ public:
     QString* getDec();
     void setDec(QString* dec);
 
+    float getAzimuth();
+    void setAzimuth(float azimuth);
+
+    float getElevation();
+    void setElevation(float elevation);
+
+    float getL();
+    void setL(float l);
+
+    float getB();
+    void setB(float b);
+
+    float getAzimuthOffset();
+    void setAzimuthOffset(float azimuth_offset);
+
+    float getElevationOffset();
+    void setElevationOffset(float elevation_offset);
+
     float getLatitude();
     void setLatitude(float latitude);
 
@@ -135,6 +153,24 @@ private:
 
     QString* dec;
     bool m_dec_isSet;
+
+    float azimuth;
+    bool m_azimuth_isSet;
+
+    float elevation;
+    bool m_elevation_isSet;
+
+    float l;
+    bool m_l_isSet;
+
+    float b;
+    bool m_b_isSet;
+
+    float azimuth_offset;
+    bool m_azimuth_offset_isSet;
+
+    float elevation_offset;
+    bool m_elevation_offset_isSet;
 
     float latitude;
     bool m_latitude_isSet;

@@ -6,6 +6,9 @@ set(startracker_SOURCES
     startrackerplugin.cpp
     startrackerworker.cpp
     startrackerwebapiadapter.cpp
+    startracker150mhzfits.qrc
+    startracker408mhzfits.qrc
+    startracker1420mhzfits.qrc
 )
 
 set(startracker_HEADERS

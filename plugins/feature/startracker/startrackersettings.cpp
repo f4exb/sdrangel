@@ -23,6 +23,14 @@
 
 #include "startrackersettings.h"
 
+const QStringList StarTrackerSettings::m_pipeTypes = {
+    QStringLiteral("RadioAstronomy")
+};
+
+const QStringList StarTrackerSettings::m_pipeURIs = {
+    QStringLiteral("sdrangel.channel.radioastronomy")
+};
+
 StarTrackerSettings::StarTrackerSettings()
 {
     resetToDefaults();
@@ -64,6 +72,15 @@ void StarTrackerSettings::resetToDefaults()
     m_reverseAPIFeatureIndex = 0;
     m_az = 0.0;
     m_el = 0.0;
+    m_l = 0.0;
+    m_b = 0.0;
+    m_azOffset = 0.0;
+    m_elOffset = 0.0;
+    m_link = false;
+    m_owmAPIKey = "";
+    m_weatherUpdatePeriod = 60;
+    m_drawSunOnSkyTempChart = true;
+    m_drawMoonOnSkyTempChart = true;
 }
 
 QByteArray StarTrackerSettings::serialize() const
@@ -104,6 +121,15 @@ QByteArray StarTrackerSettings::serialize() const
     s.writeBool(32, m_chartsDarkTheme);
     s.writeDouble(33, m_az);
     s.writeDouble(34, m_el);
+    s.writeDouble(35, m_l);
+    s.writeDouble(36, m_b);
+    s.writeBool(37, m_link);
+    s.writeString(38, m_owmAPIKey);
+    s.writeS32(39, m_weatherUpdatePeriod);
+    s.writeDouble(40, m_azOffset);
+    s.writeDouble(41, m_elOffset);
+    s.writeBool(42, m_drawSunOnSkyTempChart);
+    s.writeBool(43, m_drawMoonOnSkyTempChart);
 
     return s.final();
 }
@@ -175,6 +201,18 @@ bool StarTrackerSettings::deserialize(const QByteArray& data)
 
         d.readDouble(33, &m_az, 0.0);
         d.readDouble(34, &m_el, 0.0);
+        d.readDouble(35, &m_l, 0.0);
+        d.readDouble(36, &m_b, 0.0);
+
+        d.readBool(37, &m_link, false);
+        d.readString(38, &m_owmAPIKey, "");
+        d.readS32(39, &m_weatherUpdatePeriod, 60);
+
+        d.readDouble(40, &m_azOffset, 0.0);
+        d.readDouble(41, &m_elOffset, 0.0);
+
+        d.readBool(42, &m_drawSunOnSkyTempChart, true);
+        d.readBool(43, &m_drawMoonOnSkyTempChart, true);
 
         return true;
     }

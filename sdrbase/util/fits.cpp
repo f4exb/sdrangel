@@ -29,6 +29,10 @@ FITS::FITS(QString resourceName) :
     m_valid(false)
 {
     QResource m_res(resourceName);
+    if (!m_res.isValid()) {
+        qWarning() << "FITS: - " << resourceName << " is not a valid resource";
+        return;
+    }
     int m_headerSize = 2880;
     qint64 m_fileSize;
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
@@ -111,7 +115,7 @@ FITS::FITS(QString resourceName) :
     m_valid = true;
 }
 
-float FITS::value(int x, int y)
+float FITS::value(int x, int y) const
 {
     int offset = m_dataStart + (m_height-1-y) * m_width * m_bytesPerPixel + x * m_bytesPerPixel;
     const uchar *data = (const uchar *)m_data.data();
@@ -146,18 +150,18 @@ float FITS::value(int x, int y)
     }
 }
 
-float FITS::scaledValue(int x, int y)
+float FITS::scaledValue(int x, int y) const
 {
     float v = value(x, y);
     return v * m_uintScale;
 }
 
-int FITS::mod(int a, int b)
+int FITS::mod(int a, int b) const
 {
     return a - b * floor(a/(double)b);
 }
 
-float FITS::scaledWrappedValue(int x, int y)
+float FITS::scaledWrappedValue(int x, int y) const
 {
     float v = value(mod(x, m_width), mod(y, m_height));
     return v * m_uintScale;
