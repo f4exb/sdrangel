@@ -81,6 +81,8 @@ ChannelSettings:
       $ref: "/doc/swagger/include/PacketMod.yaml#/PacketModSettings"
     PagerDemodSettings:
       $ref: "/doc/swagger/include/PagerDemod.yaml#/PagerDemodSettings"
+    RadioAstronomySettings:
+      $ref: "/doc/swagger/include/RadioAstronomy.yaml#/RadioAstronomySettings"
     RadioClockSettings:
       $ref: "/doc/swagger/include/RadioClock.yaml#/RadioClockSettings"
     RemoteSinkSettings:

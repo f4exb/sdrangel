@@ -2870,6 +2870,9 @@ margin-bottom: 20px;
     "PacketModActions" : {
       "$ref" : "#/definitions/PacketModActions"
     },
+    "RadioAstronomyActions" : {
+      "$ref" : "#/definitions/RadioAstronomyActions"
+    },
     "SigMFFileSinkActions" : {
       "$ref" : "#/definitions/SigMFFileSinkActions"
     }
@@ -3072,6 +3075,9 @@ margin-bottom: 20px;
     "SSBDemodReport" : {
       "$ref" : "#/definitions/SSBDemodReport"
     },
+    "RadioAstronomyReport" : {
+      "$ref" : "#/definitions/RadioAstronomyReport"
+    },
     "RadioClockReport" : {
       "$ref" : "#/definitions/RadioClockReport"
     },
@@ -3226,6 +3232,9 @@ margin-bottom: 20px;
     },
     "PagerDemodSettings" : {
       "$ref" : "#/definitions/PagerDemodSettings"
+    },
+    "RadioAstronomySettings" : {
+      "$ref" : "#/definitions/RadioAstronomySettings"
     },
     "RadioClockSettings" : {
       "$ref" : "#/definitions/RadioClockSettings"
@@ -5787,6 +5796,28 @@ margin-bottom: 20px;
       "items" : {
         "type" : "string"
       }
+    },
+    "targetAzimuth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "targetElevation" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Target elevation in degrees (0-180)"
+    },
+    "currentAzimuth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "currentElevation" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Current elevation in degrees (0-180)"
+    },
+    "onTarget" : {
+      "type" : "integer",
+      "description" : "Indicates whether the rotator is pointing at the current target within the set tolerance"
     }
   },
   "description" : "GS-232 Controller report"
@@ -5844,7 +5875,8 @@ margin-bottom: 20px;
       "description" : "Maximum elevation the controller will output"
     },
     "tolerance" : {
-      "type" : "integer",
+      "type" : "number",
+      "format" : "float",
       "description" : "Tolerance in degrees"
     },
     "protocol" : {
@@ -9007,6 +9039,135 @@ margin-bottom: 20px;
     }
   }
 };
+            defs.RadioAstronomyActions = {
+  "properties" : {
+    "start" : {
+      "type" : "object",
+      "description" : "Start measurement(s)",
+      "properties" : { }
+    }
+  },
+  "description" : "RadioAstronomy"
+};
+            defs.RadioAstronomyReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power received in channel (dB)"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "RadioAstronomy"
+};
+            defs.RadioAstronomySettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "sampleRate" : {
+      "type" : "integer"
+    },
+    "rfBandwidth" : {
+      "type" : "integer"
+    },
+    "integration" : {
+      "type" : "integer"
+    },
+    "fftSize" : {
+      "type" : "integer"
+    },
+    "fftWindow" : {
+      "type" : "integer"
+    },
+    "filterFreqs" : {
+      "type" : "string"
+    },
+    "starTracker" : {
+      "type" : "string"
+    },
+    "rotator" : {
+      "type" : "string"
+    },
+    "runMode" : {
+      "type" : "integer",
+      "description" : "(0 for single, 1 for continuous, 2 for sweep)"
+    },
+    "sweepStartAtTime" : {
+      "type" : "integer",
+      "description" : "(0 for now, 1 for at sweepStartDateTime)"
+    },
+    "sweepStartDateTime" : {
+      "type" : "string"
+    },
+    "sweepType" : {
+      "type" : "integer",
+      "description" : "(0 for Az/El, 1 for l/b, 2 for offset)"
+    },
+    "sweep1Start" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "sweep1Stop" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "sweep1Step" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "sweep1Delay" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "sweep2Start" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "sweep2Stop" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "sweep2Step" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "sweep2Delay" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "RadioAstronomy"
+};
             defs.RadioClockReport = {
   "properties" : {
     "channelPowerDB" : {
@@ -9044,7 +9205,7 @@ margin-bottom: 20px;
     },
     "modulation" : {
       "type" : "integer",
-      "description" : "0 - MSF, 1 - DCF77, 2 - TDF"
+      "description" : "0 - MSF, 1 - DCF77, 2 - TDF, 3 - WWVB"
     },
     "timezone" : {
       "type" : "integer",
@@ -10848,6 +11009,80 @@ margin-bottom: 20px;
     }
   }
 };
+            defs.StarTrackerDisplayLoSSettings = {
+  "properties" : {
+    "name" : {
+      "type" : "string"
+    },
+    "b" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "l" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "d" : {
+      "type" : "number",
+      "format" : "float"
+    }
+  },
+  "description" : "Details of object to display in Star Tracker line-of-sight view. Can be sent by other plugins to startracker.display message queue"
+};
+            defs.StarTrackerDisplayLoSSettings_2 = {
+  "properties" : {
+    "name" : {
+      "type" : "string"
+    },
+    "b" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "l" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "d" : {
+      "type" : "number",
+      "format" : "float"
+    }
+  },
+  "description" : "Details of object to display in Star Tracker line-of-sight view. Can be sent by other plugins to startracker.display message queue"
+};
+            defs.StarTrackerDisplaySettings = {
+  "properties" : {
+    "dateTime" : {
+      "type" : "string",
+      "description" : "Date and time of observation. ISO 8601 extended format: yyyy-MM-ddTHH:mm:ss with Z suffix for UTC. Empty string for current time."
+    },
+    "azimuth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "elevation" : {
+      "type" : "number",
+      "format" : "float"
+    }
+  },
+  "description" : "Settings to display in Star Tracker. Can be sent by other plugins to startracker.display message queue."
+};
+            defs.StarTrackerDisplaySettings_2 = {
+  "properties" : {
+    "dateTime" : {
+      "type" : "string",
+      "description" : "Date and time of observation. ISO 8601 extended format: yyyy-MM-ddTHH:mm:ss with Z suffix for UTC. Empty string for current time."
+    },
+    "azimuth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "elevation" : {
+      "type" : "number",
+      "format" : "float"
+    }
+  },
+  "description" : "Settings to display in Star Tracker. Can be sent by other plugins to startracker.display message queue."
+};
             defs.StarTrackerSettings = {
   "properties" : {
     "target" : {
@@ -10861,6 +11096,36 @@ margin-bottom: 20px;
     "dec" : {
       "type" : "string",
       "description" : "Declination of custom target"
+    },
+    "azimuth" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Azimuth of custom target"
+    },
+    "elevation" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Elevation of custom target"
+    },
+    "l" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Galactic longitude of custom target"
+    },
+    "b" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Galactic latitude of custom target"
+    },
+    "azimuthOffset" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Offset to add to computed azimuth of target"
+    },
+    "elevationOffset" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Offset to add to computed elevation of target"
     },
     "latitude" : {
       "type" : "number",
@@ -10962,6 +11227,144 @@ margin-bottom: 20px;
     }
   },
   "description" : "Star Tracker settings"
+};
+            defs.StarTrackerTarget = {
+  "properties" : {
+    "name" : {
+      "type" : "string"
+    },
+    "azimuth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "elevation" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "ra" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Right ascension of target"
+    },
+    "dec" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Declination of target"
+    },
+    "b" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "l" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "earthRotationVelocity" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Velocity towards target at observation location due to rotation of the Earth"
+    },
+    "earthOrbitVelocityBCRS" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Velocity towards target due to Earth's orbit of Sun relative to barycentric reference frame"
+    },
+    "sunVelocityLSR" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Velocity of Sun towards target relative to local standard of rest"
+    },
+    "solarFlux" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Solar flux"
+    },
+    "airTemperature" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Surface air temperature in degrees celsius at antenna location"
+    },
+    "skyTemperature" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Sky temperature (CMB+Galactic noise) in Kelvin towards the target"
+    },
+    "hpbw" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Half-power beam width in degrees"
+    }
+  },
+  "description" : "Star Tracker target. Sent to startracker.target message queue for other plugins to use."
+};
+            defs.StarTrackerTarget_2 = {
+  "properties" : {
+    "name" : {
+      "type" : "string"
+    },
+    "azimuth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "elevation" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "ra" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Right ascension of target"
+    },
+    "dec" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Declination of target"
+    },
+    "b" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "l" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "earthRotationVelocity" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Velocity towards target at observation location due to rotation of the Earth"
+    },
+    "earthOrbitVelocityBCRS" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Velocity towards target due to Earth's orbit of Sun relative to barycentric reference frame"
+    },
+    "sunVelocityLSR" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Velocity of Sun towards target relative to local standard of rest"
+    },
+    "solarFlux" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Solar flux"
+    },
+    "airTemperature" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Surface air temperature in degrees celsius at antenna location"
+    },
+    "skyTemperature" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Sky temperature (CMB+Galactic noise) in Kelvin towards the target"
+    },
+    "hpbw" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Half-power beam width in degrees"
+    }
+  },
+  "description" : "Star Tracker target. Sent to startracker.target message queue for other plugins to use."
 };
             defs.SuccessResponse = {
   "required" : [ "message" ],
@@ -50602,7 +51005,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-10-04T00:59:39.001+02:00
+              Generated 2021-10-12T21:36:57.091+02:00
             </div>
           </div>
       </div>

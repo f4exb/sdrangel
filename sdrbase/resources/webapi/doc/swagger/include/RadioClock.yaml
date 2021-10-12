@@ -13,7 +13,7 @@ RadioClockSettings:
       type: number
       format: float
     modulation:
-      description: 0 - MSF, 1 - DCF77, 2 - TDF
+      description: 0 - MSF, 1 - DCF77, 2 - TDF, 3 - WWVB
       type: integer
     timezone:
       description: 0 - Broadcast, 1 - Local, 2 - UTC

@@ -10,6 +10,30 @@ StarTrackerSettings:
     dec:
       description: "Declination of custom target"
       type: string
+    azimuth:
+      description: "Azimuth of custom target"
+      type: number
+      format: float
+    elevation:
+      description: "Elevation of custom target"
+      type: number
+      format: float
+    l:
+      description: "Galactic longitude of custom target"
+      type: number
+      format: float
+    b:
+      description: "Galactic latitude of custom target"
+      type: number
+      format: float
+    azimuthOffset:
+      description: "Offset to add to computed azimuth of target"
+      type: number
+      format: float
+    elevationOffset:
+      description: "Offset to add to computed elevation of target"
+      type: number
+      format: float
     latitude:
       description: "Latitude in decimal degrees (North positive) of observation/antenna location"
       type: number
@@ -85,3 +109,95 @@ StarTrackerSettings:
       type: integer
     reverseAPIFeatureIndex:
       type: integer
+
+StarTrackerTarget:
+  description: "Star Tracker target. Sent to startracker.target message queue for other plugins to use."
+  properties:
+    name:
+      descrption: "The name of the target"
+      type: string
+    azimuth:
+      descrption: "The azimuth angle in degrees to the target"
+      type: number
+      format: float
+    elevation:
+      descrption: "The elevation angle in degrees to the target"
+      type: number
+      format: float
+    ra:
+      description: "Right ascension of target"
+      type: number
+      format: float
+    dec:
+      description: "Declination of target"
+      type: number
+      format: float
+    b:
+      descrption: "Galactic latitude in degrees"
+      type: number
+      format: float
+    l:
+      descrption: "Galactic longitude in degrees"
+      type: number
+      format: float
+    earthRotationVelocity:
+      description: "Velocity towards target at observation location due to rotation of the Earth"
+      type: number
+      format: float
+    earthOrbitVelocityBCRS:
+      description: "Velocity towards target due to Earth's orbit of Sun relative to barycentric reference frame"
+      type: number
+      format: float
+    sunVelocityLSR:
+      description: "Velocity of Sun towards target relative to local standard of rest"
+      type: number
+      format: float
+    solarFlux:
+      description: "Solar flux"
+      type: number
+      format: float
+    airTemperature:
+      description: "Surface air temperature in degrees celsius at antenna location"
+      type: number
+      format: float
+    skyTemperature:
+      description: "Sky temperature (CMB+Galactic noise) in Kelvin towards the target"
+      type: number
+      format: float
+    hpbw:
+      description: "Half-power beam width in degrees"
+      type: number
+      format: float
+
+StarTrackerDisplaySettings:
+  description: "Settings to display in Star Tracker. Can be sent by other plugins to startracker.display message queue."
+  properties:
+    dateTime:
+      description: "Date and time of observation. ISO 8601 extended format: yyyy-MM-ddTHH:mm:ss with Z suffix for UTC. Empty string for current time."
+      type: string
+    azimuth:
+      descrption: "The azimuth angle in degrees to the target"
+      type: number
+      format: float
+    elevation:
+      descrption: "The elevation angle in degrees to the target"
+      type: number
+      format: float
+
+StarTrackerDisplayLoSSettings:
+  description: "Details of object to display in Star Tracker line-of-sight view. Can be sent by other plugins to startracker.display message queue"
+  properties:
+    name:
+      type: string
+    b:
+      descrption: "Galactic latitude in degrees"
+      type: number
+      format: float
+    l:
+      descrption: "Galactic longitude in degrees"
+      type: number
+      format: float
+    d:
+      descrption: "Distance to object from Sun in kpc"
+      type: number
+      format: float
