@@ -30,26 +30,26 @@ The HI spectrum can be used to determine some of the Milky Way's spiral structur
 
 In radio astronomy it is common to use noise temperatures rather than power, via the relation:
 
-  T=P/(k*B)
+    T=P/(k*B)
 
 Where:
 
-  T is the noise temperature in Kelvin
-  P is power in Watts
-  k is Boltzmann's constant
-  B is bandwidth in Hertz
+- T is the noise temperature in Kelvin
+- P is power in Watts
+- k is Boltzmann's constant
+- B is bandwidth in Hertz
 
 Similarly, for low frequencies (where the Rayleigh-Jeans approximation is valid), brightness temperatures are used rather than intensity:
 
-  Tb=e*Iv*c^2/(2k*v^2)
+    Tb=e*Iv*c^2/(2k*v^2)
 
 Where:
 
-  Tb is the brightness temperature in Kelvin
-  e is the emissivity of the source
-  Iv is the intensity of the source (power per unit solid angle at the frequency v)
-  c is the speed of light
-  v is the frequency in Hertz
+- Tb is the brightness temperature in Kelvin
+- e is the emissivity of the source
+- Iv is the intensity of the source (power per unit solid angle at the frequency v)
+- c is the speed of light
+- v is the frequency in Hertz
 
 This can be convenient, as if a large astronomical source completely fills the antenna beam with a uniform brightness temperature,
 there will be an equal increase in the noise temperature measured by the receiver.
@@ -78,15 +78,15 @@ For most astronomical observations, Tsource<<Tsys and so we need to integrate ma
 than the random variations in the total noise (sigma_Tsys). The length of time and bandwidth required for this can be calculated from the
 [practical radiometer equation](https://www.cv.nrao.edu/~sransom/web/Ch3.html#E158):
 
-  sigma_Tsys = Tsys * sqrt(1/(B*tau) + (deltaG/G)^2)
+    sigma_Tsys = Tsys * sqrt(1/(B*tau) + (deltaG/G)^2)
 
 Where:
 
-  sigma_Tsys = Standard deviation / RMS of system noise temperature.
-  Tsys is system noise temperature.
-  B is bandwidth in Hertz.
-  tau is the integration time in seconds.
-  deltaG/G is the receiver gain variation.
+- sigma_Tsys = Standard deviation / RMS of system noise temperature.
+- Tsys is system noise temperature.
+- B is bandwidth in Hertz.
+- tau is the integration time in seconds.
+- deltaG/G is the receiver gain variation.
 
 <h2>Settings</h2>
 
@@ -178,13 +178,13 @@ the Galactic foreground (i.e. the increased noise temperature when looking in th
 If the link button to the right is unchecked, a value can be entered manually.
 If the link button is checked, Tgal is calculated using:
 
-  Tgal = 25.2 * (f/f0)^-2.75
+    Tgal = 25.2 * (f/f0)^-2.75
 
 Where:
 
-  25.2 is the 50th percentile of the all-sky distribution temperature.
-  f is the center frequency.
-  f0 is 408MHz.
+- 25.2 is the 50th percentile of the all-sky distribution temperature.
+- f is the center frequency.
+- f0 is 408MHz.
 
 Tgal is used in calibration to estimate Tsp.
 
@@ -201,13 +201,13 @@ Contribution to noise temperature due to atmospheric emission. Atmospheric emiss
 If the link button to the right is unchecked, a value can be entered manually.
 If the link button is checked, Tatm is calculated using:
 
-  Tatm = Tair * (1 - exp(-tau_z*sec(el)))
+   Tatm = Tair * (1 - exp(-tau_z*sec(el)))
 
 Where:
 
-  Tair is the surface air temperature from (18).
-  tau_z is the zenith opacity from (19).
-  el is the elevation of the antenna from (20)
+- Tair is the surface air temperature from (18).
+- tau_z is the zenith opacity from (19).
+- el is the elevation of the antenna from (20)
 
 <h3>18: Tair</h3>
 
@@ -231,13 +231,13 @@ If the link button is checked, El is automatically set to the elevation received
 
 This displays the value of Tsys0, the system noise temperature without an astronomical source, which is calculated as:
 
-  Tsys0=Trx+Tcmb+Tgal+Tsp+Tatm.
+    Tsys0=Trx+Tcmb+Tgal+Tsp+Tatm.
 
 <h3>22: sigma Tsys0</h3>
 
 This displays the value of sigma Tsys0, which is the standard deviation / RMS of Tsys0, and gives an indication of the sensitivity. It is calculated as:
 
-  sigma_Tsys0 = Tsys0 * sqrt(1/(B*tau) + (deltaG/G)^2)
+    sigma_Tsys0 = Tsys0 * sqrt(1/(B*tau) + (deltaG/G)^2)
 
 <h3>24: Baseline</h3>
 
@@ -432,7 +432,7 @@ When checked, the Gaussian fitting tools are displayed. These allow a Gaussian t
 
 ![Gaussian Fit](../../../doc/img/RadioAstronomy_SpectrumGaussian.png)
 
-<h3>Display Markers<h3>
+<h3>Display Markers</h3>
 
 When checked, the marker table is displayed and the user may place two markers (M1 and M2) on the chart for accurate display of the corresponding values.
 
@@ -611,7 +611,7 @@ Displays statistics calculated across all measurements (not just those visible o
 
 When checked, the Gaussian fitting tools are displayed. These allow a Gaussian to be fitted to the data, allowing measurement of the HPBW of the antenna.
 
-<h3>Display Markers<h3>
+<h3>Display Markers</h3>
 
 When checked, the marker table is displayed and the user may place two markers (M1 and M2) on the chart for accurate display of the corresponding values from the measurement series.
 
