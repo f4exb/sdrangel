@@ -25,7 +25,6 @@ const QMap<QString, QString> WebAPIUtils::m_channelURIToSettingsKey = {
     {"sdrangel.channel.adsbdemod", "ADSBDemodSettings"},
     {"sdrangel.channel.modais", "AISModSettings"},
     {"sdrangel.channel.aisdemod", "AISDemodSettings"},
-    {"sdrangel.channel.aptdemod", "APTDemodSettings"},
     {"sdrangel.channel.amdemod", "AMDemodSettings"},
     {"sdrangel.channel.aptdemod", "APTDemodSettings"},
     {"de.maintech.sdrangelove.channel.am", "AMDemodSettings"}, // remap
@@ -64,6 +63,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelURIToSettingsKey = {
     {"sdrangel.channeltx.modssb", "SSBModSettings"},
     {"sdrangel.channel.ssbdemod", "SSBDemodSettings"},
     {"de.maintech.sdrangelove.channel.ssb", "SSBDemodSettings"}, // remap
+    {"sdrangel.channel.radioastronomy", "RadioAstronomySettings"},
     {"sdrangel.channeltx.udpsource", "UDPSourceSettings"},
     {"sdrangel.channeltx.udpsink", "UDPSinkSettings"}, // remap
     {"sdrangel.channel.udpsink", "UDPSinkSettings"},
@@ -157,6 +157,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelTypeToSettingsKey = {
     {"PagerDemod", "PagerDemodSettings"},
     {"LocalSink", "LocalSinkSettings"},
     {"LocalSource", "LocalSourceSettings"},
+    {"RadioAstronomy", "RadioAstronomySettings"},
     {"RadioClock", "RadioClockSettings"},
     {"RemoteSink", "RemoteSinkSettings"},
     {"RemoteSource", "RemoteSourceSettings"},
@@ -179,6 +180,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelTypeToActionsKey = {
     {"FileSource", "FileSourceActions"},
     {"SigMFFileSink", "SigMFFileSinkActions"},
     {"IEEE_802_15_4_Mod", "IEEE_802_15_4_ModActions"},
+    {"RadioAstronomy", "RadioAstronomyActions"},
     {"PacketMod", "PacketModActions"}
 };
 
@@ -410,6 +412,51 @@ bool WebAPIUtils::getSubObjectInt(const QJsonObject &json, const QString &key, i
 
 // Set integer value withing nested JSON object
 bool WebAPIUtils::setSubObjectInt(QJsonObject &json, const QString &key, int value)
+{
+    for (QJsonObject::iterator  it = json.begin(); it != json.end(); it++)
+    {
+        QJsonValue jsonValue = it.value();
+
+        if (jsonValue.isObject())
+        {
+            QJsonObject subObject = jsonValue.toObject();
+
+            if (subObject.contains(key))
+            {
+                subObject[key] = value;
+                it.value() = subObject;
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+// Get string value from within nested JSON object
+bool WebAPIUtils::getSubObjectString(const QJsonObject &json, const QString &key, QString &value)
+{
+    for (QJsonObject::const_iterator  it = json.begin(); it != json.end(); it++)
+    {
+        QJsonValue jsonValue = it.value();
+
+        if (jsonValue.isObject())
+        {
+            QJsonObject subObject = jsonValue.toObject();
+
+            if (subObject.contains(key))
+            {
+                value = subObject[key].toString();
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+// Set string value withing nested JSON object
+bool WebAPIUtils::setSubObjectString(QJsonObject &json, const QString &key, const QString &value)
 {
     for (QJsonObject::iterator  it = json.begin(); it != json.end(); it++)
     {

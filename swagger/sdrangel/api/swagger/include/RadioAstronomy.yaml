@@ -1,0 +1,92 @@
+RadioAstronomySettings:
+  description: RadioAstronomy
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    sampleRate:
+      type: integer
+    rfBandwidth:
+      type: integer
+    integration:
+      type: integer
+    fftSize:
+      type: integer
+    fftWindow:
+      type: integer
+    filterFreqs:
+      type: string
+    starTracker:
+      type: string
+    rotator:
+      type: string
+    runMode:
+      description: "(0 for single, 1 for continuous, 2 for sweep)"
+      type: integer
+    sweepStartAtTime:
+      description: "(0 for now, 1 for at sweepStartDateTime)"
+      type: integer
+    sweepStartDateTime:
+      type: string
+    sweepType:
+      description: "(0 for Az/El, 1 for l/b, 2 for offset)"
+      type: integer
+    sweep1Start:
+      type: number
+      format: float
+    sweep1Stop:
+      type: number
+      format: float
+    sweep1Step:
+      type: number
+      format: float
+    sweep1Delay:
+      type: number
+      format: float
+    sweep2Start:
+      type: number
+      format: float
+    sweep2Stop:
+      type: number
+      format: float
+    sweep2Step:
+      type: number
+      format: float
+    sweep2Delay:
+      type: number
+      format: float
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+
+RadioAstronomyReport:
+  description: RadioAstronomy
+  properties:
+    channelPowerDB:
+      description: power received in channel (dB)
+      type: number
+      format: float
+    channelSampleRate:
+      type: integer
+
+RadioAstronomyActions:
+  description: RadioAstronomy
+  properties:
+    start:
+      type: object
+      description: "Start measurement(s)"

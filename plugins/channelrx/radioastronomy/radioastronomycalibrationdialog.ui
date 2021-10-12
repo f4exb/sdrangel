@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>RadioAstronomyCalibrationDialog</class>
+ <widget class="QDialog" name="RadioAstronomyCalibrationDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>514</width>
+    <height>345</height>
+   </rect>
+  </property>
+  <property name="font">
+   <font>
+    <family>Liberation Sans</family>
+    <pointsize>9</pointsize>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>Calibration Settings</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
+       <widget class="QGroupBox" name="gpioGroup">
+        <property name="title">
+         <string>SDR Device GPIO</string>
+        </property>
+        <layout class="QFormLayout" name="formLayout_4">
+         <item row="1" column="0">
+          <widget class="QLabel" name="gpioEnabledLabel">
+           <property name="text">
+            <string>Enabled</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QCheckBox" name="gpioEnabled">
+           <property name="toolTip">
+            <string>Check to enable setting a GPIO pin in SDR to enable calibration</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="gpioPinLabel">
+           <property name="text">
+            <string>Pin</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QSpinBox" name="gpioPin">
+           <property name="toolTip">
+            <string>SDR GPIO pin to set to start/stop calibration</string>
+           </property>
+           <property name="maximum">
+            <number>3</number>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="gpioSenseLabel">
+           <property name="text">
+            <string>Sense</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QComboBox" name="gpioSense">
+           <property name="toolTip">
+            <string>Whether pin should be set to 1 or 0 to enable calibration</string>
+           </property>
+           <property name="currentIndex">
+            <number>1</number>
+           </property>
+           <item>
+            <property name="text">
+             <string>Calibrate=0</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Calibrate=1</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="commandGroup">
+        <property name="title">
+         <string>Commands</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="2" column="0">
+          <widget class="QLabel" name="stopCalCommandLabel">
+           <property name="text">
+            <string>Stop calibration</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QLineEdit" name="startCalCommand">
+           <property name="toolTip">
+            <string>Program/script to execute to start calibration</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="startCalCommandLabel">
+           <property name="text">
+            <string>Start calibration</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="2">
+          <widget class="QLineEdit" name="stopCalCommand">
+           <property name="toolTip">
+            <string>Program/script to execute to stop calibration</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="timingGroup">
+        <property name="title">
+         <string>Timing</string>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QLabel" name="calCommandDelayLabel">
+           <property name="text">
+            <string>Pre-calibration delay (seconds)</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDoubleSpinBox" name="calCommandDelay">
+           <property name="toolTip">
+            <string>Delay in seconds after command/GPIO before calibration starts</string>
+           </property>
+           <property name="decimals">
+            <number>3</number>
+           </property>
+           <property name="minimum">
+            <double>0.000000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>100.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>0.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>gpioEnabled</tabstop>
+  <tabstop>gpioPin</tabstop>
+  <tabstop>gpioSense</tabstop>
+  <tabstop>startCalCommand</tabstop>
+  <tabstop>stopCalCommand</tabstop>
+  <tabstop>calCommandDelay</tabstop>
+ </tabstops>
+ <resources>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>RadioAstronomyCalibrationDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>RadioAstronomyCalibrationDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

@@ -34,6 +34,18 @@ SWGStarTrackerSettings::SWGStarTrackerSettings() {
     m_ra_isSet = false;
     dec = nullptr;
     m_dec_isSet = false;
+    azimuth = 0.0f;
+    m_azimuth_isSet = false;
+    elevation = 0.0f;
+    m_elevation_isSet = false;
+    l = 0.0f;
+    m_l_isSet = false;
+    b = 0.0f;
+    m_b_isSet = false;
+    azimuth_offset = 0.0f;
+    m_azimuth_offset_isSet = false;
+    elevation_offset = 0.0f;
+    m_elevation_offset_isSet = false;
     latitude = 0.0f;
     m_latitude_isSet = false;
     longitude = 0.0f;
@@ -96,6 +108,18 @@ SWGStarTrackerSettings::init() {
     m_ra_isSet = false;
     dec = new QString("");
     m_dec_isSet = false;
+    azimuth = 0.0f;
+    m_azimuth_isSet = false;
+    elevation = 0.0f;
+    m_elevation_isSet = false;
+    l = 0.0f;
+    m_l_isSet = false;
+    b = 0.0f;
+    m_b_isSet = false;
+    azimuth_offset = 0.0f;
+    m_azimuth_offset_isSet = false;
+    elevation_offset = 0.0f;
+    m_elevation_offset_isSet = false;
     latitude = 0.0f;
     m_latitude_isSet = false;
     longitude = 0.0f;
@@ -159,6 +183,12 @@ SWGStarTrackerSettings::cleanup() {
     }
 
 
+
+
+
+
+
+
     if(date_time != nullptr) { 
         delete date_time;
     }
@@ -209,6 +239,18 @@ SWGStarTrackerSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&ra, pJson["ra"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&dec, pJson["dec"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&azimuth, pJson["azimuth"], "float", "");
+    
+    ::SWGSDRangel::setValue(&elevation, pJson["elevation"], "float", "");
+    
+    ::SWGSDRangel::setValue(&l, pJson["l"], "float", "");
+    
+    ::SWGSDRangel::setValue(&b, pJson["b"], "float", "");
+    
+    ::SWGSDRangel::setValue(&azimuth_offset, pJson["azimuthOffset"], "float", "");
+    
+    ::SWGSDRangel::setValue(&elevation_offset, pJson["elevationOffset"], "float", "");
     
     ::SWGSDRangel::setValue(&latitude, pJson["latitude"], "float", "");
     
@@ -282,6 +324,24 @@ SWGStarTrackerSettings::asJsonObject() {
     }
     if(dec != nullptr && *dec != QString("")){
         toJsonValue(QString("dec"), dec, obj, QString("QString"));
+    }
+    if(m_azimuth_isSet){
+        obj->insert("azimuth", QJsonValue(azimuth));
+    }
+    if(m_elevation_isSet){
+        obj->insert("elevation", QJsonValue(elevation));
+    }
+    if(m_l_isSet){
+        obj->insert("l", QJsonValue(l));
+    }
+    if(m_b_isSet){
+        obj->insert("b", QJsonValue(b));
+    }
+    if(m_azimuth_offset_isSet){
+        obj->insert("azimuthOffset", QJsonValue(azimuth_offset));
+    }
+    if(m_elevation_offset_isSet){
+        obj->insert("elevationOffset", QJsonValue(elevation_offset));
     }
     if(m_latitude_isSet){
         obj->insert("latitude", QJsonValue(latitude));
@@ -387,6 +447,66 @@ void
 SWGStarTrackerSettings::setDec(QString* dec) {
     this->dec = dec;
     this->m_dec_isSet = true;
+}
+
+float
+SWGStarTrackerSettings::getAzimuth() {
+    return azimuth;
+}
+void
+SWGStarTrackerSettings::setAzimuth(float azimuth) {
+    this->azimuth = azimuth;
+    this->m_azimuth_isSet = true;
+}
+
+float
+SWGStarTrackerSettings::getElevation() {
+    return elevation;
+}
+void
+SWGStarTrackerSettings::setElevation(float elevation) {
+    this->elevation = elevation;
+    this->m_elevation_isSet = true;
+}
+
+float
+SWGStarTrackerSettings::getL() {
+    return l;
+}
+void
+SWGStarTrackerSettings::setL(float l) {
+    this->l = l;
+    this->m_l_isSet = true;
+}
+
+float
+SWGStarTrackerSettings::getB() {
+    return b;
+}
+void
+SWGStarTrackerSettings::setB(float b) {
+    this->b = b;
+    this->m_b_isSet = true;
+}
+
+float
+SWGStarTrackerSettings::getAzimuthOffset() {
+    return azimuth_offset;
+}
+void
+SWGStarTrackerSettings::setAzimuthOffset(float azimuth_offset) {
+    this->azimuth_offset = azimuth_offset;
+    this->m_azimuth_offset_isSet = true;
+}
+
+float
+SWGStarTrackerSettings::getElevationOffset() {
+    return elevation_offset;
+}
+void
+SWGStarTrackerSettings::setElevationOffset(float elevation_offset) {
+    this->elevation_offset = elevation_offset;
+    this->m_elevation_offset_isSet = true;
 }
 
 float
@@ -641,6 +761,24 @@ SWGStarTrackerSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(dec && *dec != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_azimuth_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_elevation_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_l_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_b_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_azimuth_offset_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_elevation_offset_isSet){
             isObjectUpdated = true; break;
         }
         if(m_latitude_isSet){

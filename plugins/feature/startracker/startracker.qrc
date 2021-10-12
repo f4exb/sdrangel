@@ -14,5 +14,6 @@
     <file>startracker/pulsar-32.png</file>
     <file>startracker/sun-40.png</file>
     <file>startracker/sun-button-24.png</file>
+    <file>startracker/moon-button-24.png</file>
   </qresource>
 </RCC>

@@ -106,6 +106,31 @@ void VISA::close(ViSession session)
     }
 }
 
+QStringList VISA::processCommands(ViSession session, const QString& commands)
+{
+    QStringList list = commands.split("\n");
+    QStringList results;
+    for (int i = 0; i < list.size(); i++)
+    {
+        QString command = list[i].trimmed();
+        if (!command.isEmpty() && !command.startsWith("#"))   // Allow # to comment out lines
+        {
+            qDebug() << "VISA ->: " << command;
+            QByteArray bytes = QString("%1\n").arg(command).toLatin1();
+            char *cmd = bytes.data();
+            viPrintf(session, cmd);
+            if (command.endsWith("?"))
+            {
+                char buf[1024] = "";
+                char format[] = "%t";
+                viScanf(session, format, buf);
+                results.append(buf);
+                qDebug() << "VISA <-: " << QString(buf).trimmed();
+            }
+        }
+    }
+    return results;
+}
 
 #ifdef _MSC_VER
 

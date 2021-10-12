@@ -3079,6 +3079,16 @@ definitions:
   MapItem:
       $ref: "http://swgserver:8081/api/swagger/include/Map.yaml#/MapItem"
 
+  # StarTracker settings passed to/from Radio Astronomy plugin
+  StarTrackerTarget:
+      $ref: "http://swgserver:8081/api/swagger/include/StarTracker.yaml#/StarTrackerTarget"
+
+  StarTrackerDisplaySettings:
+      $ref: "http://swgserver:8081/api/swagger/include/StarTracker.yaml#/StarTrackerDisplaySettings"
+
+  StarTrackerDisplayLoSSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/StarTracker.yaml#/StarTrackerDisplayLoSSettings"
+
   # This isn't in GS232Controller, as it may eventually be used by other controllers or features
   TargetAzimuthElevation:
     description: "A target azimuth and elevation"

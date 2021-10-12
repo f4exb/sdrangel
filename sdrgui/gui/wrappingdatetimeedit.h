@@ -30,6 +30,10 @@ public:
     explicit WrappingDateTimeEdit(QWidget *parent = nullptr);
 
     void stepBy(int steps) override;
+
+protected:
+    void clipAndSetDate(QDate date);
+    void clipAndSetDateTime(QDateTime dateTime);
 };
 
 #endif // SDRGUI_GUI_WRAPPINGDATETIMEEDIT_H

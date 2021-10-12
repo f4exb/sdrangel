@@ -27,7 +27,6 @@
 #include "elementpipescommon.h"
 
 class PipeEndPoint;
-class Feature;
 class MessageQueue;
 
 class SDRBASE_API MessagePipesCommon

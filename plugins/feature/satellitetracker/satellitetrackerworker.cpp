@@ -549,7 +549,7 @@ void SatelliteTrackerWorker::applyDeviceAOSSettings(const QString& name)
                 const MainSettings& mainSettings = mainCore->getSettings();
                 const std::vector<DeviceSet*>& deviceSets = mainCore->getDeviceSets();
 
-                if (devSettings->m_deviceSetIndex < deviceSets.size())
+                if (devSettings->m_deviceSetIndex < (int)deviceSets.size())
                 {
                     const DeviceSet *deviceSet = deviceSets[devSettings->m_deviceSetIndex];
                     QString presetType;

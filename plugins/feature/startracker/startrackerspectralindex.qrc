@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="/startracker/">
+    <file>startracker/408mhz_ra_dec_spectral_index.fits</file>
+  </qresource>
+</RCC>

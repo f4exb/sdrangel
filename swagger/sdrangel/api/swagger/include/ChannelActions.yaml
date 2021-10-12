@@ -29,5 +29,7 @@ ChannelActions:
       $ref: "http://swgserver:8081/api/swagger/include/IEEE_802_15_4_Mod.yaml#/IEEE_802_15_4_ModActions"
     PacketModActions:
       $ref: "http://swgserver:8081/api/swagger/include/PacketMod.yaml#/PacketModActions"
+    RadioAstronomyActions:
+      $ref: "http://swgserver:8081/api/swagger/include/RadioAstronomy.yaml#/RadioAstronomyActions"
     SigMFFileSinkActions:
       $ref: "http://swgserver:8081/api/swagger/include/SigMFFileSink.yaml#/SigMFFileSinkActions"

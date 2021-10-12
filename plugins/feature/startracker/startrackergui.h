@@ -47,6 +47,15 @@ using namespace QtCharts;
 
 class StarTrackerGUI : public FeatureGUI {
     Q_OBJECT
+
+    struct LoSMarker {
+        QString m_name;
+        float m_l;
+        float m_b;
+        float m_d;
+        QGraphicsTextItem* m_text;
+    };
+
 public:
     static StarTrackerGUI* create(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature);
     virtual void destroy();
@@ -80,9 +89,7 @@ private:
     QCategoryAxis m_skyTempRAXAxis;
     QValueAxis m_skyTempYAxis;
 
-    QChart m_solarFluxChart;
-    QLogValueAxis m_chartSolarFluxXAxis;
-    QValueAxis m_chartSolarFluxYAxis;
+    QChart *m_solarFluxChart;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
@@ -96,14 +103,22 @@ private:
 
     // Sky temperature
     QList<QImage> m_images;
-    QList<FITS> m_temps;
-    FITS m_spectralIndex;
 
     // Galactic line of sight
     QList<QPixmap> m_milkyWayImages;
     GraphicsViewZoom* m_zoom;
     QList<QGraphicsPixmapItem *> m_milkyWayItems;
     QGraphicsLineItem* m_lineOfSight;
+    QList<LoSMarker *> m_lineOfSightMarkers;
+
+    // Images that are part of the animation
+    QList<QImage> m_animationImages;
+
+    // Sun and Moon position for drawing on Sky Temperature chart
+    double m_sunRA;
+    double m_sunDec;
+    double m_moonRA;
+    double m_moonDec;
 
     explicit StarTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent = nullptr);
     virtual ~StarTrackerGUI();
@@ -123,17 +138,18 @@ private:
     void plotSolarFluxChart();
     void plotGalacticLineOfSight();
     void createGalacticLineOfSightScene();
+    void plotGalacticMarker(LoSMarker* marker);
     void plotChart();
     void removeAllAxes();
     double convertSolarFluxUnits(double sfu);
     QString solarFluxUnit();
+    double calcSolarFlux(double freqMhz);
     void displaySolarFlux();
     QString getSolarFluxFilename();
     bool readSolarFlux();
     void raDecChanged();
     void updateChartSubSelect();
     void updateSolarFlux(bool all);
-    void updateGalacticCoords();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);
@@ -143,6 +159,7 @@ private slots:
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void handleInputMessages();
     void on_startStop_toggled(bool checked);
+    void on_link_clicked(bool checked=false);
     void on_useMyPosition_clicked(bool checked=false);
     void on_latitude_valueChanged(double value);
     void on_longitude_valueChanged(double value);
@@ -150,6 +167,10 @@ private slots:
     void on_declination_editingFinished();
     void on_azimuth_valueChanged(double value);
     void on_elevation_valueChanged(double value);
+    void on_azimuthOffset_valueChanged(double value);
+    void on_elevationOffset_valueChanged(double value);
+    void on_galacticLatitude_valueChanged(double value);
+    void on_galacticLongitude_valueChanged(double value);
     void on_frequency_valueChanged(int value);
     void on_beamwidth_valueChanged(double value);
     void on_target_currentTextChanged(const QString &text);
@@ -166,6 +187,11 @@ private slots:
     void on_darkTheme_clicked(bool checked);
     void on_zoomIn_clicked();
     void on_zoomOut_clicked();
+    void on_addAnimationFrame_clicked();
+    void on_clearAnimation_clicked();
+    void on_saveAnimation_clicked();
+    void on_drawSun_clicked(bool checked);
+    void on_drawMoon_clicked(bool checked);
     void networkManagerFinished(QNetworkReply *reply);
     void downloadFinished(const QString& filename, bool success);
 };

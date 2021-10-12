@@ -1,0 +1,5197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>RadioAstronomyGUI</class>
+ <widget class="RollupWidget" name="RadioAstronomyGUI">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>740</width>
+    <height>1688</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>740</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="font">
+   <font>
+    <family>Liberation Sans</family>
+    <pointsize>9</pointsize>
+   </font>
+  </property>
+  <property name="focusPolicy">
+   <enum>Qt::StrongFocus</enum>
+  </property>
+  <property name="windowTitle">
+   <string>Radio Astronomy</string>
+  </property>
+  <property name="statusTip">
+   <string/>
+  </property>
+  <widget class="QWidget" name="settingsContainer" native="true">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>731</width>
+     <height>241</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>350</width>
+     <height>0</height>
+    </size>
+   </property>
+   <property name="windowTitle">
+    <string>Settings</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>3</number>
+    </property>
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
+     <number>2</number>
+    </property>
+    <item>
+     <layout class="QHBoxLayout" name="powLayout">
+      <property name="topMargin">
+       <number>2</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="deltaFrequencyLabel">
+        <property name="minimumSize">
+         <size>
+          <width>16</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Df</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ValueDialZ" name="deltaFrequency" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>32</width>
+          <height>16</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Liberation Mono</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>PointingHandCursor</cursorShape>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::StrongFocus</enum>
+        </property>
+        <property name="toolTip">
+         <string>Shift frequency from center in Hz</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="deltaUnits">
+        <property name="text">
+         <string>Hz </string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="sampleRateLabel">
+        <property name="text">
+         <string>SR</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ValueDialZ" name="sampleRate" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>32</width>
+          <height>16</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Liberation Mono</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>PointingHandCursor</cursorShape>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::StrongFocus</enum>
+        </property>
+        <property name="toolTip">
+         <string>Sample rate in samples per second</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="BWUnits_2">
+        <property name="text">
+         <string>Sa/s</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_37">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="rfBWLabel">
+        <property name="text">
+         <string>Δν</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ValueDialZ" name="rfBW" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>32</width>
+          <height>16</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Liberation Mono</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>PointingHandCursor</cursorShape>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::StrongFocus</enum>
+        </property>
+        <property name="toolTip">
+         <string>RF bandwidth in Hertz</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="BWUnits">
+        <property name="text">
+         <string>Hz </string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="channelPowerLayout">
+        <item>
+         <widget class="QLabel" name="channelPower">
+          <property name="toolTip">
+           <string>Channel power</string>
+          </property>
+          <property name="layoutDirection">
+           <enum>Qt::RightToLeft</enum>
+          </property>
+          <property name="text">
+           <string>0.0</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="channelPowerUnits">
+          <property name="text">
+           <string> dB</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="Line" name="line_6">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="fftLayout">
+      <item>
+       <widget class="QLabel" name="fftLabel">
+        <property name="text">
+         <string>FFT</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_40">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="integrationLabel">
+        <property name="text">
+         <string>Σ</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ValueDialZ" name="integration" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>32</width>
+          <height>16</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Liberation Mono</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>PointingHandCursor</cursorShape>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::StrongFocus</enum>
+        </property>
+        <property name="toolTip">
+         <string>FFT integration count per measurement</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_2">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="fftSizeLabel">
+        <property name="text">
+         <string>Channels</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="fftSize">
+        <property name="minimumSize">
+         <size>
+          <width>56</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>FFT size (number of bins / channels)</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>16</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>32</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>64</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>128</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>256</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>512</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>1k</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2k</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4k</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_5">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="fftWindowLabel">
+        <property name="text">
+         <string>Window</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="fftWindow">
+        <property name="minimumSize">
+         <size>
+          <width>56</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>FFT windowing function</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>None</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Hann</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_39">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="filterFreqsLabel">
+        <property name="text">
+         <string>Filter</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="filterFreqs">
+        <property name="toolTip">
+         <string>List of channels to filter to remove RFI (FFT bin is set to minimum of other bins)</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="integrationTimeLabel">
+        <property name="text">
+         <string>t&lt;sub&gt;Σ&lt;/sub&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="integrationTime">
+        <property name="toolTip">
+         <string>Time taken for a single measurement in seconds or minutes</string>
+        </property>
+        <property name="text">
+         <string>s</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="Line" name="line_3">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="starTrackerLayout">
+      <item>
+       <widget class="QLabel" name="starTrackerLabel">
+        <property name="text">
+         <string>Star Tracker</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="starTracker">
+        <property name="minimumSize">
+         <size>
+          <width>140</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Star Tracker feature that sets the observation target</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_17">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="rotatorLabel">
+        <property name="text">
+         <string>Rotator</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="rotator">
+        <property name="minimumSize">
+         <size>
+          <width>140</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Rotator controller for the antenna used for measurement</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>None</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_19">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Sensors</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="showSensors">
+        <property name="toolTip">
+         <string>Open sensor settings dialog</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/listing.png</normaloff>:/listing.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_12">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="Line" name="line_32">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="tempLayout">
+      <item>
+       <widget class="QComboBox" name="tempRXSelect">
+        <property name="baseSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <item>
+         <property name="text">
+          <string>Trx</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>NF</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="tempRX">
+        <property name="toolTip">
+         <string>Receiver noise temperature in Kelvin or noise figure in dB
+
+This is the combined noise of LNA, feed and SDR</string>
+        </property>
+        <property name="decimals">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <double>10000.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="tempRXUnitsLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>K</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_14">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="tempCMBLabel">
+        <property name="text">
+         <string>T&lt;sub&gt;CMB&lt;/sub&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="tempCMB">
+        <property name="toolTip">
+         <string>Cosmic microwave background (CMB) temperature in Kelvin
+
+This should be 2.73K when pointing at the sky</string>
+        </property>
+        <property name="maximum">
+         <double>300.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>2.730000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="tempCMBUnits">
+        <property name="text">
+         <string>K</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_15">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="tempGalLabel">
+        <property name="text">
+         <string>T&lt;sub&gt;Gal&lt;/sub&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="tempGal">
+        <property name="toolTip">
+         <string>Frequency dependent Galactic background temperature in Kelvin</string>
+        </property>
+        <property name="decimals">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <double>9999.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>2.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="tempGalUnits">
+        <property name="text">
+         <string>K</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="tempGalLink">
+        <property name="toolTip">
+         <string>Check to automatically update Tgal based on center frequency. Uncheck to manually enter a temperature in Kelvin</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/link.png</normaloff>:/link.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_16">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="tempSPLabel">
+        <property name="text">
+         <string>T&lt;sub&gt;SP&lt;/sub&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="tempSP">
+        <property name="toolTip">
+         <string>Spillover temperature in Kelvin</string>
+        </property>
+        <property name="decimals">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <double>1000.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="tempSPUnits">
+        <property name="text">
+         <string>K</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="tSys0Label">
+        <property name="toolTip">
+         <string/>
+        </property>
+        <property name="text">
+         <string>T&lt;sub&gt;sys0&lt;/sub&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="tSys0">
+        <property name="toolTip">
+         <string>System noise temperature in Kelvin assuming no source (i.e. Tsource=0)</string>
+        </property>
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="tSys0Units">
+        <property name="text">
+         <string>K</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="tempAtmLayout">
+      <item>
+       <widget class="QLabel" name="tempAtmLabel">
+        <property name="text">
+         <string>T&lt;sub&gt;Atm&lt;/sub&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="tempAtm">
+        <property name="toolTip">
+         <string>Atmospheric noise temperature in Kelvin</string>
+        </property>
+        <property name="decimals">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <double>1000.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>2.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="tempAtmUnits">
+        <property name="text">
+         <string>K</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="tempAtmLink">
+        <property name="toolTip">
+         <string>Check to automatically calculate Tatm from Tair, tz and elevation. Uncheck to manually enter a value</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/link.png</normaloff>:/link.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_10">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="tempAirLabel">
+        <property name="text">
+         <string>T&lt;sub&gt;Air&lt;/sub&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="tempAir">
+        <property name="toolTip">
+         <string>Surface air temperature in degrees celsius</string>
+        </property>
+        <property name="decimals">
+         <number>0</number>
+        </property>
+        <property name="minimum">
+         <double>-100.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>20.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="tempAirUnits">
+        <property name="text">
+         <string>C</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="tempAirLink">
+        <property name="toolTip">
+         <string>Check to automatically update Tair from air temperature from Star Tracker. Uncheck to set manually</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/link.png</normaloff>:/link.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_11">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="zenithOpacityLabel">
+        <property name="text">
+         <string>τ&lt;sub&gt;z&lt;/sub&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="zenithOpacity">
+        <property name="toolTip">
+         <string>Zenith opacity</string>
+        </property>
+        <property name="decimals">
+         <number>4</number>
+        </property>
+        <property name="maximum">
+         <double>100.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.001000000000000</double>
+        </property>
+        <property name="value">
+         <double>0.005500000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_12">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="elevationLabel">
+        <property name="text">
+         <string>El</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="elevation">
+        <property name="toolTip">
+         <string>Elevation angle in degrees</string>
+        </property>
+        <property name="decimals">
+         <number>0</number>
+        </property>
+        <property name="maximum">
+         <double>90.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>90.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="elevationUnits">
+        <property name="text">
+         <string>°</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="elevationLink">
+        <property name="toolTip">
+         <string>Check to automatically update elevation from Star Tracker. Uncheck to manually enter an elevation in degrees.</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/link.png</normaloff>:/link.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_13">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="sigmaTSys0Label">
+        <property name="text">
+         <string>σT&lt;sub&gt;sys0&lt;/sub&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="sigmaTSys0">
+        <property name="toolTip">
+         <string>Standard deviation / RMS of Tsys0</string>
+        </property>
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="sigmaTSys0Units">
+        <property name="text">
+         <string>K</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="Line" name="line_18">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="rfLayout">
+      <item>
+       <widget class="QLabel" name="spectrumBaselineLabel">
+        <property name="text">
+         <string>Baseline</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="spectrumBaseline">
+        <property name="minimumSize">
+         <size>
+          <width>56</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Baseline to subtract from Tsys to calculate Tsource</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>Tsys0</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Tmin</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Tcold</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_38">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="gainVariationLabel">
+        <property name="text">
+         <string>ΔG/G</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="gainVariation">
+        <property name="toolTip">
+         <string>Gain variation</string>
+        </property>
+        <property name="decimals">
+         <number>4</number>
+        </property>
+        <property name="maximum">
+         <double>1000.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.010000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_45">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="omegaALabel">
+        <property name="text">
+         <string>HPBW</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="omegaA">
+        <property name="toolTip">
+         <string>Antenna half-power beamwidth in degrees or solid angle in steradians from Star Tracker</string>
+        </property>
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="omegaAUnits">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <item>
+         <property name="text">
+          <string>°</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>sr</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_8">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="omegaSLabel">
+        <property name="text">
+         <string>Ω&lt;sub&gt;S&lt;/sub&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="sourceType">
+        <property name="minimumSize">
+         <size>
+          <width>80</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Angular size of source relative to antenna beam</string>
+        </property>
+        <property name="currentIndex">
+         <number>1</number>
+        </property>
+        <item>
+         <property name="text">
+          <string>Unknown</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Compact</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Extended</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Sun</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Cas A</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="omegaS">
+        <property name="toolTip">
+         <string>Angle / solid angle subtended by source</string>
+        </property>
+        <property name="decimals">
+         <number>5</number>
+        </property>
+        <property name="minimum">
+         <double>0.000010000000000</double>
+        </property>
+        <property name="maximum">
+         <double>180.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="omegaSUnits">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Select degrees to enter source angle or steradians for source solid angle</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>°</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>sr</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_15">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="sigmaSSys0Label">
+        <property name="text">
+         <string>σS&lt;sub&gt;sys0&lt;/sub&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="sigmaSSys0">
+        <property name="toolTip">
+         <string>Standard deviation / RMS of flux assuming no source (i.e. Tsource=0)</string>
+        </property>
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="sigmaSSys0Units">
+        <property name="text">
+         <string>Jy</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="sweepSettingsContainer" native="true">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>270</y>
+     <width>731</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="windowTitle">
+    <string>Run Control</string>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <property name="spacing">
+     <number>2</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <layout class="QGridLayout" name="runLayout">
+      <item row="2" column="3" colspan="2">
+       <widget class="QDateTimeEdit" name="sweepStartDateTime">
+        <property name="calendarPopup">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="7">
+       <widget class="QDoubleSpinBox" name="sweep2Start">
+        <property name="decimals">
+         <number>1</number>
+        </property>
+        <property name="minimum">
+         <double>-360.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>360.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>-5.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="8">
+       <widget class="QLabel" name="sweep2StopLabel">
+        <property name="text">
+         <string>Stop</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QComboBox" name="runMode">
+        <property name="minimumSize">
+         <size>
+          <width>70</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Measurement mode</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>Single</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Continuous</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Sweep</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="0" column="15">
+       <widget class="QDoubleSpinBox" name="sweep1Delay">
+        <property name="toolTip">
+         <string>Delay in seconds after rotation before measurements starts</string>
+        </property>
+        <property name="decimals">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <double>1000000.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QComboBox" name="sweepType">
+        <property name="minimumSize">
+         <size>
+          <width>60</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Coordinates to sweep</string>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <item>
+         <property name="text">
+          <string>Az/El</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>l/b</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Offset</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="0" column="7">
+       <widget class="QDoubleSpinBox" name="sweep1Start">
+        <property name="decimals">
+         <number>1</number>
+        </property>
+        <property name="minimum">
+         <double>-360.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>360.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>-5.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="9">
+       <widget class="QDoubleSpinBox" name="sweep2Stop">
+        <property name="decimals">
+         <number>1</number>
+        </property>
+        <property name="minimum">
+         <double>-360.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>360.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>5.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QToolButton" name="clearData">
+        <property name="toolTip">
+         <string>Clear data</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/bin.png</normaloff>:/bin.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="14">
+       <widget class="QLabel" name="sweep1DelayLabel">
+        <property name="text">
+         <string>Settle</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="5">
+       <widget class="QLabel" name="sweep2CoordLabel">
+        <property name="text">
+         <string>El</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="6">
+       <widget class="QLabel" name="sweep1StartLabel">
+        <property name="text">
+         <string>Start</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="9">
+       <widget class="QDoubleSpinBox" name="sweep1Stop">
+        <property name="decimals">
+         <number>1</number>
+        </property>
+        <property name="minimum">
+         <double>-360.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>360.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>5.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="12">
+       <widget class="QDoubleSpinBox" name="sweep2Step">
+        <property name="decimals">
+         <number>1</number>
+        </property>
+        <property name="minimum">
+         <double>-180.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>180.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>5.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="5">
+       <widget class="QLabel" name="sweep1CoordLabel">
+        <property name="text">
+         <string>Az</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="14">
+       <widget class="QLabel" name="sweep2DelayLabel">
+        <property name="text">
+         <string>Delay</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="15">
+       <widget class="QDoubleSpinBox" name="sweep2Delay">
+        <property name="toolTip">
+         <string>Delay in seconds after a measurement before the next step starts</string>
+        </property>
+        <property name="decimals">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <double>1000000.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="6">
+       <widget class="QLabel" name="sweep2StartLabel">
+        <property name="text">
+         <string>Start</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QComboBox" name="sweepStartAtTime">
+        <property name="minimumSize">
+         <size>
+          <width>56</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>When to start the sweep</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>Now</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>At</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="0" column="12">
+       <widget class="QDoubleSpinBox" name="sweep1Step">
+        <property name="decimals">
+         <number>1</number>
+        </property>
+        <property name="minimum">
+         <double>-360.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>360.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>5.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="8">
+       <widget class="QLabel" name="sweep1StopLabel">
+        <property name="text">
+         <string>Stop</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="ButtonSwitch" name="startStop">
+        <property name="toolTip">
+         <string>Start/stop measurements</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/play.png</normaloff>
+          <normalon>:/stop.png</normalon>:/play.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="10">
+       <widget class="QLabel" name="sweep2StepLabel">
+        <property name="text">
+         <string>Step</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="10">
+       <widget class="QLabel" name="sweep1StepLabel">
+        <property name="text">
+         <string>Step</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <spacer name="horizontalSpacer_17">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="statusLayout">
+      <item>
+       <widget class="QProgressBar" name="measurementProgress">
+        <property name="maximumSize">
+         <size>
+          <width>120</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Measurement status</string>
+        </property>
+        <property name="value">
+         <number>0</number>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="sweepStatus">
+        <property name="toolTip">
+         <string>Sweep status</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="spectrumChartContainer" native="true">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>350</y>
+     <width>731</width>
+     <height>631</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>200</width>
+     <height>320</height>
+    </size>
+   </property>
+   <property name="windowTitle">
+    <string>Spectrometer</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,0,0,0,0,0,0,0">
+    <property name="spacing">
+     <number>2</number>
+    </property>
+    <property name="leftMargin">
+     <number>3</number>
+    </property>
+    <property name="topMargin">
+     <number>3</number>
+    </property>
+    <property name="rightMargin">
+     <number>3</number>
+    </property>
+    <property name="bottomMargin">
+     <number>3</number>
+    </property>
+    <item>
+     <layout class="QHBoxLayout" name="spectrumToolWidgets">
+      <item>
+       <widget class="QComboBox" name="spectrumChartSelect">
+        <property name="toolTip">
+         <string>Select data to plot on chart</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>Spectrum</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Cal spectrum</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="spectrumYUnits">
+        <property name="minimumSize">
+         <size>
+          <width>56</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Spectrum Y axis units</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>dBFS</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>SNR</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>dBm</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Tsys K</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Tsource K</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_5">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QToolButton" name="showCalSettings">
+        <property name="toolTip">
+         <string>Open calibration settings dialog</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/listing.png</normaloff>:/listing.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="clearCal">
+        <property name="toolTip">
+         <string>Clear calibration data</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/bin.png</normaloff>:/bin.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="startCalHot">
+        <property name="toolTip">
+         <string>Start hot calibration</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/radioastronomy/icons/hot.png</normaloff>:/radioastronomy/icons/hot.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="startCalCold">
+        <property name="toolTip">
+         <string>Start cold calibration</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/radioastronomy/icons/cold.png</normaloff>:/radioastronomy/icons/cold.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="recalibrate">
+        <property name="toolTip">
+         <string>Recalibrate all measurements when checked. Only use calibration for new measurements when unchecked.</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="spectrumShowLegend">
+        <property name="toolTip">
+         <string>Display legend</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/radioastronomy/icons/legend.png</normaloff>:/radioastronomy/icons/legend.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="spectrumShowLAB">
+        <property name="toolTip">
+         <string>Download and plot LAB survey data for the corresponding Galactic latitude and longitude</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/radioastronomy/icons/lab.png</normaloff>:/radioastronomy/icons/lab.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="spectrumShowDistance">
+        <property name="toolTip">
+         <string>Calculate and plot distance to gas clouds</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/radioastronomy/icons/galactictriangle.png</normaloff>:/radioastronomy/icons/galactictriangle.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="spectrumShowRefLine">
+        <property name="toolTip">
+         <string>Display reference spectral line</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/radioastronomy/icons/refline.png</normaloff>:/radioastronomy/icons/refline.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="spectrumTemp">
+        <property name="toolTip">
+         <string>Display Gaussian fitting tools</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/radioastronomy/icons/gaussian.png</normaloff>:/radioastronomy/icons/gaussian.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="spectrumMarker">
+        <property name="toolTip">
+         <string>Display markers</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/radioastronomy/icons/marker.png</normaloff>:/radioastronomy/icons/marker.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="spectrumPeak">
+        <property name="toolTip">
+         <string>Display peak data</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/radioastronomy/icons/peak.png</normaloff>:/radioastronomy/icons/peak.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="spectrumReverseXAxis">
+        <property name="toolTip">
+         <string>Reverse X axis</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/radioastronomy/icons/reverse.png</normaloff>:/radioastronomy/icons/reverse.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="saveSpectrumChartImages">
+        <property name="toolTip">
+         <string>Save charts to an animation file</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/camera.png</normaloff>:/camera.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="saveSpectrumChartImage">
+        <property name="toolTip">
+         <string>Save chart to an image file</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/picture.png</normaloff>:/picture.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="loadSpectrumData">
+        <property name="toolTip">
+         <string>Load data from a .csv file</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/load.png</normaloff>:/load.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="saveSpectrumData">
+        <property name="toolTip">
+         <string>Save data to a .csv file</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/save.png</normaloff>:/save.png</iconset>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QChartView" name="spectrumChart">
+      <property name="minimumSize">
+       <size>
+        <width>200</width>
+        <height>275</height>
+       </size>
+      </property>
+      <property name="toolTip">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QWidget" name="spectrumScaleWidgets" native="true">
+      <layout class="QHBoxLayout" name="spectrumScaleLayout">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QToolButton" name="spectrumAutoscale">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Continuously scale X and Y axis so all data is visible</string>
+         </property>
+         <property name="statusTip">
+          <string/>
+         </property>
+         <property name="text">
+          <string>A</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="spectrumAutoscaleX">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Set X scale to fit all data</string>
+         </property>
+         <property name="statusTip">
+          <string>Autoscale spectrum</string>
+         </property>
+         <property name="text">
+          <string>X</string>
+         </property>
+         <property name="checkable">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="spectrumAutoscaleY">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Set Y scale to fit all data</string>
+         </property>
+         <property name="statusTip">
+          <string>Autoscale spectrum</string>
+         </property>
+         <property name="text">
+          <string>Y</string>
+         </property>
+         <property name="checkable">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="spectrumReferenceLabel">
+         <property name="text">
+          <string>Ref</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="spectrumReference">
+         <property name="toolTip">
+          <string>Spectrum reference level (Y axis maximum value)</string>
+         </property>
+         <property name="decimals">
+          <number>1</number>
+         </property>
+         <property name="minimum">
+          <double>-150.000000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>10000000000000.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="spectrumRangeLabel">
+         <property name="text">
+          <string>Range</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="spectrumRange">
+         <property name="toolTip">
+          <string>Spectrum Y axis range</string>
+         </property>
+         <property name="decimals">
+          <number>1</number>
+         </property>
+         <property name="minimum">
+          <double>0.100000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>10000000000000.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="spectrumCenterFreqLabel">
+         <property name="text">
+          <string>CF</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="spectrumCenterFreq">
+         <property name="toolTip">
+          <string>Spectrum X axis center frequency in MHz</string>
+         </property>
+         <property name="decimals">
+          <number>3</number>
+         </property>
+         <property name="minimum">
+          <double>0.000000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>20000.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.100000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="spanLabel">
+         <property name="text">
+          <string>Span</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="spectrumSpan">
+         <property name="toolTip">
+          <string>Spectrum X axis range in MHz</string>
+         </property>
+         <property name="decimals">
+          <number>2</number>
+         </property>
+         <property name="minimum">
+          <double>0.010000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>100.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.100000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="spectrumSelectLabel">
+         <property name="text">
+          <string>Sel</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="spectrumSelect">
+         <property name="minimumSize">
+          <size>
+           <width>80</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Object to select when clicking on the chart</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QWidget" name="spectrumSelectWidgets" native="true">
+      <layout class="QHBoxLayout" name="spectrumSelectLayout">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="spectrumIndexLabel">
+         <property name="text">
+          <string>Date &amp; time</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSlider" name="spectrumIndex">
+         <property name="toolTip">
+          <string>Select spectrum</string>
+         </property>
+         <property name="maximum">
+          <number>0</number>
+         </property>
+         <property name="pageStep">
+          <number>1</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDateTimeEdit" name="spectrumDateTime">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="toolTip">
+          <string>Date and time the spectrum was recorded</string>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+         <property name="buttonSymbols">
+          <enum>QAbstractSpinBox::NoButtons</enum>
+         </property>
+         <property name="displayFormat">
+          <string>dd/MM/yyyy HH:mm:ss</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QWidget" name="spectrumRefLineWidgets" native="true">
+      <layout class="QVBoxLayout" name="spectrumRefLineLayout">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="Line" name="line_42">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="spectrumRefLineWidgetsHor" native="true">
+         <layout class="QHBoxLayout" name="spectrumLineLayout">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="spectrumLineLabel">
+            <property name="text">
+             <string>Line</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="spectrumLine">
+            <property name="toolTip">
+             <string>Reference spectral line</string>
+            </property>
+            <item>
+             <property name="text">
+              <string>HI</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>OH</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>DI</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Custom</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="spectrumLineFrequency">
+            <property name="toolTip">
+             <string>Reference spectral line frequency in MHz</string>
+            </property>
+            <property name="decimals">
+             <number>6</number>
+            </property>
+            <property name="maximum">
+             <double>20000.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>1420.404999999999973</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="spectrumLineFrequencyLabel">
+            <property name="text">
+             <string>MHz</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="spectrumLineLayoutLine">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="refFrameLabel">
+            <property name="text">
+             <string>Ref</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="refFrame">
+            <property name="toolTip">
+             <string>Reference frame for velocities</string>
+            </property>
+            <item>
+             <property name="text">
+              <string>Topo</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>BCRS</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>LSR</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="sunDistanceToGCLine">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="sunDistanceToGCLabel">
+            <property name="text">
+             <string>R☉</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="sunDistanceToGC">
+            <property name="toolTip">
+             <string>Distance from Sun to Galactic center in kiloparsec. Estimates range from 7.4 to 8.7</string>
+            </property>
+            <property name="decimals">
+             <number>1</number>
+            </property>
+            <property name="minimum">
+             <double>7.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>9.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="value">
+             <double>8.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="sunDistanceToGCUnits">
+            <property name="text">
+             <string>kpc</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="sunOrbitalVelocityLine">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="sunOrbitalVelocityLabel">
+            <property name="text">
+             <string>V☉</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="sunOrbitalVelocity">
+            <property name="toolTip">
+             <string>Sun's orbital velocity around the Galactic Center in km/s. Typical values are 220 and 248</string>
+            </property>
+            <property name="decimals">
+             <number>0</number>
+            </property>
+            <property name="minimum">
+             <double>100.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>300.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>248.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="sunOrbitalVelocityUnits">
+            <property name="text">
+             <string>km/s</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_6">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QWidget" name="spectrumGaussianWidgets" native="true">
+      <layout class="QVBoxLayout" name="spectrumGaussianLayout">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="Line" name="line_43">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="spectrumGaussianWidgetsHor" native="true">
+         <layout class="QHBoxLayout" name="spectrumTempLayout">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="spectrumGaussianFreqLabel">
+            <property name="text">
+             <string>f&lt;sub&gt;0&lt;/sub&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="spectrumGaussianFreq">
+            <property name="toolTip">
+             <string>Centre frequency of Gaussian in MHz. Click on chart to set.</string>
+            </property>
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="maximum">
+             <double>20000.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.010000000000000</double>
+            </property>
+            <property name="value">
+             <double>1420.404999999999973</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="spectrumGaussianFreqUnits">
+            <property name="text">
+             <string>MHz</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="line_4">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="spectrumGaussianAmpLabel">
+            <property name="text">
+             <string>a</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="spectrumGaussianAmp">
+            <property name="toolTip">
+             <string>Gaussian amplitude</string>
+            </property>
+            <property name="decimals">
+             <number>2</number>
+            </property>
+            <property name="minimum">
+             <double>0.010000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>10000000.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="spectrumGaussianFloorLabel">
+            <property name="text">
+             <string>f</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="spectrumGaussianFloor">
+            <property name="toolTip">
+             <string>Gaussian floor (minimum value)</string>
+            </property>
+            <property name="decimals">
+             <number>2</number>
+            </property>
+            <property name="minimum">
+             <double>-10000000.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>10000000.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>0.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="line_20">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="spectrumGaussianFWHMLabel">
+            <property name="text">
+             <string>Δf&lt;sub&gt;FWHM&lt;/sub&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="spectrumGaussianFWHM">
+            <property name="toolTip">
+             <string>Frequency difference at full width half maximum in Hertz</string>
+            </property>
+            <property name="decimals">
+             <number>0</number>
+            </property>
+            <property name="minimum">
+             <double>0.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>1000000.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>84774.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="spectrumGaussianFWHMUnits">
+            <property name="text">
+             <string>Hz</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="line_7">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="spectrumTemperatureLabel">
+            <property name="text">
+             <string>T&lt;sub&gt;K&lt;/sub&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="spectrumTemperature">
+            <property name="toolTip">
+             <string>Kinetic temperature in Kelvin
+
+CNM 50-100
+WNM 5000-10000</string>
+            </property>
+            <property name="decimals">
+             <number>0</number>
+            </property>
+            <property name="maximum">
+             <double>100000.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>100.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>6680.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="spectrumTemperatureUnits">
+            <property name="text">
+             <string>K</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="line_21">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="spectrumGaussianTurbLabel">
+            <property name="text">
+             <string>v&lt;sub&gt;t&lt;/sub&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="spectrumGaussianTurb">
+            <property name="toolTip">
+             <string>RMS of turbulent velocity in km/s</string>
+            </property>
+            <property name="decimals">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <double>1000000.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>2.400000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="spectrumGaussianTurbUnits">
+            <property name="text">
+             <string>km/s</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="line_9">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="columnDensityLabel">
+            <property name="text">
+             <string>N&lt;sub&gt;H&lt;/sub&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="columnDensity">
+            <property name="toolTip">
+             <string>Column density (cm&lt;sup&gt;-2&lt;/sup&gt;)</string>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="columnDensityUnits">
+            <property name="text">
+             <string>cm&lt;sup&gt;-2&lt;/sup&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_7">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QWidget" name="calWidgets" native="true">
+      <layout class="QVBoxLayout" name="calLayout">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QWidget" name="calWidgets1" native="true">
+         <layout class="QHBoxLayout" name="calibrationLayout">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QComboBox" name="tCalColdSelect">
+            <item>
+             <property name="text">
+              <string>Tcold</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Pcold</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="tCalCold">
+            <property name="toolTip">
+             <string>Cold calibration antenna temperature in Kelvin or total channel power in dBm</string>
+            </property>
+            <property name="decimals">
+             <number>1</number>
+            </property>
+            <property name="minimum">
+             <double>-200.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>10000000000000.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>10.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="tCalColdUnitsLabel">
+            <property name="text">
+             <string>K</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="calLine1">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="tCalHotSelect">
+            <item>
+             <property name="text">
+              <string>Thot</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Phot</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="tCalHot">
+            <property name="toolTip">
+             <string>Hot calibration antenna temperature in Kelvin or total channel power in dBm</string>
+            </property>
+            <property name="decimals">
+             <number>1</number>
+            </property>
+            <property name="minimum">
+             <double>-200.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>10000000000000.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>120.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="tCalHotUnitsLabel">
+            <property name="text">
+             <string>K</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_11">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="Line" name="line_22">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="calWidgets2" native="true">
+         <layout class="QHBoxLayout" name="calibrationLayout_2">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="calAvgDiffLabel">
+            <property name="text">
+             <string>Avg Δ</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="calAvgDiff">
+            <property name="toolTip">
+             <string>Average difference in dB between hot and cold.
+
+This should be close to the expected difference in power between hot and cold calibration points</string>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="calAvgDifferenceUnits">
+            <property name="text">
+             <string>dB</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="line_23">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="calYFactorLabel">
+            <property name="text">
+             <string>y</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="calYFactor">
+            <property name="toolTip">
+             <string>Y-factor</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="line_27">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="calTrxLabel">
+            <property name="text">
+             <string>T&lt;sub&gt;rx&lt;/sub&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="calTrx">
+            <property name="toolTip">
+             <string>Receiver noise temperature in Kelvin calculated from Y-factor</string>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="capTsysUnits">
+            <property name="text">
+             <string>K</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="line_26">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="calTskyLabel">
+            <property name="text">
+             <string>T&lt;sub&gt;sky&lt;/sub&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="calTsky">
+            <property name="toolTip">
+             <string>Sky temperature in Kelvin at time of cold calibration from StarTracker</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="calTskyUnits">
+            <property name="text">
+             <string>K</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="calLine1_2">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="calTspLabel">
+            <property name="text">
+             <string>T&lt;sub&gt;SP&lt;/sub&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="calTsp">
+            <property name="toolTip">
+             <string>Estimated spillover temperature in Kelvin</string>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="calTspUnits">
+            <property name="text">
+             <string>K</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_16">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QWidget" name="spectrumMarkerTableWidgets" native="true">
+      <layout class="QVBoxLayout" name="spectrumMarkerTableLayout">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="Line" name="line_24">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTableWidget" name="spectrumMarkerTable">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="sizeAdjustPolicy">
+          <enum>QAbstractScrollArea::AdjustToContents</enum>
+         </property>
+         <property name="editTriggers">
+          <set>QAbstractItemView::NoEditTriggers</set>
+         </property>
+         <property name="cornerButtonEnabled">
+          <bool>true</bool>
+         </property>
+         <property name="rowCount">
+          <number>0</number>
+         </property>
+         <attribute name="verticalHeaderVisible">
+          <bool>false</bool>
+         </attribute>
+         <column>
+          <property name="text">
+           <string>Name</string>
+          </property>
+          <property name="toolTip">
+           <string>Marker name</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Freq (MHz)</string>
+          </property>
+          <property name="toolTip">
+           <string>Frequency in MHz</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Power (dBFS)</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>ΔX (MHz)</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>ΔY</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>ΔTo</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Vr (km/s)</string>
+          </property>
+          <property name="toolTip">
+           <string>Radial velocity in km/s</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>R (kpc)</string>
+          </property>
+          <property name="toolTip">
+           <string>Distance to Galactic center in kiloparsec</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>d (kpc)</string>
+          </property>
+          <property name="toolTip">
+           <string>Distance from observer in kiloparsec</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Plot max</string>
+          </property>
+          <property name="toolTip">
+           <string>Check to plot maximum of two solutions for d in Star Tracker</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Rmin (kpc)</string>
+          </property>
+          <property name="toolTip">
+           <string>Minimum distance to Galactic center along the line-of-slight in kiloparsec</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Vmax (km/s)</string>
+          </property>
+          <property name="toolTip">
+           <string>Orbital velocity at minimum distance to Galactic Centre along line-of-sight in km/s</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="powerChartContainer" native="true">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>990</y>
+     <width>731</width>
+     <height>481</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>200</width>
+     <height>230</height>
+    </size>
+   </property>
+   <property name="windowTitle">
+    <string>Radiometer</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0,0,0,0,0,0,0">
+    <property name="spacing">
+     <number>2</number>
+    </property>
+    <property name="leftMargin">
+     <number>3</number>
+    </property>
+    <property name="topMargin">
+     <number>3</number>
+    </property>
+    <property name="rightMargin">
+     <number>3</number>
+    </property>
+    <property name="bottomMargin">
+     <number>3</number>
+    </property>
+    <item>
+     <layout class="QHBoxLayout" name="powerChartControlsLayout">
+      <item>
+       <widget class="QComboBox" name="powerChartSelect">
+        <property name="toolTip">
+         <string>Select data to plot on chart</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>Power vs time</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Tsys vs time</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Tsource vs time</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Flux vs time</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2D map</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="powerYUnits">
+        <property name="minimumSize">
+         <size>
+          <width>60</width>
+          <height>0</height>
+         </size>
+        </property>
+        <item>
+         <property name="text">
+          <string>dBFS</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>dBm</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Watts</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_18">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="powerShowLegend">
+        <property name="toolTip">
+         <string>Display legend</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/radioastronomy/icons/legend.png</normaloff>:/radioastronomy/icons/legend.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="powerShowSensor2">
+        <property name="toolTip">
+         <string>Plot sensor 2 data</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/slot2_on.png</normaloff>:/slot2_on.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="powerShowSensor1">
+        <property name="toolTip">
+         <string>Plot sensor 1 data</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/slot1_on.png</normaloff>:/slot1_on.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="powerShowAirTemp">
+        <property name="toolTip">
+         <string>Plot air temperature data</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/radioastronomy/icons/temperature.png</normaloff>:/radioastronomy/icons/temperature.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="powerShowTsys0">
+        <property name="toolTip">
+         <string>Plot Tsys0</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/radioastronomy/icons/noise.png</normaloff>:/radioastronomy/icons/noise.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="powerShowAvg">
+        <property name="toolTip">
+         <string>Display mean, RMS and standard deviation</string>
+        </property>
+        <property name="text">
+         <string>σ</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="powerShowGaussian">
+        <property name="toolTip">
+         <string>Display Gaussian fitting tools</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/radioastronomy/icons/gaussian.png</normaloff>:/radioastronomy/icons/gaussian.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="powerShowMarker">
+        <property name="toolTip">
+         <string>Display markers</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/radioastronomy/icons/marker.png</normaloff>:/radioastronomy/icons/marker.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="powerShowPeak">
+        <property name="toolTip">
+         <string>Display peak data</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/radioastronomy/icons/peak.png</normaloff>:/radioastronomy/icons/peak.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="savePowerChartImage">
+        <property name="toolTip">
+         <string>Save chart to an image file</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/picture.png</normaloff>:/picture.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="savePowerData">
+        <property name="toolTip">
+         <string>Save data to a .csv file</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/save.png</normaloff>:/save.png</iconset>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QChartView" name="powerChart">
+      <property name="minimumSize">
+       <size>
+        <width>200</width>
+        <height>200</height>
+       </size>
+      </property>
+      <property name="toolTip">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QWidget" name="powerScaleWidgets" native="true">
+      <layout class="QHBoxLayout" name="spectrumScaleLayout_2">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QToolButton" name="powerAutoscale">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Continuously scale X and Y axis so all data is visible</string>
+         </property>
+         <property name="statusTip">
+          <string>Autoscale spectrum</string>
+         </property>
+         <property name="text">
+          <string>A</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="powerAutoscaleX">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Set X scale to fit all data</string>
+         </property>
+         <property name="statusTip">
+          <string>Autoscale spectrum</string>
+         </property>
+         <property name="text">
+          <string>X</string>
+         </property>
+         <property name="checkable">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="powerAutoscaleY">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Set Y scale to fit all data</string>
+         </property>
+         <property name="statusTip">
+          <string>Autoscale spectrum</string>
+         </property>
+         <property name="text">
+          <string>Y</string>
+         </property>
+         <property name="checkable">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="powerReferenceLabel">
+         <property name="text">
+          <string>Ref</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="powerReference">
+         <property name="toolTip">
+          <string>Reference level (Y axis maximum value)</string>
+         </property>
+         <property name="decimals">
+          <number>1</number>
+         </property>
+         <property name="minimum">
+          <double>-150.000000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>10000000000000.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="powerRangeLabel">
+         <property name="text">
+          <string>Range</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="powerRange">
+         <property name="toolTip">
+          <string>Y axis range</string>
+         </property>
+         <property name="decimals">
+          <number>1</number>
+         </property>
+         <property name="minimum">
+          <double>0.100000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>10000000000000.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="powerStartTimeLabel">
+         <property name="text">
+          <string>Start</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="WrappingDateTimeEdit" name="powerStartTime">
+         <property name="toolTip">
+          <string>X axis start time</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="powerEndTimeLabel">
+         <property name="text">
+          <string>End</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="WrappingDateTimeEdit" name="powerEndTime">
+         <property name="toolTip">
+          <string>X axis end time</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="powerSelectLabel">
+         <property name="text">
+          <string>Sel</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="powerSelect">
+         <property name="minimumSize">
+          <size>
+           <width>80</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Object to select when clicking on the chart</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_8">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QWidget" name="powerGaussianWidgets" native="true">
+      <layout class="QVBoxLayout" name="powerGaussianLayout">
+       <property name="spacing">
+        <number>2</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="Line" name="line_44">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="powerGaussianWidgetsHor" native="true">
+         <layout class="QHBoxLayout" name="spectrumTempLayout_3">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="powerGaussianCenterLabel">
+            <property name="text">
+             <string>Center</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="WrappingDateTimeEdit" name="powerGaussianCenter">
+            <property name="toolTip">
+             <string>Date and time (x axis value) of the center of the Gaussian</string>
+            </property>
+            <property name="displayFormat">
+             <string>dd/MM/yyyy HH:mm:ss</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="line_29">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="powerGaussianAmpLabel">
+            <property name="text">
+             <string>a</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="powerGaussianAmp">
+            <property name="toolTip">
+             <string>Gaussian amplitude</string>
+            </property>
+            <property name="decimals">
+             <number>2</number>
+            </property>
+            <property name="minimum">
+             <double>0.010000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>10000000.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="powerGaussianFloorLabel">
+            <property name="text">
+             <string>f</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="powerGaussianFloor">
+            <property name="toolTip">
+             <string>Gaussian floor (minimum value)</string>
+            </property>
+            <property name="decimals">
+             <number>2</number>
+            </property>
+            <property name="minimum">
+             <double>-10000000.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>10000000.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>0.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="line_30">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="powerGaussianFHWMLabel">
+            <property name="text">
+             <string>Δt&lt;sub&gt;FWHM&lt;/sub&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="powerGaussianFWHM">
+            <property name="toolTip">
+             <string>Time difference at full width half maximum in seconds</string>
+            </property>
+            <property name="decimals">
+             <number>0</number>
+            </property>
+            <property name="minimum">
+             <double>0.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>10000000.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>10.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>1350.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="powerGaussianFWHMUnits">
+            <property name="text">
+             <string>s</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="line_31">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="powerGaussianHPBWLabel">
+            <property name="text">
+             <string>HPBW</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="powerGaussianHPBW">
+            <property name="toolTip">
+             <string>Antenna half-power beam width in degrees assuming a drift-scan of the Sun with a radiation pattern matching the Gaussian</string>
+            </property>
+            <property name="decimals">
+             <number>1</number>
+            </property>
+            <property name="minimum">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>180.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="value">
+             <double>5.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="powerGaussianHPBWUnits">
+            <property name="text">
+             <string>°</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_14">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QWidget" name="power2DScaleWidgets" native="true">
+      <layout class="QGridLayout" name="power2DAxisScaleLayout">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <property name="horizontalSpacing">
+        <number>6</number>
+       </property>
+       <property name="verticalSpacing">
+        <number>2</number>
+       </property>
+       <item row="0" column="3">
+        <widget class="QSpinBox" name="power2DWidth">
+         <property name="toolTip">
+          <string>Width of map image in pixels</string>
+         </property>
+         <property name="minimum">
+          <number>0</number>
+         </property>
+         <property name="maximum">
+          <number>1000</number>
+         </property>
+         <property name="value">
+          <number>0</number>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="11">
+        <spacer name="horizontalSpacer_10">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="1" column="3">
+        <widget class="QSpinBox" name="power2DHeight">
+         <property name="toolTip">
+          <string>Width of map image in pixels</string>
+         </property>
+         <property name="minimum">
+          <number>0</number>
+         </property>
+         <property name="maximum">
+          <number>1000</number>
+         </property>
+         <property name="value">
+          <number>0</number>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="6">
+        <widget class="QDoubleSpinBox" name="power2DXMin">
+         <property name="toolTip">
+          <string>Minimum value for X axis</string>
+         </property>
+         <property name="decimals">
+          <number>1</number>
+         </property>
+         <property name="minimum">
+          <double>-360.000000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>360.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="ButtonSwitch" name="power2DLinkSweep">
+         <property name="toolTip">
+          <string>Check to automatically update map dimensions when a sweep starts</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="../../../sdrgui/resources/res.qrc">
+           <normaloff>:/link.png</normaloff>:/link.png</iconset>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="9">
+        <widget class="QDoubleSpinBox" name="power2DXMax">
+         <property name="toolTip">
+          <string>Maximum value for X axis</string>
+         </property>
+         <property name="decimals">
+          <number>1</number>
+         </property>
+         <property name="minimum">
+          <double>-360.000000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>400.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QLabel" name="power2DWidthHeight">
+         <property name="text">
+          <string>Height</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="8">
+        <widget class="QLabel" name="power2DYTo">
+         <property name="text">
+          <string>to</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QLabel" name="power2DWidthLabel">
+         <property name="text">
+          <string>Width</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="5">
+        <widget class="QLabel" name="power2DYRangeLabel">
+         <property name="text">
+          <string>Y Range</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="4">
+        <widget class="Line" name="line_36">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="4">
+        <widget class="Line" name="line_34">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="10">
+        <widget class="QLabel" name="power2DYMaxUnits">
+         <property name="text">
+          <string>°</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="9">
+        <widget class="QDoubleSpinBox" name="power2DYMax">
+         <property name="toolTip">
+          <string>Maximum value for Y axis</string>
+         </property>
+         <property name="decimals">
+          <number>1</number>
+         </property>
+         <property name="minimum">
+          <double>-180.000000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>180.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QToolButton" name="power2DAutoscale">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Automatically scale axes range based on data in radiometer table</string>
+         </property>
+         <property name="statusTip">
+          <string/>
+         </property>
+         <property name="text">
+          <string>A</string>
+         </property>
+         <property name="checkable">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="6">
+        <widget class="QDoubleSpinBox" name="power2DYMin">
+         <property name="toolTip">
+          <string>Minimum value for Y axis</string>
+         </property>
+         <property name="decimals">
+          <number>1</number>
+         </property>
+         <property name="minimum">
+          <double>-180.000000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>180.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="7">
+        <widget class="QLabel" name="power2DXMinUnits">
+         <property name="text">
+          <string>°</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="5">
+        <widget class="QLabel" name="power2DXRangeLabel">
+         <property name="text">
+          <string>X Range</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="10">
+        <widget class="QLabel" name="power2DXMaxUnits">
+         <property name="text">
+          <string>°</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="7">
+        <widget class="QLabel" name="power2DYMinUnits">
+         <property name="text">
+          <string>°</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QComboBox" name="power2DSweepType">
+         <item>
+          <property name="text">
+           <string>Az/El</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>l/b</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Offset</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="0" column="8">
+        <widget class="QLabel" name="power2DXTo">
+         <property name="text">
+          <string>to</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="Line" name="line_35">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QWidget" name="power2DColourScaleWidgets" native="true">
+      <layout class="QHBoxLayout" name="power2DScaleLayout">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QToolButton" name="powerColourAutoscale">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Automatically scale colour gradient to range from minimum and maximum values</string>
+         </property>
+         <property name="statusTip">
+          <string/>
+         </property>
+         <property name="text">
+          <string>A</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="Line" name="line_33">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="powerColourScaleMinLabel">
+         <property name="text">
+          <string>Min</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="powerColourScaleMin">
+         <property name="decimals">
+          <number>1</number>
+         </property>
+         <property name="minimum">
+          <double>-1000000.000000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>1000000.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="powerColourScaleMinUnits">
+         <property name="text">
+          <string>dB</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="Line" name="line_13">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="powerColourScaleMaxLabel">
+         <property name="text">
+          <string>Max</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="powerColourScaleMax">
+         <property name="decimals">
+          <number>1</number>
+         </property>
+         <property name="minimum">
+          <double>-1000000.000000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>1000000.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="powerColourScaleMaxUnits">
+         <property name="text">
+          <string>dB</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="Line" name="line_28">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="powerColourPalette">
+         <item>
+          <property name="text">
+           <string>Colour</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Greyscale</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_9">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QWidget" name="powerMarkerTableWidgets" native="true">
+      <layout class="QVBoxLayout" name="spectrumMarkerTableLayout_2">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="Line" name="line_25">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTableWidget" name="powerMarkerTable">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="sizeAdjustPolicy">
+          <enum>QAbstractScrollArea::AdjustToContents</enum>
+         </property>
+         <property name="editTriggers">
+          <set>QAbstractItemView::NoEditTriggers</set>
+         </property>
+         <property name="cornerButtonEnabled">
+          <bool>true</bool>
+         </property>
+         <property name="rowCount">
+          <number>0</number>
+         </property>
+         <attribute name="verticalHeaderVisible">
+          <bool>false</bool>
+         </attribute>
+         <column>
+          <property name="text">
+           <string>Name</string>
+          </property>
+          <property name="toolTip">
+           <string>Marker name</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Date</string>
+          </property>
+          <property name="toolTip">
+           <string>Date of measurement</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Time</string>
+          </property>
+          <property name="toolTip">
+           <string>Time of measurement</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Power (dBFS)</string>
+          </property>
+          <property name="toolTip">
+           <string>Value of measurement</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>ΔX</string>
+          </property>
+          <property name="toolTip">
+           <string>Time difference between markers (d hh:mm:ss)</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>ΔY</string>
+          </property>
+          <property name="toolTip">
+           <string>Difference in Y values between markers</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>ΔTo</string>
+          </property>
+          <property name="toolTip">
+           <string>Which marker the delta values are to</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QWidget" name="powerChartAvgWidgets" native="true">
+      <layout class="QHBoxLayout" name="powerChartAvgLayout">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="powerMeanLabel">
+         <property name="text">
+          <string>Mean</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="powerMean">
+         <property name="toolTip">
+          <string>Arithmetic mean (average)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="powerRMSLabel">
+         <property name="text">
+          <string>RMS</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="powerRMS">
+         <property name="toolTip">
+          <string>Root mean squared</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="powerSDLabel">
+         <property name="text">
+          <string>σ</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="powerSD">
+         <property name="toolTip">
+          <string>Standard deviation</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="powerTableContainer" native="true">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>1490</y>
+     <width>721</width>
+     <height>171</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="windowTitle">
+    <string>Radiometer Data</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayoutTable">
+    <property name="spacing">
+     <number>2</number>
+    </property>
+    <property name="leftMargin">
+     <number>3</number>
+    </property>
+    <property name="topMargin">
+     <number>3</number>
+    </property>
+    <property name="rightMargin">
+     <number>3</number>
+    </property>
+    <property name="bottomMargin">
+     <number>3</number>
+    </property>
+    <item>
+     <widget class="QTableWidget" name="powerTable">
+      <property name="toolTip">
+       <string/>
+      </property>
+      <property name="editTriggers">
+       <set>QAbstractItemView::NoEditTriggers</set>
+      </property>
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectRows</enum>
+      </property>
+      <column>
+       <property name="text">
+        <string>Date</string>
+       </property>
+       <property name="toolTip">
+        <string>Date of measurement</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Time</string>
+       </property>
+       <property name="toolTip">
+        <string>Time measurement finished</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Power (FFT)</string>
+       </property>
+       <property name="toolTip">
+        <string>Measured power (Sum of FFT absolute magnitude)</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Power (dBFS)</string>
+       </property>
+       <property name="toolTip">
+        <string>Measured power (dBFS)</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Power (dBm)</string>
+       </property>
+       <property name="toolTip">
+        <string>Measured power (dBm)</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Tsys (K)</string>
+       </property>
+       <property name="toolTip">
+        <string>Measured system noise temperature in Kelvin</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Tsys0 (K)</string>
+       </property>
+       <property name="toolTip">
+        <string>System noise temperature in Kelvin assuming no source (i.e. Tsource=0)</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Tsource (K)</string>
+       </property>
+       <property name="toolTip">
+        <string>Estimation of noise temperature contribution from astronomical source in Kelvin (Tsource=Tsys-Tsys0)</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Tb (K)</string>
+       </property>
+       <property name="toolTip">
+        <string>Brightness temperature of source in Kelvin</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Tsky (K)</string>
+       </property>
+       <property name="toolTip">
+        <string>Sky temperature in Kelvin towards target from Star Tracker</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Sν (Jy)</string>
+       </property>
+       <property name="toolTip">
+        <string>Spectral flux density in Jansky</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>σTsys (K)</string>
+       </property>
+       <property name="toolTip">
+        <string>Standard deviation / RMS of temperature in Kelvin due to random fluctuations</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>σSsys (Jy)</string>
+       </property>
+       <property name="toolTip">
+        <string>Standard deviation / RMS of flux in Jansky due to random fluctuations</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>ΩA (sr)</string>
+       </property>
+       <property name="toolTip">
+        <string>Antenna solid angle in steradians</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>ΩS (sr)</string>
+       </property>
+       <property name="toolTip">
+        <string>Source solid angle in steradians</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>RA</string>
+       </property>
+       <property name="toolTip">
+        <string>Right ascension</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Dec</string>
+       </property>
+       <property name="toolTip">
+        <string>Declination</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>l</string>
+       </property>
+       <property name="toolTip">
+        <string>Galactic latitude in degrees</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>b</string>
+       </property>
+       <property name="toolTip">
+        <string>Galactic longitude in degrees</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Az</string>
+       </property>
+       <property name="toolTip">
+        <string>Azimuth in degrees</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>El</string>
+       </property>
+       <property name="toolTip">
+        <string>Elevation in degrees</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Vbcrs</string>
+       </property>
+       <property name="toolTip">
+        <string>Velocity towards RA/Dec relative to barycentric reference frame (km/s)</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Vlsr</string>
+       </property>
+       <property name="toolTip">
+        <string>Velocity towards RA/Dec relative to local standard of rest (km/s)</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Solar Flux (Jy)</string>
+       </property>
+       <property name="toolTip">
+        <string>Solar flux in Jansky from Star Tracker</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Air Temp (C)</string>
+       </property>
+       <property name="toolTip">
+        <string>Surface air temperature in degrees Celsius from Star Tracker</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Sensor 1</string>
+       </property>
+       <property name="toolTip">
+        <string>Sensor 1 data</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Sensor 2</string>
+       </property>
+       <property name="toolTip">
+        <string>Sensor 2 data</string>
+       </property>
+      </column>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>RollupWidget</class>
+   <extends>QWidget</extends>
+   <header>gui/rollupwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ValueDialZ</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedialz.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QChartView</class>
+   <extends>QGraphicsView</extends>
+   <header>QtCharts</header>
+  </customwidget>
+  <customwidget>
+   <class>WrappingDateTimeEdit</class>
+   <extends>QDateTimeEdit</extends>
+   <header>gui/wrappingdatetimeedit.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>powerMean</tabstop>
+  <tabstop>powerRMS</tabstop>
+  <tabstop>powerSD</tabstop>
+  <tabstop>powerTable</tabstop>
+  <tabstop>fftSize</tabstop>
+  <tabstop>fftWindow</tabstop>
+  <tabstop>filterFreqs</tabstop>
+  <tabstop>starTracker</tabstop>
+  <tabstop>rotator</tabstop>
+  <tabstop>showSensors</tabstop>
+  <tabstop>tempRXSelect</tabstop>
+  <tabstop>tempRX</tabstop>
+  <tabstop>tempCMB</tabstop>
+  <tabstop>tempGal</tabstop>
+  <tabstop>tempGalLink</tabstop>
+  <tabstop>tempSP</tabstop>
+  <tabstop>tempAtm</tabstop>
+  <tabstop>tempAtmLink</tabstop>
+  <tabstop>tempAir</tabstop>
+  <tabstop>tempAirLink</tabstop>
+  <tabstop>zenithOpacity</tabstop>
+  <tabstop>elevation</tabstop>
+  <tabstop>elevationLink</tabstop>
+  <tabstop>gainVariation</tabstop>
+  <tabstop>sourceType</tabstop>
+  <tabstop>omegaS</tabstop>
+  <tabstop>omegaSUnits</tabstop>
+  <tabstop>startStop</tabstop>
+  <tabstop>clearData</tabstop>
+  <tabstop>runMode</tabstop>
+  <tabstop>sweepStartAtTime</tabstop>
+  <tabstop>sweepType</tabstop>
+  <tabstop>sweep1Start</tabstop>
+  <tabstop>sweep1Stop</tabstop>
+  <tabstop>sweep1Step</tabstop>
+  <tabstop>sweep1Delay</tabstop>
+  <tabstop>sweepStartDateTime</tabstop>
+  <tabstop>sweep2Start</tabstop>
+  <tabstop>sweep2Stop</tabstop>
+  <tabstop>sweep2Step</tabstop>
+  <tabstop>sweep2Delay</tabstop>
+  <tabstop>spectrumChartSelect</tabstop>
+  <tabstop>spectrumYUnits</tabstop>
+  <tabstop>clearCal</tabstop>
+  <tabstop>integration</tabstop>
+  <tabstop>startCalHot</tabstop>
+  <tabstop>startCalCold</tabstop>
+  <tabstop>recalibrate</tabstop>
+  <tabstop>deltaFrequency</tabstop>
+  <tabstop>spectrumShowLegend</tabstop>
+  <tabstop>spectrumShowLAB</tabstop>
+  <tabstop>spectrumShowDistance</tabstop>
+  <tabstop>rfBW</tabstop>
+  <tabstop>spectrumShowRefLine</tabstop>
+  <tabstop>spectrumTemp</tabstop>
+  <tabstop>spectrumMarker</tabstop>
+  <tabstop>spectrumPeak</tabstop>
+  <tabstop>powerChart</tabstop>
+  <tabstop>spectrumReverseXAxis</tabstop>
+  <tabstop>saveSpectrumChartImages</tabstop>
+  <tabstop>saveSpectrumChartImage</tabstop>
+  <tabstop>loadSpectrumData</tabstop>
+  <tabstop>saveSpectrumData</tabstop>
+  <tabstop>spectrumChart</tabstop>
+  <tabstop>spectrumAutoscale</tabstop>
+  <tabstop>sampleRate</tabstop>
+  <tabstop>spectrumAutoscaleX</tabstop>
+  <tabstop>spectrumAutoscaleY</tabstop>
+  <tabstop>spectrumReference</tabstop>
+  <tabstop>spectrumRange</tabstop>
+  <tabstop>spectrumCenterFreq</tabstop>
+  <tabstop>spectrumSpan</tabstop>
+  <tabstop>spectrumSelect</tabstop>
+  <tabstop>spectrumIndex</tabstop>
+  <tabstop>spectrumDateTime</tabstop>
+  <tabstop>spectrumLine</tabstop>
+  <tabstop>spectrumLineFrequency</tabstop>
+  <tabstop>refFrame</tabstop>
+  <tabstop>sunDistanceToGC</tabstop>
+  <tabstop>sunOrbitalVelocity</tabstop>
+  <tabstop>spectrumGaussianFreq</tabstop>
+  <tabstop>spectrumGaussianAmp</tabstop>
+  <tabstop>spectrumGaussianFloor</tabstop>
+  <tabstop>spectrumGaussianFWHM</tabstop>
+  <tabstop>spectrumTemperature</tabstop>
+  <tabstop>spectrumGaussianTurb</tabstop>
+  <tabstop>columnDensity</tabstop>
+  <tabstop>tCalColdSelect</tabstop>
+  <tabstop>tCalCold</tabstop>
+  <tabstop>tCalHotSelect</tabstop>
+  <tabstop>tCalHot</tabstop>
+  <tabstop>calAvgDiff</tabstop>
+  <tabstop>calYFactor</tabstop>
+  <tabstop>calTrx</tabstop>
+  <tabstop>calTsky</tabstop>
+  <tabstop>calTsp</tabstop>
+  <tabstop>spectrumMarkerTable</tabstop>
+  <tabstop>powerChartSelect</tabstop>
+  <tabstop>powerYUnits</tabstop>
+  <tabstop>powerShowLegend</tabstop>
+  <tabstop>powerShowSensor2</tabstop>
+  <tabstop>powerShowSensor1</tabstop>
+  <tabstop>powerShowAirTemp</tabstop>
+  <tabstop>powerShowTsys0</tabstop>
+  <tabstop>powerShowAvg</tabstop>
+  <tabstop>powerShowGaussian</tabstop>
+  <tabstop>powerShowMarker</tabstop>
+  <tabstop>powerShowPeak</tabstop>
+  <tabstop>savePowerChartImage</tabstop>
+  <tabstop>savePowerData</tabstop>
+  <tabstop>powerAutoscale</tabstop>
+  <tabstop>powerAutoscaleX</tabstop>
+  <tabstop>powerAutoscaleY</tabstop>
+  <tabstop>powerReference</tabstop>
+  <tabstop>powerRange</tabstop>
+  <tabstop>powerStartTime</tabstop>
+  <tabstop>powerEndTime</tabstop>
+  <tabstop>powerSelect</tabstop>
+  <tabstop>powerGaussianCenter</tabstop>
+  <tabstop>powerGaussianAmp</tabstop>
+  <tabstop>powerGaussianFloor</tabstop>
+  <tabstop>powerGaussianFWHM</tabstop>
+  <tabstop>powerGaussianHPBW</tabstop>
+  <tabstop>power2DLinkSweep</tabstop>
+  <tabstop>power2DSweepType</tabstop>
+  <tabstop>power2DWidth</tabstop>
+  <tabstop>power2DXMin</tabstop>
+  <tabstop>power2DXMax</tabstop>
+  <tabstop>power2DAutoscale</tabstop>
+  <tabstop>power2DHeight</tabstop>
+  <tabstop>power2DYMin</tabstop>
+  <tabstop>power2DYMax</tabstop>
+  <tabstop>powerColourAutoscale</tabstop>
+  <tabstop>powerColourScaleMin</tabstop>
+  <tabstop>powerColourScaleMax</tabstop>
+  <tabstop>powerColourPalette</tabstop>
+  <tabstop>powerMarkerTable</tabstop>
+ </tabstops>
+ <resources>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="icons.qrc"/>
+ </resources>
+ <connections/>
+</ui>

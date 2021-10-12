@@ -38,10 +38,10 @@ public:
     void setC2FRegistrations(
         QMutex *c2fMutex,
         QMap<MessagePipesCommon::ChannelRegistrationKey, QList<MessageQueue*>> *c2fQueues,
-        QMap<MessagePipesCommon::ChannelRegistrationKey, QList<Feature*>> *c2fFeatures
+        QMap<MessagePipesCommon::ChannelRegistrationKey, QList<PipeEndPoint*>> *c2fPipeEndPoints
     )
     {
-        m_messagePipesGC.setRegistrations(c2fMutex, c2fQueues, c2fFeatures);
+        m_messagePipesGC.setRegistrations(c2fMutex, c2fQueues, c2fPipeEndPoints);
     }
 
     void startWork();
@@ -50,12 +50,12 @@ public:
     bool isRunning() const { return m_running; }
 
 private:
-    class MessagePipesGC : public ElementPipesGC<PipeEndPoint, Feature, MessageQueue>
+    class MessagePipesGC : public ElementPipesGC<PipeEndPoint, PipeEndPoint, MessageQueue>
     {
     private:
         virtual bool existsProducer(const PipeEndPoint *pipeEndPoint);
-        virtual bool existsConsumer(const Feature *feature);
-        virtual void sendMessageToConsumer(const MessageQueue *messageQueue,  MessagePipesCommon::ChannelRegistrationKey key, Feature *feature);
+        virtual bool existsConsumer(const PipeEndPoint *pipeEndPoint);
+        virtual void sendMessageToConsumer(const MessageQueue *messageQueue, MessagePipesCommon::ChannelRegistrationKey key, PipeEndPoint *pipeEndPoint);
     };
 
     MessagePipesGC m_messagePipesGC;

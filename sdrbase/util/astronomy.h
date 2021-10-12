@@ -20,7 +20,7 @@
 
 #include "export.h"
 
-class QDateTime;
+#include <QDateTime>
 
 // Right ascension and declination
 struct SDRBASE_API RADec {
@@ -39,6 +39,7 @@ class SDRBASE_API Astronomy {
 public:
     static double julianDate(int year, int month, int day, int hours, int minutes, int seconds);
     static double julianDate(QDateTime dt);
+    static double modifiedJulianDate(QDateTime dt);
 
     static double jd_j2000(void);
     static double jd_b1950(void);
@@ -64,9 +65,27 @@ public:
 
     static void equatorialToGalactic(double ra, double dec, double& l, double& b);
     static void northGalacticPoleJ2000(double& ra, double& dec);
+    static void galacticToEquatorial(double l, double b, double& ra, double& dec);
 
-protected:
+    static double dopplerToVelocity(double f, double f0);
+    static double velocityToDoppler(double v, double f0);
+
+    static double earthRotationVelocity(RADec rd, double latitude, double longitude, QDateTime dt);
+    static double earthOrbitVelocityBCRS(RADec rd, QDateTime dt);
+    static double sunVelocityLSRK(RADec rd);
+    static double observerVelocityLSRK(RADec rd, double latitude, double longitude, QDateTime dt);
+
+    static double noisePowerdBm(double temp, double bw);
+    static double noiseTemp(double dBm, double bw);
+
     static double modulo(double a, double b);
+
+    static const double m_boltzmann;
+    static const double m_hydrogenLineFrequency;
+    static const double m_hydroxylLineFrequency;
+    static const double m_deuteriumLineFrequency;
+    static const double m_speedOfLight;
+    static const double m_hydrogenMass;
 };
 
 #endif // INCLUDE_ASTRONOMY_H

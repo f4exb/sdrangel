@@ -42,14 +42,14 @@ MessagePipes::~MessagePipes()
 	}
 }
 
-MessageQueue *MessagePipes::registerChannelToFeature(const PipeEndPoint *source, Feature *feature, const QString& type)
+MessageQueue *MessagePipes::registerChannelToFeature(const PipeEndPoint *source, PipeEndPoint *dest, const QString& type)
 {
-	return m_registrations.registerProducerToConsumer(source, feature, type);
+	return m_registrations.registerProducerToConsumer(source, dest, type);
 }
 
-MessageQueue *MessagePipes::unregisterChannelToFeature(const PipeEndPoint *source, Feature *feature, const QString& type)
+MessageQueue *MessagePipes::unregisterChannelToFeature(const PipeEndPoint *source, PipeEndPoint *dest, const QString& type)
 {
-	MessageQueue *messageQueue = m_registrations.unregisterProducerToConsumer(source, feature, type);
+	MessageQueue *messageQueue = m_registrations.unregisterProducerToConsumer(source, dest, type);
 	m_gcWorker->addMessageQueueToDelete(messageQueue);
 	return messageQueue;
 }

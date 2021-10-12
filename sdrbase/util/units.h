@@ -298,6 +298,30 @@ public:
         return sfu * 1e-22f;
     }
 
+    template <class T>
+    static T wattsPerMetrePerHertzToSolarFluxUnits(T w)
+    {
+        return w / 1e-22f;
+    }
+
+    template <class T>
+    static T wattsPerMetrePerHertzToJansky(T w)
+    {
+        return w / 1e-26f;
+    }
+
+    template <class T>
+    static T noiseFigureToNoiseTemp(T nfdB, T refTempK=T(290.0))
+    {
+        return refTempK * (std::pow(T(10.0), nfdB/T(10.0)) - T(1.0));
+    }
+
+    template <class T>
+    static T noiseTempToNoiseFigureTo(T tempK, T refTempK=T(290.0))
+    {
+        return T(10.0) * std::log10(tempK/refTempK+T(1.0));
+    }
+
 };
 
 #endif // INCLUDE_UNITS_H

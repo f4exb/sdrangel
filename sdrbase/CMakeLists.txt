@@ -198,6 +198,7 @@ set(sdrbase_SOURCES
     util/message.cpp
     util/messagequeue.cpp
     util/morse.cpp
+    util/png.cpp
     util/prettyprint.cpp
     util/rtpsink.cpp
     util/syncmessenger.cpp
@@ -209,6 +210,7 @@ set(sdrbase_SOURCES
     util/units.cpp
     util/timeutil.cpp
     util/visa.cpp
+    util/weather.cpp
 
     plugin/plugininterface.cpp
     plugin/pluginapi.cpp
@@ -406,6 +408,7 @@ set(sdrbase_HEADERS
     util/messagequeue.h
     util/morse.h
     util/movingaverage.h
+    util/png.h
     util/prettyprint.h
     util/rtpsink.h
     util/syncmessenger.h
@@ -417,6 +420,7 @@ set(sdrbase_HEADERS
     util/units.h
     util/timeutil.h
     util/visa.h
+    util/weather.h
 
     webapi/webapiadapter.h
     webapi/webapiadapterbase.h

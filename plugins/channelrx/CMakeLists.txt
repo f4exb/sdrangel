@@ -20,6 +20,7 @@ add_subdirectory(demodpacket)
 add_subdirectory(demodais)
 add_subdirectory(demodpager)
 add_subdirectory(radioclock)
+add_subdirectory(radioastronomy)
 
 if(DAB_FOUND AND ZLIB_FOUND AND FAAD_FOUND)
     add_subdirectory(demoddab)

@@ -1,0 +1,16 @@
+<RCC>
+  <qresource prefix="/radioastronomy/">
+    <file>icons/hot.png</file>
+    <file>icons/cold.png</file>
+    <file>icons/temperature.png</file>
+    <file>icons/reverse.png</file>
+    <file>icons/gaussian.png</file>
+    <file>icons/peak.png</file>
+    <file>icons/marker.png</file>
+    <file>icons/refline.png</file>
+    <file>icons/legend.png</file>
+    <file>icons/lab.png</file>
+    <file>icons/galactictriangle.png</file>
+    <file>icons/noise.png</file>
+  </qresource>
+</RCC>

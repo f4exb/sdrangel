@@ -32,7 +32,7 @@ class Feature;
 class SDRBASE_API PipeEndPoint {
 public:
 
-    // Used by pipe sinks (features) to record details about available pipe sources (channels or features)
+    // Used by pipe sinks (channels or features) to record details about available pipe sources (channels or features)
     struct AvailablePipeSource
     {
         enum {RX, TX, Feature} m_type;
@@ -92,7 +92,7 @@ public:
 protected:
 
     // Utility functions for pipe sinks to manage list of sources
-    QList<AvailablePipeSource> updateAvailablePipeSources(QString pipeName, QStringList pipeTypes, QStringList pipeURIs, Feature *destinationFeature);
+    QList<AvailablePipeSource> updateAvailablePipeSources(QString pipeName, QStringList pipeTypes, QStringList pipeURIs, PipeEndPoint *destination);
     PipeEndPoint *getPipeEndPoint(const QString name, const QList<AvailablePipeSource> &availablePipeSources);
 
 };

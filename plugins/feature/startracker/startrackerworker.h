@@ -85,12 +85,13 @@ private:
     QTimer m_pollTimer;
     QTcpServer *m_tcpServer;
     QTcpSocket *m_clientConnection;
+    float m_solarFlux;
 
     bool handleMessage(const Message& cmd);
     void applySettings(const StarTrackerSettings& settings, bool force = false);
     void restartServer(bool enabled, uint32_t port);
     MessageQueue *getMessageQueueToGUI() { return m_msgQueueToGUI; }
-    void updateRaDec(RADec rd, QDateTime dt);
+    void updateRaDec(RADec rd, QDateTime dt, bool lbTarget);
     void writeStellariumTarget(double ra, double dec);
     void removeFromMap(QString id);
     void sendToMap(QList<MessageQueue*> *mapMessageQueues, QString id, QString image, QString text, double lat, double lon, double rotation=0.0);

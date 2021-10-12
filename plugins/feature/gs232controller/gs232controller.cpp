@@ -16,6 +16,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <cmath>
+
 #include <QDebug>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -181,9 +183,9 @@ bool GS232Controller::getOnTarget() const
 {
     float targetAziumth, targetElevation;
     m_settings.calcTargetAzEl(targetAziumth, targetElevation);
-    float readTolerance = m_settings.m_tolerance + 0.5f;
-    bool onTarget =   (abs(m_currentAzimuth - targetAziumth) < readTolerance)
-                   && (abs(m_currentElevation - targetElevation) < readTolerance);
+    float readTolerance = m_settings.m_tolerance + 0.0f;
+    bool onTarget =   (std::fabs(m_currentAzimuth - targetAziumth) < readTolerance)
+                   && (std::fabs(m_currentElevation - targetElevation) < readTolerance);
     return onTarget;
 }
 

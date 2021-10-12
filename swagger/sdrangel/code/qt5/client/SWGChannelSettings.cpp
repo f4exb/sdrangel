@@ -100,6 +100,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_packet_mod_settings_isSet = false;
     pager_demod_settings = nullptr;
     m_pager_demod_settings_isSet = false;
+    radio_astronomy_settings = nullptr;
+    m_radio_astronomy_settings_isSet = false;
     radio_clock_settings = nullptr;
     m_radio_clock_settings_isSet = false;
     remote_sink_settings = nullptr;
@@ -204,6 +206,8 @@ SWGChannelSettings::init() {
     m_packet_mod_settings_isSet = false;
     pager_demod_settings = new SWGPagerDemodSettings();
     m_pager_demod_settings_isSet = false;
+    radio_astronomy_settings = new SWGRadioAstronomySettings();
+    m_radio_astronomy_settings_isSet = false;
     radio_clock_settings = new SWGRadioClockSettings();
     m_radio_clock_settings_isSet = false;
     remote_sink_settings = new SWGRemoteSinkSettings();
@@ -334,6 +338,9 @@ SWGChannelSettings::cleanup() {
     if(pager_demod_settings != nullptr) { 
         delete pager_demod_settings;
     }
+    if(radio_astronomy_settings != nullptr) { 
+        delete radio_astronomy_settings;
+    }
     if(radio_clock_settings != nullptr) { 
         delete radio_clock_settings;
     }
@@ -454,6 +461,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&packet_mod_settings, pJson["PacketModSettings"], "SWGPacketModSettings", "SWGPacketModSettings");
     
     ::SWGSDRangel::setValue(&pager_demod_settings, pJson["PagerDemodSettings"], "SWGPagerDemodSettings", "SWGPagerDemodSettings");
+    
+    ::SWGSDRangel::setValue(&radio_astronomy_settings, pJson["RadioAstronomySettings"], "SWGRadioAstronomySettings", "SWGRadioAstronomySettings");
     
     ::SWGSDRangel::setValue(&radio_clock_settings, pJson["RadioClockSettings"], "SWGRadioClockSettings", "SWGRadioClockSettings");
     
@@ -602,6 +611,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((pager_demod_settings != nullptr) && (pager_demod_settings->isSet())){
         toJsonValue(QString("PagerDemodSettings"), pager_demod_settings, obj, QString("SWGPagerDemodSettings"));
+    }
+    if((radio_astronomy_settings != nullptr) && (radio_astronomy_settings->isSet())){
+        toJsonValue(QString("RadioAstronomySettings"), radio_astronomy_settings, obj, QString("SWGRadioAstronomySettings"));
     }
     if((radio_clock_settings != nullptr) && (radio_clock_settings->isSet())){
         toJsonValue(QString("RadioClockSettings"), radio_clock_settings, obj, QString("SWGRadioClockSettings"));
@@ -1003,6 +1015,16 @@ SWGChannelSettings::setPagerDemodSettings(SWGPagerDemodSettings* pager_demod_set
     this->m_pager_demod_settings_isSet = true;
 }
 
+SWGRadioAstronomySettings*
+SWGChannelSettings::getRadioAstronomySettings() {
+    return radio_astronomy_settings;
+}
+void
+SWGChannelSettings::setRadioAstronomySettings(SWGRadioAstronomySettings* radio_astronomy_settings) {
+    this->radio_astronomy_settings = radio_astronomy_settings;
+    this->m_radio_astronomy_settings_isSet = true;
+}
+
 SWGRadioClockSettings*
 SWGChannelSettings::getRadioClockSettings() {
     return radio_clock_settings;
@@ -1234,6 +1256,9 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(pager_demod_settings && pager_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(radio_astronomy_settings && radio_astronomy_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(radio_clock_settings && radio_clock_settings->isSet()){

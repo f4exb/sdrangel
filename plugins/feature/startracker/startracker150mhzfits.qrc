@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="/startracker/">
+    <file>startracker/150mhz_ra_dec.fits</file>
+  </qresource>
+</RCC>

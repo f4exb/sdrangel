@@ -4305,6 +4305,11 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->setPagerDemodSettings(new SWGSDRangel::SWGPagerDemodSettings());
             channelSettings->getPagerDemodSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "RadioAstronomySettings")
+        {
+            channelSettings->setRadioAstronomySettings(new SWGSDRangel::SWGRadioAstronomySettings());
+            channelSettings->getRadioAstronomySettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "RadioClockSettings")
         {
             channelSettings->setRadioClockSettings(new SWGSDRangel::SWGRadioClockSettings());
@@ -4411,6 +4416,11 @@ bool WebAPIRequestMapper::getChannelActions(
         {
             channelActions->setIeee802154ModActions(new SWGSDRangel::SWGIEEE_802_15_4_ModActions());
             channelActions->getIeee802154ModActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (channelActionsKey == "RadioAstronomyActions")
+        {
+            channelActions->setRadioAstronomyActions(new SWGSDRangel::SWGRadioAstronomyActions());
+            channelActions->getRadioAstronomyActions()->fromJsonObject(actionsJsonObject);
         }
         else if (channelActionsKey == "PacketModActions")
         {
@@ -5004,6 +5014,8 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setPacketDemodSettings(nullptr);
     channelSettings.setPacketModSettings(nullptr);
     channelSettings.setPagerDemodSettings(nullptr);
+    channelSettings.setRadioAstronomySettings(nullptr);
+    channelSettings.setRadioClockSettings(nullptr);
     channelSettings.setRemoteSinkSettings(nullptr);
     channelSettings.setRemoteSourceSettings(nullptr);
     channelSettings.setSsbDemodSettings(nullptr);
@@ -5033,6 +5045,8 @@ void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& chan
     channelReport.setNoiseFigureReport(nullptr);
     channelReport.setIeee802154ModReport(nullptr);
     channelReport.setPacketModReport(nullptr);
+    channelReport.setRadioAstronomyReport(nullptr);
+    channelReport.setRadioClockReport(nullptr);
     channelReport.setRemoteSourceReport(nullptr);
     channelReport.setSsbDemodReport(nullptr);
     channelReport.setSsbModReport(nullptr);
@@ -5051,6 +5065,7 @@ void WebAPIRequestMapper::resetChannelActions(SWGSDRangel::SWGChannelActions& ch
     channelActions.setChannelType(nullptr);
     channelActions.setFileSourceActions(nullptr);
     channelActions.setIeee802154ModActions(nullptr);
+    channelActions.setRadioAstronomyActions(nullptr);
     channelActions.setPacketModActions(nullptr);
 }
 

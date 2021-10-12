@@ -61,6 +61,7 @@ public:
     void closeDefault();
     ViSession open(const QString& device);
     void close(ViSession session);
+    QStringList processCommands(ViSession session, const QString& commands);
 
     // Is the VISA library available
     bool isAvailable() const

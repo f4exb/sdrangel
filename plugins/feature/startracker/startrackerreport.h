@@ -59,20 +59,47 @@ public:
     public:
         double getRA() const { return m_ra; }
         double getDec() const { return m_dec; }
+        QString getTarget() const { return m_target; }
 
-        static MsgReportRADec* create(double ra, double dec)
+        static MsgReportRADec* create(double ra, double dec, const QString& target)
         {
-            return new MsgReportRADec(ra, dec);
+            return new MsgReportRADec(ra, dec, target);
         }
 
     private:
         double m_ra;
         double m_dec;
+        QString m_target; // "target", "sun" or "moon"
 
-        MsgReportRADec(double ra, double dec) :
+        MsgReportRADec(double ra, double dec, const QString& target) :
             Message(),
             m_ra(ra),
-            m_dec(dec)
+            m_dec(dec),
+            m_target(target)
+        {
+        }
+    };
+
+    class MsgReportGalactic : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        double getL() const { return m_l; }
+        double getB() const { return m_b; }
+
+        static MsgReportGalactic* create(double l, double b)
+        {
+            return new MsgReportGalactic(l, b);
+        }
+
+    private:
+        double m_l;
+        double m_b;
+
+        MsgReportGalactic(double l, double b) :
+            Message(),
+            m_l(l),
+            m_b(b)
         {
         }
     };

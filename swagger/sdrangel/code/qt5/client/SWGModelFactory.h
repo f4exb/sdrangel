@@ -210,6 +210,9 @@
 #include "SWGPresets.h"
 #include "SWGRDSReport.h"
 #include "SWGRDSReport_altFrequencies.h"
+#include "SWGRadioAstronomyActions.h"
+#include "SWGRadioAstronomyReport.h"
+#include "SWGRadioAstronomySettings.h"
 #include "SWGRadioClockReport.h"
 #include "SWGRadioClockSettings.h"
 #include "SWGRange.h"
@@ -253,7 +256,13 @@
 #include "SWGSoapySDRReport.h"
 #include "SWGSpectrumServer.h"
 #include "SWGSpectrumServer_clients.h"
+#include "SWGStarTrackerDisplayLoSSettings.h"
+#include "SWGStarTrackerDisplayLoSSettings_2.h"
+#include "SWGStarTrackerDisplaySettings.h"
+#include "SWGStarTrackerDisplaySettings_2.h"
 #include "SWGStarTrackerSettings.h"
+#include "SWGStarTrackerTarget.h"
+#include "SWGStarTrackerTarget_2.h"
 #include "SWGSuccessResponse.h"
 #include "SWGTargetAzimuthElevation.h"
 #include "SWGTestMISettings.h"
@@ -1269,6 +1278,21 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGRadioAstronomyActions").compare(type) == 0) {
+      SWGRadioAstronomyActions *obj = new SWGRadioAstronomyActions();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGRadioAstronomyReport").compare(type) == 0) {
+      SWGRadioAstronomyReport *obj = new SWGRadioAstronomyReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGRadioAstronomySettings").compare(type) == 0) {
+      SWGRadioAstronomySettings *obj = new SWGRadioAstronomySettings();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGRadioClockReport").compare(type) == 0) {
       SWGRadioClockReport *obj = new SWGRadioClockReport();
       obj->init();
@@ -1484,8 +1508,38 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGStarTrackerDisplayLoSSettings").compare(type) == 0) {
+      SWGStarTrackerDisplayLoSSettings *obj = new SWGStarTrackerDisplayLoSSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGStarTrackerDisplayLoSSettings_2").compare(type) == 0) {
+      SWGStarTrackerDisplayLoSSettings_2 *obj = new SWGStarTrackerDisplayLoSSettings_2();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGStarTrackerDisplaySettings").compare(type) == 0) {
+      SWGStarTrackerDisplaySettings *obj = new SWGStarTrackerDisplaySettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGStarTrackerDisplaySettings_2").compare(type) == 0) {
+      SWGStarTrackerDisplaySettings_2 *obj = new SWGStarTrackerDisplaySettings_2();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGStarTrackerSettings").compare(type) == 0) {
       SWGStarTrackerSettings *obj = new SWGStarTrackerSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGStarTrackerTarget").compare(type) == 0) {
+      SWGStarTrackerTarget *obj = new SWGStarTrackerTarget();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGStarTrackerTarget_2").compare(type) == 0) {
+      SWGStarTrackerTarget_2 *obj = new SWGStarTrackerTarget_2();
       obj->init();
       return obj;
     }
