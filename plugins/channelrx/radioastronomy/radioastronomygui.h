@@ -392,6 +392,7 @@ private:
     void updatePowerSelect();
     void spectrumAutoscale();
     void powerAutoscale();
+    void powerAutoscaleY(bool adjustAxis);
     void calcSpectrumMarkerDelta();
     void calcPowerMarkerDelta();
     void calcPowerPeakDelta();

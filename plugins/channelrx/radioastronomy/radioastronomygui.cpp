@@ -474,11 +474,8 @@ void RadioAstronomyGUI::addToPowerSeries(FFTMeasurement *fft, bool skipCalcs)
         {
             if (m_settings.m_powerAutoscale)
             {
-                double max = m_powerMax + (m_powerMax-m_powerMin)*0.2; // Add 20% space for markers
-                double range = max - m_powerMin;
                 blockApplySettings(true);
-                ui->powerRange->setValue(range);
-                ui->powerReference->setValue(max);
+                powerAutoscaleY(false);
                 blockApplySettings(false);
             }
         }
@@ -764,19 +761,39 @@ void RadioAstronomyGUI::on_powerAutoscale_toggled(bool checked)
     applySettings();
 }
 
+void RadioAstronomyGUI::powerAutoscaleY(bool adjustAxis)
+{
+    double min = m_powerMin;
+    double max = m_powerMax;
+    double range = max - min;
+    // Round to 1 or 2 decimal places
+    if (range > 1.0)
+    {
+        min = std::floor(min * 10.0) / 10.0;
+        max = std::ceil(max * 10.0) / 10.0;
+    }
+    else
+    {
+        min = std::floor(min * 100.0) / 100.0;
+        max = std::ceil(max * 100.0) / 100.0;
+    }
+    range = max - min;
+    max += range * 0.2; // Add 20% space for markers
+    range = max - min;
+    range = std::max(0.1, range);     // Don't be smaller than minimum value we can set in GUI
+
+    if (adjustAxis) {
+        m_powerYAxis->setRange(min, max);
+    }
+    ui->powerRange->setValue(range); // Call before setting reference, so number of decimals are adjusted
+    ui->powerReference->setValue(max);
+}
+
 // Scale Y axis according to min and max values
 void RadioAstronomyGUI::on_powerAutoscaleY_clicked()
 {
-    if (m_powerYAxis)
-    {
-        double min = m_powerMin;
-        double max = m_powerMax + (m_powerMax-m_powerMin)*0.2; // Add 20% space for markers
-        double range = m_powerMax - m_powerMin;
-        range = std::max(0.1, range);     // Don't be smaller than minimum value we can set in GUI
-
-        m_powerYAxis->setRange(min, max);
-        ui->powerRange->setValue(range); // Call before setting reference, so number of decimals are adjusted
-        ui->powerReference->setValue(max);
+    if (m_powerYAxis) {
+        powerAutoscaleY(true);
     }
 }
 
@@ -2857,9 +2874,6 @@ void RadioAstronomyGUI::on_powerYUnits_currentIndexChanged(int index)
         ui->powerColourScaleMinUnits->setText(text);
         ui->powerColourScaleMaxUnits->setText(text);
     }
-    if (m_settings.m_powerColourAutoscale && (ui->powerChartSelect->currentIndex() == 4)) {
-        powerColourAutoscale();
-    }
     applySettings();
     plotPowerChart();
 }
@@ -3024,6 +3038,9 @@ void RadioAstronomyGUI::plot2DChart()
         m_2DMap.fill(qRgb(0, 0, 0));
         for (int i = 0; i < m_fftMeasurements.size(); i++) {
             update2DImage(m_fftMeasurements[i], i < m_fftMeasurements.size() - 1);
+        }
+        if (m_settings.m_powerColourAutoscale) {
+            powerColourAutoscale();
         }
 
         connect(m_2DChart, SIGNAL(plotAreaChanged(QRectF)), this, SLOT(plotAreaChanged(QRectF)));
