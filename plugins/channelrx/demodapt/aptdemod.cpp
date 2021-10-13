@@ -72,6 +72,8 @@ APTDemod::APTDemod(DeviceAPI *deviceAPI) :
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+
+    startImageWorker();
 }
 
 APTDemod::~APTDemod()
@@ -109,7 +111,6 @@ void APTDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 void APTDemod::start()
 {
     startBasebandSink();
-    startImageWorker();
 }
 
 void APTDemod::startBasebandSink()
@@ -141,7 +142,6 @@ void APTDemod::startImageWorker()
 
 void APTDemod::stop()
 {
-    stopImageWorker();
     stopBasebandSink();
 }
 
@@ -594,7 +594,7 @@ int APTDemod::webapiActionsPost(
                     m_basebandSink->getInputMessageQueue()->push(APTDemod::MsgResetDecoder::create());
 
                     // Save satellite name
-                    m_satelliteName = *satelliteName;
+                    m_imageWorker->getInputMessageQueue()->push(APTDemodImageWorker::MsgSetSatelliteName::create(*satelliteName));
 
                     // Enable decoder and set direction of pass
                     APTDemodSettings settings = m_settings;

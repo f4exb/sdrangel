@@ -250,8 +250,6 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
-    QString m_satelliteName;
-
     void applySettings(const APTDemodSettings& settings, bool force = false);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const APTDemodSettings& settings, bool force);
     void webapiFormatChannelSettings(
