@@ -74,6 +74,27 @@ public:
         }
     };
 
+    class MsgSetSatelliteName : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        QString getSatelliteName() const { return m_satelliteName; }
+
+        static MsgSetSatelliteName* create(const QString &satelliteName)
+        {
+            return new MsgSetSatelliteName(satelliteName);
+        }
+
+    private:
+        QString m_satelliteName;
+
+        MsgSetSatelliteName(const QString &satelliteName) :
+            Message(),
+            m_satelliteName(satelliteName)
+        {
+        }
+    };
+
     APTDemodImageWorker();
     ~APTDemodImageWorker();
     void reset();

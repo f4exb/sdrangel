@@ -26,6 +26,7 @@
 
 MESSAGE_CLASS_DEFINITION(APTDemodImageWorker::MsgConfigureAPTDemodImageWorker, Message)
 MESSAGE_CLASS_DEFINITION(APTDemodImageWorker::MsgSaveImageToDisk, Message)
+MESSAGE_CLASS_DEFINITION(APTDemodImageWorker::MsgSetSatelliteName, Message)
 
 APTDemodImageWorker::APTDemodImageWorker() :
     m_messageQueueToGUI(nullptr),
@@ -97,6 +98,12 @@ bool APTDemodImageWorker::handleMessage(const Message& cmd)
     else if (MsgSaveImageToDisk::match(cmd))
     {
         saveImageToDisk();
+        return true;
+    }
+    else if (MsgSetSatelliteName::match(cmd))
+    {
+        MsgSetSatelliteName& msg = (MsgSetSatelliteName&) cmd;
+        m_satelliteName = msg.getSatelliteName();
         return true;
     }
     else if (APTDemod::MsgPixels::match(cmd))
@@ -336,7 +343,7 @@ void APTDemodImageWorker::saveImageToDisk()
     {
         QString filename;
         QDateTime datetime = QDateTime::currentDateTime();
-        filename = QString("apt_%1_%2.png").arg(m_satelliteName).arg(datetime.toString("yyyyMMdd_hhmm"));
+        filename = QString("apt_%1_%2.png").arg(m_satelliteName.replace(" ", "_")).arg(datetime.toString("yyyyMMdd_hhmm"));
 
         if (!m_settings.m_autoSavePath.isEmpty())
         {
