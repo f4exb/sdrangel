@@ -1,0 +1,59 @@
+# https://stackoverflow.com/questions/69126323/github-actions-creating-releases-for-multiple-branches-in-a-single-workflow
+# https://gist.github.com/NickNaso/0d478f1481686d5bcc868cac06620a60
+name: SDRangel CI
+
+on: [push]
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            name: "Windows-x64",
+            WIN_ARCH: "x64",
+            os: windows-latest,
+            QT_INST_DIR: "C:/",
+            QTDIR: "C:/Qt/5.15.2/msvc2019_64",
+            QT_ARCH: win64_msvc2019_64,
+            build_type: "Release",
+            archiver: "7z a",
+            CMAKE_GENERATOR: Ninja,
+            CMAKE_CUSTOM_OPTIONS: "-DCMAKE_BUILD_TYPE=Release \
+                                  -DARCH_OPT=nehalem \
+                                  -DDEBUG_OUTPUT=ON \
+                                  -DENABLE_EXTERNAL_LIBRARIES=ON \
+                                  -DBUILD_SERVER=OFF"
+          }
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: Print env
+        run: |
+          echo github.event.action: ${{ github.event.action }}
+          echo github.event_name: ${{ github.event_name }}
+          echo github.ref: ${{ github.ref }}
+      - name: Install basic dependencies on Windows
+        if: startsWith(matrix.config.os, 'windows')
+        run: |
+          choco install ninja cmake
+          ninja --version
+          cmake --version
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2.14.0
+        with:
+        dir: ${{matrix.config.QT_INST_DIR}}
+        arch: ${{matrix.config.QT_ARCH}}
+        version: ${{env.QT_VERSION}}
+      - name: build sdrangel on Windows
+        if: startsWith(matrix.config.os, 'windows')
+        run: |
+          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          choco install patch
+          mkdir build && cd build
+          cmake .. -G "{{ matrix.config.CMAKE_GENERATOR }}" {{ matrix.config.CMAKE_CUSTOM_OPTIONS }}
+          cmake --build . --config ${{ matrix.config.Release }} --target package
