@@ -19,14 +19,11 @@ jobs:
             QT_INST_DIR: "C:/",
             QTDIR: "C:/Qt/5.15.2/msvc2019_64",
             QT_ARCH: win64_msvc2019_64,
+            boost_dl: "${{ github.workspace }}\\downloads\\boost",
+            lib_dir: "C:\\Libraries",
             build_type: "Release",
             archiver: "7z a",
-            CMAKE_GENERATOR: Ninja,
-            CMAKE_CUSTOM_OPTIONS: "-DCMAKE_BUILD_TYPE=Release \
-                                  -DARCH_OPT=nehalem \
-                                  -DDEBUG_OUTPUT=ON \
-                                  -DENABLE_EXTERNAL_LIBRARIES=ON \
-                                  -DBUILD_SERVER=OFF"
+            generators: Ninja
           }
     steps:
       - uses: actions/checkout@v2
@@ -43,17 +40,39 @@ jobs:
           choco install ninja cmake
           ninja --version
           cmake --version
+      - name: Install MSVC on Windows
+        if: startsWith(matrix.config.os, 'windows')
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - name: Install Boost
+        env:
+          BOOST_ROOT: ${{ matrix.config.boost_dl }}
+          BOOST_DEST: ${{ matrix.config.lib_dir }}
+          BOOST_URL: https://sourceforge.net/projects/boost/files/boost/1.73.0/boost_1_73_0.tar.bz2/download
+        run: |
+          mkdir -p $BOOST_ROOT
+          mkdir -p $BOOST_DEST
+          curl --progress-bar --location --output $BOOST_ROOT/download.tar.bz2 $BOOST_URL
+          7z -o$BOOST_ROOT x $BOOST_ROOT/download.tar.bz2 -y -bd
+          7z -o$BOOST_ROOT x $BOOST_ROOT/download.tar -y -bd
+          cd $BOOST_ROOT && cp -r boost_* $BOOST_DEST
+          ls -l $BOOST_DEST
+          ls -l "C:\\"
+          rm -rf boost_*/* download.tar.bz2 download.tar
+        shell: bash
       - name: Install Qt
         uses: jurplel/install-qt-action@v2.14.0
         with:
-        dir: ${{matrix.config.QT_INST_DIR}}
-        arch: ${{matrix.config.QT_ARCH}}
-        version: ${{env.QT_VERSION}}
+          dir: ${{matrix.config.QT_INST_DIR}}
+          arch: ${{matrix.config.QT_ARCH}}
+          setup-python: false
+          modules: 'qtcharts'
       - name: build sdrangel on Windows
         if: startsWith(matrix.config.os, 'windows')
         run: |
-          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          cmd "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
           choco install patch
           mkdir build && cd build
-          cmake .. -G "{{ matrix.config.CMAKE_GENERATOR }}" {{ matrix.config.CMAKE_CUSTOM_OPTIONS }}
-          cmake --build . --config ${{ matrix.config.Release }} --target package
+          cmake .. -G "${{ matrix.config.generators }}" -DCMAKE_BUILD_TYPE=Release -DARCH_OPT=SSE4_2 -DDEBUG_OUTPUT=ON -DENABLE_MIRISDR=OFF -DBUILD_SERVER=OFF -DCMAKE_PREFIX_PATH="C:\Qt\5.15.2\msvc2019_64;C:\Libraries\boost_1_73_0"
+          cmake --build . --config Release --target package
