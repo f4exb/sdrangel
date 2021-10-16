@@ -28,7 +28,10 @@
 FeaturePresetsDialog::FeaturePresetsDialog(QWidget* parent) :
     QDialog(parent),
     ui(new Ui::FeaturePresetsDialog),
-    m_featureSetPresets(nullptr)
+    m_featureSetPresets(nullptr),
+    m_featureUISet(nullptr),
+    m_pluginAPI(nullptr),
+    m_apiAdapter(nullptr)
 {
     ui->setupUi(this);
 }

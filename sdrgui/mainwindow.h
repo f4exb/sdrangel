@@ -190,6 +190,7 @@ private slots:
 	void on_action_removeLastFeatureSet_triggered();
 	void tabInputViewIndexChanged();
     void tabChannelsIndexChanged();
+	void tabFeaturesIndexChanged();
 	void commandKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifiers, bool release);
 };
 

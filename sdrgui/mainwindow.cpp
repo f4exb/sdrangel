@@ -230,6 +230,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     connect(ui->tabChannels, SIGNAL(currentChanged(int)), this, SLOT(tabChannelsIndexChanged()));
     connect(ui->channelDock, SIGNAL(addChannel(int)), this, SLOT(channelAddClicked(int)));
     connect(ui->inputViewDock, SIGNAL(deviceChanged(int, int, int)), this, SLOT(samplingDeviceChanged(int, int, int)));
+    connect(ui->tabFeatures, SIGNAL(currentChanged(int)), this, SLOT(tabFeaturesIndexChanged()));
     connect(ui->featureDock, SIGNAL(addFeature(int)), this, SLOT(featureAddClicked(int)));
 
 	QString applicationDirPath = qApp->applicationDirPath();
@@ -2285,6 +2286,12 @@ void MainWindow::tabChannelsIndexChanged()
             ui->channelDock->addAvailableChannels(channelNames);
         }
     }
+}
+
+void MainWindow::tabFeaturesIndexChanged()
+{
+    int featuresTabIndex = ui->tabFeatures->currentIndex();
+    ui->featureDock->setFeatureUISet(m_featureUIs[featuresTabIndex]);
 }
 
 void MainWindow::updateStatus()
