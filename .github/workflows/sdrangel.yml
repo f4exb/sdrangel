@@ -5,49 +5,6 @@ name: SDRangel CI/CD
 on: [push]
 
 jobs:
-  test:
-    if: false
-    name: ${{ matrix.config.name }}-Test
-    runs-on: ${{ matrix.config.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        config:
-        - {
-            name: "Windows-x64",
-            WIN_ARCH: "x64",
-            os: windows-latest,
-            QT_INST_DIR: "C:/",
-            QTDIR: "C:/Qt/5.15.2/msvc2019_64",
-            QT_ARCH: win64_msvc2019_64,
-            boost_dl: "${{ github.workspace }}\\downloads\\boost",
-            lib_dir: "C:\\Libraries",
-            build_type: "Release",
-            archiver: "7z a",
-            generators: Ninja
-          }
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: true
-          fetch-depth: 0
-      - name: Print env
-        run: |
-          echo github.event.action: ${{ github.event.action }}
-          echo github.event_name: ${{ github.event_name }}
-          echo github.ref: ${{ github.ref }}
-          echo github.workspace: ${{ github.workspace }}
-      - name: Get version
-        id: get_version
-        run: echo "::set-output name=version::$(git describe --tags | cut -c2-)"
-      - name: Create dummy artifact
-        run: echo "test" > ${{ github.workspace }}/test-${{ steps.get_version.outputs.version }}.txt
-      - name: Upload artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: test-${{ steps.get_version.outputs.version }}.txt
-          path: ${{ github.workspace }}/test-${{ steps.get_version.outputs.version }}.txt
-
   build:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
