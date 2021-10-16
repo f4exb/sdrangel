@@ -1,3 +1,11 @@
+sdrangel (6.17.1-1) unstable; urgency=medium
+
+  * MainWindow: Change Feature UI set when feature tab changes. Fixes #1012
+  * Metis MISO: set absolute maximum frequency to 500 MHz. Fixes #1014
+  * Moved CI/CD MSVC build to Github Actions
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 16 Oct 2021 21:25:21s +0200
+
 sdrangel (6.17.0-1) unstable; urgency=medium
 
   * New Radioastronomy plugin. PR #1011. Implements #191.

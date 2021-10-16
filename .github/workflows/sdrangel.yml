@@ -2,7 +2,7 @@
 # https://gist.github.com/NickNaso/0d478f1481686d5bcc868cac06620a60
 name: SDRangel CI/CD
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -21,8 +21,6 @@ jobs:
             QT_ARCH: win64_msvc2019_64,
             boost_dl: "${{ github.workspace }}\\downloads\\boost",
             lib_dir: "C:\\Libraries",
-            build_type: "Release",
-            archiver: "7z a",
             generators: Ninja
           }
     steps:
