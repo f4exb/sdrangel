@@ -60,7 +60,7 @@ MetisMISOGui::MetisMISOGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
     ui->setupUi(this);
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-    ui->centerFrequency->setValueRange(7, 0, 61440000);
+    ui->centerFrequency->setValueRange(7, 0, m_absMaxFreq);
 
     displaySettings();
 
@@ -483,19 +483,19 @@ void MetisMISOGui::displayFrequency()
     {
         int subsamplingIndex = m_settings.m_rxSubsamplingIndexes[m_streamIndex];
         centerFrequency = m_settings.m_rxCenterFrequencies[m_streamIndex];
-        fBaseLow = subsamplingIndex*61440;
-        fBaseHigh = (subsamplingIndex+1)*61440;
+        fBaseLow = subsamplingIndex*m_absMaxFreq;
+        fBaseHigh = (subsamplingIndex+1)*m_absMaxFreq;
     }
     else if (m_streamIndex == MetisMISOSettings::m_maxReceivers)
     {
         centerFrequency = m_settings.m_txCenterFrequency;
         fBaseLow = 0;
-        fBaseHigh = 61440;
+        fBaseHigh = m_absMaxFreq;
     }
     else
     {
         fBaseLow = 0;
-        fBaseHigh = 61440;
+        fBaseHigh = m_absMaxFreq;
         centerFrequency = 0;
     }
 
