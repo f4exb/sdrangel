@@ -498,7 +498,22 @@ void DATVMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respo
 void DATVMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
     response.getDatvModReport()->setChannelPowerDb(CalcDb::dbPower(getMagSq()));
-    response.getDatvModReport()->setChannelSampleRate(m_basebandSource->getChannelSampleRate());
+    int tsBitrate = 0, tsSize = 0, channelSampleRate = 0, dataRate = 0;
+    int64_t udpBytes = 0;
+
+    if (m_basebandSource)
+    {
+        channelSampleRate = m_basebandSource->getChannelSampleRate();
+        m_basebandSource->geTsFileInfos(tsBitrate, tsSize);
+        udpBytes = m_basebandSource->getUdpByteCount();
+        dataRate = m_basebandSource->getDataRate();
+    }
+
+    response.getDatvModReport()->setChannelSampleRate(channelSampleRate);
+    response.getDatvModReport()->setDataRate(dataRate);
+    response.getDatvModReport()->setTsFileBitrate(tsBitrate);
+    response.getDatvModReport()->setTsFileLength(tsSize);
+    response.getDatvModReport()->setUdpByteCount(udpBytes);
 }
 
 void DATVMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const DATVModSettings& settings, bool force)

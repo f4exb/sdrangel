@@ -63,6 +63,12 @@ public:
         peakLevel = m_peakLevelOut;
         numSamples = m_levelNbSamples;
     }
+    void geTsFileInfos(int& mpegTSBitrate, int& mpegTSSize) const {
+        mpegTSBitrate = m_mpegTSBitrate;
+        mpegTSSize = (int) m_mpegTSSize;
+    }
+    int64_t getUdpByteCount() const { return m_udpAbsByteCount; }
+    int getDataRate() const { return getDVBSDataBitrate(m_settings); }
 
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
     void applySettings(const DATVModSettings& settings, bool force = false);
@@ -96,6 +102,7 @@ private:
 
     QUdpSocket *m_udpSocket;                                    //!< UDP socket to receive MPEG transport stream via
     int m_udpByteCount;                                         //!< Count of bytes received via UDP for bitrate calculation
+    int64_t m_udpAbsByteCount;                                  //!< Count of bytes received via UDP since the begining
     boost::chrono::steady_clock::time_point m_udpTimingStart;   //!< When we last started counting UDP bytes
     uint8_t m_udpBuffer[188*10];
     int m_udpBufferIdx;                                         //!< TS frame index into buffer
@@ -131,7 +138,7 @@ private:
     void modulateSample();
 
     int getTSBitrate(const QString& filename);
-    int getDVBSDataBitrate(const DATVModSettings& settings);
+    int getDVBSDataBitrate(const DATVModSettings& settings) const;
     void checkBitrates();
     void updateUDPBufferUtilization();
 

@@ -47,6 +47,18 @@ public:
     qint32 getChannelSampleRate();
     void setChannelSampleRate(qint32 channel_sample_rate);
 
+    qint32 getDataRate();
+    void setDataRate(qint32 data_rate);
+
+    qint32 getTsFileBitrate();
+    void setTsFileBitrate(qint32 ts_file_bitrate);
+
+    qint32 getTsFileLength();
+    void setTsFileLength(qint32 ts_file_length);
+
+    qint64 getUdpByteCount();
+    void setUdpByteCount(qint64 udp_byte_count);
+
 
     virtual bool isSet() override;
 
@@ -56,6 +68,18 @@ private:
 
     qint32 channel_sample_rate;
     bool m_channel_sample_rate_isSet;
+
+    qint32 data_rate;
+    bool m_data_rate_isSet;
+
+    qint32 ts_file_bitrate;
+    bool m_ts_file_bitrate_isSet;
+
+    qint32 ts_file_length;
+    bool m_ts_file_length_isSet;
+
+    qint64 udp_byte_count;
+    bool m_udp_byte_count_isSet;
 
 };
 

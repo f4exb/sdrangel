@@ -68,3 +68,12 @@ DATVModReport:
       format: float
     channelSampleRate:
       type: integer
+    dataRate:
+      type: integer
+    tsFileBitrate:
+      type: integer
+    tsFileLength:
+      type: integer
+    udpByteCount:
+      type: integer
+      format: int64

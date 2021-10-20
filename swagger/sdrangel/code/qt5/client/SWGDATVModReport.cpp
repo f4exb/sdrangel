@@ -32,6 +32,14 @@ SWGDATVModReport::SWGDATVModReport() {
     m_channel_power_db_isSet = false;
     channel_sample_rate = 0;
     m_channel_sample_rate_isSet = false;
+    data_rate = 0;
+    m_data_rate_isSet = false;
+    ts_file_bitrate = 0;
+    m_ts_file_bitrate_isSet = false;
+    ts_file_length = 0;
+    m_ts_file_length_isSet = false;
+    udp_byte_count = 0L;
+    m_udp_byte_count_isSet = false;
 }
 
 SWGDATVModReport::~SWGDATVModReport() {
@@ -44,10 +52,22 @@ SWGDATVModReport::init() {
     m_channel_power_db_isSet = false;
     channel_sample_rate = 0;
     m_channel_sample_rate_isSet = false;
+    data_rate = 0;
+    m_data_rate_isSet = false;
+    ts_file_bitrate = 0;
+    m_ts_file_bitrate_isSet = false;
+    ts_file_length = 0;
+    m_ts_file_length_isSet = false;
+    udp_byte_count = 0L;
+    m_udp_byte_count_isSet = false;
 }
 
 void
 SWGDATVModReport::cleanup() {
+
+
+
+
 
 
 }
@@ -66,6 +86,14 @@ SWGDATVModReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&channel_power_db, pJson["channelPowerDB"], "float", "");
     
     ::SWGSDRangel::setValue(&channel_sample_rate, pJson["channelSampleRate"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&data_rate, pJson["dataRate"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&ts_file_bitrate, pJson["tsFileBitrate"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&ts_file_length, pJson["tsFileLength"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&udp_byte_count, pJson["udpByteCount"], "qint64", "");
     
 }
 
@@ -88,6 +116,18 @@ SWGDATVModReport::asJsonObject() {
     }
     if(m_channel_sample_rate_isSet){
         obj->insert("channelSampleRate", QJsonValue(channel_sample_rate));
+    }
+    if(m_data_rate_isSet){
+        obj->insert("dataRate", QJsonValue(data_rate));
+    }
+    if(m_ts_file_bitrate_isSet){
+        obj->insert("tsFileBitrate", QJsonValue(ts_file_bitrate));
+    }
+    if(m_ts_file_length_isSet){
+        obj->insert("tsFileLength", QJsonValue(ts_file_length));
+    }
+    if(m_udp_byte_count_isSet){
+        obj->insert("udpByteCount", QJsonValue(udp_byte_count));
     }
 
     return obj;
@@ -113,6 +153,46 @@ SWGDATVModReport::setChannelSampleRate(qint32 channel_sample_rate) {
     this->m_channel_sample_rate_isSet = true;
 }
 
+qint32
+SWGDATVModReport::getDataRate() {
+    return data_rate;
+}
+void
+SWGDATVModReport::setDataRate(qint32 data_rate) {
+    this->data_rate = data_rate;
+    this->m_data_rate_isSet = true;
+}
+
+qint32
+SWGDATVModReport::getTsFileBitrate() {
+    return ts_file_bitrate;
+}
+void
+SWGDATVModReport::setTsFileBitrate(qint32 ts_file_bitrate) {
+    this->ts_file_bitrate = ts_file_bitrate;
+    this->m_ts_file_bitrate_isSet = true;
+}
+
+qint32
+SWGDATVModReport::getTsFileLength() {
+    return ts_file_length;
+}
+void
+SWGDATVModReport::setTsFileLength(qint32 ts_file_length) {
+    this->ts_file_length = ts_file_length;
+    this->m_ts_file_length_isSet = true;
+}
+
+qint64
+SWGDATVModReport::getUdpByteCount() {
+    return udp_byte_count;
+}
+void
+SWGDATVModReport::setUdpByteCount(qint64 udp_byte_count) {
+    this->udp_byte_count = udp_byte_count;
+    this->m_udp_byte_count_isSet = true;
+}
+
 
 bool
 SWGDATVModReport::isSet(){
@@ -122,6 +202,18 @@ SWGDATVModReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_channel_sample_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_data_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_ts_file_bitrate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_ts_file_length_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_udp_byte_count_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>463</width>
+    <width>543</width>
     <height>235</height>
    </rect>
   </property>
@@ -39,7 +39,7 @@
     <rect>
      <x>0</x>
      <y>10</y>
-     <width>451</width>
+     <width>541</width>
      <height>221</height>
     </rect>
    </property>
@@ -364,13 +364,6 @@
        </widget>
       </item>
       <item>
-       <widget class="Line" name="line_4">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QLabel" name="fecLabel">
         <property name="text">
          <string>FEC</string>
@@ -379,6 +372,12 @@
       </item>
       <item>
        <widget class="QComboBox" name="fec">
+        <property name="minimumSize">
+         <size>
+          <width>60</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>Forward error correction code rate</string>
         </property>
@@ -410,14 +409,13 @@
        </widget>
       </item>
       <item>
-       <widget class="Line" name="line_13">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QLabel" name="modulationLabel">
+        <property name="minimumSize">
+         <size>
+          <width>70</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="text">
          <string>Modulation</string>
         </property>
@@ -425,6 +423,12 @@
       </item>
       <item>
        <widget class="QComboBox" name="modulation">
+        <property name="minimumSize">
+         <size>
+          <width>70</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>Modulation type</string>
         </property>
@@ -441,14 +445,13 @@
        </widget>
       </item>
       <item>
-       <widget class="Line" name="line_14">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QLabel" name="rollOffLabel">
+        <property name="minimumSize">
+         <size>
+          <width>45</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="text">
          <string>Roll off</string>
         </property>
@@ -458,7 +461,7 @@
        <widget class="QComboBox" name="rollOff">
         <property name="minimumSize">
          <size>
-          <width>50</width>
+          <width>60</width>
           <height>0</height>
          </size>
         </property>

@@ -45,8 +45,10 @@ public:
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_source.setMessageQueueToGUI(messageQueue); }
     double getMagSq() const { return m_source.getMagSq(); }
+    void geTsFileInfos(int& mpegTSBitrate, int& mpegTSSize) const { m_source.geTsFileInfos(mpegTSBitrate, mpegTSSize); }
+    int64_t getUdpByteCount() const { return m_source.getUdpByteCount(); }
+    int getDataRate() const { return m_source.getDataRate(); }
     int getChannelSampleRate() const;
-
     int getEffectiveSampleRate() const { return m_source.getEffectiveSampleRate(); }
 
 signals:

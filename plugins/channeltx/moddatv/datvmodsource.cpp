@@ -77,7 +77,7 @@ int DATVModSource::getTSBitrate(const QString& filename)
 }
 
 // Get data bitrate (i.e. excluding FEC overhead)
-int DATVModSource::getDVBSDataBitrate(const DATVModSettings& settings)
+int DATVModSource::getDVBSDataBitrate(const DATVModSettings& settings) const
 {
     float fecFactor;
     float plFactor;
@@ -216,6 +216,8 @@ void DATVModSource::checkBitrates()
 }
 
 DATVModSource::DATVModSource() :
+    m_mpegTSBitrate(0),
+    m_mpegTSSize(0),
     m_sampleIdx(0),
     m_frameIdx(0),
     m_frameCount(0),
@@ -226,6 +228,7 @@ DATVModSource::DATVModSource() :
     m_samplesPerSymbol(1),
     m_udpSocket(nullptr),
     m_udpByteCount(0),
+    m_udpAbsByteCount(0),
     m_udpBufferIdx(0),
     m_udpBufferCount(0),
     m_udpMaxBufferUtilization(0),
@@ -372,6 +375,7 @@ void DATVModSource::modulateSample()
                 }
 
                 m_udpByteCount += ba.size();
+                m_udpAbsByteCount += ba.size();
             }
             else
             {
@@ -579,10 +583,12 @@ void DATVModSource::reportUDPBitrate()
     boost::chrono::duration<double> sec = boost::chrono::steady_clock::now() - m_udpTimingStart;
     double seconds = sec.count();
     int bitrate = seconds > 0.0 ? m_udpByteCount * 8 / seconds : 0;
-    if (getMessageQueueToGUI())
-        getMessageQueueToGUI()->push(DATVModReport::MsgReportUDPBitrate::create(bitrate));
     m_udpTimingStart = boost::chrono::steady_clock::now();
     m_udpByteCount = 0;
+
+    if (getMessageQueueToGUI()) {
+        getMessageQueueToGUI()->push(DATVModReport::MsgReportUDPBitrate::create(bitrate));
+    }
 }
 
 void DATVModSource::updateUDPBufferUtilization()
@@ -602,8 +608,13 @@ void DATVModSource::reportUDPBufferUtilization()
 {
     // Report maximum utilization since last call
     updateUDPBufferUtilization();
+
     if (getMessageQueueToGUI())
-        getMessageQueueToGUI()->push(DATVModReport::MsgReportUDPBufferUtilization::create(m_udpMaxBufferUtilization / (float)DATVModSettings::m_udpBufferSize * 100.0));
+    {
+        getMessageQueueToGUI()->push(DATVModReport::MsgReportUDPBufferUtilization::create(
+            m_udpMaxBufferUtilization / (float)DATVModSettings::m_udpBufferSize * 100.0));
+    }
+
     m_udpMaxBufferUtilization = 0;
 }
 
@@ -635,8 +646,9 @@ void DATVModSource::applyChannelSettings(int channelSampleRate, int channelFrequ
             if (getMessageQueueToGUI())
             {
                 getMessageQueueToGUI()->push(DATVModReport::MsgReportRates::create(
-                                                    channelSampleRate, m_sampleRate,
-                                                    getDVBSDataBitrate(m_settings)));
+                    channelSampleRate,
+                    m_sampleRate,
+                    getDVBSDataBitrate(m_settings)));
             }
         }
     }
@@ -713,6 +725,7 @@ void DATVModSource::applySettings(const DATVModSettings& settings, bool force)
             m_udpSocket->setSocketOption(QAbstractSocket::ReceiveBufferSizeSocketOption, DATVModSettings::m_udpBufferSize);
             m_udpTimingStart = boost::chrono::steady_clock::now();
             m_udpByteCount = 0;
+            m_udpAbsByteCount = 0;
         }
     }
 
