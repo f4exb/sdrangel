@@ -201,3 +201,13 @@ StarTrackerDisplayLoSSettings:
       descrption: "Distance to object from Sun in kpc"
       type: number
       format: float
+
+StarTrackerActions:
+  description: "Star Tracker actions"
+  properties:
+    run:
+      type: integer
+      description: >
+        Set the plugin running state
+          * 0 - idle
+          * 1 - run

@@ -106,6 +106,11 @@ public:
             SWGSDRangel::SWGFeatureSettings& response,
             QString& errorMessage);
 
+    virtual int webapiActionsPost(
+            const QStringList& featureActionsKeys,
+            SWGSDRangel::SWGFeatureActions& query,
+            QString& errorMessage);
+
     static void webapiFormatFeatureSettings(
         SWGSDRangel::SWGFeatureSettings& response,
         const RigCtlServerSettings& settings);

@@ -130,6 +130,11 @@ public:
             SWGSDRangel::SWGFeatureReport& response,
             QString& errorMessage);
 
+    virtual int webapiActionsPost(
+            const QStringList& featureActionsKeys,
+            SWGSDRangel::SWGFeatureActions& query,
+            QString& errorMessage);
+
     static void webapiFormatFeatureSettings(
         SWGSDRangel::SWGFeatureSettings& response,
         const GS232ControllerSettings& settings);

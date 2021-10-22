@@ -449,6 +449,35 @@ int VORLocalizer::webapiSettingsPutPatch(
     return 200;
 }
 
+int VORLocalizer::webapiActionsPost(
+    const QStringList& featureActionsKeys,
+    SWGSDRangel::SWGFeatureActions& query,
+    QString& errorMessage)
+{
+    SWGSDRangel::SWGVORLocalizerActions *swgVORLocalizerActions = query.getVorLocalizerActions();
+
+    if (swgVORLocalizerActions)
+    {
+        if (featureActionsKeys.contains("run"))
+        {
+            bool featureRun = swgVORLocalizerActions->getRun() != 0;
+            MsgStartStop *msg = MsgStartStop::create(featureRun);
+            getInputMessageQueue()->push(msg);
+            return 202;
+        }
+        else
+        {
+            errorMessage = "Unknown action";
+            return 400;
+        }
+    }
+    else
+    {
+        errorMessage = "Missing VORLocalizerActions in query";
+        return 400;
+    }
+}
+
 void VORLocalizer::webapiFormatFeatureSettings(
     SWGSDRangel::SWGFeatureSettings& response,
     const VORLocalizerSettings& settings)

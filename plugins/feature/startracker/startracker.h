@@ -128,6 +128,11 @@ public:
             SWGSDRangel::SWGFeatureSettings& response,
             QString& errorMessage) override;
 
+    virtual int webapiActionsPost(
+            const QStringList& featureActionsKeys,
+            SWGSDRangel::SWGFeatureActions& query,
+            QString& errorMessage);
+
     static void webapiFormatFeatureSettings(
         SWGSDRangel::SWGFeatureSettings& response,
         const StarTrackerSettings& settings);

@@ -41,6 +41,9 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGSimplePTTActions* fromJson(QString &jsonString) override;
 
+    qint32 getRun();
+    void setRun(qint32 run);
+
     qint32 getPtt();
     void setPtt(qint32 ptt);
 
@@ -48,6 +51,9 @@ public:
     virtual bool isSet() override;
 
 private:
+    qint32 run;
+    bool m_run_isSet;
+
     qint32 ptt;
     bool m_ptt_isSet;
 

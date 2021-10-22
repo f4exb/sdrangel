@@ -28,6 +28,8 @@ SWGAFCActions::SWGAFCActions(QString* json) {
 }
 
 SWGAFCActions::SWGAFCActions() {
+    run = 0;
+    m_run_isSet = false;
     device_track = 0;
     m_device_track_isSet = false;
     devices_apply = 0;
@@ -40,6 +42,8 @@ SWGAFCActions::~SWGAFCActions() {
 
 void
 SWGAFCActions::init() {
+    run = 0;
+    m_run_isSet = false;
     device_track = 0;
     m_device_track_isSet = false;
     devices_apply = 0;
@@ -48,6 +52,7 @@ SWGAFCActions::init() {
 
 void
 SWGAFCActions::cleanup() {
+
 
 
 }
@@ -63,6 +68,8 @@ SWGAFCActions::fromJson(QString &json) {
 
 void
 SWGAFCActions::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&run, pJson["run"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&device_track, pJson["deviceTrack"], "qint32", "");
     
     ::SWGSDRangel::setValue(&devices_apply, pJson["devicesApply"], "qint32", "");
@@ -83,6 +90,9 @@ SWGAFCActions::asJson ()
 QJsonObject*
 SWGAFCActions::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(m_run_isSet){
+        obj->insert("run", QJsonValue(run));
+    }
     if(m_device_track_isSet){
         obj->insert("deviceTrack", QJsonValue(device_track));
     }
@@ -91,6 +101,16 @@ SWGAFCActions::asJsonObject() {
     }
 
     return obj;
+}
+
+qint32
+SWGAFCActions::getRun() {
+    return run;
+}
+void
+SWGAFCActions::setRun(qint32 run) {
+    this->run = run;
+    this->m_run_isSet = true;
 }
 
 qint32
@@ -118,6 +138,9 @@ bool
 SWGAFCActions::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(m_run_isSet){
+            isObjectUpdated = true; break;
+        }
         if(m_device_track_isSet){
             isObjectUpdated = true; break;
         }

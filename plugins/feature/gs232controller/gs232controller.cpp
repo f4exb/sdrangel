@@ -390,6 +390,37 @@ int GS232Controller::webapiReportGet(
     return 200;
 }
 
+int GS232Controller::webapiActionsPost(
+    const QStringList& featureActionsKeys,
+    SWGSDRangel::SWGFeatureActions& query,
+    QString& errorMessage)
+{
+    SWGSDRangel::SWGGS232ControllerActions *swgGS232ControllerActions = query.getGs232ControllerActions();
+
+    if (swgGS232ControllerActions)
+    {
+        if (featureActionsKeys.contains("run"))
+        {
+            bool featureRun = swgGS232ControllerActions->getRun() != 0;
+
+            MsgStartStop *msg = MsgStartStop::create(featureRun);
+            getInputMessageQueue()->push(msg);
+
+            return 202;
+        }
+        else
+        {
+            errorMessage = "Unknown action";
+            return 400;
+        }
+    }
+    else
+    {
+        errorMessage = "Missing GS232ControllerActions in query";
+        return 400;
+    }
+}
+
 void GS232Controller::webapiFormatFeatureSettings(
     SWGSDRangel::SWGFeatureSettings& response,
     const GS232ControllerSettings& settings)

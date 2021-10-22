@@ -370,6 +370,35 @@ int SatelliteTracker::webapiSettingsPutPatch(
     return 200;
 }
 
+int SatelliteTracker::webapiActionsPost(
+    const QStringList& featureActionsKeys,
+    SWGSDRangel::SWGFeatureActions& query,
+    QString& errorMessage)
+{
+    SWGSDRangel::SWGSatelliteTrackerActions *swgSatelliteTrackerActions = query.getSatelliteTrackerActions();
+
+    if (swgSatelliteTrackerActions)
+    {
+        if (featureActionsKeys.contains("run"))
+        {
+            bool featureRun = swgSatelliteTrackerActions->getRun() != 0;
+            MsgStartStop *msg = MsgStartStop::create(featureRun);
+            getInputMessageQueue()->push(msg);
+            return 202;
+        }
+        else
+        {
+            errorMessage = "Unknown action";
+            return 400;
+        }
+    }
+    else
+    {
+        errorMessage = "Missing SWGSatelliteTrackerActions in query";
+        return 400;
+    }
+}
+
 static QList<QString *> *convertStringListToPtrs(QStringList listIn)
 {
     QList<QString *> *listOut = new QList<QString *>();

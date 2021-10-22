@@ -23,9 +23,14 @@
 
 
 #include "SWGAFCActions.h"
+#include "SWGGS232ControllerActions.h"
 #include "SWGMapActions.h"
 #include "SWGPERTesterActions.h"
+#include "SWGRigCtlServerActions.h"
+#include "SWGSatelliteTrackerActions.h"
 #include "SWGSimplePTTActions.h"
+#include "SWGStarTrackerActions.h"
+#include "SWGVORLocalizerActions.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -58,14 +63,29 @@ public:
     SWGAFCActions* getAfcActions();
     void setAfcActions(SWGAFCActions* afc_actions);
 
+    SWGGS232ControllerActions* getGs232ControllerActions();
+    void setGs232ControllerActions(SWGGS232ControllerActions* gs232_controller_actions);
+
     SWGMapActions* getMapActions();
     void setMapActions(SWGMapActions* map_actions);
 
     SWGPERTesterActions* getPerTesterActions();
     void setPerTesterActions(SWGPERTesterActions* per_tester_actions);
 
+    SWGRigCtlServerActions* getRigCtlServerActions();
+    void setRigCtlServerActions(SWGRigCtlServerActions* rig_ctl_server_actions);
+
+    SWGSatelliteTrackerActions* getSatelliteTrackerActions();
+    void setSatelliteTrackerActions(SWGSatelliteTrackerActions* satellite_tracker_actions);
+
     SWGSimplePTTActions* getSimplePttActions();
     void setSimplePttActions(SWGSimplePTTActions* simple_ptt_actions);
+
+    SWGStarTrackerActions* getStarTrackerActions();
+    void setStarTrackerActions(SWGStarTrackerActions* star_tracker_actions);
+
+    SWGVORLocalizerActions* getVorLocalizerActions();
+    void setVorLocalizerActions(SWGVORLocalizerActions* vor_localizer_actions);
 
 
     virtual bool isSet() override;
@@ -83,14 +103,29 @@ private:
     SWGAFCActions* afc_actions;
     bool m_afc_actions_isSet;
 
+    SWGGS232ControllerActions* gs232_controller_actions;
+    bool m_gs232_controller_actions_isSet;
+
     SWGMapActions* map_actions;
     bool m_map_actions_isSet;
 
     SWGPERTesterActions* per_tester_actions;
     bool m_per_tester_actions_isSet;
 
+    SWGRigCtlServerActions* rig_ctl_server_actions;
+    bool m_rig_ctl_server_actions_isSet;
+
+    SWGSatelliteTrackerActions* satellite_tracker_actions;
+    bool m_satellite_tracker_actions_isSet;
+
     SWGSimplePTTActions* simple_ptt_actions;
     bool m_simple_ptt_actions_isSet;
+
+    SWGStarTrackerActions* star_tracker_actions;
+    bool m_star_tracker_actions_isSet;
+
+    SWGVORLocalizerActions* vor_localizer_actions;
+    bool m_vor_localizer_actions_isSet;
 
 };
 

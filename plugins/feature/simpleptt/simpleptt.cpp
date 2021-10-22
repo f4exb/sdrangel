@@ -263,11 +263,22 @@ int SimplePTT::webapiActionsPost(
 
     if (swgSimplePTTActions)
     {
+        bool unknownAction = true;
+
+        if (featureActionsKeys.contains("run"))
+        {
+            bool featureRun = swgSimplePTTActions->getRun() != 0;
+            unknownAction = false;
+            MsgStartStop *msg = MsgStartStop::create(featureRun);
+            getInputMessageQueue()->push(msg);
+        }
+
         if (featureActionsKeys.contains("ptt"))
         {
             bool ptt = swgSimplePTTActions->getPtt() != 0;
-
+            unknownAction = false;
             MsgPTT *msg = MsgPTT::create(ptt);
+
             getInputMessageQueue()->push(msg);
 
             if (getMessageQueueToGUI())
@@ -277,7 +288,15 @@ int SimplePTT::webapiActionsPost(
             }
         }
 
-        return 202;
+        if (unknownAction)
+        {
+            errorMessage = "Unknown action";
+            return 400;
+        }
+        else
+        {
+            return 202;
+        }
     }
     else
     {

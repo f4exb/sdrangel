@@ -779,6 +779,10 @@ margin-bottom: 20px;
 };
             defs.AFCActions = {
   "properties" : {
+    "run" : {
+      "type" : "integer",
+      "description" : "Set the plugin running state\n  * 0 - idle\n  * 1 - run\n"
+    },
     "deviceTrack" : {
       "type" : "integer",
       "description" : "(Re)initialize tracker target frequency adjustment\n  * 0 - release\n  * 1 - engage\n"
@@ -4807,14 +4811,29 @@ margin-bottom: 20px;
     "AFCActions" : {
       "$ref" : "#/definitions/AFCActions"
     },
+    "GS232ControllerActions" : {
+      "$ref" : "#/definitions/GS232ControllerActions"
+    },
     "MapActions" : {
       "$ref" : "#/definitions/MapActions"
     },
     "PERTesterActions" : {
       "$ref" : "#/definitions/PERTesterActions"
     },
+    "RigCtlServerActions" : {
+      "$ref" : "#/definitions/RigCtlServerActions"
+    },
+    "SatelliteTrackerActions" : {
+      "$ref" : "#/definitions/SatelliteTrackerActions"
+    },
     "SimplePTTActions" : {
       "$ref" : "#/definitions/SimplePTTActions"
+    },
+    "StarTrackerActions" : {
+      "$ref" : "#/definitions/StarTrackerActions"
+    },
+    "VORLocalizerActions" : {
+      "$ref" : "#/definitions/VORLocalizerActions"
     }
   },
   "description" : "Base feature actions. Only the feature actions corresponding to the feature specified in the featureType field is or should be present."
@@ -5793,6 +5812,15 @@ margin-bottom: 20px;
     }
   },
   "description" : "GLSpectrumGUI settings"
+};
+            defs.GS232ControllerActions = {
+  "properties" : {
+    "run" : {
+      "type" : "integer",
+      "description" : "Set the plugin running state\n  * 0 - idle\n  * 1 - run\n"
+    }
+  },
+  "description" : "GS-232 Controller actions"
 };
             defs.GS232ControllerReport = {
   "properties" : {
@@ -7880,6 +7908,10 @@ margin-bottom: 20px;
 };
             defs.PERTesterActions = {
   "properties" : {
+    "run" : {
+      "type" : "integer",
+      "description" : "Set the plugin running state\n  * 0 - idle\n  * 1 - run\n"
+    },
     "aos" : {
       "$ref" : "#/definitions/PERTesterActions_aos"
     }
@@ -9573,6 +9605,15 @@ margin-bottom: 20px;
   },
   "description" : "Remote channel source settings"
 };
+            defs.RigCtlServerActions = {
+  "properties" : {
+    "run" : {
+      "type" : "integer",
+      "description" : "Set the plugin running state\n  * 0 - idle\n  * 1 - run\n"
+    }
+  },
+  "description" : "RigCtl server actions"
+};
             defs.RigCtlServerSettings = {
   "properties" : {
     "enabled" : {
@@ -10240,6 +10281,15 @@ margin-bottom: 20px;
   },
   "description" : "List of device set settings for a satellite"
 };
+            defs.SatelliteTrackerActions = {
+  "properties" : {
+    "run" : {
+      "type" : "integer",
+      "description" : "Set the plugin running state\n  * 0 - idle\n  * 1 - run\n"
+    }
+  },
+  "description" : "Satellite Tracker actions"
+};
             defs.SatelliteTrackerSettings = {
   "properties" : {
     "latitude" : {
@@ -10635,6 +10685,10 @@ margin-bottom: 20px;
 };
             defs.SimplePTTActions = {
   "properties" : {
+    "run" : {
+      "type" : "integer",
+      "description" : "Set the plugin running state\n  * 0 - idle\n  * 1 - run\n"
+    },
     "ptt" : {
       "type" : "integer",
       "description" : "PTT action\n  * 0 - release\n  * 1 - engage\n"
@@ -11021,6 +11075,15 @@ margin-bottom: 20px;
       "type" : "integer"
     }
   }
+};
+            defs.StarTrackerActions = {
+  "properties" : {
+    "run" : {
+      "type" : "integer",
+      "description" : "Set the plugin running state\n  * 0 - idle\n  * 1 - run\n"
+    }
+  },
+  "description" : "Star Tracker actions"
 };
             defs.StarTrackerDisplayLoSSettings = {
   "properties" : {
@@ -12311,6 +12374,15 @@ margin-bottom: 20px;
     }
   },
   "description" : "VORDemod"
+};
+            defs.VORLocalizerActions = {
+  "properties" : {
+    "run" : {
+      "type" : "integer",
+      "description" : "Set the plugin running state\n  * 0 - idle\n  * 1 - run\n"
+    }
+  },
+  "description" : "VORLocalizer"
 };
             defs.VORLocalizerSettings = {
   "properties" : {
@@ -51018,7 +51090,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-10-19T22:10:34.002+02:00
+              Generated 2021-10-22T01:02:48.375+02:00
             </div>
           </div>
       </div>

@@ -33,3 +33,13 @@ RigCtlServerSettings:
       type: integer
     reverseAPIFeatureIndex:
       type: integer
+
+RigCtlServerActions:
+  description: RigCtl server actions
+  properties:
+    run:
+      type: integer
+      description: >
+        Set the plugin running state
+          * 0 - idle
+          * 1 - run

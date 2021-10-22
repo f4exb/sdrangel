@@ -36,12 +36,22 @@ SWGFeatureActions::SWGFeatureActions() {
     m_originator_feature_index_isSet = false;
     afc_actions = nullptr;
     m_afc_actions_isSet = false;
+    gs232_controller_actions = nullptr;
+    m_gs232_controller_actions_isSet = false;
     map_actions = nullptr;
     m_map_actions_isSet = false;
     per_tester_actions = nullptr;
     m_per_tester_actions_isSet = false;
+    rig_ctl_server_actions = nullptr;
+    m_rig_ctl_server_actions_isSet = false;
+    satellite_tracker_actions = nullptr;
+    m_satellite_tracker_actions_isSet = false;
     simple_ptt_actions = nullptr;
     m_simple_ptt_actions_isSet = false;
+    star_tracker_actions = nullptr;
+    m_star_tracker_actions_isSet = false;
+    vor_localizer_actions = nullptr;
+    m_vor_localizer_actions_isSet = false;
 }
 
 SWGFeatureActions::~SWGFeatureActions() {
@@ -58,12 +68,22 @@ SWGFeatureActions::init() {
     m_originator_feature_index_isSet = false;
     afc_actions = new SWGAFCActions();
     m_afc_actions_isSet = false;
+    gs232_controller_actions = new SWGGS232ControllerActions();
+    m_gs232_controller_actions_isSet = false;
     map_actions = new SWGMapActions();
     m_map_actions_isSet = false;
     per_tester_actions = new SWGPERTesterActions();
     m_per_tester_actions_isSet = false;
+    rig_ctl_server_actions = new SWGRigCtlServerActions();
+    m_rig_ctl_server_actions_isSet = false;
+    satellite_tracker_actions = new SWGSatelliteTrackerActions();
+    m_satellite_tracker_actions_isSet = false;
     simple_ptt_actions = new SWGSimplePTTActions();
     m_simple_ptt_actions_isSet = false;
+    star_tracker_actions = new SWGStarTrackerActions();
+    m_star_tracker_actions_isSet = false;
+    vor_localizer_actions = new SWGVORLocalizerActions();
+    m_vor_localizer_actions_isSet = false;
 }
 
 void
@@ -76,14 +96,29 @@ SWGFeatureActions::cleanup() {
     if(afc_actions != nullptr) { 
         delete afc_actions;
     }
+    if(gs232_controller_actions != nullptr) { 
+        delete gs232_controller_actions;
+    }
     if(map_actions != nullptr) { 
         delete map_actions;
     }
     if(per_tester_actions != nullptr) { 
         delete per_tester_actions;
     }
+    if(rig_ctl_server_actions != nullptr) { 
+        delete rig_ctl_server_actions;
+    }
+    if(satellite_tracker_actions != nullptr) { 
+        delete satellite_tracker_actions;
+    }
     if(simple_ptt_actions != nullptr) { 
         delete simple_ptt_actions;
+    }
+    if(star_tracker_actions != nullptr) { 
+        delete star_tracker_actions;
+    }
+    if(vor_localizer_actions != nullptr) { 
+        delete vor_localizer_actions;
     }
 }
 
@@ -106,11 +141,21 @@ SWGFeatureActions::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&afc_actions, pJson["AFCActions"], "SWGAFCActions", "SWGAFCActions");
     
+    ::SWGSDRangel::setValue(&gs232_controller_actions, pJson["GS232ControllerActions"], "SWGGS232ControllerActions", "SWGGS232ControllerActions");
+    
     ::SWGSDRangel::setValue(&map_actions, pJson["MapActions"], "SWGMapActions", "SWGMapActions");
     
     ::SWGSDRangel::setValue(&per_tester_actions, pJson["PERTesterActions"], "SWGPERTesterActions", "SWGPERTesterActions");
     
+    ::SWGSDRangel::setValue(&rig_ctl_server_actions, pJson["RigCtlServerActions"], "SWGRigCtlServerActions", "SWGRigCtlServerActions");
+    
+    ::SWGSDRangel::setValue(&satellite_tracker_actions, pJson["SatelliteTrackerActions"], "SWGSatelliteTrackerActions", "SWGSatelliteTrackerActions");
+    
     ::SWGSDRangel::setValue(&simple_ptt_actions, pJson["SimplePTTActions"], "SWGSimplePTTActions", "SWGSimplePTTActions");
+    
+    ::SWGSDRangel::setValue(&star_tracker_actions, pJson["StarTrackerActions"], "SWGStarTrackerActions", "SWGStarTrackerActions");
+    
+    ::SWGSDRangel::setValue(&vor_localizer_actions, pJson["VORLocalizerActions"], "SWGVORLocalizerActions", "SWGVORLocalizerActions");
     
 }
 
@@ -140,14 +185,29 @@ SWGFeatureActions::asJsonObject() {
     if((afc_actions != nullptr) && (afc_actions->isSet())){
         toJsonValue(QString("AFCActions"), afc_actions, obj, QString("SWGAFCActions"));
     }
+    if((gs232_controller_actions != nullptr) && (gs232_controller_actions->isSet())){
+        toJsonValue(QString("GS232ControllerActions"), gs232_controller_actions, obj, QString("SWGGS232ControllerActions"));
+    }
     if((map_actions != nullptr) && (map_actions->isSet())){
         toJsonValue(QString("MapActions"), map_actions, obj, QString("SWGMapActions"));
     }
     if((per_tester_actions != nullptr) && (per_tester_actions->isSet())){
         toJsonValue(QString("PERTesterActions"), per_tester_actions, obj, QString("SWGPERTesterActions"));
     }
+    if((rig_ctl_server_actions != nullptr) && (rig_ctl_server_actions->isSet())){
+        toJsonValue(QString("RigCtlServerActions"), rig_ctl_server_actions, obj, QString("SWGRigCtlServerActions"));
+    }
+    if((satellite_tracker_actions != nullptr) && (satellite_tracker_actions->isSet())){
+        toJsonValue(QString("SatelliteTrackerActions"), satellite_tracker_actions, obj, QString("SWGSatelliteTrackerActions"));
+    }
     if((simple_ptt_actions != nullptr) && (simple_ptt_actions->isSet())){
         toJsonValue(QString("SimplePTTActions"), simple_ptt_actions, obj, QString("SWGSimplePTTActions"));
+    }
+    if((star_tracker_actions != nullptr) && (star_tracker_actions->isSet())){
+        toJsonValue(QString("StarTrackerActions"), star_tracker_actions, obj, QString("SWGStarTrackerActions"));
+    }
+    if((vor_localizer_actions != nullptr) && (vor_localizer_actions->isSet())){
+        toJsonValue(QString("VORLocalizerActions"), vor_localizer_actions, obj, QString("SWGVORLocalizerActions"));
     }
 
     return obj;
@@ -193,6 +253,16 @@ SWGFeatureActions::setAfcActions(SWGAFCActions* afc_actions) {
     this->m_afc_actions_isSet = true;
 }
 
+SWGGS232ControllerActions*
+SWGFeatureActions::getGs232ControllerActions() {
+    return gs232_controller_actions;
+}
+void
+SWGFeatureActions::setGs232ControllerActions(SWGGS232ControllerActions* gs232_controller_actions) {
+    this->gs232_controller_actions = gs232_controller_actions;
+    this->m_gs232_controller_actions_isSet = true;
+}
+
 SWGMapActions*
 SWGFeatureActions::getMapActions() {
     return map_actions;
@@ -213,6 +283,26 @@ SWGFeatureActions::setPerTesterActions(SWGPERTesterActions* per_tester_actions) 
     this->m_per_tester_actions_isSet = true;
 }
 
+SWGRigCtlServerActions*
+SWGFeatureActions::getRigCtlServerActions() {
+    return rig_ctl_server_actions;
+}
+void
+SWGFeatureActions::setRigCtlServerActions(SWGRigCtlServerActions* rig_ctl_server_actions) {
+    this->rig_ctl_server_actions = rig_ctl_server_actions;
+    this->m_rig_ctl_server_actions_isSet = true;
+}
+
+SWGSatelliteTrackerActions*
+SWGFeatureActions::getSatelliteTrackerActions() {
+    return satellite_tracker_actions;
+}
+void
+SWGFeatureActions::setSatelliteTrackerActions(SWGSatelliteTrackerActions* satellite_tracker_actions) {
+    this->satellite_tracker_actions = satellite_tracker_actions;
+    this->m_satellite_tracker_actions_isSet = true;
+}
+
 SWGSimplePTTActions*
 SWGFeatureActions::getSimplePttActions() {
     return simple_ptt_actions;
@@ -221,6 +311,26 @@ void
 SWGFeatureActions::setSimplePttActions(SWGSimplePTTActions* simple_ptt_actions) {
     this->simple_ptt_actions = simple_ptt_actions;
     this->m_simple_ptt_actions_isSet = true;
+}
+
+SWGStarTrackerActions*
+SWGFeatureActions::getStarTrackerActions() {
+    return star_tracker_actions;
+}
+void
+SWGFeatureActions::setStarTrackerActions(SWGStarTrackerActions* star_tracker_actions) {
+    this->star_tracker_actions = star_tracker_actions;
+    this->m_star_tracker_actions_isSet = true;
+}
+
+SWGVORLocalizerActions*
+SWGFeatureActions::getVorLocalizerActions() {
+    return vor_localizer_actions;
+}
+void
+SWGFeatureActions::setVorLocalizerActions(SWGVORLocalizerActions* vor_localizer_actions) {
+    this->vor_localizer_actions = vor_localizer_actions;
+    this->m_vor_localizer_actions_isSet = true;
 }
 
 
@@ -240,13 +350,28 @@ SWGFeatureActions::isSet(){
         if(afc_actions && afc_actions->isSet()){
             isObjectUpdated = true; break;
         }
+        if(gs232_controller_actions && gs232_controller_actions->isSet()){
+            isObjectUpdated = true; break;
+        }
         if(map_actions && map_actions->isSet()){
             isObjectUpdated = true; break;
         }
         if(per_tester_actions && per_tester_actions->isSet()){
             isObjectUpdated = true; break;
         }
+        if(rig_ctl_server_actions && rig_ctl_server_actions->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(satellite_tracker_actions && satellite_tracker_actions->isSet()){
+            isObjectUpdated = true; break;
+        }
         if(simple_ptt_actions && simple_ptt_actions->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(star_tracker_actions && star_tracker_actions->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(vor_localizer_actions && vor_localizer_actions->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

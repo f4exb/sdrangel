@@ -94,3 +94,13 @@ GS232ControllerReport:
     onTarget:
       description: "Indicates whether the rotator is pointing at the current target within the set tolerance"
       type: integer
+
+GS232ControllerActions:
+  description: "GS-232 Controller actions"
+  properties:
+    run:
+      type: integer
+      description: >
+        Set the plugin running state
+          * 0 - idle
+          * 1 - run

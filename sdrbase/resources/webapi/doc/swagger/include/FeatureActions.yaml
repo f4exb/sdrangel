@@ -15,9 +15,19 @@ FeatureActions:
       type: integer
     AFCActions:
       $ref: "/doc/swagger/include/AFC.yaml#/AFCActions"
+    GS232ControllerActions:
+      $ref: "/doc/swagger/include/GS232Controller.yaml#/GS232ControllerActions"
     MapActions:
       $ref: "/doc/swagger/include/Map.yaml#/MapActions"
     PERTesterActions:
       $ref: "/doc/swagger/include/PERTester.yaml#/PERTesterActions"
+    RigCtlServerActions:
+      $ref: "/doc/swagger/include/RigCtlServer.yaml#/RigCtlServerActions"
+    SatelliteTrackerActions:
+      $ref: "/doc/swagger/include/SatelliteTracker.yaml#/SatelliteTrackerActions"
     SimplePTTActions:
       $ref: "/doc/swagger/include/SimplePTT.yaml#/SimplePTTActions"
+    StarTrackerActions:
+      $ref: "/doc/swagger/include/StarTracker.yaml#/StarTrackerActions"
+    VORLocalizerActions:
+      $ref: "/doc/swagger/include/VORLocalizer.yaml#/VORLocalizerActions"

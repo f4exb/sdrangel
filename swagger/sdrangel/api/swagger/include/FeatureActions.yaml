@@ -15,9 +15,19 @@ FeatureActions:
       type: integer
     AFCActions:
       $ref: "http://swgserver:8081/api/swagger/include/AFC.yaml#/AFCActions"
+    GS232ControllerActions:
+      $ref: "http://swgserver:8081/api/swagger/include/GS232Controller.yaml#/GS232ControllerActions"
     MapActions:
       $ref: "http://swgserver:8081/api/swagger/include/Map.yaml#/MapActions"
     PERTesterActions:
       $ref: "http://swgserver:8081/api/swagger/include/PERTester.yaml#/PERTesterActions"
+    RigCtlServerActions:
+      $ref: "http://swgserver:8081/api/swagger/include/RigCtlServer.yaml#/RigCtlServerActions"
+    SatelliteTrackerActions:
+      $ref: "http://swgserver:8081/api/swagger/include/SatelliteTracker.yaml#/SatelliteTrackerActions"
     SimplePTTActions:
       $ref: "http://swgserver:8081/api/swagger/include/SimplePTT.yaml#/SimplePTTActions"
+    StarTrackerActions:
+      $ref: "http://swgserver:8081/api/swagger/include/StarTracker.yaml#/StarTrackerActions"
+    VORLocalizerActions:
+      $ref: "http://swgserver:8081/api/swagger/include/VORLocalizer.yaml#/VORLocalizerActions"

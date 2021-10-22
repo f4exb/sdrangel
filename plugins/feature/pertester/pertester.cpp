@@ -486,10 +486,23 @@ int PERTester::webapiActionsPost(
 
     if (swgPERTesterActions)
     {
+        bool unknownAction = true;
+
+        if (featureActionsKeys.contains("run"))
+        {
+            bool featureRun = swgPERTesterActions->getRun() != 0;
+            unknownAction = false;
+            MsgStartStop *msg = MsgStartStop::create(featureRun);
+
+            getInputMessageQueue()->push(msg);
+        }
+
         if (featureActionsKeys.contains("aos"))
         {
             SWGSDRangel::SWGPERTesterActions_aos* aos = swgPERTesterActions->getAos();
+            unknownAction = false;
             QString *satelliteName = aos->getSatelliteName();
+
             if (satelliteName != nullptr)
             {
                 if (m_settings.m_satellites.contains(*satelliteName))
@@ -512,8 +525,6 @@ int PERTester::webapiActionsPost(
                         });
                     }
                 }
-
-                return 202;
             }
             else
             {
@@ -521,10 +532,15 @@ int PERTester::webapiActionsPost(
                 return 400;
             }
         }
-        else
+
+        if (unknownAction)
         {
             errorMessage = "Unknown action";
             return 400;
+        }
+        else
+        {
+            return 202;
         }
     }
     else

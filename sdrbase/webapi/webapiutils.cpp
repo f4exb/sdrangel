@@ -277,8 +277,15 @@ const QMap<QString, QString> WebAPIUtils::m_featureTypeToSettingsKey = {
 };
 
 const QMap<QString, QString> WebAPIUtils::m_featureTypeToActionsKey = {
+    {"AFC", "AFCActions"},
+    {"GS232Controller", "GS232ControllerActions"},
     {"Map", "MapActions"},
-    {"SimplePTT", "SimplePTTActions"}
+    {"PERTester", "PERTesterActions"},
+    {"RigCtlServer", "RigCtlServerActions"},
+    {"SatelliteTracker", "SatelliteTrackerActions"},
+    {"SimplePTT", "SimplePTTActions"},
+    {"StarTracker", "StarTrackerActions"},
+    {"VORLocalizer", "VORLocalizerActions"}
 };
 
 const QMap<QString, QString> WebAPIUtils::m_featureURIToSettingsKey = {

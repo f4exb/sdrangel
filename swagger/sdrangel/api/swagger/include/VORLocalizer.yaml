@@ -31,3 +31,13 @@ VORLocalizerSettings:
     centerShift:
       description: Shift of center frequency in Hz
       type: integer
+
+VORLocalizerActions:
+  description: VORLocalizer
+  properties:
+    run:
+      type: integer
+      description: >
+        Set the plugin running state
+          * 0 - idle
+          * 1 - run

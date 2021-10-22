@@ -42,6 +42,12 @@ SimplePTTReport:
 SimplePTTActions:
   description: "Simple PTT actions"
   properties:
+    run:
+      type: integer
+      description: >
+        Set the plugin running state
+          * 0 - idle
+          * 1 - run
     ptt:
       type: integer
       description: >

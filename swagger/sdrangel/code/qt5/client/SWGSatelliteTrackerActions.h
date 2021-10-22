@@ -11,13 +11,13 @@
  */
 
 /*
- * SWGAFCActions.h
+ * SWGSatelliteTrackerActions.h
  *
- * AFC actions
+ * Satellite Tracker actions
  */
 
-#ifndef SWGAFCActions_H_
-#define SWGAFCActions_H_
+#ifndef SWGSatelliteTrackerActions_H_
+#define SWGSatelliteTrackerActions_H_
 
 #include <QJsonObject>
 
@@ -28,27 +28,21 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGAFCActions: public SWGObject {
+class SWG_API SWGSatelliteTrackerActions: public SWGObject {
 public:
-    SWGAFCActions();
-    SWGAFCActions(QString* json);
-    virtual ~SWGAFCActions();
+    SWGSatelliteTrackerActions();
+    SWGSatelliteTrackerActions(QString* json);
+    virtual ~SWGSatelliteTrackerActions();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGAFCActions* fromJson(QString &jsonString) override;
+    virtual SWGSatelliteTrackerActions* fromJson(QString &jsonString) override;
 
     qint32 getRun();
     void setRun(qint32 run);
-
-    qint32 getDeviceTrack();
-    void setDeviceTrack(qint32 device_track);
-
-    qint32 getDevicesApply();
-    void setDevicesApply(qint32 devices_apply);
 
 
     virtual bool isSet() override;
@@ -57,14 +51,8 @@ private:
     qint32 run;
     bool m_run_isSet;
 
-    qint32 device_track;
-    bool m_device_track_isSet;
-
-    qint32 devices_apply;
-    bool m_devices_apply_isSet;
-
 };
 
 }
 
-#endif /* SWGAFCActions_H_ */
+#endif /* SWGSatelliteTrackerActions_H_ */

@@ -11,7 +11,7 @@
  */
 
 
-#include "SWGSimplePTTActions.h"
+#include "SWGGS232ControllerActions.h"
 
 #include "SWGHelpers.h"
 
@@ -22,38 +22,33 @@
 
 namespace SWGSDRangel {
 
-SWGSimplePTTActions::SWGSimplePTTActions(QString* json) {
+SWGGS232ControllerActions::SWGGS232ControllerActions(QString* json) {
     init();
     this->fromJson(*json);
 }
 
-SWGSimplePTTActions::SWGSimplePTTActions() {
+SWGGS232ControllerActions::SWGGS232ControllerActions() {
     run = 0;
     m_run_isSet = false;
-    ptt = 0;
-    m_ptt_isSet = false;
 }
 
-SWGSimplePTTActions::~SWGSimplePTTActions() {
+SWGGS232ControllerActions::~SWGGS232ControllerActions() {
     this->cleanup();
 }
 
 void
-SWGSimplePTTActions::init() {
+SWGGS232ControllerActions::init() {
     run = 0;
     m_run_isSet = false;
-    ptt = 0;
-    m_ptt_isSet = false;
 }
 
 void
-SWGSimplePTTActions::cleanup() {
-
+SWGGS232ControllerActions::cleanup() {
 
 }
 
-SWGSimplePTTActions*
-SWGSimplePTTActions::fromJson(QString &json) {
+SWGGS232ControllerActions*
+SWGGS232ControllerActions::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -62,15 +57,13 @@ SWGSimplePTTActions::fromJson(QString &json) {
 }
 
 void
-SWGSimplePTTActions::fromJsonObject(QJsonObject &pJson) {
+SWGGS232ControllerActions::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&run, pJson["run"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&ptt, pJson["ptt"], "qint32", "");
     
 }
 
 QString
-SWGSimplePTTActions::asJson ()
+SWGGS232ControllerActions::asJson ()
 {
     QJsonObject* obj = this->asJsonObject();
 
@@ -81,47 +74,31 @@ SWGSimplePTTActions::asJson ()
 }
 
 QJsonObject*
-SWGSimplePTTActions::asJsonObject() {
+SWGGS232ControllerActions::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(m_run_isSet){
         obj->insert("run", QJsonValue(run));
-    }
-    if(m_ptt_isSet){
-        obj->insert("ptt", QJsonValue(ptt));
     }
 
     return obj;
 }
 
 qint32
-SWGSimplePTTActions::getRun() {
+SWGGS232ControllerActions::getRun() {
     return run;
 }
 void
-SWGSimplePTTActions::setRun(qint32 run) {
+SWGGS232ControllerActions::setRun(qint32 run) {
     this->run = run;
     this->m_run_isSet = true;
 }
 
-qint32
-SWGSimplePTTActions::getPtt() {
-    return ptt;
-}
-void
-SWGSimplePTTActions::setPtt(qint32 ptt) {
-    this->ptt = ptt;
-    this->m_ptt_isSet = true;
-}
-
 
 bool
-SWGSimplePTTActions::isSet(){
+SWGGS232ControllerActions::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_run_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_ptt_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

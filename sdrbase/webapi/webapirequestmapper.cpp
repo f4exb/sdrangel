@@ -4873,16 +4873,52 @@ bool WebAPIRequestMapper::getFeatureActions(
     {
         QJsonObject actionsJsonObject = featureActionsJson[featureActionsKey].toObject();
         featureActionsKeys = actionsJsonObject.keys();
+        qDebug("WebAPIRequestMapper::getFeatureActions: %s", qPrintable(featureActionsKey));
 
-        if (featureActionsKey == "MapActions")
+        if (featureActionsKey == "AFCActions")
+        {
+            featureActions->setAfcActions(new SWGSDRangel::SWGAFCActions());
+            featureActions->getAfcActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (featureActionsKey == "GS232ControllerActions")
+        {
+            featureActions->setGs232ControllerActions(new SWGSDRangel::SWGGS232ControllerActions());
+            featureActions->getGs232ControllerActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (featureActionsKey == "MapActions")
         {
             featureActions->setMapActions(new SWGSDRangel::SWGMapActions());
             featureActions->getMapActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (featureActionsKey == "PERTesterActions")
+        {
+            featureActions->setPerTesterActions(new SWGSDRangel::SWGPERTesterActions());
+            featureActions->getPerTesterActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (featureActionsKey == "RigCtlServerActions")
+        {
+            featureActions->setRigCtlServerActions(new SWGSDRangel::SWGRigCtlServerActions());
+            featureActions->getRigCtlServerActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (featureActionsKey == "SatelliteTrackerActions")
+        {
+            featureActions->setSatelliteTrackerActions(new SWGSDRangel::SWGSatelliteTrackerActions());
+            featureActions->getSatelliteTrackerActions()->fromJsonObject(actionsJsonObject);
         }
         else if (featureActionsKey == "SimplePTTActions")
         {
             featureActions->setSimplePttActions(new SWGSDRangel::SWGSimplePTTActions());
             featureActions->getSimplePttActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (featureActionsKey == "StarTrackerActions")
+        {
+            featureActions->setStarTrackerActions(new SWGSDRangel::SWGStarTrackerActions());
+            featureActions->getStarTrackerActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (featureActionsKey == "VORLocalizerActions")
+        {
+            featureActions->setVorLocalizerActions(new SWGSDRangel::SWGVORLocalizerActions());
+            featureActions->getVorLocalizerActions()->fromJsonObject(actionsJsonObject);
         }
         else
         {

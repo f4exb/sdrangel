@@ -42,6 +42,9 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGPERTesterActions* fromJson(QString &jsonString) override;
 
+    qint32 getRun();
+    void setRun(qint32 run);
+
     SWGPERTesterActions_aos* getAos();
     void setAos(SWGPERTesterActions_aos* aos);
 
@@ -49,6 +52,9 @@ public:
     virtual bool isSet() override;
 
 private:
+    qint32 run;
+    bool m_run_isSet;
+
     SWGPERTesterActions_aos* aos;
     bool m_aos_isSet;
 

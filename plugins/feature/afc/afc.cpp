@@ -335,9 +335,21 @@ int AFC::webapiActionsPost(
 
     if (swgAFCActions)
     {
+        bool unknownAction = true;
+
+        if (featureActionsKeys.contains("run"))
+        {
+            bool featureRun = swgAFCActions->getRun() != 0;
+            unknownAction = false;
+
+            MsgStartStop *msg = MsgStartStop::create(featureRun);
+            getInputMessageQueue()->push(msg);
+        }
+
         if (featureActionsKeys.contains("deviceTrack"))
         {
             bool deviceTrack = swgAFCActions->getDeviceTrack() != 0;
+            unknownAction = false;
 
             if (deviceTrack)
             {
@@ -349,6 +361,7 @@ int AFC::webapiActionsPost(
         if (featureActionsKeys.contains("devicesApply"))
         {
             bool devicesApply = swgAFCActions->getDevicesApply() != 0;
+            unknownAction = false;
 
             if (devicesApply)
             {
@@ -357,7 +370,15 @@ int AFC::webapiActionsPost(
             }
         }
 
-        return 202;
+        if (unknownAction)
+        {
+            errorMessage = "Unknown action";
+            return 400;
+        }
+        else
+        {
+            return 202;
+        }
     }
     else
     {

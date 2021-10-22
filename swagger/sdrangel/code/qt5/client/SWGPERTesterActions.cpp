@@ -28,6 +28,8 @@ SWGPERTesterActions::SWGPERTesterActions(QString* json) {
 }
 
 SWGPERTesterActions::SWGPERTesterActions() {
+    run = 0;
+    m_run_isSet = false;
     aos = nullptr;
     m_aos_isSet = false;
 }
@@ -38,12 +40,15 @@ SWGPERTesterActions::~SWGPERTesterActions() {
 
 void
 SWGPERTesterActions::init() {
+    run = 0;
+    m_run_isSet = false;
     aos = new SWGPERTesterActions_aos();
     m_aos_isSet = false;
 }
 
 void
 SWGPERTesterActions::cleanup() {
+
     if(aos != nullptr) { 
         delete aos;
     }
@@ -60,6 +65,8 @@ SWGPERTesterActions::fromJson(QString &json) {
 
 void
 SWGPERTesterActions::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&run, pJson["run"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&aos, pJson["aos"], "SWGPERTesterActions_aos", "SWGPERTesterActions_aos");
     
 }
@@ -78,11 +85,24 @@ SWGPERTesterActions::asJson ()
 QJsonObject*
 SWGPERTesterActions::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(m_run_isSet){
+        obj->insert("run", QJsonValue(run));
+    }
     if((aos != nullptr) && (aos->isSet())){
         toJsonValue(QString("aos"), aos, obj, QString("SWGPERTesterActions_aos"));
     }
 
     return obj;
+}
+
+qint32
+SWGPERTesterActions::getRun() {
+    return run;
+}
+void
+SWGPERTesterActions::setRun(qint32 run) {
+    this->run = run;
+    this->m_run_isSet = true;
 }
 
 SWGPERTesterActions_aos*
@@ -100,6 +120,9 @@ bool
 SWGPERTesterActions::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(m_run_isSet){
+            isObjectUpdated = true; break;
+        }
         if(aos && aos->isSet()){
             isObjectUpdated = true; break;
         }

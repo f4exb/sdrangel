@@ -52,6 +52,12 @@ PERTesterSettings:
 PERTesterActions:
   description: PERTester
   properties:
+    run:
+      type: integer
+      description: >
+        Set the plugin running state
+          * 0 - idle
+          * 1 - run
     aos:
       description: "Acquisition of signal"
       type: object

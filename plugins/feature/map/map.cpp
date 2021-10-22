@@ -217,11 +217,17 @@ int Map::webapiActionsPost(
         {
             QString id = *swgMapActions->getFind();
 
-            if (getMessageQueueToGUI())
+            if (getMessageQueueToGUI()) {
                 getMessageQueueToGUI()->push(MsgFind::create(id));
-        }
+            }
 
-        return 202;
+            return 202;
+        }
+        else
+        {
+            errorMessage = "Unknown action";
+            return 400;
+        }
     }
     else
     {

@@ -257,6 +257,35 @@ int RigCtlServer::webapiSettingsPutPatch(
     return 200;
 }
 
+int RigCtlServer::webapiActionsPost(
+    const QStringList& featureActionsKeys,
+    SWGSDRangel::SWGFeatureActions& query,
+    QString& errorMessage)
+{
+    SWGSDRangel::SWGRigCtlServerActions *swgRigCtlServerActions = query.getRigCtlServerActions();
+
+    if (swgRigCtlServerActions)
+    {
+        if (featureActionsKeys.contains("run"))
+        {
+            bool featureRun = swgRigCtlServerActions->getRun() != 0;
+            MsgStartStop *msg = MsgStartStop::create(featureRun);
+            getInputMessageQueue()->push(msg);
+            return 202;
+        }
+        else
+        {
+            errorMessage = "Unknown action";
+            return 400;
+        }
+    }
+    else
+    {
+        errorMessage = "Missing RigCtlServerActions in query";
+        return 400;
+    }
+}
+
 void RigCtlServer::webapiFormatFeatureSettings(
     SWGSDRangel::SWGFeatureSettings& response,
     const RigCtlServerSettings& settings)

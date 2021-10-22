@@ -165,3 +165,13 @@ SatelliteDeviceSettings:
     losCommand:
       description: "Command to execute on LOS"
       type: string
+
+SatelliteTrackerActions:
+  description: "Satellite Tracker actions"
+  properties:
+    run:
+      type: integer
+      description: >
+        Set the plugin running state
+          * 0 - idle
+          * 1 - run

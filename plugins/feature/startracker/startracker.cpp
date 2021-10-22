@@ -392,6 +392,35 @@ int StarTracker::webapiSettingsPutPatch(
     return 200;
 }
 
+int StarTracker::webapiActionsPost(
+    const QStringList& featureActionsKeys,
+    SWGSDRangel::SWGFeatureActions& query,
+    QString& errorMessage)
+{
+    SWGSDRangel::SWGStarTrackerActions *swgSWGStarTrackerActions = query.getStarTrackerActions();
+
+    if (swgSWGStarTrackerActions)
+    {
+        if (featureActionsKeys.contains("run"))
+        {
+            bool featureRun = swgSWGStarTrackerActions->getRun() != 0;
+            MsgStartStop *msg = MsgStartStop::create(featureRun);
+            getInputMessageQueue()->push(msg);
+            return 202;
+        }
+        else
+        {
+            errorMessage = "Unknown action";
+            return 400;
+        }
+    }
+    else
+    {
+        errorMessage = "Missing StarTrackerActions in query";
+        return 400;
+    }
+}
+
 void StarTracker::webapiFormatFeatureSettings(
     SWGSDRangel::SWGFeatureSettings& response,
     const StarTrackerSettings& settings)

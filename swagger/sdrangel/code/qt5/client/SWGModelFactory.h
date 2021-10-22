@@ -133,6 +133,7 @@
 #include "SWGFrequencyRange.h"
 #include "SWGGLScope.h"
 #include "SWGGLSpectrum.h"
+#include "SWGGS232ControllerActions.h"
 #include "SWGGS232ControllerReport.h"
 #include "SWGGS232ControllerSettings.h"
 #include "SWGGain.h"
@@ -224,6 +225,7 @@
 #include "SWGRemoteSinkSettings.h"
 #include "SWGRemoteSourceReport.h"
 #include "SWGRemoteSourceSettings.h"
+#include "SWGRigCtlServerActions.h"
 #include "SWGRigCtlServerSettings.h"
 #include "SWGRtlSdrReport.h"
 #include "SWGRtlSdrSettings.h"
@@ -239,6 +241,7 @@
 #include "SWGSamplingDevice.h"
 #include "SWGSatelliteDeviceSettings.h"
 #include "SWGSatelliteDeviceSettingsList.h"
+#include "SWGSatelliteTrackerActions.h"
 #include "SWGSatelliteTrackerSettings.h"
 #include "SWGSigMFFileInputActions.h"
 #include "SWGSigMFFileInputReport.h"
@@ -256,6 +259,7 @@
 #include "SWGSoapySDRReport.h"
 #include "SWGSpectrumServer.h"
 #include "SWGSpectrumServer_clients.h"
+#include "SWGStarTrackerActions.h"
 #include "SWGStarTrackerDisplayLoSSettings.h"
 #include "SWGStarTrackerDisplayLoSSettings_2.h"
 #include "SWGStarTrackerDisplaySettings.h"
@@ -283,6 +287,7 @@
 #include "SWGVORDemodSCReport.h"
 #include "SWGVORDemodSCSettings.h"
 #include "SWGVORDemodSettings.h"
+#include "SWGVORLocalizerActions.h"
 #include "SWGVORLocalizerSettings.h"
 #include "SWGWFMDemodReport.h"
 #include "SWGWFMDemodSettings.h"
@@ -893,6 +898,11 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGGS232ControllerActions").compare(type) == 0) {
+      SWGGS232ControllerActions *obj = new SWGGS232ControllerActions();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGGS232ControllerReport").compare(type) == 0) {
       SWGGS232ControllerReport *obj = new SWGGS232ControllerReport();
       obj->init();
@@ -1348,6 +1358,11 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGRigCtlServerActions").compare(type) == 0) {
+      SWGRigCtlServerActions *obj = new SWGRigCtlServerActions();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGRigCtlServerSettings").compare(type) == 0) {
       SWGRigCtlServerSettings *obj = new SWGRigCtlServerSettings();
       obj->init();
@@ -1420,6 +1435,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGSatelliteDeviceSettingsList").compare(type) == 0) {
       SWGSatelliteDeviceSettingsList *obj = new SWGSatelliteDeviceSettingsList();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGSatelliteTrackerActions").compare(type) == 0) {
+      SWGSatelliteTrackerActions *obj = new SWGSatelliteTrackerActions();
       obj->init();
       return obj;
     }
@@ -1505,6 +1525,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGSpectrumServer_clients").compare(type) == 0) {
       SWGSpectrumServer_clients *obj = new SWGSpectrumServer_clients();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGStarTrackerActions").compare(type) == 0) {
+      SWGStarTrackerActions *obj = new SWGStarTrackerActions();
       obj->init();
       return obj;
     }
@@ -1640,6 +1665,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGVORDemodSettings").compare(type) == 0) {
       SWGVORDemodSettings *obj = new SWGVORDemodSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGVORLocalizerActions").compare(type) == 0) {
+      SWGVORLocalizerActions *obj = new SWGVORLocalizerActions();
       obj->init();
       return obj;
     }
