@@ -341,7 +341,6 @@ int AFC::webapiActionsPost(
         {
             bool featureRun = swgAFCActions->getRun() != 0;
             unknownAction = false;
-
             MsgStartStop *msg = MsgStartStop::create(featureRun);
             getInputMessageQueue()->push(msg);
         }

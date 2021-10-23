@@ -402,10 +402,8 @@ int GS232Controller::webapiActionsPost(
         if (featureActionsKeys.contains("run"))
         {
             bool featureRun = swgGS232ControllerActions->getRun() != 0;
-
             MsgStartStop *msg = MsgStartStop::create(featureRun);
             getInputMessageQueue()->push(msg);
-
             return 202;
         }
         else

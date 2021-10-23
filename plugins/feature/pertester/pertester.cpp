@@ -493,7 +493,6 @@ int PERTester::webapiActionsPost(
             bool featureRun = swgPERTesterActions->getRun() != 0;
             unknownAction = false;
             MsgStartStop *msg = MsgStartStop::create(featureRun);
-
             getInputMessageQueue()->push(msg);
         }
 
