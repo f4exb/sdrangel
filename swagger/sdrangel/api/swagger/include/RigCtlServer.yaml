@@ -34,6 +34,18 @@ RigCtlServerSettings:
     reverseAPIFeatureIndex:
       type: integer
 
+RigCtlServerReport:
+  description: RigCtl server report
+  properties:
+    runningState:
+      type: integer
+      description: >
+        Running state
+          * 0 - not started
+          * 1 - idle
+          * 2 - running
+          * 3 - error
+
 RigCtlServerActions:
   description: RigCtl server actions
   properties:

@@ -41,6 +41,9 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGAFCReport* fromJson(QString &jsonString) override;
 
+    qint32 getRunningState();
+    void setRunningState(qint32 running_state);
+
     qint32 getTrackerChannelIndex();
     void setTrackerChannelIndex(qint32 tracker_channel_index);
 
@@ -54,6 +57,9 @@ public:
     virtual bool isSet() override;
 
 private:
+    qint32 running_state;
+    bool m_running_state_isSet;
+
     qint32 tracker_channel_index;
     bool m_tracker_channel_index_isSet;
 

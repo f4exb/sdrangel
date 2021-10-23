@@ -106,6 +106,10 @@ public:
             SWGSDRangel::SWGFeatureSettings& response,
             QString& errorMessage);
 
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGFeatureReport& response,
+            QString& errorMessage);
+
     virtual int webapiActionsPost(
             const QStringList& featureActionsKeys,
             SWGSDRangel::SWGFeatureActions& query,
@@ -135,6 +139,7 @@ private:
     void stop();
     void applySettings(const RigCtlServerSettings& settings, bool force = false);
     void webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const RigCtlServerSettings& settings, bool force);
+    void webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response);
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);

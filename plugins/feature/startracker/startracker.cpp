@@ -392,6 +392,22 @@ int StarTracker::webapiSettingsPutPatch(
     return 200;
 }
 
+int StarTracker::webapiReportGet(
+    SWGSDRangel::SWGFeatureReport& response,
+    QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setStarTrackerReport(new SWGSDRangel::SWGStarTrackerReport());
+    response.getStarTrackerReport()->init();
+    webapiFormatFeatureReport(response);
+    return 200;
+}
+
+void StarTracker::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response)
+{
+    response.getStarTrackerReport()->setRunningState(getState());
+}
+
 int StarTracker::webapiActionsPost(
     const QStringList& featureActionsKeys,
     SWGSDRangel::SWGFeatureActions& query,

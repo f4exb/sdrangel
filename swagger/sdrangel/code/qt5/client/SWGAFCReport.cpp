@@ -28,6 +28,8 @@ SWGAFCReport::SWGAFCReport(QString* json) {
 }
 
 SWGAFCReport::SWGAFCReport() {
+    running_state = 0;
+    m_running_state_isSet = false;
     tracker_channel_index = 0;
     m_tracker_channel_index_isSet = false;
     tracker_device_frequency = 0L;
@@ -42,6 +44,8 @@ SWGAFCReport::~SWGAFCReport() {
 
 void
 SWGAFCReport::init() {
+    running_state = 0;
+    m_running_state_isSet = false;
     tracker_channel_index = 0;
     m_tracker_channel_index_isSet = false;
     tracker_device_frequency = 0L;
@@ -52,6 +56,7 @@ SWGAFCReport::init() {
 
 void
 SWGAFCReport::cleanup() {
+
 
 
 
@@ -68,6 +73,8 @@ SWGAFCReport::fromJson(QString &json) {
 
 void
 SWGAFCReport::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&running_state, pJson["runningState"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&tracker_channel_index, pJson["trackerChannelIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&tracker_device_frequency, pJson["trackerDeviceFrequency"], "qint64", "");
@@ -90,6 +97,9 @@ SWGAFCReport::asJson ()
 QJsonObject*
 SWGAFCReport::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(m_running_state_isSet){
+        obj->insert("runningState", QJsonValue(running_state));
+    }
     if(m_tracker_channel_index_isSet){
         obj->insert("trackerChannelIndex", QJsonValue(tracker_channel_index));
     }
@@ -101,6 +111,16 @@ SWGAFCReport::asJsonObject() {
     }
 
     return obj;
+}
+
+qint32
+SWGAFCReport::getRunningState() {
+    return running_state;
+}
+void
+SWGAFCReport::setRunningState(qint32 running_state) {
+    this->running_state = running_state;
+    this->m_running_state_isSet = true;
 }
 
 qint32
@@ -138,6 +158,9 @@ bool
 SWGAFCReport::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(m_running_state_isSet){
+            isObjectUpdated = true; break;
+        }
         if(m_tracker_channel_index_isSet){
             isObjectUpdated = true; break;
         }

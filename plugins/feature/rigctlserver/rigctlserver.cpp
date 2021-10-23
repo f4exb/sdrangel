@@ -257,6 +257,22 @@ int RigCtlServer::webapiSettingsPutPatch(
     return 200;
 }
 
+int RigCtlServer::webapiReportGet(
+    SWGSDRangel::SWGFeatureReport& response,
+    QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setRigCtlServerReport(new SWGSDRangel::SWGRigCtlServerReport());
+    response.getRigCtlServerReport()->init();
+    webapiFormatFeatureReport(response);
+    return 200;
+}
+
+void RigCtlServer::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response)
+{
+    response.getRigCtlServerReport()->setRunningState(getState());
+}
+
 int RigCtlServer::webapiActionsPost(
     const QStringList& featureActionsKeys,
     SWGSDRangel::SWGFeatureActions& query,

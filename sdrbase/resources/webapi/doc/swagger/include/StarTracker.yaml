@@ -202,6 +202,18 @@ StarTrackerDisplayLoSSettings:
       type: number
       format: float
 
+StarTrackerReport:
+  description: RigCtl server report
+  properties:
+    runningState:
+      type: integer
+      description: >
+        Running state
+          * 0 - not started
+          * 1 - idle
+          * 2 - running
+          * 3 - error
+
 StarTrackerActions:
   description: "Star Tracker actions"
   properties:

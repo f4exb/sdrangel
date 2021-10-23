@@ -472,6 +472,7 @@ void AFC::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response)
     response.getAfcReport()->setTrackerChannelIndex(m_trackerIndexInDeviceSet);
     response.getAfcReport()->setTrackerDeviceFrequency(m_worker->getTrackerDeviceFrequency());
     response.getAfcReport()->setTrackerChannelOffset(m_worker->getTrackerChannelOffset());
+    response.getAfcReport()->setRunningState(getState());
 }
 
 void AFC::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const AFCSettings& settings, bool force)

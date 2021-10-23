@@ -48,6 +48,14 @@ AFCSettings:
 AFCReport:
   description: "AFC report"
   properties:
+    runningState:
+      type: integer
+      description: >
+        Running state
+          * 0 - not started
+          * 1 - idle
+          * 2 - running
+          * 3 - error
     trackerChannelIndex:
       description: Tracker index in device set
       type: integer

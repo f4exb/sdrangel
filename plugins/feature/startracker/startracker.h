@@ -128,6 +128,10 @@ public:
             SWGSDRangel::SWGFeatureSettings& response,
             QString& errorMessage) override;
 
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGFeatureReport& response,
+            QString& errorMessage);
+
     virtual int webapiActionsPost(
             const QStringList& featureActionsKeys,
             SWGSDRangel::SWGFeatureActions& query,
@@ -168,6 +172,7 @@ private:
     void stop();
     void applySettings(const StarTrackerSettings& settings, bool force = false);
     void webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const StarTrackerSettings& settings, bool force);
+    void webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response);
     double applyBeam(const FITS *fits, double beamwidth, double ra, double dec, int& imgX, int& imgY) const;
 
 private slots:

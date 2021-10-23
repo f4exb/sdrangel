@@ -32,6 +32,14 @@ SimplePTTSettings:
 SimplePTTReport:
   description: "Simple PTT report"
   properties:
+    runningState:
+      type: integer
+      description: >
+        Running state
+          * 0 - not started
+          * 1 - idle
+          * 2 - running
+          * 3 - error
     ptt:
       type: integer
       description: >

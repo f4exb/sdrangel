@@ -9,7 +9,17 @@ FeatureReport:
       type: string
     AFCReport:
       $ref: "http://swgserver:8081/api/swagger/include/AFC.yaml#/AFCReport"
-    SimplePTTReport:
-      $ref: "http://swgserver:8081/api/swagger/include/SimplePTT.yaml#/SimplePTTReport"
     GS232ControllerReport:
       $ref: "http://swgserver:8081/api/swagger/include/GS232Controller.yaml#/GS232ControllerReport"
+    PERTesterReport:
+      $ref: "http://swgserver:8081/api/swagger/include/PERTester.yaml#/PERTesterReport"
+    RigCtlServerReport:
+      $ref: "http://swgserver:8081/api/swagger/include/RigCtlServer.yaml#/RigCtlServerReport"
+    SatelliteTrackerReport:
+      $ref: "http://swgserver:8081/api/swagger/include/SatelliteTracker.yaml#/SatelliteTrackerReport"
+    SimplePTTReport:
+      $ref: "http://swgserver:8081/api/swagger/include/SimplePTT.yaml#/SimplePTTReport"
+    StarTrackerReport:
+      $ref: "http://swgserver:8081/api/swagger/include/StarTracker.yaml#/StarTrackerReport"
+    VORLocalizerReport:
+      $ref: "http://swgserver:8081/api/swagger/include/VORLocalizer.yaml#/VORLocalizerReport"

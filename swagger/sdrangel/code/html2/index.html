@@ -796,6 +796,10 @@ margin-bottom: 20px;
 };
             defs.AFCReport = {
   "properties" : {
+    "runningState" : {
+      "type" : "integer",
+      "description" : "Running state\n  * 0 - not started\n  * 1 - idle\n  * 2 - running\n  * 3 - error\n"
+    },
     "trackerChannelIndex" : {
       "type" : "integer",
       "description" : "Tracker index in device set"
@@ -4947,11 +4951,26 @@ margin-bottom: 20px;
     "AFCReport" : {
       "$ref" : "#/definitions/AFCReport"
     },
+    "GS232ControllerReport" : {
+      "$ref" : "#/definitions/GS232ControllerReport"
+    },
+    "PERTesterReport" : {
+      "$ref" : "#/definitions/PERTesterReport"
+    },
+    "RigCtlServerReport" : {
+      "$ref" : "#/definitions/RigCtlServerReport"
+    },
+    "SatelliteTrackerReport" : {
+      "$ref" : "#/definitions/SatelliteTrackerReport"
+    },
     "SimplePTTReport" : {
       "$ref" : "#/definitions/SimplePTTReport"
     },
-    "GS232ControllerReport" : {
-      "$ref" : "#/definitions/GS232ControllerReport"
+    "StarTrackerReport" : {
+      "$ref" : "#/definitions/StarTrackerReport"
+    },
+    "VORLocalizerReport" : {
+      "$ref" : "#/definitions/VORLocalizerReport"
     }
   },
   "description" : "Base feature report. Only the feature report corresponding to the feature specified in the featureType field is or should be present."
@@ -5824,6 +5843,10 @@ margin-bottom: 20px;
 };
             defs.GS232ControllerReport = {
   "properties" : {
+    "runningState" : {
+      "type" : "integer",
+      "description" : "Running state\n  * 0 - not started\n  * 1 - idle\n  * 2 - running\n  * 3 - error\n"
+    },
     "sources" : {
       "type" : "array",
       "description" : "Names of pipe sources",
@@ -7935,6 +7958,15 @@ margin-bottom: 20px;
   },
   "description" : "Acquisition of signal"
 };
+            defs.PERTesterReport = {
+  "properties" : {
+    "runningState" : {
+      "type" : "integer",
+      "description" : "Running state\n  * 0 - not started\n  * 1 - idle\n  * 2 - running\n  * 3 - error\n"
+    }
+  },
+  "description" : "PERTester"
+};
             defs.PERTesterSettings = {
   "properties" : {
     "packetCount" : {
@@ -9614,6 +9646,15 @@ margin-bottom: 20px;
   },
   "description" : "RigCtl server actions"
 };
+            defs.RigCtlServerReport = {
+  "properties" : {
+    "runningState" : {
+      "type" : "integer",
+      "description" : "Running state\n  * 0 - not started\n  * 1 - idle\n  * 2 - running\n  * 3 - error\n"
+    }
+  },
+  "description" : "RigCtl server report"
+};
             defs.RigCtlServerSettings = {
   "properties" : {
     "enabled" : {
@@ -10290,6 +10331,15 @@ margin-bottom: 20px;
   },
   "description" : "Satellite Tracker actions"
 };
+            defs.SatelliteTrackerReport = {
+  "properties" : {
+    "runningState" : {
+      "type" : "integer",
+      "description" : "Running state\n  * 0 - not started\n  * 1 - idle\n  * 2 - running\n  * 3 - error\n"
+    }
+  },
+  "description" : "Satellite Tracker report"
+};
             defs.SatelliteTrackerSettings = {
   "properties" : {
     "latitude" : {
@@ -10698,6 +10748,10 @@ margin-bottom: 20px;
 };
             defs.SimplePTTReport = {
   "properties" : {
+    "runningState" : {
+      "type" : "integer",
+      "description" : "Running state\n  * 0 - not started\n  * 1 - idle\n  * 2 - running\n  * 3 - error\n"
+    },
     "ptt" : {
       "type" : "integer",
       "description" : "PTT status\n  * 0 - released\n  * 1 - engaged\n"
@@ -11158,6 +11212,15 @@ margin-bottom: 20px;
     }
   },
   "description" : "Settings to display in Star Tracker. Can be sent by other plugins to startracker.display message queue."
+};
+            defs.StarTrackerReport = {
+  "properties" : {
+    "runningState" : {
+      "type" : "integer",
+      "description" : "Running state\n  * 0 - not started\n  * 1 - idle\n  * 2 - running\n  * 3 - error\n"
+    }
+  },
+  "description" : "RigCtl server report"
 };
             defs.StarTrackerSettings = {
   "properties" : {
@@ -12383,6 +12446,15 @@ margin-bottom: 20px;
     }
   },
   "description" : "VORLocalizer"
+};
+            defs.VORLocalizerReport = {
+  "properties" : {
+    "runningState" : {
+      "type" : "integer",
+      "description" : "Running state\n  * 0 - not started\n  * 1 - idle\n  * 2 - running\n  * 3 - error\n"
+    }
+  },
+  "description" : "VORLocalizers"
 };
             defs.VORLocalizerSettings = {
   "properties" : {
@@ -51090,7 +51162,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-10-22T01:02:48.375+02:00
+              Generated 2021-10-23T19:53:41.859+02:00
             </div>
           </div>
       </div>

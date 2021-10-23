@@ -633,6 +633,7 @@ void GS232Controller::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& r
     response.getGs232ControllerReport()->setCurrentAzimuth(m_currentAzimuth);
     response.getGs232ControllerReport()->setCurrentElevation(m_currentElevation);
     response.getGs232ControllerReport()->setOnTarget(getOnTarget());
+    response.getGs232ControllerReport()->setRunningState(getState());
 }
 
 void GS232Controller::networkManagerFinished(QNetworkReply *reply)

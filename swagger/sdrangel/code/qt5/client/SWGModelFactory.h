@@ -184,6 +184,7 @@
 #include "SWGNoiseFigureSettings.h"
 #include "SWGPERTesterActions.h"
 #include "SWGPERTesterActions_aos.h"
+#include "SWGPERTesterReport.h"
 #include "SWGPERTesterSettings.h"
 #include "SWGPacketDemodSettings.h"
 #include "SWGPacketModActions.h"
@@ -226,6 +227,7 @@
 #include "SWGRemoteSourceReport.h"
 #include "SWGRemoteSourceSettings.h"
 #include "SWGRigCtlServerActions.h"
+#include "SWGRigCtlServerReport.h"
 #include "SWGRigCtlServerSettings.h"
 #include "SWGRtlSdrReport.h"
 #include "SWGRtlSdrSettings.h"
@@ -242,6 +244,7 @@
 #include "SWGSatelliteDeviceSettings.h"
 #include "SWGSatelliteDeviceSettingsList.h"
 #include "SWGSatelliteTrackerActions.h"
+#include "SWGSatelliteTrackerReport.h"
 #include "SWGSatelliteTrackerSettings.h"
 #include "SWGSigMFFileInputActions.h"
 #include "SWGSigMFFileInputReport.h"
@@ -264,6 +267,7 @@
 #include "SWGStarTrackerDisplayLoSSettings_2.h"
 #include "SWGStarTrackerDisplaySettings.h"
 #include "SWGStarTrackerDisplaySettings_2.h"
+#include "SWGStarTrackerReport.h"
 #include "SWGStarTrackerSettings.h"
 #include "SWGStarTrackerTarget.h"
 #include "SWGStarTrackerTarget_2.h"
@@ -288,6 +292,7 @@
 #include "SWGVORDemodSCSettings.h"
 #include "SWGVORDemodSettings.h"
 #include "SWGVORLocalizerActions.h"
+#include "SWGVORLocalizerReport.h"
 #include "SWGVORLocalizerSettings.h"
 #include "SWGWFMDemodReport.h"
 #include "SWGWFMDemodSettings.h"
@@ -1153,6 +1158,11 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGPERTesterReport").compare(type) == 0) {
+      SWGPERTesterReport *obj = new SWGPERTesterReport();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGPERTesterSettings").compare(type) == 0) {
       SWGPERTesterSettings *obj = new SWGPERTesterSettings();
       obj->init();
@@ -1363,6 +1373,11 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGRigCtlServerReport").compare(type) == 0) {
+      SWGRigCtlServerReport *obj = new SWGRigCtlServerReport();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGRigCtlServerSettings").compare(type) == 0) {
       SWGRigCtlServerSettings *obj = new SWGRigCtlServerSettings();
       obj->init();
@@ -1440,6 +1455,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGSatelliteTrackerActions").compare(type) == 0) {
       SWGSatelliteTrackerActions *obj = new SWGSatelliteTrackerActions();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGSatelliteTrackerReport").compare(type) == 0) {
+      SWGSatelliteTrackerReport *obj = new SWGSatelliteTrackerReport();
       obj->init();
       return obj;
     }
@@ -1550,6 +1570,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGStarTrackerDisplaySettings_2").compare(type) == 0) {
       SWGStarTrackerDisplaySettings_2 *obj = new SWGStarTrackerDisplaySettings_2();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGStarTrackerReport").compare(type) == 0) {
+      SWGStarTrackerReport *obj = new SWGStarTrackerReport();
       obj->init();
       return obj;
     }
@@ -1670,6 +1695,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGVORLocalizerActions").compare(type) == 0) {
       SWGVORLocalizerActions *obj = new SWGVORLocalizerActions();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGVORLocalizerReport").compare(type) == 0) {
+      SWGVORLocalizerReport *obj = new SWGVORLocalizerReport();
       obj->init();
       return obj;
     }

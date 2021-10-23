@@ -24,7 +24,12 @@
 
 #include "SWGAFCReport.h"
 #include "SWGGS232ControllerReport.h"
+#include "SWGPERTesterReport.h"
+#include "SWGRigCtlServerReport.h"
+#include "SWGSatelliteTrackerReport.h"
 #include "SWGSimplePTTReport.h"
+#include "SWGStarTrackerReport.h"
+#include "SWGVORLocalizerReport.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -51,11 +56,26 @@ public:
     SWGAFCReport* getAfcReport();
     void setAfcReport(SWGAFCReport* afc_report);
 
+    SWGGS232ControllerReport* getGs232ControllerReport();
+    void setGs232ControllerReport(SWGGS232ControllerReport* gs232_controller_report);
+
+    SWGPERTesterReport* getPerTesterReport();
+    void setPerTesterReport(SWGPERTesterReport* per_tester_report);
+
+    SWGRigCtlServerReport* getRigCtlServerReport();
+    void setRigCtlServerReport(SWGRigCtlServerReport* rig_ctl_server_report);
+
+    SWGSatelliteTrackerReport* getSatelliteTrackerReport();
+    void setSatelliteTrackerReport(SWGSatelliteTrackerReport* satellite_tracker_report);
+
     SWGSimplePTTReport* getSimplePttReport();
     void setSimplePttReport(SWGSimplePTTReport* simple_ptt_report);
 
-    SWGGS232ControllerReport* getGs232ControllerReport();
-    void setGs232ControllerReport(SWGGS232ControllerReport* gs232_controller_report);
+    SWGStarTrackerReport* getStarTrackerReport();
+    void setStarTrackerReport(SWGStarTrackerReport* star_tracker_report);
+
+    SWGVORLocalizerReport* getVorLocalizerReport();
+    void setVorLocalizerReport(SWGVORLocalizerReport* vor_localizer_report);
 
 
     virtual bool isSet() override;
@@ -67,11 +87,26 @@ private:
     SWGAFCReport* afc_report;
     bool m_afc_report_isSet;
 
+    SWGGS232ControllerReport* gs232_controller_report;
+    bool m_gs232_controller_report_isSet;
+
+    SWGPERTesterReport* per_tester_report;
+    bool m_per_tester_report_isSet;
+
+    SWGRigCtlServerReport* rig_ctl_server_report;
+    bool m_rig_ctl_server_report_isSet;
+
+    SWGSatelliteTrackerReport* satellite_tracker_report;
+    bool m_satellite_tracker_report_isSet;
+
     SWGSimplePTTReport* simple_ptt_report;
     bool m_simple_ptt_report_isSet;
 
-    SWGGS232ControllerReport* gs232_controller_report;
-    bool m_gs232_controller_report_isSet;
+    SWGStarTrackerReport* star_tracker_report;
+    bool m_star_tracker_report_isSet;
+
+    SWGVORLocalizerReport* vor_localizer_report;
+    bool m_vor_localizer_report_isSet;
 
 };
 

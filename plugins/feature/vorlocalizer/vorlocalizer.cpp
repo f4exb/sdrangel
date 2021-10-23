@@ -449,6 +449,22 @@ int VORLocalizer::webapiSettingsPutPatch(
     return 200;
 }
 
+int VORLocalizer::webapiReportGet(
+    SWGSDRangel::SWGFeatureReport& response,
+    QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setVorLocalizerReport(new SWGSDRangel::SWGVORLocalizerReport());
+    response.getVorLocalizerReport()->init();
+    webapiFormatFeatureReport(response);
+    return 200;
+}
+
+void VORLocalizer::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response)
+{
+    response.getVorLocalizerReport()->setRunningState(getState());
+}
+
 int VORLocalizer::webapiActionsPost(
     const QStringList& featureActionsKeys,
     SWGSDRangel::SWGFeatureActions& query,

@@ -144,6 +144,10 @@ public:
             SWGSDRangel::SWGFeatureSettings& response,
             QString& errorMessage);
 
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGFeatureReport& response,
+            QString& errorMessage);
+
     virtual int webapiActionsPost(
             const QStringList& featureActionsKeys,
             SWGSDRangel::SWGFeatureActions& query,
@@ -185,6 +189,7 @@ private:
     void start();
     void stop();
     void applySettings(const SatelliteTrackerSettings& settings, bool force = false);
+    void webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response);
     void webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const SatelliteTrackerSettings& settings, bool force);
 
     QString satNogsSatellitesFilename();

@@ -28,6 +28,8 @@ SWGGS232ControllerReport::SWGGS232ControllerReport(QString* json) {
 }
 
 SWGGS232ControllerReport::SWGGS232ControllerReport() {
+    running_state = 0;
+    m_running_state_isSet = false;
     sources = nullptr;
     m_sources_isSet = false;
     serial_ports = nullptr;
@@ -50,6 +52,8 @@ SWGGS232ControllerReport::~SWGGS232ControllerReport() {
 
 void
 SWGGS232ControllerReport::init() {
+    running_state = 0;
+    m_running_state_isSet = false;
     sources = new QList<QString*>();
     m_sources_isSet = false;
     serial_ports = new QList<QString*>();
@@ -68,6 +72,7 @@ SWGGS232ControllerReport::init() {
 
 void
 SWGGS232ControllerReport::cleanup() {
+
     if(sources != nullptr) { 
         auto arr = sources;
         for(auto o: *arr) { 
@@ -100,6 +105,8 @@ SWGGS232ControllerReport::fromJson(QString &json) {
 
 void
 SWGGS232ControllerReport::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&running_state, pJson["runningState"], "qint32", "");
+    
     
     ::SWGSDRangel::setValue(&sources, pJson["sources"], "QList", "QString");
     
@@ -130,6 +137,9 @@ SWGGS232ControllerReport::asJson ()
 QJsonObject*
 SWGGS232ControllerReport::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(m_running_state_isSet){
+        obj->insert("runningState", QJsonValue(running_state));
+    }
     if(sources && sources->size() > 0){
         toJsonArray((QList<void*>*)sources, obj, "sources", "QString");
     }
@@ -153,6 +163,16 @@ SWGGS232ControllerReport::asJsonObject() {
     }
 
     return obj;
+}
+
+qint32
+SWGGS232ControllerReport::getRunningState() {
+    return running_state;
+}
+void
+SWGGS232ControllerReport::setRunningState(qint32 running_state) {
+    this->running_state = running_state;
+    this->m_running_state_isSet = true;
 }
 
 QList<QString*>*
@@ -230,6 +250,9 @@ bool
 SWGGS232ControllerReport::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(m_running_state_isSet){
+            isObjectUpdated = true; break;
+        }
         if(sources && (sources->size() > 0)){
             isObjectUpdated = true; break;
         }

@@ -11,7 +11,7 @@
  */
 
 
-#include "SWGSimplePTTReport.h"
+#include "SWGRigCtlServerReport.h"
 
 #include "SWGHelpers.h"
 
@@ -22,38 +22,33 @@
 
 namespace SWGSDRangel {
 
-SWGSimplePTTReport::SWGSimplePTTReport(QString* json) {
+SWGRigCtlServerReport::SWGRigCtlServerReport(QString* json) {
     init();
     this->fromJson(*json);
 }
 
-SWGSimplePTTReport::SWGSimplePTTReport() {
+SWGRigCtlServerReport::SWGRigCtlServerReport() {
     running_state = 0;
     m_running_state_isSet = false;
-    ptt = 0;
-    m_ptt_isSet = false;
 }
 
-SWGSimplePTTReport::~SWGSimplePTTReport() {
+SWGRigCtlServerReport::~SWGRigCtlServerReport() {
     this->cleanup();
 }
 
 void
-SWGSimplePTTReport::init() {
+SWGRigCtlServerReport::init() {
     running_state = 0;
     m_running_state_isSet = false;
-    ptt = 0;
-    m_ptt_isSet = false;
 }
 
 void
-SWGSimplePTTReport::cleanup() {
-
+SWGRigCtlServerReport::cleanup() {
 
 }
 
-SWGSimplePTTReport*
-SWGSimplePTTReport::fromJson(QString &json) {
+SWGRigCtlServerReport*
+SWGRigCtlServerReport::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -62,15 +57,13 @@ SWGSimplePTTReport::fromJson(QString &json) {
 }
 
 void
-SWGSimplePTTReport::fromJsonObject(QJsonObject &pJson) {
+SWGRigCtlServerReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&running_state, pJson["runningState"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&ptt, pJson["ptt"], "qint32", "");
     
 }
 
 QString
-SWGSimplePTTReport::asJson ()
+SWGRigCtlServerReport::asJson ()
 {
     QJsonObject* obj = this->asJsonObject();
 
@@ -81,47 +74,31 @@ SWGSimplePTTReport::asJson ()
 }
 
 QJsonObject*
-SWGSimplePTTReport::asJsonObject() {
+SWGRigCtlServerReport::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(m_running_state_isSet){
         obj->insert("runningState", QJsonValue(running_state));
-    }
-    if(m_ptt_isSet){
-        obj->insert("ptt", QJsonValue(ptt));
     }
 
     return obj;
 }
 
 qint32
-SWGSimplePTTReport::getRunningState() {
+SWGRigCtlServerReport::getRunningState() {
     return running_state;
 }
 void
-SWGSimplePTTReport::setRunningState(qint32 running_state) {
+SWGRigCtlServerReport::setRunningState(qint32 running_state) {
     this->running_state = running_state;
     this->m_running_state_isSet = true;
 }
 
-qint32
-SWGSimplePTTReport::getPtt() {
-    return ptt;
-}
-void
-SWGSimplePTTReport::setPtt(qint32 ptt) {
-    this->ptt = ptt;
-    this->m_ptt_isSet = true;
-}
-
 
 bool
-SWGSimplePTTReport::isSet(){
+SWGRigCtlServerReport::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_running_state_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_ptt_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

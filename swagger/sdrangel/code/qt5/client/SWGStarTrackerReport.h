@@ -11,61 +11,38 @@
  */
 
 /*
- * SWGGS232ControllerReport.h
+ * SWGStarTrackerReport.h
  *
- * GS-232 Controller report
+ * RigCtl server report
  */
 
-#ifndef SWGGS232ControllerReport_H_
-#define SWGGS232ControllerReport_H_
+#ifndef SWGStarTrackerReport_H_
+#define SWGStarTrackerReport_H_
 
 #include <QJsonObject>
 
 
-#include <QList>
-#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
 
 namespace SWGSDRangel {
 
-class SWG_API SWGGS232ControllerReport: public SWGObject {
+class SWG_API SWGStarTrackerReport: public SWGObject {
 public:
-    SWGGS232ControllerReport();
-    SWGGS232ControllerReport(QString* json);
-    virtual ~SWGGS232ControllerReport();
+    SWGStarTrackerReport();
+    SWGStarTrackerReport(QString* json);
+    virtual ~SWGStarTrackerReport();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGGS232ControllerReport* fromJson(QString &jsonString) override;
+    virtual SWGStarTrackerReport* fromJson(QString &jsonString) override;
 
     qint32 getRunningState();
     void setRunningState(qint32 running_state);
-
-    QList<QString*>* getSources();
-    void setSources(QList<QString*>* sources);
-
-    QList<QString*>* getSerialPorts();
-    void setSerialPorts(QList<QString*>* serial_ports);
-
-    float getTargetAzimuth();
-    void setTargetAzimuth(float target_azimuth);
-
-    float getTargetElevation();
-    void setTargetElevation(float target_elevation);
-
-    float getCurrentAzimuth();
-    void setCurrentAzimuth(float current_azimuth);
-
-    float getCurrentElevation();
-    void setCurrentElevation(float current_elevation);
-
-    qint32 getOnTarget();
-    void setOnTarget(qint32 on_target);
 
 
     virtual bool isSet() override;
@@ -74,29 +51,8 @@ private:
     qint32 running_state;
     bool m_running_state_isSet;
 
-    QList<QString*>* sources;
-    bool m_sources_isSet;
-
-    QList<QString*>* serial_ports;
-    bool m_serial_ports_isSet;
-
-    float target_azimuth;
-    bool m_target_azimuth_isSet;
-
-    float target_elevation;
-    bool m_target_elevation_isSet;
-
-    float current_azimuth;
-    bool m_current_azimuth_isSet;
-
-    float current_elevation;
-    bool m_current_elevation_isSet;
-
-    qint32 on_target;
-    bool m_on_target_isSet;
-
 };
 
 }
 
-#endif /* SWGGS232ControllerReport_H_ */
+#endif /* SWGStarTrackerReport_H_ */

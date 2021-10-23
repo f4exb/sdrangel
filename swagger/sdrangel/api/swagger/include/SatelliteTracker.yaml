@@ -166,6 +166,18 @@ SatelliteDeviceSettings:
       description: "Command to execute on LOS"
       type: string
 
+SatelliteTrackerReport:
+  description: "Satellite Tracker report"
+  properties:
+    runningState:
+      type: integer
+      description: >
+        Running state
+          * 0 - not started
+          * 1 - idle
+          * 2 - running
+          * 3 - error
+
 SatelliteTrackerActions:
   description: "Satellite Tracker actions"
   properties:

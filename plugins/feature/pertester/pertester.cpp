@@ -477,6 +477,22 @@ void PERTester::webapiReverseSendSettings(QList<QString>& featureSettingsKeys, c
     delete swgFeatureSettings;
 }
 
+int PERTester::webapiReportGet(
+    SWGSDRangel::SWGFeatureReport& response,
+    QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setPerTesterReport(new SWGSDRangel::SWGPERTesterReport());
+    response.getPerTesterReport()->init();
+    webapiFormatFeatureReport(response);
+    return 200;
+}
+
+void PERTester::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response)
+{
+    response.getPerTesterReport()->setRunningState(getState());
+}
+
 int PERTester::webapiActionsPost(
         const QStringList& featureActionsKeys,
         SWGSDRangel::SWGFeatureActions& query,

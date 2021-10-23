@@ -32,10 +32,20 @@ SWGFeatureReport::SWGFeatureReport() {
     m_feature_type_isSet = false;
     afc_report = nullptr;
     m_afc_report_isSet = false;
-    simple_ptt_report = nullptr;
-    m_simple_ptt_report_isSet = false;
     gs232_controller_report = nullptr;
     m_gs232_controller_report_isSet = false;
+    per_tester_report = nullptr;
+    m_per_tester_report_isSet = false;
+    rig_ctl_server_report = nullptr;
+    m_rig_ctl_server_report_isSet = false;
+    satellite_tracker_report = nullptr;
+    m_satellite_tracker_report_isSet = false;
+    simple_ptt_report = nullptr;
+    m_simple_ptt_report_isSet = false;
+    star_tracker_report = nullptr;
+    m_star_tracker_report_isSet = false;
+    vor_localizer_report = nullptr;
+    m_vor_localizer_report_isSet = false;
 }
 
 SWGFeatureReport::~SWGFeatureReport() {
@@ -48,10 +58,20 @@ SWGFeatureReport::init() {
     m_feature_type_isSet = false;
     afc_report = new SWGAFCReport();
     m_afc_report_isSet = false;
-    simple_ptt_report = new SWGSimplePTTReport();
-    m_simple_ptt_report_isSet = false;
     gs232_controller_report = new SWGGS232ControllerReport();
     m_gs232_controller_report_isSet = false;
+    per_tester_report = new SWGPERTesterReport();
+    m_per_tester_report_isSet = false;
+    rig_ctl_server_report = new SWGRigCtlServerReport();
+    m_rig_ctl_server_report_isSet = false;
+    satellite_tracker_report = new SWGSatelliteTrackerReport();
+    m_satellite_tracker_report_isSet = false;
+    simple_ptt_report = new SWGSimplePTTReport();
+    m_simple_ptt_report_isSet = false;
+    star_tracker_report = new SWGStarTrackerReport();
+    m_star_tracker_report_isSet = false;
+    vor_localizer_report = new SWGVORLocalizerReport();
+    m_vor_localizer_report_isSet = false;
 }
 
 void
@@ -62,11 +82,26 @@ SWGFeatureReport::cleanup() {
     if(afc_report != nullptr) { 
         delete afc_report;
     }
+    if(gs232_controller_report != nullptr) { 
+        delete gs232_controller_report;
+    }
+    if(per_tester_report != nullptr) { 
+        delete per_tester_report;
+    }
+    if(rig_ctl_server_report != nullptr) { 
+        delete rig_ctl_server_report;
+    }
+    if(satellite_tracker_report != nullptr) { 
+        delete satellite_tracker_report;
+    }
     if(simple_ptt_report != nullptr) { 
         delete simple_ptt_report;
     }
-    if(gs232_controller_report != nullptr) { 
-        delete gs232_controller_report;
+    if(star_tracker_report != nullptr) { 
+        delete star_tracker_report;
+    }
+    if(vor_localizer_report != nullptr) { 
+        delete vor_localizer_report;
     }
 }
 
@@ -85,9 +120,19 @@ SWGFeatureReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&afc_report, pJson["AFCReport"], "SWGAFCReport", "SWGAFCReport");
     
+    ::SWGSDRangel::setValue(&gs232_controller_report, pJson["GS232ControllerReport"], "SWGGS232ControllerReport", "SWGGS232ControllerReport");
+    
+    ::SWGSDRangel::setValue(&per_tester_report, pJson["PERTesterReport"], "SWGPERTesterReport", "SWGPERTesterReport");
+    
+    ::SWGSDRangel::setValue(&rig_ctl_server_report, pJson["RigCtlServerReport"], "SWGRigCtlServerReport", "SWGRigCtlServerReport");
+    
+    ::SWGSDRangel::setValue(&satellite_tracker_report, pJson["SatelliteTrackerReport"], "SWGSatelliteTrackerReport", "SWGSatelliteTrackerReport");
+    
     ::SWGSDRangel::setValue(&simple_ptt_report, pJson["SimplePTTReport"], "SWGSimplePTTReport", "SWGSimplePTTReport");
     
-    ::SWGSDRangel::setValue(&gs232_controller_report, pJson["GS232ControllerReport"], "SWGGS232ControllerReport", "SWGGS232ControllerReport");
+    ::SWGSDRangel::setValue(&star_tracker_report, pJson["StarTrackerReport"], "SWGStarTrackerReport", "SWGStarTrackerReport");
+    
+    ::SWGSDRangel::setValue(&vor_localizer_report, pJson["VORLocalizerReport"], "SWGVORLocalizerReport", "SWGVORLocalizerReport");
     
 }
 
@@ -111,11 +156,26 @@ SWGFeatureReport::asJsonObject() {
     if((afc_report != nullptr) && (afc_report->isSet())){
         toJsonValue(QString("AFCReport"), afc_report, obj, QString("SWGAFCReport"));
     }
+    if((gs232_controller_report != nullptr) && (gs232_controller_report->isSet())){
+        toJsonValue(QString("GS232ControllerReport"), gs232_controller_report, obj, QString("SWGGS232ControllerReport"));
+    }
+    if((per_tester_report != nullptr) && (per_tester_report->isSet())){
+        toJsonValue(QString("PERTesterReport"), per_tester_report, obj, QString("SWGPERTesterReport"));
+    }
+    if((rig_ctl_server_report != nullptr) && (rig_ctl_server_report->isSet())){
+        toJsonValue(QString("RigCtlServerReport"), rig_ctl_server_report, obj, QString("SWGRigCtlServerReport"));
+    }
+    if((satellite_tracker_report != nullptr) && (satellite_tracker_report->isSet())){
+        toJsonValue(QString("SatelliteTrackerReport"), satellite_tracker_report, obj, QString("SWGSatelliteTrackerReport"));
+    }
     if((simple_ptt_report != nullptr) && (simple_ptt_report->isSet())){
         toJsonValue(QString("SimplePTTReport"), simple_ptt_report, obj, QString("SWGSimplePTTReport"));
     }
-    if((gs232_controller_report != nullptr) && (gs232_controller_report->isSet())){
-        toJsonValue(QString("GS232ControllerReport"), gs232_controller_report, obj, QString("SWGGS232ControllerReport"));
+    if((star_tracker_report != nullptr) && (star_tracker_report->isSet())){
+        toJsonValue(QString("StarTrackerReport"), star_tracker_report, obj, QString("SWGStarTrackerReport"));
+    }
+    if((vor_localizer_report != nullptr) && (vor_localizer_report->isSet())){
+        toJsonValue(QString("VORLocalizerReport"), vor_localizer_report, obj, QString("SWGVORLocalizerReport"));
     }
 
     return obj;
@@ -141,6 +201,46 @@ SWGFeatureReport::setAfcReport(SWGAFCReport* afc_report) {
     this->m_afc_report_isSet = true;
 }
 
+SWGGS232ControllerReport*
+SWGFeatureReport::getGs232ControllerReport() {
+    return gs232_controller_report;
+}
+void
+SWGFeatureReport::setGs232ControllerReport(SWGGS232ControllerReport* gs232_controller_report) {
+    this->gs232_controller_report = gs232_controller_report;
+    this->m_gs232_controller_report_isSet = true;
+}
+
+SWGPERTesterReport*
+SWGFeatureReport::getPerTesterReport() {
+    return per_tester_report;
+}
+void
+SWGFeatureReport::setPerTesterReport(SWGPERTesterReport* per_tester_report) {
+    this->per_tester_report = per_tester_report;
+    this->m_per_tester_report_isSet = true;
+}
+
+SWGRigCtlServerReport*
+SWGFeatureReport::getRigCtlServerReport() {
+    return rig_ctl_server_report;
+}
+void
+SWGFeatureReport::setRigCtlServerReport(SWGRigCtlServerReport* rig_ctl_server_report) {
+    this->rig_ctl_server_report = rig_ctl_server_report;
+    this->m_rig_ctl_server_report_isSet = true;
+}
+
+SWGSatelliteTrackerReport*
+SWGFeatureReport::getSatelliteTrackerReport() {
+    return satellite_tracker_report;
+}
+void
+SWGFeatureReport::setSatelliteTrackerReport(SWGSatelliteTrackerReport* satellite_tracker_report) {
+    this->satellite_tracker_report = satellite_tracker_report;
+    this->m_satellite_tracker_report_isSet = true;
+}
+
 SWGSimplePTTReport*
 SWGFeatureReport::getSimplePttReport() {
     return simple_ptt_report;
@@ -151,14 +251,24 @@ SWGFeatureReport::setSimplePttReport(SWGSimplePTTReport* simple_ptt_report) {
     this->m_simple_ptt_report_isSet = true;
 }
 
-SWGGS232ControllerReport*
-SWGFeatureReport::getGs232ControllerReport() {
-    return gs232_controller_report;
+SWGStarTrackerReport*
+SWGFeatureReport::getStarTrackerReport() {
+    return star_tracker_report;
 }
 void
-SWGFeatureReport::setGs232ControllerReport(SWGGS232ControllerReport* gs232_controller_report) {
-    this->gs232_controller_report = gs232_controller_report;
-    this->m_gs232_controller_report_isSet = true;
+SWGFeatureReport::setStarTrackerReport(SWGStarTrackerReport* star_tracker_report) {
+    this->star_tracker_report = star_tracker_report;
+    this->m_star_tracker_report_isSet = true;
+}
+
+SWGVORLocalizerReport*
+SWGFeatureReport::getVorLocalizerReport() {
+    return vor_localizer_report;
+}
+void
+SWGFeatureReport::setVorLocalizerReport(SWGVORLocalizerReport* vor_localizer_report) {
+    this->vor_localizer_report = vor_localizer_report;
+    this->m_vor_localizer_report_isSet = true;
 }
 
 
@@ -172,10 +282,25 @@ SWGFeatureReport::isSet(){
         if(afc_report && afc_report->isSet()){
             isObjectUpdated = true; break;
         }
+        if(gs232_controller_report && gs232_controller_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(per_tester_report && per_tester_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(rig_ctl_server_report && rig_ctl_server_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(satellite_tracker_report && satellite_tracker_report->isSet()){
+            isObjectUpdated = true; break;
+        }
         if(simple_ptt_report && simple_ptt_report->isSet()){
             isObjectUpdated = true; break;
         }
-        if(gs232_controller_report && gs232_controller_report->isSet()){
+        if(star_tracker_report && star_tracker_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(vor_localizer_report && vor_localizer_report->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

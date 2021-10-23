@@ -377,6 +377,7 @@ void SimplePTT::webapiUpdateFeatureSettings(
 void SimplePTT::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response)
 {
     response.getSimplePttReport()->setPtt(m_ptt ? 1 : 0);
+    response.getSimplePttReport()->setRunningState(getState());
 }
 
 void SimplePTT::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const SimplePTTSettings& settings, bool force)

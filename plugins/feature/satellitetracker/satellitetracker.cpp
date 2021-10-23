@@ -370,6 +370,17 @@ int SatelliteTracker::webapiSettingsPutPatch(
     return 200;
 }
 
+int SatelliteTracker::webapiReportGet(
+    SWGSDRangel::SWGFeatureReport& response,
+    QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setSatelliteTrackerReport(new SWGSDRangel::SWGSatelliteTrackerReport());
+    response.getSatelliteTrackerReport()->init();
+    webapiFormatFeatureReport(response);
+    return 200;
+}
+
 int SatelliteTracker::webapiActionsPost(
     const QStringList& featureActionsKeys,
     SWGSDRangel::SWGFeatureActions& query,
@@ -798,6 +809,11 @@ void SatelliteTracker::webapiReverseSendSettings(QList<QString>& featureSettings
     buffer->setParent(reply);
 
     delete swgFeatureSettings;
+}
+
+void SatelliteTracker::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response)
+{
+    response.getSatelliteTrackerReport()->setRunningState(getState());
 }
 
 void SatelliteTracker::networkManagerFinished(QNetworkReply *reply)
