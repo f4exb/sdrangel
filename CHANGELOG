@@ -1,10 +1,18 @@
+sdrangel (6.17.2-1) unstable; urgency=medium
+
+  * DATV modulator: API enhancements and GUI cosmetic fixes
+  * Implemented run action API in relevant feature plugins
+  * API: report running state for feature plugins with run action
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 24 Oct 2021 08:05:33 +0200
+
 sdrangel (6.17.1-1) unstable; urgency=medium
 
   * MainWindow: Change Feature UI set when feature tab changes. Fixes #1012
   * Metis MISO: set absolute maximum frequency to 500 MHz. Fixes #1014
   * Moved CI/CD MSVC build to Github Actions
 
-  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 16 Oct 2021 21:25:21s +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 16 Oct 2021 21:25:21 +0200
 
 sdrangel (6.17.0-1) unstable; urgency=medium
 
@@ -15,7 +23,7 @@ sdrangel (6.17.0-1) unstable; urgency=medium
   * StarTracker updates for Radioastronomy plugin
   * ValueDialZ: when setting range fix zero display initial value
 
-  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 12 Oct 2021 21:23:16s +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 12 Oct 2021 21:23:16 +0200
 
 sdrangel (6.16.7-1) unstable; urgency=medium
 
@@ -25,7 +33,7 @@ sdrangel (6.16.7-1) unstable; urgency=medium
   * Only copy file if different to avoid unnecessary rebuilds. PR #1009
   * Use on premises BYOC for Ubuntu image build
 
-  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 07 Oct 2021 19:29:51s +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 07 Oct 2021 19:29:51 +0200
 
 sdrangel (6.16.6-1) unstable; urgency=medium
 
