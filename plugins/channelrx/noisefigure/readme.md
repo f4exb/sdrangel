@@ -51,7 +51,7 @@ Note that some device settings are scaled in the SDRangel GUI compared to the va
 
 <h3>8: Sweep range</h3>
 
-Specifies the values of setting (E.g. centerFrequency of gain) to measure the noise figure at. This can be specified as a:
+Specifies the values of the setting (E.g. centerFrequency of gain) to measure the noise figure at.
 
 When the sweep setting (7) is "centerFrequency":
 
@@ -133,9 +133,9 @@ A DC blocking capacitor at the output of the noise source for SDRs with a bias t
 The noise source may be a device from the 346 family (E.g. Keysight 346B or NoiseCom NC346), but also can be a lower cost device that is supplied with accurate ENR calibration data.
 (Inaccurate ENR values can significantly impact the calculated NF).
 The ENR calibration data indicates the difference in power output when the noise source is powered off compared with when it is powered on. As the first setup step, this calibration data should
-be entered in to the ENR dialog (11).
+be entered in to the ENR dialog (12).
 
-Next, we need to setup how the SDRangel powers on and off the noise source. This is set in the Noise Source Control Dialog (12).
+Next, we need to setup how the SDRangel powers on and off the noise source. This is set in the Noise Source Control Dialog (13).
 For a 346 device, a programmable power supply outputting 28V would be used. Providing the VISA libraries are installed (see below), we can send SCPI commands to enable and disable the PSU's output.
 As an example, for a Rigol DP832, we can set the channel 1 output to be 28V and enable it, with:
 
@@ -146,9 +146,9 @@ And then disable it with:
 
     :OUTPut:STATe CH1,OFF
 
-The final settings needed are the frequencies to measure the NF at. This can be set with (7), to step through a range or a list of specific point frequencies.
+The final settings needed are the frequencies or gains to measure the NF at. This can be set with (7) and (8), to step through a range or a list of specific values.
 
-To start the measurement, press (8).
+To start the measurement, press (9).
 
 <h2>Examples</h2>
 
