@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>404</width>
-    <height>642</height>
+    <height>693</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -43,7 +43,7 @@
      <x>0</x>
      <y>0</y>
      <width>390</width>
-     <height>151</height>
+     <height>181</height>
     </rect>
    </property>
    <property name="minimumSize">
@@ -367,6 +367,13 @@
        </widget>
       </item>
       <item>
+       <widget class="Line" name="line_8">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="Line" name="line_7">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
@@ -381,6 +388,56 @@
        <enum>Qt::Horizontal</enum>
       </property>
      </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QLabel" name="parameterLabel">
+        <property name="text">
+         <string>Sweep</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="setting">
+        <property name="minimumSize">
+         <size>
+          <width>160</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Device parameter to sweep</string>
+        </property>
+        <property name="editable">
+         <bool>true</bool>
+        </property>
+        <item>
+         <property name="text">
+          <string>centerFrequency</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>gain</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
     </item>
     <item>
      <layout class="QHBoxLayout" name="freqLayout">
@@ -502,18 +559,24 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="frequenciesLabel">
-        <property name="text">
-         <string>Freqs</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="frequencies">
+       <widget class="QLineEdit" name="list">
         <property name="toolTip">
          <string>List of frequencies in MHz to measure NF at</string>
         </property>
        </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_4">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </item>
@@ -618,7 +681,7 @@
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>450</y>
+     <y>500</y>
      <width>391</width>
      <height>171</height>
     </rect>
@@ -712,7 +775,7 @@
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>160</y>
+     <y>210</y>
      <width>391</width>
      <height>268</height>
     </rect>
@@ -867,7 +930,7 @@
   <tabstop>stop</tabstop>
   <tabstop>steps</tabstop>
   <tabstop>step</tabstop>
-  <tabstop>frequencies</tabstop>
+  <tabstop>list</tabstop>
   <tabstop>startStop</tabstop>
   <tabstop>saveResults</tabstop>
   <tabstop>clearResults</tabstop>
@@ -877,7 +940,6 @@
   <tabstop>openReference</tabstop>
   <tabstop>clearReference</tabstop>
   <tabstop>chart</tabstop>
-  <tabstop>results</tabstop>
  </tabstops>
  <resources>
   <include location="../../../sdrgui/resources/res.qrc"/>

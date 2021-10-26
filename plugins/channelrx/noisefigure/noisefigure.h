@@ -90,29 +90,29 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        double getFrequency() const { return m_frequency; }
+        double getSweepValue() const { return m_sweepValue; }
         double getNF() const { return m_nf; }
         double getTemp() const { return m_temp; }
         double getY() const { return m_y; }
         double getENR() const { return m_enr; }
         double getFloor() const { return m_floor; }
 
-        static MsgNFMeasurement* create(double frequency, double nf, double temp, double y, double enr, double floor)
+        static MsgNFMeasurement* create(double sweepValue, double nf, double temp, double y, double enr, double floor)
         {
-            return new MsgNFMeasurement(frequency, nf, temp, y, enr, floor);
+            return new MsgNFMeasurement(sweepValue, nf, temp, y, enr, floor);
         }
 
     private:
-        double m_frequency; // In MHz
+        double m_sweepValue;// In MHz for centerFrequency
         double m_nf;        // In dB
         double m_temp;      // In Kelvin
         double m_y;         // In dB
         double m_enr;       // In dB
         double m_floor;     // In dBm
 
-        MsgNFMeasurement(double frequency, double nf, double temp, double y, double enr, double floor) :
+        MsgNFMeasurement(double sweepValue, double nf, double temp, double y, double enr, double floor) :
             Message(),
-            m_frequency(frequency),
+            m_sweepValue(sweepValue),
             m_nf(nf),
             m_temp(temp),
             m_y(y),
@@ -257,17 +257,17 @@ private:
 
     enum State {
         IDLE,
-        SET_FREQUENCY,
+        SET_SWEEP_VALUE,
         POWER_ON,
         MEASURE_ON,
         POWER_OFF,
         MEASURE_OFF,
         COMPLETE
     } m_state;
-    double m_measurementFrequency;      // In Hz
-    QList<double> m_freqs;              // In Hz
-    int m_step;                         // Current frequency step
-    int m_steps;                        // Number of frequencies to test
+    double m_sweepValue;                // Current sweep value
+    QList<double> m_values;             // Sweep values
+    int m_step;                         // Current sweep step
+    int m_steps;                        // Number of settings to sweep
     double m_onPower;
     double m_offPower;
     ViSession m_session;

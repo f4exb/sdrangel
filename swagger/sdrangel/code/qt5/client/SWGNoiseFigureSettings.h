@@ -51,14 +51,14 @@ public:
     qint32 getFftCount();
     void setFftCount(qint32 fft_count);
 
-    qint32 getFrequencySpec();
-    void setFrequencySpec(qint32 frequency_spec);
+    qint32 getSweepSpec();
+    void setSweepSpec(qint32 sweep_spec);
 
-    float getStartFrequency();
-    void setStartFrequency(float start_frequency);
+    float getStartValue();
+    void setStartValue(float start_value);
 
-    float getStopFrequency();
-    void setStopFrequency(float stop_frequency);
+    float getStopValue();
+    void setStopValue(float stop_value);
 
     qint32 getSteps();
     void setSteps(qint32 steps);
@@ -66,8 +66,11 @@ public:
     float getStep();
     void setStep(float step);
 
-    QString* getFrequencies();
-    void setFrequencies(QString* frequencies);
+    QString* getList();
+    void setList(QString* list);
+
+    QString* getSetting();
+    void setSetting(QString* setting);
 
     QString* getVisaDevice();
     void setVisaDevice(QString* visa_device);
@@ -124,14 +127,14 @@ private:
     qint32 fft_count;
     bool m_fft_count_isSet;
 
-    qint32 frequency_spec;
-    bool m_frequency_spec_isSet;
+    qint32 sweep_spec;
+    bool m_sweep_spec_isSet;
 
-    float start_frequency;
-    bool m_start_frequency_isSet;
+    float start_value;
+    bool m_start_value_isSet;
 
-    float stop_frequency;
-    bool m_stop_frequency_isSet;
+    float stop_value;
+    bool m_stop_value_isSet;
 
     qint32 steps;
     bool m_steps_isSet;
@@ -139,8 +142,11 @@ private:
     float step;
     bool m_step_isSet;
 
-    QString* frequencies;
-    bool m_frequencies_isSet;
+    QString* list;
+    bool m_list_isSet;
+
+    QString* setting;
+    bool m_setting_isSet;
 
     QString* visa_device;
     bool m_visa_device_isSet;

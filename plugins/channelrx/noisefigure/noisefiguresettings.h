@@ -50,16 +50,16 @@ struct NoiseFigureSettings
     int m_fftSize;
     Real m_fftCount;        //!< Number of FFT bins to average
 
-    enum FrequencySpec {
+    enum SweepSpec {
         RANGE,
         STEP,
         LIST
-    } m_frequencySpec;
-    double m_startFrequency;
-    double m_stopFrequency;
+    } m_sweepSpec;
+    double m_startValue;
+    double m_stopValue;
     int m_steps;
     double m_step;
-    QString m_frequencies;
+    QString m_sweepList;
 
     QString m_visaDevice;
     QString m_powerOnSCPI;
@@ -73,6 +73,8 @@ struct NoiseFigureSettings
         LINEAR,
         BARYCENTRIC
     } m_interpolation;
+
+    QString m_setting;    //<! Device setting to sweep
 
     quint32 m_rgbColor;
     QString m_title;

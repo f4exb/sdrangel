@@ -40,12 +40,12 @@ void NoiseFigureSettings::resetToDefaults()
     m_inputFrequencyOffset = 0;
     m_fftSize = 64;
     m_fftCount = 20000.0f;
-    m_frequencySpec = RANGE;
-    m_startFrequency = 430.0;
-    m_stopFrequency = 440.0;
+    m_sweepSpec = RANGE;
+    m_startValue = 430.0;
+    m_stopValue = 440.0;
     m_steps = 3;
     m_step = 5.0f;
-    m_frequencies = DEFAULT_FREQUENCIES;
+    m_sweepList = DEFAULT_FREQUENCIES;
     m_visaDevice = DEFAULT_VISA_DEVICE;
     m_powerOnSCPI = DEFAULT_POWER_ON;
     m_powerOffSCPI = DEFAULT_POWER_OFF;
@@ -55,6 +55,7 @@ void NoiseFigureSettings::resetToDefaults()
     qDeleteAll(m_enr);
     m_enr << new ENR(1000.0, 15.0);
     m_interpolation = LINEAR;
+    m_setting = "centerFrequency";
     m_rgbColor = QColor(0, 100, 200).rgb();
     m_title = "Noise Figure";
     m_streamIndex = 0;
@@ -79,12 +80,12 @@ QByteArray NoiseFigureSettings::serialize() const
     s.writeS32(2, m_fftSize);
     s.writeFloat(3, m_fftCount);
 
-    s.writeS32(4, (int)m_frequencySpec);
-    s.writeDouble(5, m_startFrequency);
-    s.writeDouble(6, m_stopFrequency);
+    s.writeS32(4, (int)m_sweepSpec);
+    s.writeDouble(5, m_startValue);
+    s.writeDouble(6, m_stopValue);
     s.writeS32(7, m_steps);
     s.writeDouble(8, m_step);
-    s.writeString(9, m_frequencies);
+    s.writeString(9, m_sweepList);
 
     s.writeString(10, m_visaDevice);
     s.writeString(11, m_powerOnSCPI);
@@ -108,6 +109,8 @@ QByteArray NoiseFigureSettings::serialize() const
     s.writeU32(25, m_reverseAPIChannelIndex);
 
     s.writeS32(26, (int)m_interpolation);
+
+    s.writeString(27, m_setting);
 
     for (int i = 0; i < NOISEFIGURE_COLUMNS; i++) {
         s.writeS32(100 + i, m_resultsColumnIndexes[i]);
@@ -140,12 +143,12 @@ bool NoiseFigureSettings::deserialize(const QByteArray& data)
         d.readS32(2, &m_fftSize, 64);
         d.readFloat(3, &m_fftCount, 10000.0f);
 
-        d.readS32(4, (int*)&m_frequencySpec, NoiseFigureSettings::RANGE);
-        d.readDouble(5, &m_startFrequency, 430.0);
-        d.readDouble(6, &m_stopFrequency, 440.0);
+        d.readS32(4, (int*)&m_sweepSpec, NoiseFigureSettings::RANGE);
+        d.readDouble(5, &m_startValue, 430.0);
+        d.readDouble(6, &m_stopValue, 440.0);
         d.readS32(7, &m_steps, 3);
         d.readDouble(8, &m_step, 5.0);
-        d.readString(9, &m_frequencies, DEFAULT_FREQUENCIES);
+        d.readString(9, &m_sweepList, DEFAULT_FREQUENCIES);
 
         d.readString(10, &m_visaDevice, DEFAULT_VISA_DEVICE);
         d.readString(11, &m_powerOnSCPI, DEFAULT_POWER_ON);
@@ -178,6 +181,8 @@ bool NoiseFigureSettings::deserialize(const QByteArray& data)
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
 
         d.readS32(26, (int*)&m_interpolation, LINEAR);
+
+        d.readString(27, &m_setting, "centerFrequency");
 
         for (int i = 0; i < NOISEFIGURE_COLUMNS; i++) {
             d.readS32(100 + i, &m_resultsColumnIndexes[i], i);

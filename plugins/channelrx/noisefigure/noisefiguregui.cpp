@@ -66,7 +66,7 @@ void NoiseFigureGUI::resizeTable()
     // Trailing spaces are for sort arrow
     int row = ui->results->rowCount();
     ui->results->setRowCount(row + 1);
-    ui->results->setItem(row, RESULTS_COL_FREQ, new QTableWidgetItem("2000.000"));
+    ui->results->setItem(row, RESULTS_COL_SETTING, new QTableWidgetItem("2000.000"));
     ui->results->setItem(row, RESULTS_COL_NF, new QTableWidgetItem("10.00"));
     ui->results->setItem(row, RESULTS_COL_TEMP, new QTableWidgetItem("10000"));
     ui->results->setItem(row, RESULTS_COL_Y, new QTableWidgetItem("10.00"));
@@ -78,24 +78,30 @@ void NoiseFigureGUI::resizeTable()
 
 void NoiseFigureGUI::measurementReceived(NoiseFigure::MsgNFMeasurement& report)
 {
+    if (m_settings.m_setting == "centerFrequency") {
+        ui->results->horizontalHeaderItem(0)->setText("Freq (MHz)");
+    } else {
+        ui->results->horizontalHeaderItem(0)->setText(m_settings.m_setting);
+    }
+
     ui->results->setSortingEnabled(false);
     int row = ui->results->rowCount();
     ui->results->setRowCount(row + 1);
 
-    QTableWidgetItem *freqItem = new QTableWidgetItem();
+    QTableWidgetItem *sweepItem = new QTableWidgetItem();
     QTableWidgetItem *nfItem = new QTableWidgetItem();
     QTableWidgetItem *tempItem = new QTableWidgetItem();
     QTableWidgetItem *yItem = new QTableWidgetItem();
     QTableWidgetItem *enrItem = new QTableWidgetItem();
     QTableWidgetItem *floorItem = new QTableWidgetItem();
-    ui->results->setItem(row, RESULTS_COL_FREQ, freqItem);
+    ui->results->setItem(row, RESULTS_COL_SETTING, sweepItem);
     ui->results->setItem(row, RESULTS_COL_NF, nfItem);
     ui->results->setItem(row, RESULTS_COL_TEMP, tempItem);
     ui->results->setItem(row, RESULTS_COL_Y, yItem);
     ui->results->setItem(row, RESULTS_COL_ENR, enrItem);
     ui->results->setItem(row, RESULTS_COL_FLOOR, floorItem);
 
-    freqItem->setData(Qt::DisplayRole, report.getFrequency());
+    sweepItem->setData(Qt::DisplayRole, report.getSweepValue());
     nfItem->setData(Qt::DisplayRole, report.getNF());
     tempItem->setData(Qt::DisplayRole, report.getTemp());
     yItem->setData(Qt::DisplayRole, report.getY());
@@ -134,10 +140,10 @@ void NoiseFigureGUI::plotChart()
     series->setName("Measurement");
     for (int i = 0; i < ui->results->rowCount(); i++)
     {
-        double freq = ui->results->item(i, RESULTS_COL_FREQ)->data(Qt::DisplayRole).toDouble();
+        double sweepValue = ui->results->item(i, RESULTS_COL_SETTING)->data(Qt::DisplayRole).toDouble();
         double val = ui->results->item(i, ui->chartSelect->currentIndex() + RESULTS_COL_NF)->data(Qt::DisplayRole).toDouble();
 
-        series->append(freq, val);
+        series->append(sweepValue, val);
     }
 
     QValueAxis *xAxis = new QValueAxis();
@@ -146,7 +152,11 @@ void NoiseFigureGUI::plotChart()
     m_chart->addAxis(xAxis, Qt::AlignBottom);
     m_chart->addAxis(yAxis, Qt::AlignLeft);
 
-    xAxis->setTitleText("Frequency (MHz)");
+    if (m_settings.m_setting == "centerFrequency") {
+        xAxis->setTitleText("Frequency (MHz)");
+    } else {
+        xAxis->setTitleText(m_settings.m_setting);
+    }
     yAxis->setTitleText(ui->chartSelect->currentText());
 
     m_chart->addSeries(series);
@@ -341,11 +351,17 @@ void NoiseFigureGUI::on_fftCount_valueChanged(int value)
     applySettings();
 }
 
+void NoiseFigureGUI::on_setting_currentTextChanged(const QString& text)
+{
+    m_settings.m_setting = text;
+    applySettings();
+}
+
 void NoiseFigureGUI::updateFreqWidgets()
 {
-    bool range = m_settings.m_frequencySpec == NoiseFigureSettings::RANGE;
-    bool step = m_settings.m_frequencySpec == NoiseFigureSettings::STEP;
-    bool list = m_settings.m_frequencySpec == NoiseFigureSettings::LIST;
+    bool range = m_settings.m_sweepSpec == NoiseFigureSettings::RANGE;
+    bool step = m_settings.m_sweepSpec == NoiseFigureSettings::STEP;
+    bool list = m_settings.m_sweepSpec == NoiseFigureSettings::LIST;
     ui->startLabel->setVisible(range || step);
     ui->start->setVisible(range || step);
     ui->stopLabel->setVisible(range || step);
@@ -354,26 +370,25 @@ void NoiseFigureGUI::updateFreqWidgets()
     ui->steps->setVisible(range);
     ui->stepLabel->setVisible(step);
     ui->step->setVisible(step);
-    ui->frequenciesLabel->setVisible(list);
-    ui->frequencies->setVisible(list);
+    ui->list->setVisible(list);
 }
 
 void NoiseFigureGUI::on_frequencySpec_currentIndexChanged(int index)
 {
-    m_settings.m_frequencySpec = (NoiseFigureSettings::FrequencySpec)index;
+    m_settings.m_sweepSpec = (NoiseFigureSettings::SweepSpec)index;
     updateFreqWidgets();
     applySettings();
 }
 
 void NoiseFigureGUI::on_start_valueChanged(double value)
 {
-    m_settings.m_startFrequency = value;
+    m_settings.m_startValue = value;
     applySettings();
 }
 
 void NoiseFigureGUI::on_stop_valueChanged(double value)
 {
-    m_settings.m_stopFrequency = value;
+    m_settings.m_stopValue = value;
     applySettings();
 }
 
@@ -389,9 +404,9 @@ void NoiseFigureGUI::on_step_valueChanged(double value)
     applySettings();
 }
 
-void NoiseFigureGUI::on_frequencies_editingFinished()
+void NoiseFigureGUI::on_list_editingFinished()
 {
-    m_settings.m_frequencies = ui->frequencies->text().trimmed();
+    m_settings.m_sweepList = ui->list->text().trimmed();
     applySettings();
 }
 
@@ -441,7 +456,7 @@ void NoiseFigureGUI::on_saveResults_clicked()
             QTextStream out(&file);
 
             // Create a CSV file from the values in the table
-            out << "Frequency (MHz),NF (dB),Noise Temp (K),Y (dB),ENR (dB)\n";
+            out << ui->results->horizontalHeaderItem(0)->text() << ",NF (dB),Noise Temp (K),Y (dB),ENR (dB)\n";
             for (int i = 0; i < ui->results->rowCount(); i++)
             {
                 for (int j = 0; j < NOISEFIGURE_COLUMNS; j++)
@@ -712,13 +727,15 @@ void NoiseFigureGUI::displaySettings()
     ui->fftCountText->setText(QString("%1k").arg(m_settings.m_fftCount / 1000));
     ui->fftCount->setValue(m_settings.m_fftCount / 10000);
 
-    ui->frequencySpec->setCurrentIndex((int)m_settings.m_frequencySpec);
+    ui->setting->setCurrentText(m_settings.m_setting);
+
+    ui->frequencySpec->setCurrentIndex((int)m_settings.m_sweepSpec);
     updateFreqWidgets();
-    ui->start->setValue(m_settings.m_startFrequency);
-    ui->stop->setValue(m_settings.m_stopFrequency);
+    ui->start->setValue(m_settings.m_startValue);
+    ui->stop->setValue(m_settings.m_stopValue);
     ui->steps->setValue(m_settings.m_steps);
     ui->step->setValue(m_settings.m_step);
-    ui->frequencies->setText(m_settings.m_frequencies);
+    ui->list->setText(m_settings.m_sweepList);
 
     ui->fftSize->setCurrentIndex(log2(m_settings.m_fftSize) - 6);
     updateBW();
