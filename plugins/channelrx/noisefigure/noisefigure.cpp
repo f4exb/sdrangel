@@ -200,6 +200,7 @@ double NoiseFigure::calcENR(double frequency)
 // FSM for running measurements over multiple frequencies
 void NoiseFigure::nextState()
 {
+    double scaleFactor = m_settings.m_setting == "centerFrequency" ? 1e6 : 1.0;
     switch (m_state)
     {
     case IDLE:
@@ -211,69 +212,69 @@ void NoiseFigure::nextState()
             return;
         }
         m_step = 0;
-        if (m_settings.m_frequencySpec == NoiseFigureSettings::LIST)
+        if (m_settings.m_sweepSpec == NoiseFigureSettings::LIST)
         {
-            // Create list of frequencies from string
+            // Create list of sweep values from string
             QRegExp separator("[( |,|\t|)]");
-            QStringList freqStrings = m_settings.m_frequencies.trimmed().split(separator);
-            m_freqs.clear();
-            for (int i = 0; i < freqStrings.size(); i++)
+            QStringList valueStrings = m_settings.m_sweepList.trimmed().split(separator);
+            m_values.clear();
+            for (int i = 0; i < valueStrings.size(); i++)
             {
-                QString freqString = freqStrings[i].trimmed();
-                if (!freqString.isEmpty())
+                QString valueString = valueStrings[i].trimmed();
+                if (!valueString.isEmpty())
                 {
                     bool ok;
-                    double freq = freqString.toDouble(&ok);
+                    double value = valueString.toDouble(&ok);
                     if (ok) {
-                        m_freqs.append(freq * 1e6);
+                        m_values.append(value * scaleFactor);
                     } else {
-                        qDebug() << "NoiseFigure::nextState: Invalid frequency: " << freqString;
+                        qDebug() << "NoiseFigure::nextState: Invalid value: " << valueString;
                     }
                 }
             }
-            if (m_freqs.size() == 0)
+            if (m_values.size() == 0)
             {
-                qDebug() << "NoiseFigure::nextState: No frequencies in list";
+                qDebug() << "NoiseFigure::nextState: Sweep list is empty";
                 if (getMessageQueueToGUI()) {
-                    getMessageQueueToGUI()->push(MsgFinished::create("No frequencies in list"));
+                    getMessageQueueToGUI()->push(MsgFinished::create("Sweep list is empty"));
                 }
                 return;
             }
-            // Set start frequency and number of frequencies to step through
-            m_measurementFrequency = m_freqs[0];
-            m_steps = m_freqs.size();
+            // Set start value and number of values to step through
+            m_sweepValue = m_values[0];
+            m_steps = m_values.size();
         }
         else
         {
-            if (m_settings.m_stopFrequency < m_settings.m_startFrequency)
+            if (m_settings.m_stopValue < m_settings.m_startValue)
             {
                 if (getMessageQueueToGUI()) {
-                    getMessageQueueToGUI()->push(MsgFinished::create("Stop frequency must be greater or equal to start frequency"));
+                    getMessageQueueToGUI()->push(MsgFinished::create("Stop value must be greater or equal to start value"));
                 }
                 return;
             }
-            // Set start frequency and number of frequencies to step through
-            m_measurementFrequency = m_settings.m_startFrequency * 1.e6;
-            if (m_settings.m_frequencySpec == NoiseFigureSettings::RANGE) {
+            // Set start value and number of values to step through
+            m_sweepValue = m_settings.m_startValue * scaleFactor;
+            if (m_settings.m_sweepSpec == NoiseFigureSettings::RANGE) {
                 m_steps = m_settings.m_steps;
             } else {
-                m_steps = (m_settings.m_stopFrequency - m_settings.m_startFrequency) / m_settings.m_step + 1;
+                m_steps = (m_settings.m_stopValue - m_settings.m_startValue) / m_settings.m_step + 1;
             }
         }
-        m_state = SET_FREQUENCY;
+        m_state = SET_SWEEP_VALUE;
         QTimer::singleShot(0, this, SLOT(nextState()));
         break;
 
-    case SET_FREQUENCY:
-        // Set radio centre frequency
-        if (ChannelWebAPIUtils::setCenterFrequency(getDeviceSetIndex(), m_measurementFrequency))
+    case SET_SWEEP_VALUE:
+        // Set device setting that is being swept
+        if (ChannelWebAPIUtils::patchDeviceSetting(getDeviceSetIndex(), m_settings.m_setting, m_sweepValue))
         {
-            qDebug() << "NoiseFigure::nextState: Set center frequency: " << m_measurementFrequency;
+            qDebug() << "NoiseFigure::nextState: Set " << m_settings.m_setting << " to " << m_sweepValue;
             m_state = POWER_ON;
             QTimer::singleShot(100, this, SLOT(nextState()));
         } else
         {
-            qDebug() << "NoiseFigure::nextState: Unable to set center frequency: " << m_measurementFrequency;
+            qDebug() << "NoiseFigure::nextState: Unable to set " << m_settings.m_setting << " to " << m_sweepValue;
         }
         break;
 
@@ -309,7 +310,7 @@ void NoiseFigure::nextState()
         double k = 1.38064852e-23;
         double bw = 1;
         double y = m_onPower - m_offPower;
-        double enr = calcENR(m_measurementFrequency/1e6);
+        double enr = calcENR(m_centerFrequency/1e6);
         double nf = 10.0*log10(pow(10.0, enr/10.0)/(pow(10.0, y/10.0)-1.0));
         double temp = t*(pow(10.0, nf/10.0)-1.0);
         double floor = 10.0*log10(1000.0*k*t) + nf + 10*log10(bw);
@@ -317,14 +318,14 @@ void NoiseFigure::nextState()
         // Send result to GUI
         if (getMessageQueueToGUI())
         {
-            MsgNFMeasurement *msg = MsgNFMeasurement::create(m_measurementFrequency/1e6, nf, temp, y, enr, floor);
+            MsgNFMeasurement *msg = MsgNFMeasurement::create(m_sweepValue/scaleFactor, nf, temp, y, enr, floor);
             getMessageQueueToGUI()->push(msg);
         }
 
         m_step++;
         if (m_step >= m_steps)
         {
-            // All frequencies measured
+            // All values swept
             closeVISADevice();
             m_state = IDLE;
             if (getMessageQueueToGUI()) {
@@ -333,15 +334,15 @@ void NoiseFigure::nextState()
         }
         else
         {
-            // Move to next frequency
-            if (m_settings.m_frequencySpec == NoiseFigureSettings::LIST) {
-                m_measurementFrequency = m_freqs[m_step];
-            } else if (m_settings.m_frequencySpec == NoiseFigureSettings::RANGE) {
-                m_measurementFrequency += 1e6 * (m_settings.m_stopFrequency - m_settings.m_startFrequency) / (m_settings.m_steps - 1);
+            // Move to next value in sweep
+            if (m_settings.m_sweepSpec == NoiseFigureSettings::LIST) {
+                m_sweepValue = m_values[m_step];
+            } else if (m_settings.m_sweepSpec == NoiseFigureSettings::RANGE) {
+                m_sweepValue += scaleFactor * (m_settings.m_stopValue - m_settings.m_startValue) / (m_settings.m_steps - 1);
             } else {
-                m_measurementFrequency += m_settings.m_step * 1e6;
+                m_sweepValue += m_settings.m_step * scaleFactor;
             }
-            m_state = SET_FREQUENCY;
+            m_state = SET_SWEEP_VALUE;
             QTimer::singleShot(0, this, SLOT(nextState()));
         }
         break;
@@ -454,12 +455,13 @@ void NoiseFigure::applySettings(const NoiseFigureSettings& settings, bool force)
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
             << " m_fftSize: " << settings.m_fftSize
             << " m_fftCount: " << settings.m_fftCount
-            << " m_frequencySpec: " << settings.m_frequencySpec
-            << " m_startFrequency: " << settings.m_startFrequency
-            << " m_stopFrequency: " << settings.m_stopFrequency
+            << " m_sweepSpec: " << settings.m_sweepSpec
+            << " m_startValue: " << settings.m_startValue
+            << " m_stopValue: " << settings.m_stopValue
             << " m_steps: " << settings.m_steps
             << " m_step: " << settings.m_step
-            << " m_frequencies: " << settings.m_frequencies
+            << " m_sweepList: " << settings.m_sweepList
+            << " m_setting: " << settings.m_setting
             << " m_visaDevice: " << settings.m_visaDevice
             << " m_powerOnSCPI: " << settings.m_powerOnSCPI
             << " m_powerOffSCPI: " << settings.m_powerOffSCPI
@@ -578,14 +580,14 @@ void NoiseFigure::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("fftSize")) {
         settings.m_fftSize = response.getNoiseFigureSettings()->getFftSize();
     }
-    if (channelSettingsKeys.contains("frequencySpec")) {
-        settings.m_frequencySpec = (NoiseFigureSettings::FrequencySpec)response.getNoiseFigureSettings()->getFrequencySpec();
+    if (channelSettingsKeys.contains("sweepSpec")) {
+        settings.m_sweepSpec = (NoiseFigureSettings::SweepSpec)response.getNoiseFigureSettings()->getSweepSpec();
     }
-    if (channelSettingsKeys.contains("startFrequency")) {
-        settings.m_startFrequency = response.getNoiseFigureSettings()->getStartFrequency();
+    if (channelSettingsKeys.contains("startValue")) {
+        settings.m_startValue = response.getNoiseFigureSettings()->getStartValue();
     }
-    if (channelSettingsKeys.contains("stopFrequency")) {
-        settings.m_stopFrequency = response.getNoiseFigureSettings()->getStopFrequency();
+    if (channelSettingsKeys.contains("stopValue")) {
+        settings.m_stopValue = response.getNoiseFigureSettings()->getStopValue();
     }
     if (channelSettingsKeys.contains("steps")) {
         settings.m_steps = response.getNoiseFigureSettings()->getSteps();
@@ -593,8 +595,11 @@ void NoiseFigure::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("step")) {
         settings.m_step = response.getNoiseFigureSettings()->getStep();
     }
-    if (channelSettingsKeys.contains("frequencies")) {
-        settings.m_frequencies = *response.getNoiseFigureSettings()->getFrequencies();
+    if (channelSettingsKeys.contains("list")) {
+        settings.m_sweepList = *response.getNoiseFigureSettings()->getList();
+    }
+    if (channelSettingsKeys.contains("setting")) {
+        settings.m_setting = *response.getNoiseFigureSettings()->getSetting();
     }
     if (channelSettingsKeys.contains("visaDevice")) {
         settings.m_visaDevice = *response.getNoiseFigureSettings()->getVisaDevice();
@@ -715,11 +720,14 @@ void NoiseFigure::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("fftCount") || force) {
         swgNoiseFigureSettings->setFftCount(settings.m_fftCount);
     }
-    if (channelSettingsKeys.contains("frequencySpec") || force) {
-        swgNoiseFigureSettings->setFrequencySpec((int)settings.m_frequencySpec);
+    if (channelSettingsKeys.contains("sweepSpec") || force) {
+        swgNoiseFigureSettings->setSweepSpec((int)settings.m_sweepSpec);
     }
-    if (channelSettingsKeys.contains("stopFrequency") || force) {
-        swgNoiseFigureSettings->setStopFrequency(settings.m_stopFrequency);
+    if (channelSettingsKeys.contains("startValue") || force) {
+        swgNoiseFigureSettings->setStartValue(settings.m_startValue);
+    }
+    if (channelSettingsKeys.contains("stopValue") || force) {
+        swgNoiseFigureSettings->setStopValue(settings.m_stopValue);
     }
     if (channelSettingsKeys.contains("steps") || force) {
         swgNoiseFigureSettings->setSteps(settings.m_steps);
@@ -727,8 +735,11 @@ void NoiseFigure::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("step") || force) {
         swgNoiseFigureSettings->setStep(settings.m_step);
     }
-    if (channelSettingsKeys.contains("frequencies") || force) {
-        swgNoiseFigureSettings->setFrequencies(new QString(settings.m_frequencies));
+    if (channelSettingsKeys.contains("list") || force) {
+        swgNoiseFigureSettings->setList(new QString(settings.m_sweepList));
+    }
+    if (channelSettingsKeys.contains("setting") || force) {
+        swgNoiseFigureSettings->setSetting(new QString(settings.m_setting));
     }
     if (channelSettingsKeys.contains("visaDevice") || force) {
         swgNoiseFigureSettings->setVisaDevice(new QString(settings.m_visaDevice));

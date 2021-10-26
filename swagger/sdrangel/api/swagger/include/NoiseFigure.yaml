@@ -8,12 +8,13 @@ NoiseFigureSettings:
       type: integer
     fftCount:
       type: integer
-    frequencySpec:
+    sweepSpec:
+      description: "(0 - Range, 1 - Step, 2 - List)"
       type: integer
-    startFrequency:
+    startValue:
       type: number
       format: float
-    stopFrequency:
+    stopValue:
       type: number
       format: float
     steps:
@@ -21,7 +22,10 @@ NoiseFigureSettings:
     step:
       type: number
       format: float
-    frequencies:
+    list:
+      type: string
+    setting:
+      description: "The device setting to sweep (E.g. centerFrequency or gain)"
       type: string
     visaDevice:
       type: string

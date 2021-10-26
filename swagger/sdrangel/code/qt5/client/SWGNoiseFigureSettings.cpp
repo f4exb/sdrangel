@@ -34,18 +34,20 @@ SWGNoiseFigureSettings::SWGNoiseFigureSettings() {
     m_fft_size_isSet = false;
     fft_count = 0;
     m_fft_count_isSet = false;
-    frequency_spec = 0;
-    m_frequency_spec_isSet = false;
-    start_frequency = 0.0f;
-    m_start_frequency_isSet = false;
-    stop_frequency = 0.0f;
-    m_stop_frequency_isSet = false;
+    sweep_spec = 0;
+    m_sweep_spec_isSet = false;
+    start_value = 0.0f;
+    m_start_value_isSet = false;
+    stop_value = 0.0f;
+    m_stop_value_isSet = false;
     steps = 0;
     m_steps_isSet = false;
     step = 0.0f;
     m_step_isSet = false;
-    frequencies = nullptr;
-    m_frequencies_isSet = false;
+    list = nullptr;
+    m_list_isSet = false;
+    setting = nullptr;
+    m_setting_isSet = false;
     visa_device = nullptr;
     m_visa_device_isSet = false;
     power_on_scpi = nullptr;
@@ -88,18 +90,20 @@ SWGNoiseFigureSettings::init() {
     m_fft_size_isSet = false;
     fft_count = 0;
     m_fft_count_isSet = false;
-    frequency_spec = 0;
-    m_frequency_spec_isSet = false;
-    start_frequency = 0.0f;
-    m_start_frequency_isSet = false;
-    stop_frequency = 0.0f;
-    m_stop_frequency_isSet = false;
+    sweep_spec = 0;
+    m_sweep_spec_isSet = false;
+    start_value = 0.0f;
+    m_start_value_isSet = false;
+    stop_value = 0.0f;
+    m_stop_value_isSet = false;
     steps = 0;
     m_steps_isSet = false;
     step = 0.0f;
     m_step_isSet = false;
-    frequencies = new QString("");
-    m_frequencies_isSet = false;
+    list = new QString("");
+    m_list_isSet = false;
+    setting = new QString("");
+    m_setting_isSet = false;
     visa_device = new QString("");
     m_visa_device_isSet = false;
     power_on_scpi = new QString("");
@@ -140,8 +144,11 @@ SWGNoiseFigureSettings::cleanup() {
 
 
 
-    if(frequencies != nullptr) { 
-        delete frequencies;
+    if(list != nullptr) { 
+        delete list;
+    }
+    if(setting != nullptr) { 
+        delete setting;
     }
     if(visa_device != nullptr) { 
         delete visa_device;
@@ -190,17 +197,19 @@ SWGNoiseFigureSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&fft_count, pJson["fftCount"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&frequency_spec, pJson["frequencySpec"], "qint32", "");
+    ::SWGSDRangel::setValue(&sweep_spec, pJson["sweepSpec"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&start_frequency, pJson["startFrequency"], "float", "");
+    ::SWGSDRangel::setValue(&start_value, pJson["startValue"], "float", "");
     
-    ::SWGSDRangel::setValue(&stop_frequency, pJson["stopFrequency"], "float", "");
+    ::SWGSDRangel::setValue(&stop_value, pJson["stopValue"], "float", "");
     
     ::SWGSDRangel::setValue(&steps, pJson["steps"], "qint32", "");
     
     ::SWGSDRangel::setValue(&step, pJson["step"], "float", "");
     
-    ::SWGSDRangel::setValue(&frequencies, pJson["frequencies"], "QString", "QString");
+    ::SWGSDRangel::setValue(&list, pJson["list"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&setting, pJson["setting"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&visa_device, pJson["visaDevice"], "QString", "QString");
     
@@ -255,14 +264,14 @@ SWGNoiseFigureSettings::asJsonObject() {
     if(m_fft_count_isSet){
         obj->insert("fftCount", QJsonValue(fft_count));
     }
-    if(m_frequency_spec_isSet){
-        obj->insert("frequencySpec", QJsonValue(frequency_spec));
+    if(m_sweep_spec_isSet){
+        obj->insert("sweepSpec", QJsonValue(sweep_spec));
     }
-    if(m_start_frequency_isSet){
-        obj->insert("startFrequency", QJsonValue(start_frequency));
+    if(m_start_value_isSet){
+        obj->insert("startValue", QJsonValue(start_value));
     }
-    if(m_stop_frequency_isSet){
-        obj->insert("stopFrequency", QJsonValue(stop_frequency));
+    if(m_stop_value_isSet){
+        obj->insert("stopValue", QJsonValue(stop_value));
     }
     if(m_steps_isSet){
         obj->insert("steps", QJsonValue(steps));
@@ -270,8 +279,11 @@ SWGNoiseFigureSettings::asJsonObject() {
     if(m_step_isSet){
         obj->insert("step", QJsonValue(step));
     }
-    if(frequencies != nullptr && *frequencies != QString("")){
-        toJsonValue(QString("frequencies"), frequencies, obj, QString("QString"));
+    if(list != nullptr && *list != QString("")){
+        toJsonValue(QString("list"), list, obj, QString("QString"));
+    }
+    if(setting != nullptr && *setting != QString("")){
+        toJsonValue(QString("setting"), setting, obj, QString("QString"));
     }
     if(visa_device != nullptr && *visa_device != QString("")){
         toJsonValue(QString("visaDevice"), visa_device, obj, QString("QString"));
@@ -350,33 +362,33 @@ SWGNoiseFigureSettings::setFftCount(qint32 fft_count) {
 }
 
 qint32
-SWGNoiseFigureSettings::getFrequencySpec() {
-    return frequency_spec;
+SWGNoiseFigureSettings::getSweepSpec() {
+    return sweep_spec;
 }
 void
-SWGNoiseFigureSettings::setFrequencySpec(qint32 frequency_spec) {
-    this->frequency_spec = frequency_spec;
-    this->m_frequency_spec_isSet = true;
+SWGNoiseFigureSettings::setSweepSpec(qint32 sweep_spec) {
+    this->sweep_spec = sweep_spec;
+    this->m_sweep_spec_isSet = true;
 }
 
 float
-SWGNoiseFigureSettings::getStartFrequency() {
-    return start_frequency;
+SWGNoiseFigureSettings::getStartValue() {
+    return start_value;
 }
 void
-SWGNoiseFigureSettings::setStartFrequency(float start_frequency) {
-    this->start_frequency = start_frequency;
-    this->m_start_frequency_isSet = true;
+SWGNoiseFigureSettings::setStartValue(float start_value) {
+    this->start_value = start_value;
+    this->m_start_value_isSet = true;
 }
 
 float
-SWGNoiseFigureSettings::getStopFrequency() {
-    return stop_frequency;
+SWGNoiseFigureSettings::getStopValue() {
+    return stop_value;
 }
 void
-SWGNoiseFigureSettings::setStopFrequency(float stop_frequency) {
-    this->stop_frequency = stop_frequency;
-    this->m_stop_frequency_isSet = true;
+SWGNoiseFigureSettings::setStopValue(float stop_value) {
+    this->stop_value = stop_value;
+    this->m_stop_value_isSet = true;
 }
 
 qint32
@@ -400,13 +412,23 @@ SWGNoiseFigureSettings::setStep(float step) {
 }
 
 QString*
-SWGNoiseFigureSettings::getFrequencies() {
-    return frequencies;
+SWGNoiseFigureSettings::getList() {
+    return list;
 }
 void
-SWGNoiseFigureSettings::setFrequencies(QString* frequencies) {
-    this->frequencies = frequencies;
-    this->m_frequencies_isSet = true;
+SWGNoiseFigureSettings::setList(QString* list) {
+    this->list = list;
+    this->m_list_isSet = true;
+}
+
+QString*
+SWGNoiseFigureSettings::getSetting() {
+    return setting;
+}
+void
+SWGNoiseFigureSettings::setSetting(QString* setting) {
+    this->setting = setting;
+    this->m_setting_isSet = true;
 }
 
 QString*
@@ -563,13 +585,13 @@ SWGNoiseFigureSettings::isSet(){
         if(m_fft_count_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_frequency_spec_isSet){
+        if(m_sweep_spec_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_start_frequency_isSet){
+        if(m_start_value_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_stop_frequency_isSet){
+        if(m_stop_value_isSet){
             isObjectUpdated = true; break;
         }
         if(m_steps_isSet){
@@ -578,7 +600,10 @@ SWGNoiseFigureSettings::isSet(){
         if(m_step_isSet){
             isObjectUpdated = true; break;
         }
-        if(frequencies && *frequencies != QString("")){
+        if(list && *list != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(setting && *setting != QString("")){
             isObjectUpdated = true; break;
         }
         if(visa_device && *visa_device != QString("")){

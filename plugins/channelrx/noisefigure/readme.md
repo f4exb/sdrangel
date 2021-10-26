@@ -40,27 +40,44 @@ Displays the measurement bandwidth in Hz as determined by the FFT size (4) and t
 
 Determines the number of FFTs that are used to measure the average noise power. Using more FFTs can improve accuracy, at the expense of increased measurement time.
 
-<h3>7: Frequency range</h3>
+<h3>7: Sweep setting</h3>
 
-Specifies the frequencies to measure the noise figure at. This can be specified as a:
+The device setting to sweep should be entered. Predefined values include "centerFrequency" and "gain", but it is possible to
+enter any setting supported by the device (that is accessible via the Web API). Not all devices support the "gain" setting.
+
+When "centerFrequency" is set, sweep ranges and values are in MHz. For all other settings, the values are used without any scaling.
+Note that some device settings are scaled in the SDRangel GUI compared to the values in the Web API. For example, RTL SDR gain setting of
+40.2 in the GUI, is 402 in the Web API.
+
+<h3>8: Sweep range</h3>
+
+Specifies the values of the setting (E.g. centerFrequency of gain) to measure the noise figure at.
+
+When the sweep setting (7) is "centerFrequency":
 
 * Range - Specify start frequency in MHz, stop frequency in MHz and the number of steps. 100, 200, 5, would measure at 100MHz, 125MHz, 150MHz, 175MHz and 200MHz.
 * Step - Specify start frequency in MHz, stop frequency in MHz and the step frequency in MHz. 100, 200, 25, would measure at 100MHz, 125MHz, 150MHz, 175MHz and 200MHz.
 * List - Specify a space or comma separated list of frequencies in MHz. "100 125 150 175 200", would measure at 100MHz, 125MHz, 150MHz, 175MHz and 200MHz.
 
-<h3>8: Start/stop noise figure measurement</h3>
+For other settings:
+
+* Range - Specify start value, stop value and the number of steps. 100, 200, 5, would measure at 100, 125, 150, 175 and 200.
+* Step - Specify start value, stop value and the step. 100, 200, 25, would measure at 100, 125, 150, 175 and 200.
+* List - Specify a space or comma separated list of values. "100 125 150 175 200", would measure at 100, 125, 150, 175 and 200.
+
+<h3>9: Start/stop noise figure measurement</h3>
 
 Starts or stops the noise figure measurement. When starting a new measurement, existing results are cleared.
 
-<h3>9: Save results</h3>
+<h3>10: Save results</h3>
 
 Saves the results in the table to a .csv file.
 
-<h3>10: Clear results</h3>
+<h3>11: Clear results</h3>
 
 Clears the current results from the table and chart.
 
-<h3>11: Open ENR dialog</h3>
+<h3>12: Open ENR dialog</h3>
 
 Opens the ENR dialog to allow entering the Excess Noise Ratios (ENRs) for noise source. ENR specifies the difference in noise source power output in dB from when the source is powered off compared to when it is powered on.
 This typically varies with frequency, so values should be entered for each calibrated frequency. When a measurement is attempted at a frequency for which a value is not specified, an interpolated value will be used.
@@ -68,7 +85,7 @@ You can choose between linear and barycentric rational interpolation, and the di
 
 ![Noise figure ENR dialog](../../../doc/img/NoiseFigure_plugin_enr.png)
 
-<h3>12: Open Noise Source Control dialog</h3>
+<h3>13: Open Noise Source Control dialog</h3>
 
 Opens the noise source control dialog, to allow setting how the plugin turns the power to the noise source off and on. Two control methods are supported: A program or script can be run to turn the power on or off,
 or the VISA library (if installed) can be used to send SCPI commands to a programmable power supply or other test equipment. If a VISA library is not found, the VISA and SCPI fields will be disabled.
@@ -78,11 +95,11 @@ not too long so that tests over a large number of frequencies take a long time t
 
 ![Noise source control dialog](../../../doc/img/NoiseFigure_plugin_control.png)
 
-<h3>13: Results Table</h3>
+<h3>14: Results Table</h3>
 
 Displays measurement results.
 
-* Frequency - Frequency of the measurement in MHz.
+* Frequency/gain - Frequency of the measurement in MHz, gain or other setting as per (7).
 * NF - Calculated noise figure in dB.
 * T - Calculated noise temperature in Kelvin with a reference temperature of 290K.
 * Y - Measured Y factor in dB (difference in measured power when the noise source is on and off).
@@ -91,11 +108,11 @@ Displays measurement results.
 
 ![Noise figure results table](../../../doc/img/NoiseFigure_plugin_results.png)
 
-<h3>14: Results Chart</h3>
+<h3>15: Results Chart</h3>
 
 Plots the results (NF, T or Y) vs frequency as a line chart.
 
-<h3>15: Open reference data</h3>
+<h3>16: Open reference data</h3>
 
 A set of reference data in .csv format can be loaded for comparisons with the measurement results. The first column of the .csv file should contain frequency and the second the noise figure in dB. The first row should contain a header (E.g. "Frequency,NF" allthough the exact text is ignored).
 
@@ -116,9 +133,9 @@ A DC blocking capacitor at the output of the noise source for SDRs with a bias t
 The noise source may be a device from the 346 family (E.g. Keysight 346B or NoiseCom NC346), but also can be a lower cost device that is supplied with accurate ENR calibration data.
 (Inaccurate ENR values can significantly impact the calculated NF).
 The ENR calibration data indicates the difference in power output when the noise source is powered off compared with when it is powered on. As the first setup step, this calibration data should
-be entered in to the ENR dialog (11).
+be entered in to the ENR dialog (12).
 
-Next, we need to setup how the SDRangel powers on and off the noise source. This is set in the Noise Source Control Dialog (12).
+Next, we need to setup how the SDRangel powers on and off the noise source. This is set in the Noise Source Control Dialog (13).
 For a 346 device, a programmable power supply outputting 28V would be used. Providing the VISA libraries are installed (see below), we can send SCPI commands to enable and disable the PSU's output.
 As an example, for a Rigol DP832, we can set the channel 1 output to be 28V and enable it, with:
 
@@ -129,9 +146,9 @@ And then disable it with:
 
     :OUTPut:STATe CH1,OFF
 
-The final settings needed are the frequencies to measure the NF at. This can be set with (7), to step through a range or a list of specific point frequencies.
+The final settings needed are the frequencies or gains to measure the NF at. This can be set with (7) and (8), to step through a range or a list of specific values.
 
-To start the measurement, press (8).
+To start the measurement, press (9).
 
 <h2>Examples</h2>
 
@@ -148,6 +165,12 @@ As can be seen, a LNA makes a massive difference (12dB+) to the overall NF, and 
 as the total NF is primarily determined by the LNA, if it has a decent amount of gain:
 
 ![LNA comparison](../../../doc/img/NoiseFigure_plugin_lna_comparison.png)
+
+In these plots, gain is swept at a single frequency (1420MHz), firstly for a B210 on its own, and then a B210 with a Nooelec H1 LNA.
+While the NF is lowest at maximum gain for the standalone B210, due to the high gain of the LNA, the lowest NF for the combined devices is actually
+well below the maximum B210 gain setting.
+
+![NF vs Gain comparison](../../../doc/img/NoiseFigure_plugin_gain_comparison.png)
 
 <h2>VISA libraries</h2>
 

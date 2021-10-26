@@ -102,7 +102,7 @@ private:
     void plotChart();
 
     enum MessageCol {
-        RESULTS_COL_FREQ,
+        RESULTS_COL_SETTING,
         RESULTS_COL_NF,
         RESULTS_COL_TEMP,
         RESULTS_COL_Y,
@@ -113,12 +113,13 @@ private:
 private slots:
     void on_deltaFrequency_changed(qint64 value);
     void on_fftCount_valueChanged(int value);
+    void on_setting_currentTextChanged(const QString& text);
     void on_frequencySpec_currentIndexChanged(int index);
     void on_start_valueChanged(double value);
     void on_stop_valueChanged(double value);
     void on_steps_valueChanged(int value);
     void on_step_valueChanged(double value);
-    void on_frequencies_editingFinished();
+    void on_list_editingFinished();
     void on_fftSize_currentIndexChanged(int index);
     void on_startStop_clicked();
     void on_saveResults_clicked();
