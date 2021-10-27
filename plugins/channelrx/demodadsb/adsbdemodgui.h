@@ -25,6 +25,7 @@
 #include <QDateTime>
 #include <QAbstractListModel>
 #include <QProgressDialog>
+#include <QTextToSpeech>
 
 #include "channel/channelgui.h"
 #include "dsp/dsptypes.h"
@@ -125,6 +126,8 @@ struct Aircraft {
     AircraftInformation *m_aircraftInfo; // Info about the aircraft from the database
     ADSBDemodGUI *m_gui;
 
+    bool m_notified;            // Set when a notification has been made for this aircraft, so we don't repeat it
+
     // GUI table items for above data
     QTableWidgetItem *m_icaoItem;
     QTableWidgetItem *m_flightItem;
@@ -175,7 +178,8 @@ struct Aircraft {
         m_isHighlighted(false),
         m_showAll(false),
         m_aircraftInfo(nullptr),
-        m_gui(gui)
+        m_gui(gui),
+        m_notified(false)
     {
         for (int i = 0; i < 2; i++)
         {
@@ -510,6 +514,7 @@ private:
     ADSBDemodSettings::AirportType m_currentAirportMinimumSize;
     bool m_currentDisplayHeliports;
 
+    QTextToSpeech *m_speech;
     QMenu *menu;                        // Column select context menu
 
     WebAPIAdapterInterface *m_webAPIAdapterInterface;
@@ -531,6 +536,11 @@ private:
         const QDateTime dateTime,
         float correlation,
         float correlationOnes);
+    void checkStaticNotification(Aircraft *aircraft);
+    void checkDynamicNotification(Aircraft *aircraft);
+    void speechNotification(Aircraft *aircraft, const QString &speech);
+    void commandNotification(Aircraft *aircraft, const QString &command);
+    QString subAircraftString(Aircraft *aircraft, const QString &string);
     void resizeTable();
     QString getDataDir();
     QString getAirportDBFilename();
@@ -568,6 +578,7 @@ private slots:
     void on_correlateFullPreamble_clicked(bool checked);
     void on_demodModeS_clicked(bool checked);
     void on_feed_clicked(bool checked);
+    void on_notifications_clicked();
     void on_getOSNDB_clicked();
     void on_getAirportDB_clicked();
     void on_flightPaths_clicked(bool checked);

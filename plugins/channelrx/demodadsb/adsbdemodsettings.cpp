@@ -17,6 +17,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QColor>
+#include <QDataStream>
+#include <QDebug>
 
 #include "dsp/dspengine.h"
 #include "util/simpleserializer.h"
@@ -112,6 +114,8 @@ QByteArray ADSBDemodSettings::serialize() const
     s.writeFloat(32, m_interpolatorTapsPerPhase);
     s.writeBool(33, m_allFlightPaths);
 
+    s.writeBlob(34, serializeNotificationSettings(m_notificationSettings));
+
     for (int i = 0; i < ADSBDEMOD_COLUMNS; i++)
         s.writeS32(100 + i, m_columnIndexes[i]);
     for (int i = 0; i < ADSBDEMOD_COLUMNS; i++)
@@ -135,6 +139,7 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         QByteArray bytetmp;
         qint32 tmp;
         uint32_t utmp;
+        QByteArray blob;
 
         if (m_channelMarker)
         {
@@ -192,6 +197,9 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         d.readFloat(32, &m_interpolatorTapsPerPhase, 3.5f);
         d.readBool(33, &m_allFlightPaths, false);
 
+        d.readBlob(34, &blob);
+        deserializeNotificationSettings(blob, m_notificationSettings);
+
         for (int i = 0; i < ADSBDEMOD_COLUMNS; i++)
             d.readS32(100 + i, &m_columnIndexes[i], i);
         for (int i = 0; i < ADSBDEMOD_COLUMNS; i++)
@@ -203,5 +211,55 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
     {
         resetToDefaults();
         return false;
+    }
+}
+
+QDataStream& operator<<(QDataStream& out, const ADSBDemodSettings::NotificationSettings* settings)
+{
+    out << settings->m_matchColumn;
+    out << settings->m_regExp;
+    out << settings->m_speech;
+    out << settings->m_command;
+    return out;
+}
+
+QDataStream& operator>>(QDataStream& in, ADSBDemodSettings::NotificationSettings*& settings)
+{
+    settings = new ADSBDemodSettings::NotificationSettings();
+    in >> settings->m_matchColumn;
+    in >> settings->m_regExp;
+    in >> settings->m_speech;
+    in >> settings->m_command;
+    settings->updateRegularExpression();
+    return in;
+}
+
+QByteArray ADSBDemodSettings::serializeNotificationSettings(QList<NotificationSettings *> notificationSettings) const
+{
+    QByteArray data;
+    QDataStream *stream = new QDataStream(&data, QIODevice::WriteOnly);
+    (*stream) << notificationSettings;
+    delete stream;
+    return data;
+}
+
+void ADSBDemodSettings::deserializeNotificationSettings(const QByteArray& data, QList<NotificationSettings *>& notificationSettings)
+{
+    QDataStream *stream = new QDataStream(data);
+    (*stream) >> notificationSettings;
+    delete stream;
+}
+
+ADSBDemodSettings::NotificationSettings::NotificationSettings()
+{
+    m_matchColumn = 0;
+}
+
+void ADSBDemodSettings::NotificationSettings::updateRegularExpression()
+{
+    m_regularExpression.setPattern(m_regExp);
+    m_regularExpression.optimize();
+    if (m_regularExpression.isValid()) {
+        qDebug() << "ADSBDemod: Regular expression is not valid: " << m_regExp;
     }
 }

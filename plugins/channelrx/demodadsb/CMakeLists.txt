@@ -40,6 +40,8 @@ if(NOT SERVER_MODE)
         adsbdemodfeeddialog.ui
         adsbdemoddisplaydialog.cpp
         adsbdemoddisplaydialog.ui
+        adsbdemodnotificationdialog.cpp
+        adsbdemodnotificationdialog.ui
         csv.cpp
         airlinelogos.qrc
         flags.qrc
@@ -51,13 +53,14 @@ if(NOT SERVER_MODE)
         adsbdemodgui.h
         adsbdemodfeeddialog.h
         adsbdemoddisplaydialog.h
+        adsbdemodnotificationdialog.h
         ourairports.h
         osndb.h
         csv.h
     )
 
     set(TARGET_NAME demodadsb)
-    set(TARGET_LIB Qt5::Widgets Qt5::Quick Qt5::QuickWidgets Qt5::Positioning)
+    set(TARGET_LIB Qt5::Widgets Qt5::Quick Qt5::QuickWidgets Qt5::Positioning Qt5::TextToSpeech)
     set(TARGET_LIB_GUI "sdrgui")
     set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
 else()

@@ -21,6 +21,8 @@
 
 #include <QtGlobal>
 #include <QString>
+#include <QRegularExpression>
+
 #include <stdint.h>
 #include "dsp/dsptypes.h"
 
@@ -29,8 +31,46 @@ class Serializable;
 // Number of columns in the table
 #define ADSBDEMOD_COLUMNS 25
 
+// ADS-B table columns
+#define ADSB_COL_ICAO           0
+#define ADSB_COL_FLIGHT         1
+#define ADSB_COL_MODEL          2
+#define ADSB_COL_AIRLINE        3
+#define ADSB_COL_ALTITUDE       4
+#define ADSB_COL_SPEED          5
+#define ADSB_COL_HEADING        6
+#define ADSB_COL_VERTICALRATE   7
+#define ADSB_COL_RANGE          8
+#define ADSB_COL_AZEL           9
+#define ADSB_COL_LATITUDE       10
+#define ADSB_COL_LONGITUDE      11
+#define ADSB_COL_CATEGORY       12
+#define ADSB_COL_STATUS         13
+#define ADSB_COL_SQUAWK         14
+#define ADSB_COL_REGISTRATION   15
+#define ADSB_COL_COUNTRY        16
+#define ADSB_COL_REGISTERED     17
+#define ADSB_COL_MANUFACTURER   18
+#define ADSB_COL_OWNER          19
+#define ADSB_COL_OPERATOR_ICAO  20
+#define ADSB_COL_TIME           21
+#define ADSB_COL_FRAMECOUNT     22
+#define ADSB_COL_CORRELATION    23
+#define ADSB_COL_RSSI           24
+
 struct ADSBDemodSettings
 {
+    struct NotificationSettings {
+        int m_matchColumn;
+        QString m_regExp;
+        QString m_speech;
+        QString m_command;
+        QRegularExpression m_regularExpression;
+
+        NotificationSettings();
+        void updateRegularExpression();
+    };
+
     int32_t m_inputFrequencyOffset;
     Real m_rfBandwidth;
     Real m_correlationThreshold; //!< Correlation power threshold in dB
@@ -78,11 +118,15 @@ struct ADSBDemodSettings
     int m_interpolatorPhaseSteps;
     float m_interpolatorTapsPerPhase;
 
+    QList<NotificationSettings *> m_notificationSettings;
+
     ADSBDemodSettings();
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    QByteArray serializeNotificationSettings(QList<NotificationSettings *> notificationSettings) const;
+    void deserializeNotificationSettings(const QByteArray& data, QList<NotificationSettings *>& notificationSettings);
 };
 
 #endif /* PLUGINS_CHANNELRX_DEMODADSB_ADSBDEMODSETTINGS_H_ */

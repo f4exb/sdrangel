@@ -601,6 +601,23 @@
        </widget>
       </item>
       <item>
+       <widget class="QToolButton" name="notifications">
+        <property name="toolTip">
+         <string>Open notifications dialog</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/mono.png</normaloff>:/mono.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="stats">
         <property name="toolTip">
          <string>Demodulator statistics</string>
@@ -972,9 +989,10 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
+   <class>ValueDialZ</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedialz.h</header>
+   <container>1</container>
   </customwidget>
   <customwidget>
    <class>LevelMeterSignalDB</class>
@@ -983,10 +1001,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ValueDialZ</class>
-   <extends>QWidget</extends>
-   <header>gui/valuedialz.h</header>
-   <container>1</container>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>
