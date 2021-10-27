@@ -34,8 +34,8 @@ std::vector<int> ADSBDemodNotificationDialog::m_columnMap = {
 ADSBDemodNotificationDialog::ADSBDemodNotificationDialog(ADSBDemodSettings *settings,
         QWidget* parent) :
     QDialog(parent),
-    m_settings(settings),
-    ui(new Ui::ADSBDemodNotificationDialog)
+    ui(new Ui::ADSBDemodNotificationDialog),
+    m_settings(settings)
 {
     ui->setupUi(this);
 
@@ -130,7 +130,7 @@ void ADSBDemodNotificationDialog::addRow(ADSBDemodSettings::NotificationSettings
 
     if (settings != nullptr)
     {
-        for (int i = 0; i < m_columnMap.size(); i++)
+        for (unsigned int i = 0; i < m_columnMap.size(); i++)
         {
             if (m_columnMap[i] == settings->m_matchColumn)
             {
