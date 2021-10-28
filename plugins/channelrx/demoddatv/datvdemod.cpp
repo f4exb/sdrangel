@@ -29,6 +29,7 @@
 
 #include "datvdemod.h"
 #include "maincore.h"
+#include "util/db.h"
 
 const char* const DATVDemod::m_channelIdURI = "sdrangel.channel.demoddatv";
 const char* const DATVDemod::m_channelId = "DATVDemod";
@@ -147,6 +148,17 @@ int DATVDemod::webapiSettingsGet(
     response.setDatvDemodSettings(new SWGSDRangel::SWGDATVDemodSettings());
     response.getDatvDemodSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int DATVDemod::webapiReportGet(
+        SWGSDRangel::SWGChannelReport& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setDatvDemodReport(new SWGSDRangel::SWGDATVDemodReport());
+    response.getDatvDemodReport()->init();
+    webapiFormatChannelReport(response);
     return 200;
 }
 
@@ -333,6 +345,7 @@ void DATVDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
         response.getDatvDemodSettings()->setUdpTsAddress(new QString(settings.m_udpTSAddress));
     }
 
+    response.getDatvDemodSettings()->setUdpTsPort(settings.m_udpTSPort);
     response.getDatvDemodSettings()->setStreamIndex(settings.m_streamIndex);
     response.getDatvDemodSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
@@ -345,6 +358,20 @@ void DATVDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
     response.getDatvDemodSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getDatvDemodSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getDatvDemodSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+}
+
+void DATVDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+{
+    double magsq = getMagSq() / (SDR_RX_SCALED*SDR_RX_SCALED);
+    response.getDatvDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsq));
+    response.getDatvDemodReport()->setAudioActive(audioActive() ? 1 : 0);
+    response.getDatvDemodReport()->setAudioDecodeOk(audioDecodeOK() ? 1 : 0);
+    response.getDatvDemodReport()->setModcodCodeRate(getModcodCodeRate());
+    response.getDatvDemodReport()->setModcodModulation(getModcodModulation());
+    response.getDatvDemodReport()->setSetByModcod(isCstlnSetByModcod() ? 1 : 0);
+    response.getDatvDemodReport()->setUdpRunning(udpRunning() ? 1 : 0);
+    response.getDatvDemodReport()->setVideoActive(videoActive() ? 1 : 0);
+    response.getDatvDemodReport()->setVideoDecodeOk(videoDecodeOK() ? 1 : 0);
 }
 
 void DATVDemod::sendChannelSettings(

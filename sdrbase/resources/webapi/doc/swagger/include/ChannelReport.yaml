@@ -29,6 +29,8 @@ ChannelReport:
       $ref: "/doc/swagger/include/ChirpChatDemod.yaml#/ChirpChatDemodReport"
     ChirpChatModReport:
       $ref: "/doc/swagger/include/ChirpChatMod.yaml#/ChirpChatModReport"
+    DATVDemodReport:
+      $ref: "/doc/swagger/include/DATVDemod.yaml#/DATVDemodReport"
     DATVModReport:
       $ref: "/doc/swagger/include/DATVMod.yaml#/DATVModReport"
     DSDDemodReport:

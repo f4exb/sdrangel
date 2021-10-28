@@ -50,6 +50,8 @@ SWGChannelReport::SWGChannelReport() {
     m_chirp_chat_demod_report_isSet = false;
     chirp_chat_mod_report = nullptr;
     m_chirp_chat_mod_report_isSet = false;
+    datv_demod_report = nullptr;
+    m_datv_demod_report_isSet = false;
     datv_mod_report = nullptr;
     m_datv_mod_report_isSet = false;
     dsd_demod_report = nullptr;
@@ -130,6 +132,8 @@ SWGChannelReport::init() {
     m_chirp_chat_demod_report_isSet = false;
     chirp_chat_mod_report = new SWGChirpChatModReport();
     m_chirp_chat_mod_report_isSet = false;
+    datv_demod_report = new SWGDATVDemodReport();
+    m_datv_demod_report_isSet = false;
     datv_mod_report = new SWGDATVModReport();
     m_datv_mod_report_isSet = false;
     dsd_demod_report = new SWGDSDDemodReport();
@@ -214,6 +218,9 @@ SWGChannelReport::cleanup() {
     }
     if(chirp_chat_mod_report != nullptr) { 
         delete chirp_chat_mod_report;
+    }
+    if(datv_demod_report != nullptr) { 
+        delete datv_demod_report;
     }
     if(datv_mod_report != nullptr) { 
         delete datv_mod_report;
@@ -325,6 +332,8 @@ SWGChannelReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&chirp_chat_mod_report, pJson["ChirpChatModReport"], "SWGChirpChatModReport", "SWGChirpChatModReport");
     
+    ::SWGSDRangel::setValue(&datv_demod_report, pJson["DATVDemodReport"], "SWGDATVDemodReport", "SWGDATVDemodReport");
+    
     ::SWGSDRangel::setValue(&datv_mod_report, pJson["DATVModReport"], "SWGDATVModReport", "SWGDATVModReport");
     
     ::SWGSDRangel::setValue(&dsd_demod_report, pJson["DSDDemodReport"], "SWGDSDDemodReport", "SWGDSDDemodReport");
@@ -423,6 +432,9 @@ SWGChannelReport::asJsonObject() {
     }
     if((chirp_chat_mod_report != nullptr) && (chirp_chat_mod_report->isSet())){
         toJsonValue(QString("ChirpChatModReport"), chirp_chat_mod_report, obj, QString("SWGChirpChatModReport"));
+    }
+    if((datv_demod_report != nullptr) && (datv_demod_report->isSet())){
+        toJsonValue(QString("DATVDemodReport"), datv_demod_report, obj, QString("SWGDATVDemodReport"));
     }
     if((datv_mod_report != nullptr) && (datv_mod_report->isSet())){
         toJsonValue(QString("DATVModReport"), datv_mod_report, obj, QString("SWGDATVModReport"));
@@ -611,6 +623,16 @@ void
 SWGChannelReport::setChirpChatModReport(SWGChirpChatModReport* chirp_chat_mod_report) {
     this->chirp_chat_mod_report = chirp_chat_mod_report;
     this->m_chirp_chat_mod_report_isSet = true;
+}
+
+SWGDATVDemodReport*
+SWGChannelReport::getDatvDemodReport() {
+    return datv_demod_report;
+}
+void
+SWGChannelReport::setDatvDemodReport(SWGDATVDemodReport* datv_demod_report) {
+    this->datv_demod_report = datv_demod_report;
+    this->m_datv_demod_report_isSet = true;
 }
 
 SWGDATVModReport*
@@ -899,6 +921,9 @@ SWGChannelReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(chirp_chat_mod_report && chirp_chat_mod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(datv_demod_report && datv_demod_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(datv_mod_report && datv_mod_report->isSet()){

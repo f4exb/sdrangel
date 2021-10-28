@@ -118,3 +118,61 @@ DATVDemodSettings:
       type: integer
     reverseAPIChannelIndex:
       type: integer
+
+DATVDemodReport:
+  description: DATVDemod
+  properties:
+    channelPowerDB:
+      description: power received in channel (dB)
+      type: number
+      format: float
+    audioActive:
+      description: Audio is active (1 for yes, 0 for now)
+      type: integer
+    audioDecodeOK:
+      description: Audio decode (1 for OK, 0 for KO)
+      type: integer
+    videoActive:
+      description: Audio is active (1 for yes, 0 for now)
+      type: integer
+    videoDecodeOK:
+      description: Video decode (1 for OK, 0 for KO)
+      type: integer
+    udpRunning:
+      description: UDP thread (1 running, 0 idle)
+      type: integer
+    modcodModulation:
+      type: integer
+      description: >
+        Modulation set by DVB-S2 MODCOD
+          * 0: BPSK
+          * 1: QPSK
+          * 2: PSK8
+          * 3: APSK16
+          * 4: APSK32
+          * 5: APSK64E
+          * 6: QAM16
+          * 7: QAM64
+          * 8: QAM256
+    modcodCodeRate:
+      type: integer
+      description: >
+        Code rate (FEC) set by DVB-S2 MODCOD
+          * 0:  1/2
+          * 1:  2/3
+          * 2:  4/6
+          * 3:  3/4
+          * 4:  5/6
+          * 5:  7/8
+          * 6:  4/5
+          * 7:  8/9
+          * 8:  9/10
+          * 9:  1/4
+          * 10: 1/3
+          * 11: 2/5
+          * 12: 3/5
+    setByModcod:
+      type: integer
+      description: Modulation and code rate set by DVB-S2 MODCOD (1 for yes, 0 for no)
+
+

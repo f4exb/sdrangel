@@ -31,6 +31,7 @@
 #include "SWGBFMDemodReport.h"
 #include "SWGChirpChatDemodReport.h"
 #include "SWGChirpChatModReport.h"
+#include "SWGDATVDemodReport.h"
 #include "SWGDATVModReport.h"
 #include "SWGDSDDemodReport.h"
 #include "SWGFileSinkReport.h"
@@ -108,6 +109,9 @@ public:
 
     SWGChirpChatModReport* getChirpChatModReport();
     void setChirpChatModReport(SWGChirpChatModReport* chirp_chat_mod_report);
+
+    SWGDATVDemodReport* getDatvDemodReport();
+    void setDatvDemodReport(SWGDATVDemodReport* datv_demod_report);
 
     SWGDATVModReport* getDatvModReport();
     void setDatvModReport(SWGDATVModReport* datv_mod_report);
@@ -220,6 +224,9 @@ private:
 
     SWGChirpChatModReport* chirp_chat_mod_report;
     bool m_chirp_chat_mod_report_isSet;
+
+    SWGDATVDemodReport* datv_demod_report;
+    bool m_datv_demod_report_isSet;
 
     SWGDATVModReport* datv_mod_report;
     bool m_datv_mod_report_isSet;

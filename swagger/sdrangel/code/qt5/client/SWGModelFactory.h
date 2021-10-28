@@ -81,6 +81,7 @@
 #include "SWGCommand.h"
 #include "SWGComplex.h"
 #include "SWGDABDemodSettings.h"
+#include "SWGDATVDemodReport.h"
 #include "SWGDATVDemodSettings.h"
 #include "SWGDATVModReport.h"
 #include "SWGDATVModSettings.h"
@@ -640,6 +641,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGDABDemodSettings").compare(type) == 0) {
       SWGDABDemodSettings *obj = new SWGDABDemodSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDATVDemodReport").compare(type) == 0) {
+      SWGDATVDemodReport *obj = new SWGDATVDemodReport();
       obj->init();
       return obj;
     }

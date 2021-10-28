@@ -29,6 +29,8 @@ ChannelReport:
       $ref: "http://swgserver:8081/api/swagger/include/ChirpChatDemod.yaml#/ChirpChatDemodReport"
     ChirpChatModReport:
       $ref: "http://swgserver:8081/api/swagger/include/ChirpChatMod.yaml#/ChirpChatModReport"
+    DATVDemodReport:
+      $ref: "http://swgserver:8081/api/swagger/include/DATVDemod.yaml#/DATVDemodReport"
     DATVModReport:
       $ref: "http://swgserver:8081/api/swagger/include/DATVMod.yaml#/DATVModReport"
     DSDDemodReport:
