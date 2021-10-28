@@ -11,6 +11,7 @@
     <file>airlinelogos/AAY.bmp</file>
     <file>airlinelogos/AAZ.bmp</file>
     <file>airlinelogos/AB.bmp</file>
+    <file>airlinelogos/ABA.bmp</file>
     <file>airlinelogos/ABB.bmp</file>
     <file>airlinelogos/ABD.bmp</file>
     <file>airlinelogos/ABG.bmp</file>
@@ -29,6 +30,7 @@
     <file>airlinelogos/ACI.bmp</file>
     <file>airlinelogos/ACL.bmp</file>
     <file>airlinelogos/ACV.bmp</file>
+    <file>airlinelogos/ACW.bmp</file>
     <file>airlinelogos/ADN.bmp</file>
     <file>airlinelogos/ADO.bmp</file>
     <file>airlinelogos/ADR.bmp</file>
@@ -67,10 +69,12 @@
     <file>airlinelogos/AJD.bmp</file>
     <file>airlinelogos/AJI.bmp</file>
     <file>airlinelogos/AJK.bmp</file>
+    <file>airlinelogos/AJP.bmp</file>
     <file>airlinelogos/AJT.bmp</file>
     <file>airlinelogos/AKC.bmp</file>
     <file>airlinelogos/AKL.bmp</file>
     <file>airlinelogos/AKS.bmp</file>
+    <file>airlinelogos/AKY.bmp</file>
     <file>airlinelogos/ALK.bmp</file>
     <file>airlinelogos/ALN.bmp</file>
     <file>airlinelogos/ALV.bmp</file>
@@ -123,6 +127,7 @@
     <file>airlinelogos/ASY.bmp</file>
     <file>airlinelogos/ATC.bmp</file>
     <file>airlinelogos/ATG.bmp</file>
+    <file>airlinelogos/ATL.bmp</file>
     <file>airlinelogos/ATN.bmp</file>
     <file>airlinelogos/ATR.bmp</file>
     <file>airlinelogos/ATV.bmp</file>
@@ -189,6 +194,7 @@
     <file>airlinelogos/BEZ.bmp</file>
     <file>airlinelogos/BFD.bmp</file>
     <file>airlinelogos/BFL.bmp</file>
+    <file>airlinelogos/BFW.bmp</file>
     <file>airlinelogos/BGA.bmp</file>
     <file>airlinelogos/BGH.bmp</file>
     <file>airlinelogos/BGL.bmp</file>
@@ -211,12 +217,16 @@
     <file>airlinelogos/BNA.bmp</file>
     <file>airlinelogos/BNL.bmp</file>
     <file>airlinelogos/BOE.bmp</file>
+    <file>airlinelogos/BOG.bmp</file>
+    <file>airlinelogos/BOH.bmp</file>
+    <file>airlinelogos/BOL.bmp</file>
     <file>airlinelogos/BON.bmp</file>
     <file>airlinelogos/BOS.bmp</file>
     <file>airlinelogos/BOT.bmp</file>
     <file>airlinelogos/BOV.bmp</file>
     <file>airlinelogos/BOX.bmp</file>
     <file>airlinelogos/BPA.bmp</file>
+    <file>airlinelogos/BPAold.bmp</file>
     <file>airlinelogos/BQB.bmp</file>
     <file>airlinelogos/BRAVO.bmp</file>
     <file>airlinelogos/BRH.bmp</file>
@@ -226,6 +236,7 @@
     <file>airlinelogos/BRQ.bmp</file>
     <file>airlinelogos/BRU.bmp</file>
     <file>airlinelogos/BRXb.bmp</file>
+    <file>airlinelogos/BSC.bmp</file>
     <file>airlinelogos/BSK.bmp</file>
     <file>airlinelogos/BTI.bmp</file>
     <file>airlinelogos/BTK.bmp</file>
@@ -346,6 +357,7 @@
     <file>airlinelogos/CNF.bmp</file>
     <file>airlinelogos/CNK.bmp</file>
     <file>airlinelogos/CNP.bmp</file>
+    <file>airlinelogos/CNS.bmp</file>
     <file>airlinelogos/CNW.bmp</file>
     <file>airlinelogos/COB.bmp</file>
     <file>airlinelogos/COL.bmp</file>
@@ -422,6 +434,7 @@
     <file>airlinelogos/CXI.bmp</file>
     <file>airlinelogos/CXM.bmp</file>
     <file>airlinelogos/CXP.bmp</file>
+    <file>airlinelogos/CXPold.bmp</file>
     <file>airlinelogos/CYF.bmp</file>
     <file>airlinelogos/CYL.bmp</file>
     <file>airlinelogos/CYO.bmp</file>
@@ -482,6 +495,7 @@
     <file>airlinelogos/DOJ.bmp</file>
     <file>airlinelogos/DOK.bmp</file>
     <file>airlinelogos/DOM.bmp</file>
+    <file>airlinelogos/DONNINGTON.bmp</file>
     <file>airlinelogos/DOS.bmp</file>
     <file>airlinelogos/DOW.bmp</file>
     <file>airlinelogos/DPJ.bmp</file>
@@ -490,6 +504,7 @@
     <file>airlinelogos/DRK.bmp</file>
     <file>airlinelogos/DRM.bmp</file>
     <file>airlinelogos/DRU.bmp</file>
+    <file>airlinelogos/DRW.bmp</file>
     <file>airlinelogos/DRZ.bmp</file>
     <file>airlinelogos/DSM.bmp</file>
     <file>airlinelogos/DSV.bmp</file>
@@ -541,6 +556,7 @@
     <file>airlinelogos/EGJ.bmp</file>
     <file>airlinelogos/EGL.bmp</file>
     <file>airlinelogos/EGS.bmp</file>
+    <file>airlinelogos/EGT.bmp</file>
     <file>airlinelogos/EGU.bmp</file>
     <file>airlinelogos/EGW.bmp</file>
     <file>airlinelogos/EHR.bmp</file>
@@ -604,7 +620,9 @@
     <file>airlinelogos/ETS.bmp</file>
     <file>airlinelogos/EUC.bmp</file>
     <file>airlinelogos/EUG.bmp</file>
+    <file>airlinelogos/EUK.bmp</file>
     <file>airlinelogos/EUL.bmp</file>
+    <file>airlinelogos/EUP.bmp</file>
     <file>airlinelogos/EUS.bmp</file>
     <file>airlinelogos/EUW.bmp</file>
     <file>airlinelogos/EVA.bmp</file>
@@ -639,16 +657,19 @@
     <file>airlinelogos/EZE.bmp</file>
     <file>airlinelogos/EZS.bmp</file>
     <file>airlinelogos/EZY.bmp</file>
+    <file>airlinelogos/EZZ.bmp</file>
     <file>airlinelogos/FAB.bmp</file>
     <file>airlinelogos/FAD.bmp</file>
     <file>airlinelogos/FAG.bmp</file>
     <file>airlinelogos/FAH.bmp</file>
+    <file>airlinelogos/FAS.bmp</file>
     <file>airlinelogos/FAT.bmp</file>
     <file>airlinelogos/FBA.bmp</file>
     <file>airlinelogos/FBB.bmp</file>
     <file>airlinelogos/FBD.bmp</file>
     <file>airlinelogos/FBR.bmp</file>
     <file>airlinelogos/FBU.bmp</file>
+    <file>airlinelogos/FBZ.bmp</file>
     <file>airlinelogos/FC.bmp</file>
     <file>airlinelogos/FCM.bmp</file>
     <file>airlinelogos/FDA.bmp</file>
@@ -665,6 +686,7 @@
     <file>airlinelogos/FFT.bmp</file>
     <file>airlinelogos/FFV.bmp</file>
     <file>airlinelogos/FGW.bmp</file>
+    <file>airlinelogos/FHM.bmp</file>
     <file>airlinelogos/FHY.bmp</file>
     <file>airlinelogos/FIA.bmp</file>
     <file>airlinelogos/FIN.bmp</file>
@@ -675,22 +697,32 @@
     <file>airlinelogos/FLE.bmp</file>
     <file>airlinelogos/FLEXIFLY.bmp</file>
     <file>airlinelogos/FLI.bmp</file>
+    <file>airlinelogos/FLJ.bmp</file>
     <file>airlinelogos/FLO.bmp</file>
+    <file>airlinelogos/FLYINGSCHOOL.bmp</file>
     <file>airlinelogos/FLYPELICAN.bmp</file>
+    <file>airlinelogos/FLYR.bmp</file>
     <file>airlinelogos/FNA.bmp</file>
+    <file>airlinelogos/FOX.bmp</file>
+    <file>airlinelogos/FPC.bmp</file>
     <file>airlinelogos/FPK.bmp</file>
     <file>airlinelogos/FPO.bmp</file>
     <file>airlinelogos/FPY.bmp</file>
+    <file>airlinelogos/FPYa.bmp</file>
+    <file>airlinelogos/FREEDOM.bmp</file>
     <file>airlinelogos/FRF.bmp</file>
     <file>airlinelogos/FRG.bmp</file>
     <file>airlinelogos/FRH.bmp</file>
     <file>airlinelogos/FSK.bmp</file>
     <file>airlinelogos/FSQ.bmp</file>
     <file>airlinelogos/FSY.bmp</file>
+    <file>airlinelogos/FTC.bmp</file>
     <file>airlinelogos/FTH.bmp</file>
+    <file>airlinelogos/FTL.bmp</file>
     <file>airlinelogos/FTO.bmp</file>
     <file>airlinelogos/FTZ.bmp</file>
     <file>airlinelogos/FWI.bmp</file>
+    <file>airlinelogos/FWK.bmp</file>
     <file>airlinelogos/FXP.bmp</file>
     <file>airlinelogos/FXX.bmp</file>
     <file>airlinelogos/FYL.bmp</file>
@@ -701,6 +733,7 @@
     <file>airlinelogos/GAJ.bmp</file>
     <file>airlinelogos/GAL.bmp</file>
     <file>airlinelogos/GBB.bmp</file>
+    <file>airlinelogos/GBG.bmp</file>
     <file>airlinelogos/GBK.bmp</file>
     <file>airlinelogos/GBQ.bmp</file>
     <file>airlinelogos/GCL.bmp</file>
@@ -710,7 +743,9 @@
     <file>airlinelogos/GDE.bmp</file>
     <file>airlinelogos/GEA.bmp</file>
     <file>airlinelogos/GEC.bmp</file>
+    <file>airlinelogos/GEL.bmp</file>
     <file>airlinelogos/GEO.bmp</file>
+    <file>airlinelogos/GER.bmp</file>
     <file>airlinelogos/GFA.bmp</file>
     <file>airlinelogos/GFG.bmp</file>
     <file>airlinelogos/GGN.bmp</file>
@@ -724,9 +759,11 @@
     <file>airlinelogos/GLJ.bmp</file>
     <file>airlinelogos/GLO.bmp</file>
     <file>airlinelogos/GLR.bmp</file>
+    <file>airlinelogos/GLT.bmp</file>
     <file>airlinelogos/GMI.bmp</file>
     <file>airlinelogos/GMQ.bmp</file>
     <file>airlinelogos/GMR.bmp</file>
+    <file>airlinelogos/GOMAIR.bmp</file>
     <file>airlinelogos/GOW.bmp</file>
     <file>airlinelogos/GRL.bmp</file>
     <file>airlinelogos/GSW.bmp</file>
@@ -735,6 +772,7 @@
     <file>airlinelogos/GTV.bmp</file>
     <file>airlinelogos/GUG.bmp</file>
     <file>airlinelogos/GUY.bmp</file>
+    <file>airlinelogos/GWC.bmp</file>
     <file>airlinelogos/GWI.bmp</file>
     <file>airlinelogos/GXL.bmp</file>
     <file>airlinelogos/HAL.bmp</file>
@@ -767,6 +805,7 @@
     <file>airlinelogos/HXA.bmp</file>
     <file>airlinelogos/HYA.bmp</file>
     <file>airlinelogos/HYP.bmp</file>
+    <file>airlinelogos/HYS.bmp</file>
     <file>airlinelogos/HYT.bmp</file>
     <file>airlinelogos/HZS.bmp</file>
     <file>airlinelogos/IAD.bmp</file>
@@ -778,6 +817,7 @@
     <file>airlinelogos/IBS.bmp</file>
     <file>airlinelogos/IBX.bmp</file>
     <file>airlinelogos/ICE.bmp</file>
+    <file>airlinelogos/ICF.bmp</file>
     <file>airlinelogos/ICL.bmp</file>
     <file>airlinelogos/ICV.bmp</file>
     <file>airlinelogos/IFC.bmp</file>
@@ -789,6 +829,7 @@
     <file>airlinelogos/IJM.bmp</file>
     <file>airlinelogos/IKA.bmp</file>
     <file>airlinelogos/IMX.bmp</file>
+    <file>airlinelogos/INI.bmp</file>
     <file>airlinelogos/IOS.bmp</file>
     <file>airlinelogos/IRA.bmp</file>
     <file>airlinelogos/IRB.bmp</file>
@@ -799,6 +840,7 @@
     <file>airlinelogos/ISR.bmp</file>
     <file>airlinelogos/ISS.bmp</file>
     <file>airlinelogos/ISV.bmp</file>
+    <file>airlinelogos/ITL.bmp</file>
     <file>airlinelogos/IWY.bmp</file>
     <file>airlinelogos/IXR.bmp</file>
     <file>airlinelogos/IYA.bmp</file>
@@ -812,6 +854,7 @@
     <file>airlinelogos/JAT.bmp</file>
     <file>airlinelogos/JATnew.bmp</file>
     <file>airlinelogos/JAV.bmp</file>
+    <file>airlinelogos/JAW.bmp</file>
     <file>airlinelogos/JBE.bmp</file>
     <file>airlinelogos/JBU.bmp</file>
     <file>airlinelogos/JCC.bmp</file>
@@ -820,22 +863,29 @@
     <file>airlinelogos/JEI.bmp</file>
     <file>airlinelogos/JES.bmp</file>
     <file>airlinelogos/JET.bmp</file>
+    <file>airlinelogos/JFA.bmp</file>
     <file>airlinelogos/JFL.bmp</file>
     <file>airlinelogos/JG.bmp</file>
     <file>airlinelogos/JIA.bmp</file>
+    <file>airlinelogos/JIT.bmp</file>
     <file>airlinelogos/JJA.bmp</file>
     <file>airlinelogos/JJP.bmp</file>
+    <file>airlinelogos/JKH.bmp</file>
     <file>airlinelogos/JKR.bmp</file>
+    <file>airlinelogos/JLC.bmp</file>
     <file>airlinelogos/JLF.bmp</file>
     <file>airlinelogos/JLL.bmp</file>
+    <file>airlinelogos/JLN.bmp</file>
     <file>airlinelogos/JMA.bmp</file>
     <file>airlinelogos/JME.bmp</file>
     <file>airlinelogos/JML.bmp</file>
     <file>airlinelogos/JNA.bmp</file>
+    <file>airlinelogos/JNK.bmp</file>
     <file>airlinelogos/JNL.bmp</file>
     <file>airlinelogos/JON.bmp</file>
     <file>airlinelogos/JOR.bmp</file>
     <file>airlinelogos/JOY.bmp</file>
+    <file>airlinelogos/JPT.bmp</file>
     <file>airlinelogos/JRC.bmp</file>
     <file>airlinelogos/JRT.bmp</file>
     <file>airlinelogos/JSA.bmp</file>
@@ -844,6 +894,7 @@
     <file>airlinelogos/JTA.bmp</file>
     <file>airlinelogos/JTF.bmp</file>
     <file>airlinelogos/JTG.bmp</file>
+    <file>airlinelogos/JTL.bmp</file>
     <file>airlinelogos/JUS.bmp</file>
     <file>airlinelogos/JW.bmp</file>
     <file>airlinelogos/JYH.bmp</file>
@@ -855,12 +906,15 @@
     <file>airlinelogos/KAP.bmp</file>
     <file>airlinelogos/KAR.bmp</file>
     <file>airlinelogos/KAZ.bmp</file>
+    <file>airlinelogos/KBD.bmp</file>
     <file>airlinelogos/KBZ.bmp</file>
+    <file>airlinelogos/KCE.bmp</file>
     <file>airlinelogos/KDS.bmp</file>
     <file>airlinelogos/KEM.bmp</file>
     <file>airlinelogos/KEN.bmp</file>
     <file>airlinelogos/KFA.bmp</file>
     <file>airlinelogos/KFE.bmp</file>
+    <file>airlinelogos/KFR.bmp</file>
     <file>airlinelogos/KGL.bmp</file>
     <file>airlinelogos/KGO.bmp</file>
     <file>airlinelogos/KGS.bmp</file>
@@ -880,7 +934,9 @@
     <file>airlinelogos/KN.bmp</file>
     <file>airlinelogos/KNA.bmp</file>
     <file>airlinelogos/KNE.bmp</file>
+    <file>airlinelogos/KOC.bmp</file>
     <file>airlinelogos/KOR.bmp</file>
+    <file>airlinelogos/KPO.bmp</file>
     <file>airlinelogos/KQA.bmp</file>
     <file>airlinelogos/KRE.bmp</file>
     <file>airlinelogos/KRN.bmp</file>
@@ -909,12 +965,14 @@
     <file>airlinelogos/LDC.bmp</file>
     <file>airlinelogos/LDX.bmp</file>
     <file>airlinelogos/LER.bmp</file>
+    <file>airlinelogos/LET.bmp</file>
     <file>airlinelogos/LEX.bmp</file>
     <file>airlinelogos/LFO.bmp</file>
     <file>airlinelogos/LGF.bmp</file>
     <file>airlinelogos/LGL.bmp</file>
     <file>airlinelogos/LGT.bmp</file>
     <file>airlinelogos/LHA.bmp</file>
+    <file>airlinelogos/LHB.bmp</file>
     <file>airlinelogos/LIA.bmp</file>
     <file>airlinelogos/LIP.bmp</file>
     <file>airlinelogos/LJC.bmp</file>
@@ -938,18 +996,25 @@
     <file>airlinelogos/LPV.bmp</file>
     <file>airlinelogos/LRC.bmp</file>
     <file>airlinelogos/LRS.bmp</file>
+    <file>airlinelogos/LSJ.bmp</file>
     <file>airlinelogos/LSO.bmp</file>
     <file>airlinelogos/LTC.bmp</file>
+    <file>airlinelogos/LTG.bmp</file>
     <file>airlinelogos/LTR.bmp</file>
     <file>airlinelogos/LUR.bmp</file>
     <file>airlinelogos/LVR.bmp</file>
     <file>airlinelogos/LVT.bmp</file>
     <file>airlinelogos/LWA.bmp</file>
+    <file>airlinelogos/LWG.bmp</file>
     <file>airlinelogos/LXG.bmp</file>
     <file>airlinelogos/LXJ.bmp</file>
+    <file>airlinelogos/LYC.bmp</file>
+    <file>airlinelogos/LYD.bmp</file>
     <file>airlinelogos/LYM.bmp</file>
+    <file>airlinelogos/LYX.bmp</file>
     <file>airlinelogos/LZB.bmp</file>
     <file>airlinelogos/MAC.bmp</file>
+    <file>airlinelogos/MAD.bmp</file>
     <file>airlinelogos/MAI.bmp</file>
     <file>airlinelogos/MAL.bmp</file>
     <file>airlinelogos/MAR.bmp</file>
@@ -960,6 +1025,7 @@
     <file>airlinelogos/MAY.bmp</file>
     <file>airlinelogos/MBA.bmp</file>
     <file>airlinelogos/MCM.bmp</file>
+    <file>airlinelogos/MCS.bmp</file>
     <file>airlinelogos/MDA.bmp</file>
     <file>airlinelogos/MDG.bmp</file>
     <file>airlinelogos/MEA.bmp</file>
@@ -1008,17 +1074,23 @@
     <file>airlinelogos/MWI.bmp</file>
     <file>airlinelogos/MWM.bmp</file>
     <file>airlinelogos/MXD.bmp</file>
+    <file>airlinelogos/MXY.bmp</file>
     <file>airlinelogos/MYA.bmp</file>
     <file>airlinelogos/MYP.bmp</file>
+    <file>airlinelogos/MYU.bmp</file>
     <file>airlinelogos/MYW.bmp</file>
     <file>airlinelogos/MZN.bmp</file>
     <file>airlinelogos/NAA.bmp</file>
     <file>airlinelogos/NAC.bmp</file>
+    <file>airlinelogos/NAD.bmp</file>
     <file>airlinelogos/NAX.bmp</file>
     <file>airlinelogos/NCB.bmp</file>
     <file>airlinelogos/NCR.bmp</file>
+    <file>airlinelogos/NDL.bmp</file>
     <file>airlinelogos/NFA.bmp</file>
+    <file>airlinelogos/NFX.bmp</file>
     <file>airlinelogos/NGB.bmp</file>
+    <file>airlinelogos/NGL.bmp</file>
     <file>airlinelogos/NGT.bmp</file>
     <file>airlinelogos/NHX.bmp</file>
     <file>airlinelogos/NIA.bmp</file>
@@ -1027,6 +1099,7 @@
     <file>airlinelogos/NIN.bmp</file>
     <file>airlinelogos/NIS.bmp</file>
     <file>airlinelogos/NJE.bmp</file>
+    <file>airlinelogos/NJU.bmp</file>
     <file>airlinelogos/NKS.bmp</file>
     <file>airlinelogos/NKT.bmp</file>
     <file>airlinelogos/NLA.bmp</file>
@@ -1041,6 +1114,7 @@
     <file>airlinelogos/NRL.bmp</file>
     <file>airlinelogos/NRS.bmp</file>
     <file>airlinelogos/NSE.bmp</file>
+    <file>airlinelogos/NSH.bmp</file>
     <file>airlinelogos/NSJ.bmp</file>
     <file>airlinelogos/NSW.bmp</file>
     <file>airlinelogos/NTB.bmp</file>
@@ -1052,6 +1126,7 @@
     <file>airlinelogos/NWG.bmp</file>
     <file>airlinelogos/NWL.bmp</file>
     <file>airlinelogos/NWS.bmp</file>
+    <file>airlinelogos/NXU.bmp</file>
     <file>airlinelogos/NYS.bmp</file>
     <file>airlinelogos/NYT.bmp</file>
     <file>airlinelogos/NYX.bmp</file>
@@ -1060,13 +1135,17 @@
     <file>airlinelogos/OAW.bmp</file>
     <file>airlinelogos/OBS.bmp</file>
     <file>airlinelogos/OCA.bmp</file>
+    <file>airlinelogos/OCJ.bmp</file>
     <file>airlinelogos/OCL.bmp</file>
     <file>airlinelogos/OES.bmp</file>
+    <file>airlinelogos/OFL.bmp</file>
+    <file>airlinelogos/OHC.bmp</file>
     <file>airlinelogos/OHY.bmp</file>
     <file>airlinelogos/OIX.bmp</file>
     <file>airlinelogos/OKA.bmp</file>
     <file>airlinelogos/OKC.bmp</file>
     <file>airlinelogos/OKS.bmp</file>
+    <file>airlinelogos/OLA.bmp</file>
     <file>airlinelogos/OLC.bmp</file>
     <file>airlinelogos/OLS.bmp</file>
     <file>airlinelogos/OMA.bmp</file>
@@ -1091,10 +1170,12 @@
     <file>airlinelogos/PAM.bmp</file>
     <file>airlinelogos/PAO.bmp</file>
     <file>airlinelogos/PAPILLON.bmp</file>
+    <file>airlinelogos/PAS.bmp</file>
     <file>airlinelogos/PAV.bmp</file>
     <file>airlinelogos/PBD.bmp</file>
     <file>airlinelogos/PCO.bmp</file>
     <file>airlinelogos/PCP.bmp</file>
+    <file>airlinelogos/PDY.bmp</file>
     <file>airlinelogos/PER.bmp</file>
     <file>airlinelogos/PEV.bmp</file>
     <file>airlinelogos/PEX.bmp</file>
@@ -1118,11 +1199,13 @@
     <file>airlinelogos/PNX.bmp</file>
     <file>airlinelogos/POE.bmp</file>
     <file>airlinelogos/POT.bmp</file>
+    <file>airlinelogos/PPJ.bmp</file>
     <file>airlinelogos/PRF.bmp</file>
     <file>airlinelogos/PRI.bmp</file>
     <file>airlinelogos/PRW.bmp</file>
     <file>airlinelogos/PSC.bmp</file>
     <file>airlinelogos/PST.bmp</file>
+    <file>airlinelogos/PSU.bmp</file>
     <file>airlinelogos/PTB.bmp</file>
     <file>airlinelogos/PTH.bmp</file>
     <file>airlinelogos/PTR.bmp</file>
@@ -1130,20 +1213,27 @@
     <file>airlinelogos/PUE.bmp</file>
     <file>airlinelogos/PUN.bmp</file>
     <file>airlinelogos/PVD.bmp</file>
+    <file>airlinelogos/PVL.bmp</file>
     <file>airlinelogos/PVN.bmp</file>
     <file>airlinelogos/PVO.bmp</file>
     <file>airlinelogos/PVV.bmp</file>
     <file>airlinelogos/PWD.bmp</file>
     <file>airlinelogos/PXG.bmp</file>
+    <file>airlinelogos/QAI.bmp</file>
     <file>airlinelogos/QAJ.bmp</file>
     <file>airlinelogos/QAZ.bmp</file>
     <file>airlinelogos/QBA.bmp</file>
     <file>airlinelogos/QDA.bmp</file>
     <file>airlinelogos/QFA.bmp</file>
+    <file>airlinelogos/QHD.bmp</file>
     <file>airlinelogos/QLK.bmp</file>
+    <file>airlinelogos/QNT.bmp</file>
+    <file>airlinelogos/QQE.bmp</file>
     <file>airlinelogos/QSM.bmp</file>
+    <file>airlinelogos/QTG.bmp</file>
     <file>airlinelogos/QTR.bmp</file>
     <file>airlinelogos/QXE.bmp</file>
+    <file>airlinelogos/QZR.bmp</file>
     <file>airlinelogos/RAC.bmp</file>
     <file>airlinelogos/RAE.bmp</file>
     <file>airlinelogos/RAM.bmp</file>
@@ -1151,11 +1241,17 @@
     <file>airlinelogos/RBA.bmp</file>
     <file>airlinelogos/RBB.bmp</file>
     <file>airlinelogos/RBG.bmp</file>
+    <file>airlinelogos/RCH.bmp</file>
+    <file>airlinelogos/RDA.bmp</file>
     <file>airlinelogos/RDS.bmp</file>
+    <file>airlinelogos/REDAIR.bmp</file>
     <file>airlinelogos/REU.bmp</file>
+    <file>airlinelogos/REV.bmp</file>
     <file>airlinelogos/RGE.bmp</file>
+    <file>airlinelogos/RHH.bmp</file>
     <file>airlinelogos/RJA.bmp</file>
     <file>airlinelogos/RJD.bmp</file>
+    <file>airlinelogos/RJE.bmp</file>
     <file>airlinelogos/RKM.bmp</file>
     <file>airlinelogos/RKS.bmp</file>
     <file>airlinelogos/RLA.bmp</file>
@@ -1174,12 +1270,15 @@
     <file>airlinelogos/RPA.bmp</file>
     <file>airlinelogos/RPB.bmp</file>
     <file>airlinelogos/RPM.bmp</file>
+    <file>airlinelogos/RSB.bmp</file>
     <file>airlinelogos/RSI.bmp</file>
     <file>airlinelogos/RSY.bmp</file>
+    <file>airlinelogos/RTG.bmp</file>
     <file>airlinelogos/RTL.bmp</file>
     <file>airlinelogos/RUC.bmp</file>
     <file>airlinelogos/RUK.bmp</file>
     <file>airlinelogos/RUN.bmp</file>
+    <file>airlinelogos/RUT.bmp</file>
     <file>airlinelogos/RVP.bmp</file>
     <file>airlinelogos/RWD.bmp</file>
     <file>airlinelogos/RWG.bmp</file>
@@ -1201,8 +1300,10 @@
     <file>airlinelogos/SBM.bmp</file>
     <file>airlinelogos/SBS.bmp</file>
     <file>airlinelogos/SBU.bmp</file>
+    <file>airlinelogos/SCA.bmp</file>
     <file>airlinelogos/SCN.bmp</file>
     <file>airlinelogos/SCO.bmp</file>
+    <file>airlinelogos/SCU.bmp</file>
     <file>airlinelogos/SCX.bmp</file>
     <file>airlinelogos/SDA.bmp</file>
     <file>airlinelogos/SDG.bmp</file>
@@ -1225,6 +1326,7 @@
     <file>airlinelogos/SHH.bmp</file>
     <file>airlinelogos/SHI.bmp</file>
     <file>airlinelogos/SHU.bmp</file>
+    <file>airlinelogos/SHZ.bmp</file>
     <file>airlinelogos/SIA.bmp</file>
     <file>airlinelogos/SID.bmp</file>
     <file>airlinelogos/SIF.bmp</file>
@@ -1233,6 +1335,7 @@
     <file>airlinelogos/SIS.bmp</file>
     <file>airlinelogos/SIY.bmp</file>
     <file>airlinelogos/SJJ.bmp</file>
+    <file>airlinelogos/SJK.bmp</file>
     <file>airlinelogos/SJO.bmp</file>
     <file>airlinelogos/SJX.bmp</file>
     <file>airlinelogos/SJY.bmp</file>
@@ -1253,11 +1356,13 @@
     <file>airlinelogos/SLQ.bmp</file>
     <file>airlinelogos/SLX.bmp</file>
     <file>airlinelogos/SME.bmp</file>
+    <file>airlinelogos/SMF.bmp</file>
     <file>airlinelogos/SMJ.bmp</file>
     <file>airlinelogos/SMR.bmp</file>
     <file>airlinelogos/SNA.bmp</file>
     <file>airlinelogos/SNG.bmp</file>
     <file>airlinelogos/SNJ.bmp</file>
+    <file>airlinelogos/SNM.bmp</file>
     <file>airlinelogos/SOL.bmp</file>
     <file>airlinelogos/SONOCO.bmp</file>
     <file>airlinelogos/SOO.bmp</file>
@@ -1274,6 +1379,8 @@
     <file>airlinelogos/SRN.bmp</file>
     <file>airlinelogos/SRQ.bmp</file>
     <file>airlinelogos/SRR.bmp</file>
+    <file>airlinelogos/SRS.bmp</file>
+    <file>airlinelogos/SSE.bmp</file>
     <file>airlinelogos/SSF.bmp</file>
     <file>airlinelogos/SSQ.bmp</file>
     <file>airlinelogos/SSV.bmp</file>
@@ -1307,6 +1414,7 @@
     <file>airlinelogos/TAPexp.bmp</file>
     <file>airlinelogos/TAR.bmp</file>
     <file>airlinelogos/TAY.bmp</file>
+    <file>airlinelogos/TAYB752WHITE.bmp</file>
     <file>airlinelogos/TBA.bmp</file>
     <file>airlinelogos/TBM.bmp</file>
     <file>airlinelogos/TBN.bmp</file>
@@ -1327,10 +1435,12 @@
     <file>airlinelogos/THA.bmp</file>
     <file>airlinelogos/THD.bmp</file>
     <file>airlinelogos/THE.bmp</file>
+    <file>airlinelogos/THO.bmp</file>
     <file>airlinelogos/THT.bmp</file>
     <file>airlinelogos/THY.bmp</file>
     <file>airlinelogos/THYANA.bmp</file>
     <file>airlinelogos/TIA.bmp</file>
+    <file>airlinelogos/TIH.bmp</file>
     <file>airlinelogos/TIS.bmp</file>
     <file>airlinelogos/TIV.bmp</file>
     <file>airlinelogos/TIW.bmp</file>
@@ -1351,12 +1461,15 @@
     <file>airlinelogos/TNX.bmp</file>
     <file>airlinelogos/TOK.bmp</file>
     <file>airlinelogos/TOM.bmp</file>
+    <file>airlinelogos/TON.bmp</file>
     <file>airlinelogos/TOR.bmp</file>
+    <file>airlinelogos/TOS.bmp</file>
     <file>airlinelogos/TPA.bmp</file>
     <file>airlinelogos/TPC.bmp</file>
     <file>airlinelogos/TPU.bmp</file>
     <file>airlinelogos/TRA.bmp</file>
     <file>airlinelogos/TRJ.bmp</file>
+    <file>airlinelogos/TRQ.bmp</file>
     <file>airlinelogos/TSC.bmp</file>
     <file>airlinelogos/TSG.bmp</file>
     <file>airlinelogos/TSH.bmp</file>
@@ -1381,11 +1494,13 @@
     <file>airlinelogos/TWB.bmp</file>
     <file>airlinelogos/TWI.bmp</file>
     <file>airlinelogos/TWY.bmp</file>
+    <file>airlinelogos/TXA.bmp</file>
     <file>airlinelogos/TYA.bmp</file>
     <file>airlinelogos/UAE.bmp</file>
     <file>airlinelogos/UAL.bmp</file>
     <file>airlinelogos/UBA.bmp</file>
     <file>airlinelogos/UBD.bmp</file>
+    <file>airlinelogos/UBE.bmp</file>
     <file>airlinelogos/UBG.bmp</file>
     <file>airlinelogos/UCA.bmp</file>
     <file>airlinelogos/UDN.bmp</file>
@@ -1404,13 +1519,16 @@
     <file>airlinelogos/URS.bmp</file>
     <file>airlinelogos/USC.bmp</file>
     <file>airlinelogos/UTA.bmp</file>
+    <file>airlinelogos/UTAOLD.bmp</file>
     <file>airlinelogos/UTN.bmp</file>
     <file>airlinelogos/UTP.bmp</file>
     <file>airlinelogos/UTY.bmp</file>
     <file>airlinelogos/UVT.bmp</file>
+    <file>airlinelogos/UWD.bmp</file>
     <file>airlinelogos/UWJ.bmp</file>
     <file>airlinelogos/UZB.bmp</file>
     <file>airlinelogos/VAA.bmp</file>
+    <file>airlinelogos/VAG.bmp</file>
     <file>airlinelogos/VAJ.bmp</file>
     <file>airlinelogos/VAL.bmp</file>
     <file>airlinelogos/VAR.bmp</file>
@@ -1437,18 +1555,21 @@
     <file>airlinelogos/VJC.bmp</file>
     <file>airlinelogos/VJS.bmp</file>
     <file>airlinelogos/VJT.bmp</file>
+    <file>airlinelogos/VKA.bmp</file>
     <file>airlinelogos/VKG.bmp</file>
     <file>airlinelogos/VKGOLD.bmp</file>
     <file>airlinelogos/VLG.bmp</file>
     <file>airlinelogos/VLJ.bmp</file>
     <file>airlinelogos/VLK.bmp</file>
     <file>airlinelogos/VLM.bmp</file>
+    <file>airlinelogos/VLZ.bmp</file>
     <file>airlinelogos/VMP.bmp</file>
     <file>airlinelogos/VNE.bmp</file>
     <file>airlinelogos/VNL.bmp</file>
     <file>airlinelogos/VOC.bmp</file>
     <file>airlinelogos/VOE.bmp</file>
     <file>airlinelogos/VOI.bmp</file>
+    <file>airlinelogos/VOS.bmp</file>
     <file>airlinelogos/VOZ.bmp</file>
     <file>airlinelogos/VPA.bmp</file>
     <file>airlinelogos/VPC.bmp</file>
@@ -1456,6 +1577,7 @@
     <file>airlinelogos/VRD.bmp</file>
     <file>airlinelogos/VRE.bmp</file>
     <file>airlinelogos/VRG.bmp</file>
+    <file>airlinelogos/VRH.bmp</file>
     <file>airlinelogos/VSV.bmp</file>
     <file>airlinelogos/VTA.bmp</file>
     <file>airlinelogos/VTE.bmp</file>
@@ -1466,6 +1588,8 @@
     <file>airlinelogos/VUN.bmp</file>
     <file>airlinelogos/VVC.bmp</file>
     <file>airlinelogos/VVV.bmp</file>
+    <file>airlinelogos/VXP.bmp</file>
+    <file>airlinelogos/VYR.bmp</file>
     <file>airlinelogos/WAA.bmp</file>
     <file>airlinelogos/WAJ.bmp</file>
     <file>airlinelogos/WAL.bmp</file>
@@ -1474,6 +1598,7 @@
     <file>airlinelogos/WDE.bmp</file>
     <file>airlinelogos/WEN.bmp</file>
     <file>airlinelogos/WEW.bmp</file>
+    <file>airlinelogos/WFL.bmp</file>
     <file>airlinelogos/WFR.bmp</file>
     <file>airlinelogos/WGN.bmp</file>
     <file>airlinelogos/WHS.bmp</file>
@@ -1481,9 +1606,11 @@
     <file>airlinelogos/WIF.bmp</file>
     <file>airlinelogos/WIL.bmp</file>
     <file>airlinelogos/WJA.bmp</file>
+    <file>airlinelogos/WJT.bmp</file>
     <file>airlinelogos/WLB.bmp</file>
     <file>airlinelogos/WLC.bmp</file>
     <file>airlinelogos/WMN.bmp</file>
+    <file>airlinelogos/WMU.bmp</file>
     <file>airlinelogos/WON.bmp</file>
     <file>airlinelogos/WORLD2FLY.bmp</file>
     <file>airlinelogos/WOW.bmp</file>
@@ -1499,6 +1626,7 @@
     <file>airlinelogos/XAI.bmp</file>
     <file>airlinelogos/XAU.bmp</file>
     <file>airlinelogos/XAX.bmp</file>
+    <file>airlinelogos/XGE.bmp</file>
     <file>airlinelogos/XLF.bmp</file>
     <file>airlinelogos/XLK.bmp</file>
     <file>airlinelogos/XLR.bmp</file>
@@ -1506,6 +1634,7 @@
     <file>airlinelogos/XOJ.bmp</file>
     <file>airlinelogos/XRC.bmp</file>
     <file>airlinelogos/XRO.bmp</file>
+    <file>airlinelogos/XSR.bmp</file>
     <file>airlinelogos/YEL.bmp</file>
     <file>airlinelogos/YZR.bmp</file>
     <file>airlinelogos/ZOM.bmp</file>

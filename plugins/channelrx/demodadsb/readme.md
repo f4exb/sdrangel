@@ -83,6 +83,67 @@ The server hostname and port to send the frames to should be entered in the Serv
 
 The Beast binary and Hex formats are as detailed here: https://wiki.jetvision.de/wiki/Mode-S_Beast:Data_Output_Formats
 
+<h3>Open Notifications Dialog</h3>
+
+When clicked, opens the Notifications Dialog, which allows speech notifications or programs/scripts to be run when aircraft matching user-defined rules are seen.
+
+For example, you might want an audible notification when a particularly interesting aircraft is nearby or when an aircraft declares an emergency.
+By running a program such as [cmail](https://www.inveigle.net/cmail/download), e-mail notifications can be sent.
+
+Here are a few examples:
+
+![Notifications Dialog](../../../doc/img/ADSBDemod_plugin_notifications.png)
+
+Aircraft categories are:
+
+* Light
+* Small
+* Large
+* High vortex
+* Heavy
+* High performance
+* Rotorcraft
+* Glider/sailplane
+* Lighter-than-air
+* Parachutist
+* Ultralight
+* UAV
+* Space vehicle
+* Emergency vehicle
+* Service vehicle
+* Ground obstruction
+* Cluster obstacle
+* Line obstacle
+
+Emergency status are:
+
+* No emergency
+* General emergency
+* Lifeguard/Medical
+* Minimum fuel
+* No communications
+* Unlawful interference
+* Downed aircraft
+
+In the Speech and Command strings, variables can be used to substitute in ADS-B data for the aircraft:
+
+* ${icao},
+* ${flight}
+* ${aircraft}
+* ${latitude}
+* ${longitude}
+* ${altitude}
+* ${speed}
+* ${heading}
+* ${range}
+* ${category}
+* ${status}
+* ${squawk}
+* ${registration}
+* ${manufacturer}
+* ${owner}
+* ${operator}
+
 <h3>14: Refresh list of devices</h3>
 
 Use this button to refresh the list of devices.

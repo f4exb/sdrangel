@@ -28,6 +28,7 @@
 #include <QUrl>
 #include <QMessageBox>
 #include <QDebug>
+#include <QProcess>
 
 #include "SWGMapItem.h"
 
@@ -48,34 +49,8 @@
 #include "adsbdemodgui.h"
 #include "adsbdemodfeeddialog.h"
 #include "adsbdemoddisplaydialog.h"
+#include "adsbdemodnotificationdialog.h"
 #include "adsb.h"
-
-// ADS-B table columns
-#define ADSB_COL_ICAO           0
-#define ADSB_COL_FLIGHT         1
-#define ADSB_COL_MODEL          2
-#define ADSB_COL_AIRLINE        3
-#define ADSB_COL_ALTITUDE       4
-#define ADSB_COL_SPEED          5
-#define ADSB_COL_HEADING        6
-#define ADSB_COL_VERTICALRATE   7
-#define ADSB_COL_RANGE          8
-#define ADSB_COL_AZEL           9
-#define ADSB_COL_LATITUDE       10
-#define ADSB_COL_LONGITUDE      11
-#define ADSB_COL_CATEGORY       12
-#define ADSB_COL_STATUS         13
-#define ADSB_COL_SQUAWK         14
-#define ADSB_COL_REGISTRATION   15
-#define ADSB_COL_COUNTRY        16
-#define ADSB_COL_REGISTERED     17
-#define ADSB_COL_MANUFACTURER   18
-#define ADSB_COL_OWNER          19
-#define ADSB_COL_OPERATOR_ICAO  20
-#define ADSB_COL_TIME           21
-#define ADSB_COL_FRAMECOUNT     22
-#define ADSB_COL_CORRELATION    23
-#define ADSB_COL_RSSI           24
 
 const char *Aircraft::m_speedTypeNames[] = {
     "GS", "TAS", "IAS"
@@ -732,6 +707,8 @@ void ADSBDemodGUI::handleADSB(
         if (m_settings.m_autoResizeTableColumns)
             ui->adsbData->resizeColumnsToContents();
         ui->adsbData->setSortingEnabled(true);
+        // Check to see if we need to emit a notification about this new aircraft
+        checkStaticNotification(aircraft);
     }
     aircraft->m_time = dateTime;
     QTime time = dateTime.time();
@@ -1124,6 +1101,152 @@ void ADSBDemodGUI::handleADSB(
         // TIS-B
         qDebug() << "TIS B message cf=" << ca << " icao: " << icao;
     }
+
+    // Check to see if we need to emit a notification about this aircraft
+    checkDynamicNotification(aircraft);
+}
+
+void ADSBDemodGUI::checkStaticNotification(Aircraft *aircraft)
+{
+    for (int i = 0; i < m_settings.m_notificationSettings.size(); i++)
+    {
+        QString match;
+        switch (m_settings.m_notificationSettings[i]->m_matchColumn)
+        {
+        case ADSB_COL_ICAO:
+            match = aircraft->m_icaoItem->data(Qt::DisplayRole).toString();
+            break;
+        case ADSB_COL_MODEL:
+            match = aircraft->m_modelItem->data(Qt::DisplayRole).toString();
+            break;
+        case ADSB_COL_REGISTRATION:
+            match = aircraft->m_registrationItem->data(Qt::DisplayRole).toString();
+            break;
+        case ADSB_COL_MANUFACTURER:
+            match = aircraft->m_manufacturerNameItem->data(Qt::DisplayRole).toString();
+            break;
+        case ADSB_COL_OWNER:
+            match = aircraft->m_ownerItem->data(Qt::DisplayRole).toString();
+            break;
+        case ADSB_COL_OPERATOR_ICAO:
+            match = aircraft->m_operatorICAOItem->data(Qt::DisplayRole).toString();
+            break;
+        default:
+            break;
+        }
+        if (!match.isEmpty())
+        {
+            //QRegularExpression regExp(m_settings.m_notificationSettings[i]->m_regExp);
+            if (m_settings.m_notificationSettings[i]->m_regularExpression.isValid())
+            {
+                if (m_settings.m_notificationSettings[i]->m_regularExpression.match(match).hasMatch())
+                {
+                    if (!m_settings.m_notificationSettings[i]->m_speech.isEmpty()) {
+                        speechNotification(aircraft, m_settings.m_notificationSettings[i]->m_speech);
+                    }
+                    if (!m_settings.m_notificationSettings[i]->m_command.isEmpty()) {
+                        commandNotification(aircraft, m_settings.m_notificationSettings[i]->m_command);
+                    }
+                    aircraft->m_notified = true;
+                }
+            }
+        }
+    }
+}
+
+void ADSBDemodGUI::checkDynamicNotification(Aircraft *aircraft)
+{
+    if (!aircraft->m_notified)
+    {
+        for (int i = 0; i < m_settings.m_notificationSettings.size(); i++)
+        {
+            if (   (m_settings.m_notificationSettings[i]->m_matchColumn == ADSB_COL_FLIGHT)
+                || (m_settings.m_notificationSettings[i]->m_matchColumn == ADSB_COL_ALTITUDE)
+                || (m_settings.m_notificationSettings[i]->m_matchColumn == ADSB_COL_SPEED)
+                || (m_settings.m_notificationSettings[i]->m_matchColumn == ADSB_COL_RANGE)
+                || (m_settings.m_notificationSettings[i]->m_matchColumn == ADSB_COL_CATEGORY)
+                || (m_settings.m_notificationSettings[i]->m_matchColumn == ADSB_COL_STATUS)
+                || (m_settings.m_notificationSettings[i]->m_matchColumn == ADSB_COL_SQUAWK)
+               )
+            {
+                QString match;
+                switch (m_settings.m_notificationSettings[i]->m_matchColumn)
+                {
+                case ADSB_COL_FLIGHT:
+                    match = aircraft->m_flightItem->data(Qt::DisplayRole).toString();
+                    break;
+                case ADSB_COL_ALTITUDE:
+                    match = aircraft->m_altitudeItem->data(Qt::DisplayRole).toString();
+                    break;
+                case ADSB_COL_SPEED:
+                    match = aircraft->m_speedItem->data(Qt::DisplayRole).toString();
+                    break;
+                case ADSB_COL_RANGE:
+                    match = aircraft->m_rangeItem->data(Qt::DisplayRole).toString();
+                    break;
+                case ADSB_COL_CATEGORY:
+                    match = aircraft->m_emitterCategoryItem->data(Qt::DisplayRole).toString();
+                    break;
+                case ADSB_COL_STATUS:
+                    match = aircraft->m_statusItem->data(Qt::DisplayRole).toString();
+                    break;
+                case ADSB_COL_SQUAWK:
+                    match = aircraft->m_squawkItem->data(Qt::DisplayRole).toString();
+                    break;
+                default:
+                    break;
+                }
+                if (!match.isEmpty())
+                {
+                    if (m_settings.m_notificationSettings[i]->m_regularExpression.isValid())
+                    {
+                        if (m_settings.m_notificationSettings[i]->m_regularExpression.match(match).hasMatch())
+                        {
+                            if (!m_settings.m_notificationSettings[i]->m_speech.isEmpty()) {
+                                speechNotification(aircraft, m_settings.m_notificationSettings[i]->m_speech);
+                            }
+                            if (!m_settings.m_notificationSettings[i]->m_command.isEmpty()) {
+                                commandNotification(aircraft, m_settings.m_notificationSettings[i]->m_command);
+                            }
+                            aircraft->m_notified = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+void ADSBDemodGUI::speechNotification(Aircraft *aircraft, const QString &speech)
+{
+    m_speech->say(subAircraftString(aircraft, speech));
+}
+
+void ADSBDemodGUI::commandNotification(Aircraft *aircraft, const QString &command)
+{
+    QProcess::startDetached(subAircraftString(aircraft, command));
+}
+
+QString ADSBDemodGUI::subAircraftString(Aircraft *aircraft, const QString &string)
+{
+    QString s = string;
+    s = s.replace("${icao}", aircraft->m_icaoItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${flight}", aircraft->m_flightItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${aircraft}", aircraft->m_modelItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${latitude}", aircraft->m_latitudeItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${longitude}", aircraft->m_longitudeItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${altitude}", aircraft->m_altitudeItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${speed}", aircraft->m_speedItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${heading}", aircraft->m_headingItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${range}", aircraft->m_rangeItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${category}", aircraft->m_emitterCategoryItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${status}", aircraft->m_statusItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${squawk}", aircraft->m_squawkItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${registration}", aircraft->m_registrationItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${manufacturer}", aircraft->m_manufacturerNameItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${owner}", aircraft->m_ownerItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${operator}", aircraft->m_operatorICAOItem->data(Qt::DisplayRole).toString());
+    return s;
 }
 
 bool ADSBDemodGUI::handleMessage(const Message& message)
@@ -1231,6 +1354,14 @@ void ADSBDemodGUI::on_feed_clicked(bool checked)
     m_settings.m_feedEnabled = checked;
     // Don't disable host/port - so they can be entered before connecting
     applySettings();
+}
+
+void ADSBDemodGUI::on_notifications_clicked()
+{
+    ADSBDemodNotificationDialog dialog(&m_settings);
+    if (dialog.exec() == QDialog::Accepted) {
+        applySettings();
+    }
 }
 
 void ADSBDemodGUI::on_adsbData_cellClicked(int row, int column)
@@ -1892,6 +2023,9 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     // Add airports within range of My Position
     if (m_airportInfo != nullptr)
         updateAirports();
+
+    // Initialise text to speech engine
+    m_speech = new QTextToSpeech(this);
 
     updateDeviceSetList();
     displaySettings();
