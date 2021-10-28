@@ -100,10 +100,6 @@ public:
     }
 
     void SetTVScreen(TVScreen *objScreen) { m_basebandSink->setTVScreen(objScreen); }
-    void setMERLabel(QLabel *merLabel) { m_basebandSink->setMERLabel(merLabel); }
-    void setCNRLabel(QLabel *cnrLabel) { m_basebandSink->setCNRLabel(cnrLabel); }
-    void setMERMeter(LevelMeterSignalDB *merMeter) { m_basebandSink->setMERMeter(merMeter); }
-    void setCNRMeter(LevelMeterSignalDB *cnrMeter) { m_basebandSink->setCNRMeter(cnrMeter); }
     void SetVideoRender(DATVideoRender *objScreen) { m_basebandSink->SetVideoRender(objScreen); }
     DATVideostream *getVideoStream() { return m_basebandSink->getVideoStream(); }
     DATVUDPStream *getUDPStream() { return m_basebandSink->getUDPStream(); }
@@ -119,6 +115,15 @@ public:
     int getModcodModulation() const { return m_basebandSink->getModcodModulation(); }
     int getModcodCodeRate() const { return m_basebandSink->getModcodCodeRate(); }
     bool isCstlnSetByModcod() const { return m_basebandSink->isCstlnSetByModcod(); }
+
+    float getMERAvg() const { return m_basebandSink->getMERAvg(); }
+    float getMERRMS() const { return m_basebandSink->getMERRMS(); }
+    float getMERPeak() const { return m_basebandSink->getMERPeak(); }
+    int getMERNbAvg() const { return m_basebandSink->getMERNbAvg(); }
+    float getCNRAvg() const { return m_basebandSink->getCNRAvg(); }
+    float getCNRRMS() const { return m_basebandSink->getCNRRMS(); }
+    float getCNRPeak() const { return m_basebandSink->getCNRPeak(); }
+    int getCNRNbAvg() const { return m_basebandSink->getCNRNbAvg(); }
 
     static const char* const m_channelIdURI;
     static const char* const m_channelId;

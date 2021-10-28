@@ -16,42 +16,39 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef DATVGAUGE_H
-#define DATVGAUGE_H
+#ifndef DATVMETER_H
+#define DATVMETER_H
 
-#include <QLabel>
 #include <QString>
 
 #include "leansdr/framework.h"
 #include "leansdr/sdr.h"
 
-#include "gui/levelmeter.h"
-
 namespace leansdr {
 
-struct datvgauge: runnable
+struct datvmeter: runnable
 {
     leansdr::pipereader<leansdr::f32> m_in;
-    QLabel *m_label;
-    LevelMeterSignalDB *m_levelMeter;
+    float m_avg;
+    float m_rms;
+    float m_peak;
     static const int m_nbAvg = 10;
     leansdr::f32 m_samples[m_nbAvg];
     leansdr::f32 m_sum;
     int m_index;
 
-    datvgauge(
+    datvmeter(
         scheduler *sch,
         leansdr::pipebuf<leansdr::f32> &in,
-        QLabel *label = nullptr,
-        LevelMeterSignalDB *levelMeter = nullptr,
         const char *_name = nullptr
     ) :
         runnable(sch, _name ? _name : in.name),
-        m_in(in),
-        m_label(label),
-        m_levelMeter(levelMeter)
+        m_in(in)
     {
         std::fill(m_samples, m_samples+m_nbAvg, 0);
+        m_avg = 0.0f;
+        m_rms = 0.0f;
+        m_peak = 0.0f;
         m_sum = 0;
         m_index = 0;
     }
@@ -66,8 +63,9 @@ struct datvgauge: runnable
             oldest = *p;
             leansdr::f32 avg = m_sum/m_nbAvg;
 
-            m_levelMeter->levelChanged(avg/30.0, *p/30.0, m_nbAvg);
-            m_label->setText(QString("%1").arg(avg, 0, 'f', 1));
+            m_avg = avg;
+            m_rms = avg/30;
+            m_peak = *p/30;
             m_in.read(1);
 
             if (m_index == m_nbAvg) {

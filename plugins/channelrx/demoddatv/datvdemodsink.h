@@ -30,7 +30,7 @@
 #include "leansdr/iess.h"
 
 #include "datvconstellation.h"
-#include "datvgauge.h"
+#include "datvmeter.h"
 #include "datvdvbs2constellation.h"
 #include "datvvideoplayer.h"
 #include "datvideostream.h"
@@ -61,10 +61,6 @@ public:
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
     bool setTVScreen(TVScreen *objScreen);
-    void setMERLabel(QLabel *merLabel);
-    void setCNRLabel(QLabel *cnrLabel);
-    void setMERMeter(LevelMeterSignalDB *merMeter);
-    void setCNRMeter(LevelMeterSignalDB *cnrMeter);
     void SetVideoRender(DATVideoRender *objScreen);
     DATVideostream *getVideoStream() { return m_objVideoStream; }
     DATVUDPStream *getUDPStream() { return &m_udpStream; }
@@ -84,6 +80,38 @@ public:
     bool isCstlnSetByModcod() const { return m_cstlnSetByModcod; }
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_messageQueueToGUI = messageQueue; }
     AudioFifo *getAudioFifo() { return &m_audioFifo; }
+
+    float getMERAvg() const {
+        return r_merMeter ? r_merMeter->m_avg : 0;
+    }
+
+    float getMERRMS() const {
+        return r_merMeter ? r_merMeter->m_rms : 0;
+    }
+
+    float getMERPeak() const {
+        return r_merMeter ? r_merMeter->m_peak : 0;
+    }
+
+    int getMERNbAvg() const {
+        return r_merMeter ? r_merMeter->m_nbAvg : 1;
+    }
+
+    float getCNRAvg() const {
+        return r_cnrMeter ? r_cnrMeter->m_avg : 0;
+    }
+
+    float getCNRRMS() const {
+        return r_cnrMeter ? r_cnrMeter->m_rms : 0;
+    }
+
+    float getCNRPeak() const {
+        return r_cnrMeter ? r_cnrMeter->m_peak : 0;
+    }
+
+    int getCNRNbAvg() const {
+        return r_cnrMeter ? r_cnrMeter->m_nbAvg : 1;
+    }
 
     void applySettings(const DATVDemodSettings& settings, bool force = false);
 	void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
@@ -286,8 +314,8 @@ private:
     //CONSTELLATION
     leansdr::datvconstellation<leansdr::f32> *r_scope_symbols;
     leansdr::datvdvbs2constellation<leansdr::f32> *r_scope_symbols_dvbs2;
-    leansdr::datvgauge *r_merGauge;
-    leansdr::datvgauge *r_cnrGauge;
+    leansdr::datvmeter *r_merMeter;
+    leansdr::datvmeter *r_cnrMeter;
 
     //*************** DATV PARAMETERS  ***************
     TVScreen *m_objRegisteredTVScreen;
@@ -295,10 +323,6 @@ private:
     DATVideostream *m_objVideoStream;
     DATVUDPStream m_udpStream;
     DATVideoRenderThread *m_objRenderThread;
-    QLabel *m_merLabel;
-    QLabel *m_cnrLabel;
-    LevelMeterSignalDB *m_merMeter;
-    LevelMeterSignalDB *m_cnrMeter;
 
     // Audio
 	AudioFifo m_audioFifo;

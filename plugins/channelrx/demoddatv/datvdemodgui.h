@@ -64,6 +64,7 @@ private slots:
     void audioSelect();
     void ldpcToolSelect();
     void tick();
+    void tickMeter();
 
     void on_cmbStandard_currentIndexChanged(int index);
     void on_cmbModulation_currentIndexChanged(const QString &arg1);

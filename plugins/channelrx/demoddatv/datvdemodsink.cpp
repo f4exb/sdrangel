@@ -39,10 +39,6 @@ DATVDemodSink::DATVDemodSink() :
     m_objVideoStream(new DATVideostream()),
     m_udpStream(leansdr::tspacket::SIZE),
     m_objRenderThread(nullptr),
-    m_merLabel(nullptr),
-    m_cnrLabel(nullptr),
-    m_merMeter(nullptr),
-    m_cnrMeter(nullptr),
     m_audioFifo(48000),
     m_blnRenderingVideo(false),
     m_cstlnSetByModcod(false),
@@ -94,22 +90,6 @@ bool DATVDemodSink::setTVScreen(TVScreen *objScreen)
 {
     m_objRegisteredTVScreen = objScreen;
     return true;
-}
-
-void DATVDemodSink::setMERLabel(QLabel *merLabel) {
-    m_merLabel = merLabel;
-}
-
-void DATVDemodSink::setCNRLabel(QLabel *cnrLabel) {
-    m_cnrLabel = cnrLabel;
-}
-
-void DATVDemodSink::setMERMeter(LevelMeterSignalDB *merMeter) {
-    m_merMeter = merMeter;
-}
-
-void DATVDemodSink::setCNRMeter(LevelMeterSignalDB *cnrMeter) {
-    m_cnrMeter = cnrMeter;
 }
 
 void DATVDemodSink::SetVideoRender(DATVideoRender *objScreen)
@@ -233,8 +213,8 @@ void DATVDemodSink::CleanUpDATVFramework()
     if (r_cnr != nullptr) {
         delete r_cnr;
     }
-    if (r_cnrGauge != nullptr) {
-        delete r_cnrGauge;
+    if (r_cnrMeter != nullptr) {
+        delete r_cnrMeter;
     }
 
     //FILTERING
@@ -267,8 +247,8 @@ void DATVDemodSink::CleanUpDATVFramework()
     if (p_mer != nullptr) {
         delete p_mer;
     }
-    if (r_merGauge != nullptr) {
-        delete r_merGauge;
+    if (r_merMeter != nullptr) {
+        delete r_merMeter;
     }
     if (p_sampled != nullptr) {
         delete p_sampled;
@@ -460,7 +440,7 @@ void DATVDemodSink::ResetDATVFrameworkPointers()
     // CNR ESTIMATION
     p_cnr = nullptr;
     r_cnr = nullptr;
-    r_cnrGauge = nullptr;
+    r_cnrMeter = nullptr;
 
     //FILTERING
     r_resample = nullptr;
@@ -477,7 +457,7 @@ void DATVDemodSink::ResetDATVFrameworkPointers()
     p_freq = nullptr;
     p_ss = nullptr;
     p_mer = nullptr;
-    r_merGauge = nullptr;
+    r_merMeter = nullptr;
     p_sampled = nullptr;
 
     //DECIMATION
@@ -800,13 +780,8 @@ void DATVDemodSink::InitDATVFramework()
         r_scope_symbols->calculate_cstln_points();
     }
 
-    if (m_merLabel && m_merMeter) {
-        r_merGauge = new leansdr::datvgauge(m_objScheduler, *p_mer, m_merLabel, m_merMeter);
-    }
-
-    if (m_cnrLabel && m_cnrMeter) {
-        r_cnrGauge = new leansdr::datvgauge(m_objScheduler, *p_cnr, m_cnrLabel, m_cnrMeter);
-    }
+    r_merMeter = new leansdr::datvmeter(m_objScheduler, *p_mer);
+    r_cnrMeter = new leansdr::datvmeter(m_objScheduler, *p_cnr);
 
     // DECONVOLUTION AND SYNCHRONIZATION
 
@@ -1110,13 +1085,8 @@ void DATVDemodSink::InitDATVS2Framework()
         r_scope_symbols_dvbs2->calculate_cstln_points();
     }
 
-    if (m_merLabel && m_merMeter) {
-        r_merGauge = new leansdr::datvgauge(m_objScheduler, *p_mer, m_merLabel, m_merMeter);
-    }
-
-    if (m_cnrLabel && m_cnrMeter) {
-        r_cnrGauge = new leansdr::datvgauge(m_objScheduler, *p_cnr, m_cnrLabel, m_cnrMeter);
-    }
+    r_merMeter = new leansdr::datvmeter(m_objScheduler, *p_mer);
+    r_cnrMeter = new leansdr::datvmeter(m_objScheduler, *p_cnr);
 
     // Bit-flipping mode.
     // Deinterleave into hard bits.

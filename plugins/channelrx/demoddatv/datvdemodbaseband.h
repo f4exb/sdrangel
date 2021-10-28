@@ -66,10 +66,14 @@ public:
     int getChannelSampleRate() const;
     double getMagSq() const { return m_sink.getMagSq(); }
     void setTVScreen(TVScreen *tvScreen) { m_sink.setTVScreen(tvScreen); }
-    void setMERLabel(QLabel *merLabel) { m_sink.setMERLabel(merLabel); }
-    void setCNRLabel(QLabel *cnrLabel) { m_sink.setCNRLabel(cnrLabel); }
-    void setMERMeter(LevelMeterSignalDB *merMeter) { m_sink.setMERMeter(merMeter); }
-    void setCNRMeter(LevelMeterSignalDB *cnrMeter) { m_sink.setCNRMeter(cnrMeter); }
+    float getMERAvg() const { return m_sink.getMERAvg(); }
+    float getMERRMS() const { return m_sink.getMERRMS(); }
+    float getMERPeak() const { return m_sink.getMERPeak(); }
+    int getMERNbAvg() const { return m_sink.getMERNbAvg(); }
+    float getCNRAvg() const { return m_sink.getCNRAvg(); }
+    float getCNRRMS() const { return m_sink.getCNRRMS(); }
+    float getCNRPeak() const { return m_sink.getCNRPeak(); }
+    int getCNRNbAvg() const { return m_sink.getCNRNbAvg(); }
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_sink.setMessageQueueToGUI(messageQueue); }
     void setBasebandSampleRate(int sampleRate); //!< To be used when supporting thread is stopped
     void SetVideoRender(DATVideoRender *objScreen) { m_sink.SetVideoRender(objScreen); }

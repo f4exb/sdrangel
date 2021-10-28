@@ -213,10 +213,6 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
     m_objDATVDemod->setMessageQueueToGUI(getInputMessageQueue());
 
     m_objDATVDemod->SetTVScreen(ui->screenTV);
-    m_objDATVDemod->setMERLabel(ui->merText);
-    m_objDATVDemod->setCNRLabel(ui->cnrText);
-    m_objDATVDemod->setMERMeter(ui->merMeter);
-    m_objDATVDemod->setCNRMeter(ui->cnrMeter);
     m_objDATVDemod->SetVideoRender(ui->screenTV_2);
 
     if (m_settings.m_playerEnable) {
@@ -233,6 +229,7 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
     m_intReadyDecodedData=0;
     m_objTimer.setInterval(1000);
     connect(&m_objTimer, SIGNAL(timeout()), this, SLOT(tick()));
+    connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tickMeter())); // 50 ms
     m_objTimer.start();
 
     ui->fullScreen->setVisible(false);
@@ -582,8 +579,14 @@ void DATVDemodGUI::tick()
     } else {
         ui->udpIndicator->setStyleSheet("QLabel { background-color: gray; border-radius: 8px; }");
     }
+}
 
-    return;
+void DATVDemodGUI::tickMeter()
+{
+    ui->merMeter->levelChanged(m_objDATVDemod->getMERRMS(), m_objDATVDemod->getMERPeak(), m_objDATVDemod->getMERNbAvg());
+    ui->cnrMeter->levelChanged(m_objDATVDemod->getCNRRMS(), m_objDATVDemod->getCNRPeak(), m_objDATVDemod->getCNRNbAvg());
+    ui->merText->setText(QString("%1").arg(m_objDATVDemod->getMERAvg(), 0, 'f', 1));
+    ui->cnrText->setText(QString("%1").arg(m_objDATVDemod->getCNRAvg(), 0, 'f', 1));
 }
 
 void DATVDemodGUI::on_cmbStandard_currentIndexChanged(int index)
