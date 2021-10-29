@@ -27,7 +27,7 @@ class ADSBDemodDisplayDialog : public QDialog {
 public:
     explicit ADSBDemodDisplayDialog(int removeTimeout, float airportRange, ADSBDemodSettings::AirportType airportMinimumSize,
                                         bool displayHeliports, bool siUnits, QString fontName, int fontSize, bool displayDemodStats,
-                                        bool autoResizeTableColumns, QWidget* parent = 0);
+                                        bool autoResizeTableColumns, const QString& apiKey, QWidget* parent = 0);
     ~ADSBDemodDisplayDialog();
 
     int m_removeTimeout;
@@ -39,6 +39,7 @@ public:
     int m_fontSize;
     bool m_displayDemodStats;
     bool m_autoResizeTableColumns;
+    QString m_apiKey;
 
 private slots:
     void accept();

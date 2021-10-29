@@ -67,6 +67,8 @@ Clicking the Display Settings button will open the Display Settings dialog, whic
 * Whether demodulator statistics are displayed (primarily an option for developers).
 * Whether the columns in the table are automatically resized after an aircraft is added to it. If unchecked, columns can be resized manually and should be saved with presets.
 
+You can also enter an [avaiationstack](https://aviationstack.com/product) API key, needed to download flight information (such as departure and arrival airports and times).
+
 <h3>12: Display Flight Paths</h3>
 
 Checking this button draws a line on the map showing aircraft's flight paths, as determined from received ADS-B frames.
@@ -125,10 +127,10 @@ Emergency status are:
 * Unlawful interference
 * Downed aircraft
 
-In the Speech and Command strings, variables can be used to substitute in ADS-B data for the aircraft:
+In the Speech and Command strings, variables can be used to substitute in data from the ADS-B table for the aircraft:
 
 * ${icao},
-* ${flight}
+* ${callsign}
 * ${aircraft}
 * ${latitude}
 * ${longitude}
@@ -143,6 +145,23 @@ In the Speech and Command strings, variables can be used to substitute in ADS-B 
 * ${manufacturer}
 * ${owner}
 * ${operator}
+* ${flightstatus}
+* ${departure}
+* ${arrival}
+* ${std}
+* ${etd}
+* ${atd}
+* ${sta}
+* ${eta}
+* ${ata}
+
+<h3>Download flight information for selected flight</h3>
+
+When clicked, flight information (departure and arrival airport and times) is downloaded for the aircraft highlighted in the ADS-B data table using the aviationstack.com API.
+To be able to use this, a callsign for the highlighted aircraft must have been received. Also, the callsign must be mappable to a flight number, which is not always possible (this is tpyically
+the case for callsigns that end in two characters, as for these, some digits from the flight number will have been omitted).
+
+To use this feature, an aviationstack API Key must be entered in the Display Settings dialog (11). A free key giving 500 API calls per month is available from: https://aviationstack.com/product
 
 <h3>14: Refresh list of devices</h3>
 
@@ -154,12 +173,12 @@ Specify the SDRangel device set that will be have its centre frequency set when 
 
 <h3>ADS-B Data</h3>
 
-The table displays the decoded ADS-B data for each aircraft along side data available for the aircraft from the Opensky Network database. The data is not all able to be transmitted in a single ADS-B frame, so the table displays an amalgamation of the latest received data of each type.
+The table displays the decoded ADS-B data for each aircraft along side data available for the aircraft from the Opensky Network database and aviationstack API. The data is not all able to be transmitted in a single ADS-B frame, so the table displays an amalgamation of the latest received data of each type.
 
 ![ADS-B Demodulator Data](../../../doc/img/ADSBDemod_plugin_table.png)
 
 * ICAO ID - 24-bit hexidecimal ICAO aircraft address. This is unique for each aircraft. (ADS-B)
-* Flight No. - Airline flight number or callsign. (ADS-B)
+* Callsign - Aircraft callsign (which is sometimes also the flight number). (ADS-B)
 * Aircraft - The aircraft model. (DB)
 * Airline - The logo of the operator of the aircraft (or owner if no operator known). (DB)
 * Altitude (Alt) - Altitude in feet or metres. (ADS-B)
@@ -182,6 +201,15 @@ The table displays the decoded ADS-B data for each aircraft along side data avai
 * RX Frames - A count of the number of ADS-B frames received from this aircraft.
 * Correlation - Displays the minimun, average and maximum of the preamable correlation in dB for each recevied frame. These values can be used to help select a threshold setting. This correlation value is the ratio between the presence and absence of the signal corresponding to the "ones" and the "zeros" of the sync word adjusted by the bits ratio. It can be interpreted as a SNR estimation.
 * RSSI - This Received Signal Strength Indicator is based on the signal power during correlation estimation. This is the power sum during the expected presence of the signal i.e. the "ones" of the sync word.
+* Flight status - scheduled, active, landed, cancelled, incident or diverted. (API)
+* Dep - Departure airport. (API)
+* Arr - Arrival airport. (API)
+* STD - Scheduled time of departure. (API)
+* ETD - Estimated time of departure. (API)
+* ATD - Actual time of departure. (API)
+* STA - Scheduled time of arrival. (API)
+* ETA - Estimated time of arrival. (API)
+* ATA - Actual time of arrival. (API)
 
 If an ADS-B frame has not been received from an aircraft for 60 seconds, the aircraft is removed from the table and map. This timeout can be adjusted in the Display Settings dialog.
 
@@ -190,7 +218,7 @@ If an ADS-B frame has not been received from an aircraft for 60 seconds, the air
 * To reorder the columns, left click and drag left or right a column header.
 * Left click on a header to sort the table by the data in that column.
 * Double clicking in an ICAO ID cell will open a Web browser and search for the corresponding aircraft on https://www.planespotters.net/
-* Double clicking in an Flight No cell will open a Web browser and search for the corresponding flight on https://www.flightradar24.com/
+* Double clicking in an Callsign cell will open a Web browser and search for the corresponding flight on https://www.flightradar24.com/
 * Double clicking in an Az/El cell will set the aircraft as the active target. The azimuth and elevation to the aicraft will be sent to a rotator controller plugin. The aircraft information box will be coloured green, rather than blue, on the map.
 * Double clicking on any other cell in the table will centre the map on the corresponding aircraft.
 

@@ -35,6 +35,7 @@
 #include "util/azel.h"
 #include "util/movingaverage.h"
 #include "util/httpdownloadmanager.h"
+#include "util/flightinformation.h"
 #include "maincore.h"
 
 #include "adsbdemodsettings.h"
@@ -78,7 +79,8 @@ public:
 // Data about an aircraft extracted from an ADS-B frames
 struct Aircraft {
     int m_icao;                 // 24-bit ICAO aircraft address
-    QString m_flight;           // Flight callsign
+    QString m_callsign;         // Flight callsign
+    QString m_flight;           // Guess at flight number
     Real m_latitude;            // Latitude in decimal degrees
     Real m_longitude;           // Longitude in decimal degrees
     int m_altitude;             // Altitude in feet
@@ -130,7 +132,7 @@ struct Aircraft {
 
     // GUI table items for above data
     QTableWidgetItem *m_icaoItem;
-    QTableWidgetItem *m_flightItem;
+    QTableWidgetItem *m_callsignItem;
     QTableWidgetItem *m_modelItem;
     QTableWidgetItem *m_airlineItem;
     QTableWidgetItem *m_latitudeItem;
@@ -154,6 +156,15 @@ struct Aircraft {
     QTableWidgetItem *m_adsbFrameCountItem;
     QTableWidgetItem *m_correlationItem;
     QTableWidgetItem *m_rssiItem;
+    QTableWidgetItem *m_flightStatusItem;
+    QTableWidgetItem *m_depItem;
+    QTableWidgetItem *m_arrItem;
+    QTableWidgetItem *m_stdItem;
+    QTableWidgetItem *m_etdItem;
+    QTableWidgetItem *m_atdItem;
+    QTableWidgetItem *m_staItem;
+    QTableWidgetItem *m_etaItem;
+    QTableWidgetItem *m_ataItem;
 
     Aircraft(ADSBDemodGUI *gui) :
         m_icao(0),
@@ -187,7 +198,7 @@ struct Aircraft {
         }
         // These are deleted by QTableWidget
         m_icaoItem = new QTableWidgetItem();
-        m_flightItem = new QTableWidgetItem();
+        m_callsignItem = new QTableWidgetItem();
         m_modelItem = new QTableWidgetItem();
         m_airlineItem = new QTableWidgetItem();
         m_altitudeItem = new QTableWidgetItem();
@@ -211,6 +222,15 @@ struct Aircraft {
         m_adsbFrameCountItem = new QTableWidgetItem();
         m_correlationItem = new QTableWidgetItem();
         m_rssiItem = new QTableWidgetItem();
+        m_flightStatusItem = new QTableWidgetItem();
+        m_depItem = new QTableWidgetItem();
+        m_arrItem = new QTableWidgetItem();
+        m_stdItem = new QTableWidgetItem();
+        m_etdItem = new QTableWidgetItem();
+        m_atdItem = new QTableWidgetItem();
+        m_staItem = new QTableWidgetItem();
+        m_etaItem = new QTableWidgetItem();
+        m_ataItem = new QTableWidgetItem();
     }
 
     QString getImage();
@@ -219,8 +239,8 @@ struct Aircraft {
     // Name to use when selected as a target
     QString targetName()
     {
-        if (!m_flight.isEmpty())
-            return QString("Flight: %1").arg(m_flight);
+        if (!m_callsign.isEmpty())
+            return QString("Callsign: %1").arg(m_callsign);
         else
             return QString("ICAO: %1").arg(m_icao, 0, 16);
     }
@@ -480,6 +500,7 @@ public:
 public slots:
     void channelMarkerChangedByCursor();
     void channelMarkerHighlightedByCursor();
+    void flightInformationUpdated(const FlightInformation::Flight& flight);
 
 private:
     Ui::ADSBDemodGUI* ui;
@@ -516,7 +537,7 @@ private:
 
     QTextToSpeech *m_speech;
     QMenu *menu;                        // Column select context menu
-
+    FlightInformation *m_flightInformation;
     WebAPIAdapterInterface *m_webAPIAdapterInterface;
     HttpDownloadManager m_dlm;
     QProgressDialog *m_progressDialog;
@@ -558,6 +579,9 @@ private:
     QIcon *getFlagIcon(const QString &country);
     void updateDeviceSetList();
     QAction *createCheckableItem(QString& text, int idx, bool checked);
+    Aircraft* findAircraftByFlight(const QString& flight);
+    QString dataTimeToShortString(QDateTime dt);
+    void initFlightInformation();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);
@@ -579,6 +603,7 @@ private slots:
     void on_demodModeS_clicked(bool checked);
     void on_feed_clicked(bool checked);
     void on_notifications_clicked();
+    void on_flightInfo_clicked();
     void on_getOSNDB_clicked();
     void on_getAirportDB_clicked();
     void on_flightPaths_clicked(bool checked);

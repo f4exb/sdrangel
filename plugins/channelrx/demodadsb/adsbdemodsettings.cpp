@@ -66,6 +66,7 @@ void ADSBDemodSettings::resetToDefaults()
     m_autoResizeTableColumns = false;
     m_interpolatorPhaseSteps = 4;      // Higher than these two values will struggle to run in real-time
     m_interpolatorTapsPerPhase = 3.5f; // without gaining much improvement in PER
+    m_apiKey = "";
     for (int i = 0; i < ADSBDEMOD_COLUMNS; i++)
     {
         m_columnIndexes[i] = i;
@@ -115,6 +116,7 @@ QByteArray ADSBDemodSettings::serialize() const
     s.writeBool(33, m_allFlightPaths);
 
     s.writeBlob(34, serializeNotificationSettings(m_notificationSettings));
+    s.writeString(35, m_apiKey);
 
     for (int i = 0; i < ADSBDEMOD_COLUMNS; i++)
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -199,6 +201,7 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
 
         d.readBlob(34, &blob);
         deserializeNotificationSettings(blob, m_notificationSettings);
+        d.readString(35, &m_apiKey, "");
 
         for (int i = 0; i < ADSBDEMOD_COLUMNS; i++)
             d.readS32(100 + i, &m_columnIndexes[i], i);
@@ -259,7 +262,7 @@ void ADSBDemodSettings::NotificationSettings::updateRegularExpression()
 {
     m_regularExpression.setPattern(m_regExp);
     m_regularExpression.optimize();
-    if (m_regularExpression.isValid()) {
+    if (!m_regularExpression.isValid()) {
         qDebug() << "ADSBDemod: Regular expression is not valid: " << m_regExp;
     }
 }
