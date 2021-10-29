@@ -23,7 +23,7 @@
 ADSBDemodDisplayDialog::ADSBDemodDisplayDialog(
         int removeTimeout, float airportRange, ADSBDemodSettings::AirportType airportMinimumSize,
         bool displayHeliports, bool siUnits, QString fontName, int fontSize, bool displayDemodStats,
-        bool autoResizeTableColumns, QWidget* parent) :
+        bool autoResizeTableColumns, const QString& apiKey, QWidget* parent) :
     QDialog(parent),
     m_fontName(fontName),
     m_fontSize(fontSize),
@@ -37,6 +37,7 @@ ADSBDemodDisplayDialog::ADSBDemodDisplayDialog(
     ui->units->setCurrentIndex((int)siUnits);
     ui->displayStats->setChecked(displayDemodStats);
     ui->autoResizeTableColumns->setChecked(autoResizeTableColumns);
+    ui->apiKey->setText(apiKey);
 }
 
 ADSBDemodDisplayDialog::~ADSBDemodDisplayDialog()
@@ -53,6 +54,7 @@ void ADSBDemodDisplayDialog::accept()
     m_siUnits = ui->units->currentIndex() == 0 ? false : true;
     m_displayDemodStats = ui->displayStats->isChecked();
     m_autoResizeTableColumns = ui->autoResizeTableColumns->isChecked();
+    m_apiKey = ui->apiKey->text();
     QDialog::accept();
 }
 

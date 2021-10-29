@@ -29,11 +29,11 @@
 class Serializable;
 
 // Number of columns in the table
-#define ADSBDEMOD_COLUMNS 25
+#define ADSBDEMOD_COLUMNS 34
 
 // ADS-B table columns
 #define ADSB_COL_ICAO           0
-#define ADSB_COL_FLIGHT         1
+#define ADSB_COL_CALLSIGN       1
 #define ADSB_COL_MODEL          2
 #define ADSB_COL_AIRLINE        3
 #define ADSB_COL_ALTITUDE       4
@@ -57,6 +57,15 @@ class Serializable;
 #define ADSB_COL_FRAMECOUNT     22
 #define ADSB_COL_CORRELATION    23
 #define ADSB_COL_RSSI           24
+#define ADSB_COL_FLIGHT_STATUS  25
+#define ADSB_COL_DEP            26
+#define ADSB_COL_ARR            27
+#define ADSB_COL_STD            28
+#define ADSB_COL_ETD            29
+#define ADSB_COL_ATD            30
+#define ADSB_COL_STA            31
+#define ADSB_COL_ETA            32
+#define ADSB_COL_ATA            33
 
 struct ADSBDemodSettings
 {
@@ -119,6 +128,7 @@ struct ADSBDemodSettings
     float m_interpolatorTapsPerPhase;
 
     QList<NotificationSettings *> m_notificationSettings;
+    QString m_apiKey;                   //!< aviationstack.com API key
 
     ADSBDemodSettings();
     void resetToDefaults();

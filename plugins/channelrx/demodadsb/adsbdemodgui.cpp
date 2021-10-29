@@ -160,9 +160,9 @@ QString Aircraft::getImage()
 QString Aircraft::getText(bool all)
 {
     QStringList list;
-    if (m_flight.length() > 0)
+    if (m_callsign.length() > 0)
     {
-        list.append(QString("Flight: %1").arg(m_flight));
+        list.append(QString("Callsign: %1").arg(m_callsign));
     }
     else
     {
@@ -215,9 +215,53 @@ QString Aircraft::getText(bool all)
                 desc = QString("Descending: %1 (%2)").arg(rate).arg(units);
             list.append(QString(desc));
         }
-        if  ((m_status.length() > 0) && m_status.compare("No emergency"))
-        {
+        if ((m_status.length() > 0) && m_status.compare("No emergency")) {
             list.append(m_status);
+        }
+
+        QString flightStatus = m_flightStatusItem->text();
+        if (!flightStatus.isEmpty()) {
+            list.append(QString("Flight status: %1").arg(flightStatus));
+        }
+        QString dep = m_depItem->text();
+        if (!dep.isEmpty()) {
+            list.append(QString("Departed: %1").arg(dep));
+        }
+        QString std = m_stdItem->text();
+        if (!std.isEmpty()) {
+            list.append(QString("STD: %1").arg(std));
+        }
+        QString atd = m_atdItem->text();
+        if (!atd.isEmpty())
+        {
+            list.append(QString("ATD: %1").arg(atd));
+        }
+        else
+        {
+            QString etd = m_etdItem->text();
+            if (!etd.isEmpty()) {
+                list.append(QString("ETD: %1").arg(etd));
+            }
+        }
+        QString arr = m_arrItem->text();
+        if (!arr.isEmpty()) {
+            list.append(QString("Arrival: %1").arg(arr));
+        }
+        QString sta = m_staItem->text();
+        if (!sta.isEmpty()) {
+            list.append(QString("STA: %1").arg(sta));
+        }
+        QString ata = m_ataItem->text();
+        if (!ata.isEmpty())
+        {
+            list.append(QString("ATA: %1").arg(ata));
+        }
+        else
+        {
+            QString eta = m_etaItem->text();
+            if (!eta.isEmpty()) {
+                list.append(QString("ETA: %1").arg(eta));
+            }
         }
     }
     return list.join("\n");
@@ -501,6 +545,8 @@ QIcon *ADSBDemodGUI::getAirlineIcon(const QString &operatorICAO)
                 icon = new QIcon(":" + endPath);
                 m_airlineIcons.insert(operatorICAO, icon);
             }
+            else
+                qDebug() << "ADSBDemodGUI: No airline logo for " << operatorICAO;
         }
         return icon;
     }
@@ -611,7 +657,7 @@ void ADSBDemodGUI::handleADSB(
         int row = ui->adsbData->rowCount();
         ui->adsbData->setRowCount(row + 1);
         ui->adsbData->setItem(row, ADSB_COL_ICAO, aircraft->m_icaoItem);
-        ui->adsbData->setItem(row, ADSB_COL_FLIGHT, aircraft->m_flightItem);
+        ui->adsbData->setItem(row, ADSB_COL_CALLSIGN, aircraft->m_callsignItem);
         ui->adsbData->setItem(row, ADSB_COL_MODEL, aircraft->m_modelItem);
         ui->adsbData->setItem(row, ADSB_COL_AIRLINE, aircraft->m_airlineItem);
         ui->adsbData->setItem(row, ADSB_COL_ALTITUDE, aircraft->m_altitudeItem);
@@ -635,6 +681,15 @@ void ADSBDemodGUI::handleADSB(
         ui->adsbData->setItem(row, ADSB_COL_FRAMECOUNT, aircraft->m_adsbFrameCountItem);
         ui->adsbData->setItem(row, ADSB_COL_CORRELATION, aircraft->m_correlationItem);
         ui->adsbData->setItem(row, ADSB_COL_RSSI, aircraft->m_rssiItem);
+        ui->adsbData->setItem(row, ADSB_COL_FLIGHT_STATUS, aircraft->m_flightStatusItem);
+        ui->adsbData->setItem(row, ADSB_COL_DEP, aircraft->m_depItem);
+        ui->adsbData->setItem(row, ADSB_COL_ARR, aircraft->m_arrItem);
+        ui->adsbData->setItem(row, ADSB_COL_STD, aircraft->m_stdItem);
+        ui->adsbData->setItem(row, ADSB_COL_ETD, aircraft->m_etdItem);
+        ui->adsbData->setItem(row, ADSB_COL_ATD, aircraft->m_atdItem);
+        ui->adsbData->setItem(row, ADSB_COL_STA, aircraft->m_staItem);
+        ui->adsbData->setItem(row, ADSB_COL_ETA, aircraft->m_etaItem);
+        ui->adsbData->setItem(row, ADSB_COL_ATA, aircraft->m_ataItem);
         // Look aircraft up in database
         if (m_aircraftInfo != nullptr)
         {
@@ -764,8 +819,39 @@ void ADSBDemodGUI::handleADSB(
                 callsign[i] = idMap[c[i]];
             callsign[8] = '\0';
 
-            aircraft->m_flight = QString(callsign);
-            aircraft->m_flightItem->setText(aircraft->m_flight);
+            aircraft->m_callsign = QString(callsign).trimmed();
+            aircraft->m_callsignItem->setText(aircraft->m_callsign);
+
+            // Attempt to map callsign to flight number
+            if (!aircraft->m_callsign.isEmpty())
+            {
+                QRegularExpression flightNoExp("^[A-Z]{2,3}[0-9]{1,4}$");
+                // Airlines line BA add a single charater suffix that can be stripped
+                // If the suffix is two characters, then it typically means a digit
+                // has been replaced which I don't know how to guess
+                // E.g Easyjet might use callsign EZY67JQ for flight EZY6267
+                // BA use BAW90BG for BA890
+                QRegularExpression suffixedFlightNoExp("^([A-Z]{2,3})([0-9]{1,4})[A-Z]?$");
+                QRegularExpressionMatch suffixMatch;
+
+                if (flightNoExp.match(aircraft->m_callsign).hasMatch())
+                {
+                    aircraft->m_flight = aircraft->m_callsign;
+                }
+                else if ((suffixMatch = suffixedFlightNoExp.match(aircraft->m_callsign)).hasMatch())
+                {
+                    aircraft->m_flight = QString("%1%2").arg(suffixMatch.captured(1)).arg(suffixMatch.captured(2));
+                }
+                else
+                {
+                    // Don't guess, to save wasting API calls
+                    aircraft->m_flight = "";
+                }
+            }
+            else
+            {
+                aircraft->m_flight = "";
+            }
         }
         else if (((tc >= 5) && (tc <= 18)) || ((tc >= 20) && (tc <= 22)))
         {
@@ -1136,11 +1222,11 @@ void ADSBDemodGUI::checkStaticNotification(Aircraft *aircraft)
         }
         if (!match.isEmpty())
         {
-            //QRegularExpression regExp(m_settings.m_notificationSettings[i]->m_regExp);
             if (m_settings.m_notificationSettings[i]->m_regularExpression.isValid())
             {
                 if (m_settings.m_notificationSettings[i]->m_regularExpression.match(match).hasMatch())
                 {
+                    highlightAircraft(aircraft);
                     if (!m_settings.m_notificationSettings[i]->m_speech.isEmpty()) {
                         speechNotification(aircraft, m_settings.m_notificationSettings[i]->m_speech);
                     }
@@ -1160,7 +1246,7 @@ void ADSBDemodGUI::checkDynamicNotification(Aircraft *aircraft)
     {
         for (int i = 0; i < m_settings.m_notificationSettings.size(); i++)
         {
-            if (   (m_settings.m_notificationSettings[i]->m_matchColumn == ADSB_COL_FLIGHT)
+            if (   (m_settings.m_notificationSettings[i]->m_matchColumn == ADSB_COL_CALLSIGN)
                 || (m_settings.m_notificationSettings[i]->m_matchColumn == ADSB_COL_ALTITUDE)
                 || (m_settings.m_notificationSettings[i]->m_matchColumn == ADSB_COL_SPEED)
                 || (m_settings.m_notificationSettings[i]->m_matchColumn == ADSB_COL_RANGE)
@@ -1172,8 +1258,8 @@ void ADSBDemodGUI::checkDynamicNotification(Aircraft *aircraft)
                 QString match;
                 switch (m_settings.m_notificationSettings[i]->m_matchColumn)
                 {
-                case ADSB_COL_FLIGHT:
-                    match = aircraft->m_flightItem->data(Qt::DisplayRole).toString();
+                case ADSB_COL_CALLSIGN:
+                    match = aircraft->m_callsignItem->data(Qt::DisplayRole).toString();
                     break;
                 case ADSB_COL_ALTITUDE:
                     match = aircraft->m_altitudeItem->data(Qt::DisplayRole).toString();
@@ -1202,6 +1288,7 @@ void ADSBDemodGUI::checkDynamicNotification(Aircraft *aircraft)
                     {
                         if (m_settings.m_notificationSettings[i]->m_regularExpression.match(match).hasMatch())
                         {
+                            highlightAircraft(aircraft);
                             if (!m_settings.m_notificationSettings[i]->m_speech.isEmpty()) {
                                 speechNotification(aircraft, m_settings.m_notificationSettings[i]->m_speech);
                             }
@@ -1231,7 +1318,7 @@ QString ADSBDemodGUI::subAircraftString(Aircraft *aircraft, const QString &strin
 {
     QString s = string;
     s = s.replace("${icao}", aircraft->m_icaoItem->data(Qt::DisplayRole).toString());
-    s = s.replace("${flight}", aircraft->m_flightItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${callsign}", aircraft->m_callsignItem->data(Qt::DisplayRole).toString());
     s = s.replace("${aircraft}", aircraft->m_modelItem->data(Qt::DisplayRole).toString());
     s = s.replace("${latitude}", aircraft->m_latitudeItem->data(Qt::DisplayRole).toString());
     s = s.replace("${longitude}", aircraft->m_longitudeItem->data(Qt::DisplayRole).toString());
@@ -1246,6 +1333,15 @@ QString ADSBDemodGUI::subAircraftString(Aircraft *aircraft, const QString &strin
     s = s.replace("${manufacturer}", aircraft->m_manufacturerNameItem->data(Qt::DisplayRole).toString());
     s = s.replace("${owner}", aircraft->m_ownerItem->data(Qt::DisplayRole).toString());
     s = s.replace("${operator}", aircraft->m_operatorICAOItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${flightstatus}", aircraft->m_flightStatusItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${departure}", aircraft->m_depItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${arrival}", aircraft->m_arrItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${std}", aircraft->m_stdItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${etd}", aircraft->m_etdItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${atd}", aircraft->m_atdItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${sta}", aircraft->m_staItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${eta}", aircraft->m_etaItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${ata}", aircraft->m_ataItem->data(Qt::DisplayRole).toString());
     return s;
 }
 
@@ -1364,6 +1460,45 @@ void ADSBDemodGUI::on_notifications_clicked()
     }
 }
 
+void ADSBDemodGUI::on_flightInfo_clicked()
+{
+    if (m_flightInformation)
+    {
+        // Selection mode is single, so only a single row should be returned
+        QModelIndexList indexList = ui->adsbData->selectionModel()->selectedRows();
+        if (!indexList.isEmpty())
+        {
+            int row = indexList.at(0).row();
+            int icao = ui->adsbData->item(row, 0)->text().toInt(nullptr, 16);
+            if (m_aircraft.contains(icao))
+            {
+                Aircraft *aircraft = m_aircraft.value(icao);
+                if (!aircraft->m_flight.isEmpty())
+                {
+                    // Download flight information
+                    m_flightInformation->getFlightInformation(aircraft->m_flight);
+                }
+                else
+                {
+                    qDebug() << "ADSBDemodGUI::on_flightInfo_clicked - No flight number for selected aircraft";
+                }
+            }
+            else
+            {
+                qDebug() << "ADSBDemodGUI::on_flightInfo_clicked - No aircraft with icao " << icao;
+            }
+        }
+        else
+        {
+            qDebug() << "ADSBDemodGUI::on_flightInfo_clicked - No aircraft selected";
+        }
+    }
+    else
+    {
+        qDebug() << "ADSBDemodGUI::on_flightInfo_clicked - No flight information service - have you set an API key?";
+    }
+}
+
 void ADSBDemodGUI::on_adsbData_cellClicked(int row, int column)
 {
     (void) column;
@@ -1387,12 +1522,12 @@ void ADSBDemodGUI::on_adsbData_cellDoubleClicked(int row, int column)
     {
         Aircraft *aircraft = m_aircraft.value(icao);
 
-        if (column == ADSB_COL_FLIGHT)
+        if (column == ADSB_COL_CALLSIGN)
         {
-            if (aircraft->m_flight.length() > 0)
+            if (!aircraft->m_callsign.isEmpty())
             {
                 // Search for flight on flightradar24
-                QDesktopServices::openUrl(QUrl(QString("https://www.flightradar24.com/%1").arg(aircraft->m_flight.trimmed())));
+                QDesktopServices::openUrl(QUrl(QString("https://www.flightradar24.com/%1").arg(aircraft->m_callsign)));
             }
         }
         else
@@ -1876,7 +2011,8 @@ void ADSBDemodGUI::on_displaySettings_clicked()
     ADSBDemodDisplayDialog dialog(m_settings.m_removeTimeout, m_settings.m_airportRange, m_settings.m_airportMinimumSize,
                                 m_settings.m_displayHeliports, m_settings.m_siUnits,
                                 m_settings.m_tableFontName, m_settings.m_tableFontSize,
-                                m_settings.m_displayDemodStats, m_settings.m_autoResizeTableColumns);
+                                m_settings.m_displayDemodStats, m_settings.m_autoResizeTableColumns,
+                                m_settings.m_apiKey);
     if (dialog.exec() == QDialog::Accepted)
     {
         bool unitsChanged = m_settings.m_siUnits != dialog.m_siUnits;
@@ -1890,6 +2026,7 @@ void ADSBDemodGUI::on_displaySettings_clicked()
         m_settings.m_tableFontSize = dialog.m_fontSize;
         m_settings.m_displayDemodStats = dialog.m_displayDemodStats;
         m_settings.m_autoResizeTableColumns = dialog.m_autoResizeTableColumns;
+        m_settings.m_apiKey = dialog.m_apiKey;
 
         if (unitsChanged)
             m_aircraftModel.allAircraftUpdated();
@@ -2027,6 +2164,8 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     // Initialise text to speech engine
     m_speech = new QTextToSpeech(this);
 
+    m_flightInformation = nullptr;
+
     updateDeviceSetList();
     displaySettings();
     applySettings(true);
@@ -2041,6 +2180,11 @@ ADSBDemodGUI::~ADSBDemodGUI()
         Aircraft *a = i.value();
         delete a;
         ++i;
+    }
+    if (m_flightInformation)
+    {
+        disconnect(m_flightInformation, &FlightInformation::flightUpdated, this, &ADSBDemodGUI::flightInformationUpdated);
+        delete m_flightInformation;
     }
 }
 
@@ -2140,6 +2284,8 @@ void ADSBDemodGUI::displaySettings()
 
     if (!m_settings.m_displayDemodStats)
         ui->stats->setText("");
+
+    initFlightInformation();
 
     blockApplySettings(false);
 }
@@ -2242,7 +2388,7 @@ void ADSBDemodGUI::resizeTable()
     int row = ui->adsbData->rowCount();
     ui->adsbData->setRowCount(row + 1);
     ui->adsbData->setItem(row, ADSB_COL_ICAO, new QTableWidgetItem("ICAO ID"));
-    ui->adsbData->setItem(row, ADSB_COL_FLIGHT, new QTableWidgetItem("Flight No."));
+    ui->adsbData->setItem(row, ADSB_COL_CALLSIGN, new QTableWidgetItem("Callsign"));
     ui->adsbData->setItem(row, ADSB_COL_MODEL, new QTableWidgetItem("Aircraft12345"));
     ui->adsbData->setItem(row, ADSB_COL_AIRLINE, new QTableWidgetItem("airbrigdecargo1"));
     ui->adsbData->setItem(row, ADSB_COL_ALTITUDE, new QTableWidgetItem("Alt (ft)"));
@@ -2266,31 +2412,96 @@ void ADSBDemodGUI::resizeTable()
     ui->adsbData->setItem(row, ADSB_COL_FRAMECOUNT, new QTableWidgetItem("Frames"));
     ui->adsbData->setItem(row, ADSB_COL_CORRELATION, new QTableWidgetItem("0.001/0.001/0.001"));
     ui->adsbData->setItem(row, ADSB_COL_RSSI, new QTableWidgetItem("-100.0"));
+    ui->adsbData->setItem(row, ADSB_COL_FLIGHT_STATUS, new QTableWidgetItem("scheduled"));
+    ui->adsbData->setItem(row, ADSB_COL_DEP, new QTableWidgetItem("WWWW"));
+    ui->adsbData->setItem(row, ADSB_COL_ARR, new QTableWidgetItem("WWWW"));
+    ui->adsbData->setItem(row, ADSB_COL_STD, new QTableWidgetItem("12:00 -1"));
+    ui->adsbData->setItem(row, ADSB_COL_ETD, new QTableWidgetItem("12:00 -1"));
+    ui->adsbData->setItem(row, ADSB_COL_ATD, new QTableWidgetItem("12:00 -1"));
+    ui->adsbData->setItem(row, ADSB_COL_STA, new QTableWidgetItem("12:00 +1"));
+    ui->adsbData->setItem(row, ADSB_COL_ETA, new QTableWidgetItem("12:00 +1"));
+    ui->adsbData->setItem(row, ADSB_COL_ATA, new QTableWidgetItem("12:00 +1"));
     ui->adsbData->resizeColumnsToContents();
-    ui->adsbData->removeCellWidget(row, ADSB_COL_ICAO);
-    ui->adsbData->removeCellWidget(row, ADSB_COL_FLIGHT);
-    ui->adsbData->removeCellWidget(row, ADSB_COL_MODEL);
-    ui->adsbData->removeCellWidget(row, ADSB_COL_AIRLINE);
-    ui->adsbData->removeCellWidget(row, ADSB_COL_ALTITUDE);
-    ui->adsbData->removeCellWidget(row, ADSB_COL_SPEED);
-    ui->adsbData->removeCellWidget(row, ADSB_COL_HEADING);
-    ui->adsbData->removeCellWidget(row, ADSB_COL_VERTICALRATE);
-    ui->adsbData->removeCellWidget(row, ADSB_COL_RANGE);
-    ui->adsbData->removeCellWidget(row, ADSB_COL_AZEL);
-    ui->adsbData->removeCellWidget(row, ADSB_COL_LATITUDE);
-    ui->adsbData->removeCellWidget(row, ADSB_COL_LONGITUDE);
-    ui->adsbData->removeCellWidget(row, ADSB_COL_CATEGORY);
-    ui->adsbData->removeCellWidget(row, ADSB_COL_STATUS);
-    ui->adsbData->removeCellWidget(row, ADSB_COL_SQUAWK);
-    ui->adsbData->removeCellWidget(row, ADSB_COL_REGISTRATION);
-    ui->adsbData->removeCellWidget(row, ADSB_COL_COUNTRY);
-    ui->adsbData->removeCellWidget(row, ADSB_COL_REGISTERED);
-    ui->adsbData->removeCellWidget(row, ADSB_COL_MANUFACTURER);
-    ui->adsbData->removeCellWidget(row, ADSB_COL_OWNER);
-    ui->adsbData->removeCellWidget(row, ADSB_COL_OPERATOR_ICAO);
-    ui->adsbData->removeCellWidget(row, ADSB_COL_TIME);
-    ui->adsbData->removeCellWidget(row, ADSB_COL_FRAMECOUNT);
-    ui->adsbData->removeCellWidget(row, ADSB_COL_CORRELATION);
-    ui->adsbData->removeCellWidget(row, ADSB_COL_RSSI);
     ui->adsbData->setRowCount(row);
+}
+
+Aircraft* ADSBDemodGUI::findAircraftByFlight(const QString& flight)
+{
+    QHash<int, Aircraft *>::iterator i = m_aircraft.begin();
+    while (i != m_aircraft.end())
+    {
+        Aircraft *aircraft = i.value();
+        if (aircraft->m_flight == flight) {
+            return aircraft;
+        }
+        ++i;
+    }
+    return nullptr;
+}
+
+// Convert to hh:mm (+/-days)
+QString ADSBDemodGUI::dataTimeToShortString(QDateTime dt)
+{
+    if (dt.isValid())
+    {
+        QDate currentDate = QDateTime::currentDateTimeUtc().date();
+        if (dt.date() == currentDate)
+        {
+            return dt.time().toString("hh:mm");
+        }
+        else
+        {
+            int days = currentDate.daysTo(dt.date());
+            if (days >= 0) {
+                return QString("%1 +%2").arg(dt.time().toString("hh:mm")).arg(days);
+            } else {
+                return QString("%1 %2").arg(dt.time().toString("hh:mm")).arg(days);
+            }
+        }
+    }
+    else
+    {
+        return "";
+    }
+}
+
+void ADSBDemodGUI::initFlightInformation()
+{
+    if (m_flightInformation)
+    {
+        disconnect(m_flightInformation, &FlightInformation::flightUpdated, this, &ADSBDemodGUI::flightInformationUpdated);
+        delete m_flightInformation;
+        m_flightInformation = nullptr;
+    }
+    if (!m_settings.m_apiKey.isEmpty())
+    {
+        m_flightInformation = FlightInformation::create(m_settings.m_apiKey);
+        if (m_flightInformation) {
+            connect(m_flightInformation, &FlightInformation::flightUpdated, this, &ADSBDemodGUI::flightInformationUpdated);
+        }
+    }
+}
+
+void ADSBDemodGUI::flightInformationUpdated(const FlightInformation::Flight& flight)
+{
+    Aircraft* aircraft = findAircraftByFlight(flight.m_flightICAO);
+    if (aircraft)
+    {
+        aircraft->m_flightStatusItem->setText(flight.m_flightStatus);
+        aircraft->m_depItem->setText(flight.m_departureICAO);
+        aircraft->m_arrItem->setText(flight.m_arrivalICAO);
+        aircraft->m_stdItem->setText(dataTimeToShortString(flight.m_departureScheduled));
+        aircraft->m_etdItem->setText(dataTimeToShortString(flight.m_departureEstimated));
+        aircraft->m_atdItem->setText(dataTimeToShortString(flight.m_departureActual));
+        aircraft->m_staItem->setText(dataTimeToShortString(flight.m_arrivalScheduled));
+        aircraft->m_etaItem->setText(dataTimeToShortString(flight.m_arrivalEstimated));
+        aircraft->m_ataItem->setText(dataTimeToShortString(flight.m_arrivalActual));
+        if (aircraft->m_positionValid) {
+            m_aircraftModel.aircraftUpdated(aircraft);
+        }
+    }
+    else
+    {
+        qDebug() << "ADSBDemodGUI::flightInformationUpdated - Flight not found in ADS-B table: " << flight.m_flightICAO;
+    }
 }

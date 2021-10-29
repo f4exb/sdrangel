@@ -39,13 +39,13 @@ Weather* Weather::create(const QString& apiKey, const QString& service)
         }
         else
         {
-            qDebug() << "Weather::connect: An API key is required for: " << service;
+            qDebug() << "Weather::create: An API key is required for: " << service;
             return nullptr;
         }
     }
     else
     {
-        qDebug() << "Weather::connect: Unsupported service: " << service;
+        qDebug() << "Weather::create: Unsupported service: " << service;
         return nullptr;
     }
 }

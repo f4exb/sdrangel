@@ -613,7 +613,24 @@
           <normaloff>:/mono.png</normaloff>:/mono.png</iconset>
         </property>
         <property name="checkable">
-         <bool>true</bool>
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="flightInfo">
+        <property name="toolTip">
+         <string>Download flight information for selected aircraft</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/info.png</normaloff>:/info.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -721,10 +738,10 @@
       </column>
       <column>
        <property name="text">
-        <string>Flight No.</string>
+        <string>Callsign</string>
        </property>
        <property name="toolTip">
-        <string>Commercial flight number. Links to www.flightradar24.com</string>
+        <string>Callsign. Links to www.flightradar24.com</string>
        </property>
       </column>
       <column>
@@ -906,6 +923,78 @@
       <column>
        <property name="text">
         <string>RSSI</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Flight Status</string>
+       </property>
+       <property name="toolTip">
+        <string>Status of flight</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Dep</string>
+       </property>
+       <property name="toolTip">
+        <string>Departure airport</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Arr</string>
+       </property>
+       <property name="toolTip">
+        <string>Arrival airport</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>STD</string>
+       </property>
+       <property name="toolTip">
+        <string>Scheduled time of departure</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>ETD</string>
+       </property>
+       <property name="toolTip">
+        <string>Estimated time of departure</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>ATD</string>
+       </property>
+       <property name="toolTip">
+        <string>Actual time of departure</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>STA</string>
+       </property>
+       <property name="toolTip">
+        <string>Scheduled time of arrival</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>ETA</string>
+       </property>
+       <property name="toolTip">
+        <string>Estimated time of arrival</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>ATA</string>
+       </property>
+       <property name="toolTip">
+        <string>Actual time of arrival</string>
        </property>
       </column>
      </widget>
