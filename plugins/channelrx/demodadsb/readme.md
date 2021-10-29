@@ -158,10 +158,10 @@ In the Speech and Command strings, variables can be used to substitute in data f
 <h3>Download flight information for selected flight</h3>
 
 When clicked, flight information (departure and arrival airport and times) is downloaded for the aircraft highlighted in the ADS-B data table using the aviationstack.com API.
-To be able to use this, a callsign for the highlighted aircraft must have been received. Also, the callsign must be mappable to a flight number, which is not always possible (this is tpyically
+To be able to use this, a callsign for the highlighted aircraft must have been received. Also, the callsign must be mappable to a flight number, which is not always possible (this is typically
 the case for callsigns that end in two characters, as for these, some digits from the flight number will have been omitted).
 
-To use this feature, an aviationstack API Key must be entered in the Display Settings dialog (11). A free key giving 500 API calls per month is available from: https://aviationstack.com/product
+To use this feature, an (aviationstack)[aviationstack.com] API Key must be entered in the Display Settings dialog (11). A free key giving 500 API calls per month is (available)[https://aviationstack.com/product].
 
 <h3>14: Refresh list of devices</h3>
 
@@ -173,7 +173,7 @@ Specify the SDRangel device set that will be have its centre frequency set when 
 
 <h3>ADS-B Data</h3>
 
-The table displays the decoded ADS-B data for each aircraft along side data available for the aircraft from the Opensky Network database and aviationstack API. The data is not all able to be transmitted in a single ADS-B frame, so the table displays an amalgamation of the latest received data of each type.
+The table displays the decoded ADS-B data for each aircraft along side data available for the aircraft from the Opensky Network database (DB) and aviationstack (API). The data is not all able to be transmitted in a single ADS-B frame, so the table displays an amalgamation of the latest received data of each type.
 
 ![ADS-B Demodulator Data](../../../doc/img/ADSBDemod_plugin_table.png)
 
