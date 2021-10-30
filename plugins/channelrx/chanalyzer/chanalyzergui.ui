@@ -10,6 +10,12 @@
     <height>778</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="minimumSize">
    <size>
     <width>720</width>
@@ -127,6 +133,15 @@
                </color>
               </brush>
              </colorrole>
+             <colorrole role="PlaceholderText">
+              <brush brushstyle="NoBrush">
+               <color alpha="128">
+                <red>26</red>
+                <green>26</green>
+                <blue>26</blue>
+               </color>
+              </brush>
+             </colorrole>
             </active>
             <inactive>
              <colorrole role="Text">
@@ -147,6 +162,15 @@
                </color>
               </brush>
              </colorrole>
+             <colorrole role="PlaceholderText">
+              <brush brushstyle="NoBrush">
+               <color alpha="128">
+                <red>26</red>
+                <green>26</green>
+                <blue>26</blue>
+               </color>
+              </brush>
+             </colorrole>
             </inactive>
             <disabled>
              <colorrole role="Text">
@@ -164,6 +188,15 @@
                 <red>255</red>
                 <green>255</green>
                 <blue>255</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="PlaceholderText">
+              <brush brushstyle="NoBrush">
+               <color alpha="128">
+                <red>26</red>
+                <green>26</green>
+                <blue>26</blue>
                </color>
               </brush>
              </colorrole>
@@ -938,6 +971,29 @@
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>ValueDialZ</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedialz.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>GLScope</class>
+   <extends>QWidget</extends>
+   <header>gui/glscope.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>GLScopeGUI</class>
+   <extends>QWidget</extends>
+   <header>gui/glscopegui.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
    <class>GLSpectrum</class>
    <extends>QWidget</extends>
    <header>gui/glspectrum.h</header>
@@ -950,32 +1006,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ValueDialZ</class>
-   <extends>QWidget</extends>
-   <header>gui/valuedialz.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>ValueDial</class>
    <extends>QWidget</extends>
    <header>gui/valuedial.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
-  </customwidget>
-  <customwidget>
-   <class>GLScope</class>
-   <extends>QWidget</extends>
-   <header>gui/glscope.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>GLScopeGUI</class>
-   <extends>QWidget</extends>
-   <header>gui/glscopegui.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
