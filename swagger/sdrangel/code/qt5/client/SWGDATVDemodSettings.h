@@ -123,6 +123,9 @@ public:
     qint32 getUdpTs();
     void setUdpTs(qint32 udp_ts);
 
+    qint32 getPlayerEnable();
+    void setPlayerEnable(qint32 player_enable);
+
     qint32 getStreamIndex();
     void setStreamIndex(qint32 stream_index);
 
@@ -225,6 +228,9 @@ private:
 
     qint32 udp_ts;
     bool m_udp_ts_isSet;
+
+    qint32 player_enable;
+    bool m_player_enable_isSet;
 
     qint32 stream_index;
     bool m_stream_index_isSet;

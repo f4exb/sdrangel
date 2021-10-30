@@ -101,7 +101,7 @@ private:
     DeviceUISet* m_deviceUISet;
 
     ChannelMarker m_objChannelMarker;
-    DATVDemod* m_objDATVDemod;
+    DATVDemod* m_datvDemod;
     MessageQueue m_inputMessageQueue;
     DATVDemodSettings m_settings;
 

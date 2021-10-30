@@ -129,8 +129,105 @@ void DATVDemod::applySettings(const DATVDemodSettings& settings, bool force)
     QString debugMsg = tr("DATVDemod::applySettings: force: %1").arg(force);
     settings.debug(debugMsg);
 
+    QList<QString> reverseAPIKeys;
+
+    if (settings.m_rgbColor != m_settings.m_rgbColor) {
+        reverseAPIKeys.append("rgbColor");
+    }
+    if (settings.m_title != m_settings.m_title) {
+        reverseAPIKeys.append("title");
+    }
+    if (settings.m_rfBandwidth != m_settings.m_rfBandwidth) {
+        reverseAPIKeys.append("rfBandwidth");
+    }
+    if (settings.m_centerFrequency != m_settings.m_centerFrequency) {
+        reverseAPIKeys.append("centerFrequency");
+    }
+    if (settings.m_standard != m_settings.m_standard) {
+        reverseAPIKeys.append("standard");
+    }
+    if (settings.m_modulation != m_settings.m_modulation) {
+        reverseAPIKeys.append("modulation");
+    }
+    if (settings.m_fec != m_settings.m_fec) {
+        reverseAPIKeys.append("fec");
+    }
+    if (settings.m_softLDPC != m_settings.m_softLDPC) {
+        reverseAPIKeys.append("softLDPC");
+    }
+    if (settings.m_softLDPCToolPath != m_settings.m_softLDPCToolPath) {
+        reverseAPIKeys.append("softLDPCToolPath");
+    }
+    if (settings.m_softLDPCMaxTrials != m_settings.m_softLDPCMaxTrials) {
+        reverseAPIKeys.append("softLDPCMaxTrials");
+    }
+    if (settings.m_maxBitflips != m_settings.m_maxBitflips) {
+        reverseAPIKeys.append("maxBitflips");
+    }
+    if (settings.m_audioMute != m_settings.m_audioMute) {
+        reverseAPIKeys.append("audioMute");
+    }
+    if (settings.m_audioDeviceName != m_settings.m_audioDeviceName) {
+        reverseAPIKeys.append("audioDeviceName");
+    }
+    if (settings.m_symbolRate != m_settings.m_symbolRate) {
+        reverseAPIKeys.append("symbolRate");
+    }
+    if (settings.m_notchFilters != m_settings.m_notchFilters) {
+        reverseAPIKeys.append("notchFilters");
+    }
+    if (settings.m_allowDrift != m_settings.m_allowDrift) {
+        reverseAPIKeys.append("allowDrift");
+    }
+    if (settings.m_fastLock != m_settings.m_fastLock) {
+        reverseAPIKeys.append("fastLock");
+    }
+    if (settings.m_filter != m_settings.m_filter) {
+        reverseAPIKeys.append("filter");
+    }
+    if (settings.m_hardMetric != m_settings.m_hardMetric) {
+        reverseAPIKeys.append("hardMetric");
+    }
+    if (settings.m_rollOff != m_settings.m_rollOff) {
+        reverseAPIKeys.append("rollOff");
+    }
+    if (settings.m_viterbi != m_settings.m_viterbi) {
+        reverseAPIKeys.append("viterbi");
+    }
+    if (settings.m_excursion != m_settings.m_excursion) {
+        reverseAPIKeys.append("excursion");
+    }
+    if (settings.m_audioVolume != m_settings.m_audioVolume) {
+        reverseAPIKeys.append("audioVolume");
+    }
+    if (settings.m_videoMute != m_settings.m_videoMute) {
+        reverseAPIKeys.append("videoMute");
+    }
+    if (settings.m_udpTSAddress != m_settings.m_udpTSAddress) {
+        reverseAPIKeys.append("udpTSAddress");
+    }
+    if (settings.m_udpTSPort != m_settings.m_udpTSPort) {
+        reverseAPIKeys.append("udpTSPort");
+    }
+    if (settings.m_udpTS != m_settings.m_udpTS) {
+        reverseAPIKeys.append("udpTS");
+    }
+    if (settings.m_playerEnable != m_settings.m_playerEnable) {
+        reverseAPIKeys.append("playerEnable");
+    }
+
     DATVDemodBaseband::MsgConfigureDATVDemodBaseband *msg = DATVDemodBaseband::MsgConfigureDATVDemodBaseband::create(settings, force);
     m_basebandSink->getInputMessageQueue()->push(msg);
+
+    if (settings.m_useReverseAPI)
+    {
+        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
+                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
+        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+    }
 
     m_settings = settings;
 }
@@ -274,6 +371,9 @@ void DATVDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("udpTS")) {
         settings.m_udpTS = response.getDatvDemodSettings()->getUdpTs() == 1;
     }
+    if (channelSettingsKeys.contains("playerEnable")) {
+        settings.m_playerEnable = response.getDatvDemodSettings()->getPlayerEnable() == 1;
+    }
     if (channelSettingsKeys.contains("streamIndex")) {
         settings.m_streamIndex = response.getDatvDemodSettings()->getStreamIndex();
     }
@@ -346,6 +446,8 @@ void DATVDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
     }
 
     response.getDatvDemodSettings()->setUdpTsPort(settings.m_udpTSPort);
+    response.getDatvDemodSettings()->setUdpTs(settings.m_udpTS ? 1 : 0);
+    response.getDatvDemodSettings()->setPlayerEnable(settings.m_playerEnable ? 1 : 0);
     response.getDatvDemodSettings()->setStreamIndex(settings.m_streamIndex);
     response.getDatvDemodSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
@@ -372,6 +474,8 @@ void DATVDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respons
     response.getDatvDemodReport()->setUdpRunning(udpRunning() ? 1 : 0);
     response.getDatvDemodReport()->setVideoActive(videoActive() ? 1 : 0);
     response.getDatvDemodReport()->setVideoDecodeOk(videoDecodeOK() ? 1 : 0);
+    response.getDatvDemodReport()->setMer(getMERAvg());
+    response.getDatvDemodReport()->setCnr(getCNRAvg());
 }
 
 void DATVDemod::sendChannelSettings(
@@ -492,6 +596,9 @@ void DATVDemod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("udpTS") || force) {
         swgDATVDemodSettings->setUdpTs(settings.m_udpTS ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("playerEnable") || force) {
+        swgDATVDemodSettings->setPlayerEnable(settings.m_playerEnable ? 1 : 0);
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgDATVDemodSettings->setStreamIndex(settings.m_streamIndex);

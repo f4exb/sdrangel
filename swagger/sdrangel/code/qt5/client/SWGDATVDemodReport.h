@@ -68,6 +68,12 @@ public:
     qint32 getSetByModcod();
     void setSetByModcod(qint32 set_by_modcod);
 
+    float getMer();
+    void setMer(float mer);
+
+    float getCnr();
+    void setCnr(float cnr);
+
 
     virtual bool isSet() override;
 
@@ -98,6 +104,12 @@ private:
 
     qint32 set_by_modcod;
     bool m_set_by_modcod_isSet;
+
+    float mer;
+    bool m_mer_isSet;
+
+    float cnr;
+    bool m_cnr_isSet;
 
 };
 

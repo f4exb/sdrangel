@@ -99,7 +99,7 @@ public:
         m_basebandSink->setMessageQueueToGUI(queue);
     }
 
-    void SetTVScreen(TVScreen *objScreen) { m_basebandSink->setTVScreen(objScreen); }
+    void SetTVScreen(TVScreen *tvScreen) { m_basebandSink->setTVScreen(tvScreen); }
     void SetVideoRender(DATVideoRender *objScreen) { m_basebandSink->SetVideoRender(objScreen); }
     DATVideostream *getVideoStream() { return m_basebandSink->getVideoStream(); }
     DATVUDPStream *getUDPStream() { return m_basebandSink->getUDPStream(); }

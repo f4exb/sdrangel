@@ -114,7 +114,7 @@ template<typename T> struct datvconstellation: runnable
     unsigned long decimation;
     long pixels_per_frame;
     cstln_lut<eucl_ss, 256> **cstln;  // Optional ptr to optional constellation
-    TVScreen *m_objDATVScreen;
+    TVScreen *m_tvScreen;
     pipereader<std::complex<T> > in;
     unsigned long phase;
     std::vector<int> cstln_rows;
@@ -126,14 +126,14 @@ template<typename T> struct datvconstellation: runnable
             T _xymin,
             T _xymax,
             const char *_name = nullptr,
-            TVScreen *objDATVScreen = nullptr) :
+            TVScreen *tvScreen = nullptr) :
         runnable(sch, _name ? _name : _in.name),
         xymin(_xymin),
         xymax(_xymax),
         decimation(DEFAULT_GUI_DECIMATION),
         pixels_per_frame(1024),
         cstln(0),
-        m_objDATVScreen(objDATVScreen),
+        m_tvScreen(tvScreen),
         in(_in),
         phase(0)
     {
@@ -144,16 +144,16 @@ template<typename T> struct datvconstellation: runnable
         //Symbols
         while (in.readable() >= pixels_per_frame)
         {
-            if ((!phase) && m_objDATVScreen)
+            if ((!phase) && m_tvScreen)
             {
-                m_objDATVScreen->resetImage();
+                m_tvScreen->resetImage();
 
                 std::complex<T> *p = in.rd(), *pend = p + pixels_per_frame;
 
                 for (; p < pend; ++p)
                 {
-                    m_objDATVScreen->selectRow(256 * (p->real() - xymin) / (xymax - xymin));
-                    m_objDATVScreen->setDataColor(
+                    m_tvScreen->selectRow(256 * (p->real() - xymin) / (xymax - xymin));
+                    m_tvScreen->setDataColor(
                         256 - 256 * ((p->imag() - xymin) / (xymax - xymin)),
                         255, 0, 255);
                 }
@@ -166,12 +166,12 @@ template<typename T> struct datvconstellation: runnable
 
                     for (;(row_it != cstln_rows.end()) && (col_it != cstln_cols.end()); ++row_it, ++col_it)
                     {
-                        m_objDATVScreen->selectRow(*row_it);
-                        m_objDATVScreen->setDataColor(*col_it, 250, 250, 5);
+                        m_tvScreen->selectRow(*row_it);
+                        m_tvScreen->setDataColor(*col_it, 250, 250, 5);
                     }
                 }
 
-                m_objDATVScreen->renderImage(0);
+                m_tvScreen->renderImage(0);
             }
 
             in.read(pixels_per_frame);

@@ -23,6 +23,8 @@
 #include <QIODevice>
 #include <QThread>
 #include <QWidget>
+#include <QTextStream>
+#include <QDebug>
 
 #include "datvideostream.h"
 #include "gui/tvscreen.h"

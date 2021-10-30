@@ -51,7 +51,6 @@
 class TVScreen;
 class DATVideoRender;
 class QLabel;
-class LevelMeterSignalDB;
 
 class DATVDemodSink : public ChannelSampleSink {
 public:
@@ -60,9 +59,9 @@ public:
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
-    bool setTVScreen(TVScreen *objScreen);
-    void SetVideoRender(DATVideoRender *objScreen);
-    DATVideostream *getVideoStream() { return m_objVideoStream; }
+    void setTVScreen(TVScreen *tvScreen);
+    void SetVideoRender(DATVideoRender *screen);
+    DATVideostream *getVideoStream() { return m_videoStream; }
     DATVUDPStream *getUDPStream() { return &m_udpStream; }
     bool audioActive();
     bool audioDecodeOK();
@@ -318,11 +317,11 @@ private:
     leansdr::datvmeter *r_cnrMeter;
 
     //*************** DATV PARAMETERS  ***************
-    TVScreen *m_objRegisteredTVScreen;
-    DATVideoRender *m_objRegisteredVideoRender;
-    DATVideostream *m_objVideoStream;
+    TVScreen *m_tvScreen;
+    DATVideoRender *m_videoRender;
+    DATVideostream *m_videoStream;
     DATVUDPStream m_udpStream;
-    DATVideoRenderThread *m_objRenderThread;
+    DATVideoRenderThread *m_videoThread;
 
     // Audio
 	AudioFifo m_audioFifo;

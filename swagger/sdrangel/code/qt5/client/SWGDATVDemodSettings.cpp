@@ -82,6 +82,8 @@ SWGDATVDemodSettings::SWGDATVDemodSettings() {
     m_udp_ts_port_isSet = false;
     udp_ts = 0;
     m_udp_ts_isSet = false;
+    player_enable = 0;
+    m_player_enable_isSet = false;
     stream_index = 0;
     m_stream_index_isSet = false;
     use_reverse_api = 0;
@@ -156,6 +158,8 @@ SWGDATVDemodSettings::init() {
     m_udp_ts_port_isSet = false;
     udp_ts = 0;
     m_udp_ts_isSet = false;
+    player_enable = 0;
+    m_player_enable_isSet = false;
     stream_index = 0;
     m_stream_index_isSet = false;
     use_reverse_api = 0;
@@ -205,6 +209,7 @@ SWGDATVDemodSettings::cleanup() {
     if(udp_ts_address != nullptr) { 
         delete udp_ts_address;
     }
+
 
 
 
@@ -281,6 +286,8 @@ SWGDATVDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&udp_ts_port, pJson["udpTSPort"], "qint32", "");
     
     ::SWGSDRangel::setValue(&udp_ts, pJson["udpTS"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&player_enable, pJson["playerEnable"], "qint32", "");
     
     ::SWGSDRangel::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
     
@@ -390,6 +397,9 @@ SWGDATVDemodSettings::asJsonObject() {
     }
     if(m_udp_ts_isSet){
         obj->insert("udpTS", QJsonValue(udp_ts));
+    }
+    if(m_player_enable_isSet){
+        obj->insert("playerEnable", QJsonValue(player_enable));
     }
     if(m_stream_index_isSet){
         obj->insert("streamIndex", QJsonValue(stream_index));
@@ -684,6 +694,16 @@ SWGDATVDemodSettings::setUdpTs(qint32 udp_ts) {
 }
 
 qint32
+SWGDATVDemodSettings::getPlayerEnable() {
+    return player_enable;
+}
+void
+SWGDATVDemodSettings::setPlayerEnable(qint32 player_enable) {
+    this->player_enable = player_enable;
+    this->m_player_enable_isSet = true;
+}
+
+qint32
 SWGDATVDemodSettings::getStreamIndex() {
     return stream_index;
 }
@@ -827,6 +847,9 @@ SWGDATVDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_udp_ts_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_player_enable_isSet){
             isObjectUpdated = true; break;
         }
         if(m_stream_index_isSet){

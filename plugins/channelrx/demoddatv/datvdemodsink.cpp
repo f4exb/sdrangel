@@ -34,11 +34,11 @@ const unsigned int DATVDemodSink::m_rfFilterFftLength = 1024;
 
 DATVDemodSink::DATVDemodSink() :
     m_blnNeedConfigUpdate(false),
-    m_objRegisteredTVScreen(nullptr),
-    m_objRegisteredVideoRender(nullptr),
-    m_objVideoStream(new DATVideostream()),
+    m_tvScreen(nullptr),
+    m_videoRender(nullptr),
+    m_videoStream(new DATVideostream()),
     m_udpStream(leansdr::tspacket::SIZE),
-    m_objRenderThread(nullptr),
+    m_videoThread(nullptr),
     m_audioFifo(48000),
     m_blnRenderingVideo(false),
     m_cstlnSetByModcod(false),
@@ -60,14 +60,14 @@ DATVDemodSink::~DATVDemodSink()
     m_blnInitialized = false;
 
     //Immediately exit from DATVideoStream if waiting for data before killing thread
-    m_objVideoStream->setThreadTimeout(0);
-    m_objVideoStream->deleteLater();
+    m_videoStream->setThreadTimeout(0);
+    m_videoStream->deleteLater();
 
     stopVideo();
     CleanUpDATVFramework();
 
-    if (m_objRenderThread) {
-        delete m_objRenderThread;
+    if (m_videoThread) {
+        delete m_videoThread;
     }
 
     delete m_objRFFilter;
@@ -75,34 +75,33 @@ DATVDemodSink::~DATVDemodSink()
 
 void DATVDemodSink::stopVideo()
 {
-    if (m_objRenderThread)
+    if (m_videoThread)
     {
-        if (m_objRenderThread->isRunning())
+        if (m_videoThread->isRunning())
         {
-            m_objRenderThread->stopRendering();
-            m_objRenderThread->quit();
-            m_objRenderThread->wait();
+            m_videoThread->stopRendering();
+            m_videoThread->quit();
+            m_videoThread->wait();
         }
     }
 }
 
-bool DATVDemodSink::setTVScreen(TVScreen *objScreen)
+void DATVDemodSink::setTVScreen(TVScreen *tvScreen)
 {
-    m_objRegisteredTVScreen = objScreen;
-    return true;
+    m_tvScreen = tvScreen;
 }
 
-void DATVDemodSink::SetVideoRender(DATVideoRender *objScreen)
+void DATVDemodSink::SetVideoRender(DATVideoRender *screen)
 {
-    m_objRegisteredVideoRender = objScreen;
-    m_objRegisteredVideoRender->setAudioFIFO(&m_audioFifo);
-    m_objRenderThread = new DATVideoRenderThread(m_objRegisteredVideoRender, m_objVideoStream);
+    m_videoRender = screen;
+    m_videoRender->setAudioFIFO(&m_audioFifo);
+    m_videoThread = new DATVideoRenderThread(m_videoRender, m_videoStream);
 }
 
 bool DATVDemodSink::audioActive()
 {
-    if (m_objRegisteredVideoRender) {
-        return m_objRegisteredVideoRender->getAudioStreamIndex() >= 0;
+    if (m_videoRender) {
+        return m_videoRender->getAudioStreamIndex() >= 0;
     } else {
         return false;
     }
@@ -110,8 +109,8 @@ bool DATVDemodSink::audioActive()
 
 bool DATVDemodSink::videoActive()
 {
-    if (m_objRegisteredVideoRender) {
-        return m_objRegisteredVideoRender->getVideoStreamIndex() >= 0;
+    if (m_videoRender) {
+        return m_videoRender->getVideoStreamIndex() >= 0;
     } else {
         return false;
     }
@@ -119,8 +118,8 @@ bool DATVDemodSink::videoActive()
 
 bool DATVDemodSink::audioDecodeOK()
 {
-    if (m_objRegisteredVideoRender) {
-        return m_objRegisteredVideoRender->getAudioDecodeOK();
+    if (m_videoRender) {
+        return m_videoRender->getAudioDecodeOK();
     } else {
         return false;
     }
@@ -128,8 +127,8 @@ bool DATVDemodSink::audioDecodeOK()
 
 bool DATVDemodSink::videoDecodeOK()
 {
-    if (m_objRegisteredVideoRender) {
-        return m_objRegisteredVideoRender->getVideoDecodeOK();
+    if (m_videoRender) {
+        return m_videoRender->getVideoDecodeOK();
     } else {
         return false;
     }
@@ -151,27 +150,27 @@ bool DATVDemodSink::playVideo()
 {
     QMutexLocker mlock(&m_mutex);
 
-    if (m_objVideoStream == nullptr) {
+    if (m_videoStream == nullptr) {
         return false;
     }
 
-    if (m_objRegisteredVideoRender == nullptr) {
+    if (m_videoRender == nullptr) {
         return false;
     }
 
-    if (m_objRenderThread == nullptr) {
+    if (m_videoThread == nullptr) {
         return false;
     }
 
-    if (m_objRenderThread->isRunning()) {
+    if (m_videoThread->isRunning()) {
         return true;
     }
 
-    if (m_objVideoStream->bytesAvailable() > 0)
+    if (m_videoStream->bytesAvailable() > 0)
     {
-        m_objVideoStream->setMultiThreaded(true);
-        m_objVideoStream->setThreadTimeout(DATVideoRenderThread::videoThreadTimeoutMs);
-        m_objRenderThread->start();
+        m_videoStream->setMultiThreaded(true);
+        m_videoStream->setThreadTimeout(DATVideoRenderThread::videoThreadTimeoutMs);
+        m_videoThread->start();
     }
 
     return false;
@@ -179,8 +178,8 @@ bool DATVDemodSink::playVideo()
 
 void DATVDemodSink::CleanUpDATVFramework()
 {
-    if (m_objVideoStream) {
-        m_objVideoStream->cleanUp();
+    if (m_videoStream) {
+        m_videoStream->cleanUp();
     }
 
     if (m_objScheduler != nullptr)
@@ -556,7 +555,7 @@ void DATVDemodSink::InitDATVFramework()
     m_objCfg.rrc_rej = (float) m_settings.m_excursion;  //dB
     m_objCfg.rrc_steps = 0; //auto
 
-    m_objVideoStream->resetTotalReceived();
+    m_videoStream->resetTotalReceived();
     m_udpStream.resetTotalReceived();
 
     switch(m_settings.m_modulation)
@@ -769,12 +768,11 @@ void DATVDemodSink::InitDATVFramework()
 
     //constellation
 
-    if (m_objRegisteredTVScreen)
+    if (m_tvScreen)
     {
-        qDebug("DATVDemodSink::InitDATVFramework: Register DVBSTVSCREEN");
+        qDebug("DATVDemodSink::InitDATVFramework: Register DVB constellation TV screen");
 
-        m_objRegisteredTVScreen->resizeTVScreen(256,256);
-        r_scope_symbols = new leansdr::datvconstellation<leansdr::f32>(m_objScheduler, *p_sampled, -128,128, nullptr, m_objRegisteredTVScreen);
+        r_scope_symbols = new leansdr::datvconstellation<leansdr::f32>(m_objScheduler, *p_sampled, -128,128, nullptr, m_tvScreen);
         r_scope_symbols->decimation = 1;
         r_scope_symbols->cstln = &m_objDemodulator->cstln;
         r_scope_symbols->calculate_cstln_points();
@@ -850,7 +848,7 @@ void DATVDemodSink::InitDATVFramework()
 
     // OUTPUT
     if (m_settings.m_playerEnable) {
-        r_videoplayer = new leansdr::datvvideoplayer<leansdr::tspacket>(m_objScheduler, *p_tspackets, m_objVideoStream, &m_udpStream);
+        r_videoplayer = new leansdr::datvvideoplayer<leansdr::tspacket>(m_objScheduler, *p_tspackets, m_videoStream, &m_udpStream);
     } else {
         r_videoplayer = new leansdr::datvvideoplayer<leansdr::tspacket>(m_objScheduler, *p_tspackets, nullptr, &m_udpStream);
     }
@@ -895,7 +893,7 @@ void DATVDemodSink::InitDATVS2Framework()
     m_objCfg.rrc_rej = (float) m_settings.m_excursion;  //dB
     m_objCfg.rrc_steps = 0; //auto
 
-    m_objVideoStream->resetTotalReceived();
+    m_videoStream->resetTotalReceived();
     m_udpStream.resetTotalReceived();
 
     switch(m_settings.m_modulation)
@@ -1075,11 +1073,10 @@ void DATVDemodSink::InitDATVS2Framework()
 
     //constellation
 
-    if (m_objRegisteredTVScreen)
+    if (m_tvScreen)
     {
         qDebug("DATVDemodSink::InitDATVS2Framework: Register DVBS 2 TVSCREEN");
-        m_objRegisteredTVScreen->resizeTVScreen(256,256);
-        r_scope_symbols_dvbs2 = new leansdr::datvdvbs2constellation<leansdr::f32>(m_objScheduler, *p_cstln /* *p_sampled */ /* *p_cstln */, -128,128, nullptr, m_objRegisteredTVScreen);
+        r_scope_symbols_dvbs2 = new leansdr::datvdvbs2constellation<leansdr::f32>(m_objScheduler, *p_cstln /* *p_sampled */ /* *p_cstln */, -128,128, nullptr, m_tvScreen);
         r_scope_symbols_dvbs2->decimation = 1;
         r_scope_symbols_dvbs2->cstln = (leansdr::cstln_base**) &objDemodulatorDVBS2->cstln;
         r_scope_symbols_dvbs2->calculate_cstln_points();
@@ -1213,7 +1210,7 @@ void DATVDemodSink::InitDATVS2Framework()
 
     // OUTPUT
     if (m_settings.m_playerEnable) {
-        r_videoplayer = new leansdr::datvvideoplayer<leansdr::tspacket>(m_objScheduler, *p_tspackets, m_objVideoStream, &m_udpStream);
+        r_videoplayer = new leansdr::datvvideoplayer<leansdr::tspacket>(m_objScheduler, *p_tspackets, m_videoStream, &m_udpStream);
     } else {
         r_videoplayer = new leansdr::datvvideoplayer<leansdr::tspacket>(m_objScheduler, *p_tspackets, nullptr, &m_udpStream);
     }
@@ -1410,22 +1407,22 @@ void DATVDemodSink::applySettings(const DATVDemodSettings& settings, bool force)
 
     if ((settings.m_audioVolume) != (m_settings.m_audioVolume) || force)
     {
-        if (m_objRegisteredVideoRender) {
-            m_objRegisteredVideoRender->setAudioVolume(settings.m_audioVolume);
+        if (m_videoRender) {
+            m_videoRender->setAudioVolume(settings.m_audioVolume);
         }
     }
 
     if ((settings.m_audioMute) != (m_settings.m_audioMute) || force)
     {
-        if (m_objRegisteredVideoRender) {
-            m_objRegisteredVideoRender->setAudioMute(settings.m_audioMute);
+        if (m_videoRender) {
+            m_videoRender->setAudioMute(settings.m_audioMute);
         }
     }
 
     if ((settings.m_videoMute) != (m_settings.m_videoMute) || force)
     {
-        if (m_objRegisteredVideoRender) {
-            m_objRegisteredVideoRender->setVideoMute(settings.m_videoMute);
+        if (m_videoRender) {
+            m_videoRender->setVideoMute(settings.m_videoMute);
         }
     }
 

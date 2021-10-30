@@ -104,6 +104,9 @@ DATVDemodSettings:
     udpTS:
       description: boolean
       type: integer
+    playerEnable:
+      description: boolean
+      type: integer
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
@@ -176,5 +179,9 @@ DATVDemodReport:
     setByModcod:
       type: integer
       description: Modulation and code rate set by DVB-S2 MODCOD (1 for yes, 0 for no)
-
-
+    mer:
+      type: number
+      format: float
+    cnr:
+      type: number
+      format: float

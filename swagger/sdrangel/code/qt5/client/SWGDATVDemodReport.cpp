@@ -46,6 +46,10 @@ SWGDATVDemodReport::SWGDATVDemodReport() {
     m_modcod_code_rate_isSet = false;
     set_by_modcod = 0;
     m_set_by_modcod_isSet = false;
+    mer = 0.0f;
+    m_mer_isSet = false;
+    cnr = 0.0f;
+    m_cnr_isSet = false;
 }
 
 SWGDATVDemodReport::~SWGDATVDemodReport() {
@@ -72,10 +76,16 @@ SWGDATVDemodReport::init() {
     m_modcod_code_rate_isSet = false;
     set_by_modcod = 0;
     m_set_by_modcod_isSet = false;
+    mer = 0.0f;
+    m_mer_isSet = false;
+    cnr = 0.0f;
+    m_cnr_isSet = false;
 }
 
 void
 SWGDATVDemodReport::cleanup() {
+
+
 
 
 
@@ -115,6 +125,10 @@ SWGDATVDemodReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&modcod_code_rate, pJson["modcodCodeRate"], "qint32", "");
     
     ::SWGSDRangel::setValue(&set_by_modcod, pJson["setByModcod"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&mer, pJson["mer"], "float", "");
+    
+    ::SWGSDRangel::setValue(&cnr, pJson["cnr"], "float", "");
     
 }
 
@@ -158,6 +172,12 @@ SWGDATVDemodReport::asJsonObject() {
     }
     if(m_set_by_modcod_isSet){
         obj->insert("setByModcod", QJsonValue(set_by_modcod));
+    }
+    if(m_mer_isSet){
+        obj->insert("mer", QJsonValue(mer));
+    }
+    if(m_cnr_isSet){
+        obj->insert("cnr", QJsonValue(cnr));
     }
 
     return obj;
@@ -253,6 +273,26 @@ SWGDATVDemodReport::setSetByModcod(qint32 set_by_modcod) {
     this->m_set_by_modcod_isSet = true;
 }
 
+float
+SWGDATVDemodReport::getMer() {
+    return mer;
+}
+void
+SWGDATVDemodReport::setMer(float mer) {
+    this->mer = mer;
+    this->m_mer_isSet = true;
+}
+
+float
+SWGDATVDemodReport::getCnr() {
+    return cnr;
+}
+void
+SWGDATVDemodReport::setCnr(float cnr) {
+    this->cnr = cnr;
+    this->m_cnr_isSet = true;
+}
+
 
 bool
 SWGDATVDemodReport::isSet(){
@@ -283,6 +323,12 @@ SWGDATVDemodReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_set_by_modcod_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_mer_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_cnr_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

@@ -167,7 +167,7 @@ void DATVDemodGUI::onMenuDialogCalled(const QPoint &p)
     else if ((m_contextMenuType == ContextMenuStreamSettings) && (m_deviceUISet->m_deviceMIMOEngine))
     {
         DeviceStreamSelectionDialog dialog(this);
-        dialog.setNumberOfStreams(m_objDATVDemod->getNumberOfDeviceStreams());
+        dialog.setNumberOfStreams(m_datvDemod->getNumberOfDeviceStreams());
         dialog.setStreamIndex(m_settings.m_streamIndex);
         dialog.move(p);
         dialog.exec();
@@ -196,6 +196,7 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
 {
     ui->setupUi(this);
     ui->screenTV->setColor(true);
+    ui->screenTV->resizeTVScreen(256,256);
     setAttribute(Qt::WA_DeleteOnClose, true);
     connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
@@ -209,16 +210,16 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
     ui->cnrMeter->setRange(0, 30);
     ui->cnrMeter->setAverageSmoothing(2);
 
-    m_objDATVDemod = (DATVDemod*) rxChannel;
-    m_objDATVDemod->setMessageQueueToGUI(getInputMessageQueue());
+    m_datvDemod = (DATVDemod*) rxChannel;
+    m_datvDemod->setMessageQueueToGUI(getInputMessageQueue());
 
-    m_objDATVDemod->SetTVScreen(ui->screenTV);
-    m_objDATVDemod->SetVideoRender(ui->screenTV_2);
+    m_datvDemod->SetTVScreen(ui->screenTV);
+    m_datvDemod->SetVideoRender(ui->screenTV_2);
 
     if (m_settings.m_playerEnable) {
-        connect(m_objDATVDemod->getVideoStream(), &DATVideostream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
+        connect(m_datvDemod->getVideoStream(), &DATVideostream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
     } else {
-        connect(m_objDATVDemod->getUDPStream(), &DATVUDPStream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
+        connect(m_datvDemod->getUDPStream(), &DATVUDPStream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
     }
 
     connect(ui->screenTV_2, &DATVideoRender::onMetaDataChanged, this, &DATVDemodGUI::on_StreamMetaDataChanged);
@@ -377,13 +378,13 @@ void DATVDemodGUI::displaySettings()
 
     if (m_settings.m_playerEnable)
     {
-        disconnect(m_objDATVDemod->getUDPStream(), &DATVUDPStream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
-        connect(m_objDATVDemod->getVideoStream(), &DATVideostream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
+        disconnect(m_datvDemod->getUDPStream(), &DATVUDPStream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
+        connect(m_datvDemod->getVideoStream(), &DATVideostream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
     }
     else
     {
-        disconnect(m_objDATVDemod->getVideoStream(), &DATVideostream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
-        connect(m_objDATVDemod->getUDPStream(), &DATVUDPStream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
+        disconnect(m_datvDemod->getVideoStream(), &DATVideostream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
+        connect(m_datvDemod->getUDPStream(), &DATVUDPStream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
     }
 
     blockApplySettings(false);
@@ -454,7 +455,7 @@ void DATVDemodGUI::applySettings(bool force)
         m_settings.debug(msg);
 
         DATVDemod::MsgConfigureDATVDemod* message = DATVDemod::MsgConfigureDATVDemod::create(m_settings, force);
-	    m_objDATVDemod->getInputMessageQueue()->push(message);
+	    m_datvDemod->getInputMessageQueue()->push(message);
     }
 }
 
@@ -502,16 +503,16 @@ void DATVDemodGUI::ldpcToolSelect()
 
 void DATVDemodGUI::tick()
 {
-    if (m_objDATVDemod)
+    if (m_datvDemod)
     {
-        m_objMagSqAverage(m_objDATVDemod->getMagSq());
+        m_objMagSqAverage(m_datvDemod->getMagSq());
         double magSqDB = CalcDb::dbPower(m_objMagSqAverage / (SDR_RX_SCALED*SDR_RX_SCALED));
         ui->channePowerText->setText(tr("%1 dB").arg(magSqDB, 0, 'f', 1));
 
-        if ((m_modcodModulationIndex != m_objDATVDemod->getModcodModulation()) || (m_modcodCodeRateIndex != m_objDATVDemod->getModcodCodeRate()))
+        if ((m_modcodModulationIndex != m_datvDemod->getModcodModulation()) || (m_modcodCodeRateIndex != m_datvDemod->getModcodCodeRate()))
         {
-            m_modcodModulationIndex = m_objDATVDemod->getModcodModulation();
-            m_modcodCodeRateIndex = m_objDATVDemod->getModcodCodeRate();
+            m_modcodModulationIndex = m_datvDemod->getModcodModulation();
+            m_modcodCodeRateIndex = m_datvDemod->getModcodCodeRate();
             DATVDemodSettings::DATVModulation modulation = DATVDemodSettings::getModulationFromLeanDVBCode(m_modcodModulationIndex);
             DATVDemodSettings::DATVCodeRate rate = DATVDemodSettings::getCodeRateFromLeanDVBCode(m_modcodCodeRateIndex);
             QString modcodModulationStr = DATVDemodSettings::getStrFromModulation(modulation);
@@ -519,9 +520,9 @@ void DATVDemodGUI::tick()
             ui->statusText->setText(tr("MCOD %1 %2").arg(modcodModulationStr).arg(modcodCodeRateStr));
         }
 
-        if (m_cstlnSetByModcod != m_objDATVDemod->isCstlnSetByModcod())
+        if (m_cstlnSetByModcod != m_datvDemod->isCstlnSetByModcod())
         {
-            m_cstlnSetByModcod = m_objDATVDemod->isCstlnSetByModcod();
+            m_cstlnSetByModcod = m_datvDemod->isCstlnSetByModcod();
 
             if (m_cstlnSetByModcod) {
                 ui->statusText->setStyleSheet("QLabel { background-color : green; }");
@@ -537,9 +538,9 @@ void DATVDemodGUI::tick()
         ui->lblRate->setText(QString("Speed: %1b/s").arg(formatBytes(m_intLastSpeed)));
     }
 
-    if (m_objDATVDemod->audioActive())
+    if (m_datvDemod->audioActive())
     {
-        if (m_objDATVDemod->audioDecodeOK()) {
+        if (m_datvDemod->audioDecodeOK()) {
             ui->audioMute->setStyleSheet("QToolButton { background-color : green; }");
         } else {
             ui->audioMute->setStyleSheet("QToolButton { background-color : red; }");
@@ -550,9 +551,9 @@ void DATVDemodGUI::tick()
         ui->audioMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
     }
 
-    if (m_objDATVDemod->videoActive())
+    if (m_datvDemod->videoActive())
     {
-		if (m_objDATVDemod->videoDecodeOK()) {
+		if (m_datvDemod->videoDecodeOK()) {
 			ui->videoMute->setStyleSheet("QToolButton { background-color : green; }");
 		} else {
 			ui->videoMute->setStyleSheet("QToolButton { background-color : red; }");
@@ -566,7 +567,7 @@ void DATVDemodGUI::tick()
     m_intPreviousDecodedData = m_intLastDecodedData;
 
     //Try to start video rendering
-    bool success = m_objDATVDemod->playVideo();
+    bool success = m_datvDemod->playVideo();
 
     if (success) {
         ui->playerIndicator->setStyleSheet("QLabel { background-color: rgb(85, 232, 85); border-radius: 8px; }"); // green
@@ -574,7 +575,7 @@ void DATVDemodGUI::tick()
         ui->playerIndicator->setStyleSheet("QLabel { background-color: gray; border-radius: 8px; }");
     }
 
-    if (m_objDATVDemod->udpRunning()) {
+    if (m_datvDemod->udpRunning()) {
         ui->udpIndicator->setStyleSheet("QLabel { background-color: rgb(85, 232, 85); border-radius: 8px; }"); // green
     } else {
         ui->udpIndicator->setStyleSheet("QLabel { background-color: gray; border-radius: 8px; }");
@@ -583,10 +584,10 @@ void DATVDemodGUI::tick()
 
 void DATVDemodGUI::tickMeter()
 {
-    ui->merMeter->levelChanged(m_objDATVDemod->getMERRMS(), m_objDATVDemod->getMERPeak(), m_objDATVDemod->getMERNbAvg());
-    ui->cnrMeter->levelChanged(m_objDATVDemod->getCNRRMS(), m_objDATVDemod->getCNRPeak(), m_objDATVDemod->getCNRNbAvg());
-    ui->merText->setText(QString("%1").arg(m_objDATVDemod->getMERAvg(), 0, 'f', 1));
-    ui->cnrText->setText(QString("%1").arg(m_objDATVDemod->getCNRAvg(), 0, 'f', 1));
+    ui->merMeter->levelChanged(m_datvDemod->getMERRMS(), m_datvDemod->getMERPeak(), m_datvDemod->getMERNbAvg());
+    ui->cnrMeter->levelChanged(m_datvDemod->getCNRRMS(), m_datvDemod->getCNRPeak(), m_datvDemod->getCNRNbAvg());
+    ui->merText->setText(QString("%1").arg(m_datvDemod->getMERAvg(), 0, 'f', 1));
+    ui->cnrText->setText(QString("%1").arg(m_datvDemod->getCNRAvg(), 0, 'f', 1));
 }
 
 void DATVDemodGUI::on_cmbStandard_currentIndexChanged(int index)
@@ -844,13 +845,13 @@ void DATVDemodGUI::on_playerEnable_clicked()
 
     if (m_settings.m_playerEnable)
     {
-        disconnect(m_objDATVDemod->getUDPStream(), &DATVUDPStream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
-        connect(m_objDATVDemod->getVideoStream(), &DATVideostream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
+        disconnect(m_datvDemod->getUDPStream(), &DATVUDPStream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
+        connect(m_datvDemod->getVideoStream(), &DATVideostream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
     }
     else
     {
-        disconnect(m_objDATVDemod->getVideoStream(), &DATVideostream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
-        connect(m_objDATVDemod->getUDPStream(), &DATVUDPStream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
+        disconnect(m_datvDemod->getVideoStream(), &DATVideostream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
+        connect(m_datvDemod->getUDPStream(), &DATVUDPStream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
     }
 
     applySettings();
