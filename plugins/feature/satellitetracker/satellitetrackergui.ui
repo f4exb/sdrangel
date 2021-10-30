@@ -383,7 +383,7 @@
     </rect>
    </property>
    <property name="sizePolicy">
-    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
@@ -527,7 +527,7 @@
     </rect>
    </property>
    <property name="sizePolicy">
-    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
@@ -584,10 +584,16 @@
        <property name="text">
         <string>Next</string>
        </property>
+       <property name="toolTip">
+        <string>Time until next event</string>
+       </property>
       </column>
       <column>
        <property name="text">
         <string>Dur</string>
+       </property>
+       <property name="toolTip">
+        <string>Duration of next pass</string>
        </property>
       </column>
       <column>

@@ -24,8 +24,8 @@
   </property>
   <property name="maximumSize">
    <size>
-    <width>2000</width>
-    <height>500</height>
+    <width>16777215</width>
+    <height>16777215</height>
    </size>
   </property>
   <property name="font">
@@ -36,6 +36,9 @@
   </property>
   <property name="windowTitle">
    <string>AIS</string>
+  </property>
+  <property name="layoutDirection">
+   <enum>Qt::LeftToRight</enum>
   </property>
   <widget class="QWidget" name="tableContainer" native="true">
    <property name="geometry">

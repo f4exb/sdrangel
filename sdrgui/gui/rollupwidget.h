@@ -24,21 +24,21 @@
 #include "export.h"
 
 class SDRGUI_API RollupWidget : public QWidget {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	RollupWidget(QWidget* parent = nullptr);
-	void setTitleColor(const QColor& c);
-	void setHighlighted(bool highlighted);
-	void setChannelWidget(bool channelWidget) { m_channelWidget = channelWidget; }
+    RollupWidget(QWidget* parent = nullptr);
+    void setTitleColor(const QColor& c);
+    void setHighlighted(bool highlighted);
+    void setChannelWidget(bool channelWidget) { m_channelWidget = channelWidget; }
 
 signals:
-	void widgetRolled(QWidget* widget, bool rollDown);
+    void widgetRolled(QWidget* widget, bool rollDown);
 
 protected:
-	enum {
-		VersionMarker = 0xff
-	};
+    enum {
+        VersionMarker = 0xff
+    };
 
     enum ContextMenuType
     {
@@ -47,32 +47,33 @@ protected:
         ContextMenuStreamSettings
     };
 
-	QColor m_titleColor;
-	QColor m_titleTextColor;
-	bool m_highlighted;
+    QColor m_titleColor;
+    QColor m_titleTextColor;
+    bool m_highlighted;
     ContextMenuType m_contextMenuType;
     QString m_streamIndicator;
 
-	int arrangeRollups();
+    int arrangeRollups();
 
-	QByteArray saveState(int version = 0) const;
+    QByteArray saveState(int version = 0) const;
     bool restoreState(const QByteArray& state, int version = 0);
 
-	void paintEvent(QPaintEvent*);
-	int paintRollup(QWidget* rollup, int pos, QPainter* p, bool last, const QColor& frame);
+    void paintEvent(QPaintEvent*);
+    int paintRollup(QWidget* rollup, int pos, QPainter* p, bool last, const QColor& frame);
 
-	void resizeEvent(QResizeEvent* size);
-	void mousePressEvent(QMouseEvent* event);
+    void resizeEvent(QResizeEvent* size);
+    void mousePressEvent(QMouseEvent* event);
 
-	bool event(QEvent* event);
-	bool eventFilter(QObject* object, QEvent* event);
+    bool event(QEvent* event);
+    bool eventFilter(QObject* object, QEvent* event);
 
     void resetContextMenuType() { m_contextMenuType = ContextMenuNone; }
-	void setStreamIndicator(const QString& indicator);
+    void setStreamIndicator(const QString& indicator);
 
 private:
     static bool isRollupChild(QWidget *childWidget); //!< chidl is part of rollups (ex: not a dialog)
-	bool m_channelWidget;
+    bool m_channelWidget;
+    int m_newHeight;
 };
 
 #endif // INCLUDE_ROLLUPWIDGET_H
