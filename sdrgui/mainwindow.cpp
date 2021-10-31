@@ -28,6 +28,7 @@
 #include <QKeyEvent>
 #include <QResource>
 #include <QFontDatabase>
+#include <QStandardPaths>
 
 #include "device/devicegui.h"
 #include "device/deviceapi.h"
@@ -180,7 +181,20 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 
     splash->showStatusMessage("allocate FFTs...", Qt::white);
     splash->showStatusMessage("allocate FFTs...", Qt::white);
-    m_dspEngine->createFFTFactory(parser.getFFTWFWisdomFileName());
+
+    if (parser.getFFTWFWisdomFileName().length() != 0)
+    {
+        m_dspEngine->createFFTFactory(parser.getFFTWFWisdomFileName());
+    }
+    else
+    {
+        QString defaultFFTWWisdomFile = QStandardPaths::locate(QStandardPaths::AppDataLocation, "fftw-wisdom");
+
+        if (defaultFFTWWisdomFile.length() != 0) {
+            m_dspEngine->createFFTFactory(defaultFFTWWisdomFile);
+        }
+    }
+
     m_dspEngine->preAllocateFFTs();
 
     splash->showStatusMessage("load settings...", Qt::white);
