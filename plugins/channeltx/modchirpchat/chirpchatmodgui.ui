@@ -26,6 +26,9 @@
    <string>ChirpChat Modulator</string>
   </property>
   <widget class="QWidget" name="verticalLayoutWidget">
+   <property name="windowTitle">
+    <string>RF/mod/coder settings</string>
+   </property>
    <property name="geometry">
     <rect>
      <x>0</x>
@@ -495,6 +498,9 @@
    </layout>
   </widget>
   <widget class="QWidget" name="verticalLayoutWidget_2">
+   <property name="windowTitle">
+    <string>Payload</string>
+   </property>
    <property name="geometry">
     <rect>
      <x>0</x>
