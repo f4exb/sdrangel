@@ -26,7 +26,7 @@ RemoteInputSettings::RemoteInputSettings()
 void RemoteInputSettings::resetToDefaults()
 {
     m_apiAddress = "127.0.0.1";
-    m_apiPort = 9091;
+    m_apiPort = 8091;
     m_dataAddress = "127.0.0.1";
     m_dataPort = 9090;
     m_multicastAddress = "224.0.0.1";
@@ -76,9 +76,9 @@ bool RemoteInputSettings::deserialize(const QByteArray& data)
         d.readString(3, &m_multicastAddress, "224.0.0.1");
         d.readBool(4, &m_multicastJoin, false);
         d.readString(5, &m_apiAddress, "127.0.0.1");
-        d.readU32(6, &uintval, 9090);
+        d.readU32(6, &uintval, 8091);
         m_apiPort = uintval % (1<<16);
-        d.readU32(7, &uintval, 9091);
+        d.readU32(7, &uintval, 9090);
         m_dataPort = uintval % (1<<16);
         d.readString(8, &m_dataAddress, "127.0.0.1");
         d.readBool(9, &m_dcBlock, false);

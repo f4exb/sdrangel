@@ -2,7 +2,7 @@
 
 <h2>Introduction</h2>
 
-This input sample source plugin gets its samples over tbe network from a SDRangel instance's Remote channel sink using UDP connection.
+This input sample source plugin gets its samples over the network from a SDRangel instance's Remote channel sink using UDP connection.
 
 Forward Error Correction with a Cauchy MDS block erasure codec is used to prevent block loss. This can make the UDP transmission more robust particularly over WiFi links.
 
@@ -10,9 +10,7 @@ Please note that there is no provision for handling out of sync UDP blocks. It i
 
 The remote SDRangel instance that sends the data stream is controlled via its REST API using a separate control software for example [SDRangelcli](https://github.com/f4exb/sdrangelcli)
 
-A sample size conversion takes place if the stream sample size sent by the remote instance and the Rx sample size of the local instance do not match (i.e. 16 to 24 bits or 24 to 16 bits). Best performace is obtained when both instances use the same sample size.
-
-It is present only in Linux binary releases.
+A sample size conversion takes place if the stream sample size sent by the remote instance and the Rx sample size of the local instance do not match (i.e. 16 to 24 bits or 24 to 16 bits). Best performance is obtained when both instances use the same sample size.
 
 <h2>Build</h2>
 
@@ -70,7 +68,7 @@ This is the current timestamp of the block of data sent from the receiver. It is
 There are two gauges separated by a dot in the center. Ideally these gauges should not display any value thus read and write pointers are always half a buffer apart. However due to the fact that a whole frame is reconstructed at once up to ~10% variation is normal and should appear on the left gauge (write leads).
 
   - The left gauge is the negative gauge. It is the value in percent of buffer size from the write pointer position to the read pointer position when this difference is less than half of a buffer distance. It means that the writes are leading or reads are lagging.
-  - The right gauge is the positive gauge. It is the value in percent of buffer size of the difference from the read pointer position to the write pointer position when this difference is less than half of a buffer distance. It menas that the writes are lagging or reads are leading.
+  - The right gauge is the positive gauge. It is the value in percent of buffer size of the difference from the read pointer position to the write pointer position when this difference is less than half of a buffer distance. It means that the writes are lagging or reads are leading.
 
 The system tries to compensate read / write unbalance however at start or when a large stream disruption has occurred a delay of a few tens of seconds is necessary before read / write reaches equilibrium.
 
@@ -160,7 +158,7 @@ Local port the remote SDRangel instance sends the data to.  Effective when the v
 
 <h4>8.3: Validation button</h4>
 
-When the return key is hit within the interface address (8.2), port (8.3), multicast group address (10) and multicast group join/leave (9) the changes of parameters for data reception are ready for commit and this button turns green. You then push this button to commt the changes.
+When the return key is hit within the interface address (8.2), port (8.3), multicast group address (10) and multicast group join/leave (9) the changes of parameters for data reception are ready for commit and this button turns green. You then push this button to commit the changes.
 
 <h3>9: Join or leave multicast group</h3>
 
