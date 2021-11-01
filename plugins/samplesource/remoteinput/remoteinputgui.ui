@@ -726,7 +726,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Local network interface IPv4 address</string>
+        <string>Local network interface IPv4 address for data reception</string>
        </property>
        <property name="inputMask">
         <string>000.000.000.000</string>
