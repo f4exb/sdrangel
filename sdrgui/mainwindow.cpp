@@ -2191,7 +2191,7 @@ void MainWindow::deleteFeature(int featureSetIndex, int featureIndex)
 
 void MainWindow::on_action_About_triggered()
 {
-	AboutDialog dlg(m_apiHost, m_apiPort, m_mainCore->m_settings, this);
+	AboutDialog dlg(m_apiHost.isEmpty() ? "127.0.0.1" : m_apiHost, m_apiPort, m_mainCore->m_settings, this);
 	dlg.exec();
 }
 

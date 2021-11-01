@@ -26,7 +26,7 @@ MainParser::MainParser() :
     m_serverAddressOption(QStringList() << "a" << "api-address",
         "Web API server address.",
         "address",
-        "127.0.0.1"),
+        ""),
     m_serverPortOption(QStringList() << "p" << "api-port",
         "Web API server port.",
         "port",
@@ -36,7 +36,7 @@ MainParser::MainParser() :
         "file",
         "")
 {
-    m_serverAddress = "127.0.0.1";
+    m_serverAddress = "";   // Bind to any address
     m_serverPort = 8091;
     m_mimoSupport = false;
     m_fftwfWindowFileName = "";
@@ -63,18 +63,20 @@ void MainParser::parse(const QCoreApplication& app)
     // server address
 
     QString serverAddress = m_parser.value(m_serverAddressOption);
+    if (!serverAddress.isEmpty())
+    {
+        QString ipRange = "(?:[0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])";
+        QRegExp ipRegex ("^" + ipRange
+                         + "\\." + ipRange
+                         + "\\." + ipRange
+                         + "\\." + ipRange + "$");
+        QRegExpValidator ipValidator(ipRegex);
 
-    QString ipRange = "(?:[0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])";
-    QRegExp ipRegex ("^" + ipRange
-                     + "\\." + ipRange
-                     + "\\." + ipRange
-                     + "\\." + ipRange + "$");
-    QRegExpValidator ipValidator(ipRegex);
-
-    if (ipValidator.validate(serverAddress, pos) == QValidator::Acceptable) {
-        m_serverAddress = serverAddress;
-    } else {
-        qWarning() << "MainParser::parse: server address invalid. Defaulting to " << m_serverAddress;
+        if (ipValidator.validate(serverAddress, pos) == QValidator::Acceptable) {
+            m_serverAddress = serverAddress;
+        } else {
+            qWarning() << "MainParser::parse: server address invalid. Defaulting to any address.";
+        }
     }
 
     // server port
