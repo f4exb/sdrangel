@@ -299,6 +299,7 @@ void RTLSDRGui::displaySettings()
 	ui->agc->setChecked(m_settings.m_agc);
 	ui->lowSampleRate->setChecked(m_settings.m_lowSampleRate);
 	ui->offsetTuning->setChecked(m_settings.m_offsetTuning);
+	ui->biasT->setChecked(m_settings.m_biasTee);
 }
 
 void RTLSDRGui::sendSettings()
