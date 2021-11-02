@@ -1783,6 +1783,13 @@ void MainWindow::on_action_DeviceUserArguments_triggered()
 void MainWindow::on_action_FFT_triggered()
 {
     qDebug("MainWindow::on_action_FFT_triggered");
+
+    if (m_fftWisdomProcess)
+    {
+        QMessageBox::information(this, "FFTW Wisdom", QString("Process %1 is already running").arg(m_fftWisdomProcess->processId()));
+        return;
+    }
+
     m_fftWisdomProcess = new QProcess(this);
     connect(m_fftWisdomProcess,
         SIGNAL(finished(int, QProcess::ExitStatus)),
@@ -1797,6 +1804,7 @@ void MainWindow::on_action_FFT_triggered()
             this,
             SLOT(fftWisdomProcessFinished(int, QProcess::ExitStatus)));
         delete m_fftWisdomProcess;
+        m_fftWisdomProcess = nullptr;
     }
     else
     {
