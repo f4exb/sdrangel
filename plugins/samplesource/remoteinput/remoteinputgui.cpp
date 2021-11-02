@@ -330,7 +330,7 @@ void RemoteInputGui::on_dataApplyButton_clicked(bool checked)
     sendSettings();
 }
 
-void RemoteInputGui::on_apiAddress_returnPressed()
+void RemoteInputGui::on_apiAddress_editingFinished()
 {
     m_settings.m_apiAddress = ui->apiAddress->text();
 
@@ -341,14 +341,14 @@ void RemoteInputGui::on_apiAddress_returnPressed()
     sendSettings();
 }
 
-void RemoteInputGui::on_dataAddress_returnPressed()
+void RemoteInputGui::on_dataAddress_editingFinished()
 {
     m_settings.m_dataAddress = ui->dataAddress->text();
     ui->dataApplyButton->setEnabled(true);
     ui->dataApplyButton->setStyleSheet("QPushButton { background-color : green; }");
 }
 
-void RemoteInputGui::on_dataPort_returnPressed()
+void RemoteInputGui::on_dataPort_editingFinished()
 {
     bool ok;
     quint16 udpPort = ui->dataPort->text().toInt(&ok);
@@ -364,7 +364,7 @@ void RemoteInputGui::on_dataPort_returnPressed()
     ui->dataApplyButton->setStyleSheet("QPushButton { background-color : green; }");
 }
 
-void RemoteInputGui::on_multicastAddress_returnPressed()
+void RemoteInputGui::on_multicastAddress_editingFinished()
 {
     m_settings.m_multicastAddress = ui->multicastAddress->text();
     ui->dataApplyButton->setEnabled(true);
@@ -378,7 +378,7 @@ void RemoteInputGui::on_multicastJoin_toggled(bool checked)
     ui->dataApplyButton->setStyleSheet("QPushButton { background-color : green; }");
 }
 
-void RemoteInputGui::on_apiPort_returnPressed()
+void RemoteInputGui::on_apiPort_editingFinished()
 {
     bool ctlOk;
     int udpApiPort = ui->apiPort->text().toInt(&ctlOk);
