@@ -126,6 +126,7 @@
     <addaction name="action_Audio"/>
     <addaction name="action_Logging"/>
     <addaction name="action_My_Position"/>
+    <addaction name="action_FFT"/>
     <addaction name="action_AMBE"/>
     <addaction name="action_LimeRFE"/>
     <addaction name="menuDevices"/>
@@ -970,6 +971,11 @@
      <family>Liberation Sans</family>
      <pointsize>9</pointsize>
     </font>
+   </property>
+  </action>
+  <action name="action_FFT">
+   <property name="text">
+    <string>FFT</string>
    </property>
   </action>
   <zorder>presetDock</zorder>

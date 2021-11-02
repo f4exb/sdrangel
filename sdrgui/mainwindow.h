@@ -22,6 +22,7 @@
 #include <QMainWindow>
 #include <QTimer>
 #include <QList>
+#include <QProcess>
 
 #include "settings/mainsettings.h"
 #include "util/message.h"
@@ -119,6 +120,8 @@ private:
 
 	CommandKeyReceiver *m_commandKeyReceiver;
 
+	QProcess *m_fftWisdomProcess;
+
 	void loadSettings();
 	void loadPresetSettings(const Preset* preset, int tabIndex);
 	void savePresetSettings(Preset* preset, int tabIndex);
@@ -173,6 +176,7 @@ private slots:
     void on_commandKeyboardConnect_toggled(bool checked);
 	void on_action_Audio_triggered();
     void on_action_Logging_triggered();
+	void on_action_FFT_triggered();
     void on_action_AMBE_triggered();
     void on_action_LimeRFE_triggered();
 	void on_action_My_Position_triggered();
@@ -192,6 +196,7 @@ private slots:
     void tabChannelsIndexChanged();
 	void tabFeaturesIndexChanged();
 	void commandKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifiers, bool release);
+	void fftWisdomProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
 };
 
 #endif // INCLUDE_MAINWINDOW_H

@@ -37,6 +37,7 @@ set(sdrgui_SOURCES
     gui/featuresdock.cpp
     gui/featurepresetsdialog.cpp
     gui/featurewindow.cpp
+    gui/fftwisdomdialog.cpp
     gui/glscope.cpp
     gui/glscopegui.cpp
     gui/glshadercolors.cpp
@@ -125,6 +126,7 @@ set(sdrgui_HEADERS
     gui/featuresdock.h
     gui/featurepresetsdialog.h
     gui/featurewindow.h
+    gui/fftwisdomdialog.h
     gui/glscope.h
     gui/glscopegui.h
     gui/glshadercolors.h
@@ -199,6 +201,7 @@ set(sdrgui_FORMS
     gui/fmpreemphasisdialog.ui
     gui/featureadddialog.ui
     gui/featurepresetsdialog.ui
+    gui/fftwisdomdialog.ui
     gui/glscopegui.ui
     gui/glspectrumgui.ui
     gui/pluginsdialog.ui

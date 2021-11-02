@@ -57,6 +57,7 @@
 #include "gui/deviceuserargsdialog.h"
 #include "gui/sdrangelsplash.h"
 #include "gui/mypositiondialog.h"
+#include "gui/fftwisdomdialog.h"
 #include "gui/ambedevicesdialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/spectrumvis.h"
@@ -101,7 +102,8 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	m_inputGUI(0),
 	m_sampleRate(0),
 	m_centerFrequency(0),
-	m_sampleFileName(std::string("./test.sdriq"))
+	m_sampleFileName(std::string("./test.sdriq")),
+    m_fftWisdomProcess(nullptr)
 {
 	qDebug() << "MainWindow::MainWindow: start";
 
@@ -1776,6 +1778,48 @@ void MainWindow::on_action_DeviceUserArguments_triggered()
     qDebug("MainWindow::on_action_DeviceUserArguments_triggered");
     DeviceUserArgsDialog deviceUserArgsDialog(DeviceEnumerator::instance(), m_mainCore->m_settings.getDeviceUserArgs(), this);
     deviceUserArgsDialog.exec();
+}
+
+void MainWindow::on_action_FFT_triggered()
+{
+    qDebug("MainWindow::on_action_FFT_triggered");
+    m_fftWisdomProcess = new QProcess(this);
+    connect(m_fftWisdomProcess,
+        SIGNAL(finished(int, QProcess::ExitStatus)),
+        this,
+        SLOT(fftWisdomProcessFinished(int, QProcess::ExitStatus)));
+    FFTWisdomDialog fftWisdomDialog(m_fftWisdomProcess, this);
+
+    if (fftWisdomDialog.exec() == QDialog::Rejected)
+    {
+        disconnect(m_fftWisdomProcess,
+            SIGNAL(finished(int, QProcess::ExitStatus)),
+            this,
+            SLOT(fftWisdomProcessFinished(int, QProcess::ExitStatus)));
+        delete m_fftWisdomProcess;
+    }
+    else
+    {
+        QMessageBox::information(this, "FFTW Wisdom", QString("Process %1 started").arg(m_fftWisdomProcess->processId()));
+    }
+}
+
+void MainWindow::fftWisdomProcessFinished(int exitCode, QProcess::ExitStatus exitStatus)
+{
+    qDebug("MainWindow::fftWisdomProcessFinished: process finished rc=%d (%d)", exitCode, (int) exitStatus);
+
+    if ((exitCode != 0) || (exitStatus != QProcess::NormalExit))
+    {
+        QMessageBox::critical(this, "FFTW Wisdom", "fftwf-widdsom program failed");
+    }
+    else
+    {
+        QString log = m_fftWisdomProcess->readAllStandardOutput();
+        QMessageBox::information(this, "FFTW Wisdom", QString("Success\n%1").arg(log));
+
+    }
+
+    delete m_fftWisdomProcess;
 }
 
 void MainWindow::on_action_AMBE_triggered()
