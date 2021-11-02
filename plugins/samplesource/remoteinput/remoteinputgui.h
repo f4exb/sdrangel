@@ -120,11 +120,11 @@ private slots:
     void on_dataApplyButton_clicked(bool checked);
 	void on_dcOffset_toggled(bool checked);
 	void on_iqImbalance_toggled(bool checked);
-	void on_apiAddress_returnPressed();
-	void on_apiPort_returnPressed();
-    void on_dataAddress_returnPressed();
-	void on_dataPort_returnPressed();
-    void on_multicastAddress_returnPressed();
+	void on_apiAddress_editingFinished();
+	void on_apiPort_editingFinished();
+    void on_dataAddress_editingFinished();
+	void on_dataPort_editingFinished();
+    void on_multicastAddress_editingFinished();
 	void on_multicastJoin_toggled(bool checked);
 	void on_startStop_toggled(bool checked);
     void on_eventCountsReset_clicked(bool checked);
