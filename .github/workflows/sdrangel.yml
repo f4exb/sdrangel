@@ -30,7 +30,7 @@ jobs:
             generators: Ninja
           }
     steps:
-      - uses: nschloe/action-cached-lfs-checkout@v1
+      - uses: actions/checkout@v2
         with:
           submodules: true
           fetch-depth: 0
