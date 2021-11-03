@@ -32,14 +32,16 @@ QNetworkReply *HttpDownloadManagerGUI::download(const QUrl &url, const QString &
     if (parent != nullptr)
     {
         QProgressDialog *progressDialog = new QProgressDialog(parent);
-        progressDialog->setAttribute(Qt::WA_DeleteOnClose);
         progressDialog->setCancelButton(nullptr);
         progressDialog->setMinimumDuration(500);
         progressDialog->setLabelText(QString("Downloading %1.").arg(url.toString()));
         m_progressDialogs.append(progressDialog);
         connect(reply, &QNetworkReply::downloadProgress, this, [progressDialog](qint64 bytesRead, qint64 totalBytes) {
-            progressDialog->setMaximum(totalBytes);
-            progressDialog->setValue(bytesRead);
+            if (progressDialog)
+            {
+                progressDialog->setMaximum(totalBytes);
+                progressDialog->setValue(bytesRead);
+            }
         });
     }
     else
@@ -75,7 +77,10 @@ void HttpDownloadManagerGUI::downloadCompleteGUI(const QString& filename, bool s
     {
         QProgressDialog *progressDialog = m_progressDialogs[idx];
         if (progressDialog != nullptr)
+        {
             progressDialog->close();
+            delete progressDialog;
+        }
         m_filenames.remove(idx);
         m_progressDialogs.remove(idx);
     }

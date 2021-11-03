@@ -1625,7 +1625,6 @@ void ADSBDemodGUI::on_getOSNDB_clicked()
             // Download Opensky network database to a file
             QUrl dbURL(QString(OSNDB_URL));
             m_progressDialog = new QProgressDialog(this);
-            m_progressDialog->setAttribute(Qt::WA_DeleteOnClose);
             m_progressDialog->setCancelButton(nullptr);
             m_progressDialog->setLabelText(QString("Downloading %1.").arg(OSNDB_URL));
             QNetworkReply *reply = m_dlm.download(dbURL, osnDBFilename);
@@ -1645,7 +1644,6 @@ void ADSBDemodGUI::on_getAirportDB_clicked()
             // Download Opensky network database to a file
             QUrl dbURL(QString(AIRPORTS_URL));
             m_progressDialog = new QProgressDialog(this);
-            m_progressDialog->setAttribute(Qt::WA_DeleteOnClose);
             m_progressDialog->setCancelButton(nullptr);
             m_progressDialog->setLabelText(QString("Downloading %1.").arg(AIRPORTS_URL));
             QNetworkReply *reply = m_dlm.download(dbURL, airportDBFile);
@@ -1740,12 +1738,16 @@ bool ADSBDemodGUI::readFastDB(const QString& filename)
 
 void ADSBDemodGUI::updateDownloadProgress(qint64 bytesRead, qint64 totalBytes)
 {
-    m_progressDialog->setMaximum(totalBytes);
-    m_progressDialog->setValue(bytesRead);
+    if (m_progressDialog)
+    {
+        m_progressDialog->setMaximum(totalBytes);
+        m_progressDialog->setValue(bytesRead);
+    }
 }
 
 void ADSBDemodGUI::downloadFinished(const QString& filename, bool success)
 {
+    bool closeDialog = true;
     if (success)
     {
         if (filename == getOSNDBFilename())
@@ -1754,8 +1756,6 @@ void ADSBDemodGUI::downloadFinished(const QString& filename, bool success)
             // Convert to condensed format for faster loading later
             m_progressDialog->setLabelText("Processing.");
             AircraftInformation::writeFastDB(getFastDBFilename(), m_aircraftInfo);
-            m_progressDialog->close();
-            m_progressDialog = nullptr;
         }
         else if (filename == getAirportDBFilename())
         {
@@ -1765,6 +1765,7 @@ void ADSBDemodGUI::downloadFinished(const QString& filename, bool success)
             m_progressDialog->setLabelText(QString("Downloading %1.").arg(AIRPORT_FREQUENCIES_URL));
             QNetworkReply *reply = m_dlm.download(dbURL, getAirportFrequenciesDBFilename());
             connect(reply, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(updateDownloadProgress(qint64,qint64)));
+            closeDialog = false;
         }
         else if (filename == getAirportFrequenciesDBFilename())
         {
@@ -1774,19 +1775,16 @@ void ADSBDemodGUI::downloadFinished(const QString& filename, bool success)
                 // Update airports on map
                 updateAirports();
             }
-            m_progressDialog->close();
-            m_progressDialog = nullptr;
         }
         else
         {
             qDebug() << "ADSBDemodGUI::downloadFinished: Unexpected filename: " << filename;
-            m_progressDialog->close();
-            m_progressDialog = nullptr;
         }
     }
-    else
+    if (closeDialog && m_progressDialog)
     {
         m_progressDialog->close();
+        delete m_progressDialog;
         m_progressDialog = nullptr;
     }
 }

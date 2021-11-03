@@ -113,8 +113,11 @@ bool MapBeaconDialog::confirmDownload(QString filename)
 
 void MapBeaconDialog::updateDownloadProgress(qint64 bytesRead, qint64 totalBytes)
 {
-    m_progressDialog->setMaximum(totalBytes);
-    m_progressDialog->setValue(bytesRead);
+    if (m_progressDialog)
+    {
+        m_progressDialog->setMaximum(totalBytes);
+        m_progressDialog->setValue(bytesRead);
+    }
 }
 
 void MapBeaconDialog::accept()
@@ -132,7 +135,6 @@ void MapBeaconDialog::on_downloadIARU_clicked()
             // Download IARU beacons database to disk
             QUrl dbURL(QString(IARU_BEACONS_URL));
             m_progressDialog = new QProgressDialog(this);
-            m_progressDialog->setAttribute(Qt::WA_DeleteOnClose);
             m_progressDialog->setCancelButton(nullptr);
             m_progressDialog->setMinimumDuration(500);
             m_progressDialog->setLabelText(QString("Downloading %1.").arg(IARU_BEACONS_URL));
@@ -151,22 +153,22 @@ void MapBeaconDialog::downloadFinished(const QString& filename, bool success)
             QList<Beacon *> *beacons = Beacon::readIARUCSV(filename);
             if (beacons != nullptr)
                 m_gui->setBeacons(beacons);
-            m_progressDialog->close();
-            m_progressDialog = nullptr;
         }
         else
         {
             qDebug() << "MapBeaconDialog::downloadFinished: Unexpected filename: " << filename;
-            m_progressDialog->close();
-            m_progressDialog = nullptr;
         }
     }
     else
     {
         qDebug() << "MapBeaconDialog::downloadFinished: Failed: " << filename;
-        m_progressDialog->close();
-        m_progressDialog = nullptr;
         QMessageBox::warning(this, "Download failed", QString("Failed to download %1").arg(filename));
+    }
+    if (m_progressDialog)
+    {
+        m_progressDialog->close();
+        delete m_progressDialog;
+        m_progressDialog = nullptr;
     }
 }
 

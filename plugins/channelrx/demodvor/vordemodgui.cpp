@@ -980,12 +980,16 @@ QString VORDemodGUI::getVORDBFilename()
 
 void VORDemodGUI::updateDownloadProgress(qint64 bytesRead, qint64 totalBytes)
 {
-    m_progressDialog->setMaximum(totalBytes);
-    m_progressDialog->setValue(bytesRead);
+    if (m_progressDialog)
+    {
+        m_progressDialog->setMaximum(totalBytes);
+        m_progressDialog->setValue(bytesRead);
+    }
 }
 
 void VORDemodGUI::downloadFinished(const QString& filename, bool success)
 {
+    bool closeDialog = true;
     if (success)
     {
         if (filename == getVORDBFilename())
@@ -993,8 +997,6 @@ void VORDemodGUI::downloadFinished(const QString& filename, bool success)
             m_vors = NavAid::readNavAidsDB(filename);
             if (m_vors != nullptr)
                 updateVORs();
-            m_progressDialog->close();
-            m_progressDialog = nullptr;
         }
         else if (filename == getOpenAIPVORDBFilename(m_countryIndex))
         {
@@ -1007,29 +1009,30 @@ void VORDemodGUI::downloadFinished(const QString& filename, bool success)
                 m_progressDialog->setLabelText(QString("Downloading %1.").arg(urlString));
                 m_progressDialog->setValue(m_countryIndex);
                 m_dlm.download(dbURL, vorDBFile);
+                closeDialog = false;
             }
             else
             {
                 readNavAids();
                 if (m_vors != nullptr)
                     updateVORs();
-                m_progressDialog->close();
-                m_progressDialog = nullptr;
             }
         }
         else
         {
             qDebug() << "VORDemodGUI::downloadFinished: Unexpected filename: " << filename;
-            m_progressDialog->close();
-            m_progressDialog = nullptr;
         }
     }
     else
     {
         qDebug() << "VORDemodGUI::downloadFinished: Failed: " << filename;
-        m_progressDialog->close();
-        m_progressDialog = nullptr;
         QMessageBox::warning(this, "Download failed", QString("Failed to download %1").arg(filename));
+    }
+    if (closeDialog && m_progressDialog)
+    {
+        m_progressDialog->close();
+        delete m_progressDialog;
+        m_progressDialog = nullptr;
     }
 }
 
@@ -1046,7 +1049,6 @@ void VORDemodGUI::on_getOurAirportsVORDB_clicked(bool checked)
             // Download OurAirports navaid database to disk
             QUrl dbURL(QString(OURAIRPORTS_NAVAIDS_URL));
             m_progressDialog = new QProgressDialog(this);
-            m_progressDialog->setAttribute(Qt::WA_DeleteOnClose);
             m_progressDialog->setCancelButton(nullptr);
             m_progressDialog->setMinimumDuration(500);
             m_progressDialog->setLabelText(QString("Downloading %1.").arg(OURAIRPORTS_NAVAIDS_URL));
@@ -1071,7 +1073,6 @@ void VORDemodGUI::on_getOpenAIPVORDB_clicked(bool checked)
             QString urlString = getOpenAIPVORDBURL(m_countryIndex);
             QUrl dbURL(urlString);
             m_progressDialog = new QProgressDialog(this);
-            m_progressDialog->setAttribute(Qt::WA_DeleteOnClose);
             m_progressDialog->setCancelButton(nullptr);
             m_progressDialog->setMinimumDuration(500);
             m_progressDialog->setMaximum(sizeof(countryCodes)/sizeof(countryCodes[0]));
