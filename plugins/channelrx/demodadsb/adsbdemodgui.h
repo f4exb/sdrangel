@@ -618,6 +618,9 @@ private slots:
     void on_device_currentIndexChanged(int index);
     void feedSelect();
     void on_displaySettings_clicked();
+    void on_logEnable_clicked(bool checked=false);
+    void on_logFilename_clicked();
+    void on_logOpen_clicked();
 signals:
     void homePositionChanged();
 };

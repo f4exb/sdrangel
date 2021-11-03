@@ -72,6 +72,8 @@ void ADSBDemodSettings::resetToDefaults()
         m_columnIndexes[i] = i;
         m_columnSizes[i] = -1; // Autosize
     }
+    m_logFilename = "adsb_log.csv";
+    m_logEnabled = false;
 }
 
 QByteArray ADSBDemodSettings::serialize() const
@@ -117,6 +119,9 @@ QByteArray ADSBDemodSettings::serialize() const
 
     s.writeBlob(34, serializeNotificationSettings(m_notificationSettings));
     s.writeString(35, m_apiKey);
+
+    s.writeString(36, m_logFilename);
+    s.writeBool(37, m_logEnabled);
 
     for (int i = 0; i < ADSBDEMOD_COLUMNS; i++)
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -202,6 +207,9 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         d.readBlob(34, &blob);
         deserializeNotificationSettings(blob, m_notificationSettings);
         d.readString(35, &m_apiKey, "");
+
+        d.readString(36, &m_logFilename, "adsb_log.csv");
+        d.readBool(37, &m_logEnabled, false);
 
         for (int i = 0; i < ADSBDEMOD_COLUMNS; i++)
             d.readS32(100 + i, &m_columnIndexes[i], i);

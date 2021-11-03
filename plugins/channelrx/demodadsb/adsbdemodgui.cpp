@@ -29,6 +29,7 @@
 #include <QMessageBox>
 #include <QDebug>
 #include <QProcess>
+#include <QFileDialog>
 
 #include "SWGMapItem.h"
 
@@ -1016,7 +1017,8 @@ void ADSBDemodGUI::handleADSB(
                         aircraft->m_latitudeItem->setData(Qt::DisplayRole, aircraft->m_latitude);
                         aircraft->m_longitude = longitude;
                         aircraft->m_longitudeItem->setData(Qt::DisplayRole, aircraft->m_longitude);
-                        aircraft->m_coordinates.push_back(QVariant::fromValue(*new QGeoCoordinate(aircraft->m_latitude, aircraft->m_longitude, aircraft->m_altitude)));
+                        QGeoCoordinate coord(aircraft->m_latitude, aircraft->m_longitude, aircraft->m_altitude);
+                        aircraft->m_coordinates.push_back(QVariant::fromValue(coord));
                         updatePosition(aircraft);
                     }
                 }
@@ -1070,7 +1072,8 @@ void ADSBDemodGUI::handleADSB(
                     aircraft->m_latitudeItem->setData(Qt::DisplayRole, aircraft->m_latitude);
                     aircraft->m_longitude = longitude;
                     aircraft->m_longitudeItem->setData(Qt::DisplayRole, aircraft->m_longitude);
-                    aircraft->m_coordinates.push_back(QVariant::fromValue(*new QGeoCoordinate(aircraft->m_latitude, aircraft->m_longitude, aircraft->m_altitude)));
+                    QGeoCoordinate coord(aircraft->m_latitude, aircraft->m_longitude, aircraft->m_altitude);
+                    aircraft->m_coordinates.push_back(QVariant::fromValue(coord));
                 }
             }
         }
@@ -2172,13 +2175,15 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 ADSBDemodGUI::~ADSBDemodGUI()
 {
     delete ui;
-    QHash<int,Aircraft *>::iterator i = m_aircraft.begin();
-    while (i != m_aircraft.end())
-    {
-        Aircraft *a = i.value();
-        delete a;
-        ++i;
+    qDeleteAll(m_aircraft);
+    if (m_airportInfo) {
+        qDeleteAll(*m_airportInfo);
     }
+    if (m_aircraftInfo) {
+        qDeleteAll(*m_aircraftInfo);
+    }
+    qDeleteAll(m_airlineIcons);
+    qDeleteAll(m_flagIcons);
     if (m_flightInformation)
     {
         disconnect(m_flightInformation, &FlightInformation::flightUpdated, this, &ADSBDemodGUI::flightInformationUpdated);
@@ -2241,6 +2246,9 @@ void ADSBDemodGUI::displaySettings()
     m_aircraftModel.setFlightPaths(m_settings.m_flightPaths);
     ui->allFlightPaths->setChecked(m_settings.m_allFlightPaths);
     m_aircraftModel.setAllFlightPaths(m_settings.m_allFlightPaths);
+
+    ui->logFilename->setToolTip(QString(".csv log filename: %1").arg(m_settings.m_logFilename));
+    ui->logEnable->setChecked(m_settings.m_logEnabled);
 
     displayStreamIndex();
 
@@ -2501,5 +2509,106 @@ void ADSBDemodGUI::flightInformationUpdated(const FlightInformation::Flight& fli
     else
     {
         qDebug() << "ADSBDemodGUI::flightInformationUpdated - Flight not found in ADS-B table: " << flight.m_flightICAO;
+    }
+}
+
+void ADSBDemodGUI::on_logEnable_clicked(bool checked)
+{
+    m_settings.m_logEnabled = checked;
+    applySettings();
+}
+
+void ADSBDemodGUI::on_logFilename_clicked()
+{
+    // Get filename to save to
+    QFileDialog fileDialog(nullptr, "Select file to log received frames to", "", "*.csv");
+    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+    if (fileDialog.exec())
+    {
+        QStringList fileNames = fileDialog.selectedFiles();
+        if (fileNames.size() > 0)
+        {
+            m_settings.m_logFilename = fileNames[0];
+            ui->logFilename->setToolTip(QString(".csv log filename: %1").arg(m_settings.m_logFilename));
+            applySettings();
+        }
+    }
+}
+
+// Read .csv log and process as received frames
+void ADSBDemodGUI::on_logOpen_clicked()
+{
+    QFileDialog fileDialog(nullptr, "Select .csv log file to read", "", "*.csv");
+    if (fileDialog.exec())
+    {
+        QStringList fileNames = fileDialog.selectedFiles();
+        if (fileNames.size() > 0)
+        {
+            QFile file(fileNames[0]);
+            if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+            {
+                QTextStream in(&file);
+                QString header = in.readLine();
+                QStringList colNames = header.split(",");
+                int dateCol = colNames.indexOf("Date");
+                int timeCol = colNames.indexOf("Time");
+                int dataCol = colNames.indexOf("Data");
+                int correlationCol = colNames.indexOf("Correlation");
+                if (dateCol == -1)
+                {
+                    QMessageBox::critical(this, "ADS-B", QString(".csv file doesn't contain a column named 'Date'"));
+                }
+                else if (timeCol == -1)
+                {
+                    QMessageBox::critical(this, "ADS-B", QString(".csv file doesn't contain a column named 'Time'"));
+                }
+                else if (dataCol == -1)
+                {
+                    QMessageBox::critical(this, "ADS-B", QString(".csv file doesn't contain a column named 'Data'"));
+                }
+                else if (correlationCol == -1)
+                {
+                    QMessageBox::critical(this, "ADS-B", QString(".csv file doesn't contain a column named 'Correlation'"));
+                }
+                else
+                {
+                    QMessageBox dialog(this);
+                    dialog.setText("Reading ADS-B data");
+                    dialog.addButton(QMessageBox::Cancel);
+                    dialog.show();
+                    QApplication::processEvents();
+                    int count = 0;
+                    bool cancelled = false;
+                    while (!in.atEnd() && !cancelled)
+                    {
+                        QString row = in.readLine();
+                        QStringList cols = row.split(",");
+                        if (cols.size() >= dataCol)
+                        {
+                            //QDate date = QDate::fromString(cols[dateCol]);
+                            //QTime time = QTime::fromString(cols[timeCol]);
+                            //QDateTime dateTime(date, time);
+                            QDateTime dateTime = QDateTime::currentDateTime(); // So they aren't removed immediately as too old
+                            QByteArray bytes = QByteArray::fromHex(cols[dataCol].toLatin1());
+                            float correlation = cols[correlationCol].toFloat();
+                            handleADSB(bytes, dateTime, correlation, correlation);
+                            if (count % 1000 == 0)
+                            {
+                                QApplication::processEvents();
+                                if (dialog.clickedButton()) {
+                                    cancelled = true;
+                                }
+                            }
+                            count++;
+                        }
+                    }
+                    dialog.close();
+                }
+            }
+            else
+            {
+                QMessageBox::critical(this, "ADS-B", QString("Failed to open file %1").arg(fileNames[0]));
+            }
+        }
     }
 }

@@ -130,6 +130,9 @@ struct ADSBDemodSettings
     QList<NotificationSettings *> m_notificationSettings;
     QString m_apiKey;                   //!< aviationstack.com API key
 
+    QString m_logFilename;
+    bool m_logEnabled;
+
     ADSBDemodSettings();
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }

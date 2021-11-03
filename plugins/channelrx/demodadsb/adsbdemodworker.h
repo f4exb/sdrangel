@@ -22,6 +22,8 @@
 #include <QObject>
 #include <QTimer>
 #include <QTcpSocket>
+#include <QFile>
+#include <QTextStream>
 
 #include "util/message.h"
 #include "util/messagequeue.h"
@@ -71,6 +73,8 @@ private:
     QMutex m_mutex;
     QTimer m_heartbeatTimer;
     QTcpSocket m_socket;
+    QFile m_logFile;
+    QTextStream m_logStream;
 
     bool handleMessage(const Message& cmd);
     void applySettings(const ADSBDemodSettings& settings, bool force = false);
