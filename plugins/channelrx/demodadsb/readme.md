@@ -163,6 +163,18 @@ the case for callsigns that end in two characters, as for these, some digits fro
 
 To use this feature, an (aviationstack)[aviationstack.com] API Key must be entered in the Display Settings dialog (11). A free key giving 500 API calls per month is (available)[https://aviationstack.com/product].
 
+<h3>Start/stop Logging ADS-B frames to .csv File</h3>
+
+When checked, writes all received ADS-B frames to a .csv file.
+
+<h3>.csv Log Filename</h3>
+
+Click to specify the name of the .csv file which received ADS-B frames are logged to.
+
+<h3>Read Data from .csv File</h3>
+
+Click to specify a previously written ADS-B .csv log file, which is read and used to updated the ADS-B data table and map.
+
 <h3>14: Refresh list of devices</h3>
 
 Use this button to refresh the list of devices.

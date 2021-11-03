@@ -176,8 +176,32 @@ void ADSBDemod::applySettings(const ADSBDemodSettings& settings, bool force)
     if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
         reverseAPIKeys.append("inputFrequencyOffset");
     }
-    if ((settings.m_rgbColor != m_settings.m_rgbColor) || force) {
-        reverseAPIKeys.append("rgbColor");
+    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
+        reverseAPIKeys.append("rfBandwidth");
+    }
+    if ((settings.m_correlationThreshold != m_settings.m_correlationThreshold) || force) {
+        reverseAPIKeys.append("correlationThreshold");
+    }
+    if ((settings.m_samplesPerBit != m_settings.m_samplesPerBit) || force) {
+        reverseAPIKeys.append("samplesPerBit");
+    }
+    if ((settings.m_removeTimeout != m_settings.m_removeTimeout) || force) {
+        reverseAPIKeys.append("removeTimeout");
+    }
+    if ((settings.m_feedEnabled != m_settings.m_feedEnabled) || force) {
+        reverseAPIKeys.append("beastEnabled");
+    }
+    if ((settings.m_feedHost != m_settings.m_feedHost) || force) {
+        reverseAPIKeys.append("beastHost");
+    }
+    if ((settings.m_feedPort != m_settings.m_feedPort) || force) {
+        reverseAPIKeys.append("beastPort");
+    }
+    if ((settings.m_logFilename != m_settings.m_logFilename) || force) {
+        reverseAPIKeys.append("logFilename");
+    }
+    if ((settings.m_logEnabled != m_settings.m_logEnabled) || force) {
+        reverseAPIKeys.append("logEnabled");
     }
     if ((settings.m_title != m_settings.m_title) || force) {
         reverseAPIKeys.append("title");
@@ -303,6 +327,12 @@ void ADSBDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("beastPort")) {
         settings.m_feedPort = response.getAdsbDemodSettings()->getBeastPort();
     }
+    if (channelSettingsKeys.contains("logFilename")) {
+        settings.m_logFilename = *response.getAdsbDemodSettings()->getLogFilename();
+    }
+    if (channelSettingsKeys.contains("logEnabled")) {
+        settings.m_logEnabled = response.getAdsbDemodSettings()->getLogEnabled();
+    }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getAdsbDemodSettings()->getRgbColor();
     }
@@ -351,6 +381,8 @@ void ADSBDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
     response.getAdsbDemodSettings()->setBeastHost(new QString(settings.m_feedHost));
     response.getAdsbDemodSettings()->setBeastPort(settings.m_feedPort);
     response.getAdsbDemodSettings()->setRgbColor(settings.m_rgbColor);
+    response.getAdsbDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
+    response.getAdsbDemodSettings()->setLogEnabled(settings.m_logEnabled);
 
     if (response.getAdsbDemodSettings()->getTitle()) {
         *response.getAdsbDemodSettings()->getTitle() = settings.m_title;
@@ -422,6 +454,12 @@ void ADSBDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, c
     }
     if (channelSettingsKeys.contains("beastPort") || force) {
         swgADSBDemodSettings->setBeastPort(settings.m_feedPort);
+    }
+    if (channelSettingsKeys.contains("logFilename") || force) {
+        swgADSBDemodSettings->setLogFilename(new QString(settings.m_logFilename));
+    }
+    if (channelSettingsKeys.contains("logEnabled") || force) {
+        swgADSBDemodSettings->setLogEnabled(settings.m_logEnabled);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgADSBDemodSettings->setRgbColor(settings.m_rgbColor);

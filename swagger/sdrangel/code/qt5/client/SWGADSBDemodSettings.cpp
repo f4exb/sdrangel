@@ -44,6 +44,10 @@ SWGADSBDemodSettings::SWGADSBDemodSettings() {
     m_beast_host_isSet = false;
     beast_port = 0;
     m_beast_port_isSet = false;
+    log_filename = nullptr;
+    m_log_filename_isSet = false;
+    log_enabled = 0;
+    m_log_enabled_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = nullptr;
@@ -84,6 +88,10 @@ SWGADSBDemodSettings::init() {
     m_beast_host_isSet = false;
     beast_port = 0;
     m_beast_port_isSet = false;
+    log_filename = new QString("");
+    m_log_filename_isSet = false;
+    log_enabled = 0;
+    m_log_enabled_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = new QString("");
@@ -112,6 +120,10 @@ SWGADSBDemodSettings::cleanup() {
 
     if(beast_host != nullptr) { 
         delete beast_host;
+    }
+
+    if(log_filename != nullptr) { 
+        delete log_filename;
     }
 
 
@@ -154,6 +166,10 @@ SWGADSBDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&beast_host, pJson["beastHost"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&beast_port, pJson["beastPort"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&log_filename, pJson["logFilename"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&log_enabled, pJson["logEnabled"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
@@ -210,6 +226,12 @@ SWGADSBDemodSettings::asJsonObject() {
     }
     if(m_beast_port_isSet){
         obj->insert("beastPort", QJsonValue(beast_port));
+    }
+    if(log_filename != nullptr && *log_filename != QString("")){
+        toJsonValue(QString("logFilename"), log_filename, obj, QString("QString"));
+    }
+    if(m_log_enabled_isSet){
+        obj->insert("logEnabled", QJsonValue(log_enabled));
     }
     if(m_rgb_color_isSet){
         obj->insert("rgbColor", QJsonValue(rgb_color));
@@ -319,6 +341,26 @@ SWGADSBDemodSettings::setBeastPort(qint32 beast_port) {
     this->m_beast_port_isSet = true;
 }
 
+QString*
+SWGADSBDemodSettings::getLogFilename() {
+    return log_filename;
+}
+void
+SWGADSBDemodSettings::setLogFilename(QString* log_filename) {
+    this->log_filename = log_filename;
+    this->m_log_filename_isSet = true;
+}
+
+qint32
+SWGADSBDemodSettings::getLogEnabled() {
+    return log_enabled;
+}
+void
+SWGADSBDemodSettings::setLogEnabled(qint32 log_enabled) {
+    this->log_enabled = log_enabled;
+    this->m_log_enabled_isSet = true;
+}
+
 qint32
 SWGADSBDemodSettings::getRgbColor() {
     return rgb_color;
@@ -426,6 +468,12 @@ SWGADSBDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_beast_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(log_filename && *log_filename != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_log_enabled_isSet){
             isObjectUpdated = true; break;
         }
         if(m_rgb_color_isSet){

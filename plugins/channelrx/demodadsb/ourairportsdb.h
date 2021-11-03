@@ -51,6 +51,11 @@ struct AirportInformation {
     float m_elevation;
     QVector<FrequencyInformation *> m_frequencies;
 
+    AirportInformation::~AirportInformation()
+    {
+        qDeleteAll(m_frequencies);
+    }
+
     static QString trimQuotes(const QString s)
     {
         if (s.startsWith('\"') && s.endsWith('\"'))

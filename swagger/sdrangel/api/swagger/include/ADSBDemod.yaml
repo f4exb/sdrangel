@@ -22,6 +22,10 @@ ADSBDemodSettings:
       type: string
     beastPort:
       type: integer
+    logFilename:
+      type: string
+    logEnabled:
+      type: integer
     rgbColor:
       type: integer
     title:

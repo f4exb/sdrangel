@@ -122,6 +122,8 @@ void ADSBDemodWorker::applySettings(const ADSBDemodSettings& settings, bool forc
             << " m_feedHost: " << settings.m_feedHost
             << " m_feedPort: " << settings.m_feedPort
             << " m_feedFormat: " << settings.m_feedFormat
+            << " m_logEnabled: " << settings.m_logEnabled
+            << " m_logFilename: " << settings.m_logFilename
             << " force: " << force;
 
     if ((settings.m_feedEnabled != m_settings.m_feedEnabled)
@@ -134,6 +136,36 @@ void ADSBDemodWorker::applySettings(const ADSBDemodSettings& settings, bool forc
         // Open connection
         if (settings.m_feedEnabled)
             m_socket.connectToHost(settings.m_feedHost, settings.m_feedPort);
+    }
+
+    if ((settings.m_logEnabled != m_settings.m_logEnabled)
+        || (settings.m_logFilename != m_settings.m_logFilename)
+        || force)
+    {
+        if (m_logFile.isOpen())
+        {
+            m_logStream.flush();
+            m_logFile.close();
+        }
+        if (settings.m_logEnabled && !settings.m_logFilename.isEmpty())
+        {
+            m_logFile.setFileName(settings.m_logFilename);
+            if (m_logFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
+            {
+                qDebug() << "ADSBDemodWorker::applySettings - Logging to: " << settings.m_logFilename;
+                bool newFile = m_logFile.size() == 0;
+                m_logStream.setDevice(&m_logFile);
+                if (newFile)
+                {
+                    // Write header
+                    m_logStream << "Date,Time,Data,Correlation\n";
+                }
+            }
+            else
+            {
+                qDebug() << "ADSBDemodWorker::applySettings - Unable to open log file: " << settings.m_logFilename;
+            }
+        }
     }
 
     m_settings = settings;
@@ -185,49 +217,57 @@ char *ADSBDemodWorker::escape(char *p, char c)
 
 // Forward ADS-B data in Beast binary format to specified server
 // See: https://wiki.jetvision.de/wiki/Mode-S_Beast:Data_Output_Formats
+// Log to .csv file
 void ADSBDemodWorker::handleADSB(QByteArray data, const QDateTime dateTime, float correlation)
 {
-    if (m_settings.m_feedFormat == ADSBDemodSettings::BeastBinary)
+    if (m_logFile.isOpen())
     {
-        char beastBinary[2+6*2+1*2+14*2];
-        int length;
-        char *p = beastBinary;
-        qint64 timestamp;
-        unsigned char signalStrength;
-
-        timestamp = dateTime.toMSecsSinceEpoch();
-
-        if (correlation > 255)
-           signalStrength = 255;
-        if (correlation < 1)
-           signalStrength = 1;
-        else
-           signalStrength = (unsigned char)correlation;
-
-        *p++ = BEAST_ESC;
-        *p++ = '3'; // Mode-S long
-
-        p = escape(p, timestamp >> 56); // Big-endian timestamp
-        p = escape(p, timestamp >> 48);
-        p = escape(p, timestamp >> 32);
-        p = escape(p, timestamp >> 24);
-        p = escape(p, timestamp >> 16);
-        p = escape(p, timestamp >> 8);
-        p = escape(p, timestamp);
-
-        p = escape(p, signalStrength);  // Signal strength
-
-        for (int i = 0; i < data.length(); i++) // ADS-B data
-            p = escape(p, data[i]);
-
-        length = p - beastBinary;
-
-        send(beastBinary, length);
+        m_logStream << dateTime.date().toString() << "," << dateTime.time().toString() << "," << data.toHex() << "," << correlation << "\n";
     }
-    else if (m_settings.m_feedFormat == ADSBDemodSettings::BeastHex)
+    if (m_settings.m_feedEnabled)
     {
-        QString beastHex = "*" + data.toHex() + ";\n";
-        send(beastHex.toUtf8(), beastHex.size());
+        if (m_settings.m_feedFormat == ADSBDemodSettings::BeastBinary)
+        {
+            char beastBinary[2+6*2+1*2+14*2];
+            int length;
+            char *p = beastBinary;
+            qint64 timestamp;
+            unsigned char signalStrength;
+
+            timestamp = dateTime.toMSecsSinceEpoch();
+
+            if (correlation > 255)
+               signalStrength = 255;
+            if (correlation < 1)
+               signalStrength = 1;
+            else
+               signalStrength = (unsigned char)correlation;
+
+            *p++ = BEAST_ESC;
+            *p++ = '3'; // Mode-S long
+
+            p = escape(p, timestamp >> 56); // Big-endian timestamp
+            p = escape(p, timestamp >> 48);
+            p = escape(p, timestamp >> 32);
+            p = escape(p, timestamp >> 24);
+            p = escape(p, timestamp >> 16);
+            p = escape(p, timestamp >> 8);
+            p = escape(p, timestamp);
+
+            p = escape(p, signalStrength);  // Signal strength
+
+            for (int i = 0; i < data.length(); i++) // ADS-B data
+                p = escape(p, data[i]);
+
+            length = p - beastBinary;
+
+            send(beastBinary, length);
+        }
+        else if (m_settings.m_feedFormat == ADSBDemodSettings::BeastHex)
+        {
+            QString beastHex = "*" + data.toHex() + ";\n";
+            send(beastHex.toUtf8(), beastHex.size());
+        }
     }
 }
 
