@@ -4,6 +4,8 @@ name: SDRangel CI/CD
 
 on:
   push:
+    branches:
+      - master
     tags:
       - 'v*'
   pull_request:
@@ -28,10 +30,9 @@ jobs:
             generators: Ninja
           }
     steps:
-      - uses: actions/checkout@v2
+      - uses: nschloe/action-cached-lfs-checkout@v1
         with:
           submodules: true
-          lfs: true
           fetch-depth: 0
       - name: Print env
         run: |
