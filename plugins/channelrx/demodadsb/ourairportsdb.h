@@ -51,7 +51,7 @@ struct AirportInformation {
     float m_elevation;
     QVector<FrequencyInformation *> m_frequencies;
 
-    AirportInformation::~AirportInformation()
+    ~AirportInformation()
     {
         qDeleteAll(m_frequencies);
     }
