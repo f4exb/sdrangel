@@ -2,7 +2,11 @@
 # https://gist.github.com/NickNaso/0d478f1481686d5bcc868cac06620a60
 name: SDRangel CI/CD
 
-on: [push, pull_request]
+on:
+  push:
+    tags:
+      - 'v*'
+  pull_request:
 
 jobs:
   build:
