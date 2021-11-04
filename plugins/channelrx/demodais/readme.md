@@ -68,6 +68,18 @@ UDP port number to forward received messages to.
 
 The format the messages are forwared via UDP in. This can be either binary (which is useful for SDRangel's PERTester feature) or NMEA (which is useful for 3rd party applications such as OpenCPN).
 
+<h3>13: Start/stop Logging Messages to .csv File</h3>
+
+When checked, writes all received AIS messages to a .csv file.
+
+<h3>14: .csv Log Filename</h3>
+
+Click to specify the name of the .csv file which received AIS messages are logged to.
+
+<h3>15: Read Data from .csv File</h3>
+
+Click to specify a previously written AIS .csv log file, which is read and used to update the table.
+
 <h3>Received Messages Table</h3>
 
 The received messages table displays information about each AIS message received. Only messages with valid CRCs are displayed.

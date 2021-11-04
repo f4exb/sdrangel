@@ -26,6 +26,7 @@
 #include <QAction>
 #include <QRegExp>
 #include <QClipboard>
+#include <QFileDialog>
 
 #include "aisdemodgui.h"
 
@@ -36,6 +37,7 @@
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/ais.h"
+#include "util/csv.h"
 #include "util/db.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
@@ -48,8 +50,6 @@
 
 #include "aisdemod.h"
 #include "aisdemodsink.h"
-
-#include "SWGMapItem.h"
 
 void AISDemodGUI::resizeTable()
 {
@@ -150,12 +150,12 @@ bool AISDemodGUI::deserialize(const QByteArray& data)
 }
 
 // Add row to table
-void AISDemodGUI::messageReceived(const AISDemod::MsgMessage& message)
+void AISDemodGUI::messageReceived(const QByteArray& message, const QDateTime& dateTime)
 {
     AISMessage *ais;
 
     // Decode the message
-    ais = AISMessage::decode(message.getMessage());
+    ais = AISMessage::decode(message);
 
     // Add to messages table
     ui->messages->setSortingEnabled(false);
@@ -176,8 +176,8 @@ void AISDemodGUI::messageReceived(const AISDemod::MsgMessage& message)
     ui->messages->setItem(row, MESSAGE_COL_DATA, dataItem);
     ui->messages->setItem(row, MESSAGE_COL_NMEA, nmeaItem);
     ui->messages->setItem(row, MESSAGE_COL_HEX, hexItem);
-    dateItem->setText(message.getDateTime().date().toString());
-    timeItem->setText(message.getDateTime().time().toString());
+    dateItem->setText(dateTime.date().toString());
+    timeItem->setText(dateTime.time().toString());
     mmsiItem->setText(QString("%1").arg(ais->m_mmsi, 9, 10, QChar('0')));
     typeItem->setText(ais->getType());
     dataItem->setText(ais->toString());
@@ -186,6 +186,8 @@ void AISDemodGUI::messageReceived(const AISDemod::MsgMessage& message)
     ui->messages->setSortingEnabled(true);
     ui->messages->scrollToItem(dateItem); // Will only scroll if not hidden
     filterRow(row);
+
+    delete ais;
 }
 
 bool AISDemodGUI::handleMessage(const Message& message)
@@ -203,7 +205,7 @@ bool AISDemodGUI::handleMessage(const Message& message)
     else if (AISDemod::MsgMessage::match(message))
     {
         AISDemod::MsgMessage& report = (AISDemod::MsgMessage&) message;
-        messageReceived(report);
+        messageReceived(report.getMessage(), report.getDateTime());
         return true;
     }
 
@@ -579,6 +581,9 @@ void AISDemodGUI::displaySettings()
     ui->channel1->setCurrentIndex(m_settings.m_scopeCh1);
     ui->channel2->setCurrentIndex(m_settings.m_scopeCh2);
 
+    ui->logFilename->setToolTip(QString(".csv log filename: %1").arg(m_settings.m_logFilename));
+    ui->logEnable->setChecked(m_settings.m_logEnabled);
+
     // Order and size columns
     QHeaderView *header = ui->messages->horizontalHeader();
     for (int i = 0; i < AISDEMOD_MESSAGE_COLUMNS; i++)
@@ -632,4 +637,109 @@ void AISDemodGUI::tick()
     }
 
     m_tickCount++;
+}
+
+void AISDemodGUI::on_logEnable_clicked(bool checked)
+{
+    m_settings.m_logEnabled = checked;
+    applySettings();
+}
+
+void AISDemodGUI::on_logFilename_clicked()
+{
+    // Get filename to save to
+    QFileDialog fileDialog(nullptr, "Select file to log received frames to", "", "*.csv");
+    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+    if (fileDialog.exec())
+    {
+        QStringList fileNames = fileDialog.selectedFiles();
+        if (fileNames.size() > 0)
+        {
+            m_settings.m_logFilename = fileNames[0];
+            ui->logFilename->setToolTip(QString(".csv log filename: %1").arg(m_settings.m_logFilename));
+            applySettings();
+        }
+    }
+}
+
+// Read .csv log and process as received frames
+void AISDemodGUI::on_logOpen_clicked()
+{
+    QFileDialog fileDialog(nullptr, "Select .csv log file to read", "", "*.csv");
+    if (fileDialog.exec())
+    {
+        QStringList fileNames = fileDialog.selectedFiles();
+        if (fileNames.size() > 0)
+        {
+            QFile file(fileNames[0]);
+            if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+            {
+                QTextStream in(&file);
+                QString error;
+                QHash<QString, int> colIndexes = CSV::readHeader(in, {"Date", "Time", "Data"}, error);
+                if (error.isEmpty())
+                {
+                    int dateCol = colIndexes.value("Date");
+                    int timeCol = colIndexes.value("Time");
+                    int dataCol = colIndexes.value("Data");
+                    int maxCol = std::max({dateCol, timeCol, dataCol});
+
+                    QMessageBox dialog(this);
+                    dialog.setText("Reading messages");
+                    dialog.addButton(QMessageBox::Cancel);
+                    dialog.show();
+                    QApplication::processEvents();
+                    int count = 0;
+                    bool cancelled = false;
+                    QStringList cols;
+
+                    MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
+                    QList<MessageQueue*> *aisMessageQueues = messagePipes.getMessageQueues(m_aisDemod, "ais");
+
+                    while (!cancelled && CSV::readRow(in, &cols))
+                    {
+                        if (cols.size() > maxCol)
+                        {
+                            QDate date = QDate::fromString(cols[dateCol]);
+                            QTime time = QTime::fromString(cols[timeCol]);
+                            QDateTime dateTime(date, time);
+                            QByteArray bytes = QByteArray::fromHex(cols[dataCol].toLatin1());
+
+                            // Add to table
+                            messageReceived(bytes, dateTime);
+
+                            // Forward to AIS feature
+                            if (aisMessageQueues)
+                            {
+                                QList<MessageQueue*>::iterator it = aisMessageQueues->begin();
+                                for (; it != aisMessageQueues->end(); ++it)
+                                {
+                                    MainCore::MsgPacket *msg = MainCore::MsgPacket::create(m_aisDemod, bytes, dateTime);
+                                    (*it)->push(msg);
+                                }
+                            }
+
+                            if (count % 1000 == 0)
+                            {
+                                QApplication::processEvents();
+                                if (dialog.clickedButton()) {
+                                    cancelled = true;
+                                }
+                            }
+                            count++;
+                        }
+                    }
+                    dialog.close();
+                }
+                else
+                {
+                    QMessageBox::critical(this, "AIS Demod", error);
+                }
+            }
+            else
+            {
+                QMessageBox::critical(this, "AIS Demod", QString("Failed to open file %1").arg(fileNames[0]));
+            }
+        }
+    }
 }

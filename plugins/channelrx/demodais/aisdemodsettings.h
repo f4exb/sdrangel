@@ -47,6 +47,9 @@ struct AISDemodSettings
     int m_scopeCh1;
     int m_scopeCh2;
 
+    QString m_logFilename;
+    bool m_logEnabled;
+
     quint32 m_rgbColor;
     QString m_title;
     Serializable *m_channelMarker;

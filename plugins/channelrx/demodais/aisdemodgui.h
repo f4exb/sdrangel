@@ -85,7 +85,7 @@ private:
     void applySettings(bool force = false);
     void displaySettings();
     void displayStreamIndex();
-    void messageReceived(const AISDemod::MsgMessage& message);
+    void messageReceived(const QByteArray& message, const QDateTime& dateTime);
     bool handleMessage(const Message& message);
 
     void leaveEvent(QEvent*);
@@ -118,6 +118,9 @@ private slots:
     void on_channel1_currentIndexChanged(int index);
     void on_channel2_currentIndexChanged(int index);
     void on_messages_cellDoubleClicked(int row, int column);
+    void on_logEnable_clicked(bool checked=false);
+    void on_logFilename_clicked();
+    void on_logOpen_clicked();
     void filterRow(int row);
     void filter();
     void messages_sectionMoved(int logicalIndex, int oldVisualIndex, int newVisualIndex);

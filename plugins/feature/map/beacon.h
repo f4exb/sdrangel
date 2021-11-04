@@ -26,7 +26,7 @@
 
 #include "util/units.h"
 #include "util/maidenhead.h"
-#include "../../channelrx/demodadsb/csv.h"
+#include "util/csv.h"
 
 #define IARU_BEACONS_URL "https://iaru-r1-c5-beacons.org/wp-content/uploads/beacons.csv"
 

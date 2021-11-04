@@ -20,9 +20,12 @@
 
 #include <QString>
 #include <QHash>
+#include <QTextStream>
 
-// Extract string from CSV line, updating pp to next column
-static inline char *csvNext(char **pp)
+#include "export.h"
+
+// Extract string from CSV line, updating pp to next column (This doesn't handle , inside quotes)
+static inline char *csvNext(char **pp, char delimiter=',')
 {
     char *p = *pp;
 
@@ -31,7 +34,7 @@ static inline char *csvNext(char **pp)
 
     char *start = p;
 
-    while ((*p != ',') && (*p != '\n'))
+    while ((*p != delimiter) && (*p != '\n'))
         p++;
     *p++ = '\0';
     *pp = p;
@@ -39,6 +42,13 @@ static inline char *csvNext(char **pp)
     return start;
 }
 
-QHash<QString, QString> *csvHash(const QString& filename, int reserve=0);
+struct SDRBASE_API CSV {
+
+    static QHash<QString, QString> *hash(const QString& filename, int reserve=0);
+
+    static bool readRow(QTextStream &in, QStringList *row);
+    static QHash<QString, int> readHeader(QTextStream &in, QStringList requiredColumns, QString &error);
+
+};
 
 #endif /* INCLUDE_CSV_H */

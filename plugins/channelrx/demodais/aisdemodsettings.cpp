@@ -44,6 +44,8 @@ void AISDemodSettings::resetToDefaults()
     m_udpFormat = Binary;
     m_scopeCh1 = 5;
     m_scopeCh2 = 6;
+    m_logFilename = "ais_log.csv";
+    m_logEnabled = false;
     m_rgbColor = QColor(102, 0, 0).rgb();
     m_title = "AIS Demodulator";
     m_streamIndex = 0;
@@ -87,6 +89,9 @@ QByteArray AISDemodSettings::serialize() const
     s.writeU32(19, m_reverseAPIDeviceIndex);
     s.writeU32(20, m_reverseAPIChannelIndex);
     s.writeBlob(21, m_scopeGUI->serialize());
+
+    s.writeString(22, m_logFilename);
+    s.writeBool(23, m_logEnabled);
 
     for (int i = 0; i < AISDEMOD_MESSAGE_COLUMNS; i++)
         s.writeS32(100 + i, m_messageColumnIndexes[i]);
@@ -153,6 +158,9 @@ bool AISDemodSettings::deserialize(const QByteArray& data)
             d.readBlob(21, &bytetmp);
             m_scopeGUI->deserialize(bytetmp);
         }
+
+        d.readString(22, &m_logFilename, "ais_log.csv");
+        d.readBool(23, &m_logEnabled, false);
 
         for (int i = 0; i < AISDEMOD_MESSAGE_COLUMNS; i++)
             d.readS32(100 + i, &m_messageColumnIndexes[i], i);

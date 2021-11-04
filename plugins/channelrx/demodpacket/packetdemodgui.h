@@ -105,6 +105,9 @@ private slots:
     void on_udpEnabled_clicked(bool checked);
     void on_udpAddress_editingFinished();
     void on_udpPort_editingFinished();
+    void on_logEnable_clicked(bool checked=false);
+    void on_logFilename_clicked();
+    void on_logOpen_clicked();
     void filterRow(int row);
     void filter();
     void packets_sectionMoved(int logicalIndex, int oldVisualIndex, int newVisualIndex);

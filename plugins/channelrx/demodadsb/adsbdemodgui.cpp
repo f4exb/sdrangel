@@ -2127,9 +2127,9 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     if (m_airportInfo != nullptr)
         AirportInformation::readFrequenciesDB(getAirportFrequenciesDBFilename(), m_airportInfo);
     // Read registration prefix to country map
-    m_prefixMap = csvHash(":/flags/regprefixmap.csv");
+    m_prefixMap = CSV::hash(":/flags/regprefixmap.csv");
     // Read operator air force to military map
-    m_militaryMap = csvHash(":/flags/militarymap.csv");
+    m_militaryMap = CSV::hash(":/flags/militarymap.csv");
 
     // Get station position
     Real stationLatitude = MainCore::instance()->getSettings().getLatitude();
@@ -2548,30 +2548,14 @@ void ADSBDemodGUI::on_logOpen_clicked()
             if (file.open(QIODevice::ReadOnly | QIODevice::Text))
             {
                 QTextStream in(&file);
-                QString header = in.readLine();
-                QStringList colNames = header.split(",");
-                int dateCol = colNames.indexOf("Date");
-                int timeCol = colNames.indexOf("Time");
-                int dataCol = colNames.indexOf("Data");
-                int correlationCol = colNames.indexOf("Correlation");
-                if (dateCol == -1)
+                QString error;
+                QHash<QString, int> colIndexes = CSV::readHeader(in, {"Data", "Correlation"}, error);
+                if (error.isEmpty())
                 {
-                    QMessageBox::critical(this, "ADS-B", QString(".csv file doesn't contain a column named 'Date'"));
-                }
-                else if (timeCol == -1)
-                {
-                    QMessageBox::critical(this, "ADS-B", QString(".csv file doesn't contain a column named 'Time'"));
-                }
-                else if (dataCol == -1)
-                {
-                    QMessageBox::critical(this, "ADS-B", QString(".csv file doesn't contain a column named 'Data'"));
-                }
-                else if (correlationCol == -1)
-                {
-                    QMessageBox::critical(this, "ADS-B", QString(".csv file doesn't contain a column named 'Correlation'"));
-                }
-                else
-                {
+                    int dataCol = colIndexes.value("Data");
+                    int correlationCol = colIndexes.value("Correlation");
+                    int maxCol = std::max(dataCol, correlationCol);
+
                     QMessageBox dialog(this);
                     dialog.setText("Reading ADS-B data");
                     dialog.addButton(QMessageBox::Cancel);
@@ -2579,15 +2563,11 @@ void ADSBDemodGUI::on_logOpen_clicked()
                     QApplication::processEvents();
                     int count = 0;
                     bool cancelled = false;
-                    while (!in.atEnd() && !cancelled)
+                    QStringList cols;
+                    while (!cancelled && CSV::readRow(in, &cols))
                     {
-                        QString row = in.readLine();
-                        QStringList cols = row.split(",");
-                        if (cols.size() >= dataCol)
+                        if (cols.size() > maxCol)
                         {
-                            //QDate date = QDate::fromString(cols[dateCol]);
-                            //QTime time = QTime::fromString(cols[timeCol]);
-                            //QDateTime dateTime(date, time);
                             QDateTime dateTime = QDateTime::currentDateTime(); // So they aren't removed immediately as too old
                             QByteArray bytes = QByteArray::fromHex(cols[dataCol].toLatin1());
                             float correlation = cols[correlationCol].toFloat();
@@ -2603,6 +2583,10 @@ void ADSBDemodGUI::on_logOpen_clicked()
                         }
                     }
                     dialog.close();
+                }
+                else
+                {
+                    QMessageBox::critical(this, "ADS-B", error);
                 }
             }
             else

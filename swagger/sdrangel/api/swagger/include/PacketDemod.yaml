@@ -24,6 +24,10 @@ PacketDemodSettings:
     udpPort:
       description: "UDP port to forward received packets to"
       type: integer
+    logFilename:
+      type: string
+    logEnabled:
+      type: integer
     rgbColor:
       type: integer
     title:

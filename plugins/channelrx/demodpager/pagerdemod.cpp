@@ -155,6 +155,19 @@ bool PagerDemod::handleMessage(const Message& cmd)
                                 QHostAddress(m_settings.m_udpAddress), m_settings.m_udpPort);
         }
 
+        // Write to log file
+        if (m_logFile.isOpen())
+        {
+            m_logStream << report.getDateTime().date().toString() << ","
+                << report.getDateTime().time().toString() << ","
+                << QString("%1").arg(report.getAddress(), 7, 10, QChar('0')) << ","
+                << QString::number(report.getFunctionBits()) << ","
+                << "\"" << report.getAlphaMessage() << "\","
+                << report.getNumericMessage() << ","
+                << QString::number(report.getEvenParityErrors()) << ","
+                << QString::number(report.getBCHParityErrors()) << "\n";
+        }
+
         return true;
     }
     else if (MainCore::MsgChannelDemodQuery::match(cmd))
@@ -178,6 +191,8 @@ ScopeVis *PagerDemod::getScopeSink()
 void PagerDemod::applySettings(const PagerDemodSettings& settings, bool force)
 {
     qDebug() << "PagerDemod::applySettings:"
+            << " m_logEnabled: " << settings.m_logEnabled
+            << " m_logFilename: " << settings.m_logFilename
             << " m_streamIndex: " << settings.m_streamIndex
             << " m_useReverseAPI: " << settings.m_useReverseAPI
             << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
@@ -209,6 +224,12 @@ void PagerDemod::applySettings(const PagerDemodSettings& settings, bool force)
     if ((settings.m_udpPort != m_settings.m_udpPort) || force) {
         reverseAPIKeys.append("udpPort");
     }
+    if ((settings.m_logFilename != m_settings.m_logFilename) || force) {
+        reverseAPIKeys.append("logFilename");
+    }
+    if ((settings.m_logEnabled != m_settings.m_logEnabled) || force) {
+        reverseAPIKeys.append("logEnabled");
+    }
     if (m_settings.m_streamIndex != settings.m_streamIndex)
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
@@ -233,6 +254,36 @@ void PagerDemod::applySettings(const PagerDemodSettings& settings, bool force)
                 (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
                 (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
         webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+    }
+
+    if ((settings.m_logEnabled != m_settings.m_logEnabled)
+        || (settings.m_logFilename != m_settings.m_logFilename)
+        || force)
+    {
+        if (m_logFile.isOpen())
+        {
+            m_logStream.flush();
+            m_logFile.close();
+        }
+        if (settings.m_logEnabled && !settings.m_logFilename.isEmpty())
+        {
+            m_logFile.setFileName(settings.m_logFilename);
+            if (m_logFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
+            {
+                qDebug() << "PagerDemod::applySettings - Logging to: " << settings.m_logFilename;
+                bool newFile = m_logFile.size() == 0;
+                m_logStream.setDevice(&m_logFile);
+                if (newFile)
+                {
+                    // Write header
+                    m_logStream << "Date,Time,Address,Function Bits,Alpha,Numeric,Even Parity Errors,BCH Parity Errors\n";
+                }
+            }
+            else
+            {
+                qDebug() << "PagerDemod::applySettings - Unable to open log file: " << settings.m_logFilename;
+            }
+        }
     }
 
     m_settings = settings;
@@ -341,6 +392,12 @@ void PagerDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("udpPort")) {
         settings.m_udpPort = response.getPagerDemodSettings()->getUdpPort();
     }
+    if (channelSettingsKeys.contains("logFilename")) {
+        settings.m_logFilename = *response.getAdsbDemodSettings()->getLogFilename();
+    }
+    if (channelSettingsKeys.contains("logEnabled")) {
+        settings.m_logEnabled = response.getAdsbDemodSettings()->getLogEnabled();
+    }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getPagerDemodSettings()->getRgbColor();
     }
@@ -376,6 +433,8 @@ void PagerDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& re
     response.getPagerDemodSettings()->setUdpEnabled(settings.m_udpEnabled);
     response.getPagerDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
     response.getPagerDemodSettings()->setUdpPort(settings.m_udpPort);
+    response.getPagerDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
+    response.getPagerDemodSettings()->setLogEnabled(settings.m_logEnabled);
 
     response.getPagerDemodSettings()->setRgbColor(settings.m_rgbColor);
     if (response.getPagerDemodSettings()->getTitle()) {
@@ -459,6 +518,12 @@ void PagerDemod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("udpPort") || force) {
         swgPagerDemodSettings->setUdpPort(settings.m_udpPort);
+    }
+    if (channelSettingsKeys.contains("logFilename") || force) {
+        swgPagerDemodSettings->setLogFilename(new QString(settings.m_logFilename));
+    }
+    if (channelSettingsKeys.contains("logEnabled") || force) {
+        swgPagerDemodSettings->setLogEnabled(settings.m_logEnabled);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgPagerDemodSettings->setRgbColor(settings.m_rgbColor);

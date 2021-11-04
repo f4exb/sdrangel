@@ -44,6 +44,10 @@ SWGAISDemodSettings::SWGAISDemodSettings() {
     m_udp_port_isSet = false;
     udp_format = 0;
     m_udp_format_isSet = false;
+    log_filename = nullptr;
+    m_log_filename_isSet = false;
+    log_enabled = 0;
+    m_log_enabled_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = nullptr;
@@ -84,6 +88,10 @@ SWGAISDemodSettings::init() {
     m_udp_port_isSet = false;
     udp_format = 0;
     m_udp_format_isSet = false;
+    log_filename = new QString("");
+    m_log_filename_isSet = false;
+    log_enabled = 0;
+    m_log_enabled_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = new QString("");
@@ -113,6 +121,10 @@ SWGAISDemodSettings::cleanup() {
         delete udp_address;
     }
 
+
+    if(log_filename != nullptr) { 
+        delete log_filename;
+    }
 
 
     if(title != nullptr) { 
@@ -154,6 +166,10 @@ SWGAISDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&udp_port, pJson["udpPort"], "qint32", "");
     
     ::SWGSDRangel::setValue(&udp_format, pJson["udpFormat"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&log_filename, pJson["logFilename"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&log_enabled, pJson["logEnabled"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
@@ -210,6 +226,12 @@ SWGAISDemodSettings::asJsonObject() {
     }
     if(m_udp_format_isSet){
         obj->insert("udpFormat", QJsonValue(udp_format));
+    }
+    if(log_filename != nullptr && *log_filename != QString("")){
+        toJsonValue(QString("logFilename"), log_filename, obj, QString("QString"));
+    }
+    if(m_log_enabled_isSet){
+        obj->insert("logEnabled", QJsonValue(log_enabled));
     }
     if(m_rgb_color_isSet){
         obj->insert("rgbColor", QJsonValue(rgb_color));
@@ -319,6 +341,26 @@ SWGAISDemodSettings::setUdpFormat(qint32 udp_format) {
     this->m_udp_format_isSet = true;
 }
 
+QString*
+SWGAISDemodSettings::getLogFilename() {
+    return log_filename;
+}
+void
+SWGAISDemodSettings::setLogFilename(QString* log_filename) {
+    this->log_filename = log_filename;
+    this->m_log_filename_isSet = true;
+}
+
+qint32
+SWGAISDemodSettings::getLogEnabled() {
+    return log_enabled;
+}
+void
+SWGAISDemodSettings::setLogEnabled(qint32 log_enabled) {
+    this->log_enabled = log_enabled;
+    this->m_log_enabled_isSet = true;
+}
+
 qint32
 SWGAISDemodSettings::getRgbColor() {
     return rgb_color;
@@ -426,6 +468,12 @@ SWGAISDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_udp_format_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(log_filename && *log_filename != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_log_enabled_isSet){
             isObjectUpdated = true; break;
         }
         if(m_rgb_color_isSet){

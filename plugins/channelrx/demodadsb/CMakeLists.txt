@@ -42,7 +42,6 @@ if(NOT SERVER_MODE)
         adsbdemoddisplaydialog.ui
         adsbdemodnotificationdialog.cpp
         adsbdemodnotificationdialog.ui
-        csv.cpp
         airlinelogos.qrc
         flags.qrc
         map.qrc
@@ -56,7 +55,6 @@ if(NOT SERVER_MODE)
         adsbdemodnotificationdialog.h
         ourairports.h
         osndb.h
-        csv.h
     )
 
     set(TARGET_NAME demodadsb)

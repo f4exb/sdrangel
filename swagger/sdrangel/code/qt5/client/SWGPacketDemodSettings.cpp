@@ -42,6 +42,10 @@ SWGPacketDemodSettings::SWGPacketDemodSettings() {
     m_udp_address_isSet = false;
     udp_port = 0;
     m_udp_port_isSet = false;
+    log_filename = nullptr;
+    m_log_filename_isSet = false;
+    log_enabled = 0;
+    m_log_enabled_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = nullptr;
@@ -80,6 +84,10 @@ SWGPacketDemodSettings::init() {
     m_udp_address_isSet = false;
     udp_port = 0;
     m_udp_port_isSet = false;
+    log_filename = new QString("");
+    m_log_filename_isSet = false;
+    log_enabled = 0;
+    m_log_enabled_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = new QString("");
@@ -109,6 +117,10 @@ SWGPacketDemodSettings::cleanup() {
 
     if(udp_address != nullptr) { 
         delete udp_address;
+    }
+
+    if(log_filename != nullptr) { 
+        delete log_filename;
     }
 
 
@@ -149,6 +161,10 @@ SWGPacketDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&udp_address, pJson["udpAddress"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&udp_port, pJson["udpPort"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&log_filename, pJson["logFilename"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&log_enabled, pJson["logEnabled"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
@@ -202,6 +218,12 @@ SWGPacketDemodSettings::asJsonObject() {
     }
     if(m_udp_port_isSet){
         obj->insert("udpPort", QJsonValue(udp_port));
+    }
+    if(log_filename != nullptr && *log_filename != QString("")){
+        toJsonValue(QString("logFilename"), log_filename, obj, QString("QString"));
+    }
+    if(m_log_enabled_isSet){
+        obj->insert("logEnabled", QJsonValue(log_enabled));
     }
     if(m_rgb_color_isSet){
         obj->insert("rgbColor", QJsonValue(rgb_color));
@@ -299,6 +321,26 @@ void
 SWGPacketDemodSettings::setUdpPort(qint32 udp_port) {
     this->udp_port = udp_port;
     this->m_udp_port_isSet = true;
+}
+
+QString*
+SWGPacketDemodSettings::getLogFilename() {
+    return log_filename;
+}
+void
+SWGPacketDemodSettings::setLogFilename(QString* log_filename) {
+    this->log_filename = log_filename;
+    this->m_log_filename_isSet = true;
+}
+
+qint32
+SWGPacketDemodSettings::getLogEnabled() {
+    return log_enabled;
+}
+void
+SWGPacketDemodSettings::setLogEnabled(qint32 log_enabled) {
+    this->log_enabled = log_enabled;
+    this->m_log_enabled_isSet = true;
 }
 
 qint32
@@ -405,6 +447,12 @@ SWGPacketDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_udp_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(log_filename && *log_filename != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_log_enabled_isSet){
             isObjectUpdated = true; break;
         }
         if(m_rgb_color_isSet){
