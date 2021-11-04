@@ -262,6 +262,7 @@ elseif(WIN32 OR MINGW)
         include(BundleUtilities)
         fixup_bundle(\"\${CMAKE_INSTALL_PREFIX}/sdrangel${CMAKE_EXECUTABLE_SUFFIX}\" \"\" \"${WINDOWS_FIXUP_BUNDLE_LIB_DIRS}\")
       " COMPONENT Runtime)
+      install(FILES "${FFTW3F_WISDOM}" DESTINATION "${INSTALL_BIN_DIR}")
     elseif(BUILD_SERVER)
       install(CODE "
         include(BundleUtilities)
