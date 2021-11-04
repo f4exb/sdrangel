@@ -190,10 +190,15 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     }
     else
     {
-        QString defaultFFTWWisdomFile = QStandardPaths::locate(QStandardPaths::AppDataLocation, "fftw-wisdom");
+        QString filePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+        filePath += QDir::separator();
+        filePath += "fftw-wisdom";
+        QFileInfo fileInfo = QFileInfo(filePath);
 
-        if (defaultFFTWWisdomFile.length() != 0) {
-            m_dspEngine->createFFTFactory(defaultFFTWWisdomFile);
+        if (fileInfo.exists()) {
+            m_dspEngine->createFFTFactory(filePath);
+        } else {
+            m_dspEngine->createFFTFactory("");
         }
     }
 
@@ -1828,6 +1833,7 @@ void MainWindow::fftWisdomProcessFinished(int exitCode, QProcess::ExitStatus exi
     }
 
     delete m_fftWisdomProcess;
+    m_fftWisdomProcess = nullptr;
 }
 
 void MainWindow::on_action_AMBE_triggered()
