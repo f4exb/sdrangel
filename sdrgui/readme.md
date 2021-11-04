@@ -57,6 +57,7 @@ The following items are presented hierarchically from left to right:
   - Preferences:
     - _Audio_: opens a dialog to choose the audio output device (see 1.1 below for details)
     - _Logging_: opens a dialog to choose logging options (see 1.2 below for details)
+    - _FFT_: opens a dialog to run the `fftwf-wisdom` utility with a choice of direct and possibly reverse FFT sizes. It produces a so called wisdom file `fftw-wisdom` that speeds up FFT allocations. It is created at a default location and will be used at next invocations of SDRangel
     - _AMBE_: Opens a dialog to select AMBE3000 serial devices or AMBE server addresses to use for AMBE digital voice processing. If none is selected AMBE frames decoding will be done with mbelib if available else no audio will be produced for AMBE digital voice (see 1.3 below for details)
     - _My Position_: opens a dialog to enter your station ("My Position") coordinates in decimal degrees with north latitudes positive and east longitudes positive. This is used whenever positional data is to be displayed (APRS, DPRS, ...). For it now only works with D-Star $$CRC frames. See [DSD demod plugin](../plugins/channelrx/demoddsd/readme.md) for details on how to decode Digital Voice modes.
     - _Devices_: section to deal with devices settings
@@ -123,65 +124,99 @@ Use the "OK" button to validate all changes
 
 Use the "Cancel" button to dismiss all changes
 
-<h4>1.3 Preferences - AMBE</h4>
+<h4>1.3 Preferences - FFT</h4>
+
+When clicking on the FFT submenu a dialog opens for running the `fftwf-wisdom` utility with a choice of direct and possibly reverse FFT sizes. It produces a so called wisdom file `fftw-wisdom` that speeds up FFT allocations. It is created at a default location and will be used at next invocations of SDRangel.
+
+![Main Window AMBE](../doc/img/MainWindow_fft.png)
+
+<h5>1.3.1. FFTW Wisdom program</h5>
+
+Path to the `fftwf-wisdom` program. It looks in the `PATH` variable and the "current" directory (that is the same directory where the `sdrangel` binary resides).
+
+<h5>1.3.2. Select FFTW Wisdom program</h5>
+
+Opens a file selection dialog to look for the `fftwf-wisdom` program.
+
+<h5>1.3.3. FFT maximum size</h5>
+
+Select the maximum FFT size for precomputation. Sizes are powers of two between 128 and 32k.
+
+<h5>1.3.4. Reverse FFT</h5>
+
+Select this checkbox to cover reverse FFTs
+
+<h5>1.3.5. Command line</h5>
+
+This is the command line that will invoke the `fftwf-wisdom` program with its options
+
+<h5>1.3.6. OK: launch the FFTW wisdom program</h5>
+
+When clicking the "OK" button the `fftwf-wisdom` program is launched in the background. A message pop-up appears with the PID of the process and the dialog exits. A new pop-up will appear with the output content when the program completes.
+
+<h5>1.3.7. Cancel: dismiss the dialog without execution</h5>
+
+When clicking the "Cancel" button the dialog is dismissed without execution of the `fftwf-wisdom` program.
+
+<h4>1.4 Preferences - AMBE</h4>
 
 When clicking on the AMBE submenu a dialog opens to let you specify physical AMBE devices to decode AMBE frames produced by digital voice signals (using DSD decoder plugin).
 
 ![Main Window AMBE](../doc/img/MainWindow_ambe.png)
 
-<h5>1.3.1 AMBE server address and port or direct input</h5>
+<h5>1.4.1 AMBE server address and port or direct input</h5>
 
 Use this freeflow text input box to specify either the address and port of an AMBE server in the form: &lt;IPv4 address&gt;:&lt;port&gt; or any directly attached physical device address like a COM port on Windows.
 
-<h5>1.3.2 Import above address or device</h5>
+<h5>1.4.2 Import above address or device</h5>
 
 Import the address or device specified in (1) into the list of used devices. The system will try to open the device or contact the server and will add it to the list only if successful.
 
-<h5>1.3.3 Remove in use device or address</h5>
+<h5>1.4.3 Remove in use device or address</h5>
 
 When a device or address is selected in the in use list (6) push this button to remove it from the list. The corresponding resources will be released.
 
-<h5>1.3.4 Refresh in use list</h5>
+<h5>1.4.4 Refresh in use list</h5>
 
 Checks the list of devices or addresses currently in use and update the in use list (6).
 
-<h5>1.3.5 Empty in use list</h5>
+<h5>1.4.5 Empty in use list</h5>
 
 Removes all devices or addresses in use. The in use list (6) is cleared consequently. This removes all AMBE devices related resources attached to the current instance of the SDRangel program. Therefore consecutive AMBE frames decoding will be handled by the mbelib library if available or no audio will be output.
 
-<h5>1.3.6 In use list</h5>
+<h5>1.4.6 In use list</h5>
 
 List of devices or addresses currently in use for AMBE frames decoding by this instance of the SDRangel program.
 
-<h5>1.3.7 Import serial device</h5>
+<h5>1.4.7 Import serial device</h5>
 
 Imports a serial device scanned in the list of available AMBE 3000 serial devices (9) in the in use list. If this device is already in the in use list then nothing happens and this is reported in the status text (10)
 
-<h5>1.3.8 Import all serial devices</h5>
+<h5>1.4.8 Import all serial devices</h5>
 
 Imports all serial devices scanned in the list of available AMBE 3000 serial devices (9) in the in use list. If any device is already in the in use list then it is not added twice.
 
-<h5>1.3.9 List of available AMBE 3000 serial devices</h5>
+<h5>1.4.9 List of available AMBE 3000 serial devices</h5>
 
 This is the list of AMBE 3000 currently attached to the system directly. This list gets updated at every opening of the dialog.
 
-<h5>1.3.10 Status text</h5>
+<h5>1.4.10 Status text</h5>
 
 A brief text reports the result of the current action
 
-<h5>1.3.11 Close button</h5>
+<h5>1.4.11 Close button</h5>
 
 Use this button to dismiss the dialog
 
-<h4>1.4 Prefernces - LimeRFE</h4>
+<h4>1.5 Prefernces - LimeRFE</h4>
 
 Only if LimeSuite library is available this opens a dialog to control a LimeRFE device via USB. The details are provided [here](limerfeusbgui.md).
 
-<h4>1.5 Preferences - Devices - User arguments</h4>
+<h4>1.6 Preferences - Devices - User arguments</h4>
 
 See the devuces user arguments management documentation [here](deviceuserargs.md).
 
-<h4>1.6. Help - Loaded plugins display</h4>
+<h4>1.7. Help - Loaded plugins display</h4>
 
 When clicking on Help -> Loaded Plugins from the main menu bar a dialog box appears that shows information about the plugins loaded in SDRangel:
 
