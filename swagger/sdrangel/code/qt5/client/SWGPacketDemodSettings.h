@@ -63,6 +63,12 @@ public:
     qint32 getUdpPort();
     void setUdpPort(qint32 udp_port);
 
+    QString* getLogFilename();
+    void setLogFilename(QString* log_filename);
+
+    qint32 getLogEnabled();
+    void setLogEnabled(qint32 log_enabled);
+
     qint32 getRgbColor();
     void setRgbColor(qint32 rgb_color);
 
@@ -111,6 +117,12 @@ private:
 
     qint32 udp_port;
     bool m_udp_port_isSet;
+
+    QString* log_filename;
+    bool m_log_filename_isSet;
+
+    qint32 log_enabled;
+    bool m_log_enabled_isSet;
 
     qint32 rgb_color;
     bool m_rgb_color_isSet;

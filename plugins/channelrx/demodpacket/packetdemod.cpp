@@ -37,6 +37,7 @@
 #include "dsp/dspcommands.h"
 #include "device/deviceapi.h"
 #include "feature/feature.h"
+#include "util/ax25.h"
 #include "util/db.h"
 #include "maincore.h"
 
@@ -176,6 +177,32 @@ bool PacketDemod::handleMessage(const Message& cmd)
                                       QHostAddress(m_settings.m_udpAddress), m_settings.m_udpPort);
         }
 
+        // Write to log file
+        if (m_logFile.isOpen())
+        {
+            AX25Packet ax25;
+
+            if (ax25.decode(report.getPacket()))
+            {
+                m_logStream << report.getDateTime().date().toString() << ","
+                    << report.getDateTime().time().toString() << ","
+                    << report.getPacket().toHex() << ","
+                    << "\"" << ax25.m_from << "\","
+                    << "\"" << ax25.m_to << "\","
+                    << "\"" << ax25.m_via << "\","
+                    << ax25.m_type << ","
+                    << ax25.m_pid << ","
+                    << "\"" << ax25.m_dataASCII << "\","
+                    << "\"" << ax25.m_dataHex << "\"\n";
+            }
+            else
+            {
+                m_logStream << report.getDateTime().date().toString() << ","
+                    << report.getDateTime().time().toString() << ","
+                    << report.getPacket().toHex() << "\n";
+            }
+        }
+
         return true;
     }
     else if (MainCore::MsgChannelDemodQuery::match(cmd))
@@ -194,6 +221,8 @@ bool PacketDemod::handleMessage(const Message& cmd)
 void PacketDemod::applySettings(const PacketDemodSettings& settings, bool force)
 {
     qDebug() << "PacketDemod::applySettings:"
+            << " m_logEnabled: " << settings.m_logEnabled
+            << " m_logFilename: " << settings.m_logFilename
             << " m_streamIndex: " << settings.m_streamIndex
             << " m_useReverseAPI: " << settings.m_useReverseAPI
             << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
@@ -222,6 +251,12 @@ void PacketDemod::applySettings(const PacketDemodSettings& settings, bool force)
     if ((settings.m_udpPort != m_settings.m_udpPort) || force) {
         reverseAPIKeys.append("udpPort");
     }
+    if ((settings.m_logFilename != m_settings.m_logFilename) || force) {
+        reverseAPIKeys.append("logFilename");
+    }
+    if ((settings.m_logEnabled != m_settings.m_logEnabled) || force) {
+        reverseAPIKeys.append("logEnabled");
+    }
     if (m_settings.m_streamIndex != settings.m_streamIndex)
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
@@ -246,6 +281,36 @@ void PacketDemod::applySettings(const PacketDemodSettings& settings, bool force)
                 (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
                 (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
         webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+    }
+
+    if ((settings.m_logEnabled != m_settings.m_logEnabled)
+        || (settings.m_logFilename != m_settings.m_logFilename)
+        || force)
+    {
+        if (m_logFile.isOpen())
+        {
+            m_logStream.flush();
+            m_logFile.close();
+        }
+        if (settings.m_logEnabled && !settings.m_logFilename.isEmpty())
+        {
+            m_logFile.setFileName(settings.m_logFilename);
+            if (m_logFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
+            {
+                qDebug() << "PacketDemod::applySettings - Logging to: " << settings.m_logFilename;
+                bool newFile = m_logFile.size() == 0;
+                m_logStream.setDevice(&m_logFile);
+                if (newFile)
+                {
+                    // Write header
+                    m_logStream << "Date,Time,Data,From,To,Via,Type,PID,Data ASCII,Data Hex\n";
+                }
+            }
+            else
+            {
+                qDebug() << "PacketDemod::applySettings - Unable to open log file: " << settings.m_logFilename;
+            }
+        }
     }
 
     m_settings = settings;
@@ -351,6 +416,12 @@ void PacketDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("udpPort")) {
         settings.m_udpPort = response.getPacketDemodSettings()->getUdpPort();
     }
+    if (channelSettingsKeys.contains("logFilename")) {
+        settings.m_logFilename = *response.getAdsbDemodSettings()->getLogFilename();
+    }
+    if (channelSettingsKeys.contains("logEnabled")) {
+        settings.m_logEnabled = response.getAdsbDemodSettings()->getLogEnabled();
+    }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getPacketDemodSettings()->getRgbColor();
     }
@@ -385,6 +456,8 @@ void PacketDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& r
     response.getPacketDemodSettings()->setUdpEnabled(settings.m_udpEnabled);
     response.getPacketDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
     response.getPacketDemodSettings()->setUdpPort(settings.m_udpPort);
+    response.getPacketDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
+    response.getPacketDemodSettings()->setLogEnabled(settings.m_logEnabled);
 
     response.getPacketDemodSettings()->setRgbColor(settings.m_rgbColor);
     if (response.getPacketDemodSettings()->getTitle()) {
@@ -465,6 +538,12 @@ void PacketDemod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("udpPort") || force) {
         swgPacketDemodSettings->setUdpPort(settings.m_udpPort);
+    }
+    if (channelSettingsKeys.contains("logFilename") || force) {
+        swgPacketDemodSettings->setLogFilename(new QString(settings.m_logFilename));
+    }
+    if (channelSettingsKeys.contains("logEnabled") || force) {
+        swgPacketDemodSettings->setLogEnabled(settings.m_logEnabled);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgPacketDemodSettings->setRgbColor(settings.m_rgbColor);

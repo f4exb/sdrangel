@@ -44,6 +44,8 @@ void PagerDemodSettings::resetToDefaults()
     m_udpPort = 9999;
     m_scopeCh1 = 4;
     m_scopeCh2 = 9;
+    m_logFilename = "pager_log.csv";
+    m_logEnabled = false;
     m_rgbColor = QColor(200, 191, 231).rgb();
     m_title = "Pager Demodulator";
     m_streamIndex = 0;
@@ -91,6 +93,9 @@ QByteArray PagerDemodSettings::serialize() const
     s.writeBool(22, m_reverse);
     s.writeBlob(23, serializeIntList(m_sevenbit));
     s.writeBlob(24, serializeIntList(m_unicode));
+
+    s.writeString(25, m_logFilename);
+    s.writeBool(26, m_logEnabled);
 
     for (int i = 0; i < PAGERDEMOD_MESSAGE_COLUMNS; i++) {
         s.writeS32(100 + i, m_messageColumnIndexes[i]);
@@ -165,6 +170,9 @@ bool PagerDemodSettings::deserialize(const QByteArray& data)
         deserializeIntList(blob, m_sevenbit);
         d.readBlob(24, &blob);
         deserializeIntList(blob, m_unicode);
+
+        d.readString(25, &m_logFilename, "pager_log.csv");
+        d.readBool(26, &m_logEnabled, false);
 
         for (int i = 0; i < PAGERDEMOD_MESSAGE_COLUMNS; i++) {
             d.readS32(100 + i, &m_messageColumnIndexes[i], i);

@@ -179,6 +179,25 @@ bool AISDemod::handleMessage(const Message& cmd)
             }
         }
 
+        // Write to log file
+        if (m_logFile.isOpen())
+        {
+            AISMessage *ais;
+
+            // Decode the message
+            ais = AISMessage::decode(report.getMessage());
+
+            m_logStream << report.getDateTime().date().toString() << ","
+                << report.getDateTime().time().toString() << ","
+                << report.getMessage().toHex() << ","
+                << QString("%1").arg(ais->m_mmsi, 9, 10, QChar('0')) << ","
+                << ais->getType() << ","
+                << "\"" << ais->toString() << "\"" << ","
+                << "\"" << ais->toNMEA() << "\"" << "\n";
+
+            delete ais;
+        }
+
         return true;
     }
     else if (MainCore::MsgChannelDemodQuery::match(cmd))
@@ -202,6 +221,8 @@ ScopeVis *AISDemod::getScopeSink()
 void AISDemod::applySettings(const AISDemodSettings& settings, bool force)
 {
     qDebug() << "AISDemod::applySettings:"
+            << " m_logEnabled: " << settings.m_logEnabled
+            << " m_logFilename: " << settings.m_logFilename
             << " m_streamIndex: " << settings.m_streamIndex
             << " m_useReverseAPI: " << settings.m_useReverseAPI
             << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
@@ -236,6 +257,12 @@ void AISDemod::applySettings(const AISDemodSettings& settings, bool force)
     if ((settings.m_udpFormat != m_settings.m_udpFormat) || force) {
         reverseAPIKeys.append("udpFormat");
     }
+    if ((settings.m_logFilename != m_settings.m_logFilename) || force) {
+        reverseAPIKeys.append("logFilename");
+    }
+    if ((settings.m_logEnabled != m_settings.m_logEnabled) || force) {
+        reverseAPIKeys.append("logEnabled");
+    }
     if (m_settings.m_streamIndex != settings.m_streamIndex)
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
@@ -260,6 +287,36 @@ void AISDemod::applySettings(const AISDemodSettings& settings, bool force)
                 (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
                 (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
         webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+    }
+
+    if ((settings.m_logEnabled != m_settings.m_logEnabled)
+        || (settings.m_logFilename != m_settings.m_logFilename)
+        || force)
+    {
+        if (m_logFile.isOpen())
+        {
+            m_logStream.flush();
+            m_logFile.close();
+        }
+        if (settings.m_logEnabled && !settings.m_logFilename.isEmpty())
+        {
+            m_logFile.setFileName(settings.m_logFilename);
+            if (m_logFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
+            {
+                qDebug() << "AISDemod::applySettings - Logging to: " << settings.m_logFilename;
+                bool newFile = m_logFile.size() == 0;
+                m_logStream.setDevice(&m_logFile);
+                if (newFile)
+                {
+                    // Write header
+                    m_logStream << "Date,Time,Data,MMSI,Type,Message,NMEA\n";
+                }
+            }
+            else
+            {
+                qDebug() << "AISDemod::applySettings - Unable to open log file: " << settings.m_logFilename;
+            }
+        }
     }
 
     m_settings = settings;
@@ -371,6 +428,12 @@ void AISDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("udpFormat")) {
         settings.m_udpFormat = (AISDemodSettings::UDPFormat)response.getAisDemodSettings()->getUdpFormat();
     }
+    if (channelSettingsKeys.contains("logFilename")) {
+        settings.m_logFilename = *response.getAisDemodSettings()->getLogFilename();
+    }
+    if (channelSettingsKeys.contains("logEnabled")) {
+        settings.m_logEnabled = response.getAisDemodSettings()->getLogEnabled();
+    }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getAisDemodSettings()->getRgbColor();
     }
@@ -407,6 +470,8 @@ void AISDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     response.getAisDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
     response.getAisDemodSettings()->setUdpPort(settings.m_udpPort);
     response.getAisDemodSettings()->setUdpFormat((int)settings.m_udpFormat);
+    response.getAisDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
+    response.getAisDemodSettings()->setLogEnabled(settings.m_logEnabled);
 
     response.getAisDemodSettings()->setRgbColor(settings.m_rgbColor);
     if (response.getAisDemodSettings()->getTitle()) {
@@ -493,6 +558,12 @@ void AISDemod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("udpFormat") || force) {
         swgAISDemodSettings->setUdpPort((int)settings.m_udpFormat);
+    }
+    if (channelSettingsKeys.contains("logFilename") || force) {
+        swgAISDemodSettings->setLogFilename(new QString(settings.m_logFilename));
+    }
+    if (channelSettingsKeys.contains("logEnabled") || force) {
+        swgAISDemodSettings->setLogEnabled(settings.m_logEnabled);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgAISDemodSettings->setRgbColor(settings.m_rgbColor);

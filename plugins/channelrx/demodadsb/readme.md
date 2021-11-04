@@ -173,7 +173,7 @@ Click to specify the name of the .csv file which received ADS-B frames are logge
 
 <h3>Read Data from .csv File</h3>
 
-Click to specify a previously written ADS-B .csv log file, which is read and used to updated the ADS-B data table and map.
+Click to specify a previously written ADS-B .csv log file, which is read and used to update the ADS-B data table and map.
 
 <h3>14: Refresh list of devices</h3>
 

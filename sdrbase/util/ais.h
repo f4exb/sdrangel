@@ -33,6 +33,7 @@ public:
     int m_mmsi;
 
     AISMessage(const QByteArray ba);
+    virtual ~AISMessage() {}
     virtual QString getType() = 0;
     virtual bool hasPosition() { return false; }
     virtual float getLatitude() { return 0.0f; }

@@ -84,6 +84,18 @@ IP address of the host to forward received messages to via UDP.
 
 UDP port number to forward received messages to.
 
+<h3>15: Start/stop Logging Messages to .csv File</h3>
+
+When checked, writes all received messages to a .csv file.
+
+<h3>16: .csv Log Filename</h3>
+
+Click to specify the name of the .csv file which received messages are logged to.
+
+<h3>17: Read Data from .csv File</h3>
+
+Click to specify a previously written .csv log file, which is read and used to update the table.
+
 <h3>Received Messages Table</h3>
 
 The received messages table displays each pager message received.

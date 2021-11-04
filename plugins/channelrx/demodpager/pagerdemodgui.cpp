@@ -23,6 +23,8 @@
 #include <QAction>
 #include <QRegExp>
 #include <QClipboard>
+#include <QFileDialog>
+#include <QMessageBox>
 
 #include "pagerdemodgui.h"
 
@@ -33,6 +35,7 @@
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
+#include "util/csv.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
 #include "dsp/dspengine.h"
@@ -144,7 +147,9 @@ bool PagerDemodGUI::deserialize(const QByteArray& data)
 }
 
 // Add row to table
-void PagerDemodGUI::messageReceived(const PagerDemod::MsgPagerMessage& message)
+void PagerDemodGUI::messageReceived(const QDateTime dateTime, int address, int functionBits,
+        const QString &numericMessage, const QString &alphaMessage,
+        int evenParityErrors, int bchParityErrors)
 {
     // Add to messages table
     ui->messages->setSortingEnabled(false);
@@ -169,43 +174,43 @@ void PagerDemodGUI::messageReceived(const PagerDemod::MsgPagerMessage& message)
     ui->messages->setItem(row, MESSAGE_COL_NUMERIC, numericItem);
     ui->messages->setItem(row, MESSAGE_COL_EVEN_PE, evenPEItem);
     ui->messages->setItem(row, MESSAGE_COL_BCH_PE, bchPEItem);
-    dateItem->setText(message.getDateTime().date().toString());
-    timeItem->setText(message.getDateTime().time().toString());
-    addressItem->setText(QString("%1").arg(message.getAddress(), 7, 10, QChar('0')));
+    dateItem->setText(dateTime.date().toString());
+    timeItem->setText(dateTime.time().toString());
+    addressItem->setText(QString("%1").arg(address, 7, 10, QChar('0')));
     // Standard way of choosing numeric or alpha decode isn't followed widely
     if (m_settings.m_decode == PagerDemodSettings::Standard)
     {
         // Encoding is based on function bits
-        if (message.getFunctionBits() == 0) {
-            messageItem->setText(message.getNumericMessage());
+        if (functionBits == 0) {
+            messageItem->setText(numericMessage);
         } else {
-            messageItem->setText(message.getAlphaMessage());
+            messageItem->setText(alphaMessage);
         }
     }
     else if (m_settings.m_decode == PagerDemodSettings::Inverted)
     {
         // Encoding is based on function bits, but inverted from standard
-        if (message.getFunctionBits() == 3) {
-            messageItem->setText(message.getNumericMessage());
+        if (functionBits == 3) {
+            messageItem->setText(numericMessage);
         } else {
-            messageItem->setText(message.getAlphaMessage());
+            messageItem->setText(alphaMessage);
         }
     }
     else if (m_settings.m_decode == PagerDemodSettings::Numeric)
     {
         // Always display as numeric
-        messageItem->setText(message.getNumericMessage());
+        messageItem->setText(numericMessage);
     }
     else if (m_settings.m_decode == PagerDemodSettings::Alphanumeric)
     {
         // Always display as alphanumeric
-        messageItem->setText(message.getAlphaMessage());
+        messageItem->setText(alphaMessage);
     }
     else
     {
         // Guess at what the encoding is
-        QString numeric = message.getNumericMessage();
-        QString alpha = message.getAlphaMessage();
+        QString numeric = numericMessage;
+        QString alpha = alphaMessage;
         bool done = false;
         if (!done)
         {
@@ -233,11 +238,11 @@ void PagerDemodGUI::messageReceived(const PagerDemod::MsgPagerMessage& message)
             messageItem->setText(alpha);
         }
     }
-    functionItem->setText(QString("%1").arg(message.getFunctionBits()));
-    alphaItem->setText(message.getAlphaMessage());
-    numericItem->setText(message.getNumericMessage());
-    evenPEItem->setText(QString("%1").arg(message.getEvenParityErrors()));
-    bchPEItem->setText(QString("%1").arg(message.getBCHParityErrors()));
+    functionItem->setText(QString("%1").arg(functionBits));
+    alphaItem->setText(alphaMessage);
+    numericItem->setText(numericMessage);
+    evenPEItem->setText(QString("%1").arg(evenParityErrors));
+    bchPEItem->setText(QString("%1").arg(bchParityErrors));
     ui->messages->setSortingEnabled(true);
     ui->messages->scrollToItem(dateItem); // Will only scroll if not hidden
     filterRow(row);
@@ -258,7 +263,9 @@ bool PagerDemodGUI::handleMessage(const Message& message)
     else if (PagerDemod::MsgPagerMessage::match(message))
     {
         PagerDemod::MsgPagerMessage& report = (PagerDemod::MsgPagerMessage&) message;
-        messageReceived(report);
+        messageReceived(report.getDateTime(), report.getAddress(), report.getFunctionBits(),
+            report.getNumericMessage(), report.getAlphaMessage(),
+            report.getEvenParityErrors(), report.getBCHParityErrors());
         return true;
     }
 
@@ -606,6 +613,9 @@ void PagerDemodGUI::displaySettings()
     ui->channel1->setCurrentIndex(m_settings.m_scopeCh1);
     ui->channel2->setCurrentIndex(m_settings.m_scopeCh2);
 
+    ui->logFilename->setToolTip(QString(".csv log filename: %1").arg(m_settings.m_logFilename));
+    ui->logEnable->setChecked(m_settings.m_logEnabled);
+
     // Order and size columns
     QHeaderView *header = ui->messages->horizontalHeader();
     for (int i = 0; i < PAGERDEMOD_MESSAGE_COLUMNS; i++)
@@ -667,5 +677,106 @@ void PagerDemodGUI::on_charset_clicked()
     if (dialog.exec() == QDialog::Accepted)
     {
         applySettings();
+    }
+}
+
+
+void PagerDemodGUI::on_logEnable_clicked(bool checked)
+{
+    m_settings.m_logEnabled = checked;
+    applySettings();
+}
+
+void PagerDemodGUI::on_logFilename_clicked()
+{
+    // Get filename to save to
+    QFileDialog fileDialog(nullptr, "Select file to log received messages to", "", "*.csv");
+    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+    if (fileDialog.exec())
+    {
+        QStringList fileNames = fileDialog.selectedFiles();
+        if (fileNames.size() > 0)
+        {
+            m_settings.m_logFilename = fileNames[0];
+            ui->logFilename->setToolTip(QString(".csv log filename: %1").arg(m_settings.m_logFilename));
+            applySettings();
+        }
+    }
+}
+
+// Read .csv log and process as received messages
+void PagerDemodGUI::on_logOpen_clicked()
+{
+    QFileDialog fileDialog(nullptr, "Select .csv log file to read", "", "*.csv");
+    if (fileDialog.exec())
+    {
+        QStringList fileNames = fileDialog.selectedFiles();
+        if (fileNames.size() > 0)
+        {
+            QFile file(fileNames[0]);
+            if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+            {
+                QTextStream in(&file);
+                QString error;
+                QHash<QString, int> colIndexes = CSV::readHeader(in, {"Date", "Time", "Address", "Function Bits", "Alpha", "Numeric", "Even Parity Errors", "BCH Parity Errors"}, error);
+                if (error.isEmpty())
+                {
+                    int dateCol = colIndexes.value("Date");
+                    int timeCol = colIndexes.value("Time");
+                    int addressCol = colIndexes.value("Address");
+                    int functionCol = colIndexes.value("Function Bits");
+                    int alphaCol = colIndexes.value("Alpha");
+                    int numericCol = colIndexes.value("Numeric");
+                    int evenCol = colIndexes.value("Even Parity Errors");
+                    int bchCol = colIndexes.value("BCH Parity Errors");
+                    int maxCol = std::max({dateCol, timeCol, addressCol, functionCol, alphaCol, numericCol, evenCol, bchCol});
+
+                    QMessageBox dialog(this);
+                    dialog.setText("Reading messages");
+                    dialog.addButton(QMessageBox::Cancel);
+                    dialog.show();
+                    QApplication::processEvents();
+                    int count = 0;
+                    bool cancelled = false;
+
+                    QStringList cols;
+                    while (!cancelled && CSV::readRow(in, &cols))
+                    {
+                        if (cols.size() > maxCol)
+                        {
+                            QDate date = QDate::fromString(cols[dateCol]);
+                            QTime time = QTime::fromString(cols[timeCol]);
+                            QDateTime dateTime(date, time);
+                            int address = cols[addressCol].toInt();
+                            int functionBits = cols[functionCol].toInt();
+                            int evenErrors = cols[evenCol].toInt();
+                            int bchErrors = cols[bchCol].toInt();
+
+                            messageReceived(dateTime, address, functionBits,
+                                cols[numericCol], cols[alphaCol],
+                                evenErrors, bchErrors);
+
+                            if (count % 1000 == 0)
+                            {
+                                QApplication::processEvents();
+                                if (dialog.clickedButton()) {
+                                    cancelled = true;
+                                }
+                            }
+                            count++;
+                        }
+                    }
+                    dialog.close();
+                }
+                else
+                {
+                    QMessageBox::critical(this, "Pager Demod", error);
+                }
+            }
+            else
+            {
+                QMessageBox::critical(this, "Pager Demod", QString("Failed to open file %1").arg(fileNames[0]));
+            }
+        }
     }
 }

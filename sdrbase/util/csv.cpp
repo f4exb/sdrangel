@@ -25,7 +25,7 @@
 #include <QDebug>
 
 // Create a hash map from a CSV file with two columns
-QHash<QString, QString> *csvHash(const QString& filename, int reserve)
+QHash<QString, QString> *CSV::hash(const QString& filename, int reserve)
 {
     int cnt = 0;
     QHash<QString, QString> *map = nullptr;
@@ -66,4 +66,101 @@ QHash<QString, QString> *csvHash(const QString& filename, int reserve)
     qDebug() << "csvHash: " << filename << ": read " << cnt << " entries";
 
     return map;
+}
+
+// Read a row from a CSV file (handling quotes)
+// https://stackoverflow.com/questions/27318631/parsing-through-a-csv-file-in-qt
+bool CSV::readRow(QTextStream &in, QStringList *row)
+{
+    static const int delta[][5] = {
+        //  ,    "   \n    ?  eof
+        {   1,   2,  -1,   0,  -1  }, // 0: parsing (store char)
+        {   1,   2,  -1,   0,  -1  }, // 1: parsing (store column)
+        {   3,   4,   3,   3,  -2  }, // 2: quote entered (no-op)
+        {   3,   4,   3,   3,  -2  }, // 3: parsing inside quotes (store char)
+        {   1,   3,  -1,   0,  -1  }, // 4: quote exited (no-op)
+        // -1: end of row, store column, success
+        // -2: eof inside quotes
+    };
+
+    row->clear();
+
+    if (in.atEnd())
+        return false;
+
+    int state = 0, t;
+    char ch;
+    QString cell;
+
+    while (state >= 0)
+    {
+        if (in.atEnd())
+        {
+            t = 4;
+        }
+        else
+        {
+            in >> ch;
+            if (ch == ',') {
+                t = 0;
+            } else if (ch == '\"') {
+                t = 1;
+            } else if (ch == '\n') {
+                t = 2;
+            } else {
+                t = 3;
+            }
+        }
+
+        state = delta[state][t];
+
+        switch (state) {
+        case 0:
+        case 3:
+            cell += ch;
+            break;
+        case -1:
+        case 1:
+            row->append(cell);
+            cell = "";
+            break;
+        }
+
+    }
+
+    if (state == -2) {
+        return false;
+    }
+
+    return true;
+}
+
+// Read header row from CSV file and return a hash mapping names to column numbers
+// Returns error if header row can't be read, or if all of requiredColumns aren't found
+QHash<QString, int> CSV::readHeader(QTextStream &in, QStringList requiredColumns, QString &error)
+{
+    QHash<QString, int> colNumbers;
+    QStringList row;
+
+    // Read column names
+    if (CSV::readRow(in, &row))
+    {
+        // Create hash mapping column names to indices
+        for (int i = 0; i < row.size(); i++) {
+            colNumbers.insert(row[i], i);
+        }
+        // Check all required columns exist
+        for (const auto col : requiredColumns)
+        {
+            if (!colNumbers.contains(col)) {
+                error = QString("Missing column %1").arg(col);
+            }
+        }
+    }
+    else
+    {
+        error = "Failed to read header row";
+    }
+
+    return colNumbers;
 }

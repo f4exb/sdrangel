@@ -64,6 +64,9 @@ struct PagerDemodSettings
     QList<qint32> m_sevenbit;
     QList<qint32> m_unicode;
 
+    QString m_logFilename;
+    bool m_logEnabled;
+
     int m_messageColumnIndexes[PAGERDEMOD_MESSAGE_COLUMNS];//!< How the columns are ordered in the table
     int m_messageColumnSizes[PAGERDEMOD_MESSAGE_COLUMNS];  //!< Size of the columns in the table
 

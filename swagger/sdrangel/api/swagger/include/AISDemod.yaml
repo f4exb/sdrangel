@@ -25,6 +25,10 @@ AISDemodSettings:
     udpFormat:
       description: "0 for binary, 1 for NMEA"
       type: integer
+    logFilename:
+      type: string
+    logEnabled:
+      type: integer
     rgbColor:
       type: integer
     title:

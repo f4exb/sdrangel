@@ -62,6 +62,18 @@ IP address of the host to forward received packets to via UDP.
 
 UDP port number to forward received packets to.
 
+<h3>12: Start/stop Logging Packets to .csv File</h3>
+
+When checked, writes all received packets to a .csv file.
+
+<h3>13: .csv Log Filename</h3>
+
+Click to specify the name of the .csv file which received packets are logged to.
+
+<h3>14: Read Data from .csv File</h3>
+
+Click to specify a previously written .csv log file, which is read and used to update the table.
+
 <h3>Received Packets Table</h3>
 
 The received packets table displays the contents of the packets that have been received. Only packets with valid CRCs are displayed.

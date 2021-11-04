@@ -24,6 +24,7 @@
 #include <QMessageBox>
 #include <QAction>
 #include <QRegExp>
+#include <QFileDialog>
 
 #include "packetdemodgui.h"
 #include "util/ax25.h"
@@ -34,6 +35,7 @@
 #include "ui_packetdemodgui.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
+#include "util/csv.h"
 #include "util/db.h"
 #include "util/morse.h"
 #include "util/units.h"
@@ -521,6 +523,9 @@ void PacketDemodGUI::displaySettings()
     ui->udpAddress->setText(m_settings.m_udpAddress);
     ui->udpPort->setText(QString::number(m_settings.m_udpPort));
 
+    ui->logFilename->setToolTip(QString(".csv log filename: %1").arg(m_settings.m_logFilename));
+    ui->logEnable->setChecked(m_settings.m_logEnabled);
+
     // Order and size columns
     QHeaderView *header = ui->packets->horizontalHeader();
     for (int i = 0; i < PACKETDEMOD_COLUMNS; i++)
@@ -575,4 +580,91 @@ void PacketDemodGUI::tick()
     }
 
     m_tickCount++;
+}
+
+void PacketDemodGUI::on_logEnable_clicked(bool checked)
+{
+    m_settings.m_logEnabled = checked;
+    applySettings();
+}
+
+void PacketDemodGUI::on_logFilename_clicked()
+{
+    // Get filename to save to
+    QFileDialog fileDialog(nullptr, "Select file to log received frames to", "", "*.csv");
+    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+    if (fileDialog.exec())
+    {
+        QStringList fileNames = fileDialog.selectedFiles();
+        if (fileNames.size() > 0)
+        {
+            m_settings.m_logFilename = fileNames[0];
+            ui->logFilename->setToolTip(QString(".csv log filename: %1").arg(m_settings.m_logFilename));
+            applySettings();
+        }
+    }
+}
+
+// Read .csv log and process as received frames
+void PacketDemodGUI::on_logOpen_clicked()
+{
+    QFileDialog fileDialog(nullptr, "Select .csv log file to read", "", "*.csv");
+    if (fileDialog.exec())
+    {
+        QStringList fileNames = fileDialog.selectedFiles();
+        if (fileNames.size() > 0)
+        {
+            QFile file(fileNames[0]);
+            if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+            {
+                QTextStream in(&file);
+                QString error;
+                QHash<QString, int> colIndexes = CSV::readHeader(in, {"Date", "Time", "Data"}, error);
+                if (error.isEmpty())
+                {
+                    int dateCol = colIndexes.value("Date");
+                    int timeCol = colIndexes.value("Time");
+                    int dataCol = colIndexes.value("Data");
+                    int maxCol = std::max({dateCol, timeCol, dataCol});
+
+                    QMessageBox dialog(this);
+                    dialog.setText("Reading packet data");
+                    dialog.addButton(QMessageBox::Cancel);
+                    dialog.show();
+                    QApplication::processEvents();
+                    int count = 0;
+                    bool cancelled = false;
+                    QStringList cols;
+                    while (!cancelled && CSV::readRow(in, &cols))
+                    {
+                        if (cols.size() > maxCol)
+                        {
+                            QDate date = QDate::fromString(cols[dateCol]);
+                            QTime time = QTime::fromString(cols[timeCol]);
+                            QDateTime dateTime(date, time);
+                            QByteArray bytes = QByteArray::fromHex(cols[dataCol].toLatin1());
+                            packetReceived(bytes);
+                            if (count % 1000 == 0)
+                            {
+                                QApplication::processEvents();
+                                if (dialog.clickedButton()) {
+                                    cancelled = true;
+                                }
+                            }
+                            count++;
+                        }
+                    }
+                    dialog.close();
+                }
+                else
+                {
+                    QMessageBox::critical(this, "Packet Demod", error);
+                }
+            }
+            else
+            {
+                QMessageBox::critical(this, "Packet Demod", QString("Failed to open file %1").arg(fileNames[0]));
+            }
+        }
+    }
 }

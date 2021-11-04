@@ -78,7 +78,9 @@ private:
     void applySettings(bool force = false);
     void displaySettings();
     void displayStreamIndex();
-    void messageReceived(const PagerDemod::MsgPagerMessage& message);
+    void messageReceived(const QDateTime dateTime, int address, int functionBits,
+        const QString &numericMessage, const QString &alphaMessage,
+        int evenParityErrors, int bchParityErrors);
     bool handleMessage(const Message& message);
 
     void leaveEvent(QEvent*);
@@ -113,6 +115,9 @@ private slots:
     void on_udpPort_editingFinished();
     void on_channel1_currentIndexChanged(int index);
     void on_channel2_currentIndexChanged(int index);
+    void on_logEnable_clicked(bool checked=false);
+    void on_logFilename_clicked();
+    void on_logOpen_clicked();
     void filterRow(int row);
     void filter();
     void messages_sectionMoved(int logicalIndex, int oldVisualIndex, int newVisualIndex);
