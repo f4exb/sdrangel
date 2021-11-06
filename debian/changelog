@@ -1,3 +1,19 @@
+sdrangel (6.17.3-1) unstable; urgency=medium
+
+  * Noise Figure: add support for sweeping gain and other device settings. PR #1020
+  * ADSB updates. PR #1023
+  * Support for vertically expanding widgets to RollupWidget. Issue #897. PR #1026
+  * Remote inpput: allow API to bind to any address. Issue #1028. PR #1030
+  * RTLSDR: Report biasT widget state in displaySettings. PR #1032
+  * RemoteInput GUI - Use editingFinished not returnPressed. Issue #1031. PR #1033
+  * CI/CD. Fallback external/windows LFS support
+  * ADSB updates: log and memory leak. PR #1037
+  * FFTW wisdom enhancements. Issue #1024
+  * Add Logging to .csv file for some plugins. Issue #1035. PR #1038
+  * Remote sink: fixed socket deletion. Issue #1034
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 05 Nov 2021 18:05:33 +0100
+
 sdrangel (6.17.2-1) unstable; urgency=medium
 
   * DATV modulator: API enhancements and GUI cosmetic fixes
