@@ -53,7 +53,8 @@ RemoteSinkSender::RemoteSinkSender() :
 RemoteSinkSender::~RemoteSinkSender()
 {
     qDebug("RemoteSinkSender::~RemoteSinkSender");
-    delete m_socket;
+    m_socket->close();
+    m_socket->deleteLater();
 }
 
 RemoteDataBlock *RemoteSinkSender::getDataBlock()

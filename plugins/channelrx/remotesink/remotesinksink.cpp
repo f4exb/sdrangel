@@ -52,7 +52,6 @@ RemoteSinkSink::RemoteSinkSink() :
 RemoteSinkSink::~RemoteSinkSink()
 {
     qDebug("RemoteSinkSink::~RemoteSinkSink");
-
     delete m_remoteSinkSender;
     delete m_senderThread;
 }
