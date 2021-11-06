@@ -138,6 +138,7 @@ In the Speech and Command strings, variables can be used to substitute in data f
 * ${speed}
 * ${heading}
 * ${range}
+- ${azel}
 * ${category}
 * ${status}
 * ${squawk}
@@ -145,6 +146,7 @@ In the Speech and Command strings, variables can be used to substitute in data f
 * ${manufacturer}
 * ${owner}
 * ${operator}
+- ${rssi}
 * ${flightstatus}
 * ${departure}
 * ${arrival}

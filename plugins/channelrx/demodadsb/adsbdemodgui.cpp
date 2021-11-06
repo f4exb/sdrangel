@@ -1314,7 +1314,15 @@ void ADSBDemodGUI::speechNotification(Aircraft *aircraft, const QString &speech)
 
 void ADSBDemodGUI::commandNotification(Aircraft *aircraft, const QString &command)
 {
-    QProcess::startDetached(subAircraftString(aircraft, command));
+    QString commandLine = subAircraftString(aircraft, command);
+    QStringList allArgs = commandLine.split(" ");
+
+    if (allArgs.size() > 0)
+    {
+        QString program = allArgs[0];
+        allArgs.pop_front();
+        QProcess::startDetached(program, allArgs);
+    }
 }
 
 QString ADSBDemodGUI::subAircraftString(Aircraft *aircraft, const QString &string)
@@ -1329,6 +1337,7 @@ QString ADSBDemodGUI::subAircraftString(Aircraft *aircraft, const QString &strin
     s = s.replace("${speed}", aircraft->m_speedItem->data(Qt::DisplayRole).toString());
     s = s.replace("${heading}", aircraft->m_headingItem->data(Qt::DisplayRole).toString());
     s = s.replace("${range}", aircraft->m_rangeItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${azel}", aircraft->m_azElItem->data(Qt::DisplayRole).toString());
     s = s.replace("${category}", aircraft->m_emitterCategoryItem->data(Qt::DisplayRole).toString());
     s = s.replace("${status}", aircraft->m_statusItem->data(Qt::DisplayRole).toString());
     s = s.replace("${squawk}", aircraft->m_squawkItem->data(Qt::DisplayRole).toString());
@@ -1336,6 +1345,7 @@ QString ADSBDemodGUI::subAircraftString(Aircraft *aircraft, const QString &strin
     s = s.replace("${manufacturer}", aircraft->m_manufacturerNameItem->data(Qt::DisplayRole).toString());
     s = s.replace("${owner}", aircraft->m_ownerItem->data(Qt::DisplayRole).toString());
     s = s.replace("${operator}", aircraft->m_operatorICAOItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${rssi}", aircraft->m_rssiItem->data(Qt::DisplayRole).toString());
     s = s.replace("${flightstatus}", aircraft->m_flightStatusItem->data(Qt::DisplayRole).toString());
     s = s.replace("${departure}", aircraft->m_depItem->data(Qt::DisplayRole).toString());
     s = s.replace("${arrival}", aircraft->m_arrItem->data(Qt::DisplayRole).toString());
