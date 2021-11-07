@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>435</width>
+    <width>604</width>
     <height>1046</height>
    </rect>
   </property>
@@ -36,13 +36,13 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>431</width>
+     <width>600</width>
      <height>141</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
-     <width>300</width>
+     <width>600</width>
      <height>0</height>
     </size>
    </property>
@@ -225,7 +225,7 @@
          <number>100000</number>
         </property>
         <property name="pageStep">
-         <number>1000000</number>
+         <number>100000</number>
         </property>
         <property name="value">
          <number>2300000</number>
@@ -283,7 +283,7 @@
          <number>1</number>
         </property>
         <property name="value">
-         <number>16</number>
+         <number>4</number>
         </property>
        </widget>
       </item>
@@ -296,7 +296,10 @@
          </size>
         </property>
         <property name="text">
-         <string>12</string>
+         <string>4</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
@@ -332,7 +335,7 @@
        <widget class="QLabel" name="tapsPerPhaseText">
         <property name="minimumSize">
          <size>
-          <width>16</width>
+          <width>20</width>
           <height>0</height>
          </size>
         </property>
@@ -734,7 +737,7 @@
     <rect>
      <x>0</x>
      <y>140</y>
-     <width>431</width>
+     <width>600</width>
      <height>291</height>
     </rect>
    </property>
@@ -743,6 +746,12 @@
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>600</width>
+     <height>0</height>
+    </size>
    </property>
    <property name="windowTitle">
     <string>ADS-B Data</string>
@@ -1046,7 +1055,7 @@
     <rect>
      <x>10</x>
      <y>450</y>
-     <width>421</width>
+     <width>600</width>
      <height>581</height>
     </rect>
    </property>
@@ -1055,6 +1064,12 @@
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>600</width>
+     <height>0</height>
+    </size>
    </property>
    <property name="windowTitle">
     <string>Map</string>

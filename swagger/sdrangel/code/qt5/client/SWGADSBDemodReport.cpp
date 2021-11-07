@@ -32,10 +32,14 @@ SWGADSBDemodReport::SWGADSBDemodReport() {
     m_channel_power_db_isSet = false;
     channel_sample_rate = 0;
     m_channel_sample_rate_isSet = false;
+    target_name = nullptr;
+    m_target_name_isSet = false;
     target_azimuth = 0.0f;
     m_target_azimuth_isSet = false;
     target_elevation = 0.0f;
     m_target_elevation_isSet = false;
+    target_range = 0.0f;
+    m_target_range_isSet = false;
 }
 
 SWGADSBDemodReport::~SWGADSBDemodReport() {
@@ -48,15 +52,23 @@ SWGADSBDemodReport::init() {
     m_channel_power_db_isSet = false;
     channel_sample_rate = 0;
     m_channel_sample_rate_isSet = false;
+    target_name = new QString("");
+    m_target_name_isSet = false;
     target_azimuth = 0.0f;
     m_target_azimuth_isSet = false;
     target_elevation = 0.0f;
     m_target_elevation_isSet = false;
+    target_range = 0.0f;
+    m_target_range_isSet = false;
 }
 
 void
 SWGADSBDemodReport::cleanup() {
 
+
+    if(target_name != nullptr) { 
+        delete target_name;
+    }
 
 
 
@@ -77,9 +89,13 @@ SWGADSBDemodReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&channel_sample_rate, pJson["channelSampleRate"], "qint32", "");
     
+    ::SWGSDRangel::setValue(&target_name, pJson["targetName"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&target_azimuth, pJson["targetAzimuth"], "float", "");
     
     ::SWGSDRangel::setValue(&target_elevation, pJson["targetElevation"], "float", "");
+    
+    ::SWGSDRangel::setValue(&target_range, pJson["targetRange"], "float", "");
     
 }
 
@@ -103,11 +119,17 @@ SWGADSBDemodReport::asJsonObject() {
     if(m_channel_sample_rate_isSet){
         obj->insert("channelSampleRate", QJsonValue(channel_sample_rate));
     }
+    if(target_name != nullptr && *target_name != QString("")){
+        toJsonValue(QString("targetName"), target_name, obj, QString("QString"));
+    }
     if(m_target_azimuth_isSet){
         obj->insert("targetAzimuth", QJsonValue(target_azimuth));
     }
     if(m_target_elevation_isSet){
         obj->insert("targetElevation", QJsonValue(target_elevation));
+    }
+    if(m_target_range_isSet){
+        obj->insert("targetRange", QJsonValue(target_range));
     }
 
     return obj;
@@ -133,6 +155,16 @@ SWGADSBDemodReport::setChannelSampleRate(qint32 channel_sample_rate) {
     this->m_channel_sample_rate_isSet = true;
 }
 
+QString*
+SWGADSBDemodReport::getTargetName() {
+    return target_name;
+}
+void
+SWGADSBDemodReport::setTargetName(QString* target_name) {
+    this->target_name = target_name;
+    this->m_target_name_isSet = true;
+}
+
 float
 SWGADSBDemodReport::getTargetAzimuth() {
     return target_azimuth;
@@ -153,6 +185,16 @@ SWGADSBDemodReport::setTargetElevation(float target_elevation) {
     this->m_target_elevation_isSet = true;
 }
 
+float
+SWGADSBDemodReport::getTargetRange() {
+    return target_range;
+}
+void
+SWGADSBDemodReport::setTargetRange(float target_range) {
+    this->target_range = target_range;
+    this->m_target_range_isSet = true;
+}
+
 
 bool
 SWGADSBDemodReport::isSet(){
@@ -164,10 +206,16 @@ SWGADSBDemodReport::isSet(){
         if(m_channel_sample_rate_isSet){
             isObjectUpdated = true; break;
         }
+        if(target_name && *target_name != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(m_target_azimuth_isSet){
             isObjectUpdated = true; break;
         }
         if(m_target_elevation_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_target_range_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

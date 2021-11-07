@@ -47,7 +47,8 @@ private:
         NOTIFICATION_COL_MATCH,
         NOTIFICATION_COL_REG_EXP,
         NOTIFICATION_COL_SPEECH,
-        NOTIFICATION_COL_COMMAND
+        NOTIFICATION_COL_COMMAND,
+        NOTIFICATION_COL_AUTOTARGET
     };
 
     static std::vector<int> m_columnMap;

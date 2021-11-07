@@ -14,14 +14,43 @@ ADSBDemodSettings:
       format: float
     samplesPerBit:
       type: integer
+    correlateFullPreamble:
+      type: integer
+      description: >
+        Correlate on part or full preamble
+          * 0 - part
+          * 1 - full
+    demodModeS:
+      type: integer
+      description: >
+        Demodulate all mode S frames or just ADS-B
+          * 0 - just ADS-B
+          * 1 - All mode S
+    interpolatorPhaseSteps:
+      type: integer
+      description: Number of phase steps in channel interpolator
+    interpolatorTapsPerPhase:
+      type: number
+      format: float
+      description: Number of taps per phase in channel interpolator
     removeTimeout:
       type: integer
     beastEnabled:
       type: integer
+      description: >
+        Send data to beast server
+          * 0 - Do not send data
+          * 1 - Send data
     beastHost:
       type: string
     beastPort:
       type: integer
+    feedFormat:
+      type: integer
+      description: >
+        Format of sent data
+          * 0 - Beast binary
+          * 1 - Beast index
     logFilename:
       type: string
     logEnabled:
@@ -54,9 +83,14 @@ ADSBDemodReport:
       format: float
     channelSampleRate:
       type: integer
+    targetName:
+      type: string
     targetAzimuth:
       type: number
       format: float
     targetElevation:
+      type: number
+      format: float
+    targetRange:
       type: number
       format: float

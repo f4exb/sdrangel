@@ -36,6 +36,14 @@ SWGADSBDemodSettings::SWGADSBDemodSettings() {
     m_correlation_threshold_isSet = false;
     samples_per_bit = 0;
     m_samples_per_bit_isSet = false;
+    correlate_full_preamble = 0;
+    m_correlate_full_preamble_isSet = false;
+    demod_mode_s = 0;
+    m_demod_mode_s_isSet = false;
+    interpolator_phase_steps = 0;
+    m_interpolator_phase_steps_isSet = false;
+    interpolator_taps_per_phase = 0.0f;
+    m_interpolator_taps_per_phase_isSet = false;
     remove_timeout = 0;
     m_remove_timeout_isSet = false;
     beast_enabled = 0;
@@ -44,6 +52,8 @@ SWGADSBDemodSettings::SWGADSBDemodSettings() {
     m_beast_host_isSet = false;
     beast_port = 0;
     m_beast_port_isSet = false;
+    feed_format = 0;
+    m_feed_format_isSet = false;
     log_filename = nullptr;
     m_log_filename_isSet = false;
     log_enabled = 0;
@@ -80,6 +90,14 @@ SWGADSBDemodSettings::init() {
     m_correlation_threshold_isSet = false;
     samples_per_bit = 0;
     m_samples_per_bit_isSet = false;
+    correlate_full_preamble = 0;
+    m_correlate_full_preamble_isSet = false;
+    demod_mode_s = 0;
+    m_demod_mode_s_isSet = false;
+    interpolator_phase_steps = 0;
+    m_interpolator_phase_steps_isSet = false;
+    interpolator_taps_per_phase = 0.0f;
+    m_interpolator_taps_per_phase_isSet = false;
     remove_timeout = 0;
     m_remove_timeout_isSet = false;
     beast_enabled = 0;
@@ -88,6 +106,8 @@ SWGADSBDemodSettings::init() {
     m_beast_host_isSet = false;
     beast_port = 0;
     m_beast_port_isSet = false;
+    feed_format = 0;
+    m_feed_format_isSet = false;
     log_filename = new QString("");
     m_log_filename_isSet = false;
     log_enabled = 0;
@@ -118,9 +138,14 @@ SWGADSBDemodSettings::cleanup() {
 
 
 
+
+
+
+
     if(beast_host != nullptr) { 
         delete beast_host;
     }
+
 
     if(log_filename != nullptr) { 
         delete log_filename;
@@ -159,6 +184,14 @@ SWGADSBDemodSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&samples_per_bit, pJson["samplesPerBit"], "qint32", "");
     
+    ::SWGSDRangel::setValue(&correlate_full_preamble, pJson["correlateFullPreamble"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&demod_mode_s, pJson["demodModeS"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&interpolator_phase_steps, pJson["interpolatorPhaseSteps"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&interpolator_taps_per_phase, pJson["interpolatorTapsPerPhase"], "float", "");
+    
     ::SWGSDRangel::setValue(&remove_timeout, pJson["removeTimeout"], "qint32", "");
     
     ::SWGSDRangel::setValue(&beast_enabled, pJson["beastEnabled"], "qint32", "");
@@ -166,6 +199,8 @@ SWGADSBDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&beast_host, pJson["beastHost"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&beast_port, pJson["beastPort"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&feed_format, pJson["feedFormat"], "qint32", "");
     
     ::SWGSDRangel::setValue(&log_filename, pJson["logFilename"], "QString", "QString");
     
@@ -215,6 +250,18 @@ SWGADSBDemodSettings::asJsonObject() {
     if(m_samples_per_bit_isSet){
         obj->insert("samplesPerBit", QJsonValue(samples_per_bit));
     }
+    if(m_correlate_full_preamble_isSet){
+        obj->insert("correlateFullPreamble", QJsonValue(correlate_full_preamble));
+    }
+    if(m_demod_mode_s_isSet){
+        obj->insert("demodModeS", QJsonValue(demod_mode_s));
+    }
+    if(m_interpolator_phase_steps_isSet){
+        obj->insert("interpolatorPhaseSteps", QJsonValue(interpolator_phase_steps));
+    }
+    if(m_interpolator_taps_per_phase_isSet){
+        obj->insert("interpolatorTapsPerPhase", QJsonValue(interpolator_taps_per_phase));
+    }
     if(m_remove_timeout_isSet){
         obj->insert("removeTimeout", QJsonValue(remove_timeout));
     }
@@ -226,6 +273,9 @@ SWGADSBDemodSettings::asJsonObject() {
     }
     if(m_beast_port_isSet){
         obj->insert("beastPort", QJsonValue(beast_port));
+    }
+    if(m_feed_format_isSet){
+        obj->insert("feedFormat", QJsonValue(feed_format));
     }
     if(log_filename != nullptr && *log_filename != QString("")){
         toJsonValue(QString("logFilename"), log_filename, obj, QString("QString"));
@@ -302,6 +352,46 @@ SWGADSBDemodSettings::setSamplesPerBit(qint32 samples_per_bit) {
 }
 
 qint32
+SWGADSBDemodSettings::getCorrelateFullPreamble() {
+    return correlate_full_preamble;
+}
+void
+SWGADSBDemodSettings::setCorrelateFullPreamble(qint32 correlate_full_preamble) {
+    this->correlate_full_preamble = correlate_full_preamble;
+    this->m_correlate_full_preamble_isSet = true;
+}
+
+qint32
+SWGADSBDemodSettings::getDemodModeS() {
+    return demod_mode_s;
+}
+void
+SWGADSBDemodSettings::setDemodModeS(qint32 demod_mode_s) {
+    this->demod_mode_s = demod_mode_s;
+    this->m_demod_mode_s_isSet = true;
+}
+
+qint32
+SWGADSBDemodSettings::getInterpolatorPhaseSteps() {
+    return interpolator_phase_steps;
+}
+void
+SWGADSBDemodSettings::setInterpolatorPhaseSteps(qint32 interpolator_phase_steps) {
+    this->interpolator_phase_steps = interpolator_phase_steps;
+    this->m_interpolator_phase_steps_isSet = true;
+}
+
+float
+SWGADSBDemodSettings::getInterpolatorTapsPerPhase() {
+    return interpolator_taps_per_phase;
+}
+void
+SWGADSBDemodSettings::setInterpolatorTapsPerPhase(float interpolator_taps_per_phase) {
+    this->interpolator_taps_per_phase = interpolator_taps_per_phase;
+    this->m_interpolator_taps_per_phase_isSet = true;
+}
+
+qint32
 SWGADSBDemodSettings::getRemoveTimeout() {
     return remove_timeout;
 }
@@ -339,6 +429,16 @@ void
 SWGADSBDemodSettings::setBeastPort(qint32 beast_port) {
     this->beast_port = beast_port;
     this->m_beast_port_isSet = true;
+}
+
+qint32
+SWGADSBDemodSettings::getFeedFormat() {
+    return feed_format;
+}
+void
+SWGADSBDemodSettings::setFeedFormat(qint32 feed_format) {
+    this->feed_format = feed_format;
+    this->m_feed_format_isSet = true;
 }
 
 QString*
@@ -458,6 +558,18 @@ SWGADSBDemodSettings::isSet(){
         if(m_samples_per_bit_isSet){
             isObjectUpdated = true; break;
         }
+        if(m_correlate_full_preamble_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_demod_mode_s_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_interpolator_phase_steps_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_interpolator_taps_per_phase_isSet){
+            isObjectUpdated = true; break;
+        }
         if(m_remove_timeout_isSet){
             isObjectUpdated = true; break;
         }
@@ -468,6 +580,9 @@ SWGADSBDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_beast_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_feed_format_isSet){
             isObjectUpdated = true; break;
         }
         if(log_filename && *log_filename != QString("")){

@@ -706,11 +706,18 @@ margin-bottom: 20px;
     "channelSampleRate" : {
       "type" : "integer"
     },
+    "targetName" : {
+      "type" : "string"
+    },
     "targetAzimuth" : {
       "type" : "number",
       "format" : "float"
     },
     "targetElevation" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "targetRange" : {
       "type" : "number",
       "format" : "float"
     }
@@ -736,17 +743,39 @@ margin-bottom: 20px;
     "samplesPerBit" : {
       "type" : "integer"
     },
+    "correlateFullPreamble" : {
+      "type" : "integer",
+      "description" : "Correlate on part or full preamble\n  * 0 - part\n  * 1 - full\n"
+    },
+    "demodModeS" : {
+      "type" : "integer",
+      "description" : "Demodulate all mode S frames or just ADS-B\n  * 0 - just ADS-B\n  * 1 - All mode S\n"
+    },
+    "interpolatorPhaseSteps" : {
+      "type" : "integer",
+      "description" : "Number of phase steps in channel interpolator"
+    },
+    "interpolatorTapsPerPhase" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Number of taps per phase in channel interpolator"
+    },
     "removeTimeout" : {
       "type" : "integer"
     },
     "beastEnabled" : {
-      "type" : "integer"
+      "type" : "integer",
+      "description" : "Send data to beast server\n  * 0 - Do not send data\n  * 1 - Send data\n"
     },
     "beastHost" : {
       "type" : "string"
     },
     "beastPort" : {
       "type" : "integer"
+    },
+    "feedFormat" : {
+      "type" : "integer",
+      "description" : "Format of sent data\n  * 0 - Beast binary\n  * 1 - Beast index\n"
     },
     "logFilename" : {
       "type" : "string"
@@ -51248,7 +51277,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-11-04T19:20:44.212+01:00
+              Generated 2021-11-07T12:25:19.263+01:00
             </div>
           </div>
       </div>

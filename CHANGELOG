@@ -12,7 +12,7 @@ sdrangel (6.17.3-1) unstable; urgency=medium
   * Add Logging to .csv file for some plugins. Issue #1035. PR #1038
   * Remote sink: fixed socket deletion. Issue #1034
 
-  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 05 Nov 2021 18:05:33 +0100
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 06 Nov 2021 20:15:07 +0100
 
 sdrangel (6.17.2-1) unstable; urgency=medium
 

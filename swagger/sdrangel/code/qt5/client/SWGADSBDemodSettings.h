@@ -54,6 +54,18 @@ public:
     qint32 getSamplesPerBit();
     void setSamplesPerBit(qint32 samples_per_bit);
 
+    qint32 getCorrelateFullPreamble();
+    void setCorrelateFullPreamble(qint32 correlate_full_preamble);
+
+    qint32 getDemodModeS();
+    void setDemodModeS(qint32 demod_mode_s);
+
+    qint32 getInterpolatorPhaseSteps();
+    void setInterpolatorPhaseSteps(qint32 interpolator_phase_steps);
+
+    float getInterpolatorTapsPerPhase();
+    void setInterpolatorTapsPerPhase(float interpolator_taps_per_phase);
+
     qint32 getRemoveTimeout();
     void setRemoveTimeout(qint32 remove_timeout);
 
@@ -65,6 +77,9 @@ public:
 
     qint32 getBeastPort();
     void setBeastPort(qint32 beast_port);
+
+    qint32 getFeedFormat();
+    void setFeedFormat(qint32 feed_format);
 
     QString* getLogFilename();
     void setLogFilename(QString* log_filename);
@@ -112,6 +127,18 @@ private:
     qint32 samples_per_bit;
     bool m_samples_per_bit_isSet;
 
+    qint32 correlate_full_preamble;
+    bool m_correlate_full_preamble_isSet;
+
+    qint32 demod_mode_s;
+    bool m_demod_mode_s_isSet;
+
+    qint32 interpolator_phase_steps;
+    bool m_interpolator_phase_steps_isSet;
+
+    float interpolator_taps_per_phase;
+    bool m_interpolator_taps_per_phase_isSet;
+
     qint32 remove_timeout;
     bool m_remove_timeout_isSet;
 
@@ -123,6 +150,9 @@ private:
 
     qint32 beast_port;
     bool m_beast_port_isSet;
+
+    qint32 feed_format;
+    bool m_feed_format_isSet;
 
     QString* log_filename;
     bool m_log_filename_isSet;

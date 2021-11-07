@@ -75,6 +75,7 @@ struct ADSBDemodSettings
         QString m_speech;
         QString m_command;
         QRegularExpression m_regularExpression;
+        bool m_autoTarget;
 
         NotificationSettings();
         void updateRegularExpression();

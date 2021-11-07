@@ -63,6 +63,7 @@ void ADSBDemodNotificationDialog::accept()
         notificationSettings->m_regExp = ui->table->item(i, NOTIFICATION_COL_REG_EXP)->data(Qt::DisplayRole).toString().trimmed();
         notificationSettings->m_speech = ui->table->item(i, NOTIFICATION_COL_SPEECH)->data(Qt::DisplayRole).toString().trimmed();
         notificationSettings->m_command = ui->table->item(i, NOTIFICATION_COL_COMMAND)->data(Qt::DisplayRole).toString().trimmed();
+        notificationSettings->m_autoTarget = ((QCheckBox *) ui->table->cellWidget(i, NOTIFICATION_COL_AUTOTARGET))->isChecked();
         notificationSettings->updateRegularExpression();
         m_settings->m_notificationSettings.append(notificationSettings);
     }
@@ -76,6 +77,7 @@ void ADSBDemodNotificationDialog::resizeTable()
     dummy.m_regExp = "No emergency and some";
     dummy.m_speech = "${aircraft} ${reg} has entered your airspace";
     dummy.m_command = "/usr/home/sdrangel/myscript ${aircraft} ${reg}";
+    dummy.m_autoTarget = false;
     addRow(&dummy);
     ui->table->resizeColumnsToContents();
     ui->table->selectRow(0);
@@ -103,6 +105,8 @@ void ADSBDemodNotificationDialog::on_remove_clicked()
 void ADSBDemodNotificationDialog::addRow(ADSBDemodSettings::NotificationSettings *settings)
 {
     QComboBox *match = new QComboBox();
+    QCheckBox *autoTarget = new QCheckBox();
+    autoTarget->setChecked(false);
     QWidget *matchWidget = new QWidget();
     QHBoxLayout *pLayout = new QHBoxLayout(matchWidget);
     pLayout->addWidget(match);
@@ -156,6 +160,7 @@ void ADSBDemodNotificationDialog::addRow(ADSBDemodSettings::NotificationSettings
     ui->table->setItem(row, NOTIFICATION_COL_REG_EXP, regExpItem);
     ui->table->setItem(row, NOTIFICATION_COL_SPEECH, speechItem);
     ui->table->setItem(row, NOTIFICATION_COL_COMMAND, commandItem);
+    ui->table->setCellWidget(row, NOTIFICATION_COL_AUTOTARGET, autoTarget);
     ui->table->setSortingEnabled(true);
 }
 

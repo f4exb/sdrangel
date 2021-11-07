@@ -66,6 +66,11 @@
           <string>Command/script to execute when a match is made</string>
          </property>
         </column>
+        <column>
+         <property name="text">
+          <string>Auto target</string>
+         </property>
+        </column>
        </widget>
       </item>
       <item row="5" column="0">

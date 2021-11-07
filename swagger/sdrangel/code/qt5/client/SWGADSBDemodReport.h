@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
@@ -47,11 +48,17 @@ public:
     qint32 getChannelSampleRate();
     void setChannelSampleRate(qint32 channel_sample_rate);
 
+    QString* getTargetName();
+    void setTargetName(QString* target_name);
+
     float getTargetAzimuth();
     void setTargetAzimuth(float target_azimuth);
 
     float getTargetElevation();
     void setTargetElevation(float target_elevation);
+
+    float getTargetRange();
+    void setTargetRange(float target_range);
 
 
     virtual bool isSet() override;
@@ -63,11 +70,17 @@ private:
     qint32 channel_sample_rate;
     bool m_channel_sample_rate_isSet;
 
+    QString* target_name;
+    bool m_target_name_isSet;
+
     float target_azimuth;
     bool m_target_azimuth_isSet;
 
     float target_elevation;
     bool m_target_elevation_isSet;
+
+    float target_range;
+    bool m_target_range_isSet;
 
 };
 

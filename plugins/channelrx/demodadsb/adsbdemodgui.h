@@ -383,6 +383,7 @@ public:
         m_showFreq.append(false);
         m_azimuth.append(az);
         m_elevation.append(el);
+        m_range.append(distance);
         endInsertRows();
     }
 
@@ -397,6 +398,7 @@ public:
             m_showFreq.removeAt(row);
             m_azimuth.removeAt(row);
             m_elevation.removeAt(row);
+            m_range.removeAt(row);
             endRemoveRows();
         }
     }
@@ -411,6 +413,7 @@ public:
             m_showFreq.clear();
             m_azimuth.clear();
             m_elevation.clear();
+            m_range.clear();
             endRemoveRows();
         }
     }
@@ -478,6 +481,7 @@ private:
     QList<bool> m_showFreq;
     QList<float> m_azimuth;
     QList<float> m_elevation;
+    QList<float> m_range;
 };
 
 class ADSBDemodGUI : public ChannelGUI {
@@ -493,7 +497,7 @@ public:
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     void highlightAircraft(Aircraft *aircraft);
     void targetAircraft(Aircraft *aircraft);
-    void target(const QString& name, float az, float el);
+    void target(const QString& name, float az, float el, float range);
     bool setFrequency(float frequency);
     bool useSIUints() { return m_settings.m_siUnits; }
 

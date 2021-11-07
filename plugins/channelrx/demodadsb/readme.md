@@ -92,6 +92,8 @@ When clicked, opens the Notifications Dialog, which allows speech notifications 
 For example, you might want an audible notification when a particularly interesting aircraft is nearby or when an aircraft declares an emergency.
 By running a program such as [cmail](https://www.inveigle.net/cmail/download), e-mail notifications can be sent.
 
+Also you can set the target aircraft to the matching aircraft automatically by checking the box in the "Auto target" column.
+
 Here are a few examples:
 
 ![Notifications Dialog](../../../doc/img/ADSBDemod_plugin_notifications.png)
@@ -138,7 +140,7 @@ In the Speech and Command strings, variables can be used to substitute in data f
 * ${speed}
 * ${heading}
 * ${range}
-- ${azel}
+* ${azel}
 * ${category}
 * ${status}
 * ${squawk}
@@ -146,7 +148,7 @@ In the Speech and Command strings, variables can be used to substitute in data f
 * ${manufacturer}
 * ${owner}
 * ${operator}
-- ${rssi}
+* ${rssi}
 * ${flightstatus}
 * ${departure}
 * ${arrival}

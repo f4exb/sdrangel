@@ -185,6 +185,18 @@ void ADSBDemod::applySettings(const ADSBDemodSettings& settings, bool force)
     if ((settings.m_samplesPerBit != m_settings.m_samplesPerBit) || force) {
         reverseAPIKeys.append("samplesPerBit");
     }
+    if ((settings.m_correlateFullPreamble != m_settings.m_correlateFullPreamble) || force) {
+        reverseAPIKeys.append("correlateFullPreamble");
+    }
+    if ((settings.m_demodModeS != m_settings.m_demodModeS) || force) {
+        reverseAPIKeys.append("demodModeS");
+    }
+    if ((settings.m_interpolatorPhaseSteps != m_settings.m_interpolatorPhaseSteps) || force) {
+        reverseAPIKeys.append("interpolatorPhaseSteps");
+    }
+    if ((settings.m_interpolatorTapsPerPhase != m_settings.m_interpolatorTapsPerPhase) || force) {
+        reverseAPIKeys.append("interpolatorTapsPerPhase");
+    }
     if ((settings.m_removeTimeout != m_settings.m_removeTimeout) || force) {
         reverseAPIKeys.append("removeTimeout");
     }
@@ -196,6 +208,9 @@ void ADSBDemod::applySettings(const ADSBDemodSettings& settings, bool force)
     }
     if ((settings.m_feedPort != m_settings.m_feedPort) || force) {
         reverseAPIKeys.append("beastPort");
+    }
+    if ((settings.m_feedFormat != m_settings.m_feedFormat) || force) {
+        reverseAPIKeys.append("feedFormat");
     }
     if ((settings.m_logFilename != m_settings.m_logFilename) || force) {
         reverseAPIKeys.append("logFilename");
@@ -315,6 +330,18 @@ void ADSBDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("samplesPerBit")) {
         settings.m_samplesPerBit = response.getAdsbDemodSettings()->getSamplesPerBit();
     }
+    if (channelSettingsKeys.contains("correlateFullPreamble")) {
+        settings.m_correlateFullPreamble = response.getAdsbDemodSettings()->getCorrelateFullPreamble() != 0;
+    }
+    if (channelSettingsKeys.contains("demodModeS")) {
+        settings.m_demodModeS = response.getAdsbDemodSettings()->getDemodModeS() != 0;
+    }
+    if (channelSettingsKeys.contains("interpolatorPhaseSteps")) {
+        settings.m_interpolatorPhaseSteps = response.getAdsbDemodSettings()->getInterpolatorPhaseSteps();
+    }
+    if (channelSettingsKeys.contains("interpolatorTapsPerPhase")) {
+        settings.m_interpolatorTapsPerPhase = response.getAdsbDemodSettings()->getInterpolatorTapsPerPhase();
+    }
     if (channelSettingsKeys.contains("removeTimeout")) {
         settings.m_removeTimeout = response.getAdsbDemodSettings()->getRemoveTimeout();
     }
@@ -326,6 +353,9 @@ void ADSBDemod::webapiUpdateChannelSettings(
     }
     if (channelSettingsKeys.contains("beastPort")) {
         settings.m_feedPort = response.getAdsbDemodSettings()->getBeastPort();
+    }
+    if (channelSettingsKeys.contains("feedFormat")) {
+        settings.m_feedFormat = (ADSBDemodSettings::FeedFormat) response.getAdsbDemodSettings()->getFeedFormat();
     }
     if (channelSettingsKeys.contains("logFilename")) {
         settings.m_logFilename = *response.getAdsbDemodSettings()->getLogFilename();
@@ -376,10 +406,15 @@ void ADSBDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
     response.getAdsbDemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
     response.getAdsbDemodSettings()->setCorrelationThreshold(settings.m_correlationThreshold);
     response.getAdsbDemodSettings()->setSamplesPerBit(settings.m_samplesPerBit);
+    response.getAdsbDemodSettings()->setCorrelateFullPreamble(settings.m_correlateFullPreamble ? 1 : 0);
+    response.getAdsbDemodSettings()->setDemodModeS(settings.m_demodModeS ? 1 : 0);
+    response.getAdsbDemodSettings()->setInterpolatorPhaseSteps(settings.m_interpolatorPhaseSteps);
+    response.getAdsbDemodSettings()->setInterpolatorTapsPerPhase(settings.m_interpolatorTapsPerPhase);
     response.getAdsbDemodSettings()->setRemoveTimeout(settings.m_removeTimeout);
     response.getAdsbDemodSettings()->setBeastEnabled(settings.m_feedEnabled ? 1 : 0);
     response.getAdsbDemodSettings()->setBeastHost(new QString(settings.m_feedHost));
     response.getAdsbDemodSettings()->setBeastPort(settings.m_feedPort);
+    response.getAdsbDemodSettings()->setFeedFormat((int) settings.m_feedFormat);
     response.getAdsbDemodSettings()->setRgbColor(settings.m_rgbColor);
     response.getAdsbDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
     response.getAdsbDemodSettings()->setLogEnabled(settings.m_logEnabled);
@@ -412,10 +447,13 @@ void ADSBDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respons
 
     response.getAdsbDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
     response.getAdsbDemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
+
     if (m_targetAzElValid)
     {
+        response.getAdsbDemodReport()->setTargetName(new QString(m_targetName));
         response.getAdsbDemodReport()->setTargetAzimuth(m_targetAzimuth);
         response.getAdsbDemodReport()->setTargetElevation(m_targetElevation);
+        response.getAdsbDemodReport()->setTargetRange(m_targetRange);
     }
 }
 
@@ -443,6 +481,18 @@ void ADSBDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, c
     if (channelSettingsKeys.contains("samplesPerBit") || force) {
         swgADSBDemodSettings->setSamplesPerBit(settings.m_samplesPerBit);
     }
+    if (channelSettingsKeys.contains("correlateFullPreamble") || force) {
+        swgADSBDemodSettings->setCorrelateFullPreamble(settings.m_correlateFullPreamble ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("demodModeS") || force) {
+        swgADSBDemodSettings->setDemodModeS(settings.m_demodModeS ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("interpolatorPhaseSteps") || force) {
+        swgADSBDemodSettings->setInterpolatorPhaseSteps(settings.m_interpolatorPhaseSteps);
+    }
+    if (channelSettingsKeys.contains("interpolatorTapsPerPhase") || force) {
+        swgADSBDemodSettings->setInterpolatorTapsPerPhase(settings.m_interpolatorTapsPerPhase);
+    }
     if (channelSettingsKeys.contains("removeTimeout") || force) {
         swgADSBDemodSettings->setRemoveTimeout(settings.m_removeTimeout);
     }
@@ -454,6 +504,9 @@ void ADSBDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, c
     }
     if (channelSettingsKeys.contains("beastPort") || force) {
         swgADSBDemodSettings->setBeastPort(settings.m_feedPort);
+    }
+    if (channelSettingsKeys.contains("feedFormat") || force) {
+        swgADSBDemodSettings->setFeedFormat((int) settings.m_feedFormat);
     }
     if (channelSettingsKeys.contains("logFilename") || force) {
         swgADSBDemodSettings->setLogFilename(new QString(settings.m_logFilename));
@@ -512,15 +565,18 @@ void ADSBDemod::networkManagerFinished(QNetworkReply *reply)
     reply->deleteLater();
 }
 
-void ADSBDemod::setTarget(const QString& name, float targetAzimuth, float targetElevation)
+void ADSBDemod::setTarget(const QString& name, float targetAzimuth, float targetElevation, float targetRange)
 {
     m_targetAzimuth = targetAzimuth;
     m_targetElevation = targetElevation;
+    m_targetRange = targetRange;
+    m_targetName = name;
     m_targetAzElValid = true;
 
     // Send to Rotator Controllers
     MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
     QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(this, "target");
+
     if (mapMessageQueues)
     {
         QList<MessageQueue*>::iterator it = mapMessageQueues->begin();

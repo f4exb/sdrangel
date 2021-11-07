@@ -438,7 +438,7 @@ bool AirportModel::setData(const QModelIndex &index, const QVariant& value, int 
         else if (idx == m_airports[row]->m_frequencies.size())
         {
             // Set airport as target
-            m_gui->target(m_airports[row]->m_name, m_azimuth[row], m_elevation[row]);
+            m_gui->target(m_airports[row]->m_name, m_azimuth[row], m_elevation[row], m_range[row]);
             emit dataChanged(index, index);
         }
         return true;
@@ -473,7 +473,7 @@ void ADSBDemodGUI::updatePosition(Aircraft *aircraft)
     aircraft->m_rangeItem->setText(QString::number(aircraft->m_range/1000.0, 'f', 1));
     aircraft->m_azElItem->setText(QString("%1/%2").arg(std::round(aircraft->m_azimuth)).arg(std::round(aircraft->m_elevation)));
     if (aircraft == m_trackAircraft)
-        m_adsbDemod->setTarget(aircraft->targetName(), aircraft->m_azimuth, aircraft->m_elevation);
+        m_adsbDemod->setTarget(aircraft->targetName(), aircraft->m_azimuth, aircraft->m_elevation, aircraft->m_range);
 
     // Send to Map feature
     MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
@@ -1230,12 +1230,17 @@ void ADSBDemodGUI::checkStaticNotification(Aircraft *aircraft)
                 if (m_settings.m_notificationSettings[i]->m_regularExpression.match(match).hasMatch())
                 {
                     highlightAircraft(aircraft);
+
                     if (!m_settings.m_notificationSettings[i]->m_speech.isEmpty()) {
                         speechNotification(aircraft, m_settings.m_notificationSettings[i]->m_speech);
                     }
                     if (!m_settings.m_notificationSettings[i]->m_command.isEmpty()) {
                         commandNotification(aircraft, m_settings.m_notificationSettings[i]->m_command);
                     }
+                    if (m_settings.m_notificationSettings[i]->m_autoTarget) {
+                        targetAircraft(aircraft);
+                    }
+
                     aircraft->m_notified = true;
                 }
             }
@@ -1292,12 +1297,17 @@ void ADSBDemodGUI::checkDynamicNotification(Aircraft *aircraft)
                         if (m_settings.m_notificationSettings[i]->m_regularExpression.match(match).hasMatch())
                         {
                             highlightAircraft(aircraft);
+
                             if (!m_settings.m_notificationSettings[i]->m_speech.isEmpty()) {
                                 speechNotification(aircraft, m_settings.m_notificationSettings[i]->m_speech);
                             }
                             if (!m_settings.m_notificationSettings[i]->m_command.isEmpty()) {
                                 commandNotification(aircraft, m_settings.m_notificationSettings[i]->m_command);
                             }
+                            if (m_settings.m_notificationSettings[i]->m_autoTarget) {
+                                targetAircraft(aircraft);
+                            }
+
                             aircraft->m_notified = true;
                         }
                     }
@@ -1951,7 +1961,7 @@ void ADSBDemodGUI::updateAirports()
 }
 
 // Set a static target, such as an airport
-void ADSBDemodGUI::target(const QString& name, float az, float el)
+void ADSBDemodGUI::target(const QString& name, float az, float el, float range)
 {
     if (m_trackAircraft)
     {
@@ -1960,7 +1970,7 @@ void ADSBDemodGUI::target(const QString& name, float az, float el)
         m_aircraftModel.aircraftUpdated(m_trackAircraft);
         m_trackAircraft = nullptr;
     }
-    m_adsbDemod->setTarget(name, az, el);
+    m_adsbDemod->setTarget(name, az, el, range);
 }
 
 void ADSBDemodGUI::targetAircraft(Aircraft *aircraft)
@@ -1976,7 +1986,7 @@ void ADSBDemodGUI::targetAircraft(Aircraft *aircraft)
         // Track this aircraft
         m_trackAircraft = aircraft;
         if (aircraft->m_positionValid)
-            m_adsbDemod->setTarget(aircraft->targetName(), aircraft->m_azimuth, aircraft->m_elevation);
+            m_adsbDemod->setTarget(aircraft->targetName(), aircraft->m_azimuth, aircraft->m_elevation, aircraft->m_range);
         // Change colour of new target
         aircraft->m_isTarget = true;
         m_aircraftModel.aircraftUpdated(aircraft);

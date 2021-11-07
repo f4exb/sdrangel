@@ -231,6 +231,7 @@ QDataStream& operator<<(QDataStream& out, const ADSBDemodSettings::NotificationS
     out << settings->m_regExp;
     out << settings->m_speech;
     out << settings->m_command;
+    out << settings->m_autoTarget;
     return out;
 }
 
@@ -241,6 +242,7 @@ QDataStream& operator>>(QDataStream& in, ADSBDemodSettings::NotificationSettings
     in >> settings->m_regExp;
     in >> settings->m_speech;
     in >> settings->m_command;
+    in >> settings->m_autoTarget;
     settings->updateRegularExpression();
     return in;
 }

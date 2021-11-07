@@ -119,7 +119,7 @@ public:
         m_basebandSink->setMessageQueueToGUI(queue);
     }
 
-    void setTarget(const QString& name, float targetAzimuth, float targetElevation);
+    void setTarget(const QString& name, float targetAzimuth, float targetElevation, float targetRange);
     void clearTarget() { m_targetAzElValid = false; }
 
     uint32_t getNumberOfDeviceStreams() const;
@@ -138,6 +138,8 @@ private:
     bool m_targetAzElValid;
     float m_targetAzimuth;
     float m_targetElevation;
+    float m_targetRange;
+    QString m_targetName;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
