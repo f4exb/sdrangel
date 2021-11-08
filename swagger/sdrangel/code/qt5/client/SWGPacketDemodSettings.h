@@ -45,8 +45,8 @@ public:
     qint64 getInputFrequencyOffset();
     void setInputFrequencyOffset(qint64 input_frequency_offset);
 
-    QString* getMode();
-    void setMode(QString* mode);
+    qint32 getMode();
+    void setMode(qint32 mode);
 
     float getRfBandwidth();
     void setRfBandwidth(float rf_bandwidth);
@@ -100,7 +100,7 @@ private:
     qint64 input_frequency_offset;
     bool m_input_frequency_offset_isSet;
 
-    QString* mode;
+    qint32 mode;
     bool m_mode_isSet;
 
     float rf_bandwidth;

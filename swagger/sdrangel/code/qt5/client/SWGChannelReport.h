@@ -43,6 +43,7 @@
 #include "SWGNFMDemodReport.h"
 #include "SWGNFMModReport.h"
 #include "SWGNoiseFigureReport.h"
+#include "SWGPacketDemodReport.h"
 #include "SWGPacketModReport.h"
 #include "SWGPagerDemodReport.h"
 #include "SWGRadioAstronomyReport.h"
@@ -158,6 +159,9 @@ public:
     SWGRemoteSourceReport* getRemoteSourceReport();
     void setRemoteSourceReport(SWGRemoteSourceReport* remote_source_report);
 
+    SWGPacketDemodReport* getPacketDemodReport();
+    void setPacketDemodReport(SWGPacketDemodReport* packet_demod_report);
+
     SWGPacketModReport* getPacketModReport();
     void setPacketModReport(SWGPacketModReport* packet_mod_report);
 
@@ -272,6 +276,9 @@ private:
 
     SWGRemoteSourceReport* remote_source_report;
     bool m_remote_source_report_isSet;
+
+    SWGPacketDemodReport* packet_demod_report;
+    bool m_packet_demod_report_isSet;
 
     SWGPacketModReport* packet_mod_report;
     bool m_packet_mod_report_isSet;

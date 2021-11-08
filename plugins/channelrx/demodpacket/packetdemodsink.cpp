@@ -136,7 +136,7 @@ void PacketDemodSink::processOneSample(Complex &ci)
         // Look for edge
         if (sample != m_samplePrev)
         {
-            m_syncCount = PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE/m_settings.m_baud/2;
+            m_syncCount = PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE/m_settings.getBaudRate()/2;
         }
         else
         {
@@ -197,7 +197,9 @@ void PacketDemodSink::processOneSample(Complex &ci)
                                 }
                             }
                             else
-                                qDebug() << QString("CRC mismatch: %1 %2").arg(calcCrc, 4, 16,  QLatin1Char('0')).arg(rxCrc, 4, 16, QLatin1Char('0'));
+                                qDebug() << QString("PacketDemodSink::processOneSample: CRC mismatch: %1 %2")
+                                    .arg(calcCrc, 4, 16,  QLatin1Char('0'))
+                                    .arg(rxCrc, 4, 16, QLatin1Char('0'));
                             // Reset state to start receiving next packet
                             m_gotSOP = false;
                             m_bits = 0;
@@ -235,7 +237,7 @@ void PacketDemodSink::processOneSample(Complex &ci)
                         m_bitCount = 0;
                     }
                 }
-                m_syncCount = PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE/m_settings.m_baud;
+                m_syncCount = PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE/m_settings.getBaudRate();
             }
         }
         m_samplePrev = sample;
@@ -307,7 +309,7 @@ void PacketDemodSink::applySettings(const PacketDemodSettings& settings, bool fo
         delete[] m_f1;
         delete[] m_f0;
         delete[] m_corrBuf;
-        m_correlationLength = PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE/settings.m_baud;
+        m_correlationLength = PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE/settings.getBaudRate();
         m_f1 = new Complex[m_correlationLength]();
         m_f0 = new Complex[m_correlationLength]();
         m_corrBuf = new Complex[m_correlationLength]();
@@ -323,8 +325,8 @@ void PacketDemodSink::applySettings(const PacketDemodSettings& settings, bool fo
             f1 += 2.0f*(Real)M_PI*1200.0f/PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE;
         }
 
-        m_lowpassF1.create(301, PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE, settings.m_baud * 1.1f);
-        m_lowpassF0.create(301, PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE, settings.m_baud * 1.1f);
+        m_lowpassF1.create(301, PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE, settings.getBaudRate() * 1.1f);
+        m_lowpassF0.create(301, PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE, settings.getBaudRate() * 1.1f);
         m_samplePrev = 0;
         m_syncCount = 0;
         m_symbolPrev = 0;

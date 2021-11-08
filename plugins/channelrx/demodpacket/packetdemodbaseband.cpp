@@ -168,6 +168,11 @@ void PacketDemodBaseband::applySettings(const PacketDemodSettings& settings, boo
     m_settings = settings;
 }
 
+int PacketDemodBaseband::getChannelSampleRate() const
+{
+    return m_channelizer->getChannelSampleRate();
+}
+
 void PacketDemodBaseband::setBasebandSampleRate(int sampleRate)
 {
     m_channelizer->setBasebandSampleRate(sampleRate);

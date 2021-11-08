@@ -61,6 +61,8 @@ ChannelReport:
       $ref: "http://swgserver:8081/api/swagger/include/RadioClock.yaml#/RadioClockReport"
     RemoteSourceReport:
       $ref: "http://swgserver:8081/api/swagger/include/RemoteSource.yaml#/RemoteSourceReport"
+    PacketDemodReport:
+      $ref: "http://swgserver:8081/api/swagger/include/PacketDemod.yaml#/PacketDemodReport"
     PacketModReport:
       $ref: "http://swgserver:8081/api/swagger/include/PacketMod.yaml#/PacketModReport"
     PagerDemodReport:

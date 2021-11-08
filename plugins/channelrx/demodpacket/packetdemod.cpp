@@ -236,6 +236,9 @@ void PacketDemod::applySettings(const PacketDemodSettings& settings, bool force)
     if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
         reverseAPIKeys.append("inputFrequencyOffset");
     }
+    if ((settings.m_mode != m_settings.m_mode) || force) {
+        reverseAPIKeys.append("mode");
+    }
     if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
         reverseAPIKeys.append("rfBandwidth");
     }
@@ -393,6 +396,17 @@ int PacketDemod::webapiSettingsPutPatch(
     return 200;
 }
 
+int PacketDemod::webapiReportGet(
+            SWGSDRangel::SWGChannelReport& response,
+            QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setPacketDemodReport(new SWGSDRangel::SWGPacketDemodReport());
+    response.getPacketDemodReport()->init();
+    webapiFormatChannelReport(response);
+    return 200;
+}
+
 void PacketDemod::webapiUpdateChannelSettings(
         PacketDemodSettings& settings,
         const QStringList& channelSettingsKeys,
@@ -400,6 +414,9 @@ void PacketDemod::webapiUpdateChannelSettings(
 {
     if (channelSettingsKeys.contains("inputFrequencyOffset")) {
         settings.m_inputFrequencyOffset = response.getPacketDemodSettings()->getInputFrequencyOffset();
+    }
+    if (channelSettingsKeys.contains("mode")) {
+        settings.m_mode = (PacketDemodSettings::Mode) response.getPacketDemodSettings()->getMode();
     }
     if (channelSettingsKeys.contains("fmDeviation")) {
         settings.m_fmDeviation = response.getPacketDemodSettings()->getFmDeviation();
@@ -452,6 +469,7 @@ void PacketDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& r
 {
     response.getPacketDemodSettings()->setFmDeviation(settings.m_fmDeviation);
     response.getPacketDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    response.getPacketDemodSettings()->setMode((int) settings.m_mode);
     response.getPacketDemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
     response.getPacketDemodSettings()->setUdpEnabled(settings.m_udpEnabled);
     response.getPacketDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
@@ -478,6 +496,16 @@ void PacketDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& r
     response.getPacketDemodSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getPacketDemodSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getPacketDemodSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+}
+
+void PacketDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+{
+    double magsqAvg, magsqPeak;
+    int nbMagsqSamples;
+    getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
+
+    response.getPacketDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
+    response.getPacketDemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
 }
 
 void PacketDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const PacketDemodSettings& settings, bool force)
@@ -526,6 +554,9 @@ void PacketDemod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
         swgPacketDemodSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    }
+    if (channelSettingsKeys.contains("mode") || force) {
+        swgPacketDemodSettings->setMode((int) settings.m_mode);
     }
     if (channelSettingsKeys.contains("rfBandwidth") || force) {
         swgPacketDemodSettings->setRfBandwidth(settings.m_rfBandwidth);

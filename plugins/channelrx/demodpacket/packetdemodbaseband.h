@@ -71,6 +71,7 @@ public:
     }
     void setMessageQueueToChannel(MessageQueue *messageQueue) { m_sink.setMessageQueueToChannel(messageQueue); }
     void setBasebandSampleRate(int sampleRate);
+    int getChannelSampleRate() const;
     void setChannel(ChannelAPI *channel);
     double getMagSq() const { return m_sink.getMagSq(); }
     bool isRunning() const { return m_running; }

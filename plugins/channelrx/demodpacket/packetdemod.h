@@ -103,6 +103,10 @@ public:
             SWGSDRangel::SWGChannelSettings& response,
             QString& errorMessage);
 
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGChannelReport& response,
+            QString& errorMessage);
+
     static void webapiFormatChannelSettings(
             SWGSDRangel::SWGChannelSettings& response,
             const PacketDemodSettings& settings);
@@ -150,6 +154,7 @@ private:
         const PacketDemodSettings& settings,
         bool force
     );
+    void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);

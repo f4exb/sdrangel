@@ -3136,6 +3136,9 @@ margin-bottom: 20px;
     "RemoteSourceReport" : {
       "$ref" : "#/definitions/RemoteSourceReport"
     },
+    "PacketDemodReport" : {
+      "$ref" : "#/definitions/PacketDemodReport"
+    },
     "PacketModReport" : {
       "$ref" : "#/definitions/PacketModReport"
     },
@@ -8141,6 +8144,19 @@ margin-bottom: 20px;
   },
   "description" : "PER Tester settings"
 };
+            defs.PacketDemodReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power received in channel (dB)"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "AMDemod"
+};
             defs.PacketDemodSettings = {
   "properties" : {
     "inputFrequencyOffset" : {
@@ -8148,8 +8164,8 @@ margin-bottom: 20px;
       "format" : "int64"
     },
     "mode" : {
-      "type" : "string",
-      "description" : "Transmission mode\n  * \"1200 AFSK\"\n"
+      "type" : "integer",
+      "description" : "Transmission mode\n  * 0 - 1200 AFSK\n"
     },
     "rfBandwidth" : {
       "type" : "number",
@@ -51277,7 +51293,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-11-07T12:25:19.263+01:00
+              Generated 2021-11-08T00:48:24.214+01:00
             </div>
           </div>
       </div>

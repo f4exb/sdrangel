@@ -5,10 +5,10 @@ PacketDemodSettings:
       type: integer
       format: int64
     mode:
-      type: string
+      type: integer
       description: >
         Transmission mode
-          * "1200 AFSK"
+          * 0 - 1200 AFSK
     rfBandwidth:
       type: number
       format: float
@@ -45,4 +45,14 @@ PacketDemodSettings:
     reverseAPIDeviceIndex:
       type: integer
     reverseAPIChannelIndex:
+      type: integer
+
+PacketDemodReport:
+  description: AMDemod
+  properties:
+    channelPowerDB:
+      description: power received in channel (dB)
+      type: number
+      format: float
+    channelSampleRate:
       type: integer

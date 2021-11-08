@@ -61,6 +61,8 @@ ChannelReport:
       $ref: "/doc/swagger/include/RadioClock.yaml#/RadioClockReport"
     RemoteSourceReport:
       $ref: "/doc/swagger/include/RemoteSource.yaml#/RemoteSourceReport"
+    PacketDemodReport:
+      $ref: "/doc/swagger/include/PacketDemod.yaml#/PacketDemodReport"
     PacketModReport:
       $ref: "/doc/swagger/include/PacketMod.yaml#/PacketModReport"
     PagerDemodReport:

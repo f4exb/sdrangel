@@ -187,6 +187,7 @@
 #include "SWGPERTesterActions_aos.h"
 #include "SWGPERTesterReport.h"
 #include "SWGPERTesterSettings.h"
+#include "SWGPacketDemodReport.h"
 #include "SWGPacketDemodSettings.h"
 #include "SWGPacketModActions.h"
 #include "SWGPacketModActions_tx.h"
@@ -1171,6 +1172,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGPERTesterSettings").compare(type) == 0) {
       SWGPERTesterSettings *obj = new SWGPERTesterSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGPacketDemodReport").compare(type) == 0) {
+      SWGPacketDemodReport *obj = new SWGPacketDemodReport();
       obj->init();
       return obj;
     }

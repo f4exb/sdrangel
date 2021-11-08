@@ -30,7 +30,7 @@ SWGPacketDemodSettings::SWGPacketDemodSettings(QString* json) {
 SWGPacketDemodSettings::SWGPacketDemodSettings() {
     input_frequency_offset = 0L;
     m_input_frequency_offset_isSet = false;
-    mode = nullptr;
+    mode = 0;
     m_mode_isSet = false;
     rf_bandwidth = 0.0f;
     m_rf_bandwidth_isSet = false;
@@ -72,7 +72,7 @@ void
 SWGPacketDemodSettings::init() {
     input_frequency_offset = 0L;
     m_input_frequency_offset_isSet = false;
-    mode = new QString("");
+    mode = 0;
     m_mode_isSet = false;
     rf_bandwidth = 0.0f;
     m_rf_bandwidth_isSet = false;
@@ -109,9 +109,7 @@ SWGPacketDemodSettings::init() {
 void
 SWGPacketDemodSettings::cleanup() {
 
-    if(mode != nullptr) { 
-        delete mode;
-    }
+
 
 
 
@@ -150,7 +148,7 @@ void
 SWGPacketDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&input_frequency_offset, pJson["inputFrequencyOffset"], "qint64", "");
     
-    ::SWGSDRangel::setValue(&mode, pJson["mode"], "QString", "QString");
+    ::SWGSDRangel::setValue(&mode, pJson["mode"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rf_bandwidth, pJson["rfBandwidth"], "float", "");
     
@@ -201,8 +199,8 @@ SWGPacketDemodSettings::asJsonObject() {
     if(m_input_frequency_offset_isSet){
         obj->insert("inputFrequencyOffset", QJsonValue(input_frequency_offset));
     }
-    if(mode != nullptr && *mode != QString("")){
-        toJsonValue(QString("mode"), mode, obj, QString("QString"));
+    if(m_mode_isSet){
+        obj->insert("mode", QJsonValue(mode));
     }
     if(m_rf_bandwidth_isSet){
         obj->insert("rfBandwidth", QJsonValue(rf_bandwidth));
@@ -263,12 +261,12 @@ SWGPacketDemodSettings::setInputFrequencyOffset(qint64 input_frequency_offset) {
     this->m_input_frequency_offset_isSet = true;
 }
 
-QString*
+qint32
 SWGPacketDemodSettings::getMode() {
     return mode;
 }
 void
-SWGPacketDemodSettings::setMode(QString* mode) {
+SWGPacketDemodSettings::setMode(qint32 mode) {
     this->mode = mode;
     this->m_mode_isSet = true;
 }
@@ -431,7 +429,7 @@ SWGPacketDemodSettings::isSet(){
         if(m_input_frequency_offset_isSet){
             isObjectUpdated = true; break;
         }
-        if(mode && *mode != QString("")){
+        if(m_mode_isSet){
             isObjectUpdated = true; break;
         }
         if(m_rf_bandwidth_isSet){

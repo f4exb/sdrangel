@@ -29,8 +29,12 @@ class Serializable;
 
 struct PacketDemodSettings
 {
+    enum Mode {
+        ModeAFSK1200
+    };
+
     qint32 m_inputFrequencyOffset;
-    qint32 m_baud;
+    Mode m_mode;
     Real m_rfBandwidth;
     Real m_fmDeviation;
     QString m_filterFrom;
@@ -57,13 +61,14 @@ struct PacketDemodSettings
     int m_columnSizes[PACKETDEMOD_COLUMNS];  //!< Size of the columns in the table
 
     static const int PACKETDEMOD_CHANNEL_BANDWIDTH = 9600;
-    static const int PACKETDEMOD_CHANNEL_SAMPLE_RATE  = 38400; // Must be integer multiple of m_baud=1200
+    static const int PACKETDEMOD_CHANNEL_SAMPLE_RATE  = 38400; // Must be integer multiple of baud rate (x32, x4)
 
     PacketDemodSettings();
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    int getBaudRate() const;
 };
 
 #endif /* INCLUDE_PACKETDEMODSETTINGS_H */
