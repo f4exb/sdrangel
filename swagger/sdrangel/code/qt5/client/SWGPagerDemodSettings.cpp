@@ -30,6 +30,10 @@ SWGPagerDemodSettings::SWGPagerDemodSettings(QString* json) {
 SWGPagerDemodSettings::SWGPagerDemodSettings() {
     baud = 0;
     m_baud_isSet = false;
+    decode = 0;
+    m_decode_isSet = false;
+    reverse = 0;
+    m_reverse_isSet = false;
     input_frequency_offset = 0L;
     m_input_frequency_offset_isSet = false;
     rf_bandwidth = 0.0f;
@@ -76,6 +80,10 @@ void
 SWGPagerDemodSettings::init() {
     baud = 0;
     m_baud_isSet = false;
+    decode = 0;
+    m_decode_isSet = false;
+    reverse = 0;
+    m_reverse_isSet = false;
     input_frequency_offset = 0L;
     m_input_frequency_offset_isSet = false;
     rf_bandwidth = 0.0f;
@@ -122,6 +130,8 @@ SWGPagerDemodSettings::cleanup() {
 
 
 
+
+
     if(udp_address != nullptr) { 
         delete udp_address;
     }
@@ -157,6 +167,10 @@ SWGPagerDemodSettings::fromJson(QString &json) {
 void
 SWGPagerDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&baud, pJson["baud"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&decode, pJson["decode"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&reverse, pJson["reverse"], "qint32", "");
     
     ::SWGSDRangel::setValue(&input_frequency_offset, pJson["inputFrequencyOffset"], "qint64", "");
     
@@ -212,6 +226,12 @@ SWGPagerDemodSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(m_baud_isSet){
         obj->insert("baud", QJsonValue(baud));
+    }
+    if(m_decode_isSet){
+        obj->insert("decode", QJsonValue(decode));
+    }
+    if(m_reverse_isSet){
+        obj->insert("reverse", QJsonValue(reverse));
     }
     if(m_input_frequency_offset_isSet){
         obj->insert("inputFrequencyOffset", QJsonValue(input_frequency_offset));
@@ -279,6 +299,26 @@ void
 SWGPagerDemodSettings::setBaud(qint32 baud) {
     this->baud = baud;
     this->m_baud_isSet = true;
+}
+
+qint32
+SWGPagerDemodSettings::getDecode() {
+    return decode;
+}
+void
+SWGPagerDemodSettings::setDecode(qint32 decode) {
+    this->decode = decode;
+    this->m_decode_isSet = true;
+}
+
+qint32
+SWGPagerDemodSettings::getReverse() {
+    return reverse;
+}
+void
+SWGPagerDemodSettings::setReverse(qint32 reverse) {
+    this->reverse = reverse;
+    this->m_reverse_isSet = true;
 }
 
 qint64
@@ -467,6 +507,12 @@ SWGPagerDemodSettings::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_baud_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_decode_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_isSet){
             isObjectUpdated = true; break;
         }
         if(m_input_frequency_offset_isSet){

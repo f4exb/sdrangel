@@ -169,6 +169,11 @@ void PagerDemodBaseband::applySettings(const PagerDemodSettings& settings, bool 
     m_settings = settings;
 }
 
+int PagerDemodBaseband::getChannelSampleRate() const
+{
+    return m_channelizer->getChannelSampleRate();
+}
+
 void PagerDemodBaseband::setBasebandSampleRate(int sampleRate)
 {
     m_channelizer->setBasebandSampleRate(sampleRate);

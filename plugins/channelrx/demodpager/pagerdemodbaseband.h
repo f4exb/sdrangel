@@ -73,6 +73,7 @@ public:
     }
     void setMessageQueueToChannel(MessageQueue *messageQueue) { m_sink.setMessageQueueToChannel(messageQueue); }
     void setBasebandSampleRate(int sampleRate);
+    int getChannelSampleRate() const;
     ScopeVis *getScopeSink() { return &m_scopeSink; }
     void setChannel(ChannelAPI *channel);
     double getMagSq() const { return m_sink.getMagSq(); }

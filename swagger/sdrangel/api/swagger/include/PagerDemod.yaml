@@ -4,6 +4,21 @@ PagerDemodSettings:
     baud:
       description: "Baud rate"
       type: integer
+    decode:
+      type: integer
+      description: >
+        Decode mode
+          * 0 - Standard
+          * 1 - Inverted
+          * 2 - Numeric
+          * 3 - Alphanumeric
+          * 4 - Heuristic
+    reverse:
+      type: integer
+      description: >
+        Whether characters should be reversed, for right-to-left reading order
+          * 0 - Straight
+          * 1 - Reversed
     inputFrequencyOffset:
       type: integer
       format: int64

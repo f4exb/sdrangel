@@ -382,10 +382,11 @@ void PagerDemodSink::processOneSample(Complex &ci)
     m_movingAverage(magsq);
     m_magsq = m_movingAverage.asDouble();
     m_magsqSum += magsq;
-    if (magsq > m_magsqPeak)
-    {
+
+    if (magsq > m_magsqPeak) {
         m_magsqPeak = magsq;
     }
+
     m_magsqCount++;
 
     // Low pass filter
@@ -414,6 +415,7 @@ void PagerDemodSink::processOneSample(Complex &ci)
     {
         // Wait until centre of bit to sample it
         m_syncCount--;
+
         if (m_syncCount <= 0)
         {
             // According to a variety of places on the web, high frequency is a 0, low is 1.
@@ -424,11 +426,12 @@ void PagerDemodSink::processOneSample(Complex &ci)
             } else {
                 m_bit = !data;
             }
-            sample = true;
 
+            sample = true;
             // Store in shift reg. MSB transmitted first
             m_bits = (m_bits << 1) | m_bit;
             m_bitCount++;
+
             if (m_bitCount > 32) {
                 m_bitCount = 32;
             }
@@ -513,9 +516,9 @@ void PagerDemodSink::processOneSample(Complex &ci)
 
     // Save data for edge detection
     m_dataPrev = data;
-
     // Select signals to feed to scope
     Complex scopeSample;
+
     switch (m_settings.m_scopeCh1)
     {
     case 0:
@@ -549,6 +552,7 @@ void PagerDemodSink::processOneSample(Complex &ci)
         scopeSample.real(m_gotSOP);
         break;
     }
+
     switch (m_settings.m_scopeCh2)
     {
     case 0:
@@ -582,6 +586,7 @@ void PagerDemodSink::processOneSample(Complex &ci)
         scopeSample.imag(m_gotSOP);
         break;
     }
+
     sampleToScope(scopeSample);
 
     // Send demod signal to Demod Analzyer feature

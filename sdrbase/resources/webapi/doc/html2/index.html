@@ -8462,6 +8462,14 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Baud rate"
     },
+    "decode" : {
+      "type" : "integer",
+      "description" : "Decode mode\n  * 0 - Standard\n  * 1 - Inverted\n  * 2 - Numeric\n  * 3 - Alphanumeric\n  * 4 - Heuristic\n"
+    },
+    "reverse" : {
+      "type" : "integer",
+      "description" : "Whether characters should be reversed, for right-to-left reading order\n  * 0 - Straight\n  * 1 - Reversed\n"
+    },
     "inputFrequencyOffset" : {
       "type" : "integer",
       "format" : "int64"
@@ -51293,7 +51301,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-11-08T00:48:24.214+01:00
+              Generated 2021-11-08T23:01:01.926+01:00
             </div>
           </div>
       </div>

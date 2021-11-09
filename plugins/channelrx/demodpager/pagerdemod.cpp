@@ -31,6 +31,7 @@
 #include "dsp/dspcommands.h"
 #include "device/deviceapi.h"
 #include "feature/feature.h"
+#include "util/db.h"
 #include "maincore.h"
 
 MESSAGE_CLASS_DEFINITION(PagerDemod::MsgConfigurePagerDemod, Message)
@@ -206,6 +207,12 @@ void PagerDemod::applySettings(const PagerDemodSettings& settings, bool force)
     if ((settings.m_baud != m_settings.m_baud) || force) {
         reverseAPIKeys.append("baud");
     }
+    if ((settings.m_decode != m_settings.m_decode) || force) {
+        reverseAPIKeys.append("decode");
+    }
+    if ((settings.m_reverse != m_settings.m_reverse) || force) {
+        reverseAPIKeys.append("reverse");
+    }
     if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
         reverseAPIKeys.append("inputFrequencyOffset");
     }
@@ -366,6 +373,17 @@ int PagerDemod::webapiSettingsPutPatch(
     return 200;
 }
 
+int PagerDemod::webapiReportGet(
+            SWGSDRangel::SWGChannelReport& response,
+            QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setPagerDemodReport(new SWGSDRangel::SWGPagerDemodReport());
+    response.getPagerDemodReport()->init();
+    webapiFormatChannelReport(response);
+    return 200;
+}
+
 void PagerDemod::webapiUpdateChannelSettings(
         PagerDemodSettings& settings,
         const QStringList& channelSettingsKeys,
@@ -373,6 +391,12 @@ void PagerDemod::webapiUpdateChannelSettings(
 {
     if (channelSettingsKeys.contains("baud")) {
         settings.m_baud = response.getPagerDemodSettings()->getBaud();
+    }
+    if (channelSettingsKeys.contains("decode")) {
+        settings.m_decode = (PagerDemodSettings::Decode) response.getPagerDemodSettings()->getDecode();
+    }
+    if (channelSettingsKeys.contains("reverse")) {
+        settings.m_reverse = response.getPagerDemodSettings()->getReverse() != 0;
     }
     if (channelSettingsKeys.contains("inputFrequencyOffset")) {
         settings.m_inputFrequencyOffset = response.getPagerDemodSettings()->getInputFrequencyOffset();
@@ -427,6 +451,8 @@ void PagerDemod::webapiUpdateChannelSettings(
 void PagerDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const PagerDemodSettings& settings)
 {
     response.getPagerDemodSettings()->setBaud(settings.m_baud);
+    response.getPagerDemodSettings()->setDecode((int) settings.m_decode);
+    response.getPagerDemodSettings()->setReverse(settings.m_reverse ? 1 : 0);
     response.getPagerDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     response.getPagerDemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
     response.getPagerDemodSettings()->setFmDeviation(settings.m_fmDeviation);
@@ -455,6 +481,16 @@ void PagerDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& re
     response.getPagerDemodSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getPagerDemodSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getPagerDemodSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+}
+
+void PagerDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+{
+    double magsqAvg, magsqPeak;
+    int nbMagsqSamples;
+    getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
+
+    response.getPagerDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
+    response.getPagerDemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
 }
 
 void PagerDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const PagerDemodSettings& settings, bool force)
@@ -500,6 +536,12 @@ void PagerDemod::webapiFormatChannelSettings(
 
     if (channelSettingsKeys.contains("baud") || force) {
         swgPagerDemodSettings->setBaud(settings.m_baud);
+    }
+    if (channelSettingsKeys.contains("decode") || force) {
+        swgPagerDemodSettings->setDecode((int) settings.m_decode);
+    }
+    if (channelSettingsKeys.contains("reverse") || force) {
+        swgPagerDemodSettings->setReverse(settings.m_reverse ? 1 : 0);
     }
     if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
         swgPagerDemodSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);

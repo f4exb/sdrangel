@@ -45,6 +45,12 @@ public:
     qint32 getBaud();
     void setBaud(qint32 baud);
 
+    qint32 getDecode();
+    void setDecode(qint32 decode);
+
+    qint32 getReverse();
+    void setReverse(qint32 reverse);
+
     qint64 getInputFrequencyOffset();
     void setInputFrequencyOffset(qint64 input_frequency_offset);
 
@@ -105,6 +111,12 @@ public:
 private:
     qint32 baud;
     bool m_baud_isSet;
+
+    qint32 decode;
+    bool m_decode_isSet;
+
+    qint32 reverse;
+    bool m_reverse_isSet;
 
     qint64 input_frequency_offset;
     bool m_input_frequency_offset_isSet;
