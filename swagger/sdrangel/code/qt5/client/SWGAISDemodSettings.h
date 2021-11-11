@@ -42,6 +42,9 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGAISDemodSettings* fromJson(QString &jsonString) override;
 
+    qint32 getBaud();
+    void setBaud(qint32 baud);
+
     qint64 getInputFrequencyOffset();
     void setInputFrequencyOffset(qint64 input_frequency_offset);
 
@@ -100,6 +103,9 @@ public:
     virtual bool isSet() override;
 
 private:
+    qint32 baud;
+    bool m_baud_isSet;
+
     qint64 input_frequency_offset;
     bool m_input_frequency_offset_isSet;
 

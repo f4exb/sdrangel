@@ -32,8 +32,6 @@ AISModSettings:
       type: integer
     rampRange:
       type: integer
-    lpfTaps:
-      type: integer
     rfNoise:
       type: integer
       description: >
@@ -46,14 +44,30 @@ AISModSettings:
         Boolean
           * 0 - off
           * 1 - on
-    spectrumRate:
+    msgType:
       type: integer
-    msgId:
-      type: integer
+      description: >
+        Message Type
+          * 0 - Scheduled position report
+          * 1 - Assigned position report
+          * 2 - Special position report
+          * 3 - Base station report
     mmsi:
       type: string
     status:
       type: integer
+      description: >
+        Ship status
+          * 0 - Under way using engine
+          * 1 - At anchor
+          * 2 - Not under command
+          * 3 - Restricted manoeuvrability
+          * 4 - Constrained by her draught
+          * 4 - Moored
+          * 5 - Aground
+          * 6 - Engaged in fishing
+          * 7 - Under way sailing
+          * 8 - Not defined
     latitude:
       type: number
       format: float
@@ -117,9 +131,14 @@ AISModActions:
   description: AISMod
   properties:
     tx:
-      type: object
-      properties:
-        data:
-          type: string
+      type: integer
       description: >
-        Transmit a message
+        Transmit stored message
+          * 0 - do nothing
+          * 1 - transmit
+    encode:
+      type: integer
+      description: >
+        Encode message from discrete data
+          * 0 - do nothing
+          * 1 - encode

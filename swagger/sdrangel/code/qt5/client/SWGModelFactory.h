@@ -22,7 +22,6 @@
 #include "SWGAISDemodReport.h"
 #include "SWGAISDemodSettings.h"
 #include "SWGAISModActions.h"
-#include "SWGAISModActions_tx.h"
 #include "SWGAISModReport.h"
 #include "SWGAISModSettings.h"
 #include "SWGAISSettings.h"
@@ -347,11 +346,6 @@ namespace SWGSDRangel {
     }
     if(QString("SWGAISModActions").compare(type) == 0) {
       SWGAISModActions *obj = new SWGAISModActions();
-      obj->init();
-      return obj;
-    }
-    if(QString("SWGAISModActions_tx").compare(type) == 0) {
-      SWGAISModActions_tx *obj = new SWGAISModActions_tx();
       obj->init();
       return obj;
     }

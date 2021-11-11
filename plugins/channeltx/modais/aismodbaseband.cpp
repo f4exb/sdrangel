@@ -151,17 +151,16 @@ bool AISModBaseband::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (AISMod::MsgTXAISMod::match(cmd))
+    else if (AISMod::MsgTx::match(cmd)) // immediate transmission of stored message
     {
-        AISMod::MsgTXAISMod& tx = (AISMod::MsgTXAISMod&) cmd;
-        m_source.addTXPacket(tx.m_data);
-
+        m_source.transmit();
         return true;
     }
-    else if (AISMod::MsgTXPacketBytes::match(cmd))
+    else if (AISMod::MsgTXPacketBytes::match(cmd)) // This is packet from UDP with immediate transmission
     {
         AISMod::MsgTXPacketBytes& tx = (AISMod::MsgTXPacketBytes&) cmd;
         m_source.addTXPacket(tx.m_data);
+        m_source.transmit();
 
         return true;
     }

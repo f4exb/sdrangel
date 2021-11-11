@@ -22,7 +22,6 @@
 #include <QJsonObject>
 
 
-#include "SWGAISModActions_tx.h"
 
 #include "SWGObject.h"
 #include "export.h"
@@ -42,15 +41,21 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGAISModActions* fromJson(QString &jsonString) override;
 
-    SWGAISModActions_tx* getTx();
-    void setTx(SWGAISModActions_tx* tx);
+    qint32 getTx();
+    void setTx(qint32 tx);
+
+    qint32 getEncode();
+    void setEncode(qint32 encode);
 
 
     virtual bool isSet() override;
 
 private:
-    SWGAISModActions_tx* tx;
+    qint32 tx;
     bool m_tx_isSet;
+
+    qint32 encode;
+    bool m_encode_isSet;
 
 };
 

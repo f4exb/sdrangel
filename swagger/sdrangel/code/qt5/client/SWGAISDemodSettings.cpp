@@ -28,6 +28,8 @@ SWGAISDemodSettings::SWGAISDemodSettings(QString* json) {
 }
 
 SWGAISDemodSettings::SWGAISDemodSettings() {
+    baud = 0;
+    m_baud_isSet = false;
     input_frequency_offset = 0L;
     m_input_frequency_offset_isSet = false;
     rf_bandwidth = 0.0f;
@@ -72,6 +74,8 @@ SWGAISDemodSettings::~SWGAISDemodSettings() {
 
 void
 SWGAISDemodSettings::init() {
+    baud = 0;
+    m_baud_isSet = false;
     input_frequency_offset = 0L;
     m_input_frequency_offset_isSet = false;
     rf_bandwidth = 0.0f;
@@ -117,6 +121,7 @@ SWGAISDemodSettings::cleanup() {
 
 
 
+
     if(udp_address != nullptr) { 
         delete udp_address;
     }
@@ -151,6 +156,8 @@ SWGAISDemodSettings::fromJson(QString &json) {
 
 void
 SWGAISDemodSettings::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&baud, pJson["baud"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&input_frequency_offset, pJson["inputFrequencyOffset"], "qint64", "");
     
     ::SWGSDRangel::setValue(&rf_bandwidth, pJson["rfBandwidth"], "float", "");
@@ -203,6 +210,9 @@ SWGAISDemodSettings::asJson ()
 QJsonObject*
 SWGAISDemodSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(m_baud_isSet){
+        obj->insert("baud", QJsonValue(baud));
+    }
     if(m_input_frequency_offset_isSet){
         obj->insert("inputFrequencyOffset", QJsonValue(input_frequency_offset));
     }
@@ -259,6 +269,16 @@ SWGAISDemodSettings::asJsonObject() {
     }
 
     return obj;
+}
+
+qint32
+SWGAISDemodSettings::getBaud() {
+    return baud;
+}
+void
+SWGAISDemodSettings::setBaud(qint32 baud) {
+    this->baud = baud;
+    this->m_baud_isSet = true;
 }
 
 qint64
@@ -446,6 +466,9 @@ bool
 SWGAISDemodSettings::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(m_baud_isSet){
+            isObjectUpdated = true; break;
+        }
         if(m_input_frequency_offset_isSet){
             isObjectUpdated = true; break;
         }

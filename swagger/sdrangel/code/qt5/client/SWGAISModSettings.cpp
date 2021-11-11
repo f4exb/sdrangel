@@ -52,16 +52,12 @@ SWGAISModSettings::SWGAISModSettings() {
     m_ramp_down_bits_isSet = false;
     ramp_range = 0;
     m_ramp_range_isSet = false;
-    lpf_taps = 0;
-    m_lpf_taps_isSet = false;
     rf_noise = 0;
     m_rf_noise_isSet = false;
     write_to_file = 0;
     m_write_to_file_isSet = false;
-    spectrum_rate = 0;
-    m_spectrum_rate_isSet = false;
-    msg_id = 0;
-    m_msg_id_isSet = false;
+    msg_type = 0;
+    m_msg_type_isSet = false;
     mmsi = nullptr;
     m_mmsi_isSet = false;
     status = 0;
@@ -136,16 +132,12 @@ SWGAISModSettings::init() {
     m_ramp_down_bits_isSet = false;
     ramp_range = 0;
     m_ramp_range_isSet = false;
-    lpf_taps = 0;
-    m_lpf_taps_isSet = false;
     rf_noise = 0;
     m_rf_noise_isSet = false;
     write_to_file = 0;
     m_write_to_file_isSet = false;
-    spectrum_rate = 0;
-    m_spectrum_rate_isSet = false;
-    msg_id = 0;
-    m_msg_id_isSet = false;
+    msg_type = 0;
+    m_msg_type_isSet = false;
     mmsi = new QString("");
     m_mmsi_isSet = false;
     status = 0;
@@ -192,8 +184,6 @@ SWGAISModSettings::init() {
 
 void
 SWGAISModSettings::cleanup() {
-
-
 
 
 
@@ -277,15 +267,11 @@ SWGAISModSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&ramp_range, pJson["rampRange"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&lpf_taps, pJson["lpfTaps"], "qint32", "");
-    
     ::SWGSDRangel::setValue(&rf_noise, pJson["rfNoise"], "qint32", "");
     
     ::SWGSDRangel::setValue(&write_to_file, pJson["writeToFile"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&spectrum_rate, pJson["spectrumRate"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&msg_id, pJson["msgId"], "qint32", "");
+    ::SWGSDRangel::setValue(&msg_type, pJson["msgType"], "qint32", "");
     
     ::SWGSDRangel::setValue(&mmsi, pJson["mmsi"], "QString", "QString");
     
@@ -381,20 +367,14 @@ SWGAISModSettings::asJsonObject() {
     if(m_ramp_range_isSet){
         obj->insert("rampRange", QJsonValue(ramp_range));
     }
-    if(m_lpf_taps_isSet){
-        obj->insert("lpfTaps", QJsonValue(lpf_taps));
-    }
     if(m_rf_noise_isSet){
         obj->insert("rfNoise", QJsonValue(rf_noise));
     }
     if(m_write_to_file_isSet){
         obj->insert("writeToFile", QJsonValue(write_to_file));
     }
-    if(m_spectrum_rate_isSet){
-        obj->insert("spectrumRate", QJsonValue(spectrum_rate));
-    }
-    if(m_msg_id_isSet){
-        obj->insert("msgId", QJsonValue(msg_id));
+    if(m_msg_type_isSet){
+        obj->insert("msgType", QJsonValue(msg_type));
     }
     if(mmsi != nullptr && *mmsi != QString("")){
         toJsonValue(QString("mmsi"), mmsi, obj, QString("QString"));
@@ -584,16 +564,6 @@ SWGAISModSettings::setRampRange(qint32 ramp_range) {
 }
 
 qint32
-SWGAISModSettings::getLpfTaps() {
-    return lpf_taps;
-}
-void
-SWGAISModSettings::setLpfTaps(qint32 lpf_taps) {
-    this->lpf_taps = lpf_taps;
-    this->m_lpf_taps_isSet = true;
-}
-
-qint32
 SWGAISModSettings::getRfNoise() {
     return rf_noise;
 }
@@ -614,23 +584,13 @@ SWGAISModSettings::setWriteToFile(qint32 write_to_file) {
 }
 
 qint32
-SWGAISModSettings::getSpectrumRate() {
-    return spectrum_rate;
+SWGAISModSettings::getMsgType() {
+    return msg_type;
 }
 void
-SWGAISModSettings::setSpectrumRate(qint32 spectrum_rate) {
-    this->spectrum_rate = spectrum_rate;
-    this->m_spectrum_rate_isSet = true;
-}
-
-qint32
-SWGAISModSettings::getMsgId() {
-    return msg_id;
-}
-void
-SWGAISModSettings::setMsgId(qint32 msg_id) {
-    this->msg_id = msg_id;
-    this->m_msg_id_isSet = true;
+SWGAISModSettings::setMsgType(qint32 msg_type) {
+    this->msg_type = msg_type;
+    this->m_msg_type_isSet = true;
 }
 
 QString*
@@ -884,19 +844,13 @@ SWGAISModSettings::isSet(){
         if(m_ramp_range_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_lpf_taps_isSet){
-            isObjectUpdated = true; break;
-        }
         if(m_rf_noise_isSet){
             isObjectUpdated = true; break;
         }
         if(m_write_to_file_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_spectrum_rate_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_msg_id_isSet){
+        if(m_msg_type_isSet){
             isObjectUpdated = true; break;
         }
         if(mmsi && *mmsi != QString("")){

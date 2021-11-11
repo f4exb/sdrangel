@@ -920,6 +920,10 @@ margin-bottom: 20px;
 };
             defs.AISDemodSettings = {
   "properties" : {
+    "baud" : {
+      "type" : "integer",
+      "description" : "baud rate (nominal is 9600)"
+    },
     "inputFrequencyOffset" : {
       "type" : "integer",
       "format" : "int64"
@@ -990,18 +994,15 @@ margin-bottom: 20px;
             defs.AISModActions = {
   "properties" : {
     "tx" : {
-      "$ref" : "#/definitions/AISModActions_tx"
+      "type" : "integer",
+      "description" : "Transmit stored message\n  * 0 - do nothing\n  * 1 - transmit\n"
+    },
+    "encode" : {
+      "type" : "integer",
+      "description" : "Encode message from discrete data\n  * 0 - do nothing\n  * 1 - encode\n"
     }
   },
   "description" : "AISMod"
-};
-            defs.AISModActions_tx = {
-  "properties" : {
-    "data" : {
-      "type" : "string"
-    }
-  },
-  "description" : "Transmit a message\n"
 };
             defs.AISModReport = {
   "properties" : {
@@ -1061,9 +1062,6 @@ margin-bottom: 20px;
     "rampRange" : {
       "type" : "integer"
     },
-    "lpfTaps" : {
-      "type" : "integer"
-    },
     "rfNoise" : {
       "type" : "integer",
       "description" : "Boolean\n  * 0 - off\n  * 1 - on\n"
@@ -1072,17 +1070,16 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Boolean\n  * 0 - off\n  * 1 - on\n"
     },
-    "spectrumRate" : {
-      "type" : "integer"
-    },
-    "msgId" : {
-      "type" : "integer"
+    "msgType" : {
+      "type" : "integer",
+      "description" : "Message Type\n  * 0 - Scheduled position report\n  * 1 - Assigned position report\n  * 2 - Special position report\n  * 3 - Base station report\n"
     },
     "mmsi" : {
       "type" : "string"
     },
     "status" : {
-      "type" : "integer"
+      "type" : "integer",
+      "description" : "Ship status\n  * 0 - Under way using engine\n  * 1 - At anchor\n  * 2 - Not under command\n  * 3 - Restricted manoeuvrability\n  * 4 - Constrained by her draught\n  * 4 - Moored\n  * 5 - Aground\n  * 6 - Engaged in fishing\n  * 7 - Under way sailing\n  * 8 - Not defined\n"
     },
     "latitude" : {
       "type" : "number",
@@ -51301,7 +51298,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-11-08T23:01:01.926+01:00
+              Generated 2021-11-11T23:23:22.877+01:00
             </div>
           </div>
       </div>

@@ -1,6 +1,9 @@
 AISDemodSettings:
   description: AISDemod
   properties:
+    baud:
+      type: integer
+      description: baud rate (nominal is 9600)
     inputFrequencyOffset:
       type: integer
       format: int64

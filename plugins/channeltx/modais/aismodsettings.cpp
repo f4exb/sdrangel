@@ -32,7 +32,7 @@ AISModSettings::AISModSettings()
 void AISModSettings::resetToDefaults()
 {
     m_inputFrequencyOffset = 0;
-    m_baud = 9600;
+    m_baud = 9600; // nominal value
     m_rfBandwidth = 25000.0f; // 12.5k for narrow, 25k for wide (narrow is obsolete)
     m_fmDeviation = 4800.0f; // To give modulation index of 0.5 for 9600 baud
     m_gain = -1.0f; // To avoid overflow, which results in out-of-band RF
@@ -45,9 +45,9 @@ void AISModSettings::resetToDefaults()
     m_rampRange = 60;
     m_rfNoise = false;
     m_writeToFile = false;
-    m_msgId = 1;
+    m_msgType = MsgTypeScheduledPositionReport;
     m_mmsi = "0000000000";
-    m_status = 0;
+    m_status = StatusUnderWayUsingEngine;
     m_latitude = 0.0f;
     m_longitude = 0.0f;
     m_course = 0.0f;
@@ -91,9 +91,41 @@ bool AISModSettings::setMode(QString mode)
     }
 }
 
+Real AISModSettings::getRfBandwidth(int modeIndex)
+{
+    if (modeIndex == 0) { // Narrow
+        return 12500.0f;
+    } else { // Wide or other
+        return 25000.0f;
+    }
+}
+
+Real AISModSettings::getFMDeviation(int modeIndex)
+{
+    if (modeIndex == 0) { // Narrow
+        return m_baud * 0.25;
+    } else { // Wide or other
+        return m_baud * 0.5;
+    }
+}
+
+float AISModSettings::getBT(int modeIndex)
+{
+    if (modeIndex == 0) { // Narrow
+        return 0.3f;
+    } else { // Wide or other
+        return 0.4f;
+    }
+}
+
 QString AISModSettings::getMode() const
 {
     return QString("%1 %2 %3").arg(m_rfBandwidth).arg(m_fmDeviation).arg(m_bt);
+}
+
+int AISModSettings::getMsgId() const
+{
+    return ((int) m_msgType) + 1;
 }
 
 QByteArray AISModSettings::serialize() const
@@ -114,9 +146,9 @@ QByteArray AISModSettings::serialize() const
     s.writeS32(12, m_rampRange);
     s.writeBool(14, m_rfNoise);
     s.writeBool(15, m_writeToFile);
-    s.writeS32(17, m_msgId);
+    s.writeS32(17, (int) m_msgType);
     s.writeString(18, m_mmsi);
-    s.writeS32(19, m_status);
+    s.writeS32(19, (int) m_status);
     s.writeFloat(20, m_latitude);
     s.writeFloat(21, m_longitude);
     s.writeFloat(22, m_course);
@@ -174,9 +206,11 @@ bool AISModSettings::deserialize(const QByteArray& data)
         d.readS32(12, &m_rampRange, 8);
         d.readBool(14, &m_rfNoise, false);
         d.readBool(15, &m_writeToFile, false);
-        d.readS32(17, &m_msgId, 1);
+        d.readS32(17, &tmp, 0);
+        m_msgType = (MsgType) tmp;
         d.readString(18, &m_mmsi, "0000000000");
-        d.readS32(19, &m_status, 0);
+        d.readS32(19, &tmp, 0);
+        m_status = (Status) tmp;
         d.readFloat(20, &m_latitude, 0.0f);
         d.readFloat(21, &m_longitude, 0.0f);
         d.readFloat(22, &m_course, 0.0f);

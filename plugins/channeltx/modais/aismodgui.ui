@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>350</width>
+    <width>437</width>
     <height>925</height>
    </rect>
   </property>
@@ -42,7 +42,7 @@
     <rect>
      <x>2</x>
      <y>2</y>
-     <width>341</width>
+     <width>431</width>
      <height>271</height>
     </rect>
    </property>
@@ -994,7 +994,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="txButton">
+       <widget class="QPushButton" name="txButton">
         <property name="toolTip">
          <string>Press to transmit the message</string>
         </property>
@@ -1012,7 +1012,7 @@
     <rect>
      <x>0</x>
      <y>290</y>
-     <width>351</width>
+     <width>431</width>
      <height>141</height>
     </rect>
    </property>
@@ -1055,7 +1055,7 @@
     <rect>
      <x>0</x>
      <y>450</y>
-     <width>351</width>
+     <width>431</width>
      <height>331</height>
     </rect>
    </property>
@@ -1104,7 +1104,7 @@
     <rect>
      <x>0</x>
      <y>790</y>
-     <width>351</width>
+     <width>431</width>
      <height>311</height>
     </rect>
    </property>

@@ -45,7 +45,9 @@
 #include "aismod.h"
 
 MESSAGE_CLASS_DEFINITION(AISMod::MsgConfigureAISMod, Message)
-MESSAGE_CLASS_DEFINITION(AISMod::MsgTXAISMod, Message)
+MESSAGE_CLASS_DEFINITION(AISMod::MsgReportData, Message)
+MESSAGE_CLASS_DEFINITION(AISMod::MsgTx, Message)
+MESSAGE_CLASS_DEFINITION(AISMod::MsgEncode, Message)
 MESSAGE_CLASS_DEFINITION(AISMod::MsgTXPacketBytes, Message)
 
 const char* const AISMod::m_channelIdURI = "sdrangel.channel.modais";
@@ -117,13 +119,19 @@ bool AISMod::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (MsgTXAISMod::match(cmd))
+    else if (MsgTx::match(cmd))
     {
         // Forward a copy to baseband
-        MsgTXAISMod* rep = new MsgTXAISMod((MsgTXAISMod&)cmd);
-        qDebug() << "AISMod::handleMessage: MsgTXAISMod";
+        MsgTx* rep = new MsgTx((MsgTx&)cmd);
+        qDebug() << "AISMod::handleMessage: MsgTx";
         m_basebandSource->getInputMessageQueue()->push(rep);
 
+        return true;
+    }
+    else if (MsgEncode::match(cmd))
+    {
+        qDebug() << "AISMod::handleMessage: MsgEncode";
+        encode();
         return true;
     }
     else if (DSPSignalNotification::match(cmd))
@@ -151,6 +159,118 @@ bool AISMod::handleMessage(const Message& cmd)
 ScopeVis *AISMod::getScopeSink()
 {
     return m_basebandSource->getScopeSink();
+}
+
+// Convert decimal degrees to 1/10000 minutes
+int AISMod::degToMinFracs(float decimal)
+{
+    return std::round(decimal * 60.0f * 10000.0f);
+}
+
+void AISMod::encode()
+{
+    unsigned char bytes[168/8];
+    int mmsi;
+    int latitude;
+    int longitude;
+
+    mmsi = m_settings.m_mmsi.toInt();
+
+    latitude = degToMinFracs(m_settings.m_latitude);
+    longitude = degToMinFracs(m_settings.m_longitude);
+
+    if (m_settings.getMsgId() == 4)
+    {
+        // Base station report
+        QDateTime currentDateTime = QDateTime::currentDateTimeUtc();
+        QDate currentDate = currentDateTime.date();
+        QTime currentTime = currentDateTime.time();
+
+        int year = currentDate.year();
+        int month = currentDate.month();
+        int day = currentDate.day();
+        int hour = currentTime.hour();
+        int minute = currentTime.minute();
+        int second = currentTime.second();
+
+        bytes[0] = (m_settings.getMsgId() << 2); // Repeat indicator = 0
+        bytes[1] = (mmsi >> 22) & 0xff;
+        bytes[2] = (mmsi >> 14) & 0xff;
+        bytes[3] = (mmsi >> 6) & 0xff;
+        bytes[4] = ((mmsi & 0x3f) << 2) | ((year >> 12) & 0x3);
+        bytes[5] = (year >> 4) & 0xff;
+        bytes[6] = ((year & 0xf) << 4) | month;
+        bytes[7] = (day << 3) | ((hour >> 2) & 0x7);
+        bytes[8] = ((hour & 0x3) << 6) | minute;
+        bytes[9] = (second << 2) | (0 << 1) | ((longitude >> 27) & 1);
+        bytes[10] = (longitude >> 19) & 0xff;
+        bytes[11] = (longitude >> 11) & 0xff;
+        bytes[12] = (longitude >> 3) & 0xff;
+        bytes[13] = ((longitude & 0x7) << 5) | ((latitude >> 22) & 0x1f);
+        bytes[14] = (latitude >> 14) & 0xff;
+        bytes[15] = (latitude >> 6) & 0xff;
+        bytes[16] = ((latitude & 0x3f) << 2);
+        bytes[17] = 0;
+        bytes[18] = 0;
+        bytes[19] = 0;
+        bytes[20] = 0;
+    }
+    else
+    {
+        // Position report
+        int status;
+        int rateOfTurn = 0x80; // Not available as not currently in GUI
+        int speedOverGround;
+        int courseOverGround;
+        int timestamp;
+
+        timestamp = QDateTime::currentDateTimeUtc().time().second();
+
+        if (m_settings.m_speed >= 102.2)
+            speedOverGround = 1022;
+        else
+            speedOverGround = std::round(m_settings.m_speed * 10.0);
+
+        courseOverGround = std::floor(m_settings.m_course * 10.0);
+
+        if (m_settings.m_status == AISModSettings::StatusNotDefined) // Not defined (last in combo box)
+            status = 15;
+        else
+            status = (int) m_settings.m_status;
+
+        bytes[0] = (m_settings.getMsgId() << 2); // Repeat indicator = 0
+
+        bytes[1] = (mmsi >> 22) & 0xff;
+        bytes[2] = (mmsi >> 14) & 0xff;
+        bytes[3] = (mmsi >> 6) & 0xff;
+        bytes[4] = ((mmsi & 0x3f) << 2) | (status >> 2);
+
+        bytes[5] = ((status & 0x3) << 6) | ((rateOfTurn >> 2) & 0x3f);
+        bytes[6] = ((rateOfTurn & 0x3) << 6) | ((speedOverGround >> 4) & 0x3f);
+        bytes[7] = ((speedOverGround & 0xf) << 4) | (0 << 3) | ((longitude >> 25) & 0x7); // Position accuracy = 0
+        bytes[8] = (longitude >> 17) & 0xff;
+        bytes[9] = (longitude >> 9) & 0xff;
+        bytes[10] = (longitude >> 1) & 0xff;
+        bytes[11] = ((longitude & 0x1) << 7) | ((latitude >> 20) & 0x7f);
+        bytes[12] = (latitude >> 12) & 0xff;
+        bytes[13] = (latitude >> 4) & 0xff;
+        bytes[14] = ((latitude & 0xf) << 4) | ((courseOverGround >> 8) & 0xf);
+        bytes[15] = courseOverGround & 0xff;
+        bytes[16] = ((m_settings.m_heading >> 1) & 0xff);
+        bytes[17] = ((m_settings.m_heading & 0x1) << 7) | ((timestamp & 0x3f) << 1);
+        bytes[18] = 0;
+        bytes[19] = 0;
+        bytes[20] = 0;
+    }
+
+    QByteArray ba((const char *)bytes, sizeof(bytes));
+    m_settings.m_data = ba.toHex();
+
+    if (getMessageQueueToGUI())
+    {
+        MsgReportData *msg = MsgReportData::create(m_settings.m_data);
+        getMessageQueueToGUI()->push(msg);
+    }
 }
 
 void AISMod::applySettings(const AISModSettings& settings, bool force)
@@ -197,6 +317,10 @@ void AISMod::applySettings(const AISModSettings& settings, bool force)
         reverseAPIKeys.append("repeat");
     }
 
+    if ((settings.m_baud != m_settings.m_baud) || force) {
+        reverseAPIKeys.append("baud");
+    }
+
     if ((settings.m_repeatDelay != m_settings.m_repeatDelay) || force) {
         reverseAPIKeys.append("repeatDelay");
     }
@@ -225,8 +349,8 @@ void AISMod::applySettings(const AISModSettings& settings, bool force)
         reverseAPIKeys.append("writeToFile");
     }
 
-    if ((settings.m_msgId != m_settings.m_msgId) || force) {
-        reverseAPIKeys.append("msgId");
+    if ((settings.m_msgType != m_settings.m_msgType) || force) {
+        reverseAPIKeys.append("msgType");
     }
 
     if ((settings.m_mmsi != m_settings.m_mmsi) || force) {
@@ -426,6 +550,9 @@ void AISMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("repeat")) {
         settings.m_repeat = response.getAisModSettings()->getRepeat() != 0;
     }
+    if (channelSettingsKeys.contains("baud")) {
+        settings.m_baud = response.getAisModSettings()->getBaud();
+    }
     if (channelSettingsKeys.contains("repeatDelay")) {
         settings.m_repeatDelay = response.getAisModSettings()->getRepeatDelay();
     }
@@ -447,11 +574,14 @@ void AISMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("writeToFile")) {
         settings.m_writeToFile = response.getAisModSettings()->getWriteToFile() != 0;
     }
+    if (channelSettingsKeys.contains("msgType")) {
+        settings.m_msgType = (AISModSettings::MsgType) response.getAisModSettings()->getMsgType();
+    }
     if (channelSettingsKeys.contains("mmsi")) {
         settings.m_mmsi = *response.getAisModSettings()->getMmsi();
     }
     if (channelSettingsKeys.contains("status")) {
-        settings.m_status = response.getAisModSettings()->getStatus();
+        settings.m_status = (AISModSettings::Status) response.getAisModSettings()->getStatus();
     }
     if (channelSettingsKeys.contains("latitude")) {
         settings.m_latitude = response.getAisModSettings()->getLatitude();
@@ -532,23 +662,25 @@ int AISMod::webapiActionsPost(
 
     if (swgAISModActions)
     {
+        if (channelActionsKeys.contains("encode"))
+        {
+            if (swgAISModActions->getEncode() != 0)
+            {
+                AISMod::MsgEncode *msg = AISMod::MsgEncode::create();
+                getInputMessageQueue()->push(msg);
+            }
+
+            return 202;
+        }
         if (channelActionsKeys.contains("tx"))
         {
-            SWGSDRangel::SWGAISModActions_tx* tx = swgAISModActions->getTx();
-            QString *dataP = tx->getData();
-            if (dataP)
+            if (swgAISModActions->getTx() != 0)
             {
-                QString data(*dataP);
-
-                AISMod::MsgTXAISMod *msg = AISMod::MsgTXAISMod::create(data);
+                AISMod::MsgTx *msg = AISMod::MsgTx::create();
                 m_basebandSource->getInputMessageQueue()->push(msg);
-                return 202;
             }
-            else
-            {
-                errorMessage = "Message must contain data";
-                return 400;
-            }
+
+            return 202;
         }
         else
         {
@@ -571,6 +703,7 @@ void AISMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
     response.getAisModSettings()->setRfBandwidth(settings.m_rfBandwidth);
     response.getAisModSettings()->setGain(settings.m_gain);
     response.getAisModSettings()->setChannelMute(settings.m_channelMute ? 1 : 0);
+    response.getAisModSettings()->setBaud(settings.m_baud);
     response.getAisModSettings()->setRepeat(settings.m_repeat ? 1 : 0);
     response.getAisModSettings()->setRepeatDelay(settings.m_repeatDelay);
     response.getAisModSettings()->setRepeatCount(settings.m_repeatCount);
@@ -579,13 +712,14 @@ void AISMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
     response.getAisModSettings()->setRampRange(settings.m_rampRange);
     response.getAisModSettings()->setRfNoise(settings.m_rfNoise ? 1 : 0);
     response.getAisModSettings()->setWriteToFile(settings.m_writeToFile ? 1 : 0);
+    response.getAisModSettings()->setMsgType((int) settings.m_msgType);
 
     if (response.getAisModSettings()->getMmsi()) {
         *response.getAisModSettings()->getMmsi() = settings.m_mmsi;
     } else {
         response.getAisModSettings()->setMmsi(new QString(settings.m_mmsi));
     }
-    response.getAisModSettings()->setStatus(settings.m_status);
+    response.getAisModSettings()->setStatus((int) settings.m_status);
     response.getAisModSettings()->setLatitude(settings.m_latitude);
     response.getAisModSettings()->setLongitude(settings.m_longitude);
     response.getAisModSettings()->setCourse(settings.m_course);
@@ -709,6 +843,9 @@ void AISMod::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("channelMute") || force) {
         swgAISModSettings->setChannelMute(settings.m_channelMute ? 1 : 0);
     }
+    if (channelSettingsKeys.contains("baud") || force) {
+        swgAISModSettings->setBaud(settings.m_baud);
+    }
     if (channelSettingsKeys.contains("repeat") || force) {
         swgAISModSettings->setRepeat(settings.m_repeat ? 1 : 0);
     }
@@ -733,11 +870,14 @@ void AISMod::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("writeToFile")) {
         swgAISModSettings->setWriteToFile(settings.m_writeToFile ? 1 : 0);
     }
+    if (channelSettingsKeys.contains("msgType")) {
+        swgAISModSettings->setMsgType((int) settings.m_msgType);
+    }
     if (channelSettingsKeys.contains("mmsi")) {
         swgAISModSettings->setMmsi(new QString(settings.m_mmsi));
     }
     if (channelSettingsKeys.contains("status")) {
-        swgAISModSettings->setStatus(settings.m_status);
+        swgAISModSettings->setStatus((int) settings.m_status);
     }
     if (channelSettingsKeys.contains("latitude")) {
         swgAISModSettings->setLatitude(settings.m_latitude);

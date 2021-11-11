@@ -27,6 +27,26 @@ class Serializable;
 
 struct AISModSettings
 {
+    enum Status {
+        StatusUnderWayUsingEngine,
+        StatusAtAnchor,
+        StatusNotUnderCommand,
+        StatusRestrictedManoeuverability,
+        StatusConstrainedByHerDraught,
+        StatusMoored,
+        StatusAground,
+        StatusEngagedInFishing,
+        StatusUnderWaySailing,
+        StatusNotDefined
+    };
+
+    enum MsgType {
+        MsgTypeScheduledPositionReport,
+        MsgTypeAssignedPositionReport,
+        MsgTypeSpecialPositionReport,
+        MsgBaseStationReport
+    };
+
     static const int infinitePackets = -1;
 
     qint64 m_inputFrequencyOffset;
@@ -43,9 +63,9 @@ struct AISModSettings
     int m_rampRange;
     bool m_rfNoise;
     bool m_writeToFile;
-    int m_msgId;
+    MsgType m_msgType;
     QString m_mmsi;
-    int m_status;
+    Status m_status;
     float m_latitude;
     float m_longitude;
     float m_course;
@@ -78,6 +98,10 @@ struct AISModSettings
     bool deserialize(const QByteArray& data);
     bool setMode(QString mode);
     QString getMode() const;
+    int getMsgId() const;
+    Real getRfBandwidth(int modeIndex);
+    Real getFMDeviation(int modeIndex);
+    float getBT(int modeIndex);
 };
 
 #endif /* PLUGINS_CHANNELTX_MODAIS_AISMODSETTINGS_H */

@@ -78,20 +78,14 @@ public:
     qint32 getRampRange();
     void setRampRange(qint32 ramp_range);
 
-    qint32 getLpfTaps();
-    void setLpfTaps(qint32 lpf_taps);
-
     qint32 getRfNoise();
     void setRfNoise(qint32 rf_noise);
 
     qint32 getWriteToFile();
     void setWriteToFile(qint32 write_to_file);
 
-    qint32 getSpectrumRate();
-    void setSpectrumRate(qint32 spectrum_rate);
-
-    qint32 getMsgId();
-    void setMsgId(qint32 msg_id);
+    qint32 getMsgType();
+    void setMsgType(qint32 msg_type);
 
     QString* getMmsi();
     void setMmsi(QString* mmsi);
@@ -196,20 +190,14 @@ private:
     qint32 ramp_range;
     bool m_ramp_range_isSet;
 
-    qint32 lpf_taps;
-    bool m_lpf_taps_isSet;
-
     qint32 rf_noise;
     bool m_rf_noise_isSet;
 
     qint32 write_to_file;
     bool m_write_to_file_isSet;
 
-    qint32 spectrum_rate;
-    bool m_spectrum_rate_isSet;
-
-    qint32 msg_id;
-    bool m_msg_id_isSet;
+    qint32 msg_type;
+    bool m_msg_type_isSet;
 
     QString* mmsi;
     bool m_mmsi_isSet;

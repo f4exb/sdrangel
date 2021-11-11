@@ -28,8 +28,10 @@ SWGAISModActions::SWGAISModActions(QString* json) {
 }
 
 SWGAISModActions::SWGAISModActions() {
-    tx = nullptr;
+    tx = 0;
     m_tx_isSet = false;
+    encode = 0;
+    m_encode_isSet = false;
 }
 
 SWGAISModActions::~SWGAISModActions() {
@@ -38,15 +40,16 @@ SWGAISModActions::~SWGAISModActions() {
 
 void
 SWGAISModActions::init() {
-    tx = new SWGAISModActions_tx();
+    tx = 0;
     m_tx_isSet = false;
+    encode = 0;
+    m_encode_isSet = false;
 }
 
 void
 SWGAISModActions::cleanup() {
-    if(tx != nullptr) { 
-        delete tx;
-    }
+
+
 }
 
 SWGAISModActions*
@@ -60,7 +63,9 @@ SWGAISModActions::fromJson(QString &json) {
 
 void
 SWGAISModActions::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&tx, pJson["tx"], "SWGAISModActions_tx", "SWGAISModActions_tx");
+    ::SWGSDRangel::setValue(&tx, pJson["tx"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&encode, pJson["encode"], "qint32", "");
     
 }
 
@@ -78,21 +83,34 @@ SWGAISModActions::asJson ()
 QJsonObject*
 SWGAISModActions::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if((tx != nullptr) && (tx->isSet())){
-        toJsonValue(QString("tx"), tx, obj, QString("SWGAISModActions_tx"));
+    if(m_tx_isSet){
+        obj->insert("tx", QJsonValue(tx));
+    }
+    if(m_encode_isSet){
+        obj->insert("encode", QJsonValue(encode));
     }
 
     return obj;
 }
 
-SWGAISModActions_tx*
+qint32
 SWGAISModActions::getTx() {
     return tx;
 }
 void
-SWGAISModActions::setTx(SWGAISModActions_tx* tx) {
+SWGAISModActions::setTx(qint32 tx) {
     this->tx = tx;
     this->m_tx_isSet = true;
+}
+
+qint32
+SWGAISModActions::getEncode() {
+    return encode;
+}
+void
+SWGAISModActions::setEncode(qint32 encode) {
+    this->encode = encode;
+    this->m_encode_isSet = true;
 }
 
 
@@ -100,7 +118,10 @@ bool
 SWGAISModActions::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(tx && tx->isSet()){
+        if(m_tx_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_encode_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

@@ -233,6 +233,9 @@ void AISDemod::applySettings(const AISDemodSettings& settings, bool force)
 
     QList<QString> reverseAPIKeys;
 
+    if ((settings.m_baud != m_settings.m_baud) || force) {
+        reverseAPIKeys.append("baud");
+    }
     if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
         reverseAPIKeys.append("inputFrequencyOffset");
     }
@@ -404,6 +407,9 @@ void AISDemod::webapiUpdateChannelSettings(
         const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings& response)
 {
+    if (channelSettingsKeys.contains("baud")) {
+        settings.m_baud = response.getAisDemodSettings()->getBaud();
+    }
     if (channelSettingsKeys.contains("inputFrequencyOffset")) {
         settings.m_inputFrequencyOffset = response.getAisDemodSettings()->getInputFrequencyOffset();
     }
@@ -462,6 +468,7 @@ void AISDemod::webapiUpdateChannelSettings(
 
 void AISDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const AISDemodSettings& settings)
 {
+    response.getAisDemodSettings()->setBaud(settings.m_baud);
     response.getAisDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     response.getAisDemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
     response.getAisDemodSettings()->setFmDeviation(settings.m_fmDeviation);
@@ -535,6 +542,9 @@ void AISDemod::webapiFormatChannelSettings(
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
+    if (channelSettingsKeys.contains("baud") || force) {
+        swgAISDemodSettings->setBaud(settings.m_baud);
+    }
     if (channelSettingsKeys.contains("fmDeviation") || force) {
         swgAISDemodSettings->setFmDeviation(settings.m_fmDeviation);
     }

@@ -66,22 +66,49 @@ public:
         { }
     };
 
-    class MsgTXAISMod : public Message {
+    class MsgReportData : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        static MsgTXAISMod* create(QString data)
-        {
-            return new MsgTXAISMod(data);
+        static MsgReportData* create(const QString& data) {
+            return new MsgReportData(data);
         }
+        const QString& getData() const { return m_data; }
 
+    private:
         QString m_data;
 
-   private:
-
-        MsgTXAISMod(QString data) :
+        MsgReportData(const QString& data) :
             Message(),
             m_data(data)
+        {}
+    };
+
+    class MsgTx : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgTx* create() {
+            return new MsgTx();
+        }
+
+   private:
+        MsgTx() :
+            Message()
+        { }
+    };
+
+    class MsgEncode : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgEncode* create() {
+            return new MsgEncode();
+        }
+
+   private:
+        MsgEncode() :
+            Message()
         { }
     };
 
@@ -89,8 +116,7 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        static MsgTXPacketBytes* create(QByteArray data)
-        {
+        static MsgTXPacketBytes* create(const QByteArray& data) {
             return new MsgTXPacketBytes(data);
         }
 
@@ -98,7 +124,7 @@ public:
 
    private:
 
-        MsgTXPacketBytes(QByteArray data) :
+        MsgTXPacketBytes(const QByteArray& data) :
             Message(),
             m_data(data)
         { }
@@ -165,6 +191,7 @@ public:
     double getMagSq() const;
     void setLevelMeter(QObject *levelMeter);
     uint32_t getNumberOfDeviceStreams() const;
+    void encode();
 
     static const char* const m_channelIdURI;
     static const char* const m_channelId;
@@ -201,6 +228,7 @@ private:
     );
     void openUDP(const AISModSettings& settings);
     void closeUDP();
+    static int degToMinFracs(float decimal);
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);

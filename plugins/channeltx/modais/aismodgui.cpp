@@ -88,6 +88,13 @@ bool AISModGUI::handleMessage(const Message& message)
         blockApplySettings(false);
         return true;
     }
+    else if (AISMod::MsgReportData::match(message))
+    {
+        const AISMod::MsgReportData& report = (AISMod::MsgReportData&) message;
+        m_settings.m_data = report.getData();
+        ui->message->setText(m_settings.m_data);
+        return true;
+    }
     else
     {
         return false;
@@ -104,8 +111,9 @@ void AISModGUI::channelMarkerChangedByCursor()
 void AISModGUI::handleSourceMessages()
 {
     Message* message;
+    MessageQueue *messageQueue = getInputMessageQueue();
 
-    while ((message = getInputMessageQueue()->pop()) != 0)
+    while ((message = messageQueue->pop()) != 0)
     {
         if (handleMessage(*message))
         {
@@ -123,13 +131,16 @@ void AISModGUI::on_deltaFrequency_changed(qint64 value)
 
 void AISModGUI::on_mode_currentIndexChanged(int value)
 {
-    QString mode = ui->mode->currentText();
 
     // If m_doApplySettings is set, we are here from a call to displaySettings,
     // so we only want to display the current settings, not update them
     // as though a user had selected a new mode
     if (m_doApplySettings)
-        m_settings.setMode(mode);
+    {
+        m_settings.m_rfBandwidth = m_settings.getRfBandwidth(value);
+        m_settings.m_fmDeviation = m_settings.getFMDeviation(value);
+        m_settings.m_bt = m_settings.getBT(value);
+    }
 
     ui->rfBWText->setText(QString("%1k").arg(m_settings.m_rfBandwidth / 1000.0, 0, 'f', 1));
     ui->rfBW->setValue(m_settings.m_rfBandwidth / 100.0);
@@ -138,10 +149,6 @@ void AISModGUI::on_mode_currentIndexChanged(int value)
     ui->btText->setText(QString("%1").arg(m_settings.m_bt, 0, 'f', 1));
     ui->bt->setValue(m_settings.m_bt * 10);
     applySettings();
-
-    // Remove custom mode when deselected, as we no longer know how to set it
-    if (value < 2)
-        ui->mode->removeItem(2);
 }
 
 void AISModGUI::on_rfBW_valueChanged(int value)
@@ -196,12 +203,13 @@ void AISModGUI::on_txButton_clicked()
 
 void AISModGUI::on_message_returnPressed()
 {
-    transmit();
+    m_settings.m_data = ui->message->text();
+    applySettings();
 }
 
 void AISModGUI::on_msgId_currentIndexChanged(int index)
 {
-    m_settings.m_msgId = index + 1;
+    m_settings.m_msgType = (AISModSettings::MsgType) index;
     applySettings();
 }
 
@@ -213,7 +221,7 @@ void AISModGUI::on_mmsi_editingFinished()
 
 void AISModGUI::on_status_currentIndexChanged(int index)
 {
-    m_settings.m_status = index;
+    m_settings.m_status = (AISModSettings::Status) index;
     applySettings();
 }
 
@@ -253,114 +261,11 @@ void AISModGUI::on_message_editingFinished()
     applySettings();
 }
 
-// Convert decimal degrees to 1/10000 minutes
-static int degToMinFracs(float decimal)
-{
-    return std::round(decimal * 60.0f * 10000.0f);
-}
-
-// Encode the message specified by the GUI controls in to a hex string and put in message field
+// Encode the message specified in individual settings in to a hex string (data settings) and put in message field
 void AISModGUI::on_encode_clicked()
 {
-    unsigned char bytes[168/8];
-    int mmsi;
-    int latitude;
-    int longitude;
-
-    mmsi = m_settings.m_mmsi.toInt();
-
-    latitude = degToMinFracs(m_settings.m_latitude);
-    longitude = degToMinFracs(m_settings.m_longitude);
-
-    if (m_settings.m_msgId == 4)
-    {
-        // Base station report
-        QDateTime currentDateTime = QDateTime::currentDateTimeUtc();
-        QDate currentDate = currentDateTime.date();
-        QTime currentTime = currentDateTime.time();
-
-        int year = currentDate.year();
-        int month = currentDate.month();
-        int day = currentDate.day();
-        int hour = currentTime.hour();
-        int minute = currentTime.minute();
-        int second = currentTime.second();
-
-        bytes[0] = (m_settings.m_msgId << 2); // Repeat indicator = 0
-        bytes[1] = (mmsi >> 22) & 0xff;
-        bytes[2] = (mmsi >> 14) & 0xff;
-        bytes[3] = (mmsi >> 6) & 0xff;
-        bytes[4] = ((mmsi & 0x3f) << 2) | ((year >> 12) & 0x3);
-        bytes[5] = (year >> 4) & 0xff;
-        bytes[6] = ((year & 0xf) << 4) | month;
-        bytes[7] = (day << 3) | ((hour >> 2) & 0x7);
-        bytes[8] = ((hour & 0x3) << 6) | minute;
-        bytes[9] = (second << 2) | (0 << 1) | ((longitude >> 27) & 1);
-        bytes[10] = (longitude >> 19) & 0xff;
-        bytes[11] = (longitude >> 11) & 0xff;
-        bytes[12] = (longitude >> 3) & 0xff;
-        bytes[13] = ((longitude & 0x7) << 5) | ((latitude >> 22) & 0x1f);
-        bytes[14] = (latitude >> 14) & 0xff;
-        bytes[15] = (latitude >> 6) & 0xff;
-        bytes[16] = ((latitude & 0x3f) << 2);
-        bytes[17] = 0;
-        bytes[18] = 0;
-        bytes[19] = 0;
-        bytes[20] = 0;
-    }
-    else
-    {
-        // Position report
-        int status;
-        int rateOfTurn = 0x80; // Not available as not currently in GUI
-        int speedOverGround;
-        int courseOverGround;
-        int timestamp;
-
-        timestamp = QDateTime::currentDateTimeUtc().time().second();
-
-        if (m_settings.m_speed >= 102.2)
-            speedOverGround = 1022;
-        else
-            speedOverGround = std::round(m_settings.m_speed * 10.0);
-
-        courseOverGround = std::floor(m_settings.m_course * 10.0);
-
-        if (m_settings.m_status == 9) // Not defined (last in combo box)
-            status = 15;
-        else
-            status = m_settings.m_status;
-
-        bytes[0] = (m_settings.m_msgId << 2); // Repeat indicator = 0
-
-        bytes[1] = (mmsi >> 22) & 0xff;
-        bytes[2] = (mmsi >> 14) & 0xff;
-        bytes[3] = (mmsi >> 6) & 0xff;
-        bytes[4] = ((mmsi & 0x3f) << 2) | (status >> 2);
-
-        bytes[5] = ((status & 0x3) << 6) | ((rateOfTurn >> 2) & 0x3f);
-        bytes[6] = ((rateOfTurn & 0x3) << 6) | ((speedOverGround >> 4) & 0x3f);
-        bytes[7] = ((speedOverGround & 0xf) << 4) | (0 << 3) | ((longitude >> 25) & 0x7); // Position accuracy = 0
-        bytes[8] = (longitude >> 17) & 0xff;
-        bytes[9] = (longitude >> 9) & 0xff;
-        bytes[10] = (longitude >> 1) & 0xff;
-        bytes[11] = ((longitude & 0x1) << 7) | ((latitude >> 20) & 0x7f);
-        bytes[12] = (latitude >> 12) & 0xff;
-        bytes[13] = (latitude >> 4) & 0xff;
-        bytes[14] = ((latitude & 0xf) << 4) | ((courseOverGround >> 8) & 0xf);
-        bytes[15] = courseOverGround & 0xff;
-        bytes[16] = ((m_settings.m_heading >> 1) & 0xff);
-        bytes[17] = ((m_settings.m_heading & 0x1) << 7) | ((timestamp & 0x3f) << 1);
-        bytes[18] = 0;
-        bytes[19] = 0;
-        bytes[20] = 0;
-    }
-
-    QByteArray ba((const char *)bytes, sizeof(bytes));
-    ui->message->setText(ba.toHex());
-
-    m_settings.m_data = ui->message->text();
-    applySettings();
+    AISMod::MsgEncode *msg = AISMod::MsgEncode::create();
+    m_aisMod->getInputMessageQueue()->push(msg);
 }
 
 void AISModGUI::on_repeat_toggled(bool checked)
@@ -383,11 +288,11 @@ void AISModGUI::repeatSelect()
 void AISModGUI::txSettingsSelect()
 {
     AISModTXSettingsDialog dialog(m_settings.m_rampUpBits, m_settings.m_rampDownBits,
-                                        m_settings.m_rampRange,
-                                        m_settings.m_baud,
-                                        m_settings.m_symbolSpan,
-                                        m_settings.m_rfNoise,
-                                        m_settings.m_writeToFile);
+        m_settings.m_rampRange,
+        m_settings.m_baud,
+        m_settings.m_symbolSpan,
+        m_settings.m_rfNoise,
+        m_settings.m_writeToFile);
     if (dialog.exec() == QDialog::Accepted)
     {
         m_settings.m_rampUpBits = dialog.m_rampUpBits;
@@ -577,9 +482,8 @@ AISModGUI::~AISModGUI()
 
 void AISModGUI::transmit()
 {
-    QString data = ui->message->text();
-    ui->transmittedText->appendPlainText(data + "\n");
-    AISMod::MsgTXAISMod *msg = AISMod::MsgTXAISMod::create(data);
+    ui->transmittedText->appendPlainText(m_settings.m_data);
+    AISMod::MsgTx *msg = AISMod::MsgTx::create();
     m_aisMod->getInputMessageQueue()->push(msg);
 }
 
@@ -613,17 +517,6 @@ void AISModGUI::displaySettings()
     blockApplySettings(true);
 
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
-    if ((m_settings.m_rfBandwidth == 12500.0f) && (m_settings.m_bt == 0.3f))
-        ui->mode->setCurrentIndex(0);
-    else if ((m_settings.m_rfBandwidth == 25000.0f) && (m_settings.m_bt == 0.4f))
-        ui->mode->setCurrentIndex(1);
-    else
-    {
-        ui->mode->removeItem(2);
-        ui->mode->addItem(m_settings.getMode());
-        ui->mode->setCurrentIndex(2);
-    }
-
     ui->rfBWText->setText(QString("%1k").arg(m_settings.m_rfBandwidth / 1000.0, 0, 'f', 1));
     ui->rfBW->setValue(m_settings.m_rfBandwidth / 100.0);
 
@@ -643,9 +536,9 @@ void AISModGUI::displaySettings()
     ui->channelMute->setChecked(m_settings.m_channelMute);
     ui->repeat->setChecked(m_settings.m_repeat);
 
-    ui->msgId->setCurrentIndex(m_settings.m_msgId - 1);
+    ui->msgId->setCurrentIndex((int) m_settings.m_msgType);
     ui->mmsi->setText(m_settings.m_mmsi);
-    ui->status->setCurrentIndex(m_settings.m_status);
+    ui->status->setCurrentIndex((int) m_settings.m_status);
     ui->latitude->setValue(m_settings.m_latitude);
     ui->longitude->setValue(m_settings.m_longitude);
     ui->course->setValue(m_settings.m_course);

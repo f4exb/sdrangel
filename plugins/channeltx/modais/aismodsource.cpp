@@ -307,14 +307,23 @@ void AISModSource::calculateLevel(Real& sample)
 
 void AISModSource::applySettings(const AISModSettings& settings, bool force)
 {
-    if ((settings.m_bt != m_settings.m_bt) || (settings.m_symbolSpan != m_settings.m_symbolSpan) || (settings.m_baud != m_settings.m_baud) || force)
+    if ((settings.m_bt != m_settings.m_bt)
+     || (settings.m_symbolSpan != m_settings.m_symbolSpan)
+     || (settings.m_baud != m_settings.m_baud) || force)
     {
         qDebug() << "AISModSource::applySettings: Recreating pulse shaping filter: "
                 << " SampleRate:" << AISModSettings::AISMOD_SAMPLE_RATE
                 << " bt: " << settings.m_bt
                 << " symbolSpan: " << settings.m_symbolSpan
-                << " baud:" << settings.m_baud;
+                << " baud:" << settings.m_baud
+                << " data:" << settings.m_data;
         m_pulseShape.create(settings.m_bt, settings.m_symbolSpan, AISModSettings::AISMOD_SAMPLE_RATE/settings.m_baud);
+    }
+
+    if ((settings.m_data != m_settings.m_data) || force)
+    {
+        qDebug() << "AISModSource::applySettings: new data: " << settings.m_data;
+        addTXPacket(settings.m_data);
     }
 
     m_settings = settings;
@@ -410,6 +419,7 @@ void AISModSource::initTX()
     m_bitIdx = 0;
     m_bitCount = m_bitCountTotal; // Reset to allow retransmission
     m_nrziBit = 1;
+
     if (m_settings.m_rampUpBits == 0)
     {
         m_state = tx;
@@ -448,9 +458,12 @@ void AISModSource::addTXPacket(QByteArray data)
     // Flag
     *p++ = AIS_FLAG;
     crc_start = p;
+
     // Copy packet payload
-    for (int i = 0; i < data.size(); i++)
+    for (int i = 0; i < data.size(); i++) {
         *p++ = data[i];
+    }
+
     // CRC (do not include flags)
     crc.calculate(crc_start, p-crc_start);
     crcValue = crc.get();
@@ -497,6 +510,10 @@ void AISModSource::encodePacket(uint8_t *packet, int packet_length, uint8_t *crc
     }
     //m_samplesPerSymbol = AISMOD_SAMPLE_RATE / m_settings.m_baud;
     m_packetRepeatCount = m_settings.m_repeatCount;
+}
+
+void AISModSource::transmit()
+{
     initTX();
     // Only reset phases at start of new packet TX, not in initTX(), so that
     // there isn't a discontinuity in phase when repeatedly transmitting a
