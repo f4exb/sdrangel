@@ -81,9 +81,13 @@ When clicked, opens the Map Display Settings dialog, which allows setting:
 * Which data the Map will display.
 * The colour of the taken and predicted tracks.
 * Which Map provider will be used to source the map image.
+* API keys, required to access maps from different providers.
 
-In order to display Mapbox maps, you will need to enter an API Key. A key can be obtained by registering at: http://www.mapbox.com/
-Note that it is not currently possible to support entering an API Key for Open Street Maps, in order to remove the watermarks.
+Free API keys are available by signing up for an accounts with:
+
+* [Thunderforest](https://www.thunderforest.com/)
+* [Maptiler](https://www.maptiler.com/)
+* [Mapbox](https://www.mapbox.com/)
 
 <h3>Map</h3>
 
