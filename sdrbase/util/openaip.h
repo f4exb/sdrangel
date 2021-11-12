@@ -228,7 +228,8 @@ struct SDRBASE_API Airspace {
         }
         else
         {
-            qDebug() << "Airspace::readXML: Could not open " << filename << " for reading.";
+            // Don't warn, as many countries don't have files
+            //qDebug() << "Airspace::readXML: Could not open " << filename << " for reading.";
         }
         return airspaces;
     }
@@ -378,7 +379,8 @@ struct SDRBASE_API NavAid {
         }
         else
         {
-            qDebug() << "NavAid::readNavAidsXML: Could not open " << filename << " for reading.";
+            // Don't warn, as many countries don't have files
+            //qDebug() << "NavAid::readNavAidsXML: Could not open " << filename << " for reading.";
         }
         return navAidInfo;
     }

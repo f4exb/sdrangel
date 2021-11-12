@@ -2436,7 +2436,6 @@ void ADSBDemodGUI::applyMapSettings()
     object = item->findChild<QObject*>("map");
     if ((object != nullptr) && coords.isValid())
     {
-        qDebug() << "Restoring map " << coords.toString() << zoom;
         object->setProperty("zoomLevel", QVariant::fromValue(zoom));
         object->setProperty("center", QVariant::fromValue(coords));
     }

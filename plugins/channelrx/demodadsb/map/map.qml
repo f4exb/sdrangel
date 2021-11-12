@@ -2,7 +2,7 @@ import QtQuick 2.12
 import QtQuick.Window 2.12
 import QtLocation 5.12
 import QtPositioning 5.12
-import QtGraphicalEffects 1.15
+import QtGraphicalEffects 1.12
 
 Item {
     id: qmlMap
