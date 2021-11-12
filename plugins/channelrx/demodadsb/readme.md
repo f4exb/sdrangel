@@ -98,7 +98,7 @@ When clicked, flight information (departure and arrival airport and times) is do
 To be able to use this, a callsign for the highlighted aircraft must have been received. Also, the callsign must be mappable to a flight number, which is not always possible (this is typically
 the case for callsigns that end in two characters, as for these, some digits from the flight number will have been omitted).
 
-To use this feature, an (aviationstack)[aviationstack.com] API Key must be entered in the Display Settings dialog (12). A free key giving 500 API calls per month is (available)[https://aviationstack.com/product].
+To use this feature, an [aviationstack](https://aviationstack.com) API Key must be entered in the Display Settings dialog (12). A free key giving 500 API calls per month is [available](https://aviationstack.com/product).
 
 <h3>16: Feed</h3>
 

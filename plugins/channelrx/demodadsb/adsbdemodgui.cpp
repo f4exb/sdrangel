@@ -511,6 +511,9 @@ QVariant AirspaceModel::data(const QModelIndex &index, int role) const
 
 bool AirspaceModel::setData(const QModelIndex &index, const QVariant& value, int role)
 {
+    (void) value;
+    (void) role;
+
     int row = index.row();
     if ((row < 0) || (row >= m_airspaces.count())) {
         return false;
