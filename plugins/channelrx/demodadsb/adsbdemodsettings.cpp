@@ -51,7 +51,7 @@ void ADSBDemodSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
-    m_airportRange = 100;
+    m_airportRange = 100.0f;
     m_airportMinimumSize = AirportType::Medium;
     m_displayHeliports = false;
     m_flightPaths = true;
@@ -74,6 +74,11 @@ void ADSBDemodSettings::resetToDefaults()
     }
     m_logFilename = "adsb_log.csv";
     m_logEnabled = false;
+    m_airspaces = QStringList({"A", "C", "TMZ"});
+    m_airspaceRange = 500.0f;
+    m_mapType = AVIATION_LIGHT;
+    m_displayNavAids = true;
+    m_displayPhotos = true;
 }
 
 QByteArray ADSBDemodSettings::serialize() const
@@ -123,10 +128,18 @@ QByteArray ADSBDemodSettings::serialize() const
     s.writeString(36, m_logFilename);
     s.writeBool(37, m_logEnabled);
 
-    for (int i = 0; i < ADSBDEMOD_COLUMNS; i++)
+    s.writeString(38, m_airspaces.join(" "));
+    s.writeFloat(39, m_airspaceRange);
+    s.writeS32(40, (int)m_mapType);
+    s.writeBool(41, m_displayNavAids);
+    s.writeBool(42, m_displayPhotos);
+
+    for (int i = 0; i < ADSBDEMOD_COLUMNS; i++) {
         s.writeS32(100 + i, m_columnIndexes[i]);
-    for (int i = 0; i < ADSBDEMOD_COLUMNS; i++)
+    }
+    for (int i = 0; i < ADSBDEMOD_COLUMNS; i++) {
         s.writeS32(200 + i, m_columnSizes[i]);
+    }
 
     return s.final();
 }
@@ -147,6 +160,7 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         qint32 tmp;
         uint32_t utmp;
         QByteArray blob;
+        QString string;
 
         if (m_channelMarker)
         {
@@ -187,7 +201,7 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
         d.readS32(17, &m_streamIndex, 0);
 
-        d.readFloat(18, &m_airportRange, 100);
+        d.readFloat(18, &m_airportRange, 100.0f);
         d.readS32(19, (int *)&m_airportMinimumSize, AirportType::Medium);
         d.readBool(20, &m_displayHeliports, false);
         d.readBool(21, &m_flightPaths, true);
@@ -211,10 +225,19 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         d.readString(36, &m_logFilename, "adsb_log.csv");
         d.readBool(37, &m_logEnabled, false);
 
-        for (int i = 0; i < ADSBDEMOD_COLUMNS; i++)
+        d.readString(38, &string, "A C TMZ");
+        m_airspaces = string.split(" ");
+        d.readFloat(39, &m_airspaceRange, 500.0f);
+        d.readS32(40, (int *)&m_mapType, (int)AVIATION_LIGHT);
+        d.readBool(41, &m_displayNavAids, true);
+        d.readBool(42, &m_displayPhotos, true);
+
+        for (int i = 0; i < ADSBDEMOD_COLUMNS; i++) {
             d.readS32(100 + i, &m_columnIndexes[i], i);
-        for (int i = 0; i < ADSBDEMOD_COLUMNS; i++)
+        }
+        for (int i = 0; i < ADSBDEMOD_COLUMNS; i++) {
             d.readS32(200 + i, &m_columnSizes[i], -1);
+        }
 
         return true;
     }

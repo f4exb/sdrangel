@@ -42,6 +42,7 @@ if(NOT SERVER_MODE)
         adsbdemoddisplaydialog.ui
         adsbdemodnotificationdialog.cpp
         adsbdemodnotificationdialog.ui
+        adsbosmtemplateserver.cpp
         airlinelogos.qrc
         flags.qrc
         map.qrc
@@ -53,6 +54,7 @@ if(NOT SERVER_MODE)
         adsbdemodfeeddialog.h
         adsbdemoddisplaydialog.h
         adsbdemodnotificationdialog.h
+        adsbosmtemplateserver.h
         ourairports.h
         osndb.h
     )
@@ -87,3 +89,8 @@ target_link_libraries(${TARGET_NAME}
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
 
+if(WIN32)
+    # Run deployqt for QtGraphicalEffects, which isn't used in other plugins
+    include(DeployQt)
+    windeployqt(${TARGET_NAME} ${SDRANGEL_BINARY_BIN_DIR} ${PROJECT_SOURCE_DIR}/map)
+endif()

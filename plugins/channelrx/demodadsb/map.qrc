@@ -16,5 +16,10 @@
     <file>map/heliport.png</file>
     <file>map/antenna.png</file>
     <file>map/truck.png</file>
+    <file>map/VOR.png</file>
+    <file>map/VOR-DME.png</file>
+    <file>map/VORTAC.png</file>
+    <file>map/NDB.png</file>
+    <file>map/DME.png</file>
   </qresource>
 </RCC>

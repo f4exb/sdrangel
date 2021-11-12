@@ -134,6 +134,17 @@ struct ADSBDemodSettings
     QString m_logFilename;
     bool m_logEnabled;
 
+    QStringList m_airspaces;            //!< Airspace names to display
+    float m_airspaceRange;              //!< How far away we display airspace (mkm)
+    enum MapType {
+        AVIATION_LIGHT,                 //!< White map with no place names
+        AVIATION_DARK,
+        STREET,
+        SATELLITE
+    } m_mapType;
+    bool m_displayNavAids;
+    bool m_displayPhotos;
+
     ADSBDemodSettings();
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }

@@ -31,8 +31,8 @@
 #include "util/csv.h"
 #include "adsbdemodsettings.h"
 
-#define AIRPORTS_URL "https://ourairports.com/data/airports.csv"
-#define AIRPORT_FREQUENCIES_URL "https://ourairports.com/data/airport-frequencies.csv"
+#define AIRPORTS_URL "https://davidmegginson.github.io/ourairports-data/airports.csv"
+#define AIRPORT_FREQUENCIES_URL "https://davidmegginson.github.io/ourairports-data/airport-frequencies.csv"
 
 struct AirportInformation {
 
