@@ -23,7 +23,8 @@
 ADSBDemodDisplayDialog::ADSBDemodDisplayDialog(
         int removeTimeout, float airportRange, ADSBDemodSettings::AirportType airportMinimumSize,
         bool displayHeliports, bool siUnits, QString fontName, int fontSize, bool displayDemodStats,
-        bool autoResizeTableColumns, const QString& apiKey, QWidget* parent) :
+        bool autoResizeTableColumns, const QString& apiKey, QStringList airspaces, float airspaceRange,
+        ADSBDemodSettings::MapType mapType, bool displayNavAids, bool displayPhotos, QWidget* parent) :
     QDialog(parent),
     m_fontName(fontName),
     m_fontSize(fontSize),
@@ -38,6 +39,17 @@ ADSBDemodDisplayDialog::ADSBDemodDisplayDialog(
     ui->displayStats->setChecked(displayDemodStats);
     ui->autoResizeTableColumns->setChecked(autoResizeTableColumns);
     ui->apiKey->setText(apiKey);
+    for (const auto& airspace: airspaces)
+    {
+        QList<QListWidgetItem *> items = ui->airspaces->findItems(airspace, Qt::MatchExactly);
+        for (const auto& item: items) {
+            item->setCheckState(Qt::Checked);
+        }
+    }
+    ui->airspaceRange->setValue(airspaceRange);
+    ui->mapType->setCurrentIndex((int)mapType);
+    ui->navAids->setChecked(displayNavAids);
+    ui->photos->setChecked(displayPhotos);
 }
 
 ADSBDemodDisplayDialog::~ADSBDemodDisplayDialog()
@@ -55,6 +67,18 @@ void ADSBDemodDisplayDialog::accept()
     m_displayDemodStats = ui->displayStats->isChecked();
     m_autoResizeTableColumns = ui->autoResizeTableColumns->isChecked();
     m_apiKey = ui->apiKey->text();
+    m_airspaces = QStringList();
+    for (int i = 0; i < ui->airspaces->count(); i++)
+    {
+        QListWidgetItem *item = ui->airspaces->item(i);
+        if (item->checkState() == Qt::Checked) {
+            m_airspaces.append(item->text());
+        }
+    }
+    m_airspaceRange = ui->airspaceRange->value();
+    m_mapType = (ADSBDemodSettings::MapType)ui->mapType->currentIndex();
+    m_displayNavAids = ui->navAids->isChecked();
+    m_displayPhotos = ui->photos->isChecked();
     QDialog::accept();
 }
 

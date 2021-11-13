@@ -4,9 +4,13 @@
 
 The ADS-B demodulator plugin can be used to receive and display ADS-B aircraft information. This is information about an aircraft, such as position, altitude, heading and speed, broadcast by aircraft on 1090MHz, in the 1090ES (Extended Squitter) format. 1090ES frames have a chip rate of 2Mchip/s, so the baseband sample rate should be set to be greater than 2MSa/s.
 
-<h2>Interface</h2>
+As well as displaying information received via ADS-B, the plugin can also combine information from a number of databases to display more information about the aircraft and flight.
 
 ![ADS-B Demodulator plugin GUI](../../../doc/img/ADSBDemod_plugin.png)
+
+<h2>Interface</h2>
+
+![ADS-B Demodulator plugin settings](../../../doc/img/ADSBDemod_plugin_settings.png)
 
 <h3>1: Frequency shift from center frequency of reception value</h3>
 
@@ -48,20 +52,29 @@ This sets the correlation threshold in dB between the received signal and expect
 
 <h3>9: Download Opensky-Network Aircraft Database</h3>
 
-Clicking this will download the Opensky-Network (https://opensky-network.org/) aircraft database. This database contains information about aircrafts, such as registration, aircraft model and owner details, that is not broadcast via ADS-B. Once downloaded, this additional information will be displayed in the table alongside the ADS-B data. The database should only need to be downloaded once, as it is saved to disk, and it is recommended to download it before enabling the demodulator.
+Clicking this will download the [Opensky-Network](https://opensky-network.org/) aircraft database. This database contains information about aircrafts, such as registration, aircraft model and owner details, that is not broadcast via ADS-B. Once downloaded, this additional information will be displayed in the table alongside the ADS-B data. The database should only need to be downloaded once, as it is saved to disk, and it is recommended to download it before enabling the demodulator.
 
 <h3>10: Download OurAirports Airport Databases</h3>
 
-Clicking this will download the OurAirports (https://ourairports.com/) airport databases. These contains names and locations for airports allowing them to be drawn on the map, as well as their corresponding ATC frequencies, which can also be displayed next to the airport on the map, by clicking the airport name. The size of airports that will be displayed on the map, and whether heliports are displayed, can be set in the Display Settings dialog.
+Clicking this will download the [OurAirports](https://ourairports.com/) airport databases. These contains names and locations for airports allowing them to be drawn on the map, as well as their corresponding ATC frequencies, which can also be displayed next to the airport on the map, by clicking the airport name. The size of airports that will be displayed on the map, and whether heliports are displayed, can be set in the Display Settings dialog.
 
-<h3>11: Display Settings</h3>
+<h3>11: Download OpenAIP Airspace and NAVAID Databases</h3>
+
+Clicking this will download the [OpenAIP](https://www.openaip.net/) airspace and NAVAID databases. These can be displayed on the map. The airspace categories to be displayed can individually be selected in the Display Settings dialog.
+
+<h3>12: Display Settings</h3>
 
 Clicking the Display Settings button will open the Display Settings dialog, which allows you to choose:
 
 * The units for altitude, speed and vertical climb rate. These can be either ft (feet), kn (knots) and ft/min (feet per minute), or m (metres), kph (kilometers per hour) and m/s (metres per second).
+* The type of map that will be displayed. This can either be a light or dark aviation map (with no place names to reduce clutter), a street map or satellite imagery.
 * The minimum size airport that will be displayed on the map: small, medium or large. Use small to display GA airfields, medium for regional airports and large for international airports.
 * Whether or not to display heliports.
-* The distance (in kilometres), from the location set under Preferences > My Position, at which airports will be displayed on the map.
+* The distance (in kilometres), from the location set under Preferences > My Position, at which airports will be displayed on the map. Displaying too many airports will slow down drawing of the map.
+* What category of airspaces should be displayed.
+* The distance (in kilometres), from the location set under Preferences > My Position, at which airspaces will be displayed on the map. Displaying too many airspaces will slow down drawing of the map.
+* Whether NAVAIDs, such as VORs, are displayed on the map.
+* Whether aircraft photos are displayed for the highlighted aircraft.
 * The timeout, in seconds, after which an aircraft will be removed from the table and map, if an ADS-B frame has not been received from it.
 * The font used for the table.
 * Whether demodulator statistics are displayed (primarily an option for developers).
@@ -69,11 +82,25 @@ Clicking the Display Settings button will open the Display Settings dialog, whic
 
 You can also enter an [avaiationstack](https://aviationstack.com/product) API key, needed to download flight information (such as departure and arrival airports and times).
 
-<h3>12: Display Flight Paths</h3>
+![ADS-B Demodulator display settings](../../../doc/img/ADSBDemod_plugin_displaysettings.png)
 
-Checking this button draws a line on the map showing aircraft's flight paths, as determined from received ADS-B frames.
+<h3>13: Display Flight Path</h3>
 
-<h3>13: Feed</h3>
+Checking this button draws a line on the map showing the highlighted aircraft's flight paths, as determined from received ADS-B frames.
+
+<h3>14: Display Flight All Paths</h3>
+
+Checking this button draws flight paths for all aircraft.
+
+<h3>15: Download flight information for selected flight</h3>
+
+When clicked, flight information (departure and arrival airport and times) is downloaded for the aircraft highlighted in the ADS-B data table using the aviationstack.com API.
+To be able to use this, a callsign for the highlighted aircraft must have been received. Also, the callsign must be mappable to a flight number, which is not always possible (this is typically
+the case for callsigns that end in two characters, as for these, some digits from the flight number will have been omitted).
+
+To use this feature, an [aviationstack](https://aviationstack.com) API Key must be entered in the Display Settings dialog (12). A free key giving 500 API calls per month is [available](https://aviationstack.com/product).
+
+<h3>16: Feed</h3>
 
 Checking Feed enables feeding received ADS-B frames to aggregators such as ADS-B Exchange: https://www.adsbexchange.com or ADSBHub
 : https://www.adsbhub.org. Right clicking on the Feed button opens the Feed Settings dialog.
@@ -85,7 +112,7 @@ The server hostname and port to send the frames to should be entered in the Serv
 
 The Beast binary and Hex formats are as detailed here: https://wiki.jetvision.de/wiki/Mode-S_Beast:Data_Output_Formats
 
-<h3>Open Notifications Dialog</h3>
+<h3>17: Open Notifications Dialog</h3>
 
 When clicked, opens the Notifications Dialog, which allows speech notifications or programs/scripts to be run when aircraft matching user-defined rules are seen.
 
@@ -159,31 +186,19 @@ In the Speech and Command strings, variables can be used to substitute in data f
 * ${eta}
 * ${ata}
 
-<h3>Download flight information for selected flight</h3>
-
-When clicked, flight information (departure and arrival airport and times) is downloaded for the aircraft highlighted in the ADS-B data table using the aviationstack.com API.
-To be able to use this, a callsign for the highlighted aircraft must have been received. Also, the callsign must be mappable to a flight number, which is not always possible (this is typically
-the case for callsigns that end in two characters, as for these, some digits from the flight number will have been omitted).
-
-To use this feature, an (aviationstack)[aviationstack.com] API Key must be entered in the Display Settings dialog (11). A free key giving 500 API calls per month is (available)[https://aviationstack.com/product].
-
-<h3>Start/stop Logging ADS-B frames to .csv File</h3>
+<h3>18: Start/stop Logging ADS-B frames to .csv File</h3>
 
 When checked, writes all received ADS-B frames to a .csv file.
 
-<h3>.csv Log Filename</h3>
+<h3>19: .csv Log Filename</h3>
 
 Click to specify the name of the .csv file which received ADS-B frames are logged to.
 
-<h3>Read Data from .csv File</h3>
+<h3>20: Read Data from .csv File</h3>
 
 Click to specify a previously written ADS-B .csv log file, which is read and used to update the ADS-B data table and map.
 
-<h3>14: Refresh list of devices</h3>
-
-Use this button to refresh the list of devices.
-
-<h3>15: Select device set</h3>
+<h3>21: Select device set</h3>
 
 Specify the SDRangel device set that will be have its centre frequency set when an airport ATC frequency is clicked on the map. Typically, this device set would be a second SDR (as ATC frequencies are around 120MHz, so they can not be received simultaneously with 1090MHz for ADS-B) and have an AM Demodulator channel plugin.
 
@@ -240,9 +255,11 @@ If an ADS-B frame has not been received from an aircraft for 60 seconds, the air
 
 <h2>Map</h2>
 
-The map displays aircraft locations and data geographically.
+The map displays aircraft locations and data geographically. Four types of map can be chosen from in the Display Settings dialog: Aviation, Avation (Dark), Street and Satellite.
 
 ![ADS-B Demodulator Map](../../../doc/img/ADSBDemod_plugin_map.png)
+
+![ADS-B Demodulator Map](../../../doc/img/ADSBDemod_plugin_map2.png)
 
 The initial antenna location is placed according to My Position set under the Preferences > My Position menu. The position is only updated when the ADS-B demodulator plugin is first opened.
 
@@ -259,3 +276,5 @@ Aircraft are only placed upon the map when a position can be calculated, which c
 Airline logos and flags are by Steve Hibberd from https://radarspotting.com
 
 Map icons are by Alice Design, Alex Ahineev, Botho Willer, Verry Obito, Sean Maldjia, Tinashe Mugayi, Georgiana Ionescu, Andreas Vögele, Tom Fricker, Will Sullivan, Tim Tores, BGBOXXX Design, and Angriawan Ditya Zulkarnain from the Noun Project https://thenounproject.com/
+
+NDB icon is by Inductiveload from WikiMedia.

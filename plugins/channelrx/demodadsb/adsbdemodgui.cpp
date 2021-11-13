@@ -30,6 +30,7 @@
 #include <QDebug>
 #include <QProcess>
 #include <QFileDialog>
+#include <QQmlProperty>
 
 #include "SWGMapItem.h"
 
@@ -39,9 +40,11 @@
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "util/units.h"
+#include "util/morse.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
 #include "gui/crightclickenabler.h"
+#include "gui/clickablelabel.h"
 #include "dsp/dspengine.h"
 #include "mainwindow.h"
 
@@ -52,6 +55,7 @@
 #include "adsbdemoddisplaydialog.h"
 #include "adsbdemodnotificationdialog.h"
 #include "adsb.h"
+#include "adsbosmtemplateserver.h"
 
 const char *Aircraft::m_speedTypeNames[] = {
     "GS", "TAS", "IAS"
@@ -446,6 +450,155 @@ bool AirportModel::setData(const QModelIndex &index, const QVariant& value, int 
     return true;
 }
 
+QVariant AirspaceModel::data(const QModelIndex &index, int role) const
+{
+    int row = index.row();
+    if ((row < 0) || (row >= m_airspaces.count())) {
+        return QVariant();
+    }
+    if (role == AirspaceModel::nameRole)
+    {
+        // Airspace name
+        return QVariant::fromValue(m_airspaces[row]->m_name);
+    }
+    else if (role == AirspaceModel::detailsRole)
+    {
+        // Airspace name and altitudes
+        QString details;
+        details.append(m_airspaces[row]->m_name);
+        details.append(QString("\n%1 - %2")
+                    .arg(m_airspaces[row]->getAlt(&m_airspaces[row]->m_bottom))
+                    .arg(m_airspaces[row]->getAlt(&m_airspaces[row]->m_top)));
+        return QVariant::fromValue(details);
+    }
+    else if (role == AirspaceModel::positionRole)
+    {
+        // Coordinates to display the airspace name at
+        QGeoCoordinate coords;
+        coords.setLatitude(m_airspaces[row]->m_position.y());
+        coords.setLongitude(m_airspaces[row]->m_position.x());
+        coords.setAltitude(m_airspaces[row]->topHeightInMetres());
+        return QVariant::fromValue(coords);
+    }
+    else if (role == AirspaceModel::airspaceBorderColorRole)
+    {
+        if (m_airspaces[row]->m_category == "D")
+        {
+            return QVariant::fromValue(QColor("blue"));
+        }
+        else
+        {
+            return QVariant::fromValue(QColor("red"));
+        }
+    }
+    else if (role == AirspaceModel::airspaceFillColorRole)
+    {
+        if (m_airspaces[row]->m_category == "D")
+        {
+            return QVariant::fromValue(QColor(0x00, 0x00, 0xff, 0x10));
+        }
+        else
+        {
+            return QVariant::fromValue(QColor(0xff, 0x00, 0x00, 0x10));
+        }
+    }
+    else if (role == AirspaceModel::airspacePolygonRole)
+    {
+       return m_polygons[row];
+    }
+    return QVariant();
+}
+
+bool AirspaceModel::setData(const QModelIndex &index, const QVariant& value, int role)
+{
+    (void) value;
+    (void) role;
+
+    int row = index.row();
+    if ((row < 0) || (row >= m_airspaces.count())) {
+        return false;
+    }
+    return true;
+}
+
+QVariant NavAidModel::data(const QModelIndex &index, int role) const
+{
+    int row = index.row();
+    if ((row < 0) || (row >= m_navAids.count())) {
+        return QVariant();
+    }
+    if (role == NavAidModel::positionRole)
+    {
+        // Coordinates to display the VOR icon at
+        QGeoCoordinate coords;
+        coords.setLatitude(m_navAids[row]->m_latitude);
+        coords.setLongitude(m_navAids[row]->m_longitude);
+        coords.setAltitude(Units::feetToMetres(m_navAids[row]->m_elevation));
+        return QVariant::fromValue(coords);
+    }
+    else if (role == NavAidModel::navAidDataRole)
+    {
+        // Create the text to go in the bubble next to the VOR
+        if (m_selected[row])
+        {
+            QStringList list;
+            list.append(QString("Name: %1").arg(m_navAids[row]->m_name));
+            if (m_navAids[row]->m_type == "NDB") {
+                list.append(QString("Frequency: %1 kHz").arg(m_navAids[row]->m_frequencykHz, 0, 'f', 1));
+            } else {
+                list.append(QString("Frequency: %1 MHz").arg(m_navAids[row]->m_frequencykHz / 1000.0f, 0, 'f', 2));
+            }
+            if (m_navAids[row]->m_channel != "") {
+                list.append(QString("Channel: %1").arg(m_navAids[row]->m_channel));
+            }
+            list.append(QString("Ident: %1 %2").arg(m_navAids[row]->m_ident).arg(Morse::toSpacedUnicodeMorse(m_navAids[row]->m_ident)));
+            list.append(QString("Range: %1 nm").arg(m_navAids[row]->m_range));
+            if (m_navAids[row]->m_alignedTrueNorth) {
+                list.append(QString("Magnetic declination: Aligned to true North"));
+            } else if (m_navAids[row]->m_magneticDeclination != 0.0f) {
+                list.append(QString("Magnetic declination: %1%2").arg(std::round(m_navAids[row]->m_magneticDeclination)).arg(QChar(0x00b0)));
+            }
+            QString data = list.join("\n");
+            return QVariant::fromValue(data);
+        }
+        else
+        {
+            return QVariant::fromValue(m_navAids[row]->m_name);
+        }
+    }
+    else if (role == NavAidModel::navAidImageRole)
+    {
+        // Select an image to use for the NavAid
+        return QVariant::fromValue(QString("%1.png").arg(m_navAids[row]->m_type));
+    }
+    else if (role == NavAidModel::bubbleColourRole)
+    {
+        // Select a background colour for the text bubble next to the NavAid
+        return QVariant::fromValue(QColor("lightgreen"));
+    }
+    else if (role == NavAidModel::selectedRole)
+    {
+        return QVariant::fromValue(m_selected[row]);
+    }
+    return QVariant();
+}
+
+bool NavAidModel::setData(const QModelIndex &index, const QVariant& value, int role)
+{
+    int row = index.row();
+    if ((row < 0) || (row >= m_navAids.count())) {
+        return false;
+    }
+    if (role == NavAidModel::selectedRole)
+    {
+        bool selected = value.toBool();
+        m_selected[row] = selected;
+        emit dataChanged(index, index);
+        return true;
+    }
+    return true;
+}
+
 // Set selected device to the given centre frequency (used to tune to ATC selected from airports on map)
 bool ADSBDemodGUI::setFrequency(float targetFrequencyHz)
 {
@@ -632,6 +785,9 @@ void ADSBDemodGUI::handleADSB(
         "Reserved"
     };
 
+    bool newAircraft = false;
+    bool updatedCallsign = false;
+
     int df = (data[0] >> 3) & ADS_B_DF_MASK; // Downlink format
     int ca = data[0] & 0x7; // Capability
     unsigned icao = ((data[1] & 0xff) << 16) | ((data[2] & 0xff) << 8) | (data[3] & 0xff); // ICAO aircraft address
@@ -646,6 +802,7 @@ void ADSBDemodGUI::handleADSB(
     else
     {
         // Add new aircraft
+        newAircraft = true;
         aircraft = new Aircraft(this);
         aircraft->m_icao = icao;
         m_aircraft.insert(icao, aircraft);
@@ -819,8 +976,11 @@ void ADSBDemodGUI::handleADSB(
             for (int i = 0; i < 8; i++)
                 callsign[i] = idMap[c[i]];
             callsign[8] = '\0';
+            QString callsignTrimmed = QString(callsign).trimmed();
 
-            aircraft->m_callsign = QString(callsign).trimmed();
+            updatedCallsign = aircraft->m_callsign != callsignTrimmed;
+
+            aircraft->m_callsign = callsignTrimmed;
             aircraft->m_callsignItem->setText(aircraft->m_callsign);
 
             // Attempt to map callsign to flight number
@@ -1193,6 +1353,11 @@ void ADSBDemodGUI::handleADSB(
 
     // Check to see if we need to emit a notification about this aircraft
     checkDynamicNotification(aircraft);
+
+    // Update text below photo if it's likely to have changed
+    if ((aircraft == m_highlightAircraft) && (newAircraft || updatedCallsign)) {
+        updatePhotoText(aircraft);
+    }
 }
 
 void ADSBDemodGUI::checkStaticNotification(Aircraft *aircraft)
@@ -1527,8 +1692,9 @@ void ADSBDemodGUI::on_adsbData_cellClicked(int row, int column)
     (void) column;
     // Get ICAO of aircraft in row clicked
     int icao = ui->adsbData->item(row, 0)->text().toInt(nullptr, 16);
-    if (m_aircraft.contains(icao))
+    if (m_aircraft.contains(icao)) {
          highlightAircraft(m_aircraft.value(icao));
+    }
 }
 
 void ADSBDemodGUI::on_adsbData_cellDoubleClicked(int row, int column)
@@ -1672,6 +1838,18 @@ void ADSBDemodGUI::on_getAirportDB_clicked()
             QNetworkReply *reply = m_dlm.download(dbURL, airportDBFile);
             connect(reply, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(updateDownloadProgress(qint64,qint64)));
         }
+    }
+}
+
+void ADSBDemodGUI::on_getAirspacesDB_clicked()
+{
+    // Don't try to download while already in progress
+    if (m_progressDialog == nullptr)
+    {
+        m_progressDialog = new QProgressDialog(this);
+        m_progressDialog->setMaximum(OpenAIP::m_countryCodes.size());
+        m_progressDialog->setCancelButton(nullptr);
+        m_openAIP.downloadAirspaces();
     }
 }
 
@@ -1960,6 +2138,46 @@ void ADSBDemodGUI::updateAirports()
     m_currentDisplayHeliports = m_settings.m_displayHeliports;
 }
 
+void ADSBDemodGUI::updateAirspaces()
+{
+    AzEl azEl = m_azEl;
+    m_airspaceModel.removeAllAirspaces();
+    for (const auto& airspace: m_airspaces)
+    {
+        if (m_settings.m_airspaces.contains(airspace->m_category))
+        {
+            // Calculate distance to airspace from My Position
+            azEl.setTarget(airspace->m_center.y(), airspace->m_center.x(), 0);
+            azEl.calculate();
+
+            // Only display airport if in range
+            if (azEl.getDistance() <= m_settings.m_airspaceRange*1000.0f) {
+                m_airspaceModel.addAirspace(airspace);
+            }
+        }
+    }
+}
+
+void ADSBDemodGUI::updateNavAids()
+{
+    AzEl azEl = m_azEl;
+    m_navAidModel.removeAllNavAids();
+    if (m_settings.m_displayNavAids)
+    {
+        for (const auto& navAid: m_navAids)
+        {
+            // Calculate distance to NavAid from My Position
+            azEl.setTarget(navAid->m_latitude, navAid->m_longitude, Units::feetToMetres(navAid->m_elevation));
+            azEl.calculate();
+
+            // Only display NavAid if in range
+            if (azEl.getDistance() <= m_settings.m_airspaceRange*1000.0f) {
+                m_navAidModel.addNavAid(navAid);
+            }
+        }
+    }
+}
+
 // Set a static target, such as an airport
 void ADSBDemodGUI::target(const QString& name, float az, float el, float range)
 {
@@ -1993,10 +2211,102 @@ void ADSBDemodGUI::targetAircraft(Aircraft *aircraft)
     }
 }
 
+void ADSBDemodGUI::updatePhotoText(Aircraft *aircraft)
+{
+    if (m_settings.m_displayPhotos)
+    {
+        QString callsign = aircraft->m_callsignItem->text().trimmed();
+        QString reg = aircraft->m_registrationItem->text().trimmed();
+        if (!callsign.isEmpty() && !reg.isEmpty()) {
+            ui->photoHeader->setText(QString("%1 - %2").arg(callsign).arg(reg));
+        } else if (!callsign.isEmpty()) {
+            ui->photoHeader->setText(QString("%1").arg(callsign));
+        } else if (!reg.isEmpty()) {
+            ui->photoHeader->setText(QString("%1").arg(reg));
+        }
+
+        QIcon icon = aircraft->m_countryItem->icon();
+        QList<QSize> sizes = icon.availableSizes();
+        if (sizes.size() > 0) {
+            ui->photoFlag->setPixmap(icon.pixmap(sizes[0]));
+        }
+
+        updatePhotoFlightInformation(aircraft);
+
+        QString aircraftDetails = "<table width=200>"; // Note, Qt seems to make the table bigger than this so text is cropped, not wrapped
+        QString manufacturer = aircraft->m_manufacturerNameItem->text();
+        if (!manufacturer.isEmpty()) {
+            aircraftDetails.append(QString("<tr><th align=left>Manufacturer:<td>%1").arg(manufacturer));
+        }
+        QString model = aircraft->m_modelItem->text();
+        if (!model.isEmpty()) {
+            aircraftDetails.append(QString("<tr><th align=left>Aircraft:<td>%1").arg(model));
+        }
+        QString owner = aircraft->m_ownerItem->text();
+        if (!owner.isEmpty()) {
+            aircraftDetails.append(QString("<tr><th align=left>Owner:<td>%1").arg(owner));
+        }
+        QString operatorICAO = aircraft->m_operatorICAOItem->text();
+        if (!operatorICAO.isEmpty()) {
+            aircraftDetails.append(QString("<tr><th align=left>Operator:<td>%1").arg(operatorICAO));
+        }
+        QString registered = aircraft->m_registeredItem->text();
+        if (!registered.isEmpty()) {
+            aircraftDetails.append(QString("<tr><th align=left>Registered:<td>%1").arg(registered));
+        }
+        aircraftDetails.append("</table>");
+        ui->aircraftDetails->setText(aircraftDetails);
+    }
+}
+
+void ADSBDemodGUI::updatePhotoFlightInformation(Aircraft *aircraft)
+{
+    if (m_settings.m_displayPhotos)
+    {
+        QString dep = aircraft->m_depItem->text();
+        QString arr = aircraft->m_arrItem->text();
+        QString std = aircraft->m_stdItem->text();
+        QString etd = aircraft->m_etdItem->text();
+        QString atd = aircraft->m_atdItem->text();
+        QString sta = aircraft->m_staItem->text();
+        QString eta = aircraft->m_etaItem->text();
+        QString ata = aircraft->m_ataItem->text();
+        QString flightDetails;
+        if (!dep.isEmpty() && !arr.isEmpty())
+        {
+            flightDetails = QString("<center><table width=200><tr><th colspan=4>%1 - %2").arg(dep).arg(arr);
+            if (!std.isEmpty() && !sta.isEmpty()) {
+                flightDetails.append(QString("<tr><td>STD<td>%1<td>STA<td>%2").arg(std).arg(sta));
+            }
+            if ((!atd.isEmpty() || !etd.isEmpty()) && (!ata.isEmpty() || !eta.isEmpty()))
+            {
+                if (!atd.isEmpty()) {
+                    flightDetails.append(QString("<tr><td>Actual<td>%1").arg(atd));
+                } else if (!etd.isEmpty()) {
+                    flightDetails.append(QString("<tr><td>Estimated<td>%1").arg(etd));
+                }
+                if (!ata.isEmpty()) {
+                    flightDetails.append(QString("<td>Actual<td>%1").arg(ata));
+                } else if (!eta.isEmpty()) {
+                    flightDetails.append(QString("<td>Estimated<td>%1").arg(eta));
+                }
+            }
+            flightDetails.append("</center>");
+        }
+        ui->flightDetails->setText(flightDetails);
+    }
+}
+
 void ADSBDemodGUI::highlightAircraft(Aircraft *aircraft)
 {
     if (aircraft != m_highlightAircraft)
     {
+        // Hide photo of old aircraft
+        ui->photoHeader->setVisible(false);
+        ui->photoFlag->setVisible(false);
+        ui->photo->setVisible(false);
+        ui->flightDetails->setVisible(false);
+        ui->aircraftDetails->setVisible(false);
         if (m_highlightAircraft)
         {
             // Restore colour
@@ -2005,12 +2315,28 @@ void ADSBDemodGUI::highlightAircraft(Aircraft *aircraft)
         }
         // Highlight this aircraft
         m_highlightAircraft = aircraft;
-        aircraft->m_isHighlighted = true;
-        m_aircraftModel.aircraftUpdated(aircraft);
+        if (aircraft)
+        {
+            aircraft->m_isHighlighted = true;
+            m_aircraftModel.aircraftUpdated(aircraft);
+            if (m_settings.m_displayPhotos)
+            {
+                // Download photo
+                updatePhotoText(aircraft);
+                m_planeSpotters.getAircraftPhoto(QString::number(aircraft->m_icao, 16));
+            }
+        }
     }
-    // Highlight the row in the table - always do this, as it can become
-    // unselected
-    ui->adsbData->selectRow(aircraft->m_icaoItem->row());
+    if (aircraft)
+    {
+        // Highlight the row in the table - always do this, as it can become
+        // unselected
+        ui->adsbData->selectRow(aircraft->m_icaoItem->row());
+    }
+    else
+    {
+        ui->adsbData->clearSelection();
+    }
 }
 
 // Show feed dialog
@@ -2033,7 +2359,8 @@ void ADSBDemodGUI::on_displaySettings_clicked()
                                 m_settings.m_displayHeliports, m_settings.m_siUnits,
                                 m_settings.m_tableFontName, m_settings.m_tableFontSize,
                                 m_settings.m_displayDemodStats, m_settings.m_autoResizeTableColumns,
-                                m_settings.m_apiKey);
+                                m_settings.m_apiKey, m_settings.m_airspaces, m_settings.m_airspaceRange,
+                                m_settings.m_mapType, m_settings.m_displayNavAids, m_settings.m_displayPhotos);
     if (dialog.exec() == QDialog::Accepted)
     {
         bool unitsChanged = m_settings.m_siUnits != dialog.m_siUnits;
@@ -2048,12 +2375,114 @@ void ADSBDemodGUI::on_displaySettings_clicked()
         m_settings.m_displayDemodStats = dialog.m_displayDemodStats;
         m_settings.m_autoResizeTableColumns = dialog.m_autoResizeTableColumns;
         m_settings.m_apiKey = dialog.m_apiKey;
+        m_settings.m_airspaces = dialog.m_airspaces;
+        m_settings.m_airspaceRange = dialog.m_airspaceRange;
+        m_settings.m_mapType = dialog.m_mapType;
+        m_settings.m_displayNavAids = dialog.m_displayNavAids;
+        m_settings.m_displayPhotos = dialog.m_displayPhotos;
 
-        if (unitsChanged)
+        if (unitsChanged) {
             m_aircraftModel.allAircraftUpdated();
+        }
         displaySettings();
         applySettings();
     }
+}
+
+void ADSBDemodGUI::applyMapSettings()
+{
+    QQuickItem *item = ui->map->rootObject();
+
+    // Save existing position of map
+    QObject *object = item->findChild<QObject*>("map");
+    QGeoCoordinate coords;
+    double zoom;
+    if (object != nullptr)
+    {
+        coords = object->property("center").value<QGeoCoordinate>();
+        zoom = object->property("zoomLevel").value<double>();
+    }
+
+    // Create the map using the specified provider
+    QQmlProperty::write(item, "mapProvider", "osm");
+    QVariantMap parameters;
+    // Use our repo, so we can append API key and redefine transmit maps
+    parameters["osm.mapping.providersrepository.address"] = QString("http://127.0.0.1:%1/").arg(m_osmPort);
+    // Use ADS-B specific cache, as we use different transmit maps
+    QString cachePath = QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation) + "/QtLocation/5.8/tiles/osm/sdrangel_adsb";
+    parameters["osm.mapping.cache.directory"] = cachePath;
+    // On Linux, we need to create the directory
+    QDir dir(cachePath);
+    if (!dir.exists()) {
+        dir.mkpath(cachePath);
+    }
+
+    QString mapType;
+    switch (m_settings.m_mapType)
+    {
+    case ADSBDemodSettings::AVIATION_LIGHT:
+        mapType = "Transit Map";
+        break;
+    case ADSBDemodSettings::AVIATION_DARK:
+        mapType = "Night Transit Map";
+        break;
+    case ADSBDemodSettings::STREET:
+        mapType = "Street Map";
+        break;
+    case ADSBDemodSettings::SATELLITE:
+        mapType = "Satellite Map";
+        break;
+    }
+
+    QVariant retVal;
+    if (!QMetaObject::invokeMethod(item, "createMap", Qt::DirectConnection,
+                                Q_RETURN_ARG(QVariant, retVal),
+                                Q_ARG(QVariant, QVariant::fromValue(parameters)),
+                                Q_ARG(QVariant, mapType),
+                                Q_ARG(QVariant, QVariant::fromValue(this))))
+    {
+        qCritical() << "ADSBDemodGUI::applyMapSettings - Failed to invoke createMap";
+    }
+    QObject *newMap = retVal.value<QObject *>();
+
+    // Restore position of map
+    if (newMap != nullptr)
+    {
+        if (coords.isValid())
+        {
+            newMap->setProperty("zoomLevel", QVariant::fromValue(zoom));
+            newMap->setProperty("center", QVariant::fromValue(coords));
+        }
+    }
+    else
+    {
+        qDebug() << "ADSBDemodGUI::applyMapSettings - createMap returned a nullptr";
+    }
+
+    // Move antenna icon to My Position
+    QObject *stationObject = newMap->findChild<QObject*>("station");
+    if(stationObject != NULL)
+    {
+        Real stationLatitude = MainCore::instance()->getSettings().getLatitude();
+        Real stationLongitude = MainCore::instance()->getSettings().getLongitude();
+        Real stationAltitude = MainCore::instance()->getSettings().getAltitude();
+        QGeoCoordinate coords = stationObject->property("coordinate").value<QGeoCoordinate>();
+        coords.setLatitude(stationLatitude);
+        coords.setLongitude(stationLongitude);
+        coords.setAltitude(stationAltitude);
+        stationObject->setProperty("coordinate", QVariant::fromValue(coords));
+        stationObject->setProperty("stationName", QVariant::fromValue(MainCore::instance()->getSettings().getStationName()));
+    }
+    else
+    {
+        qDebug() << "ADSBDemodGUI::applyMapSettings - Couldn't find station";
+    }
+}
+
+// Called from QML when empty space clicked
+void ADSBDemodGUI::clearHighlighted()
+{
+    highlightAircraft(nullptr);
 }
 
 ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
@@ -2067,14 +2496,20 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_tickCount(0),
     m_aircraftInfo(nullptr),
     m_airportModel(this),
+    m_airspaceModel(this),
     m_trackAircraft(nullptr),
     m_highlightAircraft(nullptr),
     m_progressDialog(nullptr)
 {
     ui->setupUi(this);
 
+    m_osmPort = 0; // Pick a free port
+    m_templateServer = new ADSBOSMTemplateServer("q2RVNAe3eFKCH4XsrE3r", m_osmPort);
+
     ui->map->rootContext()->setContextProperty("aircraftModel", &m_aircraftModel);
     ui->map->rootContext()->setContextProperty("airportModel", &m_airportModel);
+    ui->map->rootContext()->setContextProperty("airspaceModel", &m_airspaceModel);
+    ui->map->rootContext()->setContextProperty("navAidModel", &m_navAidModel);
     ui->map->setSource(QUrl(QStringLiteral("qrc:/map/map.qml")));
 
     setAttribute(Qt::WA_DeleteOnClose, true);
@@ -2136,6 +2571,12 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     connect(ui->adsbData->horizontalHeader(), SIGNAL(sectionMoved(int, int, int)), SLOT(adsbData_sectionMoved(int, int, int)));
     connect(ui->adsbData->horizontalHeader(), SIGNAL(sectionResized(int, int, int)), SLOT(adsbData_sectionResized(int, int, int)));
 
+    ui->photoHeader->setVisible(false);
+    ui->photoFlag->setVisible(false);
+    ui->photo->setVisible(false);
+    ui->flightDetails->setVisible(false);
+    ui->aircraftDetails->setVisible(false);
+
     // Read aircraft information database, if it has previously been downloaded
     if (!readFastDB(getFastDBFilename()))
     {
@@ -2150,6 +2591,16 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_prefixMap = CSV::hash(":/flags/regprefixmap.csv");
     // Read operator air force to military map
     m_militaryMap = CSV::hash(":/flags/militarymap.csv");
+
+    connect(&m_openAIP, &OpenAIP::downloadingURL, this, &ADSBDemodGUI::downloadingURL);
+    connect(&m_openAIP, &OpenAIP::downloadError, this, &ADSBDemodGUI::downloadError);
+    connect(&m_openAIP, &OpenAIP::downloadAirspaceFinished, this, &ADSBDemodGUI::downloadAirspaceFinished);
+    connect(&m_openAIP, &OpenAIP::downloadNavAidsFinished, this, &ADSBDemodGUI::downloadNavAidsFinished);
+
+    // Read airspaces
+    m_airspaces = OpenAIP::readAirspaces();
+    // Read NavAids
+    m_navAids = OpenAIP::readNavAids();
 
     // Get station position
     Real stationLatitude = MainCore::instance()->getSettings().getLatitude();
@@ -2167,25 +2618,20 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
         coords.setLongitude(stationLongitude);
         object->setProperty("center", QVariant::fromValue(coords));
     }
-    // Move antenna icon to My Position
-    QObject *stationObject = item->findChild<QObject*>("station");
-    if(stationObject != NULL)
-    {
-        QGeoCoordinate coords = stationObject->property("coordinate").value<QGeoCoordinate>();
-        coords.setLatitude(stationLatitude);
-        coords.setLongitude(stationLongitude);
-        coords.setAltitude(stationAltitude);
-        stationObject->setProperty("coordinate", QVariant::fromValue(coords));
-        stationObject->setProperty("stationName", QVariant::fromValue(MainCore::instance()->getSettings().getStationName()));
-    }
     // Add airports within range of My Position
-    if (m_airportInfo != nullptr)
+    if (m_airportInfo != nullptr) {
         updateAirports();
+    }
+    updateAirspaces();
+    updateNavAids();
 
     // Initialise text to speech engine
     m_speech = new QTextToSpeech(this);
 
     m_flightInformation = nullptr;
+
+    connect(&m_planeSpotters, &PlaneSpotters::aircraftPhoto, this, &ADSBDemodGUI::aircraftPhoto);
+    connect(ui->photo, &ClickableLabel::clicked, this, &ADSBDemodGUI::photoClicked);
 
     updateDeviceSetList();
     displaySettings();
@@ -2194,6 +2640,16 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 
 ADSBDemodGUI::~ADSBDemodGUI()
 {
+    if (m_templateServer)
+    {
+        m_templateServer->close();
+        delete m_templateServer;
+    }
+    disconnect(&m_openAIP, &OpenAIP::downloadingURL, this, &ADSBDemodGUI::downloadingURL);
+    disconnect(&m_openAIP, &OpenAIP::downloadError, this, &ADSBDemodGUI::downloadError);
+    disconnect(&m_openAIP, &OpenAIP::downloadAirspaceFinished, this, &ADSBDemodGUI::downloadAirspaceFinished);
+    disconnect(&m_openAIP, &OpenAIP::downloadNavAidsFinished, this, &ADSBDemodGUI::downloadNavAidsFinished);
+    disconnect(&m_planeSpotters, &PlaneSpotters::aircraftPhoto, this, &ADSBDemodGUI::aircraftPhoto);
     delete ui;
     qDeleteAll(m_aircraft);
     if (m_airportInfo) {
@@ -2209,6 +2665,8 @@ ADSBDemodGUI::~ADSBDemodGUI()
         disconnect(m_flightInformation, &FlightInformation::flightUpdated, this, &ADSBDemodGUI::flightInformationUpdated);
         delete m_flightInformation;
     }
+    qDeleteAll(m_airspaces);
+    qDeleteAll(m_navAids);
 }
 
 void ADSBDemodGUI::applySettings(bool force)
@@ -2308,10 +2766,15 @@ void ADSBDemodGUI::displaySettings()
             || (m_settings.m_displayHeliports != m_currentDisplayHeliports)))
         updateAirports();
 
+    updateAirspaces();
+    updateNavAids();
+
     if (!m_settings.m_displayDemodStats)
         ui->stats->setText("");
 
     initFlightInformation();
+
+    applyMapSettings();
 
     blockApplySettings(false);
 }
@@ -2525,10 +2988,45 @@ void ADSBDemodGUI::flightInformationUpdated(const FlightInformation::Flight& fli
         if (aircraft->m_positionValid) {
             m_aircraftModel.aircraftUpdated(aircraft);
         }
+        updatePhotoFlightInformation(aircraft);
     }
     else
     {
         qDebug() << "ADSBDemodGUI::flightInformationUpdated - Flight not found in ADS-B table: " << flight.m_flightICAO;
+    }
+}
+
+void ADSBDemodGUI::aircraftPhoto(const PlaneSpottersPhoto *photo)
+{
+    // Make sure the photo is for the currently highlighted aircraft, as it may
+    // have taken a while to download
+    if (!photo->m_pixmap.isNull() && m_highlightAircraft && (m_highlightAircraft->m_icaoItem->text() == photo->m_icao))
+    {
+        ui->photo->setPixmap(photo->m_pixmap);
+        ui->photo->setToolTip(QString("Photographer: %1").arg(photo->m_photographer)); // Required by terms of use
+        ui->photoHeader->setVisible(true);
+        ui->photoFlag->setVisible(true);
+        ui->photo->setVisible(true);
+        ui->flightDetails->setVisible(true);
+        ui->aircraftDetails->setVisible(true);
+        m_photoLink = photo->m_link;
+    }
+}
+
+void ADSBDemodGUI::photoClicked()
+{
+    // Photo needs to link back to PlaneSpotters, as per terms of use
+    if (m_highlightAircraft)
+    {
+        if (m_photoLink.isEmpty())
+        {
+            QString icaoUpper = QString("%1").arg(m_highlightAircraft->m_icao, 1, 16).toUpper();
+            QDesktopServices::openUrl(QUrl(QString("https://www.planespotters.net/hex/%1").arg(icaoUpper)));
+        }
+        else
+        {
+            QDesktopServices::openUrl(QUrl(m_photoLink));
+        }
     }
 }
 
@@ -2614,5 +3112,50 @@ void ADSBDemodGUI::on_logOpen_clicked()
                 QMessageBox::critical(this, "ADS-B", QString("Failed to open file %1").arg(fileNames[0]));
             }
         }
+    }
+}
+
+void ADSBDemodGUI::downloadingURL(const QString& url)
+{
+    if (m_progressDialog)
+    {
+        m_progressDialog->setLabelText(QString("Downloading %1.").arg(url));
+        m_progressDialog->setValue(m_progressDialog->value() + 1);
+    }
+}
+
+void ADSBDemodGUI::downloadError(const QString& error)
+{
+    QMessageBox::critical(this, "ADS-B", error);
+    if (m_progressDialog)
+    {
+        m_progressDialog->close();
+        delete m_progressDialog;
+        m_progressDialog = nullptr;
+    }
+}
+
+void ADSBDemodGUI::downloadAirspaceFinished()
+{
+    if (m_progressDialog) {
+        m_progressDialog->setLabelText("Reading airspaces.");
+    }
+    m_airspaces = OpenAIP::readAirspaces();
+    updateAirspaces();
+    m_openAIP.downloadNavAids();
+}
+
+void ADSBDemodGUI::downloadNavAidsFinished()
+{
+    if (m_progressDialog) {
+        m_progressDialog->setLabelText("Reading NAVAIDs.");
+    }
+    m_navAids = OpenAIP::readNavAids();
+    updateNavAids();
+    if (m_progressDialog)
+    {
+        m_progressDialog->close();
+        delete m_progressDialog;
+        m_progressDialog = nullptr;
     }
 }

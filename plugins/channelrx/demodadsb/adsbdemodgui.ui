@@ -519,6 +519,20 @@
        </widget>
       </item>
       <item>
+       <widget class="QToolButton" name="getAirspacesDB">
+        <property name="toolTip">
+         <string>Download airspaces and NAVAIDs from OpenAIP (40MB)</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/icons/vor.png</normaloff>:/icons/vor.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QToolButton" name="displaySettings">
         <property name="toolTip">
          <string>Open display settings dialog</string>
@@ -573,6 +587,23 @@
        </widget>
       </item>
       <item>
+       <widget class="QToolButton" name="flightInfo">
+        <property name="toolTip">
+         <string>Download flight information for selected aircraft</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/info.png</normaloff>:/info.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="ButtonSwitch" name="feed">
         <property name="toolTip">
          <string>Enable feeding of received ADS-B messages to the specified server. Right click for settings.</string>
@@ -600,23 +631,6 @@
         <property name="icon">
          <iconset resource="../../../sdrgui/resources/res.qrc">
           <normaloff>:/mono.png</normaloff>:/mono.png</iconset>
-        </property>
-        <property name="checkable">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QToolButton" name="flightInfo">
-        <property name="toolTip">
-         <string>Download flight information for selected aircraft</string>
-        </property>
-        <property name="text">
-         <string>...</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../../../sdrgui/resources/res.qrc">
-          <normaloff>:/info.png</normaloff>:/info.png</iconset>
         </property>
         <property name="checkable">
          <bool>false</bool>
@@ -738,7 +752,7 @@
      <x>0</x>
      <y>140</y>
      <width>600</width>
-     <height>291</height>
+     <height>270</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -750,13 +764,13 @@
    <property name="minimumSize">
     <size>
      <width>600</width>
-     <height>0</height>
+     <height>270</height>
     </size>
    </property>
    <property name="windowTitle">
     <string>ADS-B Data</string>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayoutTable">
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
     <property name="spacing">
      <number>2</number>
     </property>
@@ -774,6 +788,12 @@
     </property>
     <item>
      <widget class="QTableWidget" name="adsbData">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
       <property name="editTriggers">
        <set>QAbstractItemView::NoEditTriggers</set>
       </property>
@@ -1048,6 +1068,125 @@
       </column>
      </widget>
     </item>
+    <item>
+     <layout class="QVBoxLayout" name="photoLayout">
+      <property name="spacing">
+       <number>4</number>
+      </property>
+      <item>
+       <layout class="QHBoxLayout" name="photoHeaderLayout">
+        <property name="spacing">
+         <number>4</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="photoHeader">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="photoFlag">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="ClickableLabel" name="photo">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="flightDetails">
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>200</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="textFormat">
+         <enum>Qt::RichText</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="aircraftDetails">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>200</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="textFormat">
+         <enum>Qt::RichText</enum>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="photoVerticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>0</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
    </layout>
   </widget>
   <widget class="QWidget" name="mapContainer" native="true">
@@ -1133,6 +1272,16 @@
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ClickableLabel</class>
+   <extends>QLabel</extends>
+   <header>gui/clickablelabel.h</header>
+  </customwidget>
+  <customwidget>
    <class>ValueDialZ</class>
    <extends>QWidget</extends>
    <header>gui/valuedialz.h</header>
@@ -1143,11 +1292,6 @@
    <extends>QWidget</extends>
    <header>gui/levelmeter.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>
@@ -1161,9 +1305,16 @@
   <tabstop>threshold</tabstop>
   <tabstop>getOSNDB</tabstop>
   <tabstop>getAirportDB</tabstop>
+  <tabstop>getAirspacesDB</tabstop>
   <tabstop>displaySettings</tabstop>
   <tabstop>flightPaths</tabstop>
+  <tabstop>allFlightPaths</tabstop>
+  <tabstop>flightInfo</tabstop>
   <tabstop>feed</tabstop>
+  <tabstop>notifications</tabstop>
+  <tabstop>logEnable</tabstop>
+  <tabstop>logFilename</tabstop>
+  <tabstop>logOpen</tabstop>
   <tabstop>devicesRefresh</tabstop>
   <tabstop>device</tabstop>
   <tabstop>adsbData</tabstop>

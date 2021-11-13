@@ -72,11 +72,6 @@ void AviationStack::getFlightInformation(const QString& flight)
     url.setQuery(query);
 
     m_networkManager->get(QNetworkRequest(url));
-    /*QFile file("flight.json");
-    if (file.open(QIODevice::ReadOnly))
-    {
-        parseJson(file.readAll());
-    }*/
 }
 
 void AviationStack::handleReply(QNetworkReply* reply)

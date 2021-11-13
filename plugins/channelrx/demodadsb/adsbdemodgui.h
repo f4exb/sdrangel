@@ -36,6 +36,8 @@
 #include "util/movingaverage.h"
 #include "util/httpdownloadmanager.h"
 #include "util/flightinformation.h"
+#include "util/openaip.h"
+#include "util/planespotters.h"
 #include "maincore.h"
 
 #include "adsbdemodsettings.h"
@@ -49,6 +51,7 @@ class ADSBDemod;
 class WebAPIAdapterInterface;
 class HttpDownloadManager;
 class ADSBDemodGUI;
+class ADSBOSMTemplateServer;
 
 namespace Ui {
     class ADSBDemodGUI;
@@ -484,6 +487,155 @@ private:
     QList<float> m_range;
 };
 
+// Airspace data model used by QML map item
+class AirspaceModel : public QAbstractListModel {
+    Q_OBJECT
+
+public:
+    using QAbstractListModel::QAbstractListModel;
+    enum MarkerRoles {
+        nameRole = Qt::UserRole + 1,
+        detailsRole = Qt::UserRole + 2,
+        positionRole = Qt::UserRole + 3,
+        airspaceBorderColorRole = Qt::UserRole + 4,
+        airspaceFillColorRole = Qt::UserRole + 5,
+        airspacePolygonRole = Qt::UserRole + 6
+    };
+
+    Q_INVOKABLE void addAirspace(Airspace *airspace) {
+        beginInsertRows(QModelIndex(), rowCount(), rowCount());
+        m_airspaces.append(airspace);
+        // Convert QPointF to QVariantList of QGeoCoordinates
+        QVariantList polygon;
+        for (const auto p : airspace->m_polygon)
+        {
+            QGeoCoordinate coord(p.y(), p.x(), airspace->topHeightInMetres());
+            polygon.push_back(QVariant::fromValue(coord));
+        }
+        m_polygons.append(polygon);
+        endInsertRows();
+    }
+
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override {
+        Q_UNUSED(parent)
+        return m_airspaces.count();
+    }
+
+    void removeAllAirspaces() {
+        if (m_airspaces.count() > 0)
+        {
+            beginRemoveRows(QModelIndex(), 0, m_airspaces.count() - 1);
+            m_airspaces.clear();
+            m_polygons.clear();
+            endRemoveRows();
+        }
+    }
+
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+
+    bool setData(const QModelIndex &index, const QVariant& value, int role = Qt::EditRole) override;
+
+    Qt::ItemFlags flags(const QModelIndex &index) const override
+    {
+        (void) index;
+        return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
+    }
+
+    QHash<int, QByteArray> roleNames() const {
+        QHash<int, QByteArray> roles;
+        roles[nameRole] = "name";
+        roles[detailsRole] = "details";
+        roles[positionRole] = "position";
+        roles[airspaceBorderColorRole] = "airspaceBorderColor";
+        roles[airspaceFillColorRole] = "airspaceFillColor";
+        roles[airspacePolygonRole] = "airspacePolygon";
+        return roles;
+    }
+
+private:
+    QList<Airspace *> m_airspaces;
+    QList<QVariantList> m_polygons;
+};
+
+// NavAid model used for each NavAid on the map
+class NavAidModel : public QAbstractListModel {
+    Q_OBJECT
+
+public:
+    using QAbstractListModel::QAbstractListModel;
+    enum MarkerRoles{
+        positionRole = Qt::UserRole + 1,
+        navAidDataRole = Qt::UserRole + 2,
+        navAidImageRole = Qt::UserRole + 3,
+        bubbleColourRole = Qt::UserRole + 4,
+        selectedRole = Qt::UserRole + 5
+    };
+
+    Q_INVOKABLE void addNavAid(NavAid *vor) {
+        beginInsertRows(QModelIndex(), rowCount(), rowCount());
+        m_navAids.append(vor);
+        m_selected.append(false);
+        endInsertRows();
+    }
+
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override {
+        Q_UNUSED(parent)
+        return m_navAids.count();
+    }
+
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+
+    bool setData(const QModelIndex &index, const QVariant& value, int role = Qt::EditRole) override;
+
+    Qt::ItemFlags flags(const QModelIndex &index) const override {
+        (void) index;
+        return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
+    }
+
+    void allNavAidsUpdated() {
+        for (int i = 0; i < m_navAids.count(); i++)
+        {
+            QModelIndex idx = index(i);
+            emit dataChanged(idx, idx);
+        }
+    }
+
+    void removeNavAid(NavAid *vor) {
+        int row = m_navAids.indexOf(vor);
+        if (row >= 0)
+        {
+            beginRemoveRows(QModelIndex(), row, row);
+            m_navAids.removeAt(row);
+            m_selected.removeAt(row);
+            endRemoveRows();
+        }
+    }
+
+    void removeAllNavAids() {
+        if (m_navAids.count() > 0)
+        {
+            beginRemoveRows(QModelIndex(), 0, m_navAids.count() - 1);
+            m_navAids.clear();
+            m_selected.clear();
+            endRemoveRows();
+        }
+    }
+
+    QHash<int, QByteArray> roleNames() const {
+        QHash<int, QByteArray> roles;
+        roles[positionRole] = "position";
+        roles[navAidDataRole] = "navAidData";
+        roles[navAidImageRole] = "navAidImage";
+        roles[bubbleColourRole] = "bubbleColour";
+        roles[selectedRole] = "selected";
+        return roles;
+    }
+
+private:
+    QList<NavAid *> m_navAids;
+    QList<bool> m_selected;
+};
+
 class ADSBDemodGUI : public ChannelGUI {
     Q_OBJECT
 
@@ -500,11 +652,13 @@ public:
     void target(const QString& name, float az, float el, float range);
     bool setFrequency(float frequency);
     bool useSIUints() { return m_settings.m_siUnits; }
+    Q_INVOKABLE void clearHighlighted();
 
 public slots:
     void channelMarkerChangedByCursor();
     void channelMarkerHighlightedByCursor();
     void flightInformationUpdated(const FlightInformation::Flight& flight);
+    void aircraftPhoto(const PlaneSpottersPhoto *photo);
 
 private:
     Ui::ADSBDemodGUI* ui;
@@ -524,10 +678,14 @@ private:
     QHash<int, AirportInformation *> *m_airportInfo; // Hashed on id
     AircraftModel m_aircraftModel;
     AirportModel m_airportModel;
+    AirspaceModel m_airspaceModel;
+    NavAidModel m_navAidModel;
     QHash<QString, QIcon *> m_airlineIcons; // Hashed on airline ICAO
     QHash<QString, QIcon *> m_flagIcons;    // Hashed on country
     QHash<QString, QString> *m_prefixMap;   // Registration to country (flag name)
     QHash<QString, QString> *m_militaryMap;   // Operator airforce to military (flag name)
+    QList<Airspace *> m_airspaces;
+    QList<NavAid *> m_navAids;
 
     AzEl m_azEl;                        // Position of station
     Aircraft *m_trackAircraft;          // Aircraft we want to track in Channel Report
@@ -542,9 +700,14 @@ private:
     QTextToSpeech *m_speech;
     QMenu *menu;                        // Column select context menu
     FlightInformation *m_flightInformation;
+    PlaneSpotters m_planeSpotters;
+    QString m_photoLink;
     WebAPIAdapterInterface *m_webAPIAdapterInterface;
     HttpDownloadManager m_dlm;
     QProgressDialog *m_progressDialog;
+    quint16 m_osmPort;
+    OpenAIP m_openAIP;
+    ADSBOSMTemplateServer *m_templateServer;
 
     explicit ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
     virtual ~ADSBDemodGUI();
@@ -579,6 +742,8 @@ private:
     bool readOSNDB(const QString& filename);
     bool readFastDB(const QString& filename);
     void updateAirports();
+    void updateAirspaces();
+    void updateNavAids();
     QIcon *getAirlineIcon(const QString &operatorICAO);
     QIcon *getFlagIcon(const QString &country);
     void updateDeviceSetList();
@@ -586,6 +751,9 @@ private:
     Aircraft* findAircraftByFlight(const QString& flight);
     QString dataTimeToShortString(QDateTime dt);
     void initFlightInformation();
+    void applyMapSettings();
+    void updatePhotoText(Aircraft *aircraft);
+    void updatePhotoFlightInformation(Aircraft *aircraft);
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);
@@ -610,6 +778,7 @@ private slots:
     void on_flightInfo_clicked();
     void on_getOSNDB_clicked();
     void on_getAirportDB_clicked();
+    void on_getAirspacesDB_clicked();
     void on_flightPaths_clicked(bool checked);
     void on_allFlightPaths_clicked(bool checked);
     void onWidgetRolled(QWidget* widget, bool rollDown);
@@ -625,6 +794,12 @@ private slots:
     void on_logEnable_clicked(bool checked=false);
     void on_logFilename_clicked();
     void on_logOpen_clicked();
+    void downloadingURL(const QString& url);
+    void downloadError(const QString& error);
+    void downloadAirspaceFinished();
+    void downloadNavAidsFinished();
+    void photoClicked();
+
 signals:
     void homePositionChanged();
 };

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>417</width>
-    <height>287</height>
+    <height>638</height>
    </rect>
   </property>
   <property name="font">
@@ -23,38 +23,14 @@
    <item>
     <widget class="QGroupBox" name="groupBox">
      <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="0">
-       <widget class="QLabel" name="airportSizeLabel">
+      <item row="14" column="0">
+       <widget class="QLabel" name="displayStatsLabel">
         <property name="text">
-         <string>Display airports with size</string>
+         <string>Display demodulator statistics</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="units">
-        <property name="toolTip">
-         <string>The units to use for altitude, speed and climb rate</string>
-        </property>
-        <item>
-         <property name="text">
-          <string>ft, kn, ft/min</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>m, kph, m/s</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="timeoutLabel">
-        <property name="text">
-         <string>Aircraft timeout (s)</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
+      <item row="4" column="1">
        <widget class="QSpinBox" name="airportRange">
         <property name="toolTip">
          <string>Displays airports within the specified distance in kilometres from My Position</string>
@@ -64,7 +40,219 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
+      <item row="9" column="1">
+       <widget class="QSpinBox" name="timeout">
+        <property name="toolTip">
+         <string>How long in seconds after not receiving any frames will an aircraft be removed from the table and map</string>
+        </property>
+        <property name="maximum">
+         <number>1000000</number>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="mapTypeLabel">
+        <property name="text">
+         <string>Map type</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="airspacesLabel">
+        <property name="text">
+         <string>Airspaces to display</string>
+        </property>
+       </widget>
+      </item>
+      <item row="15" column="1">
+       <widget class="QLineEdit" name="apiKey">
+        <property name="toolTip">
+         <string>aviationstack.com API key for accessing flight information</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QListWidget" name="airspaces">
+        <property name="toolTip">
+         <string>Airspace categories to display</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>A</string>
+         </property>
+         <property name="toolTip">
+          <string>IFR only</string>
+         </property>
+         <property name="checkState">
+          <enum>Unchecked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>B</string>
+         </property>
+         <property name="toolTip">
+          <string>IFR and VFR with ATC clearance</string>
+         </property>
+         <property name="checkState">
+          <enum>Unchecked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>C</string>
+         </property>
+         <property name="toolTip">
+          <string>IFR and VFR with ATC clearance</string>
+         </property>
+         <property name="checkState">
+          <enum>Unchecked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>D</string>
+         </property>
+         <property name="toolTip">
+          <string>IFR and VFR with ATC clearance</string>
+         </property>
+         <property name="checkState">
+          <enum>Unchecked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>E</string>
+         </property>
+         <property name="toolTip">
+          <string>IFR with clearance and VFR</string>
+         </property>
+         <property name="checkState">
+          <enum>Unchecked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>G</string>
+         </property>
+         <property name="toolTip">
+          <string>Uncontrolled</string>
+         </property>
+         <property name="checkState">
+          <enum>Unchecked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>FIR</string>
+         </property>
+         <property name="toolTip">
+          <string>Flight Information Region</string>
+         </property>
+         <property name="checkState">
+          <enum>Unchecked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>CTR</string>
+         </property>
+         <property name="toolTip">
+          <string>Controlled Traffic Region</string>
+         </property>
+         <property name="checkState">
+          <enum>Unchecked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>TMZ</string>
+         </property>
+         <property name="toolTip">
+          <string>Transponder Mandatory Zone</string>
+         </property>
+         <property name="checkState">
+          <enum>Unchecked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>RMZ</string>
+         </property>
+         <property name="toolTip">
+          <string>Radio Mandatory Zone</string>
+         </property>
+         <property name="checkState">
+          <enum>Unchecked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>RESTRICTED</string>
+         </property>
+         <property name="checkState">
+          <enum>Unchecked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>GLIDING</string>
+         </property>
+         <property name="checkState">
+          <enum>Unchecked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>DANGER</string>
+         </property>
+         <property name="checkState">
+          <enum>Unchecked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>PROHIBITED</string>
+         </property>
+         <property name="checkState">
+          <enum>Unchecked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>WAVE</string>
+         </property>
+         <property name="checkState">
+          <enum>Unchecked</enum>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="13" column="1">
+       <widget class="QCheckBox" name="autoResizeTableColumns">
+        <property name="toolTip">
+         <string>Resize the columns in the table after an aircraft is added to it</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="displayNavAids">
+        <property name="text">
+         <string>Display NAVAIDs</string>
+        </property>
+       </widget>
+      </item>
+      <item row="13" column="0">
+       <widget class="QLabel" name="autoResizeTableColumnsLabel">
+        <property name="text">
+         <string>Resize columns after adding aircraft</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
        <widget class="QComboBox" name="airportSize">
         <property name="toolTip">
          <string>Sets the minimum airport size that will be displayed on the map</string>
@@ -86,95 +274,14 @@
         </item>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="unitsLabel">
-        <property name="text">
-         <string>Units</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="1">
-       <widget class="QPushButton" name="font">
-        <property name="toolTip">
-         <string>Select a font for the table</string>
-        </property>
-        <property name="text">
-         <string>Select...</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="1">
-       <widget class="QSpinBox" name="timeout">
-        <property name="toolTip">
-         <string>How long in seconds after not receiving any frames will an aircraft be removed from the table and map</string>
-        </property>
-        <property name="maximum">
-         <number>1000000</number>
-        </property>
-       </widget>
-      </item>
       <item row="3" column="0">
-       <widget class="QLabel" name="airportRangeLabel">
+       <widget class="QLabel" name="heliportsLabel">
         <property name="text">
-         <string>Airport display distance (km)</string>
+         <string>Display heliports</string>
         </property>
        </widget>
       </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="fontLabel">
-        <property name="text">
-         <string>Table font</string>
-        </property>
-       </widget>
-      </item>
-      <item row="10" column="0">
-       <widget class="QLabel" name="apiKeyLabel">
-        <property name="text">
-         <string>avaitionstack API key</string>
-        </property>
-       </widget>
-      </item>
-      <item row="11" column="0">
-       <spacer name="verticalSpacer">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="9" column="1">
-       <widget class="QCheckBox" name="autoResizeTableColumns">
-        <property name="toolTip">
-         <string>Resize the columns in the table after an aircraft is added to it</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="0">
-       <widget class="QLabel" name="autoResizeTableColumnsLabel">
-        <property name="text">
-         <string>Resize columns after adding aircraft</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QCheckBox" name="heliports">
-        <property name="toolTip">
-         <string>When checked, heliports are displayed on the map</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="1">
+      <item row="14" column="1">
        <widget class="QCheckBox" name="displayStats">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -191,23 +298,152 @@
        </widget>
       </item>
       <item row="2" column="0">
-       <widget class="QLabel" name="heliportsLabel">
+       <widget class="QLabel" name="airportSizeLabel">
         <property name="text">
-         <string>Display heliports</string>
+         <string>Display airports with size</string>
         </property>
        </widget>
       </item>
-      <item row="7" column="0">
-       <widget class="QLabel" name="displayStatsLabel">
+      <item row="15" column="0">
+       <widget class="QLabel" name="apiKeyLabel">
         <property name="text">
-         <string>Display demodulator statistics</string>
+         <string>avaitionstack API key</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="0">
+       <widget class="QLabel" name="timeoutLabel">
+        <property name="text">
+         <string>Aircraft timeout (s)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <widget class="QSpinBox" name="airspaceRange">
+        <property name="toolTip">
+         <string>Displays airspace within the specified distance in kilometres from My Position</string>
+        </property>
+        <property name="maximum">
+         <number>20000</number>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="units">
+        <property name="toolTip">
+         <string>The units to use for altitude, speed and climb rate</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>ft, kn, ft/min</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>m, kph, m/s</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="unitsLabel">
+        <property name="text">
+         <string>Units</string>
         </property>
        </widget>
       </item>
       <item row="10" column="1">
-       <widget class="QLineEdit" name="apiKey">
+       <widget class="QPushButton" name="font">
         <property name="toolTip">
-         <string>aviationstack.com API key for accessing flight information</string>
+         <string>Select a font for the table</string>
+        </property>
+        <property name="text">
+         <string>Select...</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="airportRangeLabel">
+        <property name="text">
+         <string>Airport display distance (km)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="mapType">
+        <property name="toolTip">
+         <string>Type of map to display</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>Aviation</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Aviation (Dark)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Street</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Satellite</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="airspaceRangeLabel">
+        <property name="text">
+         <string>Airspace display distance (km)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QCheckBox" name="heliports">
+        <property name="toolTip">
+         <string>When checked, heliports are displayed on the map</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="10" column="0">
+       <widget class="QLabel" name="fontLabel">
+        <property name="text">
+         <string>Table font</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="1">
+       <widget class="QCheckBox" name="navAids">
+        <property name="toolTip">
+         <string>Display NAVAIDs such as VORs and NDBs</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="0">
+       <widget class="QLabel" name="photosLabel">
+        <property name="text">
+         <string>Display aircraft photos</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="1">
+       <widget class="QCheckBox" name="photos">
+        <property name="toolTip">
+         <string>Download and display photos of highlighted aircraft</string>
+        </property>
+        <property name="text">
+         <string/>
         </property>
        </widget>
       </item>
@@ -226,6 +462,22 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>units</tabstop>
+  <tabstop>mapType</tabstop>
+  <tabstop>airportSize</tabstop>
+  <tabstop>heliports</tabstop>
+  <tabstop>airportRange</tabstop>
+  <tabstop>airspaces</tabstop>
+  <tabstop>airspaceRange</tabstop>
+  <tabstop>navAids</tabstop>
+  <tabstop>photos</tabstop>
+  <tabstop>timeout</tabstop>
+  <tabstop>font</tabstop>
+  <tabstop>autoResizeTableColumns</tabstop>
+  <tabstop>displayStats</tabstop>
+  <tabstop>apiKey</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
