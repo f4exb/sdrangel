@@ -2391,16 +2391,28 @@ void ADSBDemodGUI::on_displaySettings_clicked()
 
 void ADSBDemodGUI::applyMapSettings()
 {
+    Real stationLatitude = MainCore::instance()->getSettings().getLatitude();
+    Real stationLongitude = MainCore::instance()->getSettings().getLongitude();
+    Real stationAltitude = MainCore::instance()->getSettings().getAltitude();
+
     QQuickItem *item = ui->map->rootObject();
 
-    // Save existing position of map
     QObject *object = item->findChild<QObject*>("map");
     QGeoCoordinate coords;
     double zoom;
     if (object != nullptr)
     {
+        // Save existing position of map
         coords = object->property("center").value<QGeoCoordinate>();
         zoom = object->property("zoomLevel").value<double>();
+    }
+    else
+    {
+        // Center on my location when map is first opened
+        coords.setLatitude(stationLatitude);
+        coords.setLongitude(stationLongitude);
+        coords.setAltitude(stationAltitude);
+        zoom = 10.0;
     }
 
     // Create the map using the specified provider
@@ -2463,9 +2475,6 @@ void ADSBDemodGUI::applyMapSettings()
     QObject *stationObject = newMap->findChild<QObject*>("station");
     if(stationObject != NULL)
     {
-        Real stationLatitude = MainCore::instance()->getSettings().getLatitude();
-        Real stationLongitude = MainCore::instance()->getSettings().getLongitude();
-        Real stationAltitude = MainCore::instance()->getSettings().getAltitude();
         QGeoCoordinate coords = stationObject->property("coordinate").value<QGeoCoordinate>();
         coords.setLatitude(stationLatitude);
         coords.setLongitude(stationLongitude);
@@ -2608,16 +2617,6 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     Real stationAltitude = MainCore::instance()->getSettings().getAltitude();
     m_azEl.setLocation(stationLatitude, stationLongitude, stationAltitude);
 
-    // Centre map at My Position
-    QQuickItem *item = ui->map->rootObject();
-    QObject *object = item->findChild<QObject*>("map");
-    if(object != NULL)
-    {
-        QGeoCoordinate coords = object->property("center").value<QGeoCoordinate>();
-        coords.setLatitude(stationLatitude);
-        coords.setLongitude(stationLongitude);
-        object->setProperty("center", QVariant::fromValue(coords));
-    }
     // Add airports within range of My Position
     if (m_airportInfo != nullptr) {
         updateAirports();
