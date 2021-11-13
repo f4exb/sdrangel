@@ -27,17 +27,14 @@ Item {
         var plugin = Qt.createQmlObject (pluginString, qmlMap)
 
         if (mapPtr) {
-            // Objects aren't destroyed immediately, so rename the old
-            // map, so any C++ code that calls findChild("map") doesn't find
-            // the old map
-            mapPtr.objectName = "oldMap";
+            // Objects aren't destroyed immediately, so don't call findChild("map")
             mapPtr.destroy()
             mapPtr = null
         }
         mapPtr = actualMapComponent.createObject(page)
-        mapPtr.plugin = plugin;
+        mapPtr.plugin = plugin
         mapPtr.forceActiveFocus()
-        mapPtr.objectName = "map";
+        return mapPtr
     }
 
     Item {
@@ -50,6 +47,7 @@ Item {
 
         Map {
             id: map
+            objectName: "map"
             anchors.fill: parent
             center: QtPositioning.coordinate(51.5, 0.125) // London
             zoomLevel: 10
@@ -68,7 +66,6 @@ Item {
                 id: station
                 objectName: "station"
                 stationName: "Home"
-                coordinate:  QtPositioning.coordinate(51.5, 0.125)
             }
 
             MapItemView {

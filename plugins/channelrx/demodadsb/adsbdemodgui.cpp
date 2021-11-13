@@ -2409,7 +2409,13 @@ void ADSBDemodGUI::applyMapSettings()
     // Use our repo, so we can append API key and redefine transmit maps
     parameters["osm.mapping.providersrepository.address"] = QString("http://127.0.0.1:%1/").arg(m_osmPort);
     // Use ADS-B specific cache, as we use different transmit maps
-    parameters["osm.mapping.cache.directory"] = QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation) + "/QtLocation/osm/sdrangel/adsb";
+    QString cachePath = QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation) + "/QtLocation/5.8/tiles/osm/sdrangel_adsb";
+    parameters["osm.mapping.cache.directory"] = cachePath;
+    // On Linux, we need to create the directory
+    QDir dir(cachePath);
+    if (!dir.exists()) {
+        dir.mkpath(cachePath);
+    }
 
     QString mapType;
     switch (m_settings.m_mapType)
@@ -2427,17 +2433,49 @@ void ADSBDemodGUI::applyMapSettings()
         mapType = "Satellite Map";
         break;
     }
-    QMetaObject::invokeMethod(item, "createMap",
+
+    QVariant retVal;
+    if (!QMetaObject::invokeMethod(item, "createMap", Qt::DirectConnection,
+                                Q_RETURN_ARG(QVariant, retVal),
                                 Q_ARG(QVariant, QVariant::fromValue(parameters)),
                                 Q_ARG(QVariant, mapType),
-                                Q_ARG(QVariant, QVariant::fromValue(this)));
+                                Q_ARG(QVariant, QVariant::fromValue(this))))
+    {
+        qCritical() << "ADSBDemodGUI::applyMapSettings - Failed to invoke createMap";
+    }
+    QObject *newMap = retVal.value<QObject *>();
 
     // Restore position of map
-    object = item->findChild<QObject*>("map");
-    if ((object != nullptr) && coords.isValid())
+    if (newMap != nullptr)
     {
-        object->setProperty("zoomLevel", QVariant::fromValue(zoom));
-        object->setProperty("center", QVariant::fromValue(coords));
+        if (coords.isValid())
+        {
+            newMap->setProperty("zoomLevel", QVariant::fromValue(zoom));
+            newMap->setProperty("center", QVariant::fromValue(coords));
+        }
+    }
+    else
+    {
+        qDebug() << "ADSBDemodGUI::applyMapSettings - createMap returned a nullptr";
+    }
+
+    // Move antenna icon to My Position
+    QObject *stationObject = newMap->findChild<QObject*>("station");
+    if(stationObject != NULL)
+    {
+        Real stationLatitude = MainCore::instance()->getSettings().getLatitude();
+        Real stationLongitude = MainCore::instance()->getSettings().getLongitude();
+        Real stationAltitude = MainCore::instance()->getSettings().getAltitude();
+        QGeoCoordinate coords = stationObject->property("coordinate").value<QGeoCoordinate>();
+        coords.setLatitude(stationLatitude);
+        coords.setLongitude(stationLongitude);
+        coords.setAltitude(stationAltitude);
+        stationObject->setProperty("coordinate", QVariant::fromValue(coords));
+        stationObject->setProperty("stationName", QVariant::fromValue(MainCore::instance()->getSettings().getStationName()));
+    }
+    else
+    {
+        qDebug() << "ADSBDemodGUI::applyMapSettings - Couldn't find station";
     }
 }
 
@@ -2579,17 +2617,6 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
         coords.setLatitude(stationLatitude);
         coords.setLongitude(stationLongitude);
         object->setProperty("center", QVariant::fromValue(coords));
-    }
-    // Move antenna icon to My Position
-    QObject *stationObject = item->findChild<QObject*>("station");
-    if(stationObject != NULL)
-    {
-        QGeoCoordinate coords = stationObject->property("coordinate").value<QGeoCoordinate>();
-        coords.setLatitude(stationLatitude);
-        coords.setLongitude(stationLongitude);
-        coords.setAltitude(stationAltitude);
-        stationObject->setProperty("coordinate", QVariant::fromValue(coords));
-        stationObject->setProperty("stationName", QVariant::fromValue(MainCore::instance()->getSettings().getStationName()));
     }
     // Add airports within range of My Position
     if (m_airportInfo != nullptr) {

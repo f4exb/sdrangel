@@ -74,7 +74,7 @@ void ADSBDemodSettings::resetToDefaults()
     }
     m_logFilename = "adsb_log.csv";
     m_logEnabled = false;
-    m_airspaces = QStringList({"A", "C", "TMZ"});
+    m_airspaces = QStringList({"A", "D", "TMZ"});
     m_airspaceRange = 500.0f;
     m_mapType = AVIATION_LIGHT;
     m_displayNavAids = true;
@@ -225,7 +225,7 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         d.readString(36, &m_logFilename, "adsb_log.csv");
         d.readBool(37, &m_logEnabled, false);
 
-        d.readString(38, &string, "A C TMZ");
+        d.readString(38, &string, "A D TMZ");
         m_airspaces = string.split(" ");
         d.readFloat(39, &m_airspaceRange, 500.0f);
         d.readS32(40, (int *)&m_mapType, (int)AVIATION_LIGHT);
