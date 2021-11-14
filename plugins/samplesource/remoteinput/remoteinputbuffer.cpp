@@ -394,10 +394,14 @@ uint8_t *RemoteInputBuffer::readData(int32_t length)
             m_readSize = length;
         }
 
-        std::memcpy((void *) m_readBuffer, (const void *) &buffer[m_readIndex], m_framesNbBytes - m_readIndex); // copy end of buffer
-        length -= m_framesNbBytes - m_readIndex;
-        std::memcpy((void *) &m_readBuffer[m_framesNbBytes - m_readIndex], (const void *) buffer, length); // copy start of buffer
-        m_readIndex = length;
+        if (m_readBuffer)
+        {
+            std::memcpy((void *) m_readBuffer, (const void *) &buffer[m_readIndex], m_framesNbBytes - m_readIndex); // copy end of buffer
+            length -= m_framesNbBytes - m_readIndex;
+            std::memcpy((void *) &m_readBuffer[m_framesNbBytes - m_readIndex], (const void *) buffer, length); // copy start of buffer
+            m_readIndex = length;
+        }
+
         return m_readBuffer;
     }
 }
