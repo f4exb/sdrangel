@@ -8222,27 +8222,11 @@ margin-bottom: 20px;
             defs.PacketModActions = {
   "properties" : {
     "tx" : {
-      "$ref" : "#/definitions/PacketModActions_tx"
+      "type" : "integer",
+      "description" : "Transmit with current data\n  * 0 - Do nothing\n  * 1 - Transmit\n"
     }
   },
   "description" : "PacketMod"
-};
-            defs.PacketModActions_tx = {
-  "properties" : {
-    "callsign" : {
-      "type" : "string"
-    },
-    "to" : {
-      "type" : "string"
-    },
-    "via" : {
-      "type" : "string"
-    },
-    "data" : {
-      "type" : "string"
-    }
-  },
-  "description" : "Transmit a packet\n"
 };
             defs.PacketModReport = {
   "properties" : {
@@ -8266,9 +8250,13 @@ margin-bottom: 20px;
       "type" : "integer",
       "format" : "int64"
     },
-    "mode" : {
-      "type" : "string",
-      "description" : "Transmission mode\n  * \"1200 AFSK\"\n  * \"9600 FSK\".\n"
+    "modulation" : {
+      "type" : "integer",
+      "description" : "Modulation mode\n  * 0 - AFSK\n  * 1 - FSK\n"
+    },
+    "baud" : {
+      "type" : "integer",
+      "description" : "Baud rate"
     },
     "rfBandwidth" : {
       "type" : "number",
@@ -8330,6 +8318,10 @@ margin-bottom: 20px;
       "type" : "integer"
     },
     "preEmphasisTau" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "preEmphasisLowFreq" : {
       "type" : "number",
       "format" : "float"
     },
@@ -51298,7 +51290,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-11-11T23:23:22.877+01:00
+              Generated 2021-11-13T22:32:53.016+01:00
             </div>
           </div>
       </div>

@@ -30,8 +30,10 @@ SWGPacketModSettings::SWGPacketModSettings(QString* json) {
 SWGPacketModSettings::SWGPacketModSettings() {
     input_frequency_offset = 0L;
     m_input_frequency_offset_isSet = false;
-    mode = nullptr;
-    m_mode_isSet = false;
+    modulation = 0;
+    m_modulation_isSet = false;
+    baud = 0;
+    m_baud_isSet = false;
     rf_bandwidth = 0.0f;
     m_rf_bandwidth_isSet = false;
     fm_deviation = 0.0f;
@@ -70,6 +72,8 @@ SWGPacketModSettings::SWGPacketModSettings() {
     m_pre_emphasis_isSet = false;
     pre_emphasis_tau = 0.0f;
     m_pre_emphasis_tau_isSet = false;
+    pre_emphasis_low_freq = 0.0f;
+    m_pre_emphasis_low_freq_isSet = false;
     pre_emphasis_high_freq = 0.0f;
     m_pre_emphasis_high_freq_isSet = false;
     lpf_taps = 0;
@@ -140,8 +144,10 @@ void
 SWGPacketModSettings::init() {
     input_frequency_offset = 0L;
     m_input_frequency_offset_isSet = false;
-    mode = new QString("");
-    m_mode_isSet = false;
+    modulation = 0;
+    m_modulation_isSet = false;
+    baud = 0;
+    m_baud_isSet = false;
     rf_bandwidth = 0.0f;
     m_rf_bandwidth_isSet = false;
     fm_deviation = 0.0f;
@@ -180,6 +186,8 @@ SWGPacketModSettings::init() {
     m_pre_emphasis_isSet = false;
     pre_emphasis_tau = 0.0f;
     m_pre_emphasis_tau_isSet = false;
+    pre_emphasis_low_freq = 0.0f;
+    m_pre_emphasis_low_freq_isSet = false;
     pre_emphasis_high_freq = 0.0f;
     m_pre_emphasis_high_freq_isSet = false;
     lpf_taps = 0;
@@ -245,9 +253,9 @@ SWGPacketModSettings::init() {
 void
 SWGPacketModSettings::cleanup() {
 
-    if(mode != nullptr) { 
-        delete mode;
-    }
+
+
+
 
 
 
@@ -326,7 +334,9 @@ void
 SWGPacketModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&input_frequency_offset, pJson["inputFrequencyOffset"], "qint64", "");
     
-    ::SWGSDRangel::setValue(&mode, pJson["mode"], "QString", "QString");
+    ::SWGSDRangel::setValue(&modulation, pJson["modulation"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&baud, pJson["baud"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rf_bandwidth, pJson["rfBandwidth"], "float", "");
     
@@ -365,6 +375,8 @@ SWGPacketModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&pre_emphasis, pJson["preEmphasis"], "qint32", "");
     
     ::SWGSDRangel::setValue(&pre_emphasis_tau, pJson["preEmphasisTau"], "float", "");
+    
+    ::SWGSDRangel::setValue(&pre_emphasis_low_freq, pJson["preEmphasisLowFreq"], "float", "");
     
     ::SWGSDRangel::setValue(&pre_emphasis_high_freq, pJson["preEmphasisHighFreq"], "float", "");
     
@@ -445,8 +457,11 @@ SWGPacketModSettings::asJsonObject() {
     if(m_input_frequency_offset_isSet){
         obj->insert("inputFrequencyOffset", QJsonValue(input_frequency_offset));
     }
-    if(mode != nullptr && *mode != QString("")){
-        toJsonValue(QString("mode"), mode, obj, QString("QString"));
+    if(m_modulation_isSet){
+        obj->insert("modulation", QJsonValue(modulation));
+    }
+    if(m_baud_isSet){
+        obj->insert("baud", QJsonValue(baud));
     }
     if(m_rf_bandwidth_isSet){
         obj->insert("rfBandwidth", QJsonValue(rf_bandwidth));
@@ -504,6 +519,9 @@ SWGPacketModSettings::asJsonObject() {
     }
     if(m_pre_emphasis_tau_isSet){
         obj->insert("preEmphasisTau", QJsonValue(pre_emphasis_tau));
+    }
+    if(m_pre_emphasis_low_freq_isSet){
+        obj->insert("preEmphasisLowFreq", QJsonValue(pre_emphasis_low_freq));
     }
     if(m_pre_emphasis_high_freq_isSet){
         obj->insert("preEmphasisHighFreq", QJsonValue(pre_emphasis_high_freq));
@@ -609,14 +627,24 @@ SWGPacketModSettings::setInputFrequencyOffset(qint64 input_frequency_offset) {
     this->m_input_frequency_offset_isSet = true;
 }
 
-QString*
-SWGPacketModSettings::getMode() {
-    return mode;
+qint32
+SWGPacketModSettings::getModulation() {
+    return modulation;
 }
 void
-SWGPacketModSettings::setMode(QString* mode) {
-    this->mode = mode;
-    this->m_mode_isSet = true;
+SWGPacketModSettings::setModulation(qint32 modulation) {
+    this->modulation = modulation;
+    this->m_modulation_isSet = true;
+}
+
+qint32
+SWGPacketModSettings::getBaud() {
+    return baud;
+}
+void
+SWGPacketModSettings::setBaud(qint32 baud) {
+    this->baud = baud;
+    this->m_baud_isSet = true;
 }
 
 float
@@ -807,6 +835,16 @@ void
 SWGPacketModSettings::setPreEmphasisTau(float pre_emphasis_tau) {
     this->pre_emphasis_tau = pre_emphasis_tau;
     this->m_pre_emphasis_tau_isSet = true;
+}
+
+float
+SWGPacketModSettings::getPreEmphasisLowFreq() {
+    return pre_emphasis_low_freq;
+}
+void
+SWGPacketModSettings::setPreEmphasisLowFreq(float pre_emphasis_low_freq) {
+    this->pre_emphasis_low_freq = pre_emphasis_low_freq;
+    this->m_pre_emphasis_low_freq_isSet = true;
 }
 
 float
@@ -1117,7 +1155,10 @@ SWGPacketModSettings::isSet(){
         if(m_input_frequency_offset_isSet){
             isObjectUpdated = true; break;
         }
-        if(mode && *mode != QString("")){
+        if(m_modulation_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_baud_isSet){
             isObjectUpdated = true; break;
         }
         if(m_rf_bandwidth_isSet){
@@ -1175,6 +1216,9 @@ SWGPacketModSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_pre_emphasis_tau_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_pre_emphasis_low_freq_isSet){
             isObjectUpdated = true; break;
         }
         if(m_pre_emphasis_high_freq_isSet){

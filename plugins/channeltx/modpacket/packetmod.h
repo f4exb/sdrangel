@@ -67,28 +67,31 @@ public:
         { }
     };
 
-    class MsgTXPacketMod : public Message {
+    class MsgTx : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        static MsgTXPacketMod* create(QString callsign, QString to, QString via, QString data)
-        {
-            return new MsgTXPacketMod(callsign, to, via, data);
+        static MsgTx* create() {
+            return new MsgTx();
         }
 
-        QString m_callsign;
-        QString m_to;
-        QString m_via;
-        QString m_data;
+   private:
+        MsgTx() :
+            Message()
+        { }
+    };
+
+    class MsgReportTx : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgReportTx* create() {
+            return new MsgReportTx();
+        }
 
    private:
-
-        MsgTXPacketMod(QString callsign, QString to, QString via, QString data) :
-            Message(),
-            m_callsign(callsign),
-            m_to(to),
-            m_via(via),
-            m_data(data)
+        MsgReportTx() :
+            Message()
         { }
     };
 
@@ -96,8 +99,7 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        static MsgTXPacketBytes* create(QByteArray data)
-        {
+        static MsgTXPacketBytes* create(QByteArray data) {
             return new MsgTXPacketBytes(data);
         }
 

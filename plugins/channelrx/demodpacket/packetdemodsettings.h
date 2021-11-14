@@ -60,7 +60,6 @@ struct PacketDemodSettings
     int m_columnIndexes[PACKETDEMOD_COLUMNS];//!< How the columns are ordered in the table
     int m_columnSizes[PACKETDEMOD_COLUMNS];  //!< Size of the columns in the table
 
-    static const int PACKETDEMOD_CHANNEL_BANDWIDTH = 9600;
     static const int PACKETDEMOD_CHANNEL_SAMPLE_RATE  = 38400; // Must be integer multiple of baud rate (x32, x4)
 
     PacketDemodSettings();

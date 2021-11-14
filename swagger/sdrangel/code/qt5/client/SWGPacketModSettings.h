@@ -45,8 +45,11 @@ public:
     qint64 getInputFrequencyOffset();
     void setInputFrequencyOffset(qint64 input_frequency_offset);
 
-    QString* getMode();
-    void setMode(QString* mode);
+    qint32 getModulation();
+    void setModulation(qint32 modulation);
+
+    qint32 getBaud();
+    void setBaud(qint32 baud);
 
     float getRfBandwidth();
     void setRfBandwidth(float rf_bandwidth);
@@ -104,6 +107,9 @@ public:
 
     float getPreEmphasisTau();
     void setPreEmphasisTau(float pre_emphasis_tau);
+
+    float getPreEmphasisLowFreq();
+    void setPreEmphasisLowFreq(float pre_emphasis_low_freq);
 
     float getPreEmphasisHighFreq();
     void setPreEmphasisHighFreq(float pre_emphasis_high_freq);
@@ -202,8 +208,11 @@ private:
     qint64 input_frequency_offset;
     bool m_input_frequency_offset_isSet;
 
-    QString* mode;
-    bool m_mode_isSet;
+    qint32 modulation;
+    bool m_modulation_isSet;
+
+    qint32 baud;
+    bool m_baud_isSet;
 
     float rf_bandwidth;
     bool m_rf_bandwidth_isSet;
@@ -261,6 +270,9 @@ private:
 
     float pre_emphasis_tau;
     bool m_pre_emphasis_tau_isSet;
+
+    float pre_emphasis_low_freq;
+    bool m_pre_emphasis_low_freq_isSet;
 
     float pre_emphasis_high_freq;
     bool m_pre_emphasis_high_freq_isSet;

@@ -150,10 +150,10 @@ bool PacketModBaseband::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (PacketMod::MsgTXPacketMod::match(cmd))
+    else if (PacketMod::MsgTx::match(cmd))
     {
-        PacketMod::MsgTXPacketMod& tx = (PacketMod::MsgTXPacketMod&) cmd;
-        m_source.addTXPacket(tx.m_callsign, tx.m_to, tx.m_via, tx.m_data);
+        qDebug() << "PacketModBaseband::handleMessage: MsgTx";
+        m_source.addTXPacket(m_settings.m_callsign, m_settings.m_to, m_settings.m_via, m_settings.m_data);
 
         return true;
     }

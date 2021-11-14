@@ -22,7 +22,6 @@
 #include <QJsonObject>
 
 
-#include "SWGPacketModActions_tx.h"
 
 #include "SWGObject.h"
 #include "export.h"
@@ -42,14 +41,14 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGPacketModActions* fromJson(QString &jsonString) override;
 
-    SWGPacketModActions_tx* getTx();
-    void setTx(SWGPacketModActions_tx* tx);
+    qint32 getTx();
+    void setTx(qint32 tx);
 
 
     virtual bool isSet() override;
 
 private:
-    SWGPacketModActions_tx* tx;
+    qint32 tx;
     bool m_tx_isSet;
 
 };

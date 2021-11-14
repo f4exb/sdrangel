@@ -49,7 +49,8 @@
 #include "packetmod.h"
 
 MESSAGE_CLASS_DEFINITION(PacketMod::MsgConfigurePacketMod, Message)
-MESSAGE_CLASS_DEFINITION(PacketMod::MsgTXPacketMod, Message)
+MESSAGE_CLASS_DEFINITION(PacketMod::MsgTx, Message)
+MESSAGE_CLASS_DEFINITION(PacketMod::MsgReportTx, Message)
 MESSAGE_CLASS_DEFINITION(PacketMod::MsgTXPacketBytes, Message)
 
 const char* const PacketMod::m_channelIdURI = "sdrangel.channeltx.modpacket";
@@ -122,12 +123,10 @@ bool PacketMod::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (MsgTXPacketMod::match(cmd))
+    if (MsgTx::match(cmd))
     {
-        // Forward a copy to baseband
-        MsgTXPacketMod* rep = new MsgTXPacketMod((MsgTXPacketMod&)cmd);
-        qDebug() << "PacketMod::handleMessage: MsgTXPacketMod";
-        m_basebandSource->getInputMessageQueue()->push(rep);
+        MsgTx *msg = new MsgTx((const MsgTx&) cmd);
+        m_basebandSource->getInputMessageQueue()->push(msg);
 
         return true;
     }
@@ -158,6 +157,8 @@ void PacketMod::applySettings(const PacketModSettings& settings, bool force)
 {
     qDebug() << "PacketMod::applySettings:"
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
+            << " m_modulation: " << settings.m_modulation
+            << " m_baud: " << settings.m_baud
             << " m_rfBandwidth: " << settings.m_rfBandwidth
             << " m_fmDeviation: " << settings.m_fmDeviation
             << " m_gain: " << settings.m_gain
@@ -184,6 +185,14 @@ void PacketMod::applySettings(const PacketModSettings& settings, bool force)
 
     if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
         reverseAPIKeys.append("inputFrequencyOffset");
+    }
+
+    if ((settings.m_modulation != m_settings.m_modulation) || force) {
+        reverseAPIKeys.append("modulation");
+    }
+
+    if ((settings.m_baud != m_settings.m_baud) || force) {
+        reverseAPIKeys.append("baud");
     }
 
     if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
@@ -476,8 +485,11 @@ void PacketMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("inputFrequencyOffset")) {
         settings.m_inputFrequencyOffset = response.getPacketModSettings()->getInputFrequencyOffset();
     }
-    if (channelSettingsKeys.contains("mode")) {
-        settings.setMode(*response.getPacketModSettings()->getMode());
+    if (channelSettingsKeys.contains("modulation")) {
+        settings.m_modulation = (PacketModSettings::Modulation) response.getPacketModSettings()->getModulation();
+    }
+    if (channelSettingsKeys.contains("baud")) {
+        settings.m_baud = response.getPacketModSettings()->getBaud();
     }
     if (channelSettingsKeys.contains("rfBandwidth")) {
         settings.m_rfBandwidth = response.getPacketModSettings()->getRfBandwidth();
@@ -647,25 +659,22 @@ int PacketMod::webapiActionsPost(
     {
         if (channelActionsKeys.contains("tx"))
         {
-            SWGSDRangel::SWGPacketModActions_tx* tx = swgPacketModActions->getTx();
-            QString *callsignP = tx->getCallsign();
-            QString *toP = tx->getTo();
-            QString *viaP = tx->getVia();
-            QString *dataP = tx->getData();
-            if (callsignP && toP && viaP && dataP)
+            if (swgPacketModActions->getTx() != 0)
             {
-                QString callsign(*callsignP);
-                QString to(*toP);
-                QString via(*viaP);
-                QString data(*dataP);
-
-                PacketMod::MsgTXPacketMod *msg = PacketMod::MsgTXPacketMod::create(callsign, to, via, data);
+                MsgTx *msg = MsgTx::create();
                 m_basebandSource->getInputMessageQueue()->push(msg);
+
+                if (getMessageQueueToGUI())
+                {
+                    MsgReportTx *msg = MsgReportTx::create();
+                    getMessageQueueToGUI()->push(msg);
+                }
+
                 return 202;
             }
             else
             {
-                errorMessage = "Packet must contain callsign, to, via and data";
+                errorMessage = "Packet must contain tx action";
                 return 400;
             }
         }
@@ -685,7 +694,8 @@ int PacketMod::webapiActionsPost(
 void PacketMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const PacketModSettings& settings)
 {
     response.getPacketModSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
-    response.getPacketModSettings()->setMode(new QString(settings.getMode()));
+    response.getPacketModSettings()->setModulation((int) settings.m_modulation);
+    response.getPacketModSettings()->setBaud(settings.m_baud);
     response.getPacketModSettings()->setRfBandwidth(settings.m_rfBandwidth);
     response.getPacketModSettings()->setFmDeviation(settings.m_fmDeviation);
     response.getPacketModSettings()->setGain(settings.m_gain);
@@ -841,6 +851,12 @@ void PacketMod::webapiFormatChannelSettings(
 
     if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
         swgPacketModSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    }
+    if (channelSettingsKeys.contains("modulation") || force) {
+        swgPacketModSettings->setModulation((int) settings.m_modulation);
+    }
+    if (channelSettingsKeys.contains("baud") || force) {
+        swgPacketModSettings->setBaud((int) settings.m_baud);
     }
     if (channelSettingsKeys.contains("rfBandwidth") || force) {
         swgPacketModSettings->setRfBandwidth(settings.m_rfBandwidth);

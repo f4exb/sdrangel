@@ -28,7 +28,7 @@ SWGPacketModActions::SWGPacketModActions(QString* json) {
 }
 
 SWGPacketModActions::SWGPacketModActions() {
-    tx = nullptr;
+    tx = 0;
     m_tx_isSet = false;
 }
 
@@ -38,15 +38,13 @@ SWGPacketModActions::~SWGPacketModActions() {
 
 void
 SWGPacketModActions::init() {
-    tx = new SWGPacketModActions_tx();
+    tx = 0;
     m_tx_isSet = false;
 }
 
 void
 SWGPacketModActions::cleanup() {
-    if(tx != nullptr) { 
-        delete tx;
-    }
+
 }
 
 SWGPacketModActions*
@@ -60,7 +58,7 @@ SWGPacketModActions::fromJson(QString &json) {
 
 void
 SWGPacketModActions::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&tx, pJson["tx"], "SWGPacketModActions_tx", "SWGPacketModActions_tx");
+    ::SWGSDRangel::setValue(&tx, pJson["tx"], "qint32", "");
     
 }
 
@@ -78,19 +76,19 @@ SWGPacketModActions::asJson ()
 QJsonObject*
 SWGPacketModActions::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if((tx != nullptr) && (tx->isSet())){
-        toJsonValue(QString("tx"), tx, obj, QString("SWGPacketModActions_tx"));
+    if(m_tx_isSet){
+        obj->insert("tx", QJsonValue(tx));
     }
 
     return obj;
 }
 
-SWGPacketModActions_tx*
+qint32
 SWGPacketModActions::getTx() {
     return tx;
 }
 void
-SWGPacketModActions::setTx(SWGPacketModActions_tx* tx) {
+SWGPacketModActions::setTx(qint32 tx) {
     this->tx = tx;
     this->m_tx_isSet = true;
 }
@@ -100,7 +98,7 @@ bool
 SWGPacketModActions::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(tx && tx->isSet()){
+        if(m_tx_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

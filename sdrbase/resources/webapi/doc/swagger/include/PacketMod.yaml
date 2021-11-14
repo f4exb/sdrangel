@@ -4,12 +4,15 @@ PacketModSettings:
     inputFrequencyOffset:
       type: integer
       format: int64
-    mode:
-      type: string
+    modulation:
+      type: integer
       description: >
-        Transmission mode
-          * "1200 AFSK"
-          * "9600 FSK".
+        Modulation mode
+          * 0 - AFSK
+          * 1 - FSK
+    baud:
+      type: integer
+      description: Baud rate
     rfBandwidth:
       type: number
       format: float
@@ -55,6 +58,9 @@ PacketModSettings:
     preEmphasis:
       type: integer
     preEmphasisTau:
+      type: number
+      format: float
+    preEmphasisLowFreq:
       type: number
       format: float
     preEmphasisHighFreq:
@@ -163,15 +169,8 @@ PacketModActions:
   description: PacketMod
   properties:
     tx:
-      type: object
-      properties:
-        callsign:
-          type: string
-        to:
-          type: string
-        via:
-          type: string
-        data:
-          type: string
+      type: integer
       description: >
-        Transmit a packet
+        Transmit with current data
+          * 0 - Do nothing
+          * 1 - Transmit

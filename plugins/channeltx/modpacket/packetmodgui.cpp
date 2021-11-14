@@ -88,6 +88,12 @@ bool PacketModGUI::handleMessage(const Message& message)
         blockApplySettings(false);
         return true;
     }
+    else if (PacketMod::MsgReportTx::match(message))
+    {
+        QString str = m_settings.m_callsign + ">" + m_settings.m_to + "," + m_settings.m_via + ":" + m_settings.m_data;
+        ui->transmittedText->appendPlainText(str);
+        return true;
+    }
     else
     {
         return false;
@@ -489,14 +495,10 @@ PacketModGUI::~PacketModGUI()
 
 void PacketModGUI::transmit()
 {
-    QString callsign = ui->callsign->text();
-    QString to = ui->to->currentText();
-    QString via = ui->via->currentText();
-    QString data = ui->packet->text();
     // TODO: Any validation?
-    QString str = callsign + ">" + to + "," + via + ":" + data;
-    ui->transmittedText->appendPlainText(str + "\n");
-    PacketMod::MsgTXPacketMod *msg = PacketMod::MsgTXPacketMod::create(callsign, to, via, data);
+    QString str = m_settings.m_callsign + ">" + m_settings.m_to + "," + m_settings.m_via + ":" + m_settings.m_data;
+    ui->transmittedText->appendPlainText(str);
+    PacketMod::MsgTx *msg = PacketMod::MsgTx::create();
     m_packetMod->getInputMessageQueue()->push(msg);
 }
 

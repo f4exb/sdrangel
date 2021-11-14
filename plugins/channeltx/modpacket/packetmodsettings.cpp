@@ -89,11 +89,14 @@ bool PacketModSettings::setMode(QString mode)
 {
     int baud;
     bool valid;
+    bool setCommon = false;
 
     // First part of mode string should give baud rate
     baud = mode.split(" ")[0].toInt(&valid);
-    if (!valid)
+
+    if (!valid) {
         return false;
+    }
 
     if (mode.endsWith("AFSK"))
     {
@@ -102,22 +105,56 @@ bool PacketModSettings::setMode(QString mode)
         m_scramble = false;
         m_rfBandwidth = 12500.0f;
         m_fmDeviation = 2500.0f;
-        m_spectrumRate = 8000;
         m_modulation = PacketModSettings::AFSK;
+        m_markFrequency = 2200;
+        m_spaceFrequency = 1200;
+        setCommon = true;
     }
     else if (mode.endsWith("FSK"))
     {
         // G3RUH - http://www.jrmiller.demon.co.uk/products/figs/man9k6.pdf
         m_baud = baud;
         m_scramble = true;
+        m_polynomial = 0x10800;
         m_rfBandwidth = 20000.0f;
         m_fmDeviation = 3000.0f;
-        m_spectrumRate = 24000;
-        m_bpf = false;
         m_modulation = PacketModSettings::FSK;
+        m_beta = 0.5f;
+        m_symbolSpan = 6;
+        setCommon = true;
     }
     else
+    {
         return false;
+    }
+
+    if (baud <= 2400) {
+        m_spectrumRate = 8000;
+    } else {
+        m_spectrumRate = 24000;
+    }
+
+    if (setCommon)
+    {
+        m_ax25PreFlags = 5;
+        m_ax25PostFlags = 4;
+        m_ax25PID = 0xf0;
+        m_ax25Control = 3;
+        m_preEmphasis = false;
+        m_preEmphasisTau = 531e-6f; // Narrowband FM
+        m_preEmphasisHighFreq = 3000.0f;
+        m_lpfTaps = 301;
+        m_rampUpBits = 8;
+        m_rampDownBits = 8;
+        m_rampRange = 60;
+        m_modulateWhileRamping = true;
+        m_bpf = false;
+        m_bpfLowCutoff = m_spaceFrequency - 400.0f;
+        m_bpfHighCutoff = m_markFrequency + 400.0f;
+        m_bpfTaps = 301;
+        m_pulseShaping = true;
+    }
+
     return true;
 }
 
