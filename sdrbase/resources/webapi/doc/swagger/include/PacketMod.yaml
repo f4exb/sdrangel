@@ -60,9 +60,6 @@ PacketModSettings:
     preEmphasisTau:
       type: number
       format: float
-    preEmphasisLowFreq:
-      type: number
-      format: float
     preEmphasisHighFreq:
       type: number
       format: float

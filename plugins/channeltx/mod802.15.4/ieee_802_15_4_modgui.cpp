@@ -288,6 +288,12 @@ void IEEE_802_15_4_ModGUI::on_udpPort_editingFinished()
     applySettings();
 }
 
+void IEEE_802_15_4_ModGUI::on_udpBytesFormat_clicked(bool checked)
+{
+    m_settings.m_udpBytesFormat = checked;
+    applySettings();
+}
+
 void IEEE_802_15_4_ModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
@@ -444,8 +450,8 @@ IEEE_802_15_4_ModGUI::~IEEE_802_15_4_ModGUI()
 void IEEE_802_15_4_ModGUI::transmit()
 {
     QString data = ui->frame->text();
-    ui->transmittedText->appendPlainText(data + "\n");
-    IEEE_802_15_4_Mod::MsgTXIEEE_802_15_4_Mod *msg = IEEE_802_15_4_Mod::MsgTXIEEE_802_15_4_Mod::create(data);
+    ui->transmittedText->appendPlainText(data);
+    IEEE_802_15_4_Mod::MsgTxHexString *msg = IEEE_802_15_4_Mod::MsgTxHexString::create(data);
     m_IEEE_802_15_4_Mod->getInputMessageQueue()->push(msg);
 }
 

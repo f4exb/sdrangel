@@ -108,9 +108,6 @@ public:
     float getPreEmphasisTau();
     void setPreEmphasisTau(float pre_emphasis_tau);
 
-    float getPreEmphasisLowFreq();
-    void setPreEmphasisLowFreq(float pre_emphasis_low_freq);
-
     float getPreEmphasisHighFreq();
     void setPreEmphasisHighFreq(float pre_emphasis_high_freq);
 
@@ -270,9 +267,6 @@ private:
 
     float pre_emphasis_tau;
     bool m_pre_emphasis_tau_isSet;
-
-    float pre_emphasis_low_freq;
-    bool m_pre_emphasis_low_freq_isSet;
 
     float pre_emphasis_high_freq;
     bool m_pre_emphasis_high_freq_isSet;

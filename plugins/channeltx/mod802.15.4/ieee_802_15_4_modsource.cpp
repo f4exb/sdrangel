@@ -558,18 +558,24 @@ void IEEE_802_15_4_ModSource::initTX()
     m_scrambler.init();
 }
 
-uint8_t *IEEE_802_15_4_ModSource::hexToBin(uint8_t *p, QString data)
+void IEEE_802_15_4_ModSource::convert(const QString dataStr, QByteArray& data)
 {
     // Convert string containing space separated list of hex values to binary
-    QStringList list = data.split(" ");
-    for (int i = 0; i < list.size(); i++)
-    {
-        *p++ = list[i].toInt(nullptr, 16);
+    QStringList list = dataStr.split(" ");
+
+    for (int i = 0; i < list.size(); i++) {
+        data.append(list[i].toInt(nullptr, 16));
     }
-    return p;
 }
 
-void IEEE_802_15_4_ModSource::addTXFrame(QString data)
+void IEEE_802_15_4_ModSource::addTxFrame(const QString& data)
+{
+    QByteArray ba;
+    convert(data.trimmed(), ba);
+    addTxFrame(ba);
+}
+
+void IEEE_802_15_4_ModSource::addTxFrame(const QByteArray& data)
 {
     uint8_t *crcStart;
     uint8_t *p;
@@ -592,7 +598,8 @@ void IEEE_802_15_4_ModSource::addTXFrame(QString data)
     // PHY payload
     crcStart = p;
     // Data
-    p = hexToBin(p, data.trimmed());
+    std::copy(data.data(), data.data() + data.length(), p);
+    p += data.length();
     // MAC FCS
     crc.calculate(crcStart, p-crcStart);
     crcValue = crc.get();
@@ -606,7 +613,7 @@ void IEEE_802_15_4_ModSource::addTXFrame(QString data)
 
     // Dump frame
     QByteArray qb((char *)m_bits, p-m_bits);
-    qDebug() << "TX: " << qb.toHex();
+    qDebug() << "IEEE_802_15_4_ModSource::addTxFrame: Tx: " << qb.toHex();
 
     // Save number of bits in frame
     m_bitCount = m_bitCountTotal = (p-&m_bits[0]) * 8;

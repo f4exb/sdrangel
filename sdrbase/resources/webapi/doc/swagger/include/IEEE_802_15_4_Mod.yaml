@@ -28,6 +28,12 @@ IEEE_802_15_4_ModSettings:
     udpEnabled:
       description: Enable forwarding of frames via UDP
       type: integer
+    m_udpBytesFormat:
+      type: integer
+      description: >
+        Payload format
+          * 0 - Blank separated string representation of hex bytes i.e. 00 02 0a
+          * 1 - Raw bytes
     udpAddress:
       description: UDP address to listen for frames to transmit on
       type: string

@@ -70,6 +70,7 @@ void IEEE_802_15_4_ModSettings::resetToDefaults()
     m_beta = 1.0f;
     m_symbolSpan = 6;
     m_udpEnabled = false;
+    m_udpBytesFormat = false;
     m_udpAddress = "127.0.0.1";
     m_udpPort = 9998;
 }
@@ -182,6 +183,7 @@ QByteArray IEEE_802_15_4_ModSettings::serialize() const
     s.writeBool(34, m_udpEnabled);
     s.writeString(35, m_udpAddress);
     s.writeU32(36, m_udpPort);
+    s.writeBool(37, m_udpBytesFormat);
 
     return s.final();
 }
@@ -259,6 +261,7 @@ bool IEEE_802_15_4_ModSettings::deserialize(const QByteArray& data)
         } else {
             m_udpPort = 9998;
         }
+        d.readBool(37, &m_udpBytesFormat);
 
         return true;
     }

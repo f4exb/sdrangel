@@ -46,6 +46,8 @@ SWGIEEE_802_15_4_ModSettings::SWGIEEE_802_15_4_ModSettings() {
     m_repeat_count_isSet = false;
     udp_enabled = 0;
     m_udp_enabled_isSet = false;
+    m_udp_bytes_format = 0;
+    m_m_udp_bytes_format_isSet = false;
     udp_address = nullptr;
     m_udp_address_isSet = false;
     udp_port = 0;
@@ -92,6 +94,8 @@ SWGIEEE_802_15_4_ModSettings::init() {
     m_repeat_count_isSet = false;
     udp_enabled = 0;
     m_udp_enabled_isSet = false;
+    m_udp_bytes_format = 0;
+    m_m_udp_bytes_format_isSet = false;
     udp_address = new QString("");
     m_udp_address_isSet = false;
     udp_port = 0;
@@ -120,6 +124,7 @@ SWGIEEE_802_15_4_ModSettings::cleanup() {
     if(phy != nullptr) { 
         delete phy;
     }
+
 
 
 
@@ -173,6 +178,8 @@ SWGIEEE_802_15_4_ModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&repeat_count, pJson["repeatCount"], "qint32", "");
     
     ::SWGSDRangel::setValue(&udp_enabled, pJson["udpEnabled"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&m_udp_bytes_format, pJson["m_udpBytesFormat"], "qint32", "");
     
     ::SWGSDRangel::setValue(&udp_address, pJson["udpAddress"], "QString", "QString");
     
@@ -236,6 +243,9 @@ SWGIEEE_802_15_4_ModSettings::asJsonObject() {
     }
     if(m_udp_enabled_isSet){
         obj->insert("udpEnabled", QJsonValue(udp_enabled));
+    }
+    if(m_m_udp_bytes_format_isSet){
+        obj->insert("m_udpBytesFormat", QJsonValue(m_udp_bytes_format));
     }
     if(udp_address != nullptr && *udp_address != QString("")){
         toJsonValue(QString("udpAddress"), udp_address, obj, QString("QString"));
@@ -359,6 +369,16 @@ void
 SWGIEEE_802_15_4_ModSettings::setUdpEnabled(qint32 udp_enabled) {
     this->udp_enabled = udp_enabled;
     this->m_udp_enabled_isSet = true;
+}
+
+qint32
+SWGIEEE_802_15_4_ModSettings::getMUdpBytesFormat() {
+    return m_udp_bytes_format;
+}
+void
+SWGIEEE_802_15_4_ModSettings::setMUdpBytesFormat(qint32 m_udp_bytes_format) {
+    this->m_udp_bytes_format = m_udp_bytes_format;
+    this->m_m_udp_bytes_format_isSet = true;
 }
 
 QString*
@@ -491,6 +511,9 @@ SWGIEEE_802_15_4_ModSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_udp_enabled_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_m_udp_bytes_format_isSet){
             isObjectUpdated = true; break;
         }
         if(udp_address && *udp_address != QString("")){

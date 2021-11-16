@@ -68,20 +68,38 @@ public:
         { }
     };
 
-    class MsgTXIEEE_802_15_4_Mod : public Message {
+    class MsgTxHexString : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        static MsgTXIEEE_802_15_4_Mod* create(QString data)
+        static MsgTxHexString* create(QString data)
         {
-            return new MsgTXIEEE_802_15_4_Mod(data);
+            return new MsgTxHexString(data);
         }
 
         QString m_data;
 
    private:
 
-        MsgTXIEEE_802_15_4_Mod(QString data) :
+        MsgTxHexString(QString data) :
+            Message(),
+            m_data(data)
+        { }
+    };
+
+    class MsgTxBytes : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgTxBytes* create(QByteArray data) {
+            return new MsgTxBytes(data);
+        }
+
+        QByteArray m_data;
+
+   private:
+
+        MsgTxBytes(QByteArray data) :
             Message(),
             m_data(data)
         { }

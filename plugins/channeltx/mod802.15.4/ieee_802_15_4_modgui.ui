@@ -486,6 +486,16 @@
        </widget>
       </item>
       <item>
+       <widget class="QCheckBox" name="checkBox">
+        <property name="toolTip">
+         <string>UDP payload sent in bytes format else blank separated hex string</string>
+        </property>
+        <property name="text">
+         <string>Bytes</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>

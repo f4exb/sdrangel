@@ -63,6 +63,7 @@ struct IEEE_802_15_4_ModSettings
     float m_beta;
     int m_symbolSpan;
     bool m_udpEnabled;
+    bool m_udpBytesFormat; //!< true for bytes payload
     QString m_udpAddress;
     uint16_t m_udpPort;
 

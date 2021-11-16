@@ -146,10 +146,17 @@ bool IEEE_802_15_4_ModBaseband::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (IEEE_802_15_4_Mod::MsgTXIEEE_802_15_4_Mod::match(cmd))
+    else if (IEEE_802_15_4_Mod::MsgTxHexString::match(cmd))
     {
-        IEEE_802_15_4_Mod::MsgTXIEEE_802_15_4_Mod& tx = (IEEE_802_15_4_Mod::MsgTXIEEE_802_15_4_Mod&) cmd;
-        m_source.addTXFrame(tx.m_data);
+        IEEE_802_15_4_Mod::MsgTxHexString& tx = (IEEE_802_15_4_Mod::MsgTxHexString&) cmd;
+        m_source.addTxFrame(tx.m_data);
+
+        return true;
+    }
+    else if (IEEE_802_15_4_Mod::MsgTxBytes::match(cmd))
+    {
+        IEEE_802_15_4_Mod::MsgTxBytes& tx = (IEEE_802_15_4_Mod::MsgTxBytes&) cmd;
+        m_source.addTxFrame(tx.m_data);
 
         return true;
     }

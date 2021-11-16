@@ -49,7 +49,8 @@
 #include "ieee_802_15_4_mod.h"
 
 MESSAGE_CLASS_DEFINITION(IEEE_802_15_4_Mod::MsgConfigureIEEE_802_15_4_Mod, Message)
-MESSAGE_CLASS_DEFINITION(IEEE_802_15_4_Mod::MsgTXIEEE_802_15_4_Mod, Message)
+MESSAGE_CLASS_DEFINITION(IEEE_802_15_4_Mod::MsgTxHexString, Message)
+MESSAGE_CLASS_DEFINITION(IEEE_802_15_4_Mod::MsgTxBytes, Message)
 
 const char* const IEEE_802_15_4_Mod::m_channelIdURI = "sdrangel.channeltx.mod802.15.4";
 const char* const IEEE_802_15_4_Mod::m_channelId = "IEEE_802_15_4_Mod";
@@ -118,11 +119,11 @@ bool IEEE_802_15_4_Mod::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (MsgTXIEEE_802_15_4_Mod::match(cmd))
+    else if (MsgTxHexString::match(cmd))
     {
         // Forward a copy to baseband
-        MsgTXIEEE_802_15_4_Mod* rep = new MsgTXIEEE_802_15_4_Mod((MsgTXIEEE_802_15_4_Mod&)cmd);
-        qDebug() << "IEEE_802_15_4_Mod::handleMessage: MsgTXIEEE_802_15_4_Mod";
+        MsgTxHexString* rep = new MsgTxHexString((MsgTxHexString&)cmd);
+        qDebug() << "IEEE_802_15_4_Mod::handleMessage: MsgTxHexString";
         m_basebandSource->getInputMessageQueue()->push(rep);
 
         return true;
@@ -201,6 +202,10 @@ void IEEE_802_15_4_Mod::applySettings(const IEEE_802_15_4_ModSettings& settings,
         reverseAPIKeys.append("udpEnabled");
     }
 
+    if ((settings.m_udpBytesFormat != m_settings.m_udpBytesFormat) || force) {
+        reverseAPIKeys.append("udpBytesFormat");
+    }
+
     if ((settings.m_udpAddress != m_settings.m_udpAddress) || force) {
         reverseAPIKeys.append("udpAddress");
     }
@@ -209,7 +214,7 @@ void IEEE_802_15_4_Mod::applySettings(const IEEE_802_15_4_ModSettings& settings,
         reverseAPIKeys.append("udpPort");
     }
 
-    if (   (settings.m_udpEnabled != m_settings.m_udpEnabled)
+    if ((settings.m_udpEnabled != m_settings.m_udpEnabled)
         || (settings.m_udpAddress != m_settings.m_udpAddress)
         || (settings.m_udpPort != m_settings.m_udpPort)
         || force)
@@ -342,13 +347,16 @@ void IEEE_802_15_4_Mod::webapiUpdateChannelSettings(
         settings.m_repeatCount = response.getIeee802154ModSettings()->getRepeatCount();
     }
     if (channelSettingsKeys.contains("udpEnabled")) {
-        settings.m_udpEnabled = response.getPacketDemodSettings()->getUdpEnabled();
+        settings.m_udpEnabled = response.getIeee802154ModSettings()->getUdpEnabled() != 0;
+    }
+    if (channelSettingsKeys.contains("udpBytesFormat")) {
+        settings.m_udpBytesFormat = response.getIeee802154ModSettings()->getMUdpBytesFormat() != 0;
     }
     if (channelSettingsKeys.contains("udpAddress")) {
-        settings.m_udpAddress = *response.getPacketDemodSettings()->getUdpAddress();
+        settings.m_udpAddress = *response.getIeee802154ModSettings()->getUdpAddress();
     }
     if (channelSettingsKeys.contains("udpPort")) {
-        settings.m_udpPort = response.getPacketDemodSettings()->getUdpPort();
+        settings.m_udpPort = response.getIeee802154ModSettings()->getUdpPort();
     }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getIeee802154ModSettings()->getRgbColor();
@@ -404,7 +412,7 @@ int IEEE_802_15_4_Mod::webapiActionsPost(
             {
                 QString data(*dataP);
 
-                IEEE_802_15_4_Mod::MsgTXIEEE_802_15_4_Mod *msg = IEEE_802_15_4_Mod::MsgTXIEEE_802_15_4_Mod::create(data);
+                IEEE_802_15_4_Mod::MsgTxHexString *msg = IEEE_802_15_4_Mod::MsgTxHexString::create(data);
                 m_basebandSource->getInputMessageQueue()->push(msg);
                 return 202;
             }
@@ -437,7 +445,8 @@ void IEEE_802_15_4_Mod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSetti
     response.getIeee802154ModSettings()->setRepeat(settings.m_repeat ? 1 : 0);
     response.getIeee802154ModSettings()->setRepeatDelay(settings.m_repeatDelay);
     response.getIeee802154ModSettings()->setRepeatCount(settings.m_repeatCount);
-    response.getIeee802154ModSettings()->setUdpEnabled(settings.m_udpEnabled);
+    response.getIeee802154ModSettings()->setUdpEnabled(settings.m_udpEnabled ? 1 : 0);
+    response.getIeee802154ModSettings()->setMUdpBytesFormat(settings.m_udpBytesFormat ? 1 : 0);
     response.getIeee802154ModSettings()->setUdpAddress(new QString(settings.m_udpAddress));
     response.getIeee802154ModSettings()->setUdpPort(settings.m_udpPort);
     response.getIeee802154ModSettings()->setRgbColor(settings.m_rgbColor);
@@ -552,7 +561,10 @@ void IEEE_802_15_4_Mod::webapiFormatChannelSettings(
         swgIEEE_802_15_4_ModSettings->setRepeatCount(settings.m_repeatCount);
     }
     if (channelSettingsKeys.contains("udpEnabled") || force) {
-        swgIEEE_802_15_4_ModSettings->setUdpEnabled(settings.m_udpEnabled);
+        swgIEEE_802_15_4_ModSettings->setUdpEnabled(settings.m_udpEnabled ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("udpBytesFormat") || force) {
+        swgIEEE_802_15_4_ModSettings->setMUdpBytesFormat(settings.m_udpBytesFormat ? 1 : 0);
     }
     if (channelSettingsKeys.contains("udpAddress") || force) {
         swgIEEE_802_15_4_ModSettings->setUdpAddress(new QString(settings.m_udpAddress));
@@ -638,9 +650,17 @@ void IEEE_802_15_4_Mod::udpRx()
     while (m_udpSocket->hasPendingDatagrams())
     {
         QNetworkDatagram datagram = m_udpSocket->receiveDatagram();
-        // Convert from binary to hex string
-        QString string = datagram.data().toHex(' ');
-        IEEE_802_15_4_Mod::MsgTXIEEE_802_15_4_Mod *msg = IEEE_802_15_4_Mod::MsgTXIEEE_802_15_4_Mod::create(string);
-        m_basebandSource->getInputMessageQueue()->push(msg);
+        if (m_settings.m_udpBytesFormat)
+        {
+            IEEE_802_15_4_Mod::MsgTxBytes *msg = IEEE_802_15_4_Mod::MsgTxBytes::create(datagram.data());
+            m_basebandSource->getInputMessageQueue()->push(msg);
+        }
+        else
+        {
+            // Convert from binary to hex string
+            QString string = datagram.data().toHex(' ');
+            IEEE_802_15_4_Mod::MsgTxHexString *msg = IEEE_802_15_4_Mod::MsgTxHexString::create(string);
+            m_basebandSource->getInputMessageQueue()->push(msg);
+        }
     }
 }

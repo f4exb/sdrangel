@@ -105,6 +105,7 @@ private slots:
     void on_udpEnabled_clicked(bool checked);
     void on_udpAddress_editingFinished();
     void on_udpPort_editingFinished();
+    void on_udpBytesFormat_clicked(bool checked);
 
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);

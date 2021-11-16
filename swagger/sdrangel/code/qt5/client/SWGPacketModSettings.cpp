@@ -72,8 +72,6 @@ SWGPacketModSettings::SWGPacketModSettings() {
     m_pre_emphasis_isSet = false;
     pre_emphasis_tau = 0.0f;
     m_pre_emphasis_tau_isSet = false;
-    pre_emphasis_low_freq = 0.0f;
-    m_pre_emphasis_low_freq_isSet = false;
     pre_emphasis_high_freq = 0.0f;
     m_pre_emphasis_high_freq_isSet = false;
     lpf_taps = 0;
@@ -186,8 +184,6 @@ SWGPacketModSettings::init() {
     m_pre_emphasis_isSet = false;
     pre_emphasis_tau = 0.0f;
     m_pre_emphasis_tau_isSet = false;
-    pre_emphasis_low_freq = 0.0f;
-    m_pre_emphasis_low_freq_isSet = false;
     pre_emphasis_high_freq = 0.0f;
     m_pre_emphasis_high_freq_isSet = false;
     lpf_taps = 0;
@@ -252,7 +248,6 @@ SWGPacketModSettings::init() {
 
 void
 SWGPacketModSettings::cleanup() {
-
 
 
 
@@ -375,8 +370,6 @@ SWGPacketModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&pre_emphasis, pJson["preEmphasis"], "qint32", "");
     
     ::SWGSDRangel::setValue(&pre_emphasis_tau, pJson["preEmphasisTau"], "float", "");
-    
-    ::SWGSDRangel::setValue(&pre_emphasis_low_freq, pJson["preEmphasisLowFreq"], "float", "");
     
     ::SWGSDRangel::setValue(&pre_emphasis_high_freq, pJson["preEmphasisHighFreq"], "float", "");
     
@@ -519,9 +512,6 @@ SWGPacketModSettings::asJsonObject() {
     }
     if(m_pre_emphasis_tau_isSet){
         obj->insert("preEmphasisTau", QJsonValue(pre_emphasis_tau));
-    }
-    if(m_pre_emphasis_low_freq_isSet){
-        obj->insert("preEmphasisLowFreq", QJsonValue(pre_emphasis_low_freq));
     }
     if(m_pre_emphasis_high_freq_isSet){
         obj->insert("preEmphasisHighFreq", QJsonValue(pre_emphasis_high_freq));
@@ -835,16 +825,6 @@ void
 SWGPacketModSettings::setPreEmphasisTau(float pre_emphasis_tau) {
     this->pre_emphasis_tau = pre_emphasis_tau;
     this->m_pre_emphasis_tau_isSet = true;
-}
-
-float
-SWGPacketModSettings::getPreEmphasisLowFreq() {
-    return pre_emphasis_low_freq;
-}
-void
-SWGPacketModSettings::setPreEmphasisLowFreq(float pre_emphasis_low_freq) {
-    this->pre_emphasis_low_freq = pre_emphasis_low_freq;
-    this->m_pre_emphasis_low_freq_isSet = true;
 }
 
 float
@@ -1216,9 +1196,6 @@ SWGPacketModSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_pre_emphasis_tau_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_pre_emphasis_low_freq_isSet){
             isObjectUpdated = true; break;
         }
         if(m_pre_emphasis_high_freq_isSet){

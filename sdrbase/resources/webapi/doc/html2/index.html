@@ -6267,6 +6267,10 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Enable forwarding of frames via UDP"
     },
+    "m_udpBytesFormat" : {
+      "type" : "integer",
+      "description" : "Payload format\n  * 0 - Blank separated string representation of hex bytes i.e. 00 02 0a\n  * 1 - Raw bytes\n"
+    },
     "udpAddress" : {
       "type" : "string",
       "description" : "UDP address to listen for frames to transmit on"
@@ -8318,10 +8322,6 @@ margin-bottom: 20px;
       "type" : "integer"
     },
     "preEmphasisTau" : {
-      "type" : "number",
-      "format" : "float"
-    },
-    "preEmphasisLowFreq" : {
       "type" : "number",
       "format" : "float"
     },
@@ -51290,7 +51290,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-11-13T22:32:53.016+01:00
+              Generated 2021-11-16T00:55:07.690+01:00
             </div>
           </div>
       </div>

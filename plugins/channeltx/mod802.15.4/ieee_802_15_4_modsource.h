@@ -62,8 +62,8 @@ public:
     void applySettings(const IEEE_802_15_4_ModSettings& settings, bool force = false);
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
 
-    uint8_t *hexToBin(uint8_t *p, QString data);
-    void addTXFrame(QString data);
+    void addTxFrame(const QString& data);
+    void addTxFrame(const QByteArray& data);
 
 private:
     int m_channelSampleRate;
@@ -136,6 +136,7 @@ private:
     bool chipsValid();                  // Are there any chips to transmit
     int getSymbol();
     int getChip();
+    void convert(const QString dataStr, QByteArray& data);
     void initTX();
     void createHalfSine(int sampleRate, int chipRate);
 

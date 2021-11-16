@@ -69,6 +69,9 @@ public:
     qint32 getUdpEnabled();
     void setUdpEnabled(qint32 udp_enabled);
 
+    qint32 getMUdpBytesFormat();
+    void setMUdpBytesFormat(qint32 m_udp_bytes_format);
+
     QString* getUdpAddress();
     void setUdpAddress(QString* udp_address);
 
@@ -129,6 +132,9 @@ private:
 
     qint32 udp_enabled;
     bool m_udp_enabled_isSet;
+
+    qint32 m_udp_bytes_format;
+    bool m_m_udp_bytes_format_isSet;
 
     QString* udp_address;
     bool m_udp_address_isSet;
