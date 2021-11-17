@@ -153,13 +153,6 @@ bool IEEE_802_15_4_ModBaseband::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (IEEE_802_15_4_Mod::MsgTxBytes::match(cmd))
-    {
-        IEEE_802_15_4_Mod::MsgTxBytes& tx = (IEEE_802_15_4_Mod::MsgTxBytes&) cmd;
-        m_source.addTxFrame(tx.m_data);
-
-        return true;
-    }
     else if (DSPSignalNotification::match(cmd))
     {
         QMutexLocker mutexLocker(&m_mutex);
@@ -187,6 +180,26 @@ void IEEE_802_15_4_ModBaseband::applySettings(const IEEE_802_15_4_ModSettings& s
     }
 
     m_source.applySettings(settings, force);
+
+    if ((settings.m_udpEnabled != m_settings.m_udpEnabled)
+        || (settings.m_udpAddress != m_settings.m_udpAddress)
+        || (settings.m_udpPort != m_settings.m_udpPort)
+        || force)
+    {
+        qDebug() << "IEEE_802_15_4_ModBaseband::applySettings:"
+            << " m_udpEnabled" << settings.m_udpEnabled
+            << " m_udpAddress: " << settings.m_udpAddress
+            << " m_udpPort" << settings.m_udpPort;
+
+        IEEE_802_15_4_ModSource::MsgCloseUDP *msg = IEEE_802_15_4_ModSource::MsgCloseUDP::create();
+        m_source.getInputMessageQueue()->push(msg);
+
+        if (settings.m_udpEnabled)
+        {
+            IEEE_802_15_4_ModSource::MsgOpenUDP *msg = IEEE_802_15_4_ModSource::MsgOpenUDP::create(settings.m_udpAddress, settings.m_udpPort);
+            m_source.getInputMessageQueue()->push(msg);
+        }
+    }
 
     m_settings = settings;
 }

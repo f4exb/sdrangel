@@ -34,15 +34,55 @@
 #include "dsp/fmpreemphasis.h"
 #include "util/lfsr.h"
 #include "util/movingaverage.h"
+#include "util/message.h"
 
 #include "ieee_802_15_4_modsettings.h"
 
 class BasebandSampleSink;
 class ScopeVis;
+class QUdpSocket;
 
-class IEEE_802_15_4_ModSource : public ChannelSampleSource
+class IEEE_802_15_4_ModSource : public QObject, public ChannelSampleSource
 {
+    Q_OBJECT
 public:
+    class MsgCloseUDP : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgCloseUDP* create() {
+            return new MsgCloseUDP();
+        }
+
+   private:
+
+        MsgCloseUDP() :
+            Message()
+        { }
+    };
+
+    class MsgOpenUDP : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgOpenUDP* create(const QString& udpAddress, uint16_t udpPort) {
+            return new MsgOpenUDP(udpAddress, udpPort);
+        }
+
+        const QString& getUDPAddress() const { return m_udpAddress; }
+        uint16_t getUDPPort() const { return m_udpPort; }
+
+   private:
+        QString m_udpAddress;
+        uint16_t m_udpPort;
+
+        MsgOpenUDP(const QString& udpAddress, uint16_t udpPort) :
+            Message(),
+            m_udpAddress(udpAddress),
+            m_udpPort(udpPort)
+        { }
+    };
+
     IEEE_802_15_4_ModSource();
     virtual ~IEEE_802_15_4_ModSource();
 
@@ -57,10 +97,12 @@ public:
         peakLevel = m_peakLevelOut;
         numSamples = m_levelNbSamples;
     }
+    MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
     void setSpectrumSink(BasebandSampleSink *sampleSink) { m_spectrumSink = sampleSink; }
     void setScopeSink(ScopeVis* scopeSink) { m_scopeSink = scopeSink; }
     void applySettings(const IEEE_802_15_4_ModSettings& settings, bool force = false);
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
+    bool handleMessage(const Message& cmd);
 
     void addTxFrame(const QString& data);
     void addTxFrame(const QByteArray& data);
@@ -130,14 +172,17 @@ private:
     int m_bitIdx;                       // Index in to current byte of m_bits
     int m_bitCount;                     // Count of number of valid bits in m_bits
     int m_bitCountTotal;
-
     std::ofstream m_basebandFile;       // For debug output of baseband waveform
+    QUdpSocket *m_udpSocket;
+    MessageQueue m_inputMessageQueue;   //!< Queue for asynchronous inbound communication
 
     bool chipsValid();                  // Are there any chips to transmit
     int getSymbol();
     int getChip();
     void convert(const QString dataStr, QByteArray& data);
     void initTX();
+    void openUDP(const QString& udpAddress, uint16_t udpPort);
+    void closeUDP();
     void createHalfSine(int sampleRate, int chipRate);
 
     void calculateLevel(Real& sample);
@@ -145,6 +190,9 @@ private:
     void sampleToSpectrum(Complex sample);
     void sampleToScope(Complex sample);
 
+private slots:
+    void handleInputMessages();
+    void udpRx();
 };
 
 #endif // INCLUDE_IEEE_802_15_4_MODSOURCE_H

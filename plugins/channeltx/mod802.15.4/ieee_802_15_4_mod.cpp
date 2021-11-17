@@ -50,7 +50,6 @@
 
 MESSAGE_CLASS_DEFINITION(IEEE_802_15_4_Mod::MsgConfigureIEEE_802_15_4_Mod, Message)
 MESSAGE_CLASS_DEFINITION(IEEE_802_15_4_Mod::MsgTxHexString, Message)
-MESSAGE_CLASS_DEFINITION(IEEE_802_15_4_Mod::MsgTxBytes, Message)
 
 const char* const IEEE_802_15_4_Mod::m_channelIdURI = "sdrangel.channeltx.mod802.15.4";
 const char* const IEEE_802_15_4_Mod::m_channelId = "IEEE_802_15_4_Mod";
@@ -59,8 +58,7 @@ IEEE_802_15_4_Mod::IEEE_802_15_4_Mod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
     m_deviceAPI(deviceAPI),
     m_spectrumVis(SDR_TX_SCALEF),
-    m_settingsMutex(QMutex::Recursive),
-    m_udpSocket(nullptr)
+    m_settingsMutex(QMutex::Recursive)
 {
     setObjectName(m_channelId);
 
@@ -80,7 +78,7 @@ IEEE_802_15_4_Mod::IEEE_802_15_4_Mod(DeviceAPI *deviceAPI) :
 
 IEEE_802_15_4_Mod::~IEEE_802_15_4_Mod()
 {
-    closeUDP();
+    // closeUDP();
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
     m_deviceAPI->removeChannelSourceAPI(this);
@@ -212,17 +210,6 @@ void IEEE_802_15_4_Mod::applySettings(const IEEE_802_15_4_ModSettings& settings,
 
     if ((settings.m_udpPort != m_settings.m_udpPort) || force) {
         reverseAPIKeys.append("udpPort");
-    }
-
-    if ((settings.m_udpEnabled != m_settings.m_udpEnabled)
-        || (settings.m_udpAddress != m_settings.m_udpAddress)
-        || (settings.m_udpPort != m_settings.m_udpPort)
-        || force)
-    {
-        if (settings.m_udpEnabled)
-            openUDP(settings);
-        else
-            closeUDP();
     }
 
     if (m_settings.m_streamIndex != settings.m_streamIndex)
@@ -622,45 +609,4 @@ uint32_t IEEE_802_15_4_Mod::getNumberOfDeviceStreams() const
 ScopeVis *IEEE_802_15_4_Mod::getScopeSink()
 {
     return m_basebandSource->getScopeSink();
-}
-
-void IEEE_802_15_4_Mod::openUDP(const IEEE_802_15_4_ModSettings& settings)
-{
-    closeUDP();
-    m_udpSocket = new QUdpSocket();
-    if (!m_udpSocket->bind(QHostAddress(settings.m_udpAddress), settings.m_udpPort))
-        qCritical() << "IEEE_802_15_4_Mod::openUDP: Failed to bind to port " << settings.m_udpAddress << ":" << settings.m_udpPort << ". Error: " << m_udpSocket->error();
-    else
-        qDebug() << "IEEE_802_15_4_Mod::openUDP: Listening for packets on " << settings.m_udpAddress << ":" << settings.m_udpPort;
-    connect(m_udpSocket, &QUdpSocket::readyRead, this, &IEEE_802_15_4_Mod::udpRx);
-}
-
-void IEEE_802_15_4_Mod::closeUDP()
-{
-    if (m_udpSocket != nullptr)
-    {
-        disconnect(m_udpSocket, &QUdpSocket::readyRead, this, &IEEE_802_15_4_Mod::udpRx);
-        delete m_udpSocket;
-        m_udpSocket = nullptr;
-    }
-}
-
-void IEEE_802_15_4_Mod::udpRx()
-{
-    while (m_udpSocket->hasPendingDatagrams())
-    {
-        QNetworkDatagram datagram = m_udpSocket->receiveDatagram();
-        if (m_settings.m_udpBytesFormat)
-        {
-            IEEE_802_15_4_Mod::MsgTxBytes *msg = IEEE_802_15_4_Mod::MsgTxBytes::create(datagram.data());
-            m_basebandSource->getInputMessageQueue()->push(msg);
-        }
-        else
-        {
-            // Convert from binary to hex string
-            QString string = datagram.data().toHex(' ');
-            IEEE_802_15_4_Mod::MsgTxHexString *msg = IEEE_802_15_4_Mod::MsgTxHexString::create(string);
-            m_basebandSource->getInputMessageQueue()->push(msg);
-        }
-    }
 }

@@ -18,11 +18,16 @@
 
 #include <cctype>
 #include <QDebug>
+#include <QUdpSocket>
+#include <QNetworkDatagram>
 
 #include "dsp/basebandsamplesink.h"
 #include "dsp/scopevis.h"
 #include "ieee_802_15_4_modsource.h"
 #include "util/crc.h"
+
+MESSAGE_CLASS_DEFINITION(IEEE_802_15_4_ModSource::MsgCloseUDP, Message)
+MESSAGE_CLASS_DEFINITION(IEEE_802_15_4_ModSource::MsgOpenUDP, Message)
 
 IEEE_802_15_4_ModSource::IEEE_802_15_4_ModSource() :
     m_channelSampleRate(3000000),
@@ -45,7 +50,8 @@ IEEE_802_15_4_ModSource::IEEE_802_15_4_ModSource() :
     m_state(idle),
     m_byteIdx(0),
     m_bitIdx(0),
-    m_bitCount(0)
+    m_bitCount(0),
+    m_udpSocket(nullptr)
 {
     m_lowpass.create(301, m_channelSampleRate, 22000.0 / 2.0);
     m_pulseShapeI.create(1, 6, m_channelSampleRate/300000, true);
@@ -54,10 +60,12 @@ IEEE_802_15_4_ModSource::IEEE_802_15_4_ModSource() :
     m_scopeSampleBuffer.resize(m_scopeSampleBufferSize);
     applySettings(m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }
 
 IEEE_802_15_4_ModSource::~IEEE_802_15_4_ModSource()
 {
+    closeUDP();
     delete[] m_sinLUT;
 }
 
@@ -328,16 +336,24 @@ void IEEE_802_15_4_ModSource::applySettings(const IEEE_802_15_4_ModSettings& set
         m_bitsPerSymbol = 4;
         m_chipsPerSymbol = settings.m_subGHzBand ? 16 : 32;
     }
+
     m_chipRate = settings.m_bitRate * m_chipsPerSymbol / m_bitsPerSymbol;
     m_samplesPerChip = m_channelSampleRate / m_chipRate;
     qDebug() << "m_samplesPerChip: " << m_samplesPerChip;
-    if (m_channelSampleRate % m_chipRate != 0)
-        qCritical("Sample rate is not an integer multiple of the chip rate");
-    if (m_samplesPerChip <= 2)
-        qCritical("Sample rate is not a high enough multiple of the chip rate");
 
-    if ((settings.m_pulseShaping != m_settings.m_pulseShaping) || (settings.m_beta != m_settings.m_beta) || (settings.m_symbolSpan != m_settings.m_symbolSpan)
-        || (settings.m_bitRate != m_settings.m_bitRate) || (settings.m_modulation != m_settings.m_modulation)
+    if (m_channelSampleRate % m_chipRate != 0) {
+        qCritical("Sample rate is not an integer multiple of the chip rate");
+    }
+
+    if (m_samplesPerChip <= 2) {
+        qCritical("Sample rate is not a high enough multiple of the chip rate");
+    }
+
+    if ((settings.m_pulseShaping != m_settings.m_pulseShaping)
+        || (settings.m_beta != m_settings.m_beta)
+        || (settings.m_symbolSpan != m_settings.m_symbolSpan)
+        || (settings.m_bitRate != m_settings.m_bitRate)
+        || (settings.m_modulation != m_settings.m_modulation)
         || (settings.m_subGHzBand != m_settings.m_subGHzBand)
         || force)
     {
@@ -349,16 +365,21 @@ void IEEE_802_15_4_ModSource::applySettings(const IEEE_802_15_4_ModSettings& set
                 << " subGHzBand: " << settings.m_subGHzBand
                 << " bitRate:" << settings.m_bitRate
                 << " chipRate:" << m_chipRate;
+
         if (settings.m_pulseShaping == IEEE_802_15_4_ModSettings::RC)
         {
             m_pulseShapeI.create(settings.m_beta, m_settings.m_symbolSpan, m_channelSampleRate/m_chipRate, true);
             m_pulseShapeQ.create(settings.m_beta, m_settings.m_symbolSpan, m_channelSampleRate/m_chipRate, true);
         }
         else
-            createHalfSine(m_channelSampleRate, m_chipRate);
+        {
+             createHalfSine(m_channelSampleRate, m_chipRate);
+        }
     }
-    if ((settings.m_polynomial != m_settings.m_polynomial) || force)
+
+    if ((settings.m_polynomial != m_settings.m_polynomial) || force) {
         m_scrambler.setPolynomial(settings.m_polynomial);
+    }
 
     m_settings = settings;
 
@@ -613,7 +634,6 @@ void IEEE_802_15_4_ModSource::addTxFrame(const QByteArray& data)
 
     // Dump frame
     QByteArray qb((char *)m_bits, p-m_bits);
-    qDebug() << "IEEE_802_15_4_ModSource::addTxFrame: Tx: " << qb.toHex();
 
     // Save number of bits in frame
     m_bitCount = m_bitCountTotal = (p-&m_bits[0]) * 8;
@@ -621,8 +641,93 @@ void IEEE_802_15_4_ModSource::addTxFrame(const QByteArray& data)
     m_frameRepeatCount = m_settings.m_repeatCount;
     initTX();
 
-    if (m_settings.m_writeToFile)
+    if (m_settings.m_writeToFile) {
         m_basebandFile.open("IEEE_802_15_4_Mod.csv", std::ofstream::out);
-    else if (m_basebandFile.is_open())
+    } else if (m_basebandFile.is_open()) {
         m_basebandFile.close();
+    }
+}
+
+void IEEE_802_15_4_ModSource::handleInputMessages()
+{
+    Message* message;
+
+    while ((message = m_inputMessageQueue.pop()) != nullptr)
+    {
+        if (handleMessage(*message)) {
+            delete message;
+        }
+    }
+}
+
+bool IEEE_802_15_4_ModSource::handleMessage(const Message& msg)
+{
+    if (MsgOpenUDP::match(msg))
+    {
+        qDebug("IEEE_802_15_4_ModSource::handleMessage: MsgOpenUDP");
+        const MsgOpenUDP& cmd = (const MsgOpenUDP&) msg;
+        openUDP(cmd.getUDPAddress(), cmd.getUDPPort());
+        return true;
+    }
+    else if (MsgCloseUDP::match(msg))
+    {
+        qDebug("IEEE_802_15_4_ModSource::handleMessage: MsgCloseUDP");
+        closeUDP();
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void IEEE_802_15_4_ModSource::closeUDP()
+{
+    if (m_udpSocket != nullptr)
+    {
+        disconnect(m_udpSocket, &QUdpSocket::readyRead, this, &IEEE_802_15_4_ModSource::udpRx);
+        delete m_udpSocket;
+        m_udpSocket = nullptr;
+    }
+}
+
+void IEEE_802_15_4_ModSource::openUDP(const QString& udpAddress, uint16_t udpPort)
+{
+    m_udpSocket = new QUdpSocket();
+
+    if (m_udpSocket->bind(QHostAddress(udpAddress), udpPort))
+    {
+        connect(m_udpSocket, &QUdpSocket::readyRead, this, &IEEE_802_15_4_ModSource::udpRx);
+        qDebug() << "IEEE_802_15_4_ModSource::openUDP: Listening for packets on "
+            << udpAddress << ":"
+            << udpPort;
+            m_udpSocket->setSocketOption(QAbstractSocket::ReceiveBufferSizeSocketOption, IEEE_802_15_4_ModSettings::m_udpBufferSize);
+    }
+    else
+    {
+        qCritical() << "IEEE_802_15_4_Mod::openUDP: Failed to bind to port "
+            << udpAddress << ":"
+            << udpPort
+            << ". Error: " << m_udpSocket->error();
+    }
+}
+
+void IEEE_802_15_4_ModSource::udpRx()
+{
+    while (m_udpSocket->hasPendingDatagrams())
+    {
+        QNetworkDatagram datagram = m_udpSocket->receiveDatagram();
+        QByteArray data = datagram.data();
+        qDebug() << "IEEE_802_15_4_ModSource::udpRx: " << data.toHex();
+
+        if (m_settings.m_udpBytesFormat)
+        {
+            addTxFrame(data);
+        }
+        else
+        {
+            QString string = data.toHex(' ');
+            addTxFrame(string);
+        }
+    }
 }

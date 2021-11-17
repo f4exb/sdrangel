@@ -87,24 +87,6 @@ public:
         { }
     };
 
-    class MsgTxBytes : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        static MsgTxBytes* create(QByteArray data) {
-            return new MsgTxBytes(data);
-        }
-
-        QByteArray m_data;
-
-   private:
-
-        MsgTxBytes(QByteArray data) :
-            Message(),
-            m_data(data)
-        { }
-    };
-
     //=================================================================
 
     IEEE_802_15_4_Mod(DeviceAPI *deviceAPI);
@@ -183,7 +165,7 @@ private:
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
-    QUdpSocket *m_udpSocket;
+    // QUdpSocket *m_udpSocket;
 
     void applySettings(const IEEE_802_15_4_ModSettings& settings, bool force = false);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
@@ -200,12 +182,9 @@ private:
         const IEEE_802_15_4_ModSettings& settings,
         bool force
     );
-    void openUDP(const IEEE_802_15_4_ModSettings& settings);
-    void closeUDP();
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
-    void udpRx();
 };
 
 
