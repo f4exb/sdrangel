@@ -153,23 +153,59 @@ void IEEE_802_15_4_Mod::applySettings(const IEEE_802_15_4_ModSettings& settings,
 {
     qDebug() << "IEEE_802_15_4_Mod::applySettings:"
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
+            << " m_modulation: " << settings.m_modulation
+            << " m_bitRate: " << settings.m_bitRate
+            << " m_subGHzBand: " << settings.m_subGHzBand
             << " m_rfBandwidth: " << settings.m_rfBandwidth
             << " m_gain: " << settings.m_gain
             << " m_channelMute: " << settings.m_channelMute
             << " m_repeat: " << settings.m_repeat
             << " m_repeatDelay: " << settings.m_repeatDelay
             << " m_repeatCount: " << settings.m_repeatCount
+            << " m_rampUpBits: " << settings.m_rampUpBits
+            << " m_rampDownBits: " << settings.m_rampDownBits
+            << " m_rampRange: " << settings.m_rampRange
+            << " m_modulateWhileRamping: "<< settings.m_modulateWhileRamping
+            << " m_lpfTaps: " <<  settings.m_lpfTaps
+            << " m_bbNoise: " << settings.m_bbNoise
+            << " m_writeToFile: " << settings.m_writeToFile
+            << " m_spectrumRate: " << settings.m_spectrumRate
+            << " m_data: " << settings.m_data
+            << " m_rgbColor: " << settings.m_rgbColor
+            << " m_title: " << settings.m_title
+            << " m_streamIndex: " << settings.m_streamIndex
             << " m_useReverseAPI: " << settings.m_useReverseAPI
             << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
             << " m_reverseAPIAddress: " << settings.m_reverseAPIPort
             << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
             << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
+            << " m_scramble: " << settings.m_scramble
+            << " m_polynomial: " << settings.m_polynomial
+            << " m_pulseShaping: " << settings.m_pulseShaping
+            << " m_beta: " << settings.m_beta
+            << " m_symbolSpan: " << settings.m_symbolSpan
+            << " m_udpEnabled: " << settings.m_udpEnabled
+            << " m_udpBytesFormat: " << settings.m_udpBytesFormat
+            << " m_udpAddress: " << settings.m_udpAddress
+            << " m_udpPort: " << settings.m_udpPort
             << " force: " << force;
 
     QList<QString> reverseAPIKeys;
 
     if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
         reverseAPIKeys.append("inputFrequencyOffset");
+    }
+
+    if ((settings.m_modulation != m_settings.m_modulation) || force) {
+        reverseAPIKeys.append("modulation");
+    }
+
+    if ((settings.m_bitRate != m_settings.m_bitRate) || force) {
+        reverseAPIKeys.append("bitRate");
+    }
+
+    if ((settings.m_subGHzBand != m_settings.m_subGHzBand) || force) {
+        reverseAPIKeys.append("subGHzBand");
     }
 
     if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
@@ -194,6 +230,94 @@ void IEEE_802_15_4_Mod::applySettings(const IEEE_802_15_4_ModSettings& settings,
 
     if ((settings.m_repeatCount != m_settings.m_repeatCount) || force) {
         reverseAPIKeys.append("repeatCount");
+    }
+
+    if ((settings.m_rampUpBits != m_settings.m_rampUpBits) || force) {
+        reverseAPIKeys.append("rampUpBits");
+    }
+
+    if ((settings.m_rampDownBits != m_settings.m_rampDownBits) || force) {
+        reverseAPIKeys.append("rampDownBits");
+    }
+
+    if ((settings.m_rampRange != m_settings.m_rampRange) || force) {
+        reverseAPIKeys.append("rampRange");
+    }
+
+    if ((settings.m_modulateWhileRamping != m_settings.m_modulateWhileRamping) || force) {
+        reverseAPIKeys.append("modulateWhileRamping");
+    }
+
+    if ((settings.m_lpfTaps != m_settings.m_lpfTaps) || force) {
+        reverseAPIKeys.append("lpfTaps");
+    }
+
+    if ((settings.m_bbNoise != m_settings.m_bbNoise) || force) {
+        reverseAPIKeys.append("bbNoise");
+    }
+
+    if ((settings.m_writeToFile != m_settings.m_writeToFile) || force) {
+        reverseAPIKeys.append("writeToFile");
+    }
+
+    if ((settings.m_spectrumRate != m_settings.m_spectrumRate) || force) {
+        reverseAPIKeys.append("spectrumRate");
+    }
+
+    if ((settings.m_data != m_settings.m_data) || force) {
+        reverseAPIKeys.append("data");
+    }
+
+    if ((settings.m_rgbColor != m_settings.m_rgbColor) || force) {
+        reverseAPIKeys.append("rgbColor");
+    }
+
+    if ((settings.m_title != m_settings.m_title) || force) {
+        reverseAPIKeys.append("title");
+    }
+
+    if ((settings.m_streamIndex != m_settings.m_streamIndex) || force) {
+        reverseAPIKeys.append("streamIndex");
+    }
+
+    if ((settings.m_useReverseAPI != m_settings.m_useReverseAPI) || force) {
+        reverseAPIKeys.append("useReverseAPI");
+    }
+
+    if ((settings.m_reverseAPIAddress != m_settings.m_reverseAPIAddress) || force) {
+        reverseAPIKeys.append("reverseAPIAddress");
+    }
+
+    if ((settings.m_reverseAPIPort != m_settings.m_reverseAPIPort) || force) {
+        reverseAPIKeys.append("reverseAPIPort");
+    }
+
+    if ((settings.m_reverseAPIDeviceIndex != m_settings.m_reverseAPIDeviceIndex) || force) {
+        reverseAPIKeys.append("reverseAPIDeviceIndex");
+    }
+
+    if ((settings.m_reverseAPIChannelIndex != m_settings.m_reverseAPIChannelIndex) || force) {
+        reverseAPIKeys.append("reverseAPIChannelIndex");
+    }
+
+    if ((settings.m_scramble != m_settings.m_scramble) || force) {
+        reverseAPIKeys.append("scramble");
+    }
+
+    if ((settings.m_polynomial != m_settings.m_polynomial) || force) {
+        reverseAPIKeys.append("polynomial");
+    }
+
+    if ((settings.m_pulseShaping != m_settings.m_pulseShaping) || force) {
+        reverseAPIKeys.append("pulseShaping");
+    }
+
+    if ((settings.m_beta != m_settings.m_beta) || force) {
+        reverseAPIKeys.append("beta");
+    }
+
+    if ((settings.m_symbolSpan != m_settings.m_symbolSpan) || force) {
+        reverseAPIKeys.append("symbolSpan");
     }
 
     if ((settings.m_udpEnabled != m_settings.m_udpEnabled) || force) {
@@ -312,8 +436,14 @@ void IEEE_802_15_4_Mod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("inputFrequencyOffset")) {
         settings.m_inputFrequencyOffset = response.getIeee802154ModSettings()->getInputFrequencyOffset();
     }
-    if (channelSettingsKeys.contains("phy")) {
-        settings.setPHY(*response.getIeee802154ModSettings()->getPhy());
+    if (channelSettingsKeys.contains("modulation")) {
+        settings.m_modulation = (IEEE_802_15_4_ModSettings::Modulation) response.getIeee802154ModSettings()->getModulation();
+    }
+    if (channelSettingsKeys.contains("bitRate")) {
+        settings.m_bitRate = response.getIeee802154ModSettings()->getBitRate();
+    }
+    if (channelSettingsKeys.contains("subGHzBand")) {
+        settings.m_subGHzBand = response.getIeee802154ModSettings()->getSubGHzBand() != 0;
     }
     if (channelSettingsKeys.contains("rfBandwidth")) {
         settings.m_rfBandwidth = response.getIeee802154ModSettings()->getRfBandwidth();
@@ -333,17 +463,32 @@ void IEEE_802_15_4_Mod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("repeatCount")) {
         settings.m_repeatCount = response.getIeee802154ModSettings()->getRepeatCount();
     }
-    if (channelSettingsKeys.contains("udpEnabled")) {
-        settings.m_udpEnabled = response.getIeee802154ModSettings()->getUdpEnabled() != 0;
+    if (channelSettingsKeys.contains("rampUpBits")) {
+        settings.m_rampUpBits = response.getIeee802154ModSettings()->getRampUpBits();
     }
-    if (channelSettingsKeys.contains("udpBytesFormat")) {
-        settings.m_udpBytesFormat = response.getIeee802154ModSettings()->getMUdpBytesFormat() != 0;
+    if (channelSettingsKeys.contains("rampDownBits")) {
+        settings.m_rampDownBits = response.getIeee802154ModSettings()->getRampDownBits();
     }
-    if (channelSettingsKeys.contains("udpAddress")) {
-        settings.m_udpAddress = *response.getIeee802154ModSettings()->getUdpAddress();
+    if (channelSettingsKeys.contains("rampRange")) {
+        settings.m_rampRange = response.getIeee802154ModSettings()->getRampRange();
     }
-    if (channelSettingsKeys.contains("udpPort")) {
-        settings.m_udpPort = response.getIeee802154ModSettings()->getUdpPort();
+    if (channelSettingsKeys.contains("modulateWhileRamping")) {
+        settings.m_modulateWhileRamping = response.getIeee802154ModSettings()->getModulateWhileRamping() != 0;
+    }
+    if (channelSettingsKeys.contains("lpfTaps")) {
+        settings.m_lpfTaps = response.getIeee802154ModSettings()->getLpfTaps();
+    }
+    if (channelSettingsKeys.contains("bbNoise")) {
+        settings.m_bbNoise = response.getIeee802154ModSettings()->getBbNoise() != 0;
+    }
+    if (channelSettingsKeys.contains("writeToFile")) {
+        settings.m_writeToFile = response.getIeee802154ModSettings()->getWriteToFile() != 0;
+    }
+    if (channelSettingsKeys.contains("spectrumRate")) {
+        settings.m_spectrumRate = response.getIeee802154ModSettings()->getSpectrumRate();
+    }
+    if (channelSettingsKeys.contains("data")) {
+        settings.m_data = *response.getIeee802154ModSettings()->getData();
     }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getIeee802154ModSettings()->getRgbColor();
@@ -369,6 +514,33 @@ void IEEE_802_15_4_Mod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getIeee802154ModSettings()->getReverseApiChannelIndex();
     }
+    if (channelSettingsKeys.contains("scramble")) {
+        settings.m_scramble = response.getIeee802154ModSettings()->getScramble() != 0;
+    }
+    if (channelSettingsKeys.contains("polynomial")) {
+        settings.m_polynomial = response.getIeee802154ModSettings()->getPolynomial();
+    }
+    if (channelSettingsKeys.contains("pulseShaping")) {
+        settings.m_pulseShaping = (IEEE_802_15_4_ModSettings::PulseShaping) response.getIeee802154ModSettings()->getPulseShaping();
+    }
+    if (channelSettingsKeys.contains("beta")) {
+        settings.m_beta = response.getIeee802154ModSettings()->getBeta();
+    }
+    if (channelSettingsKeys.contains("symbolSpan")) {
+        settings.m_symbolSpan = response.getIeee802154ModSettings()->getSymbolSpan();
+    }
+    if (channelSettingsKeys.contains("udpEnabled")) {
+        settings.m_udpEnabled = response.getIeee802154ModSettings()->getUdpEnabled() != 0;
+    }
+    if (channelSettingsKeys.contains("udpBytesFormat")) {
+        settings.m_udpBytesFormat = response.getIeee802154ModSettings()->getUdpBytesFormat() != 0;
+    }
+    if (channelSettingsKeys.contains("udpAddress")) {
+        settings.m_udpAddress = *response.getIeee802154ModSettings()->getUdpAddress();
+    }
+    if (channelSettingsKeys.contains("udpPort")) {
+        settings.m_udpPort = response.getIeee802154ModSettings()->getUdpPort();
+    }
 }
 
 int IEEE_802_15_4_Mod::webapiReportGet(
@@ -391,14 +563,19 @@ int IEEE_802_15_4_Mod::webapiActionsPost(
 
     if (swgIEEE_802_15_4_ModActions)
     {
-        if (channelActionsKeys.contains("tx"))
+        if (channelActionsKeys.contains("tx") && (swgIEEE_802_15_4_ModActions->getTx() != 0))
         {
-            SWGSDRangel::SWGIEEE_802_15_4_ModActions_tx* tx = swgIEEE_802_15_4_ModActions->getTx();
-            QString *dataP = tx->getData();
+            QString *dataP;
+
+            if (channelActionsKeys.contains("data")) {
+                dataP = swgIEEE_802_15_4_ModActions->getData();
+            } else {
+                dataP = &m_settings.m_data;
+            }
+
             if (dataP != nullptr)
             {
                 QString data(*dataP);
-
                 IEEE_802_15_4_Mod::MsgTxHexString *msg = IEEE_802_15_4_Mod::MsgTxHexString::create(data);
                 m_basebandSource->getInputMessageQueue()->push(msg);
                 return 202;
@@ -425,17 +602,24 @@ int IEEE_802_15_4_Mod::webapiActionsPost(
 void IEEE_802_15_4_Mod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const IEEE_802_15_4_ModSettings& settings)
 {
     response.getIeee802154ModSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
-    response.getIeee802154ModSettings()->setPhy(new QString(settings.getPHY()));
+    response.getIeee802154ModSettings()->setModulation((int) settings.m_modulation);
+    response.getIeee802154ModSettings()->setBitRate(settings.m_bitRate);
+    response.getIeee802154ModSettings()->setSubGHzBand(settings.m_subGHzBand ? 1 : 0);
     response.getIeee802154ModSettings()->setRfBandwidth(settings.m_rfBandwidth);
     response.getIeee802154ModSettings()->setGain(settings.m_gain);
     response.getIeee802154ModSettings()->setChannelMute(settings.m_channelMute ? 1 : 0);
     response.getIeee802154ModSettings()->setRepeat(settings.m_repeat ? 1 : 0);
     response.getIeee802154ModSettings()->setRepeatDelay(settings.m_repeatDelay);
     response.getIeee802154ModSettings()->setRepeatCount(settings.m_repeatCount);
-    response.getIeee802154ModSettings()->setUdpEnabled(settings.m_udpEnabled ? 1 : 0);
-    response.getIeee802154ModSettings()->setMUdpBytesFormat(settings.m_udpBytesFormat ? 1 : 0);
-    response.getIeee802154ModSettings()->setUdpAddress(new QString(settings.m_udpAddress));
-    response.getIeee802154ModSettings()->setUdpPort(settings.m_udpPort);
+    response.getIeee802154ModSettings()->setRampUpBits(settings.m_rampUpBits);
+    response.getIeee802154ModSettings()->setRampDownBits(settings.m_rampDownBits);
+    response.getIeee802154ModSettings()->setRampRange(settings.m_rampRange);
+    response.getIeee802154ModSettings()->setModulateWhileRamping(settings.m_modulateWhileRamping ? 1 : 0);
+    response.getIeee802154ModSettings()->setLpfTaps(settings.m_lpfTaps);
+    response.getIeee802154ModSettings()->setBbNoise(settings.m_bbNoise ? 1 : 0);
+    response.getIeee802154ModSettings()->setWriteToFile(settings.m_writeToFile ? 1 : 0);
+    response.getIeee802154ModSettings()->setSpectrumRate(settings.m_spectrumRate);
+    response.getIeee802154ModSettings()->setData(new QString(settings.m_data));
     response.getIeee802154ModSettings()->setRgbColor(settings.m_rgbColor);
 
     if (response.getIeee802154ModSettings()->getTitle()) {
@@ -444,6 +628,7 @@ void IEEE_802_15_4_Mod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSetti
         response.getIeee802154ModSettings()->setTitle(new QString(settings.m_title));
     }
 
+    response.getIeee802154ModSettings()->setStreamIndex(settings.m_streamIndex);
     response.getIeee802154ModSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
     if (response.getIeee802154ModSettings()->getReverseApiAddress()) {
@@ -455,6 +640,21 @@ void IEEE_802_15_4_Mod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSetti
     response.getIeee802154ModSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getIeee802154ModSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getIeee802154ModSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+    response.getIeee802154ModSettings()->setScramble(settings.m_scramble);
+    response.getIeee802154ModSettings()->setPolynomial(settings.m_polynomial);
+    response.getIeee802154ModSettings()->setPulseShaping(settings.m_pulseShaping ? 1 : 0);
+    response.getIeee802154ModSettings()->setBeta(settings.m_beta);
+    response.getIeee802154ModSettings()->setSymbolSpan(settings.m_symbolSpan);
+    response.getIeee802154ModSettings()->setUdpEnabled(settings.m_udpEnabled ? 1 : 0);
+    response.getIeee802154ModSettings()->setUdpBytesFormat(settings.m_udpBytesFormat ? 1 : 0);
+
+    if (response.getIeee802154ModSettings()->getUdpAddress()) {
+        *response.getIeee802154ModSettings()->getUdpAddress() = settings.m_udpAddress;
+    } else {
+        response.getIeee802154ModSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    }
+
+    response.getIeee802154ModSettings()->setUdpPort(settings.m_udpPort);
 }
 
 void IEEE_802_15_4_Mod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -529,6 +729,15 @@ void IEEE_802_15_4_Mod::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
         swgIEEE_802_15_4_ModSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     }
+    if (channelSettingsKeys.contains("modulation") || force) {
+        swgIEEE_802_15_4_ModSettings->setModulation((int) settings.m_modulation);
+    }
+    if (channelSettingsKeys.contains("bitRate") || force) {
+        swgIEEE_802_15_4_ModSettings->setBitRate(settings.m_bitRate);
+    }
+    if (channelSettingsKeys.contains("subGHzBand") || force) {
+        swgIEEE_802_15_4_ModSettings->setSubGHzBand(settings.m_subGHzBand ? 1 : 0);
+    }
     if (channelSettingsKeys.contains("rfBandwidth") || force) {
         swgIEEE_802_15_4_ModSettings->setRfBandwidth(settings.m_rfBandwidth);
     }
@@ -547,17 +756,32 @@ void IEEE_802_15_4_Mod::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("repeatCount") || force) {
         swgIEEE_802_15_4_ModSettings->setRepeatCount(settings.m_repeatCount);
     }
-    if (channelSettingsKeys.contains("udpEnabled") || force) {
-        swgIEEE_802_15_4_ModSettings->setUdpEnabled(settings.m_udpEnabled ? 1 : 0);
+    if (channelSettingsKeys.contains("rampUpBits") || force) {
+        swgIEEE_802_15_4_ModSettings->setRampUpBits(settings.m_rampUpBits);
     }
-    if (channelSettingsKeys.contains("udpBytesFormat") || force) {
-        swgIEEE_802_15_4_ModSettings->setMUdpBytesFormat(settings.m_udpBytesFormat ? 1 : 0);
+    if (channelSettingsKeys.contains("rampDownBits") || force) {
+        swgIEEE_802_15_4_ModSettings->setRampDownBits(settings.m_rampDownBits);
     }
-    if (channelSettingsKeys.contains("udpAddress") || force) {
-        swgIEEE_802_15_4_ModSettings->setUdpAddress(new QString(settings.m_udpAddress));
+    if (channelSettingsKeys.contains("rampRange") || force) {
+        swgIEEE_802_15_4_ModSettings->setRampRange(settings.m_rampRange);
     }
-    if (channelSettingsKeys.contains("udpPort") || force) {
-        swgIEEE_802_15_4_ModSettings->setUdpPort(settings.m_udpPort);
+    if (channelSettingsKeys.contains("rampRange") || force) {
+        swgIEEE_802_15_4_ModSettings->setModulateWhileRamping(settings.m_modulateWhileRamping ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("lpfTaps") || force) {
+        swgIEEE_802_15_4_ModSettings->setLpfTaps(settings.m_lpfTaps);
+    }
+    if (channelSettingsKeys.contains("bbNoise") || force) {
+        swgIEEE_802_15_4_ModSettings->setBbNoise(settings.m_bbNoise ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("writeToFile") || force) {
+        swgIEEE_802_15_4_ModSettings->setWriteToFile(settings.m_writeToFile ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("spectrumRate") || force) {
+        swgIEEE_802_15_4_ModSettings->setSpectrumRate(settings.m_spectrumRate);
+    }
+    if (channelSettingsKeys.contains("data") || force) {
+        swgIEEE_802_15_4_ModSettings->setData(new QString(settings.m_data));
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgIEEE_802_15_4_ModSettings->setRgbColor(settings.m_rgbColor);
@@ -567,6 +791,48 @@ void IEEE_802_15_4_Mod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgIEEE_802_15_4_ModSettings->setStreamIndex(settings.m_streamIndex);
+    }
+    if (channelSettingsKeys.contains("useReverseAPI") || force) {
+        swgIEEE_802_15_4_ModSettings->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("reverseAPIAddress") || force) {
+        swgIEEE_802_15_4_ModSettings->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+    if (channelSettingsKeys.contains("reverseAPIPort") || force) {
+        swgIEEE_802_15_4_ModSettings->setReverseApiPort(settings.m_reverseAPIPort);
+    }
+    if (channelSettingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        swgIEEE_802_15_4_ModSettings->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    }
+    if (channelSettingsKeys.contains("reverseAPIChannelIndex") || force) {
+        swgIEEE_802_15_4_ModSettings->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+    }
+    if (channelSettingsKeys.contains("scramble") || force) {
+        swgIEEE_802_15_4_ModSettings->setScramble(settings.m_scramble ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("polynomial") || force) {
+        swgIEEE_802_15_4_ModSettings->setPolynomial(settings.m_polynomial);
+    }
+    if (channelSettingsKeys.contains("pulseShaping") || force) {
+        swgIEEE_802_15_4_ModSettings->setPolynomial(settings.m_pulseShaping ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("beta") || force) {
+        swgIEEE_802_15_4_ModSettings->setBeta(settings.m_beta);
+    }
+    if (channelSettingsKeys.contains("symbolSpan") || force) {
+        swgIEEE_802_15_4_ModSettings->setBeta(settings.m_symbolSpan);
+    }
+    if (channelSettingsKeys.contains("udpEnabled") || force) {
+        swgIEEE_802_15_4_ModSettings->setUdpEnabled(settings.m_udpEnabled ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("udpBytesFormat") || force) {
+        swgIEEE_802_15_4_ModSettings->setUdpBytesFormat(settings.m_udpBytesFormat ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("udpAddress") || force) {
+        swgIEEE_802_15_4_ModSettings->setUdpAddress(new QString(settings.m_udpAddress));
+    }
+    if (channelSettingsKeys.contains("udpPort") || force) {
+        swgIEEE_802_15_4_ModSettings->setUdpPort(settings.m_udpPort);
     }
 }
 

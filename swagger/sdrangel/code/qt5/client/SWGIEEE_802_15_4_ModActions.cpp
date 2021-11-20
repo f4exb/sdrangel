@@ -28,8 +28,10 @@ SWGIEEE_802_15_4_ModActions::SWGIEEE_802_15_4_ModActions(QString* json) {
 }
 
 SWGIEEE_802_15_4_ModActions::SWGIEEE_802_15_4_ModActions() {
-    tx = nullptr;
+    tx = 0;
     m_tx_isSet = false;
+    data = nullptr;
+    m_data_isSet = false;
 }
 
 SWGIEEE_802_15_4_ModActions::~SWGIEEE_802_15_4_ModActions() {
@@ -38,14 +40,17 @@ SWGIEEE_802_15_4_ModActions::~SWGIEEE_802_15_4_ModActions() {
 
 void
 SWGIEEE_802_15_4_ModActions::init() {
-    tx = new SWGIEEE_802_15_4_ModActions_tx();
+    tx = 0;
     m_tx_isSet = false;
+    data = new QString("");
+    m_data_isSet = false;
 }
 
 void
 SWGIEEE_802_15_4_ModActions::cleanup() {
-    if(tx != nullptr) { 
-        delete tx;
+
+    if(data != nullptr) { 
+        delete data;
     }
 }
 
@@ -60,7 +65,9 @@ SWGIEEE_802_15_4_ModActions::fromJson(QString &json) {
 
 void
 SWGIEEE_802_15_4_ModActions::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&tx, pJson["tx"], "SWGIEEE_802_15_4_ModActions_tx", "SWGIEEE_802_15_4_ModActions_tx");
+    ::SWGSDRangel::setValue(&tx, pJson["tx"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&data, pJson["data"], "QString", "QString");
     
 }
 
@@ -78,21 +85,34 @@ SWGIEEE_802_15_4_ModActions::asJson ()
 QJsonObject*
 SWGIEEE_802_15_4_ModActions::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if((tx != nullptr) && (tx->isSet())){
-        toJsonValue(QString("tx"), tx, obj, QString("SWGIEEE_802_15_4_ModActions_tx"));
+    if(m_tx_isSet){
+        obj->insert("tx", QJsonValue(tx));
+    }
+    if(data != nullptr && *data != QString("")){
+        toJsonValue(QString("data"), data, obj, QString("QString"));
     }
 
     return obj;
 }
 
-SWGIEEE_802_15_4_ModActions_tx*
+qint32
 SWGIEEE_802_15_4_ModActions::getTx() {
     return tx;
 }
 void
-SWGIEEE_802_15_4_ModActions::setTx(SWGIEEE_802_15_4_ModActions_tx* tx) {
+SWGIEEE_802_15_4_ModActions::setTx(qint32 tx) {
     this->tx = tx;
     this->m_tx_isSet = true;
+}
+
+QString*
+SWGIEEE_802_15_4_ModActions::getData() {
+    return data;
+}
+void
+SWGIEEE_802_15_4_ModActions::setData(QString* data) {
+    this->data = data;
+    this->m_data_isSet = true;
 }
 
 
@@ -100,7 +120,10 @@ bool
 SWGIEEE_802_15_4_ModActions::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(tx && tx->isSet()){
+        if(m_tx_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(data && *data != QString("")){
             isObjectUpdated = true; break;
         }
     }while(false);

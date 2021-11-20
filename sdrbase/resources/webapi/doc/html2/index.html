@@ -6202,19 +6202,15 @@ margin-bottom: 20px;
             defs.IEEE_802_15_4_ModActions = {
   "properties" : {
     "tx" : {
-      "$ref" : "#/definitions/IEEE_802_15_4_ModActions_tx"
+      "type" : "integer",
+      "description" : "Initialize a transmission cycle\n  * 0 - Do nothing\n  * 1 - Start transmission cycle\n"
+    },
+    "data" : {
+      "type" : "string",
+      "description" : "Hex coded bytes of data to transmit, excluding CRC (E.g for an ACK - 02 00 00). Preempts settings data.\n"
     }
   },
   "description" : "IEEE_802_15_4_Mod"
-};
-            defs.IEEE_802_15_4_ModActions_tx = {
-  "properties" : {
-    "data" : {
-      "type" : "string",
-      "description" : "Hex coded bytes of data to transmit, excluding CRC (E.g for an ACK - 02 00 00)."
-    }
-  },
-  "description" : "Transmit a frame\n"
 };
             defs.IEEE_802_15_4_ModReport = {
   "properties" : {
@@ -6235,9 +6231,16 @@ margin-bottom: 20px;
       "type" : "integer",
       "format" : "int64"
     },
-    "phy" : {
-      "type" : "string",
-      "description" : "Physical layer. \"20kbps BPSK\", \"40kbps BPSK\", \"100kbps <1GHz O-QPSK\", \"250kbps <1GHz O-QPSK (Sine)\", \"250kbps <1GHz O-QPSK (RC)\", or \"250kbps >2GHz O-QPSK\"."
+    "modulation" : {
+      "type" : "integer",
+      "description" : "Modulation type\n  * 0 - BPSK\n  * 1 - OQPSK\n"
+    },
+    "bitRate" : {
+      "type" : "integer"
+    },
+    "subGHzBand" : {
+      "type" : "integer",
+      "description" : "Boolean value\n  * 0 - Over 1 GHz standard\n  * 1 - Under 1 GHz standard\n"
     },
     "rfBandwidth" : {
       "type" : "number",
@@ -6248,7 +6251,8 @@ margin-bottom: 20px;
       "format" : "float"
     },
     "channelMute" : {
-      "type" : "integer"
+      "type" : "integer",
+      "description" : "* 0 - Effective transmission * 1 - Transmission is muted\n"
     },
     "repeat" : {
       "type" : "integer",
@@ -6263,21 +6267,36 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Number of times to repeat the frame (-1 for infinite)."
     },
-    "udpEnabled" : {
-      "type" : "integer",
-      "description" : "Enable forwarding of frames via UDP"
+    "rampUpBits" : {
+      "type" : "integer"
     },
-    "m_udpBytesFormat" : {
-      "type" : "integer",
-      "description" : "Payload format\n  * 0 - Blank separated string representation of hex bytes i.e. 00 02 0a\n  * 1 - Raw bytes\n"
+    "rampDownBits" : {
+      "type" : "integer"
     },
-    "udpAddress" : {
+    "rampRange" : {
+      "type" : "integer"
+    },
+    "modulateWhileRamping" : {
+      "type" : "integer",
+      "description" : "Boolean value\n  * 0 - do not modulate in ramping phase\n  * 1 - modulate in ramping phase\n"
+    },
+    "lpfTaps" : {
+      "type" : "integer"
+    },
+    "bbNoise" : {
+      "type" : "integer",
+      "description" : "Boolean value\n  * 0 - Do not add gaussian noise in baseband\n  * 1 - Add gaussian noise in baseband\n"
+    },
+    "writeToFile" : {
+      "type" : "integer",
+      "description" : "Boolean value\n  * 0 - Do not write frames to .csv file\n  * 1 - Write frames to .csv file\n"
+    },
+    "spectrumRate" : {
+      "type" : "integer"
+    },
+    "data" : {
       "type" : "string",
-      "description" : "UDP address to listen for frames to transmit on"
-    },
-    "udpPort" : {
-      "type" : "integer",
-      "description" : "UDP port to listen for frames to transmit on"
+      "description" : "Hex coded bytes of data to transmit, excluding CRC (E.g for an ACK - 02 00 00)"
     },
     "rgbColor" : {
       "type" : "integer"
@@ -6304,6 +6323,42 @@ margin-bottom: 20px;
     },
     "reverseAPIChannelIndex" : {
       "type" : "integer"
+    },
+    "scramble" : {
+      "type" : "integer",
+      "description" : "Boolean value\n  * 0 - Do not scramble data\n  * 1 - Scramble data\n"
+    },
+    "polynomial" : {
+      "type" : "integer",
+      "description" : "Scrambling polynomial"
+    },
+    "pulseShaping" : {
+      "type" : "integer",
+      "description" : "Pulse shaping filter\n  * 0 - Root Cosime\n  * 1 - Sine\n"
+    },
+    "beta" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Pulse shapint filter beta factor"
+    },
+    "symbolSpan" : {
+      "type" : "integer"
+    },
+    "udpEnabled" : {
+      "type" : "integer",
+      "description" : "Enable forwarding of frames via UDP"
+    },
+    "udpBytesFormat" : {
+      "type" : "integer",
+      "description" : "Payload format\n  * 0 - Blank separated string representation of hex bytes i.e. 00 02 0a\n  * 1 - Raw bytes\n"
+    },
+    "udpAddress" : {
+      "type" : "string",
+      "description" : "UDP address to listen for frames to transmit on"
+    },
+    "udpPort" : {
+      "type" : "integer",
+      "description" : "UDP port to listen for frames to transmit on"
     }
   },
   "description" : "IEEE_802_15_4_Mod"
@@ -51290,7 +51345,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-11-16T00:55:07.690+01:00
+              Generated 2021-11-20T13:05:46.792+01:00
             </div>
           </div>
       </div>

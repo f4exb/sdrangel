@@ -140,7 +140,6 @@
 #include "SWGHackRFInputSettings.h"
 #include "SWGHackRFOutputSettings.h"
 #include "SWGIEEE_802_15_4_ModActions.h"
-#include "SWGIEEE_802_15_4_ModActions_tx.h"
 #include "SWGIEEE_802_15_4_ModReport.h"
 #include "SWGIEEE_802_15_4_ModSettings.h"
 #include "SWGInstanceChannelsResponse.h"
@@ -935,11 +934,6 @@ namespace SWGSDRangel {
     }
     if(QString("SWGIEEE_802_15_4_ModActions").compare(type) == 0) {
       SWGIEEE_802_15_4_ModActions *obj = new SWGIEEE_802_15_4_ModActions();
-      obj->init();
-      return obj;
-    }
-    if(QString("SWGIEEE_802_15_4_ModActions_tx").compare(type) == 0) {
-      SWGIEEE_802_15_4_ModActions_tx *obj = new SWGIEEE_802_15_4_ModActions_tx();
       obj->init();
       return obj;
     }

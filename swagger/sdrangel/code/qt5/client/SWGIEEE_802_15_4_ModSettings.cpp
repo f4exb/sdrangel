@@ -30,8 +30,12 @@ SWGIEEE_802_15_4_ModSettings::SWGIEEE_802_15_4_ModSettings(QString* json) {
 SWGIEEE_802_15_4_ModSettings::SWGIEEE_802_15_4_ModSettings() {
     input_frequency_offset = 0L;
     m_input_frequency_offset_isSet = false;
-    phy = nullptr;
-    m_phy_isSet = false;
+    modulation = 0;
+    m_modulation_isSet = false;
+    bit_rate = 0;
+    m_bit_rate_isSet = false;
+    sub_g_hz_band = 0;
+    m_sub_g_hz_band_isSet = false;
     rf_bandwidth = 0.0f;
     m_rf_bandwidth_isSet = false;
     gain = 0.0f;
@@ -44,14 +48,24 @@ SWGIEEE_802_15_4_ModSettings::SWGIEEE_802_15_4_ModSettings() {
     m_repeat_delay_isSet = false;
     repeat_count = 0;
     m_repeat_count_isSet = false;
-    udp_enabled = 0;
-    m_udp_enabled_isSet = false;
-    m_udp_bytes_format = 0;
-    m_m_udp_bytes_format_isSet = false;
-    udp_address = nullptr;
-    m_udp_address_isSet = false;
-    udp_port = 0;
-    m_udp_port_isSet = false;
+    ramp_up_bits = 0;
+    m_ramp_up_bits_isSet = false;
+    ramp_down_bits = 0;
+    m_ramp_down_bits_isSet = false;
+    ramp_range = 0;
+    m_ramp_range_isSet = false;
+    modulate_while_ramping = 0;
+    m_modulate_while_ramping_isSet = false;
+    lpf_taps = 0;
+    m_lpf_taps_isSet = false;
+    bb_noise = 0;
+    m_bb_noise_isSet = false;
+    write_to_file = 0;
+    m_write_to_file_isSet = false;
+    spectrum_rate = 0;
+    m_spectrum_rate_isSet = false;
+    data = nullptr;
+    m_data_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = nullptr;
@@ -68,6 +82,24 @@ SWGIEEE_802_15_4_ModSettings::SWGIEEE_802_15_4_ModSettings() {
     m_reverse_api_device_index_isSet = false;
     reverse_api_channel_index = 0;
     m_reverse_api_channel_index_isSet = false;
+    scramble = 0;
+    m_scramble_isSet = false;
+    polynomial = 0;
+    m_polynomial_isSet = false;
+    pulse_shaping = 0;
+    m_pulse_shaping_isSet = false;
+    beta = 0.0f;
+    m_beta_isSet = false;
+    symbol_span = 0;
+    m_symbol_span_isSet = false;
+    udp_enabled = 0;
+    m_udp_enabled_isSet = false;
+    udp_bytes_format = 0;
+    m_udp_bytes_format_isSet = false;
+    udp_address = nullptr;
+    m_udp_address_isSet = false;
+    udp_port = 0;
+    m_udp_port_isSet = false;
 }
 
 SWGIEEE_802_15_4_ModSettings::~SWGIEEE_802_15_4_ModSettings() {
@@ -78,8 +110,12 @@ void
 SWGIEEE_802_15_4_ModSettings::init() {
     input_frequency_offset = 0L;
     m_input_frequency_offset_isSet = false;
-    phy = new QString("");
-    m_phy_isSet = false;
+    modulation = 0;
+    m_modulation_isSet = false;
+    bit_rate = 0;
+    m_bit_rate_isSet = false;
+    sub_g_hz_band = 0;
+    m_sub_g_hz_band_isSet = false;
     rf_bandwidth = 0.0f;
     m_rf_bandwidth_isSet = false;
     gain = 0.0f;
@@ -92,14 +128,24 @@ SWGIEEE_802_15_4_ModSettings::init() {
     m_repeat_delay_isSet = false;
     repeat_count = 0;
     m_repeat_count_isSet = false;
-    udp_enabled = 0;
-    m_udp_enabled_isSet = false;
-    m_udp_bytes_format = 0;
-    m_m_udp_bytes_format_isSet = false;
-    udp_address = new QString("");
-    m_udp_address_isSet = false;
-    udp_port = 0;
-    m_udp_port_isSet = false;
+    ramp_up_bits = 0;
+    m_ramp_up_bits_isSet = false;
+    ramp_down_bits = 0;
+    m_ramp_down_bits_isSet = false;
+    ramp_range = 0;
+    m_ramp_range_isSet = false;
+    modulate_while_ramping = 0;
+    m_modulate_while_ramping_isSet = false;
+    lpf_taps = 0;
+    m_lpf_taps_isSet = false;
+    bb_noise = 0;
+    m_bb_noise_isSet = false;
+    write_to_file = 0;
+    m_write_to_file_isSet = false;
+    spectrum_rate = 0;
+    m_spectrum_rate_isSet = false;
+    data = new QString("");
+    m_data_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = new QString("");
@@ -116,26 +162,49 @@ SWGIEEE_802_15_4_ModSettings::init() {
     m_reverse_api_device_index_isSet = false;
     reverse_api_channel_index = 0;
     m_reverse_api_channel_index_isSet = false;
+    scramble = 0;
+    m_scramble_isSet = false;
+    polynomial = 0;
+    m_polynomial_isSet = false;
+    pulse_shaping = 0;
+    m_pulse_shaping_isSet = false;
+    beta = 0.0f;
+    m_beta_isSet = false;
+    symbol_span = 0;
+    m_symbol_span_isSet = false;
+    udp_enabled = 0;
+    m_udp_enabled_isSet = false;
+    udp_bytes_format = 0;
+    m_udp_bytes_format_isSet = false;
+    udp_address = new QString("");
+    m_udp_address_isSet = false;
+    udp_port = 0;
+    m_udp_port_isSet = false;
 }
 
 void
 SWGIEEE_802_15_4_ModSettings::cleanup() {
 
-    if(phy != nullptr) { 
-        delete phy;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    if(data != nullptr) { 
+        delete data;
     }
-
-
-
-
-
-
-
-
-    if(udp_address != nullptr) { 
-        delete udp_address;
-    }
-
 
     if(title != nullptr) { 
         delete title;
@@ -147,6 +216,17 @@ SWGIEEE_802_15_4_ModSettings::cleanup() {
     }
 
 
+
+
+
+
+
+
+
+
+    if(udp_address != nullptr) { 
+        delete udp_address;
+    }
 
 }
 
@@ -163,7 +243,11 @@ void
 SWGIEEE_802_15_4_ModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&input_frequency_offset, pJson["inputFrequencyOffset"], "qint64", "");
     
-    ::SWGSDRangel::setValue(&phy, pJson["phy"], "QString", "QString");
+    ::SWGSDRangel::setValue(&modulation, pJson["modulation"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&bit_rate, pJson["bitRate"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&sub_g_hz_band, pJson["subGHzBand"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rf_bandwidth, pJson["rfBandwidth"], "float", "");
     
@@ -177,13 +261,23 @@ SWGIEEE_802_15_4_ModSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&repeat_count, pJson["repeatCount"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&udp_enabled, pJson["udpEnabled"], "qint32", "");
+    ::SWGSDRangel::setValue(&ramp_up_bits, pJson["rampUpBits"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&m_udp_bytes_format, pJson["m_udpBytesFormat"], "qint32", "");
+    ::SWGSDRangel::setValue(&ramp_down_bits, pJson["rampDownBits"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&udp_address, pJson["udpAddress"], "QString", "QString");
+    ::SWGSDRangel::setValue(&ramp_range, pJson["rampRange"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&udp_port, pJson["udpPort"], "qint32", "");
+    ::SWGSDRangel::setValue(&modulate_while_ramping, pJson["modulateWhileRamping"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&lpf_taps, pJson["lpfTaps"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&bb_noise, pJson["bbNoise"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&write_to_file, pJson["writeToFile"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&spectrum_rate, pJson["spectrumRate"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&data, pJson["data"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
@@ -200,6 +294,24 @@ SWGIEEE_802_15_4_ModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&reverse_api_device_index, pJson["reverseAPIDeviceIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&reverse_api_channel_index, pJson["reverseAPIChannelIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&scramble, pJson["scramble"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&polynomial, pJson["polynomial"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&pulse_shaping, pJson["pulseShaping"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&beta, pJson["beta"], "float", "");
+    
+    ::SWGSDRangel::setValue(&symbol_span, pJson["symbolSpan"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&udp_enabled, pJson["udpEnabled"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&udp_bytes_format, pJson["udpBytesFormat"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&udp_address, pJson["udpAddress"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&udp_port, pJson["udpPort"], "qint32", "");
     
 }
 
@@ -220,8 +332,14 @@ SWGIEEE_802_15_4_ModSettings::asJsonObject() {
     if(m_input_frequency_offset_isSet){
         obj->insert("inputFrequencyOffset", QJsonValue(input_frequency_offset));
     }
-    if(phy != nullptr && *phy != QString("")){
-        toJsonValue(QString("phy"), phy, obj, QString("QString"));
+    if(m_modulation_isSet){
+        obj->insert("modulation", QJsonValue(modulation));
+    }
+    if(m_bit_rate_isSet){
+        obj->insert("bitRate", QJsonValue(bit_rate));
+    }
+    if(m_sub_g_hz_band_isSet){
+        obj->insert("subGHzBand", QJsonValue(sub_g_hz_band));
     }
     if(m_rf_bandwidth_isSet){
         obj->insert("rfBandwidth", QJsonValue(rf_bandwidth));
@@ -241,17 +359,32 @@ SWGIEEE_802_15_4_ModSettings::asJsonObject() {
     if(m_repeat_count_isSet){
         obj->insert("repeatCount", QJsonValue(repeat_count));
     }
-    if(m_udp_enabled_isSet){
-        obj->insert("udpEnabled", QJsonValue(udp_enabled));
+    if(m_ramp_up_bits_isSet){
+        obj->insert("rampUpBits", QJsonValue(ramp_up_bits));
     }
-    if(m_m_udp_bytes_format_isSet){
-        obj->insert("m_udpBytesFormat", QJsonValue(m_udp_bytes_format));
+    if(m_ramp_down_bits_isSet){
+        obj->insert("rampDownBits", QJsonValue(ramp_down_bits));
     }
-    if(udp_address != nullptr && *udp_address != QString("")){
-        toJsonValue(QString("udpAddress"), udp_address, obj, QString("QString"));
+    if(m_ramp_range_isSet){
+        obj->insert("rampRange", QJsonValue(ramp_range));
     }
-    if(m_udp_port_isSet){
-        obj->insert("udpPort", QJsonValue(udp_port));
+    if(m_modulate_while_ramping_isSet){
+        obj->insert("modulateWhileRamping", QJsonValue(modulate_while_ramping));
+    }
+    if(m_lpf_taps_isSet){
+        obj->insert("lpfTaps", QJsonValue(lpf_taps));
+    }
+    if(m_bb_noise_isSet){
+        obj->insert("bbNoise", QJsonValue(bb_noise));
+    }
+    if(m_write_to_file_isSet){
+        obj->insert("writeToFile", QJsonValue(write_to_file));
+    }
+    if(m_spectrum_rate_isSet){
+        obj->insert("spectrumRate", QJsonValue(spectrum_rate));
+    }
+    if(data != nullptr && *data != QString("")){
+        toJsonValue(QString("data"), data, obj, QString("QString"));
     }
     if(m_rgb_color_isSet){
         obj->insert("rgbColor", QJsonValue(rgb_color));
@@ -277,6 +410,33 @@ SWGIEEE_802_15_4_ModSettings::asJsonObject() {
     if(m_reverse_api_channel_index_isSet){
         obj->insert("reverseAPIChannelIndex", QJsonValue(reverse_api_channel_index));
     }
+    if(m_scramble_isSet){
+        obj->insert("scramble", QJsonValue(scramble));
+    }
+    if(m_polynomial_isSet){
+        obj->insert("polynomial", QJsonValue(polynomial));
+    }
+    if(m_pulse_shaping_isSet){
+        obj->insert("pulseShaping", QJsonValue(pulse_shaping));
+    }
+    if(m_beta_isSet){
+        obj->insert("beta", QJsonValue(beta));
+    }
+    if(m_symbol_span_isSet){
+        obj->insert("symbolSpan", QJsonValue(symbol_span));
+    }
+    if(m_udp_enabled_isSet){
+        obj->insert("udpEnabled", QJsonValue(udp_enabled));
+    }
+    if(m_udp_bytes_format_isSet){
+        obj->insert("udpBytesFormat", QJsonValue(udp_bytes_format));
+    }
+    if(udp_address != nullptr && *udp_address != QString("")){
+        toJsonValue(QString("udpAddress"), udp_address, obj, QString("QString"));
+    }
+    if(m_udp_port_isSet){
+        obj->insert("udpPort", QJsonValue(udp_port));
+    }
 
     return obj;
 }
@@ -291,14 +451,34 @@ SWGIEEE_802_15_4_ModSettings::setInputFrequencyOffset(qint64 input_frequency_off
     this->m_input_frequency_offset_isSet = true;
 }
 
-QString*
-SWGIEEE_802_15_4_ModSettings::getPhy() {
-    return phy;
+qint32
+SWGIEEE_802_15_4_ModSettings::getModulation() {
+    return modulation;
 }
 void
-SWGIEEE_802_15_4_ModSettings::setPhy(QString* phy) {
-    this->phy = phy;
-    this->m_phy_isSet = true;
+SWGIEEE_802_15_4_ModSettings::setModulation(qint32 modulation) {
+    this->modulation = modulation;
+    this->m_modulation_isSet = true;
+}
+
+qint32
+SWGIEEE_802_15_4_ModSettings::getBitRate() {
+    return bit_rate;
+}
+void
+SWGIEEE_802_15_4_ModSettings::setBitRate(qint32 bit_rate) {
+    this->bit_rate = bit_rate;
+    this->m_bit_rate_isSet = true;
+}
+
+qint32
+SWGIEEE_802_15_4_ModSettings::getSubGHzBand() {
+    return sub_g_hz_band;
+}
+void
+SWGIEEE_802_15_4_ModSettings::setSubGHzBand(qint32 sub_g_hz_band) {
+    this->sub_g_hz_band = sub_g_hz_band;
+    this->m_sub_g_hz_band_isSet = true;
 }
 
 float
@@ -362,43 +542,93 @@ SWGIEEE_802_15_4_ModSettings::setRepeatCount(qint32 repeat_count) {
 }
 
 qint32
-SWGIEEE_802_15_4_ModSettings::getUdpEnabled() {
-    return udp_enabled;
+SWGIEEE_802_15_4_ModSettings::getRampUpBits() {
+    return ramp_up_bits;
 }
 void
-SWGIEEE_802_15_4_ModSettings::setUdpEnabled(qint32 udp_enabled) {
-    this->udp_enabled = udp_enabled;
-    this->m_udp_enabled_isSet = true;
+SWGIEEE_802_15_4_ModSettings::setRampUpBits(qint32 ramp_up_bits) {
+    this->ramp_up_bits = ramp_up_bits;
+    this->m_ramp_up_bits_isSet = true;
 }
 
 qint32
-SWGIEEE_802_15_4_ModSettings::getMUdpBytesFormat() {
-    return m_udp_bytes_format;
+SWGIEEE_802_15_4_ModSettings::getRampDownBits() {
+    return ramp_down_bits;
 }
 void
-SWGIEEE_802_15_4_ModSettings::setMUdpBytesFormat(qint32 m_udp_bytes_format) {
-    this->m_udp_bytes_format = m_udp_bytes_format;
-    this->m_m_udp_bytes_format_isSet = true;
+SWGIEEE_802_15_4_ModSettings::setRampDownBits(qint32 ramp_down_bits) {
+    this->ramp_down_bits = ramp_down_bits;
+    this->m_ramp_down_bits_isSet = true;
+}
+
+qint32
+SWGIEEE_802_15_4_ModSettings::getRampRange() {
+    return ramp_range;
+}
+void
+SWGIEEE_802_15_4_ModSettings::setRampRange(qint32 ramp_range) {
+    this->ramp_range = ramp_range;
+    this->m_ramp_range_isSet = true;
+}
+
+qint32
+SWGIEEE_802_15_4_ModSettings::getModulateWhileRamping() {
+    return modulate_while_ramping;
+}
+void
+SWGIEEE_802_15_4_ModSettings::setModulateWhileRamping(qint32 modulate_while_ramping) {
+    this->modulate_while_ramping = modulate_while_ramping;
+    this->m_modulate_while_ramping_isSet = true;
+}
+
+qint32
+SWGIEEE_802_15_4_ModSettings::getLpfTaps() {
+    return lpf_taps;
+}
+void
+SWGIEEE_802_15_4_ModSettings::setLpfTaps(qint32 lpf_taps) {
+    this->lpf_taps = lpf_taps;
+    this->m_lpf_taps_isSet = true;
+}
+
+qint32
+SWGIEEE_802_15_4_ModSettings::getBbNoise() {
+    return bb_noise;
+}
+void
+SWGIEEE_802_15_4_ModSettings::setBbNoise(qint32 bb_noise) {
+    this->bb_noise = bb_noise;
+    this->m_bb_noise_isSet = true;
+}
+
+qint32
+SWGIEEE_802_15_4_ModSettings::getWriteToFile() {
+    return write_to_file;
+}
+void
+SWGIEEE_802_15_4_ModSettings::setWriteToFile(qint32 write_to_file) {
+    this->write_to_file = write_to_file;
+    this->m_write_to_file_isSet = true;
+}
+
+qint32
+SWGIEEE_802_15_4_ModSettings::getSpectrumRate() {
+    return spectrum_rate;
+}
+void
+SWGIEEE_802_15_4_ModSettings::setSpectrumRate(qint32 spectrum_rate) {
+    this->spectrum_rate = spectrum_rate;
+    this->m_spectrum_rate_isSet = true;
 }
 
 QString*
-SWGIEEE_802_15_4_ModSettings::getUdpAddress() {
-    return udp_address;
+SWGIEEE_802_15_4_ModSettings::getData() {
+    return data;
 }
 void
-SWGIEEE_802_15_4_ModSettings::setUdpAddress(QString* udp_address) {
-    this->udp_address = udp_address;
-    this->m_udp_address_isSet = true;
-}
-
-qint32
-SWGIEEE_802_15_4_ModSettings::getUdpPort() {
-    return udp_port;
-}
-void
-SWGIEEE_802_15_4_ModSettings::setUdpPort(qint32 udp_port) {
-    this->udp_port = udp_port;
-    this->m_udp_port_isSet = true;
+SWGIEEE_802_15_4_ModSettings::setData(QString* data) {
+    this->data = data;
+    this->m_data_isSet = true;
 }
 
 qint32
@@ -481,6 +711,96 @@ SWGIEEE_802_15_4_ModSettings::setReverseApiChannelIndex(qint32 reverse_api_chann
     this->m_reverse_api_channel_index_isSet = true;
 }
 
+qint32
+SWGIEEE_802_15_4_ModSettings::getScramble() {
+    return scramble;
+}
+void
+SWGIEEE_802_15_4_ModSettings::setScramble(qint32 scramble) {
+    this->scramble = scramble;
+    this->m_scramble_isSet = true;
+}
+
+qint32
+SWGIEEE_802_15_4_ModSettings::getPolynomial() {
+    return polynomial;
+}
+void
+SWGIEEE_802_15_4_ModSettings::setPolynomial(qint32 polynomial) {
+    this->polynomial = polynomial;
+    this->m_polynomial_isSet = true;
+}
+
+qint32
+SWGIEEE_802_15_4_ModSettings::getPulseShaping() {
+    return pulse_shaping;
+}
+void
+SWGIEEE_802_15_4_ModSettings::setPulseShaping(qint32 pulse_shaping) {
+    this->pulse_shaping = pulse_shaping;
+    this->m_pulse_shaping_isSet = true;
+}
+
+float
+SWGIEEE_802_15_4_ModSettings::getBeta() {
+    return beta;
+}
+void
+SWGIEEE_802_15_4_ModSettings::setBeta(float beta) {
+    this->beta = beta;
+    this->m_beta_isSet = true;
+}
+
+qint32
+SWGIEEE_802_15_4_ModSettings::getSymbolSpan() {
+    return symbol_span;
+}
+void
+SWGIEEE_802_15_4_ModSettings::setSymbolSpan(qint32 symbol_span) {
+    this->symbol_span = symbol_span;
+    this->m_symbol_span_isSet = true;
+}
+
+qint32
+SWGIEEE_802_15_4_ModSettings::getUdpEnabled() {
+    return udp_enabled;
+}
+void
+SWGIEEE_802_15_4_ModSettings::setUdpEnabled(qint32 udp_enabled) {
+    this->udp_enabled = udp_enabled;
+    this->m_udp_enabled_isSet = true;
+}
+
+qint32
+SWGIEEE_802_15_4_ModSettings::getUdpBytesFormat() {
+    return udp_bytes_format;
+}
+void
+SWGIEEE_802_15_4_ModSettings::setUdpBytesFormat(qint32 udp_bytes_format) {
+    this->udp_bytes_format = udp_bytes_format;
+    this->m_udp_bytes_format_isSet = true;
+}
+
+QString*
+SWGIEEE_802_15_4_ModSettings::getUdpAddress() {
+    return udp_address;
+}
+void
+SWGIEEE_802_15_4_ModSettings::setUdpAddress(QString* udp_address) {
+    this->udp_address = udp_address;
+    this->m_udp_address_isSet = true;
+}
+
+qint32
+SWGIEEE_802_15_4_ModSettings::getUdpPort() {
+    return udp_port;
+}
+void
+SWGIEEE_802_15_4_ModSettings::setUdpPort(qint32 udp_port) {
+    this->udp_port = udp_port;
+    this->m_udp_port_isSet = true;
+}
+
 
 bool
 SWGIEEE_802_15_4_ModSettings::isSet(){
@@ -489,7 +809,13 @@ SWGIEEE_802_15_4_ModSettings::isSet(){
         if(m_input_frequency_offset_isSet){
             isObjectUpdated = true; break;
         }
-        if(phy && *phy != QString("")){
+        if(m_modulation_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_bit_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_sub_g_hz_band_isSet){
             isObjectUpdated = true; break;
         }
         if(m_rf_bandwidth_isSet){
@@ -510,16 +836,31 @@ SWGIEEE_802_15_4_ModSettings::isSet(){
         if(m_repeat_count_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_udp_enabled_isSet){
+        if(m_ramp_up_bits_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_m_udp_bytes_format_isSet){
+        if(m_ramp_down_bits_isSet){
             isObjectUpdated = true; break;
         }
-        if(udp_address && *udp_address != QString("")){
+        if(m_ramp_range_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_udp_port_isSet){
+        if(m_modulate_while_ramping_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_lpf_taps_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_bb_noise_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_write_to_file_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_spectrum_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(data && *data != QString("")){
             isObjectUpdated = true; break;
         }
         if(m_rgb_color_isSet){
@@ -544,6 +885,33 @@ SWGIEEE_802_15_4_ModSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_reverse_api_channel_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_scramble_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_polynomial_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_pulse_shaping_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_beta_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_symbol_span_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_udp_enabled_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_udp_bytes_format_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(udp_address && *udp_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_udp_port_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

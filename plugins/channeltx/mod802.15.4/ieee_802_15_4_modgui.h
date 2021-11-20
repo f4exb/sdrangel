@@ -84,6 +84,9 @@ private:
     void applySettings(bool force = false);
     void displaySettings();
     void displayStreamIndex();
+    void displayRFBandwidth(int bandwidth);
+    void displayChipRate(const IEEE_802_15_4_ModSettings& settings);
+    QString getDisplayValueWithMultiplier(int value);
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);

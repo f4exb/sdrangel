@@ -27,10 +27,20 @@ class Serializable;
 
 struct IEEE_802_15_4_ModSettings
 {
+    enum Modulation {
+        BPSK,
+        OQPSK
+    };
+
+    enum PulseShaping {
+        RC,
+        SINE
+    };
+
     static const int infinitePackets = -1;
 
     qint64 m_inputFrequencyOffset;
-    enum Modulation {BPSK, OQPSK} m_modulation;
+    Modulation m_modulation;
     int m_bitRate;
     bool m_subGHzBand;
     Real m_rfBandwidth;
@@ -59,7 +69,7 @@ struct IEEE_802_15_4_ModSettings
     uint16_t m_reverseAPIChannelIndex;
     bool m_scramble;
     int m_polynomial;
-    enum PulseShaping {RC, SINE} m_pulseShaping;
+    PulseShaping m_pulseShaping;
     float m_beta;
     int m_symbolSpan;
     bool m_udpEnabled;

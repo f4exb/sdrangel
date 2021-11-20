@@ -21,6 +21,7 @@
 #include <QFileDialog>
 #include <QTime>
 #include <QDebug>
+#include <QMessageBox>
 
 #include "device/deviceuiset.h"
 #include "plugin/pluginapi.h"
@@ -110,6 +111,7 @@ bool IEEE_802_15_4_ModGUI::handleMessage(const Message& message)
     }
     else if (IEEE_802_15_4_Mod::MsgConfigureIEEE_802_15_4_Mod::match(message))
     {
+        qDebug("IEEE_802_15_4_ModGUI::handleMessage: MsgConfigureIEEE_802_15_4_Mod");
         const IEEE_802_15_4_Mod::MsgConfigureIEEE_802_15_4_Mod& cfg = (IEEE_802_15_4_Mod::MsgConfigureIEEE_802_15_4_Mod&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
@@ -147,12 +149,22 @@ void IEEE_802_15_4_ModGUI::handleSourceMessages()
 void IEEE_802_15_4_ModGUI::checkSampleRate()
 {
     int cr = m_settings.getChipRate();
+
     if ((m_basebandSampleRate % cr) != 0)
-        setWindowTitle(m_channelMarker.getTitle() + " - Baseband sample rate is not an integer multiple of chip rate");
+    {
+        ui->chipRateText->setStyleSheet("QLabel { background:rgb(200,50,50); }");
+        ui->chipRateText->setToolTip(QString("Baseband sample rate %1 S/s is not an integer multiple of chip rate %2 S/s").arg(m_basebandSampleRate).arg(cr));
+    }
     else if ((m_basebandSampleRate / cr) <= 2)
-        setWindowTitle(m_channelMarker.getTitle() + " - Baseband sample rate is too low");
+    {
+        ui->chipRateText->setStyleSheet("QLabel { background:rgb(200,50,50); }");
+        ui->chipRateText->setToolTip(QString("Baseband sample rate %1 S/s is too low for chip rate %2 S/s").arg(m_basebandSampleRate).arg(cr));
+    }
     else
-        setWindowTitle(m_channelMarker.getTitle());
+    {
+        ui->chipRateText->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+        ui->chipRateText->setToolTip("Chip rate");
+    }
 }
 
 void IEEE_802_15_4_ModGUI::on_deltaFrequency_changed(qint64 value)
@@ -172,11 +184,12 @@ void IEEE_802_15_4_ModGUI::on_phy_currentIndexChanged(int value)
     if (m_doApplySettings)
         m_settings.setPHY(phy);
 
-    ui->rfBWText->setText(QString("%1M").arg(m_settings.m_rfBandwidth / 1000000.0, 0, 'f', 1));
+    displayRFBandwidth(m_settings.m_rfBandwidth);
     ui->rfBW->setValue(m_settings.m_rfBandwidth / 1000.0);
     ui->glSpectrum->setCenterFrequency(0);
     ui->glSpectrum->setSampleRate(m_settings.m_spectrumRate);
-     checkSampleRate();
+    displayChipRate(m_settings);
+    checkSampleRate();
     applySettings();
 
     // Remove custom PHY when deselected, as we no longer know how to set it
@@ -187,7 +200,7 @@ void IEEE_802_15_4_ModGUI::on_phy_currentIndexChanged(int value)
 void IEEE_802_15_4_ModGUI::on_rfBW_valueChanged(int value)
 {
     float bw = value * 1000.0f;
-    ui->rfBWText->setText(QString("%1M").arg(value / 1000.0, 0, 'f', 1));
+    displayRFBandwidth(bw);
     m_channelMarker.setBandwidth(bw);
     m_settings.m_rfBandwidth = bw;
     applySettings();
@@ -241,14 +254,22 @@ void IEEE_802_15_4_ModGUI::repeatSelect()
 
 void IEEE_802_15_4_ModGUI::txSettingsSelect()
 {
-    IEEE_802_15_4_ModTXSettingsDialog dialog(m_settings.m_rampUpBits, m_settings.m_rampDownBits,
-                                        m_settings.m_rampRange, m_settings.m_modulateWhileRamping,
-                                        m_settings.m_modulation, m_settings.m_bitRate,
-                                        m_settings.m_pulseShaping, m_settings.m_beta, m_settings.m_symbolSpan,
-                                        m_settings.m_scramble, m_settings.m_polynomial,
-                                        m_settings.m_lpfTaps,
-                                        m_settings.m_bbNoise,
-                                        m_settings.m_writeToFile);
+    IEEE_802_15_4_ModTXSettingsDialog dialog(
+        m_settings.m_rampUpBits,
+        m_settings.m_rampDownBits,
+        m_settings.m_rampRange,
+        m_settings.m_modulateWhileRamping,
+        m_settings.m_modulation,
+        m_settings.m_bitRate,
+        m_settings.m_pulseShaping,
+        m_settings.m_beta,
+        m_settings.m_symbolSpan,
+        m_settings.m_scramble,
+        m_settings.m_polynomial,
+        m_settings.m_lpfTaps,
+        m_settings.m_bbNoise,
+        m_settings.m_writeToFile
+    );
     if (dialog.exec() == QDialog::Accepted)
     {
         m_settings.m_rampUpBits = dialog.m_rampUpBits;
@@ -523,8 +544,10 @@ void IEEE_802_15_4_ModGUI::displaySettings()
     ui->glSpectrum->setCenterFrequency(0);
     ui->glSpectrum->setSampleRate(m_settings.m_spectrumRate);
 
-    ui->rfBWText->setText(QString("%1M").arg(m_settings.m_rfBandwidth / 1000000.0, 0, 'f', 1));
+    displayRFBandwidth(m_settings.m_rfBandwidth);
     ui->rfBW->setValue(m_settings.m_rfBandwidth / 1000.0);
+
+    displayChipRate(m_settings);
 
     ui->gainText->setText(QString("%1").arg((double)m_settings.m_gain, 0, 'f', 1));
     ui->gain->setValue(m_settings.m_gain);
@@ -539,6 +562,35 @@ void IEEE_802_15_4_ModGUI::displaySettings()
     ui->udpPort->setText(QString::number(m_settings.m_udpPort));
 
     blockApplySettings(false);
+}
+
+void IEEE_802_15_4_ModGUI::displayRFBandwidth(int bandwidth)
+{
+    ui->rfBWText->setText(getDisplayValueWithMultiplier(bandwidth));
+}
+
+void IEEE_802_15_4_ModGUI::displayChipRate(const IEEE_802_15_4_ModSettings& settings)
+{
+    ui->chipRateText->setText(getDisplayValueWithMultiplier(settings.getChipRate()));
+}
+
+QString IEEE_802_15_4_ModGUI::getDisplayValueWithMultiplier(int value)
+{
+    if (value < 1000) {
+        return QString("%1").arg(value);
+    } else if (value < 10000) {
+        return QString("%1k").arg(value / 1000.0, 0, 'f', 2);
+    } else if (value < 100000) {
+        return QString("%1k").arg(value / 1000.0, 0, 'f', 1);
+    } else if (value < 1000000) {
+        return QString("%1k").arg(value / 1000.0);
+    } else if (value < 10000000) {
+        return QString("%1M").arg(value / 1000000.0, 0, 'f', 2);
+    } else if (value < 100000000) {
+        return QString("%1M").arg(value / 1000000.0, 0, 'f', 1);
+    } else {
+        return QString("%1M").arg(value / 1000000.0);
+    }
 }
 
 void IEEE_802_15_4_ModGUI::displayStreamIndex()

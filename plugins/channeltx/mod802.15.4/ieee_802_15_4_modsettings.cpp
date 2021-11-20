@@ -77,13 +77,15 @@ void IEEE_802_15_4_ModSettings::resetToDefaults()
 
 bool IEEE_802_15_4_ModSettings::setPHY(QString phy)
 {
-    int bitRate;
+    float bitRate;
     bool valid;
 
     // First part of phy string should give bitrate in kbps
-    bitRate = phy.split("k")[0].toInt(&valid) * 1000;
-    if (!valid)
+    bitRate = phy.split("k")[0].toFloat(&valid) * 1000.0f;
+
+    if (!valid) {
         return false;
+    }
 
     if (phy.contains("BPSK"))
     {
@@ -119,7 +121,13 @@ bool IEEE_802_15_4_ModSettings::setPHY(QString phy)
 
 QString IEEE_802_15_4_ModSettings::getPHY() const
 {
-    return QString("%1kbps %2").arg(m_bitRate/1000).arg(m_modulation == IEEE_802_15_4_ModSettings::BPSK ? "BPSK" : "O-QPSK");
+    int decPos = 0;
+
+    if (m_bitRate < 10000) {
+        decPos = 1;
+    }
+
+    return QString("%1kbps %2").arg(m_bitRate / 1000.0, 0, 'f', decPos).arg(m_modulation == IEEE_802_15_4_ModSettings::BPSK ? "BPSK" : "O-QPSK");
 }
 
 int IEEE_802_15_4_ModSettings::getChipRate() const
@@ -136,6 +144,7 @@ int IEEE_802_15_4_ModSettings::getChipRate() const
         bitsPerSymbol = 4;
         chipsPerSymbol = m_subGHzBand ? 16 : 32;
     }
+
     return m_bitRate * chipsPerSymbol / bitsPerSymbol;
 }
 

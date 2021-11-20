@@ -45,8 +45,14 @@ public:
     qint64 getInputFrequencyOffset();
     void setInputFrequencyOffset(qint64 input_frequency_offset);
 
-    QString* getPhy();
-    void setPhy(QString* phy);
+    qint32 getModulation();
+    void setModulation(qint32 modulation);
+
+    qint32 getBitRate();
+    void setBitRate(qint32 bit_rate);
+
+    qint32 getSubGHzBand();
+    void setSubGHzBand(qint32 sub_g_hz_band);
 
     float getRfBandwidth();
     void setRfBandwidth(float rf_bandwidth);
@@ -66,17 +72,32 @@ public:
     qint32 getRepeatCount();
     void setRepeatCount(qint32 repeat_count);
 
-    qint32 getUdpEnabled();
-    void setUdpEnabled(qint32 udp_enabled);
+    qint32 getRampUpBits();
+    void setRampUpBits(qint32 ramp_up_bits);
 
-    qint32 getMUdpBytesFormat();
-    void setMUdpBytesFormat(qint32 m_udp_bytes_format);
+    qint32 getRampDownBits();
+    void setRampDownBits(qint32 ramp_down_bits);
 
-    QString* getUdpAddress();
-    void setUdpAddress(QString* udp_address);
+    qint32 getRampRange();
+    void setRampRange(qint32 ramp_range);
 
-    qint32 getUdpPort();
-    void setUdpPort(qint32 udp_port);
+    qint32 getModulateWhileRamping();
+    void setModulateWhileRamping(qint32 modulate_while_ramping);
+
+    qint32 getLpfTaps();
+    void setLpfTaps(qint32 lpf_taps);
+
+    qint32 getBbNoise();
+    void setBbNoise(qint32 bb_noise);
+
+    qint32 getWriteToFile();
+    void setWriteToFile(qint32 write_to_file);
+
+    qint32 getSpectrumRate();
+    void setSpectrumRate(qint32 spectrum_rate);
+
+    QString* getData();
+    void setData(QString* data);
 
     qint32 getRgbColor();
     void setRgbColor(qint32 rgb_color);
@@ -102,6 +123,33 @@ public:
     qint32 getReverseApiChannelIndex();
     void setReverseApiChannelIndex(qint32 reverse_api_channel_index);
 
+    qint32 getScramble();
+    void setScramble(qint32 scramble);
+
+    qint32 getPolynomial();
+    void setPolynomial(qint32 polynomial);
+
+    qint32 getPulseShaping();
+    void setPulseShaping(qint32 pulse_shaping);
+
+    float getBeta();
+    void setBeta(float beta);
+
+    qint32 getSymbolSpan();
+    void setSymbolSpan(qint32 symbol_span);
+
+    qint32 getUdpEnabled();
+    void setUdpEnabled(qint32 udp_enabled);
+
+    qint32 getUdpBytesFormat();
+    void setUdpBytesFormat(qint32 udp_bytes_format);
+
+    QString* getUdpAddress();
+    void setUdpAddress(QString* udp_address);
+
+    qint32 getUdpPort();
+    void setUdpPort(qint32 udp_port);
+
 
     virtual bool isSet() override;
 
@@ -109,8 +157,14 @@ private:
     qint64 input_frequency_offset;
     bool m_input_frequency_offset_isSet;
 
-    QString* phy;
-    bool m_phy_isSet;
+    qint32 modulation;
+    bool m_modulation_isSet;
+
+    qint32 bit_rate;
+    bool m_bit_rate_isSet;
+
+    qint32 sub_g_hz_band;
+    bool m_sub_g_hz_band_isSet;
 
     float rf_bandwidth;
     bool m_rf_bandwidth_isSet;
@@ -130,17 +184,32 @@ private:
     qint32 repeat_count;
     bool m_repeat_count_isSet;
 
-    qint32 udp_enabled;
-    bool m_udp_enabled_isSet;
+    qint32 ramp_up_bits;
+    bool m_ramp_up_bits_isSet;
 
-    qint32 m_udp_bytes_format;
-    bool m_m_udp_bytes_format_isSet;
+    qint32 ramp_down_bits;
+    bool m_ramp_down_bits_isSet;
 
-    QString* udp_address;
-    bool m_udp_address_isSet;
+    qint32 ramp_range;
+    bool m_ramp_range_isSet;
 
-    qint32 udp_port;
-    bool m_udp_port_isSet;
+    qint32 modulate_while_ramping;
+    bool m_modulate_while_ramping_isSet;
+
+    qint32 lpf_taps;
+    bool m_lpf_taps_isSet;
+
+    qint32 bb_noise;
+    bool m_bb_noise_isSet;
+
+    qint32 write_to_file;
+    bool m_write_to_file_isSet;
+
+    qint32 spectrum_rate;
+    bool m_spectrum_rate_isSet;
+
+    QString* data;
+    bool m_data_isSet;
 
     qint32 rgb_color;
     bool m_rgb_color_isSet;
@@ -165,6 +234,33 @@ private:
 
     qint32 reverse_api_channel_index;
     bool m_reverse_api_channel_index_isSet;
+
+    qint32 scramble;
+    bool m_scramble_isSet;
+
+    qint32 polynomial;
+    bool m_polynomial_isSet;
+
+    qint32 pulse_shaping;
+    bool m_pulse_shaping_isSet;
+
+    float beta;
+    bool m_beta_isSet;
+
+    qint32 symbol_span;
+    bool m_symbol_span_isSet;
+
+    qint32 udp_enabled;
+    bool m_udp_enabled_isSet;
+
+    qint32 udp_bytes_format;
+    bool m_udp_bytes_format_isSet;
+
+    QString* udp_address;
+    bool m_udp_address_isSet;
+
+    qint32 udp_port;
+    bool m_udp_port_isSet;
 
 };
 

@@ -22,7 +22,7 @@
 #include <QJsonObject>
 
 
-#include "SWGIEEE_802_15_4_ModActions_tx.h"
+#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
@@ -42,15 +42,21 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGIEEE_802_15_4_ModActions* fromJson(QString &jsonString) override;
 
-    SWGIEEE_802_15_4_ModActions_tx* getTx();
-    void setTx(SWGIEEE_802_15_4_ModActions_tx* tx);
+    qint32 getTx();
+    void setTx(qint32 tx);
+
+    QString* getData();
+    void setData(QString* data);
 
 
     virtual bool isSet() override;
 
 private:
-    SWGIEEE_802_15_4_ModActions_tx* tx;
+    qint32 tx;
     bool m_tx_isSet;
+
+    QString* data;
+    bool m_data_isSet;
 
 };
 

@@ -4,9 +4,20 @@ IEEE_802_15_4_ModSettings:
     inputFrequencyOffset:
       type: integer
       format: int64
-    phy:
-      description: Physical layer. "20kbps BPSK", "40kbps BPSK", "100kbps <1GHz O-QPSK", "250kbps <1GHz O-QPSK (Sine)", "250kbps <1GHz O-QPSK (RC)", or "250kbps >2GHz O-QPSK".
-      type: string
+    modulation:
+      description: >
+        Modulation type
+          * 0 - BPSK
+          * 1 - OQPSK
+      type: integer
+    bitRate:
+      type: integer
+    subGHzBand:
+      type: integer
+      description: >
+        Boolean value
+          * 0 - Over 1 GHz standard
+          * 1 - Under 1 GHz standard
     rfBandwidth:
       type: number
       format: float
@@ -15,6 +26,9 @@ IEEE_802_15_4_ModSettings:
       format: float
     channelMute:
       type: integer
+      description: >
+        * 0 - Effective transmission
+        * 1 - Transmission is muted
     repeat:
       description: Whether to repeated transmit the frame (1 for yes, 0 for no).
       type: integer
@@ -25,21 +39,37 @@ IEEE_802_15_4_ModSettings:
     repeatCount:
       description: Number of times to repeat the frame (-1 for infinite).
       type: integer
-    udpEnabled:
-      description: Enable forwarding of frames via UDP
+    rampUpBits:
       type: integer
-    m_udpBytesFormat:
+    rampDownBits:
+      type: integer
+    rampRange:
+      type: integer
+    modulateWhileRamping:
       type: integer
       description: >
-        Payload format
-          * 0 - Blank separated string representation of hex bytes i.e. 00 02 0a
-          * 1 - Raw bytes
-    udpAddress:
-      description: UDP address to listen for frames to transmit on
-      type: string
-    udpPort:
-      description: UDP port to listen for frames to transmit on
+        Boolean value
+          * 0 - do not modulate in ramping phase
+          * 1 - modulate in ramping phase
+    lpfTaps:
       type: integer
+    bbNoise:
+      type: integer
+      description: >
+        Boolean value
+          * 0 - Do not add gaussian noise in baseband
+          * 1 - Add gaussian noise in baseband
+    writeToFile:
+      type: integer
+      description: >
+        Boolean value
+          * 0 - Do not write frames to .csv file
+          * 1 - Write frames to .csv file
+    spectrumRate:
+      type: integer
+    data:
+      type: string
+      description: Hex coded bytes of data to transmit, excluding CRC (E.g for an ACK - 02 00 00)
     rgbColor:
       type: integer
     title:
@@ -58,6 +88,42 @@ IEEE_802_15_4_ModSettings:
       type: integer
     reverseAPIChannelIndex:
       type: integer
+    scramble:
+      type: integer
+      description: >
+        Boolean value
+          * 0 - Do not scramble data
+          * 1 - Scramble data
+    polynomial:
+      type: integer
+      description: Scrambling polynomial
+    pulseShaping:
+      type: integer
+      description: >
+        Pulse shaping filter
+          * 0 - Root Cosime
+          * 1 - Sine
+    beta:
+      type: number
+      format: float
+      description: Pulse shapint filter beta factor
+    symbolSpan:
+      type: integer
+    udpEnabled:
+      description: Enable forwarding of frames via UDP
+      type: integer
+    udpBytesFormat:
+      type: integer
+      description: >
+        Payload format
+          * 0 - Blank separated string representation of hex bytes i.e. 00 02 0a
+          * 1 - Raw bytes
+    udpAddress:
+      description: UDP address to listen for frames to transmit on
+      type: string
+    udpPort:
+      description: UDP port to listen for frames to transmit on
+      type: integer
 
 IEEE_802_15_4_ModReport:
   description: IEEE_802_15_4_Mod
@@ -73,10 +139,12 @@ IEEE_802_15_4_ModActions:
   description: IEEE_802_15_4_Mod
   properties:
     tx:
-      type: object
-      properties:
-        data:
-          description: Hex coded bytes of data to transmit, excluding CRC (E.g for an ACK - 02 00 00).
-          type: string
+      type: integer
       description: >
-        Transmit a frame
+        Initialize a transmission cycle
+          * 0 - Do nothing
+          * 1 - Start transmission cycle
+    data:
+      type: string
+      description: >
+        Hex coded bytes of data to transmit, excluding CRC (E.g for an ACK - 02 00 00). Preempts settings data.
