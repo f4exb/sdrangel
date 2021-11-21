@@ -179,3 +179,9 @@ ChirpChatModReport:
       description: total message duration inc. preamble and SFD (ms)
       type: number
       format: float
+    playing:
+      type: integer
+      description: >
+        Boolean - modulator is active (playing) including idle time
+          * 0 - Modulator not active
+          * 1 - Modulator active

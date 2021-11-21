@@ -330,6 +330,9 @@ void ChirpChatMod::applySettings(const ChirpChatModSettings& settings, bool forc
         }
     }
 
+    if ((settings.m_messageRepeat != m_settings.m_messageRepeat) || force) {
+        reverseAPIKeys.append("messageRepeat");
+    }
     if ((settings.m_udpEnabled != m_settings.m_udpEnabled) || force) {
         reverseAPIKeys.append("udpEnabled");
     }
@@ -549,13 +552,13 @@ void ChirpChatMod::webapiUpdateChannelSettings(
         settings.m_messageRepeat = response.getChirpChatModSettings()->getMessageRepeat();
     }
     if (channelSettingsKeys.contains("udpEnabled")) {
-        settings.m_udpEnabled = response.getPacketDemodSettings()->getUdpEnabled();
+        settings.m_udpEnabled = response.getChirpChatModSettings()->getUdpEnabled();
     }
     if (channelSettingsKeys.contains("udpAddress")) {
-        settings.m_udpAddress = *response.getPacketDemodSettings()->getUdpAddress();
+        settings.m_udpAddress = *response.getChirpChatModSettings()->getUdpAddress();
     }
     if (channelSettingsKeys.contains("udpPort")) {
-        settings.m_udpPort = response.getPacketDemodSettings()->getUdpPort();
+        settings.m_udpPort = response.getChirpChatModSettings()->getUdpPort();
     }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getChirpChatModSettings()->getRgbColor();
@@ -698,6 +701,7 @@ void ChirpChatMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& 
         bytesStr->push_back(new QString(tr("%1").arg(b, 2, 16, QChar('0'))));
     }
 
+    response.getChirpChatModSettings()->setMessageRepeat(settings.m_messageRepeat);
     response.getChirpChatModSettings()->setUdpEnabled(settings.m_udpEnabled);
     response.getChirpChatModSettings()->setUdpAddress(new QString(settings.m_udpAddress));
     response.getChirpChatModSettings()->setUdpPort(settings.m_udpPort);
@@ -732,6 +736,7 @@ void ChirpChatMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& resp
     response.getChirpChatModReport()->setPayloadTimeMs(m_currentPayloadTime);
     response.getChirpChatModReport()->setTotalTimeMs(m_currentPayloadTime + controlMs);
     response.getChirpChatModReport()->setSymbolTimeMs(4.0 * fourthsMs);
+    response.getChirpChatModReport()->setPlaying(getModulatorActive() ? 1 : 0);
 }
 
 void ChirpChatMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const ChirpChatModSettings& settings, bool force)

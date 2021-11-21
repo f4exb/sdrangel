@@ -56,6 +56,9 @@ public:
     float getTotalTimeMs();
     void setTotalTimeMs(float total_time_ms);
 
+    qint32 getPlaying();
+    void setPlaying(qint32 playing);
+
 
     virtual bool isSet() override;
 
@@ -74,6 +77,9 @@ private:
 
     float total_time_ms;
     bool m_total_time_ms_isSet;
+
+    qint32 playing;
+    bool m_playing_isSet;
 
 };
 

@@ -38,6 +38,8 @@ SWGChirpChatModReport::SWGChirpChatModReport() {
     m_payload_time_ms_isSet = false;
     total_time_ms = 0.0f;
     m_total_time_ms_isSet = false;
+    playing = 0;
+    m_playing_isSet = false;
 }
 
 SWGChirpChatModReport::~SWGChirpChatModReport() {
@@ -56,10 +58,13 @@ SWGChirpChatModReport::init() {
     m_payload_time_ms_isSet = false;
     total_time_ms = 0.0f;
     m_total_time_ms_isSet = false;
+    playing = 0;
+    m_playing_isSet = false;
 }
 
 void
 SWGChirpChatModReport::cleanup() {
+
 
 
 
@@ -87,6 +92,8 @@ SWGChirpChatModReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&payload_time_ms, pJson["payloadTimeMs"], "float", "");
     
     ::SWGSDRangel::setValue(&total_time_ms, pJson["totalTimeMs"], "float", "");
+    
+    ::SWGSDRangel::setValue(&playing, pJson["playing"], "qint32", "");
     
 }
 
@@ -118,6 +125,9 @@ SWGChirpChatModReport::asJsonObject() {
     }
     if(m_total_time_ms_isSet){
         obj->insert("totalTimeMs", QJsonValue(total_time_ms));
+    }
+    if(m_playing_isSet){
+        obj->insert("playing", QJsonValue(playing));
     }
 
     return obj;
@@ -173,6 +183,16 @@ SWGChirpChatModReport::setTotalTimeMs(float total_time_ms) {
     this->m_total_time_ms_isSet = true;
 }
 
+qint32
+SWGChirpChatModReport::getPlaying() {
+    return playing;
+}
+void
+SWGChirpChatModReport::setPlaying(qint32 playing) {
+    this->playing = playing;
+    this->m_playing_isSet = true;
+}
+
 
 bool
 SWGChirpChatModReport::isSet(){
@@ -191,6 +211,9 @@ SWGChirpChatModReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_total_time_ms_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_playing_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);
