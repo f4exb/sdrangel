@@ -11,7 +11,7 @@
  */
 
 
-#include "SWGAISModActions.h"
+#include "SWGPacketModActions_payload.h"
 
 #include "SWGHelpers.h"
 
@@ -22,45 +22,56 @@
 
 namespace SWGSDRangel {
 
-SWGAISModActions::SWGAISModActions(QString* json) {
+SWGPacketModActions_payload::SWGPacketModActions_payload(QString* json) {
     init();
     this->fromJson(*json);
 }
 
-SWGAISModActions::SWGAISModActions() {
-    tx = 0;
-    m_tx_isSet = false;
-    encode = 0;
-    m_encode_isSet = false;
+SWGPacketModActions_payload::SWGPacketModActions_payload() {
+    callsign = nullptr;
+    m_callsign_isSet = false;
+    to = nullptr;
+    m_to_isSet = false;
+    via = nullptr;
+    m_via_isSet = false;
     data = nullptr;
     m_data_isSet = false;
 }
 
-SWGAISModActions::~SWGAISModActions() {
+SWGPacketModActions_payload::~SWGPacketModActions_payload() {
     this->cleanup();
 }
 
 void
-SWGAISModActions::init() {
-    tx = 0;
-    m_tx_isSet = false;
-    encode = 0;
-    m_encode_isSet = false;
+SWGPacketModActions_payload::init() {
+    callsign = new QString("");
+    m_callsign_isSet = false;
+    to = new QString("");
+    m_to_isSet = false;
+    via = new QString("");
+    m_via_isSet = false;
     data = new QString("");
     m_data_isSet = false;
 }
 
 void
-SWGAISModActions::cleanup() {
-
-
+SWGPacketModActions_payload::cleanup() {
+    if(callsign != nullptr) { 
+        delete callsign;
+    }
+    if(to != nullptr) { 
+        delete to;
+    }
+    if(via != nullptr) { 
+        delete via;
+    }
     if(data != nullptr) { 
         delete data;
     }
 }
 
-SWGAISModActions*
-SWGAISModActions::fromJson(QString &json) {
+SWGPacketModActions_payload*
+SWGPacketModActions_payload::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -69,17 +80,19 @@ SWGAISModActions::fromJson(QString &json) {
 }
 
 void
-SWGAISModActions::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&tx, pJson["tx"], "qint32", "");
+SWGPacketModActions_payload::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&callsign, pJson["callsign"], "QString", "QString");
     
-    ::SWGSDRangel::setValue(&encode, pJson["encode"], "qint32", "");
+    ::SWGSDRangel::setValue(&to, pJson["to"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&via, pJson["via"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&data, pJson["data"], "QString", "QString");
     
 }
 
 QString
-SWGAISModActions::asJson ()
+SWGPacketModActions_payload::asJson ()
 {
     QJsonObject* obj = this->asJsonObject();
 
@@ -90,13 +103,16 @@ SWGAISModActions::asJson ()
 }
 
 QJsonObject*
-SWGAISModActions::asJsonObject() {
+SWGPacketModActions_payload::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if(m_tx_isSet){
-        obj->insert("tx", QJsonValue(tx));
+    if(callsign != nullptr && *callsign != QString("")){
+        toJsonValue(QString("callsign"), callsign, obj, QString("QString"));
     }
-    if(m_encode_isSet){
-        obj->insert("encode", QJsonValue(encode));
+    if(to != nullptr && *to != QString("")){
+        toJsonValue(QString("to"), to, obj, QString("QString"));
+    }
+    if(via != nullptr && *via != QString("")){
+        toJsonValue(QString("via"), via, obj, QString("QString"));
     }
     if(data != nullptr && *data != QString("")){
         toJsonValue(QString("data"), data, obj, QString("QString"));
@@ -105,45 +121,58 @@ SWGAISModActions::asJsonObject() {
     return obj;
 }
 
-qint32
-SWGAISModActions::getTx() {
-    return tx;
+QString*
+SWGPacketModActions_payload::getCallsign() {
+    return callsign;
 }
 void
-SWGAISModActions::setTx(qint32 tx) {
-    this->tx = tx;
-    this->m_tx_isSet = true;
-}
-
-qint32
-SWGAISModActions::getEncode() {
-    return encode;
-}
-void
-SWGAISModActions::setEncode(qint32 encode) {
-    this->encode = encode;
-    this->m_encode_isSet = true;
+SWGPacketModActions_payload::setCallsign(QString* callsign) {
+    this->callsign = callsign;
+    this->m_callsign_isSet = true;
 }
 
 QString*
-SWGAISModActions::getData() {
+SWGPacketModActions_payload::getTo() {
+    return to;
+}
+void
+SWGPacketModActions_payload::setTo(QString* to) {
+    this->to = to;
+    this->m_to_isSet = true;
+}
+
+QString*
+SWGPacketModActions_payload::getVia() {
+    return via;
+}
+void
+SWGPacketModActions_payload::setVia(QString* via) {
+    this->via = via;
+    this->m_via_isSet = true;
+}
+
+QString*
+SWGPacketModActions_payload::getData() {
     return data;
 }
 void
-SWGAISModActions::setData(QString* data) {
+SWGPacketModActions_payload::setData(QString* data) {
     this->data = data;
     this->m_data_isSet = true;
 }
 
 
 bool
-SWGAISModActions::isSet(){
+SWGPacketModActions_payload::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_tx_isSet){
+        if(callsign && *callsign != QString("")){
             isObjectUpdated = true; break;
         }
-        if(m_encode_isSet){
+        if(to && *to != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(via && *via != QString("")){
             isObjectUpdated = true; break;
         }
         if(data && *data != QString("")){

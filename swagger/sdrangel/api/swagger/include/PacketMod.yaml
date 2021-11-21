@@ -171,3 +171,14 @@ PacketModActions:
         Transmit with current data
           * 0 - Do nothing
           * 1 - Transmit
+    payload:
+      type: object
+      properties:
+        callsign:
+          type: string
+        to:
+          type: string
+        via:
+          type: string
+        data:
+          type: string

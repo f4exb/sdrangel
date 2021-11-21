@@ -130,6 +130,24 @@ public:
         { }
     };
 
+    class MsgTXPacketData : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgTXPacketData* create(const QString& data) {
+            return new MsgTXPacketData(data);
+        }
+
+        QString m_data;
+
+   private:
+
+        MsgTXPacketData(const QString& data) :
+            Message(),
+            m_data(data)
+        { }
+    };
+
     //=================================================================
 
     AISMod(DeviceAPI *deviceAPI);

@@ -113,6 +113,31 @@ public:
         { }
     };
 
+    class MsgTXPacketData : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgTXPacketData* create(QString callsign, QString to, QString via, QString data)
+        {
+            return new MsgTXPacketData(callsign, to, via, data);
+        }
+
+        QString m_callsign;
+        QString m_to;
+        QString m_via;
+        QString m_data;
+
+   private:
+
+        MsgTXPacketData(QString callsign, QString to, QString via, QString data) :
+            Message(),
+            m_callsign(callsign),
+            m_to(to),
+            m_via(via),
+            m_data(data)
+        { }
+    };
+
     //=================================================================
 
     PacketMod(DeviceAPI *deviceAPI);

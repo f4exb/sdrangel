@@ -52,6 +52,7 @@ MESSAGE_CLASS_DEFINITION(PacketMod::MsgConfigurePacketMod, Message)
 MESSAGE_CLASS_DEFINITION(PacketMod::MsgTx, Message)
 MESSAGE_CLASS_DEFINITION(PacketMod::MsgReportTx, Message)
 MESSAGE_CLASS_DEFINITION(PacketMod::MsgTXPacketBytes, Message)
+MESSAGE_CLASS_DEFINITION(PacketMod::MsgTXPacketData, Message)
 
 const char* const PacketMod::m_channelIdURI = "sdrangel.channeltx.modpacket";
 const char* const PacketMod::m_channelId = "PacketMod";
@@ -661,8 +662,25 @@ int PacketMod::webapiActionsPost(
         {
             if (swgPacketModActions->getTx() != 0)
             {
-                MsgTx *msg = MsgTx::create();
-                m_basebandSource->getInputMessageQueue()->push(msg);
+                if (channelActionsKeys.contains("payload")
+                   && (swgPacketModActions->getPayload()->getCallsign())
+                   && (swgPacketModActions->getPayload()->getTo())
+                   && (swgPacketModActions->getPayload()->getVia())
+                   && (swgPacketModActions->getPayload()->getData()))
+                {
+                    MsgTXPacketData *msg = MsgTXPacketData::create(
+                        *swgPacketModActions->getPayload()->getCallsign(),
+                        *swgPacketModActions->getPayload()->getTo(),
+                        *swgPacketModActions->getPayload()->getVia(),
+                        *swgPacketModActions->getPayload()->getData()
+                    );
+                    m_basebandSource->getInputMessageQueue()->push(msg);
+                }
+                else
+                {
+                    MsgTx *msg = MsgTx::create();
+                    m_basebandSource->getInputMessageQueue()->push(msg);
+                }
 
                 if (getMessageQueueToGUI())
                 {

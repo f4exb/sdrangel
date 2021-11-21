@@ -1000,6 +1000,9 @@ margin-bottom: 20px;
     "encode" : {
       "type" : "integer",
       "description" : "Encode message from discrete data\n  * 0 - do nothing\n  * 1 - encode\n"
+    },
+    "data" : {
+      "type" : "string"
     }
   },
   "description" : "AISMod"
@@ -8283,9 +8286,28 @@ margin-bottom: 20px;
     "tx" : {
       "type" : "integer",
       "description" : "Transmit with current data\n  * 0 - Do nothing\n  * 1 - Transmit\n"
+    },
+    "payload" : {
+      "$ref" : "#/definitions/PacketModActions_payload"
     }
   },
   "description" : "PacketMod"
+};
+            defs.PacketModActions_payload = {
+  "properties" : {
+    "callsign" : {
+      "type" : "string"
+    },
+    "to" : {
+      "type" : "string"
+    },
+    "via" : {
+      "type" : "string"
+    },
+    "data" : {
+      "type" : "string"
+    }
+  }
 };
             defs.PacketModReport = {
   "properties" : {
@@ -51345,7 +51367,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-11-20T13:05:46.792+01:00
+              Generated 2021-11-21T00:20:10.840+01:00
             </div>
           </div>
       </div>

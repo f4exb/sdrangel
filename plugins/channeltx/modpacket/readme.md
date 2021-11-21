@@ -76,7 +76,7 @@ The packet of data to send. To send an APRS status message, use the format <tt>>
 
 <h3>17: TX</h3>
 
-Transmits a packet containing the current values in callsign, to, via and data fields.
+Transmits a packet containing the current values in callsign, to, via and data fields. Right click to open a dialog to adjust transmission details allowing parameters different from standard values.
 
 <h3>18: UDP</h3>
 
@@ -92,10 +92,16 @@ UDP port number to receive packets to be transmitted on.
 
 <h2>API</h2>
 
-Full details of the API can be found in the Swagger documentation. Here is a quick example of how to transmit a packet from the command line:
+Full details of the API can be found in the Swagger documentation. Below are a few examples.
 
-    curl -X POST "http://127.0.0.1:8091/sdrangel/deviceset/1/channel/0/actions" -d '{"channelType": "PacketMod",  "direction": 1, "PacketModActions": { "tx": { "callsign": "MYCALL", "to": "APRS", "via": "WIDE2-2", "data": ">Using SDRangel API to transmit" }}}'
+To transmit a packet with current callsign, to, via and data fields simply send a "tx" action:
 
-Or to set the mode to 9600 FSK:
+    curl -X POST "http://127.0.0.1:8091/sdrangel/deviceset/1/channel/0/actions" -d '{"channelType": "PacketMod",  "direction": 1, "PacketModActions": { "tx": 1}}'
+
+To transmit a packet from the command line:
+
+    curl -X POST "http://127.0.0.1:8091/sdrangel/deviceset/1/channel/0/actions" -d '{"channelType": "PacketMod",  "direction": 1, "PacketModActions": { "tx": 1, "payload": { "callsign": "MYCALL", "to": "APRS", "via": "WIDE2-2", "data": ">Using SDRangel API to transmit" }}}'
+
+To set the mode to 9600 FSK:
 
     curl -X PATCH "http://127.0.0.1:8091/sdrangel/deviceset/1/channel/0/settings" -d '{"channelType": "PacketMod", "direction": 1, "PacketModSettings": {"mode": "9600 FSK"}}'

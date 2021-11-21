@@ -91,13 +91,13 @@ Check this button to repeatedly transmit a frame. Right click to open the dialog
 
 <h3>14: TX</h3>
 
-Transmits a frame containing the payload set in the data field.
+Transmits a frame containing the payload set in the data field. Right click to open a dialog to adjust transmission details allowing parameters different from standard values.
 
 <h2>API</h2>
 
-Full details of the API can be found in the Swagger documentation.
+Full details of the API can be found in the Swagger documentation. Below are a few examples:
 
-To transmit stored data just send a "tx" action:
+To transmit current data just send a "tx" action:
 
     curl -X POST "http://127.0.0.1:8091/sdrangel/deviceset/1/channel/0/actions" -d '{"channelType": "IEEE_802_15_4_Mod",  "direction": 1, "IEEE_802_15_4_ModActions": { "tx": 1}}
 

@@ -188,6 +188,7 @@
 #include "SWGPacketDemodReport.h"
 #include "SWGPacketDemodSettings.h"
 #include "SWGPacketModActions.h"
+#include "SWGPacketModActions_payload.h"
 #include "SWGPacketModReport.h"
 #include "SWGPacketModSettings.h"
 #include "SWGPagerDemodReport.h"
@@ -1174,6 +1175,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGPacketModActions").compare(type) == 0) {
       SWGPacketModActions *obj = new SWGPacketModActions();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGPacketModActions_payload").compare(type) == 0) {
+      SWGPacketModActions_payload *obj = new SWGPacketModActions_payload();
       obj->init();
       return obj;
     }

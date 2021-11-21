@@ -164,6 +164,14 @@ bool AISModBaseband::handleMessage(const Message& cmd)
 
         return true;
     }
+    else if (AISMod::MsgTXPacketData::match(cmd))
+    {
+        AISMod::MsgTXPacketData& tx = (AISMod::MsgTXPacketData&) cmd;
+        m_source.addTXPacket(tx.m_data);
+        m_source.transmit();
+
+        return true;
+    }
     else if (DSPSignalNotification::match(cmd))
     {
         QMutexLocker mutexLocker(&m_mutex);

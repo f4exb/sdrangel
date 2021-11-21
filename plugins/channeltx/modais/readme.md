@@ -115,14 +115,20 @@ Check this button to repeatedly transmit a message. Right click to open the dial
 
 <h3>25: TX</h3>
 
-Transmits the message.
+Transmits the message. Right click to open a dialog to adjust transmission details allowing parameters different from standard values.
 
 <h2>API</h2>
 
-Full details of the API can be found in the Swagger documentation. Here is a quick example of how to transmit a message from the command line:
+Full details of the API can be found in the Swagger documentation. Below are a few examples.
 
-    curl -X POST "http://127.0.0.1:8091/sdrangel/deviceset/1/channel/0/actions" -d '{"channelType": "AISMod",  "direction": 1, "AISModActions": { "tx": { "data": "000000000000000000000000000000000" }}}'
+To transmit the current data just send a "tx" action:
 
-Or to set the FM deviation:
+    curl -X POST "http://127.0.0.1:8091/sdrangel/deviceset/1/channel/0/actions" -d '{"channelType": "AISMod",  "direction": 1, "AISModActions": { "tx": 1}}'
+
+To transmit a message from the command line:
+
+    curl -X POST "http://127.0.0.1:8091/sdrangel/deviceset/1/channel/0/actions" -d '{"channelType": "AISMod",  "direction": 1, "AISModActions": { "tx": 1, "data": "000000000000000000000000000000000" }}'
+
+To set the FM deviation:
 
     curl -X PATCH "http://127.0.0.1:8091/sdrangel/deviceset/1/channel/0/settings" -d '{"channelType": "AISMod", "direction": 1, "AISModSettings": {"fmDeviation": 4800}}'

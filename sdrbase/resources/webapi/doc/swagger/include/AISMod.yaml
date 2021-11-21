@@ -142,3 +142,5 @@ AISModActions:
         Encode message from discrete data
           * 0 - do nothing
           * 1 - encode
+    data:
+      type: string

@@ -49,6 +49,7 @@ MESSAGE_CLASS_DEFINITION(AISMod::MsgReportData, Message)
 MESSAGE_CLASS_DEFINITION(AISMod::MsgTx, Message)
 MESSAGE_CLASS_DEFINITION(AISMod::MsgEncode, Message)
 MESSAGE_CLASS_DEFINITION(AISMod::MsgTXPacketBytes, Message)
+MESSAGE_CLASS_DEFINITION(AISMod::MsgTXPacketData, Message)
 
 const char* const AISMod::m_channelIdURI = "sdrangel.channel.modais";
 const char* const AISMod::m_channelId = "AISMod";
@@ -676,8 +677,16 @@ int AISMod::webapiActionsPost(
         {
             if (swgAISModActions->getTx() != 0)
             {
-                AISMod::MsgTx *msg = AISMod::MsgTx::create();
-                m_basebandSource->getInputMessageQueue()->push(msg);
+                if (channelActionsKeys.contains("data") && (swgAISModActions->getData()))
+                {
+                    AISMod::MsgTXPacketData *msg = AISMod::MsgTXPacketData::create(*swgAISModActions->getData());
+                    m_basebandSource->getInputMessageQueue()->push(msg);
+                }
+                else
+                {
+                    AISMod::MsgTx *msg = AISMod::MsgTx::create();
+                    m_basebandSource->getInputMessageQueue()->push(msg);
+                }
             }
 
             return 202;

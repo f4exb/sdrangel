@@ -11,13 +11,13 @@
  */
 
 /*
- * SWGAISModActions.h
+ * SWGPacketModActions_payload.h
  *
- * AISMod
+ * 
  */
 
-#ifndef SWGAISModActions_H_
-#define SWGAISModActions_H_
+#ifndef SWGPacketModActions_payload_H_
+#define SWGPacketModActions_payload_H_
 
 #include <QJsonObject>
 
@@ -29,24 +29,27 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGAISModActions: public SWGObject {
+class SWG_API SWGPacketModActions_payload: public SWGObject {
 public:
-    SWGAISModActions();
-    SWGAISModActions(QString* json);
-    virtual ~SWGAISModActions();
+    SWGPacketModActions_payload();
+    SWGPacketModActions_payload(QString* json);
+    virtual ~SWGPacketModActions_payload();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGAISModActions* fromJson(QString &jsonString) override;
+    virtual SWGPacketModActions_payload* fromJson(QString &jsonString) override;
 
-    qint32 getTx();
-    void setTx(qint32 tx);
+    QString* getCallsign();
+    void setCallsign(QString* callsign);
 
-    qint32 getEncode();
-    void setEncode(qint32 encode);
+    QString* getTo();
+    void setTo(QString* to);
+
+    QString* getVia();
+    void setVia(QString* via);
 
     QString* getData();
     void setData(QString* data);
@@ -55,11 +58,14 @@ public:
     virtual bool isSet() override;
 
 private:
-    qint32 tx;
-    bool m_tx_isSet;
+    QString* callsign;
+    bool m_callsign_isSet;
 
-    qint32 encode;
-    bool m_encode_isSet;
+    QString* to;
+    bool m_to_isSet;
+
+    QString* via;
+    bool m_via_isSet;
 
     QString* data;
     bool m_data_isSet;
@@ -68,4 +74,4 @@ private:
 
 }
 
-#endif /* SWGAISModActions_H_ */
+#endif /* SWGPacketModActions_payload_H_ */

@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include "SWGPacketModActions_payload.h"
 
 #include "SWGObject.h"
 #include "export.h"
@@ -44,12 +45,18 @@ public:
     qint32 getTx();
     void setTx(qint32 tx);
 
+    SWGPacketModActions_payload* getPayload();
+    void setPayload(SWGPacketModActions_payload* payload);
+
 
     virtual bool isSet() override;
 
 private:
     qint32 tx;
     bool m_tx_isSet;
+
+    SWGPacketModActions_payload* payload;
+    bool m_payload_isSet;
 
 };
 
