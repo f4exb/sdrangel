@@ -22,6 +22,7 @@
 #include <QObject>
 #include <QTimer>
 #include <QSerialPort>
+#include <QTcpSocket>
 
 #include "util/message.h"
 #include "util/messagequeue.h"
@@ -71,7 +72,9 @@ private:
     GS232ControllerSettings m_settings;
     bool m_running;
     QMutex m_mutex;
+    QIODevice *m_device;
     QSerialPort m_serialPort;
+    QTcpSocket m_socket;
     QTimer m_pollTimer;
 
     float m_lastAzimuth;
@@ -81,15 +84,19 @@ private:
     bool m_spidSetSent;
     bool m_spidStatusSent;
 
+    bool m_rotCtlDReadAz;               //!< rotctrld returns 'p' responses over two lines
+    QString m_rotCtlDAz;
+
     bool handleMessage(const Message& cmd);
     void applySettings(const GS232ControllerSettings& settings, bool force = false);
-    void openSerialPort(const GS232ControllerSettings& settings);
+    QIODevice *openSerialPort(const GS232ControllerSettings& settings);
+    QIODevice *openSocket(const GS232ControllerSettings& settings);
     void setAzimuth(float azimuth);
     void setAzimuthElevation(float azimuth, float elevation);
 
 private slots:
     void handleInputMessages();
-    void readSerialData();
+    void readData();
     void update();
 };
 

@@ -50,7 +50,7 @@ void GS232ControllerSettings::resetToDefaults()
     m_baudRate = 9600;
     m_track = false;
     m_source = "";
-    m_title = "GS-232 Rotator Controller";
+    m_title = "Rotator Controller";
     m_rgbColor = QColor(225, 25, 99).rgb();
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
@@ -63,8 +63,11 @@ void GS232ControllerSettings::resetToDefaults()
     m_azimuthMax = 450;
     m_elevationMin = 0;
     m_elevationMax = 180;
-    m_tolerance = 0.0f;
+    m_tolerance = 1.0f;
     m_protocol = GS232;
+    m_connection = SERIAL;
+    m_host = "127.0.0.1";
+    m_port = 4533;
 }
 
 QByteArray GS232ControllerSettings::serialize() const
@@ -92,6 +95,10 @@ QByteArray GS232ControllerSettings::serialize() const
     s.writeS32(20, m_elevationMax);
     s.writeFloat(21, m_tolerance);
     s.writeS32(22, (int)m_protocol);
+    s.writeS32(23, (int)m_connection);
+    s.writeString(24, m_host);
+    s.writeS32(25, m_port);
+    s.writeBlob(26, m_rollupState);
 
     return s.final();
 }
@@ -118,7 +125,7 @@ bool GS232ControllerSettings::deserialize(const QByteArray& data)
         d.readS32(4, &m_baudRate, 9600);
         d.readBool(5, &m_track, false);
         d.readString(6, &m_source, "");
-        d.readString(8, &m_title, "GS-232 Rotator Controller");
+        d.readString(8, &m_title, "Rotator Controller");
         d.readU32(9, &m_rgbColor, QColor(225, 25, 99).rgb());
         d.readBool(10, &m_useReverseAPI, false);
         d.readString(11, &m_reverseAPIAddress, "127.0.0.1");
@@ -140,8 +147,12 @@ bool GS232ControllerSettings::deserialize(const QByteArray& data)
         d.readS32(18, &m_azimuthMax, 450);
         d.readS32(19, &m_elevationMin, 0);
         d.readS32(20, &m_elevationMax, 180);
-        d.readFloat(21, &m_tolerance, 0.0f);
+        d.readFloat(21, &m_tolerance, 1.0f);
         d.readS32(22, (int*)&m_protocol, GS232);
+        d.readS32(23, (int*)&m_connection, SERIAL);
+        d.readString(24, &m_host, "127.0.0.1");
+        d.readS32(25, &m_port, 4533);
+        d.readBlob(26, &m_rollupState);
 
         return true;
     }

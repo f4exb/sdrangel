@@ -35,11 +35,13 @@ GS232ControllerWorker::GS232ControllerWorker() :
     m_msgQueueToFeature(nullptr),
     m_running(false),
     m_mutex(QMutex::Recursive),
+    m_device(nullptr),
     m_lastAzimuth(-1.0f),
     m_lastElevation(-1.0f),
     m_spidSetOutstanding(false),
     m_spidSetSent(false),
-    m_spidStatusSent(false)
+    m_spidStatusSent(false),
+    m_rotCtlDReadAz(false)
 {
     connect(&m_pollTimer, SIGNAL(timeout()), this, SLOT(update()));
     m_pollTimer.start(1000);
@@ -65,9 +67,12 @@ bool GS232ControllerWorker::startWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-    connect(&m_serialPort, &QSerialPort::readyRead, this, &GS232ControllerWorker::readSerialData);
-    if (!m_settings.m_serialPort.isEmpty()) {
-        openSerialPort(m_settings);
+    connect(&m_serialPort, &QSerialPort::readyRead, this, &GS232ControllerWorker::readData);
+    connect(&m_socket, &QTcpSocket::readyRead, this, &GS232ControllerWorker::readData);
+    if (m_settings.m_connection == GS232ControllerSettings::TCP) {
+        m_device = openSocket(m_settings);
+    } else {
+        m_device = openSerialPort(m_settings);
     }
     m_running = true;
     return m_running;
@@ -77,10 +82,12 @@ void GS232ControllerWorker::stopWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
     // Close serial port as USB/controller activity can create RFI
-    if (m_serialPort.isOpen())
-        m_serialPort.close();
+    if (m_device && m_device->isOpen()) {
+        m_device->close();
+    }
     disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-    disconnect(&m_serialPort, &QSerialPort::readyRead, this, &GS232ControllerWorker::readSerialData);
+    disconnect(&m_serialPort, &QSerialPort::readyRead, this, &GS232ControllerWorker::readData);
+    disconnect(&m_socket, &QTcpSocket::readyRead, this, &GS232ControllerWorker::readData);
     m_running = false;
 }
 
@@ -125,17 +132,33 @@ void GS232ControllerWorker::applySettings(const GS232ControllerSettings& setting
             << " m_elevationMax: " << settings.m_elevationMax
             << " m_tolerance: " << settings.m_tolerance
             << " m_protocol: " << settings.m_protocol
+            << " m_connection: " << settings.m_connection
             << " m_serialPort: " << settings.m_serialPort
             << " m_baudRate: " << settings.m_baudRate
+            << " m_host: " << settings.m_host
+            << " m_port: " << settings.m_port
             << " force: " << force;
 
-    if ((settings.m_serialPort != m_settings.m_serialPort) || force)
+    if (settings.m_connection != m_settings.m_connection)
     {
-        openSerialPort(settings);
+        if (m_device && m_device->isOpen()) {
+            m_device->close();
+        }
     }
-    else if ((settings.m_baudRate != m_settings.m_baudRate) || force)
+
+    if (settings.m_connection == GS232ControllerSettings::TCP)
     {
-        m_serialPort.setBaudRate(settings.m_baudRate);
+        if ((settings.m_host != m_settings.m_host) || (settings.m_port != m_settings.m_port) || force) {
+            m_device = openSocket(settings);
+        }
+    }
+    else
+    {
+        if ((settings.m_serialPort != m_settings.m_serialPort) || force) {
+            m_device = openSerialPort(settings);
+        } else if ((settings.m_baudRate != m_settings.m_baudRate) || force) {
+            m_serialPort.setBaudRate(settings.m_baudRate);
+        }
     }
 
     // Apply offset then clamp
@@ -159,22 +182,54 @@ void GS232ControllerWorker::applySettings(const GS232ControllerSettings& setting
     m_settings = settings;
 }
 
-void GS232ControllerWorker::openSerialPort(const GS232ControllerSettings& settings)
+QIODevice *GS232ControllerWorker::openSerialPort(const GS232ControllerSettings& settings)
 {
+    qDebug() << "GS232ControllerWorker::openSerialPort: " << settings.m_serialPort;
     if (m_serialPort.isOpen()) {
         m_serialPort.close();
     }
-    m_serialPort.setPortName(settings.m_serialPort);
-    m_serialPort.setBaudRate(settings.m_baudRate);
-    if (!m_serialPort.open(QIODevice::ReadWrite))
+    m_lastAzimuth = -1;
+    m_lastElevation = -1;
+    if (!settings.m_serialPort.isEmpty())
     {
-        qCritical() << "GS232ControllerWorker::openSerialPort: Failed to open serial port " << settings.m_serialPort << ". Error: " << m_serialPort.error();
-        if (m_msgQueueToFeature) {
+        m_serialPort.setPortName(settings.m_serialPort);
+        m_serialPort.setBaudRate(settings.m_baudRate);
+        if (!m_serialPort.open(QIODevice::ReadWrite))
+        {
+            qCritical() << "GS232ControllerWorker::openSerialPort: Failed to open serial port " << settings.m_serialPort << ". Error: " << m_serialPort.error();
             m_msgQueueToFeature->push(GS232Controller::MsgReportWorker::create(QString("Failed to open serial port %1: %2").arg(settings.m_serialPort).arg(m_serialPort.error())));
+            return nullptr;
         }
+        else
+        {
+            return &m_serialPort;
+        }
+    }
+    else
+    {
+        return nullptr;
+    }
+}
+
+QIODevice *GS232ControllerWorker::openSocket(const GS232ControllerSettings& settings)
+{
+    qDebug() << "GS232ControllerWorker::openSocket: " << settings.m_host << settings.m_port;
+    if (m_socket.isOpen()) {
+        m_socket.close();
     }
     m_lastAzimuth = -1;
     m_lastElevation = -1;
+    m_socket.connectToHost(settings.m_host, settings.m_port);
+    if (m_socket.waitForConnected(3000))
+    {
+        return &m_socket;
+    }
+    else
+    {
+        qCritical() << "GS232ControllerWorker::openSocket: Failed to connect to " << settings.m_host << settings.m_port;
+        m_msgQueueToFeature->push(GS232Controller::MsgReportWorker::create(QString("Failed to connect to %1:%2").arg(settings.m_host).arg(settings.m_port)));
+        return nullptr;
+    }
 }
 
 void GS232ControllerWorker::setAzimuth(float azimuth)
@@ -200,10 +255,8 @@ void GS232ControllerWorker::setAzimuthElevation(float azimuth, float elevation)
         QByteArray data = cmd.toLatin1();
         m_serialPort.write(data);
     }
-    else
+    else if (m_settings.m_protocol == GS232ControllerSettings::SPID)
     {
-        qDebug() << "GS232ControllerWorker::setAzimuthElevation " << " AZ " << azimuth << " EL " << elevation;
-
         if (!m_spidSetSent && !m_spidStatusSent)
         {
             QByteArray cmd(13, (char)0);
@@ -233,21 +286,25 @@ void GS232ControllerWorker::setAzimuthElevation(float azimuth, float elevation)
             qDebug() << "GS232ControllerWorker::setAzimuthElevation: Not sent, waiting for status reply";
             m_spidSetOutstanding = true;
         }
+    } else {
+        QString cmd = QString("P %1 %2\n").arg(azimuth).arg(elevation);
+        QByteArray data = cmd.toLatin1();
+        m_socket.write(data);
     }
     m_lastAzimuth = azimuth;
     m_lastElevation = elevation;
 }
 
-void GS232ControllerWorker::readSerialData()
+void GS232ControllerWorker::readData()
 {
     char buf[1024];
     qint64 len;
 
     if (m_settings.m_protocol == GS232ControllerSettings::GS232)
     {
-        while (m_serialPort.canReadLine())
+        while (m_device->canReadLine())
         {
-            len = m_serialPort.readLine(buf, sizeof(buf));
+            len = m_device->readLine(buf, sizeof(buf));
             if (len != -1)
             {
                 QString response = QString::fromUtf8(buf, len);
@@ -258,7 +315,7 @@ void GS232ControllerWorker::readSerialData()
                 {
                     QString az = match.captured(1);
                     QString el = match.captured(2);
-                    //qDebug() << "GS232ControllerWorker::readSerialData read Az " << az << " El " << el;
+                    //qDebug() << "GS232ControllerWorker::readData read Az " << az << " El " << el;
                     m_msgQueueToFeature->push(GS232ControllerReport::MsgReportAzAl::create(az.toFloat(), el.toFloat()));
                 }
                 else if (response == "\r\n")
@@ -267,27 +324,27 @@ void GS232ControllerWorker::readSerialData()
                 }
                 else
                 {
-                    qDebug() << "GS232ControllerWorker::readSerialData - unexpected GS-232 response \"" << response << "\"";
+                    qWarning() << "GS232ControllerWorker::readData - unexpected GS-232 response \"" << response << "\"";
                     m_msgQueueToFeature->push(GS232Controller::MsgReportWorker::create(QString("Unexpected GS-232 response: %1").arg(response)));
                 }
             }
         }
     }
-    else
+    else if (m_settings.m_protocol == GS232ControllerSettings::SPID)
     {
-        while (m_serialPort.bytesAvailable() >= 12)
+        while (m_device->bytesAvailable() >= 12)
         {
-            len = m_serialPort.read(buf, 12);
+            len = m_device->read(buf, 12);
             if ((len == 12) && (buf[0] == 0x57))
             {
                 double az;
                 double el;
                 az = buf[1] * 100.0 + buf[2] * 10.0 + buf[3] + buf[4] / 10.0 - 360.0;
                 el = buf[6] * 100.0 + buf[7] * 10.0 + buf[8] + buf[9] / 10.0 - 360.0;
-                //qDebug() << "GS232ControllerWorker::readSerialData read Az " << az << " El " << el;
+                //qDebug() << "GS232ControllerWorker::readData read Az " << az << " El " << el;
                 m_msgQueueToFeature->push(GS232ControllerReport::MsgReportAzAl::create(az, el));
                 if (m_spidStatusSent && m_spidSetSent) {
-                    qDebug() << "GS232ControllerWorker::readSerialData - m_spidStatusSent and m_spidSetSent set simultaneously";
+                    qDebug() << "GS232ControllerWorker::readData - m_spidStatusSent and m_spidSetSent set simultaneously";
                 }
                 if (m_spidStatusSent) {
                     m_spidStatusSent = false;
@@ -304,9 +361,78 @@ void GS232ControllerWorker::readSerialData()
             else
             {
                 QByteArray bytes(buf, (int)len);
-                qDebug() << "GS232ControllerWorker::readSerialData - unexpected SPID rot2prog response \"" << bytes.toHex() << "\"";
-                if (m_msgQueueToFeature) {
-                    m_msgQueueToFeature->push(GS232Controller::MsgReportWorker::create(QString("Unexpected SPID rot2prog response: %1").arg(bytes.toHex().data())));
+                qWarning() << "GS232ControllerWorker::readData - unexpected SPID rot2prog response \"" << bytes.toHex() << "\"";
+                m_msgQueueToFeature->push(GS232Controller::MsgReportWorker::create(QString("Unexpected SPID rot2prog response: %1").arg(bytes.toHex().data())));
+            }
+        }
+    }
+    else
+    {
+        while (m_device->canReadLine())
+        {
+            len = m_device->readLine(buf, sizeof(buf));
+            if (len != -1)
+            {
+                QString response = QString::fromUtf8(buf, len).trimmed();
+                QRegularExpression rprt("RPRT (-?\\d+)");
+                QRegularExpressionMatch matchRprt = rprt.match(response);
+                QRegularExpression decimal("(-?\\d+.\\d+)");
+                QRegularExpressionMatch matchDecimal = decimal.match(response);
+                if (matchRprt.hasMatch())
+                {
+                    // See rig_errcode_e in hamlib rig.h
+                    const QStringList errors = {
+                        "OK",
+                        "Invalid parameter",
+                        "Invalid configuration",
+                        "No memory",
+                        "Not implemented",
+                        "Timeout",
+                        "IO error",
+                        "Internal error",
+                        "Protocol error",
+                        "Command rejected",
+                        "Arg truncated",
+                        "Not available",
+                        "VFO not targetable",
+                        "Bus error",
+                        "Collision on bus",
+                        "NULL rig handled or invalid pointer parameter",
+                        "Invalid VFO",
+                        "Argument out of domain of function"
+                    };
+                    int rprt = matchRprt.captured(1).toInt();
+                    if (rprt != 0)
+                    {
+                        qWarning() << "GS232ControllerWorker::readData - rotctld error: " << errors[-rprt];
+                        // Seem to get a lot of EPROTO errors from rotctld due to extra 00 char in response to GS232 C2 command
+                        // E.g: ./rotctld.exe -m 603 -r com7 -vvvvv
+                        // read_string(): RX 16 characters
+                        // 0000    00 41 5a 3d 31 37 35 20 20 45 4c 3d 30 33 38 0d     .AZ=175  EL=038.
+                        // So don't pass these to GUI for now
+                        if (rprt != -8) {
+                            m_msgQueueToFeature->push(GS232Controller::MsgReportWorker::create(QString("rotctld error: %1").arg(errors[-rprt])));
+                        }
+                    }
+                    m_rotCtlDReadAz = false;
+                }
+                else if (matchDecimal.hasMatch() && !m_rotCtlDReadAz)
+                {
+                    m_rotCtlDAz = response;
+                    m_rotCtlDReadAz = true;
+                }
+                else if (matchDecimal.hasMatch() && m_rotCtlDReadAz)
+                {
+                    QString az = m_rotCtlDAz;
+                    QString el = response;
+                    m_rotCtlDReadAz = false;
+                    //qDebug() << "GS232ControllerWorker::readData read Az " << az << " El " << el;
+                    m_msgQueueToFeature->push(GS232ControllerReport::MsgReportAzAl::create(az.toFloat(), el.toFloat()));
+                }
+                else
+                {
+                    qWarning() << "GS232ControllerWorker::readData - Unexpected rotctld response \"" << response << "\"";
+                    m_msgQueueToFeature->push(GS232Controller::MsgReportWorker::create(QString("Unexpected rotctld response: %1").arg(response)));
                 }
             }
         }
@@ -315,15 +441,15 @@ void GS232ControllerWorker::readSerialData()
 
 void GS232ControllerWorker::update()
 {
-    // Request current Az/El from GS-232 controller
-    if (m_serialPort.isOpen())
+    // Request current Az/El from controller
+    if (m_device && m_device->isOpen())
     {
         if (m_settings.m_protocol == GS232ControllerSettings::GS232)
         {
             QByteArray cmd("C2\r\n");
-            m_serialPort.write(cmd);
+            m_device->write(cmd);
         }
-        else
+        else if (m_settings.m_protocol == GS232ControllerSettings::SPID)
         {
             // Don't send a new status command, if waiting for a previous reply
             if (!m_spidSetSent && !m_spidStatusSent)
@@ -336,9 +462,14 @@ void GS232ControllerWorker::update()
                 }
                 cmd.append((char)0x1f); // Status
                 cmd.append((char)0x20); // End
-                m_serialPort.write(cmd);
+                m_device->write(cmd);
                 m_spidStatusSent = true;
             }
+        }
+        else
+        {
+            QByteArray cmd("p\n");
+            m_device->write(cmd);
         }
     }
 }
