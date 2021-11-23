@@ -5,6 +5,7 @@ set(map_SOURCES
     mapsettings.cpp
     mapplugin.cpp
     mapwebapiadapter.cpp
+    osmtemplateserver.cpp
 )
 
 set(map_HEADERS
@@ -13,6 +14,7 @@ set(map_HEADERS
     mapplugin.h
     mapreport.h
     mapwebapiadapter.h
+    osmtemplateserver.h
     beacon.h
 )
 

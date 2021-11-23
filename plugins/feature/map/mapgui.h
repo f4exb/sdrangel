@@ -32,6 +32,7 @@
 #include "SWGMapItem.h"
 #include "mapbeacondialog.h"
 #include "mapradiotimedialog.h"
+#include "osmtemplateserver.h"
 
 class PluginAPI;
 class FeatureUISet;
@@ -482,7 +483,9 @@ public:
     void setBeacons(QList<Beacon *> *beacons);
     QList<RadioTimeTransmitter> getRadioTimeTransmitters() { return m_radioTimeTransmitters; }
     void addRadioTimeTransmitters();
+    void addDAB();
     void find(const QString& target);
+    Q_INVOKABLE void supportedMapsChanged();
 
 private:
     Ui::MapGUI* ui;
@@ -499,6 +502,8 @@ private:
     QList<Beacon *> *m_beacons;
     MapBeaconDialog m_beaconDialog;
     MapRadioTimeDialog m_radioTimeDialog;
+    quint16 m_osmPort;
+    OSMTemplateServer *m_templateServer;
 
     explicit MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent = nullptr);
     virtual ~MapGUI();
@@ -506,6 +511,8 @@ private:
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
     void applyMapSettings();
+    QString osmCachePath();
+    void clearOSMCache();
     void displaySettings();
     bool handleMessage(const Message& message);
     void geoReply();

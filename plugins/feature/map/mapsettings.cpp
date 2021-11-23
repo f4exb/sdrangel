@@ -56,7 +56,10 @@ void MapSettings::resetToDefaults()
 {
     m_displayNames = true;
     m_mapProvider = "osm";
-    m_mapBoxApiKey = "";
+    m_thunderforestAPIKey = "";
+    m_maptilerAPIKey = "";
+    m_mapBoxAPIKey = "";
+    m_osmURL = "";
     m_mapBoxStyles = "";
     m_sources = -1;
     m_displaySelectedGroundTracks = true;
@@ -78,7 +81,7 @@ QByteArray MapSettings::serialize() const
 
     s.writeBool(1, m_displayNames);
     s.writeString(2, m_mapProvider);
-    s.writeString(3, m_mapBoxApiKey);
+    s.writeString(3, m_mapBoxAPIKey);
     s.writeString(4, m_mapBoxStyles);
     s.writeU32(5, m_sources);
     s.writeU32(6, m_groundTrackColor);
@@ -92,6 +95,10 @@ QByteArray MapSettings::serialize() const
     s.writeU32(14, m_reverseAPIFeatureIndex);
     s.writeBool(15, m_displaySelectedGroundTracks);
     s.writeBool(16, m_displayAllGroundTracks);
+    s.writeString(17, m_thunderforestAPIKey);
+    s.writeString(18, m_maptilerAPIKey);
+    s.writeBlob(19, m_rollupState);
+    s.writeString(20, m_osmURL);
 
     return s.final();
 }
@@ -114,7 +121,7 @@ bool MapSettings::deserialize(const QByteArray& data)
 
         d.readBool(1, &m_displayNames, true);
         d.readString(2, &m_mapProvider, "osm");
-        d.readString(3, &m_mapBoxApiKey, "");
+        d.readString(3, &m_mapBoxAPIKey, "");
         d.readString(4, &m_mapBoxStyles, "");
         d.readU32(5, &m_sources, -1);
         d.readU32(6, &m_groundTrackColor, QColor(150, 0, 20).rgb());
@@ -137,6 +144,11 @@ bool MapSettings::deserialize(const QByteArray& data)
         m_reverseAPIFeatureIndex = utmp > 99 ? 99 : utmp;
         d.readBool(15, &m_displaySelectedGroundTracks, true);
         d.readBool(16, &m_displayAllGroundTracks, true);
+
+        d.readString(17, &m_thunderforestAPIKey, "");
+        d.readString(18, &m_maptilerAPIKey, "");
+        d.readBlob(19, &m_rollupState);
+        d.readString(20, &m_osmURL, "");
 
         return true;
     }

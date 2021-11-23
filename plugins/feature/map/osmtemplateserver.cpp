@@ -15,31 +15,4 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_FEATURE_MAPSETTINGSDIALOG_H
-#define INCLUDE_FEATURE_MAPSETTINGSDIALOG_H
-
-#include "ui_mapsettingsdialog.h"
-#include "mapsettings.h"
-
-class MapSettingsDialog : public QDialog {
-    Q_OBJECT
-
-public:
-    explicit MapSettingsDialog(MapSettings *settings, QWidget* parent = 0);
-    ~MapSettingsDialog();
-
-    MapSettings *m_settings;
-    bool m_mapSettingsChanged;
-    bool m_osmURLChanged;
-    bool m_sourcesChanged;
-
-private slots:
-    void accept();
-    void on_groundTrackColor_clicked();
-    void on_predictedGroundTrackColor_clicked();
-
-private:
-    Ui::MapSettingsDialog* ui;
-};
-
-#endif // INCLUDE_FEATURE_MAPSETTINGSDIALOG_H
+#include "osmtemplateserver.h"

@@ -89,6 +89,10 @@ Free API keys are available by signing up for an accounts with:
 * [Maptiler](https://www.maptiler.com/)
 * [Mapbox](https://www.mapbox.com/)
 
+If API keys are not specified, a default key will be used, but this may not work if too many users use it.
+
+When OpenStreetMap is used as the provider, a custom map URL can be entered. For example, http://a.tile.openstreetmap.fr/hot/ or http://1.basemaps.cartocdn.com/light_nolabels/
+
 <h3>Map</h3>
 
 The map displays objects reported by other SDRangel channels and features, as well as beacon locations.

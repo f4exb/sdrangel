@@ -8,33 +8,28 @@ Item {
     id: qmlMap
     property int mapZoomLevel: 11
     property string mapProvider: "osm"
-    property variant mapParameters
     property variant mapPtr
+    property variant guiPtr
 
-    function createMap(pluginParameters) {
-        var parameters = new Array()
+    function createMap(pluginParameters, gui) {
+        guiPtr = gui
+        var paramString = ""
         for (var prop in pluginParameters) {
-            var parameter = Qt.createQmlObject('import QtLocation 5.6; PluginParameter{ name: "'+ prop + '"; value: "' + pluginParameters[prop]+'"}', qmlMap)
-            parameters.push(parameter)
+            var parameter = 'PluginParameter { name: "' + prop + '"; value: "' + pluginParameters[prop] + '"}'
+            paramString = paramString + parameter
         }
-        qmlMap.mapParameters = parameters
+        var pluginString = 'import QtLocation 5.12; Plugin{ name:"' + mapProvider + '"; '  + paramString + '}'
+        var plugin = Qt.createQmlObject (pluginString, qmlMap)
 
-        var plugin
-        if (mapParameters && mapParameters.length > 0)
-            plugin = Qt.createQmlObject ('import QtLocation 5.12; Plugin{ name:"' + mapProvider + '"; parameters: qmlMap.mapParameters}', qmlMap)
-        else
-            plugin = Qt.createQmlObject ('import QtLocation 5.12; Plugin{ name:"' + mapProvider + '"}', qmlMap)
         if (mapPtr) {
-            // Objects aren't destroyed immediately, so rename the old
-            // map, so any C++ code that calls findChild("map") doesn't find
-            // the old map
-            mapPtr.objectName = "oldMap";
+            // Objects aren't destroyed immediately, so don't call findChild("map")
             mapPtr.destroy()
+            mapPtr = null
         }
         mapPtr = actualMapComponent.createObject(page)
         mapPtr.plugin = plugin;
         mapPtr.forceActiveFocus()
-        mapPtr.objectName = "map";
+        return mapPtr
     }
 
     function getMapTypes() {
@@ -48,8 +43,11 @@ Item {
     }
 
     function setMapType(mapTypeIndex) {
-        if (mapPtr)
-            mapPtr.activeMapType = mapPtr.supportedMapTypes[mapTypeIndex]
+        if (mapPtr && (mapTypeIndex < mapPtr.supportedMapTypes.length)) {
+            if (mapPtr.supportedMapTypes[mapTypeIndex] !== undefined) {
+                mapPtr.activeMapType = mapPtr.supportedMapTypes[mapTypeIndex]
+            }
+        }
     }
 
     Item {
@@ -62,6 +60,7 @@ Item {
 
         Map {
             id: map
+            objectName: "map"
             anchors.fill: parent
             center: QtPositioning.coordinate(51.5, 0.125) // London
             zoomLevel: 10
@@ -101,6 +100,10 @@ Item {
             // split them so they don't, each time the visible region is changed. meh.
             onCenterChanged: {
                 mapModel.viewChanged(visibleRegion.boundingGeoRectangle().bottomLeft.longitude, visibleRegion.boundingGeoRectangle().bottomRight.longitude);
+            }
+
+            onSupportedMapTypesChanged : {
+                guiPtr.supportedMapsChanged()
             }
 
         }
