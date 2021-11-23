@@ -6007,6 +6007,14 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "The baud rate to use for the serial connection to the GS-232 controller"
     },
+    "host" : {
+      "type" : "string",
+      "description" : "Hostname / IP address of computer running rotctld."
+    },
+    "port" : {
+      "type" : "integer",
+      "description" : "TCP port number rotctld is listening on."
+    },
     "track" : {
       "type" : "integer",
       "description" : "Track a target where azimuth and elevation are determined by another plugin (1 for yes, 0 for no)"
@@ -51367,7 +51375,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-11-21T00:20:10.840+01:00
+              Generated 2021-11-23T13:18:02.821+01:00
             </div>
           </div>
       </div>

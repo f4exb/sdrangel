@@ -2,7 +2,8 @@
 
 <h2>Introduction</h2>
 
-The Rotator Controller feature plugin allows SDRangel to send commands to GS-232 and SPID rotators as well as hamlib's rotctld, via serial or TCP. This allows SDRangel to point antennas mounted on a rotator to a specified azimuth and elevation.
+The Rotator Controller feature plugin allows SDRangel to send commands to GS-232 and SPID rotators as well as hamlib's rotctld, via a serial or TCP connection. 
+This allows SDRangel to point antennas mounted on a rotator to a specified azimuth and elevation.
 
 Azimuth and elevation can be set manually by a user in the GUI, via the REST API, or via another plugin, such as the Map Feature, the ADS-B Demodulator, or the Star Tracker.
 
@@ -58,11 +59,11 @@ Specifies the baud rate that will be used to send commands to the rotator. Typic
 
 <h3>11: Host</h3>
 
-Specifies the hostname / IP address of the computer running rotctld.
+Specifies the hostname / IP address of the computer to connect to.
 
 <h3>12: Port</h3>
 
-Specifies the TCP port number rotctld is listening on.
+Specifies the TCP port number to connect to.
 
 <h3>13: Azimuth Offset</h3>
 
@@ -91,20 +92,22 @@ This can prevent some rotators that have a limited accuracy from making unbenefi
 If this set to 0, every target azimuth and elevation received by the controller will be send to the rotator.
 If it is set to 2, then a change in azimuth of +-1 degree from the previous azimuth, would not be sent to the rotator.
 
-<h2>GS-232 Protocol Implementation</h2>
+<h2>Protocol Implementations</h2>
+
+<h3>GS-232 Protocol Implementation Notes</h3>
 
 The controller uses the Waaa eee command when elevation needs to be set.
 When only azimuth needs to be set, the Maaa command is used.
 The C2 command is used to read current azimuth and elevation. A response of AZ=aaaEL=eee is expected.
 
-<h2>SPID rot2prog Protocol Implementation</h2>
+<h3>SPID rot2prog Protocol Implementation</h3>
 
 The controller uses the 0x2f set command with PH/PV=2 to set azimuth and elevation.
 The 0x1f status command is used to read current azimuth and elevation.
 A 12 byte response is expected for set and status commands.
 All frames start with 0x57 and end with 0x20.
 
-<h2>rotctld Protocol Implementation</h2>
+<h3>rotctld Protocol Implementation</h3>
 
 The controller uses the 'P' and 'p' commands to set and get azimuth and elevation.
 

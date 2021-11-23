@@ -388,14 +388,14 @@
       <item row="2" column="1">
        <widget class="QLineEdit" name="host">
         <property name="toolTip">
-         <string>Host name / IP address of computer running rotctld</string>
+         <string>Hostname / IP address of computer to connect to</string>
         </property>
        </widget>
       </item>
       <item row="1" column="1">
        <widget class="QComboBox" name="serialPort">
         <property name="toolTip">
-         <string>Name of serial port to use to connect to the GS-232 controller</string>
+         <string>Name of serial port to use to connect to the rotator</string>
         </property>
         <property name="editable">
          <bool>true</bool>
@@ -441,7 +441,7 @@
       <item row="1" column="3">
        <widget class="QComboBox" name="baudRate">
         <property name="toolTip">
-         <string>Serial port baud rate for the GS-232 controller</string>
+         <string>Serial port baud rate</string>
         </property>
         <property name="currentIndex">
          <number>3</number>
@@ -521,7 +521,7 @@
       <item row="2" column="3">
        <widget class="QSpinBox" name="port">
         <property name="toolTip">
-         <string>TCP port number rotctld is listening on</string>
+         <string>TCP port number to connect to</string>
         </property>
         <property name="maximum">
          <number>65535</number>
