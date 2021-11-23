@@ -120,6 +120,7 @@ QByteArray SatelliteTrackerSettings::serialize() const
     s.writeU32(34, m_reverseAPIFeatureSetIndex);
     s.writeU32(35, m_reverseAPIFeatureIndex);
     s.writeBool(36, m_chartsDarkTheme);
+    s.writeBlob(37, m_rollupState);
 
     for (int i = 0; i < SAT_COL_COLUMNS; i++)
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -197,6 +198,7 @@ bool SatelliteTrackerSettings::deserialize(const QByteArray& data)
         d.readU32(35, &utmp, 0);
         m_reverseAPIFeatureIndex = utmp > 99 ? 99 : utmp;
         d.readBool(36, &m_chartsDarkTheme, true);
+        d.readBlob(37, &m_rollupState);
 
         for (int i = 0; i < SAT_COL_COLUMNS; i++)
             d.readS32(100 + i, &m_columnIndexes[i], i);

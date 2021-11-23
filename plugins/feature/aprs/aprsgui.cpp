@@ -408,6 +408,9 @@ void APRSGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 APRSGUI::APRSGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent) :
@@ -622,6 +625,8 @@ void APRSGUI::displaySettings()
     displayTableSettings(ui->messagesTable, messagesTableMenu, m_settings.m_messagesTableColumnSizes, m_settings.m_messagesTableColumnIndexes, APRS_MESSAGES_TABLE_COLUMNS);
     displayTableSettings(ui->telemetryTable, telemetryTableMenu, m_settings.m_telemetryTableColumnSizes, m_settings.m_telemetryTableColumnIndexes, APRS_TELEMETRY_TABLE_COLUMNS);
     displayTableSettings(ui->motionTable, motionTableMenu, m_settings.m_motionTableColumnSizes, m_settings.m_motionTableColumnIndexes, APRS_MOTION_TABLE_COLUMNS);
+
+    restoreState(m_settings.m_rollupState);
 
     blockApplySettings(false);
 }

@@ -1173,6 +1173,9 @@ void VORLocalizerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void VORLocalizerGUI::onMenuDialogCalled(const QPoint &p)
@@ -1373,6 +1376,7 @@ void VORLocalizerGUI::displaySettings()
     ui->centerShift->setValue(m_settings.m_centerShift/1000);
     ui->forceRRAveraging->setChecked(m_settings.m_forceRRAveraging);
 
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 

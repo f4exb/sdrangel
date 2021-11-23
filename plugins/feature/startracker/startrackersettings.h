@@ -71,6 +71,7 @@ struct StarTrackerSettings
     double m_elOffset;
     bool m_drawSunOnSkyTempChart;
     bool m_drawMoonOnSkyTempChart;
+    QByteArray m_rollupState;
 
     StarTrackerSettings();
     void resetToDefaults();

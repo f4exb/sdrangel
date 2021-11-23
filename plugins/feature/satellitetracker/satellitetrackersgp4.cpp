@@ -112,6 +112,11 @@ void getPassAzEl(QLineSeries* azimuth, QLineSeries* elevation, QLineSeries* pola
         int steps = 20;
 
         double timeStep = (losTime - aosTime).TotalSeconds() / steps;
+        if (timeStep <= 0.0)
+        {
+            qDebug() << "getPassAzEl: AOS is the same as or after LOS";
+            return;
+        }
 
         while (currentTime <= losTime)
         {

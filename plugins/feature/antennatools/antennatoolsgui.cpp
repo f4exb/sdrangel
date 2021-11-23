@@ -101,6 +101,9 @@ void AntennaToolsGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 AntennaToolsGUI::AntennaToolsGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent) :
@@ -164,6 +167,7 @@ void AntennaToolsGUI::displaySettings()
     calcDishBeamwidth();
     calcDishGain();
     calcDishEffectiveArea();
+    restoreState(m_settings.m_rollupState);
 }
 
 void AntennaToolsGUI::leaveEvent(QEvent*)

@@ -64,6 +64,7 @@ QByteArray AISSettings::serialize() const
     s.writeU32(24, m_reverseAPIPort);
     s.writeU32(25, m_reverseAPIFeatureSetIndex);
     s.writeU32(26, m_reverseAPIFeatureIndex);
+    s.writeBlob(27, m_rollupState);
 
     for (int i = 0; i < AIS_VESSEL_COLUMNS; i++)
         s.writeS32(300 + i, m_vesselColumnIndexes[i]);
@@ -106,6 +107,7 @@ bool AISSettings::deserialize(const QByteArray& data)
         m_reverseAPIFeatureSetIndex = utmp > 99 ? 99 : utmp;
         d.readU32(26, &utmp, 0);
         m_reverseAPIFeatureIndex = utmp > 99 ? 99 : utmp;
+        d.readBlob(27, &m_rollupState);
 
         for (int i = 0; i < AIS_VESSEL_COLUMNS; i++)
             d.readS32(300 + i, &m_vesselColumnIndexes[i], i);

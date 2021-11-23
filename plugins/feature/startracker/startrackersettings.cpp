@@ -130,6 +130,7 @@ QByteArray StarTrackerSettings::serialize() const
     s.writeDouble(41, m_elOffset);
     s.writeBool(42, m_drawSunOnSkyTempChart);
     s.writeBool(43, m_drawMoonOnSkyTempChart);
+    s.writeBlob(44, m_rollupState);
 
     return s.final();
 }
@@ -213,6 +214,8 @@ bool StarTrackerSettings::deserialize(const QByteArray& data)
 
         d.readBool(42, &m_drawSunOnSkyTempChart, true);
         d.readBool(43, &m_drawMoonOnSkyTempChart, true);
+
+        d.readBlob(44, &m_rollupState);
 
         return true;
     }

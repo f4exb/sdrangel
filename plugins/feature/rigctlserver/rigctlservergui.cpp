@@ -113,6 +113,9 @@ void RigCtlServerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 RigCtlServerGUI::RigCtlServerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent) :
@@ -160,6 +163,7 @@ void RigCtlServerGUI::displaySettings()
     blockApplySettings(true);
     ui->rigCtrlPort->setValue(m_settings.m_rigCtlPort);
     ui->maxFrequencyOffset->setValue(m_settings.m_maxFrequencyOffset);
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 

@@ -51,6 +51,7 @@ struct DemodAnalyzerSettings
     uint16_t m_reverseAPIFeatureIndex;
     Serializable *m_spectrumGUI;
     Serializable *m_scopeGUI;
+    QByteArray m_rollupState;
 
     DemodAnalyzerSettings();
     void resetToDefaults();

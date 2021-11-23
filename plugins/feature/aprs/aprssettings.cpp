@@ -131,6 +131,7 @@ QByteArray APRSSettings::serialize() const
     s.writeS32(17, (int)m_speedUnits);
     s.writeS32(18, (int)m_temperatureUnits);
     s.writeS32(19, (int)m_rainfallUnits);
+    s.writeBlob(20, m_rollupState);
 
     for (int i = 0; i < APRS_PACKETS_TABLE_COLUMNS; i++)
         s.writeS32(100 + i, m_packetsTableColumnIndexes[i]);
@@ -206,6 +207,8 @@ bool APRSSettings::deserialize(const QByteArray& data)
         d.readS32(17, (int *)&m_speedUnits, (int)KNOTS);
         d.readS32(18, (int *)&m_temperatureUnits, (int)FAHRENHEIT);
         d.readS32(19, (int *)&m_rainfallUnits, (int)HUNDREDTHS_OF_AN_INCH);
+
+        d.readBlob(20, &m_rollupState);
 
         for (int i = 0; i < APRS_PACKETS_TABLE_COLUMNS; i++)
             d.readS32(100 + i, &m_packetsTableColumnIndexes[i], i);

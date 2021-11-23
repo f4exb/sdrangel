@@ -89,6 +89,7 @@ QByteArray DemodAnalyzerSettings::serialize() const
     s.writeU32(9, m_reverseAPIPort);
     s.writeU32(10, m_reverseAPIFeatureSetIndex);
     s.writeU32(11, m_reverseAPIFeatureIndex);
+    s.writeBlob(12, m_rollupState);
 
     return s.final();
 }
@@ -138,6 +139,7 @@ bool DemodAnalyzerSettings::deserialize(const QByteArray& data)
         m_reverseAPIFeatureSetIndex = utmp > 99 ? 99 : utmp;
         d.readU32(11, &utmp, 0);
         m_reverseAPIFeatureIndex = utmp > 99 ? 99 : utmp;
+        d.readBlob(12, &m_rollupState);
 
         return true;
     }

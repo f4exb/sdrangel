@@ -223,6 +223,9 @@ void StarTrackerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 StarTrackerGUI::StarTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent) :
@@ -430,6 +433,7 @@ void StarTrackerGUI::displaySettings()
     ui->frequency->setValue(m_settings.m_frequency/1000000.0);
     ui->beamwidth->setValue(m_settings.m_beamwidth);
     updateForTarget();
+    restoreState(m_settings.m_rollupState);
     plotChart();
     blockApplySettings(false);
 }
