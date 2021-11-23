@@ -65,6 +65,7 @@ private:
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
     void displaySettings();
+    void updateConnectionWidgets();
     void updateDecimals(GS232ControllerSettings::Protocol protocol);
     void updatePipeList();
     void updateSerialPortList();
@@ -79,7 +80,10 @@ private slots:
     void handleInputMessages();
     void on_startStop_toggled(bool checked);
     void on_protocol_currentIndexChanged(int index);
+    void on_connection_currentIndexChanged(int index);
     void on_serialPort_currentIndexChanged(int index);
+    void on_host_editingFinished();
+    void on_port_valueChanged(int value);
     void on_baudRate_currentIndexChanged(int index);
     void on_track_stateChanged(int state);
     void on_azimuth_valueChanged(double value);

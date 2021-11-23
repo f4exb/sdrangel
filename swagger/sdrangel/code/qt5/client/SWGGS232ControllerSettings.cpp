@@ -36,6 +36,10 @@ SWGGS232ControllerSettings::SWGGS232ControllerSettings() {
     m_serial_port_isSet = false;
     baud_rate = 0;
     m_baud_rate_isSet = false;
+    host = nullptr;
+    m_host_isSet = false;
+    port = 0;
+    m_port_isSet = false;
     track = 0;
     m_track_isSet = false;
     source = nullptr;
@@ -86,6 +90,10 @@ SWGGS232ControllerSettings::init() {
     m_serial_port_isSet = false;
     baud_rate = 0;
     m_baud_rate_isSet = false;
+    host = new QString("");
+    m_host_isSet = false;
+    port = 0;
+    m_port_isSet = false;
     track = 0;
     m_track_isSet = false;
     source = new QString("");
@@ -128,6 +136,10 @@ SWGGS232ControllerSettings::cleanup() {
 
     if(serial_port != nullptr) { 
         delete serial_port;
+    }
+
+    if(host != nullptr) { 
+        delete host;
     }
 
 
@@ -173,6 +185,10 @@ SWGGS232ControllerSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&serial_port, pJson["serialPort"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&baud_rate, pJson["baudRate"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&host, pJson["host"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&port, pJson["port"], "qint32", "");
     
     ::SWGSDRangel::setValue(&track, pJson["track"], "qint32", "");
     
@@ -235,6 +251,12 @@ SWGGS232ControllerSettings::asJsonObject() {
     }
     if(m_baud_rate_isSet){
         obj->insert("baudRate", QJsonValue(baud_rate));
+    }
+    if(host != nullptr && *host != QString("")){
+        toJsonValue(QString("host"), host, obj, QString("QString"));
+    }
+    if(m_port_isSet){
+        obj->insert("port", QJsonValue(port));
     }
     if(m_track_isSet){
         obj->insert("track", QJsonValue(track));
@@ -329,6 +351,26 @@ void
 SWGGS232ControllerSettings::setBaudRate(qint32 baud_rate) {
     this->baud_rate = baud_rate;
     this->m_baud_rate_isSet = true;
+}
+
+QString*
+SWGGS232ControllerSettings::getHost() {
+    return host;
+}
+void
+SWGGS232ControllerSettings::setHost(QString* host) {
+    this->host = host;
+    this->m_host_isSet = true;
+}
+
+qint32
+SWGGS232ControllerSettings::getPort() {
+    return port;
+}
+void
+SWGGS232ControllerSettings::setPort(qint32 port) {
+    this->port = port;
+    this->m_port_isSet = true;
 }
 
 qint32
@@ -516,6 +558,12 @@ SWGGS232ControllerSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_baud_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(host && *host != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_port_isSet){
             isObjectUpdated = true; break;
         }
         if(m_track_isSet){

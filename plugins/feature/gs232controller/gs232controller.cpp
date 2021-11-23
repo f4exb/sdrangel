@@ -244,6 +244,8 @@ void GS232Controller::applySettings(const GS232ControllerSettings& settings, boo
             << " m_protocol: " << settings.m_protocol
             << " m_serialPort: " << settings.m_serialPort
             << " m_baudRate: " << settings.m_baudRate
+            << " m_host: " << settings.m_host
+            << " m_port: " << settings.m_port
             << " m_track: " << settings.m_track
             << " m_source: " << settings.m_source
             << " m_title: " << settings.m_title
@@ -268,6 +270,12 @@ void GS232Controller::applySettings(const GS232ControllerSettings& settings, boo
     }
     if ((m_settings.m_baudRate != settings.m_baudRate) || force) {
         reverseAPIKeys.append("baudRate");
+    }
+    if ((m_settings.m_host != settings.m_host) || force) {
+        reverseAPIKeys.append("host");
+    }
+    if ((m_settings.m_port != settings.m_port) || force) {
+        reverseAPIKeys.append("port");
     }
     if ((m_settings.m_track != settings.m_track) || force) {
         reverseAPIKeys.append("track");
@@ -427,6 +435,8 @@ void GS232Controller::webapiFormatFeatureSettings(
     response.getGs232ControllerSettings()->setElevation(settings.m_elevation);
     response.getGs232ControllerSettings()->setSerialPort(new QString(settings.m_serialPort));
     response.getGs232ControllerSettings()->setBaudRate(settings.m_baudRate);
+    response.getGs232ControllerSettings()->setHost(new QString(settings.m_host));
+    response.getGs232ControllerSettings()->setPort(settings.m_port);
     response.getGs232ControllerSettings()->setTrack(settings.m_track);
     response.getGs232ControllerSettings()->setSource(new QString(settings.m_source));
     response.getGs232ControllerSettings()->setAzimuthOffset(settings.m_azimuthOffset);
@@ -474,6 +484,12 @@ void GS232Controller::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("baudRate")) {
         settings.m_baudRate = response.getGs232ControllerSettings()->getBaudRate();
+    }
+    if (featureSettingsKeys.contains("host")) {
+        settings.m_host = *response.getGs232ControllerSettings()->getHost();
+    }
+    if (featureSettingsKeys.contains("port")) {
+        settings.m_port = response.getGs232ControllerSettings()->getPort();
     }
     if (featureSettingsKeys.contains("track")) {
         settings.m_track = response.getGs232ControllerSettings()->getTrack() != 0;
@@ -550,6 +566,12 @@ void GS232Controller::webapiReverseSendSettings(QList<QString>& featureSettingsK
     }
     if (featureSettingsKeys.contains("baudRate") || force) {
         swgGS232ControllerSettings->setBaudRate(settings.m_baudRate);
+    }
+    if (featureSettingsKeys.contains("host") || force) {
+        swgGS232ControllerSettings->setHost(new QString(settings.m_host));
+    }
+    if (featureSettingsKeys.contains("port") || force) {
+        swgGS232ControllerSettings->setPort(settings.m_port);
     }
     if (featureSettingsKeys.contains("track") || force) {
         swgGS232ControllerSettings->setTrack(settings.m_track);

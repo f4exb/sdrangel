@@ -127,6 +127,8 @@ void GS232ControllerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 GS232ControllerGUI::GS232ControllerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent) :
@@ -179,10 +181,14 @@ void GS232ControllerGUI::displaySettings()
     ui->azimuth->setValue(m_settings.m_azimuth);
     ui->elevation->setValue(m_settings.m_elevation);
     ui->protocol->setCurrentIndex((int)m_settings.m_protocol);
+    ui->connection->setCurrentIndex((int)m_settings.m_connection);
     updateDecimals(m_settings.m_protocol);
-    if (m_settings.m_serialPort.length() > 0)
+    if (m_settings.m_serialPort.length() > 0) {
         ui->serialPort->lineEdit()->setText(m_settings.m_serialPort);
+    }
     ui->baudRate->setCurrentText(QString("%1").arg(m_settings.m_baudRate));
+    ui->host->setText(m_settings.m_host);
+    ui->port->setValue(m_settings.m_port);
     ui->track->setChecked(m_settings.m_track);
     ui->sources->setCurrentIndex(ui->sources->findText(m_settings.m_source));
     ui->azimuthOffset->setValue(m_settings.m_azimuthOffset);
@@ -192,7 +198,22 @@ void GS232ControllerGUI::displaySettings()
     ui->elevationMin->setValue(m_settings.m_elevationMin);
     ui->elevationMax->setValue(m_settings.m_elevationMax);
     ui->tolerance->setValue(m_settings.m_tolerance);
+    restoreState(m_settings.m_rollupState);
+    updateConnectionWidgets();
     blockApplySettings(false);
+}
+
+void GS232ControllerGUI::updateConnectionWidgets()
+{
+    bool serial = m_settings.m_connection == GS232ControllerSettings::SERIAL;
+    ui->serialPortLabel->setVisible(serial);
+    ui->serialPort->setVisible(serial);
+    ui->baudRateLabel->setVisible(serial);
+    ui->baudRate->setVisible(serial);
+    ui->hostLabel->setVisible(!serial);
+    ui->host->setVisible(!serial);
+    ui->portLabel->setVisible(!serial);
+    ui->port->setVisible(!serial);
 }
 
 void GS232ControllerGUI::updateSerialPortList()
@@ -315,6 +336,13 @@ void GS232ControllerGUI::on_protocol_currentIndexChanged(int index)
     applySettings();
 }
 
+void GS232ControllerGUI::on_connection_currentIndexChanged(int index)
+{
+    m_settings.m_connection = (GS232ControllerSettings::Connection)index;
+    applySettings();
+    updateConnectionWidgets();
+}
+
 void GS232ControllerGUI::on_serialPort_currentIndexChanged(int index)
 {
     (void) index;
@@ -326,6 +354,18 @@ void GS232ControllerGUI::on_baudRate_currentIndexChanged(int index)
 {
     (void) index;
     m_settings.m_baudRate = ui->baudRate->currentText().toInt();
+    applySettings();
+}
+
+void GS232ControllerGUI::on_host_editingFinished()
+{
+    m_settings.m_host = ui->host->text();
+    applySettings();
+}
+
+void GS232ControllerGUI::on_port_valueChanged(int value)
+{
+    m_settings.m_port = value;
     applySettings();
 }
 
@@ -388,7 +428,7 @@ void GS232ControllerGUI::on_tolerance_valueChanged(double value)
 void GS232ControllerGUI::on_track_stateChanged(int state)
 {
     m_settings.m_track = state == Qt::Checked;
-    ui->targetsLabel->setEnabled(m_settings.m_track);
+    ui->targetName->setEnabled(m_settings.m_track);
     ui->sources->setEnabled(m_settings.m_track);
 
     if (!m_settings.m_track) {
@@ -439,7 +479,7 @@ void GS232ControllerGUI::updateStatus()
                 break;
             case Feature::StError:
                 ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_gs232Controller->getErrorMessage());
+                QMessageBox::critical(this, m_settings.m_title, m_gs232Controller->getErrorMessage());
                 break;
             default:
                 break;

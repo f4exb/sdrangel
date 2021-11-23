@@ -15,6 +15,12 @@ GS232ControllerSettings:
     baudRate:
       description: The baud rate to use for the serial connection to the GS-232 controller
       type: integer
+    host:
+      description: Hostname / IP address of computer running rotctld.
+      type: string
+    port:
+      description: TCP port number rotctld is listening on.
+      type: integer
     track:
       description: Track a target where azimuth and elevation are determined by another plugin (1 for yes, 0 for no)
       type: integer

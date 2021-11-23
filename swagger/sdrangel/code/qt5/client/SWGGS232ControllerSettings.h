@@ -54,6 +54,12 @@ public:
     qint32 getBaudRate();
     void setBaudRate(qint32 baud_rate);
 
+    QString* getHost();
+    void setHost(QString* host);
+
+    qint32 getPort();
+    void setPort(qint32 port);
+
     qint32 getTrack();
     void setTrack(qint32 track);
 
@@ -120,6 +126,12 @@ private:
 
     qint32 baud_rate;
     bool m_baud_rate_isSet;
+
+    QString* host;
+    bool m_host_isSet;
+
+    qint32 port;
+    bool m_port_isSet;
 
     qint32 track;
     bool m_track_isSet;

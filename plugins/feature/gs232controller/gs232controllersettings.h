@@ -32,6 +32,8 @@ struct GS232ControllerSettings
     float m_elevation;
     QString m_serialPort;
     int m_baudRate;
+    QString m_host;
+    int m_port;
     bool m_track;
     QString m_source;           // Plugin to get az/el from. E.g: "R0:0 ADSBDemod". Use a string, so can be set via WebAPI
     int m_azimuthOffset;
@@ -41,7 +43,9 @@ struct GS232ControllerSettings
     int m_elevationMin;
     int m_elevationMax;
     float m_tolerance;
-    enum Protocol { GS232, SPID } m_protocol;
+    enum Protocol { GS232, SPID, ROTCTLD } m_protocol;
+    enum Connection { SERIAL, TCP } m_connection;
+    QByteArray m_rollupState;
     QString m_title;
     quint32 m_rgbColor;
     bool m_useReverseAPI;
