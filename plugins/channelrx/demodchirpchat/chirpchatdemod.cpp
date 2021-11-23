@@ -667,6 +667,7 @@ void ChirpChatDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& re
     response.getChirpChatDemodReport()->setPayloadCrcStatus(m_lastMsgPayloadCRC);
     response.getChirpChatDemodReport()->setMessageTimestamp(new QString(m_lastMsgTimestamp));
     response.getChirpChatDemodReport()->setMessageString(new QString(m_lastMsgString));
+    response.getChirpChatDemodReport()->setDecoding(getDemodActive() ? 1 : 0);
 
     response.getChirpChatDemodReport()->setMessageBytes(new QList<QString *>);
     QList<QString *> *bytesStr = response.getChirpChatDemodReport()->getMessageBytes();

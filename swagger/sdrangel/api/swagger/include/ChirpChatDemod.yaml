@@ -88,6 +88,12 @@ ChirpChatDemodSettings:
     sendViaUDP:
       description: boolean 1 to send decoded message via UDP else 0
       type: integer
+    udoEnabled:
+      type: integer
+      description: >
+        Boolean - Send via UDP
+          * 0 - Do not send decoded messages via UDP
+          * 1 - Send decoded messages via UDP
     udpAddress:
       description: UDP destination udpAddress
       type: string
@@ -185,3 +191,9 @@ ChirpChatDemodReport:
       type: array
       items:
         type: string
+    decoding:
+      type: integer
+      description: >
+        Boolean - decoding status
+          * 0 - no deconding
+          * 1 - decoding

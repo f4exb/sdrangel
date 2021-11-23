@@ -90,6 +90,9 @@ public:
     qint32 getSendViaUdp();
     void setSendViaUdp(qint32 send_via_udp);
 
+    qint32 getUdoEnabled();
+    void setUdoEnabled(qint32 udo_enabled);
+
     QString* getUdpAddress();
     void setUdpAddress(QString* udp_address);
 
@@ -171,6 +174,9 @@ private:
 
     qint32 send_via_udp;
     bool m_send_via_udp_isSet;
+
+    qint32 udo_enabled;
+    bool m_udo_enabled_isSet;
 
     QString* udp_address;
     bool m_udp_address_isSet;

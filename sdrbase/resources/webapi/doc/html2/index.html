@@ -3426,6 +3426,10 @@ margin-bottom: 20px;
       "items" : {
         "type" : "string"
       }
+    },
+    "decoding" : {
+      "type" : "integer",
+      "description" : "Boolean - decoding status\n  * 0 - no deconding\n  * 1 - decoding\n"
     }
   },
   "description" : "ChirpChatDemod"
@@ -3494,6 +3498,10 @@ margin-bottom: 20px;
     "sendViaUDP" : {
       "type" : "integer",
       "description" : "boolean 1 to send decoded message via UDP else 0"
+    },
+    "udoEnabled" : {
+      "type" : "integer",
+      "description" : "Boolean - Send via UDP\n  * 0 - Do not send decoded messages via UDP\n  * 1 - Send decoded messages via UDP\n"
     },
     "udpAddress" : {
       "type" : "string",
@@ -51371,7 +51379,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-11-21T11:04:18.372+01:00
+              Generated 2021-11-22T22:28:50.413+01:00
             </div>
           </div>
       </div>

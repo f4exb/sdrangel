@@ -97,6 +97,9 @@ public:
     QList<QString*>* getMessageBytes();
     void setMessageBytes(QList<QString*>* message_bytes);
 
+    qint32 getDecoding();
+    void setDecoding(qint32 decoding);
+
 
     virtual bool isSet() override;
 
@@ -154,6 +157,9 @@ private:
 
     QList<QString*>* message_bytes;
     bool m_message_bytes_isSet;
+
+    qint32 decoding;
+    bool m_decoding_isSet;
 
 };
 

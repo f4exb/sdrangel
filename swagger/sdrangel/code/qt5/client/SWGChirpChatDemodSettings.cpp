@@ -60,6 +60,8 @@ SWGChirpChatDemodSettings::SWGChirpChatDemodSettings() {
     m_has_header_isSet = false;
     send_via_udp = 0;
     m_send_via_udp_isSet = false;
+    udo_enabled = 0;
+    m_udo_enabled_isSet = false;
     udp_address = nullptr;
     m_udp_address_isSet = false;
     udp_port = 0;
@@ -120,6 +122,8 @@ SWGChirpChatDemodSettings::init() {
     m_has_header_isSet = false;
     send_via_udp = 0;
     m_send_via_udp_isSet = false;
+    udo_enabled = 0;
+    m_udo_enabled_isSet = false;
     udp_address = new QString("");
     m_udp_address_isSet = false;
     udp_port = 0;
@@ -144,6 +148,7 @@ SWGChirpChatDemodSettings::init() {
 
 void
 SWGChirpChatDemodSettings::cleanup() {
+
 
 
 
@@ -220,6 +225,8 @@ SWGChirpChatDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&has_header, pJson["hasHeader"], "qint32", "");
     
     ::SWGSDRangel::setValue(&send_via_udp, pJson["sendViaUDP"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&udo_enabled, pJson["udoEnabled"], "qint32", "");
     
     ::SWGSDRangel::setValue(&udp_address, pJson["udpAddress"], "QString", "QString");
     
@@ -304,6 +311,9 @@ SWGChirpChatDemodSettings::asJsonObject() {
     }
     if(m_send_via_udp_isSet){
         obj->insert("sendViaUDP", QJsonValue(send_via_udp));
+    }
+    if(m_udo_enabled_isSet){
+        obj->insert("udoEnabled", QJsonValue(udo_enabled));
     }
     if(udp_address != nullptr && *udp_address != QString("")){
         toJsonValue(QString("udpAddress"), udp_address, obj, QString("QString"));
@@ -499,6 +509,16 @@ SWGChirpChatDemodSettings::setSendViaUdp(qint32 send_via_udp) {
     this->m_send_via_udp_isSet = true;
 }
 
+qint32
+SWGChirpChatDemodSettings::getUdoEnabled() {
+    return udo_enabled;
+}
+void
+SWGChirpChatDemodSettings::setUdoEnabled(qint32 udo_enabled) {
+    this->udo_enabled = udo_enabled;
+    this->m_udo_enabled_isSet = true;
+}
+
 QString*
 SWGChirpChatDemodSettings::getUdpAddress() {
     return udp_address;
@@ -650,6 +670,9 @@ SWGChirpChatDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_send_via_udp_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_udo_enabled_isSet){
             isObjectUpdated = true; break;
         }
         if(udp_address && *udp_address != QString("")){

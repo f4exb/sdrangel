@@ -64,6 +64,8 @@ SWGChirpChatDemodReport::SWGChirpChatDemodReport() {
     m_message_string_isSet = false;
     message_bytes = nullptr;
     m_message_bytes_isSet = false;
+    decoding = 0;
+    m_decoding_isSet = false;
 }
 
 SWGChirpChatDemodReport::~SWGChirpChatDemodReport() {
@@ -108,6 +110,8 @@ SWGChirpChatDemodReport::init() {
     m_message_string_isSet = false;
     message_bytes = new QList<QString*>();
     m_message_bytes_isSet = false;
+    decoding = 0;
+    m_decoding_isSet = false;
 }
 
 void
@@ -140,6 +144,7 @@ SWGChirpChatDemodReport::cleanup() {
         }
         delete message_bytes;
     }
+
 }
 
 SWGChirpChatDemodReport*
@@ -189,6 +194,8 @@ SWGChirpChatDemodReport::fromJsonObject(QJsonObject &pJson) {
     
     
     ::SWGSDRangel::setValue(&message_bytes, pJson["messageBytes"], "QList", "QString");
+    ::SWGSDRangel::setValue(&decoding, pJson["decoding"], "qint32", "");
+    
 }
 
 QString
@@ -258,6 +265,9 @@ SWGChirpChatDemodReport::asJsonObject() {
     }
     if(message_bytes && message_bytes->size() > 0){
         toJsonArray((QList<void*>*)message_bytes, obj, "messageBytes", "QString");
+    }
+    if(m_decoding_isSet){
+        obj->insert("decoding", QJsonValue(decoding));
     }
 
     return obj;
@@ -443,6 +453,16 @@ SWGChirpChatDemodReport::setMessageBytes(QList<QString*>* message_bytes) {
     this->m_message_bytes_isSet = true;
 }
 
+qint32
+SWGChirpChatDemodReport::getDecoding() {
+    return decoding;
+}
+void
+SWGChirpChatDemodReport::setDecoding(qint32 decoding) {
+    this->decoding = decoding;
+    this->m_decoding_isSet = true;
+}
+
 
 bool
 SWGChirpChatDemodReport::isSet(){
@@ -500,6 +520,9 @@ SWGChirpChatDemodReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(message_bytes && (message_bytes->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(m_decoding_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);
