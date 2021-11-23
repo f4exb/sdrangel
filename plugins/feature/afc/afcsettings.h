@@ -39,6 +39,7 @@ struct AFCSettings
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIFeatureSetIndex;
     uint16_t m_reverseAPIFeatureIndex;
+    QByteArray m_rollupState;
 
     AFCSettings();
     void resetToDefaults();

@@ -76,6 +76,7 @@ QByteArray AntennaToolsSettings::serialize() const
     s.writeU32(15, m_reverseAPIPort);
     s.writeU32(16, m_reverseAPIFeatureSetIndex);
     s.writeU32(17, m_reverseAPIFeatureIndex);
+    s.writeBlob(19, m_rollupState);
 
     return s.final();
 }
@@ -125,6 +126,8 @@ bool AntennaToolsSettings::deserialize(const QByteArray& data)
         m_reverseAPIFeatureSetIndex = utmp > 99 ? 99 : utmp;
         d.readU32(17, &utmp, 0);
         m_reverseAPIFeatureIndex = utmp > 99 ? 99 : utmp;
+
+        d.readBlob(19, &m_rollupState);
 
         return true;
     }

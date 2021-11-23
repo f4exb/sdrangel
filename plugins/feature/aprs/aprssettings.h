@@ -65,6 +65,7 @@ struct APRSSettings
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIFeatureSetIndex;
     uint16_t m_reverseAPIFeatureIndex;
+    QByteArray m_rollupState;
 
     int m_packetsTableColumnIndexes[APRS_PACKETS_TABLE_COLUMNS];//!< How the columns are ordered in the table
     int m_packetsTableColumnSizes[APRS_PACKETS_TABLE_COLUMNS];  //!< Size of the columns in the table

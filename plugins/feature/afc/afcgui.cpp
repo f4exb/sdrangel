@@ -113,6 +113,9 @@ void AFCGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 AFCGUI::AFCGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent) :
@@ -175,6 +178,7 @@ void AFCGUI::displaySettings()
     ui->toleranceFrequency->setValue(m_settings.m_freqTolerance);
     ui->targetPeriod->setValue(m_settings.m_trackerAdjustPeriod);
     ui->targetPeriodText->setText(tr("%1").arg(m_settings.m_trackerAdjustPeriod));
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 

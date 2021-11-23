@@ -120,6 +120,9 @@ void SimplePTTGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 SimplePTTGUI::SimplePTTGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent) :
@@ -175,6 +178,7 @@ void SimplePTTGUI::displaySettings()
     blockApplySettings(true);
     ui->rxtxDelay->setValue(m_settings.m_rx2TxDelayMs);
     ui->txrxDelay->setValue(m_settings.m_tx2RxDelayMs);
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 

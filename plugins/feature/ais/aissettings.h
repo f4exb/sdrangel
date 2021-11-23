@@ -38,6 +38,7 @@ struct AISSettings
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIFeatureSetIndex;
     uint16_t m_reverseAPIFeatureIndex;
+    QByteArray m_rollupState;
 
     int m_vesselColumnIndexes[AIS_VESSEL_COLUMNS];
     int m_vesselColumnSizes[AIS_VESSEL_COLUMNS];

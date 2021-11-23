@@ -122,6 +122,9 @@ void DemodAnalyzerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 DemodAnalyzerGUI::DemodAnalyzerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent) :
@@ -188,6 +191,7 @@ void DemodAnalyzerGUI::displaySettings()
     setWindowTitle(m_settings.m_title);
     blockApplySettings(true);
     ui->log2Decim->setCurrentIndex(m_settings.m_log2Decim);
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 

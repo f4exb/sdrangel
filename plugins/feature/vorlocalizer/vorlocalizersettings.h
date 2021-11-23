@@ -73,6 +73,7 @@ struct VORLocalizerSettings
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIFeatureSetIndex;
     uint16_t m_reverseAPIFeatureIndex;
+    QByteArray m_rollupState;
 
 
     static const int VORDEMOD_COLUMNS  = 11;

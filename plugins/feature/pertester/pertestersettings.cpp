@@ -73,6 +73,7 @@ QByteArray PERTesterSettings::serialize() const
     s.writeU32(24, m_reverseAPIPort);
     s.writeU32(25, m_reverseAPIFeatureSetIndex);
     s.writeU32(26, m_reverseAPIFeatureIndex);
+    s.writeBlob(27, m_rollupState);
 
     return s.final();
 }
@@ -132,6 +133,8 @@ bool PERTesterSettings::deserialize(const QByteArray& data)
         m_reverseAPIFeatureSetIndex = utmp > 99 ? 99 : utmp;
         d.readU32(26, &utmp, 0);
         m_reverseAPIFeatureIndex = utmp > 99 ? 99 : utmp;
+
+        d.readBlob(27, &m_rollupState);
 
         return true;
     }

@@ -113,6 +113,9 @@ void PERTesterGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 PERTesterGUI::PERTesterGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent) :
@@ -170,6 +173,7 @@ void PERTesterGUI::displaySettings()
     ui->txUDPPort->setText(QString::number(m_settings.m_txUDPPort));
     ui->rxUDPAddress->setText(m_settings.m_rxUDPAddress);
     ui->rxUDPPort->setText(QString::number(m_settings.m_rxUDPPort));
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
     arrangeRollups();
 }

@@ -226,6 +226,9 @@ void SatelliteTrackerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 SatelliteTrackerGUI::SatelliteTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent) :
@@ -333,6 +336,7 @@ void SatelliteTrackerGUI::displaySettings()
     }
     ui->autoTarget->setChecked(m_settings.m_autoTarget);
     ui->darkTheme->setChecked(m_settings.m_chartsDarkTheme);
+    restoreState(m_settings.m_rollupState);
     plotChart();
     blockApplySettings(false);
 }
