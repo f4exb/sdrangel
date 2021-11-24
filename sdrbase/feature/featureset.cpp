@@ -179,8 +179,6 @@ void FeatureSet::loadFeatureSetSettings(const FeatureSetPreset *preset, PluginAP
 
 void FeatureSet::saveFeatureSetSettings(FeatureSetPreset *preset)
 {
-    std::sort(m_featureInstanceRegistrations.begin(), m_featureInstanceRegistrations.end(), compareFeatures);
-
     for (int i = 0; i < m_featureInstanceRegistrations.count(); i++)
     {
         qDebug("FeatureSet::saveFeatureSetSettings: saving feature [%s]", qPrintable(m_featureInstanceRegistrations[i]->getURI()));

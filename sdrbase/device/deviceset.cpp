@@ -216,9 +216,6 @@ void DeviceSet::saveRxChannelSettings(Preset *preset)
 {
     if (preset->isSourcePreset())
     {
-        // sort by increasing delta frequency and type
-        std::sort(m_channelInstanceRegistrations.begin(), m_channelInstanceRegistrations.end(), compareChannels);
-
         for (int i = 0; i < m_channelInstanceRegistrations.count(); i++)
         {
             qDebug("DeviceSet::saveChannelSettings: channel [%s] saved", qPrintable(m_channelInstanceRegistrations[i]->getURI()));
@@ -317,9 +314,6 @@ void DeviceSet::saveTxChannelSettings(Preset *preset)
 {
     if (preset->isSinkPreset())
     {
-        // sort by increasing delta frequency and type
-        std::sort(m_channelInstanceRegistrations.begin(), m_channelInstanceRegistrations.end(), compareChannels);
-
         for (int i = 0; i < m_channelInstanceRegistrations.count(); i++)
         {
             qDebug("DeviceSet::saveTxChannelSettings: channel [%s] saved", qPrintable(m_channelInstanceRegistrations[i]->getURI()));
@@ -420,9 +414,6 @@ void DeviceSet::saveMIMOChannelSettings(Preset *preset)
 {
     if (preset->isMIMOPreset())
     {
-        // sort by increasing delta frequency and type
-        std::sort(m_channelInstanceRegistrations.begin(), m_channelInstanceRegistrations.end(), compareChannels);
-
         for (int i = 0; i < m_channelInstanceRegistrations.count(); i++)
         {
             qDebug("DeviceSet::saveMIMOChannelSettings: channel [%s] saved", qPrintable(m_channelInstanceRegistrations[i]->getURI()));
