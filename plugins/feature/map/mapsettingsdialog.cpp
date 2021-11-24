@@ -42,10 +42,14 @@ MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
 {
     ui->setupUi(this);
     ui->mapProvider->setCurrentIndex(MapSettings::m_mapProviders.indexOf(settings->m_mapProvider));
-    ui->mapBoxApiKey->setText(settings->m_mapBoxApiKey);
+    ui->thunderforestAPIKey->setText(settings->m_thunderforestAPIKey);
+    ui->maptilerAPIKey->setText(settings->m_maptilerAPIKey);
+    ui->mapBoxAPIKey->setText(settings->m_mapBoxAPIKey);
+    ui->osmURL->setText(settings->m_osmURL);
     ui->mapBoxStyles->setText(settings->m_mapBoxStyles);
-    for (int i = 0; i < ui->sourceList->count(); i++)
+    for (int i = 0; i < ui->sourceList->count(); i++) {
          ui->sourceList->item(i)->setCheckState((m_settings->m_sources & (1 << i)) ? Qt::Checked : Qt::Unchecked);
+    }
     ui->groundTrackColor->setStyleSheet(backgroundCSS(m_settings->m_groundTrackColor));
     ui->predictedGroundTrackColor->setStyleSheet(backgroundCSS(m_settings->m_predictedGroundTrackColor));
 }
@@ -58,23 +62,36 @@ MapSettingsDialog::~MapSettingsDialog()
 void MapSettingsDialog::accept()
 {
     QString mapProvider = MapSettings::m_mapProviders[ui->mapProvider->currentIndex()];
-    QString mapBoxApiKey = ui->mapBoxApiKey->text();
+    QString mapBoxAPIKey = ui->mapBoxAPIKey->text();
+    QString osmURL = ui->osmURL->text();
     QString mapBoxStyles = ui->mapBoxStyles->text();
+    QString thunderforestAPIKey = ui->thunderforestAPIKey->text();
+    QString maptilerAPIKey = ui->maptilerAPIKey->text();
+    m_osmURLChanged = osmURL != m_settings->m_osmURL;
     if ((mapProvider != m_settings->m_mapProvider)
-        || (mapBoxApiKey != m_settings->m_mapBoxApiKey)
-        || (mapBoxStyles != m_settings->m_mapBoxStyles))
+        || (thunderforestAPIKey != m_settings->m_thunderforestAPIKey)
+        || (maptilerAPIKey != m_settings->m_maptilerAPIKey)
+        || (mapBoxAPIKey != m_settings->m_mapBoxAPIKey)
+        || (mapBoxStyles != m_settings->m_mapBoxStyles)
+        || (osmURL != m_settings->m_osmURL))
     {
         m_settings->m_mapProvider = mapProvider;
-        m_settings->m_mapBoxApiKey = mapBoxApiKey;
+        m_settings->m_thunderforestAPIKey = thunderforestAPIKey;
+        m_settings->m_maptilerAPIKey = maptilerAPIKey;
+        m_settings->m_mapBoxAPIKey = mapBoxAPIKey;
+        m_settings->m_osmURL = osmURL;
         m_settings->m_mapBoxStyles = mapBoxStyles;
         m_mapSettingsChanged = true;
     }
     else
+    {
         m_mapSettingsChanged = false;
+    }
     m_settings->m_sources = 0;
     quint32 sources = MapSettings::SOURCE_STATION;
-    for (int i = 0; i < ui->sourceList->count(); i++)
+    for (int i = 0; i < ui->sourceList->count(); i++) {
         sources |= (ui->sourceList->item(i)->checkState() == Qt::Checked) << i;
+    }
     m_sourcesChanged = sources != m_settings->m_sources;
     m_settings->m_sources = sources;
     QDialog::accept();

@@ -669,6 +669,9 @@ void MapGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent) :
@@ -683,6 +686,12 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     m_radioTimeDialog(this)
 {
     ui->setupUi(this);
+
+    quint16 port = 0; // Pick a free port
+    // Free keys, so no point in stealing them :)
+    QString tfKey = m_settings.m_thunderforestAPIKey.isEmpty() ? "3e1f614f78a345459931ba3c898e975e" : m_settings.m_thunderforestAPIKey;
+    QString mtKey = m_settings.m_maptilerAPIKey.isEmpty() ? "q2RVNAe3eFKCH4XsrE3r" : m_settings.m_maptilerAPIKey;
+    m_templateServer = new OSMTemplateServer(tfKey, mtKey, m_osmPort);
 
     ui->map->rootContext()->setContextProperty("mapModel", &m_mapModel);
     // 5.12 doesn't display map items when fully zoomed out
@@ -745,6 +754,11 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
 
 MapGUI::~MapGUI()
 {
+    if (m_templateServer)
+    {
+        m_templateServer->close();
+        delete m_templateServer;
+    }
     delete ui;
 }
 
@@ -804,42 +818,252 @@ void MapGUI::addRadioTimeTransmitters()
     }
 }
 
+static QString arrayToString(QJsonArray array)
+{
+    QString s;
+    for (int i = 0; i < array.size(); i++)
+    {
+        s = s.append(array[i].toString());
+        s = s.append(" ");
+    }
+    return s;
+}
+
+// Coming soon
+void MapGUI::addDAB()
+{
+    QFile file("stationlist_SI.json");
+    if (file.open(QIODevice::ReadOnly))
+    {
+        QByteArray bytes = file.readAll();
+        QJsonParseError error;
+        QJsonDocument json = QJsonDocument::fromJson(bytes, &error);
+        if (!json.isNull())
+        {
+            if (json.isObject())
+            {
+                QJsonObject obj = json.object();
+                QJsonValue stations = obj.value("stations");
+                QJsonArray stationsArray = stations.toArray();
+                for (int i = 0; i < stationsArray.size(); i++)
+                {
+                    QJsonObject station = stationsArray[i].toObject();
+                    // "txs" contains array of transmitters
+                    QString stationName = station.value("stationName").toString();
+                    QJsonArray txs = station.value("txs").toArray();
+                    QString languages = arrayToString(station.value("language").toArray());
+                    QString format = arrayToString(station.value("format").toArray());
+                    for (int j = 0; j < txs.size(); j++)
+                    {
+                        QJsonObject tx = txs[j].toObject();
+                        QString band = tx.value("band").toString();
+                        double lat = tx.value("latitude").toString().toDouble();
+                        double lon = tx.value("longitude").toString().toDouble();
+                        double alt = tx.value("haat").toString().toDouble(); // This is height above terrain - not actual height - Check "haatUnits" is m
+                        double frequency = tx.value("frequency").toString().toDouble();  // Can be MHz or kHz for AM
+                        double erp = tx.value("erp").toString().toDouble();
+                        SWGSDRangel::SWGMapItem mapItem;
+                        mapItem.setLatitude(lat);
+                        mapItem.setLongitude(lon);
+                        mapItem.setAltitude(alt);
+                        mapItem.setImageRotation(0);
+                        mapItem.setImageMinZoom(8);
+                        if (band == "DAB")
+                        {
+                            // Name should be unique - can we use TII code for this? can it repeat across countries?
+                            QString name = QString("%1").arg(tx.value("tsId").toString());
+                            mapItem.setName(new QString(name));
+                            mapItem.setImage(new QString("antennadab.png"));
+                            // Need tiicode?
+                            QString text = QString("%1 Transmitter\nStation: %2\nFrequency: %3 %4\nPower: %5 %6\nLanguage(s): %7\nType: %8\nService: %9\nEnsemble: %10")
+                                                    .arg(band)
+                                                    .arg(stationName)
+                                                    .arg(frequency)
+                                                    .arg(tx.value("frequencyUnits").toString())
+                                                    .arg(erp)
+                                                    .arg(tx.value("erpUnits").toString())
+                                                    .arg(languages)
+                                                    .arg(format)
+                                                    .arg(tx.value("serviceLabel").toString())
+                                                    .arg(tx.value("ensembleLabel").toString())
+                                                    ;
+                            mapItem.setText(new QString(text));
+                            m_mapModel.update(m_map, &mapItem, MapSettings::SOURCE_DAB);
+                        }
+                        else if (band == "FM")
+                        {
+                            // Name should be unique
+                            QString name = QString("%1").arg(tx.value("tsId").toString());
+                            mapItem.setName(new QString(name));
+                            mapItem.setImage(new QString("antennafm.png"));
+                            QString text = QString("%1 Transmitter\nStation: %2\nFrequency: %3 %4\nPower: %5 %6\nLanguage(s): %7\nType: %8")
+                                                    .arg(band)
+                                                    .arg(stationName)
+                                                    .arg(frequency)
+                                                    .arg(tx.value("frequencyUnits").toString())
+                                                    .arg(erp)
+                                                    .arg(tx.value("erpUnits").toString())
+                                                    .arg(languages)
+                                                    .arg(format)
+                                                    ;
+                            mapItem.setText(new QString(text));
+                            m_mapModel.update(m_map, &mapItem, MapSettings::SOURCE_FM);
+                        }
+                        else if (band == "AM")
+                        {
+                            // Name should be unique
+                            QString name = QString("%1").arg(tx.value("tsId").toString());
+                            mapItem.setName(new QString(name));
+                            mapItem.setImage(new QString("antennaam.png"));
+                            QString text = QString("%1 Transmitter\nStation: %2\nFrequency: %3 %4\nPower: %5 %6\nLanguage(s): %7\nType: %8")
+                                                    .arg(band)
+                                                    .arg(stationName)
+                                                    .arg(frequency)
+                                                    .arg(tx.value("frequencyUnits").toString())
+                                                    .arg(erp)
+                                                    .arg(tx.value("erpUnits").toString())
+                                                    .arg(languages)
+                                                    .arg(format)
+                                                    ;
+                            mapItem.setText(new QString(text));
+                            m_mapModel.update(m_map, &mapItem, MapSettings::SOURCE_AM);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                qDebug() << "MapGUI::addDAB: Expecting an object in DAB json:";
+            }
+        }
+        else
+        {
+            qDebug() << "MapGUI::addDAB: Failed to parse DAB json: " << error.errorString();
+        }
+    }
+    else
+    {
+        qDebug() << "MapGUI::addDAB: Failed to open DAB json";
+    }
+}
+
 void MapGUI::blockApplySettings(bool block)
 {
     m_doApplySettings = !block;
 }
 
+QString MapGUI::osmCachePath()
+{
+    return QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation) + "/QtLocation/5.8/tiles/osm/sdrangel_map";
+}
+
+void MapGUI::clearOSMCache()
+{
+    // Delete all cached custom tiles when user changes the URL. Is there a better way to do this?
+    QDir dir(osmCachePath());
+    if (dir.exists())
+    {
+        QStringList filenames = dir.entryList({"osm_100-l-8-*.png"});
+        for (const auto& filename : filenames)
+        {
+            QFile file(dir.filePath(filename));
+            if (!file.remove()) {
+                qDebug() << "MapGUI::clearOSMCache: Failed to remove " << file;
+            }
+        }
+    }
+}
+
 void MapGUI::applyMapSettings()
 {
+    float stationLatitude = MainCore::instance()->getSettings().getLatitude();
+    float stationLongitude = MainCore::instance()->getSettings().getLongitude();
+    float stationAltitude = MainCore::instance()->getSettings().getAltitude();
+
     QQuickItem *item = ui->map->rootObject();
 
-    // Save existing position of map
     QObject *object = item->findChild<QObject*>("map");
     QGeoCoordinate coords;
+    double zoom;
     if (object != nullptr)
+    {
+        // Save existing position of map
         coords = object->property("center").value<QGeoCoordinate>();
+        zoom = object->property("zoomLevel").value<double>();
+    }
+    else
+    {
+        // Center on my location when map is first opened
+        coords.setLatitude(stationLatitude);
+        coords.setLongitude(stationLongitude);
+        coords.setAltitude(stationAltitude);
+        zoom = 10.0;
+    }
 
     // Create the map using the specified provider
     QQmlProperty::write(item, "mapProvider", m_settings.m_mapProvider);
     QVariantMap parameters;
-    if (!m_settings.m_mapBoxApiKey.isEmpty() && m_settings.m_mapProvider == "mapbox")
+    if (!m_settings.m_mapBoxAPIKey.isEmpty() && m_settings.m_mapProvider == "mapbox")
     {
         parameters["mapbox.map_id"] = "mapbox.satellite"; // The only one that works
-        parameters["mapbox.access_token"] = m_settings.m_mapBoxApiKey;
+        parameters["mapbox.access_token"] = m_settings.m_mapBoxAPIKey;
     }
-    if (!m_settings.m_mapBoxApiKey.isEmpty() && m_settings.m_mapProvider == "mapboxgl")
+    if (!m_settings.m_mapBoxAPIKey.isEmpty() && m_settings.m_mapProvider == "mapboxgl")
     {
-        parameters["mapboxgl.access_token"] = m_settings.m_mapBoxApiKey;
+        parameters["mapboxgl.access_token"] = m_settings.m_mapBoxAPIKey;
         if (!m_settings.m_mapBoxStyles.isEmpty())
             parameters["mapboxgl.mapping.additional_style_urls"] = m_settings.m_mapBoxStyles;
     }
-    //QQmlProperty::write(item, "mapParameters", parameters);
-    QMetaObject::invokeMethod(item, "createMap", Q_ARG(QVariant, QVariant::fromValue(parameters)));
+    if (m_settings.m_mapProvider == "osm")
+    {
+        // Allow user to specify URL
+        if (!m_settings.m_osmURL.isEmpty()) {
+            parameters["osm.mapping.custom.host"] = m_settings.m_osmURL;  // E.g: "http://a.tile.openstreetmap.fr/hot/"
+        }
+        // Use our repo, so we can append API key
+        parameters["osm.mapping.providersrepository.address"] = QString("http://127.0.0.1:%1/").arg(m_osmPort);
+        // Use application specific cache, as other apps may not use API key so will have different images
+        QString cachePath = osmCachePath();
+        parameters["osm.mapping.cache.directory"] = cachePath;
+        // On Linux, we need to create the directory
+        QDir dir(cachePath);
+        if (!dir.exists()) {
+            dir.mkpath(cachePath);
+        }
+    }
+
+    QVariant retVal;
+    if (!QMetaObject::invokeMethod(item, "createMap", Qt::DirectConnection,
+                                Q_RETURN_ARG(QVariant, retVal),
+                                Q_ARG(QVariant, QVariant::fromValue(parameters)),
+                                //Q_ARG(QVariant, mapType),
+                                Q_ARG(QVariant, QVariant::fromValue(this))))
+    {
+        qCritical() << "MapGUI::applyMapSettings - Failed to invoke createMap";
+    }
+    QObject *newMap = retVal.value<QObject *>();
 
     // Restore position of map
-    object = item->findChild<QObject*>("map");
-    if ((object != nullptr) && coords.isValid())
-        object->setProperty("center", QVariant::fromValue(coords));
+    if (newMap != nullptr)
+    {
+        if (coords.isValid())
+        {
+            newMap->setProperty("zoomLevel", QVariant::fromValue(zoom));
+            newMap->setProperty("center", QVariant::fromValue(coords));
+        }
+    }
+    else
+    {
+        qCritical() << "MapGUI::applyMapSettings - createMap returned a nullptr";
+    }
+
+    supportedMapsChanged();
+}
+
+void MapGUI::supportedMapsChanged()
+{
+    QQuickItem *item = ui->map->rootObject();
+    QObject *object = item->findChild<QObject*>("map");
 
     // Get list of map types
     ui->mapTypes->clear();
@@ -847,14 +1071,17 @@ void MapGUI::applyMapSettings()
     {
         // Mapbox plugin only works for Satellite imagary, despite what is indicated
         if (m_settings.m_mapProvider == "mapbox")
+        {
             ui->mapTypes->addItem("Satellite");
+        }
         else
         {
             QVariant mapTypesVariant;
             QMetaObject::invokeMethod(item, "getMapTypes", Q_RETURN_ARG(QVariant, mapTypesVariant));
             QStringList mapTypes = mapTypesVariant.value<QStringList>();
-            for (int i = 0; i < mapTypes.size(); i++)
+            for (int i = 0; i < mapTypes.size(); i++) {
                 ui->mapTypes->addItem(mapTypes[i]);
+            }
         }
     }
 }
@@ -880,6 +1107,7 @@ void MapGUI::displaySettings()
     m_mapModel.setGroundTrackColor(m_settings.m_groundTrackColor);
     m_mapModel.setPredictedGroundTrackColor(m_settings.m_predictedGroundTrackColor);
     applyMapSettings();
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 
@@ -1052,11 +1280,16 @@ void MapGUI::on_displaySettings_clicked()
     MapSettingsDialog dialog(&m_settings);
     if (dialog.exec() == QDialog::Accepted)
     {
-        if (dialog.m_mapSettingsChanged)
+        if (dialog.m_osmURLChanged) {
+            clearOSMCache();
+        }
+        if (dialog.m_mapSettingsChanged) {
             applyMapSettings();
+        }
         applySettings();
-        if (dialog.m_sourcesChanged)
+        if (dialog.m_sourcesChanged) {
             m_mapModel.setSources(m_settings.m_sources);
+        }
         m_mapModel.setGroundTrackColor(m_settings.m_groundTrackColor);
         m_mapModel.setPredictedGroundTrackColor(m_settings.m_predictedGroundTrackColor);
     }

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>436</width>
-    <height>491</height>
+    <height>520</height>
    </rect>
   </property>
   <property name="font">
@@ -182,31 +182,73 @@
            </item>
           </widget>
          </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="mapBoxApiKeyLabel">
+         <item row="3" column="0">
+          <widget class="QLabel" name="mapBoxAPIKeyLabel">
            <property name="text">
             <string>Mapbox API Key</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="1">
-          <widget class="QLineEdit" name="mapBoxApiKey">
+         <item row="3" column="1">
+          <widget class="QLineEdit" name="mapBoxAPIKey">
            <property name="toolTip">
-            <string>Enter a Mapbox API key in order to use Mapbox maps</string>
+            <string>Enter a Mapbox API key in order to use Mapbox maps: https://www.mapbox.com/</string>
            </property>
           </widget>
          </item>
-         <item row="2" column="0">
+         <item row="5" column="0">
           <widget class="QLabel" name="mapBoxStylesLabel">
            <property name="text">
             <string>MapboxGL Styles</string>
            </property>
           </widget>
          </item>
-         <item row="2" column="1">
+         <item row="5" column="1">
           <widget class="QLineEdit" name="mapBoxStyles">
            <property name="toolTip">
             <string>Comma separated list of MapBox styles</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="thunderforestAPIKeyLabel">
+           <property name="text">
+            <string>Thunderforest API Key</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="maptilerAPIKeyLabel">
+           <property name="text">
+            <string>Maptiler API Key</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLineEdit" name="thunderforestAPIKey">
+           <property name="toolTip">
+            <string>Enter a Thunderforest API key in order to use non-watermarked Thunderforest maps: https://www.thunderforest.com/</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QLineEdit" name="maptilerAPIKey">
+           <property name="toolTip">
+            <string>Enter a Maptiler API key in order to use Maptiler maps: https://www.maptiler.com/</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QLabel" name="osmURLLabel">
+           <property name="text">
+            <string>OSM Custom URL</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <widget class="QLineEdit" name="osmURL">
+           <property name="toolTip">
+            <string>URL of custom map for use with OpenStreetMap provider</string>
            </property>
           </widget>
          </item>

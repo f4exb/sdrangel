@@ -4,5 +4,8 @@
     <file>map/map_5_12.qml</file>
     <file>map/antenna.png</file>
     <file>map/antennatime.png</file>
+    <file>map/antennadab.png</file>
+    <file>map/antennafm.png</file>
+    <file>map/antennaam.png</file>
   </qresource>
 </RCC>

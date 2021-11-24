@@ -31,7 +31,10 @@ struct MapSettings
 {
     bool m_displayNames;
     QString m_mapProvider;
-    QString m_mapBoxApiKey;
+    QString m_thunderforestAPIKey;
+    QString m_maptilerAPIKey;
+    QString m_mapBoxAPIKey;
+    QString m_osmURL;
     QString m_mapBoxStyles;
     quint32 m_sources;                 // Bitmask of SOURCE_*
     bool m_displayAllGroundTracks;
@@ -45,6 +48,7 @@ struct MapSettings
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIFeatureSetIndex;
     uint16_t m_reverseAPIFeatureIndex;
+    QByteArray m_rollupState;
 
     MapSettings();
     void resetToDefaults();
@@ -64,7 +68,10 @@ struct MapSettings
     static const quint32 SOURCE_SATELLITE_TRACKER = 0x10;
     static const quint32 SOURCE_BEACONS = 0x20;
     static const quint32 SOURCE_RADIO_TIME = 0x40;
-    static const quint32 SOURCE_STATION = 0x80;
+    static const quint32 SOURCE_AM = 0x80;
+    static const quint32 SOURCE_FM = 0x100;
+    static const quint32 SOURCE_DAB = 0x200;
+    static const quint32 SOURCE_STATION = 0x400; // Antenna at "My Position"
 };
 
 #endif // INCLUDE_FEATURE_MAPSETTINGS_H_
