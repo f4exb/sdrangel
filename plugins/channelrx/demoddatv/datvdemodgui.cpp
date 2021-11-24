@@ -198,6 +198,7 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
         m_cstlnSetByModcod(false)
 {
     ui->setupUi(this);
+    m_helpURL = "plugins/channelrx/demoddatv/readme.md";
     ui->screenTV->setColor(true);
     ui->screenTV->resizeTVScreen(256,256);
     setAttribute(Qt::WA_DeleteOnClose, true);

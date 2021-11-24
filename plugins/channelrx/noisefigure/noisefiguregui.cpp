@@ -611,6 +611,7 @@ NoiseFigureGUI::NoiseFigureGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
     m_chart(nullptr)
 {
     ui->setupUi(this);
+    m_helpURL = "plugins/channelrx/noisefigure/readme.md";
 
     setAttribute(Qt::WA_DeleteOnClose, true);
     connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));

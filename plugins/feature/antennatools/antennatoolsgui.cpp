@@ -115,6 +115,7 @@ AntennaToolsGUI::AntennaToolsGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     m_deviceSets(0)
 {
     ui->setupUi(this);
+    m_helpURL = "plugins/feature/antennatools/readme.md";
 
     setAttribute(Qt::WA_DeleteOnClose, true);
     setChannelWidget(false);

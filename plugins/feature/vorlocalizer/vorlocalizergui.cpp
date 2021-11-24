@@ -1226,6 +1226,7 @@ VORLocalizerGUI::VORLocalizerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     m_rrSecondsCount(0)
 {
     ui->setupUi(this);
+    m_helpURL = "plugins/feature/vorlocalizer/readme.md";
 
     ui->map->rootContext()->setContextProperty("vorModel", &m_vorModel);
     ui->map->setSource(QUrl(QStringLiteral("qrc:/demodvor/map/map.qml")));

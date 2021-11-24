@@ -1,8 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2015-2020 Edouard Griffiths, F4EXB                              //
 //                                                                               //
-// API for features                                                              //
-//                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
 // the Free Software Foundation as version 3 of the License, or                  //
@@ -22,6 +20,7 @@
 #include <QPainterPath>
 #include <QMouseEvent>
 #include <QDialog>
+#include <QDesktopServices>
 
 #include "gui/rollupwidget.h"
 #include "ui_glspectrumgui.h"
@@ -262,7 +261,7 @@ void RollupWidget::paintEvent(QPaintEvent*)
 
     p.setRenderHint(QPainter::Antialiasing, true);
 
-    // Ecken
+    // Ecken (corners)
     p.setPen(Qt::NoPen);
     p.setBrush(palette().base());
     p.drawRect(0, 0, 5, 5);
@@ -270,14 +269,14 @@ void RollupWidget::paintEvent(QPaintEvent*)
     p.drawRect(0, height() - 5, 5, 5);
     p.drawRect(width() - 5, height() - 5, 5, 5);
 
-    // Rahmen
+    // Rahmen (frame)
     p.setPen(m_highlighted ? Qt::white : frame);
     p.setBrush(palette().window());
     QRectF r(rect());
     r.adjust(0.5, 0.5, -0.5, -0.5);
     p.drawRoundedRect(r, 3.0, 3.0, Qt::AbsoluteSize);
 
-    // Titel-Hintergrund
+    // Titel-Hintergrund (Title background)
     p.setPen(Qt::NoPen);
     p.setBrush(m_titleColor);
     QPainterPath path;
@@ -289,7 +288,7 @@ void RollupWidget::paintEvent(QPaintEvent*)
     path.arcTo(QRectF(1.5, 2.5, 2.5, 2.5), 90, 90);
     p.drawPath(path);
 
-    // Titel-Abschlusslinie
+    // Titel-Abschlusslinie (Title closing line)
     p.setPen(frame);
     p.drawLine(QPointF(0.5, 2 + fm.height() + 1.5), QPointF(width() - 1.5, 2 + fm.height() + 1.5));
 
@@ -302,7 +301,7 @@ void RollupWidget::paintEvent(QPaintEvent*)
 
     if (m_channelWidget)
     {
-        // Stromkanal-Button links
+        // Stromkanal-Button links (Current channel)
         p.setPen(QPen(palette().windowText().color(), 1.0));
         p.setBrush(palette().light());
         p.drawRoundedRect(QRectF(5.5 + fm.ascent(), 2.5, fm.ascent() + 2.0, fm.ascent() + 2.0), 2.0, 2.0, Qt::AbsoluteSize);
@@ -310,7 +309,21 @@ void RollupWidget::paintEvent(QPaintEvent*)
         p.drawText(QRectF(5.5 + fm.ascent(), 2.5, fm.ascent() + 2.0, fm.ascent() + 2.0),  Qt::AlignCenter, m_streamIndicator);
     }
 
-    // Schließen-Button rechts
+    // Help button
+    if (!m_helpURL.isEmpty())
+    {
+        p.setRenderHint(QPainter::Antialiasing, true);
+        p.setPen(QPen(palette().windowText().color(), 1.0));
+        p.setBrush(palette().light());
+        r = QRectF(width() - 2*(3.5 + fm.ascent()), 3.5, fm.ascent(), fm.ascent());
+        p.drawRoundedRect(r, 2.0, 2.0, Qt::AbsoluteSize);
+        p.drawText(QRectF(width() - 2*(3.5 + fm.ascent()), 5, fm.ascent(), fm.ascent() - 2), Qt::AlignCenter, "?");
+    }
+
+    //p.drawLine(r.topLeft() + QPointF(1, 1), r.bottomRight() + QPointF(-1, -1));
+    //p.drawLine(r.bottomLeft() + QPointF(1, -1), r.topRight() + QPointF(-1, 1));
+
+    // Schließen-Button rechts (Close button on the right)
     p.setRenderHint(QPainter::Antialiasing, true);
     p.setPen(QPen(palette().windowText().color(), 1.0));
     p.setBrush(palette().light());
@@ -449,6 +462,19 @@ void RollupWidget::mousePressEvent(QMouseEvent* event)
             emit customContextMenuRequested(event->globalPos());
             return;
         }
+    }
+
+    // help button
+    if(!m_helpURL.isEmpty() && QRectF(width() - 2*(3.5 + fm.ascent()), 3.5, fm.ascent(), fm.ascent()).contains(event->pos()))
+    {
+        QString url;
+        if (m_helpURL.startsWith("http")) {
+            url = m_helpURL;
+        } else {
+            url = QString("https://github.com/f4exb/sdrangel/blob/master/%1").arg(m_helpURL); // Something like "plugins/channelrx/chanalyzer/readme.md"
+        }
+        QDesktopServices::openUrl(QUrl(url));
+        return;
     }
 
     // close button right

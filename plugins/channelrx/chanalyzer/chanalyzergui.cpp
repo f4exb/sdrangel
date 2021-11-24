@@ -469,6 +469,7 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *device
 	m_basebandSampleRate(48000)
 {
 	ui->setupUi(this);
+    m_helpURL = "plugins/channelrx/chanalyzer/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 

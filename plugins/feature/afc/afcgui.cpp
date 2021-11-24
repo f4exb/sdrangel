@@ -127,6 +127,7 @@ AFCGUI::AFCGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     m_lastFeatureState(0)
 {
 	ui->setupUi(this);
+    m_helpURL = "plugins/feature/afc/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
 
     ui->targetFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));

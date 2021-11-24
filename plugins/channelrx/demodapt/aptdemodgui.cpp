@@ -450,6 +450,7 @@ APTDemodGUI::APTDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_pixmapItem(nullptr)
 {
     ui->setupUi(this);
+    m_helpURL = "plugins/channelrx/demodapt/readme.md";
 
     setAttribute(Qt::WA_DeleteOnClose, true);
     connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));

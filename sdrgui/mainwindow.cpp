@@ -29,6 +29,7 @@
 #include <QResource>
 #include <QFontDatabase>
 #include <QStandardPaths>
+#include <QDesktopServices>
 
 #include "device/devicegui.h"
 #include "device/deviceapi.h"
@@ -1751,6 +1752,16 @@ void MainWindow::on_presetTree_itemActivated(QTreeWidgetItem *item, int column)
     (void) item;
     (void) column;
 	on_presetLoad_clicked();
+}
+
+void MainWindow::on_action_Quick_Start_triggered()
+{
+    QDesktopServices::openUrl(QUrl("https://github.com/f4exb/sdrangel/wiki/Quick-start"));
+}
+
+void MainWindow::on_action_Main_Window_triggered()
+{
+    QDesktopServices::openUrl(QUrl("https://github.com/f4exb/sdrangel/blob/master/sdrgui/readme.md"));
 }
 
 void MainWindow::on_action_Loaded_Plugins_triggered()

@@ -52,6 +52,7 @@ protected:
     bool m_highlighted;
     ContextMenuType m_contextMenuType;
     QString m_streamIndicator;
+    QString m_helpURL;
 
     int arrangeRollups();
 

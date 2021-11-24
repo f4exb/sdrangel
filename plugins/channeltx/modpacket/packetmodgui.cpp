@@ -425,6 +425,7 @@ PacketModGUI::PacketModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_doApplySettings(true)
 {
     ui->setupUi(this);
+    m_helpURL = "plugins/channeltx/modpacket/readme.md";
     setAttribute(Qt::WA_DeleteOnClose, true);
 
     connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));

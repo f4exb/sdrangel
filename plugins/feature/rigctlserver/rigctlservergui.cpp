@@ -127,6 +127,7 @@ RigCtlServerGUI::RigCtlServerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     m_lastFeatureState(0)
 {
 	ui->setupUi(this);
+    m_helpURL = "plugins/feature/rigctlserver/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
     setChannelWidget(false);
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));

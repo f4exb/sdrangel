@@ -321,6 +321,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_dsdStatusTextDialog(0)
 {
 	ui->setupUi(this);
+    m_helpURL = "plugins/channelrx/demoddsd/readme.md";
 	ui->screenTV->setColor(true);
 	ui->screenTV->resizeTVScreen(200,200);
 	setAttribute(Qt::WA_DeleteOnClose, true);
