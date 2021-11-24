@@ -85,6 +85,7 @@ QByteArray FreqTrackerSettings::serialize() const
     s.writeU32(20, m_reverseAPIChannelIndex);
     s.writeS32(21, m_squelchGate);
     s.writeS32(22, m_streamIndex);
+    s.writeBlob(23, m_rollupState);
 
     return s.final();
 }
@@ -157,6 +158,7 @@ bool FreqTrackerSettings::deserialize(const QByteArray& data)
         d.readS32(21, &tmp, 5);
         m_squelchGate = tmp < 0 ? 0 : tmp > 99 ? 99 : tmp;
         d.readS32(22, &m_streamIndex, 0);
+        d.readBlob(23, &m_rollupState);
 
         return true;
     }

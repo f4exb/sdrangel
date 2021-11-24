@@ -111,6 +111,7 @@ QByteArray NoiseFigureSettings::serialize() const
     s.writeS32(26, (int)m_interpolation);
 
     s.writeString(27, m_setting);
+    s.writeBlob(28, m_rollupState);
 
     for (int i = 0; i < NOISEFIGURE_COLUMNS; i++) {
         s.writeS32(100 + i, m_resultsColumnIndexes[i]);
@@ -183,6 +184,7 @@ bool NoiseFigureSettings::deserialize(const QByteArray& data)
         d.readS32(26, (int*)&m_interpolation, LINEAR);
 
         d.readString(27, &m_setting, "centerFrequency");
+        d.readBlob(28, &m_rollupState);
 
         for (int i = 0; i < NOISEFIGURE_COLUMNS; i++) {
             d.readS32(100 + i, &m_resultsColumnIndexes[i], i);

@@ -90,6 +90,7 @@ struct ChirpChatModSettings
     uint16_t m_reverseAPIChannelIndex;
 
     Serializable *m_channelMarker;
+    QByteArray m_rollupState;
 
     static const int bandwidths[];
     static const int nbBandwidths;

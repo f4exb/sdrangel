@@ -68,6 +68,7 @@ QByteArray RadioClockSettings::serialize() const
     s.writeU32(19, m_reverseAPIDeviceIndex);
     s.writeU32(20, m_reverseAPIChannelIndex);
     s.writeBlob(21, m_scopeGUI->serialize());
+    s.writeBlob(22, m_rollupState);
 
     return s.final();
 }
@@ -118,6 +119,7 @@ bool RadioClockSettings::deserialize(const QByteArray& data)
             d.readBlob(21, &bytetmp);
             m_scopeGUI->deserialize(bytetmp);
         }
+        d.readBlob(22, &m_rollupState);
 
         return true;
     }

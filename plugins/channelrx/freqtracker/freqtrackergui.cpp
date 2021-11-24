@@ -248,6 +248,9 @@ void FreqTrackerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void FreqTrackerGUI::onMenuDialogCalled(const QPoint &p)
@@ -426,6 +429,7 @@ void FreqTrackerGUI::displaySettings()
     displaySpectrumBandwidth(m_settings.m_spanLog2);
     displayStreamIndex();
 
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 

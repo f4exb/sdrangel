@@ -93,6 +93,7 @@ QByteArray UDPSinkSettings::serialize() const
     s.writeU32(26, m_reverseAPIDeviceIndex);
     s.writeU32(27, m_reverseAPIChannelIndex);
     s.writeS32(28, m_streamIndex);
+    s.writeBlob(29, m_rollupState);
 
     return s.final();
 
@@ -183,6 +184,7 @@ bool UDPSinkSettings::deserialize(const QByteArray& data)
         d.readU32(27, &u32tmp, 0);
         m_reverseAPIChannelIndex = u32tmp > 99 ? 99 : u32tmp;
         d.readS32(28, &m_streamIndex, 0);
+        d.readBlob(29, &m_rollupState);
 
         return true;
     }

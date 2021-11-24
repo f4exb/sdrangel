@@ -58,6 +58,7 @@ QByteArray BeamSteeringCWModSettings::serialize() const
     s.writeU32(12, m_log2Interp);
     s.writeU32(13, m_filterChainHash);
     s.writeS32(14, m_channelOutput);
+    s.writeBlob(15, m_rollupState);
 
     return s.final();
 }
@@ -101,6 +102,7 @@ bool BeamSteeringCWModSettings::deserialize(const QByteArray& data)
         d.readU32(13, &m_filterChainHash, 0);
         d.readS32(14, &stmp, 0);
         m_channelOutput = stmp < 0 ? 0 : stmp > 2 ? 2 : stmp;
+        d.readBlob(15, &m_rollupState);
 
         return true;
     }

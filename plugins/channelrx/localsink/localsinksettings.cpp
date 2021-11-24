@@ -59,6 +59,7 @@ QByteArray LocalSinkSettings::serialize() const
     s.writeU32(12, m_log2Decim);
     s.writeU32(13, m_filterChainHash);
     s.writeS32(14, m_streamIndex);
+    s.writeBlob(15, m_rollupState);
 
     return s.final();
 }
@@ -99,6 +100,7 @@ bool LocalSinkSettings::deserialize(const QByteArray& data)
         m_log2Decim = tmp > 6 ? 6 : tmp;
         d.readU32(13, &m_filterChainHash, 0);
         d.readS32(14, &m_streamIndex, 0);
+        d.readBlob(15, &m_rollupState);
 
         return true;
     }

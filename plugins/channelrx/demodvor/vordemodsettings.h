@@ -53,6 +53,7 @@ struct VORDemodSettings
     Real m_refThresholdDB;              //!< Threshold in dB for valid VOR reference signal
     Real m_varThresholdDB;              //!< Threshold in dB for valid VOR variable signal
     bool m_magDecAdjust;                //!< Adjust for magnetic declination when drawing radials on the map
+    QByteArray m_rollupState;
 
     int m_columnIndexes[VORDEMOD_COLUMNS];//!< How the columns are ordered in the table
     int m_columnSizes[VORDEMOD_COLUMNS];  //!< Size of the coumns in the table

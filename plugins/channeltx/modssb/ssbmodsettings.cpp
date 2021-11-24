@@ -121,6 +121,7 @@ QByteArray SSBModSettings::serialize() const
     s.writeReal(28, m_feedbackVolumeFactor);
     s.writeBool(29, m_feedbackAudioEnable);
     s.writeS32(30, m_streamIndex);
+    s.writeBlob(31, m_rollupState);
 
     return s.final();
 }
@@ -209,6 +210,7 @@ bool SSBModSettings::deserialize(const QByteArray& data)
         d.readReal(28, &m_feedbackVolumeFactor, 1.0);
         d.readBool(29, &m_feedbackAudioEnable, false);
         d.readS32(30, &m_streamIndex, 0);
+        d.readBlob(31, &m_rollupState);
 
         return true;
     }

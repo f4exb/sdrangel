@@ -119,6 +119,7 @@ QByteArray NFMModSettings::serialize() const
     s.writeBool(24, m_dcsOn);
     s.writeS32(25, m_dcsCode);
     s.writeBool(26, m_dcsPositive);
+    s.writeBlob(27, m_rollupState);
 
     return s.final();
 }
@@ -196,6 +197,7 @@ bool NFMModSettings::deserialize(const QByteArray& data)
         d.readS32(25, &tmp, 0023);
         m_dcsCode = tmp < 0 ? 0 : tmp > 511 ? 511 : tmp;
         d.readBool(26, &m_dcsPositive, false);
+        d.readBlob(27, &m_rollupState);
 
         return true;
     }

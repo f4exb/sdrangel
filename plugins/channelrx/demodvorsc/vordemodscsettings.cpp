@@ -75,6 +75,7 @@ QByteArray VORDemodSCSettings::serialize() const
     s.writeReal(20, m_identThreshold);
     s.writeReal(21, m_refThresholdDB);
     s.writeReal(22, m_varThresholdDB);
+    s.writeBlob(23, m_rollupState);
 
     return s.final();
 }
@@ -129,6 +130,7 @@ bool VORDemodSCSettings::deserialize(const QByteArray& data)
         d.readReal(20, &m_identThreshold, 2.0);
         d.readReal(21, &m_refThresholdDB, -45.0);
         d.readReal(22, &m_varThresholdDB, -90.0);
+        d.readBlob(23, &m_rollupState);
 
         return true;
     }

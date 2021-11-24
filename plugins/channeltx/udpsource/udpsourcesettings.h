@@ -70,6 +70,7 @@ struct UDPSourceSettings
 
     Serializable *m_channelMarker;
     Serializable *m_spectrumGUI;
+    QByteArray m_rollupState;
 
     UDPSourceSettings();
     void resetToDefaults();

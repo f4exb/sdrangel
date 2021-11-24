@@ -319,6 +319,9 @@ void IEEE_802_15_4_ModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void IEEE_802_15_4_ModGUI::onMenuDialogCalled(const QPoint &p)
@@ -561,6 +564,7 @@ void IEEE_802_15_4_ModGUI::displaySettings()
     ui->udpAddress->setText(m_settings.m_udpAddress);
     ui->udpPort->setText(QString::number(m_settings.m_udpPort));
 
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 

@@ -91,6 +91,7 @@ QByteArray ATVModSettings::serialize() const
     s.writeString(22, m_imageFileName);
     s.writeString(23, m_videoFileName);
     s.writeS32(24, m_streamIndex);
+    s.writeBlob(25, m_rollupState);
 
     return s.final();
 }
@@ -157,6 +158,7 @@ bool ATVModSettings::deserialize(const QByteArray& data)
         d.readString(22, &m_imageFileName);
         d.readString(23, &m_videoFileName);
         d.readS32(24, &m_streamIndex, 0);
+        d.readBlob(25, &m_rollupState);
 
         return true;
     }

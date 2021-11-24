@@ -119,6 +119,7 @@ void ATVDemodGUI::displaySettings()
     ui->amScaleOffsetText->setText(QString("%1").arg(m_settings.m_amOffsetFactor));
 
     applySampleRate();
+    restoreState(m_settings.m_rollupState);
 
     m_doApplySettings = true;
 }
@@ -206,6 +207,9 @@ void ATVDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* objParent) :

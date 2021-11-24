@@ -76,6 +76,7 @@ struct IEEE_802_15_4_ModSettings
     bool m_udpBytesFormat; //!< true for bytes payload
     QString m_udpAddress;
     uint16_t m_udpPort;
+    QByteArray m_rollupState;
     static const int m_udpBufferSize = 100000;
 
     IEEE_802_15_4_ModSettings();

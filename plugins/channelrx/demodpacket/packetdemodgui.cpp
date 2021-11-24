@@ -360,6 +360,9 @@ void PacketDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void PacketDemodGUI::onMenuDialogCalled(const QPoint &p)
@@ -540,6 +543,7 @@ void PacketDemodGUI::displaySettings()
 
     filter();
 
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 

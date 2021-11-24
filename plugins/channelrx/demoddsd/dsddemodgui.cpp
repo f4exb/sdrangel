@@ -246,6 +246,9 @@ void DSDDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void DSDDemodGUI::onMenuDialogCalled(const QPoint &p)
@@ -457,6 +460,7 @@ void DSDDemodGUI::displaySettings()
 
     displayStreamIndex();
 
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 

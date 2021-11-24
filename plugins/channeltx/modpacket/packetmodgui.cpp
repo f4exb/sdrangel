@@ -366,6 +366,9 @@ void PacketModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void PacketModGUI::onMenuDialogCalled(const QPoint &p)
@@ -566,6 +569,7 @@ void PacketModGUI::displaySettings()
     ui->via->lineEdit()->setText(m_settings.m_via);
     ui->packet->setText(m_settings.m_data);
 
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 

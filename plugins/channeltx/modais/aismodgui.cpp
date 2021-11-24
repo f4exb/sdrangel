@@ -329,6 +329,9 @@ void AISModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void AISModGUI::onMenuDialogCalled(const QPoint &p)
@@ -546,6 +549,7 @@ void AISModGUI::displaySettings()
     ui->heading->setValue(m_settings.m_heading);
     ui->message->setText(m_settings.m_data);
 
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 

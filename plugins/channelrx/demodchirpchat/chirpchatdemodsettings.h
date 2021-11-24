@@ -66,6 +66,7 @@ struct ChirpChatDemodSettings
 
     Serializable *m_channelMarker;
     Serializable *m_spectrumGUI;
+    QByteArray m_rollupState;
 
     static const int bandwidths[];
     static const int nbBandwidths;

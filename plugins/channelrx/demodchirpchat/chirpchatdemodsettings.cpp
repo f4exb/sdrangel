@@ -127,6 +127,7 @@ QByteArray ChirpChatDemodSettings::serialize() const
     s.writeBool(26, m_sendViaUDP);
     s.writeString(27, m_udpAddress);
     s.writeU32(28, m_udpPort);
+    s.writeBlob(29, m_rollupState);
 
     return s.final();
 }
@@ -199,6 +200,7 @@ bool ChirpChatDemodSettings::deserialize(const QByteArray& data)
         } else {
             m_udpPort = 9999;
         }
+        d.readBlob(29, &m_rollupState);
 
         return true;
     }

@@ -269,6 +269,9 @@ void AMModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void AMModGUI::onMenuDialogCalled(const QPoint &p)
@@ -451,6 +454,7 @@ void AMModGUI::displaySettings()
 
     displayStreamIndex();
 
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 

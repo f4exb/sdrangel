@@ -55,6 +55,7 @@ struct DSDDemodSettings
 
     Serializable *m_channelMarker;
     Serializable *m_scopeGUI;
+    QByteArray m_rollupState;
 
     DSDDemodSettings();
     void resetToDefaults();

@@ -102,6 +102,7 @@ QByteArray DSDDemodSettings::serialize() const
     s.writeU32(28, m_reverseAPIChannelIndex);
     s.writeBool(29, m_audioMute);
     s.writeS32(30, m_streamIndex);
+    s.writeBlob(31, m_rollupState);
 
     return s.final();
 }
@@ -180,6 +181,7 @@ bool DSDDemodSettings::deserialize(const QByteArray& data)
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
         d.readBool(29, &m_audioMute, false);
         d.readS32(30, &m_streamIndex, 0);
+        d.readBlob(31, &m_rollupState);
 
         return true;
     }

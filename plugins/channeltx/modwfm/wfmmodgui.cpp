@@ -275,6 +275,9 @@ void WFMModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void WFMModGUI::onMenuDialogCalled(const QPoint &p)
@@ -469,6 +472,7 @@ void WFMModGUI::displaySettings()
     ui->feedbackVolume->setValue(roundf(m_settings.m_feedbackVolumeFactor * 100.0));
     ui->feedbackVolumeText->setText(QString("%1").arg(m_settings.m_feedbackVolumeFactor, 0, 'f', 2));
 
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 

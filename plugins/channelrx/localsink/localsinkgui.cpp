@@ -173,6 +173,7 @@ void LocalSinkGUI::displaySettings()
     applyDecimation();
     displayStreamIndex();
 
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 
@@ -249,6 +250,9 @@ void LocalSinkGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void LocalSinkGUI::onMenuDialogCalled(const QPoint &p)

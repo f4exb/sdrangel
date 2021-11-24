@@ -281,6 +281,9 @@ void FreeDVModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void FreeDVModGUI::onMenuDialogCalled(const QPoint &p)
@@ -494,6 +497,7 @@ void FreeDVModGUI::displaySettings()
     ui->play->setChecked(m_settings.m_modAFInput == FreeDVModSettings::FreeDVModInputAF::FreeDVModInputFile);
     ui->morseKeyer->setChecked(m_settings.m_modAFInput == FreeDVModSettings::FreeDVModInputAF::FreeDVModInputCWTone);
 
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 

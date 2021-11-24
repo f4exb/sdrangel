@@ -208,6 +208,9 @@ void RadioClockGUI::onWidgetRolled(QWidget* widget, bool rollDown)
             setMinimumWidth(352);
         }
     }
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void RadioClockGUI::onMenuDialogCalled(const QPoint &p)
@@ -360,6 +363,7 @@ void RadioClockGUI::displaySettings()
 
     displayStreamIndex();
 
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 

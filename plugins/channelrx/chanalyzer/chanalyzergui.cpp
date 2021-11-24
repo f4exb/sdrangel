@@ -97,6 +97,7 @@ void ChannelAnalyzerGUI::displaySettings()
     QString rolloffStr = QString::number(m_settings.m_rrcRolloff/100.0, 'f', 2);
     ui->rrcRolloffText->setText(rolloffStr);
 
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 
@@ -432,6 +433,9 @@ void ChannelAnalyzerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void ChannelAnalyzerGUI::onMenuDialogCalled(const QPoint& p)

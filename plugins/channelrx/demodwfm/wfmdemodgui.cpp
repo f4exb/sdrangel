@@ -143,6 +143,9 @@ void WFMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void WFMDemodGUI::onMenuDialogCalled(const QPoint &p)
@@ -289,6 +292,7 @@ void WFMDemodGUI::displaySettings()
 
     displayStreamIndex();
 
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 

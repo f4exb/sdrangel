@@ -275,6 +275,7 @@ void FileSinkGUI::displaySettings()
     displayStreamIndex();
     setPosFromFrequency();
 
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 
@@ -344,6 +345,9 @@ void FileSinkGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void FileSinkGUI::onMenuDialogCalled(const QPoint &p)

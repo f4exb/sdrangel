@@ -355,6 +355,9 @@ void ChirpChatModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void ChirpChatModGUI::onMenuDialogCalled(const QPoint &p)
@@ -519,6 +522,7 @@ void ChirpChatModGUI::displaySettings()
     ui->udpEnabled->setChecked(m_settings.m_udpEnabled);
     ui->udpAddress->setText(m_settings.m_udpAddress);
     ui->udpPort->setText(QString::number(m_settings.m_udpPort));
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 

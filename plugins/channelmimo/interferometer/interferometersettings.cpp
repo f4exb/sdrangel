@@ -70,6 +70,7 @@ QByteArray InterferometerSettings::serialize() const
     if (m_channelMarker) {
         s.writeBlob(22, m_channelMarker->serialize());
     }
+    s.writeBlob(23, m_rollupState);
 
     return s.final();
 }
@@ -125,9 +126,10 @@ bool InterferometerSettings::deserialize(const QByteArray& data)
         }
 
         if (m_channelMarker) {
-            d.readBlob(21, &bytetmp);
+            d.readBlob(22, &bytetmp);
             m_channelMarker->deserialize(bytetmp);
         }
+        d.readBlob(23, &m_rollupState);
 
         return true;
     }

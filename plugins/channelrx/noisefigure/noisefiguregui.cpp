@@ -549,6 +549,9 @@ void NoiseFigureGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void NoiseFigureGUI::onMenuDialogCalled(const QPoint &p)
@@ -755,6 +758,7 @@ void NoiseFigureGUI::displaySettings()
         header->moveSection(header->visualIndex(i), m_settings.m_resultsColumnIndexes[i]);
     }
 
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 
