@@ -1104,6 +1104,9 @@ void VORDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void VORDemodGUI::onMenuDialogCalled(const QPoint &p)
@@ -1328,6 +1331,7 @@ void VORDemodGUI::displaySettings()
         header->moveSection(header->visualIndex(i), m_settings.m_columnIndexes[i]);
     }
 
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 

@@ -85,6 +85,7 @@ QByteArray ATVDemodSettings::serialize() const
     s.writeS32(22, m_amScalingFactor);
     s.writeS32(23, m_amOffsetFactor);
     s.writeBool(24, m_fftFiltering);
+    s.writeBlob(25, m_rollupState);
 
     return s.final();
 }
@@ -133,6 +134,7 @@ bool ATVDemodSettings::deserialize(const QByteArray& arrData)
         d.readS32(22, &m_amScalingFactor, 100);
         d.readS32(23, &m_amOffsetFactor, 0);
         d.readBool(24, &m_fftFiltering, false);
+        d.readBlob(25, &m_rollupState);
 
         return true;
     }

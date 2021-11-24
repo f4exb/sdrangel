@@ -62,6 +62,7 @@ QByteArray FileSourceSettings::serialize() const
     s.writeU32(11, m_reverseAPIDeviceIndex);
     s.writeU32(12, m_reverseAPIChannelIndex);
     s.writeS32(13, m_streamIndex);
+    s.writeBlob(14, m_rollupState);
 
     return s.final();
 }
@@ -106,6 +107,7 @@ bool FileSourceSettings::deserialize(const QByteArray& data)
         d.readU32(12, &tmp, 0);
         m_reverseAPIChannelIndex = tmp > 99 ? 99 : tmp;
         d.readS32(13, &m_streamIndex, 0);
+        d.readBlob(14, &m_rollupState);
 
         return true;
     }

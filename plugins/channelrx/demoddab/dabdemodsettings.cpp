@@ -76,6 +76,7 @@ QByteArray DABDemodSettings::serialize() const
     s.writeU32(13, m_reverseAPIPort);
     s.writeU32(14, m_reverseAPIDeviceIndex);
     s.writeU32(15, m_reverseAPIChannelIndex);
+    s.writeBlob(16, m_rollupState);
 
     for (int i = 0; i < DABDEMOD_COLUMNS; i++)
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -131,6 +132,7 @@ bool DABDemodSettings::deserialize(const QByteArray& data)
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
         d.readU32(15, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
+        d.readBlob(16, &m_rollupState);
 
         for (int i = 0; i < DABDEMOD_COLUMNS; i++)
             d.readS32(100 + i, &m_columnIndexes[i], i);

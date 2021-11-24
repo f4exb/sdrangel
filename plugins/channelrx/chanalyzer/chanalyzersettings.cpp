@@ -79,6 +79,7 @@ QByteArray ChannelAnalyzerSettings::serialize() const
     s.writeFloat(19, m_pllDampingFactor);
     s.writeFloat(20, m_pllLoopGain);
     s.writeBool(21, m_costasLoop);
+    s.writeBlob(22, m_rollupState);
 
     return s.final();
 }
@@ -130,6 +131,7 @@ bool ChannelAnalyzerSettings::deserialize(const QByteArray& data)
         d.readFloat(19, &m_pllDampingFactor, 0.5f);
         d.readFloat(20, &m_pllLoopGain, 10.0f);
         d.readBool(21, &m_costasLoop, false);
+        d.readBlob(22, &m_rollupState);
 
         return true;
     }

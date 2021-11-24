@@ -96,6 +96,7 @@ QByteArray UDPSourceSettings::serialize() const
     s.writeU32(24, m_reverseAPIDeviceIndex);
     s.writeU32(25, m_reverseAPIChannelIndex);
     s.writeS32(26, m_streamIndex);
+    s.writeBlob(27, m_rollupState);
 
     return s.final();
 }
@@ -190,6 +191,7 @@ bool UDPSourceSettings::deserialize(const QByteArray& data)
         d.readU32(25, &u32tmp, 0);
         m_reverseAPIChannelIndex = u32tmp > 99 ? 99 : u32tmp;
         d.readS32(26, &m_streamIndex, 0);
+        d.readBlob(27, &m_rollupState);
 
         return true;
     }

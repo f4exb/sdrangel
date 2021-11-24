@@ -75,6 +75,7 @@ QByteArray WFMDemodSettings::serialize() const
     s.writeU32(15, m_reverseAPIDeviceIndex);
     s.writeU32(16, m_reverseAPIChannelIndex);
     s.writeS32(17, m_streamIndex);
+    s.writeBlob(18, m_rollupState);
 
     return s.final();
 }
@@ -131,6 +132,7 @@ bool WFMDemodSettings::deserialize(const QByteArray& data)
         d.readU32(16, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
         d.readS32(17, &m_streamIndex, 0);
+        d.readBlob(18, &m_rollupState);
 
         return true;
     }

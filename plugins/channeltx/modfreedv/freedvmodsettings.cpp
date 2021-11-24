@@ -88,6 +88,7 @@ QByteArray FreeDVModSettings::serialize() const
     s.writeU32(25, m_reverseAPIDeviceIndex);
     s.writeU32(26, m_reverseAPIChannelIndex);
     s.writeS32(27, m_streamIndex);
+    s.writeBlob(28, m_rollupState);
 
     return s.final();
 }
@@ -169,6 +170,7 @@ bool FreeDVModSettings::deserialize(const QByteArray& data)
         d.readU32(26, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
         d.readS32(27, &m_streamIndex, 0);
+        d.readBlob(28, &m_rollupState);
 
         return true;
     }

@@ -144,6 +144,7 @@ struct ADSBDemodSettings
     } m_mapType;
     bool m_displayNavAids;
     bool m_displayPhotos;
+    QByteArray m_rollupState;
 
     ADSBDemodSettings();
     void resetToDefaults();

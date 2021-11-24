@@ -72,6 +72,7 @@ struct FreeDVModSettings
     Serializable *m_cwKeyerGUI;
 
     CWKeyerSettings m_cwKeyerSettings; //!< For standalone deserialize operation (without m_cwKeyerGUI)
+    QByteArray m_rollupState;
 
     FreeDVModSettings();
     void resetToDefaults();

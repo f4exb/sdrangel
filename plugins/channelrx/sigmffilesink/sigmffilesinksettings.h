@@ -44,6 +44,7 @@ struct SigMFFileSinkSettings
     uint16_t m_reverseAPIChannelIndex;
 
     Serializable *m_spectrumGUI;
+    QByteArray m_rollupState;
 
     SigMFFileSinkSettings();
     void resetToDefaults();

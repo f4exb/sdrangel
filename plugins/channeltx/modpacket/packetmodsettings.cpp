@@ -224,6 +224,7 @@ QByteArray PacketModSettings::serialize() const
     s.writeBool(51, m_udpEnabled);
     s.writeString(52, m_udpAddress);
     s.writeU32(53, m_udpPort);
+    s.writeBlob(54, m_rollupState);
 
     return s.final();
 }
@@ -318,6 +319,7 @@ bool PacketModSettings::deserialize(const QByteArray& data)
         } else {
             m_udpPort = 9998;
         }
+        d.readBlob(54, &m_rollupState);
 
         return true;
     }

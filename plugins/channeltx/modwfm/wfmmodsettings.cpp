@@ -95,6 +95,7 @@ QByteArray WFMModSettings::serialize() const
     s.writeString(19, m_feedbackAudioDeviceName);
     s.writeReal(20, m_feedbackVolumeFactor);
     s.writeBool(21, m_feedbackAudioEnable);
+    s.writeBlob(22, m_rollupState);
 
     return s.final();
 }
@@ -164,6 +165,7 @@ bool WFMModSettings::deserialize(const QByteArray& data)
         d.readString(19, &m_feedbackAudioDeviceName, AudioDeviceManager::m_defaultDeviceName);
         d.readReal(20, &m_feedbackVolumeFactor, 1.0);
         d.readBool(21, &m_feedbackAudioEnable, false);
+        d.readBlob(22, &m_rollupState);
 
         return true;
     }

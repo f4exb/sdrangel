@@ -193,6 +193,7 @@ QByteArray IEEE_802_15_4_ModSettings::serialize() const
     s.writeString(35, m_udpAddress);
     s.writeU32(36, m_udpPort);
     s.writeBool(37, m_udpBytesFormat);
+    s.writeBlob(38, m_rollupState);
 
     return s.final();
 }
@@ -271,6 +272,7 @@ bool IEEE_802_15_4_ModSettings::deserialize(const QByteArray& data)
             m_udpPort = 9998;
         }
         d.readBool(37, &m_udpBytesFormat);
+        d.readBlob(38, &m_rollupState);
 
         return true;
     }

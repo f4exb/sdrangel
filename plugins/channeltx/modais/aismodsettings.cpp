@@ -171,6 +171,7 @@ QByteArray AISModSettings::serialize() const
     s.writeBool(37, m_udpEnabled);
     s.writeString(38, m_udpAddress);
     s.writeU32(39, m_udpPort);
+    s.writeBlob(40, m_rollupState);
 
     return s.final();
 }
@@ -246,6 +247,7 @@ bool AISModSettings::deserialize(const QByteArray& data)
         } else {
             m_udpPort = 9998;
         }
+        d.readBlob(40, &m_rollupState);
 
         return true;
     }

@@ -222,6 +222,9 @@ void VORDemodSCGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void VORDemodSCGUI::onMenuDialogCalled(const QPoint &p)
@@ -367,6 +370,7 @@ void VORDemodSCGUI::displaySettings()
 
     displayStreamIndex();
 
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 

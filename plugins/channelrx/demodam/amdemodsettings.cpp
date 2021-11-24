@@ -73,6 +73,7 @@ QByteArray AMDemodSettings::serialize() const
     s.writeU32(16, m_reverseAPIPort);
     s.writeU32(17, m_reverseAPIDeviceIndex);
     s.writeU32(18, m_reverseAPIChannelIndex);
+    s.writeBlob(19, m_rollupState);
 
     return s.final();
 }
@@ -129,6 +130,7 @@ bool AMDemodSettings::deserialize(const QByteArray& data)
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
         d.readU32(18, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
+        d.readBlob(19, &m_rollupState);
 
         return true;
     }

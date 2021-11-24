@@ -72,6 +72,7 @@ struct UDPSinkSettings
 
     Serializable *m_channelMarker;
     Serializable *m_spectrumGUI;
+    QByteArray m_rollupState;
 
     UDPSinkSettings();
     void resetToDefaults();

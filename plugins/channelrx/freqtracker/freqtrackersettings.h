@@ -56,6 +56,7 @@ struct FreqTrackerSettings
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIDeviceIndex;
     uint16_t m_reverseAPIChannelIndex;
+    QByteArray m_rollupState;
 
     FreqTrackerSettings();
     void resetToDefaults();

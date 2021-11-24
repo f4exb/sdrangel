@@ -66,6 +66,7 @@ struct PagerDemodSettings
 
     QString m_logFilename;
     bool m_logEnabled;
+    QByteArray m_rollupState;
 
     int m_messageColumnIndexes[PAGERDEMOD_MESSAGE_COLUMNS];//!< How the columns are ordered in the table
     int m_messageColumnSizes[PAGERDEMOD_MESSAGE_COLUMNS];  //!< Size of the columns in the table

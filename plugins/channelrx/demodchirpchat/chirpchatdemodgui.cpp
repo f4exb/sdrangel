@@ -320,6 +320,9 @@ void ChirpChatDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void ChirpChatDemodGUI::onMenuDialogCalled(const QPoint &p)
@@ -492,6 +495,7 @@ void ChirpChatDemodGUI::displaySettings()
 
     displaySquelch();
 
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 

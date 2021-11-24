@@ -167,6 +167,7 @@ void BeamSteeringCWModGUI::displaySettings()
     ui->interpolationFactor->setCurrentIndex(m_settings.m_log2Interp);
     applyInterpolation();
     ui->steeringDegreesText->setText(tr("%1").arg(m_settings.m_steerDegrees));
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 
@@ -208,6 +209,9 @@ void BeamSteeringCWModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void BeamSteeringCWModGUI::onMenuDialogCalled(const QPoint &p)

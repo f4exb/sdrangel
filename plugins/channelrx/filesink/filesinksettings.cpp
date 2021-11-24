@@ -72,6 +72,7 @@ QByteArray FileSinkSettings::serialize() const
     s.writeS32(16, m_preRecordTime);
     s.writeS32(17, m_squelchPostRecordTime);
     s.writeBool(18, m_squelchRecordingEnable);
+    s.writeBlob(19, m_rollupState);
 
     return s.final();
 }
@@ -127,6 +128,7 @@ bool FileSinkSettings::deserialize(const QByteArray& data)
         d.readS32(16, &m_preRecordTime, 0);
         d.readS32(17, &m_squelchPostRecordTime, 0);
         d.readBool(18, &m_squelchRecordingEnable, false);
+        d.readBlob(19, &m_rollupState);
 
         return true;
     }

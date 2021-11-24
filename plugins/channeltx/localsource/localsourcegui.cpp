@@ -161,6 +161,7 @@ void LocalSourceGUI::displaySettings()
     ui->interpolationFactor->setCurrentIndex(m_settings.m_log2Interp);
     ui->localDevicePlay->setChecked(m_settings.m_play);
     applyInterpolation();
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 
@@ -223,6 +224,9 @@ void LocalSourceGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void LocalSourceGUI::onMenuDialogCalled(const QPoint &p)

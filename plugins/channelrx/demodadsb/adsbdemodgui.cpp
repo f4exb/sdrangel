@@ -1994,6 +1994,9 @@ void ADSBDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void ADSBDemodGUI::onMenuDialogCalled(const QPoint &p)
@@ -2775,6 +2778,7 @@ void ADSBDemodGUI::displaySettings()
 
     applyMapSettings();
 
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 

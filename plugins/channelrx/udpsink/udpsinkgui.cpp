@@ -254,6 +254,7 @@ void UDPSinkGUI::displaySettings()
 
     displayStreamIndex();
 
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 
     ui->glSpectrum->setSampleRate(m_settings.m_outputSampleRate);
@@ -584,6 +585,9 @@ void UDPSinkGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 	if ((widget == ui->spectrumBox) && (m_udpSink)) {
         m_udpSink->enableSpectrum(rollDown);
 	}
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void UDPSinkGUI::onMenuDialogCalled(const QPoint &p)

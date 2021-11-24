@@ -60,6 +60,7 @@ struct AISDemodSettings
     uint16_t m_reverseAPIDeviceIndex;
     uint16_t m_reverseAPIChannelIndex;
     Serializable *m_scopeGUI;
+    QByteArray m_rollupState;
 
     int m_messageColumnIndexes[AISDEMOD_MESSAGE_COLUMNS];//!< How the columns are ordered in the table
     int m_messageColumnSizes[AISDEMOD_MESSAGE_COLUMNS];  //!< Size of the columns in the table

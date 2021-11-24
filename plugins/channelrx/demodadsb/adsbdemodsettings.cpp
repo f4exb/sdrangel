@@ -133,6 +133,7 @@ QByteArray ADSBDemodSettings::serialize() const
     s.writeS32(40, (int)m_mapType);
     s.writeBool(41, m_displayNavAids);
     s.writeBool(42, m_displayPhotos);
+    s.writeBlob(43, m_rollupState);
 
     for (int i = 0; i < ADSBDEMOD_COLUMNS; i++) {
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -231,6 +232,7 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         d.readS32(40, (int *)&m_mapType, (int)AVIATION_LIGHT);
         d.readBool(41, &m_displayNavAids, true);
         d.readBool(42, &m_displayPhotos, true);
+        d.readBlob(43, &m_rollupState);
 
         for (int i = 0; i < ADSBDEMOD_COLUMNS; i++) {
             d.readS32(100 + i, &m_columnIndexes[i], i);

@@ -410,6 +410,9 @@ void PagerDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
             setMinimumWidth(352);
         }
     }
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void PagerDemodGUI::onMenuDialogCalled(const QPoint &p)
@@ -629,6 +632,7 @@ void PagerDemodGUI::displaySettings()
     }
     filter();
 
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 

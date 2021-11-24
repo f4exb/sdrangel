@@ -375,6 +375,9 @@ void DABDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void DABDemodGUI::onMenuDialogCalled(const QPoint &p)
@@ -553,6 +556,7 @@ void DABDemodGUI::displaySettings()
 
     filter();
 
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 

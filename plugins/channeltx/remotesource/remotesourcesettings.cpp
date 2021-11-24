@@ -56,6 +56,7 @@ QByteArray RemoteSourceSettings::serialize() const
     s.writeU32(8, m_reverseAPIDeviceIndex);
     s.writeU32(9, m_reverseAPIChannelIndex);
     s.writeS32(10, m_streamIndex);
+    s.writeBlob(11, m_rollupState);
 
     return s.final();
 }
@@ -101,6 +102,7 @@ bool RemoteSourceSettings::deserialize(const QByteArray& data)
         d.readU32(9, &tmp, 0);
         m_reverseAPIChannelIndex = tmp > 99 ? 99 : tmp;
         d.readS32(10, &m_streamIndex, 0);
+        d.readBlob(11, &m_rollupState);
 
         return true;
     }

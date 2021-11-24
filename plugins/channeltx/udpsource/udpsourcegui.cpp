@@ -229,6 +229,7 @@ void UDPSourceGUI::displaySettings()
     ui->applyBtn->setEnabled(false);
     ui->applyBtn->setStyleSheet("QPushButton { background:rgb(79,79,79); }");
 
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 
@@ -463,6 +464,9 @@ void UDPSourceGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     {
         m_udpSource->setSpectrum(rollDown);
     }
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void UDPSourceGUI::onMenuDialogCalled(const QPoint &p)

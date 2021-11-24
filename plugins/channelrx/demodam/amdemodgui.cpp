@@ -180,6 +180,9 @@ void AMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 	if((widget == ui->spectrumContainer) && (m_nfmDemod != NULL))
 		m_nfmDemod->setSpectrum(m_threadedSampleSink->getMessageQueue(), rollDown);
 	*/
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void AMDemodGUI::onMenuDialogCalled(const QPoint &p)
@@ -367,6 +370,7 @@ void AMDemodGUI::displaySettings()
 
     displayStreamIndex();
 
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 

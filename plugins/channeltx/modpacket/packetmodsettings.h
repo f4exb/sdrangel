@@ -82,6 +82,7 @@ struct PacketModSettings
     bool m_udpEnabled;
     QString m_udpAddress;
     uint16_t m_udpPort;
+    QByteArray m_rollupState;
 
     PacketModSettings();
     void resetToDefaults();

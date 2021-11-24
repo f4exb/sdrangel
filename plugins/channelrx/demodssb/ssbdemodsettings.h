@@ -50,6 +50,7 @@ struct SSBDemodSettings
 
     Serializable *m_channelMarker;
     Serializable *m_spectrumGUI;
+    QByteArray m_rollupState;
 
     SSBDemodSettings();
     void resetToDefaults();

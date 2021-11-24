@@ -72,6 +72,7 @@ struct NFMModSettings
     Serializable *m_cwKeyerGUI;
 
     CWKeyerSettings m_cwKeyerSettings; //!< For standalone deserialize operation (without m_cwKeyerGUI)
+    QByteArray m_rollupState;
 
     NFMModSettings();
     void resetToDefaults();

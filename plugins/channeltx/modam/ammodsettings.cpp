@@ -86,6 +86,7 @@ QByteArray AMModSettings::serialize() const
     s.writeReal(18, m_feedbackVolumeFactor);
     s.writeBool(19, m_feedbackAudioEnable);
     s.writeS32(20, m_streamIndex);
+    s.writeBlob(21, m_rollupState);
 
     return s.final();
 }
@@ -154,6 +155,7 @@ bool AMModSettings::deserialize(const QByteArray& data)
         d.readReal(18, &m_feedbackVolumeFactor, 1.0);
         d.readBool(19, &m_feedbackAudioEnable, false);
         d.readS32(20, &m_streamIndex, 0);
+        d.readBlob(21, &m_rollupState);
 
         return true;
     }

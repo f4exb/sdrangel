@@ -198,6 +198,7 @@ void InterferometerGUI::displaySettings()
     applyDecimation();
     ui->phaseCorrection->setValue(m_settings.m_phase);
     ui->phaseCorrectionText->setText(tr("%1").arg(m_settings.m_phase));
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 
@@ -241,6 +242,9 @@ void InterferometerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void InterferometerGUI::onMenuDialogCalled(const QPoint &p)

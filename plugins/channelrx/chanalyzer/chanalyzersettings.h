@@ -53,6 +53,7 @@ struct ChannelAnalyzerSettings
     Serializable *m_channelMarker;
     Serializable *m_spectrumGUI;
     Serializable *m_scopeGUI;
+    QByteArray m_rollupState;
 
     ChannelAnalyzerSettings();
     void resetToDefaults();

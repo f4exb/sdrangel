@@ -43,6 +43,7 @@ struct FileSinkSettings
     uint16_t m_reverseAPIChannelIndex;
 
     Serializable *m_spectrumGUI;
+    QByteArray m_rollupState;
 
     FileSinkSettings();
     void resetToDefaults();

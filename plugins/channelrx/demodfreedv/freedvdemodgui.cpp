@@ -233,6 +233,9 @@ void FreeDVDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 FreeDVDemodGUI::FreeDVDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
@@ -386,6 +389,7 @@ void FreeDVDemodGUI::displaySettings()
 
     displayStreamIndex();
 
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 

@@ -96,6 +96,7 @@ QByteArray PagerDemodSettings::serialize() const
 
     s.writeString(25, m_logFilename);
     s.writeBool(26, m_logEnabled);
+    s.writeBlob(27, m_rollupState);
 
     for (int i = 0; i < PAGERDEMOD_MESSAGE_COLUMNS; i++) {
         s.writeS32(100 + i, m_messageColumnIndexes[i]);
@@ -173,6 +174,7 @@ bool PagerDemodSettings::deserialize(const QByteArray& data)
 
         d.readString(25, &m_logFilename, "pager_log.csv");
         d.readBool(26, &m_logEnabled, false);
+        d.readBlob(27, &m_rollupState);
 
         for (int i = 0; i < PAGERDEMOD_MESSAGE_COLUMNS; i++) {
             d.readS32(100 + i, &m_messageColumnIndexes[i], i);

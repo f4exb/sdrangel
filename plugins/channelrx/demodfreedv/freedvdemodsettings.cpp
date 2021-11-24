@@ -80,6 +80,7 @@ QByteArray FreeDVDemodSettings::serialize() const
     s.writeU32(22, m_reverseAPIChannelIndex);
     s.writeS32(23, (int) m_freeDVMode);
     s.writeS32(24, m_streamIndex);
+    s.writeBlob(25, m_rollupState);
 
     return s.final();
 }
@@ -141,6 +142,7 @@ bool FreeDVDemodSettings::deserialize(const QByteArray& data)
         }
 
         d.readS32(24, &m_streamIndex, 0);
+        d.readBlob(25, &m_rollupState);
 
         return true;
     }

@@ -54,6 +54,7 @@ struct FreeDVDemodSettings
 
     Serializable *m_channelMarker;
     Serializable *m_spectrumGUI;
+    QByteArray m_rollupState;
 
     FreeDVDemodSettings();
     void resetToDefaults();

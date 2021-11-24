@@ -45,6 +45,7 @@ struct VORDemodSCSettings
     Real m_identThreshold;              //!< Linear SNR threshold for Morse demodulator
     Real m_refThresholdDB;              //!< Threshold in dB for valid VOR reference signal
     Real m_varThresholdDB;              //!< Threshold in dB for valid VOR variable signal
+    QByteArray m_rollupState;
 
     // Highest frequency is the FM subcarrier at up to ~11kHz
     // However, old VORs can have 0.005% frequency offset, which is 6kHz

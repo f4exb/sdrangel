@@ -39,6 +39,7 @@ struct LocalSinkSettings
     uint16_t m_reverseAPIChannelIndex;
 
     Serializable *m_channelMarker;
+    QByteArray m_rollupState;
 
     LocalSinkSettings();
     void resetToDefaults();

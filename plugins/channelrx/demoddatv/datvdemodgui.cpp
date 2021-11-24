@@ -135,6 +135,9 @@ void DATVDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void DATVDemodGUI::onMenuDialogCalled(const QPoint &p)
@@ -387,6 +390,7 @@ void DATVDemodGUI::displaySettings()
         connect(m_datvDemod->getUDPStream(), &DATVUDPStream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
     }
 
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 

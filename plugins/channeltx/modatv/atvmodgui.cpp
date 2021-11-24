@@ -667,6 +667,9 @@ void ATVModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void ATVModGUI::onMenuDialogCalled(const QPoint &p)
@@ -790,6 +793,7 @@ void ATVModGUI::displaySettings()
     ui->playVideo->setChecked(m_settings.m_videoPlay);
     ui->playLoop->setChecked(m_settings.m_videoPlayLoop);
 
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 

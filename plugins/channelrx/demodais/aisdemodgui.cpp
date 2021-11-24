@@ -361,6 +361,9 @@ void AISDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
             setMinimumWidth(352);
         }
     }
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void AISDemodGUI::onMenuDialogCalled(const QPoint &p)
@@ -597,6 +600,7 @@ void AISDemodGUI::displaySettings()
     }
     filter();
 
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 

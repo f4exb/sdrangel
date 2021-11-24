@@ -80,6 +80,7 @@ QByteArray VORDemodSettings::serialize() const
     s.writeReal(21, m_refThresholdDB);
     s.writeReal(22, m_varThresholdDB);
     s.writeBool(23, m_magDecAdjust);
+    s.writeBlob(24, m_rollupState);
 
     for (int i = 0; i < VORDEMOD_COLUMNS; i++)
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -139,6 +140,7 @@ bool VORDemodSettings::deserialize(const QByteArray& data)
         d.readReal(21, &m_refThresholdDB, -45.0);
         d.readReal(22, &m_varThresholdDB, -90.0);
         d.readBool(23, &m_magDecAdjust, true);
+        d.readBlob(24, &m_rollupState);
 
         for (int i = 0; i < VORDEMOD_COLUMNS; i++)
             d.readS32(100 + i, &m_columnIndexes[i], i);

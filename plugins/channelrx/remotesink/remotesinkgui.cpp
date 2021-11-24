@@ -172,6 +172,7 @@ void RemoteSinkGUI::displaySettings()
     updateTxDelayTime();
     applyDecimation();
     displayStreamIndex();
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 
@@ -222,6 +223,9 @@ void RemoteSinkGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void RemoteSinkGUI::onMenuDialogCalled(const QPoint &p)

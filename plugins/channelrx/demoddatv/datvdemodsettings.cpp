@@ -113,6 +113,7 @@ QByteArray DATVDemodSettings::serialize() const
     s.writeString(34, m_softLDPCToolPath);
     s.writeS32(35, m_softLDPCMaxTrials);
     s.writeBool(36, m_playerEnable);
+    s.writeBlob(37, m_rollupState);
 
     return s.final();
 }
@@ -201,6 +202,7 @@ bool DATVDemodSettings::deserialize(const QByteArray& data)
         d.readS32(35, &tmp, 8);
         m_softLDPCMaxTrials = tmp < 1 ? 1 : tmp > m_softLDPCMaxMaxTrials ? m_softLDPCMaxMaxTrials : tmp;
         d.readBool(36, &m_playerEnable, true);
+        d.readBlob(37, &m_rollupState);
 
         validateSystemConfiguration();
 

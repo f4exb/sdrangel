@@ -94,6 +94,7 @@ QByteArray SSBDemodSettings::serialize() const
     s.writeU32(21, m_reverseAPIDeviceIndex);
     s.writeU32(22, m_reverseAPIChannelIndex);
     s.writeS32(23, m_streamIndex);
+    s.writeBlob(24, m_rollupState);
 
     return s.final();
 }
@@ -155,6 +156,7 @@ bool SSBDemodSettings::deserialize(const QByteArray& data)
         d.readU32(22, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
         d.readS32(23, &m_streamIndex, 0);
+        d.readBlob(24, &m_rollupState);
 
         return true;
     }

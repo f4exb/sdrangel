@@ -90,6 +90,7 @@ QByteArray APTDemodSettings::serialize() const
     s.writeU32(25, m_reverseAPIPort);
     s.writeU32(26, m_reverseAPIDeviceIndex);
     s.writeU32(27, m_reverseAPIChannelIndex);
+    s.writeBlob(28, m_rollupState);
 
     return s.final();
 }
@@ -150,6 +151,7 @@ bool APTDemodSettings::deserialize(const QByteArray& data)
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
         d.readU32(27, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
+        d.readBlob(28, &m_rollupState);
 
         return true;
     }

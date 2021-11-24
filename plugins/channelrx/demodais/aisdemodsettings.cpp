@@ -92,6 +92,7 @@ QByteArray AISDemodSettings::serialize() const
     s.writeString(22, m_logFilename);
     s.writeBool(23, m_logEnabled);
     s.writeS32(24, m_baud);
+    s.writeBlob(25, m_rollupState);
 
     for (int i = 0; i < AISDEMOD_MESSAGE_COLUMNS; i++)
         s.writeS32(100 + i, m_messageColumnIndexes[i]);
@@ -162,6 +163,7 @@ bool AISDemodSettings::deserialize(const QByteArray& data)
         d.readString(22, &m_logFilename, "ais_log.csv");
         d.readBool(23, &m_logEnabled, false);
         d.readS32(24, &m_baud, 9600);
+        d.readBlob(25, &m_rollupState);
 
         for (int i = 0; i < AISDEMOD_MESSAGE_COLUMNS; i++)
             d.readS32(100 + i, &m_messageColumnIndexes[i], i);

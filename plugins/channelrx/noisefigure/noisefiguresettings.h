@@ -85,6 +85,7 @@ struct NoiseFigureSettings
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIDeviceIndex;
     uint16_t m_reverseAPIChannelIndex;
+    QByteArray m_rollupState;
 
     int m_resultsColumnIndexes[NOISEFIGURE_COLUMNS];//!< How the columns are ordered in the table
     int m_resultsColumnSizes[NOISEFIGURE_COLUMNS];  //!< Size of the columns in the table

@@ -74,6 +74,7 @@ struct ATVDemodSettings
     uint16_t m_udpPort;
     Serializable *m_channelMarker;
     int m_streamIndex;
+    QByteArray m_rollupState;
 
     ATVDemodSettings();
     void resetToDefaults();

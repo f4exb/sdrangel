@@ -107,6 +107,7 @@ QByteArray NFMDemodSettings::serialize() const
     s.writeBool(23, m_dcsOn);
     s.writeU32(24, m_dcsCode);
     s.writeBool(25, m_dcsPositive);
+    s.writeBlob(26, m_rollupState);
 
     return s.final();
 }
@@ -169,7 +170,8 @@ bool NFMDemodSettings::deserialize(const QByteArray& data)
         d.readBool(23, &m_dcsOn, false);
         d.readU32(24, &utmp, 0023);
         m_dcsCode = utmp < 511 ? utmp : 511;
-        d.readBool(26, &m_dcsPositive, false);
+        d.readBool(25, &m_dcsPositive, false);
+        d.readBlob(26, &m_rollupState);
 
         return true;
     }

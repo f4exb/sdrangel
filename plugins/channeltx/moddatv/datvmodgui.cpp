@@ -469,6 +469,9 @@ void DATVModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    m_settings.m_rollupState = saveState();
+    applySettings();
 }
 
 void DATVModGUI::onMenuDialogCalled(const QPoint &p)
@@ -575,6 +578,7 @@ void DATVModGUI::displaySettings()
     ui->udpAddress->setText(m_settings.m_udpAddress);
     ui->udpPort->setValue(m_settings.m_udpPort);
 
+    restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
 }
 
