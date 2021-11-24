@@ -163,8 +163,6 @@ void FeatureUISet::loadFeatureSetSettings(const FeatureSetPreset *preset, Plugin
 
 void FeatureUISet::saveFeatureSetSettings(FeatureSetPreset *preset)
 {
-    std::sort(m_featureInstanceRegistrations.begin(), m_featureInstanceRegistrations.end()); // sort by increasing delta frequency and type
-
     for (int i = 0; i < m_featureInstanceRegistrations.count(); i++)
     {
         qDebug("FeatureUISet::saveFeatureSetSettings: saving feature [%s]", qPrintable(m_featureInstanceRegistrations[i].m_feature->getURI()));
