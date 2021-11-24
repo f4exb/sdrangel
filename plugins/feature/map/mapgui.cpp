@@ -686,6 +686,7 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     m_radioTimeDialog(this)
 {
     ui->setupUi(this);
+    m_helpURL = "plugins/feature/map/readme.md";
 
     quint16 port = 0; // Pick a free port
     // Free keys, so no point in stealing them :)

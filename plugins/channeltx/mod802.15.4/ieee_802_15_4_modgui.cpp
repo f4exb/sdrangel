@@ -376,6 +376,7 @@ IEEE_802_15_4_ModGUI::IEEE_802_15_4_ModGUI(PluginAPI* pluginAPI, DeviceUISet *de
     m_basebandSampleRate(12000000)
 {
     ui->setupUi(this);
+    m_helpURL = "plugins/channeltx/mod802.15.4/readme.md";
     setAttribute(Qt::WA_DeleteOnClose, true);
 
     connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));

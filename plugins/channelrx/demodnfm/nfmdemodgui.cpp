@@ -340,6 +340,7 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_tickCount(0)
 {
 	ui->setupUi(this);
+    m_helpURL = "plugins/channelrx/demodnfm/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
 
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));

@@ -179,6 +179,7 @@ FileSourceGUI::FileSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     (void) channelTx;
 
     ui->setupUi(this);
+    m_helpURL = "plugins/channeltx/filesource/readme.md";
     ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
 
     setAttribute(Qt::WA_DeleteOnClose, true);

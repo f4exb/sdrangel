@@ -184,6 +184,8 @@ private slots:
     void samplingDeviceChanged(int deviceType, int tabIndex, int newDeviceIndex);
     void channelAddClicked(int channelIndex);
     void featureAddClicked(int featureIndex);
+    void on_action_Quick_Start_triggered();
+    void on_action_Main_Window_triggered();
 	void on_action_Loaded_Plugins_triggered();
 	void on_action_About_triggered();
 	void on_action_addSourceDevice_triggered();

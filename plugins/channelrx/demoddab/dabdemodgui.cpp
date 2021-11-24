@@ -432,6 +432,7 @@ DABDemodGUI::DABDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_channelFreq(0.0)
 {
     ui->setupUi(this);
+    m_helpURL = "plugins/channelrx/demoddab/readme.md";
 
     setAttribute(Qt::WA_DeleteOnClose, true);
     connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));

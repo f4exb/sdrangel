@@ -2511,6 +2511,7 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_progressDialog(nullptr)
 {
     ui->setupUi(this);
+    m_helpURL = "plugins/channelrx/demodadsb/readme.md";
 
     m_osmPort = 0; // Pick a free port
     m_templateServer = new ADSBOSMTemplateServer("q2RVNAe3eFKCH4XsrE3r", m_osmPort);

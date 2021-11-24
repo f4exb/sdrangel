@@ -405,6 +405,7 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_dcsCodeValidator(QRegExp("[0-7]{1,3}"))
 {
 	ui->setupUi(this);
+    m_helpURL = "plugins/channeltx/modnfm/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
 
     ui->channelSpacing->blockSignals(true);

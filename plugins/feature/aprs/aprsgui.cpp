@@ -422,6 +422,7 @@ APRSGUI::APRSGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feat
     m_lastFeatureState(0)
 {
     ui->setupUi(this);
+    m_helpURL = "plugins/feature/aprs/readme.md";
 
     setAttribute(Qt::WA_DeleteOnClose, true);
     setChannelWidget(false);

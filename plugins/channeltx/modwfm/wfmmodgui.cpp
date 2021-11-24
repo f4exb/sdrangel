@@ -339,6 +339,7 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_enableNavTime(false)
 {
 	ui->setupUi(this);
+    m_helpURL = "plugins/channeltx/modwfm/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
 
     blockApplySettings(true);

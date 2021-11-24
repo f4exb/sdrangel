@@ -385,6 +385,7 @@ AISModGUI::AISModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_doApplySettings(true)
 {
     ui->setupUi(this);
+    m_helpURL = "plugins/channeltx/modais/readme.md";
     setAttribute(Qt::WA_DeleteOnClose, true);
 
     connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));

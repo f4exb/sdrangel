@@ -64,7 +64,7 @@
      <x>0</x>
      <y>0</y>
      <width>1012</width>
-     <height>27</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -92,6 +92,9 @@
     <property name="title">
      <string>&amp;Help</string>
     </property>
+    <addaction name="action_Quick_Start"/>
+    <addaction name="action_Main_Window"/>
+    <addaction name="separator"/>
     <addaction name="action_Loaded_Plugins"/>
     <addaction name="separator"/>
     <addaction name="action_About"/>
@@ -976,6 +979,16 @@
   <action name="action_FFT">
    <property name="text">
     <string>FFT</string>
+   </property>
+  </action>
+  <action name="action_Quick_Start">
+   <property name="text">
+    <string>&amp;Quick Start...</string>
+   </property>
+  </action>
+  <action name="action_Main_Window">
+   <property name="text">
+    <string>&amp;Main Window...</string>
    </property>
   </action>
   <zorder>presetDock</zorder>

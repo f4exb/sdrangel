@@ -1164,6 +1164,7 @@ VORDemodGUI::VORDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_vors(nullptr)
 {
     ui->setupUi(this);
+    m_helpURL = "plugins/channelrx/demodvor/readme.md";
 
     ui->map->rootContext()->setContextProperty("vorModel", &m_vorModel);
     ui->map->setSource(QUrl(QStringLiteral("qrc:/demodvor/map/map.qml")));

@@ -416,6 +416,7 @@ PacketDemodGUI::PacketDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
     m_tickCount(0)
 {
     ui->setupUi(this);
+    m_helpURL = "plugins/channelrx/demodpacket/readme.md";
 
     setAttribute(Qt::WA_DeleteOnClose, true);
     connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
