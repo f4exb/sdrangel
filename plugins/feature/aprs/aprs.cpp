@@ -46,6 +46,7 @@ APRS::APRS(WebAPIAdapterInterface *webAPIAdapterInterface) :
     qDebug("APRS::APRS: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
     m_worker = new APRSWorker(this, webAPIAdapterInterface);
+    m_worker->moveToThread(&m_thread);
     m_state = StIdle;
     m_errorMessage = "APRS error";
     connect(&m_updatePipesTimer, SIGNAL(timeout()), this, SLOT(updatePipes()));

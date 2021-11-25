@@ -20,7 +20,6 @@
 #define INCLUDE_FEATURE_APRSWORKER_H_
 
 #include <QObject>
-#include <QTimer>
 #include <QTcpSocket>
 
 #include "util/message.h"
@@ -87,6 +86,8 @@ private:
     void send(const char *data, int length);
 
 private slots:
+    void started();
+    void finished();
     void handleInputMessages();
     void connected();
     void disconnected();

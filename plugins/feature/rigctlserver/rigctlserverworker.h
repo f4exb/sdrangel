@@ -20,7 +20,6 @@
 #define INCLUDE_FEATURE_RIGCTLSERVERWORKER_H_
 
 #include <QObject>
-#include <QTimer>
 
 #include "util/message.h"
 #include "util/messagequeue.h"

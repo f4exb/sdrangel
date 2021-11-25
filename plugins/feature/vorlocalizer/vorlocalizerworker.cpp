@@ -42,7 +42,9 @@ VorLocalizerWorker::VorLocalizerWorker(WebAPIAdapterInterface *webAPIAdapterInte
     m_msgQueueToFeature(nullptr),
     m_availableChannels(nullptr),
     m_running(false),
-    m_mutex(QMutex::Recursive)
+    m_updateTimer(this),
+    m_mutex(QMutex::Recursive),
+    m_rrTimer(this)
 {
     qDebug("VorLocalizerWorker::VorLocalizerWorker");
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
@@ -64,17 +66,29 @@ bool VorLocalizerWorker::startWork()
     QMutexLocker mutexLocker(&m_mutex);
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
     connect(&m_rrTimer, SIGNAL(timeout()), this, SLOT(rrNextTurn()));
-    m_rrTimer.start(m_settings.m_rrTime * 1000);
+    connect(thread(), SIGNAL(started()), this, SLOT(started()));
+    connect(thread(), SIGNAL(finished()), this, SLOT(finished()));
     m_running = true;
     return m_running;
 }
 
+// startWork() is called from main thread. Timers/sockets need to be started on worker thread
+void VorLocalizerWorker::started()
+{
+    m_rrTimer.start(m_settings.m_rrTime * 1000);
+    disconnect(thread(), SIGNAL(started()), this, SLOT(started()));
+}
 void VorLocalizerWorker::stopWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
+    disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+}
+
+void VorLocalizerWorker::finished()
+{
     m_rrTimer.stop();
     disconnect(&m_rrTimer, SIGNAL(timeout()), this, SLOT(rrNextTurn()));
-    disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+    disconnect(thread(), SIGNAL(finished()), this, SLOT(finished()));
     m_running = false;
 }
 

@@ -55,6 +55,7 @@ DemodAnalyzer::DemodAnalyzer(WebAPIAdapterInterface *webAPIAdapterInterface) :
     qDebug("DemodAnalyzer::DemodAnalyzer: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
     m_worker = new DemodAnalyzerWorker();
+    m_worker->moveToThread(&m_thread);
     m_worker->setScopeVis(&m_scopeVis);
     m_state = StIdle;
     m_errorMessage = "DemodAnalyzer error";

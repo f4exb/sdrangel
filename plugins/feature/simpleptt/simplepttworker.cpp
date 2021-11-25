@@ -34,6 +34,7 @@ SimplePTTWorker::SimplePTTWorker(WebAPIAdapterInterface *webAPIAdapterInterface)
     m_msgQueueToGUI(nullptr),
     m_running(false),
     m_tx(false),
+    m_updateTimer(this),
     m_mutex(QMutex::Recursive)
 {
     qDebug("SimplePTTWorker::SimplePTTWorker");

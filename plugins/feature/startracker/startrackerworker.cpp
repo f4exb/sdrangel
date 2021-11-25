@@ -52,6 +52,7 @@ StarTrackerWorker::StarTrackerWorker(StarTracker* starTracker, WebAPIAdapterInte
     m_msgQueueToGUI(nullptr),
     m_running(false),
     m_mutex(QMutex::Recursive),
+    m_pollTimer(this),
     m_tcpServer(nullptr),
     m_clientConnection(nullptr),
     m_solarFlux(0.0f)
@@ -74,17 +75,30 @@ bool StarTrackerWorker::startWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-    m_pollTimer.start((int)round(m_settings.m_updatePeriod*1000.0));
+    connect(thread(), SIGNAL(started()), this, SLOT(started()));
+    connect(thread(), SIGNAL(finished()), this, SLOT(finished()));
     m_running = true;
     return m_running;
+}
+
+// startWork() is called from main thread. Timers/sockets need to be started on worker thread
+void StarTrackerWorker::started()
+{
+    m_pollTimer.start((int)round(m_settings.m_updatePeriod*1000.0));
+    disconnect(thread(), SIGNAL(started()), this, SLOT(started()));
 }
 
 void StarTrackerWorker::stopWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
     disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+}
+
+void StarTrackerWorker::finished()
+{
     restartServer(false, 0);
     m_pollTimer.stop();
+    disconnect(thread(), SIGNAL(finished()), this, SLOT(finished()));
     m_running = false;
 }
 

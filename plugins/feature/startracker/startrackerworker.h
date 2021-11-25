@@ -97,6 +97,8 @@ private:
     void sendToMap(QList<MessageQueue*> *mapMessageQueues, QString id, QString image, QString text, double lat, double lon, double rotation=0.0);
 
 private slots:
+    void started();
+    void finished();
     void handleInputMessages();
     void update();
     void acceptConnection();
