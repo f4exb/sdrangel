@@ -52,6 +52,7 @@ AFC::AFC(WebAPIAdapterInterface *webAPIAdapterInterface) :
 {
     setObjectName(m_featureId);
     m_worker = new AFCWorker(webAPIAdapterInterface);
+    m_worker->moveToThread(&m_thread);
     m_state = StIdle;
     m_errorMessage = "AFC error";
     m_networkManager = new QNetworkAccessManager();

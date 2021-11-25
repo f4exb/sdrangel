@@ -52,6 +52,7 @@ GS232Controller::GS232Controller(WebAPIAdapterInterface *webAPIAdapterInterface)
     qDebug("GS232Controller::GS232Controller: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
     m_worker = new GS232ControllerWorker();
+    m_worker->moveToThread(&m_thread);
     m_state = StIdle;
     m_errorMessage = "GS232Controller error";
     m_selectedPipe = nullptr;

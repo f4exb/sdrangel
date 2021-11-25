@@ -38,7 +38,8 @@ APRSWorker::APRSWorker(APRS *aprs, WebAPIAdapterInterface *webAPIAdapterInterfac
     m_msgQueueToFeature(nullptr),
     m_msgQueueToGUI(nullptr),
     m_running(false),
-    m_mutex(QMutex::Recursive)
+    m_mutex(QMutex::Recursive),
+    m_socket(this)
 {
     connect(&m_socket, SIGNAL(readyRead()),this, SLOT(recv()));
     connect(&m_socket, SIGNAL(connected()), this, SLOT(connected()));
@@ -65,18 +66,32 @@ bool APRSWorker::startWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+    connect(thread(), SIGNAL(started()), this, SLOT(started()));
+    connect(thread(), SIGNAL(finished()), this, SLOT(finished()));
     m_running = true;
     return m_running;
+}
+
+// startWork() is called from main thread. Timers need to be started on worker thread
+void APRSWorker::started()
+{
+    disconnect(thread(), SIGNAL(started()), this, SLOT(started()));
 }
 
 void APRSWorker::stopWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
     disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-    m_running = false;
+}
+
+void APRSWorker::finished()
+{
     // Close any existing connection
-    if (m_socket.isOpen())
+    if (m_socket.isOpen()) {
         m_socket.close();
+    }
+    m_running = false;
+    disconnect(thread(), SIGNAL(finished()), this, SLOT(finished()));
 }
 
 void APRSWorker::handleInputMessages()

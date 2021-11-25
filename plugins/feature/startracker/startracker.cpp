@@ -49,6 +49,7 @@ StarTracker::StarTracker(WebAPIAdapterInterface *webAPIAdapterInterface) :
     qDebug("StarTracker::StarTracker: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
     m_worker = new StarTrackerWorker(this, webAPIAdapterInterface);
+    m_worker->moveToThread(&m_thread);
     m_state = StIdle;
     m_errorMessage = "StarTracker error";
     connect(&m_updatePipesTimer, SIGNAL(timeout()), this, SLOT(updatePipes()));

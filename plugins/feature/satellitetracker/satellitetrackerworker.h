@@ -130,6 +130,8 @@ private:
     void calculateRotation(SatWorkerState *satWorkerState);
 
 private slots:
+    void started();
+    void finished();
     void handleInputMessages();
     void update();
     void aos(SatWorkerState *satWorkerState);

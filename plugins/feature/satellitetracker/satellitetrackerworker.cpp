@@ -57,6 +57,7 @@ SatelliteTrackerWorker::SatelliteTrackerWorker(SatelliteTracker* satelliteTracke
     m_msgQueueToGUI(nullptr),
     m_running(false),
     m_mutex(QMutex::Recursive),
+    m_pollTimer(this),
     m_recalculatePasses(true),
     m_flipRotation(false),
     m_extendedAzRotation(false)
@@ -79,6 +80,16 @@ bool SatelliteTrackerWorker::startWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+    connect(thread(), SIGNAL(started()), this, SLOT(started()));
+    connect(thread(), SIGNAL(finished()), this, SLOT(finished()));
+    m_recalculatePasses = true;
+    m_running = true;
+    return m_running;
+}
+
+// startWork() is called from main thread. Timers need to be started on worker thread
+void SatelliteTrackerWorker::started()
+{
     m_pollTimer.start((int)round(m_settings.m_updatePeriod*1000.0));
     // Resume doppler timers
     QHashIterator<QString, SatWorkerState *> itr(m_workerState);
@@ -89,15 +100,17 @@ bool SatelliteTrackerWorker::startWork()
         if (satWorkerState->m_dopplerTimer.interval() > 0)
             satWorkerState->m_dopplerTimer.start();
     }
-    m_recalculatePasses = true;
-    m_running = true;
-    return m_running;
+    disconnect(thread(), SIGNAL(started()), this, SLOT(started()));
 }
 
 void SatelliteTrackerWorker::stopWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
     disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+}
+
+void SatelliteTrackerWorker::finished()
+{
     m_pollTimer.stop();
     // Stop doppler timers
     QHashIterator<QString, SatWorkerState *> itr(m_workerState);
@@ -107,6 +120,7 @@ void SatelliteTrackerWorker::stopWork()
         itr.value()->m_dopplerTimer.stop();
     }
     m_running = false;
+    disconnect(thread(), SIGNAL(finished()), this, SLOT(finished()));
 }
 
 void SatelliteTrackerWorker::handleInputMessages()

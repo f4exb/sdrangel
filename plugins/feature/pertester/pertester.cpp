@@ -52,6 +52,7 @@ PERTester::PERTester(WebAPIAdapterInterface *webAPIAdapterInterface) :
     qDebug("PERTester::PERTester: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
     m_worker = new PERTesterWorker();
+    m_worker->moveToThread(&m_thread);
     m_state = StIdle;
     m_errorMessage = "PERTester error";
     m_networkManager = new QNetworkAccessManager();
@@ -130,7 +131,9 @@ bool PERTester::handleMessage(const Message& cmd)
     {
         MsgReportWorker& report = (MsgReportWorker&) cmd;
         if (report.getMessage() == "Complete")
-            m_state = StIdle;
+        {
+            stop();
+        }
         else
         {
             m_state = StError;

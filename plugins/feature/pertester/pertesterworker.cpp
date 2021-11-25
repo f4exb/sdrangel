@@ -42,6 +42,8 @@ PERTesterWorker::PERTesterWorker() :
     m_running(false),
     m_mutex(QMutex::Recursive),
     m_rxUDPSocket(nullptr),
+    m_txUDPSocket(this),
+    m_txTimer(this),
     m_tx(0),
     m_rxMatched(0),
     m_rxUnmatched(0)
@@ -66,22 +68,35 @@ bool PERTesterWorker::startWork()
 {
     qDebug() << "PERTesterWorker::startWork";
     QMutexLocker mutexLocker(&m_mutex);
+    connect(thread(), SIGNAL(started()), this, SLOT(started()));
+    connect(thread(), SIGNAL(finished()), this, SLOT(finished()));
+    m_running = true;
+    return m_running;
+}
+
+// startWork() is called from main thread. Timers/sockets need to be started on worker thread
+void PERTesterWorker::started()
+{
     openUDP(m_settings);
     // Automatically restart if previous run had finished, otherwise continue
     if (m_tx >= m_settings.m_packetCount)
         resetStats();
     connect(&m_txTimer, SIGNAL(timeout()), this, SLOT(tx()));
     m_txTimer.start(m_settings.m_interval * 1000.0);
-    m_running = true;
-    return m_running;
+    disconnect(thread(), SIGNAL(started()), this, SLOT(started()));
 }
 
 void PERTesterWorker::stopWork()
 {
-    QMutexLocker mutexLocker(&m_mutex);
+    qDebug() << "PERTesterWorker::stopWork";
+}
+
+void PERTesterWorker::finished()
+{
     m_txTimer.stop();
     closeUDP();
     disconnect(&m_txTimer, SIGNAL(timeout()), this, SLOT(tx()));
+    disconnect(thread(), SIGNAL(finished()), this, SLOT(finished()));
     m_running = false;
 }
 
@@ -314,7 +329,6 @@ void PERTesterWorker::tx()
 
 void PERTesterWorker::testComplete()
 {
-    stopWork();
     if (m_msgQueueToFeature != nullptr)
         m_msgQueueToFeature->push(PERTester::MsgReportWorker::create("Complete"));
     qDebug() << "PERTesterWorker::tx: Test complete";

@@ -89,6 +89,8 @@ private:
     void resetStats();
 
 private slots:
+    void started();
+    void finished();
     void handleInputMessages();
     void rx();
     void tx();

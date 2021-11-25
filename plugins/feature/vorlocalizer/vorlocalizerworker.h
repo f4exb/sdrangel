@@ -167,6 +167,8 @@ private:
     static void getChannelsByDevice(const QHash<ChannelAPI*, VORLocalizerSettings::AvailableChannel> *availableChannels, std::vector<RRTurnPlan>& m_deviceChannels);
 
 private slots:
+    void started();
+    void finished();
     void handleInputMessages();
 	void updateHardware();
     void rrNextTurn();

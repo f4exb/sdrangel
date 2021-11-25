@@ -44,6 +44,7 @@ SimplePTT::SimplePTT(WebAPIAdapterInterface *webAPIAdapterInterface) :
 {
     setObjectName(m_featureId);
     m_worker = new SimplePTTWorker(webAPIAdapterInterface);
+    m_worker->moveToThread(&m_thread);
     m_state = StIdle;
     m_errorMessage = "SimplePTT error";
     m_networkManager = new QNetworkAccessManager();

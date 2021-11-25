@@ -51,6 +51,7 @@ SatelliteTracker::SatelliteTracker(WebAPIAdapterInterface *webAPIAdapterInterfac
     qDebug("SatelliteTracker::SatelliteTracker: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
     m_worker = new SatelliteTrackerWorker(this, webAPIAdapterInterface);
+    m_worker->moveToThread(&m_thread);
     m_state = StIdle;
     m_errorMessage = "SatelliteTracker error";
     m_networkManager = new QNetworkAccessManager();

@@ -20,7 +20,6 @@
 #include <cmath>
 
 #include <QDebug>
-#include <QTimer>
 #include <QSerialPort>
 #include <QRegularExpression>
 
@@ -36,6 +35,9 @@ GS232ControllerWorker::GS232ControllerWorker() :
     m_running(false),
     m_mutex(QMutex::Recursive),
     m_device(nullptr),
+    m_serialPort(this),
+    m_socket(this),
+    m_pollTimer(this),
     m_lastAzimuth(-1.0f),
     m_lastElevation(-1.0f),
     m_spidSetOutstanding(false),
