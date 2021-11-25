@@ -522,6 +522,7 @@ APRSGUI::APRSGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feat
     connect(ui->motionTable->horizontalHeader(), SIGNAL(sectionMoved(int, int, int)), SLOT(motionTable_sectionMoved(int, int, int)));
     connect(ui->motionTable->horizontalHeader(), SIGNAL(sectionResized(int, int, int)), SLOT(motionTable_sectionResized(int, int, int)));
 
+    m_weatherChart.setTheme(QChart::ChartThemeDark);
     m_weatherChart.legend()->hide();
     ui->weatherChart->setChart(&m_weatherChart);
     ui->weatherChart->setRenderHint(QPainter::Antialiasing);
@@ -530,6 +531,7 @@ APRSGUI::APRSGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feat
     m_weatherChart.layout()->setContentsMargins(0, 0, 0, 0);
     m_weatherChart.setMargins(QMargins(1, 1, 1, 1));
 
+    m_telemetryChart.setTheme(QChart::ChartThemeDark);
     m_telemetryChart.legend()->hide();
     ui->telemetryChart->setChart(&m_telemetryChart);
     ui->telemetryChart->setRenderHint(QPainter::Antialiasing);
@@ -538,6 +540,7 @@ APRSGUI::APRSGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feat
     m_telemetryChart.layout()->setContentsMargins(0, 0, 0, 0);
     m_telemetryChart.setMargins(QMargins(1, 1, 1, 1));
 
+    m_motionChart.setTheme(QChart::ChartThemeDark);
     m_motionChart.legend()->hide();
     ui->motionChart->setChart(&m_motionChart);
     ui->motionChart->setRenderHint(QPainter::Antialiasing);
