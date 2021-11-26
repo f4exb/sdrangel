@@ -70,6 +70,28 @@ Options are:
   - `-f` or `--frequency` device center frequency (kHz). Mandatory. Ex: 491500
   - `-s` or `--symbol-rate` symbol rate (kS/s). Mandatory. Ex: 1500
 
+<h2>dump.py</h2>
+
+Dumps an instance setup to a sequence of commands in a JSON file that can be used as input to `config.py` (see next). The setup commands comprise so far:
+
+  - Deviceset instantiations (with default device)
+  - Deviceset device change (will get the first device of the type)
+  - Deviceset device settings
+  - Deviceset main spectrum settings
+  - Deviceset channels instantiations
+  - Deviceset channels settings
+  - Featureset instantiations
+  - Featureset features instantiations
+  - Featureset features settings
+
+Of course the exact scope of settings that can be manipulated depends of the settings covered by the API.
+
+Options are:
+
+  - `-h` or `--help` show help message and exit
+  - `-a` or `--address` address and port of SDRangel instance. Default is `127.0.0.1:8091`
+  - `-j` or `--json-file` JSON output file where commands are stored - mandatory.
+
 <h2>config.py</h2>
 
 Sends a sequence of commands recorded in a JSON file which is in the form of a list of commands.
@@ -79,6 +101,8 @@ Options are:
   - `-h` or `--help` show help message and exit
   - `-a` or `--address` address and port of SDRangel instance. Default is `127.0.0.1:8091`
   - `-j` or `--json-file` JSON file containing description of API commands
+  - `-i` or `--init` Initialize instance before running script. This is useful when running a sequence of initialization commands
+  - `-1` or `--ignore-first-posts`. Ignore first deviceset or featureset post in sequence. This is useful when running a sequence of initialization commands for a GUI instance
 
 Each command in the JSON file is a JSON document with the following keys:
 
