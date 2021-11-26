@@ -1,3 +1,27 @@
+sdrangel (6.17.4-1) unstable; urgency=medium
+
+  * Basic instance save and restore wihth scripts dump.py and config,py
+  * API: fixes in features processing
+  * Use dark theme for APRS charts. PR #1060
+  * Move Feature workers to thread. PR #1059
+  * Make Sat Tracker GUI expanding. PR #1057
+  * Add links to documentation in channel and feature GUIs. PR #1056
+  * Save/restore rollup state in channel plugins. PR #1055
+  * Remove sorting of channels and features when saving presets in GUI. Fixes #1051
+  * ChirpChat demod: API changes and fixes
+  * Add better Map API key support. PR #1054
+  * Save/restore rollup state in features. PR #1053
+  * GS232 Rotator Controller updates. Fixes #1045. PR #1052
+  * IEEE 802.15.4 modulator: API and GUI changes
+  * Packet modulator: API changes
+  * Remote Input: prevent nullptr
+  * Center ADS-B map on My Location when map is first opened. PR #1048
+  * ADS-B Updates. Fix positioning of Home antenna. PR #1047
+  * Add support for POWER architecture. PR #1046
+  * ADSB demod: added auto target checkbox in notifications table.
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Fri, 26 Nov 2021 21:16:24 +0100
+
 sdrangel (6.17.3-1) unstable; urgency=medium
 
   * Noise Figure: add support for sweeping gain and other device settings. PR #1020
