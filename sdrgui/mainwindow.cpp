@@ -696,7 +696,6 @@ void MainWindow::deleteChannel(int deviceSetIndex, int channelIndex)
     {
         DeviceUISet *deviceSet = m_deviceUIs[deviceSetIndex];
         deviceSet->deleteChannel(channelIndex);
-        m_mainCore->removeLastFeatureSet();
     }
 }
 
@@ -2267,8 +2266,8 @@ void MainWindow::deleteFeature(int featureSetIndex, int featureIndex)
 {
     if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_featureUIs.size()))
     {
-        FeatureUISet *featureSet = m_featureUIs[featureSetIndex];
-        featureSet->deleteFeature(featureIndex);
+        FeatureUISet *featureUISet = m_featureUIs[featureSetIndex];
+        featureUISet->deleteFeature(featureIndex);
     }
 }
 

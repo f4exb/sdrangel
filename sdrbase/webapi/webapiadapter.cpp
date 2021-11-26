@@ -3062,7 +3062,7 @@ int WebAPIAdapter::featuresetFeatureDelete(
     else
     {
         error.init();
-        *error.getMessage() = QString("There is no device set with index %1").arg(featureSetIndex);
+        *error.getMessage() = QString("There is no feature set with index %1").arg(featureSetIndex);
         return 404;
     }
 }
