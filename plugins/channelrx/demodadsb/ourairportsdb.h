@@ -24,6 +24,7 @@
 #include <QHash>
 #include <QList>
 #include <QDebug>
+#include <QLocale>
 
 #include <stdio.h>
 #include <string.h>
@@ -84,6 +85,7 @@ struct AirportInformation {
 
         FILE *file;
         QByteArray utfFilename = filename.toUtf8();
+        QLocale cLocale(QLocale::C);
         if ((file = fopen(utfFilename.constData(), "r")) != NULL)
         {
             char row[2048];
@@ -170,21 +172,21 @@ struct AirportInformation {
                             latitudeString = p;
                             latitudeLen = strlen(latitudeString)-1;
                             latitudeString[latitudeLen] = '\0';
-                            latitude = atof(latitudeString);
+                            latitude = cLocale.toFloat(latitudeString);
                         }
                         else if (idx == longitudeCol)
                         {
                             longitudeString = p;
                             longitudeLen = strlen(longitudeString)-1;
                             longitudeString[longitudeLen] = '\0';
-                            longitude = atof(longitudeString);
+                            longitude = cLocale.toFloat(longitudeString);
                         }
                         else if (idx == elevationCol)
                         {
                             elevationString = p;
                             elevationLen = strlen(elevationString)-1;
                             elevationString[elevationLen] = '\0';
-                            elevation = atof(elevationString);
+                            elevation = cLocale.toFloat(elevationString);
                         }
                         p = strtok(NULL, ",");
                         idx++;
