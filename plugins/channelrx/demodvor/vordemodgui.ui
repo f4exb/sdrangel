@@ -392,9 +392,9 @@
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>110</y>
+     <y>80</y>
      <width>391</width>
-     <height>140</height>
+     <height>141</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -424,6 +424,12 @@
     </property>
     <item>
      <widget class="QTableWidget" name="vorData">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>140</height>
+       </size>
+      </property>
       <property name="editTriggers">
        <set>QAbstractItemView::NoEditTriggers</set>
       </property>
