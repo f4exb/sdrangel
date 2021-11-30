@@ -450,6 +450,9 @@ void FreeDVMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getFreeDvModSettings()->getReverseApiChannelIndex();
     }
+    if (settings.m_spectrumGUI && channelSettingsKeys.contains("spectrumConfig")) {
+        settings.m_spectrumGUI->updateFrom(channelSettingsKeys, response.getFreeDvModSettings()->getSpectrumConfig());
+    }
 }
 
 int FreeDVMod::webapiReportGet(
@@ -504,6 +507,20 @@ void FreeDVMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
     response.getFreeDvModSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getFreeDvModSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getFreeDvModSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+
+    if (settings.m_spectrumGUI)
+    {
+        if (response.getFreeDvModSettings()->getSpectrumConfig())
+        {
+            settings.m_spectrumGUI->formatTo(response.getFreeDvModSettings()->getSpectrumConfig());
+        }
+        else
+        {
+            SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
+            settings.m_spectrumGUI->formatTo(swgGLSpectrum);
+            response.getFreeDvModSettings()->setSpectrumConfig(swgGLSpectrum);
+        }
+    }
 }
 
 void FreeDVMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -646,6 +663,12 @@ void FreeDVMod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgFreeDVModSettings->setStreamIndex(settings.m_streamIndex);
+    }
+    if (settings.m_spectrumGUI && (channelSettingsKeys.contains("spectrunConfig") || force))
+    {
+        SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
+        settings.m_spectrumGUI->formatTo(swgGLSpectrum);
+        swgFreeDVModSettings->setSpectrumConfig(swgGLSpectrum);
     }
 
     if (force)

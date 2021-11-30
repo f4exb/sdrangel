@@ -399,6 +399,9 @@ void FreqTracker::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getFreqTrackerSettings()->getReverseApiChannelIndex();
     }
+    if (settings.m_spectrumGUI && channelSettingsKeys.contains("spectrumConfig")) {
+        settings.m_spectrumGUI->updateFrom(channelSettingsKeys, response.getFreqTrackerSettings()->getSpectrumConfig());
+    }
 }
 
 int FreqTracker::webapiReportGet(
@@ -446,6 +449,20 @@ void FreqTracker::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& r
     response.getFreqTrackerSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getFreqTrackerSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getFreqTrackerSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+
+    if (settings.m_spectrumGUI)
+    {
+        if (response.getFreqTrackerSettings()->getSpectrumConfig())
+        {
+            settings.m_spectrumGUI->formatTo(response.getFreqTrackerSettings()->getSpectrumConfig());
+        }
+        else
+        {
+            SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
+            settings.m_spectrumGUI->formatTo(swgGLSpectrum);
+            response.getFreqTrackerSettings()->setSpectrumConfig(swgGLSpectrum);
+        }
+    }
 }
 
 void FreqTracker::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -567,6 +584,12 @@ void FreqTracker::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgFreqTrackerSettings->setStreamIndex(settings.m_streamIndex);
+    }
+    if (settings.m_spectrumGUI && (channelSettingsKeys.contains("spectrunConfig") || force))
+    {
+        SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
+        settings.m_spectrumGUI->formatTo(swgGLSpectrum);
+        swgFreqTrackerSettings->setSpectrumConfig(swgGLSpectrum);
     }
 }
 

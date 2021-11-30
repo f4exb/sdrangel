@@ -24,6 +24,7 @@
         <file>webapi/doc/swagger/include/BladeRF2.yaml</file>
         <file>webapi/doc/swagger/include/ChannelActions.yaml</file>
         <file>webapi/doc/swagger/include/ChannelAnalyzer.yaml</file>
+        <file>webapi/doc/swagger/include/ChannelMarker.yaml</file>
         <file>webapi/doc/swagger/include/ChannelSettings.yaml</file>
         <file>webapi/doc/swagger/include/ChannelReport.yaml</file>
         <file>webapi/doc/swagger/include/ChirpChatDemod.yaml</file>

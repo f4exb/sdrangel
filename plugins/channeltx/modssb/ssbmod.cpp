@@ -521,6 +521,9 @@ void SSBMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getSsbModSettings()->getReverseApiChannelIndex();
     }
+    if (settings.m_spectrumGUI && channelSettingsKeys.contains("spectrumConfig")) {
+        settings.m_spectrumGUI->updateFrom(channelSettingsKeys, response.getSsbModSettings()->getSpectrumConfig());
+    }
 }
 
 int SSBMod::webapiReportGet(
@@ -582,6 +585,20 @@ void SSBMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
     response.getSsbModSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getSsbModSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getSsbModSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+
+    if (settings.m_spectrumGUI)
+    {
+        if (response.getSsbModSettings()->getSpectrumConfig())
+        {
+            settings.m_spectrumGUI->formatTo(response.getSsbModSettings()->getSpectrumConfig());
+        }
+        else
+        {
+            SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
+            settings.m_spectrumGUI->formatTo(swgGLSpectrum);
+            response.getSsbModSettings()->setSpectrumConfig(swgGLSpectrum);
+        }
+    }
 }
 
 void SSBMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -745,6 +762,12 @@ void SSBMod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgSSBModSettings->setStreamIndex(settings.m_streamIndex);
+    }
+    if (settings.m_spectrumGUI && (channelSettingsKeys.contains("spectrunConfig") || force))
+    {
+        SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
+        settings.m_spectrumGUI->formatTo(swgGLSpectrum);
+        swgSSBModSettings->setSpectrumConfig(swgGLSpectrum);
     }
 
     if (force)

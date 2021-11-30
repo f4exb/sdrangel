@@ -2325,6 +2325,9 @@ margin-bottom: 20px;
     },
     "reverseAPIChannelIndex" : {
       "type" : "integer"
+    },
+    "spectrumConfig" : {
+      "$ref" : "#/definitions/GLSpectrum"
     }
   },
   "description" : "BFMDemod"
@@ -3003,6 +3006,9 @@ margin-bottom: 20px;
     },
     "scopeConfig" : {
       "$ref" : "#/definitions/GLScope"
+    },
+    "channelMarker" : {
+      "$ref" : "#/definitions/ChannelMarker"
     }
   },
   "description" : "ChannelAnalyzer"
@@ -3048,6 +3054,25 @@ margin-bottom: 20px;
     }
   },
   "description" : "Summarized information about channel plugin"
+};
+            defs.ChannelMarker = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer"
+    },
+    "color" : {
+      "type" : "integer",
+      "description" : "RGB color"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "frequencyScaleDisplayType" : {
+      "type" : "integer",
+      "description" : "ChannelMarker::frequencyScaleDisplay_t"
+    }
+  },
+  "description" : "ChannelMarker settings"
 };
             defs.ChannelReport = {
   "required" : [ "direction" ],
@@ -3536,6 +3561,9 @@ margin-bottom: 20px;
     },
     "reverseAPIChannelIndex" : {
       "type" : "integer"
+    },
+    "spectrumConfig" : {
+      "$ref" : "#/definitions/GLSpectrum"
     }
   },
   "description" : "ChirpChatDemod"
@@ -5395,6 +5423,9 @@ margin-bottom: 20px;
     },
     "reverseAPIChannelIndex" : {
       "type" : "integer"
+    },
+    "spectrumConfig" : {
+      "$ref" : "#/definitions/GLSpectrum"
     }
   },
   "description" : "FileSink"
@@ -5575,6 +5606,9 @@ margin-bottom: 20px;
     },
     "reverseAPIChannelIndex" : {
       "type" : "integer"
+    },
+    "spectrumConfig" : {
+      "$ref" : "#/definitions/GLSpectrum"
     }
   },
   "description" : "FreeDVDemod"
@@ -5658,6 +5692,9 @@ margin-bottom: 20px;
     },
     "cwKeyer" : {
       "$ref" : "#/definitions/CWKeyerSettings"
+    },
+    "spectrumConfig" : {
+      "$ref" : "#/definitions/GLSpectrum"
     }
   },
   "description" : "FreeDVMod"
@@ -5763,6 +5800,9 @@ margin-bottom: 20px;
     },
     "reverseAPIChannelIndex" : {
       "type" : "integer"
+    },
+    "spectrumConfig" : {
+      "$ref" : "#/definitions/GLSpectrum"
     }
   },
   "description" : "FreqTracker"
@@ -5827,8 +5867,9 @@ margin-bottom: 20px;
     "timeOfs" : {
       "type" : "integer"
     },
-    "traceLen" : {
-      "type" : "integer"
+    "traceLenMult" : {
+      "type" : "integer",
+      "description" : "Trace length multiplier (multiplies 4800 samples)"
     },
     "trigPre" : {
       "type" : "integer"
@@ -5933,6 +5974,10 @@ margin-bottom: 20px;
     "usb" : {
       "type" : "integer",
       "description" : "boolean"
+    },
+    "wsSpectrum" : {
+      "type" : "integer",
+      "description" : "Boolean - Start or stop websocket server\n  * 0 - Stop server\n  * 1 - Start server\n"
     },
     "wsSpectrumAddress" : {
       "type" : "string",
@@ -10304,6 +10349,9 @@ margin-bottom: 20px;
     },
     "reverseAPIChannelIndex" : {
       "type" : "integer"
+    },
+    "spectrumConfig" : {
+      "$ref" : "#/definitions/GLSpectrum"
     }
   },
   "description" : "SSBDemod"
@@ -10410,6 +10458,9 @@ margin-bottom: 20px;
     },
     "cwKeyer" : {
       "$ref" : "#/definitions/CWKeyerSettings"
+    },
+    "spectrumConfig" : {
+      "$ref" : "#/definitions/GLSpectrum"
     }
   },
   "description" : "SSBMod"
@@ -10954,6 +11005,9 @@ margin-bottom: 20px;
     },
     "reverseAPIChannelIndex" : {
       "type" : "integer"
+    },
+    "spectrumConfig" : {
+      "$ref" : "#/definitions/GLSpectrum"
     }
   },
   "description" : "SigMFFileSink"
@@ -12201,6 +12255,9 @@ margin-bottom: 20px;
     },
     "reverseAPIChannelIndex" : {
       "type" : "integer"
+    },
+    "spectrumConfig" : {
+      "$ref" : "#/definitions/GLSpectrum"
     }
   },
   "description" : "UDPSink"
@@ -12326,6 +12383,9 @@ margin-bottom: 20px;
     },
     "reverseAPIChannelIndex" : {
       "type" : "integer"
+    },
+    "spectrumConfig" : {
+      "$ref" : "#/definitions/GLSpectrum"
     }
   },
   "description" : "UDPSource"
@@ -51387,7 +51447,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-11-24T06:35:35.789+01:00
+              Generated 2021-11-30T22:42:47.179+01:00
             </div>
           </div>
       </div>

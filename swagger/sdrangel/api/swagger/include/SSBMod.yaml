@@ -60,6 +60,8 @@ SSBModSettings:
       type: integer
     cwKeyer:
       $ref: "http://swgserver:8081/api/swagger/include/CWKeyer.yaml#/CWKeyerSettings"
+    spectrumConfig:
+      $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"
 
 SSBModReport:
   description: SSBMod

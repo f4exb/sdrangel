@@ -185,16 +185,10 @@ private:
         QStringList& deviceActionsKeys
     );
 
-    void appendSettingsSubKeys(
-            const QJsonObject& parentSettingsJsonObject,
-            QJsonObject& childSettingsJsonObject,
-            const QString& parentKey,
-            QStringList& keyList);
-
-    void appendSettingsArrayKeys(
-            const QJsonObject& parentSettingsJsonObject,
-            const QString& parentKey,
-            QStringList& keyList);
+    void extractKeys(
+        const QJsonObject& rootJsonObject,
+        QStringList& keyList
+    );
 
     bool getFeatureSettings(
         const QString& featureSettingsKey,
@@ -227,8 +221,7 @@ private:
 
     void processChannelAnalyzerSettings(
         SWGSDRangel::SWGChannelSettings *channelSettings,
-        const QJsonObject& channelSettingsJson,
-        QStringList& channelSettingsKeys
+        const QJsonObject& channelSettingsJson
     );
 
     void processSoapySDRSettings(

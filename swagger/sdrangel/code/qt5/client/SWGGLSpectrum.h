@@ -111,6 +111,9 @@ public:
     qint32 getUsb();
     void setUsb(qint32 usb);
 
+    qint32 getWsSpectrum();
+    void setWsSpectrum(qint32 ws_spectrum);
+
     QString* getWsSpectrumAddress();
     void setWsSpectrumAddress(QString* ws_spectrum_address);
 
@@ -189,6 +192,9 @@ private:
 
     qint32 usb;
     bool m_usb_isSet;
+
+    qint32 ws_spectrum;
+    bool m_ws_spectrum_isSet;
 
     QString* ws_spectrum_address;
     bool m_ws_spectrum_address_isSet;

@@ -44,6 +44,8 @@ FreeDVModSettings:
       type: integer
     cwKeyer:
       $ref: "/doc/swagger/include/CWKeyer.yaml#/CWKeyerSettings"
+    spectrumConfig:
+      $ref: "/doc/swagger/include/GLSpectrum.yaml#/GLSpectrum"
 
 FreeDVModReport:
   description: FreeDVMod

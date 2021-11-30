@@ -23,6 +23,7 @@
 
 
 #include "SWGCWKeyerSettings.h"
+#include "SWGGLSpectrum.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -100,6 +101,9 @@ public:
     SWGCWKeyerSettings* getCwKeyer();
     void setCwKeyer(SWGCWKeyerSettings* cw_keyer);
 
+    SWGGLSpectrum* getSpectrumConfig();
+    void setSpectrumConfig(SWGGLSpectrum* spectrum_config);
+
 
     virtual bool isSet() override;
 
@@ -160,6 +164,9 @@ private:
 
     SWGCWKeyerSettings* cw_keyer;
     bool m_cw_keyer_isSet;
+
+    SWGGLSpectrum* spectrum_config;
+    bool m_spectrum_config_isSet;
 
 };
 

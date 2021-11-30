@@ -110,6 +110,7 @@ bool SSBModGUI::handleMessage(const Message& message)
         }
         m_settings = mod_settings;
         blockApplySettings(true);
+        ui->spectrumGUI->updateSettings();
         displaySettings();
         blockApplySettings(false);
         return true;

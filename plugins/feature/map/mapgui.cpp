@@ -688,7 +688,6 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     ui->setupUi(this);
     m_helpURL = "plugins/feature/map/readme.md";
 
-    quint16 port = 0; // Pick a free port
     // Free keys, so no point in stealing them :)
     QString tfKey = m_settings.m_thunderforestAPIKey.isEmpty() ? "3e1f614f78a345459931ba3c898e975e" : m_settings.m_thunderforestAPIKey;
     QString mtKey = m_settings.m_maptilerAPIKey.isEmpty() ? "q2RVNAe3eFKCH4XsrE3r" : m_settings.m_maptilerAPIKey;

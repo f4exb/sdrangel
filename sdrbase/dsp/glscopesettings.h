@@ -152,7 +152,7 @@ public:
     int m_gridIntensity;
     int m_time;
     int m_timeOfs;
-    int m_traceLen;
+    int m_traceLenMult;
     int m_trigPre;
     std::vector<TraceData> m_tracesData;
     std::vector<TriggerData> m_triggersData;
@@ -171,8 +171,11 @@ public:
 
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
+    virtual void formatTo(SWGSDRangel::SWGObject *swgObject) const;
+    virtual void updateFrom(const QStringList& keys, const SWGSDRangel::SWGObject *swgObject);
     GLScopeSettings& operator=(const GLScopeSettings& t);
-
+    static int qColorToInt(const QColor& color);
+    static QColor intToQColor(int intColor);
 };
 
 #endif // SDRBASE_DSP_GLSCOPESETTINGS_H

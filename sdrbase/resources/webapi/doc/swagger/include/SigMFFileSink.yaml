@@ -48,6 +48,8 @@ SigMFFileSinkSettings:
       type: integer
     reverseAPIChannelIndex:
       type: integer
+    spectrumConfig:
+      $ref: "/doc/swagger/include/GLSpectrum.yaml#/GLSpectrum"
 
 SigMFFileSinkReport:
   description: SigMFFileSink

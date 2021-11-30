@@ -118,6 +118,8 @@ ChirpChatDemodSettings:
       type: integer
     reverseAPIChannelIndex:
       type: integer
+    spectrumConfig:
+      $ref: "/doc/swagger/include/GLSpectrum.yaml#/GLSpectrum"
 
 ChirpChatDemodReport:
   description: ChirpChatDemod

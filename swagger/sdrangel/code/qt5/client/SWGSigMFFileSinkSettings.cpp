@@ -60,6 +60,8 @@ SWGSigMFFileSinkSettings::SWGSigMFFileSinkSettings() {
     m_reverse_api_device_index_isSet = false;
     reverse_api_channel_index = 0;
     m_reverse_api_channel_index_isSet = false;
+    spectrum_config = nullptr;
+    m_spectrum_config_isSet = false;
 }
 
 SWGSigMFFileSinkSettings::~SWGSigMFFileSinkSettings() {
@@ -100,6 +102,8 @@ SWGSigMFFileSinkSettings::init() {
     m_reverse_api_device_index_isSet = false;
     reverse_api_channel_index = 0;
     m_reverse_api_channel_index_isSet = false;
+    spectrum_config = new SWGGLSpectrum();
+    m_spectrum_config_isSet = false;
 }
 
 void
@@ -126,6 +130,9 @@ SWGSigMFFileSinkSettings::cleanup() {
 
 
 
+    if(spectrum_config != nullptr) { 
+        delete spectrum_config;
+    }
 }
 
 SWGSigMFFileSinkSettings*
@@ -170,6 +177,8 @@ SWGSigMFFileSinkSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&reverse_api_device_index, pJson["reverseAPIDeviceIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&reverse_api_channel_index, pJson["reverseAPIChannelIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&spectrum_config, pJson["spectrumConfig"], "SWGGLSpectrum", "SWGGLSpectrum");
     
 }
 
@@ -234,6 +243,9 @@ SWGSigMFFileSinkSettings::asJsonObject() {
     }
     if(m_reverse_api_channel_index_isSet){
         obj->insert("reverseAPIChannelIndex", QJsonValue(reverse_api_channel_index));
+    }
+    if((spectrum_config != nullptr) && (spectrum_config->isSet())){
+        toJsonValue(QString("spectrumConfig"), spectrum_config, obj, QString("SWGGLSpectrum"));
     }
 
     return obj;
@@ -399,6 +411,16 @@ SWGSigMFFileSinkSettings::setReverseApiChannelIndex(qint32 reverse_api_channel_i
     this->m_reverse_api_channel_index_isSet = true;
 }
 
+SWGGLSpectrum*
+SWGSigMFFileSinkSettings::getSpectrumConfig() {
+    return spectrum_config;
+}
+void
+SWGSigMFFileSinkSettings::setSpectrumConfig(SWGGLSpectrum* spectrum_config) {
+    this->spectrum_config = spectrum_config;
+    this->m_spectrum_config_isSet = true;
+}
+
 
 bool
 SWGSigMFFileSinkSettings::isSet(){
@@ -450,6 +472,9 @@ SWGSigMFFileSinkSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_reverse_api_channel_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(spectrum_config && spectrum_config->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

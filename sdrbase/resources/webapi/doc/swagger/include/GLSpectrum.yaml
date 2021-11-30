@@ -62,6 +62,12 @@ GLSpectrum:
     usb:
       description: boolean
       type: integer
+    wsSpectrum:
+      type: integer
+      description: >
+        Boolean - Start or stop websocket server
+          * 0 - Stop server
+          * 1 - Start server
     wsSpectrumAddress:
       description: IPv4 address of interface the websocket server is listening to
       type: string

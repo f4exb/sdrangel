@@ -95,6 +95,7 @@ bool SigMFFileSinkGUI::handleMessage(const Message& message)
         const SigMFFileSink::MsgConfigureSigMFFileSink& cfg = (SigMFFileSink::MsgConfigureSigMFFileSink&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
+        ui->glSpectrumGUI->updateSettings();
         displaySettings();
         blockApplySettings(false);
         return true;

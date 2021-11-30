@@ -590,6 +590,9 @@ void ChirpChatDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getChirpChatDemodSettings()->getReverseApiChannelIndex();
     }
+    if (settings.m_spectrumGUI && channelSettingsKeys.contains("spectrumConfig")) {
+        settings.m_spectrumGUI->updateFrom(channelSettingsKeys, response.getChirpChatDemodSettings()->getSpectrumConfig());
+    }
 }
 
 int ChirpChatDemod::webapiReportGet(
@@ -647,6 +650,20 @@ void ChirpChatDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings
     response.getChirpChatDemodSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getChirpChatDemodSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getChirpChatDemodSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+
+    if (settings.m_spectrumGUI)
+    {
+        if (response.getChirpChatDemodSettings()->getSpectrumConfig())
+        {
+            settings.m_spectrumGUI->formatTo(response.getChirpChatDemodSettings()->getSpectrumConfig());
+        }
+        else
+        {
+            SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
+            settings.m_spectrumGUI->formatTo(swgGLSpectrum);
+            response.getChirpChatDemodSettings()->setSpectrumConfig(swgGLSpectrum);
+        }
+    }
 }
 
 void ChirpChatDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -798,6 +815,12 @@ void ChirpChatDemod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("title") || force) {
         swgChirpChatDemodSettings->setTitle(new QString(settings.m_title));
+    }
+    if (settings.m_spectrumGUI && (channelSettingsKeys.contains("spectrunConfig") || force))
+    {
+        SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
+        settings.m_spectrumGUI->formatTo(swgGLSpectrum);
+        swgChirpChatDemodSettings->setSpectrumConfig(swgGLSpectrum);
     }
 }
 

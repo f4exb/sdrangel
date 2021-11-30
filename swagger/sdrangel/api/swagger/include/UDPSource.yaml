@@ -71,6 +71,8 @@ UDPSourceSettings:
       type: integer
     reverseAPIChannelIndex:
       type: integer
+    spectrumConfig:
+      $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"
 
 UDPSourceReport:
   description: UDPSource

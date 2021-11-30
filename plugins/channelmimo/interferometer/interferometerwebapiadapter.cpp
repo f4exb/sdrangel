@@ -59,7 +59,7 @@ void InterferometerWebAPIAdapter::webapiFormatChannelSettings(
     swgScope->setTime(scopeSettings.m_time);
     swgScope->setTimeOfs(scopeSettings.m_timeOfs);
     swgScope->setTraceIntensity(scopeSettings.m_traceIntensity);
-    swgScope->setTraceLen(scopeSettings.m_traceLen);
+    swgScope->setTraceLenMult(scopeSettings.m_traceLenMult);
     swgScope->setTrigPre(scopeSettings.m_trigPre);
 
     // array of traces
@@ -178,8 +178,8 @@ void InterferometerWebAPIAdapter::webapiUpdateChannelSettings(
         if (channelSettingsKeys.contains("scopeConfig.traceIntensity")) {
             scopeSettings.m_traceIntensity = response.getInterferometerSettings()->getScopeConfig()->getTraceIntensity();
         }
-        if (channelSettingsKeys.contains("scopeConfig.traceLen")) {
-            scopeSettings.m_traceLen = response.getInterferometerSettings()->getScopeConfig()->getTraceLen();
+        if (channelSettingsKeys.contains("scopeConfig.traceLenMult")) {
+            scopeSettings.m_traceLenMult = response.getInterferometerSettings()->getScopeConfig()->getTraceLenMult();
         }
         if (channelSettingsKeys.contains("scopeConfig.trigPre")) {
             scopeSettings.m_trigPre = response.getInterferometerSettings()->getScopeConfig()->getTrigPre();

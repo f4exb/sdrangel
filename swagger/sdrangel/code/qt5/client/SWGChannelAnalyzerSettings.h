@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include "SWGChannelMarker.h"
 #include "SWGGLScope.h"
 #include "SWGGLSpectrum.h"
 #include <QString>
@@ -107,6 +108,9 @@ public:
     SWGGLScope* getScopeConfig();
     void setScopeConfig(SWGGLScope* scope_config);
 
+    SWGChannelMarker* getChannelMarker();
+    void setChannelMarker(SWGChannelMarker* channel_marker);
+
 
     virtual bool isSet() override;
 
@@ -173,6 +177,9 @@ private:
 
     SWGGLScope* scope_config;
     bool m_scope_config_isSet;
+
+    SWGChannelMarker* channel_marker;
+    bool m_channel_marker_isSet;
 
 };
 

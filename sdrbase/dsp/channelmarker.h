@@ -101,6 +101,8 @@ public:
 
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
+    virtual void formatTo(SWGSDRangel::SWGObject *swgObject) const;
+    virtual void updateFrom(const QStringList& keys, const SWGSDRangel::SWGObject *swgObject);
 
 protected:
 	static QRgb m_colorTable[];

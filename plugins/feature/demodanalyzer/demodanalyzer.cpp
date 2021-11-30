@@ -423,6 +423,34 @@ void DemodAnalyzer::webapiFormatFeatureSettings(
     response.getDemodAnalyzerSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getDemodAnalyzerSettings()->setReverseApiFeatureSetIndex(settings.m_reverseAPIFeatureSetIndex);
     response.getDemodAnalyzerSettings()->setReverseApiFeatureIndex(settings.m_reverseAPIFeatureIndex);
+
+    if (settings.m_spectrumGUI)
+    {
+        if (response.getDemodAnalyzerSettings()->getSpectrumConfig())
+        {
+            settings.m_spectrumGUI->formatTo(response.getDemodAnalyzerSettings()->getSpectrumConfig());
+        }
+        else
+        {
+            SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
+            settings.m_spectrumGUI->formatTo(swgGLSpectrum);
+            response.getDemodAnalyzerSettings()->setSpectrumConfig(swgGLSpectrum);
+        }
+    }
+
+    if (settings.m_scopeGUI)
+    {
+        if (response.getDemodAnalyzerSettings()->getScopeConfig())
+        {
+            settings.m_scopeGUI->formatTo(response.getDemodAnalyzerSettings()->getScopeConfig());
+        }
+        else
+        {
+            SWGSDRangel::SWGGLScope *swgGLScope = new SWGSDRangel::SWGGLScope();
+            settings.m_scopeGUI->formatTo(swgGLScope);
+            response.getDemodAnalyzerSettings()->setScopeConfig(swgGLScope);
+        }
+    }
 }
 
 void DemodAnalyzer::webapiUpdateFeatureSettings(
@@ -453,6 +481,12 @@ void DemodAnalyzer::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("reverseAPIFeatureIndex")) {
         settings.m_reverseAPIFeatureIndex = response.getDemodAnalyzerSettings()->getReverseApiFeatureIndex();
+    }
+    if (settings.m_spectrumGUI && featureSettingsKeys.contains("spectrumConfig")) {
+        settings.m_spectrumGUI->updateFrom(featureSettingsKeys, response.getDemodAnalyzerSettings()->getSpectrumConfig());
+    }
+    if (settings.m_scopeGUI && featureSettingsKeys.contains("scopeConfig")) {
+        settings.m_scopeGUI->updateFrom(featureSettingsKeys, response.getDemodAnalyzerSettings()->getScopeConfig());
     }
 }
 

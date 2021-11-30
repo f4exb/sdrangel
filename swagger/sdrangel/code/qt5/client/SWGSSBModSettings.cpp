@@ -80,6 +80,8 @@ SWGSSBModSettings::SWGSSBModSettings() {
     m_reverse_api_channel_index_isSet = false;
     cw_keyer = nullptr;
     m_cw_keyer_isSet = false;
+    spectrum_config = nullptr;
+    m_spectrum_config_isSet = false;
 }
 
 SWGSSBModSettings::~SWGSSBModSettings() {
@@ -140,6 +142,8 @@ SWGSSBModSettings::init() {
     m_reverse_api_channel_index_isSet = false;
     cw_keyer = new SWGCWKeyerSettings();
     m_cw_keyer_isSet = false;
+    spectrum_config = new SWGGLSpectrum();
+    m_spectrum_config_isSet = false;
 }
 
 void
@@ -177,6 +181,9 @@ SWGSSBModSettings::cleanup() {
 
     if(cw_keyer != nullptr) { 
         delete cw_keyer;
+    }
+    if(spectrum_config != nullptr) { 
+        delete spectrum_config;
     }
 }
 
@@ -242,6 +249,8 @@ SWGSSBModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&reverse_api_channel_index, pJson["reverseAPIChannelIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&cw_keyer, pJson["cwKeyer"], "SWGCWKeyerSettings", "SWGCWKeyerSettings");
+    
+    ::SWGSDRangel::setValue(&spectrum_config, pJson["spectrumConfig"], "SWGGLSpectrum", "SWGGLSpectrum");
     
 }
 
@@ -336,6 +345,9 @@ SWGSSBModSettings::asJsonObject() {
     }
     if((cw_keyer != nullptr) && (cw_keyer->isSet())){
         toJsonValue(QString("cwKeyer"), cw_keyer, obj, QString("SWGCWKeyerSettings"));
+    }
+    if((spectrum_config != nullptr) && (spectrum_config->isSet())){
+        toJsonValue(QString("spectrumConfig"), spectrum_config, obj, QString("SWGGLSpectrum"));
     }
 
     return obj;
@@ -601,6 +613,16 @@ SWGSSBModSettings::setCwKeyer(SWGCWKeyerSettings* cw_keyer) {
     this->m_cw_keyer_isSet = true;
 }
 
+SWGGLSpectrum*
+SWGSSBModSettings::getSpectrumConfig() {
+    return spectrum_config;
+}
+void
+SWGSSBModSettings::setSpectrumConfig(SWGGLSpectrum* spectrum_config) {
+    this->spectrum_config = spectrum_config;
+    this->m_spectrum_config_isSet = true;
+}
+
 
 bool
 SWGSSBModSettings::isSet(){
@@ -682,6 +704,9 @@ SWGSSBModSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(cw_keyer && cw_keyer->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(spectrum_config && spectrum_config->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

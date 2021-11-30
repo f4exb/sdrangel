@@ -74,6 +74,8 @@ SWGGLSpectrum::SWGGLSpectrum() {
     m_ssb_isSet = false;
     usb = 0;
     m_usb_isSet = false;
+    ws_spectrum = 0;
+    m_ws_spectrum_isSet = false;
     ws_spectrum_address = nullptr;
     m_ws_spectrum_address_isSet = false;
     ws_spectrum_port = 0;
@@ -132,6 +134,8 @@ SWGGLSpectrum::init() {
     m_ssb_isSet = false;
     usb = 0;
     m_usb_isSet = false;
+    ws_spectrum = 0;
+    m_ws_spectrum_isSet = false;
     ws_spectrum_address = new QString("");
     m_ws_spectrum_address_isSet = false;
     ws_spectrum_port = 0;
@@ -140,6 +144,7 @@ SWGGLSpectrum::init() {
 
 void
 SWGGLSpectrum::cleanup() {
+
 
 
 
@@ -225,6 +230,8 @@ SWGGLSpectrum::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&ssb, pJson["ssb"], "qint32", "");
     
     ::SWGSDRangel::setValue(&usb, pJson["usb"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&ws_spectrum, pJson["wsSpectrum"], "qint32", "");
     
     ::SWGSDRangel::setValue(&ws_spectrum_address, pJson["wsSpectrumAddress"], "QString", "QString");
     
@@ -314,6 +321,9 @@ SWGGLSpectrum::asJsonObject() {
     }
     if(m_usb_isSet){
         obj->insert("usb", QJsonValue(usb));
+    }
+    if(m_ws_spectrum_isSet){
+        obj->insert("wsSpectrum", QJsonValue(ws_spectrum));
     }
     if(ws_spectrum_address != nullptr && *ws_spectrum_address != QString("")){
         toJsonValue(QString("wsSpectrumAddress"), ws_spectrum_address, obj, QString("QString"));
@@ -555,6 +565,16 @@ SWGGLSpectrum::setUsb(qint32 usb) {
     this->m_usb_isSet = true;
 }
 
+qint32
+SWGGLSpectrum::getWsSpectrum() {
+    return ws_spectrum;
+}
+void
+SWGGLSpectrum::setWsSpectrum(qint32 ws_spectrum) {
+    this->ws_spectrum = ws_spectrum;
+    this->m_ws_spectrum_isSet = true;
+}
+
 QString*
 SWGGLSpectrum::getWsSpectrumAddress() {
     return ws_spectrum_address;
@@ -647,6 +667,9 @@ SWGGLSpectrum::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_usb_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_ws_spectrum_isSet){
             isObjectUpdated = true; break;
         }
         if(ws_spectrum_address && *ws_spectrum_address != QString("")){

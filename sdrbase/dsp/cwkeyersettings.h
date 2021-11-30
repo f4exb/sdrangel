@@ -23,8 +23,9 @@
 #include <QByteArray>
 
 #include "export.h"
+#include "settings/serializable.h"
 
-class SDRBASE_API CWKeyerSettings
+class SDRBASE_API CWKeyerSettings: public Serializable
 {
 public:
     typedef enum
@@ -52,6 +53,8 @@ public:
 
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    virtual void formatTo(SWGSDRangel::SWGObject *swgObject) const;
+    virtual void updateFrom(const QStringList& keys, const SWGSDRangel::SWGObject *swgObject);
 };
 
 

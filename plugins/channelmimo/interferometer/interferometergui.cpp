@@ -85,6 +85,8 @@ bool InterferometerGUI::handleMessage(const Message& message)
     {
         const Interferometer::MsgConfigureInterferometer& notif = (const Interferometer::MsgConfigureInterferometer&) message;
         m_settings = notif.getSettings();
+        ui->scopeGUI->updateSettings();
+        ui->spectrumGUI->updateSettings();
         displaySettings();
         return true;
     }

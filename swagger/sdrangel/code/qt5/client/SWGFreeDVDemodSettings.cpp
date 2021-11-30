@@ -60,6 +60,8 @@ SWGFreeDVDemodSettings::SWGFreeDVDemodSettings() {
     m_reverse_api_device_index_isSet = false;
     reverse_api_channel_index = 0;
     m_reverse_api_channel_index_isSet = false;
+    spectrum_config = nullptr;
+    m_spectrum_config_isSet = false;
 }
 
 SWGFreeDVDemodSettings::~SWGFreeDVDemodSettings() {
@@ -100,6 +102,8 @@ SWGFreeDVDemodSettings::init() {
     m_reverse_api_device_index_isSet = false;
     reverse_api_channel_index = 0;
     m_reverse_api_channel_index_isSet = false;
+    spectrum_config = new SWGGLSpectrum();
+    m_spectrum_config_isSet = false;
 }
 
 void
@@ -126,6 +130,9 @@ SWGFreeDVDemodSettings::cleanup() {
 
 
 
+    if(spectrum_config != nullptr) { 
+        delete spectrum_config;
+    }
 }
 
 SWGFreeDVDemodSettings*
@@ -170,6 +177,8 @@ SWGFreeDVDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&reverse_api_device_index, pJson["reverseAPIDeviceIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&reverse_api_channel_index, pJson["reverseAPIChannelIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&spectrum_config, pJson["spectrumConfig"], "SWGGLSpectrum", "SWGGLSpectrum");
     
 }
 
@@ -234,6 +243,9 @@ SWGFreeDVDemodSettings::asJsonObject() {
     }
     if(m_reverse_api_channel_index_isSet){
         obj->insert("reverseAPIChannelIndex", QJsonValue(reverse_api_channel_index));
+    }
+    if((spectrum_config != nullptr) && (spectrum_config->isSet())){
+        toJsonValue(QString("spectrumConfig"), spectrum_config, obj, QString("SWGGLSpectrum"));
     }
 
     return obj;
@@ -399,6 +411,16 @@ SWGFreeDVDemodSettings::setReverseApiChannelIndex(qint32 reverse_api_channel_ind
     this->m_reverse_api_channel_index_isSet = true;
 }
 
+SWGGLSpectrum*
+SWGFreeDVDemodSettings::getSpectrumConfig() {
+    return spectrum_config;
+}
+void
+SWGFreeDVDemodSettings::setSpectrumConfig(SWGGLSpectrum* spectrum_config) {
+    this->spectrum_config = spectrum_config;
+    this->m_spectrum_config_isSet = true;
+}
+
 
 bool
 SWGFreeDVDemodSettings::isSet(){
@@ -450,6 +472,9 @@ SWGFreeDVDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_reverse_api_channel_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(spectrum_config && spectrum_config->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

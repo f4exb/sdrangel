@@ -115,6 +115,22 @@ bool GLSpectrumGUI::deserialize(const QByteArray& data)
     }
 }
 
+void GLSpectrumGUI::formatTo(SWGSDRangel::SWGObject *swgObject) const
+{
+    m_settings.formatTo(swgObject);
+}
+
+void GLSpectrumGUI::updateFrom(const QStringList& keys, const SWGSDRangel::SWGObject *swgObject)
+{
+    m_settings.updateFrom(keys, swgObject);
+}
+
+void GLSpectrumGUI::updateSettings()
+{
+    displaySettings();
+    applySettings();
+}
+
 void GLSpectrumGUI::displaySettings()
 {
     blockApplySettings(true);

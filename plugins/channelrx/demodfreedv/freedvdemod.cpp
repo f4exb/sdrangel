@@ -342,6 +342,9 @@ void FreeDVDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getFreeDvDemodSettings()->getReverseApiChannelIndex();
     }
+    if (settings.m_spectrumGUI && channelSettingsKeys.contains("spectrumConfig")) {
+        settings.m_spectrumGUI->updateFrom(channelSettingsKeys, response.getFreeDvDemodSettings()->getSpectrumConfig());
+    }
 }
 
 int FreeDVDemod::webapiReportGet(
@@ -391,6 +394,20 @@ void FreeDVDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& r
     response.getFreeDvDemodSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getFreeDvDemodSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getFreeDvDemodSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+
+    if (settings.m_spectrumGUI)
+    {
+        if (response.getFreeDvDemodSettings()->getSpectrumConfig())
+        {
+            settings.m_spectrumGUI->formatTo(response.getFreeDvDemodSettings()->getSpectrumConfig());
+        }
+        else
+        {
+            SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
+            settings.m_spectrumGUI->formatTo(swgGLSpectrum);
+            response.getFreeDvDemodSettings()->setSpectrumConfig(swgGLSpectrum);
+        }
+    }
 }
 
 void FreeDVDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -500,6 +517,12 @@ void FreeDVDemod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgFreeDVDemodSettings->setStreamIndex(settings.m_streamIndex);
+    }
+    if (settings.m_spectrumGUI && (channelSettingsKeys.contains("spectrunConfig") || force))
+    {
+        SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
+        settings.m_spectrumGUI->formatTo(swgGLSpectrum);
+        swgFreeDVDemodSettings->setSpectrumConfig(swgGLSpectrum);
     }
 }
 

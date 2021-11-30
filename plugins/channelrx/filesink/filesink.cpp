@@ -494,6 +494,9 @@ void FileSink::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("inputFrequencyOffset")) {
         settings.m_reverseAPIChannelIndex = response.getFileSinkSettings()->getInputFrequencyOffset();
     }
+    if (settings.m_spectrumGUI && channelSettingsKeys.contains("spectrumConfig")) {
+        settings.m_spectrumGUI->updateFrom(channelSettingsKeys, response.getFileSinkSettings()->getSpectrumConfig());
+    }
 }
 
 void FileSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const FileSinkSettings& settings)
@@ -532,6 +535,20 @@ void FileSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     response.getFileSinkSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getFileSinkSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getFileSinkSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+
+    if (settings.m_spectrumGUI)
+    {
+        if (response.getFileSinkSettings()->getSpectrumConfig())
+        {
+            settings.m_spectrumGUI->formatTo(response.getFileSinkSettings()->getSpectrumConfig());
+        }
+        else
+        {
+            SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
+            settings.m_spectrumGUI->formatTo(swgGLSpectrum);
+            response.getFileSinkSettings()->setSpectrumConfig(swgGLSpectrum);
+        }
+    }
 }
 
 void FileSink::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -641,6 +658,12 @@ void FileSink::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("streamIndex")) {
         swgFileSinkSettings->setStreamIndex(settings.m_streamIndex);
+    }
+    if (settings.m_spectrumGUI && (channelSettingsKeys.contains("spectrunConfig") || force))
+    {
+        SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
+        settings.m_spectrumGUI->formatTo(swgGLSpectrum);
+        swgFileSinkSettings->setSpectrumConfig(swgGLSpectrum);
     }
 }
 

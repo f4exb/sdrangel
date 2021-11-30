@@ -49,6 +49,9 @@ public:
     void resetToDefaults();
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
+    virtual void formatTo(SWGSDRangel::SWGObject *swgObject) const;
+    virtual void updateFrom(const QStringList& keys, const SWGSDRangel::SWGObject *swgObject);
+    void updateSettings();
 
     bool handleMessage(Message* message);
     unsigned int getNbTraces() const { return m_settings.m_tracesData.size(); }
@@ -155,7 +158,6 @@ private:
     int m_sampleRate;
     int m_timeBase;
     int m_timeOffset;
-    int m_traceLenMult;
     QColor m_focusedTraceColor;
     QColor m_focusedTriggerColor;
     int m_ctlTraceIndex;    //!< controlled trace index

@@ -58,6 +58,9 @@ public:
 	void resetToDefaults();
 	virtual QByteArray serialize() const;
 	virtual bool deserialize(const QByteArray& data);
+    virtual void formatTo(SWGSDRangel::SWGObject *swgObject) const;
+    virtual void updateFrom(const QStringList& keys, const SWGSDRangel::SWGObject *swgObject);
+	void updateSettings();
 
 private:
 	Ui::GLSpectrumGUI* ui;

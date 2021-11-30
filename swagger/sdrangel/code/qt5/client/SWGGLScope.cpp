@@ -38,8 +38,8 @@ SWGGLScope::SWGGLScope() {
     m_time_isSet = false;
     time_ofs = 0;
     m_time_ofs_isSet = false;
-    trace_len = 0;
-    m_trace_len_isSet = false;
+    trace_len_mult = 0;
+    m_trace_len_mult_isSet = false;
     trig_pre = 0;
     m_trig_pre_isSet = false;
     traces_data = nullptr;
@@ -64,8 +64,8 @@ SWGGLScope::init() {
     m_time_isSet = false;
     time_ofs = 0;
     m_time_ofs_isSet = false;
-    trace_len = 0;
-    m_trace_len_isSet = false;
+    trace_len_mult = 0;
+    m_trace_len_mult_isSet = false;
     trig_pre = 0;
     m_trig_pre_isSet = false;
     traces_data = new QList<SWGTraceData*>();
@@ -120,7 +120,7 @@ SWGGLScope::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&time_ofs, pJson["timeOfs"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&trace_len, pJson["traceLen"], "qint32", "");
+    ::SWGSDRangel::setValue(&trace_len_mult, pJson["traceLenMult"], "qint32", "");
     
     ::SWGSDRangel::setValue(&trig_pre, pJson["trigPre"], "qint32", "");
     
@@ -159,8 +159,8 @@ SWGGLScope::asJsonObject() {
     if(m_time_ofs_isSet){
         obj->insert("timeOfs", QJsonValue(time_ofs));
     }
-    if(m_trace_len_isSet){
-        obj->insert("traceLen", QJsonValue(trace_len));
+    if(m_trace_len_mult_isSet){
+        obj->insert("traceLenMult", QJsonValue(trace_len_mult));
     }
     if(m_trig_pre_isSet){
         obj->insert("trigPre", QJsonValue(trig_pre));
@@ -226,13 +226,13 @@ SWGGLScope::setTimeOfs(qint32 time_ofs) {
 }
 
 qint32
-SWGGLScope::getTraceLen() {
-    return trace_len;
+SWGGLScope::getTraceLenMult() {
+    return trace_len_mult;
 }
 void
-SWGGLScope::setTraceLen(qint32 trace_len) {
-    this->trace_len = trace_len;
-    this->m_trace_len_isSet = true;
+SWGGLScope::setTraceLenMult(qint32 trace_len_mult) {
+    this->trace_len_mult = trace_len_mult;
+    this->m_trace_len_mult_isSet = true;
 }
 
 qint32
@@ -285,7 +285,7 @@ SWGGLScope::isSet(){
         if(m_time_ofs_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_trace_len_isSet){
+        if(m_trace_len_mult_isSet){
             isObjectUpdated = true; break;
         }
         if(m_trig_pre_isSet){

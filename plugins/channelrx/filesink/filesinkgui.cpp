@@ -96,6 +96,7 @@ bool FileSinkGUI::handleMessage(const Message& message)
         const FileSink::MsgConfigureFileSink& cfg = (FileSink::MsgConfigureFileSink&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
+        ui->glSpectrumGUI->updateSettings();
         displaySettings();
         blockApplySettings(false);
         return true;

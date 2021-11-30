@@ -16,6 +16,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "SWGCWKeyerSettings.h"
 #include "util/simpleserializer.h"
 #include "cwkeyersettings.h"
 
@@ -93,5 +94,64 @@ bool CWKeyerSettings::deserialize(const QByteArray& data)
     {
         resetToDefaults();
         return false;
+    }
+}
+
+void CWKeyerSettings::formatTo(SWGSDRangel::SWGObject *swgObject) const
+{
+    SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = static_cast<SWGSDRangel::SWGCWKeyerSettings *>(swgObject);
+
+    apiCwKeyerSettings->setLoop(m_loop ? 1 : 0);
+    apiCwKeyerSettings->setMode((int) m_mode);
+    apiCwKeyerSettings->setSampleRate(m_sampleRate);
+
+    if (apiCwKeyerSettings->getText()) {
+        *apiCwKeyerSettings->getText() = m_text;
+    } else {
+        apiCwKeyerSettings->setText(new QString(m_text));
+    }
+
+    apiCwKeyerSettings->setWpm(m_wpm);
+    apiCwKeyerSettings->setKeyboardIambic(m_keyboardIambic ? 1 : 0);
+    apiCwKeyerSettings->setDotKey((int) m_dotKey);
+    apiCwKeyerSettings->setDotKeyModifiers((unsigned int) m_dotKeyModifiers);
+    apiCwKeyerSettings->setDashKey((int) m_dashKey);
+    apiCwKeyerSettings->setDashKeyModifiers((unsigned int) m_dashKeyModifiers);
+}
+
+void CWKeyerSettings::updateFrom(const QStringList& keys, const SWGSDRangel::SWGObject *swgObject)
+{
+    SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings =
+        static_cast<SWGSDRangel::SWGCWKeyerSettings *>(const_cast<SWGSDRangel::SWGObject *>(swgObject));
+
+    if (keys.contains("cwKeyer.loop")) {
+        m_loop = apiCwKeyerSettings->getLoop() != 0;
+    }
+    if (keys.contains("cwKeyer.mode")) {
+        m_mode = (CWKeyerSettings::CWMode) apiCwKeyerSettings->getMode();
+    }
+    if (keys.contains("cwKeyer.text")) {
+        m_text = *apiCwKeyerSettings->getText();
+    }
+    if (keys.contains("cwKeyer.sampleRate")) {
+        m_sampleRate = apiCwKeyerSettings->getSampleRate();
+    }
+    if (keys.contains("cwKeyer.wpm")) {
+        m_wpm = apiCwKeyerSettings->getWpm();
+    }
+    if (keys.contains("cwKeyer.keyboardIambic")) {
+        m_keyboardIambic = apiCwKeyerSettings->getKeyboardIambic() != 0;
+    }
+    if (keys.contains("cwKeyer.dotKey")) {
+        m_dotKey = (Qt::Key) apiCwKeyerSettings->getDotKey();
+    }
+    if (keys.contains("cwKeyer.dotKeyModifiers")) {
+        m_dotKeyModifiers = (Qt::KeyboardModifiers) apiCwKeyerSettings->getDotKeyModifiers();
+    }
+    if (keys.contains("cwKeyer.dashKey")) {
+        m_dashKey = (Qt::Key) apiCwKeyerSettings->getDashKey();
+    }
+    if (keys.contains("cwKeyer.dashKeyModifiers")) {
+        m_dashKeyModifiers = (Qt::KeyboardModifiers) apiCwKeyerSettings->getDashKeyModifiers();
     }
 }

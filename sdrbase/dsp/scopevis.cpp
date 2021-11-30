@@ -159,7 +159,7 @@ void ScopeVis::configure(
     if (m_traceSize != traceSize)
     {
         setTraceSize(traceSize);
-        m_settings.m_traceLen = traceSize;
+        m_settings.m_traceLenMult = traceSize / getTraceChunkSize();
         m_triggerState = TriggerUntriggered;
         m_traces.resetControls();
     }
@@ -1120,9 +1120,9 @@ void ScopeVis::applySettings(const GLScopeSettings& settings, bool force)
     for (unsigned int i = 0; i < m_settings.m_tracesData.size(); i++)
     {
         if (i < m_traces.size()) { // change trace
-            changeTrace(m_settings.m_tracesData[i], i);
+            changeTrace(settings.m_tracesData[i], i);
         } else {  // add trace
-            addTrace(m_settings.m_tracesData[i]);
+            addTrace(settings.m_tracesData[i]);
         }
     }
 

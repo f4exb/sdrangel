@@ -18,12 +18,19 @@
 #ifndef SDRBASE_SETTINGS_SERIALIZABLE_H_
 #define SDRBASE_SETTINGS_SERIALIZABLE_H_
 
+namespace SWGSDRangel {
+    class SWGObject;
+}
+
+class QStringList;
 class Serializable
 {
 public:
     virtual ~Serializable() {}
-    virtual QByteArray serialize() const = 0;
-    virtual bool deserialize(const QByteArray& data) = 0;
+    virtual QByteArray serialize() const = 0; //!< Serialize to inary
+    virtual bool deserialize(const QByteArray& data) = 0; //!< Deserialize from binary
+    virtual void formatTo(SWGSDRangel::SWGObject *swgObject) const = 0; //!< Serialize to API
+    virtual void updateFrom(const QStringList& keys, const SWGSDRangel::SWGObject *swgObject) = 0; //!< Deserialize from API
 };
 
 #endif /* SDRBASE_SETTINGS_SERIALIZABLE_H_ */

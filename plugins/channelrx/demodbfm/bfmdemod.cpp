@@ -345,6 +345,9 @@ void BFMDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getBfmDemodSettings()->getReverseApiChannelIndex();
     }
+    if (settings.m_spectrumGUI && channelSettingsKeys.contains("spectrumConfig")) {
+        settings.m_spectrumGUI->updateFrom(channelSettingsKeys, response.getBfmDemodSettings()->getSpectrumConfig());
+    }
 }
 
 int BFMDemod::webapiReportGet(
@@ -395,6 +398,20 @@ void BFMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     response.getBfmDemodSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getBfmDemodSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getBfmDemodSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+
+    if (settings.m_spectrumGUI)
+    {
+        if (response.getBfmDemodSettings()->getSpectrumConfig())
+        {
+            settings.m_spectrumGUI->formatTo(response.getBfmDemodSettings()->getSpectrumConfig());
+        }
+        else
+        {
+            SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
+            settings.m_spectrumGUI->formatTo(swgGLSpectrum);
+            response.getBfmDemodSettings()->setSpectrumConfig(swgGLSpectrum);
+        }
+    }
 }
 
 void BFMDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -550,6 +567,12 @@ void BFMDemod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgBFMDemodSettings->setStreamIndex(settings.m_streamIndex);
+    }
+    if (settings.m_spectrumGUI && (channelSettingsKeys.contains("spectrunConfig") || force))
+    {
+        SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
+        settings.m_spectrumGUI->formatTo(swgGLSpectrum);
+        swgBFMDemodSettings->setSpectrumConfig(swgGLSpectrum);
     }
 }
 

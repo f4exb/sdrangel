@@ -11,99 +11,67 @@
  */
 
 /*
- * SWGGLScope.h
+ * SWGChannelMarker.h
  *
- * GLScopeGUI settings
+ * ChannelMarker settings
  */
 
-#ifndef SWGGLScope_H_
-#define SWGGLScope_H_
+#ifndef SWGChannelMarker_H_
+#define SWGChannelMarker_H_
 
 #include <QJsonObject>
 
 
-#include "SWGTraceData.h"
-#include "SWGTriggerData.h"
-#include <QList>
+#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
 
 namespace SWGSDRangel {
 
-class SWG_API SWGGLScope: public SWGObject {
+class SWG_API SWGChannelMarker: public SWGObject {
 public:
-    SWGGLScope();
-    SWGGLScope(QString* json);
-    virtual ~SWGGLScope();
+    SWGChannelMarker();
+    SWGChannelMarker(QString* json);
+    virtual ~SWGChannelMarker();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGGLScope* fromJson(QString &jsonString) override;
+    virtual SWGChannelMarker* fromJson(QString &jsonString) override;
 
-    qint32 getDisplayMode();
-    void setDisplayMode(qint32 display_mode);
+    qint32 getCenterFrequency();
+    void setCenterFrequency(qint32 center_frequency);
 
-    qint32 getTraceIntensity();
-    void setTraceIntensity(qint32 trace_intensity);
+    qint32 getColor();
+    void setColor(qint32 color);
 
-    qint32 getGridIntensity();
-    void setGridIntensity(qint32 grid_intensity);
+    QString* getTitle();
+    void setTitle(QString* title);
 
-    qint32 getTime();
-    void setTime(qint32 time);
-
-    qint32 getTimeOfs();
-    void setTimeOfs(qint32 time_ofs);
-
-    qint32 getTraceLenMult();
-    void setTraceLenMult(qint32 trace_len_mult);
-
-    qint32 getTrigPre();
-    void setTrigPre(qint32 trig_pre);
-
-    QList<SWGTraceData*>* getTracesData();
-    void setTracesData(QList<SWGTraceData*>* traces_data);
-
-    QList<SWGTriggerData*>* getTriggersData();
-    void setTriggersData(QList<SWGTriggerData*>* triggers_data);
+    qint32 getFrequencyScaleDisplayType();
+    void setFrequencyScaleDisplayType(qint32 frequency_scale_display_type);
 
 
     virtual bool isSet() override;
 
 private:
-    qint32 display_mode;
-    bool m_display_mode_isSet;
+    qint32 center_frequency;
+    bool m_center_frequency_isSet;
 
-    qint32 trace_intensity;
-    bool m_trace_intensity_isSet;
+    qint32 color;
+    bool m_color_isSet;
 
-    qint32 grid_intensity;
-    bool m_grid_intensity_isSet;
+    QString* title;
+    bool m_title_isSet;
 
-    qint32 time;
-    bool m_time_isSet;
-
-    qint32 time_ofs;
-    bool m_time_ofs_isSet;
-
-    qint32 trace_len_mult;
-    bool m_trace_len_mult_isSet;
-
-    qint32 trig_pre;
-    bool m_trig_pre_isSet;
-
-    QList<SWGTraceData*>* traces_data;
-    bool m_traces_data_isSet;
-
-    QList<SWGTriggerData*>* triggers_data;
-    bool m_triggers_data_isSet;
+    qint32 frequency_scale_display_type;
+    bool m_frequency_scale_display_type_isSet;
 
 };
 
 }
 
-#endif /* SWGGLScope_H_ */
+#endif /* SWGChannelMarker_H_ */

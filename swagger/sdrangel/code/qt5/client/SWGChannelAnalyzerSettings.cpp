@@ -70,6 +70,8 @@ SWGChannelAnalyzerSettings::SWGChannelAnalyzerSettings() {
     m_spectrum_config_isSet = false;
     scope_config = nullptr;
     m_scope_config_isSet = false;
+    channel_marker = nullptr;
+    m_channel_marker_isSet = false;
 }
 
 SWGChannelAnalyzerSettings::~SWGChannelAnalyzerSettings() {
@@ -120,6 +122,8 @@ SWGChannelAnalyzerSettings::init() {
     m_spectrum_config_isSet = false;
     scope_config = new SWGGLScope();
     m_scope_config_isSet = false;
+    channel_marker = new SWGChannelMarker();
+    m_channel_marker_isSet = false;
 }
 
 void
@@ -150,6 +154,9 @@ SWGChannelAnalyzerSettings::cleanup() {
     }
     if(scope_config != nullptr) { 
         delete scope_config;
+    }
+    if(channel_marker != nullptr) { 
+        delete channel_marker;
     }
 }
 
@@ -205,6 +212,8 @@ SWGChannelAnalyzerSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&spectrum_config, pJson["spectrumConfig"], "SWGGLSpectrum", "SWGGLSpectrum");
     
     ::SWGSDRangel::setValue(&scope_config, pJson["scopeConfig"], "SWGGLScope", "SWGGLScope");
+    
+    ::SWGSDRangel::setValue(&channel_marker, pJson["channelMarker"], "SWGChannelMarker", "SWGChannelMarker");
     
 }
 
@@ -284,6 +293,9 @@ SWGChannelAnalyzerSettings::asJsonObject() {
     }
     if((scope_config != nullptr) && (scope_config->isSet())){
         toJsonValue(QString("scopeConfig"), scope_config, obj, QString("SWGGLScope"));
+    }
+    if((channel_marker != nullptr) && (channel_marker->isSet())){
+        toJsonValue(QString("channelMarker"), channel_marker, obj, QString("SWGChannelMarker"));
     }
 
     return obj;
@@ -499,6 +511,16 @@ SWGChannelAnalyzerSettings::setScopeConfig(SWGGLScope* scope_config) {
     this->m_scope_config_isSet = true;
 }
 
+SWGChannelMarker*
+SWGChannelAnalyzerSettings::getChannelMarker() {
+    return channel_marker;
+}
+void
+SWGChannelAnalyzerSettings::setChannelMarker(SWGChannelMarker* channel_marker) {
+    this->channel_marker = channel_marker;
+    this->m_channel_marker_isSet = true;
+}
+
 
 bool
 SWGChannelAnalyzerSettings::isSet(){
@@ -565,6 +587,9 @@ SWGChannelAnalyzerSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(scope_config && scope_config->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(channel_marker && channel_marker->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

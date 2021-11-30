@@ -47,6 +47,8 @@ public:
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    virtual void formatTo(SWGSDRangel::SWGObject *swgObject) const;
+    virtual void updateFrom(const QStringList& keys, const SWGSDRangel::SWGObject *swgObject);
 
     void setSettings(const CWKeyerSettings& settings) { m_settings = settings; }
     void displaySettings();

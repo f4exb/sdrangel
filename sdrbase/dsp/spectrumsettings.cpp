@@ -15,6 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "SWGGLSpectrum.h"
+
 #include "util/simpleserializer.h"
 #include "spectrumsettings.h"
 
@@ -53,6 +55,7 @@ void SpectrumSettings::resetToDefaults()
 	m_linear = false;
     m_ssb = false;
     m_usb = true;
+	m_wsSpectrum = false;
     m_wsSpectrumAddress = "127.0.0.1";
     m_wsSpectrumPort = 8887;
 }
@@ -86,6 +89,7 @@ QByteArray SpectrumSettings::serialize() const
     s.writeBool(24, m_ssb);
     s.writeBool(25, m_usb);
 	s.writeS32(26, m_fpsPeriodMs);
+	s.writeBool(27, m_wsSpectrum);
 	s.writeS32(100, m_histogramMarkers.size());
 
 	for (int i = 0; i < m_histogramMarkers.size(); i++) {
@@ -146,6 +150,7 @@ bool SpectrumSettings::deserialize(const QByteArray& data)
         d.readBool(24, &m_ssb, false);
         d.readBool(25, &m_usb, true);
 		d.readS32(26, &tmp, 50);
+		d.readBool(27, &m_wsSpectrum, false);
 		m_fpsPeriodMs = tmp < 5 ? 5 : tmp > 500 ? 500 : tmp;
 		int histogramMarkersSize;
 
@@ -183,6 +188,122 @@ bool SpectrumSettings::deserialize(const QByteArray& data)
     {
 		resetToDefaults();
 		return false;
+	}
+}
+
+void SpectrumSettings::formatTo(SWGSDRangel::SWGObject *swgObject) const
+{
+	SWGSDRangel::SWGGLSpectrum *swgSpectrum = static_cast<SWGSDRangel::SWGGLSpectrum *>(swgObject);
+
+	swgSpectrum->setFftWindow((int) m_fftWindow);
+    swgSpectrum->setFftSize(m_fftSize);
+    swgSpectrum->setFftOverlap(m_fftOverlap);
+    swgSpectrum->setAveragingMode((int) m_averagingMode);
+    swgSpectrum->setAveragingValue(SpectrumSettings::getAveragingValue(m_averagingIndex, m_averagingMode));
+	swgSpectrum->setRefLevel(m_refLevel);
+	swgSpectrum->setPowerRange(m_powerRange);
+    swgSpectrum->setFpsPeriodMs(m_fpsPeriodMs);
+	swgSpectrum->setLinear(m_linear ? 1 : 0);
+	swgSpectrum->setWsSpectrum(m_wsSpectrum ? 1 : 0);
+	swgSpectrum->setWsSpectrumPort(m_wsSpectrumPort);
+
+    if (swgSpectrum->getWsSpectrumAddress()) {
+        *swgSpectrum->getWsSpectrumAddress() = m_wsSpectrumAddress;
+    } else {
+        swgSpectrum->setWsSpectrumAddress(new QString(m_wsSpectrumAddress));
+    }
+
+    swgSpectrum->setDisplayHistogram(m_displayHistogram ? 1 : 0);
+    swgSpectrum->setDecay(m_decay);
+    swgSpectrum->setDecayDivisor(m_decayDivisor);
+	swgSpectrum->setHistogramStroke(m_histogramStroke);
+    swgSpectrum->setDisplayMaxHold(m_displayMaxHold ? 1 : 0);
+    swgSpectrum->setDisplayCurrent(m_displayCurrent ? 1 : 0);
+    swgSpectrum->setDisplayTraceIntensity(m_displayTraceIntensity);
+	swgSpectrum->setInvertedWaterfall(m_invertedWaterfall ? 1 : 0);
+    swgSpectrum->setDisplayWaterfall(m_displayWaterfall ? 1 : 0);
+    swgSpectrum->setDisplayGrid(m_displayGrid ? 1 : 0);
+    swgSpectrum->setDisplayGridIntensity(m_displayGridIntensity);
+}
+
+void SpectrumSettings::updateFrom(const QStringList& keys, const SWGSDRangel::SWGObject *swgObject)
+{
+	SWGSDRangel::SWGGLSpectrum *swgSpectrum =
+		static_cast<SWGSDRangel::SWGGLSpectrum *>(const_cast<SWGSDRangel::SWGObject *>(swgObject));
+
+	if (keys.contains("spectrumConfig.fftWindow")) {
+		m_fftWindow = (FFTWindow::Function) swgSpectrum->getFftWindow();
+	}
+	if (keys.contains("spectrumConfig.fftSize")) {
+		m_fftSize = swgSpectrum->getFftSize();
+	}
+	if (keys.contains("spectrumConfig.fftOverlap")) {
+		m_fftOverlap = swgSpectrum->getFftOverlap();
+	}
+	if (keys.contains("spectrumConfig.averagingMode")) {
+		m_averagingMode = (SpectrumSettings::AveragingMode) swgSpectrum->getAveragingMode();
+	}
+	if (keys.contains("spectrumConfig.averagingValue"))
+	{
+		m_averagingValue = swgSpectrum->getAveragingValue();
+		m_averagingIndex = SpectrumSettings::getAveragingIndex(m_averagingValue, m_averagingMode);
+	}
+	if (keys.contains("spectrumConfig.refLevel")) {
+		m_refLevel = swgSpectrum->getRefLevel();
+	}
+	if (keys.contains("spectrumConfig.powerRange")) {
+		m_powerRange = swgSpectrum->getPowerRange();
+	}
+	if (keys.contains("spectrumConfig.fpsPeriodMs")) {
+		m_fpsPeriodMs = swgSpectrum->getFpsPeriodMs();
+	}
+	if (keys.contains("spectrumConfig.linear")) {
+		m_linear = swgSpectrum->getLinear() != 0;
+	}
+	if (keys.contains("spectrumConfig.wsSpectrum")) {
+		m_wsSpectrum = swgSpectrum->getWsSpectrum() != 0;
+	}
+	if (keys.contains("spectrumConfig.wsSpectrum")) {
+		m_wsSpectrum = swgSpectrum->getWsSpectrum() != 0;
+	}
+    if (keys.contains("spectrumConfig.wsSpectrumAddress")) {
+		m_wsSpectrumAddress = *swgSpectrum->getWsSpectrumAddress();
+    }
+	if (keys.contains("spectrumConfig.wsSpectrumPort")) {
+		m_wsSpectrumPort = swgSpectrum->getWsSpectrumPort();
+	}
+	if (keys.contains("spectrumConfig.displayHistogram")) {
+		m_displayHistogram = swgSpectrum->getDisplayHistogram() != 0;
+	}
+	if (keys.contains("spectrumConfig.decay")) {
+		m_decay = swgSpectrum->getDecay();
+	}
+	if (keys.contains("spectrumConfig.decayDivisor")) {
+		m_decayDivisor = swgSpectrum->getDecayDivisor();
+	}
+	if (keys.contains("spectrumConfig.histogramStroke")) {
+		m_histogramStroke = swgSpectrum->getHistogramStroke();
+	}
+	if (keys.contains("spectrumConfig.displayMaxHold")) {
+		m_displayMaxHold = swgSpectrum->getDisplayMaxHold() != 0;
+	}
+	if (keys.contains("spectrumConfig.displayCurrent")) {
+		m_displayCurrent = swgSpectrum->getDisplayCurrent() != 0;
+	}
+	if (keys.contains("spectrumConfig.displayTraceIntensity")) {
+		m_displayTraceIntensity = swgSpectrum->getDisplayTraceIntensity();
+	}
+	if (keys.contains("spectrumConfig.invertedWaterfall")) {
+		m_invertedWaterfall = swgSpectrum->getInvertedWaterfall() != 0;
+	}
+	if (keys.contains("spectrumConfig.displayWaterfall")) {
+		m_displayWaterfall = swgSpectrum->getDisplayWaterfall() != 0;
+	}
+	if (keys.contains("spectrumConfig.displayGrid")) {
+		m_displayGrid = swgSpectrum->getDisplayGrid() != 0;
+	}
+	if (keys.contains("spectrumConfig.displayGridIntensity")) {
+		m_displayGridIntensity = swgSpectrum->getDisplayGridIntensity();
 	}
 }
 

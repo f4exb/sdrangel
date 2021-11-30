@@ -1884,7 +1884,11 @@ void WebAPIRequestMapper::devicesetDeviceService(const std::string& indexStr, qt
     }
 }
 
-void WebAPIRequestMapper::devicesetDeviceSettingsService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+void WebAPIRequestMapper::devicesetDeviceSettingsService(
+    const std::string& indexStr,
+    qtwebapp::HttpRequest& request,
+    qtwebapp::HttpResponse& response
+)
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
     response.setHeader("Content-Type", "application/json");
@@ -4136,14 +4140,8 @@ bool WebAPIRequestMapper::getChannelSettings(
     if (channelKeys.contains(channelSettingsKey) && channelSettingsJson[channelSettingsKey].isObject())
     {
         QJsonObject settingsJsonObject = channelSettingsJson[channelSettingsKey].toObject();
-        channelSettingsKeys = settingsJsonObject.keys();
-
-        // get possible sub-keys
-        if (channelSettingsKeys.contains("cwKeyer"))
-        {
-            QJsonObject cwJson; // unused
-            appendSettingsSubKeys(settingsJsonObject, cwJson, "cwKeyer", channelSettingsKeys);
-        }
+        extractKeys(settingsJsonObject, channelSettingsKeys);
+        qDebug() << "WebAPIRequestMapper::getChannelSettings: channelSettingsKeys: " << channelSettingsKeys;
 
         if (channelSettingsKey == "ADSBDemodSettings")
         {
@@ -4197,7 +4195,8 @@ bool WebAPIRequestMapper::getChannelSettings(
         }
         else if (channelSettingsKey == "ChannelAnalyzerSettings")
         {
-            processChannelAnalyzerSettings(channelSettings, settingsJsonObject, channelSettingsKeys);
+            channelSettings->setChannelAnalyzerSettings(new SWGSDRangel::SWGChannelAnalyzerSettings());
+            processChannelAnalyzerSettings(channelSettings, settingsJsonObject);
         }
         else if (channelSettingsKey == "ChirpChatDemodSettings")
         {
@@ -4473,7 +4472,12 @@ bool WebAPIRequestMapper::appendPresetDeviceKeys(
         {
             SWGSDRangel::SWGDeviceSettings *deviceSettings = new SWGSDRangel::SWGDeviceSettings();
             device->setConfig(deviceSettings);
-            return getDeviceSettings(WebAPIUtils::m_deviceIdToSettingsKey[*deviceId], deviceSettings, deviceSettngsJson["config"].toObject(), devicelKeys.m_deviceKeys);
+            return getDeviceSettings(
+                WebAPIUtils::m_deviceIdToSettingsKey[*deviceId],
+                deviceSettings,
+                deviceSettngsJson["config"].toObject(),
+                devicelKeys.m_deviceKeys
+            );
         }
         else
         {
@@ -4498,7 +4502,8 @@ bool WebAPIRequestMapper::getDeviceSettings(
     if (deviceKeys.contains(deviceSettingsKey) && deviceSettingsJson[deviceSettingsKey].isObject())
     {
         QJsonObject settingsJsonObject = deviceSettingsJson[deviceSettingsKey].toObject();
-        deviceSettingsKeys = settingsJsonObject.keys();
+        extractKeys(settingsJsonObject, deviceSettingsKeys);
+        qDebug() << "WebAPIRequestMapper::getDeviceSettings: deviceSettingsKeys: " << deviceSettingsKeys;
 
         if (deviceSettingsKey == "airspySettings")
         {
@@ -4542,10 +4547,6 @@ bool WebAPIRequestMapper::getDeviceSettings(
         }
         else if (deviceSettingsKey == "bladeRF2MIMOSettings")
         {
-            if (deviceSettingsKeys.contains("streams") && settingsJsonObject["streams"].isArray()) {
-                appendSettingsArrayKeys(settingsJsonObject, "streams", deviceSettingsKeys);
-            }
-
             deviceSettings->setBladeRf2MimoSettings(new SWGSDRangel::SWGBladeRF2MIMOSettings());
             deviceSettings->getBladeRf2MimoSettings()->fromJsonObject(settingsJsonObject);
         }
@@ -4596,19 +4597,11 @@ bool WebAPIRequestMapper::getDeviceSettings(
         }
         else if (deviceSettingsKey == "limeSdrMIMOSettings")
         {
-            if (deviceSettingsKeys.contains("streams") && settingsJsonObject["streams"].isArray()) {
-                appendSettingsArrayKeys(settingsJsonObject, "streams", deviceSettingsKeys);
-            }
-
             deviceSettings->setLimeSdrMimoSettings(new SWGSDRangel::SWGLimeSdrMIMOSettings());
             deviceSettings->getLimeSdrMimoSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (deviceSettingsKey == "metisMISOSettings")
         {
-            if (deviceSettingsKeys.contains("streams") && settingsJsonObject["streams"].isArray()) {
-                appendSettingsArrayKeys(settingsJsonObject, "streams", deviceSettingsKeys);
-            }
-
             deviceSettings->setMetisMisoSettings(new SWGSDRangel::SWGMetisMISOSettings());
             deviceSettings->getMetisMisoSettings()->fromJsonObject(settingsJsonObject);
         }
@@ -4668,20 +4661,12 @@ bool WebAPIRequestMapper::getDeviceSettings(
         }
         else if (deviceSettingsKey == "testMISettings")
         {
-            if (deviceSettingsKeys.contains("streams") && settingsJsonObject["streams"].isArray()) {
-                appendSettingsArrayKeys(settingsJsonObject, "streams", deviceSettingsKeys);
-            }
-
             deviceSettings->setTestMiSettings(new SWGSDRangel::SWGTestMISettings());
             deviceSettings->getTestMiSettings()->init();
             deviceSettings->getTestMiSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (deviceSettingsKey == "testMOSyncSettings")
         {
-            if (deviceSettingsKeys.contains("streams") && settingsJsonObject["streams"].isArray()) {
-                appendSettingsArrayKeys(settingsJsonObject, "streams", deviceSettingsKeys);
-            }
-
             deviceSettings->setTestMoSyncSettings(new SWGSDRangel::SWGTestMOSyncSettings());
             deviceSettings->getTestMoSyncSettings()->fromJsonObject(settingsJsonObject);
         }
@@ -4707,10 +4692,6 @@ bool WebAPIRequestMapper::getDeviceSettings(
         }
         else if (deviceSettingsKey == "XtrxMIMOSettings")
         {
-            if (deviceSettingsKeys.contains("streams") && settingsJsonObject["streams"].isArray()) {
-                appendSettingsArrayKeys(settingsJsonObject, "streams", deviceSettingsKeys);
-            }
-
             deviceSettings->setXtrxMimoSettings(new SWGSDRangel::SWGXtrxMIMOSettings());
             deviceSettings->getXtrxMimoSettings()->fromJsonObject(settingsJsonObject);
         }
@@ -4793,7 +4774,8 @@ bool WebAPIRequestMapper::getFeatureSettings(
     if (featureKeys.contains(featureSettingsKey) && featureSettingsJson[featureSettingsKey].isObject())
     {
         QJsonObject settingsJsonObject = featureSettingsJson[featureSettingsKey].toObject();
-        featureSettingsKeys = settingsJsonObject.keys();
+        extractKeys(settingsJsonObject, featureSettingsKeys);
+        qDebug() << "WebAPIRequestMapper::getFeatureSettings: featureSettingsKeys: " << featureSettingsKeys;
 
         if (featureSettingsKey == "AISSSettings")
         {
@@ -4809,6 +4791,11 @@ bool WebAPIRequestMapper::getFeatureSettings(
         {
             featureSettings->setAprsSettings(new SWGSDRangel::SWGAPRSSettings());
             featureSettings->getAprsSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (featureSettingsKey == "DemodAnalyzerSettings")
+        {
+            featureSettings->setDemodAnalyzerSettings(new SWGSDRangel::SWGDemodAnalyzerSettings());
+            featureSettings->getDemodAnalyzerSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (featureSettingsKey == "GS232ControllerSettings")
         {
@@ -4933,39 +4920,39 @@ bool WebAPIRequestMapper::getFeatureActions(
     }
 }
 
-void WebAPIRequestMapper::appendSettingsSubKeys(
-        const QJsonObject& parentSettingsJsonObject,
-        QJsonObject& childSettingsJsonObject,
-        const QString& parentKey,
-        QStringList& keyList)
+void WebAPIRequestMapper::extractKeys(
+    const QJsonObject& rootJsonObject,
+    QStringList& keyList
+)
 {
-    childSettingsJsonObject = parentSettingsJsonObject[parentKey].toObject();
-    QStringList childSettingsKeys = childSettingsJsonObject.keys();
+    QStringList rootKeys = rootJsonObject.keys();
 
-    for (int i = 0; i < childSettingsKeys.size(); i++) {
-        keyList.append(parentKey + QString(".") + childSettingsKeys.at(i));
-    }
-}
-
-void WebAPIRequestMapper::appendSettingsArrayKeys(
-        const QJsonObject& parentSettingsJsonObject,
-        const QString& parentKey,
-        QStringList& keyList)
-{
-    QJsonArray arrayJson = parentSettingsJsonObject[parentKey].toArray();
-
-    for (int arrayIndex = 0; arrayIndex < arrayJson.count(); arrayIndex++)
+    for (auto rootKey : rootKeys)
     {
-        QJsonValue v = arrayJson.at(arrayIndex);
+        keyList.append(rootKey);
 
-        if (v.isObject())
+        if (rootJsonObject[rootKey].isObject())
         {
-            QJsonObject itemSettingsJsonObject = v.toObject();
-            QStringList itemSettingsKeys = itemSettingsJsonObject.keys();
-            keyList.append(tr("%1[%2]").arg(parentKey).arg(arrayIndex));
+            QStringList subKeys;
+            extractKeys(rootJsonObject[rootKey].toObject(), subKeys);
 
-            for (int i = 0; i < itemSettingsKeys.size(); i++) {
-                keyList.append(tr("%1[%2].%3").arg(parentKey).arg(arrayIndex).arg(itemSettingsKeys[i]));
+            for (auto subKey : subKeys) {
+                keyList.append(tr("%1.%2").arg(rootKey).arg(subKey));
+            }
+        }
+        else if (rootJsonObject[rootKey].isArray())
+        {
+            QJsonArray arrayJson = rootJsonObject[rootKey].toArray();
+
+            for (int arrayIndex = 0; arrayIndex < arrayJson.count(); arrayIndex++)
+            {
+                QStringList subKeys;
+                extractKeys(arrayJson.at(arrayIndex).toObject(), subKeys);
+                keyList.append(tr("%1[%2]").arg(rootKey).arg(arrayIndex));
+
+                for (auto subKey : subKeys) {
+                    keyList.append(tr("%1[%2].%3").arg(rootKey).arg(arrayIndex).arg(subKey));
+                }
             }
         }
     }
@@ -5155,8 +5142,7 @@ void WebAPIRequestMapper::resetFeatureActions(SWGSDRangel::SWGFeatureActions& fe
 
 void WebAPIRequestMapper::processChannelAnalyzerSettings(
         SWGSDRangel::SWGChannelSettings *channelSettings,
-        const QJsonObject& channelSettingsJson,
-        QStringList& channelSettingsKeys
+        const QJsonObject& channelSettingsJson
 )
 {
     SWGSDRangel::SWGChannelAnalyzerSettings *channelAnalyzerSettings = new SWGSDRangel::SWGChannelAnalyzerSettings();
@@ -5215,7 +5201,6 @@ void WebAPIRequestMapper::processChannelAnalyzerSettings(
         spectrum->init();
         channelAnalyzerSettings->setSpectrumConfig(spectrum);
         QJsonObject spectrumJson;
-        appendSettingsSubKeys(channelSettingsJson, spectrumJson, "spectrumConfig", channelSettingsKeys);
         spectrum->fromJsonObject(spectrumJson);
     }
 
@@ -5225,7 +5210,6 @@ void WebAPIRequestMapper::processChannelAnalyzerSettings(
         scopeConfig->init();
         channelAnalyzerSettings->setScopeConfig(scopeConfig);
         QJsonObject scopeConfigJson;
-        appendSettingsSubKeys(channelSettingsJson, scopeConfigJson, "scopeConfig", channelSettingsKeys);
         scopeConfig->fromJsonObject(scopeConfigJson);
 
         if (scopeConfigJson.contains("tracesData") && scopeConfigJson["tracesData"].isArray())
@@ -5241,13 +5225,6 @@ void WebAPIRequestMapper::processChannelAnalyzerSettings(
                 QJsonObject traceJson = tracesJson.at(i).toObject();
                 traceData->fromJsonObject(traceJson);
             }
-
-            QStringList tracesDataKeys;
-            appendSettingsArrayKeys(scopeConfigJson, "tracesData", tracesDataKeys);
-
-            for (int i = 0; i < tracesDataKeys.size(); i++) {
-                channelSettingsKeys.append(QString("scopeConfig.") + tracesDataKeys.at(i));
-            }
         }
 
         if (scopeConfigJson.contains("triggersData") && scopeConfigJson["triggersData"].isArray())
@@ -5262,13 +5239,6 @@ void WebAPIRequestMapper::processChannelAnalyzerSettings(
                 triggersData->append(triggerData);
                 QJsonObject triggerJson = triggersJson.at(i).toObject();
                 triggerData->fromJsonObject(triggerJson);
-            }
-
-            QStringList triggersDataKeys;
-            appendSettingsArrayKeys(scopeConfigJson, "triggersData", triggersDataKeys);
-
-            for (int i = 0; i < triggersDataKeys.size(); i++) {
-                channelSettingsKeys.append(QString("scopeConfig.") + triggersDataKeys.at(i));
             }
         }
     }
@@ -5471,8 +5441,6 @@ void WebAPIRequestMapper::processSoapySDRSettings(
             QJsonObject argValueJson = argsJson.at(i).toObject();
             argValue->fromJsonObject(argValueJson);
         }
-
-        appendSettingsArrayKeys(deviceSettingsJson, "deviceArgSettings", deviceSettingsKeys);
     }
 
     if (deviceSettingsKeys.contains("individualGains"))
@@ -5493,8 +5461,6 @@ void WebAPIRequestMapper::processSoapySDRSettings(
             QJsonObject argValueJson = argsJson.at(i).toObject();
             argValue->fromJsonObject(argValueJson);
         }
-
-        appendSettingsArrayKeys(deviceSettingsJson, "individualGains", deviceSettingsKeys);
     }
 
     if (deviceSettingsKeys.contains("streamArgSettings"))
@@ -5515,8 +5481,6 @@ void WebAPIRequestMapper::processSoapySDRSettings(
             QJsonObject argValueJson = argsJson.at(i).toObject();
             argValue->fromJsonObject(argValueJson);
         }
-
-        appendSettingsArrayKeys(deviceSettingsJson, "streamArgSettings", deviceSettingsKeys);
     }
 
     if (deviceSettingsKeys.contains("tunableElements"))
@@ -5537,7 +5501,5 @@ void WebAPIRequestMapper::processSoapySDRSettings(
             QJsonObject argValueJson = argsJson.at(i).toObject();
             argValue->fromJsonObject(argValueJson);
         }
-
-        appendSettingsArrayKeys(deviceSettingsJson, "tunableElements", deviceSettingsKeys);
     }
 }

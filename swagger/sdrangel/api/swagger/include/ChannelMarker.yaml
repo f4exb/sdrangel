@@ -1,0 +1,13 @@
+ChannelMarker:
+  description: ChannelMarker settings
+  properties:
+    centerFrequency:
+      type: integer
+    color:
+      type: integer
+      description: RGB color
+    title:
+      type: string
+    frequencyScaleDisplayType:
+      type: integer
+      description: ChannelMarker::frequencyScaleDisplay_t

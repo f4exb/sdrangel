@@ -385,6 +385,9 @@ void UDPSink::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getUdpSinkSettings()->getReverseApiChannelIndex();
     }
+    if (settings.m_spectrumGUI && channelSettingsKeys.contains("spectrumConfig")) {
+        settings.m_spectrumGUI->updateFrom(channelSettingsKeys, response.getUdpSinkSettings()->getSpectrumConfig());
+    }
 }
 
 int UDPSink::webapiReportGet(
@@ -443,6 +446,20 @@ void UDPSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respo
     response.getUdpSinkSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getUdpSinkSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getUdpSinkSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+
+    if (settings.m_spectrumGUI)
+    {
+        if (response.getUdpSinkSettings()->getSpectrumConfig())
+        {
+            settings.m_spectrumGUI->formatTo(response.getUdpSinkSettings()->getSpectrumConfig());
+        }
+        else
+        {
+            SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
+            settings.m_spectrumGUI->formatTo(swgGLSpectrum);
+            response.getUdpSinkSettings()->setSpectrumConfig(swgGLSpectrum);
+        }
+    }
 }
 
 void UDPSink::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -575,6 +592,12 @@ void UDPSink::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgUDPSinkSettings->setStreamIndex(settings.m_streamIndex);
+    }
+    if (settings.m_spectrumGUI && (channelSettingsKeys.contains("spectrunConfig") || force))
+    {
+        SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
+        settings.m_spectrumGUI->formatTo(swgGLSpectrum);
+        swgUDPSinkSettings->setSpectrumConfig(swgGLSpectrum);
     }
 }
 

@@ -69,6 +69,7 @@ bool SSBDemodGUI::handleMessage(const Message& message)
         const SSBDemod::MsgConfigureSSBDemod& cfg = (SSBDemod::MsgConfigureSSBDemod&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
+        ui->spectrumGUI->updateSettings();
         displaySettings();
         blockApplySettings(false);
         return true;

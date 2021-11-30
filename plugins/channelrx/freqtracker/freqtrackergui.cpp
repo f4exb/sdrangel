@@ -81,6 +81,7 @@ bool FreqTrackerGUI::handleMessage(const Message& message)
         const FreqTracker::MsgConfigureFreqTracker& cfg = (FreqTracker::MsgConfigureFreqTracker&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
+        ui->spectrumGUI->updateSettings();
         displaySettings();
         blockApplySettings(false);
         return true;

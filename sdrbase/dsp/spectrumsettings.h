@@ -68,8 +68,9 @@ public:
 	bool m_linear; //!< linear else logarithmic scale
     bool m_ssb;    //!< SSB display with spectrum center at start of array or display - else spectrum center is on center
     bool m_usb;    //!< USB display with increasing frequencies towads the right - else decreasing frequencies
-    QString m_wsSpectrumAddress;
-    uint16_t m_wsSpectrumPort;
+	bool m_wsSpectrum;           //!< Start or stop websocket spectrum server
+    QString m_wsSpectrumAddress; //!< websocket spectrum server address
+    uint16_t m_wsSpectrumPort;   //!< websocket spectrum server port
 	QList<SpectrumHistogramMarker> m_histogramMarkers;
 	QList<SpectrumWaterfallMarker> m_waterfallMarkers;
 	static const int m_log2FFTSizeMin = 6;   // 64
@@ -81,6 +82,8 @@ public:
 
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
+    virtual void formatTo(SWGSDRangel::SWGObject *swgObject) const;
+    virtual void updateFrom(const QStringList& keys, const SWGSDRangel::SWGObject *swgObject);
 
 	QList<SpectrumHistogramMarker>& getHistogramMarkers() { return m_histogramMarkers; }
 	QList<SpectrumWaterfallMarker>& getWaterfallMarkers() { return m_waterfallMarkers; }

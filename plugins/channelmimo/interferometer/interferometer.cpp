@@ -342,6 +342,12 @@ void Interferometer::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getInterferometerSettings()->getReverseApiChannelIndex();
     }
+    if (settings.m_spectrumGUI && channelSettingsKeys.contains("spectrumConfig")) {
+        settings.m_spectrumGUI->updateFrom(channelSettingsKeys, response.getInterferometerSettings()->getSpectrumConfig());
+    }
+    if (settings.m_scopeGUI && channelSettingsKeys.contains("scopeConfig")) {
+        settings.m_scopeGUI->updateFrom(channelSettingsKeys, response.getInterferometerSettings()->getScopeConfig());
+    }
 }
 
 void Interferometer::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const InterferometerSettings& settings)
@@ -367,6 +373,34 @@ void Interferometer::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings
     response.getInterferometerSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getInterferometerSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getInterferometerSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+
+    if (settings.m_spectrumGUI)
+    {
+        if (response.getInterferometerSettings()->getSpectrumConfig())
+        {
+            settings.m_spectrumGUI->formatTo(response.getInterferometerSettings()->getSpectrumConfig());
+        }
+        else
+        {
+            SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
+            settings.m_spectrumGUI->formatTo(swgGLSpectrum);
+            response.getInterferometerSettings()->setSpectrumConfig(swgGLSpectrum);
+        }
+    }
+
+    if (settings.m_scopeGUI)
+    {
+        if (response.getInterferometerSettings()->getScopeConfig())
+        {
+            settings.m_scopeGUI->formatTo(response.getInterferometerSettings()->getScopeConfig());
+        }
+        else
+        {
+            SWGSDRangel::SWGGLScope *swgGLScope = new SWGSDRangel::SWGGLScope();
+            settings.m_scopeGUI->formatTo(swgGLScope);
+            response.getInterferometerSettings()->setScopeConfig(swgGLScope);
+        }
+    }
 }
 
 void Interferometer::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const InterferometerSettings& settings, bool force)
@@ -443,6 +477,20 @@ void Interferometer::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("filterChainHash") || force) {
         swgInterferometerSettings->setFilterChainHash(settings.m_filterChainHash);
+    }
+
+    if (settings.m_spectrumGUI)
+    {
+        if (channelSettingsKeys.contains("spectrumConfig") || force) {
+            settings.m_spectrumGUI->formatTo(swgInterferometerSettings->getSpectrumConfig());
+        }
+    }
+
+    if (settings.m_scopeGUI)
+    {
+        if (channelSettingsKeys.contains("scopeConfig") || force) {
+            settings.m_scopeGUI->formatTo(swgInterferometerSettings->getScopeConfig());
+        }
     }
 }
 

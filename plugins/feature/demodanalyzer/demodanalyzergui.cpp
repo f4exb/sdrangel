@@ -76,6 +76,8 @@ bool DemodAnalyzerGUI::handleMessage(const Message& message)
         const DemodAnalyzer::MsgConfigureDemodAnalyzer& cfg = (DemodAnalyzer::MsgConfigureDemodAnalyzer&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
+        ui->spectrumGUI->updateSettings();
+        ui->scopeGUI->updateSettings();
         displaySettings();
         blockApplySettings(false);
 

@@ -81,6 +81,16 @@ bool CWKeyerGUI::deserialize(const QByteArray& data)
     }
 }
 
+void CWKeyerGUI::formatTo(SWGSDRangel::SWGObject *swgObject) const
+{
+    m_settings.formatTo(swgObject);
+}
+
+void CWKeyerGUI::updateFrom(const QStringList& keys, const SWGSDRangel::SWGObject *swgObject)
+{
+    m_settings.updateFrom(keys, swgObject);
+}
+
 // === SLOTS ==================================================================
 
 void CWKeyerGUI::on_cwTextClear_clicked(bool checked)

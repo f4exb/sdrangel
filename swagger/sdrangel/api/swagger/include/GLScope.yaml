@@ -129,8 +129,9 @@ GLScope:
       type: integer
     timeOfs:
       type: integer
-    traceLen:
+    traceLenMult:
       type: integer
+      description: Trace length multiplier (multiplies 4800 samples)
     trigPre:
       type: integer
     tracesData:

@@ -494,6 +494,9 @@ void SigMFFileSink::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("inputFrequencyOffset")) {
         settings.m_reverseAPIChannelIndex = response.getSigMfFileSinkSettings()->getInputFrequencyOffset();
     }
+    if (settings.m_spectrumGUI && channelSettingsKeys.contains("spectrumConfig")) {
+        settings.m_spectrumGUI->updateFrom(channelSettingsKeys, response.getSigMfFileSinkSettings()->getSpectrumConfig());
+    }
 }
 
 void SigMFFileSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const SigMFFileSinkSettings& settings)
@@ -532,6 +535,20 @@ void SigMFFileSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings&
     response.getSigMfFileSinkSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getSigMfFileSinkSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getSigMfFileSinkSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+
+    if (settings.m_spectrumGUI)
+    {
+        if (response.getSigMfFileSinkSettings()->getSpectrumConfig())
+        {
+            settings.m_spectrumGUI->formatTo(response.getSigMfFileSinkSettings()->getSpectrumConfig());
+        }
+        else
+        {
+            SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
+            settings.m_spectrumGUI->formatTo(swgGLSpectrum);
+            response.getSigMfFileSinkSettings()->setSpectrumConfig(swgGLSpectrum);
+        }
+    }
 }
 
 void SigMFFileSink::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -641,6 +658,12 @@ void SigMFFileSink::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("streamIndex")) {
         swgSigMFFileSinkSettings->setStreamIndex(settings.m_streamIndex);
+    }
+    if (settings.m_spectrumGUI && (channelSettingsKeys.contains("spectrunConfig") || force))
+    {
+        SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
+        settings.m_spectrumGUI->formatTo(swgGLSpectrum);
+        swgSigMFFileSinkSettings->setSpectrumConfig(swgGLSpectrum);
     }
 }
 

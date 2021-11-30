@@ -15,6 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "SWGChannelMarker.h"
 #include "dsp/channelmarker.h"
 #include "util/simpleserializer.h"
 
@@ -192,6 +193,40 @@ bool ChannelMarker::deserialize(const QByteArray& data)
     {
         resetToDefaults();
         return false;
+    }
+}
+
+void ChannelMarker::formatTo(SWGSDRangel::SWGObject *swgObject) const
+{
+    SWGSDRangel::SWGChannelMarker *swgChannelMarker = static_cast<SWGSDRangel::SWGChannelMarker *>(swgObject);
+
+    swgChannelMarker->setCenterFrequency(getCenterFrequency());
+    swgChannelMarker->setColor(getColor().rgb());
+    swgChannelMarker->setFrequencyScaleDisplayType((int) getFrequencyScaleDisplayType());
+
+    if (swgChannelMarker->getTitle()) {
+        *swgChannelMarker->getTitle() = getTitle();
+    } else {
+        swgChannelMarker->setTitle(new QString(getTitle()));
+    }
+}
+
+void ChannelMarker::updateFrom(const QStringList& keys, const SWGSDRangel::SWGObject *swgObject)
+{
+    SWGSDRangel::SWGChannelMarker *swgChannelMarker =
+        static_cast<SWGSDRangel::SWGChannelMarker *>(const_cast<SWGSDRangel::SWGObject *>(swgObject));
+
+    if (keys.contains("channelMarker.centerFrequency")) {
+        setCenterFrequency(swgChannelMarker->getCenterFrequency());
+    }
+    if (keys.contains("channelMarker.color")) {
+        setColor(swgChannelMarker->getColor());
+    }
+    if (keys.contains("channelMarker.frequencyScaleDisplayType")) {
+        setFrequencyScaleDisplayType((frequencyScaleDisplay_t) swgChannelMarker->getFrequencyScaleDisplayType());
+    }
+    if (keys.contains("channelMarker.title")) {
+        setTitle(*swgChannelMarker->getTitle());
     }
 }
 

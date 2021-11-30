@@ -614,36 +614,7 @@ void CWKeyer::webapiSettingsPutPatch(
     SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings
 )
 {
-    if (channelSettingsKeys.contains("cwKeyer.loop")) {
-        cwKeyerSettings.m_loop = apiCwKeyerSettings->getLoop() != 0;
-    }
-    if (channelSettingsKeys.contains("cwKeyer.mode")) {
-        cwKeyerSettings.m_mode = (CWKeyerSettings::CWMode) apiCwKeyerSettings->getMode();
-    }
-    if (channelSettingsKeys.contains("cwKeyer.text")) {
-        cwKeyerSettings.m_text = *apiCwKeyerSettings->getText();
-    }
-    if (channelSettingsKeys.contains("cwKeyer.sampleRate")) {
-        cwKeyerSettings.m_sampleRate = apiCwKeyerSettings->getSampleRate();
-    }
-    if (channelSettingsKeys.contains("cwKeyer.wpm")) {
-        cwKeyerSettings.m_wpm = apiCwKeyerSettings->getWpm();
-    }
-    if (channelSettingsKeys.contains("cwKeyer.keyboardIambic")) {
-        cwKeyerSettings.m_keyboardIambic = apiCwKeyerSettings->getKeyboardIambic() != 0;
-    }
-    if (channelSettingsKeys.contains("cwKeyer.dotKey")) {
-        cwKeyerSettings.m_dotKey = (Qt::Key) apiCwKeyerSettings->getDotKey();
-    }
-    if (channelSettingsKeys.contains("cwKeyer.dotKeyModifiers")) {
-        cwKeyerSettings.m_dotKeyModifiers = (Qt::KeyboardModifiers) apiCwKeyerSettings->getDotKeyModifiers();
-    }
-    if (channelSettingsKeys.contains("cwKeyer.dashKey")) {
-        cwKeyerSettings.m_dashKey = (Qt::Key) apiCwKeyerSettings->getDashKey();
-    }
-    if (channelSettingsKeys.contains("cwKeyer.dashKeyModifiers")) {
-        cwKeyerSettings.m_dashKeyModifiers = (Qt::KeyboardModifiers) apiCwKeyerSettings->getDashKeyModifiers();
-    }
+    cwKeyerSettings.updateFrom(channelSettingsKeys, apiCwKeyerSettings);
 }
 
 void CWKeyer::webapiFormatChannelSettings(
@@ -651,20 +622,5 @@ void CWKeyer::webapiFormatChannelSettings(
     const CWKeyerSettings& cwKeyerSettings
 )
 {
-    apiCwKeyerSettings->setLoop(cwKeyerSettings.m_loop ? 1 : 0);
-    apiCwKeyerSettings->setMode((int) cwKeyerSettings.m_mode);
-    apiCwKeyerSettings->setSampleRate(cwKeyerSettings.m_sampleRate);
-
-    if (apiCwKeyerSettings->getText()) {
-        *apiCwKeyerSettings->getText() = cwKeyerSettings.m_text;
-    } else {
-        apiCwKeyerSettings->setText(new QString(cwKeyerSettings.m_text));
-    }
-
-    apiCwKeyerSettings->setWpm(cwKeyerSettings.m_wpm);
-    apiCwKeyerSettings->setKeyboardIambic(cwKeyerSettings.m_keyboardIambic ? 1 : 0);
-    apiCwKeyerSettings->setDotKey((int) cwKeyerSettings.m_dotKey);
-    apiCwKeyerSettings->setDotKeyModifiers((unsigned int) cwKeyerSettings.m_dotKeyModifiers);
-    apiCwKeyerSettings->setDashKey((int) cwKeyerSettings.m_dashKey);
-    apiCwKeyerSettings->setDashKeyModifiers((unsigned int) cwKeyerSettings.m_dashKeyModifiers);
+    cwKeyerSettings.formatTo(apiCwKeyerSettings);
 }

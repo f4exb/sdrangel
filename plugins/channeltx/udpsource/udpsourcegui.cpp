@@ -72,6 +72,7 @@ bool UDPSourceGUI::handleMessage(const Message& message)
         const UDPSource::MsgConfigureUDPSource& cfg = (UDPSource::MsgConfigureUDPSource&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
+        ui->spectrumGUI->updateSettings();
         displaySettings();
         blockApplySettings(false);
         return true;

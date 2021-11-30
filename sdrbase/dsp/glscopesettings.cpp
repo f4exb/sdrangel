@@ -15,8 +15,12 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QColor>
+
 #include "util/simpleserializer.h"
 #include "glscopesettings.h"
+
+#include "SWGGLScope.h"
 
 const double GLScopeSettings::AMPS[27] = {
         2e-1, 1e-1, 5e-2,
@@ -39,20 +43,14 @@ GLScopeSettings::GLScopeSettings(const GLScopeSettings& t)
 {
     resetToDefaults();
 
-    for (unsigned int i = 0; i < m_maxNbTraces; i++) {
-        m_tracesData[i] = t.m_tracesData[i];
-    }
-
-    for (unsigned int i = 0; i < m_maxNbTriggers; i++) {
-        m_triggersData[i] = t.m_triggersData[i];
-    }
-
+    m_tracesData = t.m_tracesData;
+    m_triggersData = t.m_triggersData;
     m_displayMode = t.m_displayMode;
     m_traceIntensity = t.m_traceIntensity;
     m_gridIntensity = t.m_gridIntensity;
     m_time = t.m_time;
     m_timeOfs = t.m_timeOfs;
-    m_traceLen = t.m_traceLen;
+    m_traceLenMult = t.m_traceLenMult;
     m_trigPre = t.m_trigPre;
 }
 
@@ -66,7 +64,7 @@ void GLScopeSettings::resetToDefaults()
     m_gridIntensity = 10;
     m_time = 1;
     m_timeOfs = 0;
-    m_traceLen = 1;
+    m_traceLenMult = 1;
     m_trigPre = 0;
 }
 
@@ -80,7 +78,7 @@ QByteArray GLScopeSettings::serialize() const
     s.writeS32(3, m_gridIntensity);
     s.writeS32(4, m_time);
     // s.writeS32(5, m_timeOfs);
-    s.writeS32(6, m_traceLen);
+    s.writeS32(6, m_traceLenMult);
 
     std::vector<TraceData>::const_iterator traceDataIt = m_tracesData.begin();
     unsigned int i = 0;
@@ -149,7 +147,7 @@ bool GLScopeSettings::deserialize(const QByteArray& data)
         d.readS32(3, &m_gridIntensity, 10);
         d.readS32(4, &m_time, 1);
         // d.readS32(5, &m_timeOfs, 0);
-        d.readS32(6, &m_traceLen, 1);
+        d.readS32(6, &m_traceLenMult, 1);
         d.readS32(201, &m_trigPre, 0);
 
         uint32_t nbTracesSaved;
@@ -234,27 +232,263 @@ bool GLScopeSettings::deserialize(const QByteArray& data)
     }
 }
 
+void GLScopeSettings::formatTo(SWGSDRangel::SWGObject *swgObject) const
+{
+    SWGSDRangel::SWGGLScope *swgScope = static_cast<SWGSDRangel::SWGGLScope *>(swgObject);
+
+    swgScope->setDisplayMode(m_displayMode);
+    swgScope->setGridIntensity(m_gridIntensity);
+    swgScope->setTime(m_time);
+    swgScope->setTimeOfs(m_timeOfs);
+    swgScope->setTraceIntensity(m_traceIntensity);
+    swgScope->setTraceLenMult(m_traceLenMult);
+    swgScope->setTrigPre(m_trigPre);
+
+    // array of traces
+    swgScope->setTracesData(new QList<SWGSDRangel::SWGTraceData *>);
+    std::vector<GLScopeSettings::TraceData>::const_iterator traceIt = m_tracesData.begin();
+
+    for (; traceIt != m_tracesData.end(); ++traceIt)
+    {
+        swgScope->getTracesData()->append(new SWGSDRangel::SWGTraceData);
+        swgScope->getTracesData()->back()->setStreamIndex(traceIt->m_streamIndex);
+        swgScope->getTracesData()->back()->setAmp(traceIt->m_amp);
+        swgScope->getTracesData()->back()->setHasTextOverlay(traceIt->m_hasTextOverlay ? 1 : 0);
+        swgScope->getTracesData()->back()->setStreamIndex(traceIt->m_streamIndex);
+        swgScope->getTracesData()->back()->setOfs(traceIt->m_ofs);
+        swgScope->getTracesData()->back()->setProjectionType((int) traceIt->m_projectionType);
+        swgScope->getTracesData()->back()->setTextOverlay(new QString(traceIt->m_textOverlay));
+        swgScope->getTracesData()->back()->setTraceColor(qColorToInt(traceIt->m_traceColor));
+        swgScope->getTracesData()->back()->setTraceColorB(traceIt->m_traceColorB);
+        swgScope->getTracesData()->back()->setTraceColorG(traceIt->m_traceColorG);
+        swgScope->getTracesData()->back()->setTraceColorR(traceIt->m_traceColorR);
+        swgScope->getTracesData()->back()->setTraceDelay(traceIt->m_traceDelay);
+        swgScope->getTracesData()->back()->setTraceDelayCoarse(traceIt->m_traceDelayCoarse);
+        swgScope->getTracesData()->back()->setTraceDelayFine(traceIt->m_traceDelayFine);
+        swgScope->getTracesData()->back()->setTriggerDisplayLevel(traceIt->m_triggerDisplayLevel);
+        swgScope->getTracesData()->back()->setViewTrace(traceIt->m_viewTrace ? 1 : 0);
+    }
+
+    // array of triggers
+    swgScope->setTriggersData(new QList<SWGSDRangel::SWGTriggerData *>);
+    std::vector<GLScopeSettings::TriggerData>::const_iterator triggerIt = m_triggersData.begin();
+
+    for (; triggerIt != m_triggersData.end(); ++triggerIt)
+    {
+        swgScope->getTriggersData()->append(new SWGSDRangel::SWGTriggerData);
+        swgScope->getTriggersData()->back()->setStreamIndex(triggerIt->m_streamIndex);
+        swgScope->getTriggersData()->back()->setInputIndex(triggerIt->m_inputIndex);
+        swgScope->getTriggersData()->back()->setProjectionType((int) triggerIt->m_projectionType);
+        swgScope->getTriggersData()->back()->setTriggerBothEdges(triggerIt->m_triggerBothEdges ? 1 : 0);
+        swgScope->getTriggersData()->back()->setTriggerColor(qColorToInt(triggerIt->m_triggerColor));
+        swgScope->getTriggersData()->back()->setTriggerColorB(triggerIt->m_triggerColorB);
+        swgScope->getTriggersData()->back()->setTriggerColorG(triggerIt->m_triggerColorG);
+        swgScope->getTriggersData()->back()->setTriggerColorR(triggerIt->m_triggerColorR);
+        swgScope->getTriggersData()->back()->setTriggerDelay(triggerIt->m_triggerDelay);
+        swgScope->getTriggersData()->back()->setTriggerDelayCoarse(triggerIt->m_triggerDelayCoarse);
+        swgScope->getTriggersData()->back()->setTriggerDelayFine(triggerIt->m_triggerDelayFine);
+        swgScope->getTriggersData()->back()->setTriggerDelayMult(triggerIt->m_triggerDelayMult);
+        swgScope->getTriggersData()->back()->setTriggerHoldoff(triggerIt->m_triggerHoldoff ? 1 : 0);
+        swgScope->getTriggersData()->back()->setTriggerLevel(triggerIt->m_triggerLevel);
+        swgScope->getTriggersData()->back()->setTriggerLevelCoarse(triggerIt->m_triggerLevelCoarse);
+        swgScope->getTriggersData()->back()->setTriggerLevelFine(triggerIt->m_triggerLevelFine);
+        swgScope->getTriggersData()->back()->setTriggerPositiveEdge(triggerIt->m_triggerPositiveEdge ? 1 : 0);
+        swgScope->getTriggersData()->back()->setTriggerRepeat(triggerIt->m_triggerRepeat);
+    }
+}
+
+void GLScopeSettings::updateFrom(const QStringList& keys, const SWGSDRangel::SWGObject *swgObject)
+{
+    SWGSDRangel::SWGGLScope *swgScope =
+        static_cast<SWGSDRangel::SWGGLScope *>(const_cast<SWGSDRangel::SWGObject *>(swgObject));
+
+    if (keys.contains("scopeConfig.displayMode")) {
+        m_displayMode = (GLScopeSettings::DisplayMode) swgScope->getDisplayMode();
+    }
+    if (keys.contains("scopeConfig.gridIntensity")) {
+        m_gridIntensity = swgScope->getGridIntensity();
+    }
+    if (keys.contains("scopeConfig.time")) {
+        m_time = swgScope->getTime();
+    }
+    if (keys.contains("scopeConfig.timeOfs")) {
+        m_timeOfs = swgScope->getTimeOfs();
+    }
+    if (keys.contains("scopeConfig.traceIntensity")) {
+        m_traceIntensity = swgScope->getTraceIntensity();
+    }
+    if (keys.contains("scopeConfig.traceLenMult")) {
+        m_traceLenMult = swgScope->getTraceLenMult();
+    }
+    if (keys.contains("scopeConfig.trigPre")) {
+        m_trigPre = swgScope->getTrigPre();
+    }
+    // traces
+    if (keys.contains("scopeConfig.tracesData"))
+    {
+        QList<SWGSDRangel::SWGTraceData *> *tracesData = swgScope->getTracesData();
+        m_tracesData.clear();
+
+        for (int i = 0; i < 10; i++) // no more than 10 traces anyway
+        {
+            if (keys.contains(QString("scopeConfig.tracesData[%1]").arg(i)))
+            {
+                SWGSDRangel::SWGTraceData *traceData = tracesData->at(i);
+                m_tracesData.push_back(GLScopeSettings::TraceData());
+
+                if (keys.contains(QString("scopeConfig.tracesData[%1].streamIndex").arg(i))) {
+                    m_tracesData.back().m_streamIndex = traceData->getStreamIndex();
+                }
+                if (keys.contains(QString("scopeConfig.tracesData[%1].amp").arg(i))) {
+                    m_tracesData.back().m_amp = traceData->getAmp();
+                }
+                if (keys.contains(QString("scopeConfig.tracesData[%1].hasTextOverlay").arg(i))) {
+                    m_tracesData.back().m_hasTextOverlay = traceData->getHasTextOverlay() != 0;
+                }
+                if (keys.contains(QString("scopeConfig.tracesData[%1].inputIndex").arg(i))) {
+                    m_tracesData.back().m_streamIndex = traceData->getStreamIndex();
+                }
+                if (keys.contains(QString("scopeConfig.tracesData[%1].ofs").arg(i))) {
+                    m_tracesData.back().m_ofs = traceData->getOfs();
+                }
+                if (keys.contains(QString("scopeConfig.tracesData[%1].projectionType").arg(i))) {
+                    m_tracesData.back().m_projectionType = (Projector::ProjectionType) traceData->getProjectionType();
+                }
+                if (keys.contains(QString("scopeConfig.tracesData[%1].traceColor").arg(i))) {
+                    m_tracesData.back().m_traceColor = intToQColor(traceData->getTraceColor());
+                }
+                if (keys.contains(QString("scopeConfig.tracesData[%1].traceColorB").arg(i))) {
+                    m_tracesData.back().m_traceColorB = traceData->getTraceColorB();
+                }
+                if (keys.contains(QString("scopeConfig.tracesData[%1].traceColorG").arg(i))) {
+                    m_tracesData.back().m_traceColorG = traceData->getTraceColorG();
+                }
+                if (keys.contains(QString("scopeConfig.tracesData[%1].traceColorR").arg(i))) {
+                    m_tracesData.back().m_traceColorR = traceData->getTraceColorR();
+                }
+                if (keys.contains(QString("scopeConfig.tracesData[%1].traceDelay").arg(i))) {
+                    m_tracesData.back().m_traceDelay = traceData->getTraceDelay();
+                }
+                if (keys.contains(QString("scopeConfig.tracesData[%1].traceDelayCoarse").arg(i))) {
+                    m_tracesData.back().m_traceDelayCoarse = traceData->getTraceDelayCoarse();
+                }
+                if (keys.contains(QString("scopeConfig.tracesData[%1].traceDelayFine").arg(i))) {
+                    m_tracesData.back().m_traceDelayFine = traceData->getTraceDelayFine();
+                }
+                if (keys.contains(QString("scopeConfig.tracesData[%1].triggerDisplayLevel").arg(i))) {
+                    m_tracesData.back().m_triggerDisplayLevel = traceData->getTriggerDisplayLevel();
+                }
+                if (keys.contains(QString("scopeConfig.tracesData[%1].viewTrace").arg(i))) {
+                    m_tracesData.back().m_viewTrace = traceData->getViewTrace() != 0;
+                }
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+    // triggers
+    if (keys.contains("scopeConfig.triggersData"))
+    {
+        QList<SWGSDRangel::SWGTriggerData *> *triggersData = swgScope->getTriggersData();
+        m_triggersData.clear();
+
+        for (int i = 0; i < 10; i++) // no more than 10 triggers anyway
+        {
+            if (keys.contains(QString("scopeConfig.triggersData[%1]").arg(i)))
+            {
+                SWGSDRangel::SWGTriggerData *triggerData = triggersData->at(i);
+                m_triggersData.push_back(GLScopeSettings::TriggerData());
+
+                if (keys.contains(QString("scopeConfig.triggersData[%1].streamIndex").arg(i))) {
+                    m_triggersData.back().m_streamIndex = triggerData->getStreamIndex();
+                }
+                if (keys.contains(QString("scopeConfig.triggersData[%1].inputIndex").arg(i))) {
+                    m_triggersData.back().m_inputIndex = triggerData->getInputIndex();
+                }
+                if (keys.contains(QString("scopeConfig.triggersData[%1].projectionType").arg(i))) {
+                    m_triggersData.back().m_projectionType = (Projector::ProjectionType) triggerData->getProjectionType();
+                }
+                if (keys.contains(QString("scopeConfig.triggersData[%1].triggerBothEdges").arg(i))) {
+                    m_triggersData.back().m_triggerBothEdges = triggerData->getTriggerBothEdges() != 0;
+                }
+                if (keys.contains(QString("scopeConfig.tracesData[%1].triggerColor").arg(i))) {
+                    m_tracesData.back().m_traceColor = intToQColor(triggerData->getTriggerColor());
+                }
+                if (keys.contains(QString("scopeConfig.triggersData[%1].triggerColorB").arg(i))) {
+                    m_triggersData.back().m_triggerColorB = triggerData->getTriggerColorB();
+                }
+                if (keys.contains(QString("scopeConfig.triggersData[%1].triggerColorG").arg(i))) {
+                    m_triggersData.back().m_triggerColorG = triggerData->getTriggerColorG();
+                }
+                if (keys.contains(QString("scopeConfig.triggersData[%1].triggerColorR").arg(i))) {
+                    m_triggersData.back().m_triggerColorR = triggerData->getTriggerColorR();
+                }
+                if (keys.contains(QString("scopeConfig.triggersData[%1].triggerDelay").arg(i))) {
+                    m_triggersData.back().m_triggerDelay = triggerData->getTriggerDelay();
+                }
+                if (keys.contains(QString("scopeConfig.triggersData[%1].triggerDelayCoarse").arg(i))) {
+                    m_triggersData.back().m_triggerDelayCoarse = triggerData->getTriggerDelayCoarse();
+                }
+                if (keys.contains(QString("scopeConfig.triggersData[%1].triggerDelayFine").arg(i))) {
+                    m_triggersData.back().m_triggerDelayFine = triggerData->getTriggerDelayFine();
+                }
+                if (keys.contains(QString("scopeConfig.triggersData[%1].triggerDelayMult").arg(i))) {
+                    m_triggersData.back().m_triggerDelayMult = triggerData->getTriggerDelayMult();
+                }
+                if (keys.contains(QString("scopeConfig.triggersData[%1].triggerHoldoff").arg(i))) {
+                    m_triggersData.back().m_triggerHoldoff = triggerData->getTriggerHoldoff();
+                }
+                if (keys.contains(QString("scopeConfig.triggersData[%1].triggerLevel").arg(i))) {
+                    m_triggersData.back().m_triggerLevel = triggerData->getTriggerLevel();
+                }
+                if (keys.contains(QString("scopeConfig.triggersData[%1].triggerLevelCoarse").arg(i))) {
+                    m_triggersData.back().m_triggerLevelCoarse = triggerData->getTriggerLevelCoarse();
+                }
+                if (keys.contains(QString("scopeConfig.triggersData[%1].triggerLevelFine").arg(i))) {
+                    m_triggersData.back().m_triggerLevelFine = triggerData->getTriggerLevelFine();
+                }
+                if (keys.contains(QString("scopeConfig.triggersData[%1].triggerPositiveEdge").arg(i))) {
+                    m_triggersData.back().m_triggerPositiveEdge = triggerData->getTriggerPositiveEdge() != 0;
+                }
+                if (keys.contains(QString("scopeConfig.triggersData[%1].triggerRepeat").arg(i))) {
+                    m_triggersData.back().m_triggerRepeat = triggerData->getTriggerRepeat() != 0;
+                }
+            }
+        }
+    }
+}
+
 GLScopeSettings& GLScopeSettings::operator=(const GLScopeSettings& t)
 {
     // Check for self assignment
     if (this != &t)
     {
-        for (unsigned int i = 0; i < m_maxNbTraces; i++) {
-            m_tracesData[i] = t.m_tracesData[i];
-        }
-
-        for (unsigned int i = 0; i < m_maxNbTriggers; i++) {
-            m_triggersData[i] = t.m_triggersData[i];
-        }
-
+        m_tracesData = t.m_tracesData;
+        m_triggersData = t.m_triggersData;
         m_displayMode = t.m_displayMode;
         m_traceIntensity = t.m_traceIntensity;
         m_gridIntensity = t.m_gridIntensity;
         m_time = t.m_time;
         m_timeOfs = t.m_timeOfs;
-        m_traceLen = t.m_traceLen;
+        m_traceLenMult = t.m_traceLenMult;
         m_trigPre = t.m_trigPre;
     }
 
     return *this;
+}
+
+int GLScopeSettings::qColorToInt(const QColor& color)
+{
+    return 256*256*color.blue() + 256*color.green() + color.red();
+}
+
+QColor GLScopeSettings::intToQColor(int intColor)
+{
+    int r = intColor % 256;
+    int bg = intColor / 256;
+    int g = bg % 256;
+    int b = bg / 256;
+    return QColor(r, g, b);
 }
