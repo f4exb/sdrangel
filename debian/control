@@ -52,7 +52,21 @@ Build-Depends: debhelper (>= 9),
 
 Package: sdrangel
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libasound2, libgl1-mesa-glx, libqt5multimedia5-plugins, pulseaudio, ffmpeg
+Depends: ${shlibs:Depends},
+ ${misc:Depends},
+ libasound2,
+ libgl1-mesa-glx,
+ libqt5multimedia5-plugins,
+ pulseaudio,
+ ffmpeg,
+ qml-module-qtlocation,
+ qml-module-qtpositioning,
+ qml-module-qtquick-window2,
+ qml-module-qtquick-dialogs,
+ qml-module-qtquick-controls,
+ qml-module-qtquick-controls2,
+ qml-module-qtquick-layouts,
+ qml-module-qtgraphicaleffects
 Description: SDR/Analyzer/Generator front-end for various hardware
  SDR/Analyzer/Generator front-end for Airspy, BladeRF, HackRF,
  RTL-SDR, FunCube, LimeSDR, PlutoSDR, RSP, USRP.
