@@ -219,13 +219,6 @@ private:
     void resetFeatureReport(SWGSDRangel::SWGFeatureReport& featureReport);
     void resetFeatureActions(SWGSDRangel::SWGFeatureActions& featureActions);
 
-    void processSoapySDRSettings(
-        SWGSDRangel::SWGDeviceSettings *deviceSettings,
-        QJsonObject& deviceSettingsJson,
-        QStringList& deviceSettingsKeys,
-        bool inputElseOutput
-    );
-
     static const QMap<QString, QString> m_channelURIToSettingsKey;
     static const QMap<QString, QString> m_deviceIdToSettingsKey;
     static const QMap<QString, QString> m_channelTypeToSettingsKey;

@@ -43,24 +43,8 @@ public:
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response,
             QString& errorMessage);
-
-    static void webapiFormatChannelSettings(
-            SWGSDRangel::SWGChannelSettings& response,
-            const ChannelAnalyzerSettings& settings,
-            const GLScopeSettings& scopeSettings,
-            const SpectrumSettings& spectrumSettings);
-
-    static void webapiUpdateChannelSettings(
-            ChannelAnalyzerSettings& settings,
-            GLScopeSettings& scopeSettings,
-            SpectrumSettings& spectrumSettings,
-            const QStringList& channelSettingsKeys,
-            SWGSDRangel::SWGChannelSettings& response);
-
 private:
     ChannelAnalyzerSettings m_settings;
-    GLScopeSettings m_glScopeSettings;
-    SpectrumSettings m_SpectrumSettings;
 };
 
 #endif // INCLUDE_CHANALYZER_WEBAPIADAPTER_H
