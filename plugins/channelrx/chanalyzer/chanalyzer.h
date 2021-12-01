@@ -20,6 +20,8 @@
 
 #include <QMutex>
 #include <QThread>
+#include <QNetworkRequest>
+
 #include <vector>
 
 #include "dsp/basebandsamplesink.h"
@@ -32,6 +34,8 @@
 #include "chanalyzerbaseband.h"
 
 class DownChannelizer;
+class QNetworkReply;
+class QNetworkAccessManager;
 
 class ChannelAnalyzer : public BasebandSampleSink, public ChannelAPI {
 public:
@@ -95,6 +99,25 @@ public:
         return m_settings.m_inputFrequencyOffset;
     }
 
+    virtual int webapiSettingsGet(
+            SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+            bool force,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
+
+    static void webapiFormatChannelSettings(
+        SWGSDRangel::SWGChannelSettings& response,
+        const ChannelAnalyzerSettings& settings);
+
+    static void webapiUpdateChannelSettings(
+            ChannelAnalyzerSettings& settings,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response);
+
     static const char* const m_channelIdURI;
     static const char* const m_channelId;
 
@@ -108,7 +131,26 @@ private:
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
     qint64 m_centerFrequency; //!< stored from device message used when starting baseband sink
 
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
+
 	void applySettings(const ChannelAnalyzerSettings& settings, bool force = false);
+    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const ChannelAnalyzerSettings& settings, bool force);
+    void sendChannelSettings(
+        QList<MessageQueue*> *messageQueues,
+        QList<QString>& channelSettingsKeys,
+        const ChannelAnalyzerSettings& settings,
+        bool force
+    );
+    void webapiFormatChannelSettings(
+        QList<QString>& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings *swgChannelSettings,
+        const ChannelAnalyzerSettings& settings,
+        bool force
+    );
+
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
 };
 
 #endif // INCLUDE_CHANALYZER_H

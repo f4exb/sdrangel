@@ -66,6 +66,18 @@ SWGChannelAnalyzerSettings::SWGChannelAnalyzerSettings() {
     m_rgb_color_isSet = false;
     title = nullptr;
     m_title_isSet = false;
+    stream_index = 0;
+    m_stream_index_isSet = false;
+    use_reverse_api = 0;
+    m_use_reverse_api_isSet = false;
+    reverse_api_address = nullptr;
+    m_reverse_api_address_isSet = false;
+    reverse_api_port = 0;
+    m_reverse_api_port_isSet = false;
+    reverse_api_device_index = 0;
+    m_reverse_api_device_index_isSet = false;
+    reverse_api_channel_index = 0;
+    m_reverse_api_channel_index_isSet = false;
     spectrum_config = nullptr;
     m_spectrum_config_isSet = false;
     scope_config = nullptr;
@@ -118,6 +130,18 @@ SWGChannelAnalyzerSettings::init() {
     m_rgb_color_isSet = false;
     title = new QString("");
     m_title_isSet = false;
+    stream_index = 0;
+    m_stream_index_isSet = false;
+    use_reverse_api = 0;
+    m_use_reverse_api_isSet = false;
+    reverse_api_address = new QString("");
+    m_reverse_api_address_isSet = false;
+    reverse_api_port = 0;
+    m_reverse_api_port_isSet = false;
+    reverse_api_device_index = 0;
+    m_reverse_api_device_index_isSet = false;
+    reverse_api_channel_index = 0;
+    m_reverse_api_channel_index_isSet = false;
     spectrum_config = new SWGGLSpectrum();
     m_spectrum_config_isSet = false;
     scope_config = new SWGGLScope();
@@ -149,6 +173,14 @@ SWGChannelAnalyzerSettings::cleanup() {
     if(title != nullptr) { 
         delete title;
     }
+
+
+    if(reverse_api_address != nullptr) { 
+        delete reverse_api_address;
+    }
+
+
+
     if(spectrum_config != nullptr) { 
         delete spectrum_config;
     }
@@ -208,6 +240,18 @@ SWGChannelAnalyzerSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&reverse_api_address, pJson["reverseAPIAddress"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&reverse_api_port, pJson["reverseAPIPort"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&reverse_api_device_index, pJson["reverseAPIDeviceIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&reverse_api_channel_index, pJson["reverseAPIChannelIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&spectrum_config, pJson["spectrumConfig"], "SWGGLSpectrum", "SWGGLSpectrum");
     
@@ -287,6 +331,24 @@ SWGChannelAnalyzerSettings::asJsonObject() {
     }
     if(title != nullptr && *title != QString("")){
         toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
+    if(m_stream_index_isSet){
+        obj->insert("streamIndex", QJsonValue(stream_index));
+    }
+    if(m_use_reverse_api_isSet){
+        obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
+    }
+    if(reverse_api_address != nullptr && *reverse_api_address != QString("")){
+        toJsonValue(QString("reverseAPIAddress"), reverse_api_address, obj, QString("QString"));
+    }
+    if(m_reverse_api_port_isSet){
+        obj->insert("reverseAPIPort", QJsonValue(reverse_api_port));
+    }
+    if(m_reverse_api_device_index_isSet){
+        obj->insert("reverseAPIDeviceIndex", QJsonValue(reverse_api_device_index));
+    }
+    if(m_reverse_api_channel_index_isSet){
+        obj->insert("reverseAPIChannelIndex", QJsonValue(reverse_api_channel_index));
     }
     if((spectrum_config != nullptr) && (spectrum_config->isSet())){
         toJsonValue(QString("spectrumConfig"), spectrum_config, obj, QString("SWGGLSpectrum"));
@@ -491,6 +553,66 @@ SWGChannelAnalyzerSettings::setTitle(QString* title) {
     this->m_title_isSet = true;
 }
 
+qint32
+SWGChannelAnalyzerSettings::getStreamIndex() {
+    return stream_index;
+}
+void
+SWGChannelAnalyzerSettings::setStreamIndex(qint32 stream_index) {
+    this->stream_index = stream_index;
+    this->m_stream_index_isSet = true;
+}
+
+qint32
+SWGChannelAnalyzerSettings::getUseReverseApi() {
+    return use_reverse_api;
+}
+void
+SWGChannelAnalyzerSettings::setUseReverseApi(qint32 use_reverse_api) {
+    this->use_reverse_api = use_reverse_api;
+    this->m_use_reverse_api_isSet = true;
+}
+
+QString*
+SWGChannelAnalyzerSettings::getReverseApiAddress() {
+    return reverse_api_address;
+}
+void
+SWGChannelAnalyzerSettings::setReverseApiAddress(QString* reverse_api_address) {
+    this->reverse_api_address = reverse_api_address;
+    this->m_reverse_api_address_isSet = true;
+}
+
+qint32
+SWGChannelAnalyzerSettings::getReverseApiPort() {
+    return reverse_api_port;
+}
+void
+SWGChannelAnalyzerSettings::setReverseApiPort(qint32 reverse_api_port) {
+    this->reverse_api_port = reverse_api_port;
+    this->m_reverse_api_port_isSet = true;
+}
+
+qint32
+SWGChannelAnalyzerSettings::getReverseApiDeviceIndex() {
+    return reverse_api_device_index;
+}
+void
+SWGChannelAnalyzerSettings::setReverseApiDeviceIndex(qint32 reverse_api_device_index) {
+    this->reverse_api_device_index = reverse_api_device_index;
+    this->m_reverse_api_device_index_isSet = true;
+}
+
+qint32
+SWGChannelAnalyzerSettings::getReverseApiChannelIndex() {
+    return reverse_api_channel_index;
+}
+void
+SWGChannelAnalyzerSettings::setReverseApiChannelIndex(qint32 reverse_api_channel_index) {
+    this->reverse_api_channel_index = reverse_api_channel_index;
+    this->m_reverse_api_channel_index_isSet = true;
+}
+
 SWGGLSpectrum*
 SWGChannelAnalyzerSettings::getSpectrumConfig() {
     return spectrum_config;
@@ -581,6 +703,24 @@ SWGChannelAnalyzerSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_stream_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_use_reverse_api_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(reverse_api_address && *reverse_api_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_device_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_channel_index_isSet){
             isObjectUpdated = true; break;
         }
         if(spectrum_config && spectrum_config->isSet()){

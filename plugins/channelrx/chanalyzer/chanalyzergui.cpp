@@ -234,6 +234,21 @@ bool ChannelAnalyzerGUI::handleMessage(const Message& message)
         m_basebandSampleRate = cmd.getSampleRate();
         qDebug("ChannelAnalyzerGUI::handleMessage: DSPSignalNotification: m_basebandSampleRate: %d", m_basebandSampleRate);
         setSinkSampleRate();
+
+        return true;
+    }
+    else if (ChannelAnalyzer::MsgConfigureChannelAnalyzer::match(message))
+    {
+        qDebug("ChannelAnalyzerGUI::handleMessage: ChannelAnalyzer::MsgConfigureChannelAnalyzer");
+        const ChannelAnalyzer::MsgConfigureChannelAnalyzer& cfg = (ChannelAnalyzer::MsgConfigureChannelAnalyzer&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        ui->spectrumGUI->updateSettings();
+        ui->scopeGUI->updateSettings();
+        displaySettings();
+        blockApplySettings(false);
+
+        return true;
     }
 
     return false;

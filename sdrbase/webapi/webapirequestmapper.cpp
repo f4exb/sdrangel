@@ -4196,7 +4196,7 @@ bool WebAPIRequestMapper::getChannelSettings(
         else if (channelSettingsKey == "ChannelAnalyzerSettings")
         {
             channelSettings->setChannelAnalyzerSettings(new SWGSDRangel::SWGChannelAnalyzerSettings());
-            processChannelAnalyzerSettings(channelSettings, settingsJsonObject);
+            channelSettings->getChannelAnalyzerSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "ChirpChatDemodSettings")
         {
@@ -5138,110 +5138,6 @@ void WebAPIRequestMapper::resetFeatureActions(SWGSDRangel::SWGFeatureActions& fe
     featureActions.setFeatureType(nullptr);
     featureActions.setMapActions(nullptr);
     featureActions.setSimplePttActions(nullptr);
-}
-
-void WebAPIRequestMapper::processChannelAnalyzerSettings(
-        SWGSDRangel::SWGChannelSettings *channelSettings,
-        const QJsonObject& channelSettingsJson
-)
-{
-    SWGSDRangel::SWGChannelAnalyzerSettings *channelAnalyzerSettings = new SWGSDRangel::SWGChannelAnalyzerSettings();
-    channelSettings->setChannelAnalyzerSettings(channelAnalyzerSettings);
-    channelAnalyzerSettings->init();
-
-    if (channelSettingsJson.contains("bandwidth")) {
-        channelAnalyzerSettings->setBandwidth(channelSettingsJson["bandwidth"].toInt());
-    }
-    if (channelSettingsJson.contains("downSample")) {
-        channelAnalyzerSettings->setDownSample(channelSettingsJson["downSample"].toInt());
-    }
-    if (channelSettingsJson.contains("downSampleRate")) {
-        channelAnalyzerSettings->setDownSampleRate(channelSettingsJson["downSampleRate"].toInt());
-    }
-    if (channelSettingsJson.contains("fll")) {
-        channelAnalyzerSettings->setFll(channelSettingsJson["fll"].toInt());
-    }
-    if (channelSettingsJson.contains("frequency")) {
-        channelAnalyzerSettings->setFrequency(channelSettingsJson["frequency"].toInt());
-    }
-    if (channelSettingsJson.contains("inputType")) {
-        channelAnalyzerSettings->setInputType(channelSettingsJson["inputType"].toInt());
-    }
-    if (channelSettingsJson.contains("lowCutoff")) {
-        channelAnalyzerSettings->setLowCutoff(channelSettingsJson["lowCutoff"].toInt());
-    }
-    if (channelSettingsJson.contains("pll")) {
-        channelAnalyzerSettings->setPll(channelSettingsJson["pll"].toInt());
-    }
-    if (channelSettingsJson.contains("pllPskOrder")) {
-        channelAnalyzerSettings->setPllPskOrder(channelSettingsJson["pllPskOrder"].toInt());
-    }
-    if (channelSettingsJson.contains("rgbColor")) {
-        channelAnalyzerSettings->setRgbColor(channelSettingsJson["rgbColor"].toInt());
-    }
-    if (channelSettingsJson.contains("rrc")) {
-        channelAnalyzerSettings->setRrc(channelSettingsJson["rrc"].toInt());
-    }
-    if (channelSettingsJson.contains("rrcRolloff")) {
-        channelAnalyzerSettings->setRrcRolloff(channelSettingsJson["rrcRolloff"].toInt());
-    }
-    if (channelSettingsJson.contains("spanLog2")) {
-        channelAnalyzerSettings->setSpanLog2(channelSettingsJson["spanLog2"].toInt());
-    }
-    if (channelSettingsJson.contains("ssb")) {
-        channelAnalyzerSettings->setSsb(channelSettingsJson["ssb"].toInt());
-    }
-    if (channelSettingsJson.contains("title")) {
-        channelAnalyzerSettings->setTitle(new QString(channelSettingsJson["title"].toString()));
-    }
-
-    if (channelSettingsJson.contains("spectrumConfig"))
-    {
-        SWGSDRangel::SWGGLSpectrum *spectrum = new SWGSDRangel::SWGGLSpectrum();
-        spectrum->init();
-        channelAnalyzerSettings->setSpectrumConfig(spectrum);
-        QJsonObject spectrumJson;
-        spectrum->fromJsonObject(spectrumJson);
-    }
-
-    if (channelSettingsJson.contains("scopeConfig") && channelSettingsJson["scopeConfig"].isObject())
-    {
-        SWGSDRangel::SWGGLScope *scopeConfig = new SWGSDRangel::SWGGLScope();
-        scopeConfig->init();
-        channelAnalyzerSettings->setScopeConfig(scopeConfig);
-        QJsonObject scopeConfigJson;
-        scopeConfig->fromJsonObject(scopeConfigJson);
-
-        if (scopeConfigJson.contains("tracesData") && scopeConfigJson["tracesData"].isArray())
-        {
-            QList<SWGSDRangel::SWGTraceData *> *tracesData = new QList<SWGSDRangel::SWGTraceData *>();
-            scopeConfig->setTracesData(tracesData);
-            QJsonArray tracesJson = scopeConfigJson["tracesData"].toArray();
-
-            for (int i = 0; i < tracesJson.size(); i++)
-            {
-                SWGSDRangel::SWGTraceData *traceData = new SWGSDRangel::SWGTraceData();
-                tracesData->append(traceData);
-                QJsonObject traceJson = tracesJson.at(i).toObject();
-                traceData->fromJsonObject(traceJson);
-            }
-        }
-
-        if (scopeConfigJson.contains("triggersData") && scopeConfigJson["triggersData"].isArray())
-        {
-            QList<SWGSDRangel::SWGTriggerData *> *triggersData = new QList<SWGSDRangel::SWGTriggerData *>();
-            scopeConfig->setTriggersData(triggersData);
-            QJsonArray triggersJson = scopeConfigJson["triggersData"].toArray();
-
-            for (int i = 0; i < triggersJson.size(); i++)
-            {
-                SWGSDRangel::SWGTriggerData *triggerData = new SWGSDRangel::SWGTriggerData();
-                triggersData->append(triggerData);
-                QJsonObject triggerJson = triggersJson.at(i).toObject();
-                triggerData->fromJsonObject(triggerJson);
-            }
-        }
-    }
 }
 
 void WebAPIRequestMapper::processSoapySDRSettings(

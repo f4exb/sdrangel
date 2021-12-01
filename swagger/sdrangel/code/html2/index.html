@@ -3001,6 +3001,26 @@ margin-bottom: 20px;
     "title" : {
       "type" : "string"
     },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    },
     "spectrumConfig" : {
       "$ref" : "#/definitions/GLSpectrum"
     },
@@ -51447,7 +51467,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-11-30T22:42:47.179+01:00
+              Generated 2021-12-01T01:10:25.279+01:00
             </div>
           </div>
       </div>

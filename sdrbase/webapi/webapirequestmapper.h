@@ -219,11 +219,6 @@ private:
     void resetFeatureReport(SWGSDRangel::SWGFeatureReport& featureReport);
     void resetFeatureActions(SWGSDRangel::SWGFeatureActions& featureActions);
 
-    void processChannelAnalyzerSettings(
-        SWGSDRangel::SWGChannelSettings *channelSettings,
-        const QJsonObject& channelSettingsJson
-    );
-
     void processSoapySDRSettings(
         SWGSDRangel::SWGDeviceSettings *deviceSettings,
         QJsonObject& deviceSettingsJson,

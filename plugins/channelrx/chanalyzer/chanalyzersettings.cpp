@@ -52,6 +52,12 @@ void ChannelAnalyzerSettings::resetToDefaults()
     m_inputType = InputSignal;
     m_rgbColor = QColor(128, 128, 128).rgb();
     m_title = "Channel Analyzer";
+    m_streamIndex = 0;
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
+    m_reverseAPIChannelIndex = 0;
 }
 
 QByteArray ChannelAnalyzerSettings::serialize() const
@@ -80,6 +86,12 @@ QByteArray ChannelAnalyzerSettings::serialize() const
     s.writeFloat(20, m_pllLoopGain);
     s.writeBool(21, m_costasLoop);
     s.writeBlob(22, m_rollupState);
+    s.writeBool(23, m_useReverseAPI);
+    s.writeString(24, m_reverseAPIAddress);
+    s.writeU32(25, m_reverseAPIPort);
+    s.writeU32(26, m_reverseAPIDeviceIndex);
+    s.writeU32(27, m_reverseAPIChannelIndex);
+    s.writeS32(28, m_streamIndex);
 
     return s.final();
 }
@@ -98,6 +110,7 @@ bool ChannelAnalyzerSettings::deserialize(const QByteArray& data)
     {
         QByteArray bytetmp;
         int tmp;
+        unsigned int utmp;
 
         d.readS32(1, &m_inputFrequencyOffset, 0);
         d.readS32(2, &m_bandwidth, 5000);
@@ -132,6 +145,21 @@ bool ChannelAnalyzerSettings::deserialize(const QByteArray& data)
         d.readFloat(20, &m_pllLoopGain, 10.0f);
         d.readBool(21, &m_costasLoop, false);
         d.readBlob(22, &m_rollupState);
+        d.readBool(18, &m_useReverseAPI, false);
+        d.readString(19, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(20, &utmp, 0);
+
+        if ((utmp > 1023) && (utmp < 65535)) {
+            m_reverseAPIPort = utmp;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(21, &utmp, 0);
+        m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
+        d.readU32(22, &utmp, 0);
+        m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
+        d.readS32(23, &m_streamIndex, 0);
 
         return true;
     }

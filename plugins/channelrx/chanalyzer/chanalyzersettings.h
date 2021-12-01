@@ -54,6 +54,12 @@ struct ChannelAnalyzerSettings
     Serializable *m_spectrumGUI;
     Serializable *m_scopeGUI;
     QByteArray m_rollupState;
+    int m_streamIndex; //!< MIMO channel. Not relevant when connected to SI (single Rx).
+    bool m_useReverseAPI;
+    QString m_reverseAPIAddress;
+    uint16_t m_reverseAPIPort;
+    uint16_t m_reverseAPIDeviceIndex;
+    uint16_t m_reverseAPIChannelIndex;
 
     ChannelAnalyzerSettings();
     void resetToDefaults();
