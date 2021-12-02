@@ -245,6 +245,7 @@ bool ChannelAnalyzerGUI::handleMessage(const Message& message)
         blockApplySettings(true);
         ui->spectrumGUI->updateSettings();
         ui->scopeGUI->updateSettings();
+        m_channelMarker.updateSettings(static_cast<const ChannelMarker*>(m_settings.m_channelMarker));
         displaySettings();
         blockApplySettings(false);
 

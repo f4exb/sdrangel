@@ -643,6 +643,9 @@ void NoiseFigure::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getNoiseFigureSettings()->getReverseApiChannelIndex();
     }
+    if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getNoiseFigureSettings()->getChannelMarker());
+    }
 }
 
 void NoiseFigure::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const NoiseFigureSettings& settings)
@@ -668,6 +671,20 @@ void NoiseFigure::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& r
     response.getNoiseFigureSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getNoiseFigureSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getNoiseFigureSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+
+    if (settings.m_channelMarker)
+    {
+        if (response.getNoiseFigureSettings()->getChannelMarker())
+        {
+            settings.m_channelMarker->formatTo(response.getNoiseFigureSettings()->getChannelMarker());
+        }
+        else
+        {
+            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            settings.m_channelMarker->formatTo(swgChannelMarker);
+            response.getNoiseFigureSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
 }
 
 void NoiseFigure::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const NoiseFigureSettings& settings, bool force)
@@ -767,6 +784,13 @@ void NoiseFigure::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgNoiseFigureSettings->setStreamIndex(settings.m_streamIndex);
+    }
+
+    if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
+    {
+        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        settings.m_channelMarker->formatTo(swgChannelMarker);
+        swgNoiseFigureSettings->setChannelMarker(swgChannelMarker);
     }
 }
 

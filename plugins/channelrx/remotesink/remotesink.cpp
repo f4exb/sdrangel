@@ -37,6 +37,7 @@
 #include "dsp/dspdevicesourceengine.h"
 #include "device/deviceapi.h"
 #include "feature/feature.h"
+#include "settings/serializable.h"
 #include "maincore.h"
 
 #include "remotesinkbaseband.h"
@@ -382,6 +383,9 @@ void RemoteSink::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getRemoteSinkSettings()->getReverseApiChannelIndex();
     }
+    if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getRemoteSinkSettings()->getChannelMarker());
+    }
 }
 
 void RemoteSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const RemoteSinkSettings& settings)
@@ -418,6 +422,20 @@ void RemoteSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& re
     response.getRemoteSinkSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getRemoteSinkSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getRemoteSinkSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+
+    if (settings.m_channelMarker)
+    {
+        if (response.getRemoteSinkSettings()->getChannelMarker())
+        {
+            settings.m_channelMarker->formatTo(response.getRemoteSinkSettings()->getChannelMarker());
+        }
+        else
+        {
+            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            settings.m_channelMarker->formatTo(swgChannelMarker);
+            response.getRemoteSinkSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
 }
 
 void RemoteSink::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const RemoteSinkSettings& settings, bool force)
@@ -510,6 +528,13 @@ void RemoteSink::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgRemoteSinkSettings->setStreamIndex(settings.m_streamIndex);
+    }
+
+    if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
+    {
+        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        settings.m_channelMarker->formatTo(swgChannelMarker);
+        swgRemoteSinkSettings->setChannelMarker(swgChannelMarker);
     }
 }
 

@@ -497,6 +497,9 @@ void SigMFFileSink::webapiUpdateChannelSettings(
     if (settings.m_spectrumGUI && channelSettingsKeys.contains("spectrumConfig")) {
         settings.m_spectrumGUI->updateFrom(channelSettingsKeys, response.getSigMfFileSinkSettings()->getSpectrumConfig());
     }
+    if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getSigMfFileSinkSettings()->getChannelMarker());
+    }
 }
 
 void SigMFFileSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const SigMFFileSinkSettings& settings)
@@ -547,6 +550,20 @@ void SigMFFileSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings&
             SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
             settings.m_spectrumGUI->formatTo(swgGLSpectrum);
             response.getSigMfFileSinkSettings()->setSpectrumConfig(swgGLSpectrum);
+        }
+    }
+
+    if (settings.m_channelMarker)
+    {
+        if (response.getSigMfFileSinkSettings()->getChannelMarker())
+        {
+            settings.m_channelMarker->formatTo(response.getSigMfFileSinkSettings()->getChannelMarker());
+        }
+        else
+        {
+            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            settings.m_channelMarker->formatTo(swgChannelMarker);
+            response.getSigMfFileSinkSettings()->setChannelMarker(swgChannelMarker);
         }
     }
 }
@@ -659,11 +676,19 @@ void SigMFFileSink::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("streamIndex")) {
         swgSigMFFileSinkSettings->setStreamIndex(settings.m_streamIndex);
     }
+
     if (settings.m_spectrumGUI && (channelSettingsKeys.contains("spectrunConfig") || force))
     {
         SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
         settings.m_spectrumGUI->formatTo(swgGLSpectrum);
         swgSigMFFileSinkSettings->setSpectrumConfig(swgGLSpectrum);
+    }
+
+    if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
+    {
+        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        settings.m_channelMarker->formatTo(swgChannelMarker);
+        swgSigMFFileSinkSettings->setChannelMarker(swgChannelMarker);
     }
 }
 

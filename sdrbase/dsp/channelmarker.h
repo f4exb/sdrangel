@@ -103,6 +103,7 @@ public:
     virtual bool deserialize(const QByteArray& data);
     virtual void formatTo(SWGSDRangel::SWGObject *swgObject) const;
     virtual void updateFrom(const QStringList& keys, const SWGSDRangel::SWGObject *swgObject);
+	void updateSettings(const ChannelMarker *channelMarker);
 
 protected:
 	static QRgb m_colorTable[];

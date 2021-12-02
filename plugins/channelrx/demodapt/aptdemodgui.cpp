@@ -94,6 +94,7 @@ bool APTDemodGUI::handleMessage(const Message& message)
         const APTDemod::MsgConfigureAPTDemod& cfg = (APTDemod::MsgConfigureAPTDemod&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
+        m_channelMarker.updateSettings(static_cast<const ChannelMarker*>(m_settings.m_channelMarker));
         displaySettings();
         blockApplySettings(false);
         return true;

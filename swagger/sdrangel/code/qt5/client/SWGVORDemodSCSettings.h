@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include "SWGChannelMarker.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -87,6 +88,9 @@ public:
     qint32 getIdentThreshold();
     void setIdentThreshold(qint32 ident_threshold);
 
+    SWGChannelMarker* getChannelMarker();
+    void setChannelMarker(SWGChannelMarker* channel_marker);
+
 
     virtual bool isSet() override;
 
@@ -135,6 +139,9 @@ private:
 
     qint32 ident_threshold;
     bool m_ident_threshold_isSet;
+
+    SWGChannelMarker* channel_marker;
+    bool m_channel_marker_isSet;
 
 };
 

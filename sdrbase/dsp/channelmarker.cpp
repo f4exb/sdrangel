@@ -230,6 +230,11 @@ void ChannelMarker::updateFrom(const QStringList& keys, const SWGSDRangel::SWGOb
     }
 }
 
+void ChannelMarker::updateSettings(const ChannelMarker *channelMarker)
+{
+    m_fScaleDisplayType = channelMarker->m_fScaleDisplayType;
+}
+
 void ChannelMarker::addStreamIndex(int streamIndex)
 {
     m_enabledStreamsBits |= (1<<streamIndex);

@@ -40,6 +40,7 @@
 #include "dsp/dspcommands.h"
 #include "dsp/devicesamplemimo.h"
 #include "device/deviceapi.h"
+#include "settings/serializable.h"
 #include "util/db.h"
 #include "maincore.h"
 
@@ -387,6 +388,9 @@ void ADSBDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getAdsbDemodSettings()->getReverseApiChannelIndex();
     }
+    if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getAdsbDemodSettings()->getChannelMarker());
+    }
 }
 
 int ADSBDemod::webapiReportGet(
@@ -437,6 +441,20 @@ void ADSBDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
     response.getAdsbDemodSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getAdsbDemodSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getAdsbDemodSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+
+    if (settings.m_channelMarker)
+    {
+        if (response.getAdsbDemodSettings()->getChannelMarker())
+        {
+            settings.m_channelMarker->formatTo(response.getAdsbDemodSettings()->getChannelMarker());
+        }
+        else
+        {
+            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            settings.m_channelMarker->formatTo(swgChannelMarker);
+            response.getAdsbDemodSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
 }
 
 void ADSBDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)

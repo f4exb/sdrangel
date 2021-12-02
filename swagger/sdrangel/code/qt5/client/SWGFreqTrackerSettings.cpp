@@ -70,6 +70,8 @@ SWGFreqTrackerSettings::SWGFreqTrackerSettings() {
     m_reverse_api_channel_index_isSet = false;
     spectrum_config = nullptr;
     m_spectrum_config_isSet = false;
+    channel_marker = nullptr;
+    m_channel_marker_isSet = false;
 }
 
 SWGFreqTrackerSettings::~SWGFreqTrackerSettings() {
@@ -120,6 +122,8 @@ SWGFreqTrackerSettings::init() {
     m_reverse_api_channel_index_isSet = false;
     spectrum_config = new SWGGLSpectrum();
     m_spectrum_config_isSet = false;
+    channel_marker = new SWGChannelMarker();
+    m_channel_marker_isSet = false;
 }
 
 void
@@ -150,6 +154,9 @@ SWGFreqTrackerSettings::cleanup() {
 
     if(spectrum_config != nullptr) { 
         delete spectrum_config;
+    }
+    if(channel_marker != nullptr) { 
+        delete channel_marker;
     }
 }
 
@@ -205,6 +212,8 @@ SWGFreqTrackerSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&reverse_api_channel_index, pJson["reverseAPIChannelIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&spectrum_config, pJson["spectrumConfig"], "SWGGLSpectrum", "SWGGLSpectrum");
+    
+    ::SWGSDRangel::setValue(&channel_marker, pJson["channelMarker"], "SWGChannelMarker", "SWGChannelMarker");
     
 }
 
@@ -284,6 +293,9 @@ SWGFreqTrackerSettings::asJsonObject() {
     }
     if((spectrum_config != nullptr) && (spectrum_config->isSet())){
         toJsonValue(QString("spectrumConfig"), spectrum_config, obj, QString("SWGGLSpectrum"));
+    }
+    if((channel_marker != nullptr) && (channel_marker->isSet())){
+        toJsonValue(QString("channelMarker"), channel_marker, obj, QString("SWGChannelMarker"));
     }
 
     return obj;
@@ -499,6 +511,16 @@ SWGFreqTrackerSettings::setSpectrumConfig(SWGGLSpectrum* spectrum_config) {
     this->m_spectrum_config_isSet = true;
 }
 
+SWGChannelMarker*
+SWGFreqTrackerSettings::getChannelMarker() {
+    return channel_marker;
+}
+void
+SWGFreqTrackerSettings::setChannelMarker(SWGChannelMarker* channel_marker) {
+    this->channel_marker = channel_marker;
+    this->m_channel_marker_isSet = true;
+}
+
 
 bool
 SWGFreqTrackerSettings::isSet(){
@@ -565,6 +587,9 @@ SWGFreqTrackerSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(spectrum_config && spectrum_config->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(channel_marker && channel_marker->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

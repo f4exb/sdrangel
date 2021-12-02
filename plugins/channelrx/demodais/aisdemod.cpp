@@ -464,6 +464,12 @@ void AISDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getAisDemodSettings()->getReverseApiChannelIndex();
     }
+    if (settings.m_scopeGUI && channelSettingsKeys.contains("scopeConfig")) {
+        settings.m_scopeGUI->updateFrom(channelSettingsKeys, response.getAisDemodSettings()->getScopeConfig());
+    }
+    if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getAisDemodSettings()->getChannelMarker());
+    }
 }
 
 void AISDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const AISDemodSettings& settings)
@@ -499,6 +505,34 @@ void AISDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     response.getAisDemodSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getAisDemodSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getAisDemodSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+
+    if (settings.m_scopeGUI)
+    {
+        if (response.getAisDemodSettings()->getScopeConfig())
+        {
+            settings.m_scopeGUI->formatTo(response.getAisDemodSettings()->getScopeConfig());
+        }
+        else
+        {
+            SWGSDRangel::SWGGLScope *swgGLScope = new SWGSDRangel::SWGGLScope();
+            settings.m_scopeGUI->formatTo(swgGLScope);
+            response.getAisDemodSettings()->setScopeConfig(swgGLScope);
+        }
+    }
+
+    if (settings.m_channelMarker)
+    {
+        if (response.getAisDemodSettings()->getChannelMarker())
+        {
+            settings.m_channelMarker->formatTo(response.getAisDemodSettings()->getChannelMarker());
+        }
+        else
+        {
+            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            settings.m_channelMarker->formatTo(swgChannelMarker);
+            response.getAisDemodSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
 }
 
 void AISDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const AISDemodSettings& settings, bool force)
@@ -583,6 +617,20 @@ void AISDemod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgAISDemodSettings->setStreamIndex(settings.m_streamIndex);
+    }
+
+    if (settings.m_scopeGUI && (channelSettingsKeys.contains("scopeConfig") || force))
+    {
+        SWGSDRangel::SWGGLScope *swgGLScope = new SWGSDRangel::SWGGLScope();
+        settings.m_scopeGUI->formatTo(swgGLScope);
+        swgAISDemodSettings->setScopeConfig(swgGLScope);
+    }
+
+    if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
+    {
+        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        settings.m_channelMarker->formatTo(swgChannelMarker);
+        swgAISDemodSettings->setChannelMarker(swgChannelMarker);
     }
 }
 

@@ -23,8 +23,7 @@
 #include "dsddemodsettings.h"
 
 DSDDemodSettings::DSDDemodSettings() :
-    m_channelMarker(0),
-    m_scopeGUI(0)
+    m_channelMarker(nullptr)
 {
     resetToDefaults();
 }
@@ -73,11 +72,6 @@ QByteArray DSDDemodSettings::serialize() const
     s.writeU32(7, m_rgbColor);
     s.writeS32(8, m_squelchGate);
     s.writeS32(9, m_volume*10.0);
-
-    if (m_scopeGUI) {
-        s.writeBlob(10, m_scopeGUI->serialize());
-    }
-
     s.writeS32(11, m_baudRate);
     s.writeBool(12, m_enableCosineFiltering);
     s.writeBool(13, m_syncOrConstellation);
@@ -144,12 +138,6 @@ bool DSDDemodSettings::deserialize(const QByteArray& data)
         d.readS32(8, &m_squelchGate, 5);
         d.readS32(9, &tmp, 20);
         m_volume = tmp / 10.0;
-
-        if (m_scopeGUI) {
-            d.readBlob(10, &bytetmp);
-            m_scopeGUI->deserialize(bytetmp);
-        }
-
         d.readS32(11, &m_baudRate, 4800);
         d.readBool(12, &m_enableCosineFiltering, false);
         d.readBool(13, &m_syncOrConstellation, false);

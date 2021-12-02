@@ -54,13 +54,11 @@ struct DSDDemodSettings
     uint16_t m_reverseAPIChannelIndex;
 
     Serializable *m_channelMarker;
-    Serializable *m_scopeGUI;
     QByteArray m_rollupState;
 
     DSDDemodSettings();
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
-    void setScopeGUI(Serializable *scopeGUI) { m_scopeGUI = scopeGUI; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
 };

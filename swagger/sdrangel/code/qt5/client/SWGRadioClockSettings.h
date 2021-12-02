@@ -22,6 +22,8 @@
 #include <QJsonObject>
 
 
+#include "SWGChannelMarker.h"
+#include "SWGGLScope.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -81,6 +83,12 @@ public:
     qint32 getReverseApiChannelIndex();
     void setReverseApiChannelIndex(qint32 reverse_api_channel_index);
 
+    SWGGLScope* getScopeConfig();
+    void setScopeConfig(SWGGLScope* scope_config);
+
+    SWGChannelMarker* getChannelMarker();
+    void setChannelMarker(SWGChannelMarker* channel_marker);
+
 
     virtual bool isSet() override;
 
@@ -123,6 +131,12 @@ private:
 
     qint32 reverse_api_channel_index;
     bool m_reverse_api_channel_index_isSet;
+
+    SWGGLScope* scope_config;
+    bool m_scope_config_isSet;
+
+    SWGChannelMarker* channel_marker;
+    bool m_channel_marker_isSet;
 
 };
 

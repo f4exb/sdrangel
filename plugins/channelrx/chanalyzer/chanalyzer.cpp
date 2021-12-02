@@ -298,8 +298,11 @@ void ChannelAnalyzer::webapiUpdateChannelSettings(
     if (settings.m_spectrumGUI && channelSettingsKeys.contains("spectrumConfig")) {
         settings.m_spectrumGUI->updateFrom(channelSettingsKeys, response.getChannelAnalyzerSettings()->getSpectrumConfig());
     }
-    if (settings.m_spectrumGUI && channelSettingsKeys.contains("scopeConfig")) {
+    if (settings.m_scopeGUI && channelSettingsKeys.contains("scopeConfig")) {
         settings.m_scopeGUI->updateFrom(channelSettingsKeys, response.getChannelAnalyzerSettings()->getScopeConfig());
+    }
+    if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getChannelAnalyzerSettings()->getChannelMarker());
     }
 }
 
@@ -371,6 +374,20 @@ void ChannelAnalyzer::webapiFormatChannelSettings(
             SWGSDRangel::SWGGLScope *swgGLScope = new SWGSDRangel::SWGGLScope();
             settings.m_scopeGUI->formatTo(swgGLScope);
             response.getChannelAnalyzerSettings()->setScopeConfig(swgGLScope);
+        }
+    }
+
+    if (settings.m_channelMarker)
+    {
+        if (response.getChannelAnalyzerSettings()->getChannelMarker())
+        {
+            settings.m_channelMarker->formatTo(response.getChannelAnalyzerSettings()->getChannelMarker());
+        }
+        else
+        {
+            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            settings.m_channelMarker->formatTo(swgChannelMarker);
+            response.getChannelAnalyzerSettings()->setChannelMarker(swgChannelMarker);
         }
     }
 }
@@ -530,6 +547,13 @@ void ChannelAnalyzer::webapiFormatChannelSettings(
         SWGSDRangel::SWGGLScope *swgGLScope = new SWGSDRangel::SWGGLScope();
         settings.m_scopeGUI->formatTo(swgGLScope);
         swgChannelAnalyzerSettings->setScopeConfig(swgGLScope);
+    }
+
+    if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
+    {
+        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        settings.m_channelMarker->formatTo(swgChannelMarker);
+        swgChannelAnalyzerSettings->setChannelMarker(swgChannelMarker);
     }
 }
 

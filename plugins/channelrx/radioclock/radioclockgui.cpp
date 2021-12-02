@@ -95,6 +95,8 @@ bool RadioClockGUI::handleMessage(const Message& message)
         const RadioClock::MsgConfigureRadioClock& cfg = (RadioClock::MsgConfigureRadioClock&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
+        ui->scopeGUI->updateSettings();
+        m_channelMarker.updateSettings(static_cast<const ChannelMarker*>(m_settings.m_channelMarker));
         displaySettings();
         blockApplySettings(false);
         return true;

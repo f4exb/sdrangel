@@ -36,6 +36,8 @@ VORDemodSettings:
     magDecAdjust:
       description: Adjust radial lines on map for magnetic declination of VOR
       type: integer
+    channelMarker:
+      $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
 
 VORDemodReport:
   description: VORDemod

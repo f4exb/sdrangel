@@ -16,7 +16,7 @@ APTDemodSettings:
       description: crop noise from top and bottom of image
       type: integer
     denoise:
-      description: apply denoise filter to image 
+      description: apply denoise filter to image
       type: integer
     linearEqualise:
       description: apply linear equalisation to image
@@ -44,7 +44,7 @@ APTDemodSettings:
       type: string
     autoSaveMinScanLines:
       desciption: minimum number of scanlines (after cropping) for an image to be automatically saved
-      type: integer 
+      type: integer
     rgbColor:
       type: integer
     title:
@@ -63,6 +63,8 @@ APTDemodSettings:
       type: integer
     reverseAPIChannelIndex:
       type: integer
+    channelMarker:
+      $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
 
 APTDemodActions:
   description: APTDemod

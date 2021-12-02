@@ -198,6 +198,8 @@ bool AISDemodGUI::handleMessage(const Message& message)
         const AISDemod::MsgConfigureAISDemod& cfg = (AISDemod::MsgConfigureAISDemod&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
+        ui->scopeGUI->updateSettings();
+        m_channelMarker.updateSettings(static_cast<const ChannelMarker*>(m_settings.m_channelMarker));
         displaySettings();
         blockApplySettings(false);
         return true;

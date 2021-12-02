@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include "SWGChannelMarker.h"
 #include "SWGGLSpectrum.h"
 #include <QString>
 
@@ -106,6 +107,9 @@ public:
     SWGGLSpectrum* getSpectrumConfig();
     void setSpectrumConfig(SWGGLSpectrum* spectrum_config);
 
+    SWGChannelMarker* getChannelMarker();
+    void setChannelMarker(SWGChannelMarker* channel_marker);
+
 
     virtual bool isSet() override;
 
@@ -172,6 +176,9 @@ private:
 
     SWGGLSpectrum* spectrum_config;
     bool m_spectrum_config_isSet;
+
+    SWGChannelMarker* channel_marker;
+    bool m_channel_marker_isSet;
 
 };
 

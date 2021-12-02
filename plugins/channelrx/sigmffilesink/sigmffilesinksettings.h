@@ -44,11 +44,13 @@ struct SigMFFileSinkSettings
     uint16_t m_reverseAPIChannelIndex;
 
     Serializable *m_spectrumGUI;
+    Serializable *m_channelMarker;
     QByteArray m_rollupState;
 
     SigMFFileSinkSettings();
     void resetToDefaults();
     void setSpectrumGUI(Serializable *spectrumGUI) { m_spectrumGUI = spectrumGUI; }
+    void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
 

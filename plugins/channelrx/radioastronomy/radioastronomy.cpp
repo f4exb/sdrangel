@@ -908,6 +908,9 @@ void RadioAstronomy::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getRadioAstronomySettings()->getReverseApiChannelIndex();
     }
+    if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getRadioAstronomySettings()->getChannelMarker());
+    }
 }
 
 void RadioAstronomy::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const RadioAstronomySettings& settings)
@@ -955,6 +958,20 @@ void RadioAstronomy::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings
     response.getRadioAstronomySettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getRadioAstronomySettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getRadioAstronomySettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+
+    if (settings.m_channelMarker)
+    {
+        if (response.getRadioAstronomySettings()->getChannelMarker())
+        {
+            settings.m_channelMarker->formatTo(response.getRadioAstronomySettings()->getChannelMarker());
+        }
+        else
+        {
+            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            settings.m_channelMarker->formatTo(swgChannelMarker);
+            response.getRadioAstronomySettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
 }
 
 void RadioAstronomy::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const RadioAstronomySettings& settings, bool force)
@@ -1072,6 +1089,13 @@ void RadioAstronomy::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgRadioAstronomySettings->setStreamIndex(settings.m_streamIndex);
+    }
+
+    if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
+    {
+        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        settings.m_channelMarker->formatTo(swgChannelMarker);
+        swgRadioAstronomySettings->setChannelMarker(swgChannelMarker);
     }
 }
 

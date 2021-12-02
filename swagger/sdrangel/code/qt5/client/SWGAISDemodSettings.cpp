@@ -66,6 +66,10 @@ SWGAISDemodSettings::SWGAISDemodSettings() {
     m_reverse_api_device_index_isSet = false;
     reverse_api_channel_index = 0;
     m_reverse_api_channel_index_isSet = false;
+    scope_config = nullptr;
+    m_scope_config_isSet = false;
+    channel_marker = nullptr;
+    m_channel_marker_isSet = false;
 }
 
 SWGAISDemodSettings::~SWGAISDemodSettings() {
@@ -112,6 +116,10 @@ SWGAISDemodSettings::init() {
     m_reverse_api_device_index_isSet = false;
     reverse_api_channel_index = 0;
     m_reverse_api_channel_index_isSet = false;
+    scope_config = new SWGGLScope();
+    m_scope_config_isSet = false;
+    channel_marker = new SWGChannelMarker();
+    m_channel_marker_isSet = false;
 }
 
 void
@@ -143,6 +151,12 @@ SWGAISDemodSettings::cleanup() {
 
 
 
+    if(scope_config != nullptr) { 
+        delete scope_config;
+    }
+    if(channel_marker != nullptr) { 
+        delete channel_marker;
+    }
 }
 
 SWGAISDemodSettings*
@@ -193,6 +207,10 @@ SWGAISDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&reverse_api_device_index, pJson["reverseAPIDeviceIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&reverse_api_channel_index, pJson["reverseAPIChannelIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&scope_config, pJson["scopeConfig"], "SWGGLScope", "SWGGLScope");
+    
+    ::SWGSDRangel::setValue(&channel_marker, pJson["channelMarker"], "SWGChannelMarker", "SWGChannelMarker");
     
 }
 
@@ -266,6 +284,12 @@ SWGAISDemodSettings::asJsonObject() {
     }
     if(m_reverse_api_channel_index_isSet){
         obj->insert("reverseAPIChannelIndex", QJsonValue(reverse_api_channel_index));
+    }
+    if((scope_config != nullptr) && (scope_config->isSet())){
+        toJsonValue(QString("scopeConfig"), scope_config, obj, QString("SWGGLScope"));
+    }
+    if((channel_marker != nullptr) && (channel_marker->isSet())){
+        toJsonValue(QString("channelMarker"), channel_marker, obj, QString("SWGChannelMarker"));
     }
 
     return obj;
@@ -461,6 +485,26 @@ SWGAISDemodSettings::setReverseApiChannelIndex(qint32 reverse_api_channel_index)
     this->m_reverse_api_channel_index_isSet = true;
 }
 
+SWGGLScope*
+SWGAISDemodSettings::getScopeConfig() {
+    return scope_config;
+}
+void
+SWGAISDemodSettings::setScopeConfig(SWGGLScope* scope_config) {
+    this->scope_config = scope_config;
+    this->m_scope_config_isSet = true;
+}
+
+SWGChannelMarker*
+SWGAISDemodSettings::getChannelMarker() {
+    return channel_marker;
+}
+void
+SWGAISDemodSettings::setChannelMarker(SWGChannelMarker* channel_marker) {
+    this->channel_marker = channel_marker;
+    this->m_channel_marker_isSet = true;
+}
+
 
 bool
 SWGAISDemodSettings::isSet(){
@@ -521,6 +565,12 @@ SWGAISDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_reverse_api_channel_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(scope_config && scope_config->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(channel_marker && channel_marker->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

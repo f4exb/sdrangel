@@ -27,6 +27,7 @@
 #include "SWGChannelReport.h"
 
 #include "device/deviceapi.h"
+#include "settings/serializable.h"
 
 #include "datvdemod.h"
 #include "maincore.h"
@@ -397,6 +398,9 @@ void DATVDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getDatvDemodSettings()->getReverseApiChannelIndex();
     }
+    if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getDatvDemodSettings()->getChannelMarker());
+    }
 }
 
 void DATVDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const DATVDemodSettings& settings)
@@ -465,6 +469,20 @@ void DATVDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
     response.getDatvDemodSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getDatvDemodSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getDatvDemodSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+
+    if (settings.m_channelMarker)
+    {
+        if (response.getDatvDemodSettings()->getChannelMarker())
+        {
+            settings.m_channelMarker->formatTo(response.getDatvDemodSettings()->getChannelMarker());
+        }
+        else
+        {
+            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            settings.m_channelMarker->formatTo(swgChannelMarker);
+            response.getDatvDemodSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
 }
 
 void DATVDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -607,6 +625,13 @@ void DATVDemod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgDATVDemodSettings->setStreamIndex(settings.m_streamIndex);
+    }
+
+    if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
+    {
+        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        settings.m_channelMarker->formatTo(swgChannelMarker);
+        swgDATVDemodSettings->setChannelMarker(swgChannelMarker);
     }
 }
 

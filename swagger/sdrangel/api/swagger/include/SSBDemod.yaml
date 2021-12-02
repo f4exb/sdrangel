@@ -64,6 +64,8 @@ SSBDemodSettings:
       type: integer
     spectrumConfig:
       $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+    channelMarker:
+      $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
 
 SSBDemodReport:
   description: SSBDemod

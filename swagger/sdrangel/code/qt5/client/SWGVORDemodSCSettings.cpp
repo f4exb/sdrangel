@@ -58,6 +58,8 @@ SWGVORDemodSCSettings::SWGVORDemodSCSettings() {
     m_reverse_api_channel_index_isSet = false;
     ident_threshold = 0;
     m_ident_threshold_isSet = false;
+    channel_marker = nullptr;
+    m_channel_marker_isSet = false;
 }
 
 SWGVORDemodSCSettings::~SWGVORDemodSCSettings() {
@@ -96,6 +98,8 @@ SWGVORDemodSCSettings::init() {
     m_reverse_api_channel_index_isSet = false;
     ident_threshold = 0;
     m_ident_threshold_isSet = false;
+    channel_marker = new SWGChannelMarker();
+    m_channel_marker_isSet = false;
 }
 
 void
@@ -121,6 +125,9 @@ SWGVORDemodSCSettings::cleanup() {
 
 
 
+    if(channel_marker != nullptr) { 
+        delete channel_marker;
+    }
 }
 
 SWGVORDemodSCSettings*
@@ -163,6 +170,8 @@ SWGVORDemodSCSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&reverse_api_channel_index, pJson["reverseAPIChannelIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&ident_threshold, pJson["identThreshold"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&channel_marker, pJson["channelMarker"], "SWGChannelMarker", "SWGChannelMarker");
     
 }
 
@@ -224,6 +233,9 @@ SWGVORDemodSCSettings::asJsonObject() {
     }
     if(m_ident_threshold_isSet){
         obj->insert("identThreshold", QJsonValue(ident_threshold));
+    }
+    if((channel_marker != nullptr) && (channel_marker->isSet())){
+        toJsonValue(QString("channelMarker"), channel_marker, obj, QString("SWGChannelMarker"));
     }
 
     return obj;
@@ -379,6 +391,16 @@ SWGVORDemodSCSettings::setIdentThreshold(qint32 ident_threshold) {
     this->m_ident_threshold_isSet = true;
 }
 
+SWGChannelMarker*
+SWGVORDemodSCSettings::getChannelMarker() {
+    return channel_marker;
+}
+void
+SWGVORDemodSCSettings::setChannelMarker(SWGChannelMarker* channel_marker) {
+    this->channel_marker = channel_marker;
+    this->m_channel_marker_isSet = true;
+}
+
 
 bool
 SWGVORDemodSCSettings::isSet(){
@@ -427,6 +449,9 @@ SWGVORDemodSCSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_ident_threshold_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(channel_marker && channel_marker->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include "SWGChannelMarker.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -84,6 +85,9 @@ public:
     qint32 getMagDecAdjust();
     void setMagDecAdjust(qint32 mag_dec_adjust);
 
+    SWGChannelMarker* getChannelMarker();
+    void setChannelMarker(SWGChannelMarker* channel_marker);
+
 
     virtual bool isSet() override;
 
@@ -129,6 +133,9 @@ private:
 
     qint32 mag_dec_adjust;
     bool m_mag_dec_adjust_isSet;
+
+    SWGChannelMarker* channel_marker;
+    bool m_channel_marker_isSet;
 
 };
 

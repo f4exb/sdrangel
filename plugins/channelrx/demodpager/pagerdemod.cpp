@@ -446,6 +446,12 @@ void PagerDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getPagerDemodSettings()->getReverseApiChannelIndex();
     }
+    if (settings.m_scopeGUI && channelSettingsKeys.contains("scopeConfig")) {
+        settings.m_scopeGUI->updateFrom(channelSettingsKeys, response.getPagerDemodSettings()->getScopeConfig());
+    }
+    if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getPagerDemodSettings()->getChannelMarker());
+    }
 }
 
 void PagerDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const PagerDemodSettings& settings)
@@ -481,6 +487,35 @@ void PagerDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& re
     response.getPagerDemodSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getPagerDemodSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getPagerDemodSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+
+    if (settings.m_scopeGUI)
+    {
+        if (response.getPagerDemodSettings()->getScopeConfig())
+        {
+            settings.m_scopeGUI->formatTo(response.getPagerDemodSettings()->getScopeConfig());
+        }
+        else
+        {
+            SWGSDRangel::SWGGLScope *swgGLScope = new SWGSDRangel::SWGGLScope();
+            settings.m_scopeGUI->formatTo(swgGLScope);
+            response.getPagerDemodSettings()->setScopeConfig(swgGLScope);
+        }
+    }
+
+    if (settings.m_channelMarker)
+    {
+        if (response.getPagerDemodSettings()->getChannelMarker())
+        {
+            settings.m_channelMarker->formatTo(response.getPagerDemodSettings()->getChannelMarker());
+        }
+        else
+        {
+            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            settings.m_channelMarker->formatTo(swgChannelMarker);
+            response.getPagerDemodSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
+
 }
 
 void PagerDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -575,6 +610,20 @@ void PagerDemod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgPagerDemodSettings->setStreamIndex(settings.m_streamIndex);
+    }
+
+    if (settings.m_scopeGUI && (channelSettingsKeys.contains("scopeConfig") || force))
+    {
+        SWGSDRangel::SWGGLScope *swgGLScope = new SWGSDRangel::SWGGLScope();
+        settings.m_scopeGUI->formatTo(swgGLScope);
+        swgPagerDemodSettings->setScopeConfig(swgGLScope);
+    }
+
+    if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
+    {
+        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        settings.m_channelMarker->formatTo(swgChannelMarker);
+        swgPagerDemodSettings->setChannelMarker(swgChannelMarker);
     }
 }
 

@@ -96,6 +96,7 @@ bool SigMFFileSinkGUI::handleMessage(const Message& message)
         m_settings = cfg.getSettings();
         blockApplySettings(true);
         ui->glSpectrumGUI->updateSettings();
+        m_channelMarker.updateSettings(static_cast<const ChannelMarker*>(m_settings.m_channelMarker));
         displaySettings();
         blockApplySettings(false);
         return true;
@@ -196,6 +197,7 @@ SigMFFileSinkGUI::SigMFFileSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
     m_channelMarker.setVisible(true); // activate signal on the last setting only
 
     m_settings.setSpectrumGUI(ui->glSpectrumGUI);
+    m_settings.setChannelMarker(&m_channelMarker);
 
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);

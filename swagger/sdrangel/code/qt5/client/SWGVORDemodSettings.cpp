@@ -56,6 +56,8 @@ SWGVORDemodSettings::SWGVORDemodSettings() {
     m_ident_threshold_isSet = false;
     mag_dec_adjust = 0;
     m_mag_dec_adjust_isSet = false;
+    channel_marker = nullptr;
+    m_channel_marker_isSet = false;
 }
 
 SWGVORDemodSettings::~SWGVORDemodSettings() {
@@ -92,6 +94,8 @@ SWGVORDemodSettings::init() {
     m_ident_threshold_isSet = false;
     mag_dec_adjust = 0;
     m_mag_dec_adjust_isSet = false;
+    channel_marker = new SWGChannelMarker();
+    m_channel_marker_isSet = false;
 }
 
 void
@@ -116,6 +120,9 @@ SWGVORDemodSettings::cleanup() {
 
 
 
+    if(channel_marker != nullptr) { 
+        delete channel_marker;
+    }
 }
 
 SWGVORDemodSettings*
@@ -156,6 +163,8 @@ SWGVORDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&ident_threshold, pJson["identThreshold"], "qint32", "");
     
     ::SWGSDRangel::setValue(&mag_dec_adjust, pJson["magDecAdjust"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&channel_marker, pJson["channelMarker"], "SWGChannelMarker", "SWGChannelMarker");
     
 }
 
@@ -214,6 +223,9 @@ SWGVORDemodSettings::asJsonObject() {
     }
     if(m_mag_dec_adjust_isSet){
         obj->insert("magDecAdjust", QJsonValue(mag_dec_adjust));
+    }
+    if((channel_marker != nullptr) && (channel_marker->isSet())){
+        toJsonValue(QString("channelMarker"), channel_marker, obj, QString("SWGChannelMarker"));
     }
 
     return obj;
@@ -359,6 +371,16 @@ SWGVORDemodSettings::setMagDecAdjust(qint32 mag_dec_adjust) {
     this->m_mag_dec_adjust_isSet = true;
 }
 
+SWGChannelMarker*
+SWGVORDemodSettings::getChannelMarker() {
+    return channel_marker;
+}
+void
+SWGVORDemodSettings::setChannelMarker(SWGChannelMarker* channel_marker) {
+    this->channel_marker = channel_marker;
+    this->m_channel_marker_isSet = true;
+}
+
 
 bool
 SWGVORDemodSettings::isSet(){
@@ -404,6 +426,9 @@ SWGVORDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_mag_dec_adjust_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(channel_marker && channel_marker->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

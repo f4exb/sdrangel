@@ -97,6 +97,7 @@ bool FileSinkGUI::handleMessage(const Message& message)
         m_settings = cfg.getSettings();
         blockApplySettings(true);
         ui->glSpectrumGUI->updateSettings();
+        m_channelMarker.updateSettings(static_cast<const ChannelMarker*>(m_settings.m_channelMarker));
         displaySettings();
         blockApplySettings(false);
         return true;
@@ -208,6 +209,7 @@ FileSinkGUI::FileSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_channelMarker.blockSignals(false);
     m_channelMarker.setVisible(true); // activate signal on the last setting only
 
+    m_settings.setChannelMarker(&m_channelMarker);
     m_settings.setSpectrumGUI(ui->glSpectrumGUI);
 
     m_deviceUISet->addChannelMarker(&m_channelMarker);

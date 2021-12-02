@@ -37,6 +37,7 @@
 #include "dsp/dspcommands.h"
 #include "device/deviceapi.h"
 #include "feature/feature.h"
+#include "settings/serializable.h"
 #include "util/ax25.h"
 #include "util/db.h"
 #include "maincore.h"
@@ -463,6 +464,9 @@ void PacketDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getPacketDemodSettings()->getReverseApiChannelIndex();
     }
+    if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getPacketDemodSettings()->getChannelMarker());
+    }
 }
 
 void PacketDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const PacketDemodSettings& settings)
@@ -496,6 +500,20 @@ void PacketDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& r
     response.getPacketDemodSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getPacketDemodSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getPacketDemodSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+
+    if (settings.m_channelMarker)
+    {
+        if (response.getPacketDemodSettings()->getChannelMarker())
+        {
+            settings.m_channelMarker->formatTo(response.getPacketDemodSettings()->getChannelMarker());
+        }
+        else
+        {
+            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            settings.m_channelMarker->formatTo(swgChannelMarker);
+            response.getPacketDemodSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
 }
 
 void PacketDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -584,6 +602,13 @@ void PacketDemod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgPacketDemodSettings->setStreamIndex(settings.m_streamIndex);
+    }
+
+    if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
+    {
+        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        settings.m_channelMarker->formatTo(swgChannelMarker);
+        swgPacketDemodSettings->setChannelMarker(swgChannelMarker);
     }
 }
 

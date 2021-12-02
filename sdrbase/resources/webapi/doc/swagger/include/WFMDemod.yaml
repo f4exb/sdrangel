@@ -39,6 +39,8 @@ WFMDemodSettings:
       type: integer
     reverseAPIChannelIndex:
       type: integer
+    channelMarker:
+      $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
 
 WFMDemodReport:
   description: WFMDemod

@@ -39,6 +39,8 @@ VORDemodSCSettings:
     identThreshold:
       description: Morse code ident threshold (linear SNR)
       type: integer
+    channelMarker:
+      $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
 
 VORDemodSCReport:
   description: VORDemodSC

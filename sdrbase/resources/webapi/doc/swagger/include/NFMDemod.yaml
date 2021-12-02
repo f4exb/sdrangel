@@ -55,6 +55,8 @@ NFMDemodSettings:
       type: integer
     reverseAPIChannelIndex:
       type: integer
+    channelMarker:
+      $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
 
 NFMDemodReport:
   description: NFMDemod

@@ -333,6 +333,12 @@ void RadioClock::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getRadioClockSettings()->getReverseApiChannelIndex();
     }
+    if (settings.m_scopeGUI && channelSettingsKeys.contains("scopeConfig")) {
+        settings.m_scopeGUI->updateFrom(channelSettingsKeys, response.getRadioClockSettings()->getScopeConfig());
+    }
+    if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getRadioClockSettings()->getChannelMarker());
+    }
 }
 
 void RadioClock::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const RadioClockSettings& settings)
@@ -362,6 +368,34 @@ void RadioClock::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& re
     response.getRadioClockSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getRadioClockSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getRadioClockSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+
+    if (settings.m_scopeGUI)
+    {
+        if (response.getRadioClockSettings()->getScopeConfig())
+        {
+            settings.m_scopeGUI->formatTo(response.getRadioClockSettings()->getScopeConfig());
+        }
+        else
+        {
+            SWGSDRangel::SWGGLScope *swgGLScope = new SWGSDRangel::SWGGLScope();
+            settings.m_scopeGUI->formatTo(swgGLScope);
+            response.getRadioClockSettings()->setScopeConfig(swgGLScope);
+        }
+    }
+
+    if (settings.m_channelMarker)
+    {
+        if (response.getRadioClockSettings()->getChannelMarker())
+        {
+            settings.m_channelMarker->formatTo(response.getRadioClockSettings()->getChannelMarker());
+        }
+        else
+        {
+            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            settings.m_channelMarker->formatTo(swgChannelMarker);
+            response.getRadioClockSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
 }
 
 void RadioClock::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -451,6 +485,20 @@ void RadioClock::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgRadioClockSettings->setStreamIndex(settings.m_streamIndex);
+    }
+
+    if (settings.m_scopeGUI && (channelSettingsKeys.contains("scopeConfig") || force))
+    {
+        SWGSDRangel::SWGGLScope *swgGLScope = new SWGSDRangel::SWGGLScope();
+        settings.m_scopeGUI->formatTo(swgGLScope);
+        swgRadioClockSettings->setScopeConfig(swgGLScope);
+    }
+
+    if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
+    {
+        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        settings.m_channelMarker->formatTo(swgChannelMarker);
+        swgRadioClockSettings->setChannelMarker(swgChannelMarker);
     }
 }
 

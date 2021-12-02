@@ -84,6 +84,8 @@ SWGDSDDemodSettings::SWGDSDDemodSettings() {
     m_reverse_api_device_index_isSet = false;
     reverse_api_channel_index = 0;
     m_reverse_api_channel_index_isSet = false;
+    channel_marker = nullptr;
+    m_channel_marker_isSet = false;
 }
 
 SWGDSDDemodSettings::~SWGDSDDemodSettings() {
@@ -148,6 +150,8 @@ SWGDSDDemodSettings::init() {
     m_reverse_api_device_index_isSet = false;
     reverse_api_channel_index = 0;
     m_reverse_api_channel_index_isSet = false;
+    channel_marker = new SWGChannelMarker();
+    m_channel_marker_isSet = false;
 }
 
 void
@@ -186,6 +190,9 @@ SWGDSDDemodSettings::cleanup() {
 
 
 
+    if(channel_marker != nullptr) { 
+        delete channel_marker;
+    }
 }
 
 SWGDSDDemodSettings*
@@ -254,6 +261,8 @@ SWGDSDDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&reverse_api_device_index, pJson["reverseAPIDeviceIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&reverse_api_channel_index, pJson["reverseAPIChannelIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&channel_marker, pJson["channelMarker"], "SWGChannelMarker", "SWGChannelMarker");
     
 }
 
@@ -354,6 +363,9 @@ SWGDSDDemodSettings::asJsonObject() {
     }
     if(m_reverse_api_channel_index_isSet){
         obj->insert("reverseAPIChannelIndex", QJsonValue(reverse_api_channel_index));
+    }
+    if((channel_marker != nullptr) && (channel_marker->isSet())){
+        toJsonValue(QString("channelMarker"), channel_marker, obj, QString("SWGChannelMarker"));
     }
 
     return obj;
@@ -639,6 +651,16 @@ SWGDSDDemodSettings::setReverseApiChannelIndex(qint32 reverse_api_channel_index)
     this->m_reverse_api_channel_index_isSet = true;
 }
 
+SWGChannelMarker*
+SWGDSDDemodSettings::getChannelMarker() {
+    return channel_marker;
+}
+void
+SWGDSDDemodSettings::setChannelMarker(SWGChannelMarker* channel_marker) {
+    this->channel_marker = channel_marker;
+    this->m_channel_marker_isSet = true;
+}
+
 
 bool
 SWGDSDDemodSettings::isSet(){
@@ -726,6 +748,9 @@ SWGDSDDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_reverse_api_channel_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(channel_marker && channel_marker->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

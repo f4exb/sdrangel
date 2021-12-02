@@ -36,6 +36,10 @@ RadioClockSettings:
       type: integer
     reverseAPIChannelIndex:
       type: integer
+    scopeConfig:
+      $ref: "http://swgserver:8081/api/swagger/include/GLScope.yaml#/GLScope"
+    channelMarker:
+      $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
 
 RadioClockReport:
   description: RadioClock
