@@ -35,6 +35,7 @@
 #include "dsp/devicesamplemimo.h"
 #include "device/deviceapi.h"
 #include "feature/feature.h"
+#include "settings/serializable.h"
 #include "util/db.h"
 #include "maincore.h"
 
@@ -510,6 +511,9 @@ void ATVMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getAtvModSettings()->getReverseApiChannelIndex();
     }
+    if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getAtvModSettings()->getChannelMarker());
+    }
 }
 
 int ATVMod::webapiReportGet(
@@ -581,6 +585,20 @@ void ATVMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
     response.getAtvModSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getAtvModSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getAtvModSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+
+    if (settings.m_channelMarker)
+    {
+        if (response.getAtvModSettings()->getChannelMarker())
+        {
+            settings.m_channelMarker->formatTo(response.getAtvModSettings()->getChannelMarker());
+        }
+        else
+        {
+            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            settings.m_channelMarker->formatTo(swgChannelMarker);
+            response.getAtvModSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
 }
 
 void ATVMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -717,6 +735,13 @@ void ATVMod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgATVModSettings->setStreamIndex(settings.m_streamIndex);
+    }
+
+    if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
+    {
+        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        settings.m_channelMarker->formatTo(swgChannelMarker);
+        swgATVModSettings->setChannelMarker(swgChannelMarker);
     }
 }
 

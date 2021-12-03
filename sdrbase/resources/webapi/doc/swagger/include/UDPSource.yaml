@@ -73,6 +73,8 @@ UDPSourceSettings:
       type: integer
     spectrumConfig:
       $ref: "/doc/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+    channelMarker:
+      $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
 
 UDPSourceReport:
   description: UDPSource

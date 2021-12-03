@@ -124,6 +124,8 @@ IEEE_802_15_4_ModSettings:
     udpPort:
       description: UDP port to listen for frames to transmit on
       type: integer
+    channelMarker:
+      $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
 
 IEEE_802_15_4_ModReport:
   description: IEEE_802_15_4_Mod

@@ -453,6 +453,9 @@ void FreeDVMod::webapiUpdateChannelSettings(
     if (settings.m_spectrumGUI && channelSettingsKeys.contains("spectrumConfig")) {
         settings.m_spectrumGUI->updateFrom(channelSettingsKeys, response.getFreeDvModSettings()->getSpectrumConfig());
     }
+    if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getFreeDvModSettings()->getChannelMarker());
+    }
 }
 
 int FreeDVMod::webapiReportGet(
@@ -519,6 +522,20 @@ void FreeDVMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
             SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
             settings.m_spectrumGUI->formatTo(swgGLSpectrum);
             response.getFreeDvModSettings()->setSpectrumConfig(swgGLSpectrum);
+        }
+    }
+
+    if (settings.m_channelMarker)
+    {
+        if (response.getFreeDvModSettings()->getChannelMarker())
+        {
+            settings.m_channelMarker->formatTo(response.getFreeDvModSettings()->getChannelMarker());
+        }
+        else
+        {
+            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            settings.m_channelMarker->formatTo(swgChannelMarker);
+            response.getFreeDvModSettings()->setChannelMarker(swgChannelMarker);
         }
     }
 }
@@ -664,11 +681,19 @@ void FreeDVMod::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgFreeDVModSettings->setStreamIndex(settings.m_streamIndex);
     }
+
     if (settings.m_spectrumGUI && (channelSettingsKeys.contains("spectrunConfig") || force))
     {
         SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
         settings.m_spectrumGUI->formatTo(swgGLSpectrum);
         swgFreeDVModSettings->setSpectrumConfig(swgGLSpectrum);
+    }
+
+    if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
+    {
+        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        settings.m_channelMarker->formatTo(swgChannelMarker);
+        swgFreeDVModSettings->setChannelMarker(swgChannelMarker);
     }
 
     if (force)

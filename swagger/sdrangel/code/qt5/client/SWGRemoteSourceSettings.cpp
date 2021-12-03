@@ -48,6 +48,8 @@ SWGRemoteSourceSettings::SWGRemoteSourceSettings() {
     m_reverse_api_device_index_isSet = false;
     reverse_api_channel_index = 0;
     m_reverse_api_channel_index_isSet = false;
+    channel_marker = nullptr;
+    m_channel_marker_isSet = false;
 }
 
 SWGRemoteSourceSettings::~SWGRemoteSourceSettings() {
@@ -76,6 +78,8 @@ SWGRemoteSourceSettings::init() {
     m_reverse_api_device_index_isSet = false;
     reverse_api_channel_index = 0;
     m_reverse_api_channel_index_isSet = false;
+    channel_marker = new SWGChannelMarker();
+    m_channel_marker_isSet = false;
 }
 
 void
@@ -96,6 +100,9 @@ SWGRemoteSourceSettings::cleanup() {
 
 
 
+    if(channel_marker != nullptr) { 
+        delete channel_marker;
+    }
 }
 
 SWGRemoteSourceSettings*
@@ -128,6 +135,8 @@ SWGRemoteSourceSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&reverse_api_device_index, pJson["reverseAPIDeviceIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&reverse_api_channel_index, pJson["reverseAPIChannelIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&channel_marker, pJson["channelMarker"], "SWGChannelMarker", "SWGChannelMarker");
     
 }
 
@@ -174,6 +183,9 @@ SWGRemoteSourceSettings::asJsonObject() {
     }
     if(m_reverse_api_channel_index_isSet){
         obj->insert("reverseAPIChannelIndex", QJsonValue(reverse_api_channel_index));
+    }
+    if((channel_marker != nullptr) && (channel_marker->isSet())){
+        toJsonValue(QString("channelMarker"), channel_marker, obj, QString("SWGChannelMarker"));
     }
 
     return obj;
@@ -279,6 +291,16 @@ SWGRemoteSourceSettings::setReverseApiChannelIndex(qint32 reverse_api_channel_in
     this->m_reverse_api_channel_index_isSet = true;
 }
 
+SWGChannelMarker*
+SWGRemoteSourceSettings::getChannelMarker() {
+    return channel_marker;
+}
+void
+SWGRemoteSourceSettings::setChannelMarker(SWGChannelMarker* channel_marker) {
+    this->channel_marker = channel_marker;
+    this->m_channel_marker_isSet = true;
+}
+
 
 bool
 SWGRemoteSourceSettings::isSet(){
@@ -312,6 +334,9 @@ SWGRemoteSourceSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_reverse_api_channel_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(channel_marker && channel_marker->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

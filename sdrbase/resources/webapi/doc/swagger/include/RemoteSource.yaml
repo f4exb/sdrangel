@@ -25,6 +25,8 @@ RemoteSourceSettings:
       type: integer
     reverseAPIChannelIndex:
       type: integer
+    channelMarker:
+      $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
 
 RemoteSourceReport:
   description: "Remote channel source report"

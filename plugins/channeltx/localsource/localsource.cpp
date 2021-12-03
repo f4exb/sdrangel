@@ -32,6 +32,7 @@
 #include "dsp/hbfilterchainconverter.h"
 #include "device/deviceapi.h"
 #include "feature/feature.h"
+#include "settings/serializable.h"
 #include "maincore.h"
 
 #include "localsourcebaseband.h"
@@ -414,6 +415,9 @@ void LocalSource::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("streamIndex")) {
         settings.m_streamIndex = response.getLocalSourceSettings()->getStreamIndex();
     }
+    if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getLocalSourceSettings()->getChannelMarker());
+    }
 }
 
 void LocalSource::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const LocalSourceSettings& settings)
@@ -441,6 +445,20 @@ void LocalSource::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& r
     response.getLocalSourceSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getLocalSourceSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getLocalSourceSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+
+    if (settings.m_channelMarker)
+    {
+        if (response.getLocalSourceSettings()->getChannelMarker())
+        {
+            settings.m_channelMarker->formatTo(response.getLocalSourceSettings()->getChannelMarker());
+        }
+        else
+        {
+            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            settings.m_channelMarker->formatTo(swgChannelMarker);
+            response.getLocalSourceSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
 }
 
 void LocalSource::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const LocalSourceSettings& settings, bool force)
@@ -526,6 +544,13 @@ void LocalSource::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgLocalSourceSettings->setRgbColor(settings.m_streamIndex);
+    }
+
+    if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
+    {
+        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        settings.m_channelMarker->formatTo(swgChannelMarker);
+        swgLocalSourceSettings->setChannelMarker(swgChannelMarker);
     }
 }
 

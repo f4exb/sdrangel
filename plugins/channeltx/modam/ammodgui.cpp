@@ -93,6 +93,7 @@ bool AMModGUI::handleMessage(const Message& message)
         const AMMod::MsgConfigureAMMod& cfg = (AMMod::MsgConfigureAMMod&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
+        m_channelMarker.updateSettings(static_cast<const ChannelMarker*>(m_settings.m_channelMarker));
         displaySettings();
         blockApplySettings(false);
         return true;

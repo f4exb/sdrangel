@@ -30,6 +30,7 @@
 #include "dsp/devicesamplesink.h"
 #include "device/deviceapi.h"
 #include "feature/feature.h"
+#include "settings/serializable.h"
 #include "util/timeutil.h"
 #include "util/db.h"
 #include "maincore.h"
@@ -291,6 +292,9 @@ void RemoteSource::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getRemoteSourceSettings()->getReverseApiChannelIndex();
     }
+    if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getRemoteSourceSettings()->getChannelMarker());
+    }
 }
 
 int RemoteSource::webapiReportGet(
@@ -332,6 +336,20 @@ void RemoteSource::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& 
     response.getRemoteSourceSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getRemoteSourceSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getRemoteSourceSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+
+    if (settings.m_channelMarker)
+    {
+        if (response.getRemoteSourceSettings()->getChannelMarker())
+        {
+            settings.m_channelMarker->formatTo(response.getRemoteSourceSettings()->getChannelMarker());
+        }
+        else
+        {
+            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            settings.m_channelMarker->formatTo(swgChannelMarker);
+            response.getRemoteSourceSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
 }
 
 void RemoteSource::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -432,6 +450,13 @@ void RemoteSource::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgRemoteSourceSettings->setStreamIndex(settings.m_streamIndex);
+    }
+
+    if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
+    {
+        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        settings.m_channelMarker->formatTo(swgChannelMarker);
+        swgRemoteSourceSettings->setChannelMarker(swgChannelMarker);
     }
 }
 

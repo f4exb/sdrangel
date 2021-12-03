@@ -46,6 +46,8 @@ FreeDVModSettings:
       $ref: "/doc/swagger/include/CWKeyer.yaml#/CWKeyerSettings"
     spectrumConfig:
       $ref: "/doc/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+    channelMarker:
+      $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
 
 FreeDVModReport:
   description: FreeDVMod

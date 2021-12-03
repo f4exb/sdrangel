@@ -473,6 +473,9 @@ void AMMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getAmModSettings()->getReverseApiChannelIndex();
     }
+    if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getAmModSettings()->getChannelMarker());
+    }
 }
 
 int AMMod::webapiReportGet(
@@ -526,6 +529,20 @@ void AMMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respons
     response.getAmModSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getAmModSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getAmModSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+
+    if (settings.m_channelMarker)
+    {
+        if (response.getAmModSettings()->getChannelMarker())
+        {
+            settings.m_channelMarker->formatTo(response.getAmModSettings()->getChannelMarker());
+        }
+        else
+        {
+            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            settings.m_channelMarker->formatTo(swgChannelMarker);
+            response.getAmModSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
 }
 
 void AMMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -673,6 +690,13 @@ void AMMod::webapiFormatChannelSettings(
         swgAMModSettings->setCwKeyer(new SWGSDRangel::SWGCWKeyerSettings());
         SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = swgAMModSettings->getCwKeyer();
         m_basebandSource->getCWKeyer().webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
+    }
+
+    if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
+    {
+        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        settings.m_channelMarker->formatTo(swgChannelMarker);
+        swgAMModSettings->setChannelMarker(swgChannelMarker);
     }
 }
 

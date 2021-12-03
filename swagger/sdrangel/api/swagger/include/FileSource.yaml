@@ -31,6 +31,8 @@ FileSourceSettings:
       type: integer
     reverseAPIChannelIndex:
       type: integer
+    channelMarker:
+      $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
 
 FileSourceReport:
   description: FileSource

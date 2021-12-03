@@ -34,6 +34,7 @@
 #include "dsp/hbfilterchainconverter.h"
 #include "dsp/filerecord.h"
 #include "feature/feature.h"
+#include "settings/serializable.h"
 #include "util/db.h"
 #include "maincore.h"
 
@@ -373,6 +374,9 @@ void FileSource::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getFileSourceSettings()->getReverseApiChannelIndex();
     }
+    if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getFileSourceSettings()->getChannelMarker());
+    }
 }
 
 int FileSource::webapiReportGet(
@@ -463,6 +467,20 @@ void FileSource::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& re
     response.getFileSourceSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getFileSourceSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getFileSourceSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+
+    if (settings.m_channelMarker)
+    {
+        if (response.getFileSourceSettings()->getChannelMarker())
+        {
+            settings.m_channelMarker->formatTo(response.getFileSourceSettings()->getChannelMarker());
+        }
+        else
+        {
+            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            settings.m_channelMarker->formatTo(swgChannelMarker);
+            response.getFileSourceSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
 }
 
 void FileSource::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -583,6 +601,13 @@ void FileSource::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgFileSourceSettings->setStreamIndex(settings.m_streamIndex);
+    }
+
+    if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
+    {
+        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        settings.m_channelMarker->formatTo(swgChannelMarker);
+        swgFileSourceSettings->setChannelMarker(swgChannelMarker);
     }
 }
 

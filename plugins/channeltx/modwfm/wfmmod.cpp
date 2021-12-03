@@ -459,6 +459,9 @@ void WFMMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getWfmModSettings()->getReverseApiChannelIndex();
     }
+    if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getWfmModSettings()->getChannelMarker());
+    }
 }
 
 int WFMMod::webapiReportGet(
@@ -513,6 +516,20 @@ void WFMMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
     response.getWfmModSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getWfmModSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getWfmModSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+
+    if (settings.m_channelMarker)
+    {
+        if (response.getWfmModSettings()->getChannelMarker())
+        {
+            settings.m_channelMarker->formatTo(response.getWfmModSettings()->getChannelMarker());
+        }
+        else
+        {
+            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            settings.m_channelMarker->formatTo(swgChannelMarker);
+            response.getWfmModSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
 }
 
 void WFMMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -655,6 +672,13 @@ void WFMMod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("audioDeviceName") || force) {
         swgWFMModSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+    }
+
+    if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
+    {
+        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        settings.m_channelMarker->formatTo(swgChannelMarker);
+        swgWFMModSettings->setChannelMarker(swgChannelMarker);
     }
 
     if (force)

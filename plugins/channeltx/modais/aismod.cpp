@@ -641,6 +641,9 @@ void AISMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("udpPort")) {
         settings.m_udpPort = response.getAisModSettings()->getUdpPort();
     }
+    if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getAisModSettings()->getChannelMarker());
+    }
 }
 
 int AISMod::webapiReportGet(
@@ -766,6 +769,20 @@ void AISMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
     response.getAisModSettings()->setUdpEnabled(settings.m_udpEnabled);
     response.getAisModSettings()->setUdpAddress(new QString(settings.m_udpAddress));
     response.getAisModSettings()->setUdpPort(settings.m_udpPort);
+
+    if (settings.m_channelMarker)
+    {
+        if (response.getAisModSettings()->getChannelMarker())
+        {
+            settings.m_channelMarker->formatTo(response.getAisModSettings()->getChannelMarker());
+        }
+        else
+        {
+            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            settings.m_channelMarker->formatTo(swgChannelMarker);
+            response.getAisModSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
 }
 
 void AISMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -929,6 +946,13 @@ void AISMod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("udpPort") || force) {
         swgAISModSettings->setUdpPort(settings.m_udpPort);
+    }
+
+    if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
+    {
+        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        settings.m_channelMarker->formatTo(swgChannelMarker);
+        swgAISModSettings->setChannelMarker(swgChannelMarker);
     }
 }
 

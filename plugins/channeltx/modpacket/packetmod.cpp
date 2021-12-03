@@ -636,6 +636,9 @@ void PacketMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("udpPort")) {
         settings.m_udpPort = response.getPacketModSettings()->getUdpPort();
     }
+    if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getPacketModSettings()->getChannelMarker());
+    }
 }
 
 int PacketMod::webapiReportGet(
@@ -796,6 +799,20 @@ void PacketMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
     response.getPacketModSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getPacketModSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getPacketModSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+
+    if (settings.m_channelMarker)
+    {
+        if (response.getPacketModSettings()->getChannelMarker())
+        {
+            settings.m_channelMarker->formatTo(response.getPacketModSettings()->getChannelMarker());
+        }
+        else
+        {
+            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            settings.m_channelMarker->formatTo(swgChannelMarker);
+            response.getPacketModSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
 }
 
 void PacketMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -1004,6 +1021,13 @@ void PacketMod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("udpPort") || force) {
         swgPacketModSettings->setUdpPort(settings.m_udpPort);
+    }
+
+    if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
+    {
+        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        settings.m_channelMarker->formatTo(swgChannelMarker);
+        swgPacketModSettings->setChannelMarker(swgChannelMarker);
     }
 }
 

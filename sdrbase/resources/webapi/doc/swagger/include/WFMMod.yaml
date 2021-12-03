@@ -47,6 +47,8 @@ WFMModSettings:
       type: integer
     cwKeyer:
       $ref: "/doc/swagger/include/CWKeyer.yaml#/CWKeyerSettings"
+    channelMarker:
+      $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
 
 WFMModReport:
   description: WFMMod

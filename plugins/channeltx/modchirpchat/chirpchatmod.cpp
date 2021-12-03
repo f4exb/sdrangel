@@ -37,6 +37,7 @@
 #include "dsp/dspcommands.h"
 #include "device/deviceapi.h"
 #include "feature/feature.h"
+#include "settings/serializable.h"
 #include "util/db.h"
 #include "maincore.h"
 
@@ -584,6 +585,9 @@ void ChirpChatMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getChirpChatModSettings()->getReverseApiChannelIndex();
     }
+    if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getChirpChatModSettings()->getChannelMarker());
+    }
 }
 
 int ChirpChatMod::webapiReportGet(
@@ -725,6 +729,20 @@ void ChirpChatMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& 
     response.getChirpChatModSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getChirpChatModSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getChirpChatModSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+
+    if (settings.m_channelMarker)
+    {
+        if (response.getChirpChatModSettings()->getChannelMarker())
+        {
+            settings.m_channelMarker->formatTo(response.getChirpChatModSettings()->getChannelMarker());
+        }
+        else
+        {
+            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            settings.m_channelMarker->formatTo(swgChannelMarker);
+            response.getChirpChatModSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
 }
 
 void ChirpChatMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -912,6 +930,13 @@ void ChirpChatMod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("title") || force) {
         swgChirpChatModSettings->setTitle(new QString(settings.m_title));
+    }
+
+    if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
+    {
+        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        settings.m_channelMarker->formatTo(swgChannelMarker);
+        swgChirpChatModSettings->setChannelMarker(swgChannelMarker);
     }
 }
 

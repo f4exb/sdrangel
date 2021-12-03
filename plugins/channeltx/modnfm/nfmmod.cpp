@@ -535,6 +535,9 @@ void NFMMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getNfmModSettings()->getReverseApiChannelIndex();
     }
+    if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getNfmModSettings()->getChannelMarker());
+    }
 }
 
 int NFMMod::webapiReportGet(
@@ -594,6 +597,20 @@ void NFMMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
     response.getNfmModSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getNfmModSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getNfmModSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+
+    if (settings.m_channelMarker)
+    {
+        if (response.getNfmModSettings()->getChannelMarker())
+        {
+            settings.m_channelMarker->formatTo(response.getNfmModSettings()->getChannelMarker());
+        }
+        else
+        {
+            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            settings.m_channelMarker->formatTo(swgChannelMarker);
+            response.getNfmModSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
 }
 
 void NFMMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -751,6 +768,13 @@ void NFMMod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgNFMModSettings->setStreamIndex(settings.m_streamIndex);
+    }
+
+    if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
+    {
+        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        settings.m_channelMarker->formatTo(swgChannelMarker);
+        swgNFMModSettings->setChannelMarker(swgChannelMarker);
     }
 
     if (force)

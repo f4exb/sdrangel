@@ -100,6 +100,8 @@ SWGAISModSettings::SWGAISModSettings() {
     m_udp_address_isSet = false;
     udp_port = 0;
     m_udp_port_isSet = false;
+    channel_marker = nullptr;
+    m_channel_marker_isSet = false;
 }
 
 SWGAISModSettings::~SWGAISModSettings() {
@@ -180,6 +182,8 @@ SWGAISModSettings::init() {
     m_udp_address_isSet = false;
     udp_port = 0;
     m_udp_port_isSet = false;
+    channel_marker = new SWGChannelMarker();
+    m_channel_marker_isSet = false;
 }
 
 void
@@ -230,6 +234,9 @@ SWGAISModSettings::cleanup() {
         delete udp_address;
     }
 
+    if(channel_marker != nullptr) { 
+        delete channel_marker;
+    }
 }
 
 SWGAISModSettings*
@@ -314,6 +321,8 @@ SWGAISModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&udp_address, pJson["udpAddress"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&udp_port, pJson["udpPort"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&channel_marker, pJson["channelMarker"], "SWGChannelMarker", "SWGChannelMarker");
     
 }
 
@@ -438,6 +447,9 @@ SWGAISModSettings::asJsonObject() {
     }
     if(m_udp_port_isSet){
         obj->insert("udpPort", QJsonValue(udp_port));
+    }
+    if((channel_marker != nullptr) && (channel_marker->isSet())){
+        toJsonValue(QString("channelMarker"), channel_marker, obj, QString("SWGChannelMarker"));
     }
 
     return obj;
@@ -803,6 +815,16 @@ SWGAISModSettings::setUdpPort(qint32 udp_port) {
     this->m_udp_port_isSet = true;
 }
 
+SWGChannelMarker*
+SWGAISModSettings::getChannelMarker() {
+    return channel_marker;
+}
+void
+SWGAISModSettings::setChannelMarker(SWGChannelMarker* channel_marker) {
+    this->channel_marker = channel_marker;
+    this->m_channel_marker_isSet = true;
+}
+
 
 bool
 SWGAISModSettings::isSet(){
@@ -914,6 +936,9 @@ SWGAISModSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_udp_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(channel_marker && channel_marker->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

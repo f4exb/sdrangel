@@ -421,6 +421,9 @@ void UDPSource::webapiUpdateChannelSettings(
     if (settings.m_spectrumGUI && channelSettingsKeys.contains("spectrumConfig")) {
         settings.m_spectrumGUI->updateFrom(channelSettingsKeys, response.getUdpSourceSettings()->getSpectrumConfig());
     }
+    if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getUdpSourceSettings()->getChannelMarker());
+    }
 }
 
 int UDPSource::webapiReportGet(
@@ -498,6 +501,20 @@ void UDPSource::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
             SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
             settings.m_spectrumGUI->formatTo(swgGLSpectrum);
             response.getUdpSourceSettings()->setSpectrumConfig(swgGLSpectrum);
+        }
+    }
+
+    if (settings.m_channelMarker)
+    {
+        if (response.getUdpSourceSettings()->getChannelMarker())
+        {
+            settings.m_channelMarker->formatTo(response.getUdpSourceSettings()->getChannelMarker());
+        }
+        else
+        {
+            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            settings.m_channelMarker->formatTo(swgChannelMarker);
+            response.getUdpSourceSettings()->setChannelMarker(swgChannelMarker);
         }
     }
 }
@@ -640,11 +657,19 @@ void UDPSource::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgUDPSourceSettings->setStreamIndex(settings.m_streamIndex);
     }
+
     if (settings.m_spectrumGUI && (channelSettingsKeys.contains("spectrunConfig") || force))
     {
         SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
         settings.m_spectrumGUI->formatTo(swgGLSpectrum);
         swgUDPSourceSettings->setSpectrumConfig(swgGLSpectrum);
+    }
+
+    if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
+    {
+        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        settings.m_channelMarker->formatTo(swgChannelMarker);
+        swgUDPSourceSettings->setChannelMarker(swgChannelMarker);
     }
 }
 

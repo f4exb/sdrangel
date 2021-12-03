@@ -45,6 +45,8 @@ AMModSettings:
       type: integer
     cwKeyer:
       $ref: "http://swgserver:8081/api/swagger/include/CWKeyer.yaml#/CWKeyerSettings"
+    channelMarker:
+      $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
 
 AMModReport:
   description: AMMod

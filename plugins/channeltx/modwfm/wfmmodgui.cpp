@@ -93,6 +93,7 @@ bool WFMModGUI::handleMessage(const Message& message)
         const WFMMod::MsgConfigureWFMMod& cfg = (WFMMod::MsgConfigureWFMMod&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
+        m_channelMarker.updateSettings(static_cast<const ChannelMarker*>(m_settings.m_channelMarker));
         displaySettings();
         blockApplySettings(false);
         return true;

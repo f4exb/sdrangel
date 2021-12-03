@@ -62,6 +62,8 @@ SSBModSettings:
       $ref: "http://swgserver:8081/api/swagger/include/CWKeyer.yaml#/CWKeyerSettings"
     spectrumConfig:
       $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+    channelMarker:
+      $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
 
 SSBModReport:
   description: SSBMod

@@ -68,6 +68,8 @@ SWGFreeDVModSettings::SWGFreeDVModSettings() {
     m_cw_keyer_isSet = false;
     spectrum_config = nullptr;
     m_spectrum_config_isSet = false;
+    channel_marker = nullptr;
+    m_channel_marker_isSet = false;
 }
 
 SWGFreeDVModSettings::~SWGFreeDVModSettings() {
@@ -116,6 +118,8 @@ SWGFreeDVModSettings::init() {
     m_cw_keyer_isSet = false;
     spectrum_config = new SWGGLSpectrum();
     m_spectrum_config_isSet = false;
+    channel_marker = new SWGChannelMarker();
+    m_channel_marker_isSet = false;
 }
 
 void
@@ -149,6 +153,9 @@ SWGFreeDVModSettings::cleanup() {
     }
     if(spectrum_config != nullptr) { 
         delete spectrum_config;
+    }
+    if(channel_marker != nullptr) { 
+        delete channel_marker;
     }
 }
 
@@ -202,6 +209,8 @@ SWGFreeDVModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&cw_keyer, pJson["cwKeyer"], "SWGCWKeyerSettings", "SWGCWKeyerSettings");
     
     ::SWGSDRangel::setValue(&spectrum_config, pJson["spectrumConfig"], "SWGGLSpectrum", "SWGGLSpectrum");
+    
+    ::SWGSDRangel::setValue(&channel_marker, pJson["channelMarker"], "SWGChannelMarker", "SWGChannelMarker");
     
 }
 
@@ -278,6 +287,9 @@ SWGFreeDVModSettings::asJsonObject() {
     }
     if((spectrum_config != nullptr) && (spectrum_config->isSet())){
         toJsonValue(QString("spectrumConfig"), spectrum_config, obj, QString("SWGGLSpectrum"));
+    }
+    if((channel_marker != nullptr) && (channel_marker->isSet())){
+        toJsonValue(QString("channelMarker"), channel_marker, obj, QString("SWGChannelMarker"));
     }
 
     return obj;
@@ -483,6 +495,16 @@ SWGFreeDVModSettings::setSpectrumConfig(SWGGLSpectrum* spectrum_config) {
     this->m_spectrum_config_isSet = true;
 }
 
+SWGChannelMarker*
+SWGFreeDVModSettings::getChannelMarker() {
+    return channel_marker;
+}
+void
+SWGFreeDVModSettings::setChannelMarker(SWGChannelMarker* channel_marker) {
+    this->channel_marker = channel_marker;
+    this->m_channel_marker_isSet = true;
+}
+
 
 bool
 SWGFreeDVModSettings::isSet(){
@@ -546,6 +568,9 @@ SWGFreeDVModSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(spectrum_config && spectrum_config->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(channel_marker && channel_marker->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

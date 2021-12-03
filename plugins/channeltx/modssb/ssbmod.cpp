@@ -524,6 +524,9 @@ void SSBMod::webapiUpdateChannelSettings(
     if (settings.m_spectrumGUI && channelSettingsKeys.contains("spectrumConfig")) {
         settings.m_spectrumGUI->updateFrom(channelSettingsKeys, response.getSsbModSettings()->getSpectrumConfig());
     }
+    if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getSsbModSettings()->getChannelMarker());
+    }
 }
 
 int SSBMod::webapiReportGet(
@@ -597,6 +600,20 @@ void SSBMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
             SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
             settings.m_spectrumGUI->formatTo(swgGLSpectrum);
             response.getSsbModSettings()->setSpectrumConfig(swgGLSpectrum);
+        }
+    }
+
+    if (settings.m_channelMarker)
+    {
+        if (response.getSsbModSettings()->getChannelMarker())
+        {
+            settings.m_channelMarker->formatTo(response.getSsbModSettings()->getChannelMarker());
+        }
+        else
+        {
+            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            settings.m_channelMarker->formatTo(swgChannelMarker);
+            response.getSsbModSettings()->setChannelMarker(swgChannelMarker);
         }
     }
 }
@@ -763,11 +780,20 @@ void SSBMod::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgSSBModSettings->setStreamIndex(settings.m_streamIndex);
     }
+
     if (settings.m_spectrumGUI && (channelSettingsKeys.contains("spectrunConfig") || force))
     {
         SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
         settings.m_spectrumGUI->formatTo(swgGLSpectrum);
         swgSSBModSettings->setSpectrumConfig(swgGLSpectrum);
+    }
+
+
+    if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
+    {
+        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        settings.m_channelMarker->formatTo(swgChannelMarker);
+        swgSSBModSettings->setChannelMarker(swgChannelMarker);
     }
 
     if (force)

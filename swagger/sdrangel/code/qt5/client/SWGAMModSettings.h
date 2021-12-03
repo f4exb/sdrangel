@@ -23,6 +23,7 @@
 
 
 #include "SWGCWKeyerSettings.h"
+#include "SWGChannelMarker.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -97,6 +98,9 @@ public:
     SWGCWKeyerSettings* getCwKeyer();
     void setCwKeyer(SWGCWKeyerSettings* cw_keyer);
 
+    SWGChannelMarker* getChannelMarker();
+    void setChannelMarker(SWGChannelMarker* channel_marker);
+
 
     virtual bool isSet() override;
 
@@ -154,6 +158,9 @@ private:
 
     SWGCWKeyerSettings* cw_keyer;
     bool m_cw_keyer_isSet;
+
+    SWGChannelMarker* channel_marker;
+    bool m_channel_marker_isSet;
 
 };
 

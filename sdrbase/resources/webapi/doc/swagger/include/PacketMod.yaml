@@ -149,6 +149,8 @@ PacketModSettings:
       type: integer
     reverseAPIChannelIndex:
       type: integer
+    channelMarker:
+      $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
 
 PacketModReport:
   description: PacketMod

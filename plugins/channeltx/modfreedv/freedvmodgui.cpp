@@ -105,6 +105,7 @@ bool FreeDVModGUI::handleMessage(const Message& message)
         m_settings = cfg.getSettings();
         blockApplySettings(true);
         ui->spectrumGUI->updateSettings();
+        m_channelMarker.updateSettings(static_cast<const ChannelMarker*>(m_settings.m_channelMarker));
         displaySettings();
         blockApplySettings(false);
         return true;

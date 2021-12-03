@@ -81,6 +81,7 @@ bool ChirpChatModGUI::handleMessage(const Message& message)
         const ChirpChatMod::MsgConfigureChirpChatMod& cfg = (ChirpChatMod::MsgConfigureChirpChatMod&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
+        m_channelMarker.updateSettings(static_cast<const ChannelMarker*>(m_settings.m_channelMarker));
         displaySettings();
         blockApplySettings(false);
         return true;

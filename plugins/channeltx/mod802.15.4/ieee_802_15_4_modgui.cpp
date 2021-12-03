@@ -115,6 +115,7 @@ bool IEEE_802_15_4_ModGUI::handleMessage(const Message& message)
         const IEEE_802_15_4_Mod::MsgConfigureIEEE_802_15_4_Mod& cfg = (IEEE_802_15_4_Mod::MsgConfigureIEEE_802_15_4_Mod&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
+        m_channelMarker.updateSettings(static_cast<const ChannelMarker*>(m_settings.m_channelMarker));
         displaySettings();
         blockApplySettings(false);
         return true;

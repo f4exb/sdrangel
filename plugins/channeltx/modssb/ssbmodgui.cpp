@@ -111,6 +111,7 @@ bool SSBModGUI::handleMessage(const Message& message)
         m_settings = mod_settings;
         blockApplySettings(true);
         ui->spectrumGUI->updateSettings();
+        m_channelMarker.updateSettings(static_cast<const ChannelMarker*>(m_settings.m_channelMarker));
         displaySettings();
         blockApplySettings(false);
         return true;

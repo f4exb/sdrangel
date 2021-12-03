@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include "SWGChannelMarker.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -150,6 +151,9 @@ public:
     qint32 getUdpPort();
     void setUdpPort(qint32 udp_port);
 
+    SWGChannelMarker* getChannelMarker();
+    void setChannelMarker(SWGChannelMarker* channel_marker);
+
 
     virtual bool isSet() override;
 
@@ -261,6 +265,9 @@ private:
 
     qint32 udp_port;
     bool m_udp_port_isSet;
+
+    SWGChannelMarker* channel_marker;
+    bool m_channel_marker_isSet;
 
 };
 

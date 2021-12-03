@@ -100,6 +100,8 @@ SWGIEEE_802_15_4_ModSettings::SWGIEEE_802_15_4_ModSettings() {
     m_udp_address_isSet = false;
     udp_port = 0;
     m_udp_port_isSet = false;
+    channel_marker = nullptr;
+    m_channel_marker_isSet = false;
 }
 
 SWGIEEE_802_15_4_ModSettings::~SWGIEEE_802_15_4_ModSettings() {
@@ -180,6 +182,8 @@ SWGIEEE_802_15_4_ModSettings::init() {
     m_udp_address_isSet = false;
     udp_port = 0;
     m_udp_port_isSet = false;
+    channel_marker = new SWGChannelMarker();
+    m_channel_marker_isSet = false;
 }
 
 void
@@ -228,6 +232,9 @@ SWGIEEE_802_15_4_ModSettings::cleanup() {
         delete udp_address;
     }
 
+    if(channel_marker != nullptr) { 
+        delete channel_marker;
+    }
 }
 
 SWGIEEE_802_15_4_ModSettings*
@@ -312,6 +319,8 @@ SWGIEEE_802_15_4_ModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&udp_address, pJson["udpAddress"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&udp_port, pJson["udpPort"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&channel_marker, pJson["channelMarker"], "SWGChannelMarker", "SWGChannelMarker");
     
 }
 
@@ -436,6 +445,9 @@ SWGIEEE_802_15_4_ModSettings::asJsonObject() {
     }
     if(m_udp_port_isSet){
         obj->insert("udpPort", QJsonValue(udp_port));
+    }
+    if((channel_marker != nullptr) && (channel_marker->isSet())){
+        toJsonValue(QString("channelMarker"), channel_marker, obj, QString("SWGChannelMarker"));
     }
 
     return obj;
@@ -801,6 +813,16 @@ SWGIEEE_802_15_4_ModSettings::setUdpPort(qint32 udp_port) {
     this->m_udp_port_isSet = true;
 }
 
+SWGChannelMarker*
+SWGIEEE_802_15_4_ModSettings::getChannelMarker() {
+    return channel_marker;
+}
+void
+SWGIEEE_802_15_4_ModSettings::setChannelMarker(SWGChannelMarker* channel_marker) {
+    this->channel_marker = channel_marker;
+    this->m_channel_marker_isSet = true;
+}
+
 
 bool
 SWGIEEE_802_15_4_ModSettings::isSet(){
@@ -912,6 +934,9 @@ SWGIEEE_802_15_4_ModSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_udp_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(channel_marker && channel_marker->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

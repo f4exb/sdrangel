@@ -64,6 +64,8 @@ SWGAMModSettings::SWGAMModSettings() {
     m_reverse_api_channel_index_isSet = false;
     cw_keyer = nullptr;
     m_cw_keyer_isSet = false;
+    channel_marker = nullptr;
+    m_channel_marker_isSet = false;
 }
 
 SWGAMModSettings::~SWGAMModSettings() {
@@ -108,6 +110,8 @@ SWGAMModSettings::init() {
     m_reverse_api_channel_index_isSet = false;
     cw_keyer = new SWGCWKeyerSettings();
     m_cw_keyer_isSet = false;
+    channel_marker = new SWGChannelMarker();
+    m_channel_marker_isSet = false;
 }
 
 void
@@ -137,6 +141,9 @@ SWGAMModSettings::cleanup() {
 
     if(cw_keyer != nullptr) { 
         delete cw_keyer;
+    }
+    if(channel_marker != nullptr) { 
+        delete channel_marker;
     }
 }
 
@@ -186,6 +193,8 @@ SWGAMModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&reverse_api_channel_index, pJson["reverseAPIChannelIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&cw_keyer, pJson["cwKeyer"], "SWGCWKeyerSettings", "SWGCWKeyerSettings");
+    
+    ::SWGSDRangel::setValue(&channel_marker, pJson["channelMarker"], "SWGChannelMarker", "SWGChannelMarker");
     
 }
 
@@ -256,6 +265,9 @@ SWGAMModSettings::asJsonObject() {
     }
     if((cw_keyer != nullptr) && (cw_keyer->isSet())){
         toJsonValue(QString("cwKeyer"), cw_keyer, obj, QString("SWGCWKeyerSettings"));
+    }
+    if((channel_marker != nullptr) && (channel_marker->isSet())){
+        toJsonValue(QString("channelMarker"), channel_marker, obj, QString("SWGChannelMarker"));
     }
 
     return obj;
@@ -441,6 +453,16 @@ SWGAMModSettings::setCwKeyer(SWGCWKeyerSettings* cw_keyer) {
     this->m_cw_keyer_isSet = true;
 }
 
+SWGChannelMarker*
+SWGAMModSettings::getChannelMarker() {
+    return channel_marker;
+}
+void
+SWGAMModSettings::setChannelMarker(SWGChannelMarker* channel_marker) {
+    this->channel_marker = channel_marker;
+    this->m_channel_marker_isSet = true;
+}
+
 
 bool
 SWGAMModSettings::isSet(){
@@ -498,6 +520,9 @@ SWGAMModSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(cw_keyer && cw_keyer->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(channel_marker && channel_marker->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

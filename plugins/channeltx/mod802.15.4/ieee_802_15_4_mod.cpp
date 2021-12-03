@@ -541,6 +541,9 @@ void IEEE_802_15_4_Mod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("udpPort")) {
         settings.m_udpPort = response.getIeee802154ModSettings()->getUdpPort();
     }
+    if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getIeee802154ModSettings()->getChannelMarker());
+    }
 }
 
 int IEEE_802_15_4_Mod::webapiReportGet(
@@ -655,6 +658,20 @@ void IEEE_802_15_4_Mod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSetti
     }
 
     response.getIeee802154ModSettings()->setUdpPort(settings.m_udpPort);
+
+    if (settings.m_channelMarker)
+    {
+        if (response.getIeee802154ModSettings()->getChannelMarker())
+        {
+            settings.m_channelMarker->formatTo(response.getIeee802154ModSettings()->getChannelMarker());
+        }
+        else
+        {
+            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            settings.m_channelMarker->formatTo(swgChannelMarker);
+            response.getIeee802154ModSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
 }
 
 void IEEE_802_15_4_Mod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -833,6 +850,13 @@ void IEEE_802_15_4_Mod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("udpPort") || force) {
         swgIEEE_802_15_4_ModSettings->setUdpPort(settings.m_udpPort);
+    }
+
+    if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
+    {
+        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        settings.m_channelMarker->formatTo(swgChannelMarker);
+        swgIEEE_802_15_4_ModSettings->setChannelMarker(swgChannelMarker);
     }
 }
 
