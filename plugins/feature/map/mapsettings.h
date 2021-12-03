@@ -68,9 +68,10 @@ struct MapSettings
     static const quint32 SOURCE_SATELLITE_TRACKER = 0x10;
     static const quint32 SOURCE_BEACONS = 0x20;
     static const quint32 SOURCE_RADIO_TIME = 0x40;
-    static const quint32 SOURCE_AM = 0x80;
-    static const quint32 SOURCE_FM = 0x100;
-    static const quint32 SOURCE_DAB = 0x200;
+    static const quint32 SOURCE_RADAR = 0x80;
+    static const quint32 SOURCE_AM = 0x100;
+    static const quint32 SOURCE_FM = 0x200;
+    static const quint32 SOURCE_DAB = 0x400;
     static const quint32 SOURCE_STATION = 0x400; // Antenna at "My Position"
 };
 

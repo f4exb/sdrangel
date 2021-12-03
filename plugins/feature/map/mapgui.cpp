@@ -38,6 +38,7 @@
 #include "maplocationdialog.h"
 #include "mapmaidenheaddialog.h"
 #include "mapsettingsdialog.h"
+#include "ibpbeacon.h"
 
 #include "ui_mapgui.h"
 #include "map.h"
@@ -683,6 +684,7 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     m_mapModel(this),
     m_beacons(nullptr),
     m_beaconDialog(this),
+    m_ibpBeaconDialog(this),
     m_radioTimeDialog(this)
 {
     ui->setupUi(this);
@@ -748,8 +750,10 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     QList<Beacon *> *beacons = Beacon::readIARUCSV(MapGUI::getBeaconFilename());
     if (beacons != nullptr)
         setBeacons(beacons);
+    addIBPBeacons();
 
     addRadioTimeTransmitters();
+    addRadar();
 }
 
 MapGUI::~MapGUI()
@@ -787,6 +791,24 @@ void MapGUI::setBeacons(QList<Beacon *> *beacons)
     }
 }
 
+void MapGUI::addIBPBeacons()
+{
+    // Add to Map
+    for (const auto beacon : IBPBeacon::m_beacons)
+    {
+        SWGSDRangel::SWGMapItem beaconMapItem;
+        beaconMapItem.setName(new QString(beacon.m_callsign));
+        beaconMapItem.setLatitude(beacon.m_latitude);
+        beaconMapItem.setLongitude(beacon.m_longitude);
+        beaconMapItem.setAltitude(0);
+        beaconMapItem.setImage(new QString("antenna.png"));
+        beaconMapItem.setImageRotation(0);
+        beaconMapItem.setImageMinZoom(8);
+        beaconMapItem.setText(new QString(beacon.getText()));
+        m_mapModel.update(m_map, &beaconMapItem, MapSettings::SOURCE_BEACONS);
+    }
+}
+
 const QList<RadioTimeTransmitter> MapGUI::m_radioTimeTransmitters = {
     {"MSF", 60000, 54.9075f, -3.27333f, 17},
     {"DCF77", 77500, 50.01611111f, 9.00805556f, 50},
@@ -816,6 +838,23 @@ void MapGUI::addRadioTimeTransmitters()
         timeMapItem.setText(new QString(text));
         m_mapModel.update(m_map, &timeMapItem, MapSettings::SOURCE_RADIO_TIME);
     }
+}
+
+void MapGUI::addRadar()
+{
+    SWGSDRangel::SWGMapItem radarMapItem;
+    radarMapItem.setName(new QString("GRAVES"));
+    radarMapItem.setLatitude(47.3480);
+    radarMapItem.setLongitude(5.5151);
+    radarMapItem.setAltitude(0.0);
+    radarMapItem.setImage(new QString("antenna.png"));
+    radarMapItem.setImageRotation(0);
+    radarMapItem.setImageMinZoom(8);
+    QString text = QString("Radar\nCallsign: %1\nFrequency: %2 MHz")
+                            .arg("GRAVES")
+                            .arg("143.050");
+    radarMapItem.setText(new QString(text));
+    m_mapModel.update(m_map, &radarMapItem, MapSettings::SOURCE_RADAR);
 }
 
 static QString arrayToString(QJsonArray array)
@@ -1298,6 +1337,11 @@ void MapGUI::on_displaySettings_clicked()
 void MapGUI::on_beacons_clicked()
 {
     m_beaconDialog.show();
+}
+
+void MapGUI::on_ibpBeacons_clicked()
+{
+    m_ibpBeaconDialog.show();
 }
 
 void MapGUI::on_radiotime_clicked()
