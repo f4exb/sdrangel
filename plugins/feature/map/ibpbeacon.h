@@ -30,13 +30,15 @@ struct IBPBeacon {
 
     QString m_callsign;
     QString m_location;
+    QString m_locator;
     int m_offset; // Time offset in seconds
     float m_latitude;
     float m_longitude;
 
-    IBPBeacon(QString callsign, QString location, QString locator, int offset) :
+    IBPBeacon(const QString& callsign, const QString& location, const QString& locator, int offset) :
         m_callsign(callsign),
         m_location(location),
+        m_locator(locator),
         m_offset(offset)
     {
         Maidenhead::fromMaidenhead(locator, m_latitude, m_longitude);
@@ -52,7 +54,7 @@ struct IBPBeacon {
         list.append(QString("Polarization: V"));
         list.append(QString("Pattern: Omni"));
         list.append(QString("Key: A1"));
-        list.append(QString("Locator: %1").arg(m_location));
+        list.append(QString("Locator: %1").arg(m_locator));
         return list.join("\n");
     }
 
