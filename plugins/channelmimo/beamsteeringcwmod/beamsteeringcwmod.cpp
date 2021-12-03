@@ -26,6 +26,7 @@
 #include "device/deviceapi.h"
 #include "dsp/hbfilterchainconverter.h"
 #include "dsp/dspcommands.h"
+#include "settings/serializable.h"
 #include "feature/feature.h"
 #include "maincore.h"
 
@@ -323,6 +324,9 @@ void BeamSteeringCWMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getBeamSteeringCwModSettings()->getReverseApiChannelIndex();
     }
+    if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getBeamSteeringCwModSettings()->getChannelMarker());
+    }
 }
 
 void BeamSteeringCWMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const BeamSteeringCWModSettings& settings)
@@ -349,6 +353,20 @@ void BeamSteeringCWMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSetti
     response.getBeamSteeringCwModSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getBeamSteeringCwModSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getBeamSteeringCwModSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+
+    if (settings.m_channelMarker)
+    {
+        if (response.getBeamSteeringCwModSettings()->getChannelMarker())
+        {
+            settings.m_channelMarker->formatTo(response.getBeamSteeringCwModSettings()->getChannelMarker());
+        }
+        else
+        {
+            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            settings.m_channelMarker->formatTo(swgChannelMarker);
+            response.getBeamSteeringCwModSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
 }
 
 void BeamSteeringCWMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const BeamSteeringCWModSettings& settings, bool force)
@@ -428,6 +446,13 @@ void BeamSteeringCWMod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("filterChainHash") || force) {
         swgBeamSteeringCWSettings->setFilterChainHash(settings.m_filterChainHash);
+    }
+
+    if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
+    {
+        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        settings.m_channelMarker->formatTo(swgChannelMarker);
+        swgBeamSteeringCWSettings->setChannelMarker(swgChannelMarker);
     }
 }
 

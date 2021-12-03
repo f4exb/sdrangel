@@ -348,6 +348,9 @@ void Interferometer::webapiUpdateChannelSettings(
     if (settings.m_scopeGUI && channelSettingsKeys.contains("scopeConfig")) {
         settings.m_scopeGUI->updateFrom(channelSettingsKeys, response.getInterferometerSettings()->getScopeConfig());
     }
+    if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getInterferometerSettings()->getChannelMarker());
+    }
 }
 
 void Interferometer::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const InterferometerSettings& settings)
@@ -399,6 +402,20 @@ void Interferometer::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings
             SWGSDRangel::SWGGLScope *swgGLScope = new SWGSDRangel::SWGGLScope();
             settings.m_scopeGUI->formatTo(swgGLScope);
             response.getInterferometerSettings()->setScopeConfig(swgGLScope);
+        }
+    }
+
+    if (settings.m_channelMarker)
+    {
+        if (response.getInterferometerSettings()->getChannelMarker())
+        {
+            settings.m_channelMarker->formatTo(response.getInterferometerSettings()->getChannelMarker());
+        }
+        else
+        {
+            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            settings.m_channelMarker->formatTo(swgChannelMarker);
+            response.getInterferometerSettings()->setChannelMarker(swgChannelMarker);
         }
     }
 }
@@ -491,6 +508,13 @@ void Interferometer::webapiFormatChannelSettings(
         if (channelSettingsKeys.contains("scopeConfig") || force) {
             settings.m_scopeGUI->formatTo(swgInterferometerSettings->getScopeConfig());
         }
+    }
+
+    if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
+    {
+        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        settings.m_channelMarker->formatTo(swgChannelMarker);
+        swgInterferometerSettings->setChannelMarker(swgChannelMarker);
     }
 }
 

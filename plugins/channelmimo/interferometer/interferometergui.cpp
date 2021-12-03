@@ -87,6 +87,7 @@ bool InterferometerGUI::handleMessage(const Message& message)
         m_settings = notif.getSettings();
         ui->scopeGUI->updateSettings();
         ui->spectrumGUI->updateSettings();
+        m_channelMarker.updateSettings(static_cast<const ChannelMarker*>(m_settings.m_channelMarker));
         displaySettings();
         return true;
     }
