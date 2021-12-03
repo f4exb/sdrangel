@@ -10,8 +10,9 @@ On top of this, it can plot data from other plugins, such as:
 * Ships from the AIS Demodulator,
 * Satellites from the Satellite Tracker,
 * The Sun, Moon and Stars from the Star Tracker,
-* Beacons based on the IARU Region 1 beacon database.
-* Radio time transmitters.
+* Beacons based on the IARU Region 1 beacon database and International Beacon Project,
+* Radio time transmitters,
+* GRAVES radar.
 
 It can also create tracks showing the path aircraft, ships and APRS objects have taken, as well as predicted paths for satellites.
 
@@ -49,7 +50,20 @@ The beacons will then be displayed in the table and on the map.
 
 ![Beacon dialog](../../../doc/img/Map_plugin_beacon_dialog.png)
 
-<h3>5: Display Radio Time Transmitters dialog</h3>
+<h3>5: Display IBP Beacon Project Dialog</h3>
+
+When clicked, opens the International Beacon Project dialog. The IBP consists of 18 HF beacons around the world,
+that each transmit once on each of the frequencies 14.100, 18.110, 21.150, 24.930 and 28.200MHz every 3 minutes, for 10 seconds.
+The IBP dialog shows which of the beacons should currently be transmitting.
+
+![IBP beacon dialog](../../../doc/img/Map_plugin_ibp_beacon_dialog.png)
+
+* Double clicking in a cell in the Callsign column will centre the map on that beacon.
+* Double clicking in a cell in the Frequency column will set the Device center frequency.
+
+More details of the IBP can be found at: https://www.ncdxf.org/beacon/beaconfaq.html
+
+<h3>6: Display Radio Time Transmitters dialog</h3>
 
 When clicked, opens the Radio Time Transmitters dialog.
 
@@ -58,23 +72,23 @@ When clicked, opens the Radio Time Transmitters dialog.
 
 ![Radio Time transmitters dialog](../../../doc/img/Map_plugin_radiotime_dialog.png)
 
-<h3>6: Display Names</h3>
+<h3>7: Display Names</h3>
 
 When checked, names of objects are displayed in a bubble next to each object.
 
-<h3>7: Display tracks for selected object</h3>
+<h3>8: Display tracks for selected object</h3>
 
 When checked, displays the track (taken or predicted) for the selected object.
 
-<h3>8: Display tracks for all objects</h3>
+<h3>9: Display tracks for all objects</h3>
 
 When checked, displays the track (taken or predicted) for the all objects.
 
-<h3>9: Delete</h3>
+<h3>10: Delete</h3>
 
 When clicked, all items will be deleted from the map.
 
-<h3>10: Display settings</h3>
+<h3>11: Display settings</h3>
 
 When clicked, opens the Map Display Settings dialog, which allows setting:
 

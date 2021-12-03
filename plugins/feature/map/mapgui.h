@@ -31,6 +31,7 @@
 #include "mapsettings.h"
 #include "SWGMapItem.h"
 #include "mapbeacondialog.h"
+#include "mapibpbeacondialog.h"
 #include "mapradiotimedialog.h"
 #include "osmtemplateserver.h"
 
@@ -481,8 +482,10 @@ public:
     static QString getBeaconFilename();
     QList<Beacon *> *getBeacons() { return m_beacons; }
     void setBeacons(QList<Beacon *> *beacons);
+    void addIBPBeacons();
     QList<RadioTimeTransmitter> getRadioTimeTransmitters() { return m_radioTimeTransmitters; }
     void addRadioTimeTransmitters();
+    void addRadar();
     void addDAB();
     void find(const QString& target);
     Q_INVOKABLE void supportedMapsChanged();
@@ -501,6 +504,7 @@ private:
     AzEl m_azEl;                        // Position of station
     QList<Beacon *> *m_beacons;
     MapBeaconDialog m_beaconDialog;
+    MapIBPBeaconDialog m_ibpBeaconDialog;
     MapRadioTimeDialog m_radioTimeDialog;
     quint16 m_osmPort;
     OSMTemplateServer *m_templateServer;
@@ -536,6 +540,7 @@ private slots:
     void on_displaySettings_clicked();
     void on_mapTypes_currentIndexChanged(int index);
     void on_beacons_clicked();
+    void on_ibpBeacons_clicked();
     void on_radiotime_clicked();
 };
 

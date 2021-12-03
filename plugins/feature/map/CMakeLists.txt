@@ -6,6 +6,7 @@ set(map_SOURCES
     mapplugin.cpp
     mapwebapiadapter.cpp
     osmtemplateserver.cpp
+    ibpbeacon.cpp
 )
 
 set(map_HEADERS
@@ -16,6 +17,7 @@ set(map_HEADERS
     mapwebapiadapter.h
     osmtemplateserver.h
     beacon.h
+    ibpbeacon.h
 )
 
 include_directories(
@@ -35,6 +37,8 @@ if(NOT SERVER_MODE)
         mapsettingsdialog.ui
         mapbeacondialog.cpp
         mapbeacondialog.ui
+        mapibpbeacondialog.cpp
+        mapibpbeacondialog.ui
         mapradiotimedialog.cpp
         mapradiotimedialog.ui
         map.qrc
@@ -47,6 +51,7 @@ if(NOT SERVER_MODE)
         mapmaidenheaddialog.h
         mapsettingsdialog.h
         mapbeacondialog.h
+        mapibpbeacon.h
         mapradiotimedialog.h
     )
 

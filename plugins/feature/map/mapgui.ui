@@ -141,6 +141,20 @@
        </widget>
       </item>
       <item>
+       <widget class="QToolButton" name="ibpBeacons">
+        <property name="toolTip">
+         <string>Display IBP Beacon dialog</string>
+        </property>
+        <property name="text">
+         <string>IBP</string>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/map/icons/ibp.png</normaloff>:/map/icons/ibp.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QToolButton" name="radiotime">
         <property name="toolTip">
          <string>Display radio time transmitters dialog</string>

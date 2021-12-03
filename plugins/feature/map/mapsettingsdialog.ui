@@ -97,6 +97,14 @@
           <enum>Checked</enum>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>Radar</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
        </widget>
       </item>
       <item>

@@ -2,5 +2,6 @@
   <qresource prefix="/map/">
     <file>icons/groundtracks.png</file>
     <file>icons/clock.png</file>
+    <file>icons/ibp.png</file>
   </qresource>
 </RCC>
