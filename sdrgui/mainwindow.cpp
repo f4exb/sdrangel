@@ -683,7 +683,7 @@ void MainWindow::removeFeatureSet(unsigned int tabIndex)
     if (tabIndex < m_featureUIs.size())
     {
         delete m_featureUIs[tabIndex];
-        m_featureUIs.erase(m_featureUIs.begin() + tabIndex);
+        m_featureUIs.pop_back();
         m_mainCore->removeFeatureSet(tabIndex);
     }
 }
@@ -693,7 +693,8 @@ void MainWindow::removeAllFeatureSets()
     while (m_featureUIs.size() > 0)
     {
         delete m_featureUIs.back();
-        m_featureUIs.erase(std::prev(m_featureUIs.end()));
+        m_featureUIs.pop_back();
+        m_mainCore->removeLastFeatureSet();
     }
 }
 
