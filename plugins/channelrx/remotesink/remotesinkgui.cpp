@@ -81,7 +81,6 @@ bool RemoteSinkGUI::handleMessage(const Message& message)
         DSPSignalNotification& cfg = (DSPSignalNotification&) message;
         m_basebandSampleRate = cfg.getSampleRate();
         qDebug("RemoteSinkGUI::handleMessage: DSPSignalNotification: m_basebandSampleRate: %d", m_basebandSampleRate);
-        updateTxDelayTime();
         displayRateAndShift();
 
         return true;
@@ -169,9 +168,6 @@ void RemoteSinkGUI::displaySettings()
     QString s = QString::number(128 + m_settings.m_nbFECBlocks, 'f', 0);
     QString s1 = QString::number(m_settings.m_nbFECBlocks, 'f', 0);
     ui->nominalNbBlocksText->setText(tr("%1/%2").arg(s).arg(s1));
-    ui->txDelayText->setText(tr("%1%").arg(m_settings.m_txDelay));
-    ui->txDelay->setValue(m_settings.m_txDelay);
-    updateTxDelayTime();
     applyDecimation();
     displayStreamIndex();
     restoreState(m_settings.m_rollupState);
@@ -278,7 +274,6 @@ void RemoteSinkGUI::onMenuDialogCalled(const QPoint &p)
 void RemoteSinkGUI::on_decimationFactor_currentIndexChanged(int index)
 {
     m_settings.m_log2Decim = index;
-    updateTxDelayTime();
     applyDecimation();
 }
 
@@ -327,14 +322,6 @@ void RemoteSinkGUI::on_dataApplyButton_clicked(bool checked)
     applySettings();
 }
 
-void RemoteSinkGUI::on_txDelay_valueChanged(int value)
-{
-    m_settings.m_txDelay = value; // percentage
-    ui->txDelayText->setText(tr("%1%").arg(value));
-    updateTxDelayTime();
-    applySettings();
-}
-
 void RemoteSinkGUI::on_nbFECBlocks_valueChanged(int value)
 {
     m_settings.m_nbFECBlocks = value;
@@ -343,18 +330,7 @@ void RemoteSinkGUI::on_nbFECBlocks_valueChanged(int value)
     QString s = QString::number(nbOriginalBlocks + nbFECBlocks, 'f', 0);
     QString s1 = QString::number(nbFECBlocks, 'f', 0);
     ui->nominalNbBlocksText->setText(tr("%1/%2").arg(s).arg(s1));
-    updateTxDelayTime();
     applySettings();
-}
-
-void RemoteSinkGUI::updateTxDelayTime()
-{
-    double txDelayRatio = m_settings.m_txDelay / 100.0;
-    int samplesPerBlock = RemoteNbBytesPerBlock / sizeof(Sample);
-    int channelSampleRate = m_basebandSampleRate / (1<<m_settings.m_log2Decim);
-    double delay = channelSampleRate == 0 ? 0.0 : (127*samplesPerBlock*txDelayRatio) / channelSampleRate;
-    delay /= 128 + m_settings.m_nbFECBlocks;
-    ui->txDelayTime->setText(tr("%1µs").arg(QString::number(delay*1e6, 'f', 0)));
 }
 
 void RemoteSinkGUI::applyDecimation()

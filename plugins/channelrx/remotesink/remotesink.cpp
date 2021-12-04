@@ -173,7 +173,6 @@ void RemoteSink::applySettings(const RemoteSinkSettings& settings, bool force)
 {
     qDebug() << "RemoteSink::applySettings:"
             << " m_nbFECBlocks: " << settings.m_nbFECBlocks
-            << " m_txDelay: " << settings.m_txDelay
             << " m_dataAddress: " << settings.m_dataAddress
             << " m_dataPort: " << settings.m_dataPort
             << " m_streamIndex: " << settings.m_streamIndex
@@ -184,9 +183,6 @@ void RemoteSink::applySettings(const RemoteSinkSettings& settings, bool force)
 
     if ((m_settings.m_nbFECBlocks != settings.m_nbFECBlocks) || force) {
         reverseAPIKeys.append("nbFECBlocks");
-    }
-    if ((m_settings.m_txDelay != settings.m_txDelay) || force) {
-        reverseAPIKeys.append("txDelay");
     }
     if ((m_settings.m_dataAddress != settings.m_dataAddress) || force) {
         reverseAPIKeys.append("dataAddress");
@@ -322,17 +318,6 @@ void RemoteSink::webapiUpdateChannelSettings(
         }
     }
 
-    if (channelSettingsKeys.contains("txDelay"))
-    {
-        int txDelay = response.getRemoteSinkSettings()->getTxDelay();
-
-        if (txDelay < 0) {
-            settings.m_txDelay = 35;
-        } else {
-            settings.m_txDelay = txDelay;
-        }
-    }
-
     if (channelSettingsKeys.contains("dataAddress")) {
         settings.m_dataAddress = *response.getRemoteSinkSettings()->getDataAddress();
     }
@@ -391,7 +376,6 @@ void RemoteSink::webapiUpdateChannelSettings(
 void RemoteSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const RemoteSinkSettings& settings)
 {
     response.getRemoteSinkSettings()->setNbFecBlocks(settings.m_nbFECBlocks);
-    response.getRemoteSinkSettings()->setTxDelay(settings.m_txDelay);
 
     if (response.getRemoteSinkSettings()->getDataAddress()) {
         *response.getRemoteSinkSettings()->getDataAddress() = settings.m_dataAddress;
@@ -503,10 +487,6 @@ void RemoteSink::webapiFormatChannelSettings(
 
     if (channelSettingsKeys.contains("nbFECBlocks") || force) {
         swgRemoteSinkSettings->setNbFecBlocks(settings.m_nbFECBlocks);
-    }
-    if (channelSettingsKeys.contains("txDelay") || force)
-    {
-        swgRemoteSinkSettings->setTxDelay(settings.m_txDelay);
     }
     if (channelSettingsKeys.contains("dataAddress") || force) {
         swgRemoteSinkSettings->setDataAddress(new QString(settings.m_dataAddress));

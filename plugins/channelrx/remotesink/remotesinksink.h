@@ -66,7 +66,6 @@ private:
     uint16_t m_dataPort;
 
     void setNbBlocksFEC(int nbBlocksFEC);
-    void setTxDelay(int txDelay, int nbBlocksFEC, int log2Decim);
 };
 
 #endif // INCLUDE_REMOTESINKSINK_H_

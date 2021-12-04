@@ -35,14 +35,14 @@ RemoteInputUDPHandler::RemoteInputUDPHandler(SampleSinkFifo *sampleFifo, DeviceA
     m_masterTimerConnected(false),
     m_running(false),
     m_rateDivider(1000/REMOTEINPUT_THROTTLE_MS),
-	m_dataSocket(0),
+	m_dataSocket(nullptr),
 	m_dataAddress(QHostAddress::LocalHost),
 	m_remoteAddress(QHostAddress::LocalHost),
 	m_dataPort(9090),
     m_multicastAddress(QStringLiteral("224.0.0.1")),
     m_multicast(false),
 	m_dataConnected(false),
-	m_udpBuf(0),
+	m_udpBuf(nullptr),
 	m_udpReadBytes(0),
 	m_sampleFifo(sampleFifo),
 	m_samplerate(0),
@@ -95,8 +95,10 @@ void RemoteInputUDPHandler::start()
 	    return;
 	}
 
-	if (!m_dataSocket) {
+	if (!m_dataSocket)
+    {
 		m_dataSocket = new QUdpSocket(this);
+        m_dataSocket->setSocketOption(QAbstractSocket::ReceiveBufferSizeSocketOption, getDataSocketBufferSize());
 	}
 
     if (!m_dataConnected)
@@ -167,7 +169,7 @@ void RemoteInputUDPHandler::applyUDPLink(const QString& address, quint16 port, c
         << " address: " << address
         << " port: " << port
         << " multicastAddress: " << multicastAddress
-        << " multicastJoin: " << multicastJoin;    
+        << " multicastJoin: " << multicastJoin;
 
 	bool addressOK = m_dataAddress.setAddress(address);
 
@@ -253,6 +255,7 @@ void RemoteInputUDPHandler::processData()
             m_messageQueueToGUI->push(report);
         }
 
+        m_dataSocket->setSocketOption(QAbstractSocket::ReceiveBufferSizeSocketOption, getDataSocketBufferSize());
         connectTimer();
     }
 }
@@ -436,9 +439,9 @@ void RemoteInputUDPHandler::handleMessages()
 
 bool RemoteInputUDPHandler::handleMessage(const Message& cmd)
 {
-    if (RemoteInputUDPHandler::MsgUDPAddressAndPort::match(cmd))
+    if (MsgUDPAddressAndPort::match(cmd))
     {
-        RemoteInputUDPHandler::MsgUDPAddressAndPort& notif = (RemoteInputUDPHandler::MsgUDPAddressAndPort&) cmd;
+        MsgUDPAddressAndPort& notif = (MsgUDPAddressAndPort&) cmd;
         applyUDPLink(notif.getAddress(), notif.getPort(), notif.getMulticastAddress(), notif.getMulticastJoin());
         return true;
     }
@@ -446,4 +449,14 @@ bool RemoteInputUDPHandler::handleMessage(const Message& cmd)
     {
         return false;
     }
+}
+
+int RemoteInputUDPHandler::getDataSocketBufferSize()
+{
+    // set a floor value at 24 kS/s
+    uint32_t samplerate = m_samplerate < 24000 ? 24000 : m_samplerate;
+    // 250 ms (1/4s) at current sample rate
+    int bufferSize = (samplerate * 2 * (SDR_RX_SAMP_SZ == 16 ? 2 : 4)) / 4;
+    qDebug("RemoteInputUDPHandler::getDataSocketBufferSize: %d bytes", bufferSize);
+    return bufferSize;
 }

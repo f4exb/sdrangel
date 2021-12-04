@@ -72,7 +72,6 @@ private:
     void displaySettings();
     void displayStreamIndex();
     void displayRateAndShift();
-    void updateTxDelayTime();
     bool handleMessage(const Message& message);
 
     void leaveEvent(QEvent*);
@@ -89,7 +88,6 @@ private slots:
     void on_dataPort_returnPressed();
     void on_dataApplyButton_clicked(bool checked);
     void on_nbFECBlocks_valueChanged(int value);
-    void on_txDelay_valueChanged(int value);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void tick();

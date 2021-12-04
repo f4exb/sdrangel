@@ -52,9 +52,6 @@ public:
     qint32 getDataPort();
     void setDataPort(qint32 data_port);
 
-    qint32 getTxDelay();
-    void setTxDelay(qint32 tx_delay);
-
     qint32 getRgbColor();
     void setRgbColor(qint32 rgb_color);
 
@@ -100,9 +97,6 @@ private:
 
     qint32 data_port;
     bool m_data_port_isSet;
-
-    qint32 tx_delay;
-    bool m_tx_delay_isSet;
 
     qint32 rgb_color;
     bool m_rgb_color_isSet;

@@ -69,20 +69,6 @@ void RemoteSinkSink::stopSender()
 	m_senderThread->wait();
 }
 
-void RemoteSinkSink::setTxDelay(int txDelay, int nbBlocksFEC, int log2Decim)
-{
-    double txDelayRatio = txDelay / 100.0;
-    int samplesPerBlock = RemoteNbBytesPerBlock / sizeof(Sample);
-    int sampleRate = m_basebandSampleRate / (1<<log2Decim);
-    double delay = sampleRate == 0 ? 1.0 : (127*samplesPerBlock*txDelayRatio) / sampleRate;
-    delay /= 128 + nbBlocksFEC;
-    m_txDelay = roundf(delay*1e6); // microseconds
-    qDebug() << "RemoteSinkSink::setTxDelay:"
-        << "txDelay:" << txDelay << "%"
-        << "m_txDelay:" << m_txDelay << "us"
-        << "sampleRate: " << sampleRate << "S/s";
-}
-
 void RemoteSinkSink::setNbBlocksFEC(int nbBlocksFEC)
 {
     qDebug() << "RemoteSinkSink::setNbBlocksFEC: nbBlocksFEC: " << nbBlocksFEC;
@@ -200,7 +186,6 @@ void RemoteSinkSink::applySettings(const RemoteSinkSettings& settings, bool forc
 {
     qDebug() << "RemoteSinkSink::applySettings:"
             << " m_nbFECBlocks: " << settings.m_nbFECBlocks
-            << " m_txDelay: " << settings.m_txDelay
             << " m_dataAddress: " << settings.m_dataAddress
             << " m_dataPort: " << settings.m_dataPort
             << " m_streamIndex: " << settings.m_streamIndex
@@ -216,13 +201,11 @@ void RemoteSinkSink::applySettings(const RemoteSinkSettings& settings, bool forc
 
     if ((m_settings.m_log2Decim != settings.m_log2Decim)
      || (m_settings.m_filterChainHash != settings.m_filterChainHash)
-     || (m_settings.m_nbFECBlocks != settings.m_nbFECBlocks)
-     || (m_settings.m_txDelay != settings.m_txDelay) || force)
+     || (m_settings.m_nbFECBlocks != settings.m_nbFECBlocks) || force)
     {
         double shiftFactor = HBFilterChainConverter::getShiftFactor(settings.m_log2Decim, settings.m_filterChainHash);
         m_frequencyOffset = round(shiftFactor*m_basebandSampleRate);
         setNbBlocksFEC(settings.m_nbFECBlocks);
-        setTxDelay(settings.m_txDelay, settings.m_nbFECBlocks, settings.m_log2Decim);
     }
 
     m_settings = settings;
@@ -233,5 +216,4 @@ void RemoteSinkSink::applyBasebandSampleRate(uint32_t sampleRate)
     m_basebandSampleRate = sampleRate;
     double shiftFactor = HBFilterChainConverter::getShiftFactor(m_settings.m_log2Decim, m_settings.m_filterChainHash);
     m_frequencyOffset = round(shiftFactor*m_basebandSampleRate);
-    setTxDelay(m_settings.m_txDelay, m_settings.m_nbFECBlocks, m_settings.m_log2Decim);
 }

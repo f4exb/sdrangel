@@ -34,8 +34,6 @@ SWGRemoteSinkSettings::SWGRemoteSinkSettings() {
     m_data_address_isSet = false;
     data_port = 0;
     m_data_port_isSet = false;
-    tx_delay = 0;
-    m_tx_delay_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = nullptr;
@@ -72,8 +70,6 @@ SWGRemoteSinkSettings::init() {
     m_data_address_isSet = false;
     data_port = 0;
     m_data_port_isSet = false;
-    tx_delay = 0;
-    m_tx_delay_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = new QString("");
@@ -104,7 +100,6 @@ SWGRemoteSinkSettings::cleanup() {
     if(data_address != nullptr) { 
         delete data_address;
     }
-
 
 
     if(title != nullptr) { 
@@ -141,8 +136,6 @@ SWGRemoteSinkSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&data_address, pJson["dataAddress"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&data_port, pJson["dataPort"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&tx_delay, pJson["txDelay"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
@@ -190,9 +183,6 @@ SWGRemoteSinkSettings::asJsonObject() {
     }
     if(m_data_port_isSet){
         obj->insert("dataPort", QJsonValue(data_port));
-    }
-    if(m_tx_delay_isSet){
-        obj->insert("txDelay", QJsonValue(tx_delay));
     }
     if(m_rgb_color_isSet){
         obj->insert("rgbColor", QJsonValue(rgb_color));
@@ -259,16 +249,6 @@ void
 SWGRemoteSinkSettings::setDataPort(qint32 data_port) {
     this->data_port = data_port;
     this->m_data_port_isSet = true;
-}
-
-qint32
-SWGRemoteSinkSettings::getTxDelay() {
-    return tx_delay;
-}
-void
-SWGRemoteSinkSettings::setTxDelay(qint32 tx_delay) {
-    this->tx_delay = tx_delay;
-    this->m_tx_delay_isSet = true;
 }
 
 qint32
@@ -393,9 +373,6 @@ SWGRemoteSinkSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_data_port_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_tx_delay_isSet){
             isObjectUpdated = true; break;
         }
         if(m_rgb_color_isSet){

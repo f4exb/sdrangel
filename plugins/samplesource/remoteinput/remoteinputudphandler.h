@@ -147,6 +147,7 @@ private:
     void disconnectTimer();
 	void processData();
     void adjustNbDecoderSlots(const RemoteMetaDataFEC& metaData);
+	int getDataSocketBufferSize();
 	void applyUDPLink(const QString& address, quint16 port, const QString& multicastAddress, bool muticastJoin);
 	bool handleMessage(const Message& message);
 

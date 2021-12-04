@@ -10,9 +10,6 @@ RemoteSinkSettings:
     dataPort:
       description: "Receiving USB data port"
       type: integer
-    txDelay:
-      description: "Minimum delay in ms between consecutive USB blocks transmissions"
-      type: integer
     rgbColor:
       type: integer
     title:
