@@ -68,6 +68,8 @@ public:
 	FeatureSetPreset* getWorkingFeatureSetPreset() { return &m_workingFeatureSetPreset; }
 	QList<FeatureSetPreset*> *getFeatureSetPresets() { return &m_featureSetPresets; }
 
+	int getSourceItemIndex() const { return m_preferences.getSourceItemIndex(); }
+	void setSourceItemIndex(int value) { m_preferences.setSourceItemIndex(value); }
 	int getSourceIndex() const { return m_preferences.getSourceIndex(); }
 	void setSourceIndex(int value) { m_preferences.setSourceIndex(value); }
 	const QString& getSourceDeviceId() const { return m_preferences.getSourceDevice(); }

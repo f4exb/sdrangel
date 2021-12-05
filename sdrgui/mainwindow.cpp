@@ -227,10 +227,17 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     ui->featureDock->setPresets(m_mainCore->m_settings.getFeatureSetPresets());
     ui->featureDock->setPluginAPI(m_pluginManager->getPluginAPI());
 
-    splash->showStatusMessage("load file input...", Qt::white);
+    splash->showStatusMessage("load last device or file input...", Qt::white);
     qDebug() << "MainWindow::MainWindow: select SampleSource from settings or default (file input)...";
+    qDebug() << "MainWindow::MainWindow: look for"
+        << m_mainCore->m_settings.getSourceDeviceId()
+        << "at index" << m_mainCore->m_settings.getSourceIndex()
+        << "and item index" << m_mainCore->m_settings.getSourceItemIndex();
 
-	int deviceIndex = DeviceEnumerator::instance()->getRxSamplingDeviceIndex(m_mainCore->m_settings.getSourceDeviceId(), m_mainCore->m_settings.getSourceIndex());
+	int deviceIndex = DeviceEnumerator::instance()->getRxSamplingDeviceIndex(
+        m_mainCore->m_settings.getSourceDeviceId(),
+        m_mainCore->m_settings.getSourceIndex(),
+        m_mainCore->m_settings.getSourceItemIndex());
 	addSourceDevice(deviceIndex);  // add the first device set with file input device as default if device in settings is not enumerated
 	m_deviceUIs.back()->m_deviceAPI->setBuddyLeader(true); // the first device is always the leader
     tabChannelsIndexChanged(); // force channel selection list update
@@ -1989,8 +1996,11 @@ void MainWindow::sampleSourceChanged(int tabIndex, int newDeviceIndex)
 
         if (tabIndex == 0) // save as default starting device
         {
+            qDebug("MainWindow::sampleSourceChanged: save default starting device %s[%d:%d]",
+                qPrintable(samplingDevice->id), samplingDevice->sequence, samplingDevice->deviceItemIndex);
             m_mainCore->m_settings.setSourceIndex(samplingDevice->sequence);
             m_mainCore->m_settings.setSourceDeviceId(samplingDevice->id);
+            m_mainCore->m_settings.setSourceItemIndex(samplingDevice->deviceItemIndex);
         }
     }
 }

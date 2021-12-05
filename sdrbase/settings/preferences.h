@@ -17,6 +17,8 @@ public:
 	const QString& getSourceDevice() const { return m_sourceDevice; }
 	void setSourceIndex(const int value) { m_sourceIndex = value; }
 	int getSourceIndex() const { return m_sourceIndex; }
+	void setSourceItemIndex(const int value) { m_sourceItemIndex = value; }
+	int getSourceItemIndex() const { return m_sourceItemIndex; }
 
 	void setAudioType(const QString& value) { m_audioType = value; }
 	const QString& getAudioType() const { return m_audioType; }
@@ -44,14 +46,15 @@ public:
 protected:
 	QString m_sourceDevice; //!< Identification of the source used in R0 tab (GUI flavor) at startup
 	int m_sourceIndex;      //!< Index of the source used in R0 tab (GUI flavor) at startup
+	int m_sourceItemIndex;  //!< Index of device item in the source used in R0 tab (GUI flavor) at startup
 
 	QString m_audioType;
 	QString m_audioDevice;
 
 	QString m_stationName;  //!< Name of the station (for drawing on the map)
-        float m_latitude;       //!< Position of the station
+    float m_latitude;       //!< Position of the station
 	float m_longitude;
-        float m_altitude;       //!< Altitude in metres
+    float m_altitude;       //!< Altitude in metres
 
 	QtMsgType m_consoleMinLogLevel;
     QtMsgType m_fileMinLogLevel;

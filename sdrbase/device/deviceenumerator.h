@@ -59,8 +59,8 @@ public:
     int getFileInputDeviceIndex() const;  //!< Get Rx default device
     int getTestMIMODeviceIndex() const;   //!< Get MIMO default device
     int getFileOutputDeviceIndex() const;   //!< Get Tx default device
-    int getRxSamplingDeviceIndex(const QString& deviceId, int sequence);
-    int getTxSamplingDeviceIndex(const QString& deviceId, int sequence);
+    int getRxSamplingDeviceIndex(const QString& deviceId, int sequence, int deviceItemIndex);
+    int getTxSamplingDeviceIndex(const QString& deviceId, int sequence, int deviceItemIndex);
     int getMIMOSamplingDeviceIndex(const QString& deviceId, int sequence);
 
 private:

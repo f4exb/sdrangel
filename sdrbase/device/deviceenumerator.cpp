@@ -465,11 +465,14 @@ int DeviceEnumerator::getTestMIMODeviceIndex() const
     return -1;
 }
 
-int DeviceEnumerator::getRxSamplingDeviceIndex(const QString& deviceId, int sequence)
+int DeviceEnumerator::getRxSamplingDeviceIndex(const QString& deviceId, int sequence, int deviceItemIndex)
 {
     for (DevicesEnumeration::iterator it = m_rxEnumeration.begin(); it != m_rxEnumeration.end(); ++it)
     {
-        if ((it->m_samplingDevice.id == deviceId) && (it->m_samplingDevice.sequence == sequence)) {
+        if ((it->m_samplingDevice.id == deviceId)
+         && (it->m_samplingDevice.sequence == sequence)
+         && (it->m_samplingDevice.deviceItemIndex == deviceItemIndex))
+        {
             return it->m_index;
         }
     }
@@ -477,11 +480,14 @@ int DeviceEnumerator::getRxSamplingDeviceIndex(const QString& deviceId, int sequ
     return -1;
 }
 
-int DeviceEnumerator::getTxSamplingDeviceIndex(const QString& deviceId, int sequence)
+int DeviceEnumerator::getTxSamplingDeviceIndex(const QString& deviceId, int sequence, int deviceItemIndex)
 {
     for (DevicesEnumeration::iterator it = m_txEnumeration.begin(); it != m_txEnumeration.end(); ++it)
     {
-        if ((it->m_samplingDevice.id == deviceId) && (it->m_samplingDevice.sequence == sequence)) {
+        if ((it->m_samplingDevice.id == deviceId)
+         && (it->m_samplingDevice.sequence == sequence)
+         && (it->m_samplingDevice.deviceItemIndex == deviceItemIndex))
+        {
             return it->m_index;
         }
     }

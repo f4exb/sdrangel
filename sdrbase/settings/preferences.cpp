@@ -12,10 +12,11 @@ void Preferences::resetToDefaults()
 	m_audioType.clear();
 	m_audioDevice.clear();
 	m_sourceIndex = 0;
-        m_stationName = "Home";
+	m_sourceItemIndex = 0;
+    m_stationName = "Home";
 	m_latitude = 49.012423; // Set an interesting location so map doesn't open up in the middle of the ocean
 	m_longitude = 8.418125;
-        m_altitude = 0.0f;
+    m_altitude = 0.0f;
 	m_useLogFile = false;
 	m_logFileName = "sdrangel.log";
 	m_consoleMinLogLevel = QtDebugMsg;
@@ -35,8 +36,9 @@ QByteArray Preferences::serialize() const
 	s.writeBool(9, m_useLogFile);
 	s.writeString(10, m_logFileName);
     s.writeS32(11, (int) m_fileMinLogLevel);
-        s.writeString(12, m_stationName);
-        s.writeFloat(13, m_altitude);
+    s.writeString(12, m_stationName);
+    s.writeFloat(13, m_altitude);
+	s.writeS32(14, m_sourceItemIndex);
 	return s.final();
 }
 
@@ -78,6 +80,7 @@ bool Preferences::deserialize(const QByteArray& data)
         d.readS32(11, &tmpInt, (int) QtDebugMsg);
         d.readString(12, &m_stationName, "Home");
         d.readFloat(13, &m_altitude, 0.0f);
+		d.readS32(14, &m_sourceItemIndex, 0);
 
         if ((tmpInt == (int) QtDebugMsg) ||
             (tmpInt == (int) QtInfoMsg) ||
