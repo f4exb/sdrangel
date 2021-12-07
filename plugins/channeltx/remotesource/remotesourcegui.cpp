@@ -330,12 +330,9 @@ void RemoteSourceGUI::on_dataPort_returnPressed()
     bool dataOk;
     int dataPort = ui->dataPort->text().toInt(&dataOk);
 
-    if((!dataOk) || (dataPort < 1024) || (dataPort > 65535))
-    {
+    if ((!dataOk) || (dataPort < 1024) || (dataPort > 65535)) {
         return;
-    }
-    else
-    {
+    } else {
         m_settings.m_dataPort = dataPort;
     }
 
@@ -350,8 +347,7 @@ void RemoteSourceGUI::on_dataApplyButton_clicked(bool checked)
     bool dataOk;
     int udpDataPort = ui->dataPort->text().toInt(&dataOk);
 
-    if((dataOk) && (udpDataPort >= 1024) && (udpDataPort < 65535))
-    {
+    if ((dataOk) && (udpDataPort >= 1024) && (udpDataPort < 65535)) {
         m_settings.m_dataPort = udpDataPort;
     }
 
