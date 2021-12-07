@@ -100,8 +100,6 @@ bool RemoteOutput::start()
 	m_lastQueueLength = -2; // set first value out of bounds
 	m_chunkSizeCorrection = 0;
 
-    m_remoteOutputWorker->setTxDelay(m_settings.m_txDelay);
-
 	mutexLocker.unlock();
 	//applySettings(m_generalSettings, m_settings, true);
 	qDebug("RemoteOutput::start: started");
@@ -260,7 +258,6 @@ void RemoteOutput::applySettings(const RemoteOutputSettings& settings, bool forc
 {
     QMutexLocker mutexLocker(&m_mutex);
     bool forwardChange = false;
-    bool changeTxDelay = false;
     QList<QString> reverseAPIKeys;
 
     if ((m_settings.m_dataAddress != settings.m_dataAddress) || force) {
@@ -295,7 +292,6 @@ void RemoteOutput::applySettings(const RemoteOutputSettings& settings, bool forc
         m_tickMultiplier = m_tickMultiplier < 20 ? 20 : m_tickMultiplier; // not below half a second
 
         forwardChange = true;
-        changeTxDelay = true;
     }
 
     if (force || (m_settings.m_nbFECBlocks != settings.m_nbFECBlocks))
@@ -305,28 +301,12 @@ void RemoteOutput::applySettings(const RemoteOutputSettings& settings, bool forc
         if (m_remoteOutputWorker != 0) {
             m_remoteOutputWorker->setNbBlocksFEC(settings.m_nbFECBlocks);
         }
-
-        changeTxDelay = true;
-    }
-
-    if (force || (m_settings.m_txDelay != settings.m_txDelay))
-    {
-        reverseAPIKeys.append("txDelay");
-        changeTxDelay = true;
-    }
-
-    if (changeTxDelay)
-    {
-        if (m_remoteOutputWorker != 0) {
-            m_remoteOutputWorker->setTxDelay(settings.m_txDelay);
-        }
     }
 
     mutexLocker.unlock();
 
     qDebug() << "RemoteOutput::applySettings:"
             << " m_sampleRate: " << settings.m_sampleRate
-            << " m_txDelay: " << settings.m_txDelay
             << " m_nbFECBlocks: " << settings.m_nbFECBlocks
             << " m_apiAddress: " << settings.m_apiAddress
             << " m_apiPort: " << settings.m_apiPort
@@ -421,9 +401,6 @@ void RemoteOutput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("sampleRate")) {
         settings.m_sampleRate = response.getRemoteOutputSettings()->getSampleRate();
     }
-    if (deviceSettingsKeys.contains("txDelay")) {
-        settings.m_txDelay = response.getRemoteOutputSettings()->getTxDelay();
-    }
     if (deviceSettingsKeys.contains("nbFECBlocks")) {
         settings.m_nbFECBlocks = response.getRemoteOutputSettings()->getNbFecBlocks();
     }
@@ -474,7 +451,6 @@ void RemoteOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
 {
     response.getRemoteOutputSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getRemoteOutputSettings()->setSampleRate(settings.m_sampleRate);
-    response.getRemoteOutputSettings()->setTxDelay(settings.m_txDelay);
     response.getRemoteOutputSettings()->setNbFecBlocks(settings.m_nbFECBlocks);
     response.getRemoteOutputSettings()->setApiAddress(new QString(settings.m_apiAddress));
     response.getRemoteOutputSettings()->setApiPort(settings.m_apiPort);
@@ -658,9 +634,6 @@ void RemoteOutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys,
 
     if (deviceSettingsKeys.contains("sampleRate") || force) {
         swgRemoteOutputSettings->setSampleRate(settings.m_sampleRate);
-    }
-    if (deviceSettingsKeys.contains("txDelay") || force) {
-        swgRemoteOutputSettings->setTxDelay(settings.m_txDelay);
     }
     if (deviceSettingsKeys.contains("nbFECBlocks") || force) {
         swgRemoteOutputSettings->setNbFecBlocks(settings.m_nbFECBlocks);

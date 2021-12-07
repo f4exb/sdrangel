@@ -24,7 +24,6 @@
 struct RemoteOutputSettings {
     quint64 m_centerFrequency;
     quint32 m_sampleRate;
-    float   m_txDelay;
     quint32 m_nbFECBlocks;
     QString m_apiAddress;
     quint16 m_apiPort;

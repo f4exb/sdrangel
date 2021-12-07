@@ -32,7 +32,6 @@ UDPSinkFEC::UDPSinkFEC() :
     m_nbSamples(0),
     m_nbBlocksFEC(0),
     m_txDelayRatio(0.0),
-    m_txDelay(0),
     m_dataBlock(nullptr),
     m_txBlockIndex(0),
     m_txBlocksIndex(0),
@@ -71,35 +70,16 @@ void UDPSinkFEC::stopSender()
 	m_senderThread->wait();
 }
 
-void UDPSinkFEC::setTxDelay(float txDelayRatio)
-{
-    // delay is calculated from the fraction of the nominal UDP block process time
-    // frame size: 127 * (126 or 63 samples depending on I or Q sample bytes of 2 or 4 bytes respectively)
-    // divided by sample rate gives the frame process time
-    // divided by the number of actual blocks including FEC blocks gives the block (i.e. UDP block) process time
-    m_txDelayRatio = txDelayRatio;
-    int samplesPerBlock = RemoteNbBytesPerBlock / sizeof(Sample);
-    double delay = m_sampleRate == 0 ? 1.0 : (127*samplesPerBlock*txDelayRatio) / m_sampleRate;
-    delay /= 128 + m_nbBlocksFEC;
-    m_txDelay = delay * 1e6;
-    qDebug() << "UDPSinkFEC::setTxDelay:"
-        << "txDelay:" << txDelayRatio
-        << "m_txDelay:" << m_txDelay << " us"
-        << "m_sampleRate:" << m_sampleRate;
-}
-
 void UDPSinkFEC::setNbBlocksFEC(uint32_t nbBlocksFEC)
 {
     qDebug() << "UDPSinkFEC::setNbBlocksFEC: nbBlocksFEC: " << nbBlocksFEC;
     m_nbBlocksFEC = nbBlocksFEC;
-    setTxDelay(m_txDelayRatio);
 }
 
 void UDPSinkFEC::setSampleRate(uint32_t sampleRate)
 {
     qDebug() << "UDPSinkFEC::setSampleRate: sampleRate: " << sampleRate;
     m_sampleRate = sampleRate;
-    setTxDelay(m_txDelayRatio);
 }
 
 void UDPSinkFEC::setRemoteAddress(const QString& address, uint16_t port)
@@ -200,7 +180,6 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
                 m_dataBlock->m_txControlBlock.m_processed = false;
                 m_dataBlock->m_txControlBlock.m_complete = true;
                 m_dataBlock->m_txControlBlock.m_nbBlocksFEC = m_nbBlocksFEC;
-                m_dataBlock->m_txControlBlock.m_txDelay = m_txDelay;
                 m_dataBlock->m_txControlBlock.m_dataAddress = m_remoteAddress;
                 m_dataBlock->m_txControlBlock.m_dataPort = m_remotePort;
 

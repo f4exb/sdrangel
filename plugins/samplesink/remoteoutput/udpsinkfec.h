@@ -67,7 +67,6 @@ public:
     void setSampleRate(uint32_t sampleRate);
 
     void setNbBlocksFEC(uint32_t nbBlocksFEC);
-    void setTxDelay(float txDelayRatio);
     void setRemoteAddress(const QString& address, uint16_t port);
 
     /** Return true if the stream is OK, return false if there is an error. */
@@ -87,7 +86,6 @@ private:
     RemoteMetaDataFEC m_currentMetaFEC;  //!< Meta data for current frame
     uint32_t m_nbBlocksFEC;                 //!< Variable number of FEC blocks
     float m_txDelayRatio;                   //!< Delay in ratio of nominal frame period
-    uint32_t m_txDelay;                     //!< Delay in microseconds (usleep) between each sending of an UDP datagram
     RemoteDataBlock *m_dataBlock;
     RemoteSuperBlock m_superBlock;       //!< current super block being built
     int m_txBlockIndex;                     //!< Current index in blocks to transmit in the Tx row
