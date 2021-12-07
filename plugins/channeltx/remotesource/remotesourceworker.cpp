@@ -19,9 +19,9 @@
 #include <channel/remotedataqueue.h>
 #include <algorithm>
 
-#include <QUdpSocket>
-#include "cm256cc/cm256.h"
+#include <QThread>
 
+#include "cm256cc/cm256.h"
 #include "remotesourceworker.h"
 
 MESSAGE_CLASS_DEFINITION(RemoteSourceWorker::MsgDataBind, Message)
@@ -31,11 +31,18 @@ RemoteSourceWorker::RemoteSourceWorker(RemoteDataQueue *dataQueue, QObject* pare
     m_running(false),
     m_dataQueue(dataQueue),
     m_address(QHostAddress::LocalHost),
-    m_socket(nullptr),
+    m_socket(this),
+    m_mutex(QMutex::Recursive),
     m_sampleRate(0)
 {
     std::fill(m_dataBlocks, m_dataBlocks+4, (RemoteDataBlock *) 0);
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
+    connect(&m_socket, SIGNAL(readyRead()),this, SLOT(recv()));
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
+    connect(&m_socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &APRSWorker::errorOccurred);
+#else
+    connect(&m_socket, &QAbstractSocket::errorOccurred, this, &RemoteSourceWorker::errorOccurred);
+#endif
 }
 
 RemoteSourceWorker::~RemoteSourceWorker()
@@ -49,20 +56,43 @@ void RemoteSourceWorker::dataBind(const QString& address, uint16_t port)
     m_inputMessageQueue.push(msg);
 }
 
-void RemoteSourceWorker::startWork()
+bool RemoteSourceWorker::startWork()
 {
     qDebug("RemoteSourceWorker::startWork");
-    m_socket = new QUdpSocket(this);
-    m_socket->setSocketOption(QAbstractSocket::ReceiveBufferSizeSocketOption, getDataSocketBufferSize(m_sampleRate));
-    m_running = false;
+    QMutexLocker mutexLocker(&m_mutex);
+    m_socket.setSocketOption(QAbstractSocket::ReceiveBufferSizeSocketOption, getDataSocketBufferSize(m_sampleRate));
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+    connect(thread(), SIGNAL(started()), this, SLOT(started()));
+    connect(thread(), SIGNAL(finished()), this, SLOT(finished()));
+    m_running = true;
+    return m_running;
+}
+
+void RemoteSourceWorker::started()
+{
+    disconnect(thread(), SIGNAL(started()), this, SLOT(started()));
 }
 
 void RemoteSourceWorker::stopWork()
 {
     qDebug("RemoteSourceWorker::stopWork");
-    delete m_socket;
-    m_socket = nullptr;
+    QMutexLocker mutexLocker(&m_mutex);
+    disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+}
+
+void RemoteSourceWorker::finished()
+{
+    // Close any existing connection
+    if (m_socket.isOpen()) {
+        m_socket.close();
+    }
     m_running = false;
+    disconnect(thread(), SIGNAL(finished()), this, SLOT(finished()));
+}
+
+void RemoteSourceWorker::errorOccurred(QAbstractSocket::SocketError socketError)
+{
+    qWarning() << "RemoteSourceWorker::errorOccurred: " << socketError;
 }
 
 void RemoteSourceWorker::handleInputMessages()
@@ -73,15 +103,12 @@ void RemoteSourceWorker::handleInputMessages()
     {
         if (MsgDataBind::match(*message))
         {
+            QMutexLocker mutexLocker(&m_mutex);
             MsgDataBind* notif = (MsgDataBind*) message;
             qDebug("RemoteSourceWorker::handleInputMessages: MsgDataBind: %s:%d", qPrintable(notif->getAddress().toString()), notif->getPort());
-
-            if (m_socket)
-            {
-                disconnect(m_socket, SIGNAL(readyRead()), this, SLOT(readPendingDatagrams()));
-                m_socket->bind(notif->getAddress(), notif->getPort());
-                connect(m_socket, SIGNAL(readyRead()), this, SLOT(readPendingDatagrams()));
-            }
+            disconnect(&m_socket, SIGNAL(readyRead()), this, SLOT(readPendingDatagrams()));
+            m_socket.bind(notif->getAddress(), notif->getPort());
+            connect(&m_socket, SIGNAL(readyRead()), this, SLOT(readPendingDatagrams()));
         }
     }
 }
@@ -91,12 +118,12 @@ void RemoteSourceWorker::readPendingDatagrams()
     RemoteSuperBlock superBlock;
     qint64 size;
 
-    while (m_socket->hasPendingDatagrams())
+    while (m_socket.hasPendingDatagrams())
     {
         QHostAddress sender;
         quint16 senderPort = 0;
         //qint64 pendingDataSize = m_socket->pendingDatagramSize();
-        size = m_socket->readDatagram((char *) &superBlock, (long long int) sizeof(RemoteSuperBlock), &sender, &senderPort);
+        size = m_socket.readDatagram((char *) &superBlock, (long long int) sizeof(RemoteSuperBlock), &sender, &senderPort);
 
         if (size == sizeof(RemoteSuperBlock))
         {
@@ -111,7 +138,7 @@ void RemoteSourceWorker::readPendingDatagrams()
                 if (m_sampleRate != sampleRate)
                 {
                     qDebug("RemoteSourceWorker::readPendingDatagrams: sampleRate: %u", sampleRate);
-                    m_socket->setSocketOption(QAbstractSocket::ReceiveBufferSizeSocketOption, getDataSocketBufferSize(sampleRate));
+                    m_socket.setSocketOption(QAbstractSocket::ReceiveBufferSizeSocketOption, getDataSocketBufferSize(sampleRate));
                     m_sampleRate = sampleRate;
                 }
             }

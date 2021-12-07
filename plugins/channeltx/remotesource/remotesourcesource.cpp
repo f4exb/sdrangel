@@ -35,7 +35,9 @@ RemoteSourceSource::RemoteSourceSource() :
 }
 
 RemoteSourceSource::~RemoteSourceSource()
-{}
+{
+    stop();
+}
 
 void RemoteSourceSource::pull(SampleVector::iterator begin, unsigned int nbSamples)
 {
@@ -105,7 +107,7 @@ void RemoteSourceSource::stop()
     {
         stopWorker();
         m_sourceWorker->deleteLater();
-        m_sourceWorker = 0;
+        m_sourceWorker = nullptr;
     }
 
     m_running = false;

@@ -20,13 +20,13 @@
 
 #include <QObject>
 #include <QHostAddress>
+#include <QUdpSocket>
 
 #include "util/message.h"
 #include "util/messagequeue.h"
 
 class RemoteDataQueue;
 class RemoteDataBlock;
-class QUdpSocket;
 
 class RemoteSourceWorker : public QObject {
     Q_OBJECT
@@ -57,7 +57,7 @@ public:
     RemoteSourceWorker(RemoteDataQueue *dataQueue, QObject* parent = 0);
     ~RemoteSourceWorker();
 
-    void startWork();
+    bool startWork();
     void stopWork();
     void dataBind(const QString& address, uint16_t port);
 
@@ -68,7 +68,8 @@ private:
     RemoteDataQueue *m_dataQueue;
 
     QHostAddress m_address;
-    QUdpSocket *m_socket;
+    QUdpSocket m_socket;
+    QMutex m_mutex;
 
     static const uint32_t m_nbDataBlocks = 4;       //!< number of data blocks in the ring buffer
     RemoteDataBlock *m_dataBlocks[m_nbDataBlocks];  //!< ring buffer of data blocks indexed by frame affinity
@@ -77,6 +78,9 @@ private:
     static int getDataSocketBufferSize(uint32_t inSampleRate);
 
 private slots:
+    void started();
+    void finished();
+    void errorOccurred(QAbstractSocket::SocketError socketError);
     void handleInputMessages();
     void readPendingDatagrams();
 };
