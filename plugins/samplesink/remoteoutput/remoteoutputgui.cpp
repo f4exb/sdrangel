@@ -211,20 +211,11 @@ void RemoteOutputSinkGui::updateSampleRate()
     ui->deviceRateText->setText(tr("%1k").arg((float)(m_sampleRate) / 1000));
 }
 
-void RemoteOutputSinkGui::updateTxDelayTooltip()
-{
-    int samplesPerBlock = RemoteNbBytesPerBlock / (SDR_RX_SAMP_SZ <= 16 ? 4 : 8);
-    double delay = ((127*samplesPerBlock*m_settings.m_txDelay) / m_settings.m_sampleRate)/(128 + m_settings.m_nbFECBlocks);
-    ui->txDelayText->setToolTip(tr("%1 us").arg(QString::number(delay*1e6, 'f', 0)));
-}
-
 void RemoteOutputSinkGui::displaySettings()
 {
     blockApplySettings(true);
     ui->centerFrequency->setValue(m_deviceCenterFrequency / 1000);
     ui->sampleRate->setValue(m_settings.m_sampleRate);
-    ui->txDelay->setValue(m_settings.m_txDelay*100);
-    ui->txDelayText->setText(tr("%1").arg(m_settings.m_txDelay*100));
     ui->nbFECBlocks->setValue(m_settings.m_nbFECBlocks);
 
     QString s0 = QString::number(128 + m_settings.m_nbFECBlocks, 'f', 0);
@@ -288,15 +279,6 @@ void RemoteOutputSinkGui::updateStatus()
 void RemoteOutputSinkGui::on_sampleRate_changed(quint64 value)
 {
     m_settings.m_sampleRate = value;
-    updateTxDelayTooltip();
-    sendSettings();
-}
-
-void RemoteOutputSinkGui::on_txDelay_valueChanged(int value)
-{
-    m_settings.m_txDelay = value / 100.0;
-    ui->txDelayText->setText(tr("%1").arg(value));
-    updateTxDelayTooltip();
     sendSettings();
 }
 
@@ -308,7 +290,6 @@ void RemoteOutputSinkGui::on_nbFECBlocks_valueChanged(int value)
     QString s = QString::number(nbOriginalBlocks + nbFECBlocks, 'f', 0);
     QString s1 = QString::number(nbFECBlocks, 'f', 0);
     ui->nominalNbBlocksText->setText(tr("%1/%2").arg(s).arg(s1));
-    updateTxDelayTooltip();
     sendSettings();
 }
 

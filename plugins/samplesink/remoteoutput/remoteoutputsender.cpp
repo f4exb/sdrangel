@@ -22,8 +22,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 
-#include <thread>
-#include <chrono>
 #include <boost/crc.hpp>
 #include <boost/cstdint.hpp>
 
@@ -93,7 +91,6 @@ void RemoteOutputSender::sendDataBlock(RemoteDataBlock *dataBlock)
 
     uint16_t frameIndex = dataBlock->m_txControlBlock.m_frameIndex;
     int nbBlocksFEC = dataBlock->m_txControlBlock.m_nbBlocksFEC;
-    int txDelay = dataBlock->m_txControlBlock.m_txDelay;
     m_remoteHostAddress.setAddress(dataBlock->m_txControlBlock.m_dataAddress);
     uint16_t dataPort = dataBlock->m_txControlBlock.m_dataPort;
     RemoteSuperBlock *txBlockx = dataBlock->m_superBlocks;
@@ -102,11 +99,8 @@ void RemoteOutputSender::sendDataBlock(RemoteDataBlock *dataBlock)
     {
         if (m_udpSocket)
         {
-            for (int i = 0; i < RemoteNbOrginalBlocks; i++)
-            {
-                // send block via UDP
+            for (int i = 0; i < RemoteNbOrginalBlocks; i++) { // send block via UDP
                 m_udpSocket->writeDatagram((const char*)&txBlockx[i], (qint64 ) RemoteUdpSize, m_remoteHostAddress, dataPort);
-                std::this_thread::sleep_for(std::chrono::microseconds(txDelay));
             }
         }
     }
@@ -152,11 +146,8 @@ void RemoteOutputSender::sendDataBlock(RemoteDataBlock *dataBlock)
         // Transmit all blocks
         if (m_udpSocket)
         {
-            for (int i = 0; i < cm256Params.OriginalCount + cm256Params.RecoveryCount; i++)
-            {
-                // send block via UDP
+            for (int i = 0; i < cm256Params.OriginalCount + cm256Params.RecoveryCount; i++) { // send block via UDP
                 m_udpSocket->writeDatagram((const char*)&txBlockx[i], (qint64 ) RemoteUdpSize, m_remoteHostAddress, dataPort);
-                std::this_thread::sleep_for(std::chrono::microseconds(txDelay));
             }
         }
     }
