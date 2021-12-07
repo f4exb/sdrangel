@@ -70,8 +70,11 @@ private:
     QHostAddress m_address;
     QUdpSocket *m_socket;
 
-    static const uint32_t m_nbDataBlocks = 4;          //!< number of data blocks in the ring buffer
+    static const uint32_t m_nbDataBlocks = 4;       //!< number of data blocks in the ring buffer
     RemoteDataBlock *m_dataBlocks[m_nbDataBlocks];  //!< ring buffer of data blocks indexed by frame affinity
+    uint32_t m_sampleRate;                          //!< current sample rate from meta data
+
+    static int getDataSocketBufferSize(uint32_t inSampleRate);
 
 private slots:
     void handleInputMessages();

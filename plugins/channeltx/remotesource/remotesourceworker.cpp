@@ -31,7 +31,8 @@ RemoteSourceWorker::RemoteSourceWorker(RemoteDataQueue *dataQueue, QObject* pare
     m_running(false),
     m_dataQueue(dataQueue),
     m_address(QHostAddress::LocalHost),
-    m_socket(nullptr)
+    m_socket(nullptr),
+    m_sampleRate(0)
 {
     std::fill(m_dataBlocks, m_dataBlocks+4, (RemoteDataBlock *) 0);
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
@@ -52,6 +53,7 @@ void RemoteSourceWorker::startWork()
 {
     qDebug("RemoteSourceWorker::startWork");
     m_socket = new QUdpSocket(this);
+    m_socket->setSocketOption(QAbstractSocket::ReceiveBufferSizeSocketOption, getDataSocketBufferSize(m_sampleRate));
     m_running = false;
 }
 
@@ -99,6 +101,20 @@ void RemoteSourceWorker::readPendingDatagrams()
         if (size == sizeof(RemoteSuperBlock))
         {
             unsigned int dataBlockIndex = superBlock.m_header.m_frameIndex % m_nbDataBlocks;
+            int blockIndex = superBlock.m_header.m_blockIndex;
+
+            if (blockIndex == 0) // first block with meta data
+            {
+                const RemoteMetaDataFEC *metaData = (const RemoteMetaDataFEC *) &superBlock.m_protectedBlock;
+                uint32_t sampleRate = metaData->m_sampleRate;
+
+                if (m_sampleRate != sampleRate)
+                {
+                    qDebug("RemoteSourceWorker::readPendingDatagrams: sampleRate: %u", sampleRate);
+                    m_socket->setSocketOption(QAbstractSocket::ReceiveBufferSizeSocketOption, getDataSocketBufferSize(sampleRate));
+                    m_sampleRate = sampleRate;
+                }
+            }
 
             // create the first block for this index
             if (m_dataBlocks[dataBlockIndex] == 0) {
@@ -145,3 +161,12 @@ void RemoteSourceWorker::readPendingDatagrams()
     }
 }
 
+int RemoteSourceWorker::getDataSocketBufferSize(uint32_t inSampleRate)
+{
+    // set a floor value at 24 kS/s
+    uint32_t samplerate = inSampleRate < 24000 ? 24000 : inSampleRate;
+    // 250 ms (1/4s) at current sample rate
+    int bufferSize = (samplerate * 2 * (SDR_RX_SAMP_SZ == 16 ? 2 : 4)) / 4;
+    qDebug("RemoteSourceWorker::getDataSocketBufferSize: %d bytes", bufferSize);
+    return bufferSize;
+}
