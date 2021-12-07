@@ -32,8 +32,6 @@ SWGRemoteOutputSettings::SWGRemoteOutputSettings() {
     m_center_frequency_isSet = false;
     sample_rate = 0;
     m_sample_rate_isSet = false;
-    tx_delay = 0.0f;
-    m_tx_delay_isSet = false;
     nb_fec_blocks = 0;
     m_nb_fec_blocks_isSet = false;
     api_address = nullptr;
@@ -68,8 +66,6 @@ SWGRemoteOutputSettings::init() {
     m_center_frequency_isSet = false;
     sample_rate = 0;
     m_sample_rate_isSet = false;
-    tx_delay = 0.0f;
-    m_tx_delay_isSet = false;
     nb_fec_blocks = 0;
     m_nb_fec_blocks_isSet = false;
     api_address = new QString("");
@@ -96,7 +92,6 @@ SWGRemoteOutputSettings::init() {
 
 void
 SWGRemoteOutputSettings::cleanup() {
-
 
 
 
@@ -132,8 +127,6 @@ SWGRemoteOutputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&sample_rate, pJson["sampleRate"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&tx_delay, pJson["txDelay"], "float", "");
     
     ::SWGSDRangel::setValue(&nb_fec_blocks, pJson["nbFECBlocks"], "qint32", "");
     
@@ -178,9 +171,6 @@ SWGRemoteOutputSettings::asJsonObject() {
     }
     if(m_sample_rate_isSet){
         obj->insert("sampleRate", QJsonValue(sample_rate));
-    }
-    if(m_tx_delay_isSet){
-        obj->insert("txDelay", QJsonValue(tx_delay));
     }
     if(m_nb_fec_blocks_isSet){
         obj->insert("nbFECBlocks", QJsonValue(nb_fec_blocks));
@@ -237,16 +227,6 @@ void
 SWGRemoteOutputSettings::setSampleRate(qint32 sample_rate) {
     this->sample_rate = sample_rate;
     this->m_sample_rate_isSet = true;
-}
-
-float
-SWGRemoteOutputSettings::getTxDelay() {
-    return tx_delay;
-}
-void
-SWGRemoteOutputSettings::setTxDelay(float tx_delay) {
-    this->tx_delay = tx_delay;
-    this->m_tx_delay_isSet = true;
 }
 
 qint32
@@ -368,9 +348,6 @@ SWGRemoteOutputSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_sample_rate_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_tx_delay_isSet){
             isObjectUpdated = true; break;
         }
         if(m_nb_fec_blocks_isSet){

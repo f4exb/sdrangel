@@ -85,7 +85,6 @@ void RemoteSinkSender::sendDataBlock(RemoteDataBlock *dataBlock)
 
     uint16_t frameIndex = dataBlock->m_txControlBlock.m_frameIndex;
     int nbBlocksFEC = dataBlock->m_txControlBlock.m_nbBlocksFEC;
-    int txDelay = dataBlock->m_txControlBlock.m_txDelay;
     m_address.setAddress(dataBlock->m_txControlBlock.m_dataAddress);
     uint16_t dataPort = dataBlock->m_txControlBlock.m_dataPort;
     RemoteSuperBlock *txBlockx = dataBlock->m_superBlocks;
@@ -94,11 +93,8 @@ void RemoteSinkSender::sendDataBlock(RemoteDataBlock *dataBlock)
     {
         if (m_socket)
         {
-            for (int i = 0; i < RemoteNbOrginalBlocks; i++)
-            {
-                // send block via UDP
+            for (int i = 0; i < RemoteNbOrginalBlocks; i++) { // send block via UDP
                 m_socket->writeDatagram((const char*)&txBlockx[i], (qint64 ) RemoteUdpSize, m_address, dataPort);
-                std::this_thread::sleep_for(std::chrono::microseconds(txDelay));
             }
         }
     }
@@ -139,11 +135,8 @@ void RemoteSinkSender::sendDataBlock(RemoteDataBlock *dataBlock)
         // Transmit all blocks
         if (m_socket)
         {
-            for (int i = 0; i < cm256Params.OriginalCount + cm256Params.RecoveryCount; i++)
-            {
-                // send block via UDP
+            for (int i = 0; i < cm256Params.OriginalCount + cm256Params.RecoveryCount; i++) { // send block via UDP
                 m_socket->writeDatagram((const char*)&txBlockx[i], (qint64 ) RemoteUdpSize, m_address, dataPort);
-                std::this_thread::sleep_for(std::chrono::microseconds(txDelay));
             }
         }
     }

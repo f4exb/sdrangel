@@ -48,9 +48,6 @@ public:
     qint32 getSampleRate();
     void setSampleRate(qint32 sample_rate);
 
-    float getTxDelay();
-    void setTxDelay(float tx_delay);
-
     qint32 getNbFecBlocks();
     void setNbFecBlocks(qint32 nb_fec_blocks);
 
@@ -93,9 +90,6 @@ private:
 
     qint32 sample_rate;
     bool m_sample_rate_isSet;
-
-    float tx_delay;
-    bool m_tx_delay_isSet;
 
     qint32 nb_fec_blocks;
     bool m_nb_fec_blocks_isSet;

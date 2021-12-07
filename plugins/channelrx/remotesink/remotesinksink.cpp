@@ -36,7 +36,6 @@ RemoteSinkSink::RemoteSinkSink() :
         m_frequencyOffset(0),
         m_basebandSampleRate(48000),
         m_nbBlocksFEC(0),
-        m_txDelay(35),
         m_dataAddress("127.0.0.1"),
         m_dataPort(9090)
 {
@@ -165,7 +164,6 @@ void RemoteSinkSink::feed(const SampleVector::const_iterator& begin, const Sampl
                 m_dataBlock->m_txControlBlock.m_processed = false;
                 m_dataBlock->m_txControlBlock.m_complete = true;
                 m_dataBlock->m_txControlBlock.m_nbBlocksFEC = m_nbBlocksFEC;
-                m_dataBlock->m_txControlBlock.m_txDelay = m_txDelay;
                 m_dataBlock->m_txControlBlock.m_dataAddress = m_dataAddress;
                 m_dataBlock->m_txControlBlock.m_dataPort = m_dataPort;
 

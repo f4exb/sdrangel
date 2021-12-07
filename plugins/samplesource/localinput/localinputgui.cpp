@@ -68,8 +68,7 @@ LocalInputGui::LocalInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_countUnrecoverable(0),
 	m_countRecovered(0),
     m_doApplySettings(true),
-    m_forceSettings(true),
-    m_txDelay(0.0)
+    m_forceSettings(true)
 {
     m_paletteGreenText.setColor(QPalette::WindowText, Qt::green);
     m_paletteWhiteText.setColor(QPalette::WindowText, Qt::white);

@@ -6,10 +6,6 @@ RemoteOutputSettings:
       format: int64
     sampleRate:
       type: integer
-    txDelay:
-      description: minimum delay in ms between two consecutive packets sending
-      type: number
-      format: float
     nbFECBlocks:
       type: integer
     apiAddress:

@@ -92,7 +92,6 @@ private:
 
 	bool m_doApplySettings;
     bool m_forceSettings;
-    double m_txDelay;
 
     QPalette m_paletteGreenText;
     QPalette m_paletteWhiteText;

@@ -61,7 +61,6 @@ private:
     int64_t m_frequencyOffset;
     uint32_t m_basebandSampleRate;
     int m_nbBlocksFEC;
-    int m_txDelay;
     QString m_dataAddress;
     uint16_t m_dataPort;
 

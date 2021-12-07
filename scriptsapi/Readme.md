@@ -177,7 +177,6 @@ Example of a JSON file (delay is an example you normally do not need it):
               "reverseAPIPort": 8888,
               "rgbColor": -7601148,
               "title": "Channel 0",
-              "txDelay": 0,
               "useReverseAPI": 0
             },
             "channelType": "RemoteSink",

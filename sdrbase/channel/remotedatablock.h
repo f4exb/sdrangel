@@ -126,16 +126,15 @@ struct RemoteTxControlBlock
     bool m_processed;
     uint16_t m_frameIndex;
     int m_nbBlocksFEC;
-    int m_txDelay;
     QString m_dataAddress;
     uint16_t m_dataPort;
 
-    RemoteTxControlBlock() {
+    RemoteTxControlBlock()
+    {
         m_complete = false;
         m_processed = false;
         m_frameIndex = 0;
         m_nbBlocksFEC = 0;
-        m_txDelay = 100;
         m_dataAddress = "127.0.0.1";
         m_dataPort = 9090;
     }
