@@ -39,7 +39,7 @@ RemoteSourceWorker::RemoteSourceWorker(RemoteDataQueue *dataQueue, QObject* pare
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
     connect(&m_socket, SIGNAL(readyRead()),this, SLOT(recv()));
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-    connect(&m_socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &APRSWorker::errorOccurred);
+    connect(&m_socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &RemoteSourceWorker::errorOccurred);
 #else
     connect(&m_socket, &QAbstractSocket::errorOccurred, this, &RemoteSourceWorker::errorOccurred);
 #endif
