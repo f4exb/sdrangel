@@ -118,6 +118,7 @@ bool RemoteSinkBaseband::handleMessage(const Message& cmd)
         m_channelizer->setBasebandSampleRate(m_basebandSampleRate);
         m_sink.applyBasebandSampleRate(m_basebandSampleRate);
         m_sink.setDeviceCenterFrequency(notif.getCenterFrequency());
+        m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(m_basebandSampleRate));
 
         return true;
     }
