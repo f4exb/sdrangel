@@ -102,8 +102,8 @@ bool GS232ControllerGUI::handleMessage(const Message& message)
         MainCore::MsgTargetAzimuthElevation& msg = (MainCore::MsgTargetAzimuthElevation&) message;
         SWGSDRangel::SWGTargetAzimuthElevation *swgTarget = msg.getSWGTargetAzimuthElevation();
 
-        ui->azimuth->setValue(round(swgTarget->getAzimuth()));
-        ui->elevation->setValue(round(swgTarget->getElevation()));
+        ui->azimuth->setValue(swgTarget->getAzimuth());
+        ui->elevation->setValue(swgTarget->getElevation());
         ui->targetName->setText(*swgTarget->getName());
         return true;
     }
