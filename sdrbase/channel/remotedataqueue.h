@@ -52,6 +52,7 @@ signals:
 private:
     QMutex m_lock;
     QQueue<RemoteDataBlock*> m_queue;
+    int m_count;
 };
 
 #endif /* CHANNEL_REMOTEDATAQUEUE_H_ */

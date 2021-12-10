@@ -31,6 +31,7 @@ RemoteSourceSource::RemoteSourceSource() :
     connect(&m_dataQueue, SIGNAL(dataBlockEnqueued()), this, SLOT(handleData()), Qt::QueuedConnection);
     m_cm256p = m_cm256.isInitialized() ? &m_cm256 : 0;
     m_currentMeta.init();
+    m_dataReadQueue.setSize(50);
     applyChannelSettings(m_channelSampleRate, true);
 }
 
@@ -52,7 +53,7 @@ void RemoteSourceSource::pull(SampleVector::iterator begin, unsigned int nbSampl
 
 void RemoteSourceSource::pullOne(Sample& sample)
 {
-    m_dataReadQueue.readSample(sample, true); // true is scale for Tx
+    // m_dataReadQueue.readSample(sample, true); // true is scale for Tx
 
 	Complex ci;
 
@@ -130,14 +131,13 @@ void RemoteSourceSource::handleData()
 {
     RemoteDataBlock* dataBlock;
 
-    while (m_running && ((dataBlock = m_dataQueue.pop()) != 0)) {
+    while (m_running && ((dataBlock = m_dataQueue.pop()) != nullptr)) {
         handleDataBlock(dataBlock);
     }
 }
 
 void RemoteSourceSource::handleDataBlock(RemoteDataBlock* dataBlock)
 {
-    (void) dataBlock;
     if (dataBlock->m_rxControlBlock.m_blockCount < RemoteNbOrginalBlocks)
     {
         qWarning("RemoteSourceSource::handleDataBlock: incomplete data block: not processing");
@@ -271,10 +271,11 @@ void RemoteSourceSource::applyChannelSettings(int channelSampleRate, bool force)
 
     if ((channelSampleRate != m_channelSampleRate) || force)
     {
+        uint32_t metaSampleRate = m_currentMeta.m_sampleRate == 0 ? channelSampleRate : m_currentMeta.m_sampleRate;
         m_interpolatorDistanceRemain = 0;
         m_interpolatorConsumed = false;
-        m_interpolatorDistance = (Real) m_currentMeta.m_sampleRate / (Real) channelSampleRate;
-        m_interpolator.create(48, m_currentMeta.m_sampleRate, m_currentMeta.m_sampleRate / 2.2, 3.0);
+        m_interpolatorDistance = (Real) metaSampleRate / (Real) channelSampleRate;
+        m_interpolator.create(48, metaSampleRate, metaSampleRate / 2.2, 3.0);
     }
 
     m_channelSampleRate = channelSampleRate;

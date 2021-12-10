@@ -99,7 +99,7 @@ void RemoteSourceWorker::handleInputMessages()
 {
     Message* message;
 
-    while ((message = m_inputMessageQueue.pop()) != 0)
+    while ((message = m_inputMessageQueue.pop()) != nullptr)
     {
         if (MsgDataBind::match(*message))
         {
@@ -107,6 +107,7 @@ void RemoteSourceWorker::handleInputMessages()
             MsgDataBind* notif = (MsgDataBind*) message;
             qDebug("RemoteSourceWorker::handleInputMessages: MsgDataBind: %s:%d", qPrintable(notif->getAddress().toString()), notif->getPort());
             disconnect(&m_socket, SIGNAL(readyRead()), this, SLOT(readPendingDatagrams()));
+            m_socket.abort();
             m_socket.bind(notif->getAddress(), notif->getPort());
             connect(&m_socket, SIGNAL(readyRead()), this, SLOT(readPendingDatagrams()));
         }
