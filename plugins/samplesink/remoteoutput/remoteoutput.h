@@ -123,6 +123,100 @@ public:
         { }
     };
 
+    class MsgConfigureRemoteOutputSampleRate : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getSampleRate() const { return m_sampleRate; }
+
+        static MsgConfigureRemoteOutputSampleRate* create(int sampleRate) {
+            return new MsgConfigureRemoteOutputSampleRate(sampleRate);
+        }
+
+    private:
+        int m_sampleRate;
+
+        MsgConfigureRemoteOutputSampleRate(int sampleRate) :
+            Message(),
+            m_sampleRate(sampleRate)
+        { }
+    };
+
+    class MsgReportRemoteData : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        struct RemoteData
+        {
+            quint64 m_centerFrequency; //!< Center frequency where the stream is placed
+            int m_sampleRate;          //!< Sample rate requested by remote
+            int m_queueSize;           //!< Remote data read queue size
+            int m_queueLength;         //!< Remote data queue length
+            int m_unrecoverableCount;  //!< Number of unrecoverable errors from FEC
+            int m_recoverableCount;    //!< Number of recoverable errors from FEC
+            uint64_t m_timestampUs;    //!< Unix time stamp of request in microseconds
+            uint32_t m_sampleCount;    //!< Number of samples processed in the remote at request time
+        };
+
+        const RemoteData& getData() const { return m_remoteData; }
+
+        static MsgReportRemoteData* create(const RemoteData& remoteData) {
+            return new MsgReportRemoteData(remoteData);
+        }
+
+    private:
+        RemoteData m_remoteData;
+
+        MsgReportRemoteData(const RemoteData& remoteData) :
+            Message(),
+            m_remoteData(remoteData)
+        {}
+    };
+
+    class MsgReportRemoteFixedData : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        struct RemoteData
+        {
+            QString m_version;      //!< Remote SDRangel version
+            QString m_qtVersion;    //!< Remote Qt version used to build SDRangel
+            QString m_architecture; //!< Remote CPU architecture
+            QString m_os;           //!< Remote O/S
+            int     m_rxBits;       //!< Number of bits used for I or Q sample on Rx side
+            int     m_txBits;       //!< Number of bits used for I or Q sample on Tx side
+        };
+
+        const RemoteData& getData() const { return m_remoteData; }
+
+        static MsgReportRemoteFixedData* create(const RemoteData& remoteData) {
+            return new MsgReportRemoteFixedData(remoteData);
+        }
+
+    private:
+        RemoteData m_remoteData;
+
+        MsgReportRemoteFixedData(const RemoteData& remoteData) :
+            Message(),
+            m_remoteData(remoteData)
+        {}
+    };
+
+    class MsgRequestFixedData : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgRequestFixedData* create() {
+            return new MsgRequestFixedData();
+        }
+
+    private:
+        MsgRequestFixedData() :
+            Message()
+        {}
+    };
+
+
 	RemoteOutput(DeviceAPI *deviceAPI);
 	virtual ~RemoteOutput();
 	virtual void destroy();
@@ -186,8 +280,9 @@ private:
 	QString m_deviceDescription;
 	std::time_t m_startingTimeStamp;
 	const QTimer& m_masterTimer;
-	uint32_t m_tickCount;
-    uint32_t m_tickMultiplier;
+	uint32_t m_tickCount; // for 50 ms timer
+    uint32_t m_greaterTickCount; // for 1 s derived timer
+    uint32_t m_tickMultiplier; // for greater tick count
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;

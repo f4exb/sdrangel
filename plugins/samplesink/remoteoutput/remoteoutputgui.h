@@ -23,7 +23,6 @@
 #include <QTimer>
 #include <QElapsedTimer>
 #include <QWidget>
-#include <QNetworkRequest>
 
 #include "device/devicegui.h"
 #include "util/messagequeue.h"
@@ -32,9 +31,6 @@
 #include "remoteoutput.h"
 #include "remoteoutputsettings.h"
 
-class QNetworkAccessManager;
-class QNetworkReply;
-class QJsonObject;
 class DeviceSampleSink;
 class DeviceUISet;
 
@@ -90,7 +86,7 @@ private:
 	RemoteOutputSettings m_controlSettings; //!< settings last sent to device via control port
 	QTimer m_updateTimer;
     QTimer m_statusTimer;
-	DeviceSampleSink* m_deviceSampleSink;
+	DeviceSampleSink* m_remoteOutput;
     int m_sampleRate;
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
 	int m_samplesCount;
@@ -115,19 +111,17 @@ private:
 
     MessageQueue m_inputMessageQueue;
 
-    QNetworkAccessManager *m_networkManager;
-    QNetworkRequest m_networkRequest;
-
     void blockApplySettings(bool block);
 	void displaySettings();
 	void displayTime();
+    void displayRemoteData(const RemoteOutput::MsgReportRemoteData::RemoteData& remoteData);
+    void displayRemoteFixedData(const RemoteOutput::MsgReportRemoteFixedData::RemoteData& remoteData);
     void sendControl(bool force = false);
 	void sendSettings();
 	void updateSampleRate();
 	void displayEventCounts();
 	void displayEventStatus(int recoverableCount, int unrecoverableCount);
     void displayEventTimer();
-    void analyzeApiReply(const QJsonObject& jsonObject);
 	bool handleMessage(const Message& message);
 
 private slots:
@@ -147,7 +141,6 @@ private slots:
     void updateHardware();
     void updateStatus();
 	void tick();
-	void networkManagerFinished(QNetworkReply *reply);
     void openDeviceSettingsDialog(const QPoint& p);
 };
 

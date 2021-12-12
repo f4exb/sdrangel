@@ -20,9 +20,6 @@
 #include <QDateTime>
 #include <QString>
 #include <QMessageBox>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
-#include <QJsonParseError>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
@@ -51,7 +48,7 @@ RemoteOutputSinkGui::RemoteOutputSinkGui(DeviceUISet *deviceUISet, QWidget* pare
 	ui(new Ui::RemoteOutputGui),
 	m_deviceUISet(deviceUISet),
 	m_settings(),
-	m_deviceSampleSink(0),
+	m_remoteOutput(0),
 	m_deviceCenterFrequency(0),
 	m_samplesCount(0),
 	m_tickCount(0),
@@ -83,12 +80,9 @@ RemoteOutputSinkGui::RemoteOutputSinkGui(DeviceUISet *deviceUISet, QWidget* pare
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(500);
 
-	m_deviceSampleSink = (RemoteOutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
+	m_remoteOutput = (RemoteOutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
 
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
-
-	m_networkManager = new QNetworkAccessManager();
-	connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 
 	m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
 
@@ -105,8 +99,6 @@ RemoteOutputSinkGui::RemoteOutputSinkGui(DeviceUISet *deviceUISet, QWidget* pare
 
 RemoteOutputSinkGui::~RemoteOutputSinkGui()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
-    delete m_networkManager;
 	delete ui;
 }
 
@@ -170,6 +162,18 @@ bool RemoteOutputSinkGui::handleMessage(const Message& message)
         blockApplySettings(true);
         ui->startStop->setChecked(notif.getStartStop());
         blockApplySettings(false);
+        return true;
+    }
+    else if (RemoteOutput::MsgReportRemoteData::match(message))
+    {
+        const RemoteOutput::MsgReportRemoteData& report = (const RemoteOutput::MsgReportRemoteData&) message;
+        displayRemoteData(report.getData());
+        return true;
+    }
+    else if (RemoteOutput::MsgReportRemoteFixedData::match(message))
+    {
+        const RemoteOutput::MsgReportRemoteFixedData& report = (const RemoteOutput::MsgReportRemoteFixedData&) message;
+        displayRemoteFixedData(report.getData());
         return true;
     }
 	else
@@ -239,7 +243,7 @@ void RemoteOutputSinkGui::updateHardware()
 {
     qDebug() << "RemoteOutputSinkGui::updateHardware";
     RemoteOutput::MsgConfigureRemoteOutput* message = RemoteOutput::MsgConfigureRemoteOutput::create(m_settings, m_forceSettings);
-    m_deviceSampleSink->getInputMessageQueue()->push(message);
+    m_remoteOutput->getInputMessageQueue()->push(message);
     m_forceSettings = false;
     m_updateTimer.stop();
 }
@@ -323,9 +327,8 @@ void RemoteOutputSinkGui::on_apiAddress_returnPressed()
     m_settings.m_apiAddress = ui->apiAddress->text();
     sendSettings();
 
-    QString infoURL = QString("http://%1:%2/sdrangel").arg(m_settings.m_apiAddress).arg(m_settings.m_apiPort);
-    m_networkRequest.setUrl(QUrl(infoURL));
-    m_networkManager->get(m_networkRequest);
+    RemoteOutput::MsgRequestFixedData *msg = RemoteOutput::MsgRequestFixedData::create();
+    m_remoteOutput->getInputMessageQueue()->push(msg);
 }
 
 void RemoteOutputSinkGui::on_apiPort_returnPressed()
@@ -341,9 +344,8 @@ void RemoteOutputSinkGui::on_apiPort_returnPressed()
 
     sendSettings();
 
-    QString infoURL = QString("http://%1:%2/sdrangel").arg(m_settings.m_apiAddress).arg(m_settings.m_apiPort);
-    m_networkRequest.setUrl(QUrl(infoURL));
-    m_networkManager->get(m_networkRequest);
+    RemoteOutput::MsgRequestFixedData *msg = RemoteOutput::MsgRequestFixedData::create();
+    m_remoteOutput->getInputMessageQueue()->push(msg);
 }
 
 void RemoteOutputSinkGui::on_dataAddress_returnPressed()
@@ -381,9 +383,8 @@ void RemoteOutputSinkGui::on_apiApplyButton_clicked(bool checked)
 
     sendSettings();
 
-    QString infoURL = QString("http://%1:%2/sdrangel").arg(m_settings.m_apiAddress).arg(m_settings.m_apiPort);
-    m_networkRequest.setUrl(QUrl(infoURL));
-    m_networkManager->get(m_networkRequest);
+    RemoteOutput::MsgRequestFixedData *msg = RemoteOutput::MsgRequestFixedData::create();
+    m_remoteOutput->getInputMessageQueue()->push(msg);
 }
 
 void RemoteOutputSinkGui::on_dataApplyButton_clicked(bool checked)
@@ -407,7 +408,7 @@ void RemoteOutputSinkGui::on_startStop_toggled(bool checked)
     if (m_doApplySettings)
     {
         RemoteOutput::MsgStartStop *message = RemoteOutput::MsgStartStop::create(checked);
-        m_deviceSampleSink->getInputMessageQueue()->push(message);
+        m_remoteOutput->getInputMessageQueue()->push(message);
     }
 }
 
@@ -457,146 +458,62 @@ void RemoteOutputSinkGui::displayEventTimer()
 
 void RemoteOutputSinkGui::tick()
 {
-    if (++m_tickCount == 20) // once per second
-	{
-        QString reportURL;
-
-        reportURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/report")
-                .arg(m_settings.m_apiAddress)
-                .arg(m_settings.m_apiPort)
-                .arg(m_settings.m_deviceIndex)
-                .arg(m_settings.m_channelIndex);
-	    m_networkRequest.setUrl(QUrl(reportURL));
-	    m_networkManager->get(m_networkRequest);
-
-        displayEventTimer();
-
-        m_tickCount = 0;
-	}
 }
 
-void RemoteOutputSinkGui::networkManagerFinished(QNetworkReply *reply)
+void RemoteOutputSinkGui::displayRemoteData(const RemoteOutput::MsgReportRemoteData::RemoteData& remoteData)
 {
-    if (reply->error())
-    {
-        ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
-        ui->statusText->setText(reply->errorString());
-    }
-    else
-    {
-        QString answer = reply->readAll();
+    m_deviceCenterFrequency = remoteData.m_centerFrequency;
+    m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
+    ui->centerFrequency->setText(QString("%L1").arg(m_deviceCenterFrequency));
+    ui->remoteRateText->setText(tr("%1k").arg((float)(remoteData.m_sampleRate) / 1000));
+    QString queueLengthText = QString("%1/%2").arg(remoteData.m_queueLength).arg(remoteData.m_queueSize);
+    ui->queueLengthText->setText(queueLengthText);
+    int queueLengthPercent = (remoteData.m_queueLength*100)/remoteData.m_queueSize;
+    ui->queueLengthGauge->setValue(queueLengthPercent);
 
-        try
-        {
-            QByteArray jsonBytes(answer.toStdString().c_str());
-            QJsonParseError error;
-            QJsonDocument doc = QJsonDocument::fromJson(jsonBytes, &error);
-
-            if (error.error == QJsonParseError::NoError)
-            {
-                ui->apiAddressLabel->setStyleSheet("QLabel { background-color : green; }");
-                ui->statusText->setText(QString("API OK"));
-                analyzeApiReply(doc.object());
-            }
-            else
-            {
-                ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
-                QString errorMsg = QString("Reply JSON error: ") + error.errorString() + QString(" at offset ") + QString::number(error.offset);
-                ui->statusText->setText(QString("JSON error. See log"));
-                qInfo().noquote() << "RemoteOutputSinkGui::networkManagerFinished" << errorMsg;
-            }
-        }
-        catch (const std::exception& ex)
-        {
-            ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
-            QString errorMsg = QString("Error parsing request: ") + ex.what();
-            ui->statusText->setText("Error parsing request. See log for details");
-            qInfo().noquote() << "RemoteOutputSinkGui::networkManagerFinished" << errorMsg;
-        }
+    if (!m_resetCounts)
+    {
+        int recoverableCountDelta = remoteData.m_recoverableCount - m_lastCountRecovered;
+        int unrecoverableCountDelta = remoteData.m_unrecoverableCount - m_lastCountUnrecoverable;
+        displayEventStatus(recoverableCountDelta, unrecoverableCountDelta);
+        m_countRecovered += recoverableCountDelta;
+        m_countUnrecoverable += unrecoverableCountDelta;
+        displayEventCounts();
     }
 
-    reply->deleteLater();
+    uint32_t sampleCountDelta;
+
+    if (remoteData.m_sampleCount < m_lastSampleCount) {
+        sampleCountDelta = (0xFFFFFFFFU - m_lastSampleCount) + remoteData.m_sampleCount + 1;
+    } else {
+        sampleCountDelta = remoteData.m_sampleCount - m_lastSampleCount;
+    }
+
+    if (sampleCountDelta == 0)
+    {
+        ui->allFramesDecoded->setStyleSheet("QToolButton { background-color : blue; }");
+    }
+
+    double remoteStreamRate = sampleCountDelta*1e6 / (double) (remoteData.m_timestampUs - m_lastTimestampUs);
+
+    if (remoteStreamRate != 0) {
+        ui->remoteStreamRateText->setText(QString("%1").arg(remoteStreamRate, 0, 'f', 0));
+    }
+
+    m_resetCounts = false;
+    m_lastCountRecovered = remoteData.m_recoverableCount;
+    m_lastCountUnrecoverable = remoteData.m_unrecoverableCount;
+    m_lastSampleCount = remoteData.m_sampleCount;
+    m_lastTimestampUs = remoteData.m_timestampUs;
 }
 
-void RemoteOutputSinkGui::analyzeApiReply(const QJsonObject& jsonObject)
+void RemoteOutputSinkGui::displayRemoteFixedData(const RemoteOutput::MsgReportRemoteFixedData::RemoteData& remoteData)
 {
-    QString infoLine;
-
-    if (jsonObject.contains("RemoteSourceReport"))
-    {
-        QJsonObject report = jsonObject["RemoteSourceReport"].toObject();
-        m_deviceCenterFrequency = report["deviceCenterFreq"].toInt() * 1000;
-        m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
-        ui->centerFrequency->setText(QString("%L1").arg(m_deviceCenterFrequency));
-        int remoteRate = report["deviceSampleRate"].toInt();
-        ui->remoteRateText->setText(tr("%1k").arg((float)(remoteRate) / 1000));
-        int queueSize = report["queueSize"].toInt();
-        queueSize = queueSize == 0 ? 10 : queueSize;
-        int queueLength = report["queueLength"].toInt();
-        QString queueLengthText = QString("%1/%2").arg(queueLength).arg(queueSize);
-        ui->queueLengthText->setText(queueLengthText);
-        int queueLengthPercent = (queueLength*100)/queueSize;
-        ui->queueLengthGauge->setValue(queueLengthPercent);
-        int unrecoverableCount = report["uncorrectableErrorsCount"].toInt();
-        int recoverableCount = report["correctableErrorsCount"].toInt();
-        uint64_t timestampUs = report["tvSec"].toInt()*1000000ULL + report["tvUSec"].toInt();
-
-        if (!m_resetCounts)
-        {
-            int recoverableCountDelta = recoverableCount - m_lastCountRecovered;
-            int unrecoverableCountDelta = unrecoverableCount - m_lastCountUnrecoverable;
-            displayEventStatus(recoverableCountDelta, unrecoverableCountDelta);
-            m_countRecovered += recoverableCountDelta;
-            m_countUnrecoverable += unrecoverableCountDelta;
-            displayEventCounts();
-        }
-
-        uint32_t sampleCountDelta, sampleCount;
-        sampleCount = report["samplesCount"].toInt();
-
-        if (sampleCount < m_lastSampleCount) {
-            sampleCountDelta = (0xFFFFFFFFU - m_lastSampleCount) + sampleCount + 1;
-        } else {
-            sampleCountDelta = sampleCount - m_lastSampleCount;
-        }
-
-        if (sampleCountDelta == 0)
-        {
-            ui->allFramesDecoded->setStyleSheet("QToolButton { background-color : blue; }");
-        }
-
-        double remoteStreamRate = sampleCountDelta*1e6 / (double) (timestampUs - m_lastTimestampUs);
-
-        if (remoteStreamRate != 0) {
-            ui->remoteStreamRateText->setText(QString("%1").arg(remoteStreamRate, 0, 'f', 0));
-        }
-
-        m_resetCounts = false;
-        m_lastCountRecovered = recoverableCount;
-        m_lastCountUnrecoverable = unrecoverableCount;
-        m_lastSampleCount = sampleCount;
-        m_lastTimestampUs = timestampUs;
-    }
-
-    if (jsonObject.contains("version")) {
-        infoLine = "v" + jsonObject["version"].toString();
-    }
-
-    if (jsonObject.contains("qtVersion")) {
-        infoLine += " Qt" + jsonObject["qtVersion"].toString();
-    }
-
-    if (jsonObject.contains("architecture")) {
-        infoLine += " " + jsonObject["architecture"].toString();
-    }
-
-    if (jsonObject.contains("os")) {
-        infoLine += " " + jsonObject["os"].toString();
-    }
-
-    if (jsonObject.contains("dspRxBits") && jsonObject.contains("dspTxBits")) {
-        infoLine +=  QString(" %1/%2b").arg(jsonObject["dspRxBits"].toInt()).arg(jsonObject["dspTxBits"].toInt());
-    }
+    QString infoLine = "v" + remoteData.m_version;
+    infoLine += " Qt" + remoteData.m_qtVersion;
+    infoLine += " " + remoteData.m_architecture;
+    infoLine += " " + remoteData.m_os;
+    infoLine +=  QString(" %1/%2b").arg(remoteData.m_rxBits).arg(remoteData.m_txBits);
 
     if (infoLine.size() > 0) {
         ui->infoText->setText(infoLine);

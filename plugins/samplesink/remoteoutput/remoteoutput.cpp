@@ -41,6 +41,10 @@ MESSAGE_CLASS_DEFINITION(RemoteOutput::MsgConfigureRemoteOutput, Message)
 MESSAGE_CLASS_DEFINITION(RemoteOutput::MsgConfigureRemoteOutputWork, Message)
 MESSAGE_CLASS_DEFINITION(RemoteOutput::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(RemoteOutput::MsgConfigureRemoteOutputChunkCorrection, Message)
+MESSAGE_CLASS_DEFINITION(RemoteOutput::MsgConfigureRemoteOutputSampleRate, Message)
+MESSAGE_CLASS_DEFINITION(RemoteOutput::MsgReportRemoteData, Message)
+MESSAGE_CLASS_DEFINITION(RemoteOutput::MsgReportRemoteFixedData, Message)
+MESSAGE_CLASS_DEFINITION(RemoteOutput::MsgRequestFixedData, Message)
 
 const uint32_t RemoteOutput::NbSamplesForRateCorrection = 5000000;
 
@@ -53,7 +57,8 @@ RemoteOutput::RemoteOutput(DeviceAPI *deviceAPI) :
     m_startingTimeStamp(0),
 	m_masterTimer(deviceAPI->getMasterTimer()),
 	m_tickCount(0),
-    m_tickMultiplier(20),
+    m_greaterTickCount(0),
+    m_tickMultiplier(1),
 	m_lastRemoteSampleCount(0),
 	m_lastSampleCount(0),
 	m_lastRemoteTimestampRateCorrection(0),
@@ -243,6 +248,19 @@ bool RemoteOutput::handleMessage(const Message& message)
 
 	    return true;
 	}
+    else if (MsgRequestFixedData::match(message))
+    {
+        QString reportURL;
+
+        reportURL = QString("http://%1:%2/sdrangel")
+            .arg(m_settings.m_apiAddress)
+            .arg(m_settings.m_apiPort);
+
+        m_networkRequest.setUrl(QUrl(reportURL));
+        m_networkManager->get(m_networkRequest);
+
+        return true;
+    }
 	else
 	{
 		return false;
@@ -284,8 +302,8 @@ void RemoteOutput::applySettings(const RemoteOutputSettings& settings, bool forc
         }
 
         m_tickMultiplier = (21*NbSamplesForRateCorrection) / (2*settings.m_sampleRate); // two times per sample filling period plus small extension
-        m_tickMultiplier = m_tickMultiplier < 20 ? 20 : m_tickMultiplier; // not below half a second
-
+        m_tickMultiplier /= 20; // greter tick (one per second)
+        m_tickMultiplier = m_tickMultiplier < 1 ? 1 : m_tickMultiplier; // not below 1 second
         forwardChange = true;
     }
 
@@ -473,7 +491,7 @@ void RemoteOutput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respon
 
 void RemoteOutput::tick()
 {
-    if (++m_tickCount == m_tickMultiplier)
+    if (++m_tickCount == 20) // Every second
     {
         QString reportURL;
 
@@ -530,22 +548,44 @@ void RemoteOutput::analyzeApiReply(const QJsonObject& jsonObject, const QString&
 {
     if (jsonObject.contains("RemoteSourceReport"))
     {
+        MsgReportRemoteData::RemoteData msgRemoteData;
         QJsonObject report = jsonObject["RemoteSourceReport"].toObject();
         m_settings.m_centerFrequency = report["deviceCenterFreq"].toInt();
         m_centerFrequency = m_settings.m_centerFrequency * 1000;
+        msgRemoteData.m_centerFrequency = m_centerFrequency;
+        int queueSize = report["queueSize"].toInt();
+        queueSize = queueSize == 0 ? 20 : queueSize;
+        msgRemoteData.m_queueSize = queueSize;
+        int queueLength = report["queueLength"].toInt();
+        msgRemoteData.m_queueLength = queueLength;
+        int queueLengthPercent = (queueLength*100)/queueSize;
+        uint64_t remoteTimestampUs = report["tvSec"].toInt()*1000000ULL + report["tvUSec"].toInt();
+        msgRemoteData.m_timestampUs = remoteTimestampUs;
+        int intRemoteSampleCount = report["samplesCount"].toInt();
+        uint32_t remoteSampleCount = intRemoteSampleCount < 0 ? 0 : intRemoteSampleCount;
+        msgRemoteData.m_sampleCount = remoteSampleCount;
+        int remoteRate = report["deviceSampleRate"].toInt();
+        msgRemoteData.m_sampleRate = remoteRate;
+        int unrecoverableCount = report["uncorrectableErrorsCount"].toInt();
+        msgRemoteData.m_unrecoverableCount = unrecoverableCount;
+        int recoverableCount = report["correctableErrorsCount"].toInt();
+        msgRemoteData.m_recoverableCount = recoverableCount;
+
+        if (m_guiMessageQueue)
+        {
+            MsgReportRemoteData *msg = MsgReportRemoteData::create(msgRemoteData);
+            m_guiMessageQueue->push(msg);
+        }
 
         if (!m_remoteOutputWorker) {
             return;
         }
 
-        int queueSize = report["queueSize"].toInt();
-        queueSize = queueSize == 0 ? 10 : queueSize;
-        int queueLength = report["queueLength"].toInt();
-        int queueLengthPercent = (queueLength*100)/queueSize;
-        uint64_t remoteTimestampUs = report["tvSec"].toInt()*1000000ULL + report["tvUSec"].toInt();
+        if (++m_greaterTickCount != m_tickMultiplier) {
+            return;
+        }
 
-        uint32_t remoteSampleCountDelta, remoteSampleCount;
-        remoteSampleCount = report["samplesCount"].toInt();
+        uint32_t remoteSampleCountDelta;
 
         if (remoteSampleCount < m_lastRemoteSampleCount) {
             remoteSampleCountDelta = (0xFFFFFFFFU - m_lastRemoteSampleCount) + remoteSampleCount + 1;
@@ -596,10 +636,40 @@ void RemoteOutput::analyzeApiReply(const QJsonObject& jsonObject, const QString&
         m_lastRemoteSampleCount = remoteSampleCount;
         m_lastSampleCount = sampleCount;
         m_lastQueueLength = queueLength;
+        m_greaterTickCount = 0;
     }
     else if (jsonObject.contains("remoteOutputSettings"))
     {
         qDebug("RemoteOutput::analyzeApiReply: reply:\n%s", answer.toStdString().c_str());
+    }
+    else if (jsonObject.contains("version"))
+    {
+        MsgReportRemoteFixedData::RemoteData msgRemoteFixedData;
+        msgRemoteFixedData.m_version = jsonObject["version"].toString();
+
+        if (jsonObject.contains("qtVersion")) {
+            msgRemoteFixedData.m_qtVersion = jsonObject["qtVersion"].toString();
+        }
+
+        if (jsonObject.contains("architecture")) {
+            msgRemoteFixedData.m_architecture = jsonObject["architecture"].toString();
+        }
+
+        if (jsonObject.contains("os")) {
+            msgRemoteFixedData.m_os = jsonObject["os"].toString();
+        }
+
+        if (jsonObject.contains("dspRxBits") && jsonObject.contains("dspTxBits"))
+        {
+            msgRemoteFixedData.m_rxBits = jsonObject["dspRxBits"].toInt();
+            msgRemoteFixedData.m_txBits = jsonObject["dspTxBits"].toInt();
+        }
+
+        if (m_guiMessageQueue)
+        {
+            MsgReportRemoteFixedData *msg = MsgReportRemoteFixedData::create(msgRemoteFixedData);
+            m_guiMessageQueue->push(msg);
+        }
     }
 }
 
