@@ -47,7 +47,7 @@ void RemoteOutputFifo::reset()
     m_writeHead = 0;
 }
 
-RemoteDataBlock *RemoteOutputFifo::getDataBlock()
+RemoteDataFrame *RemoteOutputFifo::getDataFrame()
 {
     QMutexLocker mutexLocker(&m_mutex);
     m_servedHead = m_writeHead;
@@ -62,18 +62,18 @@ RemoteDataBlock *RemoteOutputFifo::getDataBlock()
     return &m_data[m_servedHead];
 }
 
-unsigned int RemoteOutputFifo::readDataBlock(RemoteDataBlock **dataBlock)
+unsigned int RemoteOutputFifo::readDataFrame(RemoteDataFrame **dataFrame)
 {
     QMutexLocker mutexLocker(&m_mutex);
 
     if (calculateRemainder() == 0)
     {
-        *dataBlock = nullptr;
+        *dataFrame = nullptr;
         return 0;
     }
     else
     {
-        *dataBlock = &m_data[m_readHead];
+        *dataFrame = &m_data[m_readHead];
         m_readHead = m_readHead < m_size - 1 ? m_readHead + 1 : 0;
         return calculateRemainder();
     }

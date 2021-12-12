@@ -113,9 +113,6 @@ public:
     static const char* const m_channelIdURI;
     static const char* const m_channelId;
 
-signals:
-    void dataBlockAvailable(RemoteDataBlock *dataBlock);
-
 private:
     DeviceAPI *m_deviceAPI;
     QThread *m_thread;

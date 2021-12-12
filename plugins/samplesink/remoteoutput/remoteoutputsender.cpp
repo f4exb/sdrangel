@@ -63,43 +63,43 @@ void RemoteOutputSender::setDestination(const QString& address, uint16_t port)
     m_remoteHostAddress.setAddress(address);
 }
 
-RemoteDataBlock *RemoteOutputSender::getDataBlock()
+RemoteDataFrame *RemoteOutputSender::getDataFrame()
 {
-    return m_fifo.getDataBlock();
+    return m_fifo.getDataFrame();
 }
 
 void RemoteOutputSender::handleData()
 {
-    RemoteDataBlock *dataBlock;
+    RemoteDataFrame *dataFrame;
     unsigned int remainder = m_fifo.getRemainder();
 
     while (remainder != 0)
     {
-        remainder = m_fifo.readDataBlock(&dataBlock);
+        remainder = m_fifo.readDataFrame(&dataFrame);
 
-        if (dataBlock) {
-            sendDataBlock(dataBlock);
+        if (dataFrame) {
+            sendDataFrame(dataFrame);
         }
     }
 }
 
-void RemoteOutputSender::sendDataBlock(RemoteDataBlock *dataBlock)
+void RemoteOutputSender::sendDataFrame(RemoteDataFrame *dataFrame)
 {
 	CM256::cm256_encoder_params cm256Params;  //!< Main interface with CM256 encoder
 	CM256::cm256_block descriptorBlocks[256]; //!< Pointers to data for CM256 encoder
 	RemoteProtectedBlock fecBlocks[256];   //!< FEC data
 
-    uint16_t frameIndex = dataBlock->m_txControlBlock.m_frameIndex;
-    int nbBlocksFEC = dataBlock->m_txControlBlock.m_nbBlocksFEC;
-    m_remoteHostAddress.setAddress(dataBlock->m_txControlBlock.m_dataAddress);
-    uint16_t dataPort = dataBlock->m_txControlBlock.m_dataPort;
-    RemoteSuperBlock *txBlockx = dataBlock->m_superBlocks;
+    uint16_t frameIndex = dataFrame->m_txControlBlock.m_frameIndex;
+    int nbBlocksFEC = dataFrame->m_txControlBlock.m_nbBlocksFEC;
+    m_remoteHostAddress.setAddress(dataFrame->m_txControlBlock.m_dataAddress);
+    uint16_t dataPort = dataFrame->m_txControlBlock.m_dataPort;
+    RemoteSuperBlock *txBlockx = dataFrame->m_superBlocks;
 
     if ((nbBlocksFEC == 0) || !m_cm256p) // Do not FEC encode
     {
         if (m_udpSocket)
         {
-            for (int i = 0; i < RemoteNbOrginalBlocks; i++) { // send block via UDP
+            for (int i = 0; i < RemoteNbOrginalBlocks; i++) { // send blocks via UDP
                 m_udpSocket->writeDatagram((const char*)&txBlockx[i], (qint64 ) RemoteUdpSize, m_remoteHostAddress, dataPort);
             }
         }
@@ -130,7 +130,7 @@ void RemoteOutputSender::sendDataBlock(RemoteDataBlock *dataBlock)
         {
             qWarning("RemoteSinkSender::handleDataBlock: CM256 encode failed. Transmit without FEC.");
             cm256Params.RecoveryCount = 0;
-            RemoteSuperBlock& superBlock = dataBlock->m_superBlocks[0]; // first block
+            RemoteSuperBlock& superBlock = dataFrame->m_superBlocks[0]; // first block
             RemoteMetaDataFEC *destMeta = (RemoteMetaDataFEC *) &superBlock.m_protectedBlock;
             destMeta->m_nbFECBlocks = 0;
             boost::crc_32_type crc32;
@@ -146,11 +146,11 @@ void RemoteOutputSender::sendDataBlock(RemoteDataBlock *dataBlock)
         // Transmit all blocks
         if (m_udpSocket)
         {
-            for (int i = 0; i < cm256Params.OriginalCount + cm256Params.RecoveryCount; i++) { // send block via UDP
+            for (int i = 0; i < cm256Params.OriginalCount + cm256Params.RecoveryCount; i++) { // send blocks via UDP
                 m_udpSocket->writeDatagram((const char*)&txBlockx[i], (qint64 ) RemoteUdpSize, m_remoteHostAddress, dataPort);
             }
         }
     }
 
-    dataBlock->m_txControlBlock.m_processed = true;
+    dataFrame->m_txControlBlock.m_processed = true;
 }

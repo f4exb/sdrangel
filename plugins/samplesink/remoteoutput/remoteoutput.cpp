@@ -200,14 +200,11 @@ bool RemoteOutput::handleMessage(const Message& message)
 		MsgConfigureRemoteOutputWork& conf = (MsgConfigureRemoteOutputWork&) message;
 		bool working = conf.isWorking();
 
-		if (m_remoteOutputWorker != 0)
+		if (m_remoteOutputWorker != nullptr)
 		{
-			if (working)
-			{
+			if (working) {
 			    m_remoteOutputWorker->startWork();
-			}
-			else
-			{
+			} else {
 			    m_remoteOutputWorker->stopWork();
 			}
 		}
@@ -221,8 +218,7 @@ bool RemoteOutput::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initDeviceEngine())
-            {
+            if (m_deviceAPI->initDeviceEngine()) {
                 m_deviceAPI->startDeviceEngine();
             }
         }
@@ -241,8 +237,7 @@ bool RemoteOutput::handleMessage(const Message& message)
 	{
 	    MsgConfigureRemoteOutputChunkCorrection& conf = (MsgConfigureRemoteOutputChunkCorrection&) message;
 
-	    if (m_remoteOutputWorker != 0)
-        {
+	    if (m_remoteOutputWorker != nullptr) {
 	        m_remoteOutputWorker->setChunkCorrection(conf.getChunkCorrection());
         }
 
@@ -472,9 +467,8 @@ void RemoteOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
 
 void RemoteOutput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
 {
-    uint64_t ts_usecs;
     response.getRemoteOutputReport()->setBufferRwBalance(m_sampleSourceFifo.getRWBalance());
-    response.getRemoteOutputReport()->setSampleCount(m_remoteOutputWorker ? (int) m_remoteOutputWorker->getSamplesCount(ts_usecs) : 0);
+    response.getRemoteOutputReport()->setSampleCount(m_remoteOutputWorker ? (int) m_remoteOutputWorker->getSamplesCount() : 0);
 }
 
 void RemoteOutput::tick()
@@ -615,7 +609,8 @@ void RemoteOutput::sampleRateCorrection(double remoteTimeDeltaUs, double timeDel
     double chunkCorr = 50000 * deltaSR; // for 50ms chunk intervals (50000us)
     m_chunkSizeCorrection += roundf(chunkCorr);
 
-    qDebug("RemoteOutput::sampleRateCorrection: %d (%f) samples", m_chunkSizeCorrection, chunkCorr);
+    qDebug("RemoteOutput::sampleRateCorrection: remote: %u / %f us local: %u / %f us corr: %d (%f) samples",
+        remoteSampleCount, remoteTimeDeltaUs, sampleCount, timeDeltaUs, m_chunkSizeCorrection, chunkCorr);
 
     MsgConfigureRemoteOutputChunkCorrection* message = MsgConfigureRemoteOutputChunkCorrection::create(m_chunkSizeCorrection);
     getInputMessageQueue()->push(message);

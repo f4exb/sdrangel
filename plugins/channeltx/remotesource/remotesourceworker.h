@@ -26,7 +26,7 @@
 #include "util/messagequeue.h"
 
 class RemoteDataQueue;
-class RemoteDataBlock;
+class RemoteDataFrame;
 
 class RemoteSourceWorker : public QObject {
     Q_OBJECT
@@ -71,18 +71,22 @@ private:
     QUdpSocket m_socket;
     QMutex m_mutex;
 
-    static const uint32_t m_nbDataBlocks = 4;       //!< number of data blocks in the ring buffer
-    RemoteDataBlock *m_dataBlocks[m_nbDataBlocks];  //!< ring buffer of data blocks indexed by frame affinity
+    static const uint32_t m_nbDataFrames = 4;       //!< number of data frames in the ring buffer
+    RemoteDataFrame *m_dataFrames[m_nbDataFrames];  //!< ring buffer of data frames indexed by frame affinity
     uint32_t m_sampleRate;                          //!< current sample rate from meta data
 
+    qint64 m_udpReadBytes;
+    char *m_udpBuf;
+
     static int getDataSocketBufferSize(uint32_t inSampleRate);
+    void processData();
 
 private slots:
     void started();
     void finished();
     void errorOccurred(QAbstractSocket::SocketError socketError);
     void handleInputMessages();
-    void readPendingDatagrams();
+    void dataReadyRead();
 };
 
 

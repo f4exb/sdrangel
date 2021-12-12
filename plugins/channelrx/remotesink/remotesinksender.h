@@ -36,7 +36,7 @@
 
 #include "remotesinkfifo.h"
 
-class RemoteDataBlock;
+class RemoteDataFrame;
 class CM256;
 class QUdpSocket;
 
@@ -47,7 +47,7 @@ public:
     RemoteSinkSender();
     ~RemoteSinkSender();
 
-    RemoteDataBlock *getDataBlock();
+    RemoteDataFrame *getDataFrame();
 
 private:
     RemoteSinkFifo m_fifo;
@@ -57,7 +57,7 @@ private:
     QHostAddress m_address;
     QUdpSocket *m_socket;
 
-    void sendDataBlock(RemoteDataBlock *dataBlock);
+    void sendDataFrame(RemoteDataFrame *dataFrame);
 
 private slots:
     void handleData();

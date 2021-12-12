@@ -55,7 +55,7 @@ private:
     int m_sampleIndex;                   //!< Current sample index in protected block data
     RemoteSuperBlock m_superBlock;
     RemoteMetaDataFEC m_currentMetaFEC;
-    RemoteDataBlock *m_dataBlock;
+    RemoteDataFrame *m_dataFrame;
 
     uint64_t m_deviceCenterFrequency;
     int64_t m_frequencyOffset;

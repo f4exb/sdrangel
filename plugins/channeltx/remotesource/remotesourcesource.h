@@ -80,7 +80,7 @@ private:
 
     void startWorker();
     void stopWorker();
-    void handleDataBlock(RemoteDataBlock *dataBlock);
+    void handleDataFrame(RemoteDataFrame *dataFrame);
     void printMeta(const QString& header, RemoteMetaDataFEC *metaData);
     void getSample();
 

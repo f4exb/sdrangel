@@ -73,9 +73,6 @@ RemoteOutputSinkGui::RemoteOutputSinkGui(DeviceUISet *deviceUISet, QWidget* pare
 
     ui->setupUi(this);
 
-	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-	ui->centerFrequency->setValueRange(7, 0, pow(10,7));
-
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
     ui->sampleRate->setValueRange(7, 32000U, 9000000U);
 
@@ -214,7 +211,7 @@ void RemoteOutputSinkGui::updateSampleRate()
 void RemoteOutputSinkGui::displaySettings()
 {
     blockApplySettings(true);
-    ui->centerFrequency->setValue(m_deviceCenterFrequency / 1000);
+    ui->centerFrequency->setText(QString("%L1").arg(m_deviceCenterFrequency));
     ui->sampleRate->setValue(m_settings.m_sampleRate);
     ui->nbFECBlocks->setValue(m_settings.m_nbFECBlocks);
 
@@ -530,7 +527,7 @@ void RemoteOutputSinkGui::analyzeApiReply(const QJsonObject& jsonObject)
         QJsonObject report = jsonObject["RemoteSourceReport"].toObject();
         m_deviceCenterFrequency = report["deviceCenterFreq"].toInt() * 1000;
         m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
-        ui->centerFrequency->setValue(m_deviceCenterFrequency/1000);
+        ui->centerFrequency->setText(QString("%L1").arg(m_deviceCenterFrequency));
         int remoteRate = report["deviceSampleRate"].toInt();
         ui->remoteRateText->setText(tr("%1k").arg((float)(remoteRate) / 1000));
         int queueSize = report["queueSize"].toInt();

@@ -86,7 +86,7 @@ private:
     RemoteMetaDataFEC m_currentMetaFEC;  //!< Meta data for current frame
     uint32_t m_nbBlocksFEC;                 //!< Variable number of FEC blocks
     float m_txDelayRatio;                   //!< Delay in ratio of nominal frame period
-    RemoteDataBlock *m_dataBlock;
+    RemoteDataFrame *m_dataFrame;
     RemoteSuperBlock m_superBlock;       //!< current super block being built
     int m_txBlockIndex;                     //!< Current index in blocks to transmit in the Tx row
     int m_txBlocksIndex;                    //!< Current index of Tx blocks row

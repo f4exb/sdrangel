@@ -31,17 +31,17 @@
 
 #include "export.h"
 
-class RemoteDataBlock;
+class RemoteDataFrame;
 
 class SDRBASE_API RemoteDataQueue : public QObject {
     Q_OBJECT
 
 public:
-    RemoteDataQueue(QObject* parent = NULL);
+    RemoteDataQueue(QObject* parent = nullptr);
     ~RemoteDataQueue();
 
-    void push(RemoteDataBlock* dataBlock, bool emitSignal = true);  //!< Push daa block onto queue
-    RemoteDataBlock* pop(); //!< Pop message from queue
+    void push(RemoteDataFrame* dataFrame, bool emitSignal = true);  //!< Push data frame onto queue
+    RemoteDataFrame* pop(); //!< Pop frame from queue
 
     int size(); //!< Returns queue size
     void clear(); //!< Empty queue
@@ -51,8 +51,7 @@ signals:
 
 private:
     QMutex m_lock;
-    QQueue<RemoteDataBlock*> m_queue;
-    int m_count;
+    QQueue<RemoteDataFrame*> m_queue;
 };
 
 #endif /* CHANNEL_REMOTEDATAQUEUE_H_ */

@@ -31,7 +31,7 @@ RemoteSourceSource::RemoteSourceSource() :
     connect(&m_dataQueue, SIGNAL(dataBlockEnqueued()), this, SLOT(handleData()), Qt::QueuedConnection);
     m_cm256p = m_cm256.isInitialized() ? &m_cm256 : 0;
     m_currentMeta.init();
-    m_dataReadQueue.setSize(50);
+    m_dataReadQueue.setSize(20);
     applyChannelSettings(m_channelSampleRate, true);
 }
 
@@ -53,7 +53,8 @@ void RemoteSourceSource::pull(SampleVector::iterator begin, unsigned int nbSampl
 
 void RemoteSourceSource::pullOne(Sample& sample)
 {
-    // m_dataReadQueue.readSample(sample, true); // true is scale for Tx
+    m_dataReadQueue.readSample(sample, true); // true is scale for Tx
+    return;
 
 	Complex ci;
 
@@ -129,18 +130,18 @@ void RemoteSourceSource::stopWorker()
 
 void RemoteSourceSource::handleData()
 {
-    RemoteDataBlock* dataBlock;
+    RemoteDataFrame* dataFrame;
 
-    while (m_running && ((dataBlock = m_dataQueue.pop()) != nullptr)) {
-        handleDataBlock(dataBlock);
+    while (m_running && ((dataFrame = m_dataQueue.pop()) != nullptr)) {
+        handleDataFrame(dataFrame);
     }
 }
 
-void RemoteSourceSource::handleDataBlock(RemoteDataBlock* dataBlock)
+void RemoteSourceSource::handleDataFrame(RemoteDataFrame* dataFrame)
 {
-    if (dataBlock->m_rxControlBlock.m_blockCount < RemoteNbOrginalBlocks)
+    if (dataFrame->m_rxControlBlock.m_blockCount < RemoteNbOrginalBlocks)
     {
-        qWarning("RemoteSourceSource::handleDataBlock: incomplete data block: not processing");
+        qWarning("RemoteSourceSource::handleDataFrame: incomplete data frame: not processing");
     }
     else
     {
@@ -148,69 +149,69 @@ void RemoteSourceSource::handleDataBlock(RemoteDataBlock* dataBlock)
 
         for (int blockIndex = 0; blockIndex < 256; blockIndex++)
         {
-            if ((blockIndex == 0) && (dataBlock->m_rxControlBlock.m_metaRetrieved))
+            if ((blockIndex == 0) && (dataFrame->m_rxControlBlock.m_metaRetrieved))
             {
                 m_cm256DescriptorBlocks[blockCount].Index = 0;
-                m_cm256DescriptorBlocks[blockCount].Block = (void *) &(dataBlock->m_superBlocks[0].m_protectedBlock);
+                m_cm256DescriptorBlocks[blockCount].Block = (void *) &(dataFrame->m_superBlocks[0].m_protectedBlock);
                 blockCount++;
             }
-            else if (dataBlock->m_superBlocks[blockIndex].m_header.m_blockIndex != 0)
+            else if (dataFrame->m_superBlocks[blockIndex].m_header.m_blockIndex != 0)
             {
-                m_cm256DescriptorBlocks[blockCount].Index = dataBlock->m_superBlocks[blockIndex].m_header.m_blockIndex;
-                m_cm256DescriptorBlocks[blockCount].Block = (void *) &(dataBlock->m_superBlocks[blockIndex].m_protectedBlock);
+                m_cm256DescriptorBlocks[blockCount].Index = dataFrame->m_superBlocks[blockIndex].m_header.m_blockIndex;
+                m_cm256DescriptorBlocks[blockCount].Block = (void *) &(dataFrame->m_superBlocks[blockIndex].m_protectedBlock);
                 blockCount++;
             }
         }
 
-        //qDebug("RemoteSourceSource::handleDataBlock: frame: %u blocks: %d", dataBlock.m_rxControlBlock.m_frameIndex, blockCount);
+        //qDebug("RemoteSourceSource::handleDataFrame: frame: %u blocks: %d", dataFrame.m_rxControlBlock.m_frameIndex, blockCount);
 
         // Need to use the CM256 recovery
-        if (m_cm256p &&(dataBlock->m_rxControlBlock.m_originalCount < RemoteNbOrginalBlocks))
+        if (m_cm256p &&(dataFrame->m_rxControlBlock.m_originalCount < RemoteNbOrginalBlocks))
         {
-            qDebug("RemoteSourceSource::handleDataBlock: %d recovery blocks", dataBlock->m_rxControlBlock.m_recoveryCount);
+            qDebug("RemoteSourceSource::handleDataFrame: %d recovery blocks", dataFrame->m_rxControlBlock.m_recoveryCount);
             CM256::cm256_encoder_params paramsCM256;
             paramsCM256.BlockBytes = sizeof(RemoteProtectedBlock); // never changes
             paramsCM256.OriginalCount = RemoteNbOrginalBlocks;  // never changes
 
             if (m_currentMeta.m_tv_sec == 0) {
-                paramsCM256.RecoveryCount = dataBlock->m_rxControlBlock.m_recoveryCount;
+                paramsCM256.RecoveryCount = dataFrame->m_rxControlBlock.m_recoveryCount;
             } else {
                 paramsCM256.RecoveryCount = m_currentMeta.m_nbFECBlocks;
             }
 
             // update counters
-            if (dataBlock->m_rxControlBlock.m_originalCount < RemoteNbOrginalBlocks - paramsCM256.RecoveryCount) {
-                m_nbUncorrectableErrors += RemoteNbOrginalBlocks - paramsCM256.RecoveryCount - dataBlock->m_rxControlBlock.m_originalCount;
+            if (dataFrame->m_rxControlBlock.m_originalCount < RemoteNbOrginalBlocks - paramsCM256.RecoveryCount) {
+                m_nbUncorrectableErrors += RemoteNbOrginalBlocks - paramsCM256.RecoveryCount - dataFrame->m_rxControlBlock.m_originalCount;
             } else {
-                m_nbCorrectableErrors += dataBlock->m_rxControlBlock.m_recoveryCount;
+                m_nbCorrectableErrors += dataFrame->m_rxControlBlock.m_recoveryCount;
             }
 
             if (m_cm256.cm256_decode(paramsCM256, m_cm256DescriptorBlocks)) // CM256 decode
             {
-                qWarning() << "RemoteSourceSource::handleDataBlock: decode CM256 error:"
-                        << " m_originalCount: " << dataBlock->m_rxControlBlock.m_originalCount
-                        << " m_recoveryCount: " << dataBlock->m_rxControlBlock.m_recoveryCount;
+                qWarning() << "RemoteSourceSource::handleDataFrame: decode CM256 error:"
+                        << " m_originalCount: " << dataFrame->m_rxControlBlock.m_originalCount
+                        << " m_recoveryCount: " << dataFrame->m_rxControlBlock.m_recoveryCount;
             }
             else
             {
-                for (int ir = 0; ir < dataBlock->m_rxControlBlock.m_recoveryCount; ir++) // restore missing blocks
+                for (int ir = 0; ir < dataFrame->m_rxControlBlock.m_recoveryCount; ir++) // restore missing blocks
                 {
-                    int recoveryIndex = RemoteNbOrginalBlocks - dataBlock->m_rxControlBlock.m_recoveryCount + ir;
+                    int recoveryIndex = RemoteNbOrginalBlocks - dataFrame->m_rxControlBlock.m_recoveryCount + ir;
                     int blockIndex = m_cm256DescriptorBlocks[recoveryIndex].Index;
                     RemoteProtectedBlock *recoveredBlock =
                             (RemoteProtectedBlock *) m_cm256DescriptorBlocks[recoveryIndex].Block;
-                    memcpy((void *) &(dataBlock->m_superBlocks[blockIndex].m_protectedBlock), recoveredBlock, sizeof(RemoteProtectedBlock));
-                    if ((blockIndex == 0) && !dataBlock->m_rxControlBlock.m_metaRetrieved) {
-                        dataBlock->m_rxControlBlock.m_metaRetrieved = true;
+                    memcpy((void *) &(dataFrame->m_superBlocks[blockIndex].m_protectedBlock), recoveredBlock, sizeof(RemoteProtectedBlock));
+                    if ((blockIndex == 0) && !dataFrame->m_rxControlBlock.m_metaRetrieved) {
+                        dataFrame->m_rxControlBlock.m_metaRetrieved = true;
                     }
                 }
             }
         }
 
         // Validate block zero and retrieve its data
-        if (dataBlock->m_rxControlBlock.m_metaRetrieved)
+        if (dataFrame->m_rxControlBlock.m_metaRetrieved)
         {
-            RemoteMetaDataFEC *metaData = (RemoteMetaDataFEC *) &(dataBlock->m_superBlocks[0].m_protectedBlock);
+            RemoteMetaDataFEC *metaData = (RemoteMetaDataFEC *) &(dataFrame->m_superBlocks[0].m_protectedBlock);
             boost::crc_32_type crc32;
             crc32.process_bytes(metaData, sizeof(RemoteMetaDataFEC)-4);
 
@@ -218,7 +219,7 @@ void RemoteSourceSource::handleDataBlock(RemoteDataBlock* dataBlock)
             {
                 if (!(m_currentMeta == *metaData))
                 {
-                    printMeta("RemoteSourceSource::handleDataBlock", metaData);
+                    printMeta("RemoteSourceSource::handleDataFrame", metaData);
 
                     if (m_currentMeta.m_sampleRate != metaData->m_sampleRate) {
                         emit newRemoteSampleRate(metaData->m_sampleRate);
@@ -230,11 +231,11 @@ void RemoteSourceSource::handleDataBlock(RemoteDataBlock* dataBlock)
             }
             else
             {
-                qWarning() << "RemoteSource::handleDataBlock: recovered meta: invalid CRC32";
+                qWarning() << "RemoteSource::handleDataFrame: recovered meta: invalid CRC32";
             }
         }
 
-        m_dataReadQueue.push(dataBlock); // Push into R/W buffer
+        m_dataReadQueue.push(dataFrame); // Push into R/W buffer
     }
 }
 

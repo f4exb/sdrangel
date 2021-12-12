@@ -29,7 +29,7 @@
 
 #include "export.h"
 
-class RemoteDataBlock;
+class RemoteDataFrame;
 struct Sample;
 
 class SDRBASE_API RemoteDataReadQueue
@@ -38,7 +38,7 @@ public:
     RemoteDataReadQueue();
     ~RemoteDataReadQueue();
 
-    void push(RemoteDataBlock* dataBlock); //!< push block on the queue
+    void push(RemoteDataFrame* dataFrame); //!< push frame on the queue
     void readSample(Sample& s, bool scaleForTx = false); //!< Read sample from queue possibly scaling to Tx size
     uint32_t length() const { return m_dataReadQueue.size(); } //!< Returns queue length
     uint32_t size() const { return m_maxSize; } //!< Returns queue size (max length)
@@ -48,26 +48,25 @@ public:
     static const uint32_t MinimumMaxSize;
 
 private:
-    QQueue<RemoteDataBlock*> m_dataReadQueue;
-    RemoteDataBlock *m_dataBlock;
+    QQueue<RemoteDataFrame*> m_dataReadQueue;
+    RemoteDataFrame *m_dataFrame;
     uint32_t m_maxSize;
     uint32_t m_blockIndex;
     uint32_t m_sampleIndex;
     uint32_t m_sampleCount; //!< use a counter capped below 2^31 as it is going to be converted to an int in the web interface
-    bool m_full; //!< full condition was hit
 
-    RemoteDataBlock* pop();                //!< Pop block from the queue
+    RemoteDataFrame* pop();                //!< Pop frame from the queue
 
     inline void convertDataToSample(Sample& s, uint32_t blockIndex, uint32_t sampleIndex, bool scaleForTx)
     {
-        int sampleSize = m_dataBlock->m_superBlocks[blockIndex].m_header.m_sampleBytes * 2; // I/Q sample size in data block
-        int samplebits = m_dataBlock->m_superBlocks[blockIndex].m_header.m_sampleBits;      // I or Q sample size in bits
+        int sampleSize = m_dataFrame->m_superBlocks[blockIndex].m_header.m_sampleBytes * 2; // I/Q sample size in data block
+        int samplebits = m_dataFrame->m_superBlocks[blockIndex].m_header.m_sampleBits;      // I or Q sample size in bits
         int32_t iconv, qconv;
 
         if ((sizeof(Sample) == 4) && (sampleSize == 8)) // generally 24->16 bits
         {
-            iconv = ((int32_t*) &(m_dataBlock->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize]))[0];
-            qconv = ((int32_t*) &(m_dataBlock->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize+4]))[0];
+            iconv = ((int32_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize]))[0];
+            qconv = ((int32_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize+4]))[0];
             iconv >>= scaleForTx ? (SDR_TX_SAMP_SZ-SDR_RX_SAMP_SZ) : (samplebits-SDR_RX_SAMP_SZ);
             qconv >>= scaleForTx ? (SDR_TX_SAMP_SZ-SDR_RX_SAMP_SZ) : (samplebits-SDR_RX_SAMP_SZ);
             s.setReal(iconv);
@@ -75,8 +74,8 @@ private:
         }
         else if ((sizeof(Sample) == 8) && (sampleSize == 4)) // generally 16->24 bits
         {
-            iconv = ((int16_t*) &(m_dataBlock->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize]))[0];
-            qconv = ((int16_t*) &(m_dataBlock->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize+2]))[0];
+            iconv = ((int16_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize]))[0];
+            qconv = ((int16_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize+2]))[0];
             iconv <<= scaleForTx ? (SDR_TX_SAMP_SZ-samplebits) : (SDR_RX_SAMP_SZ-samplebits);
             qconv <<= scaleForTx ? (SDR_TX_SAMP_SZ-samplebits) : (SDR_RX_SAMP_SZ-samplebits);
             s.setReal(iconv);
@@ -84,7 +83,7 @@ private:
         }
         else if ((sampleSize == 4) || (sampleSize == 8)) // generally 16->16 or 24->24 bits
         {
-            s = *((Sample*) &(m_dataBlock->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize]));
+            s = *((Sample*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize]));
         }
         else // invalid size
         {

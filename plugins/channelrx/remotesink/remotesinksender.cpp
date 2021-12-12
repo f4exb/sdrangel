@@ -57,37 +57,37 @@ RemoteSinkSender::~RemoteSinkSender()
     m_socket->deleteLater();
 }
 
-RemoteDataBlock *RemoteSinkSender::getDataBlock()
+RemoteDataFrame *RemoteSinkSender::getDataFrame()
 {
-    return m_fifo.getDataBlock();
+    return m_fifo.getDataFrame();
 }
 
 void RemoteSinkSender::handleData()
 {
-    RemoteDataBlock *dataBlock;
+    RemoteDataFrame *dataFrame;
     unsigned int remainder = m_fifo.getRemainder();
 
     while (remainder != 0)
     {
-        remainder = m_fifo.readDataBlock(&dataBlock);
+        remainder = m_fifo.readDataFrame(&dataFrame);
 
-        if (dataBlock) {
-            sendDataBlock(dataBlock);
+        if (dataFrame) {
+            sendDataFrame(dataFrame);
         }
     }
 }
 
-void RemoteSinkSender::sendDataBlock(RemoteDataBlock *dataBlock)
+void RemoteSinkSender::sendDataFrame(RemoteDataFrame *dataFrame)
 {
 	CM256::cm256_encoder_params cm256Params;  //!< Main interface with CM256 encoder
 	CM256::cm256_block descriptorBlocks[256]; //!< Pointers to data for CM256 encoder
 	RemoteProtectedBlock fecBlocks[256];   //!< FEC data
 
-    uint16_t frameIndex = dataBlock->m_txControlBlock.m_frameIndex;
-    int nbBlocksFEC = dataBlock->m_txControlBlock.m_nbBlocksFEC;
-    m_address.setAddress(dataBlock->m_txControlBlock.m_dataAddress);
-    uint16_t dataPort = dataBlock->m_txControlBlock.m_dataPort;
-    RemoteSuperBlock *txBlockx = dataBlock->m_superBlocks;
+    uint16_t frameIndex = dataFrame->m_txControlBlock.m_frameIndex;
+    int nbBlocksFEC = dataFrame->m_txControlBlock.m_nbBlocksFEC;
+    m_address.setAddress(dataFrame->m_txControlBlock.m_dataAddress);
+    uint16_t dataPort = dataFrame->m_txControlBlock.m_dataPort;
+    RemoteSuperBlock *txBlockx = dataFrame->m_superBlocks;
 
     if ((nbBlocksFEC == 0) || !m_cm256p) // Do not FEC encode
     {
@@ -141,5 +141,5 @@ void RemoteSinkSender::sendDataBlock(RemoteDataBlock *dataBlock)
         }
     }
 
-    dataBlock->m_txControlBlock.m_processed = true;
+    dataFrame->m_txControlBlock.m_processed = true;
 }

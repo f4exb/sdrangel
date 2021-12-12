@@ -30,14 +30,13 @@
 RemoteDataQueue::RemoteDataQueue(QObject* parent) :
 	QObject(parent),
 	m_lock(QMutex::Recursive),
-	m_queue(),
-	m_count(0)
+	m_queue()
 {
 }
 
 RemoteDataQueue::~RemoteDataQueue()
 {
-	RemoteDataBlock* data;
+	RemoteDataFrame* data;
 
 	while ((data = pop()) != nullptr)
 	{
@@ -46,14 +45,13 @@ RemoteDataQueue::~RemoteDataQueue()
 	}
 }
 
-void RemoteDataQueue::push(RemoteDataBlock* data, bool emitSignal)
+void RemoteDataQueue::push(RemoteDataFrame* data, bool emitSignal)
 {
 	if (data)
 	{
 		m_lock.lock();
 		m_queue.enqueue(data);
-		m_count++;
-		// qDebug("RemoteDataQueue::push: %d %d", m_count, m_queue.size());
+		// qDebug("RemoteDataQueue::push: %d", m_queue.size());
 		m_lock.unlock();
 	}
 
@@ -62,14 +60,13 @@ void RemoteDataQueue::push(RemoteDataBlock* data, bool emitSignal)
 	}
 }
 
-RemoteDataBlock* RemoteDataQueue::pop()
+RemoteDataFrame* RemoteDataQueue::pop()
 {
 	QMutexLocker locker(&m_lock);
 
 	if (m_queue.isEmpty()) {
 		return nullptr;
 	} else {
-		m_count--;
 		return m_queue.dequeue();
 	}
 }

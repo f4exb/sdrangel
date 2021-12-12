@@ -28,17 +28,16 @@
 const uint32_t RemoteDataReadQueue::MinimumMaxSize = 10;
 
 RemoteDataReadQueue::RemoteDataReadQueue() :
-        m_dataBlock(nullptr),
+        m_dataFrame(nullptr),
         m_maxSize(MinimumMaxSize),
         m_blockIndex(1),
         m_sampleIndex(0),
-        m_sampleCount(0),
-        m_full(false)
+        m_sampleCount(0)
 {}
 
 RemoteDataReadQueue::~RemoteDataReadQueue()
 {
-    RemoteDataBlock* data;
+    RemoteDataFrame* data;
 
     while ((data = pop()) != nullptr)
     {
@@ -47,27 +46,18 @@ RemoteDataReadQueue::~RemoteDataReadQueue()
     }
 }
 
-void RemoteDataReadQueue::push(RemoteDataBlock* dataBlock)
+void RemoteDataReadQueue::push(RemoteDataFrame* dataFrame)
 {
-    if (length() >= m_maxSize)
-    {
+    if (length() < m_maxSize) {
+        m_dataReadQueue.enqueue(dataFrame);
+    } else {
         qWarning("RemoteDataReadQueue::push: queue is full");
-        m_full = true; // stop filling the queue
-        RemoteDataBlock *data = m_dataReadQueue.takeLast();
-        delete data;
-    }
-
-    if (m_full) {
-        m_full = (length() > m_maxSize/10); // do not fill queue again before queue is half size
-    }
-
-    if (!m_full) {
-        m_dataReadQueue.enqueue(dataBlock);
     }
 }
 
-RemoteDataBlock* RemoteDataReadQueue::pop()
+RemoteDataFrame* RemoteDataReadQueue::pop()
 {
+
     if (m_dataReadQueue.isEmpty())
     {
         return nullptr;
@@ -76,7 +66,6 @@ RemoteDataBlock* RemoteDataReadQueue::pop()
     {
         m_blockIndex = 1;
         m_sampleIndex = 0;
-
         return m_dataReadQueue.dequeue();
     }
 }
@@ -91,13 +80,15 @@ void RemoteDataReadQueue::setSize(uint32_t size)
 void RemoteDataReadQueue::readSample(Sample& s, bool scaleForTx)
 {
     // depletion/repletion state
-    if (m_dataBlock == nullptr)
+    if (m_dataFrame == nullptr)
     {
-        if (length() >= m_maxSize/10)
+        m_dataFrame = pop();
+
+        if (m_dataFrame)
         {
-            qDebug("RemoteDataReadQueue::readSample: initial pop new block: queue size: %u", length());
+            qDebug("RemoteDataReadQueue::readSample: initial pop new frame: queue size: %u", length());
             m_blockIndex = 1;
-            m_dataBlock = m_dataReadQueue.dequeue();
+            m_sampleIndex = 0;
             convertDataToSample(s, m_blockIndex, m_sampleIndex, scaleForTx);
             m_sampleIndex++;
             m_sampleCount++;
@@ -110,7 +101,7 @@ void RemoteDataReadQueue::readSample(Sample& s, bool scaleForTx)
         return;
     }
 
-    int sampleSize = m_dataBlock->m_superBlocks[m_blockIndex].m_header.m_sampleBytes * 2;
+    int sampleSize = m_dataFrame->m_superBlocks[m_blockIndex].m_header.m_sampleBytes * 2;
     uint32_t samplesPerBlock = RemoteNbBytesPerBlock / sampleSize;
 
     if (m_sampleIndex < samplesPerBlock)
@@ -132,28 +123,24 @@ void RemoteDataReadQueue::readSample(Sample& s, bool scaleForTx)
         }
         else
         {
-            delete m_dataBlock;
-            m_dataBlock = nullptr;
+            delete m_dataFrame;
+            m_dataFrame = nullptr;
 
-            if (length() == 0) {
-                qWarning("RemoteDataReadQueue::readSample: try to pop new block but queue is empty");
-            }
+            m_dataFrame = pop();
 
-            if (length() > 0)
+            if (m_dataFrame)
             {
                 m_blockIndex = 1;
-                m_dataBlock = m_dataReadQueue.dequeue();
+                m_sampleIndex = 0;
                 convertDataToSample(s, m_blockIndex, m_sampleIndex, scaleForTx);
                 m_sampleIndex++;
                 m_sampleCount++;
             }
             else
             {
+                qWarning("RemoteDataReadQueue::readSample: try to pop new block but queue is empty");
                 s = Sample{0, 0};
             }
         }
     }
 }
-
-
-

@@ -36,7 +36,7 @@
 
 #include "remoteoutputfifo.h"
 
-class RemoteDataBlock;
+class RemoteDataFrame;
 class CM256;
 class QUdpSocket;
 
@@ -47,7 +47,7 @@ public:
     RemoteOutputSender();
     ~RemoteOutputSender();
 
-    RemoteDataBlock *getDataBlock();
+    RemoteDataFrame *getDataFrame();
     void setDestination(const QString& address, uint16_t port);
 
 private:
@@ -61,7 +61,7 @@ private:
     uint16_t     m_remotePort;
     QHostAddress m_remoteHostAddress;
 
-    void sendDataBlock(RemoteDataBlock *dataBlock);
+    void sendDataFrame(RemoteDataFrame *dataFrame);
 
 private slots:
     void handleData();

@@ -33,9 +33,12 @@ RemoteSourceWorker::RemoteSourceWorker(RemoteDataQueue *dataQueue, QObject* pare
     m_address(QHostAddress::LocalHost),
     m_socket(this),
     m_mutex(QMutex::Recursive),
-    m_sampleRate(0)
+    m_sampleRate(0),
+    m_udpReadBytes(0)
 {
-    std::fill(m_dataBlocks, m_dataBlocks+4, (RemoteDataBlock *) 0);
+    m_udpBuf = new char[RemoteUdpSize];
+
+    std::fill(m_dataFrames, m_dataFrames+4, (RemoteDataFrame *) 0);
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
     connect(&m_socket, SIGNAL(readyRead()),this, SLOT(recv()));
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
@@ -106,87 +109,87 @@ void RemoteSourceWorker::handleInputMessages()
             QMutexLocker mutexLocker(&m_mutex);
             MsgDataBind* notif = (MsgDataBind*) message;
             qDebug("RemoteSourceWorker::handleInputMessages: MsgDataBind: %s:%d", qPrintable(notif->getAddress().toString()), notif->getPort());
-            disconnect(&m_socket, SIGNAL(readyRead()), this, SLOT(readPendingDatagrams()));
+            disconnect(&m_socket, SIGNAL(readyRead()), this, SLOT(dataReadyRead()));
             m_socket.abort();
             m_socket.bind(notif->getAddress(), notif->getPort());
-            connect(&m_socket, SIGNAL(readyRead()), this, SLOT(readPendingDatagrams()));
+            connect(&m_socket, SIGNAL(readyRead()), this, SLOT(dataReadyRead()));
         }
     }
 }
 
-void RemoteSourceWorker::readPendingDatagrams()
+void RemoteSourceWorker::dataReadyRead()
 {
-    RemoteSuperBlock superBlock;
-    qint64 size;
+    m_udpReadBytes = 0;
 
-    while (m_socket.hasPendingDatagrams())
-    {
+	while (m_socket.hasPendingDatagrams())
+	{
+		qint64 pendingDataSize = m_socket.pendingDatagramSize();
         QHostAddress sender;
-        quint16 senderPort = 0;
-        //qint64 pendingDataSize = m_socket->pendingDatagramSize();
-        size = m_socket.readDatagram((char *) &superBlock, (long long int) sizeof(RemoteSuperBlock), &sender, &senderPort);
+		m_udpReadBytes += m_socket.readDatagram(&m_udpBuf[m_udpReadBytes], pendingDataSize, &sender, nullptr);
 
-        if (size == sizeof(RemoteSuperBlock))
+		if (m_udpReadBytes == RemoteUdpSize)
         {
-            unsigned int dataBlockIndex = superBlock.m_header.m_frameIndex % m_nbDataBlocks;
-            int blockIndex = superBlock.m_header.m_blockIndex;
+		    processData();
+		    m_udpReadBytes = 0;
+		}
+	}
+}
 
-            if (blockIndex == 0) // first block with meta data
-            {
-                const RemoteMetaDataFEC *metaData = (const RemoteMetaDataFEC *) &superBlock.m_protectedBlock;
-                uint32_t sampleRate = metaData->m_sampleRate;
+void RemoteSourceWorker::processData()
+{
+    RemoteSuperBlock *superBlock = (RemoteSuperBlock *) m_udpBuf;
+    unsigned int dataBlockIndex = superBlock->m_header.m_frameIndex % m_nbDataFrames;
+    int blockIndex = superBlock->m_header.m_blockIndex;
 
-                if (m_sampleRate != sampleRate)
-                {
-                    qDebug("RemoteSourceWorker::readPendingDatagrams: sampleRate: %u", sampleRate);
-                    m_socket.setSocketOption(QAbstractSocket::ReceiveBufferSizeSocketOption, getDataSocketBufferSize(sampleRate));
-                    m_sampleRate = sampleRate;
-                }
-            }
+    if (blockIndex == 0) // first block with meta data
+    {
+        const RemoteMetaDataFEC *metaData = (const RemoteMetaDataFEC *) &superBlock->m_protectedBlock;
+        uint32_t sampleRate = metaData->m_sampleRate;
 
-            // create the first block for this index
-            if (m_dataBlocks[dataBlockIndex] == 0) {
-                m_dataBlocks[dataBlockIndex] = new RemoteDataBlock();
-            }
-
-            if (m_dataBlocks[dataBlockIndex]->m_rxControlBlock.m_frameIndex < 0)
-            {
-                // initialize virgin block with the frame index
-                m_dataBlocks[dataBlockIndex]->m_rxControlBlock.m_frameIndex = superBlock.m_header.m_frameIndex;
-            }
-            else
-            {
-                // if the frame index is not the same for the same slot it means we are starting a new frame
-                uint32_t frameIndex = m_dataBlocks[dataBlockIndex]->m_rxControlBlock.m_frameIndex;
-
-                if (superBlock.m_header.m_frameIndex != frameIndex)
-                {
-                    //qDebug("RemoteSourceWorker::readPendingDatagrams: push frame %u", frameIndex);
-                    m_dataQueue->push(m_dataBlocks[dataBlockIndex]);
-                    m_dataBlocks[dataBlockIndex] = new RemoteDataBlock();
-                    m_dataBlocks[dataBlockIndex]->m_rxControlBlock.m_frameIndex = superBlock.m_header.m_frameIndex;
-                }
-            }
-
-            m_dataBlocks[dataBlockIndex]->m_superBlocks[superBlock.m_header.m_blockIndex] = superBlock;
-
-            if (superBlock.m_header.m_blockIndex == 0) {
-                m_dataBlocks[dataBlockIndex]->m_rxControlBlock.m_metaRetrieved = true;
-            }
-
-            if (superBlock.m_header.m_blockIndex < RemoteNbOrginalBlocks) {
-                m_dataBlocks[dataBlockIndex]->m_rxControlBlock.m_originalCount++;
-            } else {
-                m_dataBlocks[dataBlockIndex]->m_rxControlBlock.m_recoveryCount++;
-            }
-
-            m_dataBlocks[dataBlockIndex]->m_rxControlBlock.m_blockCount++;
-        }
-        else
+        if (m_sampleRate != sampleRate)
         {
-            qWarning("RemoteSourceWorker::readPendingDatagrams: wrong super block size not processing");
+            qDebug("RemoteSourceWorker::processData: sampleRate: %u", sampleRate);
+            m_socket.setSocketOption(QAbstractSocket::ReceiveBufferSizeSocketOption, getDataSocketBufferSize(sampleRate));
+            m_sampleRate = sampleRate;
         }
     }
+
+    // create the first block for this index
+    if (m_dataFrames[dataBlockIndex] == nullptr) {
+        m_dataFrames[dataBlockIndex] = new RemoteDataFrame();
+    }
+
+    if (m_dataFrames[dataBlockIndex]->m_rxControlBlock.m_frameIndex < 0)
+    {
+        // initialize virgin block with the frame index
+        m_dataFrames[dataBlockIndex]->m_rxControlBlock.m_frameIndex = superBlock->m_header.m_frameIndex;
+    }
+    else
+    {
+        // if the frame index is not the same for the same slot it means we are starting a new frame
+        uint32_t frameIndex = m_dataFrames[dataBlockIndex]->m_rxControlBlock.m_frameIndex;
+
+        if (superBlock->m_header.m_frameIndex != frameIndex)
+        {
+            m_dataQueue->push(m_dataFrames[dataBlockIndex]);
+            m_dataFrames[dataBlockIndex] = new RemoteDataFrame();
+            m_dataFrames[dataBlockIndex]->m_rxControlBlock.m_frameIndex = superBlock->m_header.m_frameIndex;
+        }
+    }
+
+    m_dataFrames[dataBlockIndex]->m_superBlocks[superBlock->m_header.m_blockIndex] = *superBlock;
+
+    if (superBlock->m_header.m_blockIndex == 0) {
+        m_dataFrames[dataBlockIndex]->m_rxControlBlock.m_metaRetrieved = true;
+    }
+
+    if (superBlock->m_header.m_blockIndex < RemoteNbOrginalBlocks) {
+        m_dataFrames[dataBlockIndex]->m_rxControlBlock.m_originalCount++;
+    } else {
+        m_dataFrames[dataBlockIndex]->m_rxControlBlock.m_recoveryCount++;
+    }
+
+    m_dataFrames[dataBlockIndex]->m_rxControlBlock.m_blockCount++;
 }
 
 int RemoteSourceWorker::getDataSocketBufferSize(uint32_t inSampleRate)

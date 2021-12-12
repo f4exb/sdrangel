@@ -157,13 +157,13 @@ struct RemoteRxControlBlock
     }
 };
 
-class RemoteDataBlock
+class RemoteDataFrame
 {
 public:
-    RemoteDataBlock() {
-        m_superBlocks = new RemoteSuperBlock[256];
+    RemoteDataFrame() {
+        m_superBlocks = new RemoteSuperBlock[256]; //!< 128 original bloks + 128 possible recovery blocks
     }
-    ~RemoteDataBlock() {
+    ~RemoteDataFrame() {
         delete[] m_superBlocks;
     }
     RemoteTxControlBlock m_txControlBlock;

@@ -32,7 +32,7 @@ UDPSinkFEC::UDPSinkFEC() :
     m_nbSamples(0),
     m_nbBlocksFEC(0),
     m_txDelayRatio(0.0),
-    m_dataBlock(nullptr),
+    m_dataFrame(nullptr),
     m_txBlockIndex(0),
     m_txBlocksIndex(0),
     m_frameCount(0),
@@ -115,14 +115,14 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
             metaData.m_tv_sec = nowus / 1000000UL;  // tv.tv_sec;
             metaData.m_tv_usec = nowus % 1000000UL; // tv.tv_usec;
 
-            if (!m_dataBlock) { // on the very first cycle there is no data block allocated
-                m_dataBlock = m_remoteOutputSender->getDataBlock(); // ask a new block to sender
+            if (!m_dataFrame) { // on the very first cycle there is no data block allocated
+                m_dataFrame = m_remoteOutputSender->getDataFrame(); // ask a new block to sender
             }
 
             boost::crc_32_type crc32;
             crc32.process_bytes(&metaData, sizeof(RemoteMetaDataFEC)-4);
             metaData.m_crc32 = crc32.checksum();
-            RemoteSuperBlock& superBlock = m_dataBlock->m_superBlocks[0]; // first block
+            RemoteSuperBlock& superBlock = m_dataFrame->m_superBlocks[0]; // first block
             superBlock.init();
             superBlock.m_header.m_frameIndex = m_frameCount;
             superBlock.m_header.m_blockIndex = m_txBlockIndex;
@@ -172,18 +172,18 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
             m_superBlock.m_header.m_blockIndex = m_txBlockIndex;
             m_superBlock.m_header.m_sampleBytes = (SDR_RX_SAMP_SZ <= 16 ? 2 : 4);
             m_superBlock.m_header.m_sampleBits = SDR_RX_SAMP_SZ;
-            m_dataBlock->m_superBlocks[m_txBlockIndex] = m_superBlock;
+            m_dataFrame->m_superBlocks[m_txBlockIndex] = m_superBlock;
 
             if (m_txBlockIndex == RemoteNbOrginalBlocks - 1) // frame complete
             {
-                m_dataBlock->m_txControlBlock.m_frameIndex = m_frameCount;
-                m_dataBlock->m_txControlBlock.m_processed = false;
-                m_dataBlock->m_txControlBlock.m_complete = true;
-                m_dataBlock->m_txControlBlock.m_nbBlocksFEC = m_nbBlocksFEC;
-                m_dataBlock->m_txControlBlock.m_dataAddress = m_remoteAddress;
-                m_dataBlock->m_txControlBlock.m_dataPort = m_remotePort;
+                m_dataFrame->m_txControlBlock.m_frameIndex = m_frameCount;
+                m_dataFrame->m_txControlBlock.m_processed = false;
+                m_dataFrame->m_txControlBlock.m_complete = true;
+                m_dataFrame->m_txControlBlock.m_nbBlocksFEC = m_nbBlocksFEC;
+                m_dataFrame->m_txControlBlock.m_dataAddress = m_remoteAddress;
+                m_dataFrame->m_txControlBlock.m_dataPort = m_remotePort;
 
-                m_dataBlock = m_remoteOutputSender->getDataBlock(); // ask a new block to sender
+                m_dataFrame = m_remoteOutputSender->getDataFrame(); // ask a new block to sender
 
                 m_txBlockIndex = 0;
                 m_frameCount++;

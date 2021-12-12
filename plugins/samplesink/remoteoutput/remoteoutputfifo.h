@@ -34,15 +34,15 @@ public:
     void resize(unsigned int size);
     void reset();
 
-    RemoteDataBlock *getDataBlock();
-    unsigned int readDataBlock(RemoteDataBlock **dataBlock);
+    RemoteDataFrame *getDataFrame();
+    unsigned int readDataFrame(RemoteDataFrame **dataFrame);
     unsigned int getRemainder();
 
 signals:
     void dataBlockServed();
 
 private:
-    std::vector<RemoteDataBlock> m_data;
+    std::vector<RemoteDataFrame> m_data;
     int m_size;
     int m_readHead;   //!< index of last data block processed
     int m_servedHead; //!< index of last data block served
