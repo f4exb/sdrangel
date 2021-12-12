@@ -42,9 +42,6 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGRemoteOutputSettings* fromJson(QString &jsonString) override;
 
-    qint32 getSampleRate();
-    void setSampleRate(qint32 sample_rate);
-
     qint32 getNbFecBlocks();
     void setNbFecBlocks(qint32 nb_fec_blocks);
 
@@ -82,9 +79,6 @@ public:
     virtual bool isSet() override;
 
 private:
-    qint32 sample_rate;
-    bool m_sample_rate_isSet;
-
     qint32 nb_fec_blocks;
     bool m_nb_fec_blocks_isSet;
 

@@ -55,7 +55,8 @@ RemoteOutputSinkGui::RemoteOutputSinkGui(DeviceUISet *deviceUISet, QWidget* pare
 	m_nbSinceLastFlowCheck(0),
 	m_lastEngineState(DeviceAPI::StNotStarted),
 	m_doApplySettings(true),
-	m_forceSettings(true)
+	m_forceSettings(true),
+    m_remoteAPIConnected(false)
 {
     m_countUnrecoverable = 0;
     m_countRecovered = 0;
@@ -68,11 +69,6 @@ RemoteOutputSinkGui::RemoteOutputSinkGui(DeviceUISet *deviceUISet, QWidget* pare
     m_paletteWhiteText.setColor(QPalette::WindowText, Qt::white);
 
     ui->setupUi(this);
-
-    ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
-    ui->sampleRate->setValueRange(7, 32000U, 9000000U);
-
-    ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
 
 	connect(&(m_deviceUISet->m_deviceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
@@ -215,7 +211,6 @@ void RemoteOutputSinkGui::displaySettings()
 {
     blockApplySettings(true);
     ui->centerFrequency->setText(QString("%L1").arg(m_deviceCenterFrequency));
-    ui->sampleRate->setValue(m_settings.m_sampleRate);
     ui->nbFECBlocks->setValue(m_settings.m_nbFECBlocks);
 
     QString s0 = QString::number(128 + m_settings.m_nbFECBlocks, 'f', 0);
@@ -274,12 +269,6 @@ void RemoteOutputSinkGui::updateStatus()
 
         m_lastEngineState = state;
     }
-}
-
-void RemoteOutputSinkGui::on_sampleRate_changed(quint64 value)
-{
-    m_settings.m_sampleRate = value;
-    sendSettings();
 }
 
 void RemoteOutputSinkGui::on_nbFECBlocks_valueChanged(int value)
@@ -457,6 +446,17 @@ void RemoteOutputSinkGui::displayEventTimer()
 
 void RemoteOutputSinkGui::tick()
 {
+    if (++m_tickCount == 20)
+    {
+        if (m_remoteAPIConnected) {
+            ui->apiAddressLabel->setStyleSheet("QLabel { background-color: green; }");
+        } else {
+            ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+        }
+
+        m_remoteAPIConnected = false;
+        m_tickCount = 0;
+    }
 }
 
 void RemoteOutputSinkGui::displayRemoteData(const RemoteOutput::MsgReportRemoteData::RemoteData& remoteData)
@@ -476,6 +476,7 @@ void RemoteOutputSinkGui::displayRemoteData(const RemoteOutput::MsgReportRemoteD
     m_countUnrecoverable += unrecoverableCountDelta;
     displayEventCounts();
     displayEventTimer();
+    m_remoteAPIConnected = true;
 
     uint32_t sampleCountDelta;
 
@@ -509,6 +510,7 @@ void RemoteOutputSinkGui::displayRemoteFixedData(const RemoteOutput::MsgReportRe
     infoLine += " " + remoteData.m_architecture;
     infoLine += " " + remoteData.m_os;
     infoLine +=  QString(" %1/%2b").arg(remoteData.m_rxBits).arg(remoteData.m_txBits);
+    m_remoteAPIConnected = true;
 
     if (infoLine.size() > 0) {
         ui->infoText->setText(infoLine);

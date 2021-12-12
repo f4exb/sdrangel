@@ -1,8 +1,6 @@
 RemoteOutputSettings:
   description: RemoteOutput
   properties:
-    sampleRate:
-      type: integer
     nbFECBlocks:
       type: integer
     apiAddress:
@@ -35,6 +33,8 @@ RemoteOutputReport:
     centerFrequency:
       type: integer
       format: int64
+    sampleRate:
+      type: integer
     bufferRWBalance:
       description: ratio off the mid buffer (positive read leads)
       type: number

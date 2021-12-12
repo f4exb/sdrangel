@@ -95,6 +95,7 @@ private:
 	int m_lastEngineState;
     bool m_doApplySettings;
     bool m_forceSettings;
+    bool m_remoteAPIConnected;
 
     uint32_t m_countUnrecoverable;
     uint32_t m_countRecovered;
@@ -125,7 +126,6 @@ private:
 
 private slots:
     void handleInputMessages();
-    void on_sampleRate_changed(quint64 value);
     void on_nbFECBlocks_valueChanged(int value);
     void on_deviceIndex_returnPressed();
     void on_channelIndex_returnPressed();

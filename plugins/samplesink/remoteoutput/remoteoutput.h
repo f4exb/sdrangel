@@ -275,6 +275,7 @@ private:
 	QMutex m_mutex;
 	RemoteOutputSettings m_settings;
 	uint64_t m_centerFrequency;
+    int m_sampleRate;
 	RemoteOutputWorker* m_remoteOutputWorker;
     QThread m_remoteOutputWorkerThread;
 	QString m_deviceDescription;
@@ -300,6 +301,8 @@ private:
     void startWorker();
     void stopWorker();
 	void applySettings(const RemoteOutputSettings& settings, bool force = false);
+    void applyCenterFrequency();
+    void applySampleRate();
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
 
     void analyzeApiReply(const QJsonObject& jsonObject, const QString& answer);

@@ -44,6 +44,9 @@ public:
     qint64 getCenterFrequency();
     void setCenterFrequency(qint64 center_frequency);
 
+    qint32 getSampleRate();
+    void setSampleRate(qint32 sample_rate);
+
     float getBufferRwBalance();
     void setBufferRwBalance(float buffer_rw_balance);
 
@@ -56,6 +59,9 @@ public:
 private:
     qint64 center_frequency;
     bool m_center_frequency_isSet;
+
+    qint32 sample_rate;
+    bool m_sample_rate_isSet;
 
     float buffer_rw_balance;
     bool m_buffer_rw_balance_isSet;

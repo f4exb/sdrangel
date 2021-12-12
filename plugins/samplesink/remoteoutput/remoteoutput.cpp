@@ -51,7 +51,8 @@ const uint32_t RemoteOutput::NbSamplesForRateCorrection = 5000000;
 RemoteOutput::RemoteOutput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
-	m_centerFrequency(0),
+	m_centerFrequency(435000000),
+    m_sampleRate(48000),
     m_remoteOutputWorker(nullptr),
 	m_deviceDescription("RemoteOutput"),
     m_startingTimeStamp(0),
@@ -72,6 +73,8 @@ RemoteOutput::RemoteOutput(DeviceAPI *deviceAPI) :
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     connect(&m_masterTimer, SIGNAL(timeout()), this, SLOT(tick()));
+    applyCenterFrequency();
+    applySampleRate();
 }
 
 RemoteOutput::~RemoteOutput()
@@ -94,7 +97,7 @@ bool RemoteOutput::start()
 	m_remoteOutputWorker = new RemoteOutputWorker(&m_sampleSourceFifo);
     m_remoteOutputWorker->moveToThread(&m_remoteOutputWorkerThread);
 	m_remoteOutputWorker->setDataAddress(m_settings.m_dataAddress, m_settings.m_dataPort);
-	m_remoteOutputWorker->setSamplerate(m_settings.m_sampleRate);
+	m_remoteOutputWorker->setSamplerate(m_sampleRate);
 	m_remoteOutputWorker->setNbBlocksFEC(m_settings.m_nbFECBlocks);
 	m_remoteOutputWorker->connectTimer(m_masterTimer);
 	startWorker();
@@ -177,7 +180,7 @@ const QString& RemoteOutput::getDeviceDescription() const
 
 int RemoteOutput::getSampleRate() const
 {
-	return m_settings.m_sampleRate;
+	return m_sampleRate;
 }
 
 quint64 RemoteOutput::getCenterFrequency() const
@@ -270,7 +273,6 @@ bool RemoteOutput::handleMessage(const Message& message)
 void RemoteOutput::applySettings(const RemoteOutputSettings& settings, bool force)
 {
     QMutexLocker mutexLocker(&m_mutex);
-    bool forwardChange = false;
     QList<QString> reverseAPIKeys;
 
     if ((m_settings.m_dataAddress != settings.m_dataAddress) || force) {
@@ -293,20 +295,6 @@ void RemoteOutput::applySettings(const RemoteOutputSettings& settings, bool forc
         }
     }
 
-    if (force || (m_settings.m_sampleRate != settings.m_sampleRate))
-    {
-        reverseAPIKeys.append("sampleRate");
-
-        if (m_remoteOutputWorker != 0) {
-            m_remoteOutputWorker->setSamplerate(settings.m_sampleRate);
-        }
-
-        m_tickMultiplier = (21*NbSamplesForRateCorrection) / (2*settings.m_sampleRate); // two times per sample filling period plus small extension
-        m_tickMultiplier /= 20; // greter tick (one per second)
-        m_tickMultiplier = m_tickMultiplier < 1 ? 1 : m_tickMultiplier; // not below 1 second
-        forwardChange = true;
-    }
-
     if (force || (m_settings.m_nbFECBlocks != settings.m_nbFECBlocks))
     {
         reverseAPIKeys.append("nbFECBlocks");
@@ -319,18 +307,11 @@ void RemoteOutput::applySettings(const RemoteOutputSettings& settings, bool forc
     mutexLocker.unlock();
 
     qDebug() << "RemoteOutput::applySettings:"
-            << " m_sampleRate: " << settings.m_sampleRate
             << " m_nbFECBlocks: " << settings.m_nbFECBlocks
             << " m_apiAddress: " << settings.m_apiAddress
             << " m_apiPort: " << settings.m_apiPort
             << " m_dataAddress: " << settings.m_dataAddress
             << " m_dataPort: " << settings.m_dataPort;
-
-    if (forwardChange)
-    {
-        DSPSignalNotification *notif = new DSPSignalNotification(settings.m_sampleRate, m_centerFrequency);
-        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
-    }
 
     if (settings.m_useReverseAPI)
     {
@@ -342,6 +323,26 @@ void RemoteOutput::applySettings(const RemoteOutputSettings& settings, bool forc
     }
 
     m_settings = settings;
+}
+
+void RemoteOutput::applyCenterFrequency()
+{
+    DSPSignalNotification *notif = new DSPSignalNotification(m_sampleRate, m_centerFrequency);
+    m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
+}
+
+void RemoteOutput::applySampleRate()
+{
+    if (m_remoteOutputWorker) {
+        m_remoteOutputWorker->setSamplerate(m_sampleRate);
+    }
+
+    m_tickMultiplier = (21*NbSamplesForRateCorrection) / (2*m_sampleRate); // two times per sample filling period plus small extension
+    m_tickMultiplier /= 20; // greter tick (one per second)
+    m_tickMultiplier = m_tickMultiplier < 1 ? 1 : m_tickMultiplier; // not below 1 second
+
+    DSPSignalNotification *notif = new DSPSignalNotification(m_sampleRate, m_centerFrequency);
+    m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 }
 
 int RemoteOutput::webapiRunGet(
@@ -411,9 +412,6 @@ void RemoteOutput::webapiUpdateDeviceSettings(
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)
 {
-    if (deviceSettingsKeys.contains("sampleRate")) {
-        settings.m_sampleRate = response.getRemoteOutputSettings()->getSampleRate();
-    }
     if (deviceSettingsKeys.contains("nbFECBlocks")) {
         settings.m_nbFECBlocks = response.getRemoteOutputSettings()->getNbFecBlocks();
     }
@@ -462,7 +460,6 @@ int RemoteOutput::webapiReportGet(
 
 void RemoteOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const RemoteOutputSettings& settings)
 {
-    response.getRemoteOutputSettings()->setSampleRate(settings.m_sampleRate);
     response.getRemoteOutputSettings()->setNbFecBlocks(settings.m_nbFECBlocks);
     response.getRemoteOutputSettings()->setApiAddress(new QString(settings.m_apiAddress));
     response.getRemoteOutputSettings()->setApiPort(settings.m_apiPort);
@@ -485,6 +482,7 @@ void RemoteOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
 void RemoteOutput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
 {
     response.getRemoteOutputReport()->setCenterFrequency(m_centerFrequency);
+    response.getRemoteOutputReport()->setSampleRate(m_sampleRate);
     response.getRemoteOutputReport()->setBufferRwBalance(m_sampleSourceFifo.getRWBalance());
     response.getRemoteOutputReport()->setSampleCount(m_remoteOutputWorker ? (int) m_remoteOutputWorker->getSamplesCount() : 0);
 }
@@ -550,8 +548,25 @@ void RemoteOutput::analyzeApiReply(const QJsonObject& jsonObject, const QString&
     {
         MsgReportRemoteData::RemoteData msgRemoteData;
         QJsonObject report = jsonObject["RemoteSourceReport"].toObject();
-        m_centerFrequency = report["deviceCenterFreq"].toInt();
+        uint64_t centerFrequency = report["deviceCenterFreq"].toInt();
+
+        if (centerFrequency != m_centerFrequency)
+        {
+            m_centerFrequency = centerFrequency;
+            applyCenterFrequency();
+        }
+
+        int remoteRate = report["deviceSampleRate"].toInt();
+
+        if (remoteRate != m_sampleRate)
+        {
+            m_sampleRate = remoteRate;
+            applySampleRate();
+        }
+
         msgRemoteData.m_centerFrequency = m_centerFrequency;
+        msgRemoteData.m_sampleRate = m_sampleRate;
+
         int queueSize = report["queueSize"].toInt();
         queueSize = queueSize == 0 ? 20 : queueSize;
         msgRemoteData.m_queueSize = queueSize;
@@ -563,8 +578,6 @@ void RemoteOutput::analyzeApiReply(const QJsonObject& jsonObject, const QString&
         int intRemoteSampleCount = report["samplesCount"].toInt();
         uint32_t remoteSampleCount = intRemoteSampleCount < 0 ? 0 : intRemoteSampleCount;
         msgRemoteData.m_sampleCount = remoteSampleCount;
-        int remoteRate = report["deviceSampleRate"].toInt();
-        msgRemoteData.m_sampleRate = remoteRate;
         int unrecoverableCount = report["uncorrectableErrorsCount"].toInt();
         msgRemoteData.m_unrecoverableCount = unrecoverableCount;
         int recoverableCount = report["correctableErrorsCount"].toInt();
@@ -696,9 +709,6 @@ void RemoteOutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys,
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
-    if (deviceSettingsKeys.contains("sampleRate") || force) {
-        swgRemoteOutputSettings->setSampleRate(settings.m_sampleRate);
-    }
     if (deviceSettingsKeys.contains("nbFECBlocks") || force) {
         swgRemoteOutputSettings->setNbFecBlocks(settings.m_nbFECBlocks);
     }

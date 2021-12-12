@@ -24,7 +24,6 @@
 #include "cm256cc/cm256.h"
 
 #include "dsp/channelsamplesource.h"
-#include "dsp/interpolator.h"
 #include "channel/remotedatablock.h"
 #include "channel/remotedataqueue.h"
 #include "channel/remotedatareadqueue.h"
@@ -72,17 +71,11 @@ private:
     uint32_t m_nbUncorrectableErrors; //!< count of uncorrectable errors in number of blocks
 
     int m_channelSampleRate;
-    Interpolator m_interpolator;
-    Real m_interpolatorDistance;
-    Real m_interpolatorDistanceRemain;
-    bool m_interpolatorConsumed;
-    Complex m_modSample;
 
     void startWorker();
     void stopWorker();
     void handleDataFrame(RemoteDataFrame *dataFrame);
     void printMeta(const QString& header, RemoteMetaDataFEC *metaData);
-    void getSample();
 
 private slots:
     void handleData();

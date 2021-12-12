@@ -54,36 +54,6 @@ void RemoteSourceSource::pull(SampleVector::iterator begin, unsigned int nbSampl
 void RemoteSourceSource::pullOne(Sample& sample)
 {
     m_dataReadQueue.readSample(sample, true); // true is scale for Tx
-    return;
-
-	Complex ci;
-
-    if (m_interpolatorDistance > 1.0f) // decimate
-    {
-    	getSample();
-
-        while (!m_interpolator.decimate(&m_interpolatorDistanceRemain, m_modSample, &ci)) {
-        	getSample();
-        }
-    }
-    else
-    {
-        if (m_interpolator.interpolate(&m_interpolatorDistanceRemain, m_modSample, &ci)) {
-        	getSample();
-        }
-    }
-
-    m_interpolatorDistanceRemain += m_interpolatorDistance;
-  	sample.m_real = (FixReal) ci.real();
-	sample.m_imag = (FixReal) ci.imag();
-}
-
-void RemoteSourceSource::getSample()
-{
-	Sample s;
-    m_dataReadQueue.readSample(s, true); // true is scale for Tx
-    m_modSample.real(s.m_real);
-    m_modSample.imag(s.m_imag);
 }
 
 void RemoteSourceSource::start()
@@ -267,17 +237,6 @@ void RemoteSourceSource::applyChannelSettings(int channelSampleRate, bool force)
 {
     qDebug() << "RemoteSourceSource::applyChannelSettings:"
             << " channelSampleRate: " << channelSampleRate
-            << " m_currentMeta.m_sampleRate: " << m_currentMeta.m_sampleRate
             << " force: " << force;
-
-    if ((channelSampleRate != m_channelSampleRate) || force)
-    {
-        uint32_t metaSampleRate = m_currentMeta.m_sampleRate == 0 ? channelSampleRate : m_currentMeta.m_sampleRate;
-        m_interpolatorDistanceRemain = 0;
-        m_interpolatorConsumed = false;
-        m_interpolatorDistance = (Real) metaSampleRate / (Real) channelSampleRate;
-        m_interpolator.create(48, metaSampleRate, metaSampleRate / 2.2, 3.0);
-    }
-
     m_channelSampleRate = channelSampleRate;
 }

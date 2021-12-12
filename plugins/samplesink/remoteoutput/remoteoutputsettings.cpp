@@ -25,7 +25,6 @@ RemoteOutputSettings::RemoteOutputSettings()
 
 void RemoteOutputSettings::resetToDefaults()
 {
-    m_sampleRate = 48000;
     m_nbFECBlocks = 0;
     m_apiAddress = "127.0.0.1";
     m_apiPort = 9091;
@@ -43,7 +42,6 @@ QByteArray RemoteOutputSettings::serialize() const
 {
     SimpleSerializer s(1);
 
-    s.writeU32(2, m_sampleRate);
     s.writeU32(4, m_nbFECBlocks);
     s.writeString(5, m_apiAddress);
     s.writeU32(6, m_apiPort);
@@ -73,7 +71,6 @@ bool RemoteOutputSettings::deserialize(const QByteArray& data)
     {
         quint32 uintval;
 
-        d.readU32(2, &m_sampleRate, 48000);
         d.readU32(4, &m_nbFECBlocks, 0);
         d.readString(5, &m_apiAddress, "127.0.0.1");
         d.readU32(6, &uintval, 9090);

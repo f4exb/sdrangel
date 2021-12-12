@@ -30,6 +30,8 @@ SWGRemoteOutputReport::SWGRemoteOutputReport(QString* json) {
 SWGRemoteOutputReport::SWGRemoteOutputReport() {
     center_frequency = 0L;
     m_center_frequency_isSet = false;
+    sample_rate = 0;
+    m_sample_rate_isSet = false;
     buffer_rw_balance = 0.0f;
     m_buffer_rw_balance_isSet = false;
     sample_count = 0;
@@ -44,6 +46,8 @@ void
 SWGRemoteOutputReport::init() {
     center_frequency = 0L;
     m_center_frequency_isSet = false;
+    sample_rate = 0;
+    m_sample_rate_isSet = false;
     buffer_rw_balance = 0.0f;
     m_buffer_rw_balance_isSet = false;
     sample_count = 0;
@@ -52,6 +56,7 @@ SWGRemoteOutputReport::init() {
 
 void
 SWGRemoteOutputReport::cleanup() {
+
 
 
 
@@ -69,6 +74,8 @@ SWGRemoteOutputReport::fromJson(QString &json) {
 void
 SWGRemoteOutputReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
+    
+    ::SWGSDRangel::setValue(&sample_rate, pJson["sampleRate"], "qint32", "");
     
     ::SWGSDRangel::setValue(&buffer_rw_balance, pJson["bufferRWBalance"], "float", "");
     
@@ -93,6 +100,9 @@ SWGRemoteOutputReport::asJsonObject() {
     if(m_center_frequency_isSet){
         obj->insert("centerFrequency", QJsonValue(center_frequency));
     }
+    if(m_sample_rate_isSet){
+        obj->insert("sampleRate", QJsonValue(sample_rate));
+    }
     if(m_buffer_rw_balance_isSet){
         obj->insert("bufferRWBalance", QJsonValue(buffer_rw_balance));
     }
@@ -111,6 +121,16 @@ void
 SWGRemoteOutputReport::setCenterFrequency(qint64 center_frequency) {
     this->center_frequency = center_frequency;
     this->m_center_frequency_isSet = true;
+}
+
+qint32
+SWGRemoteOutputReport::getSampleRate() {
+    return sample_rate;
+}
+void
+SWGRemoteOutputReport::setSampleRate(qint32 sample_rate) {
+    this->sample_rate = sample_rate;
+    this->m_sample_rate_isSet = true;
 }
 
 float
@@ -139,6 +159,9 @@ SWGRemoteOutputReport::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_center_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_sample_rate_isSet){
             isObjectUpdated = true; break;
         }
         if(m_buffer_rw_balance_isSet){
