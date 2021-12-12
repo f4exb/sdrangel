@@ -28,6 +28,8 @@ SWGRemoteOutputReport::SWGRemoteOutputReport(QString* json) {
 }
 
 SWGRemoteOutputReport::SWGRemoteOutputReport() {
+    center_frequency = 0L;
+    m_center_frequency_isSet = false;
     buffer_rw_balance = 0.0f;
     m_buffer_rw_balance_isSet = false;
     sample_count = 0;
@@ -40,6 +42,8 @@ SWGRemoteOutputReport::~SWGRemoteOutputReport() {
 
 void
 SWGRemoteOutputReport::init() {
+    center_frequency = 0L;
+    m_center_frequency_isSet = false;
     buffer_rw_balance = 0.0f;
     m_buffer_rw_balance_isSet = false;
     sample_count = 0;
@@ -48,6 +52,7 @@ SWGRemoteOutputReport::init() {
 
 void
 SWGRemoteOutputReport::cleanup() {
+
 
 
 }
@@ -63,6 +68,8 @@ SWGRemoteOutputReport::fromJson(QString &json) {
 
 void
 SWGRemoteOutputReport::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
+    
     ::SWGSDRangel::setValue(&buffer_rw_balance, pJson["bufferRWBalance"], "float", "");
     
     ::SWGSDRangel::setValue(&sample_count, pJson["sampleCount"], "qint32", "");
@@ -83,6 +90,9 @@ SWGRemoteOutputReport::asJson ()
 QJsonObject*
 SWGRemoteOutputReport::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(m_center_frequency_isSet){
+        obj->insert("centerFrequency", QJsonValue(center_frequency));
+    }
     if(m_buffer_rw_balance_isSet){
         obj->insert("bufferRWBalance", QJsonValue(buffer_rw_balance));
     }
@@ -91,6 +101,16 @@ SWGRemoteOutputReport::asJsonObject() {
     }
 
     return obj;
+}
+
+qint64
+SWGRemoteOutputReport::getCenterFrequency() {
+    return center_frequency;
+}
+void
+SWGRemoteOutputReport::setCenterFrequency(qint64 center_frequency) {
+    this->center_frequency = center_frequency;
+    this->m_center_frequency_isSet = true;
 }
 
 float
@@ -118,6 +138,9 @@ bool
 SWGRemoteOutputReport::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(m_center_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
         if(m_buffer_rw_balance_isSet){
             isObjectUpdated = true; break;
         }

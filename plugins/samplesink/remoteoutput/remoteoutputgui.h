@@ -102,7 +102,6 @@ private:
     uint32_t m_lastCountRecovered;
 	uint32_t m_lastSampleCount;
 	uint64_t m_lastTimestampUs;
-    bool m_resetCounts;
     QElapsedTimer m_time;
 
     QPalette m_paletteGreenText;

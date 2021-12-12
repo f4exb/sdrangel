@@ -62,7 +62,6 @@ RemoteOutputSinkGui::RemoteOutputSinkGui(DeviceUISet *deviceUISet, QWidget* pare
     m_lastCountUnrecoverable = 0;
     m_lastCountRecovered = 0;
     m_lastSampleCount = 0;
-    m_resetCounts = true;
 
     m_paletteGreenText.setColor(QPalette::WindowText, Qt::green);
     m_paletteRedText.setColor(QPalette::WindowText, Qt::red);
@@ -470,16 +469,13 @@ void RemoteOutputSinkGui::displayRemoteData(const RemoteOutput::MsgReportRemoteD
     ui->queueLengthText->setText(queueLengthText);
     int queueLengthPercent = (remoteData.m_queueLength*100)/remoteData.m_queueSize;
     ui->queueLengthGauge->setValue(queueLengthPercent);
-
-    if (!m_resetCounts)
-    {
-        int recoverableCountDelta = remoteData.m_recoverableCount - m_lastCountRecovered;
-        int unrecoverableCountDelta = remoteData.m_unrecoverableCount - m_lastCountUnrecoverable;
-        displayEventStatus(recoverableCountDelta, unrecoverableCountDelta);
-        m_countRecovered += recoverableCountDelta;
-        m_countUnrecoverable += unrecoverableCountDelta;
-        displayEventCounts();
-    }
+    int recoverableCountDelta = remoteData.m_recoverableCount - m_lastCountRecovered;
+    int unrecoverableCountDelta = remoteData.m_unrecoverableCount - m_lastCountUnrecoverable;
+    displayEventStatus(recoverableCountDelta, unrecoverableCountDelta);
+    m_countRecovered += recoverableCountDelta;
+    m_countUnrecoverable += unrecoverableCountDelta;
+    displayEventCounts();
+    displayEventTimer();
 
     uint32_t sampleCountDelta;
 
@@ -500,7 +496,6 @@ void RemoteOutputSinkGui::displayRemoteData(const RemoteOutput::MsgReportRemoteD
         ui->remoteStreamRateText->setText(QString("%1").arg(remoteStreamRate, 0, 'f', 0));
     }
 
-    m_resetCounts = false;
     m_lastCountRecovered = remoteData.m_recoverableCount;
     m_lastCountUnrecoverable = remoteData.m_unrecoverableCount;
     m_lastSampleCount = remoteData.m_sampleCount;

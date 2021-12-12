@@ -41,6 +41,9 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGRemoteOutputReport* fromJson(QString &jsonString) override;
 
+    qint64 getCenterFrequency();
+    void setCenterFrequency(qint64 center_frequency);
+
     float getBufferRwBalance();
     void setBufferRwBalance(float buffer_rw_balance);
 
@@ -51,6 +54,9 @@ public:
     virtual bool isSet() override;
 
 private:
+    qint64 center_frequency;
+    bool m_center_frequency_isSet;
+
     float buffer_rw_balance;
     bool m_buffer_rw_balance_isSet;
 

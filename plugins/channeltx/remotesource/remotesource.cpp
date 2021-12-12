@@ -369,7 +369,7 @@ void RemoteSource::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& resp
     response.getRemoteSourceReport()->setNbFecBlocks(currentMeta.m_nbFECBlocks);
     response.getRemoteSourceReport()->setCenterFreq(currentMeta.m_centerFrequency);
     response.getRemoteSourceReport()->setSampleRate(currentMeta.m_sampleRate);
-    response.getRemoteSourceReport()->setDeviceCenterFreq(m_deviceAPI->getSampleSink()->getCenterFrequency()/1000);
+    response.getRemoteSourceReport()->setDeviceCenterFreq(m_deviceAPI->getSampleSink()->getCenterFrequency());
     response.getRemoteSourceReport()->setDeviceSampleRate(m_deviceAPI->getSampleSink()->getSampleRate());
 }
 

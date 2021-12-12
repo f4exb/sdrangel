@@ -22,7 +22,6 @@
 #include <QString>
 
 struct RemoteOutputSettings {
-    quint64 m_centerFrequency;
     quint32 m_sampleRate;
     quint32 m_nbFECBlocks;
     QString m_apiAddress;

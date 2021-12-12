@@ -61,6 +61,7 @@ RemoteSourceReport:
     centerFreq:
       description: "Stream center frequency setting in kHz"
       type: integer
+      format: int64
     sampleRate:
       description: "Stream nominal sample rate in S/s"
       type: integer

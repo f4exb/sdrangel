@@ -68,8 +68,8 @@ public:
     qint32 getNbFecBlocks();
     void setNbFecBlocks(qint32 nb_fec_blocks);
 
-    qint32 getCenterFreq();
-    void setCenterFreq(qint32 center_freq);
+    qint64 getCenterFreq();
+    void setCenterFreq(qint64 center_freq);
 
     qint32 getSampleRate();
     void setSampleRate(qint32 sample_rate);
@@ -111,7 +111,7 @@ private:
     qint32 nb_fec_blocks;
     bool m_nb_fec_blocks_isSet;
 
-    qint32 center_freq;
+    qint64 center_freq;
     bool m_center_freq_isSet;
 
     qint32 sample_rate;

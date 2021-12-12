@@ -9820,6 +9820,10 @@ margin-bottom: 20px;
 };
             defs.RemoteOutputReport = {
   "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
     "bufferRWBalance" : {
       "type" : "number",
       "format" : "float",
@@ -9834,10 +9838,6 @@ margin-bottom: 20px;
 };
             defs.RemoteOutputSettings = {
   "properties" : {
-    "centerFrequency" : {
-      "type" : "integer",
-      "format" : "int64"
-    },
     "sampleRate" : {
       "type" : "integer"
     },
@@ -9970,6 +9970,7 @@ margin-bottom: 20px;
     },
     "centerFreq" : {
       "type" : "integer",
+      "format" : "int64",
       "description" : "Stream center frequency setting in kHz"
     },
     "sampleRate" : {
@@ -51596,7 +51597,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-12-07T06:38:29.681+01:00
+              Generated 2021-12-12T13:16:20.821+01:00
             </div>
           </div>
       </div>

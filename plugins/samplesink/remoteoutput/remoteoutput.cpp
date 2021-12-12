@@ -462,7 +462,6 @@ int RemoteOutput::webapiReportGet(
 
 void RemoteOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const RemoteOutputSettings& settings)
 {
-    response.getRemoteOutputSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getRemoteOutputSettings()->setSampleRate(settings.m_sampleRate);
     response.getRemoteOutputSettings()->setNbFecBlocks(settings.m_nbFECBlocks);
     response.getRemoteOutputSettings()->setApiAddress(new QString(settings.m_apiAddress));
@@ -485,6 +484,7 @@ void RemoteOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
 
 void RemoteOutput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
 {
+    response.getRemoteOutputReport()->setCenterFrequency(m_centerFrequency);
     response.getRemoteOutputReport()->setBufferRwBalance(m_sampleSourceFifo.getRWBalance());
     response.getRemoteOutputReport()->setSampleCount(m_remoteOutputWorker ? (int) m_remoteOutputWorker->getSamplesCount() : 0);
 }
@@ -550,8 +550,7 @@ void RemoteOutput::analyzeApiReply(const QJsonObject& jsonObject, const QString&
     {
         MsgReportRemoteData::RemoteData msgRemoteData;
         QJsonObject report = jsonObject["RemoteSourceReport"].toObject();
-        m_settings.m_centerFrequency = report["deviceCenterFreq"].toInt();
-        m_centerFrequency = m_settings.m_centerFrequency * 1000;
+        m_centerFrequency = report["deviceCenterFreq"].toInt();
         msgRemoteData.m_centerFrequency = m_centerFrequency;
         int queueSize = report["queueSize"].toInt();
         queueSize = queueSize == 0 ? 20 : queueSize;

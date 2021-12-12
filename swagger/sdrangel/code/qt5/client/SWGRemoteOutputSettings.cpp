@@ -28,8 +28,6 @@ SWGRemoteOutputSettings::SWGRemoteOutputSettings(QString* json) {
 }
 
 SWGRemoteOutputSettings::SWGRemoteOutputSettings() {
-    center_frequency = 0L;
-    m_center_frequency_isSet = false;
     sample_rate = 0;
     m_sample_rate_isSet = false;
     nb_fec_blocks = 0;
@@ -62,8 +60,6 @@ SWGRemoteOutputSettings::~SWGRemoteOutputSettings() {
 
 void
 SWGRemoteOutputSettings::init() {
-    center_frequency = 0L;
-    m_center_frequency_isSet = false;
     sample_rate = 0;
     m_sample_rate_isSet = false;
     nb_fec_blocks = 0;
@@ -92,7 +88,6 @@ SWGRemoteOutputSettings::init() {
 
 void
 SWGRemoteOutputSettings::cleanup() {
-
 
 
     if(api_address != nullptr) { 
@@ -124,8 +119,6 @@ SWGRemoteOutputSettings::fromJson(QString &json) {
 
 void
 SWGRemoteOutputSettings::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
-    
     ::SWGSDRangel::setValue(&sample_rate, pJson["sampleRate"], "qint32", "");
     
     ::SWGSDRangel::setValue(&nb_fec_blocks, pJson["nbFECBlocks"], "qint32", "");
@@ -166,9 +159,6 @@ SWGRemoteOutputSettings::asJson ()
 QJsonObject*
 SWGRemoteOutputSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if(m_center_frequency_isSet){
-        obj->insert("centerFrequency", QJsonValue(center_frequency));
-    }
     if(m_sample_rate_isSet){
         obj->insert("sampleRate", QJsonValue(sample_rate));
     }
@@ -207,16 +197,6 @@ SWGRemoteOutputSettings::asJsonObject() {
     }
 
     return obj;
-}
-
-qint64
-SWGRemoteOutputSettings::getCenterFrequency() {
-    return center_frequency;
-}
-void
-SWGRemoteOutputSettings::setCenterFrequency(qint64 center_frequency) {
-    this->center_frequency = center_frequency;
-    this->m_center_frequency_isSet = true;
 }
 
 qint32
@@ -344,9 +324,6 @@ bool
 SWGRemoteOutputSettings::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_center_frequency_isSet){
-            isObjectUpdated = true; break;
-        }
         if(m_sample_rate_isSet){
             isObjectUpdated = true; break;
         }

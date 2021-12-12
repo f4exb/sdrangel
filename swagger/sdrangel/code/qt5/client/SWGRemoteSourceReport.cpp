@@ -46,7 +46,7 @@ SWGRemoteSourceReport::SWGRemoteSourceReport() {
     m_nb_original_blocks_isSet = false;
     nb_fec_blocks = 0;
     m_nb_fec_blocks_isSet = false;
-    center_freq = 0;
+    center_freq = 0L;
     m_center_freq_isSet = false;
     sample_rate = 0;
     m_sample_rate_isSet = false;
@@ -80,7 +80,7 @@ SWGRemoteSourceReport::init() {
     m_nb_original_blocks_isSet = false;
     nb_fec_blocks = 0;
     m_nb_fec_blocks_isSet = false;
-    center_freq = 0;
+    center_freq = 0L;
     m_center_freq_isSet = false;
     sample_rate = 0;
     m_sample_rate_isSet = false;
@@ -136,7 +136,7 @@ SWGRemoteSourceReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&nb_fec_blocks, pJson["nbFECBlocks"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&center_freq, pJson["centerFreq"], "qint32", "");
+    ::SWGSDRangel::setValue(&center_freq, pJson["centerFreq"], "qint64", "");
     
     ::SWGSDRangel::setValue(&sample_rate, pJson["sampleRate"], "qint32", "");
     
@@ -293,12 +293,12 @@ SWGRemoteSourceReport::setNbFecBlocks(qint32 nb_fec_blocks) {
     this->m_nb_fec_blocks_isSet = true;
 }
 
-qint32
+qint64
 SWGRemoteSourceReport::getCenterFreq() {
     return center_freq;
 }
 void
-SWGRemoteSourceReport::setCenterFreq(qint32 center_freq) {
+SWGRemoteSourceReport::setCenterFreq(qint64 center_freq) {
     this->center_freq = center_freq;
     this->m_center_freq_isSet = true;
 }
