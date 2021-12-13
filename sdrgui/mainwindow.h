@@ -129,6 +129,7 @@ private:
 	void saveFeatureSetPresetSettings(FeatureSetPreset* preset, int featureSetIndex);
 	void saveCommandSettings();
 
+	QString openGLVersion();
 	void createStatusBar();
 	void closeEvent(QCloseEvent*);
 	void updatePresetControls();
