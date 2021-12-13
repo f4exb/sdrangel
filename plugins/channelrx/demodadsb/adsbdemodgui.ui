@@ -744,6 +744,13 @@
       </item>
      </layout>
     </item>
+    <item>
+     <widget class="QLabel" name="warning">
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QWidget" name="dataContainer" native="true">
@@ -1277,11 +1284,6 @@
    <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
-   <class>ClickableLabel</class>
-   <extends>QLabel</extends>
-   <header>gui/clickablelabel.h</header>
-  </customwidget>
-  <customwidget>
    <class>ValueDialZ</class>
    <extends>QWidget</extends>
    <header>gui/valuedialz.h</header>
@@ -1292,6 +1294,11 @@
    <extends>QWidget</extends>
    <header>gui/levelmeter.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ClickableLabel</class>
+   <extends>QLabel</extends>
+   <header>gui/clickablelabel.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>
