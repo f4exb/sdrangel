@@ -865,14 +865,43 @@ void MainWindow::saveCommandSettings()
 {
 }
 
+QString MainWindow::openGLVersion()
+{
+    QOpenGLContext *glCurrentContext = QOpenGLContext::globalShareContext();
+    if (glCurrentContext)
+    {
+        if (glCurrentContext->isValid())
+        {
+            int major = glCurrentContext->format().majorVersion();
+            int minor = glCurrentContext->format().minorVersion();
+            bool es = glCurrentContext->isOpenGLES();
+            QString version = QString("%1.%2%3").arg(major).arg(minor).arg(es ? " ES" : "");
+            // Waterfall doesn't work if major version is less than 3, so display in red
+            if (major < 3) {
+                version = "<span style=\"color:red\">" + version + "</span>";
+            }
+            return version;
+        }
+        else
+        {
+            return "N/A";
+        }
+    }
+    else
+    {
+        return "N/A";
+    }
+}
+
 void MainWindow::createStatusBar()
 {
     QString qtVersionStr = QString("Qt %1 ").arg(QT_VERSION_STR);
+    QString openGLVersionStr = QString("OpenGL %1 ").arg(openGLVersion());
 #if QT_VERSION >= QT_VERSION_CHECK(5, 4, 0)
-    m_showSystemWidget = new QLabel("SDRangel " + qApp->applicationVersion() + " " + qtVersionStr
+    m_showSystemWidget = new QLabel("SDRangel " + qApp->applicationVersion() + " " + qtVersionStr + openGLVersionStr
             + QSysInfo::currentCpuArchitecture() + " " + QSysInfo::prettyProductName(), this);
 #else
-    m_showSystemWidget = new QLabel("SDRangel " + qApp->applicationVersion() + " " + qtVersionStr, this);
+    m_showSystemWidget = new QLabel("SDRangel " + qApp->applicationVersion() + " " + qtVersionStr + openGLVersionStr, this);
 #endif
     statusBar()->addPermanentWidget(m_showSystemWidget);
 

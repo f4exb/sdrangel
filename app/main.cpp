@@ -40,6 +40,7 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
 #if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
 	QApplication::setAttribute(Qt::AA_EnableHighDpiScaling); // DPI support
     QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps); //HiDPI pixmaps
+    QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts); // Needed for WebGL in QWebEngineView and MainWindow::openGLVersion
 #endif
 
 	QApplication a(argc, argv);
