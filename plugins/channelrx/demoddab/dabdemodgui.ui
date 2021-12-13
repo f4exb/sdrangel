@@ -43,7 +43,7 @@
      <x>0</x>
      <y>0</y>
      <width>390</width>
-     <height>131</height>
+     <height>151</height>
     </rect>
    </property>
    <property name="minimumSize">
@@ -610,13 +610,20 @@
       </item>
      </layout>
     </item>
+    <item>
+     <widget class="QLabel" name="warning">
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QWidget" name="programContainer" native="true">
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>140</y>
+     <y>160</y>
      <width>381</width>
      <height>211</height>
     </rect>

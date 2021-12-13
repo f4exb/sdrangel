@@ -46,6 +46,7 @@
 #include "gui/crightclickenabler.h"
 #include "gui/clickablelabel.h"
 #include "dsp/dspengine.h"
+#include "dsp/dspcommands.h"
 #include "mainwindow.h"
 
 #include "adsbdemodreport.h"
@@ -1535,7 +1536,20 @@ QString ADSBDemodGUI::subAircraftString(Aircraft *aircraft, const QString &strin
 
 bool ADSBDemodGUI::handleMessage(const Message& message)
 {
-    if (ADSBDemodReport::MsgReportADSB::match(message))
+if (DSPSignalNotification::match(message))
+    {
+        DSPSignalNotification& notif = (DSPSignalNotification&) message;
+        bool srTooLow = notif.getSampleRate() < 2000000;
+        ui->warning->setVisible(srTooLow);
+        if (srTooLow) {
+            ui->warning->setText("Sample rate must be >= 2000000");
+        } else {
+            ui->warning->setText("");
+        }
+        arrangeRollups();
+        return true;
+    }
+    else if (ADSBDemodReport::MsgReportADSB::match(message))
     {
         ADSBDemodReport::MsgReportADSB& report = (ADSBDemodReport::MsgReportADSB&) message;
         handleADSB(
@@ -2541,6 +2555,9 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     connect(feedRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(feedSelect()));
 
     ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
+
+    ui->warning->setVisible(false);
+    ui->warning->setStyleSheet("QLabel { background-color: red; }");
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));

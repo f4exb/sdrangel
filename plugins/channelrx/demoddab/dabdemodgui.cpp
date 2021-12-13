@@ -35,7 +35,6 @@
 #include "gui/audioselectdialog.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
-#include "dsp/dspengine.h"
 #include "gui/crightclickenabler.h"
 #include "channel/channelwebapiutils.h"
 #include "maincore.h"
@@ -202,6 +201,14 @@ bool DABDemodGUI::handleMessage(const Message& message)
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
         m_basebandSampleRate = notif.getSampleRate();
+        bool srTooLow = m_basebandSampleRate < 2048000;
+        ui->warning->setVisible(srTooLow);
+        if (srTooLow) {
+            ui->warning->setText("Sample rate must be >= 2048000");
+        } else {
+            ui->warning->setText("");
+        }
+        arrangeRollups();
         return true;
     }
     else if (DABDemod::MsgDABEnsembleName::match(message))
@@ -449,6 +456,9 @@ DABDemodGUI::DABDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect()));
 
     connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
+
+    ui->warning->setVisible(false);
+    ui->warning->setStyleSheet("QLabel { background-color: red; }");
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
