@@ -288,16 +288,6 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
-    uint32_t m_lastRemoteSampleCount;
-    uint32_t m_lastSampleCount;
-    uint64_t m_lastRemoteTimestampRateCorrection;
-    uint64_t m_lastTimestampRateCorrection;
-    int m_lastQueueLength;
-    uint32_t m_nbRemoteSamplesSinceRateCorrection;
-    uint32_t m_nbSamplesSinceRateCorrection;
-    int m_chunkSizeCorrection;
-    static const uint32_t NbSamplesForRateCorrection;
-
     void startWorker();
     void stopWorker();
 	void applySettings(const RemoteOutputSettings& settings, bool force = false);
@@ -306,7 +296,11 @@ private:
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
 
     void analyzeApiReply(const QJsonObject& jsonObject, const QString& answer);
-    void sampleRateCorrection(double remoteTimeDeltaUs, double timeDeltaUs, uint32_t remoteSampleCount, uint32_t sampleCount);
+    void queueLengthCompensation(
+        int nominalSR,
+        int queueLength,
+        int queueSize
+    );
     void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const RemoteOutputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
 

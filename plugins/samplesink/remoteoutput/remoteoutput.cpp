@@ -46,8 +46,6 @@ MESSAGE_CLASS_DEFINITION(RemoteOutput::MsgReportRemoteData, Message)
 MESSAGE_CLASS_DEFINITION(RemoteOutput::MsgReportRemoteFixedData, Message)
 MESSAGE_CLASS_DEFINITION(RemoteOutput::MsgRequestFixedData, Message)
 
-const uint32_t RemoteOutput::NbSamplesForRateCorrection = 5000000;
-
 RemoteOutput::RemoteOutput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
@@ -59,15 +57,7 @@ RemoteOutput::RemoteOutput(DeviceAPI *deviceAPI) :
 	m_masterTimer(deviceAPI->getMasterTimer()),
 	m_tickCount(0),
     m_greaterTickCount(0),
-    m_tickMultiplier(1),
-	m_lastRemoteSampleCount(0),
-	m_lastSampleCount(0),
-	m_lastRemoteTimestampRateCorrection(0),
-	m_lastTimestampRateCorrection(0),
-	m_lastQueueLength(-2),
-	m_nbRemoteSamplesSinceRateCorrection(0),
-	m_nbSamplesSinceRateCorrection(0),
-	m_chunkSizeCorrection(0)
+    m_tickMultiplier(1)
 {
     m_deviceAPI->setNbSinkStreams(1);
     m_networkManager = new QNetworkAccessManager();
@@ -102,14 +92,9 @@ bool RemoteOutput::start()
 	m_remoteOutputWorker->connectTimer(m_masterTimer);
 	startWorker();
 
-	// restart auto rate correction
-	m_lastRemoteTimestampRateCorrection = 0;
-	m_lastTimestampRateCorrection = 0;
-	m_lastQueueLength = -2; // set first value out of bounds
-	m_chunkSizeCorrection = 0;
-
 	mutexLocker.unlock();
-	//applySettings(m_generalSettings, m_settings, true);
+    applySampleRate();
+
 	qDebug("RemoteOutput::start: started");
 
 	return true;
@@ -337,9 +322,9 @@ void RemoteOutput::applySampleRate()
         m_remoteOutputWorker->setSamplerate(m_sampleRate);
     }
 
-    m_tickMultiplier = (21*NbSamplesForRateCorrection) / (2*m_sampleRate); // two times per sample filling period plus small extension
-    m_tickMultiplier /= 20; // greter tick (one per second)
-    m_tickMultiplier = m_tickMultiplier < 1 ? 1 : m_tickMultiplier; // not below 1 second
+    m_tickMultiplier = 480000 / m_sampleRate;
+    m_tickMultiplier = m_tickMultiplier < 1 ? 1 : m_tickMultiplier > 10 ? 10 : m_tickMultiplier;
+    m_greaterTickCount = 0;
 
     DSPSignalNotification *notif = new DSPSignalNotification(m_sampleRate, m_centerFrequency);
     m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
@@ -548,7 +533,7 @@ void RemoteOutput::analyzeApiReply(const QJsonObject& jsonObject, const QString&
     {
         MsgReportRemoteData::RemoteData msgRemoteData;
         QJsonObject report = jsonObject["RemoteSourceReport"].toObject();
-        uint64_t centerFrequency = report["deviceCenterFreq"].toInt();
+        uint64_t centerFrequency = report["deviceCenterFreq"].toInt() + report["centerFreq"].toInt();
 
         if (centerFrequency != m_centerFrequency)
         {
@@ -556,7 +541,7 @@ void RemoteOutput::analyzeApiReply(const QJsonObject& jsonObject, const QString&
             applyCenterFrequency();
         }
 
-        int remoteRate = report["deviceSampleRate"].toInt();
+        int remoteRate = report["sampleRate"].toInt();
 
         if (remoteRate != m_sampleRate)
         {
@@ -572,7 +557,6 @@ void RemoteOutput::analyzeApiReply(const QJsonObject& jsonObject, const QString&
         msgRemoteData.m_queueSize = queueSize;
         int queueLength = report["queueLength"].toInt();
         msgRemoteData.m_queueLength = queueLength;
-        int queueLengthPercent = (queueLength*100)/queueSize;
         uint64_t remoteTimestampUs = report["tvSec"].toInt()*1000000ULL + report["tvUSec"].toInt();
         msgRemoteData.m_timestampUs = remoteTimestampUs;
         int intRemoteSampleCount = report["samplesCount"].toInt();
@@ -593,62 +577,11 @@ void RemoteOutput::analyzeApiReply(const QJsonObject& jsonObject, const QString&
             return;
         }
 
-        if (++m_greaterTickCount != m_tickMultiplier) {
-            return;
-        }
-
-        uint32_t remoteSampleCountDelta;
-
-        if (remoteSampleCount < m_lastRemoteSampleCount) {
-            remoteSampleCountDelta = (0xFFFFFFFFU - m_lastRemoteSampleCount) + remoteSampleCount + 1;
-        } else {
-            remoteSampleCountDelta = remoteSampleCount - m_lastRemoteSampleCount;
-        }
-
-        uint32_t sampleCountDelta, sampleCount;
-        uint64_t timestampUs;
-        sampleCount = m_remoteOutputWorker->getSamplesCount(timestampUs);
-
-        if (sampleCount < m_lastSampleCount) {
-            sampleCountDelta = (0xFFFFFFFFU - m_lastSampleCount) + sampleCount + 1;
-        } else {
-            sampleCountDelta = sampleCount - m_lastSampleCount;
-        }
-
-        // on initial state wait for queue stabilization
-        if ((m_lastRemoteTimestampRateCorrection == 0) && (queueLength >= m_lastQueueLength-1) && (queueLength <= m_lastQueueLength+1))
+        if (++m_greaterTickCount == m_tickMultiplier)
         {
-            m_lastRemoteTimestampRateCorrection = remoteTimestampUs;
-            m_lastTimestampRateCorrection = timestampUs;
-            m_nbRemoteSamplesSinceRateCorrection = 0;
-            m_nbSamplesSinceRateCorrection = 0;
+            queueLengthCompensation(m_sampleRate, queueLength, queueSize);
+            m_greaterTickCount = 0;
         }
-        else
-        {
-            m_nbRemoteSamplesSinceRateCorrection += remoteSampleCountDelta;
-            m_nbSamplesSinceRateCorrection += sampleCountDelta;
-
-            qDebug("RemoteOutput::analyzeApiReply: queueLengthPercent: %d m_nbSamplesSinceRateCorrection: %u",
-                queueLengthPercent,
-                m_nbRemoteSamplesSinceRateCorrection);
-
-            if (m_nbRemoteSamplesSinceRateCorrection > NbSamplesForRateCorrection)
-            {
-                sampleRateCorrection(remoteTimestampUs - m_lastRemoteTimestampRateCorrection,
-                        timestampUs - m_lastTimestampRateCorrection,
-                        m_nbRemoteSamplesSinceRateCorrection,
-                        m_nbSamplesSinceRateCorrection);
-                m_lastRemoteTimestampRateCorrection = remoteTimestampUs;
-                m_lastTimestampRateCorrection = timestampUs;
-                m_nbRemoteSamplesSinceRateCorrection = 0;
-                m_nbSamplesSinceRateCorrection = 0;
-            }
-        }
-
-        m_lastRemoteSampleCount = remoteSampleCount;
-        m_lastSampleCount = sampleCount;
-        m_lastQueueLength = queueLength;
-        m_greaterTickCount = 0;
     }
     else if (jsonObject.contains("remoteOutputSettings"))
     {
@@ -685,16 +618,18 @@ void RemoteOutput::analyzeApiReply(const QJsonObject& jsonObject, const QString&
     }
 }
 
-void RemoteOutput::sampleRateCorrection(double remoteTimeDeltaUs, double timeDeltaUs, uint32_t remoteSampleCount, uint32_t sampleCount)
+void RemoteOutput::queueLengthCompensation(
+    int nominalSR,
+    int queueLength,
+    int queueSize
+)
 {
-    double deltaSR = (remoteSampleCount/remoteTimeDeltaUs) - (sampleCount/timeDeltaUs);
-    double chunkCorr = 50000 * deltaSR; // for 50ms chunk intervals (50000us)
-    m_chunkSizeCorrection += roundf(chunkCorr);
-
-    qDebug("RemoteOutput::sampleRateCorrection: remote: %u / %f us local: %u / %f us corr: %d (%f) samples",
-        remoteSampleCount, remoteTimeDeltaUs, sampleCount, timeDeltaUs, m_chunkSizeCorrection, chunkCorr);
-
-    MsgConfigureRemoteOutputChunkCorrection* message = MsgConfigureRemoteOutputChunkCorrection::create(m_chunkSizeCorrection);
+    int deltaQueueBlocks = (queueSize/2) - queueLength;
+    int blockMultiplier = nominalSR / 4000;
+    blockMultiplier = blockMultiplier < 12 ? 12 : blockMultiplier;
+    int corr = deltaQueueBlocks * blockMultiplier;
+    qDebug("RemoteOutput::queueLengthCompensation: deltaQueueBlocks: %d corr: %d", deltaQueueBlocks, corr);
+    MsgConfigureRemoteOutputChunkCorrection* message = MsgConfigureRemoteOutputChunkCorrection::create(corr);
     getInputMessageQueue()->push(message);
 }
 

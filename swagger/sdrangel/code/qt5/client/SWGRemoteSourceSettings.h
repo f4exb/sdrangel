@@ -55,6 +55,12 @@ public:
     QString* getTitle();
     void setTitle(QString* title);
 
+    qint32 getLog2Interp();
+    void setLog2Interp(qint32 log2_interp);
+
+    qint32 getFilterChainHash();
+    void setFilterChainHash(qint32 filter_chain_hash);
+
     qint32 getStreamIndex();
     void setStreamIndex(qint32 stream_index);
 
@@ -91,6 +97,12 @@ private:
 
     QString* title;
     bool m_title_isSet;
+
+    qint32 log2_interp;
+    bool m_log2_interp_isSet;
+
+    qint32 filter_chain_hash;
+    bool m_filter_chain_hash_isSet;
 
     qint32 stream_index;
     bool m_stream_index_isSet;

@@ -34,6 +34,8 @@ void RemoteSourceSettings::resetToDefaults()
     m_dataPort = 9090;
     m_rgbColor = QColor(140, 4, 4).rgb();
     m_title = "Remote source";
+    m_log2Interp = 0;
+    m_filterChainHash = 0;
     m_channelMarker = nullptr;
     m_streamIndex = 0;
     m_useReverseAPI = false;
@@ -57,6 +59,8 @@ QByteArray RemoteSourceSettings::serialize() const
     s.writeU32(9, m_reverseAPIChannelIndex);
     s.writeS32(10, m_streamIndex);
     s.writeBlob(11, m_rollupState);
+    s.writeU32(12, m_log2Interp);
+    s.writeU32(13, m_filterChainHash);
 
     return s.final();
 }
@@ -103,6 +107,8 @@ bool RemoteSourceSettings::deserialize(const QByteArray& data)
         m_reverseAPIChannelIndex = tmp > 99 ? 99 : tmp;
         d.readS32(10, &m_streamIndex, 0);
         d.readBlob(11, &m_rollupState);
+        d.readU32(13, &m_filterChainHash, 0);
+        d.readS32(14, &m_streamIndex, 0);
 
         return true;
     }

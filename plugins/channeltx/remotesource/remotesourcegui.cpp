@@ -19,6 +19,7 @@
 
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
+#include "dsp/hbfilterchainconverter.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
 #include "mainwindow.h"
@@ -65,7 +66,14 @@ bool RemoteSourceGUI::deserialize(const QByteArray& data)
 
 bool RemoteSourceGUI::handleMessage(const Message& message)
 {
-    if (RemoteSource::MsgConfigureRemoteSource::match(message))
+    if (RemoteSource::MsgBasebandSampleRateNotification::match(message))
+    {
+        RemoteSource::MsgBasebandSampleRateNotification& notif = (RemoteSource::MsgBasebandSampleRateNotification&) message;
+        m_basebandSampleRate = notif.getBasebandSampleRate();
+        displayRateAndShift();
+        return true;
+    }
+    else if (RemoteSource::MsgConfigureRemoteSource::match(message))
     {
         const RemoteSource::MsgConfigureRemoteSource& cfg = (RemoteSource::MsgConfigureRemoteSource&) message;
         m_settings = cfg.getSettings();
@@ -149,6 +157,8 @@ RemoteSourceGUI::RemoteSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet,
         m_pluginAPI(pluginAPI),
         m_deviceUISet(deviceUISet),
         m_remoteSampleRate(48000),
+        m_basebandSampleRate(48000),
+        m_shiftFrequencyFactor(0.0),
         m_countUnrecoverable(0),
         m_countRecovered(0),
         m_lastCountUnrecoverable(0),
@@ -189,6 +199,8 @@ RemoteSourceGUI::RemoteSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet,
     m_time.start();
 
     displaySettings();
+    displayPosition();
+    displayRateAndShift();
     applySettings(true);
 }
 
@@ -231,6 +243,25 @@ void RemoteSourceGUI::displaySettings()
     ui->dataPort->setText(tr("%1").arg(m_settings.m_dataPort));
     restoreState(m_settings.m_rollupState);
     blockApplySettings(false);
+}
+
+void RemoteSourceGUI::displayRateAndShift()
+{
+    int shift = m_shiftFrequencyFactor * m_basebandSampleRate;
+    double channelSampleRate = ((double) m_basebandSampleRate) / (1<<m_settings.m_log2Interp);
+    QLocale loc;
+    ui->offsetFrequencyText->setText(tr("%1 Hz").arg(loc.toString(shift)));
+    ui->channelRateText->setText(tr("%1k").arg(QString::number(channelSampleRate / 1000.0, 'g', 5)));
+    m_channelMarker.setCenterFrequency(shift);
+    m_channelMarker.setBandwidth(channelSampleRate);
+}
+
+void RemoteSourceGUI::displayPosition()
+{
+    ui->filterChainIndex->setText(tr("%1").arg(m_settings.m_filterChainHash));
+    QString s;
+    HBFilterChainConverter::convertToString(m_settings.m_log2Interp, m_settings.m_filterChainHash, s);
+    ui->filterChainText->setText(s);
 }
 
 void RemoteSourceGUI::displayStreamIndex()
@@ -319,6 +350,18 @@ void RemoteSourceGUI::onMenuDialogCalled(const QPoint &p)
     resetContextMenuType();
 }
 
+void RemoteSourceGUI::on_interpolationFactor_currentIndexChanged(int index)
+{
+    m_settings.m_log2Interp = index;
+    applyInterpolation();
+}
+
+void RemoteSourceGUI::on_position_valueChanged(int value)
+{
+    m_settings.m_filterChainHash = value;
+    applyPosition();
+}
+
 void RemoteSourceGUI::on_dataAddress_returnPressed()
 {
     m_settings.m_dataAddress = ui->dataAddress->text();
@@ -362,6 +405,31 @@ void RemoteSourceGUI::on_eventCountsReset_clicked(bool checked)
     m_time.start();
     displayEventCounts();
     displayEventTimer();
+}
+
+void RemoteSourceGUI::applyInterpolation()
+{
+    uint32_t maxHash = 1;
+
+    for (uint32_t i = 0; i < m_settings.m_log2Interp; i++) {
+        maxHash *= 3;
+    }
+
+    ui->position->setMaximum(maxHash-1);
+    ui->position->setValue(m_settings.m_filterChainHash);
+    m_settings.m_filterChainHash = ui->position->value();
+    applyPosition();
+}
+
+void RemoteSourceGUI::applyPosition()
+{
+    ui->filterChainIndex->setText(tr("%1").arg(m_settings.m_filterChainHash));
+    QString s;
+    m_shiftFrequencyFactor = HBFilterChainConverter::convertToString(m_settings.m_log2Interp, m_settings.m_filterChainHash, s);
+    ui->filterChainText->setText(s);
+
+    displayRateAndShift();
+    applySettings();
 }
 
 void RemoteSourceGUI::displayEventCounts()

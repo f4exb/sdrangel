@@ -28,6 +28,8 @@
 #include "SWGRemoteSourceReport.h"
 
 #include "dsp/devicesamplesink.h"
+#include "dsp/hbfilterchainconverter.h"
+#include "dsp/dspcommands.h"
 #include "device/deviceapi.h"
 #include "feature/feature.h"
 #include "settings/serializable.h"
@@ -40,13 +42,17 @@
 MESSAGE_CLASS_DEFINITION(RemoteSource::MsgConfigureRemoteSource, Message)
 MESSAGE_CLASS_DEFINITION(RemoteSource::MsgQueryStreamData, Message)
 MESSAGE_CLASS_DEFINITION(RemoteSource::MsgReportStreamData, Message)
+MESSAGE_CLASS_DEFINITION(RemoteSource::MsgBasebandSampleRateNotification, Message)
 
 const char* const RemoteSource::m_channelIdURI = "sdrangel.channeltx.remotesource";
 const char* const RemoteSource::m_channelId ="RemoteSource";
 
 RemoteSource::RemoteSource(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
-    m_deviceAPI(deviceAPI)
+    m_deviceAPI(deviceAPI),
+    m_centerFrequency(0),
+    m_frequencyOffset(0),
+    m_basebandSampleRate(48000)
 {
     setObjectName(m_channelId);
 
@@ -96,7 +102,27 @@ void RemoteSource::pull(SampleVector::iterator& begin, unsigned int nbSamples)
 
 bool RemoteSource::handleMessage(const Message& cmd)
 {
-    if (MsgConfigureRemoteSource::match(cmd))
+    if (DSPSignalNotification::match(cmd))
+    {
+        DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+
+        qDebug() << "RemoteSource::handleMessage: DSPSignalNotification:"
+                << " inputSampleRate: " << notif.getSampleRate()
+                << " centerFrequency: " << notif.getCenterFrequency();
+
+        m_basebandSampleRate = notif.getSampleRate();
+        calculateFrequencyOffset(m_settings.m_log2Interp, m_settings.m_filterChainHash); // This is when device sample rate changes
+        m_centerFrequency = notif.getCenterFrequency();
+
+        if (m_guiMessageQueue)
+        {
+            MsgBasebandSampleRateNotification *msg = MsgBasebandSampleRateNotification::create(notif.getSampleRate());
+            m_guiMessageQueue->push(msg);
+        }
+
+        return true;
+    }
+    else if (MsgConfigureRemoteSource::match(cmd))
     {
         MsgConfigureRemoteSource& cfg = (MsgConfigureRemoteSource&) cmd;
         qDebug() << "MsgConfigureRemoteSource::handleMessage: MsgConfigureRemoteSource";
@@ -158,25 +184,37 @@ bool RemoteSource::deserialize(const QByteArray& data)
 void RemoteSource::applySettings(const RemoteSourceSettings& settings, bool force)
 {
     qDebug() << "RemoteSource::applySettings:"
-            << " m_dataAddress: " << settings.m_dataAddress
-            << " m_dataPort: " << settings.m_dataPort
-            << " m_rgbColor: " << settings.m_rgbColor
-            << " m_title: " << settings.m_title
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " force: " << force;
+            << "m_log2Interp:" << settings.m_log2Interp
+            << "m_filterChainHash:" << settings.m_filterChainHash
+            << "m_dataAddress:" << settings.m_dataAddress
+            << "m_dataPort:" << settings.m_dataPort
+            << "m_rgbColor:" << settings.m_rgbColor
+            << "m_title:" << settings.m_title
+            << "m_useReverseAPI:" << settings.m_useReverseAPI
+            << "m_reverseAPIAddress:" << settings.m_reverseAPIAddress
+            << "m_reverseAPIChannelIndex:" << settings.m_reverseAPIChannelIndex
+            << "m_reverseAPIDeviceIndex:" << settings.m_reverseAPIDeviceIndex
+            << "m_reverseAPIPort:" << settings.m_reverseAPIPort
+            << "force:" << force;
 
     QList<QString> reverseAPIKeys;
 
+    if ((m_settings.m_log2Interp != settings.m_log2Interp) || force) {
+        reverseAPIKeys.append("log2Interp");
+    }
+    if ((m_settings.m_filterChainHash != settings.m_filterChainHash) || force) {
+        reverseAPIKeys.append("filterChainHash");
+    }
     if ((m_settings.m_dataAddress != settings.m_dataAddress) || force) {
         reverseAPIKeys.append("dataAddress");
     }
-
     if ((m_settings.m_dataPort != settings.m_dataPort) || force) {
         reverseAPIKeys.append("dataPort");
+    }
+
+    if ((m_settings.m_log2Interp != settings.m_log2Interp)
+     || (m_settings.m_filterChainHash != settings.m_filterChainHash) || force) {
+        calculateFrequencyOffset(settings.m_log2Interp, settings.m_filterChainHash);
     }
 
     if (m_settings.m_streamIndex != settings.m_streamIndex)
@@ -212,6 +250,23 @@ void RemoteSource::applySettings(const RemoteSourceSettings& settings, bool forc
     }
 
     m_settings = settings;
+}
+
+void RemoteSource::validateFilterChainHash(RemoteSourceSettings& settings)
+{
+    unsigned int s = 1;
+
+    for (unsigned int i = 0; i < settings.m_log2Interp; i++) {
+        s *= 3;
+    }
+
+    settings.m_filterChainHash = settings.m_filterChainHash >= s ? s-1 : settings.m_filterChainHash;
+}
+
+void RemoteSource::calculateFrequencyOffset(uint32_t log2Interp, uint32_t filterChainHash)
+{
+    double shiftFactor = HBFilterChainConverter::getShiftFactor(log2Interp, filterChainHash);
+    m_frequencyOffset = m_basebandSampleRate * shiftFactor;
 }
 
 int RemoteSource::webapiSettingsGet(
@@ -274,6 +329,12 @@ void RemoteSource::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("title")) {
         settings.m_title = *response.getRemoteSourceSettings()->getTitle();
     }
+    if (channelSettingsKeys.contains("log2Interp")) {
+        settings.m_log2Interp = response.getRemoteSourceSettings()->getLog2Interp();
+    }
+    if (channelSettingsKeys.contains("filterChainHash")) {
+        settings.m_filterChainHash = response.getRemoteSourceSettings()->getFilterChainHash();
+    }
     if (channelSettingsKeys.contains("streamIndex")) {
         settings.m_streamIndex = response.getRemoteSourceSettings()->getStreamIndex();
     }
@@ -325,6 +386,8 @@ void RemoteSource::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& 
         response.getRemoteSourceSettings()->setTitle(new QString(settings.m_title));
     }
 
+    response.getRemoteSourceSettings()->setLog2Interp(settings.m_log2Interp);
+    response.getRemoteSourceSettings()->setFilterChainHash(settings.m_filterChainHash);
     response.getRemoteSourceSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
     if (response.getRemoteSourceSettings()->getReverseApiAddress()) {
@@ -367,8 +430,9 @@ void RemoteSource::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& resp
     response.getRemoteSourceReport()->setUncorrectableErrorsCount(m_basebandSource->getNbUncorrectableErrors());
     response.getRemoteSourceReport()->setNbOriginalBlocks(currentMeta.m_nbOriginalBlocks);
     response.getRemoteSourceReport()->setNbFecBlocks(currentMeta.m_nbFECBlocks);
-    response.getRemoteSourceReport()->setCenterFreq(currentMeta.m_centerFrequency);
-    response.getRemoteSourceReport()->setSampleRate(currentMeta.m_sampleRate);
+    response.getRemoteSourceReport()->setCenterFreq(m_frequencyOffset);
+    double channelSampleRate = ((double) m_basebandSampleRate) / (1<<m_settings.m_log2Interp);
+    response.getRemoteSourceReport()->setSampleRate(channelSampleRate);
     response.getRemoteSourceReport()->setDeviceCenterFreq(m_deviceAPI->getSampleSink()->getCenterFrequency());
     response.getRemoteSourceReport()->setDeviceSampleRate(m_deviceAPI->getSampleSink()->getSampleRate());
 }
@@ -444,6 +508,12 @@ void RemoteSource::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgRemoteSourceSettings->setRgbColor(settings.m_rgbColor);
+    }
+    if (channelSettingsKeys.contains("log2Interp") || force) {
+        swgRemoteSourceSettings->setLog2Interp(settings.m_log2Interp);
+    }
+    if (channelSettingsKeys.contains("filterChainHash") || force) {
+        swgRemoteSourceSettings->setFilterChainHash(settings.m_filterChainHash);
     }
     if (channelSettingsKeys.contains("title") || force) {
         swgRemoteSourceSettings->setTitle(new QString(settings.m_title));

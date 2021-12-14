@@ -57,7 +57,9 @@ private:
     ChannelMarker m_channelMarker;
     RemoteSourceSettings m_settings;
     int m_remoteSampleRate;
+    int m_basebandSampleRate;
     bool m_doApplySettings;
+    double m_shiftFrequencyFactor; //!< Channel frequency shift factor
 
     RemoteSource* m_remoteSrc;
     MessageQueue m_inputMessageQueue;
@@ -78,6 +80,8 @@ private:
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
     void displaySettings();
+    void displayRateAndShift();
+    void displayPosition();
     void displayStreamIndex();
     bool handleMessage(const Message& message);
 
@@ -88,8 +92,13 @@ private:
     void displayEventStatus(int recoverableCount, int unrecoverableCount);
     void displayEventTimer();
 
+    void applyInterpolation();
+    void applyPosition();
+
 private slots:
     void handleSourceMessages();
+    void on_interpolationFactor_currentIndexChanged(int index);
+    void on_position_valueChanged(int value);
     void on_dataAddress_returnPressed();
     void on_dataPort_returnPressed();
     void on_dataApplyButton_clicked(bool checked);

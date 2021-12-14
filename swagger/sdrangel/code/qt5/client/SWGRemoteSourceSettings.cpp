@@ -36,6 +36,10 @@ SWGRemoteSourceSettings::SWGRemoteSourceSettings() {
     m_rgb_color_isSet = false;
     title = nullptr;
     m_title_isSet = false;
+    log2_interp = 0;
+    m_log2_interp_isSet = false;
+    filter_chain_hash = 0;
+    m_filter_chain_hash_isSet = false;
     stream_index = 0;
     m_stream_index_isSet = false;
     use_reverse_api = 0;
@@ -66,6 +70,10 @@ SWGRemoteSourceSettings::init() {
     m_rgb_color_isSet = false;
     title = new QString("");
     m_title_isSet = false;
+    log2_interp = 0;
+    m_log2_interp_isSet = false;
+    filter_chain_hash = 0;
+    m_filter_chain_hash_isSet = false;
     stream_index = 0;
     m_stream_index_isSet = false;
     use_reverse_api = 0;
@@ -92,6 +100,8 @@ SWGRemoteSourceSettings::cleanup() {
     if(title != nullptr) { 
         delete title;
     }
+
+
 
 
     if(reverse_api_address != nullptr) { 
@@ -123,6 +133,10 @@ SWGRemoteSourceSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&log2_interp, pJson["log2Interp"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&filter_chain_hash, pJson["filterChainHash"], "qint32", "");
     
     ::SWGSDRangel::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
     
@@ -165,6 +179,12 @@ SWGRemoteSourceSettings::asJsonObject() {
     }
     if(title != nullptr && *title != QString("")){
         toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
+    if(m_log2_interp_isSet){
+        obj->insert("log2Interp", QJsonValue(log2_interp));
+    }
+    if(m_filter_chain_hash_isSet){
+        obj->insert("filterChainHash", QJsonValue(filter_chain_hash));
     }
     if(m_stream_index_isSet){
         obj->insert("streamIndex", QJsonValue(stream_index));
@@ -229,6 +249,26 @@ void
 SWGRemoteSourceSettings::setTitle(QString* title) {
     this->title = title;
     this->m_title_isSet = true;
+}
+
+qint32
+SWGRemoteSourceSettings::getLog2Interp() {
+    return log2_interp;
+}
+void
+SWGRemoteSourceSettings::setLog2Interp(qint32 log2_interp) {
+    this->log2_interp = log2_interp;
+    this->m_log2_interp_isSet = true;
+}
+
+qint32
+SWGRemoteSourceSettings::getFilterChainHash() {
+    return filter_chain_hash;
+}
+void
+SWGRemoteSourceSettings::setFilterChainHash(qint32 filter_chain_hash) {
+    this->filter_chain_hash = filter_chain_hash;
+    this->m_filter_chain_hash_isSet = true;
 }
 
 qint32
@@ -316,6 +356,12 @@ SWGRemoteSourceSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_log2_interp_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_filter_chain_hash_isSet){
             isObjectUpdated = true; break;
         }
         if(m_stream_index_isSet){

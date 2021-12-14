@@ -29,6 +29,8 @@ struct RemoteSourceSettings
     uint16_t m_dataPort;    //!< Listening data port
     quint32 m_rgbColor;
     QString m_title;
+    uint32_t m_log2Interp;
+    uint32_t m_filterChainHash;
     int m_streamIndex;
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;

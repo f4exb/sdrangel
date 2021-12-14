@@ -154,6 +154,27 @@ public:
         { }
     };
 
+
+    class MsgBasebandSampleRateNotification : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgBasebandSampleRateNotification* create(int sampleRate) {
+            return new MsgBasebandSampleRateNotification(sampleRate);
+        }
+
+        int getBasebandSampleRate() const { return m_sampleRate; }
+
+    private:
+
+        MsgBasebandSampleRateNotification(int sampleRate) :
+            Message(),
+            m_sampleRate(sampleRate)
+        { }
+
+        int m_sampleRate;
+    };
+
     RemoteSource(DeviceAPI *deviceAPI);
     virtual ~RemoteSource();
 
@@ -218,7 +239,13 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
+    uint64_t m_centerFrequency;
+    int64_t m_frequencyOffset;
+    uint32_t m_basebandSampleRate;
+
     void applySettings(const RemoteSourceSettings& settings, bool force = false);
+    static void validateFilterChainHash(RemoteSourceSettings& settings);
+    void calculateFrequencyOffset(uint32_t log2Interp, uint32_t filterChainHash);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const RemoteSourceSettings& settings, bool force);
     void sendChannelSettings(

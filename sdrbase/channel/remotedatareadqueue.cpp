@@ -91,12 +91,13 @@ void RemoteDataReadQueue::readSample(Sample& s, bool scaleForTx)
             m_sampleIndex = 0;
             convertDataToSample(s, m_blockIndex, m_sampleIndex, scaleForTx);
             m_sampleIndex++;
-            m_sampleCount++;
         }
         else
         {
             s = Sample{0, 0};
         }
+
+        m_sampleCount++;
 
         return;
     }
