@@ -76,12 +76,6 @@ LocalInputGui::LocalInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_startingTimeStampms = 0;
 	ui->setupUi(this);
 
-	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-	ui->centerFrequency->setValueRange(7, 0, 9999999U);
-
-	ui->centerFrequencyHz->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-	ui->centerFrequencyHz->setValueRange(3, 0, 999U);
-
     CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStop);
     connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
@@ -228,8 +222,7 @@ void LocalInputGui::updateSampleRateAndFrequency()
     m_deviceUISet->getSpectrum()->setCenterFrequency(m_streamCenterFrequency);
     ui->deviceRateText->setText(tr("%1k").arg((float)m_streamSampleRate / 1000));
     blockApplySettings(true);
-    ui->centerFrequency->setValue(m_streamCenterFrequency / 1000);
-    ui->centerFrequencyHz->setValue(m_streamCenterFrequency % 1000);
+    ui->centerFrequency->setText(tr("%L1").arg(m_streamCenterFrequency));
     blockApplySettings(false);
 }
 
@@ -237,8 +230,7 @@ void LocalInputGui::displaySettings()
 {
     blockApplySettings(true);
 
-    ui->centerFrequency->setValue(m_streamCenterFrequency / 1000);
-    ui->centerFrequencyHz->setValue(m_streamCenterFrequency % 1000);
+    ui->centerFrequency->setText(tr("%L1").arg(m_streamCenterFrequency));
     ui->deviceRateText->setText(tr("%1k").arg(m_streamSampleRate / 1000.0));
 
 	ui->dcOffset->setChecked(m_settings.m_dcBlock);

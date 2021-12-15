@@ -137,17 +137,16 @@
       </widget>
      </item>
      <item>
+      <widget class="QLabel" name="freqUnits">
+       <property name="text">
+        <string>Hz</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <layout class="QVBoxLayout" name="freqRightLayout">
        <item>
-        <layout class="QHBoxLayout" name="freqRightTopLayout">
-         <item>
-          <widget class="QLabel" name="freqUnits">
-           <property name="text">
-            <string>Hz</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <layout class="QHBoxLayout" name="freqRightTopLayout"/>
        </item>
        <item>
         <layout class="QHBoxLayout" name="freqRightBotLayout">

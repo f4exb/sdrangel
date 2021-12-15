@@ -56,8 +56,6 @@ FileInputGUI::FileInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_lastEngineState(DeviceAPI::StNotStarted)
 {
 	ui->setupUi(this);
-	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-	ui->centerFrequency->setValueRange(7, 0, pow(10,7));
 	ui->crcLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
 
 	connect(&(m_deviceUISet->m_deviceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
@@ -339,7 +337,7 @@ void FileInputGUI::updateWithAcquisition()
 
 void FileInputGUI::updateWithStreamData()
 {
-	ui->centerFrequency->setValue(m_centerFrequency/1000);
+	ui->centerFrequency->setText(tr("%L1").arg(m_centerFrequency));
 	ui->sampleRateText->setText(tr("%1k").arg((float)m_sampleRate / 1000));
 	ui->sampleSizeText->setText(tr("%1b").arg(m_sampleSize));
 	ui->play->setEnabled(m_acquisition);

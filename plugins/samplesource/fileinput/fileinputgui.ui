@@ -115,43 +115,34 @@
       </spacer>
      </item>
      <item>
-      <widget class="ValueDial" name="centerFrequency" native="true">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
+      <widget class="QLabel" name="centerFrequency">
        <property name="minimumSize">
         <size>
-         <width>32</width>
-         <height>16</height>
+         <width>170</width>
+         <height>0</height>
         </size>
        </property>
        <property name="font">
         <font>
-         <family>Liberation Mono</family>
-         <pointsize>20</pointsize>
+         <family>Liberation Sans</family>
+         <pointsize>16</pointsize>
+         <weight>50</weight>
+         <italic>false</italic>
+         <bold>false</bold>
         </font>
        </property>
-       <property name="cursor">
-        <cursorShape>PointingHandCursor</cursorShape>
+       <property name="text">
+        <string>10,000,000,000</string>
        </property>
-       <property name="focusPolicy">
-        <enum>Qt::StrongFocus</enum>
-       </property>
-       <property name="toolTip">
-        <string>Record center frequency in kHz</string>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QLabel" name="freqUnits">
        <property name="text">
-        <string> kHz</string>
+        <string>Hz</string>
        </property>
       </widget>
      </item>
@@ -242,7 +233,11 @@
        </property>
        <property name="font">
         <font>
+         <family>Liberation Sans</family>
          <pointsize>8</pointsize>
+         <weight>50</weight>
+         <italic>false</italic>
+         <bold>false</bold>
         </font>
        </property>
        <property name="toolTip">
@@ -273,7 +268,11 @@
        </property>
        <property name="font">
         <font>
+         <family>Liberation Sans</family>
          <pointsize>8</pointsize>
+         <weight>50</weight>
+         <italic>false</italic>
+         <bold>false</bold>
         </font>
        </property>
        <property name="toolTip">
@@ -298,7 +297,11 @@
       <widget class="QLabel" name="crcLabel">
        <property name="font">
         <font>
+         <family>Liberation Sans</family>
          <pointsize>8</pointsize>
+         <weight>50</weight>
+         <italic>false</italic>
+         <bold>false</bold>
         </font>
        </property>
        <property name="toolTip">
@@ -434,7 +437,11 @@
        </property>
        <property name="font">
         <font>
+         <family>Liberation Sans</family>
          <pointsize>8</pointsize>
+         <weight>50</weight>
+         <italic>false</italic>
+         <bold>false</bold>
         </font>
        </property>
        <property name="toolTip">
@@ -605,12 +612,6 @@
   </layout>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>ValueDial</class>
-   <extends>QWidget</extends>
-   <header>gui/valuedial.h</header>
-   <container>1</container>
-  </customwidget>
   <customwidget>
    <class>ButtonSwitch</class>
    <extends>QToolButton</extends>
