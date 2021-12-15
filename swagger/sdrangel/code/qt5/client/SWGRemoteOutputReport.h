@@ -47,11 +47,26 @@ public:
     qint32 getSampleRate();
     void setSampleRate(qint32 sample_rate);
 
-    float getBufferRwBalance();
-    void setBufferRwBalance(float buffer_rw_balance);
+    qint32 getQueueLength();
+    void setQueueLength(qint32 queue_length);
+
+    qint32 getQueueSize();
+    void setQueueSize(qint32 queue_size);
 
     qint32 getSampleCount();
     void setSampleCount(qint32 sample_count);
+
+    qint32 getCorrectableErrorsCount();
+    void setCorrectableErrorsCount(qint32 correctable_errors_count);
+
+    qint32 getUncorrectableErrorsCount();
+    void setUncorrectableErrorsCount(qint32 uncorrectable_errors_count);
+
+    qint32 getTvSec();
+    void setTvSec(qint32 tv_sec);
+
+    qint32 getTvUSec();
+    void setTvUSec(qint32 tv_u_sec);
 
 
     virtual bool isSet() override;
@@ -63,11 +78,26 @@ private:
     qint32 sample_rate;
     bool m_sample_rate_isSet;
 
-    float buffer_rw_balance;
-    bool m_buffer_rw_balance_isSet;
+    qint32 queue_length;
+    bool m_queue_length_isSet;
+
+    qint32 queue_size;
+    bool m_queue_size_isSet;
 
     qint32 sample_count;
     bool m_sample_count_isSet;
+
+    qint32 correctable_errors_count;
+    bool m_correctable_errors_count_isSet;
+
+    qint32 uncorrectable_errors_count;
+    bool m_uncorrectable_errors_count_isSet;
+
+    qint32 tv_sec;
+    bool m_tv_sec_isSet;
+
+    qint32 tv_u_sec;
+    bool m_tv_u_sec_isSet;
 
 };
 

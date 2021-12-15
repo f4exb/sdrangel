@@ -35,10 +35,24 @@ RemoteOutputReport:
       format: int64
     sampleRate:
       type: integer
-    bufferRWBalance:
-      description: ratio off the mid buffer (positive read leads)
-      type: number
-      format: float
+    queueLength:
+      description: "Data read/write queue length in number of data frames"
+      type: integer
+    queueSize:
+      description: "Data read/write queue size in number of data frames"
+      type: integer
     sampleCount:
       description: count of samples that have been sent
+      type: integer
+    correctableErrorsCount:
+      description: "Absolute number of correctable errors"
+      type: integer
+    uncorrectableErrorsCount:
+      description: "Absolute number of uncorrectable errors"
+      type: integer
+    tvSec:
+      description: "Counts timestamp seconds"
+      type: integer
+    tvUSec:
+      description: "Counts timestamp microseconds"
       type: integer

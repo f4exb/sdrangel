@@ -32,10 +32,20 @@ SWGRemoteOutputReport::SWGRemoteOutputReport() {
     m_center_frequency_isSet = false;
     sample_rate = 0;
     m_sample_rate_isSet = false;
-    buffer_rw_balance = 0.0f;
-    m_buffer_rw_balance_isSet = false;
+    queue_length = 0;
+    m_queue_length_isSet = false;
+    queue_size = 0;
+    m_queue_size_isSet = false;
     sample_count = 0;
     m_sample_count_isSet = false;
+    correctable_errors_count = 0;
+    m_correctable_errors_count_isSet = false;
+    uncorrectable_errors_count = 0;
+    m_uncorrectable_errors_count_isSet = false;
+    tv_sec = 0;
+    m_tv_sec_isSet = false;
+    tv_u_sec = 0;
+    m_tv_u_sec_isSet = false;
 }
 
 SWGRemoteOutputReport::~SWGRemoteOutputReport() {
@@ -48,14 +58,29 @@ SWGRemoteOutputReport::init() {
     m_center_frequency_isSet = false;
     sample_rate = 0;
     m_sample_rate_isSet = false;
-    buffer_rw_balance = 0.0f;
-    m_buffer_rw_balance_isSet = false;
+    queue_length = 0;
+    m_queue_length_isSet = false;
+    queue_size = 0;
+    m_queue_size_isSet = false;
     sample_count = 0;
     m_sample_count_isSet = false;
+    correctable_errors_count = 0;
+    m_correctable_errors_count_isSet = false;
+    uncorrectable_errors_count = 0;
+    m_uncorrectable_errors_count_isSet = false;
+    tv_sec = 0;
+    m_tv_sec_isSet = false;
+    tv_u_sec = 0;
+    m_tv_u_sec_isSet = false;
 }
 
 void
 SWGRemoteOutputReport::cleanup() {
+
+
+
+
+
 
 
 
@@ -77,9 +102,19 @@ SWGRemoteOutputReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&sample_rate, pJson["sampleRate"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&buffer_rw_balance, pJson["bufferRWBalance"], "float", "");
+    ::SWGSDRangel::setValue(&queue_length, pJson["queueLength"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&queue_size, pJson["queueSize"], "qint32", "");
     
     ::SWGSDRangel::setValue(&sample_count, pJson["sampleCount"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&correctable_errors_count, pJson["correctableErrorsCount"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&uncorrectable_errors_count, pJson["uncorrectableErrorsCount"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&tv_sec, pJson["tvSec"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&tv_u_sec, pJson["tvUSec"], "qint32", "");
     
 }
 
@@ -103,11 +138,26 @@ SWGRemoteOutputReport::asJsonObject() {
     if(m_sample_rate_isSet){
         obj->insert("sampleRate", QJsonValue(sample_rate));
     }
-    if(m_buffer_rw_balance_isSet){
-        obj->insert("bufferRWBalance", QJsonValue(buffer_rw_balance));
+    if(m_queue_length_isSet){
+        obj->insert("queueLength", QJsonValue(queue_length));
+    }
+    if(m_queue_size_isSet){
+        obj->insert("queueSize", QJsonValue(queue_size));
     }
     if(m_sample_count_isSet){
         obj->insert("sampleCount", QJsonValue(sample_count));
+    }
+    if(m_correctable_errors_count_isSet){
+        obj->insert("correctableErrorsCount", QJsonValue(correctable_errors_count));
+    }
+    if(m_uncorrectable_errors_count_isSet){
+        obj->insert("uncorrectableErrorsCount", QJsonValue(uncorrectable_errors_count));
+    }
+    if(m_tv_sec_isSet){
+        obj->insert("tvSec", QJsonValue(tv_sec));
+    }
+    if(m_tv_u_sec_isSet){
+        obj->insert("tvUSec", QJsonValue(tv_u_sec));
     }
 
     return obj;
@@ -133,14 +183,24 @@ SWGRemoteOutputReport::setSampleRate(qint32 sample_rate) {
     this->m_sample_rate_isSet = true;
 }
 
-float
-SWGRemoteOutputReport::getBufferRwBalance() {
-    return buffer_rw_balance;
+qint32
+SWGRemoteOutputReport::getQueueLength() {
+    return queue_length;
 }
 void
-SWGRemoteOutputReport::setBufferRwBalance(float buffer_rw_balance) {
-    this->buffer_rw_balance = buffer_rw_balance;
-    this->m_buffer_rw_balance_isSet = true;
+SWGRemoteOutputReport::setQueueLength(qint32 queue_length) {
+    this->queue_length = queue_length;
+    this->m_queue_length_isSet = true;
+}
+
+qint32
+SWGRemoteOutputReport::getQueueSize() {
+    return queue_size;
+}
+void
+SWGRemoteOutputReport::setQueueSize(qint32 queue_size) {
+    this->queue_size = queue_size;
+    this->m_queue_size_isSet = true;
 }
 
 qint32
@@ -151,6 +211,46 @@ void
 SWGRemoteOutputReport::setSampleCount(qint32 sample_count) {
     this->sample_count = sample_count;
     this->m_sample_count_isSet = true;
+}
+
+qint32
+SWGRemoteOutputReport::getCorrectableErrorsCount() {
+    return correctable_errors_count;
+}
+void
+SWGRemoteOutputReport::setCorrectableErrorsCount(qint32 correctable_errors_count) {
+    this->correctable_errors_count = correctable_errors_count;
+    this->m_correctable_errors_count_isSet = true;
+}
+
+qint32
+SWGRemoteOutputReport::getUncorrectableErrorsCount() {
+    return uncorrectable_errors_count;
+}
+void
+SWGRemoteOutputReport::setUncorrectableErrorsCount(qint32 uncorrectable_errors_count) {
+    this->uncorrectable_errors_count = uncorrectable_errors_count;
+    this->m_uncorrectable_errors_count_isSet = true;
+}
+
+qint32
+SWGRemoteOutputReport::getTvSec() {
+    return tv_sec;
+}
+void
+SWGRemoteOutputReport::setTvSec(qint32 tv_sec) {
+    this->tv_sec = tv_sec;
+    this->m_tv_sec_isSet = true;
+}
+
+qint32
+SWGRemoteOutputReport::getTvUSec() {
+    return tv_u_sec;
+}
+void
+SWGRemoteOutputReport::setTvUSec(qint32 tv_u_sec) {
+    this->tv_u_sec = tv_u_sec;
+    this->m_tv_u_sec_isSet = true;
 }
 
 
@@ -164,10 +264,25 @@ SWGRemoteOutputReport::isSet(){
         if(m_sample_rate_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_buffer_rw_balance_isSet){
+        if(m_queue_length_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_queue_size_isSet){
             isObjectUpdated = true; break;
         }
         if(m_sample_count_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_correctable_errors_count_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_uncorrectable_errors_count_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_tv_sec_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_tv_u_sec_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

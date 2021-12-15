@@ -29,6 +29,7 @@
 #include "SWGRemoteOutputReport.h"
 
 #include "util/simpleserializer.h"
+#include "util/timeutil.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 
@@ -41,7 +42,6 @@ MESSAGE_CLASS_DEFINITION(RemoteOutput::MsgConfigureRemoteOutput, Message)
 MESSAGE_CLASS_DEFINITION(RemoteOutput::MsgConfigureRemoteOutputWork, Message)
 MESSAGE_CLASS_DEFINITION(RemoteOutput::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(RemoteOutput::MsgConfigureRemoteOutputChunkCorrection, Message)
-MESSAGE_CLASS_DEFINITION(RemoteOutput::MsgConfigureRemoteOutputSampleRate, Message)
 MESSAGE_CLASS_DEFINITION(RemoteOutput::MsgReportRemoteData, Message)
 MESSAGE_CLASS_DEFINITION(RemoteOutput::MsgReportRemoteFixedData, Message)
 MESSAGE_CLASS_DEFINITION(RemoteOutput::MsgRequestFixedData, Message)
@@ -57,7 +57,11 @@ RemoteOutput::RemoteOutput(DeviceAPI *deviceAPI) :
 	m_masterTimer(deviceAPI->getMasterTimer()),
 	m_tickCount(0),
     m_greaterTickCount(0),
-    m_tickMultiplier(1)
+    m_tickMultiplier(1),
+    m_queueLength(0),
+    m_queueSize(0),
+    m_recoverableCount(0),
+    m_unrecoverableCount(0)
 {
     m_deviceAPI->setNbSinkStreams(1);
     m_networkManager = new QNetworkAccessManager();
@@ -466,10 +470,16 @@ void RemoteOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
 
 void RemoteOutput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
 {
+    uint64_t nowus = TimeUtil::nowus();
+    response.getRemoteOutputReport()->setTvSec(nowus / 1000000U);
+    response.getRemoteOutputReport()->setTvUSec(nowus % 1000000U);
     response.getRemoteOutputReport()->setCenterFrequency(m_centerFrequency);
     response.getRemoteOutputReport()->setSampleRate(m_sampleRate);
-    response.getRemoteOutputReport()->setBufferRwBalance(m_sampleSourceFifo.getRWBalance());
+    response.getRemoteOutputReport()->setQueueSize(m_queueSize);
+    response.getRemoteOutputReport()->setQueueLength(m_queueLength);
     response.getRemoteOutputReport()->setSampleCount(m_remoteOutputWorker ? (int) m_remoteOutputWorker->getSamplesCount() : 0);
+    response.getRemoteOutputReport()->setCorrectableErrorsCount(m_recoverableCount);
+    response.getRemoteOutputReport()->setUncorrectableErrorsCount(m_unrecoverableCount);
 }
 
 void RemoteOutput::tick()
@@ -552,20 +562,20 @@ void RemoteOutput::analyzeApiReply(const QJsonObject& jsonObject, const QString&
         msgRemoteData.m_centerFrequency = m_centerFrequency;
         msgRemoteData.m_sampleRate = m_sampleRate;
 
-        int queueSize = report["queueSize"].toInt();
-        queueSize = queueSize == 0 ? 20 : queueSize;
-        msgRemoteData.m_queueSize = queueSize;
-        int queueLength = report["queueLength"].toInt();
-        msgRemoteData.m_queueLength = queueLength;
+        m_queueSize = report["queueSize"].toInt();
+        m_queueSize = m_queueSize == 0 ? 20 : m_queueSize;
+        msgRemoteData.m_queueSize = m_queueSize;
+        m_queueLength = report["queueLength"].toInt();
+        msgRemoteData.m_queueLength = m_queueLength;
         uint64_t remoteTimestampUs = report["tvSec"].toInt()*1000000ULL + report["tvUSec"].toInt();
         msgRemoteData.m_timestampUs = remoteTimestampUs;
         int intRemoteSampleCount = report["samplesCount"].toInt();
         uint32_t remoteSampleCount = intRemoteSampleCount < 0 ? 0 : intRemoteSampleCount;
         msgRemoteData.m_sampleCount = remoteSampleCount;
-        int unrecoverableCount = report["uncorrectableErrorsCount"].toInt();
-        msgRemoteData.m_unrecoverableCount = unrecoverableCount;
-        int recoverableCount = report["correctableErrorsCount"].toInt();
-        msgRemoteData.m_recoverableCount = recoverableCount;
+        m_unrecoverableCount = report["uncorrectableErrorsCount"].toInt();
+        msgRemoteData.m_unrecoverableCount = m_unrecoverableCount;
+        m_recoverableCount = report["correctableErrorsCount"].toInt();
+        msgRemoteData.m_recoverableCount = m_recoverableCount;
 
         if (m_guiMessageQueue)
         {
@@ -579,7 +589,7 @@ void RemoteOutput::analyzeApiReply(const QJsonObject& jsonObject, const QString&
 
         if (++m_greaterTickCount == m_tickMultiplier)
         {
-            queueLengthCompensation(m_sampleRate, queueLength, queueSize);
+            queueLengthCompensation(m_sampleRate, m_queueLength, m_queueSize);
             m_greaterTickCount = 0;
         }
     }

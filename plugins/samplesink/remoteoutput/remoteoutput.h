@@ -123,25 +123,6 @@ public:
         { }
     };
 
-    class MsgConfigureRemoteOutputSampleRate : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        int getSampleRate() const { return m_sampleRate; }
-
-        static MsgConfigureRemoteOutputSampleRate* create(int sampleRate) {
-            return new MsgConfigureRemoteOutputSampleRate(sampleRate);
-        }
-
-    private:
-        int m_sampleRate;
-
-        MsgConfigureRemoteOutputSampleRate(int sampleRate) :
-            Message(),
-            m_sampleRate(sampleRate)
-        { }
-    };
-
     class MsgReportRemoteData : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -284,6 +265,10 @@ private:
 	uint32_t m_tickCount; // for 50 ms timer
     uint32_t m_greaterTickCount; // for 1 s derived timer
     uint32_t m_tickMultiplier; // for greater tick count
+    int m_queueLength;
+    int m_queueSize;
+    int m_recoverableCount;
+    int m_unrecoverableCount;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;

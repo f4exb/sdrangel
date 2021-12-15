@@ -187,7 +187,7 @@ public:
 
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
-    virtual qint64 getCenterFrequency() const { return 0; }
+    virtual qint64 getCenterFrequency() const { return m_frequencyOffset; }
 
     virtual int getNbSinkStreams() const { return 0; }
     virtual int getNbSourceStreams() const { return 1; }

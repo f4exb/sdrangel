@@ -9827,14 +9827,33 @@ margin-bottom: 20px;
     "sampleRate" : {
       "type" : "integer"
     },
-    "bufferRWBalance" : {
-      "type" : "number",
-      "format" : "float",
-      "description" : "ratio off the mid buffer (positive read leads)"
+    "queueLength" : {
+      "type" : "integer",
+      "description" : "Data read/write queue length in number of data frames"
+    },
+    "queueSize" : {
+      "type" : "integer",
+      "description" : "Data read/write queue size in number of data frames"
     },
     "sampleCount" : {
       "type" : "integer",
       "description" : "count of samples that have been sent"
+    },
+    "correctableErrorsCount" : {
+      "type" : "integer",
+      "description" : "Absolute number of correctable errors"
+    },
+    "uncorrectableErrorsCount" : {
+      "type" : "integer",
+      "description" : "Absolute number of uncorrectable errors"
+    },
+    "tvSec" : {
+      "type" : "integer",
+      "description" : "Counts timestamp seconds"
+    },
+    "tvUSec" : {
+      "type" : "integer",
+      "description" : "Counts timestamp microseconds"
     }
   },
   "description" : "RemoteOutput"
@@ -51603,7 +51622,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-12-12T22:32:39.234+01:00
+              Generated 2021-12-15T21:39:08.842+01:00
             </div>
           </div>
       </div>
