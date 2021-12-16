@@ -24,25 +24,55 @@ Local port from where the I/Q samples are fetched via UDP
 
 When the return key is hit within the address (1) or port (2) the changes are effective immediately. You can also use this button to set again these values.
 
-<h3>4: Stream sample rate</h3>
+<h3>4: Interpolation factor</h3>
 
-Stream sample rate as specified in the stream meta data. Interpolation may occur to match the baseband sample rate. This will be done around the baseband center frequency (no NCO shift). Decimation is not provisionned so unpredictable results may occur if the remote stream sample rate is larger than the baseband sample rate.
+The device baseband can be interpolated from the channel and its center can be selected with (5). The resulting sample rate of the I/Q stream pulled from the Remote Output device sink is the baseband sample rate divided by this value. The value is displayed in (5).
 
-To minimize processing an exact match of baseband sample rate and remote stream sample rate is recommended. If this is not possible then a power of two ratio is still preferable.
+<h3>5: I/Q stream sample rate</h3>
 
-<h3>5: Stream status</h3>
+This is the sample rate in kS/s of the I/Q stream pulled from the Remote Output device sink instance.
+
+<h3>6: Half-band filters chain sequence</h3>
+
+This string represents the sequence of half-band filters used in the interpolation. Each character represents a filter type:
+
+  - **L**: lower half-band
+  - **H**: higher half-band
+  - **C**: centered
+
+<h3>7: Center frequency shift</h3>
+
+This is the shift of the channel center frequency from the device center frequency. Its value is driven by the device sample rate, the interpolation (1) and the filter chain sequence (5).
+
+<h3>8: Half-band filter chain sequence</h3>
+
+The slider moves the channel center frequency roughly from the lower to the higher frequency in the device baseband.
+
+<h3>9: Half-band filter sequence</h3>
+
+The number on the right represents the filter sequence as the decimal value of a base 3 number. Each base 3 digit represents the filter type and its sequence from MSB to LSB in the filter chain:
+
+  - **0**: lower half-band
+  - **1**: centered
+  - **2**: higher half-band
+
+<h3>10: Meta data stream sample rate</h3>
+
+This is the sample rate set in the stream meta data
+
+<h3>11: Stream status</h3>
 
 ![Remote source channel plugin GUI](../../../doc/img/RemoteSource_5.png)
 
-<h4>5.1: Total number of frames and number of FEC blocks</h4>
+<h4>11.1: Total number of frames and number of FEC blocks</h4>
 
-This is the total number of frames and number of FEC blocks separated by a slash '/' as sent in the meta data block thus acknowledged by the distant server. When you set the number of FEC blocks with (4.1) the effect may not be immediate and this information can be used to monitor when it gets effectively set in the distant server.
+This is the total number of frames and number of FEC blocks separated by a slash '/' as sent in the meta data block thus acknowledged by the distant server. When you set the number of FEC blocks in the remote the effect may not be immediate and this information can be used to monitor when it gets effectively set in the distant server.
 
 A frame consists of 128 data blocks (1 meta data block followed by 127 I/Q data blocks) and a variable number of FEC blocks used to protect the UDP transmission with a Cauchy MDS block erasure correction.
 
 Using the Cauchy MDS block erasure correction ensures that if at least the number of data blocks (128) is received per complete frame then all lost blocks in any position can be restored. For example if 8 FEC blocks are used then 136 blocks are transmitted per frame. If only 130 blocks (128 or greater) are received then data can be recovered. If only 127 blocks (or less) are received then none of the lost blocks can be recovered.
 
-<h4>5.2: Stream status</h4>
+<h4>11.2: Stream status</h4>
 
 The color of the icon indicates stream status:
 
@@ -50,30 +80,30 @@ The color of the icon indicates stream status:
   - No color: some original blocks were reconstructed from FEC blocks for some frames during the last polling timeframe (ex: between 128 and 135)
   - Red: some original blocks were definitely lost for some frames during the last polling timeframe (ex: less than 128)
 
-<h4>5.3: Actual stream sample rate</h4>
+<h4>11.3: Actual stream sample rate</h4>
 
 This is the sample rate calculated using the counter of samples between two consecutive polls
 
-<h4>5.4: Reset events counters</h4>
+<h4>11.4: Reset events counters</h4>
 
-This push button can be used to reset the events counters (5.5 and 5.6) and reset the event counts timer (5.7)
+This push button can be used to reset the events counters (11.5 and 5.6) and reset the event counts timer (11.7)
 
-<h4>5.5: Unrecoverable error events counter</h4>
+<h4>11.5: Unrecoverable error events counter</h4>
 
-This counter counts the unrecoverable error conditions found (i.e. 4.4 lower than 128) since the last counters reset.
+This counter counts the unrecoverable error conditions found (i.e. lower than 128) since the last counters reset.
 
-<h4>5.6: Recoverable error events counter</h4>
+<h4>11.6: Recoverable error events counter</h4>
 
-This counter counts the unrecoverable error conditions found (i.e. 4.4 between 128 and 128 plus the number of FEC blocks) since the last counters reset.
+This counter counts the unrecoverable error conditions found (i.e. between 128 and 128 plus the number of FEC blocks) since the last counters reset.
 
-<h4>5.7: events counters timer</h4>
+<h4>11.7: events counters timer</h4>
 
-This HH:mm:ss time display shows the time since the reset events counters button (5.4) was pushed.
+This HH:mm:ss time display shows the time since the reset events counters button (11.4) was pushed.
 
-<h3>6: Transmitter queue length gauge</h3>
+<h3>12: Transmitter queue length gauge</h3>
 
 This is ratio of the reported number of data frame blocks in the remote queue over the total number of blocks in the queue.
 
-<h3>7: Transmitter queue length status</h3>
+<h3>13: Transmitter queue length status</h3>
 
 This is the detail of the ratio shown in the gauge. Each frame block is a block of 127 &#x2715; 126 samples (16 bit I or Q samples) or 127 &#x2715; 63 samples (24 bit I or Q samples).
