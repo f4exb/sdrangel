@@ -31,7 +31,7 @@
 const PluginDescriptor SigMFFileInputPlugin::m_pluginDescriptor = {
     QStringLiteral("SigMFFileInput"),
 	QStringLiteral("File device input (SigMF)"),
-    QStringLiteral("6.0.0"),
+    QStringLiteral("6.17.5"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,

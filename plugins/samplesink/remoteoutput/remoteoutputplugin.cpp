@@ -31,7 +31,7 @@
 const PluginDescriptor RemoteOutputPlugin::m_pluginDescriptor = {
     QStringLiteral("RemoteOutput"),
 	QStringLiteral("Remote device output"),
-	QStringLiteral("4.19.0"),
+	QStringLiteral("6.17.5"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,

@@ -31,7 +31,7 @@
 const PluginDescriptor LocalInputPlugin::m_pluginDescriptor = {
     QStringLiteral("LocalInput"),
 	QStringLiteral("Local device input"),
-	QStringLiteral("4.19.0"),
+	QStringLiteral("4.17.5"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,

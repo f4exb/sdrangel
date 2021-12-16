@@ -1,3 +1,25 @@
+sdrangel (6.17.5-1) unstable; urgency=medium
+
+  * ADSB demod and VOR feature: Always use C locale for parsing coords in airport database.
+    Fix #1062. PR #1065
+  * Implement serialize and deserialize to/from API in Serializable interface. Pre #1050
+  * SDRplay v1: fixed frequency boundaries in report. Fixes #1061
+  * Ubuntu build: added qm-module dependencies in the Depend section. Fixes #1063
+  * Map feature: Add IBP beacons and GRAVES. Display locator not location. PR #1071
+  * Implemented Channel Marker settings in API. Pre #1050
+  * RemoteInput: set system UDP buffer length for 250 ms of samples.
+    RemoteSink: removed UDP Tx delay. Implements #1069
+  * Increase FIFO size in Remote Sink according to baseband sample rate. Issue #1069. PR #1075
+  * GUI flavor: save and restore the device item index for the initial set up (R0). Fixes #1066
+  * MainWindow: use pop_back() to remove last element of vector. Fixes #1070
+  * Remote source and output: changes and fixes implementing #868
+  * Rotator controller - Don't round az/el received from Sat Tracker. PR #1076
+  * Display warnings in ADS-B and DAB if sample rate is too low. PR #1082
+  * Display OpenGL version in status bar. Displayed in red if less than version 3. PR #1083
+  * Replaced frequency dials by labels for unmodifiable frequency displays
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 16 Dec 2021 07:46:31 +0100
+
 sdrangel (6.17.4-1) unstable; urgency=medium
 
   * Basic instance save and restore wihth scripts dump.py and config,py

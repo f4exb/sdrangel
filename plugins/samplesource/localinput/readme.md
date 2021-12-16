@@ -17,7 +17,7 @@ Device start / stop button.
 
 <h3>3: Frequency</h3>
 
-This is the center frequency in Hz sent from the Local Sink channel instance and corresponds to the center frequency of reception. The sub kHz value (000 to 999 Hz) is represented in smaller digits on the right.
+This is the center frequency in Hz sent from the Local Sink channel instance and corresponds to the center frequency of reception.
 
 <h3>4: Stream sample rate</h3>
 
