@@ -77,7 +77,7 @@ void RemoteDataReadQueue::setSize(uint32_t size)
     }
 }
 
-void RemoteDataReadQueue::readSample(Sample& s, bool scaleForTx)
+void RemoteDataReadQueue::readSample(Sample& s)
 {
     // depletion/repletion state
     if (m_dataFrame == nullptr)
@@ -89,7 +89,7 @@ void RemoteDataReadQueue::readSample(Sample& s, bool scaleForTx)
             qDebug("RemoteDataReadQueue::readSample: initial pop new frame: queue size: %u", length());
             m_blockIndex = 1;
             m_sampleIndex = 0;
-            convertDataToSample(s, m_blockIndex, m_sampleIndex, scaleForTx);
+            convertDataToSample(s, m_blockIndex, m_sampleIndex);
             m_sampleIndex++;
         }
         else
@@ -107,7 +107,7 @@ void RemoteDataReadQueue::readSample(Sample& s, bool scaleForTx)
 
     if (m_sampleIndex < samplesPerBlock)
     {
-        convertDataToSample(s, m_blockIndex, m_sampleIndex, scaleForTx);
+        convertDataToSample(s, m_blockIndex, m_sampleIndex);
         m_sampleIndex++;
         m_sampleCount++;
     }
@@ -118,7 +118,7 @@ void RemoteDataReadQueue::readSample(Sample& s, bool scaleForTx)
 
         if (m_blockIndex < RemoteNbOrginalBlocks)
         {
-            convertDataToSample(s, m_blockIndex, m_sampleIndex, scaleForTx);
+            convertDataToSample(s, m_blockIndex, m_sampleIndex);
             m_sampleIndex++;
             m_sampleCount++;
         }
@@ -133,7 +133,7 @@ void RemoteDataReadQueue::readSample(Sample& s, bool scaleForTx)
             {
                 m_blockIndex = 1;
                 m_sampleIndex = 0;
-                convertDataToSample(s, m_blockIndex, m_sampleIndex, scaleForTx);
+                convertDataToSample(s, m_blockIndex, m_sampleIndex);
                 m_sampleIndex++;
                 m_sampleCount++;
             }

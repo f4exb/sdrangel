@@ -39,7 +39,7 @@ public:
     ~RemoteDataReadQueue();
 
     void push(RemoteDataFrame* dataFrame); //!< push frame on the queue
-    void readSample(Sample& s, bool scaleForTx = false); //!< Read sample from queue possibly scaling to Tx size
+    void readSample(Sample& s); //!< Read sample from queue
     uint32_t length() const { return m_dataReadQueue.size(); } //!< Returns queue length
     uint32_t size() const { return m_maxSize; } //!< Returns queue size (max length)
     void setSize(uint32_t size);              //!< Sets the queue size (max length)
@@ -57,37 +57,42 @@ private:
 
     RemoteDataFrame* pop();                //!< Pop frame from the queue
 
-    inline void convertDataToSample(Sample& s, uint32_t blockIndex, uint32_t sampleIndex, bool scaleForTx)
+    inline void convertDataToSample(Sample& s, uint32_t blockIndex, uint32_t sampleIndex)
     {
         int sampleSize = m_dataFrame->m_superBlocks[blockIndex].m_header.m_sampleBytes * 2; // I/Q sample size in data block
-        int samplebits = m_dataFrame->m_superBlocks[blockIndex].m_header.m_sampleBits;      // I or Q sample size in bits
         int32_t iconv, qconv;
 
-        if ((sizeof(Sample) == 4) && (sampleSize == 8)) // generally 24->16 bits
-        {
-            iconv = ((int32_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize]))[0];
-            qconv = ((int32_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize+4]))[0];
-            iconv >>= scaleForTx ? (SDR_TX_SAMP_SZ-SDR_RX_SAMP_SZ) : (samplebits-SDR_RX_SAMP_SZ);
-            qconv >>= scaleForTx ? (SDR_TX_SAMP_SZ-SDR_RX_SAMP_SZ) : (samplebits-SDR_RX_SAMP_SZ);
-            s.setReal(iconv);
-            s.setImag(qconv);
-        }
-        else if ((sizeof(Sample) == 8) && (sampleSize == 4)) // generally 16->24 bits
-        {
-            iconv = ((int16_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize]))[0];
-            qconv = ((int16_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize+2]))[0];
-            iconv <<= scaleForTx ? (SDR_TX_SAMP_SZ-samplebits) : (SDR_RX_SAMP_SZ-samplebits);
-            qconv <<= scaleForTx ? (SDR_TX_SAMP_SZ-samplebits) : (SDR_RX_SAMP_SZ-samplebits);
-            s.setReal(iconv);
-            s.setImag(qconv);
-        }
-        else if ((sampleSize == 4) || (sampleSize == 8)) // generally 16->16 or 24->24 bits
+        if (sizeof(Sample) == sampleSize) // no conversion
         {
             s = *((Sample*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize]));
         }
-        else // invalid size
+        else
         {
-            s = Sample{0, 0};
+            if (sampleSize == 2) // 8 -> 16 or 24 bits
+            {
+                iconv = ((int32_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize]))[0] << sizeof(Sample)*2;
+                qconv = ((int32_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize+sampleSize]))[0] << sizeof(Sample)*2;
+                s.setReal(iconv);
+                s.setImag(qconv);
+            }
+            else if (sampleSize == 4) // 16 -> 24 bits
+            {
+                iconv = ((int16_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize]))[0] << 8;
+                qconv = ((int16_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize+2]))[0] << 8;
+                s.setReal(iconv);
+                s.setImag(qconv);
+            }
+            else if (sampleSize == 8) // 24 -> 16 bits
+            {
+                iconv = ((int32_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize]))[0] >> 8;
+                qconv = ((int32_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize+4]))[0] >> 8;
+                s.setReal(iconv);
+                s.setImag(qconv);
+            }
+            else // invalid
+            {
+                s = Sample{0, 0};
+            }
         }
     }
 };
