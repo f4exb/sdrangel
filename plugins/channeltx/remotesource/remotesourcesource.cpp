@@ -111,7 +111,7 @@ void RemoteSourceSource::handleDataFrame(RemoteDataFrame* dataFrame)
 {
     if (dataFrame->m_rxControlBlock.m_blockCount < RemoteNbOrginalBlocks)
     {
-        qWarning("RemoteSourceSource::handleDataFrame: incomplete data frame: not processing");
+        qWarning("RemoteSourceSource::handleDataFrame: incomplete data frame (%d): not processing", dataFrame->m_rxControlBlock.m_blockCount);
     }
     else
     {

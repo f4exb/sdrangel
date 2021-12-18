@@ -453,8 +453,8 @@ bool RemoteInputUDPHandler::handleMessage(const Message& cmd)
 
 int RemoteInputUDPHandler::getDataSocketBufferSize()
 {
-    // set a floor value at 24 kS/s
-    uint32_t samplerate = m_samplerate < 24000 ? 24000 : m_samplerate;
+    // set a floor value at 96 kS/s
+    uint32_t samplerate = m_samplerate < 96000 ? 96000 : m_samplerate;
     // 250 ms (1/4s) at current sample rate
     int bufferSize = (samplerate * 2 * (SDR_RX_SAMP_SZ == 16 ? 2 : 4)) / 4;
     qDebug("RemoteInputUDPHandler::getDataSocketBufferSize: %d bytes", bufferSize);

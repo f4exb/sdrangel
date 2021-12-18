@@ -194,8 +194,8 @@ void RemoteSourceWorker::processData()
 
 int RemoteSourceWorker::getDataSocketBufferSize(uint32_t inSampleRate)
 {
-    // set a floor value at 24 kS/s
-    uint32_t samplerate = inSampleRate < 24000 ? 24000 : inSampleRate;
+    // set a floor value at 96 kS/s
+    uint32_t samplerate = inSampleRate < 96000 ? 96000 : inSampleRate;
     // 250 ms (1/4s) at current sample rate
     int bufferSize = (samplerate * 2 * (SDR_RX_SAMP_SZ == 16 ? 2 : 4)) / 4;
     qDebug("RemoteSourceWorker::getDataSocketBufferSize: %d bytes", bufferSize);
