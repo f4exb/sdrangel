@@ -31,6 +31,8 @@ UDPSinkFEC::UDPSinkFEC() :
     m_sampleRate(48000),
     m_nbSamples(0),
     m_nbBlocksFEC(0),
+    //m_nbTxBytes(SDR_RX_SAMP_SZ <= 16 ? 2 : 4),
+    m_nbTxBytes(2),
     m_txDelayRatio(0.0),
     m_dataFrame(nullptr),
     m_txBlockIndex(0),
@@ -108,8 +110,8 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
 
             metaData.m_centerFrequency = 0; // frequency not set by stream
             metaData.m_sampleRate = m_sampleRate;
-            metaData.m_sampleBytes = (SDR_RX_SAMP_SZ <= 16 ? 2 : 4);
-            metaData.m_sampleBits = SDR_RX_SAMP_SZ;
+            metaData.m_sampleBytes = m_nbTxBytes;;
+            metaData.m_sampleBits = getNbSampleBits();
             metaData.m_nbOriginalBlocks = RemoteNbOrginalBlocks;
             metaData.m_nbFECBlocks = m_nbBlocksFEC;
             metaData.m_tv_sec = nowus / 1000000UL;  // tv.tv_sec;
@@ -126,8 +128,8 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
             superBlock.init();
             superBlock.m_header.m_frameIndex = m_frameCount;
             superBlock.m_header.m_blockIndex = m_txBlockIndex;
-            superBlock.m_header.m_sampleBytes = (SDR_RX_SAMP_SZ <= 16 ? 2 : 4);
-            superBlock.m_header.m_sampleBits = SDR_RX_SAMP_SZ;
+            superBlock.m_header.m_sampleBytes = m_nbTxBytes;
+            superBlock.m_header.m_sampleBits = getNbSampleBits();
 
             RemoteMetaDataFEC *destMeta = (RemoteMetaDataFEC *) &superBlock.m_protectedBlock;
             *destMeta = metaData;
@@ -151,27 +153,29 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
         } // block zero
 
         // handle different sample sizes...
-        int samplesPerBlock = RemoteNbBytesPerBlock / (SDR_RX_SAMP_SZ <= 16 ? 4 : 8); // two I or Q samples
+        int samplesPerBlock = RemoteNbBytesPerBlock / (m_nbTxBytes * 2); // two I or Q samples
         if (m_sampleIndex + inRemainingSamples < samplesPerBlock) // there is still room in the current super block
         {
-            memcpy((void *) &m_superBlock.m_protectedBlock.buf[m_sampleIndex*sizeof(Sample)],
-                    (const void *) &(*(begin+inSamplesIndex)),
-                    inRemainingSamples * sizeof(Sample));
+            convertSampleToData(begin + inSamplesIndex, inRemainingSamples);
+            // memcpy((void *) &m_superBlock.m_protectedBlock.buf[m_sampleIndex*sizeof(Sample)],
+            //         (const void *) &(*(begin+inSamplesIndex)),
+            //         inRemainingSamples * sizeof(Sample));
             m_sampleIndex += inRemainingSamples;
             it = end; // all input samples are consumed
         }
         else // complete super block and initiate the next if not end of frame
         {
-            memcpy((void *) &m_superBlock.m_protectedBlock.buf[m_sampleIndex*sizeof(Sample)],
-                    (const void *) &(*(begin+inSamplesIndex)),
-                    (samplesPerBlock - m_sampleIndex) * sizeof(Sample));
+            convertSampleToData(begin + inSamplesIndex, samplesPerBlock - m_sampleIndex);
+            // memcpy((void *) &m_superBlock.m_protectedBlock.buf[m_sampleIndex*sizeof(Sample)],
+            //         (const void *) &(*(begin+inSamplesIndex)),
+            //         (samplesPerBlock - m_sampleIndex) * sizeof(Sample));
             it += samplesPerBlock - m_sampleIndex;
             m_sampleIndex = 0;
 
             m_superBlock.m_header.m_frameIndex = m_frameCount;
             m_superBlock.m_header.m_blockIndex = m_txBlockIndex;
-            m_superBlock.m_header.m_sampleBytes = (SDR_RX_SAMP_SZ <= 16 ? 2 : 4);
-            m_superBlock.m_header.m_sampleBits = SDR_RX_SAMP_SZ;
+            m_superBlock.m_header.m_sampleBytes = m_nbTxBytes;
+            m_superBlock.m_header.m_sampleBits = getNbSampleBits();
             m_dataFrame->m_superBlocks[m_txBlockIndex] = m_superBlock;
 
             if (m_txBlockIndex == RemoteNbOrginalBlocks - 1) // frame complete
@@ -196,3 +200,15 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
     }
 }
 
+uint32_t UDPSinkFEC::getNbSampleBits()
+{
+    if (m_nbTxBytes == 1) {
+        return 8;
+    } else if (m_nbTxBytes == 2) {
+        return 16;
+    } else if (m_nbTxBytes == 4) {
+        return 24;
+    } else {
+        return 16;
+    }
+}

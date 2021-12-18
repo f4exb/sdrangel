@@ -85,6 +85,7 @@ private:
     CRC64        m_crc64;
     RemoteMetaDataFEC m_currentMetaFEC;  //!< Meta data for current frame
     uint32_t m_nbBlocksFEC;                 //!< Variable number of FEC blocks
+    uint32_t m_nbTxBytes;
     float m_txDelayRatio;                   //!< Delay in ratio of nominal frame period
     RemoteDataFrame *m_dataFrame;
     RemoteSuperBlock m_superBlock;       //!< current super block being built
@@ -97,6 +98,45 @@ private:
     QThread *m_senderThread;
     QString m_remoteAddress;
     uint16_t m_remotePort;
+
+    uint32_t getNbSampleBits();
+
+    inline void convertSampleToData(const SampleVector::iterator& begin, int nbSamples)
+    {
+        if (sizeof(Sample) == m_nbTxBytes * 2) // 16 -> 16 or 24 ->24: direct copy
+        {
+            memcpy((void *) &m_superBlock.m_protectedBlock.buf[m_sampleIndex*m_nbTxBytes*2],
+                    (const void *) &(*(begin)),
+                    nbSamples * sizeof(Sample));
+        }
+        else
+        {
+            if (m_nbTxBytes == 4) // 16 -> 24
+            {
+                for (int i = 0; i < nbSamples; i++)
+                {
+                    m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2] = (begin+i)->m_real << 8;
+                    m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2 + m_nbTxBytes] = (begin+i)->m_imag << 8;
+                }
+            }
+            else if (m_nbTxBytes == 2) // 24 -> 16
+            {
+                for (int i = 0; i < nbSamples; i++)
+                {
+                    m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2] = (begin+i)->m_real >> 8;
+                    m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2 + m_nbTxBytes] = (begin+i)->m_imag >> 8;
+                }
+            }
+            else if (m_nbTxBytes == 1) // 16 or 24 -> 8
+            {
+                for (int i = 0; i < nbSamples; i++)
+                {
+                    m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2] = (begin+i)->m_real >> sizeof(Sample)*2;
+                    m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2 + m_nbTxBytes] = (begin+i)->m_imag >> sizeof(Sample)*2;
+                }
+            }
+        }
+    }
 };
 
 #endif /* PLUGINS_SAMPLESINK_REMOTEOUTPUT_UDPSINKFEC_H_ */
