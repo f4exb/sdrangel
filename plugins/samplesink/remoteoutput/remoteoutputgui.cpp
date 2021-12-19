@@ -212,6 +212,7 @@ void RemoteOutputSinkGui::displaySettings()
     blockApplySettings(true);
     ui->centerFrequency->setText(QString("%L1").arg(m_deviceCenterFrequency));
     ui->nbFECBlocks->setValue(m_settings.m_nbFECBlocks);
+    ui->nbTxBytes->setCurrentIndex(log2(m_settings.m_nbTxBytes));
 
     QString s0 = QString::number(128 + m_settings.m_nbFECBlocks, 'f', 0);
     QString s1 = QString::number(m_settings.m_nbFECBlocks, 'f', 0);
@@ -307,6 +308,12 @@ void RemoteOutputSinkGui::on_channelIndex_returnPressed()
         m_settings.m_channelIndex = channelIndex;
     }
 
+    sendSettings();
+}
+
+void RemoteOutputSinkGui::on_nbTxBytes_currentIndexChanged(int index)
+{
+    m_settings.m_nbTxBytes = 1 << index;
     sendSettings();
 }
 

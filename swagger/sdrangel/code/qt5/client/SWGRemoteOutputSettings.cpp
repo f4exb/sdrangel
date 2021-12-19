@@ -30,6 +30,8 @@ SWGRemoteOutputSettings::SWGRemoteOutputSettings(QString* json) {
 SWGRemoteOutputSettings::SWGRemoteOutputSettings() {
     nb_fec_blocks = 0;
     m_nb_fec_blocks_isSet = false;
+    nb_tx_bytes = 0;
+    m_nb_tx_bytes_isSet = false;
     api_address = nullptr;
     m_api_address_isSet = false;
     api_port = 0;
@@ -60,6 +62,8 @@ void
 SWGRemoteOutputSettings::init() {
     nb_fec_blocks = 0;
     m_nb_fec_blocks_isSet = false;
+    nb_tx_bytes = 0;
+    m_nb_tx_bytes_isSet = false;
     api_address = new QString("");
     m_api_address_isSet = false;
     api_port = 0;
@@ -84,6 +88,7 @@ SWGRemoteOutputSettings::init() {
 
 void
 SWGRemoteOutputSettings::cleanup() {
+
 
     if(api_address != nullptr) { 
         delete api_address;
@@ -115,6 +120,8 @@ SWGRemoteOutputSettings::fromJson(QString &json) {
 void
 SWGRemoteOutputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&nb_fec_blocks, pJson["nbFECBlocks"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&nb_tx_bytes, pJson["nbTxBytes"], "qint32", "");
     
     ::SWGSDRangel::setValue(&api_address, pJson["apiAddress"], "QString", "QString");
     
@@ -154,6 +161,9 @@ SWGRemoteOutputSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(m_nb_fec_blocks_isSet){
         obj->insert("nbFECBlocks", QJsonValue(nb_fec_blocks));
+    }
+    if(m_nb_tx_bytes_isSet){
+        obj->insert("nbTxBytes", QJsonValue(nb_tx_bytes));
     }
     if(api_address != nullptr && *api_address != QString("")){
         toJsonValue(QString("apiAddress"), api_address, obj, QString("QString"));
@@ -197,6 +207,16 @@ void
 SWGRemoteOutputSettings::setNbFecBlocks(qint32 nb_fec_blocks) {
     this->nb_fec_blocks = nb_fec_blocks;
     this->m_nb_fec_blocks_isSet = true;
+}
+
+qint32
+SWGRemoteOutputSettings::getNbTxBytes() {
+    return nb_tx_bytes;
+}
+void
+SWGRemoteOutputSettings::setNbTxBytes(qint32 nb_tx_bytes) {
+    this->nb_tx_bytes = nb_tx_bytes;
+    this->m_nb_tx_bytes_isSet = true;
 }
 
 QString*
@@ -305,6 +325,9 @@ SWGRemoteOutputSettings::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_nb_fec_blocks_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_nb_tx_bytes_isSet){
             isObjectUpdated = true; break;
         }
         if(api_address && *api_address != QString("")){

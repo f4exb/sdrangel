@@ -39,7 +39,7 @@ public:
     ~RemoteDataReadQueue();
 
     void push(RemoteDataFrame* dataFrame); //!< push frame on the queue
-    void readSample(Sample& s); //!< Read sample from queue
+    void readSample(Sample& s, bool isTx); //!< Read sample from queue
     uint32_t length() const { return m_dataReadQueue.size(); } //!< Returns queue length
     uint32_t size() const { return m_maxSize; } //!< Returns queue size (max length)
     void setSize(uint32_t size);              //!< Sets the queue size (max length)
@@ -57,7 +57,7 @@ private:
 
     RemoteDataFrame* pop();                //!< Pop frame from the queue
 
-    inline void convertDataToSample(Sample& s, uint32_t blockIndex, uint32_t sampleIndex)
+    inline void convertDataToSample(Sample& s, uint32_t blockIndex, uint32_t sampleIndex, bool isTx)
     {
         int sampleSize = m_dataFrame->m_superBlocks[blockIndex].m_header.m_sampleBytes * 2; // I/Q sample size in data block
         int32_t iconv, qconv;
@@ -66,12 +66,44 @@ private:
         {
             s = *((Sample*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize]));
         }
+        else if (isTx)
+        {
+            if (sampleSize == 2) // 8 -> 16 bits
+            {
+                int8_t iu = m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize];
+                int8_t qu = m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize+1];
+                iconv = iu * (1 << 8);
+                qconv = qu * (1 << 8);
+                s.setReal(iconv);
+                s.setImag(qconv);
+            }
+            else if (sampleSize == 4) // just convert types (always 16 bits wide)
+            {
+                iconv = ((int16_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize]))[0];
+                qconv = ((int16_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize+2]))[0];
+                s.setReal(iconv);
+                s.setImag(qconv);
+            }
+            else if (sampleSize == 8) // just convert types (always 16 bits wide)
+            {
+                iconv = ((int32_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize]))[0];
+                qconv = ((int32_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize+4]))[0];
+                s.setReal(iconv);
+                s.setImag(qconv);
+            }
+            else // invalid
+            {
+                s = Sample{0, 0};
+            }
+        }
         else
         {
             if (sampleSize == 2) // 8 -> 16 or 24 bits
             {
-                iconv = ((int32_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize]))[0] << sizeof(Sample)*2;
-                qconv = ((int32_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize+sampleSize]))[0] << sizeof(Sample)*2;
+                int8_t iu = m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize];
+                int8_t qu = m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize+1];
+                iconv = iu * (1 << sizeof(Sample)*2);
+                qconv = qu * (1 << sizeof(Sample)*2);
                 s.setReal(iconv);
                 s.setImag(qconv);
             }

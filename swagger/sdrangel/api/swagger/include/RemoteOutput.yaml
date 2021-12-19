@@ -3,6 +3,8 @@ RemoteOutputSettings:
   properties:
     nbFECBlocks:
       type: integer
+    nbTxBytes:
+      type: integer
     apiAddress:
       type: string
     apiPort:

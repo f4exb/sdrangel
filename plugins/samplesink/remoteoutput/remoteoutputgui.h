@@ -129,6 +129,7 @@ private slots:
     void on_nbFECBlocks_valueChanged(int value);
     void on_deviceIndex_returnPressed();
     void on_channelIndex_returnPressed();
+    void on_nbTxBytes_currentIndexChanged(int index);
     void on_apiAddress_returnPressed();
     void on_apiPort_returnPressed();
     void on_dataAddress_returnPressed();

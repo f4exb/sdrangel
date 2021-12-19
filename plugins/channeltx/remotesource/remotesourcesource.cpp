@@ -53,7 +53,7 @@ void RemoteSourceSource::pull(SampleVector::iterator begin, unsigned int nbSampl
 
 void RemoteSourceSource::pullOne(Sample& sample)
 {
-    m_dataReadQueue.readSample(sample);
+    m_dataReadQueue.readSample(sample, true);
 }
 
 void RemoteSourceSource::start()

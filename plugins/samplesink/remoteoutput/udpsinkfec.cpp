@@ -31,7 +31,6 @@ UDPSinkFEC::UDPSinkFEC() :
     m_sampleRate(48000),
     m_nbSamples(0),
     m_nbBlocksFEC(0),
-    //m_nbTxBytes(SDR_RX_SAMP_SZ <= 16 ? 2 : 4),
     m_nbTxBytes(2),
     m_txDelayRatio(0.0),
     m_dataFrame(nullptr),
@@ -56,6 +55,15 @@ UDPSinkFEC::~UDPSinkFEC()
 {
     delete m_remoteOutputSender;
     delete m_senderThread;
+}
+
+void UDPSinkFEC::init()
+{
+    m_dataFrame = nullptr;
+    m_txBlockIndex = 0;
+    m_txBlocksIndex = 0;
+    m_frameCount = 0;
+    m_sampleIndex = 0;
 }
 
 void UDPSinkFEC::startSender()
@@ -92,7 +100,7 @@ void UDPSinkFEC::setRemoteAddress(const QString& address, uint16_t port)
     m_remoteOutputSender->setDestination(m_remoteAddress, m_remotePort);
 }
 
-void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunkSize)
+void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunkSize, bool isTx)
 {
     const SampleVector::iterator end = begin + sampleChunkSize;
 
@@ -156,19 +164,13 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
         int samplesPerBlock = RemoteNbBytesPerBlock / (m_nbTxBytes * 2); // two I or Q samples
         if (m_sampleIndex + inRemainingSamples < samplesPerBlock) // there is still room in the current super block
         {
-            convertSampleToData(begin + inSamplesIndex, inRemainingSamples);
-            // memcpy((void *) &m_superBlock.m_protectedBlock.buf[m_sampleIndex*sizeof(Sample)],
-            //         (const void *) &(*(begin+inSamplesIndex)),
-            //         inRemainingSamples * sizeof(Sample));
+            convertSampleToData(begin + inSamplesIndex, inRemainingSamples, isTx);
             m_sampleIndex += inRemainingSamples;
             it = end; // all input samples are consumed
         }
         else // complete super block and initiate the next if not end of frame
         {
-            convertSampleToData(begin + inSamplesIndex, samplesPerBlock - m_sampleIndex);
-            // memcpy((void *) &m_superBlock.m_protectedBlock.buf[m_sampleIndex*sizeof(Sample)],
-            //         (const void *) &(*(begin+inSamplesIndex)),
-            //         (samplesPerBlock - m_sampleIndex) * sizeof(Sample));
+            convertSampleToData(begin + inSamplesIndex, samplesPerBlock - m_sampleIndex, isTx);
             it += samplesPerBlock - m_sampleIndex;
             m_sampleIndex = 0;
 

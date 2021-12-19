@@ -23,6 +23,7 @@
 
 struct RemoteOutputSettings {
     quint32 m_nbFECBlocks;
+    quint32 m_nbTxBytes;
     QString m_apiAddress;
     quint16 m_apiPort;
     QString m_dataAddress;

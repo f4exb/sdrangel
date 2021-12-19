@@ -279,7 +279,7 @@ void RemoteOutput::applySettings(const RemoteOutputSettings& settings, bool forc
 
     if (force || (m_settings.m_dataAddress != settings.m_dataAddress) || (m_settings.m_dataPort != settings.m_dataPort))
     {
-        if (m_remoteOutputWorker != 0) {
+        if (m_remoteOutputWorker) {
             m_remoteOutputWorker->setDataAddress(settings.m_dataAddress, settings.m_dataPort);
         }
     }
@@ -288,8 +288,20 @@ void RemoteOutput::applySettings(const RemoteOutputSettings& settings, bool forc
     {
         reverseAPIKeys.append("nbFECBlocks");
 
-        if (m_remoteOutputWorker != 0) {
+        if (m_remoteOutputWorker) {
             m_remoteOutputWorker->setNbBlocksFEC(settings.m_nbFECBlocks);
+        }
+    }
+
+    if (force || (m_settings.m_nbTxBytes != settings.m_nbTxBytes))
+    {
+        reverseAPIKeys.append("nbTxBytes");
+
+        if (m_remoteOutputWorker)
+        {
+            stopWorker();
+            m_remoteOutputWorker->setNbTxBytes(settings.m_nbTxBytes);
+            startWorker();
         }
     }
 
@@ -297,6 +309,7 @@ void RemoteOutput::applySettings(const RemoteOutputSettings& settings, bool forc
 
     qDebug() << "RemoteOutput::applySettings:"
             << " m_nbFECBlocks: " << settings.m_nbFECBlocks
+            << " m_nbTxBytes: " << settings.m_nbTxBytes
             << " m_apiAddress: " << settings.m_apiAddress
             << " m_apiPort: " << settings.m_apiPort
             << " m_dataAddress: " << settings.m_dataAddress
@@ -404,6 +417,9 @@ void RemoteOutput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("nbFECBlocks")) {
         settings.m_nbFECBlocks = response.getRemoteOutputSettings()->getNbFecBlocks();
     }
+    if (deviceSettingsKeys.contains("nbTxBytes")) {
+        settings.m_nbTxBytes = response.getRemoteOutputSettings()->getNbTxBytes();
+    }
     if (deviceSettingsKeys.contains("apiAddress")) {
         settings.m_apiAddress = *response.getRemoteOutputSettings()->getApiAddress();
     }
@@ -450,6 +466,7 @@ int RemoteOutput::webapiReportGet(
 void RemoteOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const RemoteOutputSettings& settings)
 {
     response.getRemoteOutputSettings()->setNbFecBlocks(settings.m_nbFECBlocks);
+    response.getRemoteOutputSettings()->setNbTxBytes(settings.m_nbTxBytes);
     response.getRemoteOutputSettings()->setApiAddress(new QString(settings.m_apiAddress));
     response.getRemoteOutputSettings()->setApiPort(settings.m_apiPort);
     response.getRemoteOutputSettings()->setDataAddress(new QString(settings.m_dataAddress));
@@ -656,6 +673,9 @@ void RemoteOutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys,
 
     if (deviceSettingsKeys.contains("nbFECBlocks") || force) {
         swgRemoteOutputSettings->setNbFecBlocks(settings.m_nbFECBlocks);
+    }
+    if (deviceSettingsKeys.contains("nbTxBytes") || force) {
+        swgRemoteOutputSettings->setNbTxBytes(settings.m_nbTxBytes);
     }
     if (deviceSettingsKeys.contains("apiAddress") || force) {
         swgRemoteOutputSettings->setApiAddress(new QString(settings.m_apiAddress));

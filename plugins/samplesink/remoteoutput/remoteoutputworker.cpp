@@ -48,6 +48,7 @@ RemoteOutputWorker::~RemoteOutputWorker()
 void RemoteOutputWorker::startWork()
 {
 	qDebug() << "RemoteOutputWorker::startWork: ";
+    m_udpSinkFEC.init();
 	m_udpSinkFEC.startSender();
     m_maxThrottlems = 0;
     m_running = true;
@@ -126,14 +127,14 @@ void RemoteOutputWorker::tick()
         {
             SampleVector::iterator beginRead = data.begin() + iPart1Begin;
             unsigned int partSize = iPart1End - iPart1Begin;
-            m_udpSinkFEC.write(beginRead, partSize);
+            m_udpSinkFEC.write(beginRead, partSize, true);
         }
 
         if (iPart2Begin != iPart2End)
         {
             SampleVector::iterator beginRead = data.begin() + iPart2Begin;
             unsigned int partSize = iPart2End - iPart2Begin;
-            m_udpSinkFEC.write(beginRead, partSize);
+            m_udpSinkFEC.write(beginRead, partSize, true);
         }
 	}
 }

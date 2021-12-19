@@ -47,13 +47,14 @@ public:
     /** Destroy UDP sink */
     ~UDPSinkFEC();
 
+    void init();
     void startSender();
     void stopSender();
 
     /**
      * Write IQ samples
      */
-    void write(const SampleVector::iterator& begin, uint32_t sampleChunkSize);
+    void write(const SampleVector::iterator& begin, uint32_t sampleChunkSize, bool isTx);
 
     /** Return the last error, or return an empty string if there is no error. */
     std::string error()
@@ -67,6 +68,7 @@ public:
     void setSampleRate(uint32_t sampleRate);
 
     void setNbBlocksFEC(uint32_t nbBlocksFEC);
+    void setNbTxBytes(uint32_t nbTxBytes) { m_nbTxBytes = nbTxBytes; }
     void setRemoteAddress(const QString& address, uint16_t port);
 
     /** Return true if the stream is OK, return false if there is an error. */
@@ -101,7 +103,7 @@ private:
 
     uint32_t getNbSampleBits();
 
-    inline void convertSampleToData(const SampleVector::iterator& begin, int nbSamples)
+    inline void convertSampleToData(const SampleVector::iterator& begin, int nbSamples, bool isTx)
     {
         if (sizeof(Sample) == m_nbTxBytes * 2) // 16 -> 16 or 24 ->24: direct copy
         {
@@ -109,30 +111,59 @@ private:
                     (const void *) &(*(begin)),
                     nbSamples * sizeof(Sample));
         }
+        else if (isTx)
+        {
+            if (m_nbTxBytes == 4) // just convert type int16_t -> int32_t (always 16 bit wide)
+            {
+                for (int i = 0; i < nbSamples; i++)
+                {
+                    *((int32_t*) &m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2]) = (begin+i)->m_real;
+                    *((int32_t*) &m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2 + m_nbTxBytes]) = (begin+i)->m_imag;
+                }
+            }
+            else if (m_nbTxBytes == 2) //just convert type int32_t -> int16_t (always 16 bit wide)
+            {
+                for (int i = 0; i < nbSamples; i++)
+                {
+                    *((int16_t*) &m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2]) = (begin+i)->m_real;
+                    *((int16_t*) &m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2 + m_nbTxBytes]) = (begin+i)->m_imag;
+                }
+            }
+            else if (m_nbTxBytes == 1) // 16 -> 8
+            {
+                for (int i = 0; i < nbSamples; i++)
+                {
+                    m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2] = (uint8_t) ((begin+i)->m_real / 256);
+                    m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2 + m_nbTxBytes] = (uint8_t) ((begin+i)->m_imag / 256);
+                }
+            }
+        }
         else
         {
             if (m_nbTxBytes == 4) // 16 -> 24
             {
                 for (int i = 0; i < nbSamples; i++)
                 {
-                    m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2] = (begin+i)->m_real << 8;
-                    m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2 + m_nbTxBytes] = (begin+i)->m_imag << 8;
+                    *((int32_t*) &m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2]) = (begin+i)->m_real << 8;
+                    *((int32_t*) &m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2 + m_nbTxBytes]) = (begin+i)->m_imag << 8;
                 }
             }
             else if (m_nbTxBytes == 2) // 24 -> 16
             {
                 for (int i = 0; i < nbSamples; i++)
                 {
-                    m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2] = (begin+i)->m_real >> 8;
-                    m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2 + m_nbTxBytes] = (begin+i)->m_imag >> 8;
+                    *((int16_t*) &m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2]) = (begin+i)->m_real >> 8;
+                    *((int16_t*) &m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2 + m_nbTxBytes]) = (begin+i)->m_imag >> 8;
                 }
             }
             else if (m_nbTxBytes == 1) // 16 or 24 -> 8
             {
                 for (int i = 0; i < nbSamples; i++)
                 {
-                    m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2] = (begin+i)->m_real >> sizeof(Sample)*2;
-                    m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2 + m_nbTxBytes] = (begin+i)->m_imag >> sizeof(Sample)*2;
+                    m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2] =
+                        (uint8_t) (((begin+i)->m_real / (1<<sizeof(Sample)*2)) & 0xFF);
+                    m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2 + m_nbTxBytes] =
+                        (uint8_t) (((begin+i)->m_imag / (1<<sizeof(Sample)*2)) & 0xFF);
                 }
             }
         }

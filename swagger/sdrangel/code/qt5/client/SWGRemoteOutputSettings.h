@@ -45,6 +45,9 @@ public:
     qint32 getNbFecBlocks();
     void setNbFecBlocks(qint32 nb_fec_blocks);
 
+    qint32 getNbTxBytes();
+    void setNbTxBytes(qint32 nb_tx_bytes);
+
     QString* getApiAddress();
     void setApiAddress(QString* api_address);
 
@@ -81,6 +84,9 @@ public:
 private:
     qint32 nb_fec_blocks;
     bool m_nb_fec_blocks_isSet;
+
+    qint32 nb_tx_bytes;
+    bool m_nb_tx_bytes_isSet;
 
     QString* api_address;
     bool m_api_address_isSet;
