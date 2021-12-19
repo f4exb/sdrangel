@@ -5,6 +5,11 @@ RemoteOutputSettings:
       type: integer
     nbTxBytes:
       type: integer
+      description: >
+        Number of bytes in a transmited I or Q sample
+          * 1
+          * 2
+          * 4
     apiAddress:
       type: string
     apiPort:

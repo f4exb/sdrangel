@@ -168,6 +168,7 @@ void RemoteSinkGUI::displaySettings()
     QString s = QString::number(128 + m_settings.m_nbFECBlocks, 'f', 0);
     QString s1 = QString::number(m_settings.m_nbFECBlocks, 'f', 0);
     ui->nominalNbBlocksText->setText(tr("%1/%2").arg(s).arg(s1));
+    ui->nbTxBytes->setCurrentIndex(log2(m_settings.m_nbTxBytes));
     applyDecimation();
     displayStreamIndex();
     restoreState(m_settings.m_rollupState);
@@ -330,6 +331,12 @@ void RemoteSinkGUI::on_nbFECBlocks_valueChanged(int value)
     QString s = QString::number(nbOriginalBlocks + nbFECBlocks, 'f', 0);
     QString s1 = QString::number(nbFECBlocks, 'f', 0);
     ui->nominalNbBlocksText->setText(tr("%1/%2").arg(s).arg(s1));
+    applySettings();
+}
+
+void RemoteSinkGUI::on_nbTxBytes_currentIndexChanged(int index)
+{
+    m_settings.m_nbTxBytes = 1 << index;
     applySettings();
 }
 

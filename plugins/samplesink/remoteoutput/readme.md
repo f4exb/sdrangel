@@ -45,6 +45,10 @@ This is the device set index in the remote instance to which the stream is conne
 
 This is the channel index of the Remote source in the remote instance to which the stream is connected to. Use this value to properly address the API to get status.
 
+<h3>6a: transmission sample size</h3>
+
+This is the size in bytes of a transmitted I or Q sample. The choice is between 1, 2 and 4 bytes. Conversion takes place if the size is different from the built-in sample size.
+
 <h3>7: Forward Error Correction setting and status</h3>
 
 ![SDR Remote output FEC GUI](../../../doc/img/RemoteOutput_plugin_06.png)

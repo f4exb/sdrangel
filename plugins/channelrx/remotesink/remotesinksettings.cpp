@@ -37,6 +37,7 @@ RemoteSinkSettings::RemoteSinkSettings()
 void RemoteSinkSettings::resetToDefaults()
 {
     m_nbFECBlocks = 0;
+    m_nbTxBytes = 2;
     m_dataAddress = "127.0.0.1";
     m_dataPort = 9090;
     m_rgbColor = QColor(140, 4, 4).rgb();
@@ -56,6 +57,7 @@ QByteArray RemoteSinkSettings::serialize() const
 {
     SimpleSerializer s(1);
     s.writeU32(1, m_nbFECBlocks);
+    s.writeU32(2, m_nbTxBytes);
     s.writeString(3, m_dataAddress);
     s.writeU32(4, m_dataPort);
     s.writeU32(5, m_rgbColor);
@@ -96,6 +98,7 @@ bool RemoteSinkSettings::deserialize(const QByteArray& data)
             m_nbFECBlocks = 0;
         }
 
+        d.readU32(2, &m_nbTxBytes, 2);
         d.readString(3, &m_dataAddress, "127.0.0.1");
         d.readU32(4, &tmp, 0);
 

@@ -9864,7 +9864,8 @@ margin-bottom: 20px;
       "type" : "integer"
     },
     "nbTxBytes" : {
-      "type" : "integer"
+      "type" : "integer",
+      "description" : "Number of bytes in a transmited I or Q sample\n  * 1\n  * 2\n  * 4\n"
     },
     "apiAddress" : {
       "type" : "string"
@@ -9905,6 +9906,10 @@ margin-bottom: 20px;
     "nbFECBlocks" : {
       "type" : "integer",
       "description" : "Number of FEC blocks per frame"
+    },
+    "nbTxBytes" : {
+      "type" : "integer",
+      "description" : "Number of bytes in a transmited I or Q sample\n  * 1\n  * 2\n  * 4\n"
     },
     "dataAddress" : {
       "type" : "string",
@@ -51625,7 +51630,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-12-18T22:54:13.645+01:00
+              Generated 2021-12-19T12:04:51.409+01:00
             </div>
           </div>
       </div>

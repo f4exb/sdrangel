@@ -209,6 +209,14 @@ void RemoteSink::applySettings(const RemoteSinkSettings& settings, bool force)
         frequencyOffsetChange = true;
     }
 
+    if ((m_settings.m_nbTxBytes != settings.m_nbTxBytes) || force)
+    {
+        reverseAPIKeys.append("nbTxBytes");
+        stop();
+        m_basebandSink->setNbTxBytes(settings.m_nbTxBytes);
+        start();
+    }
+
     if (m_settings.m_streamIndex != settings.m_streamIndex)
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
@@ -318,6 +326,10 @@ void RemoteSink::webapiUpdateChannelSettings(
         }
     }
 
+    if (channelSettingsKeys.contains("nbTxBytes")) {
+        settings.m_nbTxBytes = response.getRemoteSinkSettings()->getNbTxBytes();
+    }
+
     if (channelSettingsKeys.contains("dataAddress")) {
         settings.m_dataAddress = *response.getRemoteSinkSettings()->getDataAddress();
     }
@@ -383,6 +395,7 @@ void RemoteSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& re
         response.getRemoteSinkSettings()->setDataAddress(new QString(settings.m_dataAddress));
     }
 
+    response.getRemoteSinkSettings()->setNbTxBytes(settings.m_nbTxBytes);
     response.getRemoteSinkSettings()->setDataPort(settings.m_dataPort);
     response.getRemoteSinkSettings()->setRgbColor(settings.m_rgbColor);
 
@@ -487,6 +500,9 @@ void RemoteSink::webapiFormatChannelSettings(
 
     if (channelSettingsKeys.contains("nbFECBlocks") || force) {
         swgRemoteSinkSettings->setNbFecBlocks(settings.m_nbFECBlocks);
+    }
+    if (channelSettingsKeys.contains("nbTxBytes") || force) {
+        swgRemoteSinkSettings->setNbTxBytes(settings.m_nbTxBytes);
     }
     if (channelSettingsKeys.contains("dataAddress") || force) {
         swgRemoteSinkSettings->setDataAddress(new QString(settings.m_dataAddress));

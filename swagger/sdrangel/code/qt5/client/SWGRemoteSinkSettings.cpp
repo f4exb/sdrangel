@@ -30,6 +30,8 @@ SWGRemoteSinkSettings::SWGRemoteSinkSettings(QString* json) {
 SWGRemoteSinkSettings::SWGRemoteSinkSettings() {
     nb_fec_blocks = 0;
     m_nb_fec_blocks_isSet = false;
+    nb_tx_bytes = 0;
+    m_nb_tx_bytes_isSet = false;
     data_address = nullptr;
     m_data_address_isSet = false;
     data_port = 0;
@@ -66,6 +68,8 @@ void
 SWGRemoteSinkSettings::init() {
     nb_fec_blocks = 0;
     m_nb_fec_blocks_isSet = false;
+    nb_tx_bytes = 0;
+    m_nb_tx_bytes_isSet = false;
     data_address = new QString("");
     m_data_address_isSet = false;
     data_port = 0;
@@ -96,6 +100,7 @@ SWGRemoteSinkSettings::init() {
 
 void
 SWGRemoteSinkSettings::cleanup() {
+
 
     if(data_address != nullptr) { 
         delete data_address;
@@ -132,6 +137,8 @@ SWGRemoteSinkSettings::fromJson(QString &json) {
 void
 SWGRemoteSinkSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&nb_fec_blocks, pJson["nbFECBlocks"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&nb_tx_bytes, pJson["nbTxBytes"], "qint32", "");
     
     ::SWGSDRangel::setValue(&data_address, pJson["dataAddress"], "QString", "QString");
     
@@ -177,6 +184,9 @@ SWGRemoteSinkSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(m_nb_fec_blocks_isSet){
         obj->insert("nbFECBlocks", QJsonValue(nb_fec_blocks));
+    }
+    if(m_nb_tx_bytes_isSet){
+        obj->insert("nbTxBytes", QJsonValue(nb_tx_bytes));
     }
     if(data_address != nullptr && *data_address != QString("")){
         toJsonValue(QString("dataAddress"), data_address, obj, QString("QString"));
@@ -229,6 +239,16 @@ void
 SWGRemoteSinkSettings::setNbFecBlocks(qint32 nb_fec_blocks) {
     this->nb_fec_blocks = nb_fec_blocks;
     this->m_nb_fec_blocks_isSet = true;
+}
+
+qint32
+SWGRemoteSinkSettings::getNbTxBytes() {
+    return nb_tx_bytes;
+}
+void
+SWGRemoteSinkSettings::setNbTxBytes(qint32 nb_tx_bytes) {
+    this->nb_tx_bytes = nb_tx_bytes;
+    this->m_nb_tx_bytes_isSet = true;
 }
 
 QString*
@@ -367,6 +387,9 @@ SWGRemoteSinkSettings::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_nb_fec_blocks_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_nb_tx_bytes_isSet){
             isObjectUpdated = true; break;
         }
         if(data_address && *data_address != QString("")){

@@ -4,6 +4,13 @@ RemoteSinkSettings:
     nbFECBlocks:
       description: "Number of FEC blocks per frame"
       type: integer
+    nbTxBytes:
+      type: integer
+      description: >
+        Number of bytes in a transmited I or Q sample
+          * 1
+          * 2
+          * 4
     dataAddress:
       description: "Receiving USB data address"
       type: string

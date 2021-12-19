@@ -92,7 +92,6 @@ private:
     RemoteDataFrame *m_dataFrame;
     RemoteSuperBlock m_superBlock;       //!< current super block being built
     int m_txBlockIndex;                     //!< Current index in blocks to transmit in the Tx row
-    int m_txBlocksIndex;                    //!< Current index of Tx blocks row
     uint16_t m_frameCount;                  //!< transmission frame count
     int m_sampleIndex;                      //!< Current sample index in protected block data
 

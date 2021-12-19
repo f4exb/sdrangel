@@ -40,7 +40,9 @@ public:
 
     void startSender();
     void stopSender();
+    void init();
 
+    void setNbTxBytes(uint32_t nbTxBytes) { m_nbTxBytes = nbTxBytes; }
     void applySettings(const RemoteSinkSettings& settings, bool force = false);
     void applyBasebandSampleRate(uint32_t sampleRate);
     void setDeviceCenterFrequency(uint64_t frequency) { m_deviceCenterFrequency = frequency; }
@@ -61,10 +63,78 @@ private:
     int64_t m_frequencyOffset;
     uint32_t m_basebandSampleRate;
     int m_nbBlocksFEC;
+    uint32_t m_nbTxBytes;
     QString m_dataAddress;
     uint16_t m_dataPort;
 
     void setNbBlocksFEC(int nbBlocksFEC);
+    uint32_t getNbSampleBits();
+
+    inline void convertSampleToData(const SampleVector::const_iterator& begin, int nbSamples, bool isTx)
+    {
+        if (sizeof(Sample) == m_nbTxBytes * 2) // 16 -> 16 or 24 ->24: direct copy
+        {
+            memcpy((void *) &m_superBlock.m_protectedBlock.buf[m_sampleIndex*m_nbTxBytes*2],
+                    (const void *) &(*(begin)),
+                    nbSamples * sizeof(Sample));
+        }
+        else if (isTx)
+        {
+            if (m_nbTxBytes == 4) // just convert type int16_t -> int32_t (always 16 bit wide)
+            {
+                for (int i = 0; i < nbSamples; i++)
+                {
+                    *((int32_t*) &m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2]) = (begin+i)->m_real;
+                    *((int32_t*) &m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2 + m_nbTxBytes]) = (begin+i)->m_imag;
+                }
+            }
+            else if (m_nbTxBytes == 2) //just convert type int32_t -> int16_t (always 16 bit wide)
+            {
+                for (int i = 0; i < nbSamples; i++)
+                {
+                    *((int16_t*) &m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2]) = (begin+i)->m_real;
+                    *((int16_t*) &m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2 + m_nbTxBytes]) = (begin+i)->m_imag;
+                }
+            }
+            else if (m_nbTxBytes == 1) // 16 -> 8
+            {
+                for (int i = 0; i < nbSamples; i++)
+                {
+                    m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2] = (uint8_t) ((begin+i)->m_real / 256);
+                    m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2 + m_nbTxBytes] = (uint8_t) ((begin+i)->m_imag / 256);
+                }
+            }
+        }
+        else
+        {
+            if (m_nbTxBytes == 4) // 16 -> 24
+            {
+                for (int i = 0; i < nbSamples; i++)
+                {
+                    *((int32_t*) &m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2]) = (begin+i)->m_real << 8;
+                    *((int32_t*) &m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2 + m_nbTxBytes]) = (begin+i)->m_imag << 8;
+                }
+            }
+            else if (m_nbTxBytes == 2) // 24 -> 16
+            {
+                for (int i = 0; i < nbSamples; i++)
+                {
+                    *((int16_t*) &m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2]) = (begin+i)->m_real >> 8;
+                    *((int16_t*) &m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2 + m_nbTxBytes]) = (begin+i)->m_imag >> 8;
+                }
+            }
+            else if (m_nbTxBytes == 1) // 16 or 24 -> 8
+            {
+                for (int i = 0; i < nbSamples; i++)
+                {
+                    m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2] =
+                        (uint8_t) (((begin+i)->m_real / (1<<sizeof(Sample)*2)) & 0xFF);
+                    m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2 + m_nbTxBytes] =
+                        (uint8_t) (((begin+i)->m_imag / (1<<sizeof(Sample)*2)) & 0xFF);
+                }
+            }
+        }
+    }
 };
 
 #endif // INCLUDE_REMOTESINKSINK_H_

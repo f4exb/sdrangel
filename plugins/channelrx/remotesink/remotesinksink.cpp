@@ -36,6 +36,7 @@ RemoteSinkSink::RemoteSinkSink() :
         m_frequencyOffset(0),
         m_basebandSampleRate(48000),
         m_nbBlocksFEC(0),
+        m_nbTxBytes(SDR_RX_SAMP_SZ <= 16 ? 2 : 4),
         m_dataAddress("127.0.0.1"),
         m_dataPort(9090)
 {
@@ -68,6 +69,14 @@ void RemoteSinkSink::stopSender()
 	m_senderThread->wait();
 }
 
+void RemoteSinkSink::init()
+{
+    m_dataFrame = nullptr;
+    m_txBlockIndex = 0;
+    m_frameCount = 0;
+    m_sampleIndex = 0;
+}
+
 void RemoteSinkSink::setNbBlocksFEC(int nbBlocksFEC)
 {
     qDebug() << "RemoteSinkSink::setNbBlocksFEC: nbBlocksFEC: " << nbBlocksFEC;
@@ -92,8 +101,8 @@ void RemoteSinkSink::feed(const SampleVector::const_iterator& begin, const Sampl
 
             metaData.m_centerFrequency = m_deviceCenterFrequency + m_frequencyOffset;
             metaData.m_sampleRate = m_basebandSampleRate / (1<<m_settings.m_log2Decim);
-            metaData.m_sampleBytes = (SDR_RX_SAMP_SZ <= 16 ? 2 : 4);
-            metaData.m_sampleBits = SDR_RX_SAMP_SZ;
+            metaData.m_sampleBytes = m_nbTxBytes;
+            metaData.m_sampleBits = getNbSampleBits();
             metaData.m_nbOriginalBlocks = RemoteNbOrginalBlocks;
             metaData.m_nbFECBlocks = m_nbBlocksFEC;
             metaData.m_tv_sec = nowus / 1000000UL;  // tv.tv_sec;
@@ -110,8 +119,8 @@ void RemoteSinkSink::feed(const SampleVector::const_iterator& begin, const Sampl
             superBlock.init();
             superBlock.m_header.m_frameIndex = m_frameCount;
             superBlock.m_header.m_blockIndex = m_txBlockIndex;
-            superBlock.m_header.m_sampleBytes = (SDR_RX_SAMP_SZ <= 16 ? 2 : 4);
-            superBlock.m_header.m_sampleBits = SDR_RX_SAMP_SZ;
+            superBlock.m_header.m_sampleBytes = m_nbTxBytes;
+            superBlock.m_header.m_sampleBits = getNbSampleBits();
 
             RemoteMetaDataFEC *destMeta = (RemoteMetaDataFEC *) &superBlock.m_protectedBlock;
             *destMeta = metaData;
@@ -138,24 +147,26 @@ void RemoteSinkSink::feed(const SampleVector::const_iterator& begin, const Sampl
         int samplesPerBlock = RemoteNbBytesPerBlock / (SDR_RX_SAMP_SZ <= 16 ? 4 : 8); // two I or Q samples
         if (m_sampleIndex + inRemainingSamples < samplesPerBlock) // there is still room in the current super block
         {
-            memcpy((void *) &m_superBlock.m_protectedBlock.buf[m_sampleIndex*sizeof(Sample)],
-                    (const void *) &(*(begin+inSamplesIndex)),
-                    inRemainingSamples * sizeof(Sample));
+            convertSampleToData(begin + inSamplesIndex, inRemainingSamples, false);
+            // memcpy((void *) &m_superBlock.m_protectedBlock.buf[m_sampleIndex*sizeof(Sample)],
+            //         (const void *) &(*(begin+inSamplesIndex)),
+            //         inRemainingSamples * sizeof(Sample));
             m_sampleIndex += inRemainingSamples;
             it = end; // all input samples are consumed
         }
         else // complete super block and initiate the next if not end of frame
         {
-            memcpy((void *) &m_superBlock.m_protectedBlock.buf[m_sampleIndex*sizeof(Sample)],
-                    (const void *) &(*(begin+inSamplesIndex)),
-                    (samplesPerBlock - m_sampleIndex) * sizeof(Sample));
+            convertSampleToData(begin + inSamplesIndex, samplesPerBlock - m_sampleIndex, false);
+            // memcpy((void *) &m_superBlock.m_protectedBlock.buf[m_sampleIndex*sizeof(Sample)],
+            //         (const void *) &(*(begin+inSamplesIndex)),
+            //         (samplesPerBlock - m_sampleIndex) * sizeof(Sample));
             it += samplesPerBlock - m_sampleIndex;
             m_sampleIndex = 0;
 
             m_superBlock.m_header.m_frameIndex = m_frameCount;
             m_superBlock.m_header.m_blockIndex = m_txBlockIndex;
-            m_superBlock.m_header.m_sampleBytes = (SDR_RX_SAMP_SZ <= 16 ? 2 : 4);
-            m_superBlock.m_header.m_sampleBits = SDR_RX_SAMP_SZ;
+            m_superBlock.m_header.m_sampleBytes = m_nbTxBytes;
+            m_superBlock.m_header.m_sampleBits = getNbSampleBits();
             m_dataFrame->m_superBlocks[m_txBlockIndex] = m_superBlock;
 
             if (m_txBlockIndex == RemoteNbOrginalBlocks - 1) // frame complete
@@ -214,4 +225,17 @@ void RemoteSinkSink::applyBasebandSampleRate(uint32_t sampleRate)
     m_basebandSampleRate = sampleRate;
     double shiftFactor = HBFilterChainConverter::getShiftFactor(m_settings.m_log2Decim, m_settings.m_filterChainHash);
     m_frequencyOffset = round(shiftFactor*m_basebandSampleRate);
+}
+
+uint32_t RemoteSinkSink::getNbSampleBits()
+{
+    if (m_nbTxBytes == 1) {
+        return 8;
+    } else if (m_nbTxBytes == 2) {
+        return 16;
+    } else if (m_nbTxBytes == 4) {
+        return 24;
+    } else {
+        return 16;
+    }
 }

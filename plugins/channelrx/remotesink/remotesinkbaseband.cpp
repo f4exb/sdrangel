@@ -52,6 +52,7 @@ void RemoteSinkBaseband::reset()
 {
     QMutexLocker mutexLocker(&m_mutex);
     m_sampleFifo.reset();
+    m_sink.init();
 }
 
 void RemoteSinkBaseband::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)

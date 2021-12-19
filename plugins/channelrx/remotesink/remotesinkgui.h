@@ -88,6 +88,7 @@ private slots:
     void on_dataPort_returnPressed();
     void on_dataApplyButton_clicked(bool checked);
     void on_nbFECBlocks_valueChanged(int value);
+    void on_nbTxBytes_currentIndexChanged(int index);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void tick();

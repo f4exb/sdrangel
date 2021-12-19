@@ -35,7 +35,6 @@ UDPSinkFEC::UDPSinkFEC() :
     m_txDelayRatio(0.0),
     m_dataFrame(nullptr),
     m_txBlockIndex(0),
-    m_txBlocksIndex(0),
     m_frameCount(0),
     m_sampleIndex(0),
     m_remoteOutputSender(nullptr),
@@ -61,7 +60,6 @@ void UDPSinkFEC::init()
 {
     m_dataFrame = nullptr;
     m_txBlockIndex = 0;
-    m_txBlocksIndex = 0;
     m_frameCount = 0;
     m_sampleIndex = 0;
 }

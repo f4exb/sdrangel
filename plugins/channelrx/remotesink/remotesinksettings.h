@@ -32,6 +32,7 @@ class Serializable;
 struct RemoteSinkSettings
 {
     uint16_t m_nbFECBlocks;
+    uint32_t m_nbTxBytes;
     QString  m_dataAddress;
     uint16_t m_dataPort;
     quint32 m_rgbColor;

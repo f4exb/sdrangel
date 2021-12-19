@@ -64,6 +64,7 @@ public:
 	void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
     void startSender() { m_sink.startSender(); }
     void stopSender() { m_sink.stopSender(); }
+    void setNbTxBytes(uint32_t nbTxBytes) { m_sink.setNbTxBytes(nbTxBytes); }
 
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
     int getChannelSampleRate() const;
