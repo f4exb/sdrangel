@@ -340,13 +340,13 @@ void RemoteInputUDPHandler::tick()
             m_converterBuffer = new int32_t[m_readLengthSamples];
         }
 
-        uint8_t *buf = m_remoteInputBuffer.readData(m_readLength);
+        int8_t *buf = (int8_t*) m_remoteInputBuffer.readData(m_readLength);
 
         for (int is = 0; is < m_readLengthSamples; is++)
         {
-            m_converterBuffer[is] = buf[2*is+1] << 8; // Q -> MSB
+            m_converterBuffer[is] = buf[2*is+1] * (1<<8); // Q -> MSB
             m_converterBuffer[is] <<= 16;
-            m_converterBuffer[is] += buf[2*is] << 8; // I -> LSB
+            m_converterBuffer[is] += buf[2*is] * (1<<8);  // I -> LSB
         }
     }
     else if ((metaData.m_sampleBits == 8) && (SDR_RX_SAMP_SZ == 24)) // 8 -> 24
@@ -357,14 +357,12 @@ void RemoteInputUDPHandler::tick()
             m_converterBuffer = new int32_t[m_readLengthSamples*2];
         }
 
-        uint8_t *buf = m_remoteInputBuffer.readData(m_readLength);
+        int8_t *buf = (int8_t*) m_remoteInputBuffer.readData(m_readLength);
 
         for (int is = 0; is < m_readLengthSamples; is++)
         {
-            m_converterBuffer[2*is] = buf[2*is]; // I
-            m_converterBuffer[2*is] <<= 16;
-            m_converterBuffer[2*is+1] = buf[2*is+1]; // Q
-            m_converterBuffer[2*is+1] <<= 16;
+            m_converterBuffer[2*is] = buf[2*is] * (1<<16);     // I
+            m_converterBuffer[2*is+1] = buf[2*is+1] * (1<<16); // Q
         }
 
         m_sampleFifo->write(reinterpret_cast<quint8*>(m_converterBuffer), m_readLengthSamples*sizeof(Sample));
@@ -377,14 +375,12 @@ void RemoteInputUDPHandler::tick()
             m_converterBuffer = new int32_t[m_readLengthSamples*2];
         }
 
-        uint8_t *buf = m_remoteInputBuffer.readData(m_readLength);
+        int16_t *buf = (int16_t*) m_remoteInputBuffer.readData(m_readLength);
 
         for (int is = 0; is < m_readLengthSamples; is++)
         {
-            m_converterBuffer[2*is] = ((int16_t*)buf)[2*is]; // I
-            m_converterBuffer[2*is] <<= 8;
-            m_converterBuffer[2*is+1] = ((int16_t*)buf)[2*is+1]; // Q
-            m_converterBuffer[2*is+1] <<= 8;
+            m_converterBuffer[2*is] = buf[2*is] * (1<<8);     // I
+            m_converterBuffer[2*is+1] = buf[2*is+1] * (1<<8); // Q
         }
 
         m_sampleFifo->write(reinterpret_cast<quint8*>(m_converterBuffer), m_readLengthSamples*sizeof(Sample));
@@ -397,13 +393,13 @@ void RemoteInputUDPHandler::tick()
             m_converterBuffer = new int32_t[m_readLengthSamples];
         }
 
-        uint8_t *buf = m_remoteInputBuffer.readData(m_readLength);
+        int32_t *buf = (int32_t*) m_remoteInputBuffer.readData(m_readLength);
 
         for (int is = 0; is < m_readLengthSamples; is++)
         {
-            m_converterBuffer[is] =  ((int32_t *)buf)[2*is+1]>>8; // Q -> MSB
+            m_converterBuffer[is] =  buf[2*is+1] / (1<<8); // Q -> MSB
             m_converterBuffer[is] <<= 16;
-            m_converterBuffer[is] += ((int32_t *)buf)[2*is]>>8; // I -> LSB
+            m_converterBuffer[is] += buf[2*is] / (1<<8);   // I -> LSB
         }
 
         m_sampleFifo->write(reinterpret_cast<quint8*>(m_converterBuffer), m_readLengthSamples*sizeof(Sample));

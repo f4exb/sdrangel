@@ -128,12 +128,12 @@ private:
                     *((int16_t*) &m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2 + m_nbTxBytes]) = (begin+i)->m_imag;
                 }
             }
-            else if (m_nbTxBytes == 1) // 16 -> 8
+            else if (m_nbTxBytes == 1) // 16 or 24 -> 8
             {
                 for (int i = 0; i < nbSamples; i++)
                 {
-                    m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2] = (uint8_t) ((begin+i)->m_real / 256);
-                    m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2 + m_nbTxBytes] = (uint8_t) ((begin+i)->m_imag / 256);
+                    *((int8_t*) &m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2]) = (int8_t) ((begin+i)->m_real / (1<<8));
+                    *((int8_t*) &m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2 + m_nbTxBytes]) = (int8_t) ((begin+i)->m_imag / (1<<8));
                 }
             }
         }
@@ -143,26 +143,32 @@ private:
             {
                 for (int i = 0; i < nbSamples; i++)
                 {
-                    *((int32_t*) &m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2]) = (begin+i)->m_real << 8;
-                    *((int32_t*) &m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2 + m_nbTxBytes]) = (begin+i)->m_imag << 8;
+                    *((int32_t*) &m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2]) = (begin+i)->m_real * (1<<8);
+                    *((int32_t*) &m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2 + m_nbTxBytes]) = (begin+i)->m_imag * (1<<8);
                 }
             }
             else if (m_nbTxBytes == 2) // 24 -> 16
             {
                 for (int i = 0; i < nbSamples; i++)
                 {
-                    *((int16_t*) &m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2]) = (begin+i)->m_real >> 8;
-                    *((int16_t*) &m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2 + m_nbTxBytes]) = (begin+i)->m_imag >> 8;
+                    *((int16_t*) &m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2]) = (begin+i)->m_real / (1<<8);
+                    *((int16_t*) &m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2 + m_nbTxBytes]) = (begin+i)->m_imag / (1<<8);
                 }
             }
-            else if (m_nbTxBytes == 1) // 16 or 24 -> 8
+            else if ((m_nbTxBytes == 1) && (sizeof(Sample) == 4)) // 16 -> 8
             {
                 for (int i = 0; i < nbSamples; i++)
                 {
-                    m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2] =
-                        (uint8_t) (((begin+i)->m_real / (1<<sizeof(Sample)*2)) & 0xFF);
-                    m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2 + m_nbTxBytes] =
-                        (uint8_t) (((begin+i)->m_imag / (1<<sizeof(Sample)*2)) & 0xFF);
+                   *((int8_t*) &m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2]) = (int8_t) ((begin+i)->m_real / (1<<8));
+                   *((int8_t*) &m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2 + m_nbTxBytes]) = (int8_t) ((begin+i)->m_imag / (1<<8));
+                }
+            }
+            else if ((m_nbTxBytes == 1) && (sizeof(Sample) == 4)) // 24 -> 8
+            {
+                for (int i = 0; i < nbSamples; i++)
+                {
+                    *((int8_t*) &m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2]) = (int8_t) ((begin+i)->m_real / (1<<16));
+                    *((int8_t*) &m_superBlock.m_protectedBlock.buf[(m_sampleIndex+ i)*m_nbTxBytes*2 + m_nbTxBytes]) = (int8_t) ((begin+i)->m_imag / (1<<16));
                 }
             }
         }

@@ -56,17 +56,6 @@ When the return key is hit within the address (1) or port (2) the changes are ef
 
 This sets the number of FEC blocks per frame. A frame consists of 128 data blocks (1 meta data block followed by 127 I/Q data blocks) and a variable number of FEC blocks used to protect the UDP transmission with a Cauchy MDS block erasure correction. The two numbers next are the total number of blocks and the number of FEC blocks separated by a slash (/).
 
-<h3>10: Delay between UDP blocks transmission</h3>
+<h3>10: Transmission sample size</h3>
 
-This sets the minimum delay between transmission of an UDP block (send datagram) and the next. This allows throttling of the UDP transmission that is otherwise uncontrolled and causes network congestion.
-
-The value is a percentage of the nominal time it takes to process a block of samples corresponding to one UDP block (512 bytes). This is calculated as follows:
-
-  - Sample rate on the network: _SR_
-  - Delay percentage: _d_
-  - Number of FEC blocks: _F_
-  - There are 127 blocks of I/Q data per frame (1 meta block for 128 blocks) and each I/Q data block of 512 bytes (128 samples) has a 8 bytes header (2 samples) thus there are 126 samples remaining effectively. This gives the constant 127*126 = 16002 samples per frame in the formula
-
-Formula: ((127 &#x2715; 126 &#x2715; _d_) / _SR_) / (128 + _F_)
-
-The percentage appears first at the right of the dial button and then the actual delay value in microseconds.
+Number of bytes per I or Q sample in transmission.

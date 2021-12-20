@@ -144,7 +144,7 @@ void RemoteSinkSink::feed(const SampleVector::const_iterator& begin, const Sampl
         } // block zero
 
         // handle different sample sizes...
-        int samplesPerBlock = RemoteNbBytesPerBlock / (SDR_RX_SAMP_SZ <= 16 ? 4 : 8); // two I or Q samples
+        int samplesPerBlock = RemoteNbBytesPerBlock / (2 * m_nbTxBytes); // two I or Q samples
         if (m_sampleIndex + inRemainingSamples < samplesPerBlock) // there is still room in the current super block
         {
             convertSampleToData(begin + inSamplesIndex, inRemainingSamples, false);

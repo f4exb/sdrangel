@@ -70,24 +70,23 @@ private:
         {
             if (sampleSize == 2) // 8 -> 16 bits
             {
-                int8_t iu = m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize];
-                int8_t qu = m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize+1];
-                iconv = iu * (1 << 8);
-                qconv = qu * (1 << 8);
+                int8_t *buf = (int8_t*)  m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf;
+                iconv = buf[sampleIndex*sampleSize] * (1<<8);
+                qconv = buf[sampleIndex*sampleSize+1]  * (1<<8);
                 s.setReal(iconv);
                 s.setImag(qconv);
             }
             else if (sampleSize == 4) // just convert types (always 16 bits wide)
             {
-                iconv = ((int16_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize]))[0];
-                qconv = ((int16_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize+2]))[0];
+                iconv = *((int16_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize]));
+                qconv = *((int16_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize+2]));
                 s.setReal(iconv);
                 s.setImag(qconv);
             }
             else if (sampleSize == 8) // just convert types (always 16 bits wide)
             {
-                iconv = ((int32_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize]))[0];
-                qconv = ((int32_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize+4]))[0];
+                iconv = *((int32_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize]));
+                qconv = *((int32_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize+4]));
                 s.setReal(iconv);
                 s.setImag(qconv);
             }
@@ -98,26 +97,33 @@ private:
         }
         else
         {
-            if (sampleSize == 2) // 8 -> 16 or 24 bits
+            if ((sampleSize == 2) && (sizeof(Sample) == 2)) // 8 -> 16 bits
             {
-                int8_t iu = m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize];
-                int8_t qu = m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize+1];
-                iconv = iu * (1 << sizeof(Sample)*2);
-                qconv = qu * (1 << sizeof(Sample)*2);
+                int8_t *buf = (int8_t*) m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf;
+                iconv = buf[sampleIndex*sampleSize] * (1<<8);
+                qconv = buf[sampleIndex*sampleSize+1] * (1<<8);
+                s.setReal(iconv);
+                s.setImag(qconv);
+            }
+            else if ((sampleSize == 2) && (sizeof(Sample) == 4)) // 8 -> 24 bits
+            {
+                int8_t *buf = (int8_t*) m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf;
+                iconv = buf[sampleIndex*sampleSize] * (1<<16);
+                qconv = buf[sampleIndex*sampleSize+1] * (1<<16);
                 s.setReal(iconv);
                 s.setImag(qconv);
             }
             else if (sampleSize == 4) // 16 -> 24 bits
             {
-                iconv = ((int16_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize]))[0] << 8;
-                qconv = ((int16_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize+2]))[0] << 8;
+                iconv = *((int16_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize])) * (1<<8);
+                qconv = *((int16_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize+2])) * (1<<8);
                 s.setReal(iconv);
                 s.setImag(qconv);
             }
             else if (sampleSize == 8) // 24 -> 16 bits
             {
-                iconv = ((int32_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize]))[0] >> 8;
-                qconv = ((int32_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize+4]))[0] >> 8;
+                iconv = *((int32_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize])) / (1<<8);
+                qconv = *((int32_t*) &(m_dataFrame->m_superBlocks[blockIndex].m_protectedBlock.buf[sampleIndex*sampleSize+4])) / (1<<8);
                 s.setReal(iconv);
                 s.setImag(qconv);
             }
