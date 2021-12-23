@@ -41,8 +41,6 @@
 
 #include "channel/remotedatablock.h"
 
-#include "udpsinkfec.h"
-
 RemoteOutputSinkGui::RemoteOutputSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	DeviceGUI(parent),
 	ui(new Ui::RemoteOutputGui),

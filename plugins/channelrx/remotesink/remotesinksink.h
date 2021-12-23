@@ -46,6 +46,8 @@ public:
     void applySettings(const RemoteSinkSettings& settings, bool force = false);
     void applyBasebandSampleRate(uint32_t sampleRate);
     void setDeviceCenterFrequency(uint64_t frequency) { m_deviceCenterFrequency = frequency; }
+    void setDeviceIndex(uint32_t deviceIndex) { m_deviceIndex = deviceIndex; }
+    void setChannelIndex(uint32_t channelIndex) { m_channelIndex = channelIndex; }
 
 private:
     RemoteSinkSettings m_settings;
@@ -63,6 +65,8 @@ private:
     uint64_t m_deviceCenterFrequency;
     int64_t m_frequencyOffset;
     uint32_t m_basebandSampleRate;
+    uint32_t m_deviceIndex;
+    uint32_t m_channelIndex;
     int m_nbBlocksFEC;
     uint32_t m_nbTxBytes;
     QString m_dataAddress;

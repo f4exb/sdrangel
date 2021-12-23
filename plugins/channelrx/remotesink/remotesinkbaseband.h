@@ -70,6 +70,8 @@ public:
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
     int getChannelSampleRate() const;
     void setBasebandSampleRate(int sampleRate);
+    void setDeviceIndex(uint32_t deviceIndex) { m_sink.setDeviceIndex(deviceIndex); }
+    void setChannelIndex(uint32_t channelIndex) { m_sink.setChannelIndex(channelIndex); }
 
 private:
     bool m_running;

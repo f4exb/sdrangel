@@ -64,6 +64,7 @@ public:
         return ret;
     }
 
+    void setDeviceIndex(uint32_t deviceIndex) { m_deviceIndex = deviceIndex; }
     /** Set sample rate given in S/s */
     void setSampleRate(uint32_t sampleRate);
 
@@ -94,6 +95,7 @@ private:
     int m_txBlockIndex;                     //!< Current index in blocks to transmit in the Tx row
     uint16_t m_frameCount;                  //!< transmission frame count
     int m_sampleIndex;                      //!< Current sample index in protected block data
+    uint32_t m_deviceIndex;              //!< Index of current device set
 
     RemoteOutputSender *m_remoteOutputSender;
     QThread *m_senderThread;

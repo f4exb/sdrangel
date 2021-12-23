@@ -38,16 +38,20 @@
 #pragma pack(push, 1)
 struct RemoteMetaDataFEC
 {
-    uint64_t m_centerFrequency;   //!<  8 center frequency in kHz
-    uint32_t m_sampleRate;        //!< 12 sample rate in Hz
-    uint8_t  m_sampleBytes;       //!< 13 4 LSB: number of bytes per sample (2 or 4)
-    uint8_t  m_sampleBits;        //!< 14 number of effective bits per sample (deprecated)
-    uint8_t  m_nbOriginalBlocks;  //!< 15 number of blocks with original (protected) data
-    uint8_t  m_nbFECBlocks;       //!< 16 number of blocks carrying FEC
+    uint64_t m_centerFrequency;       //!<  8 center frequency in kHz
+    uint32_t m_sampleRate;            //!< 12 sample rate in Hz
+    uint8_t  m_sampleBytes;           //!< 13 4 LSB: number of bytes per sample (2 or 4)
+    uint8_t  m_sampleBits;            //!< 14 number of effective bits per sample (deprecated)
+    uint8_t  m_nbOriginalBlocks;      //!< 15 number of blocks with original (protected) data
+    uint8_t  m_nbFECBlocks;           //!< 16 number of blocks carrying FEC
+    uint64_t m_deviceCenterFrequency; //!< 24 device center frequency in Hz
+    uint32_t m_basebandSampleRate;    //!< 28 basebabd sample rate in Hz
+    uint8_t  m_deviceIndex;           //!< 29 index of device set in instance
+    uint8_t  m_channelIndex;          //!< 30 index of channel in device set
 
-    uint32_t m_tv_sec;            //!< 20 seconds of timestamp at start time of super-frame processing
-    uint32_t m_tv_usec;           //!< 24 microseconds of timestamp at start time of super-frame processing
-    uint32_t m_crc32;             //!< 28 CRC32 of the above
+    uint32_t m_tv_sec;                //!< 34 seconds of timestamp at start time of super-frame processing
+    uint32_t m_tv_usec;               //!< 38 microseconds of timestamp at start time of super-frame processing
+    uint32_t m_crc32;                 //!< 42 CRC32 of the above
 
     bool operator==(const RemoteMetaDataFEC& rhs)
     {
@@ -68,6 +72,10 @@ struct RemoteMetaDataFEC
         m_sampleBits = 0;
         m_nbOriginalBlocks = 0;
         m_nbFECBlocks = 0;
+        m_deviceCenterFrequency = 0;
+        m_basebandSampleRate = 1;
+        m_deviceIndex = 0;
+        m_channelIndex = 0;
         m_tv_sec = 0;
         m_tv_usec = 0;
         m_crc32 = 0;

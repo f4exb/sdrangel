@@ -90,6 +90,7 @@ bool RemoteOutput::start()
 
 	m_remoteOutputWorker = new RemoteOutputWorker(&m_sampleSourceFifo);
     m_remoteOutputWorker->moveToThread(&m_remoteOutputWorkerThread);
+    m_remoteOutputWorker->setDeviceIndex(m_deviceAPI->getDeviceSetIndex());
 	m_remoteOutputWorker->setDataAddress(m_settings.m_dataAddress, m_settings.m_dataPort);
 	m_remoteOutputWorker->setSamplerate(m_sampleRate);
 	m_remoteOutputWorker->setNbBlocksFEC(m_settings.m_nbFECBlocks);

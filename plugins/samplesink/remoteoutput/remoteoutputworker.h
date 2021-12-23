@@ -47,6 +47,7 @@ public:
 	void startWork();
 	void stopWork();
 
+    void setDeviceIndex(uint32_t deviceIndex) { m_udpSinkFEC.setDeviceIndex(deviceIndex); }
 	void setSamplerate(int samplerate);
     void setNbBlocksFEC(uint32_t nbBlocksFEC) { m_udpSinkFEC.setNbBlocksFEC(nbBlocksFEC); };
     void setNbTxBytes(uint32_t nbTxBytes) { m_udpSinkFEC.setNbTxBytes(nbTxBytes); };

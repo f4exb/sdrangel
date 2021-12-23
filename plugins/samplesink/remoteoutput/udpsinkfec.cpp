@@ -120,6 +120,10 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
             metaData.m_sampleBits = getNbSampleBits();
             metaData.m_nbOriginalBlocks = RemoteNbOrginalBlocks;
             metaData.m_nbFECBlocks = m_nbBlocksFEC;
+            metaData.m_deviceCenterFrequency = 0; // frequency not set by device
+            metaData.m_basebandSampleRate = m_sampleRate; // same as sample rate
+            metaData.m_deviceIndex = m_deviceIndex; // index of device set in the instance
+            metaData.m_channelIndex = 0; // irrelavant
             metaData.m_tv_sec = nowus / 1000000UL;  // tv.tv_sec;
             metaData.m_tv_usec = nowus % 1000000UL; // tv.tv_usec;
 
@@ -149,6 +153,10 @@ void UDPSinkFEC::write(const SampleVector::iterator& begin, uint32_t sampleChunk
                         << ":" << (int) metaData.m_sampleBits
                         << "|" << (int) metaData.m_nbOriginalBlocks
                         << ":" << (int) metaData.m_nbFECBlocks
+                        << "|" << metaData.m_deviceCenterFrequency
+                        << ":" << metaData.m_basebandSampleRate
+                        << "|" << metaData.m_deviceIndex
+                        << ":" << metaData.m_channelIndex
                         << "|" << metaData.m_tv_sec
                         << ":" << metaData.m_tv_usec;
 

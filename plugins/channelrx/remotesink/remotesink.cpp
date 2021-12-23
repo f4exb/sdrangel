@@ -96,6 +96,8 @@ void RemoteSink::start()
 {
     qDebug("RemoteSink::start: m_basebandSampleRate: %d", m_basebandSampleRate);
     m_basebandSink->reset();
+    m_basebandSink->setDeviceIndex(m_deviceAPI->getDeviceSetIndex());
+    m_basebandSink->setChannelIndex(getIndexInDeviceSet());
     m_basebandSink->startWork();
     m_thread.start();
 

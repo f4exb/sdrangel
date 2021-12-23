@@ -68,6 +68,12 @@ void RemoteSinkSender::started()
 void RemoteSinkSender::stopWork()
 {
     qDebug("RemoteSinkSender::stopWork");
+    QObject::disconnect(
+        &m_fifo,
+        &RemoteSinkFifo::dataBlockServed,
+        this,
+        &RemoteSinkSender::handleData
+    );
 }
 
 void RemoteSinkSender::finished()
