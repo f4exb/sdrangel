@@ -19,6 +19,7 @@
 #define INCLUDE_REMOTESINKSINK_H_
 
 #include <QObject>
+#include <QThread>
 
 #include "dsp/channelsamplesink.h"
 #include "channel/remotedatablock.h"
@@ -28,7 +29,6 @@
 
 class DeviceSampleSource;
 class RemoteSinkSender;
-class QThread;
 
 class RemoteSinkSink : public QObject, public ChannelSampleSink {
     Q_OBJECT
@@ -38,8 +38,8 @@ public:
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
-    void startSender();
-    void stopSender();
+    void start();
+    void stop();
     void init();
 
     void setNbTxBytes(uint32_t nbTxBytes) { m_nbTxBytes = nbTxBytes; }
@@ -49,7 +49,8 @@ public:
 
 private:
     RemoteSinkSettings m_settings;
-    QThread *m_senderThread;
+    bool m_running;
+    QThread m_senderThread;
     RemoteSinkSender *m_remoteSinkSender;
 
     int m_txBlockIndex;                  //!< Current index in blocks to transmit in the Tx row
@@ -67,6 +68,8 @@ private:
     QString m_dataAddress;
     uint16_t m_dataPort;
 
+    void startSender();
+    void stopSender();
     void setNbBlocksFEC(int nbBlocksFEC);
     uint32_t getNbSampleBits();
 

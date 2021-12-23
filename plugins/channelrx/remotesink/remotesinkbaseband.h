@@ -62,8 +62,9 @@ public:
 
     void reset();
 	void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
-    void startSender() { m_sink.startSender(); }
-    void stopSender() { m_sink.stopSender(); }
+    void startWork();
+    void stopWork();
+    bool isRunning() const { return m_running; }
     void setNbTxBytes(uint32_t nbTxBytes) { m_sink.setNbTxBytes(nbTxBytes); }
 
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
@@ -71,6 +72,7 @@ public:
     void setBasebandSampleRate(int sampleRate);
 
 private:
+    bool m_running;
     SampleSinkFifo m_sampleFifo;
     DownChannelizer *m_channelizer;
     int m_basebandSampleRate;

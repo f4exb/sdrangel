@@ -28,18 +28,9 @@ MESSAGE_CLASS_DEFINITION(RemoteSinkBaseband::MsgConfigureRemoteSinkBaseband, Mes
 RemoteSinkBaseband::RemoteSinkBaseband() :
     m_mutex(QMutex::Recursive)
 {
+    qDebug("RemoteSinkBaseband::RemoteSinkBaseband");
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
     m_channelizer = new DownChannelizer(&m_sink);
-
-    qDebug("RemoteSinkBaseband::RemoteSinkBaseband");
-    QObject::connect(
-        &m_sampleFifo,
-        &SampleSinkFifo::dataReady,
-        this,
-        &RemoteSinkBaseband::handleData,
-        Qt::QueuedConnection
-    );
-
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }
 
@@ -53,6 +44,35 @@ void RemoteSinkBaseband::reset()
     QMutexLocker mutexLocker(&m_mutex);
     m_sampleFifo.reset();
     m_sink.init();
+}
+
+void RemoteSinkBaseband::startWork()
+{
+    QMutexLocker mutexLocker(&m_mutex);
+    QObject::connect(
+        &m_sampleFifo,
+        &SampleSinkFifo::dataReady,
+        this,
+        &RemoteSinkBaseband::handleData,
+        Qt::QueuedConnection
+    );
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+    m_sink.start();
+    m_running = true;
+}
+
+void RemoteSinkBaseband::stopWork()
+{
+    QMutexLocker mutexLocker(&m_mutex);
+    m_sink.stop();
+    disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+    QObject::disconnect(
+        &m_sampleFifo,
+        &SampleSinkFifo::dataReady,
+        this,
+        &RemoteSinkBaseband::handleData
+    );
+    m_running = false;
 }
 
 void RemoteSinkBaseband::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)

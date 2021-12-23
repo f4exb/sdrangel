@@ -28,6 +28,7 @@
 #include <QMutex>
 #include <QWaitCondition>
 #include <QHostAddress>
+#include <QUdpSocket>
 
 #include "cm256cc/cm256.h"
 
@@ -47,19 +48,24 @@ public:
     RemoteSinkSender();
     ~RemoteSinkSender();
 
+    bool startWork();
+    void stopWork();
     RemoteDataFrame *getDataFrame();
 
 private:
+    volatile bool m_running;
     RemoteSinkFifo m_fifo;
     CM256 m_cm256;
     CM256 *m_cm256p;
 
     QHostAddress m_address;
-    QUdpSocket *m_socket;
+    QUdpSocket m_socket;
 
     void sendDataFrame(RemoteDataFrame *dataFrame);
 
 private slots:
+    void started();
+    void finished();
     void handleData();
 };
 

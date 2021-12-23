@@ -55,9 +55,8 @@ RemoteSink::RemoteSink(DeviceAPI *deviceAPI) :
 {
     setObjectName(m_channelId);
 
-    m_thread = new QThread(this);
     m_basebandSink = new RemoteSinkBaseband();
-    m_basebandSink->moveToThread(m_thread);
+    m_basebandSink->moveToThread(&m_thread);
 
     applySettings(m_settings, true);
 
@@ -74,8 +73,12 @@ RemoteSink::~RemoteSink()
     delete m_networkManager;
     m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
+
+    if (m_basebandSink->isRunning()) {
+        stop();
+    }
+
     delete m_basebandSink;
-    delete m_thread;
 }
 
 uint32_t RemoteSink::getNumberOfDeviceStreams() const
@@ -93,21 +96,20 @@ void RemoteSink::start()
 {
     qDebug("RemoteSink::start: m_basebandSampleRate: %d", m_basebandSampleRate);
     m_basebandSink->reset();
+    m_basebandSink->startWork();
+    m_thread.start();
 
     if (m_basebandSampleRate != 0) {
         m_basebandSink->setBasebandSampleRate(m_basebandSampleRate);
     }
-
-    m_thread->start();
-    m_basebandSink->startSender();
 }
 
 void RemoteSink::stop()
 {
     qDebug("RemoteSink::stop");
-    m_basebandSink->stopSender();
-	m_thread->exit();
-	m_thread->wait();
+    m_basebandSink->stopWork();
+    m_thread.quit();
+    m_thread.wait();
 }
 
 bool RemoteSink::handleMessage(const Message& cmd)

@@ -26,6 +26,7 @@
 
 #include <QObject>
 #include <QNetworkRequest>
+#include <QThread>
 
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelapi.h"
@@ -115,7 +116,7 @@ public:
 
 private:
     DeviceAPI *m_deviceAPI;
-    QThread *m_thread;
+    QThread m_thread;
     RemoteSinkBaseband *m_basebandSink;
     RemoteSinkSettings m_settings;
 

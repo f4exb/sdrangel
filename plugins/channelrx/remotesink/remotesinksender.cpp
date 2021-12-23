@@ -21,11 +21,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-
-#include <thread>
-#include <chrono>
-
-#include <QUdpSocket>
+#include <QThread>
 
 #include "cm256cc/cm256.h"
 
@@ -33,14 +29,24 @@
 #include "remotesinksender.h"
 
 RemoteSinkSender::RemoteSinkSender() :
+    m_running(false),
     m_fifo(20, this),
     m_address(QHostAddress::LocalHost),
-    m_socket(nullptr)
+    m_socket(this)
 {
     qDebug("RemoteSinkSender::RemoteSinkSender");
     m_cm256p = m_cm256.isInitialized() ? &m_cm256 : nullptr;
-    m_socket = new QUdpSocket(this);
+}
 
+RemoteSinkSender::~RemoteSinkSender()
+{
+    qDebug("RemoteSinkSender::~RemoteSinkSender");
+    m_socket.close();
+}
+
+bool RemoteSinkSender::startWork()
+{
+    qDebug("RemoteSinkSender::startWork");
     QObject::connect(
         &m_fifo,
         &RemoteSinkFifo::dataBlockServed,
@@ -48,13 +54,31 @@ RemoteSinkSender::RemoteSinkSender() :
         &RemoteSinkSender::handleData,
         Qt::QueuedConnection
     );
+    connect(thread(), SIGNAL(started()), this, SLOT(started()));
+    connect(thread(), SIGNAL(finished()), this, SLOT(finished()));
+    m_running = true;
+    return m_running;
 }
 
-RemoteSinkSender::~RemoteSinkSender()
+void RemoteSinkSender::started()
 {
-    qDebug("RemoteSinkSender::~RemoteSinkSender");
-    m_socket->close();
-    m_socket->deleteLater();
+    disconnect(thread(), SIGNAL(started()), this, SLOT(started()));
+}
+
+void RemoteSinkSender::stopWork()
+{
+    qDebug("RemoteSinkSender::stopWork");
+}
+
+void RemoteSinkSender::finished()
+{
+    // Close any existing connection
+    if (m_socket.isOpen()) {
+        m_socket.close();
+    }
+
+    m_running = false;
+    disconnect(thread(), SIGNAL(finished()), this, SLOT(finished()));
 }
 
 RemoteDataFrame *RemoteSinkSender::getDataFrame()
@@ -91,11 +115,8 @@ void RemoteSinkSender::sendDataFrame(RemoteDataFrame *dataFrame)
 
     if ((nbBlocksFEC == 0) || !m_cm256p) // Do not FEC encode
     {
-        if (m_socket)
-        {
-            for (int i = 0; i < RemoteNbOrginalBlocks; i++) { // send block via UDP
-                m_socket->writeDatagram((const char*)&txBlockx[i], (qint64 ) RemoteUdpSize, m_address, dataPort);
-            }
+        for (int i = 0; i < RemoteNbOrginalBlocks; i++) { // send block via UDP
+            m_socket.writeDatagram((const char*)&txBlockx[i], (qint64 ) RemoteUdpSize, m_address, dataPort);
         }
     }
     else
@@ -133,11 +154,8 @@ void RemoteSinkSender::sendDataFrame(RemoteDataFrame *dataFrame)
         }
 
         // Transmit all blocks
-        if (m_socket)
-        {
-            for (int i = 0; i < cm256Params.OriginalCount + cm256Params.RecoveryCount; i++) { // send block via UDP
-                m_socket->writeDatagram((const char*)&txBlockx[i], (qint64 ) RemoteUdpSize, m_address, dataPort);
-            }
+        for (int i = 0; i < cm256Params.OriginalCount + cm256Params.RecoveryCount; i++) { // send block via UDP
+            m_socket.writeDatagram((const char*)&txBlockx[i], (qint64 ) RemoteUdpSize, m_address, dataPort);
         }
     }
 

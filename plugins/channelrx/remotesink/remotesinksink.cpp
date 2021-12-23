@@ -28,6 +28,8 @@
 #include "remotesinksink.h"
 
 RemoteSinkSink::RemoteSinkSink() :
+        m_running(false),
+        m_remoteSinkSender(nullptr),
         m_txBlockIndex(0),
         m_frameCount(0),
         m_sampleIndex(0),
@@ -41,32 +43,56 @@ RemoteSinkSink::RemoteSinkSink() :
         m_dataPort(9090)
 {
     qDebug("RemoteSinkSink::RemoteSinkSink");
-
-    m_senderThread = new QThread(this);
-    m_remoteSinkSender = new RemoteSinkSender();
-    m_remoteSinkSender->moveToThread(m_senderThread);
-
     applySettings(m_settings, true);
 }
 
 RemoteSinkSink::~RemoteSinkSink()
 {
     qDebug("RemoteSinkSink::~RemoteSinkSink");
-    delete m_remoteSinkSender;
-    delete m_senderThread;
+    stop();
+}
+
+void RemoteSinkSink::start()
+{
+    qDebug("RemoteSinkSink::start");
+
+    if (m_running) {
+        stop();
+    }
+
+    m_remoteSinkSender = new RemoteSinkSender();
+    m_remoteSinkSender->moveToThread(&m_senderThread);
+    startSender();
+    m_running = true;
+}
+
+void RemoteSinkSink::stop()
+{
+    qDebug("RemoteSinkSink::stop");
+
+    if (m_remoteSinkSender)
+    {
+        stopSender();
+        m_remoteSinkSender->deleteLater();
+        m_remoteSinkSender = nullptr;
+    }
+
+    m_running = false;
 }
 
 void RemoteSinkSink::startSender()
 {
     qDebug("RemoteSinkSink::startSender");
-    m_senderThread->start();
+    m_remoteSinkSender->startWork();
+    m_senderThread.start();
 }
 
 void RemoteSinkSink::stopSender()
 {
     qDebug("RemoteSinkSink::stopSender");
-	m_senderThread->exit();
-	m_senderThread->wait();
+	m_remoteSinkSender->stopWork();
+	m_senderThread.quit();
+	m_senderThread.wait();
 }
 
 void RemoteSinkSink::init()
