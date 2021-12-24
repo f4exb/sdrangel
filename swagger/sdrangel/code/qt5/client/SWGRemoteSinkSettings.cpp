@@ -32,6 +32,8 @@ SWGRemoteSinkSettings::SWGRemoteSinkSettings() {
     m_nb_fec_blocks_isSet = false;
     nb_tx_bytes = 0;
     m_nb_tx_bytes_isSet = false;
+    device_center_frequency = 0;
+    m_device_center_frequency_isSet = false;
     data_address = nullptr;
     m_data_address_isSet = false;
     data_port = 0;
@@ -70,6 +72,8 @@ SWGRemoteSinkSettings::init() {
     m_nb_fec_blocks_isSet = false;
     nb_tx_bytes = 0;
     m_nb_tx_bytes_isSet = false;
+    device_center_frequency = 0;
+    m_device_center_frequency_isSet = false;
     data_address = new QString("");
     m_data_address_isSet = false;
     data_port = 0;
@@ -100,6 +104,7 @@ SWGRemoteSinkSettings::init() {
 
 void
 SWGRemoteSinkSettings::cleanup() {
+
 
 
     if(data_address != nullptr) { 
@@ -139,6 +144,8 @@ SWGRemoteSinkSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&nb_fec_blocks, pJson["nbFECBlocks"], "qint32", "");
     
     ::SWGSDRangel::setValue(&nb_tx_bytes, pJson["nbTxBytes"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&device_center_frequency, pJson["deviceCenterFrequency"], "qint32", "");
     
     ::SWGSDRangel::setValue(&data_address, pJson["dataAddress"], "QString", "QString");
     
@@ -187,6 +194,9 @@ SWGRemoteSinkSettings::asJsonObject() {
     }
     if(m_nb_tx_bytes_isSet){
         obj->insert("nbTxBytes", QJsonValue(nb_tx_bytes));
+    }
+    if(m_device_center_frequency_isSet){
+        obj->insert("deviceCenterFrequency", QJsonValue(device_center_frequency));
     }
     if(data_address != nullptr && *data_address != QString("")){
         toJsonValue(QString("dataAddress"), data_address, obj, QString("QString"));
@@ -249,6 +259,16 @@ void
 SWGRemoteSinkSettings::setNbTxBytes(qint32 nb_tx_bytes) {
     this->nb_tx_bytes = nb_tx_bytes;
     this->m_nb_tx_bytes_isSet = true;
+}
+
+qint32
+SWGRemoteSinkSettings::getDeviceCenterFrequency() {
+    return device_center_frequency;
+}
+void
+SWGRemoteSinkSettings::setDeviceCenterFrequency(qint32 device_center_frequency) {
+    this->device_center_frequency = device_center_frequency;
+    this->m_device_center_frequency_isSet = true;
 }
 
 QString*
@@ -390,6 +410,9 @@ SWGRemoteSinkSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_nb_tx_bytes_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_device_center_frequency_isSet){
             isObjectUpdated = true; break;
         }
         if(data_address && *data_address != QString("")){

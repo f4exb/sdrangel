@@ -35,6 +35,7 @@
 #include "dsp/hbfilterchainconverter.h"
 #include "dsp/devicesamplemimo.h"
 #include "dsp/dspdevicesourceengine.h"
+#include "dsp/devicesamplesource.h"
 #include "device/deviceapi.h"
 #include "feature/feature.h"
 #include "settings/serializable.h"
@@ -54,6 +55,7 @@ RemoteSink::RemoteSink(DeviceAPI *deviceAPI) :
         m_basebandSampleRate(0)
 {
     setObjectName(m_channelId);
+    updateWithDeviceData();
 
     m_basebandSink = new RemoteSinkBaseband();
     m_basebandSink->moveToThread(&m_thread);
@@ -130,6 +132,7 @@ bool RemoteSink::handleMessage(const Message& cmd)
         m_basebandSampleRate = notif.getSampleRate();
         qDebug() << "RemoteSink::handleMessage: DSPSignalNotification: m_basebandSampleRate:" << m_basebandSampleRate;
         calculateFrequencyOffset();
+        updateWithDeviceData(); // Device center frequency and/or sample rate has changed
 
         // Forward to the sink
         DSPSignalNotification* msgToBaseband = new DSPSignalNotification(notif); // make a copy
@@ -199,6 +202,17 @@ void RemoteSink::applySettings(const RemoteSinkSettings& settings, bool force)
     }
     if ((m_settings.m_title != settings.m_title) || force) {
         reverseAPIKeys.append("title");
+    }
+
+    if ((m_settings.m_deviceCenterFrequency != settings.m_deviceCenterFrequency) || force)
+    {
+        reverseAPIKeys.append("deviceCenterFrequency");
+
+        if (m_deviceAPI->getSampleSource()) {
+            m_deviceAPI->getSampleSource()->setCenterFrequency(settings.m_deviceCenterFrequency);
+        } else if (m_deviceAPI->getSampleMIMO()) {
+            m_deviceAPI->getSampleMIMO()->setSourceCenterFrequency(settings.m_deviceCenterFrequency, settings.m_streamIndex);
+        }
     }
 
     if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
@@ -277,6 +291,15 @@ void RemoteSink::calculateFrequencyOffset()
     m_frequencyOffset = m_basebandSampleRate * shiftFactor;
 }
 
+void RemoteSink::updateWithDeviceData()
+{
+    if (m_deviceAPI->getSampleSource()) {
+        m_settings.m_deviceCenterFrequency = m_deviceAPI->getSampleSource()->getCenterFrequency();
+    } else if (m_deviceAPI->getSampleMIMO()) {
+        m_settings.m_deviceCenterFrequency = m_deviceAPI->getSampleMIMO()->getSourceCenterFrequency(m_settings.m_streamIndex);
+    }
+}
+
 int RemoteSink::webapiSettingsGet(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
@@ -332,6 +355,10 @@ void RemoteSink::webapiUpdateChannelSettings(
 
     if (channelSettingsKeys.contains("nbTxBytes")) {
         settings.m_nbTxBytes = response.getRemoteSinkSettings()->getNbTxBytes();
+    }
+
+    if (channelSettingsKeys.contains("deviceCenterFrequency")) {
+        settings.m_deviceCenterFrequency = response.getRemoteSinkSettings()->getDeviceCenterFrequency();
     }
 
     if (channelSettingsKeys.contains("dataAddress")) {
@@ -400,6 +427,7 @@ void RemoteSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& re
     }
 
     response.getRemoteSinkSettings()->setNbTxBytes(settings.m_nbTxBytes);
+    response.getRemoteSinkSettings()->setDeviceCenterFrequency(settings.m_deviceCenterFrequency);
     response.getRemoteSinkSettings()->setDataPort(settings.m_dataPort);
     response.getRemoteSinkSettings()->setRgbColor(settings.m_rgbColor);
 
@@ -507,6 +535,9 @@ void RemoteSink::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("nbTxBytes") || force) {
         swgRemoteSinkSettings->setNbTxBytes(settings.m_nbTxBytes);
+    }
+    if (channelSettingsKeys.contains("deviceCenterFrequency") || force) {
+        swgRemoteSinkSettings->setDeviceCenterFrequency(settings.m_deviceCenterFrequency);
     }
     if (channelSettingsKeys.contains("dataAddress") || force) {
         swgRemoteSinkSettings->setDataAddress(new QString(settings.m_dataAddress));

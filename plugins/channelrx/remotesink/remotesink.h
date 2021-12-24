@@ -130,6 +130,7 @@ private:
     void applySettings(const RemoteSinkSettings& settings, bool force = false);
     static void validateFilterChainHash(RemoteSinkSettings& settings);
     void calculateFrequencyOffset();
+    void updateWithDeviceData();
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const RemoteSinkSettings& settings, bool force);
     void sendChannelSettings(
         QList<MessageQueue*> *messageQueues,

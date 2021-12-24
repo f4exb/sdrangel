@@ -21,8 +21,10 @@
 #include <QDebug>
 #include <QNetworkReply>
 #include <QBuffer>
+#include <QJsonParseError>
 
 #include "SWGDeviceSettings.h"
+#include "SWGChannelSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
 #include "SWGRemoteInputReport.h"
@@ -40,6 +42,7 @@ MESSAGE_CLASS_DEFINITION(RemoteInput::MsgConfigureRemoteInputTiming, Message)
 MESSAGE_CLASS_DEFINITION(RemoteInput::MsgReportRemoteInputAcquisition, Message)
 MESSAGE_CLASS_DEFINITION(RemoteInput::MsgReportRemoteInputStreamData, Message)
 MESSAGE_CLASS_DEFINITION(RemoteInput::MsgReportRemoteInputStreamTiming, Message)
+MESSAGE_CLASS_DEFINITION(RemoteInput::MsgConfigureRemoteChannel, Message)
 MESSAGE_CLASS_DEFINITION(RemoteInput::MsgStartStop, Message)
 
 RemoteInput::RemoteInput(DeviceAPI *deviceAPI) :
@@ -54,6 +57,7 @@ RemoteInput::RemoteInput(DeviceAPI *deviceAPI) :
 	m_sampleFifo.setSize(m_sampleRate * 8);
 	m_remoteInputUDPHandler = new RemoteInputUDPHandler(&m_sampleFifo, m_deviceAPI);
     m_remoteInputUDPHandler->setMessageQueueToInput(&m_inputMessageQueue);
+    connect(m_remoteInputUDPHandler, SIGNAL(metaChanged()), this, SLOT(handleMetaChanged()));
 
     m_deviceAPI->setNbSourceStreams(1);
 
@@ -63,6 +67,7 @@ RemoteInput::RemoteInput(DeviceAPI *deviceAPI) :
 
 RemoteInput::~RemoteInput()
 {
+    disconnect(m_remoteInputUDPHandler, SIGNAL(metaChanged()), this, SLOT(handleMetaChanged()));
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
 	stop();
@@ -201,6 +206,13 @@ bool RemoteInput::handleMessage(const Message& message)
         applySettings(conf.getSettings(), conf.getForce());
         return true;
     }
+    else if (MsgConfigureRemoteChannel::match(message))
+    {
+        qDebug() << "RemoteInput::handleMessage:" << message.getIdentifier();
+        MsgConfigureRemoteChannel& conf = (MsgConfigureRemoteChannel&) message;
+        applyRemoteChannelSettings(conf.getSettings());
+        return true;
+    }
 	else
 	{
 		return false;
@@ -248,10 +260,10 @@ void RemoteInput::applySettings(const RemoteInputSettings& settings, bool force)
                 settings.m_iqCorrection ? "true" : "false");
     }
 
-    if ((m_settings.m_dataAddress != settings.m_dataAddress) || 
-        (m_settings.m_dataPort != settings.m_dataPort) || 
-        (m_settings.m_multicastAddress != settings.m_multicastAddress) || 
-        (m_settings.m_multicastJoin != settings.m_multicastJoin) || force) 
+    if ((m_settings.m_dataAddress != settings.m_dataAddress) ||
+        (m_settings.m_dataPort != settings.m_dataPort) ||
+        (m_settings.m_multicastAddress != settings.m_multicastAddress) ||
+        (m_settings.m_multicastJoin != settings.m_multicastJoin) || force)
     {
         m_remoteInputUDPHandler->configureUDPLink(settings.m_dataAddress, settings.m_dataPort, settings.m_multicastAddress, settings.m_multicastJoin);
         m_remoteInputUDPHandler->getRemoteAddress(remoteAddress);
@@ -272,13 +284,70 @@ void RemoteInput::applySettings(const RemoteInputSettings& settings, bool force)
     m_remoteAddress = remoteAddress;
 
     qDebug() << "RemoteInput::applySettings: "
-            << " m_dataAddress: " << m_settings.m_dataAddress
-            << " m_dataPort: " << m_settings.m_dataPort
-            << " m_multicastAddress: " << m_settings.m_multicastAddress
-            << " m_multicastJoin: " << m_settings.m_multicastJoin
-            << " m_apiAddress: " << m_settings.m_apiAddress
-            << " m_apiPort: " << m_settings.m_apiPort
-            << " m_remoteAddress: " << m_remoteAddress;
+        << " m_dataAddress: " << m_settings.m_dataAddress
+        << " m_dataPort: " << m_settings.m_dataPort
+        << " m_multicastAddress: " << m_settings.m_multicastAddress
+        << " m_multicastJoin: " << m_settings.m_multicastJoin
+        << " m_apiAddress: " << m_settings.m_apiAddress
+        << " m_apiPort: " << m_settings.m_apiPort
+        << " m_remoteAddress: " << m_remoteAddress;
+}
+
+void RemoteInput::applyRemoteChannelSettings(const RemoteChannelSettings& settings)
+{
+    SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();;
+    swgChannelSettings->setOriginatorChannelIndex(0);
+    swgChannelSettings->setOriginatorDeviceSetIndex(m_deviceAPI->getDeviceSetIndex());
+    swgChannelSettings->setChannelType(new QString("RemoteSink"));
+    swgChannelSettings->setRemoteSinkSettings(new SWGSDRangel::SWGRemoteSinkSettings());
+    SWGSDRangel::SWGRemoteSinkSettings *swgRemoteSinkSettings = swgChannelSettings->getRemoteSinkSettings();
+    bool hasChanged = false;
+
+    if (settings.m_deviceCenterFrequency != m_remoteChannelSettings.m_deviceCenterFrequency)
+    {
+        swgRemoteSinkSettings->setDeviceCenterFrequency(settings.m_deviceCenterFrequency);
+        hasChanged = true;
+    }
+
+    if (settings.m_log2Decim != m_remoteChannelSettings.m_log2Decim)
+    {
+        swgRemoteSinkSettings->setLog2Decim(settings.m_log2Decim);
+        hasChanged = true;
+    }
+
+    if (settings.m_filterChainHash != m_remoteChannelSettings.m_filterChainHash)
+    {
+        swgRemoteSinkSettings->setFilterChainHash(settings.m_filterChainHash);
+        hasChanged = true;
+    }
+
+    if (hasChanged)
+    {
+        QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
+                .arg(m_settings.m_apiAddress)
+                .arg(m_settings.m_apiPort)
+                .arg(m_currentMeta.m_deviceIndex)
+                .arg(m_currentMeta.m_channelIndex);
+        m_networkRequest.setUrl(QUrl(channelSettingsURL));
+        m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+        QBuffer *buffer = new QBuffer();
+        buffer->open((QBuffer::ReadWrite));
+        buffer->write(swgChannelSettings->asJson().toUtf8());
+        buffer->seek(0);
+
+        // Always use PATCH to avoid passing reverse API settings
+        QNetworkReply *reply = m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+        buffer->setParent(reply);
+    }
+
+    m_remoteChannelSettings = settings;
+
+    qDebug() << "RemoteInput::applyRemoteChannelSettings: "
+        << " m_deviceCenterFrequency: " << m_remoteChannelSettings.m_deviceCenterFrequency
+        << " m_deviceSampleRate: " << m_remoteChannelSettings.m_deviceSampleRate
+        << " m_log2Decim: " << m_remoteChannelSettings.m_log2Decim
+        << " m_filterChainHash: " << m_remoteChannelSettings.m_filterChainHash;
 }
 
 int RemoteInput::webapiRunGet(
@@ -534,7 +603,51 @@ void RemoteInput::networkManagerFinished(QNetworkReply *reply)
         QString answer = reply->readAll();
         answer.chop(1); // remove last \n
         qDebug("RemoteInput::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+
+        QByteArray jsonBytes(answer.toStdString().c_str());
+        QJsonParseError error;
+        QJsonDocument doc = QJsonDocument::fromJson(jsonBytes, &error);
+
+        if (error.error == QJsonParseError::NoError)
+        {
+            if (doc.object().contains("RemoteSinkSettings")) {
+                analyzeRemoteChannelSettingsReply(doc.object());
+            }
+        }
     }
 
     reply->deleteLater();
+}
+
+void RemoteInput::analyzeRemoteChannelSettingsReply(const QJsonObject& jsonObject)
+{
+    QJsonObject settings = jsonObject["RemoteSinkSettings"].toObject();
+    m_remoteChannelSettings.m_deviceCenterFrequency = settings["deviceCenterFrequency"].toInt();
+    m_remoteChannelSettings.m_deviceSampleRate = settings["deviceSampleRate"].toInt();
+    m_remoteChannelSettings.m_log2Decim = settings["log2Decim"].toInt();
+    m_remoteChannelSettings.m_filterChainHash = settings["filterChainHash"].toInt();
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureRemoteChannel *msg = MsgConfigureRemoteChannel::create(m_remoteChannelSettings);
+        m_guiMessageQueue->push(msg);
+    }
+}
+
+void RemoteInput::getRemoteChannelSettings()
+{
+    QString getSettingsURL= QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
+        .arg(m_settings.m_apiAddress)
+        .arg(m_settings.m_apiPort)
+        .arg(m_currentMeta.m_deviceIndex)
+        .arg(m_currentMeta.m_channelIndex);
+
+    m_networkRequest.setUrl(QUrl(getSettingsURL));
+    m_networkManager->get(m_networkRequest);
+}
+
+void RemoteInput::handleMetaChanged()
+{
+    m_currentMeta = m_remoteInputUDPHandler->getCurrentMeta();
+    getRemoteChannelSettings();
 }

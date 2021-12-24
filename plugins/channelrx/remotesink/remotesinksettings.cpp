@@ -39,7 +39,6 @@ void RemoteSinkSettings::resetToDefaults()
     m_nbFECBlocks = 0;
     m_nbTxBytes = 2;
     m_deviceCenterFrequency = 0;
-    m_deviceSampleRate = 48000;
     m_dataAddress = "127.0.0.1";
     m_dataPort = 9090;
     m_rgbColor = QColor(140, 4, 4).rgb();
@@ -74,7 +73,6 @@ QByteArray RemoteSinkSettings::serialize() const
     s.writeS32(14, m_streamIndex);
     s.writeBlob(15, m_rollupState);
     s.writeU64(16, m_deviceCenterFrequency);
-    s.writeU32(17, m_deviceSampleRate);
 
     return s.final();
 }
@@ -134,7 +132,6 @@ bool RemoteSinkSettings::deserialize(const QByteArray& data)
         d.readS32(14, &m_streamIndex, 0);
         d.readBlob(15, &m_rollupState);
         d.readU64(16, &m_deviceCenterFrequency, 0);
-        d.readU32(17, &m_deviceSampleRate, 48000);
 
         return true;
     }

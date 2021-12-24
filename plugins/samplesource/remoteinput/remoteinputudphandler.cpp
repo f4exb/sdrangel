@@ -324,6 +324,13 @@ void RemoteInputUDPHandler::tick()
     }
 
     const RemoteMetaDataFEC& metaData =  m_remoteInputBuffer.getCurrentMeta();
+
+    if (!(m_currentMeta == metaData))
+    {
+        m_currentMeta = metaData;
+        emit metaChanged();
+    }
+
     m_readLength = m_readLengthSamples * (metaData.m_sampleBytes & 0xF) * 2;
 
     if (metaData.m_sampleBits == SDR_RX_SAMP_SZ) // no conversion
@@ -408,56 +415,6 @@ void RemoteInputUDPHandler::tick()
     {
         qWarning("RemoteInputUDPHandler::tick: unexpected sample size in stream: %d bits", (int) metaData.m_sampleBits);
     }
-
-    // if ((metaData.m_sampleBits == 16) && (SDR_RX_SAMP_SZ == 24)) // 16 -> 24 bits
-    // {
-    //     if (m_readLengthSamples > (int) m_converterBufferNbSamples)
-    //     {
-    //         if (m_converterBuffer) { delete[] m_converterBuffer; }
-    //         m_converterBuffer = new int32_t[m_readLengthSamples*2];
-    //     }
-
-    //     uint8_t *buf = m_remoteInputBuffer.readData(m_readLength);
-
-    //     for (int is = 0; is < m_readLengthSamples; is++)
-    //     {
-    //         m_converterBuffer[2*is] = ((int16_t*)buf)[2*is]; // I
-    //         m_converterBuffer[2*is]<<=8;
-    //         m_converterBuffer[2*is+1] = ((int16_t*)buf)[2*is+1]; // Q
-    //         m_converterBuffer[2*is+1]<<=8;
-    //     }
-
-    //     m_sampleFifo->write(reinterpret_cast<quint8*>(m_converterBuffer), m_readLengthSamples*sizeof(Sample));
-    // }
-    // else if ((metaData.m_sampleBits == 24) && (SDR_RX_SAMP_SZ == 16)) // 24 -> 16 bits
-    // {
-    //     if (m_readLengthSamples > (int) m_converterBufferNbSamples)
-    //     {
-    //         if (m_converterBuffer) { delete[] m_converterBuffer; }
-    //         m_converterBuffer = new int32_t[m_readLengthSamples];
-    //     }
-
-    //     uint8_t *buf = m_remoteInputBuffer.readData(m_readLength);
-
-    //     for (int is = 0; is < m_readLengthSamples; is++)
-    //     {
-    //         m_converterBuffer[is] =  ((int32_t *)buf)[2*is+1]>>8; // Q -> MSB
-    //         m_converterBuffer[is] <<=16;
-    //         m_converterBuffer[is] += ((int32_t *)buf)[2*is]>>8; // I -> LSB
-    //     }
-
-    //     m_sampleFifo->write(reinterpret_cast<quint8*>(m_converterBuffer), m_readLengthSamples*sizeof(Sample));
-    // }
-    // else if ((metaData.m_sampleBits == 16) || (metaData.m_sampleBits == 24)) // same sample size and valid size
-    // {
-    //     // read samples directly feeding the SampleFifo (no callback)
-    //     m_sampleFifo->write(reinterpret_cast<quint8*>(m_remoteInputBuffer.readData(m_readLength)), m_readLength);
-    //     m_samplesCount += m_readLengthSamples;
-    // }
-    // else // invalid size
-    // {
-    //     qWarning("RemoteInputUDPHandler::tick: unexpected sample size in stream: %d bits", (int) metaData.m_sampleBits);
-    // }
 
 	if (m_tickCount < m_rateDivider)
 	{

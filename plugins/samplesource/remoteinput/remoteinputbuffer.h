@@ -18,11 +18,14 @@
 #ifndef PLUGINS_SAMPLESOURCE_REMOTEINPUT_REMOTEINPUTBUFFER_H_
 #define PLUGINS_SAMPLESOURCE_REMOTEINPUT_REMOTEINPUTBUFFER_H_
 
-#include <channel/remotedatablock.h>
 #include <QString>
 #include <QDebug>
+
 #include <cstdlib>
+
 #include "cm256cc/cm256.h"
+
+#include "channel/remotedatablock.h"
 #include "util/movingaverage.h"
 
 

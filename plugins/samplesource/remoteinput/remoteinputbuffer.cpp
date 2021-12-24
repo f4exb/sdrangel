@@ -415,8 +415,6 @@ void RemoteInputBuffer::printMeta(const QString& header, RemoteMetaDataFEC *meta
             << ":" << (int) metaData->m_sampleBits
             << ":" << (int) metaData->m_nbOriginalBlocks
             << ":" << (int) metaData->m_nbFECBlocks
-            << "|" << metaData->m_deviceCenterFrequency
-            << ":" << metaData->m_basebandSampleRate
             << "|" << metaData->m_deviceIndex
             << ":" << metaData->m_channelIndex
             << "|" << metaData->m_tv_sec

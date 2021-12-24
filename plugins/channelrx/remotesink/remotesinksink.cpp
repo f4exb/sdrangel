@@ -131,8 +131,6 @@ void RemoteSinkSink::feed(const SampleVector::const_iterator& begin, const Sampl
             metaData.m_sampleBits = getNbSampleBits();
             metaData.m_nbOriginalBlocks = RemoteNbOrginalBlocks;
             metaData.m_nbFECBlocks = m_nbBlocksFEC;
-            metaData.m_deviceCenterFrequency = m_deviceCenterFrequency;
-            metaData.m_basebandSampleRate = m_basebandSampleRate;
             metaData.m_deviceIndex = m_deviceIndex % 256;
             metaData.m_channelIndex = m_channelIndex % 256;
             metaData.m_tv_sec = nowus / 1000000UL;  // tv.tv_sec;
@@ -164,8 +162,6 @@ void RemoteSinkSink::feed(const SampleVector::const_iterator& begin, const Sampl
                         << ":" << (int) metaData.m_sampleBits
                         << "|" << (int) metaData.m_nbOriginalBlocks
                         << ":" << (int) metaData.m_nbFECBlocks
-                        << "|" << metaData.m_deviceCenterFrequency
-                        << ":" << metaData.m_basebandSampleRate
                         << "|" << metaData.m_deviceIndex
                         << ":" << metaData.m_channelIndex
                         << "|" << metaData.m_tv_sec

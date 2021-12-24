@@ -74,8 +74,13 @@ public:
     uint64_t getTVmSec() const { return m_tv_msec; }
     int getMinNbBlocks() { return m_remoteInputBuffer.getMinNbBlocks(); }
     int getMaxNbRecovery() { return m_remoteInputBuffer.getMaxNbRecovery(); }
+	const RemoteMetaDataFEC& getCurrentMeta() const { return m_currentMeta; }
+
 public slots:
 	void dataReadyRead();
+
+signals:
+	void metaChanged();
 
 private:
     class MsgUDPAddressAndPort : public Message {
@@ -113,6 +118,7 @@ private:
 	bool m_running;
     uint32_t m_rateDivider;
 	RemoteInputBuffer m_remoteInputBuffer;
+	RemoteMetaDataFEC m_currentMeta;
 	QUdpSocket *m_dataSocket;
 	QHostAddress m_dataAddress;
 	QHostAddress m_remoteAddress;

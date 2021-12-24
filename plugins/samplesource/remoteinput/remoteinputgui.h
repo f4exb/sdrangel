@@ -55,6 +55,8 @@ private:
 
 	DeviceUISet* m_deviceUISet;
     RemoteInputSettings m_settings;        //!< current settings
+	RemoteInput::RemoteChannelSettings m_remoteChannelSettings;
+	double m_remoteShiftFrequencyFactor;  //!< Remote channel frequency shift factor
 	RemoteInput* m_sampleSource;
     bool m_acquisition;
     int m_streamSampleRate;          //!< Sample rate of received stream
@@ -103,6 +105,8 @@ private:
 
     void blockApplySettings(bool block);
 	void displaySettings();
+	void displayRemoteSettings();
+	void displayRemoteShift();
 	void displayTime();
     void sendSettings();
 	void updateWithAcquisition();
@@ -110,11 +114,17 @@ private:
 	void updateSampleRateAndFrequency();
 	void displayEventCounts();
     void displayEventTimer();
+	void applyDecimation();
+	void applyPosition();
+	void applyRemoteSettings();
     void analyzeApiReply(const QJsonObject& jsonObject);
 	bool handleMessage(const Message& message);
 
 private slots:
     void handleInputMessages();
+	void on_remoteDeviceFrequency_changed(quint64 value);
+    void on_decimationFactor_currentIndexChanged(int index);
+    void on_position_valueChanged(int value);
 	void on_apiApplyButton_clicked(bool checked);
     void on_dataApplyButton_clicked(bool checked);
 	void on_dcOffset_toggled(bool checked);

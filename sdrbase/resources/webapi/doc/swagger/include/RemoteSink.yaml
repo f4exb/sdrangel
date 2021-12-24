@@ -11,6 +11,9 @@ RemoteSinkSettings:
           * 1
           * 2
           * 4
+    deviceCenterFrequency:
+      type: integer
+      description: Device center frequency in kHz
     dataAddress:
       description: "Receiving USB data address"
       type: string

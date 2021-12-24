@@ -37,6 +37,7 @@
 #include "gui/basicdevicesettingsdialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
+#include "dsp/hbfilterchainconverter.h"
 #include "mainwindow.h"
 #include "util/simpleserializer.h"
 #include "device/deviceapi.h"
@@ -75,6 +76,9 @@ RemoteInputGui::RemoteInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
 	m_startingTimeStampms = 0;
 	ui->setupUi(this);
+
+    ui->remoteDeviceFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+    ui->remoteDeviceFrequency->setValueRange(8, 0, 99999999);
 
     CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStop);
     connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
@@ -157,6 +161,16 @@ bool RemoteInputGui::handleMessage(const Message& message)
         m_settings = cfg.getSettings();
         blockApplySettings(true);
         displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
+    else if (RemoteInput::MsgConfigureRemoteChannel::match(message))
+    {
+        qDebug("RemoteInputGui::handleMessage: RemoteInput::MsgConfigureRemoteChannel");
+        const RemoteInput::MsgConfigureRemoteChannel& cfg = (RemoteInput::MsgConfigureRemoteChannel&) message;
+        m_remoteChannelSettings = cfg.getSettings();
+        blockApplySettings(true);
+        displayRemoteSettings();
         blockApplySettings(false);
         return true;
     }
@@ -286,10 +300,84 @@ void RemoteInputGui::displaySettings()
 	blockApplySettings(false);
 }
 
+void RemoteInputGui::displayRemoteSettings()
+{
+    blockApplySettings(true);
+    ui->remoteDeviceFrequency->setValue(m_remoteChannelSettings.m_deviceCenterFrequency/1000);
+    ui->decimationFactor->setCurrentIndex(m_remoteChannelSettings.m_log2Decim);
+    applyDecimation();
+    blockApplySettings(false);
+}
+
+void RemoteInputGui::displayRemoteShift()
+{
+    int basebandSampleRate = m_streamSampleRate * (1<<m_remoteChannelSettings.m_log2Decim);
+    int shift = m_remoteShiftFrequencyFactor * basebandSampleRate;
+    QLocale loc;
+    ui->offsetFrequencyText->setText(tr("%1 Hz").arg(loc.toString(shift)));
+}
+
+void RemoteInputGui::applyDecimation()
+{
+    uint32_t maxHash = 1;
+
+    for (uint32_t i = 0; i < m_remoteChannelSettings.m_log2Decim; i++) {
+        maxHash *= 3;
+    }
+
+    ui->position->setMaximum(maxHash-1);
+    ui->position->setValue(m_remoteChannelSettings.m_filterChainHash);
+    m_remoteChannelSettings.m_filterChainHash = ui->position->value();
+    applyPosition();
+}
+
+void RemoteInputGui::applyPosition()
+{
+    ui->filterChainIndex->setText(tr("%1").arg(m_remoteChannelSettings.m_filterChainHash));
+    QString s;
+    m_remoteShiftFrequencyFactor = HBFilterChainConverter::convertToString(
+        m_remoteChannelSettings.m_log2Decim,
+        m_remoteChannelSettings.m_filterChainHash, s)
+    ;
+    ui->filterChainText->setText(s);
+
+    displayRemoteShift();
+    applyRemoteSettings();
+}
+
+void RemoteInputGui::applyRemoteSettings()
+{
+    if (m_doApplySettings)
+    {
+        qDebug() << "RemoteInputGui::applyRemoteSettings";
+        RemoteInput::MsgConfigureRemoteChannel* message =
+                RemoteInput::MsgConfigureRemoteChannel::create(m_remoteChannelSettings);
+        m_sampleSource->getInputMessageQueue()->push(message);
+    }
+}
+
 void RemoteInputGui::sendSettings()
 {
     if(!m_updateTimer.isActive())
         m_updateTimer.start(100);
+}
+
+void RemoteInputGui::on_remoteDeviceFrequency_changed(quint64 value)
+{
+    m_remoteChannelSettings.m_deviceCenterFrequency = value * 1000;
+    applyRemoteSettings();
+}
+
+void RemoteInputGui::on_decimationFactor_currentIndexChanged(int index)
+{
+    m_remoteChannelSettings.m_log2Decim = index;
+    applyDecimation();
+}
+
+void RemoteInputGui::on_position_valueChanged(int value)
+{
+    m_remoteChannelSettings.m_filterChainHash = value;
+    applyPosition();
 }
 
 void RemoteInputGui::on_apiApplyButton_clicked(bool checked)

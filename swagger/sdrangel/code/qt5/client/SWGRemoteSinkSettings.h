@@ -49,6 +49,9 @@ public:
     qint32 getNbTxBytes();
     void setNbTxBytes(qint32 nb_tx_bytes);
 
+    qint32 getDeviceCenterFrequency();
+    void setDeviceCenterFrequency(qint32 device_center_frequency);
+
     QString* getDataAddress();
     void setDataAddress(QString* data_address);
 
@@ -97,6 +100,9 @@ private:
 
     qint32 nb_tx_bytes;
     bool m_nb_tx_bytes_isSet;
+
+    qint32 device_center_frequency;
+    bool m_device_center_frequency_isSet;
 
     QString* data_address;
     bool m_data_address_isSet;

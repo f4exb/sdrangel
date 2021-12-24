@@ -28,6 +28,7 @@
 #include <QNetworkRequest>
 
 #include "dsp/devicesamplesource.h"
+#include "channel/remotedatablock.h"
 
 #include "remoteinputsettings.h"
 
@@ -39,6 +40,21 @@ class RemoteInputUDPHandler;
 class RemoteInput : public DeviceSampleSource {
     Q_OBJECT
 public:
+    struct RemoteChannelSettings
+    {
+        uint64_t m_deviceCenterFrequency;
+        uint32_t m_deviceSampleRate;
+        uint32_t m_log2Decim;
+        uint32_t m_filterChainHash;
+
+        RemoteChannelSettings() :
+            m_deviceCenterFrequency(0),
+            m_deviceSampleRate(1),
+            m_log2Decim(0),
+            m_filterChainHash(0)
+        {}
+    };
+
     class MsgConfigureRemoteInput : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -122,6 +138,26 @@ public:
 			m_sampleRate(sampleRate),
 			m_centerFrequency(centerFrequency),
 			m_tv_msec(tv_msec)
+		{ }
+	};
+
+	class MsgConfigureRemoteChannel : public Message {
+		MESSAGE_CLASS_DECLARATION
+
+	public:
+		const RemoteChannelSettings& getSettings() const { return m_settings; }
+
+		static MsgConfigureRemoteChannel* create(const RemoteChannelSettings& settings)
+		{
+			return new MsgConfigureRemoteChannel(settings);
+		}
+
+	protected:
+		RemoteChannelSettings m_settings;
+
+		MsgConfigureRemoteChannel(const RemoteChannelSettings& settings) :
+			Message(),
+			m_settings(settings)
 		{ }
 	};
 
@@ -307,7 +343,9 @@ private:
     int m_sampleRate;
 	QMutex m_mutex;
 	RemoteInputSettings m_settings;
+    RemoteChannelSettings m_remoteChannelSettings;
 	RemoteInputUDPHandler* m_remoteInputUDPHandler;
+    RemoteMetaDataFEC m_currentMeta;
     QString m_remoteAddress;
 	QString m_deviceDescription;
 	std::time_t m_startingTimeStamp;
@@ -315,12 +353,16 @@ private:
     QNetworkRequest m_networkRequest;
 
     void applySettings(const RemoteInputSettings& settings, bool force = false);
+    void applyRemoteChannelSettings(const RemoteChannelSettings& settings);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
     void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const RemoteInputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
+    void getRemoteChannelSettings();
+    void analyzeRemoteChannelSettingsReply(const QJsonObject& jsonObject);
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
+    void handleMetaChanged();
 };
 
 #endif // INCLUDE_REMOTEINPUT_H
