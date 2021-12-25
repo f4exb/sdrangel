@@ -25,10 +25,6 @@
 #include <QTime>
 #include <QDateTime>
 #include <QString>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
-#include <QJsonParseError>
-#include <QJsonObject>
 
 #include "ui_remoteinputgui.h"
 #include "gui/colormapper.h"
@@ -94,9 +90,6 @@ RemoteInputGui::RemoteInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 	m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);
 
-    m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
-
     m_eventsTime.start();
     displayEventCounts();
     displayEventTimer();
@@ -107,8 +100,6 @@ RemoteInputGui::RemoteInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
 RemoteInputGui::~RemoteInputGui()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
-    delete m_networkManager;
 	delete ui;
 }
 
@@ -222,7 +213,20 @@ bool RemoteInputGui::handleMessage(const Message& message)
         blockApplySettings(true);
         ui->startStop->setChecked(notif.getStartStop());
         blockApplySettings(false);
-
+        return true;
+    }
+    else if (RemoteInput::MsgReportRemoteFixedData::match(message))
+    {
+        ui->apiAddressLabel->setStyleSheet("QLabel { background-color : green; }");
+        const RemoteInput::MsgReportRemoteFixedData& report = (const RemoteInput::MsgReportRemoteFixedData&) message;
+        displayRemoteFixedData(report.getData());
+        return true;
+    }
+    else if (RemoteInput::MsgReportRemoteAPIError::match(message))
+    {
+        ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+        const RemoteInput::MsgReportRemoteAPIError& report = (const RemoteInput::MsgReportRemoteAPIError&) message;
+        ui->statusText->setText(QString(report.getMessage()));
         return true;
     }
 	else
@@ -394,9 +398,9 @@ void RemoteInputGui::on_apiApplyButton_clicked(bool checked)
 
     sendSettings();
 
-    QString infoURL = QString("http://%1:%2/sdrangel").arg(m_settings.m_apiAddress).arg(m_settings.m_apiPort);
-    m_networkRequest.setUrl(QUrl(infoURL));
-    m_networkManager->get(m_networkRequest);
+    ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+    RemoteInput::MsgRequestFixedData *msg = RemoteInput::MsgRequestFixedData::create();
+    m_sampleSource->getInputMessageQueue()->push(msg);
 }
 
 void RemoteInputGui::on_dataApplyButton_clicked(bool checked)
@@ -413,9 +417,9 @@ void RemoteInputGui::on_apiAddress_editingFinished()
 {
     m_settings.m_apiAddress = ui->apiAddress->text();
 
-    QString infoURL = QString("http://%1:%2/sdrangel").arg(m_settings.m_apiAddress).arg(m_settings.m_apiPort);
-    m_networkRequest.setUrl(QUrl(infoURL));
-    m_networkManager->get(m_networkRequest);
+    ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+    RemoteInput::MsgRequestFixedData *msg = RemoteInput::MsgRequestFixedData::create();
+    m_sampleSource->getInputMessageQueue()->push(msg);
 
     sendSettings();
 }
@@ -470,9 +474,9 @@ void RemoteInputGui::on_apiPort_editingFinished()
     {
         m_settings.m_apiPort = udpApiPort;
 
-        QString infoURL = QString("http://%1:%2/sdrangel").arg(m_settings.m_apiAddress).arg(m_settings.m_apiPort);
-        m_networkRequest.setUrl(QUrl(infoURL));
-        m_networkManager->get(m_networkRequest);
+        ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+        RemoteInput::MsgRequestFixedData *msg = RemoteInput::MsgRequestFixedData::create();
+        m_sampleSource->getInputMessageQueue()->push(msg);
 
         sendSettings();
     }
@@ -524,6 +528,21 @@ void RemoteInputGui::displayEventTimer()
     recordLength = recordLength.addSecs(elapsedTimeMillis/1000);
     QString s_time = recordLength.toString("HH:mm:ss");
     ui->eventCountsTimeText->setText(s_time);
+}
+
+void RemoteInputGui::displayRemoteFixedData(const RemoteInput::MsgReportRemoteFixedData::RemoteData& remoteData)
+{
+    QString infoLine;
+
+    infoLine = remoteData.m_version;
+    infoLine += " Qt" + remoteData.m_qtVersion;
+    infoLine += " " + remoteData.m_architecture;
+    infoLine += " " + remoteData.m_os;
+    infoLine +=  QString(" %1/%2b").arg(remoteData.m_rxBits).arg(remoteData.m_txBits);
+
+    if (infoLine.size() > 0) {
+        ui->infoText->setText(infoLine);
+    }
 }
 
 void RemoteInputGui::updateWithAcquisition()
@@ -633,78 +652,6 @@ void RemoteInputGui::updateStatus()
         ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
         ui->startStop->setChecked(false);
         ui->startStop->setEnabled(false);
-    }
-}
-
-void RemoteInputGui::networkManagerFinished(QNetworkReply *reply)
-{
-    if (reply->error())
-    {
-        ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
-        ui->statusText->setText(reply->errorString());
-    }
-    else
-    {
-        QString answer = reply->readAll();
-
-        try
-        {
-            QByteArray jsonBytes(answer.toStdString().c_str());
-            QJsonParseError error;
-            QJsonDocument doc = QJsonDocument::fromJson(jsonBytes, &error);
-
-            if (error.error == QJsonParseError::NoError)
-            {
-                ui->apiAddressLabel->setStyleSheet("QLabel { background-color : green; }");
-                ui->statusText->setText(QString("API OK"));
-                analyzeApiReply(doc.object());
-            }
-            else
-            {
-                ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
-                QString errorMsg = QString("Reply JSON error: ") + error.errorString() + QString(" at offset ") + QString::number(error.offset);
-                ui->statusText->setText(QString("JSON error. See log"));
-                qInfo().noquote() << "RemoteInputGui::networkManagerFinished" << errorMsg;
-            }
-        }
-        catch (const std::exception& ex)
-        {
-            ui->apiAddressLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
-            QString errorMsg = QString("Error parsing request: ") + ex.what();
-            ui->statusText->setText("Error parsing request. See log for details");
-            qInfo().noquote() << "RemoteInputGui::networkManagerFinished" << errorMsg;
-        }
-    }
-
-    reply->deleteLater();
-}
-
-void RemoteInputGui::analyzeApiReply(const QJsonObject& jsonObject)
-{
-    QString infoLine;
-
-    if (jsonObject.contains("version")) {
-        infoLine = jsonObject["version"].toString();
-    }
-
-    if (jsonObject.contains("qtVersion")) {
-        infoLine += " Qt" + jsonObject["qtVersion"].toString();
-    }
-
-    if (jsonObject.contains("architecture")) {
-        infoLine += " " + jsonObject["architecture"].toString();
-    }
-
-    if (jsonObject.contains("os")) {
-        infoLine += " " + jsonObject["os"].toString();
-    }
-
-    if (jsonObject.contains("dspRxBits") && jsonObject.contains("dspTxBits")) {
-        infoLine +=  QString(" %1/%2b").arg(jsonObject["dspRxBits"].toInt()).arg(jsonObject["dspTxBits"].toInt());
-    }
-
-    if (infoLine.size() > 0) {
-        ui->infoText->setText(infoLine);
     }
 }
 

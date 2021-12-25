@@ -284,6 +284,68 @@ public:
         { }
     };
 
+    class MsgReportRemoteFixedData : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        struct RemoteData
+        {
+            QString m_version;      //!< Remote SDRangel version
+            QString m_qtVersion;    //!< Remote Qt version used to build SDRangel
+            QString m_architecture; //!< Remote CPU architecture
+            QString m_os;           //!< Remote O/S
+            int     m_rxBits;       //!< Number of bits used for I or Q sample on Rx side
+            int     m_txBits;       //!< Number of bits used for I or Q sample on Tx side
+        };
+
+        const RemoteData& getData() const { return m_remoteData; }
+
+        static MsgReportRemoteFixedData* create(const RemoteData& remoteData) {
+            return new MsgReportRemoteFixedData(remoteData);
+        }
+
+    private:
+        RemoteData m_remoteData;
+
+        MsgReportRemoteFixedData(const RemoteData& remoteData) :
+            Message(),
+            m_remoteData(remoteData)
+        {}
+    };
+
+    class MsgReportRemoteAPIError : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const QString& getMessage() const { return m_message; }
+
+        static MsgReportRemoteAPIError* create(const QString& message) {
+            return new MsgReportRemoteAPIError(message);
+        }
+
+    private:
+        QString m_message;
+
+        MsgReportRemoteAPIError(const QString& message) :
+            Message(),
+            m_message(message)
+        {}
+    };
+
+    class MsgRequestFixedData : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgRequestFixedData* create() {
+            return new MsgRequestFixedData();
+        }
+
+    private:
+        MsgRequestFixedData() :
+            Message()
+        {}
+    };
+
 	RemoteInput(DeviceAPI *deviceAPI);
 	virtual ~RemoteInput();
 	virtual void destroy();
@@ -359,6 +421,7 @@ private:
     void webapiReverseSendStartStop(bool start);
     void getRemoteChannelSettings();
     void analyzeRemoteChannelSettingsReply(const QJsonObject& jsonObject);
+    void analyzeInstanceSummaryReply(const QJsonObject& jsonObject);
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);

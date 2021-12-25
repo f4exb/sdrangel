@@ -44,6 +44,9 @@ MESSAGE_CLASS_DEFINITION(RemoteInput::MsgReportRemoteInputStreamData, Message)
 MESSAGE_CLASS_DEFINITION(RemoteInput::MsgReportRemoteInputStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(RemoteInput::MsgConfigureRemoteChannel, Message)
 MESSAGE_CLASS_DEFINITION(RemoteInput::MsgStartStop, Message)
+MESSAGE_CLASS_DEFINITION(RemoteInput::MsgReportRemoteFixedData, Message)
+MESSAGE_CLASS_DEFINITION(RemoteInput::MsgReportRemoteAPIError, Message)
+MESSAGE_CLASS_DEFINITION(RemoteInput::MsgRequestFixedData, Message)
 
 RemoteInput::RemoteInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
@@ -211,6 +214,19 @@ bool RemoteInput::handleMessage(const Message& message)
         qDebug() << "RemoteInput::handleMessage:" << message.getIdentifier();
         MsgConfigureRemoteChannel& conf = (MsgConfigureRemoteChannel&) message;
         applyRemoteChannelSettings(conf.getSettings());
+        return true;
+    }
+    else if (MsgRequestFixedData::match(message))
+    {
+        QString reportURL;
+
+        reportURL = QString("http://%1:%2/sdrangel")
+            .arg(m_settings.m_apiAddress)
+            .arg(m_settings.m_apiPort);
+
+        m_networkRequest.setUrl(QUrl(reportURL));
+        m_networkManager->get(m_networkRequest);
+
         return true;
     }
 	else
@@ -597,6 +613,12 @@ void RemoteInput::networkManagerFinished(QNetworkReply *reply)
                 << " error(" << (int) replyError
                 << "): " << replyError
                 << ": " << reply->errorString();
+
+        if (m_guiMessageQueue)
+        {
+            MsgReportRemoteAPIError *msg = MsgReportRemoteAPIError::create(reply->errorString());
+            m_guiMessageQueue->push(msg);
+        }
     }
     else
     {
@@ -610,13 +632,58 @@ void RemoteInput::networkManagerFinished(QNetworkReply *reply)
 
         if (error.error == QJsonParseError::NoError)
         {
-            if (doc.object().contains("RemoteSinkSettings")) {
-                analyzeRemoteChannelSettingsReply(doc.object());
+            const QJsonObject&jsonObject = doc.object();
+
+            if (jsonObject.contains("RemoteSinkSettings")) {
+                analyzeRemoteChannelSettingsReply(jsonObject);
+            } else if (jsonObject.contains("version")) {
+                analyzeInstanceSummaryReply(jsonObject);
+            }
+        }
+        else
+        {
+            QString errorMsg = QString("Reply JSON error: ") + error.errorString() + QString(" at offset ") + QString::number(error.offset);
+            qInfo().noquote() << "RemoteInputGui::networkManagerFinished: " << errorMsg;
+
+            if (m_guiMessageQueue)
+            {
+                MsgReportRemoteAPIError *msg = MsgReportRemoteAPIError::create(errorMsg);
+                m_guiMessageQueue->push(msg);
             }
         }
     }
 
     reply->deleteLater();
+}
+
+void RemoteInput::analyzeInstanceSummaryReply(const QJsonObject& jsonObject)
+{
+    MsgReportRemoteFixedData::RemoteData msgRemoteFixedData;
+    msgRemoteFixedData.m_version = jsonObject["version"].toString();
+
+    if (jsonObject.contains("qtVersion")) {
+        msgRemoteFixedData.m_qtVersion = jsonObject["qtVersion"].toString();
+    }
+
+    if (jsonObject.contains("architecture")) {
+        msgRemoteFixedData.m_architecture = jsonObject["architecture"].toString();
+    }
+
+    if (jsonObject.contains("os")) {
+        msgRemoteFixedData.m_os = jsonObject["os"].toString();
+    }
+
+    if (jsonObject.contains("dspRxBits") && jsonObject.contains("dspTxBits"))
+    {
+        msgRemoteFixedData.m_rxBits = jsonObject["dspRxBits"].toInt();
+        msgRemoteFixedData.m_txBits = jsonObject["dspTxBits"].toInt();
+    }
+
+    if (m_guiMessageQueue)
+    {
+        MsgReportRemoteFixedData *msg = MsgReportRemoteFixedData::create(msgRemoteFixedData);
+        m_guiMessageQueue->push(msg);
+    }
 }
 
 void RemoteInput::analyzeRemoteChannelSettingsReply(const QJsonObject& jsonObject)

@@ -21,7 +21,6 @@
 #include <QTimer>
 #include <QElapsedTimer>
 #include <QWidget>
-#include <QNetworkRequest>
 
 #include "device/devicegui.h"
 #include "util/messagequeue.h"
@@ -100,14 +99,12 @@ private:
     QPalette m_paletteGreenText;
     QPalette m_paletteWhiteText;
 
-    QNetworkAccessManager *m_networkManager;
-    QNetworkRequest m_networkRequest;
-
     void blockApplySettings(bool block);
 	void displaySettings();
 	void displayRemoteSettings();
 	void displayRemoteShift();
 	void displayTime();
+	void displayRemoteFixedData(const RemoteInput::MsgReportRemoteFixedData::RemoteData& remoteData);
     void sendSettings();
 	void updateWithAcquisition();
 	void updateWithStreamTime();
@@ -117,7 +114,6 @@ private:
 	void applyDecimation();
 	void applyPosition();
 	void applyRemoteSettings();
-    void analyzeApiReply(const QJsonObject& jsonObject);
 	bool handleMessage(const Message& message);
 
 private slots:
@@ -139,7 +135,6 @@ private slots:
     void on_eventCountsReset_clicked(bool checked);
     void updateHardware();
 	void updateStatus();
-	void networkManagerFinished(QNetworkReply *reply);
     void openDeviceSettingsDialog(const QPoint& p);
 };
 
