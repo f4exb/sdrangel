@@ -1,3 +1,11 @@
+sdrangel (6.17.6-1) unstable; urgency=medium
+
+  * Remote plugins: added capability to choose sample size in transmission. Implements #1078
+  * Remote input: added some control of remote instance. Implements #1074
+  * Remote Input: fixed segfault when stream sample rate is lowered
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 26 Dec 2021 11:10:26 +0100
+
 sdrangel (6.17.5-1) unstable; urgency=medium
 
   * ADSB demod and VOR feature: Always use C locale for parsing coords in airport database.

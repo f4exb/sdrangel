@@ -31,7 +31,7 @@
 const PluginDescriptor RemoteInputPlugin::m_pluginDescriptor = {
     QStringLiteral("RemoteInput"),
 	QStringLiteral("Remote device input"),
-	QStringLiteral("6.17.5"),
+	QStringLiteral("6.17.6"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,
