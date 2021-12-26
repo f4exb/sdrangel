@@ -93,8 +93,8 @@ void RemoteInputBuffer::setNbDecoderSlots(int nbDecoderSlots)
 
     m_decoderSlots = new DecoderSlot[m_nbDecoderSlots];
     m_frames = new BufferFrame[m_nbDecoderSlots];
-
     m_frameHead = -1;
+    initReadIndex();
 }
 
 void RemoteInputBuffer::setBufferLenSec(const RemoteMetaDataFEC& metaData)
