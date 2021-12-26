@@ -26,7 +26,7 @@
 #include "remoteinputudphandler.h"
 #include "remoteinput.h"
 
-MESSAGE_CLASS_DEFINITION(RemoteInputUDPHandler::MsgReportSampleRateChange, Message)
+MESSAGE_CLASS_DEFINITION(RemoteInputUDPHandler::MsgReportMetaDataChange, Message)
 MESSAGE_CLASS_DEFINITION(RemoteInputUDPHandler::MsgUDPAddressAndPort, Message)
 
 RemoteInputUDPHandler::RemoteInputUDPHandler(SampleSinkFifo *sampleFifo, DeviceAPI *deviceAPI) :
@@ -55,7 +55,7 @@ RemoteInputUDPHandler::RemoteInputUDPHandler(SampleSinkFifo *sampleFifo, DeviceA
     m_throttlems(REMOTEINPUT_THROTTLE_MS),
     m_readLengthSamples(0),
     m_readLength(0),
-    m_converterBuffer(0),
+    m_converterBuffer(nullptr),
     m_converterBufferNbSamples(0),
     m_throttleToggle(false),
 	m_autoCorrBuffer(true)
@@ -149,7 +149,7 @@ void RemoteInputUDPHandler::stop()
 	if (m_dataSocket)
 	{
 		delete m_dataSocket;
-		m_dataSocket = 0;
+		m_dataSocket = nullptr;
 	}
 
 	m_centerFrequency = 0;
@@ -213,6 +213,18 @@ void RemoteInputUDPHandler::processData()
 {
     m_remoteInputBuffer.writeData(m_udpBuf);
     const RemoteMetaDataFEC& metaData =  m_remoteInputBuffer.getCurrentMeta();
+
+    if (!(m_currentMeta == metaData))
+    {
+        m_currentMeta = metaData;
+
+        if (m_messageQueueToInput)
+        {
+            MsgReportMetaDataChange *msg = MsgReportMetaDataChange::create(m_currentMeta);
+            m_messageQueueToInput->push(msg);
+        }
+    }
+
     bool change = false;
 
     m_tv_msec = m_remoteInputBuffer.getTVOutMSec();
@@ -227,13 +239,6 @@ void RemoteInputUDPHandler::processData()
     {
         disconnectTimer();
         adjustNbDecoderSlots(metaData);
-
-        if (m_messageQueueToInput)
-        {
-            MsgReportSampleRateChange *msg = MsgReportSampleRateChange::create(metaData.m_sampleRate);
-            m_messageQueueToInput->push(msg);
-        }
-
         m_samplerate = metaData.m_sampleRate;
         change = true;
     }
@@ -256,6 +261,8 @@ void RemoteInputUDPHandler::processData()
         }
 
         m_dataSocket->setSocketOption(QAbstractSocket::ReceiveBufferSizeSocketOption, getDataSocketBufferSize());
+        m_elapsedTimer.restart();
+        m_throttlems = 0;
         connectTimer();
     }
 }
@@ -310,7 +317,7 @@ void RemoteInputUDPHandler::tick()
     if (throttlems != m_throttlems)
     {
         m_throttlems = throttlems;
-        m_readLengthSamples = (m_remoteInputBuffer.getCurrentMeta().m_sampleRate * (m_throttlems+(m_throttleToggle ? 1 : 0))) / 1000;
+        m_readLengthSamples = (m_currentMeta.m_sampleRate * (m_throttlems+(m_throttleToggle ? 1 : 0))) / 1000;
         m_throttleToggle = !m_throttleToggle;
     }
 
@@ -319,27 +326,19 @@ void RemoteInputUDPHandler::tick()
         m_readLengthSamples += m_remoteInputBuffer.getRWBalanceCorrection();
         // Eliminate negative or excessively high values
         m_readLengthSamples = m_readLengthSamples < 0 ?
-            0 : m_readLengthSamples > (int) m_remoteInputBuffer.getCurrentMeta().m_sampleRate/5 ?
+            0 : m_readLengthSamples > (int) m_currentMeta.m_sampleRate/5 ?
                 m_remoteInputBuffer.getCurrentMeta().m_sampleRate/5 : m_readLengthSamples;
     }
 
-    const RemoteMetaDataFEC& metaData =  m_remoteInputBuffer.getCurrentMeta();
+    m_readLength = m_readLengthSamples * (m_currentMeta.m_sampleBytes & 0xF) * 2;
 
-    if (!(m_currentMeta == metaData))
-    {
-        m_currentMeta = metaData;
-        emit metaChanged();
-    }
-
-    m_readLength = m_readLengthSamples * (metaData.m_sampleBytes & 0xF) * 2;
-
-    if (metaData.m_sampleBits == SDR_RX_SAMP_SZ) // no conversion
+    if (m_currentMeta.m_sampleBits == SDR_RX_SAMP_SZ) // no conversion
     {
         // read samples directly feeding the SampleFifo (no callback)
         m_sampleFifo->write(reinterpret_cast<quint8*>(m_remoteInputBuffer.readData(m_readLength)), m_readLength);
         m_samplesCount += m_readLengthSamples;
     }
-    else if ((metaData.m_sampleBits == 8) && (SDR_RX_SAMP_SZ == 16)) // 8 -> 16
+    else if ((m_currentMeta.m_sampleBits == 8) && (SDR_RX_SAMP_SZ == 16)) // 8 -> 16
     {
         if (m_readLengthSamples > (int) m_converterBufferNbSamples)
         {
@@ -356,7 +355,7 @@ void RemoteInputUDPHandler::tick()
             m_converterBuffer[is] += buf[2*is] * (1<<8);  // I -> LSB
         }
     }
-    else if ((metaData.m_sampleBits == 8) && (SDR_RX_SAMP_SZ == 24)) // 8 -> 24
+    else if ((m_currentMeta.m_sampleBits == 8) && (SDR_RX_SAMP_SZ == 24)) // 8 -> 24
     {
         if (m_readLengthSamples > (int) m_converterBufferNbSamples)
         {
@@ -374,7 +373,7 @@ void RemoteInputUDPHandler::tick()
 
         m_sampleFifo->write(reinterpret_cast<quint8*>(m_converterBuffer), m_readLengthSamples*sizeof(Sample));
     }
-    else if (metaData.m_sampleBits == 16) // 16 -> 24
+    else if (m_currentMeta.m_sampleBits == 16) // 16 -> 24
     {
         if (m_readLengthSamples > (int) m_converterBufferNbSamples)
         {
@@ -392,7 +391,7 @@ void RemoteInputUDPHandler::tick()
 
         m_sampleFifo->write(reinterpret_cast<quint8*>(m_converterBuffer), m_readLengthSamples*sizeof(Sample));
     }
-    else if (metaData.m_sampleBits == 24) // 24 -> 16
+    else if (m_currentMeta.m_sampleBits == 24) // 24 -> 16
     {
         if (m_readLengthSamples > (int) m_converterBufferNbSamples)
         {
@@ -413,7 +412,7 @@ void RemoteInputUDPHandler::tick()
     }
     else // invalid size
     {
-        qWarning("RemoteInputUDPHandler::tick: unexpected sample size in stream: %d bits", (int) metaData.m_sampleBits);
+        qWarning("RemoteInputUDPHandler::tick: unexpected sample size in stream: %d bits", (int) m_currentMeta.m_sampleBits);
     }
 
 	if (m_tickCount < m_rateDivider)

@@ -236,7 +236,7 @@
        <item>
         <widget class="QLabel" name="decimationLabel">
          <property name="text">
-          <string>Dec</string>
+          <string>Rem ch Dec</string>
          </property>
         </widget>
        </item>
@@ -286,25 +286,6 @@
            <string>64</string>
           </property>
          </item>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="channelRateText">
-         <property name="minimumSize">
-          <size>
-           <width>50</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="toolTip">
-          <string>Effective channel rate (kS/s)</string>
-         </property>
-         <property name="text">
-          <string>0000k</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
         </widget>
        </item>
        <item>
@@ -365,7 +346,7 @@
        <item>
         <widget class="QLabel" name="positionLabel">
          <property name="text">
-          <string>Pos</string>
+          <string>Rem ch Pos</string>
          </property>
         </widget>
        </item>

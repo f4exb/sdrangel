@@ -38,23 +38,23 @@ class RemoteInputUDPHandler : public QObject
 {
 	Q_OBJECT
 public:
-	class MsgReportSampleRateChange : public Message {
+	class MsgReportMetaDataChange : public Message {
 		MESSAGE_CLASS_DECLARATION
 
 	public:
-		int getSampleRate() const { return m_sampleRate; }
+		const RemoteMetaDataFEC& getMetaData() const { return m_metaData; }
 
-		static MsgReportSampleRateChange* create(int sampleRate)
+		static MsgReportMetaDataChange* create(const RemoteMetaDataFEC& metaData)
 		{
-			return new MsgReportSampleRateChange(sampleRate);
+			return new MsgReportMetaDataChange(metaData);
 		}
 
 	protected:
-		int m_sampleRate;
+		RemoteMetaDataFEC m_metaData;
 
-		MsgReportSampleRateChange(int sampleRate) :
+		MsgReportMetaDataChange(const RemoteMetaDataFEC& metaData) :
 			Message(),
-			m_sampleRate(sampleRate)
+			m_metaData(metaData)
 		{ }
 	};
 
@@ -78,9 +78,6 @@ public:
 
 public slots:
 	void dataReadyRead();
-
-signals:
-	void metaChanged();
 
 private:
     class MsgUDPAddressAndPort : public Message {

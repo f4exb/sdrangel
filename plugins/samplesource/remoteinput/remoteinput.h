@@ -419,13 +419,11 @@ private:
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
     void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const RemoteInputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
-    void getRemoteChannelSettings();
     void analyzeRemoteChannelSettingsReply(const QJsonObject& jsonObject);
     void analyzeInstanceSummaryReply(const QJsonObject& jsonObject);
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
-    void handleMetaChanged();
 };
 
 #endif // INCLUDE_REMOTEINPUT_H

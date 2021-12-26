@@ -84,6 +84,7 @@ RemoteInputGui::RemoteInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(500);
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
+    connect(&m_remoteUpdateTimer, SIGNAL(timeout()), this, SLOT(updateRemote()));
 
     m_sampleSource = (RemoteInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
@@ -351,19 +352,16 @@ void RemoteInputGui::applyPosition()
 
 void RemoteInputGui::applyRemoteSettings()
 {
-    if (m_doApplySettings)
-    {
-        qDebug() << "RemoteInputGui::applyRemoteSettings";
-        RemoteInput::MsgConfigureRemoteChannel* message =
-                RemoteInput::MsgConfigureRemoteChannel::create(m_remoteChannelSettings);
-        m_sampleSource->getInputMessageQueue()->push(message);
+    if (!m_remoteUpdateTimer.isActive()) {
+        m_remoteUpdateTimer.start(100);
     }
 }
 
 void RemoteInputGui::sendSettings()
 {
-    if(!m_updateTimer.isActive())
+    if (!m_updateTimer.isActive()) {
         m_updateTimer.start(100);
+    }
 }
 
 void RemoteInputGui::on_remoteDeviceFrequency_changed(quint64 value)
@@ -612,6 +610,18 @@ void RemoteInputGui::updateHardware()
         m_sampleSource->getInputMessageQueue()->push(message);
         m_forceSettings = false;
         m_updateTimer.stop();
+    }
+}
+
+void RemoteInputGui::updateRemote()
+{
+    if (m_doApplySettings)
+    {
+        qDebug() << "RemoteInputGui::updateRemote";
+        RemoteInput::MsgConfigureRemoteChannel* message =
+                RemoteInput::MsgConfigureRemoteChannel::create(m_remoteChannelSettings);
+        m_sampleSource->getInputMessageQueue()->push(message);
+        m_remoteUpdateTimer.stop();
     }
 }
 

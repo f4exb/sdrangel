@@ -60,7 +60,6 @@ RemoteInput::RemoteInput(DeviceAPI *deviceAPI) :
 	m_sampleFifo.setSize(m_sampleRate * 8);
 	m_remoteInputUDPHandler = new RemoteInputUDPHandler(&m_sampleFifo, m_deviceAPI);
     m_remoteInputUDPHandler->setMessageQueueToInput(&m_inputMessageQueue);
-    connect(m_remoteInputUDPHandler, SIGNAL(metaChanged()), this, SLOT(handleMetaChanged()));
 
     m_deviceAPI->setNbSourceStreams(1);
 
@@ -164,18 +163,30 @@ bool RemoteInput::isStreaming() const
 
 bool RemoteInput::handleMessage(const Message& message)
 {
-    if (RemoteInputUDPHandler::MsgReportSampleRateChange::match(message))
+    if (RemoteInputUDPHandler::MsgReportMetaDataChange::match(message))
     {
-        RemoteInputUDPHandler::MsgReportSampleRateChange& notif = (RemoteInputUDPHandler::MsgReportSampleRateChange&) message;
-        int sampleRate = notif.getSampleRate();
+        qDebug() << "RemoteInput::handleMessage:" << message.getIdentifier();
+        RemoteInputUDPHandler::MsgReportMetaDataChange& notif = (RemoteInputUDPHandler::MsgReportMetaDataChange&) message;
+        m_currentMeta = notif.getMetaData();
+        int sampleRate = m_currentMeta.m_sampleRate;
 
         if (sampleRate != m_sampleRate)
         {
-            qDebug("RemoteInput::handleMessage: RemoteInputUDPHandler::MsgReportSampleRateChange: %d", sampleRate);
+            qDebug("RemoteInput::handleMessage: RemoteInputUDPHandler::MsgReportMetaDataChange: new sampleRate: %d", sampleRate);
             QMutexLocker mutexLocker(&m_mutex);
             m_sampleFifo.setSize(sampleRate * 8);
             m_sampleRate = sampleRate;
         }
+
+        m_currentMeta = m_remoteInputUDPHandler->getCurrentMeta();
+        QString getSettingsURL= QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
+            .arg(m_settings.m_apiAddress)
+            .arg(m_settings.m_apiPort)
+            .arg(m_currentMeta.m_deviceIndex)
+            .arg(m_currentMeta.m_channelIndex);
+
+        m_networkRequest.setUrl(QUrl(getSettingsURL));
+        m_networkManager->get(m_networkRequest);
 
         return true;
     }
@@ -218,6 +229,7 @@ bool RemoteInput::handleMessage(const Message& message)
     }
     else if (MsgRequestFixedData::match(message))
     {
+        qDebug() << "RemoteInput::handleMessage:" << message.getIdentifier();
         QString reportURL;
 
         reportURL = QString("http://%1:%2/sdrangel")
@@ -701,20 +713,4 @@ void RemoteInput::analyzeRemoteChannelSettingsReply(const QJsonObject& jsonObjec
     }
 }
 
-void RemoteInput::getRemoteChannelSettings()
-{
-    QString getSettingsURL= QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
-        .arg(m_settings.m_apiAddress)
-        .arg(m_settings.m_apiPort)
-        .arg(m_currentMeta.m_deviceIndex)
-        .arg(m_currentMeta.m_channelIndex);
 
-    m_networkRequest.setUrl(QUrl(getSettingsURL));
-    m_networkManager->get(m_networkRequest);
-}
-
-void RemoteInput::handleMetaChanged()
-{
-    m_currentMeta = m_remoteInputUDPHandler->getCurrentMeta();
-    getRemoteChannelSettings();
-}

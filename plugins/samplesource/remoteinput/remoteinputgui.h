@@ -61,6 +61,7 @@ private:
     int m_streamSampleRate;          //!< Sample rate of received stream
     quint64 m_streamCenterFrequency; //!< Center frequency of received stream
 	QTimer m_updateTimer;
+	QTimer m_remoteUpdateTimer;
 	QTimer m_statusTimer;
     int m_lastEngineState;
     MessageQueue m_inputMessageQueue;
@@ -134,6 +135,7 @@ private slots:
 	void on_startStop_toggled(bool checked);
     void on_eventCountsReset_clicked(bool checked);
     void updateHardware();
+	void updateRemote();
 	void updateStatus();
     void openDeviceSettingsDialog(const QPoint& p);
 };
