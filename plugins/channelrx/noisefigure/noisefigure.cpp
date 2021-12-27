@@ -355,7 +355,11 @@ void NoiseFigure::powerOn()
 
     if (!command.isEmpty())
     {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
         QStringList allArgs = command.split(" ", Qt::SkipEmptyParts);
+#else
+        QStringList allArgs = command.split(" ", QString::SkipEmptyParts);
+#endif
         QString program = allArgs[0];
         allArgs.pop_front();
         QProcess::execute(program, allArgs);
@@ -374,7 +378,11 @@ void NoiseFigure::powerOff()
 
     if (!command.isEmpty())
     {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
         QStringList allArgs = command.split(" ", Qt::SkipEmptyParts);
+#else
+        QStringList allArgs = command.split(" ", QString::SkipEmptyParts);
+#endif
         QString program = allArgs[0];
         allArgs.pop_front();
         QProcess::execute(program, allArgs);

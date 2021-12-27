@@ -303,7 +303,11 @@ void RadioAstronomy::startCal(bool hot)
     // Execute command to enable calibration
     if (!m_settings.m_startCalCommand.isEmpty())
     {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
         QStringList allArgs = m_settings.m_startCalCommand.split(" ", Qt::SkipEmptyParts);
+#else
+        QStringList allArgs = m_settings.m_startCalCommand.split(" ", QString::SkipEmptyParts);
+#endif
         QString program = allArgs[0];
         allArgs.pop_front();
         QProcess::startDetached(program, allArgs);
@@ -340,7 +344,11 @@ void RadioAstronomy::calComplete(MsgCalComplete* report)
     // Execute command to disable calibration
     if (!m_settings.m_stopCalCommand.isEmpty())
     {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
         QStringList allArgs = m_settings.m_stopCalCommand.split(" ", Qt::SkipEmptyParts);
+#else
+        QStringList allArgs = m_settings.m_stopCalCommand.split(" ", QString::SkipEmptyParts);
+#endif
         QString program = allArgs[0];
         allArgs.pop_front();
         QProcess::startDetached(program, allArgs);

@@ -544,7 +544,11 @@ void SatelliteTrackerWorker::applyDeviceAOSSettings(const QString& name)
     if (!m_settings.m_aosCommand.isEmpty())
     {
         qDebug() << "SatelliteTrackerWorker::aos: executing command: " << m_settings.m_aosCommand;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
         QStringList allArgs = m_settings.m_aosCommand.split(" ", Qt::SkipEmptyParts);
+#else
+        QStringList allArgs = m_settings.m_aosCommand.split(" ", QString::SkipEmptyParts);
+#endif
         QString program = allArgs[0];
         allArgs.pop_front();
         QProcess::startDetached(program, allArgs);
@@ -617,7 +621,11 @@ void SatelliteTrackerWorker::applyDeviceAOSSettings(const QString& name)
                 if (!devSettings->m_aosCommand.isEmpty())
                 {
                     qDebug() << "SatelliteTrackerWorker::aos: executing command: " << devSettings->m_aosCommand;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
                     QStringList allArgs = m_settings.m_aosCommand.split(" ", Qt::SkipEmptyParts);
+#else
+                    QStringList allArgs = m_settings.m_aosCommand.split(" ", QString::SkipEmptyParts);
+#endif
                     QString program = allArgs[0];
                     allArgs.pop_front();
                     QProcess::startDetached(program, allArgs);
@@ -758,7 +766,11 @@ void SatelliteTrackerWorker::los(SatWorkerState *satWorkerState)
         if (!m_settings.m_losCommand.isEmpty())
         {
             qDebug() << "SatelliteTrackerWorker::los: executing command: " << m_settings.m_losCommand;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
             QStringList allArgs = m_settings.m_losCommand.split(" ", Qt::SkipEmptyParts);
+#else
+            QStringList allArgs = m_settings.m_losCommand.split(" ", QString::SkipEmptyParts);
+#endif
             QString program = allArgs[0];
             allArgs.pop_front();
             QProcess::startDetached(program, allArgs);
@@ -801,7 +813,11 @@ void SatelliteTrackerWorker::los(SatWorkerState *satWorkerState)
                 if (!devSettings->m_losCommand.isEmpty())
                 {
                     qDebug() << "SatelliteTrackerWorker::los: executing command: " << devSettings->m_losCommand;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
                     QStringList allArgs = devSettings->m_losCommand.split(" ", Qt::SkipEmptyParts);
+#else
+                    QStringList allArgs = devSettings->m_losCommand.split(" ", QString::SkipEmptyParts);
+#endif
                     QString program = allArgs[0];
                     allArgs.pop_front();
                     QProcess::startDetached(program, allArgs);
