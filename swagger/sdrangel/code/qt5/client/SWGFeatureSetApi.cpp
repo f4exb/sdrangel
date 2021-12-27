@@ -45,7 +45,7 @@ SWGFeatureSetApi::featuresetFEatureSettingsPut(qint32 feature_set_index, qint32 
 
     
     QString output = body.asJson();
-    input.request_body.append(output);
+    input.request_body.append(output.toUtf8());
     
 
 
@@ -104,7 +104,7 @@ SWGFeatureSetApi::featuresetFeatureActionsPost(qint32 feature_set_index, qint32 
 
     
     QString output = body.asJson();
-    input.request_body.append(output);
+    input.request_body.append(output.toUtf8());
     
 
 
@@ -217,7 +217,7 @@ SWGFeatureSetApi::featuresetFeaturePost(qint32 feature_set_index, SWGFeatureSett
 
     
     QString output = body.asJson();
-    input.request_body.append(output);
+    input.request_body.append(output.toUtf8());
     
 
 
@@ -556,7 +556,7 @@ SWGFeatureSetApi::featuresetFeatureSettingsPatch(qint32 feature_set_index, qint3
 
     
     QString output = body.asJson();
-    input.request_body.append(output);
+    input.request_body.append(output.toUtf8());
     
 
 
@@ -667,7 +667,7 @@ SWGFeatureSetApi::featuresetPresetPatch(qint32 feature_set_index, SWGFeaturePres
 
     
     QString output = body.asJson();
-    input.request_body.append(output);
+    input.request_body.append(output.toUtf8());
     
 
 
@@ -724,7 +724,7 @@ SWGFeatureSetApi::featuresetPresetPost(qint32 feature_set_index, SWGFeaturePrese
 
     
     QString output = body.asJson();
-    input.request_body.append(output);
+    input.request_body.append(output.toUtf8());
     
 
 
@@ -781,7 +781,7 @@ SWGFeatureSetApi::featuresetPresetPut(qint32 feature_set_index, SWGFeaturePreset
 
     
     QString output = body.asJson();
-    input.request_body.append(output);
+    input.request_body.append(output.toUtf8());
     
 
 
