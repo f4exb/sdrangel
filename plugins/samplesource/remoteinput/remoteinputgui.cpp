@@ -221,6 +221,7 @@ bool RemoteInputGui::handleMessage(const Message& message)
         ui->apiAddressLabel->setStyleSheet("QLabel { background-color : green; }");
         const RemoteInput::MsgReportRemoteFixedData& report = (const RemoteInput::MsgReportRemoteFixedData&) message;
         displayRemoteFixedData(report.getData());
+        ui->statusText->setText("OK");
         return true;
     }
     else if (RemoteInput::MsgReportRemoteAPIError::match(message))
