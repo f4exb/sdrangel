@@ -203,7 +203,8 @@ void Command::run(const QString& apiAddress, int apiPort, int deviceSetIndex)
 
     m_currentProcess->setProcessChannelMode(QProcess::MergedChannels);
     m_currentProcessStartTimeStampms = TimeUtil::nowms();
-    m_currentProcess->start(m_currentProcessCommandLine);
+    QStringList allArgs = args.split(" ", Qt::SkipEmptyParts);
+    m_currentProcess->start(m_command, allArgs);
 }
 
 void Command::kill()
