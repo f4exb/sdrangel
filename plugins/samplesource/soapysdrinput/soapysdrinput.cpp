@@ -1638,7 +1638,7 @@ void SoapySDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& r
         response.getSoapySdrInputSettings()->setTunableElements(new QList<SWGSDRangel::SWGArgValue*>);
     }
 
-    for (const auto itName : settings.m_tunableElements.keys())
+    for (const auto& itName : settings.m_tunableElements.keys())
     {
         response.getSoapySdrInputSettings()->getTunableElements()->append(new SWGSDRangel::SWGArgValue);
         response.getSoapySdrInputSettings()->getTunableElements()->back()->setKey(new QString(itName));
@@ -1656,7 +1656,7 @@ void SoapySDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& r
         response.getSoapySdrInputSettings()->setIndividualGains(new QList<SWGSDRangel::SWGArgValue*>);
     }
 
-    for (const auto itName : settings.m_individualGains.keys())
+    for (const auto& itName : settings.m_individualGains.keys())
     {
         response.getSoapySdrInputSettings()->getIndividualGains()->append(new SWGSDRangel::SWGArgValue);
         response.getSoapySdrInputSettings()->getIndividualGains()->back()->setKey(new QString(itName));
@@ -1689,7 +1689,7 @@ void SoapySDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& r
         response.getSoapySdrInputSettings()->setStreamArgSettings(new QList<SWGSDRangel::SWGArgValue*>);
     }
 
-    for (const auto itName : settings.m_streamArgSettings.keys())
+    for (const auto& itName : settings.m_streamArgSettings.keys())
     {
         response.getSoapySdrInputSettings()->getStreamArgSettings()->append(new SWGSDRangel::SWGArgValue);
         response.getSoapySdrInputSettings()->getStreamArgSettings()->back()->setKey(new QString(itName));
@@ -1703,7 +1703,7 @@ void SoapySDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& r
         response.getSoapySdrInputSettings()->setDeviceArgSettings(new QList<SWGSDRangel::SWGArgValue*>);
     }
 
-    for (const auto itName : settings.m_deviceArgSettings.keys())
+    for (const auto& itName : settings.m_deviceArgSettings.keys())
     {
         response.getSoapySdrInputSettings()->getDeviceArgSettings()->append(new SWGSDRangel::SWGArgValue);
         response.getSoapySdrInputSettings()->getDeviceArgSettings()->back()->setKey(new QString(itName));
@@ -1729,7 +1729,7 @@ void SoapySDRInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respo
 
     response.getSoapySdrInputReport()->setDeviceSettingsArgs(new QList<SWGSDRangel::SWGArgInfo*>);
 
-    for (const auto itArg : m_deviceShared.m_deviceParams->getDeviceArgs())
+    for (const auto& itArg : m_deviceShared.m_deviceParams->getDeviceArgs())
     {
         response.getSoapySdrInputReport()->getDeviceSettingsArgs()->append(new SWGSDRangel::SWGArgInfo());
         webapiFormatArgInfo(itArg, response.getSoapySdrInputReport()->getDeviceSettingsArgs()->back());
@@ -1737,7 +1737,7 @@ void SoapySDRInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respo
 
     response.getSoapySdrInputReport()->setStreamSettingsArgs(new QList<SWGSDRangel::SWGArgInfo*>);
 
-    for (const auto itArg : channelSettings->m_streamSettingsArgs)
+    for (const auto& itArg : channelSettings->m_streamSettingsArgs)
     {
         response.getSoapySdrInputReport()->getStreamSettingsArgs()->append(new SWGSDRangel::SWGArgInfo());
         webapiFormatArgInfo(itArg, response.getSoapySdrInputReport()->getStreamSettingsArgs()->back());
@@ -1745,7 +1745,7 @@ void SoapySDRInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respo
 
     response.getSoapySdrInputReport()->setFrequencySettingsArgs(new QList<SWGSDRangel::SWGArgInfo*>);
 
-    for (const auto itArg : channelSettings->m_frequencySettingsArgs)
+    for (const auto& itArg : channelSettings->m_frequencySettingsArgs)
     {
         response.getSoapySdrInputReport()->getFrequencySettingsArgs()->append(new SWGSDRangel::SWGArgInfo());
         webapiFormatArgInfo(itArg, response.getSoapySdrInputReport()->getFrequencySettingsArgs()->back());
@@ -1761,7 +1761,7 @@ void SoapySDRInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respo
     {
         response.getSoapySdrInputReport()->setAntennas(new QList<QString *>);
 
-        for (const auto itAntenna : channelSettings->m_antennas) {
+        for (const auto& itAntenna : channelSettings->m_antennas) {
             response.getSoapySdrInputReport()->getAntennas()->append(new QString(itAntenna.c_str()));
         }
     }
@@ -1777,7 +1777,7 @@ void SoapySDRInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respo
     {
         response.getSoapySdrInputReport()->setGainSettings(new QList<SWGSDRangel::SWGSoapySDRGainSetting*>);
 
-        for (const auto itGain : channelSettings->m_gainSettings)
+        for (const auto& itGain : channelSettings->m_gainSettings)
         {
             response.getSoapySdrInputReport()->getGainSettings()->append(new SWGSDRangel::SWGSoapySDRGainSetting());
             response.getSoapySdrInputReport()->getGainSettings()->back()->setRange(new SWGSDRangel::SWGRangeFloat());
@@ -1791,7 +1791,7 @@ void SoapySDRInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respo
     {
         response.getSoapySdrInputReport()->setFrequencySettings(new QList<SWGSDRangel::SWGSoapySDRFrequencySetting*>);
 
-        for (const auto itFreq : channelSettings->m_frequencySettings)
+        for (const auto& itFreq : channelSettings->m_frequencySettings)
         {
             response.getSoapySdrInputReport()->getFrequencySettings()->append(new SWGSDRangel::SWGSoapySDRFrequencySetting());
             response.getSoapySdrInputReport()->getFrequencySettings()->back()->setRanges(new QList<SWGSDRangel::SWGRangeFloat*>);
@@ -1897,13 +1897,13 @@ void SoapySDRInput::webapiFormatArgInfo(const SoapySDR::ArgInfo& arg, SWGSDRange
 
     argInfo->setValueOptions(new QList<QString*>);
 
-    for (const auto itOpt : arg.options) {
+    for (const auto& itOpt : arg.options) {
         argInfo->getValueOptions()->append(new QString(itOpt.c_str()));
     }
 
     argInfo->setOptionNames(new QList<QString*>);
 
-    for (const auto itOpt : arg.optionNames) {
+    for (const auto& itOpt : arg.optionNames) {
         argInfo->getOptionNames()->append(new QString(itOpt.c_str()));
     }
 }

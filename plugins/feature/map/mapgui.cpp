@@ -794,7 +794,7 @@ void MapGUI::setBeacons(QList<Beacon *> *beacons)
 void MapGUI::addIBPBeacons()
 {
     // Add to Map
-    for (const auto beacon : IBPBeacon::m_beacons)
+    for (const auto& beacon : IBPBeacon::m_beacons)
     {
         SWGSDRangel::SWGMapItem beaconMapItem;
         beaconMapItem.setName(new QString(beacon.m_callsign));

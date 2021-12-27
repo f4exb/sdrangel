@@ -150,7 +150,7 @@ QHash<QString, int> CSV::readHeader(QTextStream &in, QStringList requiredColumns
             colNumbers.insert(row[i], i);
         }
         // Check all required columns exist
-        for (const auto col : requiredColumns)
+        for (const auto& col : requiredColumns)
         {
             if (!colNumbers.contains(col)) {
                 error = QString("Missing column %1").arg(col);
