@@ -301,8 +301,12 @@ void RadioAstronomy::startCal(bool hot)
     }
 
     // Execute command to enable calibration
-    if (!m_settings.m_startCalCommand.isEmpty()) {
-        QProcess::startDetached(m_settings.m_startCalCommand);
+    if (!m_settings.m_startCalCommand.isEmpty())
+    {
+        QStringList allArgs = m_settings.m_startCalCommand.split(" ", Qt::SkipEmptyParts);
+        QString program = allArgs[0];
+        allArgs.pop_front();
+        QProcess::startDetached(program, allArgs);
     }
 
     // Start calibration after requested delay
@@ -334,8 +338,12 @@ void RadioAstronomy::calComplete(MsgCalComplete* report)
     }
 
     // Execute command to disable calibration
-    if (!m_settings.m_stopCalCommand.isEmpty()) {
-        QProcess::startDetached(m_settings.m_stopCalCommand);
+    if (!m_settings.m_stopCalCommand.isEmpty())
+    {
+        QStringList allArgs = m_settings.m_stopCalCommand.split(" ", Qt::SkipEmptyParts);
+        QString program = allArgs[0];
+        allArgs.pop_front();
+        QProcess::startDetached(program, allArgs);
     }
 
     // Send calibration result to GUI

@@ -544,7 +544,10 @@ void SatelliteTrackerWorker::applyDeviceAOSSettings(const QString& name)
     if (!m_settings.m_aosCommand.isEmpty())
     {
         qDebug() << "SatelliteTrackerWorker::aos: executing command: " << m_settings.m_aosCommand;
-        QProcess::startDetached(m_settings.m_aosCommand);
+        QStringList allArgs = m_settings.m_aosCommand.split(" ", Qt::SkipEmptyParts);
+        QString program = allArgs[0];
+        allArgs.pop_front();
+        QProcess::startDetached(program, allArgs);
     }
 
     // Update device set
@@ -614,7 +617,10 @@ void SatelliteTrackerWorker::applyDeviceAOSSettings(const QString& name)
                 if (!devSettings->m_aosCommand.isEmpty())
                 {
                     qDebug() << "SatelliteTrackerWorker::aos: executing command: " << devSettings->m_aosCommand;
-                    QProcess::startDetached(devSettings->m_aosCommand);
+                    QStringList allArgs = m_settings.m_aosCommand.split(" ", Qt::SkipEmptyParts);
+                    QString program = allArgs[0];
+                    allArgs.pop_front();
+                    QProcess::startDetached(program, allArgs);
                 }
 
             }
@@ -752,7 +758,10 @@ void SatelliteTrackerWorker::los(SatWorkerState *satWorkerState)
         if (!m_settings.m_losCommand.isEmpty())
         {
             qDebug() << "SatelliteTrackerWorker::los: executing command: " << m_settings.m_losCommand;
-            QProcess::startDetached(m_settings.m_losCommand);
+            QStringList allArgs = m_settings.m_losCommand.split(" ", Qt::SkipEmptyParts);
+            QString program = allArgs[0];
+            allArgs.pop_front();
+            QProcess::startDetached(program, allArgs);
         }
 
         if (m_settings.m_deviceSettings.contains(satWorkerState->m_name))
@@ -792,7 +801,10 @@ void SatelliteTrackerWorker::los(SatWorkerState *satWorkerState)
                 if (!devSettings->m_losCommand.isEmpty())
                 {
                     qDebug() << "SatelliteTrackerWorker::los: executing command: " << devSettings->m_losCommand;
-                    QProcess::startDetached(devSettings->m_losCommand);
+                    QStringList allArgs = devSettings->m_losCommand.split(" ", Qt::SkipEmptyParts);
+                    QString program = allArgs[0];
+                    allArgs.pop_front();
+                    QProcess::startDetached(program, allArgs);
                 }
             }
         }

@@ -352,8 +352,13 @@ void NoiseFigure::nextState()
 void NoiseFigure::powerOn()
 {
     QString command = m_settings.m_powerOnCommand.trimmed();
-    if (!command.isEmpty()) {
-        QProcess::execute(command);
+
+    if (!command.isEmpty())
+    {
+        QStringList allArgs = command.split(" ", Qt::SkipEmptyParts);
+        QString program = allArgs[0];
+        allArgs.pop_front();
+        QProcess::execute(program, allArgs);
     }
 
     QStringList commands = m_settings.m_powerOnSCPI.split("\n");
@@ -366,8 +371,13 @@ void NoiseFigure::powerOff()
     processVISA(commands);
 
     QString command = m_settings.m_powerOffCommand.trimmed();
-    if (!command.isEmpty()) {
-        QProcess::execute(command);
+
+    if (!command.isEmpty())
+    {
+        QStringList allArgs = command.split(" ", Qt::SkipEmptyParts);
+        QString program = allArgs[0];
+        allArgs.pop_front();
+        QProcess::execute(program, allArgs);
     }
 }
 
