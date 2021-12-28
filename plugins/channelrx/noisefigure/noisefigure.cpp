@@ -16,6 +16,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <boost/version.hpp>
 #include <boost/math/interpolators/barycentric_rational.hpp>
 
 #include "noisefigure.h"
@@ -40,6 +41,12 @@
 #include "util/interpolation.h"
 #include "channel/channelwebapiutils.h"
 #include "maincore.h"
+
+#if BOOST_VERSION < 107700
+using namespace boost::math;
+#else
+using namespace boost::math::interpolators;
+#endif
 
 MESSAGE_CLASS_DEFINITION(NoiseFigure::MsgConfigureNoiseFigure, Message)
 MESSAGE_CLASS_DEFINITION(NoiseFigure::MsgPowerMeasurement, Message)
@@ -180,7 +187,7 @@ double NoiseFigure::calcENR(double frequency)
         else
         {
             int order = size - 1;
-            boost::math::barycentric_rational<double> interpolant(std::move(x), std::move(y), order);
+            barycentric_rational<double> interpolant(std::move(x), std::move(y), order);
             enr = interpolant(frequency);
         }
     }

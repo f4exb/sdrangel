@@ -17,10 +17,19 @@
 
 #include <QDebug>
 
+#include <array>
+
+#include <boost/version.hpp>
 #include <boost/math/interpolators/barycentric_rational.hpp>
 
 #include "noisefigureenrdialog.h"
 #include "util/interpolation.h"
+
+#if BOOST_VERSION < 107700
+using namespace boost::math;
+#else
+using namespace boost::math::interpolators;
+#endif
 
 NoiseFigureENRDialog::NoiseFigureENRDialog(NoiseFigureSettings *settings, QWidget* parent) :
     QDialog(parent),
@@ -153,7 +162,7 @@ void NoiseFigureENRDialog::plotChart()
             y[i] = points[i][1];
         }
         int order = size - 1;
-        boost::math::barycentric_rational<double> interpolant(std::move(x), std::move(y), order);
+        barycentric_rational<double> interpolant(std::move(x), std::move(y), order);
 
         x.resize(size);
         y.resize(size);
