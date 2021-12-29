@@ -81,7 +81,12 @@ private slots:
 	void on_rxtxDelay_valueChanged(int value);
 	void on_txrxDelay_valueChanged(int value);
 	void on_ptt_toggled(bool checked);
+	void on_vox_toggled(bool checked);
+	void on_voxEnable_clicked(bool checked);
+	void on_voxLevel_valueChanged(int value);
+	void on_voxHold_valueChanged(int value);
 	void updateStatus();
+	void audioSelect();
 };
 
 

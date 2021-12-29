@@ -147,6 +147,13 @@ bool SimplePTT::deserialize(const QByteArray& data)
     }
 }
 
+void SimplePTT::getAudioPeak(float& peak)
+{
+    if (m_worker) {
+        m_worker->getAudioPeak(peak);
+    }
+}
+
 void SimplePTT::applySettings(const SimplePTTSettings& settings, bool force)
 {
     qDebug() << "SimplePTT::applySettings:"
@@ -156,6 +163,11 @@ void SimplePTT::applySettings(const SimplePTTSettings& settings, bool force)
             << " m_txDeviceSetIndex: " << settings.m_txDeviceSetIndex
             << " m_rx2TxDelayMs: " << settings.m_rx2TxDelayMs
             << " m_tx2RxDelayMs: " << settings.m_tx2RxDelayMs
+            << " m_vox: " << settings.m_vox
+            << " m_voxEnable: " << settings.m_voxEnable
+            << " m_audioDeviceName: " << settings.m_audioDeviceName
+            << " m_voxLevel: " << settings.m_voxLevel
+            << " m_voxHold: " << settings.m_voxHold
             << " force: " << force;
 
     QList<QString> reverseAPIKeys;
@@ -177,6 +189,18 @@ void SimplePTT::applySettings(const SimplePTTSettings& settings, bool force)
     }
     if ((m_settings.m_tx2RxDelayMs != settings.m_tx2RxDelayMs) || force) {
         reverseAPIKeys.append("tx2RxDelayMs");
+    }
+    if ((m_settings.m_vox != settings.m_vox) || force) {
+        reverseAPIKeys.append("vox");
+    }
+    if ((m_settings.m_voxEnable != settings.m_voxEnable) || force) {
+        reverseAPIKeys.append("voxEnable");
+    }
+    if ((m_settings.m_voxHold != settings.m_voxHold) || force) {
+        reverseAPIKeys.append("voxHold");
+    }
+    if ((m_settings.m_voxLevel != settings.m_voxLevel) || force) {
+        reverseAPIKeys.append("voxLevel");
     }
 
     SimplePTTWorker::MsgConfigureSimplePTTWorker *msg = SimplePTTWorker::MsgConfigureSimplePTTWorker::create(
@@ -321,6 +345,10 @@ void SimplePTT::webapiFormatFeatureSettings(
     response.getSimplePttSettings()->setTxDeviceSetIndex(settings.m_txDeviceSetIndex);
     response.getSimplePttSettings()->setRx2TxDelayMs(settings.m_rx2TxDelayMs);
     response.getSimplePttSettings()->setTx2RxDelayMs(settings.m_tx2RxDelayMs);
+    response.getSimplePttSettings()->setVox(settings.m_vox ? 1 : 0);
+    response.getSimplePttSettings()->setVoxEnable(settings.m_voxEnable ? 1 : 0);
+    response.getSimplePttSettings()->setVoxHold(settings.m_voxHold);
+    response.getSimplePttSettings()->setVoxLevel(settings.m_voxLevel);
 
     response.getSimplePttSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
@@ -357,6 +385,18 @@ void SimplePTT::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("tx2RxDelayMs")) {
         settings.m_tx2RxDelayMs = response.getSimplePttSettings()->getTx2RxDelayMs();
+    }
+    if (featureSettingsKeys.contains("vox")) {
+        settings.m_vox = response.getSimplePttSettings()->getVox() != 0;
+    }
+    if (featureSettingsKeys.contains("voxEnable")) {
+        settings.m_voxEnable = response.getSimplePttSettings()->getVoxEnable() != 0;
+    }
+    if (featureSettingsKeys.contains("voxHold")) {
+        settings.m_voxHold = response.getSimplePttSettings()->getVoxHold();
+    }
+    if (featureSettingsKeys.contains("voxLevel")) {
+        settings.m_voxLevel = response.getSimplePttSettings()->getVoxLevel();
     }
     if (featureSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getSimplePttSettings()->getUseReverseApi() != 0;
@@ -409,6 +449,18 @@ void SimplePTT::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, c
     }
     if (channelSettingsKeys.contains("tx2RxDelayMs") || force) {
         swgSimplePTTSettings->setTx2RxDelayMs(settings.m_tx2RxDelayMs);
+    }
+    if (channelSettingsKeys.contains("vox") || force) {
+        swgSimplePTTSettings->setVox(settings.m_vox ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("voxEnable") || force) {
+        swgSimplePTTSettings->setVoxEnable(settings.m_voxEnable ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("voxHold") || force) {
+        swgSimplePTTSettings->setVoxHold(settings.m_voxHold);
+    }
+    if (channelSettingsKeys.contains("voxLevel") || force) {
+        swgSimplePTTSettings->setVoxLevel(settings.m_voxLevel);
     }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/featureset/%3/feature/%4/settings")

@@ -18,6 +18,7 @@
 #include "simplepttreport.h"
 
 MESSAGE_CLASS_DEFINITION(SimplePTTReport::MsgRadioState, Message)
+MESSAGE_CLASS_DEFINITION(SimplePTTReport::MsgVox, Message)
 
 SimplePTTReport::SimplePTTReport()
 {}

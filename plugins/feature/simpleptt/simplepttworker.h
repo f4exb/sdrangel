@@ -23,6 +23,7 @@
 
 #include "util/message.h"
 #include "util/messagequeue.h"
+#include "audio/audiofifo.h"
 
 #include "simplepttsettings.h"
 
@@ -83,6 +84,12 @@ public:
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_msgQueueToGUI = messageQueue; }
 
+    void getAudioPeak(float& peak)
+    {
+        peak = m_audioMagsqPeak;
+        m_audioMagsqPeak = 0;
+    }
+
 private:
     WebAPIAdapterInterface *m_webAPIAdapterInterface;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
@@ -90,6 +97,14 @@ private:
     SimplePTTSettings m_settings;
     bool m_running;
     bool m_tx;
+    AudioFifo m_audioFifo;
+    AudioVector m_audioReadBuffer;
+    unsigned int m_audioReadBufferFill;
+    int m_audioSampleRate;
+	float m_audioMagsqPeak;
+    float m_voxLevel;
+    int m_voxHoldCount;
+    bool m_voxState;
 	QTimer m_updateTimer;
     QMutex m_mutex;
 
@@ -101,6 +116,7 @@ private:
 private slots:
     void handleInputMessages();
 	void updateHardware();
+    void handleAudio();
 };
 
 #endif // INCLUDE_FEATURE_SIMPLEPTTWORKER_H_

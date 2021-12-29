@@ -31,6 +31,11 @@ struct SimplePTTSettings
     int m_txDeviceSetIndex;
     unsigned int m_rx2TxDelayMs;
     unsigned int m_tx2RxDelayMs;
+    QString m_audioDeviceName; //!< for Vox
+    int m_voxLevel; //!< Vox threshold level in dB
+    int m_voxHold;  //!< Vox hold in milliseconds
+    bool m_vox;
+    bool m_voxEnable;
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;

@@ -60,6 +60,21 @@ public:
     qint32 getTx2RxDelayMs();
     void setTx2RxDelayMs(qint32 tx2_rx_delay_ms);
 
+    qint32 getVox();
+    void setVox(qint32 vox);
+
+    qint32 getVoxEnable();
+    void setVoxEnable(qint32 vox_enable);
+
+    qint32 getVoxLevel();
+    void setVoxLevel(qint32 vox_level);
+
+    qint32 getVoxHold();
+    void setVoxHold(qint32 vox_hold);
+
+    QString* getAudioDeviceName();
+    void setAudioDeviceName(QString* audio_device_name);
+
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -96,6 +111,21 @@ private:
 
     qint32 tx2_rx_delay_ms;
     bool m_tx2_rx_delay_ms_isSet;
+
+    qint32 vox;
+    bool m_vox_isSet;
+
+    qint32 vox_enable;
+    bool m_vox_enable_isSet;
+
+    qint32 vox_level;
+    bool m_vox_level_isSet;
+
+    qint32 vox_hold;
+    bool m_vox_hold_isSet;
+
+    QString* audio_device_name;
+    bool m_audio_device_name_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;

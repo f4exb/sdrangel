@@ -34,8 +34,7 @@ public:
     public:
         RadioState getState() const { return m_state; }
 
-        static MsgRadioState* create(RadioState state)
-        {
+        static MsgRadioState* create(RadioState state) {
             return new MsgRadioState(state);
         }
 
@@ -46,6 +45,25 @@ public:
             Message(),
             m_state(state)
         { }
+    };
+
+    class MsgVox : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool getVox() const { return m_vox; }
+
+        static MsgVox* create(bool vox) {
+            return new MsgVox(vox);
+        }
+
+    private:
+        bool m_vox;
+
+        MsgVox(bool vox) :
+            Message(),
+            m_vox(vox)
+        {}
     };
 
     SimplePTTReport();

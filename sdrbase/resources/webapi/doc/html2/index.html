@@ -11231,6 +11231,25 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Delay in milliseconds from Tx off to Rx on"
     },
+    "vox" : {
+      "type" : "integer",
+      "description" : "Activate vox system\n  * 0 - not active\n  * 1 - active\n"
+    },
+    "voxEnable" : {
+      "type" : "integer",
+      "description" : "Allow vox to control PTT\n  * 0 - vox does not control PTT\n  * 1 - vox controls PTT\n"
+    },
+    "voxLevel" : {
+      "type" : "integer",
+      "description" : "Vox threshold level in dB"
+    },
+    "voxHold" : {
+      "type" : "integer",
+      "description" : "Vox hold timeout in milliseconds"
+    },
+    "audioDeviceName" : {
+      "type" : "string"
+    },
     "useReverseAPI" : {
       "type" : "integer",
       "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
@@ -51634,7 +51653,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-12-27T21:57:14.290+01:00
+              Generated 2021-12-29T17:23:49.058+01:00
             </div>
           </div>
       </div>

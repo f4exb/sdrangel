@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/">
+    <file>audio_mic.png</file>
     <file>info.png</file>
     <file>darklight.png</file>
     <file>lightdark.png</file>

@@ -142,6 +142,8 @@ public:
             const QStringList& featureSettingsKeys,
             SWGSDRangel::SWGFeatureSettings& response);
 
+    void getAudioPeak(float& peak);
+
     static const char* const m_featureIdURI;
     static const char* const m_featureId;
 

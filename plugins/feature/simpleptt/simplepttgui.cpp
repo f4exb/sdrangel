@@ -19,7 +19,11 @@
 
 #include "feature/featureuiset.h"
 #include "gui/basicfeaturesettingsdialog.h"
+#include "gui/crightclickenabler.h"
+#include "gui/audioselectdialog.h"
+#include "dsp/dspengine.h"
 #include "device/deviceset.h"
+#include "util/db.h"
 #include "maincore.h"
 
 #include "ui_simplepttgui.h"
@@ -89,6 +93,19 @@ bool SimplePTTGUI::handleMessage(const Message& message)
 
         return true;
     }
+    else if (SimplePTTReport::MsgVox::match(message))
+    {
+        qDebug("SimplePTTGUI::handleMessage: SimplePTTReport::MsgVox");
+        const SimplePTTReport::MsgVox& cfg = (const SimplePTTReport::MsgVox&) message;
+
+        if (cfg.getVox()) {
+            ui->voxLevelText->setStyleSheet("QLabel { background-color : green; }");
+        } else {
+            ui->voxLevelText->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+        }
+
+        return true;
+    }
     else if (SimplePTT::MsgPTT::match(message))
     {
         qDebug("SimplePTTGUI::handleMessage: SimplePTT::MsgPTT");
@@ -145,9 +162,11 @@ SimplePTTGUI::SimplePTTGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Fea
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+	CRightClickEnabler *voxRightClickEnabler = new CRightClickEnabler(ui->vox);
+	connect(voxRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect()));
 
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
-	m_statusTimer.start(1000);
+	m_statusTimer.start(500);
 
 	m_statusTooltips.push_back("Idle");  // 0 - all off
 	m_statusTooltips.push_back("Rx on"); // 1 - Rx on
@@ -180,6 +199,11 @@ void SimplePTTGUI::displaySettings()
     ui->rxtxDelay->setValue(m_settings.m_rx2TxDelayMs);
     ui->txrxDelay->setValue(m_settings.m_tx2RxDelayMs);
     restoreState(m_settings.m_rollupState);
+    ui->vox->setChecked(m_settings.m_vox);
+    ui->voxEnable->setChecked(m_settings.m_voxEnable);
+    ui->voxLevel->setValue(m_settings.m_voxLevel);
+    ui->voxLevelText->setText(tr("%1").arg(m_settings.m_voxLevel));
+    ui->voxHold->setValue(m_settings.m_voxHold);
     blockApplySettings(false);
 }
 
@@ -354,6 +378,31 @@ void SimplePTTGUI::on_ptt_toggled(bool checked)
     applyPTT(checked);
 }
 
+void SimplePTTGUI::on_vox_toggled(bool checked)
+{
+    m_settings.m_vox = checked;
+    applySettings();
+}
+
+void SimplePTTGUI::on_voxEnable_clicked(bool checked)
+{
+    m_settings.m_voxEnable = checked;
+    applySettings();
+}
+
+void SimplePTTGUI::on_voxLevel_valueChanged(int value)
+{
+    m_settings.m_voxLevel = value;
+    ui->voxLevelText->setText(tr("%1dB").arg(m_settings.m_voxLevel));
+    applySettings();
+}
+
+void SimplePTTGUI::on_voxHold_valueChanged(int value)
+{
+    m_settings.m_voxHold = value;
+    applySettings();
+}
+
 void SimplePTTGUI::updateStatus()
 {
     int state = m_simplePTT->getState();
@@ -381,6 +430,14 @@ void SimplePTTGUI::updateStatus()
 
         m_lastFeatureState = state;
     }
+
+    if (m_settings.m_vox)
+    {
+        float peak;
+        m_simplePTT->getAudioPeak(peak);
+        int peakDB = CalcDb::dbPower(peak);
+        ui->audioPeak->setText(tr("%1 dB").arg(peakDB));
+    }
 }
 
 void SimplePTTGUI::applySettings(bool force)
@@ -399,4 +456,17 @@ void SimplePTTGUI::applyPTT(bool tx)
 	    SimplePTT::MsgPTT* message = SimplePTT::MsgPTT::create(tx);
 	    m_simplePTT->getInputMessageQueue()->push(message);
 	}
+}
+
+void SimplePTTGUI::audioSelect()
+{
+    qDebug("SimplePTTGUI::audioSelect");
+    AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName);
+    audioSelect.exec();
+
+    if (audioSelect.m_selected)
+    {
+        m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
+        applySettings();
+    }
 }

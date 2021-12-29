@@ -17,6 +17,26 @@ SimplePTTSettings:
     tx2RxDelayMs:
       description: Delay in milliseconds from Tx off to Rx on
       type: integer
+    vox:
+      type: integer
+      description: >
+        Activate vox system
+          * 0 - not active
+          * 1 - active
+    voxEnable:
+      type: integer
+      description: >
+        Allow vox to control PTT
+          * 0 - vox does not control PTT
+          * 1 - vox controls PTT
+    voxLevel:
+      type: integer
+      description: Vox threshold level in dB
+    voxHold:
+      type: integer
+      description: Vox hold timeout in milliseconds
+    audioDeviceName:
+      type: string
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer

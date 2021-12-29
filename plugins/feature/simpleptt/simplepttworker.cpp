@@ -22,6 +22,9 @@
 #include "SWGErrorResponse.h"
 
 #include "webapi/webapiadapterinterface.h"
+#include "audio/audiodevicemanager.h"
+#include "dsp/dspengine.h"
+#include "util/db.h"
 
 #include "simplepttreport.h"
 #include "simplepttworker.h"
@@ -34,9 +37,16 @@ SimplePTTWorker::SimplePTTWorker(WebAPIAdapterInterface *webAPIAdapterInterface)
     m_msgQueueToGUI(nullptr),
     m_running(false),
     m_tx(false),
+    m_audioFifo(12000),
+    m_audioSampleRate(48000),
+    m_voxLevel(1.0),
+    m_voxHoldCount(0),
+    m_voxState(false),
     m_updateTimer(this),
     m_mutex(QMutex::Recursive)
 {
+    m_audioReadBuffer.resize(16384);
+    m_audioReadBufferFill = 0;
     qDebug("SimplePTTWorker::SimplePTTWorker");
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 }
@@ -44,6 +54,8 @@ SimplePTTWorker::SimplePTTWorker(WebAPIAdapterInterface *webAPIAdapterInterface)
 SimplePTTWorker::~SimplePTTWorker()
 {
     m_inputMessageQueue.clear();
+    AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+    audioDeviceManager->removeAudioSource(&m_audioFifo);
 }
 
 void SimplePTTWorker::reset()
@@ -115,7 +127,48 @@ void SimplePTTWorker::applySettings(const SimplePTTSettings& settings, bool forc
             << " m_txDeviceSetIndex: " << settings.m_txDeviceSetIndex
             << " m_rx2TxDelayMs: " << settings.m_rx2TxDelayMs
             << " m_tx2RxDelayMs: " << settings.m_tx2RxDelayMs
+            << " m_vox: " << settings.m_vox
+            << " m_voxEnable: " << settings.m_voxEnable
+            << " m_audioDeviceName: " << settings.m_audioDeviceName
+            << " m_voxLevel: " << settings.m_voxLevel
+            << " m_voxHold: " << settings.m_voxHold
             << " force: " << force;
+
+    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
+    {
+        QMutexLocker mlock(&m_mutex);
+        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+        int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
+        audioDeviceManager->removeAudioSource(&m_audioFifo);
+        audioDeviceManager->addAudioSource(&m_audioFifo, getInputMessageQueue(), audioDeviceIndex);
+        m_audioSampleRate = audioDeviceManager->getInputSampleRate(audioDeviceIndex);
+    }
+
+    if ((settings.m_vox != m_settings.m_vox) || force)
+    {
+        QMutexLocker mlock(&m_mutex);
+        m_voxHoldCount = 0;
+        m_audioReadBufferFill = 0;
+        m_voxState = false;
+
+        if (m_msgQueueToGUI)
+        {
+            SimplePTTReport::MsgVox *msg = SimplePTTReport::MsgVox::create(false);
+            m_msgQueueToGUI->push(msg);
+        }
+
+        if (settings.m_vox) {
+            connect(&m_audioFifo, SIGNAL(dataReady()), this, SLOT(handleAudio()));
+        } else {
+            disconnect(&m_audioFifo, SIGNAL(dataReady()), this, SLOT(handleAudio()));
+        }
+    }
+
+    if ((settings.m_voxLevel != m_settings.m_voxLevel) || force)
+    {
+        m_voxLevel = CalcDb::powerFromdB(settings.m_voxLevel);
+    }
+
     m_settings = settings;
 }
 
@@ -126,29 +179,29 @@ void SimplePTTWorker::sendPTT(bool tx)
         bool switchedOff = false;
         m_mutex.lock();
 
-        if (tx) 
+        if (tx)
         {
-            if (m_settings.m_rxDeviceSetIndex >= 0) 
+            if (m_settings.m_rxDeviceSetIndex >= 0)
             {
                 m_tx = false;
                 switchedOff = turnDevice(false);
             }
-            
-            if (m_settings.m_txDeviceSetIndex >= 0) 
+
+            if (m_settings.m_txDeviceSetIndex >= 0)
             {
                 m_tx = true;
                 m_updateTimer.start(m_settings.m_rx2TxDelayMs);
             }
-        } 
-        else 
+        }
+        else
         {
-            if (m_settings.m_txDeviceSetIndex >= 0) 
+            if (m_settings.m_txDeviceSetIndex >= 0)
             {
                 m_tx = true;
                 switchedOff = turnDevice(false);
             }
 
-            if (m_settings.m_rxDeviceSetIndex >= 0) 
+            if (m_settings.m_rxDeviceSetIndex >= 0)
             {
                 m_tx = false;
                 m_updateTimer.start(m_settings.m_tx2RxDelayMs);
@@ -190,7 +243,7 @@ bool SimplePTTWorker::turnDevice(bool on)
     SWGSDRangel::SWGDeviceState response;
     SWGSDRangel::SWGErrorResponse error;
     int httpCode;
-    
+
     if (on) {
         httpCode = m_webAPIAdapterInterface->devicesetDeviceRunPost(
             m_tx ? m_settings.m_txDeviceSetIndex : m_settings.m_rxDeviceSetIndex, response, error);
@@ -207,5 +260,64 @@ bool SimplePTTWorker::turnDevice(bool on)
     {
         qWarning("SimplePTTWorker::turnDevice: error: %s", qPrintable(*error.getMessage()));
         return false;
+    }
+}
+
+void SimplePTTWorker::handleAudio()
+{
+    unsigned int nbRead;
+    QMutexLocker mlock(&m_mutex);
+
+    while ((nbRead = m_audioFifo.read(reinterpret_cast<quint8*>(&m_audioReadBuffer[m_audioReadBufferFill]), 4096)) != 0)
+    {
+        if (m_audioReadBufferFill + nbRead + 4096 < m_audioReadBuffer.size())
+        {
+            m_audioReadBufferFill += nbRead;
+        }
+        else
+        {
+            bool voxState = m_voxState;
+
+            for (const auto &it : m_audioReadBuffer)
+            {
+                std::complex<float> za{it.l / 32768.0f, it.r / 32768.0f};
+                float magSq = std::norm(za);
+
+                if (magSq > m_audioMagsqPeak) {
+                    m_audioMagsqPeak = magSq;
+                }
+
+                if (magSq > m_voxLevel)
+                {
+                    voxState = true;
+                    m_voxHoldCount = 0;
+                }
+                else
+                {
+                    if (m_voxHoldCount < (m_settings.m_voxHold * m_audioSampleRate) / 1000) {
+                        m_voxHoldCount++;
+                    } else {
+                        voxState = false;
+                    }
+                }
+
+                if (voxState != m_voxState)
+                {
+                    if (m_settings.m_voxEnable) {
+                        sendPTT(voxState);
+                    }
+
+                    if (m_msgQueueToGUI)
+                    {
+                        SimplePTTReport::MsgVox *msg = SimplePTTReport::MsgVox::create(voxState);
+                        m_msgQueueToGUI->push(msg);
+                    }
+
+                    m_voxState = voxState;
+                }
+            }
+
+            m_audioReadBufferFill = 0;
+        }
     }
 }

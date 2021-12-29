@@ -19,6 +19,7 @@
 
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
+#include "audio/audiodevicemanager.h"
 
 #include "simplepttsettings.h"
 
@@ -35,6 +36,11 @@ void SimplePTTSettings::resetToDefaults()
     m_txDeviceSetIndex = -1;
     m_rx2TxDelayMs = 100;
     m_tx2RxDelayMs = 100;
+    m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
+    m_voxLevel = -20;
+    m_voxHold = 500;
+    m_vox = false;
+    m_voxEnable = false;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -58,6 +64,11 @@ QByteArray SimplePTTSettings::serialize() const
     s.writeU32(10, m_reverseAPIFeatureSetIndex);
     s.writeU32(11, m_reverseAPIFeatureIndex);
     s.writeBlob(12, m_rollupState);
+    s.writeString(13, m_audioDeviceName);
+    s.writeS32(14, m_voxLevel);
+    s.writeBool(15, m_vox);
+    s.writeBool(16, m_voxEnable);
+    s.writeS32(17, m_voxHold);
 
     return s.final();
 }
@@ -99,6 +110,11 @@ bool SimplePTTSettings::deserialize(const QByteArray& data)
         d.readU32(11, &utmp, 0);
         m_reverseAPIFeatureIndex = utmp > 99 ? 99 : utmp;
         d.readBlob(12, &m_rollupState);
+        d.readString(13, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
+        d.readS32(14, &m_voxLevel, -20);
+        d.readBool(15, &m_vox, false);
+        d.readBool(16, &m_voxEnable, false);
+        d.readS32(16, &m_voxHold, 500);
 
         return true;
     }

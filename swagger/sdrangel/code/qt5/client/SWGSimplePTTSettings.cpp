@@ -40,6 +40,16 @@ SWGSimplePTTSettings::SWGSimplePTTSettings() {
     m_rx2_tx_delay_ms_isSet = false;
     tx2_rx_delay_ms = 0;
     m_tx2_rx_delay_ms_isSet = false;
+    vox = 0;
+    m_vox_isSet = false;
+    vox_enable = 0;
+    m_vox_enable_isSet = false;
+    vox_level = 0;
+    m_vox_level_isSet = false;
+    vox_hold = 0;
+    m_vox_hold_isSet = false;
+    audio_device_name = nullptr;
+    m_audio_device_name_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -70,6 +80,16 @@ SWGSimplePTTSettings::init() {
     m_rx2_tx_delay_ms_isSet = false;
     tx2_rx_delay_ms = 0;
     m_tx2_rx_delay_ms_isSet = false;
+    vox = 0;
+    m_vox_isSet = false;
+    vox_enable = 0;
+    m_vox_enable_isSet = false;
+    vox_level = 0;
+    m_vox_level_isSet = false;
+    vox_hold = 0;
+    m_vox_hold_isSet = false;
+    audio_device_name = new QString("");
+    m_audio_device_name_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -92,6 +112,13 @@ SWGSimplePTTSettings::cleanup() {
 
 
 
+
+
+
+
+    if(audio_device_name != nullptr) { 
+        delete audio_device_name;
+    }
 
     if(reverse_api_address != nullptr) { 
         delete reverse_api_address;
@@ -123,6 +150,16 @@ SWGSimplePTTSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&rx2_tx_delay_ms, pJson["rx2TxDelayMs"], "qint32", "");
     
     ::SWGSDRangel::setValue(&tx2_rx_delay_ms, pJson["tx2RxDelayMs"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&vox, pJson["vox"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&vox_enable, pJson["voxEnable"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&vox_level, pJson["voxLevel"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&vox_hold, pJson["voxHold"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&audio_device_name, pJson["audioDeviceName"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -167,6 +204,21 @@ SWGSimplePTTSettings::asJsonObject() {
     }
     if(m_tx2_rx_delay_ms_isSet){
         obj->insert("tx2RxDelayMs", QJsonValue(tx2_rx_delay_ms));
+    }
+    if(m_vox_isSet){
+        obj->insert("vox", QJsonValue(vox));
+    }
+    if(m_vox_enable_isSet){
+        obj->insert("voxEnable", QJsonValue(vox_enable));
+    }
+    if(m_vox_level_isSet){
+        obj->insert("voxLevel", QJsonValue(vox_level));
+    }
+    if(m_vox_hold_isSet){
+        obj->insert("voxHold", QJsonValue(vox_hold));
+    }
+    if(audio_device_name != nullptr && *audio_device_name != QString("")){
+        toJsonValue(QString("audioDeviceName"), audio_device_name, obj, QString("QString"));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -248,6 +300,56 @@ SWGSimplePTTSettings::setTx2RxDelayMs(qint32 tx2_rx_delay_ms) {
 }
 
 qint32
+SWGSimplePTTSettings::getVox() {
+    return vox;
+}
+void
+SWGSimplePTTSettings::setVox(qint32 vox) {
+    this->vox = vox;
+    this->m_vox_isSet = true;
+}
+
+qint32
+SWGSimplePTTSettings::getVoxEnable() {
+    return vox_enable;
+}
+void
+SWGSimplePTTSettings::setVoxEnable(qint32 vox_enable) {
+    this->vox_enable = vox_enable;
+    this->m_vox_enable_isSet = true;
+}
+
+qint32
+SWGSimplePTTSettings::getVoxLevel() {
+    return vox_level;
+}
+void
+SWGSimplePTTSettings::setVoxLevel(qint32 vox_level) {
+    this->vox_level = vox_level;
+    this->m_vox_level_isSet = true;
+}
+
+qint32
+SWGSimplePTTSettings::getVoxHold() {
+    return vox_hold;
+}
+void
+SWGSimplePTTSettings::setVoxHold(qint32 vox_hold) {
+    this->vox_hold = vox_hold;
+    this->m_vox_hold_isSet = true;
+}
+
+QString*
+SWGSimplePTTSettings::getAudioDeviceName() {
+    return audio_device_name;
+}
+void
+SWGSimplePTTSettings::setAudioDeviceName(QString* audio_device_name) {
+    this->audio_device_name = audio_device_name;
+    this->m_audio_device_name_isSet = true;
+}
+
+qint32
 SWGSimplePTTSettings::getUseReverseApi() {
     return use_reverse_api;
 }
@@ -318,6 +420,21 @@ SWGSimplePTTSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_tx2_rx_delay_ms_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_vox_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_vox_enable_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_vox_level_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_vox_hold_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(audio_device_name && *audio_device_name != QString("")){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){
