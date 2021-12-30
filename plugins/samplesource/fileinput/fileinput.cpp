@@ -110,14 +110,14 @@ void FileInput::openFileStream()
         {
             // Some WAV files written by SDR tools have auxi header
             m_centerFrequency = header.m_auxi.m_centerFreq;
-            m_startingTimeStamp = header.getStartTime().toMSecsSinceEpoch() / 1000;
+            m_startingTimeStamp = header.getStartTime().toMSecsSinceEpoch();
         }
         else
         {
             // Attempt to extract start time and frequency from filename
             QDateTime startTime;
             if (WavFileRecord::getStartTime(m_settings.m_fileName, startTime)) {
-                m_startingTimeStamp = startTime.toMSecsSinceEpoch() / 1000;
+                m_startingTimeStamp = startTime.toMSecsSinceEpoch();
             }
             WavFileRecord::getCenterFrequency(m_settings.m_fileName, m_centerFrequency);
         }
@@ -655,7 +655,7 @@ void FileInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
     t = t.addMSecs(t_msec);
     response.getFileInputReport()->setElapsedTime(new QString(t.toString("HH:mm:ss.zzz")));
 
-    qint64 startingTimeStampMsec = m_startingTimeStamp * 1000LL;
+    qint64 startingTimeStampMsec = m_startingTimeStamp;
     QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
     dt = dt.addSecs(t_sec);
     dt = dt.addMSecs(t_msec);
