@@ -1,3 +1,12 @@
+sdrangel (6.17.7-1) unstable; urgency=medium
+
+  * Simple PTT feature: added vox control. Implements #1002
+  * Fix FileInput API report of absolute time following PR #981. PR #1094
+  * Support compilation with Boost >= 1.77. Fix for #1087. PR #1092
+  * Fixed some compiler warnings with Qt 5.15 and GCC 11
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 03 Jan 2022 18:24:33 +0100
+
 sdrangel (6.17.6-1) unstable; urgency=medium
 
   * Remote plugins: added capability to choose sample size in transmission. Implements #1078
