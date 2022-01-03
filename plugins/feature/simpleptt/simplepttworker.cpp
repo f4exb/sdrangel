@@ -106,7 +106,7 @@ bool SimplePTTWorker::handleMessage(const Message& cmd)
     else if (MsgPTT::match(cmd))
     {
         MsgPTT& cfg = (MsgPTT&) cmd;
-        qDebug() << "SimplePTTWorker::handleMessage: MsgPTT";
+        qDebug() << "SimplePTTWorker::handleMessage: MsgPTT tx:" << cfg.getTx();
 
         sendPTT(cfg.getTx());
 
@@ -142,6 +142,8 @@ void SimplePTTWorker::applySettings(const SimplePTTSettings& settings, bool forc
         audioDeviceManager->removeAudioSource(&m_audioFifo);
         audioDeviceManager->addAudioSource(&m_audioFifo, getInputMessageQueue(), audioDeviceIndex);
         m_audioSampleRate = audioDeviceManager->getInputSampleRate(audioDeviceIndex);
+        m_voxHoldCount = 0;
+        m_voxState = false;
     }
 
     if ((settings.m_vox != m_settings.m_vox) || force)
@@ -174,6 +176,7 @@ void SimplePTTWorker::applySettings(const SimplePTTSettings& settings, bool forc
 
 void SimplePTTWorker::sendPTT(bool tx)
 {
+    qDebug("SimplePTTWorker::sendPTT: %s", tx ? "tx" : "rx");
 	if (!m_updateTimer.isActive())
 	{
         bool switchedOff = false;
@@ -218,6 +221,7 @@ void SimplePTTWorker::sendPTT(bool tx)
 
 void SimplePTTWorker::updateHardware()
 {
+    qDebug("SimplePTTWorker::updateHardware: m_tx: %s", m_tx ? "on" : "off");
     SWGSDRangel::SWGSuccessResponse response;
     SWGSDRangel::SWGErrorResponse error;
     m_updateTimer.stop();
@@ -240,6 +244,7 @@ void SimplePTTWorker::updateHardware()
 
 bool SimplePTTWorker::turnDevice(bool on)
 {
+    qDebug("SimplePTTWorker::turnDevice %s: %s", m_tx ? "tx" : "rx", on ? "on" : "off");
     SWGSDRangel::SWGDeviceState response;
     SWGSDRangel::SWGErrorResponse error;
     int httpCode;
@@ -254,6 +259,7 @@ bool SimplePTTWorker::turnDevice(bool on)
 
     if (httpCode/100 == 2)
     {
+        qDebug("SimplePTTWorker::turnDevice: %s success", on ? "on" : "off");
         return true;
     }
     else
@@ -278,9 +284,9 @@ void SimplePTTWorker::handleAudio()
         {
             bool voxState = m_voxState;
 
-            for (const auto &it : m_audioReadBuffer)
+            for (unsigned int i = 0; i < m_audioReadBufferFill; i++)
             {
-                std::complex<float> za{it.l / 32768.0f, it.r / 32768.0f};
+                std::complex<float> za{m_audioReadBuffer[i].l / 46334.0f, m_audioReadBuffer[i].r / 46334.0f};
                 float magSq = std::norm(za);
 
                 if (magSq > m_audioMagsqPeak) {

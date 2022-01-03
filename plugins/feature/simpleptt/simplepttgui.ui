@@ -243,10 +243,10 @@
          <string>Vox delay (ms)</string>
         </property>
         <property name="minimum">
-         <number>200</number>
+         <number>500</number>
         </property>
         <property name="maximum">
-         <number>2000</number>
+         <number>5000</number>
         </property>
         <property name="singleStep">
          <number>100</number>

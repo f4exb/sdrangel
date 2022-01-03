@@ -99,9 +99,9 @@ bool SimplePTTGUI::handleMessage(const Message& message)
         const SimplePTTReport::MsgVox& cfg = (const SimplePTTReport::MsgVox&) message;
 
         if (cfg.getVox()) {
-            ui->voxLevelText->setStyleSheet("QLabel { background-color : green; }");
+            ui->voxLevel->setStyleSheet("QDial { background-color : green; }");
         } else {
-            ui->voxLevelText->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+            ui->voxLevel->setStyleSheet("QDial { background:rgb(79,79,79); }");
         }
 
         return true;
@@ -331,6 +331,13 @@ void SimplePTTGUI::on_startStop_toggled(bool checked)
 {
     if (m_doApplySettings)
     {
+        if (checked)
+        {
+            updateDeviceSetLists();
+            displaySettings();
+            applySettings();
+        }
+
         SimplePTT::MsgStartStop *message = SimplePTT::MsgStartStop::create(checked);
         m_simplePTT->getInputMessageQueue()->push(message);
     }
@@ -393,7 +400,7 @@ void SimplePTTGUI::on_voxEnable_clicked(bool checked)
 void SimplePTTGUI::on_voxLevel_valueChanged(int value)
 {
     m_settings.m_voxLevel = value;
-    ui->voxLevelText->setText(tr("%1dB").arg(m_settings.m_voxLevel));
+    ui->voxLevelText->setText(tr("%1").arg(m_settings.m_voxLevel));
     applySettings();
 }
 
@@ -453,6 +460,7 @@ void SimplePTTGUI::applyPTT(bool tx)
 {
 	if (m_doApplySettings)
 	{
+        qDebug("SimplePTTGUI::applyPTT: %s", tx ? "tx" : "rx");
 	    SimplePTT::MsgPTT* message = SimplePTT::MsgPTT::create(tx);
 	    m_simplePTT->getInputMessageQueue()->push(message);
 	}
