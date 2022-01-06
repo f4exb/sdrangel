@@ -4795,6 +4795,11 @@ bool WebAPIRequestMapper::getFeatureSettings(
             featureSettings->setDemodAnalyzerSettings(new SWGSDRangel::SWGDemodAnalyzerSettings());
             featureSettings->getDemodAnalyzerSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (featureSettingsKey == "JogdialControllerSettings")
+        {
+            featureSettings->setJogdialControllerSettings(new SWGSDRangel::SWGJogdialControllerSettings());
+            featureSettings->getJogdialControllerSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (featureSettingsKey == "GS232ControllerSettings")
         {
             featureSettings->setGs232ControllerSettings(new SWGSDRangel::SWGGS232ControllerSettings());

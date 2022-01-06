@@ -134,6 +134,19 @@ bool UDPSink::handleMessage(const Message& cmd)
 	}
 }
 
+void UDPSink::setCenterFrequency(qint64 frequency)
+{
+    UDPSinkSettings settings = m_settings;
+    settings.m_inputFrequencyOffset = frequency;
+    applySettings(settings, false);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureUDPSink *msgToGUI = MsgConfigureUDPSink::create(settings, false);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+}
+
 void UDPSink::applySettings(const UDPSinkSettings& settings, bool force)
 {
     qDebug() << "UDPSink::applySettings:"

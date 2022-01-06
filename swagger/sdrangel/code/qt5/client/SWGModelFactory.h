@@ -149,6 +149,7 @@
 #include "SWGInstanceFeaturesResponse.h"
 #include "SWGInstanceSummaryResponse.h"
 #include "SWGInterferometerSettings.h"
+#include "SWGJogdialControllerSettings.h"
 #include "SWGKiwiSDRReport.h"
 #include "SWGKiwiSDRSettings.h"
 #include "SWGLimeRFEDevice.h"
@@ -981,6 +982,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGInterferometerSettings").compare(type) == 0) {
       SWGInterferometerSettings *obj = new SWGInterferometerSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGJogdialControllerSettings").compare(type) == 0) {
+      SWGJogdialControllerSettings *obj = new SWGJogdialControllerSettings();
       obj->init();
       return obj;
     }

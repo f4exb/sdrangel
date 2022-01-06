@@ -155,6 +155,19 @@ void RadioAstronomy::stop()
     m_workerThread.wait();
 }
 
+void RadioAstronomy::setCenterFrequency(qint64 frequency)
+{
+    RadioAstronomySettings settings = m_settings;
+    settings.m_inputFrequencyOffset = frequency;
+    applySettings(settings, false);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureRadioAstronomy *msgToGUI = MsgConfigureRadioAstronomy::create(settings, false);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+}
+
 bool RadioAstronomy::handleMessage(const Message& cmd)
 {
     if (MsgConfigureRadioAstronomy::match(cmd))

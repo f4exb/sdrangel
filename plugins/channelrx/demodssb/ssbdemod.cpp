@@ -146,6 +146,19 @@ bool SSBDemod::handleMessage(const Message& cmd)
 	}
 }
 
+void SSBDemod::setCenterFrequency(qint64 frequency)
+{
+    SSBDemodSettings settings = m_settings;
+    settings.m_inputFrequencyOffset = frequency;
+    applySettings(settings, false);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureSSBDemod *msgToGUI = MsgConfigureSSBDemod::create(settings, false);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+}
+
 void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
 {
     qDebug() << "SSBDemod::applySettings:"

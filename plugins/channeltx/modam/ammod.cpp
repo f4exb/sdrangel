@@ -112,6 +112,19 @@ void AMMod::pull(SampleVector::iterator& begin, unsigned int nbSamples)
     m_basebandSource->pull(begin, nbSamples);
 }
 
+void AMMod::setCenterFrequency(qint64 frequency)
+{
+    AMModSettings settings = m_settings;
+    settings.m_inputFrequencyOffset = frequency;
+    applySettings(settings, false);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureAMMod *msgToGUI = MsgConfigureAMMod::create(settings, false);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+}
+
 bool AMMod::handleMessage(const Message& cmd)
 {
     if (MsgConfigureAMMod::match(cmd))

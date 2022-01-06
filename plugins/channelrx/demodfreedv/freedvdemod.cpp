@@ -144,6 +144,18 @@ bool FreeDVDemod::handleMessage(const Message& cmd)
 	}
 }
 
+void FreeDVDemod::setCenterFrequency(qint64 frequency)
+{
+    FreeDVDemodSettings settings = m_settings;
+    settings.m_inputFrequencyOffset = frequency;
+    applySettings(settings, false);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureFreeDVDemod *msgToGUI = MsgConfigureFreeDVDemod::create(settings, false);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+}
 
 void FreeDVDemod::applySettings(const FreeDVDemodSettings& settings, bool force)
 {

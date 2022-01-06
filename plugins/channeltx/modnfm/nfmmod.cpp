@@ -108,6 +108,19 @@ void NFMMod::pull(SampleVector::iterator& begin, unsigned int nbSamples)
     m_basebandSource->pull(begin, nbSamples);
 }
 
+void NFMMod::setCenterFrequency(qint64 frequency)
+{
+    NFMModSettings settings = m_settings;
+    settings.m_inputFrequencyOffset = frequency;
+    applySettings(settings, false);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureNFMMod *msgToGUI = MsgConfigureNFMMod::create(settings, false);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+}
+
 bool NFMMod::handleMessage(const Message& cmd)
 {
     if (MsgConfigureNFMMod::match(cmd))

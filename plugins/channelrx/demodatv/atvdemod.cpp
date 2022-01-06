@@ -129,6 +129,19 @@ bool ATVDemod::handleMessage(const Message& cmd)
     }
 }
 
+void ATVDemod::setCenterFrequency(qint64 frequency)
+{
+    ATVDemodSettings settings = m_settings;
+    settings.m_inputFrequencyOffset = frequency;
+    applySettings(settings, false);
+
+    if (getMessageQueueToGUI())
+    {
+        MsgConfigureATVDemod *msg = MsgConfigureATVDemod::create(settings, false);
+        getMessageQueueToGUI()->push(msg);
+    }
+}
+
 void ATVDemod::applySettings(const ATVDemodSettings& settings, bool force)
 {
     qDebug() << "ATVDemod::applySettings:"

@@ -106,6 +106,19 @@ void WFMMod::pull(SampleVector::iterator& begin, unsigned int nbSamples)
     m_basebandSource->pull(begin, nbSamples);
 }
 
+void WFMMod::setCenterFrequency(qint64 frequency)
+{
+    WFMModSettings settings = m_settings;
+    settings.m_inputFrequencyOffset = frequency;
+    applySettings(settings, false);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureWFMMod *msgToGUI = MsgConfigureWFMMod::create(settings, false);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+}
+
 bool WFMMod::handleMessage(const Message& cmd)
 {
     if (MsgConfigureWFMMod::match(cmd))

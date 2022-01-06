@@ -152,6 +152,13 @@ bool ChannelAnalyzer::handleMessage(const Message& cmd)
 	}
 }
 
+void ChannelAnalyzer::setCenterFrequency(qint64 frequency)
+{
+    ChannelAnalyzerSettings settings = m_settings;
+    settings.m_inputFrequencyOffset = frequency;
+    applySettings(settings);
+}
+
 void ChannelAnalyzer::applySettings(const ChannelAnalyzerSettings& settings, bool force)
 {
     qDebug() << "ChannelAnalyzer::applySettings:"

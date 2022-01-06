@@ -41,7 +41,7 @@
 #include "feature/featureuiset.h"
 #include "feature/featureset.h"
 #include "feature/feature.h"
-#include "gui/commandkeyreceiver.h"
+#include "commands/commandkeyreceiver.h"
 #include "gui/indicator.h"
 #include "gui/presetitem.h"
 #include "gui/commanditem.h"

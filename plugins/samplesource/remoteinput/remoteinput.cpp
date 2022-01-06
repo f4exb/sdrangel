@@ -148,7 +148,12 @@ quint64 RemoteInput::getCenterFrequency() const
 
 void RemoteInput::setCenterFrequency(qint64 centerFrequency)
 {
-    (void) centerFrequency;
+    qint64 streamFrequency = m_remoteInputUDPHandler->getCenterFrequency();
+    qint64 deviceFrequency = m_remoteChannelSettings.m_deviceCenterFrequency;
+    deviceFrequency += centerFrequency - streamFrequency;
+    RemoteChannelSettings remoteChannelSettings = m_remoteChannelSettings;
+    remoteChannelSettings.m_deviceCenterFrequency = deviceFrequency;
+    applyRemoteChannelSettings(remoteChannelSettings);
 }
 
 std::time_t RemoteInput::getStartingTimeStamp() const

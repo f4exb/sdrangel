@@ -101,6 +101,7 @@ public:
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = "Interferometer"; }
     virtual qint64 getCenterFrequency() const { return m_frequencyOffset; }
+    virtual void setCenterFrequency(qint64) {}
     uint32_t getDeviceSampleRate() const { return m_deviceSampleRate; }
 
     virtual QByteArray serialize() const;

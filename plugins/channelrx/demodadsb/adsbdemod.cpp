@@ -262,6 +262,19 @@ void ADSBDemod::applySettings(const ADSBDemodSettings& settings, bool force)
     m_settings = settings;
 }
 
+void ADSBDemod::setCenterFrequency(qint64 frequency)
+{
+    ADSBDemodSettings settings = m_settings;
+    settings.m_inputFrequencyOffset = frequency;
+    applySettings(settings);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureADSBDemod *msgToGUI = MsgConfigureADSBDemod::create(settings, false);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+}
+
 QByteArray ADSBDemod::serialize() const
 {
     return m_settings.serialize();

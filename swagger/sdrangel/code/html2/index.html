@@ -5269,6 +5269,9 @@ margin-bottom: 20px;
     "DemodAnalyzerSettings" : {
       "$ref" : "#/definitions/DemodAnalyzerSettings"
     },
+    "JogdialControllerSettings" : {
+      "$ref" : "#/definitions/JogdialControllerSettings"
+    },
     "GS232ControllerSettings" : {
       "$ref" : "#/definitions/GS232ControllerSettings"
     },
@@ -6689,6 +6692,33 @@ margin-bottom: 20px;
     }
   },
   "description" : "Interferometer"
+};
+            defs.JogdialControllerSettings = {
+  "properties" : {
+    "title" : {
+      "type" : "string"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API\n  * 1 - yes\n  * 0 - no\n"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIFeatureSetIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIFeatureIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "JogdialController"
 };
             defs.KiwiSDRReport = {
   "properties" : {
@@ -51653,7 +51683,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-12-29T17:23:49.058+01:00
+              Generated 2022-01-04T21:15:15.924+01:00
             </div>
           </div>
       </div>

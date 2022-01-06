@@ -163,6 +163,19 @@ bool FreqTracker::handleMessage(const Message& cmd)
 	}
 }
 
+void FreqTracker::setCenterFrequency(qint64 frequency)
+{
+    FreqTrackerSettings settings = m_settings;
+    settings.m_inputFrequencyOffset = frequency;
+    applySettings(settings, false);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureFreqTracker *msgToGUI = MsgConfigureFreqTracker::create(settings, false);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+}
+
 void FreqTracker::applySettings(const FreqTrackerSettings& settings, bool force)
 {
     if (!settings.m_tracking)

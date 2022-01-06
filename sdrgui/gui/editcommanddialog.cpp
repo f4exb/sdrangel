@@ -18,7 +18,7 @@
 #include "editcommanddialog.h"
 #include "ui_editcommanddialog.h"
 #include "commands/command.h"
-#include "commandkeyreceiver.h"
+#include "commands/commandkeyreceiver.h"
 
 #include <QFileInfo>
 #include <QFileDialog>

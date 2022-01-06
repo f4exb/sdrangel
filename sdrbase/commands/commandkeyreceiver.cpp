@@ -15,9 +15,10 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <gui/commandkeyreceiver.h>
 #include <QEvent>
 #include <QKeyEvent>
+
+#include "commandkeyreceiver.h"
 
 const std::vector<Qt::Key> CommandKeyReceiver::m_composeKeys = {Qt::Key_Shift, Qt::Key_Control, Qt::Key_Meta, Qt::Key_Alt, Qt::Key_AltGr};
 

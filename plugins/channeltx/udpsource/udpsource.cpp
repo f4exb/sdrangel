@@ -91,6 +91,19 @@ void UDPSource::pull(SampleVector::iterator& begin, unsigned int nbSamples)
     m_basebandSource->pull(begin, nbSamples);
 }
 
+void UDPSource::setCenterFrequency(qint64 frequency)
+{
+    UDPSourceSettings settings = m_settings;
+    settings.m_inputFrequencyOffset = frequency;
+    applySettings(settings, false);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureUDPSource *msgToGUI = MsgConfigureUDPSource::create(settings, false);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+}
+
 bool UDPSource::handleMessage(const Message& cmd)
 {
     if (MsgConfigureChannelizer::match(cmd))

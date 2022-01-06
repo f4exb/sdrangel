@@ -148,6 +148,19 @@ bool WFMDemod::handleMessage(const Message& cmd)
 	}
 }
 
+void WFMDemod::setCenterFrequency(qint64 frequency)
+{
+    WFMDemodSettings settings = m_settings;
+    settings.m_inputFrequencyOffset = frequency;
+    applySettings(settings, false);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureWFMDemod *msgToGUI = MsgConfigureWFMDemod::create(settings, false);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+}
+
 void WFMDemod::applySettings(const WFMDemodSettings& settings, bool force)
 {
     qDebug() << "WFMDemod::applySettings:"

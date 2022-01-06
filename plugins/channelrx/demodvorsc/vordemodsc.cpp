@@ -191,6 +191,19 @@ bool VORDemodSC::handleMessage(const Message& cmd)
     }
 }
 
+void VORDemodSC::setCenterFrequency(qint64 frequency)
+{
+    VORDemodSCSettings settings = m_settings;
+    settings.m_inputFrequencyOffset = frequency;
+    applySettings(settings, false);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureVORDemod *msgToGUI = MsgConfigureVORDemod::create(settings, false);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+}
+
 void VORDemodSC::applySettings(const VORDemodSCSettings& settings, bool force)
 {
     qDebug() << "VORDemodSC::applySettings:"

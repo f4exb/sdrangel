@@ -130,6 +130,19 @@ bool DATVDemod::handleMessage(const Message& cmd)
 	}
 }
 
+void DATVDemod::setCenterFrequency(qint64 frequency)
+{
+    DATVDemodSettings settings = m_settings;
+    settings.m_centerFrequency = frequency;
+    applySettings(settings, false);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureDATVDemod *msgToGUI = MsgConfigureDATVDemod::create(settings, false);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+}
+
 void DATVDemod::applySettings(const DATVDemodSettings& settings, bool force)
 {
     QString debugMsg = tr("DATVDemod::applySettings: force: %1").arg(force);

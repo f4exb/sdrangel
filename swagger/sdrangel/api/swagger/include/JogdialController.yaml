@@ -1,0 +1,21 @@
+JogdialControllerSettings:
+  description: JogdialController
+  properties:
+    title:
+      type: string
+    rgbColor:
+      type: integer
+    useReverseAPI:
+      type: integer
+      description: >
+        Synchronize with reverse API
+          * 1 - yes
+          * 0 - no
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIFeatureSetIndex:
+      type: integer
+    reverseAPIFeatureIndex:
+      type: integer

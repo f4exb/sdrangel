@@ -143,6 +143,19 @@ bool BFMDemod::handleMessage(const Message& cmd)
 	}
 }
 
+void BFMDemod::setCenterFrequency(qint64 frequency)
+{
+    BFMDemodSettings settings = m_settings;
+    settings.m_inputFrequencyOffset = frequency;
+    applySettings(settings, false);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureBFMDemod *msgToGUI = MsgConfigureBFMDemod::create(settings, false);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+}
+
 void BFMDemod::applySettings(const BFMDemodSettings& settings, bool force)
 {
     qDebug() << "BFMDemod::applySettings: MsgConfigureBFMDemod:"

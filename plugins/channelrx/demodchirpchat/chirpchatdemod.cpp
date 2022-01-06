@@ -294,6 +294,19 @@ bool ChirpChatDemod::handleMessage(const Message& cmd)
 	}
 }
 
+void ChirpChatDemod::setCenterFrequency(qint64 frequency)
+{
+    ChirpChatDemodSettings settings = m_settings;
+    settings.m_inputFrequencyOffset = frequency;
+    applySettings(settings, false);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureChirpChatDemod *msgToGUI = MsgConfigureChirpChatDemod::create(settings, false);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+}
+
 QByteArray ChirpChatDemod::serialize() const
 {
     return m_settings.serialize();

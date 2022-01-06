@@ -21,7 +21,6 @@ set(sdrgui_SOURCES
     gui/clickablelabel.cpp
     gui/colormapper.cpp
     gui/commanditem.cpp
-    gui/commandkeyreceiver.cpp
     gui/commandoutputdialog.cpp
     gui/crightclickenabler.cpp
     gui/customtextedit.cpp
@@ -109,7 +108,6 @@ set(sdrgui_HEADERS
     gui/channelwindow.h
     gui/colormapper.h
     gui/commanditem.h
-    gui/commandkeyreceiver.h
     gui/commandoutputdialog.h
     gui/crightclickenabler.h
     gui/customtextedit.h

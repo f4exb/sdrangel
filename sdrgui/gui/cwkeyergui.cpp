@@ -24,7 +24,7 @@
 #include "dsp/cwkeyer.h"
 #include "util/simpleserializer.h"
 #include "util/messagequeue.h"
-#include "commandkeyreceiver.h"
+#include "commands/commandkeyreceiver.h"
 #include "mainwindow.h"
 
 CWKeyerGUI::CWKeyerGUI(QWidget* parent) :

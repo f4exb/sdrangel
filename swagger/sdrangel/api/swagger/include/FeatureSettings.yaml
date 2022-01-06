@@ -23,6 +23,8 @@ FeatureSettings:
       $ref: "http://swgserver:8081/api/swagger/include/APRS.yaml#/APRSSettings"
     DemodAnalyzerSettings:
       $ref: "http://swgserver:8081/api/swagger/include/DemodAnalyzer.yaml#/DemodAnalyzerSettings"
+    JogdialControllerSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/JogdialController.yaml#/JogdialControllerSettings"
     GS232ControllerSettings:
       $ref: "http://swgserver:8081/api/swagger/include/GS232Controller.yaml#/GS232ControllerSettings"
     MapSettings:

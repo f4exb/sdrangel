@@ -44,6 +44,8 @@ SWGFeatureSettings::SWGFeatureSettings() {
     m_aprs_settings_isSet = false;
     demod_analyzer_settings = nullptr;
     m_demod_analyzer_settings_isSet = false;
+    jogdial_controller_settings = nullptr;
+    m_jogdial_controller_settings_isSet = false;
     gs232_controller_settings = nullptr;
     m_gs232_controller_settings_isSet = false;
     map_settings = nullptr;
@@ -84,6 +86,8 @@ SWGFeatureSettings::init() {
     m_aprs_settings_isSet = false;
     demod_analyzer_settings = new SWGDemodAnalyzerSettings();
     m_demod_analyzer_settings_isSet = false;
+    jogdial_controller_settings = new SWGJogdialControllerSettings();
+    m_jogdial_controller_settings_isSet = false;
     gs232_controller_settings = new SWGGS232ControllerSettings();
     m_gs232_controller_settings_isSet = false;
     map_settings = new SWGMapSettings();
@@ -123,6 +127,9 @@ SWGFeatureSettings::cleanup() {
     }
     if(demod_analyzer_settings != nullptr) { 
         delete demod_analyzer_settings;
+    }
+    if(jogdial_controller_settings != nullptr) { 
+        delete jogdial_controller_settings;
     }
     if(gs232_controller_settings != nullptr) { 
         delete gs232_controller_settings;
@@ -176,6 +183,8 @@ SWGFeatureSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&aprs_settings, pJson["APRSSettings"], "SWGAPRSSettings", "SWGAPRSSettings");
     
     ::SWGSDRangel::setValue(&demod_analyzer_settings, pJson["DemodAnalyzerSettings"], "SWGDemodAnalyzerSettings", "SWGDemodAnalyzerSettings");
+    
+    ::SWGSDRangel::setValue(&jogdial_controller_settings, pJson["JogdialControllerSettings"], "SWGJogdialControllerSettings", "SWGJogdialControllerSettings");
     
     ::SWGSDRangel::setValue(&gs232_controller_settings, pJson["GS232ControllerSettings"], "SWGGS232ControllerSettings", "SWGGS232ControllerSettings");
     
@@ -232,6 +241,9 @@ SWGFeatureSettings::asJsonObject() {
     }
     if((demod_analyzer_settings != nullptr) && (demod_analyzer_settings->isSet())){
         toJsonValue(QString("DemodAnalyzerSettings"), demod_analyzer_settings, obj, QString("SWGDemodAnalyzerSettings"));
+    }
+    if((jogdial_controller_settings != nullptr) && (jogdial_controller_settings->isSet())){
+        toJsonValue(QString("JogdialControllerSettings"), jogdial_controller_settings, obj, QString("SWGJogdialControllerSettings"));
     }
     if((gs232_controller_settings != nullptr) && (gs232_controller_settings->isSet())){
         toJsonValue(QString("GS232ControllerSettings"), gs232_controller_settings, obj, QString("SWGGS232ControllerSettings"));
@@ -341,6 +353,16 @@ SWGFeatureSettings::setDemodAnalyzerSettings(SWGDemodAnalyzerSettings* demod_ana
     this->m_demod_analyzer_settings_isSet = true;
 }
 
+SWGJogdialControllerSettings*
+SWGFeatureSettings::getJogdialControllerSettings() {
+    return jogdial_controller_settings;
+}
+void
+SWGFeatureSettings::setJogdialControllerSettings(SWGJogdialControllerSettings* jogdial_controller_settings) {
+    this->jogdial_controller_settings = jogdial_controller_settings;
+    this->m_jogdial_controller_settings_isSet = true;
+}
+
 SWGGS232ControllerSettings*
 SWGFeatureSettings::getGs232ControllerSettings() {
     return gs232_controller_settings;
@@ -448,6 +470,9 @@ SWGFeatureSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(demod_analyzer_settings && demod_analyzer_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(jogdial_controller_settings && jogdial_controller_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(gs232_controller_settings && gs232_controller_settings->isSet()){

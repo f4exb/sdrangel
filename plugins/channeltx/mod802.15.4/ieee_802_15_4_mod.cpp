@@ -149,6 +149,19 @@ bool IEEE_802_15_4_Mod::handleMessage(const Message& cmd)
     }
 }
 
+void IEEE_802_15_4_Mod::setCenterFrequency(qint64 frequency)
+{
+    IEEE_802_15_4_ModSettings settings = m_settings;
+    settings.m_inputFrequencyOffset = frequency;
+    applySettings(settings, false);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureIEEE_802_15_4_Mod *msgToGUI = MsgConfigureIEEE_802_15_4_Mod::create(settings, false);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+}
+
 void IEEE_802_15_4_Mod::applySettings(const IEEE_802_15_4_ModSettings& settings, bool force)
 {
     qDebug() << "IEEE_802_15_4_Mod::applySettings:"

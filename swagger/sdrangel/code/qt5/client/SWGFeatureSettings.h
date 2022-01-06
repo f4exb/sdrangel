@@ -28,6 +28,7 @@
 #include "SWGAntennaToolsSettings.h"
 #include "SWGDemodAnalyzerSettings.h"
 #include "SWGGS232ControllerSettings.h"
+#include "SWGJogdialControllerSettings.h"
 #include "SWGMapSettings.h"
 #include "SWGPERTesterSettings.h"
 #include "SWGRigCtlServerSettings.h"
@@ -78,6 +79,9 @@ public:
 
     SWGDemodAnalyzerSettings* getDemodAnalyzerSettings();
     void setDemodAnalyzerSettings(SWGDemodAnalyzerSettings* demod_analyzer_settings);
+
+    SWGJogdialControllerSettings* getJogdialControllerSettings();
+    void setJogdialControllerSettings(SWGJogdialControllerSettings* jogdial_controller_settings);
 
     SWGGS232ControllerSettings* getGs232ControllerSettings();
     void setGs232ControllerSettings(SWGGS232ControllerSettings* gs232_controller_settings);
@@ -130,6 +134,9 @@ private:
 
     SWGDemodAnalyzerSettings* demod_analyzer_settings;
     bool m_demod_analyzer_settings_isSet;
+
+    SWGJogdialControllerSettings* jogdial_controller_settings;
+    bool m_jogdial_controller_settings_isSet;
 
     SWGGS232ControllerSettings* gs232_controller_settings;
     bool m_gs232_controller_settings_isSet;

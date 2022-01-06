@@ -189,6 +189,19 @@ ScopeVis *PagerDemod::getScopeSink()
     return m_basebandSink->getScopeSink();
 }
 
+void PagerDemod::setCenterFrequency(qint64 frequency)
+{
+    PagerDemodSettings settings = m_settings;
+    settings.m_inputFrequencyOffset = frequency;
+    applySettings(settings, false);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigurePagerDemod *msgToGUI = MsgConfigurePagerDemod::create(settings, false);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+}
+
 void PagerDemod::applySettings(const PagerDemodSettings& settings, bool force)
 {
     qDebug() << "PagerDemod::applySettings:"

@@ -111,6 +111,19 @@ void FreeDVMod::pull(SampleVector::iterator& begin, unsigned int nbSamples)
     m_basebandSource->pull(begin, nbSamples);
 }
 
+void FreeDVMod::setCenterFrequency(qint64 frequency)
+{
+    FreeDVModSettings settings = m_settings;
+    settings.m_inputFrequencyOffset = frequency;
+    applySettings(settings, false);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureFreeDVMod *msgToGUI = MsgConfigureFreeDVMod::create(settings, false);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+}
+
 bool FreeDVMod::handleMessage(const Message& cmd)
 {
     if (MsgConfigureFreeDVMod::match(cmd))

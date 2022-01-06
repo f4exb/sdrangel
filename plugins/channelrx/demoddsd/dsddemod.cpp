@@ -150,6 +150,19 @@ bool DSDDemod::handleMessage(const Message& cmd)
 	}
 }
 
+void DSDDemod::setCenterFrequency(qint64 frequency)
+{
+    DSDDemodSettings settings = m_settings;
+    settings.m_inputFrequencyOffset = frequency;
+    applySettings(settings, false);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureDSDDemod *msgToGUI = MsgConfigureDSDDemod::create(settings, false);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+}
+
 void DSDDemod::applySettings(const DSDDemodSettings& settings, bool force)
 {
     qDebug() << "DSDDemod::applySettings: "

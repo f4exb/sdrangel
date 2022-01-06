@@ -147,6 +147,19 @@ bool NFMDemod::handleMessage(const Message& cmd)
 	}
 }
 
+void NFMDemod::setCenterFrequency(qint64 frequency)
+{
+    NFMDemodSettings settings = m_settings;
+    settings.m_inputFrequencyOffset = frequency;
+    applySettings(settings, false);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureNFMDemod *msgToGUI = MsgConfigureNFMDemod::create(settings, false);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+}
+
 void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
 {
     qDebug() << "NFMDemod::applySettings:"

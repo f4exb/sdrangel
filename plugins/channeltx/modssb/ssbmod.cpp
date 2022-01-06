@@ -109,6 +109,19 @@ void SSBMod::pull(SampleVector::iterator& begin, unsigned int nbSamples)
     m_basebandSource->pull(begin, nbSamples);
 }
 
+void SSBMod::setCenterFrequency(qint64 frequency)
+{
+    SSBModSettings settings = m_settings;
+    settings.m_inputFrequencyOffset = frequency;
+    applySettings(settings, false);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureSSBMod *msgToGUI = MsgConfigureSSBMod::create(settings, false);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+}
+
 bool SSBMod::handleMessage(const Message& cmd)
 {
     if (MsgConfigureSSBMod::match(cmd))

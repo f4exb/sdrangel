@@ -109,6 +109,19 @@ void AISMod::pull(SampleVector::iterator& begin, unsigned int nbSamples)
     m_basebandSource->pull(begin, nbSamples);
 }
 
+void AISMod::setCenterFrequency(qint64 frequency)
+{
+    AISModSettings settings = m_settings;
+    settings.m_inputFrequencyOffset = frequency;
+    applySettings(settings, false);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureAISMod *msgToGUI = MsgConfigureAISMod::create(settings, false);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+}
+
 bool AISMod::handleMessage(const Message& cmd)
 {
     if (MsgConfigureAISMod::match(cmd))

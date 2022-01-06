@@ -154,6 +154,19 @@ bool PacketMod::handleMessage(const Message& cmd)
     }
 }
 
+void PacketMod::setCenterFrequency(qint64 frequency)
+{
+    PacketModSettings settings = m_settings;
+    settings.m_inputFrequencyOffset = frequency;
+    applySettings(settings, false);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigurePacketMod *msgToGUI = MsgConfigurePacketMod::create(settings, false);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+}
+
 void PacketMod::applySettings(const PacketModSettings& settings, bool force)
 {
     qDebug() << "PacketMod::applySettings:"

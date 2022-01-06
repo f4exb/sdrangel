@@ -144,6 +144,7 @@ public:
 
     DSPDeviceSourceEngine *getDeviceSourceEngine() { return m_deviceSourceEngine; }
     DSPDeviceSinkEngine *getDeviceSinkEngine() { return m_deviceSinkEngine; }
+    DSPDeviceMIMOEngine *getDeviceMIMOEngine() { return m_deviceMIMOEngine; }
 
     void addSourceBuddy(DeviceAPI* buddy);
     void addSinkBuddy(DeviceAPI* buddy);

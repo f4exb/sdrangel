@@ -99,6 +99,19 @@ uint32_t NoiseFigure::getNumberOfDeviceStreams() const
     return m_deviceAPI->getNbSourceStreams();
 }
 
+void NoiseFigure::setCenterFrequency(qint64 frequency)
+{
+    NoiseFigureSettings settings = m_settings;
+    settings.m_inputFrequencyOffset = frequency;
+    applySettings(settings, false);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureNoiseFigure *msgToGUI = MsgConfigureNoiseFigure::create(settings, false);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+}
+
 void NoiseFigure::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
 {
     (void) firstOfBurst;

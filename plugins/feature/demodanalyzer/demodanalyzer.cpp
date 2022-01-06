@@ -213,7 +213,7 @@ bool DemodAnalyzer::deserialize(const QByteArray& data)
 void DemodAnalyzer::applySettings(const DemodAnalyzerSettings& settings, bool force)
 {
     qDebug() << "DemodAnalyzer::applySettings:"
-            << " m_channelIndex: " << settings.m_log2Decim
+            << " m_log2Decim: " << settings.m_log2Decim
             << " m_title: " << settings.m_title
             << " m_rgbColor: " << settings.m_rgbColor
             << " m_useReverseAPI: " << settings.m_useReverseAPI

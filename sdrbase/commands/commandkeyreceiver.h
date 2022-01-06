@@ -31,7 +31,7 @@ public:
     CommandKeyReceiver();
 
     void setRelease(bool release) { m_release = release; }
-    void setPass(bool release) { m_release = release; }
+    void setPass(bool pass) { m_pass = pass; }
 
 protected:
     bool eventFilter(QObject* obj, QEvent* event);

@@ -272,6 +272,19 @@ bool DABDemod::handleMessage(const Message& cmd)
     }
 }
 
+void DABDemod::setCenterFrequency(qint64 frequency)
+{
+    DABDemodSettings settings = m_settings;
+    settings.m_inputFrequencyOffset = frequency;
+    applySettings(settings, false);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureDABDemod *msgToGUI = MsgConfigureDABDemod::create(settings, false);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+}
+
 void DABDemod::applySettings(const DABDemodSettings& settings, bool force)
 {
     qDebug() << "DABDemod::applySettings:"

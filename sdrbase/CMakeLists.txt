@@ -87,6 +87,7 @@ set(sdrbase_SOURCES
     channel/remotedatareadqueue.cpp
 
     commands/command.cpp
+    commands/commandkeyreceiver.cpp
 
     dsp/afsquelch.cpp
     dsp/agc.cpp
@@ -259,6 +260,7 @@ set(sdrbase_HEADERS
     channel/remotedatablock.h
 
     commands/command.h
+    commands/commandkeyreceiver.h
 
     dsp/afsquelch.h
     dsp/autocorrector.h

@@ -136,6 +136,19 @@ bool ChirpChatMod::handleMessage(const Message& cmd)
 	}
 }
 
+void ChirpChatMod::setCenterFrequency(qint64 frequency)
+{
+    ChirpChatModSettings settings = m_settings;
+    settings.m_inputFrequencyOffset = frequency;
+    applySettings(settings, false);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureChirpChatMod *msgToGUI = MsgConfigureChirpChatMod::create(settings, false);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+}
+
 void ChirpChatMod::applySettings(const ChirpChatModSettings& settings, bool force)
 {
     qDebug() << "ChirpChatMod::applySettings:"

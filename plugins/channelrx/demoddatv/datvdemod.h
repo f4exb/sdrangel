@@ -49,6 +49,7 @@ public:
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = objectName(); }
     virtual qint64 getCenterFrequency() const { return m_settings.m_centerFrequency; }
+    virtual void setCenterFrequency(qint64 frequency);
 
     virtual QByteArray serialize() const { return QByteArray(); }
     virtual bool deserialize(const QByteArray& data) { (void) data; return false; }

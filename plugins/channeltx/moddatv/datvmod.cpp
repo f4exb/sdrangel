@@ -199,6 +199,17 @@ bool DATVMod::handleMessage(const Message& cmd)
     }
 }
 
+void DATVMod::setCenterFrequency(qint64 frequency)
+{
+    DATVModSettings settings = m_settings;
+    settings.m_inputFrequencyOffset = frequency;
+    applySettings(settings, false);
+
+    if (m_guiMessageQueue) {
+        m_guiMessageQueue->push(MsgConfigureDATVMod::create(settings, false));
+    }
+}
+
 void DATVMod::applySettings(const DATVModSettings& settings, bool force)
 {
     qDebug() << "DATVMod::applySettings:"
@@ -354,8 +365,9 @@ int DATVMod::webapiSettingsPutPatch(
     MsgConfigureDATVMod *msg = MsgConfigureDATVMod::create(settings, force);
     m_inputMessageQueue.push(msg);
 
-    if (m_guiMessageQueue)
+    if (m_guiMessageQueue) {
         m_guiMessageQueue->push(MsgConfigureDATVMod::create(settings, force));
+    }
 
     if (channelSettingsKeys.contains("tsFileName"))
     {

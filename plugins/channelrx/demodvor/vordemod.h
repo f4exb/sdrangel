@@ -76,6 +76,7 @@ public:
     virtual const QString& getURI() const { return getName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
     virtual qint64 getCenterFrequency() const { return 0; }
+    virtual void setCenterFrequency(qint64) {}
 
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);

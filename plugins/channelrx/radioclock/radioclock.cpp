@@ -117,6 +117,19 @@ void RadioClock::stop()
     m_thread.wait();
 }
 
+void RadioClock::setCenterFrequency(qint64 frequency)
+{
+    RadioClockSettings settings = m_settings;
+    settings.m_inputFrequencyOffset = frequency;
+    applySettings(settings, false);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureRadioClock *msgToGUI = MsgConfigureRadioClock::create(settings, false);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+}
+
 bool RadioClock::handleMessage(const Message& cmd)
 {
     if (MsgConfigureRadioClock::match(cmd))

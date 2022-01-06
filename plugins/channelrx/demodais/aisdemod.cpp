@@ -218,6 +218,19 @@ ScopeVis *AISDemod::getScopeSink()
     return m_basebandSink->getScopeSink();
 }
 
+void AISDemod::setCenterFrequency(qint64 frequency)
+{
+    AISDemodSettings settings = m_settings;
+    settings.m_inputFrequencyOffset = frequency;
+    applySettings(settings, false);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureAISDemod *msgToGUI = MsgConfigureAISDemod::create(settings, false);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+}
+
 void AISDemod::applySettings(const AISDemodSettings& settings, bool force)
 {
     qDebug() << "AISDemod::applySettings:"

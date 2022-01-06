@@ -151,6 +151,19 @@ bool AMDemod::handleMessage(const Message& cmd)
 	}
 }
 
+void AMDemod::setCenterFrequency(qint64 frequency)
+{
+    AMDemodSettings settings = m_settings;
+    settings.m_inputFrequencyOffset = frequency;
+    applySettings(settings, false);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureAMDemod *msgToGUI = MsgConfigureAMDemod::create(settings, false);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+}
+
 void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
 {
     qDebug() << "AMDemod::applySettings:"

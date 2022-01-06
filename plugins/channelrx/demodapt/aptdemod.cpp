@@ -210,6 +210,19 @@ bool APTDemod::handleMessage(const Message& cmd)
     }
 }
 
+void APTDemod::setCenterFrequency(qint64 frequency)
+{
+    APTDemodSettings settings = m_settings;
+    settings.m_inputFrequencyOffset = frequency;
+    applySettings(settings, false);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureAPTDemod *msgToGUI = MsgConfigureAPTDemod::create(settings, false);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+}
+
 void APTDemod::applySettings(const APTDemodSettings& settings, bool force)
 {
     qDebug() << "APTDemod::applySettings:"

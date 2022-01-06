@@ -58,6 +58,7 @@ public:
     virtual void setName(const QString& name) { m_name = name; }
     virtual const QString& getName() const { return m_name; }
     virtual qint64 getCenterFrequency() const = 0; //!< Applies to a default stream
+    virtual void setCenterFrequency(qint64 frequency) = 0;
 
     virtual QByteArray serialize() const = 0;
     virtual bool deserialize(const QByteArray& data) = 0;
