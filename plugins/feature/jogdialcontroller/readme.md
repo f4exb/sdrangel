@@ -85,7 +85,7 @@ The **keys** are mapped as follows:
 
   - K5: Select device control
   - K6: Move down through the list of available channels
-  - K7: Center the channel (set its frequency to 0) - useful when you loose the channel out of the baseband window
+  - K7: Reset the channel frequency (set to 0) - useful when you loose the channel out of the baseband window
   - K8: Move up through the list of available channels
   - K9: Select channel control
 
@@ -118,19 +118,19 @@ The shuttle devices controls are mapped according to the following table. K5 to 
     <td>K6</td>
     <td>&larr;</td>
     <td>&larr;</td>
-    <td>Previous channel</td>
+    <td>Select previous channel in list</td>
   <tr>
   <tr>
     <td>K7</td>
     <td>Home</td>
     <td>Home</td>
-    <td>Center channel</td>
+    <td>Reset channel frequency (set to 0)</td>
   <tr>
   <tr>
     <td>K8</td>
     <td>&rarr;</td>
     <td>&rarr;</td>
-    <td>Next channel</td>
+    <td>Select next channel in list</td>
   <tr>
   <tr>
     <td>K9</td>
