@@ -15,8 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRGUI_GUI_COMMANDKEYRECEIVER_H_
-#define SDRGUI_GUI_COMMANDKEYRECEIVER_H_
+#ifndef SDRBASE_COMMANDS_COMMANDKEYRECEIVER_H_
+#define SDRBASE_COMMANDS_COMMANDKEYRECEIVER_H_
 
 #include <QObject>
 
@@ -24,7 +24,7 @@
 
 class QKeyEvent;
 
-class SDRGUI_API CommandKeyReceiver : public QObject
+class SDRBASE_API CommandKeyReceiver : public QObject
 {
     Q_OBJECT
 public:
@@ -50,4 +50,4 @@ signals:
 };
 
 
-#endif /* SDRGUI_GUI_COMMANDKEYRECEIVER_H_ */
+#endif /* SDRBASE_COMMANDS_COMMANDKEYRECEIVER_H_ */
