@@ -83,7 +83,6 @@ private slots:
     void handleInputMessages();
 	void on_startStop_toggled(bool checked);
 	void on_devicesRefresh_clicked();
-	void on_device_currentIndexChanged(int index);
 	void on_channels_currentIndexChanged(int index);
 	void updateStatus();
 	void tick();
