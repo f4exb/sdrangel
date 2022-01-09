@@ -1,3 +1,10 @@
+sdrangel (6.18.0-1) unstable; urgency=medium
+
+  * New Jogdial Control feature. Implements #1088
+  * RollupWidget: make rollup state a Serializable object. Prerequisite to #1050
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 09 Jan 2022 09:42:30 +0100
+
 sdrangel (6.17.7-1) unstable; urgency=medium
 
   * Simple PTT feature: added vox control. Implements #1002

@@ -25,8 +25,8 @@
 
 RadioClockSettings::RadioClockSettings() :
     m_channelMarker(nullptr),
-    m_rollupState(nullptr),
-    m_scopeGUI(nullptr)
+    m_scopeGUI(nullptr),
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
