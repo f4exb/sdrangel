@@ -24,6 +24,7 @@
 #include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
 #include "util/messagequeue.h"
+#include "settings/rollupstate.h"
 
 #include "pagerdemodsettings.h"
 #include "pagerdemod.h"
@@ -61,6 +62,7 @@ private:
     PluginAPI* m_pluginAPI;
     DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
+    RollupState m_rollupState;
     PagerDemodSettings m_settings;
     bool m_doApplySettings;
     ScopeVis* m_scopeVis;

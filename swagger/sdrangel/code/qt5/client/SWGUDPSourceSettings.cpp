@@ -86,6 +86,8 @@ SWGUDPSourceSettings::SWGUDPSourceSettings() {
     m_spectrum_config_isSet = false;
     channel_marker = nullptr;
     m_channel_marker_isSet = false;
+    rollup_state = nullptr;
+    m_rollup_state_isSet = false;
 }
 
 SWGUDPSourceSettings::~SWGUDPSourceSettings() {
@@ -152,6 +154,8 @@ SWGUDPSourceSettings::init() {
     m_spectrum_config_isSet = false;
     channel_marker = new SWGChannelMarker();
     m_channel_marker_isSet = false;
+    rollup_state = new SWGRollupState();
+    m_rollup_state_isSet = false;
 }
 
 void
@@ -196,6 +200,9 @@ SWGUDPSourceSettings::cleanup() {
     }
     if(channel_marker != nullptr) { 
         delete channel_marker;
+    }
+    if(rollup_state != nullptr) { 
+        delete rollup_state;
     }
 }
 
@@ -267,6 +274,8 @@ SWGUDPSourceSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&spectrum_config, pJson["spectrumConfig"], "SWGGLSpectrum", "SWGGLSpectrum");
     
     ::SWGSDRangel::setValue(&channel_marker, pJson["channelMarker"], "SWGChannelMarker", "SWGChannelMarker");
+    
+    ::SWGSDRangel::setValue(&rollup_state, pJson["rollupState"], "SWGRollupState", "SWGRollupState");
     
 }
 
@@ -370,6 +379,9 @@ SWGUDPSourceSettings::asJsonObject() {
     }
     if((channel_marker != nullptr) && (channel_marker->isSet())){
         toJsonValue(QString("channelMarker"), channel_marker, obj, QString("SWGChannelMarker"));
+    }
+    if((rollup_state != nullptr) && (rollup_state->isSet())){
+        toJsonValue(QString("rollupState"), rollup_state, obj, QString("SWGRollupState"));
     }
 
     return obj;
@@ -665,6 +677,16 @@ SWGUDPSourceSettings::setChannelMarker(SWGChannelMarker* channel_marker) {
     this->m_channel_marker_isSet = true;
 }
 
+SWGRollupState*
+SWGUDPSourceSettings::getRollupState() {
+    return rollup_state;
+}
+void
+SWGUDPSourceSettings::setRollupState(SWGRollupState* rollup_state) {
+    this->rollup_state = rollup_state;
+    this->m_rollup_state_isSet = true;
+}
+
 
 bool
 SWGUDPSourceSettings::isSet(){
@@ -755,6 +777,9 @@ SWGUDPSourceSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(channel_marker && channel_marker->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(rollup_state && rollup_state->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

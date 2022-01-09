@@ -48,6 +48,8 @@ PacketDemodSettings:
       type: integer
     channelMarker:
       $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+    rollupState:
+      $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
 
 PacketDemodReport:
   description: AMDemod

@@ -102,6 +102,8 @@ SWGIEEE_802_15_4_ModSettings::SWGIEEE_802_15_4_ModSettings() {
     m_udp_port_isSet = false;
     channel_marker = nullptr;
     m_channel_marker_isSet = false;
+    rollup_state = nullptr;
+    m_rollup_state_isSet = false;
 }
 
 SWGIEEE_802_15_4_ModSettings::~SWGIEEE_802_15_4_ModSettings() {
@@ -184,6 +186,8 @@ SWGIEEE_802_15_4_ModSettings::init() {
     m_udp_port_isSet = false;
     channel_marker = new SWGChannelMarker();
     m_channel_marker_isSet = false;
+    rollup_state = new SWGRollupState();
+    m_rollup_state_isSet = false;
 }
 
 void
@@ -234,6 +238,9 @@ SWGIEEE_802_15_4_ModSettings::cleanup() {
 
     if(channel_marker != nullptr) { 
         delete channel_marker;
+    }
+    if(rollup_state != nullptr) { 
+        delete rollup_state;
     }
 }
 
@@ -321,6 +328,8 @@ SWGIEEE_802_15_4_ModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&udp_port, pJson["udpPort"], "qint32", "");
     
     ::SWGSDRangel::setValue(&channel_marker, pJson["channelMarker"], "SWGChannelMarker", "SWGChannelMarker");
+    
+    ::SWGSDRangel::setValue(&rollup_state, pJson["rollupState"], "SWGRollupState", "SWGRollupState");
     
 }
 
@@ -448,6 +457,9 @@ SWGIEEE_802_15_4_ModSettings::asJsonObject() {
     }
     if((channel_marker != nullptr) && (channel_marker->isSet())){
         toJsonValue(QString("channelMarker"), channel_marker, obj, QString("SWGChannelMarker"));
+    }
+    if((rollup_state != nullptr) && (rollup_state->isSet())){
+        toJsonValue(QString("rollupState"), rollup_state, obj, QString("SWGRollupState"));
     }
 
     return obj;
@@ -823,6 +835,16 @@ SWGIEEE_802_15_4_ModSettings::setChannelMarker(SWGChannelMarker* channel_marker)
     this->m_channel_marker_isSet = true;
 }
 
+SWGRollupState*
+SWGIEEE_802_15_4_ModSettings::getRollupState() {
+    return rollup_state;
+}
+void
+SWGIEEE_802_15_4_ModSettings::setRollupState(SWGRollupState* rollup_state) {
+    this->rollup_state = rollup_state;
+    this->m_rollup_state_isSet = true;
+}
+
 
 bool
 SWGIEEE_802_15_4_ModSettings::isSet(){
@@ -937,6 +959,9 @@ SWGIEEE_802_15_4_ModSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(channel_marker && channel_marker->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(rollup_state && rollup_state->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

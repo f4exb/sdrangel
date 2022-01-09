@@ -2010,7 +2010,7 @@ void ADSBDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 
@@ -2572,6 +2572,7 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_channelMarker.setVisible(true); // activate signal on the last setting only
 
     m_settings.setChannelMarker(&m_channelMarker);
+    m_settings.setRollupState(&m_rollupState);
 
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
@@ -2797,7 +2798,7 @@ void ADSBDemodGUI::displaySettings()
 
     applyMapSettings();
 
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
     blockApplySettings(false);
 }
 

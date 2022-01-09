@@ -1105,7 +1105,7 @@ void VORDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 
@@ -1200,6 +1200,7 @@ VORDemodGUI::VORDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
     setTitleColor(m_channelMarker.getColor());
     m_settings.setChannelMarker(&m_channelMarker);
+    m_settings.setRollupState(&m_rollupState);
 
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
@@ -1332,7 +1333,7 @@ void VORDemodGUI::displaySettings()
         header->moveSection(header->visualIndex(i), m_settings.m_columnIndexes[i]);
     }
 
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
     blockApplySettings(false);
 }
 

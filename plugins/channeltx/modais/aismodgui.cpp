@@ -331,7 +331,7 @@ void AISModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 
@@ -470,6 +470,7 @@ AISModGUI::AISModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_aisMod->setLevelMeter(ui->volumeMeter);
 
     m_settings.setChannelMarker(&m_channelMarker);
+    m_settings.setRollupState(&m_rollupState);
 
     ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
 
@@ -551,7 +552,7 @@ void AISModGUI::displaySettings()
     ui->heading->setValue(m_settings.m_heading);
     ui->message->setText(m_settings.m_data);
 
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
     blockApplySettings(false);
 }
 

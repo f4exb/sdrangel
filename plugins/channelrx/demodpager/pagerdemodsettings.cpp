@@ -25,8 +25,9 @@
 #include "pagerdemodsettings.h"
 
 PagerDemodSettings::PagerDemodSettings() :
-    m_channelMarker(0),
-    m_scopeGUI(0)
+    m_channelMarker(nullptr),
+    m_scopeGUI(nullptr),
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -80,9 +81,11 @@ QByteArray PagerDemodSettings::serialize() const
     s.writeS32(11, m_scopeCh2);
     s.writeU32(12, m_rgbColor);
     s.writeString(13, m_title);
+
     if (m_channelMarker) {
         s.writeBlob(14, m_channelMarker->serialize());
     }
+
     s.writeS32(15, m_streamIndex);
     s.writeBool(16, m_useReverseAPI);
     s.writeString(17, m_reverseAPIAddress);
@@ -93,10 +96,12 @@ QByteArray PagerDemodSettings::serialize() const
     s.writeBool(22, m_reverse);
     s.writeBlob(23, serializeIntList(m_sevenbit));
     s.writeBlob(24, serializeIntList(m_unicode));
-
     s.writeString(25, m_logFilename);
     s.writeBool(26, m_logEnabled);
-    s.writeBlob(27, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(27, m_rollupState->serialize());
+    }
 
     for (int i = 0; i < PAGERDEMOD_MESSAGE_COLUMNS; i++) {
         s.writeS32(100 + i, m_messageColumnIndexes[i]);
@@ -134,28 +139,35 @@ bool PagerDemodSettings::deserialize(const QByteArray& data)
         d.readBool(7, &m_udpEnabled);
         d.readString(8, &m_udpAddress);
         d.readU32(9, &utmp);
+
         if ((utmp > 1023) && (utmp < 65535)) {
             m_udpPort = utmp;
         } else {
             m_udpPort = 9999;
         }
+
         d.readS32(10, &m_scopeCh1, 4);
         d.readS32(11, &m_scopeCh2, 9);
         d.readU32(12, &m_rgbColor, QColor(200, 191, 231).rgb());
         d.readString(13, &m_title, "Pager Demodulator");
-        d.readBlob(14, &bytetmp);
-        if (m_channelMarker) {
+
+        if (m_channelMarker)
+        {
+            d.readBlob(14, &bytetmp);
             m_channelMarker->deserialize(bytetmp);
         }
+
         d.readS32(15, &m_streamIndex, 0);
         d.readBool(16, &m_useReverseAPI, false);
         d.readString(17, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(18, &utmp, 0);
+
         if ((utmp > 1023) && (utmp < 65535)) {
             m_reverseAPIPort = utmp;
         } else {
             m_reverseAPIPort = 8888;
         }
+
         d.readU32(19, &utmp, 0);
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
         d.readU32(20, &utmp, 0);
@@ -166,6 +178,7 @@ bool PagerDemodSettings::deserialize(const QByteArray& data)
             d.readBlob(21, &bytetmp);
             m_scopeGUI->deserialize(bytetmp);
         }
+
         d.readBool(22, &m_reverse, false);
         d.readBlob(23, &blob);
         deserializeIntList(blob, m_sevenbit);
@@ -174,11 +187,17 @@ bool PagerDemodSettings::deserialize(const QByteArray& data)
 
         d.readString(25, &m_logFilename, "pager_log.csv");
         d.readBool(26, &m_logEnabled, false);
-        d.readBlob(27, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(27, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         for (int i = 0; i < PAGERDEMOD_MESSAGE_COLUMNS; i++) {
             d.readS32(100 + i, &m_messageColumnIndexes[i], i);
         }
+
         for (int i = 0; i < PAGERDEMOD_MESSAGE_COLUMNS; i++) {
             d.readS32(200 + i, &m_messageColumnSizes[i], -1);
         }

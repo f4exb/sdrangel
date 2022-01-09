@@ -35,7 +35,9 @@ void SigMFFileSinkSettings::resetToDefaults()
     m_rgbColor = QColor(140, 4, 4).rgb();
     m_title = "SigMF File Sink";
     m_log2Decim = 0;
+    m_channelMarker = nullptr;
     m_spectrumGUI = nullptr;
+    m_rollupState = nullptr;
     m_spectrumSquelchMode = false;
     m_spectrumSquelch = -50;
     m_preRecordTime = 0;
@@ -74,7 +76,14 @@ QByteArray SigMFFileSinkSettings::serialize() const
     s.writeS32(16, m_preRecordTime);
     s.writeS32(17, m_squelchPostRecordTime);
     s.writeBool(18, m_squelchRecordingEnable);
-    s.writeBlob(19, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(19, m_rollupState->serialize());
+    }
+
+    if (m_channelMarker) {
+        s.writeBlob(20, m_channelMarker->serialize());
+    }
 
     return s.final();
 }
@@ -131,7 +140,18 @@ bool SigMFFileSinkSettings::deserialize(const QByteArray& data)
         d.readS32(16, &m_preRecordTime, 0);
         d.readS32(17, &m_squelchPostRecordTime, 0);
         d.readBool(18, &m_squelchRecordingEnable, false);
-        d.readBlob(19, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(19, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
+
+        if (m_channelMarker)
+        {
+            d.readBlob(20, &bytetmp);
+            m_channelMarker->deserialize(bytetmp);
+        }
 
         return true;
     }

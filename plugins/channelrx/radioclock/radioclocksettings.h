@@ -53,13 +53,14 @@ struct RadioClockSettings
     uint16_t m_reverseAPIDeviceIndex;
     uint16_t m_reverseAPIChannelIndex;
     Serializable *m_scopeGUI;
-    QByteArray m_rollupState;
+    Serializable *m_rollupState;
     static const int RADIOCLOCK_CHANNEL_SAMPLE_RATE = 1000;
     static const int m_scopeStreams = 8;
 
     RadioClockSettings();
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
+    void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     void setScopeGUI(Serializable *scopeGUI) { m_scopeGUI = scopeGUI; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);

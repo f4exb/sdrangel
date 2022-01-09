@@ -127,7 +127,7 @@ void GS232ControllerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 
@@ -160,6 +160,9 @@ GS232ControllerGUI::GS232ControllerGUI(PluginAPI* pluginAPI, FeatureUISet *featu
     ui->elevationCurrentText->setText("-");
 
     updateSerialPortList();
+
+    m_settings.setRollupState(&m_rollupState);
+
     displaySettings();
     applySettings(true);
 }
@@ -199,7 +202,7 @@ void GS232ControllerGUI::displaySettings()
     ui->elevationMin->setValue(m_settings.m_elevationMin);
     ui->elevationMax->setValue(m_settings.m_elevationMax);
     ui->tolerance->setValue(m_settings.m_tolerance);
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
     updateConnectionWidgets();
     blockApplySettings(false);
 }

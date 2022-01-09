@@ -24,6 +24,7 @@
 #include "dsp/channelmarker.h"
 #include "util/messagequeue.h"
 #include "util/movingaverage.h"
+#include "settings/rollupstate.h"
 
 #include "udpsource.h"
 #include "udpsourcesettings.h"
@@ -62,6 +63,7 @@ private:
     MovingAverageUtil<double, double, 4> m_inPowerAvg;
     uint32_t m_tickCount;
     ChannelMarker m_channelMarker;
+    RollupState m_rollupState;
 
     // settings
     UDPSourceSettings m_settings;

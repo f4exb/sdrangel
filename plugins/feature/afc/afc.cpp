@@ -30,6 +30,7 @@
 #include "dsp/dspengine.h"
 #include "device/deviceset.h"
 #include "channel/channelapi.h"
+#include "settings/serializable.h"
 #include "maincore.h"
 
 #include "afcworker.h"
@@ -417,6 +418,20 @@ void AFC::webapiFormatFeatureSettings(
     response.getAfcSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getAfcSettings()->setReverseApiFeatureSetIndex(settings.m_reverseAPIFeatureSetIndex);
     response.getAfcSettings()->setReverseApiFeatureIndex(settings.m_reverseAPIFeatureIndex);
+
+    if (settings.m_rollupState)
+    {
+        if (response.getAfcSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getAfcSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getAfcSettings()->setRollupState(swgRollupState);
+        }
+    }
 }
 
 void AFC::webapiUpdateFeatureSettings(
@@ -465,6 +480,9 @@ void AFC::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("reverseAPIFeatureIndex")) {
         settings.m_reverseAPIFeatureIndex = response.getAfcSettings()->getReverseApiFeatureIndex();
+    }
+    if (settings.m_rollupState && featureSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(featureSettingsKeys, response.getAfcSettings()->getRollupState());
     }
 }
 

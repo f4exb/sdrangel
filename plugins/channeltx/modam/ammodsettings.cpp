@@ -23,8 +23,9 @@
 #include "ammodsettings.h"
 
 AMModSettings::AMModSettings() :
-    m_channelMarker(0),
-    m_cwKeyerGUI(0)
+    m_channelMarker(nullptr),
+    m_cwKeyerGUI(nullptr),
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -86,7 +87,10 @@ QByteArray AMModSettings::serialize() const
     s.writeReal(18, m_feedbackVolumeFactor);
     s.writeBool(19, m_feedbackAudioEnable);
     s.writeS32(20, m_streamIndex);
-    s.writeBlob(21, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(21, m_rollupState->serialize());
+    }
 
     return s.final();
 }
@@ -129,8 +133,8 @@ bool AMModSettings::deserialize(const QByteArray& data)
 
         d.readString(9, &m_title, "AM Modulator");
         d.readString(10, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
-
         d.readS32(11, &tmp, 0);
+
         if ((tmp < 0) || (tmp > (int) AMModInputAF::AMModInputTone)) {
             m_modAFInput = AMModInputNone;
         } else {
@@ -155,7 +159,12 @@ bool AMModSettings::deserialize(const QByteArray& data)
         d.readReal(18, &m_feedbackVolumeFactor, 1.0);
         d.readBool(19, &m_feedbackAudioEnable, false);
         d.readS32(20, &m_streamIndex, 0);
-        d.readBlob(21, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(21, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         return true;
     }

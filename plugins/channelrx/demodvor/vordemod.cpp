@@ -37,6 +37,7 @@
 #include "dsp/dspcommands.h"
 #include "device/deviceapi.h"
 #include "feature/feature.h"
+#include "settings/serializable.h"
 #include "util/db.h"
 #include "maincore.h"
 
@@ -328,6 +329,12 @@ void VORDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("magDecAdjust")) {
         settings.m_magDecAdjust = response.getVorDemodSettings()->getMagDecAdjust() != 0;
     }
+    if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getVorDemodSettings()->getChannelMarker());
+    }
+    if (settings.m_rollupState && channelSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(channelSettingsKeys, response.getVorDemodSettings()->getRollupState());
+    }
 }
 
 int VORDemod::webapiReportGet(
@@ -375,6 +382,34 @@ void VORDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
 
     response.getVorDemodSettings()->setIdentThreshold(settings.m_identThreshold);
     response.getVorDemodSettings()->setMagDecAdjust(settings.m_magDecAdjust ? 1 : 0);
+
+    if (settings.m_channelMarker)
+    {
+        if (response.getVorDemodSettings()->getChannelMarker())
+        {
+            settings.m_channelMarker->formatTo(response.getVorDemodSettings()->getChannelMarker());
+        }
+        else
+        {
+            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            settings.m_channelMarker->formatTo(swgChannelMarker);
+            response.getVorDemodSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
+
+    if (settings.m_rollupState)
+    {
+        if (response.getVorDemodSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getVorDemodSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getVorDemodSettings()->setRollupState(swgRollupState);
+        }
+    }
 }
 
 void VORDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -477,6 +512,20 @@ void VORDemod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("magDecAdjust") || force) {
         swgVORDemodSettings->setMagDecAdjust(settings.m_magDecAdjust ? 1 : 0);
+    }
+
+    if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
+    {
+        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        settings.m_channelMarker->formatTo(swgChannelMarker);
+        swgVORDemodSettings->setChannelMarker(swgChannelMarker);
+    }
+
+    if (settings.m_rollupState && (channelSettingsKeys.contains("rollupState") || force))
+    {
+        SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+        settings.m_rollupState->formatTo(swgRollupState);
+        swgVORDemodSettings->setRollupState(swgRollupState);
     }
 }
 

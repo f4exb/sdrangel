@@ -364,7 +364,7 @@ void AISDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
         }
     }
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 
@@ -478,6 +478,7 @@ AISDemodGUI::AISDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     setTitleColor(m_channelMarker.getColor());
     m_settings.setChannelMarker(&m_channelMarker);
     m_settings.setScopeGUI(ui->scopeGUI);
+    m_settings.setRollupState(&m_rollupState);
 
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
@@ -601,9 +602,10 @@ void AISDemodGUI::displaySettings()
             ui->messages->setColumnWidth(i, m_settings.m_messageColumnSizes[i]);
         header->moveSection(header->visualIndex(i), m_settings.m_messageColumnIndexes[i]);
     }
+
     filter();
 
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
     blockApplySettings(false);
 }
 

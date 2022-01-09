@@ -453,6 +453,9 @@ void APTDemod::webapiUpdateChannelSettings(
     if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
         settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getAptDemodSettings()->getChannelMarker());
     }
+    if (settings.m_rollupState && channelSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(channelSettingsKeys, response.getAptDemodSettings()->getRollupState());
+    }
 }
 
 void APTDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const APTDemodSettings& settings)
@@ -504,6 +507,20 @@ void APTDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
             SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
             settings.m_channelMarker->formatTo(swgChannelMarker);
             response.getAptDemodSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
+
+    if (settings.m_rollupState)
+    {
+        if (response.getAptDemodSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getAptDemodSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getAptDemodSettings()->setRollupState(swgRollupState);
         }
     }
 }
@@ -606,6 +623,13 @@ void APTDemod::webapiFormatChannelSettings(
         SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
         settings.m_channelMarker->formatTo(swgChannelMarker);
         swgAPTDemodSettings->setChannelMarker(swgChannelMarker);
+    }
+
+    if (settings.m_rollupState && (channelSettingsKeys.contains("rollupState") || force))
+    {
+        SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+        settings.m_rollupState->formatTo(swgRollupState);
+        swgAPTDemodSettings->setRollupState(swgRollupState);
     }
 }
 

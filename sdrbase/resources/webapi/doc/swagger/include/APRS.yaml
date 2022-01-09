@@ -28,3 +28,5 @@ APRSSettings:
       type: integer
     reverseAPIFeatureIndex:
       type: integer
+    rollupState:
+      $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"

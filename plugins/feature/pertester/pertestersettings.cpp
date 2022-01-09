@@ -24,7 +24,8 @@
 
 #include "pertestersettings.h"
 
-PERTesterSettings::PERTesterSettings()
+PERTesterSettings::PERTesterSettings() :
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -65,7 +66,6 @@ QByteArray PERTesterSettings::serialize() const
     s.writeS32(8, m_ignoreTrailingBytes);
     s.writeS32(9, (int)m_start);
     s.writeBlob(10, serializeStringList(m_satellites));
-
     s.writeString(20, m_title);
     s.writeU32(21, m_rgbColor);
     s.writeBool(22, m_useReverseAPI);
@@ -73,7 +73,10 @@ QByteArray PERTesterSettings::serialize() const
     s.writeU32(24, m_reverseAPIPort);
     s.writeU32(25, m_reverseAPIFeatureSetIndex);
     s.writeU32(26, m_reverseAPIFeatureIndex);
-    s.writeBlob(27, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(27, m_rollupState->serialize());
+    }
 
     return s.final();
 }
@@ -99,24 +102,27 @@ bool PERTesterSettings::deserialize(const QByteArray& data)
         d.readFloat(2, &m_interval, 1.0f);
         d.readString(3, &m_txUDPAddress);
         d.readU32(4, &utmp);
+
         if ((utmp > 1023) && (utmp < 65535)) {
             m_txUDPPort = utmp;
         } else {
             m_txUDPPort = 8888;
         }
+
         d.readString(5, &m_rxUDPAddress);
         d.readU32(6, &utmp);
+
         if ((utmp > 1023) && (utmp < 65535)) {
             m_rxUDPPort = utmp;
         } else {
             m_rxUDPPort = 8888;
         }
+
         d.readS32(7, &m_ignoreLeadingBytes, 0);
         d.readS32(8, &m_ignoreTrailingBytes, 2);
         d.readS32(9, (int*)&m_start, (int)START_IMMEDIATELY);
         d.readBlob(10, &blob);
         deserializeStringList(blob, m_satellites);
-
         d.readString(20, &m_title, "Packet Error Rate Tester");
         d.readU32(21, &m_rgbColor, QColor(225, 25, 99).rgb());
         d.readBool(22, &m_useReverseAPI, false);
@@ -134,7 +140,11 @@ bool PERTesterSettings::deserialize(const QByteArray& data)
         d.readU32(26, &utmp, 0);
         m_reverseAPIFeatureIndex = utmp > 99 ? 99 : utmp;
 
-        d.readBlob(27, &m_rollupState);
+        if (m_rollupState)
+        {
+            d.readBlob(27, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         return true;
     }

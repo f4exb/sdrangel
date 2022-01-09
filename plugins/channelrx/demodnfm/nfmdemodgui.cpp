@@ -280,7 +280,7 @@ void NFMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 		m_nfmDemod->setSpectrum(m_threadedSampleSink->getMessageQueue(), rollDown);
 	*/
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 
@@ -406,6 +406,7 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_channelMarker.setVisible(true); // activate signal on the last setting only
 
     m_settings.setChannelMarker(&m_channelMarker);
+    m_settings.setRollupState(&m_rollupState);
 
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
@@ -508,7 +509,7 @@ void NFMDemodGUI::displaySettings()
     setDcsCode(m_reportedDcsCode);
     displayStreamIndex();
 
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
     blockApplySettings(false);
 }
 

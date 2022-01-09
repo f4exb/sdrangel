@@ -34,6 +34,7 @@
 #include "channel/channelapi.h"
 #include "device/deviceapi.h"
 #include "commands/commandkeyreceiver.h"
+#include "settings/serializable.h"
 #include "maincore.h"
 
 #include "jogdialcontroller.h"
@@ -364,6 +365,20 @@ void JogdialController::webapiFormatFeatureSettings(
     response.getJogdialControllerSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getJogdialControllerSettings()->setReverseApiFeatureSetIndex(settings.m_reverseAPIFeatureSetIndex);
     response.getJogdialControllerSettings()->setReverseApiFeatureIndex(settings.m_reverseAPIFeatureIndex);
+
+    if (settings.m_rollupState)
+    {
+        if (response.getJogdialControllerSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getJogdialControllerSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getJogdialControllerSettings()->setRollupState(swgRollupState);
+        }
+    }
 }
 
 void JogdialController::webapiUpdateFeatureSettings(
@@ -391,6 +406,9 @@ void JogdialController::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("reverseAPIFeatureIndex")) {
         settings.m_reverseAPIFeatureIndex = response.getJogdialControllerSettings()->getReverseApiFeatureIndex();
+    }
+    if (settings.m_rollupState && featureSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(featureSettingsKeys, response.getJogdialControllerSettings()->getRollupState());
     }
 }
 

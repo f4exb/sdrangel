@@ -85,7 +85,7 @@ struct NoiseFigureSettings
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIDeviceIndex;
     uint16_t m_reverseAPIChannelIndex;
-    QByteArray m_rollupState;
+    Serializable *m_rollupState;
 
     int m_resultsColumnIndexes[NOISEFIGURE_COLUMNS];//!< How the columns are ordered in the table
     int m_resultsColumnSizes[NOISEFIGURE_COLUMNS];  //!< Size of the columns in the table
@@ -93,6 +93,7 @@ struct NoiseFigureSettings
     NoiseFigureSettings();
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
+    void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
     QByteArray serializeENRs(QList<ENR *> enrs) const;

@@ -72,11 +72,12 @@ struct NFMModSettings
     Serializable *m_cwKeyerGUI;
 
     CWKeyerSettings m_cwKeyerSettings; //!< For standalone deserialize operation (without m_cwKeyerGUI)
-    QByteArray m_rollupState;
+    Serializable *m_rollupState;
 
     NFMModSettings();
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
+    void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     void setCWKeyerGUI(Serializable *cwKeyerGUI) { m_cwKeyerGUI = cwKeyerGUI; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);

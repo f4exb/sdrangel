@@ -23,7 +23,8 @@
 #include "dsddemodsettings.h"
 
 DSDDemodSettings::DSDDemodSettings() :
-    m_channelMarker(nullptr)
+    m_channelMarker(nullptr),
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -96,7 +97,10 @@ QByteArray DSDDemodSettings::serialize() const
     s.writeU32(28, m_reverseAPIChannelIndex);
     s.writeBool(29, m_audioMute);
     s.writeS32(30, m_streamIndex);
-    s.writeBlob(31, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(31, m_rollupState->serialize());
+    }
 
     return s.final();
 }
@@ -118,7 +122,8 @@ bool DSDDemodSettings::deserialize(const QByteArray& data)
         qint32 tmp;
         uint32_t utmp;
 
-        if (m_channelMarker) {
+        if (m_channelMarker)
+        {
             d.readBlob(17, &bytetmp);
             m_channelMarker->deserialize(bytetmp);
         }
@@ -169,7 +174,12 @@ bool DSDDemodSettings::deserialize(const QByteArray& data)
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
         d.readBool(29, &m_audioMute, false);
         d.readS32(30, &m_streamIndex, 0);
-        d.readBlob(31, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(31, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         return true;
     }

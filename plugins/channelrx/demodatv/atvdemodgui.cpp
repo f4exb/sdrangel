@@ -119,7 +119,7 @@ void ATVDemodGUI::displaySettings()
     ui->amScaleOffsetText->setText(QString("%1").arg(m_settings.m_amOffsetFactor));
 
     applySampleRate();
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
 
     m_doApplySettings = true;
 }
@@ -208,7 +208,7 @@ void ATVDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 
@@ -246,6 +246,9 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
     m_channelMarker.setCenterFrequency(0);
     m_channelMarker.blockSignals(false);
     m_channelMarker.setVisible(true); // activate signal on the last setting only
+
+    m_settings.setChannelMarker(&m_channelMarker);
+    m_settings.setRollupState(&m_rollupState);
 
     setTitleColor(m_channelMarker.getColor());
 

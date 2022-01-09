@@ -23,6 +23,8 @@
 #include <QWidget>
 #include "export.h"
 
+class RollupState;
+
 class SDRGUI_API RollupWidget : public QWidget {
     Q_OBJECT
 
@@ -56,8 +58,10 @@ protected:
 
     int arrangeRollups();
 
-    QByteArray saveState(int version = 0) const;
-    bool restoreState(const QByteArray& state, int version = 0);
+    // QByteArray saveState(int version = 0) const;
+    void saveState(RollupState& state) const;
+    // bool restoreState(const QByteArray& state, int version = 0);
+    void restoreState(const RollupState& state);
 
     void paintEvent(QPaintEvent*);
     int paintRollup(QWidget* rollup, int pos, QPainter* p, bool last, const QColor& frame);

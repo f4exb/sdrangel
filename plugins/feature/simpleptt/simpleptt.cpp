@@ -27,6 +27,7 @@
 #include "SWGDeviceState.h"
 
 #include "dsp/dspengine.h"
+#include "settings/serializable.h"
 
 #include "simplepttworker.h"
 #include "simpleptt.h"
@@ -361,6 +362,20 @@ void SimplePTT::webapiFormatFeatureSettings(
     response.getSimplePttSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getSimplePttSettings()->setReverseApiFeatureSetIndex(settings.m_reverseAPIFeatureSetIndex);
     response.getSimplePttSettings()->setReverseApiFeatureIndex(settings.m_reverseAPIFeatureIndex);
+
+    if (settings.m_rollupState)
+    {
+        if (response.getSimplePttSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getSimplePttSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getSimplePttSettings()->setRollupState(swgRollupState);
+        }
+    }
 }
 
 void SimplePTT::webapiUpdateFeatureSettings(
@@ -412,6 +427,9 @@ void SimplePTT::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("reverseAPIFeatureIndex")) {
         settings.m_reverseAPIFeatureIndex = response.getSimplePttSettings()->getReverseApiFeatureIndex();
+    }
+    if (settings.m_rollupState && featureSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(featureSettingsKeys, response.getSimplePttSettings()->getRollupState());
     }
 }
 

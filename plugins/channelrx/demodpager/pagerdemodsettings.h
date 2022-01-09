@@ -66,7 +66,7 @@ struct PagerDemodSettings
 
     QString m_logFilename;
     bool m_logEnabled;
-    QByteArray m_rollupState;
+    Serializable *m_rollupState;
 
     int m_messageColumnIndexes[PAGERDEMOD_MESSAGE_COLUMNS];//!< How the columns are ordered in the table
     int m_messageColumnSizes[PAGERDEMOD_MESSAGE_COLUMNS];  //!< Size of the columns in the table
@@ -76,6 +76,7 @@ struct PagerDemodSettings
     PagerDemodSettings();
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
+    void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     void setScopeGUI(Serializable *scopeGUI) { m_scopeGUI = scopeGUI; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);

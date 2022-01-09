@@ -118,6 +118,8 @@ AISModSettings:
       type: integer
     channelMarker:
       $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+    rollupState:
+      $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
 
 AISModReport:
   description: AISMod

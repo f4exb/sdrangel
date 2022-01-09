@@ -23,7 +23,8 @@
 #include "atvmodsettings.h"
 
 ATVModSettings::ATVModSettings() :
-    m_channelMarker(0)
+    m_channelMarker(nullptr),
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -91,7 +92,10 @@ QByteArray ATVModSettings::serialize() const
     s.writeString(22, m_imageFileName);
     s.writeString(23, m_videoFileName);
     s.writeS32(24, m_streamIndex);
-    s.writeBlob(25, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(25, m_rollupState->serialize());
+    }
 
     return s.final();
 }
@@ -158,7 +162,12 @@ bool ATVModSettings::deserialize(const QByteArray& data)
         d.readString(22, &m_imageFileName);
         d.readString(23, &m_videoFileName);
         d.readS32(24, &m_streamIndex, 0);
-        d.readBlob(25, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(25, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         return true;
     }

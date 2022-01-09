@@ -54,6 +54,8 @@ AISDemodSettings:
       $ref: "/doc/swagger/include/GLScope.yaml#/GLScope"
     channelMarker:
       $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+    rollupState:
+      $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
 
 AISDemodReport:
   description: AISDemod

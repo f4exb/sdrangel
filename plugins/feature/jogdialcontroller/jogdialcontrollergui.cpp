@@ -132,7 +132,7 @@ void JogdialControllerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 
@@ -165,6 +165,8 @@ JogdialControllerGUI::JogdialControllerGUI(PluginAPI* pluginAPI, FeatureUISet *f
 	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
     this->installEventFilter(&m_commandKeyReceiver);
 
+    m_settings.setRollupState(&m_rollupState);
+
     displaySettings();
 	applySettings(true);
 }
@@ -184,7 +186,7 @@ void JogdialControllerGUI::displaySettings()
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_settings.m_title);
     blockApplySettings(true);
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
     blockApplySettings(false);
 }
 

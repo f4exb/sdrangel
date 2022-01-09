@@ -472,6 +472,9 @@ void DABDemod::webapiUpdateChannelSettings(
     if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
         settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getDabDemodSettings()->getChannelMarker());
     }
+    if (settings.m_rollupState && channelSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(channelSettingsKeys, response.getDabDemodSettings()->getRollupState());
+    }
 }
 
 void DABDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const DABDemodSettings& settings)
@@ -514,6 +517,20 @@ void DABDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
             SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
             settings.m_channelMarker->formatTo(swgChannelMarker);
             response.getDabDemodSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
+
+    if (settings.m_rollupState)
+    {
+        if (response.getDabDemodSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getDabDemodSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getDabDemodSettings()->setRollupState(swgRollupState);
         }
     }
 }
@@ -592,6 +609,13 @@ void DABDemod::webapiFormatChannelSettings(
         SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
         settings.m_channelMarker->formatTo(swgChannelMarker);
         swgDABDemodSettings->setChannelMarker(swgChannelMarker);
+    }
+
+    if (settings.m_rollupState && (channelSettingsKeys.contains("rollupState") || force))
+    {
+        SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+        settings.m_rollupState->formatTo(swgRollupState);
+        swgDABDemodSettings->setRollupState(swgRollupState);
     }
 }
 

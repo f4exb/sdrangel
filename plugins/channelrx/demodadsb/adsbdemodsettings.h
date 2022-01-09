@@ -144,11 +144,12 @@ struct ADSBDemodSettings
     } m_mapType;
     bool m_displayNavAids;
     bool m_displayPhotos;
-    QByteArray m_rollupState;
+    Serializable *m_rollupState;
 
     ADSBDemodSettings();
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
+    void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
     QByteArray serializeNotificationSettings(QList<NotificationSettings *> notificationSettings) const;

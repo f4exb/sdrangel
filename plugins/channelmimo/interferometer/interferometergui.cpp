@@ -141,6 +141,7 @@ InterferometerGUI::InterferometerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     m_channelMarker.setVisible(true); // activate signal on the last setting only
 
     m_settings.setChannelMarker(&m_channelMarker);
+    m_settings.setRollupState(&m_rollupState);
     m_settings.setScopeGUI(ui->scopeGUI);
     m_settings.setSpectrumGUI(ui->spectrumGUI);
 
@@ -201,7 +202,7 @@ void InterferometerGUI::displaySettings()
     applyDecimation();
     ui->phaseCorrection->setValue(m_settings.m_phase);
     ui->phaseCorrectionText->setText(tr("%1").arg(m_settings.m_phase));
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -246,7 +247,7 @@ void InterferometerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 

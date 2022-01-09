@@ -24,7 +24,9 @@
 #include "settings/serializable.h"
 #include "packetmodsettings.h"
 
-PacketModSettings::PacketModSettings()
+PacketModSettings::PacketModSettings() :
+    m_channelMarker(nullptr),
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -197,19 +199,19 @@ QByteArray PacketModSettings::serialize() const
     s.writeString(28, m_to);
     s.writeString(29, m_via);
     s.writeString(30, m_data);
-
     s.writeU32(31, m_rgbColor);
     s.writeString(32, m_title);
+
     if (m_channelMarker) {
         s.writeBlob(33, m_channelMarker->serialize());
     }
+
     s.writeS32(34, m_streamIndex);
     s.writeBool(35, m_useReverseAPI);
     s.writeString(36, m_reverseAPIAddress);
     s.writeU32(37, m_reverseAPIPort);
     s.writeU32(38, m_reverseAPIDeviceIndex);
     s.writeU32(39, m_reverseAPIChannelIndex);
-
     s.writeBool(40, m_bpf);
     s.writeReal(41, m_bpfLowCutoff);
     s.writeReal(42, m_bpfHighCutoff);
@@ -224,7 +226,10 @@ QByteArray PacketModSettings::serialize() const
     s.writeBool(51, m_udpEnabled);
     s.writeString(52, m_udpAddress);
     s.writeU32(53, m_udpPort);
-    s.writeBlob(54, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(54, m_rollupState->serialize());
+    }
 
     return s.final();
 }
@@ -276,30 +281,30 @@ bool PacketModSettings::deserialize(const QByteArray& data)
         d.readString(28, &m_to, "APRS");
         d.readString(29, &m_via, "WIDE2-2");
         d.readString(30, &m_data, ">Using SDRangel");
-
         d.readU32(31, &m_rgbColor);
         d.readString(32, &m_title, "Packet Modulator");
 
-        if (m_channelMarker) {
+        if (m_channelMarker)
+        {
             d.readBlob(33, &bytetmp);
             m_channelMarker->deserialize(bytetmp);
         }
 
         d.readS32(34, &m_streamIndex, 0);
-
         d.readBool(35, &m_useReverseAPI, false);
         d.readString(36, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(37, &utmp, 0);
+
         if ((utmp > 1023) && (utmp < 65535)) {
             m_reverseAPIPort = utmp;
         } else {
             m_reverseAPIPort = 8888;
         }
+
         d.readU32(38, &utmp, 0);
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
         d.readU32(39, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
-
         d.readBool(40, &m_bpf, false);
         d.readReal(41, &m_bpfLowCutoff, 1200.0 - 400.0f);
         d.readReal(42, &m_bpfHighCutoff, 2200.0 + 400.0f);
@@ -314,12 +319,18 @@ bool PacketModSettings::deserialize(const QByteArray& data)
         d.readBool(51, &m_udpEnabled);
         d.readString(52, &m_udpAddress, "127.0.0.1");
         d.readU32(53, &utmp);
+
         if ((utmp > 1023) && (utmp < 65535)) {
             m_udpPort = utmp;
         } else {
             m_udpPort = 9998;
         }
-        d.readBlob(54, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(54, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         return true;
     }

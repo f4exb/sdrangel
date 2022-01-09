@@ -33,6 +33,7 @@
 #include "dsp/dspengine.h"
 #include "device/deviceset.h"
 #include "feature/featureset.h"
+#include "settings/serializable.h"
 #include "maincore.h"
 
 #include "gs232controller.h"
@@ -467,6 +468,20 @@ void GS232Controller::webapiFormatFeatureSettings(
     response.getGs232ControllerSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getGs232ControllerSettings()->setReverseApiFeatureSetIndex(settings.m_reverseAPIFeatureSetIndex);
     response.getGs232ControllerSettings()->setReverseApiFeatureIndex(settings.m_reverseAPIFeatureIndex);
+
+    if (settings.m_rollupState)
+    {
+        if (response.getGs232ControllerSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getGs232ControllerSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getGs232ControllerSettings()->setRollupState(swgRollupState);
+        }
+    }
 }
 
 void GS232Controller::webapiUpdateFeatureSettings(
@@ -542,6 +557,9 @@ void GS232Controller::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("reverseAPIFeatureIndex")) {
         settings.m_reverseAPIFeatureIndex = response.getGs232ControllerSettings()->getReverseApiFeatureIndex();
+    }
+    if (settings.m_rollupState && featureSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(featureSettingsKeys, response.getGs232ControllerSettings()->getRollupState());
     }
 }
 

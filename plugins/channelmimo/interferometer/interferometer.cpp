@@ -351,6 +351,9 @@ void Interferometer::webapiUpdateChannelSettings(
     if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
         settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getInterferometerSettings()->getChannelMarker());
     }
+    if (settings.m_rollupState && channelSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(channelSettingsKeys, response.getInterferometerSettings()->getRollupState());
+    }
 }
 
 void Interferometer::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const InterferometerSettings& settings)
@@ -416,6 +419,20 @@ void Interferometer::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings
             SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
             settings.m_channelMarker->formatTo(swgChannelMarker);
             response.getInterferometerSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
+
+    if (settings.m_rollupState)
+    {
+        if (response.getInterferometerSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getInterferometerSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getInterferometerSettings()->setRollupState(swgRollupState);
         }
     }
 }
@@ -515,6 +532,13 @@ void Interferometer::webapiFormatChannelSettings(
         SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
         settings.m_channelMarker->formatTo(swgChannelMarker);
         swgInterferometerSettings->setChannelMarker(swgChannelMarker);
+    }
+
+    if (settings.m_rollupState && (channelSettingsKeys.contains("rollupState") || force))
+    {
+        SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+        settings.m_rollupState->formatTo(swgRollupState);
+        swgInterferometerSettings->setRollupState(swgRollupState);
     }
 }
 

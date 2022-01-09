@@ -413,7 +413,7 @@ void PagerDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
         }
     }
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 
@@ -505,6 +505,7 @@ PagerDemodGUI::PagerDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     setTitleColor(m_channelMarker.getColor());
     m_settings.setChannelMarker(&m_channelMarker);
     m_settings.setScopeGUI(ui->scopeGUI);
+    m_settings.setRollupState(&m_rollupState);
 
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
@@ -624,6 +625,7 @@ void PagerDemodGUI::displaySettings()
 
     // Order and size columns
     QHeaderView *header = ui->messages->horizontalHeader();
+
     for (int i = 0; i < PAGERDEMOD_MESSAGE_COLUMNS; i++)
     {
         bool hidden = m_settings.m_messageColumnSizes[i] == 0;
@@ -633,9 +635,10 @@ void PagerDemodGUI::displaySettings()
             ui->messages->setColumnWidth(i, m_settings.m_messageColumnSizes[i]);
         header->moveSection(header->visualIndex(i), m_settings.m_messageColumnIndexes[i]);
     }
+
     filter();
 
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
     blockApplySettings(false);
 }
 

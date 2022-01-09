@@ -182,7 +182,7 @@ void AMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 		m_nfmDemod->setSpectrum(m_threadedSampleSink->getMessageQueue(), rollDown);
 	*/
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 
@@ -275,6 +275,7 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 
     setTitleColor(m_channelMarker.getColor());
     m_settings.setChannelMarker(&m_channelMarker);
+    m_settings.setRollupState(&m_rollupState);
 
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
@@ -372,7 +373,7 @@ void AMDemodGUI::displaySettings()
 
     displayStreamIndex();
 
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
     blockApplySettings(false);
 }
 

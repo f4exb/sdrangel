@@ -377,6 +377,9 @@ void FileSource::webapiUpdateChannelSettings(
     if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
         settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getFileSourceSettings()->getChannelMarker());
     }
+    if (settings.m_rollupState && channelSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(channelSettingsKeys, response.getFileSourceSettings()->getRollupState());
+    }
 }
 
 int FileSource::webapiReportGet(
@@ -479,6 +482,20 @@ void FileSource::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& re
             SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
             settings.m_channelMarker->formatTo(swgChannelMarker);
             response.getFileSourceSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
+
+    if (settings.m_rollupState)
+    {
+        if (response.getFileSourceSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getFileSourceSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getFileSourceSettings()->setRollupState(swgRollupState);
         }
     }
 }
@@ -608,6 +625,13 @@ void FileSource::webapiFormatChannelSettings(
         SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
         settings.m_channelMarker->formatTo(swgChannelMarker);
         swgFileSourceSettings->setChannelMarker(swgChannelMarker);
+    }
+
+    if (settings.m_rollupState && (channelSettingsKeys.contains("rollupState") || force))
+    {
+        SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+        settings.m_rollupState->formatTo(swgRollupState);
+        swgFileSourceSettings->setRollupState(swgRollupState);
     }
 }
 

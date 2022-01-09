@@ -37,6 +37,8 @@
 #include "util/messagequeue.h"
 #include "util/httpdownloadmanager.h"
 #include "util/azel.h"
+#include "settings/rollupstate.h"
+
 #include "vorlocalizersettings.h"
 #include "navaid.h"
 
@@ -221,6 +223,7 @@ private:
     PluginAPI* m_pluginAPI;
     FeatureUISet* m_featureUISet;
     VORLocalizerSettings m_settings;
+    RollupState m_rollupState;
     bool m_doApplySettings;
 
     VORLocalizer* m_vorLocalizer;

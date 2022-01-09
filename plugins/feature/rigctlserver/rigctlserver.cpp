@@ -27,6 +27,7 @@
 #include "SWGDeviceState.h"
 
 #include "dsp/dspengine.h"
+#include "settings/serializable.h"
 
 #include "rigctlserverworker.h"
 #include "rigctlserver.h"
@@ -331,6 +332,20 @@ void RigCtlServer::webapiFormatFeatureSettings(
     response.getRigCtlServerSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getRigCtlServerSettings()->setReverseApiFeatureSetIndex(settings.m_reverseAPIFeatureSetIndex);
     response.getRigCtlServerSettings()->setReverseApiFeatureIndex(settings.m_reverseAPIFeatureIndex);
+
+    if (settings.m_rollupState)
+    {
+        if (response.getRigCtlServerSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getRigCtlServerSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getRigCtlServerSettings()->setRollupState(swgRollupState);
+        }
+    }
 }
 
 void RigCtlServer::webapiUpdateFeatureSettings(
@@ -373,6 +388,9 @@ void RigCtlServer::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("reverseAPIFeatureIndex")) {
         settings.m_reverseAPIFeatureIndex = response.getRigCtlServerSettings()->getReverseApiFeatureIndex();
+    }
+    if (settings.m_rollupState && featureSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(featureSettingsKeys, response.getRigCtlServerSettings()->getRollupState());
     }
 }
 

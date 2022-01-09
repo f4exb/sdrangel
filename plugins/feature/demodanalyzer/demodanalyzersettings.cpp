@@ -58,7 +58,8 @@ const QStringList DemodAnalyzerSettings::m_channelURIs = {
 
 DemodAnalyzerSettings::DemodAnalyzerSettings() :
     m_spectrumGUI(nullptr),
-    m_scopeGUI(nullptr)
+    m_scopeGUI(nullptr),
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -79,8 +80,14 @@ QByteArray DemodAnalyzerSettings::serialize() const
 {
     SimpleSerializer s(1);
 
-    s.writeBlob(1, m_spectrumGUI->serialize());
-    s.writeBlob(2, m_scopeGUI->serialize());
+    if (m_spectrumGUI) {
+        s.writeBlob(1, m_spectrumGUI->serialize());
+    }
+
+    if (m_scopeGUI) {
+        s.writeBlob(2, m_scopeGUI->serialize());
+    }
+
     s.writeS32(3, m_log2Decim);
     s.writeString(5, m_title);
     s.writeU32(6, m_rgbColor);
@@ -89,7 +96,10 @@ QByteArray DemodAnalyzerSettings::serialize() const
     s.writeU32(9, m_reverseAPIPort);
     s.writeU32(10, m_reverseAPIFeatureSetIndex);
     s.writeU32(11, m_reverseAPIFeatureIndex);
-    s.writeBlob(12, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(12, m_rollupState->serialize());
+    }
 
     return s.final();
 }
@@ -139,7 +149,12 @@ bool DemodAnalyzerSettings::deserialize(const QByteArray& data)
         m_reverseAPIFeatureSetIndex = utmp > 99 ? 99 : utmp;
         d.readU32(11, &utmp, 0);
         m_reverseAPIFeatureIndex = utmp > 99 ? 99 : utmp;
-        d.readBlob(12, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(12, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         return true;
     }

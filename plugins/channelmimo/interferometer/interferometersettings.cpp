@@ -26,7 +26,8 @@
 InterferometerSettings::InterferometerSettings() :
     m_channelMarker(nullptr),
     m_spectrumGUI(nullptr),
-    m_scopeGUI(nullptr)
+    m_scopeGUI(nullptr),
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -70,7 +71,9 @@ QByteArray InterferometerSettings::serialize() const
     if (m_channelMarker) {
         s.writeBlob(22, m_channelMarker->serialize());
     }
-    s.writeBlob(23, m_rollupState);
+    if (m_rollupState) {
+        s.writeBlob(23, m_rollupState->serialize());
+    }
 
     return s.final();
 }
@@ -115,21 +118,29 @@ bool InterferometerSettings::deserialize(const QByteArray& data)
         d.readS32(12, &tmp, 0);
         m_phase = tmp < -180 ? -180 : tmp > 180 ? 180 : tmp;
 
-        if (m_spectrumGUI) {
+        if (m_spectrumGUI)
+        {
             d.readBlob(20, &bytetmp);
             m_spectrumGUI->deserialize(bytetmp);
         }
 
-        if (m_scopeGUI) {
+        if (m_scopeGUI)
+        {
             d.readBlob(21, &bytetmp);
             m_scopeGUI->deserialize(bytetmp);
         }
 
-        if (m_channelMarker) {
+        if (m_channelMarker)
+        {
             d.readBlob(22, &bytetmp);
             m_channelMarker->deserialize(bytetmp);
         }
-        d.readBlob(23, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(23, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         return true;
     }

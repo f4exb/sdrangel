@@ -451,6 +451,20 @@ void DemodAnalyzer::webapiFormatFeatureSettings(
             response.getDemodAnalyzerSettings()->setScopeConfig(swgGLScope);
         }
     }
+
+    if (settings.m_rollupState)
+    {
+        if (response.getDemodAnalyzerSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getDemodAnalyzerSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getDemodAnalyzerSettings()->setRollupState(swgRollupState);
+        }
+    }
 }
 
 void DemodAnalyzer::webapiUpdateFeatureSettings(
@@ -487,6 +501,9 @@ void DemodAnalyzer::webapiUpdateFeatureSettings(
     }
     if (settings.m_scopeGUI && featureSettingsKeys.contains("scopeConfig")) {
         settings.m_scopeGUI->updateFrom(featureSettingsKeys, response.getDemodAnalyzerSettings()->getScopeConfig());
+    }
+    if (settings.m_rollupState && featureSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(featureSettingsKeys, response.getDemodAnalyzerSettings()->getRollupState());
     }
 }
 

@@ -56,11 +56,12 @@ struct FreqTrackerSettings
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIDeviceIndex;
     uint16_t m_reverseAPIChannelIndex;
-    QByteArray m_rollupState;
+    Serializable *m_rollupState;
 
     FreqTrackerSettings();
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
+    void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     void setSpectrumGUI(Serializable *spectrumGUI) { m_spectrumGUI = spectrumGUI; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);

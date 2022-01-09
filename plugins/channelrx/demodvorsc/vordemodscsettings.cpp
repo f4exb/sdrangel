@@ -24,7 +24,8 @@
 #include "vordemodscsettings.h"
 
 VORDemodSCSettings::VORDemodSCSettings() :
-    m_channelMarker(0)
+    m_channelMarker(nullptr),
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -71,11 +72,13 @@ QByteArray VORDemodSCSettings::serialize() const
     s.writeU32(16, m_reverseAPIPort);
     s.writeU32(17, m_reverseAPIDeviceIndex);
     s.writeU32(18, m_reverseAPIChannelIndex);
-
     s.writeReal(20, m_identThreshold);
     s.writeReal(21, m_refThresholdDB);
     s.writeReal(22, m_varThresholdDB);
-    s.writeBlob(23, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(23, m_rollupState->serialize());
+    }
 
     return s.final();
 }
@@ -103,9 +106,10 @@ bool VORDemodSCSettings::deserialize(const QByteArray& data)
         m_volume = tmp * 0.1;
         d.readS32(5, &tmp, -40);
         m_squelch = tmp;
-        d.readBlob(6, &bytetmp);
 
-        if (m_channelMarker) {
+        if (m_channelMarker)
+        {
+            d.readBlob(6, &bytetmp);
             m_channelMarker->deserialize(bytetmp);
         }
 
@@ -126,11 +130,15 @@ bool VORDemodSCSettings::deserialize(const QByteArray& data)
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
         d.readU32(18, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
-
         d.readReal(20, &m_identThreshold, 2.0);
         d.readReal(21, &m_refThresholdDB, -45.0);
         d.readReal(22, &m_varThresholdDB, -90.0);
-        d.readBlob(23, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(23, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         return true;
     }

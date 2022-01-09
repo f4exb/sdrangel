@@ -404,6 +404,9 @@ void UDPSink::webapiUpdateChannelSettings(
     if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
         settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getUdpSinkSettings()->getChannelMarker());
     }
+    if (settings.m_rollupState && channelSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(channelSettingsKeys, response.getUdpSinkSettings()->getRollupState());
+    }
 }
 
 int UDPSink::webapiReportGet(
@@ -488,6 +491,20 @@ void UDPSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respo
             SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
             settings.m_channelMarker->formatTo(swgChannelMarker);
             response.getUdpSinkSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
+
+    if (settings.m_rollupState)
+    {
+        if (response.getUdpSinkSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getUdpSinkSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getUdpSinkSettings()->setRollupState(swgRollupState);
         }
     }
 }
@@ -636,6 +653,13 @@ void UDPSink::webapiFormatChannelSettings(
         SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
         settings.m_channelMarker->formatTo(swgChannelMarker);
         swgUDPSinkSettings->setChannelMarker(swgChannelMarker);
+    }
+
+    if (settings.m_rollupState && (channelSettingsKeys.contains("rollupState") || force))
+    {
+        SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+        settings.m_rollupState->formatTo(swgRollupState);
+        swgUDPSinkSettings->setRollupState(swgRollupState);
     }
 }
 

@@ -671,7 +671,7 @@ void MapGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 
@@ -710,6 +710,7 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     m_map->setMessageQueueToGUI(&m_inputMessageQueue);
 
     m_featureUISet->addRollupWidget(this);
+    m_settings.setRollupState(&m_rollupState);
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
@@ -1146,7 +1147,7 @@ void MapGUI::displaySettings()
     m_mapModel.setGroundTrackColor(m_settings.m_groundTrackColor);
     m_mapModel.setPredictedGroundTrackColor(m_settings.m_predictedGroundTrackColor);
     applyMapSettings();
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
     blockApplySettings(false);
 }
 

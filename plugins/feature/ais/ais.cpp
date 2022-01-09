@@ -31,6 +31,7 @@
 #include "device/deviceset.h"
 #include "channel/channelapi.h"
 #include "feature/featureset.h"
+#include "settings/serializable.h"
 #include "maincore.h"
 
 #include "ais.h"
@@ -219,6 +220,20 @@ void AIS::webapiFormatFeatureSettings(
     response.getAisSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getAisSettings()->setReverseApiFeatureSetIndex(settings.m_reverseAPIFeatureSetIndex);
     response.getAisSettings()->setReverseApiFeatureIndex(settings.m_reverseAPIFeatureIndex);
+
+    if (settings.m_rollupState)
+    {
+        if (response.getAisSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getAisSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getAisSettings()->setRollupState(swgRollupState);
+        }
+    }
 }
 
 void AIS::webapiUpdateFeatureSettings(
@@ -242,10 +257,13 @@ void AIS::webapiUpdateFeatureSettings(
         settings.m_reverseAPIPort = response.getAisSettings()->getReverseApiPort();
     }
     if (featureSettingsKeys.contains("reverseAPIFeatureSetIndex")) {
-        settings.m_reverseAPIFeatureSetIndex = response.getStarTrackerSettings()->getReverseApiFeatureSetIndex();
+        settings.m_reverseAPIFeatureSetIndex = response.getAisSettings()->getReverseApiFeatureSetIndex();
     }
     if (featureSettingsKeys.contains("reverseAPIFeatureIndex")) {
-        settings.m_reverseAPIFeatureIndex = response.getStarTrackerSettings()->getReverseApiFeatureIndex();
+        settings.m_reverseAPIFeatureIndex = response.getAisSettings()->getReverseApiFeatureIndex();
+    }
+    if (settings.m_rollupState && featureSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(featureSettingsKeys, response.getAisSettings()->getRollupState());
     }
 }
 

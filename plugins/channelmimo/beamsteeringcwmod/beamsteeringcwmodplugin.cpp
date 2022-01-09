@@ -29,7 +29,7 @@
 const PluginDescriptor BeamSteeringCWModPlugin::m_pluginDescriptor = {
     BeamSteeringCWMod::m_channelId,
     QStringLiteral("BeamSteeringCWMod"),
-    QStringLiteral("6.0.0"),
+    QStringLiteral("6.18.0"),
     QStringLiteral("(c) Edouard Griffiths, F4EXB"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,

@@ -38,6 +38,7 @@
 #include "util/flightinformation.h"
 #include "util/openaip.h"
 #include "util/planespotters.h"
+#include "settings/rollupstate.h"
 #include "maincore.h"
 
 #include "adsbdemodsettings.h"
@@ -665,6 +666,7 @@ private:
     PluginAPI* m_pluginAPI;
     DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
+    RollupState m_rollupState;
     ADSBDemodSettings m_settings;
     bool m_basicSettingsShown;
     bool m_doApplySettings;

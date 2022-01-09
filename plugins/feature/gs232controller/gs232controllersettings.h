@@ -45,7 +45,7 @@ struct GS232ControllerSettings
     float m_tolerance;
     enum Protocol { GS232, SPID, ROTCTLD } m_protocol;
     enum Connection { SERIAL, TCP } m_connection;
-    QByteArray m_rollupState;
+    Serializable *m_rollupState;
     QString m_title;
     quint32 m_rgbColor;
     bool m_useReverseAPI;
@@ -58,6 +58,7 @@ struct GS232ControllerSettings
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     void calcTargetAzEl(float& targetAz, float& targetEl) const;
 
     static const QStringList m_pipeTypes;

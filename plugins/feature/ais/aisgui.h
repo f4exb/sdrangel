@@ -26,6 +26,8 @@
 #include "util/messagequeue.h"
 #include "util/ais.h"
 #include "pipes/pipeendpoint.h"
+#include "settings/rollupstate.h"
+
 #include "aissettings.h"
 
 class PluginAPI;
@@ -52,6 +54,7 @@ private:
     PluginAPI* m_pluginAPI;
     FeatureUISet* m_featureUISet;
     AISSettings m_settings;
+    RollupState m_rollupState;
     bool m_doApplySettings;
 
     AIS* m_ais;

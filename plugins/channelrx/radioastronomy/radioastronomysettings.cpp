@@ -32,7 +32,8 @@ const QStringList RadioAstronomySettings::m_pipeURIs = {
 };
 
 RadioAstronomySettings::RadioAstronomySettings() :
-    m_channelMarker(0)
+    m_channelMarker(nullptr),
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }

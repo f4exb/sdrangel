@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include "SWGRollupState.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -66,6 +67,9 @@ public:
     qint32 getReverseApiFeatureIndex();
     void setReverseApiFeatureIndex(qint32 reverse_api_feature_index);
 
+    SWGRollupState* getRollupState();
+    void setRollupState(SWGRollupState* rollup_state);
+
 
     virtual bool isSet() override;
 
@@ -93,6 +97,9 @@ private:
 
     qint32 reverse_api_feature_index;
     bool m_reverse_api_feature_index_isSet;
+
+    SWGRollupState* rollup_state;
+    bool m_rollup_state_isSet;
 
 };
 

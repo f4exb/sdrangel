@@ -44,6 +44,8 @@ SWGMapSettings::SWGMapSettings() {
     m_reverse_api_feature_set_index_isSet = false;
     reverse_api_feature_index = 0;
     m_reverse_api_feature_index_isSet = false;
+    rollup_state = nullptr;
+    m_rollup_state_isSet = false;
 }
 
 SWGMapSettings::~SWGMapSettings() {
@@ -68,6 +70,8 @@ SWGMapSettings::init() {
     m_reverse_api_feature_set_index_isSet = false;
     reverse_api_feature_index = 0;
     m_reverse_api_feature_index_isSet = false;
+    rollup_state = new SWGRollupState();
+    m_rollup_state_isSet = false;
 }
 
 void
@@ -84,6 +88,9 @@ SWGMapSettings::cleanup() {
 
 
 
+    if(rollup_state != nullptr) { 
+        delete rollup_state;
+    }
 }
 
 SWGMapSettings*
@@ -112,6 +119,8 @@ SWGMapSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&reverse_api_feature_set_index, pJson["reverseAPIFeatureSetIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&reverse_api_feature_index, pJson["reverseAPIFeatureIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&rollup_state, pJson["rollupState"], "SWGRollupState", "SWGRollupState");
     
 }
 
@@ -152,6 +161,9 @@ SWGMapSettings::asJsonObject() {
     }
     if(m_reverse_api_feature_index_isSet){
         obj->insert("reverseAPIFeatureIndex", QJsonValue(reverse_api_feature_index));
+    }
+    if((rollup_state != nullptr) && (rollup_state->isSet())){
+        toJsonValue(QString("rollupState"), rollup_state, obj, QString("SWGRollupState"));
     }
 
     return obj;
@@ -237,6 +249,16 @@ SWGMapSettings::setReverseApiFeatureIndex(qint32 reverse_api_feature_index) {
     this->m_reverse_api_feature_index_isSet = true;
 }
 
+SWGRollupState*
+SWGMapSettings::getRollupState() {
+    return rollup_state;
+}
+void
+SWGMapSettings::setRollupState(SWGRollupState* rollup_state) {
+    this->rollup_state = rollup_state;
+    this->m_rollup_state_isSet = true;
+}
+
 
 bool
 SWGMapSettings::isSet(){
@@ -264,6 +286,9 @@ SWGMapSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_reverse_api_feature_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(rollup_state && rollup_state->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

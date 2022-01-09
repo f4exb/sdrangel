@@ -31,8 +31,9 @@ const float SSBDemodSettings::m_mminPowerThresholdDBf = 100.0f;
 #endif
 
 SSBDemodSettings::SSBDemodSettings() :
-    m_channelMarker(0),
-    m_spectrumGUI(0)
+    m_channelMarker(nullptr),
+    m_spectrumGUI(nullptr),
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -94,7 +95,10 @@ QByteArray SSBDemodSettings::serialize() const
     s.writeU32(21, m_reverseAPIDeviceIndex);
     s.writeU32(22, m_reverseAPIChannelIndex);
     s.writeS32(23, m_streamIndex);
-    s.writeBlob(24, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(24, m_rollupState->serialize());
+    }
 
     return s.final();
 }
@@ -122,7 +126,8 @@ bool SSBDemodSettings::deserialize(const QByteArray& data)
         d.readS32(3, &tmp, 30);
         m_volume = tmp / 10.0;
 
-        if (m_spectrumGUI) {
+        if (m_spectrumGUI)
+        {
             d.readBlob(4, &bytetmp);
             m_spectrumGUI->deserialize(bytetmp);
         }
@@ -156,7 +161,12 @@ bool SSBDemodSettings::deserialize(const QByteArray& data)
         d.readU32(22, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
         d.readS32(23, &m_streamIndex, 0);
-        d.readBlob(24, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(24, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         return true;
     }

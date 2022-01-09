@@ -19,3 +19,5 @@ JogdialControllerSettings:
       type: integer
     reverseAPIFeatureIndex:
       type: integer
+    rollupState:
+      $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"

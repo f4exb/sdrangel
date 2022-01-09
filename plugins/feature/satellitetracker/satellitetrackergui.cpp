@@ -227,7 +227,7 @@ void SatelliteTrackerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 
@@ -254,6 +254,7 @@ SatelliteTrackerGUI::SatelliteTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *fea
     m_satelliteTracker->setMessageQueueToGUI(&m_inputMessageQueue);
 
     m_featureUISet->addRollupWidget(this);
+    m_settings.setRollupState(&m_rollupState);
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
@@ -270,8 +271,9 @@ SatelliteTrackerGUI::SatelliteTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *fea
     ui->dateTime->setDateTime(SatelliteTracker::currentDateTime());
 
     // Use My Position from preferences, if none set
-    if ((m_settings.m_latitude == 0.0) && (m_settings.m_longitude == 0.0))
+    if ((m_settings.m_latitude == 0.0) && (m_settings.m_longitude == 0.0)) {
         on_useMyPosition_clicked();
+    }
 
     resizeTable();
     // Allow user to reorder columns
@@ -280,11 +282,13 @@ SatelliteTrackerGUI::SatelliteTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *fea
     ui->satTable->setSortingEnabled(true);
     // Add context menu to allow hiding/showing of columns
     menu = new QMenu(ui->satTable);
+
     for (int i = 0; i < ui->satTable->horizontalHeader()->count(); i++)
     {
         QString text = ui->satTable->horizontalHeaderItem(i)->text();
         menu->addAction(createCheckableItem(text, i, true));
     }
+
     ui->satTable->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->satTable->horizontalHeader(), SIGNAL(customContextMenuRequested(QPoint)), SLOT(columnSelectMenu(QPoint)));
     // Get signals when columns change
@@ -337,7 +341,7 @@ void SatelliteTrackerGUI::displaySettings()
     }
     ui->autoTarget->setChecked(m_settings.m_autoTarget);
     ui->darkTheme->setChecked(m_settings.m_chartsDarkTheme);
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
     plotChart();
     blockApplySettings(false);
 }

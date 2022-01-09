@@ -24,7 +24,8 @@
 #include "aptdemodsettings.h"
 
 APTDemodSettings::APTDemodSettings() :
-    m_channelMarker(0)
+    m_channelMarker(nullptr),
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -90,7 +91,10 @@ QByteArray APTDemodSettings::serialize() const
     s.writeU32(25, m_reverseAPIPort);
     s.writeU32(26, m_reverseAPIDeviceIndex);
     s.writeU32(27, m_reverseAPIChannelIndex);
-    s.writeBlob(28, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(28, m_rollupState->serialize());
+    }
 
     return s.final();
 }
@@ -129,9 +133,9 @@ bool APTDemodSettings::deserialize(const QByteArray& data)
         d.readString(16, &m_autoSavePath, "");
         d.readS32(17, &m_autoSaveMinScanLines, 200);
 
-        d.readBlob(20, &bytetmp);
-
-        if (m_channelMarker) {
+        if (m_channelMarker)
+        {
+            d.readBlob(20, &bytetmp);
             m_channelMarker->deserialize(bytetmp);
         }
 
@@ -151,7 +155,12 @@ bool APTDemodSettings::deserialize(const QByteArray& data)
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
         d.readU32(27, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
-        d.readBlob(28, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(28, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         return true;
     }

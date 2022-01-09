@@ -32,6 +32,7 @@
 #include "device/deviceset.h"
 #include "channel/channelapi.h"
 #include "feature/featureset.h"
+#include "settings/serializable.h"
 #include "maincore.h"
 
 #include "pertester.h"
@@ -351,6 +352,20 @@ void PERTester::webapiFormatFeatureSettings(
     }
 
     response.getPerTesterSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+
+    if (settings.m_rollupState)
+    {
+        if (response.getPerTesterSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getPerTesterSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getPerTesterSettings()->setRollupState(swgRollupState);
+        }
+    }
 }
 
 void PERTester::webapiUpdateFeatureSettings(
@@ -405,6 +420,9 @@ void PERTester::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("reverseAPIPort")) {
         settings.m_reverseAPIPort = response.getPerTesterSettings()->getReverseApiPort();
+    }
+    if (settings.m_rollupState && featureSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(featureSettingsKeys, response.getPerTesterSettings()->getRollupState());
     }
 }
 

@@ -25,6 +25,8 @@
 #include "feature/featuregui.h"
 #include "util/messagequeue.h"
 #include "pipes/pipeendpoint.h"
+#include "settings/rollupstate.h"
+
 #include "antennatoolssettings.h"
 
 class PluginAPI;
@@ -51,6 +53,7 @@ private:
     PluginAPI* m_pluginAPI;
     FeatureUISet* m_featureUISet;
     AntennaToolsSettings m_settings;
+    RollupState m_rollupState;
     bool m_doApplySettings;
 
     AntennaTools* m_antennatools;

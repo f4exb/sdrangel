@@ -30,7 +30,8 @@
 #define DEFAULT_AOS_SPEECH              "${name} is visible for ${duration} minutes. Max elevation, ${elevation} degrees."
 #define DEFAULT_LOS_SPEECH              "${name} is no longer visible."
 
-SatelliteTrackerSettings::SatelliteTrackerSettings()
+SatelliteTrackerSettings::SatelliteTrackerSettings() :
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -72,6 +73,7 @@ void SatelliteTrackerSettings::resetToDefaults()
     m_reverseAPIFeatureSetIndex = 0;
     m_reverseAPIFeatureIndex = 0;
     m_chartsDarkTheme = true;
+
     for (int i = 0; i < SAT_COL_COLUMNS; i++)
     {
         m_columnIndexes[i] = i;
@@ -111,7 +113,6 @@ QByteArray SatelliteTrackerSettings::serialize() const
     s.writeString(26, m_aosCommand);
     s.writeString(27, m_losCommand);
     s.writeBlob(28, serializeDeviceSettings(m_deviceSettings));
-
     s.writeString(29, m_title);
     s.writeU32(30, m_rgbColor);
     s.writeBool(31, m_useReverseAPI);
@@ -120,12 +121,18 @@ QByteArray SatelliteTrackerSettings::serialize() const
     s.writeU32(34, m_reverseAPIFeatureSetIndex);
     s.writeU32(35, m_reverseAPIFeatureIndex);
     s.writeBool(36, m_chartsDarkTheme);
-    s.writeBlob(37, m_rollupState);
 
-    for (int i = 0; i < SAT_COL_COLUMNS; i++)
+    if (m_rollupState) {
+        s.writeBlob(37, m_rollupState->serialize());
+    }
+
+    for (int i = 0; i < SAT_COL_COLUMNS; i++) {
         s.writeS32(100 + i, m_columnIndexes[i]);
-    for (int i = 0; i < SAT_COL_COLUMNS; i++)
+    }
+
+    for (int i = 0; i < SAT_COL_COLUMNS; i++) {
         s.writeS32(200 + i, m_columnSizes[i]);
+    }
 
     return s.final();
 }
@@ -180,7 +187,6 @@ bool SatelliteTrackerSettings::deserialize(const QByteArray& data)
         d.readString(27, &m_losCommand, "");
         d.readBlob(28, &blob);
         deserializeDeviceSettings(blob, m_deviceSettings);
-
         d.readString(29, &m_title, "Satellite Tracker");
         d.readU32(30, &m_rgbColor, QColor(225, 25, 99).rgb());
         d.readBool(31, &m_useReverseAPI, false);
@@ -198,12 +204,20 @@ bool SatelliteTrackerSettings::deserialize(const QByteArray& data)
         d.readU32(35, &utmp, 0);
         m_reverseAPIFeatureIndex = utmp > 99 ? 99 : utmp;
         d.readBool(36, &m_chartsDarkTheme, true);
-        d.readBlob(37, &m_rollupState);
 
-        for (int i = 0; i < SAT_COL_COLUMNS; i++)
+        if (m_rollupState)
+        {
+            d.readBlob(37, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
+
+        for (int i = 0; i < SAT_COL_COLUMNS; i++) {
             d.readS32(100 + i, &m_columnIndexes[i], i);
-        for (int i = 0; i < SAT_COL_COLUMNS; i++)
+        }
+
+        for (int i = 0; i < SAT_COL_COLUMNS; i++) {
             d.readS32(200 + i, &m_columnSizes[i], -1);
+        }
 
         return true;
     }

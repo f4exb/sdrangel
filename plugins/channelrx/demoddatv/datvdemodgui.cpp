@@ -137,7 +137,7 @@ void DATVDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 
@@ -228,6 +228,7 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
     }
 
     m_settings.setChannelMarker(&m_objChannelMarker);
+    m_settings.setRollupState(&m_rollupState);
 
     connect(ui->screenTV_2, &DATVideoRender::onMetaDataChanged, this, &DATVDemodGUI::on_StreamMetaDataChanged);
 
@@ -394,7 +395,7 @@ void DATVDemodGUI::displaySettings()
         connect(m_datvDemod->getUDPStream(), &DATVUDPStream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
     }
 
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
     blockApplySettings(false);
 }
 

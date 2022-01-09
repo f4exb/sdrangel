@@ -23,6 +23,7 @@
 #include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
+#include "settings/rollupstate.h"
 
 #include "datvdemod.h"
 
@@ -101,6 +102,7 @@ private:
     DeviceUISet* m_deviceUISet;
 
     ChannelMarker m_objChannelMarker;
+    RollupState m_rollupState;
     DATVDemod* m_datvDemod;
     MessageQueue m_inputMessageQueue;
     DATVDemodSettings m_settings;

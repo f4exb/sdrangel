@@ -25,6 +25,7 @@
 #include "dsp/channelmarker.h"
 #include "channel/channelgui.h"
 #include "util/messagequeue.h"
+#include "settings/rollupstate.h"
 
 #include "beamsteeringcwmodsettings.h"
 
@@ -53,6 +54,7 @@ private:
     PluginAPI* m_pluginAPI;
     DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
+    RollupState m_rollupState;
     BeamSteeringCWModSettings m_settings;
     int m_basebandSampleRate;
     qint64 m_centerFrequency;

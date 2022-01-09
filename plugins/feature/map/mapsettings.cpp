@@ -47,7 +47,8 @@ const QStringList MapSettings::m_mapProviders = {
     QStringLiteral("mapboxgl")
 };
 
-MapSettings::MapSettings()
+MapSettings::MapSettings() :
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -97,7 +98,11 @@ QByteArray MapSettings::serialize() const
     s.writeBool(16, m_displayAllGroundTracks);
     s.writeString(17, m_thunderforestAPIKey);
     s.writeString(18, m_maptilerAPIKey);
-    s.writeBlob(19, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(19, m_rollupState->serialize());
+    }
+
     s.writeString(20, m_osmURL);
 
     return s.final();
@@ -144,10 +149,15 @@ bool MapSettings::deserialize(const QByteArray& data)
         m_reverseAPIFeatureIndex = utmp > 99 ? 99 : utmp;
         d.readBool(15, &m_displaySelectedGroundTracks, true);
         d.readBool(16, &m_displayAllGroundTracks, true);
-
         d.readString(17, &m_thunderforestAPIKey, "");
         d.readString(18, &m_maptilerAPIKey, "");
-        d.readBlob(19, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(19, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
+
         d.readString(20, &m_osmURL, "");
 
         return true;

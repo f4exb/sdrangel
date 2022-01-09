@@ -126,6 +126,8 @@ IEEE_802_15_4_ModSettings:
       type: integer
     channelMarker:
       $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+    rollupState:
+      $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
 
 IEEE_802_15_4_ModReport:
   description: IEEE_802_15_4_Mod

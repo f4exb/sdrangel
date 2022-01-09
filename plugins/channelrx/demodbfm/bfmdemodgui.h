@@ -22,6 +22,7 @@
 #include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
 #include "util/messagequeue.h"
+#include "settings/rollupstate.h"
 #include "bfmdemodsettings.h"
 
 class PluginAPI;
@@ -57,6 +58,7 @@ private:
 	PluginAPI* m_pluginAPI;
 	DeviceUISet* m_deviceUISet;
 	ChannelMarker m_channelMarker;
+	RollupState m_rollupState;
 	BFMDemodSettings m_settings;
 	bool m_doApplySettings;
 	int m_rdsTimerCount;

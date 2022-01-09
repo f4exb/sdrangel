@@ -89,6 +89,7 @@ DATVModGUI::DATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 
     setTitleColor(m_channelMarker.getColor());
     m_settings.setChannelMarker(&m_channelMarker);
+    m_settings.setRollupState(&m_rollupState);
 
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
@@ -472,7 +473,7 @@ void DATVModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 
@@ -580,7 +581,7 @@ void DATVModGUI::displaySettings()
     ui->udpAddress->setText(m_settings.m_udpAddress);
     ui->udpPort->setValue(m_settings.m_udpPort);
 
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
     blockApplySettings(false);
 }
 

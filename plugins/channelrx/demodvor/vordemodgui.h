@@ -37,6 +37,7 @@
 #include "util/messagequeue.h"
 #include "util/httpdownloadmanager.h"
 #include "util/azel.h"
+#include "settings/rollupstate.h"
 #include "vordemodsettings.h"
 #include "navaid.h"
 
@@ -224,6 +225,7 @@ private:
     PluginAPI* m_pluginAPI;
     DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
+    RollupState m_rollupState;
     VORDemodSettings m_settings;
     bool m_doApplySettings;
 

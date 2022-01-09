@@ -29,8 +29,9 @@ const int BFMDemodSettings::m_rfBW[] = {
 };
 
 BFMDemodSettings::BFMDemodSettings() :
-    m_channelMarker(0),
-    m_spectrumGUI(0)
+    m_channelMarker(nullptr),
+    m_spectrumGUI(nullptr),
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -86,7 +87,10 @@ QByteArray BFMDemodSettings::serialize() const
     s.writeU32(17, m_reverseAPIDeviceIndex);
     s.writeU32(18, m_reverseAPIChannelIndex);
     s.writeS32(19, m_streamIndex);
-    s.writeBlob(20, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(20, m_rollupState->serialize());
+    }
 
     return s.final();
 }
@@ -120,18 +124,19 @@ bool BFMDemodSettings::deserialize(const QByteArray& data)
         m_squelch = tmp;
         d.readU32(7, &m_rgbColor);
 
-        d.readBlob(8, &bytetmp);
 
-        if (m_spectrumGUI) {
+        if (m_spectrumGUI)
+        {
+            d.readBlob(8, &bytetmp);
             m_spectrumGUI->deserialize(bytetmp);
         }
 
         d.readBool(9, &m_audioStereo, false);
         d.readBool(10, &m_lsbStereo, false);
 
-        d.readBlob(11, &bytetmp);
-
-        if (m_channelMarker) {
+        if (m_channelMarker)
+        {
+            d.readBlob(11, &bytetmp);
             m_channelMarker->deserialize(bytetmp);
         }
 
@@ -152,7 +157,12 @@ bool BFMDemodSettings::deserialize(const QByteArray& data)
         d.readU32(18, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
         d.readS32(19, &m_streamIndex, 0);
-        d.readBlob(20, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(20, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         return true;
     }

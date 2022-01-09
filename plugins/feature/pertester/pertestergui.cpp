@@ -114,7 +114,7 @@ void PERTesterGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 
@@ -135,6 +135,7 @@ PERTesterGUI::PERTesterGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Fea
     m_perTester->setMessageQueueToGUI(&m_inputMessageQueue);
 
     m_featureUISet->addRollupWidget(this);
+    m_settings.setRollupState(&m_rollupState);
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
@@ -174,7 +175,7 @@ void PERTesterGUI::displaySettings()
     ui->txUDPPort->setText(QString::number(m_settings.m_txUDPPort));
     ui->rxUDPAddress->setText(m_settings.m_rxUDPAddress);
     ui->rxUDPPort->setText(QString::number(m_settings.m_rxUDPPort));
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
     blockApplySettings(false);
     arrangeRollups();
 }

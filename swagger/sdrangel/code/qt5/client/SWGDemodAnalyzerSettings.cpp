@@ -48,6 +48,8 @@ SWGDemodAnalyzerSettings::SWGDemodAnalyzerSettings() {
     m_spectrum_config_isSet = false;
     scope_config = nullptr;
     m_scope_config_isSet = false;
+    rollup_state = nullptr;
+    m_rollup_state_isSet = false;
 }
 
 SWGDemodAnalyzerSettings::~SWGDemodAnalyzerSettings() {
@@ -76,6 +78,8 @@ SWGDemodAnalyzerSettings::init() {
     m_spectrum_config_isSet = false;
     scope_config = new SWGGLScope();
     m_scope_config_isSet = false;
+    rollup_state = new SWGRollupState();
+    m_rollup_state_isSet = false;
 }
 
 void
@@ -97,6 +101,9 @@ SWGDemodAnalyzerSettings::cleanup() {
     }
     if(scope_config != nullptr) { 
         delete scope_config;
+    }
+    if(rollup_state != nullptr) { 
+        delete rollup_state;
     }
 }
 
@@ -130,6 +137,8 @@ SWGDemodAnalyzerSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&spectrum_config, pJson["spectrumConfig"], "SWGGLSpectrum", "SWGGLSpectrum");
     
     ::SWGSDRangel::setValue(&scope_config, pJson["scopeConfig"], "SWGGLScope", "SWGGLScope");
+    
+    ::SWGSDRangel::setValue(&rollup_state, pJson["rollupState"], "SWGRollupState", "SWGRollupState");
     
 }
 
@@ -176,6 +185,9 @@ SWGDemodAnalyzerSettings::asJsonObject() {
     }
     if((scope_config != nullptr) && (scope_config->isSet())){
         toJsonValue(QString("scopeConfig"), scope_config, obj, QString("SWGGLScope"));
+    }
+    if((rollup_state != nullptr) && (rollup_state->isSet())){
+        toJsonValue(QString("rollupState"), rollup_state, obj, QString("SWGRollupState"));
     }
 
     return obj;
@@ -281,6 +293,16 @@ SWGDemodAnalyzerSettings::setScopeConfig(SWGGLScope* scope_config) {
     this->m_scope_config_isSet = true;
 }
 
+SWGRollupState*
+SWGDemodAnalyzerSettings::getRollupState() {
+    return rollup_state;
+}
+void
+SWGDemodAnalyzerSettings::setRollupState(SWGRollupState* rollup_state) {
+    this->rollup_state = rollup_state;
+    this->m_rollup_state_isSet = true;
+}
+
 
 bool
 SWGDemodAnalyzerSettings::isSet(){
@@ -314,6 +336,9 @@ SWGDemodAnalyzerSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(scope_config && scope_config->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(rollup_state && rollup_state->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

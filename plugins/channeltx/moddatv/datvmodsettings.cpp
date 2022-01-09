@@ -27,7 +27,8 @@ const QStringList DATVModSettings::m_codeRateStrings = {"1/2", "2/3", "3/4", "5/
 const QStringList DATVModSettings::m_modulationStrings = {"BPSK", "QPSK", "8PSK", "16APSK", "32APSK"};
 
 DATVModSettings::DATVModSettings() :
-    m_channelMarker(0)
+    m_channelMarker(nullptr),
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -69,15 +70,14 @@ QByteArray DATVModSettings::serialize() const
     s.writeS32(5, (int) m_fec);
     s.writeS32(6, m_symbolRate);
     s.writeReal(7, m_rollOff);
-
     s.writeS32(10, (int) m_source);
     s.writeString(11, m_tsFileName);
     s.writeBool(12, m_tsFilePlayLoop);
     s.writeString(13, m_udpAddress);
     s.writeU32(14, m_udpPort);
-
     s.writeString(20, m_title);
     s.writeU32(21, m_rgbColor);
+
     if (m_channelMarker) {
         s.writeBlob(22, m_channelMarker->serialize());
     }
@@ -88,7 +88,10 @@ QByteArray DATVModSettings::serialize() const
     s.writeU32(26, m_reverseAPIDeviceIndex);
     s.writeU32(27, m_reverseAPIChannelIndex);
     s.writeS32(28, m_streamIndex);
-    s.writeBlob(29, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(29, m_rollupState->serialize());
+    }
 
     return s.final();
 }
@@ -117,12 +120,12 @@ bool DATVModSettings::deserialize(const QByteArray& data)
         d.readS32(5, (int *) &m_fec, (int)FEC12);
         d.readS32(6, &m_symbolRate, 250000);
         d.readReal(7, &m_rollOff, 0.35f);
-
         d.readS32(10, (int *)&m_source, (int)SourceFile);
         d.readString(11, &m_tsFileName);
         d.readBool(12, &m_tsFilePlayLoop, false);
         d.readString(13, &m_udpAddress, "127.0.0.1");
         d.readU32(14, &utmp, 0);
+
         if ((utmp > 1023) && (utmp < 65536)) {
             m_udpPort = utmp;
         } else {
@@ -131,6 +134,7 @@ bool DATVModSettings::deserialize(const QByteArray& data)
 
         d.readString(20, &m_title, "DATV Modulator");
         d.readU32(21, &m_rgbColor, QColor(Qt::magenta).rgb());
+
         if (m_channelMarker)
         {
             d.readBlob(22, &bytetmp);
@@ -140,17 +144,24 @@ bool DATVModSettings::deserialize(const QByteArray& data)
         d.readBool(23, &m_useReverseAPI, false);
         d.readString(24, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(25, &utmp, 0);
+
         if ((utmp > 1023) && (utmp < 65535)) {
             m_reverseAPIPort = utmp;
         } else {
             m_reverseAPIPort = 8888;
         }
+
         d.readU32(26, &utmp, 0);
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
         d.readU32(27, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
         d.readS32(28, &m_streamIndex, 0);
-        d.readBlob(29, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(29, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         return true;
     }

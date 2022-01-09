@@ -184,6 +184,7 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 
 	m_settings.setChannelMarker(&m_channelMarker);
 	m_settings.setSpectrumGUI(ui->spectrumGUI);
+    m_settings.setRollupState(&m_rollupState);
 
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
@@ -257,7 +258,7 @@ void UDPSinkGUI::displaySettings()
 
     displayStreamIndex();
 
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
     blockApplySettings(false);
 
     ui->glSpectrum->setSampleRate(m_settings.m_outputSampleRate);
@@ -589,7 +590,7 @@ void UDPSinkGUI::onWidgetRolled(QWidget* widget, bool rollDown)
         m_udpSink->enableSpectrum(rollDown);
 	}
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 

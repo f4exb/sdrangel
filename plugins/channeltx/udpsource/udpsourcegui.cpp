@@ -149,6 +149,10 @@ UDPSourceGUI::UDPSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
     m_udpSource->setLevelMeter(ui->volumeMeter);
 
+    m_settings.setChannelMarker(&m_channelMarker);
+    m_settings.setSpectrumGUI(ui->spectrumGUI);
+    m_settings.setRollupState(&m_rollupState);
+
     displaySettings();
     applySettings(true);
 }
@@ -232,7 +236,7 @@ void UDPSourceGUI::displaySettings()
     ui->applyBtn->setEnabled(false);
     ui->applyBtn->setStyleSheet("QPushButton { background:rgb(79,79,79); }");
 
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -468,7 +472,7 @@ void UDPSourceGUI::onWidgetRolled(QWidget* widget, bool rollDown)
         m_udpSource->setSpectrum(rollDown);
     }
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 

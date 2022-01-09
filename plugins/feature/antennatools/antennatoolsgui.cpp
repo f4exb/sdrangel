@@ -102,7 +102,7 @@ void AntennaToolsGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 
@@ -131,6 +131,8 @@ AntennaToolsGUI::AntennaToolsGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     // Rather than polling, could we get a message when frequencies change?
     connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
     m_statusTimer.start(500);
+
+    m_settings.setRollupState(&m_rollupState);
 
     displaySettings();
     applySettings(true);
@@ -168,7 +170,7 @@ void AntennaToolsGUI::displaySettings()
     calcDishBeamwidth();
     calcDishGain();
     calcDishEffectiveArea();
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
 }
 
 void AntennaToolsGUI::leaveEvent(QEvent*)

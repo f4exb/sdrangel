@@ -24,6 +24,8 @@
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
 #include "util/messagequeue.h"
+#include "settings/rollupstate.h"
+
 #include "freqtrackersettings.h"
 
 class PluginAPI;
@@ -58,6 +60,7 @@ private:
 	DeviceUISet* m_deviceUISet;
 	ChannelMarker m_channelMarker;
 	ChannelMarker m_pllChannelMarker;
+	RollupState m_rollupState;
 	FreqTrackerSettings m_settings;
 	int m_basebandSampleRate;
 	bool m_doApplySettings;

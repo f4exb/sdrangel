@@ -31,6 +31,7 @@
 #include "dsp/devicesamplesource.h"
 #include "device/deviceset.h"
 #include "channel/channelapi.h"
+#include "settings/serializable.h"
 #include "maincore.h"
 
 #include "vorlocalizerreport.h"
@@ -522,6 +523,20 @@ void VORLocalizer::webapiFormatFeatureSettings(
     response.getVorLocalizerSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getVorLocalizerSettings()->setReverseApiFeatureSetIndex(settings.m_reverseAPIFeatureSetIndex);
     response.getVorLocalizerSettings()->setReverseApiFeatureIndex(settings.m_reverseAPIFeatureIndex);
+
+    if (settings.m_rollupState)
+    {
+        if (response.getVorLocalizerSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getVorLocalizerSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getVorLocalizerSettings()->setRollupState(swgRollupState);
+        }
+    }
 }
 
 void VORLocalizer::webapiUpdateFeatureSettings(
@@ -561,6 +576,9 @@ void VORLocalizer::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("reverseAPIFeatureIndex")) {
         settings.m_reverseAPIFeatureIndex = response.getVorLocalizerSettings()->getReverseApiFeatureIndex();
+    }
+    if (settings.m_rollupState && featureSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(featureSettingsKeys, response.getVorLocalizerSettings()->getRollupState());
     }
 }
 

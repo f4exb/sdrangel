@@ -44,12 +44,13 @@ struct FileSinkSettings
 
     Serializable *m_spectrumGUI;
     Serializable *m_channelMarker;
-    QByteArray m_rollupState;
+    Serializable *m_rollupState;
 
     FileSinkSettings();
     void resetToDefaults();
     void setSpectrumGUI(Serializable *spectrumGUI) { m_spectrumGUI = spectrumGUI; }
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
+    void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
 

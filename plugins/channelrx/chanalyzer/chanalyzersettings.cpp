@@ -24,9 +24,10 @@
 #include "chanalyzersettings.h"
 
 ChannelAnalyzerSettings::ChannelAnalyzerSettings() :
-    m_channelMarker(0),
-    m_spectrumGUI(0),
-    m_scopeGUI(0)
+    m_channelMarker(nullptr),
+    m_spectrumGUI(nullptr),
+    m_scopeGUI(nullptr),
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -66,12 +67,20 @@ QByteArray ChannelAnalyzerSettings::serialize() const
 
     s.writeS32(1, m_inputFrequencyOffset);
     s.writeS32(2, m_bandwidth);
-    s.writeBlob(3, m_spectrumGUI->serialize());
+
+    if (m_spectrumGUI) {
+        s.writeBlob(3, m_spectrumGUI->serialize());
+    }
+
     s.writeU32(4, m_rgbColor);
     s.writeS32(5, m_lowCutoff);
     s.writeS32(6, m_log2Decim);
     s.writeBool(7, m_ssb);
-    s.writeBlob(8, m_scopeGUI->serialize());
+
+    if (m_scopeGUI) {
+        s.writeBlob(8, m_scopeGUI->serialize());
+    }
+
     s.writeBool(9, m_rationalDownSample);
     s.writeU32(10, m_rationalDownSamplerRate);
     s.writeBool(11, m_pll);
@@ -85,7 +94,11 @@ QByteArray ChannelAnalyzerSettings::serialize() const
     s.writeFloat(19, m_pllDampingFactor);
     s.writeFloat(20, m_pllLoopGain);
     s.writeBool(21, m_costasLoop);
-    s.writeBlob(22, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(22, m_rollupState->serialize());
+    }
+
     s.writeBool(23, m_useReverseAPI);
     s.writeString(24, m_reverseAPIAddress);
     s.writeU32(25, m_reverseAPIPort);
@@ -144,7 +157,13 @@ bool ChannelAnalyzerSettings::deserialize(const QByteArray& data)
         d.readFloat(19, &m_pllDampingFactor, 0.5f);
         d.readFloat(20, &m_pllLoopGain, 10.0f);
         d.readBool(21, &m_costasLoop, false);
-        d.readBlob(22, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(22, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
+
         d.readBool(18, &m_useReverseAPI, false);
         d.readString(19, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(20, &utmp, 0);

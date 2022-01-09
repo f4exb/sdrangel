@@ -296,7 +296,7 @@ void BFMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 
@@ -394,6 +394,7 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
 	m_settings.setChannelMarker(&m_channelMarker);
 	m_settings.setSpectrumGUI(ui->spectrumGUI);
+	m_settings.setRollupState(&m_rollupState);
 
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
@@ -467,7 +468,7 @@ void BFMDemodGUI::displaySettings()
 
     displayStreamIndex();
 
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
     blockApplySettings(false);
 }
 

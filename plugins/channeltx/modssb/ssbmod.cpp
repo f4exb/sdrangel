@@ -540,6 +540,9 @@ void SSBMod::webapiUpdateChannelSettings(
     if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
         settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getSsbModSettings()->getChannelMarker());
     }
+    if (settings.m_rollupState && channelSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(channelSettingsKeys, response.getSsbModSettings()->getRollupState());
+    }
 }
 
 int SSBMod::webapiReportGet(
@@ -627,6 +630,20 @@ void SSBMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
             SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
             settings.m_channelMarker->formatTo(swgChannelMarker);
             response.getSsbModSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
+
+    if (settings.m_rollupState)
+    {
+        if (response.getSsbModSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getSsbModSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getSsbModSettings()->setRollupState(swgRollupState);
         }
     }
 }
@@ -801,12 +818,18 @@ void SSBMod::webapiFormatChannelSettings(
         swgSSBModSettings->setSpectrumConfig(swgGLSpectrum);
     }
 
-
     if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
     {
         SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
         settings.m_channelMarker->formatTo(swgChannelMarker);
         swgSSBModSettings->setChannelMarker(swgChannelMarker);
+    }
+
+    if (settings.m_rollupState && (channelSettingsKeys.contains("rollupState") || force))
+    {
+        SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+        settings.m_rollupState->formatTo(swgRollupState);
+        swgSSBModSettings->setRollupState(swgRollupState);
     }
 
     if (force)

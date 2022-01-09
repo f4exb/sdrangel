@@ -48,11 +48,12 @@ struct RemoteSinkSettings
     uint16_t m_reverseAPIChannelIndex;
 
     Serializable *m_channelMarker;
-    QByteArray m_rollupState;
+    Serializable *m_rollupState;
 
     RemoteSinkSettings();
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
+    void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
 };

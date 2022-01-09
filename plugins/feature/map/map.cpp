@@ -31,6 +31,7 @@
 #include "device/deviceset.h"
 #include "channel/channelapi.h"
 #include "feature/featureset.h"
+#include "settings/serializable.h"
 #include "maincore.h"
 #include "map.h"
 
@@ -260,6 +261,20 @@ void Map::webapiFormatFeatureSettings(
     response.getMapSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getMapSettings()->setReverseApiFeatureSetIndex(settings.m_reverseAPIFeatureSetIndex);
     response.getMapSettings()->setReverseApiFeatureIndex(settings.m_reverseAPIFeatureIndex);
+
+    if (settings.m_rollupState)
+    {
+        if (response.getMapSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getMapSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getMapSettings()->setRollupState(swgRollupState);
+        }
+    }
 }
 
 void Map::webapiUpdateFeatureSettings(
@@ -290,6 +305,9 @@ void Map::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("reverseAPIFeatureIndex")) {
         settings.m_reverseAPIFeatureIndex = response.getMapSettings()->getReverseApiFeatureIndex();
+    }
+    if (settings.m_rollupState && featureSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(featureSettingsKeys, response.getMapSettings()->getRollupState());
     }
 }
 

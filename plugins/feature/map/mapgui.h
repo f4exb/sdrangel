@@ -28,8 +28,11 @@
 #include "util/messagequeue.h"
 #include "util/azel.h"
 #include "pipes/pipeendpoint.h"
-#include "mapsettings.h"
+#include "settings/rollupstate.h"
+
 #include "SWGMapItem.h"
+
+#include "mapsettings.h"
 #include "mapbeacondialog.h"
 #include "mapibpbeacondialog.h"
 #include "mapradiotimedialog.h"
@@ -495,6 +498,7 @@ private:
     PluginAPI* m_pluginAPI;
     FeatureUISet* m_featureUISet;
     MapSettings m_settings;
+    RollupState m_rollupState;
     bool m_doApplySettings;
     QList<PipeEndPoint::AvailablePipeSource> m_availablePipes;
 

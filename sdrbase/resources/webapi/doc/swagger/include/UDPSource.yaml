@@ -75,6 +75,8 @@ UDPSourceSettings:
       $ref: "/doc/swagger/include/GLSpectrum.yaml#/GLSpectrum"
     channelMarker:
       $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+    rollupState:
+      $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
 
 UDPSourceReport:
   description: UDPSource

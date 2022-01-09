@@ -409,7 +409,7 @@ void APRSGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 
@@ -549,6 +549,8 @@ APRSGUI::APRSGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feat
     m_motionChart.layout()->setContentsMargins(0, 0, 0, 0);
     m_motionChart.setMargins(QMargins(1, 1, 1, 1));
 
+    m_settings.setRollupState(&m_rollupState);
+
     displaySettings();
     applySettings(true);
 }
@@ -630,7 +632,7 @@ void APRSGUI::displaySettings()
     displayTableSettings(ui->telemetryTable, telemetryTableMenu, m_settings.m_telemetryTableColumnSizes, m_settings.m_telemetryTableColumnIndexes, APRS_TELEMETRY_TABLE_COLUMNS);
     displayTableSettings(ui->motionTable, motionTableMenu, m_settings.m_motionTableColumnSizes, m_settings.m_motionTableColumnIndexes, APRS_MOTION_TABLE_COLUMNS);
 
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
 
     blockApplySettings(false);
 }

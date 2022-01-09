@@ -29,6 +29,8 @@
 #include "util/messagequeue.h"
 #include "util/fits.h"
 #include "gui/httpdownloadmanagergui.h"
+#include "settings/rollupstate.h"
+
 #include "startrackersettings.h"
 
 class PluginAPI;
@@ -70,6 +72,7 @@ private:
     PluginAPI* m_pluginAPI;
     FeatureUISet* m_featureUISet;
     StarTrackerSettings m_settings;
+    RollupState m_rollupState;
     bool m_doApplySettings;
 
     StarTracker* m_starTracker;

@@ -30,6 +30,7 @@
 
 #include "device/deviceset.h"
 #include "channel/channelapi.h"
+#include "settings/serializable.h"
 #include "maincore.h"
 #include "aprsworker.h"
 #include "aprs.h"
@@ -300,6 +301,21 @@ void APRS::webapiFormatFeatureSettings(
     response.getAprsSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getAprsSettings()->setReverseApiFeatureSetIndex(settings.m_reverseAPIFeatureSetIndex);
     response.getAprsSettings()->setReverseApiFeatureIndex(settings.m_reverseAPIFeatureIndex);
+
+    if (settings.m_rollupState)
+    {
+        if (response.getAprsSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getAprsSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getAprsSettings()->setRollupState(swgRollupState);
+        }
+    }
+
 }
 
 void APRS::webapiUpdateFeatureSettings(
@@ -342,6 +358,9 @@ void APRS::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("reverseAPIFeatureIndex")) {
         settings.m_reverseAPIFeatureIndex = response.getAprsSettings()->getReverseApiFeatureIndex();
+    }
+    if (settings.m_rollupState && featureSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(featureSettingsKeys, response.getAprsSettings()->getRollupState());
     }
 }
 

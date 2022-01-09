@@ -327,6 +327,9 @@ void BeamSteeringCWMod::webapiUpdateChannelSettings(
     if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
         settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getBeamSteeringCwModSettings()->getChannelMarker());
     }
+    if (settings.m_rollupState && channelSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(channelSettingsKeys, response.getBeamSteeringCwModSettings()->getRollupState());
+    }
 }
 
 void BeamSteeringCWMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const BeamSteeringCWModSettings& settings)
@@ -365,6 +368,20 @@ void BeamSteeringCWMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSetti
             SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
             settings.m_channelMarker->formatTo(swgChannelMarker);
             response.getBeamSteeringCwModSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
+
+    if (settings.m_rollupState)
+    {
+        if (response.getBeamSteeringCwModSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getBeamSteeringCwModSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getBeamSteeringCwModSettings()->setRollupState(swgRollupState);
         }
     }
 }
@@ -453,6 +470,13 @@ void BeamSteeringCWMod::webapiFormatChannelSettings(
         SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
         settings.m_channelMarker->formatTo(swgChannelMarker);
         swgBeamSteeringCWSettings->setChannelMarker(swgChannelMarker);
+    }
+
+    if (settings.m_rollupState && (channelSettingsKeys.contains("rollupState") || force))
+    {
+        SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+        settings.m_rollupState->formatTo(swgRollupState);
+        swgBeamSteeringCWSettings->setRollupState(swgRollupState);
     }
 }
 

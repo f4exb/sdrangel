@@ -23,6 +23,7 @@
 #include "dsp/channelmarker.h"
 #include "util/movingaverage.h"
 #include "util/messagequeue.h"
+#include "settings/rollupstate.h"
 
 #include "atvdemodsettings.h"
 
@@ -59,6 +60,7 @@ private:
     PluginAPI* m_pluginAPI;
     DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
+    RollupState m_rollupState;
     ATVDemod* m_atvDemod;
     ATVDemodSettings m_settings;
 

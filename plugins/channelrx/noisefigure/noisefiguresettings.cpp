@@ -25,7 +25,8 @@
 #include "noisefiguresettings.h"
 
 NoiseFigureSettings::NoiseFigureSettings() :
-    m_channelMarker(0)
+    m_channelMarker(nullptr),
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -98,24 +99,28 @@ QByteArray NoiseFigureSettings::serialize() const
 
     s.writeU32(17, m_rgbColor);
     s.writeString(18, m_title);
+
     if (m_channelMarker) {
         s.writeBlob(19, m_channelMarker->serialize());
     }
+
     s.writeS32(20, m_streamIndex);
     s.writeBool(21, m_useReverseAPI);
     s.writeString(22, m_reverseAPIAddress);
     s.writeU32(23, m_reverseAPIPort);
     s.writeU32(24, m_reverseAPIDeviceIndex);
     s.writeU32(25, m_reverseAPIChannelIndex);
-
     s.writeS32(26, (int)m_interpolation);
-
     s.writeString(27, m_setting);
-    s.writeBlob(28, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(28, m_rollupState->serialize());
+    }
 
     for (int i = 0; i < NOISEFIGURE_COLUMNS; i++) {
         s.writeS32(100 + i, m_resultsColumnIndexes[i]);
     }
+
     for (int i = 0; i < NOISEFIGURE_COLUMNS; i++) {
         s.writeS32(200 + i, m_resultsColumnSizes[i]);
     }
@@ -143,14 +148,12 @@ bool NoiseFigureSettings::deserialize(const QByteArray& data)
         d.readS32(1, &m_inputFrequencyOffset, 0);
         d.readS32(2, &m_fftSize, 64);
         d.readFloat(3, &m_fftCount, 10000.0f);
-
         d.readS32(4, (int*)&m_sweepSpec, NoiseFigureSettings::RANGE);
         d.readDouble(5, &m_startValue, 430.0);
         d.readDouble(6, &m_stopValue, 440.0);
         d.readS32(7, &m_steps, 3);
         d.readDouble(8, &m_step, 5.0);
         d.readString(9, &m_sweepList, DEFAULT_FREQUENCIES);
-
         d.readString(10, &m_visaDevice, DEFAULT_VISA_DEVICE);
         d.readString(11, &m_powerOnSCPI, DEFAULT_POWER_ON);
         d.readString(12, &m_powerOffSCPI, DEFAULT_POWER_OFF);
@@ -163,32 +166,41 @@ bool NoiseFigureSettings::deserialize(const QByteArray& data)
 
         d.readU32(17, &m_rgbColor, QColor(0, 100, 200).rgb());
         d.readString(18, &m_title, "Noise Figure");
-        d.readBlob(19, &bytetmp);
-        if (m_channelMarker) {
+
+        if (m_channelMarker)
+        {
+            d.readBlob(19, &bytetmp);
             m_channelMarker->deserialize(bytetmp);
         }
+
         d.readS32(20, &m_streamIndex, 0);
         d.readBool(21, &m_useReverseAPI, false);
         d.readString(22, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(23, &utmp, 0);
+
         if ((utmp > 1023) && (utmp < 65535)) {
             m_reverseAPIPort = utmp;
         } else {
             m_reverseAPIPort = 8888;
         }
+
         d.readU32(24, &utmp, 0);
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
         d.readU32(25, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
-
         d.readS32(26, (int*)&m_interpolation, LINEAR);
-
         d.readString(27, &m_setting, "centerFrequency");
-        d.readBlob(28, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(28, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         for (int i = 0; i < NOISEFIGURE_COLUMNS; i++) {
             d.readS32(100 + i, &m_resultsColumnIndexes[i], i);
         }
+
         for (int i = 0; i < NOISEFIGURE_COLUMNS; i++) {
             d.readS32(200 + i, &m_resultsColumnSizes[i], -1);
         }

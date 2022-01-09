@@ -352,6 +352,9 @@ void RadioClock::webapiUpdateChannelSettings(
     if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
         settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getRadioClockSettings()->getChannelMarker());
     }
+    if (settings.m_rollupState && channelSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(channelSettingsKeys, response.getRadioClockSettings()->getRollupState());
+    }
 }
 
 void RadioClock::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const RadioClockSettings& settings)
@@ -407,6 +410,20 @@ void RadioClock::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& re
             SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
             settings.m_channelMarker->formatTo(swgChannelMarker);
             response.getRadioClockSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
+
+    if (settings.m_rollupState)
+    {
+        if (response.getRadioClockSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getRadioClockSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getRadioClockSettings()->setRollupState(swgRollupState);
         }
     }
 }
@@ -512,6 +529,13 @@ void RadioClock::webapiFormatChannelSettings(
         SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
         settings.m_channelMarker->formatTo(swgChannelMarker);
         swgRadioClockSettings->setChannelMarker(swgChannelMarker);
+    }
+
+    if (settings.m_rollupState && (channelSettingsKeys.contains("rollupState") || force))
+    {
+        SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+        settings.m_rollupState->formatTo(swgRollupState);
+        swgRadioClockSettings->setRollupState(swgRollupState);
     }
 }
 

@@ -23,6 +23,8 @@
 
 #include "feature/featuregui.h"
 #include "util/messagequeue.h"
+#include "settings/rollupstate.h"
+
 #include "rigctlserversettings.h"
 
 class PluginAPI;
@@ -49,6 +51,7 @@ private:
 	PluginAPI* m_pluginAPI;
 	FeatureUISet* m_featureUISet;
 	RigCtlServerSettings m_settings;
+	RollupState m_rollupState;
 	bool m_doApplySettings;
 
 	RigCtlServer* m_rigCtlServer;

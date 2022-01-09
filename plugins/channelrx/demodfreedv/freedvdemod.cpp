@@ -360,6 +360,9 @@ void FreeDVDemod::webapiUpdateChannelSettings(
     if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
         settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getFreeDvDemodSettings()->getChannelMarker());
     }
+    if (settings.m_rollupState && channelSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(channelSettingsKeys, response.getFreeDvDemodSettings()->getRollupState());
+    }
 }
 
 int FreeDVDemod::webapiReportGet(
@@ -435,6 +438,20 @@ void FreeDVDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& r
             SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
             settings.m_channelMarker->formatTo(swgChannelMarker);
             response.getFreeDvDemodSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
+
+    if (settings.m_rollupState)
+    {
+        if (response.getFreeDvDemodSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getFreeDvDemodSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getFreeDvDemodSettings()->setRollupState(swgRollupState);
         }
     }
 }
@@ -560,6 +577,13 @@ void FreeDVDemod::webapiFormatChannelSettings(
         SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
         settings.m_channelMarker->formatTo(swgChannelMarker);
         swgFreeDVDemodSettings->setChannelMarker(swgChannelMarker);
+    }
+
+    if (settings.m_rollupState && (channelSettingsKeys.contains("rollupState") || force))
+    {
+        SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+        settings.m_rollupState->formatTo(swgRollupState);
+        swgFreeDVDemodSettings->setRollupState(swgRollupState);
     }
 }
 

@@ -114,7 +114,7 @@ void AFCGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 
@@ -153,6 +153,8 @@ AFCGUI::AFCGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     m_autoTargetStatusTimer.setSingleShot(true);
     ui->statusIndicator->setStyleSheet("QLabel { background-color: gray; border-radius: 8px; }");
 
+    m_settings.setRollupState(&m_rollupState);
+
     updateDeviceSetLists();
     displaySettings();
 	applySettings(true);
@@ -179,7 +181,7 @@ void AFCGUI::displaySettings()
     ui->toleranceFrequency->setValue(m_settings.m_freqTolerance);
     ui->targetPeriod->setValue(m_settings.m_trackerAdjustPeriod);
     ui->targetPeriodText->setText(tr("%1").arg(m_settings.m_trackerAdjustPeriod));
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
     blockApplySettings(false);
 }
 

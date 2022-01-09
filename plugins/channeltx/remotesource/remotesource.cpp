@@ -356,6 +356,9 @@ void RemoteSource::webapiUpdateChannelSettings(
     if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
         settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getRemoteSourceSettings()->getChannelMarker());
     }
+    if (settings.m_rollupState && channelSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(channelSettingsKeys, response.getRemoteSourceSettings()->getRollupState());
+    }
 }
 
 int RemoteSource::webapiReportGet(
@@ -411,6 +414,20 @@ void RemoteSource::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& 
             SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
             settings.m_channelMarker->formatTo(swgChannelMarker);
             response.getRemoteSourceSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
+
+    if (settings.m_rollupState)
+    {
+        if (response.getRemoteSourceSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getRemoteSourceSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getRemoteSourceSettings()->setRollupState(swgRollupState);
         }
     }
 }
@@ -527,6 +544,13 @@ void RemoteSource::webapiFormatChannelSettings(
         SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
         settings.m_channelMarker->formatTo(swgChannelMarker);
         swgRemoteSourceSettings->setChannelMarker(swgChannelMarker);
+    }
+
+    if (settings.m_rollupState && (channelSettingsKeys.contains("rollupState") || force))
+    {
+        SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+        settings.m_rollupState->formatTo(swgRollupState);
+        swgRemoteSourceSettings->setRollupState(swgRollupState);
     }
 }
 

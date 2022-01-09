@@ -28,7 +28,8 @@
 #include "datvdemodsettings.h"
 
 DATVDemodSettings::DATVDemodSettings() :
-    m_channelMarker(0)
+    m_channelMarker(nullptr),
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -113,7 +114,10 @@ QByteArray DATVDemodSettings::serialize() const
     s.writeString(34, m_softLDPCToolPath);
     s.writeS32(35, m_softLDPCMaxTrials);
     s.writeBool(36, m_playerEnable);
-    s.writeBlob(37, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(37, m_rollupState->serialize());
+    }
 
     return s.final();
 }
@@ -146,9 +150,9 @@ bool DATVDemodSettings::deserialize(const QByteArray& data)
         tmp = tmp < 0 ? 0 : tmp >= (int) MOD_UNSET ? (int) MOD_UNSET - 1 : tmp;
         m_modulation = (DATVModulation) tmp;
 
-        d.readBlob(6, &bytetmp);
-
-        if (m_channelMarker) {
+        if (m_channelMarker)
+        {
+            d.readBlob(6, &bytetmp);
             m_channelMarker->deserialize(bytetmp);
         }
 
@@ -202,7 +206,12 @@ bool DATVDemodSettings::deserialize(const QByteArray& data)
         d.readS32(35, &tmp, 8);
         m_softLDPCMaxTrials = tmp < 1 ? 1 : tmp > m_softLDPCMaxMaxTrials ? m_softLDPCMaxMaxTrials : tmp;
         d.readBool(36, &m_playerEnable, true);
-        d.readBlob(37, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(37, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         validateSystemConfiguration();
 

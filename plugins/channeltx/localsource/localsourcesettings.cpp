@@ -36,6 +36,7 @@ void LocalSourceSettings::resetToDefaults()
     m_log2Interp = 0;
     m_filterChainHash = 0;
     m_channelMarker = nullptr;
+    m_rollupState = nullptr;
     m_play = false;
     m_streamIndex = 0;
     m_useReverseAPI = false;
@@ -59,7 +60,14 @@ QByteArray LocalSourceSettings::serialize() const
     s.writeU32(12, m_log2Interp);
     s.writeU32(13, m_filterChainHash);
     s.writeS32(14, m_streamIndex);
-    s.writeBlob(15, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(15, m_rollupState->serialize());
+    }
+
+    if (m_channelMarker) {
+        s.writeBlob(16, m_channelMarker->serialize());
+    }
 
     return s.final();
 }
@@ -78,6 +86,7 @@ bool LocalSourceSettings::deserialize(const QByteArray& data)
     {
         uint32_t tmp;
         QString strtmp;
+        QByteArray bytetmp;
 
         d.readU32(1, &m_localDeviceIndex, 0);
         d.readU32(5, &m_rgbColor, QColor(0, 255, 255).rgb());
@@ -100,7 +109,18 @@ bool LocalSourceSettings::deserialize(const QByteArray& data)
         m_log2Interp = tmp > 6 ? 6 : tmp;
         d.readU32(13, &m_filterChainHash, 0);
         d.readS32(14, &m_streamIndex, 0);
-        d.readBlob(15, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(15, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
+
+        if (m_channelMarker)
+        {
+            d.readBlob(16, &bytetmp);
+            m_channelMarker->deserialize(bytetmp);
+        }
 
         return true;
     }

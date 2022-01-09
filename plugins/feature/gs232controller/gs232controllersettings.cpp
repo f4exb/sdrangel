@@ -37,7 +37,8 @@ const QStringList GS232ControllerSettings::m_pipeURIs = {
     QStringLiteral("sdrangel.feature.satellitetracker")
 };
 
-GS232ControllerSettings::GS232ControllerSettings()
+GS232ControllerSettings::GS232ControllerSettings() :
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -98,7 +99,10 @@ QByteArray GS232ControllerSettings::serialize() const
     s.writeS32(23, (int)m_connection);
     s.writeString(24, m_host);
     s.writeS32(25, m_port);
-    s.writeBlob(26, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(26, m_rollupState->serialize());
+    }
 
     return s.final();
 }
@@ -152,7 +156,12 @@ bool GS232ControllerSettings::deserialize(const QByteArray& data)
         d.readS32(23, (int*)&m_connection, SERIAL);
         d.readString(24, &m_host, "127.0.0.1");
         d.readS32(25, &m_port, 4533);
-        d.readBlob(26, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(26, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         return true;
     }

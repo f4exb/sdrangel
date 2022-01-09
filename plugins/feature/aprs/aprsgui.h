@@ -30,6 +30,8 @@
 #include "util/messagequeue.h"
 #include "pipes/pipeendpoint.h"
 #include "util/aprs.h"
+#include "settings/rollupstate.h"
+
 #include "aprssettings.h"
 
 class PluginAPI;
@@ -113,6 +115,7 @@ private:
     PluginAPI* m_pluginAPI;
     FeatureUISet* m_featureUISet;
     APRSSettings m_settings;
+    RollupState m_rollupState;
     bool m_doApplySettings;
     QList<PipeEndPoint::AvailablePipeSource> m_availablePipes;
 

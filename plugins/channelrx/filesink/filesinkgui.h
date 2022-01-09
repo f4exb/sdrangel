@@ -25,6 +25,7 @@
 #include "dsp/channelmarker.h"
 #include "channel/channelgui.h"
 #include "util/messagequeue.h"
+#include "settings/rollupstate.h"
 
 #include "filesinksettings.h"
 
@@ -58,6 +59,7 @@ private:
     PluginAPI* m_pluginAPI;
     DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
+    RollupState m_rollupState;
     FileSinkSettings m_settings;
     bool m_running;
     int m_fixedShiftIndex;

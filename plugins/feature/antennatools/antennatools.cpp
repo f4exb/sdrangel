@@ -29,6 +29,7 @@
 #include "device/deviceset.h"
 #include "channel/channelapi.h"
 #include "feature/featureset.h"
+#include "settings/serializable.h"
 #include "maincore.h"
 #include "antennatools.h"
 
@@ -207,6 +208,20 @@ void AntennaTools::webapiFormatFeatureSettings(
     response.getAntennaToolsSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getAntennaToolsSettings()->setReverseApiFeatureSetIndex(settings.m_reverseAPIFeatureSetIndex);
     response.getAntennaToolsSettings()->setReverseApiFeatureIndex(settings.m_reverseAPIFeatureIndex);
+
+    if (settings.m_rollupState)
+    {
+        if (response.getAntennaToolsSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getAntennaToolsSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getAntennaToolsSettings()->setRollupState(swgRollupState);
+        }
+    }
 }
 
 void AntennaTools::webapiUpdateFeatureSettings(
@@ -252,6 +267,9 @@ void AntennaTools::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("reverseAPIFeatureIndex")) {
         settings.m_reverseAPIFeatureIndex = response.getAntennaToolsSettings()->getReverseApiFeatureIndex();
+    }
+    if (settings.m_rollupState && featureSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(featureSettingsKeys, response.getAntennaToolsSettings()->getRollupState());
     }
 }
 

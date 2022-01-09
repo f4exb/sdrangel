@@ -179,6 +179,7 @@ set(sdrbase_SOURCES
     settings/preferences.cpp
     settings/preset.cpp
     settings/mainsettings.cpp
+    settings/rollupstate.cpp
 
     util/ais.cpp
     util/ax25.cpp
@@ -388,6 +389,7 @@ set(sdrbase_HEADERS
     settings/preferences.h
     settings/preset.h
     settings/mainsettings.h
+    settings/rollupstate.h
 
     util/ais.h
     util/ax25.h

@@ -24,6 +24,8 @@
 #include "feature/featuregui.h"
 #include "util/messagequeue.h"
 #include "pipes/pipeendpoint.h"
+#include "settings/rollupstate.h"
+
 #include "gs232controllersettings.h"
 
 class PluginAPI;
@@ -50,6 +52,7 @@ private:
     PluginAPI* m_pluginAPI;
     FeatureUISet* m_featureUISet;
     GS232ControllerSettings m_settings;
+    RollupState m_rollupState;
     bool m_doApplySettings;
     QList<PipeEndPoint::AvailablePipeSource> m_availablePipes;
 

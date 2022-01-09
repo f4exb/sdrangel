@@ -72,6 +72,8 @@ SWGFreqTrackerSettings::SWGFreqTrackerSettings() {
     m_spectrum_config_isSet = false;
     channel_marker = nullptr;
     m_channel_marker_isSet = false;
+    rollup_state = nullptr;
+    m_rollup_state_isSet = false;
 }
 
 SWGFreqTrackerSettings::~SWGFreqTrackerSettings() {
@@ -124,6 +126,8 @@ SWGFreqTrackerSettings::init() {
     m_spectrum_config_isSet = false;
     channel_marker = new SWGChannelMarker();
     m_channel_marker_isSet = false;
+    rollup_state = new SWGRollupState();
+    m_rollup_state_isSet = false;
 }
 
 void
@@ -157,6 +161,9 @@ SWGFreqTrackerSettings::cleanup() {
     }
     if(channel_marker != nullptr) { 
         delete channel_marker;
+    }
+    if(rollup_state != nullptr) { 
+        delete rollup_state;
     }
 }
 
@@ -214,6 +221,8 @@ SWGFreqTrackerSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&spectrum_config, pJson["spectrumConfig"], "SWGGLSpectrum", "SWGGLSpectrum");
     
     ::SWGSDRangel::setValue(&channel_marker, pJson["channelMarker"], "SWGChannelMarker", "SWGChannelMarker");
+    
+    ::SWGSDRangel::setValue(&rollup_state, pJson["rollupState"], "SWGRollupState", "SWGRollupState");
     
 }
 
@@ -296,6 +305,9 @@ SWGFreqTrackerSettings::asJsonObject() {
     }
     if((channel_marker != nullptr) && (channel_marker->isSet())){
         toJsonValue(QString("channelMarker"), channel_marker, obj, QString("SWGChannelMarker"));
+    }
+    if((rollup_state != nullptr) && (rollup_state->isSet())){
+        toJsonValue(QString("rollupState"), rollup_state, obj, QString("SWGRollupState"));
     }
 
     return obj;
@@ -521,6 +533,16 @@ SWGFreqTrackerSettings::setChannelMarker(SWGChannelMarker* channel_marker) {
     this->m_channel_marker_isSet = true;
 }
 
+SWGRollupState*
+SWGFreqTrackerSettings::getRollupState() {
+    return rollup_state;
+}
+void
+SWGFreqTrackerSettings::setRollupState(SWGRollupState* rollup_state) {
+    this->rollup_state = rollup_state;
+    this->m_rollup_state_isSet = true;
+}
+
 
 bool
 SWGFreqTrackerSettings::isSet(){
@@ -590,6 +612,9 @@ SWGFreqTrackerSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(channel_marker && channel_marker->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(rollup_state && rollup_state->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

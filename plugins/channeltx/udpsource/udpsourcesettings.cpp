@@ -24,8 +24,9 @@
 #include "settings/serializable.h"
 
 UDPSourceSettings::UDPSourceSettings() :
-    m_channelMarker(0),
-    m_spectrumGUI(0)
+    m_channelMarker(nullptr),
+    m_spectrumGUI(nullptr),
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -96,7 +97,10 @@ QByteArray UDPSourceSettings::serialize() const
     s.writeU32(24, m_reverseAPIDeviceIndex);
     s.writeU32(25, m_reverseAPIChannelIndex);
     s.writeS32(26, m_streamIndex);
-    s.writeBlob(27, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(27, m_rollupState->serialize());
+    }
 
     return s.final();
 }
@@ -126,7 +130,6 @@ bool UDPSourceSettings::deserialize(const QByteArray& data)
 
         d.readS32(2, &s32tmp, 0);
         m_inputFrequencyOffset = s32tmp;
-
         d.readS32(3, &s32tmp, 0);
 
         if (s32tmp < (int) FormatNone) {
@@ -148,23 +151,17 @@ bool UDPSourceSettings::deserialize(const QByteArray& data)
         d.readBool(9, &m_multicastJoin, false);
         d.readS32(10, &s32tmp, 10);
         m_gainOut = s32tmp / 10.0;
-
         d.readS32(11, &m_fmDeviation, 2500);
         d.readReal(12, &m_amModFactor, 0.95);
         d.readBool(13, &m_stereoInput, false);
-
         d.readS32(14, &s32tmp, -60);
         m_squelch = s32tmp * 1.0;
         m_squelchEnabled = (s32tmp != -100);
-
         d.readS32(15, &s32tmp, 5);
         m_squelchGate = s32tmp / 100.0;
-
         d.readBool(16, &m_autoRWBalance, true);
-
         d.readS32(17, &s32tmp, 10);
         m_gainIn = s32tmp / 10.0;
-
         d.readString(18, &m_udpAddress, "127.0.0.1");
         d.readU32(19, &u32tmp, 9998);
 
@@ -191,7 +188,12 @@ bool UDPSourceSettings::deserialize(const QByteArray& data)
         d.readU32(25, &u32tmp, 0);
         m_reverseAPIChannelIndex = u32tmp > 99 ? 99 : u32tmp;
         d.readS32(26, &m_streamIndex, 0);
-        d.readBlob(27, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(27, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         return true;
     }

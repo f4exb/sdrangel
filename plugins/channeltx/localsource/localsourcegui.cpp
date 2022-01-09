@@ -113,6 +113,7 @@ LocalSourceGUI::LocalSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
     m_channelMarker.setVisible(true); // activate signal on the last setting only
 
     m_settings.setChannelMarker(&m_channelMarker);
+    m_settings.setRollupState(&m_rollupState);
 
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
@@ -163,7 +164,7 @@ void LocalSourceGUI::displaySettings()
     ui->interpolationFactor->setCurrentIndex(m_settings.m_log2Interp);
     ui->localDevicePlay->setChecked(m_settings.m_play);
     applyInterpolation();
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -227,7 +228,7 @@ void LocalSourceGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 

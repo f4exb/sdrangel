@@ -70,3 +70,6 @@ ChannelAnalyzerSettings:
       $ref: "http://swgserver:8081/api/swagger/include/GLScope.yaml#/GLScope"
     channelMarker:
       $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+    rollupState:
+      $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+

@@ -24,7 +24,8 @@
 #include "packetdemodsettings.h"
 
 PacketDemodSettings::PacketDemodSettings() :
-    m_channelMarker(0)
+    m_channelMarker(nullptr),
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -89,12 +90,18 @@ QByteArray PacketDemodSettings::serialize() const
 
     s.writeString(25, m_logFilename);
     s.writeBool(26, m_logEnabled);
-    s.writeBlob(27, m_rollupState);
 
-    for (int i = 0; i < PACKETDEMOD_COLUMNS; i++)
+    if (m_rollupState) {
+        s.writeBlob(27, m_rollupState->serialize());
+    }
+
+    for (int i = 0; i < PACKETDEMOD_COLUMNS; i++) {
         s.writeS32(100 + i, m_columnIndexes[i]);
-    for (int i = 0; i < PACKETDEMOD_COLUMNS; i++)
+    }
+
+    for (int i = 0; i < PACKETDEMOD_COLUMNS; i++) {
         s.writeS32(200 + i, m_columnSizes[i]);
+    }
 
     return s.final();
 }
@@ -120,9 +127,10 @@ bool PacketDemodSettings::deserialize(const QByteArray& data)
         d.readString(3, &m_filterFrom, "");
         d.readString(4, &m_filterTo, "");
         d.readString(5, &m_filterPID, "");
-        d.readBlob(6, &bytetmp);
 
-        if (m_channelMarker) {
+        if (m_channelMarker)
+        {
+            d.readBlob(6, &bytetmp);
             m_channelMarker->deserialize(bytetmp);
         }
 
@@ -149,6 +157,7 @@ bool PacketDemodSettings::deserialize(const QByteArray& data)
         d.readBool(22, &m_udpEnabled);
         d.readString(23, &m_udpAddress);
         d.readU32(24, &utmp);
+
         if ((utmp > 1023) && (utmp < 65535)) {
             m_udpPort = utmp;
         } else {
@@ -157,12 +166,20 @@ bool PacketDemodSettings::deserialize(const QByteArray& data)
 
         d.readString(25, &m_logFilename, "pager_log.csv");
         d.readBool(26, &m_logEnabled, false);
-        d.readBlob(27, &m_rollupState);
 
-        for (int i = 0; i < PACKETDEMOD_COLUMNS; i++)
+        if (m_rollupState)
+        {
+            d.readBlob(27, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
+
+        for (int i = 0; i < PACKETDEMOD_COLUMNS; i++) {
             d.readS32(100 + i, &m_columnIndexes[i], i);
-        for (int i = 0; i < PACKETDEMOD_COLUMNS; i++)
+        }
+
+        for (int i = 0; i < PACKETDEMOD_COLUMNS; i++) {
             d.readS32(200 + i, &m_columnSizes[i], -1);
+        }
 
         return true;
     }

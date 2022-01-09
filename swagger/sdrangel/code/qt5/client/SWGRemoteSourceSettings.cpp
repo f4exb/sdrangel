@@ -54,6 +54,8 @@ SWGRemoteSourceSettings::SWGRemoteSourceSettings() {
     m_reverse_api_channel_index_isSet = false;
     channel_marker = nullptr;
     m_channel_marker_isSet = false;
+    rollup_state = nullptr;
+    m_rollup_state_isSet = false;
 }
 
 SWGRemoteSourceSettings::~SWGRemoteSourceSettings() {
@@ -88,6 +90,8 @@ SWGRemoteSourceSettings::init() {
     m_reverse_api_channel_index_isSet = false;
     channel_marker = new SWGChannelMarker();
     m_channel_marker_isSet = false;
+    rollup_state = new SWGRollupState();
+    m_rollup_state_isSet = false;
 }
 
 void
@@ -112,6 +116,9 @@ SWGRemoteSourceSettings::cleanup() {
 
     if(channel_marker != nullptr) { 
         delete channel_marker;
+    }
+    if(rollup_state != nullptr) { 
+        delete rollup_state;
     }
 }
 
@@ -151,6 +158,8 @@ SWGRemoteSourceSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&reverse_api_channel_index, pJson["reverseAPIChannelIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&channel_marker, pJson["channelMarker"], "SWGChannelMarker", "SWGChannelMarker");
+    
+    ::SWGSDRangel::setValue(&rollup_state, pJson["rollupState"], "SWGRollupState", "SWGRollupState");
     
 }
 
@@ -206,6 +215,9 @@ SWGRemoteSourceSettings::asJsonObject() {
     }
     if((channel_marker != nullptr) && (channel_marker->isSet())){
         toJsonValue(QString("channelMarker"), channel_marker, obj, QString("SWGChannelMarker"));
+    }
+    if((rollup_state != nullptr) && (rollup_state->isSet())){
+        toJsonValue(QString("rollupState"), rollup_state, obj, QString("SWGRollupState"));
     }
 
     return obj;
@@ -341,6 +353,16 @@ SWGRemoteSourceSettings::setChannelMarker(SWGChannelMarker* channel_marker) {
     this->m_channel_marker_isSet = true;
 }
 
+SWGRollupState*
+SWGRemoteSourceSettings::getRollupState() {
+    return rollup_state;
+}
+void
+SWGRemoteSourceSettings::setRollupState(SWGRollupState* rollup_state) {
+    this->rollup_state = rollup_state;
+    this->m_rollup_state_isSet = true;
+}
+
 
 bool
 SWGRemoteSourceSettings::isSet(){
@@ -383,6 +405,9 @@ SWGRemoteSourceSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(channel_marker && channel_marker->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(rollup_state && rollup_state->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

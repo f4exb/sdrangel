@@ -32,7 +32,8 @@ const QStringList AISSettings::m_pipeURIs = {
     QStringLiteral("sdrangel.channel.aisdemod")
 };
 
-AISSettings::AISSettings()
+AISSettings::AISSettings() :
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -46,6 +47,7 @@ void AISSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIFeatureSetIndex = 0;
     m_reverseAPIFeatureIndex = 0;
+
     for (int i = 0; i < AIS_VESSEL_COLUMNS; i++)
     {
         m_vesselColumnIndexes[i] = i;
@@ -64,12 +66,18 @@ QByteArray AISSettings::serialize() const
     s.writeU32(24, m_reverseAPIPort);
     s.writeU32(25, m_reverseAPIFeatureSetIndex);
     s.writeU32(26, m_reverseAPIFeatureIndex);
-    s.writeBlob(27, m_rollupState);
 
-    for (int i = 0; i < AIS_VESSEL_COLUMNS; i++)
+    if (m_rollupState) {
+        s.writeBlob(27, m_rollupState->serialize());
+    }
+
+    for (int i = 0; i < AIS_VESSEL_COLUMNS; i++) {
         s.writeS32(300 + i, m_vesselColumnIndexes[i]);
-    for (int i = 0; i < AIS_VESSEL_COLUMNS; i++)
+    }
+
+    for (int i = 0; i < AIS_VESSEL_COLUMNS; i++) {
         s.writeS32(400 + i, m_vesselColumnSizes[i]);
+    }
 
     return s.final();
 }
@@ -107,12 +115,20 @@ bool AISSettings::deserialize(const QByteArray& data)
         m_reverseAPIFeatureSetIndex = utmp > 99 ? 99 : utmp;
         d.readU32(26, &utmp, 0);
         m_reverseAPIFeatureIndex = utmp > 99 ? 99 : utmp;
-        d.readBlob(27, &m_rollupState);
 
-        for (int i = 0; i < AIS_VESSEL_COLUMNS; i++)
+        if (m_rollupState)
+        {
+            d.readBlob(27, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
+
+        for (int i = 0; i < AIS_VESSEL_COLUMNS; i++) {
             d.readS32(300 + i, &m_vesselColumnIndexes[i], i);
-        for (int i = 0; i < AIS_VESSEL_COLUMNS; i++)
+        }
+
+        for (int i = 0; i < AIS_VESSEL_COLUMNS; i++) {
             d.readS32(400 + i, &m_vesselColumnSizes[i], -1);
+        }
 
         return true;
     }

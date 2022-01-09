@@ -1937,6 +1937,9 @@ void RadioAstronomyGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+
+    saveState(m_rollupState);
+    applySettings();
 }
 
 void RadioAstronomyGUI::onMenuDialogCalled(const QPoint &p)
@@ -2086,6 +2089,7 @@ RadioAstronomyGUI::RadioAstronomyGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
 
     setTitleColor(m_channelMarker.getColor());
     m_settings.setChannelMarker(&m_channelMarker);
+    m_settings.setRollupState(&m_rollupState);
 
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
@@ -2538,6 +2542,7 @@ void RadioAstronomyGUI::displaySettings()
         header->moveSection(header->visualIndex(i), m_settings.m_powerTableColumnIndexes[i]);
     }
 
+    restoreState(m_rollupState);
     blockApplySettings(false);
     arrangeRollups();
 }

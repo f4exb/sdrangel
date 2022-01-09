@@ -90,7 +90,7 @@ struct ChirpChatModSettings
     uint16_t m_reverseAPIChannelIndex;
 
     Serializable *m_channelMarker;
-    QByteArray m_rollupState;
+    Serializable *m_rollupState;
 
     static const int bandwidths[];
     static const int nbBandwidths;
@@ -103,6 +103,7 @@ struct ChirpChatModSettings
     unsigned int getNbSFDFourths() const; //!< Get the number of SFD period fourths (depends on coding scheme)
     bool hasSyncWord() const;             //!< Only LoRa has a syncword (for the moment)
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
+    void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
 };

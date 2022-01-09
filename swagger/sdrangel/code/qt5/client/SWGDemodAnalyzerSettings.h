@@ -24,6 +24,7 @@
 
 #include "SWGGLScope.h"
 #include "SWGGLSpectrum.h"
+#include "SWGRollupState.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -74,6 +75,9 @@ public:
     SWGGLScope* getScopeConfig();
     void setScopeConfig(SWGGLScope* scope_config);
 
+    SWGRollupState* getRollupState();
+    void setRollupState(SWGRollupState* rollup_state);
+
 
     virtual bool isSet() override;
 
@@ -107,6 +111,9 @@ private:
 
     SWGGLScope* scope_config;
     bool m_scope_config_isSet;
+
+    SWGRollupState* rollup_state;
+    bool m_rollup_state_isSet;
 
 };
 

@@ -469,6 +469,9 @@ void FreeDVMod::webapiUpdateChannelSettings(
     if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
         settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getFreeDvModSettings()->getChannelMarker());
     }
+    if (settings.m_rollupState && channelSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(channelSettingsKeys, response.getFreeDvModSettings()->getRollupState());
+    }
 }
 
 int FreeDVMod::webapiReportGet(
@@ -549,6 +552,20 @@ void FreeDVMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
             SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
             settings.m_channelMarker->formatTo(swgChannelMarker);
             response.getFreeDvModSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
+
+    if (settings.m_rollupState)
+    {
+        if (response.getFreeDvModSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getFreeDvModSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getFreeDvModSettings()->setRollupState(swgRollupState);
         }
     }
 }
@@ -707,6 +724,13 @@ void FreeDVMod::webapiFormatChannelSettings(
         SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
         settings.m_channelMarker->formatTo(swgChannelMarker);
         swgFreeDVModSettings->setChannelMarker(swgChannelMarker);
+    }
+
+    if (settings.m_rollupState && (channelSettingsKeys.contains("rollupState") || force))
+    {
+        SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+        settings.m_rollupState->formatTo(swgRollupState);
+        swgFreeDVModSettings->setRollupState(swgRollupState);
     }
 
     if (force)

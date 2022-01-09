@@ -38,7 +38,7 @@ struct AISSettings
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIFeatureSetIndex;
     uint16_t m_reverseAPIFeatureIndex;
-    QByteArray m_rollupState;
+    Serializable *m_rollupState;
 
     int m_vesselColumnIndexes[AIS_VESSEL_COLUMNS];
     int m_vesselColumnSizes[AIS_VESSEL_COLUMNS];
@@ -47,6 +47,7 @@ struct AISSettings
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
 
     static const QStringList m_pipeTypes;
     static const QStringList m_pipeURIs;

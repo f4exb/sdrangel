@@ -138,7 +138,7 @@ void SimplePTTGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 
@@ -159,6 +159,7 @@ SimplePTTGUI::SimplePTTGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Fea
     m_simplePTT->setMessageQueueToGUI(&m_inputMessageQueue);
 
 	m_featureUISet->addRollupWidget(this);
+    m_settings.setRollupState(&m_rollupState);
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
@@ -198,7 +199,7 @@ void SimplePTTGUI::displaySettings()
     blockApplySettings(true);
     ui->rxtxDelay->setValue(m_settings.m_rx2TxDelayMs);
     ui->txrxDelay->setValue(m_settings.m_tx2RxDelayMs);
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
     ui->vox->setChecked(m_settings.m_vox);
     ui->voxEnable->setChecked(m_settings.m_voxEnable);
     ui->voxLevel->setValue(m_settings.m_voxLevel);

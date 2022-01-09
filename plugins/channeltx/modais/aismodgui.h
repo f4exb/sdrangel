@@ -23,6 +23,7 @@
 #include "dsp/channelmarker.h"
 #include "util/movingaverage.h"
 #include "util/messagequeue.h"
+#include "settings/rollupstate.h"
 
 #include "aismod.h"
 #include "aismodsettings.h"
@@ -57,6 +58,7 @@ private:
     PluginAPI* m_pluginAPI;
     DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
+    RollupState m_rollupState;
     AISModSettings m_settings;
     bool m_doApplySettings;
     SpectrumVis* m_spectrumVis;

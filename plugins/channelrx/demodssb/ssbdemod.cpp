@@ -436,6 +436,9 @@ void SSBDemod::webapiUpdateChannelSettings(
     if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
         settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getSsbDemodSettings()->getChannelMarker());
     }
+    if (settings.m_rollupState && channelSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(channelSettingsKeys, response.getSsbDemodSettings()->getRollupState());
+    }
 }
 
 int SSBDemod::webapiReportGet(
@@ -518,6 +521,20 @@ void SSBDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
             SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
             settings.m_channelMarker->formatTo(swgChannelMarker);
             response.getSsbDemodSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
+
+    if (settings.m_rollupState)
+    {
+        if (response.getSsbDemodSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getSsbDemodSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getSsbDemodSettings()->setRollupState(swgRollupState);
         }
     }
 }
@@ -664,6 +681,13 @@ void SSBDemod::webapiFormatChannelSettings(
         SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
         settings.m_channelMarker->formatTo(swgChannelMarker);
         swgSSBDemodSettings->setChannelMarker(swgChannelMarker);
+    }
+
+    if (settings.m_rollupState && (channelSettingsKeys.contains("rollupState") || force))
+    {
+        SWGSDRangel::SWGRollupState *swgRolllupState = new SWGSDRangel::SWGRollupState();
+        settings.m_rollupState->formatTo(swgRolllupState);
+        swgSSBDemodSettings->setRollupState(swgRolllupState);
     }
 }
 

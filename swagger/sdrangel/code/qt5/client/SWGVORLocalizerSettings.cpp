@@ -50,6 +50,8 @@ SWGVORLocalizerSettings::SWGVORLocalizerSettings() {
     m_force_rr_averaging_isSet = false;
     center_shift = 0;
     m_center_shift_isSet = false;
+    rollup_state = nullptr;
+    m_rollup_state_isSet = false;
 }
 
 SWGVORLocalizerSettings::~SWGVORLocalizerSettings() {
@@ -80,6 +82,8 @@ SWGVORLocalizerSettings::init() {
     m_force_rr_averaging_isSet = false;
     center_shift = 0;
     m_center_shift_isSet = false;
+    rollup_state = new SWGRollupState();
+    m_rollup_state_isSet = false;
 }
 
 void
@@ -99,6 +103,9 @@ SWGVORLocalizerSettings::cleanup() {
 
 
 
+    if(rollup_state != nullptr) { 
+        delete rollup_state;
+    }
 }
 
 SWGVORLocalizerSettings*
@@ -133,6 +140,8 @@ SWGVORLocalizerSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&force_rr_averaging, pJson["forceRRAveraging"], "qint32", "");
     
     ::SWGSDRangel::setValue(&center_shift, pJson["centerShift"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&rollup_state, pJson["rollupState"], "SWGRollupState", "SWGRollupState");
     
 }
 
@@ -182,6 +191,9 @@ SWGVORLocalizerSettings::asJsonObject() {
     }
     if(m_center_shift_isSet){
         obj->insert("centerShift", QJsonValue(center_shift));
+    }
+    if((rollup_state != nullptr) && (rollup_state->isSet())){
+        toJsonValue(QString("rollupState"), rollup_state, obj, QString("SWGRollupState"));
     }
 
     return obj;
@@ -297,6 +309,16 @@ SWGVORLocalizerSettings::setCenterShift(qint32 center_shift) {
     this->m_center_shift_isSet = true;
 }
 
+SWGRollupState*
+SWGVORLocalizerSettings::getRollupState() {
+    return rollup_state;
+}
+void
+SWGVORLocalizerSettings::setRollupState(SWGRollupState* rollup_state) {
+    this->rollup_state = rollup_state;
+    this->m_rollup_state_isSet = true;
+}
+
 
 bool
 SWGVORLocalizerSettings::isSet(){
@@ -333,6 +355,9 @@ SWGVORLocalizerSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_center_shift_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(rollup_state && rollup_state->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

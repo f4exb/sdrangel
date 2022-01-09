@@ -23,7 +23,8 @@
 
 #include "simplepttsettings.h"
 
-SimplePTTSettings::SimplePTTSettings()
+SimplePTTSettings::SimplePTTSettings() :
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -63,7 +64,11 @@ QByteArray SimplePTTSettings::serialize() const
     s.writeU32(9, m_reverseAPIPort);
     s.writeU32(10, m_reverseAPIFeatureSetIndex);
     s.writeU32(11, m_reverseAPIFeatureIndex);
-    s.writeBlob(12, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(12, m_rollupState->serialize());
+    }
+
     s.writeString(13, m_audioDeviceName);
     s.writeS32(14, m_voxLevel);
     s.writeBool(15, m_vox);
@@ -109,7 +114,13 @@ bool SimplePTTSettings::deserialize(const QByteArray& data)
         m_reverseAPIFeatureSetIndex = utmp > 99 ? 99 : utmp;
         d.readU32(11, &utmp, 0);
         m_reverseAPIFeatureIndex = utmp > 99 ? 99 : utmp;
-        d.readBlob(12, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(12, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
+
         d.readString(13, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
         d.readS32(14, &m_voxLevel, -20);
         d.readBool(15, &m_vox, false);

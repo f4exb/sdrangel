@@ -23,6 +23,7 @@
 #include "dsp/channelmarker.h"
 #include "channel/channelgui.h"
 #include "util/messagequeue.h"
+#include "settings/rollupstate.h"
 
 #include "../remotesource/remotesourcesettings.h"
 
@@ -55,6 +56,7 @@ private:
     PluginAPI* m_pluginAPI;
     DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
+    RollupState m_rollupState;
     RemoteSourceSettings m_settings;
     int m_remoteSampleRate;
     int m_basebandSampleRate;

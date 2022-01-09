@@ -44,8 +44,9 @@ const int NFMModSettings::m_nbChannelSpacings = 7;
 
 
 NFMModSettings::NFMModSettings() :
-    m_channelMarker(0),
-    m_cwKeyerGUI(0)
+    m_channelMarker(nullptr),
+    m_cwKeyerGUI(nullptr),
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -119,7 +120,10 @@ QByteArray NFMModSettings::serialize() const
     s.writeBool(24, m_dcsOn);
     s.writeS32(25, m_dcsCode);
     s.writeBool(26, m_dcsPositive);
-    s.writeBlob(27, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(27, m_rollupState->serialize());
+    }
 
     return s.final();
 }
@@ -159,7 +163,8 @@ bool NFMModSettings::deserialize(const QByteArray& data)
         d.readBool(9, &m_ctcssOn, false);
         d.readS32(10, &m_ctcssIndex, 0);
 
-        if (m_channelMarker) {
+        if (m_channelMarker)
+        {
             d.readBlob(11, &bytetmp);
             m_channelMarker->deserialize(bytetmp);
         }
@@ -174,7 +179,6 @@ bool NFMModSettings::deserialize(const QByteArray& data)
         }
 
         d.readString(14, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
-
         d.readBool(15, &m_useReverseAPI, false);
         d.readString(16, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(17, &utmp, 0);
@@ -197,7 +201,12 @@ bool NFMModSettings::deserialize(const QByteArray& data)
         d.readS32(25, &tmp, 0023);
         m_dcsCode = tmp < 0 ? 0 : tmp > 511 ? 511 : tmp;
         d.readBool(26, &m_dcsPositive, false);
-        d.readBlob(27, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(27, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         return true;
     }

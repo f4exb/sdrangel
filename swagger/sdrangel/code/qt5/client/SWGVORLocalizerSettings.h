@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include "SWGRollupState.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -75,6 +76,9 @@ public:
     qint32 getCenterShift();
     void setCenterShift(qint32 center_shift);
 
+    SWGRollupState* getRollupState();
+    void setRollupState(SWGRollupState* rollup_state);
+
 
     virtual bool isSet() override;
 
@@ -111,6 +115,9 @@ private:
 
     qint32 center_shift;
     bool m_center_shift_isSet;
+
+    SWGRollupState* rollup_state;
+    bool m_rollup_state_isSet;
 
 };
 

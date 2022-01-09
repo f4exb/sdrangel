@@ -24,7 +24,8 @@
 #include "dabdemodsettings.h"
 
 DABDemodSettings::DABDemodSettings() :
-    m_channelMarker(0)
+    m_channelMarker(nullptr),
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -76,12 +77,18 @@ QByteArray DABDemodSettings::serialize() const
     s.writeU32(13, m_reverseAPIPort);
     s.writeU32(14, m_reverseAPIDeviceIndex);
     s.writeU32(15, m_reverseAPIChannelIndex);
-    s.writeBlob(16, m_rollupState);
 
-    for (int i = 0; i < DABDEMOD_COLUMNS; i++)
+    if (m_rollupState) {
+        s.writeBlob(16, m_rollupState->serialize());
+    }
+
+    for (int i = 0; i < DABDEMOD_COLUMNS; i++) {
         s.writeS32(100 + i, m_columnIndexes[i]);
-    for (int i = 0; i < DABDEMOD_COLUMNS; i++)
+    }
+
+    for (int i = 0; i < DABDEMOD_COLUMNS; i++) {
         s.writeS32(200 + i, m_columnSizes[i]);
+    }
 
     return s.final();
 }
@@ -110,9 +117,9 @@ bool DABDemodSettings::deserialize(const QByteArray& data)
         d.readBool(6, &m_audioMute, false);
         d.readString(7, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
 
-        d.readBlob(8, &bytetmp);
-
-        if (m_channelMarker) {
+        if (m_channelMarker)
+        {
+            d.readBlob(8, &bytetmp);
             m_channelMarker->deserialize(bytetmp);
         }
 
@@ -132,12 +139,20 @@ bool DABDemodSettings::deserialize(const QByteArray& data)
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
         d.readU32(15, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
-        d.readBlob(16, &m_rollupState);
 
-        for (int i = 0; i < DABDEMOD_COLUMNS; i++)
+        if (m_rollupState)
+        {
+            d.readBlob(16, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
+
+        for (int i = 0; i < DABDEMOD_COLUMNS; i++) {
             d.readS32(100 + i, &m_columnIndexes[i], i);
-        for (int i = 0; i < DABDEMOD_COLUMNS; i++)
+        }
+
+        for (int i = 0; i < DABDEMOD_COLUMNS; i++) {
             d.readS32(200 + i, &m_columnSizes[i], -1);
+        }
 
         return true;
     }

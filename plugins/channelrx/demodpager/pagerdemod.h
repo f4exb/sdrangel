@@ -51,8 +51,7 @@ public:
         const PagerDemodSettings& getSettings() const { return m_settings; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigurePagerDemod* create(const PagerDemodSettings& settings, bool force)
-        {
+        static MsgConfigurePagerDemod* create(const PagerDemodSettings& settings, bool force) {
             return new MsgConfigurePagerDemod(settings, force);
         }
 
@@ -79,9 +78,24 @@ public:
         int getBCHParityErrors() const { return m_bchParityErrors; }
         QDateTime getDateTime() const { return m_dateTime; }
 
-        static MsgPagerMessage* create(int address, int functionBits, const QString& alphaMessage, const QString& numericMessage, int evenParityErrors, int bchParityErrors)
+        static MsgPagerMessage* create(
+            int address,
+            int functionBits,
+            const QString& alphaMessage,
+            const QString& numericMessage,
+            int evenParityErrors,
+            int bchParityErrors
+        )
         {
-            return new MsgPagerMessage(address, functionBits, alphaMessage, numericMessage, evenParityErrors, bchParityErrors, QDateTime::currentDateTime());
+            return new MsgPagerMessage(
+                address,
+                functionBits,
+                alphaMessage,
+                numericMessage,
+                evenParityErrors,
+                bchParityErrors,
+                QDateTime::currentDateTime()
+            );
         }
 
     private:

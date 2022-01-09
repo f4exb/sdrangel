@@ -37,6 +37,7 @@ void RemoteSourceSettings::resetToDefaults()
     m_log2Interp = 0;
     m_filterChainHash = 0;
     m_channelMarker = nullptr;
+    m_rollupState = nullptr;
     m_streamIndex = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
@@ -58,9 +59,17 @@ QByteArray RemoteSourceSettings::serialize() const
     s.writeU32(8, m_reverseAPIDeviceIndex);
     s.writeU32(9, m_reverseAPIChannelIndex);
     s.writeS32(10, m_streamIndex);
-    s.writeBlob(11, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(11, m_rollupState->serialize());
+    }
+
     s.writeU32(12, m_log2Interp);
     s.writeU32(13, m_filterChainHash);
+
+    if (m_channelMarker) {
+        s.writeBlob(14, m_channelMarker->serialize());
+    }
 
     return s.final();
 }
@@ -79,6 +88,7 @@ bool RemoteSourceSettings::deserialize(const QByteArray& data)
     {
         uint32_t tmp;
         QString strtmp;
+        QByteArray bytetmp;
 
         d.readString(1, &m_dataAddress, "127.0.0.1");
         d.readU32(2, &tmp, 0);
@@ -106,9 +116,21 @@ bool RemoteSourceSettings::deserialize(const QByteArray& data)
         d.readU32(9, &tmp, 0);
         m_reverseAPIChannelIndex = tmp > 99 ? 99 : tmp;
         d.readS32(10, &m_streamIndex, 0);
-        d.readBlob(11, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(11, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
+
+        d.readU32(12, &m_log2Interp, 0);
         d.readU32(13, &m_filterChainHash, 0);
-        d.readS32(14, &m_streamIndex, 0);
+
+        if (m_channelMarker)
+        {
+            d.readBlob(14, &bytetmp);
+            m_channelMarker->deserialize(bytetmp);
+        }
 
         return true;
     }

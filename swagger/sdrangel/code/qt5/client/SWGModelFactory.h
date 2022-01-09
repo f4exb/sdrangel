@@ -231,6 +231,8 @@
 #include "SWGRigCtlServerActions.h"
 #include "SWGRigCtlServerReport.h"
 #include "SWGRigCtlServerSettings.h"
+#include "SWGRollupChildState.h"
+#include "SWGRollupState.h"
 #include "SWGRtlSdrReport.h"
 #include "SWGRtlSdrSettings.h"
 #include "SWGSDRPlayReport.h"
@@ -1392,6 +1394,16 @@ namespace SWGSDRangel {
     }
     if(QString("SWGRigCtlServerSettings").compare(type) == 0) {
       SWGRigCtlServerSettings *obj = new SWGRigCtlServerSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGRollupChildState").compare(type) == 0) {
+      SWGRollupChildState *obj = new SWGRollupChildState();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGRollupState").compare(type) == 0) {
+      SWGRollupState *obj = new SWGRollupState();
       obj->init();
       return obj;
     }

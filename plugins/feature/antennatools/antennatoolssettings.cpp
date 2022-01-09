@@ -23,7 +23,8 @@
 
 #include "antennatoolssettings.h"
 
-AntennaToolsSettings::AntennaToolsSettings()
+AntennaToolsSettings::AntennaToolsSettings() :
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -34,7 +35,6 @@ void AntennaToolsSettings::resetToDefaults()
     m_dipoleFrequencySelect = 0;
     m_dipoleEndEffectFactor = 0.95;
     m_dipoleLengthUnits = CM;
-
     m_dishFrequencyMHz = 1700.0;
     m_dishFrequencySelect = 0;
     m_dishDiameter = 240.0;
@@ -42,7 +42,6 @@ void AntennaToolsSettings::resetToDefaults()
     m_dishEfficiency = 60;
     m_dishLengthUnits = CM;
     m_dishSurfaceError = 0.0;
-
     m_title = "Antenna Tools";
     m_rgbColor = QColor(225, 25, 99).rgb();
     m_useReverseAPI = false;
@@ -60,7 +59,6 @@ QByteArray AntennaToolsSettings::serialize() const
     s.writeS32(2, m_dipoleFrequencySelect);
     s.writeDouble(3, m_dipoleEndEffectFactor);
     s.writeS32(4, (int)m_dipoleLengthUnits);
-
     s.writeDouble(5, m_dishFrequencyMHz);
     s.writeS32(6, m_dishFrequencySelect);
     s.writeDouble(7, m_dishDiameter);
@@ -68,7 +66,6 @@ QByteArray AntennaToolsSettings::serialize() const
     s.writeS32(9, m_dishEfficiency);
     s.writeS32(10, (int)m_dishLengthUnits);
     s.writeDouble(18, m_dishSurfaceError);
-
     s.writeString(11, m_title);
     s.writeU32(12, m_rgbColor);
     s.writeBool(13, m_useReverseAPI);
@@ -76,7 +73,10 @@ QByteArray AntennaToolsSettings::serialize() const
     s.writeU32(15, m_reverseAPIPort);
     s.writeU32(16, m_reverseAPIFeatureSetIndex);
     s.writeU32(17, m_reverseAPIFeatureIndex);
-    s.writeBlob(19, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(19, m_rollupState->serialize());
+    }
 
     return s.final();
 }
@@ -101,7 +101,6 @@ bool AntennaToolsSettings::deserialize(const QByteArray& data)
         d.readS32(2, &m_dipoleFrequencySelect, 0);
         d.readDouble(3, &m_dipoleEndEffectFactor, 0.95);
         d.readS32(4, (int*)&m_dipoleLengthUnits, (int)CM);
-
         d.readDouble(5, &m_dishFrequencyMHz, 1700.0);
         d.readS32(6, &m_dishFrequencySelect, 0);
         d.readDouble(7, &m_dishDiameter, 240.0);
@@ -109,7 +108,6 @@ bool AntennaToolsSettings::deserialize(const QByteArray& data)
         d.readS32(9, &m_dishEfficiency, 60);
         d.readS32(10, (int*)&m_dishLengthUnits, (int)CM);
         d.readDouble(18, &m_dishSurfaceError, 0.0);
-
         d.readString(11, &m_title, "Antenna Tools");
         d.readU32(12, &m_rgbColor, QColor(225, 25, 99).rgb());
         d.readBool(13, &m_useReverseAPI, false);
@@ -127,7 +125,11 @@ bool AntennaToolsSettings::deserialize(const QByteArray& data)
         d.readU32(17, &utmp, 0);
         m_reverseAPIFeatureIndex = utmp > 99 ? 99 : utmp;
 
-        d.readBlob(19, &m_rollupState);
+        if (m_rollupState)
+        {
+            d.readBlob(19, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         return true;
     }

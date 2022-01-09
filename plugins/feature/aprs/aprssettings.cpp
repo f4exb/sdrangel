@@ -50,7 +50,8 @@ const QStringList APRSSettings::m_temperatureUnitNames = {
 };
 
 
-APRSSettings::APRSSettings()
+APRSSettings::APRSSettings() :
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -76,31 +77,37 @@ void APRSSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIFeatureSetIndex = 0;
     m_reverseAPIFeatureIndex = 0;
+
     for (int i = 0; i < APRS_PACKETS_TABLE_COLUMNS; i++)
     {
         m_packetsTableColumnIndexes[i] = i;
         m_packetsTableColumnSizes[i] = -1; // Autosize
     }
+
     for (int i = 0; i < APRS_WEATHER_TABLE_COLUMNS; i++)
     {
         m_weatherTableColumnIndexes[i] = i;
         m_weatherTableColumnSizes[i] = -1; // Autosize
     }
+
     for (int i = 0; i < APRS_STATUS_TABLE_COLUMNS; i++)
     {
         m_statusTableColumnIndexes[i] = i;
         m_statusTableColumnSizes[i] = -1; // Autosize
     }
+
     for (int i = 0; i < APRS_MESSAGES_TABLE_COLUMNS; i++)
     {
         m_messagesTableColumnIndexes[i] = i;
         m_messagesTableColumnSizes[i] = -1; // Autosize
     }
+
     for (int i = 0; i < APRS_TELEMETRY_TABLE_COLUMNS; i++)
     {
         m_telemetryTableColumnIndexes[i] = i;
         m_telemetryTableColumnSizes[i] = -1; // Autosize
     }
+
     for (int i = 0; i < APRS_MOTION_TABLE_COLUMNS; i++)
     {
         m_motionTableColumnIndexes[i] = i;
@@ -131,7 +138,10 @@ QByteArray APRSSettings::serialize() const
     s.writeS32(17, (int)m_speedUnits);
     s.writeS32(18, (int)m_temperatureUnits);
     s.writeS32(19, (int)m_rainfallUnits);
-    s.writeBlob(20, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(20, m_rollupState->serialize());
+    }
 
     for (int i = 0; i < APRS_PACKETS_TABLE_COLUMNS; i++)
         s.writeS32(100 + i, m_packetsTableColumnIndexes[i]);
@@ -185,7 +195,6 @@ bool APRSSettings::deserialize(const QByteArray& data)
         d.readBool(6, &m_igateEnabled, false);
         d.readS32(7, (int*)&m_stationFilter, 0);
         d.readString(8, &m_filterAddressee, "");
-
         d.readString(9, &m_title, "APRS");
         d.readU32(10, &m_rgbColor, QColor(225, 25, 99).rgb());
         d.readBool(11, &m_useReverseAPI, false);
@@ -202,13 +211,16 @@ bool APRSSettings::deserialize(const QByteArray& data)
         m_reverseAPIFeatureSetIndex = utmp > 99 ? 99 : utmp;
         d.readU32(15, &utmp, 0);
         m_reverseAPIFeatureIndex = utmp > 99 ? 99 : utmp;
-
         d.readS32(16, (int *)&m_altitudeUnits, (int)FEET);
         d.readS32(17, (int *)&m_speedUnits, (int)KNOTS);
         d.readS32(18, (int *)&m_temperatureUnits, (int)FAHRENHEIT);
         d.readS32(19, (int *)&m_rainfallUnits, (int)HUNDREDTHS_OF_AN_INCH);
 
-        d.readBlob(20, &m_rollupState);
+        if (m_rollupState)
+        {
+            d.readBlob(20, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         for (int i = 0; i < APRS_PACKETS_TABLE_COLUMNS; i++)
             d.readS32(100 + i, &m_packetsTableColumnIndexes[i], i);

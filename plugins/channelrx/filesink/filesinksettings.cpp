@@ -22,7 +22,10 @@
 
 #include "filesinksettings.h"
 
-FileSinkSettings::FileSinkSettings()
+FileSinkSettings::FileSinkSettings() :
+    m_spectrumGUI(nullptr),
+    m_channelMarker(nullptr),
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -52,6 +55,11 @@ QByteArray FileSinkSettings::serialize() const
 {
     SimpleSerializer s(1);
     s.writeS32(1, m_inputFrequencyOffset);
+
+    if (m_channelMarker) {
+        s.writeBlob(2, m_channelMarker->serialize());
+    }
+
     s.writeString(3, m_fileRecordName);
     s.writeS32(4, m_streamIndex);
     s.writeU32(5, m_rgbColor);
@@ -72,7 +80,10 @@ QByteArray FileSinkSettings::serialize() const
     s.writeS32(16, m_preRecordTime);
     s.writeS32(17, m_squelchPostRecordTime);
     s.writeBool(18, m_squelchRecordingEnable);
-    s.writeBlob(19, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(19, m_rollupState->serialize());
+    }
 
     return s.final();
 }
@@ -95,6 +106,13 @@ bool FileSinkSettings::deserialize(const QByteArray& data)
         QByteArray bytetmp;
 
         d.readS32(1, &m_inputFrequencyOffset, 0);
+
+        if (m_channelMarker)
+        {
+            d.readBlob(2, &bytetmp);
+            m_channelMarker->deserialize(bytetmp);
+        }
+
         d.readString(3, &m_fileRecordName, "");
         d.readS32(4, &m_streamIndex, 0);
         d.readU32(5, &m_rgbColor, QColor(0, 255, 255).rgb());
@@ -128,7 +146,12 @@ bool FileSinkSettings::deserialize(const QByteArray& data)
         d.readS32(16, &m_preRecordTime, 0);
         d.readS32(17, &m_squelchPostRecordTime, 0);
         d.readBool(18, &m_squelchRecordingEnable, false);
-        d.readBlob(19, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(19, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         return true;
     }

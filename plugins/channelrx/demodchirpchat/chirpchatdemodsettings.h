@@ -66,7 +66,7 @@ struct ChirpChatDemodSettings
 
     Serializable *m_channelMarker;
     Serializable *m_spectrumGUI;
-    QByteArray m_rollupState;
+    Serializable *m_rollupState;
 
     static const int bandwidths[];
     static const int nbBandwidths;
@@ -75,6 +75,7 @@ struct ChirpChatDemodSettings
     ChirpChatDemodSettings();
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
+    void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     void setSpectrumGUI(Serializable *spectrumGUI) { m_spectrumGUI = spectrumGUI; }
     unsigned int getNbSFDFourths() const; //!< Get the number of SFD period fourths (depends on coding scheme)
     bool hasSyncWord() const;             //!< Only LoRa has a syncword (for the moment)

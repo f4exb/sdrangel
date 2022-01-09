@@ -24,6 +24,8 @@
 #include "feature/featuregui.h"
 #include "util/movingaverage.h"
 #include "util/messagequeue.h"
+#include "settings/rollupstate.h"
+
 #include "demodanalyzersettings.h"
 
 class PluginAPI;
@@ -53,6 +55,7 @@ private:
 	PluginAPI* m_pluginAPI;
 	FeatureUISet* m_featureUISet;
 	DemodAnalyzerSettings m_settings;
+	RollupState m_rollupState;
 	int m_sampleRate;
 	bool m_doApplySettings;
 

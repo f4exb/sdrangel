@@ -25,3 +25,5 @@ DemodAnalyzerSettings:
       $ref: "/doc/swagger/include/GLSpectrum.yaml#/GLSpectrum"
     scopeConfig:
       $ref: "/doc/swagger/include/GLScope.yaml#/GLScope"
+    rollupState:
+      $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"

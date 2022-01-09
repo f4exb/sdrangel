@@ -368,7 +368,7 @@ void PacketModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 
@@ -484,6 +484,7 @@ PacketModGUI::PacketModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_packetMod->setLevelMeter(ui->volumeMeter);
 
     m_settings.setChannelMarker(&m_channelMarker);
+    m_settings.setRollupState(&m_rollupState);
 
     ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
 
@@ -571,7 +572,7 @@ void PacketModGUI::displaySettings()
     ui->via->lineEdit()->setText(m_settings.m_via);
     ui->packet->setText(m_settings.m_data);
 
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
     blockApplySettings(false);
 }
 

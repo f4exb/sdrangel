@@ -37,9 +37,10 @@ const int SSBModSettings::m_agcTimeConstant[] = {
 const int SSBModSettings::m_nbAGCTimeConstants = 10;
 
 SSBModSettings::SSBModSettings() :
-    m_channelMarker(0),
-    m_spectrumGUI(0),
-    m_cwKeyerGUI(0)
+    m_channelMarker(nullptr),
+    m_spectrumGUI(nullptr),
+    m_cwKeyerGUI(nullptr),
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -121,7 +122,10 @@ QByteArray SSBModSettings::serialize() const
     s.writeReal(28, m_feedbackVolumeFactor);
     s.writeBool(29, m_feedbackAudioEnable);
     s.writeS32(30, m_streamIndex);
-    s.writeBlob(31, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(31, m_rollupState->serialize());
+    }
 
     return s.final();
 }
@@ -144,10 +148,8 @@ bool SSBModSettings::deserialize(const QByteArray& data)
 
         d.readS32(1, &tmp, 0);
         m_inputFrequencyOffset = tmp;
-
         d.readS32(2, &tmp, 30);
         m_bandwidth = tmp * 100.0;
-
         d.readS32(3, &tmp, 100);
         m_toneFrequency = tmp * 10.0;
 
@@ -168,7 +170,6 @@ bool SSBModSettings::deserialize(const QByteArray& data)
 
         d.readS32(7, &tmp, 3);
         m_lowCutoff = tmp * 100.0;
-
         d.readS32(8, &m_spanLog2, 3);
         d.readBool(9, &m_audioBinaural, false);
         d.readBool(10, &m_audioFlipChannels, false);
@@ -177,15 +178,16 @@ bool SSBModSettings::deserialize(const QByteArray& data)
         d.readS32(13, &m_cmpPreGainDB, -10);
         d.readS32(14, &m_cmpThresholdDB, -60);
 
-        if (m_channelMarker) {
+        if (m_channelMarker)
+        {
             d.readBlob(18, &bytetmp);
             m_channelMarker->deserialize(bytetmp);
         }
 
         d.readString(19, &m_title, "SSB Modulator");
         d.readString(20, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
-
         d.readS32(21, &tmp, 0);
+
         if ((tmp < 0) || (tmp > (int) SSBModInputAF::SSBModInputTone)) {
             m_modAFInput = SSBModInputNone;
         } else {
@@ -210,7 +212,12 @@ bool SSBModSettings::deserialize(const QByteArray& data)
         d.readReal(28, &m_feedbackVolumeFactor, 1.0);
         d.readBool(29, &m_feedbackAudioEnable, false);
         d.readS32(30, &m_streamIndex, 0);
-        d.readBlob(31, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(31, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         return true;
     }

@@ -30,6 +30,7 @@
 
 #include "dsp/dspengine.h"
 #include "util/httpdownloadmanager.h"
+#include "settings/serializable.h"
 
 #include "satellitetrackerworker.h"
 #include "satellitetracker.h"
@@ -585,6 +586,20 @@ void SatelliteTracker::webapiFormatFeatureSettings(
     response.getSatelliteTrackerSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getSatelliteTrackerSettings()->setReverseApiFeatureSetIndex(settings.m_reverseAPIFeatureSetIndex);
     response.getSatelliteTrackerSettings()->setReverseApiFeatureIndex(settings.m_reverseAPIFeatureIndex);
+
+    if (settings.m_rollupState)
+    {
+        if (response.getSatelliteTrackerSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getSatelliteTrackerSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getSatelliteTrackerSettings()->setRollupState(swgRollupState);
+        }
+    }
 }
 
 void SatelliteTracker::webapiUpdateFeatureSettings(
@@ -696,6 +711,9 @@ void SatelliteTracker::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("reverseAPIFeatureIndex")) {
         settings.m_reverseAPIFeatureIndex = response.getSatelliteTrackerSettings()->getReverseApiFeatureIndex();
+    }
+    if (settings.m_rollupState && featureSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(featureSettingsKeys, response.getSatelliteTrackerSettings()->getRollupState());
     }
 }
 

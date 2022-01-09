@@ -311,6 +311,9 @@ void ChannelAnalyzer::webapiUpdateChannelSettings(
     if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
         settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getChannelAnalyzerSettings()->getChannelMarker());
     }
+    if (settings.m_rollupState && channelSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(channelSettingsKeys, response.getChannelAnalyzerSettings()->getRollupState());
+    }
 }
 
 void ChannelAnalyzer::webapiFormatChannelSettings(
@@ -395,6 +398,20 @@ void ChannelAnalyzer::webapiFormatChannelSettings(
             SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
             settings.m_channelMarker->formatTo(swgChannelMarker);
             response.getChannelAnalyzerSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
+
+    if (settings.m_rollupState)
+    {
+        if (response.getChannelAnalyzerSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getChannelAnalyzerSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getChannelAnalyzerSettings()->setRollupState(swgRollupState);
         }
     }
 }
@@ -561,6 +578,13 @@ void ChannelAnalyzer::webapiFormatChannelSettings(
         SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
         settings.m_channelMarker->formatTo(swgChannelMarker);
         swgChannelAnalyzerSettings->setChannelMarker(swgChannelMarker);
+    }
+
+    if (settings.m_rollupState && (channelSettingsKeys.contains("rollupState") || force))
+    {
+        SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+        settings.m_rollupState->formatTo(swgRollupState);
+        swgChannelAnalyzerSettings->setRollupState(swgRollupState);
     }
 }
 

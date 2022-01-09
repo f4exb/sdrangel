@@ -23,6 +23,7 @@
 #include <QDesktopServices>
 
 #include "gui/rollupwidget.h"
+#include "settings/rollupstate.h"
 #include "ui_glspectrumgui.h"
 
 RollupWidget::RollupWidget(QWidget* parent) :
@@ -45,91 +46,135 @@ RollupWidget::RollupWidget(QWidget* parent) :
     m_titleTextColor = palette().highlightedText().color();
 }
 
-QByteArray RollupWidget::saveState(int version) const
+// QByteArray RollupWidget::saveState(int version) const
+// {
+//     QByteArray state;
+//     QDataStream stream(&state, QIODevice::WriteOnly);
+//     int count = 0;
+
+//     for (int i = 0; i < children().count(); ++i)
+//     {
+//         QWidget* r = qobject_cast<QWidget*>(children()[i]);
+
+//         if (r) {
+//             count++;
+//         }
+//     }
+
+//     stream << VersionMarker;
+//     stream << version;
+//     stream << count;
+
+//     for (int i = 0; i < children().count(); ++i)
+//     {
+//         QWidget* r = qobject_cast<QWidget*>(children()[i]);
+
+//         if (r)
+//         {
+//             stream << r->objectName();
+
+//             if (r->isHidden()) {
+//                 stream << (int) 0;
+//             } else {
+//                 stream << (int) 1;
+//             }
+//         }
+//     }
+
+//     return state;
+// }
+
+void RollupWidget::saveState(RollupState &state) const
 {
-    QByteArray state;
-    QDataStream stream(&state, QIODevice::WriteOnly);
-    int count = 0;
+    QList<RollupState::RollupChildState>& childrenStates = state.getChildren();
+    childrenStates.clear();
 
     for (int i = 0; i < children().count(); ++i)
     {
         QWidget* r = qobject_cast<QWidget*>(children()[i]);
 
         if (r) {
-            count++;
+            childrenStates.push_back({r->objectName(), r->isHidden()});
         }
     }
-
-    stream << VersionMarker;
-    stream << version;
-    stream << count;
-
-    for (int i = 0; i < children().count(); ++i)
-    {
-        QWidget* r = qobject_cast<QWidget*>(children()[i]);
-
-        if (r)
-        {
-            stream << r->objectName();
-
-            if (r->isHidden()) {
-                stream << (int) 0;
-            } else {
-                stream << (int) 1;
-            }
-        }
-    }
-
-    return state;
 }
 
-bool RollupWidget::restoreState(const QByteArray& state, int version)
+// bool RollupWidget::restoreState(const QByteArray& state, int version)
+// {
+//     if (state.isEmpty()) {
+//         return false;
+//     }
+
+//     QByteArray sd = state;
+//     QDataStream stream(&sd, QIODevice::ReadOnly);
+//     int marker, v;
+//     stream >> marker;
+//     stream >> v;
+
+//     if ((stream.status() != QDataStream::Ok) || (marker != VersionMarker) || (v != version)) {
+//         return false;
+//     }
+
+//     int count;
+//     stream >> count;
+
+//     if (stream.status() != QDataStream::Ok) {
+//         return false;
+//     }
+
+//     for (int i = 0; i < count; ++i)
+//     {
+//         QString name;
+//         int visible;
+
+//         stream >> name;
+//         stream >> visible;
+
+//         if (stream.status() != QDataStream::Ok) {
+//             return false;
+//         }
+
+//         for (int j = 0; j < children().count(); ++j)
+//         {
+//             QWidget* r = qobject_cast<QWidget*>(children()[j]);
+
+//             if (r)
+//             {
+//                 if (r->objectName() == name)
+//                 {
+//                     if (visible) {
+//                         r->show();
+//                     } else {
+//                         r->hide();
+//                     }
+
+//                     break;
+//                 }
+//             }
+//         }
+//     }
+
+//     return true;
+// }
+
+void RollupWidget::restoreState(const RollupState& state)
 {
-    if (state.isEmpty()) {
-        return false;
-    }
+    const QList<RollupState::RollupChildState>& childrenStates = state.getChildren();
 
-    QByteArray sd = state;
-    QDataStream stream(&sd, QIODevice::ReadOnly);
-    int marker, v;
-    stream >> marker;
-    stream >> v;
-
-    if ((stream.status() != QDataStream::Ok) || (marker != VersionMarker) || (v != version)) {
-        return false;
-    }
-
-    int count;
-    stream >> count;
-
-    if (stream.status() != QDataStream::Ok) {
-        return false;
-    }
-
-    for (int i = 0; i < count; ++i)
+    for (const auto &childState : childrenStates)
     {
-        QString name;
-        int visible;
-
-        stream >> name;
-        stream >> visible;
-
-        if (stream.status() != QDataStream::Ok) {
-            return false;
-        }
-
         for (int j = 0; j < children().count(); ++j)
         {
             QWidget* r = qobject_cast<QWidget*>(children()[j]);
 
             if (r)
             {
-                if (r->objectName() == name)
+                if (r->objectName() == childState.m_objectName)
                 {
-                    if (visible) {
-                        r->show();
-                    } else {
+                    if (childState.m_isHidden) {
                         r->hide();
+                    } else {
+                        r->show();
                     }
 
                     break;
@@ -137,8 +182,6 @@ bool RollupWidget::restoreState(const QByteArray& state, int version)
             }
         }
     }
-
-    return true;
 }
 
 void RollupWidget::setTitleColor(const QColor& c)
@@ -197,13 +240,13 @@ int RollupWidget::arrangeRollups()
     // In the future, we should probably respect 'Vertical Stretch'
     int extraSpace;
     int firstExtra;
-    if ((expandingChildren > 0) && (m_newHeight > pos)) 
+    if ((expandingChildren > 0) && (m_newHeight > pos))
     {
         int totalExtra = m_newHeight - pos;
         extraSpace = totalExtra / expandingChildren;
         firstExtra = totalExtra - (extraSpace * expandingChildren);
-    } 
-    else 
+    }
+    else
     {
         extraSpace = 0;
         firstExtra = 0;

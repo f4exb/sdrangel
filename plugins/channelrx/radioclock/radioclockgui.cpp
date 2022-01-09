@@ -211,7 +211,7 @@ void RadioClockGUI::onWidgetRolled(QWidget* widget, bool rollDown)
         }
     }
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 
@@ -305,6 +305,7 @@ RadioClockGUI::RadioClockGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
 
     setTitleColor(m_channelMarker.getColor());
     m_settings.setChannelMarker(&m_channelMarker);
+    m_settings.setRollupState(&m_rollupState);
     m_settings.setScopeGUI(ui->scopeGUI);
 
     m_deviceUISet->addChannelMarker(&m_channelMarker);
@@ -366,7 +367,7 @@ void RadioClockGUI::displaySettings()
 
     displayStreamIndex();
 
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
     blockApplySettings(false);
 }
 

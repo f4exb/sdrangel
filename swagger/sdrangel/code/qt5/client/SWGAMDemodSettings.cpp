@@ -64,6 +64,8 @@ SWGAMDemodSettings::SWGAMDemodSettings() {
     m_reverse_api_channel_index_isSet = false;
     channel_marker = nullptr;
     m_channel_marker_isSet = false;
+    rollup_state = nullptr;
+    m_rollup_state_isSet = false;
 }
 
 SWGAMDemodSettings::~SWGAMDemodSettings() {
@@ -108,6 +110,8 @@ SWGAMDemodSettings::init() {
     m_reverse_api_channel_index_isSet = false;
     channel_marker = new SWGChannelMarker();
     m_channel_marker_isSet = false;
+    rollup_state = new SWGRollupState();
+    m_rollup_state_isSet = false;
 }
 
 void
@@ -137,6 +141,9 @@ SWGAMDemodSettings::cleanup() {
 
     if(channel_marker != nullptr) { 
         delete channel_marker;
+    }
+    if(rollup_state != nullptr) { 
+        delete rollup_state;
     }
 }
 
@@ -186,6 +193,8 @@ SWGAMDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&reverse_api_channel_index, pJson["reverseAPIChannelIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&channel_marker, pJson["channelMarker"], "SWGChannelMarker", "SWGChannelMarker");
+    
+    ::SWGSDRangel::setValue(&rollup_state, pJson["rollupState"], "SWGRollupState", "SWGRollupState");
     
 }
 
@@ -256,6 +265,9 @@ SWGAMDemodSettings::asJsonObject() {
     }
     if((channel_marker != nullptr) && (channel_marker->isSet())){
         toJsonValue(QString("channelMarker"), channel_marker, obj, QString("SWGChannelMarker"));
+    }
+    if((rollup_state != nullptr) && (rollup_state->isSet())){
+        toJsonValue(QString("rollupState"), rollup_state, obj, QString("SWGRollupState"));
     }
 
     return obj;
@@ -441,6 +453,16 @@ SWGAMDemodSettings::setChannelMarker(SWGChannelMarker* channel_marker) {
     this->m_channel_marker_isSet = true;
 }
 
+SWGRollupState*
+SWGAMDemodSettings::getRollupState() {
+    return rollup_state;
+}
+void
+SWGAMDemodSettings::setRollupState(SWGRollupState* rollup_state) {
+    this->rollup_state = rollup_state;
+    this->m_rollup_state_isSet = true;
+}
+
 
 bool
 SWGAMDemodSettings::isSet(){
@@ -498,6 +520,9 @@ SWGAMDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(channel_marker && channel_marker->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(rollup_state && rollup_state->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

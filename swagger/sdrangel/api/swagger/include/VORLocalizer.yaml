@@ -31,6 +31,8 @@ VORLocalizerSettings:
     centerShift:
       description: Shift of center frequency in Hz
       type: integer
+    rollupState:
+      $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
 
 VORLocalizerReport:
   description: VORLocalizers

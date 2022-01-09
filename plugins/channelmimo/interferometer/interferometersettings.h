@@ -52,10 +52,11 @@ struct InterferometerSettings
     Serializable *m_channelMarker;
     Serializable *m_spectrumGUI;
     Serializable *m_scopeGUI;
-    QByteArray m_rollupState;
+    Serializable *m_rollupState;
 
     InterferometerSettings();
     void resetToDefaults();
+    void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
     void setSpectrumGUI(Serializable *spectrumGUI) { m_spectrumGUI = spectrumGUI; }
     void setScopeGUI(Serializable *scopeGUI) { m_scopeGUI = scopeGUI; }

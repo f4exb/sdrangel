@@ -115,7 +115,7 @@ void AISGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 
@@ -162,6 +162,8 @@ AISGUI::AISGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     connect(ui->vessels->horizontalHeader(), SIGNAL(sectionMoved(int, int, int)), SLOT(vessels_sectionMoved(int, int, int)));
     connect(ui->vessels->horizontalHeader(), SIGNAL(sectionResized(int, int, int)), SLOT(vessels_sectionResized(int, int, int)));
 
+    m_settings.setRollupState(&m_rollupState);
+
     displaySettings();
     applySettings(true);
 }
@@ -195,7 +197,7 @@ void AISGUI::displaySettings()
         header->moveSection(header->visualIndex(i), m_settings.m_vesselColumnIndexes[i]);
     }
 
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
     blockApplySettings(false);
     arrangeRollups();
 }

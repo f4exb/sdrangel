@@ -500,6 +500,9 @@ void SigMFFileSink::webapiUpdateChannelSettings(
     if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
         settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getSigMfFileSinkSettings()->getChannelMarker());
     }
+    if (settings.m_rollupState && channelSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(channelSettingsKeys, response.getSigMfFileSinkSettings()->getRollupState());
+    }
 }
 
 void SigMFFileSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const SigMFFileSinkSettings& settings)
@@ -564,6 +567,20 @@ void SigMFFileSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings&
             SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
             settings.m_channelMarker->formatTo(swgChannelMarker);
             response.getSigMfFileSinkSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
+
+    if (settings.m_rollupState)
+    {
+        if (response.getSigMfFileSinkSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getSigMfFileSinkSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getSigMfFileSinkSettings()->setRollupState(swgRollupState);
         }
     }
 }
@@ -689,6 +706,13 @@ void SigMFFileSink::webapiFormatChannelSettings(
         SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
         settings.m_channelMarker->formatTo(swgChannelMarker);
         swgSigMFFileSinkSettings->setChannelMarker(swgChannelMarker);
+    }
+
+    if (settings.m_rollupState && (channelSettingsKeys.contains("rollupState") || force))
+    {
+        SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+        settings.m_rollupState->formatTo(swgRollupState);
+        swgSigMFFileSinkSettings->setRollupState(swgRollupState);
     }
 }
 

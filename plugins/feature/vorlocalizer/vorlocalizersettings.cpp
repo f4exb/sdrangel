@@ -23,7 +23,8 @@
 #include "settings/serializable.h"
 #include "vorlocalizersettings.h"
 
-VORLocalizerSettings::VORLocalizerSettings()
+VORLocalizerSettings::VORLocalizerSettings() :
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -63,7 +64,10 @@ QByteArray VORLocalizerSettings::serialize() const
     s.writeU32(16, m_reverseAPIPort);
     s.writeU32(17, m_reverseAPIFeatureSetIndex);
     s.writeU32(18, m_reverseAPIFeatureIndex);
-    s.writeBlob(19, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(19, m_rollupState->serialize());
+    }
 
     for (int i = 0; i < VORDEMOD_COLUMNS; i++) {
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -112,7 +116,12 @@ bool VORLocalizerSettings::deserialize(const QByteArray& data)
         m_reverseAPIFeatureSetIndex = utmp > 99 ? 99 : utmp;
         d.readU32(18, &utmp, 0);
         m_reverseAPIFeatureIndex = utmp > 99 ? 99 : utmp;
-        d.readBlob(19, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(19, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         for (int i = 0; i < VORDEMOD_COLUMNS; i++) {
             d.readS32(100 + i, &m_columnIndexes[i], i);

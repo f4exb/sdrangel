@@ -23,8 +23,9 @@
 #include "udpsinksettings.h"
 
 UDPSinkSettings::UDPSinkSettings() :
-    m_channelMarker(0),
-    m_spectrumGUI(0)
+    m_channelMarker(nullptr),
+    m_spectrumGUI(nullptr),
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -93,7 +94,10 @@ QByteArray UDPSinkSettings::serialize() const
     s.writeU32(26, m_reverseAPIDeviceIndex);
     s.writeU32(27, m_reverseAPIChannelIndex);
     s.writeS32(28, m_streamIndex);
-    s.writeBlob(29, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(29, m_rollupState->serialize());
+    }
 
     return s.final();
 
@@ -116,7 +120,8 @@ bool UDPSinkSettings::deserialize(const QByteArray& data)
         int32_t s32tmp;
         quint32 u32tmp;
 
-        if (m_channelMarker) {
+        if (m_channelMarker)
+        {
             d.readBlob(6, &bytetmp);
             m_channelMarker->deserialize(bytetmp);
         }
@@ -135,7 +140,8 @@ bool UDPSinkSettings::deserialize(const QByteArray& data)
         d.readReal(4, &m_outputSampleRate, 48000.0);
         d.readReal(5, &m_rfBandwidth, 32000.0);
 
-        if (m_spectrumGUI) {
+        if (m_spectrumGUI)
+        {
             d.readBlob(7, &bytetmp);
             m_spectrumGUI->deserialize(bytetmp);
         }
@@ -184,7 +190,12 @@ bool UDPSinkSettings::deserialize(const QByteArray& data)
         d.readU32(27, &u32tmp, 0);
         m_reverseAPIChannelIndex = u32tmp > 99 ? 99 : u32tmp;
         d.readS32(28, &m_streamIndex, 0);
-        d.readBlob(29, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(29, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         return true;
     }

@@ -23,9 +23,10 @@
 #include "freedvmodsettings.h"
 
 FreeDVModSettings::FreeDVModSettings() :
-    m_channelMarker(0),
-    m_spectrumGUI(0),
-    m_cwKeyerGUI(0)
+    m_channelMarker(nullptr),
+    m_spectrumGUI(nullptr),
+    m_cwKeyerGUI(nullptr),
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -88,7 +89,10 @@ QByteArray FreeDVModSettings::serialize() const
     s.writeU32(25, m_reverseAPIDeviceIndex);
     s.writeU32(26, m_reverseAPIChannelIndex);
     s.writeS32(27, m_streamIndex);
-    s.writeBlob(28, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(28, m_rollupState->serialize());
+    }
 
     return s.final();
 }
@@ -170,7 +174,12 @@ bool FreeDVModSettings::deserialize(const QByteArray& data)
         d.readU32(26, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
         d.readS32(27, &m_streamIndex, 0);
-        d.readBlob(28, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(28, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         return true;
     }

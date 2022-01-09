@@ -277,7 +277,7 @@ void WFMModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 
@@ -397,6 +397,7 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
     m_settings.setChannelMarker(&m_channelMarker);
     m_settings.setCWKeyerGUI(ui->cwKeyerGUI);
+    m_settings.setRollupState(&m_rollupState);
 
 	connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
     m_wfmMod->setLevelMeter(ui->volumeMeter);
@@ -474,7 +475,7 @@ void WFMModGUI::displaySettings()
     ui->feedbackVolume->setValue(roundf(m_settings.m_feedbackVolumeFactor * 100.0));
     ui->feedbackVolumeText->setText(QString("%1").arg(m_settings.m_feedbackVolumeFactor, 0, 'f', 2));
 
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
     blockApplySettings(false);
 }
 

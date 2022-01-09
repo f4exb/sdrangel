@@ -22,6 +22,7 @@
 #include "dsp/channelmarker.h"
 #include "util/movingaverage.h"
 #include "util/messagequeue.h"
+#include "settings/rollupstate.h"
 
 #include "interferometersettings.h"
 
@@ -52,6 +53,7 @@ private:
 	PluginAPI* m_pluginAPI;
 	DeviceUISet* m_deviceUISet;
 	ChannelMarker m_channelMarker;
+    RollupState m_rollupState;
     InterferometerSettings m_settings;
     int m_sampleRate;
     qint64 m_centerFrequency;

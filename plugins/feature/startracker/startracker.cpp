@@ -30,6 +30,7 @@
 #include "dsp/dspengine.h"
 #include "util/weather.h"
 #include "util/units.h"
+#include "settings/serializable.h"
 #include "maincore.h"
 
 #include "startrackerreport.h"
@@ -485,6 +486,20 @@ void StarTracker::webapiFormatFeatureSettings(
     response.getStarTrackerSettings()->setB(settings.m_b);
     response.getStarTrackerSettings()->setAzimuthOffset(settings.m_azOffset);
     response.getStarTrackerSettings()->setElevationOffset(settings.m_elOffset);
+
+    if (settings.m_rollupState)
+    {
+        if (response.getStarTrackerSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getStarTrackerSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getStarTrackerSettings()->setRollupState(swgRollupState);
+        }
+    }
 }
 
 void StarTracker::webapiUpdateFeatureSettings(
@@ -578,6 +593,9 @@ void StarTracker::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("elevationOffset")) {
         settings.m_elOffset = response.getStarTrackerSettings()->getElevationOffset();
+    }
+    if (settings.m_rollupState && featureSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(featureSettingsKeys, response.getStarTrackerSettings()->getRollupState());
     }
 }
 

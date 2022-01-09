@@ -48,6 +48,8 @@ SimplePTTSettings:
       type: integer
     reverseAPIFeatureIndex:
       type: integer
+    rollupState:
+      $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
 
 SimplePTTReport:
   description: "Simple PTT report"

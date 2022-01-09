@@ -29,7 +29,7 @@
 const PluginDescriptor VORDemodSCPlugin::m_pluginDescriptor = {
     VORDemodSC::m_channelId,
     QStringLiteral("VOR Single Channel Demodulator"),
-    QStringLiteral("6.6.1"),
+    QStringLiteral("6.18.0"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,

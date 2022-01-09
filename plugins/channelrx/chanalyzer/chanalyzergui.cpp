@@ -97,7 +97,7 @@ void ChannelAnalyzerGUI::displaySettings()
     QString rolloffStr = QString::number(m_settings.m_rrcRolloff/100.0, 'f', 2);
     ui->rrcRolloffText->setText(rolloffStr);
 
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -450,7 +450,7 @@ void ChannelAnalyzerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 
@@ -536,6 +536,7 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *device
 	ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
 
 	m_settings.setChannelMarker(&m_channelMarker);
+    m_settings.setRollupState(&m_rollupState);
     m_settings.setSpectrumGUI(ui->spectrumGUI);
     m_settings.setScopeGUI(ui->scopeGUI);
 

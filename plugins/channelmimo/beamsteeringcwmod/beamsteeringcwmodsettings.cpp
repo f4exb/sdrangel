@@ -37,6 +37,7 @@ void BeamSteeringCWModSettings::resetToDefaults()
     m_filterChainHash = 0;
     m_channelOutput = 0;
     m_channelMarker = nullptr;
+    m_rollupState = nullptr;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -58,7 +59,10 @@ QByteArray BeamSteeringCWModSettings::serialize() const
     s.writeU32(12, m_log2Interp);
     s.writeU32(13, m_filterChainHash);
     s.writeS32(14, m_channelOutput);
-    s.writeBlob(15, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(15, m_rollupState->serialize());
+    }
 
     return s.final();
 }
@@ -78,6 +82,7 @@ bool BeamSteeringCWModSettings::deserialize(const QByteArray& data)
         uint32_t tmp;
         int stmp;
         QString strtmp;
+        QByteArray bytetmp;
 
         d.readS32(1, &stmp, 90);
         m_steerDegrees = stmp < 0 ? -0 : stmp > 180 ? 180 : stmp;
@@ -102,7 +107,12 @@ bool BeamSteeringCWModSettings::deserialize(const QByteArray& data)
         d.readU32(13, &m_filterChainHash, 0);
         d.readS32(14, &stmp, 0);
         m_channelOutput = stmp < 0 ? 0 : stmp > 2 ? 2 : stmp;
-        d.readBlob(15, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(15, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         return true;
     }

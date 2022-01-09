@@ -4,6 +4,7 @@
 #include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
 #include "util/messagequeue.h"
+#include "settings/rollupstate.h"
 
 #include "wfmdemodsettings.h"
 
@@ -37,6 +38,7 @@ private:
 	PluginAPI* m_pluginAPI;
 	DeviceUISet* m_deviceUISet;
 	ChannelMarker m_channelMarker;
+	RollupState m_rollupState;
 	WFMDemodSettings m_settings;
 	bool m_basicSettingsShown;
 	bool m_doApplySettings;

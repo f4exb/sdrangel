@@ -23,6 +23,7 @@
 #include "dsp/dsptypes.h"
 #include "util/movingaverage.h"
 #include "util/messagequeue.h"
+#include "settings/rollupstate.h"
 
 #include "chanalyzersettings.h"
 
@@ -58,6 +59,7 @@ private:
 	PluginAPI* m_pluginAPI;
 	DeviceUISet* m_deviceUISet;
 	ChannelMarker m_channelMarker;
+	RollupState m_rollupState;
 	ChannelAnalyzerSettings m_settings;
 	bool m_doApplySettings;
 	int m_basebandSampleRate; //!< sample rate after final in-channel decimation (spanlog2)

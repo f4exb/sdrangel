@@ -67,6 +67,8 @@ GS232ControllerSettings:
       type: integer
     reverseAPIFeatureIndex:
       type: integer
+    rollupState:
+      $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
 
 GS232ControllerReport:
   description: "GS-232 Controller report"

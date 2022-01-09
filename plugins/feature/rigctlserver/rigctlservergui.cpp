@@ -114,7 +114,7 @@ void RigCtlServerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 
@@ -135,6 +135,7 @@ RigCtlServerGUI::RigCtlServerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     m_rigCtlServer->setMessageQueueToGUI(&m_inputMessageQueue);
 
 	m_featureUISet->addRollupWidget(this);
+    m_settings.setRollupState(&m_rollupState);
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
@@ -164,7 +165,7 @@ void RigCtlServerGUI::displaySettings()
     blockApplySettings(true);
     ui->rigCtrlPort->setValue(m_settings.m_rigCtlPort);
     ui->maxFrequencyOffset->setValue(m_settings.m_maxFrequencyOffset);
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
     blockApplySettings(false);
 }
 

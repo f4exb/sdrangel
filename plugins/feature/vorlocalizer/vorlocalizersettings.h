@@ -73,7 +73,7 @@ struct VORLocalizerSettings
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIFeatureSetIndex;
     uint16_t m_reverseAPIFeatureIndex;
-    QByteArray m_rollupState;
+    Serializable *m_rollupState;
 
 
     static const int VORDEMOD_COLUMNS  = 11;
@@ -98,6 +98,7 @@ struct VORLocalizerSettings
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
 };
 
 #endif /* INCLUDE_VORLOCALIZERSETTINGS_H */

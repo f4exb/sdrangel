@@ -202,6 +202,7 @@ struct RadioAstronomySettings
     quint32 m_rgbColor;
     QString m_title;
     Serializable *m_channelMarker;
+    Serializable *m_rollupState;
     int m_streamIndex; //!< MIMO channel. Not relevant when connected to SI (single Rx).
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
@@ -215,6 +216,7 @@ struct RadioAstronomySettings
     RadioAstronomySettings();
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
+    void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
 

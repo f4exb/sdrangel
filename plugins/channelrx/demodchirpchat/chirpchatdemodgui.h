@@ -21,6 +21,7 @@
 #include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
 #include "util/messagequeue.h"
+#include "settings/rollupstate.h"
 
 #include "chirpchatdemodsettings.h"
 
@@ -86,6 +87,7 @@ private:
 	PluginAPI* m_pluginAPI;
 	DeviceUISet* m_deviceUISet;
 	ChannelMarker m_channelMarker;
+	RollupState m_rollupState;
 	ChirpChatDemodSettings m_settings;
     int m_basebandSampleRate;
 	bool m_doApplySettings;

@@ -30,8 +30,9 @@ const int WFMModSettings::m_rfBW[] = {
 const int WFMModSettings::m_nbRfBW = 14;
 
 WFMModSettings::WFMModSettings() :
-    m_channelMarker(0),
-    m_cwKeyerGUI(0)
+    m_channelMarker(nullptr),
+    m_cwKeyerGUI(nullptr),
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -95,7 +96,10 @@ QByteArray WFMModSettings::serialize() const
     s.writeString(19, m_feedbackAudioDeviceName);
     s.writeReal(20, m_feedbackVolumeFactor);
     s.writeBool(21, m_feedbackAudioEnable);
-    s.writeBlob(22, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(22, m_rollupState->serialize());
+    }
 
     return s.final();
 }
@@ -132,7 +136,8 @@ bool WFMModSettings::deserialize(const QByteArray& data)
             m_cwKeyerSettings.deserialize(bytetmp);
         }
 
-        if (m_channelMarker) {
+        if (m_channelMarker)
+        {
             d.readBlob(9, &bytetmp);
             m_channelMarker->deserialize(bytetmp);
         }
@@ -165,7 +170,12 @@ bool WFMModSettings::deserialize(const QByteArray& data)
         d.readString(19, &m_feedbackAudioDeviceName, AudioDeviceManager::m_defaultDeviceName);
         d.readReal(20, &m_feedbackVolumeFactor, 1.0);
         d.readBool(21, &m_feedbackAudioEnable, false);
-        d.readBlob(22, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(22, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         return true;
     }

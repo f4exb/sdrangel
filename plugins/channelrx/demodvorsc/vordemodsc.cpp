@@ -35,6 +35,7 @@
 #include "dsp/dspcommands.h"
 #include "device/deviceapi.h"
 #include "feature/feature.h"
+#include "settings/serializable.h"
 #include "util/db.h"
 #include "maincore.h"
 
@@ -370,7 +371,6 @@ void VORDemodSC::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("audioDeviceName")) {
         settings.m_audioDeviceName = *response.getVorDemodScSettings()->getAudioDeviceName();
     }
-
     if (channelSettingsKeys.contains("streamIndex")) {
         settings.m_streamIndex = response.getVorDemodScSettings()->getStreamIndex();
     }
@@ -391,6 +391,12 @@ void VORDemodSC::webapiUpdateChannelSettings(
     }
     if (channelSettingsKeys.contains("identThreshold")) {
         settings.m_identThreshold = response.getVorDemodScSettings()->getIdentThreshold();
+    }
+    if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getVorDemodScSettings()->getChannelMarker());
+    }
+    if (settings.m_rollupState && channelSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(channelSettingsKeys, response.getVorDemodScSettings()->getRollupState());
     }
 }
 
@@ -438,8 +444,35 @@ void VORDemodSC::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& re
     response.getVorDemodScSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getVorDemodScSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getVorDemodScSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
-
     response.getVorDemodScSettings()->setIdentThreshold(settings.m_identThreshold);
+
+    if (settings.m_channelMarker)
+    {
+        if (response.getVorDemodScSettings()->getChannelMarker())
+        {
+            settings.m_channelMarker->formatTo(response.getVorDemodScSettings()->getChannelMarker());
+        }
+        else
+        {
+            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            settings.m_channelMarker->formatTo(swgChannelMarker);
+            response.getVorDemodScSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
+
+    if (settings.m_rollupState)
+    {
+        if (response.getVorDemodScSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getVorDemodScSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getVorDemodScSettings()->setRollupState(swgRollupState);
+        }
+    }
 }
 
 void VORDemodSC::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -578,6 +611,20 @@ void VORDemodSC::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("identThreshold") || force) {
         swgVORDemodSCSettings->setAudioMute(settings.m_identThreshold);
+    }
+
+    if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
+    {
+        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        settings.m_channelMarker->formatTo(swgChannelMarker);
+        swgVORDemodSCSettings->setChannelMarker(swgChannelMarker);
+    }
+
+    if (settings.m_rollupState && (channelSettingsKeys.contains("rollupState") || force))
+    {
+        SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+        settings.m_rollupState->formatTo(swgRollupState);
+        swgVORDemodSCSettings->setRollupState(swgRollupState);
     }
 }
 

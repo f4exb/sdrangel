@@ -391,7 +391,7 @@ void APTDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 
@@ -477,6 +477,7 @@ APTDemodGUI::APTDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
     setTitleColor(m_channelMarker.getColor());
     m_settings.setChannelMarker(&m_channelMarker);
+    m_settings.setRollupState(&m_rollupState);
 
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
@@ -544,15 +545,18 @@ void APTDemodGUI::displaySettings()
     ui->histogram->setChecked(m_settings.m_histogramEqualise);
     ui->precipitation->setChecked(m_settings.m_precipitationOverlay);
     ui->flip->setChecked(m_settings.m_flip);
-    if (m_settings.m_flip)
+
+    if (m_settings.m_flip) {
         ui->image->setAlignment(Qt::AlignBottom | Qt::AlignHCenter);
-    else
+    } else {
         ui->image->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
+    }
+
     ui->channels->setCurrentIndex((int)m_settings.m_channels);
 
     displayStreamIndex();
 
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
     blockApplySettings(false);
 }
 

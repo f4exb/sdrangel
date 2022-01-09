@@ -71,6 +71,8 @@ NFMModSettings:
       $ref: "/doc/swagger/include/CWKeyer.yaml#/CWKeyerSettings"
     channelMarker:
       $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+    rollupState:
+      $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
 
 NFMModReport:
   description: NFMMod

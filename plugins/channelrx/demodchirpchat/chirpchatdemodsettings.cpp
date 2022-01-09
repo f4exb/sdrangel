@@ -127,7 +127,10 @@ QByteArray ChirpChatDemodSettings::serialize() const
     s.writeBool(26, m_sendViaUDP);
     s.writeString(27, m_udpAddress);
     s.writeU32(28, m_udpPort);
-    s.writeBlob(29, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(29, m_rollupState->serialize());
+    }
 
     return s.final();
 }
@@ -152,12 +155,14 @@ bool ChirpChatDemodSettings::deserialize(const QByteArray& data)
         d.readS32(2, &m_bandwidthIndex, 0);
         d.readS32(3, &m_spreadFactor, 0);
 
-        if (m_spectrumGUI) {
+        if (m_spectrumGUI)
+        {
             d.readBlob(4, &bytetmp);
             m_spectrumGUI->deserialize(bytetmp);
         }
 
-        if (m_channelMarker) {
+        if (m_channelMarker)
+        {
             d.readBlob(5, &bytetmp);
             m_channelMarker->deserialize(bytetmp);
         }
@@ -200,7 +205,12 @@ bool ChirpChatDemodSettings::deserialize(const QByteArray& data)
         } else {
             m_udpPort = 9999;
         }
-        d.readBlob(29, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(29, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         return true;
     }

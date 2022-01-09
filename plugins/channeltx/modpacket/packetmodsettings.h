@@ -82,11 +82,12 @@ struct PacketModSettings
     bool m_udpEnabled;
     QString m_udpAddress;
     uint16_t m_udpPort;
-    QByteArray m_rollupState;
+    Serializable *m_rollupState;
 
     PacketModSettings();
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
+    void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
     bool setMode(QString mode);

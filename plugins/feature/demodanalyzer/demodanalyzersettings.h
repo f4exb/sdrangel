@@ -51,7 +51,7 @@ struct DemodAnalyzerSettings
     uint16_t m_reverseAPIFeatureIndex;
     Serializable *m_spectrumGUI;
     Serializable *m_scopeGUI;
-    QByteArray m_rollupState;
+    Serializable *m_rollupState;
 
     DemodAnalyzerSettings();
     void resetToDefaults();
@@ -59,6 +59,7 @@ struct DemodAnalyzerSettings
     bool deserialize(const QByteArray& data);
     void setSpectrumGUI(Serializable *spectrumGUI) { m_spectrumGUI = spectrumGUI; }
     void setScopeGUI(Serializable *scopeGUI) { m_scopeGUI = scopeGUI; }
+    void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
 
     static const QStringList m_channelTypes;
     static const QStringList m_channelURIs;

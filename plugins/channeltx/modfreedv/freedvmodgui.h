@@ -24,6 +24,7 @@
 #include "dsp/channelmarker.h"
 #include "util/movingaverage.h"
 #include "util/messagequeue.h"
+#include "settings/rollupstate.h"
 
 #include "freedvmod.h"
 #include "freedvmodsettings.h"
@@ -57,6 +58,7 @@ private:
     PluginAPI* m_pluginAPI;
     DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
+    RollupState m_rollupState;
     FreeDVModSettings m_settings;
     bool m_doApplySettings;
 	int m_spectrumRate;

@@ -57,7 +57,8 @@ const int ChirpChatModSettings::oversampling = 4;
 
 ChirpChatModSettings::ChirpChatModSettings() :
     m_inputFrequencyOffset(0),
-    m_channelMarker(0)
+    m_channelMarker(nullptr),
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -195,7 +196,10 @@ QByteArray ChirpChatModSettings::serialize() const
     s.writeBool(56, m_udpEnabled);
     s.writeString(57, m_udpAddress);
     s.writeU32(58, m_udpPort);
-    s.writeBlob(59, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(59, m_rollupState->serialize());
+    }
 
     return s.final();
 }
@@ -269,7 +273,6 @@ bool ChirpChatModSettings::deserialize(const QByteArray& data)
         d.readString(42, &m_myLoc, "AA00AA");
         d.readString(43, &m_myRpt, "59");
         d.readS32(44, &m_messageRepeat, 1);
-
         d.readBool(50, &m_useReverseAPI, false);
         d.readString(51, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(52, &utmp, 0);
@@ -289,12 +292,18 @@ bool ChirpChatModSettings::deserialize(const QByteArray& data)
         d.readBool(56, &m_udpEnabled);
         d.readString(57, &m_udpAddress, "127.0.0.1");
         d.readU32(58, &utmp);
+
         if ((utmp > 1023) && (utmp < 65535)) {
             m_udpPort = utmp;
         } else {
             m_udpPort = 9998;
         }
-        d.readBlob(59, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(59, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         return true;
     }

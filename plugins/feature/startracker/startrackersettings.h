@@ -71,12 +71,13 @@ struct StarTrackerSettings
     double m_elOffset;
     bool m_drawSunOnSkyTempChart;
     bool m_drawMoonOnSkyTempChart;
-    QByteArray m_rollupState;
+    Serializable *m_rollupState;
 
     StarTrackerSettings();
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
 
     static const QStringList m_pipeTypes;
     static const QStringList m_pipeURIs;

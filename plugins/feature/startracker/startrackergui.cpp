@@ -224,7 +224,7 @@ void StarTrackerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 
@@ -263,6 +263,7 @@ StarTrackerGUI::StarTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet,
     m_starTracker->setMessageQueueToGUI(&m_inputMessageQueue);
 
     m_featureUISet->addRollupWidget(this);
+    m_settings.setRollupState(&m_rollupState);
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
@@ -434,7 +435,7 @@ void StarTrackerGUI::displaySettings()
     ui->frequency->setValue(m_settings.m_frequency/1000000.0);
     ui->beamwidth->setValue(m_settings.m_beamwidth);
     updateForTarget();
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
     plotChart();
     blockApplySettings(false);
 }

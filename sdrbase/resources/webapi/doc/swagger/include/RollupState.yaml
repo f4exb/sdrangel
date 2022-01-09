@@ -1,0 +1,21 @@
+RollupChildState:
+  description: "Rollup widget child state"
+  properties:
+    objectName:
+      type: string
+    isHidden:
+      type: integer
+      description: >
+        Boolean - child hidden state
+          * 0 - visible
+          * 1 - hidden
+
+RollupState:
+  description: "Rollup widget state"
+  properties:
+    version:
+      type: integer
+    childrenStates:
+      type: array
+      items:
+        $ref: "/doc/swagger/include/RollupState.yaml#/RollupChildState"

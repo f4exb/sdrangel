@@ -24,7 +24,9 @@
 #include "settings/serializable.h"
 #include "aismodsettings.h"
 
-AISModSettings::AISModSettings()
+AISModSettings::AISModSettings() :
+    m_channelMarker(nullptr),
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -159,9 +161,11 @@ QByteArray AISModSettings::serialize() const
     s.writeS32(27, m_symbolSpan);
     s.writeU32(28, m_rgbColor);
     s.writeString(29, m_title);
+
     if (m_channelMarker) {
         s.writeBlob(30, m_channelMarker->serialize());
     }
+
     s.writeS32(31, m_streamIndex);
     s.writeBool(32, m_useReverseAPI);
     s.writeString(33, m_reverseAPIAddress);
@@ -171,7 +175,10 @@ QByteArray AISModSettings::serialize() const
     s.writeBool(37, m_udpEnabled);
     s.writeString(38, m_udpAddress);
     s.writeU32(39, m_udpPort);
-    s.writeBlob(40, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(40, m_rollupState->serialize());
+    }
 
     return s.final();
 }
@@ -222,19 +229,24 @@ bool AISModSettings::deserialize(const QByteArray& data)
         d.readS32(27, &m_symbolSpan, 3);
         d.readU32(28, &m_rgbColor, QColor(102, 0, 0).rgb());
         d.readString(29, &m_title, "AIS Modulator");
-        if (m_channelMarker) {
+
+        if (m_channelMarker)
+        {
             d.readBlob(30, &bytetmp);
             m_channelMarker->deserialize(bytetmp);
         }
+
         d.readS32(31, &m_streamIndex, 0);
         d.readBool(32, &m_useReverseAPI, false);
         d.readString(33, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(34, &utmp, 0);
+
         if ((utmp > 1023) && (utmp < 65535)) {
             m_reverseAPIPort = utmp;
         } else {
             m_reverseAPIPort = 8888;
         }
+
         d.readU32(35, &utmp, 0);
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
         d.readU32(36, &utmp, 0);
@@ -242,12 +254,18 @@ bool AISModSettings::deserialize(const QByteArray& data)
         d.readBool(37, &m_udpEnabled);
         d.readString(38, &m_udpAddress, "127.0.0.1");
         d.readU32(39, &utmp);
+
         if ((utmp > 1023) && (utmp < 65535)) {
             m_udpPort = utmp;
         } else {
             m_udpPort = 9998;
         }
-        d.readBlob(40, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(40, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         return true;
     }

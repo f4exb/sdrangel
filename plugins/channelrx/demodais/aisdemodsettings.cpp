@@ -24,8 +24,9 @@
 #include "aisdemodsettings.h"
 
 AISDemodSettings::AISDemodSettings() :
-    m_channelMarker(0),
-    m_scopeGUI(0)
+    m_channelMarker(nullptr),
+    m_scopeGUI(nullptr),
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -79,9 +80,11 @@ QByteArray AISDemodSettings::serialize() const
     s.writeS32(11, m_scopeCh2);
     s.writeU32(12, m_rgbColor);
     s.writeString(13, m_title);
+
     if (m_channelMarker) {
         s.writeBlob(14, m_channelMarker->serialize());
     }
+
     s.writeS32(15, m_streamIndex);
     s.writeBool(16, m_useReverseAPI);
     s.writeString(17, m_reverseAPIAddress);
@@ -92,7 +95,10 @@ QByteArray AISDemodSettings::serialize() const
     s.writeString(22, m_logFilename);
     s.writeBool(23, m_logEnabled);
     s.writeS32(24, m_baud);
-    s.writeBlob(25, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(25, m_rollupState->serialize());
+    }
 
     for (int i = 0; i < AISDEMOD_MESSAGE_COLUMNS; i++)
         s.writeS32(100 + i, m_messageColumnIndexes[i]);
@@ -126,29 +132,36 @@ bool AISDemodSettings::deserialize(const QByteArray& data)
         d.readBool(6, &m_udpEnabled);
         d.readString(7, &m_udpAddress);
         d.readU32(8, &utmp);
+
         if ((utmp > 1023) && (utmp < 65535)) {
             m_udpPort = utmp;
         } else {
             m_udpPort = 9999;
         }
+
         d.readS32(9, (int *)&m_udpFormat, (int)Binary);
         d.readS32(10, &m_scopeCh1, 0);
         d.readS32(11, &m_scopeCh2, 0);
         d.readU32(12, &m_rgbColor, QColor(102, 0, 0).rgb());
         d.readString(13, &m_title, "AIS Demodulator");
-        d.readBlob(14, &bytetmp);
-        if (m_channelMarker) {
+
+        if (m_channelMarker)
+        {
+            d.readBlob(14, &bytetmp);
             m_channelMarker->deserialize(bytetmp);
         }
+
         d.readS32(15, &m_streamIndex, 0);
         d.readBool(16, &m_useReverseAPI, false);
         d.readString(17, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(18, &utmp, 0);
+
         if ((utmp > 1023) && (utmp < 65535)) {
             m_reverseAPIPort = utmp;
         } else {
             m_reverseAPIPort = 8888;
         }
+
         d.readU32(19, &utmp, 0);
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
         d.readU32(20, &utmp, 0);
@@ -163,12 +176,20 @@ bool AISDemodSettings::deserialize(const QByteArray& data)
         d.readString(22, &m_logFilename, "ais_log.csv");
         d.readBool(23, &m_logEnabled, false);
         d.readS32(24, &m_baud, 9600);
-        d.readBlob(25, &m_rollupState);
 
-        for (int i = 0; i < AISDEMOD_MESSAGE_COLUMNS; i++)
+        if (m_rollupState)
+        {
+            d.readBlob(25, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
+
+        for (int i = 0; i < AISDEMOD_MESSAGE_COLUMNS; i++) {
             d.readS32(100 + i, &m_messageColumnIndexes[i], i);
-        for (int i = 0; i < AISDEMOD_MESSAGE_COLUMNS; i++)
+        }
+
+        for (int i = 0; i < AISDEMOD_MESSAGE_COLUMNS; i++) {
             d.readS32(200 + i, &m_messageColumnSizes[i], -1);
+        }
 
         return true;
     }

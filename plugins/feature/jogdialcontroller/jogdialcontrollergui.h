@@ -24,6 +24,8 @@
 #include "feature/featuregui.h"
 #include "util/messagequeue.h"
 #include "commands/commandkeyreceiver.h"
+#include "settings/rollupstate.h"
+
 #include "jogdialcontrollersettings.h"
 
 class PluginAPI;
@@ -55,6 +57,7 @@ private:
 	PluginAPI* m_pluginAPI;
 	FeatureUISet* m_featureUISet;
 	JogdialControllerSettings m_settings;
+	RollupState m_rollupState;
 	bool m_doApplySettings;
 
 	JogdialController* m_jogdialController;

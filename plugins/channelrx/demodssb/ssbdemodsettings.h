@@ -50,12 +50,13 @@ struct SSBDemodSettings
 
     Serializable *m_channelMarker;
     Serializable *m_spectrumGUI;
-    QByteArray m_rollupState;
+    Serializable *m_rollupState;
 
     SSBDemodSettings();
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
     void setSpectrumGUI(Serializable *spectrumGUI) { m_spectrumGUI = spectrumGUI; }
+    void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
 

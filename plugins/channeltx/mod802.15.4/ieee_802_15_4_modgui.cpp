@@ -321,7 +321,7 @@ void IEEE_802_15_4_ModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 
@@ -461,6 +461,7 @@ IEEE_802_15_4_ModGUI::IEEE_802_15_4_ModGUI(PluginAPI* pluginAPI, DeviceUISet *de
     m_IEEE_802_15_4_Mod->setLevelMeter(ui->volumeMeter);
 
     m_settings.setChannelMarker(&m_channelMarker);
+    m_settings.setRollupState(&m_rollupState);
 
     ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
 
@@ -566,7 +567,7 @@ void IEEE_802_15_4_ModGUI::displaySettings()
     ui->udpAddress->setText(m_settings.m_udpAddress);
     ui->udpPort->setText(QString::number(m_settings.m_udpPort));
 
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
     blockApplySettings(false);
 }
 

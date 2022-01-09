@@ -25,7 +25,9 @@
 #include "ieee_802_15_4_modsettings.h"
 #include "ieee_802_15_4_macframe.h"
 
-IEEE_802_15_4_ModSettings::IEEE_802_15_4_ModSettings()
+IEEE_802_15_4_ModSettings::IEEE_802_15_4_ModSettings() :
+    m_channelMarker(nullptr),
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -172,9 +174,11 @@ QByteArray IEEE_802_15_4_ModSettings::serialize() const
 
     s.writeU32(18, m_rgbColor);
     s.writeString(19, m_title);
+
     if (m_channelMarker) {
         s.writeBlob(20, m_channelMarker->serialize());
     }
+
     s.writeS32(21, m_streamIndex);
     s.writeBool(22, m_useReverseAPI);
     s.writeString(23, m_reverseAPIAddress);
@@ -193,7 +197,10 @@ QByteArray IEEE_802_15_4_ModSettings::serialize() const
     s.writeString(35, m_udpAddress);
     s.writeU32(36, m_udpPort);
     s.writeBool(37, m_udpBytesFormat);
-    s.writeBlob(38, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(38, m_rollupState->serialize());
+    }
 
     return s.final();
 }
@@ -232,30 +239,30 @@ bool IEEE_802_15_4_ModSettings::deserialize(const QByteArray& data)
         d.readBool(15, &m_bbNoise, false);
         d.readBool(16, &m_writeToFile, false);
         d.readString(17, &m_data, "");
-
         d.readU32(18, &m_rgbColor);
         d.readString(19, &m_title, "802.15.4 Modulator");
 
-        if (m_channelMarker) {
+        if (m_channelMarker)
+        {
             d.readBlob(20, &bytetmp);
             m_channelMarker->deserialize(bytetmp);
         }
 
         d.readS32(21, &m_streamIndex, 0);
-
         d.readBool(22, &m_useReverseAPI, false);
         d.readString(23, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(24, &utmp, 0);
+
         if ((utmp > 1023) && (utmp < 65535)) {
             m_reverseAPIPort = utmp;
         } else {
             m_reverseAPIPort = 8888;
         }
+
         d.readU32(25, &utmp, 0);
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
         d.readU32(26, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
-
         d.readBool(27, &m_scramble, false);
         d.readS32(28, &m_polynomial, 0x108);
         d.readS32(29, (qint32 *)&m_pulseShaping, RC);
@@ -266,13 +273,20 @@ bool IEEE_802_15_4_ModSettings::deserialize(const QByteArray& data)
         d.readBool(34, &m_udpEnabled);
         d.readString(35, &m_udpAddress, "127.0.0.1");
         d.readU32(36, &utmp);
+
         if ((utmp > 1023) && (utmp < 65535)) {
             m_udpPort = utmp;
         } else {
             m_udpPort = 9998;
         }
+
         d.readBool(37, &m_udpBytesFormat);
-        d.readBlob(38, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(38, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         return true;
     }

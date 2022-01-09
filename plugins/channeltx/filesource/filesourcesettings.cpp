@@ -38,6 +38,7 @@ void FileSourceSettings::resetToDefaults()
     m_rgbColor = QColor(140, 4, 4).rgb();
     m_title = "File source";
     m_channelMarker = nullptr;
+    m_rollupState = nullptr;
     m_streamIndex = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
@@ -62,7 +63,14 @@ QByteArray FileSourceSettings::serialize() const
     s.writeU32(11, m_reverseAPIDeviceIndex);
     s.writeU32(12, m_reverseAPIChannelIndex);
     s.writeS32(13, m_streamIndex);
-    s.writeBlob(14, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(14, m_rollupState->serialize());
+    }
+
+    if (m_channelMarker) {
+        s.writeBlob(15, m_channelMarker->serialize());
+    }
 
     return s.final();
 }
@@ -82,6 +90,7 @@ bool FileSourceSettings::deserialize(const QByteArray& data)
         uint32_t tmp;
         int itmp;
         QString strtmp;
+        QByteArray bytetmp;
 
         d.readString(1, &m_fileName, "test.sdriq");
         d.readBool(2, &m_loop, false);
@@ -107,7 +116,18 @@ bool FileSourceSettings::deserialize(const QByteArray& data)
         d.readU32(12, &tmp, 0);
         m_reverseAPIChannelIndex = tmp > 99 ? 99 : tmp;
         d.readS32(13, &m_streamIndex, 0);
-        d.readBlob(14, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(14, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
+
+        if (m_channelMarker)
+        {
+            d.readBlob(15, &bytetmp);
+            m_channelMarker->deserialize(bytetmp);
+        }
 
         return true;
     }

@@ -72,11 +72,12 @@ struct UDPSinkSettings
 
     Serializable *m_channelMarker;
     Serializable *m_spectrumGUI;
-    QByteArray m_rollupState;
+    Serializable *m_rollupState;
 
     UDPSinkSettings();
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
+    void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     void setSpectrumGUI(Serializable *spectrumGUI) { m_spectrumGUI = spectrumGUI; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);

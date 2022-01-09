@@ -601,6 +601,9 @@ void ChirpChatMod::webapiUpdateChannelSettings(
     if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
         settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getChirpChatModSettings()->getChannelMarker());
     }
+    if (settings.m_rollupState && channelSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(channelSettingsKeys, response.getChirpChatModSettings()->getChannelMarker());
+    }
 }
 
 int ChirpChatMod::webapiReportGet(
@@ -754,6 +757,20 @@ void ChirpChatMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& 
             SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
             settings.m_channelMarker->formatTo(swgChannelMarker);
             response.getChirpChatModSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
+
+    if (settings.m_rollupState)
+    {
+        if (response.getChirpChatModSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getChirpChatModSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getChirpChatModSettings()->setRollupState(swgRollupState);
         }
     }
 }
@@ -950,6 +967,13 @@ void ChirpChatMod::webapiFormatChannelSettings(
         SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
         settings.m_channelMarker->formatTo(swgChannelMarker);
         swgChirpChatModSettings->setChannelMarker(swgChannelMarker);
+    }
+
+    if (settings.m_rollupState && (channelSettingsKeys.contains("rollupState") || force))
+    {
+        SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+        settings.m_rollupState->formatTo(swgRollupState);
+        swgChirpChatModSettings->setRollupState(swgRollupState);
     }
 }
 

@@ -23,11 +23,13 @@
 #include "dsp/dspengine.h"
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
+#include "settings/rollupstate.h"
 
 #include "adsbdemodsettings.h"
 
 ADSBDemodSettings::ADSBDemodSettings() :
-    m_channelMarker(0)
+    m_channelMarker(nullptr),
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -92,11 +94,12 @@ QByteArray ADSBDemodSettings::serialize() const
     s.writeBool(6, m_feedEnabled);
     s.writeString(7, m_feedHost);
     s.writeU32(8, m_feedPort);
-
     s.writeU32(9, m_rgbColor);
+
     if (m_channelMarker) {
         s.writeBlob(10, m_channelMarker->serialize());
     }
+
     s.writeString(11, m_title);
     s.writeBool(12, m_useReverseAPI);
     s.writeString(13, m_reverseAPIAddress);
@@ -133,7 +136,10 @@ QByteArray ADSBDemodSettings::serialize() const
     s.writeS32(40, (int)m_mapType);
     s.writeBool(41, m_displayNavAids);
     s.writeBool(42, m_displayPhotos);
-    s.writeBlob(43, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(43, m_rollupState->serialize());
+    }
 
     for (int i = 0; i < ADSBDEMOD_COLUMNS; i++) {
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -232,7 +238,12 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         d.readS32(40, (int *)&m_mapType, (int)AVIATION_LIGHT);
         d.readBool(41, &m_displayNavAids, true);
         d.readBool(42, &m_displayPhotos, true);
-        d.readBlob(43, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(43, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         for (int i = 0; i < ADSBDEMOD_COLUMNS; i++) {
             d.readS32(100 + i, &m_columnIndexes[i], i);

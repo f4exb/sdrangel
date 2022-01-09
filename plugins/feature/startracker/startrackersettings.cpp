@@ -31,7 +31,8 @@ const QStringList StarTrackerSettings::m_pipeURIs = {
     QStringLiteral("sdrangel.channel.radioastronomy")
 };
 
-StarTrackerSettings::StarTrackerSettings()
+StarTrackerSettings::StarTrackerSettings() :
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -130,7 +131,10 @@ QByteArray StarTrackerSettings::serialize() const
     s.writeDouble(41, m_elOffset);
     s.writeBool(42, m_drawSunOnSkyTempChart);
     s.writeBool(43, m_drawMoonOnSkyTempChart);
-    s.writeBlob(44, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(44, m_rollupState->serialize());
+    }
 
     return s.final();
 }
@@ -159,11 +163,13 @@ bool StarTrackerSettings::deserialize(const QByteArray& data)
         d.readString(6, &m_dateTime, "");
         d.readBool(7, &m_enableServer, true);
         d.readU32(8, &utmp, 0);
+
         if ((utmp > 1023) && (utmp < 65535)) {
             m_serverPort = utmp;
         } else {
             m_serverPort = 10001;
         }
+
         d.readS32(9, (qint32 *)&m_azElUnits, DM);
         d.readFloat(10, &m_updatePeriod, 1.0f);
         d.readBool(11, &m_jnow, false);
@@ -177,7 +183,6 @@ bool StarTrackerSettings::deserialize(const QByteArray& data)
         d.readBool(19, &m_drawSunOnMap, true);
         d.readBool(20, &m_drawMoonOnMap, true);
         d.readBool(21, &m_drawStarOnMap, true);
-
         d.readString(22, &m_title, "Star Tracker");
         d.readU32(23, &m_rgbColor, QColor(225, 25, 99).rgb());
         d.readBool(24, &m_useReverseAPI, false);
@@ -194,28 +199,27 @@ bool StarTrackerSettings::deserialize(const QByteArray& data)
         m_reverseAPIFeatureSetIndex = utmp > 99 ? 99 : utmp;
         d.readU32(28, &utmp, 0);
         m_reverseAPIFeatureIndex = utmp > 99 ? 99 : utmp;
-
         d.readU32(29, (quint32 *)&m_solarFluxUnits, SFU);
         d.readDouble(30, &m_beamwidth, 25.0);
         d.readU32(31, (quint32 *)&m_solarFluxData, DRAO_2800);
         d.readBool(32, &m_chartsDarkTheme, true);
-
         d.readDouble(33, &m_az, 0.0);
         d.readDouble(34, &m_el, 0.0);
         d.readDouble(35, &m_l, 0.0);
         d.readDouble(36, &m_b, 0.0);
-
         d.readBool(37, &m_link, false);
         d.readString(38, &m_owmAPIKey, "");
         d.readS32(39, &m_weatherUpdatePeriod, 60);
-
         d.readDouble(40, &m_azOffset, 0.0);
         d.readDouble(41, &m_elOffset, 0.0);
-
         d.readBool(42, &m_drawSunOnSkyTempChart, true);
         d.readBool(43, &m_drawMoonOnSkyTempChart, true);
 
-        d.readBlob(44, &m_rollupState);
+        if (m_rollupState)
+        {
+            d.readBlob(44, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         return true;
     }

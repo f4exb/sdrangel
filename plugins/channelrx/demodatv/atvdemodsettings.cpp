@@ -23,7 +23,8 @@
 #include "atvdemodsettings.h"
 
 ATVDemodSettings::ATVDemodSettings() :
-    m_channelMarker(0)
+    m_channelMarker(nullptr),
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -85,7 +86,10 @@ QByteArray ATVDemodSettings::serialize() const
     s.writeS32(22, m_amScalingFactor);
     s.writeS32(23, m_amOffsetFactor);
     s.writeBool(24, m_fftFiltering);
-    s.writeBlob(25, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(25, m_rollupState->serialize());
+    }
 
     return s.final();
 }
@@ -129,12 +133,24 @@ bool ATVDemodSettings::deserialize(const QByteArray& arrData)
         d.readS32(17, &tmp, 250);
         m_fmDeviation = tmp / 500.0f;
         d.readS32(18, &tmp, 1);
+
+        if (m_channelMarker)
+        {
+            d.readBlob(19, &bytetmp);
+            m_channelMarker->deserialize(bytetmp);
+        }
+
         m_atvStd = static_cast<ATVStd>(tmp);
         d.readS32(21, &m_streamIndex, 0);
         d.readS32(22, &m_amScalingFactor, 100);
         d.readS32(23, &m_amOffsetFactor, 0);
         d.readBool(24, &m_fftFiltering, false);
-        d.readBlob(25, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(25, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         return true;
     }

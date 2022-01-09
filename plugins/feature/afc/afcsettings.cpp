@@ -22,7 +22,8 @@
 
 #include "afcsettings.h"
 
-AFCSettings::AFCSettings()
+AFCSettings::AFCSettings() :
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -63,7 +64,10 @@ QByteArray AFCSettings::serialize() const
     s.writeU32(12, m_reverseAPIPort);
     s.writeU32(13, m_reverseAPIFeatureSetIndex);
     s.writeU32(14, m_reverseAPIFeatureIndex);
-    s.writeBlob(15, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(15, m_rollupState->serialize());
+    }
 
     return s.final();
 }
@@ -107,7 +111,12 @@ bool AFCSettings::deserialize(const QByteArray& data)
         m_reverseAPIFeatureSetIndex = utmp > 99 ? 99 : utmp;
         d.readU32(14, &utmp, 0);
         m_reverseAPIFeatureIndex = utmp > 99 ? 99 : utmp;
-        d.readBlob(15, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(15, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         return true;
     }

@@ -33,6 +33,7 @@
 #include "dsp/channelmarker.h"
 #include "util/messagequeue.h"
 #include "util/httpdownloadmanager.h"
+#include "settings/rollupstate.h"
 #include "pipes/pipeendpoint.h"
 
 #include "radioastronomysettings.h"
@@ -208,6 +209,7 @@ private:
     PluginAPI* m_pluginAPI;
     DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
+    RollupState m_rollupState;
     RadioAstronomySettings m_settings;
     bool m_doApplySettings;
     QList<PipeEndPoint::AvailablePipeSource> m_availablePipes;

@@ -26,6 +26,8 @@
 
 #include "feature/featuregui.h"
 #include "util/messagequeue.h"
+#include "settings/rollupstate.h"
+
 #include "satellitetrackersettings.h"
 #include "satnogs.h"
 
@@ -56,6 +58,7 @@ private:
     PluginAPI* m_pluginAPI;
     FeatureUISet* m_featureUISet;
     SatelliteTrackerSettings m_settings;
+    RollupState m_rollupState;
     bool m_doApplySettings;
 
     SatelliteTracker* m_satelliteTracker;

@@ -271,7 +271,7 @@ void AMModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 
@@ -366,6 +366,7 @@ AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampl
 	m_channelMarker.setVisible(true); // activate signal on the last setting only
 
 	m_settings.setChannelMarker(&m_channelMarker);
+    m_settings.setRollupState(&m_rollupState);
 	m_settings.setCWKeyerGUI(ui->cwKeyerGUI);
 
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
@@ -456,7 +457,7 @@ void AMModGUI::displaySettings()
 
     displayStreamIndex();
 
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
     blockApplySettings(false);
 }
 

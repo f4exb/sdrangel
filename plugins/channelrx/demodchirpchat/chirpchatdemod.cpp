@@ -609,6 +609,9 @@ void ChirpChatDemod::webapiUpdateChannelSettings(
     if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
         settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getChirpChatDemodSettings()->getChannelMarker());
     }
+    if (settings.m_rollupState && channelSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(channelSettingsKeys, response.getChirpChatDemodSettings()->getRollupState());
+    }
 }
 
 int ChirpChatDemod::webapiReportGet(
@@ -692,6 +695,20 @@ void ChirpChatDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings
             SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
             settings.m_channelMarker->formatTo(swgChannelMarker);
             response.getChirpChatDemodSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
+
+    if (settings.m_rollupState)
+    {
+        if (response.getChirpChatDemodSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getChirpChatDemodSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getChirpChatDemodSettings()->setRollupState(swgRollupState);
         }
     }
 }
@@ -859,6 +876,13 @@ void ChirpChatDemod::webapiFormatChannelSettings(
         SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
         settings.m_channelMarker->formatTo(swgChannelMarker);
         swgChirpChatDemodSettings->setChannelMarker(swgChannelMarker);
+    }
+
+    if (settings.m_rollupState && (channelSettingsKeys.contains("rollupState") || force))
+    {
+        SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+        settings.m_rollupState->formatTo(swgRollupState);
+        swgChirpChatDemodSettings->setRollupState(swgRollupState);
     }
 }
 

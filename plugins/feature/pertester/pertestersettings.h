@@ -47,12 +47,13 @@ struct PERTesterSettings
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIFeatureSetIndex;
     uint16_t m_reverseAPIFeatureIndex;
-    QByteArray m_rollupState;
+    Serializable *m_rollupState;
 
     PERTesterSettings();
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
 
     QByteArray serializeStringList(const QList<QString>& strings) const;
     void deserializeStringList(const QByteArray& data, QList<QString>& strings);

@@ -22,6 +22,8 @@
 
 #include "feature/featuregui.h"
 #include "util/messagequeue.h"
+#include "settings/rollupstate.h"
+
 #include "simplepttsettings.h"
 
 class PluginAPI;
@@ -48,6 +50,7 @@ private:
 	PluginAPI* m_pluginAPI;
 	FeatureUISet* m_featureUISet;
 	SimplePTTSettings m_settings;
+	RollupState m_rollupState;
 	bool m_doApplySettings;
 
 	SimplePTT* m_simplePTT;

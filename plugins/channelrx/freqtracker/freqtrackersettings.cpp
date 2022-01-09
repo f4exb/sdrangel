@@ -23,8 +23,9 @@
 #include "freqtrackersettings.h"
 
 FreqTrackerSettings::FreqTrackerSettings() :
-    m_channelMarker(0),
-    m_spectrumGUI(0)
+    m_channelMarker(nullptr),
+    m_spectrumGUI(nullptr),
+    m_rollupState(nullptr)
 {
     resetToDefaults();
 }
@@ -85,7 +86,10 @@ QByteArray FreqTrackerSettings::serialize() const
     s.writeU32(20, m_reverseAPIChannelIndex);
     s.writeS32(21, m_squelchGate);
     s.writeS32(22, m_streamIndex);
-    s.writeBlob(23, m_rollupState);
+
+    if (m_rollupState) {
+        s.writeBlob(23, m_rollupState->serialize());
+    }
 
     return s.final();
 }
@@ -122,9 +126,10 @@ bool FreqTrackerSettings::deserialize(const QByteArray& data)
 
         d.readS32(5, &tmp, -40);
         m_squelch = tmp;
-        d.readBlob(6, &bytetmp);
 
-        if (m_channelMarker) {
+        if (m_channelMarker)
+        {
+            d.readBlob(6, &bytetmp);
             m_channelMarker->deserialize(bytetmp);
         }
 
@@ -158,7 +163,12 @@ bool FreqTrackerSettings::deserialize(const QByteArray& data)
         d.readS32(21, &tmp, 5);
         m_squelchGate = tmp < 0 ? 0 : tmp > 99 ? 99 : tmp;
         d.readS32(22, &m_streamIndex, 0);
-        d.readBlob(23, &m_rollupState);
+
+        if (m_rollupState)
+        {
+            d.readBlob(23, &bytetmp);
+            m_rollupState->deserialize(bytetmp);
+        }
 
         return true;
     }

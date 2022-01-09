@@ -25,6 +25,7 @@
 #include "SWGCWKeyerSettings.h"
 #include "SWGChannelMarker.h"
 #include "SWGGLSpectrum.h"
+#include "SWGRollupState.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -129,6 +130,9 @@ public:
     SWGChannelMarker* getChannelMarker();
     void setChannelMarker(SWGChannelMarker* channel_marker);
 
+    SWGRollupState* getRollupState();
+    void setRollupState(SWGRollupState* rollup_state);
+
 
     virtual bool isSet() override;
 
@@ -216,6 +220,9 @@ private:
 
     SWGChannelMarker* channel_marker;
     bool m_channel_marker_isSet;
+
+    SWGRollupState* rollup_state;
+    bool m_rollup_state_isSet;
 
 };
 

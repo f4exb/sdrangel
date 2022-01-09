@@ -64,6 +64,8 @@ SWGFreeDVDemodSettings::SWGFreeDVDemodSettings() {
     m_spectrum_config_isSet = false;
     channel_marker = nullptr;
     m_channel_marker_isSet = false;
+    rollup_state = nullptr;
+    m_rollup_state_isSet = false;
 }
 
 SWGFreeDVDemodSettings::~SWGFreeDVDemodSettings() {
@@ -108,6 +110,8 @@ SWGFreeDVDemodSettings::init() {
     m_spectrum_config_isSet = false;
     channel_marker = new SWGChannelMarker();
     m_channel_marker_isSet = false;
+    rollup_state = new SWGRollupState();
+    m_rollup_state_isSet = false;
 }
 
 void
@@ -139,6 +143,9 @@ SWGFreeDVDemodSettings::cleanup() {
     }
     if(channel_marker != nullptr) { 
         delete channel_marker;
+    }
+    if(rollup_state != nullptr) { 
+        delete rollup_state;
     }
 }
 
@@ -188,6 +195,8 @@ SWGFreeDVDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&spectrum_config, pJson["spectrumConfig"], "SWGGLSpectrum", "SWGGLSpectrum");
     
     ::SWGSDRangel::setValue(&channel_marker, pJson["channelMarker"], "SWGChannelMarker", "SWGChannelMarker");
+    
+    ::SWGSDRangel::setValue(&rollup_state, pJson["rollupState"], "SWGRollupState", "SWGRollupState");
     
 }
 
@@ -258,6 +267,9 @@ SWGFreeDVDemodSettings::asJsonObject() {
     }
     if((channel_marker != nullptr) && (channel_marker->isSet())){
         toJsonValue(QString("channelMarker"), channel_marker, obj, QString("SWGChannelMarker"));
+    }
+    if((rollup_state != nullptr) && (rollup_state->isSet())){
+        toJsonValue(QString("rollupState"), rollup_state, obj, QString("SWGRollupState"));
     }
 
     return obj;
@@ -443,6 +455,16 @@ SWGFreeDVDemodSettings::setChannelMarker(SWGChannelMarker* channel_marker) {
     this->m_channel_marker_isSet = true;
 }
 
+SWGRollupState*
+SWGFreeDVDemodSettings::getRollupState() {
+    return rollup_state;
+}
+void
+SWGFreeDVDemodSettings::setRollupState(SWGRollupState* rollup_state) {
+    this->rollup_state = rollup_state;
+    this->m_rollup_state_isSet = true;
+}
+
 
 bool
 SWGFreeDVDemodSettings::isSet(){
@@ -500,6 +522,9 @@ SWGFreeDVDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(channel_marker && channel_marker->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(rollup_state && rollup_state->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

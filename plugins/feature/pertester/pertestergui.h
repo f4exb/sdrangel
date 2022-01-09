@@ -24,6 +24,8 @@
 #include "feature/featuregui.h"
 #include "util/messagequeue.h"
 #include "pipes/pipeendpoint.h"
+#include "settings/rollupstate.h"
+
 #include "pertestersettings.h"
 
 class PluginAPI;
@@ -50,6 +52,7 @@ private:
     PluginAPI* m_pluginAPI;
     FeatureUISet* m_featureUISet;
     PERTesterSettings m_settings;
+    RollupState m_rollupState;
     bool m_doApplySettings;
 
     PERTester* m_perTester;

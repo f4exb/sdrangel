@@ -94,6 +94,8 @@ SWGStarTrackerSettings::SWGStarTrackerSettings() {
     m_reverse_api_feature_set_index_isSet = false;
     reverse_api_feature_index = 0;
     m_reverse_api_feature_index_isSet = false;
+    rollup_state = nullptr;
+    m_rollup_state_isSet = false;
 }
 
 SWGStarTrackerSettings::~SWGStarTrackerSettings() {
@@ -168,6 +170,8 @@ SWGStarTrackerSettings::init() {
     m_reverse_api_feature_set_index_isSet = false;
     reverse_api_feature_index = 0;
     m_reverse_api_feature_index_isSet = false;
+    rollup_state = new SWGRollupState();
+    m_rollup_state_isSet = false;
 }
 
 void
@@ -221,6 +225,9 @@ SWGStarTrackerSettings::cleanup() {
 
 
 
+    if(rollup_state != nullptr) { 
+        delete rollup_state;
+    }
 }
 
 SWGStarTrackerSettings*
@@ -299,6 +306,8 @@ SWGStarTrackerSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&reverse_api_feature_set_index, pJson["reverseAPIFeatureSetIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&reverse_api_feature_index, pJson["reverseAPIFeatureIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&rollup_state, pJson["rollupState"], "SWGRollupState", "SWGRollupState");
     
 }
 
@@ -414,6 +423,9 @@ SWGStarTrackerSettings::asJsonObject() {
     }
     if(m_reverse_api_feature_index_isSet){
         obj->insert("reverseAPIFeatureIndex", QJsonValue(reverse_api_feature_index));
+    }
+    if((rollup_state != nullptr) && (rollup_state->isSet())){
+        toJsonValue(QString("rollupState"), rollup_state, obj, QString("SWGRollupState"));
     }
 
     return obj;
@@ -749,6 +761,16 @@ SWGStarTrackerSettings::setReverseApiFeatureIndex(qint32 reverse_api_feature_ind
     this->m_reverse_api_feature_index_isSet = true;
 }
 
+SWGRollupState*
+SWGStarTrackerSettings::getRollupState() {
+    return rollup_state;
+}
+void
+SWGStarTrackerSettings::setRollupState(SWGRollupState* rollup_state) {
+    this->rollup_state = rollup_state;
+    this->m_rollup_state_isSet = true;
+}
+
 
 bool
 SWGStarTrackerSettings::isSet(){
@@ -851,6 +873,9 @@ SWGStarTrackerSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_reverse_api_feature_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(rollup_state && rollup_state->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

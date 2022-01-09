@@ -21,6 +21,7 @@
 #include "dsp/channelmarker.h"
 #include "channel/channelgui.h"
 #include "util/messagequeue.h"
+#include "settings/rollupstate.h"
 
 #include "filesourcesettings.h"
 
@@ -53,6 +54,7 @@ private:
     PluginAPI* m_pluginAPI;
     DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
+    RollupState m_rollupState;
     FileSourceSettings m_settings;
     int m_sampleRate;
     double m_shiftFrequencyFactor; //!< Channel frequency shift factor

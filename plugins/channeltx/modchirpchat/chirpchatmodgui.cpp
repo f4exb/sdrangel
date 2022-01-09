@@ -357,7 +357,7 @@ void ChirpChatModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    m_settings.m_rollupState = saveState();
+    saveState(m_rollupState);
     applySettings();
 }
 
@@ -449,6 +449,7 @@ ChirpChatModGUI::ChirpChatModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet,
 	connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 
     m_settings.setChannelMarker(&m_channelMarker);
+    m_settings.setRollupState(&m_rollupState);
 
     setBandwidths();
     displaySettings();
@@ -524,7 +525,7 @@ void ChirpChatModGUI::displaySettings()
     ui->udpEnabled->setChecked(m_settings.m_udpEnabled);
     ui->udpAddress->setText(m_settings.m_udpAddress);
     ui->udpPort->setText(QString::number(m_settings.m_udpPort));
-    restoreState(m_settings.m_rollupState);
+    restoreState(m_rollupState);
     blockApplySettings(false);
 }
 

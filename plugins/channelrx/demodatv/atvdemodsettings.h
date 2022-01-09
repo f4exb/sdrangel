@@ -74,11 +74,12 @@ struct ATVDemodSettings
     uint16_t m_udpPort;
     Serializable *m_channelMarker;
     int m_streamIndex;
-    QByteArray m_rollupState;
+    Serializable *m_rollupState;
 
     ATVDemodSettings();
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
+    void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
 

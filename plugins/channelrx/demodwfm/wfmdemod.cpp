@@ -39,6 +39,7 @@
 #include "dsp/devicesamplemimo.h"
 #include "device/deviceapi.h"
 #include "feature/feature.h"
+#include "settings/serializable.h"
 #include "util/db.h"
 #include "maincore.h"
 
@@ -371,6 +372,12 @@ void WFMDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getWfmDemodSettings()->getReverseApiChannelIndex();
     }
+    if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getWfmDemodSettings()->getChannelMarker());
+    }
+    if (settings.m_rollupState && channelSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(channelSettingsKeys, response.getWfmDemodSettings()->getRollupState());
+    }
 }
 
 int WFMDemod::webapiReportGet(
@@ -418,6 +425,34 @@ void WFMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     response.getWfmDemodSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getWfmDemodSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getWfmDemodSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+
+    if (settings.m_channelMarker)
+    {
+        if (response.getWfmDemodSettings()->getChannelMarker())
+        {
+            settings.m_channelMarker->formatTo(response.getWfmDemodSettings()->getChannelMarker());
+        }
+        else
+        {
+            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            settings.m_channelMarker->formatTo(swgChannelMarker);
+            response.getWfmDemodSettings()->setChannelMarker(swgChannelMarker);
+        }
+    }
+
+    if (settings.m_rollupState)
+    {
+        if (response.getWfmDemodSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getWfmDemodSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getWfmDemodSettings()->setRollupState(swgRollupState);
+        }
+    }
 }
 
 void WFMDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -524,6 +559,20 @@ void WFMDemod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgWFMDemodSettings->setStreamIndex(settings.m_streamIndex);
+    }
+
+    if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
+    {
+        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        settings.m_channelMarker->formatTo(swgChannelMarker);
+        swgWFMDemodSettings->setChannelMarker(swgChannelMarker);
+    }
+
+    if (settings.m_rollupState && (channelSettingsKeys.contains("rollupState") || force))
+    {
+        SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+        settings.m_rollupState->formatTo(swgRollupState);
+        swgWFMDemodSettings->setRollupState(swgRollupState);
     }
 }
 
