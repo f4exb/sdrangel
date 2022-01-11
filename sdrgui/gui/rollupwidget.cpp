@@ -89,11 +89,11 @@ void RollupWidget::saveState(RollupState &state) const
     QList<RollupState::RollupChildState>& childrenStates = state.getChildren();
     childrenStates.clear();
 
-    for (int i = 0; i < children().count(); ++i)
+    for (const auto &child : children())
     {
-        QWidget* r = qobject_cast<QWidget*>(children()[i]);
+        QWidget* r = qobject_cast<QWidget*>(child);
 
-        if (r) {
+        if (r && isRollupChild(r)) {
             childrenStates.push_back({r->objectName(), r->isHidden()});
         }
     }
@@ -161,15 +161,15 @@ void RollupWidget::restoreState(const RollupState& state)
 {
     const QList<RollupState::RollupChildState>& childrenStates = state.getChildren();
 
-    for (const auto &childState : childrenStates)
+    for (const auto &object : children())
     {
-        for (int j = 0; j < children().count(); ++j)
-        {
-            QWidget* r = qobject_cast<QWidget*>(children()[j]);
+        QWidget* r = qobject_cast<QWidget*>(object);
 
-            if (r)
+        if (r && isRollupChild(r))
+        {
+            for (const auto &childState : childrenStates)
             {
-                if (r->objectName() == childState.m_objectName)
+                if (childState.m_objectName.compare(r->objectName()) == 0)
                 {
                     if (childState.m_isHidden) {
                         r->hide();
