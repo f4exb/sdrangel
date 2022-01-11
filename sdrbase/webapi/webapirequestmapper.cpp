@@ -4775,7 +4775,12 @@ bool WebAPIRequestMapper::getFeatureSettings(
         extractKeys(settingsJsonObject, featureSettingsKeys);
         qDebug() << "WebAPIRequestMapper::getFeatureSettings: featureSettingsKeys: " << featureSettingsKeys;
 
-        if (featureSettingsKey == "AISSSettings")
+        if (featureSettingsKey == "AFCSettings")
+        {
+            featureSettings->setAfcSettings(new SWGSDRangel::SWGAFCSettings());
+            featureSettings->getAfcSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (featureSettingsKey == "AISSSettings")
         {
             featureSettings->setAisSettings(new SWGSDRangel::SWGAISSettings());
             featureSettings->getAisSettings()->fromJsonObject(settingsJsonObject);
@@ -4836,6 +4841,11 @@ bool WebAPIRequestMapper::getFeatureSettings(
         {
             featureSettings->setRigCtlServerSettings(new SWGSDRangel::SWGRigCtlServerSettings());
             featureSettings->getRigCtlServerSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (featureSettingsKey == "VORLocalizerSettings")
+        {
+            featureSettings->setVorLocalizerSettings(new SWGSDRangel::SWGVORLocalizerSettings());
+            featureSettings->getVorLocalizerSettings()->fromJsonObject(settingsJsonObject);
         }
         else
         {

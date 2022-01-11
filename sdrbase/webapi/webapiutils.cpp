@@ -264,18 +264,20 @@ const QMap<QString, QString> WebAPIUtils::m_mimoDeviceHwIdToActionsKey = {
 };
 
 const QMap<QString, QString> WebAPIUtils::m_featureTypeToSettingsKey = {
+    {"AFC", "AFCSettings"},
     {"AIS", "AISSettings"},
     {"AntennaTools", "AntennaToolsSettings"},
     {"APRS", "APRSSettings"},
     {"DemodAnalyzer", "DemodAnalyzerSettings"},
     {"JogdialController", "JogdialControllerSettings"},
-    {"GS232Controller", "GS232ControllerSettings"},
+    {"GS232Controller", "GS232ControllerSettings"}, // a.k.a Rotator Controller
     {"Map", "MapSettings"},
     {"PERTester", "PERTesterSettings"},
+    {"RigCtlServer", "RigCtlServerSettings"},
     {"SatelliteTracker", "SatelliteTrackerSettings"},
     {"SimplePTT", "SimplePTTSettings"},
     {"StarTracker", "StarTrackerSettings"},
-    {"RigCtlServer", "RigCtlServerSettings"}
+    {"VORLocalizer", "VORLocalizerSettings"}
 };
 
 const QMap<QString, QString> WebAPIUtils::m_featureTypeToActionsKey = {
@@ -291,6 +293,7 @@ const QMap<QString, QString> WebAPIUtils::m_featureTypeToActionsKey = {
 };
 
 const QMap<QString, QString> WebAPIUtils::m_featureURIToSettingsKey = {
+    {"sdrangel.feature.afc", "AFCSettings"},
     {"sdrangel.feature.ais", "AISSSettings"},
     {"sdrangel.feature.antennatools", "AntennaToolsSettings"},
     {"sdrangel.feature.aprs", "APRSSettings"},
@@ -299,10 +302,11 @@ const QMap<QString, QString> WebAPIUtils::m_featureURIToSettingsKey = {
     {"sdrangel.feature.gs232controller", "GS232ControllerSettings"},
     {"sdrangel.feature.map", "MapSettings"},
     {"sdrangel.feature.pertester", "PERTesterSettings"},
+    {"sdrangel.feature.rigctlserver", "RigCtlServerSettings"},
     {"sdrangel.feature.satellitetracker", "SatelliteTrackerSettings"},
     {"sdrangel.feature.simpleptt", "SimplePTTSettings"},
     {"sdrangel.feature.startracker", "StarTrackerSettings"},
-    {"sdrangel.feature.rigctlserver", "RigCtlServerSettings"}
+    {"sdrangel.feature.vorlocalizer", "VORLocalizerSettings"}
 };
 
 // Get integer value from within JSON object
