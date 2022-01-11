@@ -69,7 +69,6 @@ RemoteInput::RemoteInput(DeviceAPI *deviceAPI) :
 
 RemoteInput::~RemoteInput()
 {
-    disconnect(m_remoteInputUDPHandler, SIGNAL(metaChanged()), this, SLOT(handleMetaChanged()));
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
 	stop();
@@ -328,6 +327,10 @@ void RemoteInput::applySettings(const RemoteInputSettings& settings, bool force)
 
 void RemoteInput::applyRemoteChannelSettings(const RemoteChannelSettings& settings)
 {
+    if (m_remoteChannelSettings.m_deviceSampleRate == 1) { // uninitialized
+        return;
+    }
+
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();;
     swgChannelSettings->setOriginatorChannelIndex(0);
     swgChannelSettings->setOriginatorDeviceSetIndex(m_deviceAPI->getDeviceSetIndex());
