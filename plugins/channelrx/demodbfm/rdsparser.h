@@ -80,6 +80,7 @@ public:
 	bool           m_g2_updated;
 	unsigned int   m_g2_count;
 	char           m_g2_radiotext[64+1];
+	bool           m_radiotext_AB_flag;
 
 	// G3 data
 	bool           m_g3_updated;
@@ -193,7 +194,6 @@ private:
 	unsigned char  pi_country_identification;
 	unsigned char  pi_program_reference_number;
 
-	bool           m_radiotext_AB_flag;
 	bool           debug;
 	bool           log;
 

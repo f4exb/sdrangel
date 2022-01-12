@@ -213,6 +213,8 @@ void BFMDemodGUI::on_clearData_clicked(bool checked)
 	{
 		m_bfmDemod->getRDSParser().clearAllFields();
 
+		ui->go2Text->clear();
+		ui->go2PrevText->clear();
 		ui->g14ProgServiceNames->clear();
 		ui->g14MappedFrequencies->clear();
 		ui->g14AltFrequencies->clear();
@@ -275,6 +277,11 @@ void BFMDemodGUI::on_g00AltFrequenciesBox_activated(int index)
     (void) index;
 	qint64 f = (qint64) ((ui->g00AltFrequenciesBox->currentText()).toDouble() * 1e6);
 	changeFrequency(f);
+}
+
+void BFMDemodGUI::on_go2ClearPrevText_clicked()
+{
+	ui->go2PrevText->clear();
 }
 
 void BFMDemodGUI::on_g14MappedFrequencies_activated(int index)
@@ -353,6 +360,7 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
 	m_rdsTimerCount(0),
+    m_radiotext_AB_flag(false),
 	m_rate(625000)
 {
 	ui->setupUi(this);
@@ -684,7 +692,16 @@ void BFMDemodGUI::rdsUpdate(bool force)
 	{
 		ui->g02Label->setStyleSheet("QLabel { background-color : green; }");
 		ui->g02CountText->setNum((int) m_bfmDemod->getRDSParser().m_g2_count);
+        bool radiotext_AB_flag = m_bfmDemod->getRDSParser().m_radiotext_AB_flag;
+
+        if (!m_radiotext_AB_flag && radiotext_AB_flag) // B -> A transiition is start of new text
+        {
+            QString oldText = ui->go2Text->text();
+            ui->go2PrevText->setText(oldText);
+        }
+
 		ui->go2Text->setText(QString(m_bfmDemod->getRDSParser().m_g2_radiotext));
+        m_radiotext_AB_flag = radiotext_AB_flag;
 	}
 	else
 	{

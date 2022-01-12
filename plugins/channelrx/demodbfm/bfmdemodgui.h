@@ -62,6 +62,7 @@ private:
 	BFMDemodSettings m_settings;
 	bool m_doApplySettings;
 	int m_rdsTimerCount;
+    bool m_radiotext_AB_flag;
 
 	SpectrumVis* m_spectrumVis;
 
@@ -99,6 +100,7 @@ private slots:
 	void on_g14ProgServiceNames_currentIndexChanged(int index);
 	void on_clearData_clicked(bool checked);
 	void on_g00AltFrequenciesBox_activated(int index);
+	void on_go2ClearPrevText_clicked();
 	void on_g14MappedFrequencies_activated(int index);
 	void on_g14AltFrequencies_activated(int index);
 	void onWidgetRolled(QWidget* widget, bool rollDown);

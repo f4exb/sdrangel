@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>798</width>
-    <height>472</height>
+    <height>755</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -551,7 +551,7 @@
      <x>10</x>
      <y>170</y>
      <width>791</width>
-     <height>301</height>
+     <height>281</height>
     </rect>
    </property>
    <property name="minimumSize">
@@ -565,7 +565,7 @@
    </property>
    <layout class="QVBoxLayout" name="rdsLayout">
     <property name="spacing">
-     <number>3</number>
+     <number>1</number>
     </property>
     <item>
      <layout class="QHBoxLayout" name="reportLayout">
@@ -1602,8 +1602,52 @@
       </item>
       <item>
        <widget class="QLabel" name="go2Text">
+        <property name="toolTip">
+         <string>Current radio text</string>
+        </property>
         <property name="text">
-         <string>Radiotext</string>
+         <string/>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="row4pDataLayout">
+      <item>
+       <widget class="QPushButton" name="go2ClearPrevText">
+        <property name="maximumSize">
+         <size>
+          <width>30</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Clear previous text</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/sweep.png</normaloff>:/sweep.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="row4Separator1_2">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="go2PrevText">
+        <property name="toolTip">
+         <string>Previous radio text</string>
+        </property>
+        <property name="text">
+         <string/>
         </property>
        </widget>
       </item>
