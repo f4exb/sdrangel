@@ -193,7 +193,7 @@ private:
 	unsigned char  pi_country_identification;
 	unsigned char  pi_program_reference_number;
 
-	bool           radiotext_AB_flag;
+	bool           m_radiotext_AB_flag;
 	bool           debug;
 	bool           log;
 
