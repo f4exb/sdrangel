@@ -1170,7 +1170,35 @@ bool MainWindow::handleMessage(const Message& cmd)
     {
         MainCore::MsgAddChannel& notif = (MainCore::MsgAddChannel&) cmd;
         ui->tabInputsView->setCurrentIndex(notif.getDeviceSetIndex());
-        channelAddClicked(notif.getChannelRegistrationIndex());
+        int currentChannelTabIndex = ui->tabChannels->currentIndex();
+
+        if (currentChannelTabIndex >= 0)
+        {
+            DeviceUISet *deviceUI = m_deviceUIs[currentChannelTabIndex];
+            int channelRegistrationIndex;
+
+            if (deviceUI->m_deviceMIMOEngine)
+            {
+                int nbMIMOChannels = deviceUI->getNumberOfAvailableMIMOChannels();
+                int nbRxChannels = deviceUI->getNumberOfAvailableRxChannels();
+                int nbTxChannels = deviceUI->getNumberOfAvailableTxChannels();
+                int direction = notif.getDirection();
+
+                if (direction == 2) {
+                    channelRegistrationIndex = notif.getChannelRegistrationIndex();
+                } else if (direction == 0) {
+                    channelRegistrationIndex = nbMIMOChannels + notif.getChannelRegistrationIndex();
+                } else {
+                    channelRegistrationIndex = nbMIMOChannels + nbRxChannels + notif.getChannelRegistrationIndex();
+                }
+            }
+            else
+            {
+                channelRegistrationIndex = notif.getChannelRegistrationIndex();
+            }
+
+            channelAddClicked(channelRegistrationIndex);
+        }
 
         return true;
     }
@@ -2247,7 +2275,7 @@ void MainWindow::channelAddClicked(int channelIndex)
             int nbMIMOChannels = deviceUI->getNumberOfAvailableMIMOChannels();
             int nbRxChannels = deviceUI->getNumberOfAvailableRxChannels();
             int nbTxChannels = deviceUI->getNumberOfAvailableTxChannels();
-            qDebug("MainWindow::channelAddClicked: MIMO: tab: nbMIMO: %d %d nbRx: %d nbTx: %d selected: %d",
+            qDebug("MainWindow::channelAddClicked: MIMO: tab %d : nbMIMO: %d nbRx: %d nbTx: %d selected: %d",
                 currentChannelTabIndex, nbMIMOChannels, nbRxChannels, nbTxChannels, channelIndex);
 
             if (channelIndex < nbMIMOChannels)

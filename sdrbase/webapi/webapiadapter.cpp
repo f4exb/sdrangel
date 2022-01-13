@@ -2359,7 +2359,7 @@ int WebAPIAdapter::devicesetChannelPost(
 
             if (index < nbRegistrations)
             {
-                MainCore::MsgAddChannel *msg = MainCore::MsgAddChannel::create(deviceSetIndex, index, false);
+                MainCore::MsgAddChannel *msg = MainCore::MsgAddChannel::create(deviceSetIndex, index, 0);
                 m_mainCore->m_mainMessageQueue->push(msg);
 
                 response.init();
@@ -2395,7 +2395,7 @@ int WebAPIAdapter::devicesetChannelPost(
 
             if (index < nbRegistrations)
             {
-                MainCore::MsgAddChannel *msg = MainCore::MsgAddChannel::create(deviceSetIndex, index, true);
+                MainCore::MsgAddChannel *msg = MainCore::MsgAddChannel::create(deviceSetIndex, index, 1);
                 m_mainCore->m_mainMessageQueue->push(msg);
 
                 response.init();
@@ -2431,7 +2431,7 @@ int WebAPIAdapter::devicesetChannelPost(
 
             if (index < nbRegistrations)
             {
-            	MainCore::MsgAddChannel *msg = MainCore::MsgAddChannel::create(deviceSetIndex, index, true);
+            	MainCore::MsgAddChannel *msg = MainCore::MsgAddChannel::create(deviceSetIndex, index, 2);
                 m_mainCore->m_mainMessageQueue->push(msg);
 
                 response.init();

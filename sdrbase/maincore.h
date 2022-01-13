@@ -340,23 +340,23 @@ public:
     public:
         int getDeviceSetIndex() const { return m_deviceSetIndex; }
         int getChannelRegistrationIndex() const { return m_channelRegistrationIndex; }
-        bool isTx() const { return m_tx; }
+        int getDirection() const { return m_direction; }
 
-        static MsgAddChannel* create(int deviceSetIndex, int channelRegistrationIndex, bool tx)
+        static MsgAddChannel* create(int deviceSetIndex, int channelRegistrationIndex, int direction)
         {
-            return new MsgAddChannel(deviceSetIndex, channelRegistrationIndex, tx);
+            return new MsgAddChannel(deviceSetIndex, channelRegistrationIndex, direction);
         }
 
     private:
         int m_deviceSetIndex;
         int m_channelRegistrationIndex;
-        bool m_tx;
+        int m_direction;
 
-        MsgAddChannel(int deviceSetIndex, int channelRegistrationIndex, bool tx) :
+        MsgAddChannel(int deviceSetIndex, int channelRegistrationIndex, int direction) :
             Message(),
             m_deviceSetIndex(deviceSetIndex),
             m_channelRegistrationIndex(channelRegistrationIndex),
-            m_tx(tx)
+            m_direction(direction)
         { }
     };
 
