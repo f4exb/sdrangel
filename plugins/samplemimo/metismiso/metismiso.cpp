@@ -32,6 +32,7 @@
 #include "dsp/dspengine.h"
 #include "dsp/dspdevicemimoengine.h"
 #include "dsp/devicesamplesource.h"
+#include "dsp/samplesourcefifo.h"
 #include "metis/devicemetis.h"
 
 #include "metismisoudphandler.h"
@@ -51,7 +52,7 @@ MetisMISO::MetisMISO(DeviceAPI *deviceAPI) :
 {
     m_mimoType = MIMOHalfSynchronous;
     m_sampleMIFifo.init(MetisMISOSettings::m_maxReceivers, 96000 * 4);
-    m_sampleMOFifo.init(1, 96000 * 4);
+    m_sampleMOFifo.init(1, SampleSourceFifo::getSizePolicy(48000));
     m_deviceAPI->setNbSourceStreams(MetisMISOSettings::m_maxReceivers);
     m_deviceAPI->setNbSinkStreams(1);
     int deviceSequence = m_deviceAPI->getSamplingDeviceSequence();
