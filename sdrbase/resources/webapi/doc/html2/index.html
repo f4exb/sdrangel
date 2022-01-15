@@ -6150,6 +6150,18 @@ margin-bottom: 20px;
     "wsSpectrumPort" : {
       "type" : "integer",
       "description" : "port on which the websocket server is listening"
+    },
+    "histogramMarkers" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/SpectrumHistogramMarker"
+      }
+    },
+    "waterfallMarkers" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/SpectrumWaterfallMarker"
+      }
     }
   },
   "description" : "GLSpectrumGUI settings"
@@ -11771,6 +11783,32 @@ margin-bottom: 20px;
   },
   "description" : "SoapySDR"
 };
+            defs.SpectrumHistogramMarker = {
+  "properties" : {
+    "frequency" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "power" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Fixed power mark"
+    },
+    "markerType" : {
+      "type" : "integer",
+      "description" : "Marker type\n  * 0 - Fixed power\n  * 1 - Current power\n  * 2 - Max power\n"
+    },
+    "markerColor" : {
+      "type" : "integer",
+      "description" : "Color in 8 bit RGB serie"
+    },
+    "show" : {
+      "type" : "integer",
+      "description" : "Boolean - Marker display state\n  * 0 - Hidden\n  * 1 - Visible\n"
+    }
+  },
+  "description" : "Spectrum histogram marker settings"
+};
             defs.SpectrumServer = {
   "properties" : {
     "run" : {
@@ -11802,6 +11840,28 @@ margin-bottom: 20px;
       "type" : "integer"
     }
   }
+};
+            defs.SpectrumWaterfallMarker = {
+  "properties" : {
+    "frequency" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "time" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Time shift in seconds"
+    },
+    "markerColor" : {
+      "type" : "integer",
+      "description" : "Color in 8 bit RGB serie"
+    },
+    "show" : {
+      "type" : "integer",
+      "description" : "Boolean - Marker display state\n  * 0 - Hidden\n  * 1 - Visible\n"
+    }
+  },
+  "description" : "Spectrum waterfall marker settings"
 };
             defs.StarTrackerActions = {
   "properties" : {
@@ -51883,7 +51943,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2022-01-09T04:50:11.883+01:00
+              Generated 2022-01-15T03:12:23.419+01:00
             </div>
           </div>
       </div>

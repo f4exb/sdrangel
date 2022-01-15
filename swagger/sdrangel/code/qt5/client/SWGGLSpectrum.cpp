@@ -80,6 +80,10 @@ SWGGLSpectrum::SWGGLSpectrum() {
     m_ws_spectrum_address_isSet = false;
     ws_spectrum_port = 0;
     m_ws_spectrum_port_isSet = false;
+    histogram_markers = nullptr;
+    m_histogram_markers_isSet = false;
+    waterfall_markers = nullptr;
+    m_waterfall_markers_isSet = false;
 }
 
 SWGGLSpectrum::~SWGGLSpectrum() {
@@ -140,6 +144,10 @@ SWGGLSpectrum::init() {
     m_ws_spectrum_address_isSet = false;
     ws_spectrum_port = 0;
     m_ws_spectrum_port_isSet = false;
+    histogram_markers = new QList<SWGSpectrumHistogramMarker*>();
+    m_histogram_markers_isSet = false;
+    waterfall_markers = new QList<SWGSpectrumWaterfallMarker*>();
+    m_waterfall_markers_isSet = false;
 }
 
 void
@@ -172,6 +180,20 @@ SWGGLSpectrum::cleanup() {
         delete ws_spectrum_address;
     }
 
+    if(histogram_markers != nullptr) { 
+        auto arr = histogram_markers;
+        for(auto o: *arr) { 
+            delete o;
+        }
+        delete histogram_markers;
+    }
+    if(waterfall_markers != nullptr) { 
+        auto arr = waterfall_markers;
+        for(auto o: *arr) { 
+            delete o;
+        }
+        delete waterfall_markers;
+    }
 }
 
 SWGGLSpectrum*
@@ -237,6 +259,10 @@ SWGGLSpectrum::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&ws_spectrum_port, pJson["wsSpectrumPort"], "qint32", "");
     
+    
+    ::SWGSDRangel::setValue(&histogram_markers, pJson["histogramMarkers"], "QList", "SWGSpectrumHistogramMarker");
+    
+    ::SWGSDRangel::setValue(&waterfall_markers, pJson["waterfallMarkers"], "QList", "SWGSpectrumWaterfallMarker");
 }
 
 QString
@@ -330,6 +356,12 @@ SWGGLSpectrum::asJsonObject() {
     }
     if(m_ws_spectrum_port_isSet){
         obj->insert("wsSpectrumPort", QJsonValue(ws_spectrum_port));
+    }
+    if(histogram_markers && histogram_markers->size() > 0){
+        toJsonArray((QList<void*>*)histogram_markers, obj, "histogramMarkers", "SWGSpectrumHistogramMarker");
+    }
+    if(waterfall_markers && waterfall_markers->size() > 0){
+        toJsonArray((QList<void*>*)waterfall_markers, obj, "waterfallMarkers", "SWGSpectrumWaterfallMarker");
     }
 
     return obj;
@@ -595,6 +627,26 @@ SWGGLSpectrum::setWsSpectrumPort(qint32 ws_spectrum_port) {
     this->m_ws_spectrum_port_isSet = true;
 }
 
+QList<SWGSpectrumHistogramMarker*>*
+SWGGLSpectrum::getHistogramMarkers() {
+    return histogram_markers;
+}
+void
+SWGGLSpectrum::setHistogramMarkers(QList<SWGSpectrumHistogramMarker*>* histogram_markers) {
+    this->histogram_markers = histogram_markers;
+    this->m_histogram_markers_isSet = true;
+}
+
+QList<SWGSpectrumWaterfallMarker*>*
+SWGGLSpectrum::getWaterfallMarkers() {
+    return waterfall_markers;
+}
+void
+SWGGLSpectrum::setWaterfallMarkers(QList<SWGSpectrumWaterfallMarker*>* waterfall_markers) {
+    this->waterfall_markers = waterfall_markers;
+    this->m_waterfall_markers_isSet = true;
+}
+
 
 bool
 SWGGLSpectrum::isSet(){
@@ -676,6 +728,12 @@ SWGGLSpectrum::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_ws_spectrum_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(histogram_markers && (histogram_markers->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(waterfall_markers && (waterfall_markers->size() > 0)){
             isObjectUpdated = true; break;
         }
     }while(false);

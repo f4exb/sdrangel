@@ -92,6 +92,10 @@ public:
     static int getAveragingValue(int averagingIndex, AveragingMode averagingMode);
     static int getAveragingIndex(int averagingValue, AveragingMode averagingMode);
 	static uint64_t getMaxAveragingValue(int fftSize, AveragingMode averagingMode);
+
+private:
+	static int qColorToInt(const QColor& color);
+	static QColor intToQColor(int intColor);
 };
 
 #endif // SDRBASE_DSP_SPECTRUMSETTNGS_H

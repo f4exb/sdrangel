@@ -264,8 +264,10 @@
 #include "SWGSoapySDRInputSettings.h"
 #include "SWGSoapySDROutputSettings.h"
 #include "SWGSoapySDRReport.h"
+#include "SWGSpectrumHistogramMarker.h"
 #include "SWGSpectrumServer.h"
 #include "SWGSpectrumServer_clients.h"
+#include "SWGSpectrumWaterfallMarker.h"
 #include "SWGStarTrackerActions.h"
 #include "SWGStarTrackerDisplayLoSSettings.h"
 #include "SWGStarTrackerDisplayLoSSettings_2.h"
@@ -1562,6 +1564,11 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGSpectrumHistogramMarker").compare(type) == 0) {
+      SWGSpectrumHistogramMarker *obj = new SWGSpectrumHistogramMarker();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGSpectrumServer").compare(type) == 0) {
       SWGSpectrumServer *obj = new SWGSpectrumServer();
       obj->init();
@@ -1569,6 +1576,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGSpectrumServer_clients").compare(type) == 0) {
       SWGSpectrumServer_clients *obj = new SWGSpectrumServer_clients();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGSpectrumWaterfallMarker").compare(type) == 0) {
+      SWGSpectrumWaterfallMarker *obj = new SWGSpectrumWaterfallMarker();
       obj->init();
       return obj;
     }

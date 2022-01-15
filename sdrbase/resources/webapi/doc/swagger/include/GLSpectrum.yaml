@@ -1,3 +1,50 @@
+SpectrumHistogramMarker:
+  description: Spectrum histogram marker settings
+  properties:
+    frequency:
+      type: number
+      format: float
+    power:
+      type: number
+      format: float
+      description: Fixed power mark
+    markerType:
+      type: integer
+      description: >
+        Marker type
+          * 0 - Fixed power
+          * 1 - Current power
+          * 2 - Max power
+    markerColor:
+      type: integer
+      description: Color in 8 bit RGB serie
+    show:
+      type: integer
+      description: >
+        Boolean - Marker display state
+          * 0 - Hidden
+          * 1 - Visible
+
+SpectrumWaterfallMarker:
+  description: Spectrum waterfall marker settings
+  properties:
+    frequency:
+      type: number
+      format: float
+    time:
+      type: number
+      format: float
+      description: Time shift in seconds
+    markerColor:
+      type: integer
+      description: Color in 8 bit RGB serie
+    show:
+      type: integer
+      description: >
+        Boolean - Marker display state
+          * 0 - Hidden
+          * 1 - Visible
+
 GLSpectrum:
   description: GLSpectrumGUI settings
   properties:
@@ -74,3 +121,11 @@ GLSpectrum:
     wsSpectrumPort:
       description: port on which the websocket server is listening
       type: integer
+    histogramMarkers:
+      type: array
+      items:
+        $ref: "/doc/swagger/include/GLSpectrum.yaml#/SpectrumHistogramMarker"
+    waterfallMarkers:
+      type: array
+      items:
+        $ref: "/doc/swagger/include/GLSpectrum.yaml#/SpectrumWaterfallMarker"

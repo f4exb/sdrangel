@@ -22,6 +22,9 @@
 #include <QJsonObject>
 
 
+#include "SWGSpectrumHistogramMarker.h"
+#include "SWGSpectrumWaterfallMarker.h"
+#include <QList>
 #include <QString>
 
 #include "SWGObject.h"
@@ -120,6 +123,12 @@ public:
     qint32 getWsSpectrumPort();
     void setWsSpectrumPort(qint32 ws_spectrum_port);
 
+    QList<SWGSpectrumHistogramMarker*>* getHistogramMarkers();
+    void setHistogramMarkers(QList<SWGSpectrumHistogramMarker*>* histogram_markers);
+
+    QList<SWGSpectrumWaterfallMarker*>* getWaterfallMarkers();
+    void setWaterfallMarkers(QList<SWGSpectrumWaterfallMarker*>* waterfall_markers);
+
 
     virtual bool isSet() override;
 
@@ -201,6 +210,12 @@ private:
 
     qint32 ws_spectrum_port;
     bool m_ws_spectrum_port_isSet;
+
+    QList<SWGSpectrumHistogramMarker*>* histogram_markers;
+    bool m_histogram_markers_isSet;
+
+    QList<SWGSpectrumWaterfallMarker*>* waterfall_markers;
+    bool m_waterfall_markers_isSet;
 
 };
 

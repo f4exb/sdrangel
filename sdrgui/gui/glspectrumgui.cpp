@@ -247,6 +247,9 @@ void GLSpectrumGUI::applySpectrumSettings()
     m_glSpectrum->setPowerRange(powerRange);
     m_glSpectrum->setFPSPeriodMs(m_settings.m_fpsPeriodMs);
     m_glSpectrum->setLinear(m_settings.m_linear);
+
+    m_glSpectrum->setHistogramMarkers(m_settings.m_histogramMarkers);
+    m_glSpectrum->setWaterfallMarkers(m_settings.m_waterfallMarkers);
 }
 
 void GLSpectrumGUI::on_fftWindow_currentIndexChanged(int index)
@@ -375,6 +378,11 @@ void GLSpectrumGUI::on_markers_clicked(bool checked)
     connect(&markersDialog, SIGNAL(updateWaterfall()), this, SLOT(updateWaterfallMarkers()));
 
     markersDialog.exec();
+
+    m_settings.m_histogramMarkers = m_glSpectrum->getHistogramMarkers();
+    m_settings.m_waterfallMarkers = m_glSpectrum->getWaterfallMarkers();
+
+    applySettings();
 }
 
 void GLSpectrumGUI::on_refLevel_valueChanged(int value)

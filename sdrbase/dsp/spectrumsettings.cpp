@@ -224,6 +224,38 @@ void SpectrumSettings::formatTo(SWGSDRangel::SWGObject *swgObject) const
     swgSpectrum->setDisplayWaterfall(m_displayWaterfall ? 1 : 0);
     swgSpectrum->setDisplayGrid(m_displayGrid ? 1 : 0);
     swgSpectrum->setDisplayGridIntensity(m_displayGridIntensity);
+	swgSpectrum->setSsb(m_ssb ? 1 : 0);
+	swgSpectrum->setUsb(m_usb ? 1 : 0);
+	swgSpectrum->setWaterfallShare(m_waterfallShare);
+
+	if (m_histogramMarkers.size() > 0)
+	{
+		swgSpectrum->setHistogramMarkers(new QList<SWGSDRangel::SWGSpectrumHistogramMarker *>);
+
+		for (const auto &marker : m_histogramMarkers)
+		{
+			swgSpectrum->getHistogramMarkers()->append(new SWGSDRangel::SWGSpectrumHistogramMarker);
+			swgSpectrum->getHistogramMarkers()->back()->setFrequency(marker.m_frequency);
+			swgSpectrum->getHistogramMarkers()->back()->setPower(marker.m_power);
+			swgSpectrum->getHistogramMarkers()->back()->setMarkerType((int) marker.m_markerType);
+			swgSpectrum->getHistogramMarkers()->back()->setMarkerColor(qColorToInt(marker.m_markerColor));
+			swgSpectrum->getHistogramMarkers()->back()->setShow(marker.m_show ? 1 : 0);
+		}
+	}
+
+	if (m_waterfallMarkers.size() > 0)
+	{
+		swgSpectrum->setWaterfallMarkers(new QList<SWGSDRangel::SWGSpectrumWaterfallMarker *>);
+
+		for (const auto &marker : m_waterfallMarkers)
+		{
+			swgSpectrum->getWaterfallMarkers()->append(new SWGSDRangel::SWGSpectrumWaterfallMarker);
+			swgSpectrum->getWaterfallMarkers()->back()->setFrequency(marker.m_frequency);
+			swgSpectrum->getWaterfallMarkers()->back()->setTime(marker.m_time);
+			swgSpectrum->getWaterfallMarkers()->back()->setMarkerColor(qColorToInt(marker.m_markerColor));
+			swgSpectrum->getWaterfallMarkers()->back()->setShow(marker.m_show ? 1 : 0);
+		}
+	}
 }
 
 void SpectrumSettings::updateFrom(const QStringList& keys, const SWGSDRangel::SWGObject *swgObject)
@@ -305,6 +337,46 @@ void SpectrumSettings::updateFrom(const QStringList& keys, const SWGSDRangel::SW
 	if (keys.contains("spectrumConfig.displayGridIntensity")) {
 		m_displayGridIntensity = swgSpectrum->getDisplayGridIntensity();
 	}
+	if (keys.contains("spectrumConfig.ssb")) {
+		m_ssb = swgSpectrum->getSsb() != 0;
+	}
+	if (keys.contains("spectrumConfig.usb")) {
+		m_usb = swgSpectrum->getUsb() != 0;
+	}
+	if (keys.contains("spectrumConfig.waterfallShare")) {
+		m_waterfallShare = swgSpectrum->getWaterfallShare();
+	}
+
+	if (keys.contains("spectrumConfig.histogramMarkers"))
+	{
+        QList<SWGSDRangel::SWGSpectrumHistogramMarker *> *swgHistogramMarkers = swgSpectrum->getHistogramMarkers();
+        m_histogramMarkers.clear();
+
+		for (const auto &swgHistogramMarker : *swgHistogramMarkers)
+		{
+			m_histogramMarkers.push_back(SpectrumHistogramMarker());
+			m_histogramMarkers.back().m_frequency = swgHistogramMarker->getFrequency();
+			m_histogramMarkers.back().m_power = swgHistogramMarker->getPower();
+			m_histogramMarkers.back().m_markerType = (SpectrumHistogramMarker::SpectrumMarkerType) swgHistogramMarker->getMarkerType();
+			m_histogramMarkers.back().m_markerColor = intToQColor(swgHistogramMarker->getMarkerColor());
+			m_histogramMarkers.back().m_show = swgHistogramMarker->getShow() != 0;
+		}
+	}
+
+	if (keys.contains("spectrumConfig.waterfallMarkers"))
+	{
+        QList<SWGSDRangel::SWGSpectrumWaterfallMarker *> *swgWaterfallMarkers = swgSpectrum->getWaterfallMarkers();
+        m_waterfallMarkers.clear();
+
+		for (const auto &swgWaterfallMarker : *swgWaterfallMarkers)
+		{
+			m_waterfallMarkers.push_back(SpectrumWaterfallMarker());
+			m_waterfallMarkers.back().m_frequency = swgWaterfallMarker->getFrequency();
+			m_waterfallMarkers.back().m_time = swgWaterfallMarker->getTime();
+			m_waterfallMarkers.back().m_markerColor = intToQColor(swgWaterfallMarker->getMarkerColor());
+			m_waterfallMarkers.back().m_show = swgWaterfallMarker->getShow() != 0;
+		}
+	}
 }
 
 int SpectrumSettings::getAveragingMaxScale(AveragingMode averagingMode)
@@ -380,4 +452,18 @@ uint64_t SpectrumSettings::getMaxAveragingValue(int fftSize, AveragingMode avera
 	{
 		return (1<<20); // fixed 1 MS
 	}
+}
+
+int SpectrumSettings::qColorToInt(const QColor& color)
+{
+    return 256*256*color.blue() + 256*color.green() + color.red();
+}
+
+QColor SpectrumSettings::intToQColor(int intColor)
+{
+    int r = intColor % 256;
+    int bg = intColor / 256;
+    int g = bg % 256;
+    int b = bg / 256;
+    return QColor(r, g, b);
 }

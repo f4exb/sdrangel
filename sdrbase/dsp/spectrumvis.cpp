@@ -1040,36 +1040,7 @@ int SpectrumVis::webapiSpectrumServerDelete(SWGSDRangel::SWGSuccessResponse& res
 
 void SpectrumVis::webapiFormatSpectrumSettings(SWGSDRangel::SWGGLSpectrum& response, const SpectrumSettings& settings)
 {
-    response.setFftSize(settings.m_fftSize);
-    response.setFftOverlap(settings.m_fftOverlap);
-    response.setFftWindow((int) settings.m_fftWindow);
-    response.setRefLevel(settings.m_refLevel);
-    response.setPowerRange(settings.m_powerRange);
-    response.setFpsPeriodMs(settings.m_fpsPeriodMs);
-    response.setDecay(settings.m_decay);
-    response.setDecayDivisor(settings.m_decayDivisor);
-    response.setHistogramStroke(settings.m_histogramStroke);
-    response.setDisplayGridIntensity(settings.m_displayGridIntensity);
-    response.setDisplayTraceIntensity(settings.m_displayTraceIntensity);
-    response.setDisplayWaterfall(settings.m_displayWaterfall ? 1 : 0);
-    response.setInvertedWaterfall(settings.m_invertedWaterfall ? 1 : 0);
-    response.setWaterfallShare(settings.m_waterfallShare);
-    response.setDisplayMaxHold(settings.m_displayMaxHold ? 1 : 0);
-    response.setDisplayCurrent(settings.m_displayCurrent ? 1 : 0);
-    response.setDisplayHistogram(settings.m_displayHistogram ? 1 : 0);
-    response.setDisplayGrid(settings.m_displayGrid ? 1 : 0);
-    response.setAveragingMode((int) settings.m_averagingMode);
-    response.setAveragingValue(SpectrumSettings::getAveragingValue(settings.m_averagingIndex, settings.m_averagingMode));
-    response.setLinear(settings.m_linear ? 1 : 0);
-    response.setSsb(settings.m_ssb ? 1 : 0);
-    response.setUsb(settings.m_usb ? 1 : 0);
-    response.setWsSpectrumPort(settings.m_wsSpectrumPort);
-
-    if (response.getWsSpectrumAddress()) {
-        *response.getWsSpectrumAddress() = settings.m_wsSpectrumAddress;
-    } else {
-        response.setWsSpectrumAddress(new QString(settings.m_wsSpectrumAddress));
-    }
+    settings.formatTo(&response);
 }
 
 void SpectrumVis::webapiUpdateSpectrumSettings(
@@ -1077,82 +1048,11 @@ void SpectrumVis::webapiUpdateSpectrumSettings(
     const QStringList& spectrumSettingsKeys,
     SWGSDRangel::SWGGLSpectrum& response)
 {
-    if (spectrumSettingsKeys.contains("fftSize")) {
-        settings.m_fftSize = response.getFftSize();
+    QStringList prefixedKeys;
+
+    for (const auto &key : spectrumSettingsKeys) {
+        prefixedKeys.append(tr("spectrumConfig.%1").arg(key));
     }
-    if (spectrumSettingsKeys.contains("fftOverlap")) {
-        settings.m_fftOverlap = response.getFftOverlap();
-    }
-    if (spectrumSettingsKeys.contains("fftWindow")) {
-        settings.m_fftWindow = (FFTWindow::Function) response.getFftWindow();
-    }
-    if (spectrumSettingsKeys.contains("refLevel")) {
-        settings.m_refLevel = response.getRefLevel();
-    }
-    if (spectrumSettingsKeys.contains("powerRange")) {
-        settings.m_powerRange = response.getPowerRange();
-    }
-    if (spectrumSettingsKeys.contains("fpsPeriodMs")) {
-        settings.m_fpsPeriodMs = response.getFpsPeriodMs();
-    }
-    if (spectrumSettingsKeys.contains("decay")) {
-        settings.m_decay = response.getDecay();
-    }
-    if (spectrumSettingsKeys.contains("decayDivisor")) {
-        settings.m_decayDivisor = response.getDecayDivisor();
-    }
-    if (spectrumSettingsKeys.contains("histogramStroke")) {
-        settings.m_histogramStroke = response.getHistogramStroke();
-    }
-    if (spectrumSettingsKeys.contains("displayGridIntensity")) {
-        settings.m_displayGridIntensity = response.getDisplayGridIntensity();
-    }
-    if (spectrumSettingsKeys.contains("displayTraceIntensity")) {
-        settings.m_displayTraceIntensity = response.getDisplayTraceIntensity();
-    }
-    if (spectrumSettingsKeys.contains("displayWaterfall")) {
-        settings.m_displayWaterfall = response.getDisplayWaterfall() != 0;
-    }
-    if (spectrumSettingsKeys.contains("invertedWaterfall")) {
-        settings.m_invertedWaterfall = response.getInvertedWaterfall() != 0;
-    }
-    if (spectrumSettingsKeys.contains("waterfallShare")) {
-        settings.m_waterfallShare = response.getWaterfallShare();
-    }
-    if (spectrumSettingsKeys.contains("displayMaxHold")) {
-        settings.m_displayMaxHold = response.getDisplayMaxHold() != 0;
-    }
-    if (spectrumSettingsKeys.contains("displayCurrent")) {
-        settings.m_displayCurrent = response.getDisplayCurrent() != 0;
-    }
-    if (spectrumSettingsKeys.contains("displayHistogram")) {
-        settings.m_displayHistogram = response.getDisplayHistogram() != 0;
-    }
-    if (spectrumSettingsKeys.contains("displayGrid")) {
-        settings.m_displayGrid = response.getDisplayGrid() != 0;
-    }
-    if (spectrumSettingsKeys.contains("averagingMode")) {
-        settings.m_averagingMode = (SpectrumSettings::AveragingMode) response.getAveragingMode();
-    }
-    if (spectrumSettingsKeys.contains("averagingValue"))
-    {
-        qint32 tmp = response.getAveragingValue();
-        settings.m_averagingIndex = SpectrumSettings::getAveragingIndex(tmp, settings.m_averagingMode);
-        settings.m_averagingValue = SpectrumSettings::getAveragingValue(settings.m_averagingIndex, settings.m_averagingMode);
-    }
-    if (spectrumSettingsKeys.contains("linear")) {
-        settings.m_linear = response.getLinear() != 0;
-    }
-    if (spectrumSettingsKeys.contains("ssb")) {
-        settings.m_ssb = response.getSsb() != 0;
-    }
-    if (spectrumSettingsKeys.contains("usb")) {
-        settings.m_usb = response.getUsb() != 0;
-    }
-    if (spectrumSettingsKeys.contains("wsSpectrumAddress")) {
-        settings.m_wsSpectrumAddress = *response.getWsSpectrumAddress();
-    }
-    if (spectrumSettingsKeys.contains("wsSpectrumPort")) {
-        settings.m_wsSpectrumPort = response.getWsSpectrumPort();
-    }
+
+    settings.updateFrom(prefixedKeys, &response);
 }

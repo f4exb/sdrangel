@@ -3709,126 +3709,129 @@ bool WebAPIRequestMapper::validateLimeRFEConfig(SWGSDRangel::SWGLimeRFESettings&
 
 bool WebAPIRequestMapper::validateSpectrumSettings(SWGSDRangel::SWGGLSpectrum& spectrumSettings, QJsonObject& jsonObject, QStringList& spectrumSettingsKeys)
 {
-    if (jsonObject.contains("fftSize"))
-    {
-        spectrumSettings.setFftSize(jsonObject["fftSize"].toInt(1024));
-        spectrumSettingsKeys.append("fftSize");
-    }
-    if (jsonObject.contains("fftOverlap"))
-    {
-        spectrumSettings.setFftOverlap(jsonObject["fftOverlap"].toInt(0));
-        spectrumSettingsKeys.append("fftOverlap");
-    }
-    if (jsonObject.contains("fftWindow"))
-    {
-        spectrumSettings.setFftWindow(jsonObject["fftWindow"].toInt(0));
-        spectrumSettingsKeys.append("fftWindow");
-    }
-    if (jsonObject.contains("refLevel"))
-    {
-        spectrumSettings.setRefLevel(jsonObject["refLevel"].toDouble(0.0));
-        spectrumSettingsKeys.append("refLevel");
-    }
-    if (jsonObject.contains("powerRange"))
-    {
-        spectrumSettings.setPowerRange(jsonObject["powerRange"].toDouble(100.0));
-        spectrumSettingsKeys.append("powerRange");
-    }
-    if (jsonObject.contains("fpsPeriodMs"))
-    {
-        spectrumSettings.setFpsPeriodMs(jsonObject["fpsPeriodMs"].toInt(50));
-        spectrumSettingsKeys.append("fpsPeriodMs");
-    }
-    if (jsonObject.contains("displayWaterfall"))
-    {
-        spectrumSettings.setDisplayWaterfall(jsonObject["displayWaterfall"].toInt(0));
-        spectrumSettingsKeys.append("displayWaterfall");
-    }
-    if (jsonObject.contains("invertedWaterfall"))
-    {
-        spectrumSettings.setInvertedWaterfall(jsonObject["invertedWaterfall"].toInt(0));
-        spectrumSettingsKeys.append("invertedWaterfall");
-    }
-    if (jsonObject.contains("displayHistogram"))
-    {
-        spectrumSettings.setDisplayHistogram(jsonObject["displayHistogram"].toInt(0));
-        spectrumSettingsKeys.append("displayHistogram");
-    }
-    if (jsonObject.contains("decay"))
-    {
-        spectrumSettings.setDecay(jsonObject["decay"].toInt(1));
-        spectrumSettingsKeys.append("decay");
-    }
-    if (jsonObject.contains("displayGrid"))
-    {
-        spectrumSettings.setDisplayGrid(jsonObject["displayGrid"].toInt(0));
-        spectrumSettingsKeys.append("displayGrid");
-    }
-    if (jsonObject.contains("displayGridIntensity"))
-    {
-        spectrumSettings.setDisplayGridIntensity(jsonObject["displayGridIntensity"].toInt(30));
-        spectrumSettingsKeys.append("displayGridIntensity");
-    }
-    if (jsonObject.contains("decayDivisor"))
-    {
-        spectrumSettings.setDecayDivisor(jsonObject["decayDivisor"].toInt(1));
-        spectrumSettingsKeys.append("decayDivisor");
-    }
-    if (jsonObject.contains("histogramStroke"))
-    {
-        spectrumSettings.setHistogramStroke(jsonObject["histogramStroke"].toInt(10));
-        spectrumSettingsKeys.append("histogramStroke");
-    }
-    if (jsonObject.contains("displayCurrent"))
-    {
-        spectrumSettings.setDisplayCurrent(jsonObject["displayCurrent"].toInt(1));
-        spectrumSettingsKeys.append("displayCurrent");
-    }
-    if (jsonObject.contains("displayTraceIntensity"))
-    {
-        spectrumSettings.setDisplayTraceIntensity(jsonObject["displayTraceIntensity"].toInt(50));
-        spectrumSettingsKeys.append("displayTraceIntensity");
-    }
-    if (jsonObject.contains("waterfallShare"))
-    {
-        spectrumSettings.setWaterfallShare(jsonObject["waterfallShare"].toDouble(0.5));
-        spectrumSettingsKeys.append("waterfallShare");
-    }
-    if (jsonObject.contains("averagingMode"))
-    {
-        spectrumSettings.setAveragingMode(jsonObject["averagingMode"].toInt(0));
-        spectrumSettingsKeys.append("averagingMode");
-    }
-    if (jsonObject.contains("averagingValue"))
-    {
-        spectrumSettings.setAveragingValue(jsonObject["averagingValue"].toInt(0));
-        spectrumSettingsKeys.append("averagingValue");
-    }
-    if (jsonObject.contains("linear"))
-    {
-        spectrumSettings.setLinear(jsonObject["linear"].toInt(0));
-        spectrumSettingsKeys.append("linear");
-    }
-    if (jsonObject.contains("ssb"))
-    {
-        spectrumSettings.setSsb(jsonObject["ssb"].toInt(0));
-        spectrumSettingsKeys.append("ssb");
-    }
-    if (jsonObject.contains("usb"))
-    {
-        spectrumSettings.setUsb(jsonObject["usb"].toInt(1));
-        spectrumSettingsKeys.append("usb");
-    }
-    if (jsonObject.contains("wsSpectrumAddress") && jsonObject["wsSpectrumAddress"].isString())
-    {
-        spectrumSettings.setWsSpectrumAddress(new QString(jsonObject["wsSpectrumAddress"].toString()));
-        spectrumSettingsKeys.append("wsSpectrumAddress");
-    }
-    if (jsonObject.contains("wsSpectrumPort"))
-    {
-        spectrumSettings.setWsSpectrumPort(jsonObject["wsSpectrumPort"].toInt(8887));
-        spectrumSettingsKeys.append("wsSpectrumPort");
-    }
+    extractKeys(jsonObject, spectrumSettingsKeys);
+    spectrumSettings.init();
+    spectrumSettings.fromJsonObject(jsonObject);
+    // if (jsonObject.contains("fftSize"))
+    // {
+    //     spectrumSettings.setFftSize(jsonObject["fftSize"].toInt(1024));
+    //     spectrumSettingsKeys.append("fftSize");
+    // }
+    // if (jsonObject.contains("fftOverlap"))
+    // {
+    //     spectrumSettings.setFftOverlap(jsonObject["fftOverlap"].toInt(0));
+    //     spectrumSettingsKeys.append("fftOverlap");
+    // }
+    // if (jsonObject.contains("fftWindow"))
+    // {
+    //     spectrumSettings.setFftWindow(jsonObject["fftWindow"].toInt(0));
+    //     spectrumSettingsKeys.append("fftWindow");
+    // }
+    // if (jsonObject.contains("refLevel"))
+    // {
+    //     spectrumSettings.setRefLevel(jsonObject["refLevel"].toDouble(0.0));
+    //     spectrumSettingsKeys.append("refLevel");
+    // }
+    // if (jsonObject.contains("powerRange"))
+    // {
+    //     spectrumSettings.setPowerRange(jsonObject["powerRange"].toDouble(100.0));
+    //     spectrumSettingsKeys.append("powerRange");
+    // }
+    // if (jsonObject.contains("fpsPeriodMs"))
+    // {
+    //     spectrumSettings.setFpsPeriodMs(jsonObject["fpsPeriodMs"].toInt(50));
+    //     spectrumSettingsKeys.append("fpsPeriodMs");
+    // }
+    // if (jsonObject.contains("displayWaterfall"))
+    // {
+    //     spectrumSettings.setDisplayWaterfall(jsonObject["displayWaterfall"].toInt(0));
+    //     spectrumSettingsKeys.append("displayWaterfall");
+    // }
+    // if (jsonObject.contains("invertedWaterfall"))
+    // {
+    //     spectrumSettings.setInvertedWaterfall(jsonObject["invertedWaterfall"].toInt(0));
+    //     spectrumSettingsKeys.append("invertedWaterfall");
+    // }
+    // if (jsonObject.contains("displayHistogram"))
+    // {
+    //     spectrumSettings.setDisplayHistogram(jsonObject["displayHistogram"].toInt(0));
+    //     spectrumSettingsKeys.append("displayHistogram");
+    // }
+    // if (jsonObject.contains("decay"))
+    // {
+    //     spectrumSettings.setDecay(jsonObject["decay"].toInt(1));
+    //     spectrumSettingsKeys.append("decay");
+    // }
+    // if (jsonObject.contains("displayGrid"))
+    // {
+    //     spectrumSettings.setDisplayGrid(jsonObject["displayGrid"].toInt(0));
+    //     spectrumSettingsKeys.append("displayGrid");
+    // }
+    // if (jsonObject.contains("displayGridIntensity"))
+    // {
+    //     spectrumSettings.setDisplayGridIntensity(jsonObject["displayGridIntensity"].toInt(30));
+    //     spectrumSettingsKeys.append("displayGridIntensity");
+    // }
+    // if (jsonObject.contains("decayDivisor"))
+    // {
+    //     spectrumSettings.setDecayDivisor(jsonObject["decayDivisor"].toInt(1));
+    //     spectrumSettingsKeys.append("decayDivisor");
+    // }
+    // if (jsonObject.contains("histogramStroke"))
+    // {
+    //     spectrumSettings.setHistogramStroke(jsonObject["histogramStroke"].toInt(10));
+    //     spectrumSettingsKeys.append("histogramStroke");
+    // }
+    // if (jsonObject.contains("displayCurrent"))
+    // {
+    //     spectrumSettings.setDisplayCurrent(jsonObject["displayCurrent"].toInt(1));
+    //     spectrumSettingsKeys.append("displayCurrent");
+    // }
+    // if (jsonObject.contains("displayTraceIntensity"))
+    // {
+    //     spectrumSettings.setDisplayTraceIntensity(jsonObject["displayTraceIntensity"].toInt(50));
+    //     spectrumSettingsKeys.append("displayTraceIntensity");
+    // }
+    // if (jsonObject.contains("waterfallShare"))
+    // {
+    //     spectrumSettings.setWaterfallShare(jsonObject["waterfallShare"].toDouble(0.5));
+    //     spectrumSettingsKeys.append("waterfallShare");
+    // }
+    // if (jsonObject.contains("averagingMode"))
+    // {
+    //     spectrumSettings.setAveragingMode(jsonObject["averagingMode"].toInt(0));
+    //     spectrumSettingsKeys.append("averagingMode");
+    // }
+    // if (jsonObject.contains("averagingValue"))
+    // {
+    //     spectrumSettings.setAveragingValue(jsonObject["averagingValue"].toInt(0));
+    //     spectrumSettingsKeys.append("averagingValue");
+    // }
+    // if (jsonObject.contains("linear"))
+    // {
+    //     spectrumSettings.setLinear(jsonObject["linear"].toInt(0));
+    //     spectrumSettingsKeys.append("linear");
+    // }
+    // if (jsonObject.contains("ssb"))
+    // {
+    //     spectrumSettings.setSsb(jsonObject["ssb"].toInt(0));
+    //     spectrumSettingsKeys.append("ssb");
+    // }
+    // if (jsonObject.contains("usb"))
+    // {
+    //     spectrumSettings.setUsb(jsonObject["usb"].toInt(1));
+    //     spectrumSettingsKeys.append("usb");
+    // }
+    // if (jsonObject.contains("wsSpectrumAddress") && jsonObject["wsSpectrumAddress"].isString())
+    // {
+    //     spectrumSettings.setWsSpectrumAddress(new QString(jsonObject["wsSpectrumAddress"].toString()));
+    //     spectrumSettingsKeys.append("wsSpectrumAddress");
+    // }
+    // if (jsonObject.contains("wsSpectrumPort"))
+    // {
+    //     spectrumSettings.setWsSpectrumPort(jsonObject["wsSpectrumPort"].toInt(8887));
+    //     spectrumSettingsKeys.append("wsSpectrumPort");
+    // }
 
     return true;
 }
