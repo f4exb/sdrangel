@@ -92,6 +92,8 @@ QByteArray BFMDemodSettings::serialize() const
         s.writeBlob(20, m_rollupState->serialize());
     }
 
+    s.writeBool(21, m_rdsActive);
+
     return s.final();
 }
 
@@ -163,6 +165,8 @@ bool BFMDemodSettings::deserialize(const QByteArray& data)
             d.readBlob(20, &bytetmp);
             m_rollupState->deserialize(bytetmp);
         }
+
+        d.readBool(21, &m_rdsActive, false);
 
         return true;
     }
