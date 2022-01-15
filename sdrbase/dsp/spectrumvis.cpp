@@ -1,9 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2015-2020 Edouard Griffiths, F4EXB                              //
 //                                                                               //
-// Symbol synchronizer or symbol clock recovery mostly encapsulating             //
-// liquid-dsp's symsync "object"                                                 //
-//                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
 // the Free Software Foundation as version 3 of the License, or                  //
