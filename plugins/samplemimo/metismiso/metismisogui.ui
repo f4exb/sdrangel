@@ -307,6 +307,9 @@
         <font>
          <family>Liberation Mono</family>
          <pointsize>20</pointsize>
+         <weight>50</weight>
+         <italic>false</italic>
+         <bold>false</bold>
         </font>
        </property>
        <property name="cursor">
@@ -415,7 +418,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Modulation</string>
+        <string>Rx sample rate (Tx: fixed 48k)</string>
        </property>
        <item>
         <property name="text">
@@ -453,6 +456,9 @@
          <width>50</width>
          <height>16777215</height>
         </size>
+       </property>
+       <property name="toolTip">
+        <string>Decimation (Rx)</string>
        </property>
        <item>
         <property name="text">
@@ -818,15 +824,15 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
    <class>ValueDial</class>
    <extends>QWidget</extends>
    <header>gui/valuedial.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
    <class>TransverterButton</class>

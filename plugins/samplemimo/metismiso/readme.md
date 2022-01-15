@@ -73,6 +73,8 @@ This combo box lets you control the four pssible values for the device to host s
 
 The I/Q stream from the Metis stream is downsampled by a power of two before being sent to the passband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8.
 
+Note that there is no interpolation on the Tx side.
+
 <h4>8.3: Subsampling index</h4>
 
 The Red Pitaya has a LTC2185 ADC specified for a bandwidth up to 550 MHz. This lets you use the Red Pitaya receivers in subsampling mode with appropriate filtering and LNA chain as a front end. In this mode the received frequency may extend above 61.44 MHz in successive 61.44 MHz wide bands. This index corresponds to the frequency band index from 0 to 7 and let you input the frequency directly corresponding the the subsampling scheme. The band limits appear in the tooltip and are the following:
