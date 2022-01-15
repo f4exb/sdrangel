@@ -435,8 +435,7 @@ bool MetisMISO::applySettings(const MetisMISOSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_txCenterFrequency != settings.m_txCenterFrequency) ||
-        (m_settings.m_log2Decim != settings.m_log2Decim) || force)
+    if ((m_settings.m_txCenterFrequency != settings.m_txCenterFrequency) || force)
     {
         DSPMIMOSignalNotification *engineTxNotif = new DSPMIMOSignalNotification(
             48000, settings.m_txCenterFrequency, false, 0);
