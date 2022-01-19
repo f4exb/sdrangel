@@ -1012,7 +1012,7 @@ bool APRSPacket::parseMicE(QString& info, int& idx, QString& dest)
     QString latDigits = '';
     QString messageBits = '';
     int messageType = 0; // 0 = Standard, 1 = Custom
-    int latitudeOffset = 0;
+    int longitudeOffset = 0;
     float latitudeDirection = -1; // Assume South because North is easier to code
     float longitudeDirection = 1;
 
@@ -1023,7 +1023,7 @@ bool APRSPacket::parseMicE(QString& info, int& idx, QString& dest)
             if (inRange(48, 57, charInt)) {
                 latDigits.append(static_cast<char>(dest[i] % 48));
             } else if (inRange(65, 74, charInt)) {
-                latDigits.append(static_cast<char>(dest[i] % 48));
+                latDigits.append(static_cast<char>(dest[i] % 65));
             } else if (inRange(80, 89, charInt)) {
                 latDigits.append(static_cast<char>(dest[i] % 80));
             } else {
@@ -1052,7 +1052,7 @@ bool APRSPacket::parseMicE(QString& info, int& idx, QString& dest)
             // Longitude Offset
             if (i == 4) {
                 if (inRange(65, 75, charInt))
-                    latitudeOffset = 100;
+                    longitudeOffset = 100;
             }
 
             // Longitude Direction
@@ -1063,6 +1063,7 @@ bool APRSPacket::parseMicE(QString& info, int& idx, QString& dest)
         }
 
         m_latitude = (((float)latDigits.mid(0, 2)) + latDigits.mid(2, 2)/60.00 + latDigits.mid(4, 2)/60.0/100.0) * latitudeDirection;
+        m_hasPosition = true;
 
     } else
         return false;
@@ -1086,11 +1087,9 @@ bool APRSPacket::parseMicE(QString& info, int& idx, QString& dest)
         && (charToInt(info, idx+7) == 47 || charToInt(info, idx+7) == 92)
        )
     {
-        // Longitude
-        int deg = charToInt(info, idx) - 28;
+        // Longitude, plus offset encoded in the AX.25 Destination 
+        int deg = (charToInt(info, idx) - 28) + longitudeOffset;
         // Destination Byte 5, ASCII P through Z is offset of +100
-        if (inRange(80, 90, charToInt(dest, 4)))
-            deg += 100;
         if (inRange(180, 189, deg))
             deg -= 80;
         if (inRange(190, 199, deg))
@@ -1118,8 +1117,9 @@ bool APRSPacket::parseMicE(QString& info, int& idx, QString& dest)
     } else
         return false;
 
-    return true;
     // Altitude
     // #TODO
+
+    return true;
 }
 
