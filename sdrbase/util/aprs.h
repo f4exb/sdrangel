@@ -461,6 +461,7 @@ private:
     int charToInt(QString &s, int idx);
     bool parseTime(QString& info, int& idx);
     bool parseTimeMDHM(QString& info, int& idx);
+    bool inRange(unsigned low, unsigned high, unsigned x);
     bool isLatLongChar(QCharRef c);
     bool parsePosition(QString& info, int& idx);
     bool parseDataExension(QString& info, int& idx);
@@ -473,6 +474,7 @@ private:
     bool parseStatus(QString& info, int& idx);
     bool parseMessage(QString& info, int& idx);
     bool parseTelemetry(QString& info, int& idx);
+    bool parseMicE(QString& info, int& idx, QString& dest);
 };
 
 #endif // INCLUDE_APRS_H

@@ -143,6 +143,10 @@ bool APRSPacket::decode(AX25Packet packet)
                 parseTimeMDHM(packet.m_dataASCII, idx);
                 parseWeather(packet.m_dataASCII, idx, true);
                 break;
+            case '`': // Mic-E Information Field Data (current)
+            case '\'': // Mic-E Information Field Data (old)
+                parseMicE(packet.m_dataASCII, idx, m_to);
+                break;
             case '{': // User-defined APRS packet format
                 break;
             default:
@@ -166,6 +170,12 @@ int APRSPacket::charToInt(QString&s, int idx)
 {
     char c = s[idx].toLatin1();
     return c == ' ' ? 0 : c - '0';
+}
+
+// Mic-E Byte in Range
+bool APRSPacket::inRange(unsigned low, unsigned high, unsigned x)
+{
+ return (low <= x && x <= high);
 }
 
 bool APRSPacket::parseTime(QString& info, int& idx)
@@ -988,3 +998,128 @@ bool APRSPacket::parseTelemetry(QString& info, int& idx)
     else
         return false;
 }
+
+bool APRSPacket::parseMicE(QString& info, int& idx, QString& dest)
+{
+    // Mic-E Location data is encoded in the AX.25 Destination Address
+    if (dest.length() < 6)
+        return false;
+
+    // Mic-E Information data is 8 bytes minimum, 13-14 with altitude
+    if (info.length() < idx+8)
+        return false;
+
+    QString latDigits = '';
+    QString messageBits = '';
+    int messageType = 0; // 0 = Standard, 1 = Custom
+    int latitudeOffset = 0;
+    float latitudeDirection = -1; // Assume South because North is easier to code
+    float longitudeDirection = 1;
+
+    QRegExp re("^[A-LP-Z0-9]{3}[L-Z0-9]{3}.?$"); // 6-7 bytes
+    if (re.exactMatch(dest)) {
+        for (int i = 0; i < 6; i++) {
+            int charInt = charToInt(dest, i);
+            if (inRange(48, 57, charInt)) {
+                latDigits.append(static_cast<char>(dest[i] % 48));
+            } else if (inRange(65, 74, charInt)) {
+                latDigits.append(static_cast<char>(dest[i] % 48));
+            } else if (inRange(80, 89, charInt)) {
+                latDigits.append(static_cast<char>(dest[i] % 80));
+            } else {
+                latDigits.append(' ');
+            }
+
+            // Message Type is encoded in 3 bits
+            if (i < 3) {
+                if (inRange(48, 57, charInt) || charInt == 76) // 0-9 or L
+                    messageBits.append('0');
+                else if (inRange(80, 90, charInt)) { // A-K, Standard
+                    messageBits.append('1');
+                    messageType = 0;
+                } else if (inRange(65, 75, charInt)) { // P-Z, Custom
+                    messageBits.append('1');
+                    messageType = 1;
+                }
+            }
+
+            // Latitude Direction
+            if (i == 3) {
+                if (inRange(65, 75, charInt))
+                    latitudeDirection = 1;
+            }
+
+            // Longitude Offset
+            if (i == 4) {
+                if (inRange(65, 75, charInt))
+                    latitudeOffset = 100;
+            }
+
+            // Longitude Direction
+            if (i == 5) {
+                if (inRange(65, 75, charInt))
+                    longitudeDirection = -1;
+            }
+        }
+
+        m_latitude = (((float)latDigits.mid(0, 2)) + latDigits.mid(2, 2)/60.00 + latDigits.mid(4, 2)/60.0/100.0) * latitudeDirection;
+
+    } else
+        return false;
+
+    // Mic-E Data is encoded in ASCII.
+    // 0: Longitude Degrees, 0-360
+    // 1: Longitude Minutes, 0-59
+    // 2: Longitude Hundreths of a minute, 0-99
+    // 3: Speed, units of 10
+    // 4: Speed, units of 1, Course, Units of 100
+    // 5: Course, 0-99 degrees
+    // 6: Symbol Code
+    // 7: Symbol Table ID, / = standard, \ = alternate
+    if (inRange(38, 127, charToInt(info, idx))
+        && inRange(38, 97, charToInt(info, idx+1))
+        && inRange(28, 127, charToInt(info, idx+2))
+        && inRange(48, 127, charToInt(info, idx+3))
+        && inRange(28, 125, charToInt(info, idx+4))
+        && inRange(28, 127, charToInt(info, idx+5))
+        && inRange(33, 126, charToInt(info, idx+6))
+        && (charToInt(info, idx+7) == 47 || charToInt(info, idx+7) == 92)
+       )
+    {
+        // Longitude
+        int deg = charToInt(info, idx) - 28;
+        // Destination Byte 5, ASCII P through Z is offset of +100
+        if (inRange(80, 90, charToInt(dest, 4)))
+            deg += 100;
+        if (inRange(180, 189, deg))
+            deg -= 80;
+        if (inRange(190, 199, deg))
+            deg -= 190;
+
+        // Crap. You need the Longitude Offset from the Destination Address.
+        // How do I get that here???
+
+        int min = (charToInt(info, idx+1) - 28) % 60;
+        int hundreths = charToInt(info, idx+2);
+
+        // Course and Speed
+
+        int speed = ((charToInt(info, idx+3) - 28) * 10) % 800; // Speed in 10 kts units
+        float decoded_speed_course = (charToInt(info, idx+4) - 28) / 10;
+        speed += floor(decoded_speed_course); // Speed in 1 kt units, added to above
+        int course = (((charToInt(info, idx+4) - 28) % 10) * 100) % 400;
+        int course += charToInt(info, idx+5) - 28;
+
+        m_longitude = (((float)deg) + min/60.00 + hundreths/60.0/100.0) * longitudeDirection;
+        m_hasPosition = true;
+        m_symbolTable = info[idx+7].toLatin1();
+        m_symbolCode = info[idx+6].toLatin1();
+        m_hasSymbol = true;
+    } else
+        return false;
+
+    return true;
+    // Altitude
+    // #TODO
+}
+
