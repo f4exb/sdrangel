@@ -21,6 +21,11 @@
 
 #include "aprs.h"
 
+inline bool inRange(unsigned low, unsigned high, unsigned x)
+{
+    return (low <= x && x <= high);
+}
+
 // See: http://www.aprs.org/doc/APRS101.PDF
 
 // Currently we only decode what we want to display on the map
@@ -170,12 +175,6 @@ int APRSPacket::charToInt(QString&s, int idx)
 {
     char c = s[idx].toLatin1();
     return c == ' ' ? 0 : c - '0';
-}
-
-// Mic-E Byte in Range
-bool APRSPacket::inRange(unsigned low, unsigned high, unsigned x)
-{
- return (low <= x && x <= high);
 }
 
 bool APRSPacket::parseTime(QString& info, int& idx)
@@ -1009,8 +1008,8 @@ bool APRSPacket::parseMicE(QString& info, int& idx, QString& dest)
     if (info.length() < idx+8)
         return false;
 
-    QString latDigits = '';
-    QString messageBits = '';
+    QString latDigits = "";
+    QString messageBits = "";
     int messageType = 0; // 0 = Standard, 1 = Custom
     int longitudeOffset = 0;
     float latitudeDirection = -1; // Assume South because North is easier to code
@@ -1020,7 +1019,7 @@ bool APRSPacket::parseMicE(QString& info, int& idx, QString& dest)
     if (re.exactMatch(dest)) {
         for (int i = 0; i < 6; i++) {
             int charInt = charToInt(dest, i);
-            if (inRange(48, 57, charInt)) {
+            if (inRange(48, 57, charInt)) { 
                 latDigits.append(static_cast<char>(dest[i] % 48));
             } else if (inRange(65, 74, charInt)) {
                 latDigits.append(static_cast<char>(dest[i] % 65));
@@ -1032,9 +1031,9 @@ bool APRSPacket::parseMicE(QString& info, int& idx, QString& dest)
 
             // Message Type is encoded in 3 bits
             if (i < 3) {
-                if (inRange(48, 57, charInt) || charInt == 76) // 0-9 or L
+                if (inRange(48, 57, charInt) || charInt == 76) { // 0-9 or L
                     messageBits.append('0');
-                else if (inRange(80, 90, charInt)) { // A-K, Standard
+                } else if (inRange(80, 90, charInt)) { // A-K, Standard
                     messageBits.append('1');
                     messageType = 0;
                 } else if (inRange(65, 75, charInt)) { // P-Z, Custom
@@ -1065,8 +1064,9 @@ bool APRSPacket::parseMicE(QString& info, int& idx, QString& dest)
         m_latitude = (((float)latDigits.mid(0, 2)) + latDigits.mid(2, 2)/60.00 + latDigits.mid(4, 2)/60.0/100.0) * latitudeDirection;
         m_hasPosition = true;
 
-    } else
+    } else {
         return false;
+    }
 
     // Mic-E Data is encoded in ASCII.
     // 0: Longitude Degrees, 0-360
@@ -1114,8 +1114,9 @@ bool APRSPacket::parseMicE(QString& info, int& idx, QString& dest)
         m_symbolTable = info[idx+7].toLatin1();
         m_symbolCode = info[idx+6].toLatin1();
         m_hasSymbol = true;
-    } else
+    } else {
         return false;
+    }
 
     // Altitude
     // #TODO
