@@ -1019,12 +1019,12 @@ bool APRSPacket::parseMicE(QString& info, int& idx, QString& dest)
     if (re.exactMatch(dest)) {
         for (int i = 0; i < 6; i++) {
             int charInt = charToInt(dest, i);
-            if (inRange(48, 57, charInt)) { 
-                latDigits.append(static_cast<char>(dest[i] % 48));
+            if (inRange(48, 57, charInt)) {
+                latDigits.append(static_cast<char>(charToInt(dest, i) % 48));
             } else if (inRange(65, 74, charInt)) {
-                latDigits.append(static_cast<char>(dest[i] % 65));
+                latDigits.append(static_cast<char>(charToInt(dest, i) % 65));
             } else if (inRange(80, 89, charInt)) {
-                latDigits.append(static_cast<char>(dest[i] % 80));
+                latDigits.append(static_cast<char>(charToInt(dest, i) % 80));
             } else {
                 latDigits.append(' ');
             }
@@ -1061,7 +1061,7 @@ bool APRSPacket::parseMicE(QString& info, int& idx, QString& dest)
             }
         }
 
-        m_latitude = (((float)latDigits.mid(0, 2)) + latDigits.mid(2, 2)/60.00 + latDigits.mid(4, 2)/60.0/100.0) * latitudeDirection;
+        m_latitude = (latDigits.mid(0, 2).toFloat() + latDigits.mid(2, 2).toFloat()/60.00 + latDigits.mid(4, 2).toFloat()/60.0/100.0) * latitudeDirection;
         m_hasPosition = true;
 
     } else {
@@ -1087,7 +1087,7 @@ bool APRSPacket::parseMicE(QString& info, int& idx, QString& dest)
         && (charToInt(info, idx+7) == 47 || charToInt(info, idx+7) == 92)
        )
     {
-        // Longitude, plus offset encoded in the AX.25 Destination 
+        // Longitude, plus offset encoded in the AX.25 Destination
         int deg = (charToInt(info, idx) - 28) + longitudeOffset;
         // Destination Byte 5, ASCII P through Z is offset of +100
         if (inRange(180, 189, deg))
@@ -1107,7 +1107,7 @@ bool APRSPacket::parseMicE(QString& info, int& idx, QString& dest)
         float decoded_speed_course = (charToInt(info, idx+4) - 28) / 10;
         speed += floor(decoded_speed_course); // Speed in 1 kt units, added to above
         int course = (((charToInt(info, idx+4) - 28) % 10) * 100) % 400;
-        int course += charToInt(info, idx+5) - 28;
+        course += charToInt(info, idx+5) - 28;
 
         m_longitude = (((float)deg) + min/60.00 + hundreths/60.0/100.0) * longitudeDirection;
         m_hasPosition = true;
