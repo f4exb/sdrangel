@@ -36,7 +36,8 @@ bool APRSPacket::decode(AX25Packet packet)
     {
         // Check destination address
         QRegExp re("^(AIR.*|ALL.*|AP.*|BEACON|CQ.*|GPS.*|DF.*|DGPS.*|DRILL.*|DX.*|ID.*|JAVA.*|MAIL.*|MICE.*|QST.*|QTH.*|RTCM.*|SKY.*|SPACE.*|SPC.*|SYM.*|TEL.*|TEST.*|TLM.*|WX.*|ZIP.*)");
-        if (re.exactMatch(packet.m_to))
+        QRegExp re_mice("^[A-LP-Z0-9]{3}[L-Z0-9]{3}.?$"); // Mic-E Encoded Destination, 6-7 bytes
+        if (re.exactMatch(packet.m_to) || re_mice.exactMatch(packet.m_to))
         {
             m_from = packet.m_from;
             m_to = packet.m_to;
@@ -165,8 +166,13 @@ bool APRSPacket::decode(AX25Packet packet)
             }
 
             return true;
+        } else {
+            qDebug() << "APRSPacket::decode: AX.25 Destination did not match known regexp " << m_to;
         }
+    } else {
+        qDebug() << "APRSPacket::decode: Invalid value in type=" << packet.m_type << " pid=" << packet.m_pid << " length of " << packet.m_dataASCII;
     }
+
 
     return false;
 }
@@ -1002,10 +1008,12 @@ bool APRSPacket::parseMicE(QString& info, int& idx, QString& dest)
 {
     // Mic-E Location data is encoded in the AX.25 Destination Address
     if (dest.length() < 6)
+        qDebug() << "APRSPacket::parseMicE: Destination invalid length " << dest;
         return false;
 
     // Mic-E Information data is 8 bytes minimum, 13-14 with altitude
     if (info.length() < idx+8)
+        qDebug() << "APRSPacket::parseMicE: Information Data invalid length " << info;
         return false;
 
     QString latDigits = "";
@@ -1065,6 +1073,7 @@ bool APRSPacket::parseMicE(QString& info, int& idx, QString& dest)
         m_hasPosition = true;
 
     } else {
+        qDebug() << "APRSPacket::parseMicE: Destination invalid regexp match " << dest;
         return false;
     }
 
@@ -1104,7 +1113,7 @@ bool APRSPacket::parseMicE(QString& info, int& idx, QString& dest)
         // Course and Speed
 
         int speed = ((charToInt(info, idx+3) - 28) * 10) % 800; // Speed in 10 kts units
-        float decoded_speed_course = (charToInt(info, idx+4) - 28) / 10;
+        float decoded_speed_course = (float)(charToInt(info, idx+4) - 28) / 10.0;
         speed += floor(decoded_speed_course); // Speed in 1 kt units, added to above
         int course = (((charToInt(info, idx+4) - 28) % 10) * 100) % 400;
         course += charToInt(info, idx+5) - 28;
@@ -1115,11 +1124,14 @@ bool APRSPacket::parseMicE(QString& info, int& idx, QString& dest)
         m_symbolCode = info[idx+6].toLatin1();
         m_hasSymbol = true;
     } else {
+        qDebug() << "APRSPacket::parseMicE: Information Data invalid ASCII range " << info;
         return false;
     }
 
     // Altitude
     // #TODO
+
+    qDebug() << "APRSPacket::parseMicE: Successfully Decoded Maybe";
 
     return true;
 }
