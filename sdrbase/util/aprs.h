@@ -461,7 +461,6 @@ private:
     int charToInt(QString &s, int idx);
     bool parseTime(QString& info, int& idx);
     bool parseTimeMDHM(QString& info, int& idx);
-    bool inRange(unsigned low, unsigned high, unsigned x);
     bool isLatLongChar(QCharRef c);
     bool parsePosition(QString& info, int& idx);
     bool parseDataExension(QString& info, int& idx);
