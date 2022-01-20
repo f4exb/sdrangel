@@ -84,6 +84,8 @@ SWGGLSpectrum::SWGGLSpectrum() {
     m_histogram_markers_isSet = false;
     waterfall_markers = nullptr;
     m_waterfall_markers_isSet = false;
+    annotation_markers = nullptr;
+    m_annotation_markers_isSet = false;
 }
 
 SWGGLSpectrum::~SWGGLSpectrum() {
@@ -148,6 +150,8 @@ SWGGLSpectrum::init() {
     m_histogram_markers_isSet = false;
     waterfall_markers = new QList<SWGSpectrumWaterfallMarker*>();
     m_waterfall_markers_isSet = false;
+    annotation_markers = new QList<SWGSpectrumAnnotationMarker*>();
+    m_annotation_markers_isSet = false;
 }
 
 void
@@ -193,6 +197,13 @@ SWGGLSpectrum::cleanup() {
             delete o;
         }
         delete waterfall_markers;
+    }
+    if(annotation_markers != nullptr) { 
+        auto arr = annotation_markers;
+        for(auto o: *arr) { 
+            delete o;
+        }
+        delete annotation_markers;
     }
 }
 
@@ -263,6 +274,8 @@ SWGGLSpectrum::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&histogram_markers, pJson["histogramMarkers"], "QList", "SWGSpectrumHistogramMarker");
     
     ::SWGSDRangel::setValue(&waterfall_markers, pJson["waterfallMarkers"], "QList", "SWGSpectrumWaterfallMarker");
+    
+    ::SWGSDRangel::setValue(&annotation_markers, pJson["annotationMarkers"], "QList", "SWGSpectrumAnnotationMarker");
 }
 
 QString
@@ -362,6 +375,9 @@ SWGGLSpectrum::asJsonObject() {
     }
     if(waterfall_markers && waterfall_markers->size() > 0){
         toJsonArray((QList<void*>*)waterfall_markers, obj, "waterfallMarkers", "SWGSpectrumWaterfallMarker");
+    }
+    if(annotation_markers && annotation_markers->size() > 0){
+        toJsonArray((QList<void*>*)annotation_markers, obj, "annotationMarkers", "SWGSpectrumAnnotationMarker");
     }
 
     return obj;
@@ -647,6 +663,16 @@ SWGGLSpectrum::setWaterfallMarkers(QList<SWGSpectrumWaterfallMarker*>* waterfall
     this->m_waterfall_markers_isSet = true;
 }
 
+QList<SWGSpectrumAnnotationMarker*>*
+SWGGLSpectrum::getAnnotationMarkers() {
+    return annotation_markers;
+}
+void
+SWGGLSpectrum::setAnnotationMarkers(QList<SWGSpectrumAnnotationMarker*>* annotation_markers) {
+    this->annotation_markers = annotation_markers;
+    this->m_annotation_markers_isSet = true;
+}
+
 
 bool
 SWGGLSpectrum::isSet(){
@@ -734,6 +760,9 @@ SWGGLSpectrum::isSet(){
             isObjectUpdated = true; break;
         }
         if(waterfall_markers && (waterfall_markers->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(annotation_markers && (annotation_markers->size() > 0)){
             isObjectUpdated = true; break;
         }
     }while(false);

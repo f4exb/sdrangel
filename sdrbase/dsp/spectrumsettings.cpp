@@ -15,6 +15,9 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QBuffer>
+#include <QDataStream>
+
 #include "SWGGLSpectrum.h"
 
 #include "util/simpleserializer.h"
@@ -102,7 +105,23 @@ QByteArray SpectrumSettings::serialize() const
 		s.writeBlob(111+i, m_waterfallMarkers[i].serialize());
 	}
 
+    QByteArray data;
+    QDataStream *stream = new QDataStream(&data, QIODevice::WriteOnly);
+    (*stream) << m_annoationMarkers;
+    delete stream;
+	s.writeBlob(40, data);
+
 	return s.final();
+}
+
+QDataStream& operator<<(QDataStream& out, const SpectrumAnnotationMarker& marker)
+{
+	out << marker.m_startFrequency;
+	out << marker.m_bandwidth;
+	out << marker.m_markerColor;
+	out << marker.m_show;
+	out << marker.m_text;
+	return out;
 }
 
 bool SpectrumSettings::deserialize(const QByteArray& data)
@@ -182,6 +201,11 @@ bool SpectrumSettings::deserialize(const QByteArray& data)
 			m_waterfallMarkers.back().deserialize(bytetmp);
 		}
 
+		d.readBlob(40, &bytetmp);
+		QDataStream *stream = new QDataStream(bytetmp);
+		(*stream) >> m_annoationMarkers;
+		delete stream;
+
 		return true;
 	}
     else
@@ -189,6 +213,16 @@ bool SpectrumSettings::deserialize(const QByteArray& data)
 		resetToDefaults();
 		return false;
 	}
+}
+
+QDataStream& operator>>(QDataStream& in, SpectrumAnnotationMarker& marker)
+{
+    in >> marker.m_startFrequency;
+    in >> marker.m_bandwidth;
+    in >> marker.m_markerColor;
+    in >> marker.m_show;
+    in >> marker.m_text;
+    return in;
 }
 
 void SpectrumSettings::formatTo(SWGSDRangel::SWGObject *swgObject) const
@@ -254,6 +288,20 @@ void SpectrumSettings::formatTo(SWGSDRangel::SWGObject *swgObject) const
 			swgSpectrum->getWaterfallMarkers()->back()->setTime(marker.m_time);
 			swgSpectrum->getWaterfallMarkers()->back()->setMarkerColor(qColorToInt(marker.m_markerColor));
 			swgSpectrum->getWaterfallMarkers()->back()->setShow(marker.m_show ? 1 : 0);
+		}
+	}
+
+	if (m_annoationMarkers.size() > 0)
+	{
+		swgSpectrum->setAnnotationMarkers(new QList<SWGSDRangel::SWGSpectrumAnnotationMarker *>);
+
+		for (const auto &marker : m_annoationMarkers)
+		{
+			swgSpectrum->getAnnotationMarkers()->append(new SWGSDRangel::SWGSpectrumAnnotationMarker);
+			swgSpectrum->getAnnotationMarkers()->back()->setStartFrequency(marker.m_startFrequency);
+			swgSpectrum->getAnnotationMarkers()->back()->setBandwidth(marker.m_bandwidth);
+			swgSpectrum->getAnnotationMarkers()->back()->setMarkerColor(qColorToInt(marker.m_markerColor));
+			swgSpectrum->getAnnotationMarkers()->back()->setShow(marker.m_show ? 1 : 0);
 		}
 	}
 }
@@ -351,6 +399,7 @@ void SpectrumSettings::updateFrom(const QStringList& keys, const SWGSDRangel::SW
 	{
         QList<SWGSDRangel::SWGSpectrumHistogramMarker *> *swgHistogramMarkers = swgSpectrum->getHistogramMarkers();
         m_histogramMarkers.clear();
+		int i = 0;
 
 		for (const auto &swgHistogramMarker : *swgHistogramMarkers)
 		{
@@ -360,6 +409,10 @@ void SpectrumSettings::updateFrom(const QStringList& keys, const SWGSDRangel::SW
 			m_histogramMarkers.back().m_markerType = (SpectrumHistogramMarker::SpectrumMarkerType) swgHistogramMarker->getMarkerType();
 			m_histogramMarkers.back().m_markerColor = intToQColor(swgHistogramMarker->getMarkerColor());
 			m_histogramMarkers.back().m_show = swgHistogramMarker->getShow() != 0;
+
+			if (i++ == 10) { // no more than 10 markers
+				break;
+			}
 		}
 	}
 
@@ -367,6 +420,7 @@ void SpectrumSettings::updateFrom(const QStringList& keys, const SWGSDRangel::SW
 	{
         QList<SWGSDRangel::SWGSpectrumWaterfallMarker *> *swgWaterfallMarkers = swgSpectrum->getWaterfallMarkers();
         m_waterfallMarkers.clear();
+		int i = 0;
 
 		for (const auto &swgWaterfallMarker : *swgWaterfallMarkers)
 		{
@@ -375,6 +429,25 @@ void SpectrumSettings::updateFrom(const QStringList& keys, const SWGSDRangel::SW
 			m_waterfallMarkers.back().m_time = swgWaterfallMarker->getTime();
 			m_waterfallMarkers.back().m_markerColor = intToQColor(swgWaterfallMarker->getMarkerColor());
 			m_waterfallMarkers.back().m_show = swgWaterfallMarker->getShow() != 0;
+
+			if (i++ == 10) { // no more than 10 markers
+				break;
+			}
+		}
+	}
+
+	if (keys.contains("spectrumConfig.annotationMarkers"))
+	{
+        QList<SWGSDRangel::SWGSpectrumAnnotationMarker *> *swgAnnotationMarkers = swgSpectrum->getAnnotationMarkers();
+        m_waterfallMarkers.clear();
+
+		for (const auto &swgAnnotationMarker : *swgAnnotationMarkers)
+		{
+			m_annoationMarkers.push_back(SpectrumAnnotationMarker());
+			m_annoationMarkers.back().m_startFrequency = swgAnnotationMarker->getStartFrequency();
+			m_annoationMarkers.back().m_bandwidth = swgAnnotationMarker->getBandwidth() < 0 ? 0 : swgAnnotationMarker->getBandwidth();
+			m_annoationMarkers.back().m_markerColor = intToQColor(swgAnnotationMarker->getMarkerColor());
+			m_annoationMarkers.back().m_show = swgAnnotationMarker->getShow() != 0;
 		}
 	}
 }

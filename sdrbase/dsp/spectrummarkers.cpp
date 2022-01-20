@@ -113,3 +113,51 @@ bool SpectrumWaterfallMarker::deserialize(const QByteArray& data)
         return false;
     }
 }
+
+QByteArray SpectrumAnnotationMarker::serialize() const
+{
+    SimpleSerializer s(1);
+
+    s.writeS64(1, m_startFrequency);
+    s.writeU32(2, m_bandwidth);
+    int r, g, b;
+    m_markerColor.getRgb(&r, &g, &b);
+    s.writeS32(4, r);
+    s.writeS32(5, g);
+    s.writeS32(6, b);
+    s.writeBool(7, m_show);
+    s.writeString(8, m_text);
+
+    return s.final();
+}
+
+bool SpectrumAnnotationMarker::deserialize(const QByteArray& data)
+{
+	SimpleDeserializer d(data);
+
+	if (!d.isValid()) {
+		return false;
+	}
+
+    if (d.getVersion() == 1)
+    {
+        d.readS64(1, &m_startFrequency, 0);
+        d.readU32(2, &m_bandwidth, 0);
+        int r, g, b;
+        d.readS32(4, &r, 255);
+        m_markerColor.setRed(r);
+        d.readS32(5, &g, 255);
+        m_markerColor.setGreen(g);
+        d.readS32(6, &b, 255);
+        m_markerColor.setBlue(b);
+        d.readBool(7, &m_show, true);
+        d.readString(8, &m_text);
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+
+}

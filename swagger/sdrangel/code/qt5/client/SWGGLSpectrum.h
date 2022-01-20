@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include "SWGSpectrumAnnotationMarker.h"
 #include "SWGSpectrumHistogramMarker.h"
 #include "SWGSpectrumWaterfallMarker.h"
 #include <QList>
@@ -129,6 +130,9 @@ public:
     QList<SWGSpectrumWaterfallMarker*>* getWaterfallMarkers();
     void setWaterfallMarkers(QList<SWGSpectrumWaterfallMarker*>* waterfall_markers);
 
+    QList<SWGSpectrumAnnotationMarker*>* getAnnotationMarkers();
+    void setAnnotationMarkers(QList<SWGSpectrumAnnotationMarker*>* annotation_markers);
+
 
     virtual bool isSet() override;
 
@@ -216,6 +220,9 @@ private:
 
     QList<SWGSpectrumWaterfallMarker*>* waterfall_markers;
     bool m_waterfall_markers_isSet;
+
+    QList<SWGSpectrumAnnotationMarker*>* annotation_markers;
+    bool m_annotation_markers_isSet;
 
 };
 

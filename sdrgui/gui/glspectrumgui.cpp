@@ -36,14 +36,14 @@
 const int GLSpectrumGUI::m_fpsMs[] = {500, 200, 100, 50, 20, 10, 5};
 
 GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
-	QWidget(parent),
-	ui(new Ui::GLSpectrumGUI),
-	m_spectrumVis(nullptr),
-	m_glSpectrum(nullptr),
+    QWidget(parent),
+    ui(new Ui::GLSpectrumGUI),
+    m_spectrumVis(nullptr),
+    m_glSpectrum(nullptr),
     m_doApplySettings(true)
 {
-	ui->setupUi(this);
-	on_linscale_toggled(false);
+    ui->setupUi(this);
+    on_linscale_toggled(false);
 
     QString levelStyle = QString(
         "QSpinBox {background-color: rgb(79, 79, 79);}"
@@ -59,27 +59,27 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
     // ui->levelRange->findChild<QLineEdit*>()->setStyleSheet("color: white; background-color: rgb(79, 79, 79); border: 1px solid gray; border-radius: 4px;");
     // ui->levelRange->setStyleSheet("background-color: rgb(79, 79, 79);");
 
-	connect(&m_messageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+    connect(&m_messageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
     CRightClickEnabler *wsSpectrumRightClickEnabler = new CRightClickEnabler(ui->wsSpectrum);
     connect(wsSpectrumRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openWebsocketSpectrumSettingsDialog(const QPoint &)));
 
     displaySettings();
-	setAveragingCombo();
+    setAveragingCombo();
     applySettings();
 }
 
 GLSpectrumGUI::~GLSpectrumGUI()
 {
-	delete ui;
+    delete ui;
 }
 
 void GLSpectrumGUI::setBuddies(SpectrumVis* spectrumVis, GLSpectrum* glSpectrum)
 {
-	m_spectrumVis = spectrumVis;
-	m_glSpectrum = glSpectrum;
+    m_spectrumVis = spectrumVis;
+    m_glSpectrum = glSpectrum;
     m_glSpectrum->setSpectrumVis(spectrumVis);
-	m_glSpectrum->setMessageQueueToGUI(&m_messageQueue);
+    m_glSpectrum->setMessageQueueToGUI(&m_messageQueue);
     m_spectrumVis->setMessageQueueToGUI(&m_messageQueue);
 }
 
@@ -87,7 +87,7 @@ void GLSpectrumGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-	applySettings();
+    applySettings();
 }
 
 QByteArray GLSpectrumGUI::serialize() const
@@ -134,40 +134,40 @@ void GLSpectrumGUI::updateSettings()
 void GLSpectrumGUI::displaySettings()
 {
     blockApplySettings(true);
-	ui->refLevel->setValue(m_settings.m_refLevel);
-	ui->levelRange->setValue(m_settings.m_powerRange);
-	ui->decay->setSliderPosition(m_settings.m_decay);
-	ui->decayDivisor->setSliderPosition(m_settings.m_decayDivisor);
-	ui->stroke->setSliderPosition(m_settings.m_histogramStroke);
-	ui->waterfall->setChecked(m_settings.m_displayWaterfall);
-	ui->maxHold->setChecked(m_settings.m_displayMaxHold);
-	ui->current->setChecked(m_settings.m_displayCurrent);
-	ui->histogram->setChecked(m_settings.m_displayHistogram);
-	ui->invertWaterfall->setChecked(m_settings.m_invertedWaterfall);
-	ui->grid->setChecked(m_settings.m_displayGrid);
-	ui->gridIntensity->setSliderPosition(m_settings.m_displayGridIntensity);
+    ui->refLevel->setValue(m_settings.m_refLevel);
+    ui->levelRange->setValue(m_settings.m_powerRange);
+    ui->decay->setSliderPosition(m_settings.m_decay);
+    ui->decayDivisor->setSliderPosition(m_settings.m_decayDivisor);
+    ui->stroke->setSliderPosition(m_settings.m_histogramStroke);
+    ui->waterfall->setChecked(m_settings.m_displayWaterfall);
+    ui->maxHold->setChecked(m_settings.m_displayMaxHold);
+    ui->current->setChecked(m_settings.m_displayCurrent);
+    ui->histogram->setChecked(m_settings.m_displayHistogram);
+    ui->invertWaterfall->setChecked(m_settings.m_invertedWaterfall);
+    ui->grid->setChecked(m_settings.m_displayGrid);
+    ui->gridIntensity->setSliderPosition(m_settings.m_displayGridIntensity);
 
-	ui->decay->setToolTip(QString("Decay: %1").arg(m_settings.m_decay));
-	ui->decayDivisor->setToolTip(QString("Decay divisor: %1").arg(m_settings.m_decayDivisor));
-	ui->stroke->setToolTip(QString("Stroke: %1").arg(m_settings.m_histogramStroke));
-	ui->gridIntensity->setToolTip(QString("Grid intensity: %1").arg(m_settings.m_displayGridIntensity));
-	ui->traceIntensity->setToolTip(QString("Trace intensity: %1").arg(m_settings.m_displayTraceIntensity));
+    ui->decay->setToolTip(QString("Decay: %1").arg(m_settings.m_decay));
+    ui->decayDivisor->setToolTip(QString("Decay divisor: %1").arg(m_settings.m_decayDivisor));
+    ui->stroke->setToolTip(QString("Stroke: %1").arg(m_settings.m_histogramStroke));
+    ui->gridIntensity->setToolTip(QString("Grid intensity: %1").arg(m_settings.m_displayGridIntensity));
+    ui->traceIntensity->setToolTip(QString("Trace intensity: %1").arg(m_settings.m_displayTraceIntensity));
 
-	ui->fftWindow->blockSignals(true);
-	ui->averaging->blockSignals(true);
-	ui->averagingMode->blockSignals(true);
-	ui->linscale->blockSignals(true);
+    ui->fftWindow->blockSignals(true);
+    ui->averaging->blockSignals(true);
+    ui->averagingMode->blockSignals(true);
+    ui->linscale->blockSignals(true);
 
-	ui->fftWindow->setCurrentIndex(m_settings.m_fftWindow);
+    ui->fftWindow->setCurrentIndex(m_settings.m_fftWindow);
 
-	for (int i = SpectrumSettings::m_log2FFTSizeMin; i <= SpectrumSettings::m_log2FFTSizeMax; i++)
-	{
-		if (m_settings.m_fftSize == (1 << i))
-		{
-			ui->fftSize->setCurrentIndex(i - SpectrumSettings::m_log2FFTSizeMin);
-			break;
-		}
-	}
+    for (int i = SpectrumSettings::m_log2FFTSizeMin; i <= SpectrumSettings::m_log2FFTSizeMax; i++)
+    {
+        if (m_settings.m_fftSize == (1 << i))
+        {
+            ui->fftSize->setCurrentIndex(i - SpectrumSettings::m_log2FFTSizeMin);
+            break;
+        }
+    }
 
     setFFTSizeToolitp();
     unsigned int i = 0;
@@ -183,15 +183,15 @@ void GLSpectrumGUI::displaySettings()
 
     ui->fftOverlap->setValue(m_settings.m_fftOverlap);
     setMaximumOverlap();
-	ui->averaging->setCurrentIndex(m_settings.m_averagingIndex);
-	ui->averagingMode->setCurrentIndex((int) m_settings.m_averagingMode);
-	ui->linscale->setChecked(m_settings.m_linear);
-	setAveragingToolitp();
+    ui->averaging->setCurrentIndex(m_settings.m_averagingIndex);
+    ui->averagingMode->setCurrentIndex((int) m_settings.m_averagingMode);
+    ui->linscale->setChecked(m_settings.m_linear);
+    setAveragingToolitp();
 
-	ui->fftWindow->blockSignals(false);
-	ui->averaging->blockSignals(false);
-	ui->averagingMode->blockSignals(false);
-	ui->linscale->blockSignals(false);
+    ui->fftWindow->blockSignals(false);
+    ui->averaging->blockSignals(false);
+    ui->averagingMode->blockSignals(false);
+    ui->linscale->blockSignals(false);
     blockApplySettings(false);
 }
 
@@ -250,23 +250,24 @@ void GLSpectrumGUI::applySpectrumSettings()
 
     m_glSpectrum->setHistogramMarkers(m_settings.m_histogramMarkers);
     m_glSpectrum->setWaterfallMarkers(m_settings.m_waterfallMarkers);
+    m_glSpectrum->setAnnotationMarkers(m_settings.m_annoationMarkers);
 }
 
 void GLSpectrumGUI::on_fftWindow_currentIndexChanged(int index)
 {
-	qDebug("GLSpectrumGUI::on_fftWindow_currentIndexChanged: %d", index);
-	m_settings.m_fftWindow = (FFTWindow::Function) index;
-	applySettings();
+    qDebug("GLSpectrumGUI::on_fftWindow_currentIndexChanged: %d", index);
+    m_settings.m_fftWindow = (FFTWindow::Function) index;
+    applySettings();
 }
 
 void GLSpectrumGUI::on_fftSize_currentIndexChanged(int index)
 {
-	qDebug("GLSpectrumGUI::on_fftSize_currentIndexChanged: %d", index);
-	m_settings.m_fftSize = 1 << (SpectrumSettings::m_log2FFTSizeMin + index);
+    qDebug("GLSpectrumGUI::on_fftSize_currentIndexChanged: %d", index);
+    m_settings.m_fftSize = 1 << (SpectrumSettings::m_log2FFTSizeMin + index);
     setAveragingCombo();
     setMaximumOverlap();
-	applySettings();
-	setAveragingToolitp();
+    applySettings();
+    setAveragingToolitp();
     setFFTSizeToolitp();
 }
 
@@ -309,8 +310,8 @@ void GLSpectrumGUI::on_autoscale_clicked(bool checked)
 
     m_settings.m_refLevel = maxLvl;
     m_settings.m_powerRange = maxLvl - minLvl;
-	ui->refLevel->setValue(m_settings.m_refLevel);
-	ui->levelRange->setValue(m_settings.m_powerRange);
+    ui->refLevel->setValue(m_settings.m_refLevel);
+    ui->levelRange->setValue(m_settings.m_powerRange);
     // qDebug("GLSpectrumGUI::on_autoscale_clicked: max: %d min %d max: %e min: %e",
     //     maxLvl, minLvl, maxAvg, minAvg);
 
@@ -319,7 +320,7 @@ void GLSpectrumGUI::on_autoscale_clicked(bool checked)
 
 void GLSpectrumGUI::on_averagingMode_currentIndexChanged(int index)
 {
-	qDebug("GLSpectrumGUI::on_averagingMode_currentIndexChanged: %d", index);
+    qDebug("GLSpectrumGUI::on_averagingMode_currentIndexChanged: %d", index);
     m_settings.m_averagingMode = index < 0 ?
         SpectrumSettings::AvgModeNone :
         index > 3 ?
@@ -327,23 +328,23 @@ void GLSpectrumGUI::on_averagingMode_currentIndexChanged(int index)
             (SpectrumSettings::AveragingMode) index;
 
     setAveragingCombo();
-	applySettings();
+    applySettings();
     setAveragingToolitp();
 }
 
 void GLSpectrumGUI::on_averaging_currentIndexChanged(int index)
 {
-	qDebug("GLSpectrumGUI::on_averaging_currentIndexChanged: %d", index);
+    qDebug("GLSpectrumGUI::on_averaging_currentIndexChanged: %d", index);
     m_settings.m_averagingIndex = index;
-	applySettings();
+    applySettings();
     setAveragingToolitp();
 }
 
 void GLSpectrumGUI::on_linscale_toggled(bool checked)
 {
-	qDebug("GLSpectrumGUI::on_averaging_currentIndexChanged: %s", checked ? "lin" : "log");
+    qDebug("GLSpectrumGUI::on_averaging_currentIndexChanged: %s", checked ? "lin" : "log");
     m_settings.m_linear = checked;
-	applySettings();
+    applySettings();
 }
 
 void GLSpectrumGUI::on_wsSpectrum_toggled(bool checked)
@@ -366,6 +367,7 @@ void GLSpectrumGUI::on_markers_clicked(bool checked)
     SpectrumMarkersDialog markersDialog(
         m_glSpectrum->getHistogramMarkers(),
         m_glSpectrum->getWaterfallMarkers(),
+        m_glSpectrum->getAnnotationMarkers(),
         m_glSpectrum->getMarkersDisplay(),
         this
     );
@@ -376,24 +378,27 @@ void GLSpectrumGUI::on_markers_clicked(bool checked)
 
     connect(&markersDialog, SIGNAL(updateHistogram()), this, SLOT(updateHistogramMarkers()));
     connect(&markersDialog, SIGNAL(updateWaterfall()), this, SLOT(updateWaterfallMarkers()));
+    connect(&markersDialog, SIGNAL(updateAnnotations()), this, SLOT(updateAnnotationMarkers()));
+    connect(&markersDialog, SIGNAL(updateMarkersDisplay()), this, SLOT(updateMarkersDisplay()));
 
     markersDialog.exec();
 
     m_settings.m_histogramMarkers = m_glSpectrum->getHistogramMarkers();
     m_settings.m_waterfallMarkers = m_glSpectrum->getWaterfallMarkers();
+    m_settings.m_annoationMarkers = m_glSpectrum->getAnnotationMarkers();
 
     applySettings();
 }
 
 void GLSpectrumGUI::on_refLevel_valueChanged(int value)
 {
-	m_settings.m_refLevel = value;
+    m_settings.m_refLevel = value;
     applySettings();
 }
 
 void GLSpectrumGUI::on_levelRange_valueChanged(int value)
 {
-	m_settings.m_powerRange = value;
+    m_settings.m_powerRange = value;
     applySettings();
 }
 
@@ -406,72 +411,72 @@ void GLSpectrumGUI::on_fps_currentIndexChanged(int index)
 
 void GLSpectrumGUI::on_decay_valueChanged(int index)
 {
-	m_settings.m_decay = index;
-	ui->decay->setToolTip(QString("Decay: %1").arg(m_settings.m_decay));
+    m_settings.m_decay = index;
+    ui->decay->setToolTip(QString("Decay: %1").arg(m_settings.m_decay));
     applySettings();
 }
 
 void GLSpectrumGUI::on_decayDivisor_valueChanged(int index)
 {
-	m_settings.m_decayDivisor = index;
-	ui->decayDivisor->setToolTip(QString("Decay divisor: %1").arg(m_settings.m_decayDivisor));
+    m_settings.m_decayDivisor = index;
+    ui->decayDivisor->setToolTip(QString("Decay divisor: %1").arg(m_settings.m_decayDivisor));
     applySettings();
 }
 
 void GLSpectrumGUI::on_stroke_valueChanged(int index)
 {
-	m_settings.m_histogramStroke = index;
-	ui->stroke->setToolTip(QString("Stroke: %1").arg(m_settings.m_histogramStroke));
+    m_settings.m_histogramStroke = index;
+    ui->stroke->setToolTip(QString("Stroke: %1").arg(m_settings.m_histogramStroke));
     applySettings();
 }
 
 void GLSpectrumGUI::on_waterfall_toggled(bool checked)
 {
-	m_settings.m_displayWaterfall = checked;
+    m_settings.m_displayWaterfall = checked;
     applySettings();
 }
 
 void GLSpectrumGUI::on_histogram_toggled(bool checked)
 {
-	m_settings.m_displayHistogram = checked;
+    m_settings.m_displayHistogram = checked;
     applySettings();
 }
 
 void GLSpectrumGUI::on_maxHold_toggled(bool checked)
 {
-	m_settings.m_displayMaxHold = checked;
+    m_settings.m_displayMaxHold = checked;
     applySettings();
 }
 
 void GLSpectrumGUI::on_current_toggled(bool checked)
 {
-	m_settings.m_displayCurrent = checked;
+    m_settings.m_displayCurrent = checked;
     applySettings();
 }
 
 void GLSpectrumGUI::on_invertWaterfall_toggled(bool checked)
 {
-	m_settings.m_invertedWaterfall = checked;
+    m_settings.m_invertedWaterfall = checked;
     applySettings();
 }
 
 void GLSpectrumGUI::on_grid_toggled(bool checked)
 {
-	m_settings.m_displayGrid = checked;
+    m_settings.m_displayGrid = checked;
     applySettings();
 }
 
 void GLSpectrumGUI::on_gridIntensity_valueChanged(int index)
 {
-	m_settings.m_displayGridIntensity = index;
-	ui->gridIntensity->setToolTip(QString("Grid intensity: %1").arg(m_settings.m_displayGridIntensity));
+    m_settings.m_displayGridIntensity = index;
+    ui->gridIntensity->setToolTip(QString("Grid intensity: %1").arg(m_settings.m_displayGridIntensity));
     applySettings();
 }
 
 void GLSpectrumGUI::on_traceIntensity_valueChanged(int index)
 {
-	m_settings.m_displayTraceIntensity = index;
-	ui->traceIntensity->setToolTip(QString("Trace intensity: %1").arg(m_settings.m_displayTraceIntensity));
+    m_settings.m_displayTraceIntensity = index;
+    ui->traceIntensity->setToolTip(QString("Trace intensity: %1").arg(m_settings.m_displayTraceIntensity));
     applySettings();
 }
 
@@ -479,9 +484,9 @@ void GLSpectrumGUI::on_clearSpectrum_clicked(bool checked)
 {
     (void) checked;
 
-	if (m_glSpectrum) {
-	    m_glSpectrum->clearSpectrumHistogram();
-	}
+    if (m_glSpectrum) {
+        m_glSpectrum->clearSpectrumHistogram();
+    }
 }
 
 void GLSpectrumGUI::on_freeze_toggled(bool checked)
@@ -493,7 +498,7 @@ void GLSpectrumGUI::on_freeze_toggled(bool checked)
 void GLSpectrumGUI::setAveragingCombo()
 {
     int index = ui->averaging->currentIndex();
-	ui->averaging->blockSignals(true);
+    ui->averaging->blockSignals(true);
     ui->averaging->clear();
     ui->averaging->addItem(QString("1"));
     uint64_t maxAveraging = SpectrumSettings::getMaxAveragingValue(m_settings.m_fftSize, m_settings.m_averagingMode);
@@ -523,7 +528,7 @@ void GLSpectrumGUI::setAveragingCombo()
     }
 
     ui->averaging->setCurrentIndex(index >= ui->averaging->count() ? ui->averaging->count() - 1 : index);
-	ui->averaging->blockSignals(false);
+    ui->averaging->blockSignals(false);
 }
 
 void GLSpectrumGUI::setNumberStr(int n, QString& s)
@@ -730,5 +735,19 @@ void GLSpectrumGUI::updateWaterfallMarkers()
 {
     if (m_glSpectrum) {
         m_glSpectrum->updateWaterfallMarkers();
+    }
+}
+
+void GLSpectrumGUI::updateAnnotationMarkers()
+{
+    if (m_glSpectrum) {
+        m_glSpectrum->updateAnnotationMarkers();
+    }
+}
+
+void GLSpectrumGUI::updateMarkersDisplay()
+{
+    if (m_glSpectrum) {
+        m_glSpectrum->updateMarkersDisplay();
     }
 }

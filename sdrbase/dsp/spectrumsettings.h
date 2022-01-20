@@ -41,7 +41,8 @@ public:
     enum MarkersDisplay
     {
         MarkersDisplayNone,
-        MarkersDisplaySpectrum
+        MarkersDisplaySpectrum,
+		MarkersDisplayAnnotations
     };
 
 	int m_fftSize;
@@ -73,6 +74,7 @@ public:
     uint16_t m_wsSpectrumPort;   //!< websocket spectrum server port
 	QList<SpectrumHistogramMarker> m_histogramMarkers;
 	QList<SpectrumWaterfallMarker> m_waterfallMarkers;
+	QList<SpectrumAnnotationMarker> m_annoationMarkers;
 	static const int m_log2FFTSizeMin = 6;   // 64
 	static const int m_log2FFTSizeMax = 15;  // 32k
 

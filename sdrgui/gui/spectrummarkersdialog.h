@@ -37,6 +37,7 @@ public:
     explicit SpectrumMarkersDialog(
         QList<SpectrumHistogramMarker>& histogramMarkers,
         QList<SpectrumWaterfallMarker>& waterfallMarkers,
+        QList<SpectrumAnnotationMarker>& annotationMarkers,
         SpectrumSettings::MarkersDisplay& markersDisplay,
         QWidget* parent = nullptr
     );
@@ -49,15 +50,19 @@ private:
     Ui::SpectrumMarkersDialog* ui;
     QList<SpectrumHistogramMarker>& m_histogramMarkers;
     QList<SpectrumWaterfallMarker>& m_waterfallMarkers;
+    QList<SpectrumAnnotationMarker>& m_annotationMarkers;
     SpectrumSettings::MarkersDisplay& m_markersDisplay;
     int m_histogramMarkerIndex;
     int m_waterfallMarkerIndex;
+    int m_annotationMarkerIndex;
     qint64 m_centerFrequency;
     float m_power;
     float m_time;
+    bool m_annoFreqStartElseCenter;
 
     void displayHistogramMarker();
     void displayWaterfallMarker();
+    void displayAnnotationMarker();
     void displayTime(float time);
     float getTime() const;
 
@@ -73,6 +78,7 @@ private slots:
     void on_markerDel_clicked();
     void on_powerMode_currentIndexChanged(int index);
     void on_powerHoldReset_clicked();
+
     void on_wMarkerFrequency_changed(qint64 value);
     void on_timeCoarse_valueChanged(int value);
     void on_timeFine_valueChanged(int value);
@@ -84,11 +90,33 @@ private slots:
     void on_wSetReference_clicked();
     void on_wMarkerAdd_clicked();
     void on_wMarkerDel_clicked();
+
+    void on_aMarkerToggleFrequency_toggled(bool checked);
+    void on_aMarkerFrequency_changed(qint64 value);
+    void on_aCenterFrequency_clicked();
+    void on_aMakerDuplicate_clicked();
+    void on_aMakersSort_clicked();
+    void on_aMarkerColor_clicked();
+    void on_aShowMarker_clicked(bool clicked);
+    void on_aMarkerText_editingFinished();
+    void on_aMarker_valueChanged(int value);
+    void on_aMarkerAdd_clicked();
+    void on_aMarkerDel_clicked();
+    void on_aMarkerBandwidth_changed(qint64 value);
+    void on_aMarkersExport_clicked();
+    void on_aMarkersImport_clicked();
+
+    static bool annotationMarkerLessThan(const SpectrumAnnotationMarker& m1, const SpectrumAnnotationMarker& m2) {
+        return m1.m_startFrequency < m2.m_startFrequency;
+    }
+
     void on_showSelect_currentIndexChanged(int index);
 
 signals:
     void updateHistogram();
     void updateWaterfall();
+    void updateAnnotations();
+    void updateMarkersDisplay();
 };
 
 #endif // SDRBASE_GUI_SPECTRUMMARKERSDIALOG_H_

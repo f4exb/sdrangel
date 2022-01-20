@@ -44,7 +44,7 @@ class MessageQueue;
 class SpectrumVis;
 
 class SDRGUI_API GLSpectrum : public QGLWidget, public GLSpectrumInterface {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
     class MsgReportSampleRate : public Message {
@@ -110,43 +110,43 @@ public:
         Real m_range;
     };
 
-	GLSpectrum(QWidget* parent = nullptr);
-	virtual ~GLSpectrum();
+    GLSpectrum(QWidget* parent = nullptr);
+    virtual ~GLSpectrum();
 
-	void setCenterFrequency(qint64 frequency);
+    void setCenterFrequency(qint64 frequency);
     qint64 getCenterFrequency() const { return m_centerFrequency; }
     float getPowerMax() const;
     float getTimeMax() const;
-	void setSampleRate(qint32 sampleRate);
-	void setTimingRate(qint32 timingRate);
+    void setSampleRate(qint32 sampleRate);
+    void setTimingRate(qint32 timingRate);
     void setFFTOverlap(int overlap);
-	void setReferenceLevel(Real referenceLevel);
-	void setPowerRange(Real powerRange);
-	void setDecay(int decay);
-	void setDecayDivisor(int decayDivisor);
-	void setHistoStroke(int stroke);
-	void setDisplayWaterfall(bool display);
-	void setSsbSpectrum(bool ssbSpectrum);
-	void setLsbDisplay(bool lsbDisplay);
-	void setInvertedWaterfall(bool inv);
-	void setDisplayMaxHold(bool display);
-	void setDisplayCurrent(bool display);
-	void setDisplayHistogram(bool display);
-	void setDisplayGrid(bool display);
-	void setDisplayGridIntensity(int intensity);
-	void setDisplayTraceIntensity(int intensity);
-	void setLinear(bool linear);
-	qint32 getSampleRate() const { return m_sampleRate; }
+    void setReferenceLevel(Real referenceLevel);
+    void setPowerRange(Real powerRange);
+    void setDecay(int decay);
+    void setDecayDivisor(int decayDivisor);
+    void setHistoStroke(int stroke);
+    void setDisplayWaterfall(bool display);
+    void setSsbSpectrum(bool ssbSpectrum);
+    void setLsbDisplay(bool lsbDisplay);
+    void setInvertedWaterfall(bool inv);
+    void setDisplayMaxHold(bool display);
+    void setDisplayCurrent(bool display);
+    void setDisplayHistogram(bool display);
+    void setDisplayGrid(bool display);
+    void setDisplayGridIntensity(int intensity);
+    void setDisplayTraceIntensity(int intensity);
+    void setLinear(bool linear);
+    qint32 getSampleRate() const { return m_sampleRate; }
 
-	void addChannelMarker(ChannelMarker* channelMarker);
-	void removeChannelMarker(ChannelMarker* channelMarker);
-	void setMessageQueueToGUI(MessageQueue* messageQueue) { m_messageQueueToGUI = messageQueue; }
+    void addChannelMarker(ChannelMarker* channelMarker);
+    void removeChannelMarker(ChannelMarker* channelMarker);
+    void setMessageQueueToGUI(MessageQueue* messageQueue) { m_messageQueueToGUI = messageQueue; }
 
-	virtual void newSpectrum(const Real* spectrum, int nbBins, int fftSize);
-	void clearSpectrumHistogram();
+    virtual void newSpectrum(const Real* spectrum, int nbBins, int fftSize);
+    void clearSpectrumHistogram();
 
-	Real getWaterfallShare() const { return m_waterfallShare; }
-	void setWaterfallShare(Real waterfallShare);
+    Real getWaterfallShare() const { return m_waterfallShare; }
+    void setWaterfallShare(Real waterfallShare);
     void setFPSPeriodMs(int fpsPeriodMs);
 
     void setDisplayedStream(bool sourceOrSink, int streamIndex)
@@ -161,72 +161,80 @@ public:
     const QList<SpectrumWaterfallMarker>& getWaterfallMarkers() const { return m_waterfallMarkers; }
     QList<SpectrumWaterfallMarker>& getWaterfallMarkers() { return m_waterfallMarkers; }
     void setWaterfallMarkers(const QList<SpectrumWaterfallMarker>& waterfallMarkers);
+    const QList<SpectrumAnnotationMarker>& getAnnotationMarkers() const { return m_annotationMarkers; }
+    QList<SpectrumAnnotationMarker>& getAnnotationMarkers() { return m_annotationMarkers; }
+    void setAnnotationMarkers(const QList<SpectrumAnnotationMarker>& annotationMarkers);
     void updateHistogramMarkers();
     void updateWaterfallMarkers();
+    void updateAnnotationMarkers();
+    void updateMarkersDisplay();
     SpectrumSettings::MarkersDisplay& getMarkersDisplay() {  return m_markersDisplay; }
 
 private:
-	struct ChannelMarkerState {
-		ChannelMarker* m_channelMarker;
-		QMatrix4x4 m_glMatrixWaterfall;
-		QMatrix4x4 m_glMatrixDsbWaterfall;
-		QMatrix4x4 m_glMatrixFreqScale;
-		QMatrix4x4 m_glMatrixDsbFreqScale;
-		QMatrix4x4 m_glMatrixHistogram;
-		QMatrix4x4 m_glMatrixDsbHistogram;
-		QRect m_rect;
+    struct ChannelMarkerState {
+        ChannelMarker* m_channelMarker;
+        QMatrix4x4 m_glMatrixWaterfall;
+        QMatrix4x4 m_glMatrixDsbWaterfall;
+        QMatrix4x4 m_glMatrixFreqScale;
+        QMatrix4x4 m_glMatrixDsbFreqScale;
+        QMatrix4x4 m_glMatrixHistogram;
+        QMatrix4x4 m_glMatrixDsbHistogram;
+        QRect m_rect;
 
-		ChannelMarkerState(ChannelMarker* channelMarker) :
-			m_channelMarker(channelMarker)
-		{ }
-	};
-	QList<ChannelMarkerState*> m_channelMarkerStates;
+        ChannelMarkerState(ChannelMarker* channelMarker) :
+            m_channelMarker(channelMarker)
+        { }
+    };
+    QList<ChannelMarkerState*> m_channelMarkerStates;
 
-	enum CursorState {
-		CSNormal,
-		CSSplitter,
-		CSSplitterMoving,
-		CSChannel,
-		CSChannelMoving
-	};
+    enum CursorState {
+        CSNormal,
+        CSSplitter,
+        CSSplitterMoving,
+        CSChannel,
+        CSChannelMoving
+    };
 
     QList<SpectrumHistogramMarker> m_histogramMarkers;
     QList<SpectrumWaterfallMarker> m_waterfallMarkers;
+    QList<SpectrumAnnotationMarker> m_annotationMarkers;
+    QList<SpectrumAnnotationMarker*> m_sortedAnnotationMarkers;
+    QList<SpectrumAnnotationMarker*> m_visibleAnnotationMarkers;
     SpectrumSettings::MarkersDisplay m_markersDisplay;
 
-	CursorState m_cursorState;
-	int m_cursorChannel;
+    CursorState m_cursorState;
+    int m_cursorChannel;
 
     SpectrumVis* m_spectrumVis;
-	QTimer m_timer;
+    QTimer m_timer;
     int m_fpsPeriodMs;
-	QMutex m_mutex;
-	bool m_mouseInside;
-	bool m_changesPending;
+    QMutex m_mutex;
+    bool m_mouseInside;
+    bool m_changesPending;
 
-	qint64 m_centerFrequency;
-	Real m_referenceLevel;
-	Real m_powerRange;
-	bool m_linear;
-	int m_decay;
-	quint32 m_sampleRate;
-	quint32 m_timingRate;
+    qint64 m_centerFrequency;
+    Real m_referenceLevel;
+    Real m_powerRange;
+    bool m_linear;
+    int m_decay;
+    quint32 m_sampleRate;
+    quint32 m_timingRate;
     int m_fftOverlap;
 
-	int m_fftSize; //!< FFT size in number of bins
+    int m_fftSize; //!< FFT size in number of bins
     int m_nbBins;  //!< Number of visible FFT bins (zoom support)
 
-	bool m_displayGrid;
-	int m_displayGridIntensity;
-	int m_displayTraceIntensity;
-	bool m_invertedWaterfall;
+    bool m_displayGrid;
+    int m_displayGridIntensity;
+    int m_displayTraceIntensity;
+    bool m_invertedWaterfall;
 
-	std::vector<Real> m_maxHold;
-	bool m_displayMaxHold;
-	const Real *m_currentSpectrum;
-	bool m_displayCurrent;
+    std::vector<Real> m_maxHold;
+    bool m_displayMaxHold;
+    const Real *m_currentSpectrum;
+    bool m_displayCurrent;
 
-	Real m_waterfallShare;
+    Real m_waterfallShare;
 
     int m_leftMargin;
     int m_rightMargin;
@@ -237,76 +245,78 @@ private:
     int m_waterfallHeight;
     int m_bottomMargin;
     QFont m_textOverlayFont;
-	QPixmap m_leftMarginPixmap;
-	QPixmap m_frequencyPixmap;
+    QPixmap m_leftMarginPixmap;
+    QPixmap m_frequencyPixmap;
     QPixmap m_infoPixmap;
-	ScaleEngine m_timeScale;
-	ScaleEngine m_powerScale;
-	ScaleEngine m_frequencyScale;
+    ScaleEngine m_timeScale;
+    ScaleEngine m_powerScale;
+    ScaleEngine m_frequencyScale;
     QRectF m_histogramRect;
-	QRect m_frequencyScaleRect;
+    QRect m_frequencyScaleRect;
     QRectF m_waterfallRect;
     QRect m_infoRect;
-	QMatrix4x4 m_glFrequencyScaleBoxMatrix;
-	QMatrix4x4 m_glLeftScaleBoxMatrix;
+    QMatrix4x4 m_glFrequencyScaleBoxMatrix;
+    QMatrix4x4 m_glLeftScaleBoxMatrix;
     QMatrix4x4 m_glInfoBoxMatrix;
 
-	QRgb m_waterfallPalette[240];
-	QImage* m_waterfallBuffer;
-	int m_waterfallBufferPos;
-	int m_waterfallTextureHeight;
-	int m_waterfallTexturePos;
-	QMatrix4x4 m_glWaterfallBoxMatrix;
-	bool m_displayWaterfall;
-	bool m_ssbSpectrum;
-	bool m_lsbDisplay;
+    QRgb m_waterfallPalette[240];
+    QImage* m_waterfallBuffer;
+    int m_waterfallBufferPos;
+    int m_waterfallTextureHeight;
+    int m_waterfallTexturePos;
+    QMatrix4x4 m_glWaterfallBoxMatrix;
+    bool m_displayWaterfall;
+    bool m_ssbSpectrum;
+    bool m_lsbDisplay;
 
-	QRgb m_histogramPalette[240];
-	QImage* m_histogramBuffer;
-	quint8* m_histogram; //!< Spectrum phosphor matrix of FFT width and PSD height scaled to 100. values [0..239]
-	int m_decayDivisor;
-	int m_decayDivisorCount;
-	int m_histogramStroke;
-	QMatrix4x4 m_glHistogramSpectrumMatrix;
-	QMatrix4x4 m_glHistogramBoxMatrix;
-	bool m_displayHistogram;
-	bool m_displayChanged;
+    QRgb m_histogramPalette[240];
+    QImage* m_histogramBuffer;
+    quint8* m_histogram; //!< Spectrum phosphor matrix of FFT width and PSD height scaled to 100. values [0..239]
+    int m_decayDivisor;
+    int m_decayDivisorCount;
+    int m_histogramStroke;
+    QMatrix4x4 m_glHistogramSpectrumMatrix;
+    QMatrix4x4 m_glHistogramBoxMatrix;
+    bool m_displayHistogram;
+    bool m_displayChanged;
     bool m_displaySourceOrSink;
     int m_displayStreamIndex;
     float m_frequencyZoomFactor;
     float m_frequencyZoomPos;
     static const float m_maxFrequencyZoom;
+    static const float m_annotationMarkerHeight;
 
-	GLShaderSimple m_glShaderSimple;
-	GLShaderTextured m_glShaderLeftScale;
-	GLShaderTextured m_glShaderFrequencyScale;
-	GLShaderTextured m_glShaderWaterfall;
-	GLShaderTextured m_glShaderHistogram;
+    GLShaderSimple m_glShaderSimple;
+    GLShaderTextured m_glShaderLeftScale;
+    GLShaderTextured m_glShaderFrequencyScale;
+    GLShaderTextured m_glShaderWaterfall;
+    GLShaderTextured m_glShaderHistogram;
     GLShaderTextured m_glShaderTextOverlay;
     GLShaderTextured m_glShaderInfo;
-	int m_matrixLoc;
-	int m_colorLoc;
-	IncrementalArray<GLfloat> m_q3TickTime;
-	IncrementalArray<GLfloat> m_q3TickFrequency;
-	IncrementalArray<GLfloat> m_q3TickPower;
-	IncrementalArray<GLfloat> m_q3FFT;
+    int m_matrixLoc;
+    int m_colorLoc;
+    IncrementalArray<GLfloat> m_q3TickTime;
+    IncrementalArray<GLfloat> m_q3TickFrequency;
+    IncrementalArray<GLfloat> m_q3TickPower;
+    IncrementalArray<GLfloat> m_q3FFT;
 
-	MessageQueue *m_messageQueueToGUI;
+    MessageQueue *m_messageQueueToGUI;
 
-	void updateWaterfall(const Real *spectrum);
-	void updateHistogram(const Real *spectrum);
+    void updateWaterfall(const Real *spectrum);
+    void updateHistogram(const Real *spectrum);
 
-	void initializeGL();
-	void resizeGL(int width, int height);
-	void paintGL();
+    void initializeGL();
+    void resizeGL(int width, int height);
+    void paintGL();
     void drawSpectrumMarkers();
+    void drawAnnotationMarkers();
 
-	void stopDrag();
-	void applyChanges();
+    void stopDrag();
+    void applyChanges();
 
-	void mouseMoveEvent(QMouseEvent* event);
-	void mousePressEvent(QMouseEvent* event);
-	void mouseReleaseEvent(QMouseEvent* event);
+    void mouseMoveEvent(QMouseEvent* event);
+    void mousePressEvent(QMouseEvent* event);
+    void mouseReleaseEvent(QMouseEvent* event);
     void wheelEvent(QWheelEvent*);
     void channelMarkerMove(QWheelEvent*, int mul);
     void zoom(QWheelEvent*);
@@ -319,8 +329,8 @@ private:
     void setFrequencyScale();
     void getFrequencyZoom(int64_t& centerFrequency, int& frequencySpan);
 
-	void enterEvent(QEvent* event);
-	void leaveEvent(QEvent* event);
+    void enterEvent(QEvent* event);
+    void leaveEvent(QEvent* event);
 
     QString displayScaled(int64_t value, char type, int precision, bool showMult);
     QString displayScaledF(float value, char type, int precision, bool showMult);
@@ -335,12 +345,22 @@ private:
             bool topHalf,
             const QRectF& glRect);
     void formatTextInfo(QString& info);
+    void updateSortedAnnotationMarkers();
+
+    static bool annotationDisplayLessThan(const SpectrumAnnotationMarker *m1, const SpectrumAnnotationMarker *m2)
+    {
+        if (m1->m_bandwidth == m2->m_bandwidth) {
+            return m1->m_startFrequency < m2->m_startFrequency;
+        } else {
+            return m1->m_bandwidth > m2->m_bandwidth; // larger bandwidths should come first for display (lower layer)
+        }
+    }
 
 private slots:
-	void cleanup();
-	void tick();
-	void channelMarkerChanged();
-	void channelMarkerDestroyed(QObject* object);
+    void cleanup();
+    void tick();
+    void channelMarkerChanged();
+    void channelMarkerDestroyed(QObject* object);
 };
 
 #endif // INCLUDE_GLSPECTRUM_H

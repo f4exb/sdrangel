@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/">
+    <file>sort.png</file>
     <file>audio_mic.png</file>
     <file>info.png</file>
     <file>darklight.png</file>

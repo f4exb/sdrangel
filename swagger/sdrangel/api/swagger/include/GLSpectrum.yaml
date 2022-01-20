@@ -17,7 +17,7 @@ SpectrumHistogramMarker:
           * 2 - Max power
     markerColor:
       type: integer
-      description: Color in 8 bit RGB serie
+      description: Color in 8 bit BGR serie
     show:
       type: integer
       description: >
@@ -37,7 +37,25 @@ SpectrumWaterfallMarker:
       description: Time shift in seconds
     markerColor:
       type: integer
-      description: Color in 8 bit RGB serie
+      description: Color in 8 bit BGR serie
+    show:
+      type: integer
+      description: >
+        Boolean - Marker display state
+          * 0 - Hidden
+          * 1 - Visible
+
+SpectrumAnnotationMarker:
+  description: Spectrum annotation marker settings
+  properties:
+    startFrequency:
+      type: integer
+      format: int64
+    bandwidth:
+      type: integer
+    markerColor:
+      type: integer
+      description: Color in 8 bit BGR serie
     show:
       type: integer
       description: >
@@ -129,3 +147,7 @@ GLSpectrum:
       type: array
       items:
         $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/SpectrumWaterfallMarker"
+    annotationMarkers:
+      type: array
+      items:
+        $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/SpectrumAnnotationMarker"

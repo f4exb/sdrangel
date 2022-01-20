@@ -6162,6 +6162,12 @@ margin-bottom: 20px;
       "items" : {
         "$ref" : "#/definitions/SpectrumWaterfallMarker"
       }
+    },
+    "annotationMarkers" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/SpectrumAnnotationMarker"
+      }
     }
   },
   "description" : "GLSpectrumGUI settings"
@@ -11783,6 +11789,26 @@ margin-bottom: 20px;
   },
   "description" : "SoapySDR"
 };
+            defs.SpectrumAnnotationMarker = {
+  "properties" : {
+    "startFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "bandwidth" : {
+      "type" : "integer"
+    },
+    "markerColor" : {
+      "type" : "integer",
+      "description" : "Color in 8 bit BGR serie"
+    },
+    "show" : {
+      "type" : "integer",
+      "description" : "Boolean - Marker display state\n  * 0 - Hidden\n  * 1 - Visible\n"
+    }
+  },
+  "description" : "Spectrum annotation marker settings"
+};
             defs.SpectrumHistogramMarker = {
   "properties" : {
     "frequency" : {
@@ -11800,7 +11826,7 @@ margin-bottom: 20px;
     },
     "markerColor" : {
       "type" : "integer",
-      "description" : "Color in 8 bit RGB serie"
+      "description" : "Color in 8 bit BGR serie"
     },
     "show" : {
       "type" : "integer",
@@ -11854,7 +11880,7 @@ margin-bottom: 20px;
     },
     "markerColor" : {
       "type" : "integer",
-      "description" : "Color in 8 bit RGB serie"
+      "description" : "Color in 8 bit BGR serie"
     },
     "show" : {
       "type" : "integer",
@@ -51943,7 +51969,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2022-01-15T03:12:23.419+01:00
+              Generated 2022-01-15T23:01:29.100+01:00
             </div>
           </div>
       </div>

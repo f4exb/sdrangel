@@ -117,6 +117,8 @@ private slots:
 
 	void updateHistogramMarkers();
 	void updateWaterfallMarkers();
+	void updateAnnotationMarkers();
+	void updateMarkersDisplay();
 };
 
 #endif // INCLUDE_GLSPECTRUMGUI_H

@@ -155,4 +155,49 @@ struct SDRBASE_API SpectrumWaterfallMarker
     bool deserialize(const QByteArray& data);
 };
 
+struct SDRBASE_API SpectrumAnnotationMarker
+{
+    qint64 m_startFrequency;
+    uint32_t m_bandwidth;
+    QColor m_markerColor;
+    bool m_show;
+    QString m_text;
+    bool m_selected;
+    float m_startPos;
+    float m_stopPos;
+
+    SpectrumAnnotationMarker() :
+        m_startFrequency(0),
+        m_bandwidth(0),
+        m_markerColor("white"),
+        m_show(true),
+        m_text("Text"),
+        m_selected(false),
+        m_startPos(0.0f),
+        m_stopPos(1.0f)
+    {}
+
+    SpectrumAnnotationMarker(
+        qint64 startFrequency,
+        uint32_t bandwidth,
+        QColor markerColor,
+        bool show,
+        const QString& text
+    ) :
+        m_startFrequency(startFrequency),
+        m_bandwidth(bandwidth),
+        m_markerColor(markerColor),
+        m_show(show),
+        m_text(text),
+        m_startPos(0.0f),
+        m_stopPos(1.0f)
+    {}
+
+    SpectrumAnnotationMarker(const SpectrumAnnotationMarker& other) = default;
+    SpectrumAnnotationMarker& operator=(const SpectrumAnnotationMarker&) = default;
+
+    QByteArray serialize() const;
+    bool deserialize(const QByteArray& data);
+};
+
 #endif // INCLUDE_SPECTRUMMARKERS_H

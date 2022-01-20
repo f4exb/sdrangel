@@ -264,6 +264,7 @@
 #include "SWGSoapySDRInputSettings.h"
 #include "SWGSoapySDROutputSettings.h"
 #include "SWGSoapySDRReport.h"
+#include "SWGSpectrumAnnotationMarker.h"
 #include "SWGSpectrumHistogramMarker.h"
 #include "SWGSpectrumServer.h"
 #include "SWGSpectrumServer_clients.h"
@@ -1561,6 +1562,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGSoapySDRReport").compare(type) == 0) {
       SWGSoapySDRReport *obj = new SWGSoapySDRReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGSpectrumAnnotationMarker").compare(type) == 0) {
+      SWGSpectrumAnnotationMarker *obj = new SWGSpectrumAnnotationMarker();
       obj->init();
       return obj;
     }

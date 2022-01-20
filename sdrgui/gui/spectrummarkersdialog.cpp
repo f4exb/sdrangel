@@ -17,8 +17,10 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QColorDialog>
+#include <QFileDialog>
 
 #include "util/db.h"
+#include "util/csv.h"
 #include "spectrummarkersdialog.h"
 
 #include "ui_spectrummarkersdialog.h"
@@ -27,17 +29,21 @@
 SpectrumMarkersDialog::SpectrumMarkersDialog(
     QList<SpectrumHistogramMarker>& histogramMarkers,
     QList<SpectrumWaterfallMarker>& waterfallMarkers,
+    QList<SpectrumAnnotationMarker>& annotationMarkers,
     SpectrumSettings::MarkersDisplay& markersDisplay,
     QWidget* parent) :
     QDialog(parent),
     ui(new Ui::SpectrumMarkersDialog),
     m_histogramMarkers(histogramMarkers),
     m_waterfallMarkers(waterfallMarkers),
+    m_annotationMarkers(annotationMarkers),
     m_markersDisplay(markersDisplay),
     m_histogramMarkerIndex(0),
     m_waterfallMarkerIndex(0),
+    m_annotationMarkerIndex(0),
     m_centerFrequency(0),
-    m_power(0.5f)
+    m_power(0.5f),
+    m_annoFreqStartElseCenter(true)
 {
     ui->setupUi(this);
     ui->markerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -46,9 +52,15 @@ SpectrumMarkersDialog::SpectrumMarkersDialog(
     ui->wMarkerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->wMarkerFrequency->setValueRange(false, 10, -9999999999L, 9999999999L);
     ui->wMarker->setMaximum(m_waterfallMarkers.size() - 1);
+    ui->aMarkerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+    ui->aMarkerFrequency->setValueRange(false, 10, -9999999999L, 9999999999L);
+    ui->aMarker->setMaximum(m_annotationMarkers.size() - 1);
+    ui->aMarkerBandwidth->setColorMapper(ColorMapper::GrayYellow);
+    ui->aMarkerBandwidth->setValueRange(true, 9, 0, 999999999L);
     ui->showSelect->setCurrentIndex((int) m_markersDisplay);
     displayHistogramMarker();
     displayWaterfallMarker();
+    displayAnnotationMarker();
 }
 
 SpectrumMarkersDialog::~SpectrumMarkersDialog()
@@ -56,6 +68,14 @@ SpectrumMarkersDialog::~SpectrumMarkersDialog()
 
 void SpectrumMarkersDialog::displayHistogramMarker()
 {
+    ui->markerFrequency->blockSignals(true);
+    ui->centerFrequency->blockSignals(true);
+    ui->markerColor->blockSignals(true);
+    ui->showMarker->blockSignals(true);
+    ui->marker->blockSignals(true);
+    ui->powerMode->blockSignals(true);
+    ui->fixedPower->blockSignals(true);
+
     if (m_histogramMarkers.size() == 0)
     {
         ui->marker->setEnabled(false);
@@ -63,6 +83,7 @@ void SpectrumMarkersDialog::displayHistogramMarker()
         ui->powerMode->setEnabled(false);
         ui->fixedPower->setEnabled(false);
         ui->showMarker->setEnabled(false);
+        ui->marker->setValue(0);
         ui->markerText->setText("-");
         ui->fixedPower->setValue(0);
         ui->fixedPowerText->setText(tr("0.0"));
@@ -74,6 +95,7 @@ void SpectrumMarkersDialog::displayHistogramMarker()
         ui->powerMode->setEnabled(true);
         ui->fixedPower->setEnabled(true);
         ui->showMarker->setEnabled(true);
+        ui->marker->setValue(m_histogramMarkerIndex);
         ui->markerText->setText(tr("%1").arg(m_histogramMarkerIndex));
         ui->markerFrequency->setValue(m_histogramMarkers[m_histogramMarkerIndex].m_frequency);
         ui->powerMode->setCurrentIndex((int) m_histogramMarkers[m_histogramMarkerIndex].m_markerType);
@@ -85,10 +107,27 @@ void SpectrumMarkersDialog::displayHistogramMarker()
         ui->markerColor->setStyleSheet(tr("QLabel { background-color : rgb(%1,%2,%3); }").arg(r).arg(g).arg(b));
         ui->showMarker->setChecked(m_histogramMarkers[m_histogramMarkerIndex].m_show);
     }
+
+    ui->markerFrequency->blockSignals(false);
+    ui->centerFrequency->blockSignals(false);
+    ui->markerColor->blockSignals(false);
+    ui->showMarker->blockSignals(false);
+    ui->marker->blockSignals(false);
+    ui->powerMode->blockSignals(false);
+    ui->fixedPower->blockSignals(false);
 }
 
 void SpectrumMarkersDialog::displayWaterfallMarker()
 {
+    ui->wMarkerFrequency->blockSignals(true);
+    ui->wCenterFrequency->blockSignals(true);
+    ui->wMarkerColor->blockSignals(true);
+    ui->wShowMarker->blockSignals(true);
+    ui->wMarker->blockSignals(true);
+    ui->timeFine->blockSignals(true);
+    ui->timeCoarse->blockSignals(true);
+    ui->timeExp->blockSignals(true);
+
     if (m_waterfallMarkers.size() == 0)
     {
         ui->wMarker->setEnabled(false);
@@ -97,6 +136,7 @@ void SpectrumMarkersDialog::displayWaterfallMarker()
         ui->timeFine->setEnabled(false);
         ui->timeExp->setEnabled(false);
         ui->wShowMarker->setEnabled(false);
+        ui->wMarker->setValue(0);
         ui->wMarkerText->setText("-");
         ui->timeCoarse->setValue(0);
         ui->timeFine->setValue(0);
@@ -112,6 +152,7 @@ void SpectrumMarkersDialog::displayWaterfallMarker()
         ui->timeFine->setEnabled(true);
         ui->timeExp->setEnabled(true);
         ui->wShowMarker->setEnabled(true);
+        ui->wMarker->setValue(m_waterfallMarkerIndex);
         ui->wMarkerText->setText(tr("%1").arg(m_waterfallMarkerIndex));
         ui->wMarkerFrequency->setValue(m_waterfallMarkers[m_waterfallMarkerIndex].m_frequency);
         int r,g,b,a;
@@ -119,6 +160,75 @@ void SpectrumMarkersDialog::displayWaterfallMarker()
         ui->wMarkerColor->setStyleSheet(tr("QLabel { background-color : rgb(%1,%2,%3); }").arg(r).arg(g).arg(b));
         displayTime(m_waterfallMarkers[m_waterfallMarkerIndex].m_time);
     }
+
+    ui->wMarkerFrequency->blockSignals(false);
+    ui->wCenterFrequency->blockSignals(false);
+    ui->wMarkerColor->blockSignals(false);
+    ui->wShowMarker->blockSignals(false);
+    ui->wMarker->blockSignals(false);
+    ui->timeFine->blockSignals(false);
+    ui->timeCoarse->blockSignals(false);
+    ui->timeExp->blockSignals(false);
+}
+
+void SpectrumMarkersDialog::displayAnnotationMarker()
+{
+    ui->aMarkerFrequency->blockSignals(true);
+    ui->aCenterFrequency->blockSignals(true);
+    ui->aMarkerColor->blockSignals(true);
+    ui->aShowMarker->blockSignals(true);
+    ui->aMarkerText->blockSignals(true);
+    ui->aMarker->blockSignals(true);
+    ui->aMarkerAdd->blockSignals(true);
+    ui->aMarkerDel->blockSignals(true);
+    ui->aMarkerBandwidth->blockSignals(true);
+    ui->aMarkerToggleFrequency->blockSignals(true);
+
+    if (m_annotationMarkers.size() == 0)
+    {
+        ui->aMarker->setEnabled(false);
+        ui->aMarkerFrequency->setEnabled(false);
+        ui->aMarkerBandwidth->setEnabled(false);
+        ui->aShowMarker->setEnabled(false);
+        ui->aMarkerIndexText->setText("-");
+        ui->aMarkerText->setText("");
+    }
+    else
+    {
+        ui->aMarker->setEnabled(true);
+        ui->aMarkerFrequency->setEnabled(true);
+        ui->aMarkerBandwidth->setEnabled(true);
+        ui->aShowMarker->setEnabled(true);
+        ui->aMarker->setValue(m_annotationMarkerIndex);
+        ui->aMarkerIndexText->setText(tr("%1").arg(m_annotationMarkerIndex));
+        qint64 frequency = m_annotationMarkers[m_annotationMarkerIndex].m_startFrequency +
+            (m_annoFreqStartElseCenter ? 0 : m_annotationMarkers[m_annotationMarkerIndex].m_bandwidth / 2);
+        ui->aMarkerFrequency->setValue(frequency);
+        ui->aMarkerBandwidth->setValue(m_annotationMarkers[m_annotationMarkerIndex].m_bandwidth);
+        ui->aMarkerFreqLabel->setText(m_annoFreqStartElseCenter ? "Cent" : "Start");
+        frequency = m_annotationMarkers[m_annotationMarkerIndex].m_startFrequency +
+            (m_annoFreqStartElseCenter ? m_annotationMarkers[m_annotationMarkerIndex].m_bandwidth / 2 : 0);
+        ui->aMarkerFreqText->setText(tr("%L1").arg(frequency));
+        ui->aMarkerStopText->setText(tr("%L1").arg(
+            m_annotationMarkers[m_annotationMarkerIndex].m_startFrequency + m_annotationMarkers[m_annotationMarkerIndex].m_bandwidth));
+        int r,g,b,a;
+        m_annotationMarkers[m_annotationMarkerIndex].m_markerColor.getRgb(&r, &g, &b, &a);
+        ui->aMarkerColor->setStyleSheet(tr("QLabel { background-color : rgb(%1,%2,%3); }").arg(r).arg(g).arg(b));
+        ui->aMarkerText->setText(tr("%1").arg(m_annotationMarkers[m_annotationMarkerIndex].m_text));
+    }
+
+    ui->aMarkerToggleFrequency->setChecked(m_annoFreqStartElseCenter);
+
+    ui->aMarkerFrequency->blockSignals(false);
+    ui->aCenterFrequency->blockSignals(false);
+    ui->aMarkerColor->blockSignals(false);
+    ui->aShowMarker->blockSignals(false);
+    ui->aMarkerText->blockSignals(false);
+    ui->aMarker->blockSignals(false);
+    ui->aMarkerAdd->blockSignals(false);
+    ui->aMarkerDel->blockSignals(false);
+    ui->aMarkerBandwidth->blockSignals(false);
+    ui->aMarkerToggleFrequency->blockSignals(false);
 }
 
 void SpectrumMarkersDialog::displayTime(float time)
@@ -426,7 +536,252 @@ void SpectrumMarkersDialog::on_wMarkerDel_clicked()
     displayWaterfallMarker();
 }
 
+void SpectrumMarkersDialog::on_aMarkerToggleFrequency_toggled(bool checked)
+{
+    m_annoFreqStartElseCenter = checked;
+    ui->aMarkerToggleFrequency->setText(checked ? "Start" : "Cent");
+    displayAnnotationMarker();
+}
+
+void SpectrumMarkersDialog::on_aMarkerFrequency_changed(qint64 value)
+{
+    if (m_annotationMarkers.size() == 0) {
+        return;
+    }
+
+    if (m_annoFreqStartElseCenter) {
+        m_annotationMarkers[m_annotationMarkerIndex].m_startFrequency = value;
+    } else {
+        m_annotationMarkers[m_annotationMarkerIndex].m_startFrequency = value -
+            (m_annotationMarkers[m_annotationMarkerIndex].m_bandwidth / 2);
+    }
+
+    displayAnnotationMarker();
+    emit updateAnnotations();
+}
+
+void SpectrumMarkersDialog::on_aCenterFrequency_clicked()
+{
+    if (m_annotationMarkers.size() == 0) {
+        return;
+    }
+
+    qDebug("SpectrumMarkersDialog::on_aCenterFrequency_clicked: %lld", m_centerFrequency);
+    m_annotationMarkers[m_annotationMarkerIndex].m_startFrequency = m_centerFrequency -
+        (m_annoFreqStartElseCenter ? 0 : m_annotationMarkers[m_annotationMarkerIndex].m_bandwidth/2);
+    displayAnnotationMarker();
+    emit updateAnnotations();
+}
+
+void SpectrumMarkersDialog::on_aMakerDuplicate_clicked()
+{
+    if (m_annotationMarkers.size() == 0) {
+        return;
+    }
+
+    m_annotationMarkers.push_back(m_annotationMarkers[m_annotationMarkerIndex]);
+    ui->aMarker->setMaximum(m_annotationMarkers.size() - 1);
+    m_annotationMarkerIndex = m_annotationMarkers.size() - 1;
+    displayAnnotationMarker();
+    emit updateAnnotations();
+}
+
+void SpectrumMarkersDialog::on_aMakersSort_clicked()
+{
+    std::sort(m_annotationMarkers.begin(), m_annotationMarkers.end(), annotationMarkerLessThan);
+    displayAnnotationMarker();
+    emit updateAnnotations();
+}
+
+void SpectrumMarkersDialog::on_aMarkerColor_clicked()
+{
+    if (m_annotationMarkers.size() == 0) {
+        return;
+    }
+
+    QColor newColor = QColorDialog::getColor(
+        m_annotationMarkers[m_annotationMarkerIndex].m_markerColor,
+        this,
+        tr("Select Color for marker"),
+        QColorDialog::DontUseNativeDialog
+    );
+
+    if (newColor.isValid()) // user clicked OK and selected a color
+    {
+        m_annotationMarkers[m_annotationMarkerIndex].m_markerColor = newColor;
+        displayAnnotationMarker();
+    }
+}
+
+void SpectrumMarkersDialog::on_aShowMarker_clicked(bool clicked)
+{
+    if (m_annotationMarkers.size() == 0) {
+        return;
+    }
+
+    m_annotationMarkers[m_annotationMarkerIndex].m_show = clicked;
+}
+
+void SpectrumMarkersDialog::on_aMarkerText_editingFinished()
+{
+    if (m_annotationMarkers.size() == 0) {
+        return;
+    }
+
+    m_annotationMarkers[m_annotationMarkerIndex].m_text = ui->aMarkerText->text();
+    emit updateAnnotations();
+}
+
+void SpectrumMarkersDialog::on_aMarker_valueChanged(int value)
+{
+    if (m_annotationMarkers.size() == 0) {
+        return;
+    }
+
+    m_annotationMarkerIndex = value;
+    displayAnnotationMarker();
+}
+
+void SpectrumMarkersDialog::on_aMarkerAdd_clicked()
+{
+    m_annotationMarkers.append(SpectrumAnnotationMarker());
+    m_annotationMarkers.back().m_startFrequency = m_centerFrequency;
+    m_annotationMarkerIndex = m_annotationMarkers.size() - 1;
+    ui->aMarker->setMaximum(m_annotationMarkers.size() - 1);
+    displayAnnotationMarker();
+    emit updateAnnotations();
+}
+
+void SpectrumMarkersDialog::on_aMarkerDel_clicked()
+{
+    if (m_annotationMarkers.size() == 0) {
+        return;
+    }
+
+    m_annotationMarkers.removeAt(m_annotationMarkerIndex);
+    m_annotationMarkerIndex = m_annotationMarkerIndex < m_annotationMarkers.size() ?
+        m_annotationMarkerIndex : m_annotationMarkerIndex - 1;
+    ui->aMarker->setMaximum(m_annotationMarkers.size() - 1);
+    displayAnnotationMarker();
+    emit updateAnnotations();
+}
+
+void SpectrumMarkersDialog::on_aMarkerBandwidth_changed(qint64 value)
+{
+    if (m_annotationMarkers.size() == 0) {
+        return;
+    }
+
+    m_annotationMarkers[m_annotationMarkerIndex].m_bandwidth = value < 0 ? 0 : value;
+
+    if (!m_annoFreqStartElseCenter)
+    {
+        m_annotationMarkers[m_annotationMarkerIndex].m_startFrequency = ui->aMarkerFrequency->getValue() -
+            (m_annotationMarkers[m_annotationMarkerIndex].m_bandwidth / 2);
+    }
+
+    displayAnnotationMarker();
+    emit updateAnnotations();
+}
+
+void SpectrumMarkersDialog::on_aMarkersImport_clicked()
+{
+    QFileDialog fileDialog(nullptr, "Select .csv annotation markers file to read", "", "*.csv");
+
+    if (fileDialog.exec())
+    {
+        QStringList fileNames = fileDialog.selectedFiles();
+
+        if (fileNames.size() > 0)
+        {
+            QFile file(fileNames[0]);
+
+            if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+            {
+
+                QTextStream in(&file);
+                QString error;
+                QHash<QString, int> colIndexes = CSV::readHeader(
+                    in,
+                    {"Start", "Width", "Text", "Show", "Red", "Green", "Blue"},
+                    error
+                );
+
+                if (error.isEmpty())
+                {
+                    QStringList cols;
+                    int startCol = colIndexes.value("Start");
+                    int widthCol = colIndexes.value("Width");
+                    int textCol = colIndexes.value("Text");
+                    int showCol = colIndexes.value("Show");
+                    int redCol = colIndexes.value("Red");
+                    int greenCol = colIndexes.value("Green");
+                    int blueCol = colIndexes.value("Blue");
+
+                    m_annotationMarkers.clear();
+
+                    while (CSV::readRow(in, &cols))
+                    {
+                        m_annotationMarkers.push_back(SpectrumAnnotationMarker());
+                        m_annotationMarkers.back().m_startFrequency = cols[startCol].toLongLong();
+                        m_annotationMarkers.back().m_bandwidth = cols[widthCol].toUInt();
+                        m_annotationMarkers.back().m_text = cols[textCol];
+                        m_annotationMarkers.back().m_show = cols[showCol].toInt() != 0;
+                        int r = cols[redCol].toInt();
+                        int g = cols[greenCol].toInt();
+                        int b = cols[blueCol].toInt();
+                        m_annotationMarkers.back().m_markerColor = QColor(r, g, b);
+                    }
+
+                    m_annotationMarkerIndex = 0;
+                    ui->aMarker->setMaximum(m_annotationMarkers.size() - 1);
+                    displayAnnotationMarker();
+                    emit updateAnnotations();
+                }
+            }
+        }
+    }
+}
+
+void SpectrumMarkersDialog::on_aMarkersExport_clicked()
+{
+    QFileDialog fileDialog(nullptr, "Select file to write annotation markers to", "", "*.csv");
+    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+
+    if (fileDialog.exec())
+    {
+        QStringList fileNames = fileDialog.selectedFiles();
+
+        if (fileNames.size() > 0)
+        {
+            QFile file(fileNames[0]);
+
+            if (file.open(QIODevice::WriteOnly | QIODevice::Text))
+            {
+                QTextStream stream;
+                stream.setDevice(&file);
+                stream << "Start,Width,Text,Show,Red,Green,Blue\n";
+
+                for (const auto &marker : m_annotationMarkers)
+                {
+                    stream << marker.m_startFrequency << ","
+                        << marker.m_bandwidth << ","
+                        << marker.m_text << ","
+                        << (marker.m_show ? "1" : "0") << ","
+                        << marker.m_markerColor.red() << ","
+                        << marker.m_markerColor.green() << ","
+                        << marker.m_markerColor.blue() << "\n";
+                }
+
+                stream.flush();
+                file.close();
+            }
+        }
+    }
+}
+
 void SpectrumMarkersDialog::on_showSelect_currentIndexChanged(int index)
 {
     m_markersDisplay = (SpectrumSettings::MarkersDisplay) index;
+    emit updateMarkersDisplay();
 }

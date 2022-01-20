@@ -36,6 +36,7 @@ def getInputOptions():
     parser.add_option("-j", "--json-file", dest="json_file", help="JSON file containing commands. Mandatory", metavar="FILE", type="string")
     parser.add_option("-i", "--init", dest="initialize", help="Initialize instance before running script", action="store_true")
     parser.add_option("-1", "--ignore-first-posts", dest="ignore_first_posts", help="Ignore first deviceset or featureset post in sequence", action="store_true")
+    parser.add_option("-d", "--delay", dest="delay_ms", help="force delay after each command (ms)", metavar="TIME", type="int")
 
     (options, args) = parser.parse_args()
 
@@ -134,6 +135,8 @@ def main():
                 delay = command.get('delay', None)
                 if delay is not None and isinstance(delay, int):
                     time.sleep(delay/1000)
+                elif options.delay_ms is not None:
+                    time.sleep(options.delay_ms/1000)
 
         print("All done!")
 

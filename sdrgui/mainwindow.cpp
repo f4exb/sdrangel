@@ -1181,7 +1181,6 @@ bool MainWindow::handleMessage(const Message& cmd)
             {
                 int nbMIMOChannels = deviceUI->getNumberOfAvailableMIMOChannels();
                 int nbRxChannels = deviceUI->getNumberOfAvailableRxChannels();
-                int nbTxChannels = deviceUI->getNumberOfAvailableTxChannels();
                 int direction = notif.getDirection();
 
                 if (direction == 2) {
