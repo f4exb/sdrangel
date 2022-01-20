@@ -1034,8 +1034,9 @@ bool APRSPacket::parseMicE(QString& info, int& idx, QString& dest)
     QString messageBits = "";
     int messageType = 0; // 0 = Standard, 1 = Custom
     int longitudeOffset = 0;
-    float latitudeDirection = 1; // Assume North
-    float longitudeDirection = -1; // Assume West
+    // Assume South & East, as North & West are encoded using consecutive Characters, easier and shorter to code
+    float latitudeDirection = -1;  // South
+    float longitudeDirection = 1;  // East
 
     QHash<QString, QString> messageTypeLookup = {
         {"111", "Off Duty"},
@@ -1060,38 +1061,35 @@ bool APRSPacket::parseMicE(QString& info, int& idx, QString& dest)
             } else if (inRange(80, 89, charInt)) {
                 latDigits.append(QString::number(charInt % 80));
             } else {
-                latDigits.append('0');
+                latDigits.append('0'); // Standard states "space" but we put a zero for math
             }
 
             // Message Type is encoded in 3 bits
             if (i < 3) {
                 if (inRange(48, 57, charInt) || charInt == 76) { // 0-9 or L
                     messageBits.append('0');
-                } else if (inRange(80, 90, charInt)) { // A-K, Standard
+                } else if (inRange(80, 90, charInt)) { // P-Z, Standard
                     messageBits.append('1');
                     messageType = 0;
-                } else if (inRange(65, 75, charInt)) { // P-Z, Custom
+                } else if (inRange(65, 75, charInt)) { // A-K, Custom
                     messageBits.append('1');
                     messageType = 1;
                 }
             }
 
             // Latitude Direction
-            if (i == 3) {
-                if (!inRange(65, 75, charInt))
-                    latitudeDirection = -1;
+            if (i == 3 && inRange(80, 90, charInt)) {
+                latitudeDirection = 1; // North
             }
 
             // Longitude Offset
-            if (i == 4) {
-                if (inRange(65, 75, charInt))
-                    longitudeOffset = 100;
+            if (i == 4 && inRange(80, 90, charInt)) {
+                longitudeOffset = 100;
             }
 
             // Longitude Direction
-            if (i == 5) {
-                if (!inRange(65, 75, charInt))
-                    longitudeDirection = 1;
+            if (i == 5 && inRange(80, 90, charInt)) {
+                longitudeDirection = -1; // West
             }
         }
 
@@ -1172,7 +1170,7 @@ bool APRSPacket::parseMicE(QString& info, int& idx, QString& dest)
 
     // 4-5 bytes, we only need the 3 to get altitude, e.g. "4T}
     // Some HTs prefix the altitude with ']' or '>', so we match that optionally but ignore it
-    QRegularExpression re_mice_altitude("[\]>]?(.{3})}");
+    QRegularExpression re_mice_altitude("[\\]>]?(.{3})}");
     QRegularExpressionMatch altitude_str = re_mice_altitude.match(info);
     if (altitude_str.hasMatch()) {
         QList<int> micEAltitudeMultipliers = {91 * 91, 91, 1};
