@@ -1034,8 +1034,8 @@ bool APRSPacket::parseMicE(QString& info, int& idx, QString& dest)
     QString messageBits = "";
     int messageType = 0; // 0 = Standard, 1 = Custom
     int longitudeOffset = 0;
-    float latitudeDirection = -1; // Assume South because North is easier to code
-    float longitudeDirection = 1;
+    float latitudeDirection = 1; // Assume North
+    float longitudeDirection = -1; // Assume West
 
     QHash<QString, QString> messageTypeLookup;
     messageTypeLookup["111"] = "Off Duty";
@@ -1077,8 +1077,8 @@ bool APRSPacket::parseMicE(QString& info, int& idx, QString& dest)
 
             // Latitude Direction
             if (i == 3) {
-                if (inRange(65, 75, charInt))
-                    latitudeDirection = 1;
+                if (!inRange(65, 75, charInt))
+                    latitudeDirection = -1;
             }
 
             // Longitude Offset
@@ -1089,8 +1089,8 @@ bool APRSPacket::parseMicE(QString& info, int& idx, QString& dest)
 
             // Longitude Direction
             if (i == 5) {
-                if (inRange(65, 75, charInt))
-                    longitudeDirection = -1;
+                if (!inRange(65, 75, charInt))
+                    longitudeDirection = 1;
             }
         }
 
