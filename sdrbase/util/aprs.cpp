@@ -1037,15 +1037,16 @@ bool APRSPacket::parseMicE(QString& info, int& idx, QString& dest)
     float latitudeDirection = 1; // Assume North
     float longitudeDirection = -1; // Assume West
 
-    QHash<QString, QString> messageTypeLookup;
-    messageTypeLookup["111"] = "Off Duty";
-    messageTypeLookup["110"] = "En Route";
-    messageTypeLookup["101"] = "In Service";
-    messageTypeLookup["100"] = "Returning";
-    messageTypeLookup["011"] = "Committed";
-    messageTypeLookup["010"] = "Special";
-    messageTypeLookup["001"] = "Priority";
-    messageTypeLookup["000"] = "Emergency";
+    QHash<QString, QString> messageTypeLookup = {
+        {"111", "Off Duty"},
+        {"110", "En Route"},
+        {"101", "In Service"},
+        {"100", "Returning"},
+        {"011", "Committed"},
+        {"010", "Special"},
+        {"001", "Priority"},
+        {"000", "Emergency"}
+    };
 
     QRegularExpression re("^[A-LP-Z0-9]{3}[L-Z0-9]{3}.?$"); // 6-7 bytes
     if (re.match(dest).hasMatch()) {
@@ -1163,15 +1164,18 @@ bool APRSPacket::parseMicE(QString& info, int& idx, QString& dest)
         m_hasSymbol = true;
     }
 
-    // Altitude, encoded in Status Message
+    // Altitude, encoded in Status Message in meters, converted to feet, above -10000 meters
+    // e.g. "4T} -> Doublequote is 34, digit 4 is 52, Capital T is 84. Subtract 33 from each -> 1, 19, 51
+    //  Multiply -> (1 * 91 * 91) + (19 * 91) + (51 * 1) - 10000 = 61 meters Mean Sea Level (MSL)
+    // ASCII Integer Character Range is 33 to 127
     float altitude = -10000;
-    QRegularExpression re_mice_altitude("[\]>]?(.{3})}"); // 4-5 bytes, we only need the 3 to get altitude, e.g. "4T}
+
+    // 4-5 bytes, we only need the 3 to get altitude, e.g. "4T}
+    // Some HTs prefix the altitude with ']' or '>', so we match that optionally but ignore it
+    QRegularExpression re_mice_altitude("[\]>]?(.{3})}");
     QRegularExpressionMatch altitude_str = re_mice_altitude.match(info);
     if (altitude_str.hasMatch()) {
-        QHash<int, int> micEAltitudeMultipliers;
-        micEAltitudeMultipliers[0] = 91 * 91;
-        micEAltitudeMultipliers[1] = 91;
-        micEAltitudeMultipliers[2] = 1;
+        QList<int> micEAltitudeMultipliers = {91 * 91, 91, 1};
 
         for (int i = 0; i < 3; i++) {
             QString altmatch = altitude_str.captured(1);
@@ -1180,9 +1184,10 @@ bool APRSPacket::parseMicE(QString& info, int& idx, QString& dest)
                 qDebug() << "APRSPacket::parseMicE: Invalid Altitude Byte Found pos:" << QString::number(i) << " ascii int:" << QString::number(charInt);
                 break;
             }
-            altitude += micEAltitudeMultipliers[i] * (float)(charInt - 33);
+            altitude += (float)(charInt - 33) * micEAltitudeMultipliers.at(i);
         }
 
+        // Assume that the Mic-E transmission is Above Ground Level
         if (altitude >= 0) {
             m_altitudeFt = std::round(Units::metresToFeet(altitude));
             m_hasAltitude = true;
