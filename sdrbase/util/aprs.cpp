@@ -16,10 +16,25 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QRegExp>
+#include <QRegularExpression>
 #include <QStringList>
 #include <QDateTime>
 
 #include "aprs.h"
+#include "util/units.h"
+
+inline bool inRange(unsigned low, unsigned high, unsigned x)
+{
+    return (low <= x && x <= high);
+}
+
+// Required for Mic-E Decoding
+inline int charToIntAscii(QString&s, int idx)
+{
+    char c = s.toLatin1().at(idx);
+    return int(c);
+}
+
 
 // See: http://www.aprs.org/doc/APRS101.PDF
 
@@ -30,8 +45,9 @@ bool APRSPacket::decode(AX25Packet packet)
     if ((packet.m_type == "UI") && (packet.m_pid == "f0") && (packet.m_dataASCII.length() >= 1))
     {
         // Check destination address
-        QRegExp re("^(AIR.*|ALL.*|AP.*|BEACON|CQ.*|GPS.*|DF.*|DGPS.*|DRILL.*|DX.*|ID.*|JAVA.*|MAIL.*|MICE.*|QST.*|QTH.*|RTCM.*|SKY.*|SPACE.*|SPC.*|SYM.*|TEL.*|TEST.*|TLM.*|WX.*|ZIP.*)");
-        if (re.exactMatch(packet.m_to))
+        QRegularExpression re("^(AIR.*|ALL.*|AP.*|BEACON|CQ.*|GPS.*|DF.*|DGPS.*|DRILL.*|DX.*|ID.*|JAVA.*|MAIL.*|MICE.*|QST.*|QTH.*|RTCM.*|SKY.*|SPACE.*|SPC.*|SYM.*|TEL.*|TEST.*|TLM.*|WX.*|ZIP.*)");
+        QRegularExpression re_mice("^[A-LP-Z0-9]{3}[L-Z0-9]{3}.?$"); // Mic-E Encoded Destination, 6-7 bytes
+        if (re.match(packet.m_to).hasMatch() || re_mice.match(packet.m_to).hasMatch())
         {
             m_from = packet.m_from;
             m_to = packet.m_to;
@@ -143,6 +159,10 @@ bool APRSPacket::decode(AX25Packet packet)
                 parseTimeMDHM(packet.m_dataASCII, idx);
                 parseWeather(packet.m_dataASCII, idx, true);
                 break;
+            case '`': // Mic-E Information Field Data (current)
+            case '\'': // Mic-E Information Field Data (old)
+                parseMicE(packet.m_dataASCII, idx, m_to);
+                break;
             case '{': // User-defined APRS packet format
                 break;
             default:
@@ -156,8 +176,13 @@ bool APRSPacket::decode(AX25Packet packet)
             }
 
             return true;
+        } else {
+            qDebug() << "APRSPacket::decode: AX.25 Destination did not match known regexp " << m_to;
         }
+    } else {
+        qDebug() << "APRSPacket::decode: Invalid value in type=" << packet.m_type << " pid=" << packet.m_pid << " length of " << packet.m_dataASCII;
     }
+
 
     return false;
 }
@@ -988,3 +1013,194 @@ bool APRSPacket::parseTelemetry(QString& info, int& idx)
     else
         return false;
 }
+
+// Mic-E Implementation by Peter Beckman KM4BBB github:ooglek
+bool APRSPacket::parseMicE(QString& info, int& idx, QString& dest)
+{
+    info = info.toLatin1();
+    // Mic-E Location data is encoded in the AX.25 Destination Address
+    if (dest.length() < 6) {
+        qDebug() << "APRSPacket::parseMicE: Destination invalid length " << dest;
+        return false;
+    }
+
+    // Mic-E Information data is 8 bytes minimum, 13-14 with altitude
+    if (info.length() < idx+8) {
+        qDebug() << "APRSPacket::parseMicE: Information Data invalid length " << info;
+        return false;
+    }
+
+    QString latDigits = "";
+    QString messageBits = "";
+    int messageType = 0; // 0 = Standard, 1 = Custom
+    int longitudeOffset = 0;
+    // Assume South & East, as North & West are encoded using consecutive Characters, easier and shorter to code
+    float latitudeDirection = -1;  // South
+    float longitudeDirection = 1;  // East
+
+    QHash<QString, QString> messageTypeLookup = {
+        {"111", "Off Duty"},
+        {"110", "En Route"},
+        {"101", "In Service"},
+        {"100", "Returning"},
+        {"011", "Committed"},
+        {"010", "Special"},
+        {"001", "Priority"},
+        {"000", "Emergency"}
+    };
+
+    QRegularExpression re("^[A-LP-Z0-9]{3}[L-Z0-9]{3}.?$"); // 6-7 bytes
+    if (re.match(dest).hasMatch()) {
+        m_comment = "Mic-E";
+        for (int i = 0; i < 6; i++) {
+            int charInt = charToIntAscii(dest, i);
+            if (inRange(48, 57, charInt)) {
+                latDigits.append(QString::number(charInt % 48));
+            } else if (inRange(65, 74, charInt)) {
+                latDigits.append(QString::number(charInt % 65));
+            } else if (inRange(80, 89, charInt)) {
+                latDigits.append(QString::number(charInt % 80));
+            } else {
+                latDigits.append('0'); // Standard states "space" but we put a zero for math
+            }
+
+            // Message Type is encoded in 3 bits
+            if (i < 3) {
+                if (inRange(48, 57, charInt) || charInt == 76) { // 0-9 or L
+                    messageBits.append('0');
+                } else if (inRange(80, 90, charInt)) { // P-Z, Standard
+                    messageBits.append('1');
+                    messageType = 0;
+                } else if (inRange(65, 75, charInt)) { // A-K, Custom
+                    messageBits.append('1');
+                    messageType = 1;
+                }
+            }
+
+            // Latitude Direction
+            if (i == 3 && inRange(80, 90, charInt)) {
+                latitudeDirection = 1; // North
+            }
+
+            // Longitude Offset
+            if (i == 4 && inRange(80, 90, charInt)) {
+                longitudeOffset = 100;
+            }
+
+            // Longitude Direction
+            if (i == 5 && inRange(80, 90, charInt)) {
+                longitudeDirection = -1; // West
+            }
+        }
+
+        if (messageTypeLookup.find(messageBits) != messageTypeLookup.end()) {
+            m_status = messageTypeLookup[messageBits];
+            if (messageType == 1) {
+                m_status.append(" (custom)");
+            }
+            m_hasStatus = true;
+        }
+        m_latitude = (latDigits.mid(0, 2).toFloat() + latDigits.mid(2, 2).toFloat()/60.00 + latDigits.mid(4, 2).toFloat()/60.0/100.0) * latitudeDirection;
+        m_hasPosition = true;
+    } else {
+        qDebug() << "APRSPacket::parseMicE: Destination invalid regexp match " << dest;
+        return false;
+    }
+
+    // Mic-E Data is encoded in ASCII Characters
+    if (inRange(38, 127, charToIntAscii(info, idx))       // 0: Longitude Degrees, 0-360
+        && inRange(38, 97, charToIntAscii(info, idx+1))   // 1: Longitude Minutes, 0-59
+        && inRange(28, 127, charToIntAscii(info, idx+2))  // 2: Longitude Hundreths of a minute, 0-99
+        && inRange(28, 127, charToIntAscii(info, idx+3))  // 3: Speed (tens), 0-800
+        && inRange(28, 125, charToIntAscii(info, idx+4))  // 4: Speed (ones), 0-9, and Course (hundreds), {0, 100, 200, 300}
+        && inRange(28, 127, charToIntAscii(info, idx+5))  // 5: Course, 0-99 degrees
+       )
+    {
+        // Longitude; Degrees plus offset encoded in the AX.25 Destination
+        // Destination Byte 5, ASCII P through Z indicates an offset of +100
+        int deg = (charToIntAscii(info, idx) - 28) + longitudeOffset;
+        if (inRange(180, 189, deg))
+            deg -= 80;
+        if (inRange(190, 199, deg))
+            deg -= 190;
+
+        int min = (charToIntAscii(info, idx+1) - 28) % 60;
+        int hundreths = charToIntAscii(info, idx+2);
+
+        // Course and Speed
+        // Speed (SP+28, units of 10) can use two encodings: ASCII 28-47 and 108-127 are the same
+        // Speed & Course (DC+28, Speed units of 1, Course units of 100 e.g. 0, 100, 200, 300) uses two encodings
+        int speed = ((charToIntAscii(info, idx+3) - 28) * 10) % 800; // Speed in 10 kts units
+        float decoded_speed_course = (float)(charToIntAscii(info, idx+4) - 28) / 10.0;
+        speed += floor(decoded_speed_course); // Speed in 1 kt units, added to above
+        int course = (((charToIntAscii(info, idx+4) - 28) % 10) * 100) % 400;
+        course += charToIntAscii(info, idx+5) - 28;
+
+        m_longitude = (((float)deg) + min/60.00 + hundreths/60.0/100.0) * longitudeDirection;
+        m_hasPosition = true;
+        m_course = course;
+        m_speed = speed;
+        m_hasCourseAndSpeed = true;
+    } else {
+        qDebug() << "APRSPacket::parseMicE: Information Data invalid ASCII range " << info;
+        return false;
+    }
+
+    // 6: Symbol Code
+    // 7: Symbol Table ID, / = standard, \ = alternate, "," = Telemetry
+    if (inRange(33, 126, charToIntAscii(info, idx+6))
+        && (charToIntAscii(info, idx+7) == 47 || charToIntAscii(info, idx+7) == 92)
+       )
+    {
+        m_symbolTable = info[idx+7].toLatin1();
+        m_symbolCode = info[idx+6].toLatin1();
+        m_hasSymbol = true;
+    }
+
+    // Altitude, encoded in Status Message in meters, converted to feet, above -10000 meters
+    // e.g. "4T} -> Doublequote is 34, digit 4 is 52, Capital T is 84. Subtract 33 from each -> 1, 19, 51
+    //  Multiply -> (1 * 91 * 91) + (19 * 91) + (51 * 1) - 10000 = 61 meters Mean Sea Level (MSL)
+    // ASCII Integer Character Range is 33 to 127
+    float altitude = -10000;
+
+    // 4-5 bytes, we only need the 3 to get altitude, e.g. "4T}
+    // Some HTs prefix the altitude with ']' or '>', so we match that optionally but ignore it
+    QRegularExpression re_mice_altitude("[\\]>]?(.{3})}");
+    QRegularExpressionMatch altitude_str = re_mice_altitude.match(info);
+    if (altitude_str.hasMatch()) {
+        QList<int> micEAltitudeMultipliers = {91 * 91, 91, 1};
+
+        for (int i = 0; i < 3; i++) {
+            QString altmatch = altitude_str.captured(1);
+            int charInt = charToIntAscii(altmatch, i);
+            if (!inRange(33, 127, charInt)) {
+                qDebug() << "APRSPacket::parseMicE: Invalid Altitude Byte Found pos:" << QString::number(i) << " ascii int:" << QString::number(charInt);
+                break;
+            }
+            altitude += (float)(charInt - 33) * micEAltitudeMultipliers.at(i);
+        }
+
+        // Assume that the Mic-E transmission is Above Ground Level
+        if (altitude >= 0) {
+            m_altitudeFt = std::round(Units::metresToFeet(altitude));
+            m_hasAltitude = true;
+        }
+    }
+
+    // Mic-E Text Format
+    if (info.length() >= 9) {
+        QString mice_status = info.mid(9);
+        if (altitude_str.hasMatch() && mice_status.indexOf(altitude_str.captured(0)) != -1) {
+            mice_status.replace(altitude_str.captured(0), "");
+        }
+
+        m_comment += " " + mice_status;
+        // TODO Implement the APRS 1.2 Mic-E Text Format http://www.aprs.org/aprs12/mic-e-types.txt
+        // Consider the Kenwood leading characters
+    }
+
+    // TODO Implement Mic-E Telemetry Data -- need to modify regexp for the Symbol Table Identifier to include comma (,)
+
+    return true;
+}
+

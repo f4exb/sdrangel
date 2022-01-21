@@ -473,6 +473,7 @@ private:
     bool parseStatus(QString& info, int& idx);
     bool parseMessage(QString& info, int& idx);
     bool parseTelemetry(QString& info, int& idx);
+    bool parseMicE(QString& info, int& idx, QString& dest);
 };
 
 #endif // INCLUDE_APRS_H
