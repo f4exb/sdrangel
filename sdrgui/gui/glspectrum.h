@@ -169,6 +169,7 @@ public:
     void updateAnnotationMarkers();
     void updateMarkersDisplay();
     SpectrumSettings::MarkersDisplay& getMarkersDisplay() {  return m_markersDisplay; }
+	void setMarkersDisplay(SpectrumSettings::MarkersDisplay markersDisplay);
 
 private:
     struct ChannelMarkerState {

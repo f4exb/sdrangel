@@ -251,6 +251,7 @@ void GLSpectrumGUI::applySpectrumSettings()
     m_glSpectrum->setHistogramMarkers(m_settings.m_histogramMarkers);
     m_glSpectrum->setWaterfallMarkers(m_settings.m_waterfallMarkers);
     m_glSpectrum->setAnnotationMarkers(m_settings.m_annoationMarkers);
+    m_glSpectrum->setMarkersDisplay(m_settings.m_markersDisplay);
 }
 
 void GLSpectrumGUI::on_fftWindow_currentIndexChanged(int index)
@@ -386,6 +387,7 @@ void GLSpectrumGUI::on_markers_clicked(bool checked)
     m_settings.m_histogramMarkers = m_glSpectrum->getHistogramMarkers();
     m_settings.m_waterfallMarkers = m_glSpectrum->getWaterfallMarkers();
     m_settings.m_annoationMarkers = m_glSpectrum->getAnnotationMarkers();
+    m_settings.m_markersDisplay = m_glSpectrum->getMarkersDisplay();
 
     applySettings();
 }

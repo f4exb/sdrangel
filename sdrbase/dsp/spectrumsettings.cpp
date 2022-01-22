@@ -61,6 +61,7 @@ void SpectrumSettings::resetToDefaults()
 	m_wsSpectrum = false;
     m_wsSpectrumAddress = "127.0.0.1";
     m_wsSpectrumPort = 8887;
+	m_markersDisplay = MarkersDisplayNone;
 }
 
 QByteArray SpectrumSettings::serialize() const
@@ -93,6 +94,7 @@ QByteArray SpectrumSettings::serialize() const
     s.writeBool(25, m_usb);
 	s.writeS32(26, m_fpsPeriodMs);
 	s.writeBool(27, m_wsSpectrum);
+	s.writeS32(28, (int) m_markersDisplay);
 	s.writeS32(100, m_histogramMarkers.size());
 
 	for (int i = 0; i < m_histogramMarkers.size(); i++) {
@@ -169,10 +171,12 @@ bool SpectrumSettings::deserialize(const QByteArray& data)
         d.readBool(24, &m_ssb, false);
         d.readBool(25, &m_usb, true);
 		d.readS32(26, &tmp, 50);
-		d.readBool(27, &m_wsSpectrum, false);
 		m_fpsPeriodMs = tmp < 5 ? 5 : tmp > 500 ? 500 : tmp;
-		int histogramMarkersSize;
+		d.readBool(27, &m_wsSpectrum, false);
+		d.readS32(28, &tmp, 0);
+		m_markersDisplay = (MarkersDisplay) tmp;
 
+		int histogramMarkersSize;
 		d.readS32(100, &histogramMarkersSize, 0);
 		histogramMarkersSize = histogramMarkersSize < 0 ? 0 :
 			histogramMarkersSize > SpectrumHistogramMarker::m_maxNbOfMarkers ?

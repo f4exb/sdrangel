@@ -448,6 +448,16 @@ void GLSpectrum::setAnnotationMarkers(const QList<SpectrumAnnotationMarker>& ann
     update();
 }
 
+void GLSpectrum::setMarkersDisplay(SpectrumSettings::MarkersDisplay markersDisplay)
+{
+	m_mutex.lock();
+	m_markersDisplay = markersDisplay;
+	updateMarkersDisplay();
+    m_changesPending = true;
+    m_mutex.unlock();
+    update();
+}
+
 float GLSpectrum::getPowerMax() const
 {
     return m_linear ? m_powerScale.getRangeMax() : CalcDb::powerFromdB(m_powerScale.getRangeMax());
@@ -1403,6 +1413,7 @@ void GLSpectrum::drawAnnotationMarkers()
     }
 
     float h = m_annotationMarkerHeight / (float) m_histogramHeight;
+	float htop = 1.0f / (float) m_histogramHeight;
 
     for (const auto &marker : m_visibleAnnotationMarkers)
     {
@@ -1415,7 +1426,7 @@ void GLSpectrum::drawAnnotationMarkers()
         if (marker->m_bandwidth == 0)
         {
             GLfloat d[] {
-                marker->m_startPos, 0,
+                marker->m_startPos, htop,
                 marker->m_startPos, h
             };
             m_glShaderSimple.drawSegments(m_glHistogramBoxMatrix, color, d, 2);
@@ -1425,8 +1436,8 @@ void GLSpectrum::drawAnnotationMarkers()
             GLfloat q3[] {
                 marker->m_stopPos, h,
                 marker->m_startPos, h,
-                marker->m_startPos, 0,
-                marker->m_stopPos, 0
+                marker->m_startPos, htop,
+                marker->m_stopPos, htop
             };
             m_glShaderSimple.drawSurface(m_glHistogramBoxMatrix, color, q3, 4);
         }

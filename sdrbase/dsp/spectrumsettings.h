@@ -75,6 +75,7 @@ public:
 	QList<SpectrumHistogramMarker> m_histogramMarkers;
 	QList<SpectrumWaterfallMarker> m_waterfallMarkers;
 	QList<SpectrumAnnotationMarker> m_annoationMarkers;
+	MarkersDisplay m_markersDisplay;
 	static const int m_log2FFTSizeMin = 6;   // 64
 	static const int m_log2FFTSizeMax = 15;  // 32k
 
