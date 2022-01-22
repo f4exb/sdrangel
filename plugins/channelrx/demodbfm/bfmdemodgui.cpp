@@ -213,6 +213,7 @@ void BFMDemodGUI::on_clearData_clicked(bool checked)
 	{
 		m_bfmDemod->getRDSParser().clearAllFields();
 
+		ui->g00ProgServiceName->clear();
 		ui->go2Text->clear();
 		ui->go2PrevText->clear();
 		ui->g14ProgServiceNames->clear();
