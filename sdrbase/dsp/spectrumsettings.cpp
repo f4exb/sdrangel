@@ -265,6 +265,7 @@ void SpectrumSettings::formatTo(SWGSDRangel::SWGObject *swgObject) const
 	swgSpectrum->setSsb(m_ssb ? 1 : 0);
 	swgSpectrum->setUsb(m_usb ? 1 : 0);
 	swgSpectrum->setWaterfallShare(m_waterfallShare);
+	swgSpectrum->setMarkersDisplay((int) m_markersDisplay);
 
 	if (m_histogramMarkers.size() > 0)
 	{
@@ -397,6 +398,9 @@ void SpectrumSettings::updateFrom(const QStringList& keys, const SWGSDRangel::SW
 	}
 	if (keys.contains("spectrumConfig.waterfallShare")) {
 		m_waterfallShare = swgSpectrum->getWaterfallShare();
+	}
+	if (keys.contains("spectrumConfig.markersDisplay")) {
+		m_markersDisplay = (SpectrumSettings::MarkersDisplay) swgSpectrum->getMarkersDisplay();
 	}
 
 	if (keys.contains("spectrumConfig.histogramMarkers"))

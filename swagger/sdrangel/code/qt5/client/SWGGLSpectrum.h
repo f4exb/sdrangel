@@ -124,6 +124,9 @@ public:
     qint32 getWsSpectrumPort();
     void setWsSpectrumPort(qint32 ws_spectrum_port);
 
+    qint32 getMarkersDisplay();
+    void setMarkersDisplay(qint32 markers_display);
+
     QList<SWGSpectrumHistogramMarker*>* getHistogramMarkers();
     void setHistogramMarkers(QList<SWGSpectrumHistogramMarker*>* histogram_markers);
 
@@ -214,6 +217,9 @@ private:
 
     qint32 ws_spectrum_port;
     bool m_ws_spectrum_port_isSet;
+
+    qint32 markers_display;
+    bool m_markers_display_isSet;
 
     QList<SWGSpectrumHistogramMarker*>* histogram_markers;
     bool m_histogram_markers_isSet;

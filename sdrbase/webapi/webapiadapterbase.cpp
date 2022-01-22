@@ -165,6 +165,7 @@ void WebAPIAdapterBase::webapiFormatPreset(
         swgSpectrumConfig->setAveragingMode((int) m_spectrumSettings.m_averagingMode);
         swgSpectrumConfig->setAveragingValue(SpectrumSettings::getAveragingValue(m_spectrumSettings.m_averagingIndex, m_spectrumSettings.m_averagingMode));
         swgSpectrumConfig->setLinear(m_spectrumSettings.m_linear ? 1 : 0);
+        swgSpectrumConfig->setMarkersDisplay((int) m_spectrumSettings.m_markersDisplay);
     }
 
     int nbChannels = preset.getChannelCount();
@@ -377,6 +378,9 @@ void WebAPIAdapterBase::webapiUpdatePreset(
         }
         if (spectrumIt->contains("waterfallShare")) {
             spectrumSettings.m_waterfallShare = apiPreset->getSpectrumConfig()->getWaterfallShare();
+        }
+        if (spectrumIt->contains("markersDisplay")) {
+            spectrumSettings.m_markersDisplay = (SpectrumSettings::MarkersDisplay) apiPreset->getSpectrumConfig()->getMarkersDisplay();
         }
     }
 

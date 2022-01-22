@@ -140,6 +140,13 @@ GLSpectrum:
     wsSpectrumPort:
       description: port on which the websocket server is listening
       type: integer
+    markersDisplay:
+      type: integer
+      description: >
+        Display markers (SpectrumSettings::MarkersDisplay)
+          * 0 - Mome
+          * 1 - Spectrum markers (histogram and waterfall)
+          * 2 - Spectrum annotation markers
     histogramMarkers:
       type: array
       items:
