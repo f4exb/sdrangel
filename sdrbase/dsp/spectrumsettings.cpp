@@ -301,7 +301,7 @@ void SpectrumSettings::formatTo(SWGSDRangel::SWGObject *swgObject) const
 			swgSpectrum->getAnnotationMarkers()->back()->setStartFrequency(marker.m_startFrequency);
 			swgSpectrum->getAnnotationMarkers()->back()->setBandwidth(marker.m_bandwidth);
 			swgSpectrum->getAnnotationMarkers()->back()->setMarkerColor(qColorToInt(marker.m_markerColor));
-			swgSpectrum->getAnnotationMarkers()->back()->setShow(marker.m_show ? 1 : 0);
+			swgSpectrum->getAnnotationMarkers()->back()->setShow((int) marker.m_show);
 		}
 	}
 }
@@ -447,7 +447,7 @@ void SpectrumSettings::updateFrom(const QStringList& keys, const SWGSDRangel::SW
 			m_annoationMarkers.back().m_startFrequency = swgAnnotationMarker->getStartFrequency();
 			m_annoationMarkers.back().m_bandwidth = swgAnnotationMarker->getBandwidth() < 0 ? 0 : swgAnnotationMarker->getBandwidth();
 			m_annoationMarkers.back().m_markerColor = intToQColor(swgAnnotationMarker->getMarkerColor());
-			m_annoationMarkers.back().m_show = swgAnnotationMarker->getShow() != 0;
+			m_annoationMarkers.back().m_show = (SpectrumAnnotationMarker::ShowState) swgAnnotationMarker->getShow();
 		}
 	}
 }

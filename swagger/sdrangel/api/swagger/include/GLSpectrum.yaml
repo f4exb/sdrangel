@@ -59,9 +59,10 @@ SpectrumAnnotationMarker:
     show:
       type: integer
       description: >
-        Boolean - Marker display state
+        SpectrumAnnotationMarker::ShowState - Marker display state
           * 0 - Hidden
-          * 1 - Visible
+          * 1 - Only top marker visible
+          * 2 - Fully visible with text and full sized limits
 
 GLSpectrum:
   description: GLSpectrumGUI settings

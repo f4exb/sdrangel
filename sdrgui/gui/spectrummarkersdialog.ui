@@ -29,7 +29,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="hisTab">
       <attribute name="title">
@@ -1035,7 +1035,7 @@
            <widget class="QLabel" name="aMarkerIndexText">
             <property name="minimumSize">
              <size>
-              <width>15</width>
+              <width>30</width>
               <height>0</height>
              </size>
             </property>
@@ -1046,7 +1046,7 @@
              <string>0</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
           </item>
@@ -1217,25 +1217,12 @@
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="aShowMarker">
-            <property name="toolTip">
-             <string>Show this marker</string>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
            <widget class="QLineEdit" name="aMarkerText">
             <property name="toolTip">
              <string>Marker text</string>
             </property>
             <property name="maxLength">
-             <number>30</number>
+             <number>36</number>
             </property>
            </widget>
           </item>
@@ -1637,6 +1624,44 @@
             </property>
             <property name="text">
              <string>Hz</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="aMarkerShowState">
+            <property name="toolTip">
+             <string>Marker show state</string>
+            </property>
+            <item>
+             <property name="text">
+              <string>Hidden</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Top</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Full</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="aMarkerShowStateAll">
+            <property name="maximumSize">
+             <size>
+              <width>30</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Apply current show state to all markers</string>
+            </property>
+            <property name="text">
+             <string>All</string>
             </property>
            </widget>
           </item>

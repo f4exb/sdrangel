@@ -176,7 +176,7 @@ void SpectrumMarkersDialog::displayAnnotationMarker()
     ui->aMarkerFrequency->blockSignals(true);
     ui->aCenterFrequency->blockSignals(true);
     ui->aMarkerColor->blockSignals(true);
-    ui->aShowMarker->blockSignals(true);
+    ui->aMarkerShowState->blockSignals(true);
     ui->aMarkerText->blockSignals(true);
     ui->aMarker->blockSignals(true);
     ui->aMarkerAdd->blockSignals(true);
@@ -189,7 +189,7 @@ void SpectrumMarkersDialog::displayAnnotationMarker()
         ui->aMarker->setEnabled(false);
         ui->aMarkerFrequency->setEnabled(false);
         ui->aMarkerBandwidth->setEnabled(false);
-        ui->aShowMarker->setEnabled(false);
+        ui->aMarkerShowState->setEnabled(false);
         ui->aMarkerIndexText->setText("-");
         ui->aMarkerText->setText("");
     }
@@ -198,7 +198,7 @@ void SpectrumMarkersDialog::displayAnnotationMarker()
         ui->aMarker->setEnabled(true);
         ui->aMarkerFrequency->setEnabled(true);
         ui->aMarkerBandwidth->setEnabled(true);
-        ui->aShowMarker->setEnabled(true);
+        ui->aMarkerShowState->setEnabled(true);
         ui->aMarker->setValue(m_annotationMarkerIndex);
         ui->aMarkerIndexText->setText(tr("%1").arg(m_annotationMarkerIndex));
         qint64 frequency = m_annotationMarkers[m_annotationMarkerIndex].m_startFrequency +
@@ -215,6 +215,7 @@ void SpectrumMarkersDialog::displayAnnotationMarker()
         m_annotationMarkers[m_annotationMarkerIndex].m_markerColor.getRgb(&r, &g, &b, &a);
         ui->aMarkerColor->setStyleSheet(tr("QLabel { background-color : rgb(%1,%2,%3); }").arg(r).arg(g).arg(b));
         ui->aMarkerText->setText(tr("%1").arg(m_annotationMarkers[m_annotationMarkerIndex].m_text));
+        ui->aMarkerShowState->setCurrentIndex((int) m_annotationMarkers[m_annotationMarkerIndex].m_show);
     }
 
     ui->aMarkerToggleFrequency->setChecked(m_annoFreqStartElseCenter);
@@ -222,7 +223,7 @@ void SpectrumMarkersDialog::displayAnnotationMarker()
     ui->aMarkerFrequency->blockSignals(false);
     ui->aCenterFrequency->blockSignals(false);
     ui->aMarkerColor->blockSignals(false);
-    ui->aShowMarker->blockSignals(false);
+    ui->aMarkerShowState->blockSignals(false);
     ui->aMarkerText->blockSignals(false);
     ui->aMarker->blockSignals(false);
     ui->aMarkerAdd->blockSignals(false);
@@ -613,13 +614,20 @@ void SpectrumMarkersDialog::on_aMarkerColor_clicked()
     }
 }
 
-void SpectrumMarkersDialog::on_aShowMarker_clicked(bool clicked)
+void SpectrumMarkersDialog::on_aMarkerShowState_currentIndexChanged(int state)
 {
     if (m_annotationMarkers.size() == 0) {
         return;
     }
 
-    m_annotationMarkers[m_annotationMarkerIndex].m_show = clicked;
+    m_annotationMarkers[m_annotationMarkerIndex].m_show = (SpectrumAnnotationMarker::ShowState) state;
+}
+
+void SpectrumMarkersDialog::on_aMarkerShowStateAll_clicked()
+{
+    for (auto &marker : m_annotationMarkers) {
+        marker.m_show = (SpectrumAnnotationMarker::ShowState) ui->aMarkerShowState->currentIndex();
+    }
 }
 
 void SpectrumMarkersDialog::on_aMarkerText_editingFinished()
@@ -726,7 +734,7 @@ void SpectrumMarkersDialog::on_aMarkersImport_clicked()
                         m_annotationMarkers.back().m_startFrequency = cols[startCol].toLongLong();
                         m_annotationMarkers.back().m_bandwidth = cols[widthCol].toUInt();
                         m_annotationMarkers.back().m_text = cols[textCol];
-                        m_annotationMarkers.back().m_show = cols[showCol].toInt() != 0;
+                        m_annotationMarkers.back().m_show = (SpectrumAnnotationMarker::ShowState) cols[showCol].toInt();
                         int r = cols[redCol].toInt();
                         int g = cols[greenCol].toInt();
                         int b = cols[blueCol].toInt();

@@ -80,7 +80,7 @@ QByteArray SpectrumWaterfallMarker::serialize() const
     s.writeS32(4, r);
     s.writeS32(5, g);
     s.writeS32(6, b);
-    s.writeBool(7, m_show);
+    s.writeS32(7, (int) m_show);
 
     return s.final();
 }
@@ -141,6 +141,8 @@ bool SpectrumAnnotationMarker::deserialize(const QByteArray& data)
 
     if (d.getVersion() == 1)
     {
+        int tmp;
+
         d.readS64(1, &m_startFrequency, 0);
         d.readU32(2, &m_bandwidth, 0);
         int r, g, b;
@@ -150,7 +152,8 @@ bool SpectrumAnnotationMarker::deserialize(const QByteArray& data)
         m_markerColor.setGreen(g);
         d.readS32(6, &b, 255);
         m_markerColor.setBlue(b);
-        d.readBool(7, &m_show, true);
+        d.readS32   (7, &tmp, 1);
+        m_show = (ShowState) tmp;
         d.readString(8, &m_text);
 
         return true;

@@ -1406,7 +1406,11 @@ void GLSpectrum::drawAnnotationMarkers()
 
     for (const auto &marker : m_visibleAnnotationMarkers)
     {
-         QVector4D color(marker->m_markerColor.redF(), marker->m_markerColor.greenF(), marker->m_markerColor.blueF(), 0.5f);
+		if (marker->m_show == SpectrumAnnotationMarker::Hidden) {
+			continue;
+		}
+
+        QVector4D color(marker->m_markerColor.redF(), marker->m_markerColor.greenF(), marker->m_markerColor.blueF(), 0.5f);
 
         if (marker->m_bandwidth == 0)
         {
@@ -1427,7 +1431,7 @@ void GLSpectrum::drawAnnotationMarkers()
             m_glShaderSimple.drawSurface(m_glHistogramBoxMatrix, color, q3, 4);
         }
 
-        if (marker->m_selected)
+        if (marker->m_show == SpectrumAnnotationMarker::ShowFull)
         {
             QVector4D color(
                 marker->m_markerColor.redF(),
@@ -2283,7 +2287,6 @@ void GLSpectrum::updateSortedAnnotationMarkers()
 
         if ((startPos > 1.0f) || (stopPos < 0.0f)) // out of range
 		{
-			marker->m_selected = false;
             continue;
         }
 
@@ -2579,17 +2582,18 @@ void GLSpectrum::mousePressEvent(QMouseEvent* event)
 
             for (auto iMarker = m_visibleAnnotationMarkers.rbegin(); iMarker != m_visibleAnnotationMarkers.rend(); ++iMarker)
             {
+				if ((*iMarker)->m_show == SpectrumAnnotationMarker::Hidden) {
+					continue;
+				}
+
                 qint64 stopFrequency = (*iMarker)->m_startFrequency +
                     ((*iMarker)->m_bandwidth == 0 ? m_frequencyScale.getRange()*0.01f : (*iMarker)->m_bandwidth);
 
                 if (((*iMarker)->m_startFrequency < selectedFrequency) && (selectedFrequency <= stopFrequency) && !selected)
                 {
-                    (*iMarker)->m_selected = true;
+                    (*iMarker)->m_show = (*iMarker)->m_show == SpectrumAnnotationMarker::ShowFull ?
+						SpectrumAnnotationMarker::ShowTop : SpectrumAnnotationMarker::ShowFull;
                     selected = true;
-                }
-                else
-                {
-                    (*iMarker)->m_selected = false;
                 }
             }
         }

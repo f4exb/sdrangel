@@ -157,12 +157,18 @@ struct SDRBASE_API SpectrumWaterfallMarker
 
 struct SDRBASE_API SpectrumAnnotationMarker
 {
+    enum ShowState
+    {
+        Hidden,
+        ShowTop,
+        ShowFull
+    };
+
     qint64 m_startFrequency;
     uint32_t m_bandwidth;
     QColor m_markerColor;
-    bool m_show;
+    ShowState m_show;
     QString m_text;
-    bool m_selected;
     float m_startPos;
     float m_stopPos;
 
@@ -170,9 +176,8 @@ struct SDRBASE_API SpectrumAnnotationMarker
         m_startFrequency(0),
         m_bandwidth(0),
         m_markerColor("white"),
-        m_show(true),
+        m_show(ShowTop),
         m_text("Text"),
-        m_selected(false),
         m_startPos(0.0f),
         m_stopPos(1.0f)
     {}
@@ -181,7 +186,7 @@ struct SDRBASE_API SpectrumAnnotationMarker
         qint64 startFrequency,
         uint32_t bandwidth,
         QColor markerColor,
-        bool show,
+        ShowState show,
         const QString& text
     ) :
         m_startFrequency(startFrequency),

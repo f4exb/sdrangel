@@ -97,7 +97,8 @@ private slots:
     void on_aMakerDuplicate_clicked();
     void on_aMakersSort_clicked();
     void on_aMarkerColor_clicked();
-    void on_aShowMarker_clicked(bool clicked);
+    void on_aMarkerShowState_currentIndexChanged(int state);
+    void on_aMarkerShowStateAll_clicked();
     void on_aMarkerText_editingFinished();
     void on_aMarker_valueChanged(int value);
     void on_aMarkerAdd_clicked();
