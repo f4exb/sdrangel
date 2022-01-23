@@ -121,7 +121,7 @@ QDataStream& operator<<(QDataStream& out, const SpectrumAnnotationMarker& marker
 	out << marker.m_startFrequency;
 	out << marker.m_bandwidth;
 	out << marker.m_markerColor;
-	out << marker.m_show;
+	out << (int) marker.m_show;
 	out << marker.m_text;
 	return out;
 }
@@ -221,11 +221,13 @@ bool SpectrumSettings::deserialize(const QByteArray& data)
 
 QDataStream& operator>>(QDataStream& in, SpectrumAnnotationMarker& marker)
 {
+	int tmp;
     in >> marker.m_startFrequency;
     in >> marker.m_bandwidth;
     in >> marker.m_markerColor;
-    in >> marker.m_show;
+    in >> tmp;
     in >> marker.m_text;
+	marker.m_show = (SpectrumAnnotationMarker::ShowState) tmp;
     return in;
 }
 
