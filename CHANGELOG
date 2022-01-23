@@ -1,3 +1,17 @@
+sdrangel (6.18.1-1) unstable; urgency=medium
+
+  * APRS: implemented Mic-E decoding. PR #1108
+  * Spectrum: implemented annotation markers. Issue #887
+  * BFM Demod: fixed RDS text clearscreen. Fixes #1101
+  * BFM Demod: keep last message on a second line.
+  * BFM demod: make rds active setting persistent
+  * BFM demopd: clear BAS area when clearing RDS fields
+  * Metis: set output FIFO size to size policy. Fixes #1100
+  * Removed unused symbol synchronization object and irrelevant references to liquidsdr. Fixes #1104
+  * API: added histogram and waterfall markers to spectrum settings
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 23 Jan 2022 22:17:30 +0100
+
 sdrangel (6.18.0-1) unstable; urgency=medium
 
   * New Jogdial Control feature. Implements #1088
