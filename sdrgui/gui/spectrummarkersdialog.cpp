@@ -16,6 +16,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QStandardPaths>
 #include <QColorDialog>
 #include <QFileDialog>
 
@@ -697,7 +698,12 @@ void SpectrumMarkersDialog::on_aMarkerBandwidth_changed(qint64 value)
 
 void SpectrumMarkersDialog::on_aMarkersImport_clicked()
 {
-    QFileDialog fileDialog(nullptr, "Select .csv annotation markers file to read", "", "*.csv");
+    QFileDialog fileDialog(
+        nullptr,
+        "Select .csv annotation markers file to read",
+        QStandardPaths::writableLocation(QStandardPaths::AppDataLocation),
+        "*.csv"
+    );
 
     if (fileDialog.exec())
     {
@@ -756,7 +762,12 @@ void SpectrumMarkersDialog::on_aMarkersImport_clicked()
 
 void SpectrumMarkersDialog::on_aMarkersExport_clicked()
 {
-    QFileDialog fileDialog(nullptr, "Select file to write annotation markers to", "", "*.csv");
+    QFileDialog fileDialog(
+        nullptr,
+        "Select file to write annotation markers to",
+        QStandardPaths::writableLocation(QStandardPaths::AppDataLocation),
+        "*.csv"
+    );
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
 
     if (fileDialog.exec())
