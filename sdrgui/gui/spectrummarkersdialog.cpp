@@ -353,6 +353,7 @@ void SpectrumMarkersDialog::on_markerAdd_clicked()
     m_histogramMarkers.back().m_power = m_power;
     m_histogramMarkerIndex = m_histogramMarkers.size() - 1;
     ui->marker->setMaximum(m_histogramMarkers.size() - 1);
+    ui->marker->setMinimum(0);
     displayHistogramMarker();
 }
 
@@ -521,6 +522,7 @@ void SpectrumMarkersDialog::on_wMarkerAdd_clicked()
     m_waterfallMarkers.back().m_time = m_time;
     m_waterfallMarkerIndex = m_waterfallMarkers.size() - 1;
     ui->wMarker->setMaximum(m_waterfallMarkers.size() - 1);
+    ui->wMarker->setMinimum(0);
     displayWaterfallMarker();
 }
 
@@ -656,6 +658,7 @@ void SpectrumMarkersDialog::on_aMarkerAdd_clicked()
     m_annotationMarkers.back().m_startFrequency = m_centerFrequency;
     m_annotationMarkerIndex = m_annotationMarkers.size() - 1;
     ui->aMarker->setMaximum(m_annotationMarkers.size() - 1);
+    ui->aMarker->setMinimum(0);
     displayAnnotationMarker();
     emit updateAnnotations();
 }
