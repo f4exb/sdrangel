@@ -30,6 +30,10 @@
 
 #include "plugin/pluginmanager.h"
 
+#ifndef LIB
+#define LIB "lib"
+#endif
+
 const QString PluginManager::m_localInputHardwareID = "LocalInput";
 const QString PluginManager::m_localInputDeviceTypeID = "sdrangel.samplesource.localinput";
 const QString PluginManager::m_remoteInputHardwareID = "RemoteInput";
@@ -71,9 +75,9 @@ void PluginManager::loadPluginsPart(const QString& pluginsSubDir)
 
     // NOTE: not the best solution but for now this is
     // on make install [PREFIX]/bin and [PREFIX]/lib/sdrangel
-    PluginsPath << applicationDirPath + "/../lib/sdrangel/" + pluginsSubDir;
+    PluginsPath << applicationDirPath + "/../" + LIB + "/sdrangel/" + pluginsSubDir;
     // on build
-    PluginsPath << applicationDirPath + "/lib/" + pluginsSubDir;
+    PluginsPath << applicationDirPath + "/" + LIB + "/" + pluginsSubDir;
 #ifdef __APPLE__
     // on SDRAngel.app
     PluginsPath << applicationDirPath + "/../Resources/lib/" + pluginsSubDir;
