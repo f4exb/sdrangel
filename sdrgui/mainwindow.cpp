@@ -318,6 +318,8 @@ MainWindow::~MainWindow()
 	delete m_dateTimeWidget;
 	delete m_showSystemWidget;
 
+    disconnect(ui->tabFeatures, SIGNAL(currentChanged(int)), this, SLOT(tabFeaturesIndexChanged()));
+
     removeAllFeatureSets();
 
 	delete ui;
