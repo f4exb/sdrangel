@@ -88,6 +88,8 @@ SWGGLSpectrum::SWGGLSpectrum() {
     m_waterfall_markers_isSet = false;
     annotation_markers = nullptr;
     m_annotation_markers_isSet = false;
+    calibration_points = nullptr;
+    m_calibration_points_isSet = false;
 }
 
 SWGGLSpectrum::~SWGGLSpectrum() {
@@ -156,6 +158,8 @@ SWGGLSpectrum::init() {
     m_waterfall_markers_isSet = false;
     annotation_markers = new QList<SWGSpectrumAnnotationMarker*>();
     m_annotation_markers_isSet = false;
+    calibration_points = new QList<SWGSpectrumCalibrationPoint*>();
+    m_calibration_points_isSet = false;
 }
 
 void
@@ -209,6 +213,13 @@ SWGGLSpectrum::cleanup() {
             delete o;
         }
         delete annotation_markers;
+    }
+    if(calibration_points != nullptr) { 
+        auto arr = calibration_points;
+        for(auto o: *arr) { 
+            delete o;
+        }
+        delete calibration_points;
     }
 }
 
@@ -283,6 +294,8 @@ SWGGLSpectrum::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&waterfall_markers, pJson["waterfallMarkers"], "QList", "SWGSpectrumWaterfallMarker");
     
     ::SWGSDRangel::setValue(&annotation_markers, pJson["annotationMarkers"], "QList", "SWGSpectrumAnnotationMarker");
+    
+    ::SWGSDRangel::setValue(&calibration_points, pJson["calibrationPoints"], "QList", "SWGSpectrumCalibrationPoint");
 }
 
 QString
@@ -388,6 +401,9 @@ SWGGLSpectrum::asJsonObject() {
     }
     if(annotation_markers && annotation_markers->size() > 0){
         toJsonArray((QList<void*>*)annotation_markers, obj, "annotationMarkers", "SWGSpectrumAnnotationMarker");
+    }
+    if(calibration_points && calibration_points->size() > 0){
+        toJsonArray((QList<void*>*)calibration_points, obj, "calibrationPoints", "SWGSpectrumCalibrationPoint");
     }
 
     return obj;
@@ -693,6 +709,16 @@ SWGGLSpectrum::setAnnotationMarkers(QList<SWGSpectrumAnnotationMarker*>* annotat
     this->m_annotation_markers_isSet = true;
 }
 
+QList<SWGSpectrumCalibrationPoint*>*
+SWGGLSpectrum::getCalibrationPoints() {
+    return calibration_points;
+}
+void
+SWGGLSpectrum::setCalibrationPoints(QList<SWGSpectrumCalibrationPoint*>* calibration_points) {
+    this->calibration_points = calibration_points;
+    this->m_calibration_points_isSet = true;
+}
+
 
 bool
 SWGGLSpectrum::isSet(){
@@ -786,6 +812,9 @@ SWGGLSpectrum::isSet(){
             isObjectUpdated = true; break;
         }
         if(annotation_markers && (annotation_markers->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(calibration_points && (calibration_points->size() > 0)){
             isObjectUpdated = true; break;
         }
     }while(false);

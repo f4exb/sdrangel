@@ -23,6 +23,7 @@
 
 
 #include "SWGSpectrumAnnotationMarker.h"
+#include "SWGSpectrumCalibrationPoint.h"
 #include "SWGSpectrumHistogramMarker.h"
 #include "SWGSpectrumWaterfallMarker.h"
 #include <QList>
@@ -136,6 +137,9 @@ public:
     QList<SWGSpectrumAnnotationMarker*>* getAnnotationMarkers();
     void setAnnotationMarkers(QList<SWGSpectrumAnnotationMarker*>* annotation_markers);
 
+    QList<SWGSpectrumCalibrationPoint*>* getCalibrationPoints();
+    void setCalibrationPoints(QList<SWGSpectrumCalibrationPoint*>* calibration_points);
+
 
     virtual bool isSet() override;
 
@@ -229,6 +233,9 @@ private:
 
     QList<SWGSpectrumAnnotationMarker*>* annotation_markers;
     bool m_annotation_markers_isSet;
+
+    QList<SWGSpectrumCalibrationPoint*>* calibration_points;
+    bool m_calibration_points_isSet;
 
 };
 

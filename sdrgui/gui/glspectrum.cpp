@@ -2314,6 +2314,11 @@ void GLSpectrum::updateMarkersDisplay()
     }
 }
 
+void GLSpectrum::updateCalibrationPoints()
+{
+    // TODO
+}
+
 void GLSpectrum::mouseMoveEvent(QMouseEvent* event)
 {
     if (m_displayWaterfall || m_displayHistogram || m_displayMaxHold || m_displayCurrent)

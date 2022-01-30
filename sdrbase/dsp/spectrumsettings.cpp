@@ -107,11 +107,17 @@ QByteArray SpectrumSettings::serialize() const
 		s.writeBlob(111+i, m_waterfallMarkers[i].serialize());
 	}
 
-    QByteArray data;
-    QDataStream *stream = new QDataStream(&data, QIODevice::WriteOnly);
+    QByteArray dataAnnotation;
+    QDataStream *stream = new QDataStream(&dataAnnotation, QIODevice::WriteOnly);
     (*stream) << m_annoationMarkers;
     delete stream;
-	s.writeBlob(40, data);
+	s.writeBlob(40, dataAnnotation);
+
+    QByteArray dataCalibration;
+    stream = new QDataStream(&dataCalibration, QIODevice::WriteOnly);
+    (*stream) << m_calibrationPoints;
+    delete stream;
+	s.writeBlob(41, dataCalibration);
 
 	return s.final();
 }
@@ -123,6 +129,14 @@ QDataStream& operator<<(QDataStream& out, const SpectrumAnnotationMarker& marker
 	out << marker.m_markerColor;
 	out << (int) marker.m_show;
 	out << marker.m_text;
+	return out;
+}
+
+QDataStream& operator<<(QDataStream& out, const SpectrumCalibrationPoint& calibrationPoint)
+{
+	out << calibrationPoint.m_frequency;
+	out << calibrationPoint.m_powerRelativeReference;
+	out << calibrationPoint.m_powerAbsoluteReference;
 	return out;
 }
 
@@ -210,6 +224,11 @@ bool SpectrumSettings::deserialize(const QByteArray& data)
 		(*stream) >> m_annoationMarkers;
 		delete stream;
 
+		d.readBlob(41, &bytetmp);
+		stream = new QDataStream(bytetmp);
+		(*stream) >> m_calibrationPoints;
+		delete stream;
+
 		return true;
 	}
     else
@@ -228,6 +247,14 @@ QDataStream& operator>>(QDataStream& in, SpectrumAnnotationMarker& marker)
     in >> tmp;
     in >> marker.m_text;
 	marker.m_show = (SpectrumAnnotationMarker::ShowState) tmp;
+    return in;
+}
+
+QDataStream& operator>>(QDataStream& in, SpectrumCalibrationPoint& calibrationPoint)
+{
+    in >> calibrationPoint.m_frequency;
+    in >> calibrationPoint.m_powerRelativeReference;
+    in >> calibrationPoint.m_powerAbsoluteReference;
     return in;
 }
 
@@ -309,6 +336,19 @@ void SpectrumSettings::formatTo(SWGSDRangel::SWGObject *swgObject) const
 			swgSpectrum->getAnnotationMarkers()->back()->setBandwidth(marker.m_bandwidth);
 			swgSpectrum->getAnnotationMarkers()->back()->setMarkerColor(qColorToInt(marker.m_markerColor));
 			swgSpectrum->getAnnotationMarkers()->back()->setShow((int) marker.m_show);
+		}
+	}
+
+	if (m_calibrationPoints.size() > 0)
+	{
+		swgSpectrum->setCalibrationPoints(new QList<SWGSDRangel::SWGSpectrumCalibrationPoint *>);
+
+		for (const auto &calibrationPoint : m_calibrationPoints)
+		{
+			swgSpectrum->getCalibrationPoints()->append(new SWGSDRangel::SWGSpectrumCalibrationPoint);
+			swgSpectrum->getCalibrationPoints()->back()->setFrequency(calibrationPoint.m_frequency);
+			swgSpectrum->getCalibrationPoints()->back()->setPowerRelativeReference(calibrationPoint.m_powerRelativeReference);
+			swgSpectrum->getCalibrationPoints()->back()->setPowerAbsoluteReference(calibrationPoint.m_powerAbsoluteReference);
 		}
 	}
 }
@@ -458,6 +498,20 @@ void SpectrumSettings::updateFrom(const QStringList& keys, const SWGSDRangel::SW
 			m_annoationMarkers.back().m_bandwidth = swgAnnotationMarker->getBandwidth() < 0 ? 0 : swgAnnotationMarker->getBandwidth();
 			m_annoationMarkers.back().m_markerColor = intToQColor(swgAnnotationMarker->getMarkerColor());
 			m_annoationMarkers.back().m_show = (SpectrumAnnotationMarker::ShowState) swgAnnotationMarker->getShow();
+		}
+	}
+
+	if (keys.contains("spectrumConfig.calibrationPoints"))
+	{
+		QList<SWGSDRangel::SWGSpectrumCalibrationPoint *> *swgCalibrationPoints = swgSpectrum->getCalibrationPoints();
+		m_calibrationPoints.clear();
+
+		for (const auto &swgCalibrationPoint : *swgCalibrationPoints)
+		{
+			m_calibrationPoints.push_back(SpectrumCalibrationPoint());
+			m_calibrationPoints.back().m_frequency = swgCalibrationPoint->getFrequency();
+			m_calibrationPoints.back().m_powerRelativeReference = swgCalibrationPoint->getPowerRelativeReference();
+			m_calibrationPoints.back().m_powerAbsoluteReference = swgCalibrationPoint->getPowerAbsoluteReference();
 		}
 	}
 }

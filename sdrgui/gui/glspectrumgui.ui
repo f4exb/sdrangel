@@ -569,6 +569,20 @@
       </widget>
      </item>
      <item>
+      <widget class="ButtonSwitch" name="calibration">
+       <property name="toolTip">
+        <string>Left: toggle relative / mW units - Right: open calibration dialog</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/ruler.png</normaloff>:/ruler.png</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_3">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>

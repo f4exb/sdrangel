@@ -168,6 +168,7 @@ public:
     void updateWaterfallMarkers();
     void updateAnnotationMarkers();
     void updateMarkersDisplay();
+    void updateCalibrationPoints();
     SpectrumSettings::MarkersDisplay& getMarkersDisplay() {  return m_markersDisplay; }
 	void setMarkersDisplay(SpectrumSettings::MarkersDisplay markersDisplay);
 

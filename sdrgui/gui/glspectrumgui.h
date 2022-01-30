@@ -114,11 +114,13 @@ private slots:
 
 	void handleInputMessages();
     void openWebsocketSpectrumSettingsDialog(const QPoint& p);
+	void openCalibrationPointsDialog(const QPoint& p);
 
 	void updateHistogramMarkers();
 	void updateWaterfallMarkers();
 	void updateAnnotationMarkers();
 	void updateMarkersDisplay();
+	void updateCalibrationPoints();
 };
 
 #endif // INCLUDE_GLSPECTRUMGUI_H

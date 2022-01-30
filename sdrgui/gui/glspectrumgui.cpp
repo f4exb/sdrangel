@@ -29,6 +29,7 @@
 #include "gui/crightclickenabler.h"
 #include "gui/wsspectrumsettingsdialog.h"
 #include "gui/spectrummarkersdialog.h"
+#include "gui/spectrumcalibrationpointsdialog.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "ui_glspectrumgui.h"
@@ -63,6 +64,9 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
 
     CRightClickEnabler *wsSpectrumRightClickEnabler = new CRightClickEnabler(ui->wsSpectrum);
     connect(wsSpectrumRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openWebsocketSpectrumSettingsDialog(const QPoint &)));
+
+    CRightClickEnabler *calibrationPointsRightClickEnabler = new CRightClickEnabler(ui->calibration);
+    connect(calibrationPointsRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openCalibrationPointsDialog(const QPoint &)));
 
     displaySettings();
     setAveragingCombo();
@@ -726,6 +730,27 @@ void GLSpectrumGUI::openWebsocketSpectrumSettingsDialog(const QPoint& p)
     }
 }
 
+void GLSpectrumGUI::openCalibrationPointsDialog(const QPoint& p)
+{
+    SpectrumCalibrationPointsDialog dialog(
+        m_settings.m_calibrationPoints,
+        m_glSpectrum->getHistogramMarkers().size() > 0 ? &m_glSpectrum->getHistogramMarkers()[0] : nullptr,
+        this
+    );
+
+    dialog.setCenterFrequency(m_glSpectrum->getCenterFrequency());
+    connect(&dialog, SIGNAL(updateCalibrationPoints()), this, SLOT(updateCalibrationPoints()));
+    dialog.move(p);
+    dialog.exec();
+
+    m_settings.m_histogramMarkers = m_glSpectrum->getHistogramMarkers();
+    m_settings.m_waterfallMarkers = m_glSpectrum->getWaterfallMarkers();
+    m_settings.m_annoationMarkers = m_glSpectrum->getAnnotationMarkers();
+    m_settings.m_markersDisplay = m_glSpectrum->getMarkersDisplay();
+
+    applySettings();
+}
+
 void GLSpectrumGUI::updateHistogramMarkers()
 {
     if (m_glSpectrum) {
@@ -751,5 +776,12 @@ void GLSpectrumGUI::updateMarkersDisplay()
 {
     if (m_glSpectrum) {
         m_glSpectrum->updateMarkersDisplay();
+    }
+}
+
+void GLSpectrumGUI::updateCalibrationPoints()
+{
+    if (m_glSpectrum) {
+        m_glSpectrum->updateCalibrationPoints();
     }
 }

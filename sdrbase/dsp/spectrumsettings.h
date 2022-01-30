@@ -25,6 +25,7 @@
 #include "dsp/dsptypes.h"
 #include "dsp/fftwindow.h"
 #include "dsp/spectrummarkers.h"
+#include "dsp/spectrumcalibrationpoint.h"
 #include "settings/serializable.h"
 
 class SDRBASE_API SpectrumSettings : public Serializable
@@ -76,6 +77,7 @@ public:
 	QList<SpectrumWaterfallMarker> m_waterfallMarkers;
 	QList<SpectrumAnnotationMarker> m_annoationMarkers;
 	MarkersDisplay m_markersDisplay;
+	QList<SpectrumCalibrationPoint> m_calibrationPoints;
 	static const int m_log2FFTSizeMin = 6;   // 64
 	static const int m_log2FFTSizeMax = 15;  // 32k
 

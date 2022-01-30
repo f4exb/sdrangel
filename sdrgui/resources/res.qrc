@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/">
+    <file>ruler.png</file>
     <file>sort.png</file>
     <file>audio_mic.png</file>
     <file>info.png</file>

@@ -64,6 +64,19 @@ SpectrumAnnotationMarker:
           * 1 - Only top marker visible
           * 2 - Fully visible with text and full sized limits
 
+SpectrumCalibrationPoint:
+  description: Spectrum calibration point settings
+  properties:
+    frequency:
+      type: integer
+      format: int64
+    powerRelativeReference:
+      type: number
+      format: float
+    powerAbsoluteReference:
+      type: number
+      format: float
+
 GLSpectrum:
   description: GLSpectrumGUI settings
   properties:
@@ -159,3 +172,7 @@ GLSpectrum:
       type: array
       items:
         $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/SpectrumAnnotationMarker"
+    calibrationPoints:
+      type: array
+      items:
+        $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/SpectrumCalibrationPoint"
