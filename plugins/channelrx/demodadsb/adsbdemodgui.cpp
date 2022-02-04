@@ -866,7 +866,7 @@ void ADSBDemodGUI::handleADSB(
     float correlationOnes,
     bool updateModel)
 {
-    const char idMap[] = "?ABCDEFGHIJKLMNOPQRSTUVWXYZ????? ????????????-??0123456789??????";
+    const char idMap[] = "#ABCDEFGHIJKLMNOPQRSTUVWXYZ##### ############-##0123456789######";
     const QString categorySetA[] = {
         QStringLiteral("None"),
         QStringLiteral("Light"),
@@ -1659,7 +1659,7 @@ void ADSBDemodGUI::handleADSB(
         if (aircraft->m_positionValid)
         {
             // Check to see if we need to start any animations
-            QList<SWGSDRangel::SWGMapAnimation *> *animations = animate(dateTime, aircraft, prevAltitudeValid, prevAltitude);
+            QList<SWGSDRangel::SWGMapAnimation *> *animations = animate(dateTime, aircraft);
 
             // Update map displayed in channel
             if (updateModel) {
@@ -1685,7 +1685,7 @@ void ADSBDemodGUI::handleADSB(
     }
 }
 
-QList<SWGSDRangel::SWGMapAnimation *> * ADSBDemodGUI::animate(QDateTime dateTime, Aircraft *aircraft, bool prevAltitudeValid, int prevAltitude)
+QList<SWGSDRangel::SWGMapAnimation *> * ADSBDemodGUI::animate(QDateTime dateTime, Aircraft *aircraft)
 {
     QList<SWGSDRangel::SWGMapAnimation *> *animations = new QList<SWGSDRangel::SWGMapAnimation *>();
 
@@ -1695,7 +1695,6 @@ QList<SWGSDRangel::SWGMapAnimation *> * ADSBDemodGUI::animate(QDateTime dateTime
     const int accelerationHeight = 1500;
     const int flapsRetractAltitude = 2000;
     const int flapsCleanSpeed = 200;
-    const int flapsFullSpeed = 170;
 
     bool debug = false;
 

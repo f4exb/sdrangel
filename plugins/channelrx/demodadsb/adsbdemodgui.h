@@ -838,7 +838,7 @@ private:
         float correlation,
         float correlationOnes,
         bool updateModel);
-    QList<SWGSDRangel::SWGMapAnimation *> *animate(QDateTime dateTime, Aircraft *aircraft, bool prevAltitudeValid, int prevAltitude);
+    QList<SWGSDRangel::SWGMapAnimation *> *animate(QDateTime dateTime, Aircraft *aircraft);
     SWGSDRangel::SWGMapAnimation *gearAnimation(QDateTime startDateTime, bool up);
     SWGSDRangel::SWGMapAnimation *flapsAnimation(QDateTime startDateTime, float currentFlaps, float flaps);
     SWGSDRangel::SWGMapAnimation *slatsAnimation(QDateTime startDateTime, bool retract);
