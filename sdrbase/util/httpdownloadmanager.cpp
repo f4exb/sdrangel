@@ -20,6 +20,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QDateTime>
+#include <QRegExp>
 
 HttpDownloadManager::HttpDownloadManager()
 {
@@ -29,14 +30,21 @@ HttpDownloadManager::HttpDownloadManager()
 QNetworkReply *HttpDownloadManager::download(const QUrl &url, const QString &filename)
 {
     QNetworkRequest request(url);
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
     QNetworkReply *reply = manager.get(request);
 
     connect(reply, &QNetworkReply::sslErrors, this, &HttpDownloadManager::sslErrors);
 
     qDebug() << "HttpDownloadManager: Downloading from " << url << " to " << filename;
-    downloads.append(reply);
-    filenames.append(filename);
+    m_downloads.append(reply);
+    m_filenames.append(filename);
     return reply;
+}
+
+// Indicate if we have any downloads in progress
+bool HttpDownloadManager::downloading() const
+{
+    return m_filenames.size() > 0;
 }
 
 qint64 HttpDownloadManager::fileAgeInDays(const QString& filename)
@@ -75,7 +83,7 @@ bool HttpDownloadManager::isHttpRedirect(QNetworkReply *reply)
     return (status >= 301 && status <= 308);
 }
 
-bool HttpDownloadManager::writeToFile(const QString &filename, QIODevice *data)
+bool HttpDownloadManager::writeToFile(const QString &filename, const QByteArray &data)
 {
     QFile file(filename);
 
@@ -87,7 +95,7 @@ bool HttpDownloadManager::writeToFile(const QString &filename, QIODevice *data)
 
     if (file.open(QIODevice::WriteOnly))
     {
-        file.write(data->readAll());
+        file.write(data);
         file.close();
         return true;
     }
@@ -101,15 +109,48 @@ bool HttpDownloadManager::writeToFile(const QString &filename, QIODevice *data)
 void HttpDownloadManager::downloadFinished(QNetworkReply *reply)
 {
     QString url = reply->url().toEncoded().constData();
-    int idx = downloads.indexOf(reply);
-    QString filename = filenames[idx];
+    int idx = m_downloads.indexOf(reply);
+    QString filename = m_filenames[idx];
     bool success = false;
+    bool retry = false;
 
     if (!reply->error())
     {
         if (!isHttpRedirect(reply))
         {
-            if (writeToFile(filename, reply))
+            QByteArray data = reply->readAll();
+            QRegExp regexp("href=\\\"\\/uc\\?export\\=download\\&amp\\;confirm=([a-zA-Z0-9_\\-]*)\\&amp\\;id=([a-zA-Z0-9_\\-\\=\\;\\&]*)\\\"");
+
+            // Google drive can redirect downloads to a virus scan warning page
+            // We need to extract the confirm code and retry
+            if (url.startsWith("https://drive.google.com/uc?export=download")
+                && data.startsWith("<!DOCTYPE html>")
+                && !filename.endsWith(".html")
+                && (regexp.indexIn(data) >= 0)
+               )
+            {
+                QString confirm = regexp.capturedTexts()[1];
+                QString id = regexp.capturedTexts()[2];
+                if (confirm.isEmpty())
+                {
+                    qDebug() << "HttpDownloadManager::downloadFinished - Got HTML response but not confirmation code";
+                    qDebug() << QString(data);
+                    qDebug() << regexp.capturedTexts();
+                }
+
+                m_downloads.removeAll(reply);
+                m_filenames.remove(idx);
+
+                qDebug() << "HttpDownloadManager: Skipping Google drive warning: " << confirm << " " << id;
+                QUrl newUrl(QString("https://drive.google.com/uc?export=download&confirm=%1&id=%2").arg(confirm).arg(id));
+                QNetworkReply *newReply = download(newUrl, filename);
+
+                // Indicate that we are retrying, so progress dialogs can be updated
+                emit retryDownload(filename, reply, newReply);
+
+                retry = true;
+            }
+            else if (writeToFile(filename, data))
             {
                 success = true;
                 qDebug() << "HttpDownloadManager: Download from " << url << " to " << filename << " finshed.";
@@ -125,8 +166,11 @@ void HttpDownloadManager::downloadFinished(QNetworkReply *reply)
         qCritical() << "HttpDownloadManager: Download of " << url << " failed: " << reply->errorString();
     }
 
-    downloads.removeAll(reply);
-    filenames.remove(idx);
+    if (!retry)
+    {
+        m_downloads.removeAll(reply);
+        m_filenames.remove(idx);
+        emit downloadComplete(filename, success, url, reply->errorString());
+    }
     reply->deleteLater();
-    emit downloadComplete(filename, success);
 }

@@ -32,6 +32,7 @@ class SDRBASE_API HttpDownloadManager : public QObject
 public:
     HttpDownloadManager();
     QNetworkReply *download(const QUrl &url, const QString &filename);
+    bool downloading() const;
 
     static QString downloadDir();
 
@@ -40,10 +41,10 @@ protected:
 
 private:
     QNetworkAccessManager manager;
-    QVector<QNetworkReply *> downloads;
-    QVector<QString> filenames;
+    QVector<QNetworkReply *> m_downloads;
+    QVector<QString> m_filenames;
 
-    static bool writeToFile(const QString &filename, QIODevice *data);
+    static bool writeToFile(const QString &filename, const QByteArray &data);
     static bool isHttpRedirect(QNetworkReply *reply);
 
 public slots:
@@ -51,7 +52,8 @@ public slots:
     void sslErrors(const QList<QSslError> &errors);
 
 signals:
-    void downloadComplete(const QString &filename, bool success);
+    void downloadComplete(const QString &filename, bool success, const QString &url, const QString &errorMessage);
+    void retryDownload(const QString &filename, QNetworkReply *oldReply, QNetworkReply *newReply);
 
 };
 
