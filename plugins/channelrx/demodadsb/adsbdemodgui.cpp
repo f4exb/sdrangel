@@ -1058,6 +1058,18 @@ void ADSBDemodGUI::handleADSB(
                 get3DModel(aircraft);
             }
         }
+
+        if (aircraft->m_aircraft3DModel.isEmpty())
+        {
+            // Default to A320 until we get some more info
+            aircraft->m_aircraftCat3DModel = get3DModel("A320");
+            if (m_modelAltitudeOffset.contains("A320"))
+            {
+                aircraft->m_modelAltitudeOffset = m_modelAltitudeOffset.value("A320");
+                aircraft->m_labelAltitudeOffset = m_labelAltitudeOffset.value("A320");
+            }
+        }
+
         if (m_settings.m_autoResizeTableColumns)
             ui->adsbData->resizeColumnsToContents();
         ui->adsbData->setSortingEnabled(true);
@@ -1235,6 +1247,7 @@ void ADSBDemodGUI::handleADSB(
 
                 if (!aircraftType.isEmpty())
                 {
+                    aircraft->m_aircraftCat3DModel = "";
                     if (aircraft->m_aircraftInfo) {
                         aircraft->m_aircraftCat3DModel = get3DModel(aircraftType, aircraft->m_aircraftInfo->m_operatorICAO);
                     }
