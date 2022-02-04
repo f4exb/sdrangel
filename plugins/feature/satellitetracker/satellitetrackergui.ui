@@ -630,6 +630,16 @@
       </column>
       <column>
        <property name="text">
+        <string>Latitude (°)</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Longitude (°)</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
         <string>Alt (km)</string>
        </property>
        <property name="toolTip">

@@ -40,7 +40,8 @@ static DateTime qDateTimeToDateTime(QDateTime qdt)
     QDateTime utc = qdt.toUTC();
     QDate date = utc.date();
     QTime time = utc.time();
-    DateTime dt(date.year(), date.month(), date.day(), time.hour(), time.minute(), time.second());
+    DateTime dt;
+    dt.Initialise(date.year(), date.month(), date.day(), time.hour(), time.minute(), time.second(), time.msec() * 1000);
     return dt;
 }
 
@@ -49,7 +50,8 @@ static DateTime qDateTimeToDateTime(QDateTime qdt)
 void getGroundTrack(QDateTime dateTime,
                         const QString& tle0, const QString& tle1, const QString& tle2,
                         int steps, bool forward,
-                        QList<QGeoCoordinate *>& coordinates)
+                        QList<QGeoCoordinate *>& coordinates,
+                        QList<QDateTime *>& coordinateDateTimes)
 {
     Tle tle = Tle(tle0.toStdString(), tle1.toStdString(), tle2.toStdString());
     SGP4 sgp4(tle);
@@ -57,7 +59,13 @@ void getGroundTrack(QDateTime dateTime,
     double periodMins;
     double timeStep;
 
-    // Note map doesn't support paths wrapping around Earth
+    // For 3D map, we want to quantize to minutes, so we replace previous
+    // position data, rather than insert additional positions alongside the old
+    // which can result is the camera view jumping around
+    dateTime = QDateTime(dateTime.date(), QTime(dateTime.time().hour(), dateTime.time().minute()));
+
+    // Note 2D map doesn't support paths wrapping around Earth several times
+    // So we just have a slight overlap here, with the future track being longer
     DateTime currentTime = qDateTimeToDateTime(dateTime);
     DateTime endTime;
     if (forward)
@@ -73,7 +81,16 @@ void getGroundTrack(QDateTime dateTime,
         timeStep = -periodMins / (steps * 0.4);
     }
 
-    coordinates.clear();
+    // Quantize time step to 30 seconds
+    timeStep *= 2.0;
+    if (timeStep > 0.0) {
+        timeStep = std::max(timeStep, 1.0);
+    } else if (timeStep < 0.0) {
+        timeStep = std::min(timeStep, -1.0);
+    }
+    timeStep = round(timeStep);
+    timeStep /= 2.0;
+
     while ((forward && (currentTime < endTime)) || (!forward && (currentTime > endTime)))
     {
         // Calculate satellite position
@@ -86,7 +103,11 @@ void getGroundTrack(QDateTime dateTime,
                                                    Units::radiansToDegrees(geo.longitude),
                                                    geo.altitude * 1000.0);
         coordinates.append(coord);
-        // Map is stretched at poles, so use finer steps
+
+        QDateTime *coordDateTime = new QDateTime(dateTimeToQDateTime(currentTime));
+        coordinateDateTimes.append(coordDateTime);
+
+        // 2D map is stretched at poles, so use finer steps
         if (std::abs(Units::radiansToDegrees(geo.latitude)) >= 70)
             currentTime = currentTime.AddMinutes(timeStep/4);
         else
@@ -485,9 +506,15 @@ void getSatelliteState(QDateTime dateTime,
         }
 
         qDeleteAll(satState->m_groundTrack);
+        satState->m_groundTrack.clear();
+        qDeleteAll(satState->m_groundTrackDateTime);
+        satState->m_groundTrackDateTime.clear();
         qDeleteAll(satState->m_predictedGroundTrack);
-        getGroundTrack(dateTime, tle0, tle1, tle2, groundTrackSteps, false, satState->m_groundTrack);
-        getGroundTrack(dateTime, tle0, tle1, tle2, groundTrackSteps, true, satState->m_predictedGroundTrack);
+        satState->m_predictedGroundTrack.clear();
+        qDeleteAll(satState->m_predictedGroundTrackDateTime);
+        satState->m_predictedGroundTrackDateTime.clear();
+        getGroundTrack(dateTime, tle0, tle1, tle2, groundTrackSteps, false, satState->m_groundTrack, satState->m_groundTrackDateTime);
+        getGroundTrack(dateTime, tle0, tle1, tle2, groundTrackSteps, true, satState->m_predictedGroundTrack, satState->m_predictedGroundTrackDateTime);
     }
     catch (SatelliteException& se)
     {

@@ -115,6 +115,11 @@ struct SatNogsTLE {
         m_tle2 = tle2;
     }
 
+    QString toString() const
+    {
+        return m_tle0 + "\n" + m_tle1 + "\n" + m_tle2 + "\n";
+    }
+
     static QList<SatNogsTLE *> createList(QJsonArray array)
     {
         QList<SatNogsTLE *> list;

@@ -103,6 +103,8 @@ On the Settings tab, you can set:
 
 On the TLEs tab, you can provide a list of URL from which satellite Two Line Element files can be downloaded from.
 TLE files contain the orbital parameters for a satellite and are required in order to be able to calculate a satellites position.
+TLEs for may satellites can be obtained from https://www.celestrak.com/NORAD/elements/
+To use a TLE file on a local disk, use a URL such as file:my_tle.txt
 
 ![Satellite tracker settings dialog](../../../doc/img/SatelliteTracker_plugin_settingsdialog3.png)
 

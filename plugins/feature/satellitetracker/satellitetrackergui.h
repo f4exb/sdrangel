@@ -93,6 +93,8 @@ private:
         SAT_COL_LOS,
         SAT_COL_MAX_EL,
         SAT_COL_DIR,
+        SAT_COL_LATITUDE,
+        SAT_COL_LONGITUDE,
         SAT_COL_ALT,
         SAT_COL_RANGE,
         SAT_COL_RANGE_RATE,

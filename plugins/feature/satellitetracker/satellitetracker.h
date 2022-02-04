@@ -162,8 +162,8 @@ public:
             const QStringList& featureSettingsKeys,
             SWGSDRangel::SWGFeatureSettings& response);
 
-    static QDateTime currentDateTimeUtc();
-    static QDateTime currentDateTime();
+    QDateTime currentDateTimeUtc();
+    QDateTime currentDateTime();
 
     static const char* const m_featureIdURI;
     static const char* const m_featureId;
@@ -185,6 +185,8 @@ private:
     QHash<QString, SatNogsSatellite *> m_satellites;    // Satellites, hashed on name
     QHash<int, SatNogsSatellite *> m_satellitesId;      // Same data as m_satellites, but hashed on id, rather than name
     bool m_firstUpdateSatData;
+
+    QDateTime m_startedDateTime;
 
     void start();
     void stop();
