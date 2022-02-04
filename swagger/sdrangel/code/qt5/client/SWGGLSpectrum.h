@@ -128,6 +128,9 @@ public:
     qint32 getMarkersDisplay();
     void setMarkersDisplay(qint32 markers_display);
 
+    qint32 getUseCalibration();
+    void setUseCalibration(qint32 use_calibration);
+
     QList<SWGSpectrumHistogramMarker*>* getHistogramMarkers();
     void setHistogramMarkers(QList<SWGSpectrumHistogramMarker*>* histogram_markers);
 
@@ -224,6 +227,9 @@ private:
 
     qint32 markers_display;
     bool m_markers_display_isSet;
+
+    qint32 use_calibration;
+    bool m_use_calibration_isSet;
 
     QList<SWGSpectrumHistogramMarker*>* histogram_markers;
     bool m_histogram_markers_isSet;

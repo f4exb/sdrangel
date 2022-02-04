@@ -62,6 +62,8 @@ void SpectrumSettings::resetToDefaults()
     m_wsSpectrumAddress = "127.0.0.1";
     m_wsSpectrumPort = 8887;
 	m_markersDisplay = MarkersDisplayNone;
+	m_useCalibration = false;
+	m_calibrationInterpMode = CalibInterpLinear;
 }
 
 QByteArray SpectrumSettings::serialize() const
@@ -95,6 +97,8 @@ QByteArray SpectrumSettings::serialize() const
 	s.writeS32(26, m_fpsPeriodMs);
 	s.writeBool(27, m_wsSpectrum);
 	s.writeS32(28, (int) m_markersDisplay);
+	s.writeBool(29, m_useCalibration);
+	s.writeS32(30, (int) m_calibrationInterpMode);
 	s.writeS32(100, m_histogramMarkers.size());
 
 	for (int i = 0; i < m_histogramMarkers.size(); i++) {
@@ -136,7 +140,7 @@ QDataStream& operator<<(QDataStream& out, const SpectrumCalibrationPoint& calibr
 {
 	out << calibrationPoint.m_frequency;
 	out << calibrationPoint.m_powerRelativeReference;
-	out << calibrationPoint.m_powerAbsoluteReference;
+	out << calibrationPoint.m_powerCalibratedReference;
 	return out;
 }
 
@@ -189,6 +193,9 @@ bool SpectrumSettings::deserialize(const QByteArray& data)
 		d.readBool(27, &m_wsSpectrum, false);
 		d.readS32(28, &tmp, 0);
 		m_markersDisplay = (MarkersDisplay) tmp;
+		d.readBool(29, &m_useCalibration, false);
+		d.readS32(30, &tmp, 0);
+		m_calibrationInterpMode = (CalibrationInterpolationMode) tmp;
 
 		int histogramMarkersSize;
 		d.readS32(100, &histogramMarkersSize, 0);
@@ -254,7 +261,7 @@ QDataStream& operator>>(QDataStream& in, SpectrumCalibrationPoint& calibrationPo
 {
     in >> calibrationPoint.m_frequency;
     in >> calibrationPoint.m_powerRelativeReference;
-    in >> calibrationPoint.m_powerAbsoluteReference;
+    in >> calibrationPoint.m_powerCalibratedReference;
     return in;
 }
 
@@ -295,6 +302,7 @@ void SpectrumSettings::formatTo(SWGSDRangel::SWGObject *swgObject) const
 	swgSpectrum->setUsb(m_usb ? 1 : 0);
 	swgSpectrum->setWaterfallShare(m_waterfallShare);
 	swgSpectrum->setMarkersDisplay((int) m_markersDisplay);
+	swgSpectrum->setUseCalibration(m_useCalibration ? 1 : 0);
 
 	if (m_histogramMarkers.size() > 0)
 	{
@@ -348,7 +356,7 @@ void SpectrumSettings::formatTo(SWGSDRangel::SWGObject *swgObject) const
 			swgSpectrum->getCalibrationPoints()->append(new SWGSDRangel::SWGSpectrumCalibrationPoint);
 			swgSpectrum->getCalibrationPoints()->back()->setFrequency(calibrationPoint.m_frequency);
 			swgSpectrum->getCalibrationPoints()->back()->setPowerRelativeReference(calibrationPoint.m_powerRelativeReference);
-			swgSpectrum->getCalibrationPoints()->back()->setPowerAbsoluteReference(calibrationPoint.m_powerAbsoluteReference);
+			swgSpectrum->getCalibrationPoints()->back()->setPowerAbsoluteReference(calibrationPoint.m_powerCalibratedReference);
 		}
 	}
 }
@@ -444,6 +452,9 @@ void SpectrumSettings::updateFrom(const QStringList& keys, const SWGSDRangel::SW
 	if (keys.contains("spectrumConfig.markersDisplay")) {
 		m_markersDisplay = (SpectrumSettings::MarkersDisplay) swgSpectrum->getMarkersDisplay();
 	}
+	if (keys.contains("spectrumConfig.useCalibration")) {
+		m_useCalibration = swgSpectrum->getUseCalibration() != 0;
+	}
 
 	if (keys.contains("spectrumConfig.histogramMarkers"))
 	{
@@ -511,7 +522,7 @@ void SpectrumSettings::updateFrom(const QStringList& keys, const SWGSDRangel::SW
 			m_calibrationPoints.push_back(SpectrumCalibrationPoint());
 			m_calibrationPoints.back().m_frequency = swgCalibrationPoint->getFrequency();
 			m_calibrationPoints.back().m_powerRelativeReference = swgCalibrationPoint->getPowerRelativeReference();
-			m_calibrationPoints.back().m_powerAbsoluteReference = swgCalibrationPoint->getPowerAbsoluteReference();
+			m_calibrationPoints.back().m_powerCalibratedReference = swgCalibrationPoint->getPowerAbsoluteReference();
 		}
 	}
 }

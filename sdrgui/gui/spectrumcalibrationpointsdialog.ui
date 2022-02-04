@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>469</width>
-    <height>131</height>
+    <width>466</width>
+    <height>159</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -203,7 +203,7 @@
           </size>
          </property>
          <property name="text">
-          <string>R</string>
+          <string>Rel</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -211,29 +211,38 @@
         </widget>
        </item>
        <item>
-        <widget class="QSlider" name="relativePower">
+        <widget class="ValueDialZ" name="relativePower" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>32</width>
+           <height>16</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <family>DejaVu Sans Mono</family>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::StrongFocus</enum>
+         </property>
          <property name="toolTip">
           <string>Relative power (dB)</string>
-         </property>
-         <property name="minimum">
-          <number>-1500</number>
-         </property>
-         <property name="maximum">
-          <number>0</number>
-         </property>
-         <property name="pageStep">
-          <number>1</number>
-         </property>
-         <property name="value">
-          <number>-200</number>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="relativePowerText">
+        <widget class="QLabel" name="relativePowerUnits">
          <property name="minimumSize">
           <size>
            <width>32</width>
@@ -241,10 +250,10 @@
           </size>
          </property>
          <property name="text">
-          <string>-100.0</string>
+          <string>dB</string>
          </property>
          <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
          </property>
         </widget>
        </item>
@@ -256,7 +265,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="absolutePowerLabel">
+        <widget class="QLabel" name="calibratedPowerLabel">
          <property name="minimumSize">
           <size>
            <width>15</width>
@@ -264,7 +273,7 @@
           </size>
          </property>
          <property name="text">
-          <string>A</string>
+          <string>Cal</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -272,26 +281,38 @@
         </widget>
        </item>
        <item>
-        <widget class="QSlider" name="absolutePower">
+        <widget class="ValueDialZ" name="calibratedPower" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>32</width>
+           <height>16</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <family>DejaVu Sans Mono</family>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::StrongFocus</enum>
+         </property>
          <property name="toolTip">
-          <string>Absolute power (dBm)</string>
-         </property>
-         <property name="minimum">
-          <number>-1500</number>
-         </property>
-         <property name="maximum">
-          <number>400</number>
-         </property>
-         <property name="pageStep">
-          <number>1</number>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
+          <string>Calibrated power (dBx)</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="absolutePowerText">
+        <widget class="QLabel" name="calibratedPowerUnits">
          <property name="minimumSize">
           <size>
            <width>32</width>
@@ -299,10 +320,10 @@
           </size>
          </property>
          <property name="text">
-          <string>-100.0</string>
+          <string>dB</string>
          </property>
          <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
          </property>
         </widget>
        </item>
@@ -390,6 +411,26 @@
         </spacer>
        </item>
        <item>
+        <widget class="QPushButton" name="calibPointDuplicate">
+         <property name="maximumSize">
+          <size>
+           <width>24</width>
+           <height>24</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Duplicate current calibration point</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="../resources/res.qrc">
+           <normaloff>:/duplicate.png</normaloff>:/duplicate.png</iconset>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="importMarkerZero">
          <property name="maximumSize">
           <size>
@@ -420,6 +461,124 @@
           <string>C</string>
          </property>
         </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="CalibCommonLayout">
+       <item>
+        <widget class="QLabel" name="calibInterpModeLabel">
+         <property name="text">
+          <string>Interp</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="calibInterpMode">
+         <property name="toolTip">
+          <string>Calibration interpolation mode</string>
+         </property>
+         <item>
+          <property name="text">
+           <string>Lin</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>LogLin</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="calibrationGlobalCorrLabel">
+         <property name="text">
+          <string>Cor</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="ValueDialZ" name="calibrationGlobalCorr" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>32</width>
+           <height>16</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <family>DejaVu Sans Mono</family>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::StrongFocus</enum>
+         </property>
+         <property name="toolTip">
+          <string>Correction (dB)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="calibrationGlobalCorrUnits">
+         <property name="text">
+          <string>dB</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="globalRelativeCorrection">
+         <property name="maximumSize">
+          <size>
+           <width>35</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Apply gain correction to all relative values</string>
+         </property>
+         <property name="text">
+          <string>Rel</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="globalCalibratedCorrection">
+         <property name="maximumSize">
+          <size>
+           <width>35</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Apply gain correction to all calibrated values</string>
+         </property>
+         <property name="text">
+          <string>Cal</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
        </item>
        <item>
         <widget class="QToolButton" name="calibPointsExport">
@@ -473,6 +632,24 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>calibPointFrequency</tabstop>
+  <tabstop>calibPoint</tabstop>
+  <tabstop>calibPointAdd</tabstop>
+  <tabstop>calibPointDel</tabstop>
+  <tabstop>calibPointFrequencyUnits</tabstop>
+  <tabstop>importMarkerZero</tabstop>
+  <tabstop>centerFrequency</tabstop>
+  <tabstop>calibPointsExport</tabstop>
+  <tabstop>calibPointsImport</tabstop>
+  <tabstop>calibInterpMode</tabstop>
+  <tabstop>calibPointDuplicate</tabstop>
+  <tabstop>calibrationGlobalCorr</tabstop>
+  <tabstop>relativePower</tabstop>
+  <tabstop>calibratedPower</tabstop>
+  <tabstop>globalRelativeCorrection</tabstop>
+  <tabstop>globalCalibratedCorrection</tabstop>
+ </tabstops>
  <resources>
   <include location="../resources/res.qrc"/>
  </resources>

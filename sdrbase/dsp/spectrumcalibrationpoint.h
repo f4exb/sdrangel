@@ -25,13 +25,13 @@
 struct SDRBASE_API SpectrumCalibrationPoint
 {
     qint64 m_frequency; //!< frequency in Hz
-    float m_powerRelativeReference; //!< relative power level on 0..1 scale
-    float m_powerAbsoluteReference; //!< absolute power level in mW
+    float m_powerRelativeReference;   //!< relative power level on 0..1 scale
+    float m_powerCalibratedReference; //!< calibrated power level on 0..x scale. x limited to 10000 (40dB) in the GUI.
 
     SpectrumCalibrationPoint() :
         m_frequency(0),
         m_powerRelativeReference(1.0f),
-        m_powerAbsoluteReference(1.0f)
+        m_powerCalibratedReference(1.0f)
     {}
 
     SpectrumCalibrationPoint(
@@ -41,7 +41,7 @@ struct SDRBASE_API SpectrumCalibrationPoint
     ) :
         m_frequency(frequency),
         m_powerRelativeReference(powerRelativeReference),
-        m_powerAbsoluteReference(powerAbsoluteReference)
+        m_powerCalibratedReference(powerAbsoluteReference)
     {}
 
     SpectrumCalibrationPoint(const SpectrumCalibrationPoint& other) = default;

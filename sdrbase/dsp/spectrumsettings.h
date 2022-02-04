@@ -46,6 +46,12 @@ public:
 		MarkersDisplayAnnotations
     };
 
+	enum CalibrationInterpolationMode
+	{
+		CalibInterpLinear,    //!< linear power, linear frequency
+		CalibInterpLogLinear  //!< log power, linear frequency
+	};
+
 	int m_fftSize;
 	int m_fftOverlap;
 	FFTWindow::Function m_fftWindow;
@@ -78,6 +84,8 @@ public:
 	QList<SpectrumAnnotationMarker> m_annoationMarkers;
 	MarkersDisplay m_markersDisplay;
 	QList<SpectrumCalibrationPoint> m_calibrationPoints;
+	bool m_useCalibration;
+	CalibrationInterpolationMode m_calibrationInterpMode; //!< How is power interpolated between calibration points
 	static const int m_log2FFTSizeMin = 6;   // 64
 	static const int m_log2FFTSizeMax = 15;  // 32k
 

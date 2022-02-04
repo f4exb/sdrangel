@@ -160,6 +160,9 @@ GLSpectrum:
           * 0 - Mome
           * 1 - Spectrum markers (histogram and waterfall)
           * 2 - Spectrum annotation markers
+    useCalibration:
+      type: integer
+      description: boolean
     histogramMarkers:
       type: array
       items:

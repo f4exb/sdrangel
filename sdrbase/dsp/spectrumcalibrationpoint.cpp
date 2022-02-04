@@ -24,7 +24,7 @@ QByteArray SpectrumCalibrationPoint::serialize() const
 
     s.writeS64(1, m_frequency);
     s.writeFloat(2, m_powerRelativeReference);
-    s.writeFloat(3, m_powerAbsoluteReference);
+    s.writeFloat(3, m_powerCalibratedReference);
 
     return s.final();
 }
@@ -41,7 +41,7 @@ bool SpectrumCalibrationPoint::deserialize(const QByteArray& data)
     {
         d.readS64(1, &m_frequency, 0);
         d.readFloat(2, &m_powerRelativeReference, 1.0f);
-        d.readFloat(3, &m_powerAbsoluteReference, 1.0f);
+        d.readFloat(3, &m_powerCalibratedReference, 1.0f);
 
         return true;
     }

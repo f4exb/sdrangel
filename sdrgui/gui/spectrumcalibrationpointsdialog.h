@@ -38,6 +38,7 @@ class SDRGUI_API SpectrumCalibrationPointsDialog : public QDialog {
 public:
     explicit SpectrumCalibrationPointsDialog(
         QList<SpectrumCalibrationPoint>& calibrationPoints,
+        SpectrumSettings::CalibrationInterpolationMode& calibrationInterpMode,
         const SpectrumHistogramMarker *markerZero,
         QWidget* parent = nullptr
     );
@@ -47,9 +48,11 @@ public:
 private:
     Ui::SpectrumCalibrationPointsDialog* ui;
     QList<SpectrumCalibrationPoint>& m_calibrationPoints;
+    SpectrumSettings::CalibrationInterpolationMode& m_calibrationInterpMode;
     const SpectrumHistogramMarker *m_markerZero;
     int m_calibrationPointIndex;
     qint64 m_centerFrequency;
+    double m_globalCorrection;
 
     void displayCalibrationPoint();
 
@@ -57,11 +60,16 @@ private slots:
     void on_calibPoint_valueChanged(int value);
     void on_calibPointAdd_clicked();
     void on_calibPointDel_clicked();
-    void on_relativePower_valueChanged(int value);
-    void on_absolutePower_valueChanged(int value);
+    void on_relativePower_changed(qint64 value);
+    void on_calibratedPower_changed(qint64 value);
     void on_calibPointFrequency_changed(qint64 value);
+    void on_calibPointDuplicate_clicked();
     void on_importMarkerZero_clicked();
     void on_centerFrequency_clicked();
+    void on_calibInterpMode_currentIndexChanged(int index);
+    void on_calibrationGlobalCorr_changed(qint64 value);
+    void on_globalRelativeCorrection_clicked();
+    void on_globalCalibratedCorrection_clicked();
     void on_calibPointsExport_clicked();
     void on_calibPointsImport_clicked();
 

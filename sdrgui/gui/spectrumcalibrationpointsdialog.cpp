@@ -30,19 +30,33 @@
 
 SpectrumCalibrationPointsDialog::SpectrumCalibrationPointsDialog(
     QList<SpectrumCalibrationPoint>& calibrationPoints,
+    SpectrumSettings::CalibrationInterpolationMode& calibrationInterpMode,
     const SpectrumHistogramMarker *markerZero,
-    QWidget* parent) :
+    QWidget* parent
+) :
     QDialog(parent),
     ui(new Ui::SpectrumCalibrationPointsDialog),
     m_calibrationPoints(calibrationPoints),
+    m_calibrationInterpMode(calibrationInterpMode),
     m_markerZero(markerZero),
     m_calibrationPointIndex(0),
-    m_centerFrequency(0)
+    m_centerFrequency(0),
+    m_globalCorrection(0.0)
 {
     ui->setupUi(this);
     ui->calibPointFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->calibPointFrequency->setValueRange(false, 10, -9999999999L, 9999999999L);
+    ui->calibrationGlobalCorr->setColorMapper(ColorMapper(ColorMapper::GrayYellow));
+    ui->calibrationGlobalCorr->setValueRange(false, 5, -15000L, 4000L, 2);
+    ui->relativePower->setColorMapper(ColorMapper(ColorMapper::GrayYellow));
+    ui->relativePower->setValueRange(false, 5, -15000L, 4000L, 2);
+    ui->calibratedPower->setColorMapper(ColorMapper(ColorMapper::GrayYellow));
+    ui->calibratedPower->setValueRange(false, 5, -15000L, 4000L, 2);
     ui->calibPoint->setMaximum(m_calibrationPoints.size() - 1);
+    ui->calibInterpMode->blockSignals(true);
+    ui->calibInterpMode->setCurrentIndex((int) m_calibrationInterpMode);
+    ui->calibInterpMode->blockSignals(false);
+    ui->calibrationGlobalCorr->setValue(m_globalCorrection * 100.0);
     displayCalibrationPoint();
 }
 
@@ -54,14 +68,14 @@ void SpectrumCalibrationPointsDialog::displayCalibrationPoint()
     ui->calibPointFrequency->blockSignals(true);
     ui->calibPoint->blockSignals(true);
     ui->relativePower->blockSignals(true);
-    ui->absolutePower->blockSignals(true);
+    ui->calibratedPower->blockSignals(true);
 
     if (m_calibrationPoints.size() == 0)
     {
         ui->calibPoint->setEnabled(false);
         ui->calibPointDel->setEnabled(false);
         ui->relativePower->setEnabled(false);
-        ui->absolutePower->setEnabled(false);
+        ui->calibratedPower->setEnabled(false);
         ui->calibPointFrequency->setEnabled(false);
         ui->importMarkerZero->setEnabled(false);
         ui->centerFrequency->setEnabled(false);
@@ -71,25 +85,23 @@ void SpectrumCalibrationPointsDialog::displayCalibrationPoint()
         ui->calibPoint->setEnabled(true);
         ui->calibPointDel->setEnabled(true);
         ui->relativePower->setEnabled(true);
-        ui->absolutePower->setEnabled(true);
+        ui->calibratedPower->setEnabled(true);
         ui->calibPointFrequency->setEnabled(true);
         ui->importMarkerZero->setEnabled(true);
         ui->centerFrequency->setEnabled(true);
         ui->calibPoint->setValue(m_calibrationPointIndex);
         ui->calibPointText->setText(tr("%1").arg(m_calibrationPointIndex));
-        float powerDB = CalcDb::dbPower(m_calibrationPoints[m_calibrationPointIndex].m_powerRelativeReference);
-        ui->relativePower->setValue(powerDB*10);
-        ui->relativePowerText->setText(QString::number(powerDB, 'f', 1));
-        powerDB = CalcDb::dbPower(m_calibrationPoints[m_calibrationPointIndex].m_powerAbsoluteReference);
-        ui->absolutePower->setValue(powerDB*10);
-        ui->absolutePowerText->setText(QString::number(powerDB, 'f', 1));
+        double powerDB = CalcDb::dbPower(m_calibrationPoints[m_calibrationPointIndex].m_powerRelativeReference);
+        ui->relativePower->setValue(round(powerDB*100.0)); // fixed point 2 decimals
+        powerDB = CalcDb::dbPower(m_calibrationPoints[m_calibrationPointIndex].m_powerCalibratedReference);
+        ui->calibratedPower->setValue(round(powerDB*100.0)); // fixed point 2 decimals
         ui->calibPointFrequency->setValue(m_calibrationPoints[m_calibrationPointIndex].m_frequency);
     }
 
     ui->calibPointFrequency->blockSignals(false);
     ui->calibPoint->blockSignals(false);
     ui->relativePower->blockSignals(false);
-    ui->absolutePower->blockSignals(false);
+    ui->calibratedPower->blockSignals(false);
 }
 
 void SpectrumCalibrationPointsDialog::on_calibPoint_valueChanged(int value)
@@ -126,27 +138,25 @@ void SpectrumCalibrationPointsDialog::on_calibPointDel_clicked()
     displayCalibrationPoint();
 }
 
-void SpectrumCalibrationPointsDialog::on_relativePower_valueChanged(int value)
+void SpectrumCalibrationPointsDialog::on_relativePower_changed(qint64 value)
 {
     if (m_calibrationPoints.size() == 0) {
         return;
     }
 
-    float powerDB = value / 10.0f;
-    ui->relativePowerText->setText(QString::number(powerDB, 'f', 1));
+    float powerDB = value / 100.0f;
     m_calibrationPoints[m_calibrationPointIndex].m_powerRelativeReference = CalcDb::powerFromdB(powerDB);
     emit updateCalibrationPoints();
 }
 
-void SpectrumCalibrationPointsDialog::on_absolutePower_valueChanged(int value)
+void SpectrumCalibrationPointsDialog::on_calibratedPower_changed(qint64 value)
 {
     if (m_calibrationPoints.size() == 0) {
         return;
     }
 
-    float powerDB = value / 10.0f;
-    ui->absolutePowerText->setText(QString::number(powerDB, 'f', 1));
-    m_calibrationPoints[m_calibrationPointIndex].m_powerAbsoluteReference = CalcDb::powerFromdB(powerDB);
+    float powerDB = value / 100.0f;
+    m_calibrationPoints[m_calibrationPointIndex].m_powerCalibratedReference = CalcDb::powerFromdB(powerDB);
     emit updateCalibrationPoints();
 }
 
@@ -158,6 +168,19 @@ void SpectrumCalibrationPointsDialog::on_calibPointFrequency_changed(qint64 valu
 
     m_calibrationPoints[m_calibrationPointIndex].m_frequency = value;
     emit updateCalibrationPoints();
+}
+
+void SpectrumCalibrationPointsDialog::on_calibPointDuplicate_clicked()
+{
+    if (m_calibrationPoints.size() == 0) {
+        return;
+    }
+
+    m_calibrationPoints.push_back(SpectrumCalibrationPoint(m_calibrationPoints[m_calibrationPointIndex]));
+    ui->calibPoint->setMaximum(m_calibrationPoints.size() - 1);
+    ui->calibPoint->setMinimum(0);
+    m_calibrationPointIndex = m_calibrationPoints.size() - 1;
+    displayCalibrationPoint();
 }
 
 void SpectrumCalibrationPointsDialog::on_importMarkerZero_clicked()
@@ -179,6 +202,37 @@ void SpectrumCalibrationPointsDialog::on_centerFrequency_clicked()
     }
 
     m_calibrationPoints[m_calibrationPointIndex].m_frequency = m_centerFrequency;
+    displayCalibrationPoint();
+    emit updateCalibrationPoints();
+}
+
+void SpectrumCalibrationPointsDialog::on_calibInterpMode_currentIndexChanged(int index)
+{
+    m_calibrationInterpMode = (SpectrumSettings::CalibrationInterpolationMode) index;
+    emit updateCalibrationPoints();
+}
+
+void SpectrumCalibrationPointsDialog::on_calibrationGlobalCorr_changed(qint64 value)
+{
+    m_globalCorrection = value / 100.0;
+}
+
+void SpectrumCalibrationPointsDialog::on_globalRelativeCorrection_clicked()
+{
+    for (auto& calibrationPoint : m_calibrationPoints) {
+        calibrationPoint.m_powerRelativeReference *= CalcDb::powerFromdB(m_globalCorrection);
+    }
+
+    displayCalibrationPoint();
+    emit updateCalibrationPoints();
+}
+
+void SpectrumCalibrationPointsDialog::on_globalCalibratedCorrection_clicked()
+{
+    for (auto& calibrationPoint : m_calibrationPoints) {
+        calibrationPoint.m_powerCalibratedReference *= CalcDb::powerFromdB(m_globalCorrection);
+    }
+
     displayCalibrationPoint();
     emit updateCalibrationPoints();
 }
@@ -211,7 +265,7 @@ void SpectrumCalibrationPointsDialog::on_calibPointsExport_clicked()
                 {
                     stream << calibrationPint.m_frequency << ","
                         << calibrationPint.m_powerRelativeReference << ","
-                        << calibrationPint.m_powerAbsoluteReference << "\n";
+                        << calibrationPint.m_powerCalibratedReference << "\n";
                 }
 
                 stream.flush();
@@ -263,7 +317,7 @@ void SpectrumCalibrationPointsDialog::on_calibPointsImport_clicked()
                         m_calibrationPoints.push_back(SpectrumCalibrationPoint());
                         m_calibrationPoints.back().m_frequency = cols[frequencyCol].toLongLong();
                         m_calibrationPoints.back().m_powerRelativeReference = cols[referenceCol].toFloat();
-                        m_calibrationPoints.back().m_powerAbsoluteReference = cols[absoluteCol].toFloat();
+                        m_calibrationPoints.back().m_powerCalibratedReference = cols[absoluteCol].toFloat();
                     }
 
                     m_calibrationPointIndex = 0;

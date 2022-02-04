@@ -110,6 +110,20 @@ public:
         Real m_range;
     };
 
+    class MsgReportCalibrationShift : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        MsgReportCalibrationShift(Real calibrationShiftdB) :
+            Message(),
+            m_calibrationShiftdB(calibrationShiftdB)
+        {}
+
+        Real getCalibrationShiftdB() const { return m_calibrationShiftdB; }
+    private:
+        Real m_calibrationShiftdB;
+    };
+
     GLSpectrum(QWidget* parent = nullptr);
     virtual ~GLSpectrum();
 
@@ -136,6 +150,7 @@ public:
     void setDisplayGridIntensity(int intensity);
     void setDisplayTraceIntensity(int intensity);
     void setLinear(bool linear);
+    void setUseCalibration(bool useCalibration);
     qint32 getSampleRate() const { return m_sampleRate; }
 
     void addChannelMarker(ChannelMarker* channelMarker);
@@ -171,6 +186,10 @@ public:
     void updateCalibrationPoints();
     SpectrumSettings::MarkersDisplay& getMarkersDisplay() {  return m_markersDisplay; }
 	void setMarkersDisplay(SpectrumSettings::MarkersDisplay markersDisplay);
+    QList<SpectrumCalibrationPoint>& getCalibrationPoints() { return m_calibrationPoints; }
+    void setCalibrationPoints(const QList<SpectrumCalibrationPoint>& calibrationPoints);
+    SpectrumSettings::CalibrationInterpolationMode& getCalibrationInterpMode() { return m_calibrationInterpMode; }
+    void setCalibrationInterpMode(SpectrumSettings::CalibrationInterpolationMode mode);
 
 private:
     struct ChannelMarkerState {
@@ -203,6 +222,7 @@ private:
     QList<SpectrumAnnotationMarker*> m_sortedAnnotationMarkers;
     QList<SpectrumAnnotationMarker*> m_visibleAnnotationMarkers;
     SpectrumSettings::MarkersDisplay m_markersDisplay;
+    QList<SpectrumCalibrationPoint> m_calibrationPoints;
 
     CursorState m_cursorState;
     int m_cursorChannel;
@@ -297,6 +317,10 @@ private:
     GLShaderTextured m_glShaderInfo;
     int m_matrixLoc;
     int m_colorLoc;
+    bool m_useCalibration;
+    Real m_calibrationGain;
+    Real m_calibrationShiftdB;
+    SpectrumSettings::CalibrationInterpolationMode m_calibrationInterpMode;
     IncrementalArray<GLfloat> m_q3TickTime;
     IncrementalArray<GLfloat> m_q3TickFrequency;
     IncrementalArray<GLfloat> m_q3TickPower;
@@ -334,8 +358,9 @@ private:
     void enterEvent(QEvent* event);
     void leaveEvent(QEvent* event);
 
-    QString displayScaled(int64_t value, char type, int precision, bool showMult);
-    QString displayScaledF(float value, char type, int precision, bool showMult);
+    static QString displayScaled(int64_t value, char type, int precision, bool showMult);
+    static QString displayScaledF(float value, char type, int precision, bool showMult);
+    static QString displayPower(float value, char type, int precision);
     int getPrecision(int value);
     void drawTextOverlay(      //!< Draws a text overlay
             const QString& text,
@@ -356,6 +381,11 @@ private:
         } else {
             return m1->m_bandwidth > m2->m_bandwidth; // larger bandwidths should come first for display (lower layer)
         }
+    }
+
+    static bool calibrationPointsLessThan(const SpectrumCalibrationPoint& m1, const SpectrumCalibrationPoint& m2)
+    {
+        return m1.m_frequency < m2.m_frequency;
     }
 
 private slots:

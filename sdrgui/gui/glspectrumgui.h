@@ -70,6 +70,7 @@ private:
 	MessageQueue m_messageQueue;
     SpectrumSettings m_settings;
     bool m_doApplySettings;
+	Real m_calibrationShiftdB;
     static const int m_fpsMs[];
 
     void blockApplySettings(bool block);
@@ -111,6 +112,7 @@ private slots:
 	void on_grid_toggled(bool checked);
 	void on_clearSpectrum_clicked(bool checked);
     void on_freeze_toggled(bool checked);
+	void on_calibration_toggled(bool checked);
 
 	void handleInputMessages();
     void openWebsocketSpectrumSettingsDialog(const QPoint& p);

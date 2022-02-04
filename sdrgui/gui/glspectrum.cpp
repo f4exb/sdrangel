@@ -34,6 +34,7 @@ MESSAGE_CLASS_DEFINITION(GLSpectrum::MsgReportSampleRate, Message)
 MESSAGE_CLASS_DEFINITION(GLSpectrum::MsgReportWaterfallShare, Message)
 MESSAGE_CLASS_DEFINITION(GLSpectrum::MsgReportFFTOverlap, Message)
 MESSAGE_CLASS_DEFINITION(GLSpectrum::MsgReportPowerScale, Message)
+MESSAGE_CLASS_DEFINITION(GLSpectrum::MsgReportCalibrationShift, Message)
 
 const float GLSpectrum::m_maxFrequencyZoom = 10.0f;
 const float GLSpectrum::m_annotationMarkerHeight = 20.0f;
@@ -86,6 +87,10 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
     m_displayStreamIndex(0),
     m_matrixLoc(0),
     m_colorLoc(0),
+    m_useCalibration(false),
+    m_calibrationGain(1.0),
+    m_calibrationShiftdB(0.0),
+    m_calibrationInterpMode(SpectrumSettings::CalibInterpLinear),
     m_messageQueueToGUI(nullptr)
 {
     setAutoFillBackground(false);
@@ -202,6 +207,11 @@ void GLSpectrum::setCenterFrequency(qint64 frequency)
 {
     m_mutex.lock();
     m_centerFrequency = frequency;
+
+    if (m_useCalibration) {
+        updateCalibrationPoints();
+    }
+
     m_changesPending = true;
     m_mutex.unlock();
     update();
@@ -244,9 +254,11 @@ void GLSpectrum::setSampleRate(qint32 sampleRate)
 {
     m_mutex.lock();
     m_sampleRate = sampleRate;
+
     if (m_messageQueueToGUI) {
         m_messageQueueToGUI->push(new MsgReportSampleRate(m_sampleRate));
     }
+
     m_changesPending = true;
     m_mutex.unlock();
     update();
@@ -385,6 +397,20 @@ void GLSpectrum::setLinear(bool linear)
     update();
 }
 
+void GLSpectrum::setUseCalibration(bool useCalibration)
+{
+    m_mutex.lock();
+    m_useCalibration = useCalibration;
+
+    if (m_messageQueueToGUI) {
+        m_messageQueueToGUI->push(new MsgReportCalibrationShift(m_useCalibration ? m_calibrationShiftdB : 0.0));
+    }
+
+    m_changesPending = true;
+    m_mutex.unlock();
+    update();
+}
+
 void GLSpectrum::addChannelMarker(ChannelMarker* channelMarker)
 {
     m_mutex.lock();
@@ -453,6 +479,26 @@ void GLSpectrum::setMarkersDisplay(SpectrumSettings::MarkersDisplay markersDispl
 	m_mutex.lock();
 	m_markersDisplay = markersDisplay;
 	updateMarkersDisplay();
+    m_changesPending = true;
+    m_mutex.unlock();
+    update();
+}
+
+void GLSpectrum::setCalibrationPoints(const QList<SpectrumCalibrationPoint>& calibrationPoints)
+{
+    m_mutex.lock();
+    m_calibrationPoints = calibrationPoints;
+    updateCalibrationPoints();
+    m_changesPending = true;
+    m_mutex.unlock();
+    update();
+}
+
+void GLSpectrum::setCalibrationInterpMode(SpectrumSettings::CalibrationInterpolationMode mode)
+{
+	m_mutex.lock();
+    m_calibrationInterpMode = mode;
+    updateCalibrationPoints();
     m_changesPending = true;
     m_mutex.unlock();
     update();
@@ -1212,17 +1258,18 @@ void GLSpectrum::drawSpectrumMarkers()
 
             if (m_histogramMarkers.at(i).m_markerType == SpectrumHistogramMarker::SpectrumMarkerTypePower)
             {
-                float power = m_currentSpectrum[m_histogramMarkers.at(i).m_fftBin];
+                float power = m_linear ?
+                    m_currentSpectrum[m_histogramMarkers.at(i).m_fftBin] * (m_useCalibration ? m_calibrationGain : 1.0f):
+                    m_currentSpectrum[m_histogramMarkers.at(i).m_fftBin] + (m_useCalibration ? m_calibrationShiftdB : 0.0f);
                 ypoint.ry() =
                     (m_powerScale.getRangeMax() - power) / m_powerScale.getRange();
                 ypoint.ry() = ypoint.ry() < 0 ?
-                    0 : ypoint.ry() > 1 ?
-                        1 : ypoint.ry();
-                powerStr = displayScaledF(
+                    0 :
+                    ypoint.ry() > 1 ? 1 : ypoint.ry();
+                powerStr = displayPower(
                     power,
                     m_linear ? 'e' : 'f',
-                    m_linear ? 3 : 1,
-                    false
+                    m_linear ? 3 : 1
                 );
             }
             else if (m_histogramMarkers.at(i).m_markerType == SpectrumHistogramMarker::SpectrumMarkerTypePowerMax)
@@ -1235,16 +1282,19 @@ void GLSpectrum::drawSpectrumMarkers()
                     m_histogramMarkers[i].m_holdReset = false;
                 }
 
+                float powerMax = m_linear ?
+                    m_histogramMarkers[i].m_powerMax * (m_useCalibration ? m_calibrationGain : 1.0f) :
+                    m_histogramMarkers[i].m_powerMax + (m_useCalibration ? m_calibrationShiftdB : 0.0f);
+
                 ypoint.ry() =
-                    (m_powerScale.getRangeMax() - m_histogramMarkers[i].m_powerMax) / m_powerScale.getRange();
+                    (m_powerScale.getRangeMax() - powerMax) / m_powerScale.getRange();
                 ypoint.ry() = ypoint.ry() < 0 ?
                     0 : ypoint.ry() > 1 ?
                         1 : ypoint.ry();
-                powerStr = displayScaledF(
-                    m_histogramMarkers[i].m_powerMax,
+                powerStr = displayPower(
+                    powerMax,
                     m_linear ? 'e' : 'f',
-                    m_linear ? 3 : 1,
-                    false
+                    m_linear ? 3 : 1
                 );
             }
 
@@ -1306,7 +1356,7 @@ void GLSpectrum::drawSpectrumMarkers()
                 QString deltaPowerStr;
 
                 if (m_linear) {
-                    deltaPowerStr = displayScaledF(poweri - power0, 'e', 3, false);
+                    deltaPowerStr = QString::number(poweri - power0, 'e', 3);
                 } else {
                     deltaPowerStr = QString::number(poweri - power0, 'f', 1);
                 }
@@ -1562,10 +1612,15 @@ void GLSpectrum::applyChanges()
 
         m_powerScale.setSize(m_histogramHeight);
 
-        if (m_linear) {
-            m_powerScale.setRange(Unit::Scientific, m_referenceLevel - m_powerRange, m_referenceLevel);
-        } else {
-            m_powerScale.setRange(Unit::Decibel, m_referenceLevel - m_powerRange, m_referenceLevel);
+        if (m_linear)
+        {
+            Real referenceLevel = m_useCalibration ? m_referenceLevel * m_calibrationGain : m_referenceLevel;
+            m_powerScale.setRange(Unit::Scientific, 0.0f, referenceLevel);
+        }
+        else
+        {
+            Real referenceLevel = m_useCalibration ? m_referenceLevel + m_calibrationShiftdB : m_referenceLevel;
+            m_powerScale.setRange(Unit::Decibel, referenceLevel - m_powerRange, referenceLevel);
         }
 
         m_leftMargin = m_timeScale.getScaleWidth();
@@ -1717,7 +1772,8 @@ void GLSpectrum::applyChanges()
         m_histogramHeight = height() - m_topMargin - m_frequencyScaleHeight;
 
         m_powerScale.setSize(m_histogramHeight);
-        m_powerScale.setRange(Unit::Decibel, m_referenceLevel - m_powerRange, m_referenceLevel);
+        Real referenceLevel = m_useCalibration ? m_referenceLevel + m_calibrationShiftdB : m_referenceLevel;
+        m_powerScale.setRange(Unit::Decibel, referenceLevel - m_powerRange, referenceLevel);
         m_leftMargin = m_powerScale.getScaleWidth();
         m_leftMargin += 2 * M;
 
@@ -2175,7 +2231,9 @@ void GLSpectrum::updateHistogramMarkers()
 {
     for (int i = 0; i < m_histogramMarkers.size(); i++)
     {
-        float powerI = m_linear ? m_histogramMarkers[i].m_power : CalcDb::dbPower(m_histogramMarkers[i].m_power);
+        float powerI = m_linear ?
+            m_histogramMarkers.at(i).m_power * (m_useCalibration ? m_calibrationGain : 1.0f) :
+            CalcDb::dbPower(m_histogramMarkers.at(i).m_power) + (m_useCalibration ? m_calibrationShiftdB : 0.0f);
         m_histogramMarkers[i].m_point.rx() =
             (m_histogramMarkers[i].m_frequency - m_frequencyScale.getRangeMin()) / m_frequencyScale.getRange();
         m_histogramMarkers[i].m_point.ry() =
@@ -2196,11 +2254,10 @@ void GLSpectrum::updateHistogramMarkers()
             'f',
             getPrecision((m_centerFrequency*1000)/m_sampleRate),
             false);
-        m_histogramMarkers[i].m_powerStr = displayScaledF(
+        m_histogramMarkers[i].m_powerStr = displayPower(
             powerI,
             m_linear ? 'e' : 'f',
-            m_linear ? 3 : 1,
-            false);
+            m_linear ? 3 : 1);
 
         if (i > 0)
         {
@@ -2211,16 +2268,12 @@ void GLSpectrum::updateHistogramMarkers()
                 getPrecision(deltaFrequency/m_sampleRate),
                 true);
             float power0 = m_linear ?
-                m_histogramMarkers.at(0).m_power :
-                CalcDb::dbPower(m_histogramMarkers.at(0).m_power);
-            float powerI = m_linear ?
-                m_histogramMarkers.at(i).m_power :
-                CalcDb::dbPower(m_histogramMarkers.at(i).m_power);
-            m_histogramMarkers.back().m_deltaPowerStr = displayScaledF(
+                m_histogramMarkers.at(0).m_power * (m_useCalibration ? m_calibrationGain : 1.0f) :
+                CalcDb::dbPower(m_histogramMarkers.at(0).m_power) + (m_useCalibration ? m_calibrationShiftdB : 0.0f);
+            m_histogramMarkers.back().m_deltaPowerStr = displayPower(
                 powerI - power0,
                 m_linear ? 'e' : 'f',
-                m_linear ? 3 : 1,
-                false);
+                m_linear ? 3 : 1);
         }
     }
 }
@@ -2316,7 +2369,86 @@ void GLSpectrum::updateMarkersDisplay()
 
 void GLSpectrum::updateCalibrationPoints()
 {
-    // TODO
+    if (m_calibrationPoints.size() == 0)
+    {
+        m_calibrationGain = 1.0;
+        m_calibrationShiftdB = 0.0;
+    }
+    else if (m_calibrationPoints.size() == 1)
+    {
+        m_calibrationGain = m_calibrationPoints.first().m_powerCalibratedReference /
+             m_calibrationPoints.first().m_powerRelativeReference;
+        m_calibrationShiftdB = CalcDb::dbPower(m_calibrationGain);
+    }
+    else
+    {
+        QList<SpectrumCalibrationPoint> sortedCalibrationPoints = m_calibrationPoints;
+        std::sort(sortedCalibrationPoints.begin(), sortedCalibrationPoints.end(), calibrationPointsLessThan);
+
+        if (m_centerFrequency <= sortedCalibrationPoints.first().m_frequency)
+        {
+            m_calibrationGain = m_calibrationPoints.first().m_powerCalibratedReference /
+                m_calibrationPoints.first().m_powerRelativeReference;
+            m_calibrationShiftdB = CalcDb::dbPower(m_calibrationGain);
+        }
+        else if (m_centerFrequency >= sortedCalibrationPoints.last().m_frequency)
+        {
+            m_calibrationGain = m_calibrationPoints.last().m_powerCalibratedReference /
+                m_calibrationPoints.last().m_powerRelativeReference;
+            m_calibrationShiftdB = CalcDb::dbPower(m_calibrationGain);
+        }
+        else
+        {
+            int lowIndex = 0;
+            int highIndex = sortedCalibrationPoints.size() - 1;
+
+            for (int index = 0; index < sortedCalibrationPoints.size(); index++)
+            {
+                if (m_centerFrequency < sortedCalibrationPoints[index].m_frequency)
+                {
+                    highIndex = index;
+                    break;
+                }
+                else
+                {
+                    lowIndex = index;
+                }
+            }
+
+            // frequency interpolation is always linear
+            double deltaFrequency = sortedCalibrationPoints[highIndex].m_frequency -
+                sortedCalibrationPoints[lowIndex].m_frequency;
+            double shiftFrequency = m_centerFrequency - sortedCalibrationPoints[lowIndex].m_frequency;
+            double interpolationRatio = shiftFrequency / deltaFrequency;
+
+            // calculate low and high gains in linear mode
+            double gainLow = sortedCalibrationPoints[lowIndex].m_powerCalibratedReference /
+                sortedCalibrationPoints[lowIndex].m_powerRelativeReference;
+            double gainHigh = sortedCalibrationPoints[highIndex].m_powerCalibratedReference /
+                sortedCalibrationPoints[highIndex].m_powerRelativeReference;
+
+            // power interpolation depends on interpolation options
+            if (m_calibrationInterpMode == SpectrumSettings::CalibInterpLinear)
+            {
+                m_calibrationGain = gainLow + interpolationRatio*(gainHigh - gainLow); // linear driven
+                m_calibrationShiftdB = CalcDb::dbPower(m_calibrationGain);
+            }
+            else if (m_calibrationInterpMode == SpectrumSettings::CalibInterpLogLinear)
+            {
+                m_calibrationShiftdB = CalcDb::dbPower(gainLow)
+                    + interpolationRatio*(CalcDb::dbPower(gainHigh) - CalcDb::dbPower(gainLow)); // log driven
+                m_calibrationGain = CalcDb::powerFromdB(m_calibrationShiftdB);
+            }
+        }
+    }
+
+    updateHistogramMarkers();
+
+    if (m_messageQueueToGUI && m_useCalibration) {
+        m_messageQueueToGUI->push(new MsgReportCalibrationShift(m_calibrationShiftdB));
+    }
+
+    m_changesPending = true;
 }
 
 void GLSpectrum::mouseMoveEvent(QMouseEvent* event)
@@ -2507,11 +2639,10 @@ void GLSpectrum::mousePressEvent(QMouseEvent* event)
                         getPrecision((m_centerFrequency*1000)/m_sampleRate),
                         false);
                     m_histogramMarkers.back().m_power = power;
-                    m_histogramMarkers.back().m_powerStr = displayScaledF(
+                    m_histogramMarkers.back().m_powerStr = displayPower(
                         powerVal,
                         m_linear ? 'e' : 'f',
-                        m_linear ? 3 : 1,
-                        false);
+                        m_linear ? 3 : 1);
 
                     if (m_histogramMarkers.size() > 1)
                     {
@@ -2524,11 +2655,10 @@ void GLSpectrum::mousePressEvent(QMouseEvent* event)
                         float power0 = m_linear ?
                             m_histogramMarkers.at(0).m_power :
                             CalcDb::dbPower(m_histogramMarkers.at(0).m_power);
-                        m_histogramMarkers.back().m_deltaPowerStr = displayScaledF(
+                        m_histogramMarkers.back().m_deltaPowerStr = displayPower(
                             power - power0,
                             m_linear ? 'e' : 'f',
-                            m_linear ? 3 : 1,
-                            false);
+                            m_linear ? 3 : 1);
                     }
 
                     doUpdate = true;
@@ -2776,10 +2906,8 @@ void GLSpectrum::timeZoom(bool zoomInElseOut)
     m_fftOverlap = m_fftOverlap + (zoomInElseOut ? 1 : -1);
     m_changesPending = true;
 
-    if (m_messageQueueToGUI)
-    {
-        MsgReportFFTOverlap *msg = new MsgReportFFTOverlap(m_fftOverlap);
-        m_messageQueueToGUI->push(msg);
+    if (m_messageQueueToGUI) {
+        m_messageQueueToGUI->push(new MsgReportFFTOverlap(m_fftOverlap));
     }
 }
 
@@ -2797,10 +2925,8 @@ void GLSpectrum::powerZoom(float pw, bool zoomInElseOut)
     m_referenceLevel = m_referenceLevel < -110 ? -110 : m_referenceLevel > 0 ? 0 : m_referenceLevel;
     m_changesPending = true;
 
-    if (m_messageQueueToGUI)
-    {
-        MsgReportPowerScale *msg = new MsgReportPowerScale(m_referenceLevel, m_powerRange);
-        m_messageQueueToGUI->push(msg);
+    if (m_messageQueueToGUI) {
+        m_messageQueueToGUI->push(new MsgReportPowerScale(m_referenceLevel, m_powerRange));
     }
 }
 
@@ -2993,6 +3119,11 @@ QString GLSpectrum::displayScaled(int64_t value, char type, int precision, bool 
     }
 }
 
+QString GLSpectrum::displayPower(float value, char type, int precision)
+{
+    return tr("%1").arg(QString::number(value, type, precision));
+}
+
 QString GLSpectrum::displayScaledF(float value, char type, int precision, bool showMult)
 {
     float posValue = (value < 0) ? -value : value;
@@ -3106,6 +3237,10 @@ void GLSpectrum::drawTextOverlay(
 
 void GLSpectrum::formatTextInfo(QString& info)
 {
+    if (m_useCalibration) {
+        info.append(tr("CAL:%1dB ").arg(QString::number(m_calibrationShiftdB, 'f', 1)));
+    }
+
     if (m_frequencyZoomFactor != 1.0f) {
         info.append(tr("%1x ").arg(QString::number(m_frequencyZoomFactor, 'f', 1)));
     }

@@ -82,6 +82,8 @@ SWGGLSpectrum::SWGGLSpectrum() {
     m_ws_spectrum_port_isSet = false;
     markers_display = 0;
     m_markers_display_isSet = false;
+    use_calibration = 0;
+    m_use_calibration_isSet = false;
     histogram_markers = nullptr;
     m_histogram_markers_isSet = false;
     waterfall_markers = nullptr;
@@ -152,6 +154,8 @@ SWGGLSpectrum::init() {
     m_ws_spectrum_port_isSet = false;
     markers_display = 0;
     m_markers_display_isSet = false;
+    use_calibration = 0;
+    m_use_calibration_isSet = false;
     histogram_markers = new QList<SWGSpectrumHistogramMarker*>();
     m_histogram_markers_isSet = false;
     waterfall_markers = new QList<SWGSpectrumWaterfallMarker*>();
@@ -191,6 +195,7 @@ SWGGLSpectrum::cleanup() {
     if(ws_spectrum_address != nullptr) { 
         delete ws_spectrum_address;
     }
+
 
 
     if(histogram_markers != nullptr) { 
@@ -287,6 +292,8 @@ SWGGLSpectrum::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&ws_spectrum_port, pJson["wsSpectrumPort"], "qint32", "");
     
     ::SWGSDRangel::setValue(&markers_display, pJson["markersDisplay"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&use_calibration, pJson["useCalibration"], "qint32", "");
     
     
     ::SWGSDRangel::setValue(&histogram_markers, pJson["histogramMarkers"], "QList", "SWGSpectrumHistogramMarker");
@@ -392,6 +399,9 @@ SWGGLSpectrum::asJsonObject() {
     }
     if(m_markers_display_isSet){
         obj->insert("markersDisplay", QJsonValue(markers_display));
+    }
+    if(m_use_calibration_isSet){
+        obj->insert("useCalibration", QJsonValue(use_calibration));
     }
     if(histogram_markers && histogram_markers->size() > 0){
         toJsonArray((QList<void*>*)histogram_markers, obj, "histogramMarkers", "SWGSpectrumHistogramMarker");
@@ -679,6 +689,16 @@ SWGGLSpectrum::setMarkersDisplay(qint32 markers_display) {
     this->m_markers_display_isSet = true;
 }
 
+qint32
+SWGGLSpectrum::getUseCalibration() {
+    return use_calibration;
+}
+void
+SWGGLSpectrum::setUseCalibration(qint32 use_calibration) {
+    this->use_calibration = use_calibration;
+    this->m_use_calibration_isSet = true;
+}
+
 QList<SWGSpectrumHistogramMarker*>*
 SWGGLSpectrum::getHistogramMarkers() {
     return histogram_markers;
@@ -803,6 +823,9 @@ SWGGLSpectrum::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_markers_display_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_use_calibration_isSet){
             isObjectUpdated = true; break;
         }
         if(histogram_markers && (histogram_markers->size() > 0)){

@@ -428,10 +428,10 @@
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
        <property name="minimum">
-        <number>-110</number>
+        <number>-150</number>
        </property>
        <property name="maximum">
-        <number>0</number>
+        <number>40</number>
        </property>
       </widget>
      </item>
@@ -571,7 +571,7 @@
      <item>
       <widget class="ButtonSwitch" name="calibration">
        <property name="toolTip">
-        <string>Left: toggle relative / mW units - Right: open calibration dialog</string>
+        <string>Left: toggle relative / calibrated power - Right: open calibration dialog</string>
        </property>
        <property name="icon">
         <iconset resource="../resources/res.qrc">

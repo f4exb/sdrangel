@@ -41,7 +41,8 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
     ui(new Ui::GLSpectrumGUI),
     m_spectrumVis(nullptr),
     m_glSpectrum(nullptr),
-    m_doApplySettings(true)
+    m_doApplySettings(true),
+    m_calibrationShiftdB(0.0)
 {
     ui->setupUi(this);
     on_linscale_toggled(false);
@@ -138,7 +139,7 @@ void GLSpectrumGUI::updateSettings()
 void GLSpectrumGUI::displaySettings()
 {
     blockApplySettings(true);
-    ui->refLevel->setValue(m_settings.m_refLevel);
+    ui->refLevel->setValue(m_settings.m_refLevel + m_calibrationShiftdB);
     ui->levelRange->setValue(m_settings.m_powerRange);
     ui->decay->setSliderPosition(m_settings.m_decay);
     ui->decayDivisor->setSliderPosition(m_settings.m_decayDivisor);
@@ -191,6 +192,7 @@ void GLSpectrumGUI::displaySettings()
     ui->averagingMode->setCurrentIndex((int) m_settings.m_averagingMode);
     ui->linscale->setChecked(m_settings.m_linear);
     setAveragingToolitp();
+    ui->calibration->setChecked(m_settings.m_useCalibration);
 
     ui->fftWindow->blockSignals(false);
     ui->averaging->blockSignals(false);
@@ -251,11 +253,14 @@ void GLSpectrumGUI::applySpectrumSettings()
     m_glSpectrum->setPowerRange(powerRange);
     m_glSpectrum->setFPSPeriodMs(m_settings.m_fpsPeriodMs);
     m_glSpectrum->setLinear(m_settings.m_linear);
+    m_glSpectrum->setUseCalibration(m_settings.m_useCalibration);
 
     m_glSpectrum->setHistogramMarkers(m_settings.m_histogramMarkers);
     m_glSpectrum->setWaterfallMarkers(m_settings.m_waterfallMarkers);
     m_glSpectrum->setAnnotationMarkers(m_settings.m_annoationMarkers);
     m_glSpectrum->setMarkersDisplay(m_settings.m_markersDisplay);
+    m_glSpectrum->setCalibrationPoints(m_settings.m_calibrationPoints);
+    m_glSpectrum->setCalibrationInterpMode(m_settings.m_calibrationInterpMode);
 }
 
 void GLSpectrumGUI::on_fftWindow_currentIndexChanged(int index)
@@ -315,7 +320,7 @@ void GLSpectrumGUI::on_autoscale_clicked(bool checked)
 
     m_settings.m_refLevel = maxLvl;
     m_settings.m_powerRange = maxLvl - minLvl;
-    ui->refLevel->setValue(m_settings.m_refLevel);
+    ui->refLevel->setValue(m_settings.m_refLevel + m_calibrationShiftdB);
     ui->levelRange->setValue(m_settings.m_powerRange);
     // qDebug("GLSpectrumGUI::on_autoscale_clicked: max: %d min %d max: %e min: %e",
     //     maxLvl, minLvl, maxAvg, minAvg);
@@ -398,7 +403,7 @@ void GLSpectrumGUI::on_markers_clicked(bool checked)
 
 void GLSpectrumGUI::on_refLevel_valueChanged(int value)
 {
-    m_settings.m_refLevel = value;
+    m_settings.m_refLevel = value - m_calibrationShiftdB;
     applySettings();
 }
 
@@ -499,6 +504,12 @@ void GLSpectrumGUI::on_freeze_toggled(bool checked)
 {
     SpectrumVis::MsgStartStop *msg = SpectrumVis::MsgStartStop::create(!checked);
     m_spectrumVis->getInputMessageQueue()->push(msg);
+}
+
+void GLSpectrumGUI::on_calibration_toggled(bool checked)
+{
+    m_settings.m_useCalibration = checked;
+    applySettings();
 }
 
 void GLSpectrumGUI::setAveragingCombo()
@@ -679,9 +690,18 @@ bool GLSpectrumGUI::handleMessage(const Message& message)
         m_settings.m_powerRange = report.getRange();
         ui->refLevel->blockSignals(true);
         ui->levelRange->blockSignals(true);
-        ui->refLevel->setValue(m_settings.m_refLevel);
+        ui->refLevel->setValue(m_settings.m_refLevel + m_calibrationShiftdB);
         ui->levelRange->setValue(m_settings.m_powerRange);
         ui->levelRange->blockSignals(false);
+        ui->refLevel->blockSignals(false);
+        return true;
+    }
+    else if (GLSpectrum::MsgReportCalibrationShift::match(message))
+    {
+        const GLSpectrum::MsgReportCalibrationShift& report = (GLSpectrum::MsgReportCalibrationShift&) message;
+        m_calibrationShiftdB = report.getCalibrationShiftdB();
+        ui->refLevel->blockSignals(true);
+        ui->refLevel->setValue(m_settings.m_refLevel + m_calibrationShiftdB);
         ui->refLevel->blockSignals(false);
         return true;
     }
@@ -733,7 +753,8 @@ void GLSpectrumGUI::openWebsocketSpectrumSettingsDialog(const QPoint& p)
 void GLSpectrumGUI::openCalibrationPointsDialog(const QPoint& p)
 {
     SpectrumCalibrationPointsDialog dialog(
-        m_settings.m_calibrationPoints,
+        m_glSpectrum->getCalibrationPoints(),
+        m_glSpectrum->getCalibrationInterpMode(),
         m_glSpectrum->getHistogramMarkers().size() > 0 ? &m_glSpectrum->getHistogramMarkers()[0] : nullptr,
         this
     );
@@ -747,6 +768,8 @@ void GLSpectrumGUI::openCalibrationPointsDialog(const QPoint& p)
     m_settings.m_waterfallMarkers = m_glSpectrum->getWaterfallMarkers();
     m_settings.m_annoationMarkers = m_glSpectrum->getAnnotationMarkers();
     m_settings.m_markersDisplay = m_glSpectrum->getMarkersDisplay();
+    m_settings.m_calibrationPoints = m_glSpectrum->getCalibrationPoints();
+    m_settings.m_calibrationInterpMode = m_glSpectrum->getCalibrationInterpMode();
 
     applySettings();
 }
