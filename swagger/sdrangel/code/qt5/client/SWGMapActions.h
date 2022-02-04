@@ -45,12 +45,18 @@ public:
     QString* getFind();
     void setFind(QString* find);
 
+    QString* getSetDateTime();
+    void setSetDateTime(QString* set_date_time);
+
 
     virtual bool isSet() override;
 
 private:
     QString* find;
     bool m_find_isSet;
+
+    QString* set_date_time;
+    bool m_set_date_time_isSet;
 
 };
 

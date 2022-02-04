@@ -45,7 +45,7 @@ SWGDeviceSetApi::devicesetChannelActionsPost(qint32 device_set_index, qint32 cha
 
     
     QString output = body.asJson();
-    input.request_body.append(output.toUtf8());
+    input.request_body.append(output);
     
 
 
@@ -158,7 +158,7 @@ SWGDeviceSetApi::devicesetChannelPost(qint32 device_set_index, SWGChannelSetting
 
     
     QString output = body.asJson();
-    input.request_body.append(output.toUtf8());
+    input.request_body.append(output);
     
 
 
@@ -329,7 +329,7 @@ SWGDeviceSetApi::devicesetChannelSettingsPatch(qint32 device_set_index, qint32 c
 
     
     QString output = body.asJson();
-    input.request_body.append(output.toUtf8());
+    input.request_body.append(output);
     
 
 
@@ -388,7 +388,7 @@ SWGDeviceSetApi::devicesetChannelSettingsPut(qint32 device_set_index, qint32 cha
 
     
     QString output = body.asJson();
-    input.request_body.append(output.toUtf8());
+    input.request_body.append(output);
     
 
 
@@ -499,7 +499,7 @@ SWGDeviceSetApi::devicesetDeviceActionsPost(qint32 device_set_index, SWGDeviceAc
 
     
     QString output = body.asJson();
-    input.request_body.append(output.toUtf8());
+    input.request_body.append(output);
     
 
 
@@ -556,7 +556,7 @@ SWGDeviceSetApi::devicesetDevicePut(qint32 device_set_index, SWGDeviceListItem& 
 
     
     QString output = body.asJson();
-    input.request_body.append(output.toUtf8());
+    input.request_body.append(output);
     
 
 
@@ -667,7 +667,7 @@ SWGDeviceSetApi::devicesetDeviceRunDelete(qint32 device_set_index, SWGDeviceSett
 
     
     QString output = body.asJson();
-    input.request_body.append(output.toUtf8());
+    input.request_body.append(output);
     
 
 
@@ -778,7 +778,7 @@ SWGDeviceSetApi::devicesetDeviceRunPost(qint32 device_set_index, SWGDeviceSettin
 
     
     QString output = body.asJson();
-    input.request_body.append(output.toUtf8());
+    input.request_body.append(output);
     
 
 
@@ -889,7 +889,7 @@ SWGDeviceSetApi::devicesetDeviceSettingsPatch(qint32 device_set_index, SWGDevice
 
     
     QString output = body.asJson();
-    input.request_body.append(output.toUtf8());
+    input.request_body.append(output);
     
 
 
@@ -946,7 +946,7 @@ SWGDeviceSetApi::devicesetDeviceSettingsPut(qint32 device_set_index, SWGDeviceSe
 
     
     QString output = body.asJson();
-    input.request_body.append(output.toUtf8());
+    input.request_body.append(output);
     
 
 
@@ -1005,7 +1005,7 @@ SWGDeviceSetApi::devicesetDeviceSubsystemRunDelete(qint32 device_set_index, qint
 
     
     QString output = body.asJson();
-    input.request_body.append(output.toUtf8());
+    input.request_body.append(output);
     
 
 
@@ -1120,7 +1120,7 @@ SWGDeviceSetApi::devicesetDeviceSubsystemRunPost(qint32 device_set_index, qint32
 
     
     QString output = body.asJson();
-    input.request_body.append(output.toUtf8());
+    input.request_body.append(output);
     
 
 
@@ -1501,7 +1501,7 @@ SWGDeviceSetApi::devicesetSpectrumSettingsPatch(qint32 device_set_index, SWGGLSp
 
     
     QString output = body.asJson();
-    input.request_body.append(output.toUtf8());
+    input.request_body.append(output);
     
 
 
@@ -1558,7 +1558,7 @@ SWGDeviceSetApi::devicesetSpectrumSettingsPut(qint32 device_set_index, SWGGLSpec
 
     
     QString output = body.asJson();
-    input.request_body.append(output.toUtf8());
+    input.request_body.append(output);
     
 
 

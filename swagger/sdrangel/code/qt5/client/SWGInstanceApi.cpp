@@ -145,7 +145,7 @@ SWGInstanceApi::instanceAMBEDevicesPatch(SWGAMBEDevices& body) {
 
     
     QString output = body.asJson();
-    input.request_body.append(output.toUtf8());
+    input.request_body.append(output);
     
 
 
@@ -200,7 +200,7 @@ SWGInstanceApi::instanceAMBEDevicesPut(SWGAMBEDevices& body) {
 
     
     QString output = body.asJson();
-    input.request_body.append(output.toUtf8());
+    input.request_body.append(output);
     
 
 
@@ -411,7 +411,7 @@ SWGInstanceApi::instanceAudioInputDelete(SWGAudioInputDevice& body) {
 
     
     QString output = body.asJson();
-    input.request_body.append(output.toUtf8());
+    input.request_body.append(output);
     
 
 
@@ -466,7 +466,7 @@ SWGInstanceApi::instanceAudioInputPatch(SWGAudioInputDevice& body) {
 
     
     QString output = body.asJson();
-    input.request_body.append(output.toUtf8());
+    input.request_body.append(output);
     
 
 
@@ -573,7 +573,7 @@ SWGInstanceApi::instanceAudioOutputDelete(SWGAudioOutputDevice& body) {
 
     
     QString output = body.asJson();
-    input.request_body.append(output.toUtf8());
+    input.request_body.append(output);
     
 
 
@@ -628,7 +628,7 @@ SWGInstanceApi::instanceAudioOutputPatch(SWGAudioOutputDevice& body) {
 
     
     QString output = body.asJson();
-    input.request_body.append(output.toUtf8());
+    input.request_body.append(output);
     
 
 
@@ -795,7 +795,7 @@ SWGInstanceApi::instanceConfigPatch(SWGInstanceConfigResponse& body) {
 
     
     QString output = body.asJson();
-    input.request_body.append(output.toUtf8());
+    input.request_body.append(output);
     
 
 
@@ -850,7 +850,7 @@ SWGInstanceApi::instanceConfigPut(SWGInstanceConfigResponse& body) {
 
     
     QString output = body.asJson();
-    input.request_body.append(output.toUtf8());
+    input.request_body.append(output);
     
 
 
@@ -1069,7 +1069,7 @@ SWGInstanceApi::instanceFeaturePresetDelete(SWGFeaturePresetIdentifier& body) {
 
     
     QString output = body.asJson();
-    input.request_body.append(output.toUtf8());
+    input.request_body.append(output);
     
 
 
@@ -1340,7 +1340,7 @@ SWGInstanceApi::instanceLimeRFEConfigPut(SWGLimeRFESettings& body) {
 
     
     QString output = body.asJson();
-    input.request_body.append(output.toUtf8());
+    input.request_body.append(output);
     
 
 
@@ -1455,7 +1455,7 @@ SWGInstanceApi::instanceLimeRFERunPut(SWGLimeRFESettings& body) {
 
     
     QString output = body.asJson();
-    input.request_body.append(output.toUtf8());
+    input.request_body.append(output);
     
 
 
@@ -1614,7 +1614,7 @@ SWGInstanceApi::instanceLocationPut(SWGLocationInformation& body) {
 
     
     QString output = body.asJson();
-    input.request_body.append(output.toUtf8());
+    input.request_body.append(output);
     
 
 
@@ -1721,7 +1721,7 @@ SWGInstanceApi::instanceLoggingPut(SWGLoggingInfo& body) {
 
     
     QString output = body.asJson();
-    input.request_body.append(output.toUtf8());
+    input.request_body.append(output);
     
 
 
@@ -1776,7 +1776,7 @@ SWGInstanceApi::instancePresetDelete(SWGPresetIdentifier& body) {
 
     
     QString output = body.asJson();
-    input.request_body.append(output.toUtf8());
+    input.request_body.append(output);
     
 
 
@@ -1831,7 +1831,7 @@ SWGInstanceApi::instancePresetFilePost(SWGPresetExport& body) {
 
     
     QString output = body.asJson();
-    input.request_body.append(output.toUtf8());
+    input.request_body.append(output);
     
 
 
@@ -1886,7 +1886,7 @@ SWGInstanceApi::instancePresetFilePut(SWGPresetImport& body) {
 
     
     QString output = body.asJson();
-    input.request_body.append(output.toUtf8());
+    input.request_body.append(output);
     
 
 
@@ -1993,7 +1993,7 @@ SWGInstanceApi::instancePresetPatch(SWGPresetTransfer& body) {
 
     
     QString output = body.asJson();
-    input.request_body.append(output.toUtf8());
+    input.request_body.append(output);
     
 
 
@@ -2048,7 +2048,7 @@ SWGInstanceApi::instancePresetPost(SWGPresetTransfer& body) {
 
     
     QString output = body.asJson();
-    input.request_body.append(output.toUtf8());
+    input.request_body.append(output);
     
 
 
@@ -2103,7 +2103,7 @@ SWGInstanceApi::instancePresetPut(SWGPresetTransfer& body) {
 
     
     QString output = body.asJson();
-    input.request_body.append(output.toUtf8());
+    input.request_body.append(output);
     
 
 

@@ -16,7 +16,6 @@
 #include <QFileInfo>
 #include <QBuffer>
 #include <QtGlobal>
-#include <QRandomGenerator>
 
 
 namespace SWGSDRangel {
@@ -54,7 +53,7 @@ void SWGHttpRequestInput::add_file(QString variable_name, QString local_filename
 SWGHttpRequestWorker::SWGHttpRequestWorker(QObject *parent)
     : QObject(parent), manager(nullptr)
 {
-    QRandomGenerator::global()->seed(QDateTime::currentDateTime().toTime_t());
+    qsrand(QDateTime::currentDateTime().toTime_t());
 
     manager = new QNetworkAccessManager(this);
     connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(on_manager_finished(QNetworkReply*)));
@@ -144,12 +143,12 @@ void SWGHttpRequestWorker::execute(SWGHttpRequestInput *input) {
             isFormData = true;
             foreach (QString key, input->vars.keys()) {
                 if (!first) {
-                    request_content.append('&');
+                    request_content.append("&");
                 }
                 first = false;
 
                 request_content.append(QUrl::toPercentEncoding(key));
-                request_content.append('=');
+                request_content.append("=");
                 request_content.append(QUrl::toPercentEncoding(input->vars.value(key)));
             }
 
@@ -164,30 +163,30 @@ void SWGHttpRequestWorker::execute(SWGHttpRequestInput *input) {
 
         boundary = "__-----------------------"
             + QString::number(QDateTime::currentDateTime().toTime_t())
-            + QString::number(QRandomGenerator::global()->generate());
+            + QString::number(qrand());
         QString boundary_delimiter = "--";
         QString new_line = "\r\n";
 
         // add variables
         foreach (QString key, input->vars.keys()) {
             // add boundary
-            request_content.append(boundary_delimiter.toUtf8());
-            request_content.append(boundary.toUtf8());
-            request_content.append(new_line.toUtf8());
+            request_content.append(boundary_delimiter);
+            request_content.append(boundary);
+            request_content.append(new_line);
 
             // add header
-            request_content.append(QString("Content-Disposition: form-data; ").toUtf8());
-            request_content.append(http_attribute_encode("name", key).toUtf8());
-            request_content.append(new_line.toUtf8());
-            request_content.append(QString("Content-Type: text/plain").toUtf8());
-            request_content.append(new_line.toUtf8());
+            request_content.append("Content-Disposition: form-data; ");
+            request_content.append(http_attribute_encode("name", key));
+            request_content.append(new_line);
+            request_content.append("Content-Type: text/plain");
+            request_content.append(new_line);
 
             // add header to body splitter
-            request_content.append(new_line.toUtf8());
+            request_content.append(new_line);
 
             // add variable content
-            request_content.append((input->vars.value(key)).toUtf8());
-            request_content.append(new_line.toUtf8());
+            request_content.append(input->vars.value(key));
+            request_content.append(new_line);
         }
 
         // add files
@@ -219,41 +218,40 @@ void SWGHttpRequestWorker::execute(SWGHttpRequestInput *input) {
             }
 
             // add boundary
-            request_content.append(boundary_delimiter.toUtf8());
-            request_content.append(boundary.toUtf8());
-            request_content.append(new_line.toUtf8());
+            request_content.append(boundary_delimiter);
+            request_content.append(boundary);
+            request_content.append(new_line);
 
             // add header
-            QString s = QString("Content-Disposition: form-data; %1; %2").arg(
+            request_content.append(QString("Content-Disposition: form-data; %1; %2").arg(
                 http_attribute_encode("name", file_info->variable_name),
                 http_attribute_encode("filename", file_info->request_filename)
-            );
-            request_content.append(s.toUtf8());
-            request_content.append(new_line.toUtf8());
+            ));
+            request_content.append(new_line);
 
             if (file_info->mime_type != nullptr && !file_info->mime_type.isEmpty()) {
-                request_content.append(QString("Content-Type: ").toUtf8());
-                request_content.append((file_info->mime_type).toUtf8());
-                request_content.append(new_line.toUtf8());
+                request_content.append("Content-Type: ");
+                request_content.append(file_info->mime_type);
+                request_content.append(new_line);
             }
 
-            request_content.append(QString("Content-Transfer-Encoding: binary").toUtf8());
-            request_content.append(new_line.toUtf8());
+            request_content.append("Content-Transfer-Encoding: binary");
+            request_content.append(new_line);
 
             // add header to body splitter
-            request_content.append(new_line.toUtf8());
+            request_content.append(new_line);
 
             // add file content
             request_content.append(file.readAll());
-            request_content.append(new_line.toUtf8());
+            request_content.append(new_line);
 
             file.close();
         }
 
         // add end of body
-        request_content.append(boundary_delimiter.toUtf8());
-        request_content.append(boundary.toUtf8());
-        request_content.append(boundary_delimiter.toUtf8());
+        request_content.append(boundary_delimiter);
+        request_content.append(boundary);
+        request_content.append(boundary_delimiter);
     }
 
     if(input->request_body.size() > 0) {

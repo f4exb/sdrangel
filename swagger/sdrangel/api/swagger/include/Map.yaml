@@ -28,6 +28,9 @@ MapActions:
     find:
       description: "The name of the item or the location to centre the map on"
       type: string
+    setDateTime:
+      description: "Date and time to set for the map (ISO 8601 extended format)"
+      type: string
 
 MapItem:
   description: "An item to draw on the map. Set image to an empty string to remove item from the map."
@@ -38,31 +41,33 @@ MapItem:
       description: "A name for the item"
       type: string
     image:
-      description: "Filename or URL of image to draw on the map"
+      description: "Filename or URL of image to draw on the 2D map"
       type: string
     imageRotation:
       description: "Angle to rotate the image by"
       type: integer
       default: 0
-    imageMinZoom:
-      description: "Minimim zoom value"
-      type: integer
-      default: 11
     text:
       descrption: "Text to draw on the map when item is selected"
       type: string
     latitude:
-      description: "Latitude in decimal degrees, positive to the north"
+      description: "Latitude in decimal degrees, positive to the North"
       type: number
       format: float
     longitude:
-      description: "Longitude in decimal degrees, positive to the east"
+      description: "Longitude in decimal degrees, positive to the East"
       type: number
       format: float
     altitude:
       description: "Altitude / height above sea level in metres"
       type: number
       format: float
+    fixedPosition:
+      description: "Indicates whether position of item is constant with time (0 - variable, 1 - fixed)"
+      type: integer
+    positionDateTime:
+      description: "Date and time at this position (ISO 8601 extended format)"
+      type: string
     track:
       description: "Track/path the item has taken"
       type: array
@@ -73,17 +78,111 @@ MapItem:
       type: array
       items:
         $ref: "http://swgserver:8081/api/swagger/include/Map.yaml#/MapCoordinate"
+    model:
+      description: "3D .glb/*.gltf model for displaying on 3D map"
+      type: string
+    orientation:
+      description: "How to orientate the model (0 - Along direction of motion, 1 - Use heading, pitch and roll)"
+      type: integer
+    heading:
+      description: "Heading angle, in decimal degrees clockwise from North"
+      type: number
+      format: float
+    pitch:
+      description: "Pitch angle, in decimal degrees"
+      type: number
+      format: float
+    roll:
+      description: "Roll angle, in decimal degrees"
+      type: number
+      format: float
+    orientationDateTime:
+      description: "Date and time at this orientation (ISO 8601 extended format)"
+      type: string
+    label:
+      description: "Label for the model"
+      type: string
+    labelAltitudeOffset:
+      description: "Veritical offset to position label at"
+      type: number
+      format: float
+    modelAltitudeOffset:
+      description: "Vertical offset to adjust model by to prevent it from going underground when altitude is 0"
+      type: number
+      format: float
+    altitudeReference:
+      description: "0 - NONE (Absolule), 1 - CLAMP_TO_GROUND, 2 - RELATIVE_TO_GROUND, 3 - CLIP_TO_GROUND"
+      type: integer
+    animations:
+      description: "Animations to play"
+      type: array
+      items:
+        $ref: "http://swgserver:8081/api/swagger/include/Map.yaml#/MapAnimation"
+    type:
+      description: "(0 - Map Item, 1 - Image Tile)"
+      type: integer
+    imageTileWest:
+      type: number
+      format: float
+    imageTileSouth:
+      type: number
+      format: float
+    imageTileEast:
+      type: number
+      format: float
+    imageTileNorth:
+      type: number
+      format: float
+
+MapAnimation:
+  description: "Animation to play in the model on the 3D map"
+  properties:
+    name:
+      description: "Name of animation to play (As in .glb/.glTF file)"
+      type: string
+    reverse:
+      description: "(0 - Forward, 1 - Reverse)"
+      type: integer
+    loop:
+      description: "(0 - Play once, 1 - Play in loop)"
+      type: integer
+    startDateTime:
+      description: "Date and time to start playing this animation (ISO 8601 extended format)"
+      type: string
+    startOffset:
+      description: "Fractional [0..1] offset in to animations timeline to start animation at"
+      type: number
+      format: float
+      default: 0.0
+    multiplier:
+      description: "Speed multiplier for animation. >1 plays faster"
+      type: number
+      format: float
+      default: 1.0
+    duration:
+      description: "Time in seconds to play animation for. 0 to play whole animation"
+      type: number
+      format: float
+      default: 0.0
+    stop:
+      description: "Stop a looped animation from playing"
+      type: integer
 
 MapCoordinate:
   description: "A map coordinate"
   properties:
     latitude:
+      description: "Latitude in decimal degrees, positive to the North"
       type: number
       format: float
     longitude:
+      description: "Longitude in decimal degrees, positive to the East"
       type: number
       format: float
     altitude:
+      description: "Altitude / height above sea level in metres"
       type: number
       format: float
-
+    dateTime:
+      description: "Date and time at this coordinate (ISO 8601 extended format)"
+      type: string

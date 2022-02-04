@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
@@ -50,6 +51,9 @@ public:
     float getAltitude();
     void setAltitude(float altitude);
 
+    QString* getDateTime();
+    void setDateTime(QString* date_time);
+
 
     virtual bool isSet() override;
 
@@ -62,6 +66,9 @@ private:
 
     float altitude;
     bool m_altitude_isSet;
+
+    QString* date_time;
+    bool m_date_time_isSet;
 
 };
 

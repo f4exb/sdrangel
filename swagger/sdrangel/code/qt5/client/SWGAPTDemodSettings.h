@@ -86,6 +86,42 @@ public:
     qint32 getAutoSaveMinScanLines();
     void setAutoSaveMinScanLines(qint32 auto_save_min_scan_lines);
 
+    qint32 getSaveCombined();
+    void setSaveCombined(qint32 save_combined);
+
+    qint32 getSaveSeparate();
+    void setSaveSeparate(qint32 save_separate);
+
+    qint32 getSaveProjection();
+    void setSaveProjection(qint32 save_projection);
+
+    qint32 getScanlinesPerImageUpdate();
+    void setScanlinesPerImageUpdate(qint32 scanlines_per_image_update);
+
+    qint32 getTransparencyThreshold();
+    void setTransparencyThreshold(qint32 transparency_threshold);
+
+    qint32 getOpacityThreshold();
+    void setOpacityThreshold(qint32 opacity_threshold);
+
+    QString* getPalettes();
+    void setPalettes(QString* palettes);
+
+    qint32 getPalette();
+    void setPalette(qint32 palette);
+
+    qint32 getHorizontalPixelsPerDegree();
+    void setHorizontalPixelsPerDegree(qint32 horizontal_pixels_per_degree);
+
+    qint32 getVerticalPixelsPerDegree();
+    void setVerticalPixelsPerDegree(qint32 vertical_pixels_per_degree);
+
+    float getSatTimeOffset();
+    void setSatTimeOffset(float sat_time_offset);
+
+    float getSatYaw();
+    void setSatYaw(float sat_yaw);
+
     qint32 getRgbColor();
     void setRgbColor(qint32 rgb_color);
 
@@ -161,6 +197,42 @@ private:
 
     qint32 auto_save_min_scan_lines;
     bool m_auto_save_min_scan_lines_isSet;
+
+    qint32 save_combined;
+    bool m_save_combined_isSet;
+
+    qint32 save_separate;
+    bool m_save_separate_isSet;
+
+    qint32 save_projection;
+    bool m_save_projection_isSet;
+
+    qint32 scanlines_per_image_update;
+    bool m_scanlines_per_image_update_isSet;
+
+    qint32 transparency_threshold;
+    bool m_transparency_threshold_isSet;
+
+    qint32 opacity_threshold;
+    bool m_opacity_threshold_isSet;
+
+    QString* palettes;
+    bool m_palettes_isSet;
+
+    qint32 palette;
+    bool m_palette_isSet;
+
+    qint32 horizontal_pixels_per_degree;
+    bool m_horizontal_pixels_per_degree_isSet;
+
+    qint32 vertical_pixels_per_degree;
+    bool m_vertical_pixels_per_degree_isSet;
+
+    float sat_time_offset;
+    bool m_sat_time_offset_isSet;
+
+    float sat_yaw;
+    bool m_sat_yaw_isSet;
 
     qint32 rgb_color;
     bool m_rgb_color_isSet;

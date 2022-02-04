@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include "SWGMapAnimation.h"
 #include "SWGMapCoordinate.h"
 #include <QList>
 #include <QString>
@@ -53,9 +54,6 @@ public:
     qint32 getImageRotation();
     void setImageRotation(qint32 image_rotation);
 
-    qint32 getImageMinZoom();
-    void setImageMinZoom(qint32 image_min_zoom);
-
     QString* getText();
     void setText(QString* text);
 
@@ -68,11 +66,65 @@ public:
     float getAltitude();
     void setAltitude(float altitude);
 
+    qint32 getFixedPosition();
+    void setFixedPosition(qint32 fixed_position);
+
+    QString* getPositionDateTime();
+    void setPositionDateTime(QString* position_date_time);
+
     QList<SWGMapCoordinate*>* getTrack();
     void setTrack(QList<SWGMapCoordinate*>* track);
 
     QList<SWGMapCoordinate*>* getPredictedTrack();
     void setPredictedTrack(QList<SWGMapCoordinate*>* predicted_track);
+
+    QString* getModel();
+    void setModel(QString* model);
+
+    qint32 getOrientation();
+    void setOrientation(qint32 orientation);
+
+    float getHeading();
+    void setHeading(float heading);
+
+    float getPitch();
+    void setPitch(float pitch);
+
+    float getRoll();
+    void setRoll(float roll);
+
+    QString* getOrientationDateTime();
+    void setOrientationDateTime(QString* orientation_date_time);
+
+    QString* getLabel();
+    void setLabel(QString* label);
+
+    float getLabelAltitudeOffset();
+    void setLabelAltitudeOffset(float label_altitude_offset);
+
+    float getModelAltitudeOffset();
+    void setModelAltitudeOffset(float model_altitude_offset);
+
+    qint32 getAltitudeReference();
+    void setAltitudeReference(qint32 altitude_reference);
+
+    QList<SWGMapAnimation*>* getAnimations();
+    void setAnimations(QList<SWGMapAnimation*>* animations);
+
+    qint32 getType();
+    void setType(qint32 type);
+
+    float getImageTileWest();
+    void setImageTileWest(float image_tile_west);
+
+    float getImageTileSouth();
+    void setImageTileSouth(float image_tile_south);
+
+    float getImageTileEast();
+    void setImageTileEast(float image_tile_east);
+
+    float getImageTileNorth();
+    void setImageTileNorth(float image_tile_north);
 
 
     virtual bool isSet() override;
@@ -87,9 +139,6 @@ private:
     qint32 image_rotation;
     bool m_image_rotation_isSet;
 
-    qint32 image_min_zoom;
-    bool m_image_min_zoom_isSet;
-
     QString* text;
     bool m_text_isSet;
 
@@ -102,11 +151,65 @@ private:
     float altitude;
     bool m_altitude_isSet;
 
+    qint32 fixed_position;
+    bool m_fixed_position_isSet;
+
+    QString* position_date_time;
+    bool m_position_date_time_isSet;
+
     QList<SWGMapCoordinate*>* track;
     bool m_track_isSet;
 
     QList<SWGMapCoordinate*>* predicted_track;
     bool m_predicted_track_isSet;
+
+    QString* model;
+    bool m_model_isSet;
+
+    qint32 orientation;
+    bool m_orientation_isSet;
+
+    float heading;
+    bool m_heading_isSet;
+
+    float pitch;
+    bool m_pitch_isSet;
+
+    float roll;
+    bool m_roll_isSet;
+
+    QString* orientation_date_time;
+    bool m_orientation_date_time_isSet;
+
+    QString* label;
+    bool m_label_isSet;
+
+    float label_altitude_offset;
+    bool m_label_altitude_offset_isSet;
+
+    float model_altitude_offset;
+    bool m_model_altitude_offset_isSet;
+
+    qint32 altitude_reference;
+    bool m_altitude_reference_isSet;
+
+    QList<SWGMapAnimation*>* animations;
+    bool m_animations_isSet;
+
+    qint32 type;
+    bool m_type_isSet;
+
+    float image_tile_west;
+    bool m_image_tile_west_isSet;
+
+    float image_tile_south;
+    bool m_image_tile_south_isSet;
+
+    float image_tile_east;
+    bool m_image_tile_east_isSet;
+
+    float image_tile_north;
+    bool m_image_tile_north_isSet;
 
 };
 

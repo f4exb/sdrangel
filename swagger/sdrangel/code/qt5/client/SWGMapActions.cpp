@@ -30,6 +30,8 @@ SWGMapActions::SWGMapActions(QString* json) {
 SWGMapActions::SWGMapActions() {
     find = nullptr;
     m_find_isSet = false;
+    set_date_time = nullptr;
+    m_set_date_time_isSet = false;
 }
 
 SWGMapActions::~SWGMapActions() {
@@ -40,12 +42,17 @@ void
 SWGMapActions::init() {
     find = new QString("");
     m_find_isSet = false;
+    set_date_time = new QString("");
+    m_set_date_time_isSet = false;
 }
 
 void
 SWGMapActions::cleanup() {
     if(find != nullptr) { 
         delete find;
+    }
+    if(set_date_time != nullptr) { 
+        delete set_date_time;
     }
 }
 
@@ -61,6 +68,8 @@ SWGMapActions::fromJson(QString &json) {
 void
 SWGMapActions::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&find, pJson["find"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&set_date_time, pJson["setDateTime"], "QString", "QString");
     
 }
 
@@ -81,6 +90,9 @@ SWGMapActions::asJsonObject() {
     if(find != nullptr && *find != QString("")){
         toJsonValue(QString("find"), find, obj, QString("QString"));
     }
+    if(set_date_time != nullptr && *set_date_time != QString("")){
+        toJsonValue(QString("setDateTime"), set_date_time, obj, QString("QString"));
+    }
 
     return obj;
 }
@@ -95,12 +107,25 @@ SWGMapActions::setFind(QString* find) {
     this->m_find_isSet = true;
 }
 
+QString*
+SWGMapActions::getSetDateTime() {
+    return set_date_time;
+}
+void
+SWGMapActions::setSetDateTime(QString* set_date_time) {
+    this->set_date_time = set_date_time;
+    this->m_set_date_time_isSet = true;
+}
+
 
 bool
 SWGMapActions::isSet(){
     bool isObjectUpdated = false;
     do{
         if(find && *find != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(set_date_time && *set_date_time != QString("")){
             isObjectUpdated = true; break;
         }
     }while(false);
