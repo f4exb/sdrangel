@@ -31,7 +31,7 @@ public:
 	ValueDialZ(bool positiveOnly = true, QWidget* parent = NULL, ColorMapper colorMapper = ColorMapper(ColorMapper::Normal));
 
 	void setValue(qint64 value);
-	void setValueRange(bool positiveOnly, uint numDigits, qint64 min, qint64 max);
+	void setValueRange(bool positiveOnly, uint numDigits, qint64 min, qint64 max, int decimalPos = 0);
 	void setFont(const QFont& font);
 	void setBold(bool bold);
 	void setColorMapper(ColorMapper colorMapper);
@@ -44,7 +44,7 @@ signals:
 private:
 	QLinearGradient m_background;
 	int m_numDigits;
-	int m_numDecimalPoints;
+	int m_numThousandPoints;
 	int m_digitWidth;
 	int m_digitHeight;
 	int m_hightlightedDigit;
@@ -54,6 +54,7 @@ private:
 	qint64 m_valueMax;
 	qint64 m_valueMin;
 	bool m_positiveOnly;
+	int m_decimalPos; //!< for fixed point
 	QString m_text;
 
 	qint64 m_valueNew;
@@ -62,6 +63,7 @@ private:
 	QTimer m_animationTimer;
 	QTimer m_blinkTimer;
 	QChar m_groupSeparator;
+	QChar m_decSeparator;
 
 	ColorMapper m_colorMapper;
 
