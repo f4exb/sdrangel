@@ -24,17 +24,24 @@
 HttpDownloadManagerGUI::HttpDownloadManagerGUI()
 {
     connect(this, &HttpDownloadManager::downloadComplete, this, &HttpDownloadManagerGUI::downloadCompleteGUI);
+    connect(this, &HttpDownloadManager::retryDownload, this, &HttpDownloadManagerGUI::retryDownload);
 }
 
 QNetworkReply *HttpDownloadManagerGUI::download(const QUrl &url, const QString &filename, QWidget *parent)
 {
+    m_filenames.append(filename);
     QNetworkReply *reply = HttpDownloadManager::download(url, filename);
     if (parent != nullptr)
     {
         QProgressDialog *progressDialog = new QProgressDialog(parent);
         progressDialog->setCancelButton(nullptr);
         progressDialog->setMinimumDuration(500);
-        progressDialog->setLabelText(QString("Downloading %1.").arg(url.toString()));
+        progressDialog->setLabelText(QString("Downloading: %1\nTo: %2.").arg(url.toString(), filename));
+        Qt::WindowFlags flags = progressDialog->windowFlags();
+        flags |= Qt::CustomizeWindowHint;
+        flags &= ~Qt::WindowCloseButtonHint;
+        flags &= ~Qt::WindowContextHelpButtonHint;
+        progressDialog->setWindowFlags(flags);
         m_progressDialogs.append(progressDialog);
         connect(reply, &QNetworkReply::downloadProgress, this, [progressDialog](qint64 bytesRead, qint64 totalBytes) {
             if (progressDialog)
@@ -45,7 +52,9 @@ QNetworkReply *HttpDownloadManagerGUI::download(const QUrl &url, const QString &
         });
     }
     else
+    {
         m_progressDialogs.append(nullptr);
+    }
     return reply;
 }
 
@@ -54,16 +63,19 @@ bool HttpDownloadManagerGUI::confirmDownload(const QString& filename, QWidget *p
 {
     qint64 age = HttpDownloadManager::fileAgeInDays(filename);
     if ((age == -1) || (age > maxAge))
+    {
         return true;
+    }
     else
     {
         QMessageBox::StandardButton reply;
-        if (age == 0)
+        if (age == 0) {
             reply = QMessageBox::question(parent, "Confirm download", "This file was last downloaded today. Are you sure you wish to redownload it?", QMessageBox::Yes|QMessageBox::No);
-        else if (age == 1)
+        } else if (age == 1) {
             reply = QMessageBox::question(parent, "Confirm download", "This file was last downloaded yesterday. Are you sure you wish to redownload it?", QMessageBox::Yes|QMessageBox::No);
-        else
+        } else {
             reply = QMessageBox::question(parent, "Confirm download", QString("This file was last downloaded %1 days ago. Are you sure you wish to redownload this file?").arg(age), QMessageBox::Yes|QMessageBox::No);
+        }
         return reply == QMessageBox::Yes;
     }
 }
@@ -71,8 +83,8 @@ bool HttpDownloadManagerGUI::confirmDownload(const QString& filename, QWidget *p
 void HttpDownloadManagerGUI::downloadCompleteGUI(const QString& filename, bool success)
 {
     (void) success;
-    int idx = m_filenames.indexOf(filename);
 
+    int idx = m_filenames.indexOf(filename);
     if (idx >= 0)
     {
         QProgressDialog *progressDialog = m_progressDialogs[idx];
@@ -83,5 +95,24 @@ void HttpDownloadManagerGUI::downloadCompleteGUI(const QString& filename, bool s
         }
         m_filenames.remove(idx);
         m_progressDialogs.remove(idx);
+    }
+}
+
+void HttpDownloadManagerGUI::retryDownload(const QString &filename, QNetworkReply *oldReply, QNetworkReply *newReply)
+{
+    int idx = m_filenames.indexOf(filename);
+    if (idx >= 0)
+    {
+        QProgressDialog *progressDialog = m_progressDialogs[idx];
+        if (progressDialog != nullptr)
+        {
+            connect(newReply, &QNetworkReply::downloadProgress, this, [progressDialog](qint64 bytesRead, qint64 totalBytes) {
+                if (progressDialog)
+                {
+                    progressDialog->setMaximum(totalBytes);
+                    progressDialog->setValue(bytesRead);
+                }
+            });
+        }
     }
 }

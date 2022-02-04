@@ -40,6 +40,8 @@ private:
 
 public slots:
     void downloadCompleteGUI(const QString &filename, bool success);
+    void retryDownload(const QString &filename, QNetworkReply *oldReply, QNetworkReply *newReply);
+
 };
 
 #endif /* INCLUDE_HTTPDOWNLOADMANAGERGUI_H */
