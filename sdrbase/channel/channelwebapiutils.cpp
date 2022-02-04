@@ -23,6 +23,7 @@
 #include "SWGSuccessResponse.h"
 #include "SWGErrorResponse.h"
 #include "SWGDeviceSettings.h"
+#include "SWGDeviceReport.h"
 #include "SWGChannelSettings.h"
 #include "SWGDeviceSet.h"
 #include "SWGChannelActions.h"
@@ -403,7 +404,8 @@ bool ChannelWebAPIUtils::startStopFileSinks(unsigned int deviceIndex, bool start
 }
 
 // Send AOS actions to all channels that support it
-bool ChannelWebAPIUtils::satelliteAOS(const QString name, bool northToSouthPass)
+// See also: FeatureWebAPIUtils::satelliteAOS
+bool ChannelWebAPIUtils::satelliteAOS(const QString name, bool northToSouthPass, const QString &tle, QDateTime dateTime)
 {
     MainCore *mainCore = MainCore::instance();
     std::vector<DeviceSet*> deviceSets = mainCore->getDeviceSets();
@@ -424,6 +426,8 @@ bool ChannelWebAPIUtils::satelliteAOS(const QString name, bool northToSouthPass)
 
                 aosAction->setSatelliteName(new QString(name));
                 aosAction->setNorthToSouthPass(northToSouthPass);
+                aosAction->setTle(new QString(tle));
+                aosAction->setDateTime(new QString(dateTime.toString(Qt::ISODateWithMs)));
                 aptDemodAction->setAos(aosAction);
 
                 channelActions.setAptDemodActions(aptDemodAction);
@@ -491,6 +495,72 @@ bool ChannelWebAPIUtils::getDeviceSetting(unsigned int deviceIndex, const QStrin
     }
     else
     {
+        return false;
+    }
+}
+
+bool ChannelWebAPIUtils::getDeviceReportValue(unsigned int deviceIndex, const QString &key, QString &value)
+{
+    SWGSDRangel::SWGDeviceReport deviceReport;
+    QString errorResponse;
+    int httpRC;
+    DeviceSet *deviceSet;
+
+    // Get device report
+    std::vector<DeviceSet*> deviceSets = MainCore::instance()->getDeviceSets();
+    if (deviceIndex < deviceSets.size())
+    {
+        deviceSet = deviceSets[deviceIndex];
+        if (deviceSet->m_deviceSourceEngine)
+        {
+            deviceReport.setDeviceHwType(new QString(deviceSet->m_deviceAPI->getHardwareId()));
+            deviceReport.setDirection(0);
+            DeviceSampleSource *source = deviceSet->m_deviceAPI->getSampleSource();
+            httpRC = source->webapiReportGet(deviceReport, errorResponse);
+        }
+        else if (deviceSet->m_deviceSinkEngine)
+        {
+            deviceReport.setDeviceHwType(new QString(deviceSet->m_deviceAPI->getHardwareId()));
+            deviceReport.setDirection(1);
+            DeviceSampleSink *sink = deviceSet->m_deviceAPI->getSampleSink();
+            httpRC = sink->webapiReportGet(deviceReport, errorResponse);
+        }
+        else if (deviceSet->m_deviceMIMOEngine)
+        {
+            deviceReport.setDeviceHwType(new QString(deviceSet->m_deviceAPI->getHardwareId()));
+            deviceReport.setDirection(2);
+            DeviceSampleMIMO *mimo = deviceSet->m_deviceAPI->getSampleMIMO();
+            httpRC = mimo->webapiReportGet(deviceReport, errorResponse);
+        }
+        else
+        {
+            qDebug() << "ChannelWebAPIUtils::getDeviceReportValue: unknown device type " << deviceIndex;
+            return false;
+        }
+    }
+    else
+    {
+        qDebug() << "ChannelWebAPIUtils::getDeviceReportValue: no device " << deviceIndex;
+        return false;
+    }
+
+    if (httpRC/100 != 2)
+    {
+        qWarning("ChannelWebAPIUtils::getDeviceReportValue: get device report error %d: %s",
+            httpRC, qPrintable(errorResponse));
+        return false;
+    }
+
+    // Get value of requested key
+    QJsonObject *jsonObj = deviceReport.asJsonObject();
+    if (WebAPIUtils::getSubObjectString(*jsonObj, key, value))
+    {
+        // Done
+        return true;
+    }
+    else
+    {
+        qWarning("ChannelWebAPIUtils::getDeviceReportValue: no key %s in device report", qPrintable(key));
         return false;
     }
 }
