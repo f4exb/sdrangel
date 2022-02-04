@@ -911,9 +911,6 @@ void ADSBDemodGUI::handleADSB(
     bool newAircraft = false;
     bool updatedCallsign = false;
 
-    bool prevAltitudeValid = false;
-    int prevAltitude;
-
     int df = (data[0] >> 3) & ADS_B_DF_MASK; // Downlink format
     int ca = data[0] & 0x7; // Capability
     unsigned icao = ((data[1] & 0xff) << 16) | ((data[2] & 0xff) << 8) | (data[3] & 0xff); // ICAO aircraft address
@@ -924,10 +921,6 @@ void ADSBDemodGUI::handleADSB(
     {
         // Update existing aircraft info
         aircraft = m_aircraft.value(icao);
-
-        // Save state that we later check to see if it has changed
-        prevAltitudeValid = aircraft->m_altitudeValid;
-        prevAltitude = aircraft->m_altitude;
     }
     else
     {
