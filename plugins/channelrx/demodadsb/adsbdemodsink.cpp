@@ -134,6 +134,11 @@ void ADSBDemodSink::processOneSample(Real magsq)
     m_magsqCount++;
     m_sampleBuffer[m_writeBuffer][m_writeIdx] = magsq;
     m_writeIdx++;
+    if (!m_bufferDateTimeValid[m_writeBuffer])
+    {
+        m_bufferFirstSampleDateTime[m_writeBuffer] = QDateTime::currentDateTime();
+        m_bufferDateTimeValid[m_writeBuffer] = true;
+    }
     if (m_writeIdx >= m_bufferSize)
     {
         m_bufferRead[m_writeBuffer].release();
@@ -152,6 +157,8 @@ void ADSBDemodSink::processOneSample(Real magsq)
         m_startPoint = boost::chrono::steady_clock::now();
 
         m_writeIdx = m_samplesPerFrame - 1; // Leave space for copying samples from previous buffer
+
+        m_bufferDateTimeValid[m_writeBuffer] = false;
     }
 }
 
@@ -213,6 +220,7 @@ void ADSBDemodSink::init(int samplesPerBit)
     m_samplesPerFrame = samplesPerBit*(ADS_B_PREAMBLE_BITS+ADS_B_ES_BITS);
     m_samplesPerChip = samplesPerBit/ADS_B_CHIPS_PER_BIT;
     m_writeIdx = m_samplesPerFrame - 1; // Leave space for copying samples from previous buffer
+    m_bufferDateTimeValid[m_writeBuffer] = false;
 
     for (int i = 0; i < m_buffers; i++)
         m_sampleBuffer[i] = new Real[m_bufferSize];

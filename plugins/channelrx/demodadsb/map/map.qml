@@ -1,5 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Window 2.12
+import QtQuick.Controls 2.12
 import QtLocation 5.12
 import QtPositioning 5.12
 import QtGraphicalEffects 1.12
@@ -246,8 +247,13 @@ Item {
                         visible: !lightIcons
                         MouseArea {
                             anchors.fill: parent
+                            acceptedButtons: Qt.LeftButton | Qt.RightButton
                             onClicked: {
-                                highlighted = true
+                                if (mouse.button === Qt.LeftButton) {
+                                    highlighted = true
+                                } else if (mouse.button === Qt.RightButton) {
+                                    contextMenu.popup()
+                                }
                             }
                             onDoubleClicked: {
                                 target = true
@@ -283,11 +289,28 @@ Item {
                             id: text
                             anchors.centerIn: parent
                             text: adsbData
+                            textFormat: TextEdit.RichText
                         }
                         MouseArea {
                             anchors.fill: parent
+                            acceptedButtons: Qt.LeftButton | Qt.RightButton
                             onClicked: {
-                                showAll = !showAll
+                                if (mouse.button === Qt.LeftButton) {
+                                    showAll = !showAll
+                                } else if (mouse.button === Qt.RightButton) {
+                                    contextMenu.popup()
+                                }
+                            }
+                            Menu {
+                                id: contextMenu
+                                MenuItem {
+                                    text: "Set as target"
+                                    onTriggered: target = true
+                                }
+                                MenuItem {
+                                    text: "Find on feature map"
+                                    onTriggered: aircraftModel.findOnMap(index)
+                                }
                             }
                         }
                     }

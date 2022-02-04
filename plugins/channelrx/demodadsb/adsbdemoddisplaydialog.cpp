@@ -20,36 +20,35 @@
 
 #include "adsbdemoddisplaydialog.h"
 
-ADSBDemodDisplayDialog::ADSBDemodDisplayDialog(
-        int removeTimeout, float airportRange, ADSBDemodSettings::AirportType airportMinimumSize,
-        bool displayHeliports, bool siUnits, QString fontName, int fontSize, bool displayDemodStats,
-        bool autoResizeTableColumns, const QString& apiKey, QStringList airspaces, float airspaceRange,
-        ADSBDemodSettings::MapType mapType, bool displayNavAids, bool displayPhotos, QWidget* parent) :
+ADSBDemodDisplayDialog::ADSBDemodDisplayDialog(ADSBDemodSettings *settings, QWidget* parent) :
     QDialog(parent),
-    m_fontName(fontName),
-    m_fontSize(fontSize),
-    ui(new Ui::ADSBDemodDisplayDialog)
+    ui(new Ui::ADSBDemodDisplayDialog),
+    m_settings(settings),
+    m_fontName(settings->m_tableFontName),
+    m_fontSize(settings->m_tableFontSize)
 {
     ui->setupUi(this);
-    ui->timeout->setValue(removeTimeout);
-    ui->airportRange->setValue(airportRange);
-    ui->airportSize->setCurrentIndex((int)airportMinimumSize);
-    ui->heliports->setChecked(displayHeliports);
-    ui->units->setCurrentIndex((int)siUnits);
-    ui->displayStats->setChecked(displayDemodStats);
-    ui->autoResizeTableColumns->setChecked(autoResizeTableColumns);
-    ui->apiKey->setText(apiKey);
-    for (const auto& airspace: airspaces)
+    ui->timeout->setValue(settings->m_removeTimeout);
+    ui->airportRange->setValue(settings->m_airportRange);
+    ui->airportSize->setCurrentIndex((int)settings->m_airportMinimumSize);
+    ui->heliports->setChecked(settings->m_displayHeliports);
+    ui->units->setCurrentIndex((int)settings->m_siUnits);
+    ui->displayStats->setChecked(settings->m_displayDemodStats);
+    ui->autoResizeTableColumns->setChecked(settings->m_autoResizeTableColumns);
+    ui->apiKey->setText(settings->m_apiKey);
+    for (const auto& airspace: settings->m_airspaces)
     {
         QList<QListWidgetItem *> items = ui->airspaces->findItems(airspace, Qt::MatchExactly);
         for (const auto& item: items) {
             item->setCheckState(Qt::Checked);
         }
     }
-    ui->airspaceRange->setValue(airspaceRange);
-    ui->mapType->setCurrentIndex((int)mapType);
-    ui->navAids->setChecked(displayNavAids);
-    ui->photos->setChecked(displayPhotos);
+    ui->airspaceRange->setValue(settings->m_airspaceRange);
+    ui->mapType->setCurrentIndex((int)settings->m_mapType);
+    ui->navAids->setChecked(settings->m_displayNavAids);
+    ui->photos->setChecked(settings->m_displayPhotos);
+    ui->verboseModelMatching->setChecked(settings->m_verboseModelMatching);
+    ui->airfieldElevation->setValue(settings->m_airfieldElevation);
 }
 
 ADSBDemodDisplayDialog::~ADSBDemodDisplayDialog()
@@ -59,26 +58,30 @@ ADSBDemodDisplayDialog::~ADSBDemodDisplayDialog()
 
 void ADSBDemodDisplayDialog::accept()
 {
-    m_removeTimeout = ui->timeout->value();
-    m_airportRange = ui->airportRange->value();
-    m_airportMinimumSize = (ADSBDemodSettings::AirportType)ui->airportSize->currentIndex();
-    m_displayHeliports = ui->heliports->isChecked();
-    m_siUnits = ui->units->currentIndex() == 0 ? false : true;
-    m_displayDemodStats = ui->displayStats->isChecked();
-    m_autoResizeTableColumns = ui->autoResizeTableColumns->isChecked();
-    m_apiKey = ui->apiKey->text();
-    m_airspaces = QStringList();
+    m_settings->m_removeTimeout = ui->timeout->value();
+    m_settings->m_airportRange = ui->airportRange->value();
+    m_settings->m_airportMinimumSize = (ADSBDemodSettings::AirportType)ui->airportSize->currentIndex();
+    m_settings->m_displayHeliports = ui->heliports->isChecked();
+    m_settings->m_siUnits = ui->units->currentIndex() == 0 ? false : true;
+    m_settings->m_displayDemodStats = ui->displayStats->isChecked();
+    m_settings->m_autoResizeTableColumns = ui->autoResizeTableColumns->isChecked();
+    m_settings->m_apiKey = ui->apiKey->text();
+    m_settings->m_airspaces = QStringList();
     for (int i = 0; i < ui->airspaces->count(); i++)
     {
         QListWidgetItem *item = ui->airspaces->item(i);
         if (item->checkState() == Qt::Checked) {
-            m_airspaces.append(item->text());
+            m_settings->m_airspaces.append(item->text());
         }
     }
-    m_airspaceRange = ui->airspaceRange->value();
-    m_mapType = (ADSBDemodSettings::MapType)ui->mapType->currentIndex();
-    m_displayNavAids = ui->navAids->isChecked();
-    m_displayPhotos = ui->photos->isChecked();
+    m_settings->m_airspaceRange = ui->airspaceRange->value();
+    m_settings->m_mapType = (ADSBDemodSettings::MapType)ui->mapType->currentIndex();
+    m_settings->m_displayNavAids = ui->navAids->isChecked();
+    m_settings->m_displayPhotos = ui->photos->isChecked();
+    m_settings->m_verboseModelMatching = ui->verboseModelMatching->isChecked();
+    m_settings->m_airfieldElevation = ui->airfieldElevation->value();
+    m_settings->m_tableFontName = m_fontName;
+    m_settings->m_tableFontSize = m_fontSize;
     QDialog::accept();
 }
 
@@ -88,7 +91,6 @@ void ADSBDemodDisplayDialog::on_font_clicked()
     QFont font = QFontDialog::getFont(&ok, QFont(m_fontName, m_fontSize), this);
     if (ok)
     {
-        qDebug() << font;
         m_fontName = font.family();
         m_fontSize = font.pointSize();
     }

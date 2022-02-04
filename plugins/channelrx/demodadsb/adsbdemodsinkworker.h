@@ -76,6 +76,9 @@ private:
     Real m_correlationThresholdLinear;
     Real m_correlationScale;
     crcadsb m_crc;                      //!< Have as member to avoid recomputing LUT
+
+    QDateTime rxDateTime(int firstIdx, int readBuffer) const;
+
 };
 
 #endif // INCLUDE_ADSBDEMODSINKWORKER_H

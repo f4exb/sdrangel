@@ -145,6 +145,8 @@ struct ADSBDemodSettings
     bool m_displayNavAids;
     bool m_displayPhotos;
     Serializable *m_rollupState;
+    bool m_verboseModelMatching;
+    int m_airfieldElevation;            //!< QFE in ft so aircraft takeoff/land from correct position
 
     ADSBDemodSettings();
     void resetToDefaults();

@@ -81,6 +81,8 @@ void ADSBDemodSettings::resetToDefaults()
     m_mapType = AVIATION_LIGHT;
     m_displayNavAids = true;
     m_displayPhotos = true;
+    m_verboseModelMatching = false;
+    m_airfieldElevation = 0;
 }
 
 QByteArray ADSBDemodSettings::serialize() const
@@ -140,6 +142,9 @@ QByteArray ADSBDemodSettings::serialize() const
     if (m_rollupState) {
         s.writeBlob(43, m_rollupState->serialize());
     }
+
+    s.writeBool(44, m_verboseModelMatching);
+    s.writeS32(45, m_airfieldElevation);
 
     for (int i = 0; i < ADSBDEMOD_COLUMNS; i++) {
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -244,6 +249,9 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
             d.readBlob(43, &bytetmp);
             m_rollupState->deserialize(bytetmp);
         }
+
+        d.readBool(44, &m_verboseModelMatching, false);
+        d.readS32(45, &m_airfieldElevation, 0);
 
         for (int i = 0; i < ADSBDEMOD_COLUMNS; i++) {
             d.readS32(100 + i, &m_columnIndexes[i], i);

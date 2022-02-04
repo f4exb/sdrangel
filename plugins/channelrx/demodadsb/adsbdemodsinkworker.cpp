@@ -140,6 +140,8 @@ void ADSBDemodSinkWorker::run()
 
         if ((preambleCorrelation > m_correlationThresholdLinear) && (preambleCorrelationOnes != 0.0f))
         {
+            int firstIdx = startIdx;
+
             m_demodStats.m_correlatorMatches++;
             // Skip over preamble
             startIdx += samplesPerBit*ADS_B_PREAMBLE_BITS;
@@ -202,7 +204,8 @@ void ADSBDemodSinkWorker::run()
                         ADSBDemodReport::MsgReportADSB *msg = ADSBDemodReport::MsgReportADSB::create(
                             QByteArray((char*)data, sizeof(data)),
                             preambleCorrelation * m_correlationScale,
-                            preambleCorrelationOnes / samplesPerChip);
+                            preambleCorrelationOnes / samplesPerChip,
+                            rxDateTime(firstIdx, readBuffer));
                         m_sink->getMessageQueueToGUI()->push(msg);
                     }
                     // Pass to worker to feed to other servers
@@ -211,7 +214,8 @@ void ADSBDemodSinkWorker::run()
                         ADSBDemodReport::MsgReportADSB *msg = ADSBDemodReport::MsgReportADSB::create(
                             QByteArray((char*)data, sizeof(data)),
                             preambleCorrelation * m_correlationScale,
-                            preambleCorrelationOnes / samplesPerChip);
+                            preambleCorrelationOnes / samplesPerChip,
+                            rxDateTime(firstIdx, readBuffer));
                         m_sink->getMessageQueueToWorker()->push(msg);
                     }
                 }
@@ -245,7 +249,8 @@ void ADSBDemodSinkWorker::run()
                             ADSBDemodReport::MsgReportADSB *msg = ADSBDemodReport::MsgReportADSB::create(
                                 QByteArray((char*)data, sizeof(data)),
                                 preambleCorrelation * m_correlationScale,
-                                preambleCorrelationOnes / samplesPerChip);
+                                preambleCorrelationOnes / samplesPerChip,
+                                rxDateTime(firstIdx, readBuffer));
                             m_sink->getMessageQueueToWorker()->push(msg);
                         }
                     }
@@ -312,7 +317,6 @@ void ADSBDemodSinkWorker::run()
         }
     }
 }
-
 void ADSBDemodSinkWorker::handleInputMessages()
 {
     Message* message;
@@ -343,4 +347,11 @@ void ADSBDemodSinkWorker::handleInputMessages()
             delete message;
         }
     }
+}
+
+QDateTime ADSBDemodSinkWorker::rxDateTime(int firstIdx, int readBuffer) const
+{
+    const qint64 samplesPerSecondMSec = ADS_B_BITS_PER_SECOND * m_settings.m_samplesPerBit / 1000;
+    const qint64 offsetMSec = (firstIdx - m_sink->m_samplesPerFrame - 1) / samplesPerSecondMSec;
+    return m_sink->m_bufferFirstSampleDateTime[readBuffer].addMSecs(offsetMSec);
 }

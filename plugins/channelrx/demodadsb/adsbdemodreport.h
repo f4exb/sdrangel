@@ -43,10 +43,11 @@ public:
         static MsgReportADSB* create(
             QByteArray data,
             float preambleCorrelation,
-            float correlationOnes
+            float correlationOnes,
+            QDateTime dateTime
         )
         {
-            return new MsgReportADSB(data, preambleCorrelation, correlationOnes);
+            return new MsgReportADSB(data, preambleCorrelation, correlationOnes, dateTime);
         }
 
     private:
@@ -58,14 +59,15 @@ public:
         MsgReportADSB(
             QByteArray data,
             float preambleCorrelation,
-            float correlationOnes
+            float correlationOnes,
+            QDateTime dateTime
         ) :
             Message(),
             m_data(data),
             m_preambleCorrelation(preambleCorrelation),
-            m_correlationOnes(correlationOnes)
+            m_correlationOnes(correlationOnes),
+            m_dateTime(dateTime)
         {
-            m_dateTime = QDateTime::currentDateTime();
         }
     };
 

@@ -30,7 +30,7 @@
 
 #include "util/csv.h"
 
-#define OSNDB_URL "https://opensky-network.org/datasets/metadata/aircraftDatabase.csv"
+#define OSNDB_URL "https://opensky-network.org/datasets/metadata/aircraftDatabase.zip"
 
 struct AircraftInformation {
 
