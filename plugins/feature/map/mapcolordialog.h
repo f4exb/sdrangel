@@ -15,51 +15,31 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_FEATURE_MAPBEACONDIALOG_H
-#define INCLUDE_FEATURE_MAPBEACONDIALOG_H
+#ifndef INCLUDE_FEATURE_MAPCOLORDIALOG_H
+#define INCLUDE_FEATURE_MAPCOLORDIALOG_H
 
-#include "ui_mapbeacondialog.h"
+#include <QColorDialog>
 
-#include "gui/httpdownloadmanagergui.h"
-#include "beacon.h"
-
-class MapGUI;
-
-class MapBeaconDialog : public QDialog {
+class MapColorDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit MapBeaconDialog(MapGUI *gui, QWidget* parent = 0);
-    ~MapBeaconDialog();
-    void updateTable();
+    explicit MapColorDialog(const QColor &initial, QWidget *parent = nullptr);
+    QColor selectedColor() const;
+    bool noColorSelected() const;
+
+public slots:
+    virtual void accept() override;
+    void noColorClicked();
 
 private:
-    void downloadFinished(const QString& filename, bool success, const QString &url, const QString &errorMessage);
 
-private slots:
-    void accept();
-    void on_downloadIARU_clicked();
-    void on_beacons_cellDoubleClicked(int row, int column);
-    void on_filter_currentIndexChanged(int index);
+    QColorDialog *m_colorDialog;
+    QPushButton *m_noColorButton;
+    QPushButton *m_cancelButton;
+    QPushButton *m_okButton;
 
-private:
-    MapGUI *m_gui;
-    Ui::MapBeaconDialog* ui;
-    HttpDownloadManagerGUI m_dlm;
-
-    enum BeaconCol {
-        BEACON_COL_CALLSIGN,
-        BEACON_COL_FREQUENCY,
-        BEACON_COL_LOCATION,
-        BEACON_COL_POWER,
-        BEACON_COL_POLARIZATION,
-        BEACON_COL_PATTERN,
-        BEACON_COL_KEY,
-        BEACON_COL_MGM,
-        BEACON_COL_AZIMUTH,
-        BEACON_COL_ELEVATION,
-        BEACON_COL_DISTANCE
-    };
+    bool m_noColorSelected;
 };
 
-#endif // INCLUDE_FEATURE_MAPBEACONDIALOG_H
+#endif // INCLUDE_FEATURE_MAPCOLORDIALOG_H

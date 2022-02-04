@@ -18,8 +18,45 @@
 #ifndef INCLUDE_FEATURE_MAPSETTINGSDIALOG_H
 #define INCLUDE_FEATURE_MAPSETTINGSDIALOG_H
 
+#include <QSpinBox>
+#include <QMessageBox>
+
+#include "gui/httpdownloadmanagergui.h"
+
 #include "ui_mapsettingsdialog.h"
 #include "mapsettings.h"
+
+class MapColorGUI : public QObject {
+    Q_OBJECT
+public:
+
+    MapColorGUI(QTableWidget *table, int row, int col, bool noColor, quint32 color);
+
+public slots:
+    void on_color_clicked();
+
+private:
+    QToolButton *m_colorButton;
+
+public:
+    // Have copies of settings, so we don't change unless main dialog is accepted
+    bool m_noColor;
+    quint32 m_color;
+
+};
+
+class MapItemSettingsGUI : public QObject {
+    Q_OBJECT
+public:
+
+    MapItemSettingsGUI(QTableWidget *table, int row, MapSettings::MapItemSettings *settings);
+
+    MapColorGUI m_track2D;
+    MapColorGUI m_point3D;
+    MapColorGUI m_track3D;
+    QSpinBox *m_minZoom;
+    QSpinBox *m_minPixels;
+};
 
 class MapSettingsDialog : public QDialog {
     Q_OBJECT
@@ -28,18 +65,43 @@ public:
     explicit MapSettingsDialog(MapSettings *settings, QWidget* parent = 0);
     ~MapSettingsDialog();
 
-    MapSettings *m_settings;
-    bool m_mapSettingsChanged;
+    enum Columns {
+        COL_ENABLED,
+        COL_2D_ICON,
+        COL_2D_LABEL,
+        COL_2D_MIN_ZOOM,
+        COL_2D_TRACK,
+        COL_3D_MODEL,
+        COL_3D_MIN_PIXELS,
+        COL_3D_LABEL,
+        COL_3D_POINT,
+        COL_3D_TRACK
+    };
+
+public:
+    bool m_map2DSettingsChanged;    // 2D map needs to be reloaded
+    bool m_map3DSettingsChanged;    // 3D map needs to be reloaded
     bool m_osmURLChanged;
-    bool m_sourcesChanged;
+
+private:
+    MapSettings *m_settings;
+    QList<MapItemSettingsGUI *> m_mapItemSettingsGUIs;
+    HttpDownloadManagerGUI m_dlm;
+    int m_fileIdx;
+    QMessageBox m_downloadDialog;
+
+    void unzip(const QString &filename);
 
 private slots:
     void accept();
-    void on_groundTrackColor_clicked();
-    void on_predictedGroundTrackColor_clicked();
+    void on_map2DEnabled_clicked(bool checked=false);
+    void on_map3DEnabled_clicked(bool checked=false);
+    void on_downloadModels_clicked();
+    void downloadComplete(const QString &filename, bool success, const QString &url, const QString &errorMessage);
 
 private:
     Ui::MapSettingsDialog* ui;
+
 };
 
 #endif // INCLUDE_FEATURE_MAPSETTINGSDIALOG_H

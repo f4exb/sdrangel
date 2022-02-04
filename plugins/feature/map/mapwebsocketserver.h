@@ -15,51 +15,42 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_FEATURE_MAPBEACONDIALOG_H
-#define INCLUDE_FEATURE_MAPBEACONDIALOG_H
+#ifndef INCLUDE_FEATURE_MAPWEBSOCKERSERVER_H_
+#define INCLUDE_FEATURE_MAPWEBSOCKERSERVER_H_
 
-#include "ui_mapbeacondialog.h"
+#include <QObject>
+#include <QWebSocketServer>
+#include <QWebSocket>
+#include <QJsonObject>
 
-#include "gui/httpdownloadmanagergui.h"
-#include "beacon.h"
-
-class MapGUI;
-
-class MapBeaconDialog : public QDialog {
+class MapWebSocketServer : public QObject
+{
     Q_OBJECT
 
+private:
+
+    QWebSocketServer m_socket;
+    QWebSocket *m_client;
+
 public:
-    explicit MapBeaconDialog(MapGUI *gui, QWidget* parent = 0);
-    ~MapBeaconDialog();
-    void updateTable();
 
-private:
-    void downloadFinished(const QString& filename, bool success, const QString &url, const QString &errorMessage);
+    MapWebSocketServer(QObject *parent = nullptr);
+    quint16 serverPort();
 
-private slots:
-    void accept();
-    void on_downloadIARU_clicked();
-    void on_beacons_cellDoubleClicked(int row, int column);
-    void on_filter_currentIndexChanged(int index);
+    bool isConnected();
+    void send(const QJsonObject &obj);
 
-private:
-    MapGUI *m_gui;
-    Ui::MapBeaconDialog* ui;
-    HttpDownloadManagerGUI m_dlm;
+signals:
+    void connected();
+    void received(const QJsonObject &obj);
 
-    enum BeaconCol {
-        BEACON_COL_CALLSIGN,
-        BEACON_COL_FREQUENCY,
-        BEACON_COL_LOCATION,
-        BEACON_COL_POWER,
-        BEACON_COL_POLARIZATION,
-        BEACON_COL_PATTERN,
-        BEACON_COL_KEY,
-        BEACON_COL_MGM,
-        BEACON_COL_AZIMUTH,
-        BEACON_COL_ELEVATION,
-        BEACON_COL_DISTANCE
-    };
+public slots:
+
+    void onNewConnection();
+    void processTextMessage(QString message);
+    void processBinaryMessage(QByteArray message);
+    void socketDisconnected();
+
 };
 
-#endif // INCLUDE_FEATURE_MAPBEACONDIALOG_H
+#endif // INCLUDE_FEATURE_MAPWEBSOCKERSERVER_H_

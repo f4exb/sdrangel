@@ -37,6 +37,7 @@
 
 MESSAGE_CLASS_DEFINITION(Map::MsgConfigureMap, Message)
 MESSAGE_CLASS_DEFINITION(Map::MsgFind, Message)
+MESSAGE_CLASS_DEFINITION(Map::MsgSetDateTime, Message)
 
 const char* const Map::m_featureIdURI = "sdrangel.feature.map";
 const char* const Map::m_featureId = "Map";
@@ -221,14 +222,17 @@ int Map::webapiActionsPost(
             if (getMessageQueueToGUI()) {
                 getMessageQueueToGUI()->push(MsgFind::create(id));
             }
-
-            return 202;
         }
-        else
+        if (featureActionsKeys.contains("setDateTime"))
         {
-            errorMessage = "Unknown action";
-            return 400;
+            QString dateTimeString = *swgMapActions->getSetDateTime();
+            QDateTime dateTime = QDateTime::fromString(dateTimeString, Qt::ISODateWithMs);
+
+            if (getMessageQueueToGUI()) {
+                getMessageQueueToGUI()->push(MsgSetDateTime::create(dateTime));
+            }
         }
+        return 202;
     }
     else
     {

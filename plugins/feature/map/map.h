@@ -23,6 +23,7 @@
 #include <QHash>
 #include <QNetworkRequest>
 #include <QTimer>
+#include <QDateTime>
 
 #include "feature/feature.h"
 #include "util/message.h"
@@ -79,6 +80,25 @@ public:
         MsgFind(const QString& target) :
             Message(),
             m_target(target)
+        {}
+    };
+
+    class MsgSetDateTime : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        QDateTime getDateTime() const { return m_dateTime; }
+
+        static MsgSetDateTime* create(const QDateTime& dateTime) {
+            return new MsgSetDateTime(dateTime);
+        }
+
+    private:
+        QDateTime m_dateTime;
+
+        MsgSetDateTime(const QDateTime& dateTime) :
+            Message(),
+            m_dateTime(dateTime)
         {}
     };
 
