@@ -147,11 +147,19 @@ void WebServer::readClient()
 
             // See if we can find the file in our resources
             QResource res(path);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
             if (res.isValid() && (res.uncompressedSize() > 0))
             {
                 QByteArray data = res.uncompressedData();
                 sendFile(socket, data, mimeType, path);
             }
+#else
+            if (res.isValid() && (res.size() > 0))
+            {
+                QByteArray data = QByteArray::fromRawData((const char *)res.data(), res.size());
+                sendFile(socket, data, mimeType, path);
+            }
+#endif
             else
             {
                 // See if we can find a file

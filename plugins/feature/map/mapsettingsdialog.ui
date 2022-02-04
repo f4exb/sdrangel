@@ -16,7 +16,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Select a Location</string>
+   <string>Map Display Settings</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -366,6 +366,12 @@
          </item>
          <item row="1" column="0">
           <widget class="QLabel" name="maptilerAPIKeyLabel">
+           <property name="minimumSize">
+            <size>
+             <width>140</width>
+             <height>0</height>
+            </size>
+           </property>
            <property name="text">
             <string>Maptiler API Key</string>
            </property>
@@ -380,6 +386,12 @@
          </item>
          <item row="2" column="0">
           <widget class="QLabel" name="mapBoxAPIKeyLabel">
+           <property name="minimumSize">
+            <size>
+             <width>140</width>
+             <height>0</height>
+            </size>
+           </property>
            <property name="text">
             <string>Mapbox API Key</string>
            </property>
@@ -394,6 +406,12 @@
          </item>
          <item row="3" column="0">
           <widget class="QLabel" name="cesiumIonAPIKeyLabel">
+           <property name="minimumSize">
+            <size>
+             <width>140</width>
+             <height>0</height>
+            </size>
+           </property>
            <property name="text">
             <string>Cesium Ion API Key</string>
            </property>
@@ -462,6 +480,7 @@
   <tabstop>buildings</tabstop>
   <tabstop>sunLightEnabled</tabstop>
   <tabstop>eciCamera</tabstop>
+  <tabstop>antiAliasing</tabstop>
   <tabstop>thunderforestAPIKey</tabstop>
   <tabstop>maptilerAPIKey</tabstop>
   <tabstop>mapBoxAPIKey</tabstop>

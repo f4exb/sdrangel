@@ -122,11 +122,16 @@ MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
     ui->eciCamera->setCurrentIndex((int)m_settings->m_eciCamera);
     ui->antiAliasing->setCurrentIndex(ui->antiAliasing->findText(m_settings->m_antiAliasing));
 
-    QHashIterator<QString, MapSettings::MapItemSettings *> itr(m_settings->m_itemSettings);
+    // Sort groups in table alphabetically
+    QList<MapSettings::MapItemSettings *> itemSettings = m_settings->m_itemSettings.values();
+    std::sort(itemSettings.begin(), itemSettings.end(), 
+        [](const MapSettings::MapItemSettings* a, const MapSettings::MapItemSettings* b) -> bool { 
+            return a->m_group < b->m_group; 
+        });    
+    QListIterator<MapSettings::MapItemSettings *> itr(itemSettings);
     while (itr.hasNext())
     {
-        itr.next();
-        MapSettings::MapItemSettings *itemSettings = itr.value();
+        MapSettings::MapItemSettings *itemSettings = itr.next();
 
         // Add row to table with header
         int row = ui->mapItemSettings->rowCount();

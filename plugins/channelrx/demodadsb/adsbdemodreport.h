@@ -64,9 +64,9 @@ public:
         ) :
             Message(),
             m_data(data),
+            m_dateTime(dateTime),
             m_preambleCorrelation(preambleCorrelation),
-            m_correlationOnes(correlationOnes),
-            m_dateTime(dateTime)
+            m_correlationOnes(correlationOnes)
         {
         }
     };
