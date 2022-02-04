@@ -51,7 +51,7 @@ void MapWebSocketServer::onNewConnection()
 
 void MapWebSocketServer::processTextMessage(QString message)
 {
-    QWebSocket *client = qobject_cast<QWebSocket *>(sender());
+    //QWebSocket *client = qobject_cast<QWebSocket *>(sender());
     //qDebug() << "MapWebSocketServer::processTextMessage - Received text " << message;
 
     QJsonParseError error;
@@ -65,7 +65,7 @@ void MapWebSocketServer::processTextMessage(QString message)
 
 void MapWebSocketServer::processBinaryMessage(QByteArray message)
 {
-    QWebSocket *client = qobject_cast<QWebSocket *>(sender());
+    //QWebSocket *client = qobject_cast<QWebSocket *>(sender());
     // Shouldn't receive any binary messages for now
     qDebug() << "MapWebSocketServer::processBinaryMessage - Received binary " << message;
 }

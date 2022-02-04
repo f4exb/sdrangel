@@ -20,7 +20,7 @@
 
 #include "mapwebsocketserver.h"
 #include "czml.h"
-#include "swgmapanimation.h"
+#include "SWGMapAnimation.h"
 
 class MapItem;
 

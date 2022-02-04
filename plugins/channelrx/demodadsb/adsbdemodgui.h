@@ -691,6 +691,8 @@ public:
 
     virtual bool match(const QString &aircraft, const QString &manufacturer, QString &model)
     {
+        (void) manufacturer;
+
         QRegularExpressionMatch match = m_aircraftRegExp.match(aircraft);
         if (match.hasMatch())
         {

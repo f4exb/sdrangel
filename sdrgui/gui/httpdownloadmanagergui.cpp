@@ -100,6 +100,8 @@ void HttpDownloadManagerGUI::downloadCompleteGUI(const QString& filename, bool s
 
 void HttpDownloadManagerGUI::retryDownload(const QString &filename, QNetworkReply *oldReply, QNetworkReply *newReply)
 {
+    (void) oldReply;
+
     int idx = m_filenames.indexOf(filename);
     if (idx >= 0)
     {
