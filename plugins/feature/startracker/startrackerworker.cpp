@@ -427,7 +427,6 @@ void StarTrackerWorker::sendToMap(QList<MessageQueue*> *mapMessageQueues, QStrin
         swgMapItem->setImage(new QString(image));
         swgMapItem->setImageRotation(rotation);
         swgMapItem->setText(new QString(text));
-        swgMapItem->setImageMinZoom(3);
 
         MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_starTracker, swgMapItem);
         (*it)->push(msg);
