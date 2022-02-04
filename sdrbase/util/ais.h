@@ -124,6 +124,10 @@ public:
     QString m_name;
     quint8 m_type;
     int m_dimension;
+    int m_a;
+    int m_b;
+    int m_c;
+    int m_d;
     int m_positionFixing;
     int m_eta;
     int m_draught;
