@@ -444,6 +444,7 @@ void AISGUI::sendToMap(const QString &name, const QString &label,
                 swgMapItem->setImage(new QString(QString("qrc:///ais/map/%1").arg(image)));
             }
             swgMapItem->setModel(new QString(model));
+            swgMapItem->setModelAltitudeOffset(modelOffset);
             swgMapItem->setLabel(new QString(label));
             swgMapItem->setLabelAltitudeOffset(labelOffset);
             swgMapItem->setFixedPosition(false);
@@ -974,9 +975,6 @@ void AISGUI::vessels_customContextMenuRequested(QPoint pos)
         // Find on Map
         if (!latitudeV.isNull())
         {
-            float latitude = latitudeV.toFloat();
-            float longitude = longitudeV.toFloat();
-
             tableContextMenu->addSeparator();
 
             QAction* findMapFeatureAction = new QAction(QString("Find MMSI %1 on map").arg(mmsi), tableContextMenu);

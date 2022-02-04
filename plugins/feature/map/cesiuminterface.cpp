@@ -20,8 +20,8 @@
 #include "cesiuminterface.h"
 
 CesiumInterface::CesiumInterface(const MapSettings *settings, QObject *parent) :
-    m_czml(settings),
-    MapWebSocketServer(parent)
+    MapWebSocketServer(parent),
+    m_czml(settings)
 {
 }
 
@@ -202,7 +202,8 @@ void CesiumInterface::removeAllCZMLEntities()
 
 void CesiumInterface::initCZML()
 {
-    czml(m_czml.init());
+    QJsonObject obj = m_czml.init();
+    czml(obj);
 }
 
 // Send and process CZML

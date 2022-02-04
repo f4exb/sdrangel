@@ -264,6 +264,8 @@ void MapModel::update(const PipeEndPoint *sourcePipe, SWGSDRangel::SWGMapItem *s
 // Slot called on dataChanged signal, to update 3D map
 void MapModel::update3DMap(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles)
 {
+    (void) roles;
+
     CesiumInterface *cesium = m_gui->cesium();
     if (cesium)
     {

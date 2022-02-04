@@ -92,7 +92,7 @@ private:
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);
 
-    void AISGUI::sendToMap(const QString &name, const QString &label,
+    void sendToMap(const QString &name, const QString &label,
         const QString &image, const QString &text,
         const QString &model, float modelOffset, float labelOffset,
         float latitude, float longitude, QDateTime positionDateTime,

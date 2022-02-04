@@ -23,7 +23,7 @@
 
 #include "util/units.h"
 
-CZML::CZML(const MapSettings *settings, QObject *parent) :
+CZML::CZML(const MapSettings *settings) :
     m_settings(settings)
 {
 }
@@ -194,6 +194,8 @@ QQuaternion CZML::orientation(double longitude, double latitude, double altitude
 
 QJsonObject CZML::update(MapItem *mapItem, bool isTarget, bool isSelected)
 {
+    (void) isTarget;
+
     // Don't currently use CLIP_TO_GROUND in Cesium due to Jitter bug
     // https://github.com/CesiumGS/cesium/issues/4049
     // Instead we implement our own clipping code in map3d.html

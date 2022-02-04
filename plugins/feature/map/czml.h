@@ -38,7 +38,7 @@ private:
     QHash<QString, bool> m_hasMoved;
 
 public:
-    CZML(const MapSettings *settings, QObject *parent = nullptr);
+    CZML(const MapSettings *settings);
     QJsonObject init();
     QJsonObject update(MapItem *mapItem, bool isTarget, bool isSelected);
 
