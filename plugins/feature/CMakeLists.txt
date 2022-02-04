@@ -4,7 +4,7 @@ if (Qt5SerialPort_FOUND)
     add_subdirectory(gs232controller)
 endif()
 
-if (Qt5Quick_FOUND AND Qt5QuickWidgets_FOUND AND Qt5Positioning_FOUND AND Qt5Location_FOUND)
+if (Qt5Quick_FOUND AND Qt5QuickWidgets_FOUND AND Qt5Positioning_FOUND AND Qt5Location_FOUND AND Qt5WebEngine_FOUND)
     add_subdirectory(map)
 endif()
 if (Qt5Quick_FOUND AND Qt5QuickWidgets_FOUND AND Qt5Positioning_FOUND)

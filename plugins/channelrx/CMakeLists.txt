@@ -26,7 +26,7 @@ if(DAB_FOUND AND ZLIB_FOUND AND FAAD_FOUND)
     add_subdirectory(demoddab)
 endif()
 
-if(APT_FOUND)
+if(APT_FOUND AND SGP4_FOUND)
     add_subdirectory(demodapt)
 endif()
 
