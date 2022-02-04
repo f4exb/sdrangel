@@ -30,7 +30,6 @@
   </property>
   <property name="font">
    <font>
-    <family>Liberation Sans</family>
     <pointsize>9</pointsize>
    </font>
   </property>
@@ -168,7 +167,36 @@
       </column>
       <column>
        <property name="text">
+        <string>Length</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
         <string>Destination</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Position Updated</string>
+       </property>
+       <property name="toolTip">
+        <string>Time last position was received</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Updated</string>
+       </property>
+       <property name="toolTip">
+        <string>Time last message was received</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Messages</string>
+       </property>
+       <property name="toolTip">
+        <string>Number of messages received</string>
        </property>
       </column>
      </widget>
