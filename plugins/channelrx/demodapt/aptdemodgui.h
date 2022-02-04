@@ -30,6 +30,7 @@
 #include <QMenu>
 #include <QImage>
 #include <QPixmap>
+#include <QGraphicsRectItem>
 
 #include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
@@ -52,6 +53,16 @@ namespace Ui {
 }
 class APTDemodGUI;
 
+// Temperature scale
+class TempScale : public QObject, public QGraphicsRectItem {
+    Q_OBJECT
+public:
+    TempScale(QGraphicsItem *parent = nullptr);
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+private:
+    QLinearGradient m_gradient;
+};
+
 class APTDemodGUI : public ChannelGUI {
     Q_OBJECT
 
@@ -63,6 +74,7 @@ public:
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
+    virtual bool eventFilter(QObject *watched, QEvent *event) override;
 
 public slots:
     void channelMarkerChangedByCursor();
@@ -87,6 +99,11 @@ private:
     QGraphicsScene* m_scene;
     QGraphicsPixmapItem* m_pixmapItem;
     GraphicsViewZoom* m_zoom;
+    TempScale *m_tempScale;
+    QGraphicsRectItem *m_tempScaleBG;
+    QGraphicsSimpleTextItem *m_tempText;
+
+    QList<QString> m_mapImages;
 
     explicit APTDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
     virtual ~APTDemodGUI();
@@ -94,8 +111,12 @@ private:
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
     void displaySettings();
+    void displayPalettes();
+    void displayLabels();
     void displayStreamIndex();
     bool handleMessage(const Message& message);
+    void deleteImageFromMap(const QString &name);
+    void resetDecoder();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);
@@ -105,6 +126,11 @@ private slots:
     void on_rfBW_valueChanged(int index);
     void on_fmDev_valueChanged(int value);
     void on_channels_currentIndexChanged(int index);
+    void on_transparencyThreshold_valueChanged(int value);
+    void on_transparencyThreshold_sliderReleased();
+    void on_opacityThreshold_valueChanged(int value);
+    void on_opacityThreshold_sliderReleased();
+    void on_deleteImageFromMap_clicked();
     void on_cropNoise_clicked(bool checked=false);
     void on_denoise_clicked(bool checked=false);
     void on_linear_clicked(bool checked=false);

@@ -47,6 +47,7 @@ MESSAGE_CLASS_DEFINITION(APTDemod::MsgConfigureAPTDemod, Message)
 MESSAGE_CLASS_DEFINITION(APTDemod::MsgPixels, Message)
 MESSAGE_CLASS_DEFINITION(APTDemod::MsgImage, Message)
 MESSAGE_CLASS_DEFINITION(APTDemod::MsgLine, Message)
+MESSAGE_CLASS_DEFINITION(APTDemod::MsgMapImageName, Message)
 MESSAGE_CLASS_DEFINITION(APTDemod::MsgResetDecoder, Message)
 
 const char * const APTDemod::m_channelIdURI = "sdrangel.channel.aptdemod";
@@ -62,7 +63,7 @@ APTDemod::APTDemod(DeviceAPI *deviceAPI) :
     m_basebandSink = new APTDemodBaseband(this);
     m_basebandSink->moveToThread(&m_thread);
 
-    m_imageWorker = new APTDemodImageWorker();
+    m_imageWorker = new APTDemodImageWorker(this);
     m_basebandSink->setImagWorkerMessageQueue(m_imageWorker->getInputMessageQueue());
     m_imageWorker->moveToThread(&m_imageThread);
 
@@ -286,6 +287,42 @@ void APTDemod::applySettings(const APTDemodSettings& settings, bool force)
     if ((settings.m_autoSaveMinScanLines != m_settings.m_autoSaveMinScanLines) || force) {
         reverseAPIKeys.append("autoSaveMinScanLines");
     }
+    if ((settings.m_saveCombined != m_settings.m_saveCombined) || force) {
+        reverseAPIKeys.append("saveCombined");
+    }
+    if ((settings.m_saveSeparate != m_settings.m_saveSeparate) || force) {
+        reverseAPIKeys.append("saveSeparate");
+    }
+    if ((settings.m_saveProjection != m_settings.m_saveProjection) || force) {
+        reverseAPIKeys.append("saveProjection");
+    }
+    if ((settings.m_scanlinesPerImageUpdate != m_settings.m_scanlinesPerImageUpdate) || force) {
+        reverseAPIKeys.append("scanlinesPerImageUpdate");
+    }
+    if ((settings.m_transparencyThreshold != m_settings.m_transparencyThreshold) || force) {
+        reverseAPIKeys.append("transparencyThreshold");
+    }
+    if ((settings.m_opacityThreshold != m_settings.m_opacityThreshold) || force) {
+        reverseAPIKeys.append("opacityThreshold");
+    }
+    if ((settings.m_palettes != m_settings.m_palettes) || force) {
+        reverseAPIKeys.append("palettes");
+    }
+    if ((settings.m_palette != m_settings.m_palette) || force) {
+        reverseAPIKeys.append("palette");
+    }
+    if ((settings.m_horizontalPixelsPerDegree != m_settings.m_horizontalPixelsPerDegree) || force) {
+        reverseAPIKeys.append("horizontalPixelsPerDegree");
+    }
+    if ((settings.m_verticalPixelsPerDegree != m_settings.m_verticalPixelsPerDegree) || force) {
+        reverseAPIKeys.append("verticalPixelsPerDegree");
+    }
+    if ((settings.m_satTimeOffset != m_settings.m_satTimeOffset) || force) {
+        reverseAPIKeys.append("satTimeOffset");
+    }
+    if ((settings.m_satYaw != m_settings.m_satYaw) || force) {
+        reverseAPIKeys.append("satYaw");
+    }
 
     if (m_settings.m_streamIndex != settings.m_streamIndex)
     {
@@ -426,6 +463,42 @@ void APTDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("autoSaveMinScanLines")) {
         settings.m_autoSaveMinScanLines = response.getAptDemodSettings()->getAutoSaveMinScanLines();
     }
+    if (channelSettingsKeys.contains("saveCombined")) {
+        settings.m_saveCombined = response.getAptDemodSettings()->getSaveCombined();
+    }
+    if (channelSettingsKeys.contains("saveSeparate")) {
+        settings.m_saveSeparate = response.getAptDemodSettings()->getSaveSeparate();
+    }
+    if (channelSettingsKeys.contains("saveProjection")) {
+        settings.m_saveProjection = response.getAptDemodSettings()->getSaveProjection();
+    }
+    if (channelSettingsKeys.contains("scanlinesPerImageUpdate")) {
+        settings.m_scanlinesPerImageUpdate = response.getAptDemodSettings()->getScanlinesPerImageUpdate();
+    }
+    if (channelSettingsKeys.contains("transparencyThreshold")) {
+        settings.m_transparencyThreshold = response.getAptDemodSettings()->getTransparencyThreshold();
+    }
+    if (channelSettingsKeys.contains("m_opacityThreshold")) {
+        settings.m_opacityThreshold = response.getAptDemodSettings()->getOpacityThreshold();
+    }
+    if (channelSettingsKeys.contains("palettes")) {
+        settings.m_palettes = (*response.getAptDemodSettings()->getPalettes()).split(";");
+    }
+    if (channelSettingsKeys.contains("palette")) {
+        settings.m_palette = response.getAptDemodSettings()->getPalette();
+    }
+    if (channelSettingsKeys.contains("horizontalPixelsPerDegree")) {
+        settings.m_horizontalPixelsPerDegree = response.getAptDemodSettings()->getHorizontalPixelsPerDegree();
+    }
+    if (channelSettingsKeys.contains("verticalPixelsPerDegree")) {
+        settings.m_verticalPixelsPerDegree = response.getAptDemodSettings()->getVerticalPixelsPerDegree();
+    }
+    if (channelSettingsKeys.contains("satTimeOffset")) {
+        settings.m_satTimeOffset = response.getAptDemodSettings()->getSatTimeOffset();
+    }
+    if (channelSettingsKeys.contains("satYaw")) {
+        settings.m_satYaw = response.getAptDemodSettings()->getSatYaw();
+    }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getAptDemodSettings()->getRgbColor();
     }
@@ -474,6 +547,18 @@ void APTDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     response.getAptDemodSettings()->setAutoSave(settings.m_autoSave);
     response.getAptDemodSettings()->setAutoSavePath(new QString(settings.m_autoSavePath));
     response.getAptDemodSettings()->setAutoSaveMinScanLines(settings.m_autoSaveMinScanLines);
+    response.getAptDemodSettings()->setSaveCombined(settings.m_saveCombined);
+    response.getAptDemodSettings()->setSaveSeparate(settings.m_saveSeparate);
+    response.getAptDemodSettings()->setSaveProjection(settings.m_saveProjection);
+    response.getAptDemodSettings()->setScanlinesPerImageUpdate(settings.m_scanlinesPerImageUpdate);
+    response.getAptDemodSettings()->setTransparencyThreshold(settings.m_transparencyThreshold);
+    response.getAptDemodSettings()->setOpacityThreshold(settings.m_opacityThreshold);
+    response.getAptDemodSettings()->setPalettes(new QString(settings.m_palettes.join(";")));
+    response.getAptDemodSettings()->setPalette(settings.m_palette);
+    response.getAptDemodSettings()->setHorizontalPixelsPerDegree(settings.m_horizontalPixelsPerDegree);
+    response.getAptDemodSettings()->setVerticalPixelsPerDegree(settings.m_verticalPixelsPerDegree);
+    response.getAptDemodSettings()->setSatTimeOffset(settings.m_satTimeOffset);
+    response.getAptDemodSettings()->setSatYaw(settings.m_satYaw);
 
     response.getAptDemodSettings()->setRgbColor(settings.m_rgbColor);
 
@@ -599,14 +684,50 @@ void APTDemod::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("decodeEnabled") || force) {
         swgAPTDemodSettings->setDecodeEnabled(settings.m_decodeEnabled);
     }
-    if (channelSettingsKeys.contains("m_autoSave") || force) {
+    if (channelSettingsKeys.contains("autoSave") || force) {
         swgAPTDemodSettings->setAutoSave(settings.m_autoSave);
     }
-    if (channelSettingsKeys.contains("m_autoSavePath") || force) {
+    if (channelSettingsKeys.contains("autoSavePath") || force) {
         swgAPTDemodSettings->setAutoSavePath(new QString(settings.m_autoSavePath));
     }
-    if (channelSettingsKeys.contains("m_autoSaveMinScanLines") || force) {
+    if (channelSettingsKeys.contains("autoSaveMinScanLines") || force) {
         swgAPTDemodSettings->setAutoSaveMinScanLines(settings.m_autoSaveMinScanLines);
+    }
+    if (channelSettingsKeys.contains("saveCombined") || force) {
+        swgAPTDemodSettings->setSaveCombined(settings.m_saveCombined);
+    }
+    if (channelSettingsKeys.contains("saveSeparate") || force) {
+        swgAPTDemodSettings->setSaveSeparate(settings.m_saveSeparate);
+    }
+    if (channelSettingsKeys.contains("saveProjection") || force) {
+        swgAPTDemodSettings->setSaveProjection(settings.m_saveProjection);
+    }
+    if (channelSettingsKeys.contains("scanlinesPerImageUpdate") || force) {
+        swgAPTDemodSettings->setScanlinesPerImageUpdate(settings.m_scanlinesPerImageUpdate);
+    }
+    if (channelSettingsKeys.contains("transparencyThreshold") || force) {
+        swgAPTDemodSettings->setTransparencyThreshold(settings.m_transparencyThreshold);
+    }
+    if (channelSettingsKeys.contains("opacityThreshold") || force) {
+        swgAPTDemodSettings->setOpacityThreshold(settings.m_opacityThreshold);
+    }
+    if (channelSettingsKeys.contains("palettes") || force) {
+        swgAPTDemodSettings->setPalettes(new QString(settings.m_palettes.join(";")));
+    }
+    if (channelSettingsKeys.contains("palette") || force) {
+        swgAPTDemodSettings->setPalette(settings.m_palette);
+    }
+    if (channelSettingsKeys.contains("horizontalPixelsPerDegree") || force) {
+        swgAPTDemodSettings->setHorizontalPixelsPerDegree(settings.m_horizontalPixelsPerDegree);
+    }
+    if (channelSettingsKeys.contains("verticalPixelsPerDegree") || force) {
+        swgAPTDemodSettings->setVerticalPixelsPerDegree(settings.m_verticalPixelsPerDegree);
+    }
+    if (channelSettingsKeys.contains("satTimeOffset") || force) {
+        swgAPTDemodSettings->setSatTimeOffset(settings.m_satTimeOffset);
+    }
+    if (channelSettingsKeys.contains("satYaw") || force) {
+        swgAPTDemodSettings->setSatYaw(settings.m_satYaw);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgAPTDemodSettings->setRgbColor(settings.m_rgbColor);
@@ -654,6 +775,9 @@ int APTDemod::webapiActionsPost(
                     // Reset for new pass
                     m_imageWorker->getInputMessageQueue()->push(APTDemod::MsgResetDecoder::create());
                     m_basebandSink->getInputMessageQueue()->push(APTDemod::MsgResetDecoder::create());
+                    if (m_guiMessageQueue) {
+                        m_guiMessageQueue->push(APTDemod::MsgResetDecoder::create());
+                    }
 
                     // Save satellite name
                     m_imageWorker->getInputMessageQueue()->push(APTDemodImageWorker::MsgSetSatelliteName::create(*satelliteName));
@@ -662,10 +786,14 @@ int APTDemod::webapiActionsPost(
                     APTDemodSettings settings = m_settings;
                     settings.m_decodeEnabled = true;
                     settings.m_flip = !aos->getNorthToSouthPass();
+                    settings.m_tle = *aos->getTle();
+                    settings.m_aosDateTime = QDateTime::fromString(*aos->getDateTime(), Qt::ISODateWithMs);
+                    settings.m_northToSouth = aos->getNorthToSouthPass();
 
                     m_inputMessageQueue.push(MsgConfigureAPTDemod::create(settings, false));
-                    if (m_guiMessageQueue)
+                    if (m_guiMessageQueue) {
                         m_guiMessageQueue->push(MsgConfigureAPTDemod::create(settings, false));
+                    }
                 }
 
                 return 202;

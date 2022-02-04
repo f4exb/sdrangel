@@ -81,6 +81,12 @@ APTDemodActions:
         northToSouthPass:
           description: "Satellite is passing from the North to the South (1) or South to North (0)"
           type: integer
+        tle:
+          description: "Two line elements for satellite"
+          type: string
+        dateTime:
+          description: "Date and time of AOS (May differ from system clock when replaying old passes)"
+          type: string
     los:
       description: "Loss of signal"
       type: object

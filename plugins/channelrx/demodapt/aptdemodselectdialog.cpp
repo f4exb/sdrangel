@@ -15,30 +15,33 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_APTDEMODSETTINGSDIALOG_H
-#define INCLUDE_APTDEMODSETTINGSDIALOG_H
+#include <QDebug>
+#include <QFileDialog>
 
-#include "ui_aptdemodsettingsdialog.h"
-#include "aptdemodsettings.h"
+#include "aptdemodselectdialog.h"
 
-class APTDemodSettingsDialog : public QDialog {
-    Q_OBJECT
+APTDemodSelectDialog::APTDemodSelectDialog(const QStringList &list, QWidget* parent) :
+    QDialog(parent),
+    ui(new Ui::APTDemodSelectDialog)
+{
+    ui->setupUi(this);
+    for (auto item : list) {
+        ui->list->addItem(item);
+    }
+}
 
-public:
-    explicit APTDemodSettingsDialog(APTDemodSettings *settings, QWidget* parent = 0);
-    ~APTDemodSettingsDialog();
+APTDemodSelectDialog::~APTDemodSelectDialog()
+{
+    delete ui;
+}
 
-    APTDemodSettings *m_settings;
-
-private slots:
-    void accept();
-    void on_autoSavePathBrowse_clicked();
-    void on_autoSave_clicked(bool checked);
-    void on_addPalette_clicked();
-    void on_removePalette_clicked();
-
-private:
-    Ui::APTDemodSettingsDialog* ui;
-};
-
-#endif // INCLUDE_APTDEMODSETTINGSDIALOG_H
+void APTDemodSelectDialog::accept()
+{
+    QList<QListWidgetItem *> items = ui->list->selectedItems();
+    m_selected.clear();
+    for (auto item : items)
+    {
+        m_selected.append(item->text());
+    }
+    QDialog::accept();
+}

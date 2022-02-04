@@ -15,30 +15,26 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_APTDEMODSETTINGSDIALOG_H
-#define INCLUDE_APTDEMODSETTINGSDIALOG_H
+#ifndef INCLUDE_APTDEMODSELECTDIALOG_H
+#define INCLUDE_APTDEMODSELECTDIALOG_H
 
-#include "ui_aptdemodsettingsdialog.h"
+#include "ui_aptdemodselectdialog.h"
 #include "aptdemodsettings.h"
 
-class APTDemodSettingsDialog : public QDialog {
+class APTDemodSelectDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit APTDemodSettingsDialog(APTDemodSettings *settings, QWidget* parent = 0);
-    ~APTDemodSettingsDialog();
-
-    APTDemodSettings *m_settings;
+    explicit APTDemodSelectDialog(const QStringList &list, QWidget* parent = 0);
+    ~APTDemodSelectDialog();
+    QStringList getSelected() const { return m_selected; }
 
 private slots:
     void accept();
-    void on_autoSavePathBrowse_clicked();
-    void on_autoSave_clicked(bool checked);
-    void on_addPalette_clicked();
-    void on_removePalette_clicked();
 
 private:
-    Ui::APTDemodSettingsDialog* ui;
+    QStringList m_selected;
+    Ui::APTDemodSelectDialog* ui;
 };
 
-#endif // INCLUDE_APTDEMODSETTINGSDIALOG_H
+#endif // INCLUDE_APTDEMODSELECTDIALOG_H

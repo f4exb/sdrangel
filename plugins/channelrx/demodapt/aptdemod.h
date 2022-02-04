@@ -146,6 +146,28 @@ public:
         {}
     };
 
+    // Sent from worker to GUI to indicate name of image on Map
+    class MsgMapImageName : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        QString getName() const { return m_name; }
+
+        static MsgMapImageName* create(const QString &name)
+        {
+            return new MsgMapImageName(name);
+        }
+
+    private:
+        QString m_name;
+
+        MsgMapImageName(const QString &name) :
+            Message(),
+            m_name(name)
+        {
+        }
+    };
+
     // Sent from GUI to reset decoder
     class MsgResetDecoder : public Message {
         MESSAGE_CLASS_DECLARATION

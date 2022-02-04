@@ -21,6 +21,7 @@
 
 #include <QByteArray>
 #include <QHash>
+#include <QDateTime>
 
 class Serializable;
 
@@ -35,18 +36,29 @@ struct APTDemodSettings
     bool m_histogramEqualise;
     bool m_precipitationOverlay;
     bool m_flip;
-    enum ChannelSelection {BOTH_CHANNELS, CHANNEL_A, CHANNEL_B} m_channels;
+    enum ChannelSelection {BOTH_CHANNELS, CHANNEL_A, CHANNEL_B, TEMPERATURE, PALETTE} m_channels;
     bool m_decodeEnabled;
     bool m_satelliteTrackerControl;             //! Whether Sat Tracker can set direction of pass
     QString m_satelliteName;                    //!< All, NOAA 15, NOAA 18 or NOAA 19
     bool m_autoSave;
     QString m_autoSavePath;
     int m_autoSaveMinScanLines;
+    bool m_saveCombined;
+    bool m_saveSeparate;
+    bool m_saveProjection;
+    int m_scanlinesPerImageUpdate;
+    int m_transparencyThreshold;
+    int m_opacityThreshold;
+    QStringList m_palettes;                     // List of 256x256 images to use a colour palette
+    int m_palette;                              // Index in to m_palettes - only if m_channels==PALETTE
+    int m_horizontalPixelsPerDegree;            // Resolution for projected image
+    int m_verticalPixelsPerDegree;
+    float m_satTimeOffset;
+    float m_satYaw;
 
     quint32 m_rgbColor;
     QString m_title;
     Serializable *m_channelMarker;
-    QString m_audioDeviceName;
     int m_streamIndex; //!< MIMO channel. Not relevant when connected to SI (single Rx).
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
@@ -54,6 +66,11 @@ struct APTDemodSettings
     uint16_t m_reverseAPIDeviceIndex;
     uint16_t m_reverseAPIChannelIndex;
     Serializable *m_rollupState;
+
+    // The following are really working state, rather than settings
+    QString m_tle;                              // Satelite two-line elements, from satellite tracker
+    QDateTime m_aosDateTime;                    // When decoder was started (may not be current time, if replaying old file)
+    bool m_northToSouth;                        // Separate from flip, in case user changes it
 
     APTDemodSettings();
     void resetToDefaults();
