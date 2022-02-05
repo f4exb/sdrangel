@@ -76,7 +76,7 @@ jobs:
           dir: ${{matrix.config.QT_INST_DIR}}
           arch: ${{matrix.config.QT_ARCH}}
           setup-python: false
-          modules: 'qtcharts'
+          modules: 'qtcharts qtwebengine'
       - name: build sdrangel on Windows
         if: startsWith(matrix.config.os, 'windows')
         run: |
