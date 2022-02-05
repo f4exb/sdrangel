@@ -201,10 +201,12 @@ elseif (WIN32)
     set(VS2017 ON)
   elseif(MSVC_VERSION GREATER 1899 AND MSVC_VERSION LESS 1910)
     set(VS2015 ON)
+  elseif(MSVC_VERSION GREATER 1930)
+    set(VS2022 ON)
   endif()
 
-  if(NOT VS2015 AND NOT VS2017 AND NOT VS2019)
-    message(FATAL_ERROR "You must use Microsoft Visual Studio 2015, 2017 or 2019 as compiler")
+  if(NOT VS2015 AND NOT VS2017 AND NOT VS2019 AND NOT VS2022)
+    message(FATAL_ERROR "You must use Microsoft Visual Studio 2015, 2017, 2019 or greater as compiler")
   endif()
 
   # in alternative we can use ExternalProject
