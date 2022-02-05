@@ -910,6 +910,7 @@ void ADSBDemodGUI::handleADSB(
 
     bool newAircraft = false;
     bool updatedCallsign = false;
+    bool resetAnimation = false;
 
     int df = (data[0] >> 3) & ADS_B_DF_MASK; // Downlink format
     int ca = data[0] & 0x7; // Capability
@@ -1174,11 +1175,13 @@ void ADSBDemodGUI::handleADSB(
 
                 if (!aircraft->m_emitterCategory.compare("Heavy"))
                 {
-                    aircraftType = "B744";  // Or B77W, B788, A350, A388
+                    QStringList heavy = {"B744", "B77W", "B788", "A388"};
+                    aircraftType = heavy[m_random.bounded(heavy.size())];
                 }
                 else if (!aircraft->m_emitterCategory.compare("Large"))
                 {
-                    aircraftType = "A320";  // Or B737
+                    QStringList large = {"A319", "A320", "A321", "B737", "B738", "B739"};
+                    aircraftType = large[m_random.bounded(large.size())];
                 }
                 else if (!aircraft->m_emitterCategory.compare("Small"))
                 {
@@ -1256,6 +1259,9 @@ void ADSBDemodGUI::handleADSB(
                         aircraft->m_labelAltitudeOffset = m_labelAltitudeOffset.value(aircraftType);
                     }
                 }
+                // As we're changing the model, we need to reset animations to
+                // ensure gear/flaps are in correct position on new model
+                resetAnimation = true;
             }
         }
         else if (((tc >= 5) && (tc <= 18)) || ((tc >= 20) && (tc <= 22)))
@@ -1661,6 +1667,16 @@ void ADSBDemodGUI::handleADSB(
 
             // Send to Map feature
             sendToMap(aircraft, animations);
+
+            if (resetAnimation)
+            {
+                // Wait until after model has changed before reseting
+                // otherwise animation might play on old model
+                aircraft->m_gearDown = false;
+                aircraft->m_flaps = 0.0;
+                aircraft->m_engineStarted = false;
+                aircraft->m_rotorStarted = false;
+            }
         }
     }
     else if (df == 18)
@@ -2928,10 +2944,15 @@ QString ADSBDemodGUI::get3DModel(const QString &aircraftType, const QString &ope
     return "";
 }
 
-QString ADSBDemodGUI::get3DModel(const QString &aircraftType) const
+QString ADSBDemodGUI::get3DModel(const QString &aircraftType)
 {
-    if (m_3DModels.contains(aircraftType)) {
-        return m_3DModels.value(aircraftType);
+    if (m_3DModelsByType.contains(aircraftType))
+    {
+        // Choose a random livery
+        QStringList models = m_3DModelsByType.value(aircraftType);
+        int size = models.size();
+        int idx = m_random.bounded(size);
+        return models[idx];
     }
     if (m_settings.m_verboseModelMatching) {
         qDebug() << "ADS-B: No aircraft for " << aircraftType;
@@ -2998,6 +3019,7 @@ void ADSBDemodGUI::update3DModels()
             }
             QDir aircraftDir(dir.filePath(aircraft));
             QStringList gltfs = aircraftDir.entryList({"*.gltf"});
+            QStringList allAircraft;
             for (auto gltf : gltfs)
             {
                 QStringList filenameParts = gltf.split(".")[0].split("_");
@@ -3008,13 +3030,13 @@ void ADSBDemodGUI::update3DModels()
                         qDebug() << "Aircraft " << aircraft << "Livery " << livery;
                     }
                     // Only use relative path, as Map feature will add the prefix
-                    m_3DModels.insert(aircraft + "_" + livery, subDir + "/" + aircraft + "/" + gltf);
+                    QString filename = subDir + "/" + aircraft + "/" + gltf;
+                    m_3DModels.insert(aircraft + "_" + livery, filename);
+                    allAircraft.append(filename);
                 }
             }
-            // Also add an entry just using aircraft type, for when we can't find a operator specific livery
-            // Just use first from the list for now
             if (gltfs.size() > 0) {
-                m_3DModels.insert(aircraft, subDir + "/" + aircraft + "/" + gltfs[0]);
+                m_3DModelsByType.insert(aircraft, allAircraft);
             }
         }
     }

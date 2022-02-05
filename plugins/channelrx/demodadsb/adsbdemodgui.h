@@ -26,6 +26,7 @@
 #include <QAbstractListModel>
 #include <QProgressDialog>
 #include <QTextToSpeech>
+#include <QRandomGenerator>
 
 #include "channel/channelgui.h"
 #include "dsp/dsptypes.h"
@@ -757,7 +758,7 @@ public:
     bool useSIUints() const { return m_settings.m_siUnits; }
     Q_INVOKABLE void clearHighlighted();
     QString get3DModel(const QString &aircraft, const QString &operatorICAO) const;
-    QString get3DModel(const QString &aircraft) const;
+    QString get3DModel(const QString &aircraft);
     void get3DModel(Aircraft *aircraft);
 
 public slots:
@@ -816,7 +817,9 @@ private:
     quint16 m_osmPort;
     OpenAIP m_openAIP;
     ADSBOSMTemplateServer *m_templateServer;
+    QRandomGenerator m_random;
     QHash<QString, QString> m_3DModels; // Hashed aircraft_icao or just aircraft
+    QHash<QString, QStringList> m_3DModelsByType; // Hashed aircraft to list of all of that type
     QList<ModelMatch *> m_3DModelMatch; // Map of database aircraft names to 3D model names
     QHash<QString, float> m_modelAltitudeOffset;
     QHash<QString, float> m_labelAltitudeOffset;
