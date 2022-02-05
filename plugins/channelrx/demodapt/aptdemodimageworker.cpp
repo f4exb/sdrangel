@@ -442,7 +442,7 @@ void APTDemodImageWorker::sendImageToGUI()
         QImage image = processImage(imageTypes, m_settings.m_channels);
         m_messageQueueToGUI->push(APTDemod::MsgImage::create(image, imageTypes, m_satelliteName));
         if (m_sgp4) {
-            sendImageToMap(image, imageTypes);
+            sendImageToMap(image);
         }
     }
 }
@@ -658,7 +658,7 @@ void APTDemodImageWorker::makeTransparent(QImage &image)
     }
 }
 
-void APTDemodImageWorker::sendImageToMap(QImage image, QStringList imageTypes)
+void APTDemodImageWorker::sendImageToMap(QImage image)
 {
     // Send to Map feature
     MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();

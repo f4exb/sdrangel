@@ -153,7 +153,7 @@ private:
     void calcBoundingBox(double &east, double &south, double &west, double &north, const QImage &image);
     QImage projectImage(const QImage &image);
     void makeTransparent(QImage &image);
-    void sendImageToMap(QImage image, QStringList imageTypes);
+    void sendImageToMap(QImage image);
     void sendLineToGUI();
     void prependPath(QString &filename);
     void saveImageToDisk();

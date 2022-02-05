@@ -84,6 +84,7 @@ void APTDemodSettingsDialog::on_autoSavePathBrowse_clicked()
 
 void APTDemodSettingsDialog::on_autoSave_clicked(bool checked)
 {
+    (void) checked;
     /* Commented out until theme greys out disabled widgets
     ui->saveProjectionLabel->setEnabled(checked);
     ui->saveCombined->setEnabled(checked);
