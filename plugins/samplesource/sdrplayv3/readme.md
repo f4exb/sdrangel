@@ -83,12 +83,19 @@ This selects the IF filter bandwidth. The following bandwidths are available:
 
 <h3>15: IF frequency</h3>
 
+Warning there is no good support of non zero IF. **It is advised to keep zero IF for normal use**.
+
 This selects the IF frequency between these values:
 
-  - 0 for zero IF
-  - 450 kHz: you have to set sample rate to 1792 kHz (16) and use decimation (17) with an infradyne position (18)
-  - 1620 kHz: you have to set sample rate to 6400 kHz (16) and use decimation (17) with an infradyne position (18)
-  - 2048 kHz: you have to set sample rate to 8192 kHz (16) and use decimation (17) with an infradyne position (18)
+  - **0 for zero IF**
+  - 450 kHz. Some practical tricks that may or may not work:
+    - Frequency is shifted by -450 kHZ.
+    - Do not set center frequency lower than 450 kHz down the target frequency
+    - Use at least 1536 kHz bandwidth (14)
+    - After sample rate change (16) you may need to start/stop device to get thins right.
+    - Use decimation > 1 (17) with Inf position (18)
+  - 1620 kHz: do not use
+  - 2048 kHz: do not use
 
 <h3>16: Sample rate</h3>
 
