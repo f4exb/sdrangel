@@ -303,6 +303,7 @@ void SpectrumSettings::formatTo(SWGSDRangel::SWGObject *swgObject) const
 	swgSpectrum->setWaterfallShare(m_waterfallShare);
 	swgSpectrum->setMarkersDisplay((int) m_markersDisplay);
 	swgSpectrum->setUseCalibration(m_useCalibration ? 1 : 0);
+	swgSpectrum->setCalibrationInterpMode((int) m_calibrationInterpMode);
 
 	if (m_histogramMarkers.size() > 0)
 	{
@@ -454,6 +455,9 @@ void SpectrumSettings::updateFrom(const QStringList& keys, const SWGSDRangel::SW
 	}
 	if (keys.contains("spectrumConfig.useCalibration")) {
 		m_useCalibration = swgSpectrum->getUseCalibration() != 0;
+	}
+	if (keys.contains("spectrumConfig.calibrationInterpMode")) {
+		m_calibrationInterpMode = (CalibrationInterpolationMode) swgSpectrum->getCalibrationInterpMode();
 	}
 
 	if (keys.contains("spectrumConfig.histogramMarkers"))

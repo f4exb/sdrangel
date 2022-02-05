@@ -53,8 +53,14 @@ private:
     int m_calibrationPointIndex;
     qint64 m_centerFrequency;
     double m_globalCorrection;
+    bool m_setElseCorrectGlobal;
 
     void displayCalibrationPoint();
+
+    static bool calibrationPointsLessThan(const SpectrumCalibrationPoint& m1, const SpectrumCalibrationPoint& m2)
+    {
+        return m1.m_frequency < m2.m_frequency;
+    }
 
 private slots:
     void on_calibPoint_valueChanged(int value);
@@ -64,9 +70,11 @@ private slots:
     void on_calibratedPower_changed(qint64 value);
     void on_calibPointFrequency_changed(qint64 value);
     void on_calibPointDuplicate_clicked();
+    void on_calibPointsSort_clicked();
     void on_importMarkerZero_clicked();
     void on_centerFrequency_clicked();
     void on_calibInterpMode_currentIndexChanged(int index);
+    void on_corrOrSet_toggled(bool checked);
     void on_calibrationGlobalCorr_changed(qint64 value);
     void on_globalRelativeCorrection_clicked();
     void on_globalCalibratedCorrection_clicked();

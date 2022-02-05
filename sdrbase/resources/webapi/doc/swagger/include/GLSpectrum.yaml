@@ -163,6 +163,12 @@ GLSpectrum:
     useCalibration:
       type: integer
       description: boolean
+    calibrationInterpMode:
+      type: integer
+      description: >
+        Interpolation scheme between points SpectrumSettings::CalibrationInterpolationMode
+          * 0 - Linear
+          * 1 - Log (dB linear)
     histogramMarkers:
       type: array
       items:

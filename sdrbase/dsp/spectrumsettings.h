@@ -48,8 +48,8 @@ public:
 
 	enum CalibrationInterpolationMode
 	{
-		CalibInterpLinear,    //!< linear power, linear frequency
-		CalibInterpLogLinear  //!< log power, linear frequency
+		CalibInterpLinear, //!< linear power
+		CalibInterpLog     //!< log power (dB linear)
 	};
 
 	int m_fftSize;

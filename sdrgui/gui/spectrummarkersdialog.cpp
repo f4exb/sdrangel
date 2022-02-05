@@ -32,6 +32,7 @@ SpectrumMarkersDialog::SpectrumMarkersDialog(
     QList<SpectrumWaterfallMarker>& waterfallMarkers,
     QList<SpectrumAnnotationMarker>& annotationMarkers,
     SpectrumSettings::MarkersDisplay& markersDisplay,
+    float calibrationShiftdB,
     QWidget* parent) :
     QDialog(parent),
     ui(new Ui::SpectrumMarkersDialog),
@@ -39,6 +40,7 @@ SpectrumMarkersDialog::SpectrumMarkersDialog(
     m_waterfallMarkers(waterfallMarkers),
     m_annotationMarkers(annotationMarkers),
     m_markersDisplay(markersDisplay),
+    m_calibrationShiftdB(calibrationShiftdB),
     m_histogramMarkerIndex(0),
     m_waterfallMarkerIndex(0),
     m_annotationMarkerIndex(0),
@@ -56,8 +58,10 @@ SpectrumMarkersDialog::SpectrumMarkersDialog(
     ui->aMarkerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->aMarkerFrequency->setValueRange(false, 10, -9999999999L, 9999999999L);
     ui->aMarker->setMaximum(m_annotationMarkers.size() - 1);
-    ui->aMarkerBandwidth->setColorMapper(ColorMapper::GrayYellow);
+    ui->aMarkerBandwidth->setColorMapper(ColorMapper::GrayGreenYellow);
     ui->aMarkerBandwidth->setValueRange(true, 9, 0, 999999999L);
+    ui->fixedPower->setColorMapper(ColorMapper::GrayYellow);
+    ui->fixedPower->setValueRange(false, 4, -2000, 400, 1);
     ui->showSelect->setCurrentIndex((int) m_markersDisplay);
     displayHistogramMarker();
     displayWaterfallMarker();
@@ -87,7 +91,6 @@ void SpectrumMarkersDialog::displayHistogramMarker()
         ui->marker->setValue(0);
         ui->markerText->setText("-");
         ui->fixedPower->setValue(0);
-        ui->fixedPowerText->setText(tr("0.0"));
     }
     else
     {
@@ -100,9 +103,8 @@ void SpectrumMarkersDialog::displayHistogramMarker()
         ui->markerText->setText(tr("%1").arg(m_histogramMarkerIndex));
         ui->markerFrequency->setValue(m_histogramMarkers[m_histogramMarkerIndex].m_frequency);
         ui->powerMode->setCurrentIndex((int) m_histogramMarkers[m_histogramMarkerIndex].m_markerType);
-        float powerDB = CalcDb::dbPower(m_histogramMarkers[m_histogramMarkerIndex].m_power);
+        float powerDB = CalcDb::dbPower(m_histogramMarkers[m_histogramMarkerIndex].m_power) + m_calibrationShiftdB;
         ui->fixedPower->setValue(powerDB*10);
-        ui->fixedPowerText->setText(QString::number(powerDB, 'f', 1));
         int r,g,b,a;
         m_histogramMarkers[m_histogramMarkerIndex].m_markerColor.getRgb(&r, &g, &b, &a);
         ui->markerColor->setStyleSheet(tr("QLabel { background-color : rgb(%1,%2,%3); }").arg(r).arg(g).arg(b));
@@ -304,14 +306,13 @@ void SpectrumMarkersDialog::on_showMarker_clicked(bool clicked)
     m_histogramMarkers[m_histogramMarkerIndex].m_show = clicked;
 }
 
-void SpectrumMarkersDialog::on_fixedPower_valueChanged(int value)
+void SpectrumMarkersDialog::on_fixedPower_changed(qint64 value)
 {
     if (m_histogramMarkers.size() == 0) {
         return;
     }
 
-    float powerDB = value / 10.0f;
-    ui->fixedPowerText->setText(QString::number(powerDB, 'f', 1));
+    float powerDB = (value / 10.0f) - m_calibrationShiftdB;
     m_histogramMarkers[m_histogramMarkerIndex].m_power = CalcDb::powerFromdB(powerDB);
     emit updateHistogram();
 }

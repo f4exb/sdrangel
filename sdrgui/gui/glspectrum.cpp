@@ -2433,7 +2433,7 @@ void GLSpectrum::updateCalibrationPoints()
                 m_calibrationGain = gainLow + interpolationRatio*(gainHigh - gainLow); // linear driven
                 m_calibrationShiftdB = CalcDb::dbPower(m_calibrationGain);
             }
-            else if (m_calibrationInterpMode == SpectrumSettings::CalibInterpLogLinear)
+            else if (m_calibrationInterpMode == SpectrumSettings::CalibInterpLog)
             {
                 m_calibrationShiftdB = CalcDb::dbPower(gainLow)
                     + interpolationRatio*(CalcDb::dbPower(gainHigh) - CalcDb::dbPower(gainLow)); // log driven

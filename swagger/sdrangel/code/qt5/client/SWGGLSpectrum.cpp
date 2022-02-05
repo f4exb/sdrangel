@@ -84,6 +84,8 @@ SWGGLSpectrum::SWGGLSpectrum() {
     m_markers_display_isSet = false;
     use_calibration = 0;
     m_use_calibration_isSet = false;
+    calibration_interp_mode = 0;
+    m_calibration_interp_mode_isSet = false;
     histogram_markers = nullptr;
     m_histogram_markers_isSet = false;
     waterfall_markers = nullptr;
@@ -156,6 +158,8 @@ SWGGLSpectrum::init() {
     m_markers_display_isSet = false;
     use_calibration = 0;
     m_use_calibration_isSet = false;
+    calibration_interp_mode = 0;
+    m_calibration_interp_mode_isSet = false;
     histogram_markers = new QList<SWGSpectrumHistogramMarker*>();
     m_histogram_markers_isSet = false;
     waterfall_markers = new QList<SWGSpectrumWaterfallMarker*>();
@@ -195,6 +199,7 @@ SWGGLSpectrum::cleanup() {
     if(ws_spectrum_address != nullptr) { 
         delete ws_spectrum_address;
     }
+
 
 
 
@@ -294,6 +299,8 @@ SWGGLSpectrum::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&markers_display, pJson["markersDisplay"], "qint32", "");
     
     ::SWGSDRangel::setValue(&use_calibration, pJson["useCalibration"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&calibration_interp_mode, pJson["calibrationInterpMode"], "qint32", "");
     
     
     ::SWGSDRangel::setValue(&histogram_markers, pJson["histogramMarkers"], "QList", "SWGSpectrumHistogramMarker");
@@ -402,6 +409,9 @@ SWGGLSpectrum::asJsonObject() {
     }
     if(m_use_calibration_isSet){
         obj->insert("useCalibration", QJsonValue(use_calibration));
+    }
+    if(m_calibration_interp_mode_isSet){
+        obj->insert("calibrationInterpMode", QJsonValue(calibration_interp_mode));
     }
     if(histogram_markers && histogram_markers->size() > 0){
         toJsonArray((QList<void*>*)histogram_markers, obj, "histogramMarkers", "SWGSpectrumHistogramMarker");
@@ -699,6 +709,16 @@ SWGGLSpectrum::setUseCalibration(qint32 use_calibration) {
     this->m_use_calibration_isSet = true;
 }
 
+qint32
+SWGGLSpectrum::getCalibrationInterpMode() {
+    return calibration_interp_mode;
+}
+void
+SWGGLSpectrum::setCalibrationInterpMode(qint32 calibration_interp_mode) {
+    this->calibration_interp_mode = calibration_interp_mode;
+    this->m_calibration_interp_mode_isSet = true;
+}
+
 QList<SWGSpectrumHistogramMarker*>*
 SWGGLSpectrum::getHistogramMarkers() {
     return histogram_markers;
@@ -826,6 +846,9 @@ SWGGLSpectrum::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_use_calibration_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_calibration_interp_mode_isSet){
             isObjectUpdated = true; break;
         }
         if(histogram_markers && (histogram_markers->size() > 0)){

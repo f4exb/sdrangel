@@ -131,6 +131,9 @@ public:
     qint32 getUseCalibration();
     void setUseCalibration(qint32 use_calibration);
 
+    qint32 getCalibrationInterpMode();
+    void setCalibrationInterpMode(qint32 calibration_interp_mode);
+
     QList<SWGSpectrumHistogramMarker*>* getHistogramMarkers();
     void setHistogramMarkers(QList<SWGSpectrumHistogramMarker*>* histogram_markers);
 
@@ -230,6 +233,9 @@ private:
 
     qint32 use_calibration;
     bool m_use_calibration_isSet;
+
+    qint32 calibration_interp_mode;
+    bool m_calibration_interp_mode_isSet;
 
     QList<SWGSpectrumHistogramMarker*>* histogram_markers;
     bool m_histogram_markers_isSet;

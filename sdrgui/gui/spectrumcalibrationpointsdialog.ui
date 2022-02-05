@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>466</width>
-    <height>159</height>
+    <height>162</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -198,7 +198,7 @@
         <widget class="QLabel" name="relativePowerLabel">
          <property name="minimumSize">
           <size>
-           <width>15</width>
+           <width>24</width>
            <height>0</height>
           </size>
          </property>
@@ -243,12 +243,6 @@
        </item>
        <item>
         <widget class="QLabel" name="relativePowerUnits">
-         <property name="minimumSize">
-          <size>
-           <width>32</width>
-           <height>0</height>
-          </size>
-         </property>
          <property name="text">
           <string>dB</string>
          </property>
@@ -268,7 +262,7 @@
         <widget class="QLabel" name="calibratedPowerLabel">
          <property name="minimumSize">
           <size>
-           <width>15</width>
+           <width>24</width>
            <height>0</height>
           </size>
          </property>
@@ -313,12 +307,6 @@
        </item>
        <item>
         <widget class="QLabel" name="calibratedPowerUnits">
-         <property name="minimumSize">
-          <size>
-           <width>32</width>
-           <height>0</height>
-          </size>
-         </property>
          <property name="text">
           <string>dB</string>
          </property>
@@ -326,6 +314,19 @@
           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
          </property>
         </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </item>
@@ -411,6 +412,26 @@
         </spacer>
        </item>
        <item>
+        <widget class="QPushButton" name="calibPointsSort">
+         <property name="maximumSize">
+          <size>
+           <width>24</width>
+           <height>24</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Sort points by increasing frequency</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="../resources/res.qrc">
+           <normaloff>:/sort.png</normaloff>:/sort.png</iconset>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="calibPointDuplicate">
          <property name="maximumSize">
           <size>
@@ -480,20 +501,35 @@
          </property>
          <item>
           <property name="text">
-           <string>Lin</string>
+           <string>Linear</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>LogLin</string>
+           <string>Log</string>
           </property>
          </item>
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="calibrationGlobalCorrLabel">
+        <widget class="QToolButton" name="corrOrSet">
+         <property name="minimumSize">
+          <size>
+           <width>52</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Correct or set value</string>
+         </property>
          <property name="text">
           <string>Cor</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
          </property>
         </widget>
        </item>
@@ -524,7 +560,7 @@
           <enum>Qt::StrongFocus</enum>
          </property>
          <property name="toolTip">
-          <string>Correction (dB)</string>
+          <string>Correction or set (dB)</string>
          </property>
         </widget>
        </item>
@@ -544,7 +580,7 @@
           </size>
          </property>
          <property name="toolTip">
-          <string>Apply gain correction to all relative values</string>
+          <string>Set or apply correction to all relative values</string>
          </property>
          <property name="text">
           <string>Rel</string>
@@ -560,7 +596,7 @@
           </size>
          </property>
          <property name="toolTip">
-          <string>Apply gain correction to all calibrated values</string>
+          <string>Set or apply correction to all calibrated values</string>
          </property>
          <property name="text">
           <string>Cal</string>
@@ -605,6 +641,9 @@
          <property name="icon">
           <iconset resource="../resources/res.qrc">
            <normaloff>:/import.png</normaloff>:/import.png</iconset>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
