@@ -29,6 +29,7 @@ set(adsb_HEADERS
 include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${Boost_INCLUDE_DIRS}
+    ${Qt5Gui_PRIVATE_INCLUDE_DIRS}
 )
 
 if(NOT SERVER_MODE)
@@ -93,4 +94,9 @@ if(WIN32)
     # Run deployqt for QtGraphicalEffects, which isn't used in other plugins
     include(DeployQt)
     windeployqt(${TARGET_NAME} ${SDRANGEL_BINARY_BIN_DIR} ${PROJECT_SOURCE_DIR}/map)
+endif()
+
+# Install debug symbols
+if (WIN32)
+    install(FILES $<TARGET_PDB_FILE:${TARGET_NAME}> CONFIGURATIONS Debug RelWithDebInfo DESTINATION ${INSTALL_FOLDER} )
 endif()

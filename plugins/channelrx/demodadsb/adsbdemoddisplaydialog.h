@@ -25,27 +25,8 @@ class ADSBDemodDisplayDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit ADSBDemodDisplayDialog(int removeTimeout, float airportRange, ADSBDemodSettings::AirportType airportMinimumSize,
-                                        bool displayHeliports, bool siUnits, QString fontName, int fontSize, bool displayDemodStats,
-                                        bool autoResizeTableColumns, const QString& apiKey, QStringList airspaces, float airspaceRange,
-                                        ADSBDemodSettings::MapType mapType, bool displayNavAids, bool displayPhotos, QWidget* parent = 0);
+    explicit ADSBDemodDisplayDialog(ADSBDemodSettings *settings, QWidget* parent = 0);
     ~ADSBDemodDisplayDialog();
-
-    int m_removeTimeout;
-    float m_airportRange;
-    ADSBDemodSettings::AirportType m_airportMinimumSize;
-    bool m_displayHeliports;
-    bool m_siUnits;
-    QString m_fontName;
-    int m_fontSize;
-    bool m_displayDemodStats;
-    bool m_autoResizeTableColumns;
-    QString m_apiKey;
-    QStringList m_airspaces;
-    float m_airspaceRange;
-    ADSBDemodSettings::MapType m_mapType;
-    bool m_displayNavAids;
-    bool m_displayPhotos;
 
 private slots:
     void accept();
@@ -53,6 +34,9 @@ private slots:
 
 private:
     Ui::ADSBDemodDisplayDialog* ui;
+    ADSBDemodSettings *m_settings;
+    QString m_fontName;
+    int m_fontSize;
 };
 
 #endif // INCLUDE_ADSBDEMODDISPLAYDIALOG_H

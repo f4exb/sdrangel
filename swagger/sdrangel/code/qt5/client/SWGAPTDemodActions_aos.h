@@ -48,6 +48,12 @@ public:
     qint32 getNorthToSouthPass();
     void setNorthToSouthPass(qint32 north_to_south_pass);
 
+    QString* getTle();
+    void setTle(QString* tle);
+
+    QString* getDateTime();
+    void setDateTime(QString* date_time);
+
 
     virtual bool isSet() override;
 
@@ -57,6 +63,12 @@ private:
 
     qint32 north_to_south_pass;
     bool m_north_to_south_pass_isSet;
+
+    QString* tle;
+    bool m_tle_isSet;
+
+    QString* date_time;
+    bool m_date_time_isSet;
 
 };
 

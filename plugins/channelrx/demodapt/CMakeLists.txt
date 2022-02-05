@@ -23,6 +23,7 @@ set(demodapt_HEADERS
 include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${APT_INCLUDE_DIR}
+    ${SGP4_INCLUDE_DIR}
 )
 
 if(NOT SERVER_MODE)
@@ -32,12 +33,15 @@ if(NOT SERVER_MODE)
         aptdemodgui.ui
         aptdemodsettingsdialog.cpp
         aptdemodsettingsdialog.ui
+        aptdemodselectdialog.cpp
+        aptdemodselectdialog.ui
         icons.qrc
     )
     set(demodapt_HEADERS
         ${demodapt_HEADERS}
         aptdemodgui.h
         aptdemodsettingsdialog.h
+        aptdemodselectdialog.h
     )
 
     set(TARGET_NAME demodapt)
@@ -59,12 +63,22 @@ if(APT_EXTERNAL)
     add_dependencies(${TARGET_NAME} apt)
 endif()
 
+if(SGP4_EXTERNAL)
+    add_dependencies(${TARGET_NAME} sgp4)
+endif()
+
 target_link_libraries(${TARGET_NAME}
     Qt5::Core
     ${TARGET_LIB}
     sdrbase
     ${TARGET_LIB_GUI}
     ${APT_LIBRARIES}
+    ${SGP4_LIBRARIES}
 )
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
+
+# Install debug symbols
+if (WIN32)
+    install(FILES $<TARGET_PDB_FILE:${TARGET_NAME}> CONFIGURATIONS Debug RelWithDebInfo DESTINATION ${INSTALL_FOLDER} )
+endif()

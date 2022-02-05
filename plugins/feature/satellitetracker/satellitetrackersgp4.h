@@ -47,7 +47,9 @@ struct SatelliteState {
     double m_period;
     QList<SatellitePass *> m_passes;
     QList<QGeoCoordinate *> m_groundTrack;
+    QList<QDateTime *> m_groundTrackDateTime;
     QList<QGeoCoordinate *> m_predictedGroundTrack;
+    QList<QDateTime *> m_predictedGroundTrackDateTime;
 };
 
 void getGroundTrack(QDateTime dateTime,

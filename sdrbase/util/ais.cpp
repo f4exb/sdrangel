@@ -15,6 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QDebug>
+
 #include "ais.h"
 
 AISMessage::AISMessage(const QByteArray ba)
@@ -383,6 +385,10 @@ AISShipStaticAndVoyageData::AISShipStaticAndVoyageData(QByteArray ba) :
     m_name = AISMessage::getString(ba, 14, 8, 20);
     m_type = ba[29] & 0xff;
     m_dimension = ((ba[30] & 0xff) << 22) | ((ba[31] & 0xff) << 14) | ((ba[32] & 0xff) << 6) | ((ba[33] >> 2) & 0x3f);
+    m_a = (m_dimension >> 21) & 0x1ff;
+    m_b = (m_dimension >> 12) & 0x1ff;
+    m_c = (m_dimension >> 6) & 0x3f;
+    m_d = m_dimension & 0x3f;
     m_positionFixing = ((ba[33] & 0x3) << 2) | ((ba[34] >> 6) & 0x3);
     m_eta = ((ba[34] & 0x3f) << 14) | ((ba[35] & 0xff) << 6) | ((ba[36] >> 2) & 0x3f);
     m_draught = ((ba[36] & 0x3) << 6) | ((ba[37] >> 2) & 0x3f);

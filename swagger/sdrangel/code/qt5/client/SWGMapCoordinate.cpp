@@ -34,6 +34,8 @@ SWGMapCoordinate::SWGMapCoordinate() {
     m_longitude_isSet = false;
     altitude = 0.0f;
     m_altitude_isSet = false;
+    date_time = nullptr;
+    m_date_time_isSet = false;
 }
 
 SWGMapCoordinate::~SWGMapCoordinate() {
@@ -48,6 +50,8 @@ SWGMapCoordinate::init() {
     m_longitude_isSet = false;
     altitude = 0.0f;
     m_altitude_isSet = false;
+    date_time = new QString("");
+    m_date_time_isSet = false;
 }
 
 void
@@ -55,6 +59,9 @@ SWGMapCoordinate::cleanup() {
 
 
 
+    if(date_time != nullptr) { 
+        delete date_time;
+    }
 }
 
 SWGMapCoordinate*
@@ -73,6 +80,8 @@ SWGMapCoordinate::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&longitude, pJson["longitude"], "float", "");
     
     ::SWGSDRangel::setValue(&altitude, pJson["altitude"], "float", "");
+    
+    ::SWGSDRangel::setValue(&date_time, pJson["dateTime"], "QString", "QString");
     
 }
 
@@ -98,6 +107,9 @@ SWGMapCoordinate::asJsonObject() {
     }
     if(m_altitude_isSet){
         obj->insert("altitude", QJsonValue(altitude));
+    }
+    if(date_time != nullptr && *date_time != QString("")){
+        toJsonValue(QString("dateTime"), date_time, obj, QString("QString"));
     }
 
     return obj;
@@ -133,6 +145,16 @@ SWGMapCoordinate::setAltitude(float altitude) {
     this->m_altitude_isSet = true;
 }
 
+QString*
+SWGMapCoordinate::getDateTime() {
+    return date_time;
+}
+void
+SWGMapCoordinate::setDateTime(QString* date_time) {
+    this->date_time = date_time;
+    this->m_date_time_isSet = true;
+}
+
 
 bool
 SWGMapCoordinate::isSet(){
@@ -145,6 +167,9 @@ SWGMapCoordinate::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_altitude_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(date_time && *date_time != QString("")){
             isObjectUpdated = true; break;
         }
     }while(false);

@@ -20,9 +20,7 @@
 
 #include "ui_mapbeacondialog.h"
 
-#include <QProgressDialog>
-
-#include "util/httpdownloadmanager.h"
+#include "gui/httpdownloadmanagergui.h"
 #include "beacon.h"
 
 class MapGUI;
@@ -36,22 +34,18 @@ public:
     void updateTable();
 
 private:
-    qint64 fileAgeInDays(QString filename);
-    bool confirmDownload(QString filename);
-    void downloadFinished(const QString& filename, bool success);
+    void downloadFinished(const QString& filename, bool success, const QString &url, const QString &errorMessage);
 
 private slots:
     void accept();
     void on_downloadIARU_clicked();
-    void updateDownloadProgress(qint64 bytesRead, qint64 totalBytes);
     void on_beacons_cellDoubleClicked(int row, int column);
     void on_filter_currentIndexChanged(int index);
 
 private:
     MapGUI *m_gui;
     Ui::MapBeaconDialog* ui;
-    HttpDownloadManager m_dlm;
-    QProgressDialog *m_progressDialog;
+    HttpDownloadManagerGUI m_dlm;
 
     enum BeaconCol {
         BEACON_COL_CALLSIGN,

@@ -6,18 +6,17 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>436</width>
-    <height>520</height>
+    <width>946</width>
+    <height>800</height>
    </rect>
   </property>
   <property name="font">
    <font>
-    <family>Liberation Sans</family>
     <pointsize>9</pointsize>
    </font>
   </property>
   <property name="windowTitle">
-   <string>Select a Location</string>
+   <string>Map Display Settings</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -29,141 +28,101 @@
       <item>
        <widget class="QLabel" name="locationsLabel">
         <property name="text">
-         <string>Select data to display:</string>
+         <string>Select how to display items on the maps:</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QListWidget" name="sourceList">
+       <widget class="QTableWidget" name="mapItemSettings">
         <property name="selectionMode">
-         <enum>QAbstractItemView::MultiSelection</enum>
+         <enum>QAbstractItemView::NoSelection</enum>
         </property>
-        <property name="sortingEnabled">
-         <bool>false</bool>
-        </property>
-        <item>
+        <column>
          <property name="text">
-          <string>ADS-B</string>
+          <string>Enabled</string>
          </property>
-         <property name="checkState">
-          <enum>Checked</enum>
-         </property>
-        </item>
-        <item>
+        </column>
+        <column>
          <property name="text">
-          <string>AIS</string>
+          <string>2D Icon</string>
          </property>
-         <property name="checkState">
-          <enum>Checked</enum>
-         </property>
-        </item>
-        <item>
+        </column>
+        <column>
          <property name="text">
-          <string>APRS</string>
+          <string>2D Label</string>
          </property>
-         <property name="checkState">
-          <enum>Checked</enum>
-         </property>
-        </item>
-        <item>
+        </column>
+        <column>
          <property name="text">
-          <string>Star Tracker</string>
+          <string>2D Min Zoom</string>
          </property>
-         <property name="checkState">
-          <enum>Checked</enum>
-         </property>
-        </item>
-        <item>
+        </column>
+        <column>
          <property name="text">
-          <string>Satellite Tracker</string>
+          <string>2D Track</string>
          </property>
-         <property name="checkState">
-          <enum>Checked</enum>
-         </property>
-        </item>
-        <item>
+        </column>
+        <column>
          <property name="text">
-          <string>Beacons</string>
+          <string>3D Model</string>
          </property>
-         <property name="checkState">
-          <enum>Checked</enum>
-         </property>
-        </item>
-        <item>
+        </column>
+        <column>
          <property name="text">
-          <string>Radio Time Transmitters</string>
+          <string>3D Min Pixels</string>
          </property>
-         <property name="checkState">
-          <enum>Checked</enum>
-         </property>
-        </item>
-        <item>
+        </column>
+        <column>
          <property name="text">
-          <string>Radar</string>
+          <string>3D Label</string>
          </property>
-         <property name="checkState">
-          <enum>Checked</enum>
+        </column>
+        <column>
+         <property name="text">
+          <string>3D Point</string>
          </property>
-        </item>
+        </column>
+        <column>
+         <property name="text">
+          <string>3D Track</string>
+         </property>
+        </column>
        </widget>
       </item>
       <item>
-       <widget class="QGroupBox" name="colorsGroupBox">
+       <widget class="QGroupBox" name="map2DSettings">
         <property name="title">
-         <string>Colours</string>
+         <string>2D Map Settings</string>
         </property>
-        <layout class="QGridLayout" name="gridLayout">
-         <item row="0" column="1">
-          <widget class="QLabel" name="predictedGroundTrackColorLabel">
-           <property name="text">
-            <string>Ground tracks (predicted)</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLabel" name="groundTrackColorLabel">
-           <property name="text">
-            <string>Ground tracks (taken)</string>
-           </property>
-          </widget>
-         </item>
+        <layout class="QFormLayout" name="formLayout_2">
          <item row="0" column="0">
-          <widget class="QToolButton" name="predictedGroundTrackColor">
-           <property name="toolTip">
-            <string>Select color for predicted ground tracks</string>
+          <widget class="QLabel" name="map2DEnabledLabel">
+           <property name="minimumSize">
+            <size>
+             <width>140</width>
+             <height>0</height>
+            </size>
            </property>
+           <property name="text">
+            <string>Enabled</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QCheckBox" name="map2DEnabled">
            <property name="text">
             <string/>
            </property>
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="QToolButton" name="groundTrackColor">
-           <property name="toolTip">
-            <string>Select color for taken ground tracks</string>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QGroupBox" name="mapProvidersGroupBox">
-        <property name="title">
-         <string>Map Provider Settings</string>
-        </property>
-        <layout class="QFormLayout" name="formLayout_2">
-         <item row="0" column="0">
           <widget class="QLabel" name="mapProviderLabel">
            <property name="text">
             <string>Map provider</string>
            </property>
           </widget>
          </item>
-         <item row="0" column="1">
+         <item row="1" column="1">
           <widget class="QComboBox" name="mapProvider">
            <property name="toolTip">
             <string>Select map provider</string>
@@ -188,80 +147,312 @@
              <string>MapboxGL</string>
             </property>
            </item>
-          </widget>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="mapBoxAPIKeyLabel">
-           <property name="text">
-            <string>Mapbox API Key</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
-          <widget class="QLineEdit" name="mapBoxAPIKey">
-           <property name="toolTip">
-            <string>Enter a Mapbox API key in order to use Mapbox maps: https://www.mapbox.com/</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="0">
-          <widget class="QLabel" name="mapBoxStylesLabel">
-           <property name="text">
-            <string>MapboxGL Styles</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="1">
-          <widget class="QLineEdit" name="mapBoxStyles">
-           <property name="toolTip">
-            <string>Comma separated list of MapBox styles</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="thunderforestAPIKeyLabel">
-           <property name="text">
-            <string>Thunderforest API Key</string>
-           </property>
+           <item>
+            <property name="text">
+             <string>MapLibre</string>
+            </property>
+           </item>
           </widget>
          </item>
          <item row="2" column="0">
-          <widget class="QLabel" name="maptilerAPIKeyLabel">
-           <property name="text">
-            <string>Maptiler API Key</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLineEdit" name="thunderforestAPIKey">
-           <property name="toolTip">
-            <string>Enter a Thunderforest API key in order to use non-watermarked Thunderforest maps: https://www.thunderforest.com/</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QLineEdit" name="maptilerAPIKey">
-           <property name="toolTip">
-            <string>Enter a Maptiler API key in order to use Maptiler maps: https://www.maptiler.com/</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="0">
           <widget class="QLabel" name="osmURLLabel">
            <property name="text">
             <string>OSM Custom URL</string>
            </property>
           </widget>
          </item>
-         <item row="4" column="1">
+         <item row="2" column="1">
           <widget class="QLineEdit" name="osmURL">
            <property name="toolTip">
             <string>URL of custom map for use with OpenStreetMap provider</string>
            </property>
           </widget>
          </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="mapBoxStylesLabel">
+           <property name="text">
+            <string>MapboxGL Styles</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QLineEdit" name="mapBoxStyles">
+           <property name="toolTip">
+            <string>Comma separated list of MapBox styles</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="map3DSettings">
+        <property name="title">
+         <string>3D Map Settings</string>
+        </property>
+        <layout class="QFormLayout" name="formLayout">
+         <item row="0" column="0">
+          <widget class="QLabel" name="map3DEnabledLabel">
+           <property name="minimumSize">
+            <size>
+             <width>140</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Enabled</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QCheckBox" name="map3DEnabled">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="terrainLabel">
+           <property name="text">
+            <string>Terrain</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QComboBox" name="terrain">
+           <item>
+            <property name="text">
+             <string>Cesium World Terrain</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Ellipsoid</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Maptiler</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ArcGIS</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="buildingsLabel">
+           <property name="text">
+            <string>Buildings</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QComboBox" name="buildings">
+           <item>
+            <property name="text">
+             <string>None</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Cesium OSM Buildings</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="sunLightEnabledLabel">
+           <property name="text">
+            <string>Lighting</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QComboBox" name="sunLightEnabled">
+           <property name="toolTip">
+            <string>Whether lighting is from the Sun or Camera</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>Camera</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Sun</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QLabel" name="eciCameraLabel">
+           <property name="text">
+            <string>Camera reference frame</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <widget class="QComboBox" name="eciCamera">
+           <property name="toolTip">
+            <string>Selects camera reference frame. For ECEF the camera rotates with the Earth. For ECI, the camera position is fixed relative to the stars and the Earth's rotation will be visible.</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>ECEF</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>ECI</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item row="5" column="0">
+          <widget class="QLabel" name="antiAliasingLabel">
+           <property name="text">
+            <string>Anti-aliasing</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="1">
+          <widget class="QComboBox" name="antiAliasing">
+           <property name="toolTip">
+            <string>Set anti-aliasing to use. This can remove jagged pixels on the edge of 3D models.</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>None</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>FXAA</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="apiKeys">
+        <property name="title">
+         <string>API Keys</string>
+        </property>
+        <layout class="QFormLayout" name="formLayout_3">
+         <item row="0" column="0">
+          <widget class="QLabel" name="thunderforestAPIKeyLabel">
+           <property name="minimumSize">
+            <size>
+             <width>140</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Thunderforest API Key</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="thunderforestAPIKey">
+           <property name="toolTip">
+            <string>Enter a Thunderforest API key in order to use non-watermarked Thunderforest maps: https://www.thunderforest.com/</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="maptilerAPIKeyLabel">
+           <property name="minimumSize">
+            <size>
+             <width>140</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Maptiler API Key</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLineEdit" name="maptilerAPIKey">
+           <property name="toolTip">
+            <string>Enter a Maptiler API key in order to use Maptiler maps: https://www.maptiler.com/</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="mapBoxAPIKeyLabel">
+           <property name="minimumSize">
+            <size>
+             <width>140</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Mapbox API Key</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QLineEdit" name="mapBoxAPIKey">
+           <property name="toolTip">
+            <string>Enter a Mapbox API key in order to use Mapbox maps: https://www.mapbox.com/</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="cesiumIonAPIKeyLabel">
+           <property name="minimumSize">
+            <size>
+             <width>140</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Cesium Ion API Key</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QLineEdit" name="cesiumIonAPIKey">
+           <property name="toolTip">
+            <string>Enter a Cesium Ion Access Token</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QPushButton" name="downloadModels">
+          <property name="toolTip">
+           <string>Download 3D models. It is recommended to restart SDRangel after download.</string>
+          </property>
+          <property name="text">
+           <string>Download 3D Models (1.6GB)</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>
@@ -278,6 +469,24 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>mapItemSettings</tabstop>
+  <tabstop>map2DEnabled</tabstop>
+  <tabstop>mapProvider</tabstop>
+  <tabstop>osmURL</tabstop>
+  <tabstop>mapBoxStyles</tabstop>
+  <tabstop>map3DEnabled</tabstop>
+  <tabstop>terrain</tabstop>
+  <tabstop>buildings</tabstop>
+  <tabstop>sunLightEnabled</tabstop>
+  <tabstop>eciCamera</tabstop>
+  <tabstop>antiAliasing</tabstop>
+  <tabstop>thunderforestAPIKey</tabstop>
+  <tabstop>maptilerAPIKey</tabstop>
+  <tabstop>mapBoxAPIKey</tabstop>
+  <tabstop>cesiumIonAPIKey</tabstop>
+  <tabstop>downloadModels</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

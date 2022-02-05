@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>451</width>
+    <width>440</width>
     <height>569</height>
    </rect>
   </property>
@@ -18,13 +18,12 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>352</width>
+    <width>440</width>
     <height>0</height>
    </size>
   </property>
   <property name="font">
    <font>
-    <family>Liberation Sans</family>
     <pointsize>9</pointsize>
    </font>
   </property>
@@ -105,7 +104,6 @@
         </property>
         <property name="font">
          <font>
-          <family>Liberation Mono</family>
           <pointsize>12</pointsize>
          </font>
         </property>
@@ -198,7 +196,6 @@
         </property>
         <property name="font">
          <font>
-          <family>Liberation Mono</family>
           <pointsize>8</pointsize>
          </font>
         </property>
@@ -276,26 +273,6 @@
        </widget>
       </item>
       <item>
-       <spacer name="horizontalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="Line" name="line_2">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QLabel" name="fmDevLabel">
         <property name="text">
          <string>Dev</string>
@@ -349,6 +326,132 @@
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="Line" name="line_5">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="transparencyThresholdLabel">
+        <property name="text">
+         <string>T&lt;sub&gt;TH&lt;/sub&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDial" name="transparencyThreshold">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Transparency threshold for image on map</string>
+        </property>
+        <property name="maximum">
+         <number>255</number>
+        </property>
+        <property name="pageStep">
+         <number>10</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="transparencyThresholdText">
+        <property name="minimumSize">
+         <size>
+          <width>22</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>255</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_3">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="opacityThresholdLabel">
+        <property name="text">
+         <string>O&lt;sub&gt;TH&lt;/sub&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDial" name="opacityThreshold">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Opacity threshold for image on map</string>
+        </property>
+        <property name="maximum">
+         <number>255</number>
+        </property>
+        <property name="pageStep">
+         <number>10</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="opacityThresholdText">
+        <property name="minimumSize">
+         <size>
+          <width>22</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>255</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_2">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="deleteImageFromMap">
+        <property name="toolTip">
+         <string>Delete images from map</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/bin.png</normaloff>:/bin.png</iconset>
         </property>
        </widget>
       </item>
@@ -729,7 +832,6 @@
  <tabstops>
   <tabstop>deltaFrequency</tabstop>
   <tabstop>rfBW</tabstop>
-  <tabstop>fmDev</tabstop>
   <tabstop>startStop</tabstop>
   <tabstop>showSettings</tabstop>
   <tabstop>resetDecoder</tabstop>

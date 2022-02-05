@@ -56,6 +56,30 @@ SWGAPTDemodSettings::SWGAPTDemodSettings() {
     m_auto_save_path_isSet = false;
     auto_save_min_scan_lines = 0;
     m_auto_save_min_scan_lines_isSet = false;
+    save_combined = 0;
+    m_save_combined_isSet = false;
+    save_separate = 0;
+    m_save_separate_isSet = false;
+    save_projection = 0;
+    m_save_projection_isSet = false;
+    scanlines_per_image_update = 0;
+    m_scanlines_per_image_update_isSet = false;
+    transparency_threshold = 0;
+    m_transparency_threshold_isSet = false;
+    opacity_threshold = 0;
+    m_opacity_threshold_isSet = false;
+    palettes = nullptr;
+    m_palettes_isSet = false;
+    palette = 0;
+    m_palette_isSet = false;
+    horizontal_pixels_per_degree = 0;
+    m_horizontal_pixels_per_degree_isSet = false;
+    vertical_pixels_per_degree = 0;
+    m_vertical_pixels_per_degree_isSet = false;
+    sat_time_offset = 0.0f;
+    m_sat_time_offset_isSet = false;
+    sat_yaw = 0.0f;
+    m_sat_yaw_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = nullptr;
@@ -112,6 +136,30 @@ SWGAPTDemodSettings::init() {
     m_auto_save_path_isSet = false;
     auto_save_min_scan_lines = 0;
     m_auto_save_min_scan_lines_isSet = false;
+    save_combined = 0;
+    m_save_combined_isSet = false;
+    save_separate = 0;
+    m_save_separate_isSet = false;
+    save_projection = 0;
+    m_save_projection_isSet = false;
+    scanlines_per_image_update = 0;
+    m_scanlines_per_image_update_isSet = false;
+    transparency_threshold = 0;
+    m_transparency_threshold_isSet = false;
+    opacity_threshold = 0;
+    m_opacity_threshold_isSet = false;
+    palettes = new QString("");
+    m_palettes_isSet = false;
+    palette = 0;
+    m_palette_isSet = false;
+    horizontal_pixels_per_degree = 0;
+    m_horizontal_pixels_per_degree_isSet = false;
+    vertical_pixels_per_degree = 0;
+    m_vertical_pixels_per_degree_isSet = false;
+    sat_time_offset = 0.0f;
+    m_sat_time_offset_isSet = false;
+    sat_yaw = 0.0f;
+    m_sat_yaw_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = new QString("");
@@ -151,6 +199,20 @@ SWGAPTDemodSettings::cleanup() {
     if(auto_save_path != nullptr) { 
         delete auto_save_path;
     }
+
+
+
+
+
+
+
+    if(palettes != nullptr) { 
+        delete palettes;
+    }
+
+
+
+
 
 
     if(title != nullptr) { 
@@ -210,6 +272,30 @@ SWGAPTDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&auto_save_path, pJson["autoSavePath"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&auto_save_min_scan_lines, pJson["autoSaveMinScanLines"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&save_combined, pJson["saveCombined"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&save_separate, pJson["saveSeparate"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&save_projection, pJson["saveProjection"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&scanlines_per_image_update, pJson["scanlinesPerImageUpdate"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&transparency_threshold, pJson["transparencyThreshold"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&opacity_threshold, pJson["opacityThreshold"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&palettes, pJson["palettes"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&palette, pJson["palette"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&horizontal_pixels_per_degree, pJson["horizontalPixelsPerDegree"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&vertical_pixels_per_degree, pJson["verticalPixelsPerDegree"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&sat_time_offset, pJson["satTimeOffset"], "float", "");
+    
+    ::SWGSDRangel::setValue(&sat_yaw, pJson["satYaw"], "float", "");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
@@ -288,6 +374,42 @@ SWGAPTDemodSettings::asJsonObject() {
     }
     if(m_auto_save_min_scan_lines_isSet){
         obj->insert("autoSaveMinScanLines", QJsonValue(auto_save_min_scan_lines));
+    }
+    if(m_save_combined_isSet){
+        obj->insert("saveCombined", QJsonValue(save_combined));
+    }
+    if(m_save_separate_isSet){
+        obj->insert("saveSeparate", QJsonValue(save_separate));
+    }
+    if(m_save_projection_isSet){
+        obj->insert("saveProjection", QJsonValue(save_projection));
+    }
+    if(m_scanlines_per_image_update_isSet){
+        obj->insert("scanlinesPerImageUpdate", QJsonValue(scanlines_per_image_update));
+    }
+    if(m_transparency_threshold_isSet){
+        obj->insert("transparencyThreshold", QJsonValue(transparency_threshold));
+    }
+    if(m_opacity_threshold_isSet){
+        obj->insert("opacityThreshold", QJsonValue(opacity_threshold));
+    }
+    if(palettes != nullptr && *palettes != QString("")){
+        toJsonValue(QString("palettes"), palettes, obj, QString("QString"));
+    }
+    if(m_palette_isSet){
+        obj->insert("palette", QJsonValue(palette));
+    }
+    if(m_horizontal_pixels_per_degree_isSet){
+        obj->insert("horizontalPixelsPerDegree", QJsonValue(horizontal_pixels_per_degree));
+    }
+    if(m_vertical_pixels_per_degree_isSet){
+        obj->insert("verticalPixelsPerDegree", QJsonValue(vertical_pixels_per_degree));
+    }
+    if(m_sat_time_offset_isSet){
+        obj->insert("satTimeOffset", QJsonValue(sat_time_offset));
+    }
+    if(m_sat_yaw_isSet){
+        obj->insert("satYaw", QJsonValue(sat_yaw));
     }
     if(m_rgb_color_isSet){
         obj->insert("rgbColor", QJsonValue(rgb_color));
@@ -464,6 +586,126 @@ SWGAPTDemodSettings::setAutoSaveMinScanLines(qint32 auto_save_min_scan_lines) {
 }
 
 qint32
+SWGAPTDemodSettings::getSaveCombined() {
+    return save_combined;
+}
+void
+SWGAPTDemodSettings::setSaveCombined(qint32 save_combined) {
+    this->save_combined = save_combined;
+    this->m_save_combined_isSet = true;
+}
+
+qint32
+SWGAPTDemodSettings::getSaveSeparate() {
+    return save_separate;
+}
+void
+SWGAPTDemodSettings::setSaveSeparate(qint32 save_separate) {
+    this->save_separate = save_separate;
+    this->m_save_separate_isSet = true;
+}
+
+qint32
+SWGAPTDemodSettings::getSaveProjection() {
+    return save_projection;
+}
+void
+SWGAPTDemodSettings::setSaveProjection(qint32 save_projection) {
+    this->save_projection = save_projection;
+    this->m_save_projection_isSet = true;
+}
+
+qint32
+SWGAPTDemodSettings::getScanlinesPerImageUpdate() {
+    return scanlines_per_image_update;
+}
+void
+SWGAPTDemodSettings::setScanlinesPerImageUpdate(qint32 scanlines_per_image_update) {
+    this->scanlines_per_image_update = scanlines_per_image_update;
+    this->m_scanlines_per_image_update_isSet = true;
+}
+
+qint32
+SWGAPTDemodSettings::getTransparencyThreshold() {
+    return transparency_threshold;
+}
+void
+SWGAPTDemodSettings::setTransparencyThreshold(qint32 transparency_threshold) {
+    this->transparency_threshold = transparency_threshold;
+    this->m_transparency_threshold_isSet = true;
+}
+
+qint32
+SWGAPTDemodSettings::getOpacityThreshold() {
+    return opacity_threshold;
+}
+void
+SWGAPTDemodSettings::setOpacityThreshold(qint32 opacity_threshold) {
+    this->opacity_threshold = opacity_threshold;
+    this->m_opacity_threshold_isSet = true;
+}
+
+QString*
+SWGAPTDemodSettings::getPalettes() {
+    return palettes;
+}
+void
+SWGAPTDemodSettings::setPalettes(QString* palettes) {
+    this->palettes = palettes;
+    this->m_palettes_isSet = true;
+}
+
+qint32
+SWGAPTDemodSettings::getPalette() {
+    return palette;
+}
+void
+SWGAPTDemodSettings::setPalette(qint32 palette) {
+    this->palette = palette;
+    this->m_palette_isSet = true;
+}
+
+qint32
+SWGAPTDemodSettings::getHorizontalPixelsPerDegree() {
+    return horizontal_pixels_per_degree;
+}
+void
+SWGAPTDemodSettings::setHorizontalPixelsPerDegree(qint32 horizontal_pixels_per_degree) {
+    this->horizontal_pixels_per_degree = horizontal_pixels_per_degree;
+    this->m_horizontal_pixels_per_degree_isSet = true;
+}
+
+qint32
+SWGAPTDemodSettings::getVerticalPixelsPerDegree() {
+    return vertical_pixels_per_degree;
+}
+void
+SWGAPTDemodSettings::setVerticalPixelsPerDegree(qint32 vertical_pixels_per_degree) {
+    this->vertical_pixels_per_degree = vertical_pixels_per_degree;
+    this->m_vertical_pixels_per_degree_isSet = true;
+}
+
+float
+SWGAPTDemodSettings::getSatTimeOffset() {
+    return sat_time_offset;
+}
+void
+SWGAPTDemodSettings::setSatTimeOffset(float sat_time_offset) {
+    this->sat_time_offset = sat_time_offset;
+    this->m_sat_time_offset_isSet = true;
+}
+
+float
+SWGAPTDemodSettings::getSatYaw() {
+    return sat_yaw;
+}
+void
+SWGAPTDemodSettings::setSatYaw(float sat_yaw) {
+    this->sat_yaw = sat_yaw;
+    this->m_sat_yaw_isSet = true;
+}
+
+qint32
 SWGAPTDemodSettings::getRgbColor() {
     return rgb_color;
 }
@@ -608,6 +850,42 @@ SWGAPTDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_auto_save_min_scan_lines_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_save_combined_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_save_separate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_save_projection_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_scanlines_per_image_update_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_transparency_threshold_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_opacity_threshold_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(palettes && *palettes != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_palette_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_horizontal_pixels_per_degree_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_vertical_pixels_per_degree_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_sat_time_offset_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_sat_yaw_isSet){
             isObjectUpdated = true; break;
         }
         if(m_rgb_color_isSet){

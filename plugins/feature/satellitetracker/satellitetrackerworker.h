@@ -48,7 +48,7 @@ public:
         m_satState.m_name = name;
     }
 
-    bool hasAOS();
+    bool hasAOS(const QDateTime& currentTime);
 
 protected:
     QString m_name;             // Name of the satellite
@@ -122,9 +122,13 @@ private:
     void applySettings(const SatelliteTrackerSettings& settings, bool force = false);
     MessageQueue *getMessageQueueToGUI() { return m_msgQueueToGUI; }
     void removeFromMap(QString id);
-    void sendToMap(QList<MessageQueue*> *mapMessageQueues, QString id, QString image, QString text,
+    void sendToMap(QList<MessageQueue*> *mapMessageQueues, QString id, QString image, QString model, QString text,
+                   float labelOffset,
                    double lat, double lon, double altitude, double rotation,
-                   QList<QGeoCoordinate *> *track = nullptr, QList<QGeoCoordinate *> *predictedTrack = nullptr);
+                   QList<QGeoCoordinate *> *track = nullptr,
+                   QList<QDateTime *> *trackDateTime = nullptr,
+                   QList<QGeoCoordinate *> *predictedTrack = nullptr,
+                   QList<QDateTime *> *predictedTrackDateTime = nullptr);
     void applyDeviceAOSSettings(const QString& name);
     void startStopSinks(bool start);
     void calculateRotation(SatWorkerState *satWorkerState);

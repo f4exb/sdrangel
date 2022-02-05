@@ -31,6 +31,8 @@
 #include "dsp/dspengine.h"
 #include "util/httpdownloadmanager.h"
 #include "settings/serializable.h"
+#include "channel/channelwebapiutils.h"
+#include "feature/featurewebapiutils.h"
 
 #include "satellitetrackerworker.h"
 #include "satellitetracker.h"
@@ -75,6 +77,14 @@ SatelliteTracker::~SatelliteTracker()
 void SatelliteTracker::start()
 {
     qDebug("SatelliteTracker::start");
+
+    if (m_settings.m_replayEnabled)
+    {
+        m_startedDateTime = QDateTime::currentDateTimeUtc();
+        if (m_settings.m_sendTimeToMap) {
+            FeatureWebAPIUtils::mapSetDateTime(currentDateTime());
+        }
+    }
 
     m_worker->reset();
     m_worker->setMessageQueueToFeature(getInputMessageQueue());
@@ -1066,18 +1076,40 @@ void SatelliteTracker::updateSatData()
         qDebug() << "SatelliteTracker::updateSatData: update in progress";
 }
 
-// Redirect requests for current time via these methods, so it can be adjusted when testing
-
+/// Redirect requests for current time via these methods, for replays
 QDateTime SatelliteTracker::currentDateTimeUtc()
 {
-    QDateTime now = QDateTime::currentDateTimeUtc();
-    //now = now.addSecs(26*60);
-    return now;
+    if (m_settings.m_replayEnabled)
+    {
+        if (m_settings.m_useFileInputTime)
+        {
+            QString dateTimeStr;
+            if (ChannelWebAPIUtils::getDeviceReportValue(0, "absoluteTime", dateTimeStr))
+            {
+                return QDateTime::fromString(dateTimeStr, Qt::ISODateWithMs);
+            }
+            else
+            {
+                return QDateTime::currentDateTimeUtc();
+            }
+        }
+        else
+        {
+            QDateTime now = QDateTime::currentDateTimeUtc();
+            return m_settings.m_replayStartDateTime.addSecs(m_startedDateTime.secsTo(now));
+        }
+    }
+    else
+    {
+        return QDateTime::currentDateTimeUtc();
+    }
 }
 
 QDateTime SatelliteTracker::currentDateTime()
 {
-    QDateTime now = QDateTime::currentDateTime();
-    //now = now.addSecs(26*60);
-    return now;
+    if (m_settings.m_replayEnabled) {
+        return currentDateTimeUtc().toLocalTime();
+    } else {
+        return QDateTime::currentDateTime();
+    }
 }

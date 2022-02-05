@@ -21,6 +21,9 @@
 
 #include <QTimer>
 #include <QMenu>
+#include <QDateTime>
+#include <QHash>
+#include <QRandomGenerator>
 
 #include "feature/featuregui.h"
 #include "util/messagequeue.h"
@@ -40,6 +43,13 @@ namespace Ui {
 
 class AISGUI : public FeatureGUI {
     Q_OBJECT
+
+    // Holds information not in the table
+    struct Vessel {
+        QString m_image;
+        QString m_model;
+    };
+
 public:
     static AISGUI* create(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature);
     virtual void destroy();
@@ -59,8 +69,15 @@ private:
 
     AIS* m_ais;
     MessageQueue m_inputMessageQueue;
-    QTimer m_statusTimer;
+    QTimer m_timer;
     int m_lastFeatureState;
+
+    QRandomGenerator m_random;
+    QHash<QString, Vessel *> m_vessels;             // Hash of mmsi to vessels
+    static QStringList m_shipModels;
+    static QStringList m_sailboatModels;
+    static QHash<QString, float> m_labelOffset;
+    static QHash<QString, float> m_modelOffset;
 
     QMenu *vesselsMenu;                         // Column select context menu
 
@@ -75,7 +92,14 @@ private:
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);
 
-    void updateVessels(AISMessage *ais);
+    void sendToMap(const QString &name, const QString &label,
+        const QString &image, const QString &text,
+        const QString &model, float modelOffset, float labelOffset,
+        float latitude, float longitude, QDateTime positionDateTime,
+        float heading
+    );
+    void updateVessels(AISMessage *ais, QDateTime dateTime);
+    void getImageAndModel(const QString &type, const QString &shipType, int length, const QString &status, Vessel *vessel);
     void resizeTable();
     QAction *createCheckableItem(QString& text, int idx, bool checked, const char *slot);
 
@@ -92,19 +116,24 @@ private:
         VESSEL_COL_NAME,
         VESSEL_COL_CALLSIGN,
         VESSEL_COL_SHIP_TYPE,
-        VESSEL_COL_DESTINATION
+        VESSEL_COL_LENGTH,
+        VESSEL_COL_DESTINATION,
+        VESSEL_COL_POSITION_UPDATE,
+        VESSEL_COL_LAST_UPDATE,
+        VESSEL_COL_MESSAGES
     };
 
 private slots:
     void onMenuDialogCalled(const QPoint &p);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void handleInputMessages();
-    void updateStatus();
     void on_vessels_cellDoubleClicked(int row, int column);
+    void vessels_customContextMenuRequested(QPoint pos);
     void vessels_sectionMoved(int logicalIndex, int oldVisualIndex, int newVisualIndex);
     void vessels_sectionResized(int logicalIndex, int oldSize, int newSize);
     void vesselsColumnSelectMenu(QPoint pos);
     void vesselsColumnSelectMenuChecked(bool checked = false);
+    void removeOldVessels();
 };
 
 #endif // INCLUDE_FEATURE_AISGUI_H_

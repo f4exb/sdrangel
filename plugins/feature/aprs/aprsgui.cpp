@@ -355,6 +355,7 @@ bool APRSGUI::handleMessage(const Message& message)
                             swgMapItem->setLatitude(aprs->m_latitude);
                             swgMapItem->setLongitude(aprs->m_longitude);
                             swgMapItem->setAltitude(aprs->m_hasAltitude ? Units::feetToMetres(aprs->m_altitudeFt) : 0);
+                            swgMapItem->setAltitudeReference(1); // CLAMP_TO_GROUND
                             if (aprs->m_objectKilled)
                             {
                                 swgMapItem->setImage(new QString(""));
@@ -369,7 +370,6 @@ bool APRSGUI::handleMessage(const Message& message)
                                                                         m_settings.m_temperatureUnits == APRSSettings::CELSIUS,
                                                                         m_settings.m_rainfallUnits == APRSSettings::MILLIMETRE)));
                             }
-                            swgMapItem->setImageMinZoom(11);
 
                             MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_aprs, swgMapItem);
                             (*it)->push(msg);

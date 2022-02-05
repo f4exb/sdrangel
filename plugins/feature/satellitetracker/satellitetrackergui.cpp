@@ -268,7 +268,7 @@ SatelliteTrackerGUI::SatelliteTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *fea
     ui->passChart->setChart(&m_emptyChart);
     ui->passChart->setRenderHint(QPainter::Antialiasing);
 
-    ui->dateTime->setDateTime(SatelliteTracker::currentDateTime());
+    ui->dateTime->setDateTime(m_satelliteTracker->currentDateTime());
 
     // Use My Position from preferences, if none set
     if ((m_settings.m_latitude == 0.0) && (m_settings.m_longitude == 0.0)) {
@@ -604,7 +604,7 @@ void SatelliteTrackerGUI::updateTimeToAOS()
         ui->aos->setText("Now");
     else if (m_nextTargetAOS.isValid())
     {
-        QDateTime currentTime = SatelliteTracker::currentDateTime();
+        QDateTime currentTime = m_satelliteTracker->currentDateTime();            // FIXME: UTC
         int secondsToAOS = m_nextTargetAOS.toSecsSinceEpoch() - currentTime.toSecsSinceEpoch();
         if (secondsToAOS > 0)
         {
@@ -833,7 +833,7 @@ void SatelliteTrackerGUI::plotPolarChart()
 
         QDateTime currentTime;
         if (m_settings.m_dateTime == "")
-            currentTime = SatelliteTracker::currentDateTimeUtc();
+            currentTime = m_satelliteTracker->currentDateTimeUtc();
         else if (m_settings.m_utc)
             currentTime = QDateTime::fromString(m_settings.m_dateTime, Qt::ISODateWithMs);
         else
@@ -863,7 +863,7 @@ void SatelliteTrackerGUI::plotPolarChart()
         // Possibly geostationary, just plot current position
         QDateTime currentTime;
         if (m_settings.m_dateTime == "")
-            currentTime = SatelliteTracker::currentDateTimeUtc();
+            currentTime = m_satelliteTracker->currentDateTimeUtc();
         else if (m_settings.m_utc)
             currentTime = QDateTime::fromString(m_settings.m_dateTime, Qt::ISODateWithMs);
         else
@@ -1004,6 +1004,8 @@ void SatelliteTrackerGUI::resizeTable()
     ui->satTable->setItem(row, SAT_COL_LOS, new QTableWidgetItem("+1 10:17"));
     ui->satTable->setItem(row, SAT_COL_MAX_EL, new QTableWidgetItem("90"));
     ui->satTable->setItem(row, SAT_COL_DIR, new QTableWidgetItem("^"));
+    ui->satTable->setItem(row, SAT_COL_LATITUDE, new QTableWidgetItem("-90.0"));
+    ui->satTable->setItem(row, SAT_COL_LONGITUDE, new QTableWidgetItem("-180.0"));
     ui->satTable->setItem(row, SAT_COL_ALT, new QTableWidgetItem("50000"));
     ui->satTable->setItem(row, SAT_COL_RANGE, new QTableWidgetItem("50000"));
     ui->satTable->setItem(row, SAT_COL_RANGE_RATE, new QTableWidgetItem("10.0"));
@@ -1125,7 +1127,8 @@ void SatelliteTrackerGUI::updateTable(SatelliteState *satState)
         }
 
         // Text alignment
-        for( int col : {SAT_COL_AZ, SAT_COL_EL, SAT_COL_TNE, SAT_COL_DUR, SAT_COL_MAX_EL,
+        for (int col : {SAT_COL_AZ, SAT_COL_EL, SAT_COL_TNE, SAT_COL_DUR, SAT_COL_MAX_EL,
+                        SAT_COL_LATITUDE, SAT_COL_LONGITUDE,
                         SAT_COL_ALT, SAT_COL_RANGE, SAT_COL_RANGE_RATE, SAT_COL_DOPPLER,
                         SAT_COL_PATH_LOSS, SAT_COL_DELAY})
             items[col]->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
@@ -1143,7 +1146,7 @@ void SatelliteTrackerGUI::updateTable(SatelliteState *satState)
     if (satState->m_passes.size() > 0)
     {
         // Get number of days to AOS/LOS
-        QDateTime currentDateTime = QDateTime::currentDateTime();
+        QDateTime currentDateTime = m_satelliteTracker->currentDateTime();
         int daysToAOS = currentDateTime.daysTo(satState->m_passes[0]->m_aos);
         int daysToLOS = currentDateTime.daysTo(satState->m_passes[0]->m_los);
         if( satState->m_passes[ 0 ]->m_aos > currentDateTime )
@@ -1170,6 +1173,8 @@ void SatelliteTrackerGUI::updateTable(SatelliteState *satState)
         items[SAT_COL_MAX_EL]->setData(Qt::DisplayRole, QVariant());
         items[SAT_COL_DIR]->setText("");
     }
+    items[SAT_COL_LATITUDE]->setData(Qt::DisplayRole, satState->m_latitude);
+    items[SAT_COL_LONGITUDE]->setData(Qt::DisplayRole, satState->m_longitude);
     items[SAT_COL_ALT]->setData(Qt::DisplayRole, (int)round(satState->m_altitude));
     items[SAT_COL_RANGE]->setData(Qt::DisplayRole, (int)round(satState->m_range));
     items[SAT_COL_RANGE_RATE]->setData(Qt::DisplayRole, QString::number(satState->m_rangeRate, 'f', 3));
@@ -1184,6 +1189,7 @@ void SatelliteTrackerGUI::on_satTable_cellDoubleClicked(int row, int column)
 
     QString sat = ui->satTable->item(row, SAT_COL_NAME)->text();
     FeatureWebAPIUtils::mapFind(sat);
+
 }
 
 // Columns in table reordered

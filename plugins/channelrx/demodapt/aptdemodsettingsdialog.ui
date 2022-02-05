@@ -6,13 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>385</width>
-    <height>212</height>
+    <width>600</width>
+    <height>576</height>
    </rect>
   </property>
   <property name="font">
    <font>
-    <family>Liberation Sans</family>
     <pointsize>9</pointsize>
    </font>
   </property>
@@ -29,69 +28,31 @@
       </sizepolicy>
      </property>
      <layout class="QFormLayout" name="formLayout">
-      <item row="5" column="0">
-       <widget class="QLabel" name="autoSavePathLabel">
+      <item row="0" column="0">
+       <widget class="QLabel" name="satelliteTrackerControlLabel">
         <property name="text">
-         <string>Path to save image</string>
+         <string>Enable Satellite Tracker control</string>
         </property>
        </widget>
       </item>
-      <item row="5" column="1">
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <item>
-         <widget class="QLineEdit" name="autoSavePath">
-          <property name="toolTip">
-           <string>Path to save images to</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="autoSavePathBrowse">
-          <property name="text">
-           <string/>
-          </property>
-          <property name="icon">
-           <iconset resource="../../../sdrgui/resources/res.qrc">
-            <normaloff>:/load.png</normaloff>:/load.png</iconset>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="minScanlinesLabel">
-        <property name="text">
-         <string>Minimum scanlines</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="1">
-       <widget class="QSpinBox" name="minScanlines">
+      <item row="0" column="1">
+       <widget class="QCheckBox" name="satelliteTrackerControl">
         <property name="toolTip">
-         <string>Enter the minimum number of scanlines in an image (after cropping) for it to be automatically saved</string>
+         <string>Check to enable control by Satellite Tracker feature</string>
         </property>
-        <property name="minimum">
-         <number>1</number>
-        </property>
-        <property name="maximum">
-         <number>30000</number>
-        </property>
-        <property name="singleStep">
-         <number>100</number>
-        </property>
-        <property name="value">
-         <number>200</number>
+        <property name="text">
+         <string/>
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
+      <item row="3" column="0">
        <widget class="QLabel" name="satelliteLabel">
         <property name="text">
          <string>Satellite</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
+      <item row="3" column="1">
        <widget class="QComboBox" name="satellite">
         <property name="toolTip">
          <string>Select which satellite this channel will be used for</string>
@@ -121,23 +82,316 @@
         </item>
        </widget>
       </item>
-      <item row="1" column="0" colspan="2">
-       <widget class="QCheckBox" name="satelliteTrackerControl">
-        <property name="toolTip">
-         <string>Check to enable control by Satellite Tracker feature</string>
-        </property>
+      <item row="4" column="0">
+       <widget class="QLabel" name="autoSaveLabel">
         <property name="text">
-         <string>Enable Satellite Tracker control</string>
+         <string>Auto save images</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="0" colspan="2">
+      <item row="4" column="1">
        <widget class="QCheckBox" name="autoSave">
         <property name="toolTip">
          <string>Check to automatically save images when acquisition is stopped or LOS</string>
         </property>
         <property name="text">
-         <string>Auto save image</string>
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="saveCombinedLabel">
+        <property name="text">
+         <string>Save combined image</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QCheckBox" name="saveCombined">
+        <property name="toolTip">
+         <string>Save a combined image of both channel A and B</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="saveSeparateLabel">
+        <property name="text">
+         <string>Save separate images</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <widget class="QCheckBox" name="saveSeparate">
+        <property name="toolTip">
+         <string>Save images from channels A and B to separate files</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="saveProjectionLabel">
+        <property name="text">
+         <string>Save projected images</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="1">
+       <widget class="QCheckBox" name="saveProjection">
+        <property name="toolTip">
+         <string>Saves the equidistant cylindrical projected image</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="0">
+       <widget class="QLabel" name="autoSavePathLabel">
+        <property name="text">
+         <string>Path to save images</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QLineEdit" name="autoSavePath">
+          <property name="toolTip">
+           <string>Path to save images to</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="autoSavePathBrowse">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
+            <normaloff>:/load.png</normaloff>:/load.png</iconset>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="11" column="0">
+       <widget class="QLabel" name="minScanlinesLabel">
+        <property name="text">
+         <string>Minimum scanlines for auto save</string>
+        </property>
+       </widget>
+      </item>
+      <item row="11" column="1">
+       <widget class="QSpinBox" name="minScanlines">
+        <property name="toolTip">
+         <string>Enter the minimum number of scanlines in an image (after cropping) for it to be automatically saved</string>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>30000</number>
+        </property>
+        <property name="singleStep">
+         <number>100</number>
+        </property>
+        <property name="value">
+         <number>200</number>
+        </property>
+       </widget>
+      </item>
+      <item row="12" column="0">
+       <widget class="QLabel" name="scanlinesPerImageUpdateLabel">
+        <property name="text">
+         <string>Scanlines per image update</string>
+        </property>
+       </widget>
+      </item>
+      <item row="12" column="1">
+       <widget class="QSpinBox" name="scanlinesPerImageUpdate">
+        <property name="toolTip">
+         <string>How often the image processing functions are applied to the image and how often it is sent to the map</string>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>9999</number>
+        </property>
+       </widget>
+      </item>
+      <item row="17" column="0">
+       <widget class="QLabel" name="palettesLabel">
+        <property name="text">
+         <string>Colour palettes</string>
+        </property>
+       </widget>
+      </item>
+      <item row="17" column="1">
+       <widget class="QListWidget" name="palettes">
+        <property name="selectionMode">
+         <enum>QAbstractItemView::MultiSelection</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="18" column="1">
+       <layout class="QHBoxLayout" name="buttonsHhorizontalLayout">
+        <item>
+         <widget class="QPushButton" name="addPalette">
+          <property name="text">
+           <string>Add</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="removePalette">
+          <property name="text">
+           <string>Remove</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="buttonsHorizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item row="13" column="1">
+       <widget class="QComboBox" name="horizontalPixelsPerDegree">
+        <property name="toolTip">
+         <string>Number of pixels per degree longitude in projected image</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>10</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>15</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>20</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="14" column="1">
+       <widget class="QComboBox" name="verticalPixelsPerDegree">
+        <property name="toolTip">
+         <string>Number of pixels per degree latitude in projected image</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>20</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>30</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>40</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>45</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>50</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>55</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>60</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="13" column="0">
+       <widget class="QLabel" name="horizontalPixelsPerDegreeLabel">
+        <property name="text">
+         <string>Horizontal pixels per degree</string>
+        </property>
+       </widget>
+      </item>
+      <item row="14" column="0">
+       <widget class="QLabel" name="verticalPixelsPerDegreeLabel">
+        <property name="text">
+         <string>Vertical pixels per degree</string>
+        </property>
+       </widget>
+      </item>
+      <item row="15" column="0">
+       <widget class="QLabel" name="satTimeOffsetLabel">
+        <property name="text">
+         <string>Satellite position time offset (s)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="15" column="1">
+       <widget class="QDoubleSpinBox" name="satTimeOffset">
+        <property name="toolTip">
+         <string>Time offset in seconds to add when calculating satellites position.
+This may be used to help align images on the map.</string>
+        </property>
+        <property name="decimals">
+         <number>1</number>
+        </property>
+        <property name="minimum">
+         <double>-100.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="16" column="0">
+       <widget class="QLabel" name="satYawLabel">
+        <property name="text">
+         <string>Satellite yaw correction (°)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="16" column="1">
+       <widget class="QDoubleSpinBox" name="satYaw">
+        <property name="toolTip">
+         <string>Add yaw offset to help with aligning images on the map.</string>
+        </property>
+        <property name="decimals">
+         <number>2</number>
+        </property>
+        <property name="minimum">
+         <double>-10.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>10.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.250000000000000</double>
         </property>
        </widget>
       </item>
@@ -160,9 +414,16 @@
   <tabstop>satelliteTrackerControl</tabstop>
   <tabstop>satellite</tabstop>
   <tabstop>autoSave</tabstop>
+  <tabstop>saveCombined</tabstop>
+  <tabstop>saveSeparate</tabstop>
+  <tabstop>saveProjection</tabstop>
   <tabstop>autoSavePath</tabstop>
   <tabstop>autoSavePathBrowse</tabstop>
   <tabstop>minScanlines</tabstop>
+  <tabstop>scanlinesPerImageUpdate</tabstop>
+  <tabstop>palettes</tabstop>
+  <tabstop>addPalette</tabstop>
+  <tabstop>removePalette</tabstop>
  </tabstops>
  <resources>
   <include location="../../../sdrgui/resources/res.qrc"/>

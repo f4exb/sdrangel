@@ -32,6 +32,10 @@ SWGAPTDemodActions_aos::SWGAPTDemodActions_aos() {
     m_satellite_name_isSet = false;
     north_to_south_pass = 0;
     m_north_to_south_pass_isSet = false;
+    tle = nullptr;
+    m_tle_isSet = false;
+    date_time = nullptr;
+    m_date_time_isSet = false;
 }
 
 SWGAPTDemodActions_aos::~SWGAPTDemodActions_aos() {
@@ -44,6 +48,10 @@ SWGAPTDemodActions_aos::init() {
     m_satellite_name_isSet = false;
     north_to_south_pass = 0;
     m_north_to_south_pass_isSet = false;
+    tle = new QString("");
+    m_tle_isSet = false;
+    date_time = new QString("");
+    m_date_time_isSet = false;
 }
 
 void
@@ -52,6 +60,12 @@ SWGAPTDemodActions_aos::cleanup() {
         delete satellite_name;
     }
 
+    if(tle != nullptr) { 
+        delete tle;
+    }
+    if(date_time != nullptr) { 
+        delete date_time;
+    }
 }
 
 SWGAPTDemodActions_aos*
@@ -68,6 +82,10 @@ SWGAPTDemodActions_aos::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&satellite_name, pJson["satelliteName"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&north_to_south_pass, pJson["northToSouthPass"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&tle, pJson["tle"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&date_time, pJson["dateTime"], "QString", "QString");
     
 }
 
@@ -90,6 +108,12 @@ SWGAPTDemodActions_aos::asJsonObject() {
     }
     if(m_north_to_south_pass_isSet){
         obj->insert("northToSouthPass", QJsonValue(north_to_south_pass));
+    }
+    if(tle != nullptr && *tle != QString("")){
+        toJsonValue(QString("tle"), tle, obj, QString("QString"));
+    }
+    if(date_time != nullptr && *date_time != QString("")){
+        toJsonValue(QString("dateTime"), date_time, obj, QString("QString"));
     }
 
     return obj;
@@ -115,6 +139,26 @@ SWGAPTDemodActions_aos::setNorthToSouthPass(qint32 north_to_south_pass) {
     this->m_north_to_south_pass_isSet = true;
 }
 
+QString*
+SWGAPTDemodActions_aos::getTle() {
+    return tle;
+}
+void
+SWGAPTDemodActions_aos::setTle(QString* tle) {
+    this->tle = tle;
+    this->m_tle_isSet = true;
+}
+
+QString*
+SWGAPTDemodActions_aos::getDateTime() {
+    return date_time;
+}
+void
+SWGAPTDemodActions_aos::setDateTime(QString* date_time) {
+    this->date_time = date_time;
+    this->m_date_time_isSet = true;
+}
+
 
 bool
 SWGAPTDemodActions_aos::isSet(){
@@ -124,6 +168,12 @@ SWGAPTDemodActions_aos::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_north_to_south_pass_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(tle && *tle != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(date_time && *date_time != QString("")){
             isObjectUpdated = true; break;
         }
     }while(false);

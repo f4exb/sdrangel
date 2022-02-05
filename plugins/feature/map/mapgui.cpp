@@ -17,20 +17,19 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <cmath>
-#include <QMessageBox>
-#include <QLineEdit>
 #include <QQmlContext>
 #include <QQmlProperty>
-#include <QQuickItem>
 #include <QGeoLocation>
 #include <QGeoCoordinate>
 #include <QGeoCodingManager>
 #include <QGeoServiceProvider>
-#include <QRegExp>
+
+#include <QtWebEngineWidgets/QWebEngineView>
+#include <QtWebEngineWidgets/QWebEngineSettings>
+#include <QtWebEngineWidgets/QWebEngineProfile>
 
 #include "feature/featureuiset.h"
 #include "gui/basicfeaturesettingsdialog.h"
-#include "channel/channelwebapiutils.h"
 #include "mainwindow.h"
 #include "device/deviceuiset.h"
 #include "util/units.h"
@@ -45,539 +44,6 @@
 #include "mapgui.h"
 #include "SWGMapItem.h"
 #include "SWGTargetAzimuthElevation.h"
-
-void MapItem::findFrequency()
-{
-    // Look for a frequency in the text for this object
-    QRegExp re("(([0-9]+(\\.[0-9]+)?) *([kMG])?Hz)");
-    if (re.indexIn(m_text) != -1)
-    {
-        QStringList capture = re.capturedTexts();
-        m_frequency = capture[2].toDouble();
-        if (capture.length() == 5)
-        {
-            QChar unit = capture[4][0];
-            if (unit == 'k')
-                m_frequency *= 1000.0;
-            else if (unit == 'M')
-                m_frequency *= 1000000.0;
-            else if (unit == 'G')
-                m_frequency *= 1000000000.0;
-        }
-        m_frequencyString = capture[0];
-    }
-    else
-        m_frequency = 0.0;
-}
-
-QVariant MapModel::data(const QModelIndex &index, int role) const
-{
-    int row = index.row();
-
-    if ((row < 0) || (row >= m_items.count()))
-        return QVariant();
-    if (role == MapModel::positionRole)
-    {
-        // Coordinates to display the item at
-        QGeoCoordinate coords;
-        coords.setLatitude(m_items[row]->m_latitude);
-        coords.setLongitude(m_items[row]->m_longitude);
-        return QVariant::fromValue(coords);
-    }
-    else if (role == MapModel::mapTextRole)
-    {
-        // Create the text to go in the bubble next to the image
-        if (row == m_target)
-        {
-            AzEl *azEl = m_gui->getAzEl();
-            QString text = QString("%1\nAz: %2 El: %3")
-                                .arg(m_selected[row] ? m_items[row]->m_text : m_items[row]->m_name)
-                                .arg(std::round(azEl->getAzimuth()))
-                                .arg(std::round(azEl->getElevation()));
-            return QVariant::fromValue(text);
-        }
-        else if (m_selected[row])
-            return QVariant::fromValue(m_items[row]->m_text);
-        else
-            return QVariant::fromValue(m_items[row]->m_name);
-    }
-    else if (role == MapModel::mapTextVisibleRole)
-    {
-        return QVariant::fromValue((m_selected[row] || m_displayNames) && (m_sources & m_items[row]->m_sourceMask));
-    }
-    else if (role == MapModel::mapImageVisibleRole)
-    {
-        return QVariant::fromValue((m_sources & m_items[row]->m_sourceMask) != 0);
-    }
-    else if (role == MapModel::mapImageRole)
-    {
-        // Set an image to use
-        return QVariant::fromValue(m_items[row]->m_image);
-    }
-    else if (role == MapModel::mapImageRotationRole)
-    {
-        // Angle to rotate image by
-        return QVariant::fromValue(m_items[row]->m_imageRotation);
-    }
-    else if (role == MapModel::mapImageMinZoomRole)
-    {
-        // Minimum zoom level
-        return QVariant::fromValue(m_items[row]->m_imageMinZoom);
-    }
-    else if (role == MapModel::bubbleColourRole)
-    {
-        // Select a background colour for the text bubble next to the item
-        if (m_selected[row])
-            return QVariant::fromValue(QColor("lightgreen"));
-        else
-            return QVariant::fromValue(QColor("lightblue"));
-    }
-    else if (role == MapModel::selectedRole)
-        return QVariant::fromValue(m_selected[row]);
-    else if (role == MapModel::targetRole)
-        return QVariant::fromValue(m_target == row);
-    else if (role == MapModel::frequencyRole)
-        return QVariant::fromValue(m_items[row]->m_frequency);
-    else if (role == MapModel::frequencyStringRole)
-        return QVariant::fromValue(m_items[row]->m_frequencyString);
-    else if (role == MapModel::predictedGroundTrack1Role)
-    {
-        if ((m_displayAllGroundTracks || (m_displaySelectedGroundTracks && m_selected[row])) && (m_sources & m_items[row]->m_sourceMask))
-            return m_items[row]->m_predictedTrack1;
-        else
-            return QVariantList();
-    }
-    else if (role == MapModel::predictedGroundTrack2Role)
-    {
-        if ((m_displayAllGroundTracks || (m_displaySelectedGroundTracks && m_selected[row])) && (m_sources & m_items[row]->m_sourceMask))
-            return m_items[row]->m_predictedTrack2;
-        else
-            return QVariantList();
-    }
-    else if (role == MapModel::groundTrack1Role)
-    {
-        if ((m_displayAllGroundTracks || (m_displaySelectedGroundTracks && m_selected[row])) && (m_sources & m_items[row]->m_sourceMask))
-            return m_items[row]->m_takenTrack1;
-        else
-            return QVariantList();
-    }
-    else if (role == MapModel::groundTrack2Role)
-    {
-        if ((m_displayAllGroundTracks || (m_displaySelectedGroundTracks && m_selected[row])) && (m_sources & m_items[row]->m_sourceMask))
-            return m_items[row]->m_takenTrack2;
-        else
-            return QVariantList();
-    }
-    else if (role == groundTrackColorRole)
-    {
-        return m_groundTrackColor;
-    }
-    else if (role == predictedGroundTrackColorRole)
-    {
-        return m_predictedGroundTrackColor;
-    }
-    return QVariant();
-}
-
-bool MapModel::setData(const QModelIndex &idx, const QVariant& value, int role)
-{
-    int row = idx.row();
-    if ((row < 0) || (row >= m_items.count()))
-        return false;
-    if (role == MapModel::selectedRole)
-    {
-        m_selected[row] = value.toBool();
-        emit dataChanged(idx, idx);
-        return true;
-    }
-    else if (role == MapModel::targetRole)
-    {
-        if (m_target >= 0)
-        {
-            // Update text bubble for old target
-            QModelIndex oldIdx = index(m_target);
-            m_target = -1;
-            emit dataChanged(oldIdx, oldIdx);
-        }
-        m_target = row;
-        updateTarget();
-        emit dataChanged(idx, idx);
-        return true;
-    }
-    return true;
-}
-
-void MapModel::setFrequency(double frequency)
-{
-    // Set as centre frequency
-    ChannelWebAPIUtils::setCenterFrequency(0, frequency);
-}
-
-void MapModel::update(const PipeEndPoint *sourcePipe, SWGSDRangel::SWGMapItem *swgMapItem, quint32 sourceMask)
-{
-    QString name = *swgMapItem->getName();
-    // Add, update or delete and item
-    MapItem *item = findMapItem(sourcePipe, name);
-    if (item != nullptr)
-    {
-        QString image = *swgMapItem->getImage();
-        if (image.isEmpty())
-        {
-            // Delete the item
-            remove(item);
-        }
-        else
-        {
-            // Update the item
-            item->update(swgMapItem);
-            splitTracks(item);
-            update(item);
-        }
-    }
-    else
-    {
-        // Make sure not a duplicate request to delete
-        QString image = *swgMapItem->getImage();
-        if (!image.isEmpty())
-        {
-            if (!sourceMask)
-                sourceMask = m_gui->getSourceMask(sourcePipe);
-            // Add new item
-            add(new MapItem(sourcePipe, sourceMask, swgMapItem));
-        }
-    }
-}
-
-void MapModel::updateTarget()
-{
-    // Calculate range, azimuth and elevation to object from station
-    AzEl *azEl = m_gui->getAzEl();
-    azEl->setTarget(m_items[m_target]->m_latitude, m_items[m_target]->m_longitude, m_items[m_target]->m_altitude);
-    azEl->calculate();
-
-    // Send to Rotator Controllers
-    MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
-    QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(m_gui->getMap(), "target");
-    if (mapMessageQueues)
-    {
-        QList<MessageQueue*>::iterator it = mapMessageQueues->begin();
-
-        for (; it != mapMessageQueues->end(); ++it)
-        {
-            SWGSDRangel::SWGTargetAzimuthElevation *swgTarget = new SWGSDRangel::SWGTargetAzimuthElevation();
-            swgTarget->setName(new QString(m_items[m_target]->m_name));
-            swgTarget->setAzimuth(azEl->getAzimuth());
-            swgTarget->setElevation(azEl->getElevation());
-            (*it)->push(MainCore::MsgTargetAzimuthElevation::create(m_gui->getMap(), swgTarget));
-        }
-    }
-}
-
-void MapModel::splitTracks(MapItem *item)
-{
-    if (item->m_takenTrackCoords.size() > 1)
-        splitTrack(item->m_takenTrackCoords, item->m_takenTrack, item->m_takenTrack1, item->m_takenTrack2,
-                        item->m_takenStart1, item->m_takenStart2, item->m_takenEnd1, item->m_takenEnd2);
-    if (item->m_predictedTrackCoords.size() > 1)
-        splitTrack(item->m_predictedTrackCoords, item->m_predictedTrack, item->m_predictedTrack1, item->m_predictedTrack2,
-                        item->m_predictedStart1, item->m_predictedStart2, item->m_predictedEnd1, item->m_predictedEnd2);
-}
-
-void MapModel::interpolateEast(QGeoCoordinate *c1, QGeoCoordinate *c2, double x, QGeoCoordinate *ci, bool offScreen)
-{
-    double x1 = c1->longitude();
-    double y1 = c1->latitude();
-    double x2 = c2->longitude();
-    double y2 = c2->latitude();
-    double y;
-    if (x2 < x1)
-        x2 += 360.0;
-    if (x < x1)
-        x += 360.0;
-    y = interpolate(x1, y1, x2, y2, x);
-    if (x > 180)
-        x -= 360.0;
-    if (offScreen)
-        x -= 0.000000001;
-    else
-        x += 0.000000001;
-    ci->setLongitude(x);
-    ci->setLatitude(y);
-    ci->setAltitude(c1->altitude());
-}
-
-void MapModel::interpolateWest(QGeoCoordinate *c1, QGeoCoordinate *c2, double x, QGeoCoordinate *ci, bool offScreen)
-{
-    double x1 = c1->longitude();
-    double y1 = c1->latitude();
-    double x2 = c2->longitude();
-    double y2 = c2->latitude();
-    double y;
-    if (x2 > x1)
-        x2 -= 360.0;
-    if (x > x1)
-        x -= 360.0;
-    y = interpolate(x1, y1, x2, y2, x);
-    if (x < -180)
-        x += 360.0;
-    if (offScreen)
-        x += 0.000000001;
-    else
-        x -= 0.000000001;
-    ci->setLongitude(x);
-    ci->setLatitude(y);
-    ci->setAltitude(c1->altitude());
-}
-
-static bool isOnScreen(double lon, double bottomLeftLongitude, double bottomRightLongitude, double width, bool antimed)
-{
-    bool onScreen = false;
-    if (width == 360)
-        onScreen = true;
-    else if (!antimed)
-        onScreen = (lon > bottomLeftLongitude) && (lon <= bottomRightLongitude);
-    else
-        onScreen = (lon > bottomLeftLongitude) || (lon <= bottomRightLongitude);
-    return onScreen;
-}
-
-static bool crossesAntimeridian(double prevLon, double lon)
-{
-    bool crosses = false;
-    if ((prevLon > 90) && (lon < -90))
-        crosses = true; // West to East
-    else if ((prevLon < -90) && (lon > 90))
-        crosses = true; // East to West
-    return crosses;
-}
-
-static bool crossesAntimeridianEast(double prevLon, double lon)
-{
-    bool crosses = false;
-    if ((prevLon > 90) && (lon < -90))
-        crosses = true; // West to East
-    return crosses;
-}
-
-static bool crossesAntimeridianWest(double prevLon, double lon)
-{
-    bool crosses = false;
-    if ((prevLon < -90) && (lon > 90))
-        crosses = true; // East to West
-    return crosses;
-}
-
-static bool crossesEdge(double lon, double prevLon, double bottomLeftLongitude, double bottomRightLongitude)
-{
-    // Determine if antimerdian is between the two points
-    if (!crossesAntimeridian(prevLon, lon))
-    {
-        bool crosses = false;
-        if ((prevLon <= bottomRightLongitude) && (lon > bottomRightLongitude))
-            crosses = true; // Crosses right edge East
-        else if ((prevLon >= bottomRightLongitude) && (lon < bottomRightLongitude))
-            crosses = true; // Crosses right edge West
-        else if ((prevLon >= bottomLeftLongitude) && (lon < bottomLeftLongitude))
-            crosses = true; // Crosses left edge West
-        else if ((prevLon <= bottomLeftLongitude) && (lon > bottomLeftLongitude))
-            crosses = true; // Crosses left edge East
-        return crosses;
-    }
-    else
-    {
-        // Determine which point and the edge the antimerdian is between
-        bool prevLonToRightCrossesAnti = crossesAntimeridianEast(prevLon, bottomRightLongitude);
-        bool rightToLonCrossesAnti = crossesAntimeridianEast(bottomRightLongitude, lon);
-        bool prevLonToLeftCrossesAnti = crossesAntimeridianWest(prevLon, bottomLeftLongitude);
-        bool leftToLonCrossesAnti = crossesAntimeridianWest(bottomLeftLongitude, lon);
-
-        bool crosses = false;
-        if (   ((prevLon > bottomRightLongitude) && prevLonToRightCrossesAnti && (lon > bottomRightLongitude))
-            || ((prevLon <= bottomRightLongitude) && (lon <= bottomRightLongitude) && rightToLonCrossesAnti)
-           )
-            crosses = true; // Crosses right edge East
-        else if (   ((prevLon < bottomRightLongitude) && prevLonToRightCrossesAnti && (lon < bottomRightLongitude))
-                 || ((prevLon >= bottomRightLongitude) && (lon >= bottomRightLongitude) && rightToLonCrossesAnti)
-                )
-            crosses = true; // Crosses right edge West
-        else if (   ((prevLon < bottomLeftLongitude) && prevLonToLeftCrossesAnti && (lon < bottomLeftLongitude))
-                 || ((prevLon >= bottomLeftLongitude) && (lon >= bottomLeftLongitude) && leftToLonCrossesAnti)
-                )
-            crosses = true; // Crosses left edge West
-        else if (   ((prevLon > bottomLeftLongitude) && prevLonToLeftCrossesAnti && (lon > bottomLeftLongitude))
-                 || ((prevLon <= bottomLeftLongitude) && (lon <= bottomLeftLongitude) && leftToLonCrossesAnti)
-                )
-            crosses = true; // Crosses left edge East
-        return crosses;
-    }
-}
-
-void MapModel::interpolate(QGeoCoordinate *c1, QGeoCoordinate *c2, double bottomLeftLongitude, double bottomRightLongitude, QGeoCoordinate* ci, bool offScreen)
-{
-    double x1 = c1->longitude();
-    double x2 = c2->longitude();
-    double crossesAnti = crossesAntimeridian(x1, x2);
-    double x;
-
-    // Need to work out which edge we're interpolating too
-    // and whether antimeridian is in the way, as that flips x1<x2 to x1>x2
-
-    if (((x1 < x2) && !crossesAnti) || ((x1 > x2) && crossesAnti))
-    {
-        x = offScreen ? bottomRightLongitude : bottomLeftLongitude;
-        interpolateEast(c1, c2, x, ci, offScreen);
-    }
-    else
-    {
-        x = offScreen ? bottomLeftLongitude : bottomRightLongitude;
-        interpolateWest(c1, c2, x, ci, offScreen);
-    }
-}
-
-void MapModel::splitTrack(const QList<QGeoCoordinate *>& coords, const QVariantList& track,
-                        QVariantList& track1, QVariantList& track2,
-                        QGeoCoordinate& start1, QGeoCoordinate& start2,
-                        QGeoCoordinate& end1, QGeoCoordinate& end2)
-{
-    /*
-    QStringList l;
-    for (int i = 0; i < track.size(); i++)
-    {
-        QGeoCoordinate c = track[i].value<QGeoCoordinate>();
-        l.append(QString("%1").arg((int)c.longitude()));
-    }
-    qDebug() << "Init T: " << l;
-    */
-
-    QQuickItem* map = m_gui->getMapItem();
-    QVariant rectVariant;
-    QMetaObject::invokeMethod(map, "mapRect", Q_RETURN_ARG(QVariant, rectVariant));
-    QGeoRectangle rect = qvariant_cast<QGeoRectangle>(rectVariant);
-    double bottomLeftLongitude = rect.bottomLeft().longitude();
-    double bottomRightLongitude = rect.bottomRight().longitude();
-
-    int width = round(rect.width());
-    bool antimed = (width == 360) || (bottomLeftLongitude > bottomRightLongitude);
-
-    /*
-    qDebug() << "Anitmed visible: " << antimed;
-    qDebug() << "bottomLeftLongitude: " << bottomLeftLongitude;
-    qDebug() << "bottomRightLongitude: " << bottomRightLongitude;
-    */
-
-    track1.clear();
-    track2.clear();
-
-    double lon, prevLon;
-    bool onScreen, prevOnScreen;
-    QList<QVariantList *> tracks({&track1, &track2});
-    QList<QGeoCoordinate *> ends({&end1, &end2});
-    QList<QGeoCoordinate *> starts({&start1, &start2});
-    int trackIdx = 0;
-    for (int i = 0; i < coords.size(); i++)
-    {
-        lon = coords[i]->longitude();
-        if (i == 0)
-        {
-            prevLon = lon;
-            prevOnScreen = true; // To avoid interpolation for first point
-        }
-        // Can be onscreen after having crossed edge from other side
-        // Or can be onscreen after previously having been off screen
-        onScreen = isOnScreen(lon, bottomLeftLongitude, bottomRightLongitude, width, antimed);
-        bool crossedEdge = crossesEdge(lon, prevLon, bottomLeftLongitude, bottomRightLongitude);
-        if ((onScreen && !crossedEdge) || (onScreen && !prevOnScreen))
-        {
-            if ((i > 0) && (tracks[trackIdx]->size() == 0)) // Could also use (onScreen && !prevOnScreen)?
-            {
-                if (trackIdx >= starts.size())
-                    break;
-                // Interpolate from edge of screen
-                interpolate(coords[i-1], coords[i], bottomLeftLongitude, bottomRightLongitude, starts[trackIdx], false);
-                tracks[trackIdx]->append(QVariant::fromValue(*starts[trackIdx]));
-            }
-            tracks[trackIdx]->append(track[i]);
-        }
-        else if (tracks[trackIdx]->size() > 0)
-        {
-            // Either we've crossed to the other side, or have gone off screen
-            if (trackIdx >= ends.size())
-                break;
-            // Interpolate to edge of screen
-            interpolate(coords[i-1], coords[i], bottomLeftLongitude, bottomRightLongitude, ends[trackIdx], true);
-            tracks[trackIdx]->append(QVariant::fromValue(*ends[trackIdx]));
-            // Start new track
-            trackIdx++;
-            if (trackIdx >= tracks.size())
-            {
-                // This can happen with highly retrograde orbits, where trace 90% of period
-                // will cover more than 360 degrees - delete last point as Map
-                // will not be able to display it properly
-                tracks[trackIdx-1]->removeLast();
-                break;
-            }
-            if (onScreen)
-            {
-                // Interpolate from edge of screen
-                interpolate(coords[i-1], coords[i], bottomLeftLongitude, bottomRightLongitude, starts[trackIdx], false);
-                tracks[trackIdx]->append(QVariant::fromValue(*starts[trackIdx]));
-                tracks[trackIdx]->append(track[i]);
-            }
-        }
-        prevLon = lon;
-        prevOnScreen = onScreen;
-    }
-
-    /*
-    l.clear();
-    for (int i = 0; i < track1.size(); i++)
-    {
-        QGeoCoordinate c = track1[i].value<QGeoCoordinate>();
-        if (!c.isValid())
-            l.append("Invalid!");
-        else
-            l.append(QString("%1").arg(c.longitude(), 0, 'f', 1));
-    }
-    qDebug() << "T1: " << l;
-
-    l.clear();
-    for (int i = 0; i < track2.size(); i++)
-    {
-        QGeoCoordinate c = track2[i].value<QGeoCoordinate>();
-        if (!c.isValid())
-            l.append("Invalid!");
-        else
-        l.append(QString("%1").arg(c.longitude(), 0, 'f', 1));
-    }
-    qDebug() << "T2: " << l;
-    */
-}
-
-void MapModel::viewChanged(double bottomLeftLongitude, double bottomRightLongitude)
-{
-    (void) bottomRightLongitude;
-    if (!std::isnan(bottomLeftLongitude))
-    {
-        for (int row = 0; row < m_items.size(); row++)
-        {
-            MapItem *item = m_items[row];
-            if (item->m_takenTrackCoords.size() > 1)
-            {
-                splitTrack(item->m_takenTrackCoords, item->m_takenTrack, item->m_takenTrack1, item->m_takenTrack2,
-                                item->m_takenStart1, item->m_takenStart2, item->m_takenEnd1, item->m_takenEnd2);
-                QModelIndex idx = index(row);
-                emit dataChanged(idx, idx);
-            }
-            if (item->m_predictedTrackCoords.size() > 1)
-            {
-                splitTrack(item->m_predictedTrackCoords, item->m_predictedTrack, item->m_predictedTrack1, item->m_predictedTrack2,
-                                item->m_predictedStart1, item->m_predictedStart2, item->m_predictedEnd1, item->m_predictedEnd2);
-                QModelIndex idx = index(row);
-                emit dataChanged(idx, idx);
-            }
-        }
-    }
-}
 
 MapGUI* MapGUI::create(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature)
 {
@@ -643,11 +109,34 @@ bool MapGUI::handleMessage(const Message& message)
         find(msgFind.getTarget());
         return true;
     }
+    else if (Map::MsgSetDateTime::match(message))
+    {
+        Map::MsgSetDateTime& msgSetDateTime = (Map::MsgSetDateTime&) message;
+        if (m_cesium) {
+            m_cesium->setDateTime(msgSetDateTime.getDateTime());
+        }
+        return true;
+    }
     else if (MainCore::MsgMapItem::match(message))
     {
         MainCore::MsgMapItem& msgMapItem = (MainCore::MsgMapItem&) message;
         SWGSDRangel::SWGMapItem *swgMapItem = msgMapItem.getSWGMapItem();
-        m_mapModel.update(msgMapItem.getPipeSource(), swgMapItem);
+
+        // TODO: Could have this in SWGMapItem so plugins can create additional groups
+        QString group;
+        for (int i = 0; i < m_availablePipes.size(); i++)
+        {
+            if (m_availablePipes[i].m_source == msgMapItem.getPipeSource())
+            {
+                 for (int j = 0; j < MapSettings::m_pipeTypes.size(); j++)
+                 {
+                     if (m_availablePipes[i].m_id == MapSettings::m_pipeTypes[j]) {
+                         group = m_availablePipes[i].m_id;
+                     }
+                 }
+            }
+        }
+        update(msgMapItem.getPipeSource(), swgMapItem, group);
         return true;
     }
 
@@ -685,15 +174,18 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     m_beacons(nullptr),
     m_beaconDialog(this),
     m_ibpBeaconDialog(this),
-    m_radioTimeDialog(this)
+    m_radioTimeDialog(this),
+    m_cesium(nullptr)
 {
     ui->setupUi(this);
     m_helpURL = "plugins/feature/map/readme.md";
 
-    // Free keys, so no point in stealing them :)
-    QString tfKey = m_settings.m_thunderforestAPIKey.isEmpty() ? "3e1f614f78a345459931ba3c898e975e" : m_settings.m_thunderforestAPIKey;
-    QString mtKey = m_settings.m_maptilerAPIKey.isEmpty() ? "q2RVNAe3eFKCH4XsrE3r" : m_settings.m_maptilerAPIKey;
-    m_templateServer = new OSMTemplateServer(tfKey, mtKey, m_osmPort);
+    m_osmPort = 0;
+    m_templateServer = new OSMTemplateServer(thunderforestAPIKey(), maptilerAPIKey(), m_osmPort);
+
+    // Web server to serve dynamic files from QResources
+    m_webPort = 0;
+    m_webServer = new WebServer(m_webPort);
 
     ui->map->rootContext()->setContextProperty("mapModel", &m_mapModel);
     // 5.12 doesn't display map items when fully zoomed out
@@ -702,6 +194,9 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
 #else
     ui->map->setSource(QUrl(QStringLiteral("qrc:/map/map/map.qml")));
 #endif
+
+    m_settings.m_modelURL = QString("http://127.0.0.1:%1/3d/").arg(m_webPort);
+    m_webServer->addPathSubstitution("3d", m_settings.m_modelDir);
 
     setAttribute(Qt::WA_DeleteOnClose, true);
     setChannelWidget(false);
@@ -715,8 +210,9 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
-    displaySettings();
-    applySettings(true);
+    QWebEngineSettings *settings = ui->web->settings();
+    settings->setAttribute(QWebEngineSettings::FullScreenSupportEnabled, true);
+    connect(ui->web->page(), &QWebEnginePage::fullScreenRequested, this, &MapGUI::fullScreenRequested);
 
     // Get station position
     float stationLatitude = MainCore::instance()->getSettings().getLatitude();
@@ -743,28 +239,74 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     antennaMapItem.setAltitude(stationAltitude);
     antennaMapItem.setImage(new QString("antenna.png"));
     antennaMapItem.setImageRotation(0);
-    antennaMapItem.setImageMinZoom(11);
     antennaMapItem.setText(new QString(MainCore::instance()->getSettings().getStationName()));
-    m_mapModel.update(m_map, &antennaMapItem, MapSettings::SOURCE_STATION);
+    antennaMapItem.setModel(new QString("antenna.glb"));
+    antennaMapItem.setFixedPosition(true);
+    antennaMapItem.setOrientation(0);
+    antennaMapItem.setLabel(new QString(MainCore::instance()->getSettings().getStationName()));
+    antennaMapItem.setLabelAltitudeOffset(4.5);
+    antennaMapItem.setAltitudeReference(1);
+    update(m_map, &antennaMapItem, "Station");
 
     // Read beacons, if they exist
     QList<Beacon *> *beacons = Beacon::readIARUCSV(MapGUI::getBeaconFilename());
-    if (beacons != nullptr)
+    if (beacons != nullptr) {
         setBeacons(beacons);
+    }
     addIBPBeacons();
 
     addRadioTimeTransmitters();
     addRadar();
+
+    displaySettings();
+    applySettings(true);
+
+    ui->map->installEventFilter(this);
 }
 
 MapGUI::~MapGUI()
 {
+    //m_cesium->deleteLater();
+    delete m_cesium;
     if (m_templateServer)
     {
         m_templateServer->close();
         delete m_templateServer;
     }
+    if (m_webServer)
+    {
+        m_webServer->close();
+        delete m_webServer;
+    }
     delete ui;
+}
+
+// Update a map item or image
+void MapGUI::update(const PipeEndPoint *source, SWGSDRangel::SWGMapItem *swgMapItem, const QString &group)
+{
+    if (swgMapItem->getType() == 0)
+    {
+        m_mapModel.update(source, swgMapItem, group);
+    }
+    else if (m_cesium)
+    {
+        QString name = *swgMapItem->getName();
+        QString image = *swgMapItem->getImage();
+        if (!image.isEmpty())
+        {
+            m_cesium->updateImage(name,
+                                swgMapItem->getImageTileEast(),
+                                swgMapItem->getImageTileWest(),
+                                swgMapItem->getImageTileNorth(),
+                                swgMapItem->getImageTileSouth(),
+                                swgMapItem->getAltitude(),
+                                image);
+        }
+        else
+        {
+            m_cesium->removeImage(name);
+        }
+    }
 }
 
 void MapGUI::setBeacons(QList<Beacon *> *beacons)
@@ -786,9 +328,16 @@ void MapGUI::setBeacons(QList<Beacon *> *beacons)
         beaconMapItem.setAltitude(beacon->m_altitude);
         beaconMapItem.setImage(new QString("antenna.png"));
         beaconMapItem.setImageRotation(0);
-        beaconMapItem.setImageMinZoom(8);
         beaconMapItem.setText(new QString(beacon->getText()));
-        m_mapModel.update(m_map, &beaconMapItem, MapSettings::SOURCE_BEACONS);
+        beaconMapItem.setModel(new QString("antenna.glb"));
+        beaconMapItem.setFixedPosition(true);
+        beaconMapItem.setOrientation(0);
+        // Just use callsign for label, so we don't have multiple labels on top of each other on 3D map
+        // as it makes them unreadable
+        beaconMapItem.setLabel(new QString(beacon->m_callsign));
+        beaconMapItem.setLabelAltitudeOffset(4.5);
+        beaconMapItem.setAltitudeReference(1);
+        update(m_map, &beaconMapItem, "Beacons");
     }
 }
 
@@ -804,9 +353,14 @@ void MapGUI::addIBPBeacons()
         beaconMapItem.setAltitude(0);
         beaconMapItem.setImage(new QString("antenna.png"));
         beaconMapItem.setImageRotation(0);
-        beaconMapItem.setImageMinZoom(8);
         beaconMapItem.setText(new QString(beacon.getText()));
-        m_mapModel.update(m_map, &beaconMapItem, MapSettings::SOURCE_BEACONS);
+        beaconMapItem.setModel(new QString("antenna.glb"));
+        beaconMapItem.setFixedPosition(true);
+        beaconMapItem.setOrientation(0);
+        beaconMapItem.setLabel(new QString(beacon.m_callsign));
+        beaconMapItem.setLabelAltitudeOffset(4.5);
+        beaconMapItem.setAltitudeReference(1);
+        update(m_map, &beaconMapItem, "Beacons");
     }
 }
 
@@ -831,13 +385,18 @@ void MapGUI::addRadioTimeTransmitters()
         timeMapItem.setAltitude(0.0);
         timeMapItem.setImage(new QString("antennatime.png"));
         timeMapItem.setImageRotation(0);
-        timeMapItem.setImageMinZoom(8);
         QString text = QString("Radio Time Transmitter\nCallsign: %1\nFrequency: %2 kHz\nPower: %3 kW")
                                 .arg(m_radioTimeTransmitters[i].m_callsign)
                                 .arg(m_radioTimeTransmitters[i].m_frequency/1000.0)
                                 .arg(m_radioTimeTransmitters[i].m_power);
         timeMapItem.setText(new QString(text));
-        m_mapModel.update(m_map, &timeMapItem, MapSettings::SOURCE_RADIO_TIME);
+        timeMapItem.setModel(new QString("antenna.glb"));
+        timeMapItem.setFixedPosition(true);
+        timeMapItem.setOrientation(0);
+        timeMapItem.setLabel(new QString(name));
+        timeMapItem.setLabelAltitudeOffset(4.5);
+        timeMapItem.setAltitudeReference(1);
+        update(m_map, &timeMapItem, "Radio Time Transmitters");
     }
 }
 
@@ -850,12 +409,17 @@ void MapGUI::addRadar()
     radarMapItem.setAltitude(0.0);
     radarMapItem.setImage(new QString("antenna.png"));
     radarMapItem.setImageRotation(0);
-    radarMapItem.setImageMinZoom(8);
     QString text = QString("Radar\nCallsign: %1\nFrequency: %2 MHz")
                             .arg("GRAVES")
                             .arg("143.050");
     radarMapItem.setText(new QString(text));
-    m_mapModel.update(m_map, &radarMapItem, MapSettings::SOURCE_RADAR);
+    radarMapItem.setModel(new QString("antenna.glb"));
+    radarMapItem.setFixedPosition(true);
+    radarMapItem.setOrientation(0);
+    radarMapItem.setLabel(new QString("GRAVES"));
+    radarMapItem.setLabelAltitudeOffset(4.5);
+    radarMapItem.setAltitudeReference(1);
+    update(m_map, &radarMapItem, "Radar");
 }
 
 static QString arrayToString(QJsonArray array)
@@ -907,13 +471,18 @@ void MapGUI::addDAB()
                         mapItem.setLongitude(lon);
                         mapItem.setAltitude(alt);
                         mapItem.setImageRotation(0);
-                        mapItem.setImageMinZoom(8);
+                        mapItem.setModel(new QString("antenna.glb"));
+                        mapItem.setFixedPosition(true);
+                        mapItem.setOrientation(0);
+                        mapItem.setLabelAltitudeOffset(4.5);
+                        mapItem.setAltitudeReference(1);
                         if (band == "DAB")
                         {
                             // Name should be unique - can we use TII code for this? can it repeat across countries?
                             QString name = QString("%1").arg(tx.value("tsId").toString());
                             mapItem.setName(new QString(name));
                             mapItem.setImage(new QString("antennadab.png"));
+                            mapItem.setLabel(new QString(name));
                             // Need tiicode?
                             QString text = QString("%1 Transmitter\nStation: %2\nFrequency: %3 %4\nPower: %5 %6\nLanguage(s): %7\nType: %8\nService: %9\nEnsemble: %10")
                                                     .arg(band)
@@ -928,7 +497,7 @@ void MapGUI::addDAB()
                                                     .arg(tx.value("ensembleLabel").toString())
                                                     ;
                             mapItem.setText(new QString(text));
-                            m_mapModel.update(m_map, &mapItem, MapSettings::SOURCE_DAB);
+                            update(m_map, &mapItem, "DAB");
                         }
                         else if (band == "FM")
                         {
@@ -936,6 +505,7 @@ void MapGUI::addDAB()
                             QString name = QString("%1").arg(tx.value("tsId").toString());
                             mapItem.setName(new QString(name));
                             mapItem.setImage(new QString("antennafm.png"));
+                            mapItem.setLabel(new QString(name));
                             QString text = QString("%1 Transmitter\nStation: %2\nFrequency: %3 %4\nPower: %5 %6\nLanguage(s): %7\nType: %8")
                                                     .arg(band)
                                                     .arg(stationName)
@@ -947,7 +517,7 @@ void MapGUI::addDAB()
                                                     .arg(format)
                                                     ;
                             mapItem.setText(new QString(text));
-                            m_mapModel.update(m_map, &mapItem, MapSettings::SOURCE_FM);
+                            update(m_map, &mapItem, "FM");
                         }
                         else if (band == "AM")
                         {
@@ -955,6 +525,7 @@ void MapGUI::addDAB()
                             QString name = QString("%1").arg(tx.value("tsId").toString());
                             mapItem.setName(new QString(name));
                             mapItem.setImage(new QString("antennaam.png"));
+                            mapItem.setLabel(new QString(name));
                             QString text = QString("%1 Transmitter\nStation: %2\nFrequency: %3 %4\nPower: %5 %6\nLanguage(s): %7\nType: %8")
                                                     .arg(band)
                                                     .arg(stationName)
@@ -966,7 +537,7 @@ void MapGUI::addDAB()
                                                     .arg(format)
                                                     ;
                             mapItem.setText(new QString(text));
-                            m_mapModel.update(m_map, &mapItem, MapSettings::SOURCE_AM);
+                            update(m_map, &mapItem, "AM");
                         }
                     }
                 }
@@ -1014,90 +585,149 @@ void MapGUI::clearOSMCache()
     }
 }
 
-void MapGUI::applyMapSettings()
+void MapGUI::applyMap2DSettings(bool reloadMap)
 {
-    float stationLatitude = MainCore::instance()->getSettings().getLatitude();
-    float stationLongitude = MainCore::instance()->getSettings().getLongitude();
-    float stationAltitude = MainCore::instance()->getSettings().getAltitude();
+    ui->map->setVisible(m_settings.m_map2DEnabled);
 
-    QQuickItem *item = ui->map->rootObject();
+    if (m_settings.m_map2DEnabled && reloadMap)
+    {
+        float stationLatitude = MainCore::instance()->getSettings().getLatitude();
+        float stationLongitude = MainCore::instance()->getSettings().getLongitude();
+        float stationAltitude = MainCore::instance()->getSettings().getAltitude();
 
-    QObject *object = item->findChild<QObject*>("map");
-    QGeoCoordinate coords;
-    double zoom;
-    if (object != nullptr)
-    {
-        // Save existing position of map
-        coords = object->property("center").value<QGeoCoordinate>();
-        zoom = object->property("zoomLevel").value<double>();
-    }
-    else
-    {
-        // Center on my location when map is first opened
-        coords.setLatitude(stationLatitude);
-        coords.setLongitude(stationLongitude);
-        coords.setAltitude(stationAltitude);
-        zoom = 10.0;
-    }
+        QQuickItem *item = ui->map->rootObject();
 
-    // Create the map using the specified provider
-    QQmlProperty::write(item, "mapProvider", m_settings.m_mapProvider);
-    QVariantMap parameters;
-    if (!m_settings.m_mapBoxAPIKey.isEmpty() && m_settings.m_mapProvider == "mapbox")
-    {
-        parameters["mapbox.map_id"] = "mapbox.satellite"; // The only one that works
-        parameters["mapbox.access_token"] = m_settings.m_mapBoxAPIKey;
-    }
-    if (!m_settings.m_mapBoxAPIKey.isEmpty() && m_settings.m_mapProvider == "mapboxgl")
-    {
-        parameters["mapboxgl.access_token"] = m_settings.m_mapBoxAPIKey;
-        if (!m_settings.m_mapBoxStyles.isEmpty())
-            parameters["mapboxgl.mapping.additional_style_urls"] = m_settings.m_mapBoxStyles;
-    }
-    if (m_settings.m_mapProvider == "osm")
-    {
-        // Allow user to specify URL
-        if (!m_settings.m_osmURL.isEmpty()) {
-            parameters["osm.mapping.custom.host"] = m_settings.m_osmURL;  // E.g: "http://a.tile.openstreetmap.fr/hot/"
-        }
-        // Use our repo, so we can append API key
-        parameters["osm.mapping.providersrepository.address"] = QString("http://127.0.0.1:%1/").arg(m_osmPort);
-        // Use application specific cache, as other apps may not use API key so will have different images
-        QString cachePath = osmCachePath();
-        parameters["osm.mapping.cache.directory"] = cachePath;
-        // On Linux, we need to create the directory
-        QDir dir(cachePath);
-        if (!dir.exists()) {
-            dir.mkpath(cachePath);
-        }
-    }
-
-    QVariant retVal;
-    if (!QMetaObject::invokeMethod(item, "createMap", Qt::DirectConnection,
-                                Q_RETURN_ARG(QVariant, retVal),
-                                Q_ARG(QVariant, QVariant::fromValue(parameters)),
-                                //Q_ARG(QVariant, mapType),
-                                Q_ARG(QVariant, QVariant::fromValue(this))))
-    {
-        qCritical() << "MapGUI::applyMapSettings - Failed to invoke createMap";
-    }
-    QObject *newMap = retVal.value<QObject *>();
-
-    // Restore position of map
-    if (newMap != nullptr)
-    {
-        if (coords.isValid())
+        QObject *object = item->findChild<QObject*>("map");
+        QGeoCoordinate coords;
+        double zoom;
+        if (object != nullptr)
         {
-            newMap->setProperty("zoomLevel", QVariant::fromValue(zoom));
-            newMap->setProperty("center", QVariant::fromValue(coords));
+            // Save existing position of map
+            coords = object->property("center").value<QGeoCoordinate>();
+            zoom = object->property("zoomLevel").value<double>();
+        }
+        else
+        {
+            // Center on my location when map is first opened
+            coords.setLatitude(stationLatitude);
+            coords.setLongitude(stationLongitude);
+            coords.setAltitude(stationAltitude);
+            zoom = 10.0;
+        }
+
+        // Create the map using the specified provider
+        QQmlProperty::write(item, "mapProvider", m_settings.m_mapProvider);
+        QVariantMap parameters;
+        if (!m_settings.m_mapBoxAPIKey.isEmpty() && m_settings.m_mapProvider == "mapbox")
+        {
+            parameters["mapbox.map_id"] = "mapbox.satellite"; // The only one that works
+            parameters["mapbox.access_token"] = m_settings.m_mapBoxAPIKey;
+        }
+        if (!m_settings.m_mapBoxAPIKey.isEmpty() && m_settings.m_mapProvider == "mapboxgl")
+        {
+            parameters["mapboxgl.access_token"] = m_settings.m_mapBoxAPIKey;
+            if (!m_settings.m_mapBoxStyles.isEmpty())
+                parameters["mapboxgl.mapping.additional_style_urls"] = m_settings.m_mapBoxStyles;
+        }
+        if (m_settings.m_mapProvider == "maplibre")
+        {
+            parameters["maplibre.access_token"] = m_settings.m_mapBoxAPIKey;
+            if (!m_settings.m_mapBoxStyles.isEmpty())
+                parameters["maplibre.mapping.additional_style_urls"] = m_settings.m_mapBoxStyles;
+        }
+        if (m_settings.m_mapProvider == "osm")
+        {
+            // Allow user to specify URL
+            if (!m_settings.m_osmURL.isEmpty()) {
+                parameters["osm.mapping.custom.host"] = m_settings.m_osmURL;  // E.g: "http://a.tile.openstreetmap.fr/hot/"
+            }
+            // Use our repo, so we can append API key
+            parameters["osm.mapping.providersrepository.address"] = QString("http://127.0.0.1:%1/").arg(m_osmPort);
+            // Use application specific cache, as other apps may not use API key so will have different images
+            QString cachePath = osmCachePath();
+            parameters["osm.mapping.cache.directory"] = cachePath;
+            // On Linux, we need to create the directory
+            QDir dir(cachePath);
+            if (!dir.exists()) {
+                dir.mkpath(cachePath);
+            }
+        }
+
+        QVariant retVal;
+        if (!QMetaObject::invokeMethod(item, "createMap", Qt::DirectConnection,
+                                    Q_RETURN_ARG(QVariant, retVal),
+                                    Q_ARG(QVariant, QVariant::fromValue(parameters)),
+                                    //Q_ARG(QVariant, mapType),
+                                    Q_ARG(QVariant, QVariant::fromValue(this))))
+        {
+            qCritical() << "MapGUI::applyMap2DSettings - Failed to invoke createMap";
+        }
+        QObject *newMap = retVal.value<QObject *>();
+
+        // Restore position of map
+        if (newMap != nullptr)
+        {
+            if (coords.isValid())
+            {
+                newMap->setProperty("zoomLevel", QVariant::fromValue(zoom));
+                newMap->setProperty("center", QVariant::fromValue(coords));
+            }
+        }
+        else
+        {
+            qCritical() << "MapGUI::applyMap2DSettings - createMap returned a nullptr";
+        }
+
+        supportedMapsChanged();
+    }
+}
+
+void MapGUI::redrawMap()
+{
+    // An awful workaround for https://bugreports.qt.io/browse/QTBUG-100333
+    // Also used in ADS-B demod
+    QQuickItem *item = ui->map->rootObject();
+    if (item)
+    {
+        QObject *object = item->findChild<QObject*>("map");
+        if (object)
+        {
+            double zoom = object->property("zoomLevel").value<double>();
+            object->setProperty("zoomLevel", QVariant::fromValue(zoom+1));
+            object->setProperty("zoomLevel", QVariant::fromValue(zoom));
         }
     }
-    else
-    {
-        qCritical() << "MapGUI::applyMapSettings - createMap returned a nullptr";
-    }
+}
 
-    supportedMapsChanged();
+void MapGUI::showEvent(QShowEvent *event)
+{
+    if (!event->spontaneous())
+    {
+        // Workaround for https://bugreports.qt.io/browse/QTBUG-100333
+        // MapQuickItems can be in wrong position when window is first displayed
+        QTimer::singleShot(500, [this] {
+            redrawMap();
+        });
+    }
+}
+
+bool MapGUI::eventFilter(QObject *obj, QEvent *event)
+{
+    if (obj == ui->map)
+    {
+        if (event->type() == QEvent::Resize)
+        {
+            // Workaround for https://bugreports.qt.io/browse/QTBUG-100333
+            // MapQuickItems can be in wrong position after vertical resize
+            QResizeEvent *resizeEvent = static_cast<QResizeEvent *>(event);
+            QSize oldSize = resizeEvent->oldSize();
+            QSize size = resizeEvent->size();
+            if (oldSize.height() != size.height()) {
+                redrawMap();
+            }
+        }
+    }
+    return false;
 }
 
 void MapGUI::supportedMapsChanged()
@@ -1106,6 +736,7 @@ void MapGUI::supportedMapsChanged()
     QObject *object = item->findChild<QObject*>("map");
 
     // Get list of map types
+    ui->mapTypes->blockSignals(true);
     ui->mapTypes->clear();
     if (object != nullptr)
     {
@@ -1124,12 +755,85 @@ void MapGUI::supportedMapsChanged()
             }
         }
     }
+    ui->mapTypes->blockSignals(false);
+
+    // Try to select desired map, if available
+    if (!m_settings.m_mapType.isEmpty())
+    {
+        int index = ui->mapTypes->findText(m_settings.m_mapType);
+        if (index != -1) {
+            ui->mapTypes->setCurrentIndex(index);
+        }
+    }
 }
 
 void MapGUI::on_mapTypes_currentIndexChanged(int index)
 {
-    QVariant mapType = index;
-    QMetaObject::invokeMethod(ui->map->rootObject(), "setMapType", Q_ARG(QVariant, mapType));
+    if (index >= 0)
+    {
+        QVariant mapType = index;
+        QMetaObject::invokeMethod(ui->map->rootObject(), "setMapType", Q_ARG(QVariant, mapType));
+        QString currentMap = ui->mapTypes->currentText();
+        if (!currentMap.isEmpty())
+        {
+            m_settings.m_mapType = currentMap;
+            applySettings();
+        }
+    }
+}
+
+void MapGUI::applyMap3DSettings(bool reloadMap)
+{
+    if (m_settings.m_map3DEnabled && ((m_cesium == nullptr) || reloadMap))
+    {
+        if (m_cesium == nullptr) {
+            m_cesium = new CesiumInterface(&m_settings);
+            connect(m_cesium, &CesiumInterface::connected, this, &MapGUI::init3DMap);
+            connect(m_cesium, &CesiumInterface::received, this, &MapGUI::receivedCesiumEvent);
+        }
+        m_webServer->addSubstitution("/map/map/map3d.html", "$WS_PORT$", QString::number(m_cesium->serverPort()));
+        m_webServer->addSubstitution("/map/map/map3d.html", "$CESIUM_ION_API_KEY$", cesiumIonAPIKey());
+        //ui->web->page()->profile()->clearHttpCache();
+        ui->web->load(QUrl(QString("http://127.0.0.1:%1/map/map/map3d.html").arg(m_webPort)));
+        //ui->web->load(QUrl("chrome://gpu/"));
+        ui->web->show();
+    }
+    else if (!m_settings.m_map3DEnabled && (m_cesium != nullptr))
+    {
+        ui->web->setHtml("<html></html>");
+        m_cesium->deleteLater();
+        m_cesium = nullptr;
+    }
+    ui->web->setVisible(m_settings.m_map3DEnabled);
+    if (m_cesium && m_cesium->isConnected())
+    {
+        m_cesium->setTerrain(m_settings.m_terrain, maptilerAPIKey());
+        m_cesium->setBuildings(m_settings.m_buildings);
+        m_cesium->setSunLight(m_settings.m_sunLightEnabled);
+        m_cesium->setCameraReferenceFrame(m_settings.m_eciCamera);
+        m_cesium->setAntiAliasing(m_settings.m_antiAliasing);
+    }
+}
+
+void MapGUI::init3DMap()
+{
+    qDebug() << "MapGUI::init3DMap";
+
+    m_cesium->initCZML();
+
+    m_cesium->setTerrain(m_settings.m_terrain, maptilerAPIKey());
+    m_cesium->setBuildings(m_settings.m_buildings);
+    m_cesium->setSunLight(m_settings.m_sunLightEnabled);
+    m_cesium->setCameraReferenceFrame(m_settings.m_eciCamera);
+    m_cesium->setAntiAliasing(m_settings.m_antiAliasing);
+
+    float stationLatitude = MainCore::instance()->getSettings().getLatitude();
+    float stationLongitude = MainCore::instance()->getSettings().getLongitude();
+
+    // Set 3D view after loading initial objects
+    m_cesium->setHomeView(stationLatitude, stationLongitude);
+
+    m_mapModel.allUpdated();
 }
 
 void MapGUI::displaySettings()
@@ -1143,10 +847,9 @@ void MapGUI::displaySettings()
     m_mapModel.setDisplayNames(m_settings.m_displayNames);
     m_mapModel.setDisplaySelectedGroundTracks(m_settings.m_displaySelectedGroundTracks);
     m_mapModel.setDisplayAllGroundTracks(m_settings.m_displayAllGroundTracks);
-    m_mapModel.setSources(m_settings.m_sources);
-    m_mapModel.setGroundTrackColor(m_settings.m_groundTrackColor);
-    m_mapModel.setPredictedGroundTrackColor(m_settings.m_predictedGroundTrackColor);
-    applyMapSettings();
+    m_mapModel.updateItemSettings(m_settings.m_itemSettings);
+    applyMap2DSettings(true);
+    applyMap3DSettings(true);
     restoreState(m_rollupState);
     blockApplySettings(false);
 }
@@ -1242,7 +945,11 @@ void MapGUI::geoReply()
         if (qGeoLocs.size() == 1)
         {
             // Only one result, so centre map on that
-            map->setProperty("center", QVariant::fromValue(qGeoLocs.at(0).coordinate()));
+            QGeoCoordinate coord = qGeoLocs.at(0).coordinate();
+            map->setProperty("center", QVariant::fromValue(coord));
+            if (m_cesium) {
+                m_cesium->setView(coord.latitude(), coord.longitude());
+            }
         }
         else if (qGeoLocs.size() == 0)
         {
@@ -1254,12 +961,39 @@ void MapGUI::geoReply()
             // Show dialog allowing user to select from the results
             MapLocationDialog dialog(qGeoLocs);
             if (dialog.exec() == QDialog::Accepted)
-                map->setProperty("center", QVariant::fromValue(dialog.m_selectedLocation.coordinate()));
+            {
+                QGeoCoordinate coord = dialog.m_selectedLocation.coordinate();
+                map->setProperty("center", QVariant::fromValue(coord));
+                if (m_cesium) {
+                    m_cesium->setView(coord.latitude(), coord.longitude());
+                }
+            }
         }
     }
     else
+    {
         qWarning() << "MapGUI::geoReply: GeoCode error: " << pQGeoCode->error();
+    }
     pQGeoCode->deleteLater();
+}
+
+// Free keys, so no point in stealing them :)
+
+QString MapGUI::thunderforestAPIKey() const
+{
+    return m_settings.m_thunderforestAPIKey.isEmpty() ? "3e1f614f78a345459931ba3c898e975e" : m_settings.m_thunderforestAPIKey;
+}
+
+QString MapGUI::maptilerAPIKey() const
+{
+    return m_settings.m_maptilerAPIKey.isEmpty() ? "q2RVNAe3eFKCH4XsrE3r" : m_settings.m_maptilerAPIKey;
+}
+
+QString MapGUI::cesiumIonAPIKey() const
+{
+    return m_settings.m_cesiumIonAPIKey.isEmpty()
+        ? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIyNTcxMDA2OC0yNTIzLTQxMGYtYTNiMS1iM2I3MDFhNWVlMDYiLCJpZCI6ODEyMDUsImlhdCI6MTY0MzY2OTIzOX0.A7NchU4LzaNsuAUpsrA9ZwekOJfMoNcja-8XeRdRoIg"
+        : m_settings.m_cesiumIonAPIKey;
 }
 
 void MapGUI::find(const QString& target)
@@ -1279,16 +1013,27 @@ void MapGUI::find(const QString& target)
             if (Units::stringToLatitudeAndLongitude(target, latitude, longitude))
             {
                 map->setProperty("center", QVariant::fromValue(QGeoCoordinate(latitude, longitude)));
+                if (m_cesium) {
+                    m_cesium->setView(latitude, longitude);
+                }
             }
             else if (Maidenhead::fromMaidenhead(target, latitude, longitude))
             {
                 map->setProperty("center", QVariant::fromValue(QGeoCoordinate(latitude, longitude)));
+                if (m_cesium) {
+                    m_cesium->setView(latitude, longitude);
+                }
             }
             else
             {
                 MapItem *mapItem = m_mapModel.findMapItem(target);
                 if (mapItem != nullptr)
+                {
                     map->setProperty("center", QVariant::fromValue(mapItem->getCoordinates()));
+                    if (m_cesium) {
+                        m_cesium->track(target);
+                    }
+                }
                 else
                 {
                     QGeoServiceProvider* geoSrv = new QGeoServiceProvider("osm");
@@ -1297,22 +1042,37 @@ void MapGUI::find(const QString& target)
                         QLocale qLocaleC(QLocale::C, QLocale::AnyCountry);
                         geoSrv->setLocale(qLocaleC);
                         QGeoCodeReply *pQGeoCode = geoSrv->geocodingManager()->geocode(target);
-                        if (pQGeoCode)
+                        if (pQGeoCode) {
                             QObject::connect(pQGeoCode, &QGeoCodeReply::finished, this, &MapGUI::geoReply);
-                        else
+                        } else {
                             qDebug() << "MapGUI::find: GeoCoding failed";
+                        }
                     }
                     else
+                    {
                         qDebug() << "MapGUI::find: osm not available";
+                    }
                 }
             }
         }
     }
 }
 
+void MapGUI::track3D(const QString& target)
+{
+    if (m_cesium) {
+        m_cesium->track(target);
+    }
+}
+
 void MapGUI::on_deleteAll_clicked()
 {
     m_mapModel.removeAll();
+    if (m_cesium)
+    {
+        m_cesium->removeAllCZMLEntities();
+        m_cesium->removeAllImages();
+    }
 }
 
 void MapGUI::on_displaySettings_clicked()
@@ -1323,15 +1083,10 @@ void MapGUI::on_displaySettings_clicked()
         if (dialog.m_osmURLChanged) {
             clearOSMCache();
         }
-        if (dialog.m_mapSettingsChanged) {
-            applyMapSettings();
-        }
+        applyMap2DSettings(dialog.m_map2DSettingsChanged);
+        applyMap3DSettings(dialog.m_map3DSettingsChanged);
         applySettings();
-        if (dialog.m_sourcesChanged) {
-            m_mapModel.setSources(m_settings.m_sources);
-        }
-        m_mapModel.setGroundTrackColor(m_settings.m_groundTrackColor);
-        m_mapModel.setPredictedGroundTrackColor(m_settings.m_predictedGroundTrackColor);
+        m_mapModel.allUpdated();
     }
 }
 
@@ -1351,22 +1106,6 @@ void MapGUI::on_radiotime_clicked()
     m_radioTimeDialog.show();
 }
 
-quint32 MapGUI::getSourceMask(const PipeEndPoint *sourcePipe)
-{
-    for (int i = 0; i < m_availablePipes.size(); i++)
-    {
-        if (m_availablePipes[i].m_source == sourcePipe)
-        {
-             for (int j = 0; j < MapSettings::m_pipeTypes.size(); j++)
-             {
-                 if (m_availablePipes[i].m_id == MapSettings::m_pipeTypes[j])
-                     return 1 << j;
-             }
-        }
-    }
-    return 0;
-}
-
 QString MapGUI::getDataDir()
 {
     // Get directory to store app data in (aircraft & airport databases and user-definable icons)
@@ -1382,4 +1121,46 @@ QString MapGUI::getBeaconFilename()
 
 QQuickItem *MapGUI::getMapItem() {
     return ui->map->rootObject();
+}
+
+void MapGUI::receivedCesiumEvent(const QJsonObject &obj)
+{
+    if (obj.contains("event"))
+    {
+        QString event = obj.value("event").toString();
+        if (event == "selected")
+        {
+            if (obj.contains("id")) {
+                m_mapModel.setSelected3D(obj.value("id").toString());
+            } else {
+                m_mapModel.setSelected3D("");
+            }
+        }
+        else if (event == "tracking")
+        {
+            if (obj.contains("id")) {
+                //m_mapModel.setTarget(obj.value("id").toString());
+            } else {
+                //m_mapModel.setTarget("");
+            }
+        }
+    }
+    else
+    {
+        qDebug() << "MapGUI::receivedCesiumEvent - Unexpected event: " << obj;
+    }
+}
+
+void MapGUI::fullScreenRequested(QWebEngineFullScreenRequest fullScreenRequest)
+{
+    fullScreenRequest.accept();
+    if (fullScreenRequest.toggleOn())
+    {
+        ui->web->setParent(nullptr);
+        ui->web->showFullScreen();
+    }
+    else
+    {
+        ui->splitter->addWidget(ui->web);
+    }
 }

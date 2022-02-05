@@ -17,10 +17,12 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <cmath>
+
 #include <QMessageBox>
 #include <QLineEdit>
 #include <QDesktopServices>
 #include <QAction>
+#include <QClipboard>
 
 #include "feature/featureuiset.h"
 #include "feature/featurewebapiutils.h"
@@ -33,6 +35,55 @@
 #include "aisgui.h"
 
 #include "SWGMapItem.h"
+
+// Models to use for ships when type is unknown
+// Use as many as possibly, so it doesn't look too samey, but don't use
+// the massive ships
+QStringList AISGUI::m_shipModels = {
+    "ship_27m.glbe", "ship_65m.glbe",
+    "tug_20m.glbe", "tug_30m_1.glbe", "tug_30m_2.glbe", "tug_30m_3.glbe",
+    "cargo_75m.glbe", "tanker_50m.glbe", "dredger_53m.glbe",
+    "trawler_22m.glbe",
+    "speedboat_8m.glbe", "yacht_10m.glbe", "yacht_20m.glbe", "yacht_42m.glbe"
+};
+
+QStringList AISGUI::m_sailboatModels = {
+    "sailboat_8m.glbe", "sailboat_17m.glbe"
+};
+
+QHash<QString, float> AISGUI::m_labelOffset = {
+    {"helicopter.glb", 4.0f},
+    {"antenna.glb", 4.5f},
+    {"buoy.glb", 1.5f},
+    {"ship_27m.glbe", 13.0f},
+    {"dredger_53m.glbe", 19.0f},
+    {"ship_65m.glbe", 26.0f},
+    {"tug_20m.glbe", 10.0f},
+    {"tug_30m_1.glbe", 17.0f},
+    {"tug_30m_2.glbe", 17.0f},
+    {"tug_30m_3.glbe", 17.0f},
+    {"coastguard.glbe", 4.0},
+    {"cargo_75m.glbe", 22.0f},
+    {"cargo_190m.glbe", 42.0f},
+    {"cargo_230m.glbe", 42.0f},
+    {"tanker_50m.glbe", 12.0f},
+    {"tanker_180m.glbe", 35.0f},
+    {"tanker_245m_1.glbe", 30.0f},
+    {"tanker_380m_1.glbe", 42.0f},
+    {"passenger_100m.glbe", 34.0f},
+    {"dredger_53m.glbe", 19.0f},
+    {"trawler_22m.glbe", 15.0f},
+    {"sailboat_8m.glbe", 11.0f},
+    {"sailboat_17m.glbe", 24.0f},
+    {"speedboat_8m.glbe", 3.0f},
+    {"yacht_10m.glbe", 3.0f},
+    {"yacht_20m.glbe", 7.5f},
+    {"yacht_42m.glbe", 10.0f},
+};
+
+QHash<QString, float> AISGUI::m_modelOffset = {
+    {"helicopter.glb", 4.0f},
+};
 
 AISGUI* AISGUI::create(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature)
 {
@@ -92,7 +143,7 @@ bool AISGUI::handleMessage(const Message& message)
         // Decode the message
         AISMessage *ais = AISMessage::decode(report.getPacket());
         // Update table
-        updateVessels(ais);
+        updateVessels(ais, report.getDateTime());
     }
 
     return false;
@@ -140,8 +191,9 @@ AISGUI::AISGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
-    connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
-    m_statusTimer.start(1000);
+    // Timer to remove vessels we haven't heard from in a while
+    connect(&m_timer, SIGNAL(timeout()), this, SLOT(removeOldVessels()));
+    m_timer.start(60*1000);
 
     // Resize the table using dummy data
     resizeTable();
@@ -161,6 +213,9 @@ AISGUI::AISGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     // Get signals when columns change
     connect(ui->vessels->horizontalHeader(), SIGNAL(sectionMoved(int, int, int)), SLOT(vessels_sectionMoved(int, int, int)));
     connect(ui->vessels->horizontalHeader(), SIGNAL(sectionResized(int, int, int)), SLOT(vessels_sectionResized(int, int, int)));
+    // Context menu
+    ui->vessels->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->vessels, SIGNAL(customContextMenuRequested(QPoint)), SLOT(vessels_customContextMenuRequested(QPoint)));
 
     m_settings.setRollupState(&m_rollupState);
 
@@ -170,6 +225,7 @@ AISGUI::AISGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
 
 AISGUI::~AISGUI()
 {
+    qDeleteAll(m_vessels);
     delete ui;
 }
 
@@ -243,8 +299,32 @@ void AISGUI::onMenuDialogCalled(const QPoint &p)
     resetContextMenuType();
 }
 
-void AISGUI::updateStatus()
+void AISGUI::removeOldVessels()
 {
+    // Remove if we haven't received a message in 10 minutes
+    QDateTime currentDateTime = QDateTime::currentDateTime();
+    for (int row = ui->vessels->rowCount() - 1; row >= 0; row--)
+    {
+        QDateTime lastDateTime = ui->vessels->item(row, VESSEL_COL_LAST_UPDATE)->data(Qt::DisplayRole).toDateTime();
+        if (lastDateTime.isValid())
+        {
+            qint64 diff = lastDateTime.secsTo(currentDateTime);
+            if (diff > 10*60)
+            {
+                QString mmsi = ui->vessels->item(row, VESSEL_COL_MMSI)->text();
+                // Remove from map
+                sendToMap(mmsi, "",
+                    "", "",
+                    "", 0.0f, 0.0f,
+                    0.0f, 0.0f, QDateTime(),
+                    0.0f);
+                // Remove from table
+                ui->vessels->removeRow(row);
+                // Remove from hash
+                m_vessels.remove(mmsi);
+            }
+        }
+    }
 }
 
 void AISGUI::applySettings(bool force)
@@ -273,7 +353,11 @@ void AISGUI::resizeTable()
     ui->vessels->setItem(row, VESSEL_COL_NAME, new QTableWidgetItem("12345678901234567890"));
     ui->vessels->setItem(row, VESSEL_COL_CALLSIGN, new QTableWidgetItem("1234567"));
     ui->vessels->setItem(row, VESSEL_COL_SHIP_TYPE, new QTableWidgetItem("Passenger"));
+    ui->vessels->setItem(row, VESSEL_COL_LENGTH, new QTableWidgetItem("400"));
     ui->vessels->setItem(row, VESSEL_COL_DESTINATION, new QTableWidgetItem("12345678901234567890"));
+    ui->vessels->setItem(row, VESSEL_COL_POSITION_UPDATE, new QTableWidgetItem("12/12/2022 12:00"));
+    ui->vessels->setItem(row, VESSEL_COL_LAST_UPDATE, new QTableWidgetItem("12/12/2022 12:00"));
+    ui->vessels->setItem(row, VESSEL_COL_MESSAGES, new QTableWidgetItem("1000"));
     ui->vessels->resizeColumnsToContents();
     ui->vessels->removeRow(row);
 }
@@ -324,7 +408,59 @@ QAction *AISGUI::createCheckableItem(QString &text, int idx, bool checked, const
     return action;
 }
 
-void AISGUI::updateVessels(AISMessage *ais)
+// Send to Map feature
+void AISGUI::sendToMap(const QString &name, const QString &label,
+    const QString &image, const QString &text,
+    const QString &model, float modelOffset, float labelOffset,
+    float latitude, float longitude, QDateTime positionDateTime,
+    float heading
+    )
+{
+    MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
+    QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(m_ais, "mapitems");
+    if (mapMessageQueues)
+    {
+        QList<MessageQueue*>::iterator it = mapMessageQueues->begin();
+
+        for (; it != mapMessageQueues->end(); ++it)
+        {
+            SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
+            swgMapItem->setName(new QString(name));
+            swgMapItem->setLatitude(latitude);
+            swgMapItem->setLongitude(longitude);
+            swgMapItem->setAltitude(0);
+            swgMapItem->setAltitudeReference(1); // CLAMP_TO_GROUND
+
+            if (positionDateTime.isValid()) {
+                swgMapItem->setPositionDateTime(new QString(positionDateTime.toString(Qt::ISODateWithMs)));
+            }
+
+            swgMapItem->setImageRotation(heading);
+            swgMapItem->setText(new QString(text));
+
+            if (image.isEmpty()) {
+                swgMapItem->setImage(new QString(""));
+            } else {
+                swgMapItem->setImage(new QString(QString("qrc:///ais/map/%1").arg(image)));
+            }
+            swgMapItem->setModel(new QString(model));
+            swgMapItem->setModelAltitudeOffset(modelOffset);
+            swgMapItem->setLabel(new QString(label));
+            swgMapItem->setLabelAltitudeOffset(labelOffset);
+            swgMapItem->setFixedPosition(false);
+            swgMapItem->setOrientation(1);
+            swgMapItem->setHeading(heading);
+            swgMapItem->setPitch(0.0);
+            swgMapItem->setRoll(0.0);
+
+            MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_ais, swgMapItem);
+            (*it)->push(msg);
+        }
+    }
+}
+
+// Update table with received message
+void AISGUI::updateVessels(AISMessage *ais, QDateTime dateTime)
 {
     QTableWidgetItem *mmsiItem;
     QTableWidgetItem *typeItem;
@@ -338,7 +474,15 @@ void AISGUI::updateVessels(AISMessage *ais)
     QTableWidgetItem *nameItem;
     QTableWidgetItem *callsignItem;
     QTableWidgetItem *shipTypeItem;
+    QTableWidgetItem *lengthItem;
     QTableWidgetItem *destinationItem;
+    QTableWidgetItem *positionUpdateItem;
+    QTableWidgetItem *lastUpdateItem;
+    QTableWidgetItem *messagesItem;
+
+    QString previousType;
+    QString previousShipType;
+    Vessel *vessel;
 
     // See if vessel is already in table
     QString messageMMSI = QString("%1").arg(ais->m_mmsi, 9, 10, QChar('0'));
@@ -361,7 +505,12 @@ void AISGUI::updateVessels(AISMessage *ais)
             nameItem = ui->vessels->item(row, VESSEL_COL_NAME);
             callsignItem = ui->vessels->item(row, VESSEL_COL_CALLSIGN);
             shipTypeItem = ui->vessels->item(row, VESSEL_COL_SHIP_TYPE);
+            lengthItem = ui->vessels->item(row, VESSEL_COL_LENGTH);
             destinationItem = ui->vessels->item(row, VESSEL_COL_DESTINATION);
+            positionUpdateItem = ui->vessels->item(row, VESSEL_COL_POSITION_UPDATE);
+            lastUpdateItem = ui->vessels->item(row, VESSEL_COL_LAST_UPDATE);
+            messagesItem = ui->vessels->item(row, VESSEL_COL_MESSAGES);
+            vessel = m_vessels.value(messageMMSI);
             found = true;
             break;
         }
@@ -385,7 +534,11 @@ void AISGUI::updateVessels(AISMessage *ais)
         nameItem = new QTableWidgetItem();
         callsignItem = new QTableWidgetItem();
         shipTypeItem = new QTableWidgetItem();
+        lengthItem = new QTableWidgetItem();
         destinationItem = new QTableWidgetItem();
+        positionUpdateItem = new QTableWidgetItem();
+        lastUpdateItem = new QTableWidgetItem();
+        messagesItem = new QTableWidgetItem();
         ui->vessels->setItem(row, VESSEL_COL_MMSI, mmsiItem);
         ui->vessels->setItem(row, VESSEL_COL_TYPE, typeItem);
         ui->vessels->setItem(row, VESSEL_COL_LATITUDE, latitudeItem);
@@ -398,10 +551,24 @@ void AISGUI::updateVessels(AISMessage *ais)
         ui->vessels->setItem(row, VESSEL_COL_NAME, nameItem);
         ui->vessels->setItem(row, VESSEL_COL_CALLSIGN, callsignItem);
         ui->vessels->setItem(row, VESSEL_COL_SHIP_TYPE, shipTypeItem);
+        ui->vessels->setItem(row, VESSEL_COL_LENGTH, lengthItem);
         ui->vessels->setItem(row, VESSEL_COL_DESTINATION, destinationItem);
+        ui->vessels->setItem(row, VESSEL_COL_POSITION_UPDATE, positionUpdateItem);
+        ui->vessels->setItem(row, VESSEL_COL_LAST_UPDATE, lastUpdateItem);
+        ui->vessels->setItem(row, VESSEL_COL_MESSAGES, messagesItem);
+        messagesItem->setData(Qt::DisplayRole, 0);
+
+        vessel = new Vessel();
+        m_vessels.insert(messageMMSI, vessel);
     }
 
+    previousType = typeItem->text();
+    previousShipType = shipTypeItem->text();
+
     mmsiItem->setText(QString("%1").arg(ais->m_mmsi, 9, 10, QChar('0')));
+    lastUpdateItem->setData(Qt::DisplayRole, dateTime);
+    messagesItem->setData(Qt::DisplayRole, messagesItem->data(Qt::DisplayRole).toInt() + 1);
+
     if ((ais->m_id <= 3) || (ais->m_id == 5) || (ais->m_id == 18) || (ais->m_id == 19)) {
         typeItem->setText("Vessel");
     } else if (ais->m_id == 4) {
@@ -429,6 +596,7 @@ void AISGUI::updateVessels(AISMessage *ais)
              nameItem->setText(vd->m_name);
              callsignItem->setText(vd->m_callsign);
              shipTypeItem->setText(AISMessage::typeToString(vd->m_type));
+             lengthItem->setData(Qt::DisplayRole, vd->m_a + vd->m_b);
              destinationItem->setText(vd->m_destination);
          }
     }
@@ -438,6 +606,7 @@ void AISGUI::updateVessels(AISMessage *ais)
         {
             latitudeItem->setData(Qt::DisplayRole, ais->getLatitude());
             longitudeItem->setData(Qt::DisplayRole, ais->getLongitude());
+            positionUpdateItem->setData(Qt::DisplayRole, dateTime);
         }
         if (ais->hasCourse()) {
             courseItem->setData(Qt::DisplayRole, ais->getCourse());
@@ -488,88 +657,211 @@ void AISGUI::updateVessels(AISMessage *ais)
 
     if (!latitudeV.isNull() && !longitudeV.isNull() && !type.isEmpty())
     {
-        // Send to Map feature
-        MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
-        QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(m_ais, "mapitems");
-        if (mapMessageQueues)
+        // Image and model to use on map
+        QString shipType = shipTypeItem->text();
+        int length = lengthItem->data(Qt::DisplayRole).toInt();
+        QString status = statusItem->text();
+
+        // Only update model if change in type - so we don't keeping picking new
+        // random models
+        if ((previousType != type) || (previousShipType != shipType)) {
+            getImageAndModel(type, shipType, length, status, vessel);
+        }
+
+        float labelOffset = m_labelOffset.value(vessel->m_model);
+        float modelOffset = 0.0f;
+        if (m_modelOffset.contains(vessel->m_model)) {
+            modelOffset = m_modelOffset.value(vessel->m_model);
+        }
+
+        // Text to display in info box
+        QStringList text;
+        QVariant courseV = courseItem->data(Qt::DisplayRole);
+        QVariant speedV = speedItem->data(Qt::DisplayRole);
+        QVariant headingV = headingItem->data(Qt::DisplayRole);
+        QString name = nameItem->text();
+        QString callsign = callsignItem->text();
+        QString destination = destinationItem->text();
+        float heading = 0.0f;
+        if (!name.isEmpty()) {
+            text.append(QString("Name: %1").arg(name));
+        }
+        if (!callsign.isEmpty()) {
+            text.append(QString("Callsign: %1").arg(callsign));
+        }
+        if (!destination.isEmpty()) {
+            text.append(QString("Destination: %1").arg(destination));
+        }
+        if (!courseV.isNull())
         {
-            QList<MessageQueue*>::iterator it = mapMessageQueues->begin();
+            float course = courseV.toFloat();
+            text.append(QString("Course: %1%2").arg(course).arg(QChar(0xb0)));
+            heading = course;
+        }
+        if (!speedV.isNull()) {
+            text.append(QString("Speed: %1 knts").arg(speedV.toFloat()));
+        }
+        if (!headingV.isNull())
+        {
+            heading = headingV.toFloat();
+            text.append(QString("Heading: %1%2").arg(heading).arg(QChar(0xb0)));
+        }
+        if (!shipType.isEmpty()) {
+            text.append(QString("Ship type: %1").arg(shipType));
+        }
+        if (!status.isEmpty()) {
+            text.append(QString("Status: %1").arg(status));
+        }
 
-            for (; it != mapMessageQueues->end(); ++it)
+        // Send to map feature
+        sendToMap(mmsiItem->text(), callsign,
+            vessel->m_image, text.join("<br>"),
+            vessel->m_model, modelOffset, labelOffset,
+            latitudeV.toFloat(), longitudeV.toFloat(), positionUpdateItem->data(Qt::DisplayRole).toDateTime(),
+            heading);
+    }
+}
+
+void AISGUI::getImageAndModel(const QString &type, const QString &shipType, int length, const QString &status, Vessel *vessel)
+{
+   if (type == "Aircraft")
+    {
+        // I presume search and rescue aircraft are more likely to be helicopters
+        vessel->m_image = "helicopter.png";
+        vessel->m_model = "helicopter.glb";
+    }
+    else if (type == "Base station")
+    {
+        vessel->m_image = "anchor.png";
+        vessel->m_model = "antenna.glb";
+    }
+    else if (type == "Aid-to-nav")
+    {
+        vessel->m_image = "bouy.png";
+        vessel->m_model = "buoy.glb";
+    }
+    else
+    {
+        vessel->m_image = "ship.png";
+        if (status == "Under way sailing") {
+            vessel->m_model = m_sailboatModels[m_random.bounded(m_sailboatModels.size())];
+        } else {
+            vessel->m_model = m_shipModels[m_random.bounded(m_shipModels.size())];
+        }
+
+        if (!shipType.isEmpty())
+        {
+            if (shipType == "Ship")
             {
-                SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
-                swgMapItem->setName(new QString(QString("%1").arg(mmsiItem->text())));
-                swgMapItem->setLatitude(latitudeV.toFloat());
-                swgMapItem->setLongitude(longitudeV.toFloat());
-                swgMapItem->setAltitude(0);
-                QString image;
-                if (type == "Aircraft") {
-                    // I presume search and rescue aircraft are more likely to be helicopters
-                    image = "helicopter.png";
-                } else if (type == "Base station") {
-                    image = "anchor.png";
-                } else if (type == "Aid-to-nav") {
-                    image = "bouy.png";
-                } else {
-                    image = "ship.png";
-                    QString shipType = shipTypeItem->text();
-                    if (!shipType.isEmpty())
-                    {
-                        if (shipType == "Tug") {
-                            image = "tug.png";
-                        } else if (shipType == "Cargo") {
-                            image = "cargo.png";
-                        } else if (shipType == "Tanker") {
-                            image = "tanker.png";
-                        }
-                    }
-                }
-                swgMapItem->setImage(new QString(QString("qrc:///ais/map/%1").arg(image)));
-
-                swgMapItem->setImageMinZoom(11);
-                QStringList text;
-                QVariant courseV = courseItem->data(Qt::DisplayRole);
-                QVariant speedV = speedItem->data(Qt::DisplayRole);
-                QVariant headingV = headingItem->data(Qt::DisplayRole);
-                QString name = nameItem->text();
-                QString callsign = callsignItem->text();
-                QString destination = destinationItem->text();
-                QString shipType = shipTypeItem->text();
-                QString status = statusItem->text();
-                if (!name.isEmpty()) {
-                    text.append(QString("Name: %1").arg(name));
-                }
-                if (!callsign.isEmpty()) {
-                    text.append(QString("Callsign: %1").arg(callsign));
-                }
-                if (!destination.isEmpty()) {
-                    text.append(QString("Destination: %1").arg(destination));
-                }
-                if (!courseV.isNull())
+                if (length < 40)
                 {
-                    float course = courseV.toFloat();
-                    text.append(QString("Course: %1%2").arg(course).arg(QChar(0xb0)));
-                    swgMapItem->setImageRotation(course);
+                    vessel->m_model = "ship_27m.glbe";
                 }
-                if (!speedV.isNull()) {
-                    text.append(QString("Speed: %1 knts").arg(speedV.toFloat()));
-                }
-                if (!headingV.isNull())
+                else if (length < 60)
                 {
-                    float heading = headingV.toFloat();
-                    text.append(QString("Heading: %1%2").arg(heading).arg(QChar(0xb0)));
-                    swgMapItem->setImageRotation(heading); // heading takes precedence over course
+                    vessel->m_model = "dredger_53m.glbe";
                 }
-                if (!shipType.isEmpty()) {
-                    text.append(QString("Ship type: %1").arg(shipType));
+                else
+                {
+                    vessel->m_model = "ship_65m.glbe";
                 }
-                if (!status.isEmpty()) {
-                    text.append(QString("Status: %1").arg(status));
+            }
+            else if ((shipType == "Tug") || (shipType == "Port tender") || (shipType == "Pilot vessel"))
+            {
+                vessel->m_image = "tug.png";
+                if (length < 25)
+                {
+                    vessel->m_model = "tug_20m.glbe";
                 }
-                swgMapItem->setText(new QString(text.join("\n")));
-
-                MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_ais, swgMapItem);
-                (*it)->push(msg);
+                else
+                {
+                    int rand = m_random.bounded(1, 3);
+                    vessel->m_model = QString("tug_30m_%1.glbe").arg(rand);
+                }
+            }
+            else if ((shipType == "Law enforcement vessel") || (shipType == "Search and rescue vessel"))
+            {
+                vessel->m_model = "coastguard.glbe";
+            }
+            else if (shipType == "Cargo")
+            {
+                vessel->m_image = "cargo.png";
+                if (length < 120)
+                {
+                    vessel->m_model = "cargo_75m.glbe";
+                }
+                else if (length < 200)
+                {
+                    vessel->m_model = "cargo_190m.glbe";
+                }
+                else
+                {
+                    vessel->m_model = "cargo_230m.glbe";
+                }
+            }
+            else if (shipType == "Tanker")
+            {
+                vessel->m_image = "tanker.png";
+                if (length < 120)
+                {
+                    vessel->m_model = "tanker_50m.glbe";
+                }
+                else if (length < 210)
+                {
+                    vessel->m_model = "tanker_180m.glbe";
+                }
+                else if (length < 300)
+                {
+                    int rand = m_random.bounded(1, 4);
+                    vessel->m_model = QString("tanker_245m_%1.glbe").arg(rand);
+                }
+                else
+                {
+                    int rand = m_random.bounded(1, 3);
+                    vessel->m_model = QString("tanker_380m_%1.glbe").arg(rand);
+                }
+            }
+            else if (shipType == "Passenger")
+            {
+                vessel->m_model = "passenger_100m.glbe";
+            }
+            else if (shipType == "Vessel - Dredging or underwater operations")
+            {
+                vessel->m_model = "dredger_53m.glbe";
+            }
+            else if (shipType == "Vessel - Fishing")
+            {
+                vessel->m_model = "trawler_22m.glbe";
+            }
+            else if (shipType == "Vessel - Sailing")
+            {
+                if (length < 13)
+                {
+                    vessel->m_model = "sailboat_8m.glbe";
+                }
+                else
+                {
+                    vessel->m_model = "sailboat_17m.glbe";
+                }
+            }
+            else if (shipType.contains("Pleasure craft"))
+            {
+                if (length < 9)
+                {
+                    vessel->m_model = "speedboat_8m.glbe";
+                }
+                else if (length < 18)
+                {
+                    vessel->m_model = "yacht_10m.glbe";
+                }
+                else if (length < 32)
+                {
+                    vessel->m_model = "yacht_20m.glbe";
+                }
+                else
+                {
+                    vessel->m_model = "yacht_42m.glbe";
+                }
             }
         }
     }
@@ -584,7 +876,7 @@ void AISGUI::on_vessels_cellDoubleClicked(int row, int column)
         // Search for MMSI on www.vesselfinder.com
         QDesktopServices::openUrl(QUrl(QString("https://www.vesselfinder.com/vessels?name=%1").arg(mmsi)));
     }
-    else if ((column == VESSEL_COL_LATITUDE) || (column == VESSEL_COL_LONGITUDE))
+    else if ((column == VESSEL_COL_LATITUDE) || (column == VESSEL_COL_LONGITUDE) || (column == VESSEL_COL_SHIP_TYPE))
     {
         // Get MMSI of vessel in row double clicked
         QString mmsi = ui->vessels->item(row, VESSEL_COL_MMSI)->text();
@@ -617,5 +909,92 @@ void AISGUI::on_vessels_cellDoubleClicked(int row, int column)
             // Find destination on Map
             FeatureWebAPIUtils::mapFind(destination);
         }
+    }
+}
+
+// Table cells context menu
+void AISGUI::vessels_customContextMenuRequested(QPoint pos)
+{
+    QTableWidgetItem *item =  ui->vessels->itemAt(pos);
+    if (item)
+    {
+        int row = item->row();
+        QString mmsi = ui->vessels->item(row, VESSEL_COL_MMSI)->text();
+        QString imo = ui->vessels->item(row, VESSEL_COL_IMO)->text();
+        QString name = ui->vessels->item(row, VESSEL_COL_NAME)->text();
+        QVariant latitudeV = ui->vessels->item(row, VESSEL_COL_LATITUDE)->data(Qt::DisplayRole);
+        QVariant longitudeV = ui->vessels->item(row, VESSEL_COL_LONGITUDE)->data(Qt::DisplayRole);
+        QString destination = ui->vessels->item(row, VESSEL_COL_DESTINATION)->text();
+
+        QMenu* tableContextMenu = new QMenu(ui->vessels);
+        connect(tableContextMenu, &QMenu::aboutToHide, tableContextMenu, &QMenu::deleteLater);
+
+        // Copy current cell
+
+        QAction* copyAction = new QAction("Copy", tableContextMenu);
+        const QString text = item->text();
+        connect(copyAction, &QAction::triggered, this, [text]()->void {
+            QClipboard *clipboard = QGuiApplication::clipboard();
+            clipboard->setText(text);
+        });
+        tableContextMenu->addAction(copyAction);
+        tableContextMenu->addSeparator();
+
+        // View vessel on various websites
+
+        QAction* mmsiAISHubAction = new QAction(QString("View MMSI %1 on aishub.net...").arg(mmsi), tableContextMenu);
+        connect(mmsiAISHubAction, &QAction::triggered, this, [mmsi]()->void {
+            QDesktopServices::openUrl(QUrl(QString("https://www.aishub.net/vessels?Ship%5Bmmsi%5D=%1&mmsi=%1").arg(mmsi)));
+        });
+        tableContextMenu->addAction(mmsiAISHubAction);
+
+        QAction* mmsiAction = new QAction(QString("View MMSI %1 on vesselfinder.com...").arg(mmsi), tableContextMenu);
+        connect(mmsiAction, &QAction::triggered, this, [mmsi]()->void {
+            QDesktopServices::openUrl(QUrl(QString("https://www.vesselfinder.net/vessels?name=%1").arg(mmsi)));
+        });
+        tableContextMenu->addAction(mmsiAction);
+
+        if (!imo.isEmpty())
+        {
+            QAction* imoAction = new QAction(QString("View IMO %1 on vesselfinder.net...").arg(imo), tableContextMenu);
+            connect(imoAction, &QAction::triggered, this, [imo]()->void {
+                QDesktopServices::openUrl(QUrl(QString("https://www.vesselfinder.net/vessels?name=%1").arg(imo)));
+            });
+            tableContextMenu->addAction(imoAction);
+        }
+
+        if (!name.isEmpty())
+        {
+            QAction* nameAction = new QAction(QString("View %1 on vesselfinder.net...").arg(name), tableContextMenu);
+            connect(nameAction, &QAction::triggered, this, [name]()->void {
+                QDesktopServices::openUrl(QUrl(QString("https://www.vesselfinder.net/vessels?name=%1").arg(name)));
+            });
+            tableContextMenu->addAction(nameAction);
+        }
+
+        // Find on Map
+        if (!latitudeV.isNull())
+        {
+            tableContextMenu->addSeparator();
+
+            QAction* findMapFeatureAction = new QAction(QString("Find MMSI %1 on map").arg(mmsi), tableContextMenu);
+            connect(findMapFeatureAction, &QAction::triggered, this, [mmsi]()->void {
+                FeatureWebAPIUtils::mapFind(mmsi);
+            });
+            tableContextMenu->addAction(findMapFeatureAction);
+        }
+
+        if (!destination.isEmpty())
+        {
+            tableContextMenu->addSeparator();
+
+            QAction* findDestinationFeatureAction = new QAction(QString("Find %1 on map").arg(destination), tableContextMenu);
+            connect(findDestinationFeatureAction, &QAction::triggered, this, [destination]()->void {
+                FeatureWebAPIUtils::mapFind(destination);
+            });
+            tableContextMenu->addAction(findDestinationFeatureAction);
+        }
+
+        tableContextMenu->popup(ui->vessels->viewport()->mapToGlobal(pos));
     }
 }

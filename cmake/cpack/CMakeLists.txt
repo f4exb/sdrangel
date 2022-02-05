@@ -247,7 +247,9 @@ elseif(WIN32 OR MINGW)
   if(BUILD_GUI)
     install(CODE "
       include(BundleUtilities)
-      fixup_bundle(\"${SDRANGEL_BINARY_BIN_DIR}/sdrangel${CMAKE_EXECUTABLE_SUFFIX}\" \"\" \"${WINDOWS_FIXUP_BUNDLE_LIB_DIRS}\")
+      # BundleUtilities.cmake verify_app fails unless we ignore QtWebEngineProcess.exe, as it fails if there are any "external" prerequisites
+      # Should we ignore it? It appears to work OK if we do. Is there a better way?
+      fixup_bundle(\"${SDRANGEL_BINARY_BIN_DIR}/sdrangel${CMAKE_EXECUTABLE_SUFFIX}\" \"\" \"${WINDOWS_FIXUP_BUNDLE_LIB_DIRS}\" IGNORE_ITEM \"QtWebEngineProcess.exe\")
     " COMPONENT Runtime)
   elseif(BUILD_SERVER)
     install(CODE "
@@ -294,6 +296,7 @@ elseif(WIN32 OR MINGW)
     # OpenSSL
     install(DIRECTORY "${OPENSSL_DLL_DIR}/" DESTINATION "${INSTALL_LIB_DIR}"
       FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+
 
     install(CODE "
       # remove *.lib files

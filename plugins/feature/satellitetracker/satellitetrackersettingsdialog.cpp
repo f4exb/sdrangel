@@ -51,6 +51,10 @@ SatelliteTrackerSettingsDialog::SatelliteTrackerSettingsDialog(SatelliteTrackerS
         item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEditable|Qt::ItemIsEnabled);
         ui->tles->addItem(item);
     }
+    ui->replayEnabled->setChecked(settings->m_replayEnabled);
+    ui->replayDateTime->setDateTime(settings->m_replayStartDateTime);
+    ui->useFileInputTime->setChecked(settings->m_useFileInputTime);
+    ui->sendTimeToMap->setChecked(settings->m_sendTimeToMap);
 }
 
 SatelliteTrackerSettingsDialog::~SatelliteTrackerSettingsDialog()
@@ -95,7 +99,12 @@ void SatelliteTrackerSettingsDialog::accept()
     m_settings->m_utc = ui->utc->isChecked();
     m_settings->m_drawOnMap = ui->drawOnMap->isChecked();
     m_settings->m_tles.clear();
-    for (int i = 0; i < ui->tles->count(); i++)
+    for (int i = 0; i < ui->tles->count(); i++) {
         m_settings->m_tles.append(ui->tles->item(i)->text());
+    }
+    m_settings->m_replayEnabled = ui->replayEnabled->isChecked();
+    m_settings->m_replayStartDateTime = ui->replayDateTime->dateTime();
+    m_settings->m_useFileInputTime = ui->useFileInputTime->isChecked();
+    m_settings->m_sendTimeToMap = ui->sendTimeToMap->isChecked();
     QDialog::accept();
 }

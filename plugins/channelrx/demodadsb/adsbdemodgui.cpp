@@ -29,13 +29,15 @@
 #include <QMessageBox>
 #include <QDebug>
 #include <QProcess>
+#include <QClipboard>
 #include <QFileDialog>
 #include <QQmlProperty>
 
-#include "SWGMapItem.h"
+#include <QtGui/private/qzipreader_p.h>
 
 #include "ui_adsbdemodgui.h"
 #include "channel/channelwebapiutils.h"
+#include "feature/featurewebapiutils.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
@@ -87,12 +89,15 @@ QByteArray ADSBDemodGUI::serialize() const
 
 bool ADSBDemodGUI::deserialize(const QByteArray& data)
 {
-    if(m_settings.deserialize(data)) {
+    if(m_settings.deserialize(data))
+    {
         updateDeviceSetList();
         displaySettings();
         applySettings(true);
         return true;
-    } else {
+    }
+    else
+    {
         resetToDefaults();
         return false;
     }
@@ -102,11 +107,17 @@ bool ADSBDemodGUI::deserialize(const QByteArray& data)
 static int cprNL(double lat)
 {
     if (lat == 0.0)
+    {
         return 59;
+    }
     else if ((lat == 87.0) || (lat == -87.0))
+    {
         return 2;
+    }
     else if ((lat > 87.0) || (lat < -87.0))
+    {
         return 1;
+    }
     else
     {
         double nz = 15.0;
@@ -119,10 +130,11 @@ static int cprNL(double lat)
 static int cprN(double lat, int odd)
 {
     int nl = cprNL(lat) - odd;
-    if (nl > 1)
+    if (nl > 1) {
         return nl;
-    else
+    } else {
         return 1;
+    }
 }
 
 // Can't use std::fmod, as that works differently for negative numbers (See C.2.6.2)
@@ -131,71 +143,94 @@ static Real modulus(double x, double y)
     return x - y * std::floor(x/y);
 }
 
-QString Aircraft::getImage()
+QString Aircraft::getImage() const
 {
     if (m_emitterCategory.length() > 0)
     {
-        if (!m_emitterCategory.compare("Heavy"))
-            return QString("aircraft_4engine.png");
-        else if (!m_emitterCategory.compare("Large"))
+        if (!m_emitterCategory.compare("Heavy")) {
+            return QString("aircraft_4engine.png"); // Can also be 777, 787
+        } else if (!m_emitterCategory.compare("Large")) {
             return QString("aircraft_2engine.png");
-        else if (!m_emitterCategory.compare("Small"))
+        } else if (!m_emitterCategory.compare("Small")) {
             return QString("aircraft_2enginesmall.png");
-        else if (!m_emitterCategory.compare("Rotorcraft"))
+        } else if (!m_emitterCategory.compare("Rotorcraft")) {
             return QString("aircraft_helicopter.png");
-        else if (!m_emitterCategory.compare("High performance"))
+        } else if (!m_emitterCategory.compare("High performance")) {
             return QString("aircraft_fighter.png");
-        else if (!m_emitterCategory.compare("Light")
+        } else if (!m_emitterCategory.compare("Light")
                 || !m_emitterCategory.compare("Ultralight")
-                || !m_emitterCategory.compare("Glider/sailplane"))
+                || !m_emitterCategory.compare("Glider/sailplane")) {
             return QString("aircraft_light.png");
-        else if (!m_emitterCategory.compare("Space vehicle"))
+        } else if (!m_emitterCategory.compare("Space vehicle")) {
             return QString("aircraft_space.png");
-        else if (!m_emitterCategory.compare("UAV"))
+        } else if (!m_emitterCategory.compare("UAV")) {
             return QString("aircraft_drone.png");
-        else if (!m_emitterCategory.compare("Emergency vehicle")
-                || !m_emitterCategory.compare("Service vehicle"))
+        } else if (!m_emitterCategory.compare("Emergency vehicle")
+                || !m_emitterCategory.compare("Service vehicle")) {
             return QString("truck.png");
-        else
+        } else {
             return QString("aircraft_2engine.png");
+        }
     }
     else
+    {
         return QString("aircraft_2engine.png");
+    }
 }
 
-QString Aircraft::getText(bool all)
+QString Aircraft::getText(bool all) const
 {
     QStringList list;
-    if (m_callsign.length() > 0)
+    if (m_showAll || all)
     {
-        list.append(QString("Callsign: %1").arg(m_callsign));
-    }
-    else
-    {
-        list.append(QString("ICAO: %1").arg(m_icao, 1, 16));
-    }
-    if (m_showAll || m_isHighlighted || all)
-    {
+        if (!m_flagIconURL.isEmpty() && !m_airlineIconURL.isEmpty())
+        {
+            list.append(QString("<table width=100%><tr><td><img src=%1><td><img src=%2 align=right></table>").arg(m_airlineIconURL).arg(m_flagIconURL));
+        }
+        else
+        {
+            if (!m_flagIconURL.isEmpty()) {
+                list.append(QString("<img src=%1>").arg(m_flagIconURL));
+            } else if (!m_airlineIconURL.isEmpty()) {
+                list.append(QString("<img src=%1>").arg(m_airlineIconURL));
+            }
+        }
+        list.append(QString("ICAO: %1").arg(m_icaoHex));
+        if (!m_callsign.isEmpty()) {
+            list.append(QString("Callsign: %1").arg(m_callsign));
+        }
         if (m_aircraftInfo != nullptr)
         {
-            if (m_aircraftInfo->m_model.size() > 0)
-            {
+            if (!m_aircraftInfo->m_model.isEmpty()) {
                 list.append(QString("Aircraft: %1").arg(m_aircraftInfo->m_model));
             }
         }
+        if (!m_emitterCategory.isEmpty()) {
+            list.append(QString("Category: %1").arg(m_emitterCategory));
+        }
         if (m_altitudeValid)
         {
-            if (m_gui->useSIUints())
-                list.append(QString("Altitude: %1 (m)").arg(Units::feetToIntegerMetres(m_altitude)));
+            if (m_onSurface)
+            {
+                list.append(QString("Altitude: Surface"));
+            }
             else
-                list.append(QString("Altitude: %1 (ft)").arg(m_altitude));
+            {
+                QString reference = m_altitudeGNSS ? "GNSS" : "Baro";
+                if (m_gui->useSIUints()) {
+                    list.append(QString("Altitude: %1 (m %2)").arg(Units::feetToIntegerMetres(m_altitude)).arg(reference));
+                } else {
+                    list.append(QString("Altitude: %1 (ft %2)").arg(m_altitude).arg(reference));
+                }
+            }
         }
         if (m_speedValid)
         {
-            if (m_gui->useSIUints())
+            if (m_gui->useSIUints()) {
                 list.append(QString("%1: %2 (kph)").arg(m_speedTypeNames[m_speedType]).arg(Units::knotsToIntegerKPH(m_speed)));
-            else
+            } else {
                 list.append(QString("%1: %2 (kn)").arg(m_speedTypeNames[m_speedType]).arg(m_speed));
+            }
         }
         if (m_verticalRateValid)
         {
@@ -213,12 +248,13 @@ QString Aircraft::getText(bool all)
                 rate = m_verticalRate;
                 units = QString("ft/min");
             }
-            if (m_verticalRate == 0)
+            if (m_verticalRate == 0) {
                 desc = "Level flight";
-            else if (rate > 0)
+            } else if (rate > 0) {
                 desc = QString("Climbing: %1 (%2)").arg(rate).arg(units);
-            else
+            } else {
                 desc = QString("Descending: %1 (%2)").arg(rate).arg(units);
+            }
             list.append(QString(desc));
         }
         if ((m_status.length() > 0) && m_status.compare("No emergency")) {
@@ -270,7 +306,15 @@ QString Aircraft::getText(bool all)
             }
         }
     }
-    return list.join("\n");
+    else if (!m_callsign.isEmpty())
+    {
+        list.append(m_callsign);
+    }
+    else
+    {
+        list.append(m_icaoHex);
+    }
+    return list.join("<br>");
 }
 
 QVariant AircraftModel::data(const QModelIndex &index, int role) const
@@ -366,6 +410,14 @@ bool AircraftModel::setData(const QModelIndex &index, const QVariant& value, int
         return true;
     }
     return true;
+}
+
+void AircraftModel::findOnMap(int index)
+{
+    if ((index < 0) || (index >= m_aircrafts.count())) {
+        return;
+    }
+    FeatureWebAPIUtils::mapFind(m_aircrafts[index]->m_icaoHex);
 }
 
 QVariant AirportModel::data(const QModelIndex &index, int role) const
@@ -626,31 +678,8 @@ void ADSBDemodGUI::updatePosition(Aircraft *aircraft)
     aircraft->m_elevation = m_azEl.getElevation();
     aircraft->m_rangeItem->setText(QString::number(aircraft->m_range/1000.0, 'f', 1));
     aircraft->m_azElItem->setText(QString("%1/%2").arg(std::round(aircraft->m_azimuth)).arg(std::round(aircraft->m_elevation)));
-    if (aircraft == m_trackAircraft)
+    if (aircraft == m_trackAircraft) {
         m_adsbDemod->setTarget(aircraft->targetName(), aircraft->m_azimuth, aircraft->m_elevation, aircraft->m_range);
-
-    // Send to Map feature
-    MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
-    QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(m_adsbDemod, "mapitems");
-    if (mapMessageQueues)
-    {
-        QList<MessageQueue*>::iterator it = mapMessageQueues->begin();
-
-        for (; it != mapMessageQueues->end(); ++it)
-        {
-            SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
-            swgMapItem->setName(new QString(QString("%1").arg(aircraft->m_icao, 0, 16)));
-            swgMapItem->setLatitude(aircraft->m_latitude);
-            swgMapItem->setLongitude(aircraft->m_longitude);
-            swgMapItem->setAltitude(Units::feetToMetres(aircraft->m_altitude));
-            swgMapItem->setImage(new QString(QString("qrc:///map/%1").arg(aircraft->getImage())));
-            swgMapItem->setImageRotation(aircraft->m_heading);
-            swgMapItem->setImageMinZoom(11);
-            swgMapItem->setText(new QString(aircraft->getText(true)));
-
-            MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_adsbDemod, swgMapItem);
-            (*it)->push(msg);
-        }
     }
 }
 
@@ -671,68 +700,160 @@ bool ADSBDemodGUI::updateLocalPosition(Aircraft *aircraft, double latitude, doub
         return true;
     }
     else
+    {
+        //qDebug() << "Local position out of range - calculated distance: " << m_azEl.getDistance();
         return false;
+    }
+}
+
+void ADSBDemodGUI::sendToMap(Aircraft *aircraft, QList<SWGSDRangel::SWGMapAnimation *> *animations)
+{
+    // Send to Map feature
+    MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
+    QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(m_adsbDemod, "mapitems");
+    if (mapMessageQueues)
+    {
+        QList<MessageQueue*>::iterator it = mapMessageQueues->begin();
+
+        // Adjust altitude by airfield barometric elevation, so aircraft appears to
+        // take-off/land at correct point on runway
+        int altitudeFt = aircraft->m_altitude;
+        if (!aircraft->m_onSurface && !aircraft->m_altitudeGNSS) {
+            altitudeFt -= m_settings.m_airfieldElevation;
+        }
+        float altitudeM = Units::feetToMetres(altitudeFt);
+
+        for (; it != mapMessageQueues->end(); ++it)
+        {
+            SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
+            swgMapItem->setName(new QString(aircraft->m_icaoHex));
+            swgMapItem->setLatitude(aircraft->m_latitude);
+            swgMapItem->setLongitude(aircraft->m_longitude);
+            swgMapItem->setAltitude(altitudeM);
+            swgMapItem->setPositionDateTime(new QString(aircraft->m_positionDateTime.toString(Qt::ISODateWithMs)));
+            swgMapItem->setFixedPosition(false);
+            swgMapItem->setImage(new QString(QString("qrc:///map/%1").arg(aircraft->getImage())));
+            swgMapItem->setImageRotation(aircraft->m_heading);
+            swgMapItem->setText(new QString(aircraft->getText(true)));
+            if (!aircraft->m_aircraft3DModel.isEmpty()) {
+                swgMapItem->setModel(new QString(aircraft->m_aircraft3DModel));
+            } else {
+                swgMapItem->setModel(new QString(aircraft->m_aircraftCat3DModel));
+            }
+            swgMapItem->setLabel(new QString(aircraft->m_callsign));
+            if (aircraft->m_headingValid)
+            {
+                swgMapItem->setOrientation(1);
+                swgMapItem->setHeading(aircraft->m_heading);
+                swgMapItem->setPitch(aircraft->m_pitch);
+                swgMapItem->setRoll(aircraft->m_roll);
+                swgMapItem->setOrientationDateTime(new QString(aircraft->m_positionDateTime.toString(Qt::ISODateWithMs)));
+            }
+            else
+            {
+                // Orient aircraft based on velocity calculated from position
+                swgMapItem->setOrientation(0);
+            }
+            swgMapItem->setModelAltitudeOffset(aircraft->m_modelAltitudeOffset);
+            swgMapItem->setLabelAltitudeOffset(aircraft->m_labelAltitudeOffset);
+            swgMapItem->setAltitudeReference(3); // CLIP_TO_GROUND so aircraft don't go under runway
+            swgMapItem->setAnimations(animations);  // Does this need to be duplicated?
+
+            MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_adsbDemod, swgMapItem);
+            (*it)->push(msg);
+        }
+    }
+}
+
+QString ADSBDemodGUI::getAirlineIconPath(const QString &operatorICAO)
+{
+    QString endPath = QString("/airlinelogos/%1.bmp").arg(operatorICAO);
+    // Try in user directory first, so they can customise
+    QString userIconPath = getDataDir() + endPath;
+    QFile file(userIconPath);
+    if (file.exists())
+    {
+        return userIconPath;
+    }
+    else
+    {
+        // Try in resources
+        QString resourceIconPath = ":" + endPath;
+        QResource resource(resourceIconPath);
+        if (resource.isValid())
+        {
+            return resourceIconPath;
+        }
+    }
+    return QString();
 }
 
 // Try to find an airline logo based on ICAO
 QIcon *ADSBDemodGUI::getAirlineIcon(const QString &operatorICAO)
 {
     if (m_airlineIcons.contains(operatorICAO))
+    {
         return m_airlineIcons.value(operatorICAO);
+    }
     else
     {
         QIcon *icon = nullptr;
-        QString endPath = QString("/airlinelogos/%1.bmp").arg(operatorICAO);
-        // Try in user directory first, so they can customise
-        QString userIconPath = getDataDir() + endPath;
-        QFile file(userIconPath);
-        if (file.exists())
+        QString path = getAirlineIconPath(operatorICAO);
+        if (!path.isEmpty())
         {
-            icon = new QIcon(userIconPath);
+            icon = new QIcon(path);
             m_airlineIcons.insert(operatorICAO, icon);
         }
         else
         {
-            // Try in resources
-            QResource resourceIconPath(QString(":%1").arg(endPath));
-            if (resourceIconPath.isValid())
+            if (!m_airlineMissingIcons.contains(operatorICAO))
             {
-                icon = new QIcon(":" + endPath);
-                m_airlineIcons.insert(operatorICAO, icon);
-            }
-            else
                 qDebug() << "ADSBDemodGUI: No airline logo for " << operatorICAO;
+                m_airlineMissingIcons.insert(operatorICAO, true);
+            }
         }
         return icon;
     }
+}
+
+QString ADSBDemodGUI::getFlagIconPath(const QString &country)
+{
+    QString endPath = QString("/flags/%1.bmp").arg(country);
+    // Try in user directory first, so they can customise
+    QString userIconPath = getDataDir() + endPath;
+    QFile file(userIconPath);
+    if (file.exists())
+    {
+        return userIconPath;
+    }
+    else
+    {
+        // Try in resources
+        QString resourceIconPath = ":" + endPath;
+        QResource resource(resourceIconPath);
+        if (resource.isValid())
+        {
+            return resourceIconPath;
+        }
+    }
+    return QString();
 }
 
 // Try to find an flag logo based on a country
 QIcon *ADSBDemodGUI::getFlagIcon(const QString &country)
 {
     if (m_flagIcons.contains(country))
+    {
         return m_flagIcons.value(country);
+    }
     else
     {
         QIcon *icon = nullptr;
-        QString endPath = QString("/flags/%1.bmp").arg(country);
-        // Try in user directory first, so they can customise
-        QString userIconPath = getDataDir() + endPath;
-        QFile file(userIconPath);
-        if (file.exists())
+        QString path = getFlagIconPath(country);
+        if (!path.isEmpty())
         {
-            icon = new QIcon(userIconPath);
+            icon = new QIcon(path);
             m_flagIcons.insert(country, icon);
-        }
-        else
-        {
-            // Try in resources
-            QResource resourceIconPath(QString(":%1").arg(endPath));
-            if (resourceIconPath.isValid())
-            {
-                icon = new QIcon(":" + endPath);
-                m_flagIcons.insert(country, icon);
-            }
         }
         return icon;
     }
@@ -742,52 +863,54 @@ void ADSBDemodGUI::handleADSB(
     const QByteArray data,
     const QDateTime dateTime,
     float correlation,
-    float correlationOnes)
+    float correlationOnes,
+    bool updateModel)
 {
-    const char idMap[] = "?ABCDEFGHIJKLMNOPQRSTUVWXYZ????? ???????????????0123456789??????";
+    const char idMap[] = "#ABCDEFGHIJKLMNOPQRSTUVWXYZ##### ############-##0123456789######";
     const QString categorySetA[] = {
-        "None",
-        "Light",
-        "Small",
-        "Large",
-        "High vortex",
-        "Heavy",
-        "High performance",
-        "Rotorcraft"
+        QStringLiteral("None"),
+        QStringLiteral("Light"),
+        QStringLiteral("Small"),
+        QStringLiteral("Large"),
+        QStringLiteral("High vortex"),
+        QStringLiteral("Heavy"),
+        QStringLiteral("High performance"),
+        QStringLiteral("Rotorcraft")
     };
     const QString categorySetB[] = {
-        "None",
-        "Glider/sailplane",
-        "Lighter-than-air",
-        "Parachutist",
-        "Ultralight",
-        "Reserved",
-        "UAV",
-        "Space vehicle"
+        QStringLiteral("None"),
+        QStringLiteral("Glider/sailplane"),
+        QStringLiteral("Lighter-than-air"),
+        QStringLiteral("Parachutist"),
+        QStringLiteral("Ultralight"),
+        QStringLiteral("Reserved"),
+        QStringLiteral("UAV"),
+        QStringLiteral("Space vehicle")
     };
     const QString categorySetC[] = {
-        "None",
-        "Emergency vehicle",
-        "Service vehicle",
-        "Ground obstruction",
-        "Cluster obstacle",
-        "Line obstacle",
-        "Reserved",
-        "Reserved"
+        QStringLiteral("None"),
+        QStringLiteral("Emergency vehicle"),
+        QStringLiteral("Service vehicle"),
+        QStringLiteral("Ground obstruction"),
+        QStringLiteral("Cluster obstacle"),
+        QStringLiteral("Line obstacle"),
+        QStringLiteral("Reserved"),
+        QStringLiteral("Reserved")
     };
     const QString emergencyStatus[] = {
-        "No emergency",
-        "General emergency",
-        "Lifeguard/Medical",
-        "Minimum fuel",
-        "No communications",
-        "Unlawful interference",
-        "Downed aircraft",
-        "Reserved"
+        QStringLiteral("No emergency"),
+        QStringLiteral("General emergency"),
+        QStringLiteral("Lifeguard/Medical"),
+        QStringLiteral("Minimum fuel"),
+        QStringLiteral("No communications"),
+        QStringLiteral("Unlawful interference"),
+        QStringLiteral("Downed aircraft"),
+        QStringLiteral("Reserved")
     };
 
     bool newAircraft = false;
     bool updatedCallsign = false;
+    bool resetAnimation = false;
 
     int df = (data[0] >> 3) & ADS_B_DF_MASK; // Downlink format
     int ca = data[0] & 0x7; // Capability
@@ -806,12 +929,14 @@ void ADSBDemodGUI::handleADSB(
         newAircraft = true;
         aircraft = new Aircraft(this);
         aircraft->m_icao = icao;
+        aircraft->m_icaoHex = QString::number(aircraft->m_icao, 16);
         m_aircraft.insert(icao, aircraft);
         // Check for TIS-B addresses
-        if ((df == 18) && !((df == 18) && ((ca == 0) || (ca == 1) || (ca == 6))))
-            aircraft->m_icaoItem->setText(QString("TIS-B %1").arg(aircraft->m_icao, 1, 16));
-        else
-            aircraft->m_icaoItem->setText(QString("%1").arg(aircraft->m_icao, 1, 16));
+        if ((df == 18) && !((df == 18) && ((ca == 0) || (ca == 1) || (ca == 6)))) {
+            aircraft->m_icaoItem->setText(QString("TIS-B %1").arg(aircraft->m_icaoHex));
+        } else {
+            aircraft->m_icaoItem->setText(aircraft->m_icaoHex);
+        }
         ui->adsbData->setSortingEnabled(false);
         int row = ui->adsbData->rowCount();
         ui->adsbData->setRowCount(row + 1);
@@ -865,6 +990,10 @@ void ADSBDemodGUI::handleADSB(
                 QIcon *icon = nullptr;
                 if (aircraft->m_aircraftInfo->m_operatorICAO.size() > 0)
                 {
+                    aircraft->m_airlineIconURL = getAirlineIconPath(aircraft->m_aircraftInfo->m_operatorICAO);
+                    if (aircraft->m_airlineIconURL.startsWith(':')) {
+                        aircraft->m_airlineIconURL = "qrc://" + aircraft->m_airlineIconURL.mid(1);
+                    }
                     icon = getAirlineIcon(aircraft->m_aircraftInfo->m_operatorICAO);
                     if (icon != nullptr)
                     {
@@ -908,6 +1037,10 @@ void ADSBDemodGUI::handleADSB(
                     }
                     if (flag != "")
                     {
+                        aircraft->m_flagIconURL = getFlagIconPath(flag);
+                        if (aircraft->m_flagIconURL.startsWith(':')) {
+                            aircraft->m_flagIconURL = "qrc://" + aircraft->m_flagIconURL.mid(1);
+                        }
                         icon = getFlagIcon(flag);
                         if (icon != nullptr)
                         {
@@ -916,8 +1049,21 @@ void ADSBDemodGUI::handleADSB(
                         }
                     }
                 }
+                get3DModel(aircraft);
             }
         }
+
+        if (aircraft->m_aircraft3DModel.isEmpty())
+        {
+            // Default to A320 until we get some more info
+            aircraft->m_aircraftCat3DModel = get3DModel("A320");
+            if (m_modelAltitudeOffset.contains("A320"))
+            {
+                aircraft->m_modelAltitudeOffset = m_modelAltitudeOffset.value("A320");
+                aircraft->m_labelAltitudeOffset = m_labelAltitudeOffset.value("A320");
+            }
+        }
+
         if (m_settings.m_autoResizeTableColumns)
             ui->adsbData->resizeColumnsToContents();
         ui->adsbData->setSortingEnabled(true);
@@ -952,14 +1098,17 @@ void ADSBDemodGUI::handleADSB(
         {
             // Aircraft identification
             int ec = data[4] & 0x7;   // Emitter category
-            if (tc == 4)
+
+            QString prevEmitterCategory = aircraft->m_emitterCategory;
+            if (tc == 4) {
                 aircraft->m_emitterCategory = categorySetA[ec];
-            else if (tc == 3)
+            } else if (tc == 3) {
                 aircraft->m_emitterCategory = categorySetB[ec];
-            else if (tc == 2)
+            } else if (tc == 2) {
                 aircraft->m_emitterCategory = categorySetC[ec];
-            else
-                aircraft->m_emitterCategory = QString("Reserved");
+            } else {
+                aircraft->m_emitterCategory = QStringLiteral("Reserved");
+            }
             aircraft->m_emitterCategoryItem->setText(aircraft->m_emitterCategory);
 
             // Flight/callsign - Extract 8 6-bit characters from 6 8-bit bytes, MSB first
@@ -1014,18 +1163,130 @@ void ADSBDemodGUI::handleADSB(
             {
                 aircraft->m_flight = "";
             }
+
+            // Select 3D model based on category, if we don't already have one based on ICAO
+            if (   aircraft->m_aircraft3DModel.isEmpty()
+                && (   aircraft->m_aircraftCat3DModel.isEmpty()
+                    || (prevEmitterCategory != aircraft->m_emitterCategory)
+                   )
+               )
+            {
+                QString aircraftType;
+
+                if (!aircraft->m_emitterCategory.compare("Heavy"))
+                {
+                    QStringList heavy = {"B744", "B77W", "B788", "A388"};
+                    aircraftType = heavy[m_random.bounded(heavy.size())];
+                }
+                else if (!aircraft->m_emitterCategory.compare("Large"))
+                {
+                    QStringList large = {"A319", "A320", "A321", "B737", "B738", "B739"};
+                    aircraftType = large[m_random.bounded(large.size())];
+                }
+                else if (!aircraft->m_emitterCategory.compare("Small"))
+                {
+                    aircraftType = "LJ45";
+                }
+                else if (!aircraft->m_emitterCategory.compare("Rotorcraft"))
+                {
+                    aircraft->m_aircraftCat3DModel = "helicopter.glb";
+                    aircraft->m_modelAltitudeOffset = 4.0f;
+                    aircraft->m_labelAltitudeOffset = 4.0f;
+                }
+                else if (!aircraft->m_emitterCategory.compare("High performance"))
+                {
+                    aircraft->m_aircraftCat3DModel = "f15.glb";
+                    aircraft->m_modelAltitudeOffset = 1.0f;
+                    aircraft->m_labelAltitudeOffset = 6.0f;
+                }
+                else if (!aircraft->m_emitterCategory.compare("Light"))
+                {
+                    aircraftType = "C172";
+                }
+                else if (!aircraft->m_emitterCategory.compare("Ultralight"))
+                {
+                    aircraft->m_aircraftCat3DModel = "ultralight.glb";
+                    aircraft->m_modelAltitudeOffset = 0.55f;
+                    aircraft->m_labelAltitudeOffset = 0.75f;
+                }
+                else if (!aircraft->m_emitterCategory.compare("Glider/sailplane"))
+                {
+                    aircraft->m_aircraftCat3DModel = "glider.glb";
+                    aircraft->m_modelAltitudeOffset = 1.0f;
+                    aircraft->m_labelAltitudeOffset = 1.5f;
+                }
+                else if (!aircraft->m_emitterCategory.compare("Space vehicle"))
+                {
+                    aircraft->m_aircraftCat3DModel = "atlas_v.glb";
+                    aircraft->m_labelAltitudeOffset = 16.0f;
+                }
+                else if (!aircraft->m_emitterCategory.compare("UAV"))
+                {
+                    aircraft->m_aircraftCat3DModel = "drone.glb";
+                    aircraft->m_labelAltitudeOffset = 1.0f;
+                }
+                else if (!aircraft->m_emitterCategory.compare("Emergency vehicle"))
+                {
+                    aircraft->m_aircraftCat3DModel = "fire_truck.glb";
+                    aircraft->m_modelAltitudeOffset = 0.3f;
+                    aircraft->m_labelAltitudeOffset = 2.5f;
+                }
+                else if (!aircraft->m_emitterCategory.compare("Service vehicle"))
+                {
+                    aircraft->m_aircraftCat3DModel = "airport_truck.glb";
+                    aircraft->m_labelAltitudeOffset = 3.0f;
+                }
+                else
+                {
+                    aircraftType = "A320";
+                }
+
+                if (!aircraftType.isEmpty())
+                {
+                    aircraft->m_aircraftCat3DModel = "";
+                    if (aircraft->m_aircraftInfo) {
+                        aircraft->m_aircraftCat3DModel = get3DModel(aircraftType, aircraft->m_aircraftInfo->m_operatorICAO);
+                    }
+                    if (aircraft->m_aircraftCat3DModel.isEmpty()) {
+                        aircraft->m_aircraftCat3DModel = get3DModel(aircraftType, aircraft->m_callsign.left(3));
+                    }
+                    if (aircraft->m_aircraftCat3DModel.isEmpty()) {
+                        aircraft->m_aircraftCat3DModel = get3DModel(aircraftType);
+                    }
+                    if (m_modelAltitudeOffset.contains(aircraftType))
+                    {
+                        aircraft->m_modelAltitudeOffset = m_modelAltitudeOffset.value(aircraftType);
+                        aircraft->m_labelAltitudeOffset = m_labelAltitudeOffset.value(aircraftType);
+                    }
+                }
+                // As we're changing the model, we need to reset animations to
+                // ensure gear/flaps are in correct position on new model
+                resetAnimation = true;
+            }
         }
         else if (((tc >= 5) && (tc <= 18)) || ((tc >= 20) && (tc <= 22)))
         {
-            bool surfacePosition = (tc >= 5) && (tc <= 8);
-            if (surfacePosition)
+            bool wasOnSurface = aircraft->m_onSurface;
+            aircraft->m_onSurface = (tc >= 5) && (tc <= 8);
+
+            if (wasOnSurface != aircraft->m_onSurface)
+            {
+                // Can't mix CPR values used on surface and those that are airbourne
+                aircraft->m_cprValid[0] = false;
+                aircraft->m_cprValid[1] = false;
+            }
+
+            if (aircraft->m_onSurface)
             {
                 // Surface position
 
-                // Set altitude to 0, if we're on the surface
-                // Actual altitude may of course depend on airport elevation
+                // There are a few airports that are below 0 MSL
+                // https://en.wikipedia.org/wiki/List_of_lowest_airports
+                // So we set altitude to a negative value here, which should
+                // then get clipped to actual terrain elevation in 3D map
                 aircraft->m_altitudeValid = true;
-                aircraft->m_altitudeItem->setData(Qt::DisplayRole, 0);
+                aircraft->m_altitude = -200;
+                aircraft->m_altitudeItem->setData(Qt::DisplayRole, "Surface");
 
                 int movement = ((data[4] & 0x7) << 4) | ((data[5] >> 4) & 0xf);
                 if (movement == 0)
@@ -1039,50 +1300,52 @@ void ADSBDemodGUI::handleADSB(
                     // Aircraft stopped
                     aircraft->m_speedValid = true;
                     aircraft->m_speedItem->setData(Qt::DisplayRole, 0);
+                    aircraft->m_speed = 0.0;
                 }
                 else if ((movement >= 2) && (movement <= 123))
                 {
-                    // float base, step; // In knts
-                    // int adjust;
-                    // if ((movement >= 2) && (movement <= 8))
-                    // {
-                    //     base = 0.125f;
-                    //     step = 0.125f;
-                    //     adjust = 2;
-                    // }
-                    // else if ((movement >= 9) && (movement <= 12))
-                    // {
-                    //     base = 1.0f;
-                    //     step = 0.25f;
-                    //     adjust = 9;
-                    // }
-                    // else if ((movement >= 13) && (movement <= 38))
-                    // {
-                    //     base = 2.0f;
-                    //     step = 0.5f;
-                    //     adjust = 13;
-                    // }
-                    // else if ((movement >= 39) && (movement <= 93))
-                    // {
-                    //     base = 15.0f;
-                    //     step = 1.0f;
-                    //     adjust = 39;
-                    // }
-                    // else if ((movement >= 94) && (movement <= 108))
-                    // {
-                    //     base = 70.0f;
-                    //     step = 2.0f;
-                    //     adjust = 94;
-                    // }
-                    // else
-                    // {
-                    //     base = 100.0f;
-                    //     step = 5.0f;
-                    //     adjust = 109;
-                    // }
+                    float base, step; // In knts
+                    int adjust;
+                    if ((movement >= 2) && (movement <= 8))
+                    {
+                        base = 0.125f;
+                        step = 0.125f;
+                        adjust = 2;
+                    }
+                    else if ((movement >= 9) && (movement <= 12))
+                    {
+                        base = 1.0f;
+                        step = 0.25f;
+                        adjust = 9;
+                    }
+                    else if ((movement >= 13) && (movement <= 38))
+                    {
+                        base = 2.0f;
+                        step = 0.5f;
+                        adjust = 13;
+                    }
+                    else if ((movement >= 39) && (movement <= 93))
+                    {
+                        base = 15.0f;
+                        step = 1.0f;
+                        adjust = 39;
+                    }
+                    else if ((movement >= 94) && (movement <= 108))
+                    {
+                        base = 70.0f;
+                        step = 2.0f;
+                        adjust = 94;
+                    }
+                    else
+                    {
+                        base = 100.0f;
+                        step = 5.0f;
+                        adjust = 109;
+                    }
+                    aircraft->m_speed = base + (movement - adjust) * step;
                     aircraft->m_speedType = Aircraft::GS;
                     aircraft->m_speedValid = true;
-                    aircraft->m_speedItem->setData(Qt::DisplayRole,  m_settings.m_siUnits ? Units::knotsToIntegerKPH(aircraft->m_speed) : (int)std::round(aircraft->m_speed));
+                    aircraft->m_speedItem->setData(Qt::DisplayRole, m_settings.m_siUnits ? Units::knotsToIntegerKPH(aircraft->m_speed) : (int)std::round(aircraft->m_speed));
                 }
                 else if (movement == 124)
                 {
@@ -1094,22 +1357,62 @@ void ADSBDemodGUI::handleADSB(
                 int groundTrackValue = ((data[5] & 0x7) << 4) | ((data[6] >> 4) & 0xf);
                 if (groundTrackStatus)
                 {
-                    aircraft->m_heading = std::round((groundTrackValue * 360.0/128.0));
+                    aircraft->m_heading = groundTrackValue * 360.0/128.0;
                     aircraft->m_headingValid = true;
-                    aircraft->m_headingItem->setData(Qt::DisplayRole, aircraft->m_heading);
+                    aircraft->m_headingItem->setData(Qt::DisplayRole, std::round(aircraft->m_heading));
                 }
             }
             else if (((tc >= 9) && (tc <= 18)) || ((tc >= 20) && (tc <= 22)))
             {
                 // Airbourne position (9-18 baro, 20-22 GNSS)
                 int alt = ((data[5] & 0xff) << 4) | ((data[6] >> 4) & 0xf); // Altitude
-                int n = ((alt >> 1) & 0x7f0) | (alt & 0xf);
-                int alt_ft = n * ((alt & 0x10) ? 25 : 100) - 1000;
+                int q = (alt & 0x10) != 0;
+                int n = ((alt >> 1) & 0x7f0) | (alt & 0xf);  // Remove Q-bit
+                int alt_ft;
+                if (q == 1)
+                {
+                    alt_ft = n * ((alt & 0x10) ? 25 : 100) - 1000;
+                }
+                else
+                {
+                    // https://en.wikipedia.org/wiki/Gillham_code
+                    int c1 = (n >> 10) & 1;
+                    int a1 = (n >> 9) & 1;
+                    int c2 = (n >> 8) & 1;
+                    int a2 = (n >> 7) & 1;
+                    int c4 = (n >> 6) & 1;
+                    int a4 = (n >> 5) & 1;
+                    int b1 = (n >> 4) & 1;
+                    int b2 = (n >> 3) & 1;
+                    int d2 = (n >> 2) & 1;
+                    int b4 = (n >> 1) & 1;
+                    int d4 = n & 1;
+
+                    int n500 = grayToBinary((d2 << 7) | (d4 << 6) | (a1 << 5) | (a2 << 4) | (a4 << 3) | (b1 << 2) | (b2 << 1) | b4, 4);
+                    int n100 = grayToBinary((c1 << 2) | (c2 << 1) | c4, 3) - 1;
+
+                    if (n100 == 6) {
+                        n100 = 4;
+                    }
+                    if (n500 %2 != 0) {
+                        n100 = 4 - n100;
+                    }
+
+                    alt_ft = -1200 + n500*500 + n100*100;
+                }
 
                 aircraft->m_altitude = alt_ft;
-                aircraft->m_altitudeValid = true;
+                aircraft->m_altitudeValid = alt != 0;
+                aircraft->m_altitudeGNSS = ((tc >= 20) && (tc <= 22));
                 // setData rather than setText so it sorts numerically
                 aircraft->m_altitudeItem->setData(Qt::DisplayRole, m_settings.m_siUnits ? Units::feetToIntegerMetres(aircraft->m_altitude) : aircraft->m_altitude);
+
+                // Assume runway elevation is at first reported airboune altitude
+                if (wasOnSurface)
+                {
+                    aircraft->m_runwayAltitude = aircraft->m_altitude;
+                    aircraft->m_runwayAltitudeValid = true;
+                }
             }
 
             int f = (data[6] >> 2) & 1; // CPR odd/even frame - should alternate every 0.2s
@@ -1126,10 +1429,12 @@ void ADSBDemodGUI::handleADSB(
             // See also: https://mode-s.org/decode/adsb/airborne-position.html
             // For global decoding, we need both odd and even frames
             // We also need to check that both frames aren't greater than 10s apart in time (C.2.6.7), otherwise position may be out by ~10deg
+            // I've reduced this to 8.5s, as problems have been seen where times are just 9s apart. This may be because
+            // our timestamps aren't accurate, as the times are generated when packets are decoded on buffered data.
             // We could compare global + local methods to see if the positions are sensible
             if (aircraft->m_cprValid[0] && aircraft->m_cprValid[1]
-               && (std::abs(aircraft->m_cprTime[0].toSecsSinceEpoch() - aircraft->m_cprTime[1].toSecsSinceEpoch()) < 10)
-               && !surfacePosition)
+               && (std::abs(aircraft->m_cprTime[0].toMSecsSinceEpoch() - aircraft->m_cprTime[1].toMSecsSinceEpoch()) <= 8500)
+               && !aircraft->m_onSurface)
             {
                 // Global decode using odd and even frames (C.2.6)
 
@@ -1178,6 +1483,7 @@ void ADSBDemodGUI::handleADSB(
                         aircraft->m_latitudeItem->setData(Qt::DisplayRole, aircraft->m_latitude);
                         aircraft->m_longitude = longitude;
                         aircraft->m_longitudeItem->setData(Qt::DisplayRole, aircraft->m_longitude);
+                        aircraft->m_positionDateTime = dateTime;
                         QGeoCoordinate coord(aircraft->m_latitude, aircraft->m_longitude, aircraft->m_altitude);
                         aircraft->m_coordinates.push_back(QVariant::fromValue(coord));
                         updatePosition(aircraft);
@@ -1185,7 +1491,7 @@ void ADSBDemodGUI::handleADSB(
                 }
                 else
                 {
-                    qDebug() << "ADSBDemodGUI::handleADSB: Invalid latitude " << latitude << " for " << QString("%1").arg(aircraft->m_icao, 1, 16)
+                    qDebug() << "ADSBDemodGUI::handleADSB: Invalid latitude " << latitude << " for " << QString("%1").arg(aircraft->m_icaoHex)
                         << " m_cprLat[0] " << aircraft->m_cprLat[0]
                         << " m_cprLat[1] " << aircraft->m_cprLat[1];
                     aircraft->m_cprValid[0] = false;
@@ -1198,7 +1504,7 @@ void ADSBDemodGUI::handleADSB(
                 // Only valid if airbourne within 180nm/333km (C.2.6.4) or 45nm for surface
 
                 // Caclulate latitude
-                const double maxDeg = surfacePosition ? 90.0 : 360.0;
+                const double maxDeg = aircraft->m_onSurface ? 90.0 : 360.0;
                 const double dLatEven = maxDeg/60.0;
                 const double dLatOdd = maxDeg/59.0;
                 double dLat = f ? dLatOdd : dLatEven;
@@ -1227,12 +1533,13 @@ void ADSBDemodGUI::handleADSB(
                 int m = std::floor(m_azEl.getLocationSpherical().m_longitude/dLong) + std::floor(modulus(m_azEl.getLocationSpherical().m_longitude, dLong)/dLong - aircraft->m_cprLong[f] + 0.5);
                 longitude =  dLong * (m + aircraft->m_cprLong[f]);
 
-                if (updateLocalPosition(aircraft, latitude, longitude, surfacePosition))
+                if (updateLocalPosition(aircraft, latitude, longitude, aircraft->m_onSurface))
                 {
                     aircraft->m_latitude = latitude;
                     aircraft->m_latitudeItem->setData(Qt::DisplayRole, aircraft->m_latitude);
                     aircraft->m_longitude = longitude;
                     aircraft->m_longitudeItem->setData(Qt::DisplayRole, aircraft->m_longitude);
+                    aircraft->m_positionDateTime = dateTime;
                     QGeoCoordinate coord(aircraft->m_latitude, aircraft->m_longitude, aircraft->m_altitude);
                     aircraft->m_coordinates.push_back(QVariant::fromValue(coord));
                 }
@@ -1252,29 +1559,34 @@ void ADSBDemodGUI::handleADSB(
 
                 int v_we;
                 int v_sn;
-                int v;
-                int h;
+                float v;
+                float h;
 
-                if (s_ew)
+                if (s_ew) {
                     v_we = -1 * (v_ew - 1);
-                else
+                } else {
                     v_we = v_ew - 1;
-                if (s_ns)
+                }
+                if (s_ns) {
                     v_sn = -1 * (v_ns - 1);
-                else
+                } else {
                     v_sn = v_ns - 1;
-                v = (int)std::sqrt(v_we*v_we + v_sn*v_sn);
+                }
+                v = std::round(std::sqrt(v_we*v_we + v_sn*v_sn));
                 h = std::atan2(v_we, v_sn) * 360.0/(2.0*M_PI);
-                if (h < 0)
-                    h += 360;
+                if (h < 0.0) {
+                    h += 360.0;
+                }
 
                 aircraft->m_heading = h;
                 aircraft->m_headingValid = true;
+                aircraft->m_headingDateTime = dateTime;
                 aircraft->m_speed = v;
                 aircraft->m_speedType = Aircraft::GS;
                 aircraft->m_speedValid = true;
-                aircraft->m_headingItem->setData(Qt::DisplayRole, aircraft->m_heading);
+                aircraft->m_headingItem->setData(Qt::DisplayRole, std::round(aircraft->m_heading));
                 aircraft->m_speedItem->setData(Qt::DisplayRole, m_settings.m_siUnits ? Units::knotsToIntegerKPH(aircraft->m_speed) : aircraft->m_speed);
+                aircraft->m_orientationDateTime = dateTime;
             }
             else
             {
@@ -1285,10 +1597,12 @@ void ADSBDemodGUI::handleADSB(
                 {
                     aircraft->m_heading = hdg/1024.0f*360.0f;
                     aircraft->m_headingValid = true;
-                    aircraft->m_headingItem->setData(Qt::DisplayRole, aircraft->m_heading);
+                    aircraft->m_headingDateTime = dateTime;
+                    aircraft->m_headingItem->setData(Qt::DisplayRole, std::round(aircraft->m_heading));
+                    aircraft->m_orientationDateTime = dateTime;
                 }
 
-                int as_t =  (data[7] >> 7) & 1; // Airspeed type
+                int as_t = (data[7] >> 7) & 1; // Airspeed type
                 int as = ((data[7] & 0x7f) << 3) | ((data[8] >> 5) & 0x7); // Airspeed
 
                 aircraft->m_speed = as;
@@ -1343,7 +1657,26 @@ void ADSBDemodGUI::handleADSB(
         // Update aircraft in map
         if (aircraft->m_positionValid)
         {
-            m_aircraftModel.aircraftUpdated(aircraft);
+            // Check to see if we need to start any animations
+            QList<SWGSDRangel::SWGMapAnimation *> *animations = animate(dateTime, aircraft);
+
+            // Update map displayed in channel
+            if (updateModel) {
+                m_aircraftModel.aircraftUpdated(aircraft);
+            }
+
+            // Send to Map feature
+            sendToMap(aircraft, animations);
+
+            if (resetAnimation)
+            {
+                // Wait until after model has changed before reseting
+                // otherwise animation might play on old model
+                aircraft->m_gearDown = false;
+                aircraft->m_flaps = 0.0;
+                aircraft->m_engineStarted = false;
+                aircraft->m_rotorStarted = false;
+            }
         }
     }
     else if (df == 18)
@@ -1359,6 +1692,332 @@ void ADSBDemodGUI::handleADSB(
     if ((aircraft == m_highlightAircraft) && (newAircraft || updatedCallsign)) {
         updatePhotoText(aircraft);
     }
+}
+
+QList<SWGSDRangel::SWGMapAnimation *> * ADSBDemodGUI::animate(QDateTime dateTime, Aircraft *aircraft)
+{
+    QList<SWGSDRangel::SWGMapAnimation *> *animations = new QList<SWGSDRangel::SWGMapAnimation *>();
+
+    const int gearDownSpeed = 150;
+    const int gearUpAltitude = 200;
+    const int gearUpVerticalRate = 1000;
+    const int accelerationHeight = 1500;
+    const int flapsRetractAltitude = 2000;
+    const int flapsCleanSpeed = 200;
+
+    bool debug = false;
+
+    // Landing gear should be down when on surface
+    // Check speed in case we get a mixture of surface and airbourne positions
+    // during take-off
+    if (   aircraft->m_onSurface
+        && !aircraft->m_gearDown
+        && (   (aircraft->m_speedValid && (aircraft->m_speed < 80))
+            || !aircraft->m_speedValid
+           )
+       )
+    {
+        if (debug) {
+            qDebug() << "Gear down as on surface " << aircraft->m_icaoHex;
+        }
+        animations->append(gearAnimation(dateTime, false));
+        aircraft->m_gearDown = true;
+    }
+
+    // Flaps when on the surface
+    if (aircraft->m_onSurface && aircraft->m_speedValid)
+    {
+        if ((aircraft->m_speed <= 20) && (aircraft->m_flaps != 0.0))
+        {
+            // No flaps when stationary / taxiing
+            if (debug) {
+                qDebug() << "Parking flaps " << aircraft->m_icaoHex;
+            }
+            animations->append(flapsAnimation(dateTime, aircraft->m_flaps, 0.0));
+            animations->append(slatsAnimation(dateTime, true));
+            aircraft->m_flaps = 0.0;
+        }
+        else if ((aircraft->m_speed >= 30) && (aircraft->m_flaps < 0.25))
+        {
+            // Flaps for takeoff
+            if (debug) {
+                qDebug() << "Takeoff flaps " << aircraft->m_icaoHex;
+            }
+            animations->append(flapsAnimation(dateTime, aircraft->m_flaps, 0.25));
+            animations->append(slatsAnimation(dateTime, false));
+            aircraft->m_flaps = 0.25;
+        }
+    }
+
+    // Pitch up on take-off
+    if (   aircraft->m_gearDown
+        && !aircraft->m_onSurface
+        && (   (aircraft->m_verticalRateValid && (aircraft->m_verticalRate > 300))
+            || (aircraft->m_runwayAltitudeValid && (aircraft->m_altitude > (aircraft->m_runwayAltitude + gearUpAltitude/2)))
+           )
+        )
+    {
+        if (debug) {
+            qDebug() << "Pitch up " << aircraft->m_icaoHex;
+        }
+        aircraft->m_pitch = 5.0;
+    }
+
+    // Retract landing gear after take-off
+    if (   aircraft->m_gearDown
+        && !aircraft->m_onSurface
+        && (   (aircraft->m_verticalRateValid && (aircraft->m_verticalRate > 1000))
+            || (aircraft->m_runwayAltitudeValid && (aircraft->m_altitude > (aircraft->m_runwayAltitude + gearUpAltitude)))
+           )
+        )
+    {
+        if (debug) {
+            qDebug() << "Gear up " << aircraft->m_icaoHex
+                    << " VR " << (aircraft->m_verticalRateValid && (aircraft->m_verticalRate > gearUpVerticalRate))
+                    << " Alt " << (aircraft->m_runwayAltitudeValid && (aircraft->m_altitude > (aircraft->m_runwayAltitude + gearUpAltitude)))
+                    <<  "m_altitude " << aircraft->m_altitude   << " aircraft->m_runwayAltitude " << aircraft->m_runwayAltitude;
+        }
+        aircraft->m_pitch = 10.0;
+        animations->append(gearAnimation(dateTime.addSecs(2), true));
+        aircraft->m_gearDown = false;
+    }
+
+    // Reduce pitch at acceleration height
+    if (   (aircraft->m_flaps > 0.0)
+        && (aircraft->m_runwayAltitudeValid && (aircraft->m_altitude > (aircraft->m_runwayAltitude + accelerationHeight)))
+       )
+    {
+        aircraft->m_pitch = 5.0;
+    }
+
+    // Retract flaps/slats after take-off
+    // Should be after acceleration altitude (1500-3000ft AAL)
+    // And before max speed for flaps is reached (215knt for A320, 255KIAS for 777)
+    if (   (aircraft->m_flaps > 0.0)
+        && (   (aircraft->m_runwayAltitudeValid && (aircraft->m_altitude > (aircraft->m_runwayAltitude + flapsRetractAltitude)))
+            || (aircraft->m_speedValid && (aircraft->m_speed > flapsCleanSpeed))
+           )
+       )
+    {
+        if (debug) {
+            qDebug() << "Retract flaps " << aircraft->m_icaoHex
+                    << " Spd " << (aircraft->m_speedValid && (aircraft->m_speed > flapsCleanSpeed))
+                    << " Alt " << (aircraft->m_runwayAltitudeValid && (aircraft->m_altitude > (aircraft->m_runwayAltitude + flapsRetractAltitude)));
+        }
+        animations->append(flapsAnimation(dateTime, aircraft->m_flaps, 0.0));
+        animations->append(slatsAnimation(dateTime, true));
+        aircraft->m_flaps = 0.0;
+        // Clear runway information
+        aircraft->m_runwayAltitudeValid = false;
+        aircraft->m_runwayAltitude = 0.0;
+    }
+
+    // Extend flaps for approach and landing
+    // We don't know airport elevation, so just base on speed and descent rate
+    // Vertical rate can go negative during take-off, so we check m_runwayAltitudeValid
+    if (!aircraft->m_onSurface
+        && !aircraft->m_runwayAltitudeValid
+        && (aircraft->m_verticalRateValid && (aircraft->m_verticalRate < 0))
+        && aircraft->m_speedValid
+       )
+    {
+        if ((aircraft->m_speed < flapsCleanSpeed) && (aircraft->m_flaps < 0.25))
+        {
+            // Extend flaps for approach
+            if (debug) {
+                qDebug() << "Extend flaps for approach" << aircraft->m_icaoHex;
+            }
+            animations->append(flapsAnimation(dateTime, aircraft->m_flaps, 0.25));
+            //animations->append(slatsAnimation(dateTime, false));
+            aircraft->m_flaps = 0.25;
+            aircraft->m_pitch = 1.0;
+        }
+    }
+
+    // Gear down for landing
+    // We don't know airport elevation, so just base on speed and descent rate
+    if (!aircraft->m_gearDown
+        && !aircraft->m_onSurface
+        && !aircraft->m_runwayAltitudeValid
+        && (aircraft->m_verticalRateValid && (aircraft->m_verticalRate < 0))
+        && (aircraft->m_speedValid && (aircraft->m_speed < gearDownSpeed))
+       )
+    {
+        if (debug) {
+            qDebug() << "Flaps/Gear down for landing " << aircraft->m_icaoHex;
+        }
+        animations->append(flapsAnimation(dateTime, aircraft->m_flaps, 0.5));
+        animations->append(slatsAnimation(dateTime, false));
+        animations->append(gearAnimation(dateTime.addSecs(8), false));
+        animations->append(flapsAnimation(dateTime.addSecs(16), 0.5, 1.0));
+        aircraft->m_gearDown = true;
+        aircraft->m_flaps = 1.0;
+        aircraft->m_pitch = 3.0;
+    }
+
+    // Engine control
+    if (aircraft->m_emitterCategory == "Rotorcraft")
+    {
+        // Helicopter rotors
+        if (!aircraft->m_rotorStarted && !aircraft->m_onSurface)
+        {
+            // Start rotors
+            if (debug) {
+                qDebug() << "Start rotors " << aircraft->m_icaoHex;
+            }
+            animations->append(rotorAnimation(dateTime, false));
+            aircraft->m_rotorStarted = true;
+        }
+        else if (aircraft->m_rotorStarted && aircraft->m_onSurface)
+        {
+            if (debug) {
+                qDebug() << "Stop rotors " << aircraft->m_icaoHex;
+            }
+            animations->append(rotorAnimation(dateTime, true));
+            aircraft->m_rotorStarted = false;
+        }
+    }
+    else
+    {
+        // Propellors
+        if (!aircraft->m_engineStarted && aircraft->m_speedValid && (aircraft->m_speed > 0))
+        {
+            if (debug) {
+                qDebug() << "Start engines " << aircraft->m_icaoHex;
+            }
+            animations->append(engineAnimation(dateTime, 1, false));
+            animations->append(engineAnimation(dateTime, 2, false));
+            aircraft->m_engineStarted = true;
+        }
+        else if (aircraft->m_engineStarted && aircraft->m_speedValid && (aircraft->m_speed == 0))
+        {
+            if (debug) {
+                qDebug() << "Stop engines " << aircraft->m_icaoHex;
+            }
+            animations->append(engineAnimation(dateTime, 1, true));
+            animations->append(engineAnimation(dateTime, 2, true));
+            aircraft->m_engineStarted = false;
+        }
+    }
+
+    // Estimate pitch, so it looks a little more realistic
+    if (aircraft->m_onSurface)
+    {
+        // Check speed so we don't set pitch to 0 immediately on touch-down
+        // Should probably record time of touch-down and reduce over time
+        if (aircraft->m_speedValid)
+        {
+            if (aircraft->m_speed < 80) {
+                aircraft->m_pitch = 0.0;
+            } else if ((aircraft->m_speed < 130) && (aircraft->m_pitch >= 2)) {
+                aircraft->m_pitch = 1;
+            }
+        }
+    }
+    else if ((aircraft->m_flaps < 0.25) && aircraft->m_verticalRateValid)
+    {
+        // In climb/descent
+        aircraft->m_pitch = std::abs(aircraft->m_verticalRate / 400.0);
+    }
+
+    // Estimate some roll
+    if (aircraft->m_onSurface
+        || (aircraft->m_runwayAltitudeValid && (aircraft->m_altitude < (aircraft->m_runwayAltitude + accelerationHeight))))
+    {
+        aircraft->m_roll = 0.0;
+    }
+    else if (aircraft->m_headingValid)
+    {
+        // Really need to use more data points for this - or better yet, get it from Mode-S frames
+        if (aircraft->m_prevHeadingDateTime.isValid())
+        {
+             qint64 msecs = aircraft->m_prevHeadingDateTime.msecsTo(aircraft->m_headingDateTime);
+             if (msecs > 0)
+             {
+                 float headingDiff = fmod(aircraft->m_heading - aircraft->m_prevHeading + 540.0, 360.0) - 180.0;
+                 float roll = headingDiff / (msecs / 1000.0);
+                 //qDebug() << "Heading Diff " << headingDiff << " msecs " << msecs << " roll " << roll;
+                 roll = std::min(roll, 15.0f);
+                 roll = std::max(roll, -15.0f);
+                 aircraft->m_roll = roll;
+             }
+        }
+        aircraft->m_prevHeadingDateTime = aircraft->m_headingDateTime;
+        aircraft->m_prevHeading = aircraft->m_heading;
+    }
+
+    return animations;
+}
+
+SWGSDRangel::SWGMapAnimation *ADSBDemodGUI::gearAnimation(QDateTime startDateTime, bool up)
+{
+    // Gear up/down
+    SWGSDRangel::SWGMapAnimation *animation = new SWGSDRangel::SWGMapAnimation();
+    animation->setName(new QString("libxplanemp/controls/gear_ratio"));
+    animation->setStartDateTime(new QString(startDateTime.toString(Qt::ISODateWithMs)));
+    animation->setReverse(up);
+    animation->setLoop(0);
+    animation->setDuration(5);
+    animation->setMultiplier(0.2);
+    return animation;
+}
+
+SWGSDRangel::SWGMapAnimation *ADSBDemodGUI::flapsAnimation(QDateTime startDateTime, float currentFlaps, float flaps)
+{
+    // Extend / retract flags
+    bool retract = flaps < currentFlaps;
+    SWGSDRangel::SWGMapAnimation *animation = new SWGSDRangel::SWGMapAnimation();
+    animation->setName(new QString("libxplanemp/controls/flap_ratio"));
+    animation->setStartDateTime(new QString(startDateTime.toString(Qt::ISODateWithMs)));
+    animation->setReverse(retract);
+    animation->setLoop(0);
+    animation->setDuration(5*std::abs(flaps-currentFlaps));
+    animation->setMultiplier(0.2);
+    if (retract) {
+        animation->setStartOffset(1.0 - currentFlaps);
+    } else {
+        animation->setStartOffset(currentFlaps);
+    }
+    return animation;
+}
+
+SWGSDRangel::SWGMapAnimation *ADSBDemodGUI::slatsAnimation(QDateTime startDateTime, bool retract)
+{
+    // Extend / retract slats
+    SWGSDRangel::SWGMapAnimation *animation = new SWGSDRangel::SWGMapAnimation();
+    animation->setName(new QString("libxplanemp/controls/slat_ratio"));
+    animation->setStartDateTime(new QString(startDateTime.toString(Qt::ISODateWithMs)));
+    animation->setReverse(retract);
+    animation->setLoop(0);
+    animation->setDuration(5);
+    animation->setMultiplier(0.2);
+    return animation;
+}
+
+SWGSDRangel::SWGMapAnimation *ADSBDemodGUI::rotorAnimation(QDateTime startDateTime, bool stop)
+{
+    // Turn rotors in helicopter.glb model
+    SWGSDRangel::SWGMapAnimation *animation = new SWGSDRangel::SWGMapAnimation();
+    animation->setName(new QString("Take 001"));
+    animation->setStartDateTime(new QString(startDateTime.toString(Qt::ISODateWithMs)));
+    animation->setReverse(false);
+    animation->setLoop(true);
+    animation->setMultiplier(1);
+    animation->setStop(stop);
+    return animation;
+}
+
+SWGSDRangel::SWGMapAnimation *ADSBDemodGUI::engineAnimation(QDateTime startDateTime, int engine, bool stop)
+{
+    // Turn propellors
+    SWGSDRangel::SWGMapAnimation *animation = new SWGSDRangel::SWGMapAnimation();
+    animation->setName(new QString(QString("libxplanemp/engines/engine_rotation_angle_deg%1").arg(engine)));
+    animation->setStartDateTime(new QString(startDateTime.toString(Qt::ISODateWithMs)));
+    animation->setReverse(false);
+    animation->setLoop(true);
+    animation->setMultiplier(1);
+    animation->setStop(stop);
+    return animation;
 }
 
 void ADSBDemodGUI::checkStaticNotification(Aircraft *aircraft)
@@ -1539,10 +2198,11 @@ bool ADSBDemodGUI::handleMessage(const Message& message)
 if (DSPSignalNotification::match(message))
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
-        bool srTooLow = notif.getSampleRate() < 2000000;
+        int sr = notif.getSampleRate();
+        bool srTooLow = sr < 2000000;
         ui->warning->setVisible(srTooLow);
         if (srTooLow) {
-            ui->warning->setText("Sample rate must be >= 2000000");
+            ui->warning->setText(QString("Sample rate must be >= 2000000. Currently %1").arg(sr));
         } else {
             ui->warning->setText("");
         }
@@ -1556,7 +2216,8 @@ if (DSPSignalNotification::match(message))
             report.getData(),
             report.getDateTime(),
             report.getPreambleCorrelation(),
-            report.getCorrelationOnes());
+            report.getCorrelationOnes(),
+            true);
         return true;
     }
     else if (ADSBDemodReport::MsgReportDemodStats::match(message))
@@ -1702,6 +2363,136 @@ void ADSBDemodGUI::on_flightInfo_clicked()
     }
 }
 
+// Find highlighed aircraft on Map Feature
+void ADSBDemodGUI::on_findOnMapFeature_clicked()
+{
+    QModelIndexList indexList = ui->adsbData->selectionModel()->selectedRows();
+    if (!indexList.isEmpty())
+    {
+        int row = indexList.at(0).row();
+        QString icao = ui->adsbData->item(row, 0)->text();
+        FeatureWebAPIUtils::mapFind(icao);
+    }
+}
+
+// Find aircraft on channel map
+void ADSBDemodGUI::findOnChannelMap(Aircraft *aircraft)
+{
+    if (aircraft->m_positionValid)
+    {
+        QQuickItem *item = ui->map->rootObject();
+        QObject *object = item->findChild<QObject*>("map");
+        if(object != NULL)
+        {
+            QGeoCoordinate geocoord = object->property("center").value<QGeoCoordinate>();
+            geocoord.setLatitude(aircraft->m_latitude);
+            geocoord.setLongitude(aircraft->m_longitude);
+            object->setProperty("center", QVariant::fromValue(geocoord));
+        }
+    }
+}
+
+void ADSBDemodGUI::adsbData_customContextMenuRequested(QPoint pos)
+{
+    QTableWidgetItem *item =  ui->adsbData->itemAt(pos);
+    if (item)
+    {
+        int row = item->row();
+        int icao = ui->adsbData->item(row, 0)->text().toInt(nullptr, 16);
+        Aircraft *aircraft = nullptr;
+        if (m_aircraft.contains(icao)) {
+            aircraft = m_aircraft.value(icao);
+        }
+        QString icaoHex = QString("%1").arg(icao, 1, 16);
+
+        QMenu* tableContextMenu = new QMenu(ui->adsbData);
+        connect(tableContextMenu, &QMenu::aboutToHide, tableContextMenu, &QMenu::deleteLater);
+
+        // Copy current cell
+
+        QAction* copyAction = new QAction("Copy", tableContextMenu);
+        const QString text = item->text();
+        connect(copyAction, &QAction::triggered, this, [text]()->void {
+            QClipboard *clipboard = QGuiApplication::clipboard();
+            clipboard->setText(text);
+        });
+        tableContextMenu->addAction(copyAction);
+        tableContextMenu->addSeparator();
+
+        // View aircraft on various websites
+
+        QAction* planeSpottersAction = new QAction("View aircraft on planespotters.net...", tableContextMenu);
+        connect(planeSpottersAction, &QAction::triggered, this, [icao]()->void {
+            QString icaoUpper = QString("%1").arg(icao, 1, 16).toUpper();
+            QDesktopServices::openUrl(QUrl(QString("https://www.planespotters.net/hex/%1").arg(icaoUpper)));
+        });
+        tableContextMenu->addAction(planeSpottersAction);
+
+        QAction* adsbExchangeAction = new QAction("View aircraft on adsbexchange.net...", tableContextMenu);
+        connect(adsbExchangeAction, &QAction::triggered, this, [icaoHex]()->void {
+            QDesktopServices::openUrl(QUrl(QString("https://globe.adsbexchange.com/?icao=%1").arg(icaoHex)));
+        });
+        tableContextMenu->addAction(adsbExchangeAction);
+
+        QAction* viewOpenSkyAction = new QAction("View aircraft on opensky-network.org...", tableContextMenu);
+        connect(viewOpenSkyAction, &QAction::triggered, this, [icaoHex]()->void {
+            QDesktopServices::openUrl(QUrl(QString("https://opensky-network.org/aircraft-profile?icao24=%1").arg(icaoHex)));
+        });
+        tableContextMenu->addAction(viewOpenSkyAction);
+
+        if (!aircraft->m_callsign.isEmpty())
+        {
+            QAction* flightRadarAction = new QAction("View flight on flightradar24.net...", tableContextMenu);
+            connect(flightRadarAction, &QAction::triggered, this, [aircraft]()->void {
+                QDesktopServices::openUrl(QUrl(QString("https://www.flightradar24.com/%1").arg(aircraft->m_callsign)));
+            });
+            tableContextMenu->addAction(flightRadarAction);
+        }
+
+        tableContextMenu->addSeparator();
+
+        // Edit aircraft
+
+        if (!aircraft->m_aircraftInfo)
+        {
+            QAction* addOpenSkyAction = new QAction("Add aircraft to opensky-network.org...", tableContextMenu);
+            connect(addOpenSkyAction, &QAction::triggered, this, []()->void {
+                QDesktopServices::openUrl(QUrl(QString("https://opensky-network.org/edit-aircraft-profile")));
+            });
+            tableContextMenu->addAction(addOpenSkyAction);
+        }
+        else
+        {
+
+            QAction* editOpenSkyAction = new QAction("Edit aircraft on opensky-network.org...", tableContextMenu);
+            connect(editOpenSkyAction, &QAction::triggered, this, [icaoHex]()->void {
+                QDesktopServices::openUrl(QUrl(QString("https://opensky-network.org/edit-aircraft-profile?icao24=%1").arg(icaoHex)));
+            });
+            tableContextMenu->addAction(editOpenSkyAction);
+        }
+
+        // Find on Map
+        if (aircraft->m_positionValid)
+        {
+            tableContextMenu->addSeparator();
+
+            QAction* findChannelMapAction = new QAction("Find on ADS-B map", tableContextMenu);
+            connect(findChannelMapAction, &QAction::triggered, this, [this, aircraft]()->void {
+                findOnChannelMap(aircraft);
+            });
+            tableContextMenu->addAction(findChannelMapAction);
+
+            QAction* findMapFeatureAction = new QAction("Find on feature map", tableContextMenu);
+            connect(findMapFeatureAction, &QAction::triggered, this, [icaoHex]()->void {
+                FeatureWebAPIUtils::mapFind(icaoHex);
+            });
+            tableContextMenu->addAction(findMapFeatureAction);
+        }
+
+        tableContextMenu->popup(ui->adsbData->viewport()->mapToGlobal(pos));
+    }
+}
+
 void ADSBDemodGUI::on_adsbData_cellClicked(int row, int column)
 {
     (void) column;
@@ -1743,15 +2534,7 @@ void ADSBDemodGUI::on_adsbData_cellDoubleClicked(int row, int column)
             // Center map view on aircraft if it has a valid position
             if (aircraft->m_positionValid)
             {
-                QQuickItem *item = ui->map->rootObject();
-                QObject *object = item->findChild<QObject*>("map");
-                if(object != NULL)
-                {
-                    QGeoCoordinate geocoord = object->property("center").value<QGeoCoordinate>();
-                    geocoord.setLatitude(aircraft->m_latitude);
-                    geocoord.setLongitude(aircraft->m_longitude);
-                    object->setProperty("center", QVariant::fromValue(geocoord));
-                }
+                findOnChannelMap(aircraft);
             }
         }
     }
@@ -1823,7 +2606,7 @@ void ADSBDemodGUI::on_getOSNDB_clicked()
     // Don't try to download while already in progress
     if (m_progressDialog == nullptr)
     {
-        QString osnDBFilename = getOSNDBFilename();
+        QString osnDBFilename = getOSNDBZipFilename();
         if (confirmDownload(osnDBFilename))
         {
             // Download Opensky network database to a file
@@ -1898,6 +2681,11 @@ QString ADSBDemodGUI::getAirportFrequenciesDBFilename()
     return getDataDir() + "/airportFrequenciesDatabase.csv";
 }
 
+QString ADSBDemodGUI::getOSNDBZipFilename()
+{
+    return getDataDir() + "/aircraftDatabase.zip";
+}
+
 QString ADSBDemodGUI::getOSNDBFilename()
 {
     return getDataDir() + "/aircraftDatabase.csv";
@@ -1966,9 +2754,32 @@ void ADSBDemodGUI::downloadFinished(const QString& filename, bool success)
     bool closeDialog = true;
     if (success)
     {
-        if (filename == getOSNDBFilename())
+        if (filename == getOSNDBZipFilename())
         {
-            readOSNDB(filename);
+            // Extract .csv file from .zip file
+            QZipReader reader(filename);
+            QByteArray database = reader.fileData("media/data/samples/metadata/aircraftDatabase.csv");
+            if (database.size() > 0)
+            {
+                QFile file(getOSNDBFilename());
+                if (file.open(QIODevice::WriteOnly))
+                {
+                    file.write(database);
+                    file.close();
+                }
+                else
+                {
+                    qWarning() << "ADSBDemodGUI::downloadFinished - Failed to open " << file.fileName() << " for writing";
+                }
+            }
+            else
+            {
+                qWarning() << "ADSBDemodGUI::downloadFinished - aircraftDatabase.csv not in expected dir. Extracting all.";
+                if (!reader.extractAll(getDataDir())) {
+                    qWarning() << "ADSBDemodGUI::downloadFinished - Failed to extract files from " << filename;
+                }
+            }
+            readOSNDB(getOSNDBFilename());
             // Convert to condensed format for faster loading later
             m_progressDialog->setLabelText("Processing.");
             AircraftInformation::writeFastDB(getFastDBFilename(), m_aircraftInfo);
@@ -2119,6 +2930,347 @@ void ADSBDemodGUI::on_device_currentIndexChanged(int index)
         m_settings.m_deviceIndex = ui->device->currentData().toInt();
         applySettings();
     }
+}
+
+QString ADSBDemodGUI::get3DModel(const QString &aircraftType, const QString &operatorICAO) const
+{
+    QString aircraftTypeOperator = aircraftType + "_" + operatorICAO;
+    if (m_3DModels.contains(aircraftTypeOperator)) {
+        return m_3DModels.value(aircraftTypeOperator);
+    }
+    if (m_settings.m_verboseModelMatching) {
+        qDebug() << "ADS-B: No livery for " << aircraftTypeOperator;
+    }
+    return "";
+}
+
+QString ADSBDemodGUI::get3DModel(const QString &aircraftType)
+{
+    if (m_3DModelsByType.contains(aircraftType))
+    {
+        // Choose a random livery
+        QStringList models = m_3DModelsByType.value(aircraftType);
+        int size = models.size();
+        int idx = m_random.bounded(size);
+        return models[idx];
+    }
+    if (m_settings.m_verboseModelMatching) {
+        qDebug() << "ADS-B: No aircraft for " << aircraftType;
+    }
+    return "";
+}
+
+void ADSBDemodGUI::get3DModel(Aircraft *aircraft)
+{
+    QString model;
+    if (aircraft->m_aircraftInfo && !aircraft->m_aircraftInfo->m_model.isEmpty())
+    {
+        QString aircraftType;
+        for (auto mm : m_3DModelMatch)
+        {
+            if (mm->match(aircraft->m_aircraftInfo->m_model, aircraft->m_aircraftInfo->m_manufacturerName, aircraftType))
+            {
+                // Look for operator specific livery
+                if (!aircraft->m_aircraftInfo->m_operatorICAO.isEmpty()) {
+                    model = get3DModel(aircraftType, aircraft->m_aircraftInfo->m_operatorICAO);
+                }
+                if (model.isEmpty()) {
+                    // Try for aircraft with out specific livery
+                    model = get3DModel(aircraftType);
+                }
+                if (!model.isEmpty())
+                {
+                    aircraft->m_aircraft3DModel = model;
+                    if (m_modelAltitudeOffset.contains(aircraftType))
+                    {
+                        aircraft->m_modelAltitudeOffset = m_modelAltitudeOffset.value(aircraftType);
+                        aircraft->m_labelAltitudeOffset = m_labelAltitudeOffset.value(aircraftType);
+                    }
+                }
+                break;
+            }
+        }
+        if (m_settings.m_verboseModelMatching)
+        {
+            if (model.isEmpty()) {
+                qDebug() << "ADS-B: No 3D model for " << aircraft->m_aircraftInfo->m_model << " " << aircraft->m_aircraftInfo->m_operatorICAO << " for " << aircraft->m_icaoHex;
+            } else {
+                qDebug() << "ADS-B: Matched " << aircraft->m_aircraftInfo->m_model << " " << aircraft->m_aircraftInfo->m_operatorICAO << " to " << model << " for " << aircraft->m_icaoHex;
+            }
+        }
+    }
+}
+
+void ADSBDemodGUI::update3DModels()
+{
+    // Look for all aircraft gltfs in 3d directory
+    QString modelDir = getDataDir() + "/3d";
+    QStringList subDirs = {"BB_Airbus_png", "BB_Boeing_png", "BB_Jets_png", "BB_Props_png", "BB_GA_png", "BB_Mil_png", "BB_Heli_png"};
+
+    for (auto subDir : subDirs)
+    {
+        QString dirName = modelDir + "/" + subDir;
+        QDir dir(dirName);
+        QStringList aircrafts = dir.entryList(QDir::AllDirs | QDir::NoDotAndDotDot);
+        for (auto aircraft : aircrafts)
+        {
+            if (m_settings.m_verboseModelMatching) {
+                qDebug() << "Aircraft " << aircraft;
+            }
+            QDir aircraftDir(dir.filePath(aircraft));
+            QStringList gltfs = aircraftDir.entryList({"*.gltf"});
+            QStringList allAircraft;
+            for (auto gltf : gltfs)
+            {
+                QStringList filenameParts = gltf.split(".")[0].split("_");
+                if (filenameParts.size() == 2)
+                {
+                    QString livery = filenameParts[1];
+                    if (m_settings.m_verboseModelMatching) {
+                        qDebug() << "Aircraft " << aircraft << "Livery " << livery;
+                    }
+                    // Only use relative path, as Map feature will add the prefix
+                    QString filename = subDir + "/" + aircraft + "/" + gltf;
+                    m_3DModels.insert(aircraft + "_" + livery, filename);
+                    allAircraft.append(filename);
+                }
+            }
+            if (gltfs.size() > 0) {
+                m_3DModelsByType.insert(aircraft, allAircraft);
+            }
+        }
+    }
+
+    // Vertical offset so undercarriage isn't underground, because 0,0,0 is in the middle of the model
+    // rather than at the bottom
+    m_modelAltitudeOffset.insert("A306", 4.6f);
+    m_modelAltitudeOffset.insert("A310", 4.6f);
+    m_modelAltitudeOffset.insert("A318", 3.7f);
+    m_modelAltitudeOffset.insert("A319", 3.5f);
+    m_modelAltitudeOffset.insert("A320", 3.5f);
+    m_modelAltitudeOffset.insert("A321", 3.5f);
+    m_modelAltitudeOffset.insert("A332", 5.52f);
+    m_modelAltitudeOffset.insert("A333", 5.52f);
+    m_modelAltitudeOffset.insert("A334", 5.52f);
+    m_modelAltitudeOffset.insert("A343", 4.65f);
+    m_modelAltitudeOffset.insert("A345", 4.65f);
+    m_modelAltitudeOffset.insert("A346", 4.65f);
+    m_modelAltitudeOffset.insert("A388", 5.75f);
+    m_modelAltitudeOffset.insert("B717", 0.0f);
+    m_modelAltitudeOffset.insert("B733", 3.1f);
+    m_modelAltitudeOffset.insert("B734", 3.27f);
+    m_modelAltitudeOffset.insert("B737", 3.0f);
+    m_modelAltitudeOffset.insert("B738", 3.31f);
+    m_modelAltitudeOffset.insert("B739", 3.32f);
+    m_modelAltitudeOffset.insert("B74F", 5.3f);
+    m_modelAltitudeOffset.insert("B744", 5.25f);
+    m_modelAltitudeOffset.insert("B752", 3.6f);
+    m_modelAltitudeOffset.insert("B763", 4.44f);
+    m_modelAltitudeOffset.insert("B772", 5.57f);
+    m_modelAltitudeOffset.insert("B773", 5.6f);
+    m_modelAltitudeOffset.insert("B77L", 5.57f);
+    m_modelAltitudeOffset.insert("B77W", 5.57f);
+    m_modelAltitudeOffset.insert("B788", 4.1f);
+    m_modelAltitudeOffset.insert("BE20", 1.48f);
+    m_modelAltitudeOffset.insert("C150", 1.05f);
+    m_modelAltitudeOffset.insert("C172", 1.16f);
+    m_modelAltitudeOffset.insert("C421", 1.16f);
+    m_modelAltitudeOffset.insert("H25B", 1.45f);
+    m_modelAltitudeOffset.insert("LJ45", 1.27f);
+    m_modelAltitudeOffset.insert("B462", 1.8f);
+    m_modelAltitudeOffset.insert("B463", 1.9f);
+    m_modelAltitudeOffset.insert("CRJ2", 1.3f);
+    m_modelAltitudeOffset.insert("CRJ7", 1.66f);
+    m_modelAltitudeOffset.insert("CRJ9", 2.27f);
+    m_modelAltitudeOffset.insert("CRJX", 2.49f);
+    m_modelAltitudeOffset.insert("DC10", 5.2f);
+    m_modelAltitudeOffset.insert("E135", 1.88f);
+    m_modelAltitudeOffset.insert("E145", 1.86f);
+    m_modelAltitudeOffset.insert("E170", 2.3f);
+    m_modelAltitudeOffset.insert("E190", 3.05f);
+    m_modelAltitudeOffset.insert("E195", 2.97f);
+    m_modelAltitudeOffset.insert("F28", 2.34f);
+    m_modelAltitudeOffset.insert("F70", 2.43f);
+    m_modelAltitudeOffset.insert("F100", 2.23f);
+    m_modelAltitudeOffset.insert("J328", 1.01f);
+    m_modelAltitudeOffset.insert("MD11", 5.22f);
+    m_modelAltitudeOffset.insert("MD83", 2.71f);
+    m_modelAltitudeOffset.insert("MD90", 2.62f);
+    m_modelAltitudeOffset.insert("AT42", 1.75f);
+    m_modelAltitudeOffset.insert("AT72", 1.83f);
+    m_modelAltitudeOffset.insert("D328", 0.99f);
+    m_modelAltitudeOffset.insert("DH8D", 1.65f);
+    m_modelAltitudeOffset.insert("F50", 2.16f);
+    m_modelAltitudeOffset.insert("JS41", 1.9f);
+    m_modelAltitudeOffset.insert("L410", 1.1f);
+    m_modelAltitudeOffset.insert("SB20", 2.0f);
+    m_modelAltitudeOffset.insert("SF34", 1.89f);
+
+    // Label offsets (from bottom of aircraft)
+    m_labelAltitudeOffset.insert("A306", 10.0f);
+    m_labelAltitudeOffset.insert("A310", 15.0f);
+    m_labelAltitudeOffset.insert("A318", 10.0f);
+    m_labelAltitudeOffset.insert("A319", 10.0f);
+    m_labelAltitudeOffset.insert("A320", 10.0f);
+    m_labelAltitudeOffset.insert("A321", 10.0f);
+    m_labelAltitudeOffset.insert("A332", 14.0f);
+    m_labelAltitudeOffset.insert("A333", 14.0f);
+    m_labelAltitudeOffset.insert("A334", 14.0f);
+    m_labelAltitudeOffset.insert("A343", 14.0f);
+    m_labelAltitudeOffset.insert("A345", 14.0f);
+    m_labelAltitudeOffset.insert("A346", 14.0f);
+    m_labelAltitudeOffset.insert("A388", 20.0f);
+    m_labelAltitudeOffset.insert("B717", 7.5f);
+    m_labelAltitudeOffset.insert("B733", 10.0f);
+    m_labelAltitudeOffset.insert("B734", 10.0f);
+    m_labelAltitudeOffset.insert("B737", 10.0f);
+    m_labelAltitudeOffset.insert("B738", 10.0f);
+    m_labelAltitudeOffset.insert("B739", 10.0f);
+    m_labelAltitudeOffset.insert("B74F", 15.0f);
+    m_labelAltitudeOffset.insert("B744", 15.0f);
+    m_labelAltitudeOffset.insert("B752", 12.0f);
+    m_labelAltitudeOffset.insert("B763", 14.0f);
+    m_labelAltitudeOffset.insert("B772", 14.0f);
+    m_labelAltitudeOffset.insert("B773", 14.0f);
+    m_labelAltitudeOffset.insert("B77L", 14.0f);
+    m_labelAltitudeOffset.insert("B77W", 14.0f);
+    m_labelAltitudeOffset.insert("B788", 14.0f);
+    m_labelAltitudeOffset.insert("BE20", 4.0f);
+    m_labelAltitudeOffset.insert("C150", 3.0f);
+    m_labelAltitudeOffset.insert("C172", 3.0f);
+    m_labelAltitudeOffset.insert("C421", 4.0f);
+    m_labelAltitudeOffset.insert("H25B", 5.0f);
+    m_labelAltitudeOffset.insert("LJ45", 5.0f);
+    m_labelAltitudeOffset.insert("B462", 7.0f);
+    m_labelAltitudeOffset.insert("B463", 7.0f);
+    m_labelAltitudeOffset.insert("CRJ2", 5.5f);
+    m_labelAltitudeOffset.insert("CRJ7", 6.0f);
+    m_labelAltitudeOffset.insert("CRJ9", 6.0f);
+    m_labelAltitudeOffset.insert("CRJX", 6.0f);
+    m_labelAltitudeOffset.insert("DC10", 15.0f);
+    m_labelAltitudeOffset.insert("E135", 5.0f);
+    m_labelAltitudeOffset.insert("E145", 5.0f);
+    m_labelAltitudeOffset.insert("E170", 8.0f);
+    m_labelAltitudeOffset.insert("E190", 8.5f);
+    m_labelAltitudeOffset.insert("E195", 8.5f);
+    m_labelAltitudeOffset.insert("F28", 7.0f);
+    m_labelAltitudeOffset.insert("F70", 6.5f);
+    m_labelAltitudeOffset.insert("F100", 6.5f);
+    m_labelAltitudeOffset.insert("J328", 5.0f);  // Check
+    m_labelAltitudeOffset.insert("MD11", 15.0f);
+    m_labelAltitudeOffset.insert("MD83", 7.5f);
+    m_labelAltitudeOffset.insert("MD90", 7.5f);
+    m_labelAltitudeOffset.insert("AT42", 7.0f);
+    m_labelAltitudeOffset.insert("AT72", 7.0f);
+    m_labelAltitudeOffset.insert("D328", 6.0f);
+    m_labelAltitudeOffset.insert("DH8D", 6.5f);
+    m_labelAltitudeOffset.insert("F50",  7.0f);
+    m_labelAltitudeOffset.insert("JS41", 5.0f);
+    m_labelAltitudeOffset.insert("L410", 5.0f);
+    m_labelAltitudeOffset.insert("SB20", 6.5f);
+    m_labelAltitudeOffset.insert("SF34", 6.0f);
+
+    // Map from database names to 3D model names
+    m_3DModelMatch.append(new ModelMatch("A300.*", "A306")); // A300 B4 is A300-600, but use for others as closest match
+    m_3DModelMatch.append(new ModelMatch("A310.*", "A310"));
+    m_3DModelMatch.append(new ModelMatch("A318.*", "A318"));
+    m_3DModelMatch.append(new ModelMatch("A.?319.*", "A319"));
+    m_3DModelMatch.append(new ModelMatch("A.?320.*", "A320"));
+    m_3DModelMatch.append(new ModelMatch("A.?321.*", "A321"));
+    m_3DModelMatch.append(new ModelMatch("A330.2.*", "A332"));
+    m_3DModelMatch.append(new ModelMatch("A330.3.*", "A333"));
+    m_3DModelMatch.append(new ModelMatch("A330.4.*", "A342"));
+    m_3DModelMatch.append(new ModelMatch("A340.3.*", "A343"));
+    m_3DModelMatch.append(new ModelMatch("A340.5.*", "A345"));
+    m_3DModelMatch.append(new ModelMatch("A340.6.*", "A346"));
+    m_3DModelMatch.append(new ModelMatch("A350.*", "A333"));   // No A350 model - use 330 as twin engine
+    m_3DModelMatch.append(new ModelMatch("A380.*", "A388"));
+
+    m_3DModelMatch.append(new ModelMatch("737.2.*", "B733"));  // No 200 model
+    m_3DModelMatch.append(new ModelMatch("737.3.*", "B733"));
+    m_3DModelMatch.append(new ModelMatch("737.4.*", "B734"));
+    m_3DModelMatch.append(new ModelMatch("737.5.*", "B734"));  // No 500 model
+    m_3DModelMatch.append(new ModelMatch("737.6.*", "B737"));  // No 600 model
+    m_3DModelMatch.append(new ModelMatch("737NG.6.*", "B737"));
+    m_3DModelMatch.append(new ModelMatch("737.7.*", "B737"));
+    m_3DModelMatch.append(new ModelMatch("737NG.7.*", "B737"));
+    m_3DModelMatch.append(new ModelMatch("737.8.*", "B738"));
+    m_3DModelMatch.append(new ModelMatch("737NG.8.*", "B738"));  // No Max model yet
+    m_3DModelMatch.append(new ModelMatch("737MAX.8.*", "B738"));
+    m_3DModelMatch.append(new ModelMatch("737.9", "B739"));
+    m_3DModelMatch.append(new ModelMatch("737NG.9", "B739"));
+    m_3DModelMatch.append(new ModelMatch("737MAX.9", "B739"));
+    m_3DModelMatch.append(new ModelMatch("B747.*F", "B74F"));
+    m_3DModelMatch.append(new ModelMatch("B747.*\\(F\\)", "B74F"));
+    m_3DModelMatch.append(new ModelMatch("747.*", "B744"));
+    m_3DModelMatch.append(new ModelMatch("757.*", "B752"));
+    m_3DModelMatch.append(new ModelMatch("767.*", "B763"));
+    m_3DModelMatch.append(new ModelMatch("777.2.*LR.*", "B77L"));
+    m_3DModelMatch.append(new ModelMatch("777.2.*", "B772"));
+    m_3DModelMatch.append(new ModelMatch("777.3.*ER.*", "B77W"));
+    m_3DModelMatch.append(new ModelMatch("777.3.*", "B773"));
+    m_3DModelMatch.append(new ModelMatch("777.*", "B772"));
+    m_3DModelMatch.append(new ModelMatch("787.*", "B788"));
+    m_3DModelMatch.append(new ModelMatch("717.*", "B717"));
+    // No 727 model
+
+    // Jets
+    m_3DModelMatch.append(new ModelMatch(".*EMB.135.*", "E135"));
+    m_3DModelMatch.append(new ModelMatch(".*ERJ.135.*", "E135"));
+    m_3DModelMatch.append(new ModelMatch("Embraer 135.*", "E135"));
+    m_3DModelMatch.append(new ModelMatch(".*EMB.145.*", "E145"));
+    m_3DModelMatch.append(new ModelMatch(".*ERJ.145.*", "E145"));
+    m_3DModelMatch.append(new ModelMatch("Embraer 145.*", "E145"));
+    m_3DModelMatch.append(new ModelMatch(".*EMB.170.*", "E170"));
+    m_3DModelMatch.append(new ModelMatch(".*ERJ.170.*", "E170"));
+    m_3DModelMatch.append(new ModelMatch("Embraer 170.*", "E170"));
+    m_3DModelMatch.append(new ModelMatch(".*EMB.190.*", "E190"));
+    m_3DModelMatch.append(new ModelMatch(".*ERJ.190.*", "E190"));
+    m_3DModelMatch.append(new ModelMatch("Embraer 190.*", "E190"));
+    m_3DModelMatch.append(new ModelMatch(".*EMB.195.*", "E195"));
+    m_3DModelMatch.append(new ModelMatch(".*ERJ.195.*", "E195"));
+    m_3DModelMatch.append(new ModelMatch("Embraer 195.*", "E195"));
+
+    m_3DModelMatch.append(new ModelMatch(".*CRJ.200.*", "CRJ2"));
+    m_3DModelMatch.append(new ModelMatch(".*CRJ.700.*", "CRJ7"));
+    m_3DModelMatch.append(new ModelMatch(".*CRJ.900.*", "CRJ9"));
+    m_3DModelMatch.append(new ModelMatch(".*CRJ.1000.*", "CRJX"));
+
+    // PNGs missing
+    //m_3DModelMatch.append(new ModelMatch("(BAE )?146.2.*", "B462"));
+    //m_3DModelMatch.append(new ModelMatch("(BAE )?146.3.*", "B463"));
+
+    m_3DModelMatch.append(new ModelMatch("DC-10.*", "DC10"));
+
+    m_3DModelMatch.append(new ModelMatch(".*MD.11.*", "MD11"));
+    m_3DModelMatch.append(new ModelMatch(".*MD.83.*", "MD83"));
+    m_3DModelMatch.append(new ModelMatch(".*MD.90.*", "MD90"));
+
+    m_3DModelMatch.append(new ModelMatch(".*F28.*", "F28"));
+    m_3DModelMatch.append(new ModelMatch(".*F70.*", "F70"));
+    m_3DModelMatch.append(new ModelMatch(".*F100.*", "F100"));
+
+    // GA
+    m_3DModelMatch.append(new ModelMatch(".*B200.*", "BE20"));
+    m_3DModelMatch.append(new ManufacturerModelMatch(".*200.*", ".*Beech.*", "BE20"));
+    m_3DModelMatch.append(new ModelMatch(".*150.*", "C150"));
+    m_3DModelMatch.append(new ModelMatch(".*172.*", "C172"));
+    m_3DModelMatch.append(new ModelMatch(".*421.*", "C421"));
+    m_3DModelMatch.append(new ModelMatch(".*125.*", "H25B"));
+    m_3DModelMatch.append(new ManufacturerModelMatch(".*400.*", "Hawker.*", "H25B"));
+    m_3DModelMatch.append(new ManufacturerModelMatch(".*400.*", "Raytheon.*", "H25B"));
+    m_3DModelMatch.append(new ModelMatch(".*Learjet.*", "LJ45"));
+
+    // Props
+    m_3DModelMatch.append(new ModelMatch("ATR.*42.*", "AT42"));
+    m_3DModelMatch.append(new ModelMatch("ATR.*72.*", "AT72"));
+    m_3DModelMatch.append(new ModelMatch("Do 328.*", "D328"));
+    m_3DModelMatch.append(new ModelMatch("DHC-8.*", "DH8D"));
+    m_3DModelMatch.append(new ModelMatch(".*F50.*", "F50"));
+    m_3DModelMatch.append(new ModelMatch("Jetstream 41.*", "JS41"));
+    m_3DModelMatch.append(new ModelMatch(".*L.410.*", "L410"));
+    m_3DModelMatch.append(new ModelMatch("SAAB.2000.*", "SB20"));
+    m_3DModelMatch.append(new ManufacturerModelMatch(".*340.*", "Saab.*", "SF34"));
 }
 
 void ADSBDemodGUI::updateAirports()
@@ -2341,7 +3493,7 @@ void ADSBDemodGUI::highlightAircraft(Aircraft *aircraft)
             {
                 // Download photo
                 updatePhotoText(aircraft);
-                m_planeSpotters.getAircraftPhoto(QString::number(aircraft->m_icao, 16));
+                m_planeSpotters.getAircraftPhoto(aircraft->m_icaoHex);
             }
         }
     }
@@ -2373,32 +3525,11 @@ void ADSBDemodGUI::feedSelect()
 // Show display settings dialog
 void ADSBDemodGUI::on_displaySettings_clicked()
 {
-    ADSBDemodDisplayDialog dialog(m_settings.m_removeTimeout, m_settings.m_airportRange, m_settings.m_airportMinimumSize,
-                                m_settings.m_displayHeliports, m_settings.m_siUnits,
-                                m_settings.m_tableFontName, m_settings.m_tableFontSize,
-                                m_settings.m_displayDemodStats, m_settings.m_autoResizeTableColumns,
-                                m_settings.m_apiKey, m_settings.m_airspaces, m_settings.m_airspaceRange,
-                                m_settings.m_mapType, m_settings.m_displayNavAids, m_settings.m_displayPhotos);
+    bool oldSiUnits = m_settings.m_siUnits;
+    ADSBDemodDisplayDialog dialog(&m_settings);
     if (dialog.exec() == QDialog::Accepted)
     {
-        bool unitsChanged = m_settings.m_siUnits != dialog.m_siUnits;
-
-        m_settings.m_removeTimeout = dialog.m_removeTimeout;
-        m_settings.m_airportRange = dialog.m_airportRange;
-        m_settings.m_airportMinimumSize = dialog.m_airportMinimumSize;
-        m_settings.m_displayHeliports = dialog.m_displayHeliports;
-        m_settings.m_siUnits = dialog.m_siUnits;
-        m_settings.m_tableFontName = dialog.m_fontName;
-        m_settings.m_tableFontSize = dialog.m_fontSize;
-        m_settings.m_displayDemodStats = dialog.m_displayDemodStats;
-        m_settings.m_autoResizeTableColumns = dialog.m_autoResizeTableColumns;
-        m_settings.m_apiKey = dialog.m_apiKey;
-        m_settings.m_airspaces = dialog.m_airspaces;
-        m_settings.m_airspaceRange = dialog.m_airspaceRange;
-        m_settings.m_mapType = dialog.m_mapType;
-        m_settings.m_displayNavAids = dialog.m_displayNavAids;
-        m_settings.m_displayPhotos = dialog.m_displayPhotos;
-
+        bool unitsChanged = m_settings.m_siUnits != oldSiUnits;
         if (unitsChanged) {
             m_aircraftModel.allAircraftUpdated();
         }
@@ -2602,6 +3733,9 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     // Get signals when columns change
     connect(ui->adsbData->horizontalHeader(), SIGNAL(sectionMoved(int, int, int)), SLOT(adsbData_sectionMoved(int, int, int)));
     connect(ui->adsbData->horizontalHeader(), SIGNAL(sectionResized(int, int, int)), SLOT(adsbData_sectionResized(int, int, int)));
+    // Context menu
+    ui->adsbData->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->adsbData, SIGNAL(customContextMenuRequested(QPoint)), SLOT(adsbData_customContextMenuRequested(QPoint)));
 
     ui->photoHeader->setVisible(false);
     ui->photoFlag->setVisible(false);
@@ -2640,12 +3774,18 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     Real stationAltitude = MainCore::instance()->getSettings().getAltitude();
     m_azEl.setLocation(stationLatitude, stationLongitude, stationAltitude);
 
+    // These are the default values in sdrbase/settings/preferences.cpp
+    if ((stationLatitude == 49.012423) && (stationLongitude == 8.418125)) {
+        ui->warning->setText("Please set your antenna location under Preferences > My Position");
+    }
+
     // Add airports within range of My Position
     if (m_airportInfo != nullptr) {
         updateAirports();
     }
     updateAirspaces();
     updateNavAids();
+    update3DModels();
 
     // Initialise text to speech engine
     m_speech = new QTextToSpeech(this);
@@ -2658,6 +3798,8 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     updateDeviceSetList();
     displaySettings();
     applySettings(true);
+
+    ui->map->installEventFilter(this);
 }
 
 ADSBDemodGUI::~ADSBDemodGUI()
@@ -2689,6 +3831,7 @@ ADSBDemodGUI::~ADSBDemodGUI()
     }
     qDeleteAll(m_airspaces);
     qDeleteAll(m_navAids);
+    qDeleteAll(m_3DModelMatch);
 }
 
 void ADSBDemodGUI::applySettings(bool force)
@@ -3112,9 +4255,10 @@ void ADSBDemodGUI::on_logOpen_clicked()
                             QDateTime dateTime = QDateTime::currentDateTime(); // So they aren't removed immediately as too old
                             QByteArray bytes = QByteArray::fromHex(cols[dataCol].toLatin1());
                             float correlation = cols[correlationCol].toFloat();
-                            handleADSB(bytes, dateTime, correlation, correlation);
-                            if (count % 1000 == 0)
+                            handleADSB(bytes, dateTime, correlation, correlation, false);
+                            if ((count > 0) && (count % 100000 == 0))
                             {
+                                dialog.setText(QString("Reading ADS-B data\n%1").arg(count));
                                 QApplication::processEvents();
                                 if (dialog.clickedButton()) {
                                     cancelled = true;
@@ -3123,6 +4267,7 @@ void ADSBDemodGUI::on_logOpen_clicked()
                             count++;
                         }
                     }
+                    m_aircraftModel.allAircraftUpdated();
                     dialog.close();
                 }
                 else
@@ -3181,4 +4326,61 @@ void ADSBDemodGUI::downloadNavAidsFinished()
         delete m_progressDialog;
         m_progressDialog = nullptr;
     }
+}
+
+int ADSBDemodGUI::grayToBinary(int gray, int bits) const
+{
+    int binary = 0;
+    for (int i = bits - 1; i >= 0; i--) {
+        binary = binary | ((((1 << (i+1)) & binary) >> 1) ^ ((1 << i) & gray));
+    }
+    return binary;
+}
+
+void ADSBDemodGUI::redrawMap()
+{
+    // An awful workaround for https://bugreports.qt.io/browse/QTBUG-100333
+    // Also used in Map feature
+    QQuickItem *item = ui->map->rootObject();
+    if (item)
+    {
+        QObject *object = item->findChild<QObject*>("map");
+        if (object)
+        {
+            double zoom = object->property("zoomLevel").value<double>();
+            object->setProperty("zoomLevel", QVariant::fromValue(zoom+1));
+            object->setProperty("zoomLevel", QVariant::fromValue(zoom));
+        }
+    }
+}
+
+void ADSBDemodGUI::showEvent(QShowEvent *event)
+{
+    if (!event->spontaneous())
+    {
+        // Workaround for https://bugreports.qt.io/browse/QTBUG-100333
+        // MapQuickItems can be in wrong position when window is first displayed
+        QTimer::singleShot(500, [this] {
+            redrawMap();
+        });
+    }
+}
+
+bool ADSBDemodGUI::eventFilter(QObject *obj, QEvent *event)
+{
+    if (obj == ui->map)
+    {
+        if (event->type() == QEvent::Resize)
+        {
+            // Workaround for https://bugreports.qt.io/browse/QTBUG-100333
+            // MapQuickItems can be in wrong position after vertical resize
+            QResizeEvent *resizeEvent = static_cast<QResizeEvent *>(event);
+            QSize oldSize = resizeEvent->oldSize();
+            QSize size = resizeEvent->size();
+            if (oldSize.height() != size.height()) {
+                redrawMap();
+            }
+        }
+    }
+    return false;
 }

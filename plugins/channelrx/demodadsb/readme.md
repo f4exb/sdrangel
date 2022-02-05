@@ -8,6 +8,10 @@ As well as displaying information received via ADS-B, the plugin can also combin
 
 ![ADS-B Demodulator plugin GUI](../../../doc/img/ADSBDemod_plugin.png)
 
+The ADS-B plugin can send aicraft for display on the [Map Feature](../../feature/map/readme.md) alongside objects from other plugins and in 3D.
+
+![ADS-B on 3D Map](../../../doc/img/ADSBDemod_plugin_map_3d.png)
+
 <h2>Interface</h2>
 
 ![ADS-B Demodulator plugin settings](../../../doc/img/ADSBDemod_plugin_settings.png)
@@ -262,6 +266,7 @@ The map displays aircraft locations and data geographically. Four types of map c
 ![ADS-B Demodulator Map](../../../doc/img/ADSBDemod_plugin_map2.png)
 
 The initial antenna location is placed according to My Position set under the Preferences > My Position menu. The position is only updated when the ADS-B demodulator plugin is first opened.
+If My Position is not set correctly, the position of aircraft may not be computed correctly.
 
 Aircraft are only placed upon the map when a position can be calculated, which can require several frames to be received.
 

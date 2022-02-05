@@ -26,6 +26,7 @@
 #include <QAbstractListModel>
 #include <QProgressDialog>
 #include <QTextToSpeech>
+#include <QRandomGenerator>
 
 #include "channel/channelgui.h"
 #include "dsp/dsptypes.h"
@@ -40,6 +41,8 @@
 #include "util/planespotters.h"
 #include "settings/rollupstate.h"
 #include "maincore.h"
+
+#include "SWGMapItem.h"
 
 #include "adsbdemodsettings.h"
 #include "ourairportsdb.h"
@@ -83,11 +86,14 @@ public:
 // Data about an aircraft extracted from an ADS-B frames
 struct Aircraft {
     int m_icao;                 // 24-bit ICAO aircraft address
+    QString m_icaoHex;
     QString m_callsign;         // Flight callsign
     QString m_flight;           // Guess at flight number
     Real m_latitude;            // Latitude in decimal degrees
     Real m_longitude;           // Longitude in decimal degrees
     int m_altitude;             // Altitude in feet
+    bool m_onSurface;           // Indicates if on surface or airbourne
+    bool m_altitudeGNSS;        // Altitude is GNSS HAE (Height above WGS-84 ellipsoid) rather than barometric alitute (relative to 29.92 Hg)
     int m_speed;                // Speed in knots
     enum SpeedType {
         GS,                     // Ground speed
@@ -95,14 +101,14 @@ struct Aircraft {
         IAS                     // Indicated air speed
     } m_speedType;
     static const char *m_speedTypeNames[];
-    int m_heading;              // Heading in degrees
+    float m_heading;            // Heading in degrees
     int m_verticalRate;         // Vertical climb rate in ft/min
     QString m_emitterCategory;  // Aircraft type
     QString m_status;           // Aircraft status
     int m_squawk;               // Mode-A code
     Real m_range;               // Distance from station to aircraft
     Real m_azimuth;             // Azimuth from station to aircraft
-    Real m_elevation;           // Elevation from station to aicraft;
+    Real m_elevation;           // Elevation from station to aicraft
     QDateTime m_time;           // When last updated
 
     bool m_positionValid;       // Indicates if we have valid data for the above fields
@@ -130,7 +136,28 @@ struct Aircraft {
     QVariantList m_coordinates; // Coordinates we've recorded the aircraft at
 
     AircraftInformation *m_aircraftInfo; // Info about the aircraft from the database
+    QString m_aircraft3DModel;    // 3D model for map based on aircraft type
+    QString m_aircraftCat3DModel; // 3D model based on aircraft category
+    float m_modelAltitudeOffset;  // Altitude adjustment so aircraft model doesn't go underground
+    float m_labelAltitudeOffset;  // How height to position label above aircraft
     ADSBDemodGUI *m_gui;
+    QString m_flagIconURL;
+    QString m_airlineIconURL;
+
+    // For animation on 3D map
+    float m_runwayAltitude;
+    bool m_runwayAltitudeValid;
+    bool m_gearDown;
+    float m_flaps;              // 0 - no flaps, 1 - full flaps
+    bool m_rotorStarted;        // Rotors started on 'Rotorcraft'
+    bool m_engineStarted;       // Engines started (typically propellors)
+    QDateTime m_positionDateTime;
+    QDateTime m_orientationDateTime;
+    QDateTime m_headingDateTime;
+    QDateTime m_prevHeadingDateTime;
+    int m_prevHeading;
+    float m_pitch;              // Estimated pitch based on vertical rate
+    float m_roll;               // Estimated roll based on rate of change in heading
 
     bool m_notified;            // Set when a notification has been made for this aircraft, so we don't repeat it
 
@@ -175,7 +202,10 @@ struct Aircraft {
         m_latitude(0),
         m_longitude(0),
         m_altitude(0),
+        m_onSurface(false),
+        m_altitudeGNSS(false),
         m_speed(0),
+        m_speedType(GS),
         m_heading(0),
         m_verticalRate(0),
         m_azimuth(0),
@@ -193,7 +223,17 @@ struct Aircraft {
         m_isHighlighted(false),
         m_showAll(false),
         m_aircraftInfo(nullptr),
+        m_modelAltitudeOffset(0.0f),
+        m_labelAltitudeOffset(5.0f),
         m_gui(gui),
+        m_runwayAltitude(0.0),
+        m_runwayAltitudeValid(false),
+        m_gearDown(false),
+        m_flaps(0.0),
+        m_rotorStarted(false),
+        m_engineStarted(false),
+        m_pitch(0.0),
+        m_roll(0.0),
         m_notified(false)
     {
         for (int i = 0; i < 2; i++)
@@ -237,8 +277,8 @@ struct Aircraft {
         m_ataItem = new QTableWidgetItem();
     }
 
-    QString getImage();
-    QString getText(bool all=false);
+    QString getImage() const;
+    QString getText(bool all=false) const;
 
     // Name to use when selected as a target
     QString targetName()
@@ -347,6 +387,8 @@ public:
         m_allFlightPaths = allFlightPaths;
         allAircraftUpdated();
     }
+
+   Q_INVOKABLE void findOnMap(int index);
 
 private:
     QList<Aircraft *> m_aircrafts;
@@ -637,6 +679,67 @@ private:
     QList<bool> m_selected;
 };
 
+// Match 3D models to Opensky-Network Aircraft database
+// The database doesn't use consistent names for aircraft, so we use regexps
+class ModelMatch {
+public:
+    ModelMatch(const QString &aircraftRegExp, const QString &model) :
+        m_aircraftRegExp(aircraftRegExp),
+        m_model(model)
+    {
+        m_aircraftRegExp.optimize();
+    }
+
+    virtual bool match(const QString &aircraft, const QString &manufacturer, QString &model)
+    {
+        (void) manufacturer;
+
+        QRegularExpressionMatch match = m_aircraftRegExp.match(aircraft);
+        if (match.hasMatch())
+        {
+            model = m_model;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+protected:
+    QRegularExpression m_aircraftRegExp;
+    QString m_model;
+};
+
+// For very generic aircraft names, also match against manufacturer name
+class ManufacturerModelMatch : public ModelMatch {
+public:
+    ManufacturerModelMatch(const QString &modelRegExp, const QString &manufacturerRegExp, const QString &model) :
+        ModelMatch(modelRegExp, model),
+        m_manufacturerRegExp(manufacturerRegExp)
+    {
+        m_manufacturerRegExp.optimize();
+    }
+
+    virtual bool match(const QString &aircraft, const QString &manufacturer, QString &model) override
+    {
+        QRegularExpressionMatch matchManufacturer = m_manufacturerRegExp.match(manufacturer);
+        if (matchManufacturer.hasMatch())
+        {
+            QRegularExpressionMatch matchAircraft = m_aircraftRegExp.match(aircraft);
+            if (matchAircraft.hasMatch())
+            {
+                model = m_model;
+                return true;
+            }
+        }
+        return false;
+    }
+
+protected:
+    QRegularExpression m_manufacturerRegExp;
+};
+
 class ADSBDemodGUI : public ChannelGUI {
     Q_OBJECT
 
@@ -652,8 +755,11 @@ public:
     void targetAircraft(Aircraft *aircraft);
     void target(const QString& name, float az, float el, float range);
     bool setFrequency(float frequency);
-    bool useSIUints() { return m_settings.m_siUnits; }
+    bool useSIUints() const { return m_settings.m_siUnits; }
     Q_INVOKABLE void clearHighlighted();
+    QString get3DModel(const QString &aircraft, const QString &operatorICAO) const;
+    QString get3DModel(const QString &aircraft);
+    void get3DModel(Aircraft *aircraft);
 
 public slots:
     void channelMarkerChangedByCursor();
@@ -683,6 +789,7 @@ private:
     AirspaceModel m_airspaceModel;
     NavAidModel m_navAidModel;
     QHash<QString, QIcon *> m_airlineIcons; // Hashed on airline ICAO
+    QHash<QString, bool> m_airlineMissingIcons; // Hash containing which ICAOs we don't have icons for
     QHash<QString, QIcon *> m_flagIcons;    // Hashed on country
     QHash<QString, QString> *m_prefixMap;   // Registration to country (flag name)
     QHash<QString, QString> *m_militaryMap;   // Operator airforce to military (flag name)
@@ -710,6 +817,12 @@ private:
     quint16 m_osmPort;
     OpenAIP m_openAIP;
     ADSBOSMTemplateServer *m_templateServer;
+    QRandomGenerator m_random;
+    QHash<QString, QString> m_3DModels; // Hashed aircraft_icao or just aircraft
+    QHash<QString, QStringList> m_3DModelsByType; // Hashed aircraft to list of all of that type
+    QList<ModelMatch *> m_3DModelMatch; // Map of database aircraft names to 3D model names
+    QHash<QString, float> m_modelAltitudeOffset;
+    QHash<QString, float> m_labelAltitudeOffset;
 
     explicit ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
     virtual ~ADSBDemodGUI();
@@ -721,11 +834,19 @@ private:
     bool handleMessage(const Message& message);
     void updatePosition(Aircraft *aircraft);
     bool updateLocalPosition(Aircraft *aircraft, double latitude, double longitude, bool surfacePosition);
+    void sendToMap(Aircraft *aircraft, QList<SWGSDRangel::SWGMapAnimation *> *animations);
     void handleADSB(
         const QByteArray data,
         const QDateTime dateTime,
         float correlation,
-        float correlationOnes);
+        float correlationOnes,
+        bool updateModel);
+    QList<SWGSDRangel::SWGMapAnimation *> *animate(QDateTime dateTime, Aircraft *aircraft);
+    SWGSDRangel::SWGMapAnimation *gearAnimation(QDateTime startDateTime, bool up);
+    SWGSDRangel::SWGMapAnimation *flapsAnimation(QDateTime startDateTime, float currentFlaps, float flaps);
+    SWGSDRangel::SWGMapAnimation *slatsAnimation(QDateTime startDateTime, bool retract);
+    SWGSDRangel::SWGMapAnimation *rotorAnimation(QDateTime startDateTime, bool stop);
+    SWGSDRangel::SWGMapAnimation *engineAnimation(QDateTime startDateTime, int engine, bool stop);
     void checkStaticNotification(Aircraft *aircraft);
     void checkDynamicNotification(Aircraft *aircraft);
     void speechNotification(Aircraft *aircraft, const QString &speech);
@@ -735,6 +856,7 @@ private:
     QString getDataDir();
     QString getAirportDBFilename();
     QString getAirportFrequenciesDBFilename();
+    QString getOSNDBZipFilename();
     QString getOSNDBFilename();
     QString getFastDBFilename();
     qint64 fileAgeInDays(QString filename);
@@ -743,10 +865,13 @@ private:
     void readAirportFrequenciesDB(const QString& filename);
     bool readOSNDB(const QString& filename);
     bool readFastDB(const QString& filename);
+    void update3DModels();
     void updateAirports();
     void updateAirspaces();
     void updateNavAids();
+    QString getAirlineIconPath(const QString &operatorICAO);
     QIcon *getAirlineIcon(const QString &operatorICAO);
+    QString getFlagIconPath(const QString &country);
     QIcon *getFlagIcon(const QString &country);
     void updateDeviceSetList();
     QAction *createCheckableItem(QString& text, int idx, bool checked);
@@ -756,6 +881,9 @@ private:
     void applyMapSettings();
     void updatePhotoText(Aircraft *aircraft);
     void updatePhotoFlightInformation(Aircraft *aircraft);
+    void findOnChannelMap(Aircraft *aircraft);
+    int grayToBinary(int gray, int bits) const;
+    void redrawMap();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);
@@ -766,6 +894,7 @@ private slots:
     void on_threshold_valueChanged(int value);
     void on_phaseSteps_valueChanged(int value);
     void on_tapsPerPhase_valueChanged(int value);
+    void adsbData_customContextMenuRequested(QPoint point);
     void on_adsbData_cellClicked(int row, int column);
     void on_adsbData_cellDoubleClicked(int row, int column);
     void adsbData_sectionMoved(int logicalIndex, int oldVisualIndex, int newVisualIndex);
@@ -778,6 +907,7 @@ private slots:
     void on_feed_clicked(bool checked);
     void on_notifications_clicked();
     void on_flightInfo_clicked();
+    void on_findOnMapFeature_clicked();
     void on_getOSNDB_clicked();
     void on_getAirportDB_clicked();
     void on_getAirspacesDB_clicked();
@@ -801,6 +931,8 @@ private slots:
     void downloadAirspaceFinished();
     void downloadNavAidsFinished();
     void photoClicked();
+    virtual void showEvent(QShowEvent *event);
+    virtual bool eventFilter(QObject *obj, QEvent *event);
 
 signals:
     void homePositionChanged();

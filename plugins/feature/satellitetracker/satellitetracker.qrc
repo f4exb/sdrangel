@@ -2,5 +2,6 @@
   <qresource prefix="/satellitetracker/">
     <file>satellitetracker/iss-32.png</file>
     <file>satellitetracker/satellite-32.png</file>
+    <file>satellitetracker/cubesat-32.png</file>
   </qresource>
 </RCC>

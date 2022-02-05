@@ -174,6 +174,7 @@ Item {
                             id: text
                             anchors.centerIn: parent
                             text: mapText
+                            textFormat: TextEdit.RichText
                         }
                         MouseArea {
                             anchors.fill: parent
@@ -214,6 +215,10 @@ Item {
                                 MenuItem {
                                     text: "Move to back"
                                     onTriggered: mapModel.moveToBack(index)
+                                }
+                                MenuItem {
+                                    text: "Track on 3D map"
+                                    onTriggered: mapModel.track3D(index)
                                 }
                             }
                         }

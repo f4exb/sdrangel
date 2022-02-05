@@ -38,9 +38,10 @@ public:
     static bool getFrequencyOffset(unsigned int deviceIndex, int channelIndex, int& offset);
     static bool setFrequencyOffset(unsigned int deviceIndex, int channelIndex, int offset);
     static bool startStopFileSinks(unsigned int deviceIndex, bool start);
-    static bool satelliteAOS(const QString name, bool northToSouthPass);
+    static bool satelliteAOS(const QString name, bool northToSouthPass, const QString &tle, QDateTime dateTime);
     static bool satelliteLOS(const QString name);
     static bool getDeviceSetting(unsigned int deviceIndex, const QString &setting, int &value);
+    static bool getDeviceReportValue(unsigned int deviceIndex, const QString &key, QString &value);
     static bool patchDeviceSetting(unsigned int deviceIndex, const QString &setting, int value);
     static bool patchFeatureSetting(unsigned int featureSetIndex, unsigned int featureIndex, const QString &setting, const QString &value);
     static bool patchFeatureSetting(unsigned int featureSetIndex, unsigned int featureIndex, const QString &setting, double value);

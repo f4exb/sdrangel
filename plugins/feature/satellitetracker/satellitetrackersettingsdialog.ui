@@ -12,7 +12,6 @@
   </property>
   <property name="font">
    <font>
-    <family>Liberation Sans</family>
     <pointsize>9</pointsize>
    </font>
   </property>
@@ -490,6 +489,91 @@
             </property>
             <property name="maximum">
              <number>360</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="replayTab">
+         <attribute name="title">
+          <string>Replay</string>
+         </attribute>
+         <layout class="QFormLayout" name="formLayout">
+          <item row="0" column="0">
+           <widget class="QLabel" name="replaceEnabledLabel">
+            <property name="text">
+             <string>Enable replay</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QCheckBox" name="replayEnabled">
+            <property name="toolTip">
+             <string>Enable replay of a pass in the past, by starting with the chosen date and time</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="useFileInputTimeLabel">
+            <property name="text">
+             <string>Get time from FileInput device</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QCheckBox" name="useFileInputTime">
+            <property name="toolTip">
+             <string>Get the time from the FileInput device</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="replayDateTimeLabel">
+            <property name="text">
+             <string>Start date and time</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QDateTimeEdit" name="replayDateTime">
+            <property name="toolTip">
+             <string>Set date and time to the displayed value when Satellite Tracker's start button is pressed</string>
+            </property>
+            <property name="date">
+             <date>
+              <year>2021</year>
+              <month>1</month>
+              <day>1</day>
+             </date>
+            </property>
+            <property name="displayFormat">
+             <string>dd/MM/yyyy HH:mm:ss</string>
+            </property>
+            <property name="calendarPopup">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="sendTimeToMapLabel">
+            <property name="text">
+             <string>Send time to map</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QCheckBox" name="sendTimeToMap">
+            <property name="toolTip">
+             <string>Send time to Map feature when Satellite Tracker's start button is pressed</string>
+            </property>
+            <property name="text">
+             <string/>
             </property>
            </widget>
           </item>

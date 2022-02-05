@@ -24,7 +24,6 @@
   </property>
   <property name="font">
    <font>
-    <family>Liberation Sans</family>
     <pointsize>9</pointsize>
    </font>
   </property>
@@ -101,7 +100,6 @@
           </property>
           <property name="font">
            <font>
-            <family>Liberation Mono</family>
             <pointsize>12</pointsize>
            </font>
           </property>
@@ -190,7 +188,6 @@
         </property>
         <property name="font">
          <font>
-          <family>Liberation Mono</family>
           <pointsize>8</pointsize>
          </font>
         </property>
@@ -685,6 +682,23 @@
         <property name="icon">
          <iconset resource="../../../sdrgui/resources/res.qrc">
           <normaloff>:/load.png</normaloff>:/load.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="findOnMapFeature">
+        <property name="toolTip">
+         <string>Find selected aircraft on feature map</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/gridpolar.png</normaloff>:/gridpolar.png</iconset>
         </property>
         <property name="checkable">
          <bool>false</bool>

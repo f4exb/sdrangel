@@ -21,14 +21,35 @@
 
 #include <QByteArray>
 #include <QString>
-
-#include "util/message.h"
+#include <QHash>
 
 class Serializable;
-class PipeEndPoint;
 
 struct MapSettings
 {
+    struct MapItemSettings {
+        QString m_group;          // Name of the group the settings apply to
+        bool m_enabled;           // Whether enabled at all on 2D or 3D map
+        bool m_display2DIcon;     // Display image 2D map
+        bool m_display2DLabel;    // Display label on 2D map
+        bool m_display2DTrack;    // Display tracks on 2D map
+        quint32 m_2DTrackColor;
+        int m_2DMinZoom;
+        bool m_display3DModel;    // Draw 3D model for item
+        bool m_display3DLabel;    // Display a label next to this item on the 3D map
+        bool m_display3DPoint;    // Draw a point for this item on the 3D map
+        quint32 m_3DPointColor;
+        bool m_display3DTrack;    // Display a ground track for this item on the 3D map
+        quint32 m_3DTrackColor;
+        int m_3DModelMinPixelSize;
+
+        MapItemSettings(const QString& group, const QColor color, bool display3DPoint=true, int minZoom=11, int modelMinPixelSize=0);
+        MapItemSettings(const QByteArray& data);
+        void resetToDefaults();
+        QByteArray serialize() const;
+        bool deserialize(const QByteArray& data);
+    };
+
     bool m_displayNames;
     QString m_mapProvider;
     QString m_thunderforestAPIKey;
@@ -36,11 +57,8 @@ struct MapSettings
     QString m_mapBoxAPIKey;
     QString m_osmURL;
     QString m_mapBoxStyles;
-    quint32 m_sources;                 // Bitmask of SOURCE_*
     bool m_displayAllGroundTracks;
     bool m_displaySelectedGroundTracks;
-    quint32 m_groundTrackColor;
-    quint32 m_predictedGroundTrackColor;
     QString m_title;
     quint32 m_rgbColor;
     bool m_useReverseAPI;
@@ -49,31 +67,36 @@ struct MapSettings
     uint16_t m_reverseAPIFeatureSetIndex;
     uint16_t m_reverseAPIFeatureIndex;
     Serializable *m_rollupState;
+    bool m_map2DEnabled;
+    QString m_mapType;          // "Street Map", "Satellite Map", etc.. as selected in combobox
+
+    // 3D Map settings
+    bool m_map3DEnabled;
+    QString m_terrain;          // "Ellipsoid" or "Cesium World Terrain"
+    QString m_buildings;        // "None" or "Cesium OSM Buildings"
+    QString m_modelURL;         // Base URL for 3D models (Not user settable, as depends on web server port)
+    QString m_modelDir;         // Directory to store 3D models (not customizable for now, as ADS-B plugin needs to know)
+    bool m_sunLightEnabled;     // Light globe from direction of Sun
+    bool m_eciCamera;           // Use ECI instead of ECEF for camera
+    QString m_cesiumIonAPIKey;
+    QString m_antiAliasing;
+
+    // Per source settings
+    QHash<QString, MapItemSettings *> m_itemSettings;
 
     MapSettings();
+    ~MapSettings();
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
     void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
+    QByteArray serializeItemSettings(QHash<QString, MapItemSettings *> itemSettings) const;
+    void deserializeItemSettings(const QByteArray& data, QHash<QString, MapItemSettings *>& itemSettings);
 
     static const QStringList m_pipeTypes;
     static const QStringList m_pipeURIs;
 
     static const QStringList m_mapProviders;
-
-    // The first few should match the order in m_pipeTypes for MapGUI::getSourceMask to work
-    static const quint32 SOURCE_ADSB = 0x1;
-    static const quint32 SOURCE_AIS = 0x2;
-    static const quint32 SOURCE_APRS = 0x4;
-    static const quint32 SOURCE_STAR_TRACKER = 0x8;
-    static const quint32 SOURCE_SATELLITE_TRACKER = 0x10;
-    static const quint32 SOURCE_BEACONS = 0x20;
-    static const quint32 SOURCE_RADIO_TIME = 0x40;
-    static const quint32 SOURCE_RADAR = 0x80;
-    static const quint32 SOURCE_AM = 0x100;
-    static const quint32 SOURCE_FM = 0x200;
-    static const quint32 SOURCE_DAB = 0x400;
-    static const quint32 SOURCE_STATION = 0x400; // Antenna at "My Position"
 };
 
 #endif // INCLUDE_FEATURE_MAPSETTINGS_H_

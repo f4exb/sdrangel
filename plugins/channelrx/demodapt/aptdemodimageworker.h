@@ -25,14 +25,22 @@
 
 #include <apt.h>
 
+#include <CoordTopocentric.h>
+#include <CoordGeodetic.h>
+#include <Observer.h>
+#include <SGP4.h>
+
 #include "util/messagequeue.h"
 #include "util/message.h"
 
 #include "aptdemodsettings.h"
 
+class APTDemod;
+
 class APTDemodImageWorker : public QObject
 {
     Q_OBJECT
+
 public:
     class MsgConfigureAPTDemodImageWorker : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -95,7 +103,7 @@ public:
         }
     };
 
-    APTDemodImageWorker();
+    APTDemodImageWorker(APTDemod *aptDemod);
     ~APTDemodImageWorker();
     void reset();
     void startWork();
@@ -109,6 +117,7 @@ private:
     MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     MessageQueue *m_messageQueueToGUI;
     APTDemodSettings m_settings;
+    APTDemod *m_aptDemod;
 
     // Image buffers
     apt_image_t m_image;                // Received image
@@ -117,18 +126,39 @@ private:
     QImage m_colourImage;
     QString m_satelliteName;
 
+    QList<CoordGeodetic> m_satCoords;   // Lat,lon for satellite for each image row - in received order for both pass directions
+    QVector<QVector<CoordGeodetic>> m_pixelCoords;  // Coordinates for each pixel - reversed y order for south to north passes, so always highest lat first
+    SGP4 *m_sgp4;                       // For calculating satellite position
+    double m_tileEast;                  // Bounding box for projected image, in degrees
+    double m_tileWest;
+    double m_tileNorth;
+    double m_tileSouth;
+
+    QList<QImage> m_palettes;
+
     bool m_running;
     QMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
     void applySettings(const APTDemodSettings& settings, bool force = false);
     void resetDecoder();
+    double calcHeading(CoordGeodetic from, CoordGeodetic to) const;
+    void calcPixelCoords(CoordGeodetic centreCoord, double heading);
+    void recalcCoords();
+    void calcCoords(QDateTime qdt, int row);
+    void calcCoord(int row);
     void processPixels(const float *pixels);
     void sendImageToGUI();
+    QRgb findNearest(const QImage &image, double latitude, double longitude, int xPrevious, int yPrevious, int &xNearest, int &yNearest) const;
+    void calcBoundingBox(double &east, double &south, double &west, double &north, const QImage &image);
+    QImage projectImage(const QImage &image);
+    void makeTransparent(QImage &image);
+    void sendImageToMap(QImage image);
     void sendLineToGUI();
+    void prependPath(QString &filename);
     void saveImageToDisk();
-    QImage processImage(QStringList& imageTypes);
-    QImage extractImage(QImage image);
+    QImage processImage(QStringList& imageTypes, APTDemodSettings::ChannelSelection channels);
+    QImage extractImage(QImage image, APTDemodSettings::ChannelSelection channels);
 
     static void copyImage(apt_image_t *dst, apt_image_t *src);
     static uchar roundAndClip(float p);

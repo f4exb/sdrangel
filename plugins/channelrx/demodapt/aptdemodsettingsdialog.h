@@ -33,6 +33,9 @@ public:
 private slots:
     void accept();
     void on_autoSavePathBrowse_clicked();
+    void on_autoSave_clicked(bool checked);
+    void on_addPalette_clicked();
+    void on_removePalette_clicked();
 
 private:
     Ui::APTDemodSettingsDialog* ui;

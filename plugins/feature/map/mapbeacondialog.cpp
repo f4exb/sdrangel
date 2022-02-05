@@ -27,8 +27,7 @@
 MapBeaconDialog::MapBeaconDialog(MapGUI *gui, QWidget* parent) :
     QDialog(parent),
     m_gui(gui),
-    ui(new Ui::MapBeaconDialog),
-    m_progressDialog(nullptr)
+    ui(new Ui::MapBeaconDialog)
 {
     ui->setupUi(this);
     connect(&m_dlm, &HttpDownloadManager::downloadComplete, this, &MapBeaconDialog::downloadFinished);
@@ -79,47 +78,6 @@ void MapBeaconDialog::updateTable()
     ui->beacons->resizeColumnsToContents();
 }
 
-qint64 MapBeaconDialog::fileAgeInDays(QString filename)
-{
-    QFile file(filename);
-    if (file.exists())
-    {
-        QDateTime modified = file.fileTime(QFileDevice::FileModificationTime);
-        if (modified.isValid())
-            return modified.daysTo(QDateTime::currentDateTime());
-        else
-            return -1;
-    }
-    return -1;
-}
-
-bool MapBeaconDialog::confirmDownload(QString filename)
-{
-    qint64 age = fileAgeInDays(filename);
-    if ((age == -1) || (age > 100))
-        return true;
-    else
-    {
-        QMessageBox::StandardButton reply;
-        if (age == 0)
-            reply = QMessageBox::question(this, "Confirm download", "This file was last downloaded today. Are you sure you wish to redownload it?", QMessageBox::Yes|QMessageBox::No);
-        else if (age == 1)
-            reply = QMessageBox::question(this, "Confirm download", "This file was last downloaded yesterday. Are you sure you wish to redownload it?", QMessageBox::Yes|QMessageBox::No);
-        else
-            reply = QMessageBox::question(this, "Confirm download", QString("This file was last downloaded %1 days ago. Are you sure you wish to redownload this file?").arg(age), QMessageBox::Yes|QMessageBox::No);
-        return reply == QMessageBox::Yes;
-    }
-}
-
-void MapBeaconDialog::updateDownloadProgress(qint64 bytesRead, qint64 totalBytes)
-{
-    if (m_progressDialog)
-    {
-        m_progressDialog->setMaximum(totalBytes);
-        m_progressDialog->setValue(bytesRead);
-    }
-}
-
 void MapBeaconDialog::accept()
 {
     QDialog::accept();
@@ -127,32 +85,28 @@ void MapBeaconDialog::accept()
 
 void MapBeaconDialog::on_downloadIARU_clicked()
 {
-    if (m_progressDialog == nullptr)
+    if (!m_dlm.downloading())
     {
         QString beaconFile = MapGUI::getBeaconFilename();
-        if (confirmDownload(beaconFile))
+        if (HttpDownloadManagerGUI::confirmDownload(beaconFile, this))
         {
             // Download IARU beacons database to disk
             QUrl dbURL(QString(IARU_BEACONS_URL));
-            m_progressDialog = new QProgressDialog(this);
-            m_progressDialog->setCancelButton(nullptr);
-            m_progressDialog->setMinimumDuration(500);
-            m_progressDialog->setLabelText(QString("Downloading %1.").arg(IARU_BEACONS_URL));
-            QNetworkReply *reply = m_dlm.download(dbURL, beaconFile);
-            connect(reply, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(updateDownloadProgress(qint64,qint64)));
+            m_dlm.download(dbURL, beaconFile, this);
         }
     }
 }
 
-void MapBeaconDialog::downloadFinished(const QString& filename, bool success)
+void MapBeaconDialog::downloadFinished(const QString& filename, bool success, const QString &url, const QString &errorMessage)
 {
     if (success)
     {
         if (filename == MapGUI::getBeaconFilename())
         {
             QList<Beacon *> *beacons = Beacon::readIARUCSV(filename);
-            if (beacons != nullptr)
+            if (beacons != nullptr) {
                 m_gui->setBeacons(beacons);
+            }
         }
         else
         {
@@ -161,14 +115,7 @@ void MapBeaconDialog::downloadFinished(const QString& filename, bool success)
     }
     else
     {
-        qDebug() << "MapBeaconDialog::downloadFinished: Failed: " << filename;
-        QMessageBox::warning(this, "Download failed", QString("Failed to download %1").arg(filename));
-    }
-    if (m_progressDialog)
-    {
-        m_progressDialog->close();
-        delete m_progressDialog;
-        m_progressDialog = nullptr;
+        QMessageBox::warning(this, "Download failed", QString("Failed to download %1 to %2\n%3").arg(url).arg(filename).arg(errorMessage));
     }
 }
 

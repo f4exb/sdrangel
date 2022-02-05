@@ -237,13 +237,17 @@ void SatelliteTrackerWorker::removeFromMap(QString id)
     MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
     QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(m_satelliteTracker, "mapitems");
     if (mapMessageQueues)
-        sendToMap(mapMessageQueues, id, "", "", 0.0, 0.0, 0.0, 0.0, nullptr, nullptr);
+        sendToMap(mapMessageQueues, id, "", "", "", 0.0f, 0.0, 0.0, 0.0, 0.0, nullptr, nullptr, nullptr, nullptr);
 }
 
 void SatelliteTrackerWorker::sendToMap(QList<MessageQueue*> *mapMessageQueues,
-                                       QString name, QString image, QString text,
+                                       QString name, QString image, QString model, QString text,
+                                       float labelOffset,
                                        double lat, double lon, double altitude, double rotation,
-                                       QList<QGeoCoordinate *> *track, QList<QGeoCoordinate *> *predictedTrack)
+                                       QList<QGeoCoordinate *> *track,
+                                       QList<QDateTime *> *trackDateTime,
+                                       QList<QGeoCoordinate *> *predictedTrack,
+                                       QList<QDateTime *> *predictedTrackDateTime)
 {
     QList<MessageQueue*>::iterator it = mapMessageQueues->begin();
 
@@ -257,7 +261,11 @@ void SatelliteTrackerWorker::sendToMap(QList<MessageQueue*> *mapMessageQueues,
         swgMapItem->setImage(new QString(image));
         swgMapItem->setImageRotation(rotation);
         swgMapItem->setText(new QString(text));
-        swgMapItem->setImageMinZoom(0);
+        swgMapItem->setModel(new QString(model));
+        swgMapItem->setFixedPosition(false);
+        swgMapItem->setOrientation(0);
+        swgMapItem->setLabel(new QString(name));
+        swgMapItem->setLabelAltitudeOffset(labelOffset);
         if (track != nullptr)
         {
             QList<SWGSDRangel::SWGMapCoordinate *> *mapTrack = new QList<SWGSDRangel::SWGMapCoordinate *>();
@@ -268,6 +276,7 @@ void SatelliteTrackerWorker::sendToMap(QList<MessageQueue*> *mapMessageQueues,
                 p->setLatitude(c->latitude());
                 p->setLongitude(c->longitude());
                 p->setAltitude(c->altitude());
+                p->setDateTime(new QString(trackDateTime->at(i)->toString(Qt::ISODate)));
                 mapTrack->append(p);
             }
             swgMapItem->setTrack(mapTrack);
@@ -282,6 +291,7 @@ void SatelliteTrackerWorker::sendToMap(QList<MessageQueue*> *mapMessageQueues,
                 p->setLatitude(c->latitude());
                 p->setLongitude(c->longitude());
                 p->setAltitude(c->altitude());
+                p->setDateTime(new QString(predictedTrackDateTime->at(i)->toString(Qt::ISODate)));
                 mapTrack->append(p);
             }
             swgMapItem->setPredictedTrack(mapTrack);
@@ -297,7 +307,7 @@ void SatelliteTrackerWorker::update()
     // Get date and time to calculate position at
     QDateTime qdt;
     if (m_settings.m_dateTime == "")
-        qdt = SatelliteTracker::currentDateTimeUtc();
+        qdt = m_satelliteTracker->currentDateTimeUtc();
     else if (m_settings.m_utc)
         qdt = QDateTime::fromString(m_settings.m_dateTime, Qt::ISODateWithMs);
     else
@@ -333,6 +343,7 @@ void SatelliteTrackerWorker::update()
                     // Do we have a new AOS?
                     if ((satWorkerState->m_aos != satWorkerState->m_satState.m_passes[0]->m_aos) || (satWorkerState->m_los != satWorkerState->m_satState.m_passes[0]->m_los))
                     {
+                        qDebug() << "SatelliteTrackerWorker: Current time: " << qdt.toString(Qt::ISODateWithMs);
                         qDebug() << "SatelliteTrackerWorker: New AOS: " << name << " new: " << satWorkerState->m_satState.m_passes[0]->m_aos << " old: " << satWorkerState->m_aos;
                         qDebug() << "SatelliteTrackerWorker: New LOS: " << name << " new: " << satWorkerState->m_satState.m_passes[0]->m_los << " old: " << satWorkerState->m_los;
                         satWorkerState->m_aos = satWorkerState->m_satState.m_passes[0]->m_aos;
@@ -356,14 +367,15 @@ void SatelliteTrackerWorker::update()
                             if (satWorkerState->m_losTimer.isActive()) {
                                 qDebug() << "SatelliteTrackerWorker::update m_losTimer.remainingTime: " << satWorkerState->m_losTimer.remainingTime();
                             }
-                            // We can detect a new AOS for a satellite, a little bit before the LOS has occured, presumably
-                            // because the calculations aren't accurate to fractions of a second. Allow for 1s here
-                            if (satWorkerState->m_losTimer.isActive() && (satWorkerState->m_losTimer.remainingTime() <= 1000))
+                            // We can detect a new AOS for a satellite, a little bit before the LOS has occured
+                            // Allow for 5s here (1s doesn't appear to be enough in some cases)
+                            if (satWorkerState->m_losTimer.isActive() && (satWorkerState->m_losTimer.remainingTime() <= 5000))
                             {
                                 satWorkerState->m_losTimer.stop();
                                 // LOS hasn't been called yet - do so, before we reset timer
                                 los(satWorkerState);
                             }
+                            qDebug() << "SatelliteTrackerWorker:: Interval to LOS " << (satWorkerState->m_los.toMSecsSinceEpoch() - qdt.toMSecsSinceEpoch());
                             satWorkerState->m_losTimer.setInterval(satWorkerState->m_los.toMSecsSinceEpoch() - qdt.toMSecsSinceEpoch());
                             satWorkerState->m_losTimer.setSingleShot(true);
                             satWorkerState->m_losTimer.start();
@@ -417,11 +429,29 @@ void SatelliteTrackerWorker::update()
                     QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(m_satelliteTracker, "mapitems");
                     if (mapMessageQueues)
                     {
+                        const QStringList cubeSats({"AISAT-1", "FOX-1B", "FOX-1C", "FOX-1D", "FOX-1E", "FUNCUBE-1", "NO-84"});
                         QString image;
+                        QString model;
+                        float labelOffset;
+
                         if (sat->m_name == "ISS")
+                        {
                             image = "qrc:///satellitetracker/satellitetracker/iss-32.png";
+                            model = "iss.glb";
+                            labelOffset = 15.0f;
+                        }
+                        else if (cubeSats.contains(sat->m_name))
+                        {
+                            image = "qrc:///satellitetracker/satellitetracker/cubesat-32.png";
+                            model = "cubesat.glb";
+                            labelOffset = 0.7f;
+                        }
                         else
+                        {
                             image = "qrc:///satellitetracker/satellitetracker/satellite-32.png";
+                            model = "satellite.glb";
+                            labelOffset = 2.5f;
+                        }
 
                         QString text = QString("Name: %1\nAltitude: %2 km\nRange: %3 km\nRange rate: %4 km/s\nSpeed: %5 km/h\nPeriod: %6 mins")
                                                .arg(sat->m_name)
@@ -456,10 +486,11 @@ void SatelliteTrackerWorker::update()
                                             .arg(QChar(0xb0));
                         }
 
-                        sendToMap(mapMessageQueues, sat->m_name, image, text,
+                        sendToMap(mapMessageQueues, sat->m_name, image, model, text, labelOffset,
                                    satWorkerState->m_satState.m_latitude, satWorkerState->m_satState.m_longitude,
                                    satWorkerState->m_satState.m_altitude * 1000.0, 0,
-                                   &satWorkerState->m_satState.m_groundTrack, &satWorkerState->m_satState.m_predictedGroundTrack);
+                                   &satWorkerState->m_satState.m_groundTrack, &satWorkerState->m_satState.m_groundTrackDateTime,
+                                   &satWorkerState->m_satState.m_predictedGroundTrack, &satWorkerState->m_satState.m_predictedGroundTrackDateTime);
                     }
                 }
 
@@ -495,7 +526,7 @@ void SatelliteTrackerWorker::aos(SatWorkerState *satWorkerState)
         SatWorkerState *targetSatWorkerState = m_workerState.value(m_settings.m_target);
         int currentTargetIdx = m_settings.m_satellites.indexOf(m_settings.m_target);
         int newTargetIdx = m_settings.m_satellites.indexOf(satWorkerState->m_name);
-        if ((newTargetIdx < currentTargetIdx) || !targetSatWorkerState->hasAOS())
+        if ((newTargetIdx < currentTargetIdx) || !targetSatWorkerState->hasAOS(m_satelliteTracker->currentDateTimeUtc()))
         {
             // Stop doppler correction for current target
             if (m_workerState.contains(m_settings.m_target))
@@ -646,7 +677,12 @@ void SatelliteTrackerWorker::applyDeviceAOSSettings(const QString& name)
 
             // Send AOS message to channels/features
             SatWorkerState *satWorkerState = m_workerState.value(name);
-            ChannelWebAPIUtils::satelliteAOS(name, satWorkerState->m_satState.m_passes[0]->m_northToSouth);
+            SatNogsSatellite *sat = m_satellites.value(satWorkerState->m_name);
+            // APT needs current time, for current position of satellite, not start of pass which may be in the past
+            // if the satellite was already visible when Sat Tracker was started
+            ChannelWebAPIUtils::satelliteAOS(name, satWorkerState->m_satState.m_passes[0]->m_northToSouth,
+                                             sat->m_tle->toString(),
+                                             m_satelliteTracker->currentDateTimeUtc());
             FeatureWebAPIUtils::satelliteAOS(name, satWorkerState->m_aos, satWorkerState->m_los);
 
             // Start Doppler correction, if needed
@@ -677,6 +713,7 @@ void SatelliteTrackerWorker::applyDeviceAOSSettings(const QString& name)
             }
             if (requiresDoppler)
             {
+                qDebug() << "SatelliteTrackerWorker::applyDeviceAOSSettings: requiresDoppler";
                 satWorkerState->m_dopplerTimer.setInterval(m_settings.m_dopplerPeriod * 1000);
                 satWorkerState->m_dopplerTimer.start();
                 connect(&satWorkerState->m_dopplerTimer, &QTimer::timeout, [this, satWorkerState]() {
@@ -705,7 +742,10 @@ void SatelliteTrackerWorker::applyDeviceAOSSettings(const QString& name)
     {
         // Send AOS message to channels/features
         SatWorkerState *satWorkerState = m_workerState.value(name);
-        ChannelWebAPIUtils::satelliteAOS(name, satWorkerState->m_satState.m_passes[0]->m_northToSouth);
+        SatNogsSatellite *sat = m_satellites.value(satWorkerState->m_name);
+        ChannelWebAPIUtils::satelliteAOS(name, satWorkerState->m_satState.m_passes[0]->m_northToSouth,
+                                            sat->m_tle->toString(),
+                                            m_satelliteTracker->currentDateTimeUtc());
         FeatureWebAPIUtils::satelliteAOS(name, satWorkerState->m_aos, satWorkerState->m_los);
     }
 
@@ -750,7 +790,7 @@ void SatelliteTrackerWorker::doppler(SatWorkerState *satWorkerState)
 
 void SatelliteTrackerWorker::los(SatWorkerState *satWorkerState)
 {
-    qDebug() << "SatelliteTrackerWorker::los " << satWorkerState->m_name;
+    qDebug() << "SatelliteTrackerWorker::los " << satWorkerState->m_name << " target: " << m_settings.m_target;
 
     // Indicate LOS to GUI
     if (getMessageQueueToGUI())
@@ -776,6 +816,10 @@ void SatelliteTrackerWorker::los(SatWorkerState *satWorkerState)
             QProcess::startDetached(program, allArgs);
         }
 
+        // Send LOS message to channels/features
+        ChannelWebAPIUtils::satelliteLOS(satWorkerState->m_name);
+        FeatureWebAPIUtils::satelliteLOS(satWorkerState->m_name);
+
         if (m_settings.m_deviceSettings.contains(satWorkerState->m_name))
         {
             QList<SatelliteTrackerSettings::SatelliteDeviceSettings *> *m_deviceSettingsList = m_settings.m_deviceSettings.value(satWorkerState->m_name);
@@ -790,10 +834,6 @@ void SatelliteTrackerWorker::los(SatWorkerState *satWorkerState)
                     ChannelWebAPIUtils::startStopFileSinks(devSettings->m_deviceSetIndex, false);
                 }
             }
-
-            // Send LOS message to channels/features
-            ChannelWebAPIUtils::satelliteLOS(satWorkerState->m_name);
-            FeatureWebAPIUtils::satelliteLOS(satWorkerState->m_name);
 
             // Stop acquisition
             for (int i = 0; i < m_deviceSettingsList->size(); i++)
@@ -834,7 +874,7 @@ void SatelliteTrackerWorker::los(SatWorkerState *satWorkerState)
             if (m_workerState.contains(m_settings.m_satellites[i]))
             {
                 SatWorkerState *newSatWorkerState = m_workerState.value(m_settings.m_satellites[i]);
-                if (newSatWorkerState->hasAOS())
+                if (newSatWorkerState->hasAOS(m_satelliteTracker->currentDateTimeUtc()))
                 {
                     qDebug() << "SatelliteTrackerWorker::los - autoTarget setting " << m_settings.m_satellites[i];
                     m_settings.m_target = m_settings.m_satellites[i];
@@ -852,8 +892,7 @@ void SatelliteTrackerWorker::los(SatWorkerState *satWorkerState)
     m_recalculatePasses = true;
 }
 
-bool SatWorkerState::hasAOS()
+bool SatWorkerState::hasAOS(const QDateTime& currentTime)
 {
-    QDateTime currentTime = SatelliteTracker::currentDateTimeUtc();
     return (m_aos <= currentTime) && (m_los > currentTime);
 }

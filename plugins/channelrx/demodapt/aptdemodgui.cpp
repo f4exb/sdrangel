@@ -25,8 +25,10 @@
 #include <QAction>
 #include <QRegExp>
 #include <QFileDialog>
+#include <QFileInfo>
 #include <QGraphicsScene>
 #include <QGraphicsPixmapItem>
+#include <QGraphicsSceneMouseEvent>
 
 #include "aptdemodgui.h"
 
@@ -50,6 +52,45 @@
 #include "aptdemod.h"
 #include "aptdemodsink.h"
 #include "aptdemodsettingsdialog.h"
+#include "aptdemodselectdialog.h"
+
+#include "SWGMapItem.h"
+
+TempScale::TempScale(QGraphicsItem *parent) :
+    QGraphicsRectItem(parent)
+{
+    // Temp scale appears to be -100 to +60C
+    // We just draw -100 to +50C, so it's nicely divides up according to the palette
+    setRect(30, 30, 25, 240);
+    m_gradient.setCoordinateMode(QGradient::ObjectBoundingMode);
+    m_gradient.setStart(0.0, 0.0);
+    m_gradient.setFinalStop(0.0, 1.0);
+
+    for (int i = 0; i < 240; i++)
+    {
+        int idx = (240 - i) * 3;
+        QColor color((unsigned char)apt_TempPalette[idx], (unsigned char)apt_TempPalette[idx+1], (unsigned char)apt_TempPalette[idx+2]);
+        m_gradient.setColorAt(i/240.0, color);
+    }
+}
+
+void TempScale::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+{
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
+
+    int left = rect().left() + rect().width() + 10;
+    painter->setPen(QPen(Qt::black));
+    painter->setBrush(m_gradient);
+    painter->drawRect(rect());
+    painter->drawText(left, rect().top(), "50C");
+    painter->drawText(left, rect().top() + rect().height() * 1 / 6, "25C");
+    painter->drawText(left, rect().top() + rect().height() * 2 / 6, "0C");
+    painter->drawText(left, rect().top() + rect().height() * 3 / 6, "-25C");
+    painter->drawText(left, rect().top() + rect().height() * 4 / 6, "-50C");
+    painter->drawText(left, rect().top() + rect().height() * 5 / 6, "-75C");
+    painter->drawText(left, rect().top() + rect().height(), "-100C");
+}
 
 APTDemodGUI* APTDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
@@ -76,7 +117,8 @@ QByteArray APTDemodGUI::serialize() const
 
 bool APTDemodGUI::deserialize(const QByteArray& data)
 {
-    if(m_settings.deserialize(data)) {
+    if(m_settings.deserialize(data))
+    {
         displaySettings();
         applySettings(true);
         return true;
@@ -103,19 +145,29 @@ bool APTDemodGUI::handleMessage(const Message& message)
     {
         const APTDemod::MsgImage& imageMsg = (APTDemod::MsgImage&) message;
         m_image = imageMsg.getImage();
-        m_pixmap.convertFromImage(m_image);
-        if (m_pixmapItem != nullptr)
+        // Display can be corrupted if we try to drawn an image with 0 height
+        if (m_image.height() > 0)
         {
-            m_pixmapItem->setPixmap(m_pixmap);
-            if (ui->zoomAll->isChecked()) {
+            m_pixmap.convertFromImage(m_image);
+            if (m_pixmapItem != nullptr)
+            {
+                m_pixmapItem->setPixmap(m_pixmap);
+                if (ui->zoomAll->isChecked()) {
+                    ui->image->fitInView(m_pixmapItem, Qt::KeepAspectRatio);
+                }
+            }
+            else
+            {
+                m_pixmapItem = m_scene->addPixmap(m_pixmap);
+                m_pixmapItem->setPos(0, 0);
                 ui->image->fitInView(m_pixmapItem, Qt::KeepAspectRatio);
             }
-        }
-        else
-        {
-            m_pixmapItem = m_scene->addPixmap(m_pixmap);
-            m_pixmapItem->setPos(0, 0);
-            ui->image->fitInView(m_pixmapItem, Qt::KeepAspectRatio);
+            bool temp = m_settings.m_channels == APTDemodSettings::TEMPERATURE;
+            m_tempScale->setVisible(temp);
+            m_tempScaleBG->setVisible(temp);
+            if (!temp) {
+                m_tempText->setVisible(false);
+            }
         }
 
         QStringList imageTypes = imageMsg.getImageTypes();
@@ -126,20 +178,24 @@ bool APTDemodGUI::handleMessage(const Message& message)
         }
         else
         {
-            if (imageTypes[0].isEmpty())
+            if (imageTypes[0].isEmpty()) {
                 ui->channelALabel->setText("Channel A");
-            else
+            } else {
                 ui->channelALabel->setText(imageTypes[0]);
-            if (imageTypes[1].isEmpty())
+            }
+            if (imageTypes[1].isEmpty()) {
                 ui->channelBLabel->setText("Channel B");
-            else
+            } else {
                 ui->channelBLabel->setText(imageTypes[1]);
+            }
         }
         QString satelliteName = imageMsg.getSatelliteName();
-        if (!satelliteName.isEmpty())
+        if (!satelliteName.isEmpty()) {
             ui->imageContainer->setWindowTitle("Received image from " + satelliteName);
-        else
+        } else {
             ui->imageContainer->setWindowTitle("Received image");
+        }
+
         return true;
     }
     else if (APTDemod::MsgLine::match(message))
@@ -203,6 +259,18 @@ bool APTDemodGUI::handleMessage(const Message& message)
 
         return true;
     }
+    else if (APTDemod::MsgMapImageName::match(message))
+    {
+        const APTDemod::MsgMapImageName& mapNameMsg = (APTDemod::MsgMapImageName&) message;
+        QString name = mapNameMsg.getName();
+        if (!m_mapImages.contains(name)) {
+            m_mapImages.append(name);
+        }
+    }
+    else if (APTDemod::MsgResetDecoder::match(message))
+    {
+        resetDecoder();
+    }
     else if (DSPSignalNotification::match(message))
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
@@ -261,24 +329,88 @@ void APTDemodGUI::on_fmDev_valueChanged(int value)
     applySettings();
 }
 
-void APTDemodGUI::on_channels_currentIndexChanged(int index)
+void APTDemodGUI::displayLabels()
 {
-    m_settings.m_channels = (APTDemodSettings::ChannelSelection)index;
     if (m_settings.m_channels == APTDemodSettings::BOTH_CHANNELS)
     {
         ui->channelALabel->setVisible(true);
         ui->channelBLabel->setVisible(true);
+        ui->precipitation->setVisible(true);
     }
     else if (m_settings.m_channels == APTDemodSettings::CHANNEL_A)
     {
         ui->channelALabel->setVisible(true);
         ui->channelBLabel->setVisible(false);
+        ui->precipitation->setVisible(true);
+    }
+    else if (m_settings.m_channels == APTDemodSettings::CHANNEL_B)
+    {
+        ui->channelALabel->setVisible(false);
+        ui->channelBLabel->setVisible(true);
+        ui->precipitation->setVisible(true);
+    }
+    else if (m_settings.m_channels == APTDemodSettings::TEMPERATURE)
+    {
+        ui->channelALabel->setVisible(false);
+        ui->channelBLabel->setVisible(false);
+        ui->precipitation->setVisible(false);
     }
     else
     {
         ui->channelALabel->setVisible(false);
-        ui->channelBLabel->setVisible(true);
+        ui->channelBLabel->setVisible(false);
+        ui->precipitation->setVisible(false);
     }
+}
+
+void APTDemodGUI::on_channels_currentIndexChanged(int index)
+{
+    if (index <= (int)APTDemodSettings::CHANNEL_B)
+    {
+        m_settings.m_channels = (APTDemodSettings::ChannelSelection)index;
+    }
+    else if (index == (int)APTDemodSettings::TEMPERATURE)
+    {
+        m_settings.m_channels = APTDemodSettings::TEMPERATURE;
+        m_settings.m_precipitationOverlay = false;
+    }
+    else
+    {
+        m_settings.m_channels = APTDemodSettings::PALETTE;
+        m_settings.m_palette = index - (int)APTDemodSettings::PALETTE;
+        m_settings.m_precipitationOverlay = false;
+    }
+    displayLabels();
+    applySettings();
+}
+
+void APTDemodGUI::on_transparencyThreshold_valueChanged(int value)
+{
+    m_settings.m_transparencyThreshold = value;
+    ui->transparencyThresholdText->setText(QString::number(m_settings.m_transparencyThreshold));
+    // Don't applySettings while tracking, as processing an image takes a long time
+    if (!ui->transparencyThreshold->isSliderDown()) {
+        applySettings();
+    }
+}
+
+void APTDemodGUI::on_transparencyThreshold_sliderReleased()
+{
+    applySettings();
+}
+
+void APTDemodGUI::on_opacityThreshold_valueChanged(int value)
+{
+    m_settings.m_opacityThreshold = value;
+    ui->opacityThresholdText->setText(QString::number(m_settings.m_opacityThreshold));
+    // Don't applySettings while tracking, as processing an image takes a long time
+    if (!ui->opacityThreshold->isSliderDown()) {
+        applySettings();
+    }
+}
+
+void APTDemodGUI::on_opacityThreshold_sliderReleased()
+{
     applySettings();
 }
 
@@ -315,10 +447,11 @@ void APTDemodGUI::on_precipitation_clicked(bool checked)
 void APTDemodGUI::on_flip_clicked(bool checked)
 {
     m_settings.m_flip = checked;
-    if (m_settings.m_flip)
+    if (m_settings.m_flip) {
         ui->image->setAlignment(Qt::AlignBottom | Qt::AlignHCenter);
-    else
+    } else {
         ui->image->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
+    }
     applySettings();
 }
 
@@ -328,13 +461,22 @@ void APTDemodGUI::on_startStop_clicked(bool checked)
     applySettings();
 }
 
-void APTDemodGUI::on_resetDecoder_clicked()
+void APTDemodGUI::resetDecoder()
 {
-    if (m_pixmapItem != nullptr) {
+    if (m_pixmapItem != nullptr)
+    {
+        m_image = QImage();
         m_pixmapItem->setPixmap(QPixmap());
     }
     ui->imageContainer->setWindowTitle("Received image");
-    // Send message to reset decoder
+    ui->channelALabel->setText("Channel A");
+    ui->channelBLabel->setText("Channel B");
+}
+
+void APTDemodGUI::on_resetDecoder_clicked()
+{
+    resetDecoder();
+    // Send message to reset decoder to other parts of demod
     m_aptDemod->getInputMessageQueue()->push(APTDemod::MsgResetDecoder::create());
 }
 
@@ -342,7 +484,10 @@ void APTDemodGUI::on_showSettings_clicked()
 {
     APTDemodSettingsDialog dialog(&m_settings);
     if (dialog.exec() == QDialog::Accepted)
+    {
+        displayPalettes();
         applySettings();
+    }
 }
 
 // Save image to disk
@@ -356,8 +501,9 @@ void APTDemodGUI::on_saveImage_clicked()
         if (fileNames.size() > 0)
         {
             qDebug() << "APT: Saving image to " << fileNames;
-            if (!m_image.save(fileNames[0]))
+            if (!m_image.save(fileNames[0])) {
                 QMessageBox::critical(this, "APT Demodulator", QString("Failed to save image to %1").arg(fileNames[0]));
+            }
         }
     }
 }
@@ -489,9 +635,27 @@ APTDemodGUI::APTDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_zoom = new GraphicsViewZoom(ui->image); // Deleted automatically when view is deleted
     connect(m_zoom, SIGNAL(zoomed()), this, SLOT(on_image_zoomed()));
 
+    // Create slightly transparent white background so labels can be seen
+    m_tempScale = new TempScale();
+    m_tempScale->setZValue(2.0);
+    m_tempScale->setVisible(false);
+    QRectF rect = m_tempScale->rect();
+    m_tempScaleBG = new QGraphicsRectItem(rect.left()-10, rect.top()-15, rect.width()+60, rect.height()+45);
+    m_tempScaleBG->setPen(QColor(200, 200, 200, 200));
+    m_tempScaleBG->setBrush(QColor(200, 200, 200, 200));
+    m_tempScaleBG->setZValue(1.0);
+    m_tempScaleBG->setVisible(false);
+    m_tempText = new QGraphicsSimpleTextItem("");
+    m_tempText->setZValue(3.0);
+    m_tempText->setVisible(false);
     m_scene = new QGraphicsScene(ui->image);
+    m_scene->addItem(m_tempScale);
+    m_scene->addItem(m_tempScaleBG);
+    m_scene->addItem(m_tempText);
     ui->image->setScene(m_scene);
     ui->image->show();
+
+    m_scene->installEventFilter(this);
 
     displaySettings();
     applySettings(true);
@@ -500,6 +664,55 @@ APTDemodGUI::APTDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 APTDemodGUI::~APTDemodGUI()
 {
     delete ui;
+}
+
+bool APTDemodGUI::eventFilter(QObject *obj, QEvent *event)
+{
+    if ((obj == m_scene) && (m_settings.m_channels == APTDemodSettings::TEMPERATURE))
+    {
+        if (event->type() == QEvent::GraphicsSceneMouseMove)
+        {
+            QGraphicsSceneMouseEvent *mouseEvent = static_cast<QGraphicsSceneMouseEvent *>(event);
+            // Find temperature under cursor
+            int x = round(mouseEvent->scenePos().x());
+            int y = round(mouseEvent->scenePos().y());
+            if ((x >= 0) && (y >= 0) && (x < m_image.width()) && (y < m_image.height()))
+            {
+                // Map from colored temperature pixel back to greyscale level
+                // This is perhaps a bit slow - might be better to give GUI access to greyscale image as well
+                QRgb p = m_image.pixel(x, y);
+                int r = qRed(p);
+                int g = qGreen(p);
+                int b = qBlue(p);
+                int i;
+                for (i = 0; i < 256; i++)
+                {
+                    if (   (r == (unsigned char)apt_TempPalette[i*3])
+                        && (g == (unsigned char)apt_TempPalette[i*3+1])
+                        && (b == (unsigned char)apt_TempPalette[i*3+2]))
+                    {
+                        // Map from palette index to degrees C
+                        int temp = (i / 255.0) * 160.0 - 100.0;
+                        m_tempText->setText(QString("%1C").arg(temp));
+                        int width = m_tempText->boundingRect().width();
+                        int height = m_tempText->boundingRect().height();
+                        QRectF rect = m_tempScaleBG->rect();
+                        m_tempText->setPos(rect.left()+rect.width()/2-width/2, rect.top()+rect.height()-height-5);
+                        m_tempText->setVisible(true);
+                        break;
+                    }
+                }
+                if (i == 256) {
+                    m_tempText->setVisible(false);
+                }
+            }
+            else
+            {
+                m_tempText->setVisible(false);
+            }
+        }
+    }
+    return ChannelGUI::eventFilter(obj, event);
 }
 
 void APTDemodGUI::blockApplySettings(bool block)
@@ -538,6 +751,11 @@ void APTDemodGUI::displaySettings()
     ui->fmDevText->setText(QString("%1k").arg(m_settings.m_fmDeviation / 1000.0, 0, 'f', 1));
     ui->fmDev->setValue(m_settings.m_fmDeviation / 100.0);
 
+    ui->transparencyThreshold->setValue(m_settings.m_transparencyThreshold);
+    ui->transparencyThresholdText->setText(QString::number(m_settings.m_transparencyThreshold));
+    ui->opacityThreshold->setValue(m_settings.m_opacityThreshold);
+    ui->opacityThresholdText->setText(QString::number(m_settings.m_opacityThreshold));
+
     ui->startStop->setChecked(m_settings.m_decodeEnabled);
     ui->cropNoise->setChecked(m_settings.m_cropNoise);
     ui->denoise->setChecked(m_settings.m_denoise);
@@ -552,12 +770,36 @@ void APTDemodGUI::displaySettings()
         ui->image->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
     }
 
-    ui->channels->setCurrentIndex((int)m_settings.m_channels);
-
+    displayPalettes();
+    displayLabels();
     displayStreamIndex();
 
     restoreState(m_rollupState);
     blockApplySettings(false);
+}
+
+void APTDemodGUI::displayPalettes()
+{
+    ui->channels->blockSignals(true);
+    ui->channels->clear();
+    ui->channels->addItem("Both");
+    ui->channels->addItem("A");
+    ui->channels->addItem("B");
+    ui->channels->addItem("Temperature");
+    for (auto palette : m_settings.m_palettes)
+    {
+        QFileInfo fi(palette);
+        ui->channels->addItem(fi.baseName());
+    }
+    if (m_settings.m_channels == APTDemodSettings::PALETTE)
+    {
+        ui->channels->setCurrentIndex(((int)m_settings.m_channels) + m_settings.m_palette);
+    }
+    else
+    {
+        ui->channels->setCurrentIndex((int)m_settings.m_channels);
+    }
+    ui->channels->blockSignals(false);
 }
 
 void APTDemodGUI::displayStreamIndex()
@@ -597,4 +839,48 @@ void APTDemodGUI::tick()
     }
 
     m_tickCount++;
+}
+
+void APTDemodGUI::on_deleteImageFromMap_clicked()
+{
+    // If more than one image, pop up a dialog to select which to delete
+    if (m_mapImages.size() > 1)
+    {
+        APTDemodSelectDialog dialog(m_mapImages, this);
+        if (dialog.exec() == QDialog::Accepted)
+        {
+            for (auto name : dialog.getSelected())
+            {
+                deleteImageFromMap(name);
+                m_mapImages.removeAll(name);
+            }
+        }
+    }
+    else
+    {
+        for (auto name : m_mapImages) {
+            deleteImageFromMap(name);
+        }
+        m_mapImages.clear();
+    }
+}
+
+void APTDemodGUI::deleteImageFromMap(const QString &name)
+{
+    MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
+    QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(m_aptDemod, "mapitems");
+    if (mapMessageQueues)
+    {
+        QList<MessageQueue*>::iterator it = mapMessageQueues->begin();
+        for (; it != mapMessageQueues->end(); ++it)
+        {
+            SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
+            swgMapItem->setName(new QString(name));
+            swgMapItem->setImage(new QString());  // Set image to "" to delete it
+            swgMapItem->setType(1);
+
+            MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_aptDemod, swgMapItem);
+            (*it)->push(msg);
+        }
+    }
 }

@@ -27,7 +27,7 @@
 
 class Serializable;
 
-#define SAT_COL_COLUMNS 16
+#define SAT_COL_COLUMNS 18
 
 struct SatelliteTrackerSettings
 {
@@ -76,6 +76,10 @@ struct SatelliteTrackerSettings
     QString m_losCommand;               //!< Command/script to execute on LOS
     bool m_chartsDarkTheme;             //!< Set dark theme for charts (effective for GUI only)
     QHash<QString, QList<SatelliteDeviceSettings *> *> m_deviceSettings; //!< Settings for each device set for each satellite
+    bool m_replayEnabled;               //!< Replay a pass in the past, by setting date and time to m_replayStartDateTime
+    QDateTime m_replayStartDateTime;    //!< Time to start the replay at
+    bool m_useFileInputTime;            //!< Get time from FileInput device
+    bool m_sendTimeToMap;               //!< Send time to map when start pressed
 
     int m_columnIndexes[SAT_COL_COLUMNS];//!< How the columns are ordered in the table
     int m_columnSizes[SAT_COL_COLUMNS];  //!< Size of the coumns in the table

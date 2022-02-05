@@ -48,6 +48,18 @@ void APTDemodSettings::resetToDefaults()
     m_autoSave = false;
     m_autoSavePath = "";
     m_autoSaveMinScanLines = 200;
+    m_saveCombined = true;
+    m_saveSeparate = false;
+    m_saveProjection = false;
+    m_scanlinesPerImageUpdate = 20;
+    m_transparencyThreshold = 100;
+    m_opacityThreshold = 200;
+    m_palettes.clear();
+    m_palette = 0;
+    m_horizontalPixelsPerDegree = 10;
+    m_verticalPixelsPerDegree = 20;
+    m_satTimeOffset = 0.0f;
+    m_satYaw = 0.0f;
 
     m_rgbColor = QColor(216, 112, 169).rgb();
     m_title = "APT Demodulator";
@@ -79,6 +91,8 @@ QByteArray APTDemodSettings::serialize() const
     s.writeBool(15, m_autoSave);
     s.writeString(16, m_autoSavePath);
     s.writeS32(17, m_autoSaveMinScanLines);
+    s.writeBool(18, m_saveProjection);
+    s.writeS32(19, m_scanlinesPerImageUpdate);
 
     if (m_channelMarker) {
         s.writeBlob(20, m_channelMarker->serialize());
@@ -95,6 +109,17 @@ QByteArray APTDemodSettings::serialize() const
     if (m_rollupState) {
         s.writeBlob(28, m_rollupState->serialize());
     }
+
+    s.writeBool(29, m_saveCombined);
+    s.writeBool(30, m_saveSeparate);
+    s.writeS32(31, m_transparencyThreshold);
+    s.writeS32(32, m_opacityThreshold);
+    s.writeString(33, m_palettes.join(";"));
+    s.writeS32(34, m_palette);
+    s.writeS32(35, m_horizontalPixelsPerDegree);
+    s.writeS32(36, m_verticalPixelsPerDegree);
+    s.writeFloat(37, m_satTimeOffset);
+    s.writeFloat(38, m_satYaw);
 
     return s.final();
 }
@@ -132,6 +157,8 @@ bool APTDemodSettings::deserialize(const QByteArray& data)
         d.readBool(15, &m_autoSave, false);
         d.readString(16, &m_autoSavePath, "");
         d.readS32(17, &m_autoSaveMinScanLines, 200);
+        d.readBool(18, &m_saveProjection, false);
+        d.readS32(19, &m_scanlinesPerImageUpdate, 20);
 
         if (m_channelMarker)
         {
@@ -161,6 +188,19 @@ bool APTDemodSettings::deserialize(const QByteArray& data)
             d.readBlob(28, &bytetmp);
             m_rollupState->deserialize(bytetmp);
         }
+
+        d.readBool(29, &m_saveCombined, true);
+        d.readBool(30, &m_saveSeparate, false);
+        d.readS32(31, &m_transparencyThreshold, 100);
+        d.readS32(32, &m_opacityThreshold, 200);
+        d.readString(33, &strtmp);
+        m_palettes = strtmp.split(";");
+        m_palettes.removeAll("");
+        d.readS32(34, &m_palette, 0);
+        d.readS32(35, &m_horizontalPixelsPerDegree, 10);
+        d.readS32(36, &m_verticalPixelsPerDegree, 20);
+        d.readFloat(37, &m_satTimeOffset, 0.0f);
+        d.readFloat(38, &m_satYaw, 0.0f);
 
         return true;
     }

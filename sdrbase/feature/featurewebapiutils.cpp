@@ -56,6 +56,36 @@ bool FeatureWebAPIUtils::mapFind(const QString& target, int featureSetIndex, int
     }
 }
 
+// Set the date and time the map uses for display
+bool FeatureWebAPIUtils::mapSetDateTime(const QDateTime& dateTime, int featureSetIndex, int featureIndex)
+{
+    Feature *feature = FeatureWebAPIUtils::getFeature(featureSetIndex, featureIndex, "sdrangel.feature.map");
+    if (feature != nullptr)
+    {
+        QString errorMessage;
+        QStringList featureActionKeys = {"setDateTime"};
+        SWGSDRangel::SWGFeatureActions query;
+        SWGSDRangel::SWGMapActions *mapActions = new SWGSDRangel::SWGMapActions();
+
+        mapActions->setSetDateTime(new QString(dateTime.toString(Qt::ISODateWithMs)));
+        query.setMapActions(mapActions);
+
+        int httpRC = feature->webapiActionsPost(featureActionKeys, query, errorMessage);
+        if (httpRC/100 != 2)
+        {
+            qWarning() << "FeatureWebAPIUtils::mapSetDateTime: error " << httpRC << ":" << errorMessage;
+            return false;
+        }
+
+        return true;
+    }
+    else
+    {
+        qWarning("FeatureWebAPIUtils::mapSetDateTime: no Map feature");
+        return false;
+    }
+}
+
 // Get first feature with the given URI
 Feature* FeatureWebAPIUtils::getFeature(int featureSetIndex, int featureIndex, const QString& uri)
 {
@@ -102,6 +132,7 @@ Feature* FeatureWebAPIUtils::getFeature(int featureSetIndex, int featureIndex, c
 }
 
 // Send AOS actions to all features that support it
+// See also: ChannelWebAPIUtils::satelliteAOS
 bool FeatureWebAPIUtils::satelliteAOS(const QString name, const QDateTime aos, const QDateTime los)
 {
     std::vector<FeatureSet*>& featureSets = MainCore::instance()->getFeatureeSets();

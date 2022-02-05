@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <script src="/Cesium/Cesium.js"></script>
+    <style>
+      @import url(/Cesium/Widgets/widgets.css);
+      html,
+      body,
+      #cesiumContainer {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+    </style>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
+    />
+</head>
+<body style="margin:0;padding:0">
+  <div id="cesiumContainer"></div>
+  <script>
+
+    // See: https://community.cesium.com/t/how-to-run-an-animation-for-an-entity-model/16932
+    function getActiveAnimations(viewer, entity) {
+        var primitives = viewer.scene.primitives;
+        var length = primitives.length;
+        for(var i = 0; i < length; i++) {
+            var primitive = primitives.get(i);
+            if (primitive.id === entity && primitive instanceof Cesium.Model && primitive.ready) {
+                return primitive.activeAnimations;
+            }
+        }
+        return undefined;
+    }
+
+    function playAnimation(viewer, command, retries) {
+        var entity = czmlStream.entities.getById(command.id);
+        if (entity !== undefined) {
+            var animations = getActiveAnimations(viewer, entity);
+            if (animations !== undefined) {
+                try {
+                    let options = {
+                        name: command.animation,
+                        startOffset: command.startOffset,
+                        reverse: command.reverse,
+                        loop: command.loop ? Cesium.ModelAnimationLoop.REPEAT : Cesium.ModelAnimationLoop.NONE,
+                        multiplier: command.multiplier,
+                    };
+                    options.startTime = Cesium.JulianDate.fromIso8601(command.startDateTime);
+                    // https://github.com/CesiumGS/cesium/issues/10048
+                    // Animations aren't moved to last frame if startTime in the past
+                    // so just play now, in order to ensure gears are down, etc
+                    if (Cesium.JulianDate.compare(options.startTime, viewer.clock.currentTime) < 0) {
+                        options.startTime = viewer.clock.currentTime;
+                    }
+                    if (command.duration != 0) {
+                        options.stopTime = Cesium.JulianDate.addSeconds(options.startTime, command.duration, new Cesium.JulianDate());
+                    }
+                    animations.add(options);
+                } catch (e) {
+                    // Note we get TypeError instead of DeveloperError, if running minified version of Cesium
+                    if ((e instanceof Cesium.DeveloperError) || (e instanceof TypeError)) {
+                        // ADS-B plugin doesn't know which animations each aircraft has
+                        // so we should expect a lot of these, as it tries to start slat animations
+                        // on aircraft that do not have them
+                        console.log(`Exception playing ${command.animation} for ${command.id}\n${e}`);
+                    } else {
+                        throw e;
+                    }
+                }
+            } else {
+                // Give Entity time to create primitive
+                // No ready promise in entity API - https://github.com/CesiumGS/cesium/issues/4727
+                if (retries > 0) {
+                    setTimeout(function() {
+                        //console.log(`Retrying animation for entity ${command.id}`);
+                        playAnimation(viewer, command, retries-1);
+                    }, 1000);
+                } else {
+                    console.log(`Gave up trying to play animation for entity ${command.id}`);
+                }
+            }
+        } else {
+            // It seems in some cases, entities aren't created immediately, so wait and retry
+            if (retries > 0) {
+                setTimeout(function() {
+                    //console.log(`Retrying entity ${command.id}`);
+                    playAnimation(viewer, command, retries-1);
+                }, 1000);
+            } else {
+                console.log(`Gave up trying to find entity ${command.id}`);
+            }
+        }
+    }
+
+    // There's no way to stop a looped animation that doesn't have a stopTime,
+    // only remove it
+    // So we need to remove it, then re-add it with a new stopTime, so that it
+    // plays again if the timeline is changed
+    function stopAnimation(viewer, command) {
+        var entity = czmlStream.entities.getById(command.id);
+        if (entity !== undefined) {
+            var animations = getActiveAnimations(viewer, entity);
+            if (animations !== undefined) {
+                var length = animations.length;
+                var anim = undefined;
+                // Find animation with lastet startTime
+                for (var i = 0; i < length; i++) {
+                    var a = animations.get(i);
+                    if (a.name == command.animation) {
+                        if ((anim === undefined) || (Cesium.JulianDate.compare(a.startTime, anim.startTime) >= 0)) {
+                            anim = a;
+                        }
+                    }
+                }
+                if (anim !== undefined) {
+                    animations.remove(anim);
+                    // Re add with new stopTime
+                    animations.add({
+                        name: anim.name,
+                        startOffset: anim.startOffset,
+                        reverse: anim.reverse,
+                        loop: anim.loop,
+                        multiplier: anim.multiplier,
+                        startTime: anim.startTime,
+                        stopTime: Cesium.JulianDate.fromIso8601(command.startDateTime)
+                    });
+                }
+            }
+        }
+    }
+
+    function icrf(scene, time) {
+        if (scene.mode !== Cesium.SceneMode.SCENE3D) {
+            return;
+        }
+        var icrfToFixed = Cesium.Transforms.computeIcrfToFixedMatrix(time);
+        if (Cesium.defined(icrfToFixed)) {
+            var camera = viewer.camera;
+            var offset = Cesium.Cartesian3.clone(camera.position);
+            var transform = Cesium.Matrix4.fromRotationTranslation(icrfToFixed);
+            camera.lookAtTransform(transform, offset);
+        }
+    }
+
+    Cesium.Ion.defaultAccessToken = '$CESIUM_ION_API_KEY$';
+
+    const viewer = new Cesium.Viewer('cesiumContainer', {
+        terrainProvider: Cesium.createWorldTerrain(),
+        animation: true,
+        shouldAnimate: true,
+        timeline: true,
+        geocoder: false,
+        fullscreenButton: true,
+        navigationHelpButton: false,
+        navigationInstructionsInitiallyVisible: false
+    });
+    var buildings = undefined;
+    const images = new Map();
+
+    // Use CZML to stream data from Map plugin to Cesium
+    var czmlStream = new Cesium.CzmlDataSource();
+
+    viewer.dataSources.add(czmlStream);
+
+    function cameraLight(scene, time) {
+        viewer.scene.light.direction = Cesium.Cartesian3.clone(scene.camera.directionWC, viewer.scene.light.direction);
+    }
+
+    // Use WebSockets for handling commands from MapPlugin
+    // (CZML doesn't support camera control, for example)
+    // and sending events back to it
+    let socket = new WebSocket("ws://127.0.0.1:$WS_PORT$");
+
+    socket.onmessage = function(event) {
+        try {
+            const command = JSON.parse(event.data);
+
+            if (command.command == "trackId") {
+                // Track an entity with the given ID
+                viewer.trackedEntity = czmlStream.entities.getById(command.id);
+            } else if (command.command == "setHomeView") {
+                // Set the viewing rectangle used when the home button is pressed
+                Cesium.Camera.DEFAULT_VIEW_RECTANGLE = Cesium.Rectangle.fromDegrees(
+                    command.longitude - command.angle,
+                    command.latitude - command.angle,
+                    command.longitude + command.angle,
+                    command.latitude + command.angle
+                    );
+                Cesium.Camera.DEFAULT_VIEW_FACTOR = 0.0;
+                viewer.camera.flyHome(0);
+            } else if (command.command == "setView") {
+                // Set the camera view
+                viewer.scene.camera.setView({
+                    destination: Cesium.Cartesian3.fromDegrees(command.longitude, command.latitude, command.altitude),
+                    orientation: {
+                        heading: 0,
+                    },
+                });
+            } else if (command.command == "playAnimation") {
+                // Play model animation
+                if (command.stop) {
+                    //console.log(`stopping animation ${command.animation} for ${command.id}`);
+                    stopAnimation(viewer, command);
+                } else {
+                    //console.log(`playing animation ${command.animation} for ${command.id}`);
+                    playAnimation(viewer, command, 30);
+                }
+            } else if (command.command == "setDateTime") {
+                 // Set current date and time of viewer
+                 var dateTime = Cesium.JulianDate.fromIso8601(command.dateTime);
+                 viewer.clock.currentTime = dateTime;
+            } else if (command.command == "getDateTime") {
+                 // Get current date and time of viewer
+                 socket.send(JSON.stringify({
+                     command: "getDateTime",
+                     dateTime: Cesium.JulianDate.toIso8601(viewer.clock.currentTime)
+                 }));
+            } else if (command.command == "setTerrain") {
+                // Support using Ellipsoid terrain for performance and also
+                // because paths can't be clammped to ground, so AIS paths
+                // currently appear underground if terrain is used
+                if (command.provider == "Ellipsoid") {
+                    if (!(viewer.terrainProvider instanceof Cesium.EllipsoidTerrainProvider)) {
+                        viewer.terrainProvider = new Cesium.EllipsoidTerrainProvider();
+                    }
+                } else if (command.provider == "Cesium World Terrain") {
+                    viewer.terrainProvider = Cesium.createWorldTerrain();
+                } else if (command.provider == "CesiumTerrainProvider") {
+                    viewer.terrainProvider = new Cesium.CesiumTerrainProvider({
+                        url: command.url
+                    });
+                } else if (command.provider == "ArcGISTiledElevationTerrainProvider") {
+                    viewer.terrainProvider = new Cesium.ArcGISTiledElevationTerrainProvider({
+                        url: command.url
+                    });
+                } else {
+                    console.log(`Unknown terrain ${command.terrain}`);
+                }
+            } else if (command.command == "setBuildings") {
+                if (command.buildings == "None") {
+                    if (buildings !== undefined) {
+                        viewer.scene.primitives.remove(buildings);
+                        buildings = undefined;
+                    }
+                } else {
+                    if (buildings === undefined) {
+                        buildings = viewer.scene.primitives.add(Cesium.createOsmBuildings());
+                    }
+                }
+            } else if (command.command == "setSunLight") {
+                // Enable illumination of the globe from the direction of the Sun or camera
+                viewer.scene.globe.enableLighting = command.useSunLight;
+                viewer.scene.globe.nightFadeOutDistance = 0.0;
+                if (!command.useSunLight) {
+                    viewer.scene.light = new Cesium.DirectionalLight({
+                        direction : new Cesium.Cartesian3(1, 0, 0)
+                    });
+                    viewer.scene.preRender.addEventListener(cameraLight);
+                } else {
+                    viewer.scene.light = new Cesium.SunLight();
+                    viewer.scene.preRender.removeEventListener(cameraLight);
+                }
+            } else if (command.command == "setCameraReferenceFrame") {
+                if (command.eci) {
+                    viewer.scene.postUpdate.addEventListener(icrf);
+                } else {
+                    viewer.scene.postUpdate.removeEventListener(icrf);
+                }
+            } else if (command.command == "setAntiAliasing") {
+                if (command.antiAliasing == "FXAA") {
+                    viewer.scene.postProcessStages.fxaa.enabled = true;
+                } else {
+                    viewer.scene.postProcessStages.fxaa.enabled = false;
+                }
+            } else if (command.command == "updateImage") {
+
+                // Textures on entities can flash white when changed: https://github.com/CesiumGS/cesium/issues/1640
+                // so we use a primitive instead of an entity
+                // Can't modify geometry of primitives, so need to create a new primitive each time
+                // Material needs to be set as translucent in order to allow camera to zoom through it
+                var oldImage = images.get(command.name);
+                var image = viewer.scene.primitives.add(new Cesium.Primitive({
+                    geometryInstances : new Cesium.GeometryInstance({
+                        geometry : new Cesium.RectangleGeometry({
+                            rectangle : Cesium.Rectangle.fromDegrees(command.west, command.south, command.east, command.north),
+                            vertexFormat : Cesium.EllipsoidSurfaceAppearance.VERTEX_FORMAT,
+                            height: command.altitude
+                        })
+                    }),
+                    appearance : new Cesium.EllipsoidSurfaceAppearance({
+                        aboveGround : false,
+                        material: new Cesium.Material({
+                            fabric: {
+                                type: 'Image',
+                                uniforms: {
+                                    image: 'data:image/png;base64,' + command.data,
+                                }
+                            },
+                            translucent: true
+                        })
+                    })
+                }));
+                images.set(command.name, image);
+                if (oldImage !== undefined) {
+                    image.readyPromise.then(function(prim) {
+                        viewer.scene.primitives.remove(oldImage);
+                    });
+                }
+            } else if (command.command == "removeImage") {
+                var image = images.get(command.name);
+                if (image !== undefined) {
+                    viewer.scene.primitives.remove(image);
+                } else {
+                    console.log(`Can't find image ${command.name} to remove it`);
+                }
+            } else if (command.command == "removeAllImages") {
+                for (let [k,image] of images) {
+                    viewer.scene.primitives.remove(image);
+                }
+            } else if (command.command == "removeAllCZMLEntities") {
+                czmlStream.entities.removeAll();
+            } else if (command.command == "czml") {
+                // Implement CLIP_TO_GROUND, to work around https://github.com/CesiumGS/cesium/issues/4049
+                if (command.hasOwnProperty('altitudeReference') && command.hasOwnProperty('position') && command.position.hasOwnProperty('cartographicDegrees')) {
+                    var size = command.position.cartographicDegrees.length;
+                    if ((size == 3) || (size == 4)) {
+                        var position;
+                        var height;
+                        if (size == 3) {
+                            position = Cesium.Cartographic.fromDegrees(command.position.cartographicDegrees[0], command.position.cartographicDegrees[1]);
+                            height = command.position.cartographicDegrees[2];
+                        } else if (size == 4) {
+                            position = Cesium.Cartographic.fromDegrees(command.position.cartographicDegrees[1], command.position.cartographicDegrees[2]);
+                            height = command.position.cartographicDegrees[3];
+                        }
+                        if (viewer.terrainProvider instanceof Cesium.EllipsoidTerrainProvider) {
+                            // sampleTerrainMostDetailed will reject Ellipsoid.
+                            if (height < 0) {
+                                if (size == 3) {
+                                    command.position.cartographicDegrees[2] = 0;
+                                } else if (size == 4) {
+                                    command.position.cartographicDegrees[3] = 0;
+                                }
+                            }
+                            czmlStream.process(command);
+                        } else {
+                            var promise = Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, [position]);
+                            Cesium.when(promise, function(updatedPositions) {
+                                if (height < updatedPositions[0].height) {
+                                    if (size == 3) {
+                                        command.position.cartographicDegrees[2] = updatedPositions[0].height;
+                                    } else if (size == 4) {
+                                        command.position.cartographicDegrees[3] = updatedPositions[0].height;
+                                    }
+                                }
+                                czmlStream.process(command);
+                            }, function() {
+                                console.log(`Terrain doesn't support sampleTerrainMostDetailed`);
+                                czmlStream.process(command);
+                            });
+                        };
+                    } else {
+                        console.log(`Can't currently use altitudeReference when more than one position`);
+                        czmlStream.process(command);
+                    }
+                } else {
+                    czmlStream.process(command);
+                }
+
+            } else {
+                console.log(`Unknown command ${command.command}`);
+            }
+
+        } catch(e) {
+            console.log(`Erroring processing received message:\n${e}\n${event.data}`);
+        }
+    };
+
+    viewer.selectedEntityChanged.addEventListener(function(selectedEntity) {
+        if (Cesium.defined(selectedEntity) && Cesium.defined(selectedEntity.id)) {
+            socket.send(JSON.stringify({event: "selected", id: selectedEntity.id}));
+        } else {
+            socket.send(JSON.stringify({event: "selected"}));
+        }
+    });
+
+    viewer.trackedEntityChanged.addEventListener(function(trackedEntity) {
+        if (Cesium.defined(trackedEntity) && Cesium.defined(trackedEntity.id)) {
+            socket.send(JSON.stringify({event: "tracking", id: trackedEntity.id}));
+        } else {
+            socket.send(JSON.stringify({event: "tracking"}));
+        }
+    });
+
+  </script>
+ </div>
+</body>
+</html>

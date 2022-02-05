@@ -171,6 +171,7 @@
 #include "SWGLocationInformation.h"
 #include "SWGLoggingInfo.h"
 #include "SWGMapActions.h"
+#include "SWGMapAnimation.h"
 #include "SWGMapCoordinate.h"
 #include "SWGMapItem.h"
 #include "SWGMapItem_2.h"
@@ -1097,6 +1098,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGMapActions").compare(type) == 0) {
       SWGMapActions *obj = new SWGMapActions();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGMapAnimation").compare(type) == 0) {
+      SWGMapAnimation *obj = new SWGMapAnimation();
       obj->init();
       return obj;
     }

@@ -17,8 +17,10 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QColor>
+#include <QDebug>
 
 #include "util/simpleserializer.h"
+#include "util/httpdownloadmanager.h"
 #include "settings/serializable.h"
 
 #include "mapsettings.h"
@@ -27,6 +29,7 @@ const QStringList MapSettings::m_pipeTypes = {
     QStringLiteral("ADSBDemod"),
     QStringLiteral("AIS"),
     QStringLiteral("APRS"),
+    QStringLiteral("APTDemod"),
     QStringLiteral("StarTracker"),
     QStringLiteral("SatelliteTracker")
 };
@@ -35,6 +38,7 @@ const QStringList MapSettings::m_pipeURIs = {
     QStringLiteral("sdrangel.channel.adsbdemod"),
     QStringLiteral("sdrangel.feature.ais"),
     QStringLiteral("sdrangel.feature.aprs"),
+    QStringLiteral("sdrangel.channel.aptdemod"),
     QStringLiteral("sdrangel.feature.startracker"),
     QStringLiteral("sdrangel.feature.satellitetracker")
 };
@@ -44,13 +48,31 @@ const QStringList MapSettings::m_mapProviders = {
     QStringLiteral("osm"),
     QStringLiteral("esri"),
     QStringLiteral("mapbox"),
-    QStringLiteral("mapboxgl")
+    QStringLiteral("mapboxgl"),
+    QStringLiteral("maplibre")
 };
 
 MapSettings::MapSettings() :
     m_rollupState(nullptr)
 {
+    // Source names should match m_pipeTypes
+    // Colors currently match color of rollup widget for that plugin
+    int modelMinPixelSize = 50;
+    m_itemSettings.insert("ADSBDemod", new MapItemSettings("ADSBDemod", QColor(244, 151, 57), false, 11, modelMinPixelSize));
+    m_itemSettings.insert("AIS", new MapItemSettings("AIS", QColor(102, 0, 0), false, 11, modelMinPixelSize));
+    m_itemSettings.insert("APRS", new MapItemSettings("APRS", QColor(255, 255, 0), false, 11));
+    m_itemSettings.insert("StarTracker", new MapItemSettings("StarTracker", QColor(230, 230, 230), true, 3));
+    m_itemSettings.insert("SatelliteTracker", new MapItemSettings("SatelliteTracker", QColor(0, 0, 255), false, 0, modelMinPixelSize));
+    m_itemSettings.insert("Beacons", new MapItemSettings("Beacons", QColor(255, 0, 0), true, 8));
+    m_itemSettings.insert("Radio Time Transmitters", new MapItemSettings("Radio Time Transmitters", QColor(255, 0, 0), true, 8));
+    m_itemSettings.insert("Radar", new MapItemSettings("Radar", QColor(255, 0, 0), true, 8));
+    m_itemSettings.insert("Station", new MapItemSettings("Station", QColor(255, 0, 0), true, 11));
     resetToDefaults();
+}
+
+MapSettings::~MapSettings()
+{
+    //qDeleteAll(m_itemSettings);
 }
 
 void MapSettings::resetToDefaults()
@@ -62,11 +84,8 @@ void MapSettings::resetToDefaults()
     m_mapBoxAPIKey = "";
     m_osmURL = "";
     m_mapBoxStyles = "";
-    m_sources = -1;
     m_displaySelectedGroundTracks = true;
     m_displayAllGroundTracks = true;
-    m_groundTrackColor = QColor(150, 0, 20).rgb();
-    m_predictedGroundTrackColor = QColor(225, 0, 50).rgb();
     m_title = "Map";
     m_rgbColor = QColor(225, 25, 99).rgb();
     m_useReverseAPI = false;
@@ -74,6 +93,14 @@ void MapSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIFeatureSetIndex = 0;
     m_reverseAPIFeatureIndex = 0;
+    m_map2DEnabled = true;
+    m_map3DEnabled = true;
+    m_terrain = "Cesium World Terrain";
+    m_buildings = "None";
+    m_sunLightEnabled = true;
+    m_eciCamera = false;
+    m_modelDir = HttpDownloadManager::downloadDir() + "/3d";
+    m_antiAliasing = "None";
 }
 
 QByteArray MapSettings::serialize() const
@@ -84,9 +111,6 @@ QByteArray MapSettings::serialize() const
     s.writeString(2, m_mapProvider);
     s.writeString(3, m_mapBoxAPIKey);
     s.writeString(4, m_mapBoxStyles);
-    s.writeU32(5, m_sources);
-    s.writeU32(6, m_groundTrackColor);
-    s.writeU32(7, m_predictedGroundTrackColor);
     s.writeString(8, m_title);
     s.writeU32(9, m_rgbColor);
     s.writeBool(10, m_useReverseAPI);
@@ -104,6 +128,17 @@ QByteArray MapSettings::serialize() const
     }
 
     s.writeString(20, m_osmURL);
+    s.writeString(21, m_mapType);
+    s.writeBool(22, m_map2DEnabled);
+    s.writeBool(23, m_map3DEnabled);
+    s.writeString(24, m_terrain);
+    s.writeString(25, m_buildings);
+    s.writeBlob(27, serializeItemSettings(m_itemSettings));
+    s.writeString(28, m_modelDir);
+    s.writeBool(29, m_sunLightEnabled);
+    s.writeBool(30, m_eciCamera);
+    s.writeString(31, m_cesiumIonAPIKey);
+    s.writeString(32, m_antiAliasing);
 
     return s.final();
 }
@@ -123,14 +158,12 @@ bool MapSettings::deserialize(const QByteArray& data)
         QByteArray bytetmp;
         uint32_t utmp;
         QString strtmp;
+        QByteArray blob;
 
         d.readBool(1, &m_displayNames, true);
         d.readString(2, &m_mapProvider, "osm");
         d.readString(3, &m_mapBoxAPIKey, "");
         d.readString(4, &m_mapBoxStyles, "");
-        d.readU32(5, &m_sources, -1);
-        d.readU32(6, &m_groundTrackColor, QColor(150, 0, 20).rgb());
-        d.readU32(7, &m_predictedGroundTrackColor, QColor(225, 0, 50).rgb());
         d.readString(8, &m_title, "Map");
         d.readU32(9, &m_rgbColor, QColor(225, 25, 99).rgb());
         d.readBool(10, &m_useReverseAPI, false);
@@ -159,6 +192,19 @@ bool MapSettings::deserialize(const QByteArray& data)
         }
 
         d.readString(20, &m_osmURL, "");
+        d.readString(21, &m_mapType, "");
+
+        d.readBool(22, &m_map2DEnabled, true);
+        d.readBool(23, &m_map3DEnabled, true);
+        d.readString(24, &m_terrain, "Cesium World Terrain");
+        d.readString(25, &m_buildings, "None");
+        d.readBlob(27, &blob);
+        deserializeItemSettings(blob, m_itemSettings);
+        d.readString(28, &m_modelDir, HttpDownloadManager::downloadDir() + "/3d");
+        d.readBool(29, &m_sunLightEnabled, true);
+        d.readBool(30, &m_eciCamera, false);
+        d.readString(31, &m_cesiumIonAPIKey, "");
+        d.readString(32, &m_antiAliasing, "None");
 
         return true;
     }
@@ -167,4 +213,148 @@ bool MapSettings::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+MapSettings::MapItemSettings::MapItemSettings(const QString& group,
+                                              const QColor color,
+                                              bool display3DPoint,
+                                              int minZoom,
+                                              int modelMinPixelSize)
+{
+    m_group = group;
+    resetToDefaults();
+    m_3DPointColor = color.rgb();
+    m_2DTrackColor = color.darker().rgb();
+    m_3DTrackColor = color.darker().rgb();
+    m_display3DPoint = display3DPoint;
+    m_2DMinZoom = minZoom;
+    m_3DModelMinPixelSize = modelMinPixelSize;
+}
+
+MapSettings::MapItemSettings::MapItemSettings(const QByteArray& data)
+{
+    deserialize(data);
+}
+
+void MapSettings::MapItemSettings::resetToDefaults()
+{
+    m_enabled = true;
+    m_display2DIcon = true;
+    m_display2DLabel = true;
+    m_display2DTrack = true;
+    m_2DTrackColor = QColor(150, 0, 20).rgb();
+    m_2DMinZoom = 1;
+    m_display3DModel = true;
+    m_display3DPoint = false;
+    m_3DPointColor = QColor(225, 0, 0).rgb();
+    m_display3DLabel = true;
+    m_display3DTrack = true;
+    m_3DTrackColor = QColor(150, 0, 20).rgb();
+    m_3DModelMinPixelSize = 0;
+}
+
+QByteArray MapSettings::MapItemSettings::serialize() const
+{
+    SimpleSerializer s(1);
+
+    s.writeString(1, m_group);
+    s.writeBool(2, m_enabled);
+    s.writeBool(3, m_display2DIcon);
+    s.writeBool(4, m_display2DLabel);
+    s.writeBool(5, m_display2DTrack);
+    s.writeU32(6, m_2DTrackColor);
+    s.writeS32(7, m_2DMinZoom);
+    s.writeBool(8, m_display3DModel);
+    s.writeBool(9, m_display3DLabel);
+    s.writeBool(10, m_display3DPoint);
+    s.writeU32(11, m_3DPointColor);
+    s.writeBool(12, m_display3DTrack);
+    s.writeU32(13, m_3DTrackColor);
+    s.writeS32(14, m_3DModelMinPixelSize);
+
+    return s.final();
+}
+
+bool MapSettings::MapItemSettings::deserialize(const QByteArray& data)
+{
+    SimpleDeserializer d(data);
+
+    if (!d.isValid())
+    {
+        resetToDefaults();
+        return false;
+    }
+
+    if (d.getVersion() == 1)
+    {
+        d.readString(1, &m_group, "");
+        d.readBool(2, &m_enabled, true);
+        d.readBool(3, &m_display2DIcon, true);
+        d.readBool(4, &m_display2DLabel, true);
+        d.readBool(5, &m_display2DTrack, true);
+        d.readU32(6, &m_2DTrackColor, QColor(150, 0, 0).rgb());
+        d.readS32(7, &m_2DMinZoom, 1);
+        d.readBool(8, &m_display3DModel, true);
+        d.readBool(9, &m_display3DLabel, true);
+        d.readBool(10, &m_display3DPoint, true);
+        d.readU32(11, &m_3DPointColor, QColor(255, 0, 0).rgb());
+        d.readBool(12, &m_display3DTrack, true);
+        d.readU32(13, &m_3DTrackColor, QColor(150, 0, 20).rgb());
+        d.readS32(14, &m_3DModelMinPixelSize, 0);
+        return true;
+    }
+    else
+    {
+        resetToDefaults();
+        return false;
+    }
+}
+
+QByteArray MapSettings::serializeItemSettings(QHash<QString, MapItemSettings *> itemSettings) const
+{
+    SimpleSerializer s(1);
+
+    int idx = 1;
+    QHashIterator<QString, MapItemSettings *> i(itemSettings);
+    while (i.hasNext())
+    {
+        i.next();
+
+        s.writeString(idx+1, i.key());
+        s.writeBlob(idx+2, i.value()->serialize());
+
+        idx += 2;
+    }
+
+    return s.final();
+}
+
+void MapSettings::deserializeItemSettings(const QByteArray& data, QHash<QString, MapItemSettings *>& itemSettings)
+{
+    SimpleDeserializer d(data);
+
+    if (!d.isValid()) {
+        return;
+    }
+
+    int idx = 1;
+    bool done = false;
+    do
+    {
+        QString key;
+        QByteArray blob;
+
+        if (!d.readString(idx+1, &key))
+        {
+            done = true;
+        }
+        else
+        {
+            d.readBlob(idx+2, &blob);
+            MapItemSettings *settings = new MapItemSettings(blob);
+            itemSettings.insert(key, settings);
+        }
+
+        idx += 2;
+    } while(!done);
 }
