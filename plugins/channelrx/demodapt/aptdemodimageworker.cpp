@@ -381,11 +381,11 @@ void APTDemodImageWorker::calcCoord(int row)
 {
     if (row == 0)
     {
-        QStringList tle = m_settings.m_tle.trimmed().split("\n");
-        if (tle.size() == 3)
+        QStringList elements = m_settings.m_tle.trimmed().split("\n");
+        if (elements.size() == 3)
         {
             // Initalise SGP4
-            Tle tle(tle[0].toStdString(), tle[1].toStdString(), tle[2].toStdString());
+            Tle tle(elements[0].toStdString(), elements[1].toStdString(), elements[2].toStdString());
             m_sgp4 = new SGP4(tle);
 
             // Output time so we can check time offset from when AOS is signalled
