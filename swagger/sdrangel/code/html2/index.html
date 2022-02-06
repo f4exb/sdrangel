@@ -1489,6 +1489,14 @@ margin-bottom: 20px;
     "northToSouthPass" : {
       "type" : "integer",
       "description" : "Satellite is passing from the North to the South (1) or South to North (0)"
+    },
+    "tle" : {
+      "type" : "string",
+      "description" : "Two line elements for satellite"
+    },
+    "dateTime" : {
+      "type" : "string",
+      "description" : "Date and time of AOS (May differ from system clock when replaying old passes)"
     }
   },
   "description" : "Acquisition of signal"
@@ -1507,59 +1515,110 @@ margin-bottom: 20px;
     "inputFrequencyOffset" : {
       "type" : "integer",
       "format" : "int64",
-      "description" : "channel center frequency shift from baseband center in Hz"
+      "description" : "Channel center frequency shift from baseband center in Hz"
     },
     "rfBandwidth" : {
       "type" : "number",
       "format" : "float",
-      "description" : "channel RF bandwidth in Hz"
+      "description" : "Channel RF bandwidth in Hz"
     },
     "fmDeviation" : {
       "type" : "integer",
-      "description" : "frequency deviation in Hz"
+      "description" : "Frequency deviation in Hz"
     },
     "cropNoise" : {
       "type" : "integer",
-      "description" : "crop noise from top and bottom of image"
+      "description" : "Crop noise from top and bottom of image"
     },
     "denoise" : {
       "type" : "integer",
-      "description" : "apply denoise filter to image"
+      "description" : "Apply denoise filter to image"
     },
     "linearEqualise" : {
       "type" : "integer",
-      "description" : "apply linear equalisation to image"
+      "description" : "Apply linear equalisation to image"
     },
     "histogramEqualise" : {
       "type" : "integer",
-      "description" : "apply histogram equalisation to image"
+      "description" : "Apply histogram equalisation to image"
     },
     "precipitationOverlay" : {
       "type" : "integer",
-      "description" : "create colour overlay of precipitation"
+      "description" : "Create colour overlay of precipitation"
     },
     "flip" : {
       "type" : "integer",
-      "description" : "flip image for South to North passes"
+      "description" : "Flip image for South to North passes"
     },
     "channels" : {
       "type" : "integer",
-      "description" : "which channel to display (0=both, 1=A, 2=B)"
+      "description" : "Which channel to display (0=both, 1=A, 2=B, 3=Temperature, 4+=palette)"
     },
     "decodeEnabled" : {
       "type" : "integer",
-      "description" : "controls whether the decoder is enabled"
+      "description" : "Controls whether the decoder is enabled"
     },
     "autoSave" : {
       "type" : "integer",
-      "description" : "automatically save images when acquisition is stopped"
+      "description" : "Automatically save images when acquisition is stopped"
     },
     "autoSavePath" : {
       "type" : "string",
-      "description" : "directory to automatically save images in"
+      "description" : "Directory to automatically save images in"
     },
     "autoSaveMinScanLines" : {
-      "type" : "integer"
+      "type" : "integer",
+      "description" : "Minimum number of scanlines (after cropping) for an image to be automatically saved"
+    },
+    "saveCombined" : {
+      "type" : "integer",
+      "description" : "Save image with channels A and B"
+    },
+    "saveSeparate" : {
+      "type" : "integer",
+      "description" : "Save channel A and B as separate image files"
+    },
+    "saveProjection" : {
+      "type" : "integer",
+      "description" : "Save equidistant cylindrical projection of image"
+    },
+    "scanlinesPerImageUpdate" : {
+      "type" : "integer",
+      "description" : "Interval in scanlines between image processing and projection"
+    },
+    "transparencyThreshold" : {
+      "type" : "integer",
+      "description" : "Threshold below which pixels will be fully transparent (0-255)"
+    },
+    "opacityThreshold" : {
+      "type" : "integer",
+      "description" : "Threshold above which pixels will be fully opaque (0-255)"
+    },
+    "palettes" : {
+      "type" : "string",
+      "description" : "; separated list of 256x256 image files that can be used as colour maps"
+    },
+    "palette" : {
+      "type" : "integer",
+      "description" : "Index in to palletes. Used when channels=4"
+    },
+    "horizontalPixelsPerDegree" : {
+      "type" : "integer",
+      "description" : "Horizontal pixels per degree longitude in projected image"
+    },
+    "verticalPixelsPerDegree" : {
+      "type" : "integer",
+      "description" : "Vertical pixels per degree latitude in projected image"
+    },
+    "satTimeOffset" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Time offset in seconds, for aligning image on map"
+    },
+    "satYaw" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Yaw angle offset in degrees, for aligning image on map"
     },
     "rgbColor" : {
       "type" : "integer"
@@ -7777,23 +7836,77 @@ margin-bottom: 20px;
     "find" : {
       "type" : "string",
       "description" : "The name of the item or the location to centre the map on"
+    },
+    "setDateTime" : {
+      "type" : "string",
+      "description" : "Date and time to set for the map (ISO 8601 extended format)"
     }
   },
   "description" : "Map"
+};
+            defs.MapAnimation = {
+  "properties" : {
+    "name" : {
+      "type" : "string",
+      "description" : "Name of animation to play (As in .glb/.glTF file)"
+    },
+    "reverse" : {
+      "type" : "integer",
+      "description" : "(0 - Forward, 1 - Reverse)"
+    },
+    "loop" : {
+      "type" : "integer",
+      "description" : "(0 - Play once, 1 - Play in loop)"
+    },
+    "startDateTime" : {
+      "type" : "string",
+      "description" : "Date and time to start playing this animation (ISO 8601 extended format)"
+    },
+    "startOffset" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Fractional [0..1] offset in to animations timeline to start animation at",
+      "default" : 0.0
+    },
+    "multiplier" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Speed multiplier for animation. >1 plays faster",
+      "default" : 1.0
+    },
+    "duration" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Time in seconds to play animation for. 0 to play whole animation",
+      "default" : 0.0
+    },
+    "stop" : {
+      "type" : "integer",
+      "description" : "Stop a looped animation from playing"
+    }
+  },
+  "description" : "Animation to play in the model on the 3D map"
 };
             defs.MapCoordinate = {
   "properties" : {
     "latitude" : {
       "type" : "number",
-      "format" : "float"
+      "format" : "float",
+      "description" : "Latitude in decimal degrees, positive to the North"
     },
     "longitude" : {
       "type" : "number",
-      "format" : "float"
+      "format" : "float",
+      "description" : "Longitude in decimal degrees, positive to the East"
     },
     "altitude" : {
       "type" : "number",
-      "format" : "float"
+      "format" : "float",
+      "description" : "Altitude / height above sea level in metres"
+    },
+    "dateTime" : {
+      "type" : "string",
+      "description" : "Date and time at this coordinate (ISO 8601 extended format)"
     }
   },
   "description" : "A map coordinate"
@@ -7807,15 +7920,11 @@ margin-bottom: 20px;
     },
     "image" : {
       "type" : "string",
-      "description" : "Filename or URL of image to draw on the map"
+      "description" : "Filename or URL of image to draw on the 2D map"
     },
     "imageRotation" : {
       "type" : "integer",
       "description" : "Angle to rotate the image by"
-    },
-    "imageMinZoom" : {
-      "type" : "integer",
-      "description" : "Minimim zoom value"
     },
     "text" : {
       "type" : "string"
@@ -7823,17 +7932,25 @@ margin-bottom: 20px;
     "latitude" : {
       "type" : "number",
       "format" : "float",
-      "description" : "Latitude in decimal degrees, positive to the north"
+      "description" : "Latitude in decimal degrees, positive to the North"
     },
     "longitude" : {
       "type" : "number",
       "format" : "float",
-      "description" : "Longitude in decimal degrees, positive to the east"
+      "description" : "Longitude in decimal degrees, positive to the East"
     },
     "altitude" : {
       "type" : "number",
       "format" : "float",
       "description" : "Altitude / height above sea level in metres"
+    },
+    "fixedPosition" : {
+      "type" : "integer",
+      "description" : "Indicates whether position of item is constant with time (0 - variable, 1 - fixed)"
+    },
+    "positionDateTime" : {
+      "type" : "string",
+      "description" : "Date and time at this position (ISO 8601 extended format)"
     },
     "track" : {
       "type" : "array",
@@ -7848,6 +7965,78 @@ margin-bottom: 20px;
       "items" : {
         "$ref" : "#/definitions/MapCoordinate"
       }
+    },
+    "model" : {
+      "type" : "string",
+      "description" : "3D .glb/*.gltf model for displaying on 3D map"
+    },
+    "orientation" : {
+      "type" : "integer",
+      "description" : "How to orientate the model (0 - Along direction of motion, 1 - Use heading, pitch and roll)"
+    },
+    "heading" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Heading angle, in decimal degrees clockwise from North"
+    },
+    "pitch" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Pitch angle, in decimal degrees"
+    },
+    "roll" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Roll angle, in decimal degrees"
+    },
+    "orientationDateTime" : {
+      "type" : "string",
+      "description" : "Date and time at this orientation (ISO 8601 extended format)"
+    },
+    "label" : {
+      "type" : "string",
+      "description" : "Label for the model"
+    },
+    "labelAltitudeOffset" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Veritical offset to position label at"
+    },
+    "modelAltitudeOffset" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Vertical offset to adjust model by to prevent it from going underground when altitude is 0"
+    },
+    "altitudeReference" : {
+      "type" : "integer",
+      "description" : "0 - NONE (Absolule), 1 - CLAMP_TO_GROUND, 2 - RELATIVE_TO_GROUND, 3 - CLIP_TO_GROUND"
+    },
+    "animations" : {
+      "type" : "array",
+      "description" : "Animations to play",
+      "items" : {
+        "$ref" : "#/definitions/MapAnimation"
+      }
+    },
+    "type" : {
+      "type" : "integer",
+      "description" : "(0 - Map Item, 1 - Image Tile)"
+    },
+    "imageTileWest" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "imageTileSouth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "imageTileEast" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "imageTileNorth" : {
+      "type" : "number",
+      "format" : "float"
     }
   },
   "description" : "An item to draw on the map. Set image to an empty string to remove item from the map."
@@ -7861,15 +8050,11 @@ margin-bottom: 20px;
     },
     "image" : {
       "type" : "string",
-      "description" : "Filename or URL of image to draw on the map"
+      "description" : "Filename or URL of image to draw on the 2D map"
     },
     "imageRotation" : {
       "type" : "integer",
       "description" : "Angle to rotate the image by"
-    },
-    "imageMinZoom" : {
-      "type" : "integer",
-      "description" : "Minimim zoom value"
     },
     "text" : {
       "type" : "string"
@@ -7877,17 +8062,25 @@ margin-bottom: 20px;
     "latitude" : {
       "type" : "number",
       "format" : "float",
-      "description" : "Latitude in decimal degrees, positive to the north"
+      "description" : "Latitude in decimal degrees, positive to the North"
     },
     "longitude" : {
       "type" : "number",
       "format" : "float",
-      "description" : "Longitude in decimal degrees, positive to the east"
+      "description" : "Longitude in decimal degrees, positive to the East"
     },
     "altitude" : {
       "type" : "number",
       "format" : "float",
       "description" : "Altitude / height above sea level in metres"
+    },
+    "fixedPosition" : {
+      "type" : "integer",
+      "description" : "Indicates whether position of item is constant with time (0 - variable, 1 - fixed)"
+    },
+    "positionDateTime" : {
+      "type" : "string",
+      "description" : "Date and time at this position (ISO 8601 extended format)"
     },
     "track" : {
       "type" : "array",
@@ -7902,6 +8095,78 @@ margin-bottom: 20px;
       "items" : {
         "$ref" : "#/definitions/MapCoordinate"
       }
+    },
+    "model" : {
+      "type" : "string",
+      "description" : "3D .glb/*.gltf model for displaying on 3D map"
+    },
+    "orientation" : {
+      "type" : "integer",
+      "description" : "How to orientate the model (0 - Along direction of motion, 1 - Use heading, pitch and roll)"
+    },
+    "heading" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Heading angle, in decimal degrees clockwise from North"
+    },
+    "pitch" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Pitch angle, in decimal degrees"
+    },
+    "roll" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Roll angle, in decimal degrees"
+    },
+    "orientationDateTime" : {
+      "type" : "string",
+      "description" : "Date and time at this orientation (ISO 8601 extended format)"
+    },
+    "label" : {
+      "type" : "string",
+      "description" : "Label for the model"
+    },
+    "labelAltitudeOffset" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Veritical offset to position label at"
+    },
+    "modelAltitudeOffset" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Vertical offset to adjust model by to prevent it from going underground when altitude is 0"
+    },
+    "altitudeReference" : {
+      "type" : "integer",
+      "description" : "0 - NONE (Absolule), 1 - CLAMP_TO_GROUND, 2 - RELATIVE_TO_GROUND, 3 - CLIP_TO_GROUND"
+    },
+    "animations" : {
+      "type" : "array",
+      "description" : "Animations to play",
+      "items" : {
+        "$ref" : "#/definitions/MapAnimation"
+      }
+    },
+    "type" : {
+      "type" : "integer",
+      "description" : "(0 - Map Item, 1 - Image Tile)"
+    },
+    "imageTileWest" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "imageTileSouth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "imageTileEast" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "imageTileNorth" : {
+      "type" : "number",
+      "format" : "float"
     }
   },
   "description" : "An item to draw on the map. Set image to an empty string to remove item from the map."
@@ -52004,7 +52269,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2022-02-05T07:11:11.381+01:00
+              Generated 2022-02-06T00:22:44.703+01:00
             </div>
           </div>
       </div>
