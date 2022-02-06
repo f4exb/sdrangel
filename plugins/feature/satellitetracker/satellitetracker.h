@@ -28,6 +28,7 @@
 
 #include "satellitetrackersettings.h"
 #include "satnogs.h"
+#include "satellitetrackersgp4.h"
 
 class WebAPIAdapterInterface;
 class SatelliteTrackerWorker;
@@ -187,6 +188,8 @@ private:
     bool m_firstUpdateSatData;
 
     QDateTime m_startedDateTime;
+
+    QHash<QString, SatelliteState *> m_satState;
 
     void start();
     void stop();

@@ -35,6 +35,7 @@
 #include "feature/featurewebapiutils.h"
 
 #include "satellitetrackerworker.h"
+#include "satellitetrackerreport.h"
 #include "satellitetracker.h"
 
 MESSAGE_CLASS_DEFINITION(SatelliteTracker::MsgConfigureSatelliteTracker, Message)
@@ -72,6 +73,7 @@ SatelliteTracker::~SatelliteTracker()
     }
 
     delete m_worker;
+    qDeleteAll(m_satState);
 }
 
 void SatelliteTracker::start()
@@ -141,6 +143,21 @@ bool SatelliteTracker::handleMessage(const Message& cmd)
         }
         else
             updateSatData();
+        return true;
+    }
+    else if (SatelliteTrackerReport::MsgReportSat::match(cmd))
+    {
+        // Save latest satellite state for Web report
+        SatelliteTrackerReport::MsgReportSat& satReport = (SatelliteTrackerReport::MsgReportSat&) cmd;
+        SatelliteState *satState = satReport.getSatelliteState();
+        if (m_satState.contains(satState->m_name))
+        {
+            delete m_satState.value(satState->m_name);
+            m_satState.remove(satState->m_name);
+        }
+        if (m_settings.m_satellites.contains(satState->m_name)) {
+            m_satState.insert(satState->m_name, satState);
+        }
         return true;
     }
     else
@@ -333,6 +350,19 @@ void SatelliteTracker::applySettings(const SatelliteTrackerSettings& settings, b
             readSatData();
         else
             updateSatData();
+    }
+
+    // Remove unneeded satellite state
+    QMutableHashIterator<QString, SatelliteState *> itr(m_satState);
+    while (itr.hasNext())
+    {
+        itr.next();
+        SatelliteState *satState = itr.value();
+        if (!m_settings.m_satellites.contains(satState->m_name))
+        {
+            delete satState;
+            itr.remove();
+        }
     }
 }
 
@@ -843,6 +873,36 @@ void SatelliteTracker::webapiReverseSendSettings(QList<QString>& featureSettings
 void SatelliteTracker::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response)
 {
     response.getSatelliteTrackerReport()->setRunningState(getState());
+    QList<SWGSDRangel::SWGSatelliteState *> *list = response.getSatelliteTrackerReport()->getSatelliteState();
+    QHashIterator<QString, SatelliteState *> itr(m_satState);
+    while (itr.hasNext())
+    {
+        itr.next();
+        SatelliteState *satState = itr.value();
+        SWGSDRangel::SWGSatelliteState *swgSatState = new SWGSDRangel::SWGSatelliteState();
+        swgSatState->setName(new QString(satState->m_name));
+        swgSatState->setLatitude(satState->m_latitude);
+        swgSatState->setLongitude(satState->m_longitude);
+        swgSatState->setAltitude(satState->m_altitude);
+        swgSatState->setAzimuth(satState->m_azimuth);
+        swgSatState->setElevation(satState->m_elevation);
+        swgSatState->setRange(satState->m_range);
+        swgSatState->setRangeRate(satState->m_rangeRate);
+        swgSatState->setSpeed(satState->m_speed);
+        swgSatState->setPeriod(satState->m_period);
+        swgSatState->setElevation(satState->m_elevation);
+        QList<SWGSDRangel::SWGSatellitePass *> *passesList = new QList<SWGSDRangel::SWGSatellitePass*>();
+        for (auto pass : satState->m_passes)
+        {
+            SWGSDRangel::SWGSatellitePass *swgPass = new SWGSDRangel::SWGSatellitePass();
+            swgPass->setAos(new QString(pass->m_aos.toString(Qt::ISODateWithMs)));
+            swgPass->setLos(new QString(pass->m_los.toString(Qt::ISODateWithMs)));
+            swgPass->setMaxElevation(pass->m_maxElevation);
+            passesList->append(swgPass);
+        }
+        swgSatState->setPasses(passesList);
+        list->append(swgSatState);
+    }
 }
 
 void SatelliteTracker::networkManagerFinished(QNetworkReply *reply)

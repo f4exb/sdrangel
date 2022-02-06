@@ -11,56 +11,61 @@
  */
 
 /*
- * SWGSatelliteTrackerReport.h
+ * SWGSatellitePass.h
  *
- * Satellite Tracker report
+ * 
  */
 
-#ifndef SWGSatelliteTrackerReport_H_
-#define SWGSatelliteTrackerReport_H_
+#ifndef SWGSatellitePass_H_
+#define SWGSatellitePass_H_
 
 #include <QJsonObject>
 
 
-#include "SWGSatelliteState.h"
-#include <QList>
+#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
 
 namespace SWGSDRangel {
 
-class SWG_API SWGSatelliteTrackerReport: public SWGObject {
+class SWG_API SWGSatellitePass: public SWGObject {
 public:
-    SWGSatelliteTrackerReport();
-    SWGSatelliteTrackerReport(QString* json);
-    virtual ~SWGSatelliteTrackerReport();
+    SWGSatellitePass();
+    SWGSatellitePass(QString* json);
+    virtual ~SWGSatellitePass();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGSatelliteTrackerReport* fromJson(QString &jsonString) override;
+    virtual SWGSatellitePass* fromJson(QString &jsonString) override;
 
-    qint32 getRunningState();
-    void setRunningState(qint32 running_state);
+    QString* getAos();
+    void setAos(QString* aos);
 
-    QList<SWGSatelliteState*>* getSatelliteState();
-    void setSatelliteState(QList<SWGSatelliteState*>* satellite_state);
+    QString* getLos();
+    void setLos(QString* los);
+
+    float getMaxElevation();
+    void setMaxElevation(float max_elevation);
 
 
     virtual bool isSet() override;
 
 private:
-    qint32 running_state;
-    bool m_running_state_isSet;
+    QString* aos;
+    bool m_aos_isSet;
 
-    QList<SWGSatelliteState*>* satellite_state;
-    bool m_satellite_state_isSet;
+    QString* los;
+    bool m_los_isSet;
+
+    float max_elevation;
+    bool m_max_elevation_isSet;
 
 };
 
 }
 
-#endif /* SWGSatelliteTrackerReport_H_ */
+#endif /* SWGSatellitePass_H_ */

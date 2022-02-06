@@ -497,6 +497,10 @@ void SatelliteTrackerWorker::update()
                 // Send to GUI
                 if (getMessageQueueToGUI())
                     getMessageQueueToGUI()->push(SatelliteTrackerReport::MsgReportSat::create(new SatelliteState(satWorkerState->m_satState)));
+
+                // Sent to Feature for Web report
+                if (m_msgQueueToFeature)
+                    m_msgQueueToFeature->push(SatelliteTrackerReport::MsgReportSat::create(new SatelliteState(satWorkerState->m_satState)));
             }
             else
                 qDebug() << "SatelliteTrackerWorker::update: No TLE for " << sat->m_name << ". Can't compute position.";
