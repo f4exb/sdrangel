@@ -160,8 +160,8 @@ void DATVideoRender::resetMetaData()
 bool DATVideoRender::preprocessStream()
 {
     AVDictionary *opts = nullptr;
-    AVCodec *videoCodec = nullptr;
-    AVCodec *audioCodec = nullptr;
+    const AVCodec *videoCodec = nullptr;
+    const AVCodec *audioCodec = nullptr;
 
     int intRet = -1;
     char *buffer = nullptr;
