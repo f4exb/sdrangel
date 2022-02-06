@@ -485,3 +485,8 @@ target_link_libraries(sdrbase
 )
 
 install(TARGETS sdrbase DESTINATION ${INSTALL_LIB_DIR})
+
+# Install debug symbols
+if (WIN32)
+    install(FILES $<TARGET_PDB_FILE:sdrbase> CONFIGURATIONS Debug RelWithDebInfo DESTINATION ${INSTALL_LIB_DIR} )
+endif()

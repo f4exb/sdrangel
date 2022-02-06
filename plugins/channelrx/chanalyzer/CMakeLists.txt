@@ -26,15 +26,23 @@ include_directories(
 	${Boost_INCLUDE_DIRS}
 )
 
-add_library(chanalyzer SHARED
+set(TARGET_NAME chanalyzer)
+set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
+
+add_library(${TARGET_NAME} SHARED
 	${chanalyzer_SOURCES}
 )
 
-target_link_libraries(chanalyzer
+target_link_libraries(${TARGET_NAME}
     Qt5::Core
     Qt5::Widgets
 	sdrbase
 	sdrgui
 )
 
-install(TARGETS chanalyzer DESTINATION ${INSTALL_PLUGINS_DIR})
+install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
+
+# Install debug symbols
+if (WIN32)
+    install(FILES $<TARGET_PDB_FILE:${TARGET_NAME}> CONFIGURATIONS Debug RelWithDebInfo DESTINATION ${INSTALL_FOLDER} )
+endif()
