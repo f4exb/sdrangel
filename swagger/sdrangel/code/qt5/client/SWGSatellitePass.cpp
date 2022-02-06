@@ -11,7 +11,7 @@
  */
 
 
-#include "SWGSatelliteTrackerReport.h"
+#include "SWGSatellitePass.h"
 
 #include "SWGHelpers.h"
 
@@ -22,44 +22,47 @@
 
 namespace SWGSDRangel {
 
-SWGSatelliteTrackerReport::SWGSatelliteTrackerReport(QString* json) {
+SWGSatellitePass::SWGSatellitePass(QString* json) {
     init();
     this->fromJson(*json);
 }
 
-SWGSatelliteTrackerReport::SWGSatelliteTrackerReport() {
-    running_state = 0;
-    m_running_state_isSet = false;
-    satellite_state = nullptr;
-    m_satellite_state_isSet = false;
+SWGSatellitePass::SWGSatellitePass() {
+    aos = nullptr;
+    m_aos_isSet = false;
+    los = nullptr;
+    m_los_isSet = false;
+    max_elevation = 0.0f;
+    m_max_elevation_isSet = false;
 }
 
-SWGSatelliteTrackerReport::~SWGSatelliteTrackerReport() {
+SWGSatellitePass::~SWGSatellitePass() {
     this->cleanup();
 }
 
 void
-SWGSatelliteTrackerReport::init() {
-    running_state = 0;
-    m_running_state_isSet = false;
-    satellite_state = new QList<SWGSatelliteState*>();
-    m_satellite_state_isSet = false;
+SWGSatellitePass::init() {
+    aos = new QString("");
+    m_aos_isSet = false;
+    los = new QString("");
+    m_los_isSet = false;
+    max_elevation = 0.0f;
+    m_max_elevation_isSet = false;
 }
 
 void
-SWGSatelliteTrackerReport::cleanup() {
-
-    if(satellite_state != nullptr) { 
-        auto arr = satellite_state;
-        for(auto o: *arr) { 
-            delete o;
-        }
-        delete satellite_state;
+SWGSatellitePass::cleanup() {
+    if(aos != nullptr) { 
+        delete aos;
     }
+    if(los != nullptr) { 
+        delete los;
+    }
+
 }
 
-SWGSatelliteTrackerReport*
-SWGSatelliteTrackerReport::fromJson(QString &json) {
+SWGSatellitePass*
+SWGSatellitePass::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -68,15 +71,17 @@ SWGSatelliteTrackerReport::fromJson(QString &json) {
 }
 
 void
-SWGSatelliteTrackerReport::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&running_state, pJson["runningState"], "qint32", "");
+SWGSatellitePass::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&aos, pJson["aos"], "QString", "QString");
     
+    ::SWGSDRangel::setValue(&los, pJson["los"], "QString", "QString");
     
-    ::SWGSDRangel::setValue(&satellite_state, pJson["satelliteState"], "QList", "SWGSatelliteState");
+    ::SWGSDRangel::setValue(&max_elevation, pJson["maxElevation"], "float", "");
+    
 }
 
 QString
-SWGSatelliteTrackerReport::asJson ()
+SWGSatellitePass::asJson ()
 {
     QJsonObject* obj = this->asJsonObject();
 
@@ -87,47 +92,63 @@ SWGSatelliteTrackerReport::asJson ()
 }
 
 QJsonObject*
-SWGSatelliteTrackerReport::asJsonObject() {
+SWGSatellitePass::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if(m_running_state_isSet){
-        obj->insert("runningState", QJsonValue(running_state));
+    if(aos != nullptr && *aos != QString("")){
+        toJsonValue(QString("aos"), aos, obj, QString("QString"));
     }
-    if(satellite_state && satellite_state->size() > 0){
-        toJsonArray((QList<void*>*)satellite_state, obj, "satelliteState", "SWGSatelliteState");
+    if(los != nullptr && *los != QString("")){
+        toJsonValue(QString("los"), los, obj, QString("QString"));
+    }
+    if(m_max_elevation_isSet){
+        obj->insert("maxElevation", QJsonValue(max_elevation));
     }
 
     return obj;
 }
 
-qint32
-SWGSatelliteTrackerReport::getRunningState() {
-    return running_state;
+QString*
+SWGSatellitePass::getAos() {
+    return aos;
 }
 void
-SWGSatelliteTrackerReport::setRunningState(qint32 running_state) {
-    this->running_state = running_state;
-    this->m_running_state_isSet = true;
+SWGSatellitePass::setAos(QString* aos) {
+    this->aos = aos;
+    this->m_aos_isSet = true;
 }
 
-QList<SWGSatelliteState*>*
-SWGSatelliteTrackerReport::getSatelliteState() {
-    return satellite_state;
+QString*
+SWGSatellitePass::getLos() {
+    return los;
 }
 void
-SWGSatelliteTrackerReport::setSatelliteState(QList<SWGSatelliteState*>* satellite_state) {
-    this->satellite_state = satellite_state;
-    this->m_satellite_state_isSet = true;
+SWGSatellitePass::setLos(QString* los) {
+    this->los = los;
+    this->m_los_isSet = true;
+}
+
+float
+SWGSatellitePass::getMaxElevation() {
+    return max_elevation;
+}
+void
+SWGSatellitePass::setMaxElevation(float max_elevation) {
+    this->max_elevation = max_elevation;
+    this->m_max_elevation_isSet = true;
 }
 
 
 bool
-SWGSatelliteTrackerReport::isSet(){
+SWGSatellitePass::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_running_state_isSet){
+        if(aos && *aos != QString("")){
             isObjectUpdated = true; break;
         }
-        if(satellite_state && (satellite_state->size() > 0)){
+        if(los && *los != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_max_elevation_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

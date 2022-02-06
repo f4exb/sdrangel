@@ -11,56 +11,111 @@
  */
 
 /*
- * SWGSatelliteTrackerReport.h
+ * SWGSatelliteState.h
  *
- * Satellite Tracker report
+ * 
  */
 
-#ifndef SWGSatelliteTrackerReport_H_
-#define SWGSatelliteTrackerReport_H_
+#ifndef SWGSatelliteState_H_
+#define SWGSatelliteState_H_
 
 #include <QJsonObject>
 
 
-#include "SWGSatelliteState.h"
+#include "SWGSatellitePass.h"
 #include <QList>
+#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
 
 namespace SWGSDRangel {
 
-class SWG_API SWGSatelliteTrackerReport: public SWGObject {
+class SWG_API SWGSatelliteState: public SWGObject {
 public:
-    SWGSatelliteTrackerReport();
-    SWGSatelliteTrackerReport(QString* json);
-    virtual ~SWGSatelliteTrackerReport();
+    SWGSatelliteState();
+    SWGSatelliteState(QString* json);
+    virtual ~SWGSatelliteState();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGSatelliteTrackerReport* fromJson(QString &jsonString) override;
+    virtual SWGSatelliteState* fromJson(QString &jsonString) override;
 
-    qint32 getRunningState();
-    void setRunningState(qint32 running_state);
+    QString* getName();
+    void setName(QString* name);
 
-    QList<SWGSatelliteState*>* getSatelliteState();
-    void setSatelliteState(QList<SWGSatelliteState*>* satellite_state);
+    float getLatitude();
+    void setLatitude(float latitude);
+
+    float getLongitude();
+    void setLongitude(float longitude);
+
+    float getAltitude();
+    void setAltitude(float altitude);
+
+    float getAzimuth();
+    void setAzimuth(float azimuth);
+
+    float getElevation();
+    void setElevation(float elevation);
+
+    float getRange();
+    void setRange(float range);
+
+    float getRangeRate();
+    void setRangeRate(float range_rate);
+
+    float getSpeed();
+    void setSpeed(float speed);
+
+    float getPeriod();
+    void setPeriod(float period);
+
+    QList<SWGSatellitePass*>* getPasses();
+    void setPasses(QList<SWGSatellitePass*>* passes);
 
 
     virtual bool isSet() override;
 
 private:
-    qint32 running_state;
-    bool m_running_state_isSet;
+    QString* name;
+    bool m_name_isSet;
 
-    QList<SWGSatelliteState*>* satellite_state;
-    bool m_satellite_state_isSet;
+    float latitude;
+    bool m_latitude_isSet;
+
+    float longitude;
+    bool m_longitude_isSet;
+
+    float altitude;
+    bool m_altitude_isSet;
+
+    float azimuth;
+    bool m_azimuth_isSet;
+
+    float elevation;
+    bool m_elevation_isSet;
+
+    float range;
+    bool m_range_isSet;
+
+    float range_rate;
+    bool m_range_rate_isSet;
+
+    float speed;
+    bool m_speed_isSet;
+
+    float period;
+    bool m_period_isSet;
+
+    QList<SWGSatellitePass*>* passes;
+    bool m_passes_isSet;
 
 };
 
 }
 
-#endif /* SWGSatelliteTrackerReport_H_ */
+#endif /* SWGSatelliteState_H_ */

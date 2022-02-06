@@ -248,6 +248,8 @@
 #include "SWGSamplingDevice.h"
 #include "SWGSatelliteDeviceSettings.h"
 #include "SWGSatelliteDeviceSettingsList.h"
+#include "SWGSatellitePass.h"
+#include "SWGSatelliteState.h"
 #include "SWGSatelliteTrackerActions.h"
 #include "SWGSatelliteTrackerReport.h"
 #include "SWGSatelliteTrackerSettings.h"
@@ -1484,6 +1486,16 @@ namespace SWGSDRangel {
     }
     if(QString("SWGSatelliteDeviceSettingsList").compare(type) == 0) {
       SWGSatelliteDeviceSettingsList *obj = new SWGSatelliteDeviceSettingsList();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGSatellitePass").compare(type) == 0) {
+      SWGSatellitePass *obj = new SWGSatellitePass();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGSatelliteState").compare(type) == 0) {
+      SWGSatelliteState *obj = new SWGSatelliteState();
       obj->init();
       return obj;
     }
