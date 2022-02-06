@@ -146,7 +146,7 @@ bool SDRPlayV3Input::start()
     m_sdrPlayThread->setFcPos((int) m_settings.m_fcPos);
     m_sdrPlayThread->startWork();
 
-    m_running = true;
+    m_running = m_sdrPlayThread->isRunning();
     applySettings(m_settings, true, true);
 
     return true;

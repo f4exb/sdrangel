@@ -44,10 +44,27 @@ SDRPlayV3Thread::~SDRPlayV3Thread()
 
 void SDRPlayV3Thread::startWork()
 {
+    sdrplay_api_ErrT err;
+    sdrplay_api_CallbackFnsT cbFns;
+
+    cbFns.StreamACbFn = &SDRPlayV3Thread::callbackHelper;
+    cbFns.StreamBCbFn = &SDRPlayV3Thread::callbackHelper;
+    cbFns.EventCbFn = &SDRPlayV3Thread::eventCallback;
+
+    if ((err = sdrplay_api_Init(m_dev->dev, &cbFns, this)) != sdrplay_api_Success)
+    {
+        qCritical() << "SDRPlayV3Thread::run: sdrplay_api_Init error: " << sdrplay_api_GetErrorString(err);
+        m_running = false;
+        return;
+    }
+
     m_startWaitMutex.lock();
     start();
-    while(!m_running)
+
+    while(!m_running) {
         m_startWaiter.wait(&m_startWaitMutex, 100);
+    }
+
     m_startWaitMutex.unlock();
 }
 
@@ -58,9 +75,12 @@ void SDRPlayV3Thread::stopWork()
     if (m_running)
     {
         m_running = false;
-        if ((err = sdrplay_api_Uninit(m_dev->dev)) != sdrplay_api_Success)
+
+        if ((err = sdrplay_api_Uninit(m_dev->dev)) != sdrplay_api_Success) {
             qWarning() << "SDRPlayV3Thread::callbackHelper: sdrplay_api_Uninit error: " << sdrplay_api_GetErrorString(err);
+        }
     }
+
     wait();
 }
 
@@ -94,16 +114,6 @@ bool SDRPlayV3Thread::waitForRfChanged()
 // Don't really need a thread here - just using same structure as other plugins
 void SDRPlayV3Thread::run()
 {
-    sdrplay_api_ErrT err;
-    sdrplay_api_CallbackFnsT cbFns;
-
-    cbFns.StreamACbFn = &SDRPlayV3Thread::callbackHelper;
-    cbFns.StreamBCbFn = &SDRPlayV3Thread::callbackHelper;
-    cbFns.EventCbFn = &SDRPlayV3Thread::eventCallback;
-
-    if ((err = sdrplay_api_Init(m_dev->dev, &cbFns, this)) != sdrplay_api_Success)
-        qCritical() << "SDRPlayV3Thread::run: sdrplay_api_Init error: " << sdrplay_api_GetErrorString(err);
-
     m_running = true;
     m_startWaiter.wakeAll();
 }

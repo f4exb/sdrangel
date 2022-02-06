@@ -37,6 +37,7 @@ public:
 
     void startWork();
     void stopWork();
+    bool isRunning() const { return m_running; }
     void setSamplerate(int samplerate);
     void setLog2Decimation(unsigned int log2_decim);
     void setFcPos(int fcPos);
