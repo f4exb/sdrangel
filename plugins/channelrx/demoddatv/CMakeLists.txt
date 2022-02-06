@@ -66,18 +66,21 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
 
+set(TARGET_NAME demoddatv)
+set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
+
 if (LINUX)
-    add_library(demoddatv SHARED
+    add_library(${TARGET_NAME} SHARED
         ${datv_SOURCES}
         ${ldpc_SOURCES}
     )
 else()
-    add_library(demoddatv SHARED
+    add_library(${TARGET_NAME} SHARED
         ${datv_SOURCES}
     )
 endif()
 
-target_link_libraries(demoddatv
+target_link_libraries(${TARGET_NAME}
     Qt5::Core
     Qt5::Widgets
     Qt5::Multimedia
@@ -99,4 +102,9 @@ if (LINUX)
     install(TARGETS ldpctool DESTINATION ${INSTALL_BIN_DIR})
 endif()
 
-install(TARGETS demoddatv DESTINATION ${INSTALL_PLUGINS_DIR})
+install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
+
+# Install debug symbols
+if (WIN32)
+    install(FILES $<TARGET_PDB_FILE:${TARGET_NAME}> CONFIGURATIONS Debug RelWithDebInfo DESTINATION ${INSTALL_FOLDER} )
+endif()

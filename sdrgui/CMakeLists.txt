@@ -268,3 +268,8 @@ target_link_libraries(sdrgui
   )
 
 install(TARGETS sdrgui DESTINATION ${INSTALL_LIB_DIR})
+
+# Install debug symbols
+if (WIN32)
+    install(FILES $<TARGET_PDB_FILE:sdrgui> CONFIGURATIONS Debug RelWithDebInfo DESTINATION ${INSTALL_LIB_DIR} )
+endif()

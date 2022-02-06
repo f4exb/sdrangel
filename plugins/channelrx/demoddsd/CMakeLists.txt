@@ -71,3 +71,8 @@ target_link_libraries(${TARGET_NAME}
 )
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
+
+# Install debug symbols
+if (WIN32)
+    install(FILES $<TARGET_PDB_FILE:${TARGET_NAME}> CONFIGURATIONS Debug RelWithDebInfo DESTINATION ${INSTALL_FOLDER} )
+endif()
