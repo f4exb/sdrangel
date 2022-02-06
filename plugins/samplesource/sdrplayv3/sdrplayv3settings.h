@@ -50,6 +50,9 @@ struct SDRPlayV3Settings {
     int m_tuner;
     int m_antenna;
     bool m_extRef;
+    bool m_transverterMode;
+    bool m_iqOrder;
+	qint64 m_transverterDeltaFrequency;
     bool     m_useReverseAPI;
     QString  m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;

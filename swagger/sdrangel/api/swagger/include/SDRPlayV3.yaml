@@ -38,6 +38,17 @@ SDRPlayV3Settings:
       type: integer
     antenna:
       type: integer
+    transverterMode:
+      type: integer
+    transverterDeltaFrequency:
+      type: integer
+      format: int64
+    iqOrder:
+      type: integer
+      description: >
+        IQ samples order
+          * 0 - Q then I (swapped)
+          * 1 - I then Q (straight)
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer

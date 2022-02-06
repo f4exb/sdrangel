@@ -67,6 +67,7 @@ private:
     void updateLNAValues();
     void sendSettings();
     void updateSampleRateAndFrequency();
+    void updateFrequencyLimits();
     bool handleMessage(const Message& message);
 
 private slots:
@@ -93,6 +94,7 @@ private slots:
     void on_gainIFAGC_toggled(bool checked);
     void on_gainIF_valueChanged(int value);
     void on_startStop_toggled(bool checked);
+    void on_transverter_clicked();
     void openDeviceSettingsDialog(const QPoint& p);
 };
 

@@ -41,6 +41,7 @@ public:
     void setSamplerate(int samplerate);
     void setLog2Decimation(unsigned int log2_decim);
     void setFcPos(int fcPos);
+    void setIQOrder(bool iqOrder) { m_iqOrder = iqOrder; }
 
     void resetRfChanged();
     bool waitForRfChanged();
@@ -57,14 +58,17 @@ private:
     int m_samplerate;
     unsigned int m_log2Decim;
     int m_fcPos;
+    bool m_iqOrder;
 
     int m_rfChanged;
     static const unsigned int m_rfChangedTimeout = 500;
 
     Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 16, true> m_decimatorsIQ;
+    Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 16, false> m_decimatorsQI;
 
     void run();
     void callbackIQ(const qint16* buf, qint32 len);
+    void callbackQI(const qint16* buf, qint32 len);
 
     static void callbackHelper(short *xi, short *xq, sdrplay_api_StreamCbParamsT *params, unsigned int numSamples, unsigned int reset, void *ctx);
     static void eventCallback(sdrplay_api_EventT eventId, sdrplay_api_TunerSelectT tuner, sdrplay_api_EventParamsT *params, void *cbContext);

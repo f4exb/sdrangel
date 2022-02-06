@@ -47,6 +47,9 @@ void SDRPlayV3Settings::resetToDefaults()
     m_tuner = 0;
     m_antenna = 0;
     m_extRef = false;
+    m_transverterMode = false;
+    m_iqOrder = true;
+	m_transverterDeltaFrequency = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -79,6 +82,10 @@ QByteArray SDRPlayV3Settings::serialize() const
     s.writeS32(23, m_tuner);
     s.writeS32(24, m_antenna);
     s.writeBool(25, m_extRef);
+    s.writeBool(26, m_transverterMode);
+    s.writeS64(27, m_transverterDeltaFrequency);
+    s.writeBool(28, m_iqOrder);
+
     return s.final();
 }
 
@@ -128,6 +135,9 @@ bool SDRPlayV3Settings::deserialize(const QByteArray& data)
         d.readS32(23, &m_tuner, 0);
         d.readS32(24, &m_antenna, 0);
         d.readBool(25, &m_extRef, false);
+        d.readBool(26, &m_transverterMode, false);
+        d.readS64(27, &m_transverterDeltaFrequency, 0);
+        d.readBool(28, &m_iqOrder, true);
 
         return true;
     }

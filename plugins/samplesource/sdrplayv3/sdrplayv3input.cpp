@@ -429,20 +429,37 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
     if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force) {
         reverseAPIKeys.append("LOppmTenths");
     }
+    if ((m_settings.m_transverterMode != settings.m_transverterMode) || force) {
+        reverseAPIKeys.append("transverterMode");
+    }
+    if ((m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency) || force) {
+        reverseAPIKeys.append("transverterDeltaFrequency");
+    }
+
+    if ((m_settings.m_iqOrder != settings.m_iqOrder) || force)
+    {
+        reverseAPIKeys.append("iqOrder");
+
+        if (m_sdrPlayThread) {
+            m_sdrPlayThread->setIQOrder(settings.m_iqOrder);
+        }
+    }
 
     if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
         || (m_settings.m_LOppmTenths != settings.m_LOppmTenths)
         || (m_settings.m_fcPos != settings.m_fcPos)
-        || (m_settings.m_log2Decim != settings.m_log2Decim) || force)
+        || (m_settings.m_log2Decim != settings.m_log2Decim)
+        || (m_settings.m_transverterMode != settings.m_transverterMode)
+        || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency) || force)
     {
         qint64 deviceCenterFrequency = DeviceSampleSource::calculateDeviceCenterFrequency(
                 settings.m_centerFrequency,
-                0,
+                settings.m_transverterDeltaFrequency,
                 settings.m_log2Decim,
                 (DeviceSampleSource::fcPos_t) settings.m_fcPos,
                 settings.m_devSampleRate,
                 DeviceSampleSource::FrequencyShiftScheme::FSHIFT_STD,
-                false);
+                settings.m_transverterMode);
 
         forwardChange = true;
 
@@ -862,6 +879,15 @@ void SDRPlayV3Input::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("antenna")) {
         settings.m_antenna = response.getSdrPlayV3Settings()->getAntenna();
     }
+    if (deviceSettingsKeys.contains("transverterDeltaFrequency")) {
+        settings.m_transverterDeltaFrequency = response.getSdrPlayV3Settings()->getTransverterDeltaFrequency();
+    }
+    if (deviceSettingsKeys.contains("transverterMode")) {
+        settings.m_transverterMode = response.getSdrPlayV3Settings()->getTransverterMode() != 0;
+    }
+    if (deviceSettingsKeys.contains("iqOrder")) {
+        settings.m_iqOrder = response.getSdrPlayV3Settings()->getIqOrder() != 0;
+    }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getSdrPlayV3Settings()->getUseReverseApi() != 0;
     }
@@ -896,6 +922,9 @@ void SDRPlayV3Input::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& 
     response.getSdrPlayV3Settings()->setExtRef(settings.m_extRef);
     response.getSdrPlayV3Settings()->setTuner(settings.m_tuner);
     response.getSdrPlayV3Settings()->setAntenna(settings.m_antenna);
+    response.getSdrPlayV3Settings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
+    response.getSdrPlayV3Settings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
+    response.getSdrPlayV3Settings()->setIqOrder(settings.m_iqOrder ? 1 : 0);
 
     response.getSdrPlayV3Settings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
@@ -1025,6 +1054,15 @@ void SDRPlayV3Input::webapiReverseSendSettings(QList<QString>& deviceSettingsKey
     }
     if (deviceSettingsKeys.contains("antenna") || force) {
         swgSDRPlayV3Settings->setAntenna(settings.m_antenna);
+    }
+    if (deviceSettingsKeys.contains("transverterDeltaFrequency") || force) {
+        swgSDRPlayV3Settings->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
+    }
+    if (deviceSettingsKeys.contains("transverterMode") || force) {
+        swgSDRPlayV3Settings->setTransverterMode(settings.m_transverterMode ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("iqOrder") || force) {
+        swgSDRPlayV3Settings->setIqOrder(settings.m_iqOrder ? 1 : 0);
     }
 
     QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")

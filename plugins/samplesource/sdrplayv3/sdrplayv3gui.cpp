@@ -44,7 +44,7 @@ SDRPlayV3Gui::SDRPlayV3Gui(DeviceUISet *deviceUISet, QWidget* parent) :
 
     ui->setupUi(this);
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-    ui->centerFrequency->setValueRange(7, 1U, 2000000U);
+    updateFrequencyLimits();
 
     ui->ifFrequency->clear();
     for (unsigned int i = 0; i < SDRPlayV3IF::getNbIFs(); i++)
@@ -218,8 +218,28 @@ void SDRPlayV3Gui::updateSampleRateAndFrequency()
     ui->deviceRateText->setText(tr("%1k").arg((float)m_sampleRate / 1000));
 }
 
+void SDRPlayV3Gui::updateFrequencyLimits()
+{
+    // values in kHz
+    qint64 deltaFrequency = m_settings.m_transverterMode ? m_settings.m_transverterDeltaFrequency/1000 : 0;
+    qint64 minLimit = 1U + deltaFrequency;
+    qint64 maxLimit = 2000000U + deltaFrequency;
+
+    minLimit = minLimit < 0 ? 0 : minLimit > 9999999 ? 9999999 : minLimit;
+    maxLimit = maxLimit < 0 ? 0 : maxLimit > 9999999 ? 9999999 : maxLimit;
+
+    qDebug("SDRPlayV3Gui::updateFrequencyLimits: delta: %lld min: %lld max: %lld", deltaFrequency, minLimit, maxLimit);
+
+    ui->centerFrequency->setValueRange(7, minLimit, maxLimit);
+}
+
 void SDRPlayV3Gui::displaySettings()
 {
+    ui->transverter->setDeltaFrequency(m_settings.m_transverterDeltaFrequency);
+    ui->transverter->setDeltaFrequencyActive(m_settings.m_transverterMode);
+    ui->transverter->setIQOrder(m_settings.m_iqOrder);
+    updateFrequencyLimits();
+
     ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
 
     ui->ppm->setValue(m_settings.m_LOppmTenths);
@@ -469,6 +489,17 @@ void SDRPlayV3Gui::on_startStop_toggled(bool checked)
         SDRPlayV3Input::MsgStartStop *message = SDRPlayV3Input::MsgStartStop::create(checked);
         m_sdrPlayV3Input->getInputMessageQueue()->push(message);
     }
+}
+
+void SDRPlayV3Gui::on_transverter_clicked()
+{
+    m_settings.m_transverterMode = ui->transverter->getDeltaFrequencyAcive();
+    m_settings.m_transverterDeltaFrequency = ui->transverter->getDeltaFrequency();
+    m_settings.m_iqOrder = ui->transverter->getIQOrder();
+    qDebug("SDRPlayV3Gui::on_transverter_clicked: %lld Hz %s", m_settings.m_transverterDeltaFrequency, m_settings.m_transverterMode ? "on" : "off");
+    updateFrequencyLimits();
+    m_settings.m_centerFrequency = ui->centerFrequency->getValueNew()*1000;
+    sendSettings();
 }
 
 void SDRPlayV3Gui::openDeviceSettingsDialog(const QPoint& p)

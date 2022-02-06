@@ -10880,6 +10880,17 @@ margin-bottom: 20px;
     "antenna" : {
       "type" : "integer"
     },
+    "transverterMode" : {
+      "type" : "integer"
+    },
+    "transverterDeltaFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "iqOrder" : {
+      "type" : "integer",
+      "description" : "IQ samples order\n  * 0 - Q then I (swapped)\n  * 1 - I then Q (straight)\n"
+    },
     "useReverseAPI" : {
       "type" : "integer",
       "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
@@ -52269,7 +52280,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2022-02-06T00:22:44.703+01:00
+              Generated 2022-02-06T20:14:33.369+01:00
             </div>
           </div>
       </div>

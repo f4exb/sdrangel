@@ -64,6 +64,12 @@ SWGSDRPlayV3Settings::SWGSDRPlayV3Settings() {
     m_tuner_isSet = false;
     antenna = 0;
     m_antenna_isSet = false;
+    transverter_mode = 0;
+    m_transverter_mode_isSet = false;
+    transverter_delta_frequency = 0L;
+    m_transverter_delta_frequency_isSet = false;
+    iq_order = 0;
+    m_iq_order_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -116,6 +122,12 @@ SWGSDRPlayV3Settings::init() {
     m_tuner_isSet = false;
     antenna = 0;
     m_antenna_isSet = false;
+    transverter_mode = 0;
+    m_transverter_mode_isSet = false;
+    transverter_delta_frequency = 0L;
+    m_transverter_delta_frequency_isSet = false;
+    iq_order = 0;
+    m_iq_order_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -128,6 +140,9 @@ SWGSDRPlayV3Settings::init() {
 
 void
 SWGSDRPlayV3Settings::cleanup() {
+
+
+
 
 
 
@@ -200,6 +215,12 @@ SWGSDRPlayV3Settings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&tuner, pJson["tuner"], "qint32", "");
     
     ::SWGSDRangel::setValue(&antenna, pJson["antenna"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&transverter_mode, pJson["transverterMode"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&transverter_delta_frequency, pJson["transverterDeltaFrequency"], "qint64", "");
+    
+    ::SWGSDRangel::setValue(&iq_order, pJson["iqOrder"], "qint32", "");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -278,6 +299,15 @@ SWGSDRPlayV3Settings::asJsonObject() {
     }
     if(m_antenna_isSet){
         obj->insert("antenna", QJsonValue(antenna));
+    }
+    if(m_transverter_mode_isSet){
+        obj->insert("transverterMode", QJsonValue(transverter_mode));
+    }
+    if(m_transverter_delta_frequency_isSet){
+        obj->insert("transverterDeltaFrequency", QJsonValue(transverter_delta_frequency));
+    }
+    if(m_iq_order_isSet){
+        obj->insert("iqOrder", QJsonValue(iq_order));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -476,6 +506,36 @@ SWGSDRPlayV3Settings::setAntenna(qint32 antenna) {
 }
 
 qint32
+SWGSDRPlayV3Settings::getTransverterMode() {
+    return transverter_mode;
+}
+void
+SWGSDRPlayV3Settings::setTransverterMode(qint32 transverter_mode) {
+    this->transverter_mode = transverter_mode;
+    this->m_transverter_mode_isSet = true;
+}
+
+qint64
+SWGSDRPlayV3Settings::getTransverterDeltaFrequency() {
+    return transverter_delta_frequency;
+}
+void
+SWGSDRPlayV3Settings::setTransverterDeltaFrequency(qint64 transverter_delta_frequency) {
+    this->transverter_delta_frequency = transverter_delta_frequency;
+    this->m_transverter_delta_frequency_isSet = true;
+}
+
+qint32
+SWGSDRPlayV3Settings::getIqOrder() {
+    return iq_order;
+}
+void
+SWGSDRPlayV3Settings::setIqOrder(qint32 iq_order) {
+    this->iq_order = iq_order;
+    this->m_iq_order_isSet = true;
+}
+
+qint32
 SWGSDRPlayV3Settings::getUseReverseApi() {
     return use_reverse_api;
 }
@@ -572,6 +632,15 @@ SWGSDRPlayV3Settings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_antenna_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_transverter_mode_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_transverter_delta_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_iq_order_isSet){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){

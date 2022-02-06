@@ -33,7 +33,8 @@ SDRPlayV3Thread::SDRPlayV3Thread(sdrplay_api_DeviceT* dev, SampleSinkFifo* sampl
     m_sampleFifo(sampleFifo),
     m_samplerate(2000000),
     m_log2Decim(0),
-    m_fcPos(0)
+    m_fcPos(0),
+    m_iqOrder(true)
 {
 }
 
@@ -149,7 +150,11 @@ void SDRPlayV3Thread::callbackHelper(short *xi, short *xq, sdrplay_api_StreamCbP
             iq[i*2+1] = xq[i];
         }
 
-        thread->callbackIQ(iq, numSamples*2);
+        if (thread->m_iqOrder) {
+            thread->callbackIQ(iq, numSamples*2);
+        } else {
+            thread->callbackQI(iq, numSamples*2);
+        }
     }
 }
 
@@ -236,6 +241,99 @@ void SDRPlayV3Thread::callbackIQ(const qint16* buf, qint32 len)
                 break;
             case 6:
                 m_decimatorsIQ.decimate64_cen(&it, buf, len);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    m_sampleFifo->write(m_convertBuffer.begin(), it);
+}
+
+void SDRPlayV3Thread::callbackQI(const qint16* buf, qint32 len)
+{
+    SampleVector::iterator it = m_convertBuffer.begin();
+
+    if (m_log2Decim == 0)
+    {
+        m_decimatorsQI.decimate1(&it, buf, len);
+    }
+    else
+    {
+        if (m_fcPos == 0) // Infradyne
+        {
+            switch (m_log2Decim)
+            {
+            case 1:
+                m_decimatorsQI.decimate2_inf(&it, buf, len);
+                break;
+            case 2:
+                m_decimatorsQI.decimate4_inf(&it, buf, len);
+                break;
+            case 3:
+                m_decimatorsQI.decimate8_inf(&it, buf, len);
+                break;
+            case 4:
+                m_decimatorsQI.decimate16_inf(&it, buf, len);
+                break;
+            case 5:
+                m_decimatorsQI.decimate32_inf(&it, buf, len);
+                break;
+            case 6:
+                m_decimatorsQI.decimate64_inf(&it, buf, len);
+                break;
+            default:
+                break;
+            }
+        }
+        else if (m_fcPos == 1) // Supradyne
+        {
+            switch (m_log2Decim)
+            {
+            case 1:
+                m_decimatorsQI.decimate2_sup(&it, buf, len);
+                break;
+            case 2:
+                m_decimatorsQI.decimate4_sup(&it, buf, len);
+                break;
+            case 3:
+                m_decimatorsQI.decimate8_sup(&it, buf, len);
+                break;
+            case 4:
+                m_decimatorsQI.decimate16_sup(&it, buf, len);
+                break;
+            case 5:
+                m_decimatorsQI.decimate32_sup(&it, buf, len);
+                break;
+            case 6:
+                m_decimatorsQI.decimate64_sup(&it, buf, len);
+                break;
+            default:
+                break;
+            }
+        }
+        else // Centered
+        {
+            switch (m_log2Decim)
+            {
+            case 1:
+                m_decimatorsQI.decimate2_cen(&it, buf, len);
+                break;
+            case 2:
+                m_decimatorsQI.decimate4_cen(&it, buf, len);
+                break;
+            case 3:
+                m_decimatorsQI.decimate8_cen(&it, buf, len);
+                break;
+            case 4:
+                m_decimatorsQI.decimate16_cen(&it, buf, len);
+                break;
+            case 5:
+                m_decimatorsQI.decimate32_cen(&it, buf, len);
+                break;
+            case 6:
+                m_decimatorsQI.decimate64_cen(&it, buf, len);
                 break;
             default:
                 break;
