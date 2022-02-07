@@ -1,3 +1,23 @@
+sdrangel (6.19.0-1) unstable; urgency=medium
+
+  * Map: added 3D to map feature. PR #1127
+  * APT demod: many updates see PR #1127
+  * ADS-B demod: many updates see PR #1127
+  * AIS: many updates see PR #1127
+  * AIS: remove vessels afer some idle time. Issue #1086. PR #1127
+  * Satellite tracker: many updates see PR #1127
+  * Satellite tracker: export data via API. Issue #1106. PR #1130.
+  * Spectrum calibration. Implements #1120
+  * SDRPlayV3: added transverter feature. Implemented #1125
+  * Spectrum markers: save .csv in Qt default writable location. Implements #1114
+  * Fixed removing all feature sets causing segfault. Fixes #1118
+  * BFM demod: added readme and link to help button.
+  * Fixed LIB_SUFFIX for Fedora and lib64 systems. PR #1115
+  * DATV Demod: Make AVCodecs cons. PR #1128
+  * Install debug symbols on Windows for debug builds. PR #1131
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 07 Feb 2022 20:41:51 +0100
+
 sdrangel (6.18.1-1) unstable; urgency=medium
 
   * APRS: implemented Mic-E decoding. PR #1108
