@@ -65,7 +65,7 @@ NFMDemodSink::NFMDemodSink() :
         m_squelchDelayLine(24000),
         m_messageQueueToGUI(nullptr)
 {
-    m_audioBuffer.resize(1<<16);
+    m_audioBuffer.resize(1<<14);
     m_demodBuffer.resize(1<<12);
     m_demodBufferFill = 0;
 
@@ -109,17 +109,6 @@ void NFMDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
                 }
             }
         }
-    }
-
-    if (m_audioBufferFill > 0)
-    {
-        uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
-
-        if (res != m_audioBufferFill) {
-            qDebug("NFMDemodSink::feed: %u/%u tail samples written", res, m_audioBufferFill);
-        }
-
-        m_audioBufferFill = 0;
     }
 }
 

@@ -116,7 +116,6 @@ private:
 	uint m_audioBufferFill;
 
 	AudioFifo m_audioFifo;
-	SampleVector m_sampleBuffer;
 	PhaseDiscriminators m_phaseDiscri;
 
     QVector<qint16> m_demodBuffer;

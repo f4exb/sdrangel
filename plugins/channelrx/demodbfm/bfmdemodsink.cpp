@@ -72,7 +72,7 @@ BFMDemodSink::BFMDemodSink() :
 	m_deemphasisFilterY.configure(default_deemphasis * m_audioSampleRate * 1.0e-6);
  	m_phaseDiscri.setFMScaling(384000/m_fmExcursion);
 
-	m_audioBuffer.resize(16384);
+	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
 
 	applySettings(m_settings, true);
@@ -229,22 +229,11 @@ void BFMDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
 		}
 	}
 
-	if (m_audioBufferFill > 0)
+	if (m_spectrumSink && (m_sampleBuffer.size() != 0))
 	{
-		uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
-
-		if (res != m_audioBufferFill) {
-			qDebug("BFMDemodSink::feed: %u/%u tail samples written", res, m_audioBufferFill);
-		}
-
-		m_audioBufferFill = 0;
-	}
-
-	if (m_spectrumSink) {
 		m_spectrumSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), true);
+		m_sampleBuffer.clear();
 	}
-
-	m_sampleBuffer.clear();
 }
 
 void BFMDemodSink::applyAudioSampleRate(int sampleRate)

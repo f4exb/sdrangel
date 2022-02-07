@@ -100,17 +100,6 @@ void VORDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
             }
         }
     }
-
-    if (m_audioBufferFill > 0)
-    {
-        uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
-
-        if (res != m_audioBufferFill) {
-            qDebug("VORDemodSink::feed: %u/%u tail samples written", res, m_audioBufferFill);
-        }
-
-        m_audioBufferFill = 0;
-    }
 }
 
 void VORDemodSink::processOneAudioSample(Complex &ci)

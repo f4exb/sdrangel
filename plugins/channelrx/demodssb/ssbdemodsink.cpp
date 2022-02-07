@@ -241,19 +241,11 @@ void SSBDemodSink::processOneSample(Complex &ci)
         }
     }
 
-	uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
-
-	if (res != m_audioBufferFill) {
-        qDebug("SSBDemodSink::feed: %u/%u tail samples written", res, m_audioBufferFill);
-	}
-
-	m_audioBufferFill = 0;
-
-	if (m_spectrumSink != 0) {
+	if (m_spectrumSink && (m_sampleBuffer.size() != 0))
+    {
 		m_spectrumSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), !m_dsb);
+    	m_sampleBuffer.clear();
 	}
-
-	m_sampleBuffer.clear();
 }
 
 void SSBDemodSink::applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force)

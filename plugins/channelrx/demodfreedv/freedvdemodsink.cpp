@@ -211,21 +211,11 @@ void FreeDVDemodSink::feed(const SampleVector::const_iterator& begin, const Samp
         }
 	}
 
-	uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
-
-	if (res != m_audioBufferFill)
-	{
-        qDebug("FreeDVDemod::feed: %u/%u tail samples written", res, m_audioBufferFill);
-	}
-
-	m_audioBufferFill = 0;
-
-	if (m_spectrumSink)
-	{
+    if (m_spectrumSink && (m_sampleBuffer.size() != 0))
+    {
 		m_spectrumSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), true);
+        m_sampleBuffer.clear();
 	}
-
-	m_sampleBuffer.clear();
 }
 
 void FreeDVDemodSink::processOneSample(Complex &ci)

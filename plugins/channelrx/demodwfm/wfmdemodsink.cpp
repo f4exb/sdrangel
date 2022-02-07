@@ -49,7 +49,7 @@ WFMDemodSink::WFMDemodSink() :
 	m_rfFilter = new fftfilt(-50000.0 / 384000.0, 50000.0 / 384000.0, m_rfFilterFftLength);
 	m_phaseDiscri.setFMScaling(384000/75000);
 
-	m_audioBuffer.resize(16384);
+	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
 
     m_demodBuffer.resize(1<<12);
@@ -119,7 +119,6 @@ void WFMDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
 			if (m_interpolator.decimate(&m_interpolatorDistanceRemain, e, &ci))
 			{
 				qint16 sample = (qint16)(ci.real() * 3276.8f * m_settings.m_volume);
-				m_sampleBuffer.push_back(Sample(sample, sample));
 				m_audioBuffer[m_audioBufferFill].l = sample;
 				m_audioBuffer[m_audioBufferFill].r = sample;
 
@@ -158,19 +157,6 @@ void WFMDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
 			}
 		}
 	}
-
-	if (m_audioBufferFill > 0)
-	{
-		uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
-
-		if (res != m_audioBufferFill) {
-			qDebug("WFMDemodSink::feed: %u/%u tail samples written", res, m_audioBufferFill);
-		}
-
-		m_audioBufferFill = 0;
-	}
-
-	m_sampleBuffer.clear();
 }
 
 void WFMDemodSink::applyAudioSampleRate(int sampleRate)
