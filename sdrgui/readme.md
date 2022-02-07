@@ -369,7 +369,7 @@ Most devices will also present an interface to control automatic DC removal and 
 
 ![Spectrum GUI](../doc/img/MainWindow_spectrum_gui.png)
 
-These are the controls of the main spectrum display in (7). The same controls are found in the plugins that feature a spectrum display:
+These are the controls of the main spectrum display in (7). The same controls are found in the plugins that feature a spectrum display. For example:
   - Channel Analyzer
   - Broadcast FM demodulator
   - ChirpChat (LoRa) demodulator
@@ -528,6 +528,12 @@ The server only sends data. Control including FFT details is done via the REST A
 <h4>3B.7. Spectrum markers dialog</h4>
 
 Opens the [spectrum markers dialog](spectrummarkers.md)
+
+<h4>3B.8. Spectrum calibration</h4>
+
+Use the toggle button to switch between relative and calibrated power readings.
+
+Right click to open the [calibration management dialog](spectrumcalibration.md)
 
 <h3>3C.  Spectrum display control line 3</h3>
 
