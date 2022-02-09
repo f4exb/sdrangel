@@ -11,6 +11,8 @@ FeatureReport:
       $ref: "/doc/swagger/include/AFC.yaml#/AFCReport"
     GS232ControllerReport:
       $ref: "/doc/swagger/include/GS232Controller.yaml#/GS232ControllerReport"
+    MapReport:
+      $ref: "/doc/swagger/include/Map.yaml#/MapReport"
     PERTesterReport:
       $ref: "/doc/swagger/include/PERTester.yaml#/PERTesterReport"
     RigCtlServerReport:

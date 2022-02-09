@@ -312,6 +312,8 @@ bool MetisMISO::applySettings(const MetisMISOSettings& settings, bool force)
         << " m_dcBlock:" << settings.m_dcBlock
         << " m_iqCorrection:" << settings.m_iqCorrection
         << " m_txDrive:" << settings.m_txDrive
+        << " m_streamIndex:" << m_settings.m_streamIndex
+        << " m_spectrumStreamIndex:" << m_settings.m_spectrumStreamIndex
         << " m_useReverseAPI: " << settings.m_useReverseAPI
         << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
         << " m_reverseAPIPort: " << settings.m_reverseAPIPort
@@ -440,6 +442,21 @@ bool MetisMISO::applySettings(const MetisMISOSettings& settings, bool force)
         DSPMIMOSignalNotification *engineTxNotif = new DSPMIMOSignalNotification(
             48000, settings.m_txCenterFrequency, false, 0);
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(engineTxNotif);
+    }
+
+    if ((m_settings.m_streamIndex != settings.m_streamIndex) || force) {
+        reverseAPIKeys.append("streamIndex");
+    }
+
+    if ((m_settings.m_spectrumStreamIndex != settings.m_spectrumStreamIndex) || force)
+    {
+        reverseAPIKeys.append("spectrumStreamIndex");
+
+        if (settings.m_spectrumStreamIndex < MetisMISOSettings::m_maxReceivers) {
+            m_deviceAPI->setSpectrumSinkInput(true, m_settings.m_spectrumStreamIndex);
+        } else {
+            m_deviceAPI->setSpectrumSinkInput(false, 0);
+        }
     }
 
     if (propagateSettings) {
@@ -647,6 +664,12 @@ void MetisMISO::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("txDrive")) {
         settings.m_txDrive = response.getMetisMisoSettings()->getTxDrive();
     }
+    if (deviceSettingsKeys.contains("spectrumStreamIndex")) {
+        settings.m_spectrumStreamIndex = response.getMetisMisoSettings()->getSpectrumStreamIndex();
+    }
+    if (deviceSettingsKeys.contains("streamIndex")) {
+        settings.m_streamIndex = response.getMetisMisoSettings()->getStreamIndex();
+    }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getMetisMisoSettings()->getUseReverseApi() != 0;
     }
@@ -700,6 +723,8 @@ void MetisMISO::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& respo
     response.getMetisMisoSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
     response.getMetisMisoSettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
     response.getMetisMisoSettings()->setTxDrive(settings.m_txDrive);
+    response.getMetisMisoSettings()->setSpectrumStreamIndex(settings.m_spectrumStreamIndex);
+    response.getMetisMisoSettings()->setStreamIndex(settings.m_streamIndex);
     response.getMetisMisoSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
     if (response.getMetisMisoSettings()->getReverseApiAddress()) {
@@ -825,6 +850,12 @@ void MetisMISO::webapiReverseSendSettings(const QList<QString>& deviceSettingsKe
     }
     if (deviceSettingsKeys.contains("txDrive") || force) {
         swgMetisMISOSettings->setTxDrive(settings.m_txDrive);
+    }
+    if (deviceSettingsKeys.contains("spectrumStreamIndex") || force) {
+        swgMetisMISOSettings->setSpectrumStreamIndex(settings.m_spectrumStreamIndex);
+    }
+    if (deviceSettingsKeys.contains("streamIndex") || force) {
+        swgMetisMISOSettings->setStreamIndex(settings.m_streamIndex);
     }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")

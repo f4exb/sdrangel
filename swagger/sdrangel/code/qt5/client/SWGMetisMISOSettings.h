@@ -144,6 +144,12 @@ public:
     qint32 getTxDrive();
     void setTxDrive(qint32 tx_drive);
 
+    qint32 getStreamIndex();
+    void setStreamIndex(qint32 stream_index);
+
+    qint32 getSpectrumStreamIndex();
+    void setSpectrumStreamIndex(qint32 spectrum_stream_index);
+
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -261,6 +267,12 @@ private:
 
     qint32 tx_drive;
     bool m_tx_drive_isSet;
+
+    qint32 stream_index;
+    bool m_stream_index_isSet;
+
+    qint32 spectrum_stream_index;
+    bool m_spectrum_stream_index_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;

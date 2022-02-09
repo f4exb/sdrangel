@@ -139,6 +139,12 @@ MetisMISOSettings:
     txDrive:
       type: integer
       description: Tx drive level (0 to 15)
+    streamIndex:
+      type: integer
+      description: The index of the stream currently in scope
+    spectrumStreamIndex:
+      type: integer
+      description: The index of the stream that is used as source of the main spectrum
     useReverseAPI:
       type: integer
       description: >

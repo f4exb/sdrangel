@@ -96,6 +96,10 @@ SWGMetisMISOSettings::SWGMetisMISOSettings() {
     m_iq_correction_isSet = false;
     tx_drive = 0;
     m_tx_drive_isSet = false;
+    stream_index = 0;
+    m_stream_index_isSet = false;
+    spectrum_stream_index = 0;
+    m_spectrum_stream_index_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -180,6 +184,10 @@ SWGMetisMISOSettings::init() {
     m_iq_correction_isSet = false;
     tx_drive = 0;
     m_tx_drive_isSet = false;
+    stream_index = 0;
+    m_stream_index_isSet = false;
+    spectrum_stream_index = 0;
+    m_spectrum_stream_index_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -192,6 +200,8 @@ SWGMetisMISOSettings::init() {
 
 void
 SWGMetisMISOSettings::cleanup() {
+
+
 
 
 
@@ -312,6 +322,10 @@ SWGMetisMISOSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&iq_correction, pJson["iqCorrection"], "qint32", "");
     
     ::SWGSDRangel::setValue(&tx_drive, pJson["txDrive"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&spectrum_stream_index, pJson["spectrumStreamIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -438,6 +452,12 @@ SWGMetisMISOSettings::asJsonObject() {
     }
     if(m_tx_drive_isSet){
         obj->insert("txDrive", QJsonValue(tx_drive));
+    }
+    if(m_stream_index_isSet){
+        obj->insert("streamIndex", QJsonValue(stream_index));
+    }
+    if(m_spectrum_stream_index_isSet){
+        obj->insert("spectrumStreamIndex", QJsonValue(spectrum_stream_index));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -796,6 +816,26 @@ SWGMetisMISOSettings::setTxDrive(qint32 tx_drive) {
 }
 
 qint32
+SWGMetisMISOSettings::getStreamIndex() {
+    return stream_index;
+}
+void
+SWGMetisMISOSettings::setStreamIndex(qint32 stream_index) {
+    this->stream_index = stream_index;
+    this->m_stream_index_isSet = true;
+}
+
+qint32
+SWGMetisMISOSettings::getSpectrumStreamIndex() {
+    return spectrum_stream_index;
+}
+void
+SWGMetisMISOSettings::setSpectrumStreamIndex(qint32 spectrum_stream_index) {
+    this->spectrum_stream_index = spectrum_stream_index;
+    this->m_spectrum_stream_index_isSet = true;
+}
+
+qint32
 SWGMetisMISOSettings::getUseReverseApi() {
     return use_reverse_api;
 }
@@ -940,6 +980,12 @@ SWGMetisMISOSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_tx_drive_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_stream_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_spectrum_stream_index_isSet){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){

@@ -42,6 +42,8 @@ struct MetisMISOSettings {
     bool m_dcBlock;
     bool m_iqCorrection;
     unsigned int m_txDrive;
+    int m_streamIndex;
+    int m_spectrumStreamIndex; //!< spectrum source
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;

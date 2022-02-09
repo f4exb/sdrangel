@@ -53,8 +53,6 @@ MetisMISOGui::MetisMISOGui(DeviceUISet *deviceUISet, QWidget* parent) :
 {
     qDebug("MetisMISOGui::MetisMISOGui");
     m_sampleMIMO = m_deviceUISet->m_deviceAPI->getSampleMIMO();
-    m_streamIndex = 0;
-    m_spectrumStreamIndex = 0;
     m_rxSampleRate = 48000;
     m_txSampleRate = 48000;
 
@@ -94,9 +92,9 @@ void MetisMISOGui::resetToDefaults()
 
 void MetisMISOGui::setCenterFrequency(qint64 centerFrequency)
 {
-    if (m_streamIndex < MetisMISOSettings::m_maxReceivers) {
-        m_settings.m_rxCenterFrequencies[m_streamIndex] = centerFrequency;
-    } else if (m_streamIndex == MetisMISOSettings::m_maxReceivers) {
+    if (m_settings.m_streamIndex < MetisMISOSettings::m_maxReceivers) {
+        m_settings.m_rxCenterFrequencies[m_settings.m_streamIndex] = centerFrequency;
+    } else if (m_settings.m_streamIndex == MetisMISOSettings::m_maxReceivers) {
         m_settings.m_txCenterFrequency = centerFrequency;
     }
 
@@ -135,18 +133,16 @@ void MetisMISOGui::on_streamIndex_currentIndexChanged(int index)
 {
     if (ui->streamLock->isChecked())
     {
-        m_spectrumStreamIndex = index;
+        m_settings.m_spectrumStreamIndex = index;
 
-        if (m_spectrumStreamIndex < MetisMISOSettings::m_maxReceivers)
+        if (m_settings.m_spectrumStreamIndex < MetisMISOSettings::m_maxReceivers)
         {
             m_deviceUISet->m_spectrum->setDisplayedStream(true, index);
-            m_deviceUISet->m_deviceAPI->setSpectrumSinkInput(true, m_spectrumStreamIndex);
             m_deviceUISet->setSpectrumScalingFactor(SDR_RX_SCALEF);
         }
         else
         {
             m_deviceUISet->m_spectrum->setDisplayedStream(false, 0);
-            m_deviceUISet->m_deviceAPI->setSpectrumSinkInput(false, 0);
             m_deviceUISet->setSpectrumScalingFactor(SDR_TX_SCALEF);
         }
 
@@ -157,7 +153,8 @@ void MetisMISOGui::on_streamIndex_currentIndexChanged(int index)
         ui->spectrumSource->blockSignals(false);
     }
 
-    m_streamIndex = index;
+    m_settings.m_streamIndex = index;
+    sendSettings();
 
     updateSubsamplingIndex();
     displayFrequency();
@@ -166,18 +163,16 @@ void MetisMISOGui::on_streamIndex_currentIndexChanged(int index)
 
 void MetisMISOGui::on_spectrumSource_currentIndexChanged(int index)
 {
-    m_spectrumStreamIndex = index;
+    m_settings.m_spectrumStreamIndex = index;
 
-    if (m_spectrumStreamIndex < MetisMISOSettings::m_maxReceivers)
+    if (m_settings.m_spectrumStreamIndex < MetisMISOSettings::m_maxReceivers)
     {
         m_deviceUISet->m_spectrum->setDisplayedStream(true, index);
-        m_deviceUISet->m_deviceAPI->setSpectrumSinkInput(true, m_spectrumStreamIndex);
         m_deviceUISet->setSpectrumScalingFactor(SDR_RX_SCALEF);
     }
     else
     {
         m_deviceUISet->m_spectrum->setDisplayedStream(false, 0);
-        m_deviceUISet->m_deviceAPI->setSpectrumSinkInput(false, 0);
         m_deviceUISet->setSpectrumScalingFactor(SDR_TX_SCALEF);
     }
 
@@ -188,11 +183,13 @@ void MetisMISOGui::on_spectrumSource_currentIndexChanged(int index)
         ui->streamIndex->blockSignals(true);
         ui->streamIndex->setCurrentIndex(index);
         ui->streamIndex->blockSignals(false);
-        m_streamIndex = index;
+        m_settings.m_streamIndex = index;
         updateSubsamplingIndex();
         displayFrequency();
         displaySampleRate();
     }
+
+    sendSettings();
 }
 
 void MetisMISOGui::on_streamLock_toggled(bool checked)
@@ -211,9 +208,9 @@ void MetisMISOGui::on_LOppm_valueChanged(int value)
 
 void MetisMISOGui::on_centerFrequency_changed(quint64 value)
 {
-    if (m_streamIndex < MetisMISOSettings::m_maxReceivers) {
-        m_settings.m_rxCenterFrequencies[m_streamIndex] = value * 1000;
-    } else if (m_streamIndex == MetisMISOSettings::m_maxReceivers) {
+    if (m_settings.m_streamIndex < MetisMISOSettings::m_maxReceivers) {
+        m_settings.m_rxCenterFrequencies[m_settings.m_streamIndex] = value * 1000;
+    } else if (m_settings.m_streamIndex == MetisMISOSettings::m_maxReceivers) {
         m_settings.m_txCenterFrequency = value * 1000;
     }
 
@@ -235,9 +232,9 @@ void MetisMISOGui::on_log2Decim_currentIndexChanged(int index)
 
 void MetisMISOGui::on_subsamplingIndex_currentIndexChanged(int index)
 {
-    if (m_streamIndex < MetisMISOSettings::m_maxReceivers) // valid for Rx only
+    if (m_settings.m_streamIndex < MetisMISOSettings::m_maxReceivers) // valid for Rx only
     {
-        m_settings.m_rxSubsamplingIndexes[m_streamIndex] = index;
+        m_settings.m_rxSubsamplingIndexes[m_settings.m_streamIndex] = index;
         ui->subsamplingIndex->setToolTip(tr("Subsampling band index [%1 - %2 MHz]")
             .arg(index*61.44).arg((index+1)*61.44));
         displayFrequency();
@@ -260,7 +257,7 @@ void MetisMISOGui::on_iqCorrection_toggled(bool checked)
 
 void MetisMISOGui::on_transverter_clicked()
 {
-    if (m_streamIndex < MetisMISOSettings::m_maxReceivers)
+    if (m_settings.m_streamIndex < MetisMISOSettings::m_maxReceivers)
     {
         m_settings.m_rxTransverterMode = ui->transverter->getDeltaFrequencyAcive();
         m_settings.m_rxTransverterDeltaFrequency = ui->transverter->getDeltaFrequency();
@@ -326,8 +323,8 @@ void MetisMISOGui::displaySettings()
 {
     blockApplySettings(true);
 
-    ui->streamIndex->setCurrentIndex(m_streamIndex);
-    ui->spectrumSource->setCurrentIndex(m_spectrumStreamIndex);
+    ui->streamIndex->setCurrentIndex(m_settings.m_streamIndex);
+    ui->spectrumSource->setCurrentIndex(m_settings.m_spectrumStreamIndex);
     ui->nbRxIndex->setCurrentIndex(m_settings.m_nbReceivers - 1);
     ui->samplerateIndex->setCurrentIndex(m_settings.m_sampleRateIndex);
     ui->LOppm->setValue(m_settings.m_LOppmTenths);
@@ -405,6 +402,13 @@ bool MetisMISOGui::handleMessage(const Message& message)
         qDebug("MetisMISOGui::handleMessage: MsgConfigureMetisMISO");
         const MetisMISO::MsgConfigureMetisMISO& cfg = (MetisMISO::MsgConfigureMetisMISO&) message;
         m_settings = cfg.getSettings();
+
+        if ((m_settings.m_spectrumStreamIndex != m_settings.m_streamIndex) && (ui->streamLock->isChecked()))
+        {
+            m_settings.m_spectrumStreamIndex = m_settings.m_streamIndex;
+            sendSettings();
+        }
+
         displaySettings();
         return true;
     }
@@ -479,14 +483,14 @@ void MetisMISOGui::displayFrequency()
     qint64 centerFrequency;
     qint64 fBaseLow, fBaseHigh;
 
-    if (m_streamIndex < MetisMISOSettings::m_maxReceivers)
+    if (m_settings.m_streamIndex < MetisMISOSettings::m_maxReceivers)
     {
-        int subsamplingIndex = m_settings.m_rxSubsamplingIndexes[m_streamIndex];
-        centerFrequency = m_settings.m_rxCenterFrequencies[m_streamIndex];
+        int subsamplingIndex = m_settings.m_rxSubsamplingIndexes[m_settings.m_streamIndex];
+        centerFrequency = m_settings.m_rxCenterFrequencies[m_settings.m_streamIndex];
         fBaseLow = subsamplingIndex*m_absMaxFreq;
         fBaseHigh = (subsamplingIndex+1)*m_absMaxFreq;
     }
-    else if (m_streamIndex == MetisMISOSettings::m_maxReceivers)
+    else if (m_settings.m_streamIndex == MetisMISOSettings::m_maxReceivers)
     {
         centerFrequency = m_settings.m_txCenterFrequency;
         fBaseLow = 0;
@@ -505,7 +509,7 @@ void MetisMISOGui::displayFrequency()
 
 void MetisMISOGui::displaySampleRate()
 {
-    if (m_streamIndex < MetisMISOSettings::m_maxReceivers) {
+    if (m_settings.m_streamIndex < MetisMISOSettings::m_maxReceivers) {
         ui->deviceRateText->setText(tr("%1k").arg((float) m_rxSampleRate / 1000));
     } else {
         ui->deviceRateText->setText(tr("%1k").arg((float) m_txSampleRate / 1000));
@@ -516,9 +520,9 @@ void MetisMISOGui::updateSpectrum()
 {
     qint64 centerFrequency;
 
-    if (m_spectrumStreamIndex < MetisMISOSettings::m_maxReceivers) {
-        centerFrequency = m_settings.m_rxCenterFrequencies[m_spectrumStreamIndex];
-    } else if (m_spectrumStreamIndex == MetisMISOSettings::m_maxReceivers) {
+    if (m_settings.m_spectrumStreamIndex < MetisMISOSettings::m_maxReceivers) {
+        centerFrequency = m_settings.m_rxCenterFrequencies[m_settings.m_spectrumStreamIndex];
+    } else if (m_settings.m_spectrumStreamIndex == MetisMISOSettings::m_maxReceivers) {
         centerFrequency = m_settings.m_txCenterFrequency;
     } else {
         centerFrequency = 0;
@@ -526,7 +530,7 @@ void MetisMISOGui::updateSpectrum()
 
     m_deviceUISet->getSpectrum()->setCenterFrequency(centerFrequency);
 
-    if (m_spectrumStreamIndex < MetisMISOSettings::m_maxReceivers) {
+    if (m_settings.m_spectrumStreamIndex < MetisMISOSettings::m_maxReceivers) {
         m_deviceUISet->getSpectrum()->setSampleRate(m_rxSampleRate);
     } else {
         m_deviceUISet->getSpectrum()->setSampleRate(m_txSampleRate);
@@ -535,10 +539,10 @@ void MetisMISOGui::updateSpectrum()
 
 void MetisMISOGui::updateSubsamplingIndex()
 {
-    if (m_streamIndex < MetisMISOSettings::m_maxReceivers)
+    if (m_settings.m_streamIndex < MetisMISOSettings::m_maxReceivers)
     {
         ui->subsamplingIndex->setEnabled(true);
-        ui->subsamplingIndex->setCurrentIndex(m_settings.m_rxSubsamplingIndexes[m_streamIndex]);
+        ui->subsamplingIndex->setCurrentIndex(m_settings.m_rxSubsamplingIndexes[m_settings.m_streamIndex]);
     }
     else
     {

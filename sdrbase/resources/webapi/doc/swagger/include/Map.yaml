@@ -22,6 +22,13 @@ MapSettings:
     rollupState:
       $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
 
+MapReport:
+  description: Map
+  properties:
+    dateTime:
+      description: "Current date and time being displayed by 3D map"
+      type: string
+
 MapActions:
   description: Map
   properties:

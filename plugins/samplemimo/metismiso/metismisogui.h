@@ -51,8 +51,6 @@ private:
 
 	DeviceUISet* m_deviceUISet;
 	MetisMISOSettings m_settings;
-    int m_streamIndex; //!< Current stream index being dealt with
-    int m_spectrumStreamIndex; //!< Index of the stream displayed on main spectrum
     int m_rxSampleRate;
     int m_txSampleRate;
     QTimer m_updateTimer;

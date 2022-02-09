@@ -179,6 +179,68 @@ SatelliteTrackerReport:
           * 1 - idle
           * 2 - running
           * 3 - error
+    satelliteState:
+      type: array
+      items:
+        $ref: "/doc/swagger/include/SatelliteTracker.yaml#/SatelliteState"
+
+SatelliteState:
+  properties:
+    name:
+      type: string
+    latitude:
+      description: "Latitude of satellite in degrees"
+      type: number
+      format: float
+    longitude:
+      description: "Longitude of satellite in degrees"
+      type: number
+      format: float
+    altitude:
+      description: "Altitude of satellite in km"
+      type: number
+      format: float
+    azimuth:
+      description: "Azimuth to satellite in degrees"
+      type: number
+      format: float
+    elevation:
+      description: "Elevation to satellite in degrees"
+      type: number
+      format: float
+    range:
+      description: "Satellite range in km"
+      type: number
+      format: float
+    rangeRate:
+      description: "Satellite range rate in km/s"
+      type: number
+      format: float
+    speed:
+      description: "Satellite speed in km/s"
+      type: number
+      format: float
+    period:
+      description: "Satellite period in minutes"
+      type: number
+      format: float
+    passes:
+      type: array
+      items:
+        $ref: "/doc/swagger/include/SatelliteTracker.yaml#/SatellitePass"
+
+SatellitePass:
+  properties:
+    aos:
+      description: "Date and time of AOS"
+      type: string
+    los:
+      description: "Date and time of LOS"
+      type: string
+    maxElevation:
+      description: "Maximum elevation of pass in degrees"
+      type: number
+      format: float
 
 SatelliteTrackerActions:
   description: "Satellite Tracker actions"

@@ -763,19 +763,60 @@ margin-bottom: 20px;
     "removeTimeout" : {
       "type" : "integer"
     },
-    "beastEnabled" : {
-      "type" : "integer",
-      "description" : "Send data to beast server\n  * 0 - Do not send data\n  * 1 - Send data\n"
-    },
-    "beastHost" : {
-      "type" : "string"
-    },
-    "beastPort" : {
+    "feedEnabled" : {
       "type" : "integer"
     },
-    "feedFormat" : {
+    "exportClientEnabled" : {
       "type" : "integer",
-      "description" : "Format of sent data\n  * 0 - Beast binary\n  * 1 - Beast index\n"
+      "description" : "Send data to server\n  * 0 - Do not send data\n  * 1 - Send data\n"
+    },
+    "exportClientHost" : {
+      "type" : "string",
+      "description" : "Host to send data to"
+    },
+    "exportClientPort" : {
+      "type" : "integer"
+    },
+    "exportClientFormat" : {
+      "type" : "integer",
+      "description" : "Format of sent data\n  * 0 - Beast binary\n  * 1 - Beast hex\n"
+    },
+    "exportServerEnabled" : {
+      "type" : "integer"
+    },
+    "exportServerPort" : {
+      "type" : "integer"
+    },
+    "importEnabled" : {
+      "type" : "integer"
+    },
+    "importHost" : {
+      "type" : "string"
+    },
+    "importUsername" : {
+      "type" : "string"
+    },
+    "importPassword" : {
+      "type" : "string"
+    },
+    "importParameters" : {
+      "type" : "string"
+    },
+    "importPeriod" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "importMinLatitude" : {
+      "type" : "string"
+    },
+    "importMaxLatitude" : {
+      "type" : "string"
+    },
+    "importMinLongitude" : {
+      "type" : "string"
+    },
+    "importMaxLongitude" : {
+      "type" : "string"
     },
     "logFilename" : {
       "type" : "string"
@@ -5285,6 +5326,9 @@ margin-bottom: 20px;
     "GS232ControllerReport" : {
       "$ref" : "#/definitions/GS232ControllerReport"
     },
+    "MapReport" : {
+      "$ref" : "#/definitions/MapReport"
+    },
     "PERTesterReport" : {
       "$ref" : "#/definitions/PERTesterReport"
     },
@@ -8171,6 +8215,15 @@ margin-bottom: 20px;
   },
   "description" : "An item to draw on the map. Set image to an empty string to remove item from the map."
 };
+            defs.MapReport = {
+  "properties" : {
+    "dateTime" : {
+      "type" : "string",
+      "description" : "Current date and time being displayed by 3D map"
+    }
+  },
+  "description" : "Map"
+};
             defs.MapSettings = {
   "properties" : {
     "displayNames" : {
@@ -8348,6 +8401,14 @@ margin-bottom: 20px;
     "txDrive" : {
       "type" : "integer",
       "description" : "Tx drive level (0 to 15)"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "The index of the stream currently in scope"
+    },
+    "spectrumStreamIndex" : {
+      "type" : "integer",
+      "description" : "The index of the stream that is used as source of the main spectrum"
     },
     "useReverseAPI" : {
       "type" : "integer",
@@ -11273,6 +11334,81 @@ margin-bottom: 20px;
   },
   "description" : "List of device set settings for a satellite"
 };
+            defs.SatellitePass = {
+  "properties" : {
+    "aos" : {
+      "type" : "string",
+      "description" : "Date and time of AOS"
+    },
+    "los" : {
+      "type" : "string",
+      "description" : "Date and time of LOS"
+    },
+    "maxElevation" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Maximum elevation of pass in degrees"
+    }
+  }
+};
+            defs.SatelliteState = {
+  "properties" : {
+    "name" : {
+      "type" : "string"
+    },
+    "latitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Latitude of satellite in degrees"
+    },
+    "longitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Longitude of satellite in degrees"
+    },
+    "altitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Altitude of satellite in km"
+    },
+    "azimuth" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Azimuth to satellite in degrees"
+    },
+    "elevation" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Elevation to satellite in degrees"
+    },
+    "range" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Satellite range in km"
+    },
+    "rangeRate" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Satellite range rate in km/s"
+    },
+    "speed" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Satellite speed in km/s"
+    },
+    "period" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Satellite period in minutes"
+    },
+    "passes" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/SatellitePass"
+      }
+    }
+  }
+};
             defs.SatelliteTrackerActions = {
   "properties" : {
     "run" : {
@@ -11287,6 +11423,12 @@ margin-bottom: 20px;
     "runningState" : {
       "type" : "integer",
       "description" : "Running state\n  * 0 - not started\n  * 1 - idle\n  * 2 - running\n  * 3 - error\n"
+    },
+    "satelliteState" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/SatelliteState"
+      }
     }
   },
   "description" : "Satellite Tracker report"
@@ -52280,7 +52422,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2022-02-06T20:14:33.369+01:00
+              Generated 2022-02-09T21:10:57.247+01:00
             </div>
           </div>
       </div>
