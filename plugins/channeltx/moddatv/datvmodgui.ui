@@ -24,7 +24,6 @@
   </property>
   <property name="font">
    <font>
-    <family>Liberation Sans</family>
     <pointsize>9</pointsize>
    </font>
   </property>
@@ -98,7 +97,6 @@
           </property>
           <property name="font">
            <font>
-            <family>Liberation Mono</family>
             <pointsize>12</pointsize>
            </font>
           </property>
@@ -306,7 +304,7 @@
          <number>1</number>
         </property>
         <property name="maximum">
-         <number>100</number>
+         <number>500</number>
         </property>
         <property name="pageStep">
          <number>1</number>
@@ -800,15 +798,15 @@
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
    <class>ValueDialZ</class>
    <extends>QWidget</extends>
    <header>gui/valuedialz.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
  <resources>
