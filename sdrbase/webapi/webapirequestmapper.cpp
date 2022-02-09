@@ -5145,14 +5145,29 @@ void WebAPIRequestMapper::resetFeatureReport(SWGSDRangel::SWGFeatureReport& feat
 {
     featureReport.cleanup();
     featureReport.setFeatureType(nullptr);
+    featureReport.setAfcReport(nullptr);
+    featureReport.setGs232ControllerReport(nullptr);
+    featureReport.setPerTesterReport(nullptr);
+    featureReport.setRigCtlServerReport(nullptr);
+    featureReport.setMapReport(nullptr);
+    featureReport.setSatelliteTrackerReport(nullptr);
     featureReport.setSimplePttReport(nullptr);
+    featureReport.setStarTrackerReport(nullptr);
+    featureReport.setVorLocalizerReport(nullptr);
 }
 
 void WebAPIRequestMapper::resetFeatureActions(SWGSDRangel::SWGFeatureActions& featureActions)
 {
     featureActions.cleanup();
     featureActions.setFeatureType(nullptr);
+    featureActions.setAfcActions(nullptr);
+    featureActions.setGs232ControllerActions(nullptr);
     featureActions.setMapActions(nullptr);
+    featureActions.setPerTesterActions(nullptr);
+    featureActions.setRigCtlServerActions(nullptr);
+    featureActions.setSatelliteTrackerActions(nullptr);
     featureActions.setSimplePttActions(nullptr);
+    featureActions.setStarTrackerActions(nullptr);
+    featureActions.setVorLocalizerActions(nullptr);
 }
 

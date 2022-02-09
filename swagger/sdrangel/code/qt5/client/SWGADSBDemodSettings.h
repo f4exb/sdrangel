@@ -71,17 +71,56 @@ public:
     qint32 getRemoveTimeout();
     void setRemoveTimeout(qint32 remove_timeout);
 
-    qint32 getBeastEnabled();
-    void setBeastEnabled(qint32 beast_enabled);
+    qint32 getFeedEnabled();
+    void setFeedEnabled(qint32 feed_enabled);
 
-    QString* getBeastHost();
-    void setBeastHost(QString* beast_host);
+    qint32 getExportClientEnabled();
+    void setExportClientEnabled(qint32 export_client_enabled);
 
-    qint32 getBeastPort();
-    void setBeastPort(qint32 beast_port);
+    QString* getExportClientHost();
+    void setExportClientHost(QString* export_client_host);
 
-    qint32 getFeedFormat();
-    void setFeedFormat(qint32 feed_format);
+    qint32 getExportClientPort();
+    void setExportClientPort(qint32 export_client_port);
+
+    qint32 getExportClientFormat();
+    void setExportClientFormat(qint32 export_client_format);
+
+    qint32 getExportServerEnabled();
+    void setExportServerEnabled(qint32 export_server_enabled);
+
+    qint32 getExportServerPort();
+    void setExportServerPort(qint32 export_server_port);
+
+    qint32 getImportEnabled();
+    void setImportEnabled(qint32 import_enabled);
+
+    QString* getImportHost();
+    void setImportHost(QString* import_host);
+
+    QString* getImportUsername();
+    void setImportUsername(QString* import_username);
+
+    QString* getImportPassword();
+    void setImportPassword(QString* import_password);
+
+    QString* getImportParameters();
+    void setImportParameters(QString* import_parameters);
+
+    float getImportPeriod();
+    void setImportPeriod(float import_period);
+
+    QString* getImportMinLatitude();
+    void setImportMinLatitude(QString* import_min_latitude);
+
+    QString* getImportMaxLatitude();
+    void setImportMaxLatitude(QString* import_max_latitude);
+
+    QString* getImportMinLongitude();
+    void setImportMinLongitude(QString* import_min_longitude);
+
+    QString* getImportMaxLongitude();
+    void setImportMaxLongitude(QString* import_max_longitude);
 
     QString* getLogFilename();
     void setLogFilename(QString* log_filename);
@@ -150,17 +189,56 @@ private:
     qint32 remove_timeout;
     bool m_remove_timeout_isSet;
 
-    qint32 beast_enabled;
-    bool m_beast_enabled_isSet;
+    qint32 feed_enabled;
+    bool m_feed_enabled_isSet;
 
-    QString* beast_host;
-    bool m_beast_host_isSet;
+    qint32 export_client_enabled;
+    bool m_export_client_enabled_isSet;
 
-    qint32 beast_port;
-    bool m_beast_port_isSet;
+    QString* export_client_host;
+    bool m_export_client_host_isSet;
 
-    qint32 feed_format;
-    bool m_feed_format_isSet;
+    qint32 export_client_port;
+    bool m_export_client_port_isSet;
+
+    qint32 export_client_format;
+    bool m_export_client_format_isSet;
+
+    qint32 export_server_enabled;
+    bool m_export_server_enabled_isSet;
+
+    qint32 export_server_port;
+    bool m_export_server_port_isSet;
+
+    qint32 import_enabled;
+    bool m_import_enabled_isSet;
+
+    QString* import_host;
+    bool m_import_host_isSet;
+
+    QString* import_username;
+    bool m_import_username_isSet;
+
+    QString* import_password;
+    bool m_import_password_isSet;
+
+    QString* import_parameters;
+    bool m_import_parameters_isSet;
+
+    float import_period;
+    bool m_import_period_isSet;
+
+    QString* import_min_latitude;
+    bool m_import_min_latitude_isSet;
+
+    QString* import_max_latitude;
+    bool m_import_max_latitude_isSet;
+
+    QString* import_min_longitude;
+    bool m_import_min_longitude_isSet;
+
+    QString* import_max_longitude;
+    bool m_import_max_longitude_isSet;
 
     QString* log_filename;
     bool m_log_filename_isSet;

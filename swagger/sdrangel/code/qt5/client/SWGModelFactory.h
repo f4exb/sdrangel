@@ -175,6 +175,7 @@
 #include "SWGMapCoordinate.h"
 #include "SWGMapItem.h"
 #include "SWGMapItem_2.h"
+#include "SWGMapReport.h"
 #include "SWGMapSettings.h"
 #include "SWGMetisMISOSettings.h"
 #include "SWGNFMDemodReport.h"
@@ -1121,6 +1122,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGMapItem_2").compare(type) == 0) {
       SWGMapItem_2 *obj = new SWGMapItem_2();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGMapReport").compare(type) == 0) {
+      SWGMapReport *obj = new SWGMapReport();
       obj->init();
       return obj;
     }

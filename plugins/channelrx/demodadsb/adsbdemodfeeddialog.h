@@ -25,16 +25,14 @@ class ADSBDemodFeedDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit ADSBDemodFeedDialog(QString& feedHost, int feedPort, ADSBDemodSettings::FeedFormat feedFormat, QWidget* parent = 0);
+    explicit ADSBDemodFeedDialog(ADSBDemodSettings *settings, QWidget* parent = 0);
     ~ADSBDemodFeedDialog();
 
-    QString m_feedHost;
-    int m_feedPort;
-    ADSBDemodSettings::FeedFormat m_feedFormat;
+    ADSBDemodSettings *m_settings;
 
 private slots:
     void accept();
-    void on_host_currentIndexChanged(int value);
+    void on_exportClientHost_currentIndexChanged(int value);
 
 private:
     Ui::ADSBDemodFeedDialog* ui;

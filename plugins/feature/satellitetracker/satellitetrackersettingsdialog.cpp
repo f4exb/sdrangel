@@ -53,7 +53,6 @@ SatelliteTrackerSettingsDialog::SatelliteTrackerSettingsDialog(SatelliteTrackerS
     }
     ui->replayEnabled->setChecked(settings->m_replayEnabled);
     ui->replayDateTime->setDateTime(settings->m_replayStartDateTime);
-    ui->useFileInputTime->setChecked(settings->m_useFileInputTime);
     ui->sendTimeToMap->setChecked(settings->m_sendTimeToMap);
 }
 
@@ -104,7 +103,6 @@ void SatelliteTrackerSettingsDialog::accept()
     }
     m_settings->m_replayEnabled = ui->replayEnabled->isChecked();
     m_settings->m_replayStartDateTime = ui->replayDateTime->dateTime();
-    m_settings->m_useFileInputTime = ui->useFileInputTime->isChecked();
     m_settings->m_sendTimeToMap = ui->sendTimeToMap->isChecked();
     QDialog::accept();
 }

@@ -19,6 +19,7 @@
 #define INCLUDE_FEATURE_MAPSETTINGSDIALOG_H
 
 #include <QSpinBox>
+#include <QDoubleSpinBox>
 #include <QMessageBox>
 
 #include "gui/httpdownloadmanagergui.h"
@@ -56,6 +57,7 @@ public:
     MapColorGUI m_track3D;
     QSpinBox *m_minZoom;
     QSpinBox *m_minPixels;
+    QDoubleSpinBox *m_labelScale;
 };
 
 class MapSettingsDialog : public QDialog {
@@ -75,7 +77,8 @@ public:
         COL_3D_MIN_PIXELS,
         COL_3D_LABEL,
         COL_3D_POINT,
-        COL_3D_TRACK
+        COL_3D_TRACK,
+        COL_3D_LABEL_SCALE
     };
 
 public:

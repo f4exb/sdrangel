@@ -96,8 +96,13 @@ MapItemSettingsGUI::MapItemSettingsGUI(QTableWidget *table, int row, MapSettings
     m_minPixels = new QSpinBox(table);
     m_minPixels->setRange(0, 200);
     m_minPixels->setValue(settings->m_3DModelMinPixelSize);
+    m_labelScale = new QDoubleSpinBox(table);
+    m_labelScale->setDecimals(2);
+    m_labelScale->setRange(0.01, 10.0);
+    m_labelScale->setValue(settings->m_3DLabelScale);
     table->setCellWidget(row, MapSettingsDialog::COL_2D_MIN_ZOOM, m_minZoom);
     table->setCellWidget(row, MapSettingsDialog::COL_3D_MIN_PIXELS, m_minPixels);
+    table->setCellWidget(row, MapSettingsDialog::COL_3D_LABEL_SCALE, m_labelScale);
 }
 
 MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
@@ -241,6 +246,7 @@ void MapSettingsDialog::accept()
         itemSettings->m_display3DTrack = !gui->m_track3D.m_noColor;
         itemSettings->m_3DTrackColor = gui->m_track3D.m_color;
         itemSettings->m_3DModelMinPixelSize = gui->m_minPixels->value();
+        itemSettings->m_3DLabelScale = gui->m_labelScale->value();
     }
 
     QDialog::accept();
@@ -276,6 +282,7 @@ void MapSettingsDialog::on_map3DEnabled_clicked(bool checked)
         ui->mapItemSettings->showColumn(COL_3D_LABEL);
         ui->mapItemSettings->showColumn(COL_3D_POINT);
         ui->mapItemSettings->showColumn(COL_3D_TRACK);
+        ui->mapItemSettings->showColumn(COL_3D_LABEL_SCALE);
     }
     else
     {
@@ -284,6 +291,7 @@ void MapSettingsDialog::on_map3DEnabled_clicked(bool checked)
         ui->mapItemSettings->hideColumn(COL_3D_LABEL);
         ui->mapItemSettings->hideColumn(COL_3D_POINT);
         ui->mapItemSettings->hideColumn(COL_3D_TRACK);
+        ui->mapItemSettings->hideColumn(COL_3D_LABEL_SCALE);
     }
     ui->terrain->setEnabled(checked);
     ui->buildings->setEnabled(checked);

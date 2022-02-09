@@ -43,7 +43,9 @@ const char* const Map::m_featureIdURI = "sdrangel.feature.map";
 const char* const Map::m_featureId = "Map";
 
 Map::Map(WebAPIAdapterInterface *webAPIAdapterInterface) :
-    Feature(m_featureIdURI, webAPIAdapterInterface)
+    Feature(m_featureIdURI, webAPIAdapterInterface),
+    m_multiplier(0.0),
+    m_dateTimeMutex(QMutex::Recursive)
 {
     qDebug("Map::Map: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
@@ -206,6 +208,17 @@ int Map::webapiSettingsPutPatch(
     return 200;
 }
 
+int Map::webapiReportGet(
+    SWGSDRangel::SWGFeatureReport& response,
+    QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setMapReport(new SWGSDRangel::SWGMapReport());
+    response.getMapReport()->init();
+    webapiFormatFeatureReport(response);
+    return 200;
+}
+
 int Map::webapiActionsPost(
     const QStringList& featureActionsKeys,
     SWGSDRangel::SWGFeatureActions& query,
@@ -356,6 +369,16 @@ void Map::webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const M
     delete swgFeatureSettings;
 }
 
+void Map::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response)
+{
+    QString mapDateTime = getMapDateTime().toString(Qt::ISODateWithMs);
+    if (response.getMapReport()->getDateTime()) {
+        *response.getMapReport()->getDateTime() = mapDateTime;
+    } else {
+        response.getMapReport()->setDateTime(new QString(mapDateTime));
+    }
+}
+
 void Map::networkManagerFinished(QNetworkReply *reply)
 {
     QNetworkReply::NetworkError replyError = reply->error();
@@ -375,4 +398,30 @@ void Map::networkManagerFinished(QNetworkReply *reply)
     }
 
     reply->deleteLater();
+}
+
+void Map::setMapDateTime(QDateTime mapDateTime, QDateTime systemDateTime, double multiplier)
+{
+    QMutexLocker mutexLocker(&m_dateTimeMutex);
+    m_mapDateTime = mapDateTime;
+    m_systemDateTime = systemDateTime;
+    m_multiplier = multiplier;
+}
+
+QDateTime Map::getMapDateTime()
+{
+    QMutexLocker mutexLocker(&m_dateTimeMutex);
+    if (m_multiplier == 0.0)
+    {
+        return m_mapDateTime;
+    }
+    else
+    {
+        // It's not possible to synchronously get the time from Cesium
+        // so we calculate it based on the system clock difference from
+        // when changes were made to the clock GUI elements
+        // Should be accurate enough for satellite tracker
+        qint64 diffMsecs = m_systemDateTime.msecsTo(QDateTime::currentDateTime());
+        return m_mapDateTime.addMSecs(diffMsecs * m_multiplier);
+    }
 }

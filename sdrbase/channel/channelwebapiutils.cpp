@@ -134,6 +134,44 @@ bool ChannelWebAPIUtils::getFeatureSettings(unsigned int featureSetIndex, unsign
     return true;
 }
 
+bool ChannelWebAPIUtils::getFeatureReport(unsigned int featureSetIndex, unsigned int featureIndex, SWGSDRangel::SWGFeatureReport &featureReport)
+{
+    QString errorResponse;
+    int httpRC;
+    FeatureSet *featureSet;
+    Feature *feature;
+
+    // Get feature report
+    std::vector<FeatureSet*> featureSets = MainCore::instance()->getFeatureeSets();
+    if (featureSetIndex < featureSets.size())
+    {
+        featureSet = featureSets[featureSetIndex];
+        if (featureIndex < (unsigned int)featureSet->getNumberOfFeatures())
+        {
+            feature = featureSet->getFeatureAt(featureIndex);
+            httpRC = feature->webapiReportGet(featureReport, errorResponse);
+        }
+        else
+        {
+            qDebug() << "ChannelWebAPIUtils::getFeatureReport: no feature " << featureSetIndex << ":" << featureIndex;
+            return false;
+        }
+    }
+    else
+    {
+        qDebug() << "ChannelWebAPIUtils::getFeatureReport: no feature set " << featureSetIndex;
+        return false;
+    }
+
+    if (httpRC/100 != 2)
+    {
+        qWarning("ChannelWebAPIUtils::getFeatureReport: get feature settings error %d: %s",
+            httpRC, qPrintable(errorResponse));
+        return false;
+    }
+
+    return true;
+}
 
 // Get device center frequency
 bool ChannelWebAPIUtils::getCenterFrequency(unsigned int deviceIndex, double &frequencyInHz)
@@ -711,50 +749,43 @@ bool ChannelWebAPIUtils::patchFeatureSetting(unsigned int featureSetIndex, unsig
 bool ChannelWebAPIUtils::getFeatureReportValue(unsigned int featureSetIndex, unsigned int featureIndex, const QString &key, int &value)
 {
     SWGSDRangel::SWGFeatureReport featureReport;
-    QString errorResponse;
-    int httpRC;
-    FeatureSet *featureSet;
-    Feature *feature;
 
-    // Get feature report
-    std::vector<FeatureSet*> featureSets = MainCore::instance()->getFeatureeSets();
-    if (featureSetIndex < featureSets.size())
+    if (getFeatureReport(featureSetIndex, featureIndex, featureReport))
     {
-        featureSet = featureSets[featureSetIndex];
-        if (featureIndex < (unsigned int)featureSet->getNumberOfFeatures())
+        // Get value of requested key
+        QJsonObject *jsonObj = featureReport.asJsonObject();
+        if (WebAPIUtils::getSubObjectInt(*jsonObj, key, value))
         {
-            feature = featureSet->getFeatureAt(featureIndex);
-            httpRC = feature->webapiReportGet(featureReport, errorResponse);
+            // Done
+            return true;
         }
         else
         {
-            qDebug() << "ChannelWebAPIUtils::getFeatureReportValue: no feature " << featureSetIndex << ":" << featureIndex;
+            qWarning("ChannelWebAPIUtils::getFeatureReportValue: no key %s in feature report", qPrintable(key));
             return false;
         }
     }
-    else
-    {
-        qDebug() << "ChannelWebAPIUtils::getFeatureReportValue: no feature set " << featureSetIndex;
-        return false;
-    }
+    return false;
+}
 
-    if (httpRC/100 != 2)
-    {
-        qWarning("ChannelWebAPIUtils::getFeatureReportValue: get feature report error %d: %s",
-            httpRC, qPrintable(errorResponse));
-        return false;
-    }
+bool ChannelWebAPIUtils::getFeatureReportValue(unsigned int featureSetIndex, unsigned int featureIndex, const QString &key, QString &value)
+{
+    SWGSDRangel::SWGFeatureReport featureReport;
 
-    // Get value of requested key
-    QJsonObject *jsonObj = featureReport.asJsonObject();
-    if (WebAPIUtils::getSubObjectInt(*jsonObj, key, value))
+    if (getFeatureReport(featureSetIndex, featureIndex, featureReport))
     {
-        // Done
-        return true;
+        // Get value of requested key
+        QJsonObject *jsonObj = featureReport.asJsonObject();
+        if (WebAPIUtils::getSubObjectString(*jsonObj, key, value))
+        {
+            // Done
+            return true;
+        }
+        else
+        {
+            qWarning("ChannelWebAPIUtils::getFeatureReportValue: no key %s in feature report", qPrintable(key));
+            return false;
+        }
     }
-    else
-    {
-        qWarning("ChannelWebAPIUtils::getFeatureReportValue: no key %s in feature report", qPrintable(key));
-        return false;
-    }
+    return false;
 }

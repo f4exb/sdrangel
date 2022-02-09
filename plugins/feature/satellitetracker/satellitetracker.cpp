@@ -80,12 +80,11 @@ void SatelliteTracker::start()
 {
     qDebug("SatelliteTracker::start");
 
-    if (m_settings.m_replayEnabled)
-    {
+    if (m_settings.m_replayEnabled) {
         m_startedDateTime = QDateTime::currentDateTimeUtc();
-        if (m_settings.m_sendTimeToMap) {
-            FeatureWebAPIUtils::mapSetDateTime(currentDateTime());
-        }
+    }
+    if (m_settings.m_sendTimeToMap) {
+        FeatureWebAPIUtils::mapSetDateTime(currentDateTime());
     }
 
     m_worker->reset();
@@ -1139,25 +1138,49 @@ void SatelliteTracker::updateSatData()
 /// Redirect requests for current time via these methods, for replays
 QDateTime SatelliteTracker::currentDateTimeUtc()
 {
-    if (m_settings.m_replayEnabled)
+    if (m_settings.m_dateTimeSelect == SatelliteTrackerSettings::FROM_FILE)
     {
-        if (m_settings.m_useFileInputTime)
+        QString dateTimeStr;
+        int deviceIdx = 0;
+        if (m_settings.m_fileInputDevice.size() >= 2) {
+            deviceIdx = m_settings.m_fileInputDevice.mid(1).toInt();
+        }
+        if (ChannelWebAPIUtils::getDeviceReportValue(deviceIdx, "absoluteTime", dateTimeStr))
         {
-            QString dateTimeStr;
-            if (ChannelWebAPIUtils::getDeviceReportValue(0, "absoluteTime", dateTimeStr))
-            {
-                return QDateTime::fromString(dateTimeStr, Qt::ISODateWithMs);
-            }
-            else
-            {
-                return QDateTime::currentDateTimeUtc();
-            }
+            return QDateTime::fromString(dateTimeStr, Qt::ISODateWithMs);
         }
         else
         {
-            QDateTime now = QDateTime::currentDateTimeUtc();
-            return m_settings.m_replayStartDateTime.addSecs(m_startedDateTime.secsTo(now));
+            return QDateTime::currentDateTimeUtc();
         }
+    }
+    else if (m_settings.m_dateTimeSelect == SatelliteTrackerSettings::FROM_MAP)
+    {
+        QString dateTimeStr;
+        int featureSet = 0;
+        int featureIdx = 0;
+        if (m_settings.m_mapFeature.size() >= 4)
+        {
+            QStringList numbers = m_settings.m_mapFeature.mid(1).split(":");
+            if (numbers.size() == 2)
+            {
+                featureSet = numbers[0].toInt();
+                featureIdx = numbers[1].toInt();
+            }
+        }
+        if (ChannelWebAPIUtils::getFeatureReportValue(featureSet, featureIdx, "dateTime", dateTimeStr))
+        {
+            return QDateTime::fromString(dateTimeStr, Qt::ISODateWithMs);
+        }
+        else
+        {
+            return QDateTime::currentDateTimeUtc();
+        }
+    }
+    else if (m_settings.m_replayEnabled)
+    {
+        QDateTime now = QDateTime::currentDateTimeUtc();
+        return m_settings.m_replayStartDateTime.addSecs(m_startedDateTime.secsTo(now));
     }
     else
     {
@@ -1167,9 +1190,9 @@ QDateTime SatelliteTracker::currentDateTimeUtc()
 
 QDateTime SatelliteTracker::currentDateTime()
 {
-    if (m_settings.m_replayEnabled) {
-        return currentDateTimeUtc().toLocalTime();
-    } else {
+    if (m_settings.m_dateTimeSelect == SatelliteTrackerSettings::NOW) {
         return QDateTime::currentDateTime();
+    } else {
+        return currentDateTimeUtc().toLocalTime();
     }
 }

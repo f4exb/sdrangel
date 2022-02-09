@@ -6,13 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>351</width>
-    <height>138</height>
+    <width>472</width>
+    <height>553</height>
    </rect>
   </property>
   <property name="font">
    <font>
-    <family>Liberation Sans</family>
     <pointsize>9</pointsize>
    </font>
   </property>
@@ -23,75 +22,334 @@
    <item>
     <widget class="QGroupBox" name="groupBox">
      <layout class="QFormLayout" name="formLayout">
-      <item row="0" column="0">
-       <widget class="QLabel" name="hostLabel">
-        <property name="text">
-         <string>Server hostname</string>
+      <item row="2" column="0" colspan="2">
+       <widget class="QGroupBox" name="importSettings">
+        <property name="title">
+         <string>Import</string>
         </property>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="4" column="0">
+          <widget class="QLabel" name="importParametersLabel">
+           <property name="text">
+            <string>Parameters</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QLineEdit" name="importUsername">
+           <property name="toolTip">
+            <string>Username to access server with</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="0" colspan="2">
+          <layout class="QGridLayout" name="gridLayout_2">
+           <item row="0" column="0">
+            <widget class="QLabel" name="latitudeMinLabel">
+             <property name="text">
+              <string>Latitude Min</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLineEdit" name="latitudeMin">
+             <property name="toolTip">
+              <string>Minimum latitude of area to receive aircraft data from</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QLabel" name="latitudeMaxLabel">
+             <property name="text">
+              <string>Latitude Max</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="3">
+            <widget class="QLineEdit" name="latitudeMax">
+             <property name="toolTip">
+              <string>Maximum latitude of area to receive aircraft data from</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="longitudeMinLabel">
+             <property name="toolTip">
+              <string>Minimum longitude of area to receive aircraft data from</string>
+             </property>
+             <property name="text">
+              <string>Longitude Min</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QLineEdit" name="longitudeMin"/>
+           </item>
+           <item row="1" column="2">
+            <widget class="QLabel" name="longitudeMaxLabel">
+             <property name="text">
+              <string>Longitude Max</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="3">
+            <widget class="QLineEdit" name="longitudeMax">
+             <property name="toolTip">
+              <string>Maximum longitude of area to receive aircraft data from</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="importHostnameLabel">
+           <property name="text">
+            <string>Server hostname</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="importUsernameLabel">
+           <property name="text">
+            <string>Username</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="0">
+          <widget class="QLabel" name="importPeriodLabel">
+           <property name="text">
+            <string>Update period (s)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QCheckBox" name="importEnabled">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="importEnabledLabel">
+           <property name="minimumSize">
+            <size>
+             <width>100</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Enable import</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QLineEdit" name="importPassword">
+           <property name="toolTip">
+            <string>Password to access the server with</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <widget class="QLineEdit" name="importParameters">
+           <property name="toolTip">
+            <string>Parameters for the API call such as geographic location</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="1">
+          <widget class="QDoubleSpinBox" name="importPeriod">
+           <property name="toolTip">
+            <string>Time period in seconds between updates requested from the server</string>
+           </property>
+           <property name="decimals">
+            <number>0</number>
+           </property>
+           <property name="minimum">
+            <double>5.000000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>1000.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>10.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QComboBox" name="importHost">
+           <property name="toolTip">
+            <string>Hostname of server to receive ADS-B data from</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>opensky-network.org</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="importPasswordLabel">
+           <property name="text">
+            <string>Password</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="portLabel">
-        <property name="text">
-         <string>Port number</string>
+      <item row="0" column="0" colspan="2">
+       <widget class="QGroupBox" name="exportClientSettings">
+        <property name="title">
+         <string>Export Client</string>
         </property>
+        <layout class="QFormLayout" name="formLayout_2">
+         <item row="0" column="0">
+          <widget class="QLabel" name="exportClientEnabledLabel">
+           <property name="minimumSize">
+            <size>
+             <width>100</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Enable client</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QCheckBox" name="exportClientEnabled">
+           <property name="toolTip">
+            <string>Enable TCP client</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="exportClientHostLabel">
+           <property name="text">
+            <string>Server hostname</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QComboBox" name="exportClientHost">
+           <property name="toolTip">
+            <string>Hostname of server to feed ADS-B data to</string>
+           </property>
+           <property name="editable">
+            <bool>true</bool>
+           </property>
+           <item>
+            <property name="text">
+             <string>feed.adsbexchange.com</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>data.adsbhub.org</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="exportClientPortLabel">
+           <property name="text">
+            <string>Port</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QSpinBox" name="exportClientPort">
+           <property name="toolTip">
+            <string>The TCP port number the server is listening on</string>
+           </property>
+           <property name="minimum">
+            <number>1024</number>
+           </property>
+           <property name="maximum">
+            <number>65535</number>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="exportClientFormatLabel">
+           <property name="text">
+            <string>Format</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QComboBox" name="exportClientFormat">
+           <property name="toolTip">
+            <string>Format to feed the data to the server in</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>Beast binary</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Beast hex</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
-      <item row="1" column="1">
-       <widget class="QSpinBox" name="port">
-        <property name="toolTip">
-         <string>The TCP port number the server is listening on</string>
+      <item row="1" column="0" colspan="2">
+       <widget class="QGroupBox" name="exportServerSettings">
+        <property name="title">
+         <string>Export Server</string>
         </property>
-        <property name="minimum">
-         <number>1024</number>
-        </property>
-        <property name="maximum">
-         <number>65535</number>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QComboBox" name="format">
-        <property name="toolTip">
-         <string>Format to feed the data to the server in</string>
-        </property>
-        <item>
-         <property name="text">
-          <string>Beast binary</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Beast hex</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="formatLabel">
-        <property name="text">
-         <string>Format</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="host">
-        <property name="toolTip">
-         <string>Hostname of server to feed ADS-B data to</string>
-        </property>
-        <property name="editable">
-         <bool>true</bool>
-        </property>
-        <item>
-         <property name="text">
-          <string>feed.adsbexchange.com</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>data.adsbhub.org</string>
-         </property>
-        </item>
+        <layout class="QFormLayout" name="formLayout_3">
+         <item row="1" column="0">
+          <widget class="QLabel" name="exportServerPortLabel">
+           <property name="text">
+            <string>Port</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QSpinBox" name="exportServerPort">
+           <property name="toolTip">
+            <string>TCP port number to listen for connections on</string>
+           </property>
+           <property name="minimum">
+            <number>1024</number>
+           </property>
+           <property name="maximum">
+            <number>65535</number>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="exportServerEnabledLabel">
+           <property name="minimumSize">
+            <size>
+             <width>100</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Enable server</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QCheckBox" name="exportServerEnabled">
+           <property name="toolTip">
+            <string>Enable TCP server</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
      </layout>
@@ -110,7 +368,22 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>port</tabstop>
+  <tabstop>exportClientEnabled</tabstop>
+  <tabstop>exportClientHost</tabstop>
+  <tabstop>exportClientPort</tabstop>
+  <tabstop>exportClientFormat</tabstop>
+  <tabstop>exportServerEnabled</tabstop>
+  <tabstop>exportServerPort</tabstop>
+  <tabstop>importEnabled</tabstop>
+  <tabstop>importHost</tabstop>
+  <tabstop>importUsername</tabstop>
+  <tabstop>importPassword</tabstop>
+  <tabstop>importParameters</tabstop>
+  <tabstop>importPeriod</tabstop>
+  <tabstop>latitudeMin</tabstop>
+  <tabstop>latitudeMax</tabstop>
+  <tabstop>longitudeMin</tabstop>
+  <tabstop>longitudeMax</tabstop>
  </tabstops>
  <resources/>
  <connections>

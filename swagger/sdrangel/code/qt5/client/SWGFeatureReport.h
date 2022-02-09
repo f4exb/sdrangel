@@ -24,6 +24,7 @@
 
 #include "SWGAFCReport.h"
 #include "SWGGS232ControllerReport.h"
+#include "SWGMapReport.h"
 #include "SWGPERTesterReport.h"
 #include "SWGRigCtlServerReport.h"
 #include "SWGSatelliteTrackerReport.h"
@@ -59,6 +60,9 @@ public:
     SWGGS232ControllerReport* getGs232ControllerReport();
     void setGs232ControllerReport(SWGGS232ControllerReport* gs232_controller_report);
 
+    SWGMapReport* getMapReport();
+    void setMapReport(SWGMapReport* map_report);
+
     SWGPERTesterReport* getPerTesterReport();
     void setPerTesterReport(SWGPERTesterReport* per_tester_report);
 
@@ -89,6 +93,9 @@ private:
 
     SWGGS232ControllerReport* gs232_controller_report;
     bool m_gs232_controller_report_isSet;
+
+    SWGMapReport* map_report;
+    bool m_map_report_isSet;
 
     SWGPERTesterReport* per_tester_report;
     bool m_per_tester_report_isSet;

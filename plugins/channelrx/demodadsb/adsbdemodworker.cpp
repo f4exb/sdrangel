@@ -28,6 +28,57 @@
 
 MESSAGE_CLASS_DEFINITION(ADSBDemodWorker::MsgConfigureADSBDemodWorker, Message)
 
+ADSBBeastServer::ADSBBeastServer()
+{
+}
+
+void ADSBBeastServer::listen(quint16 port)
+{
+    QTcpServer::listen(QHostAddress::Any, port);
+    qDebug() << "ADSBBeastServer listening on port " << serverPort();
+}
+
+void ADSBBeastServer::incomingConnection(qintptr socket)
+{
+    qDebug() << "ADSBBeastServer client connected";
+    QTcpSocket *s = new QTcpSocket(this);
+    connect(s, &QTcpSocket::readyRead, this, &ADSBBeastServer::readClient);
+    connect(s, SIGNAL(disconnected()), this, SLOT(discardClient()));
+    s->setSocketDescriptor(socket);
+    m_clients.append(s);
+}
+
+void ADSBBeastServer::send(const char *data, int length)
+{
+    // Send frame to all clients
+    for (auto client : m_clients) {
+        client->write(data, length);
+    }
+}
+
+void ADSBBeastServer::close()
+{
+    for (auto client : m_clients) {
+        client->deleteLater();
+    }
+    m_clients.clear();
+    QTcpServer::close();
+}
+
+void ADSBBeastServer::readClient()
+{
+    QTcpSocket *socket = (QTcpSocket *)sender();
+    socket->readAll();
+}
+
+void ADSBBeastServer::discardClient()
+{
+    qDebug() << "ADSBBeastServer client disconnected";
+    QTcpSocket *socket = (QTcpSocket*)sender();
+    socket->deleteLater();
+    m_clients.removeAll(socket);
+}
+
 ADSBDemodWorker::ADSBDemodWorker() :
     m_running(false),
     m_mutex(QMutex::Recursive)
@@ -41,6 +92,8 @@ ADSBDemodWorker::ADSBDemodWorker() :
 #else
     connect(&m_socket, &QAbstractSocket::errorOccurred, this, &ADSBDemodWorker::errorOccurred);
 #endif
+    m_startTime = QDateTime::currentDateTime().toMSecsSinceEpoch();
+    m_heartbeatTimer.start(60*1000);
 }
 
 ADSBDemodWorker::~ADSBDemodWorker()
@@ -63,7 +116,6 @@ bool ADSBDemodWorker::startWork()
     }
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-    m_heartbeatTimer.start(60*1000);
     m_running = true;
     return m_running;
 }
@@ -76,7 +128,6 @@ void ADSBDemodWorker::stopWork()
         return;
     }
 
-    m_heartbeatTimer.stop();
     disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
     m_running = false;
 }
@@ -119,23 +170,43 @@ void ADSBDemodWorker::applySettings(const ADSBDemodSettings& settings, bool forc
 {
     qDebug() << "ADSBDemodWorker::applySettings:"
             << " m_feedEnabled: " << settings.m_feedEnabled
-            << " m_feedHost: " << settings.m_feedHost
-            << " m_feedPort: " << settings.m_feedPort
-            << " m_feedFormat: " << settings.m_feedFormat
+            << " m_exportClientEnabled: " << settings.m_exportClientEnabled
+            << " m_exportClientHost: " << settings.m_exportClientHost
+            << " m_exportClientPort: " << settings.m_exportClientPort
+            << " m_exportClientFormat: " << settings.m_exportClientFormat
+            << " m_exportServerEnabled: " << settings.m_exportServerEnabled
+            << " m_exportServerPort: " << settings.m_exportServerPort
             << " m_logEnabled: " << settings.m_logEnabled
             << " m_logFilename: " << settings.m_logFilename
             << " force: " << force;
 
     if ((settings.m_feedEnabled != m_settings.m_feedEnabled)
-        || (settings.m_feedHost != m_settings.m_feedHost)
-        || (settings.m_feedPort != m_settings.m_feedPort) || force)
+        || (settings.m_exportClientEnabled != m_settings.m_exportClientEnabled)
+        || (settings.m_exportClientHost != m_settings.m_exportClientHost)
+        || (settings.m_exportClientPort != m_settings.m_exportClientPort)
+        || force)
     {
         // Close any existing connection
-        if (m_socket.isOpen())
+        if (m_socket.isOpen()) {
             m_socket.close();
+        }
         // Open connection
-        if (settings.m_feedEnabled)
-            m_socket.connectToHost(settings.m_feedHost, settings.m_feedPort);
+        if (settings.m_feedEnabled && settings.m_exportClientEnabled) {
+            m_socket.connectToHost(settings.m_exportClientHost, settings.m_exportClientPort);
+        }
+    }
+
+    if ((settings.m_feedEnabled != m_settings.m_feedEnabled)
+        || (settings.m_exportServerEnabled != m_settings.m_exportServerEnabled)
+        || (settings.m_exportServerPort != m_settings.m_exportServerPort)
+        || force)
+    {
+        if (m_beastServer.isListening()) {
+            m_beastServer.close();
+        }
+        if (settings.m_feedEnabled && settings.m_exportServerEnabled) {
+            m_beastServer.listen(settings.m_exportServerPort);
+        }
     }
 
     if ((settings.m_logEnabled != m_settings.m_logEnabled)
@@ -173,7 +244,7 @@ void ADSBDemodWorker::applySettings(const ADSBDemodSettings& settings, bool forc
 
 void ADSBDemodWorker::connected()
 {
-    qDebug() << "ADSBDemodWorker::connected " << m_settings.m_feedHost;
+    qDebug() << "ADSBDemodWorker::connected " << m_settings.m_exportClientHost;
 }
 
 void ADSBDemodWorker::disconnected()
@@ -195,11 +266,12 @@ void ADSBDemodWorker::recv()
 
 void ADSBDemodWorker::send(const char *data, int length)
 {
-    if (m_settings.m_feedEnabled)
+    if (m_settings.m_feedEnabled && m_settings.m_exportClientEnabled)
     {
         // Reopen connection if it was lost
-        if (!m_socket.isOpen())
-            m_socket.connectToHost(m_settings.m_feedHost, m_settings.m_feedPort);
+        if (!m_socket.isOpen()) {
+            m_socket.connectToHost(m_settings.m_exportClientHost, m_settings.m_exportClientPort);
+        }
         // Send data
         m_socket.write(data, length);
     }
@@ -210,8 +282,9 @@ void ADSBDemodWorker::send(const char *data, int length)
 char *ADSBDemodWorker::escape(char *p, char c)
 {
     *p++ = c;
-    if (c == BEAST_ESC)
+    if (c == BEAST_ESC) {
         *p++ = BEAST_ESC;
+    }
     return p;
 }
 
@@ -220,13 +293,14 @@ char *ADSBDemodWorker::escape(char *p, char c)
 // Log to .csv file
 void ADSBDemodWorker::handleADSB(QByteArray data, const QDateTime dateTime, float correlation)
 {
-    if (m_logFile.isOpen())
-    {
+    if (m_logFile.isOpen()) {
         m_logStream << dateTime.date().toString() << "," << dateTime.time().toString() << "," << data.toHex() << "," << correlation << "\n";
     }
-    if (m_settings.m_feedEnabled)
+
+    if (m_settings.m_feedEnabled && (m_settings.m_exportClientEnabled || m_settings.m_exportServerEnabled))
     {
-        if (m_settings.m_feedFormat == ADSBDemodSettings::BeastBinary)
+        if ((m_settings.m_exportClientEnabled && (m_settings.m_exportClientFormat == ADSBDemodSettings::BeastBinary))
+            || m_settings.m_exportServerEnabled)
         {
             char beastBinary[2+6*2+1*2+14*2];
             int length;
@@ -234,20 +308,21 @@ void ADSBDemodWorker::handleADSB(QByteArray data, const QDateTime dateTime, floa
             qint64 timestamp;
             unsigned char signalStrength;
 
-            timestamp = dateTime.toMSecsSinceEpoch();
+            // Timestamp seems to be 12MHz ticks since device started
+            timestamp = (dateTime.toMSecsSinceEpoch() - m_startTime) * 12000;
 
-            if (correlation > 255)
+            if (correlation > 255) {
                signalStrength = 255;
-            if (correlation < 1)
+            } else if (correlation < 1) {
                signalStrength = 1;
-            else
+            } else {
                signalStrength = (unsigned char)correlation;
+            }
 
             *p++ = BEAST_ESC;
             *p++ = '3'; // Mode-S long
 
-            p = escape(p, timestamp >> 56); // Big-endian timestamp
-            p = escape(p, timestamp >> 48);
+            p = escape(p, timestamp >> 48);  // Big-endian timestamp
             p = escape(p, timestamp >> 32);
             p = escape(p, timestamp >> 24);
             p = escape(p, timestamp >> 16);
@@ -256,14 +331,20 @@ void ADSBDemodWorker::handleADSB(QByteArray data, const QDateTime dateTime, floa
 
             p = escape(p, signalStrength);  // Signal strength
 
-            for (int i = 0; i < data.length(); i++) // ADS-B data
+            for (int i = 0; i < data.length(); i++) { // ADS-B data
                 p = escape(p, data[i]);
+            }
 
             length = p - beastBinary;
 
-            send(beastBinary, length);
+            if ((m_settings.m_exportClientEnabled) && (m_settings.m_exportClientFormat == ADSBDemodSettings::BeastBinary)) {
+                send(beastBinary, length);
+            }
+            if (m_settings.m_exportServerEnabled) {
+                m_beastServer.send(beastBinary, length);
+            }
         }
-        else if (m_settings.m_feedFormat == ADSBDemodSettings::BeastHex)
+        if (m_settings.m_exportClientEnabled && (m_settings.m_exportClientFormat == ADSBDemodSettings::BeastHex))
         {
             QString beastHex = "*" + data.toHex() + ";\n";
             send(beastHex.toUtf8(), beastHex.size());
@@ -274,6 +355,14 @@ void ADSBDemodWorker::handleADSB(QByteArray data, const QDateTime dateTime, floa
 // Periodically send heartbeat to keep connection alive
 void ADSBDemodWorker::heartbeat()
 {
-    const char heartbeat[] = {BEAST_ESC, '1', 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Mode AC packet
-    send(heartbeat, sizeof(heartbeat));
+    if (m_running)
+    {
+        const char heartbeat[] = {BEAST_ESC, '1', 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Mode AC packet
+        if (m_settings.m_exportClientEnabled) {
+            send(heartbeat, sizeof(heartbeat));
+        }
+        if (m_settings.m_exportServerEnabled) {
+            m_beastServer.send(heartbeat, sizeof(heartbeat));
+        }
+    }
 }

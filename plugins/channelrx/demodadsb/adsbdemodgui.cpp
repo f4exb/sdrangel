@@ -32,6 +32,8 @@
 #include <QClipboard>
 #include <QFileDialog>
 #include <QQmlProperty>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 #include <QtGui/private/qzipreader_p.h>
 
@@ -859,65 +861,11 @@ QIcon *ADSBDemodGUI::getFlagIcon(const QString &country)
     }
 }
 
-void ADSBDemodGUI::handleADSB(
-    const QByteArray data,
-    const QDateTime dateTime,
-    float correlation,
-    float correlationOnes,
-    bool updateModel)
+// Find aircraft with icao, or create if it doesn't exist
+Aircraft *ADSBDemodGUI::getAircraft(int icao, bool &newAircraft)
 {
-    const char idMap[] = "#ABCDEFGHIJKLMNOPQRSTUVWXYZ##### ############-##0123456789######";
-    const QString categorySetA[] = {
-        QStringLiteral("None"),
-        QStringLiteral("Light"),
-        QStringLiteral("Small"),
-        QStringLiteral("Large"),
-        QStringLiteral("High vortex"),
-        QStringLiteral("Heavy"),
-        QStringLiteral("High performance"),
-        QStringLiteral("Rotorcraft")
-    };
-    const QString categorySetB[] = {
-        QStringLiteral("None"),
-        QStringLiteral("Glider/sailplane"),
-        QStringLiteral("Lighter-than-air"),
-        QStringLiteral("Parachutist"),
-        QStringLiteral("Ultralight"),
-        QStringLiteral("Reserved"),
-        QStringLiteral("UAV"),
-        QStringLiteral("Space vehicle")
-    };
-    const QString categorySetC[] = {
-        QStringLiteral("None"),
-        QStringLiteral("Emergency vehicle"),
-        QStringLiteral("Service vehicle"),
-        QStringLiteral("Ground obstruction"),
-        QStringLiteral("Cluster obstacle"),
-        QStringLiteral("Line obstacle"),
-        QStringLiteral("Reserved"),
-        QStringLiteral("Reserved")
-    };
-    const QString emergencyStatus[] = {
-        QStringLiteral("No emergency"),
-        QStringLiteral("General emergency"),
-        QStringLiteral("Lifeguard/Medical"),
-        QStringLiteral("Minimum fuel"),
-        QStringLiteral("No communications"),
-        QStringLiteral("Unlawful interference"),
-        QStringLiteral("Downed aircraft"),
-        QStringLiteral("Reserved")
-    };
-
-    bool newAircraft = false;
-    bool updatedCallsign = false;
-    bool resetAnimation = false;
-
-    int df = (data[0] >> 3) & ADS_B_DF_MASK; // Downlink format
-    int ca = data[0] & 0x7; // Capability
-    unsigned icao = ((data[1] & 0xff) << 16) | ((data[2] & 0xff) << 8) | (data[3] & 0xff); // ICAO aircraft address
-    int tc = (data[4] >> 3) & 0x1f; // Type code
-
     Aircraft *aircraft;
+
     if (m_aircraft.contains(icao))
     {
         // Update existing aircraft info
@@ -931,12 +879,7 @@ void ADSBDemodGUI::handleADSB(
         aircraft->m_icao = icao;
         aircraft->m_icaoHex = QString::number(aircraft->m_icao, 16);
         m_aircraft.insert(icao, aircraft);
-        // Check for TIS-B addresses
-        if ((df == 18) && !((df == 18) && ((ca == 0) || (ca == 1) || (ca == 6)))) {
-            aircraft->m_icaoItem->setText(QString("TIS-B %1").arg(aircraft->m_icaoHex));
-        } else {
-            aircraft->m_icaoItem->setText(aircraft->m_icaoHex);
-        }
+        aircraft->m_icaoItem->setText(aircraft->m_icaoHex);
         ui->adsbData->setSortingEnabled(false);
         int row = ui->adsbData->rowCount();
         ui->adsbData->setRowCount(row + 1);
@@ -1020,20 +963,30 @@ void ADSBDemodGUI::handleADSB(
                         // Some countries use AA-A - try these first as first letters are common
                         prefix = aircraft->m_aircraftInfo->m_registration.left(idx + 2);
                         if (m_prefixMap->contains(prefix))
-                            flag =  m_prefixMap->value(prefix);
+                            flag = m_prefixMap->value(prefix);
                         else
                         {
                             // Try letters before '-'
                             prefix = aircraft->m_aircraftInfo->m_registration.left(idx);
                             if (m_prefixMap->contains(prefix))
-                                flag =  m_prefixMap->value(prefix);
+                                flag = m_prefixMap->value(prefix);
                         }
                     }
                     else
                     {
-                        // No '-' Could be military
-                        if ((m_militaryMap != nullptr) && (m_militaryMap->contains(aircraft->m_aircraftInfo->m_operator)))
+                        // No '-' Could be one of a few countries or military.
+                        // See: https://en.wikipedia.org/wiki/List_of_aircraft_registration_prefixes
+                        if (aircraft->m_aircraftInfo->m_registration.startsWith("N")) {
+                            flag = m_prefixMap->value("N"); // US
+                        } else if (aircraft->m_aircraftInfo->m_registration.startsWith("JA")) {
+                            flag = m_prefixMap->value("JA"); // Japan
+                        } else if (aircraft->m_aircraftInfo->m_registration.startsWith("HL")) {
+                            flag = m_prefixMap->value("HL"); // Korea
+                        } else if (aircraft->m_aircraftInfo->m_registration.startsWith("YV")) {
+                            flag = m_prefixMap->value("YV"); // Venezuela
+                        } else if ((m_militaryMap != nullptr) && (m_militaryMap->contains(aircraft->m_aircraftInfo->m_operator))) {
                             flag = m_militaryMap->value(aircraft->m_aircraftInfo->m_operator);
+                        }
                     }
                     if (flag != "")
                     {
@@ -1070,6 +1023,70 @@ void ADSBDemodGUI::handleADSB(
         // Check to see if we need to emit a notification about this new aircraft
         checkStaticNotification(aircraft);
     }
+
+    return aircraft;
+}
+
+void ADSBDemodGUI::handleADSB(
+    const QByteArray data,
+    const QDateTime dateTime,
+    float correlation,
+    float correlationOnes,
+    bool updateModel)
+{
+    const char idMap[] = "#ABCDEFGHIJKLMNOPQRSTUVWXYZ##### ############-##0123456789######";
+    const QString categorySetA[] = {
+        QStringLiteral("None"),
+        QStringLiteral("Light"),
+        QStringLiteral("Small"),
+        QStringLiteral("Large"),
+        QStringLiteral("High vortex"),
+        QStringLiteral("Heavy"),
+        QStringLiteral("High performance"),
+        QStringLiteral("Rotorcraft")
+    };
+    const QString categorySetB[] = {
+        QStringLiteral("None"),
+        QStringLiteral("Glider/sailplane"),
+        QStringLiteral("Lighter-than-air"),
+        QStringLiteral("Parachutist"),
+        QStringLiteral("Ultralight"),
+        QStringLiteral("Reserved"),
+        QStringLiteral("UAV"),
+        QStringLiteral("Space vehicle")
+    };
+    const QString categorySetC[] = {
+        QStringLiteral("None"),
+        QStringLiteral("Emergency vehicle"),
+        QStringLiteral("Service vehicle"),
+        QStringLiteral("Ground obstruction"),
+        QStringLiteral("Cluster obstacle"),
+        QStringLiteral("Line obstacle"),
+        QStringLiteral("Reserved"),
+        QStringLiteral("Reserved")
+    };
+    const QString emergencyStatus[] = {
+        QStringLiteral("No emergency"),
+        QStringLiteral("General emergency"),
+        QStringLiteral("Lifeguard/Medical"),
+        QStringLiteral("Minimum fuel"),
+        QStringLiteral("No communications"),
+        QStringLiteral("Unlawful interference"),
+        QStringLiteral("Downed aircraft"),
+        QStringLiteral("Reserved")
+    };
+
+    bool newAircraft = false;
+    bool updatedCallsign = false;
+    bool resetAnimation = false;
+
+    int df = (data[0] >> 3) & ADS_B_DF_MASK; // Downlink format
+    int ca = data[0] & 0x7; // Capability
+    unsigned icao = ((data[1] & 0xff) << 16) | ((data[2] & 0xff) << 8) | (data[3] & 0xff); // ICAO aircraft address
+    int tc = (data[4] >> 3) & 0x1f; // Type code
+
+    Aircraft *aircraft = getAircraft(icao, newAircraft);
+
     aircraft->m_time = dateTime;
     QTime time = dateTime.time();
     aircraft->m_timeItem->setText(QString("%1:%2:%3").arg(time.hour(), 2, 10, QLatin1Char('0')).arg(time.minute(), 2, 10, QLatin1Char('0')).arg(time.second(), 2, 10, QLatin1Char('0')));
@@ -1171,94 +1188,7 @@ void ADSBDemodGUI::handleADSB(
                    )
                )
             {
-                QString aircraftType;
-
-                if (!aircraft->m_emitterCategory.compare("Heavy"))
-                {
-                    QStringList heavy = {"B744", "B77W", "B788", "A388"};
-                    aircraftType = heavy[m_random.bounded(heavy.size())];
-                }
-                else if (!aircraft->m_emitterCategory.compare("Large"))
-                {
-                    QStringList large = {"A319", "A320", "A321", "B737", "B738", "B739"};
-                    aircraftType = large[m_random.bounded(large.size())];
-                }
-                else if (!aircraft->m_emitterCategory.compare("Small"))
-                {
-                    aircraftType = "LJ45";
-                }
-                else if (!aircraft->m_emitterCategory.compare("Rotorcraft"))
-                {
-                    aircraft->m_aircraftCat3DModel = "helicopter.glb";
-                    aircraft->m_modelAltitudeOffset = 4.0f;
-                    aircraft->m_labelAltitudeOffset = 4.0f;
-                }
-                else if (!aircraft->m_emitterCategory.compare("High performance"))
-                {
-                    aircraft->m_aircraftCat3DModel = "f15.glb";
-                    aircraft->m_modelAltitudeOffset = 1.0f;
-                    aircraft->m_labelAltitudeOffset = 6.0f;
-                }
-                else if (!aircraft->m_emitterCategory.compare("Light"))
-                {
-                    aircraftType = "C172";
-                }
-                else if (!aircraft->m_emitterCategory.compare("Ultralight"))
-                {
-                    aircraft->m_aircraftCat3DModel = "ultralight.glb";
-                    aircraft->m_modelAltitudeOffset = 0.55f;
-                    aircraft->m_labelAltitudeOffset = 0.75f;
-                }
-                else if (!aircraft->m_emitterCategory.compare("Glider/sailplane"))
-                {
-                    aircraft->m_aircraftCat3DModel = "glider.glb";
-                    aircraft->m_modelAltitudeOffset = 1.0f;
-                    aircraft->m_labelAltitudeOffset = 1.5f;
-                }
-                else if (!aircraft->m_emitterCategory.compare("Space vehicle"))
-                {
-                    aircraft->m_aircraftCat3DModel = "atlas_v.glb";
-                    aircraft->m_labelAltitudeOffset = 16.0f;
-                }
-                else if (!aircraft->m_emitterCategory.compare("UAV"))
-                {
-                    aircraft->m_aircraftCat3DModel = "drone.glb";
-                    aircraft->m_labelAltitudeOffset = 1.0f;
-                }
-                else if (!aircraft->m_emitterCategory.compare("Emergency vehicle"))
-                {
-                    aircraft->m_aircraftCat3DModel = "fire_truck.glb";
-                    aircraft->m_modelAltitudeOffset = 0.3f;
-                    aircraft->m_labelAltitudeOffset = 2.5f;
-                }
-                else if (!aircraft->m_emitterCategory.compare("Service vehicle"))
-                {
-                    aircraft->m_aircraftCat3DModel = "airport_truck.glb";
-                    aircraft->m_labelAltitudeOffset = 3.0f;
-                }
-                else
-                {
-                    aircraftType = "A320";
-                }
-
-                if (!aircraftType.isEmpty())
-                {
-                    aircraft->m_aircraftCat3DModel = "";
-                    if (aircraft->m_aircraftInfo) {
-                        aircraft->m_aircraftCat3DModel = get3DModel(aircraftType, aircraft->m_aircraftInfo->m_operatorICAO);
-                    }
-                    if (aircraft->m_aircraftCat3DModel.isEmpty()) {
-                        aircraft->m_aircraftCat3DModel = get3DModel(aircraftType, aircraft->m_callsign.left(3));
-                    }
-                    if (aircraft->m_aircraftCat3DModel.isEmpty()) {
-                        aircraft->m_aircraftCat3DModel = get3DModel(aircraftType);
-                    }
-                    if (m_modelAltitudeOffset.contains(aircraftType))
-                    {
-                        aircraft->m_modelAltitudeOffset = m_modelAltitudeOffset.value(aircraftType);
-                        aircraft->m_labelAltitudeOffset = m_labelAltitudeOffset.value(aircraftType);
-                    }
-                }
+                get3DModelBasedOnCategory(aircraft);
                 // As we're changing the model, we need to reset animations to
                 // ensure gear/flaps are in correct position on new model
                 resetAnimation = true;
@@ -2314,6 +2244,7 @@ void ADSBDemodGUI::on_feed_clicked(bool checked)
     m_settings.m_feedEnabled = checked;
     // Don't disable host/port - so they can be entered before connecting
     applySettings();
+    applyImportSettings();
 }
 
 void ADSBDemodGUI::on_notifications_clicked()
@@ -3001,6 +2932,98 @@ void ADSBDemodGUI::get3DModel(Aircraft *aircraft)
     }
 }
 
+void ADSBDemodGUI::get3DModelBasedOnCategory(Aircraft *aircraft)
+{
+    QString aircraftType;
+
+    if (!aircraft->m_emitterCategory.compare("Heavy"))
+    {
+        QStringList heavy = {"B744", "B77W", "B788", "A388"};
+        aircraftType = heavy[m_random.bounded(heavy.size())];
+    }
+    else if (!aircraft->m_emitterCategory.compare("Large"))
+    {
+        QStringList large = {"A319", "A320", "A321", "B737", "B738", "B739"};
+        aircraftType = large[m_random.bounded(large.size())];
+    }
+    else if (!aircraft->m_emitterCategory.compare("Small"))
+    {
+        aircraftType = "LJ45";
+    }
+    else if (!aircraft->m_emitterCategory.compare("Rotorcraft"))
+    {
+        aircraft->m_aircraftCat3DModel = "helicopter.glb";
+        aircraft->m_modelAltitudeOffset = 4.0f;
+        aircraft->m_labelAltitudeOffset = 4.0f;
+    }
+    else if (!aircraft->m_emitterCategory.compare("High performance"))
+    {
+        aircraft->m_aircraftCat3DModel = "f15.glb";
+        aircraft->m_modelAltitudeOffset = 1.0f;
+        aircraft->m_labelAltitudeOffset = 6.0f;
+    }
+    else if (!aircraft->m_emitterCategory.compare("Light"))
+    {
+        aircraftType = "C172";
+    }
+    else if (!aircraft->m_emitterCategory.compare("Ultralight"))
+    {
+        aircraft->m_aircraftCat3DModel = "ultralight.glb";
+        aircraft->m_modelAltitudeOffset = 0.55f;
+        aircraft->m_labelAltitudeOffset = 0.75f;
+    }
+    else if (!aircraft->m_emitterCategory.compare("Glider/sailplane"))
+    {
+        aircraft->m_aircraftCat3DModel = "glider.glb";
+        aircraft->m_modelAltitudeOffset = 1.0f;
+        aircraft->m_labelAltitudeOffset = 1.5f;
+    }
+    else if (!aircraft->m_emitterCategory.compare("Space vehicle"))
+    {
+        aircraft->m_aircraftCat3DModel = "atlas_v.glb";
+        aircraft->m_labelAltitudeOffset = 16.0f;
+    }
+    else if (!aircraft->m_emitterCategory.compare("UAV"))
+    {
+        aircraft->m_aircraftCat3DModel = "drone.glb";
+        aircraft->m_labelAltitudeOffset = 1.0f;
+    }
+    else if (!aircraft->m_emitterCategory.compare("Emergency vehicle"))
+    {
+        aircraft->m_aircraftCat3DModel = "fire_truck.glb";
+        aircraft->m_modelAltitudeOffset = 0.3f;
+        aircraft->m_labelAltitudeOffset = 2.5f;
+    }
+    else if (!aircraft->m_emitterCategory.compare("Service vehicle"))
+    {
+        aircraft->m_aircraftCat3DModel = "airport_truck.glb";
+        aircraft->m_labelAltitudeOffset = 3.0f;
+    }
+    else
+    {
+        aircraftType = "A320";
+    }
+
+    if (!aircraftType.isEmpty())
+    {
+        aircraft->m_aircraftCat3DModel = "";
+        if (aircraft->m_aircraftInfo) {
+            aircraft->m_aircraftCat3DModel = get3DModel(aircraftType, aircraft->m_aircraftInfo->m_operatorICAO);
+        }
+        if (aircraft->m_aircraftCat3DModel.isEmpty()) {
+            aircraft->m_aircraftCat3DModel = get3DModel(aircraftType, aircraft->m_callsign.left(3));
+        }
+        if (aircraft->m_aircraftCat3DModel.isEmpty()) {
+            aircraft->m_aircraftCat3DModel = get3DModel(aircraftType);
+        }
+        if (m_modelAltitudeOffset.contains(aircraftType))
+        {
+            aircraft->m_modelAltitudeOffset = m_modelAltitudeOffset.value(aircraftType);
+            aircraft->m_labelAltitudeOffset = m_labelAltitudeOffset.value(aircraftType);
+        }
+    }
+}
+
 void ADSBDemodGUI::update3DModels()
 {
     // Look for all aircraft gltfs in 3d directory
@@ -3399,6 +3422,8 @@ void ADSBDemodGUI::updatePhotoText(Aircraft *aircraft)
         QList<QSize> sizes = icon.availableSizes();
         if (sizes.size() > 0) {
             ui->photoFlag->setPixmap(icon.pixmap(sizes[0]));
+        } else {
+            ui->photoFlag->setPixmap(QPixmap());
         }
 
         updatePhotoFlightInformation(aircraft);
@@ -3512,13 +3537,11 @@ void ADSBDemodGUI::highlightAircraft(Aircraft *aircraft)
 // Show feed dialog
 void ADSBDemodGUI::feedSelect()
 {
-    ADSBDemodFeedDialog dialog(m_settings.m_feedHost, m_settings.m_feedPort, m_settings.m_feedFormat);
+    ADSBDemodFeedDialog dialog(&m_settings);
     if (dialog.exec() == QDialog::Accepted)
     {
-        m_settings.m_feedHost = dialog.m_feedHost;
-        m_settings.m_feedPort = dialog.m_feedPort;
-        m_settings.m_feedFormat = dialog.m_feedFormat;
         applySettings();
+        applyImportSettings();
     }
 }
 
@@ -3799,6 +3822,11 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     displaySettings();
     applySettings(true);
 
+    connect(&m_importTimer, &QTimer::timeout, this, &ADSBDemodGUI::import);
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(handleImportReply(QNetworkReply*)));
+    applyImportSettings();
+
     ui->map->installEventFilter(this);
 }
 
@@ -3832,6 +3860,7 @@ ADSBDemodGUI::~ADSBDemodGUI()
     qDeleteAll(m_airspaces);
     qDeleteAll(m_navAids);
     qDeleteAll(m_3DModelMatch);
+    delete m_networkManager;
 }
 
 void ADSBDemodGUI::applySettings(bool force)
@@ -3940,6 +3969,7 @@ void ADSBDemodGUI::displaySettings()
     initFlightInformation();
 
     applyMapSettings();
+    applyImportSettings();
 
     restoreState(m_rollupState);
     blockApplySettings(false);
@@ -4383,4 +4413,177 @@ bool ADSBDemodGUI::eventFilter(QObject *obj, QEvent *event)
         }
     }
     return false;
+}
+
+void ADSBDemodGUI::applyImportSettings()
+{
+    m_importTimer.setInterval(m_settings.m_importPeriod * 1000);
+    if (m_settings.m_feedEnabled && m_settings.m_importEnabled) {
+        m_importTimer.start();
+    } else {
+        m_importTimer.stop();
+    }
+}
+
+// Import ADS-B data from opensky-network via an API call
+void ADSBDemodGUI::import()
+{
+    QString urlString = "https://";
+    if (!m_settings.m_importUsername.isEmpty() && !m_settings.m_importPassword.isEmpty()) {
+        urlString = urlString + m_settings.m_importUsername + ":" + m_settings.m_importPassword + "@";
+    }
+    urlString = urlString + m_settings.m_importHost + "/api/states/all";
+    QChar join = '?';
+    if (!m_settings.m_importParameters.isEmpty())
+    {
+        urlString = urlString + join + m_settings.m_importParameters;
+        join = '&';
+    }
+    if (!m_settings.m_importMinLatitude.isEmpty())
+    {
+        urlString = urlString + join + "lamin=" + m_settings.m_importMinLatitude;
+        join = '&';
+    }
+    if (!m_settings.m_importMaxLatitude.isEmpty())
+    {
+        urlString = urlString + join + "lamax=" + m_settings.m_importMaxLatitude;
+        join = '&';
+    }
+    if (!m_settings.m_importMinLongitude.isEmpty())
+    {
+        urlString = urlString + join + "lomin=" + m_settings.m_importMinLongitude;
+        join = '&';
+    }
+    if (!m_settings.m_importMaxLongitude.isEmpty())
+    {
+        urlString = urlString + join + "lomax=" + m_settings.m_importMaxLongitude;
+        join = '&';
+    }
+    m_networkManager->get(QNetworkRequest(QUrl(urlString)));
+}
+
+// Handle opensky-network API call reply
+void ADSBDemodGUI::handleImportReply(QNetworkReply* reply)
+{
+    if (reply)
+    {
+        if (!reply->error())
+        {
+            QJsonDocument document = QJsonDocument::fromJson(reply->readAll());
+            if (document.isObject())
+            {
+                QJsonObject obj = document.object();
+                if (obj.contains("time") && obj.contains("states"))
+                {
+                    int seconds = obj.value("time").toInt();
+                    QDateTime dateTime = QDateTime::fromSecsSinceEpoch(seconds);
+                    QJsonArray states = obj.value("states").toArray();
+                    for (int i = 0; i < states.size(); i++)
+                    {
+                        QJsonArray state = states[i].toArray();
+                        int icao = state[0].toString().toInt(nullptr, 16);
+
+                        bool newAircraft;
+                        Aircraft *aircraft = getAircraft(icao, newAircraft);
+
+                        QString callsign = state[1].toString().trimmed();
+                        if (!callsign.isEmpty())
+                        {
+                            aircraft->m_callsign = callsign;
+                            aircraft->m_callsignItem->setText(aircraft->m_callsign);
+                        }
+
+                        QDateTime timePosition = dateTime;
+                        if (state[3].isNull()) {
+                            timePosition = dateTime.addSecs(-15); // At least 15 seconds old
+                        } else {
+                            timePosition = QDateTime::fromSecsSinceEpoch(state[3].toInt());
+                        }
+                        aircraft->m_time = QDateTime::fromSecsSinceEpoch(state[4].toInt());
+                        QTime time = aircraft->m_time.time();
+                        aircraft->m_timeItem->setText(QString("%1:%2:%3").arg(time.hour(), 2, 10, QLatin1Char('0')).arg(time.minute(), 2, 10, QLatin1Char('0')).arg(time.second(), 2, 10, QLatin1Char('0')));
+                        aircraft->m_adsbFrameCount++;
+                        aircraft->m_adsbFrameCountItem->setData(Qt::DisplayRole, aircraft->m_adsbFrameCount);
+
+                        if (timePosition > aircraft->m_positionDateTime)
+                        {
+                            if (!state[5].isNull() && !state[6].isNull())
+                            {
+                                aircraft->m_longitude = state[5].toDouble();
+                                aircraft->m_latitude = state[6].toDouble();
+                                aircraft->m_longitudeItem->setData(Qt::DisplayRole, aircraft->m_longitude);
+                                aircraft->m_latitudeItem->setData(Qt::DisplayRole, aircraft->m_latitude);
+                                updatePosition(aircraft);
+                                aircraft->m_cprValid[0] = false;
+                                aircraft->m_cprValid[1] = false;
+                            }
+                            if (!state[7].isNull())
+                            {
+                                aircraft->m_altitude = (int)Units::metresToFeet(state[7].toDouble());
+                                aircraft->m_altitudeValid = true;
+                                aircraft->m_altitudeGNSS = false;
+                                aircraft->m_altitudeItem->setData(Qt::DisplayRole, aircraft->m_altitude);
+                            }
+                            aircraft->m_positionDateTime = timePosition;
+                        }
+                        aircraft->m_onSurface = state[8].toBool(false);
+                        if (!state[9].isNull())
+                        {
+                            aircraft->m_speed = (int)state[9].toDouble();
+                            aircraft->m_speedItem->setData(Qt::DisplayRole, aircraft->m_speed);
+                            aircraft->m_speedValid = true;
+                            aircraft->m_speedType = Aircraft::GS;
+                        }
+                        if (!state[10].isNull())
+                        {
+                            aircraft->m_heading = (float)state[10].toDouble();
+                            aircraft->m_headingItem->setData(Qt::DisplayRole, std::round(aircraft->m_heading));
+                            aircraft->m_headingValid = true;
+                            aircraft->m_headingDateTime = aircraft->m_time;
+                        }
+                        if (!state[11].isNull())
+                        {
+                            aircraft->m_verticalRate = (int)state[10].toDouble();
+                            aircraft->m_verticalRateItem->setData(Qt::DisplayRole, aircraft->m_verticalRate);
+                            aircraft->m_verticalRateValid = true;
+                        }
+                        if (!state[14].isNull())
+                        {
+                            aircraft->m_squawk = state[14].toString().toInt();
+                            aircraft->m_squawkItem->setText(QString("%1").arg(aircraft->m_squawk, 4, 10, QLatin1Char('0')));
+                        }
+
+                        // Update aircraft in map
+                        if (aircraft->m_positionValid)
+                        {
+                            // Check to see if we need to start any animations
+                            QList<SWGSDRangel::SWGMapAnimation *> *animations = animate(dateTime, aircraft);
+
+                            // Update map displayed in channel
+                            m_aircraftModel.aircraftUpdated(aircraft);
+
+                            // Send to Map feature
+                            sendToMap(aircraft, animations);
+                        }
+
+                        // Check to see if we need to emit a notification about this aircraft
+                        checkDynamicNotification(aircraft);
+                    }
+                }
+                else
+                {
+                    qDebug() << "ADSBDemodGUI::handleImportReply: Document object does not contain time and states: " << document;
+                }
+            }
+            else
+            {
+                qDebug() << "ADSBDemodGUI::handleImportReply: Document is not an object: " << document;
+            }
+        }
+        else
+        {
+            qDebug() << "ADSBDemodGUI::handleImportReply: error " << reply->error();
+        }
+        reply->deleteLater();
+    }
 }

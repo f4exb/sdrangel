@@ -34,6 +34,8 @@ SWGFeatureReport::SWGFeatureReport() {
     m_afc_report_isSet = false;
     gs232_controller_report = nullptr;
     m_gs232_controller_report_isSet = false;
+    map_report = nullptr;
+    m_map_report_isSet = false;
     per_tester_report = nullptr;
     m_per_tester_report_isSet = false;
     rig_ctl_server_report = nullptr;
@@ -60,6 +62,8 @@ SWGFeatureReport::init() {
     m_afc_report_isSet = false;
     gs232_controller_report = new SWGGS232ControllerReport();
     m_gs232_controller_report_isSet = false;
+    map_report = new SWGMapReport();
+    m_map_report_isSet = false;
     per_tester_report = new SWGPERTesterReport();
     m_per_tester_report_isSet = false;
     rig_ctl_server_report = new SWGRigCtlServerReport();
@@ -84,6 +88,9 @@ SWGFeatureReport::cleanup() {
     }
     if(gs232_controller_report != nullptr) { 
         delete gs232_controller_report;
+    }
+    if(map_report != nullptr) { 
+        delete map_report;
     }
     if(per_tester_report != nullptr) { 
         delete per_tester_report;
@@ -122,6 +129,8 @@ SWGFeatureReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&gs232_controller_report, pJson["GS232ControllerReport"], "SWGGS232ControllerReport", "SWGGS232ControllerReport");
     
+    ::SWGSDRangel::setValue(&map_report, pJson["MapReport"], "SWGMapReport", "SWGMapReport");
+    
     ::SWGSDRangel::setValue(&per_tester_report, pJson["PERTesterReport"], "SWGPERTesterReport", "SWGPERTesterReport");
     
     ::SWGSDRangel::setValue(&rig_ctl_server_report, pJson["RigCtlServerReport"], "SWGRigCtlServerReport", "SWGRigCtlServerReport");
@@ -158,6 +167,9 @@ SWGFeatureReport::asJsonObject() {
     }
     if((gs232_controller_report != nullptr) && (gs232_controller_report->isSet())){
         toJsonValue(QString("GS232ControllerReport"), gs232_controller_report, obj, QString("SWGGS232ControllerReport"));
+    }
+    if((map_report != nullptr) && (map_report->isSet())){
+        toJsonValue(QString("MapReport"), map_report, obj, QString("SWGMapReport"));
     }
     if((per_tester_report != nullptr) && (per_tester_report->isSet())){
         toJsonValue(QString("PERTesterReport"), per_tester_report, obj, QString("SWGPERTesterReport"));
@@ -209,6 +221,16 @@ void
 SWGFeatureReport::setGs232ControllerReport(SWGGS232ControllerReport* gs232_controller_report) {
     this->gs232_controller_report = gs232_controller_report;
     this->m_gs232_controller_report_isSet = true;
+}
+
+SWGMapReport*
+SWGFeatureReport::getMapReport() {
+    return map_report;
+}
+void
+SWGFeatureReport::setMapReport(SWGMapReport* map_report) {
+    this->map_report = map_report;
+    this->m_map_report_isSet = true;
 }
 
 SWGPERTesterReport*
@@ -283,6 +305,9 @@ SWGFeatureReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(gs232_controller_report && gs232_controller_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(map_report && map_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(per_tester_report && per_tester_report->isSet()){

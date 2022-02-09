@@ -812,6 +812,7 @@ void MapGUI::applyMap3DSettings(bool reloadMap)
         m_cesium->setSunLight(m_settings.m_sunLightEnabled);
         m_cesium->setCameraReferenceFrame(m_settings.m_eciCamera);
         m_cesium->setAntiAliasing(m_settings.m_antiAliasing);
+        m_cesium->getDateTime();
     }
 }
 
@@ -826,14 +827,14 @@ void MapGUI::init3DMap()
     m_cesium->setSunLight(m_settings.m_sunLightEnabled);
     m_cesium->setCameraReferenceFrame(m_settings.m_eciCamera);
     m_cesium->setAntiAliasing(m_settings.m_antiAliasing);
+    m_cesium->getDateTime();
 
+    m_mapModel.allUpdated();
     float stationLatitude = MainCore::instance()->getSettings().getLatitude();
     float stationLongitude = MainCore::instance()->getSettings().getLongitude();
 
     // Set 3D view after loading initial objects
     m_cesium->setHomeView(stationLatitude, stationLongitude);
-
-    m_mapModel.allUpdated();
 }
 
 void MapGUI::displaySettings()
@@ -1142,6 +1143,18 @@ void MapGUI::receivedCesiumEvent(const QJsonObject &obj)
                 //m_mapModel.setTarget(obj.value("id").toString());
             } else {
                 //m_mapModel.setTarget("");
+            }
+        }
+        else if (event == "clock")
+        {
+            if (m_map)
+            {
+                QDateTime mapDateTime = QDateTime::fromString(obj.value("currentTime").toString(), Qt::ISODateWithMs);
+                QDateTime systemDateTime = QDateTime::fromString(obj.value("systemTime").toString(), Qt::ISODateWithMs);
+                double multiplier = obj.value("multiplier").toDouble();
+                bool canAnimate = obj.value("canAnimate").toBool();
+                bool shouldAnimate = obj.value("shouldAnimate").toBool();
+                m_map->setMapDateTime(mapDateTime, systemDateTime, canAnimate && shouldAnimate ? multiplier : 0.0);
             }
         }
     }

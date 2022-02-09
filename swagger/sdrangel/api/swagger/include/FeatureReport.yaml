@@ -11,6 +11,8 @@ FeatureReport:
       $ref: "http://swgserver:8081/api/swagger/include/AFC.yaml#/AFCReport"
     GS232ControllerReport:
       $ref: "http://swgserver:8081/api/swagger/include/GS232Controller.yaml#/GS232ControllerReport"
+    MapReport:
+      $ref: "http://swgserver:8081/api/swagger/include/Map.yaml#/MapReport"
     PERTesterReport:
       $ref: "http://swgserver:8081/api/swagger/include/PERTester.yaml#/PERTesterReport"
     RigCtlServerReport:

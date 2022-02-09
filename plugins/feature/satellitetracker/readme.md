@@ -127,7 +127,14 @@ Specifies the longitude in decimal degrees (East positive) of the antenna locati
 
 <h3>11: Time</h3>
 
-Select the date and time at which the position of the satellite should be calculated. Select either Now, for the current time, or Custom to manually enter a date and time.
+Select the date and time at which the position of the satellite should be calculated. Select either:
+
+* Now, for the current time based on the computers clock,
+* Custom to manually enter a date and time,
+* Map to get the time from the 3D map or
+* File to get the time from a File Input device.
+
+When Map or File are selected, a combo box is displayed that allows choosing which Map feature or File Input device, should there be several.
 
 <h3>12: Target</h3>
 

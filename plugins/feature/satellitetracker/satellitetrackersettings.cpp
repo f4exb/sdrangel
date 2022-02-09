@@ -74,8 +74,10 @@ void SatelliteTrackerSettings::resetToDefaults()
     m_reverseAPIFeatureIndex = 0;
     m_chartsDarkTheme = true;
     m_replayEnabled = false;
-    m_useFileInputTime = true;
     m_sendTimeToMap = true;
+    m_dateTimeSelect = NOW;
+    m_mapFeature = "";
+    m_fileInputDevice = "";
     for (int i = 0; i < SAT_COL_COLUMNS; i++)
     {
         m_columnIndexes[i] = i;
@@ -128,8 +130,10 @@ QByteArray SatelliteTrackerSettings::serialize() const
     }
     s.writeBool(38, m_replayEnabled);
     s.writeString(39, m_replayStartDateTime.toString(Qt::ISODate));
-    s.writeBool(40, m_useFileInputTime);
     s.writeBool(41, m_sendTimeToMap);
+    s.writeS32(42, (int)m_dateTimeSelect);
+    s.writeString(43, m_mapFeature);
+    s.writeString(44, m_fileInputDevice);
 
     for (int i = 0; i < SAT_COL_COLUMNS; i++) {
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -217,8 +221,10 @@ bool SatelliteTrackerSettings::deserialize(const QByteArray& data)
         d.readBool(38, &m_replayEnabled, false);
         d.readString(39, &strtmp);
         m_replayStartDateTime = QDateTime::fromString(strtmp, Qt::ISODate);
-        d.readBool(40, &m_useFileInputTime, true);
         d.readBool(41, &m_sendTimeToMap, true);
+        d.readS32(42, (int *)&m_dateTimeSelect, (int)NOW);
+        d.readString(43, &m_mapFeature, "");
+        d.readString(44, &m_fileInputDevice, "");
 
         for (int i = 0; i < SAT_COL_COLUMNS; i++) {
             d.readS32(100 + i, &m_columnIndexes[i], i);

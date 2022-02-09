@@ -126,6 +126,10 @@ private:
     void updateTimeToAOS();
     QString formatDaysTime(qint64 days, QDateTime dateTime);
     QString formatSecondsHHMM(qint64 seconds);
+    void updateDeviceFeatureCombo();
+    void updateDeviceFeatureCombo(const QStringList &items, const QString &selected);
+    void updateFileInputList();
+    void updateMapList();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);
@@ -141,7 +145,7 @@ private slots:
     void on_target_currentTextChanged(const QString &text);
     void on_displaySettings_clicked();
     void on_radioControl_clicked();
-    void on_dateTimeSelect_currentTextChanged(const QString &text);
+    void on_dateTimeSelect_currentIndexChanged(int index);
     void on_dateTime_dateTimeChanged(const QDateTime &datetime);
     void updateStatus();
     void on_viewOnMap_clicked();
@@ -157,6 +161,7 @@ private slots:
     void satTable_sectionResized(int logicalIndex, int oldSize, int newSize);
     void columnSelectMenu(QPoint pos);
     void columnSelectMenuChecked(bool checked = false);
+    void on_deviceFeatureSelect_currentIndexChanged(int index);
 };
 
 

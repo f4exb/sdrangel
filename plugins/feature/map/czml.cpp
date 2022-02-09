@@ -443,7 +443,7 @@ QJsonObject CZML::update(MapItem *mapItem, bool isTarget, bool isSelected)
     QJsonObject label {
         {"text", mapItem->m_label},
         {"show", m_settings->m_displayNames && mapItem->m_itemSettings->m_enabled && mapItem->m_itemSettings->m_display3DLabel},
-        {"scale", 0.5},
+        {"scale", mapItem->m_itemSettings->m_3DLabelScale},
         {"pixelOffset", labelPixelOffset},
         {"eyeOffset", labelEyeOffset},
         {"verticalOrigin",  "BASELINE"},

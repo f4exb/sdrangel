@@ -206,16 +206,55 @@ void ADSBDemod::applySettings(const ADSBDemodSettings& settings, bool force)
         reverseAPIKeys.append("removeTimeout");
     }
     if ((settings.m_feedEnabled != m_settings.m_feedEnabled) || force) {
-        reverseAPIKeys.append("beastEnabled");
+        reverseAPIKeys.append("feedEnabled");
     }
-    if ((settings.m_feedHost != m_settings.m_feedHost) || force) {
-        reverseAPIKeys.append("beastHost");
+    if ((settings.m_exportClientEnabled != m_settings.m_exportClientEnabled) || force) {
+        reverseAPIKeys.append("exportClientEnabled");
     }
-    if ((settings.m_feedPort != m_settings.m_feedPort) || force) {
-        reverseAPIKeys.append("beastPort");
+    if ((settings.m_exportClientHost != m_settings.m_exportClientHost) || force) {
+        reverseAPIKeys.append("exportClientHost");
     }
-    if ((settings.m_feedFormat != m_settings.m_feedFormat) || force) {
-        reverseAPIKeys.append("feedFormat");
+    if ((settings.m_exportClientPort != m_settings.m_exportClientPort) || force) {
+        reverseAPIKeys.append("exportClientPort");
+    }
+    if ((settings.m_exportClientFormat != m_settings.m_exportClientFormat) || force) {
+        reverseAPIKeys.append("exportClientFormat");
+    }
+     if ((settings.m_exportServerEnabled != m_settings.m_exportServerEnabled) || force) {
+        reverseAPIKeys.append("exportServerEnabled");
+    }
+    if ((settings.m_exportServerPort != m_settings.m_exportServerPort) || force) {
+        reverseAPIKeys.append("exportServerPort");
+    }
+   if ((settings.m_importEnabled != m_settings.m_importEnabled) || force) {
+        reverseAPIKeys.append("importEnabled");
+    }
+    if ((settings.m_importHost != m_settings.m_importHost) || force) {
+        reverseAPIKeys.append("importHost");
+    }
+    if ((settings.m_importUsername != m_settings.m_importUsername) || force) {
+        reverseAPIKeys.append("importUsername");
+    }
+    if ((settings.m_importPassword != m_settings.m_importPassword) || force) {
+        reverseAPIKeys.append("importPassword");
+    }
+    if ((settings.m_importParameters != m_settings.m_importParameters) || force) {
+        reverseAPIKeys.append("importParameters");
+    }
+    if ((settings.m_importPeriod != m_settings.m_importPeriod) || force) {
+        reverseAPIKeys.append("importPeriod");
+    }
+    if ((settings.m_importMinLatitude != m_settings.m_importMinLatitude) || force) {
+        reverseAPIKeys.append("importMinLatitude");
+    }
+    if ((settings.m_importMaxLatitude != m_settings.m_importMaxLatitude) || force) {
+        reverseAPIKeys.append("importMaxLatitude");
+    }
+    if ((settings.m_importMinLongitude != m_settings.m_importMinLongitude) || force) {
+        reverseAPIKeys.append("importMinLongitude");
+    }
+    if ((settings.m_importMaxLongitude != m_settings.m_importMaxLongitude) || force) {
+        reverseAPIKeys.append("importMaxLongitude");
     }
     if ((settings.m_logFilename != m_settings.m_logFilename) || force) {
         reverseAPIKeys.append("logFilename");
@@ -363,17 +402,56 @@ void ADSBDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("removeTimeout")) {
         settings.m_removeTimeout = response.getAdsbDemodSettings()->getRemoveTimeout();
     }
-    if (channelSettingsKeys.contains("beastEnabled")) {
-        settings.m_feedEnabled = response.getAdsbDemodSettings()->getBeastEnabled() != 0;
+    if (channelSettingsKeys.contains("feedEnabled")) {
+        settings.m_feedEnabled = response.getAdsbDemodSettings()->getFeedEnabled() != 0;
     }
-    if (channelSettingsKeys.contains("beastHost")) {
-        settings.m_feedHost = *response.getAdsbDemodSettings()->getBeastHost();
+    if (channelSettingsKeys.contains("exportClientEnabled")) {
+        settings.m_exportClientEnabled = response.getAdsbDemodSettings()->getExportClientEnabled() != 0;
     }
-    if (channelSettingsKeys.contains("beastPort")) {
-        settings.m_feedPort = response.getAdsbDemodSettings()->getBeastPort();
+    if (channelSettingsKeys.contains("exportClientHost")) {
+        settings.m_exportClientHost = *response.getAdsbDemodSettings()->getExportClientHost();
     }
-    if (channelSettingsKeys.contains("feedFormat")) {
-        settings.m_feedFormat = (ADSBDemodSettings::FeedFormat) response.getAdsbDemodSettings()->getFeedFormat();
+    if (channelSettingsKeys.contains("exportClientPort")) {
+        settings.m_exportClientPort = response.getAdsbDemodSettings()->getExportClientPort();
+    }
+    if (channelSettingsKeys.contains("exportClientFormat")) {
+        settings.m_exportClientFormat = (ADSBDemodSettings::FeedFormat) response.getAdsbDemodSettings()->getExportClientFormat();
+    }
+    if (channelSettingsKeys.contains("exportServerEnabled")) {
+        settings.m_exportServerEnabled = response.getAdsbDemodSettings()->getExportServerEnabled() != 0;
+    }
+    if (channelSettingsKeys.contains("exportServerPort")) {
+        settings.m_exportServerPort = response.getAdsbDemodSettings()->getExportServerPort();
+    }
+    if (channelSettingsKeys.contains("importEnabled")) {
+        settings.m_importEnabled = response.getAdsbDemodSettings()->getImportEnabled() != 0;
+    }
+    if (channelSettingsKeys.contains("importHost")) {
+        settings.m_importHost = *response.getAdsbDemodSettings()->getImportHost();
+    }
+    if (channelSettingsKeys.contains("importUsername")) {
+        settings.m_importUsername = *response.getAdsbDemodSettings()->getImportUsername();
+    }
+    if (channelSettingsKeys.contains("importPassword")) {
+        settings.m_importPassword = *response.getAdsbDemodSettings()->getImportPassword();
+    }
+    if (channelSettingsKeys.contains("importParameters")) {
+        settings.m_importParameters = *response.getAdsbDemodSettings()->getImportParameters();
+    }
+    if (channelSettingsKeys.contains("importPeriod")) {
+        settings.m_importPeriod = response.getAdsbDemodSettings()->getImportPeriod();
+    }
+    if (channelSettingsKeys.contains("importMinLatitude")) {
+        settings.m_importMinLatitude = *response.getAdsbDemodSettings()->getImportMinLatitude();
+    }
+    if (channelSettingsKeys.contains("importMaxLatitude")) {
+        settings.m_importMaxLatitude = *response.getAdsbDemodSettings()->getImportMaxLatitude();
+    }
+    if (channelSettingsKeys.contains("importMinLongitude")) {
+        settings.m_importMinLongitude = *response.getAdsbDemodSettings()->getImportMinLongitude();
+    }
+    if (channelSettingsKeys.contains("importMaxLongitude")) {
+        settings.m_importMaxLongitude = *response.getAdsbDemodSettings()->getImportMaxLongitude();
     }
     if (channelSettingsKeys.contains("logFilename")) {
         settings.m_logFilename = *response.getAdsbDemodSettings()->getLogFilename();
@@ -435,10 +513,23 @@ void ADSBDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
     response.getAdsbDemodSettings()->setInterpolatorPhaseSteps(settings.m_interpolatorPhaseSteps);
     response.getAdsbDemodSettings()->setInterpolatorTapsPerPhase(settings.m_interpolatorTapsPerPhase);
     response.getAdsbDemodSettings()->setRemoveTimeout(settings.m_removeTimeout);
-    response.getAdsbDemodSettings()->setBeastEnabled(settings.m_feedEnabled ? 1 : 0);
-    response.getAdsbDemodSettings()->setBeastHost(new QString(settings.m_feedHost));
-    response.getAdsbDemodSettings()->setBeastPort(settings.m_feedPort);
-    response.getAdsbDemodSettings()->setFeedFormat((int) settings.m_feedFormat);
+    response.getAdsbDemodSettings()->setFeedEnabled(settings.m_feedEnabled ? 1 : 0);
+    response.getAdsbDemodSettings()->setExportClientEnabled(settings.m_exportClientEnabled ? 1 : 0);
+    response.getAdsbDemodSettings()->setExportClientHost(new QString(settings.m_exportClientHost));
+    response.getAdsbDemodSettings()->setExportClientPort(settings.m_exportClientPort);
+    response.getAdsbDemodSettings()->setExportClientFormat((int) settings.m_exportClientFormat);
+    response.getAdsbDemodSettings()->setExportServerEnabled(settings.m_exportServerEnabled ? 1 : 0);
+    response.getAdsbDemodSettings()->setExportServerPort(settings.m_exportServerPort);
+    response.getAdsbDemodSettings()->setImportEnabled(settings.m_importEnabled ? 1 : 0);
+    response.getAdsbDemodSettings()->setImportHost(new QString(settings.m_importHost));
+    response.getAdsbDemodSettings()->setImportUsername(new QString(settings.m_importUsername));
+    response.getAdsbDemodSettings()->setImportPassword(new QString(settings.m_importPassword));
+    response.getAdsbDemodSettings()->setImportParameters(new QString(settings.m_importParameters));
+    response.getAdsbDemodSettings()->setImportPeriod(settings.m_importPeriod);
+    response.getAdsbDemodSettings()->setImportMinLatitude(new QString(settings.m_importMinLatitude));
+    response.getAdsbDemodSettings()->setImportMaxLatitude(new QString(settings.m_importMaxLatitude));
+    response.getAdsbDemodSettings()->setImportMinLongitude(new QString(settings.m_importMinLongitude));
+    response.getAdsbDemodSettings()->setImportMaxLongitude(new QString(settings.m_importMaxLongitude));
     response.getAdsbDemodSettings()->setRgbColor(settings.m_rgbColor);
     response.getAdsbDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
     response.getAdsbDemodSettings()->setLogEnabled(settings.m_logEnabled);
@@ -548,17 +639,56 @@ void ADSBDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, c
     if (channelSettingsKeys.contains("removeTimeout") || force) {
         swgADSBDemodSettings->setRemoveTimeout(settings.m_removeTimeout);
     }
-    if (channelSettingsKeys.contains("beastEnabled") || force) {
-        swgADSBDemodSettings->setBeastEnabled(settings.m_feedEnabled ? 1 : 0);
+    if (channelSettingsKeys.contains("feedEnabled") || force) {
+        swgADSBDemodSettings->setFeedEnabled(settings.m_feedEnabled ? 1 : 0);
     }
-    if (channelSettingsKeys.contains("beastHost") || force) {
-        swgADSBDemodSettings->setBeastHost(new QString(settings.m_feedHost));
+    if (channelSettingsKeys.contains("exportClientEnabled") || force) {
+        swgADSBDemodSettings->setExportClientEnabled(settings.m_exportClientEnabled ? 1 : 0);
     }
-    if (channelSettingsKeys.contains("beastPort") || force) {
-        swgADSBDemodSettings->setBeastPort(settings.m_feedPort);
+    if (channelSettingsKeys.contains("exportClientHost") || force) {
+        swgADSBDemodSettings->setExportClientHost(new QString(settings.m_exportClientHost));
     }
-    if (channelSettingsKeys.contains("feedFormat") || force) {
-        swgADSBDemodSettings->setFeedFormat((int) settings.m_feedFormat);
+    if (channelSettingsKeys.contains("exportClientPort") || force) {
+        swgADSBDemodSettings->setExportClientPort(settings.m_exportClientPort);
+    }
+    if (channelSettingsKeys.contains("exportClientFormat") || force) {
+        swgADSBDemodSettings->setExportClientFormat((int) settings.m_exportClientFormat);
+    }
+    if (channelSettingsKeys.contains("exportServerEnabled") || force) {
+        swgADSBDemodSettings->setExportServerEnabled(settings.m_exportServerEnabled ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("exportServerPort") || force) {
+        swgADSBDemodSettings->setExportServerPort(settings.m_exportServerPort);
+    }
+    if (channelSettingsKeys.contains("importEnabled") || force) {
+        swgADSBDemodSettings->setImportEnabled(settings.m_importEnabled ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("importHost") || force) {
+        swgADSBDemodSettings->setImportHost(new QString(settings.m_importHost));
+    }
+    if (channelSettingsKeys.contains("importUsername") || force) {
+        swgADSBDemodSettings->setImportUsername(new QString(settings.m_importUsername));
+    }
+    if (channelSettingsKeys.contains("importPassword") || force) {
+        swgADSBDemodSettings->setImportPassword(new QString(settings.m_importPassword));
+    }
+    if (channelSettingsKeys.contains("importParameters") || force) {
+        swgADSBDemodSettings->setImportParameters(new QString(settings.m_importParameters));
+    }
+    if (channelSettingsKeys.contains("importPeriod") || force) {
+        swgADSBDemodSettings->setImportPeriod(settings.m_importPeriod);
+    }
+    if (channelSettingsKeys.contains("importMinLatitude") || force) {
+        swgADSBDemodSettings->setImportMinLatitude(new QString(settings.m_importMinLatitude));
+    }
+    if (channelSettingsKeys.contains("importMaxLatitude") || force) {
+        swgADSBDemodSettings->setImportMaxLatitude(new QString(settings.m_importMaxLatitude));
+    }
+    if (channelSettingsKeys.contains("importMinLongitude") || force) {
+        swgADSBDemodSettings->setImportMinLongitude(new QString(settings.m_importMinLongitude));
+    }
+    if (channelSettingsKeys.contains("importMaxLongitude") || force) {
+        swgADSBDemodSettings->setImportMaxLongitude(new QString(settings.m_importMaxLongitude));
     }
     if (channelSettingsKeys.contains("logFilename") || force) {
         swgADSBDemodSettings->setLogFilename(new QString(settings.m_logFilename));
