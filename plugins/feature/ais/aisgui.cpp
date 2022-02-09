@@ -663,8 +663,10 @@ void AISGUI::updateVessels(AISMessage *ais, QDateTime dateTime)
         QString status = statusItem->text();
 
         // Only update model if change in type - so we don't keeping picking new
-        // random models
-        if ((previousType != type) || (previousShipType != shipType)) {
+        // random models.
+        // Check if image is empty to handle case where ShipStaticData is received
+        // before position
+        if ((previousType != type) || (previousShipType != shipType) || vessel->m_image.isEmpty()) {
             getImageAndModel(type, shipType, length, status, vessel);
         }
 
@@ -712,7 +714,6 @@ void AISGUI::updateVessels(AISMessage *ais, QDateTime dateTime)
         if (!status.isEmpty()) {
             text.append(QString("Status: %1").arg(status));
         }
-
         // Send to map feature
         sendToMap(mmsiItem->text(), callsign,
             vessel->m_image, text.join("<br>"),
@@ -724,7 +725,7 @@ void AISGUI::updateVessels(AISMessage *ais, QDateTime dateTime)
 
 void AISGUI::getImageAndModel(const QString &type, const QString &shipType, int length, const QString &status, Vessel *vessel)
 {
-   if (type == "Aircraft")
+    if (type == "Aircraft")
     {
         // I presume search and rescue aircraft are more likely to be helicopters
         vessel->m_image = "helicopter.png";
@@ -766,7 +767,7 @@ void AISGUI::getImageAndModel(const QString &type, const QString &shipType, int 
                     vessel->m_model = "ship_65m.glbe";
                 }
             }
-            else if ((shipType == "Tug") || (shipType == "Port tender") || (shipType == "Pilot vessel"))
+            else if ((shipType == "Tug") || (shipType == "Port tender") || (shipType == "Pilot vessel") || (shipType == "Vessel - Towing"))
             {
                 vessel->m_image = "tug.png";
                 if (length < 25)
