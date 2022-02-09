@@ -78,8 +78,10 @@ struct SatelliteTrackerSettings
     QHash<QString, QList<SatelliteDeviceSettings *> *> m_deviceSettings; //!< Settings for each device set for each satellite
     bool m_replayEnabled;               //!< Replay a pass in the past, by setting date and time to m_replayStartDateTime
     QDateTime m_replayStartDateTime;    //!< Time to start the replay at
-    bool m_useFileInputTime;            //!< Get time from FileInput device
     bool m_sendTimeToMap;               //!< Send time to map when start pressed
+    enum DateTimeSelect {NOW, CUSTOM, FROM_MAP, FROM_FILE} m_dateTimeSelect;
+    QString m_mapFeature;               //!< Which feature when FROM_MAP
+    QString m_fileInputDevice;          //!< Which device when FROM_FILE
 
     int m_columnIndexes[SAT_COL_COLUMNS];//!< How the columns are ordered in the table
     int m_columnSizes[SAT_COL_COLUMNS];  //!< Size of the coumns in the table

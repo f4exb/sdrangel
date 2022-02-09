@@ -26,6 +26,9 @@
 #include <QtCharts/QDateTimeAxis>
 #include <QtCharts/QValueAxis>
 
+#include "device/deviceapi.h"
+#include "device/deviceset.h"
+#include "feature/featureset.h"
 #include "feature/featureuiset.h"
 #include "feature/featurewebapiutils.h"
 #include "gui/basicfeaturesettingsdialog.h"
@@ -269,6 +272,7 @@ SatelliteTrackerGUI::SatelliteTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *fea
     ui->passChart->setRenderHint(QPainter::Antialiasing);
 
     ui->dateTime->setDateTime(m_satelliteTracker->currentDateTime());
+    ui->deviceFeatureSelect->setVisible(false);
 
     // Use My Position from preferences, if none set
     if ((m_settings.m_latitude == 0.0) && (m_settings.m_longitude == 0.0)) {
@@ -328,17 +332,9 @@ void SatelliteTrackerGUI::displaySettings()
     }
 
     ui->target->setCurrentIndex(ui->target->findText(m_settings.m_target));
-    if (m_settings.m_dateTime == "")
-    {
-        ui->dateTimeSelect->setCurrentIndex(0);
-        ui->dateTime->setVisible(false);
-    }
-    else
-    {
-        ui->dateTime->setDateTime(QDateTime::fromString(m_settings.m_dateTime, Qt::ISODateWithMs));
-        ui->dateTime->setVisible(true);
-        ui->dateTimeSelect->setCurrentIndex(1);
-    }
+    ui->dateTimeSelect->setCurrentIndex((int)m_settings.m_dateTimeSelect);
+    ui->dateTime->setVisible(m_settings.m_dateTimeSelect == SatelliteTrackerSettings::CUSTOM);
+    ui->dateTime->setDateTime(QDateTime::fromString(m_settings.m_dateTime, Qt::ISODateWithMs));
     ui->autoTarget->setChecked(m_settings.m_autoTarget);
     ui->darkTheme->setChecked(m_settings.m_chartsDarkTheme);
     restoreState(m_rollupState);
@@ -485,9 +481,10 @@ void SatelliteTrackerGUI::on_displaySettings_clicked()
     }
 }
 
-void SatelliteTrackerGUI::on_dateTimeSelect_currentTextChanged(const QString &text)
+void SatelliteTrackerGUI::on_dateTimeSelect_currentIndexChanged(int index)
 {
-    if (text == "Now")
+    m_settings.m_dateTimeSelect = (SatelliteTrackerSettings::DateTimeSelect)index;
+    if (m_settings.m_dateTimeSelect != SatelliteTrackerSettings::CUSTOM)
     {
         m_settings.m_dateTime = "";
         ui->dateTime->setVisible(false);
@@ -497,6 +494,9 @@ void SatelliteTrackerGUI::on_dateTimeSelect_currentTextChanged(const QString &te
         m_settings.m_dateTime = ui->dateTime->dateTime().toString(Qt::ISODateWithMs);
         ui->dateTime->setVisible(true);
     }
+    ui->deviceFeatureSelect->setVisible(m_settings.m_dateTimeSelect >= SatelliteTrackerSettings::FROM_MAP);
+    updateDeviceFeatureCombo();
+
     applySettings();
     plotChart();
 }
@@ -595,6 +595,8 @@ void SatelliteTrackerGUI::updateStatus()
     }
 
     updateTimeToAOS();
+
+    updateDeviceFeatureCombo();
 }
 
 // Update time to AOS
@@ -1233,4 +1235,81 @@ QAction *SatelliteTrackerGUI::createCheckableItem(QString &text, int idx, bool c
     action->setData(QVariant(idx));
     connect(action, SIGNAL(triggered()), this, SLOT(columnSelectMenuChecked()));
     return action;
+}
+
+void SatelliteTrackerGUI::updateDeviceFeatureCombo()
+{
+    if (m_settings.m_dateTimeSelect == SatelliteTrackerSettings::FROM_MAP) {
+        updateMapList();
+    } else if (m_settings.m_dateTimeSelect == SatelliteTrackerSettings::FROM_FILE) {
+        updateFileInputList();
+    }
+}
+
+void SatelliteTrackerGUI::updateDeviceFeatureCombo(const QStringList &items, const QString &selected)
+{
+    // Remove items no longer in list
+    int i = 0;
+    while (i < ui->deviceFeatureSelect->count())
+    {
+        if (!items.contains(ui->deviceFeatureSelect->itemText(i))) {
+            ui->deviceFeatureSelect->removeItem(i);
+        } else {
+            i++;
+        }
+    }
+    // Add new items to list
+    for (auto item : items)
+    {
+        int idx = ui->deviceFeatureSelect->findText(item);
+        if (idx == -1) {
+            ui->deviceFeatureSelect->addItem(item);
+        }
+    }
+    ui->deviceFeatureSelect->setCurrentIndex(ui->deviceFeatureSelect->findText(selected));
+}
+
+void SatelliteTrackerGUI::updateFileInputList()
+{
+    // Create list of File Input devices
+    std::vector<DeviceSet*>& deviceSets = MainCore::instance()->getDeviceSets();
+    int deviceIndex = 0;
+    QStringList items;
+    for (std::vector<DeviceSet*>::const_iterator it = deviceSets.begin(); it != deviceSets.end(); ++it, deviceIndex++)
+    {
+        if ((*it)->m_deviceAPI && (*it)->m_deviceAPI->getHardwareId() == "FileInput") {
+           items.append(QString("R%1").arg(deviceIndex));
+        }
+    }
+    updateDeviceFeatureCombo(items, m_settings.m_fileInputDevice);
+}
+
+void SatelliteTrackerGUI::updateMapList()
+{
+    // Create list of Map features
+    std::vector<FeatureSet*>& featureSets = MainCore::instance()->getFeatureeSets();
+    int featureIndex = 0;
+    QStringList items;
+    for (std::vector<FeatureSet*>::const_iterator it = featureSets.begin(); it != featureSets.end(); ++it, featureIndex++)
+    {
+        for (int fi = 0; fi < (*it)->getNumberOfFeatures(); fi++)
+        {
+            Feature *feature = (*it)->getFeatureAt(fi);
+            if (feature->getURI() == "sdrangel.feature.map") {
+                items.append(QString("F%1:%2").arg(featureIndex).arg(fi));
+            }
+        }
+    }
+    updateDeviceFeatureCombo(items, m_settings.m_mapFeature);
+}
+
+void SatelliteTrackerGUI::on_deviceFeatureSelect_currentIndexChanged(int index)
+{
+    (int) index;
+    if (m_settings.m_dateTimeSelect == SatelliteTrackerSettings::FROM_MAP) {
+        m_settings.m_mapFeature = ui->deviceFeatureSelect->currentText();
+    } else {
+        m_settings.m_fileInputDevice = ui->deviceFeatureSelect->currentText();
+    }
+    applySettings();
 }

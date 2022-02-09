@@ -517,30 +517,13 @@
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="useFileInputTimeLabel">
-            <property name="text">
-             <string>Get time from FileInput device</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QCheckBox" name="useFileInputTime">
-            <property name="toolTip">
-             <string>Get the time from the FileInput device</string>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
            <widget class="QLabel" name="replayDateTimeLabel">
             <property name="text">
              <string>Start date and time</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
+          <item row="1" column="1">
            <widget class="QDateTimeEdit" name="replayDateTime">
             <property name="toolTip">
              <string>Set date and time to the displayed value when Satellite Tracker's start button is pressed</string>
@@ -560,14 +543,14 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
+          <item row="2" column="0">
            <widget class="QLabel" name="sendTimeToMapLabel">
             <property name="text">
              <string>Send time to map</string>
             </property>
            </widget>
           </item>
-          <item row="3" column="1">
+          <item row="2" column="1">
            <widget class="QCheckBox" name="sendTimeToMap">
             <property name="toolTip">
              <string>Send time to Map feature when Satellite Tracker's start button is pressed</string>

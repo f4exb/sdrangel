@@ -30,7 +30,6 @@
   </property>
   <property name="font">
    <font>
-    <family>Liberation Sans</family>
     <pointsize>9</pointsize>
    </font>
   </property>
@@ -94,6 +93,16 @@
         <item>
          <property name="text">
           <string>Custom</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>From map</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>From file</string>
          </property>
         </item>
        </widget>
@@ -349,25 +358,32 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="3" colspan="2">
-       <widget class="WrappingDateTimeEdit" name="dateTime">
-        <property name="toolTip">
-         <string>Date and time to use when calculating satellite's position</string>
-        </property>
-        <property name="displayFormat">
-         <string>dd/MM/yyyy HH:mm:ss</string>
-        </property>
-        <property name="calendarPopup">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
       <item row="4" column="3">
        <widget class="QLabel" name="aosLabel">
         <property name="text">
          <string>AOS</string>
         </property>
        </widget>
+      </item>
+      <item row="3" column="3" colspan="2">
+       <layout class="QHBoxLayout" name="timeLayout">
+        <item>
+         <widget class="WrappingDateTimeEdit" name="dateTime">
+          <property name="toolTip">
+           <string>Date and time to use when calculating satellite's position</string>
+          </property>
+          <property name="displayFormat">
+           <string>dd/MM/yyyy HH:mm:ss</string>
+          </property>
+          <property name="calendarPopup">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="deviceFeatureSelect"/>
+        </item>
+       </layout>
       </item>
      </layout>
     </item>
@@ -736,6 +752,7 @@
   <tabstop>longitude</tabstop>
   <tabstop>dateTimeSelect</tabstop>
   <tabstop>dateTime</tabstop>
+  <tabstop>deviceFeatureSelect</tabstop>
   <tabstop>target</tabstop>
   <tabstop>aos</tabstop>
   <tabstop>azimuth</tabstop>
@@ -743,6 +760,7 @@
   <tabstop>chartSelect</tabstop>
   <tabstop>prevPass</tabstop>
   <tabstop>nextPass</tabstop>
+  <tabstop>darkTheme</tabstop>
   <tabstop>passChart</tabstop>
   <tabstop>satTable</tabstop>
  </tabstops>
