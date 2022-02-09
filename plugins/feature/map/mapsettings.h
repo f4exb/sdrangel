@@ -42,6 +42,7 @@ struct MapSettings
         bool m_display3DTrack;    // Display a ground track for this item on the 3D map
         quint32 m_3DTrackColor;
         int m_3DModelMinPixelSize;
+        float m_3DLabelScale;
 
         MapItemSettings(const QString& group, const QColor color, bool display3DPoint=true, int minZoom=11, int modelMinPixelSize=0);
         MapItemSettings(const QByteArray& data);

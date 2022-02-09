@@ -216,10 +216,7 @@
                  viewer.clock.currentTime = dateTime;
             } else if (command.command == "getDateTime") {
                  // Get current date and time of viewer
-                 socket.send(JSON.stringify({
-                     command: "getDateTime",
-                     dateTime: Cesium.JulianDate.toIso8601(viewer.clock.currentTime)
-                 }));
+                 reportClock();
             } else if (command.command == "setTerrain") {
                 // Support using Ellipsoid terrain for performance and also
                 // because paths can't be clammped to ground, so AIS paths
@@ -396,6 +393,39 @@
             socket.send(JSON.stringify({event: "tracking"}));
         }
     });
+
+    // Report clock changes for use by other plugins
+    var systemTime = new Cesium.JulianDate();
+    function reportClock() {
+        if (socket.readyState === 1) {
+            Cesium.JulianDate.now(systemTime);
+            socket.send(JSON.stringify({
+                event: "clock",
+                canAnimate: viewer.clock.canAnimate,
+                shouldAnimate: viewer.clock.shouldAnimate,
+                currentTime: Cesium.JulianDate.toIso8601(viewer.clock.currentTime),
+                multiplier: viewer.clock.multiplier,
+                systemTime: Cesium.JulianDate.toIso8601(systemTime)
+            }));
+        }
+    };
+
+    Cesium.knockout.getObservable(viewer.clockViewModel, 'shouldAnimate').subscribe(function(isAnimating) {
+        reportClock();
+    });
+    Cesium.knockout.getObservable(viewer.clockViewModel, 'multiplier').subscribe(function(multiplier) {
+        reportClock();
+    });
+    // This is called every frame
+    //Cesium.knockout.getObservable(viewer.clockViewModel, 'currentTime').subscribe(function(currentTime) {
+        //reportClock();
+    //});
+    viewer.timeline.addEventListener('settime', reportClock, false);
+
+    socket.onopen = () => {
+        reportClock();
+    };
+
 
   </script>
  </div>

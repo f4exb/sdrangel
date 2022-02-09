@@ -40,6 +40,9 @@ FITS::FITS(QString resourceName) :
     m_fileSize = m_res.uncompressedSize();
 #else
     m_data = QByteArray::fromRawData((const char *)m_res.data(), m_res.size());
+    if (res.isCompressed()) {
+        m_data = qUncompress(m_data);
+    }
     m_fileSize = m_res.size();
 #endif
     int hLen = std::min((qint64)m_headerSize * 3, m_fileSize);   // Could possibly be bigger

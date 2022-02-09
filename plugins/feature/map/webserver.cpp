@@ -157,6 +157,9 @@ void WebServer::readClient()
             if (res.isValid() && (res.size() > 0))
             {
                 QByteArray data = QByteArray::fromRawData((const char *)res.data(), res.size());
+                if (res.isCompressed()) {
+                    data = qUncompress(data);
+                }
                 sendFile(socket, data, mimeType, path);
             }
 #endif

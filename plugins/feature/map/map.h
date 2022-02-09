@@ -24,6 +24,7 @@
 #include <QNetworkRequest>
 #include <QTimer>
 #include <QDateTime>
+#include <QMutex>
 
 #include "feature/feature.h"
 #include "util/message.h"
@@ -127,6 +128,10 @@ public:
             SWGSDRangel::SWGFeatureSettings& response,
             QString& errorMessage);
 
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGFeatureReport& response,
+            QString& errorMessage);
+
     virtual int webapiActionsPost(
             const QStringList& featureActionsKeys,
             SWGSDRangel::SWGFeatureActions& query,
@@ -141,6 +146,9 @@ public:
             const QStringList& featureSettingsKeys,
             SWGSDRangel::SWGFeatureSettings& response);
 
+    void setMapDateTime(QDateTime mapDateTime, QDateTime systemDateTime, double multiplier);
+    QDateTime getMapDateTime();
+
     static const char* const m_featureIdURI;
     static const char* const m_featureId;
 
@@ -154,7 +162,13 @@ private:
     QNetworkRequest m_networkRequest;
 
     void applySettings(const MapSettings& settings, bool force = false);
+    void webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response);
     void webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const MapSettings& settings, bool force);
+
+    QDateTime m_mapDateTime;
+    QDateTime m_systemDateTime;
+    double m_multiplier;
+    QMutex m_dateTimeMutex;
 
 private slots:
     void updatePipes();

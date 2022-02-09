@@ -251,6 +251,7 @@ void MapSettings::MapItemSettings::resetToDefaults()
     m_display3DTrack = true;
     m_3DTrackColor = QColor(150, 0, 20).rgb();
     m_3DModelMinPixelSize = 0;
+    m_3DLabelScale = 0.5f;
 }
 
 QByteArray MapSettings::MapItemSettings::serialize() const
@@ -271,6 +272,7 @@ QByteArray MapSettings::MapItemSettings::serialize() const
     s.writeBool(12, m_display3DTrack);
     s.writeU32(13, m_3DTrackColor);
     s.writeS32(14, m_3DModelMinPixelSize);
+    s.writeFloat(15, m_3DLabelScale);
 
     return s.final();
 }
@@ -301,6 +303,7 @@ bool MapSettings::MapItemSettings::deserialize(const QByteArray& data)
         d.readBool(12, &m_display3DTrack, true);
         d.readU32(13, &m_3DTrackColor, QColor(150, 0, 20).rgb());
         d.readS32(14, &m_3DModelMinPixelSize, 0);
+        d.readFloat(15, &m_3DLabelScale, 0.5f);
         return true;
     }
     else
