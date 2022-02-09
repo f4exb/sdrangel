@@ -1305,7 +1305,7 @@ void SatelliteTrackerGUI::updateMapList()
 
 void SatelliteTrackerGUI::on_deviceFeatureSelect_currentIndexChanged(int index)
 {
-    (int) index;
+    (void) index;
     if (m_settings.m_dateTimeSelect == SatelliteTrackerSettings::FROM_MAP) {
         m_settings.m_mapFeature = ui->deviceFeatureSelect->currentText();
     } else {
