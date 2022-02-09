@@ -21,6 +21,7 @@
 
 #include <QObject>
 #include <QTimer>
+#include <QTcpServer>
 #include <QTcpSocket>
 #include <QFile>
 #include <QTextStream>
@@ -30,6 +31,27 @@
 
 #include "adsbdemodsettings.h"
 
+// Beast binary server for sending ADS-B data to OpenSky Network (and others)
+class ADSBBeastServer : public QTcpServer
+{
+    Q_OBJECT
+
+private:
+    QList<QTcpSocket*> m_clients;
+
+public:
+    ADSBBeastServer();
+    void listen(quint16 port = 30005);
+    void incomingConnection(qintptr socket);
+    void send(const char *data, int length);
+    void close();
+
+private slots:
+    void readClient();
+    void discardClient();
+};
+
+// Worker that forwards ADS-B frames to various aggregators
 class ADSBDemodWorker : public QObject
 {
     Q_OBJECT
@@ -75,6 +97,8 @@ private:
     QTcpSocket m_socket;
     QFile m_logFile;
     QTextStream m_logStream;
+    qint64 m_startTime;
+    ADSBBeastServer m_beastServer;
 
     bool handleMessage(const Message& cmd);
     void applySettings(const ADSBDemodSettings& settings, bool force = false);

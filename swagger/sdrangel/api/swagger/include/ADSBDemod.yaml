@@ -35,22 +35,50 @@ ADSBDemodSettings:
       description: Number of taps per phase in channel interpolator
     removeTimeout:
       type: integer
-    beastEnabled:
+    feedEnabled:
+      type: integer
+    exportClientEnabled:
       type: integer
       description: >
-        Send data to beast server
+        Send data to server
           * 0 - Do not send data
           * 1 - Send data
-    beastHost:
+    exportClientHost:
+      description: Host to send data to
       type: string
-    beastPort:
+    exportClientPort:
       type: integer
-    feedFormat:
+    exportClientFormat:
       type: integer
       description: >
         Format of sent data
           * 0 - Beast binary
-          * 1 - Beast index
+          * 1 - Beast hex
+    exportServerEnabled:
+      type: integer
+    exportServerPort:
+      type: integer
+    importEnabled:
+      type: integer
+    importHost:
+      type: string
+    importUsername:
+      type: string
+    importPassword:
+      type: string
+    importParameters:
+      type: string
+    importPeriod:
+      type: number
+      format: float
+    importMinLatitude:
+      type: string
+    importMaxLatitude:
+      type: string
+    importMinLongitude:
+      type: string
+    importMaxLongitude:
+      type: string
     logFilename:
       type: string
     logEnabled:

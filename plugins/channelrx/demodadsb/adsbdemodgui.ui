@@ -1336,6 +1336,7 @@
   <tabstop>logEnable</tabstop>
   <tabstop>logFilename</tabstop>
   <tabstop>logOpen</tabstop>
+  <tabstop>findOnMapFeature</tabstop>
   <tabstop>devicesRefresh</tabstop>
   <tabstop>device</tabstop>
   <tabstop>adsbData</tabstop>

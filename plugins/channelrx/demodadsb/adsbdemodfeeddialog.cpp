@@ -20,14 +20,28 @@
 #include "adsbdemodfeeddialog.h"
 #include "adsbdemodsettings.h"
 
-ADSBDemodFeedDialog::ADSBDemodFeedDialog(QString& feedHost, int feedPort, ADSBDemodSettings::FeedFormat feedFormat, QWidget* parent) :
+ADSBDemodFeedDialog::ADSBDemodFeedDialog(ADSBDemodSettings *settings, QWidget* parent) :
     QDialog(parent),
+    m_settings(settings),
     ui(new Ui::ADSBDemodFeedDialog)
 {
     ui->setupUi(this);
-    ui->host->lineEdit()->setText(feedHost);
-    ui->port->setValue(feedPort);
-    ui->format->setCurrentIndex((int)feedFormat);
+    ui->exportClientEnabled->setChecked(m_settings->m_exportClientEnabled);
+    ui->exportClientHost->lineEdit()->setText(m_settings->m_exportClientHost);
+    ui->exportClientPort->setValue(m_settings->m_exportClientPort);
+    ui->exportClientFormat->setCurrentIndex((int)m_settings->m_exportClientFormat);
+    ui->exportServerEnabled->setChecked(m_settings->m_exportServerEnabled);
+    ui->exportServerPort->setValue(m_settings->m_exportServerPort);
+    ui->importEnabled->setChecked(m_settings->m_importEnabled);
+    ui->importHost->setCurrentIndex(ui->importHost->findText(m_settings->m_importHost));
+    ui->importUsername->setText(m_settings->m_importUsername);
+    ui->importPassword->setText(m_settings->m_importPassword);
+    ui->importParameters->setText(m_settings->m_importParameters);
+    ui->importPeriod->setValue(m_settings->m_importPeriod);
+    ui->latitudeMin->setText(m_settings->m_importMinLatitude);
+    ui->latitudeMax->setText(m_settings->m_importMaxLatitude);
+    ui->longitudeMin->setText(m_settings->m_importMinLongitude);
+    ui->longitudeMax->setText(m_settings->m_importMaxLongitude);
 }
 
 ADSBDemodFeedDialog::~ADSBDemodFeedDialog()
@@ -37,24 +51,38 @@ ADSBDemodFeedDialog::~ADSBDemodFeedDialog()
 
 void ADSBDemodFeedDialog::accept()
 {
-    m_feedHost = ui->host->currentText();
-    m_feedPort = ui->port->value();
-    m_feedFormat = (ADSBDemodSettings::FeedFormat )ui->format->currentIndex();
+    m_settings->m_exportClientEnabled = ui->exportClientEnabled->isChecked();
+    m_settings->m_exportClientHost = ui->exportClientHost->currentText();
+    m_settings->m_exportClientPort = ui->exportClientPort->value();
+    m_settings->m_exportClientFormat = (ADSBDemodSettings::FeedFormat )ui->exportClientFormat->currentIndex();
+    m_settings->m_exportServerEnabled = ui->exportServerEnabled->isChecked();
+    m_settings->m_exportServerPort = ui->exportServerPort->value();
+    m_settings->m_importEnabled = ui->importEnabled->isChecked();
+    m_settings->m_importHost = ui->importHost->currentText();
+    m_settings->m_importUsername = ui->importUsername->text();
+    m_settings->m_importPassword = ui->importPassword->text();
+    m_settings->m_importParameters = ui->importParameters->text();
+    m_settings->m_importPeriod = ui->importPeriod->value();
+    m_settings->m_importMinLatitude = ui->latitudeMin->text();
+    m_settings->m_importMaxLatitude = ui->latitudeMax->text();
+    m_settings->m_importMinLongitude = ui->longitudeMin->text();
+    m_settings->m_importMaxLongitude = ui->longitudeMax->text();
+
     QDialog::accept();
 }
 
-void ADSBDemodFeedDialog::on_host_currentIndexChanged(int value)
+void ADSBDemodFeedDialog::on_exportClientHost_currentIndexChanged(int value)
 {
     if (value == 0)
     {
-        ui->host->lineEdit()->setText("feed.adsbexchange.com");
-        ui->port->setValue(30005);
-        ui->format->setCurrentIndex(0);
+        ui->exportClientHost->lineEdit()->setText("feed.adsbexchange.com");
+        ui->exportClientPort->setValue(30005);
+        ui->exportClientFormat->setCurrentIndex(0);
     }
     else if (value == 1)
     {
-        ui->host->lineEdit()->setText("data.adsbhub.org");
-        ui->port->setValue(5002);
-        ui->format->setCurrentIndex(1);
+        ui->exportClientHost->lineEdit()->setText("data.adsbhub.org");
+        ui->exportClientPort->setValue(5002);
+        ui->exportClientFormat->setCurrentIndex(1);
     }
 }

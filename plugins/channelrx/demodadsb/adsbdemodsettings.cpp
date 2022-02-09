@@ -42,9 +42,22 @@ void ADSBDemodSettings::resetToDefaults()
     m_samplesPerBit = 4;
     m_removeTimeout = 60;
     m_feedEnabled = false;
-    m_feedHost = "feed.adsbexchange.com";
-    m_feedPort = 30005;
-    m_feedFormat = BeastBinary;
+    m_exportClientEnabled = true;
+    m_exportClientHost = "feed.adsbexchange.com";
+    m_exportClientPort = 30005;
+    m_exportClientFormat = BeastBinary;
+    m_exportServerEnabled = false;
+    m_exportServerPort = 30005;
+    m_importEnabled = false;
+    m_importHost = "opensky-network.org";
+    m_importUsername = "";
+    m_importPassword = "";
+    m_importParameters = "";
+    m_importPeriod = 10.0;
+    m_importMinLatitude = "";
+    m_importMaxLatitude = "";
+    m_importMinLongitude = "";
+    m_importMaxLongitude = "";
     m_rgbColor = QColor(244, 151, 57).rgb();
     m_title = "ADS-B Demodulator";
     m_streamIndex = 0;
@@ -94,8 +107,8 @@ QByteArray ADSBDemodSettings::serialize() const
     s.writeS32(4, m_samplesPerBit);
     s.writeS32(5, m_removeTimeout);
     s.writeBool(6, m_feedEnabled);
-    s.writeString(7, m_feedHost);
-    s.writeU32(8, m_feedPort);
+    s.writeString(7, m_exportClientHost);
+    s.writeU32(8, m_exportClientPort);
     s.writeU32(9, m_rgbColor);
 
     if (m_channelMarker) {
@@ -116,7 +129,7 @@ QByteArray ADSBDemodSettings::serialize() const
     s.writeBool(21, m_flightPaths);
     s.writeS32(22, m_deviceIndex);
     s.writeBool(23, m_siUnits);
-    s.writeS32(24, (int)m_feedFormat);
+    s.writeS32(24, (int)m_exportClientFormat);
     s.writeString(25, m_tableFontName);
     s.writeS32(26, m_tableFontSize);
     s.writeBool(27, m_displayDemodStats);
@@ -145,6 +158,20 @@ QByteArray ADSBDemodSettings::serialize() const
 
     s.writeBool(44, m_verboseModelMatching);
     s.writeS32(45, m_airfieldElevation);
+
+    s.writeBool(46, m_exportClientEnabled);
+    s.writeBool(47, m_exportServerEnabled);
+    s.writeBool(48, m_exportServerPort);
+    s.writeBool(49, m_importEnabled);
+    s.writeString(50, m_importHost);
+    s.writeString(51, m_importUsername);
+    s.writeString(52, m_importPassword);
+    s.writeString(53, m_importParameters);
+    s.writeFloat(54, m_importPeriod);
+    s.writeString(55, m_importMinLatitude);
+    s.writeString(56, m_importMaxLatitude);
+    s.writeString(57, m_importMinLongitude);
+    s.writeString(58, m_importMaxLongitude);
 
     for (int i = 0; i < ADSBDEMOD_COLUMNS; i++) {
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -187,12 +214,12 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         d.readS32(4, &m_samplesPerBit, 4);
         d.readS32(5, &m_removeTimeout, 60);
         d.readBool(6, &m_feedEnabled, false);
-        d.readString(7, &m_feedHost, "feed.adsbexchange.com");
+        d.readString(7, &m_exportClientHost, "feed.adsbexchange.com");
         d.readU32(8, &utmp, 0);
         if ((utmp > 1023) && (utmp < 65535)) {
-            m_feedPort = utmp;
+            m_exportClientPort = utmp;
         } else {
-            m_feedPort = 30005;
+            m_exportClientPort = 30005;
         }
 
         d.readU32(9, &m_rgbColor, QColor(244, 151, 57).rgb());
@@ -219,7 +246,7 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         d.readBool(21, &m_flightPaths, true);
         d.readS32(22, &m_deviceIndex, -1);
         d.readBool(23, &m_siUnits, false);
-        d.readS32(24, (int *) &m_feedFormat, BeastBinary);
+        d.readS32(24, (int *) &m_exportClientFormat, BeastBinary);
         d.readString(25, &m_tableFontName, "Liberation Sans");
         d.readS32(26, &m_tableFontSize, 9);
         d.readBool(27, &m_displayDemodStats, false);
@@ -252,6 +279,25 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
 
         d.readBool(44, &m_verboseModelMatching, false);
         d.readS32(45, &m_airfieldElevation, 0);
+
+        d.readBool(46, &m_exportClientEnabled, true);
+        d.readBool(47, &m_exportServerEnabled, true);
+        d.readU32(48, &utmp, 0);
+        if ((utmp > 1023) && (utmp < 65535)) {
+            m_exportServerPort = utmp;
+        } else {
+            m_exportServerPort = 30005;
+        }
+        d.readBool(49, &m_importEnabled, false);
+        d.readString(50, &m_importHost, "opensky-network.org");
+        d.readString(51, &m_importUsername, "");
+        d.readString(52, &m_importPassword, "");
+        d.readString(53, &m_importParameters, "");
+        d.readFloat(54, &m_importPeriod, 10.0f);
+        d.readString(55, &m_importMinLatitude, "");
+        d.readString(56, &m_importMaxLatitude, "");
+        d.readString(57, &m_importMinLongitude, "");
+        d.readString(58, &m_importMaxLongitude, "");
 
         for (int i = 0; i < ADSBDEMOD_COLUMNS; i++) {
             d.readS32(100 + i, &m_columnIndexes[i], i);

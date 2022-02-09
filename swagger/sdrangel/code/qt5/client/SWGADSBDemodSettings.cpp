@@ -46,14 +46,40 @@ SWGADSBDemodSettings::SWGADSBDemodSettings() {
     m_interpolator_taps_per_phase_isSet = false;
     remove_timeout = 0;
     m_remove_timeout_isSet = false;
-    beast_enabled = 0;
-    m_beast_enabled_isSet = false;
-    beast_host = nullptr;
-    m_beast_host_isSet = false;
-    beast_port = 0;
-    m_beast_port_isSet = false;
-    feed_format = 0;
-    m_feed_format_isSet = false;
+    feed_enabled = 0;
+    m_feed_enabled_isSet = false;
+    export_client_enabled = 0;
+    m_export_client_enabled_isSet = false;
+    export_client_host = nullptr;
+    m_export_client_host_isSet = false;
+    export_client_port = 0;
+    m_export_client_port_isSet = false;
+    export_client_format = 0;
+    m_export_client_format_isSet = false;
+    export_server_enabled = 0;
+    m_export_server_enabled_isSet = false;
+    export_server_port = 0;
+    m_export_server_port_isSet = false;
+    import_enabled = 0;
+    m_import_enabled_isSet = false;
+    import_host = nullptr;
+    m_import_host_isSet = false;
+    import_username = nullptr;
+    m_import_username_isSet = false;
+    import_password = nullptr;
+    m_import_password_isSet = false;
+    import_parameters = nullptr;
+    m_import_parameters_isSet = false;
+    import_period = 0.0f;
+    m_import_period_isSet = false;
+    import_min_latitude = nullptr;
+    m_import_min_latitude_isSet = false;
+    import_max_latitude = nullptr;
+    m_import_max_latitude_isSet = false;
+    import_min_longitude = nullptr;
+    m_import_min_longitude_isSet = false;
+    import_max_longitude = nullptr;
+    m_import_max_longitude_isSet = false;
     log_filename = nullptr;
     m_log_filename_isSet = false;
     log_enabled = 0;
@@ -104,14 +130,40 @@ SWGADSBDemodSettings::init() {
     m_interpolator_taps_per_phase_isSet = false;
     remove_timeout = 0;
     m_remove_timeout_isSet = false;
-    beast_enabled = 0;
-    m_beast_enabled_isSet = false;
-    beast_host = new QString("");
-    m_beast_host_isSet = false;
-    beast_port = 0;
-    m_beast_port_isSet = false;
-    feed_format = 0;
-    m_feed_format_isSet = false;
+    feed_enabled = 0;
+    m_feed_enabled_isSet = false;
+    export_client_enabled = 0;
+    m_export_client_enabled_isSet = false;
+    export_client_host = new QString("");
+    m_export_client_host_isSet = false;
+    export_client_port = 0;
+    m_export_client_port_isSet = false;
+    export_client_format = 0;
+    m_export_client_format_isSet = false;
+    export_server_enabled = 0;
+    m_export_server_enabled_isSet = false;
+    export_server_port = 0;
+    m_export_server_port_isSet = false;
+    import_enabled = 0;
+    m_import_enabled_isSet = false;
+    import_host = new QString("");
+    m_import_host_isSet = false;
+    import_username = new QString("");
+    m_import_username_isSet = false;
+    import_password = new QString("");
+    m_import_password_isSet = false;
+    import_parameters = new QString("");
+    m_import_parameters_isSet = false;
+    import_period = 0.0f;
+    m_import_period_isSet = false;
+    import_min_latitude = new QString("");
+    m_import_min_latitude_isSet = false;
+    import_max_latitude = new QString("");
+    m_import_max_latitude_isSet = false;
+    import_min_longitude = new QString("");
+    m_import_min_longitude_isSet = false;
+    import_max_longitude = new QString("");
+    m_import_max_longitude_isSet = false;
     log_filename = new QString("");
     m_log_filename_isSet = false;
     log_enabled = 0;
@@ -150,11 +202,40 @@ SWGADSBDemodSettings::cleanup() {
 
 
 
-    if(beast_host != nullptr) { 
-        delete beast_host;
+
+    if(export_client_host != nullptr) { 
+        delete export_client_host;
     }
 
 
+
+
+
+    if(import_host != nullptr) { 
+        delete import_host;
+    }
+    if(import_username != nullptr) { 
+        delete import_username;
+    }
+    if(import_password != nullptr) { 
+        delete import_password;
+    }
+    if(import_parameters != nullptr) { 
+        delete import_parameters;
+    }
+
+    if(import_min_latitude != nullptr) { 
+        delete import_min_latitude;
+    }
+    if(import_max_latitude != nullptr) { 
+        delete import_max_latitude;
+    }
+    if(import_min_longitude != nullptr) { 
+        delete import_min_longitude;
+    }
+    if(import_max_longitude != nullptr) { 
+        delete import_max_longitude;
+    }
     if(log_filename != nullptr) { 
         delete log_filename;
     }
@@ -208,13 +289,39 @@ SWGADSBDemodSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&remove_timeout, pJson["removeTimeout"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&beast_enabled, pJson["beastEnabled"], "qint32", "");
+    ::SWGSDRangel::setValue(&feed_enabled, pJson["feedEnabled"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&beast_host, pJson["beastHost"], "QString", "QString");
+    ::SWGSDRangel::setValue(&export_client_enabled, pJson["exportClientEnabled"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&beast_port, pJson["beastPort"], "qint32", "");
+    ::SWGSDRangel::setValue(&export_client_host, pJson["exportClientHost"], "QString", "QString");
     
-    ::SWGSDRangel::setValue(&feed_format, pJson["feedFormat"], "qint32", "");
+    ::SWGSDRangel::setValue(&export_client_port, pJson["exportClientPort"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&export_client_format, pJson["exportClientFormat"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&export_server_enabled, pJson["exportServerEnabled"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&export_server_port, pJson["exportServerPort"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&import_enabled, pJson["importEnabled"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&import_host, pJson["importHost"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&import_username, pJson["importUsername"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&import_password, pJson["importPassword"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&import_parameters, pJson["importParameters"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&import_period, pJson["importPeriod"], "float", "");
+    
+    ::SWGSDRangel::setValue(&import_min_latitude, pJson["importMinLatitude"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&import_max_latitude, pJson["importMaxLatitude"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&import_min_longitude, pJson["importMinLongitude"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&import_max_longitude, pJson["importMaxLongitude"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&log_filename, pJson["logFilename"], "QString", "QString");
     
@@ -283,17 +390,56 @@ SWGADSBDemodSettings::asJsonObject() {
     if(m_remove_timeout_isSet){
         obj->insert("removeTimeout", QJsonValue(remove_timeout));
     }
-    if(m_beast_enabled_isSet){
-        obj->insert("beastEnabled", QJsonValue(beast_enabled));
+    if(m_feed_enabled_isSet){
+        obj->insert("feedEnabled", QJsonValue(feed_enabled));
     }
-    if(beast_host != nullptr && *beast_host != QString("")){
-        toJsonValue(QString("beastHost"), beast_host, obj, QString("QString"));
+    if(m_export_client_enabled_isSet){
+        obj->insert("exportClientEnabled", QJsonValue(export_client_enabled));
     }
-    if(m_beast_port_isSet){
-        obj->insert("beastPort", QJsonValue(beast_port));
+    if(export_client_host != nullptr && *export_client_host != QString("")){
+        toJsonValue(QString("exportClientHost"), export_client_host, obj, QString("QString"));
     }
-    if(m_feed_format_isSet){
-        obj->insert("feedFormat", QJsonValue(feed_format));
+    if(m_export_client_port_isSet){
+        obj->insert("exportClientPort", QJsonValue(export_client_port));
+    }
+    if(m_export_client_format_isSet){
+        obj->insert("exportClientFormat", QJsonValue(export_client_format));
+    }
+    if(m_export_server_enabled_isSet){
+        obj->insert("exportServerEnabled", QJsonValue(export_server_enabled));
+    }
+    if(m_export_server_port_isSet){
+        obj->insert("exportServerPort", QJsonValue(export_server_port));
+    }
+    if(m_import_enabled_isSet){
+        obj->insert("importEnabled", QJsonValue(import_enabled));
+    }
+    if(import_host != nullptr && *import_host != QString("")){
+        toJsonValue(QString("importHost"), import_host, obj, QString("QString"));
+    }
+    if(import_username != nullptr && *import_username != QString("")){
+        toJsonValue(QString("importUsername"), import_username, obj, QString("QString"));
+    }
+    if(import_password != nullptr && *import_password != QString("")){
+        toJsonValue(QString("importPassword"), import_password, obj, QString("QString"));
+    }
+    if(import_parameters != nullptr && *import_parameters != QString("")){
+        toJsonValue(QString("importParameters"), import_parameters, obj, QString("QString"));
+    }
+    if(m_import_period_isSet){
+        obj->insert("importPeriod", QJsonValue(import_period));
+    }
+    if(import_min_latitude != nullptr && *import_min_latitude != QString("")){
+        toJsonValue(QString("importMinLatitude"), import_min_latitude, obj, QString("QString"));
+    }
+    if(import_max_latitude != nullptr && *import_max_latitude != QString("")){
+        toJsonValue(QString("importMaxLatitude"), import_max_latitude, obj, QString("QString"));
+    }
+    if(import_min_longitude != nullptr && *import_min_longitude != QString("")){
+        toJsonValue(QString("importMinLongitude"), import_min_longitude, obj, QString("QString"));
+    }
+    if(import_max_longitude != nullptr && *import_max_longitude != QString("")){
+        toJsonValue(QString("importMaxLongitude"), import_max_longitude, obj, QString("QString"));
     }
     if(log_filename != nullptr && *log_filename != QString("")){
         toJsonValue(QString("logFilename"), log_filename, obj, QString("QString"));
@@ -426,43 +572,173 @@ SWGADSBDemodSettings::setRemoveTimeout(qint32 remove_timeout) {
 }
 
 qint32
-SWGADSBDemodSettings::getBeastEnabled() {
-    return beast_enabled;
+SWGADSBDemodSettings::getFeedEnabled() {
+    return feed_enabled;
 }
 void
-SWGADSBDemodSettings::setBeastEnabled(qint32 beast_enabled) {
-    this->beast_enabled = beast_enabled;
-    this->m_beast_enabled_isSet = true;
+SWGADSBDemodSettings::setFeedEnabled(qint32 feed_enabled) {
+    this->feed_enabled = feed_enabled;
+    this->m_feed_enabled_isSet = true;
+}
+
+qint32
+SWGADSBDemodSettings::getExportClientEnabled() {
+    return export_client_enabled;
+}
+void
+SWGADSBDemodSettings::setExportClientEnabled(qint32 export_client_enabled) {
+    this->export_client_enabled = export_client_enabled;
+    this->m_export_client_enabled_isSet = true;
 }
 
 QString*
-SWGADSBDemodSettings::getBeastHost() {
-    return beast_host;
+SWGADSBDemodSettings::getExportClientHost() {
+    return export_client_host;
 }
 void
-SWGADSBDemodSettings::setBeastHost(QString* beast_host) {
-    this->beast_host = beast_host;
-    this->m_beast_host_isSet = true;
+SWGADSBDemodSettings::setExportClientHost(QString* export_client_host) {
+    this->export_client_host = export_client_host;
+    this->m_export_client_host_isSet = true;
 }
 
 qint32
-SWGADSBDemodSettings::getBeastPort() {
-    return beast_port;
+SWGADSBDemodSettings::getExportClientPort() {
+    return export_client_port;
 }
 void
-SWGADSBDemodSettings::setBeastPort(qint32 beast_port) {
-    this->beast_port = beast_port;
-    this->m_beast_port_isSet = true;
+SWGADSBDemodSettings::setExportClientPort(qint32 export_client_port) {
+    this->export_client_port = export_client_port;
+    this->m_export_client_port_isSet = true;
 }
 
 qint32
-SWGADSBDemodSettings::getFeedFormat() {
-    return feed_format;
+SWGADSBDemodSettings::getExportClientFormat() {
+    return export_client_format;
 }
 void
-SWGADSBDemodSettings::setFeedFormat(qint32 feed_format) {
-    this->feed_format = feed_format;
-    this->m_feed_format_isSet = true;
+SWGADSBDemodSettings::setExportClientFormat(qint32 export_client_format) {
+    this->export_client_format = export_client_format;
+    this->m_export_client_format_isSet = true;
+}
+
+qint32
+SWGADSBDemodSettings::getExportServerEnabled() {
+    return export_server_enabled;
+}
+void
+SWGADSBDemodSettings::setExportServerEnabled(qint32 export_server_enabled) {
+    this->export_server_enabled = export_server_enabled;
+    this->m_export_server_enabled_isSet = true;
+}
+
+qint32
+SWGADSBDemodSettings::getExportServerPort() {
+    return export_server_port;
+}
+void
+SWGADSBDemodSettings::setExportServerPort(qint32 export_server_port) {
+    this->export_server_port = export_server_port;
+    this->m_export_server_port_isSet = true;
+}
+
+qint32
+SWGADSBDemodSettings::getImportEnabled() {
+    return import_enabled;
+}
+void
+SWGADSBDemodSettings::setImportEnabled(qint32 import_enabled) {
+    this->import_enabled = import_enabled;
+    this->m_import_enabled_isSet = true;
+}
+
+QString*
+SWGADSBDemodSettings::getImportHost() {
+    return import_host;
+}
+void
+SWGADSBDemodSettings::setImportHost(QString* import_host) {
+    this->import_host = import_host;
+    this->m_import_host_isSet = true;
+}
+
+QString*
+SWGADSBDemodSettings::getImportUsername() {
+    return import_username;
+}
+void
+SWGADSBDemodSettings::setImportUsername(QString* import_username) {
+    this->import_username = import_username;
+    this->m_import_username_isSet = true;
+}
+
+QString*
+SWGADSBDemodSettings::getImportPassword() {
+    return import_password;
+}
+void
+SWGADSBDemodSettings::setImportPassword(QString* import_password) {
+    this->import_password = import_password;
+    this->m_import_password_isSet = true;
+}
+
+QString*
+SWGADSBDemodSettings::getImportParameters() {
+    return import_parameters;
+}
+void
+SWGADSBDemodSettings::setImportParameters(QString* import_parameters) {
+    this->import_parameters = import_parameters;
+    this->m_import_parameters_isSet = true;
+}
+
+float
+SWGADSBDemodSettings::getImportPeriod() {
+    return import_period;
+}
+void
+SWGADSBDemodSettings::setImportPeriod(float import_period) {
+    this->import_period = import_period;
+    this->m_import_period_isSet = true;
+}
+
+QString*
+SWGADSBDemodSettings::getImportMinLatitude() {
+    return import_min_latitude;
+}
+void
+SWGADSBDemodSettings::setImportMinLatitude(QString* import_min_latitude) {
+    this->import_min_latitude = import_min_latitude;
+    this->m_import_min_latitude_isSet = true;
+}
+
+QString*
+SWGADSBDemodSettings::getImportMaxLatitude() {
+    return import_max_latitude;
+}
+void
+SWGADSBDemodSettings::setImportMaxLatitude(QString* import_max_latitude) {
+    this->import_max_latitude = import_max_latitude;
+    this->m_import_max_latitude_isSet = true;
+}
+
+QString*
+SWGADSBDemodSettings::getImportMinLongitude() {
+    return import_min_longitude;
+}
+void
+SWGADSBDemodSettings::setImportMinLongitude(QString* import_min_longitude) {
+    this->import_min_longitude = import_min_longitude;
+    this->m_import_min_longitude_isSet = true;
+}
+
+QString*
+SWGADSBDemodSettings::getImportMaxLongitude() {
+    return import_max_longitude;
+}
+void
+SWGADSBDemodSettings::setImportMaxLongitude(QString* import_max_longitude) {
+    this->import_max_longitude = import_max_longitude;
+    this->m_import_max_longitude_isSet = true;
 }
 
 QString*
@@ -617,16 +893,55 @@ SWGADSBDemodSettings::isSet(){
         if(m_remove_timeout_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_beast_enabled_isSet){
+        if(m_feed_enabled_isSet){
             isObjectUpdated = true; break;
         }
-        if(beast_host && *beast_host != QString("")){
+        if(m_export_client_enabled_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_beast_port_isSet){
+        if(export_client_host && *export_client_host != QString("")){
             isObjectUpdated = true; break;
         }
-        if(m_feed_format_isSet){
+        if(m_export_client_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_export_client_format_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_export_server_enabled_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_export_server_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_import_enabled_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(import_host && *import_host != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(import_username && *import_username != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(import_password && *import_password != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(import_parameters && *import_parameters != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_import_period_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(import_min_latitude && *import_min_latitude != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(import_max_latitude && *import_max_latitude != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(import_min_longitude && *import_min_longitude != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(import_max_longitude && *import_max_longitude != QString("")){
             isObjectUpdated = true; break;
         }
         if(log_filename && *log_filename != QString("")){

@@ -27,6 +27,7 @@
 #include <QProgressDialog>
 #include <QTextToSpeech>
 #include <QRandomGenerator>
+#include <QNetworkAccessManager>
 
 #include "channel/channelgui.h"
 #include "dsp/dsptypes.h"
@@ -760,6 +761,7 @@ public:
     QString get3DModel(const QString &aircraft, const QString &operatorICAO) const;
     QString get3DModel(const QString &aircraft);
     void get3DModel(Aircraft *aircraft);
+    void get3DModelBasedOnCategory(Aircraft *aircraft);
 
 public slots:
     void channelMarkerChangedByCursor();
@@ -824,6 +826,9 @@ private:
     QHash<QString, float> m_modelAltitudeOffset;
     QHash<QString, float> m_labelAltitudeOffset;
 
+    QTimer m_importTimer;
+    QNetworkAccessManager *m_networkManager;
+
     explicit ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
     virtual ~ADSBDemodGUI();
 
@@ -835,6 +840,7 @@ private:
     void updatePosition(Aircraft *aircraft);
     bool updateLocalPosition(Aircraft *aircraft, double latitude, double longitude, bool surfacePosition);
     void sendToMap(Aircraft *aircraft, QList<SWGSDRangel::SWGMapAnimation *> *animations);
+    Aircraft *getAircraft(int icao, bool &newAircraft);
     void handleADSB(
         const QByteArray data,
         const QDateTime dateTime,
@@ -884,6 +890,7 @@ private:
     void findOnChannelMap(Aircraft *aircraft);
     int grayToBinary(int gray, int bits) const;
     void redrawMap();
+    void applyImportSettings();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);
@@ -933,6 +940,8 @@ private slots:
     void photoClicked();
     virtual void showEvent(QShowEvent *event);
     virtual bool eventFilter(QObject *obj, QEvent *event);
+    void import();
+    void handleImportReply(QNetworkReply* reply);
 
 signals:
     void homePositionChanged();

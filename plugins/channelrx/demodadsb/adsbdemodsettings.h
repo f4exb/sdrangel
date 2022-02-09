@@ -86,13 +86,27 @@ struct ADSBDemodSettings
     Real m_correlationThreshold; //!< Correlation power threshold in dB
     int m_samplesPerBit;
     int m_removeTimeout;                //!< Time in seconds before removing an aircraft, unless a new frame is received
+
     bool m_feedEnabled;
-    QString m_feedHost;
-    uint16_t m_feedPort;
+    bool m_exportClientEnabled;
+    QString m_exportClientHost;
+    uint16_t m_exportClientPort;
     enum FeedFormat {
         BeastBinary,
         BeastHex
-    } m_feedFormat;
+    } m_exportClientFormat;
+    bool m_exportServerEnabled;
+    uint16_t m_exportServerPort;
+    bool m_importEnabled;
+    QString m_importHost;
+    QString m_importUsername;
+    QString m_importPassword;
+    QString m_importParameters;
+    float m_importPeriod;
+    QString m_importMinLatitude;
+    QString m_importMaxLatitude;
+    QString m_importMinLongitude;
+    QString m_importMaxLongitude;
 
     quint32 m_rgbColor;
     QString m_title;

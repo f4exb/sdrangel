@@ -106,15 +106,25 @@ To use this feature, an [aviationstack](https://aviationstack.com) API Key must 
 
 <h3>16: Feed</h3>
 
-Checking Feed enables feeding received ADS-B frames to aggregators such as ADS-B Exchange: https://www.adsbexchange.com or ADSBHub
-: https://www.adsbhub.org. Right clicking on the Feed button opens the Feed Settings dialog.
+Checking Feed enables feeding received ADS-B frames to aggregators such as [ADS-B Exchange](https://www.adsbexchange.com), [ADSBHub](https://www.adsbhub.org) or [OpenSky Network](https://opensky-network.org/)
+and receiving aircraft state from anywhere in the world from [OpenSky Network](https://opensky-network.org/). Right clicking on the Feed button opens the Feed Settings dialog.
 
-The server hostname and port to send the frames to should be entered in the Server and Port fields, with the appropriate format selected:
+The ADS-B plugin can export ADS-B frames acting as both a client and server. When a client, the ADS-B plugin opens a connection to a remote host. When a server, the remote computer connects to this computer.
 
-* For ADS-B Exchange, set Server hostname to feed.adsbexchange.com, Port to 30005 and Format to Beast binary. You can check for successful feeding (after about 30 seconds) at: https://www.adsbexchange.com/myip/
-* For ADSBHub, set Server hostname to data.adsbhub.org, Port to 5002 and Format to Beast hex. You will need to have setup an account on ADSBHub first. You can check for successful feeding at: https://www.adsbhub.org/statistic.php
+As a client:
+
+* For ADS-B Exchange, check Enable Client, set Server hostname to feed.adsbexchange.com, Port to 30005 and Format to Beast binary. You can check for successful feeding (after about 30 seconds) at: https://www.adsbexchange.com/myip/
+* For ADSBHub, check Enable Client, set Server hostname to data.adsbhub.org, Port to 5002 and Format to Beast hex. You will need to have setup an account on ADSBHub first. You can check for successful feeding at: https://www.adsbhub.org/statistic.php
+
+As a server:
+
+* For OpenSky Network, check Enable Server and set Port to 30005. You can check for successfull feeding at: https://opensky-network.org/my-opensky
 
 The Beast binary and Hex formats are as detailed here: https://wiki.jetvision.de/wiki/Mode-S_Beast:Data_Output_Formats
+
+When Enable import is checked, aircraft data for aircraft anywhere in the world can be imported from OpenSky Network.
+A username and password are not required, but when specified, this allows the update period to be reduced to 5 seconds instead of 10 seconds.
+To limit network traffic and processing power requirements, a geographical region can be set via the mininum and maximum latitude and longitude fields.
 
 <h3>17: Open Notifications Dialog</h3>
 
