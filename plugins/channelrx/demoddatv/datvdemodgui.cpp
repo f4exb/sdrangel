@@ -248,7 +248,7 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
     ui->deltaFrequency->setValueRange(false, 8, -99999999, 99999999);
 
     ui->rfBandwidth->setColorMapper(ColorMapper(ColorMapper::GrayYellow));
-    ui->rfBandwidth->setValueRange(true, 7, 0, 9999999);
+    ui->rfBandwidth->setValueRange(true, 8, 0, 50000000);
 
     m_objChannelMarker.blockSignals(true);
     m_objChannelMarker.setColor(Qt::magenta);
