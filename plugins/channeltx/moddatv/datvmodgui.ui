@@ -24,6 +24,7 @@
   </property>
   <property name="font">
    <font>
+    <family>Liberation Sans</family>
     <pointsize>9</pointsize>
    </font>
   </property>
@@ -97,6 +98,7 @@
           </property>
           <property name="font">
            <font>
+            <family>Liberation Mono</family>
             <pointsize>12</pointsize>
            </font>
           </property>
