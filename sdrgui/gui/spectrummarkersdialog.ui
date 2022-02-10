@@ -35,6 +35,9 @@
       <attribute name="title">
        <string>Hist</string>
       </attribute>
+      <attribute name="toolTip">
+       <string>Histogram (spectrum line) markers</string>
+      </attribute>
       <widget class="QWidget" name="layoutWidget">
        <property name="geometry">
         <rect>
@@ -413,6 +416,11 @@
               <height>16777215</height>
              </size>
             </property>
+            <property name="toolTip">
+             <string>Man - Set marker power to fixed level
+Cur - Marker will move according to current power at the marker frequency
+Max - Marker will move according to the maximum power at the marker frequency</string>
+            </property>
             <item>
              <property name="text">
               <string>Man</string>
@@ -498,6 +506,9 @@
      <widget class="QWidget" name="watTab">
       <attribute name="title">
        <string>Wat</string>
+      </attribute>
+      <attribute name="toolTip">
+       <string>Waterfall markers</string>
       </attribute>
       <widget class="QWidget" name="layoutWidget">
        <property name="geometry">
@@ -1014,6 +1025,9 @@
      <widget class="QWidget" name="anoTab">
       <attribute name="title">
        <string>Anno</string>
+      </attribute>
+      <attribute name="toolTip">
+       <string>Annotation markers</string>
       </attribute>
       <widget class="QWidget" name="layoutWidget_2">
        <property name="geometry">
@@ -1712,7 +1726,11 @@
      <item>
       <widget class="QComboBox" name="showSelect">
        <property name="toolTip">
-        <string>Select which set of markers to show</string>
+        <string>Select which set of markers to show
+
+None - Hide all markers
+Spec - Show histogram and waterfall markers
+Anno - Show annotation markers</string>
        </property>
        <item>
         <property name="text">
