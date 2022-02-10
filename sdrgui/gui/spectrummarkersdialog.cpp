@@ -110,6 +110,8 @@ void SpectrumMarkersDialog::displayHistogramMarker()
         ui->markerColor->setStyleSheet(tr("QLabel { background-color : rgb(%1,%2,%3); }").arg(r).arg(g).arg(b));
         ui->showMarker->setChecked(m_histogramMarkers[m_histogramMarkerIndex].m_show);
     }
+    ui->fixedPower->setVisible(m_histogramMarkers[m_histogramMarkerIndex].m_markerType == SpectrumHistogramMarker::SpectrumMarkerTypeManual);
+    ui->fixedPowerUnits->setVisible(m_histogramMarkers[m_histogramMarkerIndex].m_markerType == SpectrumHistogramMarker::SpectrumMarkerTypeManual);
 
     ui->markerFrequency->blockSignals(false);
     ui->centerFrequency->blockSignals(false);
@@ -379,6 +381,9 @@ void SpectrumMarkersDialog::on_powerMode_currentIndexChanged(int index)
     }
 
     SpectrumHistogramMarker::SpectrumMarkerType newType = (SpectrumHistogramMarker::SpectrumMarkerType) index;
+
+    ui->fixedPower->setVisible(newType == SpectrumHistogramMarker::SpectrumMarkerTypeManual);
+    ui->fixedPowerUnits->setVisible(newType == SpectrumHistogramMarker::SpectrumMarkerTypeManual);
 
     if ((m_histogramMarkers[m_histogramMarkerIndex].m_markerType != newType)
        && (newType == SpectrumHistogramMarker::SpectrumMarkerTypePowerMax))
