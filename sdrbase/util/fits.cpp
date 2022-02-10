@@ -40,7 +40,7 @@ FITS::FITS(QString resourceName) :
     m_fileSize = m_res.uncompressedSize();
 #else
     m_data = QByteArray::fromRawData((const char *)m_res.data(), m_res.size());
-    if (res.isCompressed()) {
+    if (m_res.isCompressed()) {
         m_data = qUncompress(m_data);
     }
     m_fileSize = m_res.size();
