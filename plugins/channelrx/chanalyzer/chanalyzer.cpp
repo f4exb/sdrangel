@@ -54,11 +54,17 @@ ChannelAnalyzer::ChannelAnalyzer(DeviceAPI *deviceAPI) :
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
+
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 ChannelAnalyzer::~ChannelAnalyzer()
 {
     qDebug("ChannelAnalyzer::~ChannelAnalyzer");
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
+
 	m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
 
@@ -177,11 +183,102 @@ void ChannelAnalyzer::applySettings(const ChannelAnalyzerSettings& settings, boo
             << " m_pllBandwidth: " << settings.m_pllBandwidth
             << " m_pllDampingFactor: " << settings.m_pllDampingFactor
             << " m_pllLoopGain: " << settings.m_pllLoopGain
-            << " m_inputType: " << (int) settings.m_inputType;
+            << " m_inputType: " << (int) settings.m_inputType
+            << " m_useReverseAPI:" << settings.m_useReverseAPI
+            << " m_reverseAPIAddress:" << settings.m_reverseAPIAddress
+            << " m_reverseAPIPort:" << settings.m_reverseAPIPort
+            << " m_reverseAPIDeviceIndex:" << settings.m_reverseAPIDeviceIndex
+            << " m_reverseAPIChannelIndex:" << settings.m_reverseAPIChannelIndex;
+
+    QList<QString> reverseAPIKeys;
+
+    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
+        reverseAPIKeys.append("inputFrequencyOffset");
+    }
+    if ((settings.m_rationalDownSample != m_settings.m_rationalDownSample) || force) {
+        reverseAPIKeys.append("rationalDownSample");
+    }
+    if ((settings.m_rationalDownSamplerRate != m_settings.m_rationalDownSamplerRate) || force) {
+        reverseAPIKeys.append("rationalDownSamplerRate");
+    }
+    if ((settings.m_bandwidth != m_settings.m_bandwidth) || force) {
+        reverseAPIKeys.append("bandwidth");
+    }
+    if ((settings.m_lowCutoff != m_settings.m_lowCutoff) || force) {
+        reverseAPIKeys.append("lowCutoff");
+    }
+    if ((settings.m_log2Decim != m_settings.m_log2Decim) || force) {
+        reverseAPIKeys.append("log2Decim");
+    }
+    if ((settings.m_lowCutoff != m_settings.m_lowCutoff) || force) {
+        reverseAPIKeys.append("lowCutoff");
+    }
+    if ((settings.m_ssb != m_settings.m_ssb) || force) {
+        reverseAPIKeys.append("ssb");
+    }
+    if ((settings.m_pll != m_settings.m_pll) || force) {
+        reverseAPIKeys.append("pll");
+    }
+    if ((settings.m_fll != m_settings.m_fll) || force) {
+        reverseAPIKeys.append("fll");
+    }
+    if ((settings.m_costasLoop != m_settings.m_costasLoop) || force) {
+        reverseAPIKeys.append("costasLoop");
+    }
+    if ((settings.m_rrc != m_settings.m_rrc) || force) {
+        reverseAPIKeys.append("rrc");
+    }
+    if ((settings.m_rrcRolloff != m_settings.m_rrcRolloff) || force) {
+        reverseAPIKeys.append("rrcRolloff");
+    }
+    if ((settings.m_pllPskOrder != m_settings.m_pllPskOrder) || force) {
+        reverseAPIKeys.append("pllPskOrder");
+    }
+    if ((settings.m_pllBandwidth != m_settings.m_pllBandwidth) || force) {
+        reverseAPIKeys.append("pllBandwidth");
+    }
+    if ((settings.m_pllDampingFactor != m_settings.m_pllDampingFactor) || force) {
+        reverseAPIKeys.append("pllDampingFactor");
+    }
+    if ((settings.m_pllLoopGain != m_settings.m_pllLoopGain) || force) {
+        reverseAPIKeys.append("pllLoopGain");
+    }
+    if ((settings.m_inputType != m_settings.m_inputType) || force) {
+        reverseAPIKeys.append("inputType");
+    }
+    if ((settings.m_rgbColor != m_settings.m_rgbColor) || force) {
+        reverseAPIKeys.append("rgbColor");
+    }
+    if ((settings.m_title != m_settings.m_title) || force) {
+        reverseAPIKeys.append("title");
+    }
+
+    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    {
+        if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
+        {
+            m_deviceAPI->removeChannelSinkAPI(this);
+            m_deviceAPI->removeChannelSink(this, m_settings.m_streamIndex);
+            m_deviceAPI->addChannelSink(this, settings.m_streamIndex);
+            m_deviceAPI->addChannelSinkAPI(this);
+        }
+
+        reverseAPIKeys.append("streamIndex");
+    }
 
     ChannelAnalyzerBaseband::MsgConfigureChannelAnalyzerBaseband *msg
         = ChannelAnalyzerBaseband::MsgConfigureChannelAnalyzerBaseband::create(settings, force);
     m_basebandSink->getInputMessageQueue()->push(msg);
+
+    if (settings.m_useReverseAPI)
+    {
+        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
+                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
+        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+    }
 
     m_settings = settings;
 }
@@ -478,7 +575,7 @@ void ChannelAnalyzer::webapiFormatChannelSettings(
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
     swgChannelSettings->setChannelType(new QString(m_channelId));
-    swgChannelSettings->setSsbDemodSettings(new SWGSDRangel::SWGSSBDemodSettings());
+    swgChannelSettings->setChannelAnalyzerSettings(new SWGSDRangel::SWGChannelAnalyzerSettings());
     SWGSDRangel::SWGChannelAnalyzerSettings *swgChannelAnalyzerSettings = swgChannelSettings->getChannelAnalyzerSettings();
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data

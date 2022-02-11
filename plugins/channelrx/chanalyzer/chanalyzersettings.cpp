@@ -164,9 +164,9 @@ bool ChannelAnalyzerSettings::deserialize(const QByteArray& data)
             m_rollupState->deserialize(bytetmp);
         }
 
-        d.readBool(18, &m_useReverseAPI, false);
-        d.readString(19, &m_reverseAPIAddress, "127.0.0.1");
-        d.readU32(20, &utmp, 0);
+        d.readBool(23, &m_useReverseAPI, false);
+        d.readString(24, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(25, &utmp, 0);
 
         if ((utmp > 1023) && (utmp < 65535)) {
             m_reverseAPIPort = utmp;
@@ -174,11 +174,11 @@ bool ChannelAnalyzerSettings::deserialize(const QByteArray& data)
             m_reverseAPIPort = 8888;
         }
 
-        d.readU32(21, &utmp, 0);
+        d.readU32(26, &utmp, 0);
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
-        d.readU32(22, &utmp, 0);
+        d.readU32(27, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
-        d.readS32(23, &m_streamIndex, 0);
+        d.readS32(28, &m_streamIndex, 0);
 
         return true;
     }
