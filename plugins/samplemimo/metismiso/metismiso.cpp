@@ -312,8 +312,8 @@ bool MetisMISO::applySettings(const MetisMISOSettings& settings, bool force)
         << " m_dcBlock:" << settings.m_dcBlock
         << " m_iqCorrection:" << settings.m_iqCorrection
         << " m_txDrive:" << settings.m_txDrive
-        << " m_streamIndex:" << m_settings.m_streamIndex
-        << " m_spectrumStreamIndex:" << m_settings.m_spectrumStreamIndex
+        << " m_streamIndex:" << settings.m_streamIndex
+        << " m_spectrumStreamIndex:" << settings.m_spectrumStreamIndex
         << " m_useReverseAPI: " << settings.m_useReverseAPI
         << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
         << " m_reverseAPIPort: " << settings.m_reverseAPIPort
@@ -448,15 +448,8 @@ bool MetisMISO::applySettings(const MetisMISOSettings& settings, bool force)
         reverseAPIKeys.append("streamIndex");
     }
 
-    if ((m_settings.m_spectrumStreamIndex != settings.m_spectrumStreamIndex) || force)
-    {
+    if ((m_settings.m_spectrumStreamIndex != settings.m_spectrumStreamIndex) || force) {
         reverseAPIKeys.append("spectrumStreamIndex");
-
-        if (settings.m_spectrumStreamIndex < MetisMISOSettings::m_maxReceivers) {
-            m_deviceAPI->setSpectrumSinkInput(true, m_settings.m_spectrumStreamIndex);
-        } else {
-            m_deviceAPI->setSpectrumSinkInput(false, 0);
-        }
     }
 
     if (propagateSettings) {

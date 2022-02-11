@@ -138,11 +138,13 @@ void MetisMISOGui::on_streamIndex_currentIndexChanged(int index)
         if (m_settings.m_spectrumStreamIndex < MetisMISOSettings::m_maxReceivers)
         {
             m_deviceUISet->m_spectrum->setDisplayedStream(true, index);
+            m_deviceUISet->m_deviceAPI->setSpectrumSinkInput(true, m_settings.m_spectrumStreamIndex);
             m_deviceUISet->setSpectrumScalingFactor(SDR_RX_SCALEF);
         }
         else
         {
             m_deviceUISet->m_spectrum->setDisplayedStream(false, 0);
+            m_deviceUISet->m_deviceAPI->setSpectrumSinkInput(false, 0);
             m_deviceUISet->setSpectrumScalingFactor(SDR_TX_SCALEF);
         }
 
@@ -168,11 +170,13 @@ void MetisMISOGui::on_spectrumSource_currentIndexChanged(int index)
     if (m_settings.m_spectrumStreamIndex < MetisMISOSettings::m_maxReceivers)
     {
         m_deviceUISet->m_spectrum->setDisplayedStream(true, index);
+        m_deviceUISet->m_deviceAPI->setSpectrumSinkInput(true, m_settings.m_spectrumStreamIndex);
         m_deviceUISet->setSpectrumScalingFactor(SDR_RX_SCALEF);
     }
     else
     {
         m_deviceUISet->m_spectrum->setDisplayedStream(false, 0);
+        m_deviceUISet->m_deviceAPI->setSpectrumSinkInput(false, 0);
         m_deviceUISet->setSpectrumScalingFactor(SDR_TX_SCALEF);
     }
 
