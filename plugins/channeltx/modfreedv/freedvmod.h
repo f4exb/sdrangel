@@ -43,8 +43,6 @@ class FreeDVModBaseband;
 struct freedv;
 
 class FreeDVMod : public BasebandSampleSource, public ChannelAPI {
-    Q_OBJECT
-
 public:
     class MsgConfigureFreeDVMod : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -183,7 +181,8 @@ public:
     virtual void start();
     virtual void stop();
     virtual void pull(SampleVector::iterator& begin, unsigned int nbSamples);
-    virtual bool handleMessage(const Message& cmd);
+    virtual void pushMessage(Message *msg) { m_inputMessageQueue.push(msg); }
+    virtual QString getSourceName() { return objectName(); }
 
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
@@ -263,6 +262,7 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
+    virtual bool handleMessage(const Message& cmd);
     void applySettings(const FreeDVModSettings& settings, bool force = false);
     void openFileStream();
     void seekFileStream(int seekPercentage);

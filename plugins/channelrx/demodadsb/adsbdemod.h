@@ -38,7 +38,6 @@ class DeviceAPI;
 class ADSBDemodWorker;
 
 class ADSBDemod : public BasebandSampleSink, public ChannelAPI {
-    Q_OBJECT
 public:
     class MsgConfigureADSBDemod : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -71,7 +70,8 @@ public:
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
     virtual void start();
     virtual void stop();
-    virtual bool handleMessage(const Message& cmd);
+    virtual void pushMessage(Message *msg) { m_inputMessageQueue.push(msg); }
+    virtual QString getSinkName() { return objectName(); }
 
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
@@ -145,6 +145,7 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
+	virtual bool handleMessage(const Message& cmd); //!< Processing of a message. Returns true if message has actually been processed
     void applySettings(const ADSBDemodSettings& settings, bool force = false);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const ADSBDemodSettings& settings, bool force);

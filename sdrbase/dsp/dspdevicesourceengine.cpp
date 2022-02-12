@@ -122,14 +122,14 @@ void DSPDeviceSourceEngine::setSourceSequence(int sequence)
 
 void DSPDeviceSourceEngine::addSink(BasebandSampleSink* sink)
 {
-	qDebug() << "DSPDeviceSourceEngine::addSink: " << sink->objectName().toStdString().c_str();
+	qDebug() << "DSPDeviceSourceEngine::addSink: " << sink->getSinkName().toStdString().c_str();
 	DSPAddBasebandSampleSink cmd(sink);
 	m_syncMessenger.sendWait(cmd);
 }
 
 void DSPDeviceSourceEngine::removeSink(BasebandSampleSink* sink)
 {
-	qDebug() << "DSPDeviceSourceEngine::removeSink: " << sink->objectName().toStdString().c_str();
+	qDebug() << "DSPDeviceSourceEngine::removeSink: " << sink->getSinkName().toStdString().c_str();
 	DSPRemoveBasebandSampleSink cmd(sink);
 	m_syncMessenger.sendWait(cmd);
 }
@@ -444,7 +444,7 @@ DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoInit()
 	for (BasebandSampleSinks::const_iterator it = m_basebandSampleSinks.begin(); it != m_basebandSampleSinks.end(); ++it)
 	{
 		DSPSignalNotification *notif = new DSPSignalNotification(m_sampleRate, m_centerFrequency);
-		qDebug() << "DSPDeviceSourceEngine::gotoInit: initializing " << (*it)->objectName().toStdString().c_str();
+		qDebug() << "DSPDeviceSourceEngine::gotoInit: initializing " << (*it)->getSinkName().toStdString().c_str();
 		(*it)->pushMessage(notif);
 	}
 
@@ -493,7 +493,7 @@ DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoRunning()
 
 	for(BasebandSampleSinks::const_iterator it = m_basebandSampleSinks.begin(); it != m_basebandSampleSinks.end(); it++)
 	{
-        qDebug() << "DSPDeviceSourceEngine::gotoRunning: starting " << (*it)->objectName().toStdString().c_str();
+        qDebug() << "DSPDeviceSourceEngine::gotoRunning: starting " << (*it)->getSinkName().toStdString().c_str();
 		(*it)->start();
 	}
 
@@ -659,7 +659,7 @@ void DSPDeviceSourceEngine::handleInputMessages()
 			for(BasebandSampleSinks::const_iterator it = m_basebandSampleSinks.begin(); it != m_basebandSampleSinks.end(); it++)
 			{
 				DSPSignalNotification* rep = new DSPSignalNotification(*notif); // make a copy
-				qDebug() << "DSPDeviceSourceEngine::handleInputMessages: forward message to " << (*it)->objectName().toStdString().c_str();
+				qDebug() << "DSPDeviceSourceEngine::handleInputMessages: forward message to " << (*it)->getSinkName().toStdString().c_str();
 				(*it)->pushMessage(rep);
 			}
 

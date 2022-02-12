@@ -20,6 +20,7 @@
 #ifndef SDRBASE_CHANNEL_CHANNELAPI_H_
 #define SDRBASE_CHANNEL_CHANNELAPI_H_
 
+#include <QObject>
 #include <QString>
 #include <QByteArray>
 #include <QList>
@@ -39,7 +40,8 @@ namespace SWGSDRangel
     class SWGChannelActions;
 }
 
-class SDRBASE_API ChannelAPI : public PipeEndPoint {
+class SDRBASE_API ChannelAPI : public QObject, public PipeEndPoint {
+    Q_OBJECT
 public:
     enum StreamType //!< This is the same enum as in PluginInterface
     {
@@ -65,6 +67,7 @@ public:
 
     virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
     MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
+    MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     MessageQueue *getChannelMessageQueue() { return &m_channelMessageQueue; } //!< Get the queue for plugin communication
 
     /**
@@ -141,8 +144,13 @@ public:
     }
 
 protected:
+	virtual bool handleMessage(const Message& cmd) = 0; //!< Processing of a message. Returns true if message has actually been processed
     MessageQueue *m_guiMessageQueue;    //!< Input message queue to the GUI
     MessageQueue m_channelMessageQueue; //!< Input message queue for inter plugin communication
+	MessageQueue m_inputMessageQueue;     //!< Queue for asynchronous inbound communication
+
+protected slots:
+	void handleInputMessages();
 
 private:
     StreamType m_streamType;

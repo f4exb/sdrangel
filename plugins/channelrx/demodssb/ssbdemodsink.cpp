@@ -24,7 +24,7 @@
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "dsp/devicesamplemimo.h"
-#include "dsp/basebandsamplesink.h"
+#include "dsp/spectrumvis.h"
 #include "dsp/datafifo.h"
 #include "device/deviceapi.h"
 #include "util/db.h"

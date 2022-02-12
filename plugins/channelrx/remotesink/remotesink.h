@@ -37,7 +37,6 @@ class QNetworkReply;
 class DeviceAPI;
 
 class RemoteSink : public BasebandSampleSink, public ChannelAPI {
-    Q_OBJECT
 public:
     class MsgConfigureRemoteSink : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -70,7 +69,8 @@ public:
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
     virtual void start();
     virtual void stop();
-    virtual bool handleMessage(const Message& cmd);
+    virtual void pushMessage(Message *msg) { m_inputMessageQueue.push(msg); }
+    virtual QString getSinkName() { return objectName(); }
 
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = "Remote Sink"; }
@@ -128,6 +128,7 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
+    virtual bool handleMessage(const Message& cmd);
     void applySettings(const RemoteSinkSettings& settings, bool force = false);
     static void validateFilterChainHash(RemoteSinkSettings& settings);
     void calculateFrequencyOffset();

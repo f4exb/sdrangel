@@ -41,8 +41,6 @@ class CWKeyer;
 class ChirpChatModBaseband;
 
 class ChirpChatMod : public BasebandSampleSource, public ChannelAPI {
-    Q_OBJECT
-
 public:
     class MsgConfigureChirpChatMod : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -94,7 +92,8 @@ public:
     virtual void start();
     virtual void stop();
     virtual void pull(SampleVector::iterator& begin, unsigned int nbSamples);
-    virtual bool handleMessage(const Message& cmd);
+    virtual void pushMessage(Message *msg) { m_inputMessageQueue.push(msg); }
+    virtual QString getSourceName() { return objectName(); }
 
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
@@ -163,6 +162,7 @@ private:
     QNetworkRequest m_networkRequest;
     QUdpSocket *m_udpSocket;
 
+    virtual bool handleMessage(const Message& cmd);
     void applySettings(const ChirpChatModSettings& settings, bool force = false);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const ChirpChatModSettings& settings, bool force);

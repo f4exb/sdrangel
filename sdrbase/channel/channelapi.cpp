@@ -30,4 +30,18 @@ ChannelAPI::ChannelAPI(const QString& uri, StreamType streamType) :
     m_deviceSetIndex(0),
     m_deviceAPI(0),
     m_uid(UidCalculator::getNewObjectId())
-{ }
+{
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+}
+
+void ChannelAPI::handleInputMessages()
+{
+	Message* message;
+
+	while ((message = m_inputMessageQueue.pop()) != 0)
+	{
+		if (handleMessage(*message)) {
+			delete message;
+		}
+	}
+}

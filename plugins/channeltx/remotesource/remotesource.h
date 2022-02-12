@@ -35,8 +35,6 @@ class DeviceAPI;
 class RemoteSourceBaseband;
 
 class RemoteSource : public BasebandSampleSource, public ChannelAPI {
-    Q_OBJECT
-
 public:
     class MsgConfigureRemoteSource : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -183,7 +181,8 @@ public:
     virtual void start();
     virtual void stop();
     virtual void pull(SampleVector::iterator& begin, unsigned int nbSamples);
-    virtual bool handleMessage(const Message& cmd);
+    virtual void pushMessage(Message *msg) { m_inputMessageQueue.push(msg); }
+    virtual QString getSourceName() { return objectName(); }
 
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
@@ -244,6 +243,7 @@ private:
     int64_t m_frequencyOffset;
     uint32_t m_basebandSampleRate;
 
+    virtual bool handleMessage(const Message& cmd);
     void applySettings(const RemoteSourceSettings& settings, bool force = false);
     static void validateFilterChainHash(RemoteSourceSettings& settings);
     void calculateFrequencyOffset(uint32_t log2Interp, uint32_t filterChainHash);

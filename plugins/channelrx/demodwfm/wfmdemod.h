@@ -35,7 +35,6 @@ class QNetworkReply;
 class DeviceAPI;
 
 class WFMDemod : public BasebandSampleSink, public ChannelAPI {
-    Q_OBJECT
 public:
     class MsgConfigureWFMDemod : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -68,7 +67,8 @@ public:
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
 	virtual void stop();
-	virtual bool handleMessage(const Message& cmd);
+    virtual void pushMessage(Message *msg) { m_inputMessageQueue.push(msg); }
+    virtual QString getSinkName() { return objectName(); }
 
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
@@ -134,6 +134,7 @@ private:
 
     static const int m_udpBlockSize;
 
+	virtual bool handleMessage(const Message& cmd);
     void applySettings(const WFMDemodSettings& settings, bool force = false);
     void sendSampleRateToDemodAnalyzer();
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);

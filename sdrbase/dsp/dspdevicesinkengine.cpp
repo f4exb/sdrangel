@@ -112,28 +112,28 @@ void DSPDeviceSinkEngine::setSinkSequence(int sequence)
 
 void DSPDeviceSinkEngine::addChannelSource(BasebandSampleSource* source)
 {
-	qDebug() << "DSPDeviceSinkEngine::addChannelSource: " << source->objectName().toStdString().c_str();
+	qDebug() << "DSPDeviceSinkEngine::addChannelSource: " << source->getSourceName().toStdString().c_str();
 	DSPAddBasebandSampleSource cmd(source);
 	m_syncMessenger.sendWait(cmd);
 }
 
 void DSPDeviceSinkEngine::removeChannelSource(BasebandSampleSource* source)
 {
-	qDebug() << "DSPDeviceSinkEngine::removeChannelSource: " << source->objectName().toStdString().c_str();
+	qDebug() << "DSPDeviceSinkEngine::removeChannelSource: " << source->getSourceName().toStdString().c_str();
 	DSPRemoveBasebandSampleSource cmd(source);
 	m_syncMessenger.sendWait(cmd);
 }
 
 void DSPDeviceSinkEngine::addSpectrumSink(BasebandSampleSink* spectrumSink)
 {
-	qDebug() << "DSPDeviceSinkEngine::addSpectrumSink: " << spectrumSink->objectName().toStdString().c_str();
+	qDebug() << "DSPDeviceSinkEngine::addSpectrumSink: " << spectrumSink->getSinkName().toStdString().c_str();
 	DSPAddSpectrumSink cmd(spectrumSink);
 	m_syncMessenger.sendWait(cmd);
 }
 
 void DSPDeviceSinkEngine::removeSpectrumSink(BasebandSampleSink* spectrumSink)
 {
-	qDebug() << "DSPDeviceSinkEngine::removeSpectrumSink: " << spectrumSink->objectName().toStdString().c_str();
+	qDebug() << "DSPDeviceSinkEngine::removeSpectrumSink: " << spectrumSink->getSinkName().toStdString().c_str();
 	DSPRemoveSpectrumSink cmd(spectrumSink);
 	m_syncMessenger.sendWait(cmd);
 }
@@ -268,7 +268,7 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoIdle()
 
 	for(BasebandSampleSources::const_iterator it = m_basebandSampleSources.begin(); it != m_basebandSampleSources.end(); it++)
 	{
-        qDebug() << "DSPDeviceSinkEngine::gotoIdle: stopping " << (*it)->objectName().toStdString().c_str();
+        qDebug() << "DSPDeviceSinkEngine::gotoIdle: stopping " << (*it)->getSourceName().toStdString().c_str();
 		(*it)->stop();
 	}
 
@@ -315,7 +315,7 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoInit()
 
 	for (BasebandSampleSources::const_iterator it = m_basebandSampleSources.begin(); it != m_basebandSampleSources.end(); ++it)
 	{
-		qDebug() << "DSPDeviceSinkEngine::gotoInit: initializing " << (*it)->objectName().toStdString().c_str();
+		qDebug() << "DSPDeviceSinkEngine::gotoInit: initializing " << (*it)->getSourceName().toStdString().c_str();
 		(*it)->pushMessage(new DSPSignalNotification(notif));
 	}
 
@@ -368,7 +368,7 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoRunning()
 
 	for(BasebandSampleSources::const_iterator it = m_basebandSampleSources.begin(); it != m_basebandSampleSources.end(); it++)
 	{
-        qDebug() << "DSPDeviceSinkEngine::gotoRunning: starting " << (*it)->objectName().toStdString().c_str();
+        qDebug() << "DSPDeviceSinkEngine::gotoRunning: starting " << (*it)->getSourceName().toStdString().c_str();
 		(*it)->start();
 	}
 
@@ -519,7 +519,7 @@ void DSPDeviceSinkEngine::handleInputMessages()
 			for(BasebandSampleSources::const_iterator it = m_basebandSampleSources.begin(); it != m_basebandSampleSources.end(); it++)
 			{
 				DSPSignalNotification* rep = new DSPSignalNotification(*notif); // make a copy
-				qDebug() << "DSPDeviceSinkEngine::handleInputMessages: forward message to " << (*it)->objectName().toStdString().c_str();
+				qDebug() << "DSPDeviceSinkEngine::handleInputMessages: forward message to " << (*it)->getSourceName().toStdString().c_str();
 				(*it)->pushMessage(rep);
 			}
 

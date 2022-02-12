@@ -20,26 +20,8 @@
 
 MIMOChannel::MIMOChannel()
 {
-	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }
 
 MIMOChannel::~MIMOChannel()
 {
-}
-
-void MIMOChannel::pushMessage(Message *msg)
-{
-	m_inputMessageQueue.push(msg);
-}
-
-void MIMOChannel::handleInputMessages()
-{
-	Message* message;
-
-	while ((message = m_inputMessageQueue.pop()) != 0)
-	{
-		if (handleMessage(*message)) {
-			delete message;
-		}
-	}
 }

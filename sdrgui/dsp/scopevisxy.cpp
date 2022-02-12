@@ -20,6 +20,7 @@
 #include <thread>
 
 #include "scopevisxy.h"
+#include "util/message.h"
 #include "gui/tvscreen.h"
 
 ScopeVisXY::ScopeVisXY(TVScreen *tvScreen) :
@@ -100,6 +101,18 @@ void ScopeVisXY::start()
 
 void ScopeVisXY::stop()
 {
+}
+
+void ScopeVisXY::handleInputMessages()
+{
+	Message* message;
+
+	while ((message = m_inputMessageQueue.pop()) != 0)
+	{
+		if (handleMessage(*message)) {
+			delete message;
+		}
+	}
 }
 
 bool ScopeVisXY::handleMessage(const Message& message)

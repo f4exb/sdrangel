@@ -38,7 +38,6 @@ class QNetworkAccessManager;
 
 class Interferometer: public MIMOChannel, public ChannelAPI
 {
-    Q_OBJECT
 public:
     class MsgConfigureInterferometer : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -96,7 +95,8 @@ public:
     virtual void stopSources() {}
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int sinkIndex);
     virtual void pull(SampleVector::iterator& begin, unsigned int nbSamples, unsigned int sourceIndex);
-	virtual bool handleMessage(const Message& cmd); //!< Processing of a message. Returns true if message has actually been processed
+    virtual void pushMessage(Message *msg) { m_inputMessageQueue.push(msg); }
+    virtual QString getMIMOName() { return objectName(); }
 
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = "Interferometer"; }
@@ -165,6 +165,7 @@ private:
     uint32_t m_deviceSampleRate;
     int m_count0, m_count1;
 
+	virtual bool handleMessage(const Message& cmd); //!< Processing of a message. Returns true if message has actually been processed
     void applySettings(const InterferometerSettings& settings, bool force = false);
     static void validateFilterChainHash(InterferometerSettings& settings);
     void calculateFrequencyOffset();

@@ -37,7 +37,6 @@ class BasebandSampleSink;
 
 class BeamSteeringCWMod: public MIMOChannel, public ChannelAPI
 {
-    Q_OBJECT
 public:
     class MsgConfigureBeamSteeringCWMod : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -95,7 +94,8 @@ public:
     virtual void stopSources(); //!< thread exit() and wait()
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int sinkIndex);
     virtual void pull(SampleVector::iterator& begin, unsigned int nbSamples, unsigned int sourceIndex);
-	virtual bool handleMessage(const Message& cmd); //!< Processing of a message. Returns true if message has actually been processed
+    virtual void pushMessage(Message *msg) { m_inputMessageQueue.push(msg); }
+    virtual QString getMIMOName() { return objectName(); }
 
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = "BeamSteeringCWMod"; }
@@ -160,6 +160,7 @@ private:
     uint32_t m_basebandSampleRate;
     int m_count0, m_count1;
 
+   	virtual bool handleMessage(const Message& cmd); //!< Processing of a message. Returns true if message has actually been processed
     void applySettings(const BeamSteeringCWModSettings& settings, bool force = false);
     static void validateFilterChainHash(BeamSteeringCWModSettings& settings);
     void calculateFrequencyOffset();

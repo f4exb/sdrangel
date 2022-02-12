@@ -34,8 +34,6 @@ class QNetworkReply;
 class DeviceAPI;
 
 class UDPSink : public BasebandSampleSink, public ChannelAPI {
-	Q_OBJECT
-
 public:
     class MsgConfigureUDPSink : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -76,7 +74,8 @@ public:
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
 	virtual void stop();
-	virtual bool handleMessage(const Message& cmd);
+    virtual void pushMessage(Message *msg) { m_inputMessageQueue.push(msg); }
+    virtual QString getSinkName() { return objectName(); }
 
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
@@ -142,8 +141,9 @@ protected:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
-    void applySettings(const UDPSinkSettings& settings, bool force = false);
+	virtual bool handleMessage(const Message& cmd);
 
+    void applySettings(const UDPSinkSettings& settings, bool force = false);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const UDPSinkSettings& settings, bool force);
     void sendChannelSettings(

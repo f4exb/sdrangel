@@ -19,15 +19,13 @@
 #ifndef SDRBASE_DSP_BASEBANDSAMPLESOURCE_H_
 #define SDRBASE_DSP_BASEBANDSAMPLESOURCE_H_
 
-#include <QObject>
 #include "dsp/dsptypes.h"
 #include "export.h"
 #include "util/messagequeue.h"
 
 class Message;
 
-class SDRBASE_API BasebandSampleSource : public QObject {
-	Q_OBJECT
+class SDRBASE_API BasebandSampleSource {
 public:
 	BasebandSampleSource();
 	virtual ~BasebandSampleSource();
@@ -35,16 +33,8 @@ public:
 	virtual void start() = 0;
 	virtual void stop() = 0;
 	virtual void pull(SampleVector::iterator& begin, unsigned int nbSamples) = 0;
-	void pushMessage(Message *msg);
-
-	MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
-
-protected:
-	virtual bool handleMessage(const Message& cmd) = 0; //!< Processing of a message. Returns true if message has actually been processed
-	MessageQueue m_inputMessageQueue;     //!< Queue for asynchronous inbound communication
-
-protected slots:
-	void handleInputMessages();
+	virtual void pushMessage(Message *msg) = 0;
+	virtual QString getSourceName() = 0;
 };
 
 #endif /* SDRBASE_DSP_BASEBANDSAMPLESOURCE_H_ */

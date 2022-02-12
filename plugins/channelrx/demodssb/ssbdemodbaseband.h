@@ -29,6 +29,7 @@
 
 class DownChannelizer;
 class ChannelAPI;
+class SpectrumVis;
 
 class SSBDemodBaseband : public QObject
 {

@@ -19,15 +19,13 @@
 #ifndef INCLUDE_SAMPLESINK_H
 #define INCLUDE_SAMPLESINK_H
 
-#include <QObject>
 #include "dsp/dsptypes.h"
 #include "export.h"
 #include "util/messagequeue.h"
 
 class Message;
 
-class SDRBASE_API BasebandSampleSink : public QObject {
-	Q_OBJECT
+class SDRBASE_API BasebandSampleSink {
 public:
 	BasebandSampleSink();
 	virtual ~BasebandSampleSink();
@@ -35,22 +33,10 @@ public:
 	virtual void start() = 0;
 	virtual void stop() = 0;
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly) = 0;
-	void pushMessage(Message *msg);
-
-	MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
-
-    virtual void feed(const Complex *begin, unsigned int length) //!< Special feed directly with complex array
-    {
-        (void) begin;
-        (void) length;
+    virtual void feed(const Complex*, unsigned int) { //!< Special feed directly with complex array
     }
-
-protected:
-	virtual bool handleMessage(const Message& cmd) = 0; //!< Processing of a message. Returns true if message has actually been processed
-	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
-
-protected slots:
-	void handleInputMessages();
+	virtual void pushMessage(Message *msg) = 0;
+	virtual QString getSinkName() = 0;
 };
 
 #endif // INCLUDE_SAMPLESINK_H

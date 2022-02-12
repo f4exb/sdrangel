@@ -19,16 +19,13 @@
 #ifndef SDRBASE_MIMOCHANNEL_H
 #define SDRBASE_MIMOCHANNEL_H
 
-#include <QObject>
-
 #include "export.h"
 #include "dsp/dsptypes.h"
 #include "util/messagequeue.h"
 #include "util/message.h"
 
 
-class SDRBASE_API MIMOChannel : public QObject {
-	Q_OBJECT
+class SDRBASE_API MIMOChannel {
 public:
 	MIMOChannel();
 	virtual ~MIMOChannel();
@@ -39,16 +36,8 @@ public:
 	virtual void stopSources() = 0;
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int sinkIndex) = 0;
     virtual void pull(SampleVector::iterator& begin, unsigned int nbSamples, unsigned int sourceIndex) = 0;
-	void pushMessage(Message *msg);
-
-	MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
-
-protected:
-	virtual bool handleMessage(const Message& cmd) = 0; //!< Processing of a message. Returns true if message has actually been processed
-	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
-
-protected slots:
-	void handleInputMessages();
+	virtual void pushMessage(Message *msg) = 0;
+	virtual QString getMIMOName() = 0;
 };
 
 #endif // SDRBASE_MIMOCHANNEL_H

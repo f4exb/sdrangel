@@ -80,7 +80,8 @@ public:
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
 	virtual void stop();
-	virtual bool handleMessage(const Message& cmd);
+    virtual void pushMessage(Message *msg) { m_inputMessageQueue.push(msg); }
+    virtual QString getSinkName() { return objectName(); }
 
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = objectName(); }
@@ -135,6 +136,7 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
+	virtual bool handleMessage(const Message& cmd);
 	void applySettings(const ChannelAnalyzerSettings& settings, bool force = false);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const ChannelAnalyzerSettings& settings, bool force);
     void sendChannelSettings(

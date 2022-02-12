@@ -30,7 +30,7 @@
 
 #include "ssbdemodsettings.h"
 
-class BasebandSampleSink;
+class SpectrumVis;
 class ChannelAPI;
 
 class SSBDemodSink : public ChannelSampleSink {
@@ -40,7 +40,7 @@ public:
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
-	void setSpectrumSink(BasebandSampleSink* spectrumSink) { m_spectrumSink = spectrumSink; }
+	void setSpectrumSink(SpectrumVis* spectrumSink) { m_spectrumSink = spectrumSink; }
 	void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
 	void applySettings(const SSBDemodSettings& settings, bool force = false);
     void applyAudioSampleRate(int sampleRate);
@@ -116,7 +116,7 @@ private:
 	fftfilt* SSBFilter;
 	fftfilt* DSBFilter;
 
-	BasebandSampleSink* m_spectrumSink;
+	SpectrumVis* m_spectrumSink;
 	SampleVector m_sampleBuffer;
 
 	AudioVector m_audioBuffer;

@@ -35,7 +35,6 @@ class DeviceSampleSink;
 class LocalSourceBaseband;
 
 class LocalSource : public BasebandSampleSource, public ChannelAPI {
-    Q_OBJECT
 public:
     class MsgConfigureLocalSource : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -87,7 +86,8 @@ public:
     virtual void start();
     virtual void stop();
     virtual void pull(SampleVector::iterator& begin, unsigned int nbSamples);
-    virtual bool handleMessage(const Message& cmd);
+    virtual void pushMessage(Message *msg) { m_inputMessageQueue.push(msg); }
+    virtual QString getSourceName() { return objectName(); }
 
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = "Local Sink"; }
@@ -145,6 +145,7 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
+    virtual bool handleMessage(const Message& cmd);
     void applySettings(const LocalSourceSettings& settings, bool force = false);
     void propagateSampleRateAndFrequency(uint32_t index, uint32_t log2Interp);
     static void validateFilterChainHash(LocalSourceSettings& settings);

@@ -21,15 +21,17 @@
 
 #include "dsp/basebandsamplesink.h"
 #include "export.h"
-#include "util/message.h"
+#include "util/messagequeue.h"
 
+#include <QObject>
 #include <QColor>
 #include <vector>
 #include <complex>
 
 class TVScreen;
 
-class SDRGUI_API ScopeVisXY : public BasebandSampleSink {
+class SDRGUI_API ScopeVisXY : public QObject, public BasebandSampleSink {
+	Q_OBJECT
 public:
 	ScopeVisXY(TVScreen *tvScreen);
 	virtual ~ScopeVisXY();
@@ -38,7 +40,8 @@ public:
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();
 	virtual void stop();
-	virtual bool handleMessage(const Message& message);
+    virtual void pushMessage(Message *msg) { m_inputMessageQueue.push(msg); }
+    virtual QString getSinkName() { return objectName(); }
 
 	void setScale(float scale) { m_scale = scale; }
 	void setStroke(int stroke) { m_alphaTrace = stroke; }
@@ -53,6 +56,7 @@ public:
 	void clearGraticule();
 
 private:
+	virtual bool handleMessage(const Message& message);
 	void drawGraticule();
 
 	TVScreen *m_tvScreen;
@@ -68,6 +72,10 @@ private:
 	std::vector<std::complex<float> > m_graticule;
 	std::vector<int> m_graticuleRows;
 	std::vector<int> m_graticuleCols;
+	MessageQueue m_inputMessageQueue;
+
+private slots:
+	void handleInputMessages();
 };
 
 

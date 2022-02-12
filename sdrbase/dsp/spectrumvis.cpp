@@ -66,6 +66,7 @@ SpectrumVis::SpectrumVis(Real scalef) :
 	m_mutex(QMutex::Recursive)
 {
 	setObjectName("SpectrumVis");
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
     applySettings(m_settings, true);
 }
 
@@ -78,13 +79,13 @@ SpectrumVis::~SpectrumVis()
 void SpectrumVis::setScalef(Real scalef)
 {
     MsgConfigureScalingFactor* cmd = new MsgConfigureScalingFactor(scalef);
-    getInputMessageQueue()->push(cmd);
+    m_inputMessageQueue.push(cmd);
 }
 
 void SpectrumVis::configureWSSpectrum(const QString& address, uint16_t port)
 {
     MsgConfigureWSpectrum* cmd = new MsgConfigureWSpectrum(address, port);
-    getInputMessageQueue()->push(cmd);
+    m_inputMessageQueue.push(cmd);
 }
 
 void SpectrumVis::feedTriggered(const SampleVector::const_iterator& triggerPoint, const SampleVector::const_iterator& end, bool positiveOnly)
@@ -762,6 +763,28 @@ void SpectrumVis::stop()
         MsgStartStop *msg = MsgStartStop::create(false);
         getMessageQueueToGUI()->push(msg);
     }
+}
+
+void SpectrumVis::pushMessage(Message *msg)
+{
+    m_inputMessageQueue.push(msg);
+}
+
+QString SpectrumVis::getSinkName()
+{
+    return objectName();
+}
+
+void SpectrumVis::handleInputMessages()
+{
+	Message* message;
+
+	while ((message = m_inputMessageQueue.pop()) != 0)
+	{
+		if (handleMessage(*message)) {
+			delete message;
+		}
+	}
 }
 
 bool SpectrumVis::handleMessage(const Message& message)

@@ -36,7 +36,6 @@ class ScopeVis;
 
 class ATVDemod : public BasebandSampleSink, public ChannelAPI
 {
-	Q_OBJECT
 public:
     class MsgConfigureATVDemod : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -69,7 +68,8 @@ public:
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
 	virtual void stop();
-	virtual bool handleMessage(const Message& cmd);
+    virtual void pushMessage(Message *msg) { m_inputMessageQueue.push(msg); }
+    virtual QString getSinkName() { return objectName(); }
 
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = objectName(); }
@@ -106,6 +106,7 @@ private:
     qint64 m_centerFrequency; //!< center frequency stored from device message used when starting baseband sink
     int m_basebandSampleRate; //!< sample rate stored from device message used when starting baseband sink
 
+	virtual bool handleMessage(const Message& cmd);
     void applySettings(const ATVDemodSettings& settings, bool force = false);
 };
 

@@ -18,6 +18,7 @@
 #ifndef INCLUDE_SPECTRUMVIS_H
 #define INCLUDE_SPECTRUMVIS_H
 
+#include <QObject>
 #include <QMutex>
 
 #include "dsp/basebandsamplesink.h"
@@ -26,13 +27,13 @@
 #include "dsp/spectrumsettings.h"
 #include "export.h"
 #include "util/message.h"
+#include "util/messagequeue.h"
 #include "util/movingaverage2d.h"
 #include "util/fixedaverage2d.h"
 #include "util/max2d.h"
 #include "websockets/wsspectrum.h"
 
 class GLSpectrumInterface;
-class MessageQueue;
 
 namespace SWGSDRangel {
     class SWGGLSpectrum;
@@ -40,8 +41,8 @@ namespace SWGSDRangel {
     class SWGSuccessResponse;
 };
 
-class SDRBASE_API SpectrumVis : public BasebandSampleSink {
-
+class SDRBASE_API SpectrumVis : public QObject, public BasebandSampleSink {
+    Q_OBJECT
 public:
     class SDRBASE_API MsgConfigureSpectrumVis : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -153,7 +154,9 @@ public:
 	void feedTriggered(const SampleVector::const_iterator& triggerPoint, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();
 	virtual void stop();
-	virtual bool handleMessage(const Message& message);
+    virtual void pushMessage(Message *msg);
+    virtual QString getSinkName();
+    MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 
     void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
     MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
@@ -237,6 +240,7 @@ private:
 	Real m_powFFTDiv;
 	static const Real m_mult;
 
+    MessageQueue m_inputMessageQueue;
     MessageQueue *m_guiMessageQueue;  //!< Input message queue to the GUI
 
 	QMutex m_mutex;
@@ -244,6 +248,7 @@ private:
     void processFFT(bool positiveOnly);
     void setRunning(bool running) { m_running = running; }
     void applySettings(const SpectrumSettings& settings, bool force = false);
+  	bool handleMessage(const Message& message);
     void handleConfigureDSP(uint64_t centerFrequency, int sampleRate);
     void handleScalef(Real scalef);
     void handleWSOpenClose(bool openClose);
@@ -254,6 +259,9 @@ private:
             SpectrumSettings& settings,
             const QStringList& spectrumSettingsKeys,
             SWGSDRangel::SWGGLSpectrum& response);
+
+private slots:
+	void handleInputMessages();
 };
 
 #endif // INCLUDE_SPECTRUMVIS_H

@@ -36,8 +36,6 @@ class DeviceAPI;
 class UDPSourceBaseband;
 
 class UDPSource : public BasebandSampleSource, public ChannelAPI {
-    Q_OBJECT
-
 public:
     class MsgConfigureUDPSource : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -100,7 +98,8 @@ public:
     virtual void start();
     virtual void stop();
     virtual void pull(SampleVector::iterator& begin, unsigned int nbSamples);
-    virtual bool handleMessage(const Message& cmd);
+    virtual void pushMessage(Message *msg) { m_inputMessageQueue.push(msg); }
+    virtual QString getSourceName() { return objectName(); }
 
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
@@ -172,8 +171,9 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
-    void applySettings(const UDPSourceSettings& settings, bool force = false);
+    virtual bool handleMessage(const Message& cmd);
 
+    void applySettings(const UDPSourceSettings& settings, bool force = false);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const UDPSourceSettings& settings, bool force);
     void sendChannelSettings(

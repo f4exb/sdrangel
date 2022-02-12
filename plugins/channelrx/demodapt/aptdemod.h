@@ -42,7 +42,6 @@ class DeviceAPI;
 class APTDemodImageWorker;
 
 class APTDemod : public BasebandSampleSink, public ChannelAPI {
-    Q_OBJECT
 public:
     class MsgConfigureAPTDemod : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -194,11 +193,12 @@ public:
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
     virtual void start();
     virtual void stop();
-    virtual void startBasebandSink();
-    virtual void stopBasebandSink();
-    virtual void startImageWorker();
-    virtual void stopImageWorker();
-    virtual bool handleMessage(const Message& cmd);
+    virtual void pushMessage(Message *msg) { m_inputMessageQueue.push(msg); }
+    virtual QString getSinkName() { return objectName(); }
+    void startBasebandSink();
+    void stopBasebandSink();
+    void startImageWorker();
+    void stopImageWorker();
 
     void setMessageQueueToGUI(MessageQueue* queue) override
     {
@@ -273,6 +273,7 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
+    virtual bool handleMessage(const Message& cmd);
     void applySettings(const APTDemodSettings& settings, bool force = false);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const APTDemodSettings& settings, bool force);
     void webapiFormatChannelSettings(

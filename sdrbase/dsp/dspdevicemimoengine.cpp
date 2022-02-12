@@ -152,7 +152,7 @@ void DSPDeviceMIMOEngine::setMIMOSequence(int sequence)
 void DSPDeviceMIMOEngine::addChannelSource(BasebandSampleSource* source, int index)
 {
 	qDebug() << "DSPDeviceMIMOEngine::addChannelSource: "
-        << source->objectName().toStdString().c_str()
+        << source->getSourceName().toStdString().c_str()
         << " at: "
         << index;
 	AddBasebandSampleSource cmd(source, index);
@@ -162,7 +162,7 @@ void DSPDeviceMIMOEngine::addChannelSource(BasebandSampleSource* source, int ind
 void DSPDeviceMIMOEngine::removeChannelSource(BasebandSampleSource* source, int index)
 {
 	qDebug() << "DSPDeviceMIMOEngine::removeChannelSource: "
-        << source->objectName().toStdString().c_str()
+        << source->getSourceName().toStdString().c_str()
         << " at: "
         << index;
 	RemoveBasebandSampleSource cmd(source, index);
@@ -172,7 +172,7 @@ void DSPDeviceMIMOEngine::removeChannelSource(BasebandSampleSource* source, int 
 void DSPDeviceMIMOEngine::addChannelSink(BasebandSampleSink* sink, int index)
 {
 	qDebug() << "DSPDeviceMIMOEngine::addChannelSink: "
-        << sink->objectName().toStdString().c_str()
+        << sink->getSinkName().toStdString().c_str()
         << " at: "
         << index;
 	AddBasebandSampleSink cmd(sink, index);
@@ -182,7 +182,7 @@ void DSPDeviceMIMOEngine::addChannelSink(BasebandSampleSink* sink, int index)
 void DSPDeviceMIMOEngine::removeChannelSink(BasebandSampleSink* sink, int index)
 {
 	qDebug() << "DSPDeviceMIMOEngine::removeChannelSink: "
-        << sink->objectName().toStdString().c_str()
+        << sink->getSinkName().toStdString().c_str()
         << " at: "
         << index;
 	RemoveBasebandSampleSink cmd(sink, index);
@@ -192,7 +192,7 @@ void DSPDeviceMIMOEngine::removeChannelSink(BasebandSampleSink* sink, int index)
 void DSPDeviceMIMOEngine::addMIMOChannel(MIMOChannel *channel)
 {
 	qDebug() << "DSPDeviceMIMOEngine::addMIMOChannel: "
-        << channel->objectName().toStdString().c_str();
+        << channel->getMIMOName().toStdString().c_str();
     AddMIMOChannel cmd(channel);
     m_syncMessenger.sendWait(cmd);
 }
@@ -200,21 +200,21 @@ void DSPDeviceMIMOEngine::addMIMOChannel(MIMOChannel *channel)
 void DSPDeviceMIMOEngine::removeMIMOChannel(MIMOChannel *channel)
 {
 	qDebug() << "DSPDeviceMIMOEngine::removeMIMOChannel: "
-        << channel->objectName().toStdString().c_str();
+        << channel->getMIMOName().toStdString().c_str();
     RemoveMIMOChannel cmd(channel);
     m_syncMessenger.sendWait(cmd);
 }
 
 void DSPDeviceMIMOEngine::addSpectrumSink(BasebandSampleSink* spectrumSink)
 {
-	qDebug() << "DSPDeviceMIMOEngine::addSpectrumSink: " << spectrumSink->objectName().toStdString().c_str();
+	qDebug() << "DSPDeviceMIMOEngine::addSpectrumSink: " << spectrumSink->getSinkName().toStdString().c_str();
 	AddSpectrumSink cmd(spectrumSink);
 	m_syncMessenger.sendWait(cmd);
 }
 
 void DSPDeviceMIMOEngine::removeSpectrumSink(BasebandSampleSink* spectrumSink)
 {
-	qDebug() << "DSPDeviceSinkEngine::removeSpectrumSink: " << spectrumSink->objectName().toStdString().c_str();
+	qDebug() << "DSPDeviceSinkEngine::removeSpectrumSink: " << spectrumSink->getSinkName().toStdString().c_str();
 	DSPRemoveSpectrumSink cmd(spectrumSink);
 	m_syncMessenger.sendWait(cmd);
 }
@@ -505,14 +505,14 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoIdle(int subsystemIndex)
         {
             for (BasebandSampleSinks::const_iterator it = vbit->begin(); it != vbit->end(); ++it)
             {
-                qDebug() << "DSPDeviceMIMOEngine::gotoIdle: stopping BasebandSampleSink: " << (*it)->objectName().toStdString().c_str();
+                qDebug() << "DSPDeviceMIMOEngine::gotoIdle: stopping BasebandSampleSink: " << (*it)->getSinkName().toStdString().c_str();
                 (*it)->stop();
             }
         }
 
         for (MIMOChannels::const_iterator it = m_mimoChannels.begin(); it != m_mimoChannels.end(); ++it)
         {
-            qDebug() << "DSPDeviceMIMOEngine::gotoIdle: stopping MIMOChannel sinks: " << (*it)->objectName().toStdString().c_str();
+            qDebug() << "DSPDeviceMIMOEngine::gotoIdle: stopping MIMOChannel sinks: " << (*it)->getMIMOName().toStdString().c_str();
             (*it)->stopSinks();
         }
     }
@@ -539,14 +539,14 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoIdle(int subsystemIndex)
         {
             for (BasebandSampleSources::const_iterator it = vSourceIt->begin(); it != vSourceIt->end(); ++it)
             {
-                qDebug() << "DSPDeviceMIMOEngine::gotoIdle: stopping BasebandSampleSource(" << (*it)->objectName().toStdString().c_str() << ")";
+                qDebug() << "DSPDeviceMIMOEngine::gotoIdle: stopping BasebandSampleSource(" << (*it)->getSourceName().toStdString().c_str() << ")";
                 (*it)->stop();
             }
         }
 
         for (MIMOChannels::const_iterator it = m_mimoChannels.begin(); it != m_mimoChannels.end(); ++it)
         {
-            qDebug() << "DSPDeviceMIMOEngine::gotoIdle: stopping MIMOChannel sources: " << (*it)->objectName().toStdString().c_str();
+            qDebug() << "DSPDeviceMIMOEngine::gotoIdle: stopping MIMOChannel sources: " << (*it)->getMIMOName().toStdString().c_str();
             (*it)->stopSources();
         }
     }
@@ -612,7 +612,7 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoInit(int subsystemIndex)
             {
                 for (BasebandSampleSinks::const_iterator it = m_basebandSampleSinks[isource].begin(); it != m_basebandSampleSinks[isource].end(); ++it)
                 {
-                    qDebug() << "DSPDeviceMIMOEngine::gotoInit: initializing " << (*it)->objectName().toStdString().c_str();
+                    qDebug() << "DSPDeviceMIMOEngine::gotoInit: initializing " << (*it)->getSinkName().toStdString().c_str();
                     (*it)->pushMessage(new DSPSignalNotification(notif));
                 }
             }
@@ -649,7 +649,7 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoInit(int subsystemIndex)
             {
                 for (BasebandSampleSources::const_iterator it = m_basebandSampleSources[isink].begin(); it != m_basebandSampleSources[isink].end(); ++it)
                 {
-                    qDebug() << "DSPDeviceMIMOEngine::gotoInit: initializing BasebandSampleSource(" << (*it)->objectName().toStdString().c_str() << ")";
+                    qDebug() << "DSPDeviceMIMOEngine::gotoInit: initializing BasebandSampleSource(" << (*it)->getSourceName().toStdString().c_str() << ")";
                     (*it)->pushMessage(new DSPSignalNotification(notif));
                 }
             }
@@ -697,14 +697,14 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoRunning(int subsystemIndex)
         {
             for (BasebandSampleSinks::const_iterator it = vbit->begin(); it != vbit->end(); ++it)
             {
-                qDebug() << "DSPDeviceMIMOEngine::gotoRunning: starting BasebandSampleSink: " << (*it)->objectName().toStdString().c_str();
+                qDebug() << "DSPDeviceMIMOEngine::gotoRunning: starting BasebandSampleSink: " << (*it)->getSinkName().toStdString().c_str();
                 (*it)->start();
             }
         }
 
         for (MIMOChannels::const_iterator it = m_mimoChannels.begin(); it != m_mimoChannels.end(); ++it)
         {
-            qDebug() << "DSPDeviceMIMOEngine::gotoRunning: starting MIMOChannel sinks: " << (*it)->objectName().toStdString().c_str();
+            qDebug() << "DSPDeviceMIMOEngine::gotoRunning: starting MIMOChannel sinks: " << (*it)->getMIMOName().toStdString().c_str();
             (*it)->startSinks();
         }
     }
@@ -736,14 +736,14 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoRunning(int subsystemIndex)
         {
             for (BasebandSampleSources::const_iterator it = vSourceIt->begin(); it != vSourceIt->end(); ++it)
             {
-                qDebug() << "DSPDeviceMIMOEngine::gotoRunning: starting BasebandSampleSource(" << (*it)->objectName().toStdString().c_str() << ")";
+                qDebug() << "DSPDeviceMIMOEngine::gotoRunning: starting BasebandSampleSource(" << (*it)->getSourceName().toStdString().c_str() << ")";
                 (*it)->start();
             }
         }
 
         for (MIMOChannels::const_iterator it = m_mimoChannels.begin(); it != m_mimoChannels.end(); ++it)
         {
-            qDebug() << "DSPDeviceMIMOEngine::gotoRunning: starting MIMOChannel sources: " << (*it)->objectName().toStdString().c_str();
+            qDebug() << "DSPDeviceMIMOEngine::gotoRunning: starting MIMOChannel sources: " << (*it)->getMIMOName().toStdString().c_str();
             (*it)->startSources();
         }
     }
@@ -1179,7 +1179,7 @@ void DSPDeviceMIMOEngine::handleInputMessages()
                         for (BasebandSampleSinks::const_iterator it = m_basebandSampleSinks[istream].begin(); it != m_basebandSampleSinks[istream].end(); ++it)
                         {
                             DSPSignalNotification *message = new DSPSignalNotification(sampleRate, centerFrequency);
-                            qDebug() << "DSPDeviceMIMOEngine::handleInputMessages: starting " << (*it)->objectName().toStdString().c_str();
+                            qDebug() << "DSPDeviceMIMOEngine::handleInputMessages: starting " << (*it)->getSinkName().toStdString().c_str();
                             (*it)->pushMessage(message);
                         }
                     }
@@ -1212,7 +1212,7 @@ void DSPDeviceMIMOEngine::handleInputMessages()
                         for (BasebandSampleSources::const_iterator it = m_basebandSampleSources[istream].begin(); it != m_basebandSampleSources[istream].end(); ++it)
                         {
                             DSPSignalNotification *message = new DSPSignalNotification(sampleRate, centerFrequency);
-                            qDebug() << "DSPDeviceMIMOEngine::handleSinkMessages: forward message to BasebandSampleSource(" << (*it)->objectName().toStdString().c_str() << ")";
+                            qDebug() << "DSPDeviceMIMOEngine::handleSinkMessages: forward message to BasebandSampleSource(" << (*it)->getSourceName().toStdString().c_str() << ")";
                             (*it)->pushMessage(message);
                         }
                     }

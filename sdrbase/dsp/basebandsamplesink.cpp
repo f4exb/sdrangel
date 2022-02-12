@@ -21,28 +21,8 @@
 
 BasebandSampleSink::BasebandSampleSink()
 {
-	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }
 
 BasebandSampleSink::~BasebandSampleSink()
 {
 }
-
-void BasebandSampleSink::pushMessage(Message *msg)
-{
-	m_inputMessageQueue.push(msg);
-}
-
-void BasebandSampleSink::handleInputMessages()
-{
-	Message* message;
-
-	while ((message = m_inputMessageQueue.pop()) != 0)
-	{
-		if (handleMessage(*message))
-		{
-			delete message;
-		}
-	}
-}
-
