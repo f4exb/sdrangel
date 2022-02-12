@@ -27,6 +27,11 @@ MIMOChannel::~MIMOChannel()
 {
 }
 
+void MIMOChannel::pushMessage(Message *msg)
+{
+	m_inputMessageQueue.push(msg);
+}
+
 void MIMOChannel::handleInputMessages()
 {
 	Message* message;

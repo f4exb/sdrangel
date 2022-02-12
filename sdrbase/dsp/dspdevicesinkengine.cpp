@@ -316,11 +316,11 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoInit()
 	for (BasebandSampleSources::const_iterator it = m_basebandSampleSources.begin(); it != m_basebandSampleSources.end(); ++it)
 	{
 		qDebug() << "DSPDeviceSinkEngine::gotoInit: initializing " << (*it)->objectName().toStdString().c_str();
-		(*it)->handleMessage(notif);
+		(*it)->pushMessage(new DSPSignalNotification(notif));
 	}
 
 	if (m_spectrumSink) {
-        m_spectrumSink->handleMessage(notif);
+        m_spectrumSink->pushMessage(new DSPSignalNotification(notif));
 	}
 
 	// pass data to listeners
@@ -471,8 +471,8 @@ void DSPDeviceSinkEngine::handleSynchronousMessages()
 	{
 		BasebandSampleSource* source = ((DSPAddBasebandSampleSource*) message)->getSampleSource();
 		m_basebandSampleSources.push_back(source);
-        DSPSignalNotification notif(m_sampleRate, m_centerFrequency);
-        source->handleMessage(notif);
+        DSPSignalNotification *notif = new DSPSignalNotification(m_sampleRate, m_centerFrequency);
+        source->pushMessage(notif);
 
         if (m_state == StRunning)
         {
@@ -518,8 +518,9 @@ void DSPDeviceSinkEngine::handleInputMessages()
 
 			for(BasebandSampleSources::const_iterator it = m_basebandSampleSources.begin(); it != m_basebandSampleSources.end(); it++)
 			{
+				DSPSignalNotification* rep = new DSPSignalNotification(*notif); // make a copy
 				qDebug() << "DSPDeviceSinkEngine::handleInputMessages: forward message to " << (*it)->objectName().toStdString().c_str();
-				(*it)->handleMessage(*message);
+				(*it)->pushMessage(rep);
 			}
 
 			// forward changes to listeners on DSP output queue

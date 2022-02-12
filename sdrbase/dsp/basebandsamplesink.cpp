@@ -28,6 +28,11 @@ BasebandSampleSink::~BasebandSampleSink()
 {
 }
 
+void BasebandSampleSink::pushMessage(Message *msg)
+{
+	m_inputMessageQueue.push(msg);
+}
+
 void BasebandSampleSink::handleInputMessages()
 {
 	Message* message;

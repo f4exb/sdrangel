@@ -613,7 +613,7 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoInit(int subsystemIndex)
                 for (BasebandSampleSinks::const_iterator it = m_basebandSampleSinks[isource].begin(); it != m_basebandSampleSinks[isource].end(); ++it)
                 {
                     qDebug() << "DSPDeviceMIMOEngine::gotoInit: initializing " << (*it)->objectName().toStdString().c_str();
-                    (*it)->handleMessage(notif);
+                    (*it)->pushMessage(new DSPSignalNotification(notif));
                 }
             }
         }
@@ -650,7 +650,7 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoInit(int subsystemIndex)
                 for (BasebandSampleSources::const_iterator it = m_basebandSampleSources[isink].begin(); it != m_basebandSampleSources[isink].end(); ++it)
                 {
                     qDebug() << "DSPDeviceMIMOEngine::gotoInit: initializing BasebandSampleSource(" << (*it)->objectName().toStdString().c_str() << ")";
-                    (*it)->handleMessage(notif);
+                    (*it)->pushMessage(new DSPSignalNotification(notif));
                 }
             }
         }
@@ -956,8 +956,8 @@ void DSPDeviceMIMOEngine::handleSynchronousMessages()
             // initialize sample rate and center frequency in the sink:
             int sourceStreamSampleRate = m_deviceSampleMIMO->getSourceSampleRate(isource);
             quint64 sourceCenterFrequency = m_deviceSampleMIMO->getSourceCenterFrequency(isource);
-            DSPSignalNotification msg(sourceStreamSampleRate, sourceCenterFrequency);
-            sink->handleMessage(msg);
+            DSPSignalNotification *msg = new DSPSignalNotification(sourceStreamSampleRate, sourceCenterFrequency);
+            sink->pushMessage(msg);
             // start the sink:
             if (m_stateRx == StRunning) {
                 sink->start();
@@ -991,8 +991,8 @@ void DSPDeviceMIMOEngine::handleSynchronousMessages()
             // initialize sample rate and center frequency in the sink:
             int sinkStreamSampleRate = m_deviceSampleMIMO->getSinkSampleRate(isink);
             quint64 sinkCenterFrequency = m_deviceSampleMIMO->getSinkCenterFrequency(isink);
-            DSPSignalNotification msg(sinkStreamSampleRate, sinkCenterFrequency);
-            sampleSource->handleMessage(msg);
+            DSPSignalNotification *msg = new DSPSignalNotification(sinkStreamSampleRate, sinkCenterFrequency);
+            sampleSource->pushMessage(msg);
             // start the sink:
             if (m_stateTx == StRunning) {
                 sampleSource->start();
@@ -1019,24 +1019,24 @@ void DSPDeviceMIMOEngine::handleSynchronousMessages()
 
         for (unsigned int isource = 0; isource < m_deviceSampleMIMO->getNbSourceStreams(); isource++)
         {
-            DSPMIMOSignalNotification notif(
+            DSPMIMOSignalNotification *notif = new DSPMIMOSignalNotification(
                 m_deviceSampleMIMO->getSourceSampleRate(isource),
                 m_deviceSampleMIMO->getSourceCenterFrequency(isource),
                 true,
                 isource
             );
-            channel->handleMessage(notif);
+            channel->pushMessage(notif);
         }
 
         for (unsigned int isink = 0; isink < m_deviceSampleMIMO->getNbSinkStreams(); isink++)
         {
-            DSPMIMOSignalNotification notif(
+            DSPMIMOSignalNotification *notif = new DSPMIMOSignalNotification(
                 m_deviceSampleMIMO->getSinkSampleRate(isink),
                 m_deviceSampleMIMO->getSinkCenterFrequency(isink),
                 false,
                 isink
             );
-            channel->handleMessage(notif);
+            channel->pushMessage(notif);
         }
 
         if (m_stateRx == StRunning) {
@@ -1077,19 +1077,19 @@ void DSPDeviceMIMOEngine::handleSynchronousMessages()
             {
                 if (m_spectrumSink)
                 {
-                    DSPSignalNotification notif(
+                    DSPSignalNotification *notif = new DSPSignalNotification(
                         m_deviceSampleMIMO->getSinkSampleRate(spectrumInputIndex),
                         m_deviceSampleMIMO->getSinkCenterFrequency(spectrumInputIndex));
-                    m_spectrumSink->handleMessage(notif);
+                    m_spectrumSink->pushMessage(notif);
                 }
             }
 
             if (m_spectrumSink && (spectrumInputSourceElseSink) && (spectrumInputIndex <  m_deviceSampleMIMO->getNbSinkFifos()))
             {
-                DSPSignalNotification notif(
+                DSPSignalNotification *notif = new DSPSignalNotification(
                     m_deviceSampleMIMO->getSourceSampleRate(spectrumInputIndex),
                     m_deviceSampleMIMO->getSourceCenterFrequency(spectrumInputIndex));
-                m_spectrumSink->handleMessage(notif);
+                m_spectrumSink->pushMessage(notif);
             }
 
             m_spectrumInputSourceElseSink = spectrumInputSourceElseSink;
@@ -1165,22 +1165,22 @@ void DSPDeviceMIMOEngine::handleInputMessages()
             for (MIMOChannels::const_iterator it = m_mimoChannels.begin(); it != m_mimoChannels.end(); ++it)
             {
                 DSPMIMOSignalNotification *message = new DSPMIMOSignalNotification(*notif);
-                (*it)->handleMessage(*message);
+                (*it)->pushMessage(message);
             }
 
             if (sourceElseSink)
             {
                 if ((istream < m_deviceSampleMIMO->getNbSourceStreams()))
                 {
-                    DSPSignalNotification *message = new DSPSignalNotification(sampleRate, centerFrequency);
 
-                    // forward source changes to ancillary sinks with immediate execution (no queuing)
+                    // forward source changes to ancillary sinks
                     if (istream < m_basebandSampleSinks.size())
                     {
                         for (BasebandSampleSinks::const_iterator it = m_basebandSampleSinks[istream].begin(); it != m_basebandSampleSinks[istream].end(); ++it)
                         {
+                            DSPSignalNotification *message = new DSPSignalNotification(sampleRate, centerFrequency);
                             qDebug() << "DSPDeviceMIMOEngine::handleInputMessages: starting " << (*it)->objectName().toStdString().c_str();
-                            (*it)->handleMessage(*message);
+                            (*it)->pushMessage(message);
                         }
                     }
 
@@ -1196,8 +1196,8 @@ void DSPDeviceMIMOEngine::handleInputMessages()
                     // forward changes to spectrum sink if currently active
                     if (m_spectrumSink && m_spectrumInputSourceElseSink && (m_spectrumInputIndex == istream))
                     {
-                        DSPSignalNotification spectrumNotif(sampleRate, centerFrequency);
-                        m_spectrumSink->handleMessage(spectrumNotif);
+                        DSPSignalNotification *spectrumNotif = new DSPSignalNotification(sampleRate, centerFrequency);
+                        m_spectrumSink->pushMessage(spectrumNotif);
                     }
                 }
             }
@@ -1205,15 +1205,15 @@ void DSPDeviceMIMOEngine::handleInputMessages()
             {
                 if ((istream < m_deviceSampleMIMO->getNbSinkStreams()))
                 {
-                    DSPSignalNotification *message = new DSPSignalNotification(sampleRate, centerFrequency);
 
                     // forward source changes to channel sources with immediate execution (no queuing)
                     if (istream < m_basebandSampleSources.size())
                     {
                         for (BasebandSampleSources::const_iterator it = m_basebandSampleSources[istream].begin(); it != m_basebandSampleSources[istream].end(); ++it)
                         {
+                            DSPSignalNotification *message = new DSPSignalNotification(sampleRate, centerFrequency);
                             qDebug() << "DSPDeviceMIMOEngine::handleSinkMessages: forward message to BasebandSampleSource(" << (*it)->objectName().toStdString().c_str() << ")";
-                            (*it)->handleMessage(*message);
+                            (*it)->pushMessage(message);
                         }
                     }
 
@@ -1229,8 +1229,8 @@ void DSPDeviceMIMOEngine::handleInputMessages()
                     // forward changes to spectrum sink if currently active
                     if (m_spectrumSink && !m_spectrumInputSourceElseSink && (m_spectrumInputIndex == istream))
                     {
-                        DSPSignalNotification spectrumNotif(sampleRate, centerFrequency);
-                        m_spectrumSink->handleMessage(spectrumNotif);
+                        DSPSignalNotification *spectrumNotif = new DSPSignalNotification(sampleRate, centerFrequency);
+                        m_spectrumSink->pushMessage(spectrumNotif);
                     }
                 }
             }

@@ -440,18 +440,18 @@ DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoInit()
 			<< " sampleRate: " << m_sampleRate
 			<< " centerFrequency: " << m_centerFrequency;
 
-	DSPSignalNotification notif(m_sampleRate, m_centerFrequency);
 
 	for (BasebandSampleSinks::const_iterator it = m_basebandSampleSinks.begin(); it != m_basebandSampleSinks.end(); ++it)
 	{
+		DSPSignalNotification *notif = new DSPSignalNotification(m_sampleRate, m_centerFrequency);
 		qDebug() << "DSPDeviceSourceEngine::gotoInit: initializing " << (*it)->objectName().toStdString().c_str();
-		(*it)->handleMessage(notif);
+		(*it)->pushMessage(notif);
 	}
 
 	// pass data to listeners
 	if (m_deviceSampleSource->getMessageQueueToGUI())
 	{
-        DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy for the output queue
+        DSPSignalNotification* rep = new DSPSignalNotification(m_sampleRate, m_centerFrequency);
         m_deviceSampleSource->getMessageQueueToGUI()->push(rep);
 	}
 
@@ -581,8 +581,8 @@ void DSPDeviceSourceEngine::handleSynchronousMessages()
 		BasebandSampleSink* sink = ((DSPAddBasebandSampleSink*) message)->getSampleSink();
 		m_basebandSampleSinks.push_back(sink);
         // initialize sample rate and center frequency in the sink:
-        DSPSignalNotification msg(m_sampleRate, m_centerFrequency);
-        sink->handleMessage(msg);
+        DSPSignalNotification *msg = new DSPSignalNotification(m_sampleRate, m_centerFrequency);
+        sink->pushMessage(msg);
         // start the sink:
         if(m_state == StRunning) {
             sink->start();
@@ -658,8 +658,9 @@ void DSPDeviceSourceEngine::handleInputMessages()
 
 			for(BasebandSampleSinks::const_iterator it = m_basebandSampleSinks.begin(); it != m_basebandSampleSinks.end(); it++)
 			{
+				DSPSignalNotification* rep = new DSPSignalNotification(*notif); // make a copy
 				qDebug() << "DSPDeviceSourceEngine::handleInputMessages: forward message to " << (*it)->objectName().toStdString().c_str();
-				(*it)->handleMessage(*message);
+				(*it)->pushMessage(rep);
 			}
 
 			// forward changes to source GUI input queue
@@ -667,7 +668,8 @@ void DSPDeviceSourceEngine::handleInputMessages()
 			MessageQueue *guiMessageQueue = m_deviceSampleSource->getMessageQueueToGUI();
 			qDebug("DSPDeviceSourceEngine::handleInputMessages: DSPSignalNotification: guiMessageQueue: %p", guiMessageQueue);
 
-			if (guiMessageQueue) {
+			if (guiMessageQueue)
+			{
 			    DSPSignalNotification* rep = new DSPSignalNotification(*notif); // make a copy for the source GUI
                 guiMessageQueue->push(rep);
 			}

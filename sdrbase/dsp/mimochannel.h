@@ -39,11 +39,12 @@ public:
 	virtual void stopSources() = 0;
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int sinkIndex) = 0;
     virtual void pull(SampleVector::iterator& begin, unsigned int nbSamples, unsigned int sourceIndex) = 0;
-	virtual bool handleMessage(const Message& cmd) = 0; //!< Processing of a message. Returns true if message has actually been processed
+	void pushMessage(Message *msg);
 
 	MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
 
 protected:
+	virtual bool handleMessage(const Message& cmd) = 0; //!< Processing of a message. Returns true if message has actually been processed
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
 
 protected slots:
