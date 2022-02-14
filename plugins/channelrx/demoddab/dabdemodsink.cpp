@@ -423,7 +423,7 @@ void DABDemodSink::processOneAudioSample(Complex &ci)
     float factor = m_settings.m_volume / 5.0f; // Should this be 5 or 10? 5 allows some positive gain
 
     qint16 l = scale(ci.real(), factor);
-    qint16 r = scale(ci.real(), factor);
+    qint16 r = scale(ci.imag(), factor);
 
     m_audioBuffer[m_audioBufferFill].l = l;
     m_audioBuffer[m_audioBufferFill].r = r;
