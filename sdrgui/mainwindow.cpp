@@ -139,13 +139,13 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 
 	// work around broken Qt dock widget ordering
     removeDockWidget(ui->inputViewDock);
-	removeDockWidget(ui->spectraDisplayDock);
+	removeDockWidget(ui->spectraControlDock);
 	removeDockWidget(ui->presetDock);
     removeDockWidget(ui->commandsDock);
 	removeDockWidget(ui->channelDock);
     removeDockWidget(ui->featureDock);
     addDockWidget(Qt::LeftDockWidgetArea, ui->inputViewDock);
-	addDockWidget(Qt::LeftDockWidgetArea, ui->spectraDisplayDock);
+	addDockWidget(Qt::LeftDockWidgetArea, ui->spectraControlDock);
 	addDockWidget(Qt::LeftDockWidgetArea, ui->presetDock);
     addDockWidget(Qt::LeftDockWidgetArea, ui->commandsDock);
     tabifyDockWidget(ui->presetDock, ui->commandsDock);
@@ -153,21 +153,27 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	addDockWidget(Qt::RightDockWidgetArea, ui->featureDock);
 
 	ui->inputViewDock->show();
-	ui->spectraDisplayDock->show();
+	ui->spectraControlDock->show();
 	ui->presetDock->show();
 	ui->commandsDock->show();
 	ui->channelDock->show();
     ui->featureDock->show();
 
+    m_spectrumToggleViewAction = new QAction(tr("Spectrum display"));
+    m_spectrumToggleViewAction->setCheckable(true);
+    m_spectrumToggleViewAction->setChecked(true);
+    connect(m_spectrumToggleViewAction, SIGNAL(toggled(bool)), this, SLOT(toggleSpectrumView(bool)));
+
     ui->menu_Window->addAction(ui->inputViewDock->toggleViewAction());
-	ui->menu_Window->addAction(ui->spectraDisplayDock->toggleViewAction());
+	ui->menu_Window->addAction(ui->spectraControlDock->toggleViewAction());
+    ui->menu_Window->addAction(m_spectrumToggleViewAction);
 	ui->menu_Window->addAction(ui->presetDock->toggleViewAction());
     ui->menu_Window->addAction(ui->commandsDock->toggleViewAction());
 	ui->menu_Window->addAction(ui->channelDock->toggleViewAction());
     ui->menu_Window->addAction(ui->featureDock->toggleViewAction());
 
-    ui->spectraDisplayDock->setStyleSheet("QAbstractButton#qt_dockwidget_closebutton{qproperty-toolTip: \"Close\";}");
-    ui->spectraDisplayDock->setStyleSheet("QAbstractButton#qt_dockwidget_floatbutton{qproperty-toolTip: \"Dock/undock\";}");
+    ui->spectraControlDock->setStyleSheet("QAbstractButton#qt_dockwidget_closebutton{qproperty-toolTip: \"Close\";}");
+    ui->spectraControlDock->setStyleSheet("QAbstractButton#qt_dockwidget_floatbutton{qproperty-toolTip: \"Dock/undock\";}");
     ui->presetDock->setStyleSheet("QAbstractButton#qt_dockwidget_closebutton{qproperty-toolTip: \"Close\";}");
     ui->presetDock->setStyleSheet("QAbstractButton#qt_dockwidget_floatbutton{qproperty-toolTip: \"Dock/undock\";}");
 
@@ -323,6 +329,7 @@ MainWindow::~MainWindow()
     removeAllFeatureSets();
 
 	delete ui;
+    delete m_spectrumToggleViewAction;
 
 	qDebug() << "MainWindow::~MainWindow: end";
 	delete m_commandKeyReceiver;
@@ -788,6 +795,8 @@ void MainWindow::loadPresetSettings(const Preset* preset, int tabIndex)
         }
 	}
 
+    m_spectrumToggleViewAction->setChecked(preset->getShowSpectrum());
+
 	// has to be last step
     if (!preset->getLayout().isEmpty()) {
 	    restoreState(preset->getLayout());
@@ -832,6 +841,7 @@ void MainWindow::savePresetSettings(Preset* preset, int tabIndex)
         deviceUI->m_deviceAPI->saveSamplingDeviceSettings(preset);
     }
 
+    preset->setShowSpectrum(m_spectrumToggleViewAction->isChecked());
     preset->setLayout(saveState());
 }
 
@@ -1910,6 +1920,15 @@ void MainWindow::fftWisdomProcessFinished(int exitCode, QProcess::ExitStatus exi
 
     delete m_fftWisdomProcess;
     m_fftWisdomProcess = nullptr;
+}
+
+void MainWindow::toggleSpectrumView(bool checked)
+{
+    if (checked) {
+        ui->centralWidget->show();
+    } else {
+        ui->centralWidget->hide();
+    }
 }
 
 void MainWindow::on_action_AMBE_triggered()

@@ -36,6 +36,7 @@ Preset::Preset(const Preset& other) :
 	m_iqImbalanceCorrection(other.m_iqImbalanceCorrection),
 	m_channelConfigs(other.m_channelConfigs),
 	m_deviceConfigs(other.m_deviceConfigs),
+	m_showSpectrum(other.m_showSpectrum),
 	m_layout(other.m_layout)
 {}
 
@@ -50,6 +51,7 @@ void Preset::resetToDefaults()
 	m_channelConfigs.clear();
 	m_dcOffsetCorrection = false;
 	m_iqImbalanceCorrection = false;
+	m_showSpectrum = true;
 }
 
 QByteArray Preset::serialize() const
@@ -69,6 +71,7 @@ QByteArray Preset::serialize() const
 	s.writeBlob(5, m_spectrumConfig);
     s.writeBool(6, m_presetType == PresetSource);
 	s.writeS32(7, (int) m_presetType);
+	s.writeBool(8, m_showSpectrum);
 
 	s.writeS32(20, m_deviceConfigs.size());
 
@@ -126,6 +129,7 @@ bool Preset::deserialize(const QByteArray& data)
 		d.readBlob(5, &m_spectrumConfig);
 		d.readBool(6, &tmpBool, true);
         d.readS32(7, &tmp, PresetSource);
+		d.readBool(8, &m_showSpectrum, true);
         m_presetType = tmp < (int) PresetSource ? PresetSource : tmp > (int) PresetMIMO ? PresetMIMO : (PresetType) tmp;
 
         if (m_presetType != PresetMIMO) {

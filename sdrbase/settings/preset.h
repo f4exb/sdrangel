@@ -96,6 +96,8 @@ public:
 	bool hasIQImbalanceCorrection() const { return m_iqImbalanceCorrection; }
     void setIQImbalanceCorrection(bool iqImbalanceCorrection) { m_iqImbalanceCorrection = iqImbalanceCorrection; }
 
+	void setShowSpectrum(bool show) { m_showSpectrum = show; }
+	bool getShowSpectrum() const { return m_showSpectrum; }
 	void setLayout(const QByteArray& data) { m_layout = data; }
 	const QByteArray& getLayout() const { return m_layout; }
 
@@ -164,6 +166,7 @@ protected:
 	DeviceeConfigs m_deviceConfigs;
 
 	// screen and dock layout
+	bool m_showSpectrum;
 	QByteArray m_layout;
 
 private:

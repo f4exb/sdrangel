@@ -117,6 +117,7 @@ private:
 	WebAPIAdapter *m_apiAdapter;
 	QString m_apiHost;
 	int m_apiPort;
+	QAction *m_spectrumToggleViewAction;
 
 	CommandKeyReceiver *m_commandKeyReceiver;
 
@@ -200,6 +201,7 @@ private slots:
 	void tabFeaturesIndexChanged();
 	void commandKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifiers, bool release);
 	void fftWisdomProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
+	void toggleSpectrumView(bool checked);
 };
 
 #endif // INCLUDE_MAINWINDOW_H

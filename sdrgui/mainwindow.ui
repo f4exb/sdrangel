@@ -64,7 +64,7 @@
      <x>0</x>
      <y>0</y>
      <width>1012</width>
-     <height>20</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -193,9 +193,9 @@
     </layout>
    </widget>
   </widget>
-  <widget class="QDockWidget" name="spectraDisplayDock">
+  <widget class="QDockWidget" name="spectraControlDock">
    <property name="windowTitle">
-    <string>Spectrum Display</string>
+    <string>Spectrum Control</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>1</number>
