@@ -11,6 +11,7 @@ sdrangel (6.19.1-1) unstable; urgency=medium
   * Metis MISO: save stream and spectrum stream indices in settings. Fixes #1126
   * Map feature, ADSB and AIS demods updates. PR #1135
   * Do not write tail audio samples and write to sample buffer only if necessary. Issue #1132
+  * ValueDialZ: fixed compilation warning, Fixes #1155
 
   -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 20 Feb 2022 21:31:55 +0100
 

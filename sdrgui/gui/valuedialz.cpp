@@ -136,7 +136,7 @@ void ValueDialZ::setValue(qint64 value)
 void ValueDialZ::setValueRange(bool positiveOnly, uint numDigits, qint64 min, qint64 max, int decimalPos)
 {
     m_positiveOnly = positiveOnly;
-    m_decimalPos = decimalPos < 0 ? 0 : decimalPos > numDigits ? numDigits : decimalPos;
+    m_decimalPos = decimalPos < 0 ? 0 : decimalPos > (int) numDigits ? numDigits : decimalPos;
 	m_numDigits = numDigits;
 	m_numThousandPoints = m_numDigits < 3 ? 0 : (m_numDigits%3) == 0 ? (m_numDigits/3)-1 : m_numDigits/3;
 
