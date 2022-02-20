@@ -50,7 +50,7 @@ DemodAnalyzer::DemodAnalyzer(WebAPIAdapterInterface *webAPIAdapterInterface) :
     Feature(m_featureIdURI, webAPIAdapterInterface),
     m_spectrumVis(SDR_RX_SCALEF),
     m_selectedChannel(nullptr),
-    m_dataFifo(nullptr)
+    m_dataPipe(nullptr)
 {
     qDebug("DemodAnalyzer::DemodAnalyzer: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
@@ -88,10 +88,15 @@ void DemodAnalyzer::start()
         = DemodAnalyzerWorker::MsgConfigureDemodAnalyzerWorker::create(m_settings, true);
     m_worker->getInputMessageQueue()->push(msg);
 
-    if (m_dataFifo)
+    if (m_dataPipe)
     {
-        DemodAnalyzerWorker::MsgConnectFifo *msg = DemodAnalyzerWorker::MsgConnectFifo::create(m_dataFifo, true);
-        m_worker->getInputMessageQueue()->push(msg);
+        DataFifo *fifo = qobject_cast<DataFifo*>(m_dataPipe->m_element);
+
+        if (fifo)
+        {
+            DemodAnalyzerWorker::MsgConnectFifo *msg = DemodAnalyzerWorker::MsgConnectFifo::create(fifo, true);
+            m_worker->getInputMessageQueue()->push(msg);
+        }
     }
 }
 
@@ -99,10 +104,15 @@ void DemodAnalyzer::stop()
 {
     qDebug("DemodAnalyzer::stop");
 
-    if (m_dataFifo)
+    if (m_dataPipe)
     {
-        DemodAnalyzerWorker::MsgConnectFifo *msg = DemodAnalyzerWorker::MsgConnectFifo::create(m_dataFifo, false);
-        m_worker->getInputMessageQueue()->push(msg);
+        DataFifo *fifo = qobject_cast<DataFifo*>(m_dataPipe->m_element);
+
+        if (fifo)
+        {
+            DemodAnalyzerWorker::MsgConnectFifo *msg = DemodAnalyzerWorker::MsgConnectFifo::create(fifo, false);
+            m_worker->getInputMessageQueue()->push(msg);
+        }
     }
 
 	m_worker->stopWork();
@@ -169,8 +179,13 @@ bool DemodAnalyzer::handleMessage(const Message& cmd)
             DSPSignalNotification *msg = new DSPSignalNotification(0, m_sampleRate);
             m_spectrumVis.getInputMessageQueue()->push(msg);
 
-            if (m_dataFifo) {
-                m_dataFifo->setSize(2*m_sampleRate);
+            if (m_dataPipe)
+            {
+                DataFifo *fifo = qobject_cast<DataFifo*>(m_dataPipe->m_element);
+
+                if (fifo) {
+                    fifo->setSize(2*m_sampleRate);
+                }
             }
 
             if (getMessageQueueToGUI())
@@ -319,7 +334,8 @@ void DemodAnalyzer::setChannel(ChannelAPI *selectedChannel)
 
     if (m_selectedChannel)
     {
-        DataFifo *fifo = mainCore->getDataPipes().unregisterChannelToFeature(m_selectedChannel, this, "demod");
+        ObjectPipe *pipe = mainCore->getDataPipes().unregisterProducerToConsumer(m_selectedChannel, this, "demod");
+        DataFifo *fifo = qobject_cast<DataFifo*>(pipe->m_element);
 
         if ((fifo) && m_worker->isRunning())
         {
@@ -331,13 +347,18 @@ void DemodAnalyzer::setChannel(ChannelAPI *selectedChannel)
         disconnect(messageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessageQueue(MessageQueue*)));
     }
 
-    m_dataFifo = mainCore->getDataPipes().registerChannelToFeature(selectedChannel, this, "demod");
-    m_dataFifo->setSize(96000);
+    m_dataPipe = mainCore->getDataPipes().registerProducerToConsumer(selectedChannel, this, "demod");
+    DataFifo *fifo = qobject_cast<DataFifo*>(m_dataPipe->m_element);
 
-    if (m_worker->isRunning())
+    if (fifo)
     {
-        DemodAnalyzerWorker::MsgConnectFifo *msg = DemodAnalyzerWorker::MsgConnectFifo::create(m_dataFifo, true);
-        m_worker->getInputMessageQueue()->push(msg);
+        fifo->setSize(96000);
+
+        if (m_worker->isRunning())
+        {
+            DemodAnalyzerWorker::MsgConnectFifo *msg = DemodAnalyzerWorker::MsgConnectFifo::create(fifo, true);
+            m_worker->getInputMessageQueue()->push(msg);
+        }
     }
 
     MessageQueue *messageQueue = mainCore->getMessagePipes().registerChannelToFeature(selectedChannel, this, "reportdemod");

@@ -207,19 +207,25 @@ void SSBDemodSink::processOneSample(Complex &ci)
 
             if (m_demodBufferFill >= m_demodBuffer.size())
             {
-                QList<DataFifo*> *dataFifos = MainCore::instance()->getDataPipes().getFifos(m_channel, "demod");
+                QList<ObjectPipe*> dataPipes;
+                MainCore::instance()->getDataPipes().getDataPipes(m_channel, "demod", dataPipes);
 
-                if (dataFifos)
+                if (dataPipes.size() > 0)
                 {
-                    QList<DataFifo*>::iterator it = dataFifos->begin();
+                    QList<ObjectPipe*>::iterator it = dataPipes.begin();
 
-                    for (; it != dataFifos->end(); ++it)
+                    for (; it != dataPipes.end(); ++it)
                     {
-                        (*it)->write(
-                            (quint8*) &m_demodBuffer[0],
-                            m_demodBuffer.size() * sizeof(qint16),
-                            m_audioBinaual ? DataFifo::DataTypeCI16 : DataFifo::DataTypeI16
-                        );
+                        DataFifo *fifo = qobject_cast<DataFifo*>((*it)->m_element);
+
+                        if (fifo)
+                        {
+                            fifo->write(
+                                (quint8*) &m_demodBuffer[0],
+                                m_demodBuffer.size() * sizeof(qint16),
+                                m_audioBinaual ? DataFifo::DataTypeCI16 : DataFifo::DataTypeI16
+                            );
+                        }
                     }
                 }
 

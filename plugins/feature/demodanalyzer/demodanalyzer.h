@@ -33,7 +33,7 @@ class WebAPIAdapterInterface;
 class DemodAnalyzerWorker;
 class QNetworkAccessManager;
 class QNetworkReply;
-class DataFifo;
+class ObjectPipe;
 
 namespace SWGSDRangel {
     class SWGDeviceState;
@@ -201,7 +201,7 @@ private:
     ScopeVis m_scopeVis;
     QHash<ChannelAPI*, DemodAnalyzerSettings::AvailableChannel> m_availableChannels;
     ChannelAPI *m_selectedChannel;
-    DataFifo *m_dataFifo;
+    ObjectPipe *m_dataPipe;
     int m_sampleRate;
 
     QNetworkAccessManager *m_networkManager;
