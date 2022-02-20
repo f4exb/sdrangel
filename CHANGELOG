@@ -1,3 +1,19 @@
+sdrangel (6.19.1-1) unstable; urgency=medium
+
+  * Fix stereo sound in DAB demod. PR #1150.
+  * Make Channel API inherit from QObject. Issue #1147
+  * Channel Analyzer: fixed reverse API handling and a few other things. Fixes #1144
+  * Metis MISO: set spectrum sink input back in GUI. Fixes #1145
+  * DATV Demod - Increase max RF bandwidth in GUI to 50MHz. PR #1142. Issue #1136.
+  * DATV Mod - Increase RF bandwidth slider to 50M. PR #1137. Issue #1136
+  * Spectrum markers update. PR #1141
+  * Pager demod: fixed typo in POCSAG. Fixes #1138
+  * Metis MISO: save stream and spectrum stream indices in settings. Fixes #1126
+  * Map feature, ADSB and AIS demods updates. PR #1135
+  * Do not write tail audio samples and write to sample buffer only if necessary. Issue #1132
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 20 Feb 2022 21:31:55 +0100
+
 sdrangel (6.19.0-1) unstable; urgency=medium
 
   * Map: added 3D to map feature. PR #1127
