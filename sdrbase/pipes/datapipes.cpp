@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2020 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2022 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -16,18 +16,13 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "dsp/datafifo.h"
-
-#include "datapipesgcworker.h"
 #include "datapipes.h"
+#include "datapipesgcworker.h"
 
-DataPipes::DataPipes()
+DataPipes::DataPipes() :
+    m_registrations(&m_dataFifoStore)
 {
-	m_gcWorker = new DataPipesGCWorker();
-	m_gcWorker->setC2FRegistrations(
-		m_registrations.getMutex(),
-		m_registrations.getElements(),
-		m_registrations.getConsumers()
-	);
+  	m_gcWorker = new DataPipesGCWorker(m_registrations);
 	m_gcWorker->moveToThread(&m_gcThread);
 	startGC();
 }
@@ -37,23 +32,23 @@ DataPipes::~DataPipes()
 	if (m_gcWorker->isRunning()) {
 		stopGC();
 	}
+
+    m_gcWorker->deleteLater();
 }
 
-DataFifo *DataPipes::registerChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type)
+ObjectPipe *DataPipes::registerProducerToConsumer(const QObject *producer, const QObject *consumer, const QString& type)
 {
-	return m_registrations.registerProducerToConsumer(source, feature, type);
+    return m_registrations.registerProducerToConsumer(producer, consumer, type);
 }
 
-DataFifo *DataPipes::unregisterChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type)
+ObjectPipe *DataPipes::unregisterProducerToConsumer(const QObject *producer, const QObject *consumer, const QString& type)
 {
-	DataFifo *dataFifo = m_registrations.unregisterProducerToConsumer(source, feature, type);
-	m_gcWorker->addDataFifoToDelete(dataFifo);
-	return dataFifo;
+    return m_registrations.unregisterProducerToConsumer(producer, consumer, type);
 }
 
-QList<DataFifo*>* DataPipes::getFifos(const ChannelAPI *source, const QString& type)
+void DataPipes::getDataPipes(const QObject *producer, const QString& type, QList<ObjectPipe*>& pipes)
 {
-	return m_registrations.getElements(source, type);
+    return m_registrations.getPipes(producer, type, pipes);
 }
 
 void DataPipes::startGC()

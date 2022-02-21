@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2020 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2022 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,24 +15,18 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_PIPES_DATAPIPES_H_
-#define SDRBASE_PIPES_DATAPIPES_H_
+#ifndef SDRBASE_PIPES_DATAPIPES2_H_
+#define SDRBASE_PIPES_DATAPIPES2_H_
 
 #include <QObject>
-#include <QHash>
-#include <QMap>
-#include <QMutex>
 #include <QThread>
 
 #include "export.h"
+#include "objectpipesregistrations.h"
+#include "datafifostore.h"
 
-#include "datapipescommon.h"
-#include "elementpipesregistrations.h"
-
-class ChannelAPI;
-class Feature;
-class DataPipesGCWorker;
 class DataFifo;
+class DataPipesGCWorker;
 
 class SDRBASE_API DataPipes : public QObject
 {
@@ -43,12 +37,13 @@ public:
     DataPipes& operator=(const DataPipes&) = delete;
     ~DataPipes();
 
-    DataFifo *registerChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type);
-    DataFifo *unregisterChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type);
-    QList<DataFifo*>* getFifos(const ChannelAPI *source, const QString& type);
+    ObjectPipe *registerProducerToConsumer(const QObject *producer, const QObject *consumer, const QString& type);
+    ObjectPipe *unregisterProducerToConsumer(const QObject *producer, const QObject *consumer, const QString& type);
+    void getDataPipes(const QObject *producer, const QString& type, QList<ObjectPipe*>& pipes);
 
 private:
-    ElementPipesRegistrations<ChannelAPI, Feature, DataFifo> m_registrations;
+    DataFifoStore m_dataFifoStore;
+    ObjectPipesRegistrations m_registrations;
     QThread m_gcThread; //!< Garbage collector thread
     DataPipesGCWorker *m_gcWorker; //!< Garbage collector
 
@@ -56,4 +51,5 @@ private:
 	void stopGC();  //!< Stop garbage collector
 };
 
-#endif // SDRBASE_PIPES_DATAPIPES_H_
+
+#endif // SDRBASE_PIPES_DATAPIPES2_H_

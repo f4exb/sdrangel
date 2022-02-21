@@ -167,12 +167,9 @@ set(sdrbase_SOURCES
 
     limerfe/limerfeusbcalib.cpp
 
-    pipes/datapipes.cpp
-    pipes/datapipescommon.cpp
-    pipes/datapipesgcworker.cpp
     pipes/datafifostore.cpp
-    pipes/datapipes2.cpp
-    pipes/datapipes2gcworker.cpp
+    pipes/datapipes.cpp
+    pipes/datapipesgcworker.cpp
     pipes/messagepipes.cpp
     pipes/messagepipescommon.cpp
     pipes/messagepipesgcworker.cpp
@@ -376,12 +373,9 @@ set(sdrbase_HEADERS
 
     limerfe/limerfeusbcalib.h
 
-    pipes/datapipes.h
-    pipes/datapipescommon.h
-    pipes/datapipesgcworker.h
     pipes/datafifostore.h
-    pipes/datapipes2.h
-    pipes/datapipes2gcworker.h
+    pipes/datapipes.h
+    pipes/datapipesgcworker.h
     pipes/elementpipescommon.h
     pipes/elementpipesgc.h
     pipes/messagepipes.h
