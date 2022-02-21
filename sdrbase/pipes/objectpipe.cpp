@@ -26,10 +26,10 @@ ObjectPipe::ObjectPipe() :
     m_gcCount(0)
 {}
 
-void ObjectPipe::setToBeDeleted(int reason)
+void ObjectPipe::setToBeDeleted(int reason, QObject *object)
 {
     m_gcCount = 2; // will defer actual deletion by one GC pass
-    emit toBeDeleted(reason);
+    emit toBeDeleted(reason, object);
 }
 
 int ObjectPipe::getGCCount() const {

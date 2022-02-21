@@ -348,6 +348,7 @@ void DemodAnalyzer::setChannel(ChannelAPI *selectedChannel)
     }
 
     m_dataPipe = mainCore->getDataPipes().registerProducerToConsumer(selectedChannel, this, "demod");
+    connect(m_dataPipe, SIGNAL(toBeDeleted(int, QObject*)), this, SLOT(handleDataPipeToBeDeleted(int, QObject*)));
     DataFifo *fifo = qobject_cast<DataFifo*>(m_dataPipe->m_element);
 
     if (fifo)
@@ -599,5 +600,24 @@ void DemodAnalyzer::handleChannelMessageQueue(MessageQueue* messageQueue)
         if (handleMessage(*message)) {
             delete message;
         }
+    }
+}
+
+void DemodAnalyzer::handleDataPipeToBeDeleted(int reason, QObject *object)
+{
+    qDebug("DemodAnalyzer::handleDataPipeToBeDeleted: %d %p", reason, object);
+
+    if ((reason == 0) && (m_selectedChannel == object))
+    {
+        DataFifo *fifo = qobject_cast<DataFifo*>(m_dataPipe->m_element);
+
+        if (fifo && m_worker->isRunning())
+        {
+            DemodAnalyzerWorker::MsgConnectFifo *msg = DemodAnalyzerWorker::MsgConnectFifo::create(fifo, false);
+            m_worker->getInputMessageQueue()->push(msg);
+        }
+
+        updateChannels();
+        m_selectedChannel = nullptr;
     }
 }

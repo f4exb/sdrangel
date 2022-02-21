@@ -217,6 +217,7 @@ private:
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
     void handleChannelMessageQueue(MessageQueue *messageQueues);
+    void handleDataPipeToBeDeleted(int reason, QObject *object);
 };
 
 #endif // INCLUDE_FEATURE_DEMODANALYZER_H_

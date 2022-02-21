@@ -29,6 +29,7 @@ ObjectPipesRegistrations::~ObjectPipesRegistrations()
 
 ObjectPipe *ObjectPipesRegistrations::registerProducerToConsumer(const QObject *producer, const QObject *consumer, const QString& type)
 {
+    qDebug("ObjectPipesRegistrations::registerProducerToConsumer: %p %p %s", producer, consumer, qPrintable("type"));
     int typeId;
     QMutexLocker mlock(&m_mutex);
 
@@ -72,6 +73,7 @@ ObjectPipe *ObjectPipesRegistrations::registerProducerToConsumer(const QObject *
 
 ObjectPipe *ObjectPipesRegistrations::unregisterProducerToConsumer(const QObject *producer, const QObject *consumer, const QString& type)
 {
+    qDebug("ObjectPipesRegistrations::unregisterProducerToConsumer: %p %p %s", producer, consumer, qPrintable("type"));
     ObjectPipe *pipe = nullptr;
 
     if (m_typeIds.contains(type))
@@ -102,7 +104,7 @@ ObjectPipe *ObjectPipesRegistrations::unregisterProducerToConsumer(const QObject
                 m_producerAndTypeIdPipes.remove(std::make_tuple(producer, typeId));
             }
 
-            pipe->setToBeDeleted(PipeDeletionReason::PipeDeleted);
+            pipe->setToBeDeleted(PipeDeletionReason::PipeDeleted, pipe);
         }
     }
 
@@ -123,7 +125,6 @@ void ObjectPipesRegistrations::getPipes(const QObject *producer, const QString& 
 
 void ObjectPipesRegistrations::processGC()
 {
-    qDebug("ObjectPipesRegistrations::processGC");
     QMutexLocker mlock(&m_mutex);
 
     typename QList<ObjectPipe*>::iterator itPipe = m_pipes.begin();
@@ -143,12 +144,16 @@ void ObjectPipesRegistrations::processGC()
                 ++itPipe;
             }
         }
+        else
+        {
+            ++itPipe;
+        }
     }
 }
 
 void ObjectPipesRegistrations::removeProducer(QObject *producer)
 {
-    qDebug("ObjectPipesRegistrations::removeProducer");
+    qDebug("ObjectPipesRegistrations::removeProducer: %p", producer);
     QMutexLocker mlock(&m_mutex);
 
     if (m_producerPipes.contains(producer) && (m_producerPipes[producer].size() != 0))
@@ -165,7 +170,7 @@ void ObjectPipesRegistrations::removeProducer(QObject *producer)
                 m_typeIdPipes[typeId].removeAll(pipe);
             }
 
-            pipe->setToBeDeleted(PipeDeletionReason::PipeProducerDeleted);
+            pipe->setToBeDeleted(PipeDeletionReason::PipeProducerDeleted, producer);
         }
 
         m_producerPipes.remove(producer);
@@ -196,7 +201,7 @@ void ObjectPipesRegistrations::removeProducer(QObject *producer)
 
 void ObjectPipesRegistrations::removeConsumer(QObject *consumer)
 {
-    qDebug("ObjectPipesRegistrations::removeConsumer");
+    qDebug("ObjectPipesRegistrations::removeConsumer: %p", consumer);
     QMutexLocker mlock(&m_mutex);
 
     if (m_consumerPipes.contains(consumer) && (m_consumerPipes[consumer].size() != 0))
@@ -217,7 +222,7 @@ void ObjectPipesRegistrations::removeConsumer(QObject *consumer)
                 m_producerAndTypeIdPipes[producerAndTypeId].removeAll(pipe);
             }
 
-            pipe->setToBeDeleted(PipeDeletionReason::PipeConsumerDeleted);
+            pipe->setToBeDeleted(PipeDeletionReason::PipeConsumerDeleted, consumer);
         }
 
         m_consumerPipes.remove(consumer);

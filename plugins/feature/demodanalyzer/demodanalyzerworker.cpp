@@ -156,11 +156,11 @@ bool DemodAnalyzerWorker::handleMessage(const Message& cmd)
     }
     else if (MsgConnectFifo::match(cmd))
     {
-        qDebug("DemodAnalyzerWorker::handleMessage: MsgConnectFifo");
         QMutexLocker mutexLocker(&m_mutex);
         MsgConnectFifo& msg = (MsgConnectFifo&) cmd;
         m_dataFifo = msg.getFifo();
         bool doConnect = msg.getConnect();
+        qDebug("DemodAnalyzerWorker::handleMessage: MsgConnectFifo: %s", (doConnect ? "connect" : "disconnect"));
 
         if (doConnect) {
             QObject::connect(
@@ -170,7 +170,9 @@ bool DemodAnalyzerWorker::handleMessage(const Message& cmd)
                 &DemodAnalyzerWorker::handleData,
                 Qt::QueuedConnection
             );
-        } else {
+        }
+        else
+        {
             QObject::disconnect(
                 m_dataFifo,
                 &DataFifo::dataReady,
