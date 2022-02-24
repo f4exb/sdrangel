@@ -15,31 +15,31 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "datapipesgcworker.h"
+#include "messagepipes2gcworker.h"
 
-DataPipesGCWorker::DataPipesGCWorker(ObjectPipesRegistrations& objectPipesRegistrations) :
+MessagePipes2GCWorker::MessagePipes2GCWorker(ObjectPipesRegistrations& objectPipesRegistrations) :
     m_running(false),
     m_objectPipesRegistrations(objectPipesRegistrations)
 {}
 
-DataPipesGCWorker::~DataPipesGCWorker()
+MessagePipes2GCWorker::~MessagePipes2GCWorker()
 {}
 
-void DataPipesGCWorker::startWork()
+void MessagePipes2GCWorker::startWork()
 {
     connect(&m_gcTimer, SIGNAL(timeout()), this, SLOT(processGC()));
     m_gcTimer.start(10000); // collect garbage every 10s
     m_running = true;
 }
 
-void DataPipesGCWorker::stopWork()
+void MessagePipes2GCWorker::stopWork()
 {
     m_running = false;
     m_gcTimer.stop();
     disconnect(&m_gcTimer, SIGNAL(timeout()), this, SLOT(processGC()));
 }
 
-void DataPipesGCWorker::processGC()
+void MessagePipes2GCWorker::processGC()
 {
     m_objectPipesRegistrations.processGC();
 }

@@ -15,31 +15,29 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "datapipesgcworker.h"
+#ifndef SDRBASE_PIPES_MESSAGEQUEUESTORE_H_
+#define SDRBASE_PIPES_MESSAGEQUEUESTORE_H_
 
-DataPipesGCWorker::DataPipesGCWorker(ObjectPipesRegistrations& objectPipesRegistrations) :
-    m_running(false),
-    m_objectPipesRegistrations(objectPipesRegistrations)
-{}
+#include <QList>
 
-DataPipesGCWorker::~DataPipesGCWorker()
-{}
+#include "export.h"
+#include "objectpipeelementsstore.h"
 
-void DataPipesGCWorker::startWork()
+class MessageQueue;
+
+class SDRBASE_API MessageQueueStore : public ObjectPipeElementsStore
 {
-    connect(&m_gcTimer, SIGNAL(timeout()), this, SLOT(processGC()));
-    m_gcTimer.start(10000); // collect garbage every 10s
-    m_running = true;
-}
+public:
+    MessageQueueStore();
+    virtual ~MessageQueueStore();
 
-void DataPipesGCWorker::stopWork()
-{
-    m_running = false;
-    m_gcTimer.stop();
-    disconnect(&m_gcTimer, SIGNAL(timeout()), this, SLOT(processGC()));
-}
+    virtual QObject *createElement();
+    virtual void deleteElement(QObject*);
 
-void DataPipesGCWorker::processGC()
-{
-    m_objectPipesRegistrations.processGC();
-}
+private:
+    void deleteAllElements();
+    QList<MessageQueue*> m_messageQueues;
+};
+
+
+#endif // SDRBASE_PIPES_MESSAGEQUEUESTORE_H_

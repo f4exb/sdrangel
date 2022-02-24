@@ -15,31 +15,42 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "datapipesgcworker.h"
+#include "util/messagequeue.h"
+#include "messagequeuestore.h"
 
-DataPipesGCWorker::DataPipesGCWorker(ObjectPipesRegistrations& objectPipesRegistrations) :
-    m_running(false),
-    m_objectPipesRegistrations(objectPipesRegistrations)
+MessageQueueStore::MessageQueueStore()
 {}
 
-DataPipesGCWorker::~DataPipesGCWorker()
-{}
-
-void DataPipesGCWorker::startWork()
+MessageQueueStore::~MessageQueueStore()
 {
-    connect(&m_gcTimer, SIGNAL(timeout()), this, SLOT(processGC()));
-    m_gcTimer.start(10000); // collect garbage every 10s
-    m_running = true;
+    deleteAllElements();
 }
 
-void DataPipesGCWorker::stopWork()
+QObject *MessageQueueStore::createElement()
 {
-    m_running = false;
-    m_gcTimer.stop();
-    disconnect(&m_gcTimer, SIGNAL(timeout()), this, SLOT(processGC()));
+    MessageQueue *messageQueue = new MessageQueue();
+    m_messageQueues.push_back(messageQueue);
+    qDebug("MessageQueueStore::createElement: %d added", m_messageQueues.size() - 1);
+    return messageQueue;
 }
 
-void DataPipesGCWorker::processGC()
+void MessageQueueStore::deleteElement(QObject *element)
 {
-    m_objectPipesRegistrations.processGC();
+    int i = m_messageQueues.indexOf((MessageQueue*) element);
+
+    if (i >= 0)
+    {
+        qDebug("MessageQueueStore::deleteElement: delte element at %d", i);
+        delete m_messageQueues[i];
+        m_messageQueues.removeAt(i);
+    }
+}
+
+void MessageQueueStore::deleteAllElements()
+{
+    for (auto& messageQueue : m_messageQueues) {
+        delete messageQueue;
+    }
+
+    m_messageQueues.clear();
 }

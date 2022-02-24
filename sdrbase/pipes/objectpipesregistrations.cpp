@@ -73,7 +73,7 @@ ObjectPipe *ObjectPipesRegistrations::registerProducerToConsumer(const QObject *
 
 ObjectPipe *ObjectPipesRegistrations::unregisterProducerToConsumer(const QObject *producer, const QObject *consumer, const QString& type)
 {
-    qDebug("ObjectPipesRegistrations::unregisterProducerToConsumer: %p %p %s", producer, consumer, qPrintable("type"));
+    qDebug("ObjectPipesRegistrations::unregisterProducerToConsumer: %p %p %s", producer, consumer, qPrintable(type));
     ObjectPipe *pipe = nullptr;
 
     if (m_typeIds.contains(type))

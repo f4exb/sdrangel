@@ -15,31 +15,33 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "datapipesgcworker.h"
+#ifndef SDRBASE_PIPES_MESSAGEPIPES2GCWORKER_H_
+#define SDRBASE_PIPES_MESSAGEPIPES2GCWORKER_H_
 
-DataPipesGCWorker::DataPipesGCWorker(ObjectPipesRegistrations& objectPipesRegistrations) :
-    m_running(false),
-    m_objectPipesRegistrations(objectPipesRegistrations)
-{}
+#include <QObject>
+#include <QTimer>
 
-DataPipesGCWorker::~DataPipesGCWorker()
-{}
+#include "export.h"
+#include "objectpipesregistrations.h"
 
-void DataPipesGCWorker::startWork()
+class SDRBASE_API MessagePipes2GCWorker : public QObject
 {
-    connect(&m_gcTimer, SIGNAL(timeout()), this, SLOT(processGC()));
-    m_gcTimer.start(10000); // collect garbage every 10s
-    m_running = true;
-}
+    Q_OBJECT
+public:
+    MessagePipes2GCWorker(ObjectPipesRegistrations& objectPipesRegistrations);
+    ~MessagePipes2GCWorker();
 
-void DataPipesGCWorker::stopWork()
-{
-    m_running = false;
-    m_gcTimer.stop();
-    disconnect(&m_gcTimer, SIGNAL(timeout()), this, SLOT(processGC()));
-}
+    void startWork();
+    void stopWork();
+    bool isRunning() const { return m_running; }
 
-void DataPipesGCWorker::processGC()
-{
-    m_objectPipesRegistrations.processGC();
-}
+private:
+    bool m_running;
+    QTimer m_gcTimer;
+    ObjectPipesRegistrations& m_objectPipesRegistrations;
+
+private slots:
+    void processGC(); //!< Collect garbage
+};
+
+#endif // SDRBASE_PIPES_MESSAGEPIPES2GCWORKER_H_

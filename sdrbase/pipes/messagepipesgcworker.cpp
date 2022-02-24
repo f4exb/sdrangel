@@ -35,22 +35,10 @@ bool MessagePipesGCWorker::MessagePipesGC::existsConsumer(const PipeEndPoint *pi
 }
 
 void MessagePipesGCWorker::MessagePipesGC::sendMessageToConsumer(
-    const MessageQueue *messageQueue,
-    MessagePipesCommon::ChannelRegistrationKey channelKey,
-    PipeEndPoint *pipeEndPoint)
+    const MessageQueue *,
+    MessagePipesCommon::ChannelRegistrationKey,
+    PipeEndPoint *)
 {
-    MessagePipesCommon::MsgReportChannelDeleted *msg = MessagePipesCommon::MsgReportChannelDeleted::create(
-        messageQueue, channelKey);
-    if (MainCore::instance()->existsFeature((const Feature *)pipeEndPoint)) // Use RTTI instead?
-    {
-        Feature *feature = (Feature *)pipeEndPoint;
-        feature->getInputMessageQueue()->push(msg);
-    }
-    else
-    {
-        ChannelAPI *channel = (ChannelAPI *)pipeEndPoint;
-        channel->getChannelMessageQueue()->push(msg);
-    }
 }
 
 MessagePipesGCWorker::MessagePipesGCWorker() :

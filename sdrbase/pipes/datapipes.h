@@ -25,7 +25,6 @@
 #include "objectpipesregistrations.h"
 #include "datafifostore.h"
 
-class DataFifo;
 class DataPipesGCWorker;
 
 class SDRBASE_API DataPipes : public QObject

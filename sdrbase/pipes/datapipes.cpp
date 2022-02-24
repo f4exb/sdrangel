@@ -15,7 +15,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "dsp/datafifo.h"
 #include "datapipes.h"
 #include "datapipesgcworker.h"
 
