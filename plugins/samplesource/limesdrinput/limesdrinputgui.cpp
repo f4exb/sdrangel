@@ -84,7 +84,7 @@ LimeSDRInputGUI::LimeSDRInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
         ui->antenna->setItemText(2, "Lo");
         ui->antenna->setItemText(3, "Wi");
         ui->antenna->setItemText(4, "T1");
-        ui->antenna->setItemText(4, "T2");
+        ui->antenna->setItemText(5, "T2");
         ui->antenna->setToolTip("Antenna select: No: none, NC: not connected, Hi: >1.5 GHz, Lo: <1.5 GHz Wi: full band, T1: Tx1 LB, T2: Tx2 LB");
     }
 
