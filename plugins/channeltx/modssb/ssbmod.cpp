@@ -381,19 +381,19 @@ bool SSBMod::deserialize(const QByteArray& data)
 
 void SSBMod::sendSampleRateToDemodAnalyzer()
 {
-    QList<MessageQueue*> *messageQueues = MainCore::instance()->getMessagePipes().getMessageQueues(this, "reportdemod");
+    QList<ObjectPipe*> pipes;
+    MainCore::instance()->getMessagePipes2().getMessagePipes(this, "reportdemod", pipes);
 
-    if (messageQueues)
+    if (pipes.size() > 0)
     {
-        QList<MessageQueue*>::iterator it = messageQueues->begin();
-
-        for (; it != messageQueues->end(); ++it)
+        for (const auto& pipe : pipes)
         {
+            MessageQueue* messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
             MainCore::MsgChannelDemodReport *msg = MainCore::MsgChannelDemodReport::create(
                 this,
                 getAudioSampleRate()
             );
-            (*it)->push(msg);
+            messageQueue->push(msg);
         }
     }
 }

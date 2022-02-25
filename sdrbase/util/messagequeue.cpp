@@ -26,6 +26,7 @@ MessageQueue::MessageQueue(QObject* parent) :
 	m_lock(QMutex::Recursive),
 	m_queue()
 {
+	setObjectName("MessageQueue");
 }
 
 MessageQueue::~MessageQueue()

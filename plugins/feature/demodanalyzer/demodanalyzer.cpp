@@ -157,12 +157,13 @@ bool DemodAnalyzer::handleMessage(const Message& cmd)
     }
     else if (MsgSelectChannel::match(cmd))
     {
-        qDebug() << "DemodAnalyzer::handleMessage: MsgSelectChannel";
         MsgSelectChannel& cfg = (MsgSelectChannel&) cmd;
         ChannelAPI *selectedChannel = cfg.getChannel();
+        qDebug("DemodAnalyzer::handleMessage: MsgSelectChannel: %p %s",
+            selectedChannel, qPrintable(selectedChannel->objectName()));
         setChannel(selectedChannel);
         MainCore::MsgChannelDemodQuery *msg = MainCore::MsgChannelDemodQuery::create();
-        selectedChannel->getChannelMessageQueue()->push(msg);
+        selectedChannel->getInputMessageQueue()->push(msg);
 
         return true;
     }
@@ -343,8 +344,16 @@ void DemodAnalyzer::setChannel(ChannelAPI *selectedChannel)
             m_worker->getInputMessageQueue()->push(msg);
         }
 
-        MessageQueue *messageQueue = mainCore->getMessagePipes().unregisterChannelToFeature(m_selectedChannel, this, "reportdemod");
-        disconnect(messageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessageQueue(MessageQueue*)));
+        ObjectPipe *messagePipe = mainCore->getMessagePipes2().unregisterProducerToConsumer(m_selectedChannel, this, "reportdemod");
+
+        if (messagePipe)
+        {
+            MessageQueue *messageQueue = qobject_cast<MessageQueue*>(messagePipe->m_element);
+
+            if (messageQueue) {
+                disconnect(messageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessageQueue(MessageQueue*)));
+            }
+        }
     }
 
     m_dataPipe = mainCore->getDataPipes().registerProducerToConsumer(selectedChannel, this, "demod");
@@ -362,15 +371,23 @@ void DemodAnalyzer::setChannel(ChannelAPI *selectedChannel)
         }
     }
 
-    MessageQueue *messageQueue = mainCore->getMessagePipes().registerChannelToFeature(selectedChannel, this, "reportdemod");
+    ObjectPipe *messagePipe = mainCore->getMessagePipes2().registerProducerToConsumer(selectedChannel, this, "reportdemod");
 
-    QObject::connect(
-        messageQueue,
-        &MessageQueue::messageEnqueued,
-        this,
-        [=](){ this->handleChannelMessageQueue(messageQueue); },
-        Qt::QueuedConnection
-    );
+    if (messagePipe)
+    {
+        MessageQueue *messageQueue = qobject_cast<MessageQueue*>(messagePipe->m_element);
+
+        if (messageQueue)
+        {
+            QObject::connect(
+                messageQueue,
+                &MessageQueue::messageEnqueued,
+                this,
+                [=](){ this->handleChannelMessageQueue(messageQueue); },
+                Qt::QueuedConnection
+            );
+        }
+    }
 
     m_selectedChannel = selectedChannel;
 }

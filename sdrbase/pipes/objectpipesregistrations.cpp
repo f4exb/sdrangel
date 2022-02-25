@@ -29,7 +29,6 @@ ObjectPipesRegistrations::~ObjectPipesRegistrations()
 
 ObjectPipe *ObjectPipesRegistrations::registerProducerToConsumer(const QObject *producer, const QObject *consumer, const QString& type)
 {
-    qDebug("ObjectPipesRegistrations::registerProducerToConsumer: %p %p %s", producer, consumer, qPrintable("type"));
     int typeId;
     QMutexLocker mlock(&m_mutex);
 
@@ -52,6 +51,8 @@ ObjectPipe *ObjectPipesRegistrations::registerProducerToConsumer(const QObject *
     }
 
     QObject *element = m_objectPipeElementsStore->createElement();
+    qDebug("ObjectPipesRegistrations::registerProducerToConsumer: %p %p %s %s",
+        producer, consumer, qPrintable(element->objectName()), qPrintable(type));
     m_pipes.push_back(new ObjectPipe());
     m_pipes.back()->m_pipeId = ++m_pipeId;
     m_pipes.back()->m_typeId = typeId;
@@ -73,7 +74,6 @@ ObjectPipe *ObjectPipesRegistrations::registerProducerToConsumer(const QObject *
 
 ObjectPipe *ObjectPipesRegistrations::unregisterProducerToConsumer(const QObject *producer, const QObject *consumer, const QString& type)
 {
-    qDebug("ObjectPipesRegistrations::unregisterProducerToConsumer: %p %p %s", producer, consumer, qPrintable(type));
     ObjectPipe *pipe = nullptr;
 
     if (m_typeIds.contains(type))
@@ -106,6 +106,17 @@ ObjectPipe *ObjectPipesRegistrations::unregisterProducerToConsumer(const QObject
 
             pipe->setToBeDeleted(PipeDeletionReason::PipeDeleted, pipe);
         }
+    }
+
+    if (pipe)
+    {
+        qDebug("ObjectPipesRegistrations::unregisterProducerToConsumer: %p %p %s %s",
+            producer, consumer, qPrintable(pipe->m_element->objectName()), qPrintable(type));
+    }
+    else
+    {
+        qDebug("ObjectPipesRegistrations::unregisterProducerToConsumer: %p %p %s nullptr",
+            producer, consumer, qPrintable(type));
     }
 
     return pipe;

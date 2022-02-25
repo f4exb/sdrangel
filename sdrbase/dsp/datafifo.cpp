@@ -44,6 +44,7 @@ DataFifo::DataFifo(QObject* parent) :
 	m_currentDataType(DataTypeI16),
 	m_mutex(QMutex::Recursive)
 {
+	setObjectName("DataFifo");
 	m_suppressed = -1;
 	m_size = 0;
 	m_fill = 0;
@@ -57,6 +58,7 @@ DataFifo::DataFifo(int size, QObject* parent) :
 	m_currentDataType(DataTypeI16),
 	m_mutex(QMutex::Recursive)
 {
+	setObjectName("DataFifo");
 	m_suppressed = -1;
 	create(size);
 }
@@ -67,6 +69,7 @@ DataFifo::DataFifo(const DataFifo& other) :
 	m_currentDataType(DataTypeI16),
 	m_mutex(QMutex::Recursive)
 {
+	setObjectName("DataFifo");
   	m_suppressed = -1;
 	m_size = m_data.size();
 	m_fill = 0;

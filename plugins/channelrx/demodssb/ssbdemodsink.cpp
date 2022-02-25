@@ -309,16 +309,21 @@ void SSBDemodSink::applyAudioSampleRate(int sampleRate)
     m_audioFifo.setSize(sampleRate);
     m_audioSampleRate = sampleRate;
 
-    QList<MessageQueue*> *messageQueues = MainCore::instance()->getMessagePipes().getMessageQueues(m_channel, "reportdemod");
 
-    if (messageQueues)
+    QList<ObjectPipe*> pipes;
+    MainCore::instance()->getMessagePipes2().getMessagePipes(m_channel, "reportdemod", pipes);
+
+    if (pipes.size() > 0)
     {
-        QList<MessageQueue*>::iterator it = messageQueues->begin();
-
-        for (; it != messageQueues->end(); ++it)
+        for (const auto& pipe : pipes)
         {
-            MainCore::MsgChannelDemodReport *msg = MainCore::MsgChannelDemodReport::create(m_channel, sampleRate);
-            (*it)->push(msg);
+            MessageQueue* messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+
+            if (messageQueue)
+            {
+                MainCore::MsgChannelDemodReport *msg = MainCore::MsgChannelDemodReport::create(m_channel, sampleRate);
+                messageQueue->push(msg);
+            }
         }
     }
 }

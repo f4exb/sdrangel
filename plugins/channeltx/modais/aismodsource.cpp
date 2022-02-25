@@ -364,16 +364,16 @@ void AISModSource::applyChannelSettings(int channelSampleRate, int channelFreque
     m_channelSampleRate = channelSampleRate;
     m_channelFrequencyOffset = channelFrequencyOffset;
 
-    QList<MessageQueue*> *messageQueues = MainCore::instance()->getMessagePipes().getMessageQueues(m_channel, "reportdemod");
+    QList<ObjectPipe*> pipes;
+    MainCore::instance()->getMessagePipes2().getMessagePipes(m_channel, "reportdemod", pipes);
 
-    if (messageQueues)
+    if (pipes.size() > 0)
     {
-        QList<MessageQueue*>::iterator it = messageQueues->begin();
-
-        for (; it != messageQueues->end(); ++it)
+        for (const auto& pipe : pipes)
         {
+            MessageQueue* messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
             MainCore::MsgChannelDemodReport *msg = MainCore::MsgChannelDemodReport::create(m_channel, m_channelSampleRate);
-            (*it)->push(msg);
+            messageQueue->push(msg);
         }
     }
 }

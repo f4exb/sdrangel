@@ -68,7 +68,6 @@ public:
     virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
     MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
-    MessageQueue *getChannelMessageQueue() { return &m_channelMessageQueue; } //!< Get the queue for plugin communication
 
     /**
      * API adapter for the channel settings GET requests
