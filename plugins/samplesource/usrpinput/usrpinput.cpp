@@ -35,6 +35,7 @@
 #include "device/deviceapi.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
+#include "util/poweroftwo.h"
 #include "usrpinput.h"
 #include "usrpinputthread.h"
 #include "usrp/deviceusrpparam.h"
@@ -338,8 +339,11 @@ bool USRPInput::acquireChannel()
 
             m_streamId = m_deviceShared.m_deviceParams->getDevice()->get_rx_stream(stream_args);
 
-            // Match our receive buffer size to what UHD uses
+            // Decimators require buffers to sized as powers of two (See #1161)
             m_bufSamples = m_streamId->get_max_num_samps();
+            if (!isPowerOfTwo(m_bufSamples)) {
+                m_bufSamples = lowerPowerOfTwo(m_bufSamples);
+            }
 
             // Wait for reference and LO to lock
             DeviceUSRP::waitForLock(usrp, m_settings.m_clockSource, m_deviceShared.m_channel);
