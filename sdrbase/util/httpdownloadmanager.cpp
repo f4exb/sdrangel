@@ -20,7 +20,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QDateTime>
-#include <QRegExp>
+#include <QRegularExpression>
 
 HttpDownloadManager::HttpDownloadManager()
 {
@@ -119,36 +119,36 @@ void HttpDownloadManager::downloadFinished(QNetworkReply *reply)
         if (!isHttpRedirect(reply))
         {
             QByteArray data = reply->readAll();
-            QRegExp regexp("href=\\\"\\/uc\\?export\\=download\\&amp\\;confirm=([a-zA-Z0-9_\\-]*)\\&amp\\;id=([a-zA-Z0-9_\\-\\=\\;\\&]*)\\\"");
 
             // Google drive can redirect downloads to a virus scan warning page
-            // We need to extract the confirm code and retry
+            // We need to use URL with confirm code and retry
             if (url.startsWith("https://drive.google.com/uc?export=download")
                 && data.startsWith("<!DOCTYPE html>")
                 && !filename.endsWith(".html")
-                && (regexp.indexIn(data) >= 0)
                )
             {
-                QString confirm = regexp.capturedTexts()[1];
-                QString id = regexp.capturedTexts()[2];
-                if (confirm.isEmpty())
+                QRegularExpression regexp("action=\\\"(.*?)\\\"");
+                QRegularExpressionMatch match = regexp.match(data);
+                if (match.hasMatch())
                 {
-                    qDebug() << "HttpDownloadManager::downloadFinished - Got HTML response but not confirmation code";
-                    qDebug() << QString(data);
-                    qDebug() << regexp.capturedTexts();
+                    m_downloads.removeAll(reply);
+                    m_filenames.remove(idx);
+
+                    QString action = match.captured(1);
+                    action = action.replace("&amp;", "&");
+                    qDebug() << "HttpDownloadManager: Skipping Go ogle drive warning - downloading " << action;
+                    QUrl newUrl(action);
+                    QNetworkReply *newReply = download(newUrl, filename);
+
+                    // Indicate that we are retrying, so progress dialogs can be updated
+                    emit retryDownload(filename, reply, newReply);
+
+                    retry = true;
                 }
-
-                m_downloads.removeAll(reply);
-                m_filenames.remove(idx);
-
-                qDebug() << "HttpDownloadManager: Skipping Google drive warning: " << confirm << " " << id;
-                QUrl newUrl(QString("https://drive.google.com/uc?export=download&confirm=%1&id=%2").arg(confirm).arg(id));
-                QNetworkReply *newReply = download(newUrl, filename);
-
-                // Indicate that we are retrying, so progress dialogs can be updated
-                emit retryDownload(filename, reply, newReply);
-
-                retry = true;
+                else
+                {
+                    qDebug() << "HttpDownloadManager: Can't find action URL in Google Drive page " << data;
+                }
             }
             else if (writeToFile(filename, data))
             {
