@@ -157,11 +157,12 @@ bool VORDemodSC::handleMessage(const Message& cmd)
             m_guiMessageQueue->push(msg);
         }
 
-        MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
-        QList<MessageQueue*> *reportMessageQueues = messagePipes.getMessageQueues(this, "report");
+        MessagePipes2& messagePipes = MainCore::instance()->getMessagePipes2();
+        QList<ObjectPipe*> pipes;
+        messagePipes.getMessagePipes(this, "report", pipes);
 
-        if (reportMessageQueues) {
-            sendChannelReport(reportMessageQueues);
+        if (pipes.size() > 0) {
+            sendChannelReport(pipes);
         }
 
         return true;
@@ -177,11 +178,12 @@ bool VORDemodSC::handleMessage(const Message& cmd)
             m_guiMessageQueue->push(msg);
         }
 
-        MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
-        QList<MessageQueue*> *reportMessageQueues = messagePipes.getMessageQueues(this, "report");
+        MessagePipes2& messagePipes = MainCore::instance()->getMessagePipes2();
+        QList<ObjectPipe*> pipes;
+        messagePipes.getMessagePipes(this, "report", pipes);
 
-        if (reportMessageQueues) {
-            sendChannelReport(reportMessageQueues);
+        if (pipes.size() > 0) {
+            sendChannelReport(pipes);
         }
 
         return true;
@@ -550,19 +552,22 @@ void VORDemodSC::sendChannelSettings(
     }
 }
 
-void VORDemodSC::sendChannelReport(QList<MessageQueue*> *messageQueues)
+void VORDemodSC::sendChannelReport(QList<ObjectPipe*>& messagePipes)
 {
-    QList<MessageQueue*>::iterator it = messageQueues->begin();
-
-    for (; it != messageQueues->end(); ++it)
+    for (const auto& pipe : messagePipes)
     {
-        SWGSDRangel::SWGChannelReport *swgChannelReport = new SWGSDRangel::SWGChannelReport();
-        swgChannelReport->setDirection(0);
-        swgChannelReport->setChannelType(new QString(m_channelId));
-        swgChannelReport->setVorDemodScReport(new SWGSDRangel::SWGVORDemodSCReport());
-        webapiFormatChannelReport(*swgChannelReport);
-        MainCore::MsgChannelReport *msg = MainCore::MsgChannelReport::create(this, swgChannelReport);
-        (*it)->push(msg);
+        MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+
+        if (messageQueue)
+        {
+            SWGSDRangel::SWGChannelReport *swgChannelReport = new SWGSDRangel::SWGChannelReport();
+            swgChannelReport->setDirection(0);
+            swgChannelReport->setChannelType(new QString(m_channelId));
+            swgChannelReport->setVorDemodScReport(new SWGSDRangel::SWGVORDemodSCReport());
+            webapiFormatChannelReport(*swgChannelReport);
+            MainCore::MsgChannelReport *msg = MainCore::MsgChannelReport::create(this, swgChannelReport);
+            messageQueue->push(msg);
+        }
     }
 }
 

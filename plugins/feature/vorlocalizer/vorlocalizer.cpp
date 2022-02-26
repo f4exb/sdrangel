@@ -244,23 +244,22 @@ bool VORLocalizer::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (MessagePipesCommon::MsgReportChannelDeleted::match(cmd))
-    {
-        qDebug() << "VORLocalizer::handleMessage: MsgReportChannelDeleted";
-        MessagePipesCommon::MsgReportChannelDeleted& report = (MessagePipesCommon::MsgReportChannelDeleted&) cmd;
-        const MessagePipesCommon::ChannelRegistrationKey& channelKey = report.getChannelRegistrationKey();
-        const PipeEndPoint *channel = channelKey.m_key;
-        m_availableChannels.remove(const_cast<ChannelAPI*>(reinterpret_cast<const ChannelAPI*>(channel)));
-        updateChannels();
-        MessageQueue *messageQueue = MainCore::instance()->getMessagePipes().unregisterChannelToFeature(channel, this, "report");
-        disconnect(messageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessageQueue(MessageQueue*)));
-
-        return true;
-    }
     else
 	{
 		return false;
 	}
+}
+
+void VORLocalizer::handleMessagePipeToBeDeleted(int reason, QObject* object)
+{
+    if (reason == 0) // producer (channel)
+    {
+        if (m_availableChannels.contains((ChannelAPI*) object))
+        {
+            m_availableChannels.remove((ChannelAPI*) object);
+            updateChannels();
+        }
+    }
 }
 
 QByteArray VORLocalizer::serialize() const
@@ -337,7 +336,7 @@ void VORLocalizer::applySettings(const VORLocalizerSettings& settings, bool forc
 void VORLocalizer::updateChannels()
 {
     MainCore *mainCore = MainCore::instance();
-    MessagePipes& messagePipes = mainCore->getMessagePipes();
+    MessagePipes2& messagePipes = mainCore->getMessagePipes2();
     std::vector<DeviceSet*>& deviceSets = mainCore->getDeviceSets();
     std::vector<DeviceSet*>::const_iterator it = deviceSets.begin();
     m_availableChannels.clear();
@@ -362,7 +361,8 @@ void VORLocalizer::updateChannels()
                 {
                     if (!m_availableChannels.contains(channel))
                     {
-                        MessageQueue *messageQueue = messagePipes.registerChannelToFeature(channel, this, "report");
+                        ObjectPipe *pipe = messagePipes.registerProducerToConsumer(channel, this, "report");
+                        MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
                         QObject::connect(
                             messageQueue,
                             &MessageQueue::messageEnqueued,
@@ -370,6 +370,7 @@ void VORLocalizer::updateChannels()
                             [=](){ this->handleChannelMessageQueue(messageQueue); },
                             Qt::QueuedConnection
                         );
+                        connect(pipe, SIGNAL(toBeDeleted(int, QObject*)), this, SLOT(handleMessagePipeToBeDeleted(int, QObject*)));
                     }
 
                     VORLocalizerSettings::AvailableChannel availableChannel =

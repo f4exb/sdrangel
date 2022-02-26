@@ -164,7 +164,7 @@ void ObjectPipesRegistrations::processGC()
 
 void ObjectPipesRegistrations::removeProducer(QObject *producer)
 {
-    qDebug("ObjectPipesRegistrations::removeProducer: %p", producer);
+    qDebug("ObjectPipesRegistrations::removeProducer: %p %s", producer, qPrintable(producer->objectName()));
     QMutexLocker mlock(&m_mutex);
 
     if (m_producerPipes.contains(producer) && (m_producerPipes[producer].size() != 0))
@@ -212,7 +212,7 @@ void ObjectPipesRegistrations::removeProducer(QObject *producer)
 
 void ObjectPipesRegistrations::removeConsumer(QObject *consumer)
 {
-    qDebug("ObjectPipesRegistrations::removeConsumer: %p", consumer);
+    qDebug("ObjectPipesRegistrations::removeConsumer: %p %s", consumer, qPrintable(consumer->objectName()));
     QMutexLocker mlock(&m_mutex);
 
     if (m_consumerPipes.contains(consumer) && (m_consumerPipes[consumer].size() != 0))

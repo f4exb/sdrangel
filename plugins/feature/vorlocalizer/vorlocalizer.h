@@ -218,7 +218,7 @@ private:
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
     void handleChannelMessageQueue(MessageQueue* messageQueue);
-
+    void handleMessagePipeToBeDeleted(int reason, QObject* object);
 };
 
 #endif // INCLUDE_FEATURE_VORLOCALIZER_H_

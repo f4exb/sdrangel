@@ -35,6 +35,7 @@ class QNetworkAccessManager;
 class QNetworkReply;
 class QThread;
 class DeviceAPI;
+class ObjectPipe;
 
 class VORDemodSC : public BasebandSampleSink, public ChannelAPI {
 public:
@@ -153,7 +154,7 @@ private:
         const VORDemodSCSettings& settings,
         bool force
     );
-    void sendChannelReport(QList<MessageQueue*> *messageQueues);
+    void sendChannelReport(QList<ObjectPipe*>& messagePipes);
     void webapiFormatChannelSettings(
         QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
