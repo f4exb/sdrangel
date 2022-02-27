@@ -44,11 +44,13 @@ MessagePipes::~MessagePipes()
 
 MessageQueue *MessagePipes::registerChannelToFeature(const PipeEndPoint *source, PipeEndPoint *dest, const QString& type)
 {
+	qDebug("MessagePipes::registerChannelToFeature: %p %p %s", source, dest, qPrintable(type));
 	return m_registrations.registerProducerToConsumer(source, dest, type);
 }
 
 MessageQueue *MessagePipes::unregisterChannelToFeature(const PipeEndPoint *source, PipeEndPoint *dest, const QString& type)
 {
+	qDebug("MessagePipes::unregisterChannelToFeature: %p %p %s", source, dest, qPrintable(type));
 	MessageQueue *messageQueue = m_registrations.unregisterProducerToConsumer(source, dest, type);
 	m_gcWorker->addMessageQueueToDelete(messageQueue);
 	return messageQueue;
@@ -56,6 +58,7 @@ MessageQueue *MessagePipes::unregisterChannelToFeature(const PipeEndPoint *sourc
 
 QList<MessageQueue*>* MessagePipes::getMessageQueues(const PipeEndPoint *source, const QString& type)
 {
+	qDebug("MessagePipes::getMessageQueues: %p %s", source, qPrintable(type));
 	return m_registrations.getElements(source, type);
 }
 

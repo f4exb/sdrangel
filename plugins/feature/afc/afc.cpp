@@ -159,6 +159,7 @@ bool AFC::handleMessage(const Message& cmd)
     }
     else if (MsgDevicesApply::match(cmd))
     {
+        qDebug("AFC::handleMessage: MsgDevicesApply");
         removeTrackerFeatureReference();
         trackerDeviceChange(m_settings.m_trackerDeviceSetIndex);
         removeTrackedFeatureReferences();
@@ -621,6 +622,8 @@ void AFC::networkManagerFinished(QNetworkReply *reply)
 
 void AFC::trackerDeviceChange(int deviceIndex)
 {
+    qDebug("AFC::trackerDeviceChange: deviceIndex: %d", deviceIndex);
+
     if (deviceIndex < 0) {
         return;
     }
@@ -650,6 +653,8 @@ void AFC::trackerDeviceChange(int deviceIndex)
 
 void AFC::trackedDeviceChange(int deviceIndex)
 {
+    qDebug("AFC::trackedDeviceChange: deviceIndex: %d", deviceIndex);
+
     if (deviceIndex < 0) {
         return;
     }
@@ -682,6 +687,7 @@ void AFC::removeTrackerFeatureReference()
     {
         if (MainCore::instance()->existsChannel(m_trackerChannelAPI))
         {
+            qDebug("AFC::removeTrackerFeatureReference: m_trackerChannelAPI: %s", qPrintable(m_trackerChannelAPI->objectName()));
             MessageQueue *messageQueue
                 = MainCore::instance()->getMessagePipes().unregisterChannelToFeature(m_trackerChannelAPI, this, "settings");
             disconnect(messageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessageQueue(MessageQueue*)));
@@ -695,7 +701,9 @@ void AFC::removeTrackedFeatureReferences()
     {
         ChannelAPI *channel = *it;
 
-        if (MainCore::instance()->existsChannel(channel)) {
+        if (MainCore::instance()->existsChannel(channel))
+        {
+            qDebug("AFC::removeTrackedFeatureReferences: channel: %s", qPrintable(channel->objectName()));
             MainCore::instance()->getMessagePipes().unregisterChannelToFeature(channel, this, "settings");
         }
     }
