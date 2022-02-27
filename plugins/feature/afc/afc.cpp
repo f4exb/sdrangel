@@ -637,14 +637,20 @@ void AFC::trackerDeviceChange(int deviceIndex)
 
         if (channel->getURI() == "sdrangel.channel.freqtracker")
         {
-            MessageQueue *messageQueue = mainCore->getMessagePipes().registerChannelToFeature(channel, this, "settings");
-            QObject::connect(
-                messageQueue,
-                &MessageQueue::messageEnqueued,
-                this,
-                [=](){ this->handleChannelMessageQueue(messageQueue); },
-                Qt::QueuedConnection
-            );
+            ObjectPipe *pipe = mainCore->getMessagePipes2().registerProducerToConsumer(channel, this, "settings");
+            MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+
+            if (messageQueue)
+            {
+                QObject::connect(
+                    messageQueue,
+                    &MessageQueue::messageEnqueued,
+                    this,
+                    [=](){ this->handleChannelMessageQueue(messageQueue); },
+                    Qt::QueuedConnection
+                );
+            }
+
             m_trackerChannelAPI = channel;
             break;
         }
@@ -668,15 +674,20 @@ void AFC::trackedDeviceChange(int deviceIndex)
 
         if (channel->getURI() != "sdrangel.channel.freqtracker")
         {
-            MessageQueue *messageQueue = mainCore->getMessagePipes().registerChannelToFeature(channel, this, "settings");
-            QObject::connect(
-                messageQueue,
-                &MessageQueue::messageEnqueued,
-                this,
-                [=](){ this->handleChannelMessageQueue(messageQueue); },
-                Qt::QueuedConnection
-            );
-            m_trackerIndexInDeviceSet = i;
+            ObjectPipe *pipe = mainCore->getMessagePipes2().registerProducerToConsumer(channel, this, "settings");
+            MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+
+            if (messageQueue)
+            {
+                QObject::connect(
+                    messageQueue,
+                    &MessageQueue::messageEnqueued,
+                    this,
+                    [=](){ this->handleChannelMessageQueue(messageQueue); },
+                    Qt::QueuedConnection
+                );
+                m_trackerIndexInDeviceSet = i;
+            }
         }
     }
 }
@@ -688,9 +699,12 @@ void AFC::removeTrackerFeatureReference()
         if (MainCore::instance()->existsChannel(m_trackerChannelAPI))
         {
             qDebug("AFC::removeTrackerFeatureReference: m_trackerChannelAPI: %s", qPrintable(m_trackerChannelAPI->objectName()));
-            MessageQueue *messageQueue
-                = MainCore::instance()->getMessagePipes().unregisterChannelToFeature(m_trackerChannelAPI, this, "settings");
-            disconnect(messageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessageQueue(MessageQueue*)));
+            ObjectPipe *pipe = MainCore::instance()->getMessagePipes2().unregisterProducerToConsumer(m_trackerChannelAPI, this, "settings");
+            MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+
+            if (messageQueue) {
+                disconnect(messageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessageQueue(MessageQueue*)));
+            }
         }
     }
 }
@@ -704,7 +718,7 @@ void AFC::removeTrackedFeatureReferences()
         if (MainCore::instance()->existsChannel(channel))
         {
             qDebug("AFC::removeTrackedFeatureReferences: channel: %s", qPrintable(channel->objectName()));
-            MainCore::instance()->getMessagePipes().unregisterChannelToFeature(channel, this, "settings");
+            MainCore::instance()->getMessagePipes2().unregisterProducerToConsumer(channel, this, "settings");
         }
     }
 
