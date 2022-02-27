@@ -40,6 +40,8 @@ MESSAGE_CLASS_DEFINITION(AFC::MsgConfigureAFC, Message)
 MESSAGE_CLASS_DEFINITION(AFC::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(AFC::MsgDeviceTrack, Message)
 MESSAGE_CLASS_DEFINITION(AFC::MsgDevicesApply, Message)
+MESSAGE_CLASS_DEFINITION(AFC::MsgDeviceSetListsQuery, Message)
+MESSAGE_CLASS_DEFINITION(AFC::MsgDeviceSetListsReport, Message)
 
 const char* const AFC::m_featureIdURI = "sdrangel.feature.afc";
 const char* const AFC::m_featureId = "AFC";
@@ -170,6 +172,12 @@ bool AFC::handleMessage(const Message& cmd)
 
         return true;
     }
+    else if (MsgDeviceSetListsQuery::match(cmd))
+    {
+        qDebug("AFC::handleMessage: MsgDeviceSetListsQuery");
+        updateDeviceSetLists();
+        return true;
+    }
 
     return false;
 }
@@ -268,6 +276,43 @@ void AFC::applySettings(const AFCSettings& settings, bool force)
     }
 
     m_settings = settings;
+}
+
+void AFC::updateDeviceSetLists()
+{
+    MainCore *mainCore = MainCore::instance();
+    std::vector<DeviceSet*>& deviceSets = mainCore->getDeviceSets();
+    std::vector<DeviceSet*>::const_iterator it = deviceSets.begin();
+    MsgDeviceSetListsReport *msg = MsgDeviceSetListsReport::create();
+
+    unsigned int deviceIndex = 0;
+
+    for (; it != deviceSets.end(); ++it, deviceIndex++)
+    {
+        DSPDeviceSourceEngine *deviceSourceEngine =  (*it)->m_deviceSourceEngine;
+        DSPDeviceSinkEngine *deviceSinkEngine = (*it)->m_deviceSinkEngine;
+
+        if (deviceSourceEngine) {
+            msg->addTrackedDevice(deviceIndex, true);
+        } else if (deviceSinkEngine) {
+            msg->addTrackedDevice(deviceIndex, false);
+        }
+
+        for (int chi = 0; chi < (*it)->getNumberOfChannels(); chi++)
+        {
+            ChannelAPI *channel = (*it)->getChannelAt(chi);
+
+            if (channel->getURI() == "sdrangel.channel.freqtracker")
+            {
+                msg->addTrackerDevice(deviceIndex, true);
+                break;
+            }
+        }
+    }
+
+    if (getMessageQueueToGUI()) {
+        getMessageQueueToGUI()->push(msg);
+    }
 }
 
 int AFC::webapiRun(bool run,
@@ -576,6 +621,10 @@ void AFC::networkManagerFinished(QNetworkReply *reply)
 
 void AFC::trackerDeviceChange(int deviceIndex)
 {
+    if (deviceIndex < 0) {
+        return;
+    }
+
     MainCore *mainCore = MainCore::instance();
     m_trackerDeviceSet = mainCore->getDeviceSets()[deviceIndex];
 
@@ -601,6 +650,10 @@ void AFC::trackerDeviceChange(int deviceIndex)
 
 void AFC::trackedDeviceChange(int deviceIndex)
 {
+    if (deviceIndex < 0) {
+        return;
+    }
+
     MainCore *mainCore = MainCore::instance();
     m_trackedDeviceSet = mainCore->getDeviceSets()[deviceIndex];
 

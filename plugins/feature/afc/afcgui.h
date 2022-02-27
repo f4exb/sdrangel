@@ -25,11 +25,10 @@
 #include "settings/rollupstate.h"
 
 #include "afcsettings.h"
+#include "afc.h"
 
 class PluginAPI;
 class FeatureUISet;
-class AFC;
-
 namespace Ui {
 	class AFCGUI;
 }
@@ -65,7 +64,8 @@ private:
     void blockApplySettings(bool block);
 	void applySettings(bool force = false);
 	void displaySettings();
-    void updateDeviceSetLists();
+	void requestDeviceSetLists();
+    void updateDeviceSetLists(const AFC::MsgDeviceSetListsReport& report);
 	bool handleMessage(const Message& message);
 
 	void leaveEvent(QEvent*);

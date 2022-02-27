@@ -107,6 +107,52 @@ public:
         { }
     };
 
+    class MsgDeviceSetListsQuery : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgDeviceSetListsQuery* create() {
+            return new MsgDeviceSetListsQuery();
+        }
+    protected:
+        MsgDeviceSetListsQuery() :
+            Message()
+        { }
+    };
+
+    class MsgDeviceSetListsReport : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        struct DeviceSetReference
+        {
+            unsigned int m_deviceIndex;
+            bool m_rx;
+        };
+
+        void addTrackerDevice(unsigned int index, bool rx) {
+            m_trackerDevices.push_back(DeviceSetReference{index, rx});
+        }
+        void addTrackedDevice(unsigned int index, bool rx) {
+            m_trackedDevices.push_back(DeviceSetReference{index, rx});
+        }
+        const QList<DeviceSetReference>& getTrackerDevices() const {
+            return m_trackerDevices;
+        }
+        const QList<DeviceSetReference>& getTrackedDevices() const {
+            return m_trackedDevices;
+        }
+        static MsgDeviceSetListsReport* create() {
+            return new MsgDeviceSetListsReport();
+        }
+    private:
+        MsgDeviceSetListsReport() :
+            Message()
+        { }
+        QList<DeviceSetReference> m_trackerDevices;
+        QList<DeviceSetReference> m_trackedDevices;
+    };
+
     AFC(WebAPIAdapterInterface *webAPIAdapterInterface);
     virtual ~AFC();
     virtual void destroy() { delete this; }
@@ -175,6 +221,7 @@ private:
     void trackedDeviceChange(int deviceIndex);
     void removeTrackerFeatureReference();
     void removeTrackedFeatureReferences();
+    void updateDeviceSetLists();
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);

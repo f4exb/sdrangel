@@ -179,6 +179,10 @@ void AFCWorker::applySettings(const AFCSettings& settings, bool force)
 
 void AFCWorker::initTrackerDeviceSet(int deviceSetIndex)
 {
+    if (deviceSetIndex < 0) {
+        return;
+    }
+
     MainCore *mainCore = MainCore::instance();
     m_trackerDeviceSet = mainCore->getDeviceSets()[deviceSetIndex];
 
@@ -231,6 +235,10 @@ void AFCWorker::initTrackerDeviceSet(int deviceSetIndex)
 
 void AFCWorker::initTrackedDeviceSet(int deviceSetIndex)
 {
+    if (deviceSetIndex < 0) {
+        return;
+    }
+
     MainCore *mainCore = MainCore::instance();
     m_trackedDeviceSet = mainCore->getDeviceSets()[deviceSetIndex];
     m_channelsMap.clear();

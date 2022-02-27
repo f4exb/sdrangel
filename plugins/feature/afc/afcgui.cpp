@@ -25,7 +25,6 @@
 
 #include "ui_afcgui.h"
 #include "afcreport.h"
-#include "afc.h"
 #include "afcgui.h"
 
 AFCGUI* AFCGUI::create(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature)
@@ -93,6 +92,11 @@ bool AFCGUI::handleMessage(const Message& message)
         m_autoTargetStatusTimer.start(500);
         return true;
     }
+    else if (AFC::MsgDeviceSetListsReport::match(message))
+    {
+        const AFC::MsgDeviceSetListsReport& report = (AFC::MsgDeviceSetListsReport&) message;
+        updateDeviceSetLists(report);
+    }
 
 	return false;
 }
@@ -155,7 +159,7 @@ AFCGUI::AFCGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
 
     m_settings.setRollupState(&m_rollupState);
 
-    updateDeviceSetLists();
+    requestDeviceSetLists();
     displaySettings();
 	applySettings(true);
 }
@@ -185,47 +189,37 @@ void AFCGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void AFCGUI::updateDeviceSetLists()
+void AFCGUI::requestDeviceSetLists()
 {
-    MainCore *mainCore = MainCore::instance();
-    std::vector<DeviceSet*>& deviceSets = mainCore->getDeviceSets();
-    std::vector<DeviceSet*>::const_iterator it = deviceSets.begin();
+    AFC::MsgDeviceSetListsQuery *msg = AFC::MsgDeviceSetListsQuery::create();
+    m_afc->getInputMessageQueue()->push(msg);
+}
 
+void AFCGUI::updateDeviceSetLists(const AFC::MsgDeviceSetListsReport& report)
+{
     ui->trackerDevice->blockSignals(true);
     ui->trackedDevice->blockSignals(true);
 
     ui->trackerDevice->clear();
     ui->trackedDevice->clear();
 
-    unsigned int deviceIndex = 0;
+    for (const auto& deviceSetRef : report.getTrackerDevices()) {
+        ui->trackerDevice->addItem(QString("R%1").arg(deviceSetRef.m_deviceIndex), deviceSetRef.m_deviceIndex);
+    }
 
-    for (; it != deviceSets.end(); ++it, deviceIndex++)
+    for (const auto& deviceSetRef : report.getTrackedDevices())
     {
-        DSPDeviceSourceEngine *deviceSourceEngine =  (*it)->m_deviceSourceEngine;
-        DSPDeviceSinkEngine *deviceSinkEngine = (*it)->m_deviceSinkEngine;
-
-        if (deviceSourceEngine) {
-            ui->trackedDevice->addItem(QString("R%1").arg(deviceIndex), deviceIndex);
-        } else if (deviceSinkEngine) {
-            ui->trackedDevice->addItem(QString("T%1").arg(deviceIndex), deviceIndex);
-        }
-
-        for (int chi = 0; chi < (*it)->getNumberOfChannels(); chi++)
-        {
-            ChannelAPI *channel = (*it)->getChannelAt(chi);
-
-            if (channel->getURI() == "sdrangel.channel.freqtracker")
-            {
-                ui->trackerDevice->addItem(QString("R%1").arg(deviceIndex), deviceIndex);
-                break;
-            }
+        if (deviceSetRef.m_rx) {
+            ui->trackedDevice->addItem(QString("R%1").arg(deviceSetRef.m_deviceIndex), deviceSetRef.m_deviceIndex);
+        } else {
+            ui->trackedDevice->addItem(QString("T%1").arg(deviceSetRef.m_deviceIndex), deviceSetRef.m_deviceIndex);
         }
     }
 
     int trackedDeviceIndex;
     int trackerDeviceIndex;
 
-    if (deviceIndex > 0)
+    if ((report.getTrackerDevices().size() > 0) && (report.getTrackedDevices().size() > 0))
     {
         if (m_settings.m_trackedDeviceSetIndex < 0) {
             ui->trackedDevice->setCurrentIndex(0);
@@ -344,8 +338,7 @@ void AFCGUI::on_deviceTrack_clicked()
 
 void AFCGUI::on_devicesRefresh_clicked()
 {
-    updateDeviceSetLists();
-    displaySettings();
+    requestDeviceSetLists();
 }
 
 void AFCGUI::on_trackerDevice_currentIndexChanged(int index)
