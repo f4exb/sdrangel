@@ -28,7 +28,7 @@
 #include "settings/mainsettings.h"
 #include "util/message.h"
 #include "pipes/messagepipeslegacy.h"
-#include "pipes/messagepipes2.h"
+#include "pipes/messagepipes.h"
 #include "pipes/datapipes.h"
 #include "channel/channelapi.h"
 
@@ -732,7 +732,7 @@ public:
     void clearFeatures(FeatureSet *featureSet);
     // pipes
     MessagePipesLegacy& getMessagePipes() { return m_messagePipes; }
-    MessagePipes2& getMessagePipes2() { return m_messagePipes2; }
+    MessagePipes& getMessagePipes2() { return m_messagePipes2; }
     DataPipes& getDataPipes() { return m_dataPipes; }
 
     friend class MainServer;
@@ -753,7 +753,7 @@ private:
     QMap<Feature*, FeatureSet*> m_featuresMap;   //!< Feature to feature set map
     PluginManager* m_pluginManager;
     MessagePipesLegacy m_messagePipes;
-    MessagePipes2 m_messagePipes2;
+    MessagePipes m_messagePipes2;
     DataPipes m_dataPipes;
 
     void debugMaps();

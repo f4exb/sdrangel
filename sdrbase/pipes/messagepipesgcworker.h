@@ -15,8 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_PIPES_MESSAGEPIPES2GCWORKER_H_
-#define SDRBASE_PIPES_MESSAGEPIPES2GCWORKER_H_
+#ifndef SDRBASE_PIPES_MESSAGEPIPESGCWORKER_H_
+#define SDRBASE_PIPES_MESSAGEPIPESGCWORKER_H_
 
 #include <QObject>
 #include <QTimer>
@@ -24,12 +24,12 @@
 #include "export.h"
 #include "objectpipesregistrations.h"
 
-class SDRBASE_API MessagePipes2GCWorker : public QObject
+class SDRBASE_API MessagePipesGCWorker : public QObject
 {
     Q_OBJECT
 public:
-    MessagePipes2GCWorker(ObjectPipesRegistrations& objectPipesRegistrations);
-    ~MessagePipes2GCWorker();
+    MessagePipesGCWorker(ObjectPipesRegistrations& objectPipesRegistrations);
+    ~MessagePipesGCWorker();
 
     void startWork();
     void stopWork();
@@ -44,4 +44,4 @@ private slots:
     void processGC(); //!< Collect garbage
 };
 
-#endif // SDRBASE_PIPES_MESSAGEPIPES2GCWORKER_H_
+#endif // SDRBASE_PIPES_MESSAGEPIPESGCWORKER_H_

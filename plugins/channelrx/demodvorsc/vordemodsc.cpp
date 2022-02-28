@@ -157,7 +157,7 @@ bool VORDemodSC::handleMessage(const Message& cmd)
             m_guiMessageQueue->push(msg);
         }
 
-        MessagePipes2& messagePipes = MainCore::instance()->getMessagePipes2();
+        MessagePipes& messagePipes = MainCore::instance()->getMessagePipes2();
         QList<ObjectPipe*> pipes;
         messagePipes.getMessagePipes(this, "report", pipes);
 
@@ -178,7 +178,7 @@ bool VORDemodSC::handleMessage(const Message& cmd)
             m_guiMessageQueue->push(msg);
         }
 
-        MessagePipes2& messagePipes = MainCore::instance()->getMessagePipes2();
+        MessagePipes& messagePipes = MainCore::instance()->getMessagePipes2();
         QList<ObjectPipe*> pipes;
         messagePipes.getMessagePipes(this, "report", pipes);
 

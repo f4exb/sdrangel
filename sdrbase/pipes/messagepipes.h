@@ -15,8 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_PIPES_MESSAGEPIPES2_H_
-#define SDRBASE_PIPES_MESSAGEPIPES2_H_
+#ifndef SDRBASE_PIPES_MESSAGEPIPES_H_
+#define SDRBASE_PIPES_MESSAGEPIPES_H_
 
 #include <QObject>
 #include <QThread>
@@ -25,16 +25,16 @@
 #include "objectpipesregistrations.h"
 #include "messagequeuestore.h"
 
-class MessagePipes2GCWorker;
+class MessagePipesGCWorker;
 
-class SDRBASE_API MessagePipes2 : public QObject
+class SDRBASE_API MessagePipes : public QObject
 {
     Q_OBJECT
 public:
-    MessagePipes2();
-    MessagePipes2(const MessagePipes2&) = delete;
-    MessagePipes2& operator=(const MessagePipes2&) = delete;
-    ~MessagePipes2();
+    MessagePipes();
+    MessagePipes(const MessagePipes&) = delete;
+    MessagePipes& operator=(const MessagePipes&) = delete;
+    ~MessagePipes();
 
     ObjectPipe *registerProducerToConsumer(const QObject *producer, const QObject *consumer, const QString& type);
     ObjectPipe *unregisterProducerToConsumer(const QObject *producer, const QObject *consumer, const QString& type);
@@ -44,11 +44,11 @@ private:
     MessageQueueStore m_messageQueueStore;
     ObjectPipesRegistrations m_registrations;
     QThread m_gcThread; //!< Garbage collector thread
-    MessagePipes2GCWorker *m_gcWorker; //!< Garbage collector
+    MessagePipesGCWorker *m_gcWorker; //!< Garbage collector
 
 	void startGC(); //!< Start garbage collector
 	void stopGC();  //!< Stop garbage collector
 };
 
 
-#endif // SDRBASE_PIPES_MESSAGEPIPES2_H_
+#endif // SDRBASE_PIPES_MESSAGEPIPES_H_

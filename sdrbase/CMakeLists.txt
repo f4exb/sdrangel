@@ -171,10 +171,10 @@ set(sdrbase_SOURCES
     pipes/datapipes.cpp
     pipes/datapipesgcworker.cpp
     pipes/messagepipeslegacy.cpp
-    pipes/messagepipes2.cpp
+    pipes/messagepipes.cpp
     pipes/messagepipeslegacycommon.cpp
     pipes/messagepipeslegacygcworker.cpp
-    pipes/messagepipes2gcworker.cpp
+    pipes/messagepipesgcworker.cpp
     pipes/messagequeuestore.cpp
     pipes/pipeendpoint.cpp
     pipes/objectpipe.cpp
@@ -382,10 +382,10 @@ set(sdrbase_HEADERS
     pipes/elementpipescommon.h
     pipes/elementpipesgc.h
     pipes/messagepipeslegacy.h
-    pipes/messagepipes2.h
+    pipes/messagepipes.h
     pipes/messagepipeslegacycommon.h
     pipes/messagepipeslegacygcworker.h
-    pipes/messagepipes2gcworker.h
+    pipes/messagepipesgcworker.h
     pipes/messagequeuestore.h
     pipes/pipeendpoint.h
     pipes/objectpipe.h

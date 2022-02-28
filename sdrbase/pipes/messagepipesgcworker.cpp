@@ -15,53 +15,31 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "messagepipes2.h"
-#include "messagepipes2gcworker.h"
+#include "messagepipesgcworker.h"
 
-MessagePipes2::MessagePipes2() :
-    m_registrations(&m_messageQueueStore)
+MessagePipesGCWorker::MessagePipesGCWorker(ObjectPipesRegistrations& objectPipesRegistrations) :
+    m_running(false),
+    m_objectPipesRegistrations(objectPipesRegistrations)
+{}
+
+MessagePipesGCWorker::~MessagePipesGCWorker()
+{}
+
+void MessagePipesGCWorker::startWork()
 {
-  	m_gcWorker = new MessagePipes2GCWorker(m_registrations);
-	m_gcWorker->moveToThread(&m_gcThread);
-	startGC();
+    connect(&m_gcTimer, SIGNAL(timeout()), this, SLOT(processGC()));
+    m_gcTimer.start(10000); // collect garbage every 10s
+    m_running = true;
 }
 
-MessagePipes2::~MessagePipes2()
+void MessagePipesGCWorker::stopWork()
 {
-	if (m_gcWorker->isRunning()) {
-		stopGC();
-	}
-
-    m_gcWorker->deleteLater();
+    m_running = false;
+    m_gcTimer.stop();
+    disconnect(&m_gcTimer, SIGNAL(timeout()), this, SLOT(processGC()));
 }
 
-ObjectPipe *MessagePipes2::registerProducerToConsumer(const QObject *producer, const QObject *consumer, const QString& type)
+void MessagePipesGCWorker::processGC()
 {
-    return m_registrations.registerProducerToConsumer(producer, consumer, type);
-}
-
-ObjectPipe *MessagePipes2::unregisterProducerToConsumer(const QObject *producer, const QObject *consumer, const QString& type)
-{
-    return m_registrations.unregisterProducerToConsumer(producer, consumer, type);
-}
-
-void MessagePipes2::getMessagePipes(const QObject *producer, const QString& type, QList<ObjectPipe*>& pipes)
-{
-    return m_registrations.getPipes(producer, type, pipes);
-}
-
-void MessagePipes2::startGC()
-{
-	qDebug("MessagePipes2::startGC");
-
-    m_gcWorker->startWork();
-    m_gcThread.start();
-}
-
-void MessagePipes2::stopGC()
-{
-    qDebug("MessagePipes2::stopGC");
-	m_gcWorker->stopWork();
-	m_gcThread.quit();
-	m_gcThread.wait();
+    m_objectPipesRegistrations.processGC();
 }
