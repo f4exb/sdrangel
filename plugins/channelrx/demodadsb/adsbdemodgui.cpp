@@ -711,7 +711,7 @@ bool ADSBDemodGUI::updateLocalPosition(Aircraft *aircraft, double latitude, doub
 void ADSBDemodGUI::sendToMap(Aircraft *aircraft, QList<SWGSDRangel::SWGMapAnimation *> *animations)
 {
     // Send to Map feature
-    MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
+    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipes();
     QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(m_adsbDemod, "mapitems");
     if (mapMessageQueues)
     {
@@ -4044,7 +4044,7 @@ void ADSBDemodGUI::tick()
                 // Remove aircraft from hash
                 i = m_aircraft.erase(i);
                 // Remove from map feature
-                MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
+                MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipes();
                 QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(m_adsbDemod, "mapitems");
                 if (mapMessageQueues)
                 {

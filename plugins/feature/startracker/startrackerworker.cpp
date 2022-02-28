@@ -407,7 +407,7 @@ void StarTrackerWorker::updateRaDec(RADec rd, QDateTime dt, bool lbTarget)
 
 void StarTrackerWorker::removeFromMap(QString id)
 {
-    MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
+    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipes();
     QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(m_starTracker, "mapitems");
     if (mapMessageQueues) {
         sendToMap(mapMessageQueues, id, "", "", 0.0, 0.0);
@@ -580,7 +580,7 @@ void StarTrackerWorker::update()
         }
     }
 
-    MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
+    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipes();
     QList<MessageQueue*>* messageQueues;
 
     // Send Az/El to Rotator Controllers

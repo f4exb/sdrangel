@@ -138,11 +138,11 @@ bool AFC::handleMessage(const Message& cmd)
             return true;
         }
     }
-    else if (MessagePipesCommon::MsgReportChannelDeleted::match(cmd))
+    else if (MessagePipesLegacyCommon::MsgReportChannelDeleted::match(cmd))
     {
-        qDebug() << "AFC::handleMessage: MessagePipesCommon::MsgReportChannelDeleted";
-        MessagePipesCommon::MsgReportChannelDeleted& report = (MessagePipesCommon::MsgReportChannelDeleted&) cmd;
-        const MessagePipesCommon::ChannelRegistrationKey& channelKey = report.getChannelRegistrationKey();
+        qDebug() << "AFC::handleMessage: MessagePipesLegacyCommon::MsgReportChannelDeleted";
+        MessagePipesLegacyCommon::MsgReportChannelDeleted& report = (MessagePipesLegacyCommon::MsgReportChannelDeleted&) cmd;
+        const MessagePipesLegacyCommon::ChannelRegistrationKey& channelKey = report.getChannelRegistrationKey();
         MainCore::instance()->getMessagePipes().unregisterChannelToFeature(channelKey.m_key, this, "settings");
 
         return true;

@@ -148,7 +148,7 @@ bool AISDemod::handleMessage(const Message& cmd)
             getMessageQueueToGUI()->push(msg);
         }
 
-        MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
+        MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipes();
 
         // Forward to AIS feature
         QList<MessageQueue*> *aisMessageQueues = messagePipes.getMessageQueues(this, "ais");

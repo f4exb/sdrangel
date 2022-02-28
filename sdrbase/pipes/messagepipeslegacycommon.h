@@ -15,8 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_PIPES_MESSAGEPIPESCOMON_H_
-#define SDRBASE_PIPES_MESSAGEPIPESCOMON_H_
+#ifndef SDRBASE_PIPES_MESSAGEPIPESLEGACYCOMON_H_
+#define SDRBASE_PIPES_MESSAGEPIPESLEGACYCOMON_H_
 
 #include <QHash>
 #include <QMap>
@@ -29,7 +29,7 @@
 class PipeEndPoint;
 class MessageQueue;
 
-class SDRBASE_API MessagePipesCommon
+class SDRBASE_API MessagePipesLegacyCommon
 {
 public:
     typedef ElementPipesCommon::RegistrationKey<PipeEndPoint> ChannelRegistrationKey;
@@ -58,4 +58,4 @@ public:
     };
 };
 
-#endif // SDRBASE_PIPES_MESSAGEPIPESCOMON_H_
+#endif // SDRBASE_PIPES_MESSAGEPIPESLEGACYCOMON_H_

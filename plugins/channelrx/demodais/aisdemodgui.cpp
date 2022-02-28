@@ -702,7 +702,7 @@ void AISDemodGUI::on_logOpen_clicked()
                     bool cancelled = false;
                     QStringList cols;
 
-                    MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
+                    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipes();
                     QList<MessageQueue*> *aisMessageQueues = messagePipes.getMessageQueues(m_aisDemod, "ais");
 
                     while (!cancelled && CSV::readRow(in, &cols))

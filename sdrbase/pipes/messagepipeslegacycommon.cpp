@@ -15,6 +15,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "messagepipescommon.h"
+#include "messagepipeslegacycommon.h"
 
-MESSAGE_CLASS_DEFINITION(MessagePipesCommon::MsgReportChannelDeleted, Message)
+MESSAGE_CLASS_DEFINITION(MessagePipesLegacyCommon::MsgReportChannelDeleted, Message)

@@ -34,7 +34,7 @@ MESSAGE_CLASS_DEFINITION(PipeEndPoint::MsgReportPipes, Message)
 QList<PipeEndPoint::AvailablePipeSource> PipeEndPoint::updateAvailablePipeSources(QString pipeName, QStringList pipeTypes, QStringList pipeURIs, PipeEndPoint *destination)
 {
     MainCore *mainCore = MainCore::instance();
-    MessagePipes& messagePipes = mainCore->getMessagePipes();
+    MessagePipesLegacy& messagePipes = mainCore->getMessagePipes();
     std::vector<DeviceSet*>& deviceSets = mainCore->getDeviceSets();
     QHash<PipeEndPoint *, AvailablePipeSource> availablePipes;
 

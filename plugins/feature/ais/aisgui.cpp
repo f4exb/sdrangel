@@ -416,7 +416,7 @@ void AISGUI::sendToMap(const QString &name, const QString &label,
     float heading
     )
 {
-    MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
+    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipes();
     QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(m_ais, "mapitems");
     if (mapMessageQueues)
     {

@@ -15,8 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_PIPES_MESSAGEPIPES_H_
-#define SDRBASE_PIPES_MESSAGEPIPES_H_
+#ifndef SDRBASE_PIPES_MESSAGEPIPESLEGACY_H_
+#define SDRBASE_PIPES_MESSAGEPIPESLEGACY_H_
 
 #include <QObject>
 #include <QHash>
@@ -26,21 +26,21 @@
 
 #include "export.h"
 
-#include "messagepipescommon.h"
+#include "messagepipeslegacycommon.h"
 #include "elementpipesregistrations.h"
 
 class PipeEndPoint;
-class MessagePipesGCWorker;
+class MessagePipesLegacyGCWorker;
 class MessageQueue;
 
-class SDRBASE_API MessagePipes : public QObject
+class SDRBASE_API MessagePipesLegacy : public QObject
 {
     Q_OBJECT
 public:
-    MessagePipes();
-    MessagePipes(const MessagePipes&) = delete;
-    MessagePipes& operator=(const MessagePipes&) = delete;
-    ~MessagePipes();
+    MessagePipesLegacy();
+    MessagePipesLegacy(const MessagePipesLegacy&) = delete;
+    MessagePipesLegacy& operator=(const MessagePipesLegacy&) = delete;
+    ~MessagePipesLegacy();
 
     // FIXME: Names of these functions should probably change, as we now support channel or feature at either end
     MessageQueue *registerChannelToFeature(const PipeEndPoint *source, PipeEndPoint *dest, const QString& type);
@@ -50,10 +50,10 @@ public:
 private:
     ElementPipesRegistrations<PipeEndPoint, PipeEndPoint, MessageQueue> m_registrations;
     QThread m_gcThread; //!< Garbage collector thread
-    MessagePipesGCWorker *m_gcWorker; //!< Garbage collector
+    MessagePipesLegacyGCWorker *m_gcWorker; //!< Garbage collector
 
 	void startGC(); //!< Start garbage collector
 	void stopGC();  //!< Stop garbage collector
 };
 
-#endif // SDRBASE_PIPES_MESSAGEPIPES_H_
+#endif // SDRBASE_PIPES_MESSAGEPIPESLEGACY_H_

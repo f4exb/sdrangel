@@ -18,7 +18,7 @@
 #include <QGeoRectangle>
 
 #include "channel/channelwebapiutils.h"
-#include "pipes/messagepipes.h"
+#include "pipes/messagepipeslegacy.h"
 #include "maincore.h"
 
 #include "mapmodel.h"
@@ -358,7 +358,7 @@ void MapModel::updateTarget()
     azEl->calculate();
 
     // Send to Rotator Controllers
-    MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
+    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipes();
     QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(m_gui->getMap(), "target");
     if (mapMessageQueues)
     {

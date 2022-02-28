@@ -15,30 +15,30 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_PIPES_MESSAGEPIPESGCWORKER_H_
-#define SDRBASE_PIPES_MESSAGEPIPESGCWORKER_H_
+#ifndef SDRBASE_PIPES_MESSAGEPIPESLEGACYGCWORKER_H_
+#define SDRBASE_PIPES_MESSAGEPIPESLEGACYGCWORKER_H_
 
 #include <QObject>
 #include <QTimer>
 
 #include "export.h"
 
-#include "messagepipescommon.h"
+#include "messagepipeslegacycommon.h"
 #include "elementpipesgc.h"
 
 class QMutex;
 
-class SDRBASE_API MessagePipesGCWorker : public QObject
+class SDRBASE_API MessagePipesLegacyGCWorker : public QObject
 {
     Q_OBJECT
 public:
-    MessagePipesGCWorker();
-    ~MessagePipesGCWorker();
+    MessagePipesLegacyGCWorker();
+    ~MessagePipesLegacyGCWorker();
 
     void setC2FRegistrations(
         QMutex *c2fMutex,
-        QMap<MessagePipesCommon::ChannelRegistrationKey, QList<MessageQueue*>> *c2fQueues,
-        QMap<MessagePipesCommon::ChannelRegistrationKey, QList<PipeEndPoint*>> *c2fPipeEndPoints
+        QMap<MessagePipesLegacyCommon::ChannelRegistrationKey, QList<MessageQueue*>> *c2fQueues,
+        QMap<MessagePipesLegacyCommon::ChannelRegistrationKey, QList<PipeEndPoint*>> *c2fPipeEndPoints
     )
     {
         m_messagePipesGC.setRegistrations(c2fMutex, c2fQueues, c2fPipeEndPoints);
@@ -55,7 +55,7 @@ private:
     private:
         virtual bool existsProducer(const PipeEndPoint *pipeEndPoint);
         virtual bool existsConsumer(const PipeEndPoint *pipeEndPoint);
-        virtual void sendMessageToConsumer(const MessageQueue *messageQueue, MessagePipesCommon::ChannelRegistrationKey key, PipeEndPoint *pipeEndPoint);
+        virtual void sendMessageToConsumer(const MessageQueue *messageQueue, MessagePipesLegacyCommon::ChannelRegistrationKey key, PipeEndPoint *pipeEndPoint);
     };
 
     MessagePipesGC m_messagePipesGC;
@@ -66,4 +66,4 @@ private slots:
     void processGC(); //!< Collect garbage
 };
 
-#endif
+#endif // SDRBASE_PIPES_MESSAGEPIPESLEGACYGCWORKER_H_

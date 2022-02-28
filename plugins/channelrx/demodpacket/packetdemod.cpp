@@ -156,7 +156,7 @@ bool PacketDemod::handleMessage(const Message& cmd)
             getMessageQueueToGUI()->push(msg);
         }
 
-        MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
+        MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipes();
 
         // Forward to APRS and other packet features
         QList<MessageQueue*> *packetMessageQueues = messagePipes.getMessageQueues(this, "packets");

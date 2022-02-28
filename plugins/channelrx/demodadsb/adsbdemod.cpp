@@ -756,7 +756,7 @@ void ADSBDemod::setTarget(const QString& name, float targetAzimuth, float target
     m_targetAzElValid = true;
 
     // Send to Rotator Controllers
-    MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
+    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipes();
     QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(this, "target");
 
     if (mapMessageQueues)

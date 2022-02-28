@@ -19,13 +19,13 @@
 
 #include "util/messagequeue.h"
 
-#include "messagepipesgcworker.h"
-#include "messagepipes.h"
+#include "messagepipeslegacygcworker.h"
+#include "messagepipeslegacy.h"
 #include "pipeendpoint.h"
 
-MessagePipes::MessagePipes()
+MessagePipesLegacy::MessagePipesLegacy()
 {
-	m_gcWorker = new MessagePipesGCWorker();
+	m_gcWorker = new MessagePipesLegacyGCWorker();
 	m_gcWorker->setC2FRegistrations(
 		m_registrations.getMutex(),
 		m_registrations.getElements(),
@@ -35,43 +35,43 @@ MessagePipes::MessagePipes()
 	startGC();
 }
 
-MessagePipes::~MessagePipes()
+MessagePipesLegacy::~MessagePipesLegacy()
 {
 	if (m_gcWorker->isRunning()) {
 		stopGC();
 	}
 }
 
-MessageQueue *MessagePipes::registerChannelToFeature(const PipeEndPoint *source, PipeEndPoint *dest, const QString& type)
+MessageQueue *MessagePipesLegacy::registerChannelToFeature(const PipeEndPoint *source, PipeEndPoint *dest, const QString& type)
 {
-	qDebug("MessagePipes::registerChannelToFeature: %p %p %s", source, dest, qPrintable(type));
+	qDebug("MessagePipesLegacy::registerChannelToFeature: %p %p %s", source, dest, qPrintable(type));
 	return m_registrations.registerProducerToConsumer(source, dest, type);
 }
 
-MessageQueue *MessagePipes::unregisterChannelToFeature(const PipeEndPoint *source, PipeEndPoint *dest, const QString& type)
+MessageQueue *MessagePipesLegacy::unregisterChannelToFeature(const PipeEndPoint *source, PipeEndPoint *dest, const QString& type)
 {
-	qDebug("MessagePipes::unregisterChannelToFeature: %p %p %s", source, dest, qPrintable(type));
+	qDebug("MessagePipesLegacy::unregisterChannelToFeature: %p %p %s", source, dest, qPrintable(type));
 	MessageQueue *messageQueue = m_registrations.unregisterProducerToConsumer(source, dest, type);
 	m_gcWorker->addMessageQueueToDelete(messageQueue);
 	return messageQueue;
 }
 
-QList<MessageQueue*>* MessagePipes::getMessageQueues(const PipeEndPoint *source, const QString& type)
+QList<MessageQueue*>* MessagePipesLegacy::getMessageQueues(const PipeEndPoint *source, const QString& type)
 {
-	qDebug("MessagePipes::getMessageQueues: %p %s", source, qPrintable(type));
+	qDebug("MessagePipesLegacy::getMessageQueues: %p %s", source, qPrintable(type));
 	return m_registrations.getElements(source, type);
 }
 
-void MessagePipes::startGC()
+void MessagePipesLegacy::startGC()
 {
-	qDebug("MessagePipes::startGC");
+	qDebug("MessagePipesLegacy::startGC");
     m_gcWorker->startWork();
     m_gcThread.start();
 }
 
-void MessagePipes::stopGC()
+void MessagePipesLegacy::stopGC()
 {
-    qDebug("MessagePipes::stopGC");
+    qDebug("MessagePipesLegacy::stopGC");
 	m_gcWorker->stopWork();
 	m_gcThread.quit();
 	m_gcThread.wait();

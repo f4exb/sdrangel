@@ -272,7 +272,7 @@ void DemodAnalyzer::applySettings(const DemodAnalyzerSettings& settings, bool fo
 void DemodAnalyzer::updateChannels()
 {
     MainCore *mainCore = MainCore::instance();
-    // MessagePipes& messagePipes = mainCore->getMessagePipes();
+    // MessagePipesLegacy& messagePipes = mainCore->getMessagePipes();
     std::vector<DeviceSet*>& deviceSets = mainCore->getDeviceSets();
     std::vector<DeviceSet*>::const_iterator it = deviceSets.begin();
     m_availableChannels.clear();

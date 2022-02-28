@@ -19,50 +19,50 @@
 #include "feature/feature.h"
 #include "util/messagequeue.h"
 #include "maincore.h"
-#include "messagepipescommon.h"
-#include "messagepipesgcworker.h"
+#include "messagepipeslegacycommon.h"
+#include "messagepipeslegacygcworker.h"
 
-bool MessagePipesGCWorker::MessagePipesGC::existsProducer(const PipeEndPoint *pipeEndPoint)
+bool MessagePipesLegacyGCWorker::MessagePipesGC::existsProducer(const PipeEndPoint *pipeEndPoint)
 {
     return MainCore::instance()->existsChannel((const ChannelAPI *)pipeEndPoint)
         || MainCore::instance()->existsFeature((const Feature *)pipeEndPoint);
 }
 
-bool MessagePipesGCWorker::MessagePipesGC::existsConsumer(const PipeEndPoint *pipeEndPoint)
+bool MessagePipesLegacyGCWorker::MessagePipesGC::existsConsumer(const PipeEndPoint *pipeEndPoint)
 {
     return MainCore::instance()->existsChannel((const ChannelAPI *)pipeEndPoint)
         || MainCore::instance()->existsFeature((const Feature *)pipeEndPoint);
 }
 
-void MessagePipesGCWorker::MessagePipesGC::sendMessageToConsumer(
+void MessagePipesLegacyGCWorker::MessagePipesGC::sendMessageToConsumer(
     const MessageQueue *,
-    MessagePipesCommon::ChannelRegistrationKey,
+    MessagePipesLegacyCommon::ChannelRegistrationKey,
     PipeEndPoint *)
 {
 }
 
-MessagePipesGCWorker::MessagePipesGCWorker() :
+MessagePipesLegacyGCWorker::MessagePipesLegacyGCWorker() :
     m_running(false)
 {}
 
-MessagePipesGCWorker::~MessagePipesGCWorker()
+MessagePipesLegacyGCWorker::~MessagePipesLegacyGCWorker()
 {}
 
-void MessagePipesGCWorker::startWork()
+void MessagePipesLegacyGCWorker::startWork()
 {
     connect(&m_gcTimer, SIGNAL(timeout()), this, SLOT(processGC()));
     m_gcTimer.start(10000); // collect garbage every 10s
     m_running = true;
 }
 
-void MessagePipesGCWorker::stopWork()
+void MessagePipesLegacyGCWorker::stopWork()
 {
     m_running = false;
     m_gcTimer.stop();
     disconnect(&m_gcTimer, SIGNAL(timeout()), this, SLOT(processGC()));
 }
 
-void MessagePipesGCWorker::addMessageQueueToDelete(MessageQueue *messageQueue)
+void MessagePipesLegacyGCWorker::addMessageQueueToDelete(MessageQueue *messageQueue)
 {
     if (messageQueue)
     {
@@ -71,8 +71,8 @@ void MessagePipesGCWorker::addMessageQueueToDelete(MessageQueue *messageQueue)
     }
 }
 
-void MessagePipesGCWorker::processGC()
+void MessagePipesLegacyGCWorker::processGC()
 {
-    // qDebug("MessagePipesGCWorker::processGC");
+    // qDebug("MessagePipesLegacyGCWorker::processGC");
     m_messagePipesGC.processGC();
 }

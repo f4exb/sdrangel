@@ -220,7 +220,7 @@ bool ChirpChatDemod::handleMessage(const Message& cmd)
                 }
 
                 // Forward to APRS and other packet features
-                MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
+                MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipes();
                 QList<MessageQueue*> *packetMessageQueues = messagePipes.getMessageQueues(this, "packets");
                 if (packetMessageQueues)
                 {

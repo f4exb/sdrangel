@@ -203,7 +203,7 @@ void JogdialController::applySettings(const JogdialControllerSettings& settings,
 void JogdialController::updateChannels()
 {
     MainCore *mainCore = MainCore::instance();
-    // MessagePipes& messagePipes = mainCore->getMessagePipes();
+    // MessagePipesLegacy& messagePipes = mainCore->getMessagePipes();
     std::vector<DeviceSet*>& deviceSets = mainCore->getDeviceSets();
     std::vector<DeviceSet*>::const_iterator it = deviceSets.begin();
     m_availableChannels.clear();
