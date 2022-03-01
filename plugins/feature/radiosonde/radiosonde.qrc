@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="/radiosonde/">
+    <file>map/ballon.png</file>
+    <file>map/parachute.png</file>
+  </qresource>
+</RCC>

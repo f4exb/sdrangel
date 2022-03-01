@@ -191,6 +191,7 @@ set(sdrbase_SOURCES
     util/aprs.cpp
     util/astronomy.cpp
     util/azel.cpp
+    util/coordinates.cpp
     util/crc.cpp
     util/CRC64.cpp
     util/csv.cpp
@@ -210,6 +211,7 @@ set(sdrbase_SOURCES
     util/planespotters.cpp
     util/png.cpp
     util/prettyprint.cpp
+    util/radiosonde.cpp
     util/rtpsink.cpp
     util/syncmessenger.cpp
     util/samplesourceserializer.cpp
@@ -406,6 +408,7 @@ set(sdrbase_HEADERS
     util/aprs.h
     util/astronomy.h
     util/azel.h
+    util/coordinates.h
     util/CRC64.h
     util/csv.h
     util/db.h
@@ -430,6 +433,7 @@ set(sdrbase_HEADERS
     util/planespotters.h
     util/png.h
     util/prettyprint.h
+    util/radiosonde.h
     util/rtpsink.h
     util/syncmessenger.h
     util/samplesourceserializer.h

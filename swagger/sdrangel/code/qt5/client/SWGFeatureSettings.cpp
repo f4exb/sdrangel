@@ -52,6 +52,8 @@ SWGFeatureSettings::SWGFeatureSettings() {
     m_map_settings_isSet = false;
     per_tester_settings = nullptr;
     m_per_tester_settings_isSet = false;
+    radiosonde_settings = nullptr;
+    m_radiosonde_settings_isSet = false;
     rig_ctl_server_settings = nullptr;
     m_rig_ctl_server_settings_isSet = false;
     satellite_tracker_settings = nullptr;
@@ -94,6 +96,8 @@ SWGFeatureSettings::init() {
     m_map_settings_isSet = false;
     per_tester_settings = new SWGPERTesterSettings();
     m_per_tester_settings_isSet = false;
+    radiosonde_settings = new SWGRadiosondeSettings();
+    m_radiosonde_settings_isSet = false;
     rig_ctl_server_settings = new SWGRigCtlServerSettings();
     m_rig_ctl_server_settings_isSet = false;
     satellite_tracker_settings = new SWGSatelliteTrackerSettings();
@@ -139,6 +143,9 @@ SWGFeatureSettings::cleanup() {
     }
     if(per_tester_settings != nullptr) { 
         delete per_tester_settings;
+    }
+    if(radiosonde_settings != nullptr) { 
+        delete radiosonde_settings;
     }
     if(rig_ctl_server_settings != nullptr) { 
         delete rig_ctl_server_settings;
@@ -191,6 +198,8 @@ SWGFeatureSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&map_settings, pJson["MapSettings"], "SWGMapSettings", "SWGMapSettings");
     
     ::SWGSDRangel::setValue(&per_tester_settings, pJson["PERTesterSettings"], "SWGPERTesterSettings", "SWGPERTesterSettings");
+    
+    ::SWGSDRangel::setValue(&radiosonde_settings, pJson["RadiosondeSettings"], "SWGRadiosondeSettings", "SWGRadiosondeSettings");
     
     ::SWGSDRangel::setValue(&rig_ctl_server_settings, pJson["RigCtlServerSettings"], "SWGRigCtlServerSettings", "SWGRigCtlServerSettings");
     
@@ -253,6 +262,9 @@ SWGFeatureSettings::asJsonObject() {
     }
     if((per_tester_settings != nullptr) && (per_tester_settings->isSet())){
         toJsonValue(QString("PERTesterSettings"), per_tester_settings, obj, QString("SWGPERTesterSettings"));
+    }
+    if((radiosonde_settings != nullptr) && (radiosonde_settings->isSet())){
+        toJsonValue(QString("RadiosondeSettings"), radiosonde_settings, obj, QString("SWGRadiosondeSettings"));
     }
     if((rig_ctl_server_settings != nullptr) && (rig_ctl_server_settings->isSet())){
         toJsonValue(QString("RigCtlServerSettings"), rig_ctl_server_settings, obj, QString("SWGRigCtlServerSettings"));
@@ -393,6 +405,16 @@ SWGFeatureSettings::setPerTesterSettings(SWGPERTesterSettings* per_tester_settin
     this->m_per_tester_settings_isSet = true;
 }
 
+SWGRadiosondeSettings*
+SWGFeatureSettings::getRadiosondeSettings() {
+    return radiosonde_settings;
+}
+void
+SWGFeatureSettings::setRadiosondeSettings(SWGRadiosondeSettings* radiosonde_settings) {
+    this->radiosonde_settings = radiosonde_settings;
+    this->m_radiosonde_settings_isSet = true;
+}
+
 SWGRigCtlServerSettings*
 SWGFeatureSettings::getRigCtlServerSettings() {
     return rig_ctl_server_settings;
@@ -482,6 +504,9 @@ SWGFeatureSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(per_tester_settings && per_tester_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(radiosonde_settings && radiosonde_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(rig_ctl_server_settings && rig_ctl_server_settings->isSet()){

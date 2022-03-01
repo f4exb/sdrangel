@@ -1,0 +1,444 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>RadiosondeGUI</class>
+ <widget class="RollupWidget" name="RadiosondeGUI">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>484</width>
+    <height>732</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>320</width>
+    <height>100</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>16777215</width>
+    <height>16777215</height>
+   </size>
+  </property>
+  <property name="font">
+   <font>
+    <pointsize>9</pointsize>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>Radiosonde</string>
+  </property>
+  <property name="layoutDirection">
+   <enum>Qt::LeftToRight</enum>
+  </property>
+  <widget class="QWidget" name="tableContainer" native="true">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>336</width>
+     <height>508</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="windowTitle">
+    <string>Radiosondes</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>3</number>
+    </property>
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
+     <number>2</number>
+    </property>
+    <item>
+     <widget class="QSplitter" name="splitter">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <widget class="QTableWidget" name="radiosondes">
+       <property name="toolTip">
+        <string>Radiosondes</string>
+       </property>
+       <property name="editTriggers">
+        <set>QAbstractItemView::NoEditTriggers</set>
+       </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::SingleSelection</enum>
+       </property>
+       <property name="selectionBehavior">
+        <enum>QAbstractItemView::SelectRows</enum>
+       </property>
+       <column>
+        <property name="text">
+         <string>Serial</string>
+        </property>
+        <property name="toolTip">
+         <string>Serial number of the Radiosonde</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Type</string>
+        </property>
+        <property name="toolTip">
+         <string>Type of Radiosonde</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Lat (°)</string>
+        </property>
+        <property name="toolTip">
+         <string>Latitude in degrees. East positive</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Lon (°)</string>
+        </property>
+        <property name="toolTip">
+         <string>Longitude in degrees. North positive.</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Alt (m)</string>
+        </property>
+        <property name="toolTip">
+         <string>Altitude in metres</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Spd (km/h)</string>
+        </property>
+        <property name="toolTip">
+         <string>Speed in kilometers per second</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>VR (m/s)</string>
+        </property>
+        <property name="toolTip">
+         <string>Vertical climb rate in metres per second</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Hd (°)</string>
+        </property>
+        <property name="toolTip">
+         <string>Heading in degrees.</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Status</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>P (hPa)</string>
+        </property>
+        <property name="toolTip">
+         <string>Pressure in hectpascals</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>T (C)</string>
+        </property>
+        <property name="toolTip">
+         <string>Temperature in degrees Celsius</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>U (%)</string>
+        </property>
+        <property name="toolTip">
+         <string>Relative humidity in percent</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Alt Max (m)</string>
+        </property>
+        <property name="toolTip">
+         <string>Maximum altitude seen in metres</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Freq (MHz)</string>
+        </property>
+        <property name="toolTip">
+         <string>Transmission frequency in MHz</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>BurstKill Status</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>BurstKill Timer</string>
+        </property>
+        <property name="toolTip">
+         <string>Time last position was received</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Updated</string>
+        </property>
+        <property name="toolTip">
+         <string>Time last message was received</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Messages</string>
+        </property>
+        <property name="toolTip">
+         <string>Number of messages received</string>
+        </property>
+       </column>
+      </widget>
+      <widget class="QWidget" name="chartContainer" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <layout class="QHBoxLayout" name="chartButtonsLayout">
+          <item>
+           <widget class="QLabel" name="y1Label">
+            <property name="text">
+             <string>Y1</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="y1">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>Select data to plot on left Y axis</string>
+            </property>
+            <property name="currentIndex">
+             <number>0</number>
+            </property>
+            <item>
+             <property name="text">
+              <string>None</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Altitude</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Temperature</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Humidity</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Pressure</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Speed</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Vertical rate</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Heading</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Battery Voltage</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="y2Label">
+            <property name="text">
+             <string>Y2</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="y2">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>Select data to plot on right Y axis</string>
+            </property>
+            <item>
+             <property name="text">
+              <string>None</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Altitude</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Temperature</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Humidity</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Pressure</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Speed</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Vertical rate</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Heading</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Battery Voltage</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="deleteAll">
+            <property name="toolTip">
+             <string>Delete all data</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../../../sdrgui/resources/res.qrc">
+              <normaloff>:/bin.png</normaloff>:/bin.png</iconset>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QChartView" name="chart">
+          <property name="minimumSize">
+           <size>
+            <width>300</width>
+            <height>100</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>RollupWidget</class>
+   <extends>QWidget</extends>
+   <header>gui/rollupwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QChartView</class>
+   <extends>QGraphicsView</extends>
+   <header>QtCharts</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+ </resources>
+ <connections/>
+</ui>

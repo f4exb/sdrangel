@@ -104,6 +104,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_radio_astronomy_settings_isSet = false;
     radio_clock_settings = nullptr;
     m_radio_clock_settings_isSet = false;
+    radiosonde_demod_settings = nullptr;
+    m_radiosonde_demod_settings_isSet = false;
     remote_sink_settings = nullptr;
     m_remote_sink_settings_isSet = false;
     remote_source_settings = nullptr;
@@ -210,6 +212,8 @@ SWGChannelSettings::init() {
     m_radio_astronomy_settings_isSet = false;
     radio_clock_settings = new SWGRadioClockSettings();
     m_radio_clock_settings_isSet = false;
+    radiosonde_demod_settings = new SWGRadiosondeDemodSettings();
+    m_radiosonde_demod_settings_isSet = false;
     remote_sink_settings = new SWGRemoteSinkSettings();
     m_remote_sink_settings_isSet = false;
     remote_source_settings = new SWGRemoteSourceSettings();
@@ -344,6 +348,9 @@ SWGChannelSettings::cleanup() {
     if(radio_clock_settings != nullptr) { 
         delete radio_clock_settings;
     }
+    if(radiosonde_demod_settings != nullptr) { 
+        delete radiosonde_demod_settings;
+    }
     if(remote_sink_settings != nullptr) { 
         delete remote_sink_settings;
     }
@@ -465,6 +472,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&radio_astronomy_settings, pJson["RadioAstronomySettings"], "SWGRadioAstronomySettings", "SWGRadioAstronomySettings");
     
     ::SWGSDRangel::setValue(&radio_clock_settings, pJson["RadioClockSettings"], "SWGRadioClockSettings", "SWGRadioClockSettings");
+    
+    ::SWGSDRangel::setValue(&radiosonde_demod_settings, pJson["RadiosondeDemodSettings"], "SWGRadiosondeDemodSettings", "SWGRadiosondeDemodSettings");
     
     ::SWGSDRangel::setValue(&remote_sink_settings, pJson["RemoteSinkSettings"], "SWGRemoteSinkSettings", "SWGRemoteSinkSettings");
     
@@ -617,6 +626,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((radio_clock_settings != nullptr) && (radio_clock_settings->isSet())){
         toJsonValue(QString("RadioClockSettings"), radio_clock_settings, obj, QString("SWGRadioClockSettings"));
+    }
+    if((radiosonde_demod_settings != nullptr) && (radiosonde_demod_settings->isSet())){
+        toJsonValue(QString("RadiosondeDemodSettings"), radiosonde_demod_settings, obj, QString("SWGRadiosondeDemodSettings"));
     }
     if((remote_sink_settings != nullptr) && (remote_sink_settings->isSet())){
         toJsonValue(QString("RemoteSinkSettings"), remote_sink_settings, obj, QString("SWGRemoteSinkSettings"));
@@ -1035,6 +1047,16 @@ SWGChannelSettings::setRadioClockSettings(SWGRadioClockSettings* radio_clock_set
     this->m_radio_clock_settings_isSet = true;
 }
 
+SWGRadiosondeDemodSettings*
+SWGChannelSettings::getRadiosondeDemodSettings() {
+    return radiosonde_demod_settings;
+}
+void
+SWGChannelSettings::setRadiosondeDemodSettings(SWGRadiosondeDemodSettings* radiosonde_demod_settings) {
+    this->radiosonde_demod_settings = radiosonde_demod_settings;
+    this->m_radiosonde_demod_settings_isSet = true;
+}
+
 SWGRemoteSinkSettings*
 SWGChannelSettings::getRemoteSinkSettings() {
     return remote_sink_settings;
@@ -1262,6 +1284,9 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(radio_clock_settings && radio_clock_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(radiosonde_demod_settings && radiosonde_demod_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(remote_sink_settings && remote_sink_settings->isSet()){

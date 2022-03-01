@@ -85,6 +85,8 @@ ChannelSettings:
       $ref: "http://swgserver:8081/api/swagger/include/RadioAstronomy.yaml#/RadioAstronomySettings"
     RadioClockSettings:
       $ref: "http://swgserver:8081/api/swagger/include/RadioClock.yaml#/RadioClockSettings"
+    RadiosondeDemodSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/RadiosondeDemod.yaml#/RadiosondeDemodSettings"
     RemoteSinkSettings:
       $ref: "http://swgserver:8081/api/swagger/include/RemoteSink.yaml#/RemoteSinkSettings"
     RemoteSourceSettings:

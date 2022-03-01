@@ -31,6 +31,7 @@
 #include "SWGJogdialControllerSettings.h"
 #include "SWGMapSettings.h"
 #include "SWGPERTesterSettings.h"
+#include "SWGRadiosondeSettings.h"
 #include "SWGRigCtlServerSettings.h"
 #include "SWGSatelliteTrackerSettings.h"
 #include "SWGSimplePTTSettings.h"
@@ -92,6 +93,9 @@ public:
     SWGPERTesterSettings* getPerTesterSettings();
     void setPerTesterSettings(SWGPERTesterSettings* per_tester_settings);
 
+    SWGRadiosondeSettings* getRadiosondeSettings();
+    void setRadiosondeSettings(SWGRadiosondeSettings* radiosonde_settings);
+
     SWGRigCtlServerSettings* getRigCtlServerSettings();
     void setRigCtlServerSettings(SWGRigCtlServerSettings* rig_ctl_server_settings);
 
@@ -146,6 +150,9 @@ private:
 
     SWGPERTesterSettings* per_tester_settings;
     bool m_per_tester_settings_isSet;
+
+    SWGRadiosondeSettings* radiosonde_settings;
+    bool m_radiosonde_settings_isSet;
 
     SWGRigCtlServerSettings* rig_ctl_server_settings;
     bool m_rig_ctl_server_settings_isSet;
