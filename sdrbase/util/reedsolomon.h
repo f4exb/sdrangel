@@ -274,10 +274,6 @@ public:
             parity = data + len;
         }
 
-        std::array<uint8_t, SIZE> tmp;
-        uint8_t msk = static_cast<uint8_t>(~0UL << SYMBOL);
-
-
         int corrects;
         if (!erasure.size() && !position) {
             // No erasures, and error position info not wanted.
@@ -340,8 +336,8 @@ public:
         const
     {
         // Check length parameter for validity
-        int pad = NN - NROOTS - len;
-        for (int i = 0; i < NROOTS; i++) parity[i] = 0;
+        for (int i = 0; i < NROOTS; i++)
+            parity[i] = 0;
         for (int i = 0; i < len; i++) {
             uint8_t feedback = index_of[data[i] ^ parity[0]];
             if (feedback != A0) {
