@@ -511,7 +511,7 @@ QVariant MapModel::data(const QModelIndex &index, int role) const
         if (row == m_target)
         {
             AzEl *azEl = m_gui->getAzEl();
-            QString text = QString("%1\nAz: %2%5 El: %3%5 Dist: %4 km")
+            QString text = QString("%1<br>Az: %2%5 El: %3%5 Dist: %4 km")
                                 .arg(m_selected[row] ? m_items[row]->m_text : m_items[row]->m_name)
                                 .arg(std::round(azEl->getAzimuth()))
                                 .arg(std::round(azEl->getElevation()))
