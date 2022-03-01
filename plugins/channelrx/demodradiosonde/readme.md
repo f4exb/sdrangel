@@ -2,7 +2,7 @@
 
 <h2>Introduction</h2>
 
-This plugin can be used to demodulate RS41 radiosonde weather ballon signals. Radiosondes typically transmit on 400-406MHz and are in the sky around the world for around 1 hour around 00:00 UTC.
+This plugin can be used to demodulate RS41 radiosonde weather balloon signals. Radiosondes typically transmit on 400-406MHz and are in the sky around the world for around 1 hour around 00:00 UTC.
 
 RS41 radiosondes transmit data frames every second, containing position, velocity and PTU (Pressure, Temperature and Humidity) readings. The radios use GFSK modulation, with ±2.4kHz deviation at 4,800 baud. Reed Solomon encoding is used for ECC (Error Checking and Correction).
 
