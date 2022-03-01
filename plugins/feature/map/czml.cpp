@@ -21,7 +21,7 @@
 #include "mapsettings.h"
 #include "mapmodel.h"
 
-#include "util/units.h"
+#include "util/coordinates.h"
 
 CZML::CZML(const MapSettings *settings) :
     m_settings(settings)
@@ -48,149 +48,6 @@ QJsonObject CZML::init()
     return doc;
 }
 
-// Convert a position specified in longitude, latitude in degrees and height in metres above WGS84 ellipsoid in to
-// Earth Centered Earth Fixed frame cartesian coordinates
-// See Cesium.Cartesian3.fromDegrees
-QVector3D CZML::cartesian3FromDegrees(double longitude, double latitude, double height) const
-{
-    return cartesianFromRadians(Units::degreesToRadians(longitude), Units::degreesToRadians(latitude), height);
-}
-
-// FIXME: QVector3D is only float!
-// See Cesium.Cartesian3.fromRadians
-QVector3D CZML::cartesianFromRadians(double longitude, double latitude, double height) const
-{
-    QVector3D wgs84RadiiSquared(6378137.0 * 6378137.0, 6378137.0 * 6378137.0, 6356752.3142451793 * 6356752.3142451793);
-
-    double cosLatitude = cos(latitude);
-    QVector3D n;
-    n.setX(cosLatitude * cos(longitude));
-    n.setY(cosLatitude * sin(longitude));
-    n.setZ(sin(latitude));
-    n.normalize();
-    QVector3D k;
-    k = wgs84RadiiSquared * n;
-    double gamma = sqrt(QVector3D::dotProduct(n, k));
-    k = k / gamma;
-    n = n * height;
-    return k + n;
-}
-
-// Convert heading, pitch and roll in degrees to a quaternoin
-// See: Cesium.Quaternion.fromHeadingPitchRoll
-QQuaternion CZML::fromHeadingPitchRoll(double heading, double pitch, double roll) const
-{
-    QVector3D xAxis(1, 0, 0);
-    QVector3D yAxis(0, 1, 0);
-    QVector3D zAxis(0, 0, 1);
-
-    QQuaternion rollQ = QQuaternion::fromAxisAndAngle(xAxis, roll);
-
-    QQuaternion pitchQ = QQuaternion::fromAxisAndAngle(yAxis, -pitch);
-
-    QQuaternion headingQ = QQuaternion::fromAxisAndAngle(zAxis, -heading);
-
-    QQuaternion temp = rollQ * pitchQ;
-
-    return headingQ * temp;
-}
-
-// Calculate a transformation matrix from a East, North, Up frame at the given position to Earth Centered Earth Fixed frame
-// See: Cesium.Transforms.eastNorthUpToFixedFrame
-QMatrix4x4 CZML::eastNorthUpToFixedFrame(QVector3D origin) const
-{
-    // TODO: Handle special case at centre of earth and poles
-    QVector3D up = origin.normalized();
-    QVector3D east(-origin.y(), origin.x(), 0.0);
-    east.normalize();
-    QVector3D north = QVector3D::crossProduct(up, east);
-    QMatrix4x4 result(
-        east.x(), north.x(), up.x(), origin.x(),
-        east.y(), north.y(), up.y(), origin.y(),
-        east.z(), north.z(), up.z(), origin.z(),
-        0.0, 0.0, 0.0, 1.0
-    );
-    return result;
-}
-
-// Convert 3x3 rotation matrix to a quaternoin
-// Although there is a method for this in Qt: QQuaternion::fromRotationMatrix, it seems to
-// result in different signs, so the following is based on Cesium code
-QQuaternion CZML::fromRotation(QMatrix3x3 mat) const
-{
-    QQuaternion q;
-
-    double trace = mat(0, 0) + mat(1, 1) + mat(2, 2);
-
-    if (trace > 0.0)
-    {
-        double root = sqrt(trace + 1.0);
-        q.setScalar(0.5 * root);
-        root = 0.5 / root;
-
-        q.setX((mat(2,1) - mat(1,2)) * root);
-        q.setY((mat(0,2) - mat(2,0)) * root);
-        q.setZ((mat(1,0) - mat(0,1)) * root);
-    }
-    else
-    {
-        double next[] = {1, 2, 0};
-        int i = 0;
-        if (mat(1,1) > mat(0,0)) {
-            i = 1;
-        }
-        if (mat(2,2) > mat(0,0) && mat(2,2) > mat(1,1)) {
-            i = 2;
-        }
-        int j = next[i];
-        int k = next[j];
-
-        double root = sqrt(mat(i,i) - mat(j,j) - mat(k,k) + 1);
-        double quat[] = {0.0, 0.0, 0.0};
-        quat[i] = 0.5 * root;
-        root = 0.5 / root;
-
-        q.setScalar((mat(j,k) - mat(k,j)) * root);
-        quat[j] = (mat(i,j) + mat(j,i)) * root;
-        quat[k] = (mat(i,k) + mat(k,i)) * root;
-        q.setX(-quat[0]);
-        q.setY(-quat[1]);
-        q.setZ(-quat[2]);
-    }
-    return q;
-}
-
-// Calculate orientation quaternion for a model (such as an aircraft) based on position and (HPR) heading, pitch and roll (in degrees)
-// While Cesium supports specifying orientation as HPR, CZML doesn't currently. See https://github.com/CesiumGS/cesium/issues/5184
-// CZML requires the orientation to be in the Earth Centered Earth Fixed (geocentric) reference frame (https://en.wikipedia.org/wiki/Local_tangent_plane_coordinates)
-// The orientation therefore depends not only on HPR but also on position
-//
-// glTF uses a right-handed axis convention; that is, the cross product of right and forward yields up. glTF defines +Y as up, +Z as forward, and -X as right.
-// Cesium.Quaternion.fromHeadingPitchRoll  Heading is the rotation about the negative z axis. Pitch is the rotation about the negative y axis. Roll is the rotation about the positive x axis.
-QQuaternion CZML::orientation(double longitude, double latitude, double altitude, double heading, double pitch, double roll) const
-{
-    // Forward direction for gltf models in Cesium seems to be Eastward, rather than Northward, so we adjust heading by -90 degrees
-    heading = -90 + heading;
-
-    // Convert position to Earth Centered Earth Fixed (ECEF) frame
-    QVector3D positionECEF = cartesian3FromDegrees(longitude, latitude, altitude);
-
-    // Calculate matrix to transform from East, North, Up (ENU) frame to ECEF frame
-    QMatrix4x4 enuToECEFTransform = eastNorthUpToFixedFrame(positionECEF);
-
-    // Calculate rotation based on HPR in ENU frame
-    QQuaternion hprENU = fromHeadingPitchRoll(heading, pitch, roll);
-
-    // Transform rotation from ENU to ECEF
-    QMatrix3x3 hprENU3 = hprENU.toRotationMatrix();
-    QMatrix4x4 hprENU4(hprENU3);
-    QMatrix4x4 transform = enuToECEFTransform * hprENU4;
-
-    // Convert from 4x4 matrix to 3x3 matrix then to a quaternion
-    QQuaternion oq = fromRotation(transform.toGenericMatrix<3,3>());
-
-    return oq;
-}
 
 QJsonObject CZML::update(MapItem *mapItem, bool isTarget, bool isSelected)
 {
@@ -316,8 +173,8 @@ QJsonObject CZML::update(MapItem *mapItem, bool isTarget, bool isSelected)
         }
     }
 
-    QQuaternion q = orientation(mapItem->m_longitude, mapItem->m_latitude, mapItem->m_altitude,
-                                mapItem->m_heading, mapItem->m_pitch, mapItem->m_roll);
+    QQuaternion q = Coordinates::orientation(mapItem->m_longitude, mapItem->m_latitude, mapItem->m_altitude,
+                                             mapItem->m_heading, mapItem->m_pitch, mapItem->m_roll);
     QJsonArray quaternion;
     if (!fixedPosition && mapItem->m_orientationDateTime.isValid()) {
         quaternion.push_back(mapItem->m_orientationDateTime.toString(Qt::ISODateWithMs));

@@ -25,6 +25,8 @@ set(sdrgui_SOURCES
     gui/crightclickenabler.cpp
     gui/customtextedit.cpp
     gui/cwkeyergui.cpp
+    gui/datetimedelegate.cpp
+    gui/decimaldelegate.cpp
     gui/devicestreamselectiondialog.cpp
     gui/deviceuserargsdialog.cpp
     gui/dmsspinbox.cpp
@@ -62,6 +64,7 @@ set(sdrgui_SOURCES
     gui/spectrumcalibrationpointsdialog.cpp
     gui/spectrummarkersdialog.cpp
     gui/tickedslider.cpp
+    gui/timedelegate.cpp
     gui/transverterbutton.cpp
     gui/transverterdialog.cpp
     gui/tvscreen.cpp
@@ -113,6 +116,8 @@ set(sdrgui_HEADERS
     gui/crightclickenabler.h
     gui/customtextedit.h
     gui/cwkeyergui.h
+    gui/datetimedelegate.h
+    gui/decimaldelegate.h
     gui/devicestreamselectiondialog.h
     gui/deviceuserargsdialog.h
     gui/dmsspinbox.h
@@ -152,6 +157,7 @@ set(sdrgui_HEADERS
     gui/spectrumcalibrationpointsdialog.h
     gui/spectrummarkersdialog.h
     gui/tickedslider.h
+    gui/timedelegate.h
     gui/transverterbutton.h
     gui/transverterdialog.h
     gui/tvscreen.h

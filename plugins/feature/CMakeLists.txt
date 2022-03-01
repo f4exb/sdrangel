@@ -31,4 +31,7 @@ else()
     endif()
 endif()
 
-add_subdirectory(startracker)
+if (Qt5Charts_FOUND)
+    add_subdirectory(radiosonde)
+    add_subdirectory(startracker)
+endif()

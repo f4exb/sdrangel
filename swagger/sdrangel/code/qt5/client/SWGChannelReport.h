@@ -48,6 +48,7 @@
 #include "SWGPagerDemodReport.h"
 #include "SWGRadioAstronomyReport.h"
 #include "SWGRadioClockReport.h"
+#include "SWGRadiosondeDemodReport.h"
 #include "SWGRemoteSourceReport.h"
 #include "SWGSSBDemodReport.h"
 #include "SWGSSBModReport.h"
@@ -155,6 +156,9 @@ public:
 
     SWGRadioClockReport* getRadioClockReport();
     void setRadioClockReport(SWGRadioClockReport* radio_clock_report);
+
+    SWGRadiosondeDemodReport* getRadiosondeDemodReport();
+    void setRadiosondeDemodReport(SWGRadiosondeDemodReport* radiosonde_demod_report);
 
     SWGRemoteSourceReport* getRemoteSourceReport();
     void setRemoteSourceReport(SWGRemoteSourceReport* remote_source_report);
@@ -273,6 +277,9 @@ private:
 
     SWGRadioClockReport* radio_clock_report;
     bool m_radio_clock_report_isSet;
+
+    SWGRadiosondeDemodReport* radiosonde_demod_report;
+    bool m_radiosonde_demod_report_isSet;
 
     SWGRemoteSourceReport* remote_source_report;
     bool m_remote_source_report_isSet;

@@ -221,6 +221,9 @@
 #include "SWGRadioAstronomySettings.h"
 #include "SWGRadioClockReport.h"
 #include "SWGRadioClockSettings.h"
+#include "SWGRadiosondeDemodReport.h"
+#include "SWGRadiosondeDemodSettings.h"
+#include "SWGRadiosondeSettings.h"
 #include "SWGRange.h"
 #include "SWGRangeFloat.h"
 #include "SWGRemoteInputReport.h"
@@ -1352,6 +1355,21 @@ namespace SWGSDRangel {
     }
     if(QString("SWGRadioClockSettings").compare(type) == 0) {
       SWGRadioClockSettings *obj = new SWGRadioClockSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGRadiosondeDemodReport").compare(type) == 0) {
+      SWGRadiosondeDemodReport *obj = new SWGRadiosondeDemodReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGRadiosondeDemodSettings").compare(type) == 0) {
+      SWGRadiosondeDemodSettings *obj = new SWGRadiosondeDemodSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGRadiosondeSettings").compare(type) == 0) {
+      SWGRadiosondeSettings *obj = new SWGRadiosondeSettings();
       obj->init();
       return obj;
     }

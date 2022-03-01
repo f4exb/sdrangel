@@ -56,6 +56,7 @@
 #include "SWGPagerDemodSettings.h"
 #include "SWGRadioAstronomySettings.h"
 #include "SWGRadioClockSettings.h"
+#include "SWGRadiosondeDemodSettings.h"
 #include "SWGRemoteSinkSettings.h"
 #include "SWGRemoteSourceSettings.h"
 #include "SWGSSBDemodSettings.h"
@@ -200,6 +201,9 @@ public:
 
     SWGRadioClockSettings* getRadioClockSettings();
     void setRadioClockSettings(SWGRadioClockSettings* radio_clock_settings);
+
+    SWGRadiosondeDemodSettings* getRadiosondeDemodSettings();
+    void setRadiosondeDemodSettings(SWGRadiosondeDemodSettings* radiosonde_demod_settings);
 
     SWGRemoteSinkSettings* getRemoteSinkSettings();
     void setRemoteSinkSettings(SWGRemoteSinkSettings* remote_sink_settings);
@@ -351,6 +355,9 @@ private:
 
     SWGRadioClockSettings* radio_clock_settings;
     bool m_radio_clock_settings_isSet;
+
+    SWGRadiosondeDemodSettings* radiosonde_demod_settings;
+    bool m_radiosonde_demod_settings_isSet;
 
     SWGRemoteSinkSettings* remote_sink_settings;
     bool m_remote_sink_settings_isSet;

@@ -4317,6 +4317,11 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->setRadioClockSettings(new SWGSDRangel::SWGRadioClockSettings());
             channelSettings->getRadioClockSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "RadiosondeDemodSettings")
+        {
+            channelSettings->setRadiosondeDemodSettings(new SWGSDRangel::SWGRadiosondeDemodSettings());
+            channelSettings->getRadiosondeDemodSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "RemoteSinkSettings")
         {
             channelSettings->setRemoteSinkSettings(new SWGSDRangel::SWGRemoteSinkSettings());
@@ -4840,6 +4845,11 @@ bool WebAPIRequestMapper::getFeatureSettings(
             featureSettings->setStarTrackerSettings(new SWGSDRangel::SWGStarTrackerSettings());
             featureSettings->getStarTrackerSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (featureSettingsKey == "RadiosondeSettings")
+        {
+            featureSettings->setRadiosondeSettings(new SWGSDRangel::SWGRadiosondeSettings());
+            featureSettings->getRadiosondeSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (featureSettingsKey == "RigCtlServerSettings")
         {
             featureSettings->setRigCtlServerSettings(new SWGSDRangel::SWGRigCtlServerSettings());
@@ -5060,6 +5070,7 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setPagerDemodSettings(nullptr);
     channelSettings.setRadioAstronomySettings(nullptr);
     channelSettings.setRadioClockSettings(nullptr);
+    channelSettings.setRadiosondeDemodSettings(nullptr);
     channelSettings.setRemoteSinkSettings(nullptr);
     channelSettings.setRemoteSourceSettings(nullptr);
     channelSettings.setSsbDemodSettings(nullptr);
@@ -5091,6 +5102,7 @@ void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& chan
     channelReport.setPacketModReport(nullptr);
     channelReport.setRadioAstronomyReport(nullptr);
     channelReport.setRadioClockReport(nullptr);
+    channelReport.setRadiosondeDemodReport(nullptr);
     channelReport.setRemoteSourceReport(nullptr);
     channelReport.setSsbDemodReport(nullptr);
     channelReport.setSsbModReport(nullptr);
@@ -5130,6 +5142,7 @@ void WebAPIRequestMapper::resetFeatureSettings(SWGSDRangel::SWGFeatureSettings& 
 {
     featureSettings.cleanup();
     featureSettings.setFeatureType(nullptr);
+    featureSettings.setAisSettings(nullptr);
     featureSettings.setAntennaToolsSettings(nullptr);
     featureSettings.setAprsSettings(nullptr);
     featureSettings.setGs232ControllerSettings(nullptr);
@@ -5138,6 +5151,7 @@ void WebAPIRequestMapper::resetFeatureSettings(SWGSDRangel::SWGFeatureSettings& 
     featureSettings.setSatelliteTrackerSettings(nullptr);
     featureSettings.setSimplePttSettings(nullptr);
     featureSettings.setStarTrackerSettings(nullptr);
+    featureSettings.setRadiosondeSettings(nullptr);
     featureSettings.setRigCtlServerSettings(nullptr);
 }
 
