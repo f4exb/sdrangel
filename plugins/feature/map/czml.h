@@ -20,10 +20,6 @@
 
 #include <QHash>
 #include <QJsonArray>
-#include <QMatrix3x3>
-#include <QMatrix4x4>
-#include <QQuaternion>
-#include <QVector3D>
 #include <QJsonObject>
 
 struct MapSettings;
@@ -41,14 +37,6 @@ public:
     CZML(const MapSettings *settings);
     QJsonObject init();
     QJsonObject update(MapItem *mapItem, bool isTarget, bool isSelected);
-
-protected:
-    QVector3D cartesian3FromDegrees(double longitude, double latitude, double height=0.0) const;
-    QVector3D cartesianFromRadians(double longitude, double latitude, double height=0.0) const;
-    QQuaternion fromHeadingPitchRoll(double heading, double pitch, double roll) const;
-    QMatrix4x4 eastNorthUpToFixedFrame(QVector3D origin) const;
-    QQuaternion fromRotation(QMatrix3x3 mat) const;
-    QQuaternion orientation(double longitude, double latitude, double altitude, double heading, double pitch, double roll) const;
 
 signals:
     void connected();
