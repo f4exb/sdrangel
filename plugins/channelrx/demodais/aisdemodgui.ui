@@ -219,13 +219,6 @@
     <item>
      <layout class="QHBoxLayout" name="phySettingsLayout">
       <item>
-       <widget class="Line" name="line_4">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QLabel" name="rfBWLabel">
         <property name="text">
          <string>BW</string>
@@ -339,7 +332,7 @@
          </size>
         </property>
         <property name="text">
-         <string>2.4k</string>
+         <string>±2.4k</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -407,6 +400,13 @@
     <item>
      <layout class="QHBoxLayout" name="udpLayout">
       <item>
+       <widget class="QLabel" name="udpEnabledLabel">
+        <property name="text">
+         <string>UDP</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QCheckBox" name="udpEnabled">
         <property name="toolTip">
          <string>Send packets via UDP</string>
@@ -415,7 +415,7 @@
          <enum>Qt::RightToLeft</enum>
         </property>
         <property name="text">
-         <string>UDP</string>
+         <string/>
         </property>
        </widget>
       </item>
