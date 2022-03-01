@@ -3,7 +3,7 @@
 <h2>Introduction</h2>
 
 The Radiosonde feature displays a table containing the most recent information received from radiosondes
-based on data received via [Radiosonde Demodulators](../../channelrx/demodradiasonde/readme.md).
+based on data received via [Radiosonde Demodulators](../../channelrx/demodradiosonde/readme.md).
 
 The chart can plot two data series vs time for the radiosonde selected in the table.
 
@@ -51,5 +51,5 @@ To centre the map on an item in the table, double click in the Lat or Lon column
 
 <h2>Attribution</h2>
 
-Hot-air-balloon icons created by Freepik - https://www.flaticon.com/free-icons/hot-air-balloon
-Parachute icons created by Freepik - https://www.flaticon.com/free-icons/parachute
+* Hot-air-balloon icons created by Freepik - https://www.flaticon.com/free-icons/hot-air-balloon
+* Parachute icons created by Freepik - https://www.flaticon.com/free-icons/parachute
