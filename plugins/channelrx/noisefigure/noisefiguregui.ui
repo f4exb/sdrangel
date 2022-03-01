@@ -32,7 +32,7 @@
    <enum>Qt::StrongFocus</enum>
   </property>
   <property name="windowTitle">
-   <string>AIS Demodulator</string>
+   <string>Noise Figure</string>
   </property>
   <property name="statusTip">
    <string/>
