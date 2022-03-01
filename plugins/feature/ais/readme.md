@@ -6,7 +6,7 @@ The AIS feature displays a table containing the most recent information about ve
 based on messages received via [AIS Demodulators](../../channelrx/demodais/readme.md).
 Typically the AIS feature would be used with two AIS Demodulators: one at 161.975MHz and 162.025MHz.
 
-The AIS feature can draw corresponding objects on the Map in 2D and 3D.
+The AIS feature can draw corresponding objects on the [Map](../../feature/map/readme.md) in 2D and 3D.
 
 <h2>Interface</h2>
 
