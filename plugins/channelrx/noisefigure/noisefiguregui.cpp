@@ -33,32 +33,13 @@
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
 #include "gui/crightclickenabler.h"
+#include "gui/decimaldelegate.h"
 #include "maincore.h"
 
 #include "noisefigure.h"
 #include "noisefiguresink.h"
 #include "noisefigurecontroldialog.h"
 #include "noisefigureenrdialog.h"
-
-// Deligate for table to control precision used to display floating point values
-class DecimalDelegate : public QStyledItemDelegate {
-
-public:
-    DecimalDelegate(int precision = 2) :
-        m_precision(precision)
-    {
-    }
-
-    virtual QString displayText(const QVariant &value, const QLocale &locale) const override
-    {
-        (void) locale;
-        return QString::number(value.toDouble(), 'f', m_precision);
-    }
-
-private:
-    int m_precision;
-
-};
 
 void NoiseFigureGUI::resizeTable()
 {
