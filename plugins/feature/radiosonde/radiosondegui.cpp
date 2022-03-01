@@ -287,7 +287,7 @@ void RadiosondeGUI::resizeTable()
     ui->radiosondes->setItem(row, RADIOSONDE_COL_HEADING, new QTableWidgetItem("360"));
     ui->radiosondes->setItem(row, RADIOSONDE_COL_STATUS, new QTableWidgetItem("Ascent"));
     ui->radiosondes->setItem(row, RADIOSONDE_COL_PRESSURE, new QTableWidgetItem("1234"));
-    ui->radiosondes->setItem(row, RADIOSONDE_COL_TEMPERATURE, new QTableWidgetItem("-50.0"));
+    ui->radiosondes->setItem(row, RADIOSONDE_COL_TEMPERATURE, new QTableWidgetItem("-50.0U"));
     ui->radiosondes->setItem(row, RADIOSONDE_COL_HUMIDITY, new QTableWidgetItem("100.0"));
     ui->radiosondes->setItem(row, RADIOSONDE_COL_ALT_MAX, new QTableWidgetItem("10000"));
     ui->radiosondes->setItem(row, RADIOSONDE_COL_FREQUENCY, new QTableWidgetItem("400.000"));
