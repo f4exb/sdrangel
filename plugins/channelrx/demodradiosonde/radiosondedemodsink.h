@@ -134,7 +134,7 @@ private:
     MessageQueue *getMessageQueueToChannel() { return m_messageQueueToChannel; }
     void processOneSample(Complex &ci);
     Real correlate(int idx) const;
-    bool processFrame(int length, float corr, int sampleIdx, int *firstError);
+    bool processFrame(int length, float corr, int sampleIdx);
     int reedSolomonErrorCorrection();
     bool checkCRCs(int length);
     void sampleToScope(Complex sample);

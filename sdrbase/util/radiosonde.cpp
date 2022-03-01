@@ -38,8 +38,8 @@ RS41Frame::RS41Frame(const QByteArray ba) :
     m_longitude(0.0),
     m_height(0.0),
     m_bytes(ba),
-    m_temperatureCalibrated(false),
     m_pressureCalibrated(false),
+    m_temperatureCalibrated(false),
     m_humidityTemperatureCalibrated(false),
     m_humidityCalibrated(false)
 {

@@ -176,7 +176,6 @@ void RadiosondeDemodSink::processOneSample(Complex &ci)
             // Try to see if starting at a later sample improves correlation
             int maxCorrOffset = 0;
             Real maxCorr;
-            Real initCorr = fabs(corr);
             do
             {
                 maxCorr = fabs(corr);
@@ -201,9 +200,7 @@ void RadiosondeDemodSink::processOneSample(Complex &ci)
             // Attempt to demodulate
             uint64_t bits = 0;
             int bitCount = 0;
-            int onesCount = 0;
             int byteCount = 0;
-            int symbolPrev = 0;
             QList<int> sampleIdxs;
             for (int sampleIdx = 0; sampleIdx < m_rxBufLength; sampleIdx += m_samplesPerSymbol)
             {
@@ -238,17 +235,16 @@ void RadiosondeDemodSink::processOneSample(Complex &ci)
                         bits = 0;
                         bitCount = 0;
 
-                        if (byteCount >= RADIOSONDE_LENGTH_STD)
+                        if (byteCount >= RS41_LENGTH_STD)
                         {
                             // Get expected length of frame
-                            uint8_t frameType = m_bytes[RADIOSONDE_OFFSET_FRAME_TYPE] ^ m_descramble[RADIOSONDE_OFFSET_FRAME_TYPE];
+                            uint8_t frameType = m_bytes[RS41_OFFSET_FRAME_TYPE] ^ m_descramble[RS41_OFFSET_FRAME_TYPE];
                             int length = RS41Frame::getFrameLength(frameType);
 
                             // Have we received a complete frame?
                             if (byteCount == length)
                             {
-                                int firstError;
-                                bool ok = processFrame(length, corr, sampleIdx, &firstError);
+                                bool ok = processFrame(length, corr, sampleIdx);
                                 scopeCRCValid = ok;
                                 scopeCRCInvalid = !ok;
                                 break;
@@ -405,7 +401,7 @@ Real RadiosondeDemodSink::correlate(int idx) const
     return corr;
 }
 
-bool RadiosondeDemodSink::processFrame(int length, float corr, int sampleIdx, int *firstError)
+bool RadiosondeDemodSink::processFrame(int length, float corr, int sampleIdx)
 {
     // Descramble
     for (int i = 0; i < length; i++) {
@@ -438,24 +434,24 @@ bool RadiosondeDemodSink::processFrame(int length, float corr, int sampleIdx, in
 // Returns number of errors corrected, or -1 if there are uncorrectable errors
 int RadiosondeDemodSink::reedSolomonErrorCorrection()
 {
-    ReedSolomon::RS<RADIOSONDE_RS_N,RADIOSONDE_RS_K> rs;
+    ReedSolomon::RS<RS41_RS_N,RS41_RS_K> rs;
     int errorsCorrected = 0;
 
-    for (int i = 0; (i < RADIOSONDE_RS_INTERLEAVE) && (errorsCorrected >= 0); i++)
+    for (int i = 0; (i < RS41_RS_INTERLEAVE) && (errorsCorrected >= 0); i++)
     {
         // Deinterleave and reverse order
-        uint8_t rsData[RADIOSONDE_RS_N];
+        uint8_t rsData[RS41_RS_N];
 
-        memset(rsData, 0, RADIOSONDE_RS_PAD);
-        for (int j = 0; j < RADIOSONDE_RS_DATA; j++) {
-            rsData[RADIOSONDE_RS_K-1-j] = m_bytes[RADIOSONDE_OFFSET_FRAME_TYPE+j*RADIOSONDE_RS_INTERLEAVE+i];
+        memset(rsData, 0, RS41_RS_PAD);
+        for (int j = 0; j < RS41_RS_DATA; j++) {
+            rsData[RS41_RS_K-1-j] = m_bytes[RS41_OFFSET_FRAME_TYPE+j*RS41_RS_INTERLEAVE+i];
         }
-        for (int j = 0; j < RADIOSONDE_RS_2T; j++) {
-            rsData[RADIOSONDE_RS_N-1-j] = m_bytes[RADIOSONDE_OFFSET_RS+i*RADIOSONDE_RS_2T+j];
+        for (int j = 0; j < RS41_RS_2T; j++) {
+            rsData[RS41_RS_N-1-j] = m_bytes[RS41_OFFSET_RS+i*RS41_RS_2T+j];
         }
 
         // Detect and correct errors
-        int errors = rs.decode(&rsData[0], RADIOSONDE_RS_K);    // FIXME: Indicate 0 padding?
+        int errors = rs.decode(&rsData[0], RS41_RS_K);    // FIXME: Indicate 0 padding?
         if (errors >= 0) {
             errorsCorrected += errors;
         } else {
@@ -464,8 +460,8 @@ int RadiosondeDemodSink::reedSolomonErrorCorrection()
         }
 
         // Restore corrected data
-        for (int j = 0; j < RADIOSONDE_RS_DATA; j++) {
-            m_bytes[RADIOSONDE_OFFSET_FRAME_TYPE+j*RADIOSONDE_RS_INTERLEAVE+i] = rsData[RADIOSONDE_RS_K-1-j];
+        for (int j = 0; j < RS41_RS_DATA; j++) {
+            m_bytes[RS41_OFFSET_FRAME_TYPE+j*RS41_RS_INTERLEAVE+i] = rsData[RS41_RS_K-1-j];
         }
 
     }
@@ -476,9 +472,8 @@ int RadiosondeDemodSink::reedSolomonErrorCorrection()
 // We could pass partial frames that have some correct CRCs, but for now, whole frame has to be correct
 bool RadiosondeDemodSink::checkCRCs(int length)
 {
-    for (int i = RADIOSONDE_OFFSET_BLOCK_0; i < length; )
+    for (int i = RS41_OFFSET_BLOCK_0; i < length; )
     {
-        uint8_t blockID = m_bytes[i+0];
         uint8_t blockLength = m_bytes[i+1];
         uint16_t rxCrc = m_bytes[i+2+blockLength] | (m_bytes[i+2+blockLength+1] << 8);
         // CRC doesn't include ID/len - so these can be wrong
