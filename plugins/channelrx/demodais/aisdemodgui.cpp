@@ -27,6 +27,7 @@
 #include <QRegExp>
 #include <QClipboard>
 #include <QFileDialog>
+#include <QScrollBar>
 
 #include "aisdemodgui.h"
 
@@ -157,6 +158,10 @@ void AISDemodGUI::messageReceived(const QByteArray& message, const QDateTime& da
     // Decode the message
     ais = AISMessage::decode(message);
 
+    // Is scroll bar at bottom
+    QScrollBar *sb = ui->messages->verticalScrollBar();
+    bool scrollToBottom = sb->value() == sb->maximum();
+
     // Add to messages table
     ui->messages->setSortingEnabled(false);
     int row = ui->messages->rowCount();
@@ -184,7 +189,9 @@ void AISDemodGUI::messageReceived(const QByteArray& message, const QDateTime& da
     nmeaItem->setText(ais->toNMEA());
     hexItem->setText(ais->toHex());
     ui->messages->setSortingEnabled(true);
-    ui->messages->scrollToItem(dateItem); // Will only scroll if not hidden
+    if (scrollToBottom) {
+        ui->messages->scrollToBottom();
+    }
     filterRow(row);
 
     delete ais;

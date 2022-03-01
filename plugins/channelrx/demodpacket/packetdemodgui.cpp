@@ -25,6 +25,7 @@
 #include <QAction>
 #include <QRegExp>
 #include <QFileDialog>
+#include <QScrollBar>
 
 #include "packetdemodgui.h"
 #include "util/ax25.h"
@@ -162,6 +163,10 @@ void PacketDemodGUI::packetReceived(QByteArray packet)
 
     if (ax25.decode(packet))
     {
+        // Is scroll bar at bottom
+        QScrollBar *sb = ui->packets->verticalScrollBar();
+        bool scrollToBottom = sb->value() == sb->maximum();
+
         ui->packets->setSortingEnabled(false);
         int row = ui->packets->rowCount();
         ui->packets->setRowCount(row + 1);
@@ -188,7 +193,9 @@ void PacketDemodGUI::packetReceived(QByteArray packet)
         dataASCIIItem->setText(ax25.m_dataASCII);
         dataHexItem->setText(ax25.m_dataHex);
         ui->packets->setSortingEnabled(true);
-        ui->packets->scrollToItem(fromItem);
+        if (scrollToBottom) {
+            ui->packets->scrollToBottom();
+        }
         filterRow(row);
     }
     else

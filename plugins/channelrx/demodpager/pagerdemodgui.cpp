@@ -25,6 +25,7 @@
 #include <QClipboard>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QScrollBar>
 
 #include "pagerdemodgui.h"
 
@@ -151,6 +152,10 @@ void PagerDemodGUI::messageReceived(const QDateTime dateTime, int address, int f
         const QString &numericMessage, const QString &alphaMessage,
         int evenParityErrors, int bchParityErrors)
 {
+    // Is scroll bar at bottom
+    QScrollBar *sb = ui->messages->verticalScrollBar();
+    bool scrollToBottom = sb->value() == sb->maximum();
+
     // Add to messages table
     ui->messages->setSortingEnabled(false);
     int row = ui->messages->rowCount();
@@ -244,7 +249,9 @@ void PagerDemodGUI::messageReceived(const QDateTime dateTime, int address, int f
     evenPEItem->setText(QString("%1").arg(evenParityErrors));
     bchPEItem->setText(QString("%1").arg(bchParityErrors));
     ui->messages->setSortingEnabled(true);
-    ui->messages->scrollToItem(dateItem); // Will only scroll if not hidden
+    if (scrollToBottom) {
+        ui->messages->scrollToBottom();
+    }
     filterRow(row);
 }
 
