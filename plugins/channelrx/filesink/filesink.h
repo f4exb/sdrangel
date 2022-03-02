@@ -35,6 +35,7 @@ class QNetworkReply;
 class DeviceAPI;
 class DeviceSampleSource;
 class FileSinkBaseband;
+class ObjectPipe;
 
 class FileSink : public BasebandSampleSink, public ChannelAPI {
 public:
@@ -171,7 +172,7 @@ private:
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const FileSinkSettings& settings, bool force);
     void sendChannelSettings(
-        QList<MessageQueue*> *messageQueues,
+        const QList<ObjectPipe*>& pipes,
         QList<QString>& channelSettingsKeys,
         const FileSinkSettings& settings,
         bool force

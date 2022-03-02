@@ -32,6 +32,7 @@
 class QNetworkAccessManager;
 class QNetworkReply;
 class DeviceAPI;
+class ObjectPipe;
 
 class UDPSink : public BasebandSampleSink, public ChannelAPI {
 public:
@@ -147,7 +148,7 @@ protected:
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const UDPSinkSettings& settings, bool force);
     void sendChannelSettings(
-        QList<MessageQueue*> *messageQueues,
+        const QList<ObjectPipe*>& pipes,
         QList<QString>& channelSettingsKeys,
         const UDPSinkSettings& settings,
         bool force

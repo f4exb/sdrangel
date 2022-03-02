@@ -39,6 +39,7 @@ class QThread;
 class QUdpSocket;
 class DeviceAPI;
 class PacketModBaseband;
+class ObjectPipe;
 
 class PacketMod : public BasebandSampleSource, public ChannelAPI {
 public:
@@ -230,7 +231,7 @@ private:
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const PacketModSettings& settings, bool force);
     void sendChannelSettings(
-        QList<MessageQueue*> *messageQueues,
+        const QList<ObjectPipe*>& pipes,
         QList<QString>& channelSettingsKeys,
         const PacketModSettings& settings,
         bool force

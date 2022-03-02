@@ -248,6 +248,13 @@ void DATVDemod::applySettings(const DATVDemodSettings& settings, bool force)
         webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
     }
 
+    QList<ObjectPipe*> pipes;
+    MainCore::instance()->getMessagePipes2().getMessagePipes(this, "settings", pipes);
+
+    if (pipes.size() > 0) {
+        sendChannelSettings(pipes, reverseAPIKeys, settings, force);
+    }
+
     m_settings = settings;
 }
 
@@ -532,24 +539,27 @@ void DATVDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respons
 }
 
 void DATVDemod::sendChannelSettings(
-    QList<MessageQueue*> *messageQueues,
+    const QList<ObjectPipe*>& pipes,
     QList<QString>& channelSettingsKeys,
     const DATVDemodSettings& settings,
     bool force)
 {
-    QList<MessageQueue*>::iterator it = messageQueues->begin();
-
-    for (; it != messageQueues->end(); ++it)
+    for (const auto& pipe : pipes)
     {
-        SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
-        webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
-        MainCore::MsgChannelSettings *msg = MainCore::MsgChannelSettings::create(
-            this,
-            channelSettingsKeys,
-            swgChannelSettings,
-            force
-        );
-        (*it)->push(msg);
+        MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+
+        if (messageQueue)
+        {
+            SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+            webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
+            MainCore::MsgChannelSettings *msg = MainCore::MsgChannelSettings::create(
+                this,
+                channelSettingsKeys,
+                swgChannelSettings,
+                force
+            );
+            messageQueue->push(msg);
+        }
     }
 }
 

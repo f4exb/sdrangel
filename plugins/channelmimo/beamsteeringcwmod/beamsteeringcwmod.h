@@ -34,6 +34,7 @@ class BeamSteeringCWModBaseband;
 class QNetworkReply;
 class QNetworkAccessManager;
 class BasebandSampleSink;
+class ObjectPipe;
 
 class BeamSteeringCWMod: public MIMOChannel, public ChannelAPI
 {
@@ -166,7 +167,7 @@ private:
     void calculateFrequencyOffset();
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const BeamSteeringCWModSettings& settings, bool force);
     void sendChannelSettings(
-        QList<MessageQueue*> *messageQueues,
+        const QList<ObjectPipe*>& pipes,
         QList<QString>& channelSettingsKeys,
         const BeamSteeringCWModSettings& settings,
         bool force

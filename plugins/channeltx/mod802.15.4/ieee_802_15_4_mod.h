@@ -40,6 +40,7 @@ class QUdpSocket;
 class DeviceAPI;
 class IEEE_802_15_4_ModBaseband;
 class ScopeVis;
+class ObjectPipe;
 
 class IEEE_802_15_4_Mod : public BasebandSampleSource, public ChannelAPI {
 public:
@@ -172,7 +173,7 @@ private:
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const IEEE_802_15_4_ModSettings& settings, bool force);
     void sendChannelSettings(
-        QList<MessageQueue*> *messageQueues,
+        const QList<ObjectPipe*>& pipes,
         QList<QString>& channelSettingsKeys,
         const IEEE_802_15_4_ModSettings& settings,
         bool force

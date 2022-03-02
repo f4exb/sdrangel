@@ -37,6 +37,7 @@ class QNetworkAccessManager;
 class QNetworkReply;
 class DeviceAPI;
 class QThread;
+class ObjectPipe;
 
 class ChirpChatDemod : public BasebandSampleSink, public ChannelAPI {
 public:
@@ -294,7 +295,7 @@ private:
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const ChirpChatDemodSettings& settings, bool force);
     void sendChannelSettings(
-        QList<MessageQueue*> *messageQueues,
+        const QList<ObjectPipe*>& pipes,
         QList<QString>& channelSettingsKeys,
         const ChirpChatDemodSettings& settings,
         bool force

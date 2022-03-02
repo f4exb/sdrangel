@@ -39,6 +39,7 @@ class QThread;
 class DeviceAPI;
 class CWKeyer;
 class FreeDVModBaseband;
+class ObjectPipe;
 
 struct freedv;
 
@@ -270,7 +271,7 @@ private:
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const FreeDVModSettings& settings, bool force);
     void webapiReverseSendCWSettings(const CWKeyerSettings& settings);
     void sendChannelSettings(
-        QList<MessageQueue*> *messageQueues,
+        const QList<ObjectPipe*>& pipes,
         QList<QString>& channelSettingsKeys,
         const FreeDVModSettings& settings,
         bool force

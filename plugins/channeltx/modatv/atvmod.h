@@ -36,6 +36,7 @@ class QNetworkReply;
 class QThread;
 class ATVModBaseband;
 class DeviceAPI;
+class ObjectPipe;
 
 class ATVMod : public BasebandSampleSource, public ChannelAPI {
 public:
@@ -318,7 +319,7 @@ private:
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const ATVModSettings& settings, bool force);
     void sendChannelSettings(
-        QList<MessageQueue*> *messageQueues,
+        const QList<ObjectPipe*>& pipes,
         QList<QString>& channelSettingsKeys,
         const ATVModSettings& settings,
         bool force

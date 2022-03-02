@@ -35,6 +35,7 @@ class DeviceAPI;
 
 class QNetworkAccessManager;
 class QNetworkReply;
+class ObjectPipe;
 
 class DATVDemod : public BasebandSampleSink, public ChannelAPI
 {
@@ -165,7 +166,7 @@ private:
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const DATVDemodSettings& settings, bool force);
     void sendChannelSettings(
-        QList<MessageQueue*> *messageQueues,
+        const QList<ObjectPipe*>& pipes,
         QList<QString>& channelSettingsKeys,
         const DATVDemodSettings& settings,
         bool force

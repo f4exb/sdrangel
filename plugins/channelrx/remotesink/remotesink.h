@@ -35,6 +35,7 @@
 class QNetworkAccessManager;
 class QNetworkReply;
 class DeviceAPI;
+class ObjectPipe;
 
 class RemoteSink : public BasebandSampleSink, public ChannelAPI {
 public:
@@ -135,7 +136,7 @@ private:
     void updateWithDeviceData();
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const RemoteSinkSettings& settings, bool force);
     void sendChannelSettings(
-        QList<MessageQueue*> *messageQueues,
+        const QList<ObjectPipe*>& pipes,
         QList<QString>& channelSettingsKeys,
         const RemoteSinkSettings& settings,
         bool force

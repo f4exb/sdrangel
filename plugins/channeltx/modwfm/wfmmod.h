@@ -37,6 +37,7 @@ class QThread;
 class DeviceAPI;
 class CWKeyer;
 class WFMModBaseband;
+class ObjectPipe;
 
 class WFMMod : public BasebandSampleSource, public ChannelAPI {
 public:
@@ -275,7 +276,7 @@ private:
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const WFMModSettings& settings, bool force);
     void webapiReverseSendCWSettings(const CWKeyerSettings& settings);
     void sendChannelSettings(
-        QList<MessageQueue*> *messageQueues,
+        const QList<ObjectPipe*>& pipes,
         QList<QString>& channelSettingsKeys,
         const WFMModSettings& settings,
         bool force

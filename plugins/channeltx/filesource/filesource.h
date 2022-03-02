@@ -40,6 +40,7 @@ class QNetworkReply;
 
 class DeviceAPI;
 class FileSourceBaseband;
+class ObjectPipe;
 
 class FileSource : public BasebandSampleSource, public ChannelAPI {
 public:
@@ -255,7 +256,7 @@ private:
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const FileSourceSettings& settings, bool force);
     void sendChannelSettings(
-        QList<MessageQueue*> *messageQueues,
+        const QList<ObjectPipe*>& pipes,
         QList<QString>& channelSettingsKeys,
         const FileSourceSettings& settings,
         bool force

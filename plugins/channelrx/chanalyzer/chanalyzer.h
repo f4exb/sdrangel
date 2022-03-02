@@ -36,7 +36,7 @@
 class DownChannelizer;
 class QNetworkReply;
 class QNetworkAccessManager;
-
+class ObjectPipe;
 class ChannelAnalyzer : public BasebandSampleSink, public ChannelAPI {
 public:
     class MsgConfigureChannelAnalyzer : public Message {
@@ -140,7 +140,7 @@ private:
 	void applySettings(const ChannelAnalyzerSettings& settings, bool force = false);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const ChannelAnalyzerSettings& settings, bool force);
     void sendChannelSettings(
-        QList<MessageQueue*> *messageQueues,
+        const QList<ObjectPipe*>& pipes,
         QList<QString>& channelSettingsKeys,
         const ChannelAnalyzerSettings& settings,
         bool force

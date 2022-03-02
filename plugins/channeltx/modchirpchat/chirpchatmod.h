@@ -39,6 +39,7 @@ class QUdpSocket;
 class DeviceAPI;
 class CWKeyer;
 class ChirpChatModBaseband;
+class ObjectPipe;
 
 class ChirpChatMod : public BasebandSampleSource, public ChannelAPI {
 public:
@@ -167,7 +168,7 @@ private:
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const ChirpChatModSettings& settings, bool force);
     void sendChannelSettings(
-        QList<MessageQueue*> *messageQueues,
+        const QList<ObjectPipe*>& pipes,
         QList<QString>& channelSettingsKeys,
         const ChirpChatModSettings& settings,
         bool force

@@ -38,6 +38,7 @@ class QUdpSocket;
 class DeviceAPI;
 class AISModBaseband;
 class ScopeVis;
+class ObjectPipe;
 
 class AISMod : public BasebandSampleSource, public ChannelAPI {
 public:
@@ -234,7 +235,7 @@ private:
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const AISModSettings& settings, bool force);
     void sendChannelSettings(
-        QList<MessageQueue*> *messageQueues,
+        const QList<ObjectPipe*>& pipes,
         QList<QString>& channelSettingsKeys,
         const AISModSettings& settings,
         bool force

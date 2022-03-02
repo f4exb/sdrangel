@@ -261,10 +261,11 @@ void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
         webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
     }
 
-    QList<MessageQueue*> *messageQueues = MainCore::instance()->getMessagePipes().getMessageQueues(this, "settings");
+    QList<ObjectPipe*> pipes;
+    MainCore::instance()->getMessagePipes2().getMessagePipes(this, "settings", pipes);
 
-    if (messageQueues) {
-        sendChannelSettings(messageQueues, reverseAPIKeys, settings, force);
+    if (pipes.size() > 0) {
+        sendChannelSettings(pipes, reverseAPIKeys, settings, force);
     }
 
     m_settings = settings;
@@ -551,24 +552,27 @@ void NFMDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, co
 }
 
 void NFMDemod::sendChannelSettings(
-    QList<MessageQueue*> *messageQueues,
+    const QList<ObjectPipe*>& pipes,
     QList<QString>& channelSettingsKeys,
     const NFMDemodSettings& settings,
     bool force)
 {
-    QList<MessageQueue*>::iterator it = messageQueues->begin();
-
-    for (; it != messageQueues->end(); ++it)
+    for (const auto& pipe : pipes)
     {
-        SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
-        webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
-        MainCore::MsgChannelSettings *msg = MainCore::MsgChannelSettings::create(
-            this,
-            channelSettingsKeys,
-            swgChannelSettings,
-            force
-        );
-        (*it)->push(msg);
+        MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+
+        if (messageQueue)
+        {
+            SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+            webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
+            MainCore::MsgChannelSettings *msg = MainCore::MsgChannelSettings::create(
+                this,
+                channelSettingsKeys,
+                swgChannelSettings,
+                force
+            );
+            messageQueue->push(msg);
+        }
     }
 }
 

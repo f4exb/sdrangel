@@ -36,6 +36,7 @@ class QNetworkAccessManager;
 class QNetworkReply;
 class QThread;
 class DeviceAPI;
+class ObjectPipe;
 
 namespace SWGSDRangel {
     class SWGRDSReport;
@@ -161,7 +162,7 @@ private:
     void webapiFormatRDSReport(SWGSDRangel::SWGRDSReport *report);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const BFMDemodSettings& settings, bool force);
     void sendChannelSettings(
-        QList<MessageQueue*> *messageQueues,
+        const QList<ObjectPipe*>& pipes,
         QList<QString>& channelSettingsKeys,
         const BFMDemodSettings& settings,
         bool force

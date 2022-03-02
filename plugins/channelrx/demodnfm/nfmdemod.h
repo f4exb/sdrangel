@@ -34,6 +34,7 @@ class QNetworkAccessManager;
 class QNetworkReply;
 class QThread;
 class DeviceAPI;
+class ObjectPipe;
 
 class NFMDemod : public BasebandSampleSink, public ChannelAPI {
 public:
@@ -144,7 +145,7 @@ private:
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const NFMDemodSettings& settings, bool force);
     void sendChannelSettings(
-        QList<MessageQueue*> *messageQueues,
+        const QList<ObjectPipe*>& pipes,
         QList<QString>& channelSettingsKeys,
         const NFMDemodSettings& settings,
         bool force

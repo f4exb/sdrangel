@@ -35,7 +35,7 @@ class DeviceAPI;
 class InterferometerBaseband;
 class QNetworkReply;
 class QNetworkAccessManager;
-
+class ObjectPipe;
 class Interferometer: public MIMOChannel, public ChannelAPI
 {
 public:
@@ -171,7 +171,7 @@ private:
     void calculateFrequencyOffset();
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const InterferometerSettings& settings, bool force);
     void sendChannelSettings(
-        QList<MessageQueue*> *messageQueues,
+        const QList<ObjectPipe*>& pipes,
         QList<QString>& channelSettingsKeys,
         const InterferometerSettings& settings,
         bool force

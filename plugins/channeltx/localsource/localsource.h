@@ -33,6 +33,7 @@ class QThread;
 class DeviceAPI;
 class DeviceSampleSink;
 class LocalSourceBaseband;
+class ObjectPipe;
 
 class LocalSource : public BasebandSampleSource, public ChannelAPI {
 public:
@@ -154,7 +155,7 @@ private:
 
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const LocalSourceSettings& settings, bool force);
     void sendChannelSettings(
-        QList<MessageQueue*> *messageQueues,
+        const QList<ObjectPipe*>& pipes,
         QList<QString>& channelSettingsKeys,
         const LocalSourceSettings& settings,
         bool force

@@ -34,6 +34,7 @@ class QNetworkAccessManager;
 class QNetworkReply;
 class DeviceAPI;
 class QThread;
+class ObjectPipe;
 
 class FreeDVDemod : public BasebandSampleSink, public ChannelAPI {
 public:
@@ -162,7 +163,7 @@ private:
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const FreeDVDemodSettings& settings, bool force);
     void sendChannelSettings(
-        QList<MessageQueue*> *messageQueues,
+        const QList<ObjectPipe*>& pipes,
         QList<QString>& channelSettingsKeys,
         const FreeDVDemodSettings& settings,
         bool force
