@@ -358,7 +358,7 @@ void MapModel::updateTarget()
     azEl->calculate();
 
     // Send to Rotator Controllers
-    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipes();
+    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
     QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(m_gui->getMap(), "target");
     if (mapMessageQueues)
     {

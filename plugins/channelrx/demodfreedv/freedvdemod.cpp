@@ -235,7 +235,7 @@ void FreeDVDemod::applySettings(const FreeDVDemodSettings& settings, bool force)
     }
 
     QList<ObjectPipe*> pipes;
-    MainCore::instance()->getMessagePipes2().getMessagePipes(this, "settings", pipes);
+    MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
     if (pipes.size() > 0) {
         sendChannelSettings(pipes, reverseAPIKeys, settings, force);

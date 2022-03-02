@@ -661,7 +661,7 @@ void APTDemodImageWorker::makeTransparent(QImage &image)
 void APTDemodImageWorker::sendImageToMap(QImage image)
 {
     // Send to Map feature
-    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipes();
+    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
     QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(m_aptDemod, "mapitems");
     if (mapMessageQueues)
     {

@@ -337,7 +337,7 @@ bool APRSGUI::handleMessage(const Message& message)
                 }
 
                 // Forward to map
-                MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipes();
+                MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
                 QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(m_aprs, "mapitems");
                 if (mapMessageQueues)
                 {

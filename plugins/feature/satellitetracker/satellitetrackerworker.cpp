@@ -234,7 +234,7 @@ void SatelliteTrackerWorker::applySettings(const SatelliteTrackerSettings& setti
 
 void SatelliteTrackerWorker::removeFromMap(QString id)
 {
-    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipes();
+    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
     QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(m_satelliteTracker, "mapitems");
     if (mapMessageQueues)
         sendToMap(mapMessageQueues, id, "", "", "", 0.0f, 0.0, 0.0, 0.0, 0.0, nullptr, nullptr, nullptr, nullptr);
@@ -405,7 +405,7 @@ void SatelliteTrackerWorker::update()
                         azimuth = std::fmod(azimuth + 180.0, 360.0);
                         elevation = 180.0 - elevation;
                     }
-                    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipes();
+                    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
                     QList<MessageQueue*> *rotatorMessageQueues = messagePipes.getMessageQueues(m_satelliteTracker, "target");
                     if (rotatorMessageQueues)
                     {
@@ -425,7 +425,7 @@ void SatelliteTrackerWorker::update()
                 // Send to Map
                 if (m_settings.m_drawOnMap)
                 {
-                    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipes();
+                    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
                     QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(m_satelliteTracker, "mapitems");
                     if (mapMessageQueues)
                     {

@@ -731,8 +731,8 @@ public:
     void removeFeatureInstance(Feature *feature);
     void clearFeatures(FeatureSet *featureSet);
     // pipes
-    MessagePipesLegacy& getMessagePipes() { return m_messagePipes; }
-    MessagePipes& getMessagePipes2() { return m_messagePipes2; }
+    MessagePipesLegacy& getMessagePipesLegacy() { return m_messagePipesLegacy; }
+    MessagePipes& getMessagePipes() { return m_messagePipes; }
     DataPipes& getDataPipes() { return m_dataPipes; }
 
     friend class MainServer;
@@ -752,8 +752,8 @@ private:
     QMap<ChannelAPI*, DeviceSet*> m_channelsMap; //!< Channel to device set map
     QMap<Feature*, FeatureSet*> m_featuresMap;   //!< Feature to feature set map
     PluginManager* m_pluginManager;
-    MessagePipesLegacy m_messagePipes;
-    MessagePipes m_messagePipes2;
+    MessagePipesLegacy m_messagePipesLegacy;
+    MessagePipes m_messagePipes;
     DataPipes m_dataPipes;
 
     void debugMaps();

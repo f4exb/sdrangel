@@ -407,7 +407,7 @@ void PacketMod::applySettings(const PacketModSettings& settings, bool force)
     }
 
     QList<ObjectPipe*> pipes;
-    MainCore::instance()->getMessagePipes2().getMessagePipes(this, "settings", pipes);
+    MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
     if (pipes.size() > 0) {
         sendChannelSettings(pipes, reverseAPIKeys, settings, force);
@@ -440,7 +440,7 @@ bool PacketMod::deserialize(const QByteArray& data)
 void PacketMod::sendSampleRateToDemodAnalyzer()
 {
     QList<ObjectPipe*> pipes;
-    MainCore::instance()->getMessagePipes2().getMessagePipes(this, "reportdemod", pipes);
+    MainCore::instance()->getMessagePipes().getMessagePipes(this, "reportdemod", pipes);
 
     if (pipes.size() > 0)
     {

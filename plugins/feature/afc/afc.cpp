@@ -143,7 +143,7 @@ bool AFC::handleMessage(const Message& cmd)
         qDebug() << "AFC::handleMessage: MessagePipesLegacyCommon::MsgReportChannelDeleted";
         MessagePipesLegacyCommon::MsgReportChannelDeleted& report = (MessagePipesLegacyCommon::MsgReportChannelDeleted&) cmd;
         const MessagePipesLegacyCommon::ChannelRegistrationKey& channelKey = report.getChannelRegistrationKey();
-        MainCore::instance()->getMessagePipes().unregisterChannelToFeature(channelKey.m_key, this, "settings");
+        MainCore::instance()->getMessagePipesLegacy().unregisterChannelToFeature(channelKey.m_key, this, "settings");
 
         return true;
     }
@@ -638,7 +638,7 @@ void AFC::trackerDeviceChange(int deviceIndex)
 
         if (channel->getURI() == "sdrangel.channel.freqtracker")
         {
-            ObjectPipe *pipe = mainCore->getMessagePipes2().registerProducerToConsumer(channel, this, "settings");
+            ObjectPipe *pipe = mainCore->getMessagePipes().registerProducerToConsumer(channel, this, "settings");
             MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
 
             if (messageQueue)
@@ -687,7 +687,7 @@ void AFC::trackedDeviceChange(int deviceIndex)
 
         if (channel->getURI() != "sdrangel.channel.freqtracker")
         {
-            ObjectPipe *pipe = mainCore->getMessagePipes2().registerProducerToConsumer(channel, this, "settings");
+            ObjectPipe *pipe = mainCore->getMessagePipes().registerProducerToConsumer(channel, this, "settings");
             MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
 
             if (messageQueue)
@@ -721,7 +721,7 @@ void AFC::removeTrackerFeatureReference()
 {
     if (m_trackerChannelAPI)
     {
-        ObjectPipe *pipe = MainCore::instance()->getMessagePipes2().unregisterProducerToConsumer(m_trackerChannelAPI, this, "settings");
+        ObjectPipe *pipe = MainCore::instance()->getMessagePipes().unregisterProducerToConsumer(m_trackerChannelAPI, this, "settings");
 
         if (pipe)
         {
@@ -740,7 +740,7 @@ void AFC::removeTrackedFeatureReferences()
 {
     for (auto& channel : m_trackedChannelAPIs)
     {
-        ObjectPipe *pipe = MainCore::instance()->getMessagePipes2().unregisterProducerToConsumer(channel, this, "settings");
+        ObjectPipe *pipe = MainCore::instance()->getMessagePipes().unregisterProducerToConsumer(channel, this, "settings");
 
         if (pipe)
         {

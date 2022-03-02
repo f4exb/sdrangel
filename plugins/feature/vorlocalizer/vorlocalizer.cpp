@@ -336,7 +336,7 @@ void VORLocalizer::applySettings(const VORLocalizerSettings& settings, bool forc
 void VORLocalizer::updateChannels()
 {
     MainCore *mainCore = MainCore::instance();
-    MessagePipes& messagePipes = mainCore->getMessagePipes2();
+    MessagePipes& messagePipes = mainCore->getMessagePipes();
     std::vector<DeviceSet*>& deviceSets = mainCore->getDeviceSets();
     std::vector<DeviceSet*>::const_iterator it = deviceSets.begin();
     m_availableChannels.clear();

@@ -271,7 +271,7 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
     }
 
     QList<ObjectPipe*> pipes;
-    MainCore::instance()->getMessagePipes2().getMessagePipes(this, "settings", pipes);
+    MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
     if (pipes.size() > 0) {
         sendChannelSettings(pipes, reverseAPIKeys, settings, force);
@@ -305,7 +305,7 @@ bool SSBDemod::deserialize(const QByteArray& data)
 void SSBDemod::sendSampleRateToDemodAnalyzer()
 {
     QList<ObjectPipe*> pipes;
-    MainCore::instance()->getMessagePipes2().getMessagePipes(this, "reportdemod", pipes);
+    MainCore::instance()->getMessagePipes().getMessagePipes(this, "reportdemod", pipes);
 
     if (pipes.size() > 0)
     {

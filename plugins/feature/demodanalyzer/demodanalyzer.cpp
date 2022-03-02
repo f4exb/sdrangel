@@ -272,7 +272,7 @@ void DemodAnalyzer::applySettings(const DemodAnalyzerSettings& settings, bool fo
 void DemodAnalyzer::updateChannels()
 {
     MainCore *mainCore = MainCore::instance();
-    // MessagePipesLegacy& messagePipes = mainCore->getMessagePipes();
+    // MessagePipesLegacy& messagePipes = mainCore->getMessagePipesLegacy();
     std::vector<DeviceSet*>& deviceSets = mainCore->getDeviceSets();
     std::vector<DeviceSet*>::const_iterator it = deviceSets.begin();
     m_availableChannels.clear();
@@ -344,7 +344,7 @@ void DemodAnalyzer::setChannel(ChannelAPI *selectedChannel)
             m_worker->getInputMessageQueue()->push(msg);
         }
 
-        ObjectPipe *messagePipe = mainCore->getMessagePipes2().unregisterProducerToConsumer(m_selectedChannel, this, "reportdemod");
+        ObjectPipe *messagePipe = mainCore->getMessagePipes().unregisterProducerToConsumer(m_selectedChannel, this, "reportdemod");
 
         if (messagePipe)
         {
@@ -371,7 +371,7 @@ void DemodAnalyzer::setChannel(ChannelAPI *selectedChannel)
         }
     }
 
-    ObjectPipe *messagePipe = mainCore->getMessagePipes2().registerProducerToConsumer(selectedChannel, this, "reportdemod");
+    ObjectPipe *messagePipe = mainCore->getMessagePipes().registerProducerToConsumer(selectedChannel, this, "reportdemod");
 
     if (messagePipe)
     {

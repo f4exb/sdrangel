@@ -156,7 +156,7 @@ bool PacketDemod::handleMessage(const Message& cmd)
             getMessageQueueToGUI()->push(msg);
         }
 
-        MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipes();
+        MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
 
         // Forward to APRS and other packet features
         QList<MessageQueue*> *packetMessageQueues = messagePipes.getMessageQueues(this, "packets");
@@ -336,7 +336,7 @@ void PacketDemod::applySettings(const PacketDemodSettings& settings, bool force)
 void PacketDemod::sendSampleRateToDemodAnalyzer()
 {
     QList<ObjectPipe*> pipes;
-    MainCore::instance()->getMessagePipes2().getMessagePipes(this, "reportdemod", pipes);
+    MainCore::instance()->getMessagePipes().getMessagePipes(this, "reportdemod", pipes);
 
     if (pipes.size() > 0)
     {

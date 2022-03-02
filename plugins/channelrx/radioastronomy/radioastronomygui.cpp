@@ -1908,7 +1908,7 @@ void RadioAstronomyGUI::on_powerTable_cellDoubleClicked(int row, int column)
     if ((column >= POWER_COL_RA) && (column >= POWER_COL_EL))
     {
         // Display target in Star Tracker
-        MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipes();
+        MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
         QList<MessageQueue*> *messageQueues = messagePipes.getMessageQueues(m_radioAstronomy, "startracker.display");
         if (messageQueues)
         {
@@ -4276,7 +4276,7 @@ void RadioAstronomyGUI::showLoSMarker(int row)
 void RadioAstronomyGUI::updateLoSMarker(const QString& name, float l, float b, float d)
 {
     // Send to Star Tracker
-    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipes();
+    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
     QList<MessageQueue*> *messageQueues = messagePipes.getMessageQueues(m_radioAstronomy, "startracker.display");
     if (messageQueues)
     {
@@ -4678,7 +4678,7 @@ void RadioAstronomyGUI::on_spectrumIndex_valueChanged(int value)
         ui->powerTable->scrollTo(ui->powerTable->model()->index(value, 0));
         ui->spectrumDateTime->setDateTime(m_fftMeasurements[value]->m_dateTime);
         // Display target in Star Tracker
-        MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipes();
+        MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
         QList<MessageQueue*> *messageQueues = messagePipes.getMessageQueues(m_radioAstronomy, "startracker.display");
         if (messageQueues)
         {

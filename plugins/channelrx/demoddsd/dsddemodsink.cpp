@@ -329,7 +329,7 @@ void DSDDemodSink::applyAudioSampleRate(int sampleRate)
     m_audioSampleRate = sampleRate;
 
     QList<ObjectPipe*> pipes;
-    MainCore::instance()->getMessagePipes2().getMessagePipes(m_channel, "reportdemod", pipes);
+    MainCore::instance()->getMessagePipes().getMessagePipes(m_channel, "reportdemod", pipes);
 
     if (pipes.size() > 0)
     {

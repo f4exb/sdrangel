@@ -370,7 +370,7 @@ bool DABDemod::deserialize(const QByteArray& data)
 void DABDemod::sendSampleRateToDemodAnalyzer()
 {
     QList<ObjectPipe*> pipes;
-    MainCore::instance()->getMessagePipes2().getMessagePipes(this, "reportdemod", pipes);
+    MainCore::instance()->getMessagePipes().getMessagePipes(this, "reportdemod", pipes);
 
     if (pipes.size() > 0)
     {

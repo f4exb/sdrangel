@@ -372,7 +372,7 @@ void WFMModSource::applyAudioSampleRate(int sampleRate)
     applyFeedbackAudioSampleRate(m_feedbackAudioSampleRate);
 
     QList<ObjectPipe*> pipes;
-    MainCore::instance()->getMessagePipes2().getMessagePipes(m_channel, "reportdemod", pipes);
+    MainCore::instance()->getMessagePipes().getMessagePipes(m_channel, "reportdemod", pipes);
 
     if (pipes.size() > 0)
     {

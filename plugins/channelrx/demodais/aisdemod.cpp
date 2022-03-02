@@ -148,7 +148,7 @@ bool AISDemod::handleMessage(const Message& cmd)
             getMessageQueueToGUI()->push(msg);
         }
 
-        MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipes();
+        MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
 
         // Forward to AIS feature
         QList<MessageQueue*> *aisMessageQueues = messagePipes.getMessageQueues(this, "ais");
@@ -363,7 +363,7 @@ bool AISDemod::deserialize(const QByteArray& data)
 void AISDemod::sendSampleRateToDemodAnalyzer()
 {
     QList<ObjectPipe*> pipes;
-    MainCore::instance()->getMessagePipes2().getMessagePipes(this, "reportdemod", pipes);
+    MainCore::instance()->getMessagePipes().getMessagePipes(this, "reportdemod", pipes);
 
     if (pipes.size() > 0)
     {

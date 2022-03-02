@@ -846,7 +846,7 @@ void RadiosondeDemodGUI::on_logOpen_clicked()
                     bool cancelled = false;
                     QStringList cols;
 
-                    MessagePipesLegacy& framePipes = MainCore::instance()->getMessagePipes();
+                    MessagePipesLegacy& framePipes = MainCore::instance()->getMessagePipesLegacy();
                     QList<MessageQueue*> *radiosondeMessageQueues = framePipes.getMessageQueues(m_radiosondeDemod, "radiosonde");
 
                     while (!cancelled && CSV::readRow(in, &cols))

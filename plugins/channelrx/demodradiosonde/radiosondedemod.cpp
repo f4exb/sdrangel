@@ -163,7 +163,7 @@ bool RadiosondeDemod::handleMessage(const Message& cmd)
             getMessageQueueToGUI()->push(msg);
         }
 
-        MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipes();
+        MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
 
         // Forward to Radiosonde feature
         QList<MessageQueue*> *radiosondeMessageQueues = messagePipes.getMessageQueues(this, "radiosonde");
@@ -386,7 +386,7 @@ bool RadiosondeDemod::deserialize(const QByteArray& data)
 
 void RadiosondeDemod::sendSampleRateToDemodAnalyzer()
 {
-    QList<MessageQueue*> *messageQueues = MainCore::instance()->getMessagePipes().getMessageQueues(this, "reportdemod");
+    QList<MessageQueue*> *messageQueues = MainCore::instance()->getMessagePipesLegacy().getMessageQueues(this, "reportdemod");
 
     if (messageQueues)
     {

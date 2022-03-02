@@ -418,7 +418,7 @@ void PacketModSource::applyChannelSettings(int channelSampleRate, int channelFre
     m_phaseSensitivity = 2.0f * M_PI * m_settings.m_fmDeviation / (double)m_channelSampleRate;
 
     QList<ObjectPipe*> pipes;
-    MainCore::instance()->getMessagePipes2().getMessagePipes(m_channel, "reportdemod", pipes);
+    MainCore::instance()->getMessagePipes().getMessagePipes(m_channel, "reportdemod", pipes);
 
     if (pipes.size() > 0)
     {

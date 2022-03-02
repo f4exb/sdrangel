@@ -867,7 +867,7 @@ void APTDemodGUI::on_deleteImageFromMap_clicked()
 
 void APTDemodGUI::deleteImageFromMap(const QString &name)
 {
-    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipes();
+    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
     QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(m_aptDemod, "mapitems");
     if (mapMessageQueues)
     {
