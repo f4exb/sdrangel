@@ -33,6 +33,7 @@
 class QNetworkAccessManager;
 class QNetworkReply;
 class DeviceAPI;
+class ObjectPipe;
 
 class FreqTracker : public BasebandSampleSink, public ChannelAPI {
 public:
@@ -145,7 +146,7 @@ private:
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const FreqTrackerSettings& settings, bool force);
     void sendChannelSettings(
-        QList<MessageQueue*> *messageQueues,
+        const QList<ObjectPipe*>& pipes,
         QList<QString>& channelSettingsKeys,
         const FreqTrackerSettings& settings,
         bool force

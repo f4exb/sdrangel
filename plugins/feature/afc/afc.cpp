@@ -630,6 +630,7 @@ void AFC::trackerDeviceChange(int deviceIndex)
 
     MainCore *mainCore = MainCore::instance();
     m_trackerDeviceSet = mainCore->getDeviceSets()[deviceIndex];
+    m_trackerChannelAPI = nullptr;
 
     for (int i = 0; i < m_trackerDeviceSet->getNumberOfChannels(); i++)
     {
@@ -651,9 +652,19 @@ void AFC::trackerDeviceChange(int deviceIndex)
                 );
             }
 
+            connect(pipe, SIGNAL(toBeDeleted(int, QObject*)), this, SLOT(handleTrackerMessagePipeToBeDeleted(int, QObject*)));
             m_trackerChannelAPI = channel;
             break;
         }
+    }
+}
+
+void AFC::handleTrackerMessagePipeToBeDeleted(int reason, QObject* object)
+{
+    if ((reason == 0) && ((ChannelAPI*) object == m_trackerChannelAPI))  // tracker channel has been de;eted
+    {
+        m_trackerChannelAPI = nullptr;
+        updateDeviceSetLists();
     }
 }
 
@@ -667,6 +678,8 @@ void AFC::trackedDeviceChange(int deviceIndex)
 
     MainCore *mainCore = MainCore::instance();
     m_trackedDeviceSet = mainCore->getDeviceSets()[deviceIndex];
+    m_trackerIndexInDeviceSet = -1;
+    m_trackedChannelAPIs.clear();
 
     for (int i = 0; i < m_trackedDeviceSet->getNumberOfChannels(); i++)
     {
@@ -688,7 +701,19 @@ void AFC::trackedDeviceChange(int deviceIndex)
                 );
                 m_trackerIndexInDeviceSet = i;
             }
+
+            m_trackedChannelAPIs.push_back(channel);
+            connect(pipe, SIGNAL(toBeDeleted(int, QObject*)), this, SLOT(handleTrackedMessagePipeToBeDeleted(int, QObject*)));
         }
+    }
+}
+
+void AFC::handleTrackedMessagePipeToBeDeleted(int reason, QObject* object)
+{
+    if ((reason == 0) && m_trackedChannelAPIs.contains((ChannelAPI*) object))
+    {
+        m_trackedChannelAPIs.removeAll((ChannelAPI*) object);
+        updateDeviceSetLists();
     }
 }
 
@@ -696,33 +721,38 @@ void AFC::removeTrackerFeatureReference()
 {
     if (m_trackerChannelAPI)
     {
-        if (MainCore::instance()->existsChannel(m_trackerChannelAPI))
+        ObjectPipe *pipe = MainCore::instance()->getMessagePipes2().unregisterProducerToConsumer(m_trackerChannelAPI, this, "settings");
+
+        if (pipe)
         {
-            qDebug("AFC::removeTrackerFeatureReference: m_trackerChannelAPI: %s", qPrintable(m_trackerChannelAPI->objectName()));
-            ObjectPipe *pipe = MainCore::instance()->getMessagePipes2().unregisterProducerToConsumer(m_trackerChannelAPI, this, "settings");
             MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
 
             if (messageQueue) {
                 disconnect(messageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessageQueue(MessageQueue*)));
             }
         }
+
+        m_trackerChannelAPI = nullptr;
     }
 }
 
 void AFC::removeTrackedFeatureReferences()
 {
-    for (QList<ChannelAPI*>::iterator it = m_trackedChannelAPIs.begin(); it != m_trackedChannelAPIs.end(); ++it)
+    for (auto& channel : m_trackedChannelAPIs)
     {
-        ChannelAPI *channel = *it;
+        ObjectPipe *pipe = MainCore::instance()->getMessagePipes2().unregisterProducerToConsumer(channel, this, "settings");
 
-        if (MainCore::instance()->existsChannel(channel))
+        if (pipe)
         {
-            qDebug("AFC::removeTrackedFeatureReferences: channel: %s", qPrintable(channel->objectName()));
-            MainCore::instance()->getMessagePipes2().unregisterProducerToConsumer(channel, this, "settings");
-        }
-    }
+            MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
 
-    m_trackedChannelAPIs.clear();
+            if (messageQueue) {
+                disconnect(messageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessageQueue(MessageQueue*)));
+            }
+        }
+
+        m_trackedChannelAPIs.removeAll(channel);
+    }
 }
 
 void AFC::handleChannelMessageQueue(MessageQueue* messageQueue)

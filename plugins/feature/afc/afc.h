@@ -226,6 +226,8 @@ private:
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
     void handleChannelMessageQueue(MessageQueue* messageQueue);
+    void handleTrackerMessagePipeToBeDeleted(int reason, QObject* object);
+    void handleTrackedMessagePipeToBeDeleted(int reason, QObject* object);
 };
 
 #endif // INCLUDE_FEATURE_AFC_H_
