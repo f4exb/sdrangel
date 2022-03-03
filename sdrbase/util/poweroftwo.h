@@ -22,14 +22,14 @@
 
 // Is x a power of two
 // From: https://stackoverflow.com/questions/600293/how-to-check-if-a-number-is-a-power-of-2
-static bool isPowerOfTwo(uint32_t x)
+inline bool isPowerOfTwo(uint32_t x)
 {
     return (x & (x - 1)) == 0;
 }
 
 // Calculate next power of 2 lower than x
 // From: https://stackoverflow.com/questions/2679815/previous-power-of-2
-static uint32_t lowerPowerOfTwo(uint32_t x)
+inline uint32_t lowerPowerOfTwo(uint32_t x)
 {
     x = x | (x >> 1);
     x = x | (x >> 2);
