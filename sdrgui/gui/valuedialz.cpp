@@ -173,7 +173,8 @@ quint64 ValueDialZ::findExponent(int digit)
 
     for (int i = s+1; i < d+s; i++)
     {
-        if ((i%4 == 0) || (m_positiveOnly && (i == d+s-1))) { // non digit positions
+        // if ((i%4 == 0) || (m_positiveOnly && (i == d+s-1))) { // non digit positions
+        if (i%4 == 0) {
             continue;
         }
 
