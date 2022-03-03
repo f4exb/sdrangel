@@ -60,6 +60,9 @@ private:
     int m_fcPos;
     bool m_iqOrder;
 
+    qint16 m_iq[8192];
+    int m_iqCount;
+
     int m_rfChanged;
     static const unsigned int m_rfChangedTimeout = 500;
 

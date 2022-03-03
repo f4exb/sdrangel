@@ -22,6 +22,7 @@
 #include <thread>
 #include "sdrplayv3thread.h"
 #include "dsp/samplesinkfifo.h"
+#include "util/poweroftwo.h"
 
 #include <QDebug>
 
@@ -34,7 +35,8 @@ SDRPlayV3Thread::SDRPlayV3Thread(sdrplay_api_DeviceT* dev, SampleSinkFifo* sampl
     m_samplerate(2000000),
     m_log2Decim(0),
     m_fcPos(0),
-    m_iqOrder(true)
+    m_iqOrder(true),
+    m_iqCount(0)
 {
 }
 
@@ -134,27 +136,37 @@ void SDRPlayV3Thread::callbackHelper(short *xi, short *xq, sdrplay_api_StreamCbP
     (void) params;
     (void) reset;
     SDRPlayV3Thread* thread = (SDRPlayV3Thread*) ctx;
-    qint16 iq[8192];
 
     if (params->rfChanged)
         thread->m_rfChanged = params->rfChanged;
 
     if (thread->m_running)
     {
-        if (numSamples > 8192)
-            qCritical() << "SDRPlayV3Thread::callbackHelper: IQ buffer too small: " << numSamples;
-
+        // Interleave samples
         for (int i = 0; i < (int)numSamples; i++)
         {
-            iq[i*2] = xi[i];
-            iq[i*2+1] = xq[i];
+            thread->m_iq[thread->m_iqCount+i*2] = xi[i];
+            thread->m_iq[thread->m_iqCount+i*2+1] = xq[i];
+        }
+        thread->m_iqCount += numSamples * 2;
+
+        if (thread->m_iqCount > 8192) {
+            qCritical() << "SDRPlayV3Thread::callbackHelper: IQ buffer too small: " << numSamples;
         }
 
+        // Decimators require length to be a power of 2
+        int iqLen = lowerPowerOfTwo(thread->m_iqCount);
+
         if (thread->m_iqOrder) {
-            thread->callbackIQ(iq, numSamples*2);
+            thread->callbackIQ(thread->m_iq, iqLen);
         } else {
-            thread->callbackQI(iq, numSamples*2);
+            thread->callbackQI(thread->m_iq, iqLen);
         }
+
+        // Shuffle buffer up
+        int iqRemaining = thread->m_iqCount - iqLen;
+        memmove(thread->m_iq, &thread->m_iq[iqLen], iqRemaining * sizeof(qint16));
+        thread->m_iqCount = iqRemaining;
     }
 }
 
