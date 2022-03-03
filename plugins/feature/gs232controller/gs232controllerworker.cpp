@@ -45,8 +45,6 @@ GS232ControllerWorker::GS232ControllerWorker() :
     m_spidStatusSent(false),
     m_rotCtlDReadAz(false)
 {
-    connect(&m_pollTimer, SIGNAL(timeout()), this, SLOT(update()));
-    m_pollTimer.start(1000);
 }
 
 GS232ControllerWorker::~GS232ControllerWorker()
@@ -69,6 +67,15 @@ bool GS232ControllerWorker::startWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+    connect(thread(), SIGNAL(started()), this, SLOT(started()));
+    connect(thread(), SIGNAL(finished()), this, SLOT(finished()));
+    m_running = true;
+    return m_running;
+}
+
+// startWork() is called from main thread. Serial ports on Linux need to be opened/closed on worker thread
+void GS232ControllerWorker::started()
+{
     connect(&m_serialPort, &QSerialPort::readyRead, this, &GS232ControllerWorker::readData);
     connect(&m_socket, &QTcpSocket::readyRead, this, &GS232ControllerWorker::readData);
     if (m_settings.m_connection == GS232ControllerSettings::TCP) {
@@ -76,21 +83,29 @@ bool GS232ControllerWorker::startWork()
     } else {
         m_device = openSerialPort(m_settings);
     }
-    m_running = true;
-    return m_running;
+    connect(&m_pollTimer, SIGNAL(timeout()), this, SLOT(update()));
+    m_pollTimer.start(1000);
+    disconnect(thread(), SIGNAL(started()), this, SLOT(started()));
 }
 
 void GS232ControllerWorker::stopWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
+    disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+}
+
+void GS232ControllerWorker::finished()
+{
     // Close serial port as USB/controller activity can create RFI
     if (m_device && m_device->isOpen()) {
         m_device->close();
     }
-    disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
     disconnect(&m_serialPort, &QSerialPort::readyRead, this, &GS232ControllerWorker::readData);
     disconnect(&m_socket, &QTcpSocket::readyRead, this, &GS232ControllerWorker::readData);
+    m_pollTimer.stop();
+    disconnect(&m_pollTimer, SIGNAL(timeout()), this, SLOT(update()));
     m_running = false;
+    disconnect(thread(), SIGNAL(finished()), this, SLOT(finished()));
 }
 
 void GS232ControllerWorker::handleInputMessages()
