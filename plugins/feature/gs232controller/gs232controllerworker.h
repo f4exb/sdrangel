@@ -95,6 +95,8 @@ private:
     void setAzimuthElevation(float azimuth, float elevation);
 
 private slots:
+    void started();
+    void finished();
     void handleInputMessages();
     void readData();
     void update();
