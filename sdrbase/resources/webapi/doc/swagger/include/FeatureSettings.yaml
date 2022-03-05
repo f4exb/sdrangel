@@ -31,6 +31,8 @@ FeatureSettings:
       $ref: "/doc/swagger/include/Map.yaml#/MapSettings"
     PERTesterSettings:
       $ref: "/doc/swagger/include/PERTester.yaml#/PERTesterSettings"
+    RadiosondeSettings:
+      $ref: "/doc/swagger/include/Radiosonde.yaml#/RadiosondeSettings"
     RigCtlServerSettings:
       $ref: "/doc/swagger/include/RigCtlServer.yaml#/RigCtlServerSettings"
     SatelliteTrackerSettings:

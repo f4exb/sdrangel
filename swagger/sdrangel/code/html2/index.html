@@ -3350,6 +3350,9 @@ margin-bottom: 20px;
     "RadioClockReport" : {
       "$ref" : "#/definitions/RadioClockReport"
     },
+    "RadiosondeDemodReport" : {
+      "$ref" : "#/definitions/RadiosondeDemodReport"
+    },
     "RemoteSourceReport" : {
       "$ref" : "#/definitions/RemoteSourceReport"
     },
@@ -3510,6 +3513,9 @@ margin-bottom: 20px;
     },
     "RadioClockSettings" : {
       "$ref" : "#/definitions/RadioClockSettings"
+    },
+    "RadiosondeDemodSettings" : {
+      "$ref" : "#/definitions/RadiosondeDemodSettings"
     },
     "RemoteSinkSettings" : {
       "$ref" : "#/definitions/RemoteSinkSettings"
@@ -5446,6 +5452,9 @@ margin-bottom: 20px;
     },
     "PERTesterSettings" : {
       "$ref" : "#/definitions/PERTesterSettings"
+    },
+    "RadiosondeSettings" : {
+      "$ref" : "#/definitions/RadiosondeSettings"
     },
     "RigCtlServerSettings" : {
       "$ref" : "#/definitions/RigCtlServerSettings"
@@ -10229,6 +10238,127 @@ margin-bottom: 20px;
     }
   },
   "description" : "RadioClock"
+};
+            defs.RadiosondeDemodReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power received in channel (dB)"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "RadiosondeDemod"
+};
+            defs.RadiosondeDemodSettings = {
+  "properties" : {
+    "baud" : {
+      "type" : "integer",
+      "description" : "baud rate (nominal is 4800)"
+    },
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "fmDeviation" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "correlationThreshold" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "udpEnabled" : {
+      "type" : "integer",
+      "description" : "Whether to forward received messages to specified UDP port"
+    },
+    "udpAddress" : {
+      "type" : "string",
+      "description" : "UDP address to forward received messages to"
+    },
+    "udpPort" : {
+      "type" : "integer",
+      "description" : "UDP port to forward received messages to"
+    },
+    "logFilename" : {
+      "type" : "string"
+    },
+    "logEnabled" : {
+      "type" : "integer"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    },
+    "scopeConfig" : {
+      "$ref" : "#/definitions/GLScope"
+    },
+    "channelMarker" : {
+      "$ref" : "#/definitions/ChannelMarker"
+    },
+    "rollupState" : {
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "RadiosondeDemod"
+};
+            defs.RadiosondeSettings = {
+  "properties" : {
+    "title" : {
+      "type" : "string"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIFeatureSetIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIFeatureIndex" : {
+      "type" : "integer"
+    },
+    "rollupState" : {
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "Radiosonde settings"
 };
             defs.Range = {
   "properties" : {
@@ -52422,7 +52552,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2022-02-09T21:10:57.247+01:00
+              Generated 2022-03-05T04:59:37.901+01:00
             </div>
           </div>
       </div>

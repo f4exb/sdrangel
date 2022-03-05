@@ -59,6 +59,8 @@ ChannelReport:
       $ref: "/doc/swagger/include/RadioAstronomy.yaml#/RadioAstronomyReport"
     RadioClockReport:
       $ref: "/doc/swagger/include/RadioClock.yaml#/RadioClockReport"
+    RadiosondeDemodReport:
+      $ref: "/doc/swagger/include/RadiosondeDemod.yaml#/RadiosondeDemodReport"
     RemoteSourceReport:
       $ref: "/doc/swagger/include/RemoteSource.yaml#/RemoteSourceReport"
     PacketDemodReport:

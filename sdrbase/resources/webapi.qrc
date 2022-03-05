@@ -79,6 +79,8 @@
         <file>webapi/doc/swagger/include/Preferences.yaml</file>
         <file>webapi/doc/swagger/include/Preset.yaml</file>
         <file>webapi/doc/swagger/include/RadioAstronomy.yaml</file>
+        <file>webapi/doc/swagger/include/Radiosonde.yaml</file>
+        <file>webapi/doc/swagger/include/RadiosondeDemod.yaml</file>
         <file>webapi/doc/swagger/include/RtlSdr.yaml</file>
         <file>webapi/doc/swagger/include/RadioClock.yaml</file>
         <file>webapi/doc/swagger/include/RemoteSink.yaml</file>
