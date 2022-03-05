@@ -21,7 +21,7 @@ if(ENABLE_BLADERF AND LIBBLADERF_FOUND)
     add_subdirectory(bladerf2input)
 endif()
 
-if(ENABLE_FUNCUBE AND UNIX AND LIBUSB_FOUND)
+if(ENABLE_FUNCUBE AND UNIX AND LIBUSB_FOUND AND HIDAPI_FOUND)
     add_subdirectory(fcdpro)
     add_subdirectory(fcdproplus)
 endif()

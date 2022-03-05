@@ -11,6 +11,7 @@ set(fcdhid_HEADERS
 
 include_directories(
     ${LIBUSB_INCLUDE_DIR}
+	${HIDAPI_INCLUDE_DIRS}
     ${ICONV_INCLUDE_DIR}
     ${CUSTOM_APPLE_INCLUDE}
 )
@@ -21,6 +22,7 @@ add_library(fcdhid SHARED
 
 target_link_libraries(fcdhid
     ${LIBUSB_LIBRARIES}
+	${HIDAPI_LIBRARIES}
     ${ICONV_LIBRARY}
 )
 
