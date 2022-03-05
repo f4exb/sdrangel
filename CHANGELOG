@@ -1,3 +1,15 @@
+sdrangel (6.20.0-1) unstable; urgency=medium
+
+  * New radiosonde plugin. PR #1170. Implements #1081.
+  * Message pipes rework. Partially implements #1154
+  * Lime SDR inout: fix antenna names in GUI combobox. PR #1162
+  * HttpDownloadManager - Fix Google Drive downloads. PR #1164
+  * Rotator controller: Open/close serial ports in worker thread. Issue #1153. PR #1171
+  * SDRPlayV2 and USRP: Ensure decimation length is power of two. Issue #1161, PR #1172
+  * ValueDialZ: fix find exponent. Issue #1158
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 05 Mar 2022 03:56:54 +0100
+
 sdrangel (6.19.1-1) unstable; urgency=medium
 
   * Fix stereo sound in DAB demod. PR #1150.

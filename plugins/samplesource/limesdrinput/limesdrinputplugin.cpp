@@ -35,7 +35,7 @@
 const PluginDescriptor LimeSDRInputPlugin::m_pluginDescriptor = {
     QStringLiteral("LimeSDR"),
     QStringLiteral("LimeSDR Input"),
-    QStringLiteral("4.19.0"),
+    QStringLiteral("6.20.0"),
     QStringLiteral("(c) Edouard Griffiths, F4EXB"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,
