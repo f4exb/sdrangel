@@ -349,7 +349,6 @@ find_package(PkgConfig REQUIRED)
 find_package(Boost REQUIRED)
 find_package(FFTW3F REQUIRED)
 find_package(LibUSB REQUIRED)  # used by so many packages
-find_package(HIDAPI) # For FCD
 find_package(OpenCV OPTIONAL_COMPONENTS core highgui imgproc imgcodecs videoio) # channeltx/modatv
 find_package(LibSigMF) # SigMF recording files support
 if(NOT WIN32)
@@ -449,7 +448,7 @@ if(ENABLE_USRP)
   find_package(UHD)
 endif()
 
-if(ENABLE_FUNCUBE AND UNIX AND LIBUSB_FOUND AND HIDAPI_FOUND)
+if(ENABLE_FUNCUBE AND UNIX AND LIBUSB_FOUND)
     add_subdirectory(fcdlib)
     add_subdirectory(fcdhid)
 endif()

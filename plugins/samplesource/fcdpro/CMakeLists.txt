@@ -17,9 +17,8 @@ set(fcdpro_HEADERS
 )
 
 include_directories(
-    ${HIDAPI_INCLUDE_DIRS}
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
-    ${CMAKE_SOURCE_DIR}/fcdhid
+        ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+        ${CMAKE_SOURCE_DIR}/fcdhid
 	${CMAKE_SOURCE_DIR}/fcdlib
 )
 
@@ -27,6 +26,7 @@ if(NOT SERVER_MODE)
     set(fcdpro_SOURCES
         ${fcdpro_SOURCES}
         fcdprogui.cpp
+
         fcdprogui.ui
     )
     set(fcdpro_HEADERS
@@ -50,14 +50,13 @@ add_library(${TARGET_NAME} SHARED
 )
 
 target_link_libraries(${TARGET_NAME}
-    ${HIDAPI_LIBRARIES}
-    Qt5::Core
-    ${TARGET_LIB}
+        Qt5::Core
+        ${TARGET_LIB}
 	sdrbase
 	${TARGET_LIB_GUI}
-    swagger
-    fcdhid
-    fcdlib
+        swagger
+        fcdhid
+        fcdlib
 )
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
