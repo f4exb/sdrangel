@@ -448,10 +448,12 @@ if(ENABLE_USRP)
   find_package(UHD)
 endif()
 
-# if(ENABLE_FUNCUBE AND UNIX AND LIBUSB_FOUND)
-#     add_subdirectory(fcdlib)
-#     add_subdirectory(fcdhid)
-# endif()
+find_package(HIDAPI)
+
+if(ENABLE_FUNCUBE AND UNIX AND LIBUSB_FOUND AND HIDAPI_FOUND)
+    add_subdirectory(fcdlib)
+    add_subdirectory(fcdhid)
+endif()
 
 # base libraries
 add_subdirectory(sdrbase)
