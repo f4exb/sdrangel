@@ -2229,6 +2229,11 @@ void GLSpectrum::applyChanges()
 
 void GLSpectrum::updateHistogramMarkers()
 {
+    int64_t centerFrequency;
+    int frequencySpan;
+    getFrequencyZoom(centerFrequency, frequencySpan);
+    int effFftSize = m_fftSize * ((float) frequencySpan / (float) m_sampleRate);
+
     for (int i = 0; i < m_histogramMarkers.size(); i++)
     {
         float powerI = m_linear ?
@@ -2238,8 +2243,10 @@ void GLSpectrum::updateHistogramMarkers()
             (m_histogramMarkers[i].m_frequency - m_frequencyScale.getRangeMin()) / m_frequencyScale.getRange();
         m_histogramMarkers[i].m_point.ry() =
             (m_powerScale.getRangeMax() - powerI) / m_powerScale.getRange();
+        // m_histogramMarkers[i].m_fftBin =
+        //     (((m_histogramMarkers[i].m_frequency - m_centerFrequency) / (float) m_sampleRate) + 0.5) * m_fftSize;
         m_histogramMarkers[i].m_fftBin =
-            (((m_histogramMarkers[i].m_frequency - m_centerFrequency) / (float) m_sampleRate) * m_fftSize) + (m_fftSize / 2);
+            (((m_histogramMarkers[i].m_frequency - centerFrequency) / (float) frequencySpan) + 0.5) * effFftSize;
         m_histogramMarkers[i].m_point.rx() = m_histogramMarkers[i].m_point.rx() < 0 ?
             0 : m_histogramMarkers[i].m_point.rx() > 1 ?
                 1 : m_histogramMarkers[i].m_point.rx();
