@@ -235,6 +235,10 @@ void ADSBDemodSink::applyChannelSettings(int channelSampleRate, int channelFrequ
             << " channelSampleRate: " << channelSampleRate
             << " channelFrequencyOffset: " << channelFrequencyOffset;
 
+    if (channelSampleRate == 0) {
+        return;
+    }
+
     if ((channelFrequencyOffset != m_channelFrequencyOffset) ||
         (channelSampleRate != m_channelSampleRate) || force)
     {
