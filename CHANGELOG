@@ -1,3 +1,11 @@
+sdrangel (6.20.1-1) unstable; urgency=medium
+
+  * Removed built in HIDAPI. Fixes #1160
+  * ADSB demod: do not process channel sample rate when it is zero. Fixes #1165
+  * Fixed spectrum markers dynamic values. Fixes #1140
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 09 Mar 2022 18:11:18 +0100
+
 sdrangel (6.20.0-1) unstable; urgency=medium
 
   * New radiosonde plugin. PR #1170. Implements #1081.

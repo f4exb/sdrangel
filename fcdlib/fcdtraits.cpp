@@ -35,8 +35,8 @@ const char *fcd_traits<ProPlus>::displayedName = "FunCube Dongle Pro+";
 const char *fcd_traits<Pro>::pluginDisplayedName = "FunCube Pro Input";
 const char *fcd_traits<ProPlus>::pluginDisplayedName = "FunCube Pro+ Input";
 
-const char *fcd_traits<Pro>::pluginVersion = "4.19.0";
-const char *fcd_traits<ProPlus>::pluginVersion = "4.19.0";
+const char *fcd_traits<Pro>::pluginVersion = "6.20.1";
+const char *fcd_traits<ProPlus>::pluginVersion = "6.20.1";
 
 const int64_t fcd_traits<Pro>::loLowLimitFreq = 64000000L;
 const int64_t fcd_traits<ProPlus>::loLowLimitFreq = 150000L;
