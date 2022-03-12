@@ -122,6 +122,20 @@ void MainCore::setLoggingOptions()
     }
 }
 
+DeviceAPI *MainCore::getDevice(unsigned int deviceSetIndex)
+{
+    if (deviceSetIndex < m_deviceSets.size()) {
+        return m_deviceSets[deviceSetIndex]->m_deviceAPI;
+    } else {
+        return nullptr;
+    }
+}
+
+void MainCore::sendDeviceChanged(int deviceSetIndex)
+{
+    emit deviceChanged(deviceSetIndex);
+}
+
 ChannelAPI *MainCore::getChannel(unsigned int deviceSetIndex, int channelIndex)
 {
     if (deviceSetIndex < m_deviceSets.size()) {
@@ -146,6 +160,7 @@ void MainCore::appendFeatureSet()
     FeatureSet *featureSet = new FeatureSet(newIndex);
     m_featureSets.push_back(featureSet);
     m_featureSetsMap.insert(featureSet, newIndex);
+    emit featureSetAdded(newIndex);
 }
 
 void MainCore::removeFeatureSet(unsigned int index)
@@ -155,6 +170,7 @@ void MainCore::removeFeatureSet(unsigned int index)
         FeatureSet *featureSet = m_featureSets[index];
         m_featureSetsMap.remove(featureSet);
         m_featureSets.erase(m_featureSets.begin() + index);
+        emit featureSetRemoved(index);
     }
 }
 
@@ -162,9 +178,11 @@ void MainCore::removeLastFeatureSet()
 {
     if (m_featureSets.size() != 0)
     {
+        int size = m_featureSets.size();
         FeatureSet *featureSet = m_featureSets.back();
         m_featureSetsMap.remove(featureSet);
         m_featureSets.pop_back();
+        emit featureSetRemoved(size - 1);
     }
 }
 
@@ -174,21 +192,25 @@ void MainCore::appendDeviceSet(int deviceType)
     DeviceSet *deviceSet = new DeviceSet(newIndex, deviceType);
     m_deviceSets.push_back(deviceSet);
     m_deviceSetsMap.insert(deviceSet, newIndex);
+    emit deviceSetAdded(newIndex, deviceSet->m_deviceAPI);
 }
 
 void MainCore::removeLastDeviceSet()
 {
     if (m_deviceSets.size() != 0)
     {
+        int size = m_deviceSets.size();
         DeviceSet *deviceSet = m_deviceSets.back();
         m_deviceSetsMap.remove(deviceSet);
         m_deviceSets.pop_back();
+        emit deviceSetRemoved(size - 1);
     }
 }
 
 void MainCore::addChannelInstance(DeviceSet *deviceSet, ChannelAPI *channelAPI)
 {
     m_channelsMap.insert(channelAPI, deviceSet);
+    emit channelAdded(m_deviceSetsMap[deviceSet], channelAPI);
     // debugMaps();
 }
 
@@ -197,15 +219,20 @@ void MainCore::removeChannelInstanceAt(DeviceSet *deviceSet, int channelIndex)
     int deviceSetIndex = m_deviceSetsMap[deviceSet];
     ChannelAPI *channelAPI = m_deviceSets[deviceSetIndex]->getChannelAt(channelIndex);
 
-    if (channelAPI) {
+    if (channelAPI)
+    {
         m_channelsMap.remove(channelAPI);
+        emit channelRemoved(deviceSetIndex, channelAPI);
     }
 }
 
 void MainCore::removeChannelInstance(ChannelAPI *channelAPI)
 {
-    if (channelAPI) {
+    if (channelAPI)
+    {
+        int deviceSetIndex = m_deviceSetsMap[m_channelsMap[channelAPI]];
         m_channelsMap.remove(channelAPI);
+        emit channelRemoved(deviceSetIndex, channelAPI);
     }
 }
 
@@ -215,12 +242,14 @@ void MainCore::clearChannels(DeviceSet *deviceSet)
     {
         ChannelAPI *channelAPI = deviceSet->getChannelAt(i);
         m_channelsMap.remove(channelAPI);
+        emit channelRemoved(m_deviceSetsMap[deviceSet], channelAPI);
     }
 }
 
 void MainCore::addFeatureInstance(FeatureSet *featureSet, Feature *feature)
 {
     m_featuresMap.insert(feature, featureSet);
+    emit featureAdded(m_featureSetsMap[featureSet], feature);
     // debugMaps();
 }
 
@@ -229,15 +258,20 @@ void MainCore::removeFeatureInstanceAt(FeatureSet *featureSet, int featureIndex)
     int featureSetIndex = m_featureSetsMap[featureSet];
     Feature *feature = m_featureSets[featureSetIndex]->getFeatureAt(featureIndex);
 
-    if (feature) {
+    if (feature)
+    {
         m_featuresMap.remove(feature);
+        emit featureRemoved(featureSetIndex, feature);
     }
 }
 
 void MainCore::removeFeatureInstance(Feature *feature)
 {
-    if (feature) {
+    if (feature)
+    {
+        int featureSetIndex = m_featureSetsMap[m_featuresMap[feature]];
         m_featuresMap.remove(feature);
+        emit featureRemoved(featureSetIndex, feature);
     }
 }
 
@@ -247,6 +281,7 @@ void MainCore::clearFeatures(FeatureSet *featureSet)
     {
         Feature *feature = featureSet->getFeatureAt(i);
         m_featuresMap.remove(feature);
+        emit featureRemoved(m_featureSetsMap[featureSet], feature);
     }
 }
 

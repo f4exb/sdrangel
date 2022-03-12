@@ -23,6 +23,7 @@
 #include <QMap>
 #include <QTimer>
 #include <QDateTime>
+#include <QObject>
 
 #include "export.h"
 #include "settings/mainsettings.h"
@@ -53,8 +54,9 @@ namespace SWGSDRangel
     class SWGStarTrackerDisplayLoSSettings;
 }
 
-class SDRBASE_API MainCore
+class SDRBASE_API MainCore : public QObject
 {
+    Q_OBJECT
 public:
 	class SDRBASE_API MsgDeviceSetFocus : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -710,6 +712,8 @@ public:
     std::vector<DeviceSet*>& getDeviceSets() { return m_deviceSets; }
     std::vector<FeatureSet*>& getFeatureeSets() { return m_featureSets; }
     void setLoggingOptions();
+    DeviceAPI *getDevice(unsigned int deviceSetIndex);
+    void sendDeviceChanged(int deviceSetIndex);
     ChannelAPI *getChannel(unsigned int deviceSetIndex, int channelIndex);
     Feature *getFeature(unsigned int featureSetIndex, int featureIndex);
     bool existsChannel(const ChannelAPI *channel) const { return m_channelsMap.contains(const_cast<ChannelAPI*>(channel)); }
@@ -738,6 +742,17 @@ public:
     friend class MainServer;
     friend class MainWindow;
     friend class WebAPIAdapter;
+
+signals:
+    void deviceSetAdded(int index, DeviceAPI *device);
+    void deviceChanged(int index);
+    void deviceSetRemoved(int index);
+    void channelAdded(int deviceSetIndex, ChannelAPI *channel);
+    void channelRemoved(int deviceSetIndex, ChannelAPI *oldChannel);
+    void featureSetAdded(int index);
+    void featureSetRemoved(int index);
+    void featureAdded(int featureSetIndex, Feature *feature);
+    void featureRemoved(int featureSetIndex, Feature *oldFeature);
 
 private:
     MainSettings m_settings;

@@ -1963,6 +1963,8 @@ void MainWindow::samplingDeviceChanged(int deviceType, int tabIndex, int newDevi
     } else if (deviceType == 2) {
         sampleMIMOChanged(tabIndex, newDeviceIndex);
     }
+
+    MainCore::instance()->sendDeviceChanged(tabIndex);
 }
 
 void MainWindow::sampleSourceChanged(int tabIndex, int newDeviceIndex)

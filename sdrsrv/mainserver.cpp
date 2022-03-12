@@ -529,6 +529,9 @@ void MainServer::changeSampleSource(int deviceSetIndex, int selectedDeviceIndex)
         deviceSet->m_deviceAPI->setSampleSource(source);
 
         deviceSet->m_deviceAPI->loadSamplingDeviceSettings(m_mainCore->m_settings.getWorkingPreset()); // load new API settings
+
+        // Notify
+        m_mainCore->sendDeviceChanged(deviceSetIndex);
     }
 }
 
