@@ -30,6 +30,7 @@
 #include "dsp/dspdevicesourceengine.h"
 #include "dsp/devicesamplesource.h"
 #include "device/deviceset.h"
+#include "device/deviceapi.h"
 #include "channel/channelapi.h"
 #include "settings/serializable.h"
 #include "maincore.h"
@@ -57,10 +58,12 @@ VORLocalizer::VORLocalizer(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_errorMessage = "VORLocalizer error";
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    connect(MainCore::instance(), SIGNAL(channelAdded(int, ChannelAPI*)), this, SLOT(handleChannelAdded(int, ChannelAPI*)));
 }
 
 VORLocalizer::~VORLocalizer()
 {
+    disconnect(MainCore::instance(), SIGNAL(channelAdded(int, ChannelAPI*)), this, SLOT(handleChannelAdded(int, ChannelAPI*)));
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
     if (m_worker->isRunning()) {
@@ -381,28 +384,7 @@ void VORLocalizer::updateChannels()
         }
     }
 
-    if (getMessageQueueToGUI())
-    {
-        VORLocalizerReport::MsgReportChannels *msgToGUI = VORLocalizerReport::MsgReportChannels::create();
-        std::vector<VORLocalizerReport::MsgReportChannels::Channel>& msgChannels = msgToGUI->getChannels();
-        // TODO: check https://github.com/microsoft/vscode-cpptools/issues/6222
-        QHash<ChannelAPI*, VORLocalizerSettings::AvailableChannel>::iterator it = m_availableChannels.begin();
-
-        for (; it != m_availableChannels.end(); ++it)
-        {
-            VORLocalizerReport::MsgReportChannels::Channel msgChannel =
-                VORLocalizerReport::MsgReportChannels::Channel{
-                    it->m_deviceSetIndex,
-                    it->m_channelIndex
-                };
-            msgChannels.push_back(msgChannel);
-        }
-
-        getMessageQueueToGUI()->push(msgToGUI);
-    }
-
-    VorLocalizerWorker::MsgRefreshChannels *msgToWorker = VorLocalizerWorker::MsgRefreshChannels::create();
-    m_worker->getInputMessageQueue()->push(msgToWorker);
+    notifyUpdateChannels();
 }
 
 int VORLocalizer::webapiRun(bool run,
@@ -664,4 +646,65 @@ void VORLocalizer::handleChannelMessageQueue(MessageQueue* messageQueue)
             delete message;
         }
     }
+}
+
+void VORLocalizer::handleChannelAdded(int deviceSetIndex, ChannelAPI *channel)
+{
+    qDebug(" VORLocalizer::handleChannelAdded: deviceSetIndex: %d channel: %s", deviceSetIndex, qPrintable(channel->getURI()));
+    DeviceAPI *device = MainCore::instance()->getDevice(deviceSetIndex);
+    DSPDeviceSourceEngine *deviceSourceEngine =  device->getDeviceSourceEngine();
+
+    if (deviceSourceEngine && (channel->getURI() == "sdrangel.channel.vordemodsc"))
+    {
+        DeviceSampleSource *deviceSource = deviceSourceEngine->getSource();
+        quint64 deviceCenterFrequency = deviceSource->getCenterFrequency();
+        int basebandSampleRate = deviceSource->getSampleRate();
+        int chi = channel->getIndexInDeviceSet();
+
+        if (!m_availableChannels.contains(channel))
+        {
+            MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
+            ObjectPipe *pipe = messagePipes.registerProducerToConsumer(channel, this, "report");
+            MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+            QObject::connect(
+                messageQueue,
+                &MessageQueue::messageEnqueued,
+                this,
+                [=](){ this->handleChannelMessageQueue(messageQueue); },
+                Qt::QueuedConnection
+            );
+            connect(pipe, SIGNAL(toBeDeleted(int, QObject*)), this, SLOT(handleMessagePipeToBeDeleted(int, QObject*)));
+        }
+
+        VORLocalizerSettings::AvailableChannel availableChannel =
+            VORLocalizerSettings::AvailableChannel{deviceSetIndex, chi, channel, deviceCenterFrequency, basebandSampleRate, -1};
+        m_availableChannels[channel] = availableChannel;
+
+        notifyUpdateChannels();
+    }
+}
+
+void VORLocalizer::notifyUpdateChannels()
+{
+    if (getMessageQueueToGUI())
+    {
+        VORLocalizerReport::MsgReportChannels *msgToGUI = VORLocalizerReport::MsgReportChannels::create();
+        std::vector<VORLocalizerReport::MsgReportChannels::Channel>& msgChannels = msgToGUI->getChannels();
+        QHash<ChannelAPI*, VORLocalizerSettings::AvailableChannel>::iterator it = m_availableChannels.begin();
+
+        for (; it != m_availableChannels.end(); ++it)
+        {
+            VORLocalizerReport::MsgReportChannels::Channel msgChannel =
+                VORLocalizerReport::MsgReportChannels::Channel{
+                    it->m_deviceSetIndex,
+                    it->m_channelIndex
+                };
+            msgChannels.push_back(msgChannel);
+        }
+
+        getMessageQueueToGUI()->push(msgToGUI);
+    }
+
+    VorLocalizerWorker::MsgRefreshChannels *msgToWorker = VorLocalizerWorker::MsgRefreshChannels::create();
+    m_worker->getInputMessageQueue()->push(msgToWorker);
 }

@@ -212,6 +212,7 @@ private:
     void stop();
     void applySettings(const VORLocalizerSettings& settings, bool force = false);
     void updateChannels();
+    void notifyUpdateChannels();
     void webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const VORLocalizerSettings& settings, bool force);
     void webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response);
 
@@ -219,6 +220,7 @@ private slots:
     void networkManagerFinished(QNetworkReply *reply);
     void handleChannelMessageQueue(MessageQueue* messageQueue);
     void handleMessagePipeToBeDeleted(int reason, QObject* object);
+    void handleChannelAdded(int deviceSetIndex, ChannelAPI *channel);
 };
 
 #endif // INCLUDE_FEATURE_VORLOCALIZER_H_
