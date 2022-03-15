@@ -32,6 +32,9 @@ private:
 	QElapsedTimer m_msgRateTimer;
 	int m_suppressed;
 	SampleVector m_data;
+	int m_total;
+	unsigned int m_writtenSignalCount;
+	unsigned int m_writtenSignalRateDivider;
 	QMutex m_mutex;
 
 	unsigned int m_size;
@@ -49,6 +52,7 @@ public:
 
 	bool setSize(int size);
     void reset();
+	void setWrittenSignalRateDivider(unsigned int divider);
 	inline unsigned int size() { QMutexLocker mutexLocker(&m_mutex); unsigned int size = m_size; return size; }
 	inline unsigned int fill() { QMutexLocker mutexLocker(&m_mutex); unsigned int fill = m_fill; return fill; }
 
@@ -65,6 +69,9 @@ public:
 
 signals:
 	void dataReady();
+	void written(int nsamples, qint64 timestamp);
+	void overflow(int nsamples);
+	void underflow(int nsamples);
 };
 
 #endif // INCLUDE_SAMPLEFIFO_H

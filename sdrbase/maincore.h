@@ -22,6 +22,7 @@
 
 #include <QMap>
 #include <QTimer>
+#include <QElapsedTimer>
 #include <QDateTime>
 #include <QObject>
 
@@ -706,6 +707,8 @@ public:
 	static MainCore *instance();
 
     const QTimer& getMasterTimer() const { return m_masterTimer; }
+    qint64 getElapsedNsecs() const { return m_masterElapsedTimer.nsecsElapsed(); } //!< Elapsed nanoseconds since main core construction
+    qint64 getStartMsecsSinceEpoch() const { return m_startMsecsSinceEpoch; } //!< Epoch timestamp in millisecodns close to elapsed timer start
     const MainSettings& getSettings() const { return m_settings; }
     MessageQueue *getMainMessageQueue() { return m_mainMessageQueue; }
     const PluginManager *getPluginManager() const { return m_pluginManager; }
@@ -760,6 +763,8 @@ private:
     MessageQueue *m_mainMessageQueue;
     int m_masterTabIndex;
     QTimer m_masterTimer;
+    QElapsedTimer m_masterElapsedTimer;
+    qint64 m_startMsecsSinceEpoch;
     std::vector<DeviceSet*> m_deviceSets;
     std::vector<FeatureSet*> m_featureSets;
     QMap<DeviceSet*, int> m_deviceSetsMap;       //!< Device set instance to device set index map

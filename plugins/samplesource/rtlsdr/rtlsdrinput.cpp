@@ -100,6 +100,8 @@ bool RTLSDRInput::openDevice()
         return false;
     }
 
+    m_sampleFifo.setWrittenSignalRateDivider(32);
+
     int device;
 
     if ((device = rtlsdr_get_index_by_serial(qPrintable(m_deviceAPI->getSamplingDeviceSerial()))) < 0)

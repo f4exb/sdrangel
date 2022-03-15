@@ -62,6 +62,8 @@ MainCore::MainCore()
 {
 	m_masterTimer.setTimerType(Qt::PreciseTimer);
 	m_masterTimer.start(50);
+    m_startMsecsSinceEpoch = QDateTime::currentMSecsSinceEpoch();
+    m_masterElapsedTimer.start();
 }
 
 MainCore::~MainCore()
