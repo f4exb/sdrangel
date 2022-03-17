@@ -31,9 +31,6 @@
   <property name="windowTitle">
    <string>Frequency Tracker</string>
   </property>
-  <property name="statusTip">
-   <string>Frequency Tracker</string>
-  </property>
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">
     <rect>

@@ -34,9 +34,6 @@
   <property name="windowTitle">
    <string>Radio Clock</string>
   </property>
-  <property name="statusTip">
-   <string>Radio Clock</string>
-  </property>
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">
     <rect>

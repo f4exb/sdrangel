@@ -31,9 +31,6 @@
   <property name="windowTitle">
    <string>UDP Sample Sink</string>
   </property>
-  <property name="statusTip">
-   <string>UDP Sample Sink</string>
-  </property>
   <widget class="QWidget" name="widget" native="true">
    <property name="geometry">
     <rect>

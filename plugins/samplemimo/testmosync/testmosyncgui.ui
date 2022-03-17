@@ -31,9 +31,6 @@
   <property name="windowTitle">
    <string>Test MO Sync</string>
   </property>
-  <property name="statusTip">
-   <string>Test MO Sync</string>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
     <number>3</number>

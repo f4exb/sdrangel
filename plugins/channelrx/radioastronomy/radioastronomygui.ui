@@ -34,9 +34,6 @@
   <property name="windowTitle">
    <string>Radio Astronomy</string>
   </property>
-  <property name="statusTip">
-   <string/>
-  </property>
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">
     <rect>
@@ -2170,9 +2167,6 @@ This should be 2.73K when pointing at the sky</string>
          </property>
          <property name="toolTip">
           <string>Continuously scale X and Y axis so all data is visible</string>
-         </property>
-         <property name="statusTip">
-          <string/>
          </property>
          <property name="text">
           <string>A</string>
@@ -4341,9 +4335,6 @@ This should be close to the expected difference in power between hot and cold ca
          <property name="toolTip">
           <string>Automatically scale axes range based on data in radiometer table</string>
          </property>
-         <property name="statusTip">
-          <string/>
-         </property>
          <property name="text">
           <string>A</string>
          </property>
@@ -4457,9 +4448,6 @@ This should be close to the expected difference in power between hot and cold ca
          </property>
          <property name="toolTip">
           <string>Automatically scale colour gradient to range from minimum and maximum values</string>
-         </property>
-         <property name="statusTip">
-          <string/>
          </property>
          <property name="text">
           <string>A</string>

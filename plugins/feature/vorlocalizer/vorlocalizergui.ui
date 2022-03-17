@@ -34,9 +34,6 @@
   <property name="windowTitle">
    <string>VOR Localizer</string>
   </property>
-  <property name="statusTip">
-   <string>VOR Localizer</string>
-  </property>
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">
     <rect>

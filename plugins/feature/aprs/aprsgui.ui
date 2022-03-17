@@ -34,9 +34,6 @@
   <property name="windowTitle">
    <string>APRS</string>
   </property>
-  <property name="statusTip">
-   <string>APRS</string>
-  </property>
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">
     <rect>

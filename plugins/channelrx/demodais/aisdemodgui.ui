@@ -34,9 +34,6 @@
   <property name="windowTitle">
    <string>AIS Demodulator</string>
   </property>
-  <property name="statusTip">
-   <string>AIS Demodulator</string>
-  </property>
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">
     <rect>

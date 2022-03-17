@@ -33,9 +33,6 @@
   <property name="windowTitle">
    <string>APT Demodulator</string>
   </property>
-  <property name="statusTip">
-   <string>APT Demodulator</string>
-  </property>
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">
     <rect>

@@ -34,9 +34,6 @@
   <property name="windowTitle">
    <string>Packet Demodulator</string>
   </property>
-  <property name="statusTip">
-   <string>Packet Demodulator</string>
-  </property>
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">
     <rect>

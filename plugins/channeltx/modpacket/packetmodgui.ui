@@ -396,9 +396,6 @@
         <property name="toolTip">
          <string>Audio input gain value</string>
         </property>
-        <property name="statusTip">
-         <string/>
-        </property>
         <property name="text">
          <string>-80.0dB</string>
         </property>

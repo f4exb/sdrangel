@@ -37,9 +37,6 @@
   <property name="toolTip">
    <string/>
   </property>
-  <property name="statusTip">
-   <string>Broadcast FM Demod</string>
-  </property>
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">
     <rect>

@@ -34,9 +34,6 @@
   <property name="windowTitle">
    <string>DAB Demodulator</string>
   </property>
-  <property name="statusTip">
-   <string>DAB Demodulator</string>
-  </property>
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">
     <rect>

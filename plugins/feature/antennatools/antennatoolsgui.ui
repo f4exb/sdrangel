@@ -34,9 +34,6 @@
   <property name="windowTitle">
    <string>Antenna Tools</string>
   </property>
-  <property name="statusTip">
-   <string>AntennaTools</string>
-  </property>
   <widget class="QTabWidget" name="tabWidget">
    <property name="geometry">
     <rect>

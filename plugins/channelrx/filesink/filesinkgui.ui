@@ -25,9 +25,6 @@
   <property name="windowTitle">
    <string>File Sink</string>
   </property>
-  <property name="statusTip">
-   <string>File Sink</string>
-  </property>
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">
     <rect>
