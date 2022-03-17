@@ -68,6 +68,7 @@ public:
     void setBasebandSampleRate(int sampleRate);
     void setDecoderMessageQueue(MessageQueue *messageQueue) { m_sink.setDecoderMessageQueue(messageQueue); }
     void setSpectrumSink(BasebandSampleSink* spectrumSink) { m_sink.setSpectrumSink(spectrumSink); }
+    void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
 
 private:
     SampleSinkFifo m_sampleFifo;

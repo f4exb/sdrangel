@@ -72,6 +72,7 @@ public:
     void setBasebandSampleRate(int sampleRate);
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_messageQueueToGUI = messageQueue; }
     void setChannel(ChannelAPI *channel);
+    void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
 
 private:
     SampleSinkFifo m_sampleFifo;

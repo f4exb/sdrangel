@@ -46,6 +46,7 @@ SoapySDRInput::SoapySDRInput(DeviceAPI *deviceAPI) :
     m_running(false),
     m_thread(nullptr)
 {
+    m_sampleFifo.setLabel(m_deviceDescription);
     openDevice();
     initGainSettings(m_settings);
     initTunableElementsSettings(m_settings);

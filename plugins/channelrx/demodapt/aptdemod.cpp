@@ -61,6 +61,11 @@ APTDemod::APTDemod(DeviceAPI *deviceAPI) :
     setObjectName(m_channelId);
 
     m_basebandSink = new APTDemodBaseband(this);
+    m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
+        .arg(m_channelId)
+        .arg(m_deviceAPI->getDeviceSetIndex())
+        .arg(getIndexInDeviceSet())
+    );
     m_basebandSink->moveToThread(&m_thread);
 
     m_imageWorker = new APTDemodImageWorker(this);

@@ -60,6 +60,11 @@ DSDDemod::DSDDemod(DeviceAPI *deviceAPI) :
 
     m_thread = new QThread(this);
     m_basebandSink = new DSDDemodBaseband();
+    m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
+        .arg(m_channelId)
+        .arg(m_deviceAPI->getDeviceSetIndex())
+        .arg(getIndexInDeviceSet())
+    );
     m_basebandSink->setChannel(this);
     m_basebandSink->moveToThread(m_thread);
 

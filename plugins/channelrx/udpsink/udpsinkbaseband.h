@@ -88,6 +88,7 @@ public:
 	double getMagSq() const { return m_sink.getMagSq(); }
 	double getInMagSq() const { return m_sink.getInMagSq(); }
 	bool getSquelchOpen() const { return m_sink.getSquelchOpen(); }
+    void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
 
 private:
     SampleSinkFifo m_sampleFifo;

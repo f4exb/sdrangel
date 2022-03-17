@@ -51,6 +51,7 @@ AirspyInput::AirspyInput(DeviceAPI *deviceAPI) :
 	m_deviceDescription("Airspy"),
 	m_running(false)
 {
+    m_sampleFifo.setLabel(m_deviceDescription);
     openDevice();
     m_deviceAPI->setNbSourceStreams(1);
 

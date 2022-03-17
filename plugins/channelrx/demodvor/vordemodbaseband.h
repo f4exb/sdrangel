@@ -110,6 +110,7 @@ public:
             return 0.0;
     }
     bool isRunning() const { return m_running; }
+    void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
 
 private:
     SampleSinkFifo m_sampleFifo;

@@ -50,6 +50,7 @@ SDRPlayInput::SDRPlayInput(DeviceAPI *deviceAPI) :
     m_devNumber(0),
     m_running(false)
 {
+    m_sampleFifo.setLabel(m_deviceDescription);
     openDevice();
     m_deviceAPI->setNbSourceStreams(1);
 

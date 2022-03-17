@@ -47,6 +47,7 @@ HackRFInput::HackRFInput(DeviceAPI *deviceAPI) :
 	m_deviceDescription("HackRF"),
 	m_running(false)
 {
+    m_sampleFifo.setLabel(m_deviceDescription);
     openDevice();
 
     m_deviceAPI->setNbSourceStreams(1);

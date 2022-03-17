@@ -45,6 +45,7 @@ PlutoSDRInput::PlutoSDRInput(DeviceAPI *deviceAPI) :
     m_plutoRxBuffer(0),
     m_plutoSDRInputThread(nullptr)
 {
+    m_sampleFifo.setLabel(m_deviceDescription);
     m_deviceSampleRates.m_addaConnvRate = 0;
     m_deviceSampleRates.m_bbRateHz = 0;
     m_deviceSampleRates.m_firRate = 0;

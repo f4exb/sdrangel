@@ -74,6 +74,7 @@ public:
     Real getPllFrequency() const { return m_sink.getPllFrequency(); }
     void setChannel(ChannelAPI *channel);
     bool isRunning() const { return m_running; }
+    void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
 
 private:
     SampleSinkFifo m_sampleFifo;

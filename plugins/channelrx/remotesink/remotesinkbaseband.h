@@ -72,6 +72,7 @@ public:
     void setBasebandSampleRate(int sampleRate);
     void setDeviceIndex(uint32_t deviceIndex) { m_sink.setDeviceIndex(deviceIndex); }
     void setChannelIndex(uint32_t channelIndex) { m_sink.setChannelIndex(channelIndex); }
+    void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
 
 private:
     bool m_running;

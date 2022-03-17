@@ -54,6 +54,7 @@ LimeSDRInput::LimeSDRInput(DeviceAPI *deviceAPI) :
     m_running(false),
     m_channelAcquired(false)
 {
+    m_sampleFifo.setLabel(m_deviceDescription);
     m_streamId.handle = 0;
     suspendRxBuddies();
     suspendTxBuddies();

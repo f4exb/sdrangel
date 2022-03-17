@@ -45,6 +45,7 @@ FCDProPlusInput::FCDProPlusInput(DeviceAPI *deviceAPI) :
 	m_deviceDescription(fcd_traits<ProPlus>::displayedName),
 	m_running(false)
 {
+    m_sampleFifo.setLabel(m_deviceDescription);
     m_fcdFIFO.setSize(20*fcd_traits<ProPlus>::convBufSize);
     openDevice();
     m_deviceAPI->setNbSourceStreams(1);

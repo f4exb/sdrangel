@@ -57,6 +57,7 @@ USRPInput::USRPInput(DeviceAPI *deviceAPI) :
     m_channelAcquired(false),
     m_bufSamples(0)
 {
+    m_sampleFifo.setLabel(m_deviceDescription);
     m_streamId = nullptr;
     suspendRxBuddies();
     suspendTxBuddies();

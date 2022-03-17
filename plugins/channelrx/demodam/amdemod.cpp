@@ -34,6 +34,7 @@
 
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
+#include "dsp/devicesamplesource.h"
 #include "device/deviceapi.h"
 #include "feature/feature.h"
 #include "settings/serializable.h"
@@ -49,11 +50,17 @@ const int AMDemod::m_udpBlockSize = 512;
 AMDemod::AMDemod(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
-        m_basebandSampleRate(0)
+        m_basebandSampleRate(0),
+        m_lastTs(0)
 {
     setObjectName(m_channelId);
 
     m_basebandSink = new AMDemodBaseband();
+    m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
+        .arg(m_channelId)
+        .arg(m_deviceAPI->getDeviceSetIndex())
+        .arg(getIndexInDeviceSet())
+    );
     m_basebandSink->setChannel(this);
     m_basebandSink->moveToThread(&m_thread);
 
@@ -65,11 +72,25 @@ AMDemod::AMDemod(DeviceAPI *deviceAPI) :
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     connect(&m_channelMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessages()));
+    // Experimental:
+    // QObject::connect(
+    //     m_deviceAPI->getSampleSource()->getSampleFifo(),
+    //     &SampleSinkFifo::written,
+    //     this,
+    //     &AMDemod::handleWrittenToFifo
+    // );
 }
 
 AMDemod::~AMDemod()
 {
     qDebug("AMDemod::~AMDemod");
+    // Experimental:
+    // QObject::disconnect(
+    //     m_deviceAPI->getSampleSource()->getSampleFifo(),
+    //     &SampleSinkFifo::written,
+    //     this,
+    //     &AMDemod::handleWrittenToFifo
+    // );
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
 	m_deviceAPI->removeChannelSinkAPI(this);
@@ -644,4 +665,16 @@ void AMDemod::handleChannelMessages()
 			delete message;
 		}
 	}
+}
+
+void AMDemod::handleWrittenToFifo(int nsamples, qint64 timestamp)
+{
+    QDateTime dt;
+    dt.setMSecsSinceEpoch(MainCore::instance()->getStartMsecsSinceEpoch() + timestamp/1000000);
+    qDebug("AMDemod::handleWrittenToFifo: %s: nsamples: %d, dts: %lld sr: %f",
+        qPrintable(dt.toString("yyyy.MM.dd hh:mm:ss.zzz")),
+        nsamples,
+        timestamp - m_lastTs, nsamples*1e9 / (timestamp - m_lastTs)
+    );
+    m_lastTs = timestamp;
 }

@@ -70,13 +70,14 @@ SigMFFileInput::SigMFFileInput(DeviceAPI *deviceAPI) :
     m_crcOK(false),
     m_recordLengthOK(false),
 	m_fileInputWorker(nullptr),
-	m_deviceDescription(),
+	m_deviceDescription("SigMFFileInput"),
 	m_sampleRate(48000),
 	m_sampleBytes(1),
 	m_centerFrequency(0),
 	m_recordLength(0),
     m_startingTimeStamp(0)
 {
+    m_sampleFifo.setLabel(m_deviceDescription);
     m_deviceAPI->setNbSourceStreams(1);
     qDebug("SigMFFileInput::SigMFFileInput: device source engine: %p", m_deviceAPI->getDeviceSourceEngine());
     qDebug("SigMFFileInput::SigMFFileInput: device source engine message queue: %p", m_deviceAPI->getDeviceEngineInputMessageQueue());

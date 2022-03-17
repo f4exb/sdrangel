@@ -71,6 +71,7 @@ public:
     int getSquelchState() const { return m_sink.getSquelchState(); }
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) { m_sink.getMagSqLevels(avg, peak, nbSamples); }
     void setChannel(ChannelAPI *channel);
+    void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
 
 private:
     SampleSinkFifo m_sampleFifo;

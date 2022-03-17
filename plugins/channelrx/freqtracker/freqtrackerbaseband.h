@@ -74,6 +74,7 @@ public:
 	bool getPllLocked() const { return m_sink.getPllLocked(); }
 	Real getFrequency() const { return m_sink.getFrequency(); };
     Real getAvgDeltaFreq() const { return m_sink.getAvgDeltaFreq(); }
+    void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
 
 private:
     SampleSinkFifo m_sampleFifo;

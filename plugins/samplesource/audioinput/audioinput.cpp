@@ -44,6 +44,7 @@ AudioInput::AudioInput(DeviceAPI *deviceAPI) :
     m_running(false),
     m_centerFrequency(0)
 {
+    m_sampleFifo.setLabel(m_deviceDescription);
     m_fifo.setSize(20*AudioInputWorker::m_convBufSamples);
     openDevice();
     m_deviceAPI->setNbSourceStreams(1);

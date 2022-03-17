@@ -48,6 +48,7 @@ BladeRF2Input::BladeRF2Input(DeviceAPI *deviceAPI) :
     m_running(false),
     m_thread(nullptr)
 {
+    m_sampleFifo.setLabel(m_deviceDescription);
     openDevice();
 
     if (m_deviceShared.m_dev)

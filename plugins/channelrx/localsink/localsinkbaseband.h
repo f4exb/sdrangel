@@ -105,6 +105,7 @@ public:
     int getChannelSampleRate() const;
     void startSource() { m_sink.start(m_localSampleSource); }
     void stopSource() { m_sink.stop(); }
+    void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
 
 private:
     SampleSinkFifo m_sampleFifo;

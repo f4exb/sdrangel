@@ -46,6 +46,7 @@ Bladerf1Input::Bladerf1Input(DeviceAPI *deviceAPI) :
 	m_deviceDescription("BladeRFInput"),
 	m_running(false)
 {
+    m_sampleFifo.setLabel(m_deviceDescription);
     openDevice();
     m_deviceAPI->setNbSourceStreams(1);
     m_deviceAPI->setBuddySharedPtr(&m_sharedParams);

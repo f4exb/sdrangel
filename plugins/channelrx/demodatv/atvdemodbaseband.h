@@ -72,6 +72,7 @@ public:
     void setVideoTabIndex(int videoTabIndex) { m_sink.setVideoTabIndex(videoTabIndex); }
     void setBasebandSampleRate(int sampleRate); //!< To be used when supporting thread is stopped
     bool isRunning() const { return m_running; }
+    void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
 
 private:
     SampleSinkFifo m_sampleFifo;

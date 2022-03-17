@@ -76,6 +76,7 @@ public:
     double getMagSq() const { return m_sink.getMagSq(); }
     bool isRunning() const { return m_running; }
     void startMeasurement() { m_sink.startMeasurement(); }
+    void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
 
 private:
     SampleSinkFifo m_sampleFifo;

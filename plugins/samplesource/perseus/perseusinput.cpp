@@ -42,6 +42,7 @@ PerseusInput::PerseusInput(DeviceAPI *deviceAPI) :
     m_perseusWorker(nullptr),
     m_perseusDescriptor(0)
 {
+    m_sampleFifo.setLabel(m_deviceDescription);
     openDevice();
     m_deviceAPI->setNbSourceStreams(1);
 

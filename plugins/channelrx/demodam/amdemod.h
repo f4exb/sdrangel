@@ -140,6 +140,7 @@ private:
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
+    qint64 m_lastTs;
 
 	virtual bool handleMessage(const Message& cmd);
     void applySettings(const AMDemodSettings& settings, bool force = false);
@@ -162,6 +163,7 @@ private:
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
     void handleChannelMessages();
+    void handleWrittenToFifo(int nsamples, qint64 timestamp);
 };
 
 #endif // INCLUDE_AMDEMOD_H

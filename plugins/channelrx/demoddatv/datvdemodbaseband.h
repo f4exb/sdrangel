@@ -90,6 +90,7 @@ public:
     int getModcodCodeRate() const { return m_sink.getModcodCodeRate(); }
     bool isCstlnSetByModcod() const { return m_sink.isCstlnSetByModcod(); }
     bool isRunning() const { return m_running; }
+    void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
 
 private:
     SampleSinkFifo m_sampleFifo;

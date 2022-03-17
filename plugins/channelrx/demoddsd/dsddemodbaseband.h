@@ -73,6 +73,7 @@ public:
    	const DSDDecoder& getDecoder() const { return m_sink.getDecoder(); }
     const char *updateAndGetStatusText() { return m_sink.updateAndGetStatusText(); }
     void setChannel(ChannelAPI *channel);
+    void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
 
 private:
     SampleSinkFifo m_sampleFifo;

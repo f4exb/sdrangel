@@ -44,10 +44,11 @@ KiwiSDRInput::KiwiSDRInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_kiwiSDRWorker(nullptr),
-	m_deviceDescription(),
+	m_deviceDescription("KiwiSDR"),
 	m_running(false),
 	m_masterTimer(deviceAPI->getMasterTimer())
 {
+    m_sampleFifo.setLabel(m_deviceDescription);
 	m_kiwiSDRWorkerThread.start();
 
     m_deviceAPI->setNbSourceStreams(1);

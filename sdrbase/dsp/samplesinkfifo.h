@@ -41,6 +41,7 @@ private:
 	unsigned int m_fill;
 	unsigned int m_head;
 	unsigned int m_tail;
+	QString m_label;
 
 	void create(unsigned int s);
 
@@ -65,6 +66,7 @@ public:
 		SampleVector::iterator* part1Begin, SampleVector::iterator* part1End,
 		SampleVector::iterator* part2Begin, SampleVector::iterator* part2End);
 	unsigned int readCommit(unsigned int count);
+	void setLabel(const QString& label) { m_label = label; }
     static unsigned int getSizePolicy(unsigned int sampleRate);
 
 signals:

@@ -40,10 +40,11 @@ TestSourceInput::TestSourceInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_testSourceWorker(nullptr),
-	m_deviceDescription(),
+	m_deviceDescription("TestSourceInput"),
 	m_running(false),
 	m_masterTimer(deviceAPI->getMasterTimer())
 {
+    m_sampleFifo.setLabel(m_deviceDescription);
     m_deviceAPI->setNbSourceStreams(1);
 
     if (!m_sampleFifo.setSize(96000 * 4)) {

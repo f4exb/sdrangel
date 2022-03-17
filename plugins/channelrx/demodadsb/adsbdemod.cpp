@@ -65,6 +65,11 @@ ADSBDemod::ADSBDemod(DeviceAPI *devieAPI) :
 
     m_thread = new QThread(this);
     m_basebandSink = new ADSBDemodBaseband();
+    m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
+        .arg(m_channelId)
+        .arg(m_deviceAPI->getDeviceSetIndex())
+        .arg(getIndexInDeviceSet())
+    );
     m_basebandSink->moveToThread(m_thread);
 
     m_worker = new ADSBDemodWorker();

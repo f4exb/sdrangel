@@ -101,6 +101,7 @@ public:
     bool isRecording() const { return m_sink.isRecording(); }
     float getSpecMax() const { return m_specMax; }
     int getSinkSampleRate() const { return m_sink.getSampleRate(); }
+    void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
 
 private:
     SampleSinkFifo m_sampleFifo;

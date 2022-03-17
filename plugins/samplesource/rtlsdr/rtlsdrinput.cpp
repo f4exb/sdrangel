@@ -53,9 +53,10 @@ RTLSDRInput::RTLSDRInput(DeviceAPI *deviceAPI) :
 	m_settings(),
 	m_dev(0),
 	m_rtlSDRThread(nullptr),
-	m_deviceDescription(),
+	m_deviceDescription("RTLSDR"),
 	m_running(false)
 {
+    m_sampleFifo.setLabel(m_deviceDescription);
     openDevice();
 
     m_deviceAPI->setNbSourceStreams(1);

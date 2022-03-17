@@ -70,6 +70,7 @@ public:
     int getAudioSampleRate() const { return m_sink.getAudioSampleRate(); }
     void setBasebandSampleRate(int sampleRate);
     void setChannel(ChannelAPI *channel);
+    void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
 
 private:
     SampleSinkFifo m_sampleFifo;

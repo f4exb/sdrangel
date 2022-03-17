@@ -44,8 +44,13 @@ DATVDemod::DATVDemod(DeviceAPI *deviceAPI) :
     m_basebandSampleRate(0)
 {
     qDebug("DATVDemod::DATVDemod");
-    setObjectName("DATVDemod");
+    setObjectName(m_channelId);
     m_basebandSink = new DATVDemodBaseband();
+    m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
+        .arg(m_channelId)
+        .arg(m_deviceAPI->getDeviceSetIndex())
+        .arg(getIndexInDeviceSet())
+    );
     m_basebandSink->moveToThread(&m_thread);
 
     applySettings(m_settings, true);

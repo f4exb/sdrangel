@@ -58,6 +58,11 @@ RemoteSink::RemoteSink(DeviceAPI *deviceAPI) :
     updateWithDeviceData();
 
     m_basebandSink = new RemoteSinkBaseband();
+    m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
+        .arg(m_channelId)
+        .arg(m_deviceAPI->getDeviceSetIndex())
+        .arg(getIndexInDeviceSet())
+    );
     m_basebandSink->moveToThread(&m_thread);
 
     applySettings(m_settings, true);

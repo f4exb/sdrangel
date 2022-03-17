@@ -79,6 +79,7 @@ public:
 	Real getDemodFclk() const { return m_sink.getDemodFclk(); }
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) { m_sink.getMagSqLevels(avg, peak, nbSamples); }
     RDSParser& getRDSParser() { return m_sink.getRDSParser(); }
+    void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
 
 private:
     SampleSinkFifo m_sampleFifo;

@@ -54,9 +54,10 @@ RemoteInput::RemoteInput(DeviceAPI *deviceAPI) :
     m_mutex(QMutex::Recursive),
     m_settings(),
 	m_remoteInputUDPHandler(nullptr),
-	m_deviceDescription(),
+	m_deviceDescription("RemoteInput"),
 	m_startingTimeStamp(0)
 {
+    m_sampleFifo.setLabel(m_deviceDescription);
 	m_sampleFifo.setSize(m_sampleRate * 8);
 	m_remoteInputUDPHandler = new RemoteInputUDPHandler(&m_sampleFifo, m_deviceAPI);
     m_remoteInputUDPHandler->setMessageQueueToInput(&m_inputMessageQueue);

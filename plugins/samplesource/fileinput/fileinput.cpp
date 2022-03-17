@@ -54,13 +54,14 @@ FileInput::FileInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_fileInputWorker(nullptr),
-	m_deviceDescription(),
+	m_deviceDescription("FileInput"),
 	m_sampleRate(48000),
 	m_sampleSize(0),
 	m_centerFrequency(435000000),
 	m_recordLengthMuSec(0),
     m_startingTimeStamp(0)
 {
+    m_sampleFifo.setLabel(m_deviceDescription);
     m_deviceAPI->setNbSourceStreams(1);
     qDebug("FileInput::FileInput: device source engine: %p", m_deviceAPI->getDeviceSourceEngine());
     qDebug("FileInput::FileInput: device source engine message queue: %p", m_deviceAPI->getDeviceEngineInputMessageQueue());

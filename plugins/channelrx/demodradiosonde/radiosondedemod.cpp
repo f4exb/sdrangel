@@ -52,6 +52,11 @@ RadiosondeDemod::RadiosondeDemod(DeviceAPI *deviceAPI) :
     setObjectName(m_channelId);
 
     m_basebandSink = new RadiosondeDemodBaseband(this);
+    m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
+        .arg(m_channelId)
+        .arg(m_deviceAPI->getDeviceSetIndex())
+        .arg(getIndexInDeviceSet())
+    );
     m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());
     m_basebandSink->setChannel(this);
     m_basebandSink->moveToThread(&m_thread);

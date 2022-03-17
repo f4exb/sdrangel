@@ -89,6 +89,7 @@ public:
 	int getBER() const { return m_sink.getBER(); }
 	float getFrequencyOffset() const { return m_sink.getFrequencyOffset(); }
 	bool isSync() const { return m_sink.isSync(); }
+    void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
 
 signals:
 	/**

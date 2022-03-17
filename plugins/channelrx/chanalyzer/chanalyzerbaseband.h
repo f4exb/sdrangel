@@ -72,6 +72,7 @@ public:
     Real getPllFrequency() const { return m_sink.getPllFrequency(); }
     Real getPllDeltaPhase() const { return m_sink.getPllDeltaPhase(); }
     Real getPllPhase() const { return m_sink.getPllPhase(); }
+    void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
 
 private:
     SampleSinkFifo m_sampleFifo;

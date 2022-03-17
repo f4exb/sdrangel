@@ -72,6 +72,11 @@ ChirpChatDemod::ChirpChatDemod(DeviceAPI* deviceAPI) :
 
     m_thread = new QThread(this);
     m_basebandSink = new ChirpChatDemodBaseband();
+    m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
+        .arg(m_channelId)
+        .arg(m_deviceAPI->getDeviceSetIndex())
+        .arg(getIndexInDeviceSet())
+    );
     m_basebandSink->setSpectrumSink(&m_spectrumVis);
     m_basebandSink->setDecoderMessageQueue(getInputMessageQueue()); // Decoder held on the main thread
     m_basebandSink->moveToThread(m_thread);

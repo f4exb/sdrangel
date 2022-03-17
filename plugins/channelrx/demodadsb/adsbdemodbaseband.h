@@ -69,6 +69,7 @@ public:
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_sink.setMessageQueueToGUI(messageQueue); }
     void setMessageQueueToWorker(MessageQueue *messageQueue) { m_sink.setMessageQueueToWorker(messageQueue); }
     void setBasebandSampleRate(int sampleRate);
+    void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
 
 private:
     SampleSinkFifo m_sampleFifo;
