@@ -15,8 +15,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <QBoxLayout>
-#include <QSpacerItem>
 #include <QPainter>
 #include <QResizeEvent>
 
@@ -24,34 +22,43 @@
 #include "rollupwidget.h"
 
 FeatureWindow::FeatureWindow(QWidget* parent) :
-	QScrollArea(parent)
+    QScrollArea(parent)
 {
-	m_container = new QWidget(this);
-	m_layout = new QBoxLayout(QBoxLayout::TopToBottom, m_container);
-	setWidget(m_container);
-	setWidgetResizable(true);
-	setBackgroundRole(QPalette::Base);
-	m_layout->setMargin(3);
-	m_layout->setSpacing(3);
+    m_container = new QWidget(this);
+    m_container->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    m_splitter = new QSplitter();
+    m_layout = new FeatureLayout(m_container, 3, 3, 3);
+    setWidget(m_container);
+    setWidgetResizable(true);
+    setBackgroundRole(QPalette::Base);
+    m_layout->addWidget(m_splitter); // Splitter must be added first
 }
 
 void FeatureWindow::addRollupWidget(QWidget* rollupWidget)
 {
-	rollupWidget->setParent(m_container);
-	m_container->layout()->addWidget(rollupWidget);
+    if (rollupWidget->sizePolicy().verticalPolicy() == QSizePolicy::Expanding)
+    {
+        rollupWidget->setParent(m_splitter);
+        m_splitter->addWidget(rollupWidget);
+    }
+    else
+    {
+        rollupWidget->setParent(m_container);
+        m_layout->addWidget(rollupWidget);
+    }
 }
 
 void FeatureWindow::resizeEvent(QResizeEvent* event)
 {
-	if (event->size().height() > event->size().width())
-	{
-		m_layout->setDirection(QBoxLayout::TopToBottom);
-		m_layout->setAlignment(Qt::AlignTop);
-	}
-	else
-	{
-		m_layout->setDirection(QBoxLayout::LeftToRight);
-		m_layout->setAlignment(Qt::AlignLeft);
-	}
-	QScrollArea::resizeEvent(event);
+    if (event->size().height() > event->size().width())
+    {
+        m_layout->setOrientation(Qt::Vertical);
+        m_splitter->setOrientation(Qt::Vertical);
+    }
+    else
+    {
+        m_layout->setOrientation(Qt::Horizontal);
+        m_splitter->setOrientation(Qt::Horizontal);
+    }
+    QScrollArea::resizeEvent(event);
 }

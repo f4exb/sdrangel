@@ -290,7 +290,7 @@ int RollupWidget::arrangeRollups()
     } else {
         setMaximumHeight(16777215);
     }
-
+    updateGeometry();
     return pos;
 }
 
