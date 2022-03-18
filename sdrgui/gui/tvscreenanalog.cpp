@@ -86,6 +86,10 @@ TVScreenAnalog::~TVScreenAnalog()
 
 void TVScreenAnalog::cleanup()
 {
+	if (!QOpenGLContext::currentContext()) {
+		return;
+	}
+
 	if (m_shader)
 	{
 		delete m_shader;

@@ -272,6 +272,10 @@ void GLShaderTVArray::cleanup()
 
     m_objCurrentRow = nullptr;
 
+	if (!QOpenGLContext::currentContext()) {
+		return;
+	}
+
     if (m_objProgram)
     {
         delete m_objProgram;

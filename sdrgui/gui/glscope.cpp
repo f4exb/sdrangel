@@ -2074,6 +2074,7 @@ void GLScope::cleanup()
 {
     //makeCurrent();
     m_glShaderSimple.cleanup();
+    m_glShaderColors.cleanup();
     m_glShaderBottom1Scale.cleanup();
     m_glShaderBottom2Scale.cleanup();
     m_glShaderLeft1Scale.cleanup();

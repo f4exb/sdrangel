@@ -198,6 +198,10 @@ void GLShaderTextured::drawMutable(unsigned int mode, const QMatrix4x4& transfor
 
 void GLShaderTextured::cleanup()
 {
+	if (!QOpenGLContext::currentContext()) {
+		return;
+	}
+
 	if (m_program)
     {
 		delete m_program;

@@ -103,10 +103,10 @@ void GLShaderSimple::draw(unsigned int mode, const QMatrix4x4& transformMatrix, 
 
 void GLShaderSimple::cleanup()
 {
-	if (m_program)
+	if (QOpenGLContext::currentContext() && m_program)
 	{
 		delete m_program;
-		m_program = 0;
+		m_program = nullptr;
 	}
 }
 

@@ -107,6 +107,10 @@ void GLShaderColors::draw(unsigned int mode, const QMatrix4x4& transformMatrix, 
 
 void GLShaderColors::cleanup()
 {
+	if (!QOpenGLContext::currentContext()) {
+		return;
+	}
+
 	if (m_program)
 	{
 		delete m_program;
