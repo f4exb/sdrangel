@@ -22,7 +22,7 @@
 #ifndef INCLUDE_TVSCREEN_H
 #define INCLUDE_TVSCREEN_H
 
-#include <QGLWidget>
+#include <QOpenGLWidget>
 #include <QPen>
 #include <QTimer>
 #include <QMutex>
@@ -36,7 +36,7 @@
 
 class QPainter;
 
-class SDRGUI_API TVScreen: public QGLWidget
+class SDRGUI_API TVScreen: public QOpenGLWidget
 {
 	Q_OBJECT
 

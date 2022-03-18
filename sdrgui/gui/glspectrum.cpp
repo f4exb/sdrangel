@@ -40,7 +40,7 @@ const float GLSpectrum::m_maxFrequencyZoom = 10.0f;
 const float GLSpectrum::m_annotationMarkerHeight = 20.0f;
 
 GLSpectrum::GLSpectrum(QWidget* parent) :
-    QGLWidget(parent),
+    QOpenGLWidget(parent),
     m_markersDisplay(SpectrumSettings::MarkersDisplaySpectrum),
     m_cursorState(CSNormal),
     m_cursorChannel(0),
@@ -697,7 +697,7 @@ void GLSpectrum::initializeGL()
         return;
     }
 
-    connect(glCurrentContext, &QOpenGLContext::aboutToBeDestroyed, this, &GLSpectrum::cleanup); // TODO: when migrating to QOpenGLWidget
+    connect(glCurrentContext, &QOpenGLContext::aboutToBeDestroyed, this, &GLSpectrum::cleanup);
 
     QOpenGLFunctions *glFunctions = QOpenGLContext::currentContext()->functions();
     glFunctions->initializeOpenGLFunctions();
@@ -3034,14 +3034,14 @@ void GLSpectrum::enterEvent(QEvent* event)
 {
     m_mouseInside = true;
     update();
-    QGLWidget::enterEvent(event);
+    QOpenGLWidget::enterEvent(event);
 }
 
 void GLSpectrum::leaveEvent(QEvent* event)
 {
     m_mouseInside = false;
     update();
-    QGLWidget::enterEvent(event);
+    QOpenGLWidget::enterEvent(event);
 }
 
 void GLSpectrum::tick()

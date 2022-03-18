@@ -33,7 +33,7 @@
 
 // Note: When this object is created, QWidget* is converted to bool
 TVScreen::TVScreen(bool color, QWidget* parent) :
-    QGLWidget(parent),
+    QOpenGLWidget(parent),
     m_mutex(QMutex::Recursive),
     m_glShaderArray(color)
 {
@@ -156,7 +156,7 @@ void TVScreen::initializeGL()
         &QOpenGLContext::aboutToBeDestroyed,
         this,
         &TVScreen::cleanup
-    ); // TODO: when migrating to QOpenGLWidget
+    );
 
     m_glContextInitialized = true;
 }

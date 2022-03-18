@@ -64,8 +64,8 @@ static const char* fragmentShaderSource =
 "    gl_FragColor = vec4(p);\n"
 "}\n";
 
-TVScreenAnalog::TVScreenAnalog(QWidget *parent)
-	: QGLWidget(parent),
+TVScreenAnalog::TVScreenAnalog(QWidget *parent)	:
+	QOpenGLWidget(parent),
 	m_shader(nullptr),
 	m_imageTexture(nullptr),
 	m_lineShiftsTexture(nullptr)
@@ -134,8 +134,12 @@ void TVScreenAnalog::initializeGL()
 {
 	initializeOpenGLFunctions();
 
-	connect(QOpenGLContext::currentContext(), &QOpenGLContext::aboutToBeDestroyed,
-		this, &TVScreenAnalog::cleanup); // TODO: when migrating to QOpenGLWidget
+	connect(
+		QOpenGLContext::currentContext(),
+		&QOpenGLContext::aboutToBeDestroyed,
+		this,
+		&TVScreenAnalog::cleanup
+	);
 
 	m_shader = new QOpenGLShaderProgram(this);
 

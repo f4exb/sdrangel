@@ -39,7 +39,8 @@ const GLfloat GLScope::m_q3RadiiConst[] = {
     1.0f,  0.75f, 0.0f,  0.25f  // 150
 };
 
-GLScope::GLScope(QWidget *parent) : QGLWidget(parent),
+GLScope::GLScope(QWidget *parent) :
+    QOpenGLWidget(parent),
     m_tracesData(nullptr),
     m_traces(nullptr),
     m_projectionTypes(nullptr),
@@ -195,7 +196,7 @@ void GLScope::initializeGL()
         }
     }
 
-    connect(glCurrentContext, &QOpenGLContext::aboutToBeDestroyed, this, &GLScope::cleanup); // TODO: when migrating to QOpenGLWidget
+    connect(glCurrentContext, &QOpenGLContext::aboutToBeDestroyed, this, &GLScope::cleanup);
 
     QOpenGLFunctions *glFunctions = QOpenGLContext::currentContext()->functions();
     glFunctions->initializeOpenGLFunctions();

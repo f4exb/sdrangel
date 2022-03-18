@@ -27,7 +27,7 @@
 
 #include <QMutex>
 #include <QTimer>
-#include <QGLWidget>
+#include <QOpenGLWidget>
 #include <QOpenGLTexture>
 #include <QOpenGLFunctions>
 #include <QOpenGLShaderProgram>
@@ -108,7 +108,7 @@ private:
 	int* m_outOfBoundsLine;
 };
 
-class SDRGUI_API TVScreenAnalog : public QGLWidget, protected QOpenGLFunctions
+class SDRGUI_API TVScreenAnalog : public QOpenGLWidget, protected QOpenGLFunctions
 {
 	Q_OBJECT
 

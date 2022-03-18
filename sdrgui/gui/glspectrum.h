@@ -27,7 +27,7 @@
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
 #include <QMatrix4x4>
-#include <QGLWidget>
+#include <QOpenGLWidget>
 #include "gui/scaleengine.h"
 #include "gui/glshadersimple.h"
 #include "gui/glshadertextured.h"
@@ -43,7 +43,7 @@ class QOpenGLShaderProgram;
 class MessageQueue;
 class SpectrumVis;
 
-class SDRGUI_API GLSpectrum : public QGLWidget, public GLSpectrumInterface {
+class SDRGUI_API GLSpectrum : public QOpenGLWidget, public GLSpectrumInterface {
     Q_OBJECT
 
 public:
