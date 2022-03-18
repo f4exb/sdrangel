@@ -61,11 +61,6 @@ FreqTracker::FreqTracker(DeviceAPI *deviceAPI) :
 
     m_thread = new QThread(this);
     m_basebandSink = new FreqTrackerBaseband();
-    m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
-        .arg(m_channelId)
-        .arg(m_deviceAPI->getDeviceSetIndex())
-        .arg(getIndexInDeviceSet())
-    );
     m_basebandSink->setSpectrumSink(&m_spectrumVis);
     propagateMessageQueue(getInputMessageQueue());
     m_basebandSink->moveToThread(m_thread);
@@ -77,6 +72,12 @@ FreqTracker::FreqTracker(DeviceAPI *deviceAPI) :
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        this,
+        &ChannelAPI::indexInDeviceSetChanged,
+        this,
+        &FreqTracker::handleIndexInDeviceSetChanged
+    );
 }
 
 FreqTracker::~FreqTracker()
@@ -683,4 +684,17 @@ void FreqTracker::networkManagerFinished(QNetworkReply *reply)
     }
 
     reply->deleteLater();
+}
+
+void FreqTracker::handleIndexInDeviceSetChanged(int index)
+{
+    if (index < 0) {
+        return;
+    }
+
+    QString fifoLabel = QString("%1 [%2:%3]")
+        .arg(m_channelId)
+        .arg(m_deviceAPI->getDeviceSetIndex())
+        .arg(index);
+    m_basebandSink->setFifoLabel(fifoLabel);
 }

@@ -55,11 +55,6 @@ PacketDemod::PacketDemod(DeviceAPI *deviceAPI) :
     setObjectName(m_channelId);
 
     m_basebandSink = new PacketDemodBaseband(this);
-    m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
-        .arg(m_channelId)
-        .arg(m_deviceAPI->getDeviceSetIndex())
-        .arg(getIndexInDeviceSet())
-    );
     m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());
     m_basebandSink->setChannel(this);
     m_basebandSink->moveToThread(&m_thread);
@@ -72,6 +67,12 @@ PacketDemod::PacketDemod(DeviceAPI *deviceAPI) :
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     connect(&m_channelMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessages()));
+    QObject::connect(
+        this,
+        &ChannelAPI::indexInDeviceSetChanged,
+        this,
+        &PacketDemod::handleIndexInDeviceSetChanged
+    );
 }
 
 PacketDemod::~PacketDemod()
@@ -685,4 +686,17 @@ void PacketDemod::handleChannelMessages()
 			delete message;
 		}
 	}
+}
+
+void PacketDemod::handleIndexInDeviceSetChanged(int index)
+{
+    if (index < 0) {
+        return;
+    }
+
+    QString fifoLabel = QString("%1 [%2:%3]")
+        .arg(m_channelId)
+        .arg(m_deviceAPI->getDeviceSetIndex())
+        .arg(index);
+    m_basebandSink->setFifoLabel(fifoLabel);
 }

@@ -152,6 +152,7 @@ private:
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
+    void handleIndexInDeviceSetChanged(int index);
 };
 
 #endif // INCLUDE_ADSBDEMOD_H

@@ -51,11 +51,6 @@ FreeDVDemod::FreeDVDemod(DeviceAPI *deviceAPI) :
 
     m_thread = new QThread(this);
     m_basebandSink = new FreeDVDemodBaseband();
-    m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
-        .arg(m_channelId)
-        .arg(m_deviceAPI->getDeviceSetIndex())
-        .arg(getIndexInDeviceSet())
-    );
     m_basebandSink->setSpectrumSink(&m_spectrumVis);
     m_basebandSink->moveToThread(m_thread);
 
@@ -66,6 +61,12 @@ FreeDVDemod::FreeDVDemod(DeviceAPI *deviceAPI) :
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        this,
+        &ChannelAPI::indexInDeviceSetChanged,
+        this,
+        &FreeDVDemod::handleIndexInDeviceSetChanged
+    );
 }
 
 FreeDVDemod::~FreeDVDemod()
@@ -620,4 +621,18 @@ void FreeDVDemod::networkManagerFinished(QNetworkReply *reply)
 void FreeDVDemod::setLevelMeter(QObject *levelMeter)
 {
     connect(m_basebandSink, SIGNAL(levelChanged(qreal, qreal, int)), levelMeter, SLOT(levelChanged(qreal, qreal, int)));
+}
+
+void FreeDVDemod::handleIndexInDeviceSetChanged(int index)
+{
+    if (index < 0) {
+        return;
+    }
+
+    QString fifoLabel = QString("%1 [%2:%3]")
+        .arg(m_channelId)
+        .arg(m_deviceAPI->getDeviceSetIndex())
+        .arg(index);
+    m_basebandSink->setFifoLabel(fifoLabel);
+    m_basebandSink->setAudioFifoLabel(fifoLabel);
 }

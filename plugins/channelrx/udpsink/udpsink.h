@@ -127,6 +127,7 @@ public:
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
+    void handleIndexInDeviceSetChanged(int index);
 
 protected:
     DeviceAPI* m_deviceAPI;

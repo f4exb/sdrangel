@@ -46,6 +46,7 @@ public:
 	inline bool isEmpty() const { return m_fill == 0; }
 	inline bool isFull() const { return m_fill == m_size; }
 	inline uint32_t size() const { return m_size; }
+	void setLabel(const QString& label) { m_label = label; }
 
 private:
 	QMutex m_mutex;
@@ -58,11 +59,13 @@ private:
 	uint32_t m_fill;
 	uint32_t m_head;
 	uint32_t m_tail;
+	QString m_label;
 
 	bool create(uint32_t numSamples);
 
 signals:
 	void dataReady();
+	void overflow(int nsamples);
 };
 
 #endif // INCLUDE_AUDIOFIFO_H

@@ -164,7 +164,7 @@ private:
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
-
+    void handleIndexInDeviceSetChanged(int index);
 };
 
 #endif // INCLUDE_VORDEMODSC_H

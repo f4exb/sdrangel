@@ -72,11 +72,6 @@ ChirpChatDemod::ChirpChatDemod(DeviceAPI* deviceAPI) :
 
     m_thread = new QThread(this);
     m_basebandSink = new ChirpChatDemodBaseband();
-    m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
-        .arg(m_channelId)
-        .arg(m_deviceAPI->getDeviceSetIndex())
-        .arg(getIndexInDeviceSet())
-    );
     m_basebandSink->setSpectrumSink(&m_spectrumVis);
     m_basebandSink->setDecoderMessageQueue(getInputMessageQueue()); // Decoder held on the main thread
     m_basebandSink->moveToThread(m_thread);
@@ -85,6 +80,13 @@ ChirpChatDemod::ChirpChatDemod(DeviceAPI* deviceAPI) :
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
+
+    QObject::connect(
+        this,
+        &ChannelAPI::indexInDeviceSetChanged,
+        this,
+        &ChirpChatDemod::handleIndexInDeviceSetChanged
+    );
 }
 
 ChirpChatDemod::~ChirpChatDemod()
@@ -929,4 +931,17 @@ double ChirpChatDemod::getCurrentNoiseLevel() const
 double ChirpChatDemod::getTotalPower() const
 {
     return m_basebandSink->getTotalPower();
+}
+
+void ChirpChatDemod::handleIndexInDeviceSetChanged(int index)
+{
+    if (index < 0) {
+        return;
+    }
+
+    QString fifoLabel = QString("%1 [%2:%3]")
+        .arg(m_channelId)
+        .arg(m_deviceAPI->getDeviceSetIndex())
+        .arg(index);
+    m_basebandSink->setFifoLabel(fifoLabel);
 }

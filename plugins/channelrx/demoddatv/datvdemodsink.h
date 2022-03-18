@@ -79,6 +79,7 @@ public:
     bool isCstlnSetByModcod() const { return m_cstlnSetByModcod; }
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_messageQueueToGUI = messageQueue; }
     AudioFifo *getAudioFifo() { return &m_audioFifo; }
+    void setAudioFifoLabel(const QString& label) { m_audioFifo.setLabel(label); }
 
     float getMERAvg() const {
         return r_merMeter ? r_merMeter->m_avg : 0;

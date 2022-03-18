@@ -80,6 +80,7 @@ public:
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) { m_sink.getMagSqLevels(avg, peak, nbSamples); }
     RDSParser& getRDSParser() { return m_sink.getRDSParser(); }
     void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
+    void setAudioFifoLabel(const QString& label) { m_sink.setAudioFifoLabel(label); }
 
 private:
     SampleSinkFifo m_sampleFifo;

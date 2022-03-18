@@ -433,7 +433,7 @@ private slots:
     void waitUntilOnTarget();
     void sweepNext();
     void sweepComplete();
-
+    void handleIndexInDeviceSetChanged(int index);
 };
 
 #endif // INCLUDE_RADIOASTRONOMY_H

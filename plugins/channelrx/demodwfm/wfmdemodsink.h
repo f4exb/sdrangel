@@ -67,6 +67,7 @@ public:
     void applySettings(const WFMDemodSettings& settings, bool force = false);
 
     AudioFifo *getAudioFifo() { return &m_audioFifo; }
+    void setAudioFifoLabel(const QString& label) { m_audioFifo.setLabel(label); }
     void applyAudioSampleRate(int sampleRate);
     int getAudioSampleRate() const { return m_audioSampleRate; }
     void setChannel(ChannelAPI *channel) { m_channel = channel; }

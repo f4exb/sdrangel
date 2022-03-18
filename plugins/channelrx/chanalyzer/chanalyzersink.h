@@ -27,7 +27,6 @@
 #include "dsp/phaselockcomplex.h"
 #include "dsp/freqlockcomplex.h"
 #include "dsp/costasloop.h"
-#include "audio/audiofifo.h"
 
 #include "util/movingaverage.h"
 

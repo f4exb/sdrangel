@@ -83,6 +83,7 @@ public:
     void applySettings(const BFMDemodSettings& settings, bool force = false);
 
     AudioFifo *getAudioFifo() { return &m_audioFifo; }
+    void setAudioFifoLabel(const QString& label) { m_audioFifo.setLabel(label); }
     void applyAudioSampleRate(int sampleRate);
     int getAudioSampleRate() const { return m_audioSampleRate; }
 

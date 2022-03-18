@@ -50,6 +50,7 @@ public:
     double getMagSq() const { return m_magsq; }
     bool getSquelchOpen() const { return m_squelchOpen; }
     AudioFifo *getAudioFifo() { return &m_audioFifo; }
+    void setAudioFifoLabel(const QString& label) { m_audioFifo.setLabel(label); }
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples)
     {

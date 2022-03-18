@@ -46,11 +46,6 @@ DATVDemod::DATVDemod(DeviceAPI *deviceAPI) :
     qDebug("DATVDemod::DATVDemod");
     setObjectName(m_channelId);
     m_basebandSink = new DATVDemodBaseband();
-    m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
-        .arg(m_channelId)
-        .arg(m_deviceAPI->getDeviceSetIndex())
-        .arg(getIndexInDeviceSet())
-    );
     m_basebandSink->moveToThread(&m_thread);
 
     applySettings(m_settings, true);
@@ -60,6 +55,12 @@ DATVDemod::DATVDemod(DeviceAPI *deviceAPI) :
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        this,
+        &ChannelAPI::indexInDeviceSetChanged,
+        this,
+        &DATVDemod::handleIndexInDeviceSetChanged
+    );
 }
 
 DATVDemod::~DATVDemod()
@@ -731,4 +732,18 @@ void DATVDemod::networkManagerFinished(QNetworkReply *reply)
     }
 
     reply->deleteLater();
+}
+
+void DATVDemod::handleIndexInDeviceSetChanged(int index)
+{
+    if (index < 0) {
+        return;
+    }
+
+    QString fifoLabel = QString("%1 [%2:%3]")
+        .arg(m_channelId)
+        .arg(m_deviceAPI->getDeviceSetIndex())
+        .arg(index);
+    m_basebandSink->setFifoLabel(fifoLabel);
+    m_basebandSink->setAudioFifoLabel(fifoLabel);
 }

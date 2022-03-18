@@ -48,6 +48,7 @@ public:
     void applySettings(const UDPSinkSettings& settings, bool force = false);
 
     AudioFifo *getAudioFifo() { return &m_audioFifo; }
+    void setAudioFifoLabel(const QString& label) { m_audioFifo.setLabel(label); }
 	void setSpectrum(BasebandSampleSink* spectrum) { m_spectrum = spectrum; }
     void enableSpectrum(bool enable) { m_spectrumEnabled = enable; }
     void setSpectrumPositiveOnly(bool positiveOnly) { m_spectrumPositiveOnly = positiveOnly; }

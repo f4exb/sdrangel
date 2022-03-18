@@ -57,11 +57,6 @@ LocalSink::LocalSink(DeviceAPI *deviceAPI) :
 
     m_thread = new QThread(this);
     m_basebandSink = new LocalSinkBaseband();
-    m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
-        .arg(m_channelId)
-        .arg(m_deviceAPI->getDeviceSetIndex())
-        .arg(getIndexInDeviceSet())
-    );
     m_basebandSink->moveToThread(m_thread);
 
     applySettings(m_settings, true);
@@ -71,6 +66,12 @@ LocalSink::LocalSink(DeviceAPI *deviceAPI) :
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        this,
+        &ChannelAPI::indexInDeviceSetChanged,
+        this,
+        &LocalSink::handleIndexInDeviceSetChanged
+    );
 }
 
 LocalSink::~LocalSink()
@@ -604,4 +605,17 @@ void LocalSink::networkManagerFinished(QNetworkReply *reply)
     }
 
     reply->deleteLater();
+}
+
+void LocalSink::handleIndexInDeviceSetChanged(int index)
+{
+    if (index < 0) {
+        return;
+    }
+
+    QString fifoLabel = QString("%1 [%2:%3]")
+        .arg(m_channelId)
+        .arg(m_deviceAPI->getDeviceSetIndex())
+        .arg(index);
+    m_basebandSink->setFifoLabel(fifoLabel);
 }

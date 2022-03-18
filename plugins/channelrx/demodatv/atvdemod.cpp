@@ -53,6 +53,13 @@ ATVDemod::ATVDemod(DeviceAPI *deviceAPI) :
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
+
+    QObject::connect(
+        this,
+        &ChannelAPI::indexInDeviceSetChanged,
+        this,
+        &ATVDemod::handleIndexInDeviceSetChanged
+    );
 }
 
 ATVDemod::~ATVDemod()
@@ -176,4 +183,17 @@ void ATVDemod::applySettings(const ATVDemodSettings& settings, bool force)
     m_basebandSink->getInputMessageQueue()->push(msg);
 
     m_settings = settings;
+}
+
+void ATVDemod::handleIndexInDeviceSetChanged(int index)
+{
+    if (index < 0) {
+        return;
+    }
+
+    QString fifoLabel = QString("%1 [%2:%3]")
+        .arg(m_channelId)
+        .arg(m_deviceAPI->getDeviceSetIndex())
+        .arg(index);
+    m_basebandSink->setFifoLabel(fifoLabel);
 }

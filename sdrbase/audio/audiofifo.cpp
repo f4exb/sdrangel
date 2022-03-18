@@ -63,7 +63,7 @@ bool AudioFifo::setSize(uint32_t numSamples)
 	return create(numSamples);
 }
 
-uint AudioFifo::write(const quint8* data, uint32_t numSamples)
+uint32_t AudioFifo::write(const quint8* data, uint32_t numSamples)
 {
 	uint32_t total;
 	uint32_t remaining;
@@ -102,11 +102,20 @@ uint AudioFifo::write(const quint8* data, uint32_t numSamples)
 	}
 
 	m_mutex.unlock();
+
 	emit dataReady();
+
+	if (total < numSamples)
+	{
+		qCritical("AudioFifo::write: (%s) overflow %u samples",
+			qPrintable(m_label), numSamples - total);
+		emit overflow(numSamples - total);
+	}
+
 	return total;
 }
 
-uint AudioFifo::read(quint8* data, uint32_t numSamples)
+uint32_t AudioFifo::read(quint8* data, uint32_t numSamples)
 {
 	uint32_t total;
 	uint32_t remaining;

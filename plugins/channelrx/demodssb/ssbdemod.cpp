@@ -57,11 +57,6 @@ SSBDemod::SSBDemod(DeviceAPI *deviceAPI) :
 
     m_thread = new QThread(this);
     m_basebandSink = new SSBDemodBaseband();
-    m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
-        .arg(m_channelId)
-        .arg(m_deviceAPI->getDeviceSetIndex())
-        .arg(getIndexInDeviceSet())
-    );
     m_basebandSink->setSpectrumSink(&m_spectrumVis);
     m_basebandSink->setChannel(this);
     m_basebandSink->moveToThread(m_thread);
@@ -74,6 +69,12 @@ SSBDemod::SSBDemod(DeviceAPI *deviceAPI) :
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     connect(&m_channelMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessages()));
+    QObject::connect(
+        this,
+        &ChannelAPI::indexInDeviceSetChanged,
+        this,
+        &SSBDemod::handleIndexInDeviceSetChanged
+    );
 }
 
 SSBDemod::~SSBDemod()
@@ -737,4 +738,18 @@ void SSBDemod::handleChannelMessages()
 			delete message;
 		}
 	}
+}
+
+void SSBDemod::handleIndexInDeviceSetChanged(int index)
+{
+    if (index < 0) {
+        return;
+    }
+
+    QString fifoLabel = QString("%1 [%2:%3]")
+        .arg(m_channelId)
+        .arg(m_deviceAPI->getDeviceSetIndex())
+        .arg(index);
+    m_basebandSink->setFifoLabel(fifoLabel);
+    m_basebandSink->setAudioFifoLabel(fifoLabel);
 }

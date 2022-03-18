@@ -54,11 +54,6 @@ UDPSink::UDPSink(DeviceAPI *deviceAPI) :
 
     m_thread = new QThread(this);
     m_basebandSink = new UDPSinkBaseband();
-    m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
-        .arg(m_channelId)
-        .arg(m_deviceAPI->getDeviceSetIndex())
-        .arg(getIndexInDeviceSet())
-    );
     m_basebandSink->setSpectrum(&m_spectrumVis);
     m_basebandSink->moveToThread(m_thread);
 
@@ -69,6 +64,12 @@ UDPSink::UDPSink(DeviceAPI *deviceAPI) :
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        this,
+        &ChannelAPI::indexInDeviceSetChanged,
+        this,
+        &UDPSink::handleIndexInDeviceSetChanged
+    );
 }
 
 UDPSink::~UDPSink()
@@ -697,4 +698,18 @@ void UDPSink::enableSpectrum(bool enable)
 {
     UDPSinkBaseband::MsgEnableSpectrum *msg = UDPSinkBaseband::MsgEnableSpectrum::create(enable);
     m_basebandSink->getInputMessageQueue()->push(msg);
+}
+
+void UDPSink::handleIndexInDeviceSetChanged(int index)
+{
+    if (index < 0) {
+        return;
+    }
+
+    QString fifoLabel = QString("%1 [%2:%3]")
+        .arg(m_channelId)
+        .arg(m_deviceAPI->getDeviceSetIndex())
+        .arg(index);
+    m_basebandSink->setFifoLabel(fifoLabel);
+    m_basebandSink->setAudioFifoLabel(fifoLabel);
 }

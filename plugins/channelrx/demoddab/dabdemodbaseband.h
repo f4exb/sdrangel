@@ -76,6 +76,7 @@ public:
     bool isRunning() const { return m_running; }
     int getAudioSampleRate() const { return m_sink.getAudioSampleRate(); }
     void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
+    void setAudioFifoLabel(const QString& label) { m_sink.setAudioFifoLabel(label); }
 
 private:
     SampleSinkFifo m_sampleFifo;

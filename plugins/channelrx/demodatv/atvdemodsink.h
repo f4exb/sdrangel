@@ -30,7 +30,6 @@
 #include "dsp/phaselock.h"
 #include "dsp/recursivefilters.h"
 #include "dsp/phasediscri.h"
-#include "audio/audiofifo.h"
 #include "util/movingaverage.h"
 #include "gui/tvscreenanalog.h"
 

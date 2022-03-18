@@ -52,6 +52,7 @@ public:
 	bool getPllLocked() const { return m_settings.m_pll && m_pll.locked(); }
 	Real getPllFrequency() const { return m_pll.getFreq(); }
     AudioFifo *getAudioFifo() { return &m_audioFifo; }
+    void setAudioFifoLabel(const QString& label) { m_audioFifo.setLabel(label); }
     void setChannel(ChannelAPI *channel) { m_channel = channel; }
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples)

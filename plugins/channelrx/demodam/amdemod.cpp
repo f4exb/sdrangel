@@ -56,11 +56,6 @@ AMDemod::AMDemod(DeviceAPI *deviceAPI) :
     setObjectName(m_channelId);
 
     m_basebandSink = new AMDemodBaseband();
-    m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
-        .arg(m_channelId)
-        .arg(m_deviceAPI->getDeviceSetIndex())
-        .arg(getIndexInDeviceSet())
-    );
     m_basebandSink->setChannel(this);
     m_basebandSink->moveToThread(&m_thread);
 
@@ -79,6 +74,12 @@ AMDemod::AMDemod(DeviceAPI *deviceAPI) :
     //     this,
     //     &AMDemod::handleWrittenToFifo
     // );
+    QObject::connect(
+        this,
+        &ChannelAPI::indexInDeviceSetChanged,
+        this,
+        &AMDemod::handleIndexInDeviceSetChanged
+    );
 }
 
 AMDemod::~AMDemod()
@@ -677,4 +678,18 @@ void AMDemod::handleWrittenToFifo(int nsamples, qint64 timestamp)
         timestamp - m_lastTs, nsamples*1e9 / (timestamp - m_lastTs)
     );
     m_lastTs = timestamp;
+}
+
+void AMDemod::handleIndexInDeviceSetChanged(int index)
+{
+    if (index < 0) {
+        return;
+    }
+
+    QString fifoLabel = QString("%1 [%2:%3]")
+        .arg(m_channelId)
+        .arg(m_deviceAPI->getDeviceSetIndex())
+        .arg(index);
+    m_basebandSink->setFifoLabel(fifoLabel);
+    m_basebandSink->setAudioFifoLabel(fifoLabel);
 }

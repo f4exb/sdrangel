@@ -183,6 +183,7 @@ private:
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
     void handleChannelMessages();
+    void handleIndexInDeviceSetChanged(int index);
 };
 
 #endif // INCLUDE_AISDEMOD_H

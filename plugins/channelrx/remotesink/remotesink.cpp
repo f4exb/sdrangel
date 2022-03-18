@@ -58,11 +58,6 @@ RemoteSink::RemoteSink(DeviceAPI *deviceAPI) :
     updateWithDeviceData();
 
     m_basebandSink = new RemoteSinkBaseband();
-    m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
-        .arg(m_channelId)
-        .arg(m_deviceAPI->getDeviceSetIndex())
-        .arg(getIndexInDeviceSet())
-    );
     m_basebandSink->moveToThread(&m_thread);
 
     applySettings(m_settings, true);
@@ -72,6 +67,12 @@ RemoteSink::RemoteSink(DeviceAPI *deviceAPI) :
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        this,
+        &ChannelAPI::indexInDeviceSetChanged,
+        this,
+        &RemoteSink::handleIndexInDeviceSetChanged
+    );
 }
 
 RemoteSink::~RemoteSink()
@@ -621,4 +622,17 @@ void RemoteSink::networkManagerFinished(QNetworkReply *reply)
     }
 
     reply->deleteLater();
+}
+
+void RemoteSink::handleIndexInDeviceSetChanged(int index)
+{
+    if (index < 0) {
+        return;
+    }
+
+    QString fifoLabel = QString("%1 [%2:%3]")
+        .arg(m_channelId)
+        .arg(m_deviceAPI->getDeviceSetIndex())
+        .arg(index);
+    m_basebandSink->setFifoLabel(fifoLabel);
 }

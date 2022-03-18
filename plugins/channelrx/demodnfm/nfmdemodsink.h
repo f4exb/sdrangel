@@ -75,6 +75,7 @@ public:
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_messageQueueToGUI = messageQueue; }
 
     AudioFifo *getAudioFifo() { return &m_audioFifo; }
+    void setAudioFifoLabel(const QString& label) { m_audioFifo.setLabel(label); }
     void applyAudioSampleRate(unsigned int sampleRate);
     int getAudioSampleRate() const { return m_audioSampleRate; }
     void setChannel(ChannelAPI *channel) { m_channel = channel; }

@@ -120,7 +120,13 @@ public:
     }
 
     int getIndexInDeviceSet() const { return m_indexInDeviceSet; }
-    void setIndexInDeviceSet(int indexInDeviceSet) { m_indexInDeviceSet = indexInDeviceSet; }
+
+    void setIndexInDeviceSet(int indexInDeviceSet)
+    {
+        m_indexInDeviceSet = indexInDeviceSet;
+        emit indexInDeviceSetChanged(indexInDeviceSet);
+    }
+
     int getDeviceSetIndex() const { return m_deviceSetIndex; }
     void setDeviceSetIndex(int deviceSetIndex) { m_deviceSetIndex = deviceSetIndex; }
     DeviceAPI *getDeviceAPI() { return m_deviceAPI; }
@@ -164,6 +170,9 @@ private:
     int m_deviceSetIndex;
     DeviceAPI *m_deviceAPI;
     uint64_t m_uid;
+
+signals:
+    void indexInDeviceSetChanged(int index);
 };
 
 

@@ -55,11 +55,6 @@ VORDemodSC::VORDemodSC(DeviceAPI *deviceAPI) :
     setObjectName(m_channelId);
 
     m_basebandSink = new VORDemodSCBaseband();
-    m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
-        .arg(m_channelId)
-        .arg(m_deviceAPI->getDeviceSetIndex())
-        .arg(getIndexInDeviceSet())
-    );
     m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());
     m_basebandSink->moveToThread(&m_thread);
 
@@ -70,6 +65,12 @@ VORDemodSC::VORDemodSC(DeviceAPI *deviceAPI) :
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        this,
+        &ChannelAPI::indexInDeviceSetChanged,
+        this,
+        &VORDemodSC::handleIndexInDeviceSetChanged
+    );
 }
 
 VORDemodSC::~VORDemodSC()
@@ -661,4 +662,18 @@ void VORDemodSC::networkManagerFinished(QNetworkReply *reply)
     }
 
     reply->deleteLater();
+}
+
+void VORDemodSC::handleIndexInDeviceSetChanged(int index)
+{
+    if (index < 0) {
+        return;
+    }
+
+    QString fifoLabel = QString("%1 [%2:%3]")
+        .arg(m_channelId)
+        .arg(m_deviceAPI->getDeviceSetIndex())
+        .arg(index);
+    m_basebandSink->setFifoLabel(fifoLabel);
+    m_basebandSink->setAudioFifoLabel(fifoLabel);
 }

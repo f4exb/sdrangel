@@ -108,6 +108,9 @@ private:
 
 	virtual bool handleMessage(const Message& cmd);
     void applySettings(const ATVDemodSettings& settings, bool force = false);
+
+private slots:
+    void handleIndexInDeviceSetChanged(int index);
 };
 
 #endif // INCLUDE_ATVDEMOD_H

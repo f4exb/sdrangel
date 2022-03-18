@@ -49,6 +49,7 @@ public:
     void applyAudioSampleRate(int sampleRate);
 	void applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode);
     AudioFifo *getAudioFifo() { return &m_audioFifo; }
+    void setAudioFifoLabel(const QString& label) { m_audioFifo.setLabel(label); }
     void resyncFreeDV();
 
 	void setSpectrumSink(BasebandSampleSink* spectrumSink) { m_spectrumSink = spectrumSink; }

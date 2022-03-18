@@ -49,6 +49,10 @@ public:
 	void applySettings(const DSDDemodSettings& settings, bool force = false);
     AudioFifo *getAudioFifo1() { return &m_audioFifo1; }
     AudioFifo *getAudioFifo2() { return &m_audioFifo2; }
+    void setAudioFifoLabel(const QString& label) {
+        m_audioFifo1.setLabel("1:" + label);
+        m_audioFifo2.setLabel("2:" + label);
+    }
     int getAudioSampleRate() const { return m_audioSampleRate; }
     void setChannel(ChannelAPI *channel) { m_channel = channel; }
 
