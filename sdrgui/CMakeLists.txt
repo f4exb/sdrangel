@@ -35,6 +35,7 @@ set(sdrgui_SOURCES
     gui/externalclockdialog.cpp
     gui/fmpreemphasisdialog.cpp
     gui/featureadddialog.cpp
+    gui/featurelayout.cpp
     gui/featuresdock.cpp
     gui/featurepresetsdialog.cpp
     gui/featurewindow.cpp
@@ -127,6 +128,7 @@ set(sdrgui_HEADERS
     gui/externalclockdialog.h
     gui/fmpreemphasisdialog.h
     gui/featureadddialog.h
+    gui/featurelayout.h
     gui/featuresdock.h
     gui/featurepresetsdialog.h
     gui/featurewindow.h

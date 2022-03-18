@@ -19,26 +19,28 @@
 #define INCLUDE_FEATUREWINDOW_H
 
 #include <QScrollArea>
+#include <QSplitter>
 
 #include "export.h"
+#include "featurelayout.h"
 
 class QBoxLayout;
 class QSpacerItem;
 class RollupWidget;
 
 class SDRGUI_API FeatureWindow : public QScrollArea {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	FeatureWindow(QWidget* parent = nullptr);
-
-	void addRollupWidget(QWidget* rollupWidget);
+    FeatureWindow(QWidget* parent = nullptr);
+    void addRollupWidget(QWidget* rollupWidget);
 
 protected:
-	QWidget* m_container;
-	QBoxLayout* m_layout;
+    QWidget* m_container;
+    FeatureLayout* m_layout;
+    QSplitter* m_splitter;
 
-	void resizeEvent(QResizeEvent* event);
+    void resizeEvent(QResizeEvent* event);
 };
 
 #endif // INCLUDE_FEATUREWINDOW_H
