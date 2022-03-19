@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>397</width>
-    <height>112</height>
+    <width>359</width>
+    <height>106</height>
    </rect>
   </property>
   <property name="font">
@@ -21,24 +21,24 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
-    <number>3</number>
+    <number>1</number>
    </property>
    <property name="leftMargin">
-    <number>2</number>
+    <number>1</number>
    </property>
    <property name="topMargin">
-    <number>2</number>
+    <number>1</number>
    </property>
    <property name="rightMargin">
-    <number>2</number>
+    <number>1</number>
    </property>
    <property name="bottomMargin">
-    <number>2</number>
+    <number>1</number>
    </property>
    <item>
     <layout class="QHBoxLayout" name="Line1Layout">
      <property name="spacing">
-      <number>3</number>
+      <number>1</number>
      </property>
      <item>
       <widget class="QComboBox" name="fftWindow">
@@ -389,7 +389,7 @@
    <item>
     <layout class="QHBoxLayout" name="Line2Layout">
      <property name="spacing">
-      <number>3</number>
+      <number>1</number>
      </property>
      <item>
       <widget class="QPushButton" name="autoscale">
@@ -600,7 +600,7 @@
    <item>
     <layout class="QHBoxLayout" name="Line3Layout">
      <property name="spacing">
-      <number>3</number>
+      <number>1</number>
      </property>
      <item>
       <widget class="QPushButton" name="clearSpectrum">

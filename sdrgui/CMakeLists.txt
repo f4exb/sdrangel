@@ -40,6 +40,7 @@ set(sdrgui_SOURCES
     gui/featurepresetsdialog.cpp
     gui/featurewindow.cpp
     gui/fftwisdomdialog.cpp
+    gui/flowlayout.cpp
     gui/glscope.cpp
     gui/glscopegui.cpp
     gui/glshadercolors.cpp
@@ -133,6 +134,7 @@ set(sdrgui_HEADERS
     gui/featurepresetsdialog.h
     gui/featurewindow.h
     gui/fftwisdomdialog.h
+    gui/flowlayout.h
     gui/glscope.h
     gui/glscopegui.h
     gui/glshadercolors.h

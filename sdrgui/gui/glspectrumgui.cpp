@@ -30,6 +30,7 @@
 #include "gui/wsspectrumsettingsdialog.h"
 #include "gui/spectrummarkersdialog.h"
 #include "gui/spectrumcalibrationpointsdialog.h"
+#include "gui/flowlayout.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "ui_glspectrumgui.h"
@@ -45,6 +46,17 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
     m_calibrationShiftdB(0.0)
 {
     ui->setupUi(this);
+
+    // Use the custom flow layout for the 3 main horizontal layouts (lines)
+    ui->verticalLayout->removeItem(ui->Line3Layout);
+    ui->verticalLayout->removeItem(ui->Line2Layout);
+    ui->verticalLayout->removeItem(ui->Line1Layout);
+    FlowLayout *flowLayout = new FlowLayout(this, 1, 1, 1);
+    flowLayout->addItem(ui->Line1Layout);
+    flowLayout->addItem(ui->Line2Layout);
+    flowLayout->addItem(ui->Line3Layout);
+    ui->verticalLayout->addItem(flowLayout);
+
     on_linscale_toggled(false);
 
     QString levelStyle = QString(
@@ -55,11 +67,6 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
     ui->refLevel->setStyleSheet(levelStyle);
     ui->levelRange->setStyleSheet(levelStyle);
     ui->fftOverlap->setStyleSheet(levelStyle);
-    // ui->refLevel->findChild<QLineEdit*>()->setStyleSheet("color: white; background-color: rgb(79, 79, 79); border: 1px solid gray; border-radius: 4px; ");
-    // ui->refLevel->setStyleSheet("background-color: rgb(79, 79, 79);");
-
-    // ui->levelRange->findChild<QLineEdit*>()->setStyleSheet("color: white; background-color: rgb(79, 79, 79); border: 1px solid gray; border-radius: 4px;");
-    // ui->levelRange->setStyleSheet("background-color: rgb(79, 79, 79);");
 
     connect(&m_messageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
