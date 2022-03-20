@@ -236,12 +236,12 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     splash->showStatusMessage("load last device or file input...", Qt::white);
     qDebug() << "MainWindow::MainWindow: select SampleSource from settings or default (file input)...";
     qDebug() << "MainWindow::MainWindow: look for"
-        << m_mainCore->m_settings.getSourceDeviceId()
+        << m_mainCore->m_settings.getSourceDevice()
         << "at index" << m_mainCore->m_settings.getSourceIndex()
         << "and item index" << m_mainCore->m_settings.getSourceItemIndex();
 
 	int deviceIndex = DeviceEnumerator::instance()->getRxSamplingDeviceIndex(
-        m_mainCore->m_settings.getSourceDeviceId(),
+        m_mainCore->m_settings.getSourceDevice(),
         m_mainCore->m_settings.getSourceIndex(),
         m_mainCore->m_settings.getSourceItemIndex());
 	addSourceDevice(deviceIndex);  // add the first device set with file input device as default if device in settings is not enumerated
@@ -2079,7 +2079,7 @@ void MainWindow::sampleSourceChanged(int tabIndex, int newDeviceIndex)
             qDebug("MainWindow::sampleSourceChanged: save default starting device %s[%d:%d]",
                 qPrintable(samplingDevice->id), samplingDevice->sequence, samplingDevice->deviceItemIndex);
             m_mainCore->m_settings.setSourceIndex(samplingDevice->sequence);
-            m_mainCore->m_settings.setSourceDeviceId(samplingDevice->id);
+            m_mainCore->m_settings.setSourceDevice(samplingDevice->id);
             m_mainCore->m_settings.setSourceItemIndex(samplingDevice->deviceItemIndex);
         }
     }

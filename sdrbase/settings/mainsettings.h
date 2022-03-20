@@ -1,6 +1,7 @@
 #ifndef INCLUDE_SETTINGS_H
 #define INCLUDE_SETTINGS_H
 
+#include <QObject>
 #include <QString>
 #include "device/deviceuserargs.h"
 #include "limerfe/limerfeusbcalib.h"
@@ -15,7 +16,8 @@ class AudioDeviceManager;
 class AMBEEngine;
 
 
-class SDRBASE_API MainSettings {
+class SDRBASE_API MainSettings : public QObject {
+	Q_OBJECT
 public:
 	MainSettings();
 	~MainSettings();
@@ -68,36 +70,105 @@ public:
 	FeatureSetPreset* getWorkingFeatureSetPreset() { return &m_workingFeatureSetPreset; }
 	QList<FeatureSetPreset*> *getFeatureSetPresets() { return &m_featureSetPresets; }
 
-	int getSourceItemIndex() const { return m_preferences.getSourceItemIndex(); }
-	void setSourceItemIndex(int value) { m_preferences.setSourceItemIndex(value); }
+	const QString& getSourceDevice() const { return m_preferences.getSourceDevice(); }
+	void setSourceDevice(const QString& value)
+	{
+		m_preferences.setSourceDevice(value);
+		emit preferenceChanged(Preferences::SourceDevice);
+	}
+
 	int getSourceIndex() const { return m_preferences.getSourceIndex(); }
-	void setSourceIndex(int value) { m_preferences.setSourceIndex(value); }
-	const QString& getSourceDeviceId() const { return m_preferences.getSourceDevice(); }
-	void setSourceDeviceId(const QString& deviceId) { m_preferences.setSourceDevice(deviceId); }
+	void setSourceIndex(int value)
+	{
+		m_preferences.setSourceIndex(value);
+		emit preferenceChanged(Preferences::SourceIndex);
+	}
 
-	void setStationName(const QString& name) { m_preferences.setStationName(name); }
-        void setLatitude(float latitude) { m_preferences.setLatitude(latitude); }
-	void setLongitude(float longitude) { m_preferences.setLongitude(longitude); }
-	void setAltitude(float altitude) { m_preferences.setAltitude(altitude); }
-        QString getStationName() const { return m_preferences.getStationName(); }
+	int getSourceItemIndex() const { return m_preferences.getSourceItemIndex(); }
+	void setSourceItemIndex(int value)
+	{
+		m_preferences.setSourceItemIndex(value);
+		emit preferenceChanged(Preferences::SourceItemIndex);
+	}
+
+	const QString& getAudioType() const { return m_preferences.getAudioType(); }
+	void setAudioType(const QString& value)
+	{
+		m_preferences.setAudioType(value);
+		emit preferenceChanged(Preferences::AudioType);
+	}
+
+	const QString& getAudioDevice() const { return m_preferences.getAudioDevice(); }
+	void setAudioDevice(const QString& value)
+	{
+		m_preferences.setAudioDevice(value);
+		emit preferenceChanged(Preferences::AudioDevice);
+	}
+
+    QString getStationName() const { return m_preferences.getStationName(); }
+	void setStationName(const QString& name)
+	{
+		m_preferences.setStationName(name);
+		emit preferenceChanged(Preferences::StationName);
+	}
+
 	float getLatitude() const { return m_preferences.getLatitude(); }
-	float getLongitude() const { return m_preferences.getLongitude(); }
-	float getAltitude() const { return m_preferences.getAltitude(); }
+	void setLatitude(float latitude)
+	{
+		m_preferences.setLatitude(latitude);
+		emit preferenceChanged(Preferences::Latitude);
+	}
 
-    void setConsoleMinLogLevel(const QtMsgType& minLogLevel) { m_preferences.setConsoleMinLogLevel(minLogLevel); }
-    void setFileMinLogLevel(const QtMsgType& minLogLevel) { m_preferences.setFileMinLogLevel(minLogLevel); }
-    void setUseLogFile(bool useLogFile) { m_preferences.setUseLogFile(useLogFile); }
-    void setLogFileName(const QString& value) { m_preferences.setLogFileName(value); }
+	float getLongitude() const { return m_preferences.getLongitude(); }
+	void setLongitude(float longitude)
+	{
+		m_preferences.setLongitude(longitude);
+		emit preferenceChanged(Preferences::Longitude);
+	}
+
+	float getAltitude() const { return m_preferences.getAltitude(); }
+	void setAltitude(float altitude)
+	{
+		m_preferences.setAltitude(altitude);
+		emit preferenceChanged(Preferences::Altitude);
+	}
+
     QtMsgType getConsoleMinLogLevel() const { return m_preferences.getConsoleMinLogLevel(); }
+	void setConsoleMinLogLevel(const QtMsgType& minLogLevel)
+	{
+		m_preferences.setConsoleMinLogLevel(minLogLevel);
+		emit preferenceChanged(Preferences::ConsoleMinLogLevel);
+	}
+
     QtMsgType getFileMinLogLevel() const { return m_preferences.getFileMinLogLevel(); }
+    void setFileMinLogLevel(const QtMsgType& minLogLevel)
+	{
+		m_preferences.setFileMinLogLevel(minLogLevel);
+		emit preferenceChanged(Preferences::FileMinLogLevel);
+	}
+
     bool getUseLogFile() const { return m_preferences.getUseLogFile(); }
+	void setUseLogFile(bool useLogFile)
+	{
+		m_preferences.setUseLogFile(useLogFile);
+		emit preferenceChanged(Preferences::UseLogFile);
+	}
+
     const QString& getLogFileName() const { return m_preferences.getLogFileName(); }
+	void setLogFileName(const QString& value)
+	{
+		m_preferences.setLogFileName(value);
+		emit preferenceChanged(Preferences::LogFileName);
+	}
+
 	DeviceUserArgs& getDeviceUserArgs() { return m_hardwareDeviceUserArgs; }
 	LimeRFEUSBCalib& getLimeRFEUSBCalib() { return m_limeRFEUSBCalib; }
-
 	const AudioDeviceManager *getAudioDeviceManager() const { return m_audioDeviceManager; }
 	void setAudioDeviceManager(AudioDeviceManager *audioDeviceManager) { m_audioDeviceManager = audioDeviceManager; }
     void setAMBEEngine(AMBEEngine *ambeEngine) { m_ambeEngine = ambeEngine; }
+
+signals:
+	void preferenceChanged(int);
 
 protected:
 	Preferences m_preferences;
