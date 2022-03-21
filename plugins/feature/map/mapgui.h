@@ -103,6 +103,7 @@ private:
     MessageQueue m_inputMessageQueue;
     MapModel m_mapModel;
     AzEl m_azEl;                        // Position of station
+    SWGSDRangel::SWGMapItem m_antennaMapItem;
     QList<Beacon *> *m_beacons;
     MapBeaconDialog m_beaconDialog;
     MapIBPBeaconDialog m_ibpBeaconDialog;
@@ -158,6 +159,7 @@ private slots:
     virtual void showEvent(QShowEvent *event);
     virtual bool eventFilter(QObject *obj, QEvent *event);
     void fullScreenRequested(QWebEngineFullScreenRequest fullScreenRequest);
+    void preferenceChanged(int elementType);
 
 };
 

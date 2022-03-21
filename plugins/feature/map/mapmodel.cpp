@@ -231,7 +231,7 @@ void MapModel::update(const PipeEndPoint *sourcePipe, SWGSDRangel::SWGMapItem *s
             remove(item);
             // Need to call update, for it to be removed in 3D map
             // Item is set to not be available from this point in time
-            // It will still be avialable if time is set in the past
+            // It will still be available if time is set in the past
             item->update(swgMapItem);
         }
         else
@@ -508,11 +508,12 @@ QVariant MapModel::data(const QModelIndex &index, int role) const
     else if (role == MapModel::mapTextRole)
     {
         // Create the text to go in the bubble next to the image
+        QString name = m_items[row]->m_label.isEmpty() ? m_items[row]->m_name : m_items[row]->m_label;
         if (row == m_target)
         {
             AzEl *azEl = m_gui->getAzEl();
             QString text = QString("%1<br>Az: %2%5 El: %3%5 Dist: %4 km")
-                                .arg(m_selected[row] ? m_items[row]->m_text : m_items[row]->m_name)
+                                .arg(m_selected[row] ? m_items[row]->m_text : name)
                                 .arg(std::round(azEl->getAzimuth()))
                                 .arg(std::round(azEl->getElevation()))
                                 .arg(std::round(azEl->getDistance() / 1000.0))
@@ -525,7 +526,7 @@ QVariant MapModel::data(const QModelIndex &index, int role) const
         }
         else
         {
-            return QVariant::fromValue(m_items[row]->m_name);
+            return QVariant::fromValue(name);
         }
     }
     else if (role == MapModel::mapTextVisibleRole)

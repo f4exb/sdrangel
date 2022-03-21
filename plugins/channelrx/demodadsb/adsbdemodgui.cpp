@@ -3802,6 +3802,9 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
         ui->warning->setText("Please set your antenna location under Preferences > My Position");
     }
 
+    // Get updated when position changes
+    connect(&MainCore::instance()->getSettings(), &MainSettings::preferenceChanged, this, &ADSBDemodGUI::preferenceChanged);
+
     // Add airports within range of My Position
     if (m_airportInfo != nullptr) {
         updateAirports();
@@ -4585,5 +4588,57 @@ void ADSBDemodGUI::handleImportReply(QNetworkReply* reply)
             qDebug() << "ADSBDemodGUI::handleImportReply: error " << reply->error();
         }
         reply->deleteLater();
+    }
+}
+
+void ADSBDemodGUI::preferenceChanged(int elementType)
+{
+    Preferences::ElementType pref = (Preferences::ElementType)elementType;
+    if ((pref == Preferences::Latitude) || (pref == Preferences::Longitude) || (pref == Preferences::Altitude))
+    {
+        Real stationLatitude = MainCore::instance()->getSettings().getLatitude();
+        Real stationLongitude = MainCore::instance()->getSettings().getLongitude();
+        Real stationAltitude = MainCore::instance()->getSettings().getAltitude();
+
+        if (   (stationLatitude != m_azEl.getLocationSpherical().m_latitude)
+            || (stationLongitude != m_azEl.getLocationSpherical().m_longitude)
+            || (stationAltitude != m_azEl.getLocationSpherical().m_altitude))
+        {
+            m_azEl.setLocation(stationLatitude, stationLongitude, stationAltitude);
+
+            // Update distances and what is visible
+            updateAirports();
+            updateAirspaces();
+            updateNavAids();
+
+            // Update icon position on Map
+            QQuickItem *item = ui->map->rootObject();
+            QObject *map = item->findChild<QObject*>("map");
+            if (map != nullptr)
+            {
+                QObject *stationObject = map->findChild<QObject*>("station");
+                if(stationObject != NULL)
+                {
+                    QGeoCoordinate coords = stationObject->property("coordinate").value<QGeoCoordinate>();
+                    coords.setLatitude(stationLatitude);
+                    coords.setLongitude(stationLongitude);
+                    coords.setAltitude(stationAltitude);
+                    stationObject->setProperty("coordinate", QVariant::fromValue(coords));
+                }
+            }
+        }
+    }
+    if (pref == Preferences::StationName)
+    {
+        // Update icon label on Map
+        QQuickItem *item = ui->map->rootObject();
+        QObject *map = item->findChild<QObject*>("map");
+        if (map != nullptr)
+        {
+            QObject *stationObject = map->findChild<QObject*>("station");
+            if(stationObject != NULL) {
+                stationObject->setProperty("stationName", QVariant::fromValue(MainCore::instance()->getSettings().getStationName()));
+            }
+        }
     }
 }

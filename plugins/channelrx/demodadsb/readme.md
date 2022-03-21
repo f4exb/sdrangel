@@ -275,7 +275,7 @@ The map displays aircraft locations and data geographically. Four types of map c
 
 ![ADS-B Demodulator Map](../../../doc/img/ADSBDemod_plugin_map2.png)
 
-The initial antenna location is placed according to My Position set under the Preferences > My Position menu. The position is only updated when the ADS-B demodulator plugin is first opened.
+The antenna location is placed according to My Position set under the Preferences > My Position menu.
 If My Position is not set correctly, the position of aircraft may not be computed correctly.
 
 Aircraft are only placed upon the map when a position can be calculated, which can require several frames to be received.
