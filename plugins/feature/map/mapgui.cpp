@@ -232,7 +232,6 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     }
 
     // Create antenna at My Position
-    //m_antennaMapItem.setName(new QString(MainCore::instance()->getSettings().getStationName()));
     m_antennaMapItem.setName(new QString("Station"));
     m_antennaMapItem.setLatitude(stationLatitude);
     m_antennaMapItem.setLongitude(stationLongitude);
