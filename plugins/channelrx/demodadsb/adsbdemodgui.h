@@ -942,6 +942,7 @@ private slots:
     virtual bool eventFilter(QObject *obj, QEvent *event);
     void import();
     void handleImportReply(QNetworkReply* reply);
+    void preferenceChanged(int elementType);
 
 signals:
     void homePositionChanged();

@@ -69,7 +69,9 @@ MapSettings::MapSettings() :
     m_itemSettings.insert("RadioSonde", new MapItemSettings("RadioSonde", QColor(102, 0, 102), false, 11, modelMinPixelSize));
     m_itemSettings.insert("Radio Time Transmitters", new MapItemSettings("Radio Time Transmitters", QColor(255, 0, 0), true, 8));
     m_itemSettings.insert("Radar", new MapItemSettings("Radar", QColor(255, 0, 0), true, 8));
-    m_itemSettings.insert("Station", new MapItemSettings("Station", QColor(255, 0, 0), true, 11));
+    MapItemSettings *stationItemSettings = new MapItemSettings("Station", QColor(255, 0, 0), true, 11);
+    stationItemSettings->m_display2DTrack = false;
+    m_itemSettings.insert("Station", stationItemSettings);
     resetToDefaults();
 }
 

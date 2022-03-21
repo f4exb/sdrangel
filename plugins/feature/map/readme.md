@@ -141,7 +141,7 @@ These are not included with the SDRangel distribution, so must be downloaded.
 
 The map feature displays a 2D and a 3D map overlaid with objects reported by other SDRangel channels and features, as well as beacon locations.
 
-* The "Home Station" antenna location is placed according to My Position set under the Preferences > My Position menu. The position is only updated when the Map plugin is first opened.
+* The "Home Station" antenna location is placed according to My Position set under the Preferences > My Position menu.
 * To pan around the map, click the left mouse button and drag. To zoom in or out, use the mouse scroll wheel.
 * Single clicking on an object in the map will display a text bubble with additional information about the object.
 * Right clicking on a object on the 2D map will open a context menu, which allows:

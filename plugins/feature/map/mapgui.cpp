@@ -232,21 +232,24 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     }
 
     // Create antenna at My Position
-    SWGSDRangel::SWGMapItem antennaMapItem;
-    antennaMapItem.setName(new QString(MainCore::instance()->getSettings().getStationName()));
-    antennaMapItem.setLatitude(stationLatitude);
-    antennaMapItem.setLongitude(stationLongitude);
-    antennaMapItem.setAltitude(stationAltitude);
-    antennaMapItem.setImage(new QString("antenna.png"));
-    antennaMapItem.setImageRotation(0);
-    antennaMapItem.setText(new QString(MainCore::instance()->getSettings().getStationName()));
-    antennaMapItem.setModel(new QString("antenna.glb"));
-    antennaMapItem.setFixedPosition(true);
-    antennaMapItem.setOrientation(0);
-    antennaMapItem.setLabel(new QString(MainCore::instance()->getSettings().getStationName()));
-    antennaMapItem.setLabelAltitudeOffset(4.5);
-    antennaMapItem.setAltitudeReference(1);
-    update(m_map, &antennaMapItem, "Station");
+    //m_antennaMapItem.setName(new QString(MainCore::instance()->getSettings().getStationName()));
+    m_antennaMapItem.setName(new QString("Station"));
+    m_antennaMapItem.setLatitude(stationLatitude);
+    m_antennaMapItem.setLongitude(stationLongitude);
+    m_antennaMapItem.setAltitude(stationAltitude);
+    m_antennaMapItem.setImage(new QString("antenna.png"));
+    m_antennaMapItem.setImageRotation(0);
+    m_antennaMapItem.setText(new QString(MainCore::instance()->getSettings().getStationName()));
+    m_antennaMapItem.setModel(new QString("antenna.glb"));
+    m_antennaMapItem.setFixedPosition(true);
+    m_antennaMapItem.setOrientation(0);
+    m_antennaMapItem.setLabel(new QString(MainCore::instance()->getSettings().getStationName()));
+    m_antennaMapItem.setLabelAltitudeOffset(4.5);
+    m_antennaMapItem.setAltitudeReference(1);
+    update(m_map, &m_antennaMapItem, "Station");
+
+    // Get updated when position changes
+    connect(&MainCore::instance()->getSettings(), &MainSettings::preferenceChanged, this, &MapGUI::preferenceChanged);
 
     // Read beacons, if they exist
     QList<Beacon *> *beacons = Beacon::readIARUCSV(MapGUI::getBeaconFilename());
@@ -1175,5 +1178,36 @@ void MapGUI::fullScreenRequested(QWebEngineFullScreenRequest fullScreenRequest)
     else
     {
         ui->splitter->addWidget(ui->web);
+    }
+}
+
+void MapGUI::preferenceChanged(int elementType)
+{
+    Preferences::ElementType pref = (Preferences::ElementType)elementType;
+    if ((pref == Preferences::Latitude) || (pref == Preferences::Longitude) || (pref == Preferences::Altitude))
+    {
+        float stationLatitude = MainCore::instance()->getSettings().getLatitude();
+        float stationLongitude = MainCore::instance()->getSettings().getLongitude();
+        float stationAltitude = MainCore::instance()->getSettings().getAltitude();
+
+        if (   (stationLatitude != m_azEl.getLocationSpherical().m_latitude)
+            || (stationLongitude != m_azEl.getLocationSpherical().m_longitude)
+            || (stationAltitude != m_azEl.getLocationSpherical().m_altitude))
+        {
+            // Update position of station
+            m_azEl.setLocation(stationLatitude, stationLongitude, stationAltitude);
+
+            m_antennaMapItem.setLatitude(stationLatitude);
+            m_antennaMapItem.setLongitude(stationLongitude);
+            m_antennaMapItem.setAltitude(stationAltitude);
+            update(m_map, &m_antennaMapItem, "Station");
+        }
+    }
+    if (pref == Preferences::StationName)
+    {
+        // Update station name
+        m_antennaMapItem.setLabel(new QString(MainCore::instance()->getSettings().getStationName()));
+        m_antennaMapItem.setText(new QString(MainCore::instance()->getSettings().getStationName()));
+        update(m_map, &m_antennaMapItem, "Station");
     }
 }
