@@ -263,11 +263,15 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     displaySettings();
     applySettings(true);
 
+    connect(&m_redrawMapTimer, &QTimer::timeout, this, &MapGUI::redrawMap);
+    m_redrawMapTimer.setSingleShot(true);
     ui->map->installEventFilter(this);
 }
 
 MapGUI::~MapGUI()
 {
+    disconnect(&m_redrawMapTimer, &QTimer::timeout, this, &MapGUI::redrawMap);
+    m_redrawMapTimer.stop();
     //m_cesium->deleteLater();
     delete m_cesium;
     if (m_templateServer)
@@ -281,6 +285,7 @@ MapGUI::~MapGUI()
         delete m_webServer;
     }
     delete ui;
+    ui = nullptr;
 }
 
 // Update a map item or image
@@ -707,9 +712,7 @@ void MapGUI::showEvent(QShowEvent *event)
     {
         // Workaround for https://bugreports.qt.io/browse/QTBUG-100333
         // MapQuickItems can be in wrong position when window is first displayed
-        QTimer::singleShot(500, [this] {
-            redrawMap();
-        });
+        m_redrawMapTimer.start(500);
     }
 }
 

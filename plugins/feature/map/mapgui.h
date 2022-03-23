@@ -110,6 +110,7 @@ private:
     MapRadioTimeDialog m_radioTimeDialog;
     quint16 m_osmPort;
     OSMTemplateServer *m_templateServer;
+    QTimer m_redrawMapTimer;
 
     CesiumInterface *m_cesium;
     WebServer *m_webServer;
