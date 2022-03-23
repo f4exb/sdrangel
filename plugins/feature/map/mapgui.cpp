@@ -285,7 +285,6 @@ MapGUI::~MapGUI()
         delete m_webServer;
     }
     delete ui;
-    ui = nullptr;
 }
 
 // Update a map item or image

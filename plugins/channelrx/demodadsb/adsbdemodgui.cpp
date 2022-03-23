@@ -4397,7 +4397,7 @@ void ADSBDemodGUI::showEvent(QShowEvent *event)
     {
         // Workaround for https://bugreports.qt.io/browse/QTBUG-100333
         // MapQuickItems can be in wrong position when window is first displayed
-        m_redrawMapTimer.start(500);        
+        m_redrawMapTimer.start(500);
     }
 }
 
