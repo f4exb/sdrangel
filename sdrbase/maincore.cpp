@@ -133,11 +133,6 @@ DeviceAPI *MainCore::getDevice(unsigned int deviceSetIndex)
     }
 }
 
-void MainCore::sendDeviceChanged(int deviceSetIndex)
-{
-    emit deviceChanged(deviceSetIndex);
-}
-
 ChannelAPI *MainCore::getChannel(unsigned int deviceSetIndex, int channelIndex)
 {
     if (deviceSetIndex < m_deviceSets.size()) {
@@ -162,7 +157,6 @@ void MainCore::appendFeatureSet()
     FeatureSet *featureSet = new FeatureSet(newIndex);
     m_featureSets.push_back(featureSet);
     m_featureSetsMap.insert(featureSet, newIndex);
-    emit featureSetAdded(newIndex);
 }
 
 void MainCore::removeFeatureSet(unsigned int index)
@@ -172,7 +166,6 @@ void MainCore::removeFeatureSet(unsigned int index)
         FeatureSet *featureSet = m_featureSets[index];
         m_featureSetsMap.remove(featureSet);
         m_featureSets.erase(m_featureSets.begin() + index);
-        emit featureSetRemoved(index);
     }
 }
 
@@ -180,11 +173,9 @@ void MainCore::removeLastFeatureSet()
 {
     if (m_featureSets.size() != 0)
     {
-        int size = m_featureSets.size();
         FeatureSet *featureSet = m_featureSets.back();
         m_featureSetsMap.remove(featureSet);
         m_featureSets.pop_back();
-        emit featureSetRemoved(size - 1);
     }
 }
 
@@ -194,18 +185,15 @@ void MainCore::appendDeviceSet(int deviceType)
     DeviceSet *deviceSet = new DeviceSet(newIndex, deviceType);
     m_deviceSets.push_back(deviceSet);
     m_deviceSetsMap.insert(deviceSet, newIndex);
-    emit deviceSetAdded(newIndex, deviceSet->m_deviceAPI);
 }
 
 void MainCore::removeLastDeviceSet()
 {
     if (m_deviceSets.size() != 0)
     {
-        int size = m_deviceSets.size();
         DeviceSet *deviceSet = m_deviceSets.back();
         m_deviceSetsMap.remove(deviceSet);
         m_deviceSets.pop_back();
-        emit deviceSetRemoved(size - 1);
     }
 }
 

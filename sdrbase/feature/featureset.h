@@ -36,7 +36,7 @@ public:
 
     int getNumberOfFeatures() const { return m_featureInstanceRegistrations.size(); }
     int getIndex() const { return m_featureTabIndex; }
-    void addFeature(int selectedFeatureIndex, PluginAPI *pluginAPI, WebAPIAdapterInterface *apiAdapter);
+    Feature *addFeature(int selectedFeatureIndex, PluginAPI *pluginAPI, WebAPIAdapterInterface *apiAdapter);
     void removeFeatureInstance(Feature* feature);
     void freeFeatures();
     void deleteFeature(int featureIndex);

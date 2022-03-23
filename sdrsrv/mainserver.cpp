@@ -311,6 +311,7 @@ void MainServer::addSinkDevice()
     DeviceSampleSink *sink = deviceAPI->getPluginInterface()->createSampleSinkPluginInstance(
             deviceAPI->getSamplingDeviceId(), deviceAPI);
     deviceAPI->setSampleSink(sink);
+    emit m_mainCore->deviceSetAdded(deviceTabIndex, deviceAPI);
 }
 
 void MainServer::addSourceDevice()
@@ -357,6 +358,7 @@ void MainServer::addSourceDevice()
     DeviceSampleSource *source = deviceAPI->getPluginInterface()->createSampleSourcePluginInstance(
             deviceAPI->getSamplingDeviceId(), deviceAPI);
     deviceAPI->setSampleSource(source);
+    emit m_mainCore->deviceSetAdded(deviceTabIndex, deviceAPI);
 }
 
 void MainServer::addMIMODevice()
@@ -401,10 +403,13 @@ void MainServer::addMIMODevice()
     DeviceSampleMIMO *mimo = deviceAPI->getPluginInterface()->createSampleMIMOPluginInstance(
             deviceAPI->getSamplingDeviceId(), deviceAPI);
     m_mainCore->m_deviceSets.back()->m_deviceAPI->setSampleMIMO(mimo);
+    emit m_mainCore->deviceSetAdded(deviceTabIndex, deviceAPI);
 }
 
 void MainServer::removeLastDevice()
 {
+    int removedTabIndex = m_mainCore->m_deviceSets.size() - 1;
+
     if (m_mainCore->m_deviceSets.back()->m_deviceSourceEngine) // source set
     {
         DSPDeviceSourceEngine *lastDeviceEngine = m_mainCore->m_deviceSets.back()->m_deviceSourceEngine;
@@ -447,6 +452,7 @@ void MainServer::removeLastDevice()
     }
 
     m_mainCore->m_deviceSets.pop_back();
+    emit m_mainCore->deviceSetRemoved(removedTabIndex);
 }
 
 void MainServer::changeSampleSource(int deviceSetIndex, int selectedDeviceIndex)
@@ -531,7 +537,7 @@ void MainServer::changeSampleSource(int deviceSetIndex, int selectedDeviceIndex)
         deviceSet->m_deviceAPI->loadSamplingDeviceSettings(m_mainCore->m_settings.getWorkingPreset()); // load new API settings
 
         // Notify
-        m_mainCore->sendDeviceChanged(deviceSetIndex);
+        emit m_mainCore->deviceChanged(deviceSetIndex);
     }
 }
 
@@ -701,12 +707,15 @@ void MainServer::deleteChannel(int deviceSetIndex, int channelIndex)
 void MainServer::addFeatureSet()
 {
     m_mainCore->appendFeatureSet();
+    emit m_mainCore->featureSetAdded(m_mainCore->getFeatureeSets().size() - 1);
 }
 
 void MainServer::removeFeatureSet(unsigned int featureSetIndex)
 {
-    if (featureSetIndex < m_mainCore->m_featureSets.size()) {
+    if (featureSetIndex < m_mainCore->m_featureSets.size())
+    {
         m_mainCore->removeFeatureSet(featureSetIndex);
+        emit m_mainCore->featureSetRemoved(featureSetIndex);
     }
 }
 

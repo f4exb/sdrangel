@@ -151,6 +151,11 @@ void DeviceUISet::deleteChannel(int channelIndex)
     m_deviceSet->removeChannelInstanceAt(channelIndex);
 }
 
+ChannelAPI *DeviceUISet::getChannelAt(int channelIndex)
+{
+    return m_deviceSet->getChannelAt(channelIndex);
+}
+
 void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginAPI)
 {
     if (preset->isSourcePreset())

@@ -34,7 +34,7 @@ FeatureSet::~FeatureSet()
 {
 }
 
-void FeatureSet::addFeature(int selectedFeatureIndex, PluginAPI *pluginAPI, WebAPIAdapterInterface *apiAdapter)
+Feature *FeatureSet::addFeature(int selectedFeatureIndex, PluginAPI *pluginAPI, WebAPIAdapterInterface *apiAdapter)
 {
     PluginAPI::FeatureRegistrations *featureRegistrations = pluginAPI->getFeatureRegistrations(); // Available feature plugins
     Feature *feature = featureRegistrations->at(selectedFeatureIndex).m_plugin->createFeature(apiAdapter);
@@ -43,6 +43,7 @@ void FeatureSet::addFeature(int selectedFeatureIndex, PluginAPI *pluginAPI, WebA
     m_featureInstanceRegistrations.append(feature);
     MainCore::instance()->addFeatureInstance(this, feature);
     renameFeatureInstances();
+    return feature;
 }
 
 void FeatureSet::removeFeatureInstance(Feature* feature)

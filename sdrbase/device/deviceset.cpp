@@ -92,40 +92,40 @@ void DeviceSet::deleteChannel(int channelIndex)
     }
 }
 
-void DeviceSet::addRxChannel(int selectedChannelIndex, PluginAPI *pluginAPI)
+ChannelAPI *DeviceSet::addRxChannel(int selectedChannelIndex, PluginAPI *pluginAPI)
 {
     PluginAPI::ChannelRegistrations *channelRegistrations = pluginAPI->getRxChannelRegistrations(); // Available channel plugins
     ChannelAPI *rxChannel;
     (*channelRegistrations)[selectedChannelIndex].m_plugin->createRxChannel(m_deviceAPI, nullptr, &rxChannel);
-    ChannelAPI *channelAPI = rxChannel;
-    m_channelInstanceRegistrations.append(channelAPI);
-    MainCore::instance()->addChannelInstance(this, channelAPI);
+    m_channelInstanceRegistrations.append(rxChannel);
+    MainCore::instance()->addChannelInstance(this, rxChannel);
     renameChannelInstances();
     qDebug("DeviceSet::addRxChannel: %s", qPrintable(rxChannel->getName()));
+    return rxChannel;
 }
 
-void DeviceSet::addTxChannel(int selectedChannelIndex, PluginAPI *pluginAPI)
+ChannelAPI *DeviceSet::addTxChannel(int selectedChannelIndex, PluginAPI *pluginAPI)
 {
     PluginAPI::ChannelRegistrations *channelRegistrations = pluginAPI->getTxChannelRegistrations(); // Available channel plugins
     ChannelAPI *txChannel;
     (*channelRegistrations)[selectedChannelIndex].m_plugin->createTxChannel(m_deviceAPI, nullptr, &txChannel);
-    ChannelAPI *channelAPI = txChannel;
-    m_channelInstanceRegistrations.append(channelAPI);
-    MainCore::instance()->addChannelInstance(this, channelAPI);
+    m_channelInstanceRegistrations.append(txChannel);
+    MainCore::instance()->addChannelInstance(this, txChannel);
     renameChannelInstances();
     qDebug("DeviceSet::addTxChannel: %s", qPrintable(txChannel->getName()));
+    return txChannel;
 }
 
-void DeviceSet::addMIMOChannel(int selectedChannelIndex, PluginAPI *pluginAPI)
+ChannelAPI *DeviceSet::addMIMOChannel(int selectedChannelIndex, PluginAPI *pluginAPI)
 {
     PluginAPI::ChannelRegistrations *channelRegistrations = pluginAPI->getMIMOChannelRegistrations(); // Available channel plugins
     ChannelAPI *mimoChannel;
     (*channelRegistrations)[selectedChannelIndex].m_plugin->createMIMOChannel(m_deviceAPI, nullptr, &mimoChannel);
-    ChannelAPI *channelAPI = mimoChannel;
-    m_channelInstanceRegistrations.append(channelAPI);
-    MainCore::instance()->addChannelInstance(this, channelAPI);
+    m_channelInstanceRegistrations.append(mimoChannel);
+    MainCore::instance()->addChannelInstance(this, mimoChannel);
     renameChannelInstances();
     qDebug("DeviceSet::addMIMOChannel: %s", qPrintable(mimoChannel->getName()));
+    return mimoChannel;
 }
 
 void DeviceSet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginAPI)

@@ -72,6 +72,7 @@ public:
     int getNumberOfChannels() const { return m_channelInstanceRegistrations.size(); }
     void freeChannels();
     void deleteChannel(int channelIndex);
+    ChannelAPI *getChannelAt(int channelIndex);
     void loadRxChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
     void saveRxChannelSettings(Preset* preset);
     void loadTxChannelSettings(const Preset* preset, PluginAPI *pluginAPI);

@@ -412,6 +412,7 @@ void MainWindow::addSourceDevice(int deviceIndex)
     m_deviceUIs.back()->m_deviceGUI = pluginGUI;
     m_deviceUIs.back()->m_deviceAPI->getSampleSource()->init();
     setDeviceGUI(deviceTabIndex, gui, deviceAPI->getSamplingDeviceDisplayName());
+    emit m_mainCore->deviceSetAdded(deviceTabIndex, deviceAPI);
 }
 
 void MainWindow::addSinkDevice()
@@ -489,6 +490,7 @@ void MainWindow::addSinkDevice()
     m_deviceUIs.back()->m_deviceGUI = pluginGUI;
     m_deviceUIs.back()->m_deviceAPI->getSampleSink()->init();
     setDeviceGUI(deviceTabIndex, gui, deviceAPI->getSamplingDeviceDisplayName(), 1);
+    emit m_mainCore->deviceSetAdded(deviceTabIndex, deviceAPI);
 }
 
 void MainWindow::addMIMODevice()
@@ -574,11 +576,14 @@ void MainWindow::addMIMODevice()
     m_deviceUIs.back()->m_deviceGUI = pluginGUI;
     m_deviceUIs.back()->m_deviceAPI->getSampleMIMO()->init();
     setDeviceGUI(deviceTabIndex, gui, deviceAPI->getSamplingDeviceDisplayName(), 2);
+    emit m_mainCore->deviceSetAdded(deviceTabIndex, deviceAPI);
 }
 
 void MainWindow::removeLastDevice()
 {
-	if (m_deviceUIs.back()->m_deviceSourceEngine) // source tab
+    int removedTabIndex = m_deviceUIs.size() - 1;
+
+    if (m_deviceUIs.back()->m_deviceSourceEngine) // source tab
 	{
 	    DSPDeviceSourceEngine *lastDeviceEngine = m_deviceUIs.back()->m_deviceSourceEngine;
 	    lastDeviceEngine->stopAcquistion();
@@ -677,6 +682,7 @@ void MainWindow::removeLastDevice()
 
     m_deviceUIs.pop_back();
     m_mainCore->removeLastDeviceSet();
+    emit m_mainCore->deviceSetRemoved(removedTabIndex);
 }
 
 void MainWindow::addFeatureSet()
@@ -685,6 +691,7 @@ void MainWindow::addFeatureSet()
     m_mainCore->appendFeatureSet();
     m_featureUIs.push_back(new FeatureUISet(tabIndex, m_mainCore->m_featureSets[tabIndex]));
     ui->tabFeatures->addTab(m_featureUIs.back()->m_featureWindow, QString("F%1").arg(tabIndex));
+    emit m_mainCore->featureSetAdded(tabIndex);
 }
 
 void MainWindow::removeFeatureSet(unsigned int tabIndex)
@@ -694,6 +701,7 @@ void MainWindow::removeFeatureSet(unsigned int tabIndex)
         delete m_featureUIs[tabIndex];
         m_featureUIs.pop_back();
         m_mainCore->removeFeatureSet(tabIndex);
+        emit m_mainCore->featureSetRemoved(tabIndex);
     }
 }
 
@@ -1964,7 +1972,7 @@ void MainWindow::samplingDeviceChanged(int deviceType, int tabIndex, int newDevi
         sampleMIMOChanged(tabIndex, newDeviceIndex);
     }
 
-    MainCore::instance()->sendDeviceChanged(tabIndex);
+    emit MainCore::instance()->deviceChanged(tabIndex);
 }
 
 void MainWindow::sampleSourceChanged(int tabIndex, int newDeviceIndex)

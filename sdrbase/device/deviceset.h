@@ -61,9 +61,9 @@ public:
     void saveTxChannelSettings(Preset* preset);
     void loadMIMOChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
     void saveMIMOChannelSettings(Preset* preset);
-    void addRxChannel(int selectedChannelIndex, PluginAPI *pluginAPI);
-    void addTxChannel(int selectedChannelIndex, PluginAPI *pluginAPI);
-    void addMIMOChannel(int selectedChannelIndex, PluginAPI *pluginAPI);
+    ChannelAPI *addRxChannel(int selectedChannelIndex, PluginAPI *pluginAPI);
+    ChannelAPI *addTxChannel(int selectedChannelIndex, PluginAPI *pluginAPI);
+    ChannelAPI *addMIMOChannel(int selectedChannelIndex, PluginAPI *pluginAPI);
     // slave mode
     void addChannelInstance(ChannelAPI *channelAPI);
     void removeChannelInstanceAt(int index);

@@ -136,7 +136,13 @@ public:
     }
 
     int getIndexInFeatureSet() const { return m_indexInFeatureSet; }
-    void setIndexInFeatureSet(int indexInFeatureSet) { m_indexInFeatureSet = indexInFeatureSet; }
+
+    void setIndexInFeatureSet(int indexInFeatureSet)
+    {
+        m_indexInFeatureSet = indexInFeatureSet;
+        emit indexInFeatureSetChanged(m_indexInFeatureSet);
+    }
+
     uint64_t getUID() const { return m_uid; }
     FeatureState getState() const { return m_state; }
     const QString& getErrorMessage() const { return m_errorMessage; }
@@ -164,6 +170,9 @@ private:
     QString m_uri;  //!< Unique non modifiable identifier attached to channel type
     uint64_t m_uid;
     int m_indexInFeatureSet;
+
+signals:
+    void indexInFeatureSetChanged(int index);
 };
 
 #endif // SDRBASE_FETURE_FEATUREAPI_H_

@@ -716,7 +716,6 @@ public:
     std::vector<FeatureSet*>& getFeatureeSets() { return m_featureSets; }
     void setLoggingOptions();
     DeviceAPI *getDevice(unsigned int deviceSetIndex);
-    void sendDeviceChanged(int deviceSetIndex);
     ChannelAPI *getChannel(unsigned int deviceSetIndex, int channelIndex);
     Feature *getFeature(unsigned int featureSetIndex, int featureIndex);
     bool existsChannel(const ChannelAPI *channel) const { return m_channelsMap.contains(const_cast<ChannelAPI*>(channel)); }
