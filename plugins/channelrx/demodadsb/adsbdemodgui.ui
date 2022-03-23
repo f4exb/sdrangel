@@ -729,20 +729,6 @@
        </spacer>
       </item>
       <item>
-       <widget class="QToolButton" name="devicesRefresh">
-        <property name="toolTip">
-         <string>Refresh device list</string>
-        </property>
-        <property name="text">
-         <string>...</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../../../sdrgui/resources/res.qrc">
-          <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QLabel" name="label">
         <property name="text">
          <string>Device</string>
@@ -1334,7 +1320,6 @@
   <tabstop>logFilename</tabstop>
   <tabstop>logOpen</tabstop>
   <tabstop>findOnMapFeature</tabstop>
-  <tabstop>devicesRefresh</tabstop>
   <tabstop>device</tabstop>
   <tabstop>adsbData</tabstop>
   <tabstop>map</tabstop>

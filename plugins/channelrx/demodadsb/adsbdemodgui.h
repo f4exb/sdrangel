@@ -827,6 +827,7 @@ private:
     QHash<QString, float> m_labelAltitudeOffset;
 
     QTimer m_importTimer;
+    QTimer m_redrawMapTimer;
     QNetworkAccessManager *m_networkManager;
 
     explicit ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
@@ -926,7 +927,6 @@ private slots:
     void tick();
     void updateDownloadProgress(qint64 bytesRead, qint64 totalBytes);
     void downloadFinished(const QString& filename, bool success);
-    void on_devicesRefresh_clicked();
     void on_device_currentIndexChanged(int index);
     void feedSelect();
     void on_displaySettings_clicked();
