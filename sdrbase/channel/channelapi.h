@@ -144,14 +144,13 @@ public:
         Message* message;
 
         while ((message = messageQueue->pop()) != nullptr) {
-            m_channelMessageQueue.push(message);
+            m_inputMessageQueue.push(message);
         }
     }
 
 protected:
 	virtual bool handleMessage(const Message& cmd) = 0; //!< Processing of a message. Returns true if message has actually been processed
     MessageQueue *m_guiMessageQueue;    //!< Input message queue to the GUI
-    MessageQueue m_channelMessageQueue; //!< Input message queue for inter plugin communication
 	MessageQueue m_inputMessageQueue;     //!< Queue for asynchronous inbound communication
 
 protected slots:

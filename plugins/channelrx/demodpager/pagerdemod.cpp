@@ -58,8 +58,12 @@ PagerDemod::PagerDemod(DeviceAPI *deviceAPI) :
     m_deviceAPI->addChannelSinkAPI(this);
 
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
-    connect(&m_channelMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessages()));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &PagerDemod::networkManagerFinished
+    );
     QObject::connect(
         this,
         &ChannelAPI::indexInDeviceSetChanged,
@@ -71,7 +75,12 @@ PagerDemod::PagerDemod(DeviceAPI *deviceAPI) :
 PagerDemod::~PagerDemod()
 {
     qDebug("PagerDemod::~PagerDemod");
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &PagerDemod::networkManagerFinished
+    );
     delete m_networkManager;
     m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
@@ -688,18 +697,6 @@ void PagerDemod::networkManagerFinished(QNetworkReply *reply)
     }
 
     reply->deleteLater();
-}
-
-void PagerDemod::handleChannelMessages()
-{
-	Message* message;
-
-	while ((message = m_channelMessageQueue.pop()) != nullptr)
-	{
-		if (handleMessage(*message)) {
-			delete message;
-		}
-	}
 }
 
 void PagerDemod::handleIndexInDeviceSetChanged(int index)

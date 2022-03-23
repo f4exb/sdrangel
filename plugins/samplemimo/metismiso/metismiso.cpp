@@ -59,12 +59,22 @@ MetisMISO::MetisMISO(DeviceAPI *deviceAPI) :
     const DeviceMetisScan::DeviceScan *deviceScan = DeviceMetis::instance().getDeviceScanAt(deviceSequence);
     m_udpHandler.setMetisAddress(deviceScan->m_address, deviceScan->m_port);
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &MetisMISO::networkManagerFinished
+    );
 }
 
 MetisMISO::~MetisMISO()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &MetisMISO::networkManagerFinished
+    );
     delete m_networkManager;
 
     if (m_running) {

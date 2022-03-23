@@ -68,12 +68,22 @@ OpenWeatherMap::OpenWeatherMap(const QString& apiKey) :
     m_apiKey(apiKey)
 {
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(handleReply(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &OpenWeatherMap::handleReply
+    );
 }
 
 OpenWeatherMap::~OpenWeatherMap()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(handleReply(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &OpenWeatherMap::handleReply
+    );
     delete m_networkManager;
 }
 

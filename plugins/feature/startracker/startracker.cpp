@@ -56,7 +56,12 @@ StarTracker::StarTracker(WebAPIAdapterInterface *webAPIAdapterInterface) :
     connect(&m_updatePipesTimer, SIGNAL(timeout()), this, SLOT(updatePipes()));
     m_updatePipesTimer.start(1000);
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &StarTracker::networkManagerFinished
+    );
     m_weather = nullptr;
     m_solarFlux = 0.0f;
     // Unfortunately, can't seem to access resources in static global constructor
@@ -68,7 +73,12 @@ StarTracker::StarTracker(WebAPIAdapterInterface *webAPIAdapterInterface) :
 
 StarTracker::~StarTracker()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &StarTracker::networkManagerFinished
+    );
     delete m_networkManager;
     if (m_worker->isRunning()) {
         stop();

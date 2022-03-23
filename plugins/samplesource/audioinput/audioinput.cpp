@@ -49,12 +49,22 @@ AudioInput::AudioInput(DeviceAPI *deviceAPI) :
     openDevice();
     m_deviceAPI->setNbSourceStreams(1);
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &AudioInput::networkManagerFinished
+    );
 }
 
 AudioInput::~AudioInput()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &AudioInput::networkManagerFinished
+    );
     delete m_networkManager;
 
     if (m_running) {

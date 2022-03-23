@@ -51,12 +51,22 @@ Radiosonde::Radiosonde(WebAPIAdapterInterface *webAPIAdapterInterface) :
     connect(&m_updatePipesTimer, SIGNAL(timeout()), this, SLOT(updatePipes()));
     m_updatePipesTimer.start(1000);
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &Radiosonde::networkManagerFinished
+    );
 }
 
 Radiosonde::~Radiosonde()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &Radiosonde::networkManagerFinished
+    );
     delete m_networkManager;
 }
 
@@ -194,7 +204,7 @@ int Radiosonde::webapiSettingsPutPatch(
     }
 
     webapiFormatFeatureSettings(response, settings);
-  
+
     return 200;
 }
 

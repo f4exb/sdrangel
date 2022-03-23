@@ -57,12 +57,22 @@ AirspyHFInput::AirspyHFInput(DeviceAPI *deviceAPI) :
     openDevice();
     m_deviceAPI->setNbSourceStreams(1);
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &AirspyHFInput::networkManagerFinished
+    );
 }
 
 AirspyHFInput::~AirspyHFInput()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &AirspyHFInput::networkManagerFinished
+    );
     delete m_networkManager;
 
     if (m_running) {

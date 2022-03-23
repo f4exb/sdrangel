@@ -49,12 +49,22 @@ HackRFOutput::HackRFOutput(DeviceAPI *deviceAPI) :
     m_deviceAPI->setNbSinkStreams(1);
     m_deviceAPI->setBuddySharedPtr(&m_sharedParams);
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &HackRFOutput::networkManagerFinished
+    );
 }
 
 HackRFOutput::~HackRFOutput()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &HackRFOutput::networkManagerFinished
+    );
     delete m_networkManager;
 
     if (m_running) {

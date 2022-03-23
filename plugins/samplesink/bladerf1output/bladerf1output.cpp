@@ -51,12 +51,22 @@ Bladerf1Output::Bladerf1Output(DeviceAPI *deviceAPI) :
     m_deviceAPI->setNbSinkStreams(1);
     m_deviceAPI->setBuddySharedPtr(&m_sharedParams);
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &Bladerf1Output::networkManagerFinished
+    );
 }
 
 Bladerf1Output::~Bladerf1Output()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &Bladerf1Output::networkManagerFinished
+    );
     delete m_networkManager;
 
     if (m_running) {
@@ -344,7 +354,7 @@ bool Bladerf1Output::applySettings(const BladeRF1OutputSettings& settings, bool 
 #if defined(_MSC_VER)
         unsigned int fifoRate = (unsigned int) settings.m_devSampleRate / (1<<settings.m_log2Interp);
         fifoRate = fifoRate < 48000U ? 48000U : fifoRate;
-#else        
+#else
         unsigned int fifoRate = std::max(
             (unsigned int) settings.m_devSampleRate / (1<<settings.m_log2Interp),
             DeviceBladeRF1Shared::m_sampleFifoMinRate);

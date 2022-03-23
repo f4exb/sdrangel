@@ -73,13 +73,22 @@ WFMMod::WFMMod(DeviceAPI *deviceAPI) :
     m_deviceAPI->addChannelSourceAPI(this);
 
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
-    connect(&m_channelMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessages()));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &WFMMod::networkManagerFinished
+    );
 }
 
 WFMMod::~WFMMod()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &WFMMod::networkManagerFinished
+    );
     delete m_networkManager;
     m_deviceAPI->removeChannelSourceAPI(this);
     m_deviceAPI->removeChannelSource(this);
@@ -780,16 +789,4 @@ int WFMMod::getAudioSampleRate() const
 int WFMMod::getFeedbackAudioSampleRate() const
 {
     return m_basebandSource->getFeedbackAudioSampleRate();
-}
-
-void WFMMod::handleChannelMessages()
-{
-	Message* message;
-
-	while ((message = m_channelMessageQueue.pop()) != nullptr)
-	{
-		if (handleMessage(*message)) {
-			delete message;
-		}
-	}
 }

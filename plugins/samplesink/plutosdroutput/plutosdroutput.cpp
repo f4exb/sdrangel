@@ -64,12 +64,22 @@ PlutoSDROutput::PlutoSDROutput(DeviceAPI *deviceAPI) :
     resumeBuddies();
 
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &PlutoSDROutput::networkManagerFinished
+    );
 }
 
 PlutoSDROutput::~PlutoSDROutput()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &PlutoSDROutput::networkManagerFinished
+    );
     delete m_networkManager;
 
     suspendBuddies();

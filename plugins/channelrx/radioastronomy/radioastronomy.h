@@ -425,7 +425,6 @@ private:
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
     void updatePipes();
-    void handleChannelMessages();
     void startMeasurement();
     void sweepStartMeasurement();
     void sweep1();

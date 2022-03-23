@@ -48,12 +48,22 @@ LocalOutput::LocalOutput(DeviceAPI *deviceAPI) :
 	m_sampleSourceFifo.resize(SampleSourceFifo::getSizePolicy(m_sampleRate));
     m_deviceAPI->setNbSinkStreams(1);
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &LocalOutput::networkManagerFinished
+    );
 }
 
 LocalOutput::~LocalOutput()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &LocalOutput::networkManagerFinished
+    );
     delete m_networkManager;
 	stop();
 }

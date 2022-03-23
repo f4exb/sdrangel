@@ -48,12 +48,22 @@ RigCtlServer::RigCtlServer(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_state = StIdle;
     m_errorMessage = "RigCtlServer error";
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &RigCtlServer::networkManagerFinished
+    );
 }
 
 RigCtlServer::~RigCtlServer()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &RigCtlServer::networkManagerFinished
+    );
     delete m_networkManager;
     if (m_worker->isRunning()) {
         stop();

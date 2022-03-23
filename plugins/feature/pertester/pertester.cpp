@@ -57,12 +57,22 @@ PERTester::PERTester(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_state = StIdle;
     m_errorMessage = "PERTester error";
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &PERTester::networkManagerFinished
+    );
 }
 
 PERTester::~PERTester()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &PERTester::networkManagerFinished
+    );
     delete m_networkManager;
     if (m_worker->isRunning()) {
         stop();

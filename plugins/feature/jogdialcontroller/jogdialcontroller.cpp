@@ -62,13 +62,23 @@ JogdialController::JogdialController(WebAPIAdapterInterface *webAPIAdapterInterf
     m_state = StIdle;
     m_errorMessage = "JogdialController error";
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &JogdialController::networkManagerFinished
+    );
     connect(&m_repeatTimer, SIGNAL(timeout()), this, SLOT(handleRepeat()));
 }
 
 JogdialController::~JogdialController()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &JogdialController::networkManagerFinished
+    );
     delete m_networkManager;
 }
 

@@ -60,12 +60,22 @@ DemodAnalyzer::DemodAnalyzer(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_state = StIdle;
     m_errorMessage = "DemodAnalyzer error";
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &DemodAnalyzer::networkManagerFinished
+    );
 }
 
 DemodAnalyzer::~DemodAnalyzer()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &DemodAnalyzer::networkManagerFinished
+    );
     delete m_networkManager;
     if (m_worker->isRunning()) {
         stop();

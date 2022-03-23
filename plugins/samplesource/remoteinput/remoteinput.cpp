@@ -65,12 +65,22 @@ RemoteInput::RemoteInput(DeviceAPI *deviceAPI) :
     m_deviceAPI->setNbSourceStreams(1);
 
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &RemoteInput::networkManagerFinished
+    );
 }
 
 RemoteInput::~RemoteInput()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &RemoteInput::networkManagerFinished
+    );
     delete m_networkManager;
 	stop();
     delete m_remoteInputUDPHandler;

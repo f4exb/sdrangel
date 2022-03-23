@@ -282,7 +282,6 @@ private:
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
-    void handleChannelMessages();
 };
 
 

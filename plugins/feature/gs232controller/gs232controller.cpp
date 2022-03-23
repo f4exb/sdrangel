@@ -60,12 +60,22 @@ GS232Controller::GS232Controller(WebAPIAdapterInterface *webAPIAdapterInterface)
     connect(&m_updatePipesTimer, SIGNAL(timeout()), this, SLOT(updatePipes()));
     m_updatePipesTimer.start(1000);
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &GS232Controller::networkManagerFinished
+    );
 }
 
 GS232Controller::~GS232Controller()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &GS232Controller::networkManagerFinished
+    );
     delete m_networkManager;
     if (m_worker->isRunning()) {
         stop();

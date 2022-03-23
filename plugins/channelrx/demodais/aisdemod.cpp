@@ -63,8 +63,12 @@ AISDemod::AISDemod(DeviceAPI *deviceAPI) :
     m_deviceAPI->addChannelSinkAPI(this);
 
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
-    connect(&m_channelMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessages()));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &AISDemod::networkManagerFinished
+    );
     QObject::connect(
         this,
         &ChannelAPI::indexInDeviceSetChanged,
@@ -76,7 +80,12 @@ AISDemod::AISDemod(DeviceAPI *deviceAPI) :
 AISDemod::~AISDemod()
 {
     qDebug("AISDemod::~AISDemod");
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &AISDemod::networkManagerFinished
+    );
     delete m_networkManager;
     m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
@@ -689,18 +698,6 @@ void AISDemod::networkManagerFinished(QNetworkReply *reply)
     }
 
     reply->deleteLater();
-}
-
-void AISDemod::handleChannelMessages()
-{
-	Message* message;
-
-	while ((message = m_channelMessageQueue.pop()) != nullptr)
-	{
-		if (handleMessage(*message)) {
-			delete message;
-		}
-	}
 }
 
 void AISDemod::handleIndexInDeviceSetChanged(int index)

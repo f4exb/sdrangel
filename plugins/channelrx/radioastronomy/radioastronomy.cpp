@@ -89,8 +89,12 @@ RadioAstronomy::RadioAstronomy(DeviceAPI *deviceAPI) :
     m_updatePipesTimer.start(1000);
 
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
-    connect(&m_channelMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessages()));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &RadioAstronomy::networkManagerFinished
+    );
     QObject::connect(
         this,
         &ChannelAPI::indexInDeviceSetChanged,
@@ -104,7 +108,12 @@ RadioAstronomy::RadioAstronomy(DeviceAPI *deviceAPI) :
 RadioAstronomy::~RadioAstronomy()
 {
     qDebug("RadioAstronomy::~RadioAstronomy");
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &RadioAstronomy::networkManagerFinished
+    );
     delete m_networkManager;
     m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
@@ -1177,18 +1186,6 @@ void RadioAstronomy::networkManagerFinished(QNetworkReply *reply)
     }
 
     reply->deleteLater();
-}
-
-void RadioAstronomy::handleChannelMessages()
-{
-	Message* message;
-
-    while ((message = m_channelMessageQueue.pop()) != nullptr)
-	{
-		if (handleMessage(*message)) {
-			delete message;
-		}
-	}
 }
 
 void RadioAstronomy::handleIndexInDeviceSetChanged(int index)

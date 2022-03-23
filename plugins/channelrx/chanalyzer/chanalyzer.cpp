@@ -56,7 +56,12 @@ ChannelAnalyzer::ChannelAnalyzer(DeviceAPI *deviceAPI) :
     m_deviceAPI->addChannelSinkAPI(this);
 
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &ChannelAnalyzer::networkManagerFinished
+    );
     QObject::connect(
         this,
         &ChannelAPI::indexInDeviceSetChanged,
@@ -68,7 +73,12 @@ ChannelAnalyzer::ChannelAnalyzer(DeviceAPI *deviceAPI) :
 ChannelAnalyzer::~ChannelAnalyzer()
 {
     qDebug("ChannelAnalyzer::~ChannelAnalyzer");
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &ChannelAnalyzer::networkManagerFinished
+    );
     delete m_networkManager;
 
 	m_deviceAPI->removeChannelSinkAPI(this);

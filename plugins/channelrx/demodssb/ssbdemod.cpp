@@ -67,8 +67,12 @@ SSBDemod::SSBDemod(DeviceAPI *deviceAPI) :
     m_deviceAPI->addChannelSinkAPI(this);
 
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
-    connect(&m_channelMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessages()));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &SSBDemod::networkManagerFinished
+    );
     QObject::connect(
         this,
         &ChannelAPI::indexInDeviceSetChanged,
@@ -79,7 +83,12 @@ SSBDemod::SSBDemod(DeviceAPI *deviceAPI) :
 
 SSBDemod::~SSBDemod()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &SSBDemod::networkManagerFinished
+    );
     delete m_networkManager;
 	m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
@@ -726,18 +735,6 @@ void SSBDemod::networkManagerFinished(QNetworkReply *reply)
     }
 
     reply->deleteLater();
-}
-
-void SSBDemod::handleChannelMessages()
-{
-	Message* message;
-
-	while ((message = m_channelMessageQueue.pop()) != nullptr)
-	{
-		if (handleMessage(*message)) {
-			delete message;
-		}
-	}
 }
 
 void SSBDemod::handleIndexInDeviceSetChanged(int index)

@@ -57,14 +57,24 @@ VORLocalizer::VORLocalizer(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_state = StIdle;
     m_errorMessage = "VORLocalizer error";
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &VORLocalizer::networkManagerFinished
+    );
     connect(MainCore::instance(), SIGNAL(channelAdded(int, ChannelAPI*)), this, SLOT(handleChannelAdded(int, ChannelAPI*)));
 }
 
 VORLocalizer::~VORLocalizer()
 {
     disconnect(MainCore::instance(), SIGNAL(channelAdded(int, ChannelAPI*)), this, SLOT(handleChannelAdded(int, ChannelAPI*)));
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &VORLocalizer::networkManagerFinished
+    );
     delete m_networkManager;
     if (m_worker->isRunning()) {
         stop();

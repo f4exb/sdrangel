@@ -51,12 +51,22 @@ TestMI::TestMI(DeviceAPI *deviceAPI) :
     m_sampleMIFifo.init(2, 96000 * 4);
     m_deviceAPI->setNbSourceStreams(2);
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &TestMI::networkManagerFinished
+    );
 }
 
 TestMI::~TestMI()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &TestMI::networkManagerFinished
+    );
     delete m_networkManager;
 
     if (m_running) {

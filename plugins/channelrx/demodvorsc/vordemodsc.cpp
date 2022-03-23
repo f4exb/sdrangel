@@ -64,7 +64,12 @@ VORDemodSC::VORDemodSC(DeviceAPI *deviceAPI) :
     m_deviceAPI->addChannelSinkAPI(this);
 
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &VORDemodSC::networkManagerFinished
+    );
     QObject::connect(
         this,
         &ChannelAPI::indexInDeviceSetChanged,
@@ -76,7 +81,12 @@ VORDemodSC::VORDemodSC(DeviceAPI *deviceAPI) :
 VORDemodSC::~VORDemodSC()
 {
     qDebug("VORDemodSC::~VORDemodSC");
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &VORDemodSC::networkManagerFinished
+    );
     delete m_networkManager;
     m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);

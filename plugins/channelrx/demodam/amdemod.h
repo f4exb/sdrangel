@@ -162,7 +162,6 @@ private:
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
-    void handleChannelMessages();
     void handleWrittenToFifo(int nsamples, qint64 timestamp);
     void handleIndexInDeviceSetChanged(int index);
 };

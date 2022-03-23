@@ -62,8 +62,12 @@ RadiosondeDemod::RadiosondeDemod(DeviceAPI *deviceAPI) :
     m_deviceAPI->addChannelSinkAPI(this);
 
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
-    connect(&m_channelMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessages()));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &RadiosondeDemod::networkManagerFinished
+    );
     QObject::connect(
         this,
         &ChannelAPI::indexInDeviceSetChanged,
@@ -75,7 +79,12 @@ RadiosondeDemod::RadiosondeDemod(DeviceAPI *deviceAPI) :
 RadiosondeDemod::~RadiosondeDemod()
 {
     qDebug("RadiosondeDemod::~RadiosondeDemod");
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &RadiosondeDemod::networkManagerFinished
+    );
     delete m_networkManager;
     m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
@@ -706,18 +715,6 @@ void RadiosondeDemod::networkManagerFinished(QNetworkReply *reply)
     }
 
     reply->deleteLater();
-}
-
-void RadiosondeDemod::handleChannelMessages()
-{
-	Message* message;
-
-	while ((message = m_channelMessageQueue.pop()) != nullptr)
-	{
-		if (handleMessage(*message)) {
-			delete message;
-		}
-	}
 }
 
 void RadiosondeDemod::handleIndexInDeviceSetChanged(int index)

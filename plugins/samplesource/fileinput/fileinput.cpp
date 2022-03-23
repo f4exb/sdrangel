@@ -67,7 +67,12 @@ FileInput::FileInput(DeviceAPI *deviceAPI) :
     qDebug("FileInput::FileInput: device source engine message queue: %p", m_deviceAPI->getDeviceEngineInputMessageQueue());
     qDebug("FileInput::FileInput: device source: %p", m_deviceAPI->getDeviceSourceEngine()->getSource());
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &FileInput::networkManagerFinished
+    );
     m_masterTimer.setTimerType(Qt::PreciseTimer);
     m_masterTimer.start(50);
 }
@@ -75,7 +80,12 @@ FileInput::FileInput(DeviceAPI *deviceAPI) :
 FileInput::~FileInput()
 {
     m_masterTimer.stop();
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &FileInput::networkManagerFinished
+    );
     delete m_networkManager;
 
 	stop();

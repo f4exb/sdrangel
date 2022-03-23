@@ -70,12 +70,22 @@ ChirpChatMod::ChirpChatMod(DeviceAPI *deviceAPI) :
     m_deviceAPI->addChannelSourceAPI(this);
 
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &ChirpChatMod::networkManagerFinished
+    );
 }
 
 ChirpChatMod::~ChirpChatMod()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &ChirpChatMod::networkManagerFinished
+    );
     delete m_networkManager;
     m_deviceAPI->removeChannelSourceAPI(this);
     m_deviceAPI->removeChannelSource(this);

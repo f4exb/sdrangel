@@ -58,12 +58,22 @@ Interferometer::Interferometer(DeviceAPI *deviceAPI) :
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &Interferometer::networkManagerFinished
+    );
 }
 
 Interferometer::~Interferometer()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &Interferometer::networkManagerFinished
+    );
     delete m_networkManager;
 
     m_deviceAPI->removeChannelSinkAPI(this);

@@ -83,7 +83,12 @@ SigMFFileInput::SigMFFileInput(DeviceAPI *deviceAPI) :
     qDebug("SigMFFileInput::SigMFFileInput: device source engine message queue: %p", m_deviceAPI->getDeviceEngineInputMessageQueue());
     qDebug("SigMFFileInput::SigMFFileInput: device source: %p", m_deviceAPI->getDeviceSourceEngine()->getSource());
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &SigMFFileInput::networkManagerFinished
+    );
     m_masterTimer.setTimerType(Qt::PreciseTimer);
     m_masterTimer.start(50);
 }
@@ -91,7 +96,12 @@ SigMFFileInput::SigMFFileInput(DeviceAPI *deviceAPI) :
 SigMFFileInput::~SigMFFileInput()
 {
     m_masterTimer.stop();
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &SigMFFileInput::networkManagerFinished
+    );
     delete m_networkManager;
 
 	stop();

@@ -71,7 +71,12 @@ FreqTracker::FreqTracker(DeviceAPI *deviceAPI) :
     m_deviceAPI->addChannelSinkAPI(this);
 
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &FreqTracker::networkManagerFinished
+    );
     QObject::connect(
         this,
         &ChannelAPI::indexInDeviceSetChanged,
@@ -82,7 +87,12 @@ FreqTracker::FreqTracker(DeviceAPI *deviceAPI) :
 
 FreqTracker::~FreqTracker()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &FreqTracker::networkManagerFinished
+    );
     delete m_networkManager;
 
     m_deviceAPI->removeChannelSinkAPI(this);

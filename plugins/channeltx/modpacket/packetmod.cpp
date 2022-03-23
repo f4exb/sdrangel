@@ -79,14 +79,23 @@ PacketMod::PacketMod(DeviceAPI *deviceAPI) :
     m_deviceAPI->addChannelSourceAPI(this);
 
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
-    connect(&m_channelMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessages()));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &PacketMod::networkManagerFinished
+    );
 }
 
 PacketMod::~PacketMod()
 {
     closeUDP();
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &PacketMod::networkManagerFinished
+    );
     delete m_networkManager;
     m_deviceAPI->removeChannelSourceAPI(this);
     m_deviceAPI->removeChannelSource(this);
@@ -1142,16 +1151,4 @@ void PacketMod::udpRx()
         MsgTXPacketBytes *msg = MsgTXPacketBytes::create(datagram.data());
         m_basebandSource->getInputMessageQueue()->push(msg);
     }
-}
-
-void PacketMod::handleChannelMessages()
-{
-	Message* message;
-
-	while ((message = m_channelMessageQueue.pop()) != nullptr)
-	{
-		if (handleMessage(*message)) {
-			delete message;
-		}
-	}
 }

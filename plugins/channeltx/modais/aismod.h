@@ -253,7 +253,6 @@ private:
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
     void udpRx();
-    void handleChannelMessages();
 };
 
 

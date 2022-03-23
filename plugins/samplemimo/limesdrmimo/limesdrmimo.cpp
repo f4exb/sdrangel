@@ -74,12 +74,22 @@ LimeSDRMIMO::LimeSDRMIMO(DeviceAPI *deviceAPI) :
     m_deviceAPI->setNbSourceStreams(m_deviceParams->m_nbRxChannels);
     m_deviceAPI->setNbSinkStreams(m_deviceParams->m_nbTxChannels);
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &LimeSDRMIMO::networkManagerFinished
+    );
 }
 
 LimeSDRMIMO::~LimeSDRMIMO()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &LimeSDRMIMO::networkManagerFinished
+    );
     delete m_networkManager;
     closeDevice();
 }

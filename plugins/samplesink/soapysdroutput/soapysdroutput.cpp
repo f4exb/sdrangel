@@ -52,12 +52,22 @@ SoapySDROutput::SoapySDROutput(DeviceAPI *deviceAPI) :
     initDeviceArgSettings(m_settings);
 
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &SoapySDROutput::networkManagerFinished
+    );
 }
 
 SoapySDROutput::~SoapySDROutput()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &SoapySDROutput::networkManagerFinished
+    );
     delete m_networkManager;
 
     if (m_running) {

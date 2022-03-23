@@ -65,12 +65,22 @@ USRPOutput::USRPOutput(DeviceAPI *deviceAPI) :
     resumeTxBuddies();
     resumeRxBuddies();
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &USRPOutput::networkManagerFinished
+    );
 }
 
 USRPOutput::~USRPOutput()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &USRPOutput::networkManagerFinished
+    );
     delete m_networkManager;
 
     if (m_running) {

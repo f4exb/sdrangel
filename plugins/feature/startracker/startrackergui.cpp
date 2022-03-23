@@ -355,7 +355,12 @@ StarTrackerGUI::StarTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet,
 */
 
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &StarTrackerGUI::networkManagerFinished
+    );
 
     readSolarFlux();
     connect(&m_solarFluxTimer, SIGNAL(timeout()), this, SLOT(autoUpdateSolarFlux()));
@@ -368,7 +373,12 @@ StarTrackerGUI::StarTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet,
 
 StarTrackerGUI::~StarTrackerGUI()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &StarTrackerGUI::networkManagerFinished
+    );
     delete m_networkManager;
     delete ui;
 }

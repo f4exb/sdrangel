@@ -66,12 +66,22 @@ BladeRF2Input::BladeRF2Input(DeviceAPI *deviceAPI) :
 
     m_deviceAPI->setNbSourceStreams(1);
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &BladeRF2Input::networkManagerFinished
+    );
 }
 
 BladeRF2Input::~BladeRF2Input()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &BladeRF2Input::networkManagerFinished
+    );
     delete m_networkManager;
 
     if (m_running) {

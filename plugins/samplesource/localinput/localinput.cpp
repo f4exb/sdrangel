@@ -50,12 +50,22 @@ LocalInput::LocalInput(DeviceAPI *deviceAPI) :
     m_deviceAPI->setNbSourceStreams(1);
 
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &LocalInput::networkManagerFinished
+    );
 }
 
 LocalInput::~LocalInput()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &LocalInput::networkManagerFinished
+    );
     delete m_networkManager;
 	stop();
 }

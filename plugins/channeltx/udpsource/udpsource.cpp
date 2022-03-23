@@ -59,12 +59,22 @@ UDPSource::UDPSource(DeviceAPI *deviceAPI) :
     m_deviceAPI->addChannelSourceAPI(this);
 
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &UDPSource::networkManagerFinished
+    );
 }
 
 UDPSource::~UDPSource()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &UDPSource::networkManagerFinished
+    );
     delete m_networkManager;
     m_deviceAPI->removeChannelSourceAPI(this);
     m_deviceAPI->removeChannelSource(this);

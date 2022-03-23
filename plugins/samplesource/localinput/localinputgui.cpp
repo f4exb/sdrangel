@@ -90,17 +90,12 @@ LocalInputGui::LocalInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 	m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);
 
-    m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
-
     m_forceSettings = true;
     sendSettings();
 }
 
 LocalInputGui::~LocalInputGui()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
-    delete m_networkManager;
 	delete ui;
 }
 

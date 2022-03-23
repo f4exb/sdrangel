@@ -75,14 +75,23 @@ AISMod::AISMod(DeviceAPI *deviceAPI) :
     m_deviceAPI->addChannelSourceAPI(this);
 
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
-    connect(&m_channelMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessages()));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &AISMod::networkManagerFinished
+    );
 }
 
 AISMod::~AISMod()
 {
     closeUDP();
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &AISMod::networkManagerFinished
+    );
     delete m_networkManager;
     m_deviceAPI->removeChannelSourceAPI(this);
     m_deviceAPI->removeChannelSource(this);
@@ -1062,16 +1071,4 @@ void AISMod::udpRx()
         MsgTXPacketBytes *msg = MsgTXPacketBytes::create(datagram.data());
         m_basebandSource->getInputMessageQueue()->push(msg);
     }
-}
-
-void AISMod::handleChannelMessages()
-{
-	Message* message;
-
-	while ((message = m_channelMessageQueue.pop()) != nullptr)
-	{
-		if (handleMessage(*message)) {
-			delete message;
-		}
-	}
 }

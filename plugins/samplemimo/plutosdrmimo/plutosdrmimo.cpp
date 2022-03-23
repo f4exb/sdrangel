@@ -58,7 +58,12 @@ PlutoSDRMIMO::PlutoSDRMIMO(DeviceAPI *deviceAPI) :
     m_sampleMIFifo.init(2, 16 * PlutoSDRMIMOSettings::m_plutoSDRBlockSizeSamples);
     m_sampleMOFifo.init(2, 16 * PlutoSDRMIMOSettings::m_plutoSDRBlockSizeSamples);
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &PlutoSDRMIMO::networkManagerFinished
+    );
 
     m_open = openDevice();
 
@@ -74,7 +79,12 @@ PlutoSDRMIMO::PlutoSDRMIMO(DeviceAPI *deviceAPI) :
 
 PlutoSDRMIMO::~PlutoSDRMIMO()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &PlutoSDRMIMO::networkManagerFinished
+    );
     delete m_networkManager;
     closeDevice();
 }

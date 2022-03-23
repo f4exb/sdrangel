@@ -65,8 +65,12 @@ AMDemod::AMDemod(DeviceAPI *deviceAPI) :
     m_deviceAPI->addChannelSinkAPI(this);
 
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
-    connect(&m_channelMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessages()));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &AMDemod::networkManagerFinished
+    );
     // Experimental:
     // QObject::connect(
     //     m_deviceAPI->getSampleSource()->getSampleFifo(),
@@ -92,7 +96,12 @@ AMDemod::~AMDemod()
     //     this,
     //     &AMDemod::handleWrittenToFifo
     // );
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &AMDemod::networkManagerFinished
+    );
     delete m_networkManager;
 	m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
@@ -654,18 +663,6 @@ void AMDemod::networkManagerFinished(QNetworkReply *reply)
     }
 
     reply->deleteLater();
-}
-
-void AMDemod::handleChannelMessages()
-{
-	Message* message;
-
-	while ((message = m_channelMessageQueue.pop()) != nullptr)
-	{
-		if (handleMessage(*message)) {
-			delete message;
-		}
-	}
 }
 
 void AMDemod::handleWrittenToFifo(int nsamples, qint64 timestamp)

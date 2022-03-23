@@ -65,7 +65,12 @@ RemoteOutput::RemoteOutput(DeviceAPI *deviceAPI) :
 {
     m_deviceAPI->setNbSinkStreams(1);
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &RemoteOutput::networkManagerFinished
+    );
     connect(&m_masterTimer, SIGNAL(timeout()), this, SLOT(tick()));
     applyCenterFrequency();
     applySampleRate();
@@ -73,7 +78,12 @@ RemoteOutput::RemoteOutput(DeviceAPI *deviceAPI) :
 
 RemoteOutput::~RemoteOutput()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &RemoteOutput::networkManagerFinished
+    );
 	stop();
 	delete m_networkManager;
 }

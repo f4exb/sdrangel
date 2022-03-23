@@ -75,12 +75,22 @@ BladeRF2MIMO::BladeRF2MIMO(DeviceAPI *deviceAPI) :
     m_deviceAPI->setNbSourceStreams(2);
     m_deviceAPI->setNbSinkStreams(2);
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &BladeRF2MIMO::networkManagerFinished
+    );
 }
 
 BladeRF2MIMO::~BladeRF2MIMO()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &BladeRF2MIMO::networkManagerFinished
+    );
     delete m_networkManager;
     closeDevice();
 }

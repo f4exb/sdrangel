@@ -2828,7 +2828,7 @@ void ADSBDemodGUI::updateDeviceSetList()
     {
         if (m_settings.m_deviceIndex < 0) {
             ui->device->setCurrentIndex(0);
-        } else if (m_settings.m_deviceIndex >= deviceUISets.size()) {
+        } else if (m_settings.m_deviceIndex >= (int) deviceUISets.size()) {
             ui->device->setCurrentIndex(deviceUISets.size() - 1);
         } else {
             ui->device->setCurrentIndex(m_settings.m_deviceIndex);
@@ -3827,7 +3827,12 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 
     connect(&m_importTimer, &QTimer::timeout, this, &ADSBDemodGUI::import);
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(handleImportReply(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &ADSBDemodGUI::handleImportReply
+    );
     applyImportSettings();
 
     connect(&m_redrawMapTimer, &QTimer::timeout, this, &ADSBDemodGUI::redrawMap);

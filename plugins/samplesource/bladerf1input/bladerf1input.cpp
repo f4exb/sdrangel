@@ -52,12 +52,22 @@ Bladerf1Input::Bladerf1Input(DeviceAPI *deviceAPI) :
     m_deviceAPI->setBuddySharedPtr(&m_sharedParams);
 
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &Bladerf1Input::networkManagerFinished
+    );
 }
 
 Bladerf1Input::~Bladerf1Input()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &Bladerf1Input::networkManagerFinished
+    );
     delete m_networkManager;
 
     if (m_running) {

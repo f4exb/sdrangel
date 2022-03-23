@@ -37,7 +37,12 @@ SatelliteSelectionDialog::SatelliteSelectionDialog(SatelliteTrackerSettings *set
 {
     ui->setupUi(this);
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &SatelliteSelectionDialog::networkManagerFinished
+    );
 
     QHashIterator<QString, SatNogsSatellite *> itr(satellites);
     while (itr.hasNext())

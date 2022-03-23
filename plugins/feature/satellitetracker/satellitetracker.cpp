@@ -59,7 +59,12 @@ SatelliteTracker::SatelliteTracker(WebAPIAdapterInterface *webAPIAdapterInterfac
     m_state = StIdle;
     m_errorMessage = "SatelliteTracker error";
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &SatelliteTracker::networkManagerFinished
+    );
     connect(&m_dlm, &HttpDownloadManager::downloadComplete, this, &SatelliteTracker::downloadFinished);
 
     if (!readSatData())

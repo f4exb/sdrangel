@@ -65,12 +65,22 @@ LimeSDRInput::LimeSDRInput(DeviceAPI *deviceAPI) :
     m_deviceAPI->setNbSourceStreams(1);
 
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &LimeSDRInput::networkManagerFinished
+    );
 }
 
 LimeSDRInput::~LimeSDRInput()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &LimeSDRInput::networkManagerFinished
+    );
     delete m_networkManager;
 
     if (m_running) {

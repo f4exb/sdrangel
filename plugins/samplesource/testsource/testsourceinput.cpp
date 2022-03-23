@@ -55,12 +55,22 @@ TestSourceInput::TestSourceInput(DeviceAPI *deviceAPI) :
     m_testSourceWorker->moveToThread(&m_testSourceWorkerThread);
 
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &TestSourceInput::networkManagerFinished
+    );
 }
 
 TestSourceInput::~TestSourceInput()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &TestSourceInput::networkManagerFinished
+    );
     delete m_networkManager;
 
     if (m_running) {

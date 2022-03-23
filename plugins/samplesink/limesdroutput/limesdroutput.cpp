@@ -63,12 +63,22 @@ LimeSDROutput::LimeSDROutput(DeviceAPI *deviceAPI) :
     resumeTxBuddies();
     resumeRxBuddies();
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &LimeSDROutput::networkManagerFinished
+    );
 }
 
 LimeSDROutput::~LimeSDROutput()
 {
-    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::disconnect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &LimeSDROutput::networkManagerFinished
+    );
     delete m_networkManager;
 
     if (m_running) {

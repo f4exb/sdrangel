@@ -20,7 +20,6 @@
 
 #include <QTimer>
 #include <QWidget>
-#include <QNetworkRequest>
 
 #include "device/devicegui.h"
 #include "util/messagequeue.h"
@@ -28,7 +27,6 @@
 #include "localoutput.h"
 
 class DeviceUISet;
-class QNetworkAccessManager;
 class QNetworkReply;
 class QJsonObject;
 
@@ -71,9 +69,6 @@ private:
 
     QPalette m_paletteGreenText;
     QPalette m_paletteWhiteText;
-
-    QNetworkAccessManager *m_networkManager;
-    QNetworkRequest m_networkRequest;
 
     void blockApplySettings(bool block);
 	void displaySettings();

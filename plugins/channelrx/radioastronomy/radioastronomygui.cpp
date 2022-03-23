@@ -2059,7 +2059,12 @@ RadioAstronomyGUI::RadioAstronomyGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 
     m_networkManager = new QNetworkAccessManager();
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    QObject::connect(
+        m_networkManager,
+        &QNetworkAccessManager::finished,
+        this,
+        &RadioAstronomyGUI::networkManagerFinished
+    );
     connect(&m_dlm, &HttpDownloadManager::downloadComplete, this, &RadioAstronomyGUI::downloadFinished);
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
