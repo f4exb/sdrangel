@@ -38,6 +38,7 @@
 #include <QtGui/private/qzipreader_p.h>
 
 #include "ui_adsbdemodgui.h"
+#include "device/deviceapi.h"
 #include "channel/channelwebapiutils.h"
 #include "feature/featurewebapiutils.h"
 #include "plugin/pluginapi.h"
@@ -2827,6 +2828,8 @@ void ADSBDemodGUI::updateDeviceSetList()
     {
         if (m_settings.m_deviceIndex < 0) {
             ui->device->setCurrentIndex(0);
+        } else if (m_settings.m_deviceIndex >= deviceUISets.size()) {
+            ui->device->setCurrentIndex(deviceUISets.size() - 1);
         } else {
             ui->device->setCurrentIndex(m_settings.m_deviceIndex);
         }
@@ -2845,13 +2848,6 @@ void ADSBDemodGUI::updateDeviceSetList()
     }
 
     ui->device->blockSignals(false);
-}
-
-void ADSBDemodGUI::on_devicesRefresh_clicked()
-{
-    updateDeviceSetList();
-    displaySettings();
-    applySettings();
 }
 
 void ADSBDemodGUI::on_device_currentIndexChanged(int index)
@@ -3821,6 +3817,10 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     connect(&m_planeSpotters, &PlaneSpotters::aircraftPhoto, this, &ADSBDemodGUI::aircraftPhoto);
     connect(ui->photo, &ClickableLabel::clicked, this, &ADSBDemodGUI::photoClicked);
 
+    // Update device list when devices are added or removed
+    connect(MainCore::instance(), &MainCore::deviceSetAdded, this, &ADSBDemodGUI::updateDeviceSetList);
+    connect(MainCore::instance(), &MainCore::deviceSetRemoved, this, &ADSBDemodGUI::updateDeviceSetList);
+
     updateDeviceSetList();
     displaySettings();
     applySettings(true);
@@ -3830,6 +3830,8 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(handleImportReply(QNetworkReply*)));
     applyImportSettings();
 
+    connect(&m_redrawMapTimer, &QTimer::timeout, this, &ADSBDemodGUI::redrawMap);
+    m_redrawMapTimer.setSingleShot(true);
     ui->map->installEventFilter(this);
 }
 
@@ -3845,6 +3847,8 @@ ADSBDemodGUI::~ADSBDemodGUI()
     disconnect(&m_openAIP, &OpenAIP::downloadAirspaceFinished, this, &ADSBDemodGUI::downloadAirspaceFinished);
     disconnect(&m_openAIP, &OpenAIP::downloadNavAidsFinished, this, &ADSBDemodGUI::downloadNavAidsFinished);
     disconnect(&m_planeSpotters, &PlaneSpotters::aircraftPhoto, this, &ADSBDemodGUI::aircraftPhoto);
+    disconnect(&m_redrawMapTimer, &QTimer::timeout, this, &ADSBDemodGUI::redrawMap);
+    m_redrawMapTimer.stop();
     delete ui;
     qDeleteAll(m_aircraft);
     if (m_airportInfo) {
@@ -4393,9 +4397,7 @@ void ADSBDemodGUI::showEvent(QShowEvent *event)
     {
         // Workaround for https://bugreports.qt.io/browse/QTBUG-100333
         // MapQuickItems can be in wrong position when window is first displayed
-        QTimer::singleShot(500, [this] {
-            redrawMap();
-        });
+        m_redrawMapTimer.start(500);        
     }
 }
 
