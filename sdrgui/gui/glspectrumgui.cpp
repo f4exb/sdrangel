@@ -51,7 +51,7 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
     ui->verticalLayout->removeItem(ui->Line3Layout);
     ui->verticalLayout->removeItem(ui->Line2Layout);
     ui->verticalLayout->removeItem(ui->Line1Layout);
-    FlowLayout *flowLayout = new FlowLayout(this, 1, 1, 1);
+    FlowLayout *flowLayout = new FlowLayout(nullptr, 1, 1, 1);
     flowLayout->addItem(ui->Line1Layout);
     flowLayout->addItem(ui->Line2Layout);
     flowLayout->addItem(ui->Line3Layout);
