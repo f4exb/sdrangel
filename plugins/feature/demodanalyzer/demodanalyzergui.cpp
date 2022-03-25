@@ -153,8 +153,6 @@ DemodAnalyzerGUI::DemodAnalyzerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUI
 	m_spectrumVis->setGLSpectrum(ui->glSpectrum);
     m_scopeVis->setSpectrumVis(m_spectrumVis);
 
-	m_featureUISet->addRollupWidget(this);
-
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
@@ -170,6 +168,8 @@ DemodAnalyzerGUI::DemodAnalyzerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUI
 
 	ui->glScope->connectTimer(MainCore::instance()->getMasterTimer());
 	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
+
+	m_featureUISet->addRollupWidget(this);
 
     m_settings.setSpectrumGUI(ui->spectrumGUI);
     m_settings.setScopeGUI(ui->scopeGUI);
