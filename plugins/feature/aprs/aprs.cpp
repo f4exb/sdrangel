@@ -37,6 +37,8 @@
 
 MESSAGE_CLASS_DEFINITION(APRS::MsgConfigureAPRS, Message)
 MESSAGE_CLASS_DEFINITION(APRS::MsgReportWorker, Message)
+MESSAGE_CLASS_DEFINITION(APRS::MsgQueryAvailableChannels, Message)
+MESSAGE_CLASS_DEFINITION(APRS::MsgReportAvailableChannels, Message)
 
 const char* const APRS::m_featureIdURI = "sdrangel.feature.aprs";
 const char* const APRS::m_featureId = "APRS";
@@ -50,8 +52,6 @@ APRS::APRS(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_worker->moveToThread(&m_thread);
     m_state = StIdle;
     m_errorMessage = "APRS error";
-    connect(&m_updatePipesTimer, SIGNAL(timeout()), this, SLOT(updatePipes()));
-    m_updatePipesTimer.start(1000);
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
         m_networkManager,
@@ -59,10 +59,13 @@ APRS::APRS(WebAPIAdapterInterface *webAPIAdapterInterface) :
         this,
         &APRS::networkManagerFinished
     );
+    scanAvailableChannels();
+    connect(MainCore::instance(), SIGNAL(channelAdded(int, ChannelAPI*)), this, SLOT(handleChannelAdded(int, ChannelAPI*)));
 }
 
 APRS::~APRS()
 {
+    disconnect(MainCore::instance(), SIGNAL(channelAdded(int, ChannelAPI*)), this, SLOT(handleChannelAdded(int, ChannelAPI*)));
     QObject::disconnect(
         m_networkManager,
         &QNetworkAccessManager::finished,
@@ -124,6 +127,11 @@ bool APRS::handleMessage(const Message& cmd)
         }
         return true;
     }
+    else if (MsgQueryAvailableChannels::match(cmd))
+    {
+        notifyUpdateChannels();
+        return true;
+    }
     else if (MainCore::MsgPacket::match(cmd))
     {
         MainCore::MsgPacket& report = (MainCore::MsgPacket&) cmd;
@@ -142,23 +150,6 @@ bool APRS::handleMessage(const Message& cmd)
     else
     {
         return false;
-    }
-}
-
-void APRS::updatePipes()
-{
-    QList<AvailablePipeSource> availablePipes = updateAvailablePipeSources("packets", APRSSettings::m_pipeTypes, APRSSettings::m_pipeURIs, this);
-
-    if (availablePipes != m_availablePipes)
-    {
-        m_availablePipes = availablePipes;
-        if (getMessageQueueToGUI())
-        {
-            MsgReportPipes *msgToGUI = MsgReportPipes::create();
-            QList<AvailablePipeSource>& msgAvailablePipes = msgToGUI->getAvailablePipes();
-            msgAvailablePipes.append(availablePipes);
-            getMessageQueueToGUI()->push(msgToGUI);
-        }
     }
 }
 
@@ -446,4 +437,115 @@ void APRS::networkManagerFinished(QNetworkReply *reply)
     }
 
     reply->deleteLater();
+}
+
+void APRS::scanAvailableChannels()
+{
+    MainCore *mainCore = MainCore::instance();
+    MessagePipes& messagePipes = mainCore->getMessagePipes();
+    std::vector<DeviceSet*>& deviceSets = mainCore->getDeviceSets();
+    m_availableChannels.clear();
+
+    for (const auto& deviceSet : deviceSets)
+    {
+        DSPDeviceSourceEngine *deviceSourceEngine =  deviceSet->m_deviceSourceEngine;
+
+        if (deviceSourceEngine)
+        {
+            for (int chi = 0; chi < deviceSet->getNumberOfChannels(); chi++)
+            {
+                ChannelAPI *channel = deviceSet->getChannelAt(chi);
+
+                if (APRSSettings::m_pipeURIs.contains(channel->getURI()) && !m_availableChannels.contains(channel))
+                {
+                    qDebug("APRS::scanAvailableChannels: register %d:%d %s (%p)",
+                        deviceSet->getIndex(), chi, qPrintable(channel->getURI()), channel);
+                    ObjectPipe *pipe = messagePipes.registerProducerToConsumer(channel, this, "packets");
+                    MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+                    QObject::connect(
+                        messageQueue,
+                        &MessageQueue::messageEnqueued,
+                        this,
+                        [=](){ this->handleChannelMessageQueue(messageQueue); },
+                        Qt::QueuedConnection
+                    );
+                    connect(pipe, SIGNAL(toBeDeleted(int, QObject*)), this, SLOT(handleMessagePipeToBeDeleted(int, QObject*)));
+                    APRSSettings::AvailableChannel availableChannel =
+                        APRSSettings::AvailableChannel{deviceSet->getIndex(), chi, channel->getIdentifier()};
+                    m_availableChannels[channel] = availableChannel;
+                }
+            }
+
+            notifyUpdateChannels();
+        }
+    }
+}
+
+void APRS::notifyUpdateChannels()
+{
+    if (getMessageQueueToGUI())
+    {
+        MsgReportAvailableChannels *msg = MsgReportAvailableChannels::create();
+        msg->getChannels() = m_availableChannels.values();
+        getMessageQueueToGUI()->push(msg);
+    }
+}
+
+void APRS::handleChannelAdded(int deviceSetIndex, ChannelAPI *channel)
+{
+    qDebug("APRS::handleChannelAdded: deviceSetIndex: %d:%d channel: %s (%p)",
+        deviceSetIndex, channel->getIndexInDeviceSet(), qPrintable(channel->getURI()), channel);
+    DeviceSet *deviceSet = MainCore::instance()->getDeviceSets()[deviceSetIndex];
+    DSPDeviceSourceEngine *deviceSourceEngine =  deviceSet->m_deviceSourceEngine;
+
+    if (deviceSourceEngine && APRSSettings::m_pipeURIs.contains(channel->getURI()))
+    {
+        int chi = channel->getIndexInDeviceSet();
+
+        if (!m_availableChannels.contains(channel))
+        {
+            MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
+            ObjectPipe *pipe = messagePipes.registerProducerToConsumer(channel, this, "packets");
+            MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+            QObject::connect(
+                messageQueue,
+                &MessageQueue::messageEnqueued,
+                this,
+                [=](){ this->handleChannelMessageQueue(messageQueue); },
+                Qt::QueuedConnection
+            );
+            connect(pipe, SIGNAL(toBeDeleted(int, QObject*)), this, SLOT(handleMessagePipeToBeDeleted(int, QObject*)));
+        }
+
+        APRSSettings::AvailableChannel availableChannel =
+            APRSSettings::AvailableChannel{deviceSet->getIndex(), chi, channel->getIdentifier()};
+        m_availableChannels[channel] = availableChannel;
+
+        notifyUpdateChannels();
+    }
+}
+
+void APRS::handleMessagePipeToBeDeleted(int reason, QObject* object)
+{
+    if (reason == 0) // producer (channel)
+    {
+        if (m_availableChannels.contains((ChannelAPI*) object))
+        {
+            qDebug("APRS::handleMessagePipeToBeDeleted: removing channel at (%p)", object);
+            m_availableChannels.remove((ChannelAPI*) object);
+            notifyUpdateChannels();
+        }
+    }
+}
+
+void APRS::handleChannelMessageQueue(MessageQueue* messageQueue)
+{
+    Message* message;
+
+    while ((message = messageQueue->pop()) != nullptr)
+    {
+        if (handleMessage(*message)) {
+            delete message;
+        }
+    }
 }

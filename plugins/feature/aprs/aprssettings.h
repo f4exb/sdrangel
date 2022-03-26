@@ -36,6 +36,17 @@ class Serializable;
 
 struct APRSSettings
 {
+    struct AvailableChannel
+    {
+        int m_deviceSetIndex;
+        int m_channelIndex;
+        QString m_type;
+
+        AvailableChannel() = default;
+        AvailableChannel(const AvailableChannel&) = default;
+        AvailableChannel& operator=(const AvailableChannel&) = default;
+    };
+
     QString m_igateServer;
     int m_igatePort;
     QString m_igateCallsign;

@@ -28,7 +28,6 @@
 #include "feature/featuregui.h"
 #include "util/messagequeue.h"
 #include "util/radiosonde.h"
-#include "pipes/pipeendpoint.h"
 #include "settings/rollupstate.h"
 
 #include "radiosondesettings.h"

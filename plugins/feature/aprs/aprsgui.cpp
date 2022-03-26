@@ -157,11 +157,11 @@ bool APRSGUI::handleMessage(const Message& message)
 
         return true;
     }
-    else if (PipeEndPoint::MsgReportPipes::match(message))
+    else if (APRS::MsgReportAvailableChannels::match(message))
     {
-        PipeEndPoint::MsgReportPipes& report = (PipeEndPoint::MsgReportPipes&) message;
-        m_availablePipes = report.getAvailablePipes();
-        updatePipeList();
+        APRS::MsgReportAvailableChannels& report = (APRS::MsgReportAvailableChannels&) message;
+        m_availableChannels = report.getChannels();
+        updateChannelList();
 
         return true;
     }
@@ -551,6 +551,8 @@ APRSGUI::APRSGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feat
 
     m_settings.setRollupState(&m_rollupState);
 
+    m_aprs->getInputMessageQueue()->push(APRS::MsgQueryAvailableChannels::create());
+
     displaySettings();
     applySettings(true);
 }
@@ -637,15 +639,13 @@ void APRSGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void APRSGUI::updatePipeList()
+void APRSGUI::updateChannelList()
 {
     ui->sourcePipes->blockSignals(true);
     ui->sourcePipes->clear();
-    QList<PipeEndPoint::AvailablePipeSource>::const_iterator it = m_availablePipes.begin();
 
-    for (int i = 0; it != m_availablePipes.end(); ++it, i++)
-    {
-        ui->sourcePipes->addItem(it->getName());
+    for (const auto& channel : m_availableChannels) {
+        ui->sourcePipes->addItem(tr("R%1:%2 %3").arg(channel.m_deviceSetIndex).arg(channel.m_channelIndex).arg(channel.m_type));
     }
 
     ui->sourcePipes->blockSignals(false);

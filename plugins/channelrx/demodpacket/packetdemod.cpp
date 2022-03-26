@@ -171,18 +171,15 @@ bool PacketDemod::handleMessage(const Message& cmd)
             getMessageQueueToGUI()->push(msg);
         }
 
-        MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
-
         // Forward to APRS and other packet features
-        QList<MessageQueue*> *packetMessageQueues = messagePipes.getMessageQueues(this, "packets");
-        if (packetMessageQueues)
+        QList<ObjectPipe*> packetsPipes;
+        MainCore::instance()->getMessagePipes().getMessagePipes(this, "packets", packetsPipes);
+
+        for (const auto& pipe : packetsPipes)
         {
-            QList<MessageQueue*>::iterator it = packetMessageQueues->begin();
-            for (; it != packetMessageQueues->end(); ++it)
-            {
-                MainCore::MsgPacket *msg = new MainCore::MsgPacket(report);
-                (*it)->push(msg);
-            }
+            MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+            MainCore::MsgPacket *msg = new MainCore::MsgPacket(report);
+            messageQueue->push(msg);
         }
 
         // Forward via UDP

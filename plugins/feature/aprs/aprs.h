@@ -22,7 +22,6 @@
 #include <QThread>
 #include <QHash>
 #include <QNetworkRequest>
-#include <QTimer>
 
 #include "feature/feature.h"
 #include "util/message.h"
@@ -83,6 +82,38 @@ public:
         {}
     };
 
+    class MsgQueryAvailableChannels : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgQueryAvailableChannels* create() {
+            return new MsgQueryAvailableChannels();
+        }
+
+    protected:
+        MsgQueryAvailableChannels() :
+            Message()
+        { }
+    };
+
+    class MsgReportAvailableChannels : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        QList<APRSSettings::AvailableChannel>& getChannels() { return m_availableChannels; }
+
+        static MsgReportAvailableChannels* create() {
+            return new MsgReportAvailableChannels();
+        }
+
+    private:
+        QList<APRSSettings::AvailableChannel> m_availableChannels;
+
+        MsgReportAvailableChannels() :
+            Message()
+        {}
+    };
+
     APRS(WebAPIAdapterInterface *webAPIAdapterInterface);
     virtual ~APRS();
     virtual void destroy() { delete this; }
@@ -124,8 +155,7 @@ private:
     QThread m_thread;
     APRSWorker *m_worker;
     APRSSettings m_settings;
-    QList<PipeEndPoint::AvailablePipeSource> m_availablePipes;
-    QTimer m_updatePipesTimer;
+    QHash<ChannelAPI*, APRSSettings::AvailableChannel> m_availableChannels;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
@@ -134,10 +164,14 @@ private:
     void stop();
     void applySettings(const APRSSettings& settings, bool force = false);
     void webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const APRSSettings& settings, bool force);
+    void scanAvailableChannels();
+    void notifyUpdateChannels();
 
 private slots:
-    void updatePipes();
     void networkManagerFinished(QNetworkReply *reply);
+    void handleChannelAdded(int deviceSetIndex, ChannelAPI *channel);
+    void handleMessagePipeToBeDeleted(int reason, QObject* object);
+    void handleChannelMessageQueue(MessageQueue* messageQueue);
 };
 
 #endif // INCLUDE_FEATURE_APRS_H_

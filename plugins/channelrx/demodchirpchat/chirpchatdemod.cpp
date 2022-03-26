@@ -227,16 +227,14 @@ bool ChirpChatDemod::handleMessage(const Message& cmd)
                 }
 
                 // Forward to APRS and other packet features
-                MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
-                QList<MessageQueue*> *packetMessageQueues = messagePipes.getMessageQueues(this, "packets");
-                if (packetMessageQueues)
+                QList<ObjectPipe*> packetsPipes;
+                MainCore::instance()->getMessagePipes().getMessagePipes(this, "packets", packetsPipes);
+
+                for (const auto& pipe : packetsPipes)
                 {
-                    QList<MessageQueue*>::iterator it = packetMessageQueues->begin();
-                    for (; it != packetMessageQueues->end(); ++it)
-                    {
-                        MainCore::MsgPacket *msg = MainCore::MsgPacket::create(this, packet, QDateTime::currentDateTime());
-                        (*it)->push(msg);
-                    }
+                    MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+                    MainCore::MsgPacket *msg = MainCore::MsgPacket::create(this, packet, QDateTime::currentDateTime());
+                    messageQueue->push(msg);
                 }
             }
 

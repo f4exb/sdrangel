@@ -28,7 +28,6 @@
 
 #include "feature/featuregui.h"
 #include "util/messagequeue.h"
-#include "pipes/pipeendpoint.h"
 #include "util/aprs.h"
 #include "settings/rollupstate.h"
 
@@ -117,7 +116,7 @@ private:
     APRSSettings m_settings;
     RollupState m_rollupState;
     bool m_doApplySettings;
-    QList<PipeEndPoint::AvailablePipeSource> m_availablePipes;
+    QList<APRSSettings::AvailableChannel> m_availableChannels;
 
     APRS* m_aprs;
     MessageQueue m_inputMessageQueue;
@@ -154,7 +153,7 @@ private:
     bool filterStation(APRSStation *station);
     void filterStations();
     void displaySettings();
-    void updatePipeList();
+    void updateChannelList();
     bool handleMessage(const Message& message);
 
     void leaveEvent(QEvent*);
