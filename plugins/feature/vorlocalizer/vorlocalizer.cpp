@@ -30,7 +30,6 @@
 #include "dsp/dspdevicesourceengine.h"
 #include "dsp/devicesamplesource.h"
 #include "device/deviceset.h"
-#include "device/deviceapi.h"
 #include "channel/channelapi.h"
 #include "settings/serializable.h"
 #include "maincore.h"
@@ -351,14 +350,11 @@ void VORLocalizer::updateChannels()
     MainCore *mainCore = MainCore::instance();
     MessagePipes& messagePipes = mainCore->getMessagePipes();
     std::vector<DeviceSet*>& deviceSets = mainCore->getDeviceSets();
-    std::vector<DeviceSet*>::const_iterator it = deviceSets.begin();
     m_availableChannels.clear();
 
-    int deviceIndex = 0;
-
-    for (; it != deviceSets.end(); ++it, deviceIndex++)
+    for (const auto& deviceSet : deviceSets)
     {
-        DSPDeviceSourceEngine *deviceSourceEngine =  (*it)->m_deviceSourceEngine;
+        DSPDeviceSourceEngine *deviceSourceEngine = deviceSet->m_deviceSourceEngine;
 
         if (deviceSourceEngine)
         {
@@ -366,9 +362,9 @@ void VORLocalizer::updateChannels()
             quint64 deviceCenterFrequency = deviceSource->getCenterFrequency();
             int basebandSampleRate = deviceSource->getSampleRate();
 
-            for (int chi = 0; chi < (*it)->getNumberOfChannels(); chi++)
+            for (int chi = 0; chi < deviceSet->getNumberOfChannels(); chi++)
             {
-                ChannelAPI *channel = (*it)->getChannelAt(chi);
+                ChannelAPI *channel = deviceSet->getChannelAt(chi);
 
                 if (channel->getURI() == "sdrangel.channel.vordemodsc")
                 {
@@ -387,7 +383,7 @@ void VORLocalizer::updateChannels()
                     }
 
                     VORLocalizerSettings::AvailableChannel availableChannel =
-                        VORLocalizerSettings::AvailableChannel{deviceIndex, chi, channel, deviceCenterFrequency, basebandSampleRate, -1};
+                        VORLocalizerSettings::AvailableChannel{deviceSet->getIndex(), chi, channel, deviceCenterFrequency, basebandSampleRate, -1};
                     m_availableChannels[channel] = availableChannel;
                 }
             }
@@ -661,8 +657,8 @@ void VORLocalizer::handleChannelMessageQueue(MessageQueue* messageQueue)
 void VORLocalizer::handleChannelAdded(int deviceSetIndex, ChannelAPI *channel)
 {
     qDebug(" VORLocalizer::handleChannelAdded: deviceSetIndex: %d channel: %s", deviceSetIndex, qPrintable(channel->getURI()));
-    DeviceAPI *device = MainCore::instance()->getDevice(deviceSetIndex);
-    DSPDeviceSourceEngine *deviceSourceEngine =  device->getDeviceSourceEngine();
+    DeviceSet *deviceSet = MainCore::instance()->getDeviceSets()[deviceSetIndex];
+    DSPDeviceSourceEngine *deviceSourceEngine =  deviceSet->m_deviceSourceEngine;
 
     if (deviceSourceEngine && (channel->getURI() == "sdrangel.channel.vordemodsc"))
     {
