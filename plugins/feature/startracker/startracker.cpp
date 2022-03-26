@@ -27,6 +27,7 @@
 #include "SWGDeviceState.h"
 #include "SWGStarTrackerDisplaySettings.h"
 
+#include "device/deviceset.h"
 #include "dsp/dspengine.h"
 #include "util/weather.h"
 #include "util/units.h"
@@ -53,8 +54,6 @@ StarTracker::StarTracker(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_worker->moveToThread(&m_thread);
     m_state = StIdle;
     m_errorMessage = "StarTracker error";
-    connect(&m_updatePipesTimer, SIGNAL(timeout()), this, SLOT(updatePipes()));
-    m_updatePipesTimer.start(1000);
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
         m_networkManager,
@@ -69,10 +68,13 @@ StarTracker::StarTracker(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_temps.append(new FITS(":/startracker/startracker/408mhz_ra_dec.fits"));
     m_temps.append(new FITS(":/startracker/startracker/1420mhz_ra_dec.fits"));
     m_spectralIndex = new FITS(":/startracker/startracker/408mhz_ra_dec_spectral_index.fits");
+    scanAvailableChannels();
+    connect(MainCore::instance(), SIGNAL(channelAdded(int, ChannelAPI*)), this, SLOT(handleChannelAdded(int, ChannelAPI*)));
 }
 
 StarTracker::~StarTracker()
 {
+    disconnect(MainCore::instance(), SIGNAL(channelAdded(int, ChannelAPI*)), this, SLOT(handleChannelAdded(int, ChannelAPI*)));
     QObject::disconnect(
         m_networkManager,
         &QNetworkAccessManager::finished,
@@ -167,23 +169,6 @@ bool StarTracker::handleMessage(const Message& cmd)
     else
     {
         return false;
-    }
-}
-
-void StarTracker::updatePipes()
-{
-    QList<AvailablePipeSource> availablePipes = updateAvailablePipeSources("startracker.display", StarTrackerSettings::m_pipeTypes, StarTrackerSettings::m_pipeURIs, this);
-
-    if (availablePipes != m_availablePipes)
-    {
-        m_availablePipes = availablePipes;
-        if (getMessageQueueToGUI())
-        {
-            MsgReportPipes *msgToGUI = MsgReportPipes::create();
-            QList<AvailablePipeSource>& msgAvailablePipes = msgToGUI->getAvailablePipes();
-            msgAvailablePipes.append(availablePipes);
-            getMessageQueueToGUI()->push(msgToGUI);
-        }
     }
 }
 
@@ -899,6 +884,95 @@ bool StarTracker::calcSkyTemperature(double frequency, double beamwidth, double 
         {
             qDebug() << "StarTracker::calcSkyTemperature: 408MHz FITS temperature file not valid";
             return false;
+        }
+    }
+}
+
+void StarTracker::scanAvailableChannels()
+{
+    MainCore *mainCore = MainCore::instance();
+    MessagePipes& messagePipes = mainCore->getMessagePipes();
+    std::vector<DeviceSet*>& deviceSets = mainCore->getDeviceSets();
+    m_availableChannels.clear();
+
+    for (const auto& deviceSet : deviceSets)
+    {
+        DSPDeviceSourceEngine *deviceSourceEngine =  deviceSet->m_deviceSourceEngine;
+
+        if (deviceSourceEngine)
+        {
+            for (int chi = 0; chi < deviceSet->getNumberOfChannels(); chi++)
+            {
+                ChannelAPI *channel = deviceSet->getChannelAt(chi);
+
+                if (StarTrackerSettings::m_pipeURIs.contains(channel->getURI()) && !m_availableChannels.contains(channel))
+                {
+                    qDebug("StarTracker::scanAvailableChannels: register %d:%d %s (%p)",
+                        deviceSet->getIndex(), chi, qPrintable(channel->getURI()), channel);
+                    ObjectPipe *pipe = messagePipes.registerProducerToConsumer(channel, this, "startracker.display");
+                    MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+                    QObject::connect(
+                        messageQueue,
+                        &MessageQueue::messageEnqueued,
+                        this,
+                        [=](){ this->handleChannelMessageQueue(messageQueue); },
+                        Qt::QueuedConnection
+                    );
+                    connect(pipe, SIGNAL(toBeDeleted(int, QObject*)), this, SLOT(handleMessagePipeToBeDeleted(int, QObject*)));
+                    m_availableChannels.insert(channel);
+                }
+            }
+        }
+    }
+}
+
+void StarTracker::handleChannelAdded(int deviceSetIndex, ChannelAPI *channel)
+{
+    qDebug("StarTracker::handleChannelAdded: deviceSetIndex: %d:%d channel: %s (%p)",
+        deviceSetIndex, channel->getIndexInDeviceSet(), qPrintable(channel->getURI()), channel);
+    DeviceSet *deviceSet = MainCore::instance()->getDeviceSets()[deviceSetIndex];
+    DSPDeviceSourceEngine *deviceSourceEngine =  deviceSet->m_deviceSourceEngine;
+
+    if (deviceSourceEngine && StarTrackerSettings::m_pipeURIs.contains(channel->getURI()))
+    {
+        if (!m_availableChannels.contains(channel))
+        {
+            MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
+            ObjectPipe *pipe = messagePipes.registerProducerToConsumer(channel, this, "startracker.display");
+            MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+            QObject::connect(
+                messageQueue,
+                &MessageQueue::messageEnqueued,
+                this,
+                [=](){ this->handleChannelMessageQueue(messageQueue); },
+                Qt::QueuedConnection
+            );
+            connect(pipe, SIGNAL(toBeDeleted(int, QObject*)), this, SLOT(handleMessagePipeToBeDeleted(int, QObject*)));
+            m_availableChannels.insert(channel);
+        }
+    }
+}
+
+void StarTracker::handleMessagePipeToBeDeleted(int reason, QObject* object)
+{
+    if (reason == 0) // producer (channel)
+    {
+        if (m_availableChannels.contains((ChannelAPI*) object))
+        {
+            qDebug("StarTracker::handleMessagePipeToBeDeleted: removing channel at (%p)", object);
+            m_availableChannels.remove((ChannelAPI*) object);
+        }
+    }
+}
+
+void StarTracker::handleChannelMessageQueue(MessageQueue* messageQueue)
+{
+    Message* message;
+
+    while ((message = messageQueue->pop()) != nullptr)
+    {
+        if (handleMessage(*message)) {
+            delete message;
         }
     }
 }

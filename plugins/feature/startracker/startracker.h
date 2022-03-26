@@ -21,7 +21,6 @@
 
 #include <QThread>
 #include <QNetworkRequest>
-#include <QTimer>
 
 #include "feature/feature.h"
 #include "util/message.h"
@@ -109,6 +108,7 @@ public:
     virtual bool handleMessage(const Message& cmd);
 
     virtual void getIdentifier(QString& id) const { id = objectName(); }
+    virtual QString getIdentifier() const { return objectName(); }
     virtual void getTitle(QString& title) const { title = m_settings.m_title; }
 
     virtual QByteArray serialize() const;
@@ -160,8 +160,6 @@ private:
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
-    QList<AvailablePipeSource> m_availablePipes;
-    QTimer m_updatePipesTimer;
     Weather *m_weather;
     float m_solarFlux;
 
@@ -176,7 +174,6 @@ private:
     double applyBeam(const FITS *fits, double beamwidth, double ra, double dec, int& imgX, int& imgY) const;
 
 private slots:
-    void updatePipes();
     void networkManagerFinished(QNetworkReply *reply);
     void weatherUpdated(float temperature, float pressure, float humidity);
 };

@@ -87,6 +87,7 @@ public:
     virtual bool handleMessage(const Message& cmd);
 
     virtual void getIdentifier(QString& id) const { id = objectName(); }
+    virtual QString getIdentifier() const { return objectName(); }
     virtual void getTitle(QString& title) const { title = m_settings.m_title; }
 
     virtual QByteArray serialize() const;

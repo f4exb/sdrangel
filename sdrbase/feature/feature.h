@@ -58,6 +58,7 @@ public:
 
     const QString& getURI() const { return m_uri; }
     virtual void getIdentifier(QString& id) const = 0;
+    virtual QString getIdentifier() const = 0;
     virtual void getTitle(QString& title) const = 0;
     virtual void setName(const QString& name) { m_name = name; }
     virtual const QString& getName() const { return m_name; }
