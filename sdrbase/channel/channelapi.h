@@ -55,6 +55,7 @@ public:
     virtual void destroy() = 0;
 
     virtual void getIdentifier(QString& id) = 0;
+    virtual QString getIdentifier() const = 0;
     const QString& getURI() const { return m_uri; }
     virtual void getTitle(QString& title) = 0;
     virtual void setName(const QString& name) { m_name = name; }

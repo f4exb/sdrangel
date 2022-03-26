@@ -74,6 +74,7 @@ public:
     virtual QString getSinkName() { return objectName(); }
 
     virtual void getIdentifier(QString& id) { id = objectName(); }
+    virtual QString getIdentifier() const { return objectName(); }
     virtual void getTitle(QString& title) { title = "Remote Sink"; }
     virtual qint64 getCenterFrequency() const { return m_frequencyOffset; }
     virtual void setCenterFrequency(qint64) {}

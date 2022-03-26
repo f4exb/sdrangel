@@ -132,11 +132,9 @@ bool JogdialController::handleMessage(const Message& cmd)
         {
             DeviceAPI *selectedDevice = m_availableChannels[cfg.getIndex()].m_deviceAPI;
             ChannelAPI *selectedChannel = m_availableChannels[cfg.getIndex()].m_channelAPI;
-            QString channelId;
-            selectedChannel->getIdentifier(channelId);
             qDebug() << "JogdialController::handleMessage: MsgSelectChannel"
                 << "device:" << selectedDevice->getHardwareId()
-                << "channel:" << channelId;
+                << "channel:" << selectedChannel->getIdentifier();
             m_selectedDevice = selectedDevice;
             m_selectedChannel = selectedChannel;
             m_selectedIndex = index;
@@ -236,8 +234,6 @@ void JogdialController::updateChannels()
             for (int chi = 0; chi < (*it)->getNumberOfChannels(); chi++)
             {
                 ChannelAPI *channel = (*it)->getChannelAt(chi);
-                QString channelId;
-                channel->getIdentifier(channelId);
                 JogdialControllerSettings::AvailableChannel availableChannel =
                     JogdialControllerSettings::AvailableChannel{
                         deviceSinkEngine != nullptr,
@@ -246,7 +242,7 @@ void JogdialController::updateChannels()
                         device,
                         channel,
                         device->getHardwareId(),
-                        channelId
+                        channel->getIdentifier()
                     };
                 m_availableChannels.push_back(availableChannel);
             }

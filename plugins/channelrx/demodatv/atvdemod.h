@@ -72,6 +72,7 @@ public:
     virtual QString getSinkName() { return objectName(); }
 
     virtual void getIdentifier(QString& id) { id = objectName(); }
+    virtual QString getIdentifier() const { return objectName(); }
     virtual void getTitle(QString& title) { title = objectName(); }
     virtual qint64 getCenterFrequency() const { return m_settings.m_inputFrequencyOffset; }
     virtual void setCenterFrequency(qint64 frequency);
