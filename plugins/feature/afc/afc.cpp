@@ -148,15 +148,6 @@ bool AFC::handleMessage(const Message& cmd)
             return true;
         }
     }
-    else if (MessagePipesLegacyCommon::MsgReportChannelDeleted::match(cmd))
-    {
-        qDebug() << "AFC::handleMessage: MessagePipesLegacyCommon::MsgReportChannelDeleted";
-        MessagePipesLegacyCommon::MsgReportChannelDeleted& report = (MessagePipesLegacyCommon::MsgReportChannelDeleted&) cmd;
-        const MessagePipesLegacyCommon::ChannelRegistrationKey& channelKey = report.getChannelRegistrationKey();
-        MainCore::instance()->getMessagePipesLegacy().unregisterChannelToFeature(channelKey.m_key, this, "settings");
-
-        return true;
-    }
     else if (MsgDeviceTrack::match(cmd))
     {
         if (m_worker->isRunning())

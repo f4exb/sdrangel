@@ -211,7 +211,6 @@ void JogdialController::applySettings(const JogdialControllerSettings& settings,
 void JogdialController::updateChannels()
 {
     MainCore *mainCore = MainCore::instance();
-    // MessagePipesLegacy& messagePipes = mainCore->getMessagePipesLegacy();
     std::vector<DeviceSet*>& deviceSets = mainCore->getDeviceSets();
     std::vector<DeviceSet*>::const_iterator it = deviceSets.begin();
     m_availableChannels.clear();
@@ -227,10 +226,6 @@ void JogdialController::updateChannels()
 
         if (deviceSourceEngine || deviceSinkEngine)
         {
-            // DeviceSampleSource *deviceSource = deviceSourceEngine->getSource();
-            // quint64 deviceCenterFrequency = deviceSource->getCenterFrequency();
-            // int basebandSampleRate = deviceSource->getSampleRate();
-
             for (int chi = 0; chi < (*it)->getNumberOfChannels(); chi++)
             {
                 ChannelAPI *channel = (*it)->getChannelAt(chi);
