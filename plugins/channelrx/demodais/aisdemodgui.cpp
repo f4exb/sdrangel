@@ -709,8 +709,8 @@ void AISDemodGUI::on_logOpen_clicked()
                     bool cancelled = false;
                     QStringList cols;
 
-                    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
-                    QList<MessageQueue*> *aisMessageQueues = messagePipes.getMessageQueues(m_aisDemod, "ais");
+                    QList<ObjectPipe*> aisPipes;
+                    MainCore::instance()->getMessagePipes().getMessagePipes(this, "ais", aisPipes);
 
                     while (!cancelled && CSV::readRow(in, &cols))
                     {
@@ -725,14 +725,11 @@ void AISDemodGUI::on_logOpen_clicked()
                             messageReceived(bytes, dateTime);
 
                             // Forward to AIS feature
-                            if (aisMessageQueues)
+                            for (const auto& pipe : aisPipes)
                             {
-                                QList<MessageQueue*>::iterator it = aisMessageQueues->begin();
-                                for (; it != aisMessageQueues->end(); ++it)
-                                {
-                                    MainCore::MsgPacket *msg = MainCore::MsgPacket::create(m_aisDemod, bytes, dateTime);
-                                    (*it)->push(msg);
-                                }
+                                MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+                                MainCore::MsgPacket *msg = MainCore::MsgPacket::create(m_aisDemod, bytes, dateTime);
+                                messageQueue->push(msg);
                             }
 
                             if (count % 1000 == 0)

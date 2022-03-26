@@ -178,18 +178,15 @@ bool RadiosondeDemod::handleMessage(const Message& cmd)
             getMessageQueueToGUI()->push(msg);
         }
 
-        MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
-
         // Forward to Radiosonde feature
-        QList<MessageQueue*> *radiosondeMessageQueues = messagePipes.getMessageQueues(this, "radiosonde");
-        if (radiosondeMessageQueues)
+        QList<ObjectPipe*> radiosondePipes;
+        MainCore::instance()->getMessagePipes().getMessagePipes(this, "radiosonde", radiosondePipes);
+
+        for (const auto& pipe : radiosondePipes)
         {
-            QList<MessageQueue*>::iterator it = radiosondeMessageQueues->begin();
-            for (; it != radiosondeMessageQueues->end(); ++it)
-            {
-                MainCore::MsgPacket *msg = MainCore::MsgPacket::create(this, report.getMessage(), report.getDateTime());
-                (*it)->push(msg);
-            }
+            MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+            MainCore::MsgPacket *msg = MainCore::MsgPacket::create(this, report.getMessage(), report.getDateTime());
+            messageQueue->push(msg);
         }
 
         // Forward via UDP

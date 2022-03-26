@@ -846,8 +846,8 @@ void RadiosondeDemodGUI::on_logOpen_clicked()
                     bool cancelled = false;
                     QStringList cols;
 
-                    MessagePipesLegacy& framePipes = MainCore::instance()->getMessagePipesLegacy();
-                    QList<MessageQueue*> *radiosondeMessageQueues = framePipes.getMessageQueues(m_radiosondeDemod, "radiosonde");
+                    QList<ObjectPipe*> radiosondePipes;
+                    MainCore::instance()->getMessagePipes().getMessagePipes(this, "radiosonde", radiosondePipes);
 
                     while (!cancelled && CSV::readRow(in, &cols))
                     {
@@ -862,14 +862,11 @@ void RadiosondeDemodGUI::on_logOpen_clicked()
                             frameReceived(bytes, dateTime, 0, 0);
 
                             // Forward to Radiosonde feature
-                            if (radiosondeMessageQueues)
+                            for (const auto& pipe : radiosondePipes)
                             {
-                                QList<MessageQueue*>::iterator it = radiosondeMessageQueues->begin();
-                                for (; it != radiosondeMessageQueues->end(); ++it)
-                                {
-                                    MainCore::MsgPacket *msg = MainCore::MsgPacket::create(m_radiosondeDemod, bytes, dateTime);
-                                    (*it)->push(msg);
-                                }
+                                MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+                                MainCore::MsgPacket *msg = MainCore::MsgPacket::create(m_radiosondeDemod, bytes, dateTime);
+                                messageQueue->push(msg);
                             }
 
                             if (count % 100 == 0)

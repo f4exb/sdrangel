@@ -20,7 +20,6 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QBuffer>
-#include <QTimer>
 
 #include "SWGFeatureSettings.h"
 #include "SWGFeatureReport.h"
@@ -48,8 +47,6 @@ AIS::AIS(WebAPIAdapterInterface *webAPIAdapterInterface) :
     setObjectName(m_featureId);
     m_state = StIdle;
     m_errorMessage = "AIS error";
-    connect(&m_updatePipesTimer, SIGNAL(timeout()), this, SLOT(updatePipes()));
-    m_updatePipesTimer.start(1000);
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
         m_networkManager,
@@ -57,10 +54,13 @@ AIS::AIS(WebAPIAdapterInterface *webAPIAdapterInterface) :
         this,
         &AIS::networkManagerFinished
     );
+    scanAvailableChannels();
+    connect(MainCore::instance(), SIGNAL(channelAdded(int, ChannelAPI*)), this, SLOT(handleChannelAdded(int, ChannelAPI*)));
 }
 
 AIS::~AIS()
 {
+    disconnect(MainCore::instance(), SIGNAL(channelAdded(int, ChannelAPI*)), this, SLOT(handleChannelAdded(int, ChannelAPI*)));
     QObject::disconnect(
         m_networkManager,
         &QNetworkAccessManager::finished,
@@ -105,15 +105,6 @@ bool AIS::handleMessage(const Message& cmd)
     else
     {
         return false;
-    }
-}
-
-void AIS::updatePipes()
-{
-    QList<AvailablePipeSource> availablePipes = updateAvailablePipeSources("ais", AISSettings::m_pipeTypes, AISSettings::m_pipeURIs, this);
-
-    if (availablePipes != m_availablePipes) {
-        m_availablePipes = availablePipes;
     }
 }
 
@@ -334,4 +325,93 @@ void AIS::networkManagerFinished(QNetworkReply *reply)
     }
 
     reply->deleteLater();
+}
+
+void AIS::scanAvailableChannels()
+{
+    MainCore *mainCore = MainCore::instance();
+    MessagePipes& messagePipes = mainCore->getMessagePipes();
+    std::vector<DeviceSet*>& deviceSets = mainCore->getDeviceSets();
+    m_availableChannels.clear();
+
+    for (const auto& deviceSet : deviceSets)
+    {
+        DSPDeviceSourceEngine *deviceSourceEngine =  deviceSet->m_deviceSourceEngine;
+
+        if (deviceSourceEngine)
+        {
+            for (int chi = 0; chi < deviceSet->getNumberOfChannels(); chi++)
+            {
+                ChannelAPI *channel = deviceSet->getChannelAt(chi);
+
+                if ((channel->getURI() == "sdrangel.channel.aisdemod") && !m_availableChannels.contains(channel))
+                {
+                    qDebug("AIS::scanAvailableChannels: register %d:%d (%p)", deviceSet->getIndex(), chi, channel);
+                    ObjectPipe *pipe = messagePipes.registerProducerToConsumer(channel, this, "ais");
+                    MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+                    QObject::connect(
+                        messageQueue,
+                        &MessageQueue::messageEnqueued,
+                        this,
+                        [=](){ this->handleChannelMessageQueue(messageQueue); },
+                        Qt::QueuedConnection
+                    );
+                    connect(pipe, SIGNAL(toBeDeleted(int, QObject*)), this, SLOT(handleMessagePipeToBeDeleted(int, QObject*)));
+                    m_availableChannels.insert(channel);
+                }
+            }
+        }
+    }
+}
+
+void AIS::handleChannelAdded(int deviceSetIndex, ChannelAPI *channel)
+{
+    qDebug("AIS::handleChannelAdded: deviceSetIndex: %d:%d channel: %s (%p)",
+        deviceSetIndex, channel->getIndexInDeviceSet(), qPrintable(channel->getURI()), channel);
+    std::vector<DeviceSet*>& deviceSets = MainCore::instance()->getDeviceSets();
+    DeviceSet *deviceSet = deviceSets[deviceSetIndex];
+    DSPDeviceSourceEngine *deviceSourceEngine =  deviceSet->m_deviceSourceEngine;
+
+    if (deviceSourceEngine && (channel->getURI() == "sdrangel.channel.aisdemod"))
+    {
+        if (!m_availableChannels.contains(channel))
+        {
+            MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
+            ObjectPipe *pipe = messagePipes.registerProducerToConsumer(channel, this, "ais");
+            MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+            QObject::connect(
+                messageQueue,
+                &MessageQueue::messageEnqueued,
+                this,
+                [=](){ this->handleChannelMessageQueue(messageQueue); },
+                Qt::QueuedConnection
+            );
+            connect(pipe, SIGNAL(toBeDeleted(int, QObject*)), this, SLOT(handleMessagePipeToBeDeleted(int, QObject*)));
+            m_availableChannels.insert(channel);
+        }
+    }
+}
+
+void AIS::handleMessagePipeToBeDeleted(int reason, QObject* object)
+{
+    if (reason == 0) // producer (channel)
+    {
+        if (m_availableChannels.contains((ChannelAPI*) object))
+        {
+            qDebug("AIS::handleMessagePipeToBeDeleted: removing channel at (%p)", object);
+            m_availableChannels.remove((ChannelAPI*) object);
+        }
+    }
+}
+
+void AIS::handleChannelMessageQueue(MessageQueue* messageQueue)
+{
+    Message* message;
+
+    while ((message = messageQueue->pop()) != nullptr)
+    {
+        if (handleMessage(*message)) {
+            delete message;
+        }
+    }
 }

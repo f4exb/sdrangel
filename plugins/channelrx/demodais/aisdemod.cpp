@@ -163,18 +163,15 @@ bool AISDemod::handleMessage(const Message& cmd)
             getMessageQueueToGUI()->push(msg);
         }
 
-        MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
+        QList<ObjectPipe*> aisPipes;
+        MainCore::instance()->getMessagePipes().getMessagePipes(this, "ais", aisPipes);
 
         // Forward to AIS feature
-        QList<MessageQueue*> *aisMessageQueues = messagePipes.getMessageQueues(this, "ais");
-        if (aisMessageQueues)
+        for (const auto& pipe : aisPipes)
         {
-            QList<MessageQueue*>::iterator it = aisMessageQueues->begin();
-            for (; it != aisMessageQueues->end(); ++it)
-            {
-                MainCore::MsgPacket *msg = MainCore::MsgPacket::create(this, report.getMessage(), report.getDateTime());
-                (*it)->push(msg);
-            }
+            MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+            MainCore::MsgPacket *msg = MainCore::MsgPacket::create(this, report.getMessage(), report.getDateTime());
+            messageQueue->push(msg);
         }
 
         // Forward via UDP

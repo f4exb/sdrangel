@@ -21,7 +21,7 @@
 
 #include <QThread>
 #include <QNetworkRequest>
-#include <QTimer>
+#include <QSet>
 
 #include "feature/feature.h"
 #include "util/message.h"
@@ -97,8 +97,7 @@ public:
 
 private:
     RadiosondeSettings m_settings;
-    QList<PipeEndPoint::AvailablePipeSource> m_availablePipes;
-    QTimer m_updatePipesTimer;
+    QSet<ChannelAPI*> m_availableChannels;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
@@ -107,10 +106,13 @@ private:
     void stop();
     void applySettings(const RadiosondeSettings& settings, bool force = false);
     void webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const RadiosondeSettings& settings, bool force);
+    void scanAvailableChannels();
 
 private slots:
-    void updatePipes();
     void networkManagerFinished(QNetworkReply *reply);
+    void handleChannelAdded(int deviceSetIndex, ChannelAPI *channel);
+    void handleMessagePipeToBeDeleted(int reason, QObject* object);
+    void handleChannelMessageQueue(MessageQueue* messageQueue);
 };
 
 #endif // INCLUDE_FEATURE_RADIOSONDE_H_
