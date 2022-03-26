@@ -398,20 +398,17 @@ bool RadiosondeDemod::deserialize(const QByteArray& data)
 
 void RadiosondeDemod::sendSampleRateToDemodAnalyzer()
 {
-    QList<MessageQueue*> *messageQueues = MainCore::instance()->getMessagePipesLegacy().getMessageQueues(this, "reportdemod");
+    QList<ObjectPipe*> reportPipes;
+    MainCore::instance()->getMessagePipes().getMessagePipes(this, "reportdemod", reportPipes);
 
-    if (messageQueues)
+    for (const auto& pipe : reportPipes)
     {
-        QList<MessageQueue*>::iterator it = messageQueues->begin();
-
-        for (; it != messageQueues->end(); ++it)
-        {
-            MainCore::MsgChannelDemodReport *msg = MainCore::MsgChannelDemodReport::create(
-                this,
-                RadiosondeDemodSettings::RADIOSONDEDEMOD_CHANNEL_SAMPLE_RATE
-            );
-            (*it)->push(msg);
-        }
+        MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+        MainCore::MsgChannelDemodReport *msg = MainCore::MsgChannelDemodReport::create(
+            this,
+            RadiosondeDemodSettings::RADIOSONDEDEMOD_CHANNEL_SAMPLE_RATE
+        );
+        messageQueue->push(msg);
     }
 }
 
