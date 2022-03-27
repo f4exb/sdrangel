@@ -607,36 +607,34 @@ void StarTrackerWorker::update()
     // Unless we're receiving settings to display from a Radio Astronomy plugins
     if (!m_settings.m_link)
     {
-        messageQueues = messagePipes.getMessageQueues(m_starTracker, "startracker.target");
-        if (messageQueues)
-        {
-            QList<MessageQueue*>::iterator it = messageQueues->begin();
+        QList<ObjectPipe*> starTrackerPipes;
+        MainCore::instance()->getMessagePipes().getMessagePipes(this, "startracker.target", starTrackerPipes);
 
-            for (; it != messageQueues->end(); ++it)
-            {
-                SWGSDRangel::SWGStarTrackerTarget *swgTarget = new SWGSDRangel::SWGStarTrackerTarget();
-                swgTarget->setName(new QString(m_settings.m_target));
-                swgTarget->setAzimuth(aa.az);
-                swgTarget->setElevation(aa.alt);
-                swgTarget->setRa(rd.ra);
-                swgTarget->setDec(rd.dec);
-                swgTarget->setB(b);
-                swgTarget->setL(l);
-                swgTarget->setSolarFlux(m_solarFlux);
-                swgTarget->setAirTemperature(m_settings.m_temperature);
-                double temp;
-                m_starTracker->calcSkyTemperature(m_settings.m_frequency, m_settings.m_beamwidth, rd.ra, rd.dec, temp);
-                swgTarget->setSkyTemperature(temp);
-                swgTarget->setHpbw(m_settings.m_beamwidth);
-                // Calculate velocities
-                double vRot = Astronomy::earthRotationVelocity(rd, m_settings.m_latitude, m_settings.m_longitude, dt);
-                swgTarget->setEarthRotationVelocity(vRot);
-                double vOrbit = Astronomy::earthOrbitVelocityBCRS(rd,dt);
-                swgTarget->setEarthOrbitVelocityBcrs(vOrbit);
-                double vLSRK = Astronomy::sunVelocityLSRK(rd);
-                swgTarget->setSunVelocityLsr(vLSRK);
-                (*it)->push(MainCore::MsgStarTrackerTarget::create(m_starTracker, swgTarget));
-            }
+        for (const auto& pipe : starTrackerPipes)
+        {
+            MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+            SWGSDRangel::SWGStarTrackerTarget *swgTarget = new SWGSDRangel::SWGStarTrackerTarget();
+            swgTarget->setName(new QString(m_settings.m_target));
+            swgTarget->setAzimuth(aa.az);
+            swgTarget->setElevation(aa.alt);
+            swgTarget->setRa(rd.ra);
+            swgTarget->setDec(rd.dec);
+            swgTarget->setB(b);
+            swgTarget->setL(l);
+            swgTarget->setSolarFlux(m_solarFlux);
+            swgTarget->setAirTemperature(m_settings.m_temperature);
+            double temp;
+            m_starTracker->calcSkyTemperature(m_settings.m_frequency, m_settings.m_beamwidth, rd.ra, rd.dec, temp);
+            swgTarget->setSkyTemperature(temp);
+            swgTarget->setHpbw(m_settings.m_beamwidth);
+            // Calculate velocities
+            double vRot = Astronomy::earthRotationVelocity(rd, m_settings.m_latitude, m_settings.m_longitude, dt);
+            swgTarget->setEarthRotationVelocity(vRot);
+            double vOrbit = Astronomy::earthOrbitVelocityBCRS(rd,dt);
+            swgTarget->setEarthOrbitVelocityBcrs(vOrbit);
+            double vLSRK = Astronomy::sunVelocityLSRK(rd);
+            swgTarget->setSunVelocityLsr(vLSRK);
+            messageQueue->push(MainCore::MsgStarTrackerTarget::create(m_starTracker, swgTarget));
         }
     }
 

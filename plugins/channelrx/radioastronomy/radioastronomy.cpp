@@ -40,6 +40,7 @@
 #include "device/deviceapi.h"
 #include "feature/feature.h"
 #include "channel/channelwebapiutils.h"
+#include "feature/featureset.h"
 #include "util/astronomy.h"
 #include "util/db.h"
 #include "maincore.h"
@@ -58,6 +59,7 @@ MESSAGE_CLASS_DEFINITION(RadioAstronomy::MsgStartSweep, Message)
 MESSAGE_CLASS_DEFINITION(RadioAstronomy::MsgStopSweep, Message)
 MESSAGE_CLASS_DEFINITION(RadioAstronomy::MsgSweepComplete, Message)
 MESSAGE_CLASS_DEFINITION(RadioAstronomy::MsgSweepStatus, Message)
+MESSAGE_CLASS_DEFINITION(RadioAstronomy::MsgReportAvailableFeatures, Message)
 
 const char * const RadioAstronomy::m_channelIdURI = "sdrangel.channel.radioastronomy";
 const char * const RadioAstronomy::m_channelId = "RadioAstronomy";
@@ -68,6 +70,7 @@ RadioAstronomy::RadioAstronomy(DeviceAPI *deviceAPI) :
         m_basebandSampleRate(0),
         m_sweeping(false)
 {
+    qDebug("RadioAstronomy::RadioAstronomy");
     setObjectName(m_channelId);
 
     m_basebandSink = new RadioAstronomyBaseband(this);
@@ -85,8 +88,6 @@ RadioAstronomy::RadioAstronomy(DeviceAPI *deviceAPI) :
     m_deviceAPI->addChannelSinkAPI(this);
 
     m_selectedPipe = nullptr;
-    connect(&m_updatePipesTimer, SIGNAL(timeout()), this, SLOT(updatePipes()));
-    m_updatePipesTimer.start(1000);
 
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -101,6 +102,12 @@ RadioAstronomy::RadioAstronomy(DeviceAPI *deviceAPI) :
         this,
         &RadioAstronomy::handleIndexInDeviceSetChanged
     );
+    QObject::connect(
+        MainCore::instance(),
+        &MainCore::featureAdded,
+        this,
+        &RadioAstronomy::handleFeatureAdded
+    );
 
     m_sweepTimer.setSingleShot(true);
 }
@@ -108,6 +115,12 @@ RadioAstronomy::RadioAstronomy(DeviceAPI *deviceAPI) :
 RadioAstronomy::~RadioAstronomy()
 {
     qDebug("RadioAstronomy::~RadioAstronomy");
+    QObject::disconnect(
+        MainCore::instance(),
+        &MainCore::featureAdded,
+        this,
+        &RadioAstronomy::handleFeatureAdded
+    );
     QObject::disconnect(
         m_networkManager,
         &QNetworkAccessManager::finished,
@@ -153,10 +166,10 @@ void RadioAstronomy::start()
     m_workerThread.start();
 
     m_basebandSink->getInputMessageQueue()->push(new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency));
-
     m_basebandSink->getInputMessageQueue()->push(RadioAstronomyBaseband::MsgConfigureRadioAstronomyBaseband::create(m_settings, true));
-
     m_worker->getInputMessageQueue()->push(RadioAstronomyWorker::MsgConfigureRadioAstronomyWorker::create(m_settings, true));
+
+    scanAvailableFeatures();
 }
 
 void RadioAstronomy::stop()
@@ -631,23 +644,6 @@ void RadioAstronomy::sweepComplete()
     }
 }
 
-void RadioAstronomy::updatePipes()
-{
-    QList<AvailablePipeSource> availablePipes = updateAvailablePipeSources("startracker.target", RadioAstronomySettings::m_pipeTypes, RadioAstronomySettings::m_pipeURIs, this);
-
-    if (availablePipes != m_availablePipes)
-    {
-        m_availablePipes = availablePipes;
-        if (getMessageQueueToGUI())
-        {
-            MsgReportPipes *msgToGUI = MsgReportPipes::create();
-            QList<AvailablePipeSource>& msgAvailablePipes = msgToGUI->getAvailablePipes();
-            msgAvailablePipes.append(availablePipes);
-            getMessageQueueToGUI()->push(msgToGUI);
-        }
-    }
-}
-
 void RadioAstronomy::applySettings(const RadioAstronomySettings& settings, bool force)
 {
     qDebug() << "RadioAstronomy::applySettings:"
@@ -733,8 +729,22 @@ void RadioAstronomy::applySettings(const RadioAstronomySettings& settings, bool 
     {
         if (!settings.m_starTracker.isEmpty())
         {
-            m_selectedPipe = getPipeEndPoint(settings.m_starTracker, m_availablePipes);
-            if (m_selectedPipe == nullptr) {
+            Feature *feature = nullptr;
+
+            for (const auto& fval : m_availableFeatures)
+            {
+                QString starTrackerText = tr("F1:%2 %3").arg(fval.m_deviceSetIndex).arg(fval.m_featureIndex).arg(fval.m_type);
+
+                if (settings.m_starTracker == starTrackerText)
+                {
+                    feature = m_availableFeatures.key(fval);
+                    break;
+                }
+            }
+
+            if (feature) {
+                m_selectedPipe = feature;
+            } else {
                 qDebug() << "RadioAstronomy::applySettings: No plugin corresponding to target " << settings.m_starTracker;
             }
         }
@@ -1199,4 +1209,110 @@ void RadioAstronomy::handleIndexInDeviceSetChanged(int index)
         .arg(m_deviceAPI->getDeviceSetIndex())
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
+}
+
+void RadioAstronomy::scanAvailableFeatures()
+{
+    qDebug("RadioAstronomy::scanAvailableFeatures");
+    MainCore *mainCore = MainCore::instance();
+    MessagePipes& messagePipes = mainCore->getMessagePipes();
+    std::vector<FeatureSet*>& featureSets = mainCore->getFeatureeSets();
+    m_availableFeatures.clear();
+
+    for (const auto& featureSet : featureSets)
+    {
+        for (int fei = 0; fei < featureSet->getNumberOfFeatures(); fei++)
+        {
+            Feature *feature = featureSet->getFeatureAt(fei);
+
+            if (RadioAstronomySettings::m_pipeURIs.contains(feature->getURI()) && !m_availableFeatures.contains(feature))
+            {
+                qDebug("RadioAstronomy::scanAvailableFeatures: register %d:%d %s (%p)",
+                    featureSet->getIndex(), fei, qPrintable(feature->getURI()), feature);
+                ObjectPipe *pipe = messagePipes.registerProducerToConsumer(feature, this, "startracker.target");
+                MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+                QObject::connect(
+                    messageQueue,
+                    &MessageQueue::messageEnqueued,
+                    this,
+                    [=](){ this->handleFeatureMessageQueue(messageQueue); },
+                    Qt::QueuedConnection
+                );
+                connect(pipe, SIGNAL(toBeDeleted(int, QObject*)), this, SLOT(handleMessagePipeToBeDeleted(int, QObject*)));
+                RadioAstronomySettings::AvailableFeature availableFeature =
+                    RadioAstronomySettings::AvailableFeature{featureSet->getIndex(), fei, feature->getIdentifier()};
+                m_availableFeatures[feature] = availableFeature;
+            }
+        }
+    }
+
+    notifyUpdateFeatures();
+}
+
+void RadioAstronomy::notifyUpdateFeatures()
+{
+    if (getMessageQueueToGUI())
+    {
+        MsgReportAvailableFeatures *msg = MsgReportAvailableFeatures::create();
+        msg->getFeatures() = m_availableFeatures.values();
+        getMessageQueueToGUI()->push(msg);
+    }
+}
+
+void RadioAstronomy::handleFeatureAdded(int featureSetIndex, Feature *feature)
+{
+    qDebug("RadioAstronomy::handleFeatureAdded: featureSetIndex: %d:%d feature: %s (%p)",
+        featureSetIndex, feature->getIndexInFeatureSet(), qPrintable(feature->getURI()), feature);
+    FeatureSet *featureSet = MainCore::instance()->getFeatureeSets()[featureSetIndex];
+
+    if (RadioAstronomySettings::m_pipeURIs.contains(feature->getURI()))
+    {
+        int fei = feature->getIndexInFeatureSet();
+
+        if (!m_availableFeatures.contains(feature))
+        {
+            MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
+            ObjectPipe *pipe = messagePipes.registerProducerToConsumer(feature, this, "startracker.target");
+            MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+            QObject::connect(
+                messageQueue,
+                &MessageQueue::messageEnqueued,
+                this,
+                [=](){ this->handleFeatureMessageQueue(messageQueue); },
+                Qt::QueuedConnection
+            );
+            connect(pipe, SIGNAL(toBeDeleted(int, QObject*)), this, SLOT(handleMessagePipeToBeDeleted(int, QObject*)));
+        }
+
+        RadioAstronomySettings::AvailableFeature availableFeature =
+            RadioAstronomySettings::AvailableFeature{featureSet->getIndex(), fei, feature->getIdentifier()};
+        m_availableFeatures[feature] = availableFeature;
+
+        notifyUpdateFeatures();
+    }
+}
+
+void RadioAstronomy::handleMessagePipeToBeDeleted(int reason, QObject* object)
+{
+    if (reason == 0) // producer (channel)
+    {
+        if (m_availableFeatures.contains((Feature*) object))
+        {
+            qDebug("RadioAstronomy::handleMessagePipeToBeDeleted: removing feature at (%p)", object);
+            m_availableFeatures.remove((Feature*) object);
+            notifyUpdateFeatures();
+        }
+    }
+}
+
+void RadioAstronomy::handleFeatureMessageQueue(MessageQueue* messageQueue)
+{
+    Message* message;
+
+    while ((message = messageQueue->pop()) != nullptr)
+    {
+        if (handleMessage(*message)) {
+            delete message;
+        }
+    }
 }

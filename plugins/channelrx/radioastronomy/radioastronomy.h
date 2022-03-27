@@ -25,12 +25,12 @@
 #include <QUdpSocket>
 #include <QThread>
 #include <QDateTime>
+#include <QHash>
 #include <QTimer>
 
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelapi.h"
 #include "util/message.h"
-#include "pipes/pipeendpoint.h"
 
 #include "radioastronomybaseband.h"
 #include "radioastronomysettings.h"
@@ -306,6 +306,23 @@ public:
         }
     };
 
+    class MsgReportAvailableFeatures : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        QList<RadioAstronomySettings::AvailableFeature>& getFeatures() { return m_availableFeatures; }
+
+        static MsgReportAvailableFeatures* create() {
+            return new MsgReportAvailableFeatures();
+        }
+
+    private:
+        QList<RadioAstronomySettings::AvailableFeature> m_availableFeatures;
+
+        MsgReportAvailableFeatures() :
+            Message()
+        {}
+    };
 
     RadioAstronomy(DeviceAPI *deviceAPI);
     virtual ~RadioAstronomy();
@@ -387,9 +404,8 @@ private:
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
     qint64 m_centerFrequency;
 
-    QList<AvailablePipeSource> m_availablePipes;
-    PipeEndPoint *m_selectedPipe;
-    QTimer m_updatePipesTimer;
+    QHash<Feature*, RadioAstronomySettings::AvailableFeature> m_availableFeatures;
+    QObject *m_selectedPipe;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
@@ -422,10 +438,11 @@ private:
     void sweepStart();
     void startCal(bool hot);
     void calComplete(MsgCalComplete* report);
+    void scanAvailableFeatures();
+    void notifyUpdateFeatures();
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
-    void updatePipes();
     void startMeasurement();
     void sweepStartMeasurement();
     void sweep1();
@@ -434,6 +451,9 @@ private slots:
     void sweepNext();
     void sweepComplete();
     void handleIndexInDeviceSetChanged(int index);
+    void handleFeatureAdded(int deviceSetIndex, Feature *feature);
+    void handleMessagePipeToBeDeleted(int reason, QObject* object);
+    void handleFeatureMessageQueue(MessageQueue* messageQueue);
 };
 
 #endif // INCLUDE_RADIOASTRONOMY_H

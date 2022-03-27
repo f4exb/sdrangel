@@ -35,6 +35,20 @@ class Serializable;
 
 struct RadioAstronomySettings
 {
+    struct AvailableFeature
+    {
+        int m_deviceSetIndex;
+        int m_featureIndex;
+        QString m_type;
+
+        AvailableFeature() = default;
+        AvailableFeature(const AvailableFeature&) = default;
+        AvailableFeature& operator=(const AvailableFeature&) = default;
+        bool operator==(const AvailableFeature& a) const {
+            return (m_deviceSetIndex == a.m_deviceSetIndex) && (m_featureIndex == a.m_featureIndex) && (m_type == a.m_type);
+        }
+    };
+
     int m_inputFrequencyOffset;
     int m_sampleRate;
     int m_rfBandwidth;

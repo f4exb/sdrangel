@@ -34,7 +34,6 @@
 #include "util/messagequeue.h"
 #include "util/httpdownloadmanager.h"
 #include "settings/rollupstate.h"
-#include "pipes/pipeendpoint.h"
 
 #include "radioastronomysettings.h"
 #include "radioastronomy.h"
@@ -212,7 +211,7 @@ private:
     RollupState m_rollupState;
     RadioAstronomySettings m_settings;
     bool m_doApplySettings;
-    QList<PipeEndPoint::AvailablePipeSource> m_availablePipes;
+    QList<RadioAstronomySettings::AvailableFeature> m_availableFeatures;
 
     int m_basebandSampleRate;
     quint64 m_centerFrequency;
@@ -322,7 +321,7 @@ private:
     void displayStreamIndex();
     void displaySpectrumLineFrequency();
     void displayRunModeSettings();
-    void updatePipeList();
+    void updateAvailableFeatures();
     void updateRotatorList();
     bool handleMessage(const Message& message);
     double degreesToSteradian(double deg) const;

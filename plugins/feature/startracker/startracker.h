@@ -21,6 +21,7 @@
 
 #include <QThread>
 #include <QNetworkRequest>
+#include <QSet>
 
 #include "feature/feature.h"
 #include "util/message.h"
@@ -160,6 +161,7 @@ private:
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
+    QSet<ChannelAPI*> m_availableChannels;
     Weather *m_weather;
     float m_solarFlux;
 
@@ -172,10 +174,14 @@ private:
     void webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const StarTrackerSettings& settings, bool force);
     void webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response);
     double applyBeam(const FITS *fits, double beamwidth, double ra, double dec, int& imgX, int& imgY) const;
+    void scanAvailableChannels();
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
     void weatherUpdated(float temperature, float pressure, float humidity);
+    void handleChannelAdded(int deviceSetIndex, ChannelAPI *channel);
+    void handleMessagePipeToBeDeleted(int reason, QObject* object);
+    void handleChannelMessageQueue(MessageQueue* messageQueue);
 };
 
 #endif // INCLUDE_FEATURE_STARTRACKER_H_

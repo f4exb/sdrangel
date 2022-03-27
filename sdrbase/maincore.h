@@ -635,19 +635,19 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        const PipeEndPoint *getPipeSource() const { return m_pipeSource; }
+        const QObject *getPipeSource() const { return m_pipeSource; }
         SWGSDRangel::SWGStarTrackerTarget *getSWGStarTrackerTarget() const { return m_swgStarTrackerTarget; }
 
-        static MsgStarTrackerTarget* create(const PipeEndPoint *pipeSource, SWGSDRangel::SWGStarTrackerTarget *swgStarTrackerTarget)
+        static MsgStarTrackerTarget* create(const QObject *pipeSource, SWGSDRangel::SWGStarTrackerTarget *swgStarTrackerTarget)
         {
             return new MsgStarTrackerTarget(pipeSource, swgStarTrackerTarget);
         }
 
     private:
-        const PipeEndPoint *m_pipeSource;
+        const QObject *m_pipeSource;
         SWGSDRangel::SWGStarTrackerTarget *m_swgStarTrackerTarget;
 
-        MsgStarTrackerTarget(const PipeEndPoint *pipeSource, SWGSDRangel::SWGStarTrackerTarget *swgStarTrackerTarget) :
+        MsgStarTrackerTarget(const QObject *pipeSource, SWGSDRangel::SWGStarTrackerTarget *swgStarTrackerTarget) :
             Message(),
             m_pipeSource(pipeSource),
             m_swgStarTrackerTarget(swgStarTrackerTarget)

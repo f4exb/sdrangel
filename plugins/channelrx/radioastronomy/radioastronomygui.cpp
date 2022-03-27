@@ -935,20 +935,19 @@ bool RadioAstronomyGUI::deserialize(const QByteArray& data)
     }
 }
 
-void RadioAstronomyGUI::updatePipeList()
+void RadioAstronomyGUI::updateAvailableFeatures()
 {
     QString currentText = ui->starTracker->currentText();
     ui->starTracker->blockSignals(true);
     ui->starTracker->clear();
-    QList<PipeEndPoint::AvailablePipeSource>::const_iterator it = m_availablePipes.begin();
 
-    for (int i = 0; it != m_availablePipes.end(); ++it, i++) {
-        ui->starTracker->addItem(it->getName());
+    for (const auto& feature : m_availableFeatures) {
+        ui->starTracker->addItem(tr("F%1:%2 %3").arg(feature.m_deviceSetIndex).arg(feature.m_featureIndex).arg(feature.m_type));
     }
 
     if (currentText.isEmpty())
     {
-        if (m_availablePipes.size() > 0) {
+        if (m_availableFeatures.size() > 0) {
             ui->starTracker->setCurrentIndex(0);
         }
     }
@@ -956,9 +955,10 @@ void RadioAstronomyGUI::updatePipeList()
     {
         ui->starTracker->setCurrentIndex(ui->starTracker->findText(currentText));
     }
-    ui->starTracker->blockSignals(false);
 
+    ui->starTracker->blockSignals(false);
     QString newText = ui->starTracker->currentText();
+
     if (currentText != newText)
     {
        m_settings.m_starTracker = newText;
@@ -979,11 +979,12 @@ bool RadioAstronomyGUI::handleMessage(const Message& message)
         updateTSys0();
         return true;
     }
-    else if (PipeEndPoint::MsgReportPipes::match(message))
+    else if (RadioAstronomy::MsgReportAvailableFeatures::match(message))
     {
-        PipeEndPoint::MsgReportPipes& report = (PipeEndPoint::MsgReportPipes&) message;
-        m_availablePipes = report.getAvailablePipes();
-        updatePipeList();
+        qDebug("RadioAstronomyGUI::handleMessage: MsgReportAvailableFeatures");
+        RadioAstronomy::MsgReportAvailableFeatures& report = (RadioAstronomy::MsgReportAvailableFeatures&) message;
+        m_availableFeatures = report.getFeatures();
+        updateAvailableFeatures();
         return true;
     }
     else if (MainCore::MsgStarTrackerTarget::match(message))
@@ -1908,22 +1909,19 @@ void RadioAstronomyGUI::on_powerTable_cellDoubleClicked(int row, int column)
     if ((column >= POWER_COL_RA) && (column >= POWER_COL_EL))
     {
         // Display target in Star Tracker
-        MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
-        QList<MessageQueue*> *messageQueues = messagePipes.getMessageQueues(m_radioAstronomy, "startracker.display");
-        if (messageQueues)
-        {
-            QList<MessageQueue*>::iterator it = messageQueues->begin();
+        QList<ObjectPipe*> starTrackerPipes;
+        MainCore::instance()->getMessagePipes().getMessagePipes(this, "startracker.display", starTrackerPipes);
 
-            for (; it != messageQueues->end(); ++it)
-            {
-                SWGSDRangel::SWGStarTrackerDisplaySettings *swgSettings = new SWGSDRangel::SWGStarTrackerDisplaySettings();
-                QDateTime dt(ui->powerTable->item(row, POWER_COL_DATE)->data(Qt::DisplayRole).toDate(),
-                             ui->powerTable->item(row, POWER_COL_TIME)->data(Qt::DisplayRole).toTime());
-                swgSettings->setDateTime(new QString(dt.toString(Qt::ISODateWithMs)));
-                swgSettings->setAzimuth(ui->powerTable->item(row, POWER_COL_AZ)->data(Qt::DisplayRole).toFloat());
-                swgSettings->setElevation(ui->powerTable->item(row, POWER_COL_EL)->data(Qt::DisplayRole).toFloat());
-                (*it)->push(MainCore::MsgStarTrackerDisplaySettings::create(m_radioAstronomy, swgSettings));
-            }
+        for (const auto& pipe : starTrackerPipes)
+        {
+            MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+            SWGSDRangel::SWGStarTrackerDisplaySettings *swgSettings = new SWGSDRangel::SWGStarTrackerDisplaySettings();
+            QDateTime dt(ui->powerTable->item(row, POWER_COL_DATE)->data(Qt::DisplayRole).toDate(),
+                            ui->powerTable->item(row, POWER_COL_TIME)->data(Qt::DisplayRole).toTime());
+            swgSettings->setDateTime(new QString(dt.toString(Qt::ISODateWithMs)));
+            swgSettings->setAzimuth(ui->powerTable->item(row, POWER_COL_AZ)->data(Qt::DisplayRole).toFloat());
+            swgSettings->setElevation(ui->powerTable->item(row, POWER_COL_EL)->data(Qt::DisplayRole).toFloat());
+            messageQueue->push(MainCore::MsgStarTrackerDisplaySettings::create(m_radioAstronomy, swgSettings));
         }
     }
     else
@@ -2047,6 +2045,7 @@ RadioAstronomyGUI::RadioAstronomyGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     m_bLAB(0.0f),
     m_downloadingLAB(false)
 {
+    qDebug("RadioAstronomyGUI::RadioAstronomyGUI");
     ui->setupUi(this);
 
     setAttribute(Qt::WA_DeleteOnClose, true);
@@ -4281,21 +4280,18 @@ void RadioAstronomyGUI::showLoSMarker(int row)
 void RadioAstronomyGUI::updateLoSMarker(const QString& name, float l, float b, float d)
 {
     // Send to Star Tracker
-    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
-    QList<MessageQueue*> *messageQueues = messagePipes.getMessageQueues(m_radioAstronomy, "startracker.display");
-    if (messageQueues)
-    {
-        QList<MessageQueue*>::iterator it = messageQueues->begin();
+    QList<ObjectPipe*> starTrackerPipes;
+    MainCore::instance()->getMessagePipes().getMessagePipes(this, "startracker.display", starTrackerPipes);
 
-        for (; it != messageQueues->end(); ++it)
-        {
-            SWGSDRangel::SWGStarTrackerDisplayLoSSettings *swgSettings = new SWGSDRangel::SWGStarTrackerDisplayLoSSettings();
-            swgSettings->setName(new QString(name));
-            swgSettings->setL(l);
-            swgSettings->setB(b);
-            swgSettings->setD(d);
-            (*it)->push(MainCore::MsgStarTrackerDisplayLoSSettings::create(m_radioAstronomy, swgSettings));
-        }
+    for (const auto& pipe : starTrackerPipes)
+    {
+        MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+        SWGSDRangel::SWGStarTrackerDisplayLoSSettings *swgSettings = new SWGSDRangel::SWGStarTrackerDisplayLoSSettings();
+        swgSettings->setName(new QString(name));
+        swgSettings->setL(l);
+        swgSettings->setB(b);
+        swgSettings->setD(d);
+        messageQueue->push(MainCore::MsgStarTrackerDisplayLoSSettings::create(m_radioAstronomy, swgSettings));
     }
 }
 
@@ -4682,21 +4678,19 @@ void RadioAstronomyGUI::on_spectrumIndex_valueChanged(int value)
         ui->powerTable->selectRow(value);
         ui->powerTable->scrollTo(ui->powerTable->model()->index(value, 0));
         ui->spectrumDateTime->setDateTime(m_fftMeasurements[value]->m_dateTime);
-        // Display target in Star Tracker
-        MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
-        QList<MessageQueue*> *messageQueues = messagePipes.getMessageQueues(m_radioAstronomy, "startracker.display");
-        if (messageQueues)
-        {
-            QList<MessageQueue*>::iterator it = messageQueues->begin();
 
-            for (; it != messageQueues->end(); ++it)
-            {
-                SWGSDRangel::SWGStarTrackerDisplaySettings *swgSettings = new SWGSDRangel::SWGStarTrackerDisplaySettings();
-                swgSettings->setDateTime(new QString(m_fftMeasurements[value]->m_dateTime.toString(Qt::ISODateWithMs)));
-                swgSettings->setAzimuth(m_fftMeasurements[value]->m_azimuth);
-                swgSettings->setElevation(m_fftMeasurements[value]->m_elevation);
-                (*it)->push(MainCore::MsgStarTrackerDisplaySettings::create(m_radioAstronomy, swgSettings));
-            }
+        // Display target in Star Tracker
+        QList<ObjectPipe*> starTrackerPipes;
+        MainCore::instance()->getMessagePipes().getMessagePipes(this, "startracker.display", starTrackerPipes);
+
+        for (const auto& pipe : starTrackerPipes)
+        {
+            MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+            SWGSDRangel::SWGStarTrackerDisplaySettings *swgSettings = new SWGSDRangel::SWGStarTrackerDisplaySettings();
+            swgSettings->setDateTime(new QString(m_fftMeasurements[value]->m_dateTime.toString(Qt::ISODateWithMs)));
+            swgSettings->setAzimuth(m_fftMeasurements[value]->m_azimuth);
+            swgSettings->setElevation(m_fftMeasurements[value]->m_elevation);
+            messageQueue->push(MainCore::MsgStarTrackerDisplaySettings::create(m_radioAstronomy, swgSettings));
         }
     }
 }
