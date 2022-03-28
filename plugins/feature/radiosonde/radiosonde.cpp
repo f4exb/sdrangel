@@ -55,12 +55,22 @@ Radiosonde::Radiosonde(WebAPIAdapterInterface *webAPIAdapterInterface) :
         &Radiosonde::networkManagerFinished
     );
     scanAvailableChannels();
-    connect(MainCore::instance(), SIGNAL(channelAdded(int, ChannelAPI*)), this, SLOT(handleChannelAdded(int, ChannelAPI*)));
+    QObject::connect(
+        MainCore::instance(),
+        &MainCore::channelAdded,
+        this,
+        &Radiosonde::handleChannelAdded
+    );
 }
 
 Radiosonde::~Radiosonde()
 {
-    disconnect(MainCore::instance(), SIGNAL(channelAdded(int, ChannelAPI*)), this, SLOT(handleChannelAdded(int, ChannelAPI*)));
+    QObject::disconnect(
+        MainCore::instance(),
+        &MainCore::channelAdded,
+        this,
+        &Radiosonde::handleChannelAdded
+    );
     QObject::disconnect(
         m_networkManager,
         &QNetworkAccessManager::finished,
@@ -356,7 +366,12 @@ void Radiosonde::scanAvailableChannels()
                         [=](){ this->handleChannelMessageQueue(messageQueue); },
                         Qt::QueuedConnection
                     );
-                    connect(pipe, SIGNAL(toBeDeleted(int, QObject*)), this, SLOT(handleMessagePipeToBeDeleted(int, QObject*)));
+                    QObject::connect(
+                        pipe,
+                        &ObjectPipe::toBeDeleted,
+                        this,
+                        &Radiosonde::handleMessagePipeToBeDeleted
+                    );
                     m_availableChannels.insert(channel);
                 }
             }
@@ -386,7 +401,12 @@ void Radiosonde::handleChannelAdded(int deviceSetIndex, ChannelAPI *channel)
                 [=](){ this->handleChannelMessageQueue(messageQueue); },
                 Qt::QueuedConnection
             );
-            connect(pipe, SIGNAL(toBeDeleted(int, QObject*)), this, SLOT(handleMessagePipeToBeDeleted(int, QObject*)));
+            QObject::connect(
+                pipe,
+                &ObjectPipe::toBeDeleted,
+                this,
+                &Radiosonde::handleMessagePipeToBeDeleted
+            );
             m_availableChannels.insert(channel);
         }
     }
@@ -394,13 +414,10 @@ void Radiosonde::handleChannelAdded(int deviceSetIndex, ChannelAPI *channel)
 
 void Radiosonde::handleMessagePipeToBeDeleted(int reason, QObject* object)
 {
-    if (reason == 0) // producer (channel)
+    if ((reason == 0) && m_availableChannels.contains((ChannelAPI*) object)) // producer (channel)
     {
-        if (m_availableChannels.contains((ChannelAPI*) object))
-        {
-            qDebug("Radiosonde::handleMessagePipeToBeDeleted: removing channel at (%p)", object);
-            m_availableChannels.remove((ChannelAPI*) object);
-        }
+        qDebug("Radiosonde::handleMessagePipeToBeDeleted: removing channel at (%p)", object);
+        m_availableChannels.remove((ChannelAPI*) object);
     }
 }
 

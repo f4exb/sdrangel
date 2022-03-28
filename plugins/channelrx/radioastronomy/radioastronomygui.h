@@ -322,7 +322,7 @@ private:
     void displaySpectrumLineFrequency();
     void displayRunModeSettings();
     void updateAvailableFeatures();
-    void updateRotatorList();
+    void updateRotatorList(const QList<RadioAstronomySettings::AvailableFeature>& rotators);
     bool handleMessage(const Message& message);
     double degreesToSteradian(double deg) const;
     double hpbwToSteradians(double hpbw) const;

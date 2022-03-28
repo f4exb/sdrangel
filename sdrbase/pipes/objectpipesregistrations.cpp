@@ -45,13 +45,32 @@ ObjectPipe *ObjectPipesRegistrations::registerProducerToConsumer(const QObject *
 
     for (auto& pipe : m_pipes) // check if pipe exists already - there is a unique pipe per producer, consumer and type
     {
-        if ((producer == pipe->m_producer) && (consumer == pipe->m_consumer) && (typeId == pipe->m_typeId)) {
+        if ((producer == pipe->m_producer) && (consumer == pipe->m_consumer) && (typeId == pipe->m_typeId))
+        {
+            qDebug("ObjectPipesRegistrations::registerProducerToConsumer: return existing pipe %p %p %s %s",
+                producer, consumer, qPrintable(pipe->m_element->objectName()), qPrintable(type));
+            pipe->unsetToBeDeleted();
+            if (!m_producerPipes[producer].contains(pipe)) {
+                m_producerPipes[producer].push_back(pipe);
+            }
+            if (!m_consumerPipes[consumer].contains(pipe)) {
+                m_consumerPipes[consumer].push_back(pipe);
+            }
+            if (!m_typeIdPipes[typeId].contains(pipe)) {
+                m_typeIdPipes[typeId].push_back(pipe);
+            }
+            if (!m_producerAndTypeIdPipes[std::make_tuple(producer, typeId)].contains(pipe)) {
+                m_producerAndTypeIdPipes[std::make_tuple(producer, typeId)].push_back(pipe);
+            }
+            if (!m_pipeMap.contains(std::make_tuple(producer, consumer, typeId))) {
+                m_pipeMap[std::make_tuple(producer, consumer, typeId)] = pipe;
+            }
             return pipe;
         }
     }
 
     QObject *element = m_objectPipeElementsStore->createElement();
-    qDebug("ObjectPipesRegistrations::registerProducerToConsumer: %p %p %s %s",
+    qDebug("ObjectPipesRegistrations::registerProducerToConsumer: new pipe %p %p %s %s",
         producer, consumer, qPrintable(element->objectName()), qPrintable(type));
     m_pipes.push_back(new ObjectPipe());
     m_pipes.back()->m_pipeId = ++m_pipeId;

@@ -580,26 +580,21 @@ void StarTrackerWorker::update()
         }
     }
 
-    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
-    QList<MessageQueue*>* messageQueues;
-
     // Send Az/El to Rotator Controllers
     // Unless we're receiving settings to display from a Radio Astronomy plugins
     if (!m_settings.m_link)
     {
-        messageQueues = messagePipes.getMessageQueues(m_starTracker, "target");
-        if (messageQueues)
-        {
-            QList<MessageQueue*>::iterator it = messageQueues->begin();
+        QList<ObjectPipe*> rotatorPipes;
+        MainCore::instance()->getMessagePipes().getMessagePipes(m_starTracker, "target", rotatorPipes);
 
-            for (; it != messageQueues->end(); ++it)
-            {
-                SWGSDRangel::SWGTargetAzimuthElevation *swgTarget = new SWGSDRangel::SWGTargetAzimuthElevation();
-                swgTarget->setName(new QString(m_settings.m_target));
-                swgTarget->setAzimuth(aa.az);
-                swgTarget->setElevation(aa.alt);
-                (*it)->push(MainCore::MsgTargetAzimuthElevation::create(m_starTracker, swgTarget));
-            }
+        for (const auto& pipe : rotatorPipes)
+        {
+            MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+            SWGSDRangel::SWGTargetAzimuthElevation *swgTarget = new SWGSDRangel::SWGTargetAzimuthElevation();
+            swgTarget->setName(new QString(m_settings.m_target));
+            swgTarget->setAzimuth(aa.az);
+            swgTarget->setElevation(aa.alt);
+            messageQueue->push(MainCore::MsgTargetAzimuthElevation::create(m_starTracker, swgTarget));
         }
     }
 
@@ -608,7 +603,7 @@ void StarTrackerWorker::update()
     if (!m_settings.m_link)
     {
         QList<ObjectPipe*> starTrackerPipes;
-        MainCore::instance()->getMessagePipes().getMessagePipes(this, "startracker.target", starTrackerPipes);
+        MainCore::instance()->getMessagePipes().getMessagePipes(m_starTracker, "startracker.target", starTrackerPipes);
 
         for (const auto& pipe : starTrackerPipes)
         {
@@ -641,7 +636,10 @@ void StarTrackerWorker::update()
     // Send to Map
     if (m_settings.m_drawSunOnMap || m_settings.m_drawMoonOnMap || m_settings.m_drawStarOnMap)
     {
+        MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
+        QList<MessageQueue*>* messageQueues;
         messageQueues = messagePipes.getMessageQueues(m_starTracker, "mapitems");
+
         if (messageQueues)
         {
             // Different between GMST(Lst at Greenwich) and RA

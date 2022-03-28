@@ -18,7 +18,6 @@
 #include <QGeoRectangle>
 
 #include "channel/channelwebapiutils.h"
-#include "pipes/messagepipeslegacy.h"
 #include "maincore.h"
 
 #include "mapmodel.h"
@@ -358,20 +357,17 @@ void MapModel::updateTarget()
     azEl->calculate();
 
     // Send to Rotator Controllers
-    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
-    QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(m_gui->getMap(), "target");
-    if (mapMessageQueues)
-    {
-        QList<MessageQueue*>::iterator it = mapMessageQueues->begin();
+    QList<ObjectPipe*> rotatorPipes;
+    MainCore::instance()->getMessagePipes().getMessagePipes(this, "target", rotatorPipes);
 
-        for (; it != mapMessageQueues->end(); ++it)
-        {
-            SWGSDRangel::SWGTargetAzimuthElevation *swgTarget = new SWGSDRangel::SWGTargetAzimuthElevation();
-            swgTarget->setName(new QString(m_items[m_target]->m_name));
-            swgTarget->setAzimuth(azEl->getAzimuth());
-            swgTarget->setElevation(azEl->getElevation());
-            (*it)->push(MainCore::MsgTargetAzimuthElevation::create(m_gui->getMap(), swgTarget));
-        }
+    for (const auto& pipe : rotatorPipes)
+    {
+        MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+        SWGSDRangel::SWGTargetAzimuthElevation *swgTarget = new SWGSDRangel::SWGTargetAzimuthElevation();
+        swgTarget->setName(new QString(m_items[m_target]->m_name));
+        swgTarget->setAzimuth(azEl->getAzimuth());
+        swgTarget->setElevation(azEl->getElevation());
+        messageQueue->push(MainCore::MsgTargetAzimuthElevation::create(m_gui->getMap(), swgTarget));
     }
 }
 

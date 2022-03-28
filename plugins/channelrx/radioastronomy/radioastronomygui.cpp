@@ -942,7 +942,7 @@ void RadioAstronomyGUI::updateAvailableFeatures()
     ui->starTracker->clear();
 
     for (const auto& feature : m_availableFeatures) {
-        ui->starTracker->addItem(tr("F%1:%2 %3").arg(feature.m_deviceSetIndex).arg(feature.m_featureIndex).arg(feature.m_type));
+        ui->starTracker->addItem(tr("F%1:%2 %3").arg(feature.m_featureSetIndex).arg(feature.m_featureIndex).arg(feature.m_type));
     }
 
     if (currentText.isEmpty())
@@ -1071,6 +1071,12 @@ bool RadioAstronomyGUI::handleMessage(const Message& message)
     {
         RadioAstronomy::MsgSensorMeasurement& measurement = (RadioAstronomy::MsgSensorMeasurement&) message;
         sensorMeasurementReceived(measurement);
+        return true;
+    }
+    else if (RadioAstronomy::MsgReportAvailableRotators::match(message))
+    {
+        RadioAstronomy::MsgReportAvailableRotators& report = (RadioAstronomy::MsgReportAvailableRotators&) message;
+        updateRotatorList(report.getFeatures());
         return true;
     }
 
@@ -2208,8 +2214,6 @@ RadioAstronomyGUI::RadioAstronomyGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     ui->sweepStartDateTime->setMinimumDateTime(QDateTime::currentDateTime());
     ui->spectrumDateTime->setDateTime(QDateTime::currentDateTime());
 
-    updateRotatorList();
-
     ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
 
     displaySettings();
@@ -2581,52 +2585,33 @@ void RadioAstronomyGUI::tick()
         ui->channelPower->setText(QString::number(powDbAvg, 'f', 1));
     }
 
-    if (m_tickCount % 20 == 0) { // 1s
-        updateRotatorList();
-    }
-
     m_tickCount++;
 }
 
-void RadioAstronomyGUI::updateRotatorList()
+void RadioAstronomyGUI::updateRotatorList(const QList<RadioAstronomySettings::AvailableFeature>& rotators)
 {
     // Update list of rotators
-    std::vector<FeatureSet*> featureSets = MainCore::instance()->getFeatureeSets();
-    for (unsigned int i = 0; i < featureSets.size(); i++)
+    ui->rotator->blockSignals(true);
+    ui->rotator->clear();
+    ui->rotator->addItem("None");
+
+    for (const auto& rotator : rotators)
     {
-        FeatureSet* featureSet = featureSets[i];
-        for (int j = 0; j < featureSet->getNumberOfFeatures(); j++)
-        {
-            const Feature* feature = featureSet->getFeatureAt(j);
-            if (feature->getURI() == "sdrangel.feature.gs232controller")
-            {
-                // Add if it doesn't already exist
-                QString name = QString("F%1:%2 GS232Controller").arg(i).arg(j);
-                if (ui->rotator->findText(name) == -1)
-                {
-                    ui->rotator->addItem(name);
-                    // Rotator feature can be created after this plugin, so select it
-                    // if the chosen rotator appears
-                    if (name == m_settings.m_rotator) {
-                        ui->rotator->setCurrentIndex(ui->rotator->findText(name));
-                    }
-                }
-            }
-            else
-            {
-                // Try to remove
-                QString prefix = QString("F%1:%2").arg(i).arg(j);
-                for (int k = 0; k < ui->rotator->count(); k++)
-                {
-                    if (ui->rotator->itemText(k).startsWith(prefix))
-                    {
-                        ui->rotator->removeItem(k);
-                        break;
-                    }
-                }
-            }
-        }
+        QString name = QString("F%1:%2 %3").arg(rotator.m_featureSetIndex).arg(rotator.m_featureIndex).arg(rotator.m_type);
+        ui->rotator->addItem(name);
     }
+
+    // Rotator feature can be created after this plugin, so select it
+    // if the chosen rotator appears
+    int rotatorIndex = ui->rotator->findText(m_settings.m_rotator);
+
+    if (rotatorIndex >= 0) {
+        ui->rotator->setCurrentIndex(rotatorIndex);
+    } else {
+        ui->rotator->setCurrentIndex(0); // return to None
+    }
+
+    ui->rotator->blockSignals(false);
 }
 
 void RadioAstronomyGUI::on_fftSize_currentIndexChanged(int index)

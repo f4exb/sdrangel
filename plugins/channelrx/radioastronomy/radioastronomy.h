@@ -324,6 +324,24 @@ public:
         {}
     };
 
+    class MsgReportAvailableRotators : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        QList<RadioAstronomySettings::AvailableFeature>& getFeatures() { return m_availableFeatures; }
+
+        static MsgReportAvailableRotators* create() {
+            return new MsgReportAvailableRotators();
+        }
+
+    private:
+        QList<RadioAstronomySettings::AvailableFeature> m_availableFeatures;
+
+        MsgReportAvailableRotators() :
+            Message()
+        {}
+    };
+
     RadioAstronomy(DeviceAPI *deviceAPI);
     virtual ~RadioAstronomy();
     virtual void destroy() { delete this; }
@@ -405,6 +423,7 @@ private:
     qint64 m_centerFrequency;
 
     QHash<Feature*, RadioAstronomySettings::AvailableFeature> m_availableFeatures;
+    QHash<Feature*, RadioAstronomySettings::AvailableFeature> m_rotators;
     QObject *m_selectedPipe;
 
     QNetworkAccessManager *m_networkManager;
@@ -440,6 +459,7 @@ private:
     void calComplete(MsgCalComplete* report);
     void scanAvailableFeatures();
     void notifyUpdateFeatures();
+    void notifyUpdateRotators();
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
@@ -451,7 +471,8 @@ private slots:
     void sweepNext();
     void sweepComplete();
     void handleIndexInDeviceSetChanged(int index);
-    void handleFeatureAdded(int deviceSetIndex, Feature *feature);
+    void handleFeatureAdded(int featureSetIndex, Feature *feature);
+    void handleFeatureRemoved(int featureSetIndex, Feature *feature);
     void handleMessagePipeToBeDeleted(int reason, QObject* object);
     void handleFeatureMessageQueue(MessageQueue* messageQueue);
 };

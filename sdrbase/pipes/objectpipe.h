@@ -31,6 +31,7 @@ public:
     ObjectPipe& operator=(const ObjectPipe&) = default;
 
     void setToBeDeleted(int reason, QObject *object);
+    void unsetToBeDeleted();
     int getGCCount() const;
     int decreaseGCCount();
 

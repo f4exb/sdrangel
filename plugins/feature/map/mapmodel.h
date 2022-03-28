@@ -23,7 +23,6 @@
 #include <QColor>
 
 #include "util/azel.h"
-#include "pipes/pipeendpoint.h"
 #include "mapsettings.h"
 #include "cesiuminterface.h"
 
@@ -32,6 +31,7 @@
 class MapModel;
 class MapGUI;
 class CZML;
+class PipeEndPoint;
 
 // Information required about each item displayed on the map
 class MapItem {

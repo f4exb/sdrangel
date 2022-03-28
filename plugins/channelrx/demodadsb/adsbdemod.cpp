@@ -772,21 +772,17 @@ void ADSBDemod::setTarget(const QString& name, float targetAzimuth, float target
     m_targetAzElValid = true;
 
     // Send to Rotator Controllers
-    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
-    QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(this, "target");
+    QList<ObjectPipe*> rotatorPipes;
+    MainCore::instance()->getMessagePipes().getMessagePipes(this, "target", rotatorPipes);
 
-    if (mapMessageQueues)
+    for (const auto& pipe : rotatorPipes)
     {
-        QList<MessageQueue*>::iterator it = mapMessageQueues->begin();
-
-        for (; it != mapMessageQueues->end(); ++it)
-        {
-            SWGSDRangel::SWGTargetAzimuthElevation *swgTarget = new SWGSDRangel::SWGTargetAzimuthElevation();
-            swgTarget->setName(new QString(name));
-            swgTarget->setAzimuth(targetAzimuth);
-            swgTarget->setElevation(targetElevation);
-            (*it)->push(MainCore::MsgTargetAzimuthElevation::create(this, swgTarget));
-        }
+        MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+        SWGSDRangel::SWGTargetAzimuthElevation *swgTarget = new SWGSDRangel::SWGTargetAzimuthElevation();
+        swgTarget->setName(new QString(name));
+        swgTarget->setAzimuth(targetAzimuth);
+        swgTarget->setElevation(targetElevation);
+        messageQueue->push(MainCore::MsgTargetAzimuthElevation::create(this, swgTarget));
     }
 }
 

@@ -83,11 +83,11 @@ bool GS232ControllerGUI::handleMessage(const Message& message)
 
         return true;
     }
-    else if (PipeEndPoint::MsgReportPipes::match(message))
+    else if (GS232Controller::MsgReportAvailableChannelOrFeatures::match(message))
     {
-        PipeEndPoint::MsgReportPipes& report = (PipeEndPoint::MsgReportPipes&) message;
-        m_availablePipes = report.getAvailablePipes();
-        updatePipeList();
+        GS232Controller::MsgReportAvailableChannelOrFeatures& report =
+            (GS232Controller::MsgReportAvailableChannelOrFeatures&) message;
+        updatePipeList(report.getItems());
         return true;
     }
     else if (GS232ControllerReport::MsgReportAzAl::match(message))
@@ -232,41 +232,56 @@ void GS232ControllerGUI::updateSerialPortList()
     }
 }
 
-void GS232ControllerGUI::updatePipeList()
+void GS232ControllerGUI::updatePipeList(const QList<GS232ControllerSettings::AvailableChannelOrFeature>& sources)
 {
     QString currentText = ui->sources->currentText();
+    QString newText;
     ui->sources->blockSignals(true);
     ui->sources->clear();
-    QList<PipeEndPoint::AvailablePipeSource>::const_iterator it = m_availablePipes.begin();
 
-    for (int i = 0; it != m_availablePipes.end(); ++it, i++)
+    for (const auto& source : sources)
     {
-        ui->sources->addItem(it->getName());
+        QString name = tr("%1%2:%3 %4")
+            .arg(source.m_kind)
+            .arg(source.m_superIndex)
+            .arg(source.m_index)
+            .arg(source.m_type);
+        ui->sources->addItem(name);
     }
 
-    if (currentText.isEmpty())
+    int index = ui->sources->findText(m_settings.m_source);
+    ui->sources->setCurrentIndex(index);
+
+    if (index < 0) // current source is not found
     {
-        // Source feature may be loaded after this, so may not have existed when
-        // displaySettings was called
-        if (m_availablePipes.size() > 0) {
-            ui->sources->setCurrentIndex(ui->sources->findText(m_settings.m_source));
-        }
+        m_settings.m_source = "";
+        ui->targetName->setText("");
+        applySettings();
     }
-    else
-    {
-        ui->sources->setCurrentIndex(ui->sources->findText(currentText));
-    }
+
+    // if (currentText.isEmpty())
+    // {
+    //     // Source feature may be loaded after this, so may not have existed when
+    //     // displaySettings was called
+    //     if (sources.size() > 0) {
+    //         ui->sources->setCurrentIndex(ui->sources->findText(m_settings.m_source));
+    //     }
+    // }
+    // else
+    // {
+    //     ui->sources->setCurrentIndex(ui->sources->findText(currentText));
+    // }
 
     ui->sources->blockSignals(false);
 
-    QString newText = ui->sources->currentText();
+    // QString newText = ui->sources->currentText();
 
-    if (currentText != newText)
-    {
-       m_settings.m_source = newText;
-       ui->targetName->setText("");
-       applySettings();
-    }
+    // if (currentText != newText)
+    // {
+    //    m_settings.m_source = newText;
+    //    ui->targetName->setText("");
+    //    applySettings();
+    // }
 }
 
 void GS232ControllerGUI::leaveEvent(QEvent*)

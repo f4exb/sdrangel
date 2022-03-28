@@ -23,7 +23,6 @@
 
 #include "feature/featuregui.h"
 #include "util/messagequeue.h"
-#include "pipes/pipeendpoint.h"
 #include "settings/rollupstate.h"
 
 #include "gs232controllersettings.h"
@@ -54,7 +53,6 @@ private:
     GS232ControllerSettings m_settings;
     RollupState m_rollupState;
     bool m_doApplySettings;
-    QList<PipeEndPoint::AvailablePipeSource> m_availablePipes;
 
     GS232Controller* m_gs232Controller;
     MessageQueue m_inputMessageQueue;
@@ -70,7 +68,7 @@ private:
     void displaySettings();
     void updateConnectionWidgets();
     void updateDecimals(GS232ControllerSettings::Protocol protocol);
-    void updatePipeList();
+    void updatePipeList(const QList<GS232ControllerSettings::AvailableChannelOrFeature>& sources);
     void updateSerialPortList();
     bool handleMessage(const Message& message);
 

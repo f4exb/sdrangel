@@ -69,12 +69,22 @@ StarTracker::StarTracker(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_temps.append(new FITS(":/startracker/startracker/1420mhz_ra_dec.fits"));
     m_spectralIndex = new FITS(":/startracker/startracker/408mhz_ra_dec_spectral_index.fits");
     scanAvailableChannels();
-    connect(MainCore::instance(), SIGNAL(channelAdded(int, ChannelAPI*)), this, SLOT(handleChannelAdded(int, ChannelAPI*)));
+    QObject::connect(
+        MainCore::instance(),
+        &MainCore::channelAdded,
+        this,
+        &StarTracker::handleChannelAdded
+    );
 }
 
 StarTracker::~StarTracker()
 {
-    disconnect(MainCore::instance(), SIGNAL(channelAdded(int, ChannelAPI*)), this, SLOT(handleChannelAdded(int, ChannelAPI*)));
+    QObject::disconnect(
+        MainCore::instance(),
+        &MainCore::channelAdded,
+        this,
+        &StarTracker::handleChannelAdded
+    );
     QObject::disconnect(
         m_networkManager,
         &QNetworkAccessManager::finished,
@@ -918,7 +928,12 @@ void StarTracker::scanAvailableChannels()
                         [=](){ this->handleChannelMessageQueue(messageQueue); },
                         Qt::QueuedConnection
                     );
-                    connect(pipe, SIGNAL(toBeDeleted(int, QObject*)), this, SLOT(handleMessagePipeToBeDeleted(int, QObject*)));
+                    QObject::connect(
+                        pipe,
+                        &ObjectPipe::toBeDeleted,
+                        this,
+                        &StarTracker::handleMessagePipeToBeDeleted
+                    );
                     m_availableChannels.insert(channel);
                 }
             }
@@ -947,7 +962,12 @@ void StarTracker::handleChannelAdded(int deviceSetIndex, ChannelAPI *channel)
                 [=](){ this->handleChannelMessageQueue(messageQueue); },
                 Qt::QueuedConnection
             );
-            connect(pipe, SIGNAL(toBeDeleted(int, QObject*)), this, SLOT(handleMessagePipeToBeDeleted(int, QObject*)));
+            QObject::connect(
+                pipe,
+                &ObjectPipe::toBeDeleted,
+                this,
+                &StarTracker::handleMessagePipeToBeDeleted
+            );
             m_availableChannels.insert(channel);
         }
     }
@@ -955,13 +975,10 @@ void StarTracker::handleChannelAdded(int deviceSetIndex, ChannelAPI *channel)
 
 void StarTracker::handleMessagePipeToBeDeleted(int reason, QObject* object)
 {
-    if (reason == 0) // producer (channel)
+    if ((reason == 0) && m_availableChannels.contains((ChannelAPI*) object)) // producer (channel)
     {
-        if (m_availableChannels.contains((ChannelAPI*) object))
-        {
-            qDebug("StarTracker::handleMessagePipeToBeDeleted: removing channel at (%p)", object);
-            m_availableChannels.remove((ChannelAPI*) object);
-        }
+        qDebug("StarTracker::handleMessagePipeToBeDeleted: removing channel at (%p)", object);
+        m_availableChannels.remove((ChannelAPI*) object);
     }
 }
 

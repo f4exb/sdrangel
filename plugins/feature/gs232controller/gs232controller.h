@@ -21,7 +21,7 @@
 
 #include <QThread>
 #include <QNetworkRequest>
-#include <QTimer>
+#include <QHash>
 
 #include "feature/feature.h"
 #include "util/message.h"
@@ -101,6 +101,24 @@ public:
         {}
     };
 
+    class MsgReportAvailableChannelOrFeatures : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        QList<GS232ControllerSettings::AvailableChannelOrFeature>& getItems() { return m_availableChannelOrFeatures; }
+
+        static MsgReportAvailableChannelOrFeatures* create() {
+            return new MsgReportAvailableChannelOrFeatures();
+        }
+
+    private:
+        QList<GS232ControllerSettings::AvailableChannelOrFeature> m_availableChannelOrFeatures;
+
+        MsgReportAvailableChannelOrFeatures() :
+            Message()
+        {}
+    };
+
     GS232Controller(WebAPIAdapterInterface *webAPIAdapterInterface);
     virtual ~GS232Controller();
     virtual void destroy() { delete this; }
@@ -154,9 +172,8 @@ private:
     QThread m_thread;
     GS232ControllerWorker *m_worker;
     GS232ControllerSettings m_settings;
-    QList<AvailablePipeSource> m_availablePipes;
-    PipeEndPoint *m_selectedPipe;
-    QTimer m_updatePipesTimer;
+    QHash<QObject*, GS232ControllerSettings::AvailableChannelOrFeature> m_availableChannelOrFeatures;
+    QObject *m_selectedPipe;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
@@ -169,10 +186,18 @@ private:
     void applySettings(const GS232ControllerSettings& settings, bool force = false);
     void webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const GS232ControllerSettings& settings, bool force);
     void webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response);
+    void scanAvailableChannelsAndFeatures();
+    void notifyUpdate();
+    void registerPipe(QObject *object);
 
 private slots:
-    void updatePipes();
     void networkManagerFinished(QNetworkReply *reply);
+    void handleFeatureAdded(int featureSetIndex, Feature *feature);
+    void handleChannelAdded(int deviceSetIndex, ChannelAPI *channel);
+    void handleFeatureRemoved(int featureSetIndex, Feature *feature);
+    void handleChannelRemoved(int deviceSetIndex, ChannelAPI *feature);
+    void handleMessagePipeToBeDeleted(int reason, QObject* object);
+    void handlePipeMessageQueue(MessageQueue* messageQueue);
 };
 
 #endif // INCLUDE_FEATURE_GS232CONTROLLER_H_

@@ -405,20 +405,18 @@ void SatelliteTrackerWorker::update()
                         azimuth = std::fmod(azimuth + 180.0, 360.0);
                         elevation = 180.0 - elevation;
                     }
-                    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
-                    QList<MessageQueue*> *rotatorMessageQueues = messagePipes.getMessageQueues(m_satelliteTracker, "target");
-                    if (rotatorMessageQueues)
-                    {
-                        QList<MessageQueue*>::iterator it = rotatorMessageQueues->begin();
 
-                        for (; it != rotatorMessageQueues->end(); ++it)
-                        {
-                            SWGSDRangel::SWGTargetAzimuthElevation *swgTarget = new SWGSDRangel::SWGTargetAzimuthElevation();
-                            swgTarget->setName(new QString(m_settings.m_target));
-                            swgTarget->setAzimuth(azimuth);
-                            swgTarget->setElevation(elevation);
-                            (*it)->push(MainCore::MsgTargetAzimuthElevation::create(m_satelliteTracker, swgTarget));
-                        }
+                    QList<ObjectPipe*> rotatorPipes;
+                    MainCore::instance()->getMessagePipes().getMessagePipes(m_satelliteTracker, "target", rotatorPipes);
+
+                    for (const auto& pipe : rotatorPipes)
+                    {
+                        MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+                        SWGSDRangel::SWGTargetAzimuthElevation *swgTarget = new SWGSDRangel::SWGTargetAzimuthElevation();
+                        swgTarget->setName(new QString(m_settings.m_target));
+                        swgTarget->setAzimuth(azimuth);
+                        swgTarget->setElevation(elevation);
+                        messageQueue->push(MainCore::MsgTargetAzimuthElevation::create(m_satelliteTracker, swgTarget));
                     }
                 }
 

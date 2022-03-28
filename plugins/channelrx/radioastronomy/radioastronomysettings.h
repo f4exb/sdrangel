@@ -37,7 +37,7 @@ struct RadioAstronomySettings
 {
     struct AvailableFeature
     {
-        int m_deviceSetIndex;
+        int m_featureSetIndex;
         int m_featureIndex;
         QString m_type;
 
@@ -45,7 +45,7 @@ struct RadioAstronomySettings
         AvailableFeature(const AvailableFeature&) = default;
         AvailableFeature& operator=(const AvailableFeature&) = default;
         bool operator==(const AvailableFeature& a) const {
-            return (m_deviceSetIndex == a.m_deviceSetIndex) && (m_featureIndex == a.m_featureIndex) && (m_type == a.m_type);
+            return (m_featureSetIndex == a.m_featureSetIndex) && (m_featureIndex == a.m_featureIndex) && (m_type == a.m_type);
         }
     };
 

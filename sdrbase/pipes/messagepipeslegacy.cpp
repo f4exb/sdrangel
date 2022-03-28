@@ -58,7 +58,7 @@ MessageQueue *MessagePipesLegacy::unregisterChannelToFeature(const PipeEndPoint 
 
 QList<MessageQueue*>* MessagePipesLegacy::getMessageQueues(const PipeEndPoint *source, const QString& type)
 {
-	qDebug("MessagePipesLegacy::getMessageQueues: %p %s", source, qPrintable(type));
+	//qDebug("MessagePipesLegacy::getMessageQueues: %p %s", source, qPrintable(type));
 	return m_registrations.getElements(source, type);
 }
 

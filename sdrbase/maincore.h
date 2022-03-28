@@ -610,19 +610,19 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        const PipeEndPoint *getPipeSource() const { return m_pipeSource; }
+        const QObject *getPipeSource() const { return m_pipeSource; }
         SWGSDRangel::SWGTargetAzimuthElevation *getSWGTargetAzimuthElevation() const { return m_swgTargetAzimuthElevation; }
 
-        static MsgTargetAzimuthElevation* create(const PipeEndPoint *pipeSource, SWGSDRangel::SWGTargetAzimuthElevation *swgTargetAzimuthElevation)
+        static MsgTargetAzimuthElevation* create(const QObject *pipeSource, SWGSDRangel::SWGTargetAzimuthElevation *swgTargetAzimuthElevation)
         {
             return new MsgTargetAzimuthElevation(pipeSource, swgTargetAzimuthElevation);
         }
 
     private:
-        const PipeEndPoint *m_pipeSource;
+        const QObject *m_pipeSource;
         SWGSDRangel::SWGTargetAzimuthElevation *m_swgTargetAzimuthElevation;
 
-        MsgTargetAzimuthElevation(const PipeEndPoint *pipeSource, SWGSDRangel::SWGTargetAzimuthElevation *swgTargetAzimuthElevation) :
+        MsgTargetAzimuthElevation(const QObject *pipeSource, SWGSDRangel::SWGTargetAzimuthElevation *swgTargetAzimuthElevation) :
             Message(),
             m_pipeSource(pipeSource),
             m_swgTargetAzimuthElevation(swgTargetAzimuthElevation)

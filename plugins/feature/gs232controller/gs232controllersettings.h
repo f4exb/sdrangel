@@ -28,6 +28,21 @@ class Serializable;
 
 struct GS232ControllerSettings
 {
+    struct AvailableChannelOrFeature
+    {
+        QString m_kind; //!< "R" for channel, "F" for feature
+        int m_superIndex;
+        int m_index;
+        QString m_type;
+
+        AvailableChannelOrFeature() = default;
+        AvailableChannelOrFeature(const AvailableChannelOrFeature&) = default;
+        AvailableChannelOrFeature& operator=(const AvailableChannelOrFeature&) = default;
+        bool operator==(const AvailableChannelOrFeature& a) const {
+            return (m_kind == a.m_kind) && (m_superIndex == a.m_superIndex) && (m_index == a.m_index) && (m_type == a.m_type);
+        }
+    };
+
     float m_azimuth;
     float m_elevation;
     QString m_serialPort;
