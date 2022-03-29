@@ -23,6 +23,8 @@
 #include <Observer.h>
 #include <SGP4.h>
 
+#include <QTimeZone>
+
 #include "util/units.h"
 
 #include "satellitetrackersgp4.h"
@@ -62,7 +64,7 @@ void getGroundTrack(QDateTime dateTime,
     // For 3D map, we want to quantize to minutes, so we replace previous
     // position data, rather than insert additional positions alongside the old
     // which can result is the camera view jumping around
-    dateTime = QDateTime(dateTime.date(), QTime(dateTime.time().hour(), dateTime.time().minute()));
+    dateTime = QDateTime(dateTime.date(), QTime(dateTime.time().hour(), dateTime.time().minute()), dateTime.timeZone());
 
     // Note 2D map doesn't support paths wrapping around Earth several times
     // So we just have a slight overlap here, with the future track being longer
