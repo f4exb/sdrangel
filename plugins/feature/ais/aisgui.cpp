@@ -416,46 +416,44 @@ void AISGUI::sendToMap(const QString &name, const QString &label,
     float heading
     )
 {
-    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
-    QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(m_ais, "mapitems");
-    if (mapMessageQueues)
+    QList<ObjectPipe*> mapPipes;
+    MainCore::instance()->getMessagePipes().getMessagePipes(m_ais, "mapitems", mapPipes);
+
+    for (const auto& pipe : mapPipes)
     {
-        QList<MessageQueue*>::iterator it = mapMessageQueues->begin();
+        MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+        SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
+        swgMapItem->setName(new QString(name));
+        swgMapItem->setLatitude(latitude);
+        swgMapItem->setLongitude(longitude);
+        swgMapItem->setAltitude(0);
+        swgMapItem->setAltitudeReference(1); // CLAMP_TO_GROUND
 
-        for (; it != mapMessageQueues->end(); ++it)
-        {
-            SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
-            swgMapItem->setName(new QString(name));
-            swgMapItem->setLatitude(latitude);
-            swgMapItem->setLongitude(longitude);
-            swgMapItem->setAltitude(0);
-            swgMapItem->setAltitudeReference(1); // CLAMP_TO_GROUND
-
-            if (positionDateTime.isValid()) {
-                swgMapItem->setPositionDateTime(new QString(positionDateTime.toString(Qt::ISODateWithMs)));
-            }
-
-            swgMapItem->setImageRotation(heading);
-            swgMapItem->setText(new QString(text));
-
-            if (image.isEmpty()) {
-                swgMapItem->setImage(new QString(""));
-            } else {
-                swgMapItem->setImage(new QString(QString("qrc:///ais/map/%1").arg(image)));
-            }
-            swgMapItem->setModel(new QString(model));
-            swgMapItem->setModelAltitudeOffset(modelOffset);
-            swgMapItem->setLabel(new QString(label));
-            swgMapItem->setLabelAltitudeOffset(labelOffset);
-            swgMapItem->setFixedPosition(false);
-            swgMapItem->setOrientation(1);
-            swgMapItem->setHeading(heading);
-            swgMapItem->setPitch(0.0);
-            swgMapItem->setRoll(0.0);
-
-            MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_ais, swgMapItem);
-            (*it)->push(msg);
+        if (positionDateTime.isValid()) {
+            swgMapItem->setPositionDateTime(new QString(positionDateTime.toString(Qt::ISODateWithMs)));
         }
+
+        swgMapItem->setImageRotation(heading);
+        swgMapItem->setText(new QString(text));
+
+        if (image.isEmpty()) {
+            swgMapItem->setImage(new QString(""));
+        } else {
+            swgMapItem->setImage(new QString(QString("qrc:///ais/map/%1").arg(image)));
+        }
+
+        swgMapItem->setModel(new QString(model));
+        swgMapItem->setModelAltitudeOffset(modelOffset);
+        swgMapItem->setLabel(new QString(label));
+        swgMapItem->setLabelAltitudeOffset(labelOffset);
+        swgMapItem->setFixedPosition(false);
+        swgMapItem->setOrientation(1);
+        swgMapItem->setHeading(heading);
+        swgMapItem->setPitch(0.0);
+        swgMapItem->setRoll(0.0);
+
+        MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_ais, swgMapItem);
+        messageQueue->push(msg);
     }
 }
 

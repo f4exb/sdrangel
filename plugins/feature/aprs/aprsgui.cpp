@@ -337,46 +337,52 @@ bool APRSGUI::handleMessage(const Message& message)
                 }
 
                 // Forward to map
-                MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
-                QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(m_aprs, "mapitems");
-                if (mapMessageQueues)
+                if (aprs->m_hasPosition && (aprs->m_from != ""))
                 {
-                    if (aprs->m_hasPosition && (aprs->m_from != ""))
+                    QList<ObjectPipe*> mapPipes;
+                    MainCore::instance()->getMessagePipes().getMessagePipes(m_aprs, "mapitems", mapPipes);
+
+                    for (const auto& pipe : mapPipes)
                     {
-                        QList<MessageQueue*>::iterator it = mapMessageQueues->begin();
+                        MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+                        SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
 
-                        for (; it != mapMessageQueues->end(); ++it)
-                        {
-                            SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
-                            if (!aprs->m_objectName.isEmpty())
-                                swgMapItem->setName(new QString(aprs->m_objectName));
-                            else
-                                swgMapItem->setName(new QString(aprs->m_from));
-                            swgMapItem->setLatitude(aprs->m_latitude);
-                            swgMapItem->setLongitude(aprs->m_longitude);
-                            swgMapItem->setAltitude(aprs->m_hasAltitude ? Units::feetToMetres(aprs->m_altitudeFt) : 0);
-                            swgMapItem->setAltitudeReference(1); // CLAMP_TO_GROUND
-                            if (aprs->m_objectKilled)
-                            {
-                                swgMapItem->setImage(new QString(""));
-                                swgMapItem->setText(new QString(""));
-                            }
-                            else
-                            {
-                                swgMapItem->setImage(new QString(QString("qrc:///%1").arg(aprs->m_symbolImage)));
-                                swgMapItem->setText(new QString(aprs->toText(true, false, '\n',
-                                                                        m_settings.m_altitudeUnits == APRSSettings::METRES,
-                                                                        (int)m_settings.m_speedUnits,
-                                                                        m_settings.m_temperatureUnits == APRSSettings::CELSIUS,
-                                                                        m_settings.m_rainfallUnits == APRSSettings::MILLIMETRE)));
-                            }
-
-                            MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_aprs, swgMapItem);
-                            (*it)->push(msg);
+                        if (!aprs->m_objectName.isEmpty()) {
+                            swgMapItem->setName(new QString(aprs->m_objectName));
+                        } else {
+                            swgMapItem->setName(new QString(aprs->m_from));
                         }
+
+                        swgMapItem->setLatitude(aprs->m_latitude);
+                        swgMapItem->setLongitude(aprs->m_longitude);
+                        swgMapItem->setAltitude(aprs->m_hasAltitude ? Units::feetToMetres(aprs->m_altitudeFt) : 0);
+                        swgMapItem->setAltitudeReference(1); // CLAMP_TO_GROUND
+
+                        if (aprs->m_objectKilled)
+                        {
+                            swgMapItem->setImage(new QString(""));
+                            swgMapItem->setText(new QString(""));
+                        }
+                        else
+                        {
+                            swgMapItem->setImage(new QString(QString("qrc:///%1").arg(aprs->m_symbolImage)));
+                            swgMapItem->setText(new QString(
+                                aprs->toText(
+                                    true,
+                                    false,
+                                    '\n',
+                                    m_settings.m_altitudeUnits == APRSSettings::METRES,
+                                    (int)m_settings.m_speedUnits,
+                                    m_settings.m_temperatureUnits == APRSSettings::CELSIUS,
+                                    m_settings.m_rainfallUnits == APRSSettings::MILLIMETRE
+                                )
+                            ));
+                        }
+
+                        MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_aprs, swgMapItem);
+                        messageQueue->push(msg);
                     }
                 }
-
             }
             else
             {
@@ -385,7 +391,10 @@ bool APRSGUI::handleMessage(const Message& message)
             }
         }
         else
+        {
             qDebug() << "APRSGUI::handleMessage: Failed to decode as AX.25";
+        }
+
         return true;
     }
 

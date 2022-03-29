@@ -97,7 +97,7 @@ private:
     MapSettings m_settings;
     RollupState m_rollupState;
     bool m_doApplySettings;
-    QList<PipeEndPoint::AvailablePipeSource> m_availablePipes;
+    QList<MapSettings::AvailableChannelOrFeature> m_availableChannelOrFeatures;
 
     Map* m_map;
     MessageQueue m_inputMessageQueue;
@@ -119,7 +119,7 @@ private:
     explicit MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent = nullptr);
     virtual ~MapGUI();
 
-    void update(const PipeEndPoint *source, SWGSDRangel::SWGMapItem *swgMapItem, const QString &group);
+    void update(const QObject *source, SWGSDRangel::SWGMapItem *swgMapItem, const QString &group);
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
     void applyMap2DSettings(bool reloadMap);

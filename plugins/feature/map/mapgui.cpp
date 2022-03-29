@@ -96,10 +96,10 @@ bool MapGUI::handleMessage(const Message& message)
 
         return true;
     }
-    else if (PipeEndPoint::MsgReportPipes::match(message))
+    else if (Map::MsgReportAvailableChannelOrFeatures::match(message))
     {
-        PipeEndPoint::MsgReportPipes& report = (PipeEndPoint::MsgReportPipes&) message;
-        m_availablePipes = report.getAvailablePipes();
+        Map::MsgReportAvailableChannelOrFeatures& report = (Map::MsgReportAvailableChannelOrFeatures&) message;
+        m_availableChannelOrFeatures = report.getItems();
 
         return true;
     }
@@ -124,18 +124,20 @@ bool MapGUI::handleMessage(const Message& message)
 
         // TODO: Could have this in SWGMapItem so plugins can create additional groups
         QString group;
-        for (int i = 0; i < m_availablePipes.size(); i++)
+
+        for (int i = 0; i < m_availableChannelOrFeatures.size(); i++)
         {
-            if (m_availablePipes[i].m_source == msgMapItem.getPipeSource())
+            if (m_availableChannelOrFeatures[i].m_source == msgMapItem.getPipeSource())
             {
                  for (int j = 0; j < MapSettings::m_pipeTypes.size(); j++)
                  {
-                     if (m_availablePipes[i].m_id == MapSettings::m_pipeTypes[j]) {
-                         group = m_availablePipes[i].m_id;
+                     if (m_availableChannelOrFeatures[i].m_type == MapSettings::m_pipeTypes[j]) {
+                         group = m_availableChannelOrFeatures[i].m_type;
                      }
                  }
             }
         }
+
         update(msgMapItem.getPipeSource(), swgMapItem, group);
         return true;
     }
@@ -288,7 +290,7 @@ MapGUI::~MapGUI()
 }
 
 // Update a map item or image
-void MapGUI::update(const PipeEndPoint *source, SWGSDRangel::SWGMapItem *swgMapItem, const QString &group)
+void MapGUI::update(const QObject *source, SWGSDRangel::SWGMapItem *swgMapItem, const QString &group)
 {
     if (swgMapItem->getType() == 0)
     {

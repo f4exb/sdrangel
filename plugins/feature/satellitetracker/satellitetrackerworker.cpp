@@ -234,25 +234,34 @@ void SatelliteTrackerWorker::applySettings(const SatelliteTrackerSettings& setti
 
 void SatelliteTrackerWorker::removeFromMap(QString id)
 {
-    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
-    QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(m_satelliteTracker, "mapitems");
-    if (mapMessageQueues)
-        sendToMap(mapMessageQueues, id, "", "", "", 0.0f, 0.0, 0.0, 0.0, 0.0, nullptr, nullptr, nullptr, nullptr);
+    QList<ObjectPipe*> mapMessagePipes;
+    MainCore::instance()->getMessagePipes().getMessagePipes(m_satelliteTracker, "mapitems", mapMessagePipes);
+
+    if (mapMessagePipes.size() > 0) {
+        sendToMap(mapMessagePipes, id, "", "", "", 0.0f, 0.0, 0.0, 0.0, 0.0, nullptr, nullptr, nullptr, nullptr);
+    }
 }
 
-void SatelliteTrackerWorker::sendToMap(QList<MessageQueue*> *mapMessageQueues,
-                                       QString name, QString image, QString model, QString text,
-                                       float labelOffset,
-                                       double lat, double lon, double altitude, double rotation,
-                                       QList<QGeoCoordinate *> *track,
-                                       QList<QDateTime *> *trackDateTime,
-                                       QList<QGeoCoordinate *> *predictedTrack,
-                                       QList<QDateTime *> *predictedTrackDateTime)
+void SatelliteTrackerWorker::sendToMap(
+    const QList<ObjectPipe*>& mapMessagePipes,
+    QString name,
+    QString image,
+    QString model,
+    QString text,
+    float labelOffset,
+    double lat,
+    double lon,
+    double altitude,
+    double rotation,
+    QList<QGeoCoordinate *> *track,
+    QList<QDateTime *> *trackDateTime,
+    QList<QGeoCoordinate *> *predictedTrack,
+    QList<QDateTime *> *predictedTrackDateTime
+)
 {
-    QList<MessageQueue*>::iterator it = mapMessageQueues->begin();
-
-    for (; it != mapMessageQueues->end(); ++it)
+    for (const auto& pipe : mapMessagePipes)
     {
+        MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
         SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
         swgMapItem->setName(new QString(name));
         swgMapItem->setLatitude(lat);
@@ -298,7 +307,7 @@ void SatelliteTrackerWorker::sendToMap(QList<MessageQueue*> *mapMessageQueues,
         }
 
         MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_satelliteTracker, swgMapItem);
-        (*it)->push(msg);
+        messageQueue->push(msg);
     }
 }
 
@@ -423,9 +432,10 @@ void SatelliteTrackerWorker::update()
                 // Send to Map
                 if (m_settings.m_drawOnMap)
                 {
-                    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
-                    QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(m_satelliteTracker, "mapitems");
-                    if (mapMessageQueues)
+                    QList<ObjectPipe*> mapMessagePipes;
+                    MainCore::instance()->getMessagePipes().getMessagePipes(m_satelliteTracker, "mapitems", mapMessagePipes);
+
+                    if (mapMessagePipes.size() > 0)
                     {
                         const QStringList cubeSats({"AISAT-1", "FOX-1B", "FOX-1C", "FOX-1D", "FOX-1E", "FUNCUBE-1", "NO-84"});
                         QString image;
@@ -484,11 +494,18 @@ void SatelliteTrackerWorker::update()
                                             .arg(QChar(0xb0));
                         }
 
-                        sendToMap(mapMessageQueues, sat->m_name, image, model, text, labelOffset,
-                                   satWorkerState->m_satState.m_latitude, satWorkerState->m_satState.m_longitude,
-                                   satWorkerState->m_satState.m_altitude * 1000.0, 0,
-                                   &satWorkerState->m_satState.m_groundTrack, &satWorkerState->m_satState.m_groundTrackDateTime,
-                                   &satWorkerState->m_satState.m_predictedGroundTrack, &satWorkerState->m_satState.m_predictedGroundTrackDateTime);
+                        sendToMap(
+                            mapMessagePipes,
+                            sat->m_name,
+                            image,
+                            model,
+                            text,
+                            labelOffset,
+                            satWorkerState->m_satState.m_latitude, satWorkerState->m_satState.m_longitude,
+                            satWorkerState->m_satState.m_altitude * 1000.0, 0,
+                            &satWorkerState->m_satState.m_groundTrack, &satWorkerState->m_satState.m_groundTrackDateTime,
+                            &satWorkerState->m_satState.m_predictedGroundTrack, &satWorkerState->m_satState.m_predictedGroundTrackDateTime
+                        );
                     }
                 }
 

@@ -553,19 +553,19 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        const PipeEndPoint *getPipeSource() const { return m_pipeSource; }
+        const QObject *getPipeSource() const { return m_pipeSource; }
         SWGSDRangel::SWGMapItem *getSWGMapItem() const { return m_swgMapItem; }
 
-        static MsgMapItem* create(const PipeEndPoint *pipeSource, SWGSDRangel::SWGMapItem *swgMapItem)
+        static MsgMapItem* create(const QObject *pipeSource, SWGSDRangel::SWGMapItem *swgMapItem)
         {
             return new MsgMapItem(pipeSource, swgMapItem);
         }
 
     private:
-        const PipeEndPoint *m_pipeSource;
+        const QObject *m_pipeSource;
         SWGSDRangel::SWGMapItem *m_swgMapItem;
 
-        MsgMapItem(const PipeEndPoint *pipeSource, SWGSDRangel::SWGMapItem *swgMapItem) :
+        MsgMapItem(const QObject *pipeSource, SWGSDRangel::SWGMapItem *swgMapItem) :
             Message(),
             m_pipeSource(pipeSource),
             m_swgMapItem(swgMapItem)

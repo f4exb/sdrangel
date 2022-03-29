@@ -407,19 +407,27 @@ void StarTrackerWorker::updateRaDec(RADec rd, QDateTime dt, bool lbTarget)
 
 void StarTrackerWorker::removeFromMap(QString id)
 {
-    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
-    QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(m_starTracker, "mapitems");
-    if (mapMessageQueues) {
-        sendToMap(mapMessageQueues, id, "", "", 0.0, 0.0);
+    QList<ObjectPipe*> mapMessagePipes;
+    MainCore::instance()->getMessagePipes().getMessagePipes(m_starTracker, "mapitems", mapMessagePipes);
+
+    if (mapMessagePipes.size() > 0) {
+        sendToMap(mapMessagePipes, id, "", "", 0.0, 0.0);
     }
 }
 
-void StarTrackerWorker::sendToMap(QList<MessageQueue*> *mapMessageQueues, QString name, QString image, QString text, double lat, double lon, double rotation)
+void StarTrackerWorker::sendToMap(
+    const QList<ObjectPipe*>& mapMessagePipes,
+    QString name,
+    QString image,
+    QString text,
+    double lat,
+    double lon,
+    double rotation
+)
 {
-    QList<MessageQueue*>::iterator it = mapMessageQueues->begin();
-
-    for (; it != mapMessageQueues->end(); ++it)
+    for (const auto& pipe : mapMessagePipes)
     {
+        MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
         SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
         swgMapItem->setName(new QString(name));
         swgMapItem->setLatitude(lat);
@@ -429,7 +437,7 @@ void StarTrackerWorker::sendToMap(QList<MessageQueue*> *mapMessageQueues, QStrin
         swgMapItem->setText(new QString(text));
 
         MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_starTracker, swgMapItem);
-        (*it)->push(msg);
+        messageQueue->push(msg);
     }
 }
 
@@ -636,11 +644,10 @@ void StarTrackerWorker::update()
     // Send to Map
     if (m_settings.m_drawSunOnMap || m_settings.m_drawMoonOnMap || m_settings.m_drawStarOnMap)
     {
-        MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
-        QList<MessageQueue*>* messageQueues;
-        messageQueues = messagePipes.getMessageQueues(m_starTracker, "mapitems");
+        QList<ObjectPipe*> mapMessagePipes;
+        MainCore::instance()->getMessagePipes().getMessagePipes(m_starTracker, "mapitems", mapMessagePipes);
 
-        if (messageQueues)
+        if (mapMessagePipes.size() > 0)
         {
             // Different between GMST(Lst at Greenwich) and RA
             double lst = Astronomy::localSiderealTime(dt, 0.0);
@@ -651,7 +658,7 @@ void StarTrackerWorker::update()
             {
                 sunLongitude = Astronomy::lstAndRAToLongitude(lst, sunRD.ra);
                 sunLatitude = sunRD.dec;
-                sendToMap(messageQueues, "Sun", "qrc:///startracker/startracker/sun-40.png", "Sun", sunLatitude, sunLongitude);
+                sendToMap(mapMessagePipes, "Sun", "qrc:///startracker/startracker/sun-40.png", "Sun", sunLatitude, sunLongitude);
             }
             if (m_settings.m_drawMoonOnMap)
             {
@@ -659,7 +666,7 @@ void StarTrackerWorker::update()
                 double moonLatitude = moonRD.dec;
                 double moonRotation;
                 QString phase = moonPhase(sunLongitude, moonLongitude, m_settings.m_latitude, moonRotation);
-                sendToMap(messageQueues, "Moon", QString("qrc:///startracker/startracker/moon-%1-32").arg(phase), "Moon",
+                sendToMap(mapMessagePipes, "Moon", QString("qrc:///startracker/startracker/moon-%1-32").arg(phase), "Moon",
                                 moonLatitude, moonLongitude, moonRotation);
             }
             if ((m_settings.m_drawStarOnMap) && (m_settings.m_target != "Sun") && (m_settings.m_target != "Moon"))
@@ -667,7 +674,7 @@ void StarTrackerWorker::update()
                 double starLongitude = Astronomy::lstAndRAToLongitude(lst, rd.ra);
                 double starLatitude = rd.dec;
                 QString text = m_settings.m_target.startsWith("Custom") ? "Star" : m_settings.m_target;
-                sendToMap(messageQueues, "Star", "qrc:///startracker/startracker/pulsar-32.png", text, starLatitude, starLongitude);
+                sendToMap(mapMessagePipes, "Star", "qrc:///startracker/startracker/pulsar-32.png", text, starLatitude, starLongitude);
             }
         }
     }

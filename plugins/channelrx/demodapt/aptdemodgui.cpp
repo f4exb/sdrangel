@@ -867,20 +867,18 @@ void APTDemodGUI::on_deleteImageFromMap_clicked()
 
 void APTDemodGUI::deleteImageFromMap(const QString &name)
 {
-    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
-    QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(m_aptDemod, "mapitems");
-    if (mapMessageQueues)
-    {
-        QList<MessageQueue*>::iterator it = mapMessageQueues->begin();
-        for (; it != mapMessageQueues->end(); ++it)
-        {
-            SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
-            swgMapItem->setName(new QString(name));
-            swgMapItem->setImage(new QString());  // Set image to "" to delete it
-            swgMapItem->setType(1);
+    QList<ObjectPipe*> mapPipes;
+    MainCore::instance()->getMessagePipes().getMessagePipes(m_aptDemod, "mapitems", mapPipes);
 
-            MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_aptDemod, swgMapItem);
-            (*it)->push(msg);
-        }
+    for (const auto& pipe : mapPipes)
+    {
+        MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+        SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
+        swgMapItem->setName(new QString(name));
+        swgMapItem->setImage(new QString());  // Set image to "" to delete it
+        swgMapItem->setType(1);
+
+        MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_aptDemod, swgMapItem);
+        messageQueue->push(msg);
     }
 }

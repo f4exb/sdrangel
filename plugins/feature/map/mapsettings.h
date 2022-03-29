@@ -51,6 +51,26 @@ struct MapSettings
         bool deserialize(const QByteArray& data);
     };
 
+    struct AvailableChannelOrFeature
+    {
+        QString m_kind; //!< "R" for channel, "F" for feature
+        int m_superIndex;
+        int m_index;
+        QString m_type;
+        QObject *m_source;
+
+        AvailableChannelOrFeature() = default;
+        AvailableChannelOrFeature(const AvailableChannelOrFeature&) = default;
+        AvailableChannelOrFeature& operator=(const AvailableChannelOrFeature&) = default;
+        bool operator==(const AvailableChannelOrFeature& a) const {
+            return (m_kind == a.m_kind)
+                && (m_superIndex == a.m_superIndex)
+                && (m_index == a.m_index)
+                && (m_type == a.m_type)
+                && (m_source == a.m_source);
+        }
+    };
+
     bool m_displayNames;
     QString m_mapProvider;
     QString m_thunderforestAPIKey;

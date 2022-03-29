@@ -712,22 +712,24 @@ bool ADSBDemodGUI::updateLocalPosition(Aircraft *aircraft, double latitude, doub
 void ADSBDemodGUI::sendToMap(Aircraft *aircraft, QList<SWGSDRangel::SWGMapAnimation *> *animations)
 {
     // Send to Map feature
-    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
-    QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(m_adsbDemod, "mapitems");
-    if (mapMessageQueues)
-    {
-        QList<MessageQueue*>::iterator it = mapMessageQueues->begin();
+    QList<ObjectPipe*> mapPipes;
+    MainCore::instance()->getMessagePipes().getMessagePipes(m_adsbDemod, "mapitems", mapPipes);
 
+    if (mapPipes.size() > 0)
+    {
         // Adjust altitude by airfield barometric elevation, so aircraft appears to
         // take-off/land at correct point on runway
         int altitudeFt = aircraft->m_altitude;
+
         if (!aircraft->m_onSurface && !aircraft->m_altitudeGNSS) {
             altitudeFt -= m_settings.m_airfieldElevation;
         }
+
         float altitudeM = Units::feetToMetres(altitudeFt);
 
-        for (; it != mapMessageQueues->end(); ++it)
+        for (const auto& pipe : mapPipes)
         {
+            MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
             SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
             swgMapItem->setName(new QString(aircraft->m_icaoHex));
             swgMapItem->setLatitude(aircraft->m_latitude);
@@ -738,12 +740,15 @@ void ADSBDemodGUI::sendToMap(Aircraft *aircraft, QList<SWGSDRangel::SWGMapAnimat
             swgMapItem->setImage(new QString(QString("qrc:///map/%1").arg(aircraft->getImage())));
             swgMapItem->setImageRotation(aircraft->m_heading);
             swgMapItem->setText(new QString(aircraft->getText(true)));
+
             if (!aircraft->m_aircraft3DModel.isEmpty()) {
                 swgMapItem->setModel(new QString(aircraft->m_aircraft3DModel));
             } else {
                 swgMapItem->setModel(new QString(aircraft->m_aircraftCat3DModel));
             }
+
             swgMapItem->setLabel(new QString(aircraft->m_callsign));
+
             if (aircraft->m_headingValid)
             {
                 swgMapItem->setOrientation(1);
@@ -757,13 +762,14 @@ void ADSBDemodGUI::sendToMap(Aircraft *aircraft, QList<SWGSDRangel::SWGMapAnimat
                 // Orient aircraft based on velocity calculated from position
                 swgMapItem->setOrientation(0);
             }
+
             swgMapItem->setModelAltitudeOffset(aircraft->m_modelAltitudeOffset);
             swgMapItem->setLabelAltitudeOffset(aircraft->m_labelAltitudeOffset);
             swgMapItem->setAltitudeReference(3); // CLIP_TO_GROUND so aircraft don't go under runway
             swgMapItem->setAnimations(animations);  // Does this need to be duplicated?
 
             MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_adsbDemod, swgMapItem);
-            (*it)->push(msg);
+            messageQueue->push(msg);
         }
     }
 }
@@ -4037,10 +4043,12 @@ void ADSBDemodGUI::tick()
         QDateTime now = QDateTime::currentDateTime();
         qint64 nowSecs = now.toSecsSinceEpoch();
         QHash<int, Aircraft *>::iterator i = m_aircraft.begin();
+
         while (i != m_aircraft.end())
         {
             Aircraft *aircraft = i.value();
             qint64 secondsSinceLastFrame = nowSecs - aircraft->m_time.toSecsSinceEpoch();
+
             if (secondsSinceLastFrame >= m_settings.m_removeTimeout)
             {
                 // Don't try to track it anymore
@@ -4049,6 +4057,7 @@ void ADSBDemodGUI::tick()
                     m_adsbDemod->clearTarget();
                     m_trackAircraft = nullptr;
                 }
+
                 // Remove map model
                 m_aircraftModel.removeAircraft(aircraft);
                 // Remove row from table
@@ -4056,25 +4065,26 @@ void ADSBDemodGUI::tick()
                 // Remove aircraft from hash
                 i = m_aircraft.erase(i);
                 // Remove from map feature
-                MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
-                QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(m_adsbDemod, "mapitems");
-                if (mapMessageQueues)
+                QList<ObjectPipe*> mapPipes;
+                MainCore::instance()->getMessagePipes().getMessagePipes(this, "mapitems", mapPipes);
+
+                for (const auto& pipe : mapPipes)
                 {
-                    QList<MessageQueue*>::iterator it = mapMessageQueues->begin();
-                    for (; it != mapMessageQueues->end(); ++it)
-                    {
-                        SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
-                        swgMapItem->setName(new QString(QString("%1").arg(aircraft->m_icao, 0, 16)));
-                        swgMapItem->setImage(new QString(""));
-                        MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_adsbDemod, swgMapItem);
-                        (*it)->push(msg);
-                    }
+                    MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+                    SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
+                    swgMapItem->setName(new QString(QString("%1").arg(aircraft->m_icao, 0, 16)));
+                    swgMapItem->setImage(new QString(""));
+                    MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_adsbDemod, swgMapItem);
+                    messageQueue->push(msg);
                 }
+
                 // And finally free its memory
                 delete aircraft;
             }
             else
+            {
                 ++i;
+            }
         }
     }
 }

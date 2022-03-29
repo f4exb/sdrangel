@@ -661,9 +661,10 @@ void APTDemodImageWorker::makeTransparent(QImage &image)
 void APTDemodImageWorker::sendImageToMap(QImage image)
 {
     // Send to Map feature
-    MessagePipesLegacy& messagePipes = MainCore::instance()->getMessagePipesLegacy();
-    QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(m_aptDemod, "mapitems");
-    if (mapMessageQueues)
+    QList<ObjectPipe*> mapPipes;
+    MainCore::instance()->getMessagePipes().getMessagePipes(m_aptDemod, "mapitems", mapPipes);
+
+    if (mapPipes.size() > 0)
     {
         // Only display one channel on map
         QImage selectedChannel;
@@ -695,9 +696,9 @@ void APTDemodImageWorker::sendImageToMap(QImage image)
         // Send name to GUI
         m_messageQueueToGUI->push(APTDemod::MsgMapImageName::create(name));
 
-        QList<MessageQueue*>::iterator it = mapMessageQueues->begin();
-        for (; it != mapMessageQueues->end(); ++it)
+        for (const auto& pipe : mapPipes)
         {
+            MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
             SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
             swgMapItem->setName(new QString(name));
             swgMapItem->setImage(new QString(data));
@@ -709,7 +710,7 @@ void APTDemodImageWorker::sendImageToMap(QImage image)
             swgMapItem->setImageTileSouth(m_tileSouth);
 
             MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_aptDemod, swgMapItem);
-            (*it)->push(msg);
+            messageQueue->push(msg);
         }
     }
 }

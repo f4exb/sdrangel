@@ -26,7 +26,7 @@
 
 #include "SWGTargetAzimuthElevation.h"
 
-MapItem::MapItem(const PipeEndPoint *sourcePipe, const QString &group, MapSettings::MapItemSettings *itemSettings, SWGSDRangel::SWGMapItem *mapItem) :
+MapItem::MapItem(const QObject *sourcePipe, const QString &group, MapSettings::MapItemSettings *itemSettings, SWGSDRangel::SWGMapItem *mapItem) :
     m_altitude(0.0)
 {
     m_sourcePipe = sourcePipe;
@@ -216,7 +216,7 @@ Q_INVOKABLE void MapModel::add(MapItem *item)
     endInsertRows();
 }
 
-void MapModel::update(const PipeEndPoint *sourcePipe, SWGSDRangel::SWGMapItem *swgMapItem, const QString &group)
+void MapModel::update(const QObject *sourcePipe, SWGSDRangel::SWGMapItem *swgMapItem, const QString &group)
 {
     QString name = *swgMapItem->getName();
     // Add, update or delete and item
@@ -440,7 +440,7 @@ Q_INVOKABLE void MapModel::moveToBack(int oldRow)
     }
 }
 
-MapItem *MapModel::findMapItem(const PipeEndPoint *source, const QString& name)
+MapItem *MapModel::findMapItem(const QObject *source, const QString& name)
 {
     // FIXME: Should consider adding a QHash for this
     QListIterator<MapItem *> i(m_items);

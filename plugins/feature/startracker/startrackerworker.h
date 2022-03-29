@@ -34,6 +34,7 @@ class QTcpServer;
 class QTcpSocket;
 class StarTracker;
 class QDateTime;
+class ObjectPipe;
 
 class StarTrackerWorker : public QObject
 {
@@ -94,7 +95,15 @@ private:
     void updateRaDec(RADec rd, QDateTime dt, bool lbTarget);
     void writeStellariumTarget(double ra, double dec);
     void removeFromMap(QString id);
-    void sendToMap(QList<MessageQueue*> *mapMessageQueues, QString id, QString image, QString text, double lat, double lon, double rotation=0.0);
+    void sendToMap(
+        const QList<ObjectPipe*>& mapMessagePipes,
+        QString id,
+        QString image,
+        QString text,
+        double lat,
+        double lon,
+        double rotation = 0.0
+    );
 
 private slots:
     void started();

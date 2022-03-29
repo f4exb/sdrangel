@@ -20,6 +20,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QBuffer>
+#include <QTimer>
 
 #include "SWGFeatureSettings.h"
 #include "SWGFeatureReport.h"
@@ -38,6 +39,7 @@
 MESSAGE_CLASS_DEFINITION(Map::MsgConfigureMap, Message)
 MESSAGE_CLASS_DEFINITION(Map::MsgFind, Message)
 MESSAGE_CLASS_DEFINITION(Map::MsgSetDateTime, Message)
+MESSAGE_CLASS_DEFINITION(Map::MsgReportAvailableChannelOrFeatures, Message)
 
 const char* const Map::m_featureIdURI = "sdrangel.feature.map";
 const char* const Map::m_featureId = "Map";
@@ -51,8 +53,6 @@ Map::Map(WebAPIAdapterInterface *webAPIAdapterInterface) :
     setObjectName(m_featureId);
     m_state = StIdle;
     m_errorMessage = "Map error";
-    connect(&m_updatePipesTimer, SIGNAL(timeout()), this, SLOT(updatePipes()));
-    m_updatePipesTimer.start(1000);
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
         m_networkManager,
@@ -60,10 +60,35 @@ Map::Map(WebAPIAdapterInterface *webAPIAdapterInterface) :
         this,
         &Map::networkManagerFinished
     );
+    QObject::connect(
+        MainCore::instance(),
+        &MainCore::featureAdded,
+        this,
+        &Map::handleFeatureAdded
+    );
+    QObject::connect(
+        MainCore::instance(),
+        &MainCore::channelAdded,
+        this,
+        &Map::handleChannelAdded
+    );
+    QTimer::singleShot(2000, this, SLOT(scanAvailableChannelsAndFeatures()));
 }
 
 Map::~Map()
 {
+    QObject::disconnect(
+        MainCore::instance(),
+        &MainCore::featureAdded,
+        this,
+        &Map::handleFeatureAdded
+    );
+    QObject::disconnect(
+        MainCore::instance(),
+        &MainCore::channelAdded,
+        this,
+        &Map::handleChannelAdded
+    );
     QObject::disconnect(
         m_networkManager,
         &QNetworkAccessManager::finished,
@@ -85,6 +110,7 @@ bool Map::handleMessage(const Message& cmd)
     }
     else if (MainCore::MsgMapItem::match(cmd))
     {
+        qDebug() << "Map::handleMessage: MsgMapItem";
         MainCore::MsgMapItem& msgMapItem = (MainCore::MsgMapItem&) cmd;
         MainCore::MsgMapItem *copy = new MainCore::MsgMapItem(msgMapItem);
         getMessageQueueToGUI()->push(copy);
@@ -93,23 +119,6 @@ bool Map::handleMessage(const Message& cmd)
     else
     {
         return false;
-    }
-}
-
-void Map::updatePipes()
-{
-    QList<AvailablePipeSource> availablePipes = updateAvailablePipeSources("mapitems", MapSettings::m_pipeTypes, MapSettings::m_pipeURIs, this);
-
-    if (availablePipes != m_availablePipes)
-    {
-        m_availablePipes = availablePipes;
-        if (getMessageQueueToGUI())
-        {
-            MsgReportPipes *msgToGUI = MsgReportPipes::create();
-            QList<AvailablePipeSource>& msgAvailablePipes = msgToGUI->getAvailablePipes();
-            msgAvailablePipes.append(availablePipes);
-            getMessageQueueToGUI()->push(msgToGUI);
-        }
     }
 }
 
@@ -433,5 +442,166 @@ QDateTime Map::getMapDateTime()
         // Should be accurate enough for satellite tracker
         qint64 diffMsecs = m_systemDateTime.msecsTo(QDateTime::currentDateTime());
         return m_mapDateTime.addMSecs(diffMsecs * m_multiplier);
+    }
+}
+
+void Map::scanAvailableChannelsAndFeatures()
+{
+    qDebug("Map::scanAvailableChannelsAndFeatures");
+    std::vector<FeatureSet*>& featureSets = MainCore::instance()->getFeatureeSets();
+    m_availableChannelOrFeatures.clear();
+
+    for (const auto& featureSet : featureSets)
+    {
+        for (int fei = 0; fei < featureSet->getNumberOfFeatures(); fei++)
+        {
+            Feature *feature = featureSet->getFeatureAt(fei);
+
+            if (MapSettings::m_pipeURIs.contains(feature->getURI()) && !m_availableChannelOrFeatures.contains(feature))
+            {
+                qDebug("Map::scanAvailableChannelsAndFeatures: store feature %d:%d %s (%p)",
+                    featureSet->getIndex(), fei, qPrintable(feature->getURI()), feature);
+                registerPipe(feature);
+                MapSettings::AvailableChannelOrFeature availableItem =
+                    MapSettings::AvailableChannelOrFeature{
+                        "F",
+                        featureSet->getIndex(),
+                        fei,
+                        feature->getIdentifier(),
+                        feature
+                    };
+                m_availableChannelOrFeatures[feature] = availableItem;
+            }
+        }
+    }
+
+    std::vector<DeviceSet*>& deviceSets = MainCore::instance()->getDeviceSets();
+
+    for (const auto& deviceSet : deviceSets)
+    {
+        DSPDeviceSourceEngine *deviceSourceEngine =  deviceSet->m_deviceSourceEngine;
+
+        if (deviceSourceEngine)
+        {
+            for (int chi = 0; chi < deviceSet->getNumberOfChannels(); chi++)
+            {
+                ChannelAPI *channel = deviceSet->getChannelAt(chi);
+
+                if (MapSettings::m_pipeURIs.contains(channel->getURI()) && !m_availableChannelOrFeatures.contains(channel))
+                {
+                    qDebug("Map::scanAvailableChannelsAndFeatures: store channel %d:%d %s (%p)",
+                        deviceSet->getIndex(), chi, qPrintable(channel->getURI()), channel);
+                    registerPipe(channel);
+                    MapSettings::AvailableChannelOrFeature availableItem =
+                        MapSettings::AvailableChannelOrFeature{
+                            "R",
+                            deviceSet->getIndex(),
+                            chi,
+                            channel->getIdentifier(),
+                            channel};
+                    m_availableChannelOrFeatures[channel] = availableItem;
+                }
+            }
+        }
+    }
+
+    notifyUpdate();
+}
+
+void Map::handleFeatureAdded(int featureSetIndex, Feature *feature)
+{
+    FeatureSet *featureSet = MainCore::instance()->getFeatureeSets()[featureSetIndex];
+
+    if (MapSettings::m_pipeURIs.contains(feature->getURI()))
+    {
+        qDebug("Map::handleFeatureAdded: featureSetIndex: %d:%d feature: %s (%p)",
+            featureSetIndex, feature->getIndexInFeatureSet(), qPrintable(feature->getURI()), feature);
+        registerPipe(feature);
+        MapSettings::AvailableChannelOrFeature availableItem =
+            MapSettings::AvailableChannelOrFeature{
+                "F",
+                featureSet->getIndex(),
+                feature->getIndexInFeatureSet(),
+                feature->getIdentifier(),
+                feature
+            };
+        m_availableChannelOrFeatures[feature] = availableItem;
+        notifyUpdate();
+    }
+}
+
+void Map::handleChannelAdded(int deviceSetIndex, ChannelAPI *channel)
+{
+    DeviceSet *deviceSet = MainCore::instance()->getDeviceSets()[deviceSetIndex];
+    DSPDeviceSourceEngine *deviceSourceEngine =  deviceSet->m_deviceSourceEngine;
+
+    if (deviceSourceEngine && MapSettings::m_pipeURIs.contains(channel->getURI()))
+    {
+        qDebug("Map::handleChannelAdded: deviceSetIndex: %d:%d channel: %s (%p)",
+            deviceSetIndex, channel->getIndexInDeviceSet(), qPrintable(channel->getURI()), channel);
+        registerPipe(channel);
+        MapSettings::AvailableChannelOrFeature availableItem =
+            MapSettings::AvailableChannelOrFeature{
+                "R",
+                deviceSet->getIndex(),
+                channel->getIndexInDeviceSet(),
+                channel->getIdentifier(),
+                channel
+            };
+        m_availableChannelOrFeatures[channel] = availableItem;
+        notifyUpdate();
+    }
+}
+
+void Map::registerPipe(QObject *object)
+{
+    qDebug("Map::registerPipe: register %s (%p)", qPrintable(object->objectName()), object);
+    MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
+    ObjectPipe *pipe = messagePipes.registerProducerToConsumer(object, this, "mapitems");
+    MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+    QObject::connect(
+        messageQueue,
+        &MessageQueue::messageEnqueued,
+        this,
+        [=](){ this->handlePipeMessageQueue(messageQueue); },
+        Qt::QueuedConnection
+    );
+    QObject::connect(
+        pipe,
+        &ObjectPipe::toBeDeleted,
+        this,
+        &Map::handleMessagePipeToBeDeleted
+    );
+}
+
+void Map::notifyUpdate()
+{
+    if (getMessageQueueToGUI())
+    {
+        MsgReportAvailableChannelOrFeatures *msg = MsgReportAvailableChannelOrFeatures::create();
+        msg->getItems() = m_availableChannelOrFeatures.values();
+        getMessageQueueToGUI()->push(msg);
+    }
+}
+
+void Map::handleMessagePipeToBeDeleted(int reason, QObject* object)
+{
+    if ((reason == 0) && m_availableChannelOrFeatures.contains(object)) // producer
+    {
+        qDebug("Map::handleMessagePipeToBeDeleted: removing channel or feature at (%p)", object);
+        m_availableChannelOrFeatures.remove(object);
+        notifyUpdate();
+    }
+}
+
+void Map::handlePipeMessageQueue(MessageQueue* messageQueue)
+{
+    Message* message;
+
+    while ((message = messageQueue->pop()) != nullptr)
+    {
+        if (handleMessage(*message)) {
+            delete message;
+        }
     }
 }

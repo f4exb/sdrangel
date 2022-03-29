@@ -22,7 +22,6 @@
 #include <QThread>
 #include <QHash>
 #include <QNetworkRequest>
-#include <QTimer>
 #include <QDateTime>
 #include <QMutex>
 
@@ -103,6 +102,24 @@ public:
         {}
     };
 
+    class MsgReportAvailableChannelOrFeatures : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        QList<MapSettings::AvailableChannelOrFeature>& getItems() { return m_availableChannelOrFeatures; }
+
+        static MsgReportAvailableChannelOrFeatures* create() {
+            return new MsgReportAvailableChannelOrFeatures();
+        }
+
+    private:
+        QList<MapSettings::AvailableChannelOrFeature> m_availableChannelOrFeatures;
+
+        MsgReportAvailableChannelOrFeatures() :
+            Message()
+        {}
+    };
+
     Map(WebAPIAdapterInterface *webAPIAdapterInterface);
     virtual ~Map();
     virtual void destroy() { delete this; }
@@ -156,8 +173,7 @@ public:
 private:
     QThread m_thread;
     MapSettings m_settings;
-    QList<AvailablePipeSource> m_availablePipes;
-    QTimer m_updatePipesTimer;
+    QHash<QObject*, MapSettings::AvailableChannelOrFeature> m_availableChannelOrFeatures;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
@@ -165,6 +181,8 @@ private:
     void applySettings(const MapSettings& settings, bool force = false);
     void webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response);
     void webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const MapSettings& settings, bool force);
+    void registerPipe(QObject *object);
+    void notifyUpdate();
 
     QDateTime m_mapDateTime;
     QDateTime m_systemDateTime;
@@ -172,8 +190,12 @@ private:
     QMutex m_dateTimeMutex;
 
 private slots:
-    void updatePipes();
     void networkManagerFinished(QNetworkReply *reply);
+    void scanAvailableChannelsAndFeatures();
+    void handleFeatureAdded(int featureSetIndex, Feature *feature);
+    void handleChannelAdded(int deviceSetIndex, ChannelAPI *channel);
+    void handleMessagePipeToBeDeleted(int reason, QObject* object);
+    void handlePipeMessageQueue(MessageQueue* messageQueue);
 };
 
 #endif // INCLUDE_FEATURE_MAP_H_

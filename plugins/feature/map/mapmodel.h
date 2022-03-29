@@ -31,13 +31,12 @@
 class MapModel;
 class MapGUI;
 class CZML;
-class PipeEndPoint;
 
 // Information required about each item displayed on the map
 class MapItem {
 
 public:
-    MapItem(const PipeEndPoint *sourcePipe, const QString &group, MapSettings::MapItemSettings *itemSettings, SWGSDRangel::SWGMapItem *mapItem);
+    MapItem(const QObject *sourcePipe, const QString &group, MapSettings::MapItemSettings *itemSettings, SWGSDRangel::SWGMapItem *mapItem);
     void update(SWGSDRangel::SWGMapItem *mapItem);
     QGeoCoordinate getCoordinates();
 
@@ -50,7 +49,7 @@ private:
     friend CZML;
     QString m_group;
     MapSettings::MapItemSettings *m_itemSettings;
-    const PipeEndPoint *m_sourcePipe;   // Channel/feature that created the item
+    const QObject *m_sourcePipe;   // Channel/feature that created the item
     QString m_name;
     QString m_label;
     float m_latitude;
@@ -127,7 +126,7 @@ public:
     void playAnimations(MapItem *item);
 
     Q_INVOKABLE void add(MapItem *item);
-    void update(const PipeEndPoint *source, SWGSDRangel::SWGMapItem *swgMapItem, const QString &group="");
+    void update(const QObject *source, SWGSDRangel::SWGMapItem *swgMapItem, const QString &group="");
     void update(MapItem *item);
     void remove(MapItem *item);
     void allUpdated();
@@ -141,7 +140,7 @@ public:
     Q_INVOKABLE void moveToFront(int oldRow);
     Q_INVOKABLE void moveToBack(int oldRow);
 
-    MapItem *findMapItem(const PipeEndPoint *source, const QString& name);
+    MapItem *findMapItem(const QObject *source, const QString& name);
     MapItem *findMapItem(const QString& name);
     QModelIndex findMapItemIndex(const QString& name);
 
