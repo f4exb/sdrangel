@@ -30,7 +30,6 @@
 #include "feature/featuregui.h"
 #include "util/messagequeue.h"
 #include "util/azel.h"
-#include "pipes/pipeendpoint.h"
 #include "settings/rollupstate.h"
 
 #include "SWGMapItem.h"

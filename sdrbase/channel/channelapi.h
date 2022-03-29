@@ -28,7 +28,6 @@
 #include <stdint.h>
 
 #include "export.h"
-#include "pipes/pipeendpoint.h"
 #include "util/messagequeue.h"
 
 class DeviceAPI;
@@ -40,7 +39,7 @@ namespace SWGSDRangel
     class SWGChannelActions;
 }
 
-class SDRBASE_API ChannelAPI : public QObject, public PipeEndPoint {
+class SDRBASE_API ChannelAPI : public QObject {
     Q_OBJECT
 public:
     enum StreamType //!< This is the same enum as in PluginInterface

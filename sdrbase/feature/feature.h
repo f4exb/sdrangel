@@ -25,7 +25,6 @@
 #include <QByteArray>
 
 #include "export.h"
-#include "pipes/pipeendpoint.h"
 #include "util/messagequeue.h"
 
 class WebAPIAdapterInterface;
@@ -41,7 +40,7 @@ namespace SWGSDRangel
     class SWGChannelSettings;
 }
 
-class SDRBASE_API Feature : public QObject, public PipeEndPoint {
+class SDRBASE_API Feature : public QObject {
     Q_OBJECT
 public:
     enum FeatureState {
@@ -164,7 +163,6 @@ protected:
 protected slots:
 	void handleInputMessages();
     void handlePipeMessageQueue(MessageQueue* messageQueue);
-    friend PipeEndPoint;
 
 private:
     QString m_name; //!< Unique identifier in a device set used for sorting may change depending on relative position in device set

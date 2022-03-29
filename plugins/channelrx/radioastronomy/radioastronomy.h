@@ -39,6 +39,7 @@ class QNetworkAccessManager;
 class QNetworkReply;
 class QThread;
 class DeviceAPI;
+class Feature;
 class RadioAstronomyWorker;
 
 class RadioAstronomy : public BasebandSampleSink, public ChannelAPI {

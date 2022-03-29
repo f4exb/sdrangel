@@ -25,7 +25,6 @@
 #include "dsp/scopevis.h"
 #include "util/db.h"
 #include "util/stepfunctions.h"
-#include "pipes/pipeendpoint.h"
 #include "maincore.h"
 
 #include "aisdemod.h"

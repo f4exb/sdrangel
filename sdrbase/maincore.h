@@ -29,7 +29,6 @@
 #include "export.h"
 #include "settings/mainsettings.h"
 #include "util/message.h"
-#include "pipes/messagepipeslegacy.h"
 #include "pipes/messagepipes.h"
 #include "pipes/datapipes.h"
 #include "channel/channelapi.h"
@@ -577,26 +576,26 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        const PipeEndPoint *getPipeSource() const { return m_pipeSource; }
+        const QObject *getPipeSource() const { return m_pipeSource; }
         QByteArray getPacket() const { return m_packet; }
         QDateTime getDateTime() const { return m_dateTime; }
 
-        static MsgPacket* create(const PipeEndPoint *pipeSource, QByteArray packet)
+        static MsgPacket* create(const QObject *pipeSource, QByteArray packet)
         {
             return new MsgPacket(pipeSource, packet, QDateTime::currentDateTime());
         }
 
-        static MsgPacket* create(const PipeEndPoint *pipeSource, QByteArray packet, QDateTime dateTime)
+        static MsgPacket* create(const QObject *pipeSource, QByteArray packet, QDateTime dateTime)
         {
             return new MsgPacket(pipeSource, packet, dateTime);
         }
 
     private:
-        const PipeEndPoint *m_pipeSource;
+        const QObject *m_pipeSource;
         QByteArray m_packet;
         QDateTime m_dateTime;
 
-        MsgPacket(const PipeEndPoint *pipeSource, QByteArray packet, QDateTime dateTime) :
+        MsgPacket(const QObject *pipeSource, QByteArray packet, QDateTime dateTime) :
             Message(),
             m_pipeSource(pipeSource),
             m_packet(packet),
@@ -658,19 +657,19 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        const PipeEndPoint *getPipeSource() const { return m_pipeSource; }
+        const QObject *getPipeSource() const { return m_pipeSource; }
         SWGSDRangel::SWGStarTrackerDisplaySettings *getSWGStarTrackerDisplaySettings() const { return m_swgStarTrackerDisplaySettings; }
 
-        static MsgStarTrackerDisplaySettings* create(const PipeEndPoint *pipeSource, SWGSDRangel::SWGStarTrackerDisplaySettings *swgStarTrackerDisplaySettings)
+        static MsgStarTrackerDisplaySettings* create(const QObject *pipeSource, SWGSDRangel::SWGStarTrackerDisplaySettings *swgStarTrackerDisplaySettings)
         {
             return new MsgStarTrackerDisplaySettings(pipeSource, swgStarTrackerDisplaySettings);
         }
 
     private:
-        const PipeEndPoint *m_pipeSource;
+        const QObject *m_pipeSource;
         SWGSDRangel::SWGStarTrackerDisplaySettings *m_swgStarTrackerDisplaySettings;
 
-        MsgStarTrackerDisplaySettings(const PipeEndPoint *pipeSource, SWGSDRangel::SWGStarTrackerDisplaySettings *swgStarTrackerDisplaySettings) :
+        MsgStarTrackerDisplaySettings(const QObject *pipeSource, SWGSDRangel::SWGStarTrackerDisplaySettings *swgStarTrackerDisplaySettings) :
             Message(),
             m_pipeSource(pipeSource),
             m_swgStarTrackerDisplaySettings(swgStarTrackerDisplaySettings)
@@ -681,19 +680,19 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        const PipeEndPoint *getPipeSource() const { return m_pipeSource; }
+        const QObject *getPipeSource() const { return m_pipeSource; }
         SWGSDRangel::SWGStarTrackerDisplayLoSSettings *getSWGStarTrackerDisplayLoSSettings() const { return m_swgStarTrackerDisplayLoSSettings; }
 
-        static MsgStarTrackerDisplayLoSSettings* create(const PipeEndPoint *pipeSource, SWGSDRangel::SWGStarTrackerDisplayLoSSettings *swgStarTrackerDisplayLoSSettings)
+        static MsgStarTrackerDisplayLoSSettings* create(const QObject *pipeSource, SWGSDRangel::SWGStarTrackerDisplayLoSSettings *swgStarTrackerDisplayLoSSettings)
         {
             return new MsgStarTrackerDisplayLoSSettings(pipeSource, swgStarTrackerDisplayLoSSettings);
         }
 
     private:
-        const PipeEndPoint *m_pipeSource;
+        const QObject *m_pipeSource;
         SWGSDRangel::SWGStarTrackerDisplayLoSSettings *m_swgStarTrackerDisplayLoSSettings;
 
-        MsgStarTrackerDisplayLoSSettings(const PipeEndPoint *pipeSource, SWGSDRangel::SWGStarTrackerDisplayLoSSettings *swgStarTrackerDisplayLoSSettings) :
+        MsgStarTrackerDisplayLoSSettings(const QObject *pipeSource, SWGSDRangel::SWGStarTrackerDisplayLoSSettings *swgStarTrackerDisplayLoSSettings) :
             Message(),
             m_pipeSource(pipeSource),
             m_swgStarTrackerDisplayLoSSettings(swgStarTrackerDisplayLoSSettings)
@@ -737,7 +736,6 @@ public:
     void removeFeatureInstance(Feature *feature);
     void clearFeatures(FeatureSet *featureSet);
     // pipes
-    MessagePipesLegacy& getMessagePipesLegacy() { return m_messagePipesLegacy; }
     MessagePipes& getMessagePipes() { return m_messagePipes; }
     DataPipes& getDataPipes() { return m_dataPipes; }
 
@@ -771,7 +769,6 @@ private:
     QMap<ChannelAPI*, DeviceSet*> m_channelsMap; //!< Channel to device set map
     QMap<Feature*, FeatureSet*> m_featuresMap;   //!< Feature to feature set map
     PluginManager* m_pluginManager;
-    MessagePipesLegacy m_messagePipesLegacy;
     MessagePipes m_messagePipes;
     DataPipes m_dataPipes;
 
