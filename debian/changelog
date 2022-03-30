@@ -1,3 +1,24 @@
+sdrangel (6.20.2-1) unstable; urgency=medium
+
+  * MainCore: signals to notify changes in devices channels and features. Part of #1139
+  * Implement signal when main preferences are changed. Partially implements #1139
+  * Moved device and feature sets add and remove signals where appropriate. Improves #1139
+  * Added signals to SampleSinkFifo including samples timings. Implements #1143 and part of #1139
+  * VOR localizer feature: use added channel signal for automatic update
+  * Add FeatureLayout - to try to better use space in Feature window. PR #1178
+  * Replace obsolete QGLWidget by QOpenGLWidget
+  * Fixed cleanup method on shader classes. Fixes #1179
+  * GLSpectrum GUI: use a custom flow layout for the 3 main horizontal layouts
+  * ADS-B: Use QSplitter for table and map. PR #1180
+  * Update station icon on map when My Position preference changes. PR #1182
+  * ADS-B: Remove device set refresh button, as now automatic. Fix possible crash on close. PR #1184
+  * Fixed some signal/slot connects. Removed unnecessary m_channelMessageQueue in ChannelAPI. Fixes #1185
+  * Demod analyzer feature: change addRollupWidget placement to fix #1183. Fixes #1183
+  * Implement new message pipes. Implements #1154
+  * Fix satellite tracks when timezone isn't UTC. Fixes #1188. PR #1190
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 30 Mar 2022 19:29:43 +0200
+
 sdrangel (6.20.1-1) unstable; urgency=medium
 
   * Removed built in HIDAPI. Fixes #1160

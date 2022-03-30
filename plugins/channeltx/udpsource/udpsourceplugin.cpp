@@ -31,7 +31,7 @@
 const PluginDescriptor UDPSourcePlugin::m_pluginDescriptor = {
     UDPSource::m_channelId,
 	QStringLiteral("UDP Channel Source"),
-	QStringLiteral("6.18.0"),
+	QStringLiteral("6.20.2"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,

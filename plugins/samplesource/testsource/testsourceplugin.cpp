@@ -31,7 +31,7 @@
 const PluginDescriptor TestSourcePlugin::m_pluginDescriptor = {
     QStringLiteral("TestSource"),
 	QStringLiteral("Test Source input"),
-	QStringLiteral("4.21.1"),
+	QStringLiteral("6.20.2"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,

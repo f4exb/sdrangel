@@ -33,7 +33,7 @@
 const PluginDescriptor SoapySDROutputPlugin::m_pluginDescriptor = {
     QStringLiteral("SoapySDR"),
     QStringLiteral("SoapySDR Output"),
-    QStringLiteral("4.19.0"),
+    QStringLiteral("6.20.2"),
     QStringLiteral("(c) Edouard Griffiths, F4EXB"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,

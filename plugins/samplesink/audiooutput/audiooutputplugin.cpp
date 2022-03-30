@@ -31,7 +31,7 @@
 const PluginDescriptor AudioOutputPlugin::m_pluginDescriptor = {
     QString("AudioOutput"),
 	QString("Audio output"),
-	QString("6.8.0"),
+	QString("6.20.2"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,

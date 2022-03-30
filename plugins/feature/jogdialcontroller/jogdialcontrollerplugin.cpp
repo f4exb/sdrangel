@@ -29,7 +29,7 @@
 const PluginDescriptor JogdialControllerPlugin::m_pluginDescriptor = {
     JogdialController::m_featureId,
 	QStringLiteral("Jogdial Controller"),
-	QStringLiteral("6.18.0"),
+	QStringLiteral("6.20.2"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,

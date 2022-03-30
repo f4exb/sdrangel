@@ -29,7 +29,7 @@
 const PluginDescriptor RadioClockPlugin::m_pluginDescriptor = {
     RadioClock::m_channelId,
     QStringLiteral("Radio Clock"),
-    QStringLiteral("6.18.0"),
+    QStringLiteral("6.20.2"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,

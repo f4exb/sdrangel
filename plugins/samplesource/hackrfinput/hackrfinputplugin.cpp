@@ -33,7 +33,7 @@
 const PluginDescriptor HackRFInputPlugin::m_pluginDescriptor = {
     QStringLiteral("HackRF"),
 	QStringLiteral("HackRF Input"),
-	QStringLiteral("6.7.0"),
+	QStringLiteral("6.20.2"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,

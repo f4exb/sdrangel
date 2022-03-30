@@ -15,7 +15,7 @@
 const PluginDescriptor RTLSDRPlugin::m_pluginDescriptor = {
     QStringLiteral("RTLSDR"),
 	QStringLiteral("RTL-SDR Input"),
-	QStringLiteral("6.17.3"),
+	QStringLiteral("6.20.2"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,

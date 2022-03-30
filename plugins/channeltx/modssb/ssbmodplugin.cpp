@@ -28,7 +28,7 @@
 const PluginDescriptor SSBModPlugin::m_pluginDescriptor = {
     SSBMod::m_channelId,
     QStringLiteral("SSB Modulator"),
-    QStringLiteral("6.18.0"),
+    QStringLiteral("6.20.2"),
     QStringLiteral("(c) Edouard Griffiths, F4EXB"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,
