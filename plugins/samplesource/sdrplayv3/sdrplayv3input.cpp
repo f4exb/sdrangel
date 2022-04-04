@@ -228,8 +228,23 @@ const QString& SDRPlayV3Input::getDeviceDescription() const
 
 int SDRPlayV3Input::getSampleRate() const
 {
-    int rate = m_settings.m_devSampleRate;
-    return rate / (1 << m_settings.m_log2Decim);
+    uint32_t fsHz = m_settings.m_devSampleRate;
+    sdrplay_api_Bw_MHzT bwType = SDRPlayV3Bandwidths::getBandwidthEnum(m_settings.m_bandwidthIndex);
+    sdrplay_api_If_kHzT ifType = SDRPlayV3IF::getIFEnum(m_settings.m_ifFrequencyIndex);
+
+    if(
+        ((fsHz == 8192000) && (bwType == sdrplay_api_BW_1_536) && (ifType == sdrplay_api_IF_2_048)) ||
+        ((fsHz == 8000000) && (bwType == sdrplay_api_BW_1_536) && (ifType == sdrplay_api_IF_2_048)) ||
+        ((fsHz == 8000000) && (bwType == sdrplay_api_BW_5_000) && (ifType == sdrplay_api_IF_2_048)) ||
+        ((fsHz == 2000000) && (bwType <= sdrplay_api_BW_0_300) && (ifType == sdrplay_api_IF_0_450))) {
+        fsHz /= 4;
+    } else if ((fsHz == 2000000) && (bwType == sdrplay_api_BW_0_600) && (ifType == sdrplay_api_IF_0_450)) {
+        fsHz /= 2;
+    }else if ((fsHz == 6000000) && (bwType <= sdrplay_api_BW_1_536) && (ifType == sdrplay_api_IF_1_620)) {
+        fsHz /= 3;
+    }
+
+    return fsHz / (1 << m_settings.m_log2Decim);
 }
 
 quint64 SDRPlayV3Input::getCenterFrequency() const
