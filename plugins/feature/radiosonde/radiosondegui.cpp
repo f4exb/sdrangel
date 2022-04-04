@@ -117,7 +117,7 @@ void RadiosondeGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -129,11 +129,11 @@ RadiosondeGUI::RadiosondeGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, F
     m_doApplySettings(true),
     m_lastFeatureState(0)
 {
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/feature/radiosonde/readme.md";
     setAttribute(Qt::WA_DeleteOnClose, true);
-    setChannelWidget(false);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     m_radiosonde = reinterpret_cast<Radiosonde*>(feature);
     m_radiosonde->setMessageQueueToGUI(&m_inputMessageQueue);
 
@@ -180,6 +180,7 @@ RadiosondeGUI::RadiosondeGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, F
 
     displaySettings();
     applySettings(true);
+    makeUIConnections();
 
     plotChart();
 }
@@ -199,6 +200,7 @@ void RadiosondeGUI::displaySettings()
 {
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_settings.m_title);
+    setTitle(m_settings.m_title);
     blockApplySettings(true);
 
     // Order and size columns
@@ -217,9 +219,9 @@ void RadiosondeGUI::displaySettings()
     ui->y1->setCurrentIndex((int)m_settings.m_y1);
     ui->y2->setCurrentIndex((int)m_settings.m_y2);
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
-    arrangeRollups();
+    getRollupContents()->arrangeRollups();
 }
 
 void RadiosondeGUI::leaveEvent(QEvent*)
@@ -236,7 +238,6 @@ void RadiosondeGUI::onMenuDialogCalled(const QPoint &p)
     {
         BasicFeatureSettingsDialog dialog(this);
         dialog.setTitle(m_settings.m_title);
-        dialog.setColor(m_settings.m_rgbColor);
         dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
         dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
@@ -246,7 +247,6 @@ void RadiosondeGUI::onMenuDialogCalled(const QPoint &p)
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_rgbColor = dialog.getColor().rgb();
         m_settings.m_title = dialog.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
@@ -852,4 +852,13 @@ void RadiosondeGUI::on_deleteAll_clicked()
         // Remove from hash
         m_radiosondes.remove(serial);
     }
+}
+
+void RadiosondeGUI::makeUIConnections()
+{
+    QObject::connect(ui->radiosondes, &QTableWidget::itemSelectionChanged, this, &RadiosondeGUI::on_radiosondes_itemSelectionChanged);
+    QObject::connect(ui->radiosondes, &QTableWidget::cellDoubleClicked, this, &RadiosondeGUI::on_radiosondes_cellDoubleClicked);
+    QObject::connect(ui->y1, qOverload<int>(&QComboBox::currentIndexChanged), this, &RadiosondeGUI::on_y1_currentIndexChanged);
+    QObject::connect(ui->y2, qOverload<int>(&QComboBox::currentIndexChanged), this, &RadiosondeGUI::on_y2_currentIndexChanged);
+    QObject::connect(ui->deleteAll, &QPushButton::clicked, this, &RadiosondeGUI::on_deleteAll_clicked);
 }

@@ -130,6 +130,7 @@ private:
     void updateDeviceFeatureCombo(const QStringList &items, const QString &selected);
     void updateFileInputList();
     void updateMapList();
+    void makeUIConnections();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);

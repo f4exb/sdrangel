@@ -1174,7 +1174,7 @@ void VORLocalizerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -1184,7 +1184,6 @@ void VORLocalizerGUI::onMenuDialogCalled(const QPoint &p)
     {
         BasicFeatureSettingsDialog dialog(this);
         dialog.setTitle(m_settings.m_title);
-        dialog.setColor(m_settings.m_rgbColor);
         dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
         dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
@@ -1194,7 +1193,6 @@ void VORLocalizerGUI::onMenuDialogCalled(const QPoint &p)
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_rgbColor = dialog.getColor().rgb();
         m_settings.m_title = dialog.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
@@ -1225,7 +1223,8 @@ VORLocalizerGUI::VORLocalizerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     m_lastFeatureState(0),
     m_rrSecondsCount(0)
 {
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/feature/vorlocalizer/readme.md";
 
     ui->map->rootContext()->setContextProperty("vorModel", &m_vorModel);
@@ -1235,7 +1234,7 @@ VORLocalizerGUI::VORLocalizerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     m_muteIcon.addPixmap(QPixmap("://sound_on.png"), QIcon::Normal, QIcon::Off);
 
     setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(&m_dlm, &HttpDownloadManager::downloadComplete, this, &VORLocalizerGUI::downloadFinished);
 
@@ -1328,6 +1327,7 @@ VORLocalizerGUI::VORLocalizerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
 
     displaySettings();
     applySettings(true);
+    makeUIConnections();
 }
 
 VORLocalizerGUI::~VORLocalizerGUI()
@@ -1353,6 +1353,7 @@ void VORLocalizerGUI::displaySettings()
 {
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_settings.m_title);
+    setTitle(m_settings.m_title);
 
     blockApplySettings(true);
 
@@ -1378,7 +1379,7 @@ void VORLocalizerGUI::displaySettings()
     ui->centerShift->setValue(m_settings.m_centerShift/1000);
     ui->forceRRAveraging->setChecked(m_settings.m_forceRRAveraging);
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -1448,4 +1449,15 @@ void VORLocalizerGUI::tick()
         ui->rrTurnTimeProgress->setToolTip(tr("Round robin turn time %1s").arg(m_rrSecondsCount));
         m_tickCount = 0;
     }
+}
+
+void VORLocalizerGUI::makeUIConnections()
+{
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &VORLocalizerGUI::on_startStop_toggled);
+    QObject::connect(ui->getOurAirportsVORDB, &QPushButton::clicked, this, &VORLocalizerGUI::on_getOurAirportsVORDB_clicked);
+    QObject::connect(ui->getOpenAIPVORDB, &QPushButton::clicked, this, &VORLocalizerGUI::on_getOpenAIPVORDB_clicked);
+    QObject::connect(ui->magDecAdjust, &ButtonSwitch::toggled, this, &VORLocalizerGUI::on_magDecAdjust_toggled);
+    QObject::connect(ui->rrTime, &QDial::valueChanged, this, &VORLocalizerGUI::on_rrTime_valueChanged);
+    QObject::connect(ui->centerShift, &QDial::valueChanged, this, &VORLocalizerGUI::on_centerShift_valueChanged);
+    QObject::connect(ui->channelsRefresh, &QPushButton::clicked, this, &VORLocalizerGUI::on_channelsRefresh_clicked);
 }

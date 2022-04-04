@@ -71,6 +71,7 @@ private:
     void updatePipeList(const QList<GS232ControllerSettings::AvailableChannelOrFeature>& sources);
     void updateSerialPortList();
     bool handleMessage(const Message& message);
+    void makeUIConnections();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);

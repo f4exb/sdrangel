@@ -118,7 +118,7 @@ void AFCGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -130,7 +130,8 @@ AFCGUI::AFCGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
 	m_doApplySettings(true),
     m_lastFeatureState(0)
 {
-	ui->setupUi(this);
+	ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/feature/afc/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
 
@@ -140,8 +141,7 @@ AFCGUI::AFCGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     ui->toleranceFrequency->setColorMapper(ColorMapper(ColorMapper::GrayYellow));
     ui->toleranceFrequency->setValueRange(5, 0, 99999L);
 
-    setChannelWidget(false);
-	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+	connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     m_afc = reinterpret_cast<AFC*>(feature);
     m_afc->setMessageQueueToGUI(&m_inputMessageQueue);
 
@@ -162,6 +162,7 @@ AFCGUI::AFCGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     requestDeviceSetLists();
     displaySettings();
 	applySettings(true);
+    makeUIConnections();
 }
 
 AFCGUI::~AFCGUI()
@@ -178,6 +179,7 @@ void AFCGUI::displaySettings()
 {
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_settings.m_title);
+    setTitle(m_settings.m_title);
     blockApplySettings(true);
     ui->hasTargetFrequency->setChecked(m_settings.m_hasTargetFrequency);
     ui->transverterTarget->setChecked(m_settings.m_transverterTarget);
@@ -185,7 +187,7 @@ void AFCGUI::displaySettings()
     ui->toleranceFrequency->setValue(m_settings.m_freqTolerance);
     ui->targetPeriod->setValue(m_settings.m_trackerAdjustPeriod);
     ui->targetPeriodText->setText(tr("%1").arg(m_settings.m_trackerAdjustPeriod));
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -269,7 +271,6 @@ void AFCGUI::onMenuDialogCalled(const QPoint &p)
     {
         BasicFeatureSettingsDialog dialog(this);
         dialog.setTitle(m_settings.m_title);
-        dialog.setColor(m_settings.m_rgbColor);
         dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
         dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
@@ -279,7 +280,6 @@ void AFCGUI::onMenuDialogCalled(const QPoint &p)
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_rgbColor = dialog.getColor().rgb();
         m_settings.m_title = dialog.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
@@ -413,4 +413,19 @@ void AFCGUI::applySettings(bool force)
 	    AFC::MsgConfigureAFC* message = AFC::MsgConfigureAFC::create( m_settings, force);
 	    m_afc->getInputMessageQueue()->push(message);
 	}
+}
+
+void AFCGUI::makeUIConnections()
+{
+	QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &AFCGUI::on_startStop_toggled);
+	QObject::connect(ui->hasTargetFrequency, &ButtonSwitch::toggled, this, &AFCGUI::on_hasTargetFrequency_toggled);
+    QObject::connect(ui->targetFrequency, &ValueDial::changed, this, &AFCGUI::on_targetFrequency_changed);
+	QObject::connect(ui->transverterTarget, &ButtonSwitch::toggled, this, &AFCGUI::on_transverterTarget_toggled);
+	QObject::connect(ui->toleranceFrequency, &ValueDial::changed, this, &AFCGUI::on_toleranceFrequency_changed);
+	QObject::connect(ui->deviceTrack, &QPushButton::clicked, this, &AFCGUI::on_deviceTrack_clicked);
+	QObject::connect(ui->devicesRefresh, &QPushButton::clicked, this, &AFCGUI::on_devicesRefresh_clicked);
+	QObject::connect(ui->trackerDevice, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AFCGUI::on_trackerDevice_currentIndexChanged);
+	QObject::connect(ui->trackedDevice, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AFCGUI::on_trackedDevice_currentIndexChanged);
+	QObject::connect(ui->devicesApply, &QPushButton::clicked, this, &AFCGUI::on_devicesApply_clicked);
+	QObject::connect(ui->targetPeriod, &QDial::valueChanged, this, &AFCGUI::on_targetPeriod_valueChanged);
 }

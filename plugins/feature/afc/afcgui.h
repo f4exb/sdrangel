@@ -67,6 +67,7 @@ private:
 	void requestDeviceSetLists();
     void updateDeviceSetLists(const AFC::MsgDeviceSetListsReport& report);
 	bool handleMessage(const Message& message);
+    void makeUIConnections();
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);

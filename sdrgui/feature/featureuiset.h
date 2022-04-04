@@ -25,13 +25,13 @@
 #include "export.h"
 
 class QWidget;
-class FeatureWindow;
 class FeatureGUI;
 class PluginAPI;
 class FeatureSet;
 class Feature;
 class FeatureSetPreset;
 class WebAPIAdapterInterface;
+class Workspace;
 
 class SDRGUI_API FeatureUISet : public QObject
 {
@@ -46,10 +46,13 @@ public:
     void deleteFeature(int featureIndex);
     const Feature *getFeatureAt(int featureIndex) const;
     Feature *getFeatureAt(int featureIndex);
-    void loadFeatureSetSettings(const FeatureSetPreset* preset, PluginAPI *pluginAPI, WebAPIAdapterInterface *apiAdapter);
+    void loadFeatureSetSettings(
+        const FeatureSetPreset* preset,
+        PluginAPI *pluginAPI,
+        WebAPIAdapterInterface *apiAdapter,
+        Workspace *workspace
+    );
     void saveFeatureSetSettings(FeatureSetPreset* preset);
-
-    FeatureWindow *m_featureWindow;
 
 private:
     struct FeatureInstanceRegistration

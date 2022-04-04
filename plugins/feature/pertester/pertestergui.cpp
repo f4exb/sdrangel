@@ -114,7 +114,7 @@ void PERTesterGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -126,11 +126,11 @@ PERTesterGUI::PERTesterGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Fea
     m_doApplySettings(true),
     m_lastFeatureState(0)
 {
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/feature/pertester/readme.md";
     setAttribute(Qt::WA_DeleteOnClose, true);
-    setChannelWidget(false);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     m_perTester = reinterpret_cast<PERTester*>(feature);
     m_perTester->setMessageQueueToGUI(&m_inputMessageQueue);
 
@@ -145,6 +145,7 @@ PERTesterGUI::PERTesterGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Fea
 
     displaySettings();
     applySettings(true);
+    makeUIConnections();
 }
 
 PERTesterGUI::~PERTesterGUI()
@@ -161,6 +162,7 @@ void PERTesterGUI::displaySettings()
 {
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_settings.m_title);
+    setTitle(m_settings.m_title);
     blockApplySettings(true);
     ui->packetCount->setValue(m_settings.m_packetCount);
     ui->start->setCurrentIndex((int)m_settings.m_start);
@@ -175,9 +177,9 @@ void PERTesterGUI::displaySettings()
     ui->txUDPPort->setText(QString::number(m_settings.m_txUDPPort));
     ui->rxUDPAddress->setText(m_settings.m_rxUDPAddress);
     ui->rxUDPPort->setText(QString::number(m_settings.m_rxUDPPort));
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
-    arrangeRollups();
+    getRollupContents()->arrangeRollups();
 }
 
 void PERTesterGUI::leaveEvent(QEvent*)
@@ -194,7 +196,6 @@ void PERTesterGUI::onMenuDialogCalled(const QPoint &p)
     {
         BasicFeatureSettingsDialog dialog(this);
         dialog.setTitle(m_settings.m_title);
-        dialog.setColor(m_settings.m_rgbColor);
         dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
         dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
@@ -204,7 +205,6 @@ void PERTesterGUI::onMenuDialogCalled(const QPoint &p)
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_rgbColor = dialog.getColor().rgb();
         m_settings.m_title = dialog.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
@@ -251,7 +251,7 @@ void PERTesterGUI::on_start_currentIndexChanged(int index)
     ui->satellites->setVisible(m_settings.m_start != PERTesterSettings::START_IMMEDIATELY);
     ui->satellitesLabel->setVisible(m_settings.m_start != PERTesterSettings::START_IMMEDIATELY);
     applySettings();
-    arrangeRollups();
+    getRollupContents()->arrangeRollups();
 }
 
 void PERTesterGUI::on_satellites_editingFinished()
@@ -352,4 +352,21 @@ void PERTesterGUI::applySettings(bool force)
         PERTester::MsgConfigurePERTester* message = PERTester::MsgConfigurePERTester::create(m_settings, force);
         m_perTester->getInputMessageQueue()->push(message);
     }
+}
+
+void PERTesterGUI::makeUIConnections()
+{
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &PERTesterGUI::on_startStop_toggled);
+    QObject::connect(ui->resetStats, &QToolButton::clicked, this, &PERTesterGUI::on_resetStats_clicked);
+    QObject::connect(ui->packetCount, qOverload<int>(&QSpinBox::valueChanged), this, &PERTesterGUI::on_packetCount_valueChanged);
+    QObject::connect(ui->start, qOverload<int>(&QComboBox::currentIndexChanged), this, &PERTesterGUI::on_start_currentIndexChanged);
+    QObject::connect(ui->satellites, &QLineEdit::editingFinished, this, &PERTesterGUI::on_satellites_editingFinished);
+    QObject::connect(ui->interval, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &PERTesterGUI::on_interval_valueChanged);
+    QObject::connect(ui->packet, &QPlainTextEdit::textChanged, this, &PERTesterGUI::on_packet_textChanged);
+    QObject::connect(ui->leading, qOverload<int>(&QSpinBox::valueChanged), this, &PERTesterGUI::on_leading_valueChanged);
+    QObject::connect(ui->trailing, qOverload<int>(&QSpinBox::valueChanged), this, &PERTesterGUI::on_trailing_valueChanged);
+    QObject::connect(ui->txUDPAddress, &QLineEdit::editingFinished, this, &PERTesterGUI::on_txUDPAddress_editingFinished);
+    QObject::connect(ui->txUDPPort, &QLineEdit::editingFinished, this, &PERTesterGUI::on_txUDPPort_editingFinished);
+    QObject::connect(ui->rxUDPAddress, &QLineEdit::editingFinished, this, &PERTesterGUI::on_rxUDPAddress_editingFinished);
+    QObject::connect(ui->rxUDPPort, &QLineEdit::editingFinished, this, &PERTesterGUI::on_rxUDPPort_editingFinished);
 }

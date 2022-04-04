@@ -418,7 +418,7 @@ void APRSGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -430,12 +430,12 @@ APRSGUI::APRSGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feat
     m_doApplySettings(true),
     m_lastFeatureState(0)
 {
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/feature/aprs/readme.md";
 
     setAttribute(Qt::WA_DeleteOnClose, true);
-    setChannelWidget(false);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     m_aprs = reinterpret_cast<APRS*>(feature);
     m_aprs->setMessageQueueToGUI(&m_inputMessageQueue);
 
@@ -564,6 +564,7 @@ APRSGUI::APRSGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feat
 
     displaySettings();
     applySettings(true);
+    makeUIConnections();
 }
 
 APRSGUI::~APRSGUI()
@@ -629,6 +630,7 @@ void APRSGUI::displaySettings()
 {
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_settings.m_title);
+    setTitle(m_settings.m_title);
     blockApplySettings(true);
     ui->igate->setChecked(m_settings.m_igateEnabled);
     ui->stationFilter->setCurrentIndex((int)m_settings.m_stationFilter);
@@ -643,7 +645,7 @@ void APRSGUI::displaySettings()
     displayTableSettings(ui->telemetryTable, telemetryTableMenu, m_settings.m_telemetryTableColumnSizes, m_settings.m_telemetryTableColumnIndexes, APRS_TELEMETRY_TABLE_COLUMNS);
     displayTableSettings(ui->motionTable, motionTableMenu, m_settings.m_motionTableColumnSizes, m_settings.m_motionTableColumnIndexes, APRS_MOTION_TABLE_COLUMNS);
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
 
     blockApplySettings(false);
 }
@@ -683,7 +685,6 @@ void APRSGUI::onMenuDialogCalled(const QPoint &p)
     {
         BasicFeatureSettingsDialog dialog(this);
         dialog.setTitle(m_settings.m_title);
-        dialog.setColor(m_settings.m_rgbColor);
         dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
         dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
@@ -693,7 +694,6 @@ void APRSGUI::onMenuDialogCalled(const QPoint &p)
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_rgbColor = dialog.getColor().rgb();
         m_settings.m_title = dialog.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
@@ -2025,4 +2025,21 @@ void APRSGUI::on_viewOnMap_clicked()
             FeatureWebAPIUtils::mapFind(station->m_station);
         }
     }
+}
+
+void APRSGUI::makeUIConnections()
+{
+    QObject::connect(ui->stationFilter, qOverload<int>(&QComboBox::currentIndexChanged), this, &APRSGUI::on_stationFilter_currentIndexChanged);
+    QObject::connect(ui->stationSelect, qOverload<int>(&QComboBox::currentIndexChanged), this, &APRSGUI::on_stationSelect_currentIndexChanged);
+    QObject::connect(ui->filterAddressee, &QLineEdit::editingFinished, this, &APRSGUI::on_filterAddressee_editingFinished);
+    QObject::connect(ui->deleteMessages, &QPushButton::clicked, this, &APRSGUI::on_deleteMessages_clicked);
+    QObject::connect(ui->weatherTimeSelect, qOverload<int>(&QComboBox::currentIndexChanged), this, &APRSGUI::on_weatherTimeSelect_currentIndexChanged);
+    QObject::connect(ui->weatherPlotSelect, qOverload<int>(&QComboBox::currentIndexChanged), this, &APRSGUI::on_weatherPlotSelect_currentIndexChanged);
+    QObject::connect(ui->telemetryTimeSelect, qOverload<int>(&QComboBox::currentIndexChanged), this, &APRSGUI::on_telemetryTimeSelect_currentIndexChanged);
+    QObject::connect(ui->telemetryPlotSelect, qOverload<int>(&QComboBox::currentIndexChanged), this, &APRSGUI::on_telemetryPlotSelect_currentIndexChanged);
+    QObject::connect(ui->motionTimeSelect, qOverload<int>(&QComboBox::currentIndexChanged), this, &APRSGUI::on_motionTimeSelect_currentIndexChanged);
+    QObject::connect(ui->motionPlotSelect, qOverload<int>(&QComboBox::currentIndexChanged), this, &APRSGUI::on_motionPlotSelect_currentIndexChanged);
+    QObject::connect(ui->displaySettings, &QPushButton::clicked, this, &APRSGUI::on_displaySettings_clicked);
+    QObject::connect(ui->igate, &ButtonSwitch::toggled, this, &APRSGUI::on_igate_toggled);
+    QObject::connect(ui->viewOnMap, &QPushButton::clicked, this, &APRSGUI::on_viewOnMap_clicked);
 }

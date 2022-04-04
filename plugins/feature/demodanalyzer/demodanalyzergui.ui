@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>DemodAnalyzerGUI</class>
- <widget class="RollupWidget" name="DemodAnalyzerGUI">
+ <widget class="RollupContents" name="DemodAnalyzerGUI">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -370,9 +370,14 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>RollupWidget</class>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
+   <class>RollupContents</class>
    <extends>QWidget</extends>
-   <header>gui/rollupwidget.h</header>
+   <header>gui/rollupcontents.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -386,11 +391,6 @@
    <extends>QWidget</extends>
    <header>gui/glspectrumgui.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
    <class>GLScope</class>

@@ -29,6 +29,7 @@ class FeatureSetPreset;
 class FeatureUISet;
 class WebAPIAdapterInterface;
 class PluginAPI;
+class Workspace;
 
 namespace Ui {
     class FeaturePresetsDialog;
@@ -43,6 +44,7 @@ public:
     void setFeatureUISet(FeatureUISet *featureUISet) { m_featureUISet = featureUISet; }
     void setPluginAPI(PluginAPI *pluginAPI) { m_pluginAPI = pluginAPI; }
     void setWebAPIAdapter(WebAPIAdapterInterface *apiAdapter) { m_apiAdapter = apiAdapter; }
+    void setWorkspace(Workspace *workspace) { m_workspace = workspace; }
     void populateTree();
 
 private:
@@ -56,6 +58,7 @@ private:
     FeatureUISet *m_featureUISet;
     PluginAPI *m_pluginAPI;
     WebAPIAdapterInterface *m_apiAdapter;
+    Workspace *m_workspace;
 
     QTreeWidgetItem* addPresetToTree(const FeatureSetPreset* preset);
     void updatePresetControls();

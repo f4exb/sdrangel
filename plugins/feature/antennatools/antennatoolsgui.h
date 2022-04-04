@@ -67,6 +67,7 @@ private:
     void applySettings(bool force = false);
     void displaySettings();
     bool handleMessage(const Message& message);
+    void makeUIConnections();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);

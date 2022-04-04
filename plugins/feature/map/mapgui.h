@@ -132,6 +132,7 @@ private:
     QString maptilerAPIKey() const;
     QString cesiumIonAPIKey() const;
     void redrawMap();
+    void makeUIConnections();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);

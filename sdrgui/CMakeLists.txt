@@ -57,6 +57,7 @@ set(sdrgui_SOURCES
     gui/mypositiondialog.cpp
     gui/pluginsdialog.cpp
     gui/presetitem.cpp
+    gui/rollupcontents.cpp
     gui/rollupwidget.cpp
     gui/samplingdevicedialog.cpp
     gui/samplingdevicesdock.cpp
@@ -73,6 +74,8 @@ set(sdrgui_SOURCES
     gui/tvscreenanalog.cpp
     gui/valuedial.cpp
     gui/valuedialz.cpp
+    gui/workspace.cpp
+    gui/workspaceselectiondialog.cpp
     gui/wsspectrumsettingsdialog.cpp
     gui/wrappingdatetimeedit.cpp
 
@@ -152,6 +155,7 @@ set(sdrgui_HEADERS
     gui/physicalunit.h
     gui/pluginsdialog.h
     gui/presetitem.h
+    gui/rollupcontents.h
     gui/rollupwidget.h
     gui/samplingdevicedialog.h
     gui/samplingdevicesdock.h
@@ -168,6 +172,8 @@ set(sdrgui_HEADERS
     gui/tvscreenanalog.h
     gui/valuedial.h
     gui/valuedialz.h
+    gui/workspace.h
+    gui/workspaceselectiondialog.h
     gui/wsspectrumsettingsdialog.h
     gui/wrappingdatetimeedit.h
 
@@ -224,6 +230,7 @@ set(sdrgui_FORMS
     gui/myposdialog.ui
     gui/transverterdialog.ui
     gui/loggingdialog.ui
+    gui/workspaceselectiondialog.ui
     gui/wsspectrumsettingsdialog.ui
     soapygui/discreterangegui.ui
     soapygui/intervalrangegui.ui

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>StarTrackerGUI</class>
- <widget class="RollupWidget" name="StarTrackerGUI">
+ <widget class="RollupContents" name="StarTrackerGUI">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -847,15 +847,15 @@ This can be specified as a decimal (E.g. 34.23) or in degrees, minutes and secon
  </widget>
  <customwidgets>
   <customwidget>
-   <class>RollupWidget</class>
-   <extends>QWidget</extends>
-   <header>gui/rollupwidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>ButtonSwitch</class>
    <extends>QToolButton</extends>
    <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
+   <class>RollupContents</class>
+   <extends>QWidget</extends>
+   <header>gui/rollupcontents.h</header>
+   <container>1</container>
   </customwidget>
   <customwidget>
    <class>QChartView</class>

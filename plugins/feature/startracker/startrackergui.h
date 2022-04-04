@@ -153,6 +153,7 @@ private:
     void raDecChanged();
     void updateChartSubSelect();
     void updateSolarFlux(bool all);
+    void makeUIConnections();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);

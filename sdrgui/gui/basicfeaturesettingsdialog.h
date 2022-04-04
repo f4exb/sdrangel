@@ -34,9 +34,7 @@ public:
     explicit BasicFeatureSettingsDialog(QWidget *parent = nullptr);
     ~BasicFeatureSettingsDialog();
     void setTitle(const QString& title);
-    void setColor(const QColor& color);
     const QString& getTitle() const { return m_title; }
-    const QColor& getColor() const { return m_color; }
     bool useReverseAPI() const { return m_useReverseAPI; }
     const QString& getReverseAPIAddress() const { return m_reverseAPIAddress; }
     uint16_t getReverseAPIPort() const { return m_reverseAPIPort; }
@@ -50,7 +48,6 @@ public:
     bool hasChanged() const { return m_hasChanged; }
 
 private slots:
-    void on_colorBtn_clicked();
     void on_title_editingFinished();
     void on_reverseAPI_toggled(bool checked);
     void on_reverseAPIAddress_editingFinished();
@@ -61,7 +58,6 @@ private slots:
 
 private:
     Ui::BasicFeatureSettingsDialog *ui;
-    QColor m_color;
     QString m_title;
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
@@ -69,8 +65,6 @@ private:
     uint16_t m_reverseAPIFeatureSetIndex;
     uint16_t m_reverseAPIFeatureIndex;
     bool m_hasChanged;
-
-    void paintColor();
 };
 
 #endif // INCLUDE_SDRGUI_BASICFEATURESETTINGSDIALOG_H

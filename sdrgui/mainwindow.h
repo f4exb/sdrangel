@@ -57,24 +57,27 @@ class Command;
 class FeatureSetPreset;
 class CommandKeyReceiver;
 
-namespace Ui {
-	class MainWindow;
-}
+class QMenuBar;
+class Workspace;
+
+// namespace Ui {
+// 	class MainWindow;
+// }
 
 class SDRGUI_API MainWindow : public QMainWindow {
 	Q_OBJECT
 
 public:
-	explicit MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parser, QWidget* parent = 0);
+	explicit MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parser, QWidget* parent = nullptr);
 	~MainWindow();
 	static MainWindow *getInstance() { return m_instance; } // Main Window is de facto a singleton so this just returns its reference
 	MessageQueue* getInputMessageQueue() { return &m_inputMessageQueue; }
 	void addViewAction(QAction* action);
-	void setDeviceGUI(int deviceTabIndex, QWidget* gui, const QString& deviceDisplayName, int deviceType = 0);
     const PluginManager *getPluginManager() const { return m_pluginManager; }
     std::vector<DeviceUISet*>& getDeviceUISets() { return m_deviceUIs; }
     void commandKeysConnect(QObject *object, const char *slot);
     void commandKeysDisconnect(QObject *object, const char *slot);
+    int getNumberOfWorkspaces() const { return m_workspaces.size(); }
 
 private:
     enum {
@@ -90,7 +93,9 @@ private:
 	};
 
 	static MainWindow *m_instance;
-	Ui::MainWindow* ui;
+    QList<Workspace*> m_workspaces;
+    Workspace *m_currentWorkspace;
+	// Ui::MainWindow* ui;
 	MessageQueue m_inputMessageQueue;
     MainCore *m_mainCore;
 	std::vector<DeviceUISet*> m_deviceUIs;
@@ -103,14 +108,9 @@ private:
 	QTimer m_statusTimer;
 	int m_lastEngineState;
 
+    QMenuBar *m_menuBar;
 	QLabel* m_dateTimeWidget;
 	QLabel* m_showSystemWidget;
-
-	QWidget* m_inputGUI;
-
-	int m_sampleRate;
-	quint64 m_centerFrequency;
-	std::string m_sampleFileName;
 
 	WebAPIRequestMapper *m_requestMapper;
 	WebAPIServer *m_apiServer;
@@ -126,11 +126,12 @@ private:
 	void loadSettings();
 	void loadPresetSettings(const Preset* preset, int tabIndex);
 	void savePresetSettings(Preset* preset, int tabIndex);
-	void loadFeatureSetPresetSettings(const FeatureSetPreset* preset, int featureSetIndex);
+	void loadFeatureSetPresetSettings(const FeatureSetPreset* preset, int featureSetIndex, Workspace *workspace);
 	void saveFeatureSetPresetSettings(FeatureSetPreset* preset, int featureSetIndex);
 	void saveCommandSettings();
 
 	QString openGLVersion();
+    void createMenuBar();
 	void createStatusBar();
 	void closeEvent(QCloseEvent*);
 	void updatePresetControls();
@@ -138,6 +139,7 @@ private:
 	QTreeWidgetItem* addCommandToTree(const Command* command);
 	void applySettings();
 
+  	void setDeviceGUI(int deviceTabIndex, QWidget* gui, const QString& deviceDisplayName, int deviceType = 0);
 	void addSourceDevice(int deviceIndex);
 	void addSinkDevice();
 	void addMIMODevice();
@@ -156,7 +158,11 @@ private:
 
 private slots:
 	void handleMessages();
+    void handleWorkspaceVisibility(Workspace *workspace, bool visibility);
 	void updateStatus();
+    void addWorkspace();
+    void viewAllWorkspaces();
+
 	void on_action_View_Fullscreen_toggled(bool checked);
 	void on_presetSave_clicked();
 	void on_presetUpdate_clicked();
@@ -185,7 +191,9 @@ private slots:
     void on_action_DeviceUserArguments_triggered();
     void samplingDeviceChanged(int deviceType, int tabIndex, int newDeviceIndex);
     void channelAddClicked(int channelIndex);
-    void featureAddClicked(int featureIndex);
+    void featureAddClicked(Workspace *workspace, int featureIndex);
+    void featureMove(FeatureGUI *gui, int wsIndexDestnation);
+    void openFeaturePresetsDialog(QPoint p, Workspace *workspace);
     void on_action_Quick_Start_triggered();
     void on_action_Main_Window_triggered();
 	void on_action_Loaded_Plugins_triggered();
@@ -201,7 +209,7 @@ private slots:
 	void tabFeaturesIndexChanged();
 	void commandKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifiers, bool release);
 	void fftWisdomProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
-	void toggleSpectrumView(bool checked);
+	// void toggleSpectrumView(bool checked);
 };
 
 #endif // INCLUDE_MAINWINDOW_H

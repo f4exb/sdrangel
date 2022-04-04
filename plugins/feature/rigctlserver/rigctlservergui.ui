@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>RigCtlServerGUI</class>
- <widget class="RollupWidget" name="RigCtlServerGUI">
+ <widget class="RollupContents" name="RigCtlServerGUI">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -264,15 +264,15 @@ Default is 10000.</string>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>RollupWidget</class>
-   <extends>QWidget</extends>
-   <header>gui/rollupwidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>ButtonSwitch</class>
    <extends>QToolButton</extends>
    <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
+   <class>RollupContents</class>
+   <extends>QWidget</extends>
+   <header>gui/rollupcontents.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>

@@ -230,7 +230,7 @@ void SatelliteTrackerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -248,11 +248,11 @@ SatelliteTrackerGUI::SatelliteTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *fea
     m_polarChart(nullptr),
     m_geostationarySatVisible(false)
 {
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/feature/satellitetracker/readme.md";
     setAttribute(Qt::WA_DeleteOnClose, true);
-    setChannelWidget(false);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     m_satelliteTracker = reinterpret_cast<SatelliteTracker*>(feature);
     m_satelliteTracker->setMessageQueueToGUI(&m_inputMessageQueue);
 
@@ -303,6 +303,7 @@ SatelliteTrackerGUI::SatelliteTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *fea
 
     displaySettings();
     applySettings(true);
+    makeUIConnections();
 
     // Get initial list of satellites
     on_updateSatData_clicked();
@@ -322,6 +323,7 @@ void SatelliteTrackerGUI::displaySettings()
 {
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_settings.m_title);
+    setTitle(m_settings.m_title);
     blockApplySettings(true);
     ui->latitude->setValue(m_settings.m_latitude);
     ui->longitude->setValue(m_settings.m_longitude);
@@ -337,7 +339,7 @@ void SatelliteTrackerGUI::displaySettings()
     ui->dateTime->setDateTime(QDateTime::fromString(m_settings.m_dateTime, Qt::ISODateWithMs));
     ui->autoTarget->setChecked(m_settings.m_autoTarget);
     ui->darkTheme->setChecked(m_settings.m_chartsDarkTheme);
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     plotChart();
     blockApplySettings(false);
 }
@@ -356,7 +358,6 @@ void SatelliteTrackerGUI::onMenuDialogCalled(const QPoint &p)
     {
         BasicFeatureSettingsDialog dialog(this);
         dialog.setTitle(m_settings.m_title);
-        dialog.setColor(m_settings.m_rgbColor);
         dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
         dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
@@ -366,7 +367,6 @@ void SatelliteTrackerGUI::onMenuDialogCalled(const QPoint &p)
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_rgbColor = dialog.getColor().rgb();
         m_settings.m_title = dialog.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
@@ -1312,4 +1312,27 @@ void SatelliteTrackerGUI::on_deviceFeatureSelect_currentIndexChanged(int index)
         m_settings.m_fileInputDevice = ui->deviceFeatureSelect->currentText();
     }
     applySettings();
+}
+
+void SatelliteTrackerGUI::makeUIConnections()
+{
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &SatelliteTrackerGUI::on_startStop_toggled);
+    QObject::connect(ui->useMyPosition, &QToolButton::clicked, this, &SatelliteTrackerGUI::on_useMyPosition_clicked);
+    QObject::connect(ui->latitude, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &SatelliteTrackerGUI::on_latitude_valueChanged);
+    QObject::connect(ui->longitude, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &SatelliteTrackerGUI::on_longitude_valueChanged);
+    QObject::connect(ui->target, &QComboBox::currentTextChanged, this, &SatelliteTrackerGUI::on_target_currentTextChanged);
+    QObject::connect(ui->displaySettings, &QToolButton::clicked, this, &SatelliteTrackerGUI::on_displaySettings_clicked);
+    QObject::connect(ui->radioControl, &QToolButton::clicked, this, &SatelliteTrackerGUI::on_radioControl_clicked);
+    QObject::connect(ui->dateTimeSelect, qOverload<int>(&QComboBox::currentIndexChanged), this, &SatelliteTrackerGUI::on_dateTimeSelect_currentIndexChanged);
+    QObject::connect(ui->dateTime, &WrappingDateTimeEdit::dateTimeChanged, this, &SatelliteTrackerGUI::on_dateTime_dateTimeChanged);
+    QObject::connect(ui->viewOnMap, &QToolButton::clicked, this, &SatelliteTrackerGUI::on_viewOnMap_clicked);
+    QObject::connect(ui->updateSatData, &QToolButton::clicked, this, &SatelliteTrackerGUI::on_updateSatData_clicked);
+    QObject::connect(ui->selectSats, &QToolButton::clicked, this, &SatelliteTrackerGUI::on_selectSats_clicked);
+    QObject::connect(ui->autoTarget, &ButtonSwitch::clicked, this, &SatelliteTrackerGUI::on_autoTarget_clicked);
+    QObject::connect(ui->chartSelect, qOverload<int>(&QComboBox::currentIndexChanged), this, &SatelliteTrackerGUI::on_chartSelect_currentIndexChanged);
+    QObject::connect(ui->nextPass, &QToolButton::clicked, this, &SatelliteTrackerGUI::on_nextPass_clicked);
+    QObject::connect(ui->prevPass, &QToolButton::clicked, this, &SatelliteTrackerGUI::on_prevPass_clicked);
+    QObject::connect(ui->darkTheme, &QToolButton::clicked, this, &SatelliteTrackerGUI::on_darkTheme_clicked);
+    QObject::connect(ui->satTable, &QTableWidget::cellDoubleClicked, this, &SatelliteTrackerGUI::on_satTable_cellDoubleClicked);
+    QObject::connect(ui->deviceFeatureSelect, qOverload<int>(&QComboBox::currentIndexChanged), this, &SatelliteTrackerGUI::on_deviceFeatureSelect_currentIndexChanged);
 }

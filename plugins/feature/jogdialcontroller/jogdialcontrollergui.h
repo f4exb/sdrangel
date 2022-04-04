@@ -76,6 +76,7 @@ private:
 	void displaySettings();
 	void updateChannelList();
 	bool handleMessage(const Message& message);
+    void makeUIConnections();
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);

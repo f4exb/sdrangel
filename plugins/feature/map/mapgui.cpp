@@ -162,7 +162,7 @@ void MapGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -179,7 +179,8 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     m_radioTimeDialog(this),
     m_cesium(nullptr)
 {
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/feature/map/readme.md";
 
     m_osmPort = 0;
@@ -201,8 +202,7 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     m_webServer->addPathSubstitution("3d", m_settings.m_modelDir);
 
     setAttribute(Qt::WA_DeleteOnClose, true);
-    setChannelWidget(false);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     m_map = reinterpret_cast<Map*>(feature);
     m_map->setMessageQueueToGUI(&m_inputMessageQueue);
 
@@ -268,6 +268,8 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     connect(&m_redrawMapTimer, &QTimer::timeout, this, &MapGUI::redrawMap);
     m_redrawMapTimer.setSingleShot(true);
     ui->map->installEventFilter(this);
+
+    makeUIConnections();
 }
 
 MapGUI::~MapGUI()
@@ -847,6 +849,7 @@ void MapGUI::displaySettings()
 {
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_settings.m_title);
+    setTitle(m_settings.m_title);
     blockApplySettings(true);
     ui->displayNames->setChecked(m_settings.m_displayNames);
     ui->displaySelectedGroundTracks->setChecked(m_settings.m_displaySelectedGroundTracks);
@@ -857,7 +860,7 @@ void MapGUI::displaySettings()
     m_mapModel.updateItemSettings(m_settings.m_itemSettings);
     applyMap2DSettings(true);
     applyMap3DSettings(true);
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -875,7 +878,6 @@ void MapGUI::onMenuDialogCalled(const QPoint &p)
     {
         BasicFeatureSettingsDialog dialog(this);
         dialog.setTitle(m_settings.m_title);
-        dialog.setColor(m_settings.m_rgbColor);
         dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
         dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
@@ -885,7 +887,6 @@ void MapGUI::onMenuDialogCalled(const QPoint &p)
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_rgbColor = dialog.getColor().rgb();
         m_settings.m_title = dialog.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
@@ -1213,4 +1214,19 @@ void MapGUI::preferenceChanged(int elementType)
         m_antennaMapItem.setText(new QString(MainCore::instance()->getSettings().getStationName()));
         update(m_map, &m_antennaMapItem, "Station");
     }
+}
+
+void MapGUI::makeUIConnections()
+{
+    QObject::connect(ui->displayNames, &ButtonSwitch::clicked, this, &MapGUI::on_displayNames_clicked);
+    QObject::connect(ui->displayAllGroundTracks, &ButtonSwitch::clicked, this, &MapGUI::on_displayAllGroundTracks_clicked);
+    QObject::connect(ui->displaySelectedGroundTracks, &ButtonSwitch::clicked, this, &MapGUI::on_displaySelectedGroundTracks_clicked);
+    QObject::connect(ui->find, &QLineEdit::returnPressed, this, &MapGUI::on_find_returnPressed);
+    QObject::connect(ui->maidenhead, &QToolButton::clicked, this, &MapGUI::on_maidenhead_clicked);
+    QObject::connect(ui->deleteAll, &QToolButton::clicked, this, &MapGUI::on_deleteAll_clicked);
+    QObject::connect(ui->displaySettings, &QToolButton::clicked, this, &MapGUI::on_displaySettings_clicked);
+    QObject::connect(ui->mapTypes, qOverload<int>(&QComboBox::currentIndexChanged), this, &MapGUI::on_mapTypes_currentIndexChanged);
+    QObject::connect(ui->beacons, &QToolButton::clicked, this, &MapGUI::on_beacons_clicked);
+    QObject::connect(ui->ibpBeacons, &QToolButton::clicked, this, &MapGUI::on_ibpBeacons_clicked);
+    QObject::connect(ui->radiotime, &QToolButton::clicked, this, &MapGUI::on_radiotime_clicked);
 }

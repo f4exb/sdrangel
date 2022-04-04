@@ -740,6 +740,12 @@
     </layout>
    </widget>
   </widget>
+  <widget class="Workspace" name="workspaceDock">
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents"/>
+  </widget>
   <action name="action_Exit">
    <property name="text">
     <string>E&amp;xit</string>
@@ -995,6 +1001,7 @@
   <zorder>channelDock</zorder>
   <zorder>commandsDock</zorder>
   <zorder>featureDock</zorder>
+  <zorder>workspaceDock</zorder>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -1019,6 +1026,12 @@
    <class>FeaturesDock</class>
    <extends>QDockWidget</extends>
    <header>gui/featuresdock.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Workspace</class>
+   <extends>QDockWidget</extends>
+   <header>gui/workspace.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

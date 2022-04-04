@@ -166,7 +166,8 @@ void AISGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    shrinkWindow();
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -178,11 +179,11 @@ AISGUI::AISGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     m_doApplySettings(true),
     m_lastFeatureState(0)
 {
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/feature/ais/readme.md";
     setAttribute(Qt::WA_DeleteOnClose, true);
-    setChannelWidget(false);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     m_ais = reinterpret_cast<AIS*>(feature);
     m_ais->setMessageQueueToGUI(&m_inputMessageQueue);
 
@@ -238,6 +239,7 @@ void AISGUI::displaySettings()
 {
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_settings.m_title);
+    setTitle(m_settings.m_title);
     blockApplySettings(true);
 
     // Order and size columns
@@ -253,9 +255,9 @@ void AISGUI::displaySettings()
         header->moveSection(header->visualIndex(i), m_settings.m_vesselColumnIndexes[i]);
     }
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
-    arrangeRollups();
+    getRollupContents()->arrangeRollups();
 }
 
 void AISGUI::leaveEvent(QEvent*)
@@ -272,7 +274,6 @@ void AISGUI::onMenuDialogCalled(const QPoint &p)
     {
         BasicFeatureSettingsDialog dialog(this);
         dialog.setTitle(m_settings.m_title);
-        dialog.setColor(m_settings.m_rgbColor);
         dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
         dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
@@ -282,7 +283,6 @@ void AISGUI::onMenuDialogCalled(const QPoint &p)
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_rgbColor = dialog.getColor().rgb();
         m_settings.m_title = dialog.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();

@@ -102,7 +102,7 @@ void AntennaToolsGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -114,12 +114,12 @@ AntennaToolsGUI::AntennaToolsGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     m_doApplySettings(true),
     m_deviceSets(0)
 {
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/feature/antennatools/readme.md";
 
     setAttribute(Qt::WA_DeleteOnClose, true);
-    setChannelWidget(false);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     m_antennatools = reinterpret_cast<AntennaTools*>(feature);
     m_antennatools->setMessageQueueToGUI(&m_inputMessageQueue);
 
@@ -136,6 +136,7 @@ AntennaToolsGUI::AntennaToolsGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
 
     displaySettings();
     applySettings(true);
+    makeUIConnections();
 }
 
 AntennaToolsGUI::~AntennaToolsGUI()
@@ -152,6 +153,7 @@ void AntennaToolsGUI::displaySettings()
 {
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_settings.m_title);
+    setTitle(m_settings.m_title);
     blockApplySettings(true);
     ui->dipoleFrequency->setValue(m_settings.m_dipoleFrequencyMHz);
     ui->dipoleFrequencySelect->setCurrentIndex(m_settings.m_dipoleFrequencySelect);
@@ -170,7 +172,24 @@ void AntennaToolsGUI::displaySettings()
     calcDishBeamwidth();
     calcDishGain();
     calcDishEffectiveArea();
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
+}
+
+void AntennaToolsGUI::makeUIConnections()
+{
+    QObject::connect(ui->dipoleFrequency, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &AntennaToolsGUI::on_dipoleFrequency_valueChanged);
+    QObject::connect(ui->dipoleFrequencySelect, qOverload<int>(&QComboBox::currentIndexChanged), this, &AntennaToolsGUI::on_dipoleFrequencySelect_currentIndexChanged);
+    QObject::connect(ui->dipoleEndEffectFactor, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &AntennaToolsGUI::on_dipoleEndEffectFactor_valueChanged);
+    QObject::connect(ui->dipoleLengthUnits, qOverload<int>(&QComboBox::currentIndexChanged), this, &AntennaToolsGUI::on_dipoleLengthUnits_currentIndexChanged);
+    QObject::connect(ui->dipoleLength, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &AntennaToolsGUI::on_dipoleLength_valueChanged);
+    QObject::connect(ui->dipoleElementLength, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &AntennaToolsGUI::on_dipoleElementLength_valueChanged);
+    QObject::connect(ui->dishFrequency, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &AntennaToolsGUI::on_dishFrequency_valueChanged);
+    QObject::connect(ui->dishFrequencySelect, qOverload<int>(&QComboBox::currentIndexChanged), this, &AntennaToolsGUI::on_dishFrequencySelect_currentIndexChanged);
+    QObject::connect(ui->dishDiameter, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &AntennaToolsGUI::on_dishDiameter_valueChanged);
+    QObject::connect(ui->dishLengthUnits, qOverload<int>(&QComboBox::currentIndexChanged), this, &AntennaToolsGUI::on_dishLengthUnits_currentIndexChanged);
+    QObject::connect(ui->dishDepth, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &AntennaToolsGUI::on_dishDepth_valueChanged);
+    QObject::connect(ui->dishEfficiency, qOverload<int>(&QSpinBox::valueChanged), this, &AntennaToolsGUI::on_dishEfficiency_valueChanged);
+    QObject::connect(ui->dishSurfaceError, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &AntennaToolsGUI::on_dishSurfaceError_valueChanged);
 }
 
 void AntennaToolsGUI::leaveEvent(QEvent*)
@@ -187,7 +206,6 @@ void AntennaToolsGUI::onMenuDialogCalled(const QPoint &p)
     {
         BasicFeatureSettingsDialog dialog(this);
         dialog.setTitle(m_settings.m_title);
-        dialog.setColor(m_settings.m_rgbColor);
         dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
         dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
@@ -197,7 +215,6 @@ void AntennaToolsGUI::onMenuDialogCalled(const QPoint &p)
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_rgbColor = dialog.getColor().rgb();
         m_settings.m_title = dialog.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();

@@ -68,6 +68,7 @@ private:
     void updateDeviceSetList();
 	bool updateChannelList(); //!< true if channel index has changed
 	bool handleMessage(const Message& message);
+    void makeUIConnections();
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);

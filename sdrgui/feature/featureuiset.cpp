@@ -15,7 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "gui/featurewindow.h"
+#include "gui/workspace.h"
 #include "plugin/pluginapi.h"
 #include "settings/featuresetpreset.h"
 #include "feature/featureutils.h"
@@ -27,7 +27,6 @@
 
 FeatureUISet::FeatureUISet(int tabIndex, FeatureSet *featureSet)
 {
-    m_featureWindow = new FeatureWindow;
     m_featureTabIndex = tabIndex;
     m_featureSet = featureSet;
 }
@@ -35,12 +34,11 @@ FeatureUISet::FeatureUISet(int tabIndex, FeatureSet *featureSet)
 FeatureUISet::~FeatureUISet()
 {
     freeFeatures();
-    delete m_featureWindow;
 }
 
-void FeatureUISet::addRollupWidget(QWidget *widget)
+void FeatureUISet::addRollupWidget(QWidget *) // TODO: remove
 {
-    m_featureWindow->addRollupWidget(widget);
+    // m_featureWindow->addRollupWidget(widget);
 }
 
 void FeatureUISet::registerFeatureInstance(FeatureGUI* featureGUI, Feature *feature)
@@ -114,7 +112,12 @@ Feature *FeatureUISet::getFeatureAt(int featureIndex)
     }
 }
 
-void FeatureUISet::loadFeatureSetSettings(const FeatureSetPreset *preset, PluginAPI *pluginAPI, WebAPIAdapterInterface *apiAdapter)
+void FeatureUISet::loadFeatureSetSettings(
+    const FeatureSetPreset *preset,
+    PluginAPI *pluginAPI,
+    WebAPIAdapterInterface *apiAdapter,
+    Workspace *workspace
+)
 {
     qDebug("FeatureUISet::loadFeatureSetSettings: Loading preset [%s | %s]",
         qPrintable(preset->getGroup()),
@@ -160,6 +163,9 @@ void FeatureUISet::loadFeatureSetSettings(const FeatureSetPreset *preset, Plugin
                 featureGUI =
                         (*featureRegistrations)[i].m_plugin->createFeatureGUI(this, feature);
                 registerFeatureInstance(featureGUI, feature);
+                featureGUI->setIndex(feature->getIndexInFeatureSet());
+                featureGUI->setWorkspaceIndex(workspace->getIndex());
+                workspace->addToMdiArea((QMdiSubWindow*) featureGUI);
                 break;
             }
         }

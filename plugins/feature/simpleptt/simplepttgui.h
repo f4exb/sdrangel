@@ -69,6 +69,7 @@ private:
 	void displaySettings();
     void updateDeviceSetLists();
 	bool handleMessage(const Message& message);
+    void makeUIConnections();
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);

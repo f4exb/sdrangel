@@ -125,7 +125,7 @@ void DemodAnalyzerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -139,11 +139,11 @@ DemodAnalyzerGUI::DemodAnalyzerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUI
     m_lastFeatureState(0),
     m_selectedChannel(nullptr)
 {
-	ui->setupUi(this);
+	ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/feature/demodanalyzer/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
-    setChannelWidget(false);
-	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+	connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 
     m_demodAnalyzer = reinterpret_cast<DemodAnalyzer*>(feature);
     m_demodAnalyzer->setMessageQueueToGUI(&m_inputMessageQueue);
@@ -177,6 +177,7 @@ DemodAnalyzerGUI::DemodAnalyzerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUI
 
     displaySettings();
 	applySettings(true);
+    makeUIConnections();
 }
 
 DemodAnalyzerGUI::~DemodAnalyzerGUI()
@@ -193,9 +194,10 @@ void DemodAnalyzerGUI::displaySettings()
 {
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_settings.m_title);
+    setTitle(m_settings.m_title);
     blockApplySettings(true);
     ui->log2Decim->setCurrentIndex(m_settings.m_log2Decim);
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -253,7 +255,6 @@ void DemodAnalyzerGUI::onMenuDialogCalled(const QPoint &p)
     {
         BasicFeatureSettingsDialog dialog(this);
         dialog.setTitle(m_settings.m_title);
-        dialog.setColor(m_settings.m_rgbColor);
         dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
         dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
@@ -263,7 +264,6 @@ void DemodAnalyzerGUI::onMenuDialogCalled(const QPoint &p)
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_rgbColor = dialog.getColor().rgb();
         m_settings.m_title = dialog.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
@@ -368,4 +368,13 @@ void DemodAnalyzerGUI::applySettings(bool force)
 	    DemodAnalyzer::MsgConfigureDemodAnalyzer* message = DemodAnalyzer::MsgConfigureDemodAnalyzer::create( m_settings, force);
 	    m_demodAnalyzer->getInputMessageQueue()->push(message);
 	}
+}
+
+void DemodAnalyzerGUI::makeUIConnections()
+{
+	QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &DemodAnalyzerGUI::on_startStop_toggled);
+	QObject::connect(ui->devicesRefresh, &QPushButton::clicked, this, &DemodAnalyzerGUI::on_devicesRefresh_clicked);
+	QObject::connect(ui->channels, qOverload<int>(&QComboBox::currentIndexChanged), this, &DemodAnalyzerGUI::on_channels_currentIndexChanged);
+	QObject::connect(ui->channelApply, &QPushButton::clicked, this, &DemodAnalyzerGUI::on_channelApply_clicked);
+	QObject::connect(ui->log2Decim, qOverload<int>(&QComboBox::currentIndexChanged), this, &DemodAnalyzerGUI::on_log2Decim_currentIndexChanged);
 }

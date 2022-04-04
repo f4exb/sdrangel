@@ -375,7 +375,7 @@ void FeaturePresetsDialog::loadPresetSettings(const FeatureSetPreset* preset)
 		qPrintable(preset->getGroup()),
 		qPrintable(preset->getDescription()));
 
-    m_featureUISet->loadFeatureSetSettings(preset, m_pluginAPI, m_apiAdapter);
+    m_featureUISet->loadFeatureSetSettings(preset, m_pluginAPI, m_apiAdapter, m_workspace);
 }
 
 void FeaturePresetsDialog::sortFeatureSetPresets()

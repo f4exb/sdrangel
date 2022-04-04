@@ -224,7 +224,7 @@ void StarTrackerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -254,11 +254,11 @@ StarTrackerGUI::StarTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet,
     m_moonRA(0.0),
     m_moonDec(0.0)
 {
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/feature/startracker/readme.md";
     setAttribute(Qt::WA_DeleteOnClose, true);
-    setChannelWidget(false);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     m_starTracker = reinterpret_cast<StarTracker*>(feature);
     m_starTracker->setMessageQueueToGUI(&m_inputMessageQueue);
 
@@ -325,6 +325,7 @@ StarTrackerGUI::StarTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet,
     ui->dateTime->setDateTime(QDateTime::currentDateTime());
     displaySettings();
     applySettings(true);
+    makeUIConnections();
 
     // Populate subchart menu
     on_chartSelect_currentIndexChanged(0);
@@ -392,6 +393,7 @@ void StarTrackerGUI::displaySettings()
 {
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_settings.m_title);
+    setTitle(m_settings.m_title);
     blockApplySettings(true);
     ui->darkTheme->setChecked(m_settings.m_chartsDarkTheme);
     if (m_solarFluxChart) {
@@ -445,7 +447,7 @@ void StarTrackerGUI::displaySettings()
     ui->frequency->setValue(m_settings.m_frequency/1000000.0);
     ui->beamwidth->setValue(m_settings.m_beamwidth);
     updateForTarget();
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     plotChart();
     blockApplySettings(false);
 }
@@ -464,7 +466,6 @@ void StarTrackerGUI::onMenuDialogCalled(const QPoint &p)
     {
         BasicFeatureSettingsDialog dialog(this);
         dialog.setTitle(m_settings.m_title);
-        dialog.setColor(m_settings.m_rgbColor);
         dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
         dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
@@ -474,7 +475,6 @@ void StarTrackerGUI::onMenuDialogCalled(const QPoint &p)
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_rgbColor = dialog.getColor().rgb();
         m_settings.m_title = dialog.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
@@ -2035,4 +2035,39 @@ void StarTrackerGUI::downloadFinished(const QString& filename, bool success)
     (void) filename;
     if (success)
         readSolarFlux();
+}
+
+void StarTrackerGUI::makeUIConnections()
+{
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &StarTrackerGUI::on_startStop_toggled);
+    QObject::connect(ui->link, &ButtonSwitch::clicked, this, &StarTrackerGUI::on_link_clicked);
+    QObject::connect(ui->useMyPosition, &QToolButton::clicked, this, &StarTrackerGUI::on_useMyPosition_clicked);
+    QObject::connect(ui->latitude, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &StarTrackerGUI::on_latitude_valueChanged);
+    QObject::connect(ui->longitude, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &StarTrackerGUI::on_longitude_valueChanged);
+    QObject::connect(ui->rightAscension, &QLineEdit::editingFinished, this, &StarTrackerGUI::on_rightAscension_editingFinished);
+    QObject::connect(ui->declination, &QLineEdit::editingFinished, this, &StarTrackerGUI::on_declination_editingFinished);
+    QObject::connect(ui->azimuth, &DMSSpinBox::valueChanged, this, &StarTrackerGUI::on_azimuth_valueChanged);
+    QObject::connect(ui->elevation, &DMSSpinBox::valueChanged, this, &StarTrackerGUI::on_elevation_valueChanged);
+    QObject::connect(ui->azimuthOffset, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &StarTrackerGUI::on_azimuthOffset_valueChanged);
+    QObject::connect(ui->elevationOffset, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &StarTrackerGUI::on_elevationOffset_valueChanged);
+    QObject::connect(ui->galacticLatitude, &DMSSpinBox::valueChanged, this, &StarTrackerGUI::on_galacticLatitude_valueChanged);
+    QObject::connect(ui->galacticLongitude, &DMSSpinBox::valueChanged, this, &StarTrackerGUI::on_galacticLongitude_valueChanged);
+    QObject::connect(ui->frequency, qOverload<int>(&QSpinBox::valueChanged), this, &StarTrackerGUI::on_frequency_valueChanged);
+    QObject::connect(ui->beamwidth, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &StarTrackerGUI::on_beamwidth_valueChanged);
+    QObject::connect(ui->target, &QComboBox::currentTextChanged, this, &StarTrackerGUI::on_target_currentTextChanged);
+    QObject::connect(ui->displaySettings, &QToolButton::clicked, this, &StarTrackerGUI::on_displaySettings_clicked);
+    QObject::connect(ui->dateTimeSelect, &QComboBox::currentTextChanged, this, &StarTrackerGUI::on_dateTimeSelect_currentTextChanged);
+    QObject::connect(ui->dateTime, &WrappingDateTimeEdit::dateTimeChanged, this, &StarTrackerGUI::on_dateTime_dateTimeChanged);
+    QObject::connect(ui->viewOnMap, &QToolButton::clicked, this, &StarTrackerGUI::on_viewOnMap_clicked);
+    QObject::connect(ui->chartSelect, qOverload<int>(&QComboBox::currentIndexChanged), this, &StarTrackerGUI::on_chartSelect_currentIndexChanged);
+    QObject::connect(ui->chartSubSelect, qOverload<int>(&QComboBox::currentIndexChanged), this, &StarTrackerGUI::on_chartSubSelect_currentIndexChanged);
+    QObject::connect(ui->downloadSolarFlux, &QToolButton::clicked, this, &StarTrackerGUI::on_downloadSolarFlux_clicked);
+    QObject::connect(ui->darkTheme, &QToolButton::clicked, this, &StarTrackerGUI::on_darkTheme_clicked);
+    QObject::connect(ui->zoomIn, &QToolButton::clicked, this, &StarTrackerGUI::on_zoomIn_clicked);
+    QObject::connect(ui->zoomOut, &QToolButton::clicked, this, &StarTrackerGUI::on_zoomOut_clicked);
+    QObject::connect(ui->addAnimationFrame, &QToolButton::clicked, this, &StarTrackerGUI::on_addAnimationFrame_clicked);
+    QObject::connect(ui->clearAnimation, &QToolButton::clicked, this, &StarTrackerGUI::on_clearAnimation_clicked);
+    QObject::connect(ui->saveAnimation, &QToolButton::clicked, this, &StarTrackerGUI::on_saveAnimation_clicked);
+    QObject::connect(ui->drawSun, &QToolButton::clicked, this, &StarTrackerGUI::on_drawSun_clicked);
+    QObject::connect(ui->drawMoon, &QToolButton::clicked, this, &StarTrackerGUI::on_drawMoon_clicked);
 }

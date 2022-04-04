@@ -132,7 +132,7 @@ void JogdialControllerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -145,11 +145,11 @@ JogdialControllerGUI::JogdialControllerGUI(PluginAPI* pluginAPI, FeatureUISet *f
     m_lastFeatureState(0),
     m_selectedChannel(nullptr)
 {
-	ui->setupUi(this);
+	ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/feature/jogdialcontroller/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
-    setChannelWidget(false);
-	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+	connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 
     m_jogdialController = reinterpret_cast<JogdialController*>(feature);
     m_jogdialController->setMessageQueueToGUI(&m_inputMessageQueue);
@@ -169,6 +169,7 @@ JogdialControllerGUI::JogdialControllerGUI(PluginAPI* pluginAPI, FeatureUISet *f
 
     displaySettings();
 	applySettings(true);
+    makeUIConnections();
 }
 
 JogdialControllerGUI::~JogdialControllerGUI()
@@ -185,8 +186,9 @@ void JogdialControllerGUI::displaySettings()
 {
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_settings.m_title);
+    setTitle(m_settings.m_title);
     blockApplySettings(true);
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -243,7 +245,6 @@ void JogdialControllerGUI::onMenuDialogCalled(const QPoint &p)
     {
         BasicFeatureSettingsDialog dialog(this);
         dialog.setTitle(m_settings.m_title);
-        dialog.setColor(m_settings.m_rgbColor);
         dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
         dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
@@ -253,7 +254,6 @@ void JogdialControllerGUI::onMenuDialogCalled(const QPoint &p)
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_rgbColor = dialog.getColor().rgb();
         m_settings.m_title = dialog.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
@@ -361,4 +361,11 @@ void JogdialControllerGUI::focusOutEvent(QFocusEvent*)
     qDebug("JogdialControllerGUI::focusOutEvent");
     ui->focusIndicator->setStyleSheet("QLabel { background-color: gray; border-radius: 8px; }"); // gray
     ui->focusIndicator->setToolTip("Idle");
+}
+
+void JogdialControllerGUI::makeUIConnections()
+{
+	QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &JogdialControllerGUI::on_startStop_toggled);
+	QObject::connect(ui->devicesRefresh, &QPushButton::clicked, this, &JogdialControllerGUI::on_devicesRefresh_clicked);
+	QObject::connect(ui->channels, qOverload<int>(&QComboBox::currentIndexChanged), this, &JogdialControllerGUI::on_channels_currentIndexChanged);
 }
