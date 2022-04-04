@@ -742,6 +742,7 @@ public:
     friend class MainServer;
     friend class MainWindow;
     friend class WebAPIAdapter;
+    friend class CommandsDialog;
 
 signals:
     void deviceSetAdded(int index, DeviceAPI *device);

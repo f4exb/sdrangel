@@ -30,6 +30,7 @@
 #include <QFontDatabase>
 #include <QStandardPaths>
 #include <QDesktopServices>
+#include <QProcess>
 
 #include <QAction>
 #include <QMenuBar>
@@ -49,10 +50,7 @@
 #include "commands/commandkeyreceiver.h"
 #include "gui/indicator.h"
 #include "gui/presetitem.h"
-#include "gui/commanditem.h"
 #include "gui/addpresetdialog.h"
-#include "gui/editcommanddialog.h"
-#include "gui/commandoutputdialog.h"
 #include "gui/pluginsdialog.h"
 #include "gui/aboutdialog.h"
 #include "gui/rollupwidget.h"
@@ -67,6 +65,7 @@
 #include "gui/ambedevicesdialog.h"
 #include "gui/workspace.h"
 #include "gui/featurepresetsdialog.h"
+#include "gui/commandsdialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/dspcommands.h"
@@ -975,6 +974,9 @@ void MainWindow::createMenuBar()
     QAction *userArgumentsAction = devicesMenu->addAction("User arguments");
     userArgumentsAction->setToolTip("Device custom user arguments");
     QObject::connect(userArgumentsAction, &QAction::triggered, this, &MainWindow::on_action_DeviceUserArguments_triggered);
+    QAction *commandsAction = preferencesMenu->addAction("Commands");
+    commandsAction->setToolTip("External commands dialog");
+    QObject::connect(commandsAction, &QAction::triggered, this, &MainWindow::on_action_commands_triggered);
 
     QMenu *helpMenu = menuBar->addMenu("Help");
     QAction *quickStartAction = helpMenu->addAction("Quick start");
@@ -1427,245 +1429,25 @@ void MainWindow::on_action_View_Fullscreen_toggled(bool checked)
 	}
 }
 
-void MainWindow::on_commandNew_clicked()
-{
-    // QStringList groups;
-    // QString group = "";
-    // QString description = "";
-
-    // for(int i = 0; i < ui->commandTree->topLevelItemCount(); i++) {
-    //     groups.append(ui->commandTree->topLevelItem(i)->text(0));
-    // }
-
-    // QTreeWidgetItem* item = ui->commandTree->currentItem();
-
-    // if(item != 0)
-    // {
-    //     if(item->type() == PGroup) {
-    //         group = item->text(0);
-    //     } else if(item->type() == PItem) {
-    //         group = item->parent()->text(0);
-    //         description = item->text(0);
-    //     }
-    // }
-
-    // Command *command = new Command();
-    // command->setGroup(group);
-    // command->setDescription(description);
-    // EditCommandDialog editCommandDialog(groups, group, this);
-    // editCommandDialog.fromCommand(*command);
-
-    // if (editCommandDialog.exec() == QDialog::Accepted)
-    // {
-    //     editCommandDialog.toCommand(*command);
-    //     m_mainCore->m_settings.addCommand(command);
-    //     ui->commandTree->setCurrentItem(addCommandToTree(command));
-    //     m_mainCore->m_settings.sortCommands();
-    // }
-}
-
-void MainWindow::on_commandDuplicate_clicked()
-{
-    // QTreeWidgetItem* item = ui->commandTree->currentItem();
-    // const Command* command = qvariant_cast<const Command*>(item->data(0, Qt::UserRole));
-    // Command *commandCopy = new Command(*command);
-    // m_mainCore->m_settings.addCommand(commandCopy);
-    // ui->commandTree->setCurrentItem(addCommandToTree(commandCopy));
-    // m_mainCore->m_settings.sortCommands();
-}
-
-void MainWindow::on_commandEdit_clicked()
-{
-    // QTreeWidgetItem* item = ui->commandTree->currentItem();
-    // bool change = false;
-    // const Command *changedCommand = 0;
-    // QString newGroupName;
-
-    // QStringList groups;
-
-    // for(int i = 0; i < ui->commandTree->topLevelItemCount(); i++) {
-    //     groups.append(ui->commandTree->topLevelItem(i)->text(0));
-    // }
-
-    // if(item != 0)
-    // {
-    //     if (item->type() == PItem)
-    //     {
-    //         const Command* command = qvariant_cast<const Command*>(item->data(0, Qt::UserRole));
-
-    //         if (command != 0)
-    //         {
-    //             EditCommandDialog editCommandDialog(groups, command->getGroup(), this);
-    //             editCommandDialog.fromCommand(*command);
-
-    //             if (editCommandDialog.exec() == QDialog::Accepted)
-    //             {
-    //                 Command* command_mod = const_cast<Command*>(command);
-    //                 editCommandDialog.toCommand(*command_mod);
-    //                 change = true;
-    //                 changedCommand = command;
-    //             }
-    //         }
-    //     }
-    //     else if (item->type() == PGroup)
-    //     {
-    //         AddPresetDialog dlg(groups, item->text(0), this);
-    //         dlg.showGroupOnly();
-    //         dlg.setDialogTitle("Edit command group");
-    //         dlg.setDescriptionBoxTitle("Command details");
-
-    //         if (dlg.exec() == QDialog::Accepted)
-    //         {
-    //             m_mainCore->m_settings.renameCommandGroup(item->text(0), dlg.group());
-    //             newGroupName = dlg.group();
-    //             change = true;
-    //         }
-    //     }
-    // }
-
-    // if (change)
-    // {
-    //     m_mainCore->m_settings.sortCommands();
-    //     ui->commandTree->clear();
-
-    //     for (int i = 0; i < m_mainCore->m_settings.getCommandCount(); ++i)
-    //     {
-    //         QTreeWidgetItem *item_x = addCommandToTree(m_mainCore->m_settings.getCommand(i));
-    //         const Command* command_x = qvariant_cast<const Command*>(item_x->data(0, Qt::UserRole));
-    //         if (changedCommand &&  (command_x == changedCommand)) { // set cursor on changed command
-    //             ui->commandTree->setCurrentItem(item_x);
-    //         }
-    //     }
-
-    //     if (!changedCommand) // on group name change set cursor on the group that has been changed
-    //     {
-    //         for(int i = 0; i < ui->commandTree->topLevelItemCount(); i++)
-    //         {
-    //             QTreeWidgetItem* item = ui->commandTree->topLevelItem(i);
-
-    //             if (item->text(0) == newGroupName) {
-    //                 ui->commandTree->setCurrentItem(item);
-    //             }
-    //         }
-    //     }
-    // }
-}
-
-void MainWindow::on_commandDelete_clicked()
-{
-    // QTreeWidgetItem* item = ui->commandTree->currentItem();
-
-    // if (item != 0)
-    // {
-    //     if (item->type() == PItem) // delete individual command
-    //     {
-    //         const Command* command = qvariant_cast<const Command*>(item->data(0, Qt::UserRole));
-
-    //         if(command)
-    //         {
-    //             if (QMessageBox::question(this,
-    //                     tr("Delete command"),
-    //                     tr("Do you want to delete command '%1'?")
-    //                         .arg(command->getDescription()), QMessageBox::No | QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
-    //             {
-    //                 delete item;
-    //                 m_mainCore->m_settings.deleteCommand(command);
-    //             }
-    //         }
-    //     }
-    //     else if (item->type() == PGroup) // delete all commands in this group
-    //     {
-    //         if (QMessageBox::question(this,
-    //                 tr("Delete command group"),
-    //                 tr("Do you want to delete command group '%1'?")
-    //                     .arg(item->text(0)), QMessageBox::No | QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
-    //         {
-    //             m_mainCore->m_settings.deleteCommandGroup(item->text(0));
-
-    //             ui->commandTree->clear();
-
-    //             for (int i = 0; i < m_mainCore->m_settings.getCommandCount(); ++i) {
-    //                 addCommandToTree(m_mainCore->m_settings.getCommand(i));
-    //             }
-    //         }
-    //     }
-    // }
-}
-
-void MainWindow::on_commandRun_clicked()
-{
-    // QTreeWidgetItem* item = ui->commandTree->currentItem();
-
-    // if (item != 0)
-    // {
-    //     int currentDeviceSetIndex = ui->tabInputsView->currentIndex();
-
-    //     if (item->type() == PItem) // run individual command
-    //     {
-    //         const Command* command = qvariant_cast<const Command*>(item->data(0, Qt::UserRole));
-    //         Command* command_mod = const_cast<Command*>(command);
-    //         command_mod->run(m_apiServer->getHost(), m_apiServer->getPort(), currentDeviceSetIndex);
-    //     }
-    //     else if (item->type() == PGroup) // run all commands in this group
-    //     {
-    //         QString group = item->text(0);
-
-    //         for (int i = 0; i < m_mainCore->m_settings.getCommandCount(); ++i)
-    //         {
-    //             Command *command_mod = const_cast<Command*>(m_mainCore->m_settings.getCommand(i));
-
-    //             if (command_mod->getGroup() == group) {
-    //                 command_mod->run(m_apiServer->getHost(), m_apiServer->getPort(), currentDeviceSetIndex);
-    //             }
-    //         }
-    //     }
-    // }
-}
-
-void MainWindow::on_commandOutput_clicked()
-{
-    // QTreeWidgetItem* item = ui->commandTree->currentItem();
-
-    // if ((item != 0) && (item->type() == PItem))
-    // {
-    //     const Command* command = qvariant_cast<const Command*>(item->data(0, Qt::UserRole));
-    //     Command* command_mod = const_cast<Command*>(command);
-    //     CommandOutputDialog commandOutputDialog(*command_mod);
-    //     commandOutputDialog.exec();
-    // }
-}
-
-void MainWindow::on_commandsSave_clicked()
-{
-    saveCommandSettings();
-    m_mainCore->m_settings.save();
-}
-
 void MainWindow::commandKeysConnect(QObject *object, const char *slot)
 {
     setFocus();
-    connect(m_commandKeyReceiver, SIGNAL(capturedKey(Qt::Key, Qt::KeyboardModifiers, bool)),
-            object, slot);
+    connect(
+        m_commandKeyReceiver,
+        SIGNAL(capturedKey(Qt::Key, Qt::KeyboardModifiers, bool)),
+        object,
+        slot
+    );
 }
 
 void MainWindow::commandKeysDisconnect(QObject *object, const char *slot)
 {
-    disconnect(m_commandKeyReceiver, SIGNAL(capturedKey(Qt::Key, Qt::KeyboardModifiers, bool)),
-            object, slot);
-}
-
-void MainWindow::on_commandKeyboardConnect_toggled(bool checked)
-{
-    qDebug("on_commandKeyboardConnect_toggled: %s", checked ? "true" : "false");
-
-    if (checked)
-    {
-        commandKeysConnect(this, SLOT(commandKeyPressed(Qt::Key, Qt::KeyboardModifiers, bool)));
-    }
-    else
-    {
-        commandKeysDisconnect(this, SLOT(commandKeyPressed(Qt::Key, Qt::KeyboardModifiers, bool)));
-    }
+    disconnect(
+        m_commandKeyReceiver,
+        SIGNAL(capturedKey(Qt::Key, Qt::KeyboardModifiers, bool)),
+        object,
+        slot
+    );
 }
 
 void MainWindow::on_presetSave_clicked()
@@ -2019,6 +1801,17 @@ void MainWindow::on_action_DeviceUserArguments_triggered()
     qDebug("MainWindow::on_action_DeviceUserArguments_triggered");
     DeviceUserArgsDialog deviceUserArgsDialog(DeviceEnumerator::instance(), m_mainCore->m_settings.getDeviceUserArgs(), this);
     deviceUserArgsDialog.exec();
+}
+
+void MainWindow::on_action_commands_triggered()
+{
+    qDebug("MainWindow::on_action_commands_triggered");
+    CommandsDialog commandsDialog(this);
+    commandsDialog.setApiHost(m_apiServer->getHost());
+    commandsDialog.setApiPort(m_apiServer->getPort());
+    commandsDialog.setCommandKeyReceiver(m_commandKeyReceiver);
+    commandsDialog.populateTree();
+    commandsDialog.exec();
 }
 
 void MainWindow::on_action_FFT_triggered()
@@ -2659,22 +2452,22 @@ void MainWindow::updateStatus()
 
 void MainWindow::commandKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifiers, bool release)
 {
-    //qDebug("MainWindow::commandKeyPressed: key: %x mod: %x %s", (int) key, (int) keyModifiers, release ? "release" : "press");
-    // int currentDeviceSetIndex = ui->tabInputsView->currentIndex();
+    qDebug("MainWindow::commandKeyPressed: key: %x mod: %x %s", (int) key, (int) keyModifiers, release ? "release" : "press");
+    int currentDeviceSetIndex = 0;
 
-    // for (int i = 0; i < m_mainCore->m_settings.getCommandCount(); ++i)
-    // {
-    //     const Command* command = m_mainCore->m_settings.getCommand(i);
+    for (int i = 0; i < m_mainCore->m_settings.getCommandCount(); ++i)
+    {
+        const Command* command = m_mainCore->m_settings.getCommand(i);
 
-    //     if (command->getAssociateKey()
-    //             && (command->getRelease() == release)
-    //             && (command->getKey() == key)
-    //             && (command->getKeyModifiers() == keyModifiers))
-    //     {
-    //         Command* command_mod = const_cast<Command*>(command);
-    //         command_mod->run(m_apiServer->getHost(), m_apiServer->getPort(), currentDeviceSetIndex);
-    //     }
-    // }
+        if (command->getAssociateKey()
+                && (command->getRelease() == release)
+                && (command->getKey() == key)
+                && (command->getKeyModifiers() == keyModifiers))
+        {
+            Command* command_mod = const_cast<Command*>(command);
+            command_mod->run(m_apiServer->getHost(), m_apiServer->getPort(), currentDeviceSetIndex);
+        }
+    }
 }
 
 void MainWindow::restoreDeviceTabs()

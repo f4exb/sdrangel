@@ -21,6 +21,7 @@ set(sdrgui_SOURCES
     gui/clickablelabel.cpp
     gui/colormapper.cpp
     gui/commanditem.cpp
+    gui/commandsdialog.cpp
     gui/commandoutputdialog.cpp
     gui/crightclickenabler.cpp
     gui/customtextedit.cpp
@@ -117,6 +118,7 @@ set(sdrgui_HEADERS
     gui/channelwindow.h
     gui/colormapper.h
     gui/commanditem.h
+    gui/commandsdialog.h
     gui/commandoutputdialog.h
     gui/crightclickenabler.h
     gui/customtextedit.h
@@ -208,6 +210,7 @@ set(sdrgui_FORMS
     gui/basicdevicesettingsdialog.ui
     gui/basicfeaturesettingsdialog.ui
     gui/channeladddialog.ui
+    gui/commandsdialog.ui
     gui/commandoutputdialog.ui
     gui/cwkeyergui.ui
     gui/devicestreamselectiondialog.ui

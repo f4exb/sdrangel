@@ -174,14 +174,6 @@ private slots:
 	void on_presetDelete_clicked();
 	void on_presetTree_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
 	void on_presetTree_itemActivated(QTreeWidgetItem *item, int column);
-	void on_commandNew_clicked();
-    void on_commandDuplicate_clicked();
-    void on_commandEdit_clicked();
-    void on_commandDelete_clicked();
-    void on_commandRun_clicked();
-    void on_commandOutput_clicked();
-    void on_commandsSave_clicked();
-    void on_commandKeyboardConnect_toggled(bool checked);
 	void on_action_Audio_triggered();
     void on_action_Logging_triggered();
 	void on_action_FFT_triggered();
@@ -189,6 +181,7 @@ private slots:
     void on_action_LimeRFE_triggered();
 	void on_action_My_Position_triggered();
     void on_action_DeviceUserArguments_triggered();
+    void on_action_commands_triggered();
     void samplingDeviceChanged(int deviceType, int tabIndex, int newDeviceIndex);
     void channelAddClicked(int channelIndex);
     void featureAddClicked(Workspace *workspace, int featureIndex);
