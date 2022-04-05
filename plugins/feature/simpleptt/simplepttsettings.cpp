@@ -47,6 +47,7 @@ void SimplePTTSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIFeatureSetIndex = 0;
     m_reverseAPIFeatureIndex = 0;
+    m_workspaceIndex = 0;
 }
 
 QByteArray SimplePTTSettings::serialize() const
@@ -74,6 +75,8 @@ QByteArray SimplePTTSettings::serialize() const
     s.writeBool(15, m_vox);
     s.writeBool(16, m_voxEnable);
     s.writeS32(17, m_voxHold);
+    s.writeS32(18, m_workspaceIndex);
+    s.writeBlob(19, m_geometryBytes);
 
     return s.final();
 }
@@ -125,7 +128,9 @@ bool SimplePTTSettings::deserialize(const QByteArray& data)
         d.readS32(14, &m_voxLevel, -20);
         d.readBool(15, &m_vox, false);
         d.readBool(16, &m_voxEnable, false);
-        d.readS32(16, &m_voxHold, 500);
+        d.readS32(17, &m_voxHold, 500);
+        d.readS32(18, &m_workspaceIndex, 0);
+        d.readBlob(19, &m_geometryBytes);
 
         return true;
     }

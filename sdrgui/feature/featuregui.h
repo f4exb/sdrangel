@@ -49,6 +49,11 @@ public:
 	virtual void resetToDefaults() = 0;
 	virtual QByteArray serialize() const = 0;
 	virtual bool deserialize(const QByteArray& data) = 0;
+    // Data saved in the derived settings
+    virtual void setWorkspaceIndex(int index)= 0;
+    virtual int getWorkspaceIndex() const = 0;
+    virtual void setGeometryBytes(const QByteArray& blob) = 0;
+    virtual QByteArray getGeometryBytes() const = 0;
 
 	virtual MessageQueue* getInputMessageQueue() = 0;
 
@@ -56,8 +61,7 @@ public:
     void setTitleColor(const QColor&) {} // not implemented for a feature
     void setTitle(const QString& title);
     void setIndex(int index);
-    void setWorkspaceIndex(int index) { m_workspaceIndex = index; }
-    int getWorkspaceIndex() const { return m_workspaceIndex; }
+    int getIndex() const { return m_featureIndex; }
 
 protected:
     void closeEvent(QCloseEvent *event);
@@ -66,7 +70,6 @@ protected:
     void resetContextMenuType() { m_contextMenuType = ContextMenuNone; }
 
     int m_featureIndex;
-    int m_workspaceIndex;
     QString m_helpURL;
     RollupContents m_rollupContents;
     ContextMenuType m_contextMenuType;

@@ -44,6 +44,7 @@ void AFCSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIFeatureSetIndex = 0;
     m_reverseAPIFeatureIndex = 0;
+    m_workspaceIndex = 0;
 }
 
 QByteArray AFCSettings::serialize() const
@@ -68,6 +69,9 @@ QByteArray AFCSettings::serialize() const
     if (m_rollupState) {
         s.writeBlob(15, m_rollupState->serialize());
     }
+
+    s.writeS32(16, m_workspaceIndex);
+    s.writeBlob(17, m_geometryBytes);
 
     return s.final();
 }
@@ -117,6 +121,9 @@ bool AFCSettings::deserialize(const QByteArray& data)
             d.readBlob(15, &bytetmp);
             m_rollupState->deserialize(bytetmp);
         }
+
+        d.readS32(16, &m_workspaceIndex, 0);
+        d.readBlob(17, &m_geometryBytes);
 
         return true;
     }

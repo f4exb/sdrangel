@@ -124,20 +124,6 @@
       </widget>
      </item>
      <item>
-      <widget class="QToolButton" name="commandsSave">
-       <property name="toolTip">
-        <string>Save commands in settings</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="../resources/res.qrc">
-         <normaloff>:/save.png</normaloff>:/save.png</iconset>
-       </property>
-      </widget>
-     </item>
-     <item>
       <spacer name="horizontalSpacer_3">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -179,6 +165,9 @@
      </item>
      <item>
       <widget class="ButtonSwitch" name="commandKeyboardConnect">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="toolTip">
         <string>Toggle keyboard to command connection</string>
        </property>

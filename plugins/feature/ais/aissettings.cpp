@@ -47,6 +47,7 @@ void AISSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIFeatureSetIndex = 0;
     m_reverseAPIFeatureIndex = 0;
+    m_workspaceIndex = 0;
 
     for (int i = 0; i < AIS_VESSEL_COLUMNS; i++)
     {
@@ -70,6 +71,9 @@ QByteArray AISSettings::serialize() const
     if (m_rollupState) {
         s.writeBlob(27, m_rollupState->serialize());
     }
+
+    s.writeS32(27, m_workspaceIndex);
+    s.writeBlob(28, m_geometryBytes);
 
     for (int i = 0; i < AIS_VESSEL_COLUMNS; i++) {
         s.writeS32(300 + i, m_vesselColumnIndexes[i]);
@@ -121,6 +125,9 @@ bool AISSettings::deserialize(const QByteArray& data)
             d.readBlob(27, &bytetmp);
             m_rollupState->deserialize(bytetmp);
         }
+
+        d.readS32(27, &m_workspaceIndex, 0);
+        d.readBlob(28, &m_geometryBytes);
 
         for (int i = 0; i < AIS_VESSEL_COLUMNS; i++) {
             d.readS32(300 + i, &m_vesselColumnIndexes[i], i);

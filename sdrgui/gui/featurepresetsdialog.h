@@ -46,6 +46,7 @@ public:
     void setWebAPIAdapter(WebAPIAdapterInterface *apiAdapter) { m_apiAdapter = apiAdapter; }
     void setWorkspace(Workspace *workspace) { m_workspace = workspace; }
     void populateTree();
+    bool wasPresetLoaded() const { return m_presetLoaded; }
 
 private:
     enum {
@@ -59,6 +60,7 @@ private:
     PluginAPI *m_pluginAPI;
     WebAPIAdapterInterface *m_apiAdapter;
     Workspace *m_workspace;
+    bool m_presetLoaded;
 
     QTreeWidgetItem* addPresetToTree(const FeatureSetPreset* preset);
     void updatePresetControls();
@@ -74,7 +76,6 @@ private:
 private slots:
 	void on_presetSave_clicked();
 	void on_presetUpdate_clicked();
-	void on_settingsSave_clicked();
     void on_presetEdit_clicked();
 	void on_presetDelete_clicked();
 	void on_presetLoad_clicked();

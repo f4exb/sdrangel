@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>FeaturePresetsDialog</class>
- <widget class="QDialog" name="FeaturePresetsDialog">
+ <class>ConfigurationsDialog</class>
+ <widget class="QDialog" name="ConfigurationsDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -17,7 +17,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Feature presets</string>
+   <string>Configurations</string>
   </property>
   <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">
@@ -46,7 +46,10 @@
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QTreeWidget" name="presetsTree">
+     <widget class="QTreeWidget" name="configurationsTree">
+      <property name="toolTip">
+       <string>List of configurations</string>
+      </property>
       <property name="indentation">
        <number>5</number>
       </property>
@@ -77,11 +80,11 @@
      <height>34</height>
     </rect>
    </property>
-   <layout class="QHBoxLayout" name="presetsControl">
+   <layout class="QHBoxLayout" name="configurationsControl">
     <item>
-     <widget class="QToolButton" name="presetSave">
+     <widget class="QToolButton" name="configurationSave">
       <property name="toolTip">
-       <string>Save current settings as new preset</string>
+       <string>Save current workspaces configuration as new configuration</string>
       </property>
       <property name="text">
        <string>...</string>
@@ -99,9 +102,9 @@
      </widget>
     </item>
     <item>
-     <widget class="QToolButton" name="presetUpdate">
+     <widget class="QToolButton" name="configurationUpdate">
       <property name="toolTip">
-       <string>Update selected preset with current settings</string>
+       <string>Update selected configuration with current workspaces configuration</string>
       </property>
       <property name="text">
        <string>...</string>
@@ -119,9 +122,9 @@
      </widget>
     </item>
     <item>
-     <widget class="QToolButton" name="presetEdit">
+     <widget class="QToolButton" name="configurationEdit">
       <property name="toolTip">
-       <string>Edit preset details</string>
+       <string>Edit configuration details</string>
       </property>
       <property name="text">
        <string/>
@@ -146,9 +149,9 @@
      </spacer>
     </item>
     <item>
-     <widget class="QToolButton" name="presetDelete">
+     <widget class="QToolButton" name="configurationDelete">
       <property name="toolTip">
-       <string>Delete selected preset</string>
+       <string>Delete selected configuration</string>
       </property>
       <property name="text">
        <string>...</string>
@@ -179,9 +182,9 @@
      </spacer>
     </item>
     <item>
-     <widget class="QToolButton" name="presetLoad">
+     <widget class="QToolButton" name="configurationLoad">
       <property name="toolTip">
-       <string>Load selected preset</string>
+       <string>Load selected configuration</string>
       </property>
       <property name="text">
        <string>...</string>
@@ -208,7 +211,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>FeaturePresetsDialog</receiver>
+   <receiver>ConfigurationsDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -224,7 +227,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>FeaturePresetsDialog</receiver>
+   <receiver>ConfigurationsDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

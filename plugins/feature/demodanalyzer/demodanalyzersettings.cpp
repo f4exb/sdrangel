@@ -76,6 +76,7 @@ void DemodAnalyzerSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIFeatureSetIndex = 0;
     m_reverseAPIFeatureIndex = 0;
+    m_workspaceIndex = 0;
 }
 
 QByteArray DemodAnalyzerSettings::serialize() const
@@ -102,6 +103,9 @@ QByteArray DemodAnalyzerSettings::serialize() const
     if (m_rollupState) {
         s.writeBlob(12, m_rollupState->serialize());
     }
+
+    s.writeS32(13, m_workspaceIndex);
+    s.writeBlob(14, m_geometryBytes);
 
     return s.final();
 }
@@ -157,6 +161,9 @@ bool DemodAnalyzerSettings::deserialize(const QByteArray& data)
             d.readBlob(12, &bytetmp);
             m_rollupState->deserialize(bytetmp);
         }
+
+        d.readS32(13, &m_workspaceIndex, 0);
+        d.readBlob(14, &m_geometryBytes);
 
         return true;
     }

@@ -66,6 +66,7 @@
 #include "gui/workspace.h"
 #include "gui/featurepresetsdialog.h"
 #include "gui/commandsdialog.h"
+#include "gui/configurationsdialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/dspcommands.h"
@@ -263,6 +264,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	// loadPresetSettings(m_mainCore->m_settings.getWorkingPreset(), 0);
 	m_apiAdapter = new WebAPIAdapter();
     // loadFeatureSetPresetSettings(m_mainCore->m_settings.getWorkingFeatureSetPreset(), 0);
+    loadConfiguration(m_mainCore->m_settings.getWorkingConfiguration());
 
     splash->showStatusMessage("update preset controls...", Qt::white);
 	qDebug() << "MainWindow::MainWindow: update preset controls...";
@@ -324,6 +326,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 
 MainWindow::~MainWindow()
 {
+    m_mainCore->m_settings.save();
     m_apiServer->stop();
     delete m_apiServer;
     delete m_requestMapper;
@@ -773,8 +776,8 @@ void MainWindow::loadSettings()
 
     m_mainCore->m_settings.load();
     m_mainCore->m_settings.sortPresets();
-    int middleIndex = m_mainCore->m_settings.getPresetCount() / 2;
-    QTreeWidgetItem *treeItem;
+    // int middleIndex = m_mainCore->m_settings.getPresetCount() / 2;
+    // QTreeWidgetItem *treeItem;
 
     // for (int i = 0; i < m_mainCore->m_settings.getPresetCount(); ++i)
     // {
@@ -787,10 +790,10 @@ void MainWindow::loadSettings()
 
     m_mainCore->m_settings.sortCommands();
 
-    for (int i = 0; i < m_mainCore->m_settings.getCommandCount(); ++i)
-    {
-        treeItem = addCommandToTree(m_mainCore->m_settings.getCommand(i));
-    }
+    // for (int i = 0; i < m_mainCore->m_settings.getCommandCount(); ++i)
+    // {
+    //     treeItem = addCommandToTree(m_mainCore->m_settings.getCommand(i));
+    // }
 
     m_mainCore->setLoggingOptions();
 }
@@ -894,8 +897,64 @@ void MainWindow::saveFeatureSetPresetSettings(FeatureSetPreset* preset, int feat
     featureUI->saveFeatureSetSettings(preset);
 }
 
-void MainWindow::saveCommandSettings()
+void MainWindow::loadConfiguration(const Configuration *configuration)
 {
+	qDebug("MainWindow::loadConfiguration: configuration [%s | %s] %d workspaces",
+		qPrintable(configuration->getGroup()),
+		qPrintable(configuration->getDescription()),
+        configuration->getNumberOfWorkspaces()
+    );
+
+    // Wipe out everything first
+
+    // Features
+    m_featureUIs[0]->freeFeatures();
+    // Workspaces
+    for (const auto& workspace : m_workspaces) {
+        delete workspace;
+    }
+    m_workspaces.clear();
+
+    // Reconstruct
+
+    // Workspaces
+    for (int i = 0; i < configuration->getNumberOfWorkspaces(); i++) {
+        addWorkspace();
+    }
+    // Features
+    m_featureUIs[0]->loadFeatureSetSettings(&configuration->getFeatureSetPreset(), m_pluginManager->getPluginAPI(), m_apiAdapter, m_workspaces);
+
+    for (int i = 0; i < m_featureUIs[0]->getNumberOfFeatures(); i++)
+    {
+        FeatureGUI *gui = m_featureUIs[0]->getFeatureGuiAt(i);
+        QObject::connect(
+            gui,
+            &FeatureGUI::moveToWorkspace,
+            this,
+            [=](int wsIndexDest){ this->featureMove(gui, wsIndexDest); }
+        );
+    }
+
+    // Lastly restore workspaces geometry
+    for (int i = 0; i < configuration->getNumberOfWorkspaces(); i++) {
+        m_workspaces[i]->restoreGeometry(configuration->getWorkspaceGeometries()[i]);
+    }
+}
+
+void MainWindow::saveConfiguration(Configuration *configuration)
+{
+	qDebug("MainWindow::saveConfiguration: configuration [%s | %s] %d workspaces",
+		qPrintable(configuration->getGroup()),
+		qPrintable(configuration->getDescription()),
+        m_workspaces.size()
+    );
+
+    configuration->clearData();
+    m_featureUIs[0]->saveFeatureSetSettings(&configuration->getFeatureSetPreset());
+
+    for (const auto& workspace : m_workspaces) {
+        configuration->getWorkspaceGeometries().push_back(workspace->saveGeometry());
+    }
 }
 
 QString MainWindow::openGLVersion()
@@ -950,8 +1009,14 @@ void MainWindow::createMenuBar()
     QAction *viewAllWorkspacesAction = workspacesMenu->addAction("View all");
     viewAllWorkspacesAction->setToolTip("View all workspaces");
     QObject::connect(viewAllWorkspacesAction, &QAction::triggered, this, &MainWindow::viewAllWorkspaces);
+    QAction *removeEmptyWorkspacesAction = workspacesMenu->addAction("Remove empty");
+    removeEmptyWorkspacesAction->setToolTip("Remove empty workspaces");
+    QObject::connect(removeEmptyWorkspacesAction, &QAction::triggered, this, &MainWindow::removeEmptyWorkspaces);
 
     QMenu *preferencesMenu = menuBar->addMenu("Preferences");
+    QAction *configurationsAction = preferencesMenu->addAction("Configurations");
+    configurationsAction->setToolTip("Manage configurations");
+    QObject::connect(configurationsAction, &QAction::triggered, this, &MainWindow::on_action_Configurations_triggered);
     QAction *audioAction = preferencesMenu->addAction("Audio");
     audioAction->setToolTip("Audio preferences");
     QObject::connect(audioAction, &QAction::triggered, this, &MainWindow::on_action_Audio_triggered);
@@ -977,6 +1042,9 @@ void MainWindow::createMenuBar()
     QAction *commandsAction = preferencesMenu->addAction("Commands");
     commandsAction->setToolTip("External commands dialog");
     QObject::connect(commandsAction, &QAction::triggered, this, &MainWindow::on_action_commands_triggered);
+    QAction *saveAllAction = preferencesMenu->addAction("Save all");
+    saveAllAction->setToolTip("Save all current settings");
+    QObject::connect(saveAllAction, &QAction::triggered, this, &MainWindow::on_action_saveAll_triggered);
 
     QMenu *helpMenu = menuBar->addMenu("Help");
     QAction *quickStartAction = helpMenu->addAction("Quick start");
@@ -1021,7 +1089,8 @@ void MainWindow::closeEvent(QCloseEvent *closeEvent)
 
     // savePresetSettings(m_mainCore->m_settings.getWorkingPreset(), 0);
     // saveFeatureSetPresetSettings(m_mainCore->m_settings.getWorkingFeatureSetPreset(), 0);
-    // m_mainCore->m_settings.save();
+    saveConfiguration(m_mainCore->m_settings.getWorkingConfiguration());
+    m_mainCore->m_settings.save();
 
     // while (m_deviceUIs.size() > 0)
     // {
@@ -1128,6 +1197,7 @@ void MainWindow::applySettings()
 {
  	// loadPresetSettings(m_mainCore->m_settings.getWorkingPreset(), 0);
     // loadFeatureSetPresetSettings(m_mainCore->m_settings.getWorkingFeatureSetPreset(), 0);
+    loadConfiguration(m_mainCore->m_settings.getWorkingConfiguration());
 
     m_mainCore->m_settings.sortPresets();
     int middleIndex = m_mainCore->m_settings.getPresetCount() / 2;
@@ -1420,6 +1490,24 @@ void MainWindow::viewAllWorkspaces()
     }
 }
 
+void MainWindow::removeEmptyWorkspaces()
+{
+    QList<Workspace *>::iterator it = m_workspaces.begin();
+
+    while (it != m_workspaces.end())
+    {
+        if ((*it)->getNumberOfSubWindows() == 0)
+        {
+            removeDockWidget(*it);
+            it = m_workspaces.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
+}
+
 void MainWindow::on_action_View_Fullscreen_toggled(bool checked)
 {
 	if(checked) {
@@ -1674,11 +1762,13 @@ void MainWindow::on_presetImport_clicked()
 	// }
 }
 
-void MainWindow::on_settingsSave_clicked()
+void MainWindow::on_action_saveAll_triggered()
 {
     // savePresetSettings(m_mainCore->m_settings.getWorkingPreset(), ui->tabInputsView->currentIndex());
     // saveFeatureSetPresetSettings(m_mainCore->m_settings.getWorkingFeatureSetPreset(), ui->tabFeatures->currentIndex());
+    saveConfiguration(m_mainCore->m_settings.getWorkingConfiguration());
     m_mainCore->m_settings.save();
+    QMessageBox::information(this, tr("Done"), tr("All curent settings saved"));
 }
 
 void MainWindow::on_presetLoad_clicked()
@@ -1775,6 +1865,26 @@ void MainWindow::on_action_Loaded_Plugins_triggered()
 {
     PluginsDialog pluginsDialog(m_pluginManager, this);
     pluginsDialog.exec();
+}
+
+void MainWindow::on_action_Configurations_triggered()
+{
+    ConfigurationsDialog dialog(this);
+    dialog.setConfigurations(m_mainCore->m_settings.getConfigurations());
+    dialog.populateTree();
+    QObject::connect(
+        &dialog,
+        &ConfigurationsDialog::saveConfiguration,
+        this,
+        &MainWindow::saveConfiguration
+    );
+    QObject::connect(
+        &dialog,
+        &ConfigurationsDialog::loadConfiguration,
+        this,
+        &MainWindow::loadConfiguration
+    );
+    dialog.exec();
 }
 
 void MainWindow::on_action_Audio_triggered()
@@ -2329,6 +2439,20 @@ void MainWindow::openFeaturePresetsDialog(QPoint p, Workspace *workspace)
     dialog.populateTree();
     dialog.move(p);
     dialog.exec();
+
+    if (dialog.wasPresetLoaded())
+    {
+        for (int i = 0; i < m_featureUIs[0]->getNumberOfFeatures(); i++)
+        {
+            FeatureGUI *gui = m_featureUIs[0]->getFeatureGuiAt(i);
+            QObject::connect(
+                gui,
+                &FeatureGUI::moveToWorkspace,
+                this,
+                [=](int wsIndexDest){ this->featureMove(gui, wsIndexDest); }
+            );
+        }
+    }
 }
 
 void MainWindow::deleteFeature(int featureSetIndex, int featureIndex)

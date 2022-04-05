@@ -37,6 +37,7 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     setWidget(m_mdi);
 
     setWindowTitle(tr("W%1").arg(m_index));
+    setObjectName(tr("W%1").arg(m_index));
 
     m_titleBar = new QWidget();
     m_titleBarLayout = new QHBoxLayout();
@@ -105,7 +106,7 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     m_normalButton->setFixedSize(20, 20);
 
     m_closeButton = new QPushButton();
-    QIcon closeIcon(":/cross.png");
+    QIcon closeIcon(":/hide.png");
     m_closeButton->setIcon(closeIcon);
     m_closeButton->setToolTip("Hide workspace");
     m_closeButton->setFixedSize(20, 20);
@@ -268,4 +269,19 @@ void Workspace::addToMdiArea(QMdiSubWindow *sub)
 void Workspace::removeFromMdiArea(QMdiSubWindow *sub)
 {
     m_mdi->removeSubWindow(sub);
+}
+
+int Workspace::getNumberOfSubWindows() const
+{
+    return m_mdi->subWindowList().size();
+}
+
+QByteArray Workspace::saveMdiGeometry()
+{
+    return qCompress(m_mdi->saveGeometry());
+}
+
+void Workspace::restoreMdiGeometry(const QByteArray& blob)
+{
+    m_mdi->restoreGeometry(qUncompress(blob));
 }

@@ -129,6 +129,7 @@
     <file>help.png</file>
     <file>shrink.png</file>
     <file>exit.png</file>
+    <file>hide.png</file>
     <file>LiberationMono-Regular.ttf</file>
     <file>LiberationSans-Regular.ttf</file>
   </qresource>

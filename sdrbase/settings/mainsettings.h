@@ -8,6 +8,7 @@
 #include "preferences.h"
 #include "preset.h"
 #include "featuresetpreset.h"
+#include "configuration.h"
 #include "export.h"
 #include "plugin/pluginmanager.h"
 
@@ -69,6 +70,20 @@ public:
     const FeatureSetPreset& getWorkingFeatureSetPresetConst() const { return m_workingFeatureSetPreset; }
 	FeatureSetPreset* getWorkingFeatureSetPreset() { return &m_workingFeatureSetPreset; }
 	QList<FeatureSetPreset*> *getFeatureSetPresets() { return &m_featureSetPresets; }
+
+    Configuration* newConfiguration(const QString& group, const QString& description);
+    void addConfiguration(Configuration *configuration);
+    void deleteConfiguration(const Configuration *configuration);
+    int getConfigurationCount() const { return m_configurations.size(); }
+	const Configuration* getConfiguration(int index) const { return m_configurations[index]; }
+	const Configuration* getConfiguration(const QString& groupName, const QString& description) const;
+    void sortConfigurations();
+	void renameConfigurationGroup(const QString& oldGroupName, const QString& newGroupName);
+	void deleteConfigurationGroup(const QString& groupName);
+    void clearConfigurations();
+    const Configuration& getWorkingConfigurationConst() const { return m_workingConfiguration; }
+	Configuration* getWorkingConfiguration() { return &m_workingConfiguration; }
+	QList<Configuration*> *getConfigurations() { return &m_configurations; }
 
 	const QString& getSourceDevice() const { return m_preferences.getSourceDevice(); }
 	void setSourceDevice(const QString& value)
@@ -174,13 +189,16 @@ protected:
 	Preferences m_preferences;
 	AudioDeviceManager *m_audioDeviceManager;
 	Preset m_workingPreset;
-	FeatureSetPreset m_workingFeatureSetPreset;
 	typedef QList<Preset*> Presets;
 	Presets m_presets;
     typedef QList<Command*> Commands;
     Commands m_commands;
+	FeatureSetPreset m_workingFeatureSetPreset;
     typedef QList<FeatureSetPreset*> FeatureSetPresets;
     FeatureSetPresets m_featureSetPresets;
+    Configuration m_workingConfiguration;
+    typedef QList<Configuration*> Configurations;
+    Configurations m_configurations;
 	DeviceUserArgs m_hardwareDeviceUserArgs;
 	LimeRFEUSBCalib m_limeRFEUSBCalib;
     AMBEEngine *m_ambeEngine;

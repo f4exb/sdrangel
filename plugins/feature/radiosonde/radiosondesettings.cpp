@@ -76,6 +76,8 @@ QByteArray RadiosondeSettings::serialize() const
 
     s.writeS32(10, (int)m_y1);
     s.writeS32(11, (int)m_y2);
+    s.writeS32(12, m_workspaceIndex);
+    s.writeBlob(13, m_geometryBytes);
 
     for (int i = 0; i < RADIOSONDES_COLUMNS; i++) {
         s.writeS32(300 + i, m_radiosondesColumnIndexes[i]);
@@ -130,6 +132,8 @@ bool RadiosondeSettings::deserialize(const QByteArray& data)
 
         d.readS32(10, (int *)&m_y1, (int)ALTITUDE);
         d.readS32(11, (int *)&m_y2, (int)TEMPERATURE);
+        d.readS32(12, &m_workspaceIndex, 0);
+        d.readBlob(13, &m_geometryBytes);
 
         for (int i = 0; i < RADIOSONDES_COLUMNS; i++) {
             d.readS32(300 + i, &m_radiosondesColumnIndexes[i], i);

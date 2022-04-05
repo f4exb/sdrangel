@@ -33,7 +33,6 @@
 FeatureGUI::FeatureGUI(QWidget *parent) :
     QMdiSubWindow(parent),
     m_featureIndex(0),
-    m_workspaceIndex(0),
     m_contextMenuType(ContextMenuNone),
     m_drag(false)
 {
@@ -81,7 +80,7 @@ FeatureGUI::FeatureGUI(QWidget *parent) :
     m_closeButton->setToolTip("Close feature");
 
     m_statusLabel = new QLabel();
-    m_statusLabel->setText("OK"); // for future use
+    // m_statusLabel->setText("OK"); // for future use
     m_statusLabel->setFixedHeight(20);
     m_statusLabel->setToolTip("Feature status");
 
@@ -111,6 +110,7 @@ FeatureGUI::FeatureGUI(QWidget *parent) :
     m_bottomLayout->addWidget(m_statusLabel);
     m_sizeGripBottomRight = new QSizeGrip(this);
     m_sizeGripBottomRight->setStyleSheet("QSizeGrip { background-color: rgb(128, 128, 128); width: 10px; height: 10px; }");
+    m_bottomLayout->addStretch(1);
     m_bottomLayout->addWidget(m_sizeGripBottomRight, 0, Qt::AlignBottom | Qt::AlignRight);
 
     m_layouts->addLayout(m_topLayout);

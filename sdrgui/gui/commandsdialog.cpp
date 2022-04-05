@@ -50,10 +50,9 @@ void CommandsDialog::populateTree()
 {
     MainCore::instance()->m_settings.sortCommands();
     ui->commandTree->clear();
-    QTreeWidgetItem *treeItem;
 
     for (int i = 0; i < MainCore::instance()->m_settings.getCommandCount(); ++i) {
-        treeItem = addCommandToTree(MainCore::instance()->m_settings.getCommand(i));
+        addCommandToTree(MainCore::instance()->m_settings.getCommand(i));
     }
 }
 
@@ -220,11 +219,6 @@ void CommandsDialog::on_commandOutput_clicked()
         CommandOutputDialog commandOutputDialog(*command_mod);
         commandOutputDialog.exec();
     }
-}
-
-void CommandsDialog::on_commandsSave_clicked()
-{
-    MainCore::instance()->m_settings.save();
 }
 
 void CommandsDialog::on_commandDelete_clicked()

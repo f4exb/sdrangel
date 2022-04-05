@@ -46,13 +46,22 @@ public:
     void deleteFeature(int featureIndex);
     const Feature *getFeatureAt(int featureIndex) const;
     Feature *getFeatureAt(int featureIndex);
+    const FeatureGUI *getFeatureGuiAt(int featureIndex) const;
+    FeatureGUI *getFeatureGuiAt(int featureIndex);
     void loadFeatureSetSettings(
         const FeatureSetPreset* preset,
         PluginAPI *pluginAPI,
         WebAPIAdapterInterface *apiAdapter,
         Workspace *workspace
     );
+    void loadFeatureSetSettings(
+        const FeatureSetPreset* preset,
+        PluginAPI *pluginAPI,
+        WebAPIAdapterInterface *apiAdapter,
+        QList<Workspace*>& workspaces
+    );
     void saveFeatureSetSettings(FeatureSetPreset* preset);
+    void freeFeatures();
 
 private:
     struct FeatureInstanceRegistration
@@ -79,7 +88,6 @@ private:
     int m_featureTabIndex;
     FeatureSet *m_featureSet;
 
-    void freeFeatures();
 
 private slots:
     void handleClosingFeatureGUI(FeatureGUI *featureGUI);

@@ -74,7 +74,8 @@ struct VORLocalizerSettings
     uint16_t m_reverseAPIFeatureSetIndex;
     uint16_t m_reverseAPIFeatureIndex;
     Serializable *m_rollupState;
-
+    int m_workspaceIndex;
+    QByteArray m_geometryBytes;
 
     static const int VORDEMOD_COLUMNS  = 11;
     static const int VOR_COL_NAME      =  0;

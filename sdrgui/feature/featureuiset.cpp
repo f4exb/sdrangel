@@ -112,6 +112,24 @@ Feature *FeatureUISet::getFeatureAt(int featureIndex)
     }
 }
 
+const FeatureGUI *FeatureUISet::getFeatureGuiAt(int featureIndex) const
+{
+    if ((featureIndex >= 0) && (featureIndex < m_featureInstanceRegistrations.count())) {
+        return m_featureInstanceRegistrations.at(featureIndex).m_gui;
+    } else{
+        return nullptr;
+    }
+}
+
+FeatureGUI *FeatureUISet::getFeatureGuiAt(int featureIndex)
+{
+    if ((featureIndex >= 0) && (featureIndex < m_featureInstanceRegistrations.count())) {
+        return m_featureInstanceRegistrations.at(featureIndex).m_gui;
+    } else{
+        return nullptr;
+    }
+}
+
 void FeatureUISet::loadFeatureSetSettings(
     const FeatureSetPreset *preset,
     PluginAPI *pluginAPI,
@@ -147,6 +165,7 @@ void FeatureUISet::loadFeatureSetSettings(
     {
         const FeatureSetPreset::FeatureConfig& featureConfig = preset->getFeatureConfig(i);
         FeatureGUI *featureGUI = nullptr;
+        Feature *feature = nullptr;
 
         // create feature instance
 
@@ -158,14 +177,9 @@ void FeatureUISet::loadFeatureSetSettings(
                     qPrintable((*featureRegistrations)[i].m_featureIdURI),
                     qPrintable(featureConfig.m_featureIdURI)
                 );
-                Feature *feature =
-                        (*featureRegistrations)[i].m_plugin->createFeature(apiAdapter);
-                featureGUI =
-                        (*featureRegistrations)[i].m_plugin->createFeatureGUI(this, feature);
+                feature = (*featureRegistrations)[i].m_plugin->createFeature(apiAdapter);
+                featureGUI = (*featureRegistrations)[i].m_plugin->createFeatureGUI(this, feature);
                 registerFeatureInstance(featureGUI, feature);
-                featureGUI->setIndex(feature->getIndexInFeatureSet());
-                featureGUI->setWorkspaceIndex(workspace->getIndex());
-                workspace->addToMdiArea((QMdiSubWindow*) featureGUI);
                 break;
             }
         }
@@ -173,9 +187,63 @@ void FeatureUISet::loadFeatureSetSettings(
         if (featureGUI)
         {
             qDebug("FeatureUISet::loadFeatureSetSettings: deserializing feature [%s]",
-                qPrintable(featureConfig.m_featureIdURI)
-            );
+                qPrintable(featureConfig.m_featureIdURI));
             featureGUI->deserialize(featureConfig.m_config);
+
+            if (workspace) // restore in current workspace
+            {
+                featureGUI->setIndex(feature->getIndexInFeatureSet());
+                featureGUI->setWorkspaceIndex(workspace->getIndex());
+                workspace->addToMdiArea((QMdiSubWindow*) featureGUI);
+            }
+        }
+    }
+}
+
+void FeatureUISet::loadFeatureSetSettings(
+    const FeatureSetPreset* preset,
+    PluginAPI *pluginAPI,
+    WebAPIAdapterInterface *apiAdapter,
+    QList<Workspace*>& workspaces
+)
+{
+    // This method loads from scratch - load from configuration
+    qDebug("FeatureUISet::loadFeatureSetSettings: %d feature(s) in preset", preset->getFeatureCount());
+
+    // Available feature plugins
+    PluginAPI::FeatureRegistrations *featureRegistrations = pluginAPI->getFeatureRegistrations();
+
+    for (int i = 0; i < preset->getFeatureCount(); i++)
+    {
+        const FeatureSetPreset::FeatureConfig& featureConfig = preset->getFeatureConfig(i);
+        FeatureGUI *featureGUI = nullptr;
+        Feature *feature = nullptr;
+
+        // create feature instance
+
+        for(int i = 0; i < featureRegistrations->count(); i++)
+        {
+            if (FeatureUtils::compareFeatureURIs((*featureRegistrations)[i].m_featureIdURI, featureConfig.m_featureIdURI))
+            {
+                qDebug("FeatureUISet::loadFeatureSetSettings: creating new feature [%s] from config [%s]",
+                    qPrintable((*featureRegistrations)[i].m_featureIdURI),
+                    qPrintable(featureConfig.m_featureIdURI)
+                );
+                feature = (*featureRegistrations)[i].m_plugin->createFeature(apiAdapter);
+                featureGUI = (*featureRegistrations)[i].m_plugin->createFeatureGUI(this, feature);
+                registerFeatureInstance(featureGUI, feature);
+                break;
+            }
+        }
+
+        if (featureGUI)
+        {
+            qDebug("FeatureUISet::loadFeatureSetSettings: deserializing feature [%s]",
+                qPrintable(featureConfig.m_featureIdURI));
+            featureGUI->deserialize(featureConfig.m_config);
+            featureGUI->setIndex(feature->getIndexInFeatureSet());
+            workspaces[featureGUI->getWorkspaceIndex()]->addToMdiArea((QMdiSubWindow*) featureGUI);
+            featureGUI->restoreGeometry(featureGUI->getGeometryBytes());
         }
     }
 }
@@ -187,6 +255,8 @@ void FeatureUISet::saveFeatureSetSettings(FeatureSetPreset *preset)
         qDebug("FeatureUISet::saveFeatureSetSettings: saving feature [%s]",
             qPrintable(m_featureInstanceRegistrations.at(i).m_feature->getURI())
         );
+        FeatureGUI *featureGUI = m_featureInstanceRegistrations.at(i).m_gui;
+        featureGUI->setGeometryBytes(featureGUI->saveGeometry());
         preset->addFeature(
             m_featureInstanceRegistrations.at(i).m_feature->getURI(),
             m_featureInstanceRegistrations.at(i).m_gui->serialize()

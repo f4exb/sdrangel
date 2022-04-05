@@ -72,6 +72,8 @@ struct StarTrackerSettings
     bool m_drawSunOnSkyTempChart;
     bool m_drawMoonOnSkyTempChart;
     Serializable *m_rollupState;
+    int m_workspaceIndex;
+    QByteArray m_geometryBytes;
 
     StarTrackerSettings();
     void resetToDefaults();

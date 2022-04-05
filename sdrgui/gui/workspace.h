@@ -44,6 +44,9 @@ public:
     void addAvailableFeatures(const QStringList& featureNames) { m_featureAddDialog.addFeatureNames(featureNames); }
     void addToMdiArea(QMdiSubWindow *sub);
     void removeFromMdiArea(QMdiSubWindow *sub);
+    int getNumberOfSubWindows() const;
+    QByteArray saveMdiGeometry();
+    void restoreMdiGeometry(const QByteArray& blob);
 
 private:
     int m_index;

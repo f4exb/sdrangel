@@ -77,6 +77,7 @@ void APRSSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIFeatureSetIndex = 0;
     m_reverseAPIFeatureIndex = 0;
+    m_workspaceIndex = 0;
 
     for (int i = 0; i < APRS_PACKETS_TABLE_COLUMNS; i++)
     {
@@ -142,6 +143,9 @@ QByteArray APRSSettings::serialize() const
     if (m_rollupState) {
         s.writeBlob(20, m_rollupState->serialize());
     }
+
+    s.writeS32(21, m_workspaceIndex);
+    s.writeBlob(22, m_geometryBytes);
 
     for (int i = 0; i < APRS_PACKETS_TABLE_COLUMNS; i++)
         s.writeS32(100 + i, m_packetsTableColumnIndexes[i]);
@@ -221,6 +225,9 @@ bool APRSSettings::deserialize(const QByteArray& data)
             d.readBlob(20, &bytetmp);
             m_rollupState->deserialize(bytetmp);
         }
+
+        d.readS32(21, &m_workspaceIndex, 0);
+        d.readBlob(22, &m_geometryBytes);
 
         for (int i = 0; i < APRS_PACKETS_TABLE_COLUMNS; i++)
             d.readS32(100 + i, &m_packetsTableColumnIndexes[i], i);

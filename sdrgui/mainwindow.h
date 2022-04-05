@@ -128,7 +128,6 @@ private:
 	void savePresetSettings(Preset* preset, int tabIndex);
 	void loadFeatureSetPresetSettings(const FeatureSetPreset* preset, int featureSetIndex, Workspace *workspace);
 	void saveFeatureSetPresetSettings(FeatureSetPreset* preset, int featureSetIndex);
-	void saveCommandSettings();
 
 	QString openGLVersion();
     void createMenuBar();
@@ -162,6 +161,9 @@ private slots:
 	void updateStatus();
     void addWorkspace();
     void viewAllWorkspaces();
+    void removeEmptyWorkspaces();
+	void loadConfiguration(const Configuration *configuration);
+    void saveConfiguration(Configuration *configuration);
 
 	void on_action_View_Fullscreen_toggled(bool checked);
 	void on_presetSave_clicked();
@@ -169,11 +171,12 @@ private slots:
     void on_presetEdit_clicked();
 	void on_presetExport_clicked();
 	void on_presetImport_clicked();
-	void on_settingsSave_clicked();
+	void on_action_saveAll_triggered();
 	void on_presetLoad_clicked();
 	void on_presetDelete_clicked();
 	void on_presetTree_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
 	void on_presetTree_itemActivated(QTreeWidgetItem *item, int column);
+    void on_action_Configurations_triggered();
 	void on_action_Audio_triggered();
     void on_action_Logging_triggered();
 	void on_action_FFT_triggered();

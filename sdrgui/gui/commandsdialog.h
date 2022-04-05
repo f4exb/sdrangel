@@ -60,7 +60,6 @@ private slots:
     void on_commandEdit_clicked();
     void on_commandRun_clicked();
     void on_commandOutput_clicked();
-    void on_commandsSave_clicked();
     void on_commandDelete_clicked();
     void on_commandKeyboardConnect_toggled(bool checked);
 };

@@ -106,6 +106,7 @@ void MapSettings::resetToDefaults()
     m_eciCamera = false;
     m_modelDir = HttpDownloadManager::downloadDir() + "/3d";
     m_antiAliasing = "None";
+    m_workspaceIndex = 0;
 }
 
 QByteArray MapSettings::serialize() const
@@ -144,6 +145,8 @@ QByteArray MapSettings::serialize() const
     s.writeBool(30, m_eciCamera);
     s.writeString(31, m_cesiumIonAPIKey);
     s.writeString(32, m_antiAliasing);
+    s.writeS32(33, m_workspaceIndex);
+    s.writeBlob(34, m_geometryBytes);
 
     return s.final();
 }
@@ -210,6 +213,8 @@ bool MapSettings::deserialize(const QByteArray& data)
         d.readBool(30, &m_eciCamera, false);
         d.readString(31, &m_cesiumIonAPIKey, "");
         d.readString(32, &m_antiAliasing, "None");
+        d.readS32(33, &m_workspaceIndex, 0);
+        d.readBlob(34, &m_geometryBytes);
 
         return true;
     }

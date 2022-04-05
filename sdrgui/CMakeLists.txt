@@ -23,6 +23,7 @@ set(sdrgui_SOURCES
     gui/commanditem.cpp
     gui/commandsdialog.cpp
     gui/commandoutputdialog.cpp
+    gui/configurationsdialog.cpp
     gui/crightclickenabler.cpp
     gui/customtextedit.cpp
     gui/cwkeyergui.cpp
@@ -120,6 +121,7 @@ set(sdrgui_HEADERS
     gui/commanditem.h
     gui/commandsdialog.h
     gui/commandoutputdialog.h
+    gui/configurationsdialog.h
     gui/crightclickenabler.h
     gui/customtextedit.h
     gui/cwkeyergui.h
@@ -212,6 +214,7 @@ set(sdrgui_FORMS
     gui/channeladddialog.ui
     gui/commandsdialog.ui
     gui/commandoutputdialog.ui
+    gui/configurationsdialog.ui
     gui/cwkeyergui.ui
     gui/devicestreamselectiondialog.ui
     gui/deviceuserargsdialog.ui
