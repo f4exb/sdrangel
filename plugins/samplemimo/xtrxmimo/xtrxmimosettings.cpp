@@ -75,6 +75,8 @@ void XTRXMIMOSettings::resetToDefaults()
     m_lpfBWTx1 = 4.5e6f;
     m_gainTx1 = 20;
     m_pwrmodeTx1 = 4;
+    // GUI
+    m_workspaceIndex = 0;
 }
 
 QByteArray XTRXMIMOSettings::serialize() const
@@ -129,6 +131,9 @@ QByteArray XTRXMIMOSettings::serialize() const
     s.writeFloat(90, m_lpfBWTx1);
     s.writeU32(91, m_gainTx1);
     s.writeU32(92, m_pwrmodeTx1);
+    // GUI
+    s.writeS32(93, m_workspaceIndex);
+    s.writeBlob(94, m_geometryBytes);
 
     return s.final();
 }

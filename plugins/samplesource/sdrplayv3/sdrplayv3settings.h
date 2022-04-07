@@ -57,6 +57,8 @@ struct SDRPlayV3Settings {
     QString  m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIDeviceIndex;
+    int m_workspaceIndex;
+    QByteArray m_geometryBytes;
 
     SDRPlayV3Settings();
     void resetToDefaults();

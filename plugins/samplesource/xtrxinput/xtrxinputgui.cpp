@@ -47,9 +47,12 @@ XTRXInputGUI::XTRXInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_statusCounter(0),
     m_deviceStatusCounter(0)
 {
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_XTRXInput = (XTRXInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
-    ui->setupUi(this);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#XTRXInputGUI { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplesource/xtrxinput/readme.md";
 
     float minF, maxF, stepF;
 
@@ -77,6 +80,7 @@ XTRXInputGUI::XTRXInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
     displaySettings();
+    makeUIConnections();
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
@@ -646,4 +650,27 @@ void XTRXInputGUI::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+void XTRXInputGUI::makeUIConnections()
+{
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &XTRXInputGUI::on_startStop_toggled);
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &XTRXInputGUI::on_centerFrequency_changed);
+    QObject::connect(ui->ncoFrequency, &ValueDialZ::changed, this, &XTRXInputGUI::on_ncoFrequency_changed);
+    QObject::connect(ui->ncoEnable, &ButtonSwitch::toggled, this, &XTRXInputGUI::on_ncoEnable_toggled);
+    QObject::connect(ui->dcOffset, &ButtonSwitch::toggled, this, &XTRXInputGUI::on_dcOffset_toggled);
+    QObject::connect(ui->iqImbalance, &ButtonSwitch::toggled, this, &XTRXInputGUI::on_iqImbalance_toggled);
+    QObject::connect(ui->sampleRate, &ValueDial::changed, this, &XTRXInputGUI::on_sampleRate_changed);
+    QObject::connect(ui->hwDecim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &XTRXInputGUI::on_hwDecim_currentIndexChanged);
+    QObject::connect(ui->swDecim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &XTRXInputGUI::on_swDecim_currentIndexChanged);
+    QObject::connect(ui->lpf, &ValueDial::changed, this, &XTRXInputGUI::on_lpf_changed);
+    QObject::connect(ui->gainMode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &XTRXInputGUI::on_gainMode_currentIndexChanged);
+    QObject::connect(ui->gain, &QDial::valueChanged, this, &XTRXInputGUI::on_gain_valueChanged);
+    QObject::connect(ui->lnaGain, &QDial::valueChanged, this, &XTRXInputGUI::on_lnaGain_valueChanged);
+    QObject::connect(ui->tiaGain, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &XTRXInputGUI::on_tiaGain_currentIndexChanged);
+    QObject::connect(ui->pgaGain, &QDial::valueChanged, this, &XTRXInputGUI::on_pgaGain_valueChanged);
+    QObject::connect(ui->antenna, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &XTRXInputGUI::on_antenna_currentIndexChanged);
+    QObject::connect(ui->extClock, &ExternalClockButton::clicked, this, &XTRXInputGUI::on_extClock_clicked);
+    QObject::connect(ui->pwrmode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &XTRXInputGUI::on_pwrmode_currentIndexChanged);
+    QObject::connect(ui->sampleRateMode, &QToolButton::toggled, this, &XTRXInputGUI::on_sampleRateMode_toggled);
 }

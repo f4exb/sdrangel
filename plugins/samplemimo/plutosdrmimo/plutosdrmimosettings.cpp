@@ -77,6 +77,7 @@ void PlutoSDRMIMOSettings::resetToDefaults()
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
+    m_workspaceIndex = 0;
 }
 
 QByteArray PlutoSDRMIMOSettings::serialize() const
@@ -140,6 +141,9 @@ QByteArray PlutoSDRMIMOSettings::serialize() const
     s.writeString(101, m_reverseAPIAddress);
     s.writeU32(102,    m_reverseAPIPort);
     s.writeU32(103,    m_reverseAPIDeviceIndex);
+
+    s.writeS32(104, m_workspaceIndex);
+    s.writeBlob(105, m_geometryBytes);
 
 	return s.final();
 }
@@ -274,6 +278,9 @@ bool PlutoSDRMIMOSettings::deserialize(const QByteArray& data)
 
         d.readU32(103, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
+
+        d.readS32(104, &m_workspaceIndex, 0);
+        d.readBlob(105, &m_geometryBytes);
 
 		return true;
     }

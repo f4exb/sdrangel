@@ -41,9 +41,12 @@ PerseusGui::PerseusGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_sampleSource(0),
 	m_lastEngineState(DeviceAPI::StNotStarted)
 {
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_sampleSource = (PerseusInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
-    ui->setupUi(this);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#PerseusGui { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplesource/perseus/readme.md";
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 	updateFrequencyLimits();
 
@@ -62,6 +65,7 @@ PerseusGui::PerseusGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);
 
     sendSettings();
+    makeUIConnections();
 }
 
 PerseusGui::~PerseusGui()
@@ -389,4 +393,19 @@ void PerseusGui::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+void PerseusGui::makeUIConnections()
+{
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &PerseusGui::on_centerFrequency_changed);
+    QObject::connect(ui->LOppm, &QSlider::valueChanged, this, &PerseusGui::on_LOppm_valueChanged);
+    QObject::connect(ui->resetLOppm, &QPushButton::clicked, this, &PerseusGui::on_resetLOppm_clicked);
+    QObject::connect(ui->sampleRate, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PerseusGui::on_sampleRate_currentIndexChanged);
+    QObject::connect(ui->wideband, &ButtonSwitch::toggled, this, &PerseusGui::on_wideband_toggled);
+    QObject::connect(ui->decim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PerseusGui::on_decim_currentIndexChanged);
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &PerseusGui::on_startStop_toggled);
+    QObject::connect(ui->transverter, &TransverterButton::clicked, this, &PerseusGui::on_transverter_clicked);
+    QObject::connect(ui->attenuator, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PerseusGui::on_attenuator_currentIndexChanged);
+    QObject::connect(ui->adcDither, &ButtonSwitch::toggled, this, &PerseusGui::on_adcDither_toggled);
+    QObject::connect(ui->adcPreamp, &ButtonSwitch::toggled, this, &PerseusGui::on_adcPreamp_toggled);
 }

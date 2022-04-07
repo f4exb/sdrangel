@@ -66,7 +66,10 @@ BladeRF2MIMOGui::BladeRF2MIMOGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleRateMode(true)
 {
     qDebug("BladeRF2MIMOGui::BladeRF2MIMOGui");
-    ui->setupUi(this);
+    setAttribute(Qt::WA_DeleteOnClose, true);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#BladeRF2MIMOGui { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplemimo/bladerf2mimo/readme.md";
     m_sampleMIMO = (BladeRF2MIMO*) m_deviceUISet->m_deviceAPI->getSampleMIMO();
 
     m_sampleMIMO->getRxFrequencyRange(m_fMinRx, m_fMaxRx, m_fStepRx, m_fScaleRx);
@@ -100,6 +103,7 @@ BladeRF2MIMOGui::BladeRF2MIMOGui(DeviceUISet *deviceUISet, QWidget* parent) :
     connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
     sendSettings();
+    makeUIConnections();
 }
 
 BladeRF2MIMOGui::~BladeRF2MIMOGui()
@@ -820,4 +824,28 @@ int BladeRF2MIMOGui::getGainValue(float gainDB, int gainMin, int gainMax, int ga
     qDebug("BladeRF2MIMOGui::getGainValue: gainDB: %f m_gainMin: %d m_gainMax: %d m_gainStep: %d gainScale: %f gain: %d",
         gainDB, gainMin, gainMax, gainStep, gainScale, gain);
     return gain;
+}
+
+void BladeRF2MIMOGui::makeUIConnections()
+{
+	QObject::connect(ui->streamSide, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &BladeRF2MIMOGui::on_streamSide_currentIndexChanged);
+	QObject::connect(ui->streamIndex, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &BladeRF2MIMOGui::on_streamIndex_currentIndexChanged);
+	QObject::connect(ui->spectrumSide, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &BladeRF2MIMOGui::on_spectrumSide_currentIndexChanged);
+	QObject::connect(ui->spectrumIndex, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &BladeRF2MIMOGui::on_spectrumIndex_currentIndexChanged);
+	QObject::connect(ui->startStopRx, &ButtonSwitch::toggled, this, &BladeRF2MIMOGui::on_startStopRx_toggled);
+	QObject::connect(ui->startStopTx, &ButtonSwitch::toggled, this, &BladeRF2MIMOGui::on_startStopTx_toggled);
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &BladeRF2MIMOGui::on_centerFrequency_changed);
+	QObject::connect(ui->LOppm, &QSlider::valueChanged, this, &BladeRF2MIMOGui::on_LOppm_valueChanged);
+    QObject::connect(ui->dcOffset, &ButtonSwitch::toggled, this, &BladeRF2MIMOGui::on_dcOffset_toggled);
+    QObject::connect(ui->iqImbalance, &ButtonSwitch::toggled, this, &BladeRF2MIMOGui::on_iqImbalance_toggled);
+	QObject::connect(ui->bandwidth, &ValueDial::changed, this, &BladeRF2MIMOGui::on_bandwidth_changed);
+	QObject::connect(ui->sampleRate, &ValueDial::changed, this, &BladeRF2MIMOGui::on_sampleRate_changed);
+	QObject::connect(ui->fcPos, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &BladeRF2MIMOGui::on_fcPos_currentIndexChanged);
+	QObject::connect(ui->decim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &BladeRF2MIMOGui::on_decim_currentIndexChanged);
+    QObject::connect(ui->gainLock, &QToolButton::toggled, this, &BladeRF2MIMOGui::on_gainLock_toggled);
+	QObject::connect(ui->gainMode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &BladeRF2MIMOGui::on_gainMode_currentIndexChanged);
+	QObject::connect(ui->gain, &QSlider::valueChanged, this, &BladeRF2MIMOGui::on_gain_valueChanged);
+	QObject::connect(ui->biasTee, &ButtonSwitch::toggled, this, &BladeRF2MIMOGui::on_biasTee_toggled);
+	QObject::connect(ui->transverter, &TransverterButton::clicked, this, &BladeRF2MIMOGui::on_transverter_clicked);
+
 }

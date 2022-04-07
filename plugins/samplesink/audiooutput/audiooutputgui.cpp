@@ -40,9 +40,12 @@ AudioOutputGui::AudioOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_settings(),
     m_centerFrequency(0)
 {
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_audioOutput = (AudioOutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
 
-    ui->setupUi(this);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#AudioOutputGui { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplesink/audiooutput/readme.md";
 
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 
@@ -57,6 +60,8 @@ AudioOutputGui::AudioOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
     m_audioOutput->setMessageQueueToGUI(&m_inputMessageQueue);
+
+    makeUIConnections();
 }
 
 AudioOutputGui::~AudioOutputGui()
@@ -236,4 +241,12 @@ void AudioOutputGui::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+void AudioOutputGui::makeUIConnections()
+{
+    QObject::connect(ui->deviceSelect, &QPushButton::clicked, this, &AudioOutputGui::on_deviceSelect_clicked);
+    QObject::connect(ui->volume, &QDial::valueChanged, this, &AudioOutputGui::on_volume_valueChanged);
+    QObject::connect(ui->channels, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AudioOutputGui::on_channels_currentIndexChanged);
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &AudioOutputGui::on_startStop_toggled);
 }

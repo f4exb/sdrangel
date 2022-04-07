@@ -65,7 +65,10 @@ XTRXMIMOGUI::XTRXMIMOGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleRateMode(true)
 {
     qDebug("XTRXMIMOGUI::XTRXMIMOGUI");
-    ui->setupUi(this);
+    setAttribute(Qt::WA_DeleteOnClose, true);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#XTRXMIMOGUI { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplemimo/xtrxmimo/readme.md";
     m_xtrxMIMO = (XTRXMIMO*) m_deviceUISet->m_deviceAPI->getSampleMIMO();
 
     float minF, maxF, stepF;
@@ -97,6 +100,7 @@ XTRXMIMOGUI::XTRXMIMOGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
     sendSettings();
+    makeUIConnections();
 }
 
 XTRXMIMOGUI::~XTRXMIMOGUI()
@@ -1012,4 +1016,32 @@ void XTRXMIMOGUI::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+void XTRXMIMOGUI::makeUIConnections()
+{
+    QObject::connect(ui->streamSide, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &XTRXMIMOGUI::on_streamSide_currentIndexChanged);
+    QObject::connect(ui->streamIndex, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &XTRXMIMOGUI::on_streamIndex_currentIndexChanged);
+    QObject::connect(ui->spectrumSide, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &XTRXMIMOGUI::on_spectrumSide_currentIndexChanged);
+    QObject::connect(ui->spectrumIndex, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &XTRXMIMOGUI::on_spectrumIndex_currentIndexChanged);
+    QObject::connect(ui->startStopRx, &ButtonSwitch::toggled, this, &XTRXMIMOGUI::on_startStopRx_toggled);
+    QObject::connect(ui->startStopTx, &ButtonSwitch::toggled, this, &XTRXMIMOGUI::on_startStopTx_toggled);
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &XTRXMIMOGUI::on_centerFrequency_changed);
+    QObject::connect(ui->ncoEnable, &ButtonSwitch::toggled, this, &XTRXMIMOGUI::on_ncoEnable_toggled);
+    QObject::connect(ui->ncoFrequency, &ValueDialZ::changed, this, &XTRXMIMOGUI::on_ncoFrequency_changed);
+    QObject::connect(ui->dcOffset, &ButtonSwitch::toggled, this, &XTRXMIMOGUI::on_dcOffset_toggled);
+    QObject::connect(ui->iqImbalance, &ButtonSwitch::toggled, this, &XTRXMIMOGUI::on_iqImbalance_toggled);
+    QObject::connect(ui->extClock, &ExternalClockButton::clicked, this, &XTRXMIMOGUI::on_extClock_clicked);
+    QObject::connect(ui->hwDecim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &XTRXMIMOGUI::on_hwDecim_currentIndexChanged);
+    QObject::connect(ui->swDecim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &XTRXMIMOGUI::on_swDecim_currentIndexChanged);
+    QObject::connect(ui->sampleRateMode, &QToolButton::toggled, this, &XTRXMIMOGUI::on_sampleRateMode_toggled);
+    QObject::connect(ui->sampleRate, &ValueDial::changed, this, &XTRXMIMOGUI::on_sampleRate_changed);
+    QObject::connect(ui->lpf, &ValueDial::changed, this, &XTRXMIMOGUI::on_lpf_changed);
+    QObject::connect(ui->pwrmode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &XTRXMIMOGUI::on_pwrmode_currentIndexChanged);
+    QObject::connect(ui->gainMode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &XTRXMIMOGUI::on_gainMode_currentIndexChanged);
+    QObject::connect(ui->gain, &QDial::valueChanged, this, &XTRXMIMOGUI::on_gain_valueChanged);
+    QObject::connect(ui->lnaGain, &QDial::valueChanged, this, &XTRXMIMOGUI::on_lnaGain_valueChanged);
+    QObject::connect(ui->tiaGain, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &XTRXMIMOGUI::on_tiaGain_currentIndexChanged);
+    QObject::connect(ui->pgaGain, &QDial::valueChanged, this, &XTRXMIMOGUI::on_pgaGain_valueChanged);
+    QObject::connect(ui->antenna, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &XTRXMIMOGUI::on_antenna_currentIndexChanged);
 }

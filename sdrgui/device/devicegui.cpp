@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2020 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2022 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -28,38 +28,54 @@
 
 #include "mainwindow.h"
 #include "gui/workspaceselectiondialog.h"
-#include "featuregui.h"
+#include "gui/samplingdevicedialog.h"
+#include "devicegui.h"
 
-FeatureGUI::FeatureGUI(QWidget *parent) :
+DeviceGUI::DeviceGUI(QWidget *parent) :
     QMdiSubWindow(parent),
-    m_featureIndex(0),
+    m_deviceType(DeviceRx),
+    m_deviceSetIndex(0),
     m_contextMenuType(ContextMenuNone),
-    m_drag(false)
+    m_drag(false),
+    m_currentDeviceIndex(-1)
 {
-    qDebug("FeatureGUI::FeatureGUI");
+    qDebug("DeviceGUI::DeviceGUI: %p", parent);
     setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
 
     m_indexLabel = new QLabel();
-    m_indexLabel->setFixedSize(40, 16);
+    m_indexLabel->setFixedSize(32, 16);
     m_indexLabel->setStyleSheet("QLabel { background-color: rgb(128, 128, 128); qproperty-alignment: AlignCenter; }");
-    m_indexLabel->setText(tr("F:%1").arg(m_featureIndex));
-    m_indexLabel->setToolTip("Feature index");
+    m_indexLabel->setText(tr("X:%1").arg(m_deviceSetIndex));
+    m_indexLabel->setToolTip("Device type and set index");
 
-    m_settingsButton = new QPushButton();
-    QIcon settingsIcon(":/gear.png");
-    m_settingsButton->setIcon(settingsIcon);
-    m_settingsButton->setToolTip("Common settings");
+    m_changeDeviceButton = new QPushButton();
+    m_changeDeviceButton->setFixedSize(20, 20);
+    QIcon changeDeviceIcon(":/swap.png");
+    m_changeDeviceButton->setIcon(changeDeviceIcon);
+    m_changeDeviceButton->setToolTip("Change device");
+
+    m_reloadDeviceButton = new QPushButton();
+    m_reloadDeviceButton->setFixedSize(20, 20);
+    QIcon reloadDeviceIcon(":/recycle.png");
+    m_reloadDeviceButton->setIcon(reloadDeviceIcon);
+    m_reloadDeviceButton->setToolTip("Reload device");
+
+    m_addChannelsButton = new QPushButton();
+    m_addChannelsButton->setFixedSize(20, 20);
+    QIcon addChannelsIcon(":/create.png");
+    m_addChannelsButton->setIcon(addChannelsIcon);
+    m_addChannelsButton->setToolTip("Add channels");
 
     m_titleLabel = new QLabel();
-    m_titleLabel->setText("Feature");
-    m_titleLabel->setToolTip("Feature name");
+    m_titleLabel->setText("Device");
+    m_titleLabel->setToolTip("Device identification");
     m_titleLabel->setFixedHeight(20);
 
     m_helpButton = new QPushButton();
     m_helpButton->setFixedSize(20, 20);
     QIcon helpIcon(":/help.png");
     m_helpButton->setIcon(helpIcon);
-    m_helpButton->setToolTip("Show feature documentation in browser");
+    m_helpButton->setToolTip("Show device documentation in browser");
 
     m_moveButton = new QPushButton();
     m_moveButton->setFixedSize(20, 20);
@@ -77,12 +93,12 @@ FeatureGUI::FeatureGUI(QWidget *parent) :
     m_closeButton->setFixedSize(20, 20);
     QIcon closeIcon(":/cross.png");
     m_closeButton->setIcon(closeIcon);
-    m_closeButton->setToolTip("Close feature");
+    m_closeButton->setToolTip("Close device");
 
     m_statusLabel = new QLabel();
     // m_statusLabel->setText("OK"); // for future use
     m_statusLabel->setFixedHeight(20);
-    m_statusLabel->setToolTip("Feature status");
+    m_statusLabel->setToolTip("Device status");
 
     m_layouts = new QVBoxLayout();
     m_layouts->setContentsMargins(0, 4, 0, 4);
@@ -91,7 +107,9 @@ FeatureGUI::FeatureGUI(QWidget *parent) :
     m_topLayout = new QHBoxLayout();
     m_topLayout->setContentsMargins(0, 0, 0, 0);
     m_topLayout->addWidget(m_indexLabel);
-    m_topLayout->addWidget(m_settingsButton);
+    m_topLayout->addWidget(m_changeDeviceButton);
+    m_topLayout->addWidget(m_reloadDeviceButton);
+    m_topLayout->addWidget(m_addChannelsButton);
     m_topLayout->addWidget(m_titleLabel);
     m_topLayout->addStretch(1);
     m_topLayout->addWidget(m_helpButton);
@@ -103,7 +121,8 @@ FeatureGUI::FeatureGUI(QWidget *parent) :
     m_topLayout->addWidget(m_sizeGripTopRight, 0, Qt::AlignTop | Qt::AlignRight);
 
     m_centerLayout = new QHBoxLayout();
-    m_centerLayout->addWidget(&m_rollupContents);
+    m_contents = new QWidget();
+    m_centerLayout->addWidget(m_contents);
 
     m_bottomLayout = new QHBoxLayout();
     m_bottomLayout->setContentsMargins(0, 0, 0, 0);
@@ -120,17 +139,19 @@ FeatureGUI::FeatureGUI(QWidget *parent) :
     QObjectCleanupHandler().add(layout());
     setLayout(m_layouts);
 
-    connect(m_settingsButton, SIGNAL(clicked()), this, SLOT(activateSettingsDialog()));
+    connect(m_changeDeviceButton, SIGNAL(clicked()), this, SLOT(openChangeDeviceDialog()));
+    connect(m_reloadDeviceButton, SIGNAL(clicked()), this, SLOT(deviceReload()));
     connect(m_helpButton, SIGNAL(clicked()), this, SLOT(showHelp()));
     connect(m_moveButton, SIGNAL(clicked()), this, SLOT(openMoveToWorkspaceDialog()));
     connect(m_shrinkButton, SIGNAL(clicked()), this, SLOT(shrinkWindow()));
     connect(this, SIGNAL(forceShrink()), this, SLOT(shrinkWindow()));
     connect(m_closeButton, SIGNAL(clicked()), this, SLOT(close()));
+    connect(this, SIGNAL(forceClose()), this, SLOT(close()));
 }
 
-FeatureGUI::~FeatureGUI()
+DeviceGUI::~DeviceGUI()
 {
-    qDebug("FeatureGUI::~FeatureGUI");
+    qDebug("DeviceGUI::~DeviceGUI");
     delete m_sizeGripBottomRight;
     delete m_bottomLayout;
     delete m_centerLayout;
@@ -143,19 +164,22 @@ FeatureGUI::~FeatureGUI()
     delete m_moveButton;
     delete m_helpButton;
     delete m_titleLabel;
-    delete m_settingsButton;
+    delete m_addChannelsButton;
+    delete m_reloadDeviceButton;
+    delete m_changeDeviceButton;
     delete m_indexLabel;
-    qDebug("FeatureGUI::~FeatureGUI: end");
+    delete m_contents;
+    qDebug("DeviceGUI::~DeviceGUI: end");
 }
 
-void FeatureGUI::closeEvent(QCloseEvent *event)
+void DeviceGUI::closeEvent(QCloseEvent *event)
 {
-    qDebug("FeatureGUI::closeEvent");
+    qDebug("DeviceGUI::closeEvent");
     emit closing();
     event->accept();
 }
 
-void FeatureGUI::mousePressEvent(QMouseEvent* event)
+void DeviceGUI::mousePressEvent(QMouseEvent* event)
 {
     if ((event->button() == Qt::LeftButton) && isOnMovingPad())
     {
@@ -165,7 +189,7 @@ void FeatureGUI::mousePressEvent(QMouseEvent* event)
     }
 }
 
-void FeatureGUI::mouseMoveEvent(QMouseEvent* event)
+void DeviceGUI::mouseMoveEvent(QMouseEvent* event)
 {
     if ((event->buttons() & Qt::LeftButton) && isOnMovingPad())
     {
@@ -174,14 +198,25 @@ void FeatureGUI::mouseMoveEvent(QMouseEvent* event)
     }
 }
 
-void FeatureGUI::activateSettingsDialog()
+void DeviceGUI::openChangeDeviceDialog()
 {
-    QPoint p = mapFromGlobal(QCursor::pos());
-    m_contextMenuType = ContextMenuChannelSettings;
-    emit customContextMenuRequested(p);
+    SamplingDeviceDialog dialog((int) m_deviceType, this);
+
+    if (dialog.exec() == QDialog::Accepted)
+    {
+        m_currentDeviceIndex = dialog.getSelectedDeviceIndex();
+        emit deviceChange(m_currentDeviceIndex);
+    }
 }
 
-void FeatureGUI::showHelp()
+void DeviceGUI::deviceReload()
+{
+    if (m_currentDeviceIndex >= 0) {
+        emit deviceChange(m_currentDeviceIndex);
+    }
+}
+
+void DeviceGUI::showHelp()
 {
     if (m_helpURL.isEmpty()) {
         return;
@@ -198,7 +233,7 @@ void FeatureGUI::showHelp()
     QDesktopServices::openUrl(QUrl(url));
 }
 
-void FeatureGUI::openMoveToWorkspaceDialog()
+void DeviceGUI::openMoveToWorkspaceDialog()
 {
     int numberOfWorkspaces = MainWindow::getInstance()->getNumberOfWorkspaces();
     WorkspaceSelectionDialog dialog(numberOfWorkspaces, this);
@@ -209,25 +244,70 @@ void FeatureGUI::openMoveToWorkspaceDialog()
     }
 }
 
-void FeatureGUI::shrinkWindow()
+void DeviceGUI::shrinkWindow()
 {
-    qDebug("FeatureGUI::shrinkWindow");
+    qDebug("DeviceGUI::shrinkWindow");
     adjustSize();
 }
 
-void FeatureGUI::setTitle(const QString& title)
+void DeviceGUI::setTitle(const QString& title)
 {
     m_titleLabel->setText(title);
 }
 
-bool FeatureGUI::isOnMovingPad()
+QString DeviceGUI::getTitle() const
+{
+    return m_titleLabel->text();
+}
+
+bool DeviceGUI::isOnMovingPad()
 {
     return m_indexLabel->underMouse() || m_titleLabel->underMouse() || m_statusLabel->underMouse();
 }
 
-void FeatureGUI::setIndex(int index)
+void DeviceGUI::setIndex(int index)
 {
-    m_featureIndex = index;
-    m_indexLabel->setText(tr("F:%1").arg(m_featureIndex));
+    m_deviceSetIndex = index;
+    m_indexLabel->setText(tr("%1:%2").arg(getDeviceTypeTag()).arg(m_deviceSetIndex));
 }
 
+void DeviceGUI::setDeviceType(DeviceType type)
+{
+    m_deviceType = type;
+    m_indexLabel->setStyleSheet(tr("QLabel { background-color: %1; qproperty-alignment: AlignCenter; }").arg(getDeviceTypeColor()));
+}
+
+void DeviceGUI::setToolTip(const QString& tooltip)
+{
+    m_titleLabel->setToolTip(tooltip);
+}
+
+QString DeviceGUI::getDeviceTypeColor()
+{
+    switch(m_deviceType)
+    {
+        case DeviceRx:
+            return "rgb(0, 128, 0)";
+        case DeviceTx:
+            return "rgb(204, 0, 0)";
+        case DeviceMIMO:
+            return "rgb(0, 0, 192)";
+        default:
+            return "rgb(128, 128, 128)";
+    }
+}
+
+QString DeviceGUI::getDeviceTypeTag()
+{
+    switch(m_deviceType)
+    {
+        case DeviceRx:
+            return "R";
+        case DeviceTx:
+            return "T";
+        case DeviceMIMO:
+            return "M";
+        default:
+            return "X";
+    }
+}

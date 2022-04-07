@@ -68,7 +68,10 @@ LimeSDRMIMOGUI::LimeSDRMIMOGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleRateMode(true)
 {
     qDebug("LimeSDRMIMOGUI::LimeSDRMIMOGUI");
-    ui->setupUi(this);
+    setAttribute(Qt::WA_DeleteOnClose, true);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#LimeSDRMIMOGUI { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplemimo/limesdrmimo/readme.md";
     m_limeSDRMIMO = (LimeSDRMIMO*) m_deviceUISet->m_deviceAPI->getSampleMIMO();
 
     m_limeSDRMIMO->getRxFrequencyRange(m_fMinRx, m_fMaxRx, m_fStepRx);
@@ -100,6 +103,7 @@ LimeSDRMIMOGUI::LimeSDRMIMOGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
     sendSettings();
+    makeUIConnections();
 }
 
 LimeSDRMIMOGUI::~LimeSDRMIMOGUI()
@@ -1136,4 +1140,34 @@ void LimeSDRMIMOGUI::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+void LimeSDRMIMOGUI::makeUIConnections()
+{
+	QObject::connect(ui->streamSide, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LimeSDRMIMOGUI::on_streamSide_currentIndexChanged);
+	QObject::connect(ui->streamIndex, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LimeSDRMIMOGUI::on_streamIndex_currentIndexChanged);
+	QObject::connect(ui->spectrumSide, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LimeSDRMIMOGUI::on_spectrumSide_currentIndexChanged);
+	QObject::connect(ui->spectrumIndex, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LimeSDRMIMOGUI::on_spectrumIndex_currentIndexChanged);
+	QObject::connect(ui->startStopRx, &ButtonSwitch::toggled, this, &LimeSDRMIMOGUI::on_startStopRx_toggled);
+	QObject::connect(ui->startStopTx, &ButtonSwitch::toggled, this, &LimeSDRMIMOGUI::on_startStopTx_toggled);
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &LimeSDRMIMOGUI::on_centerFrequency_changed);
+    QObject::connect(ui->ncoEnable, &ButtonSwitch::toggled, this, &LimeSDRMIMOGUI::on_ncoEnable_toggled);
+    QObject::connect(ui->ncoFrequency, &ValueDialZ::changed, this, &LimeSDRMIMOGUI::on_ncoFrequency_changed);
+    QObject::connect(ui->dcOffset, &ButtonSwitch::toggled, this, &LimeSDRMIMOGUI::on_dcOffset_toggled);
+    QObject::connect(ui->iqImbalance, &ButtonSwitch::toggled, this, &LimeSDRMIMOGUI::on_iqImbalance_toggled);
+    QObject::connect(ui->extClock, &ExternalClockButton::clicked, this, &LimeSDRMIMOGUI::on_extClock_clicked);
+    QObject::connect(ui->hwDecim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LimeSDRMIMOGUI::on_hwDecim_currentIndexChanged);
+    QObject::connect(ui->swDecim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LimeSDRMIMOGUI::on_swDecim_currentIndexChanged);
+    QObject::connect(ui->sampleRateMode, &QToolButton::toggled, this, &LimeSDRMIMOGUI::on_sampleRateMode_toggled);
+    QObject::connect(ui->sampleRate, &ValueDial::changed, this, &LimeSDRMIMOGUI::on_sampleRate_changed);
+    QObject::connect(ui->lpf, &ValueDial::changed, this, &LimeSDRMIMOGUI::on_lpf_changed);
+    QObject::connect(ui->lpFIREnable, &ButtonSwitch::toggled, this, &LimeSDRMIMOGUI::on_lpFIREnable_toggled);
+    QObject::connect(ui->lpFIR, &ValueDial::changed, this, &LimeSDRMIMOGUI::on_lpFIR_changed);
+    QObject::connect(ui->transverter, &TransverterButton::clicked, this, &LimeSDRMIMOGUI::on_transverter_clicked);
+    QObject::connect(ui->gainMode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LimeSDRMIMOGUI::on_gainMode_currentIndexChanged);
+    QObject::connect(ui->gain, &QDial::valueChanged, this, &LimeSDRMIMOGUI::on_gain_valueChanged);
+    QObject::connect(ui->lnaGain, &QDial::valueChanged, this, &LimeSDRMIMOGUI::on_lnaGain_valueChanged);
+    QObject::connect(ui->tiaGain, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LimeSDRMIMOGUI::on_tiaGain_currentIndexChanged);
+    QObject::connect(ui->pgaGain, &QDial::valueChanged, this, &LimeSDRMIMOGUI::on_pgaGain_valueChanged);
+    QObject::connect(ui->antenna, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LimeSDRMIMOGUI::on_antenna_currentIndexChanged);
 }

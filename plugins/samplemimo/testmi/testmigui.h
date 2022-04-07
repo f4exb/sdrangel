@@ -45,6 +45,10 @@ public:
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
+    virtual void setWorkspaceIndex(int index) { m_settings.m_workspaceIndex = index; }
+    virtual int getWorkspaceIndex() const { return m_settings.m_workspaceIndex; }
+    virtual void setGeometryBytes(const QByteArray& blob) { m_settings.m_geometryBytes = blob; }
+    virtual QByteArray getGeometryBytes() const { return m_settings.m_geometryBytes; }
 
 private:
 	Ui::TestMIGui* ui;
@@ -73,6 +77,7 @@ private:
     void updateAmpFineLimit();
     void updateFrequencyShiftLimit();
 	bool handleMessage(const Message& message);
+    void makeUIConnections();
 
 private slots:
     void handleInputMessages();

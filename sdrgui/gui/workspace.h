@@ -68,9 +68,9 @@ private:
     QMdiArea *m_mdi;
 
 private slots:
-    void addRxDevice();
-    void addTxDevice();
-    void addMIMODevice();
+    void addRxDeviceClicked();
+    void addTxDeviceClicked();
+    void addMIMODeviceClicked();
     void addFeatureDialog();
     void featurePresetsDialog();
     void cascadeSubWindows();
@@ -79,6 +79,9 @@ private slots:
     void toggleFloating();
 
 signals:
+    void addRxDevice(Workspace *inWorkspace, int deviceIndex);
+    void addTxDevice(Workspace *inWorkspace, int deviceIndex);
+    void addMIMODevice(Workspace *inWorkspace, int deviceIndex);
     void addFeature(Workspace*, int);
     void featurePresetsDialogRequested(QPoint, Workspace*);
 };

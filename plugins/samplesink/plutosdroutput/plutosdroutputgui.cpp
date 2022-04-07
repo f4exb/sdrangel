@@ -45,9 +45,12 @@ PlutoSDROutputGUI::PlutoSDROutputGUI(DeviceUISet *deviceUISet, QWidget* parent) 
     m_doApplySettings(true),
     m_statusCounter(0)
 {
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_sampleSink = (PlutoSDROutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
 
-    ui->setupUi(this);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#PlutoSDROutputGUI { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplesink/plutosdroutput/readme.md";
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     updateFrequencyLimits();
 
@@ -71,6 +74,7 @@ PlutoSDROutputGUI::PlutoSDROutputGUI(DeviceUISet *deviceUISet, QWidget* parent) 
 
     blockApplySettings(true);
     displaySettings();
+    makeUIConnections();
     blockApplySettings(false);
 
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
@@ -492,4 +496,22 @@ void PlutoSDROutputGUI::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+void PlutoSDROutputGUI::makeUIConnections()
+{
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &PlutoSDROutputGUI::on_startStop_toggled);
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &PlutoSDROutputGUI::on_centerFrequency_changed);
+    QObject::connect(ui->loPPM, &QSlider::valueChanged, this, &PlutoSDROutputGUI::on_loPPM_valueChanged);
+    QObject::connect(ui->swInterp, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PlutoSDROutputGUI::on_swInterp_currentIndexChanged);
+    QObject::connect(ui->sampleRate, &ValueDial::changed, this, &PlutoSDROutputGUI::on_sampleRate_changed);
+    QObject::connect(ui->lpf, &ValueDial::changed, this, &PlutoSDROutputGUI::on_lpf_changed);
+    QObject::connect(ui->lpFIREnable, &ButtonSwitch::toggled, this, &PlutoSDROutputGUI::on_lpFIREnable_toggled);
+    QObject::connect(ui->lpFIR, &ValueDial::changed, this, &PlutoSDROutputGUI::on_lpFIR_changed);
+    QObject::connect(ui->lpFIRInterpolation, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PlutoSDROutputGUI::on_lpFIRInterpolation_currentIndexChanged);
+    QObject::connect(ui->lpFIRGain, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PlutoSDROutputGUI::on_lpFIRGain_currentIndexChanged);
+    QObject::connect(ui->att, &QDial::valueChanged, this, &PlutoSDROutputGUI::on_att_valueChanged);
+    QObject::connect(ui->antenna, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PlutoSDROutputGUI::on_antenna_currentIndexChanged);
+    QObject::connect(ui->transverter, &TransverterButton::clicked, this, &PlutoSDROutputGUI::on_transverter_clicked);
+    QObject::connect(ui->sampleRateMode, &QToolButton::toggled, this, &PlutoSDROutputGUI::on_sampleRateMode_toggled);
 }

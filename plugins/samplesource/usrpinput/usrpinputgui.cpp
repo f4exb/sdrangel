@@ -47,9 +47,12 @@ USRPInputGUI::USRPInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_statusCounter(0),
     m_deviceStatusCounter(0)
 {
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_usrpInput = (USRPInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
-    ui->setupUi(this);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#USRPInputGUI { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplesource/usrpinput/readme.md";
 
     float minF, maxF;
 
@@ -81,6 +84,7 @@ USRPInputGUI::USRPInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_statusTimer.start(500);
 
     displaySettings();
+    makeUIConnections();
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
     m_usrpInput->setMessageQueueToGUI(&m_inputMessageQueue);
@@ -619,4 +623,22 @@ void USRPInputGUI::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+void USRPInputGUI::makeUIConnections()
+{
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &USRPInputGUI::on_startStop_toggled);
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &USRPInputGUI::on_centerFrequency_changed);
+    QObject::connect(ui->dcOffset, &ButtonSwitch::toggled, this, &USRPInputGUI::on_dcOffset_toggled);
+    QObject::connect(ui->iqImbalance, &ButtonSwitch::toggled, this, &USRPInputGUI::on_iqImbalance_toggled);
+    QObject::connect(ui->sampleRate, &ValueDial::changed, this, &USRPInputGUI::on_sampleRate_changed);
+    QObject::connect(ui->swDecim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &USRPInputGUI::on_swDecim_currentIndexChanged);
+    QObject::connect(ui->lpf, &ValueDial::changed, this, &USRPInputGUI::on_lpf_changed);
+    QObject::connect(ui->loOffset, &ValueDialZ::changed, this, &USRPInputGUI::on_loOffset_changed);
+    QObject::connect(ui->gainMode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &USRPInputGUI::on_gainMode_currentIndexChanged);
+    QObject::connect(ui->gain, &QSlider::valueChanged, this, &USRPInputGUI::on_gain_valueChanged);
+    QObject::connect(ui->antenna, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &USRPInputGUI::on_antenna_currentIndexChanged);
+    QObject::connect(ui->clockSource, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &USRPInputGUI::on_clockSource_currentIndexChanged);
+    QObject::connect(ui->transverter, &TransverterButton::clicked, this, &USRPInputGUI::on_transverter_clicked);
+    QObject::connect(ui->sampleRateMode, &QToolButton::toggled, this, &USRPInputGUI::on_sampleRateMode_toggled);
 }

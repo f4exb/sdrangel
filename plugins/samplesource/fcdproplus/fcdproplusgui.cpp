@@ -42,9 +42,12 @@ FCDProPlusGui::FCDProPlusGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_sampleSource(NULL),
 	m_lastEngineState(DeviceAPI::StNotStarted)
 {
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_sampleSource = (FCDProPlusInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
-	ui->setupUi(this);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#FCDProPlusGui { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplesource/fcdproplus/readme.md";
 
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 	updateFrequencyLimits();
@@ -69,6 +72,7 @@ FCDProPlusGui::FCDProPlusGui(DeviceUISet *deviceUISet, QWidget* parent) :
     connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
 	displaySettings();
+    makeUIConnections();
 
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
     m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);
@@ -371,4 +375,22 @@ void FCDProPlusGui::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+void FCDProPlusGui::makeUIConnections()
+{
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &FCDProPlusGui::on_centerFrequency_changed);
+    QObject::connect(ui->decim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FCDProPlusGui::on_decim_currentIndexChanged);
+    QObject::connect(ui->fcPos, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FCDProPlusGui::on_fcPos_currentIndexChanged);
+    QObject::connect(ui->dcOffset, &ButtonSwitch::toggled, this, &FCDProPlusGui::on_dcOffset_toggled);
+    QObject::connect(ui->iqImbalance, &ButtonSwitch::toggled, this, &FCDProPlusGui::on_iqImbalance_toggled);
+    QObject::connect(ui->checkBoxG, &QCheckBox::stateChanged, this, &FCDProPlusGui::on_checkBoxG_stateChanged);
+    QObject::connect(ui->checkBoxB, &QCheckBox::stateChanged, this, &FCDProPlusGui::on_checkBoxB_stateChanged);
+    QObject::connect(ui->mixGain, &QCheckBox::stateChanged, this, &FCDProPlusGui::on_mixGain_stateChanged);
+    QObject::connect(ui->ifGain, &QSlider::valueChanged, this, &FCDProPlusGui::on_ifGain_valueChanged);
+    QObject::connect(ui->filterRF, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FCDProPlusGui::on_filterRF_currentIndexChanged);
+    QObject::connect(ui->filterIF, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FCDProPlusGui::on_filterIF_currentIndexChanged);
+    QObject::connect(ui->ppm, &QSlider::valueChanged, this, &FCDProPlusGui::on_ppm_valueChanged);
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &FCDProPlusGui::on_startStop_toggled);
+    QObject::connect(ui->transverter, &TransverterButton::clicked, this, &FCDProPlusGui::on_transverter_clicked);
 }

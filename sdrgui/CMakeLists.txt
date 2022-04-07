@@ -83,6 +83,7 @@ set(sdrgui_SOURCES
 
     dsp/scopevisxy.cpp
 
+    device/devicegui.cpp
     device/deviceuiset.cpp
 
     channel/channelgui.cpp
@@ -183,14 +184,13 @@ set(sdrgui_HEADERS
 
     dsp/scopevisxy.h
 
+    device/devicegui.h
     device/deviceuiset.h
 
     channel/channelgui.h
 
     feature/featuregui.h
     feature/featureuiset.h
-
-    device/devicegui.h
 
     soapygui/discreterangegui.h
     soapygui/intervalrangegui.h

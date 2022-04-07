@@ -119,6 +119,9 @@ struct LimeSDRMIMOSettings
     uint32_t  m_gainTx1;         //!< Tx[1] Optimally distributed gain (dB)
     PathTxRFE m_antennaPathTx1;  //!< Tx[1] Antenna connection
 
+    int m_workspaceIndex;
+    QByteArray m_geometryBytes;
+
     LimeSDRMIMOSettings();
     void resetToDefaults();
     QByteArray serialize() const;

@@ -55,7 +55,10 @@ FileInputGUI::FileInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_enableNavTime(false),
 	m_lastEngineState(DeviceAPI::StNotStarted)
 {
-	ui->setupUi(this);
+    setAttribute(Qt::WA_DeleteOnClose, true);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#FileInputGUI { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplesource/fileinput/readme.md";
 	ui->crcLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
 
 	connect(&(m_deviceUISet->m_deviceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
@@ -75,11 +78,15 @@ FileInputGUI::FileInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
     m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);
+
+    makeUIConnections();
 }
 
 FileInputGUI::~FileInputGUI()
 {
+    qDebug("FileInputGUI::~FileInputGUI");
 	delete ui;
+    qDebug("FileInputGUI::~FileInputGUI: end");
 }
 
 void FileInputGUI::destroy()
@@ -443,4 +450,14 @@ void FileInputGUI::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+void FileInputGUI::makeUIConnections()
+{
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &FileInputGUI::on_startStop_toggled);
+    QObject::connect(ui->playLoop, &ButtonSwitch::toggled, this, &FileInputGUI::on_playLoop_toggled);
+    QObject::connect(ui->play, &ButtonSwitch::toggled, this, &FileInputGUI::on_play_toggled);
+    QObject::connect(ui->navTimeSlider, &QSlider::valueChanged, this, &FileInputGUI::on_navTimeSlider_valueChanged);
+    QObject::connect(ui->showFileDialog, &QPushButton::clicked, this, &FileInputGUI::on_showFileDialog_clicked);
+    QObject::connect(ui->acceleration, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FileInputGUI::on_acceleration_currentIndexChanged);
 }

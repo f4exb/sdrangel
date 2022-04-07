@@ -48,6 +48,7 @@ void HackRFInputSettings::resetToDefaults()
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
+    m_workspaceIndex = 0;
 }
 
 QByteArray HackRFInputSettings::serialize() const
@@ -73,6 +74,8 @@ QByteArray HackRFInputSettings::serialize() const
     s.writeS64(19, m_transverterDeltaFrequency);
     s.writeBool(20, m_iqOrder);
     s.writeBool(21, m_autoBBF);
+    s.writeS32(22, m_workspaceIndex);
+    s.writeBlob(23, m_geometryBytes);
 
 	return s.final();
 }
@@ -120,6 +123,8 @@ bool HackRFInputSettings::deserialize(const QByteArray& data)
         d.readS64(19, &m_transverterDeltaFrequency, 0);
         d.readBool(20, &m_iqOrder, true);
         d.readBool(21, &m_autoBBF, true);
+        d.readS32(22, &m_workspaceIndex, 0);
+        d.readBlob(23, &m_geometryBytes);
 
 		return true;
 	}

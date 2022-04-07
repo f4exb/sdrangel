@@ -30,6 +30,8 @@ struct SigMFFileInputSettings {
     QString  m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIDeviceIndex;
+    int m_workspaceIndex;
+    QByteArray m_geometryBytes;
 
     static const unsigned int m_accelerationMaxScale; //!< Max power of 10 multiplier to 2,5,10 base ex: 2 -> 2,5,10,20,50,100,200,500,1000
 

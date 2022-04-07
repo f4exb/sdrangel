@@ -47,6 +47,7 @@ void BladeRF1InputSettings::resetToDefaults()
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
+    m_workspaceIndex = 0;
 }
 
 QByteArray BladeRF1InputSettings::serialize() const
@@ -70,6 +71,8 @@ QByteArray BladeRF1InputSettings::serialize() const
     s.writeU32(15, m_reverseAPIPort);
     s.writeU32(16, m_reverseAPIDeviceIndex);
     s.writeBool(17, m_iqOrder);
+    s.writeS32(18, m_workspaceIndex);
+    s.writeBlob(19, m_geometryBytes);
 
 	return s.final();
 }
@@ -117,6 +120,8 @@ bool BladeRF1InputSettings::deserialize(const QByteArray& data)
         d.readU32(16, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
         d.readBool(17, &m_iqOrder);
+        d.readS32(18, &m_workspaceIndex, 0);
+        d.readBlob(19, &m_geometryBytes);
 
 		return true;
 	}

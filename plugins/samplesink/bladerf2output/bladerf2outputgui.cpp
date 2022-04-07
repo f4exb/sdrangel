@@ -43,12 +43,15 @@ BladeRF2OutputGui::BladeRF2OutputGui(DeviceUISet *deviceUISet, QWidget* parent) 
     m_sampleRate(0),
     m_lastEngineState(DeviceAPI::StNotStarted)
 {
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_sampleSink = (BladeRF2Output*) m_deviceUISet->m_deviceAPI->getSampleSink();
     int max, min, step;
     float scale;
     uint64_t f_min, f_max;
 
-    ui->setupUi(this);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#BladeRF2OutputGui { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplesink/bladerf2output/readme.md";	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 
     m_sampleSink->getFrequencyRange(f_min, f_max, step, scale);
     qDebug("BladeRF2OutputGui::BladeRF2OutputGui: getFrequencyRange: [%lu,%lu] step: %d", f_min, f_max, step);
@@ -80,6 +83,7 @@ BladeRF2OutputGui::BladeRF2OutputGui(DeviceUISet *deviceUISet, QWidget* parent) 
     connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
     displaySettings();
+    makeUIConnections();
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
     m_sampleSink->setMessageQueueToGUI(&m_inputMessageQueue);
@@ -452,4 +456,18 @@ int BladeRF2OutputGui::getGainValue(float gainDB)
     // qDebug("BladeRF2OutputGui::getGainValue: gainDB: %f m_gainMin: %d m_gainMax: %d m_gainStep: %d gain: %d",
     //     gainDB, m_gainMin, m_gainMax, m_gainStep, gain);
     return gain;
+}
+
+void BladeRF2OutputGui::makeUIConnections()
+{
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &BladeRF2OutputGui::on_centerFrequency_changed);
+    QObject::connect(ui->LOppm, &QSlider::valueChanged, this, &BladeRF2OutputGui::on_LOppm_valueChanged);
+    QObject::connect(ui->biasTee, &ButtonSwitch::toggled, this, &BladeRF2OutputGui::on_biasTee_toggled);
+    QObject::connect(ui->sampleRate, &ValueDial::changed, this, &BladeRF2OutputGui::on_sampleRate_changed);
+    QObject::connect(ui->bandwidth, &ValueDial::changed, this, &BladeRF2OutputGui::on_bandwidth_changed);
+    QObject::connect(ui->interp, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &BladeRF2OutputGui::on_interp_currentIndexChanged);
+    QObject::connect(ui->gain, &QSlider::valueChanged, this, &BladeRF2OutputGui::on_gain_valueChanged);
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &BladeRF2OutputGui::on_startStop_toggled);
+    QObject::connect(ui->transverter, &TransverterButton::clicked, this, &BladeRF2OutputGui::on_transverter_clicked);
+    QObject::connect(ui->sampleRateMode, &QToolButton::toggled, this, &BladeRF2OutputGui::on_sampleRateMode_toggled);
 }

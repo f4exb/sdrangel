@@ -43,10 +43,12 @@ Bladerf1OutputGui::Bladerf1OutputGui(DeviceUISet *deviceUISet, QWidget* parent) 
 	m_sampleRate(0),
 	m_lastEngineState(DeviceAPI::StNotStarted)
 {
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_deviceSampleSink = (Bladerf1Output*) m_deviceUISet->m_deviceAPI->getSampleSink();
 
-	ui->setupUi(this);
-	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#Bladerf1OutputGui { border: 1px solid #C06900 }");
+    m_helpURL = "/plugins/samplesink/bladerf1output/readme.md";	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 	ui->centerFrequency->setValueRange(7, BLADERF_FREQUENCY_MIN_XB200/1000, BLADERF_FREQUENCY_MAX/1000);
 
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
@@ -67,6 +69,7 @@ Bladerf1OutputGui::Bladerf1OutputGui(DeviceUISet *deviceUISet, QWidget* parent) 
     connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
 	displaySettings();
+    makeUIConnections();
 
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
@@ -459,4 +462,14 @@ void Bladerf1OutputGui::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+void Bladerf1OutputGui::makeUIConnections()
+{
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &Bladerf1OutputGui::on_centerFrequency_changed);
+    QObject::connect(ui->sampleRate, &ValueDial::changed, this, &Bladerf1OutputGui::on_sampleRate_changed);
+    QObject::connect(ui->bandwidth, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &Bladerf1OutputGui::on_bandwidth_currentIndexChanged);
+    QObject::connect(ui->interp, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &Bladerf1OutputGui::on_interp_currentIndexChanged);
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &Bladerf1OutputGui::on_startStop_toggled);
+    QObject::connect(ui->sampleRateMode, &QToolButton::toggled, this, &Bladerf1OutputGui::on_sampleRateMode_toggled);
 }

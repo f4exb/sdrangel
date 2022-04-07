@@ -31,6 +31,8 @@ struct TestMOSyncSettings {
     quint64 m_sampleRate;
     quint32 m_log2Interp;
     fcPos_t  m_fcPosTx;
+    int m_workspaceIndex;
+    QByteArray m_geometryBytes;
 
     static const unsigned int m_msThrottle;
 

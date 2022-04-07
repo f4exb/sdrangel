@@ -67,11 +67,14 @@ RemoteInputGui::RemoteInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_doApplySettings(true),
     m_forceSettings(true)
 {
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_paletteGreenText.setColor(QPalette::WindowText, Qt::green);
     m_paletteWhiteText.setColor(QPalette::WindowText, Qt::white);
 
 	m_startingTimeStampms = 0;
-	ui->setupUi(this);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#RemoteInputGui { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplesource/remoteinput/readme.md";
 
     ui->remoteDeviceFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->remoteDeviceFrequency->setValueRange(8, 0, 99999999);
@@ -97,6 +100,7 @@ RemoteInputGui::RemoteInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
     m_forceSettings = true;
     sendSettings();
+    makeUIConnections();
 }
 
 RemoteInputGui::~RemoteInputGui()
@@ -683,4 +687,23 @@ void RemoteInputGui::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+void RemoteInputGui::makeUIConnections()
+{
+    QObject::connect(ui->remoteDeviceFrequency, &ValueDial::changed, this, &RemoteInputGui::on_remoteDeviceFrequency_changed);
+    QObject::connect(ui->decimationFactor, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RemoteInputGui::on_decimationFactor_currentIndexChanged);
+    QObject::connect(ui->position, &QSlider::valueChanged, this, &RemoteInputGui::on_position_valueChanged);
+    QObject::connect(ui->apiApplyButton, &QPushButton::clicked, this, &RemoteInputGui::on_apiApplyButton_clicked);
+    QObject::connect(ui->dataApplyButton, &QPushButton::clicked, this, &RemoteInputGui::on_dataApplyButton_clicked);
+    QObject::connect(ui->dcOffset, &ButtonSwitch::toggled, this, &RemoteInputGui::on_dcOffset_toggled);
+    QObject::connect(ui->iqImbalance, &ButtonSwitch::toggled, this, &RemoteInputGui::on_iqImbalance_toggled);
+    QObject::connect(ui->apiAddress, &QLineEdit::editingFinished, this, &RemoteInputGui::on_apiAddress_editingFinished);
+    QObject::connect(ui->apiPort, &QLineEdit::editingFinished, this, &RemoteInputGui::on_apiPort_editingFinished);
+    QObject::connect(ui->dataAddress, &QLineEdit::editingFinished, this, &RemoteInputGui::on_dataAddress_editingFinished);
+    QObject::connect(ui->dataPort, &QLineEdit::editingFinished, this, &RemoteInputGui::on_dataPort_editingFinished);
+    QObject::connect(ui->multicastAddress, &QLineEdit::editingFinished, this, &RemoteInputGui::on_multicastAddress_editingFinished);
+    QObject::connect(ui->multicastJoin, &ButtonSwitch::toggled, this, &RemoteInputGui::on_multicastJoin_toggled);
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &RemoteInputGui::on_startStop_toggled);
+    QObject::connect(ui->eventCountsReset, &QPushButton::clicked, this, &RemoteInputGui::on_eventCountsReset_clicked);
 }

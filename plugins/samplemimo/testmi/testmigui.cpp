@@ -52,6 +52,7 @@ TestMIGui::TestMIGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_lastEngineState(DeviceAPI::StNotStarted)
 {
     qDebug("TestMIGui::TestMIGui");
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_sampleMIMO = m_deviceUISet->m_deviceAPI->getSampleMIMO();
     m_streamIndex = 0;
     m_deviceCenterFrequencies.push_back(m_settings.m_streams[0].m_centerFrequency);
@@ -59,7 +60,9 @@ TestMIGui::TestMIGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_deviceSampleRates.push_back(m_settings.m_streams[0].m_sampleRate / (1<<m_settings.m_streams[0].m_log2Decim));
     m_deviceSampleRates.push_back(m_settings.m_streams[1].m_sampleRate / (1<<m_settings.m_streams[1].m_log2Decim));
 
-    ui->setupUi(this);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#TestMIGui { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplemimo/testmi/readme.md";
     ui->spectrumSource->addItem("0");
     ui->spectrumSource->addItem("1");
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -81,6 +84,8 @@ TestMIGui::TestMIGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
     CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStop);
     connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
+
+    makeUIConnections();
 }
 
 TestMIGui::~TestMIGui()
@@ -558,4 +563,29 @@ void TestMIGui::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+void TestMIGui::makeUIConnections()
+{
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &TestMIGui::on_startStop_toggled);
+    QObject::connect(ui->streamIndex, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TestMIGui::on_streamIndex_currentIndexChanged);
+    QObject::connect(ui->spectrumSource, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TestMIGui::on_spectrumSource_currentIndexChanged);
+    QObject::connect(ui->streamLock, &QToolButton::toggled, this, &TestMIGui::on_streamLock_toggled);
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &TestMIGui::on_centerFrequency_changed);
+    QObject::connect(ui->autoCorr, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TestMIGui::on_autoCorr_currentIndexChanged);
+    QObject::connect(ui->frequencyShift, &ValueDialZ::changed, this, &TestMIGui::on_frequencyShift_changed);
+    QObject::connect(ui->decimation, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TestMIGui::on_decimation_currentIndexChanged);
+    QObject::connect(ui->fcPos, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TestMIGui::on_fcPos_currentIndexChanged);
+    QObject::connect(ui->sampleRate, &ValueDial::changed, this, &TestMIGui::on_sampleRate_changed);
+    QObject::connect(ui->sampleSize, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TestMIGui::on_sampleSize_currentIndexChanged);
+    QObject::connect(ui->amplitudeCoarse, &QSlider::valueChanged, this, &TestMIGui::on_amplitudeCoarse_valueChanged);
+    QObject::connect(ui->amplitudeFine, &QSlider::valueChanged, this, &TestMIGui::on_amplitudeFine_valueChanged);
+    QObject::connect(ui->modulation, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TestMIGui::on_modulation_currentIndexChanged);
+    QObject::connect(ui->modulationFrequency, &QDial::valueChanged, this, &TestMIGui::on_modulationFrequency_valueChanged);
+    QObject::connect(ui->amModulation, &QDial::valueChanged, this, &TestMIGui::on_amModulation_valueChanged);
+    QObject::connect(ui->fmDeviation, &QDial::valueChanged, this, &TestMIGui::on_fmDeviation_valueChanged);
+    QObject::connect(ui->dcBias, &QSlider::valueChanged, this, &TestMIGui::on_dcBias_valueChanged);
+    QObject::connect(ui->iBias, &QSlider::valueChanged, this, &TestMIGui::on_iBias_valueChanged);
+    QObject::connect(ui->qBias, &QSlider::valueChanged, this, &TestMIGui::on_qBias_valueChanged);
+    QObject::connect(ui->phaseImbalance, &QSlider::valueChanged, this, &TestMIGui::on_phaseImbalance_valueChanged);
 }

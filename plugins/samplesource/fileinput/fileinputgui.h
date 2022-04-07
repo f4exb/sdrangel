@@ -37,7 +37,7 @@ class FileInputGUI : public DeviceGUI {
 	Q_OBJECT
 
 public:
-	explicit FileInputGUI(DeviceUISet *deviceUISet, QWidget* parent = 0);
+	explicit FileInputGUI(DeviceUISet *deviceUISet, QWidget* parent = nullptr);
 	virtual ~FileInputGUI();
 	virtual void destroy();
 
@@ -46,6 +46,10 @@ public:
 	bool deserialize(const QByteArray& data);
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 	virtual bool handleMessage(const Message& message);
+    virtual void setWorkspaceIndex(int index) { m_settings.m_workspaceIndex = index; }
+    virtual int getWorkspaceIndex() const { return m_settings.m_workspaceIndex; }
+    virtual void setGeometryBytes(const QByteArray& blob) { m_settings.m_geometryBytes = blob; }
+    virtual QByteArray getGeometryBytes() const { return m_settings.m_geometryBytes; }
 
 private:
 	Ui::FileInputGUI* ui;
@@ -81,6 +85,7 @@ private:
 	void updateWithStreamTime();
     void setAccelerationCombo();
     void setNumberStr(int n, QString& s);
+    void makeUIConnections();
 
 private slots:
     void handleInputMessages();

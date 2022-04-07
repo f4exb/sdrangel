@@ -54,6 +54,7 @@ void SDRPlayV3Settings::resetToDefaults()
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
+    m_workspaceIndex = 0;
 }
 
 QByteArray SDRPlayV3Settings::serialize() const
@@ -85,6 +86,8 @@ QByteArray SDRPlayV3Settings::serialize() const
     s.writeBool(26, m_transverterMode);
     s.writeS64(27, m_transverterDeltaFrequency);
     s.writeBool(28, m_iqOrder);
+    s.writeS32(29, m_workspaceIndex);
+    s.writeBlob(30, m_geometryBytes);
 
     return s.final();
 }
@@ -138,6 +141,8 @@ bool SDRPlayV3Settings::deserialize(const QByteArray& data)
         d.readBool(26, &m_transverterMode, false);
         d.readS64(27, &m_transverterDeltaFrequency, 0);
         d.readBool(28, &m_iqOrder, true);
+        d.readS32(29, &m_workspaceIndex, 0);
+        d.readBlob(30, &m_geometryBytes);
 
         return true;
     }

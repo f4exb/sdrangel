@@ -45,12 +45,15 @@ BladeRF2InputGui::BladeRF2InputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleRate(0),
     m_lastEngineState(DeviceAPI::StNotStarted)
 {
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_sampleSource = (BladeRF2Input*) m_deviceUISet->m_deviceAPI->getSampleSource();
     int max, min, step;
     float scale;
     uint64_t f_min, f_max;
 
-    ui->setupUi(this);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#Bladerf2InputGui { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplesource/bladerf2input/readme.md";
 
     m_sampleSource->getFrequencyRange(f_min, f_max, step, scale);
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -96,6 +99,7 @@ BladeRF2InputGui::BladeRF2InputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);
 
     sendSettings();
+    makeUIConnections();
 }
 
 BladeRF2InputGui::~BladeRF2InputGui()
@@ -541,4 +545,22 @@ int BladeRF2InputGui::getGainValue(float gainDB)
     // qDebug("BladeRF2InputGui::getGainValue: gainDB: %f m_gainMin: %d m_gainMax: %d m_gainStep: %d m_gainScale: %f gain: %d",
     //     gainDB, m_gainMin, m_gainMax, m_gainStep, m_gainScale, gain);
     return gain;
+}
+
+void BladeRF2InputGui::makeUIConnections()
+{
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &BladeRF2InputGui::on_centerFrequency_changed);
+    QObject::connect(ui->LOppm, &QSlider::valueChanged, this, &BladeRF2InputGui::on_LOppm_valueChanged);
+    QObject::connect(ui->sampleRate, &ValueDial::changed, this, &BladeRF2InputGui::on_sampleRate_changed);
+    QObject::connect(ui->dcOffset, &ButtonSwitch::toggled, this, &BladeRF2InputGui::on_dcOffset_toggled);
+    QObject::connect(ui->iqImbalance, &ButtonSwitch::toggled, this, &BladeRF2InputGui::on_iqImbalance_toggled);
+    QObject::connect(ui->biasTee, &ButtonSwitch::toggled, this, &BladeRF2InputGui::on_biasTee_toggled);
+    QObject::connect(ui->bandwidth, &ValueDial::changed, this, &BladeRF2InputGui::on_bandwidth_changed);
+    QObject::connect(ui->decim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &BladeRF2InputGui::on_decim_currentIndexChanged);
+    QObject::connect(ui->fcPos, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &BladeRF2InputGui::on_fcPos_currentIndexChanged);
+    QObject::connect(ui->gainMode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &BladeRF2InputGui::on_gainMode_currentIndexChanged);
+    QObject::connect(ui->gain, &QSlider::valueChanged, this, &BladeRF2InputGui::on_gain_valueChanged);
+    QObject::connect(ui->transverter, &TransverterButton::clicked, this, &BladeRF2InputGui::on_transverter_clicked);
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &BladeRF2InputGui::on_startStop_toggled);
+    QObject::connect(ui->sampleRateMode, &QToolButton::toggled, this, &BladeRF2InputGui::on_sampleRateMode_toggled);
 }

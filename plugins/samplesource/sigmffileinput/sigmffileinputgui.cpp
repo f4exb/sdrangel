@@ -61,7 +61,10 @@ SigMFFileInputGUI::SigMFFileInputGUI(DeviceUISet *deviceUISet, QWidget* parent) 
 	m_enableFullNavTime(false),
 	m_lastEngineState(DeviceAPI::StNotStarted)
 {
-	ui->setupUi(this);
+    setAttribute(Qt::WA_DeleteOnClose, true);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#SigMFFileInputGUI { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplesource/sigmffileinput/readme.md";
 
     ui->fileNameText->setText(m_metaFileName);
 	ui->crcLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
@@ -76,6 +79,7 @@ SigMFFileInputGUI::SigMFFileInputGUI(DeviceUISet *deviceUISet, QWidget* parent) 
 
 	setAccelerationCombo();
 	displaySettings();
+    makeUIConnections();
     updateStartStop();
 
 	ui->trackNavTimeSlider->setEnabled(false);
@@ -678,4 +682,19 @@ void SigMFFileInputGUI::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+void SigMFFileInputGUI::makeUIConnections()
+{
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &SigMFFileInputGUI::on_startStop_toggled);
+    QObject::connect(ui->infoDetails, &QPushButton::clicked, this, &SigMFFileInputGUI::on_infoDetails_clicked);
+    QObject::connect(ui->captureTable, &QTableWidget::itemSelectionChanged, this, &SigMFFileInputGUI::on_captureTable_itemSelectionChanged);
+    QObject::connect(ui->trackNavTimeSlider, &QSlider::valueChanged, this, &SigMFFileInputGUI::on_trackNavTimeSlider_valueChanged);
+    QObject::connect(ui->playTrack, &ButtonSwitch::toggled, this, &SigMFFileInputGUI::on_playTrack_toggled);
+    QObject::connect(ui->playTrackLoop, &ButtonSwitch::toggled, this, &SigMFFileInputGUI::on_playTrackLoop_toggled);
+    QObject::connect(ui->fullNavTimeSlider, &QSlider::valueChanged, this, &SigMFFileInputGUI::on_fullNavTimeSlider_valueChanged);
+    QObject::connect(ui->playFull, &ButtonSwitch::toggled, this, &SigMFFileInputGUI::on_playFull_toggled);
+    QObject::connect(ui->playFullLoop, &ButtonSwitch::toggled, this, &SigMFFileInputGUI::on_playFullLoop_toggled);
+    QObject::connect(ui->showFileDialog, &QPushButton::clicked, this, &SigMFFileInputGUI::on_showFileDialog_clicked);
+    QObject::connect(ui->acceleration, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SigMFFileInputGUI::on_acceleration_currentIndexChanged);
 }

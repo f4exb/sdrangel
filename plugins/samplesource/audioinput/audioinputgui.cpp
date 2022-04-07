@@ -40,9 +40,12 @@ AudioInputGui::AudioInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource(nullptr),
     m_centerFrequency(0)
 {
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_sampleSource = (AudioInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
-    ui->setupUi(this);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#AudioInputGui { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplesource/audioinput/readme.md";
 
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 
@@ -50,6 +53,7 @@ AudioInputGui::AudioInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
     displaySettings();
+    makeUIConnections();
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
     m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);
@@ -305,4 +309,14 @@ void AudioInputGui::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+void AudioInputGui::makeUIConnections()
+{
+    QObject::connect(ui->device, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AudioInputGui::on_device_currentIndexChanged);
+    QObject::connect(ui->sampleRate, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AudioInputGui::on_sampleRate_currentIndexChanged);
+    QObject::connect(ui->decim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AudioInputGui::on_decim_currentIndexChanged);
+    QObject::connect(ui->volume, &QDial::valueChanged, this, &AudioInputGui::on_volume_valueChanged);
+    QObject::connect(ui->channels, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AudioInputGui::on_channels_currentIndexChanged);
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &AudioInputGui::on_startStop_toggled);
 }

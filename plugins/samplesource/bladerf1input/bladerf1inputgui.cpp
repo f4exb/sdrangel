@@ -45,9 +45,12 @@ Bladerf1InputGui::Bladerf1InputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_sampleRate(0),
 	m_lastEngineState(DeviceAPI::StNotStarted)
 {
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_sampleSource = (Bladerf1Input*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
-	ui->setupUi(this);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#Bladerf1InputGui { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplesource/bladerf1input/readme.md";
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 	ui->centerFrequency->setValueRange(7, BLADERF_FREQUENCY_MIN_XB200/1000, BLADERF_FREQUENCY_MAX/1000);
 
@@ -74,6 +77,7 @@ Bladerf1InputGui::Bladerf1InputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);
 
 	sendSettings();
+    makeUIConnections();
 }
 
 Bladerf1InputGui::~Bladerf1InputGui()
@@ -524,4 +528,18 @@ void Bladerf1InputGui::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+void Bladerf1InputGui::makeUIConnections()
+{
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &Bladerf1InputGui::on_centerFrequency_changed);
+    QObject::connect(ui->sampleRate, &ValueDial::changed, this, &Bladerf1InputGui::on_sampleRate_changed);
+    QObject::connect(ui->dcOffset, &ButtonSwitch::toggled, this, &Bladerf1InputGui::on_dcOffset_toggled);
+    QObject::connect(ui->iqImbalance, &ButtonSwitch::toggled, this, &Bladerf1InputGui::on_iqImbalance_toggled);
+    QObject::connect(ui->bandwidth, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &Bladerf1InputGui::on_bandwidth_currentIndexChanged);
+    QObject::connect(ui->decim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &Bladerf1InputGui::on_decim_currentIndexChanged);
+    QObject::connect(ui->lna, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &Bladerf1InputGui::on_lna_currentIndexChanged);
+    QObject::connect(ui->fcPos, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &Bladerf1InputGui::on_fcPos_currentIndexChanged);
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &Bladerf1InputGui::on_startStop_toggled);
+    QObject::connect(ui->sampleRateMode, &QToolButton::toggled, this, &Bladerf1InputGui::on_sampleRateMode_toggled);
 }

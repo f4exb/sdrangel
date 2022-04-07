@@ -48,7 +48,10 @@ TestSinkGui::TestSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_tickCount(0),
 	m_lastEngineState(DeviceAPI::StNotStarted)
 {
-	ui->setupUi(this);
+    setAttribute(Qt::WA_DeleteOnClose, true);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#TestSinkGui { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplesink/testsink/readme.md";
     m_sampleSink = (TestSinkOutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
 
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -69,6 +72,7 @@ TestSinkGui::TestSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_statusTimer.start(500);
 
 	displaySettings();
+    makeUIConnections();
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
@@ -256,4 +260,12 @@ void TestSinkGui::on_startStop_toggled(bool checked)
 
 void TestSinkGui::tick()
 {
+}
+
+void TestSinkGui::makeUIConnections()
+{
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &TestSinkGui::on_centerFrequency_changed);
+    QObject::connect(ui->sampleRate, &ValueDial::changed, this, &TestSinkGui::on_sampleRate_changed);
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &TestSinkGui::on_startStop_toggled);
+    QObject::connect(ui->interp, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TestSinkGui::on_interp_currentIndexChanged);
 }

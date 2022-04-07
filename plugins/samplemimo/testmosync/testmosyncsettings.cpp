@@ -31,6 +31,7 @@ void TestMOSyncSettings::resetToDefaults()
     m_sampleRate = 48000;
     m_log2Interp = 0;
     m_fcPosTx = FC_POS_CENTER;
+    m_workspaceIndex = 0;
 }
 
 QByteArray TestMOSyncSettings::serialize() const
@@ -40,6 +41,8 @@ QByteArray TestMOSyncSettings::serialize() const
     s.writeU64(1, m_sampleRate);
     s.writeU32(2, m_log2Interp);
     s.writeS32(3, (int) m_fcPosTx);
+    s.writeS32(4, m_workspaceIndex);
+    s.writeBlob(5, m_geometryBytes);
 
     return s.final();
 }
@@ -60,8 +63,10 @@ bool TestMOSyncSettings::deserialize(const QByteArray& data)
 
         d.readU64(1, &m_sampleRate, 48000);
         d.readU32(2, &m_log2Interp, 0);
-        d.readS32(38, &intval, 2);
+        d.readS32(3, &intval, 2);
         m_fcPosTx = (fcPos_t) intval;
+        d.readS32(4, &m_workspaceIndex, 0);
+        d.readBlob(5, &m_geometryBytes);
 
         return true;
     }

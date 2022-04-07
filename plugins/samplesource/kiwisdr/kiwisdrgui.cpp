@@ -52,6 +52,7 @@ KiwiSDRGui::KiwiSDRGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_lastEngineState(DeviceAPI::StNotStarted)
 {
     qDebug("KiwiSDRGui::KiwiSDRGui");
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_sampleSource = m_deviceUISet->m_deviceAPI->getSampleSource();
 
 	m_statusTooltips.push_back("Idle");          // 0
@@ -66,11 +67,14 @@ KiwiSDRGui::KiwiSDRGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_statusColors.push_back("rgb(232, 85, 85)");   // Error (red)
 	m_statusColors.push_back("rgb(232, 85, 232)");  // Disconnected (magenta)
 
-    ui->setupUi(this);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#KiwiSDRGui { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplesource/kiwisdr/readme.md";
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->centerFrequency->setValueRange(7, 0, 9999999);
 
     displaySettings();
+    makeUIConnections();
 
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
     connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
@@ -312,4 +316,15 @@ void KiwiSDRGui::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+void KiwiSDRGui::makeUIConnections()
+{
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &KiwiSDRGui::on_startStop_toggled);
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &KiwiSDRGui::on_centerFrequency_changed);
+    QObject::connect(ui->gain, &QSlider::valueChanged, this, &KiwiSDRGui::on_gain_valueChanged);
+    QObject::connect(ui->agc, &QToolButton::toggled, this, &KiwiSDRGui::on_agc_toggled);
+    QObject::connect(ui->serverAddress, &QLineEdit::returnPressed, this, &KiwiSDRGui::on_serverAddress_returnPressed);
+    QObject::connect(ui->serverAddressApplyButton, &QPushButton::clicked, this, &KiwiSDRGui::on_serverAddressApplyButton_clicked);
+    QObject::connect(ui->dcBlock, &ButtonSwitch::toggled, this, &KiwiSDRGui::on_dcBlock_toggled);
 }

@@ -30,6 +30,7 @@ void TestSinkSettings::resetToDefaults()
     m_sampleRate = 48000;
     m_log2Interp = 0;
     m_spectrumGUI = nullptr;
+    m_workspaceIndex = 0;
 }
 
 QByteArray TestSinkSettings::serialize() const
@@ -43,6 +44,9 @@ QByteArray TestSinkSettings::serialize() const
     if (m_spectrumGUI) {
         s.writeBlob(4, m_spectrumGUI->serialize());
     }
+
+    s.writeS32(5, m_workspaceIndex);
+    s.writeBlob(6, m_geometryBytes);
 
     return s.final();
 }
@@ -70,6 +74,9 @@ bool TestSinkSettings::deserialize(const QByteArray& data)
             d.readBlob(4, &bytetmp);
             m_spectrumGUI->deserialize(bytetmp);
         }
+
+        d.readS32(5, &m_workspaceIndex, 0);
+        d.readBlob(6, &m_geometryBytes);
 
         return true;
     }

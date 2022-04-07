@@ -59,8 +59,11 @@ SoapySDRInputGui::SoapySDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_autoDCCorrection(0),
     m_autoIQCorrection(0)
 {
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_sampleSource = (SoapySDRInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
-    ui->setupUi(this);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#SoapySDRInputGui { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplesource/soapysdrinput/readme.md";
 
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     uint64_t f_min, f_max;
@@ -101,6 +104,7 @@ SoapySDRInputGui::SoapySDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);
 
     sendSettings();
+    makeUIConnections();
 }
 
 SoapySDRInputGui::~SoapySDRInputGui()
@@ -923,4 +927,16 @@ void SoapySDRInputGui::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+void SoapySDRInputGui::makeUIConnections()
+{
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &SoapySDRInputGui::on_centerFrequency_changed);
+    QObject::connect(ui->LOppm, &QSlider::valueChanged, this, &SoapySDRInputGui::on_LOppm_valueChanged);
+    QObject::connect(ui->dcOffset, &ButtonSwitch::toggled, this, &SoapySDRInputGui::on_dcOffset_toggled);
+    QObject::connect(ui->iqImbalance, &ButtonSwitch::toggled, this, &SoapySDRInputGui::on_iqImbalance_toggled);
+    QObject::connect(ui->decim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SoapySDRInputGui::on_decim_currentIndexChanged);
+    QObject::connect(ui->fcPos, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SoapySDRInputGui::on_fcPos_currentIndexChanged);
+    QObject::connect(ui->transverter, &TransverterButton::clicked, this, &SoapySDRInputGui::on_transverter_clicked);
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &SoapySDRInputGui::on_startStop_toggled);
 }

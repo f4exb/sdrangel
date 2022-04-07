@@ -55,6 +55,7 @@ void FCDProSettings::resetToDefaults()
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
+    m_workspaceIndex = 0;
 }
 
 QByteArray FCDProSettings::serialize() const
@@ -89,6 +90,8 @@ QByteArray FCDProSettings::serialize() const
     s.writeU32(26, m_reverseAPIPort);
     s.writeU32(27, m_reverseAPIDeviceIndex);
     s.writeBool(28, m_iqOrder);
+    s.writeS32(29, m_workspaceIndex);
+    s.writeBlob(30, m_geometryBytes);
 
 	return s.final();
 }
@@ -145,6 +148,8 @@ bool FCDProSettings::deserialize(const QByteArray& data)
         d.readU32(27, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
         d.readBool(28, &m_iqOrder, true);
+        d.readS32(29, &m_workspaceIndex, 0);
+        d.readBlob(30, &m_geometryBytes);
 
 		return true;
 	}

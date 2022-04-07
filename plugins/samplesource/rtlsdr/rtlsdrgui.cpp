@@ -43,9 +43,12 @@ RTLSDRGui::RTLSDRGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_sampleSource(0),
 	m_lastEngineState(DeviceAPI::StNotStarted)
 {
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_sampleSource = (RTLSDRInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
-    ui->setupUi(this);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#RTLSDRGui { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplesource/rtlsdr/readme.md";
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 	updateFrequencyLimits();
 
@@ -59,6 +62,7 @@ RTLSDRGui::RTLSDRGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_statusTimer.start(500);
 
 	displaySettings();
+    makeUIConnections();
 
 	m_gains = m_sampleSource->getGains();
 	displayGains();
@@ -532,4 +536,25 @@ void RTLSDRGui::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+void RTLSDRGui::makeUIConnections()
+{
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &RTLSDRGui::on_centerFrequency_changed);
+    QObject::connect(ui->sampleRate, &ValueDial::changed, this, &RTLSDRGui::on_sampleRate_changed);
+    QObject::connect(ui->offsetTuning, &QCheckBox::toggled, this, &RTLSDRGui::on_offsetTuning_toggled);
+    QObject::connect(ui->rfBW, &ValueDial::changed, this, &RTLSDRGui::on_rfBW_changed);
+    QObject::connect(ui->lowSampleRate, &ButtonSwitch::toggled, this, &RTLSDRGui::on_lowSampleRate_toggled);
+    QObject::connect(ui->dcOffset, &ButtonSwitch::toggled, this, &RTLSDRGui::on_dcOffset_toggled);
+    QObject::connect(ui->iqImbalance, &ButtonSwitch::toggled, this, &RTLSDRGui::on_iqImbalance_toggled);
+    QObject::connect(ui->decim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RTLSDRGui::on_decim_currentIndexChanged);
+    QObject::connect(ui->fcPos, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RTLSDRGui::on_fcPos_currentIndexChanged);
+    QObject::connect(ui->ppm, &QSlider::valueChanged, this, &RTLSDRGui::on_ppm_valueChanged);
+    QObject::connect(ui->gain, &QSlider::valueChanged, this, &RTLSDRGui::on_gain_valueChanged);
+    QObject::connect(ui->checkBox, &QCheckBox::stateChanged, this, &RTLSDRGui::on_checkBox_stateChanged);
+    QObject::connect(ui->agc, &QCheckBox::stateChanged, this, &RTLSDRGui::on_agc_stateChanged);
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &RTLSDRGui::on_startStop_toggled);
+    QObject::connect(ui->transverter, &TransverterButton::clicked, this, &RTLSDRGui::on_transverter_clicked);
+    QObject::connect(ui->sampleRateMode, &QToolButton::toggled, this, &RTLSDRGui::on_sampleRateMode_toggled);
+    QObject::connect(ui->biasT, &QCheckBox::stateChanged, this, &RTLSDRGui::on_biasT_stateChanged);
 }

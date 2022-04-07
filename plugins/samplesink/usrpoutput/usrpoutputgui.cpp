@@ -43,9 +43,12 @@ USRPOutputGUI::USRPOutputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_statusCounter(0),
     m_deviceStatusCounter(0)
 {
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_usrpOutput = (USRPOutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
 
-    ui->setupUi(this);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#USRPOutputGUI { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplesink/usrpoutput/readme.md";
 
     float minF, maxF;
 
@@ -87,6 +90,7 @@ USRPOutputGUI::USRPOutputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
     sendSettings();
+    makeUIConnections();
 }
 
 USRPOutputGUI::~USRPOutputGUI()
@@ -573,4 +577,19 @@ void USRPOutputGUI::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+void USRPOutputGUI::makeUIConnections()
+{
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &USRPOutputGUI::on_startStop_toggled);
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &USRPOutputGUI::on_centerFrequency_changed);
+    QObject::connect(ui->sampleRate, &ValueDial::changed, this, &USRPOutputGUI::on_sampleRate_changed);
+    QObject::connect(ui->swInterp, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &USRPOutputGUI::on_swInterp_currentIndexChanged);
+    QObject::connect(ui->lpf, &ValueDial::changed, this, &USRPOutputGUI::on_lpf_changed);
+    QObject::connect(ui->loOffset, &ValueDialZ::changed, this, &USRPOutputGUI::on_loOffset_changed);
+    QObject::connect(ui->gain, &QSlider::valueChanged, this, &USRPOutputGUI::on_gain_valueChanged);
+    QObject::connect(ui->antenna, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &USRPOutputGUI::on_antenna_currentIndexChanged);
+    QObject::connect(ui->clockSource, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &USRPOutputGUI::on_clockSource_currentIndexChanged);
+    QObject::connect(ui->transverter, &TransverterButton::clicked, this, &USRPOutputGUI::on_transverter_clicked);
+    QObject::connect(ui->sampleRateMode, &QToolButton::toggled, this, &USRPOutputGUI::on_sampleRateMode_toggled);
 }

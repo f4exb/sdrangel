@@ -121,6 +121,8 @@ struct PlutoSDRMIMOSettings {
     QString  m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIDeviceIndex;
+    int m_workspaceIndex;
+    QByteArray m_geometryBytes;
 
     static const int m_plutoSDRBlockSizeSamples = 64*256; //complex samples per buffer (must be multiple of 64)
 

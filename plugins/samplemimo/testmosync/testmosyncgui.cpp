@@ -49,7 +49,10 @@ TestMOSyncGui::TestMOSyncGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_tickCount(0),
 	m_lastEngineState(DeviceAPI::StNotStarted)
 {
-	ui->setupUi(this);
+    setAttribute(Qt::WA_DeleteOnClose, true);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#TestMOSyncGui { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplemimo/testmosync/readme.md";
     m_sampleMIMO = (TestMOSync*) m_deviceUISet->m_deviceAPI->getSampleMIMO();
 
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -70,6 +73,7 @@ TestMOSyncGui::TestMOSyncGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_statusTimer.start(500);
 
 	displaySettings();
+    makeUIConnections();
 
     m_sampleMIMO->setMessageQueueToGUI(&m_inputMessageQueue);
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
@@ -77,6 +81,7 @@ TestMOSyncGui::TestMOSyncGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_deviceUISet->m_spectrum->setDisplayedStream(false, 0);
     m_deviceUISet->m_deviceAPI->setSpectrumSinkInput(false, 0);
     m_deviceUISet->setSpectrumScalingFactor(SDR_TX_SCALEF);
+
 }
 
 TestMOSyncGui::~TestMOSyncGui()
@@ -281,4 +286,13 @@ void TestMOSyncGui::on_spectrumIndex_currentIndexChanged(int index)
 
 void TestMOSyncGui::tick()
 {
+}
+
+void TestMOSyncGui::makeUIConnections()
+{
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &TestMOSyncGui::on_centerFrequency_changed);
+    QObject::connect(ui->sampleRate, &ValueDial::changed, this, &TestMOSyncGui::on_sampleRate_changed);
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &TestMOSyncGui::on_startStop_toggled);
+    QObject::connect(ui->interp, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TestMOSyncGui::on_interp_currentIndexChanged);
+    QObject::connect(ui->spectrumIndex, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TestMOSyncGui::on_spectrumIndex_currentIndexChanged);
 }

@@ -44,9 +44,11 @@ AirspyGui::AirspyGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_sampleSource(0),
 	m_lastEngineState(DeviceAPI::StNotStarted)
 {
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_sampleSource = (AirspyInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
-    ui->setupUi(this);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#AirspyGui { border: 1px solid #C06900 }");
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 	updateFrequencyLimits();
 
@@ -65,6 +67,7 @@ AirspyGui::AirspyGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);
 
     sendSettings();
+    makeUIConnections();
 }
 
 AirspyGui::~AirspyGui()
@@ -446,4 +449,23 @@ void AirspyGui::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+void AirspyGui::makeUIConnections()
+{
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &AirspyGui::on_centerFrequency_changed);
+    QObject::connect(ui->LOppm, &QSlider::valueChanged, this, &AirspyGui::on_LOppm_valueChanged);
+    QObject::connect(ui->dcOffset, &ButtonSwitch::toggled, this, &AirspyGui::on_dcOffset_toggled);
+    QObject::connect(ui->iqImbalance, &ButtonSwitch::toggled, this, &AirspyGui::on_iqImbalance_toggled);
+    QObject::connect(ui->sampleRate, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AirspyGui::on_sampleRate_currentIndexChanged);
+    QObject::connect(ui->biasT, &QCheckBox::stateChanged, this, &AirspyGui::on_biasT_stateChanged);
+    QObject::connect(ui->decim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AirspyGui::on_decim_currentIndexChanged);
+    QObject::connect(ui->fcPos, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AirspyGui::on_fcPos_currentIndexChanged);
+    QObject::connect(ui->lna, &QSlider::valueChanged, this, &AirspyGui::on_lna_valueChanged);
+    QObject::connect(ui->mix, &QSlider::valueChanged, this, &AirspyGui::on_mix_valueChanged);
+    QObject::connect(ui->vga, &QSlider::valueChanged, this, &AirspyGui::on_vga_valueChanged);
+    QObject::connect(ui->lnaAGC, &QCheckBox::stateChanged, this, &AirspyGui::on_lnaAGC_stateChanged);
+    QObject::connect(ui->mixAGC, &QCheckBox::stateChanged, this, &AirspyGui::on_mixAGC_stateChanged);
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &AirspyGui::on_startStop_toggled);
+    QObject::connect(ui->transverter, &TransverterButton::clicked, this, &AirspyGui::on_transverter_clicked);
 }

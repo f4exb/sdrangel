@@ -50,6 +50,7 @@ TestMISettings::TestMISettings()
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
+    m_workspaceIndex = 0;
     m_streams.push_back(TestMIStreamSettings());
     m_streams.push_back(TestMIStreamSettings());
 }
@@ -61,6 +62,7 @@ TestMISettings::TestMISettings(const TestMISettings& other) :
     m_reverseAPIAddress = other.m_reverseAPIAddress;
     m_reverseAPIPort = other.m_reverseAPIPort;
     m_reverseAPIDeviceIndex = other.m_reverseAPIDeviceIndex;
+    m_workspaceIndex = other.m_workspaceIndex;
 }
 
 void TestMISettings::resetToDefaults()
@@ -78,6 +80,8 @@ QByteArray TestMISettings::serialize() const
     s.writeString(2, m_reverseAPIAddress);
     s.writeU32(3, m_reverseAPIPort);
     s.writeU32(4, m_reverseAPIDeviceIndex);
+    s.writeS32(5, m_workspaceIndex);
+    s.writeBlob(6, m_geometryBytes);
 
     for (unsigned int i = 0; i < m_streams.size(); i++)
     {
@@ -128,6 +132,8 @@ bool TestMISettings::deserialize(const QByteArray& data)
 
         d.readU32(4, &utmp, 0);
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
+        d.readS32(5, &m_workspaceIndex, 0);
+        d.readBlob(6, &m_geometryBytes);
 
         for (unsigned int i = 0; i < m_streams.size(); i++)
         {

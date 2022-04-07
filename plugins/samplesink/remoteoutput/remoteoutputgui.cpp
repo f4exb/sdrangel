@@ -56,6 +56,7 @@ RemoteOutputSinkGui::RemoteOutputSinkGui(DeviceUISet *deviceUISet, QWidget* pare
 	m_forceSettings(true),
     m_remoteAPIConnected(false)
 {
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_countUnrecoverable = 0;
     m_countRecovered = 0;
     m_lastCountUnrecoverable = 0;
@@ -66,7 +67,9 @@ RemoteOutputSinkGui::RemoteOutputSinkGui(DeviceUISet *deviceUISet, QWidget* pare
     m_paletteRedText.setColor(QPalette::WindowText, Qt::red);
     m_paletteWhiteText.setColor(QPalette::WindowText, Qt::white);
 
-    ui->setupUi(this);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#RemoteOutputGui { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplesink/remoteoutput/readme.md";
 
 	connect(&(m_deviceUISet->m_deviceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
@@ -88,6 +91,7 @@ RemoteOutputSinkGui::RemoteOutputSinkGui(DeviceUISet *deviceUISet, QWidget* pare
 
     displaySettings();
     sendSettings();
+    makeUIConnections();
 }
 
 RemoteOutputSinkGui::~RemoteOutputSinkGui()
@@ -539,4 +543,20 @@ void RemoteOutputSinkGui::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+void RemoteOutputSinkGui::makeUIConnections()
+{
+    QObject::connect(ui->nbFECBlocks, &QDial::valueChanged, this, &RemoteOutputSinkGui::on_nbFECBlocks_valueChanged);
+    QObject::connect(ui->deviceIndex, &QLineEdit::returnPressed, this, &RemoteOutputSinkGui::on_deviceIndex_returnPressed);
+    QObject::connect(ui->channelIndex, &QLineEdit::returnPressed, this, &RemoteOutputSinkGui::on_channelIndex_returnPressed);
+    QObject::connect(ui->nbTxBytes, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RemoteOutputSinkGui::on_nbTxBytes_currentIndexChanged);
+    QObject::connect(ui->apiAddress, &QLineEdit::returnPressed, this, &RemoteOutputSinkGui::on_apiAddress_returnPressed);
+    QObject::connect(ui->apiPort, &QLineEdit::returnPressed, this, &RemoteOutputSinkGui::on_apiPort_returnPressed);
+    QObject::connect(ui->dataAddress, &QLineEdit::returnPressed, this, &RemoteOutputSinkGui::on_dataAddress_returnPressed);
+    QObject::connect(ui->dataPort, &QLineEdit::returnPressed, this, &RemoteOutputSinkGui::on_dataPort_returnPressed);
+    QObject::connect(ui->apiApplyButton, &QPushButton::clicked, this, &RemoteOutputSinkGui::on_apiApplyButton_clicked);
+    QObject::connect(ui->dataApplyButton, &QPushButton::clicked, this, &RemoteOutputSinkGui::on_dataApplyButton_clicked);
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &RemoteOutputSinkGui::on_startStop_toggled);
+    QObject::connect(ui->eventCountsReset, &QPushButton::clicked, this, &RemoteOutputSinkGui::on_eventCountsReset_clicked);
 }

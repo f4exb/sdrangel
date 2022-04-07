@@ -46,9 +46,12 @@ HackRFInputGui::HackRFInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_sampleSource(NULL),
 	m_lastEngineState(DeviceAPI::StNotStarted)
 {
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_sampleSource = (HackRFInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
-    ui->setupUi(this);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#HackRFInputGui { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplesource/hackrfinput/readme.md";
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 	ui->centerFrequency->setValueRange(7, 0U, 7250000U);
 
@@ -69,6 +72,7 @@ HackRFInputGui::HackRFInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);
 
     sendSettings();
+    makeUIConnections();
 }
 
 HackRFInputGui::~HackRFInputGui()
@@ -505,4 +509,24 @@ void HackRFInputGui::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+void HackRFInputGui::makeUIConnections()
+{
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &HackRFInputGui::on_centerFrequency_changed);
+    QObject::connect(ui->sampleRate, &ValueDial::changed, this, &HackRFInputGui::on_sampleRate_changed);
+    QObject::connect(ui->LOppm, &QSlider::valueChanged, this, &HackRFInputGui::on_LOppm_valueChanged);
+    QObject::connect(ui->dcOffset, &ButtonSwitch::toggled, this, &HackRFInputGui::on_dcOffset_toggled);
+    QObject::connect(ui->iqImbalance, &ButtonSwitch::toggled, this, &HackRFInputGui::on_iqImbalance_toggled);
+    QObject::connect(ui->autoBBF, &ButtonSwitch::toggled, this, &HackRFInputGui::on_autoBBF_toggled);
+    QObject::connect(ui->biasT, &QCheckBox::stateChanged, this, &HackRFInputGui::on_biasT_stateChanged);
+    QObject::connect(ui->decim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &HackRFInputGui::on_decim_currentIndexChanged);
+    QObject::connect(ui->fcPos, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &HackRFInputGui::on_fcPos_currentIndexChanged);
+    QObject::connect(ui->lnaExt, &QCheckBox::stateChanged, this, &HackRFInputGui::on_lnaExt_stateChanged);
+    QObject::connect(ui->lna, &QSlider::valueChanged, this, &HackRFInputGui::on_lna_valueChanged);
+    QObject::connect(ui->bbFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &HackRFInputGui::on_bbFilter_currentIndexChanged);
+    QObject::connect(ui->vga, &QSlider::valueChanged, this, &HackRFInputGui::on_vga_valueChanged);
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &HackRFInputGui::on_startStop_toggled);
+    QObject::connect(ui->sampleRateMode, &QToolButton::toggled, this, &HackRFInputGui::on_sampleRateMode_toggled);
+    QObject::connect(ui->transverter, &TransverterButton::clicked, this, &HackRFInputGui::on_transverter_clicked);
 }

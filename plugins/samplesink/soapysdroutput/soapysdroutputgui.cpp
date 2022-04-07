@@ -57,8 +57,11 @@ SoapySDROutputGui::SoapySDROutputGui(DeviceUISet *deviceUISet, QWidget* parent) 
     m_autoDCCorrection(0),
     m_autoIQCorrection(0)
 {
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_sampleSink = (SoapySDROutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
-    ui->setupUi(this);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#SoapySDROutputGui { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplesink/soapysdroutput/readme.md";
 
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     uint64_t f_min, f_max;
@@ -99,6 +102,7 @@ SoapySDROutputGui::SoapySDROutputGui(DeviceUISet *deviceUISet, QWidget* parent) 
     m_sampleSink->setMessageQueueToGUI(&m_inputMessageQueue);
 
     sendSettings();
+    makeUIConnections();
 }
 
 SoapySDROutputGui::~SoapySDROutputGui()
@@ -882,4 +886,13 @@ void SoapySDROutputGui::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+void SoapySDROutputGui::makeUIConnections()
+{
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &SoapySDROutputGui::on_centerFrequency_changed);
+    QObject::connect(ui->LOppm, &QSlider::valueChanged, this, &SoapySDROutputGui::on_LOppm_valueChanged);
+    QObject::connect(ui->interp, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SoapySDROutputGui::on_interp_currentIndexChanged);
+    QObject::connect(ui->transverter, &TransverterButton::clicked, this, &SoapySDROutputGui::on_transverter_clicked);
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &SoapySDROutputGui::on_startStop_toggled);
 }

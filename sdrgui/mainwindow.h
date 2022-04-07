@@ -72,7 +72,6 @@ public:
 	~MainWindow();
 	static MainWindow *getInstance() { return m_instance; } // Main Window is de facto a singleton so this just returns its reference
 	MessageQueue* getInputMessageQueue() { return &m_inputMessageQueue; }
-	void addViewAction(QAction* action);
     const PluginManager *getPluginManager() const { return m_pluginManager; }
     std::vector<DeviceUISet*>& getDeviceUISets() { return m_deviceUIs; }
     void commandKeysConnect(QObject *object, const char *slot);
@@ -135,25 +134,41 @@ private:
 	void closeEvent(QCloseEvent*);
 	void updatePresetControls();
 	QTreeWidgetItem* addPresetToTree(const Preset* preset);
-	QTreeWidgetItem* addCommandToTree(const Command* command);
 	void applySettings();
 
-  	void setDeviceGUI(int deviceTabIndex, QWidget* gui, const QString& deviceDisplayName, int deviceType = 0);
-	void addSourceDevice(int deviceIndex);
-	void addSinkDevice();
-	void addMIMODevice();
     void removeLastDevice();
     void addFeatureSet();
     void removeFeatureSet(unsigned int tabIndex);
     void removeAllFeatureSets();
     void deleteChannel(int deviceSetIndex, int channelIndex);
-    void sampleSourceChanged(int tabIndex, int newDeviceIndex);
-	void sampleSinkChanged(int tabIndex, int newDeviceIndex);
-	void sampleMIMOChanged(int tabIndex, int newDeviceIndex);
+    void sampleDeviceChange(int deviceType, int deviceSetIndex, int newDeviceIndex, Workspace *workspace);
+    void sampleSourceChange(int deviceSetIndex, int newDeviceIndex, Workspace *workspace);
+	void sampleSinkChange(int deviceSetIndex, int newDeviceIndex, Workspace *workspace);
+	void sampleMIMOChange(int deviceSetIndex, int newDeviceIndex, Workspace *workspace);
+    void sampleSourceImplement(
+        int deviceSetIndex,
+        int deviceIndex,
+        DeviceAPI *deviceAPI,
+        DeviceUISet *deviceUISet,
+        Workspace *workspace
+    );
+    void sampleSinkImplement(
+        int deviceSetIndex,
+        int deviceIndex,
+        DeviceAPI *deviceAPI,
+        DeviceUISet *deviceUISet,
+        Workspace *workspace
+    );
+    void sampleMIMOImplement(
+        int deviceSetIndex,
+        int deviceIndex,
+        DeviceAPI *deviceAPI,
+        DeviceUISet *deviceUISet,
+        Workspace *workspace
+    );
     void deleteFeature(int featureSetIndex, int featureIndex);
 
     bool handleMessage(const Message& cmd);
-	void restoreDeviceTabs();
 
 private slots:
 	void handleMessages();
@@ -164,6 +179,10 @@ private slots:
     void removeEmptyWorkspaces();
 	void loadConfiguration(const Configuration *configuration);
     void saveConfiguration(Configuration *configuration);
+	void sampleSourceAdd(Workspace *workspace, int deviceIndex);
+	void sampleSinkAdd(Workspace *workspace, int deviceIndex);
+	void sampleMIMOAdd(Workspace *workspace, int deviceIndex);
+    void sampleDeviceChangeHandler(DeviceGUI *deviceGUI, int newDeviceIndex);
 
 	void on_action_View_Fullscreen_toggled(bool checked);
 	void on_presetSave_clicked();
@@ -185,27 +204,22 @@ private slots:
 	void on_action_My_Position_triggered();
     void on_action_DeviceUserArguments_triggered();
     void on_action_commands_triggered();
-    void samplingDeviceChanged(int deviceType, int tabIndex, int newDeviceIndex);
     void channelAddClicked(int channelIndex);
     void featureAddClicked(Workspace *workspace, int featureIndex);
     void featureMove(FeatureGUI *gui, int wsIndexDestnation);
     void openFeaturePresetsDialog(QPoint p, Workspace *workspace);
+    void deviceMove(DeviceGUI *gui, int wsIndexDestnation);
     void on_action_Quick_Start_triggered();
     void on_action_Main_Window_triggered();
 	void on_action_Loaded_Plugins_triggered();
 	void on_action_About_triggered();
-	void on_action_addSourceDevice_triggered();
-	void on_action_addSinkDevice_triggered();
-    void on_action_addMIMODevice_triggered();
 	void on_action_removeLastDevice_triggered();
 	void on_action_addFeatureSet_triggered();
 	void on_action_removeLastFeatureSet_triggered();
 	void tabInputViewIndexChanged();
     void tabChannelsIndexChanged();
-	void tabFeaturesIndexChanged();
 	void commandKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifiers, bool release);
 	void fftWisdomProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
-	// void toggleSpectrumView(bool checked);
 };
 
 #endif // INCLUDE_MAINWINDOW_H

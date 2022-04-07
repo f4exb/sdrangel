@@ -24,11 +24,10 @@
 #include "device/deviceenumerator.h"
 
 
-SamplingDeviceDialog::SamplingDeviceDialog(int deviceType, int deviceTabIndex, QWidget* parent) :
+SamplingDeviceDialog::SamplingDeviceDialog(int deviceType, QWidget* parent) :
     QDialog(parent),
     ui(new Ui::SamplingDeviceDialog),
     m_deviceType(deviceType),
-    m_deviceTabIndex(deviceTabIndex),
     m_selectedDeviceIndex(-1),
     m_hasChanged(false)
 {
@@ -81,15 +80,6 @@ void SamplingDeviceDialog::on_deviceSelect_currentIndexChanged(int index)
 void SamplingDeviceDialog::accept()
 {
     m_selectedDeviceIndex = m_deviceIndexes[ui->deviceSelect->currentIndex()];
-
-    if (m_deviceType == 0) { // Single Rx
-        DeviceEnumerator::instance()->changeRxSelection(m_deviceTabIndex, m_selectedDeviceIndex);
-    } else if (m_deviceType == 1) { // Single Tx
-        DeviceEnumerator::instance()->changeTxSelection(m_deviceTabIndex, m_selectedDeviceIndex);
-    } else if (m_deviceType == 2) { // MIMO
-        DeviceEnumerator::instance()->changeMIMOSelection(m_deviceTabIndex, m_selectedDeviceIndex);
-    }
-
     QDialog::accept();
 }
 

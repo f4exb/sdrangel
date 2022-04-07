@@ -68,7 +68,10 @@ PlutoSDRMIMOGUI::PlutoSDRMIMOGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleRateMode(true)
 {
     qDebug("PlutoSDRMIMOGui::PlutoSDRMIMOGui");
-    ui->setupUi(this);
+    setAttribute(Qt::WA_DeleteOnClose, true);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#PlutoSDRMIMOGUI { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplemimo/plutosdrmimo/readme.md";
     m_sampleMIMO = (PlutoSDRMIMO*) m_deviceUISet->m_deviceAPI->getSampleMIMO();
 
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -102,6 +105,8 @@ PlutoSDRMIMOGUI::PlutoSDRMIMOGUI(DeviceUISet *deviceUISet, QWidget* parent) :
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
     m_sampleMIMO->setMessageQueueToGUI(&m_inputMessageQueue);
+
+    makeUIConnections();
 }
 
 PlutoSDRMIMOGUI::~PlutoSDRMIMOGUI()
@@ -890,4 +895,36 @@ void PlutoSDRMIMOGUI::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+void PlutoSDRMIMOGUI::makeUIConnections()
+{
+	QObject::connect(ui->streamSide, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PlutoSDRMIMOGUI::on_streamSide_currentIndexChanged);
+	QObject::connect(ui->streamIndex, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PlutoSDRMIMOGUI::on_streamIndex_currentIndexChanged);
+	QObject::connect(ui->spectrumSide, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PlutoSDRMIMOGUI::on_spectrumSide_currentIndexChanged);
+	QObject::connect(ui->spectrumIndex, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PlutoSDRMIMOGUI::on_spectrumIndex_currentIndexChanged);
+	QObject::connect(ui->startStopRx, &ButtonSwitch::toggled, this, &PlutoSDRMIMOGUI::on_startStopRx_toggled);
+	QObject::connect(ui->startStopTx, &ButtonSwitch::toggled, this, &PlutoSDRMIMOGUI::on_startStopTx_toggled);
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &PlutoSDRMIMOGUI::on_centerFrequency_changed);
+    QObject::connect(ui->loPPM, &QSlider::valueChanged, this, &PlutoSDRMIMOGUI::on_loPPM_valueChanged);
+    QObject::connect(ui->dcOffset, &ButtonSwitch::toggled, this, &PlutoSDRMIMOGUI::on_dcOffset_toggled);
+    QObject::connect(ui->iqImbalance, &ButtonSwitch::toggled, this, &PlutoSDRMIMOGUI::on_iqImbalance_toggled);
+	QObject::connect(ui->sampleRate, &ValueDial::changed, this, &PlutoSDRMIMOGUI::on_sampleRate_changed);
+    QObject::connect(ui->sampleRateMode, &QToolButton::toggled, this, &PlutoSDRMIMOGUI::on_sampleRateMode_toggled);
+    QObject::connect(ui->fcPos, QOverload<int>::of(&QComboBox::currentIndexChanged),this, &PlutoSDRMIMOGUI::on_fcPos_currentIndexChanged);
+    QObject::connect(ui->swDecim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PlutoSDRMIMOGUI::on_swDecim_currentIndexChanged);
+    QObject::connect(ui->gainLock, &QToolButton::toggled, this, &PlutoSDRMIMOGUI::on_gainLock_toggled);
+	QObject::connect(ui->gainMode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PlutoSDRMIMOGUI::on_gainMode_currentIndexChanged);
+	QObject::connect(ui->gain, &QDial::valueChanged, this, &PlutoSDRMIMOGUI::on_gain_valueChanged);
+	QObject::connect(ui->att, &QDial::valueChanged, this, &PlutoSDRMIMOGUI::on_att_valueChanged);
+	QObject::connect(ui->transverter, &TransverterButton::clicked, this, &PlutoSDRMIMOGUI::on_transverter_clicked);
+    QObject::connect(ui->rfDCOffset, &ButtonSwitch::toggled, this, &PlutoSDRMIMOGUI::on_rfDCOffset_toggled);
+    QObject::connect(ui->bbDCOffset, &ButtonSwitch::toggled, this, &PlutoSDRMIMOGUI::on_bbDCOffset_toggled);
+    QObject::connect(ui->hwIQImbalance, &ButtonSwitch::toggled, this, &PlutoSDRMIMOGUI::on_hwIQImbalance_toggled);
+    QObject::connect(ui->lpf, &ValueDial::changed, this, &PlutoSDRMIMOGUI::on_lpf_changed);
+    QObject::connect(ui->lpFIREnable, &ButtonSwitch::toggled, this, &PlutoSDRMIMOGUI::on_lpFIREnable_toggled);
+    QObject::connect(ui->lpFIR, &ValueDial::changed, this, &PlutoSDRMIMOGUI::on_lpFIR_changed);
+    QObject::connect(ui->lpFIRDecimation, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PlutoSDRMIMOGUI::on_lpFIRDecimation_currentIndexChanged);
+    QObject::connect(ui->lpFIRGain, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PlutoSDRMIMOGUI::on_lpFIRGain_currentIndexChanged);
+    QObject::connect(ui->antenna, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PlutoSDRMIMOGUI::on_antenna_currentIndexChanged);
 }

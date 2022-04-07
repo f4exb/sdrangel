@@ -40,9 +40,12 @@ SDRPlayV3Gui::SDRPlayV3Gui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_doApplySettings(true),
     m_forceSettings(true)
 {
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_sdrPlayV3Input = (SDRPlayV3Input*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
-    ui->setupUi(this);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#SDRPlayV3Gui { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplesource/sdrplayv3/readme.md";
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     updateFrequencyLimits();
 
@@ -114,6 +117,7 @@ SDRPlayV3Gui::SDRPlayV3Gui(DeviceUISet *deviceUISet, QWidget* parent) :
     ui->antenna->blockSignals(false);
 
     displaySettings();
+    makeUIConnections();
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
     m_sdrPlayV3Input->setMessageQueueToGUI(&m_inputMessageQueue);
@@ -519,4 +523,29 @@ void SDRPlayV3Gui::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+void SDRPlayV3Gui::makeUIConnections()
+{
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &SDRPlayV3Gui::on_centerFrequency_changed);
+    QObject::connect(ui->ppm, &QSlider::valueChanged, this, &SDRPlayV3Gui::on_ppm_valueChanged);
+    QObject::connect(ui->tuner, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SDRPlayV3Gui::on_tuner_currentIndexChanged);
+    QObject::connect(ui->antenna, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SDRPlayV3Gui::on_antenna_currentIndexChanged);
+    QObject::connect(ui->dcOffset, &ButtonSwitch::toggled, this, &SDRPlayV3Gui::on_dcOffset_toggled);
+    QObject::connect(ui->iqImbalance, &ButtonSwitch::toggled, this, &SDRPlayV3Gui::on_iqImbalance_toggled);
+    QObject::connect(ui->extRef, &ButtonSwitch::toggled, this, &SDRPlayV3Gui::on_extRef_toggled);
+    QObject::connect(ui->biasTee, &ButtonSwitch::toggled, this, &SDRPlayV3Gui::on_biasTee_toggled);
+    QObject::connect(ui->amNotch, &ButtonSwitch::toggled, this, &SDRPlayV3Gui::on_amNotch_toggled);
+    QObject::connect(ui->fmNotch, &ButtonSwitch::toggled, this, &SDRPlayV3Gui::on_fmNotch_toggled);
+    QObject::connect(ui->dabNotch, &ButtonSwitch::toggled, this, &SDRPlayV3Gui::on_dabNotch_toggled);
+    QObject::connect(ui->bandwidth, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SDRPlayV3Gui::on_bandwidth_currentIndexChanged);
+    QObject::connect(ui->samplerate, &ValueDial::changed, this, &SDRPlayV3Gui::on_samplerate_changed);
+    QObject::connect(ui->ifFrequency, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SDRPlayV3Gui::on_ifFrequency_currentIndexChanged);
+    QObject::connect(ui->decim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SDRPlayV3Gui::on_decim_currentIndexChanged);
+    QObject::connect(ui->fcPos, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SDRPlayV3Gui::on_fcPos_currentIndexChanged);
+    QObject::connect(ui->gainLNA, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SDRPlayV3Gui::on_gainLNA_currentIndexChanged);
+    QObject::connect(ui->gainIFAGC, &ButtonSwitch::toggled, this, &SDRPlayV3Gui::on_gainIFAGC_toggled);
+    QObject::connect(ui->gainIF, &QDial::valueChanged, this, &SDRPlayV3Gui::on_gainIF_valueChanged);
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &SDRPlayV3Gui::on_startStop_toggled);
+    QObject::connect(ui->transverter, &TransverterButton::clicked, this, &SDRPlayV3Gui::on_transverter_clicked);
 }

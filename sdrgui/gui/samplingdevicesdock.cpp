@@ -111,7 +111,7 @@ void SamplingDevicesDock::addDevice(int deviceType, int deviceTabIndex)
     m_devicesInfo.push_back(DeviceInfo{
         deviceType,
         deviceTabIndex,
-        new SamplingDeviceDialog(deviceType, deviceTabIndex, this)
+        new SamplingDeviceDialog(deviceType, this)
     });
 
     setCurrentTabIndex(deviceTabIndex);

@@ -45,9 +45,12 @@ HackRFOutputGui::HackRFOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_lastEngineState(DeviceAPI::StNotStarted),
 	m_doApplySettings(true)
 {
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_deviceSampleSink = (HackRFOutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
 
-    ui->setupUi(this);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#HackRFOutputGui { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplesink/hackrfoutput/readme.md";
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 	ui->centerFrequency->setValueRange(7, 0U, 7250000U);
 
@@ -64,6 +67,7 @@ HackRFOutputGui::HackRFOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	displaySettings();
 	displayBandwidths();
 	sendSettings();
+    makeUIConnections();
 
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
@@ -453,4 +457,20 @@ void HackRFOutputGui::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+void HackRFOutputGui::makeUIConnections()
+{
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &HackRFOutputGui::on_centerFrequency_changed);
+    QObject::connect(ui->sampleRate, &ValueDial::changed, this, &HackRFOutputGui::on_sampleRate_changed);
+    QObject::connect(ui->LOppm, &QSlider::valueChanged, this, &HackRFOutputGui::on_LOppm_valueChanged);
+    QObject::connect(ui->biasT, &QCheckBox::stateChanged, this, &HackRFOutputGui::on_biasT_stateChanged);
+    QObject::connect(ui->interp, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &HackRFOutputGui::on_interp_currentIndexChanged);
+    QObject::connect(ui->fcPos, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &HackRFOutputGui::on_fcPos_currentIndexChanged);
+    QObject::connect(ui->lnaExt, &QCheckBox::stateChanged, this, &HackRFOutputGui::on_lnaExt_stateChanged);
+    QObject::connect(ui->bbFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &HackRFOutputGui::on_bbFilter_currentIndexChanged);
+    QObject::connect(ui->txvga, &QSlider::valueChanged, this, &HackRFOutputGui::on_txvga_valueChanged);
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &HackRFOutputGui::on_startStop_toggled);
+    QObject::connect(ui->sampleRateMode, &QToolButton::toggled, this, &HackRFOutputGui::on_sampleRateMode_toggled);
+    QObject::connect(ui->transverter, &TransverterButton::clicked, this, &HackRFOutputGui::on_transverter_clicked);
 }

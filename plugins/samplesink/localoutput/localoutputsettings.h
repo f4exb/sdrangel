@@ -26,6 +26,8 @@ struct LocalOutputSettings {
     QString  m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIDeviceIndex;
+    int m_workspaceIndex;
+    QByteArray m_geometryBytes;
 
     LocalOutputSettings();
     void resetToDefaults();

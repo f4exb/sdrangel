@@ -47,6 +47,7 @@ void SoapySDROutputSettings::resetToDefaults()
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
+    m_workspaceIndex = 0;
 }
 
 QByteArray SoapySDROutputSettings::serialize() const
@@ -76,6 +77,8 @@ QByteArray SoapySDROutputSettings::serialize() const
     s.writeString(24, m_reverseAPIAddress);
     s.writeU32(25, m_reverseAPIPort);
     s.writeU32(26, m_reverseAPIDeviceIndex);
+    s.writeS32(27, m_workspaceIndex);
+    s.writeBlob(28, m_geometryBytes);
 
     return s.final();
 }
@@ -133,6 +136,8 @@ bool SoapySDROutputSettings::deserialize(const QByteArray& data)
 
         d.readU32(26, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
+        d.readS32(27, &m_workspaceIndex, 0);
+        d.readBlob(28, &m_geometryBytes);
 
         return true;
     }

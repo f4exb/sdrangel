@@ -35,6 +35,9 @@ struct KiwiSDRSettings {
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIDeviceIndex;
 
+    int m_workspaceIndex;
+    QByteArray m_geometryBytes;
+
 	KiwiSDRSettings();
 	void resetToDefaults();
 	QByteArray serialize() const;

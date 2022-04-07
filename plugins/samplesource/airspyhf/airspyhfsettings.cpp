@@ -46,6 +46,7 @@ void AirspyHFSettings::resetToDefaults()
     m_attenuatorSteps = 0;
 	m_dcBlock = false;
 	m_iqCorrection = false;
+    m_workspaceIndex = 0;
 }
 
 QByteArray AirspyHFSettings::serialize() const
@@ -70,6 +71,8 @@ QByteArray AirspyHFSettings::serialize() const
 	s.writeBool(19, m_dcBlock);
 	s.writeBool(20, m_iqCorrection);
     s.writeBool(21, m_iqOrder);
+    s.writeS32(22, m_workspaceIndex);
+    s.writeBlob(23, m_geometryBytes);
 
 	return s.final();
 }
@@ -117,6 +120,8 @@ bool AirspyHFSettings::deserialize(const QByteArray& data)
 		d.readBool(19, &m_dcBlock, false);
 		d.readBool(20, &m_iqCorrection, false);
         d.readBool(21, &m_iqOrder, true);
+        d.readS32(22, &m_workspaceIndex, 0);
+        d.readBlob(23, &m_geometryBytes);
 
 		return true;
 	}

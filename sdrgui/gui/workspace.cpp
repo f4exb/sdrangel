@@ -24,6 +24,7 @@
 #include <QMdiSubWindow>
 #include <QFrame>
 
+#include "gui/samplingdevicedialog.h"
 #include "workspace.h"
 
 Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
@@ -130,21 +131,21 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
         m_addRxDeviceButton,
         &QPushButton::clicked,
         this,
-        &Workspace::addRxDevice
+        &Workspace::addRxDeviceClicked
     );
 
     QObject::connect(
         m_addTxDeviceButton,
         &QPushButton::clicked,
         this,
-        &Workspace::addTxDevice
+        &Workspace::addTxDeviceClicked
     );
 
     QObject::connect(
         m_addMIMODeviceButton,
         &QPushButton::clicked,
         this,
-        &Workspace::addMIMODevice
+        &Workspace::addMIMODeviceClicked
     );
 
     QObject::connect(
@@ -194,6 +195,7 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
 
 Workspace::~Workspace()
 {
+    qDebug("Workspace::~Workspace");
     delete m_closeButton;
     delete m_normalButton;
     delete m_tileSubWindows;
@@ -208,7 +210,9 @@ Workspace::~Workspace()
     delete m_titleLabel;
     delete m_titleBarLayout;
     delete m_titleBar;
+    qDebug("Workspace::~Workspace: about to delete MDI");
     delete m_mdi;
+    qDebug("Workspace::~Workspace: end");
 }
 
 void Workspace::toggleFloating()
@@ -216,19 +220,31 @@ void Workspace::toggleFloating()
     setFloating(!isFloating());
 }
 
-void Workspace::addRxDevice()
+void Workspace::addRxDeviceClicked()
 {
+    SamplingDeviceDialog dialog(0, this);
 
+    if (dialog.exec() == QDialog::Accepted) {
+        emit addRxDevice(this, dialog.getSelectedDeviceIndex());
+    }
 }
 
-void Workspace::addTxDevice()
+void Workspace::addTxDeviceClicked()
 {
+    SamplingDeviceDialog dialog(1, this);
 
+    if (dialog.exec() == QDialog::Accepted) {
+        emit addTxDevice(this, dialog.getSelectedDeviceIndex());
+    }
 }
 
-void Workspace::addMIMODevice()
+void Workspace::addMIMODeviceClicked()
 {
+    SamplingDeviceDialog dialog(2, this);
 
+    if (dialog.exec() == QDialog::Accepted) {
+        emit addMIMODevice(this, dialog.getSelectedDeviceIndex());
+    }
 }
 
 void Workspace::addFeatureDialog()
@@ -261,7 +277,6 @@ void Workspace::tileSubWindows()
 
 void Workspace::addToMdiArea(QMdiSubWindow *sub)
 {
-    sub->setParent(m_mdi);
     m_mdi->addSubWindow(sub);
     sub->show();
 }

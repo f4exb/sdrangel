@@ -58,10 +58,13 @@ LocalOutputGui::LocalOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_doApplySettings(true),
     m_forceSettings(true)
 {
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_paletteGreenText.setColor(QPalette::WindowText, Qt::green);
     m_paletteWhiteText.setColor(QPalette::WindowText, Qt::white);
 
-	ui->setupUi(this);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#LocalOutputGui { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplesink/localoutput/readme.md";
 
     CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStop);
     connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
@@ -79,6 +82,7 @@ LocalOutputGui::LocalOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
     m_forceSettings = true;
     sendSettings();
+    makeUIConnections();
 }
 
 LocalOutputGui::~LocalOutputGui()
@@ -292,4 +296,9 @@ void LocalOutputGui::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+void LocalOutputGui::makeUIConnections()
+{
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &LocalOutputGui::on_startStop_toggled);
 }

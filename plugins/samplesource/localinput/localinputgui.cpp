@@ -70,16 +70,20 @@ LocalInputGui::LocalInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_doApplySettings(true),
     m_forceSettings(true)
 {
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_paletteGreenText.setColor(QPalette::WindowText, Qt::green);
     m_paletteWhiteText.setColor(QPalette::WindowText, Qt::white);
 
 	m_startingTimeStampms = 0;
-	ui->setupUi(this);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#LocalInputGui { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplesource/localinput/readme.md";
 
     CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStop);
     connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
 	displaySettings();
+    makeUIConnections();
 
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(500);
@@ -320,4 +324,11 @@ void LocalInputGui::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+void LocalInputGui::makeUIConnections()
+{
+    QObject::connect(ui->dcOffset, &ButtonSwitch::toggled, this, &LocalInputGui::on_dcOffset_toggled);
+    QObject::connect(ui->iqImbalance, &ButtonSwitch::toggled, this, &LocalInputGui::on_iqImbalance_toggled);
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &LocalInputGui::on_startStop_toggled);
 }

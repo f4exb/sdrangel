@@ -52,11 +52,14 @@ MetisMISOGui::MetisMISOGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_lastEngineState(DeviceAPI::StNotStarted)
 {
     qDebug("MetisMISOGui::MetisMISOGui");
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_sampleMIMO = m_deviceUISet->m_deviceAPI->getSampleMIMO();
     m_rxSampleRate = 48000;
     m_txSampleRate = 48000;
 
-    ui->setupUi(this);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#MetisMISOGui { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplemimo/metismiso/readme.md";
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->centerFrequency->setValueRange(7, 0, m_absMaxFreq);
 
@@ -71,6 +74,8 @@ MetisMISOGui::MetisMISOGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
     CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStop);
     connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
+
+    makeUIConnections();
 }
 
 MetisMISOGui::~MetisMISOGui()
@@ -573,4 +578,27 @@ void MetisMISOGui::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+void MetisMISOGui::makeUIConnections()
+{
+	QObject::connect(ui->streamIndex, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MetisMISOGui::on_streamIndex_currentIndexChanged);
+    QObject::connect(ui->spectrumSource, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MetisMISOGui::on_spectrumSource_currentIndexChanged);
+    QObject::connect(ui->streamLock, &QToolButton::toggled, this, &MetisMISOGui::on_streamLock_toggled);
+    QObject::connect(ui->LOppm, &QSlider::valueChanged, this, &MetisMISOGui::on_LOppm_valueChanged);
+	QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &MetisMISOGui::on_startStop_toggled);
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &MetisMISOGui::on_centerFrequency_changed);
+    QObject::connect(ui->samplerateIndex, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MetisMISOGui::on_samplerateIndex_currentIndexChanged);
+    QObject::connect(ui->log2Decim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MetisMISOGui::on_log2Decim_currentIndexChanged);
+    QObject::connect(ui->subsamplingIndex, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MetisMISOGui::on_subsamplingIndex_currentIndexChanged);
+    QObject::connect(ui->dcBlock, &ButtonSwitch::toggled, this, &MetisMISOGui::on_dcBlock_toggled);
+    QObject::connect(ui->iqCorrection, &ButtonSwitch::toggled, this, &MetisMISOGui::on_iqCorrection_toggled);
+    QObject::connect(ui->transverter, &TransverterButton::clicked, this, &MetisMISOGui::on_transverter_clicked);
+    QObject::connect(ui->preamp, &ButtonSwitch::toggled, this, &MetisMISOGui::on_preamp_toggled);
+    QObject::connect(ui->random, &ButtonSwitch::toggled, this, &MetisMISOGui::on_random_toggled);
+    QObject::connect(ui->dither, &ButtonSwitch::toggled, this, &MetisMISOGui::on_dither_toggled);
+    QObject::connect(ui->duplex, &ButtonSwitch::toggled, this, &MetisMISOGui::on_duplex_toggled);
+    QObject::connect(ui->nbRxIndex, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MetisMISOGui::on_nbRxIndex_currentIndexChanged);
+    QObject::connect(ui->txEnable, &ButtonSwitch::toggled, this, &MetisMISOGui::on_txEnable_toggled);
+    QObject::connect(ui->txDrive, &QDial::valueChanged, this, &MetisMISOGui::on_txDrive_valueChanged);
 }

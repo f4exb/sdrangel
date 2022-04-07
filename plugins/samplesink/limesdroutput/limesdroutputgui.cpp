@@ -42,9 +42,12 @@ LimeSDROutputGUI::LimeSDROutputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_statusCounter(0),
     m_deviceStatusCounter(0)
 {
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_limeSDROutput = (LimeSDROutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
 
-    ui->setupUi(this);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#LimeSDROutputGUI { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplesink/limesdroutput/readme.md";
 
     float minF, maxF;
 
@@ -94,6 +97,7 @@ LimeSDROutputGUI::LimeSDROutputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
     sendSettings();
+    makeUIConnections();
 }
 
 LimeSDROutputGUI::~LimeSDROutputGUI()
@@ -629,4 +633,23 @@ void LimeSDROutputGUI::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+void LimeSDROutputGUI::makeUIConnections()
+{
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &LimeSDROutputGUI::on_startStop_toggled);
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &LimeSDROutputGUI::on_centerFrequency_changed);
+    QObject::connect(ui->ncoFrequency, &ValueDialZ::changed, this, &LimeSDROutputGUI::on_ncoFrequency_changed);
+    QObject::connect(ui->ncoEnable, &ButtonSwitch::toggled, this, &LimeSDROutputGUI::on_ncoEnable_toggled);
+    QObject::connect(ui->sampleRate, &ValueDial::changed, this, &LimeSDROutputGUI::on_sampleRate_changed);
+    QObject::connect(ui->hwInterp, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LimeSDROutputGUI::on_hwInterp_currentIndexChanged);
+    QObject::connect(ui->swInterp, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LimeSDROutputGUI::on_swInterp_currentIndexChanged);
+    QObject::connect(ui->lpf, &ValueDial::changed, this, &LimeSDROutputGUI::on_lpf_changed);
+    QObject::connect(ui->lpFIREnable, &ButtonSwitch::toggled, this, &LimeSDROutputGUI::on_lpFIREnable_toggled);
+    QObject::connect(ui->lpFIR, &ValueDial::changed, this, &LimeSDROutputGUI::on_lpFIR_changed);
+    QObject::connect(ui->gain, &QSlider::valueChanged, this, &LimeSDROutputGUI::on_gain_valueChanged);
+    QObject::connect(ui->antenna, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LimeSDROutputGUI::on_antenna_currentIndexChanged);
+    QObject::connect(ui->extClock, &ExternalClockButton::clicked, this, &LimeSDROutputGUI::on_extClock_clicked);
+    QObject::connect(ui->transverter, &TransverterButton::clicked, this, &LimeSDROutputGUI::on_transverter_clicked);
+    QObject::connect(ui->sampleRateMode, &QToolButton::toggled, this, &LimeSDROutputGUI::on_sampleRateMode_toggled);
 }

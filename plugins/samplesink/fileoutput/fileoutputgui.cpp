@@ -51,7 +51,11 @@ FileOutputGui::FileOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_tickCount(0),
 	m_lastEngineState(DeviceAPI::StNotStarted)
 {
-	ui->setupUi(this);
+    setAttribute(Qt::WA_DeleteOnClose, true);
+    ui->setupUi(getContents());
+    getContents()->setStyleSheet("#FileOutputGui { border: 1px solid #C06900 }");
+    m_helpURL = "plugins/samplesink/fileoutput/readme.md";
+    ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 	ui->centerFrequency->setValueRange(7, 0, pow(10,7));
@@ -67,6 +71,7 @@ FileOutputGui::FileOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_statusTimer.start(500);
 
 	displaySettings();
+    makeUIConnections();
 
     m_deviceSampleSink = (FileOutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
@@ -315,4 +320,13 @@ void FileOutputGui::tick()
 		FileOutput::MsgConfigureFileOutputStreamTiming* message = FileOutput::MsgConfigureFileOutputStreamTiming::create();
 		m_deviceSampleSink->getInputMessageQueue()->push(message);
 	}
+}
+
+void FileOutputGui::makeUIConnections()
+{
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &FileOutputGui::on_centerFrequency_changed);
+    QObject::connect(ui->sampleRate, &ValueDial::changed, this, &FileOutputGui::on_sampleRate_changed);
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &FileOutputGui::on_startStop_toggled);
+    QObject::connect(ui->showFileDialog, &QPushButton::clicked, this, &FileOutputGui::on_showFileDialog_clicked);
+    QObject::connect(ui->interp, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FileOutputGui::on_interp_currentIndexChanged);
 }
