@@ -72,6 +72,14 @@ QByteArray Preset::serialize() const
     s.writeBool(6, m_presetType == PresetSource);
 	s.writeS32(7, (int) m_presetType);
 	s.writeBool(8, m_showSpectrum);
+    s.writeBlob(9, m_spectrumGeometry);
+    s.writeS32(10, m_spectrumWorkspaceIndex);
+    s.writeBlob(11, m_deviceGeometry);
+    s.writeS32(12, m_deviceWorkspaceIndex);
+    s.writeString(13, m_selectedDevice.m_deviceId);
+    s.writeString(14, m_selectedDevice.m_deviceSerial);
+    s.writeS32(15, m_selectedDevice.m_deviceSequence);
+    s.writeS32(16, m_selectedDevice.m_deviceItemIndex);
 
 	s.writeS32(20, m_deviceConfigs.size());
 
@@ -129,12 +137,21 @@ bool Preset::deserialize(const QByteArray& data)
 		d.readBlob(5, &m_spectrumConfig);
 		d.readBool(6, &tmpBool, true);
         d.readS32(7, &tmp, PresetSource);
-		d.readBool(8, &m_showSpectrum, true);
         m_presetType = tmp < (int) PresetSource ? PresetSource : tmp > (int) PresetMIMO ? PresetMIMO : (PresetType) tmp;
 
         if (m_presetType != PresetMIMO) {
             m_presetType = tmpBool ? PresetSource : PresetSink;
         }
+
+		d.readBool(8, &m_showSpectrum, true);
+        d.readBlob(9, &m_spectrumGeometry);
+        d.readS32(10, &m_spectrumWorkspaceIndex, 0);
+        d.readBlob(11, &m_deviceGeometry);
+        d.readS32(12, &m_deviceWorkspaceIndex, 0);
+        d.readString(13, &m_selectedDevice.m_deviceId);
+        d.readString(14, &m_selectedDevice.m_deviceSerial);
+        d.readS32(15, &m_selectedDevice.m_deviceSequence);
+        d.readS32(16, &m_selectedDevice.m_deviceItemIndex);
 
 //		qDebug("Preset::deserialize: m_group: %s mode: %s m_description: %s m_centerFrequency: %llu",
 //				qPrintable(m_group),
@@ -205,7 +222,7 @@ void Preset::addOrUpdateDeviceConfig(const QString& sourceId,
 		int sourceSequence,
 		const QByteArray& config)
 {
-	DeviceeConfigs::iterator it = m_deviceConfigs.begin();
+	DeviceConfigs::iterator it = m_deviceConfigs.begin();
 
 	for (; it != m_deviceConfigs.end(); ++it)
 	{
@@ -243,7 +260,7 @@ const QByteArray* Preset::findDeviceConfig(
         const QString& deviceSerial,
         int deviceSequence) const
 {
-    DeviceeConfigs::const_iterator it = m_deviceConfigs.begin();
+    DeviceConfigs::const_iterator it = m_deviceConfigs.begin();
 
     for (; it != m_deviceConfigs.end(); ++it)
 	{
@@ -254,46 +271,46 @@ const QByteArray* Preset::findDeviceConfig(
 
     return nullptr;
 }
-
+//_samplingDeviceId, m_samplingDeviceSerial, m_samplingDeviceSequence
 const QByteArray* Preset::findBestDeviceConfig(
-        const QString& sourceId,
-		const QString& sourceSerial,
-		int sourceSequence) const
+        const QString& deviceId,
+		const QString& deviceSerial,
+		int deviceSequence) const
 {
 	// Special case for SoapySDR based on serial (driver name)
-	if (sourceId == "sdrangel.samplesource.soapysdrinput") {
-		return findBestDeviceConfigSoapy(sourceId, sourceSerial);
-	} else if (sourceId == "sdrangel.samplesource.soapysdroutput") {
-		return findBestDeviceConfigSoapy(sourceId, sourceSerial);
+	if (deviceId == "sdrangel.samplesource.soapysdrinput") {
+		return findBestDeviceConfigSoapy(deviceId, deviceSerial);
+	} else if (deviceId == "sdrangel.samplesource.soapysdroutput") {
+		return findBestDeviceConfigSoapy(deviceId, deviceSerial);
 	}
 
-	DeviceeConfigs::const_iterator it = m_deviceConfigs.begin();
-	DeviceeConfigs::const_iterator itFirstOfKind = m_deviceConfigs.end();
-	DeviceeConfigs::const_iterator itMatchSequence = m_deviceConfigs.end();
+	DeviceConfigs::const_iterator it = m_deviceConfigs.begin();
+	DeviceConfigs::const_iterator itFirstOfKind = m_deviceConfigs.end();
+	DeviceConfigs::const_iterator itMatchSequence = m_deviceConfigs.end();
 
 	for (; it != m_deviceConfigs.end(); ++it)
 	{
-		if (it->m_deviceId == sourceId)
+		if (it->m_deviceId == deviceId)
 		{
 			if (itFirstOfKind == m_deviceConfigs.end())
 			{
 				itFirstOfKind = it;
 			}
 
-			if (sourceSerial.isNull() || sourceSerial.isEmpty())
+			if (deviceSerial.isNull() || deviceSerial.isEmpty())
 			{
-				if (it->m_deviceSequence == sourceSequence)
+				if (it->m_deviceSequence == deviceSequence)
 				{
 					break;
 				}
 			}
 			else
 			{
-				if (it->m_deviceSerial == sourceSerial)
+				if (it->m_deviceSerial == deviceSerial)
 				{
 					break;
 				}
-				else if(it->m_deviceSequence == sourceSequence)
+				else if(it->m_deviceSequence == deviceSequence)
 				{
 					itMatchSequence = it;
 				}
@@ -303,13 +320,13 @@ const QByteArray* Preset::findBestDeviceConfig(
 
 	if (it == m_deviceConfigs.end()) // no exact match
 	{
-		if (itMatchSequence != m_deviceConfigs.end()) // match sequence ?
+		if (itMatchSequence != m_deviceConfigs.end()) // match device type and sequence ?
 		{
 			qDebug("Preset::findBestDeviceConfig: sequence matched: id: %s ser: %s seq: %d",
 				qPrintable(itMatchSequence->m_deviceId), qPrintable(itMatchSequence->m_deviceSerial), itMatchSequence->m_deviceSequence);
 			return &(itMatchSequence->m_config);
 		}
-		else if (itFirstOfKind != m_deviceConfigs.end()) // match source type ?
+		else if (itFirstOfKind != m_deviceConfigs.end()) // match just device type ?
 		{
 			qDebug("Preset::findBestDeviceConfig: first of kind matched: id: %s ser: %s seq: %d",
 				qPrintable(itFirstOfKind->m_deviceId), qPrintable(itFirstOfKind->m_deviceSerial), itFirstOfKind->m_deviceSequence);
@@ -337,8 +354,8 @@ const QByteArray* Preset::findBestDeviceConfigSoapy(const QString& sourceId, con
 		return 0; // unable to process
 	}
 
-	DeviceeConfigs::const_iterator it = m_deviceConfigs.begin();
-	DeviceeConfigs::const_iterator itFirstOfKind = m_deviceConfigs.end();
+	DeviceConfigs::const_iterator it = m_deviceConfigs.begin();
+	DeviceConfigs::const_iterator itFirstOfKind = m_deviceConfigs.end();
 
 	for (; it != m_deviceConfigs.end(); ++it)
 	{

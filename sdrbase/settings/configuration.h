@@ -26,6 +26,7 @@
 #include <QMetaType>
 
 #include "featuresetpreset.h"
+#include "preset.h"
 #include "export.h"
 
 class SDRBASE_API WorkspaceConfiguration {
@@ -47,10 +48,12 @@ public:
 	const QString& getDescription() const { return m_description; }
 
     int getNumberOfWorkspaces() const;
-    FeatureSetPreset& getFeatureSetPreset() { return m_featureSetPreset; }
-    const FeatureSetPreset& getFeatureSetPreset() const { return m_featureSetPreset; }
     QList<QByteArray>& getWorkspaceGeometries() { return m_workspaceGeometries; }
     const QList<QByteArray>& getWorkspaceGeometries() const { return m_workspaceGeometries; }
+    FeatureSetPreset& getFeatureSetPreset() { return m_featureSetPreset; }
+    const FeatureSetPreset& getFeatureSetPreset() const { return m_featureSetPreset; }
+    QList<Preset>& getDeviceSetPresets() { return m_deviceSetPresets; }
+    const QList<Preset>& getDeviceSetPresets() const { return m_deviceSetPresets; }
     void clearData();
 
 	static bool configCompare(const Configuration *p1, Configuration *p2)
@@ -70,6 +73,7 @@ private:
 	QString m_description;
     QList<QByteArray> m_workspaceGeometries;
     FeatureSetPreset m_featureSetPreset;
+    QList<Preset> m_deviceSetPresets;
 };
 
 Q_DECLARE_METATYPE(const Configuration*)

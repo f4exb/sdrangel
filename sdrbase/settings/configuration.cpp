@@ -44,11 +44,19 @@ QByteArray Configuration::serialize() const
     QByteArray b = m_featureSetPreset.serialize();
     s.writeBlob(3, b);
 
-    s.writeS32(100, m_workspaceGeometries.size());
+    int nitems = m_workspaceGeometries.size() < 99 ? m_workspaceGeometries.size() : 99;
+    s.writeS32(100, nitems);
 
-	for(int i = 0; i < m_workspaceGeometries.size(); i++) {
+	for (int i = 0; i < nitems; i++) {
 		s.writeBlob(101 + i, m_workspaceGeometries[i]);
 	}
+
+    nitems = m_deviceSetPresets.size() < 99 ? m_deviceSetPresets.size() : 99;
+    s.writeS32(200, nitems);
+
+    for (int i = 0; i < nitems; i++) {
+        s.writeBlob(201 + i, m_deviceSetPresets[i].serialize());
+    }
 
 	return s.final();
 }
@@ -72,13 +80,22 @@ bool Configuration::deserialize(const QByteArray& data)
         d.readBlob(3, &b);
         m_featureSetPreset.deserialize(b);
 
-        int nbWorkspaces;
-        d.readS32(100, &nbWorkspaces, 0);
+        int nitems;
+        d.readS32(100, &nitems, 0);
 
-        for(int i = 0; i < nbWorkspaces; i++)
+        for(int i = 0; i < nitems; i++)
         {
             m_workspaceGeometries.push_back(QByteArray());
             d.readBlob(101 + i, &m_workspaceGeometries.back());
+        }
+
+        d.readS32(200, &nitems, 0);
+
+        for (int i = 0; i < nitems; i++)
+        {
+            d.readBlob(201 + i, &b);
+            m_deviceSetPresets.push_back(Preset());
+            m_deviceSetPresets.back().deserialize(b);
         }
 
 		return true;
@@ -97,6 +114,7 @@ int Configuration::getNumberOfWorkspaces() const
 
 void Configuration::clearData()
 {
+    m_deviceSetPresets.clear();
     m_featureSetPreset.clearFeatures();
     m_workspaceGeometries.clear();
 }

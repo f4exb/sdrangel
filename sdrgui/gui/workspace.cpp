@@ -73,13 +73,13 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     m_vline1->setFrameShadow(QFrame::Sunken);
 
     m_addFeatureButton = new QPushButton();
-    QIcon addFeatureIcon(":/tool.png");
+    QIcon addFeatureIcon(":/tool_add.png");
     m_addFeatureButton->setIcon(addFeatureIcon);
     m_addFeatureButton->setToolTip("Add features");
     m_addFeatureButton->setFixedSize(20, 20);
 
     m_featurePresetsButton = new QPushButton();
-    QIcon presetsIcon(":/star.png");
+    QIcon presetsIcon(":/tool_star.png");
     m_featurePresetsButton->setIcon(presetsIcon);
     m_featurePresetsButton->setToolTip("Feature presets");
     m_featurePresetsButton->setFixedSize(20, 20);

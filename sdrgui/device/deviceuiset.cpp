@@ -25,31 +25,35 @@
 #include "gui/glspectrum.h"
 #include "gui/glspectrumgui.h"
 #include "gui/channelwindow.h"
+#include "gui/workspace.h"
 #include "device/devicegui.h"
 #include "device/deviceset.h"
+#include "device/deviceapi.h"
 #include "plugin/pluginapi.h"
 #include "plugin/plugininterface.h"
 #include "channel/channelutils.h"
 #include "channel/channelapi.h"
 #include "channel/channelgui.h"
+#include "mainspectrum/mainspectrumgui.h"
 #include "settings/preset.h"
 
 #include "deviceuiset.h"
 
-DeviceUISet::DeviceUISet(int tabIndex, DeviceSet *deviceSet)
+DeviceUISet::DeviceUISet(int deviceSetIndex, DeviceSet *deviceSet)
 {
     m_spectrum = new GLSpectrum;
     m_spectrumVis = deviceSet->m_spectrumVis;
     m_spectrumVis->setGLSpectrum(m_spectrum);
     m_spectrumGUI = new GLSpectrumGUI;
     m_spectrumGUI->setBuddies(m_spectrumVis, m_spectrum);
+    m_mainSpectrumGUI = new MainSpectrumGUI(m_spectrum, m_spectrumGUI);
     m_channelWindow = new ChannelWindow;
     m_deviceAPI = nullptr;
     m_deviceGUI = nullptr;
     m_deviceSourceEngine = nullptr;
     m_deviceSinkEngine = nullptr;
     m_deviceMIMOEngine = nullptr;
-    m_deviceTabIndex = tabIndex;
+    m_deviceSetIndex = deviceSetIndex;
     m_deviceSet = deviceSet;
     m_nbAvailableRxChannels = 0;   // updated at enumeration for UI selector
     m_nbAvailableTxChannels = 0;   // updated at enumeration for UI selector
@@ -65,8 +69,9 @@ DeviceUISet::DeviceUISet(int tabIndex, DeviceSet *deviceSet)
 DeviceUISet::~DeviceUISet()
 {
     delete m_channelWindow;
-    delete m_spectrumGUI;
-    delete m_spectrum;
+    delete m_mainSpectrumGUI;
+    // delete m_spectrumGUI; // done above
+    // delete m_spectrum;
 }
 
 void DeviceUISet::setSpectrumScalingFactor(float scalef)
@@ -156,6 +161,60 @@ ChannelAPI *DeviceUISet::getChannelAt(int channelIndex)
     return m_deviceSet->getChannelAt(channelIndex);
 }
 
+void DeviceUISet::loadDeviceSetSettings(
+    const Preset* preset,
+    PluginAPI *pluginAPI,
+    QList<Workspace*> *workspaces,
+    Workspace *currentWorkspace
+)
+{
+    (void) workspaces; // TODO: use for channels
+    (void) currentWorkspace; // TODO: use for channels
+
+    m_spectrumGUI->deserialize(preset->getSpectrumConfig());
+    m_deviceAPI->loadSamplingDeviceSettings(preset);
+
+    if (m_deviceSourceEngine) { // source device
+        loadRxChannelSettings(preset, pluginAPI);
+    } else if (m_deviceSinkEngine) { // sink device
+        loadTxChannelSettings(preset, pluginAPI);
+    } else if (m_deviceMIMOEngine) { // MIMO device
+        loadMIMOChannelSettings(preset, pluginAPI);
+    }
+}
+
+void DeviceUISet::saveDeviceSetSettings(Preset* preset) const
+{
+    preset->setSpectrumConfig(m_spectrumGUI->serialize());
+    preset->setSpectrumWorkspaceIndex(m_mainSpectrumGUI->getWorkspaceIndex());
+    preset->setSpectrumGeometry(m_mainSpectrumGUI->saveGeometry());
+    preset->setSelectedDevice(Preset::SelectedDevice{
+        m_deviceAPI->getSamplingDeviceId(),
+        m_deviceAPI->getSamplingDeviceSerial(),
+        (int) m_deviceAPI->getSamplingDeviceSequence(),
+        (int) m_deviceAPI->getDeviceItemIndex()
+    });
+    preset->clearChannels();
+
+    if (m_deviceSourceEngine) // source device
+    {
+        preset->setSourcePreset();
+        saveRxChannelSettings(preset);
+    }
+    else if (m_deviceSinkEngine) // sink device
+    {
+        preset->setSinkPreset();
+        saveTxChannelSettings(preset);
+    }
+    else if (m_deviceMIMOEngine) // MIMO device
+    {
+        preset->setMIMOPreset();
+        saveMIMOChannelSettings(preset);
+    }
+
+    m_deviceAPI->saveSamplingDeviceSettings(preset);
+}
+
 void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginAPI)
 {
     if (preset->isSourcePreset())
@@ -224,7 +283,7 @@ void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginA
     }
 }
 
-void DeviceUISet::saveRxChannelSettings(Preset *preset)
+void DeviceUISet::saveRxChannelSettings(Preset *preset) const
 {
     if (preset->isSourcePreset())
     {
@@ -308,7 +367,7 @@ void DeviceUISet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginA
 
 }
 
-void DeviceUISet::saveTxChannelSettings(Preset *preset)
+void DeviceUISet::saveTxChannelSettings(Preset *preset) const
 {
     if (preset->isSinkPreset())
     {
@@ -392,7 +451,7 @@ void DeviceUISet::loadMIMOChannelSettings(const Preset *preset, PluginAPI *plugi
     }
 }
 
-void DeviceUISet::saveMIMOChannelSettings(Preset *preset)
+void DeviceUISet::saveMIMOChannelSettings(Preset *preset) const
 {
     if (preset->isMIMOPreset())
     {

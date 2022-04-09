@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2020 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2022 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -16,43 +16,43 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QCloseEvent>
-#include <QStyle>
 #include <QLabel>
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QSizeGrip>
-#include <QTextEdit>
 #include <QObjectCleanupHandler>
 #include <QDesktopServices>
 
 #include "mainwindow.h"
+#include "gui/glspectrum.h"
+#include "gui/glspectrumgui.h"
 #include "gui/workspaceselectiondialog.h"
-#include "featuregui.h"
+#include "mainspectrumgui.h"
 
-FeatureGUI::FeatureGUI(QWidget *parent) :
+MainSpectrumGUI::MainSpectrumGUI(GLSpectrum *spectrum, GLSpectrumGUI *spectrumGUI, QWidget *parent) :
     QMdiSubWindow(parent),
-    m_featureIndex(0),
-    m_contextMenuType(ContextMenuNone),
+    m_spectrum(spectrum),
+    m_spectrumGUI(spectrumGUI),
+    m_deviceType(DeviceRx),
+    m_deviceSetIndex(0),
     m_drag(false)
 {
-    qDebug("FeatureGUI::FeatureGUI");
+    qDebug("MainSpectrumGUI::MainSpectrumGUI: %p", parent);
     setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
 
     m_indexLabel = new QLabel();
-    m_indexLabel->setFixedSize(40, 16);
+    m_indexLabel->setFixedSize(32, 16);
     m_indexLabel->setStyleSheet("QLabel { background-color: rgb(128, 128, 128); qproperty-alignment: AlignCenter; }");
-    m_indexLabel->setText(tr("F:%1").arg(m_featureIndex));
-    m_indexLabel->setToolTip("Feature index");
+    m_indexLabel->setText(tr("X:%1").arg(m_deviceSetIndex));
+    m_indexLabel->setToolTip("Device type and set index");
 
-    m_settingsButton = new QPushButton();
-    QIcon settingsIcon(":/gear.png");
-    m_settingsButton->setIcon(settingsIcon);
-    m_settingsButton->setToolTip("Common settings");
+    m_spacerLabel = new QLabel();
+    m_spacerLabel->setFixedWidth(5);
 
     m_titleLabel = new QLabel();
-    m_titleLabel->setText("Feature");
-    m_titleLabel->setToolTip("Feature name");
+    m_titleLabel->setText("Device");
+    m_titleLabel->setToolTip("Device identification");
     m_titleLabel->setFixedHeight(20);
     m_titleLabel->setMinimumWidth(20);
     m_titleLabel->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
@@ -61,7 +61,7 @@ FeatureGUI::FeatureGUI(QWidget *parent) :
     m_helpButton->setFixedSize(20, 20);
     QIcon helpIcon(":/help.png");
     m_helpButton->setIcon(helpIcon);
-    m_helpButton->setToolTip("Show feature documentation in browser");
+    m_helpButton->setToolTip("Show spectrum window documentation in browser");
 
     m_moveButton = new QPushButton();
     m_moveButton->setFixedSize(20, 20);
@@ -75,40 +75,43 @@ FeatureGUI::FeatureGUI(QWidget *parent) :
     m_shrinkButton->setIcon(shrinkIcon);
     m_shrinkButton->setToolTip("Adjust window to minimum size");
 
-    m_closeButton = new QPushButton();
-    m_closeButton->setFixedSize(20, 20);
-    QIcon closeIcon(":/cross.png");
-    m_closeButton->setIcon(closeIcon);
-    m_closeButton->setToolTip("Close feature");
+    m_hideButton = new QPushButton();
+    m_hideButton->setFixedSize(20, 20);
+    QIcon hideIcon(":/hide.png");
+    m_hideButton->setIcon(hideIcon);
+    m_hideButton->setToolTip("Hide device");
 
     m_statusLabel = new QLabel();
     // m_statusLabel->setText("OK"); // for future use
-    m_statusLabel->setFixedHeight(20);
-    m_statusLabel->setMinimumWidth(20);
+    m_statusLabel->setFixedHeight(10);
+    m_statusLabel->setMinimumWidth(10);
     m_statusLabel->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
-    m_statusLabel->setToolTip("Feature status");
+    // m_statusLabel->setToolTip("Spectrum status");
 
     m_layouts = new QVBoxLayout();
     m_layouts->setContentsMargins(0, 4, 0, 4);
-    m_layouts->setSpacing(2);
+    m_layouts->setSpacing(0);
 
     m_topLayout = new QHBoxLayout();
     m_topLayout->setContentsMargins(0, 0, 0, 0);
     m_topLayout->addWidget(m_indexLabel);
-    m_topLayout->addWidget(m_settingsButton);
+    m_topLayout->addWidget(m_spacerLabel);
     m_topLayout->addWidget(m_titleLabel);
     // m_topLayout->addStretch(1);
     m_topLayout->addWidget(m_helpButton);
     m_topLayout->addWidget(m_moveButton);
     m_topLayout->addWidget(m_shrinkButton);
-    m_topLayout->addWidget(m_closeButton);
+    m_topLayout->addWidget(m_hideButton);
     m_sizeGripTopRight = new QSizeGrip(this);
     m_sizeGripTopRight->setStyleSheet("QSizeGrip { background-color: rgb(128, 128, 128); width: 10px; height: 10px; }");
     m_sizeGripTopRight->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     m_topLayout->addWidget(m_sizeGripTopRight, 0, Qt::AlignTop | Qt::AlignRight);
 
-    m_centerLayout = new QHBoxLayout();
-    m_centerLayout->addWidget(&m_rollupContents);
+    m_spectrumLayout = new QHBoxLayout();
+    m_spectrumLayout->addWidget(spectrum);
+    spectrum->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+    m_spectrumGUILayout = new QHBoxLayout();
+    m_spectrumGUILayout->addWidget(spectrumGUI);
 
     m_bottomLayout = new QHBoxLayout();
     m_bottomLayout->setContentsMargins(0, 0, 0, 0);
@@ -116,52 +119,58 @@ FeatureGUI::FeatureGUI(QWidget *parent) :
     m_sizeGripBottomRight = new QSizeGrip(this);
     m_sizeGripBottomRight->setStyleSheet("QSizeGrip { background-color: rgb(128, 128, 128); width: 10px; height: 10px; }");
     m_sizeGripBottomRight->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    // m_bottomLayout->addStretch(1);
+    //m_bottomLayout->addStretch(1);
     m_bottomLayout->addWidget(m_sizeGripBottomRight, 0, Qt::AlignBottom | Qt::AlignRight);
 
     m_layouts->addLayout(m_topLayout);
-    m_layouts->addLayout(m_centerLayout);
+    m_layouts->addLayout(m_spectrumLayout);
+    m_layouts->addLayout(m_spectrumGUILayout);
     m_layouts->addLayout(m_bottomLayout);
 
     QObjectCleanupHandler().add(layout());
     setLayout(m_layouts);
 
-    connect(m_settingsButton, SIGNAL(clicked()), this, SLOT(activateSettingsDialog()));
     connect(m_helpButton, SIGNAL(clicked()), this, SLOT(showHelp()));
     connect(m_moveButton, SIGNAL(clicked()), this, SLOT(openMoveToWorkspaceDialog()));
     connect(m_shrinkButton, SIGNAL(clicked()), this, SLOT(shrinkWindow()));
     connect(this, SIGNAL(forceShrink()), this, SLOT(shrinkWindow()));
-    connect(m_closeButton, SIGNAL(clicked()), this, SLOT(close()));
+    connect(m_hideButton, SIGNAL(clicked()), this, SLOT(hide()));
+    connect(this, SIGNAL(forceClose()), this, SLOT(close()));
+
+    shrinkWindow();
 }
 
-FeatureGUI::~FeatureGUI()
+MainSpectrumGUI::~MainSpectrumGUI()
 {
-    qDebug("FeatureGUI::~FeatureGUI");
+    qDebug("MainSpectrumGUI::~MainSpectrumGUI");
+    m_spectrumLayout->removeWidget(m_spectrum);
+    m_spectrumGUILayout->removeWidget(m_spectrumGUI);
     delete m_sizeGripBottomRight;
     delete m_bottomLayout;
-    delete m_centerLayout;
+    delete m_spectrumGUILayout;
+    delete m_spectrumLayout;
     delete m_sizeGripTopRight;
     delete m_topLayout;
     delete m_layouts;
     delete m_statusLabel;
-    delete m_closeButton;
+    delete m_hideButton;
     delete m_shrinkButton;
     delete m_moveButton;
     delete m_helpButton;
     delete m_titleLabel;
-    delete m_settingsButton;
+    delete m_spacerLabel;
     delete m_indexLabel;
-    qDebug("FeatureGUI::~FeatureGUI: end");
+    qDebug("MainSpectrumGUI::~MainSpectrumGUI: end");
 }
 
-void FeatureGUI::closeEvent(QCloseEvent *event)
+void MainSpectrumGUI::closeEvent(QCloseEvent *event)
 {
-    qDebug("FeatureGUI::closeEvent");
+    qDebug("MainSpectrumGUI::closeEvent");
     emit closing();
     event->accept();
 }
 
-void FeatureGUI::mousePressEvent(QMouseEvent* event)
+void MainSpectrumGUI::mousePressEvent(QMouseEvent* event)
 {
     if ((event->button() == Qt::LeftButton) && isOnMovingPad())
     {
@@ -171,7 +180,7 @@ void FeatureGUI::mousePressEvent(QMouseEvent* event)
     }
 }
 
-void FeatureGUI::mouseMoveEvent(QMouseEvent* event)
+void MainSpectrumGUI::mouseMoveEvent(QMouseEvent* event)
 {
     if ((event->buttons() & Qt::LeftButton) && isOnMovingPad())
     {
@@ -180,14 +189,7 @@ void FeatureGUI::mouseMoveEvent(QMouseEvent* event)
     }
 }
 
-void FeatureGUI::activateSettingsDialog()
-{
-    QPoint p = mapFromGlobal(QCursor::pos());
-    m_contextMenuType = ContextMenuChannelSettings;
-    emit customContextMenuRequested(p);
-}
-
-void FeatureGUI::showHelp()
+void MainSpectrumGUI::showHelp()
 {
     if (m_helpURL.isEmpty()) {
         return;
@@ -204,7 +206,7 @@ void FeatureGUI::showHelp()
     QDesktopServices::openUrl(QUrl(url));
 }
 
-void FeatureGUI::openMoveToWorkspaceDialog()
+void MainSpectrumGUI::openMoveToWorkspaceDialog()
 {
     int numberOfWorkspaces = MainWindow::getInstance()->getNumberOfWorkspaces();
     WorkspaceSelectionDialog dialog(numberOfWorkspaces, this);
@@ -215,25 +217,74 @@ void FeatureGUI::openMoveToWorkspaceDialog()
     }
 }
 
-void FeatureGUI::shrinkWindow()
+void MainSpectrumGUI::shrinkWindow()
 {
-    qDebug("FeatureGUI::shrinkWindow");
+    qDebug("MainSpectrumGUI::shrinkWindow");
     adjustSize();
+    resize(width(), 360);
 }
 
-void FeatureGUI::setTitle(const QString& title)
+void MainSpectrumGUI::setTitle(const QString& title)
 {
     m_titleLabel->setText(title);
 }
 
-bool FeatureGUI::isOnMovingPad()
+QString MainSpectrumGUI::getTitle() const
 {
-    return m_indexLabel->underMouse() || m_titleLabel->underMouse() || m_statusLabel->underMouse();
+    return m_titleLabel->text();
 }
 
-void FeatureGUI::setIndex(int index)
+bool MainSpectrumGUI::isOnMovingPad()
 {
-    m_featureIndex = index;
-    m_indexLabel->setText(tr("F:%1").arg(m_featureIndex));
+    return m_indexLabel->underMouse() ||
+        m_spacerLabel->underMouse() ||
+        m_titleLabel->underMouse() ||
+        m_statusLabel->underMouse();
 }
 
+void MainSpectrumGUI::setIndex(int index)
+{
+    m_deviceSetIndex = index;
+    m_indexLabel->setText(tr("%1:%2").arg(getDeviceTypeTag()).arg(m_deviceSetIndex));
+}
+
+void MainSpectrumGUI::setDeviceType(DeviceType type)
+{
+    m_deviceType = type;
+    m_indexLabel->setStyleSheet(tr("QLabel { background-color: %1; qproperty-alignment: AlignCenter; }").arg(getDeviceTypeColor()));
+}
+
+void MainSpectrumGUI::setToolTip(const QString& tooltip)
+{
+    m_titleLabel->setToolTip(tooltip);
+}
+
+QString MainSpectrumGUI::getDeviceTypeColor()
+{
+    switch(m_deviceType)
+    {
+        case DeviceRx:
+            return "rgb(0, 128, 0)";
+        case DeviceTx:
+            return "rgb(204, 0, 0)";
+        case DeviceMIMO:
+            return "rgb(0, 0, 192)";
+        default:
+            return "rgb(128, 128, 128)";
+    }
+}
+
+QString MainSpectrumGUI::getDeviceTypeTag()
+{
+    switch(m_deviceType)
+    {
+        case DeviceRx:
+            return "R";
+        case DeviceTx:
+            return "T";
+        case DeviceMIMO:
+            return "M";
+        default:
+            return "X";
+    }
+}

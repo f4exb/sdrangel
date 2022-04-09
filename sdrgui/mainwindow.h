@@ -40,6 +40,7 @@ class DSPDeviceSourceEngine;
 class DSPDeviceSinkEngine;
 class Indicator;
 class GLSpectrumGUI;
+class MainSpectrumGUI;
 class PluginAPI;
 class ChannelGUI;
 class ChannelMarker;
@@ -123,8 +124,8 @@ private:
 	QProcess *m_fftWisdomProcess;
 
 	void loadSettings();
-	void loadPresetSettings(const Preset* preset, int tabIndex);
-	void savePresetSettings(Preset* preset, int tabIndex);
+	void loadDeviceSetPresetSettings(const Preset* preset, int deviceSetIndex);
+	void saveDeviceSetPresetSettings(Preset* preset, int deviceSetIndex);
 	void loadFeatureSetPresetSettings(const FeatureSetPreset* preset, int featureSetIndex, Workspace *workspace);
 	void saveFeatureSetPresetSettings(FeatureSetPreset* preset, int featureSetIndex);
 
@@ -145,26 +146,23 @@ private:
     void sampleSourceChange(int deviceSetIndex, int newDeviceIndex, Workspace *workspace);
 	void sampleSinkChange(int deviceSetIndex, int newDeviceIndex, Workspace *workspace);
 	void sampleMIMOChange(int deviceSetIndex, int newDeviceIndex, Workspace *workspace);
-    void sampleSourceImplement(
+    void sampleSourceCreate(
         int deviceSetIndex,
         int deviceIndex,
         DeviceAPI *deviceAPI,
-        DeviceUISet *deviceUISet,
-        Workspace *workspace
+        DeviceUISet *deviceUISet
     );
-    void sampleSinkImplement(
+    void sampleSinkCreate(
         int deviceSetIndex,
         int deviceIndex,
         DeviceAPI *deviceAPI,
-        DeviceUISet *deviceUISet,
-        Workspace *workspace
+        DeviceUISet *deviceUISet
     );
-    void sampleMIMOImplement(
+    void sampleMIMOCreate(
         int deviceSetIndex,
         int deviceIndex,
         DeviceAPI *deviceAPI,
-        DeviceUISet *deviceUISet,
-        Workspace *workspace
+        DeviceUISet *deviceUISet
     );
     void deleteFeature(int featureSetIndex, int featureIndex);
 
@@ -209,6 +207,7 @@ private slots:
     void featureMove(FeatureGUI *gui, int wsIndexDestnation);
     void openFeaturePresetsDialog(QPoint p, Workspace *workspace);
     void deviceMove(DeviceGUI *gui, int wsIndexDestnation);
+    void mainSpectrumMove(MainSpectrumGUI *gui, int wsIndexDestnation);
     void on_action_Quick_Start_triggered();
     void on_action_Main_Window_triggered();
 	void on_action_Loaded_Plugins_triggered();

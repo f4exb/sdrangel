@@ -62,6 +62,9 @@ public:
     int getRxSamplingDeviceIndex(const QString& deviceId, int sequence, int deviceItemIndex);
     int getTxSamplingDeviceIndex(const QString& deviceId, int sequence, int deviceItemIndex);
     int getMIMOSamplingDeviceIndex(const QString& deviceId, int sequence);
+    int getBestRxSamplingDeviceIndex(const QString& deviceId, const QString& serial, int sequence, int deviceItemIndex);
+    int getBestTxSamplingDeviceIndex(const QString& deviceId, const QString& serial, int sequence, int deviceItemIndex);
+    int getBestMIMOSamplingDeviceIndex(const QString& deviceId, const QString& serial, int sequence);
 
 private:
     struct DeviceEnumeration
@@ -91,6 +94,13 @@ private:
     bool isRxEnumerated(const QString& deviceHwId, int deviceSequence);
     bool isTxEnumerated(const QString& deviceHwId, int deviceSequence);
     bool isMIMOEnumerated(const QString& deviceHwId, int deviceSequence);
+    int getBestSamplingDeviceIndex(
+        const DevicesEnumeration& devicesEnumeration,
+        const QString& deviceId,
+        const QString& serial,
+        int sequence,
+        int deviceItemIndex
+    );
 };
 
 #endif /* SDRBASE_DEVICE_DEVICEENUMERATOR_H_ */

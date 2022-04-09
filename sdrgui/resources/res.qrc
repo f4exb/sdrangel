@@ -117,6 +117,8 @@
     <file>tx.png</file>
     <file>mimo.png</file>
     <file>tool.png</file>
+    <file>tool_add.png</file>
+    <file>tool_star.png</file>
     <file>gear.png</file>
     <file>corner_topleft.png</file>
     <file>corner_topright.png</file>
@@ -130,6 +132,8 @@
     <file>shrink.png</file>
     <file>exit.png</file>
     <file>hide.png</file>
+    <file>channels.png</file>
+    <file>channels_add.png</file>
     <file>LiberationMono-Regular.ttf</file>
     <file>LiberationSans-Regular.ttf</file>
   </qresource>

@@ -61,7 +61,7 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
     m_displayGrid(true),
     m_displayGridIntensity(5),
     m_displayTraceIntensity(50),
-    m_invertedWaterfall(false),
+    m_invertedWaterfall(true),
     m_displayMaxHold(false),
     m_currentSpectrum(nullptr),
     m_displayCurrent(false),
@@ -69,7 +69,7 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
     m_rightMargin(0),
     m_topMargin(0),
     m_frequencyScaleHeight(0),
-    m_histogramHeight(20),
+    m_histogramHeight(80),
     m_waterfallHeight(0),
     m_bottomMargin(0),
     m_waterfallBuffer(nullptr),
@@ -93,6 +93,7 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
     m_calibrationInterpMode(SpectrumSettings::CalibInterpLinear),
     m_messageQueueToGUI(nullptr)
 {
+    setObjectName("GLSpectrum");
     setAutoFillBackground(false);
     setAttribute(Qt::WA_OpaquePaintEvent, true);
     setAttribute(Qt::WA_NoSystemBackground, true);
@@ -100,7 +101,7 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 
     setMinimumSize(200, 200);
 
-    m_waterfallShare = 0.66;
+    m_waterfallShare = 0.5;
 
     for (int i = 0; i <= 239; i++)
     {

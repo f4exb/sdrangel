@@ -52,13 +52,8 @@ public:
         const FeatureSetPreset* preset,
         PluginAPI *pluginAPI,
         WebAPIAdapterInterface *apiAdapter,
-        Workspace *workspace
-    );
-    void loadFeatureSetSettings(
-        const FeatureSetPreset* preset,
-        PluginAPI *pluginAPI,
-        WebAPIAdapterInterface *apiAdapter,
-        QList<Workspace*>& workspaces
+        QList<Workspace*> *workspaces,
+        Workspace *currentWorkspace
     );
     void saveFeatureSetSettings(FeatureSetPreset* preset);
     void freeFeatures();

@@ -62,14 +62,22 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
 
     m_addChannelsButton = new QPushButton();
     m_addChannelsButton->setFixedSize(20, 20);
-    QIcon addChannelsIcon(":/create.png");
+    QIcon addChannelsIcon(":/channels_add.png");
     m_addChannelsButton->setIcon(addChannelsIcon);
     m_addChannelsButton->setToolTip("Add channels");
+
+    m_deviceSetPresetsButton = new QPushButton();
+    m_deviceSetPresetsButton->setFixedSize(20, 20);
+    QIcon deviceSetPresetsIcon(":/star.png");
+    m_deviceSetPresetsButton->setIcon(deviceSetPresetsIcon);
+    m_deviceSetPresetsButton->setToolTip("Device set presets");
 
     m_titleLabel = new QLabel();
     m_titleLabel->setText("Device");
     m_titleLabel->setToolTip("Device identification");
     m_titleLabel->setFixedHeight(20);
+    m_titleLabel->setMinimumWidth(20);
+    m_titleLabel->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
 
     m_helpButton = new QPushButton();
     m_helpButton->setFixedSize(20, 20);
@@ -98,7 +106,21 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
     m_statusLabel = new QLabel();
     // m_statusLabel->setText("OK"); // for future use
     m_statusLabel->setFixedHeight(20);
+    m_statusLabel->setMinimumWidth(20);
+    m_statusLabel->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
     m_statusLabel->setToolTip("Device status");
+
+    m_showSpectrumButton = new QPushButton();
+    m_showSpectrumButton->setFixedSize(20, 20);
+    QIcon showSpectrumIcon(":/dsb.png");
+    m_showSpectrumButton->setIcon(showSpectrumIcon);
+    m_showSpectrumButton->setToolTip("Show main spectrum");
+
+    m_showAllChannelsButton = new QPushButton();
+    m_showAllChannelsButton->setFixedSize(20, 20);
+    QIcon showAllChannelsIcon(":/channels.png");
+    m_showAllChannelsButton->setIcon(showAllChannelsIcon);
+    m_showAllChannelsButton->setToolTip("Show all channels");
 
     m_layouts = new QVBoxLayout();
     m_layouts->setContentsMargins(0, 4, 0, 4);
@@ -110,14 +132,16 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
     m_topLayout->addWidget(m_changeDeviceButton);
     m_topLayout->addWidget(m_reloadDeviceButton);
     m_topLayout->addWidget(m_addChannelsButton);
+    m_topLayout->addWidget(m_deviceSetPresetsButton);
     m_topLayout->addWidget(m_titleLabel);
-    m_topLayout->addStretch(1);
+    // m_topLayout->addStretch(1);
     m_topLayout->addWidget(m_helpButton);
     m_topLayout->addWidget(m_moveButton);
     m_topLayout->addWidget(m_shrinkButton);
     m_topLayout->addWidget(m_closeButton);
     m_sizeGripTopRight = new QSizeGrip(this);
     m_sizeGripTopRight->setStyleSheet("QSizeGrip { background-color: rgb(128, 128, 128); width: 10px; height: 10px; }");
+    m_sizeGripTopRight->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     m_topLayout->addWidget(m_sizeGripTopRight, 0, Qt::AlignTop | Qt::AlignRight);
 
     m_centerLayout = new QHBoxLayout();
@@ -126,10 +150,13 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
 
     m_bottomLayout = new QHBoxLayout();
     m_bottomLayout->setContentsMargins(0, 0, 0, 0);
+    m_bottomLayout->addWidget(m_showSpectrumButton);
+    m_bottomLayout->addWidget(m_showAllChannelsButton);
     m_bottomLayout->addWidget(m_statusLabel);
     m_sizeGripBottomRight = new QSizeGrip(this);
     m_sizeGripBottomRight->setStyleSheet("QSizeGrip { background-color: rgb(128, 128, 128); width: 10px; height: 10px; }");
-    m_bottomLayout->addStretch(1);
+    m_sizeGripBottomRight->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    // m_bottomLayout->addStretch(1);
     m_bottomLayout->addWidget(m_sizeGripBottomRight, 0, Qt::AlignBottom | Qt::AlignRight);
 
     m_layouts->addLayout(m_topLayout);
@@ -158,12 +185,15 @@ DeviceGUI::~DeviceGUI()
     delete m_sizeGripTopRight;
     delete m_topLayout;
     delete m_layouts;
+    delete m_showAllChannelsButton;
+    delete m_showSpectrumButton;
     delete m_statusLabel;
     delete m_closeButton;
     delete m_shrinkButton;
     delete m_moveButton;
     delete m_helpButton;
     delete m_titleLabel;
+    delete m_deviceSetPresetsButton;
     delete m_addChannelsButton;
     delete m_reloadDeviceButton;
     delete m_changeDeviceButton;

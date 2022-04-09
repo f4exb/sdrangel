@@ -44,7 +44,8 @@ public:
     void setFeatureUISet(FeatureUISet *featureUISet) { m_featureUISet = featureUISet; }
     void setPluginAPI(PluginAPI *pluginAPI) { m_pluginAPI = pluginAPI; }
     void setWebAPIAdapter(WebAPIAdapterInterface *apiAdapter) { m_apiAdapter = apiAdapter; }
-    void setWorkspace(Workspace *workspace) { m_workspace = workspace; }
+    void setCurrentWorkspace(Workspace *workspace) { m_currentWorkspace = workspace; }
+    void setWorkspaces(QList<Workspace*> *workspaces) { m_workspaces = workspaces; }
     void populateTree();
     bool wasPresetLoaded() const { return m_presetLoaded; }
 
@@ -59,7 +60,8 @@ private:
     FeatureUISet *m_featureUISet;
     PluginAPI *m_pluginAPI;
     WebAPIAdapterInterface *m_apiAdapter;
-    Workspace *m_workspace;
+    Workspace *m_currentWorkspace;
+    QList<Workspace*> *m_workspaces;
     bool m_presetLoaded;
 
     QTreeWidgetItem* addPresetToTree(const FeatureSetPreset* preset);

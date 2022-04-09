@@ -91,6 +91,8 @@ set(sdrgui_SOURCES
     feature/featuregui.cpp
     feature/featureuiset.cpp
 
+    mainspectrum/mainspectrumgui.cpp
+
     soapygui/discreterangegui.cpp
     soapygui/intervalrangegui.cpp
     soapygui/itemsettinggui.cpp
@@ -191,6 +193,8 @@ set(sdrgui_HEADERS
 
     feature/featuregui.h
     feature/featureuiset.h
+
+    mainspectrum/mainspectrumgui.h
 
     soapygui/discreterangegui.h
     soapygui/intervalrangegui.h

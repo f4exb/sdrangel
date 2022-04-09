@@ -27,6 +27,7 @@
 class SpectrumVis;
 class GLSpectrum;
 class GLSpectrumGUI;
+class MainSpectrumGUI;
 class ChannelWindow;
 class DeviceAPI;
 class DeviceSet;
@@ -39,6 +40,7 @@ class DeviceGUI;
 class ChannelAPI;
 class ChannelGUI;
 class Preset;
+class Workspace;
 
 namespace SWGSDRangel {
     class SWGGLSpectrum;
@@ -53,6 +55,7 @@ public:
     SpectrumVis *m_spectrumVis;
     GLSpectrum *m_spectrum;
     GLSpectrumGUI *m_spectrumGUI;
+    MainSpectrumGUI *m_mainSpectrumGUI;
     ChannelWindow *m_channelWindow;
     DeviceAPI *m_deviceAPI;
     DeviceGUI *m_deviceGUI;
@@ -60,8 +63,12 @@ public:
     DSPDeviceSinkEngine *m_deviceSinkEngine;
     DSPDeviceMIMOEngine *m_deviceMIMOEngine;
     QByteArray m_mainWindowState;
+    QString m_selectedDeviceId;
+    QString m_selectedDeviceSerial;
+    int m_selectedDeviceSequence;
+    int m_selectedDeviceItemImdex;
 
-    DeviceUISet(int tabIndex, DeviceSet *deviceSet);
+    DeviceUISet(int deviceSetIndex, DeviceSet *deviceSet);
     ~DeviceUISet();
 
     GLSpectrum *getSpectrum() { return m_spectrum; }     //!< Direct spectrum getter
@@ -73,12 +80,15 @@ public:
     void freeChannels();
     void deleteChannel(int channelIndex);
     ChannelAPI *getChannelAt(int channelIndex);
-    void loadRxChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
-    void saveRxChannelSettings(Preset* preset);
-    void loadTxChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
-    void saveTxChannelSettings(Preset* preset);
-    void loadMIMOChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
-    void saveMIMOChannelSettings(Preset* preset);
+
+    void loadDeviceSetSettings(
+        const Preset* preset,
+        PluginAPI *pluginAPI,
+        QList<Workspace*> *workspaces,
+        Workspace *currentWorkspace
+    );
+    void saveDeviceSetSettings(Preset* preset) const;
+
     void registerRxChannelInstance(ChannelAPI *channelAPI, ChannelGUI* channelGUI);
     void registerTxChannelInstance(ChannelAPI *channelAPI, ChannelGUI* channelGUI);
     void registerChannelInstance(ChannelAPI *channelAPI, ChannelGUI* channelGUI);
@@ -129,11 +139,18 @@ private:
     // ChannelInstanceRegistrations m_rxChannelInstanceRegistrations;
     // ChannelInstanceRegistrations m_txChannelInstanceRegistrations;
     ChannelInstanceRegistrations m_channelInstanceRegistrations;
-    int m_deviceTabIndex;
+    int m_deviceSetIndex;
     DeviceSet *m_deviceSet;
     int m_nbAvailableRxChannels;   //!< Number of Rx channels available for selection
     int m_nbAvailableTxChannels;   //!< Number of Tx channels available for selection
     int m_nbAvailableMIMOChannels; //!< Number of MIMO channels available for selection
+
+    void loadRxChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
+    void loadTxChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
+    void loadMIMOChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
+    void saveRxChannelSettings(Preset* preset) const;
+    void saveTxChannelSettings(Preset* preset) const;
+    void saveMIMOChannelSettings(Preset* preset) const;
 
 private slots:
     void handleChannelGUIClosing(ChannelGUI* channelGUI);
