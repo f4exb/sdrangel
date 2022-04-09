@@ -48,13 +48,15 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
     ui->setupUi(this);
 
     // Use the custom flow layout for the 3 main horizontal layouts (lines)
+    ui->verticalLayout->removeItem(ui->Line4Layout);
     ui->verticalLayout->removeItem(ui->Line3Layout);
     ui->verticalLayout->removeItem(ui->Line2Layout);
     ui->verticalLayout->removeItem(ui->Line1Layout);
     FlowLayout *flowLayout = new FlowLayout(nullptr, 1, 1, 1);
+    flowLayout->addItem(ui->Line3Layout);
     flowLayout->addItem(ui->Line1Layout);
     flowLayout->addItem(ui->Line2Layout);
-    flowLayout->addItem(ui->Line3Layout);
+    flowLayout->addItem(ui->Line4Layout);
     ui->verticalLayout->addItem(flowLayout);
 
     on_linscale_toggled(false);
