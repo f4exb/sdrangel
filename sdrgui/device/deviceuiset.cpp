@@ -174,6 +174,10 @@ void DeviceUISet::loadDeviceSetSettings(
     m_spectrumGUI->deserialize(preset->getSpectrumConfig());
     m_deviceAPI->loadSamplingDeviceSettings(preset);
 
+    if (!preset->getShowSpectrum()) {
+        m_mainSpectrumGUI->hide();
+    }
+
     if (m_deviceSourceEngine) { // source device
         loadRxChannelSettings(preset, pluginAPI);
     } else if (m_deviceSinkEngine) { // sink device
@@ -188,6 +192,7 @@ void DeviceUISet::saveDeviceSetSettings(Preset* preset) const
     preset->setSpectrumConfig(m_spectrumGUI->serialize());
     preset->setSpectrumWorkspaceIndex(m_mainSpectrumGUI->getWorkspaceIndex());
     preset->setSpectrumGeometry(m_mainSpectrumGUI->saveGeometry());
+    preset->setShowSpectrum(m_spectrumGUI->isVisible());
     preset->setSelectedDevice(Preset::SelectedDevice{
         m_deviceAPI->getSamplingDeviceId(),
         m_deviceAPI->getSamplingDeviceSerial(),

@@ -125,6 +125,7 @@ private slots:
     void deviceReload();
     void showHelp();
     void openMoveToWorkspaceDialog();
+    void showSpectrumHandler();
 
 signals:
     void forceClose();
@@ -133,6 +134,7 @@ signals:
     void forceShrink();
     void deviceAdd(int deviceType, int deviceIndex);
     void deviceChange(int newDeviceIndex);
+    void showSpectrum(int deviceSetIndex);
 };
 
 #endif // INCLUDE_DEVICEGUI_H

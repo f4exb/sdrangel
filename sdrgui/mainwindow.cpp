@@ -516,6 +516,12 @@ void MainWindow::sampleSourceCreate(
         this,
         [=](int newDeviceIndex){ this->sampleDeviceChangeHandler(deviceGUI, newDeviceIndex); }
     );
+    QObject::connect(
+        deviceGUI,
+        &DeviceGUI::showSpectrum,
+        this,
+        [=](int deviceSetIndex){ this->mainSpectrumShow(this->m_deviceUIs[deviceSetIndex]->m_mainSpectrumGUI); }
+    );
     deviceAPI->getSampleSource()->setMessageQueueToGUI(deviceGUI->getInputMessageQueue());
     deviceUISet->m_deviceGUI = deviceGUI;
     const PluginInterface::SamplingDevice *selectedDevice = DeviceEnumerator::instance()->getRxSamplingDevice(selectedDeviceIndex);
@@ -2499,6 +2505,11 @@ void MainWindow::mainSpectrumMove(MainSpectrumGUI *gui, int wsIndexDestnation)
     m_workspaces[wsIndexOrigin]->removeFromMdiArea(gui);
     gui->setWorkspaceIndex(wsIndexDestnation);
     m_workspaces[wsIndexDestnation]->addToMdiArea(gui);
+}
+
+void MainWindow::mainSpectrumShow(MainSpectrumGUI *gui)
+{
+    gui->show();
 }
 
 void MainWindow::openFeaturePresetsDialog(QPoint p, Workspace *workspace)

@@ -208,6 +208,7 @@ private slots:
     void openFeaturePresetsDialog(QPoint p, Workspace *workspace);
     void deviceMove(DeviceGUI *gui, int wsIndexDestnation);
     void mainSpectrumMove(MainSpectrumGUI *gui, int wsIndexDestnation);
+    void mainSpectrumShow(MainSpectrumGUI *gui);
     void on_action_Quick_Start_triggered();
     void on_action_Main_Window_triggered();
 	void on_action_Loaded_Plugins_triggered();

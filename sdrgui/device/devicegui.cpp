@@ -174,6 +174,7 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
     connect(this, SIGNAL(forceShrink()), this, SLOT(shrinkWindow()));
     connect(m_closeButton, SIGNAL(clicked()), this, SLOT(close()));
     connect(this, SIGNAL(forceClose()), this, SLOT(close()));
+    connect(m_showSpectrumButton, SIGNAL(clicked()), this, SLOT(showSpectrumHandler()));
 }
 
 DeviceGUI::~DeviceGUI()
@@ -272,6 +273,11 @@ void DeviceGUI::openMoveToWorkspaceDialog()
     if (dialog.hasChanged()) {
         emit moveToWorkspace(dialog.getSelectedIndex());
     }
+}
+
+void DeviceGUI::showSpectrumHandler()
+{
+    emit showSpectrum(m_deviceSetIndex);
 }
 
 void DeviceGUI::shrinkWindow()
