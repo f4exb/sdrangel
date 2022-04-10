@@ -47,7 +47,8 @@ AirspyHFGui::AirspyHFGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource = (AirspyHFInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
     ui->setupUi(getContents());
-    getContents()->setStyleSheet("#AirspyHFGui { border: 1px solid #C06900 }");
+    getContents()->setStyleSheet(QString(tr("#AirspyHFGui { border: 1px solid %1 }")
+        .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesource/airspyhf/readme.md";
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 	updateFrequencyLimits();

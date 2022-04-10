@@ -63,7 +63,8 @@ LocalOutputGui::LocalOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_paletteWhiteText.setColor(QPalette::WindowText, Qt::white);
 
     ui->setupUi(getContents());
-    getContents()->setStyleSheet("#LocalOutputGui { border: 1px solid #C06900 }");
+    getContents()->setStyleSheet(QString(tr("#LocalOutputGui { border: 1px solid %1 }")
+        .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesink/localoutput/readme.md";
 
     CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStop);

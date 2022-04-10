@@ -68,7 +68,8 @@ RemoteOutputSinkGui::RemoteOutputSinkGui(DeviceUISet *deviceUISet, QWidget* pare
     m_paletteWhiteText.setColor(QPalette::WindowText, Qt::white);
 
     ui->setupUi(getContents());
-    getContents()->setStyleSheet("#RemoteOutputGui { border: 1px solid #C06900 }");
+    getContents()->setStyleSheet(QString(tr("#RemoteOutputGui { border: 1px solid %1 }")
+        .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesink/remoteoutput/readme.md";
 
 	connect(&(m_deviceUISet->m_deviceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));

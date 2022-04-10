@@ -68,7 +68,8 @@ KiwiSDRGui::KiwiSDRGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_statusColors.push_back("rgb(232, 85, 232)");  // Disconnected (magenta)
 
     ui->setupUi(getContents());
-    getContents()->setStyleSheet("#KiwiSDRGui { border: 1px solid #C06900 }");
+    getContents()->setStyleSheet(QString(tr("#KiwiSDRGui { border: 1px solid %1 }")
+        .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesource/kiwisdr/readme.md";
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->centerFrequency->setValueRange(7, 0, 9999999);

@@ -57,7 +57,8 @@ FileInputGUI::FileInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
 {
     setAttribute(Qt::WA_DeleteOnClose, true);
     ui->setupUi(getContents());
-    getContents()->setStyleSheet("#FileInputGUI { border: 1px solid #C06900 }");
+    getContents()->setStyleSheet(QString(tr("#FileInputGUI { border: 1px solid %1 }")
+        .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesource/fileinput/readme.md";
 	ui->crcLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
 

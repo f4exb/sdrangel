@@ -47,7 +47,8 @@ USRPOutputGUI::USRPOutputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_usrpOutput = (USRPOutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
 
     ui->setupUi(getContents());
-    getContents()->setStyleSheet("#USRPOutputGUI { border: 1px solid #C06900 }");
+    getContents()->setStyleSheet(QString(tr("#USRPOutputGUI { border: 1px solid %1 }")
+        .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesink/usrpoutput/readme.md";
 
     float minF, maxF;

@@ -70,7 +70,8 @@ PlutoSDRMIMOGUI::PlutoSDRMIMOGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     qDebug("PlutoSDRMIMOGui::PlutoSDRMIMOGui");
     setAttribute(Qt::WA_DeleteOnClose, true);
     ui->setupUi(getContents());
-    getContents()->setStyleSheet("#PlutoSDRMIMOGUI { border: 1px solid #C06900 }");
+    getContents()->setStyleSheet(QString(tr("#PlutoSDRMIMOGUI { border: 1px solid %1 }")
+        .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplemimo/plutosdrmimo/readme.md";
     m_sampleMIMO = (PlutoSDRMIMO*) m_deviceUISet->m_deviceAPI->getSampleMIMO();
 

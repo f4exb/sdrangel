@@ -46,7 +46,8 @@ FCDProPlusGui::FCDProPlusGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource = (FCDProPlusInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
     ui->setupUi(getContents());
-    getContents()->setStyleSheet("#FCDProPlusGui { border: 1px solid #C06900 }");
+    getContents()->setStyleSheet(QString(tr("#FCDProPlusGui { border: 1px solid %1 }")
+        .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesource/fcdproplus/readme.md";
 
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));

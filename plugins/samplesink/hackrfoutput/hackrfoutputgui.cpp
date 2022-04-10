@@ -49,7 +49,8 @@ HackRFOutputGui::HackRFOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_deviceSampleSink = (HackRFOutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
 
     ui->setupUi(getContents());
-    getContents()->setStyleSheet("#HackRFOutputGui { border: 1px solid #C06900 }");
+    getContents()->setStyleSheet(QString(tr("#HackRFOutputGui { border: 1px solid %1 }")
+        .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesink/hackrfoutput/readme.md";
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 	ui->centerFrequency->setValueRange(7, 0U, 7250000U);

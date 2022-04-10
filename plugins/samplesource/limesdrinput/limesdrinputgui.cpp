@@ -50,7 +50,8 @@ LimeSDRInputGUI::LimeSDRInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_limeSDRInput = (LimeSDRInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
     ui->setupUi(getContents());
-    getContents()->setStyleSheet("#LimeSDRInputGUI { border: 1px solid #C06900 }");
+    getContents()->setStyleSheet(QString(tr("#LimeSDRInputGUI { border: 1px solid %1 }")
+        .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesource/limesdrinput/readme.md";
 
     float minF, maxF;

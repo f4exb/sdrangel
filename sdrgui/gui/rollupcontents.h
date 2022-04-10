@@ -31,10 +31,7 @@ class SDRGUI_API RollupContents : public QWidget {
 public:
     RollupContents(QWidget* parent = nullptr);
     void setHighlighted(bool highlighted);
-    // void setChannelWidget(bool channelWidget) { m_channelWidget = channelWidget; }
-    // QByteArray saveState(int version = 0) const;
     void saveState(RollupState& state) const;
-    // bool restoreState(const QByteArray& state, int version = 0);
     void restoreState(const RollupState& state);
     int arrangeRollups();
 
@@ -51,7 +48,7 @@ protected:
     QString m_helpURL;
 
     void paintEvent(QPaintEvent*);
-    int paintRollup(QWidget* rollup, int pos, QPainter* p, bool last, const QColor& frame);
+    int paintRollup(QWidget* rollup, int pos, QPainter* p, bool last, const QColor& frameColor);
 
     void resizeEvent(QResizeEvent* size);
     void mousePressEvent(QMouseEvent* event);

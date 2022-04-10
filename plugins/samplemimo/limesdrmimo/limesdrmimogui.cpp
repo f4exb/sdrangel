@@ -70,7 +70,8 @@ LimeSDRMIMOGUI::LimeSDRMIMOGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     qDebug("LimeSDRMIMOGUI::LimeSDRMIMOGUI");
     setAttribute(Qt::WA_DeleteOnClose, true);
     ui->setupUi(getContents());
-    getContents()->setStyleSheet("#LimeSDRMIMOGUI { border: 1px solid #C06900 }");
+    getContents()->setStyleSheet(QString(tr("#LimeSDRMIMOGUI { border: 1px solid %1 }")
+        .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplemimo/limesdrmimo/readme.md";
     m_limeSDRMIMO = (LimeSDRMIMO*) m_deviceUISet->m_deviceAPI->getSampleMIMO();
 

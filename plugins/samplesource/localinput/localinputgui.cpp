@@ -76,7 +76,8 @@ LocalInputGui::LocalInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
 	m_startingTimeStampms = 0;
     ui->setupUi(getContents());
-    getContents()->setStyleSheet("#LocalInputGui { border: 1px solid #C06900 }");
+    getContents()->setStyleSheet(QString(tr("#LocalInputGui { border: 1px solid %1 }")
+        .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesource/localinput/readme.md";
 
     CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStop);

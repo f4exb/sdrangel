@@ -44,7 +44,8 @@ AudioInputGui::AudioInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource = (AudioInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
     ui->setupUi(getContents());
-    getContents()->setStyleSheet("#AudioInputGui { border: 1px solid #C06900 }");
+    getContents()->setStyleSheet(QString(tr("#AudioInputGui { border: 1px solid %1 }")
+        .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesource/audioinput/readme.md";
 
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));

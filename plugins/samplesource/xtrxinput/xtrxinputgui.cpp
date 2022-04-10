@@ -51,7 +51,8 @@ XTRXInputGUI::XTRXInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_XTRXInput = (XTRXInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
     ui->setupUi(getContents());
-    getContents()->setStyleSheet("#XTRXInputGUI { border: 1px solid #C06900 }");
+    getContents()->setStyleSheet(QString(tr("#XTRXInputGUI { border: 1px solid %1 }")
+        .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesource/xtrxinput/readme.md";
 
     float minF, maxF, stepF;

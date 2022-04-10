@@ -62,7 +62,8 @@ SoapySDRInputGui::SoapySDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_sampleSource = (SoapySDRInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
     ui->setupUi(getContents());
-    getContents()->setStyleSheet("#SoapySDRInputGui { border: 1px solid #C06900 }");
+    getContents()->setStyleSheet(QString(tr("#SoapySDRInputGui { border: 1px solid %1 }")
+        .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesource/soapysdrinput/readme.md";
 
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));

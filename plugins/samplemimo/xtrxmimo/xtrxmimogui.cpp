@@ -67,7 +67,8 @@ XTRXMIMOGUI::XTRXMIMOGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     qDebug("XTRXMIMOGUI::XTRXMIMOGUI");
     setAttribute(Qt::WA_DeleteOnClose, true);
     ui->setupUi(getContents());
-    getContents()->setStyleSheet("#XTRXMIMOGUI { border: 1px solid #C06900 }");
+    getContents()->setStyleSheet(QString(tr("#XTRXMIMOGUI { border: 1px solid %1 }")
+        .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplemimo/xtrxmimo/readme.md";
     m_xtrxMIMO = (XTRXMIMO*) m_deviceUISet->m_deviceAPI->getSampleMIMO();
 

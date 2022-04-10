@@ -41,44 +41,6 @@ RollupContents::RollupContents(QWidget* parent) :
     setAttribute(Qt::WA_OpaquePaintEvent, true);
 }
 
-// QByteArray RollupWidget::saveState(int version) const
-// {
-//     QByteArray state;
-//     QDataStream stream(&state, QIODevice::WriteOnly);
-//     int count = 0;
-
-//     for (int i = 0; i < children().count(); ++i)
-//     {
-//         QWidget* r = qobject_cast<QWidget*>(children()[i]);
-
-//         if (r) {
-//             count++;
-//         }
-//     }
-
-//     stream << VersionMarker;
-//     stream << version;
-//     stream << count;
-
-//     for (int i = 0; i < children().count(); ++i)
-//     {
-//         QWidget* r = qobject_cast<QWidget*>(children()[i]);
-
-//         if (r)
-//         {
-//             stream << r->objectName();
-
-//             if (r->isHidden()) {
-//                 stream << (int) 0;
-//             } else {
-//                 stream << (int) 1;
-//             }
-//         }
-//     }
-
-//     return state;
-// }
-
 void RollupContents::saveState(RollupState &state) const
 {
     QList<RollupState::RollupChildState>& childrenStates = state.getChildren();
@@ -93,64 +55,6 @@ void RollupContents::saveState(RollupState &state) const
         }
     }
 }
-
-// bool RollupWidget::restoreState(const QByteArray& state, int version)
-// {
-//     if (state.isEmpty()) {
-//         return false;
-//     }
-
-//     QByteArray sd = state;
-//     QDataStream stream(&sd, QIODevice::ReadOnly);
-//     int marker, v;
-//     stream >> marker;
-//     stream >> v;
-
-//     if ((stream.status() != QDataStream::Ok) || (marker != VersionMarker) || (v != version)) {
-//         return false;
-//     }
-
-//     int count;
-//     stream >> count;
-
-//     if (stream.status() != QDataStream::Ok) {
-//         return false;
-//     }
-
-//     for (int i = 0; i < count; ++i)
-//     {
-//         QString name;
-//         int visible;
-
-//         stream >> name;
-//         stream >> visible;
-
-//         if (stream.status() != QDataStream::Ok) {
-//             return false;
-//         }
-
-//         for (int j = 0; j < children().count(); ++j)
-//         {
-//             QWidget* r = qobject_cast<QWidget*>(children()[j]);
-
-//             if (r)
-//             {
-//                 if (r->objectName() == name)
-//                 {
-//                     if (visible) {
-//                         r->show();
-//                     } else {
-//                         r->hide();
-//                     }
-
-//                     break;
-//                 }
-//             }
-//         }
-//     }
-
-//     return true;
-// }
 
 void RollupContents::restoreState(const RollupState& state)
 {
@@ -284,7 +188,7 @@ int RollupContents::arrangeRollups()
 void RollupContents::paintEvent(QPaintEvent*)
 {
     QPainter p(this);
-    QColor frame = palette().highlight().color();
+    QColor frameColor = palette().highlight().color().darker(115);
 
     // Eigenbau
     QFontMetrics fm(font());
@@ -292,82 +196,20 @@ void RollupContents::paintEvent(QPaintEvent*)
     p.setRenderHint(QPainter::Antialiasing, true);
 
     // Ecken (corners)
-    p.setPen(Qt::NoPen);
-    p.setBrush(palette().base());
-    p.drawRect(0, 0, 5, 5);
-    p.drawRect(width() - 5, 0, 5, 5);
-    p.drawRect(0, height() - 5, 5, 5);
-    p.drawRect(width() - 5, height() - 5, 5, 5);
+    // p.setPen(Qt::NoPen);
+    // p.setBrush(palette().base());
+    // p.drawRect(0, 0, 5, 5);
+    // p.drawRect(width() - 5, 0, 5, 5);
+    // p.drawRect(0, height() - 5, 5, 5);
+    // p.drawRect(width() - 5, height() - 5, 5, 5);
 
     // Rahmen (frame)
-    p.setPen(m_highlighted ? Qt::white : frame);
+    p.setPen(m_highlighted ? Qt::white : frameColor);
     p.setBrush(palette().window());
     QRectF r(rect());
     r.adjust(0.5, 0.5, -0.5, -0.5);
-    p.drawRoundedRect(r, 3.0, 3.0, Qt::AbsoluteSize);
-
-    // // Titel-Hintergrund (Title background)
-    // p.setPen(Qt::NoPen);
-    // p.setBrush(m_titleColor);
-    // QPainterPath path;
-    // path.moveTo(1.5, fm.height() + 2.5);
-    // path.lineTo(width() - 1.5, fm.height() + 2.5);
-    // path.lineTo(width() - 1.5, 3.5);
-    // path.arcTo(QRectF(width() - 3.5, 0, 2.5, 2.5), 270, -90);
-    // path.lineTo(3.5, 1.5);
-    // path.arcTo(QRectF(1.5, 2.5, 2.5, 2.5), 90, 90);
-    // p.drawPath(path);
-
-    // // Titel-Abschlusslinie (Title closing line)
-    // p.setPen(frame);
-    // p.drawLine(QPointF(0.5, 2 + fm.height() + 1.5), QPointF(width() - 1.5, 2 + fm.height() + 1.5));
-
-    // // Aktiv-Button links
-    // p.setPen(QPen(palette().windowText().color(), 1.0));
-    // p.setBrush(palette().light());
-    // p.drawRoundedRect(QRectF(3.5, 3.5, fm.ascent(), fm.ascent()), 2.0, 2.0, Qt::AbsoluteSize);
-    // p.setPen(QPen(Qt::white, 1.0));
-    // p.drawText(QRectF(3.5, 2.5, fm.ascent(), fm.ascent()),  Qt::AlignCenter, "c");
-
-    // if (m_channelWidget)
-    // {
-    //     // Stromkanal-Button links (Current channel)
-    //     p.setPen(QPen(palette().windowText().color(), 1.0));
-    //     p.setBrush(palette().light());
-    //     p.drawRoundedRect(QRectF(5.5 + fm.ascent(), 2.5, fm.ascent() + 2.0, fm.ascent() + 2.0), 2.0, 2.0, Qt::AbsoluteSize);
-    //     p.setPen(QPen(Qt::white, 1.0));
-    //     p.drawText(QRectF(5.5 + fm.ascent(), 2.5, fm.ascent() + 2.0, fm.ascent() + 2.0),  Qt::AlignCenter, m_streamIndicator);
-    // }
-
-    // // Help button
-    // if (!m_helpURL.isEmpty())
-    // {
-    //     p.setRenderHint(QPainter::Antialiasing, true);
-    //     p.setPen(QPen(palette().windowText().color(), 1.0));
-    //     p.setBrush(palette().light());
-    //     r = QRectF(width() - 2*(3.5 + fm.ascent()), 3.5, fm.ascent(), fm.ascent());
-    //     p.drawRoundedRect(r, 2.0, 2.0, Qt::AbsoluteSize);
-    //     p.drawText(QRectF(width() - 2*(3.5 + fm.ascent()), 5, fm.ascent(), fm.ascent() - 2), Qt::AlignCenter, "?");
-    // }
-
-    // //p.drawLine(r.topLeft() + QPointF(1, 1), r.bottomRight() + QPointF(-1, -1));
-    // //p.drawLine(r.bottomLeft() + QPointF(1, -1), r.topRight() + QPointF(-1, 1));
-
-    // // Schließen-Button rechts (Close button on the right)
-    // p.setRenderHint(QPainter::Antialiasing, true);
-    // p.setPen(QPen(palette().windowText().color(), 1.0));
-    // p.setBrush(palette().light());
-    // r = QRectF(width() - 3.5 - fm.ascent(), 3.5, fm.ascent(), fm.ascent());
-    // p.drawRoundedRect(r, 2.0, 2.0, Qt::AbsoluteSize);
-    // p.setPen(QPen(palette().windowText().color(), 1.5));
-    // p.drawLine(r.topLeft() + QPointF(1, 1), r.bottomRight() + QPointF(-1, -1));
-    // p.drawLine(r.bottomLeft() + QPointF(1, -1), r.topRight() + QPointF(-1, 1));
-
-    // // Titel
-    // //p.setPen(palette().highlightedText().color());
-    // p.setPen(m_titleTextColor);
-    // p.drawText(QRect(2 + 2*fm.height() + 2, 2, width() - 6 - 3*fm.height(), fm.height()),
-    //     fm.elidedText(windowTitle(), Qt::ElideMiddle, width() - 6 - 3*fm.height(), 0));
+    // p.drawRoundedRect(r, 3.0, 3.0, Qt::AbsoluteSize);
+    p.drawRect(r);
 
     // Rollups
     int pos = 2; // fm.height() + 4;
@@ -396,11 +238,11 @@ void RollupContents::paintEvent(QPaintEvent*)
             }
         }
 
-        pos += paintRollup(qobject_cast<QWidget*>(*w), pos, &p, n == c.end(), frame);
+        pos += paintRollup(qobject_cast<QWidget*>(*w), pos, &p, n == c.end(), frameColor);
     }
 }
 
-int RollupContents::paintRollup(QWidget* rollup, int pos, QPainter* p, bool last, const QColor& frame)
+int RollupContents::paintRollup(QWidget* rollup, int pos, QPainter* p, bool last, const QColor& frameColor)
 {
     QFontMetrics fm(font());
     int height = 1;
@@ -418,7 +260,7 @@ int RollupContents::paintRollup(QWidget* rollup, int pos, QPainter* p, bool last
     {
         if (!last)
         {
-            p->setPen(frame);
+            p->setPen(frameColor);
             p->drawLine(QPointF(1.5, pos + fm.height() + 1.5), QPointF(width() - 1.5, pos + fm.height() + 1.5));
             height++;
         }
@@ -455,7 +297,7 @@ int RollupContents::paintRollup(QWidget* rollup, int pos, QPainter* p, bool last
     if (!rollup->isHidden() && (!last))
     {
         // Rollup-Abschlusslinie
-        p->setPen(frame);
+        p->setPen(frameColor);
         p->drawLine(QPointF(1.5, pos + fm.height() + rollup->height() + 6.5),
                     QPointF(width() - 1.5, pos + fm.height() + rollup->height() + 6.5));
         height += rollup->height() + 4;
@@ -474,44 +316,6 @@ void RollupContents::resizeEvent(QResizeEvent* size)
 void RollupContents::mousePressEvent(QMouseEvent* event)
 {
     QFontMetrics fm(font());
-
-    // // menu box left
-    // if (QRectF(3.5, 3.5, fm.ascent(), fm.ascent()).contains(event->pos()))
-    // {
-    //     m_contextMenuType = ContextMenuChannelSettings;
-    //     emit customContextMenuRequested(event->globalPos());
-    //     return;
-    // }
-
-    // if (m_channelWidget)
-    // {
-    //     // Stream channel menu left
-    //     if (QRectF(5.5 + fm.ascent(), 2.5, fm.ascent() + 2.0, fm.ascent() + 2.0).contains(event->pos()))
-    //     {
-    //         m_contextMenuType = ContextMenuStreamSettings;
-    //         emit customContextMenuRequested(event->globalPos());
-    //         return;
-    //     }
-    // }
-
-    // // help button
-    // if(!m_helpURL.isEmpty() && QRectF(width() - 2*(3.5 + fm.ascent()), 3.5, fm.ascent(), fm.ascent()).contains(event->pos()))
-    // {
-    //     QString url;
-    //     if (m_helpURL.startsWith("http")) {
-    //         url = m_helpURL;
-    //     } else {
-    //         url = QString("https://github.com/f4exb/sdrangel/blob/master/%1").arg(m_helpURL); // Something like "plugins/channelrx/chanalyzer/readme.md"
-    //     }
-    //     QDesktopServices::openUrl(QUrl(url));
-    //     return;
-    // }
-
-    // // close button right
-    // if(QRectF(width() - 3.5 - fm.ascent(), 3.5, fm.ascent(), fm.ascent()).contains(event->pos())) {
-    //     close();
-    //     return;
-    // }
 
     // check if we need to change a rollup widget
     int pos = 2; // fm.height() + 4;

@@ -48,7 +48,8 @@ AirspyGui::AirspyGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource = (AirspyInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
     ui->setupUi(getContents());
-    getContents()->setStyleSheet("#AirspyGui { border: 1px solid #C06900 }");
+    getContents()->setStyleSheet(QString(tr("#AirspyGui { border: 1px solid %1 }")
+        .arg(palette().highlight().color().darker(115).name())));
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 	updateFrequencyLimits();
 

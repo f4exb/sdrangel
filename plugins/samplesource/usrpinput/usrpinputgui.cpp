@@ -51,7 +51,8 @@ USRPInputGUI::USRPInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_usrpInput = (USRPInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
     ui->setupUi(getContents());
-    getContents()->setStyleSheet("#USRPInputGUI { border: 1px solid #C06900 }");
+    getContents()->setStyleSheet(QString(tr("#USRPInputGUI { border: 1px solid %1 }")
+        .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesource/usrpinput/readme.md";
 
     float minF, maxF;

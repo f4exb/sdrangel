@@ -50,7 +50,8 @@ TestSinkGui::TestSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
 {
     setAttribute(Qt::WA_DeleteOnClose, true);
     ui->setupUi(getContents());
-    getContents()->setStyleSheet("#TestSinkGui { border: 1px solid #C06900 }");
+    getContents()->setStyleSheet(QString(tr("#TestSinkGui { border: 1px solid %1 }")
+        .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesink/testsink/readme.md";
     m_sampleSink = (TestSinkOutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
 

@@ -46,7 +46,8 @@ LimeSDROutputGUI::LimeSDROutputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_limeSDROutput = (LimeSDROutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
 
     ui->setupUi(getContents());
-    getContents()->setStyleSheet("#LimeSDROutputGUI { border: 1px solid #C06900 }");
+    getContents()->setStyleSheet(QString(tr("#LimeSDROutputGUI { border: 1px solid %1 }")
+        .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesink/limesdroutput/readme.md";
 
     float minF, maxF;

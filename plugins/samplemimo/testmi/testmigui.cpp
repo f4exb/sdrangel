@@ -61,7 +61,8 @@ TestMIGui::TestMIGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_deviceSampleRates.push_back(m_settings.m_streams[1].m_sampleRate / (1<<m_settings.m_streams[1].m_log2Decim));
 
     ui->setupUi(getContents());
-    getContents()->setStyleSheet("#TestMIGui { border: 1px solid #C06900 }");
+    getContents()->setStyleSheet(QString(tr("#TestMIGui { border: 1px solid %1 }")
+        .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplemimo/testmi/readme.md";
     ui->spectrumSource->addItem("0");
     ui->spectrumSource->addItem("1");

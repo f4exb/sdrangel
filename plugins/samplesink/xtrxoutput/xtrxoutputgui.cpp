@@ -48,7 +48,8 @@ XTRXOutputGUI::XTRXOutputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_XTRXOutput = (XTRXOutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
 
     ui->setupUi(getContents());
-    getContents()->setStyleSheet("#XTRXOutputGUI { border: 1px solid #C06900 }");
+    getContents()->setStyleSheet(QString(tr("#XTRXOutputGUI { border: 1px solid %1 }")
+        .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesink/xtrxoutput/readme.md";
 
     float minF, maxF, stepF;

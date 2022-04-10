@@ -49,7 +49,8 @@ PlutoSDROutputGUI::PlutoSDROutputGUI(DeviceUISet *deviceUISet, QWidget* parent) 
     m_sampleSink = (PlutoSDROutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
 
     ui->setupUi(getContents());
-    getContents()->setStyleSheet("#PlutoSDROutputGUI { border: 1px solid #C06900 }");
+    getContents()->setStyleSheet(QString(tr("#PlutoSDROutputGUI { border: 1px solid %1 }")
+        .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesink/plutosdroutput/readme.md";
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     updateFrequencyLimits();
