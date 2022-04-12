@@ -16,12 +16,314 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QCloseEvent>
+#include <QStyle>
+#include <QLabel>
+#include <QPushButton>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QSizeGrip>
+#include <QTextEdit>
+#include <QObjectCleanupHandler>
+#include <QDesktopServices>
+
+#include "mainwindow.h"
+#include "gui/workspaceselectiondialog.h"
 
 #include "channelgui.h"
+
+ChannelGUI::ChannelGUI(QWidget *parent) :
+    QMdiSubWindow(parent),
+    m_deviceType(DeviceRx),
+    m_deviceSetIndex(0),
+    m_channelIndex(0),
+    m_contextMenuType(ContextMenuNone),
+    m_drag(false)
+{
+    qDebug("ChannelGUI::ChannelGUI");
+    setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
+
+    m_indexLabel = new QLabel();
+    m_indexLabel->setFixedSize(50, 16);
+    m_indexLabel->setStyleSheet("QLabel { background-color: rgb(128, 128, 128); qproperty-alignment: AlignCenter; }");
+    m_indexLabel->setText(tr("X%1:%2").arg(m_deviceSetIndex).arg(m_channelIndex));
+    m_indexLabel->setToolTip("Channel index");
+
+    m_settingsButton = new QPushButton();
+    QIcon settingsIcon(":/gear.png");
+    m_settingsButton->setIcon(settingsIcon);
+    m_settingsButton->setToolTip("Common settings");
+
+    m_titleLabel = new QLabel();
+    m_titleLabel->setText("Channel");
+    m_titleLabel->setToolTip("Channel name");
+    m_titleLabel->setFixedHeight(20);
+    m_titleLabel->setMinimumWidth(20);
+    m_titleLabel->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
+
+    m_helpButton = new QPushButton();
+    m_helpButton->setFixedSize(20, 20);
+    QIcon helpIcon(":/help.png");
+    m_helpButton->setIcon(helpIcon);
+    m_helpButton->setToolTip("Show channel documentation in browser");
+
+    m_moveButton = new QPushButton();
+    m_moveButton->setFixedSize(20, 20);
+    QIcon moveIcon(":/exit.png");
+    m_moveButton->setIcon(moveIcon);
+    m_moveButton->setToolTip("Move to workspace");
+
+    m_shrinkButton = new QPushButton();
+    m_shrinkButton->setFixedSize(20, 20);
+    QIcon shrinkIcon(":/shrink.png");
+    m_shrinkButton->setIcon(shrinkIcon);
+    m_shrinkButton->setToolTip("Adjust window to minimum size");
+
+    m_hideButton = new QPushButton();
+    m_hideButton->setFixedSize(20, 20);
+    QIcon hideIcon(":/hide.png");
+    m_hideButton->setIcon(hideIcon);
+    m_hideButton->setToolTip("Hide channel");
+
+    m_closeButton = new QPushButton();
+    m_closeButton->setFixedSize(20, 20);
+    QIcon closeIcon(":/cross.png");
+    m_closeButton->setIcon(closeIcon);
+    m_closeButton->setToolTip("Close channel");
+
+    m_statusLabel = new QLabel();
+    // m_statusLabel->setText("OK"); // for future use
+    m_statusLabel->setFixedHeight(20);
+    m_statusLabel->setMinimumWidth(20);
+    m_statusLabel->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
+    m_statusLabel->setToolTip("Channel status");
+
+    m_layouts = new QVBoxLayout();
+    m_layouts->setContentsMargins(0, 4, 0, 4);
+    m_layouts->setSpacing(2);
+
+    m_topLayout = new QHBoxLayout();
+    m_topLayout->setContentsMargins(0, 0, 0, 0);
+    m_topLayout->addWidget(m_indexLabel);
+    m_topLayout->addWidget(m_settingsButton);
+    m_topLayout->addWidget(m_titleLabel);
+    // m_topLayout->addStretch(1);
+    m_topLayout->addWidget(m_helpButton);
+    m_topLayout->addWidget(m_moveButton);
+    m_topLayout->addWidget(m_shrinkButton);
+    m_topLayout->addWidget(m_hideButton);
+    m_topLayout->addWidget(m_closeButton);
+    m_sizeGripTopRight = new QSizeGrip(this);
+    m_sizeGripTopRight->setStyleSheet("QSizeGrip { background-color: rgb(128, 128, 128); width: 10px; height: 10px; }");
+    m_sizeGripTopRight->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    m_topLayout->addWidget(m_sizeGripTopRight, 0, Qt::AlignTop | Qt::AlignRight);
+
+    m_centerLayout = new QHBoxLayout();
+    m_centerLayout->addWidget(&m_rollupContents);
+
+    m_bottomLayout = new QHBoxLayout();
+    m_bottomLayout->setContentsMargins(0, 0, 0, 0);
+    m_bottomLayout->addWidget(m_statusLabel);
+    m_sizeGripBottomRight = new QSizeGrip(this);
+    m_sizeGripBottomRight->setStyleSheet("QSizeGrip { background-color: rgb(128, 128, 128); width: 10px; height: 10px; }");
+    m_sizeGripBottomRight->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    // m_bottomLayout->addStretch(1);
+    m_bottomLayout->addWidget(m_sizeGripBottomRight, 0, Qt::AlignBottom | Qt::AlignRight);
+
+    m_layouts->addLayout(m_topLayout);
+    m_layouts->addLayout(m_centerLayout);
+    m_layouts->addLayout(m_bottomLayout);
+
+    QObjectCleanupHandler().add(layout());
+    setLayout(m_layouts);
+
+    connect(m_settingsButton, SIGNAL(clicked()), this, SLOT(activateSettingsDialog()));
+    connect(m_helpButton, SIGNAL(clicked()), this, SLOT(showHelp()));
+    connect(m_moveButton, SIGNAL(clicked()), this, SLOT(openMoveToWorkspaceDialog()));
+    connect(m_shrinkButton, SIGNAL(clicked()), this, SLOT(shrinkWindow()));
+    connect(this, SIGNAL(forceShrink()), this, SLOT(shrinkWindow()));
+    connect(m_hideButton, SIGNAL(clicked()), this, SLOT(hide()));
+    connect(m_closeButton, SIGNAL(clicked()), this, SLOT(close()));
+
+    connect(
+        &m_rollupContents,
+        &RollupContents::widgetRolled,
+        this,
+        &ChannelGUI::onWidgetRolled
+    );
+}
+
+ChannelGUI::~ChannelGUI()
+{
+    qDebug("ChannelGUI::~ChannelGUI");
+    delete m_sizeGripBottomRight;
+    delete m_bottomLayout;
+    delete m_centerLayout;
+    delete m_sizeGripTopRight;
+    delete m_topLayout;
+    delete m_layouts;
+    delete m_statusLabel;
+    delete m_closeButton;
+    delete m_hideButton;
+    delete m_shrinkButton;
+    delete m_moveButton;
+    delete m_helpButton;
+    delete m_titleLabel;
+    delete m_settingsButton;
+    delete m_indexLabel;
+    qDebug("ChannelGUI::~ChannelGUI: end");
+}
 
 void ChannelGUI::closeEvent(QCloseEvent *event)
 {
     qDebug("ChannelGUI::closeEvent");
     emit closing();
     event->accept();
+}
+
+void ChannelGUI::mousePressEvent(QMouseEvent* event)
+{
+    if ((event->button() == Qt::LeftButton) && isOnMovingPad())
+    {
+        m_drag = true;
+        m_DragPosition = event->globalPos() - pos();
+        event->accept();
+    }
+}
+
+void ChannelGUI::mouseMoveEvent(QMouseEvent* event)
+{
+    if ((event->buttons() & Qt::LeftButton) && isOnMovingPad())
+    {
+        move(event->globalPos() - m_DragPosition);
+        event->accept();
+    }
+}
+
+void ChannelGUI::setStreamIndicator(const QString& indicator)
+{
+    (void) indicator; // TODO
+}
+
+void ChannelGUI::activateSettingsDialog()
+{
+    QPoint p = mapFromGlobal(QCursor::pos());
+    m_contextMenuType = ContextMenuChannelSettings;
+    emit customContextMenuRequested(p);
+}
+
+void ChannelGUI::showHelp()
+{
+    if (m_helpURL.isEmpty()) {
+        return;
+    }
+
+    QString url;
+
+    if (m_helpURL.startsWith("http")) {
+        url = m_helpURL;
+    } else {
+        url = QString("https://github.com/f4exb/sdrangel/blob/master/%1").arg(m_helpURL); // Something like "plugins/channelrx/chanalyzer/readme.md"
+    }
+
+    QDesktopServices::openUrl(QUrl(url));
+}
+
+void ChannelGUI::openMoveToWorkspaceDialog()
+{
+    int numberOfWorkspaces = MainWindow::getInstance()->getNumberOfWorkspaces();
+    WorkspaceSelectionDialog dialog(numberOfWorkspaces, this);
+    dialog.exec();
+
+    if (dialog.hasChanged()) {
+        emit moveToWorkspace(dialog.getSelectedIndex());
+    }
+}
+
+void ChannelGUI::onWidgetRolled(QWidget *widget, bool show)
+{
+    if (show)
+    {
+        // qDebug("ChannelGUI::onWidgetRolled: show: %d %d", m_rollupContents.height(), widget->height());
+        int dh = m_heightsMap.contains(widget) ? m_heightsMap[widget] - widget->height() : widget->minimumHeight();
+        resize(width(), 52 +  m_rollupContents.height() + dh);
+    }
+    else
+    {
+        // qDebug("ChannelGUI::onWidgetRolled: hide: %d %d", m_rollupContents.height(), widget->height());
+        m_heightsMap[widget] = widget->height();
+        resize(width(), 52 +  m_rollupContents.height());
+    }
+}
+
+void ChannelGUI::shrinkWindow()
+{
+    qDebug("ChannelGUI::shrinkWindow");
+    adjustSize();
+}
+
+void ChannelGUI::setTitle(const QString& title)
+{
+    m_titleLabel->setText(title);
+}
+
+void ChannelGUI::setTitleColor(const QColor& c)
+{
+    m_indexLabel->setStyleSheet(tr("QLabel { background-color: %1; color: %2; }")
+        .arg(c.name())
+        .arg(getTitleColor(c).name())
+    );
+}
+
+void ChannelGUI::setDeviceType(DeviceType type)
+{
+    m_deviceType = type;
+    updateIndexLabel();
+}
+
+void ChannelGUI::setToolTip(const QString& tooltip)
+{
+    m_indexLabel->setToolTip(tooltip);
+}
+
+void ChannelGUI::setIndex(int index)
+{
+    m_channelIndex = index;
+    updateIndexLabel();
+}
+
+void ChannelGUI::setDeviceSetIndex(int index)
+{
+    m_deviceSetIndex = index;
+    updateIndexLabel();
+}
+
+void ChannelGUI::updateIndexLabel()
+{
+    m_indexLabel->setText(tr("%1%2:%3").arg(getDeviceTypeTag()).arg(m_deviceSetIndex).arg(m_channelIndex));
+}
+
+bool ChannelGUI::isOnMovingPad()
+{
+    return m_indexLabel->underMouse() || m_titleLabel->underMouse() || m_statusLabel->underMouse();
+}
+
+QString ChannelGUI::getDeviceTypeTag()
+{
+    switch (m_deviceType)
+    {
+        case DeviceRx:
+            return "R";
+        case DeviceTx:
+            return "T";
+        case DeviceMIMO:
+            return "M";
+        default:
+            return "X";
+    }
+}
+
+QColor ChannelGUI::getTitleColor(const QColor& backgroundColor)
+{
+    float l = 0.2126*backgroundColor.redF() + 0.7152*backgroundColor.greenF() + 0.0722*backgroundColor.blueF();
+    return l < 0.5f ? Qt::white : Qt::black;
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>VORDemodGUI</class>
- <widget class="RollupWidget" name="VORDemodGUI">
+ <widget class="RollupContents" name="VORDemodGUI">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -593,9 +593,9 @@
    <header location="global">QtQuickWidgets/QQuickWidget</header>
   </customwidget>
   <customwidget>
-   <class>RollupWidget</class>
+   <class>RollupContents</class>
    <extends>QWidget</extends>
-   <header>gui/rollupwidget.h</header>
+   <header>gui/rollupcontents.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

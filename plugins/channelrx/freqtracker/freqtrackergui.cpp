@@ -140,7 +140,7 @@ void FreqTrackerGUI::channelMarkerChangedByCursor()
 
 void FreqTrackerGUI::channelMarkerHighlightedByCursor()
 {
-    setHighlighted(m_channelMarker.getHighlighted());
+    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void FreqTrackerGUI::on_deltaFrequency_changed(qint64 value)
@@ -251,7 +251,7 @@ void FreqTrackerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -278,6 +278,7 @@ void FreqTrackerGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -312,10 +313,11 @@ FreqTrackerGUI::FreqTrackerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 	m_squelchOpen(false),
 	m_tickCount(0)
 {
-	ui->setupUi(this);
+	ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/freqtracker/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
-	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+	connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_freqTracker = reinterpret_cast<FreqTracker*>(rxChannel);
@@ -363,6 +365,7 @@ FreqTrackerGUI::FreqTrackerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
 	displaySettings();
+    makeUIConnections();
 	applySettings(true);
 }
 
@@ -403,6 +406,7 @@ void FreqTrackerGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
 
@@ -433,7 +437,7 @@ void FreqTrackerGUI::displaySettings()
     displaySpectrumBandwidth(m_settings.m_spanLog2);
     displayStreamIndex();
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -518,3 +522,16 @@ void FreqTrackerGUI::tick()
 	m_tickCount++;
 }
 
+void FreqTrackerGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &FreqTrackerGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &FreqTrackerGUI::on_rfBW_valueChanged);
+    QObject::connect(ui->tracking, &QToolButton::toggled, this, &FreqTrackerGUI::on_tracking_toggled);
+    QObject::connect(ui->alphaEMA, &QDial::valueChanged, this, &FreqTrackerGUI::on_alphaEMA_valueChanged);
+    QObject::connect(ui->trackerType, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FreqTrackerGUI::on_trackerType_currentIndexChanged);
+    QObject::connect(ui->pllPskOrder, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FreqTrackerGUI::on_pllPskOrder_currentIndexChanged);
+    QObject::connect(ui->rrc, &ButtonSwitch::toggled, this, &FreqTrackerGUI::on_rrc_toggled);
+    QObject::connect(ui->rrcRolloff, &QDial::valueChanged, this, &FreqTrackerGUI::on_rrcRolloff_valueChanged);
+    QObject::connect(ui->squelch, &QSlider::valueChanged, this, &FreqTrackerGUI::on_squelch_valueChanged);
+    QObject::connect(ui->squelchGate, &QDial::valueChanged, this, &FreqTrackerGUI::on_squelchGate_valueChanged);
+}

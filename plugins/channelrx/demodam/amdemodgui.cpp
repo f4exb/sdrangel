@@ -111,7 +111,7 @@ void AMDemodGUI::channelMarkerChangedByCursor()
 
 void AMDemodGUI::channelMarkerHighlightedByCursor()
 {
-    setHighlighted(m_channelMarker.getHighlighted());
+    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void AMDemodGUI::on_deltaFrequency_changed(qint64 value)
@@ -182,7 +182,7 @@ void AMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 		m_nfmDemod->setSpectrum(m_threadedSampleSink->getMessageQueue(), rollDown);
 	*/
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -209,6 +209,7 @@ void AMDemodGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -243,10 +244,11 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 	m_samUSB(true),
 	m_tickCount(0)
 {
-	ui->setupUi(this);
+	ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/demodam/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
-	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+	connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_amDemod = reinterpret_cast<AMDemod*>(rxChannel);
@@ -290,6 +292,7 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
     m_iconDSBLSB.addPixmap(QPixmap("://lsb.png"), QIcon::Normal, QIcon::On);
 
 	displaySettings();
+    makeUIConnections();
 	applySettings(true);
 }
 
@@ -323,6 +326,7 @@ void AMDemodGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
 
@@ -373,7 +377,7 @@ void AMDemodGUI::displaySettings()
 
     displayStreamIndex();
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -478,3 +482,14 @@ void AMDemodGUI::tick()
 	m_tickCount++;
 }
 
+void AMDemodGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &AMDemodGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->pll, &QToolButton::toggled, this, &AMDemodGUI::on_pll_toggled);
+    QObject::connect(ui->ssb, &QToolButton::toggled, this, &AMDemodGUI::on_ssb_toggled);
+    QObject::connect(ui->bandpassEnable, &ButtonSwitch::toggled, this, &AMDemodGUI::on_bandpassEnable_toggled);
+    QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &AMDemodGUI::on_rfBW_valueChanged);
+    QObject::connect(ui->volume, &QSlider::valueChanged, this, &AMDemodGUI::on_volume_valueChanged);
+    QObject::connect(ui->squelch, &QSlider::valueChanged, this, &AMDemodGUI::on_squelch_valueChanged);
+    QObject::connect(ui->audioMute, &QToolButton::toggled, this, &AMDemodGUI::on_audioMute_toggled);
+}

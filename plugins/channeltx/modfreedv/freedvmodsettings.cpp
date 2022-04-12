@@ -51,6 +51,7 @@ void FreeDVModSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
+    m_workspaceIndex = 0;
 }
 
 QByteArray FreeDVModSettings::serialize() const
@@ -93,6 +94,9 @@ QByteArray FreeDVModSettings::serialize() const
     if (m_rollupState) {
         s.writeBlob(28, m_rollupState->serialize());
     }
+
+    s.writeS32(29, m_workspaceIndex);
+    s.writeBlob(30, m_geometryBytes);
 
     return s.final();
 }
@@ -180,6 +184,9 @@ bool FreeDVModSettings::deserialize(const QByteArray& data)
             d.readBlob(28, &bytetmp);
             m_rollupState->deserialize(bytetmp);
         }
+
+        d.readS32(29, &m_workspaceIndex, 0);
+        d.readBlob(30, &m_geometryBytes);
 
         return true;
     }

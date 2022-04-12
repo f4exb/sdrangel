@@ -101,10 +101,11 @@ LocalSinkGUI::LocalSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
         m_basebandSampleRate(0),
         m_tickCount(0)
 {
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/localsink/readme.md";
     setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_localSink = (LocalSink*) channelrx;
@@ -127,6 +128,7 @@ LocalSinkGUI::LocalSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 
     updateLocalDevices();
     displaySettings();
+    makeUIConnections();
     applySettings(true);
 }
 
@@ -163,6 +165,7 @@ void LocalSinkGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
     int index = getLocalDeviceIndexInCombo(m_settings.m_localDeviceIndex);
@@ -176,7 +179,7 @@ void LocalSinkGUI::displaySettings()
     applyDecimation();
     displayStreamIndex();
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -254,7 +257,7 @@ void LocalSinkGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -281,6 +284,7 @@ void LocalSinkGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -368,4 +372,13 @@ void LocalSinkGUI::tick()
     if (++m_tickCount == 20) { // once per second
         m_tickCount = 0;
     }
+}
+
+void LocalSinkGUI::makeUIConnections()
+{
+    QObject::connect(ui->decimationFactor, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LocalSinkGUI::on_decimationFactor_currentIndexChanged);
+    QObject::connect(ui->position, &QSlider::valueChanged, this, &LocalSinkGUI::on_position_valueChanged);
+    QObject::connect(ui->localDevice, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LocalSinkGUI::on_localDevice_currentIndexChanged);
+    QObject::connect(ui->localDevicesRefresh, &QPushButton::clicked, this, &LocalSinkGUI::on_localDevicesRefresh_clicked);
+    QObject::connect(ui->localDevicePlay, &ButtonSwitch::toggled, this, &LocalSinkGUI::on_localDevicePlay_toggled);
 }

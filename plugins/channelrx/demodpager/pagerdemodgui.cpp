@@ -303,7 +303,7 @@ void PagerDemodGUI::channelMarkerChangedByCursor()
 
 void PagerDemodGUI::channelMarkerHighlightedByCursor()
 {
-    setHighlighted(m_channelMarker.getHighlighted());
+    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void PagerDemodGUI::on_deltaFrequency_changed(qint64 value)
@@ -420,7 +420,7 @@ void PagerDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
         }
     }
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -446,6 +446,7 @@ void PagerDemodGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -477,11 +478,12 @@ PagerDemodGUI::PagerDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     m_doApplySettings(true),
     m_tickCount(0)
 {
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/demodpager/readme.md";
 
     setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_pagerDemod = reinterpret_cast<PagerDemod*>(rxChannel);
@@ -545,6 +547,7 @@ PagerDemodGUI::PagerDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     ui->scopeContainer->setVisible(false);
 
     displaySettings();
+    makeUIConnections();
     applySettings(true);
 }
 
@@ -596,6 +599,7 @@ void PagerDemodGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
 
@@ -645,7 +649,7 @@ void PagerDemodGUI::displaySettings()
 
     filter();
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -796,4 +800,22 @@ void PagerDemodGUI::on_logOpen_clicked()
             }
         }
     }
+}
+
+void PagerDemodGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &PagerDemodGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &PagerDemodGUI::on_rfBW_valueChanged);
+    QObject::connect(ui->fmDev, &QSlider::valueChanged, this, &PagerDemodGUI::on_fmDev_valueChanged);
+    QObject::connect(ui->baud, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PagerDemodGUI::on_baud_currentIndexChanged);
+    QObject::connect(ui->decode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PagerDemodGUI::on_decode_currentIndexChanged);
+    QObject::connect(ui->charset, &QToolButton::clicked, this, &PagerDemodGUI::on_charset_clicked);
+    QObject::connect(ui->filterAddress, &QLineEdit::editingFinished, this, &PagerDemodGUI::on_filterAddress_editingFinished);
+    QObject::connect(ui->clearTable, &QToolButton::clicked, this, &PagerDemodGUI::on_clearTable_clicked);
+    QObject::connect(ui->udpEnabled, &QCheckBox::clicked, this, &PagerDemodGUI::on_udpEnabled_clicked);
+    QObject::connect(ui->udpAddress, &QLineEdit::editingFinished, this, &PagerDemodGUI::on_udpAddress_editingFinished);
+    QObject::connect(ui->udpPort, &QLineEdit::editingFinished, this, &PagerDemodGUI::on_udpPort_editingFinished);
+    QObject::connect(ui->logEnable, &ButtonSwitch::clicked, this, &PagerDemodGUI::on_logEnable_clicked);
+    QObject::connect(ui->logFilename, &QToolButton::clicked, this, &PagerDemodGUI::on_logFilename_clicked);
+    QObject::connect(ui->logOpen, &QToolButton::clicked, this, &PagerDemodGUI::on_logOpen_clicked);
 }

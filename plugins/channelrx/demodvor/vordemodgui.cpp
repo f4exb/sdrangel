@@ -887,7 +887,7 @@ void VORDemodGUI::channelMarkerChangedByCursor()
 
 void VORDemodGUI::channelMarkerHighlightedByCursor()
 {
-    setHighlighted(m_channelMarker.getHighlighted());
+    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void VORDemodGUI::on_thresh_valueChanged(int value)
@@ -1105,7 +1105,7 @@ void VORDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -1131,6 +1131,7 @@ void VORDemodGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -1166,7 +1167,8 @@ VORDemodGUI::VORDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_vorModel(this),
     m_vors(nullptr)
 {
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/demodvor/readme.md";
 
     ui->map->rootContext()->setContextProperty("vorModel", &m_vorModel);
@@ -1176,7 +1178,7 @@ VORDemodGUI::VORDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_muteIcon.addPixmap(QPixmap("://sound_on.png"), QIcon::Normal, QIcon::Off);
 
     setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(&m_dlm, &HttpDownloadManager::downloadComplete, this, &VORDemodGUI::downloadFinished);
 
@@ -1272,6 +1274,7 @@ VORDemodGUI::VORDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     connect(ui->vorData->horizontalHeader(), SIGNAL(sectionResized(int, int, int)), SLOT(vorData_sectionResized(int, int, int)));
 
     displaySettings();
+    makeUIConnections();
     applySettings(true);
 }
 
@@ -1305,6 +1308,7 @@ void VORDemodGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
 
@@ -1333,7 +1337,7 @@ void VORDemodGUI::displaySettings()
         header->moveSection(header->visualIndex(i), m_settings.m_columnIndexes[i]);
     }
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -1424,4 +1428,16 @@ void VORDemodGUI::tick()
     }
 
     m_tickCount++;
+}
+
+void VORDemodGUI::makeUIConnections()
+{
+    QObject::connect(ui->audioMute, &QToolButton::toggled, this, &VORDemodGUI::on_audioMute_toggled);
+    QObject::connect(ui->thresh, &QDial::valueChanged, this, &VORDemodGUI::on_thresh_valueChanged);
+    QObject::connect(ui->volume, &QDial::valueChanged, this, &VORDemodGUI::on_volume_valueChanged);
+    QObject::connect(ui->squelch, &QDial::valueChanged, this, &VORDemodGUI::on_squelch_valueChanged);
+    QObject::connect(ui->audioMute, &QToolButton::toggled, this, &VORDemodGUI::on_audioMute_toggled);
+    QObject::connect(ui->getOurAirportsVORDB, &QPushButton::clicked, this, &VORDemodGUI::on_getOurAirportsVORDB_clicked);
+    QObject::connect(ui->getOpenAIPVORDB, &QPushButton::clicked, this, &VORDemodGUI::on_getOpenAIPVORDB_clicked);
+    QObject::connect(ui->magDecAdjust, &QPushButton::clicked, this, &VORDemodGUI::on_magDecAdjust_clicked);
 }

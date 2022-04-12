@@ -63,10 +63,11 @@ DATVModGUI::DATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
     m_tickCount(0),
     m_enableNavTime(false)
 {
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channeltx/moddatv/readme.md";
     setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_datvMod = (DATVMod*) channelTx;
@@ -107,6 +108,7 @@ DATVModGUI::DATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 #endif
 
     displaySettings();
+    makeUIConnections();
     applySettings(true);
     if (!m_settings.m_tsFileName.isEmpty())
         configureTsFileName();
@@ -473,7 +475,7 @@ void DATVModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -501,6 +503,7 @@ void DATVModGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -552,6 +555,7 @@ void DATVModGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
     displayStreamIndex();
 
     blockApplySettings(true);
@@ -581,7 +585,7 @@ void DATVModGUI::displaySettings()
     ui->udpAddress->setText(m_settings.m_udpAddress);
     ui->udpPort->setValue(m_settings.m_udpPort);
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -662,3 +666,21 @@ void DATVModGUI::updateWithStreamTime()
     }
 }
 
+void DATVModGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &DATVModGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->channelMute, &QToolButton::toggled, this, &DATVModGUI::on_channelMute_toggled);
+    QObject::connect(ui->dvbStandard, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DATVModGUI::on_dvbStandard_currentIndexChanged);
+    QObject::connect(ui->symbolRate, QOverload<int>::of(&QSpinBox::valueChanged), this, &DATVModGUI::on_symbolRate_valueChanged);
+    QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &DATVModGUI::on_rfBW_valueChanged);
+    QObject::connect(ui->fec, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DATVModGUI::on_fec_currentIndexChanged);
+    QObject::connect(ui->modulation, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DATVModGUI::on_modulation_currentIndexChanged);
+    QObject::connect(ui->rollOff, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DATVModGUI::on_rollOff_currentIndexChanged);
+    QObject::connect(ui->inputSelect, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DATVModGUI::on_inputSelect_currentIndexChanged);
+    QObject::connect(ui->tsFileDialog, &QPushButton::clicked, this, &DATVModGUI::on_tsFileDialog_clicked);
+    QObject::connect(ui->playFile, &ButtonSwitch::toggled, this, &DATVModGUI::on_playFile_toggled);
+    QObject::connect(ui->playLoop, &ButtonSwitch::toggled, this, &DATVModGUI::on_playLoop_toggled);
+    QObject::connect(ui->navTimeSlider, &QSlider::valueChanged, this, &DATVModGUI::on_navTimeSlider_valueChanged);
+    QObject::connect(ui->udpAddress, &QLineEdit::editingFinished, this, &DATVModGUI::on_udpAddress_editingFinished);
+    QObject::connect(ui->udpPort, QOverload<int>::of(&QSpinBox::valueChanged), this, &DATVModGUI::on_udpPort_valueChanged);
+}

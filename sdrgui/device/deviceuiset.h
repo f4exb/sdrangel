@@ -71,6 +71,7 @@ public:
     DeviceUISet(int deviceSetIndex, DeviceSet *deviceSet);
     ~DeviceUISet();
 
+    void setIndex(int deviceSetIndex);
     GLSpectrum *getSpectrum() { return m_spectrum; }     //!< Direct spectrum getter
     void setSpectrumScalingFactor(float scalef);
     void addChannelMarker(ChannelMarker* channelMarker); //!< Add channel marker to spectrum
@@ -80,6 +81,7 @@ public:
     void freeChannels();
     void deleteChannel(int channelIndex);
     ChannelAPI *getChannelAt(int channelIndex);
+    ChannelGUI *getChannelGUIAt(int channelIndex);
 
     void loadDeviceSetSettings(
         const Preset* preset,
@@ -145,9 +147,9 @@ private:
     int m_nbAvailableTxChannels;   //!< Number of Tx channels available for selection
     int m_nbAvailableMIMOChannels; //!< Number of MIMO channels available for selection
 
-    void loadRxChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
-    void loadTxChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
-    void loadMIMOChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
+    void loadRxChannelSettings(const Preset* preset, PluginAPI *pluginAPI, QList<Workspace*> *workspaces, Workspace *currentWorkspace);
+    void loadTxChannelSettings(const Preset* preset, PluginAPI *pluginAPI, QList<Workspace*> *workspaces, Workspace *currentWorkspace);
+    void loadMIMOChannelSettings(const Preset* preset, PluginAPI *pluginAPI, QList<Workspace*> *workspaces, Workspace *currentWorkspace);
     void saveRxChannelSettings(Preset* preset) const;
     void saveTxChannelSettings(Preset* preset) const;
     void saveMIMOChannelSettings(Preset* preset) const;

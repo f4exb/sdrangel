@@ -284,7 +284,7 @@ void FreeDVModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -312,6 +312,7 @@ void FreeDVModGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -349,10 +350,11 @@ FreeDVModGUI::FreeDVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_tickCount(0),
     m_enableNavTime(false)
 {
-	ui->setupUi(this);
+	ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channeltx/modfreedv/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
-	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+	connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_freeDVMod = (FreeDVMod*) channelTx;
@@ -397,6 +399,7 @@ FreeDVModGUI::FreeDVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_freeDVMod->setLevelMeter(ui->volumeMeter);
 
     displaySettings();
+    makeUIConnections();
     applyBandwidths(5 - ui->spanLog2->value(), true); // does applySettings(true)
 }
 
@@ -460,6 +463,7 @@ void FreeDVModGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
     displayStreamIndex();
 
     blockApplySettings(true);
@@ -501,7 +505,7 @@ void FreeDVModGUI::displaySettings()
     ui->play->setChecked(m_settings.m_modAFInput == FreeDVModSettings::FreeDVModInputAF::FreeDVModInputFile);
     ui->morseKeyer->setChecked(m_settings.m_modAFInput == FreeDVModSettings::FreeDVModInputAF::FreeDVModInputCWTone);
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -595,4 +599,21 @@ void FreeDVModGUI::updateWithStreamTime()
         float posRatio = (float) t_sec / (float) m_recordLength;
         ui->navTimeSlider->setValue((int) (posRatio * 100.0));
     }
+}
+
+void FreeDVModGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &FreeDVModGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->gaugeInput, &QCheckBox::toggled, this, &FreeDVModGUI::on_gaugeInput_toggled);
+    QObject::connect(ui->volume, &QDial::valueChanged, this, &FreeDVModGUI::on_volume_valueChanged);
+    QObject::connect(ui->audioMute, &QToolButton::toggled, this, &FreeDVModGUI::on_audioMute_toggled);
+    QObject::connect(ui->freeDVMode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FreeDVModGUI::on_freeDVMode_currentIndexChanged);
+    QObject::connect(ui->tone, &ButtonSwitch::toggled, this, &FreeDVModGUI::on_tone_toggled);
+    QObject::connect(ui->toneFrequency, &QDial::valueChanged, this, &FreeDVModGUI::on_toneFrequency_valueChanged);
+    QObject::connect(ui->mic, &ButtonSwitch::toggled, this, &FreeDVModGUI::on_mic_toggled);
+    QObject::connect(ui->play, &ButtonSwitch::toggled, this, &FreeDVModGUI::on_play_toggled);
+    QObject::connect(ui->playLoop, &ButtonSwitch::toggled, this, &FreeDVModGUI::on_playLoop_toggled);
+    QObject::connect(ui->morseKeyer, &ButtonSwitch::toggled, this, &FreeDVModGUI::on_morseKeyer_toggled);
+    QObject::connect(ui->navTimeSlider, &QSlider::valueChanged, this, &FreeDVModGUI::on_navTimeSlider_valueChanged);
+    QObject::connect(ui->showFileDialog, &QPushButton::clicked, this, &FreeDVModGUI::on_showFileDialog_clicked);
 }

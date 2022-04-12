@@ -109,7 +109,7 @@ void UDPSinkGUI::channelMarkerChangedByCursor()
 
 void UDPSinkGUI::channelMarkerHighlightedByCursor()
 {
-    setHighlighted(m_channelMarker.getHighlighted());
+    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void UDPSinkGUI::tick()
@@ -147,9 +147,10 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
     m_doApplySettings(true),
     m_rfBandwidthChanged(false)
 {
-	ui->setupUi(this);
+	ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/udpsink/readme.md";
-	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+	connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 	setAttribute(Qt::WA_DeleteOnClose, true);
 
@@ -196,6 +197,7 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 	ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
 
 	displaySettings();
+    makeUIConnections();
 	applySettingsImmediate(true);
 	applySettings(true);
 }
@@ -221,6 +223,7 @@ void UDPSinkGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
 
@@ -258,7 +261,7 @@ void UDPSinkGUI::displaySettings()
 
     displayStreamIndex();
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 
     ui->glSpectrum->setSampleRate(m_settings.m_outputSampleRate);
@@ -590,7 +593,7 @@ void UDPSinkGUI::onWidgetRolled(QWidget* widget, bool rollDown)
         m_udpSink->enableSpectrum(rollDown);
 	}
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -618,6 +621,7 @@ void UDPSinkGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettingsImmediate();
@@ -650,4 +654,22 @@ void UDPSinkGUI::enterEvent(QEvent*)
 	m_channelMarker.setHighlighted(true);
 }
 
-
+void UDPSinkGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &UDPSinkGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->sampleFormat, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &UDPSinkGUI::on_sampleFormat_currentIndexChanged);
+    QObject::connect(ui->outputUDPAddress, &QLineEdit::editingFinished, this, &UDPSinkGUI::on_outputUDPAddress_editingFinished);
+    QObject::connect(ui->outputUDPPort, &QLineEdit::editingFinished, this, &UDPSinkGUI::on_outputUDPPort_editingFinished);
+    QObject::connect(ui->inputUDPAudioPort, &QLineEdit::editingFinished, this, &UDPSinkGUI::on_inputUDPAudioPort_editingFinished);
+    QObject::connect(ui->sampleRate, &QLineEdit::textEdited, this, &UDPSinkGUI::on_sampleRate_textEdited);
+    QObject::connect(ui->rfBandwidth, &QLineEdit::textEdited, this, &UDPSinkGUI::on_rfBandwidth_textEdited);
+    QObject::connect(ui->fmDeviation, &QLineEdit::textEdited, this, &UDPSinkGUI::on_fmDeviation_textEdited);
+    QObject::connect(ui->audioActive, &QToolButton::toggled, this, &UDPSinkGUI::on_audioActive_toggled);
+    QObject::connect(ui->audioStereo, &QToolButton::toggled, this, &UDPSinkGUI::on_audioStereo_toggled);
+    QObject::connect(ui->applyBtn, &QPushButton::clicked, this, &UDPSinkGUI::on_applyBtn_clicked);
+    QObject::connect(ui->gain, &QSlider::valueChanged, this, &UDPSinkGUI::on_gain_valueChanged);
+    QObject::connect(ui->volume, &QSlider::valueChanged, this, &UDPSinkGUI::on_volume_valueChanged);
+    QObject::connect(ui->squelch, &QSlider::valueChanged, this, &UDPSinkGUI::on_squelch_valueChanged);
+    QObject::connect(ui->squelchGate, &QDial::valueChanged, this, &UDPSinkGUI::on_squelchGate_valueChanged);
+    QObject::connect(ui->agc, &ButtonSwitch::toggled, this, &UDPSinkGUI::on_agc_toggled);
+}

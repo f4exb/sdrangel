@@ -348,7 +348,7 @@ void SSBModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -376,6 +376,7 @@ void SSBModGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -414,10 +415,11 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_tickCount(0),
     m_enableNavTime(false)
 {
-	ui->setupUi(this);
+	ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channeltx/modssb/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
-	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+	connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_ssbMod = (SSBMod*) channelTx;
@@ -479,6 +481,7 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_iconDSBLSB.addPixmap(QPixmap("://lsb.png"), QIcon::Normal, QIcon::Off);
 
     displaySettings();
+    makeUIConnections();
     applyBandwidths(5 - ui->spanLog2->value(), true); // does applySettings(true)
 }
 
@@ -648,6 +651,7 @@ void SSBModGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
     displayStreamIndex();
 
     blockApplySettings(true);
@@ -715,7 +719,7 @@ void SSBModGUI::displaySettings()
     ui->feedbackVolume->setValue(roundf(m_settings.m_feedbackVolumeFactor * 100.0));
     ui->feedbackVolumeText->setText(QString("%1").arg(m_settings.m_feedbackVolumeFactor, 0, 'f', 2));
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -835,4 +839,30 @@ void SSBModGUI::updateWithStreamTime()
         float posRatio = (float) t_sec / (float) m_recordLength;
         ui->navTimeSlider->setValue((int) (posRatio * 100.0));
     }
+}
+
+void SSBModGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &SSBModGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->flipSidebands, &QPushButton::clicked, this, &SSBModGUI::on_flipSidebands_clicked);
+    QObject::connect(ui->dsb, &QToolButton::toggled, this, &SSBModGUI::on_dsb_toggled);
+    QObject::connect(ui->audioBinaural, &QToolButton::toggled, this, &SSBModGUI::on_audioBinaural_toggled);
+    QObject::connect(ui->audioFlipChannels, &QToolButton::toggled, this, &SSBModGUI::on_audioFlipChannels_toggled);
+    QObject::connect(ui->BW, &TickedSlider::valueChanged, this, &SSBModGUI::on_BW_valueChanged);
+    QObject::connect(ui->lowCut, &TickedSlider::valueChanged, this, &SSBModGUI::on_lowCut_valueChanged);
+    QObject::connect(ui->volume, &QDial::valueChanged, this, &SSBModGUI::on_volume_valueChanged);
+    QObject::connect(ui->audioMute, &QToolButton::toggled, this, &SSBModGUI::on_audioMute_toggled);
+    QObject::connect(ui->tone, &ButtonSwitch::toggled, this, &SSBModGUI::on_tone_toggled);
+    QObject::connect(ui->toneFrequency, &QDial::valueChanged, this, &SSBModGUI::on_toneFrequency_valueChanged);
+    QObject::connect(ui->mic, &ButtonSwitch::toggled, this, &SSBModGUI::on_mic_toggled);
+    QObject::connect(ui->agc, &ButtonSwitch::toggled, this, &SSBModGUI::on_agc_toggled);
+    QObject::connect(ui->cmpPreGain, &QDial::valueChanged, this, &SSBModGUI::on_cmpPreGain_valueChanged);
+    QObject::connect(ui->cmpThreshold, &QDial::valueChanged, this, &SSBModGUI::on_cmpThreshold_valueChanged);
+    QObject::connect(ui->play, &ButtonSwitch::toggled, this, &SSBModGUI::on_play_toggled);
+    QObject::connect(ui->playLoop, &ButtonSwitch::toggled, this, &SSBModGUI::on_playLoop_toggled);
+    QObject::connect(ui->morseKeyer, &ButtonSwitch::toggled, this, &SSBModGUI::on_morseKeyer_toggled);
+    QObject::connect(ui->navTimeSlider, &QSlider::valueChanged, this, &SSBModGUI::on_navTimeSlider_valueChanged);
+    QObject::connect(ui->showFileDialog, &QPushButton::clicked, this, &SSBModGUI::on_showFileDialog_clicked);
+    QObject::connect(ui->feedbackEnable, &QToolButton::toggled, this, &SSBModGUI::on_feedbackEnable_toggled);
+    QObject::connect(ui->feedbackVolume, &QDial::valueChanged, this, &SSBModGUI::on_feedbackVolume_valueChanged);
 }

@@ -357,7 +357,7 @@ void ChirpChatModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -384,6 +384,7 @@ void ChirpChatModGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -416,11 +417,12 @@ ChirpChatModGUI::ChirpChatModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet,
 	m_doApplySettings(true),
     m_tickCount(0)
 {
-	ui->setupUi(this);
+	ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channeltx/modchirpchat/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
 
-	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+	connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_chirpChatMod = (ChirpChatMod*) channelTx;
@@ -453,6 +455,7 @@ ChirpChatModGUI::ChirpChatModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet,
 
     setBandwidths();
     displaySettings();
+    makeUIConnections();
     applySettings();
 }
 
@@ -488,6 +491,7 @@ void ChirpChatModGUI::displaySettings()
     setTitleColor(m_settings.m_rgbColor);
 
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
     displayStreamIndex();
     displayCurrentPayloadMessage();
     displayBinaryMessage();
@@ -525,7 +529,7 @@ void ChirpChatModGUI::displaySettings()
     ui->udpEnabled->setChecked(m_settings.m_udpEnabled);
     ui->udpAddress->setText(m_settings.m_udpAddress);
     ui->udpPort->setText(QString::number(m_settings.m_udpPort));
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -618,4 +622,34 @@ void ChirpChatModGUI::tick()
             ui->playMessage->setStyleSheet("QPushButton { background:rgb(79,79,79); }");
         }
     }
+}
+
+void ChirpChatModGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &ChirpChatModGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->bw, &QSlider::valueChanged, this, &ChirpChatModGUI::on_bw_valueChanged);
+    QObject::connect(ui->spread, &QSlider::valueChanged, this, &ChirpChatModGUI::on_spread_valueChanged);
+    QObject::connect(ui->deBits, &QSlider::valueChanged, this, &ChirpChatModGUI::on_deBits_valueChanged);
+    QObject::connect(ui->preambleChirps, &QSlider::valueChanged, this, &ChirpChatModGUI::on_preambleChirps_valueChanged);
+    QObject::connect(ui->idleTime, &QSlider::valueChanged, this, &ChirpChatModGUI::on_idleTime_valueChanged);
+    QObject::connect(ui->syncWord, &QLineEdit::editingFinished, this, &ChirpChatModGUI::on_syncWord_editingFinished);
+    QObject::connect(ui->channelMute, &QToolButton::toggled, this, &ChirpChatModGUI::on_channelMute_toggled);
+    QObject::connect(ui->scheme, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ChirpChatModGUI::on_scheme_currentIndexChanged);
+    QObject::connect(ui->fecParity, &QDial::valueChanged, this, &ChirpChatModGUI::on_fecParity_valueChanged);
+    QObject::connect(ui->crc, &QCheckBox::stateChanged, this, &ChirpChatModGUI::on_crc_stateChanged);
+    QObject::connect(ui->header, &QCheckBox::stateChanged, this, &ChirpChatModGUI::on_header_stateChanged);
+    QObject::connect(ui->myCall, &QLineEdit::editingFinished, this, &ChirpChatModGUI::on_myCall_editingFinished);
+    QObject::connect(ui->urCall, &QLineEdit::editingFinished, this, &ChirpChatModGUI::on_urCall_editingFinished);
+    QObject::connect(ui->myLocator, &QLineEdit::editingFinished, this, &ChirpChatModGUI::on_myLocator_editingFinished);
+    QObject::connect(ui->report, &QLineEdit::editingFinished, this, &ChirpChatModGUI::on_report_editingFinished);
+    QObject::connect(ui->msgType, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ChirpChatModGUI::on_msgType_currentIndexChanged);
+    QObject::connect(ui->resetMessages, &QPushButton::clicked, this, &ChirpChatModGUI::on_resetMessages_clicked);
+    QObject::connect(ui->playMessage, &QPushButton::clicked, this, &ChirpChatModGUI::on_playMessage_clicked);
+    QObject::connect(ui->repeatMessage, &QDial::valueChanged, this, &ChirpChatModGUI::on_repeatMessage_valueChanged);
+    QObject::connect(ui->generateMessages, &QPushButton::clicked, this, &ChirpChatModGUI::on_generateMessages_clicked);
+    QObject::connect(ui->messageText, &CustomTextEdit::editingFinished, this, &ChirpChatModGUI::on_messageText_editingFinished);
+    QObject::connect(ui->hexText, &QLineEdit::editingFinished, this, &ChirpChatModGUI::on_hexText_editingFinished);
+    QObject::connect(ui->udpEnabled, &QCheckBox::clicked, this, &ChirpChatModGUI::on_udpEnabled_clicked);
+    QObject::connect(ui->udpAddress, &QLineEdit::editingFinished, this, &ChirpChatModGUI::on_udpAddress_editingFinished);
+    QObject::connect(ui->udpPort, &QLineEdit::editingFinished, this, &ChirpChatModGUI::on_udpPort_editingFinished);
 }

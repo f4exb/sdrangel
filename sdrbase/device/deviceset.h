@@ -51,6 +51,7 @@ public:
 
     int getNumberOfChannels() const { return m_channelInstanceRegistrations.size(); }
     int getIndex() const { return m_deviceTabIndex; }
+    void setIndex(int index) { m_deviceTabIndex = index; }
     void freeChannels();
     const ChannelAPI *getChannelAt(int channelIndex) const;
     ChannelAPI *getChannelAt(int channelIndex);

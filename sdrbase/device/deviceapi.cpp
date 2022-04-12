@@ -819,3 +819,9 @@ void DeviceAPI::renumerateChannels()
         }
     }
 }
+
+void DeviceAPI::setDeviceSetIndex(int deviceSetIndex)
+{
+    m_deviceTabIndex = deviceSetIndex;
+    renumerateChannels();
+}

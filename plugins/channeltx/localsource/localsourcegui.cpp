@@ -95,10 +95,11 @@ LocalSourceGUI::LocalSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
         m_basebandSampleRate(0),
         m_tickCount(0)
 {
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channeltx/localsource/readme.md";
     setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_localSource = (LocalSource*) channeltx;
@@ -122,6 +123,7 @@ LocalSourceGUI::LocalSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 
     updateLocalDevices();
     displaySettings();
+    makeUIConnections();
     applySettings(true);
 }
 
@@ -158,13 +160,14 @@ void LocalSourceGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
     displayStreamIndex();
 
     blockApplySettings(true);
     ui->interpolationFactor->setCurrentIndex(m_settings.m_log2Interp);
     ui->localDevicePlay->setChecked(m_settings.m_play);
     applyInterpolation();
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -228,7 +231,7 @@ void LocalSourceGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -255,6 +258,7 @@ void LocalSourceGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -337,4 +341,13 @@ void LocalSourceGUI::tick()
     if (++m_tickCount == 20) { // once per second
         m_tickCount = 0;
     }
+}
+
+void LocalSourceGUI::makeUIConnections()
+{
+    QObject::connect(ui->interpolationFactor, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LocalSourceGUI::on_interpolationFactor_currentIndexChanged);
+    QObject::connect(ui->position, &QSlider::valueChanged, this, &LocalSourceGUI::on_position_valueChanged);
+    QObject::connect(ui->localDevice, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LocalSourceGUI::on_localDevice_currentIndexChanged);
+    QObject::connect(ui->localDevicesRefresh, &QPushButton::clicked, this, &LocalSourceGUI::on_localDevicesRefresh_clicked);
+    QObject::connect(ui->localDevicePlay, &ButtonSwitch::toggled, this, &LocalSourceGUI::on_localDevicePlay_toggled);
 }

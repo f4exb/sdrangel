@@ -106,7 +106,7 @@ void NFMDemodGUI::channelMarkerChangedByCursor()
 
 void NFMDemodGUI::channelMarkerHighlightedByCursor()
 {
-    setHighlighted(m_channelMarker.getHighlighted());
+    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void NFMDemodGUI::on_deltaFrequency_changed(qint64 value)
@@ -280,7 +280,7 @@ void NFMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 		m_nfmDemod->setSpectrum(m_threadedSampleSink->getMessageQueue(), rollDown);
 	*/
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -307,6 +307,7 @@ void NFMDemodGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -343,11 +344,12 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_dcsShowPositive(false),
 	m_tickCount(0)
 {
-	ui->setupUi(this);
+	ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/demodnfm/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
 
-	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+	connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_nfmDemod = reinterpret_cast<NFMDemod*>(rxChannel);
@@ -420,6 +422,7 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
 	displaySettings();
+    makeUIConnections();
 	applySettings(true);
 }
 
@@ -450,6 +453,7 @@ void NFMDemodGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
 
@@ -509,7 +513,7 @@ void NFMDemodGUI::displaySettings()
     setDcsCode(m_reportedDcsCode);
     displayStreamIndex();
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -610,4 +614,23 @@ void NFMDemodGUI::tick()
 	}
 
 	m_tickCount++;
+}
+
+void NFMDemodGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &NFMDemodGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->channelSpacingApply, &QPushButton::clicked, this, &NFMDemodGUI::on_channelSpacingApply_clicked);
+    QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &NFMDemodGUI::on_rfBW_valueChanged);
+    QObject::connect(ui->afBW, &QSlider::valueChanged, this, &NFMDemodGUI::on_afBW_valueChanged);
+    QObject::connect(ui->fmDev, &QSlider::valueChanged, this, &NFMDemodGUI::on_fmDev_valueChanged);
+    QObject::connect(ui->volume, &QDial::valueChanged, this, &NFMDemodGUI::on_volume_valueChanged);
+    QObject::connect(ui->squelchGate, &QDial::valueChanged, this, &NFMDemodGUI::on_squelchGate_valueChanged);
+    QObject::connect(ui->deltaSquelch, &ButtonSwitch::toggled, this, &NFMDemodGUI::on_deltaSquelch_toggled);
+    QObject::connect(ui->squelch, &QDial::valueChanged, this, &NFMDemodGUI::on_squelch_valueChanged);
+    QObject::connect(ui->ctcss, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &NFMDemodGUI::on_ctcss_currentIndexChanged);
+    QObject::connect(ui->ctcssOn, &QCheckBox::toggled, this, &NFMDemodGUI::on_ctcssOn_toggled);
+    QObject::connect(ui->dcsOn, &QCheckBox::toggled, this, &NFMDemodGUI::on_dcsOn_toggled);
+    QObject::connect(ui->dcsCode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &NFMDemodGUI::on_dcsCode_currentIndexChanged);
+    QObject::connect(ui->highPassFilter, &ButtonSwitch::toggled, this, &NFMDemodGUI::on_highPassFilter_toggled);
+    QObject::connect(ui->audioMute, &QToolButton::toggled, this, &NFMDemodGUI::on_audioMute_toggled);
 }

@@ -60,6 +60,7 @@ void UDPSourceSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
+    m_workspaceIndex = 0;
 }
 
 QByteArray UDPSourceSettings::serialize() const
@@ -101,6 +102,9 @@ QByteArray UDPSourceSettings::serialize() const
     if (m_rollupState) {
         s.writeBlob(27, m_rollupState->serialize());
     }
+
+    s.writeS32(28, m_workspaceIndex);
+    s.writeBlob(29, m_geometryBytes);
 
     return s.final();
 }
@@ -194,6 +198,9 @@ bool UDPSourceSettings::deserialize(const QByteArray& data)
             d.readBlob(27, &bytetmp);
             m_rollupState->deserialize(bytetmp);
         }
+
+        d.readS32(28, &m_workspaceIndex, 0);
+        d.readBlob(29, &m_geometryBytes);
 
         return true;
     }

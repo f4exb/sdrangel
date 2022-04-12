@@ -158,7 +158,7 @@ void RadioClockGUI::channelMarkerChangedByCursor()
 
 void RadioClockGUI::channelMarkerHighlightedByCursor()
 {
-    setHighlighted(m_channelMarker.getHighlighted());
+    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void RadioClockGUI::on_deltaFrequency_changed(qint64 value)
@@ -211,7 +211,7 @@ void RadioClockGUI::onWidgetRolled(QWidget* widget, bool rollDown)
         }
     }
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -237,6 +237,7 @@ void RadioClockGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -268,11 +269,12 @@ RadioClockGUI::RadioClockGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     m_doApplySettings(true),
     m_tickCount(0)
 {
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/radioclock/readme.md";
 
     setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 
     m_radioClock = reinterpret_cast<RadioClock*>(rxChannel);
     m_radioClock->setMessageQueueToGUI(getInputMessageQueue());
@@ -318,6 +320,7 @@ RadioClockGUI::RadioClockGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     ui->scopeContainer->setVisible(false);
 
     displaySettings();
+    makeUIConnections();
     applySettings(true);
 }
 
@@ -351,6 +354,7 @@ void RadioClockGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
 
@@ -367,7 +371,7 @@ void RadioClockGUI::displaySettings()
 
     displayStreamIndex();
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -408,4 +412,13 @@ void RadioClockGUI::tick()
     }
 
     m_tickCount++;
+}
+
+void RadioClockGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &RadioClockGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &RadioClockGUI::on_rfBW_valueChanged);
+    QObject::connect(ui->threshold, &QDial::valueChanged, this, &RadioClockGUI::on_threshold_valueChanged);
+    QObject::connect(ui->modulation, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RadioClockGUI::on_modulation_currentIndexChanged);
+    QObject::connect(ui->timezone, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RadioClockGUI::on_timezone_currentIndexChanged);
 }

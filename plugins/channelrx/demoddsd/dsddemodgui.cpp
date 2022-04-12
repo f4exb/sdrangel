@@ -248,7 +248,7 @@ void DSDDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -276,6 +276,7 @@ void DSDDemodGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -321,13 +322,14 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_tickCount(0),
 	m_dsdStatusTextDialog(0)
 {
-	ui->setupUi(this);
+	ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/demoddsd/readme.md";
 	ui->screenTV->setColor(true);
 	ui->screenTV->resizeTVScreen(200,200);
 	setAttribute(Qt::WA_DeleteOnClose, true);
 
-	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+	connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
@@ -382,6 +384,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
 	updateMyPosition();
 	displaySettings();
+    makeUIConnections();
 	applySettings(true);
 }
 
@@ -415,6 +418,7 @@ void DSDDemodGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
 
@@ -463,7 +467,7 @@ void DSDDemodGUI::displaySettings()
 
     displayStreamIndex();
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -511,7 +515,7 @@ void DSDDemodGUI::channelMarkerChangedByCursor()
 
 void DSDDemodGUI::channelMarkerHighlightedByCursor()
 {
-    setHighlighted(m_channelMarker.getHighlighted());
+    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void DSDDemodGUI::audioSelect()
@@ -613,4 +617,26 @@ void DSDDemodGUI::tick()
 	}
 
 	m_tickCount++;
+}
+
+void DSDDemodGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &DSDDemodGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &DSDDemodGUI::on_rfBW_valueChanged);
+    QObject::connect(ui->demodGain, &QSlider::valueChanged, this, &DSDDemodGUI::on_demodGain_valueChanged);
+    QObject::connect(ui->volume, &QDial::valueChanged, this, &DSDDemodGUI::on_volume_valueChanged);
+    QObject::connect(ui->baudRate, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DSDDemodGUI::on_baudRate_currentIndexChanged);
+    QObject::connect(ui->enableCosineFiltering, &ButtonSwitch::toggled, this, &DSDDemodGUI::on_enableCosineFiltering_toggled);
+    QObject::connect(ui->syncOrConstellation, &QToolButton::toggled, this, &DSDDemodGUI::on_syncOrConstellation_toggled);
+    QObject::connect(ui->traceLength, &QDial::valueChanged, this, &DSDDemodGUI::on_traceLength_valueChanged);
+    QObject::connect(ui->traceStroke, &QDial::valueChanged, this, &DSDDemodGUI::on_traceStroke_valueChanged);
+    QObject::connect(ui->traceDecay, &QDial::valueChanged, this, &DSDDemodGUI::on_traceDecay_valueChanged);
+    QObject::connect(ui->tdmaStereoSplit, &QToolButton::toggled, this, &DSDDemodGUI::on_tdmaStereoSplit_toggled);
+    QObject::connect(ui->fmDeviation, &QSlider::valueChanged, this, &DSDDemodGUI::on_fmDeviation_valueChanged);
+    QObject::connect(ui->squelchGate, &QDial::valueChanged, this, &DSDDemodGUI::on_squelchGate_valueChanged);
+    QObject::connect(ui->squelch, &QDial::valueChanged, this, &DSDDemodGUI::on_squelch_valueChanged);
+    QObject::connect(ui->highPassFilter, &ButtonSwitch::toggled, this, &DSDDemodGUI::on_highPassFilter_toggled);
+    QObject::connect(ui->audioMute, &QToolButton::toggled, this, &DSDDemodGUI::on_audioMute_toggled);
+    QObject::connect(ui->symbolPLLLock, &QToolButton::toggled, this, &DSDDemodGUI::on_symbolPLLLock_toggled);
+    QObject::connect(ui->viewStatusLog, &QPushButton::clicked, this, &DSDDemodGUI::on_viewStatusLog_clicked);
 }

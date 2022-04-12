@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>DATVModGUI</class>
- <widget class="RollupWidget" name="DATVModGUI">
+ <widget class="RollupContents" name="DATVModGUI">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -794,9 +794,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>RollupWidget</class>
+   <class>RollupContents</class>
    <extends>QWidget</extends>
-   <header>gui/rollupwidget.h</header>
+   <header>gui/rollupcontents.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

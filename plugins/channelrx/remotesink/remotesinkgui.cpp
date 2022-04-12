@@ -99,10 +99,11 @@ RemoteSinkGUI::RemoteSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
         m_basebandSampleRate(0),
         m_tickCount(0)
 {
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/remotesink/readme.md";
     setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_remoteSink = (RemoteSink*) channelrx;
@@ -125,6 +126,7 @@ RemoteSinkGUI::RemoteSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 
     displaySettings();
+    makeUIConnections();
     applySettings(true);
 }
 
@@ -161,6 +163,7 @@ void RemoteSinkGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
     ui->decimationFactor->setCurrentIndex(m_settings.m_log2Decim);
@@ -172,7 +175,7 @@ void RemoteSinkGUI::displaySettings()
     ui->nbTxBytes->setCurrentIndex(log2(m_settings.m_nbTxBytes));
     applyDecimation();
     displayStreamIndex();
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -224,7 +227,7 @@ void RemoteSinkGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -251,6 +254,7 @@ void RemoteSinkGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -371,4 +375,15 @@ void RemoteSinkGUI::tick()
     if (++m_tickCount == 20) { // once per second
         m_tickCount = 0;
     }
+}
+
+void RemoteSinkGUI::makeUIConnections()
+{
+    QObject::connect(ui->decimationFactor, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RemoteSinkGUI::on_decimationFactor_currentIndexChanged);
+    QObject::connect(ui->position, &QSlider::valueChanged, this, &RemoteSinkGUI::on_position_valueChanged);
+    QObject::connect(ui->dataAddress, &QLineEdit::returnPressed, this, &RemoteSinkGUI::on_dataAddress_returnPressed);
+    QObject::connect(ui->dataPort, &QLineEdit::returnPressed, this, &RemoteSinkGUI::on_dataPort_returnPressed);
+    QObject::connect(ui->dataApplyButton, &QPushButton::clicked, this, &RemoteSinkGUI::on_dataApplyButton_clicked);
+    QObject::connect(ui->nbFECBlocks, &QDial::valueChanged, this, &RemoteSinkGUI::on_nbFECBlocks_valueChanged);
+    QObject::connect(ui->nbTxBytes, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RemoteSinkGUI::on_nbTxBytes_currentIndexChanged);
 }

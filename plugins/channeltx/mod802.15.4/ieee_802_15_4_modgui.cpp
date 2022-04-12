@@ -310,18 +310,12 @@ void IEEE_802_15_4_ModGUI::on_udpPort_editingFinished()
     applySettings();
 }
 
-void IEEE_802_15_4_ModGUI::on_udpBytesFormat_clicked(bool checked)
-{
-    m_settings.m_udpBytesFormat = checked;
-    applySettings();
-}
-
 void IEEE_802_15_4_ModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -348,6 +342,7 @@ void IEEE_802_15_4_ModGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -379,11 +374,12 @@ IEEE_802_15_4_ModGUI::IEEE_802_15_4_ModGUI(PluginAPI* pluginAPI, DeviceUISet *de
     m_doApplySettings(true),
     m_basebandSampleRate(12000000)
 {
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channeltx/mod802.15.4/readme.md";
     setAttribute(Qt::WA_DeleteOnClose, true);
 
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_IEEE_802_15_4_Mod = (IEEE_802_15_4_Mod*) channelTx;
@@ -466,6 +462,7 @@ IEEE_802_15_4_ModGUI::IEEE_802_15_4_ModGUI(PluginAPI* pluginAPI, DeviceUISet *de
     ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
 
     displaySettings();
+    makeUIConnections();
     applySettings();
 }
 
@@ -507,6 +504,7 @@ void IEEE_802_15_4_ModGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
     displayStreamIndex();
 
     blockApplySettings(true);
@@ -567,7 +565,7 @@ void IEEE_802_15_4_ModGUI::displaySettings()
     ui->udpAddress->setText(m_settings.m_udpAddress);
     ui->udpPort->setText(QString::number(m_settings.m_udpPort));
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -624,4 +622,20 @@ void IEEE_802_15_4_ModGUI::tick()
     double powDb = CalcDb::dbPower(m_IEEE_802_15_4_Mod->getMagSq());
     m_channelPowerDbAvg(powDb);
     ui->channelPower->setText(tr("%1 dB").arg(m_channelPowerDbAvg.asDouble(), 0, 'f', 1));
+}
+
+void IEEE_802_15_4_ModGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &IEEE_802_15_4_ModGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->phy, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &IEEE_802_15_4_ModGUI::on_phy_currentIndexChanged);
+    QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &IEEE_802_15_4_ModGUI::on_rfBW_valueChanged);
+    QObject::connect(ui->gain, &QDial::valueChanged, this, &IEEE_802_15_4_ModGUI::on_gain_valueChanged);
+    QObject::connect(ui->channelMute, &QToolButton::toggled, this, &IEEE_802_15_4_ModGUI::on_channelMute_toggled);
+    QObject::connect(ui->txButton, &QToolButton::clicked, this, &IEEE_802_15_4_ModGUI::on_txButton_clicked);
+    QObject::connect(ui->frame, &QLineEdit::editingFinished, this, &IEEE_802_15_4_ModGUI::on_frame_editingFinished);
+    QObject::connect(ui->frame, &QLineEdit::returnPressed, this, &IEEE_802_15_4_ModGUI::on_frame_returnPressed);
+    QObject::connect(ui->repeat, &ButtonSwitch::toggled, this, &IEEE_802_15_4_ModGUI::on_repeat_toggled);
+    QObject::connect(ui->udpEnabled, &QCheckBox::clicked, this, &IEEE_802_15_4_ModGUI::on_udpEnabled_clicked);
+    QObject::connect(ui->udpAddress, &QLineEdit::editingFinished, this, &IEEE_802_15_4_ModGUI::on_udpAddress_editingFinished);
+    QObject::connect(ui->udpPort, &QLineEdit::editingFinished, this, &IEEE_802_15_4_ModGUI::on_udpPort_editingFinished);
 }

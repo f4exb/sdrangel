@@ -85,6 +85,7 @@ void PacketModSettings::resetToDefaults()
     m_udpEnabled = false;
     m_udpAddress = "127.0.0.1";
     m_udpPort = 9998;
+    m_workspaceIndex = 0;
 }
 
 bool PacketModSettings::setMode(QString mode)
@@ -231,6 +232,9 @@ QByteArray PacketModSettings::serialize() const
         s.writeBlob(54, m_rollupState->serialize());
     }
 
+    s.writeS32(55, m_workspaceIndex);
+    s.writeBlob(56, m_geometryBytes);
+
     return s.final();
 }
 
@@ -331,6 +335,9 @@ bool PacketModSettings::deserialize(const QByteArray& data)
             d.readBlob(54, &bytetmp);
             m_rollupState->deserialize(bytetmp);
         }
+
+        d.readS32(55, &m_workspaceIndex, 0);
+        d.readBlob(56, &m_geometryBytes);
 
         return true;
     }

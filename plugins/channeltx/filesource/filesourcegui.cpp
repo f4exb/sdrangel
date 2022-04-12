@@ -179,12 +179,13 @@ FileSourceGUI::FileSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
 {
     (void) channelTx;
 
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channeltx/filesource/readme.md";
     ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
 
     setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_fileSource = (FileSource*) channelTx;
@@ -211,6 +212,7 @@ FileSourceGUI::FileSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 
     displaySettings();
+    makeUIConnections();
     applySettings(true);
 }
 
@@ -302,6 +304,8 @@ void FileSourceGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
+
     displayStreamIndex();
 
     blockApplySettings(true);
@@ -310,7 +314,7 @@ void FileSourceGUI::displaySettings()
     ui->gainText->setText(tr("%1 dB").arg(m_settings.m_gainDB));
     ui->interpolationFactor->setCurrentIndex(m_settings.m_log2Interp);
     applyInterpolation();
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -362,7 +366,7 @@ void FileSourceGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -524,4 +528,15 @@ void FileSourceGUI::tick()
 
 void FileSourceGUI::channelMarkerChangedByCursor()
 {
+}
+
+void FileSourceGUI::makeUIConnections()
+{
+    QObject::connect(ui->interpolationFactor, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FileSourceGUI::on_interpolationFactor_currentIndexChanged);
+    QObject::connect(ui->position, &QSlider::valueChanged, this, &FileSourceGUI::on_position_valueChanged);
+    QObject::connect(ui->gain, &QSlider::valueChanged, this, &FileSourceGUI::on_gain_valueChanged);
+    QObject::connect(ui->showFileDialog, &QPushButton::clicked, this, &FileSourceGUI::on_showFileDialog_clicked);
+    QObject::connect(ui->playLoop, &ButtonSwitch::toggled, this, &FileSourceGUI::on_playLoop_toggled);
+    QObject::connect(ui->play, &ButtonSwitch::toggled, this, &FileSourceGUI::on_play_toggled);
+    QObject::connect(ui->navTime, &QSlider::valueChanged, this, &FileSourceGUI::on_navTime_valueChanged);
 }

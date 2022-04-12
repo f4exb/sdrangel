@@ -271,7 +271,7 @@ void AMModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -298,6 +298,7 @@ void AMModGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -335,10 +336,11 @@ AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampl
     m_tickCount(0),
     m_enableNavTime(false)
 {
-	ui->setupUi(this);
+	ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channeltx/modam/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
-	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+	connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_amMod = (AMMod*) channelTx;
@@ -386,6 +388,7 @@ AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampl
     m_amMod->setLevelMeter(ui->volumeMeter);
 
 	displaySettings();
+    makeUIConnections();
     applySettings(true);
 }
 
@@ -420,6 +423,7 @@ void AMModGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
 
@@ -457,7 +461,7 @@ void AMModGUI::displaySettings()
 
     displayStreamIndex();
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -577,4 +581,23 @@ void AMModGUI::updateWithStreamTime()
         float posRatio = (float) t_sec / (float) m_recordLength;
         ui->navTimeSlider->setValue((int) (posRatio * 100.0));
     }
+}
+
+void AMModGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &AMModGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &AMModGUI::on_rfBW_valueChanged);
+    QObject::connect(ui->modPercent, &QSlider::valueChanged, this, &AMModGUI::on_modPercent_valueChanged);
+    QObject::connect(ui->volume, &QDial::valueChanged, this, &AMModGUI::on_volume_valueChanged);
+    QObject::connect(ui->channelMute, &QToolButton::toggled, this, &AMModGUI::on_channelMute_toggled);
+    QObject::connect(ui->tone, &ButtonSwitch::toggled, this, &AMModGUI::on_tone_toggled);
+    QObject::connect(ui->toneFrequency, &QDial::valueChanged, this, &AMModGUI::on_toneFrequency_valueChanged);
+    QObject::connect(ui->mic, &ButtonSwitch::toggled, this, &AMModGUI::on_mic_toggled);
+    QObject::connect(ui->play, &ButtonSwitch::toggled, this, &AMModGUI::on_play_toggled);
+    QObject::connect(ui->morseKeyer, &ButtonSwitch::toggled, this, &AMModGUI::on_morseKeyer_toggled);
+    QObject::connect(ui->playLoop, &ButtonSwitch::toggled, this, &AMModGUI::on_playLoop_toggled);
+    QObject::connect(ui->navTimeSlider, &QSlider::valueChanged, this, &AMModGUI::on_navTimeSlider_valueChanged);
+    QObject::connect(ui->showFileDialog, &QPushButton::clicked, this, &AMModGUI::on_showFileDialog_clicked);
+    QObject::connect(ui->feedbackEnable, &QToolButton::toggled, this, &AMModGUI::on_feedbackEnable_toggled);
+    QObject::connect(ui->feedbackVolume, &QDial::valueChanged, this, &AMModGUI::on_feedbackVolume_valueChanged);
 }

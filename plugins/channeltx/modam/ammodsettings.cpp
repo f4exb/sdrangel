@@ -52,6 +52,7 @@ void AMModSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
+    m_workspaceIndex = 0;
 }
 
 QByteArray AMModSettings::serialize() const
@@ -91,6 +92,9 @@ QByteArray AMModSettings::serialize() const
     if (m_rollupState) {
         s.writeBlob(21, m_rollupState->serialize());
     }
+
+    s.writeS32(22, m_workspaceIndex);
+    s.writeBlob(23, m_geometryBytes);
 
     return s.final();
 }
@@ -165,6 +169,9 @@ bool AMModSettings::deserialize(const QByteArray& data)
             d.readBlob(21, &bytetmp);
             m_rollupState->deserialize(bytetmp);
         }
+
+        d.readS32(22, &m_workspaceIndex, 0);
+        d.readBlob(23, &m_geometryBytes);
 
         return true;
     }

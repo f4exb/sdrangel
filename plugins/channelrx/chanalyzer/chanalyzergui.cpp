@@ -76,6 +76,7 @@ void ChannelAnalyzerGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
 
@@ -97,7 +98,7 @@ void ChannelAnalyzerGUI::displaySettings()
     QString rolloffStr = QString::number(m_settings.m_rrcRolloff/100.0, 'f', 2);
     ui->rrcRolloffText->setText(rolloffStr);
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -181,7 +182,7 @@ void ChannelAnalyzerGUI::setPLLVisibility()
     else
         ui->pllPskOrder->setCurrentIndex(i);
     ui->pllPskOrder->blockSignals(false);
-    arrangeRollups();
+    getRollupContents()->arrangeRollups();
 }
 
 void ChannelAnalyzerGUI::setSpectrumDisplay()
@@ -279,7 +280,7 @@ void ChannelAnalyzerGUI::channelMarkerChangedByCursor()
 
 void ChannelAnalyzerGUI::channelMarkerHighlightedByCursor()
 {
-    setHighlighted(m_channelMarker.getHighlighted());
+    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void ChannelAnalyzerGUI::tick()
@@ -450,7 +451,7 @@ void ChannelAnalyzerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -477,6 +478,7 @@ void ChannelAnalyzerGUI::onMenuDialogCalled(const QPoint& p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -494,11 +496,12 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *device
 	m_doApplySettings(true),
 	m_basebandSampleRate(48000)
 {
-	ui->setupUi(this);
+	ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/chanalyzer/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
-	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_channelAnalyzer = (ChannelAnalyzer*) rxChannel;
@@ -555,6 +558,7 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *device
 	connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
 	displaySettings();
+    makeUIConnections();
 	applySettings(true);
 }
 
@@ -681,3 +685,21 @@ void ChannelAnalyzerGUI::enterEvent(QEvent*)
 	m_channelMarker.setHighlighted(true);
 }
 
+void ChannelAnalyzerGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &ChannelAnalyzerGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->rationalDownSamplerRate, &ValueDial::changed, this, &ChannelAnalyzerGUI::on_rationalDownSamplerRate_changed);
+    QObject::connect(ui->pll, &QToolButton::toggled, this, &ChannelAnalyzerGUI::on_pll_toggled);
+    QObject::connect(ui->pllType, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ChannelAnalyzerGUI::on_pllType_currentIndexChanged);
+    QObject::connect(ui->pllPskOrder, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ChannelAnalyzerGUI::on_pllPskOrder_currentIndexChanged);
+    QObject::connect(ui->pllBandwidth, &QDial::valueChanged, this, &ChannelAnalyzerGUI::on_pllBandwidth_valueChanged);
+    QObject::connect(ui->pllDampingFactor, &QDial::valueChanged, this, &ChannelAnalyzerGUI::on_pllDampingFactor_valueChanged);
+    QObject::connect(ui->pllLoopGain, &QDial::valueChanged, this, &ChannelAnalyzerGUI::on_pllLoopGain_valueChanged);
+    QObject::connect(ui->useRationalDownsampler, &ButtonSwitch::toggled, this, &ChannelAnalyzerGUI::on_useRationalDownsampler_toggled);
+    QObject::connect(ui->signalSelect, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ChannelAnalyzerGUI::on_signalSelect_currentIndexChanged);
+    QObject::connect(ui->rrcFilter, &ButtonSwitch::toggled, this, &ChannelAnalyzerGUI::on_rrcFilter_toggled);
+    QObject::connect(ui->rrcRolloff, &QDial::valueChanged, this, &ChannelAnalyzerGUI::on_rrcRolloff_valueChanged);
+    QObject::connect(ui->BW, &QSlider::valueChanged, this, &ChannelAnalyzerGUI::on_BW_valueChanged);
+    QObject::connect(ui->lowCut, &QSlider::valueChanged, this, &ChannelAnalyzerGUI::on_lowCut_valueChanged);
+    QObject::connect(ui->ssb, &QCheckBox::toggled, this, &ChannelAnalyzerGUI::on_ssb_toggled);
+}

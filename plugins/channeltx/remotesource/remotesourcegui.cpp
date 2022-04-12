@@ -168,11 +168,11 @@ RemoteSourceGUI::RemoteSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet,
         m_resetCounts(true),
         m_tickCount(0)
 {
-    (void) channelTx;
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channeltx/remotesource/readme.md";
     setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_remoteSrc = (RemoteSource*) channelTx;
@@ -200,6 +200,7 @@ RemoteSourceGUI::RemoteSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet,
     m_time.start();
 
     displaySettings();
+    makeUIConnections();
     displayPosition();
     displayRateAndShift();
     applySettings(true);
@@ -237,12 +238,13 @@ void RemoteSourceGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
     displayStreamIndex();
 
     blockApplySettings(true);
     ui->dataAddress->setText(m_settings.m_dataAddress);
     ui->dataPort->setText(tr("%1").arg(m_settings.m_dataPort));
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -302,7 +304,7 @@ void RemoteSourceGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -329,6 +331,7 @@ void RemoteSourceGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -482,4 +485,14 @@ void RemoteSourceGUI::tick()
 
 void RemoteSourceGUI::channelMarkerChangedByCursor()
 {
+}
+
+void RemoteSourceGUI::makeUIConnections()
+{
+    QObject::connect(ui->interpolationFactor, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RemoteSourceGUI::on_interpolationFactor_currentIndexChanged);
+    QObject::connect(ui->position, &QSlider::valueChanged, this, &RemoteSourceGUI::on_position_valueChanged);
+    QObject::connect(ui->dataAddress, &QLineEdit::returnPressed, this, &RemoteSourceGUI::on_dataAddress_returnPressed);
+    QObject::connect(ui->dataPort, &QLineEdit::returnPressed, this, &RemoteSourceGUI::on_dataPort_returnPressed);
+    QObject::connect(ui->dataApplyButton, &QPushButton::clicked, this, &RemoteSourceGUI::on_dataApplyButton_clicked);
+    QObject::connect(ui->eventCountsReset, &QPushButton::clicked, this, &RemoteSourceGUI::on_eventCountsReset_clicked);
 }

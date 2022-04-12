@@ -54,6 +54,9 @@ struct RadioClockSettings
     uint16_t m_reverseAPIChannelIndex;
     Serializable *m_scopeGUI;
     Serializable *m_rollupState;
+    int m_workspaceIndex;
+    QByteArray m_geometryBytes;
+
     static const int RADIOCLOCK_CHANNEL_SAMPLE_RATE = 1000;
     static const int m_scopeStreams = 8;
 

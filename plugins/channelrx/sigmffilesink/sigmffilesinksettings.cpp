@@ -49,6 +49,7 @@ void SigMFFileSinkSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
+    m_workspaceIndex = 0;
 }
 
 QByteArray SigMFFileSinkSettings::serialize() const
@@ -84,6 +85,9 @@ QByteArray SigMFFileSinkSettings::serialize() const
     if (m_channelMarker) {
         s.writeBlob(20, m_channelMarker->serialize());
     }
+
+    s.writeS32(21, m_workspaceIndex);
+    s.writeBlob(22, m_geometryBytes);
 
     return s.final();
 }
@@ -152,6 +156,9 @@ bool SigMFFileSinkSettings::deserialize(const QByteArray& data)
             d.readBlob(20, &bytetmp);
             m_channelMarker->deserialize(bytetmp);
         }
+
+        d.readS32(21, &m_workspaceIndex, 0);
+        d.readBlob(22, &m_geometryBytes);
 
         return true;
     }

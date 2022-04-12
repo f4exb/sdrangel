@@ -86,6 +86,7 @@ void ATVDemodGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
     displayStreamIndex();
 
     m_doApplySettings = false;
@@ -119,7 +120,7 @@ void ATVDemodGUI::displaySettings()
     ui->amScaleOffsetText->setText(QString("%1").arg(m_settings.m_amOffsetFactor));
 
     applySampleRate();
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
 
     m_doApplySettings = true;
 }
@@ -187,7 +188,7 @@ void ATVDemodGUI::channelMarkerChangedByCursor()
 
 void ATVDemodGUI::channelMarkerHighlightedByCursor()
 {
-    setHighlighted(m_channelMarker.getHighlighted());
+    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void ATVDemodGUI::handleSourceMessages()
@@ -208,7 +209,7 @@ void ATVDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -222,10 +223,11 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
         m_intTickCount(0),
         m_basebandSampleRate(48000)
 {
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/demodatv/readme.md";
     setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 
     m_atvDemod = (ATVDemod*) rxChannel;
     m_atvDemod->setMessageQueueToGUI(getInputMessageQueue());
@@ -278,6 +280,8 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
 
     QChar delta = QChar(0x94, 0x03);
     ui->fmDeviationLabel->setText(delta);
+
+    makeUIConnections();
 }
 
 ATVDemodGUI::~ATVDemodGUI()
@@ -563,4 +567,28 @@ void ATVDemodGUI::topTimeUpdate()
         ui->topTimeText->setText(tr("%1 ms").arg(nominalTopTime * 1000.0, 0, 'f', 2));
     else
         ui->topTimeText->setText(tr("%1 s").arg(nominalTopTime * 1.0, 0, 'f', 2));
+}
+
+void ATVDemodGUI::makeUIConnections()
+{
+    QObject::connect(ui->synchLevel, &QSlider::valueChanged, this, &ATVDemodGUI::on_synchLevel_valueChanged);
+    QObject::connect(ui->blackLevel, &QSlider::valueChanged, this, &ATVDemodGUI::on_blackLevel_valueChanged);
+    QObject::connect(ui->hSync, &QCheckBox::clicked, this, &ATVDemodGUI::on_hSync_clicked);
+    QObject::connect(ui->vSync, &QCheckBox::clicked, this, &ATVDemodGUI::on_vSync_clicked);
+    QObject::connect(ui->invertVideo, &QCheckBox::clicked, this, &ATVDemodGUI::on_invertVideo_clicked);
+    QObject::connect(ui->halfImage, &QCheckBox::clicked, this, &ATVDemodGUI::on_halfImage_clicked);
+    QObject::connect(ui->modulation, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ATVDemodGUI::on_modulation_currentIndexChanged);
+    QObject::connect(ui->nbLines, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ATVDemodGUI::on_nbLines_currentIndexChanged);
+    QObject::connect(ui->fps, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ATVDemodGUI::on_fps_currentIndexChanged);
+    QObject::connect(ui->standard, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ATVDemodGUI::on_standard_currentIndexChanged);
+    QObject::connect(ui->reset, &QPushButton::clicked, this, &ATVDemodGUI::on_reset_clicked);
+    QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &ATVDemodGUI::on_rfBW_valueChanged);
+    QObject::connect(ui->rfOppBW, &QSlider::valueChanged, this, &ATVDemodGUI::on_rfOppBW_valueChanged);
+    QObject::connect(ui->rfFiltering, &ButtonSwitch::toggled, this, &ATVDemodGUI::on_rfFiltering_toggled);
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &ATVDemodGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->bfo, &QDial::valueChanged, this, &ATVDemodGUI::on_bfo_valueChanged);
+    QObject::connect(ui->fmDeviation, &QDial::valueChanged, this, &ATVDemodGUI::on_fmDeviation_valueChanged);
+    QObject::connect(ui->amScaleFactor, &QDial::valueChanged, this, &ATVDemodGUI::on_amScaleFactor_valueChanged);
+    QObject::connect(ui->amScaleOffset, &QDial::valueChanged, this, &ATVDemodGUI::on_amScaleOffset_valueChanged);
+    QObject::connect(ui->screenTabWidget, &QTabWidget::currentChanged, this, &ATVDemodGUI::on_screenTabWidget_currentChanged);
 }

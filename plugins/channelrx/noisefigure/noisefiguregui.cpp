@@ -316,7 +316,7 @@ void NoiseFigureGUI::channelMarkerChangedByCursor()
 
 void NoiseFigureGUI::channelMarkerHighlightedByCursor()
 {
-    setHighlighted(m_channelMarker.getHighlighted());
+    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void NoiseFigureGUI::on_deltaFrequency_changed(qint64 value)
@@ -532,7 +532,7 @@ void NoiseFigureGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -558,6 +558,7 @@ void NoiseFigureGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -592,11 +593,12 @@ NoiseFigureGUI::NoiseFigureGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
     m_runningTest(false),
     m_chart(nullptr)
 {
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/noisefigure/readme.md";
 
     setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_noiseFigure = reinterpret_cast<NoiseFigure*>(rxChannel);
@@ -656,6 +658,7 @@ NoiseFigureGUI::NoiseFigureGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
     ui->results->setItemDelegateForColumn(RESULTS_COL_FLOOR, new DecimalDelegate(1));
 
     displaySettings();
+    makeUIConnections();
     applySettings(true);
 }
 
@@ -706,6 +709,7 @@ void NoiseFigureGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
 
@@ -742,7 +746,7 @@ void NoiseFigureGUI::displaySettings()
         header->moveSection(header->visualIndex(i), m_settings.m_resultsColumnIndexes[i]);
     }
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -783,4 +787,26 @@ void NoiseFigureGUI::tick()
     }
 
     m_tickCount++;
+}
+
+void NoiseFigureGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &NoiseFigureGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->fftCount, &QSlider::valueChanged, this, &NoiseFigureGUI::on_fftCount_valueChanged);
+    QObject::connect(ui->setting, &QComboBox::currentTextChanged, this, &NoiseFigureGUI::on_setting_currentTextChanged);
+    QObject::connect(ui->frequencySpec, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &NoiseFigureGUI::on_frequencySpec_currentIndexChanged);
+    QObject::connect(ui->start, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &NoiseFigureGUI::on_start_valueChanged);
+    QObject::connect(ui->stop, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &NoiseFigureGUI::on_stop_valueChanged);
+    QObject::connect(ui->steps, QOverload<int>::of(&QSpinBox::valueChanged), this, &NoiseFigureGUI::on_steps_valueChanged);
+    QObject::connect(ui->step, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &NoiseFigureGUI::on_step_valueChanged);
+    QObject::connect(ui->list, &QLineEdit::editingFinished, this, &NoiseFigureGUI::on_list_editingFinished);
+    QObject::connect(ui->fftSize, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &NoiseFigureGUI::on_fftSize_currentIndexChanged);
+    QObject::connect(ui->startStop, &ButtonSwitch::clicked, this, &NoiseFigureGUI::on_startStop_clicked);
+    QObject::connect(ui->saveResults, &QToolButton::clicked, this, &NoiseFigureGUI::on_saveResults_clicked);
+    QObject::connect(ui->clearResults, &QToolButton::clicked, this, &NoiseFigureGUI::on_clearResults_clicked);
+    QObject::connect(ui->enr, &QToolButton::clicked, this, &NoiseFigureGUI::on_enr_clicked);
+    QObject::connect(ui->control, &QToolButton::clicked, this, &NoiseFigureGUI::on_control_clicked);
+    QObject::connect(ui->chartSelect, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &NoiseFigureGUI::on_chartSelect_currentIndexChanged);
+    QObject::connect(ui->openReference, &QToolButton::clicked, this, &NoiseFigureGUI::on_openReference_clicked);
+    QObject::connect(ui->clearReference, &QToolButton::clicked, this, &NoiseFigureGUI::on_clearReference_clicked);
 }

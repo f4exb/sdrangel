@@ -253,7 +253,7 @@ void PacketDemodGUI::channelMarkerChangedByCursor()
 
 void PacketDemodGUI::channelMarkerHighlightedByCursor()
 {
-    setHighlighted(m_channelMarker.getHighlighted());
+    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void PacketDemodGUI::on_deltaFrequency_changed(qint64 value)
@@ -369,7 +369,7 @@ void PacketDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -395,6 +395,7 @@ void PacketDemodGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -426,11 +427,12 @@ PacketDemodGUI::PacketDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
     m_doApplySettings(true),
     m_tickCount(0)
 {
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/demodpacket/readme.md";
 
     setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_packetDemod = reinterpret_cast<PacketDemod*>(rxChannel);
@@ -482,6 +484,7 @@ PacketDemodGUI::PacketDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
     connect(ui->packets->horizontalHeader(), SIGNAL(sectionResized(int, int, int)), SLOT(packets_sectionResized(int, int, int)));
 
     displaySettings();
+    makeUIConnections();
     applySettings(true);
 }
 
@@ -515,6 +518,7 @@ void PacketDemodGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
 
@@ -553,7 +557,7 @@ void PacketDemodGUI::displaySettings()
 
     filter();
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -681,4 +685,22 @@ void PacketDemodGUI::on_logOpen_clicked()
             }
         }
     }
+}
+
+void PacketDemodGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &PacketDemodGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->mode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PacketDemodGUI::on_mode_currentIndexChanged);
+    QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &PacketDemodGUI::on_rfBW_valueChanged);
+    QObject::connect(ui->fmDev, &QSlider::valueChanged, this, &PacketDemodGUI::on_fmDev_valueChanged);
+    QObject::connect(ui->filterFrom, &QLineEdit::editingFinished, this, &PacketDemodGUI::on_filterFrom_editingFinished);
+    QObject::connect(ui->filterTo, &QLineEdit::editingFinished, this, &PacketDemodGUI::on_filterTo_editingFinished);
+    QObject::connect(ui->filterPID, &QCheckBox::stateChanged, this, &PacketDemodGUI::on_filterPID_stateChanged);
+    QObject::connect(ui->clearTable, &QPushButton::clicked, this, &PacketDemodGUI::on_clearTable_clicked);
+    QObject::connect(ui->udpEnabled, &QCheckBox::clicked, this, &PacketDemodGUI::on_udpEnabled_clicked);
+    QObject::connect(ui->udpAddress, &QLineEdit::editingFinished, this, &PacketDemodGUI::on_udpAddress_editingFinished);
+    QObject::connect(ui->udpPort, &QLineEdit::editingFinished, this, &PacketDemodGUI::on_udpPort_editingFinished);
+    QObject::connect(ui->logEnable, &ButtonSwitch::clicked, this, &PacketDemodGUI::on_logEnable_clicked);
+    QObject::connect(ui->logFilename, &QToolButton::clicked, this, &PacketDemodGUI::on_logFilename_clicked);
+    QObject::connect(ui->logOpen, &QToolButton::clicked, this, &PacketDemodGUI::on_logOpen_clicked);
 }

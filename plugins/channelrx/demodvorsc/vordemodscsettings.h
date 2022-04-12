@@ -46,6 +46,8 @@ struct VORDemodSCSettings
     Real m_refThresholdDB;              //!< Threshold in dB for valid VOR reference signal
     Real m_varThresholdDB;              //!< Threshold in dB for valid VOR variable signal
     Serializable *m_rollupState;
+    int m_workspaceIndex;
+    QByteArray m_geometryBytes;
 
     // Highest frequency is the FM subcarrier at up to ~11kHz
     // However, old VORs can have 0.005% frequency offset, which is 6kHz

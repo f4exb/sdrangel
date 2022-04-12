@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>ADSBDemodGUI</class>
- <widget class="RollupWidget" name="ADSBDemodGUI">
+ <widget class="RollupContents" name="ADSBDemodGUI">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>604</width>
+    <width>600</width>
     <height>1046</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>350</width>
+    <width>600</width>
     <height>0</height>
    </size>
   </property>
@@ -35,13 +35,13 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>600</width>
+     <width>598</width>
      <height>141</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
-     <width>600</width>
+     <width>598</width>
      <height>0</height>
     </size>
    </property>
@@ -758,7 +758,7 @@
     <rect>
      <x>0</x>
      <y>140</y>
-     <width>600</width>
+     <width>598</width>
      <height>600</height>
     </rect>
    </property>
@@ -770,7 +770,7 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>600</width>
+     <width>598</width>
      <height>0</height>
     </size>
    </property>
@@ -1270,15 +1270,15 @@
    <header location="global">QtQuickWidgets/QQuickWidget</header>
   </customwidget>
   <customwidget>
-   <class>RollupWidget</class>
-   <extends>QWidget</extends>
-   <header>gui/rollupwidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>ButtonSwitch</class>
    <extends>QToolButton</extends>
    <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
+   <class>RollupContents</class>
+   <extends>QWidget</extends>
+   <header>gui/rollupcontents.h</header>
+   <container>1</container>
   </customwidget>
   <customwidget>
    <class>ValueDialZ</class>

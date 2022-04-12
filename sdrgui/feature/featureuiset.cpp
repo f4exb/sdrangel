@@ -92,6 +92,11 @@ void FeatureUISet::deleteFeature(int featureIndex)
         m_featureInstanceRegistrations.removeAt(featureIndex);
         m_featureSet->removeFeatureInstanceAt(featureIndex);
     }
+
+    // Renumerate
+    for (int i = 0; i < m_featureInstanceRegistrations.count(); i++) {
+        m_featureInstanceRegistrations.at(i).m_gui->setIndex(i);
+    }
 }
 
 const Feature *FeatureUISet::getFeatureAt(int featureIndex) const
@@ -236,5 +241,10 @@ void FeatureUISet::handleClosingFeatureGUI(FeatureGUI *featureGUI)
             m_featureInstanceRegistrations.erase(it);
             break;
         }
+    }
+
+    // Renumerate
+    for (int i = 0; i < m_featureInstanceRegistrations.count(); i++) {
+        m_featureInstanceRegistrations.at(i).m_gui->setIndex(i);
     }
 }

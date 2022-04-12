@@ -70,6 +70,7 @@ void DATVDemodSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
+    m_workspaceIndex = 0;
 }
 
 QByteArray DATVDemodSettings::serialize() const
@@ -118,6 +119,9 @@ QByteArray DATVDemodSettings::serialize() const
     if (m_rollupState) {
         s.writeBlob(37, m_rollupState->serialize());
     }
+
+    s.writeS32(38, m_workspaceIndex);
+    s.writeBlob(39, m_geometryBytes);
 
     return s.final();
 }
@@ -212,6 +216,9 @@ bool DATVDemodSettings::deserialize(const QByteArray& data)
             d.readBlob(37, &bytetmp);
             m_rollupState->deserialize(bytetmp);
         }
+
+        d.readS32(38, &m_workspaceIndex, 0);
+        d.readBlob(39, &m_geometryBytes);
 
         validateSystemConfiguration();
 

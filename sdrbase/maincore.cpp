@@ -24,6 +24,7 @@
 #include "feature/featureset.h"
 #include "feature/feature.h"
 #include "device/deviceset.h"
+#include "device/deviceapi.h"
 #include "channel/channelapi.h"
 
 #include "maincore.h"
@@ -194,6 +195,24 @@ void MainCore::removeLastDeviceSet()
         DeviceSet *deviceSet = m_deviceSets.back();
         m_deviceSetsMap.remove(deviceSet);
         m_deviceSets.pop_back();
+    }
+}
+
+void MainCore::removeDeviceSet(int deviceSetIndex)
+{
+    if (deviceSetIndex < (int) m_deviceSets.size())
+    {
+        DeviceSet *deviceSet = m_deviceSets[deviceSetIndex];
+        m_deviceSetsMap.remove(deviceSet);
+        m_deviceSets.erase(m_deviceSets.begin() + deviceSetIndex);
+        delete deviceSet;
+    }
+
+    // Renumerate
+    for (int i = 0; i < (int) m_deviceSets.size(); i++)
+    {
+        m_deviceSets[i]->m_deviceAPI->setDeviceSetIndex(i);
+        m_deviceSets[i]->setIndex(i);
     }
 }
 

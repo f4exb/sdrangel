@@ -57,6 +57,7 @@ class Preset;
 class Command;
 class FeatureSetPreset;
 class CommandKeyReceiver;
+class ConfigurationsDialog;
 
 class QMenuBar;
 class Workspace;
@@ -78,6 +79,9 @@ public:
     void commandKeysConnect(QObject *object, const char *slot);
     void commandKeysDisconnect(QObject *object, const char *slot);
     int getNumberOfWorkspaces() const { return m_workspaces.size(); }
+
+public slots:
+    void channelMove(ChannelGUI *gui, int wsIndexDestnation);
 
 private:
     enum {
@@ -137,9 +141,10 @@ private:
 	QTreeWidgetItem* addPresetToTree(const Preset* preset);
 	void applySettings();
 
+    void removeDeviceSet(int deviceSetIndex);
     void removeLastDevice();
     void addFeatureSet();
-    void removeFeatureSet(unsigned int tabIndex);
+    void removeFeatureSet(unsigned int featureSetIndex);
     void removeAllFeatureSets();
     void deleteChannel(int deviceSetIndex, int channelIndex);
     void sampleDeviceChange(int deviceType, int deviceSetIndex, int newDeviceIndex, Workspace *workspace);
@@ -175,7 +180,7 @@ private slots:
     void addWorkspace();
     void viewAllWorkspaces();
     void removeEmptyWorkspaces();
-	void loadConfiguration(const Configuration *configuration);
+	void loadConfiguration(const Configuration *configuration, bool fromDialog = false);
     void saveConfiguration(Configuration *configuration);
 	void sampleSourceAdd(Workspace *workspace, int deviceIndex);
 	void sampleSinkAdd(Workspace *workspace, int deviceIndex);
@@ -202,13 +207,14 @@ private slots:
 	void on_action_My_Position_triggered();
     void on_action_DeviceUserArguments_triggered();
     void on_action_commands_triggered();
-    void channelAddClicked(int channelIndex);
+    void channelAddClicked(Workspace *workspace, int deviceSetIndex, int channelIndex);
     void featureAddClicked(Workspace *workspace, int featureIndex);
     void featureMove(FeatureGUI *gui, int wsIndexDestnation);
     void openFeaturePresetsDialog(QPoint p, Workspace *workspace);
     void deviceMove(DeviceGUI *gui, int wsIndexDestnation);
     void mainSpectrumMove(MainSpectrumGUI *gui, int wsIndexDestnation);
     void mainSpectrumShow(MainSpectrumGUI *gui);
+    void showAllChannels(int deviceSetIndex);
     void on_action_Quick_Start_triggered();
     void on_action_Main_Window_triggered();
 	void on_action_Loaded_Plugins_triggered();

@@ -303,7 +303,7 @@ void APTDemodGUI::channelMarkerChangedByCursor()
 
 void APTDemodGUI::channelMarkerHighlightedByCursor()
 {
-    setHighlighted(m_channelMarker.getHighlighted());
+    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void APTDemodGUI::on_deltaFrequency_changed(qint64 value)
@@ -527,7 +527,7 @@ void APTDemodGUI::on_zoomAll_clicked(bool checked)
     }
 }
 
-void APTDemodGUI::on_image_zoomed()
+void APTDemodGUI::onImageZoomed()
 {
     ui->zoomAll->setChecked(false);
 }
@@ -537,7 +537,7 @@ void APTDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -563,6 +563,7 @@ void APTDemodGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -596,11 +597,12 @@ APTDemodGUI::APTDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_scene(nullptr),
     m_pixmapItem(nullptr)
 {
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/demodapt/readme.md";
 
     setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_aptDemod = reinterpret_cast<APTDemod*>(rxChannel);
@@ -633,7 +635,7 @@ APTDemodGUI::APTDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
     m_zoom = new GraphicsViewZoom(ui->image); // Deleted automatically when view is deleted
-    connect(m_zoom, SIGNAL(zoomed()), this, SLOT(on_image_zoomed()));
+    connect(m_zoom, SIGNAL(zoomed()), this, SLOT(onImageZoomed()));
 
     // Create slightly transparent white background so labels can be seen
     m_tempScale = new TempScale();
@@ -658,6 +660,7 @@ APTDemodGUI::APTDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_scene->installEventFilter(this);
 
     displaySettings();
+    makeUIConnections();
     applySettings(true);
 }
 
@@ -740,6 +743,7 @@ void APTDemodGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
 
@@ -774,7 +778,7 @@ void APTDemodGUI::displaySettings()
     displayLabels();
     displayStreamIndex();
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -881,4 +885,30 @@ void APTDemodGUI::deleteImageFromMap(const QString &name)
         MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_aptDemod, swgMapItem);
         messageQueue->push(msg);
     }
+}
+
+void APTDemodGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &APTDemodGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &APTDemodGUI::on_rfBW_valueChanged);
+    QObject::connect(ui->fmDev, &QSlider::valueChanged, this, &APTDemodGUI::on_fmDev_valueChanged);
+    QObject::connect(ui->channels, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &APTDemodGUI::on_channels_currentIndexChanged);
+    QObject::connect(ui->transparencyThreshold, &QDial::valueChanged, this, &APTDemodGUI::on_transparencyThreshold_valueChanged);
+    QObject::connect(ui->transparencyThreshold, &QDial::sliderReleased, this, &APTDemodGUI::on_transparencyThreshold_sliderReleased);
+    QObject::connect(ui->opacityThreshold, &QDial::valueChanged, this, &APTDemodGUI::on_opacityThreshold_valueChanged);
+    QObject::connect(ui->opacityThreshold, &QDial::sliderReleased, this, &APTDemodGUI::on_opacityThreshold_sliderReleased);
+    QObject::connect(ui->deleteImageFromMap, &QToolButton::clicked, this, &APTDemodGUI::on_deleteImageFromMap_clicked);
+    QObject::connect(ui->cropNoise, &ButtonSwitch::clicked, this, &APTDemodGUI::on_cropNoise_clicked);
+    QObject::connect(ui->denoise, &ButtonSwitch::clicked, this, &APTDemodGUI::on_denoise_clicked);
+    QObject::connect(ui->linear, &ButtonSwitch::clicked, this, &APTDemodGUI::on_linear_clicked);
+    QObject::connect(ui->histogram, &ButtonSwitch::clicked, this, &APTDemodGUI::on_histogram_clicked);
+    QObject::connect(ui->precipitation, &ButtonSwitch::clicked, this, &APTDemodGUI::on_precipitation_clicked);
+    QObject::connect(ui->flip, &ButtonSwitch::clicked, this, &APTDemodGUI::on_flip_clicked);
+    QObject::connect(ui->startStop, &ButtonSwitch::clicked, this, &APTDemodGUI::on_startStop_clicked);
+    QObject::connect(ui->showSettings, &QToolButton::clicked, this, &APTDemodGUI::on_showSettings_clicked);
+    QObject::connect(ui->resetDecoder, &QToolButton::clicked, this, &APTDemodGUI::on_resetDecoder_clicked);
+    QObject::connect(ui->saveImage, &QToolButton::clicked, this, &APTDemodGUI::on_saveImage_clicked);
+    QObject::connect(ui->zoomIn, &QToolButton::clicked, this, &APTDemodGUI::on_zoomIn_clicked);
+    QObject::connect(ui->zoomOut, &QToolButton::clicked, this, &APTDemodGUI::on_zoomOut_clicked);
+    QObject::connect(ui->zoomAll, &ButtonSwitch::clicked, this, &APTDemodGUI::on_zoomAll_clicked);
 }

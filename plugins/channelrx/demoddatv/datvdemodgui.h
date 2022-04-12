@@ -50,6 +50,12 @@ public:
 	void resetToDefaults();
 	QByteArray serialize() const;
     bool deserialize(const QByteArray& arrData);
+    virtual void setWorkspaceIndex(int index) { m_settings.m_workspaceIndex = index; };
+    virtual int getWorkspaceIndex() const { return m_settings.m_workspaceIndex; };
+    virtual void setGeometryBytes(const QByteArray& blob) { m_settings.m_geometryBytes = blob; };
+    virtual QByteArray getGeometryBytes() const { return m_settings.m_geometryBytes; };
+    virtual QString getTitle() const { return m_settings.m_title; };
+    virtual QColor getTitleColor() const  { return m_settings.m_rgbColor; };
 
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 
@@ -68,8 +74,8 @@ private slots:
     void tickMeter();
 
     void on_cmbStandard_currentIndexChanged(int index);
-    void on_cmbModulation_currentIndexChanged(const QString &arg1);
-    void on_cmbFEC_currentIndexChanged(const QString &arg1);
+    void on_cmbModulation_currentIndexChanged(int arg1);
+    void on_cmbFEC_currentIndexChanged(int arg1);
     void on_softLDPC_clicked();
     void on_maxBitflips_valueChanged(int value);
     void on_chkViterbi_clicked();
@@ -137,6 +143,7 @@ private:
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
     bool handleMessage(const Message& objMessage);
+    void makeUIConnections();
 };
 
 #endif // INCLUDE_DATVDEMODGUI_H

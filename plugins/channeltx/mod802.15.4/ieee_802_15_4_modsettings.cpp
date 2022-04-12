@@ -75,6 +75,7 @@ void IEEE_802_15_4_ModSettings::resetToDefaults()
     m_udpBytesFormat = false;
     m_udpAddress = "127.0.0.1";
     m_udpPort = 9998;
+    m_workspaceIndex = 0;
 }
 
 bool IEEE_802_15_4_ModSettings::setPHY(QString phy)
@@ -202,6 +203,9 @@ QByteArray IEEE_802_15_4_ModSettings::serialize() const
         s.writeBlob(38, m_rollupState->serialize());
     }
 
+    s.writeS32(39, m_workspaceIndex);
+    s.writeBlob(40, m_geometryBytes);
+
     return s.final();
 }
 
@@ -287,6 +291,9 @@ bool IEEE_802_15_4_ModSettings::deserialize(const QByteArray& data)
             d.readBlob(38, &bytetmp);
             m_rollupState->deserialize(bytetmp);
         }
+
+        d.readS32(39, &m_workspaceIndex, 0);
+        d.readBlob(40, &m_geometryBytes);
 
         return true;
     }

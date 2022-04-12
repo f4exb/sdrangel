@@ -132,6 +132,13 @@ FeatureGUI::FeatureGUI(QWidget *parent) :
     connect(m_shrinkButton, SIGNAL(clicked()), this, SLOT(shrinkWindow()));
     connect(this, SIGNAL(forceShrink()), this, SLOT(shrinkWindow()));
     connect(m_closeButton, SIGNAL(clicked()), this, SLOT(close()));
+
+    connect(
+        &m_rollupContents,
+        &RollupContents::widgetRolled,
+        this,
+        &FeatureGUI::onWidgetRolled
+    );
 }
 
 FeatureGUI::~FeatureGUI()
@@ -212,6 +219,22 @@ void FeatureGUI::openMoveToWorkspaceDialog()
 
     if (dialog.hasChanged()) {
         emit moveToWorkspace(dialog.getSelectedIndex());
+    }
+}
+
+void FeatureGUI::onWidgetRolled(QWidget *widget, bool show)
+{
+    if (show)
+    {
+        // qDebug("FeatureGUI::onWidgetRolled: show: %d %d", m_rollupContents.height(), widget->height());
+        int dh = m_heightsMap.contains(widget) ? m_heightsMap[widget] - widget->height() : widget->minimumHeight();
+        resize(width(), 52 +  m_rollupContents.height() + dh);
+    }
+    else
+    {
+        // qDebug("FeatureGUI::onWidgetRolled: hide: %d %d", m_rollupContents.height(), widget->height());
+        m_heightsMap[widget] = widget->height();
+        resize(width(), 52 +  m_rollupContents.height());
     }
 }
 

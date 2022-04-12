@@ -56,6 +56,7 @@ void FreeDVDemodSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
+    m_workspaceIndex = 0;
 }
 
 QByteArray FreeDVDemodSettings::serialize() const
@@ -85,6 +86,9 @@ QByteArray FreeDVDemodSettings::serialize() const
     if (m_rollupState) {
         s.writeBlob(25, m_rollupState->serialize());
     }
+
+    s.writeS32(26, m_workspaceIndex);
+    s.writeBlob(27, m_geometryBytes);
 
     return s.final();
 }
@@ -153,6 +157,9 @@ bool FreeDVDemodSettings::deserialize(const QByteArray& data)
             d.readBlob(25, &bytetmp);
             m_rollupState->deserialize(bytetmp);
         }
+
+        d.readS32(26, &m_workspaceIndex, 0);
+        d.readBlob(27, &m_geometryBytes);
 
         return true;
     }

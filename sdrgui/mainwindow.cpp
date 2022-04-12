@@ -96,6 +96,7 @@
 #include <string>
 #include <QDebug>
 #include <QSplashScreen>
+#include <QProgressDialog>
 
 #if defined(HAS_LIMERFEUSB)
 #include "limerfegui/limerfeusbdialog.h"
@@ -401,6 +402,13 @@ void MainWindow::sampleSourceAdd(Workspace *workspace, int deviceIndex)
         [=](int wsIndexDest){ this->mainSpectrumMove(m_deviceUIs.back()->m_mainSpectrumGUI, wsIndexDest); }
     );
 
+    QObject::connect(
+        m_deviceUIs.back()->m_deviceGUI,
+        &DeviceGUI::addChannelEmitted,
+        this,
+        [=](int channelIndex){ this->channelAddClicked(workspace, deviceSetIndex, channelIndex); }
+    );
+
     workspace->addToMdiArea(m_deviceUIs.back()->m_deviceGUI);
     workspace->addToMdiArea(m_deviceUIs.back()->m_mainSpectrumGUI);
     emit m_mainCore->deviceSetAdded(deviceSetIndex, deviceAPI);
@@ -522,6 +530,19 @@ void MainWindow::sampleSourceCreate(
         this,
         [=](int deviceSetIndex){ this->mainSpectrumShow(this->m_deviceUIs[deviceSetIndex]->m_mainSpectrumGUI); }
     );
+    QObject::connect(
+        deviceGUI,
+        &DeviceGUI::showAllChannels,
+        this,
+        &MainWindow::showAllChannels
+    );
+    QObject::connect(
+        deviceGUI,
+        &DeviceGUI::closing,
+        this,
+        [=](){ this->removeDeviceSet(deviceGUI->getIndex()); }
+    );
+
     deviceAPI->getSampleSource()->setMessageQueueToGUI(deviceGUI->getInputMessageQueue());
     deviceUISet->m_deviceGUI = deviceGUI;
     const PluginInterface::SamplingDevice *selectedDevice = DeviceEnumerator::instance()->getRxSamplingDevice(selectedDeviceIndex);
@@ -536,6 +557,9 @@ void MainWindow::sampleSourceCreate(
     deviceGUI->setToolTip(samplingDevice->displayedName);
     deviceGUI->setTitle(samplingDevice->displayedName.split(" ")[0]);
     deviceGUI->setCurrentDeviceIndex(selectedDeviceIndex);
+    QStringList channelNames;
+    m_pluginManager->listRxChannels(channelNames);
+    deviceGUI->setChannelNames(channelNames);
     MainSpectrumGUI *mainSpectrumGUI = deviceUISet->m_mainSpectrumGUI;
     mainSpectrumGUI->setDeviceType(MainSpectrumGUI::DeviceRx);
     mainSpectrumGUI->setIndex(deviceSetIndex);
@@ -587,6 +611,13 @@ void MainWindow::sampleSinkAdd(Workspace *workspace, int deviceIndex)
         &MainSpectrumGUI::moveToWorkspace,
         this,
         [=](int wsIndexDest){ this->mainSpectrumMove(m_deviceUIs.back()->m_mainSpectrumGUI, wsIndexDest); }
+    );
+
+    QObject::connect(
+        m_deviceUIs.back()->m_deviceGUI,
+        &DeviceGUI::addChannelEmitted,
+        this,
+        [=](int channelIndex){ this->channelAddClicked(workspace, deviceSetIndex, channelIndex); }
     );
 
     workspace->addToMdiArea(m_deviceUIs.back()->m_deviceGUI);
@@ -704,6 +735,24 @@ void MainWindow::sampleSinkCreate(
         this,
         [=](int newDeviceIndex){ this->sampleDeviceChangeHandler(deviceGUI, newDeviceIndex); }
     );
+    QObject::connect(
+        deviceGUI,
+        &DeviceGUI::showSpectrum,
+        this,
+        [=](int deviceSetIndex){ this->mainSpectrumShow(this->m_deviceUIs[deviceSetIndex]->m_mainSpectrumGUI); }
+    );
+    QObject::connect(
+        deviceGUI,
+        &DeviceGUI::showAllChannels,
+        this,
+        &MainWindow::showAllChannels
+    );
+    QObject::connect(
+        deviceGUI,
+        &DeviceGUI::closing,
+        this,
+        [=](){ this->removeDeviceSet(deviceGUI->getIndex()); }
+    );
     deviceAPI->getSampleSink()->setMessageQueueToGUI(deviceGUI->getInputMessageQueue());
     deviceUISet->m_deviceGUI = deviceGUI;
     const PluginInterface::SamplingDevice *selectedDevice = DeviceEnumerator::instance()->getRxSamplingDevice(selectedDeviceIndex);
@@ -718,6 +767,9 @@ void MainWindow::sampleSinkCreate(
     deviceGUI->setToolTip(samplingDevice->displayedName);
     deviceGUI->setTitle(samplingDevice->displayedName.split(" ")[0]);
     deviceGUI->setCurrentDeviceIndex(selectedDeviceIndex);
+    QStringList channelNames;
+    m_pluginManager->listTxChannels(channelNames);
+    deviceGUI->setChannelNames(channelNames);
     MainSpectrumGUI *spectrumGUI = deviceUISet->m_mainSpectrumGUI;
     spectrumGUI->setDeviceType(MainSpectrumGUI::DeviceTx);
     spectrumGUI->setIndex(deviceSetIndex);
@@ -777,6 +829,13 @@ void MainWindow::sampleMIMOAdd(Workspace *workspace, int deviceIndex)
         &MainSpectrumGUI::moveToWorkspace,
         this,
         [=](int wsIndexDest){ this->mainSpectrumMove(m_deviceUIs.back()->m_mainSpectrumGUI, wsIndexDest); }
+    );
+
+    QObject::connect(
+        m_deviceUIs.back()->m_deviceGUI,
+        &DeviceGUI::addChannelEmitted,
+        this,
+        [=](int channelIndex){ this->channelAddClicked(workspace, deviceSetIndex, channelIndex); }
     );
 
     workspace->addToMdiArea(m_deviceUIs.back()->m_deviceGUI);
@@ -860,6 +919,24 @@ void MainWindow::sampleMIMOCreate(
         this,
         [=](int newDeviceIndex){ this->sampleDeviceChangeHandler(deviceGUI, newDeviceIndex); }
     );
+    QObject::connect(
+        deviceGUI,
+        &DeviceGUI::showSpectrum,
+        this,
+        [=](int deviceSetIndex){ this->mainSpectrumShow(this->m_deviceUIs[deviceSetIndex]->m_mainSpectrumGUI); }
+    );
+    QObject::connect(
+        deviceGUI,
+        &DeviceGUI::showAllChannels,
+        this,
+        &MainWindow::showAllChannels
+    );
+    QObject::connect(
+        deviceGUI,
+        &DeviceGUI::closing,
+        this,
+        [=](){ this->removeDeviceSet(deviceGUI->getIndex()); }
+    );
     deviceAPI->getSampleMIMO()->setMessageQueueToGUI(deviceGUI->getInputMessageQueue());
     deviceUISet->m_deviceGUI = deviceGUI;
     const PluginInterface::SamplingDevice *selectedDevice = DeviceEnumerator::instance()->getRxSamplingDevice(selectedDeviceIndex);
@@ -874,11 +951,105 @@ void MainWindow::sampleMIMOCreate(
     deviceGUI->setToolTip(samplingDevice->displayedName);
     deviceGUI->setTitle(samplingDevice->displayedName.split(" ")[0]);
     deviceGUI->setCurrentDeviceIndex(selectedDeviceIndex);
+    QStringList channelNames;
+    m_pluginManager->listMIMOChannels(channelNames);
+    deviceGUI->setChannelNames(channelNames);
     MainSpectrumGUI *spectrumGUI = deviceUISet->m_mainSpectrumGUI;
     spectrumGUI->setDeviceType(MainSpectrumGUI::DeviceMIMO);
     spectrumGUI->setIndex(deviceSetIndex);
     spectrumGUI->setToolTip(samplingDevice->displayedName);
     spectrumGUI->setTitle(samplingDevice->displayedName.split(" ")[0]);
+}
+
+void MainWindow::removeDeviceSet(int deviceSetIndex)
+{
+    if (deviceSetIndex >= (int) m_deviceUIs.size()) {
+        return;
+    }
+
+    DeviceUISet *deviceUISet = m_deviceUIs[deviceSetIndex];
+
+    if (deviceUISet->m_deviceSourceEngine) // source device
+    {
+        DSPDeviceSourceEngine *deviceEngine = deviceUISet->m_deviceSourceEngine;
+        deviceEngine->stopAcquistion();
+        deviceEngine->removeSink(deviceUISet->m_spectrumVis);
+
+        // deletes old UI and core object
+        deviceUISet->freeChannels();      // destroys the channel instances
+        deviceUISet->m_deviceAPI->getSampleSource()->setMessageQueueToGUI(nullptr); // have source stop sending messages to the GUI
+        deviceUISet->m_deviceGUI->destroy();
+        deviceUISet->m_deviceAPI->resetSamplingDeviceId();
+        deviceUISet->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceInput(
+            deviceUISet->m_deviceAPI->getSampleSource());
+        deviceUISet->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
+
+	    DeviceAPI *sourceAPI = deviceUISet->m_deviceAPI;
+	    delete deviceUISet;
+
+	    deviceEngine->stop();
+	    m_dspEngine->removeDeviceEngineAt(deviceSetIndex);
+
+	    delete sourceAPI;
+    }
+    else if (deviceUISet->m_deviceSinkEngine) // sink device
+    {
+	    DSPDeviceSinkEngine *deviceEngine = deviceUISet->m_deviceSinkEngine;
+	    deviceEngine->stopGeneration();
+	    deviceEngine->removeSpectrumSink(deviceUISet->m_spectrumVis);
+
+        // deletes old UI and output object
+        deviceUISet->freeChannels();
+        deviceUISet->m_deviceAPI->getSampleSink()->setMessageQueueToGUI(nullptr); // have sink stop sending messages to the GUI
+        deviceUISet->m_deviceGUI->destroy();
+	    deviceUISet->m_deviceAPI->resetSamplingDeviceId();
+	    deviceUISet->m_deviceAPI->getPluginInterface()->deleteSampleSinkPluginInstanceOutput(
+	        deviceUISet->m_deviceAPI->getSampleSink());
+        deviceUISet->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
+
+	    DeviceAPI *sinkAPI = deviceUISet->m_deviceAPI;
+	    delete deviceUISet;
+
+	    deviceEngine->stop();
+	    m_dspEngine->removeDeviceEngineAt(deviceSetIndex);
+
+	    delete sinkAPI;
+    }
+    else if (deviceUISet->m_deviceMIMOEngine) // MIMO device
+    {
+	    DSPDeviceMIMOEngine *deviceEngine = deviceUISet->m_deviceMIMOEngine;
+	    deviceEngine->stopProcess(1); // Tx side
+        deviceEngine->stopProcess(0); // Rx side
+	    deviceEngine->removeSpectrumSink(deviceUISet->m_spectrumVis);
+
+        // deletes old UI and output object
+        deviceUISet->freeChannels();
+        deviceUISet->m_deviceAPI->getSampleMIMO()->setMessageQueueToGUI(nullptr); // have sink stop sending messages to the GUI
+        deviceUISet->m_deviceGUI->destroy();
+	    deviceUISet->m_deviceAPI->resetSamplingDeviceId();
+	    deviceUISet->m_deviceAPI->getPluginInterface()->deleteSampleMIMOPluginInstanceMIMO(
+	        deviceUISet->m_deviceAPI->getSampleMIMO());
+
+	    DeviceAPI *mimoAPI = deviceUISet->m_deviceAPI;
+	    delete deviceUISet;
+
+	    deviceEngine->stop();
+	    m_dspEngine->removeDeviceEngineAt(deviceSetIndex);
+
+	    delete mimoAPI;
+    }
+
+    m_deviceUIs.erase(m_deviceUIs.begin() + deviceSetIndex);
+    m_mainCore->removeDeviceSet(deviceSetIndex);
+
+    // Renumerate
+    for (int i = 0; i < (int) m_deviceUIs.size(); i++)
+    {
+        DeviceUISet *deviceUISet = m_deviceUIs[i];
+        deviceUISet->setIndex(i);
+    }
+
+    emit m_mainCore->deviceSetRemoved(deviceSetIndex);
 }
 
 void MainWindow::removeLastDevice()
@@ -891,10 +1062,6 @@ void MainWindow::removeLastDevice()
 	    lastDeviceEngine->stopAcquistion();
 	    lastDeviceEngine->removeSink(m_deviceUIs.back()->m_spectrumVis);
 
-	    // ui->tabSpectraGUI->removeTab(ui->tabSpectraGUI->count() - 1);
-	    // ui->tabSpectra->removeTab(ui->tabSpectra->count() - 1);
-        // ui->inputViewDock->removeLastDevice();
-
         // deletes old UI and input object
         m_deviceUIs.back()->freeChannels();      // destroys the channel instances
         m_deviceUIs.back()->m_deviceAPI->getSampleSource()->setMessageQueueToGUI(nullptr); // have source stop sending messages to the GUI
@@ -903,11 +1070,6 @@ void MainWindow::removeLastDevice()
         m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceInput(
             m_deviceUIs.back()->m_deviceAPI->getSampleSource());
         m_deviceUIs.back()->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
-
-	    // ui->tabChannels->removeTab(ui->tabChannels->count() - 1);
-
-	    // m_deviceWidgetTabs.removeLast();
-        // restoreDeviceTabs();
 
 	    DeviceAPI *sourceAPI = m_deviceUIs.back()->m_deviceAPI;
 	    delete m_deviceUIs.back();
@@ -923,10 +1085,6 @@ void MainWindow::removeLastDevice()
 	    lastDeviceEngine->stopGeneration();
 	    lastDeviceEngine->removeSpectrumSink(m_deviceUIs.back()->m_spectrumVis);
 
-	    // ui->tabSpectraGUI->removeTab(ui->tabSpectraGUI->count() - 1);
-	    // ui->tabSpectra->removeTab(ui->tabSpectra->count() - 1);
-        // ui->inputViewDock->removeLastDevice();
-
         // deletes old UI and output object
         m_deviceUIs.back()->freeChannels();
         m_deviceUIs.back()->m_deviceAPI->getSampleSink()->setMessageQueueToGUI(nullptr); // have sink stop sending messages to the GUI
@@ -935,11 +1093,6 @@ void MainWindow::removeLastDevice()
 	    m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->deleteSampleSinkPluginInstanceOutput(
 	        m_deviceUIs.back()->m_deviceAPI->getSampleSink());
         m_deviceUIs.back()->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
-
-	    // ui->tabChannels->removeTab(ui->tabChannels->count() - 1);
-
-	    // m_deviceWidgetTabs.removeLast();
-        // restoreDeviceTabs();
 
 	    DeviceAPI *sinkAPI = m_deviceUIs.back()->m_deviceAPI;
 	    delete m_deviceUIs.back();
@@ -956,10 +1109,6 @@ void MainWindow::removeLastDevice()
         lastDeviceEngine->stopProcess(0); // Rx side
 	    lastDeviceEngine->removeSpectrumSink(m_deviceUIs.back()->m_spectrumVis);
 
-	    // ui->tabSpectraGUI->removeTab(ui->tabSpectraGUI->count() - 1);
-	    // ui->tabSpectra->removeTab(ui->tabSpectra->count() - 1);
-        // ui->inputViewDock->removeLastDevice();
-
         // deletes old UI and output object
         m_deviceUIs.back()->freeChannels();
         m_deviceUIs.back()->m_deviceAPI->getSampleMIMO()->setMessageQueueToGUI(nullptr); // have sink stop sending messages to the GUI
@@ -967,11 +1116,6 @@ void MainWindow::removeLastDevice()
 	    m_deviceUIs.back()->m_deviceAPI->resetSamplingDeviceId();
 	    m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->deleteSampleMIMOPluginInstanceMIMO(
 	        m_deviceUIs.back()->m_deviceAPI->getSampleMIMO());
-
-	    // ui->tabChannels->removeTab(ui->tabChannels->count() - 1);
-
-	    // m_deviceWidgetTabs.removeLast();
-        // restoreDeviceTabs();
 
 	    DeviceAPI *mimoAPI = m_deviceUIs.back()->m_deviceAPI;
 	    delete m_deviceUIs.back();
@@ -1119,7 +1263,7 @@ void MainWindow::saveFeatureSetPresetSettings(FeatureSetPreset* preset, int feat
     featureUI->saveFeatureSetSettings(preset);
 }
 
-void MainWindow::loadConfiguration(const Configuration *configuration)
+void MainWindow::loadConfiguration(const Configuration *configuration, bool fromDialog)
 {
 	qDebug("MainWindow::loadConfiguration: configuration [%s | %s] %d workspace(s) - %d device set(s) - %d feature(s)",
 		qPrintable(configuration->getGroup()),
@@ -1128,6 +1272,21 @@ void MainWindow::loadConfiguration(const Configuration *configuration)
         configuration->getDeviceSetPresets().size(),
         configuration->getFeatureSetPreset().getFeatureCount()
     );
+
+    QMessageBox *waitBox = nullptr;
+
+    if (fromDialog)
+    {
+        waitBox = new QMessageBox(this);
+        waitBox->setStandardButtons(QMessageBox::NoButton);
+        waitBox->setWindowModality(Qt::NonModal);
+        waitBox->setIcon(QMessageBox::Information);
+        waitBox->setText("Loading configuration                  ");
+        waitBox->setInformativeText("Deleting existing...");
+        waitBox->setWindowTitle("Please wait");
+        waitBox->show();
+        waitBox->raise();
+    }
 
     // Wipe out everything first
 
@@ -1155,6 +1314,10 @@ void MainWindow::loadConfiguration(const Configuration *configuration)
     }
 
     // Device sets
+    if (waitBox) {
+        waitBox->setInformativeText("Loading device sets...");
+    }
+
     const QList<Preset>& deviceSetPresets = configuration->getDeviceSetPresets();
 
     for (const auto& deviceSetPreset : deviceSetPresets)
@@ -1201,7 +1364,12 @@ void MainWindow::loadConfiguration(const Configuration *configuration)
         m_deviceUIs.back()->m_mainSpectrumGUI->restoreGeometry(deviceSetPreset.getSpectrumGeometry());
         m_deviceUIs.back()->loadDeviceSetSettings(&deviceSetPreset, m_pluginManager->getPluginAPI(), &m_workspaces, nullptr);
     }
+
     // Features
+    if (waitBox) {
+        waitBox->setInformativeText("Loading device sets...");
+    }
+
     m_featureUIs[0]->loadFeatureSetSettings(
         &configuration->getFeatureSetPreset(),
         m_pluginManager->getPluginAPI(),
@@ -1222,8 +1390,18 @@ void MainWindow::loadConfiguration(const Configuration *configuration)
     }
 
     // Lastly restore workspaces geometry
+    if (waitBox) {
+        waitBox->setInformativeText("Finalizing...");
+    }
+
     for (int i = 0; i < configuration->getNumberOfWorkspaces(); i++) {
         m_workspaces[i]->restoreGeometry(configuration->getWorkspaceGeometries()[i]);
+    }
+
+    if (waitBox)
+    {
+        waitBox->close();
+        delete waitBox;
     }
 }
 
@@ -2166,7 +2344,7 @@ void MainWindow::on_action_Configurations_triggered()
         &dialog,
         &ConfigurationsDialog::loadConfiguration,
         this,
-        &MainWindow::loadConfiguration
+        [=](const Configuration* configuration) { this->loadConfiguration(configuration, true); }
     );
     dialog.exec();
 }
@@ -2323,6 +2501,13 @@ void MainWindow::sampleSourceChange(int deviceSetIndex, int newDeviceIndex, Work
         sampleSourceCreate(deviceSetIndex, newDeviceIndex, deviceUISet->m_deviceAPI, deviceUISet);
         deviceUISet->m_deviceGUI->setWorkspaceIndex(workspace->getIndex());
         workspace->addToMdiArea(deviceUISet->m_deviceGUI);
+
+        QObject::connect(
+            deviceUISet->m_deviceGUI,
+            &DeviceGUI::addChannelEmitted,
+            this,
+            [=](int channelIndex){ this->channelAddClicked(workspace, deviceSetIndex, channelIndex); }
+        );
     }
 }
 
@@ -2345,6 +2530,13 @@ void MainWindow::sampleSinkChange(int deviceSetIndex, int newDeviceIndex, Worksp
         sampleSourceCreate(deviceSetIndex, newDeviceIndex, deviceUISet->m_deviceAPI, deviceUISet);
         deviceUISet->m_deviceGUI->setWorkspaceIndex(workspace->getIndex());
         workspace->addToMdiArea(deviceUISet->m_deviceGUI);
+
+        QObject::connect(
+            deviceUISet->m_deviceGUI,
+            &DeviceGUI::addChannelEmitted,
+            this,
+            [=](int channelIndex){ this->channelAddClicked(workspace, deviceSetIndex, channelIndex); }
+        );
     }
 }
 
@@ -2366,78 +2558,111 @@ void MainWindow::sampleMIMOChange(int deviceSetIndex, int newDeviceIndex, Worksp
         sampleSourceCreate(deviceSetIndex, newDeviceIndex, deviceUISet->m_deviceAPI, deviceUISet);
         deviceUISet->m_deviceGUI->setWorkspaceIndex(workspace->getIndex());
         workspace->addToMdiArea(deviceUISet->m_deviceGUI);
+
+        QObject::connect(
+            deviceUISet->m_deviceGUI,
+            &DeviceGUI::addChannelEmitted,
+            this,
+            [=](int channelIndex){ this->channelAddClicked(workspace, deviceSetIndex, channelIndex); }
+        );
     }
 }
 
-void MainWindow::channelAddClicked(int channelIndex)
+void MainWindow::channelAddClicked(Workspace *workspace, int deviceSetIndex, int channelIndex)
 {
-    // Do it in the currently selected source tab
-    // int currentChannelTabIndex = ui->tabChannels->currentIndex();
+    if (deviceSetIndex >= 0)
+    {
+        DeviceUISet *deviceUI = m_deviceUIs[deviceSetIndex];
+        ChannelGUI *gui = nullptr;
+        DeviceAPI *deviceAPI = deviceUI->m_deviceAPI;
 
-    // if (currentChannelTabIndex >= 0)
-    // {
-    //     DeviceUISet *deviceUI = m_deviceUIs[currentChannelTabIndex];
+        if (deviceUI->m_deviceSourceEngine) // source device => Rx channels
+        {
+            PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getRxChannelRegistrations(); // Available channel plugins
+            PluginInterface *pluginInterface = (*channelRegistrations)[channelIndex].m_plugin;
+            ChannelAPI *channelAPI;
+            BasebandSampleSink *rxChannel;
+            pluginInterface->createRxChannel(deviceUI->m_deviceAPI, &rxChannel, &channelAPI);
+            gui = pluginInterface->createRxChannelGUI(deviceUI, rxChannel);
+            deviceUI->registerRxChannelInstance(channelAPI, gui);
+            gui->setDeviceType(ChannelGUI::DeviceRx);
+            gui->setIndex(channelAPI->getIndexInDeviceSet());
+        }
+        else if (deviceUI->m_deviceSinkEngine) // sink device => Tx channels
+        {
+            PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getTxChannelRegistrations(); // Available channel plugins
+            PluginInterface *pluginInterface = (*channelRegistrations)[channelIndex].m_plugin;
+            ChannelAPI *channelAPI;
+            BasebandSampleSource *txChannel;
+            pluginInterface->createTxChannel(deviceUI->m_deviceAPI, &txChannel, &channelAPI);
+            gui = pluginInterface->createTxChannelGUI(deviceUI, txChannel);
+            deviceUI->registerTxChannelInstance(channelAPI, gui);
+            gui->setDeviceType(ChannelGUI::DeviceTx);
+            gui->setIndex(channelAPI->getIndexInDeviceSet());
+        }
+        else if (deviceUI->m_deviceMIMOEngine) // MIMO device => all possible channels. Depends on index range
+        {
+            int nbMIMOChannels = deviceUI->getNumberOfAvailableMIMOChannels();
+            int nbRxChannels = deviceUI->getNumberOfAvailableRxChannels();
+            int nbTxChannels = deviceUI->getNumberOfAvailableTxChannels();
+            qDebug("MainWindow::channelAddClicked: MIMO: dev %d : nbMIMO: %d nbRx: %d nbTx: %d selected: %d",
+                deviceSetIndex, nbMIMOChannels, nbRxChannels, nbTxChannels, channelIndex);
 
-    //     if (deviceUI->m_deviceSourceEngine) // source device => Rx channels
-    //     {
-    //         PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getRxChannelRegistrations(); // Available channel plugins
-    //         PluginInterface *pluginInterface = (*channelRegistrations)[channelIndex].m_plugin;
-    //         ChannelAPI *channelAPI;
-    //         BasebandSampleSink *rxChannel;
-    //         pluginInterface->createRxChannel(deviceUI->m_deviceAPI, &rxChannel, &channelAPI);
-    //         ChannelGUI *gui = pluginInterface->createRxChannelGUI(deviceUI, rxChannel);
-    //         deviceUI->registerRxChannelInstance(channelAPI, gui);
-    //     }
-    //     else if (deviceUI->m_deviceSinkEngine) // sink device => Tx channels
-    //     {
-    //         PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getTxChannelRegistrations(); // Available channel plugins
-    //         PluginInterface *pluginInterface = (*channelRegistrations)[channelIndex].m_plugin;
-    //         ChannelAPI *channelAPI;
-    //         BasebandSampleSource *txChannel;
-    //         pluginInterface->createTxChannel(deviceUI->m_deviceAPI, &txChannel, &channelAPI);
-    //         ChannelGUI *gui = pluginInterface->createTxChannelGUI(deviceUI, txChannel);
-    //         deviceUI->registerTxChannelInstance(channelAPI, gui);
-    //     }
-    //     else if (deviceUI->m_deviceMIMOEngine) // MIMO device => all possible channels. Depends on index range
-    //     {
-    //         int nbMIMOChannels = deviceUI->getNumberOfAvailableMIMOChannels();
-    //         int nbRxChannels = deviceUI->getNumberOfAvailableRxChannels();
-    //         int nbTxChannels = deviceUI->getNumberOfAvailableTxChannels();
-    //         qDebug("MainWindow::channelAddClicked: MIMO: tab %d : nbMIMO: %d nbRx: %d nbTx: %d selected: %d",
-    //             currentChannelTabIndex, nbMIMOChannels, nbRxChannels, nbTxChannels, channelIndex);
+            if (channelIndex < nbMIMOChannels)
+            {
+                PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getMIMOChannelRegistrations(); // Available channel plugins
+                PluginInterface *pluginInterface = (*channelRegistrations)[channelIndex].m_plugin;
+                ChannelAPI *channelAPI;
+                MIMOChannel *mimoChannel;
+                pluginInterface->createMIMOChannel(deviceUI->m_deviceAPI, &mimoChannel, &channelAPI);
+                gui = pluginInterface->createMIMOChannelGUI(deviceUI, mimoChannel);
+                deviceUI->registerChannelInstance(channelAPI, gui);
+                gui->setIndex(channelAPI->getIndexInDeviceSet());
+            }
+            else if (channelIndex < nbMIMOChannels + nbRxChannels) // Rx
+            {
+                PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getRxChannelRegistrations(); // Available channel plugins
+                PluginInterface *pluginInterface = (*channelRegistrations)[channelIndex - nbMIMOChannels].m_plugin;
+                ChannelAPI *channelAPI;
+                BasebandSampleSink *rxChannel;
+                pluginInterface->createRxChannel(deviceUI->m_deviceAPI, &rxChannel, &channelAPI);
+                gui = pluginInterface->createRxChannelGUI(deviceUI, rxChannel);
+                deviceUI->registerRxChannelInstance(channelAPI, gui);
+                gui->setIndex(channelAPI->getIndexInDeviceSet());
+            }
+            else if (channelIndex < nbMIMOChannels + nbRxChannels + nbTxChannels)
+            {
+                PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getTxChannelRegistrations(); // Available channel plugins
+                PluginInterface *pluginInterface = (*channelRegistrations)[channelIndex - nbMIMOChannels - nbRxChannels].m_plugin;
+                ChannelAPI *channelAPI;
+                BasebandSampleSource *txChannel;
+                pluginInterface->createTxChannel(deviceUI->m_deviceAPI, &txChannel, &channelAPI);
+                gui = pluginInterface->createTxChannelGUI(deviceUI, txChannel);
+                deviceUI->registerTxChannelInstance(channelAPI, gui);
+                gui->setIndex(channelAPI->getIndexInDeviceSet());
+            }
 
-    //         if (channelIndex < nbMIMOChannels)
-    //         {
-    //             PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getMIMOChannelRegistrations(); // Available channel plugins
-    //             PluginInterface *pluginInterface = (*channelRegistrations)[channelIndex].m_plugin;
-    //             ChannelAPI *channelAPI;
-    //             MIMOChannel *mimoChannel;
-    //             pluginInterface->createMIMOChannel(deviceUI->m_deviceAPI, &mimoChannel, &channelAPI);
-    //             ChannelGUI *gui = pluginInterface->createMIMOChannelGUI(deviceUI, mimoChannel);
-    //             deviceUI->registerChannelInstance(channelAPI, gui);
-    //         }
-    //         else if (channelIndex < nbMIMOChannels + nbRxChannels) // Rx
-    //         {
-    //             PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getRxChannelRegistrations(); // Available channel plugins
-    //             PluginInterface *pluginInterface = (*channelRegistrations)[channelIndex - nbMIMOChannels].m_plugin;
-    //             ChannelAPI *channelAPI;
-    //             BasebandSampleSink *rxChannel;
-    //             pluginInterface->createRxChannel(deviceUI->m_deviceAPI, &rxChannel, &channelAPI);
-    //             ChannelGUI *gui = pluginInterface->createRxChannelGUI(deviceUI, rxChannel);
-    //             deviceUI->registerRxChannelInstance(channelAPI, gui);
-    //         }
-    //         else if (channelIndex < nbMIMOChannels + nbRxChannels + nbTxChannels)
-    //         {
-    //             PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getTxChannelRegistrations(); // Available channel plugins
-    //             PluginInterface *pluginInterface = (*channelRegistrations)[channelIndex - nbMIMOChannels - nbRxChannels].m_plugin;
-    //             ChannelAPI *channelAPI;
-    //             BasebandSampleSource *txChannel;
-    //             pluginInterface->createTxChannel(deviceUI->m_deviceAPI, &txChannel, &channelAPI);
-    //             ChannelGUI *gui = pluginInterface->createTxChannelGUI(deviceUI, txChannel);
-    //             deviceUI->registerTxChannelInstance(channelAPI, gui);
-    //         }
-    //     }
-    // }
+            gui->setDeviceType(ChannelGUI::DeviceMIMO);
+        }
+
+        if (gui)
+        {
+            QObject::connect(
+                gui,
+                &ChannelGUI::moveToWorkspace,
+                this,
+                [=](int wsIndexDest){ this->channelMove(gui, wsIndexDest); }
+            );
+
+            gui->setDeviceSetIndex(deviceSetIndex);
+            gui->setToolTip(deviceAPI->getSamplingDeviceDisplayName());
+            gui->setWorkspaceIndex(workspace->getIndex());
+            qDebug("MainWindow::channelAddClicked: adding %s to workspace #%d",
+                qPrintable(gui->getTitle()), workspace->getIndex());
+            workspace->addToMdiArea((QMdiSubWindow*) gui);
+            //gui->restoreGeometry(gui->getGeometryBytes());
+        }
+    }
 }
 
 void MainWindow::featureAddClicked(Workspace *workspace, int featureIndex)
@@ -2494,6 +2719,19 @@ void MainWindow::deviceMove(DeviceGUI *gui, int wsIndexDestnation)
     m_workspaces[wsIndexDestnation]->addToMdiArea(gui);
 }
 
+void MainWindow::channelMove(ChannelGUI *gui, int wsIndexDestnation)
+{
+    int wsIndexOrigin = gui->getWorkspaceIndex();
+
+    if (wsIndexOrigin == wsIndexDestnation) {
+        return;
+    }
+
+    m_workspaces[wsIndexOrigin]->removeFromMdiArea(gui);
+    gui->setWorkspaceIndex(wsIndexDestnation);
+    m_workspaces[wsIndexDestnation]->addToMdiArea(gui);
+}
+
 void MainWindow::mainSpectrumMove(MainSpectrumGUI *gui, int wsIndexDestnation)
 {
     int wsIndexOrigin = gui->getWorkspaceIndex();
@@ -2510,6 +2748,15 @@ void MainWindow::mainSpectrumMove(MainSpectrumGUI *gui, int wsIndexDestnation)
 void MainWindow::mainSpectrumShow(MainSpectrumGUI *gui)
 {
     gui->show();
+}
+
+void MainWindow::showAllChannels(int deviceSetIndex)
+{
+    DeviceUISet *deviceUISet = m_deviceUIs[deviceSetIndex];
+
+    for (int i = 0; i < deviceUISet->getNumberOfChannels(); i++) {
+        deviceUISet->getChannelGUIAt(i)->show();
+    }
 }
 
 void MainWindow::openFeaturePresetsDialog(QPoint p, Workspace *workspace)

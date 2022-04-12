@@ -110,7 +110,7 @@ bool Map::handleMessage(const Message& cmd)
     }
     else if (MainCore::MsgMapItem::match(cmd))
     {
-        qDebug() << "Map::handleMessage: MsgMapItem";
+        // qDebug() << "Map::handleMessage: MsgMapItem";
         MainCore::MsgMapItem& msgMapItem = (MainCore::MsgMapItem&) cmd;
         MainCore::MsgMapItem *copy = new MainCore::MsgMapItem(msgMapItem);
         getMessageQueueToGUI()->push(copy);

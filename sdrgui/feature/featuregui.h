@@ -19,6 +19,7 @@
 #define SDRGUI_FEATURE_FEATUREGUI_H_
 
 #include <QMdiSubWindow>
+#include <QMap>
 
 #include "gui/rollupcontents.h"
 #include "export.h"
@@ -96,11 +97,13 @@ private:
     QSizeGrip *m_sizeGripBottomRight;
     bool m_drag;
     QPoint m_DragPosition;
+    QMap<QWidget*, int> m_heightsMap;
 
 private slots:
     void activateSettingsDialog();
     void showHelp();
     void openMoveToWorkspaceDialog();
+    void onWidgetRolled(QWidget *widget, bool show);
 
 signals:
     void closing();

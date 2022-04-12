@@ -350,7 +350,7 @@ void RadiosondeDemodGUI::channelMarkerChangedByCursor()
 
 void RadiosondeDemodGUI::channelMarkerHighlightedByCursor()
 {
-    setHighlighted(m_channelMarker.getHighlighted());
+    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void RadiosondeDemodGUI::on_deltaFrequency_changed(qint64 value)
@@ -477,7 +477,7 @@ void RadiosondeDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
         }
     }
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -503,6 +503,7 @@ void RadiosondeDemodGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -534,11 +535,12 @@ RadiosondeDemodGUI::RadiosondeDemodGUI(PluginAPI* pluginAPI, DeviceUISet *device
     m_doApplySettings(true),
     m_tickCount(0)
 {
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/demodradiosonde/readme.md";
 
     setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_radiosondeDemod = reinterpret_cast<RadiosondeDemod*>(rxChannel);
@@ -634,6 +636,7 @@ RadiosondeDemodGUI::RadiosondeDemodGUI(PluginAPI* pluginAPI, DeviceUISet *device
     ui->scopeContainer->setVisible(false);
 
     displaySettings();
+    makeUIConnections();
     applySettings(true);
 }
 
@@ -707,6 +710,7 @@ void RadiosondeDemodGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
 
@@ -749,7 +753,7 @@ void RadiosondeDemodGUI::displaySettings()
 
     filter();
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -892,4 +896,21 @@ void RadiosondeDemodGUI::on_logOpen_clicked()
             }
         }
     }
+}
+
+void RadiosondeDemodGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &RadiosondeDemodGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &RadiosondeDemodGUI::on_rfBW_valueChanged);
+    QObject::connect(ui->fmDev, &QSlider::valueChanged, this, &RadiosondeDemodGUI::on_fmDev_valueChanged);
+    QObject::connect(ui->threshold, &QDial::valueChanged, this, &RadiosondeDemodGUI::on_threshold_valueChanged);
+    QObject::connect(ui->filterSerial, &QLineEdit::editingFinished, this, &RadiosondeDemodGUI::on_filterSerial_editingFinished);
+    QObject::connect(ui->clearTable, &QPushButton::clicked, this, &RadiosondeDemodGUI::on_clearTable_clicked);
+    QObject::connect(ui->udpEnabled, &QCheckBox::clicked, this, &RadiosondeDemodGUI::on_udpEnabled_clicked);
+    QObject::connect(ui->udpAddress, &QLineEdit::editingFinished, this, &RadiosondeDemodGUI::on_udpAddress_editingFinished);
+    QObject::connect(ui->udpPort, &QLineEdit::editingFinished, this, &RadiosondeDemodGUI::on_udpPort_editingFinished);
+    QObject::connect(ui->frames, &QTableWidget::cellDoubleClicked, this, &RadiosondeDemodGUI::on_frames_cellDoubleClicked);
+    QObject::connect(ui->logEnable, &ButtonSwitch::clicked, this, &RadiosondeDemodGUI::on_logEnable_clicked);
+    QObject::connect(ui->logFilename, &QToolButton::clicked, this, &RadiosondeDemodGUI::on_logFilename_clicked);
+    QObject::connect(ui->logOpen, &QToolButton::clicked, this, &RadiosondeDemodGUI::on_logOpen_clicked);
 }

@@ -40,7 +40,7 @@ DSPEngine::DSPEngine() :
 
 DSPEngine::~DSPEngine()
 {
-    std::vector<DSPDeviceSourceEngine*>::iterator it = m_deviceSourceEngines.begin();
+    QList<DSPDeviceSourceEngine*>::iterator it = m_deviceSourceEngines.begin();
 
     while (it != m_deviceSourceEngines.end())
     {
@@ -63,6 +63,7 @@ DSPDeviceSourceEngine *DSPEngine::addDeviceSourceEngine()
 {
     m_deviceSourceEngines.push_back(new DSPDeviceSourceEngine(m_deviceSourceEnginesUIDSequence));
     m_deviceSourceEnginesUIDSequence++;
+    m_deviceEngineReferences.push_back(DeviceEngineReference{0, m_deviceSourceEngines.size() - 1});
     return m_deviceSourceEngines.back();
 }
 
@@ -71,9 +72,18 @@ void DSPEngine::removeLastDeviceSourceEngine()
     if (m_deviceSourceEngines.size() > 0)
     {
         DSPDeviceSourceEngine *lastDeviceEngine = m_deviceSourceEngines.back();
+        int lastSourceDeviceEngineIndex = m_deviceSourceEngines.size() - 1;
         delete lastDeviceEngine;
         m_deviceSourceEngines.pop_back();
-        m_deviceSourceEnginesUIDSequence--;
+
+        for (int i = 0; i < m_deviceEngineReferences.size(); i++)
+        {
+            if (m_deviceEngineReferences[i].deviceEngineIndex == lastSourceDeviceEngineIndex)
+            {
+                m_deviceEngineReferences.removeAt(i);
+                break;
+            }
+        }
     }
 }
 
@@ -81,6 +91,7 @@ DSPDeviceSinkEngine *DSPEngine::addDeviceSinkEngine()
 {
     m_deviceSinkEngines.push_back(new DSPDeviceSinkEngine(m_deviceSinkEnginesUIDSequence));
     m_deviceSinkEnginesUIDSequence++;
+    m_deviceEngineReferences.push_back(DeviceEngineReference{1, m_deviceSinkEngines.size() - 1});
     return m_deviceSinkEngines.back();
 }
 
@@ -89,9 +100,18 @@ void DSPEngine::removeLastDeviceSinkEngine()
     if (m_deviceSinkEngines.size() > 0)
     {
         DSPDeviceSinkEngine *lastDeviceEngine = m_deviceSinkEngines.back();
+        int lastSinkDeviceEngineIndex = m_deviceSinkEngines.size() - 1;
         delete lastDeviceEngine;
         m_deviceSinkEngines.pop_back();
-        m_deviceSinkEnginesUIDSequence--;
+
+        for (int i = 0; i < m_deviceEngineReferences.size(); i++)
+        {
+            if (m_deviceEngineReferences[i].deviceEngineIndex == lastSinkDeviceEngineIndex)
+            {
+                m_deviceEngineReferences.removeAt(i);
+                break;
+            }
+        }
     }
 }
 
@@ -99,6 +119,7 @@ DSPDeviceMIMOEngine *DSPEngine::addDeviceMIMOEngine()
 {
     m_deviceMIMOEngines.push_back(new DSPDeviceMIMOEngine(m_deviceMIMOEnginesUIDSequence));
     m_deviceMIMOEnginesUIDSequence++;
+    m_deviceEngineReferences.push_back(DeviceEngineReference{2, m_deviceMIMOEngines.size() - 1});
     return m_deviceMIMOEngines.back();
 }
 
@@ -107,58 +128,47 @@ void DSPEngine::removeLastDeviceMIMOEngine()
     if (m_deviceMIMOEngines.size() > 0)
     {
         DSPDeviceMIMOEngine *lastDeviceEngine = m_deviceMIMOEngines.back();
+        int lastMIMODeviceEngineIndex = m_deviceMIMOEngines.size() - 1;
         delete lastDeviceEngine;
         m_deviceMIMOEngines.pop_back();
-        m_deviceMIMOEnginesUIDSequence--;
+
+        for (int i = 0; i < m_deviceEngineReferences.size(); i++)
+        {
+            if (m_deviceEngineReferences[i].deviceEngineIndex == lastMIMODeviceEngineIndex)
+            {
+                m_deviceEngineReferences.removeAt(i);
+                break;
+            }
+        }
     }
 }
 
-DSPDeviceSourceEngine *DSPEngine::getDeviceSourceEngineByUID(uint uid)
+void DSPEngine::removeDeviceEngineAt(int deviceIndex)
 {
-    std::vector<DSPDeviceSourceEngine*>::iterator it = m_deviceSourceEngines.begin();
-
-    while (it != m_deviceSourceEngines.end())
-    {
-        if ((*it)->getUID() == uid) {
-            return *it;
-        }
-
-        ++it;
+    if (deviceIndex >= m_deviceEngineReferences.size()) {
+        return;
     }
 
-    return nullptr;
-}
-
-DSPDeviceSinkEngine *DSPEngine::getDeviceSinkEngineByUID(uint uid)
-{
-    std::vector<DSPDeviceSinkEngine*>::iterator it = m_deviceSinkEngines.begin();
-
-    while (it != m_deviceSinkEngines.end())
+    if (m_deviceEngineReferences[deviceIndex].deviceEngineTYpe == 0) // source
     {
-        if ((*it)->getUID() == uid) {
-            return *it;
-        }
-
-        ++it;
+        DSPDeviceSourceEngine *deviceEngine = m_deviceSourceEngines[m_deviceEngineReferences[deviceIndex].deviceEngineIndex];
+        delete deviceEngine;
+        m_deviceSourceEngines.removeAt(m_deviceEngineReferences[deviceIndex].deviceEngineIndex);
+    }
+    else if (m_deviceEngineReferences[deviceIndex].deviceEngineTYpe == 1) // sink
+    {
+        DSPDeviceSinkEngine *deviceEngine = m_deviceSinkEngines[m_deviceEngineReferences[deviceIndex].deviceEngineIndex];
+        delete deviceEngine;
+        m_deviceSinkEngines.removeAt(m_deviceEngineReferences[deviceIndex].deviceEngineIndex);
+    }
+    else if (m_deviceEngineReferences[deviceIndex].deviceEngineTYpe == 2) // MIMO
+    {
+        DSPDeviceMIMOEngine *deviceEngine = m_deviceMIMOEngines[m_deviceEngineReferences[deviceIndex].deviceEngineIndex];
+        delete deviceEngine;
+        m_deviceMIMOEngines.removeAt(m_deviceEngineReferences[deviceIndex].deviceEngineIndex);
     }
 
-    return nullptr;
-}
-
-DSPDeviceMIMOEngine *DSPEngine::getDeviceMIMOEngineByUID(uint uid)
-{
-    std::vector<DSPDeviceMIMOEngine*>::iterator it = m_deviceMIMOEngines.begin();
-
-    while (it != m_deviceMIMOEngines.end())
-    {
-        if ((*it)->getUID() == uid) {
-            return *it;
-        }
-
-        ++it;
-    }
-
-    return nullptr;
+    m_deviceEngineReferences.removeAt(deviceIndex);
 }
 
 bool DSPEngine::hasDVSerialSupport()

@@ -725,6 +725,7 @@ public:
     void removeLastFeatureSet();
     void appendDeviceSet(int deviceType);
     void removeLastDeviceSet();
+    void removeDeviceSet(int deviceSetIndex);
     // slave mode - channels
     void addChannelInstance(DeviceSet *deviceSet, ChannelAPI *channelAPI);
     void removeChannelInstanceAt(DeviceSet *deviceSet, int channelIndex);

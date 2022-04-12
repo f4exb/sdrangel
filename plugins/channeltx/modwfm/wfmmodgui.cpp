@@ -277,7 +277,7 @@ void WFMModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -305,6 +305,7 @@ void WFMModGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -342,7 +343,8 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_tickCount(0),
     m_enableNavTime(false)
 {
-	ui->setupUi(this);
+	ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channeltx/modwfm/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
 
@@ -356,7 +358,7 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
     blockApplySettings(false);
 
-	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+	connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_wfmMod = (WFMMod*) channelTx;
@@ -403,6 +405,7 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_wfmMod->setLevelMeter(ui->volumeMeter);
 
 	displaySettings();
+    makeUIConnections();
     applySettings(true);
 }
 
@@ -438,6 +441,7 @@ void WFMModGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
     displayStreamIndex();
 
     blockApplySettings(true);
@@ -475,7 +479,7 @@ void WFMModGUI::displaySettings()
     ui->feedbackVolume->setValue(roundf(m_settings.m_feedbackVolumeFactor * 100.0));
     ui->feedbackVolumeText->setText(QString("%1").arg(m_settings.m_feedbackVolumeFactor, 0, 'f', 2));
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -595,4 +599,24 @@ void WFMModGUI::updateWithStreamTime()
         float posRatio = (float) t_sec / (float) m_recordLength;
         ui->navTimeSlider->setValue((int) (posRatio * 100.0));
     }
+}
+
+void WFMModGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &WFMModGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->rfBW, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &WFMModGUI::on_rfBW_currentIndexChanged);
+    QObject::connect(ui->afBW, &QSlider::valueChanged, this, &WFMModGUI::on_afBW_valueChanged);
+    QObject::connect(ui->fmDev, &QSlider::valueChanged, this, &WFMModGUI::on_fmDev_valueChanged);
+    QObject::connect(ui->toneFrequency, &QDial::valueChanged, this, &WFMModGUI::on_toneFrequency_valueChanged);
+    QObject::connect(ui->volume, &QDial::valueChanged, this, &WFMModGUI::on_volume_valueChanged);
+    QObject::connect(ui->channelMute, &QToolButton::toggled, this, &WFMModGUI::on_channelMute_toggled);
+    QObject::connect(ui->tone, &ButtonSwitch::toggled, this, &WFMModGUI::on_tone_toggled);
+    QObject::connect(ui->morseKeyer, &ButtonSwitch::toggled, this, &WFMModGUI::on_morseKeyer_toggled);
+    QObject::connect(ui->mic, &ButtonSwitch::toggled, this, &WFMModGUI::on_mic_toggled);
+    QObject::connect(ui->play, &ButtonSwitch::toggled, this, &WFMModGUI::on_play_toggled);
+    QObject::connect(ui->playLoop, &ButtonSwitch::toggled, this, &WFMModGUI::on_playLoop_toggled);
+    QObject::connect(ui->navTimeSlider, &QSlider::valueChanged, this, &WFMModGUI::on_navTimeSlider_valueChanged);
+    QObject::connect(ui->showFileDialog, &QPushButton::clicked, this, &WFMModGUI::on_showFileDialog_clicked);
+    QObject::connect(ui->feedbackEnable, &QToolButton::toggled, this, &WFMModGUI::on_feedbackEnable_toggled);
+    QObject::connect(ui->feedbackVolume, &QDial::valueChanged, this, &WFMModGUI::on_feedbackVolume_valueChanged);
 }

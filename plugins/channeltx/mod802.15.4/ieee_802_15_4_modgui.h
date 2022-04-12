@@ -55,7 +55,13 @@ public:
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
-    virtual bool handleMessage(const Message& message);
+    virtual void setWorkspaceIndex(int index) { m_settings.m_workspaceIndex = index; };
+    virtual int getWorkspaceIndex() const { return m_settings.m_workspaceIndex; };
+    virtual void setGeometryBytes(const QByteArray& blob) { m_settings.m_geometryBytes = blob; };
+    virtual QByteArray getGeometryBytes() const { return m_settings.m_geometryBytes; };
+    virtual QString getTitle() const { return m_settings.m_title; };
+    virtual QColor getTitleColor() const  { return m_settings.m_rgbColor; };
+
 
 public slots:
     void channelMarkerChangedByCursor();
@@ -89,6 +95,8 @@ private:
     void displayRFBandwidth(int bandwidth);
     void displayChipRate(const IEEE_802_15_4_ModSettings& settings);
     QString getDisplayValueWithMultiplier(int value);
+    bool handleMessage(const Message& message);
+    void makeUIConnections();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);
@@ -110,7 +118,6 @@ private slots:
     void on_udpEnabled_clicked(bool checked);
     void on_udpAddress_editingFinished();
     void on_udpPort_editingFinished();
-    void on_udpBytesFormat_clicked(bool checked);
 
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);

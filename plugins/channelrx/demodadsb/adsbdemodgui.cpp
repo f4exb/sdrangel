@@ -2143,7 +2143,7 @@ if (DSPSignalNotification::match(message))
         } else {
             ui->warning->setText("");
         }
-        arrangeRollups();
+        getRollupContents()->arrangeRollups();
         return true;
     }
     else if (ADSBDemodReport::MsgReportADSB::match(message))
@@ -2204,7 +2204,7 @@ void ADSBDemodGUI::channelMarkerChangedByCursor()
 
 void ADSBDemodGUI::channelMarkerHighlightedByCursor()
 {
-    setHighlighted(m_channelMarker.getHighlighted());
+    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void ADSBDemodGUI::on_deltaFrequency_changed(qint64 value)
@@ -2759,7 +2759,7 @@ void ADSBDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -2786,6 +2786,7 @@ void ADSBDemodGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -3684,7 +3685,8 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_highlightAircraft(nullptr),
     m_progressDialog(nullptr)
 {
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/demodadsb/readme.md";
 
     m_osmPort = 0; // Pick a free port
@@ -3698,7 +3700,7 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 
     setAttribute(Qt::WA_DeleteOnClose, true);
 
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(&m_dlm, &HttpDownloadManager::downloadComplete, this, &ADSBDemodGUI::downloadFinished);
 
@@ -3829,6 +3831,7 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 
     updateDeviceSetList();
     displaySettings();
+    makeUIConnections();
     applySettings(true);
 
     connect(&m_importTimer, &QTimer::timeout, this, &ADSBDemodGUI::import);
@@ -3903,6 +3906,7 @@ void ADSBDemodGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
 
@@ -3989,7 +3993,7 @@ void ADSBDemodGUI::displaySettings()
     applyMapSettings();
     applyImportSettings();
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -4658,4 +4662,32 @@ void ADSBDemodGUI::preferenceChanged(int elementType)
             }
         }
     }
+}
+
+void ADSBDemodGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &ADSBDemodGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &ADSBDemodGUI::on_rfBW_valueChanged);
+    QObject::connect(ui->threshold, &QDial::valueChanged, this, &ADSBDemodGUI::on_threshold_valueChanged);
+    QObject::connect(ui->phaseSteps, &QDial::valueChanged, this, &ADSBDemodGUI::on_phaseSteps_valueChanged);
+    QObject::connect(ui->tapsPerPhase, &QDial::valueChanged, this, &ADSBDemodGUI::on_tapsPerPhase_valueChanged);
+    QObject::connect(ui->adsbData, &QTableWidget::cellClicked, this, &ADSBDemodGUI::on_adsbData_cellClicked);
+    QObject::connect(ui->adsbData, &QTableWidget::cellDoubleClicked, this, &ADSBDemodGUI::on_adsbData_cellDoubleClicked);
+    QObject::connect(ui->spb, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ADSBDemodGUI::on_spb_currentIndexChanged);
+    QObject::connect(ui->correlateFullPreamble, &ButtonSwitch::clicked, this, &ADSBDemodGUI::on_correlateFullPreamble_clicked);
+    QObject::connect(ui->demodModeS, &ButtonSwitch::clicked, this, &ADSBDemodGUI::on_demodModeS_clicked);
+    QObject::connect(ui->feed, &ButtonSwitch::clicked, this, &ADSBDemodGUI::on_feed_clicked);
+    QObject::connect(ui->notifications, &QToolButton::clicked, this, &ADSBDemodGUI::on_notifications_clicked);
+    QObject::connect(ui->flightInfo, &QToolButton::clicked, this, &ADSBDemodGUI::on_flightInfo_clicked);
+    QObject::connect(ui->findOnMapFeature, &QToolButton::clicked, this, &ADSBDemodGUI::on_findOnMapFeature_clicked);
+    QObject::connect(ui->getOSNDB, &QToolButton::clicked, this, &ADSBDemodGUI::on_getOSNDB_clicked);
+    QObject::connect(ui->getAirportDB, &QToolButton::clicked, this, &ADSBDemodGUI::on_getAirportDB_clicked);
+    QObject::connect(ui->getAirspacesDB, &QToolButton::clicked, this, &ADSBDemodGUI::on_getAirspacesDB_clicked);
+    QObject::connect(ui->flightPaths, &ButtonSwitch::clicked, this, &ADSBDemodGUI::on_flightPaths_clicked);
+    QObject::connect(ui->allFlightPaths, &ButtonSwitch::clicked, this, &ADSBDemodGUI::on_allFlightPaths_clicked);
+    QObject::connect(ui->device, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ADSBDemodGUI::on_device_currentIndexChanged);
+    QObject::connect(ui->displaySettings, &QToolButton::clicked, this, &ADSBDemodGUI::on_displaySettings_clicked);
+    QObject::connect(ui->logEnable, &ButtonSwitch::clicked, this, &ADSBDemodGUI::on_logEnable_clicked);
+    QObject::connect(ui->logFilename, &QToolButton::clicked, this, &ADSBDemodGUI::on_logFilename_clicked);
+    QObject::connect(ui->logOpen, &QToolButton::clicked, this, &ADSBDemodGUI::on_logOpen_clicked);
 }

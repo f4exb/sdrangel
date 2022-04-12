@@ -112,7 +112,7 @@ void SSBDemodGUI::channelMarkerChangedByCursor()
 
 void SSBDemodGUI::channelMarkerHighlightedByCursor()
 {
-    setHighlighted(m_channelMarker.getHighlighted());
+    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void SSBDemodGUI::on_audioBinaural_toggled(bool binaural)
@@ -249,6 +249,7 @@ void SSBDemodGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -276,7 +277,7 @@ void SSBDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -294,10 +295,11 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_squelchOpen(false),
     m_audioSampleRate(-1)
 {
-	ui->setupUi(this);
+	ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/demodssb/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
-	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+	connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_ssbDemod = (SSBDemod*) rxChannel;
@@ -352,6 +354,8 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     ui->BW->setMaximum(480);
     ui->lowCut->setMaximum(480);
 	displaySettings();
+    makeUIConnections();
+
 	applyBandwidths(m_settings.m_spanLog2, true); // does applySettings(true)
 }
 
@@ -520,6 +524,7 @@ void SSBDemodGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
 
@@ -575,7 +580,7 @@ void SSBDemodGUI::displaySettings()
 
     displayStreamIndex();
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -672,4 +677,22 @@ void SSBDemodGUI::tick()
     }
 
     m_tickCount++;
+}
+
+void SSBDemodGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &SSBDemodGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->audioBinaural, &QToolButton::toggled, this, &SSBDemodGUI::on_audioBinaural_toggled);
+    QObject::connect(ui->audioFlipChannels, &QToolButton::toggled, this, &SSBDemodGUI::on_audioFlipChannels_toggled);
+    QObject::connect(ui->dsb, &QToolButton::toggled, this, &SSBDemodGUI::on_dsb_toggled);
+    QObject::connect(ui->BW, &TickedSlider::valueChanged, this, &SSBDemodGUI::on_BW_valueChanged);
+    QObject::connect(ui->lowCut, &TickedSlider::valueChanged, this, &SSBDemodGUI::on_lowCut_valueChanged);
+    QObject::connect(ui->volume, &QDial::valueChanged, this, &SSBDemodGUI::on_volume_valueChanged);
+    QObject::connect(ui->agc, &ButtonSwitch::toggled, this, &SSBDemodGUI::on_agc_toggled);
+    QObject::connect(ui->agcClamping, &ButtonSwitch::toggled, this, &SSBDemodGUI::on_agcClamping_toggled);
+    QObject::connect(ui->agcPowerThreshold, &QDial::valueChanged, this, &SSBDemodGUI::on_agcPowerThreshold_valueChanged);
+    QObject::connect(ui->agcThresholdGate, &QDial::valueChanged, this, &SSBDemodGUI::on_agcThresholdGate_valueChanged);
+    QObject::connect(ui->audioMute, &QToolButton::toggled, this, &SSBDemodGUI::on_audioMute_toggled);
+    QObject::connect(ui->spanLog2, &QSlider::valueChanged, this, &SSBDemodGUI::on_spanLog2_valueChanged);
+    QObject::connect(ui->flipSidebands, &QPushButton::clicked, this, &SSBDemodGUI::on_flipSidebands_clicked);
 }

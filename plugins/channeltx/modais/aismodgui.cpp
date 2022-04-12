@@ -331,7 +331,7 @@ void AISModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -358,6 +358,7 @@ void AISModGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -388,11 +389,12 @@ AISModGUI::AISModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_channelMarker(this),
     m_doApplySettings(true)
 {
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channeltx/modais/readme.md";
     setAttribute(Qt::WA_DeleteOnClose, true);
 
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_aisMod = (AISMod*) channelTx;
@@ -478,6 +480,7 @@ AISModGUI::AISModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     ui->spectrumContainer->setVisible(false);
 
     displaySettings();
+    makeUIConnections();
     applySettings();
 }
 
@@ -518,6 +521,7 @@ void AISModGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
     displayStreamIndex();
 
     blockApplySettings(true);
@@ -552,7 +556,7 @@ void AISModGUI::displaySettings()
     ui->heading->setValue(m_settings.m_heading);
     ui->message->setText(m_settings.m_data);
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -580,4 +584,32 @@ void AISModGUI::tick()
     double powDb = CalcDb::dbPower(m_aisMod->getMagSq());
     m_channelPowerDbAvg(powDb);
     ui->channelPower->setText(tr("%1 dB").arg(m_channelPowerDbAvg.asDouble(), 0, 'f', 1));
+}
+
+void AISModGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &AISModGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->mode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AISModGUI::on_mode_currentIndexChanged);
+    QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &AISModGUI::on_rfBW_valueChanged);
+    QObject::connect(ui->fmDev, &QSlider::valueChanged, this, &AISModGUI::on_fmDev_valueChanged);
+    QObject::connect(ui->bt, &QSlider::valueChanged, this, &AISModGUI::on_bt_valueChanged);
+    QObject::connect(ui->gain, &QDial::valueChanged, this, &AISModGUI::on_gain_valueChanged);
+    QObject::connect(ui->channelMute, &QToolButton::toggled, this, &AISModGUI::on_channelMute_toggled);
+    QObject::connect(ui->txButton, &QPushButton::clicked, this, &AISModGUI::on_txButton_clicked);
+    QObject::connect(ui->encode, &QToolButton::clicked, this, &AISModGUI::on_encode_clicked);
+    QObject::connect(ui->msgId, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AISModGUI::on_msgId_currentIndexChanged);
+    QObject::connect(ui->mmsi, &QLineEdit::editingFinished, this, &AISModGUI::on_mmsi_editingFinished);
+    QObject::connect(ui->status, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AISModGUI::on_status_currentIndexChanged);
+    QObject::connect(ui->latitude, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &AISModGUI::on_latitude_valueChanged);
+    QObject::connect(ui->longitude, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &AISModGUI::on_longitude_valueChanged);
+    QObject::connect(ui->insertPosition, &QToolButton::clicked, this, &AISModGUI::on_insertPosition_clicked);
+    QObject::connect(ui->course, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &AISModGUI::on_course_valueChanged);
+    QObject::connect(ui->speed, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &AISModGUI::on_speed_valueChanged);
+    QObject::connect(ui->heading, QOverload<int>::of(&QSpinBox::valueChanged), this, &AISModGUI::on_heading_valueChanged);
+    QObject::connect(ui->message, &QLineEdit::editingFinished, this, &AISModGUI::on_message_editingFinished);
+    QObject::connect(ui->message, &QLineEdit::returnPressed, this, &AISModGUI::on_message_returnPressed);
+    QObject::connect(ui->repeat, &ButtonSwitch::toggled, this, &AISModGUI::on_repeat_toggled);
+    QObject::connect(ui->udpEnabled, &QCheckBox::clicked, this, &AISModGUI::on_udpEnabled_clicked);
+    QObject::connect(ui->udpAddress, &QLineEdit::editingFinished, this, &AISModGUI::on_udpAddress_editingFinished);
+    QObject::connect(ui->udpPort, &QLineEdit::editingFinished, this, &AISModGUI::on_udpPort_editingFinished);
 }

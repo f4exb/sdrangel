@@ -123,6 +123,7 @@ public:
     uint32_t getDeviceItemIndex() const { return m_deviceItemIndex; }
 
     int getDeviceSetIndex() const { return m_deviceTabIndex; }
+    void setDeviceSetIndex(int deviceSetIndex);
     PluginInterface *getPluginInterface() { return m_pluginInterface; }
 
     void getDeviceEngineStateStr(QString& state, int subsystemIndex = 0);

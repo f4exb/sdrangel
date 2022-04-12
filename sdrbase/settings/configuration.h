@@ -54,6 +54,7 @@ public:
     const FeatureSetPreset& getFeatureSetPreset() const { return m_featureSetPreset; }
     QList<Preset>& getDeviceSetPresets() { return m_deviceSetPresets; }
     const QList<Preset>& getDeviceSetPresets() const { return m_deviceSetPresets; }
+    int getNumberOfDeviceSetPresets() const { return m_deviceSetPresets.size(); }
     void clearData();
 
 	static bool configCompare(const Configuration *p1, Configuration *p2)

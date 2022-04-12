@@ -25,6 +25,7 @@
 #include <QByteArray>
 #include <QWidget>
 
+#include "gui/channeladddialog.h"
 #include "export.h"
 
 class QCloseEvent;
@@ -76,6 +77,7 @@ public:
     void setIndex(int index);
     int getIndex() const { return m_deviceSetIndex; }
     void setCurrentDeviceIndex(int index) { m_currentDeviceIndex = index; } //!< index in plugins list
+    void setChannelNames(const QStringList& channelNames) { m_channelAddDialog.addChannelNames(channelNames); }
 
 protected:
     void closeEvent(QCloseEvent *event);
@@ -119,13 +121,16 @@ private:
     bool m_drag;
     QPoint m_DragPosition;
     int m_currentDeviceIndex; //!< Index in device plugins registrations
+    ChannelAddDialog m_channelAddDialog;
 
 private slots:
     void openChangeDeviceDialog();
+    void openAddChannelsDialog();
     void deviceReload();
     void showHelp();
     void openMoveToWorkspaceDialog();
     void showSpectrumHandler();
+    void showAllChannelsHandler();
 
 signals:
     void forceClose();
@@ -135,6 +140,8 @@ signals:
     void deviceAdd(int deviceType, int deviceIndex);
     void deviceChange(int newDeviceIndex);
     void showSpectrum(int deviceSetIndex);
+    void showAllChannels(int deviceSetIndex);
+    void addChannelEmitted(int channelIndex);
 };
 
 #endif // INCLUDE_DEVICEGUI_H

@@ -106,11 +106,12 @@ InterferometerGUI::InterferometerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
         m_centerFrequency(435000000),
         m_tickCount(0)
 {
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     setAttribute(Qt::WA_DeleteOnClose, true);
     setStreamIndicator("M");
 
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_interferometer = (Interferometer*) channelMIMO;
@@ -157,6 +158,7 @@ InterferometerGUI::InterferometerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 
     displaySettings();
+    makeUIConnections();
     displayRateAndShift();
     applySettings(true);
 }
@@ -196,13 +198,14 @@ void InterferometerGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
     ui->decimationFactor->setCurrentIndex(m_settings.m_log2Decim);
     applyDecimation();
     ui->phaseCorrection->setValue(m_settings.m_phase);
     ui->phaseCorrectionText->setText(tr("%1").arg(m_settings.m_phase));
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -247,7 +250,7 @@ void InterferometerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -274,6 +277,7 @@ void InterferometerGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -337,4 +341,12 @@ void InterferometerGUI::tick()
     if (++m_tickCount == 20) { // once per second
         m_tickCount = 0;
     }
+}
+
+void InterferometerGUI::makeUIConnections()
+{
+    QObject::connect(ui->decimationFactor, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &InterferometerGUI::on_decimationFactor_currentIndexChanged);
+    QObject::connect(ui->position, &QSlider::valueChanged, this, &InterferometerGUI::on_position_valueChanged);
+    QObject::connect(ui->phaseCorrection, &QSlider::valueChanged, this, &InterferometerGUI::on_phaseCorrection_valueChanged);
+    QObject::connect(ui->correlationType, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &InterferometerGUI::on_correlationType_currentIndexChanged);
 }

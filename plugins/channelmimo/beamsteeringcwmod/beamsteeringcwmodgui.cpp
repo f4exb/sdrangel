@@ -96,11 +96,12 @@ BeamSteeringCWModGUI::BeamSteeringCWModGUI(PluginAPI* pluginAPI, DeviceUISet *de
         m_centerFrequency(435000000),
         m_tickCount(0)
 {
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     setAttribute(Qt::WA_DeleteOnClose, true);
     setStreamIndicator("M");
 
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_bsCWSource = (BeamSteeringCWMod*) mimoChannel;
@@ -127,6 +128,7 @@ BeamSteeringCWModGUI::BeamSteeringCWModGUI(PluginAPI* pluginAPI, DeviceUISet *de
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 
     displaySettings();
+    makeUIConnections();
     displayRateAndShift();
     applySettings(true);
 }
@@ -164,12 +166,13 @@ void BeamSteeringCWModGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
     ui->interpolationFactor->setCurrentIndex(m_settings.m_log2Interp);
     applyInterpolation();
     ui->steeringDegreesText->setText(tr("%1").arg(m_settings.m_steerDegrees));
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -212,7 +215,7 @@ void BeamSteeringCWModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -239,6 +242,7 @@ void BeamSteeringCWModGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -302,4 +306,12 @@ void BeamSteeringCWModGUI::tick()
     if (++m_tickCount == 20) { // once per second
         m_tickCount = 0;
     }
+}
+
+void BeamSteeringCWModGUI::makeUIConnections()
+{
+    QObject::connect(ui->channelOutput, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &BeamSteeringCWModGUI::on_channelOutput_currentIndexChanged);
+    QObject::connect(ui->interpolationFactor, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &BeamSteeringCWModGUI::on_interpolationFactor_currentIndexChanged);
+    QObject::connect(ui->position, &QSlider::valueChanged, this, &BeamSteeringCWModGUI::on_position_valueChanged);
+    QObject::connect(ui->steeringDegrees, &QSlider::valueChanged, this, &BeamSteeringCWModGUI::on_steeringDegrees_valueChanged);
 }

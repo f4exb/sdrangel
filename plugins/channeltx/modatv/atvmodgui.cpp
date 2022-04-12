@@ -63,10 +63,11 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_camBusyFPSMessageBox(0),
     m_rfSliderDivisor(100000)
 {
-	ui->setupUi(this);
+	ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channeltx/modatv/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
-	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+	connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_atvMod = (ATVMod*) channelTx;
@@ -112,6 +113,7 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     ui->fmExcursionLabel->setText(delta);
 
     displaySettings();
+    makeUIConnections();
     applySettings(true);
 }
 
@@ -671,7 +673,7 @@ void ATVModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -699,6 +701,7 @@ void ATVModGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -750,6 +753,7 @@ void ATVModGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
     displayStreamIndex();
 
     blockApplySettings(true);
@@ -796,7 +800,7 @@ void ATVModGUI::displaySettings()
     ui->playVideo->setChecked(m_settings.m_videoPlay);
     ui->playLoop->setChecked(m_settings.m_videoPlayLoop);
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -867,3 +871,31 @@ void ATVModGUI::updateWithStreamTime()
     }
 }
 
+void ATVModGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &ATVModGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->channelMute, &QToolButton::toggled, this, &ATVModGUI::on_channelMute_toggled);
+    QObject::connect(ui->forceDecimator, &ButtonSwitch::toggled, this, &ATVModGUI::on_forceDecimator_toggled);
+    QObject::connect(ui->modulation, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ATVModGUI::on_modulation_currentIndexChanged);
+    QObject::connect(ui->rfScaling, &QDial::valueChanged, this, &ATVModGUI::on_rfScaling_valueChanged);
+    QObject::connect(ui->fmExcursion, &QDial::valueChanged, this, &ATVModGUI::on_fmExcursion_valueChanged);
+    QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &ATVModGUI::on_rfBW_valueChanged);
+    QObject::connect(ui->rfOppBW, &QSlider::valueChanged, this, &ATVModGUI::on_rfOppBW_valueChanged);
+    QObject::connect(ui->nbLines, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ATVModGUI::on_nbLines_currentIndexChanged);
+    QObject::connect(ui->fps, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ATVModGUI::on_fps_currentIndexChanged);
+    QObject::connect(ui->standard, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ATVModGUI::on_standard_currentIndexChanged);
+    QObject::connect(ui->invertVideo, &QCheckBox::clicked, this, &ATVModGUI::on_invertVideo_clicked);
+    QObject::connect(ui->uniformLevel, &QDial::valueChanged, this, &ATVModGUI::on_uniformLevel_valueChanged);
+    QObject::connect(ui->inputSelect, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ATVModGUI::on_inputSelect_currentIndexChanged);
+    QObject::connect(ui->imageFileDialog, &QPushButton::clicked, this, &ATVModGUI::on_imageFileDialog_clicked);
+    QObject::connect(ui->videoFileDialog, &QPushButton::clicked, this, &ATVModGUI::on_videoFileDialog_clicked);
+    QObject::connect(ui->playVideo, &ButtonSwitch::toggled, this, &ATVModGUI::on_playVideo_toggled);
+    QObject::connect(ui->playLoop, &ButtonSwitch::toggled, this, &ATVModGUI::on_playLoop_toggled);
+    QObject::connect(ui->navTimeSlider, &QSlider::valueChanged, this, &ATVModGUI::on_navTimeSlider_valueChanged);
+    QObject::connect(ui->playCamera, &ButtonSwitch::toggled, this, &ATVModGUI::on_playCamera_toggled);
+    QObject::connect(ui->camSelect, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ATVModGUI::on_camSelect_currentIndexChanged);
+    QObject::connect(ui->cameraManualFPSEnable, &ButtonSwitch::toggled, this, &ATVModGUI::on_cameraManualFPSEnable_toggled);
+    QObject::connect(ui->cameraManualFPS, &QDial::valueChanged, this, &ATVModGUI::on_cameraManualFPS_valueChanged);
+    QObject::connect(ui->overlayTextShow, &ButtonSwitch::toggled, this, &ATVModGUI::on_overlayTextShow_toggled);
+    QObject::connect(ui->overlayText, &QLineEdit::textEdited, this, &ATVModGUI::on_overlayText_textEdited);
+}

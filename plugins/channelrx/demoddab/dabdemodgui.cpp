@@ -208,7 +208,7 @@ bool DABDemodGUI::handleMessage(const Message& message)
         } else {
             ui->warning->setText("");
         }
-        arrangeRollups();
+        getRollupContents()->arrangeRollups();
         return true;
     }
     else if (DABDemod::MsgDABEnsembleName::match(message))
@@ -281,7 +281,7 @@ bool DABDemodGUI::handleMessage(const Message& message)
             ui->motImage->resize(ui->motImage->width(), pixmap.height());
             ui->motImage->setVisible(true);
             ui->motImage->setPixmap(pixmap, pixmap.size());
-            arrangeRollups();
+            getRollupContents()->arrangeRollups();
         }
         return true;
     }
@@ -311,7 +311,7 @@ void DABDemodGUI::channelMarkerChangedByCursor()
 
 void DABDemodGUI::channelMarkerHighlightedByCursor()
 {
-    setHighlighted(m_channelMarker.getHighlighted());
+    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void DABDemodGUI::on_deltaFrequency_changed(qint64 value)
@@ -384,7 +384,7 @@ void DABDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -410,6 +410,7 @@ void DABDemodGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -442,11 +443,12 @@ DABDemodGUI::DABDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_tickCount(0),
     m_channelFreq(0.0)
 {
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/demoddab/readme.md";
 
     setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_dabDemod = reinterpret_cast<DABDemod*>(rxChannel);
@@ -506,6 +508,7 @@ DABDemodGUI::DABDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     connect(ui->programs->horizontalHeader(), SIGNAL(sectionResized(int, int, int)), SLOT(programs_sectionResized(int, int, int)));
 
     displaySettings();
+    makeUIConnections();
     applySettings(true);
 }
 
@@ -539,6 +542,7 @@ void DABDemodGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
 
@@ -569,7 +573,7 @@ void DABDemodGUI::displaySettings()
 
     filter();
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -605,7 +609,7 @@ void DABDemodGUI::clearProgram()
     ui->data->setText("");
     ui->motImage->setPixmap(QPixmap());
     ui->motImage->setVisible(false);
-    arrangeRollups();
+    getRollupContents()->arrangeRollups();
 }
 
 void DABDemodGUI::resetService()
@@ -691,4 +695,16 @@ void DABDemodGUI::tick()
     }
 
     m_tickCount++;
+}
+
+void DABDemodGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &DABDemodGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->audioMute, &QToolButton::toggled, this, &DABDemodGUI::on_audioMute_toggled);
+    QObject::connect(ui->volume, &QSlider::valueChanged, this, &DABDemodGUI::on_volume_valueChanged);
+    QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &DABDemodGUI::on_rfBW_valueChanged);
+    QObject::connect(ui->filter, &QLineEdit::editingFinished, this, &DABDemodGUI::on_filter_editingFinished);
+    QObject::connect(ui->clearTable, &QPushButton::clicked, this, &DABDemodGUI::on_clearTable_clicked);
+    QObject::connect(ui->programs, &QTableWidget::cellDoubleClicked, this, &DABDemodGUI::on_programs_cellDoubleClicked);
+    QObject::connect(ui->channel, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DABDemodGUI::on_channel_currentIndexChanged);
 }

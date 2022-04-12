@@ -368,7 +368,7 @@ void PacketModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -395,6 +395,7 @@ void PacketModGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -425,11 +426,12 @@ PacketModGUI::PacketModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_channelMarker(this),
     m_doApplySettings(true)
 {
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channeltx/modpacket/readme.md";
     setAttribute(Qt::WA_DeleteOnClose, true);
 
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_packetMod = (PacketMod*) channelTx;
@@ -491,6 +493,7 @@ PacketModGUI::PacketModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     ui->spectrumContainer->setVisible(false);
 
     displaySettings();
+    makeUIConnections();
     applySettings();
 }
 
@@ -533,6 +536,7 @@ void PacketModGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
     displayStreamIndex();
 
     blockApplySettings(true);
@@ -572,7 +576,7 @@ void PacketModGUI::displaySettings()
     ui->via->lineEdit()->setText(m_settings.m_via);
     ui->packet->setText(m_settings.m_data);
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -600,4 +604,27 @@ void PacketModGUI::tick()
     double powDb = CalcDb::dbPower(m_packetMod->getMagSq());
     m_channelPowerDbAvg(powDb);
     ui->channelPower->setText(tr("%1 dB").arg(m_channelPowerDbAvg.asDouble(), 0, 'f', 1));
+}
+
+void PacketModGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &PacketModGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->mode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PacketModGUI::on_mode_currentIndexChanged);
+    QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &PacketModGUI::on_rfBW_valueChanged);
+    QObject::connect(ui->fmDev, &QSlider::valueChanged, this, &PacketModGUI::on_fmDev_valueChanged);
+    QObject::connect(ui->gain, &QDial::valueChanged, this, &PacketModGUI::on_gain_valueChanged);
+    QObject::connect(ui->channelMute, &QToolButton::toggled, this, &PacketModGUI::on_channelMute_toggled);
+    QObject::connect(ui->txButton, &QToolButton::clicked, this, &PacketModGUI::on_txButton_clicked);
+    QObject::connect(ui->callsign, &QLineEdit::editingFinished, this, &PacketModGUI::on_callsign_editingFinished);
+    QObject::connect(ui->to, &QComboBox::currentTextChanged, this, &PacketModGUI::on_to_currentTextChanged);
+    QObject::connect(ui->via, &QComboBox::currentTextChanged, this, &PacketModGUI::on_via_currentTextChanged);
+    QObject::connect(ui->packet, &QLineEdit::editingFinished, this, &PacketModGUI::on_packet_editingFinished);
+    QObject::connect(ui->insertPosition, &QToolButton::clicked, this, &PacketModGUI::on_insertPosition_clicked);
+    QObject::connect(ui->packet, &QLineEdit::returnPressed, this, &PacketModGUI::on_packet_returnPressed);
+    QObject::connect(ui->repeat, &ButtonSwitch::toggled, this, &PacketModGUI::on_repeat_toggled);
+    QObject::connect(ui->preEmphasis, &ButtonSwitch::toggled, this, &PacketModGUI::on_preEmphasis_toggled);
+    QObject::connect(ui->bpf, &ButtonSwitch::toggled, this, &PacketModGUI::on_bpf_toggled);
+    QObject::connect(ui->udpEnabled, &QCheckBox::clicked, this, &PacketModGUI::on_udpEnabled_clicked);
+    QObject::connect(ui->udpAddress, &QLineEdit::editingFinished, this, &PacketModGUI::on_udpAddress_editingFinished);
+    QObject::connect(ui->udpPort, &QLineEdit::editingFinished, this, &PacketModGUI::on_udpPort_editingFinished);
 }

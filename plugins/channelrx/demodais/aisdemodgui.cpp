@@ -243,7 +243,7 @@ void AISDemodGUI::channelMarkerChangedByCursor()
 
 void AISDemodGUI::channelMarkerHighlightedByCursor()
 {
-    setHighlighted(m_channelMarker.getHighlighted());
+    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void AISDemodGUI::on_deltaFrequency_changed(qint64 value)
@@ -371,7 +371,7 @@ void AISDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
         }
     }
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -397,6 +397,7 @@ void AISDemodGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -428,11 +429,12 @@ AISDemodGUI::AISDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_doApplySettings(true),
     m_tickCount(0)
 {
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/demodais/readme.md";
 
     setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_aisDemod = reinterpret_cast<AISDemod*>(rxChannel);
@@ -518,6 +520,7 @@ AISDemodGUI::AISDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     ui->scopeContainer->setVisible(false);
 
     displaySettings();
+    makeUIConnections();
     applySettings(true);
 }
 
@@ -569,6 +572,7 @@ void AISDemodGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
 
@@ -612,7 +616,7 @@ void AISDemodGUI::displaySettings()
 
     filter();
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -755,4 +759,22 @@ void AISDemodGUI::on_logOpen_clicked()
             }
         }
     }
+}
+
+void AISDemodGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &AISDemodGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &AISDemodGUI::on_rfBW_valueChanged);
+    QObject::connect(ui->fmDev, &QSlider::valueChanged, this, &AISDemodGUI::on_fmDev_valueChanged);
+    QObject::connect(ui->threshold, &QDial::valueChanged, this, &AISDemodGUI::on_threshold_valueChanged);
+    QObject::connect(ui->filterMMSI, &QLineEdit::editingFinished, this, &AISDemodGUI::on_filterMMSI_editingFinished);
+    QObject::connect(ui->clearTable, &QPushButton::clicked, this, &AISDemodGUI::on_clearTable_clicked);
+    QObject::connect(ui->udpEnabled, &QCheckBox::clicked, this, &AISDemodGUI::on_udpEnabled_clicked);
+    QObject::connect(ui->udpAddress, &QLineEdit::editingFinished, this, &AISDemodGUI::on_udpAddress_editingFinished);
+    QObject::connect(ui->udpPort, &QLineEdit::editingFinished, this, &AISDemodGUI::on_udpPort_editingFinished);
+    QObject::connect(ui->udpFormat, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AISDemodGUI::on_udpFormat_currentIndexChanged);
+    QObject::connect(ui->messages, &QTableWidget::cellDoubleClicked, this, &AISDemodGUI::on_messages_cellDoubleClicked);
+    QObject::connect(ui->logEnable, &ButtonSwitch::clicked, this, &AISDemodGUI::on_logEnable_clicked);
+    QObject::connect(ui->logFilename, &QToolButton::clicked, this, &AISDemodGUI::on_logFilename_clicked);
+    QObject::connect(ui->logOpen, &QToolButton::clicked, this, &AISDemodGUI::on_logOpen_clicked);
 }

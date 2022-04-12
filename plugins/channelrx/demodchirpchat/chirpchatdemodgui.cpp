@@ -156,7 +156,7 @@ void ChirpChatDemodGUI::on_deltaFrequency_changed(qint64 value)
 
 void ChirpChatDemodGUI::channelMarkerHighlightedByCursor()
 {
-    setHighlighted(m_channelMarker.getHighlighted());
+    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void ChirpChatDemodGUI::on_BW_valueChanged(int value)
@@ -323,7 +323,7 @@ void ChirpChatDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -350,6 +350,7 @@ void ChirpChatDemodGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -382,10 +383,11 @@ ChirpChatDemodGUI::ChirpChatDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
 	m_doApplySettings(true),
     m_tickCount(0)
 {
-	ui->setupUi(this);
+	ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/demodchirpchat/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
-	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+	connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_chirpChatDemod = (ChirpChatDemod*) rxChannel;
@@ -424,6 +426,7 @@ ChirpChatDemodGUI::ChirpChatDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
 
     setBandwidths();
 	displaySettings();
+    makeUIConnections();
     resetLoRaStatus();
 	applySettings(true);
 }
@@ -459,6 +462,7 @@ void ChirpChatDemodGUI::displaySettings()
     m_channelMarker.blockSignals(false);
     m_channelMarker.setColor(m_settings.m_rgbColor);
     setTitleColor(m_settings.m_rgbColor);
+    setTitle(m_channelMarker.getTitle());
 
 	ui->glSpectrum->setSampleRate(thisBW);
 	ui->glSpectrum->setCenterFrequency(thisBW/2);
@@ -499,7 +503,7 @@ void ChirpChatDemodGUI::displaySettings()
 
     displaySquelch();
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -767,3 +771,25 @@ void ChirpChatDemodGUI::tick()
     }
 }
 
+void ChirpChatDemodGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &ChirpChatDemodGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->BW, &QSlider::valueChanged, this, &ChirpChatDemodGUI::on_BW_valueChanged);
+    QObject::connect(ui->Spread, &QSlider::valueChanged, this, &ChirpChatDemodGUI::on_Spread_valueChanged);
+    QObject::connect(ui->deBits, &QSlider::valueChanged, this, &ChirpChatDemodGUI::on_deBits_valueChanged);
+    QObject::connect(ui->fftWindow, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ChirpChatDemodGUI::on_fftWindow_currentIndexChanged);
+    QObject::connect(ui->preambleChirps, &QSlider::valueChanged, this, &ChirpChatDemodGUI::on_preambleChirps_valueChanged);
+    QObject::connect(ui->scheme, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ChirpChatDemodGUI::on_scheme_currentIndexChanged);
+    QObject::connect(ui->mute, &QToolButton::toggled, this, &ChirpChatDemodGUI::on_mute_toggled);
+    QObject::connect(ui->clear, &QPushButton::clicked, this, &ChirpChatDemodGUI::on_clear_clicked);
+    QObject::connect(ui->eomSquelch, &QDial::valueChanged, this, &ChirpChatDemodGUI::on_eomSquelch_valueChanged);
+    QObject::connect(ui->messageLength, &QDial::valueChanged, this, &ChirpChatDemodGUI::on_messageLength_valueChanged);
+    QObject::connect(ui->messageLengthAuto, &QCheckBox::stateChanged, this, &ChirpChatDemodGUI::on_messageLengthAuto_stateChanged);
+    QObject::connect(ui->header, &QCheckBox::stateChanged, this, &ChirpChatDemodGUI::on_header_stateChanged);
+    QObject::connect(ui->fecParity, &QDial::valueChanged, this, &ChirpChatDemodGUI::on_fecParity_valueChanged);
+    QObject::connect(ui->crc, &QCheckBox::stateChanged, this, &ChirpChatDemodGUI::on_crc_stateChanged);
+    QObject::connect(ui->packetLength, &QDial::valueChanged, this, &ChirpChatDemodGUI::on_packetLength_valueChanged);
+    QObject::connect(ui->udpSend, &QCheckBox::stateChanged, this, &ChirpChatDemodGUI::on_udpSend_stateChanged);
+    QObject::connect(ui->udpAddress, &QLineEdit::editingFinished, this, &ChirpChatDemodGUI::on_udpAddress_editingFinished);
+    QObject::connect(ui->udpPort, &QLineEdit::editingFinished, this, &ChirpChatDemodGUI::on_udpPort_editingFinished);
+}

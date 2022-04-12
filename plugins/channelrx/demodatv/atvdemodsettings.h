@@ -74,7 +74,14 @@ struct ATVDemodSettings
     uint16_t m_udpPort;
     Serializable *m_channelMarker;
     int m_streamIndex;
+    bool m_useReverseAPI;
+    QString m_reverseAPIAddress;
+    uint16_t m_reverseAPIPort;
+    uint16_t m_reverseAPIDeviceIndex;
+    uint16_t m_reverseAPIChannelIndex;
     Serializable *m_rollupState;
+    int m_workspaceIndex;
+    QByteArray m_geometryBytes;
 
     ATVDemodSettings();
     void resetToDefaults();

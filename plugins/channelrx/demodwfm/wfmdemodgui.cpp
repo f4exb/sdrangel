@@ -95,7 +95,7 @@ void WFMDemodGUI::channelMarkerChangedByCursor()
 
 void WFMDemodGUI::channelMarkerHighlightedByCursor()
 {
-    setHighlighted(m_channelMarker.getHighlighted());
+    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void WFMDemodGUI::on_deltaFrequency_changed(qint64 value)
@@ -144,7 +144,7 @@ void WFMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -172,6 +172,7 @@ void WFMDemodGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -204,10 +205,11 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_squelchOpen(false),
     m_audioSampleRate(-1)
 {
-	ui->setupUi(this);
+	ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/demodwfm/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
-	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+	connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
@@ -246,6 +248,7 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
 
     displaySettings();
+    makeUIConnections();
 	applySettings(true);
 }
 
@@ -279,6 +282,7 @@ void WFMDemodGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
 
@@ -294,7 +298,7 @@ void WFMDemodGUI::displaySettings()
 
     displayStreamIndex();
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -360,4 +364,14 @@ void WFMDemodGUI::tick()
         m_audioSampleRate = audioSampleRate;
         m_squelchOpen = squelchOpen;
     }
+}
+
+void WFMDemodGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &WFMDemodGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->rfBW, &ValueDial::changed, this, &WFMDemodGUI::on_rfBW_changed);
+    QObject::connect(ui->afBW, &QSlider::valueChanged, this, &WFMDemodGUI::on_afBW_valueChanged);
+    QObject::connect(ui->volume, &QSlider::valueChanged, this, &WFMDemodGUI::on_volume_valueChanged);
+    QObject::connect(ui->squelch, &QSlider::valueChanged, this, &WFMDemodGUI::on_squelch_valueChanged);
+    QObject::connect(ui->audioMute, &QToolButton::toggled, this, &WFMDemodGUI::on_audioMute_toggled);
 }

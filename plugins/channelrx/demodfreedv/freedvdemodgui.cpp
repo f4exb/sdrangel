@@ -123,7 +123,7 @@ void FreeDVDemodGUI::channelMarkerChangedByCursor()
 
 void FreeDVDemodGUI::channelMarkerHighlightedByCursor()
 {
-    setHighlighted(m_channelMarker.getHighlighted());
+    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void FreeDVDemodGUI::on_deltaFrequency_changed(qint64 value)
@@ -209,6 +209,7 @@ void FreeDVDemodGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -236,7 +237,7 @@ void FreeDVDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -254,10 +255,11 @@ FreeDVDemodGUI::FreeDVDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 	m_squelchOpen(false),
     m_audioSampleRate(-1)
 {
-	ui->setupUi(this);
+	ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/demodfreedv/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
-	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+	connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_freeDVDemod = (FreeDVDemod*) rxChannel;
@@ -308,6 +310,7 @@ FreeDVDemodGUI::FreeDVDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
     m_iconDSBLSB.addPixmap(QPixmap("://lsb.png"), QIcon::Normal, QIcon::Off);
 
 	displaySettings();
+    makeUIConnections();
 	applyBandwidths(5 - ui->spanLog2->value(), true); // does applySettings(true)
 }
 
@@ -371,6 +374,7 @@ void FreeDVDemodGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
 
@@ -393,7 +397,7 @@ void FreeDVDemodGUI::displaySettings()
 
     displayStreamIndex();
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -486,4 +490,15 @@ void FreeDVDemodGUI::tick()
     }
 
     m_tickCount++;
+}
+
+void FreeDVDemodGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &FreeDVDemodGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->reSync, &QPushButton::clicked, this, &FreeDVDemodGUI::on_reSync_clicked);
+    QObject::connect(ui->freeDVMode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FreeDVDemodGUI::on_freeDVMode_currentIndexChanged);
+    QObject::connect(ui->volume, &QDial::valueChanged, this, &FreeDVDemodGUI::on_volume_valueChanged);
+    QObject::connect(ui->volumeIn, &QDial::valueChanged, this, &FreeDVDemodGUI::on_volumeIn_valueChanged);
+    QObject::connect(ui->agc, &ButtonSwitch::toggled, this, &FreeDVDemodGUI::on_agc_toggled);
+    QObject::connect(ui->audioMute, &QToolButton::toggled, this, &FreeDVDemodGUI::on_audioMute_toggled);
 }

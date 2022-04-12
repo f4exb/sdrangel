@@ -128,7 +128,7 @@ void DATVDemodGUI::channelMarkerChangedByCursor()
 
 void DATVDemodGUI::channelMarkerHighlightedByCursor()
 {
-    setHighlighted(m_objChannelMarker.getHighlighted());
+    getRollupContents()->setHighlighted(m_objChannelMarker.getHighlighted());
 }
 
 
@@ -137,7 +137,7 @@ void DATVDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -164,6 +164,7 @@ void DATVDemodGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_objChannelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -198,12 +199,13 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
         m_modcodCodeRateIndex(-1),
         m_cstlnSetByModcod(false)
 {
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/demoddatv/readme.md";
     ui->screenTV->setColor(true);
     ui->screenTV->resizeTVScreen(256,256);
     setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
@@ -283,6 +285,7 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
     ui->playerIndicator->setStyleSheet("QLabel { background-color: gray; border-radius: 8px; }");
     ui->udpIndicator->setStyleSheet("QLabel { background-color: gray; border-radius: 8px; }");
     resetToDefaults(); // does applySettings()
+    makeUIConnections();
 }
 
 DATVDemodGUI::~DATVDemodGUI()
@@ -308,6 +311,7 @@ void DATVDemodGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_objChannelMarker.getTitle());
+    setTitle(m_objChannelMarker.getTitle());
 
     ui->deltaFrequency->setValue(m_settings.m_centerFrequency);
     ui->chkAllowDrift->setChecked(m_settings.m_allowDrift);
@@ -395,7 +399,7 @@ void DATVDemodGUI::displaySettings()
         connect(m_datvDemod->getUDPStream(), &DATVUDPStream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
     }
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -656,7 +660,7 @@ void DATVDemodGUI::on_cmbStandard_currentIndexChanged(int index)
     applySettings();
 }
 
-void DATVDemodGUI::on_cmbModulation_currentIndexChanged(const QString &arg1)
+void DATVDemodGUI::on_cmbModulation_currentIndexChanged(int arg1)
 {
     (void) arg1;
     QString strModulation = ui->cmbModulation->currentText();
@@ -674,7 +678,7 @@ void DATVDemodGUI::on_cmbModulation_currentIndexChanged(const QString &arg1)
     applySettings();
 }
 
-void DATVDemodGUI::on_cmbFEC_currentIndexChanged(const QString &arg1)
+void DATVDemodGUI::on_cmbFEC_currentIndexChanged(int arg1)
 {
     (void) arg1;
     QString strFEC = ui->cmbFEC->currentText();
@@ -918,4 +922,33 @@ void DATVDemodGUI::on_udpTSPort_editingFinished()
     m_settings.m_udpTSPort = udpPort;
     ui->udpTSPort->setText(tr("%1").arg(udpPort));
     applySettings();
+}
+
+void DATVDemodGUI::makeUIConnections()
+{
+    QObject::connect(ui->cmbStandard, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DATVDemodGUI::on_cmbStandard_currentIndexChanged);
+    QObject::connect(ui->cmbModulation, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DATVDemodGUI::on_cmbModulation_currentIndexChanged);
+    QObject::connect(ui->cmbFEC, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DATVDemodGUI::on_cmbFEC_currentIndexChanged);
+    QObject::connect(ui->softLDPC, &QCheckBox::clicked, this, &DATVDemodGUI::on_softLDPC_clicked);
+    QObject::connect(ui->maxBitflips, QOverload<int>::of(&QSpinBox::valueChanged), this, &DATVDemodGUI::on_maxBitflips_valueChanged);
+    QObject::connect(ui->chkViterbi, &QCheckBox::clicked, this, &DATVDemodGUI::on_chkViterbi_clicked);
+    QObject::connect(ui->chkHardMetric, &QCheckBox::clicked, this, &DATVDemodGUI::on_chkHardMetric_clicked);
+    QObject::connect(ui->resetDefaults, &QPushButton::clicked, this, &DATVDemodGUI::on_resetDefaults_clicked);
+    QObject::connect(ui->spiSymbolRate, QOverload<int>::of(&QSpinBox::valueChanged), this, &DATVDemodGUI::on_spiSymbolRate_valueChanged);
+    QObject::connect(ui->spiNotchFilters, QOverload<int>::of(&QSpinBox::valueChanged), this, &DATVDemodGUI::on_spiNotchFilters_valueChanged);
+    QObject::connect(ui->chkAllowDrift, &QCheckBox::clicked, this, &DATVDemodGUI::on_chkAllowDrift_clicked);
+    QObject::connect(ui->fullScreen, &QPushButton::clicked, this, &DATVDemodGUI::on_fullScreen_clicked);
+    QObject::connect(ui->chkFastlock, &QCheckBox::clicked, this, &DATVDemodGUI::on_chkFastlock_clicked);
+    QObject::connect(ui->cmbFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DATVDemodGUI::on_cmbFilter_currentIndexChanged);
+    QObject::connect(ui->spiRollOff, QOverload<int>::of(&QSpinBox::valueChanged), this, &DATVDemodGUI::on_spiRollOff_valueChanged);
+    QObject::connect(ui->spiExcursion, QOverload<int>::of(&QSpinBox::valueChanged), this, &DATVDemodGUI::on_spiExcursion_valueChanged);
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &DATVDemodGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->rfBandwidth, &ValueDialZ::changed, this, &DATVDemodGUI::on_rfBandwidth_changed);
+    QObject::connect(ui->audioMute, &QToolButton::toggled, this, &DATVDemodGUI::on_audioMute_toggled);
+    QObject::connect(ui->audioVolume, &QSlider::valueChanged, this, &DATVDemodGUI::on_audioVolume_valueChanged);
+    QObject::connect(ui->videoMute, &QToolButton::toggled, this, &DATVDemodGUI::on_videoMute_toggled);
+    QObject::connect(ui->udpTS, &ButtonSwitch::clicked, this, &DATVDemodGUI::on_udpTS_clicked);
+    QObject::connect(ui->udpTSAddress, &QLineEdit::editingFinished, this, &DATVDemodGUI::on_udpTSAddress_editingFinished);
+    QObject::connect(ui->udpTSPort, &QLineEdit::editingFinished, this, &DATVDemodGUI::on_udpTSPort_editingFinished);
+    QObject::connect(ui->playerEnable, &QCheckBox::clicked, this, &DATVDemodGUI::on_playerEnable_clicked);
 }

@@ -63,6 +63,8 @@ struct ChirpChatDemodSettings
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIDeviceIndex;
     uint16_t m_reverseAPIChannelIndex;
+    int m_workspaceIndex;
+    QByteArray m_geometryBytes;
 
     Serializable *m_channelMarker;
     Serializable *m_spectrumGUI;

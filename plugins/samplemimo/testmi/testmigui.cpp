@@ -45,6 +45,8 @@ TestMIGui::TestMIGui(DeviceUISet *deviceUISet, QWidget* parent) :
     ui(new Ui::TestMIGui),
     m_deviceUISet(deviceUISet),
     m_settings(),
+    m_streamIndex(0),
+    m_spectrumStreamIndex(0),
     m_doApplySettings(true),
     m_forceSettings(true),
     m_sampleMIMO(nullptr),

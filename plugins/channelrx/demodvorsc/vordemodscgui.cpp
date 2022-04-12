@@ -181,7 +181,7 @@ void VORDemodSCGUI::channelMarkerChangedByCursor()
 
 void VORDemodSCGUI::channelMarkerHighlightedByCursor()
 {
-    setHighlighted(m_channelMarker.getHighlighted());
+    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void VORDemodSCGUI::on_deltaFrequency_changed(qint64 value)
@@ -223,7 +223,7 @@ void VORDemodSCGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -249,6 +249,7 @@ void VORDemodSCGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -281,11 +282,12 @@ VORDemodSCGUI::VORDemodSCGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     m_squelchOpen(false),
     m_tickCount(0)
 {
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/demodvorsc/readme.md";
 
     setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_vorDemod = reinterpret_cast<VORDemodSC*>(rxChannel);
@@ -321,6 +323,7 @@ VORDemodSCGUI::VORDemodSCGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
     displaySettings();
+    makeUIConnections();
     applySettings(true);
 }
 
@@ -354,6 +357,7 @@ void VORDemodSCGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
 
@@ -372,7 +376,7 @@ void VORDemodSCGUI::displaySettings()
 
     displayStreamIndex();
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -442,4 +446,13 @@ void VORDemodSCGUI::tick()
     }
 
     m_tickCount++;
+}
+
+void VORDemodSCGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &VORDemodSCGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->thresh, &QDial::valueChanged, this, &VORDemodSCGUI::on_thresh_valueChanged);
+    QObject::connect(ui->volume, &QDial::valueChanged, this, &VORDemodSCGUI::on_volume_valueChanged);
+    QObject::connect(ui->squelch, &QDial::valueChanged, this, &VORDemodSCGUI::on_squelch_valueChanged);
+    QObject::connect(ui->audioMute, &QToolButton::toggled, this, &VORDemodSCGUI::on_audioMute_toggled);
 }

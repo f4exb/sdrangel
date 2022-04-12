@@ -78,6 +78,8 @@ struct IEEE_802_15_4_ModSettings
     uint16_t m_udpPort;
     Serializable *m_rollupState;
     static const int m_udpBufferSize = 100000;
+    int m_workspaceIndex;
+    QByteArray m_geometryBytes;
 
     IEEE_802_15_4_ModSettings();
     void resetToDefaults();

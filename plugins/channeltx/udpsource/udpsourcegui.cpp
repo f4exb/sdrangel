@@ -107,9 +107,10 @@ UDPSourceGUI::UDPSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
         m_rfBandwidthChanged(false),
         m_doApplySettings(true)
 {
-    ui->setupUi(this);
+    ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channeltx/udpsource/readme.md";
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     setAttribute(Qt::WA_DeleteOnClose, true);
 
@@ -154,6 +155,7 @@ UDPSourceGUI::UDPSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_settings.setRollupState(&m_rollupState);
 
     displaySettings();
+    makeUIConnections();
     applySettings(true);
 }
 
@@ -193,7 +195,8 @@ void UDPSourceGUI::displaySettings()
     m_channelMarker.setColor(m_settings.m_rgbColor);
 
     setTitleColor(m_settings.m_rgbColor);
-    this->setWindowTitle(m_channelMarker.getTitle());
+    setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
     displayStreamIndex();
 
     blockApplySettings(true);
@@ -236,7 +239,7 @@ void UDPSourceGUI::displaySettings()
     ui->applyBtn->setEnabled(false);
     ui->applyBtn->setStyleSheet("QPushButton { background:rgb(79,79,79); }");
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -472,7 +475,7 @@ void UDPSourceGUI::onWidgetRolled(QWidget* widget, bool rollDown)
         m_udpSource->setSpectrum(rollDown);
     }
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -499,6 +502,7 @@ void UDPSourceGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_channelMarker.getTitle());
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -637,3 +641,25 @@ void UDPSourceGUI::setSampleFormat(int index)
     }
 }
 
+void UDPSourceGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &UDPSourceGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->sampleFormat, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &UDPSourceGUI::on_sampleFormat_currentIndexChanged);
+    QObject::connect(ui->localUDPAddress, &QLineEdit::editingFinished, this, &UDPSourceGUI::on_localUDPAddress_editingFinished);
+    QObject::connect(ui->localUDPPort, &QLineEdit::editingFinished, this, &UDPSourceGUI::on_localUDPPort_editingFinished);
+    QObject::connect(ui->multicastAddress, &QLineEdit::editingFinished, this, &UDPSourceGUI::on_multicastAddress_editingFinished);
+    QObject::connect(ui->multicastJoin, &ButtonSwitch::toggled, this, &UDPSourceGUI::on_multicastJoin_toggled);
+    QObject::connect(ui->sampleRate, &QLineEdit::textEdited, this, &UDPSourceGUI::on_sampleRate_textEdited);
+    QObject::connect(ui->rfBandwidth, &QLineEdit::textEdited, this, &UDPSourceGUI::on_rfBandwidth_textEdited);
+    QObject::connect(ui->fmDeviation, &QLineEdit::textEdited, this, &UDPSourceGUI::on_fmDeviation_textEdited);
+    QObject::connect(ui->amModPercent, &QLineEdit::textEdited, this, &UDPSourceGUI::on_amModPercent_textEdited);
+    QObject::connect(ui->applyBtn, &QPushButton::clicked, this, &UDPSourceGUI::on_applyBtn_clicked);
+    QObject::connect(ui->gainIn, &QDial::valueChanged, this, &UDPSourceGUI::on_gainIn_valueChanged);
+    QObject::connect(ui->gainOut, &QDial::valueChanged, this, &UDPSourceGUI::on_gainOut_valueChanged);
+    QObject::connect(ui->squelch, &QSlider::valueChanged, this, &UDPSourceGUI::on_squelch_valueChanged);
+    QObject::connect(ui->squelchGate, &QDial::valueChanged, this, &UDPSourceGUI::on_squelchGate_valueChanged);
+    QObject::connect(ui->channelMute, &QToolButton::toggled, this, &UDPSourceGUI::on_channelMute_toggled);
+    QObject::connect(ui->resetUDPReadIndex, &QPushButton::clicked, this, &UDPSourceGUI::on_resetUDPReadIndex_clicked);
+    QObject::connect(ui->autoRWBalance, &ButtonSwitch::toggled, this, &UDPSourceGUI::on_autoRWBalance_toggled);
+    QObject::connect(ui->stereoInput, &QToolButton::toggled, this, &UDPSourceGUI::on_stereoInput_toggled);
+}

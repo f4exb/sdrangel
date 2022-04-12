@@ -343,7 +343,7 @@ void NFMModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -370,6 +370,7 @@ void NFMModGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -408,7 +409,8 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_enableNavTime(false),
     m_dcsCodeValidator(QRegExp("[0-7]{1,3}"))
 {
-	ui->setupUi(this);
+	ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channeltx/modnfm/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
 
@@ -422,7 +424,7 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     ui->channelSpacing->setCurrentIndex(NFMModSettings::getChannelSpacingIndex(25000));
     ui->channelSpacing->blockSignals(false);
 
-	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+	connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_nfmMod = (NFMMod*) channelTx;
@@ -474,6 +476,7 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_settings.setRollupState(&m_rollupState);
 
     displaySettings();
+    makeUIConnections();
     applySettings();
 }
 
@@ -506,6 +509,7 @@ void NFMModGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
     displayStreamIndex();
 
     blockApplySettings(true);
@@ -556,7 +560,7 @@ void NFMModGUI::displaySettings()
     ui->feedbackVolume->setValue(roundf(m_settings.m_feedbackVolumeFactor * 100.0));
     ui->feedbackVolumeText->setText(QString("%1").arg(m_settings.m_feedbackVolumeFactor, 0, 'f', 2));
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -676,4 +680,30 @@ void NFMModGUI::updateWithStreamTime()
         float posRatio = (float) t_sec / (float) m_recordLength;
         ui->navTimeSlider->setValue((int) (posRatio * 100.0));
     }
+}
+
+void NFMModGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &NFMModGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->channelSpacingApply, &QPushButton::clicked, this, &NFMModGUI::on_channelSpacingApply_clicked);
+    QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &NFMModGUI::on_rfBW_valueChanged);
+    QObject::connect(ui->afBW, &QSlider::valueChanged, this, &NFMModGUI::on_afBW_valueChanged);
+    QObject::connect(ui->fmDev, &QSlider::valueChanged, this, &NFMModGUI::on_fmDev_valueChanged);
+    QObject::connect(ui->toneFrequency, &QDial::valueChanged, this, &NFMModGUI::on_toneFrequency_valueChanged);
+    QObject::connect(ui->volume, &QDial::valueChanged, this, &NFMModGUI::on_volume_valueChanged);
+    QObject::connect(ui->channelMute, &QToolButton::toggled, this, &NFMModGUI::on_channelMute_toggled);
+    QObject::connect(ui->tone, &ButtonSwitch::toggled, this, &NFMModGUI::on_tone_toggled);
+    QObject::connect(ui->morseKeyer, &ButtonSwitch::toggled, this, &NFMModGUI::on_morseKeyer_toggled);
+    QObject::connect(ui->mic, &ButtonSwitch::toggled, this, &NFMModGUI::on_mic_toggled);
+    QObject::connect(ui->play, &ButtonSwitch::toggled, this, &NFMModGUI::on_play_toggled);
+    QObject::connect(ui->playLoop, &ButtonSwitch::toggled, this, &NFMModGUI::on_playLoop_toggled);
+    QObject::connect(ui->navTimeSlider, &QSlider::valueChanged, this, &NFMModGUI::on_navTimeSlider_valueChanged);
+    QObject::connect(ui->showFileDialog, &QPushButton::clicked, this, &NFMModGUI::on_showFileDialog_clicked);
+    QObject::connect(ui->ctcss, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &NFMModGUI::on_ctcss_currentIndexChanged);
+    QObject::connect(ui->ctcssOn, &QCheckBox::toggled, this, &NFMModGUI::on_ctcssOn_toggled);
+    QObject::connect(ui->dcsOn, &QCheckBox::toggled, this, &NFMModGUI::on_dcsOn_toggled);
+    QObject::connect(ui->dcsCode, &QLineEdit::editingFinished, this, &NFMModGUI::on_dcsCode_editingFinished);
+    QObject::connect(ui->dcsPositive, &QCheckBox::toggled, this, &NFMModGUI::on_dcsPositive_toggled);
+    QObject::connect(ui->feedbackEnable, &QToolButton::toggled, this, &NFMModGUI::on_feedbackEnable_toggled);
+    QObject::connect(ui->feedbackVolume, &QDial::valueChanged, this, &NFMModGUI::on_feedbackVolume_valueChanged);
 }

@@ -44,6 +44,7 @@ void VORDemodSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
+    m_workspaceIndex = 0;
 
     m_identThreshold = 2.0;
     m_refThresholdDB = -45.0;
@@ -84,6 +85,9 @@ QByteArray VORDemodSettings::serialize() const
     if (m_rollupState) {
         s.writeBlob(24, m_rollupState->serialize());
     }
+
+    s.writeS32(25, m_workspaceIndex);
+    s.writeBlob(26, m_geometryBytes);
 
     for (int i = 0; i < VORDEMOD_COLUMNS; i++) {
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -152,6 +156,9 @@ bool VORDemodSettings::deserialize(const QByteArray& data)
             d.readBlob(24, &bytetmp);
             m_rollupState->deserialize(bytetmp);
         }
+
+        d.readS32(25, &m_workspaceIndex, 0);
+        d.readBlob(26, &m_geometryBytes);
 
         for (int i = 0; i < VORDEMOD_COLUMNS; i++) {
             d.readS32(100 + i, &m_columnIndexes[i], i);

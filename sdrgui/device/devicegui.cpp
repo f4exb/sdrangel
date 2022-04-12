@@ -168,6 +168,7 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
 
     connect(m_changeDeviceButton, SIGNAL(clicked()), this, SLOT(openChangeDeviceDialog()));
     connect(m_reloadDeviceButton, SIGNAL(clicked()), this, SLOT(deviceReload()));
+    connect(m_addChannelsButton, SIGNAL(clicked()), this, SLOT(openAddChannelsDialog()));
     connect(m_helpButton, SIGNAL(clicked()), this, SLOT(showHelp()));
     connect(m_moveButton, SIGNAL(clicked()), this, SLOT(openMoveToWorkspaceDialog()));
     connect(m_shrinkButton, SIGNAL(clicked()), this, SLOT(shrinkWindow()));
@@ -175,6 +176,14 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
     connect(m_closeButton, SIGNAL(clicked()), this, SLOT(close()));
     connect(this, SIGNAL(forceClose()), this, SLOT(close()));
     connect(m_showSpectrumButton, SIGNAL(clicked()), this, SLOT(showSpectrumHandler()));
+    connect(m_showAllChannelsButton, SIGNAL(clicked()), this, SLOT(showAllChannelsHandler()));
+
+    QObject::connect(
+        &m_channelAddDialog,
+        &ChannelAddDialog::addChannel,
+        this,
+        &DeviceGUI::addChannelEmitted
+    );
 }
 
 DeviceGUI::~DeviceGUI()
@@ -275,9 +284,19 @@ void DeviceGUI::openMoveToWorkspaceDialog()
     }
 }
 
+void DeviceGUI::openAddChannelsDialog()
+{
+    m_channelAddDialog.exec();
+}
+
 void DeviceGUI::showSpectrumHandler()
 {
     emit showSpectrum(m_deviceSetIndex);
+}
+
+void DeviceGUI::showAllChannelsHandler()
+{
+    emit showAllChannels(m_deviceSetIndex);
 }
 
 void DeviceGUI::shrinkWindow()

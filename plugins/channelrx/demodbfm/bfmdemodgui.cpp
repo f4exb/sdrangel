@@ -138,7 +138,7 @@ void BFMDemodGUI::channelMarkerChangedByCursor()
 
 void BFMDemodGUI::channelMarkerHighlightedByCursor()
 {
-    setHighlighted(m_channelMarker.getHighlighted());
+    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void BFMDemodGUI::on_deltaFrequency_changed(qint64 value)
@@ -304,7 +304,7 @@ void BFMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -332,6 +332,7 @@ void BFMDemodGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -364,7 +365,8 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_radiotext_AB_flag(false),
 	m_rate(625000)
 {
-	ui->setupUi(this);
+	ui->setupUi(getRollupContents());
+    getRollupContents()->arrangeRollups();
 	m_helpURL = "plugins/channelrx/demodbfm/readme.md";
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -375,7 +377,7 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect()));
 
 	setAttribute(Qt::WA_DeleteOnClose, true);
-	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+	connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
@@ -421,6 +423,7 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	rdsUpdateFixedFields();
 	rdsUpdate(true);
 	displaySettings();
+    makeUIConnections();
 	applySettings(true);
 }
 
@@ -454,6 +457,7 @@ void BFMDemodGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
 
@@ -478,7 +482,7 @@ void BFMDemodGUI::displaySettings()
 
     displayStreamIndex();
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -828,4 +832,18 @@ void BFMDemodGUI::changeFrequency(qint64 f)
 {
 	qint64 df = m_channelMarker.getCenterFrequency();
 	qDebug() << "BFMDemodGUI::changeFrequency: " << f - df;
+}
+
+void BFMDemodGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &BFMDemodGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &BFMDemodGUI::on_rfBW_valueChanged);
+    QObject::connect(ui->afBW, &QSlider::valueChanged, this, &BFMDemodGUI::on_afBW_valueChanged);
+    QObject::connect(ui->volume, &QSlider::valueChanged, this, &BFMDemodGUI::on_volume_valueChanged);
+    QObject::connect(ui->squelch, &QSlider::valueChanged, this, &BFMDemodGUI::on_squelch_valueChanged);
+    QObject::connect(ui->audioStereo, &QToolButton::toggled, this, &BFMDemodGUI::on_audioStereo_toggled);
+    QObject::connect(ui->lsbStereo, &ButtonSwitch::toggled, this, &BFMDemodGUI::on_lsbStereo_toggled);
+    QObject::connect(ui->showPilot, &ButtonSwitch::clicked, this, &BFMDemodGUI::on_showPilot_clicked);
+    QObject::connect(ui->rds, &ButtonSwitch::clicked, this, &BFMDemodGUI::on_rds_clicked);
+    QObject::connect(ui->clearData, &QPushButton::clicked, this, &BFMDemodGUI::on_clearData_clicked);
 }

@@ -166,7 +166,6 @@ void AISGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    shrinkWindow();
     getRollupContents()->saveState(m_rollupState);
     applySettings();
 }

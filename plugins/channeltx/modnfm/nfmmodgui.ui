@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>NFMModGUI</class>
- <widget class="RollupWidget" name="NFMModGUI">
+ <widget class="RollupContents" name="NFMModGUI">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -928,9 +928,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>RollupWidget</class>
+   <class>RollupContents</class>
    <extends>QWidget</extends>
-   <header>gui/rollupwidget.h</header>
+   <header>gui/rollupcontents.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
