@@ -60,6 +60,7 @@ void ATVDemodSettings::resetToDefaults()
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
     m_workspaceIndex = 0;
+    m_hidden = false;
 }
 
 QByteArray ATVDemodSettings::serialize() const
@@ -104,6 +105,7 @@ QByteArray ATVDemodSettings::serialize() const
     s.writeU32(30, m_reverseAPIChannelIndex);
     s.writeS32(31, m_workspaceIndex);
     s.writeBlob(32, m_geometryBytes);
+    s.writeBool(33, m_hidden);
 
     return s.final();
 }
@@ -183,6 +185,7 @@ bool ATVDemodSettings::deserialize(const QByteArray& arrData)
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
         d.readS32(31, &m_workspaceIndex, 0);
         d.readBlob(32, &m_geometryBytes);
+        d.readBool(33, &m_hidden, false);
 
         return true;
     }

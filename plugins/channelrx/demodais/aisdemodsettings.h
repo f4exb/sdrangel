@@ -63,6 +63,7 @@ struct AISDemodSettings
     Serializable *m_rollupState;
     int m_workspaceIndex;
     QByteArray m_geometryBytes;
+    bool m_hidden;
 
     int m_messageColumnIndexes[AISDEMOD_MESSAGE_COLUMNS];//!< How the columns are ordered in the table
     int m_messageColumnSizes[AISDEMOD_MESSAGE_COLUMNS];  //!< Size of the columns in the table

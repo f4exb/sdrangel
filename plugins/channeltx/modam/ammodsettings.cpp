@@ -53,6 +53,7 @@ void AMModSettings::resetToDefaults()
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
     m_workspaceIndex = 0;
+    m_hidden = false;
 }
 
 QByteArray AMModSettings::serialize() const
@@ -95,6 +96,7 @@ QByteArray AMModSettings::serialize() const
 
     s.writeS32(22, m_workspaceIndex);
     s.writeBlob(23, m_geometryBytes);
+    s.writeBool(24, m_hidden);
 
     return s.final();
 }
@@ -172,6 +174,7 @@ bool AMModSettings::deserialize(const QByteArray& data)
 
         d.readS32(22, &m_workspaceIndex, 0);
         d.readBlob(23, &m_geometryBytes);
+        d.readBool(24, &m_hidden, false);
 
         return true;
     }

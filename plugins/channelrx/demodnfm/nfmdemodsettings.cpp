@@ -75,6 +75,7 @@ void NFMDemodSettings::resetToDefaults()
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
     m_workspaceIndex = 0;
+    m_hidden = false;
 }
 
 QByteArray NFMDemodSettings::serialize() const
@@ -116,6 +117,7 @@ QByteArray NFMDemodSettings::serialize() const
 
     s.writeS32(27, m_workspaceIndex);
     s.writeBlob(28, m_geometryBytes);
+    s.writeBool(29, m_hidden);
 
     return s.final();
 }
@@ -188,6 +190,7 @@ bool NFMDemodSettings::deserialize(const QByteArray& data)
 
         d.readS32(27, &m_workspaceIndex, 0);
         d.readBlob(28, &m_geometryBytes);
+        d.readBool(29, &m_hidden, false);
 
         return true;
     }

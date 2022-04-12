@@ -45,6 +45,7 @@ void LocalSinkSettings::resetToDefaults()
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
     m_workspaceIndex = 0;
+    m_hidden = false;
 }
 
 QByteArray LocalSinkSettings::serialize() const
@@ -73,6 +74,7 @@ QByteArray LocalSinkSettings::serialize() const
 
     s.writeS32(16, m_workspaceIndex);
     s.writeBlob(17, m_geometryBytes);
+    s.writeBool(18, m_hidden);
 
     return s.final();
 }
@@ -130,6 +132,7 @@ bool LocalSinkSettings::deserialize(const QByteArray& data)
 
         d.readS32(16, &m_workspaceIndex, 0);
         d.readBlob(17, &m_geometryBytes);
+        d.readBool(18, &m_hidden, false);
 
         return true;
     }

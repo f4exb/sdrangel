@@ -50,6 +50,7 @@ void FileSinkSettings::resetToDefaults()
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
     m_workspaceIndex = 0;
+    m_hidden = false;
 }
 
 QByteArray FileSinkSettings::serialize() const
@@ -88,6 +89,7 @@ QByteArray FileSinkSettings::serialize() const
 
     s.writeS32(20, m_workspaceIndex);
     s.writeBlob(21, m_geometryBytes);
+    s.writeBool(22, m_hidden);
 
     return s.final();
 }
@@ -159,6 +161,7 @@ bool FileSinkSettings::deserialize(const QByteArray& data)
 
         d.readS32(20, &m_workspaceIndex, 0);
         d.readBlob(21, &m_geometryBytes);
+        d.readBool(22, &m_hidden, false);
 
         return true;
     }

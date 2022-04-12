@@ -48,6 +48,7 @@ void DABDemodSettings::resetToDefaults()
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
     m_workspaceIndex = 0;
+    m_hidden = false;
 
     for (int i = 0; i < DABDEMOD_COLUMNS; i++)
     {
@@ -85,6 +86,7 @@ QByteArray DABDemodSettings::serialize() const
 
     s.writeS32(17, m_workspaceIndex);
     s.writeBlob(18, m_geometryBytes);
+    s.writeBool(19, m_hidden);
 
     for (int i = 0; i < DABDEMOD_COLUMNS; i++) {
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -152,6 +154,7 @@ bool DABDemodSettings::deserialize(const QByteArray& data)
 
         d.readS32(17, &m_workspaceIndex, 0);
         d.readBlob(18, &m_geometryBytes);
+        d.readBool(19, &m_hidden, false);
 
         for (int i = 0; i < DABDEMOD_COLUMNS; i++) {
             d.readS32(100 + i, &m_columnIndexes[i], i);

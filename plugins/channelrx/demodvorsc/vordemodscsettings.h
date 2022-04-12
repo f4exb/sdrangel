@@ -48,6 +48,7 @@ struct VORDemodSCSettings
     Serializable *m_rollupState;
     int m_workspaceIndex;
     QByteArray m_geometryBytes;
+    bool m_hidden;
 
     // Highest frequency is the FM subcarrier at up to ~11kHz
     // However, old VORs can have 0.005% frequency offset, which is 6kHz

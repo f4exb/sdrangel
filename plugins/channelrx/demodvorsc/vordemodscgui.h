@@ -54,6 +54,8 @@ public:
     virtual QByteArray getGeometryBytes() const { return m_settings.m_geometryBytes; };
     virtual QString getTitle() const { return m_settings.m_title; };
     virtual QColor getTitleColor() const  { return m_settings.m_rgbColor; };
+    virtual void zetHidden(bool hidden) { m_settings.m_hidden = hidden; }
+    virtual bool getHidden() const { return m_settings.m_hidden; }
 
 public slots:
     void channelMarkerChangedByCursor();

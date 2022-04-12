@@ -58,6 +58,7 @@ void UDPSinkSettings::resetToDefaults()
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
     m_workspaceIndex = 0;
+    m_hidden = false;
 }
 
 QByteArray UDPSinkSettings::serialize() const
@@ -102,6 +103,7 @@ QByteArray UDPSinkSettings::serialize() const
 
     s.writeS32(30, m_workspaceIndex);
     s.writeBlob(31, m_geometryBytes);
+    s.writeBool(32, m_hidden);
 
     return s.final();
 
@@ -201,8 +203,9 @@ bool UDPSinkSettings::deserialize(const QByteArray& data)
             m_rollupState->deserialize(bytetmp);
         }
 
-        d.readS32(29, &m_workspaceIndex, 0);
-        d.readBlob(30, &m_geometryBytes);
+        d.readS32(30, &m_workspaceIndex, 0);
+        d.readBlob(31, &m_geometryBytes);
+        d.readBool(32, &m_hidden, false);
 
         return true;
     }

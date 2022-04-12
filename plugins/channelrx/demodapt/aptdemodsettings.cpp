@@ -70,6 +70,7 @@ void APTDemodSettings::resetToDefaults()
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
     m_workspaceIndex = 0;
+    m_hidden = false;
 }
 
 QByteArray APTDemodSettings::serialize() const
@@ -123,6 +124,7 @@ QByteArray APTDemodSettings::serialize() const
     s.writeFloat(38, m_satYaw);
     s.writeS32(39, m_workspaceIndex);
     s.writeBlob(40, m_geometryBytes);
+    s.writeBool(41, m_hidden);
 
     return s.final();
 }
@@ -206,6 +208,7 @@ bool APTDemodSettings::deserialize(const QByteArray& data)
         d.readFloat(38, &m_satYaw, 0.0f);
         d.readS32(39, &m_workspaceIndex, 0);
         d.readBlob(40, &m_geometryBytes);
+        d.readBool(41, &m_hidden, false);
 
         return true;
     }

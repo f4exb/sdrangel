@@ -54,6 +54,7 @@ void PacketDemodSettings::resetToDefaults()
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
     m_workspaceIndex = 0;
+    m_hidden = false;
 
     for (int i = 0; i < PACKETDEMOD_COLUMNS; i++)
     {
@@ -98,6 +99,7 @@ QByteArray PacketDemodSettings::serialize() const
 
     s.writeS32(28, m_workspaceIndex);
     s.writeBlob(29, m_geometryBytes);
+    s.writeBool(30, m_hidden);
 
     for (int i = 0; i < PACKETDEMOD_COLUMNS; i++) {
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -179,6 +181,7 @@ bool PacketDemodSettings::deserialize(const QByteArray& data)
 
         d.readS32(28, &m_workspaceIndex, 0);
         d.readBlob(29, &m_geometryBytes);
+        d.readBool(30, &m_hidden, false);
 
         for (int i = 0; i < PACKETDEMOD_COLUMNS; i++) {
             d.readS32(100 + i, &m_columnIndexes[i], i);

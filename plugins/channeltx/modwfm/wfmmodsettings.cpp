@@ -61,6 +61,7 @@ void WFMModSettings::resetToDefaults()
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
     m_workspaceIndex = 0;
+    m_hidden = false;
 }
 
 QByteArray WFMModSettings::serialize() const
@@ -104,6 +105,7 @@ QByteArray WFMModSettings::serialize() const
 
     s.writeS32(23, m_workspaceIndex);
     s.writeBlob(24, m_geometryBytes);
+    s.writeBool(25, m_hidden);
 
     return s.final();
 }
@@ -183,6 +185,7 @@ bool WFMModSettings::deserialize(const QByteArray& data)
 
         d.readS32(23, &m_workspaceIndex, 0);
         d.readBlob(24, &m_geometryBytes);
+        d.readBool(25, &m_hidden, false);
 
         return true;
     }

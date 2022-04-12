@@ -47,6 +47,7 @@ void VORDemodSCSettings::resetToDefaults()
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
     m_workspaceIndex = 0;
+    m_hidden = false;
 
     m_identThreshold = 2.0;
     m_refThresholdDB = -45.0;
@@ -83,6 +84,7 @@ QByteArray VORDemodSCSettings::serialize() const
 
     s.writeS32(24, m_workspaceIndex);
     s.writeBlob(25, m_geometryBytes);
+    s.writeBool(26, m_hidden);
 
     return s.final();
 }
@@ -146,6 +148,7 @@ bool VORDemodSCSettings::deserialize(const QByteArray& data)
 
         d.readS32(24, &m_workspaceIndex, 0);
         d.readBlob(25, &m_geometryBytes);
+        d.readBool(26, &m_hidden, false);
 
         return true;
     }

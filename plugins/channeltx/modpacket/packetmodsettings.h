@@ -85,6 +85,7 @@ struct PacketModSettings
     Serializable *m_rollupState;
     int m_workspaceIndex;
     QByteArray m_geometryBytes;
+    bool m_hidden;
 
     PacketModSettings();
     void resetToDefaults();

@@ -80,6 +80,7 @@ struct IEEE_802_15_4_ModSettings
     static const int m_udpBufferSize = 100000;
     int m_workspaceIndex;
     QByteArray m_geometryBytes;
+    bool m_hidden;
 
     IEEE_802_15_4_ModSettings();
     void resetToDefaults();

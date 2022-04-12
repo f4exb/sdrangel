@@ -45,6 +45,7 @@ void RemoteSourceSettings::resetToDefaults()
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
     m_workspaceIndex = 0;
+    m_hidden = false;
 }
 
 QByteArray RemoteSourceSettings::serialize() const
@@ -74,6 +75,7 @@ QByteArray RemoteSourceSettings::serialize() const
 
     s.writeS32(15, m_workspaceIndex);
     s.writeBlob(16, m_geometryBytes);
+    s.writeBool(17, m_hidden);
 
     return s.final();
 }
@@ -138,6 +140,7 @@ bool RemoteSourceSettings::deserialize(const QByteArray& data)
 
         d.readS32(15, &m_workspaceIndex, 0);
         d.readBlob(16, &m_geometryBytes);
+        d.readBool(17, &m_hidden, false);
 
         return true;
     }

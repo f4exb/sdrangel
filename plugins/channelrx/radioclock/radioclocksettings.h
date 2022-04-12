@@ -56,6 +56,7 @@ struct RadioClockSettings
     Serializable *m_rollupState;
     int m_workspaceIndex;
     QByteArray m_geometryBytes;
+    bool m_hidden;
 
     static const int RADIOCLOCK_CHANNEL_SAMPLE_RATE = 1000;
     static const int m_scopeStreams = 8;

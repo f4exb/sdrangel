@@ -66,6 +66,7 @@ void NoiseFigureSettings::resetToDefaults()
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
     m_workspaceIndex = 0;
+    m_hidden = false;
 
     for (int i = 0; i < NOISEFIGURE_COLUMNS; i++)
     {
@@ -120,6 +121,7 @@ QByteArray NoiseFigureSettings::serialize() const
 
     s.writeS32(29, m_workspaceIndex);
     s.writeBlob(30, m_geometryBytes);
+    s.writeBool(31, m_hidden);
 
     for (int i = 0; i < NOISEFIGURE_COLUMNS; i++) {
         s.writeS32(100 + i, m_resultsColumnIndexes[i]);
@@ -203,6 +205,7 @@ bool NoiseFigureSettings::deserialize(const QByteArray& data)
 
         d.readS32(29, &m_workspaceIndex, 0);
         d.readBlob(30, &m_geometryBytes);
+        d.readBool(31, &m_hidden, false);
 
         for (int i = 0; i < NOISEFIGURE_COLUMNS; i++) {
             d.readS32(100 + i, &m_resultsColumnIndexes[i], i);

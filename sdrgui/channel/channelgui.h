@@ -64,6 +64,8 @@ public:
     virtual QByteArray getGeometryBytes() const = 0;
     virtual QString getTitle() const = 0;
     virtual QColor getTitleColor() const  = 0;
+    virtual void zetHidden(bool hidden) = 0;
+    virtual bool getHidden() const = 0;
 
 	virtual MessageQueue* getInputMessageQueue() = 0;
 

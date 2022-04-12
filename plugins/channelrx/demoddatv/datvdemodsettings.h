@@ -110,6 +110,7 @@ struct DATVDemodSettings
     Serializable *m_rollupState;
     int m_workspaceIndex;
     QByteArray m_geometryBytes;
+    bool m_hidden;
 
     static const int m_softLDPCMaxMaxTrials = 50;
 

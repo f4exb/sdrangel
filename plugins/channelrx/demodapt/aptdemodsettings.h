@@ -68,6 +68,7 @@ struct APTDemodSettings
     Serializable *m_rollupState;
     int m_workspaceIndex;
     QByteArray m_geometryBytes;
+    bool m_hidden;
 
     // The following are really working state, rather than settings
     QString m_tle;                              // Satelite two-line elements, from satellite tracker

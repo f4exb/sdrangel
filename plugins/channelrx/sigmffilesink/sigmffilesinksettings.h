@@ -44,6 +44,7 @@ struct SigMFFileSinkSettings
     uint16_t m_reverseAPIChannelIndex;
     int m_workspaceIndex;
     QByteArray m_geometryBytes;
+    bool m_hidden;
 
     Serializable *m_spectrumGUI;
     Serializable *m_channelMarker;

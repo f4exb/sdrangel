@@ -306,6 +306,10 @@ void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginA
                     currentWorkspace->addToMdiArea((QMdiSubWindow*) rxChannelGUI);
                 }
 
+                if (rxChannelGUI->getHidden()) {
+                    rxChannelGUI->hide();
+                }
+
                 rxChannelGUI->restoreGeometry(rxChannelGUI->getGeometryBytes());
                 rxChannelGUI->setDeviceType(ChannelGUI::DeviceRx);
                 rxChannelGUI->setDeviceSetIndex(m_deviceSetIndex);
@@ -336,6 +340,7 @@ void DeviceUISet::saveRxChannelSettings(Preset *preset) const
             ChannelGUI *channelGUI = m_channelInstanceRegistrations[i].m_gui;
             qDebug("DeviceUISet::saveRxChannelSettings: saving channel [%s]", qPrintable(m_channelInstanceRegistrations[i].m_channelAPI->getURI()));
             channelGUI->setGeometryBytes(channelGUI->saveGeometry());
+            channelGUI->zetHidden(channelGUI->isHidden());
             preset->addChannel(m_channelInstanceRegistrations[i].m_channelAPI->getURI(), channelGUI->serialize());
         }
     }
@@ -415,6 +420,10 @@ void DeviceUISet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginA
                     currentWorkspace->addToMdiArea((QMdiSubWindow*) txChannelGUI);
                 }
 
+                if (txChannelGUI->getHidden()) {
+                    txChannelGUI->hide();
+                }
+
                 txChannelGUI->restoreGeometry(txChannelGUI->getGeometryBytes());
                 txChannelGUI->setDeviceType(ChannelGUI::DeviceRx);
                 txChannelGUI->setDeviceSetIndex(m_deviceSetIndex);
@@ -446,6 +455,7 @@ void DeviceUISet::saveTxChannelSettings(Preset *preset) const
             ChannelGUI *channelGUI = m_channelInstanceRegistrations[i].m_gui;
             qDebug("DeviceUISet::saveTxChannelSettings: saving channel [%s]", qPrintable(m_channelInstanceRegistrations[i].m_channelAPI->getURI()));
             channelGUI->setGeometryBytes(channelGUI->saveGeometry());
+            channelGUI->zetHidden(channelGUI->isHidden());
             preset->addChannel(m_channelInstanceRegistrations[i].m_channelAPI->getURI(), channelGUI->serialize());
         }
     }
@@ -526,6 +536,10 @@ void DeviceUISet::loadMIMOChannelSettings(const Preset *preset, PluginAPI *plugi
                     currentWorkspace->addToMdiArea((QMdiSubWindow*) mimoChannelGUI);
                 }
 
+                if (mimoChannelGUI->getHidden()) {
+                    mimoChannelGUI->hide();
+                }
+
                 mimoChannelGUI->restoreGeometry(mimoChannelGUI->getGeometryBytes());
                 mimoChannelGUI->setDeviceType(ChannelGUI::DeviceRx);
                 mimoChannelGUI->setDeviceSetIndex(m_deviceSetIndex);
@@ -556,6 +570,7 @@ void DeviceUISet::saveMIMOChannelSettings(Preset *preset) const
             ChannelGUI *channelGUI = m_channelInstanceRegistrations[i].m_gui;
             qDebug("DeviceUISet::saveMIMOChannelSettings: saving channel [%s]", qPrintable(m_channelInstanceRegistrations[i].m_channelAPI->getURI()));
             channelGUI->setGeometryBytes(channelGUI->saveGeometry());
+            channelGUI->zetHidden(channelGUI->isHidden());
             preset->addChannel(m_channelInstanceRegistrations[i].m_channelAPI->getURI(), channelGUI->serialize());
         }
     }

@@ -94,6 +94,8 @@ void ChirpChatModSettings::resetToDefaults()
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
     m_workspaceIndex = 0;
+    m_hidden = false;
+
     setDefaultTemplates();
 }
 
@@ -204,6 +206,7 @@ QByteArray ChirpChatModSettings::serialize() const
 
     s.writeS32(60, m_workspaceIndex);
     s.writeBlob(61, m_geometryBytes);
+    s.writeBool(62, m_hidden);
 
     return s.final();
 }
@@ -311,6 +314,7 @@ bool ChirpChatModSettings::deserialize(const QByteArray& data)
 
         d.readS32(60, &m_workspaceIndex, 0);
         d.readBlob(61, &m_geometryBytes);
+        d.readBool(62, &m_hidden, false);
 
         return true;
     }

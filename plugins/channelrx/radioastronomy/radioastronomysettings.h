@@ -225,6 +225,7 @@ struct RadioAstronomySettings
     uint16_t m_reverseAPIChannelIndex;
     int m_workspaceIndex;
     QByteArray m_geometryBytes;
+    bool m_hidden;
 
     int m_powerTableColumnIndexes[RADIOASTRONOMY_POWERTABLE_COLUMNS];//!< How the columns are ordered in the table
     int m_powerTableColumnSizes[RADIOASTRONOMY_POWERTABLE_COLUMNS];  //!< Size of the columns in the table
