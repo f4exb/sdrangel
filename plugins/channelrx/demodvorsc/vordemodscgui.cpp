@@ -282,8 +282,8 @@ VORDemodSCGUI::VORDemodSCGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     ui(new Ui::VORDemodSCGUI),
     m_pluginAPI(pluginAPI),
     m_deviceUISet(deviceUISet),
-    m_deviceCenterFrequency(0),
     m_channelMarker(this),
+    m_deviceCenterFrequency(0),
     m_doApplySettings(true),
     m_squelchOpen(false),
     m_tickCount(0)
