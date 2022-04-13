@@ -48,7 +48,7 @@ const qint64 AirspyHFInput::loHighLimitFreqVHF = 260000000L;
 AirspyHFInput::AirspyHFInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
-	m_dev(0),
+	m_dev(nullptr),
 	m_airspyHFWorker(nullptr),
 	m_deviceDescription("AirspyHF"),
 	m_running(false)
@@ -89,7 +89,7 @@ void AirspyHFInput::destroy()
 
 bool AirspyHFInput::openDevice()
 {
-    if (m_dev != 0)
+    if (m_dev)
     {
         closeDevice();
     }
@@ -105,7 +105,7 @@ bool AirspyHFInput::openDevice()
     if ((m_dev = open_airspyhf_from_serial(m_deviceAPI->getSamplingDeviceSerial())) == 0)
     {
         qCritical("AirspyHFInput::openDevice: could not open Airspy HF with serial %s", qPrintable(m_deviceAPI->getSamplingDeviceSerial()));
-        m_dev = 0;
+        m_dev = nullptr;
         return false;
     }
     else
@@ -226,11 +226,11 @@ void AirspyHFInput::stopWorker()
 
 void AirspyHFInput::closeDevice()
 {
-    if (m_dev != 0)
+    if (m_dev)
     {
         airspyhf_stop(m_dev);
         airspyhf_close(m_dev);
-        m_dev = 0;
+        m_dev = nullptr;
     }
 
     m_deviceDescription.clear();
@@ -445,7 +445,7 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
 		    sampleRateIndex = m_sampleRates.size() - 1;
 		}
 
-		if ((m_dev != 0) && (sampleRateIndex >= 0))
+		if (m_dev && (sampleRateIndex >= 0))
 		{
 			rc = (airspyhf_error) airspyhf_set_samplerate(m_dev, sampleRateIndex);
 
@@ -486,7 +486,7 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
 	{
         reverseAPIKeys.append("LOppmTenths");
 
-	    if (m_dev != 0)
+	    if (m_dev)
 	    {
 	        rc = (airspyhf_error) airspyhf_set_calibration(m_dev, settings.m_LOppmTenths * 100);
 
@@ -520,7 +520,7 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
         deviceCenterFrequency = deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency;
         qint64 f_img = deviceCenterFrequency;
 
-		if ((m_dev != 0) && (sampleRateIndex >= 0))
+		if (m_dev && (sampleRateIndex >= 0))
 		{
             quint32 devSampleRate = m_sampleRates[sampleRateIndex];
 			setDeviceCenterFrequency(deviceCenterFrequency, settings);
@@ -539,7 +539,7 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
     {
         reverseAPIKeys.append("useAGC");
 
-        if (m_dev != 0)
+        if (m_dev)
         {
             rc = (airspyhf_error) airspyhf_set_hf_agc(m_dev, settings.m_useAGC ? 1 : 0);
 
@@ -555,7 +555,7 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
     {
         reverseAPIKeys.append("agcHigh");
 
-        if (m_dev != 0)
+        if (m_dev)
         {
             rc = (airspyhf_error) airspyhf_set_hf_agc_threshold(m_dev, settings.m_agcHigh ? 1 : 0);
 
@@ -571,7 +571,7 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
     {
         reverseAPIKeys.append("useDSP");
 
-        if (m_dev != 0)
+        if (m_dev)
         {
             rc = (airspyhf_error) airspyhf_set_lib_dsp(m_dev, settings.m_useDSP ? 1 : 0);
 
@@ -587,7 +587,7 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
     {
         reverseAPIKeys.append("useLNA");
 
-        if (m_dev != 0)
+        if (m_dev)
         {
             rc = (airspyhf_error) airspyhf_set_hf_lna(m_dev, settings.m_useLNA ? 1 : 0);
 
@@ -603,7 +603,7 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
     {
         reverseAPIKeys.append("attenuatorSteps");
 
-        if (m_dev != 0)
+        if (m_dev)
         {
             rc = (airspyhf_error) airspyhf_set_hf_att(m_dev, settings.m_attenuatorSteps);
 
@@ -615,7 +615,7 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
         }
     }
 
-	if (forwardChange && (sampleRateIndex >= 0))
+	if (forwardChange && (m_sampleRates.size() != 0) && (sampleRateIndex >= 0))
 	{
 		int sampleRate = m_sampleRates[sampleRateIndex]/(1<<settings.m_log2Decim);
 		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, settings.m_centerFrequency);
