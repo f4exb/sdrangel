@@ -74,6 +74,8 @@ private:
     ChannelMarker m_channelMarker;
     RollupState m_rollupState;
     RadiosondeDemodSettings m_settings;
+    qint64 m_deviceCenterFrequency;
+    int m_basebandSampleRate;
     bool m_doApplySettings;
     ScopeVis* m_scopeVis;
 
@@ -96,6 +98,7 @@ private:
     void frameReceived(const QByteArray& frame, const QDateTime& dateTime, int errorsCorrected, int threshold);
     bool handleMessage(const Message& message);
     void makeUIConnections();
+    void updateAbsoluteCenterFrequency();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);

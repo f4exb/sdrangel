@@ -99,6 +99,16 @@ bool SSBModGUI::handleMessage(const Message& message)
         applyBandwidths(5 - ui->spanLog2->value()); // will update spectrum details with new sample rate
         return true;
     }
+    else if (DSPSignalNotification::match(message))
+    {
+        const DSPSignalNotification& notif = (const DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getCenterFrequency();
+        m_basebandSampleRate = notif.getSampleRate();
+        ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
+        return true;
+    }
     else if (SSBMod::MsgConfigureSSBMod::match(message))
     {
         SSBModSettings mod_settings; // different USB/LSB convention between modulator and GUI
@@ -160,6 +170,7 @@ void SSBModGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -366,7 +377,6 @@ void SSBModGUI::onMenuDialogCalled(const QPoint &p)
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
         m_settings.m_title = m_channelMarker.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
@@ -405,6 +415,8 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
+    m_deviceCenterFrequency(0),
+    m_basebandSampleRate(1),
 	m_doApplySettings(true),
 	m_spectrumRate(6000),
     m_recordLength(0),
@@ -720,6 +732,7 @@ void SSBModGUI::displaySettings()
     ui->feedbackVolumeText->setText(QString("%1").arg(m_settings.m_feedbackVolumeFactor, 0, 'f', 2));
 
     getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
@@ -865,4 +878,9 @@ void SSBModGUI::makeUIConnections()
     QObject::connect(ui->showFileDialog, &QPushButton::clicked, this, &SSBModGUI::on_showFileDialog_clicked);
     QObject::connect(ui->feedbackEnable, &QToolButton::toggled, this, &SSBModGUI::on_feedbackEnable_toggled);
     QObject::connect(ui->feedbackVolume, &QDial::valueChanged, this, &SSBModGUI::on_feedbackVolume_valueChanged);
+}
+
+void SSBModGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

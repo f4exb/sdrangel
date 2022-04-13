@@ -121,6 +121,7 @@ void ATVDemodGUI::displaySettings()
 
     applySampleRate();
     getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
 
     m_doApplySettings = true;
 }
@@ -168,6 +169,10 @@ bool ATVDemodGUI::handleMessage(const Message& message)
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
         m_basebandSampleRate = notif.getSampleRate();
+        m_deviceCenterFrequency = notif.getCenterFrequency();
+        ui->deltaFrequency->setValueRange(false, 8, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
         applySampleRate();
 
         return true;
@@ -219,6 +224,7 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
         m_pluginAPI(objPluginAPI),
         m_deviceUISet(deviceUISet),
         m_channelMarker(this),
+        m_deviceCenterFrequency(0),
         m_doApplySettings(false),
         m_intTickCount(0),
         m_basebandSampleRate(48000)
@@ -499,6 +505,7 @@ void ATVDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_settings.m_inputFrequencyOffset = value;
     m_channelMarker.setCenterFrequency(value);
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -591,4 +598,9 @@ void ATVDemodGUI::makeUIConnections()
     QObject::connect(ui->amScaleFactor, &QDial::valueChanged, this, &ATVDemodGUI::on_amScaleFactor_valueChanged);
     QObject::connect(ui->amScaleOffset, &QDial::valueChanged, this, &ATVDemodGUI::on_amScaleOffset_valueChanged);
     QObject::connect(ui->screenTabWidget, &QTabWidget::currentChanged, this, &ATVDemodGUI::on_screenTabWidget_currentChanged);
+}
+
+void ATVDemodGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

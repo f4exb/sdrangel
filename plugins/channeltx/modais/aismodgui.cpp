@@ -25,6 +25,7 @@
 #include "dsp/spectrumvis.h"
 #include "dsp/scopevis.h"
 #include "dsp/glscopesettings.h"
+#include "dsp/dspcommands.h"
 #include "device/deviceuiset.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
@@ -96,6 +97,16 @@ bool AISModGUI::handleMessage(const Message& message)
         ui->message->setText(m_settings.m_data);
         return true;
     }
+    else if (DSPSignalNotification::match(message))
+    {
+        const DSPSignalNotification& notif = (const DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getCenterFrequency();
+        m_basebandSampleRate = notif.getSampleRate();
+        ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
+        return true;
+    }
     else
     {
         return false;
@@ -127,6 +138,7 @@ void AISModGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -348,7 +360,6 @@ void AISModGUI::onMenuDialogCalled(const QPoint &p)
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
         m_settings.m_title = m_channelMarker.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
@@ -387,6 +398,8 @@ AISModGUI::AISModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_pluginAPI(pluginAPI),
     m_deviceUISet(deviceUISet),
     m_channelMarker(this),
+    m_deviceCenterFrequency(0),
+    m_basebandSampleRate(1),
     m_doApplySettings(true)
 {
     ui->setupUi(getRollupContents());
@@ -557,6 +570,7 @@ void AISModGUI::displaySettings()
     ui->message->setText(m_settings.m_data);
 
     getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
@@ -612,4 +626,9 @@ void AISModGUI::makeUIConnections()
     QObject::connect(ui->udpEnabled, &QCheckBox::clicked, this, &AISModGUI::on_udpEnabled_clicked);
     QObject::connect(ui->udpAddress, &QLineEdit::editingFinished, this, &AISModGUI::on_udpAddress_editingFinished);
     QObject::connect(ui->udpPort, &QLineEdit::editingFinished, this, &AISModGUI::on_udpPort_editingFinished);
+}
+
+void AISModGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

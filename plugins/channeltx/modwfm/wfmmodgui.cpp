@@ -28,6 +28,7 @@
 #include "util/db.h"
 #include "dsp/dspengine.h"
 #include "dsp/cwkeyer.h"
+#include "dsp/dspcommands.h"
 #include "gui/crightclickenabler.h"
 #include "gui/audioselectdialog.h"
 #include "gui/basicchannelsettingsdialog.h"
@@ -105,6 +106,16 @@ bool WFMModGUI::handleMessage(const Message& message)
         ui->cwKeyerGUI->displaySettings();
         return true;
     }
+    else if (DSPSignalNotification::match(message))
+    {
+        const DSPSignalNotification& notif = (const DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getCenterFrequency();
+        m_basebandSampleRate = notif.getSampleRate();
+        ui->deltaFrequency->setValueRange(false, 8, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
+        return true;
+    }
     else
     {
         return false;
@@ -135,6 +146,7 @@ void WFMModGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -295,7 +307,6 @@ void WFMModGUI::onMenuDialogCalled(const QPoint &p)
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
         m_settings.m_title = m_channelMarker.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
@@ -334,6 +345,8 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
+    m_deviceCenterFrequency(0),
+    m_basebandSampleRate(1),
 	m_doApplySettings(true),
     m_recordLength(0),
     m_recordSampleRate(48000),
@@ -480,6 +493,7 @@ void WFMModGUI::displaySettings()
     ui->feedbackVolumeText->setText(QString("%1").arg(m_settings.m_feedbackVolumeFactor, 0, 'f', 2));
 
     getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
@@ -619,4 +633,9 @@ void WFMModGUI::makeUIConnections()
     QObject::connect(ui->showFileDialog, &QPushButton::clicked, this, &WFMModGUI::on_showFileDialog_clicked);
     QObject::connect(ui->feedbackEnable, &QToolButton::toggled, this, &WFMModGUI::on_feedbackEnable_toggled);
     QObject::connect(ui->feedbackVolume, &QDial::valueChanged, this, &WFMModGUI::on_feedbackVolume_valueChanged);
+}
+
+void WFMModGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

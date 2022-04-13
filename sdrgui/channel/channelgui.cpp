@@ -90,6 +90,17 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
     m_closeButton->setIcon(closeIcon);
     m_closeButton->setToolTip("Close channel");
 
+    m_statusFrequency = new QLabel();
+    // QFont font = m_statusFrequency->font();
+    // font.setPointSize(8);
+    // m_statusFrequency->setFont(font);
+    m_statusFrequency->setAlignment(Qt::AlignRight |Qt::AlignVCenter);
+    m_statusFrequency->setFixedHeight(20);
+    m_statusFrequency->setFixedWidth(90);
+    m_statusFrequency->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    m_statusFrequency->setText(tr("%L1").arg(0));
+    m_statusFrequency->setToolTip("Channel absolute frequency (Hz)");
+
     m_statusLabel = new QLabel();
     // m_statusLabel->setText("OK"); // for future use
     m_statusLabel->setFixedHeight(20);
@@ -122,6 +133,7 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
 
     m_bottomLayout = new QHBoxLayout();
     m_bottomLayout->setContentsMargins(0, 0, 0, 0);
+    m_bottomLayout->addWidget(m_statusFrequency );
     m_bottomLayout->addWidget(m_statusLabel);
     m_sizeGripBottomRight = new QSizeGrip(this);
     m_sizeGripBottomRight->setStyleSheet("QSizeGrip { background-color: rgb(128, 128, 128); width: 10px; height: 10px; }");
@@ -162,6 +174,7 @@ ChannelGUI::~ChannelGUI()
     delete m_topLayout;
     delete m_layouts;
     delete m_statusLabel;
+    delete m_statusFrequency;
     delete m_closeButton;
     delete m_hideButton;
     delete m_shrinkButton;
@@ -297,6 +310,16 @@ void ChannelGUI::setDeviceSetIndex(int index)
     updateIndexLabel();
 }
 
+void ChannelGUI::setStatusFrequency(qint64 frequency)
+{
+    m_statusFrequency->setText(tr("%L1").arg(frequency));
+}
+
+void ChannelGUI::setStatusText(const QString& text)
+{
+    m_statusLabel->setText(text);
+}
+
 void ChannelGUI::updateIndexLabel()
 {
     m_indexLabel->setText(tr("%1%2:%3").arg(getDeviceTypeTag()).arg(m_deviceSetIndex).arg(m_channelIndex));
@@ -304,7 +327,7 @@ void ChannelGUI::updateIndexLabel()
 
 bool ChannelGUI::isOnMovingPad()
 {
-    return m_indexLabel->underMouse() || m_titleLabel->underMouse() || m_statusLabel->underMouse();
+    return m_indexLabel->underMouse() || m_titleLabel->underMouse() || m_statusFrequency->underMouse() || m_statusLabel->underMouse();
 }
 
 QString ChannelGUI::getDeviceTypeTag()

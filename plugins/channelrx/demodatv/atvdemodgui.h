@@ -71,6 +71,7 @@ private:
     RollupState m_rollupState;
     ATVDemod* m_atvDemod;
     ATVDemodSettings m_settings;
+    qint64 m_deviceCenterFrequency;
 
     bool m_doApplySettings;
 
@@ -97,6 +98,7 @@ private:
     void topTimeUpdate();
     bool handleMessage(const Message& objMessage);
     void makeUIConnections();
+    void updateAbsoluteCenterFrequency();
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);

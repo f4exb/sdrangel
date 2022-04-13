@@ -41,7 +41,6 @@
 #include "localsink.h"
 
 MESSAGE_CLASS_DEFINITION(LocalSink::MsgConfigureLocalSink, Message)
-MESSAGE_CLASS_DEFINITION(LocalSink::MsgBasebandSampleRateNotification, Message)
 
 const char* const LocalSink::m_channelIdURI = "sdrangel.channel.localsink";
 const char* const LocalSink::m_channelId = "LocalSink";
@@ -138,10 +137,8 @@ bool LocalSink::handleMessage(const Message& cmd)
         DSPSignalNotification *msg = new DSPSignalNotification(notif.getSampleRate(), notif.getCenterFrequency());
         m_basebandSink->getInputMessageQueue()->push(msg);
 
-        if (getMessageQueueToGUI())
-        {
-            MsgBasebandSampleRateNotification *msg = MsgBasebandSampleRateNotification::create(notif.getSampleRate());
-            getMessageQueueToGUI()->push(msg);
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
         }
 
         return true;

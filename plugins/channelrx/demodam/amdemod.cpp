@@ -167,6 +167,10 @@ bool AMDemod::handleMessage(const Message& cmd)
         qDebug() << "AMDemod::handleMessage: DSPSignalNotification";
         m_basebandSink->getInputMessageQueue()->push(rep);
 
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
+        }
+
 	    return true;
     }
     else if (MainCore::MsgChannelDemodQuery::match(cmd))

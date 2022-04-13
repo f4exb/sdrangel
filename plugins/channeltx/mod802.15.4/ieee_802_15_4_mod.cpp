@@ -145,10 +145,8 @@ bool IEEE_802_15_4_Mod::handleMessage(const Message& cmd)
         m_basebandSource->getInputMessageQueue()->push(rep);
 
         // Forward to GUI
-        if (getMessageQueueToGUI())
-        {
-            DSPSignalNotification *notifToGUI = new DSPSignalNotification(notif);
-            getMessageQueueToGUI()->push(notifToGUI);
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
         }
 
         return true;

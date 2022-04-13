@@ -132,6 +132,16 @@ bool RadioClockGUI::handleMessage(const Message& message)
         ui->status->setText(report.getStatus());
         return true;
     }
+    else if (DSPSignalNotification::match(message))
+    {
+        const DSPSignalNotification& notif = (const DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getCenterFrequency();
+        m_basebandSampleRate = notif.getSampleRate();
+        ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
+        return true;
+    }
 
     return false;
 }
@@ -165,6 +175,7 @@ void RadioClockGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -266,6 +277,8 @@ RadioClockGUI::RadioClockGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     m_pluginAPI(pluginAPI),
     m_deviceUISet(deviceUISet),
     m_channelMarker(this),
+    m_deviceCenterFrequency(0),
+    m_basebandSampleRate(1),
     m_doApplySettings(true),
     m_tickCount(0)
 {
@@ -372,6 +385,7 @@ void RadioClockGUI::displaySettings()
     displayStreamIndex();
 
     getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
@@ -421,4 +435,9 @@ void RadioClockGUI::makeUIConnections()
     QObject::connect(ui->threshold, &QDial::valueChanged, this, &RadioClockGUI::on_threshold_valueChanged);
     QObject::connect(ui->modulation, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RadioClockGUI::on_modulation_currentIndexChanged);
     QObject::connect(ui->timezone, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RadioClockGUI::on_timezone_currentIndexChanged);
+}
+
+void RadioClockGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

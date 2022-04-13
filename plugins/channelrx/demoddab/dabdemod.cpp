@@ -162,10 +162,8 @@ bool DABDemod::handleMessage(const Message& cmd)
         qDebug() << "DABDemod::handleMessage: DSPSignalNotification";
         m_basebandSink->getInputMessageQueue()->push(rep);
         // Forward to GUI if any
-        if (m_guiMessageQueue)
-        {
-            rep = new DSPSignalNotification(notif);
-            m_guiMessageQueue->push(rep);
+        if (m_guiMessageQueue) {
+            m_guiMessageQueue->push(new DSPSignalNotification(notif));
         }
 
         return true;

@@ -74,6 +74,7 @@ private:
     ChannelMarker m_channelMarker;
     RollupState m_rollupState;
     IEEE_802_15_4_ModSettings m_settings;
+    qint64 m_deviceCenterFrequency;
     bool m_doApplySettings;
     SpectrumVis* m_spectrumVis;
     ScopeVis* m_scopeVis;
@@ -98,6 +99,7 @@ private:
     QString getDisplayValueWithMultiplier(int value);
     bool handleMessage(const Message& message);
     void makeUIConnections();
+    void updateAbsoluteCenterFrequency();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);

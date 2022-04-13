@@ -20,6 +20,7 @@
 #include "device/deviceuiset.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/dspengine.h"
+#include "dsp/dspcommands.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "gui/basicchannelsettingsdialog.h"
@@ -78,6 +79,16 @@ bool UDPSourceGUI::handleMessage(const Message& message)
         blockApplySettings(false);
         return true;
     }
+    else if (DSPSignalNotification::match(message))
+    {
+        const DSPSignalNotification& notif = (const DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getCenterFrequency();
+        m_basebandSampleRate = notif.getSampleRate();
+        ui->deltaFrequency->setValueRange(false, 8, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
+        return true;
+    }
     else
     {
         return false;
@@ -104,6 +115,8 @@ UDPSourceGUI::UDPSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
         m_deviceUISet(deviceUISet),
         m_tickCount(0),
         m_channelMarker(this),
+        m_deviceCenterFrequency(0),
+        m_basebandSampleRate(1),
         m_rfBandwidthChanged(false),
         m_doApplySettings(true)
 {
@@ -240,6 +253,7 @@ void UDPSourceGUI::displaySettings()
     ui->applyBtn->setStyleSheet("QPushButton { background:rgb(79,79,79); }");
 
     getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
@@ -263,6 +277,7 @@ void UDPSourceGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_settings.m_inputFrequencyOffset = value;
     m_channelMarker.setCenterFrequency(value);
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -493,7 +508,6 @@ void UDPSourceGUI::onMenuDialogCalled(const QPoint &p)
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
@@ -662,4 +676,9 @@ void UDPSourceGUI::makeUIConnections()
     QObject::connect(ui->resetUDPReadIndex, &QPushButton::clicked, this, &UDPSourceGUI::on_resetUDPReadIndex_clicked);
     QObject::connect(ui->autoRWBalance, &ButtonSwitch::toggled, this, &UDPSourceGUI::on_autoRWBalance_toggled);
     QObject::connect(ui->stereoInput, &QToolButton::toggled, this, &UDPSourceGUI::on_stereoInput_toggled);
+}
+
+void UDPSourceGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

@@ -68,6 +68,8 @@ private:
 	DeviceUISet* m_deviceUISet;
 	UDPSink* m_udpSink;
 	UDPSinkSettings m_settings;
+    qint64 m_deviceCenterFrequency;
+    int m_basebandSampleRate;
 	ChannelMarker m_channelMarker;
 	RollupState m_rollupState;
 	MovingAverage<double> m_channelPowerAvg;
@@ -94,6 +96,7 @@ private:
 	void setSampleFormatIndex(const UDPSinkSettings::SampleFormat& sampleFormat);
 	bool handleMessage(const Message& message);
     void makeUIConnections();
+    void updateAbsoluteCenterFrequency();
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);

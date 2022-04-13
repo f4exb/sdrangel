@@ -764,7 +764,9 @@ bool VORDemodGUI::handleMessage(const Message& message)
     else if (DSPSignalNotification::match(message))
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getCenterFrequency();
         m_basebandSampleRate = notif.getSampleRate();
+        updateAbsoluteCenterFrequency();
         return true;
     }
     else if (VORDemodReport::MsgReportRadial::match(message))
@@ -1160,6 +1162,7 @@ VORDemodGUI::VORDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_pluginAPI(pluginAPI),
     m_deviceUISet(deviceUISet),
     m_channelMarker(this),
+    m_deviceCenterFrequency(0),
     m_doApplySettings(true),
     m_squelchOpen(false),
     m_tickCount(0),
@@ -1440,4 +1443,9 @@ void VORDemodGUI::makeUIConnections()
     QObject::connect(ui->getOurAirportsVORDB, &QPushButton::clicked, this, &VORDemodGUI::on_getOurAirportsVORDB_clicked);
     QObject::connect(ui->getOpenAIPVORDB, &QPushButton::clicked, this, &VORDemodGUI::on_getOpenAIPVORDB_clicked);
     QObject::connect(ui->magDecAdjust, &QPushButton::clicked, this, &VORDemodGUI::on_magDecAdjust_clicked);
+}
+
+void VORDemodGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency);
 }

@@ -64,6 +64,7 @@ private:
     ChannelMarker m_channelMarker;
     RollupState m_rollupState;
     FileSourceSettings m_settings;
+    qint64 m_deviceCenterFrequency;
     int m_sampleRate;
     double m_shiftFrequencyFactor; //!< Channel frequency shift factor
     int m_fileSampleRate;
@@ -94,6 +95,7 @@ private:
     void displayStreamIndex();
     bool handleMessage(const Message& message);
     void makeUIConnections();
+    void updateAbsoluteCenterFrequency();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);

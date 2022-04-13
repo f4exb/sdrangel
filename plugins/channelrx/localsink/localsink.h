@@ -61,26 +61,6 @@ public:
         { }
     };
 
-    class MsgBasebandSampleRateNotification : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        static MsgBasebandSampleRateNotification* create(int sampleRate) {
-            return new MsgBasebandSampleRateNotification(sampleRate);
-        }
-
-        int getSampleRate() const { return m_sampleRate; }
-
-    private:
-
-        MsgBasebandSampleRateNotification(int sampleRate) :
-            Message(),
-            m_sampleRate(sampleRate)
-        { }
-
-        int m_sampleRate;
-    };
-
     LocalSink(DeviceAPI *deviceAPI);
     virtual ~LocalSink();
     virtual void destroy() { delete this; }

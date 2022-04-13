@@ -29,6 +29,7 @@
 
 #include "dsp/dspengine.h"
 #include "dsp/spectrumvis.h"
+#include "dsp/dspcommands.h"
 #include "gui/glspectrum.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
@@ -110,6 +111,16 @@ bool BFMDemodGUI::handleMessage(const Message& message)
         blockApplySettings(false);
         return true;
     }
+    else if (DSPSignalNotification::match(message))
+    {
+        DSPSignalNotification& notif = (DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getCenterFrequency();
+        m_basebandSampleRate = notif.getSampleRate();
+        ui->deltaFrequency->setValueRange(false, 8, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
+        return true;
+    }
     else
     {
         return false;
@@ -145,6 +156,7 @@ void BFMDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -322,7 +334,6 @@ void BFMDemodGUI::onMenuDialogCalled(const QPoint &p)
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
         m_settings.m_title = m_channelMarker.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
@@ -361,6 +372,8 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
+    m_deviceCenterFrequency(0),
+    m_basebandSampleRate(1),
 	m_rdsTimerCount(0),
     m_radiotext_AB_flag(false),
 	m_rate(625000)
@@ -483,6 +496,7 @@ void BFMDemodGUI::displaySettings()
     displayStreamIndex();
 
     getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
@@ -846,4 +860,9 @@ void BFMDemodGUI::makeUIConnections()
     QObject::connect(ui->showPilot, &ButtonSwitch::clicked, this, &BFMDemodGUI::on_showPilot_clicked);
     QObject::connect(ui->rds, &ButtonSwitch::clicked, this, &BFMDemodGUI::on_rds_clicked);
     QObject::connect(ui->clearData, &QPushButton::clicked, this, &BFMDemodGUI::on_clearData_clicked);
+}
+
+void BFMDemodGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

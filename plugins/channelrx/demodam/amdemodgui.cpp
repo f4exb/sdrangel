@@ -24,17 +24,17 @@
 
 #include "device/deviceuiset.h"
 #include "dsp/dspengine.h"
-#include "ui_amdemodgui.h"
+#include "dsp/dspcommands.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
-#include "dsp/dspengine.h"
 #include "gui/crightclickenabler.h"
 #include "gui/audioselectdialog.h"
 #include "maincore.h"
 
+#include "ui_amdemodgui.h"
 #include "amdemod.h"
 
 AMDemodGUI* AMDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
@@ -85,6 +85,17 @@ bool AMDemodGUI::handleMessage(const Message& message)
         blockApplySettings(false);
         return true;
     }
+    else if (DSPSignalNotification::match(message))
+    {
+        DSPSignalNotification& notif = (DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getCenterFrequency();
+        m_basebandSampleRate = notif.getSampleRate();
+        ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
+
+        return true;
+    }
 
 	return false;
 }
@@ -118,6 +129,7 @@ void AMDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -199,7 +211,6 @@ void AMDemodGUI::onMenuDialogCalled(const QPoint &p)
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
         m_settings.m_title = m_channelMarker.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
@@ -238,6 +249,8 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
+    m_deviceCenterFrequency(0),
+    m_basebandSampleRate(1),
 	m_doApplySettings(true),
 	m_squelchOpen(false),
     m_audioSampleRate(-1),
@@ -378,6 +391,7 @@ void AMDemodGUI::displaySettings()
     displayStreamIndex();
 
     getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
@@ -492,4 +506,9 @@ void AMDemodGUI::makeUIConnections()
     QObject::connect(ui->volume, &QSlider::valueChanged, this, &AMDemodGUI::on_volume_valueChanged);
     QObject::connect(ui->squelch, &QSlider::valueChanged, this, &AMDemodGUI::on_squelch_valueChanged);
     QObject::connect(ui->audioMute, &QToolButton::toggled, this, &AMDemodGUI::on_audioMute_toggled);
+}
+
+void AMDemodGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

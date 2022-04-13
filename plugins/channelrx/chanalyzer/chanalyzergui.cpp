@@ -99,6 +99,7 @@ void ChannelAnalyzerGUI::displaySettings()
     ui->rrcRolloffText->setText(rolloffStr);
 
     getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
@@ -233,6 +234,10 @@ bool ChannelAnalyzerGUI::handleMessage(const Message& message)
     {
         DSPSignalNotification& cmd = (DSPSignalNotification&) message;
         m_basebandSampleRate = cmd.getSampleRate();
+        m_deviceCenterFrequency = cmd.getCenterFrequency();
+        ui->deltaFrequency->setValueRange(false, 8, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
         qDebug("ChannelAnalyzerGUI::handleMessage: DSPSignalNotification: m_basebandSampleRate: %d", m_basebandSampleRate);
         setSinkSampleRate();
 
@@ -275,6 +280,7 @@ void ChannelAnalyzerGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
 	applySettings();
 }
 
@@ -388,6 +394,7 @@ void ChannelAnalyzerGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -468,7 +475,6 @@ void ChannelAnalyzerGUI::onMenuDialogCalled(const QPoint& p)
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
         m_settings.m_title = m_channelMarker.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
@@ -702,4 +708,9 @@ void ChannelAnalyzerGUI::makeUIConnections()
     QObject::connect(ui->BW, &QSlider::valueChanged, this, &ChannelAnalyzerGUI::on_BW_valueChanged);
     QObject::connect(ui->lowCut, &QSlider::valueChanged, this, &ChannelAnalyzerGUI::on_lowCut_valueChanged);
     QObject::connect(ui->ssb, &QCheckBox::toggled, this, &ChannelAnalyzerGUI::on_ssb_toggled);
+}
+
+void ChannelAnalyzerGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

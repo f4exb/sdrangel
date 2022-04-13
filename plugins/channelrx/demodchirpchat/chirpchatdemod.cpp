@@ -285,10 +285,8 @@ bool ChirpChatDemod::handleMessage(const Message& cmd)
         qDebug() << "ChirpChatDemod::handleMessage: DSPSignalNotification: m_basebandSampleRate: " << m_basebandSampleRate;
         m_basebandSink->getInputMessageQueue()->push(rep);
 
-        if (getMessageQueueToGUI())
-        {
-            DSPSignalNotification* repToGUI = new DSPSignalNotification(notif); // make a copy
-            getMessageQueueToGUI()->push(repToGUI);
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new DSPSignalNotification(notif)); // make a copy
         }
 
         return true;

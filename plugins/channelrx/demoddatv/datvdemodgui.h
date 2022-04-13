@@ -114,6 +114,8 @@ private:
     DATVDemod* m_datvDemod;
     MessageQueue m_inputMessageQueue;
     DATVDemodSettings m_settings;
+    qint64 m_deviceCenterFrequency;
+    int m_basebandSampleRate;
 
     QTimer m_objTimer;
     qint64 m_intPreviousDecodedData;
@@ -146,6 +148,7 @@ private:
 	void enterEvent(QEvent*);
     bool handleMessage(const Message& objMessage);
     void makeUIConnections();
+    void updateAbsoluteCenterFrequency();
 };
 
 #endif // INCLUDE_DATVDEMODGUI_H

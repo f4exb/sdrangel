@@ -97,6 +97,7 @@ private:
 	ChannelMarker m_channelMarker;
 	RollupState m_rollupState;
 	ChirpChatDemodSettings m_settings;
+    qint64 m_deviceCenterFrequency;
     int m_basebandSampleRate;
 	bool m_doApplySettings;
 
@@ -124,6 +125,7 @@ private:
     void resetLoRaStatus();
 	bool handleMessage(const Message& message);
     void makeUIConnections();
+    void updateAbsoluteCenterFrequency();
 };
 
 #endif // INCLUDE_CHIRPCHATDEMODGUI_H

@@ -95,6 +95,7 @@ private:
     ChannelMarker m_channelMarker;
     RollupState m_rollupState;
     APTDemodSettings m_settings;
+    qint64 m_deviceCenterFrequency;
     bool m_doApplySettings;
 
     APTDemod* m_aptDemod;
@@ -124,6 +125,7 @@ private:
     void displayStreamIndex();
     bool handleMessage(const Message& message);
     void makeUIConnections();
+    void updateAbsoluteCenterFrequency();
 
     void deleteImageFromMap(const QString &name);
     void resetDecoder();

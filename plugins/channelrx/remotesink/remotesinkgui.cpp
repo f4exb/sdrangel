@@ -79,6 +79,7 @@ bool RemoteSinkGUI::handleMessage(const Message& message)
     else if (DSPSignalNotification::match(message))
     {
         DSPSignalNotification& cfg = (DSPSignalNotification&) message;
+        m_deviceCenterFrequency = cfg.getCenterFrequency();
         m_basebandSampleRate = cfg.getSampleRate();
         qDebug("RemoteSinkGUI::handleMessage: DSPSignalNotification: m_basebandSampleRate: %d", m_basebandSampleRate);
         displayRateAndShift();
@@ -97,6 +98,7 @@ RemoteSinkGUI::RemoteSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
         m_pluginAPI(pluginAPI),
         m_deviceUISet(deviceUISet),
         m_basebandSampleRate(0),
+        m_deviceCenterFrequency(0),
         m_tickCount(0)
 {
     ui->setupUi(getRollupContents());
@@ -176,6 +178,7 @@ void RemoteSinkGUI::displaySettings()
     applyDecimation();
     displayStreamIndex();
     getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
@@ -366,6 +369,7 @@ void RemoteSinkGUI::applyPosition()
     m_shiftFrequencyFactor = HBFilterChainConverter::convertToString(m_settings.m_log2Decim, m_settings.m_filterChainHash, s);
     ui->filterChainText->setText(s);
 
+    updateAbsoluteCenterFrequency();
     displayRateAndShift();
     applySettings();
 }
@@ -386,4 +390,10 @@ void RemoteSinkGUI::makeUIConnections()
     QObject::connect(ui->dataApplyButton, &QPushButton::clicked, this, &RemoteSinkGUI::on_dataApplyButton_clicked);
     QObject::connect(ui->nbFECBlocks, &QDial::valueChanged, this, &RemoteSinkGUI::on_nbFECBlocks_valueChanged);
     QObject::connect(ui->nbTxBytes, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RemoteSinkGUI::on_nbTxBytes_currentIndexChanged);
+}
+
+void RemoteSinkGUI::updateAbsoluteCenterFrequency()
+{
+    int shift = m_shiftFrequencyFactor * m_basebandSampleRate;
+    setStatusFrequency(m_deviceCenterFrequency + shift);
 }

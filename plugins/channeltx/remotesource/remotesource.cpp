@@ -42,7 +42,6 @@
 MESSAGE_CLASS_DEFINITION(RemoteSource::MsgConfigureRemoteSource, Message)
 MESSAGE_CLASS_DEFINITION(RemoteSource::MsgQueryStreamData, Message)
 MESSAGE_CLASS_DEFINITION(RemoteSource::MsgReportStreamData, Message)
-MESSAGE_CLASS_DEFINITION(RemoteSource::MsgBasebandSampleRateNotification, Message)
 
 const char* const RemoteSource::m_channelIdURI = "sdrangel.channeltx.remotesource";
 const char* const RemoteSource::m_channelId ="RemoteSource";
@@ -124,10 +123,8 @@ bool RemoteSource::handleMessage(const Message& cmd)
         calculateFrequencyOffset(m_settings.m_log2Interp, m_settings.m_filterChainHash); // This is when device sample rate changes
         m_centerFrequency = notif.getCenterFrequency();
 
-        if (m_guiMessageQueue)
-        {
-            MsgBasebandSampleRateNotification *msg = MsgBasebandSampleRateNotification::create(notif.getSampleRate());
-            m_guiMessageQueue->push(msg);
+        if (m_guiMessageQueue) {
+            m_guiMessageQueue->push(new DSPSignalNotification(notif));
         }
 
         return true;

@@ -20,6 +20,7 @@
 #include "plugin/pluginapi.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/dspengine.h"
+#include "dsp/dspcommands.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "gui/basicchannelsettingsdialog.h"
@@ -81,6 +82,16 @@ bool UDPSinkGUI::handleMessage(const Message& message )
         blockApplySettings(false);
         return true;
     }
+    else if (DSPSignalNotification::match(message))
+    {
+        const DSPSignalNotification& notif = (const DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getCenterFrequency();
+        m_basebandSampleRate = notif.getSampleRate();
+        ui->deltaFrequency->setValueRange(false, 8, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
+        return true;
+    }
     else
     {
         return false;
@@ -139,7 +150,9 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 	ui(new Ui::UDPSinkGUI),
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
-	m_udpSink(0),
+	m_udpSink(nullptr),
+    m_deviceCenterFrequency(0),
+    m_basebandSampleRate(1),
 	m_channelMarker(this),
 	m_channelPowerAvg(4, 1e-10),
     m_inPowerAvg(4, 1e-10),
@@ -262,6 +275,7 @@ void UDPSinkGUI::displaySettings()
     displayStreamIndex();
 
     getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 
     ui->glSpectrum->setSampleRate(m_settings.m_outputSampleRate);
@@ -399,6 +413,7 @@ void UDPSinkGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -611,7 +626,6 @@ void UDPSinkGUI::onMenuDialogCalled(const QPoint &p)
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
         m_settings.m_title = m_channelMarker.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
@@ -672,4 +686,9 @@ void UDPSinkGUI::makeUIConnections()
     QObject::connect(ui->squelch, &QSlider::valueChanged, this, &UDPSinkGUI::on_squelch_valueChanged);
     QObject::connect(ui->squelchGate, &QDial::valueChanged, this, &UDPSinkGUI::on_squelchGate_valueChanged);
     QObject::connect(ui->agc, &ButtonSwitch::toggled, this, &UDPSinkGUI::on_agc_toggled);
+}
+
+void UDPSinkGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

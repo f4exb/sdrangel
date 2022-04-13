@@ -67,6 +67,8 @@ private:
     ChannelMarker m_channelMarker;
     RollupState m_rollupState;
     DATVModSettings m_settings;
+    qint64 m_deviceCenterFrequency;
+    int m_basebandSampleRate;
     bool m_doApplySettings;
     bool m_tickMsgOutstanding;
 
@@ -95,6 +97,7 @@ private:
     void setChannelMarkerBandwidth();
     bool handleMessage(const Message& message);
     void makeUIConnections();
+    void updateAbsoluteCenterFrequency();
 
     void updateFEC();
 

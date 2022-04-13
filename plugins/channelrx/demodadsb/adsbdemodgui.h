@@ -785,6 +785,8 @@ private:
     ChannelMarker m_channelMarker;
     RollupState m_rollupState;
     ADSBDemodSettings m_settings;
+    qint64 m_deviceCenterFrequency;
+    int m_basebandSampleRate;
     bool m_basicSettingsShown;
     bool m_doApplySettings;
 
@@ -848,6 +850,7 @@ private:
     void displayStreamIndex();
     bool handleMessage(const Message& message);
     void makeUIConnections();
+    void updateAbsoluteCenterFrequency();
 
     void updatePosition(Aircraft *aircraft);
     bool updateLocalPosition(Aircraft *aircraft, double latitude, double longitude, bool surfacePosition);

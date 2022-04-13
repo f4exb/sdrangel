@@ -21,6 +21,7 @@
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
 #include "dsp/hbfilterchainconverter.h"
+#include "dsp/dspcommands.h"
 #include "mainwindow.h"
 
 #include "localsourcegui.h"
@@ -64,10 +65,12 @@ bool LocalSourceGUI::deserialize(const QByteArray& data)
 
 bool LocalSourceGUI::handleMessage(const Message& message)
 {
-    if (LocalSource::MsgBasebandSampleRateNotification::match(message))
+    if (DSPSignalNotification::match(message))
     {
-        LocalSource::MsgBasebandSampleRateNotification& notif = (LocalSource::MsgBasebandSampleRateNotification&) message;
-        m_basebandSampleRate = notif.getBasebandSampleRate();
+        DSPSignalNotification& notif = (DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getCenterFrequency();
+        m_basebandSampleRate = notif.getSampleRate();
+        updateAbsoluteCenterFrequency();
         displayRateAndShift();
         return true;
     }
@@ -93,6 +96,7 @@ LocalSourceGUI::LocalSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
         m_pluginAPI(pluginAPI),
         m_deviceUISet(deviceUISet),
         m_basebandSampleRate(0),
+        m_deviceCenterFrequency(0),
         m_tickCount(0)
 {
     ui->setupUi(getRollupContents());
@@ -168,6 +172,7 @@ void LocalSourceGUI::displaySettings()
     ui->localDevicePlay->setChecked(m_settings.m_play);
     applyInterpolation();
     getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
@@ -332,6 +337,7 @@ void LocalSourceGUI::applyPosition()
     m_shiftFrequencyFactor = HBFilterChainConverter::convertToString(m_settings.m_log2Interp, m_settings.m_filterChainHash, s);
     ui->filterChainText->setText(s);
 
+    updateAbsoluteCenterFrequency();
     displayRateAndShift();
     applySettings();
 }
@@ -350,4 +356,10 @@ void LocalSourceGUI::makeUIConnections()
     QObject::connect(ui->localDevice, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LocalSourceGUI::on_localDevice_currentIndexChanged);
     QObject::connect(ui->localDevicesRefresh, &QPushButton::clicked, this, &LocalSourceGUI::on_localDevicesRefresh_clicked);
     QObject::connect(ui->localDevicePlay, &ButtonSwitch::toggled, this, &LocalSourceGUI::on_localDevicePlay_toggled);
+}
+
+void LocalSourceGUI::updateAbsoluteCenterFrequency()
+{
+    int shift = m_shiftFrequencyFactor * m_basebandSampleRate;
+    setStatusFrequency(m_deviceCenterFrequency + shift);
 }

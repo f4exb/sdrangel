@@ -40,7 +40,6 @@
 
 #include "filesourcebaseband.h"
 
-MESSAGE_CLASS_DEFINITION(FileSource::MsgSampleRateNotification, Message)
 MESSAGE_CLASS_DEFINITION(FileSource::MsgConfigureFileSource, Message)
 MESSAGE_CLASS_DEFINITION(FileSource::MsgConfigureFileSourceWork, Message)
 MESSAGE_CLASS_DEFINITION(FileSource::MsgConfigureFileSourceStreamTiming, Message)
@@ -134,8 +133,7 @@ bool FileSource::handleMessage(const Message& cmd)
         if (m_guiMessageQueue)
         {
             qDebug() << "FileSource::handleMessage: DSPSignalNotification: push to GUI";
-            MsgSampleRateNotification *msg = MsgSampleRateNotification::create(notif.getSampleRate());
-            m_guiMessageQueue->push(msg);
+            m_guiMessageQueue->push(new DSPSignalNotification(notif));
         }
 
         return true;

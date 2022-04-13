@@ -79,6 +79,8 @@ public:
     int getIndex() const { return m_channelIndex; }
     void setDeviceSetIndex(int index);
     int getDeviceSetIndex() const { return m_channelIndex; }
+    void setStatusFrequency(qint64 frequency);
+    void setStatusText(const QString& text);
 
 protected:
     void closeEvent(QCloseEvent *event);
@@ -111,6 +113,7 @@ private:
     QPushButton *m_shrinkButton;
     QPushButton *m_hideButton;
     QPushButton *m_closeButton;
+    QLabel *m_statusFrequency;
     QLabel *m_statusLabel;
     QVBoxLayout *m_layouts;
     QHBoxLayout *m_topLayout;

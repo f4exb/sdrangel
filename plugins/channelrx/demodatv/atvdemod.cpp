@@ -127,10 +127,8 @@ bool ATVDemod::handleMessage(const Message& cmd)
         m_basebandSink->getInputMessageQueue()->push(notifToSink);
 
         // Forward to GUI
-        if (getMessageQueueToGUI())
-        {
-            DSPSignalNotification *notifToGUI = new DSPSignalNotification(notif);
-            getMessageQueueToGUI()->push(notifToGUI);
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
         }
 
         return true;

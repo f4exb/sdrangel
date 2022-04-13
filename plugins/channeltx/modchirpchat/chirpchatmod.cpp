@@ -132,10 +132,8 @@ bool ChirpChatMod::handleMessage(const Message& cmd)
         m_basebandSource->getInputMessageQueue()->push(rep);
 
         // Forward to the GUI
-        if (getMessageQueueToGUI())
-        {
-            DSPSignalNotification* repToGUI = new DSPSignalNotification(notif); // make a copy
-            getMessageQueueToGUI()->push(repToGUI);
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
         }
 
         return true;

@@ -68,6 +68,8 @@ private:
 	ChannelMarker m_channelMarker;
 	RollupState m_rollupState;
 	BFMDemodSettings m_settings;
+    qint64 m_deviceCenterFrequency;
+    int m_basebandSampleRate;
 	bool m_doApplySettings;
 	int m_rdsTimerCount;
     bool m_radiotext_AB_flag;
@@ -90,6 +92,7 @@ private:
 	void rdsUpdateFixedFields();
 	bool handleMessage(const Message& message);
     void makeUIConnections();
+    void updateAbsoluteCenterFrequency();
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);

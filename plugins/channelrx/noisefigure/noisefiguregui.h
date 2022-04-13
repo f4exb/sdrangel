@@ -75,6 +75,7 @@ private:
     ChannelMarker m_channelMarker;
     RollupState m_rollupState;
     NoiseFigureSettings m_settings;
+    qint64 m_deviceCenterFrequency;
     bool m_doApplySettings;
 
     NoiseFigure* m_noiseFigure;
@@ -101,6 +102,7 @@ private:
     void displayStreamIndex();
     bool handleMessage(const Message& message);
     void makeUIConnections();
+    void updateAbsoluteCenterFrequency();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);

@@ -2132,7 +2132,7 @@ QString ADSBDemodGUI::subAircraftString(Aircraft *aircraft, const QString &strin
 
 bool ADSBDemodGUI::handleMessage(const Message& message)
 {
-if (DSPSignalNotification::match(message))
+    if (DSPSignalNotification::match(message))
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
         int sr = notif.getSampleRate();
@@ -2144,6 +2144,11 @@ if (DSPSignalNotification::match(message))
             ui->warning->setText("");
         }
         getRollupContents()->arrangeRollups();
+        m_deviceCenterFrequency = notif.getCenterFrequency();
+        m_basebandSampleRate = sr;
+        ui->deltaFrequency->setValueRange(false, 7, -sr/2, sr/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(sr/2));
+        updateAbsoluteCenterFrequency();
         return true;
     }
     else if (ADSBDemodReport::MsgReportADSB::match(message))
@@ -2211,6 +2216,7 @@ void ADSBDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -2776,7 +2782,6 @@ void ADSBDemodGUI::onMenuDialogCalled(const QPoint &p)
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
         m_settings.m_title = m_channelMarker.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
@@ -3675,6 +3680,8 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_pluginAPI(pluginAPI),
     m_deviceUISet(deviceUISet),
     m_channelMarker(this),
+    m_deviceCenterFrequency(0),
+    m_basebandSampleRate(1),
     m_basicSettingsShown(false),
     m_doApplySettings(true),
     m_tickCount(0),
@@ -4690,4 +4697,9 @@ void ADSBDemodGUI::makeUIConnections()
     QObject::connect(ui->logEnable, &ButtonSwitch::clicked, this, &ADSBDemodGUI::on_logEnable_clicked);
     QObject::connect(ui->logFilename, &QToolButton::clicked, this, &ADSBDemodGUI::on_logFilename_clicked);
     QObject::connect(ui->logOpen, &QToolButton::clicked, this, &ADSBDemodGUI::on_logOpen_clicked);
+}
+
+void ADSBDemodGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

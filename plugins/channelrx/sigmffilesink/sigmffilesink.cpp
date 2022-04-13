@@ -170,10 +170,8 @@ bool SigMFFileSink::handleMessage(const Message& cmd)
         DSPSignalNotification *notif = new DSPSignalNotification(cfg);
         m_basebandSink->getInputMessageQueue()->push(notif);
 
-        if (getMessageQueueToGUI())
-        {
-            DSPSignalNotification *notifToGUI = new DSPSignalNotification(cfg);
-            getMessageQueueToGUI()->push(notifToGUI);
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new DSPSignalNotification(cfg));
         }
 
         return true;

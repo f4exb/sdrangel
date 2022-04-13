@@ -29,6 +29,7 @@
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "dsp/dspengine.h"
+#include "dsp/dspcommands.h"
 #include "util/db.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
@@ -55,6 +56,8 @@ DATVModGUI::DATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
     m_pluginAPI(pluginAPI),
     m_deviceUISet(deviceUISet),
     m_channelMarker(this),
+    m_deviceCenterFrequency(0),
+    m_basebandSampleRate(1),
     m_doApplySettings(true),
     m_tickMsgOutstanding(false),
     m_streamLength(0),
@@ -208,6 +211,17 @@ bool DATVModGUI::handleMessage(const Message& message)
         ui->tsFileText->setText(m_settings.m_tsFileName);
         return true;
     }
+    else if (DSPSignalNotification::match(message))
+    {
+        const DSPSignalNotification& notif = (const DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getCenterFrequency();
+        m_basebandSampleRate = notif.getSampleRate();
+        ui->deltaFrequency->setValueRange(false, 8, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
+        return true;
+
+    }
     else
     {
         return false;
@@ -238,6 +252,7 @@ void DATVModGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = value;
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -493,7 +508,6 @@ void DATVModGUI::onMenuDialogCalled(const QPoint &p)
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
         m_settings.m_title = m_channelMarker.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
@@ -586,6 +600,7 @@ void DATVModGUI::displaySettings()
     ui->udpPort->setValue(m_settings.m_udpPort);
 
     getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
@@ -683,4 +698,9 @@ void DATVModGUI::makeUIConnections()
     QObject::connect(ui->navTimeSlider, &QSlider::valueChanged, this, &DATVModGUI::on_navTimeSlider_valueChanged);
     QObject::connect(ui->udpAddress, &QLineEdit::editingFinished, this, &DATVModGUI::on_udpAddress_editingFinished);
     QObject::connect(ui->udpPort, QOverload<int>::of(&QSpinBox::valueChanged), this, &DATVModGUI::on_udpPort_valueChanged);
+}
+
+void DATVModGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

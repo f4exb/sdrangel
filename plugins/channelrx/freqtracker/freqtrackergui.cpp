@@ -90,7 +90,11 @@ bool FreqTrackerGUI::handleMessage(const Message& message)
     else if (DSPSignalNotification::match(message))
     {
         DSPSignalNotification& cfg = (DSPSignalNotification&) message;
+        m_deviceCenterFrequency = cfg.getCenterFrequency();
         m_basebandSampleRate = cfg.getSampleRate();
+        ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
         int sinkSampleRate = m_basebandSampleRate / (1<<m_settings.m_log2Decim);
         ui->channelSampleRateText->setText(tr("%1k").arg(QString::number(sinkSampleRate / 1000.0f, 'g', 5)));
         displaySpectrumBandwidth(m_settings.m_spanLog2);
@@ -147,6 +151,7 @@ void FreqTrackerGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -268,7 +273,6 @@ void FreqTrackerGUI::onMenuDialogCalled(const QPoint &p)
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
         m_settings.m_title = m_channelMarker.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
@@ -308,6 +312,7 @@ FreqTrackerGUI::FreqTrackerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
     m_pllChannelMarker(this),
+    m_deviceCenterFrequency(0),
     m_basebandSampleRate(0),
 	m_doApplySettings(true),
 	m_squelchOpen(false),
@@ -438,6 +443,7 @@ void FreqTrackerGUI::displaySettings()
     displayStreamIndex();
 
     getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
@@ -534,4 +540,9 @@ void FreqTrackerGUI::makeUIConnections()
     QObject::connect(ui->rrcRolloff, &QDial::valueChanged, this, &FreqTrackerGUI::on_rrcRolloff_valueChanged);
     QObject::connect(ui->squelch, &QSlider::valueChanged, this, &FreqTrackerGUI::on_squelch_valueChanged);
     QObject::connect(ui->squelchGate, &QDial::valueChanged, this, &FreqTrackerGUI::on_squelchGate_valueChanged);
+}
+
+void FreqTrackerGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

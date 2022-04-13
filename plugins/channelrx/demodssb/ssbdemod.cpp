@@ -145,6 +145,10 @@ bool SSBDemod::handleMessage(const Message& cmd)
         DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
         qDebug() << "SSBDemod::handleMessage: DSPSignalNotification";
         m_basebandSink->getInputMessageQueue()->push(rep);
+        // Forwatd to GUI if any
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
+        }
 
         return true;
     }

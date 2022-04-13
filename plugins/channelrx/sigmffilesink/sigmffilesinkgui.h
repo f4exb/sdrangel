@@ -69,6 +69,7 @@ private:
     ChannelMarker m_channelMarker;
     RollupState m_rollupState;
     SigMFFileSinkSettings m_settings;
+    qint64 m_deviceCenterFrequency;
     bool m_running;
     int m_fixedShiftIndex;
     int m_basebandSampleRate;
@@ -97,6 +98,7 @@ private:
     QString displayScaled(uint64_t value, int precision);
     bool handleMessage(const Message& message);
     void makeUIConnections();
+    void updateAbsoluteCenterFrequency();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);

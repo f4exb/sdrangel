@@ -13,6 +13,7 @@
 #include "gui/audioselectdialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/dcscodes.h"
+#include "dsp/dspcommands.h"
 #include "maincore.h"
 
 #include "nfmdemodreport.h"
@@ -80,6 +81,16 @@ bool NFMDemodGUI::handleMessage(const Message& message)
         blockApplySettings(false);
         return true;
     }
+    else if (DSPSignalNotification::match(message))
+    {
+        DSPSignalNotification& notif = (DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getCenterFrequency();
+        m_basebandSampleRate = notif.getSampleRate();
+        ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
+        return true;
+    }
 
     return false;
 }
@@ -113,6 +124,7 @@ void NFMDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -297,7 +309,6 @@ void NFMDemodGUI::onMenuDialogCalled(const QPoint &p)
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
         m_settings.m_title = m_channelMarker.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
@@ -336,6 +347,8 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
+    m_deviceCenterFrequency(0),
+    m_basebandSampleRate(1),
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
 	m_squelchOpen(false),
@@ -514,6 +527,7 @@ void NFMDemodGUI::displaySettings()
     displayStreamIndex();
 
     getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
@@ -633,4 +647,9 @@ void NFMDemodGUI::makeUIConnections()
     QObject::connect(ui->dcsCode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &NFMDemodGUI::on_dcsCode_currentIndexChanged);
     QObject::connect(ui->highPassFilter, &ButtonSwitch::toggled, this, &NFMDemodGUI::on_highPassFilter_toggled);
     QObject::connect(ui->audioMute, &QToolButton::toggled, this, &NFMDemodGUI::on_audioMute_toggled);
+}
+
+void NFMDemodGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

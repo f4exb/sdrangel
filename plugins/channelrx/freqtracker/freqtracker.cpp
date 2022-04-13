@@ -142,10 +142,8 @@ bool FreqTracker::handleMessage(const Message& cmd)
         qDebug() << "FreqTracker::handleMessage: DSPSignalNotification";
         m_basebandSink->getInputMessageQueue()->push(rep);
 
-        if (getMessageQueueToGUI())
-        {
-            DSPSignalNotification *msg = new DSPSignalNotification(notif);
-            getMessageQueueToGUI()->push(msg);
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
         }
 
         return true;

@@ -973,10 +973,16 @@ bool RadioAstronomyGUI::handleMessage(const Message& message)
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
         m_basebandSampleRate = notif.getSampleRate();
         m_centerFrequency = notif.getCenterFrequency();
+        ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
+
         if (m_settings.m_tempGalLink) {
             calcGalacticBackgroundTemp();
         }
+
         updateTSys0();
+
         return true;
     }
     else if (RadioAstronomy::MsgReportAvailableFeatures::match(message))
@@ -1199,6 +1205,7 @@ void RadioAstronomyGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -1997,6 +2004,7 @@ RadioAstronomyGUI::RadioAstronomyGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     m_pluginAPI(pluginAPI),
     m_deviceUISet(deviceUISet),
     m_channelMarker(this),
+    m_deviceCenterFrequency(0),
     m_doApplySettings(true),
     m_basebandSampleRate(0),
     m_centerFrequency(0),
@@ -2555,6 +2563,7 @@ void RadioAstronomyGUI::displaySettings()
     }
 
     getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
     getRollupContents()->arrangeRollups();
 }
@@ -6144,4 +6153,9 @@ void RadioAstronomyGUI::makeUIConnections()
     QObject::connect(ui->powerColourScaleMax, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_powerColourScaleMax_valueChanged);
     QObject::connect(ui->powerColourPalette, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RadioAstronomyGUI::on_powerColourPalette_currentIndexChanged);
     QObject::connect(ui->powerTable, &QTableWidget::cellDoubleClicked, this, &RadioAstronomyGUI::on_powerTable_cellDoubleClicked);
+}
+
+void RadioAstronomyGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

@@ -141,6 +141,10 @@ bool UDPSink::handleMessage(const Message& cmd)
         DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
         qDebug() << "UDPSink::handleMessage: DSPSignalNotification";
         m_basebandSink->getInputMessageQueue()->push(rep);
+        // Forward to GUI if any
+         if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
+        }
 
         return true;
     }

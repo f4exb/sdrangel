@@ -218,6 +218,7 @@ private:
     ChannelMarker m_channelMarker;
     RollupState m_rollupState;
     RadioAstronomySettings m_settings;
+    qint64 m_deviceCenterFrequency;
     bool m_doApplySettings;
     QList<RadioAstronomySettings::AvailableFeature> m_availableFeatures;
 
@@ -333,6 +334,7 @@ private:
     void updateRotatorList(const QList<RadioAstronomySettings::AvailableFeature>& rotators);
     bool handleMessage(const Message& message);
     void makeUIConnections();
+    void updateAbsoluteCenterFrequency();
 
     double degreesToSteradian(double deg) const;
     double hpbwToSteradians(double hpbw) const;

@@ -28,6 +28,7 @@
 #include "util/db.h"
 #include "dsp/dspengine.h"
 #include "dsp/cwkeyer.h"
+#include "dsp/dspcommands.h"
 #include "gui/crightclickenabler.h"
 #include "gui/audioselectdialog.h"
 #include "gui/basicchannelsettingsdialog.h"
@@ -105,6 +106,16 @@ bool AMModGUI::handleMessage(const Message& message)
         ui->cwKeyerGUI->displaySettings();
         return true;
     }
+    else if (DSPSignalNotification::match(message))
+    {
+        const DSPSignalNotification& notif = (const DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getCenterFrequency();
+        m_basebandSampleRate = notif.getSampleRate();
+        ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
+        return true;
+    }
     else
     {
         return false;
@@ -135,6 +146,7 @@ void AMModGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = value;
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -288,7 +300,6 @@ void AMModGUI::onMenuDialogCalled(const QPoint &p)
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
         m_settings.m_title = m_channelMarker.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
@@ -327,6 +338,8 @@ AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampl
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
+    m_deviceCenterFrequency(0),
+    m_basebandSampleRate(1),
 	m_doApplySettings(true),
     m_recordLength(0),
     m_recordSampleRate(48000),
@@ -462,6 +475,7 @@ void AMModGUI::displaySettings()
     displayStreamIndex();
 
     getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
@@ -600,4 +614,9 @@ void AMModGUI::makeUIConnections()
     QObject::connect(ui->showFileDialog, &QPushButton::clicked, this, &AMModGUI::on_showFileDialog_clicked);
     QObject::connect(ui->feedbackEnable, &QToolButton::toggled, this, &AMModGUI::on_feedbackEnable_toggled);
     QObject::connect(ui->feedbackVolume, &QDial::valueChanged, this, &AMModGUI::on_feedbackVolume_valueChanged);
+}
+
+void AMModGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

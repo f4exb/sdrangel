@@ -78,6 +78,7 @@ private:
     ChannelMarker m_channelMarker;
     RollupState m_rollupState;
     PacketDemodSettings m_settings;
+    qint64 m_deviceCenterFrequency;
     bool m_doApplySettings;
 
     PacketDemod* m_packetDemod;
@@ -97,6 +98,7 @@ private:
     void packetReceived(QByteArray packet);
     bool handleMessage(const Message& message);
     void makeUIConnections();
+    void updateAbsoluteCenterFrequency();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);

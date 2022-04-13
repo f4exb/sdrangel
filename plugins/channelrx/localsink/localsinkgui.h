@@ -64,6 +64,7 @@ private:
     ChannelMarker m_channelMarker;
     RollupState m_rollupState;
     LocalSinkSettings m_settings;
+    qint64 m_deviceCenterFrequency;
     int m_basebandSampleRate;
     double m_shiftFrequencyFactor; //!< Channel frequency shift factor
     bool m_doApplySettings;
@@ -85,6 +86,7 @@ private:
     int getLocalDeviceIndexInCombo(int localDeviceIndex);
     bool handleMessage(const Message& message);
     void makeUIConnections();
+    void updateAbsoluteCenterFrequency();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);

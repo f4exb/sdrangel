@@ -155,10 +155,8 @@ bool RemoteSink::handleMessage(const Message& cmd)
         m_basebandSink->getInputMessageQueue()->push(msgToBaseband);
 
         // Forward to the GUI
-        if (getMessageQueueToGUI())
-        {
-            DSPSignalNotification* msgToGUI = new DSPSignalNotification(notif); // make a copy
-            getMessageQueueToGUI()->push(msgToGUI);
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
         }
 
 	    return true;

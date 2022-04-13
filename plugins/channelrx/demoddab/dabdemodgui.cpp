@@ -200,15 +200,22 @@ bool DABDemodGUI::handleMessage(const Message& message)
     else if (DSPSignalNotification::match(message))
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getCenterFrequency();
         m_basebandSampleRate = notif.getSampleRate();
+        ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
         bool srTooLow = m_basebandSampleRate < 2048000;
         ui->warning->setVisible(srTooLow);
+
         if (srTooLow) {
             ui->warning->setText("Sample rate must be >= 2048000");
         } else {
             ui->warning->setText("");
         }
+
         getRollupContents()->arrangeRollups();
+        updateAbsoluteCenterFrequency();
+
         return true;
     }
     else if (DABDemod::MsgDABEnsembleName::match(message))
@@ -318,6 +325,7 @@ void DABDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -439,6 +447,7 @@ DABDemodGUI::DABDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_pluginAPI(pluginAPI),
     m_deviceUISet(deviceUISet),
     m_channelMarker(this),
+    m_deviceCenterFrequency(0),
     m_doApplySettings(true),
     m_tickCount(0),
     m_channelFreq(0.0)
@@ -574,6 +583,7 @@ void DABDemodGUI::displaySettings()
     filter();
 
     getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
@@ -707,4 +717,9 @@ void DABDemodGUI::makeUIConnections()
     QObject::connect(ui->clearTable, &QPushButton::clicked, this, &DABDemodGUI::on_clearTable_clicked);
     QObject::connect(ui->programs, &QTableWidget::cellDoubleClicked, this, &DABDemodGUI::on_programs_cellDoubleClicked);
     QObject::connect(ui->channel, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DABDemodGUI::on_channel_currentIndexChanged);
+}
+
+void DABDemodGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

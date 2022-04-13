@@ -69,6 +69,7 @@ private:
 	ChannelMarker m_channelMarker;
 	RollupState m_rollupState;
 	ChannelAnalyzerSettings m_settings;
+    qint64 m_deviceCenterFrequency;
 	bool m_doApplySettings;
 	int m_basebandSampleRate; //!< sample rate after final in-channel decimation (spanlog2)
 	MovingAverageUtil<double, double, 40> m_channelPowerAvg;
@@ -93,6 +94,7 @@ private:
 	void setSpectrumDisplay();
 	bool handleMessage(const Message& message);
     void makeUIConnections();
+    void updateAbsoluteCenterFrequency();
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);

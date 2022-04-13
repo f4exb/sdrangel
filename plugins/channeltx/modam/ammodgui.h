@@ -67,6 +67,8 @@ private:
     ChannelMarker m_channelMarker;
     RollupState m_rollupState;
     AMModSettings m_settings;
+    qint64 m_deviceCenterFrequency;
+    int m_basebandSampleRate;
     bool m_doApplySettings;
 
     AMMod* m_amMod;
@@ -93,6 +95,7 @@ private:
     void updateWithStreamTime();
     bool handleMessage(const Message& message);
     void makeUIConnections();
+    void updateAbsoluteCenterFrequency();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);

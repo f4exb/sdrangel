@@ -71,6 +71,8 @@ private:
     ChannelMarker m_channelMarker;
     RollupState m_rollupState;
     RadioClockSettings m_settings;
+    qint64 m_deviceCenterFrequency;
+    int m_basebandSampleRate;
     bool m_doApplySettings;
     ScopeVis* m_scopeVis;
 
@@ -89,6 +91,7 @@ private:
     void displayStreamIndex();
     bool handleMessage(const Message& message);
     void makeUIConnections();
+    void updateAbsoluteCenterFrequency();
 
     void displayDateTime();
 

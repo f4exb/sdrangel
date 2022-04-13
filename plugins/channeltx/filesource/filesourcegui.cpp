@@ -22,6 +22,7 @@
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
 #include "dsp/hbfilterchainconverter.h"
+#include "dsp/dspcommands.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
 #include "util/db.h"
@@ -70,10 +71,12 @@ bool FileSourceGUI::deserialize(const QByteArray& data)
 
 bool FileSourceGUI::handleMessage(const Message& message)
 {
-    if (FileSource::MsgSampleRateNotification::match(message))
+    if (DSPSignalNotification::match(message))
     {
-        FileSource::MsgSampleRateNotification& notif = (FileSource::MsgSampleRateNotification&) message;
+        DSPSignalNotification& notif = (DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getCenterFrequency();
         m_sampleRate = notif.getSampleRate();
+        updateAbsoluteCenterFrequency();
         displayRateAndShift();
         return true;
     }
@@ -165,6 +168,7 @@ FileSourceGUI::FileSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
         ui(new Ui::FileSourceGUI),
         m_pluginAPI(pluginAPI),
         m_deviceUISet(deviceUISet),
+        m_deviceCenterFrequency(0),
         m_sampleRate(0),
         m_shiftFrequencyFactor(0.0),
         m_fileSampleRate(0),
@@ -315,6 +319,7 @@ void FileSourceGUI::displaySettings()
     ui->interpolationFactor->setCurrentIndex(m_settings.m_log2Interp);
     applyInterpolation();
     getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
@@ -497,6 +502,7 @@ void FileSourceGUI::applyPosition()
     m_shiftFrequencyFactor = HBFilterChainConverter::convertToString(m_settings.m_log2Interp, m_settings.m_filterChainHash, s);
     ui->filterChainText->setText(s);
 
+    updateAbsoluteCenterFrequency();
     displayRateAndShift();
     applySettings();
 }
@@ -539,4 +545,10 @@ void FileSourceGUI::makeUIConnections()
     QObject::connect(ui->playLoop, &ButtonSwitch::toggled, this, &FileSourceGUI::on_playLoop_toggled);
     QObject::connect(ui->play, &ButtonSwitch::toggled, this, &FileSourceGUI::on_play_toggled);
     QObject::connect(ui->navTime, &QSlider::valueChanged, this, &FileSourceGUI::on_navTime_valueChanged);
+}
+
+void FileSourceGUI::updateAbsoluteCenterFrequency()
+{
+    int shift = m_shiftFrequencyFactor * m_sampleRate;
+    setStatusFrequency(m_deviceCenterFrequency + shift);
 }

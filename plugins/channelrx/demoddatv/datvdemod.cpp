@@ -138,6 +138,11 @@ bool DATVDemod::handleMessage(const Message& cmd)
         DSPSignalNotification* notifToSink = new DSPSignalNotification(notif); // make a copy
         m_basebandSink->getInputMessageQueue()->push(notifToSink);
 
+        // Forward to GUI if any
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
+        }
+
         return true;
     }
 	else

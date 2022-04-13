@@ -76,7 +76,11 @@ bool FileSinkGUI::handleMessage(const Message& message)
     if (DSPSignalNotification::match(message))
     {
         DSPSignalNotification notif = (const DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getCenterFrequency();
         m_basebandSampleRate = notif.getSampleRate();
+        ui->deltaFrequency->setValueRange(false, 8, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
         displayRate();
 
         if (m_fixedPosition)
@@ -178,6 +182,7 @@ FileSinkGUI::FileSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
         m_pluginAPI(pluginAPI),
         m_deviceUISet(deviceUISet),
         m_channelMarker(this),
+        m_deviceCenterFrequency(0),
         m_running(false),
         m_fixedShiftIndex(0),
         m_basebandSampleRate(0),
@@ -284,6 +289,7 @@ void FileSinkGUI::displaySettings()
     setPosFromFrequency();
 
     getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
@@ -410,6 +416,7 @@ void FileSinkGUI::on_deltaFrequency_changed(qint64 value)
     {
         m_channelMarker.setCenterFrequency(value);
         m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+        updateAbsoluteCenterFrequency();
         setPosFromFrequency();
         applySettings();
     }
@@ -542,6 +549,7 @@ void FileSinkGUI::setFrequencyFromPos()
     m_channelMarker.setCenterFrequency(inputFrequencyOffset);
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
 }
 
 void FileSinkGUI::setPosFromFrequency()
@@ -608,4 +616,9 @@ void FileSinkGUI::makeUIConnections()
     QObject::connect(ui->squelchedRecording, &ButtonSwitch::toggled, this, &FileSinkGUI::on_squelchedRecording_toggled);
     QObject::connect(ui->record, &ButtonSwitch::toggled, this, &FileSinkGUI::on_record_toggled);
     QObject::connect(ui->showFileDialog, &QPushButton::clicked, this, &FileSinkGUI::on_showFileDialog_clicked);
+}
+
+void FileSinkGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

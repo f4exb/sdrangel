@@ -81,6 +81,7 @@ bool ChirpChatDemodGUI::handleMessage(const Message& message)
     if (DSPSignalNotification::match(message))
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getCenterFrequency();
         int basebandSampleRate = notif.getSampleRate();
         qDebug() << "ChirpChatDemodGUI::handleMessage: DSPSignalNotification: m_basebandSampleRate: " << basebandSampleRate;
 
@@ -89,6 +90,10 @@ bool ChirpChatDemodGUI::handleMessage(const Message& message)
             m_basebandSampleRate = basebandSampleRate;
             setBandwidths();
         }
+
+        ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
 
         return true;
     }
@@ -151,6 +156,7 @@ void ChirpChatDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -340,7 +346,6 @@ void ChirpChatDemodGUI::onMenuDialogCalled(const QPoint &p)
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
         m_settings.m_title = m_channelMarker.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
@@ -379,6 +384,7 @@ ChirpChatDemodGUI::ChirpChatDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
+    m_deviceCenterFrequency(0),
     m_basebandSampleRate(250000),
 	m_doApplySettings(true),
     m_tickCount(0)
@@ -504,6 +510,7 @@ void ChirpChatDemodGUI::displaySettings()
     displaySquelch();
 
     getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
@@ -792,4 +799,9 @@ void ChirpChatDemodGUI::makeUIConnections()
     QObject::connect(ui->udpSend, &QCheckBox::stateChanged, this, &ChirpChatDemodGUI::on_udpSend_stateChanged);
     QObject::connect(ui->udpAddress, &QLineEdit::editingFinished, this, &ChirpChatDemodGUI::on_udpAddress_editingFinished);
     QObject::connect(ui->udpPort, &QLineEdit::editingFinished, this, &ChirpChatDemodGUI::on_udpPort_editingFinished);
+}
+
+void ChirpChatDemodGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

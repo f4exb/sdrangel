@@ -91,7 +91,11 @@ bool VORDemodSCGUI::handleMessage(const Message& message)
     else if (DSPSignalNotification::match(message))
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getCenterFrequency();
         m_basebandSampleRate = notif.getSampleRate();
+        ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
         return true;
     }
     else if (VORDemodSCReport::MsgReportRadial::match(message))
@@ -188,6 +192,7 @@ void VORDemodSCGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -277,6 +282,7 @@ VORDemodSCGUI::VORDemodSCGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     ui(new Ui::VORDemodSCGUI),
     m_pluginAPI(pluginAPI),
     m_deviceUISet(deviceUISet),
+    m_deviceCenterFrequency(0),
     m_channelMarker(this),
     m_doApplySettings(true),
     m_squelchOpen(false),
@@ -377,6 +383,7 @@ void VORDemodSCGUI::displaySettings()
     displayStreamIndex();
 
     getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
@@ -455,4 +462,9 @@ void VORDemodSCGUI::makeUIConnections()
     QObject::connect(ui->volume, &QDial::valueChanged, this, &VORDemodSCGUI::on_volume_valueChanged);
     QObject::connect(ui->squelch, &QDial::valueChanged, this, &VORDemodSCGUI::on_squelch_valueChanged);
     QObject::connect(ui->audioMute, &QToolButton::toggled, this, &VORDemodSCGUI::on_audioMute_toggled);
+}
+
+void VORDemodSCGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

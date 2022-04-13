@@ -151,6 +151,10 @@ bool BFMDemod::handleMessage(const Message& cmd)
         qDebug() << "BFMDemod::handleMessage: DSPSignalNotification";
         m_basebandSink->getInputMessageQueue()->push(rep);
 
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
+        }
+
         return true;
     }
 	else

@@ -38,7 +38,6 @@
 #include "localsourcebaseband.h"
 
 MESSAGE_CLASS_DEFINITION(LocalSource::MsgConfigureLocalSource, Message)
-MESSAGE_CLASS_DEFINITION(LocalSource::MsgBasebandSampleRateNotification, Message)
 
 const char* const LocalSource::m_channelIdURI = "sdrangel.channel.localsource";
 const char* const LocalSource::m_channelId = "LocalSource";
@@ -122,10 +121,8 @@ bool LocalSource::handleMessage(const Message& cmd)
         DSPSignalNotification *msg = new DSPSignalNotification(cfg.getSampleRate(), cfg.getCenterFrequency());
         m_basebandSource->getInputMessageQueue()->push(msg);
 
-        if (m_guiMessageQueue)
-        {
-            MsgBasebandSampleRateNotification *msg = MsgBasebandSampleRateNotification::create(cfg.getSampleRate());
-            m_guiMessageQueue->push(msg);
+        if (m_guiMessageQueue) {
+            m_guiMessageQueue->push(new DSPSignalNotification(cfg));
         }
 
         return true;

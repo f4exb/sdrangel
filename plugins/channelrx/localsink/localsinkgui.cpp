@@ -21,6 +21,7 @@
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
 #include "dsp/hbfilterchainconverter.h"
+#include "dsp/dspcommands.h"
 #include "mainwindow.h"
 
 #include "localsinkgui.h"
@@ -69,11 +70,13 @@ bool LocalSinkGUI::deserialize(const QByteArray& data)
 
 bool LocalSinkGUI::handleMessage(const Message& message)
 {
-    if (LocalSink::MsgBasebandSampleRateNotification::match(message))
+    if (DSPSignalNotification::match(message))
     {
-        LocalSink::MsgBasebandSampleRateNotification& notif = (LocalSink::MsgBasebandSampleRateNotification&) message;
+        DSPSignalNotification& notif = (DSPSignalNotification&) message;
         //m_channelMarker.setBandwidth(notif.getSampleRate());
+        m_deviceCenterFrequency = notif.getCenterFrequency();
         m_basebandSampleRate = notif.getSampleRate();
+        updateAbsoluteCenterFrequency();
         displayRateAndShift();
         return true;
     }
@@ -98,6 +101,7 @@ LocalSinkGUI::LocalSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
         ui(new Ui::LocalSinkGUI),
         m_pluginAPI(pluginAPI),
         m_deviceUISet(deviceUISet),
+        m_deviceCenterFrequency(0),
         m_basebandSampleRate(0),
         m_tickCount(0)
 {
@@ -363,6 +367,7 @@ void LocalSinkGUI::applyPosition()
     m_shiftFrequencyFactor = HBFilterChainConverter::convertToString(m_settings.m_log2Decim, m_settings.m_filterChainHash, s);
     ui->filterChainText->setText(s);
 
+    updateAbsoluteCenterFrequency();
     displayRateAndShift();
     applySettings();
 }
@@ -381,4 +386,10 @@ void LocalSinkGUI::makeUIConnections()
     QObject::connect(ui->localDevice, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LocalSinkGUI::on_localDevice_currentIndexChanged);
     QObject::connect(ui->localDevicesRefresh, &QPushButton::clicked, this, &LocalSinkGUI::on_localDevicesRefresh_clicked);
     QObject::connect(ui->localDevicePlay, &ButtonSwitch::toggled, this, &LocalSinkGUI::on_localDevicePlay_toggled);
+}
+
+void LocalSinkGUI::updateAbsoluteCenterFrequency()
+{
+    int shift = m_shiftFrequencyFactor * m_basebandSampleRate;
+    setStatusFrequency(m_deviceCenterFrequency + shift);
 }

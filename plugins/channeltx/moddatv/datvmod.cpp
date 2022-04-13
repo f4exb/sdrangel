@@ -164,6 +164,10 @@ bool DATVMod::handleMessage(const Message& cmd)
         DSPSignalNotification* rep = new DSPSignalNotification(notif);
         qDebug() << "DATVMod::handleMessage: DSPSignalNotification";
         m_basebandSource->getInputMessageQueue()->push(rep);
+        // Forward to GUI if any
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
+        }
 
         return true;
     }

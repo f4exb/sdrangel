@@ -151,6 +151,10 @@ bool AISDemod::handleMessage(const Message& cmd)
         qDebug() << "AISDemod::handleMessage: DSPSignalNotification";
         m_basebandSink->getInputMessageQueue()->push(rep);
 
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
+        }
+
         return true;
     }
     else if (MsgMessage::match(cmd))

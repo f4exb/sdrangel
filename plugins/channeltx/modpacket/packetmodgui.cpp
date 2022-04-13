@@ -23,11 +23,12 @@
 #include <QDebug>
 
 #include "dsp/spectrumvis.h"
+#include "dsp/dspengine.h"
+#include "dsp/dspcommands.h"
 #include "device/deviceuiset.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
-#include "dsp/dspengine.h"
 #include "gui/glspectrum.h"
 #include "gui/crightclickenabler.h"
 #include "gui/basicchannelsettingsdialog.h"
@@ -95,6 +96,16 @@ bool PacketModGUI::handleMessage(const Message& message)
         ui->transmittedText->appendPlainText(str);
         return true;
     }
+    else if (DSPSignalNotification::match(message))
+    {
+        const DSPSignalNotification& notif = (const DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getCenterFrequency();
+        m_basebandSampleRate = notif.getSampleRate();
+        ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
+        return true;
+    }
     else
     {
         return false;
@@ -125,6 +136,7 @@ void PacketModGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -385,7 +397,6 @@ void PacketModGUI::onMenuDialogCalled(const QPoint &p)
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
         m_settings.m_title = m_channelMarker.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
@@ -424,6 +435,8 @@ PacketModGUI::PacketModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_pluginAPI(pluginAPI),
     m_deviceUISet(deviceUISet),
     m_channelMarker(this),
+    m_deviceCenterFrequency(0),
+    m_basebandSampleRate(1),
     m_doApplySettings(true)
 {
     ui->setupUi(getRollupContents());
@@ -577,6 +590,7 @@ void PacketModGUI::displaySettings()
     ui->packet->setText(m_settings.m_data);
 
     getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
@@ -627,4 +641,9 @@ void PacketModGUI::makeUIConnections()
     QObject::connect(ui->udpEnabled, &QCheckBox::clicked, this, &PacketModGUI::on_udpEnabled_clicked);
     QObject::connect(ui->udpAddress, &QLineEdit::editingFinished, this, &PacketModGUI::on_udpAddress_editingFinished);
     QObject::connect(ui->udpPort, &QLineEdit::editingFinished, this, &PacketModGUI::on_udpPort_editingFinished);
+}
+
+void PacketModGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

@@ -99,6 +99,16 @@ bool FreeDVModGUI::handleMessage(const Message& message)
         applyBandwidths(5 - ui->spanLog2->value()); // will update spectrum details with new sample rate
         return true;
     }
+    else if (DSPSignalNotification::match(message))
+    {
+        const DSPSignalNotification& notif = (const DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getCenterFrequency();
+        m_basebandSampleRate = notif.getSampleRate();
+        ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
+        return true;
+    }
     else if (FreeDVMod::MsgConfigureFreeDVMod::match(message))
     {
         const FreeDVMod::MsgConfigureFreeDVMod& cfg = (FreeDVMod::MsgConfigureFreeDVMod&) message;
@@ -154,6 +164,7 @@ void FreeDVModGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -302,7 +313,6 @@ void FreeDVModGUI::onMenuDialogCalled(const QPoint &p)
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
         m_settings.m_title = m_channelMarker.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
@@ -341,6 +351,8 @@ FreeDVModGUI::FreeDVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
+    m_deviceCenterFrequency(0),
+    m_basebandSampleRate(1),
 	m_doApplySettings(true),
 	m_spectrumRate(6000),
     m_recordLength(0),
@@ -506,6 +518,7 @@ void FreeDVModGUI::displaySettings()
     ui->morseKeyer->setChecked(m_settings.m_modAFInput == FreeDVModSettings::FreeDVModInputAF::FreeDVModInputCWTone);
 
     getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
@@ -616,4 +629,9 @@ void FreeDVModGUI::makeUIConnections()
     QObject::connect(ui->morseKeyer, &ButtonSwitch::toggled, this, &FreeDVModGUI::on_morseKeyer_toggled);
     QObject::connect(ui->navTimeSlider, &QSlider::valueChanged, this, &FreeDVModGUI::on_navTimeSlider_valueChanged);
     QObject::connect(ui->showFileDialog, &QPushButton::clicked, this, &FreeDVModGUI::on_showFileDialog_clicked);
+}
+
+void FreeDVModGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

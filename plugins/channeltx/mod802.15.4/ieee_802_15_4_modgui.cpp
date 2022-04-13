@@ -104,7 +104,11 @@ bool IEEE_802_15_4_ModGUI::handleMessage(const Message& message)
     if (DSPSignalNotification::match(message))
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getCenterFrequency();
         m_basebandSampleRate = notif.getSampleRate();
+        ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
         m_scopeVis->setLiveRate(m_basebandSampleRate);
         checkSampleRate();
         return true;
@@ -172,6 +176,7 @@ void IEEE_802_15_4_ModGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -332,7 +337,6 @@ void IEEE_802_15_4_ModGUI::onMenuDialogCalled(const QPoint &p)
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
         m_settings.m_title = m_channelMarker.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
@@ -371,6 +375,7 @@ IEEE_802_15_4_ModGUI::IEEE_802_15_4_ModGUI(PluginAPI* pluginAPI, DeviceUISet *de
     m_pluginAPI(pluginAPI),
     m_deviceUISet(deviceUISet),
     m_channelMarker(this),
+    m_deviceCenterFrequency(0),
     m_doApplySettings(true),
     m_basebandSampleRate(12000000)
 {
@@ -566,6 +571,7 @@ void IEEE_802_15_4_ModGUI::displaySettings()
     ui->udpPort->setText(QString::number(m_settings.m_udpPort));
 
     getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
@@ -638,4 +644,9 @@ void IEEE_802_15_4_ModGUI::makeUIConnections()
     QObject::connect(ui->udpEnabled, &QCheckBox::clicked, this, &IEEE_802_15_4_ModGUI::on_udpEnabled_clicked);
     QObject::connect(ui->udpAddress, &QLineEdit::editingFinished, this, &IEEE_802_15_4_ModGUI::on_udpAddress_editingFinished);
     QObject::connect(ui->udpPort, &QLineEdit::editingFinished, this, &IEEE_802_15_4_ModGUI::on_udpPort_editingFinished);
+}
+
+void IEEE_802_15_4_ModGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

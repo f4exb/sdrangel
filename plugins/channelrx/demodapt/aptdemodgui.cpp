@@ -274,7 +274,11 @@ bool APTDemodGUI::handleMessage(const Message& message)
     else if (DSPSignalNotification::match(message))
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getCenterFrequency();
         m_basebandSampleRate = notif.getSampleRate();
+        ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
         return true;
     }
 
@@ -310,6 +314,7 @@ void APTDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -592,6 +597,7 @@ APTDemodGUI::APTDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_pluginAPI(pluginAPI),
     m_deviceUISet(deviceUISet),
     m_channelMarker(this),
+    m_deviceCenterFrequency(0),
     m_doApplySettings(true),
     m_tickCount(0),
     m_scene(nullptr),
@@ -779,6 +785,7 @@ void APTDemodGUI::displaySettings()
     displayStreamIndex();
 
     getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
@@ -911,4 +918,9 @@ void APTDemodGUI::makeUIConnections()
     QObject::connect(ui->zoomIn, &QToolButton::clicked, this, &APTDemodGUI::on_zoomIn_clicked);
     QObject::connect(ui->zoomOut, &QToolButton::clicked, this, &APTDemodGUI::on_zoomOut_clicked);
     QObject::connect(ui->zoomAll, &ButtonSwitch::clicked, this, &APTDemodGUI::on_zoomAll_clicked);
+}
+
+void APTDemodGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

@@ -22,6 +22,7 @@
 
 #include "ui_dsddemodgui.h"
 #include "dsp/scopevisxy.h"
+#include "dsp/dspcommands.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
@@ -94,6 +95,16 @@ bool DSDDemodGUI::handleMessage(const Message& message)
         blockApplySettings(false);
         return true;
     }
+    else if (DSPSignalNotification::match(message))
+    {
+        DSPSignalNotification& notif = (DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getCenterFrequency();
+        m_basebandSampleRate = notif.getSampleRate();
+        ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
+        return true;
+    }
     else
     {
         return false;
@@ -117,6 +128,7 @@ void DSDDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -266,7 +278,6 @@ void DSDDemodGUI::onMenuDialogCalled(const QPoint &p)
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
         m_settings.m_title = m_channelMarker.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
@@ -311,6 +322,8 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
+    m_deviceCenterFrequency(0),
+    m_basebandSampleRate(1),
 	m_doApplySettings(true),
 	m_enableCosineFiltering(false),
 	m_syncOrConstellation(false),
@@ -468,6 +481,7 @@ void DSDDemodGUI::displaySettings()
     displayStreamIndex();
 
     getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
@@ -639,4 +653,9 @@ void DSDDemodGUI::makeUIConnections()
     QObject::connect(ui->audioMute, &QToolButton::toggled, this, &DSDDemodGUI::on_audioMute_toggled);
     QObject::connect(ui->symbolPLLLock, &QToolButton::toggled, this, &DSDDemodGUI::on_symbolPLLLock_toggled);
     QObject::connect(ui->viewStatusLog, &QPushButton::clicked, this, &DSDDemodGUI::on_viewStatusLog_clicked);
+}
+
+void DSDDemodGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

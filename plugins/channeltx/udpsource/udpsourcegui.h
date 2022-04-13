@@ -75,6 +75,8 @@ private:
 
     // settings
     UDPSourceSettings m_settings;
+    qint64 m_deviceCenterFrequency;
+    int m_basebandSampleRate;
     bool m_rfBandwidthChanged;
     bool m_doApplySettings;
     MessageQueue m_inputMessageQueue;
@@ -90,6 +92,7 @@ private:
     void setSampleFormatIndex(const UDPSourceSettings::SampleFormat& sampleFormat);
     bool handleMessage(const Message& message);
     void makeUIConnections();
+    void updateAbsoluteCenterFrequency();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);

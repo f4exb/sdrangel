@@ -269,7 +269,11 @@ bool NoiseFigureGUI::handleMessage(const Message& message)
     else if (DSPSignalNotification::match(message))
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getSampleRate();
         m_basebandSampleRate = notif.getSampleRate();
+        ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
         updateBW();
         return true;
     }
@@ -323,6 +327,7 @@ void NoiseFigureGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -587,6 +592,7 @@ NoiseFigureGUI::NoiseFigureGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
     m_pluginAPI(pluginAPI),
     m_deviceUISet(deviceUISet),
     m_channelMarker(this),
+    m_deviceCenterFrequency(0),
     m_doApplySettings(true),
     m_basebandSampleRate(1000000),
     m_tickCount(0),
@@ -747,6 +753,7 @@ void NoiseFigureGUI::displaySettings()
     }
 
     getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
@@ -809,4 +816,9 @@ void NoiseFigureGUI::makeUIConnections()
     QObject::connect(ui->chartSelect, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &NoiseFigureGUI::on_chartSelect_currentIndexChanged);
     QObject::connect(ui->openReference, &QToolButton::clicked, this, &NoiseFigureGUI::on_openReference_clicked);
     QObject::connect(ui->clearReference, &QToolButton::clicked, this, &NoiseFigureGUI::on_clearReference_clicked);
+}
+
+void NoiseFigureGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

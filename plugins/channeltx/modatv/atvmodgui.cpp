@@ -28,6 +28,7 @@
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "dsp/dspengine.h"
+#include "dsp/dspcommands.h"
 #include "util/db.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
@@ -54,6 +55,8 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
+    m_deviceCenterFrequency(0),
+    m_basebandSampleRate(1),
 	m_doApplySettings(true),
     m_videoLength(0),
     m_videoFrameRate(48000),
@@ -226,6 +229,16 @@ bool ATVModGUI::handleMessage(const Message& message)
     {
         const ATVMod::MsgConfigureVideoFileName& cfg = (ATVMod::MsgConfigureVideoFileName&) message;
         ui->videoFileText->setText(cfg.getFileName());
+        return true;
+    }
+    else if (DSPSignalNotification::match(message))
+    {
+        const DSPSignalNotification& notif = (const DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getCenterFrequency();
+        m_basebandSampleRate = notif.getSampleRate();
+        ui->deltaFrequency->setValueRange(false, 8, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
         return true;
     }
     else
@@ -435,6 +448,7 @@ void ATVModGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = value;
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -691,7 +705,6 @@ void ATVModGUI::onMenuDialogCalled(const QPoint &p)
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
         m_settings.m_title = m_channelMarker.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
@@ -801,6 +814,7 @@ void ATVModGUI::displaySettings()
     ui->playLoop->setChecked(m_settings.m_videoPlayLoop);
 
     getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
@@ -898,4 +912,9 @@ void ATVModGUI::makeUIConnections()
     QObject::connect(ui->cameraManualFPS, &QDial::valueChanged, this, &ATVModGUI::on_cameraManualFPS_valueChanged);
     QObject::connect(ui->overlayTextShow, &ButtonSwitch::toggled, this, &ATVModGUI::on_overlayTextShow_toggled);
     QObject::connect(ui->overlayText, &QLineEdit::textEdited, this, &ATVModGUI::on_overlayText_textEdited);
+}
+
+void ATVModGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

@@ -20,6 +20,7 @@
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
 #include "dsp/hbfilterchainconverter.h"
+#include "dsp/dspcommands.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
 #include "mainwindow.h"
@@ -66,10 +67,12 @@ bool RemoteSourceGUI::deserialize(const QByteArray& data)
 
 bool RemoteSourceGUI::handleMessage(const Message& message)
 {
-    if (RemoteSource::MsgBasebandSampleRateNotification::match(message))
+    if (DSPSignalNotification::match(message))
     {
-        RemoteSource::MsgBasebandSampleRateNotification& notif = (RemoteSource::MsgBasebandSampleRateNotification&) message;
-        m_basebandSampleRate = notif.getBasebandSampleRate();
+        DSPSignalNotification& notif = (DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getCenterFrequency();
+        m_basebandSampleRate = notif.getSampleRate();
+        updateAbsoluteCenterFrequency();
         displayRateAndShift();
         return true;
     }
@@ -156,6 +159,7 @@ RemoteSourceGUI::RemoteSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet,
         ui(new Ui::RemoteSourceGUI),
         m_pluginAPI(pluginAPI),
         m_deviceUISet(deviceUISet),
+        m_deviceCenterFrequency(0),
         m_remoteSampleRate(48000),
         m_basebandSampleRate(48000),
         m_shiftFrequencyFactor(0.0),
@@ -245,6 +249,7 @@ void RemoteSourceGUI::displaySettings()
     ui->dataAddress->setText(m_settings.m_dataAddress);
     ui->dataPort->setText(tr("%1").arg(m_settings.m_dataPort));
     getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
@@ -432,6 +437,7 @@ void RemoteSourceGUI::applyPosition()
     m_shiftFrequencyFactor = HBFilterChainConverter::convertToString(m_settings.m_log2Interp, m_settings.m_filterChainHash, s);
     ui->filterChainText->setText(s);
 
+    updateAbsoluteCenterFrequency();
     displayRateAndShift();
     applySettings();
 }
@@ -496,3 +502,10 @@ void RemoteSourceGUI::makeUIConnections()
     QObject::connect(ui->dataApplyButton, &QPushButton::clicked, this, &RemoteSourceGUI::on_dataApplyButton_clicked);
     QObject::connect(ui->eventCountsReset, &QPushButton::clicked, this, &RemoteSourceGUI::on_eventCountsReset_clicked);
 }
+
+void RemoteSourceGUI::updateAbsoluteCenterFrequency()
+{
+    int shift = m_shiftFrequencyFactor * m_basebandSampleRate;
+    setStatusFrequency(m_deviceCenterFrequency + shift);
+}
+

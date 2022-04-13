@@ -68,6 +68,7 @@ private:
     ChannelMarker m_channelMarker;
     RollupState m_rollupState;
     VORDemodSCSettings m_settings;
+    qint64 m_deviceCenterFrequency;
     bool m_doApplySettings;
 
     VORDemodSC* m_vorDemod;
@@ -85,6 +86,7 @@ private:
     void displayStreamIndex();
     bool handleMessage(const Message& message);
     void makeUIConnections();
+    void updateAbsoluteCenterFrequency();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);
