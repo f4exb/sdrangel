@@ -169,6 +169,7 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
     connect(m_changeDeviceButton, SIGNAL(clicked()), this, SLOT(openChangeDeviceDialog()));
     connect(m_reloadDeviceButton, SIGNAL(clicked()), this, SLOT(deviceReload()));
     connect(m_addChannelsButton, SIGNAL(clicked()), this, SLOT(openAddChannelsDialog()));
+    connect(m_deviceSetPresetsButton, SIGNAL(clicked()), this, SLOT(deviceSetPresetsDialog()));
     connect(m_helpButton, SIGNAL(clicked()), this, SLOT(showHelp()));
     connect(m_moveButton, SIGNAL(clicked()), this, SLOT(openMoveToWorkspaceDialog()));
     connect(m_shrinkButton, SIGNAL(clicked()), this, SLOT(shrinkWindow()));
@@ -303,6 +304,12 @@ void DeviceGUI::shrinkWindow()
 {
     qDebug("DeviceGUI::shrinkWindow");
     adjustSize();
+}
+
+void DeviceGUI::deviceSetPresetsDialog()
+{
+    QPoint p = mapFromGlobal(QCursor::pos());
+    emit deviceSetPresetsDialogRequested(p, this);
 }
 
 void DeviceGUI::setTitle(const QString& title)

@@ -131,6 +131,7 @@ private slots:
     void openMoveToWorkspaceDialog();
     void showSpectrumHandler();
     void showAllChannelsHandler();
+    void deviceSetPresetsDialog();
 
 signals:
     void forceClose();
@@ -142,6 +143,7 @@ signals:
     void showSpectrum(int deviceSetIndex);
     void showAllChannels(int deviceSetIndex);
     void addChannelEmitted(int channelIndex);
+    void deviceSetPresetsDialogRequested(QPoint, DeviceGUI*);
 };
 
 #endif // INCLUDE_DEVICEGUI_H

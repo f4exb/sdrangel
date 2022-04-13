@@ -1,20 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>FeaturePresetsDialog</class>
- <widget class="QDialog" name="FeaturePresetsDialog">
+ <class>DeviceSetPresetsDialog</class>
+ <widget class="QDialog" name="DeviceSetPresetsDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>376</width>
-    <height>399</height>
+    <width>396</width>
+    <height>396</height>
    </rect>
-  </property>
-  <property name="sizePolicy">
-   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-    <horstretch>0</horstretch>
-    <verstretch>0</verstretch>
-   </sizepolicy>
   </property>
   <property name="font">
    <font>
@@ -23,40 +17,41 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Feature presets</string>
+   <string>Device Set Presets</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2">
+  <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QWidget" name="widget" native="true">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
+    <widget class="QTreeWidget" name="presetTree">
+     <property name="indentation">
+      <number>10</number>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-       <widget class="QTreeWidget" name="presetsTree">
-        <property name="indentation">
-         <number>5</number>
-        </property>
-        <property name="allColumnsShowFocus">
-         <bool>true</bool>
-        </property>
-        <property name="columnCount">
-         <number>1</number>
-        </property>
-        <attribute name="headerMinimumSectionSize">
-         <number>5</number>
-        </attribute>
-        <column>
-         <property name="text">
-          <string>Description</string>
-         </property>
-        </column>
-       </widget>
-      </item>
-     </layout>
+     <property name="allColumnsShowFocus">
+      <bool>true</bool>
+     </property>
+     <attribute name="headerMinimumSectionSize">
+      <number>5</number>
+     </attribute>
+     <column>
+      <property name="text">
+       <string>Freq (MHz)</string>
+      </property>
+      <property name="toolTip">
+       <string>Center frequency in MHz</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>M</string>
+      </property>
+      <property name="toolTip">
+       <string>Mode: R: Rx or source, T: Tx or sink</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Description</string>
+      </property>
+     </column>
     </widget>
    </item>
    <item>
@@ -116,6 +111,34 @@
       </widget>
      </item>
      <item>
+      <widget class="QToolButton" name="presetExport">
+       <property name="toolTip">
+        <string>Export current preset to file</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/export.png</normaloff>:/export.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="presetImport">
+       <property name="toolTip">
+        <string>Import preset from file into current group</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/import.png</normaloff>:/import.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -163,6 +186,12 @@
      </item>
      <item>
       <widget class="QToolButton" name="presetLoad">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="toolTip">
         <string>Load selected preset</string>
        </property>
@@ -202,7 +231,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>FeaturePresetsDialog</receiver>
+   <receiver>DeviceSetPresetsDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -218,7 +247,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>FeaturePresetsDialog</receiver>
+   <receiver>DeviceSetPresetsDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

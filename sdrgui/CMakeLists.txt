@@ -29,6 +29,7 @@ set(sdrgui_SOURCES
     gui/cwkeyergui.cpp
     gui/datetimedelegate.cpp
     gui/decimaldelegate.cpp
+    gui/devicesetpresetsdialog.cpp
     gui/devicestreamselectiondialog.cpp
     gui/deviceuserargsdialog.cpp
     gui/dmsspinbox.cpp
@@ -130,6 +131,7 @@ set(sdrgui_HEADERS
     gui/cwkeyergui.h
     gui/datetimedelegate.h
     gui/decimaldelegate.h
+    gui/devicesetpresetsdialog.h
     gui/devicestreamselectiondialog.h
     gui/deviceuserargsdialog.h
     gui/dmsspinbox.h
@@ -220,6 +222,7 @@ set(sdrgui_FORMS
     gui/commandoutputdialog.ui
     gui/configurationsdialog.ui
     gui/cwkeyergui.ui
+    gui/devicesetpresetsdialog.ui
     gui/devicestreamselectiondialog.ui
     gui/deviceuserargsdialog.ui
     gui/editcommanddialog.ui

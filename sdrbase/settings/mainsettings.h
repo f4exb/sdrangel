@@ -46,6 +46,7 @@ public:
     void clearPresets();
     const Preset& getWorkingPresetConst() const { return m_workingPreset; }
 	Preset* getWorkingPreset() { return &m_workingPreset; }
+    QList<Preset*> *getPresets() { return &m_presets; }
 
     void addCommand(Command *command);
     void deleteCommand(const Command* command);

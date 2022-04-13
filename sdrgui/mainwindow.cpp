@@ -66,6 +66,7 @@
 #include "gui/ambedevicesdialog.h"
 #include "gui/workspace.h"
 #include "gui/featurepresetsdialog.h"
+#include "gui/devicesetpresetsdialog.h"
 #include "gui/commandsdialog.h"
 #include "gui/configurationsdialog.h"
 #include "dsp/dspengine.h"
@@ -542,6 +543,12 @@ void MainWindow::sampleSourceCreate(
         this,
         [=](){ this->removeDeviceSet(deviceGUI->getIndex()); }
     );
+    QObject::connect(
+        deviceGUI,
+        &DeviceGUI::deviceSetPresetsDialogRequested,
+        this,
+        &MainWindow::openDeviceSetPresetsDialog
+    );
 
     deviceAPI->getSampleSource()->setMessageQueueToGUI(deviceGUI->getInputMessageQueue());
     deviceUISet->m_deviceGUI = deviceGUI;
@@ -753,6 +760,13 @@ void MainWindow::sampleSinkCreate(
         this,
         [=](){ this->removeDeviceSet(deviceGUI->getIndex()); }
     );
+    QObject::connect(
+        deviceGUI,
+        &DeviceGUI::deviceSetPresetsDialogRequested,
+        this,
+        &MainWindow::openDeviceSetPresetsDialog
+    );
+
     deviceAPI->getSampleSink()->setMessageQueueToGUI(deviceGUI->getInputMessageQueue());
     deviceUISet->m_deviceGUI = deviceGUI;
     const PluginInterface::SamplingDevice *selectedDevice = DeviceEnumerator::instance()->getRxSamplingDevice(selectedDeviceIndex);
@@ -937,6 +951,13 @@ void MainWindow::sampleMIMOCreate(
         this,
         [=](){ this->removeDeviceSet(deviceGUI->getIndex()); }
     );
+    QObject::connect(
+        deviceGUI,
+        &DeviceGUI::deviceSetPresetsDialogRequested,
+        this,
+        &MainWindow::openDeviceSetPresetsDialog
+    );
+
     deviceAPI->getSampleMIMO()->setMessageQueueToGUI(deviceGUI->getInputMessageQueue());
     deviceUISet->m_deviceGUI = deviceGUI;
     const PluginInterface::SamplingDevice *selectedDevice = DeviceEnumerator::instance()->getRxSamplingDevice(selectedDeviceIndex);
@@ -1591,44 +1612,6 @@ void MainWindow::updatePresetControls()
 	// }
 }
 
-QTreeWidgetItem* MainWindow::addPresetToTree(const Preset* preset)
-{
-	// QTreeWidgetItem* group = 0;
-
-	// for(int i = 0; i < ui->presetTree->topLevelItemCount(); i++)
-	// {
-	// 	if(ui->presetTree->topLevelItem(i)->text(0) == preset->getGroup())
-	// 	{
-	// 		group = ui->presetTree->topLevelItem(i);
-	// 		break;
-	// 	}
-	// }
-
-	// if(group == 0)
-	// {
-	// 	QStringList sl;
-	// 	sl.append(preset->getGroup());
-	// 	group = new QTreeWidgetItem(ui->presetTree, sl, PGroup);
-	// 	group->setFirstColumnSpanned(true);
-	// 	group->setExpanded(true);
-	// 	ui->presetTree->sortByColumn(0, Qt::AscendingOrder);
-	// }
-
-	// QStringList sl;
-	// sl.append(QString("%1").arg(preset->getCenterFrequency() / 1e6f, 0, 'f', 3)); // frequency column
-	// sl.append(QString("%1").arg(preset->isSourcePreset() ? 'R' : preset->isSinkPreset() ? 'T' : preset->isMIMOPreset() ? 'M' : 'X'));           // mode column
-	// sl.append(preset->getDescription());                                          // description column
-	// PresetItem* item = new PresetItem(group, sl, preset->getCenterFrequency(), PItem);
-	// item->setTextAlignment(0, Qt::AlignRight);
-	// item->setData(0, Qt::UserRole, QVariant::fromValue(preset));
-	// ui->presetTree->resizeColumnToContents(0); // Resize frequency column to minimum
-    // ui->presetTree->resizeColumnToContents(1); // Resize mode column to minimum
-
-	// updatePresetControls();
-	// return item;
-    return nullptr;
-}
-
 void MainWindow::applySettings()
 {
  	// loadDeviceSetPresetSettings(m_mainCore->m_settings.getWorkingPreset(), 0);
@@ -1664,7 +1647,15 @@ bool MainWindow::handleMessage(const Message& cmd)
     if (MainCore::MsgLoadPreset::match(cmd))
     {
         MainCore::MsgLoadPreset& notif = (MainCore::MsgLoadPreset&) cmd;
-        loadDeviceSetPresetSettings(notif.getPreset(), notif.getDeviceSetIndex());
+        int deviceSetIndex =  notif.getDeviceSetIndex();
+        const Preset *preset = notif.getPreset();
+
+        if (deviceSetIndex < (int) m_deviceUIs.size())
+        {
+            DeviceUISet *deviceUISet = m_deviceUIs[deviceSetIndex];
+            deviceUISet->loadDeviceSetSettings(preset, m_pluginManager->getPluginAPI(), &m_workspaces, nullptr);
+        }
+
         return true;
     }
     else if (MainCore::MsgSavePreset::match(cmd))
@@ -2303,14 +2294,14 @@ void MainWindow::on_presetTree_currentItemChanged(QTreeWidgetItem *current, QTre
 {
     (void) current;
     (void) previous;
-	updatePresetControls();
+	// updatePresetControls();
 }
 
 void MainWindow::on_presetTree_itemActivated(QTreeWidgetItem *item, int column)
 {
     (void) item;
     (void) column;
-	on_presetLoad_clicked();
+	// on_presetLoad_clicked();
 }
 
 void MainWindow::on_action_Quick_Start_triggered()
@@ -2785,6 +2776,36 @@ void MainWindow::openFeaturePresetsDialog(QPoint p, Workspace *workspace)
             );
         }
     }
+}
+
+void MainWindow::openDeviceSetPresetsDialog(QPoint p, DeviceGUI *deviceGUI)
+{
+    Workspace *workspace = m_workspaces[deviceGUI->getWorkspaceIndex()];
+    DeviceUISet *deviceUISet = m_deviceUIs[deviceGUI->getIndex()];
+
+    DeviceSetPresetsDialog dialog;
+    dialog.setDeviceUISet(deviceUISet);
+    dialog.setPresets(m_mainCore->m_settings.getPresets());
+    dialog.setPluginAPI(m_pluginManager->getPluginAPI());
+    dialog.setCurrentWorkspace(workspace);
+    dialog.setWorkspaces(&m_workspaces);
+    dialog.populateTree((int) deviceGUI->getDeviceType());
+    dialog.move(p);
+    dialog.exec();
+
+    // if (dialog.wasPresetLoaded())
+    // {
+    //     for (int i = 0; i < m_featureUIs[0]->getNumberOfFeatures(); i++)
+    //     {
+    //         FeatureGUI *gui = m_featureUIs[0]->getFeatureGuiAt(i);
+    //         QObject::connect(
+    //             gui,
+    //             &FeatureGUI::moveToWorkspace,
+    //             this,
+    //             [=](int wsIndexDest){ this->featureMove(gui, wsIndexDest); }
+    //         );
+    //     }
+    // }
 }
 
 void MainWindow::deleteFeature(int featureSetIndex, int featureIndex)
