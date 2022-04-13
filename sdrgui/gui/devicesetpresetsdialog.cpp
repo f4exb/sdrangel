@@ -18,6 +18,8 @@
 
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QTextStream>
+#include <QFile>
 
 #include "settings/preset.h"
 #include "gui/presetitem.h"
@@ -371,7 +373,7 @@ void DeviceSetPresetsDialog::on_presetImport_clicked()
 
 void DeviceSetPresetsDialog::on_presetLoad_clicked()
 {
-	qDebug() << "DeviceSetPresetsDialog::on_presetLoad_clicked";
+	qDebug("DeviceSetPresetsDialog::on_presetLoad_clicked");
 
 	QTreeWidgetItem* item = ui->presetTree->currentItem();
 
