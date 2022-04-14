@@ -37,24 +37,25 @@ const QString GLShaderTVArray::m_strFragmentShaderSourceColored = QString(
                 "    gl_FragColor = texture2D(uTexture, texCoordVar);\n"
                 "}\n");
 
-GLShaderTVArray::GLShaderTVArray(bool blnColor) : m_blnColor(blnColor)
+GLShaderTVArray::GLShaderTVArray(bool blnColor) :
+    m_objProgram(nullptr),
+    m_matrixLoc(0),
+    m_textureLoc(0),
+    m_objImage(nullptr),
+    m_objTexture(nullptr),
+    m_intCols(0),
+    m_intRows(0),
+    m_objCurrentRow(nullptr),
+    m_blnInitialized(false),
+    m_blnColor(blnColor),
+    m_blnAlphaBlend(false),
+    m_blnAlphaReset(false)
 {
-	m_blnAlphaBlend = false;
-    m_blnAlphaReset = false;
-    m_objProgram = nullptr;
-    m_objImage = nullptr;
-    m_objTexture = nullptr;
-    m_intCols = 0;
-    m_intRows = 0;
-    m_blnInitialized = false;
-    m_objCurrentRow = nullptr;
-
-    m_textureLoc = 0;
-    m_matrixLoc = 0;
 }
 
 GLShaderTVArray::~GLShaderTVArray()
 {
+    qDebug("GLShaderTVArray::~GLShaderTVArray");
     cleanup();
 }
 
@@ -128,7 +129,7 @@ void GLShaderTVArray::initializeGL(int intCols, int intRows)
 
 }
 
-QRgb * GLShaderTVArray::GetRowBuffer(int intRow)
+QRgb *GLShaderTVArray::GetRowBuffer(int intRow)
 {
     if (!m_blnInitialized) {
         return nullptr;
