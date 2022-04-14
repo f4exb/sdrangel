@@ -302,6 +302,7 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
 
 DATVDemodGUI::~DATVDemodGUI()
 {
+    ui->screenTV->setParent(nullptr); // Prefer memory leak to core dump... ~TVScreen() is buggy
     delete ui;
 }
 

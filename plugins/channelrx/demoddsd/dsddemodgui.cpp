@@ -404,6 +404,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 DSDDemodGUI::~DSDDemodGUI()
 {
 	delete m_scopeVisXY;
+    ui->screenTV->setParent(nullptr); // Prefer memory leak to core dump... ~TVScreen() is buggy
 	delete ui;
 }
 
