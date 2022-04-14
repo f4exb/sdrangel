@@ -34,11 +34,13 @@ MainParser::MainParser() :
     m_fftwfWisdomOption(QStringList() << "w" << "fftwf-wisdom",
         "FFTW Wisdom file.",
         "file",
-        "")
+        ""),
+    m_scratchOption("scratch", "Start from scratch (no current config).")
 {
+
     m_serverAddress = "";   // Bind to any address
     m_serverPort = 8091;
-    m_mimoSupport = false;
+    m_scratch = false;
     m_fftwfWindowFileName = "";
 
     m_parser.setApplicationDescription("Software Defined Radio application");
@@ -48,6 +50,7 @@ MainParser::MainParser() :
     m_parser.addOption(m_serverAddressOption);
     m_parser.addOption(m_serverPortOption);
     m_parser.addOption(m_fftwfWisdomOption);
+    m_parser.addOption(m_scratchOption);
 }
 
 MainParser::~MainParser()
@@ -94,18 +97,7 @@ void MainParser::parse(const QCoreApplication& app)
 
     m_fftwfWindowFileName = m_parser.value(m_fftwfWisdomOption);
 
-    // MIMO - from version
+    // Scratch mode
 
-    QStringList versionParts = app.applicationVersion().split(".");
-
-    if (versionParts.size() > 0)
-    {
-        bool ok;
-        int maj = versionParts.at(0).toInt(&ok);
-        m_mimoSupport = ok && (maj > 4);
-    }
-    else
-    {
-        m_mimoSupport = false;
-    }
+    m_scratch = m_parser.isSet(m_scratchOption);
 }

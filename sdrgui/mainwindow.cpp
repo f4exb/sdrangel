@@ -261,13 +261,21 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	// m_deviceUIs.back()->m_deviceAPI->setBuddyLeader(true); // the first device is always the leader
     tabChannelsIndexChanged(); // force channel selection list update
 
-    splash->showStatusMessage("load current configuration...", Qt::white);
-	qDebug() << "MainWindow::MainWindow: load current configuration...";
-
-	// loadDeviceSetPresetSettings(m_mainCore->m_settings.getWorkingPreset(), 0);
 	m_apiAdapter = new WebAPIAdapter();
-    // loadFeatureSetPresetSettings(m_mainCore->m_settings.getWorkingFeatureSetPreset(), 0);
-    loadConfiguration(m_mainCore->m_settings.getWorkingConfiguration());
+
+    if (!parser.getScratch())
+    {
+        splash->showStatusMessage("load current configuration...", Qt::white);
+        qDebug() << "MainWindow::MainWindow: load current configuration...";
+
+        // loadDeviceSetPresetSettings(m_mainCore->m_settings.getWorkingPreset(), 0);
+        // loadFeatureSetPresetSettings(m_mainCore->m_settings.getWorkingFeatureSetPreset(), 0);
+        loadConfiguration(m_mainCore->m_settings.getWorkingConfiguration());
+    }
+    else
+    {
+        qDebug() << "MainWindow::MainWindow: scratch mode: do not load current configuration";
+    }
 
     // splash->showStatusMessage("update preset controls...", Qt::white);
 	// qDebug() << "MainWindow::MainWindow: update preset controls...";
@@ -304,7 +312,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	m_commandKeyReceiver->setRelease(true);
 	this->installEventFilter(m_commandKeyReceiver);
 
-    m_dspEngine->setMIMOSupport(parser.getMIMOSupport());
+    m_dspEngine->setMIMOSupport(true);
 
     // if (!parser.getMIMOSupport()) {
     //     ui->menu_Devices->removeAction(ui->action_sampleMIMOAdd);
