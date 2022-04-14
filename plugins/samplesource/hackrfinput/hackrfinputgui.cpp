@@ -78,7 +78,9 @@ HackRFInputGui::HackRFInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
 HackRFInputGui::~HackRFInputGui()
 {
+    qDebug("HackRFInputGui::~HackRFInputGui");
 	delete ui;
+    qDebug("HackRFInputGui::~HackRFInputGui: end");
 }
 
 void HackRFInputGui::destroy()

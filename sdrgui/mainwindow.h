@@ -153,19 +153,16 @@ private:
     void sampleSourceCreate(
         int deviceSetIndex,
         int deviceIndex,
-        DeviceAPI *deviceAPI,
         DeviceUISet *deviceUISet
     );
     void sampleSinkCreate(
         int deviceSetIndex,
         int deviceIndex,
-        DeviceAPI *deviceAPI,
         DeviceUISet *deviceUISet
     );
     void sampleMIMOCreate(
         int deviceSetIndex,
         int deviceIndex,
-        DeviceAPI *deviceAPI,
         DeviceUISet *deviceUISet
     );
     void deleteFeature(int featureSetIndex, int featureIndex);

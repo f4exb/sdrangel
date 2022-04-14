@@ -400,7 +400,7 @@ void MainWindow::sampleSourceAdd(Workspace *deviceWorkspace, Workspace *spectrum
         deviceIndex = DeviceEnumerator::instance()->getFileInputDeviceIndex();
     }
 
-    sampleSourceCreate(deviceSetIndex, deviceIndex, deviceAPI, m_deviceUIs.back());
+    sampleSourceCreate(deviceSetIndex, deviceIndex, m_deviceUIs.back());
     m_deviceUIs.back()->m_deviceGUI->setWorkspaceIndex(deviceWorkspace->getIndex());
     m_deviceUIs.back()->m_mainSpectrumGUI->setWorkspaceIndex(spectrumWorkspace->getIndex());
     MainSpectrumGUI *mainSpectrumGUI = m_deviceUIs.back()->m_mainSpectrumGUI;
@@ -427,10 +427,10 @@ void MainWindow::sampleSourceAdd(Workspace *deviceWorkspace, Workspace *spectrum
 void MainWindow::sampleSourceCreate(
     int deviceSetIndex,
     int deviceIndex,
-    DeviceAPI *deviceAPI,
     DeviceUISet *deviceUISet
 )
 {
+    DeviceAPI *deviceAPI = deviceUISet->m_deviceAPI;
     int selectedDeviceIndex = deviceIndex;
     DeviceEnumerator::instance()->changeRxSelection(deviceSetIndex, deviceIndex);
     const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(deviceIndex);
@@ -507,10 +507,7 @@ void MainWindow::sampleSourceCreate(
         deviceUISet->m_deviceAPI->setBuddyLeader(true);
     }
 
-    // delete previous GUI if it exists
-    if (deviceUISet->m_deviceGUI) {
-        emit deviceUISet->m_deviceGUI->destroy();
-    }
+    // DeviceGUI *oldDeviceGUI = deviceUISet->m_deviceGUI; // store old GUI pointer for later
 
     // constructs new GUI and input object
     DeviceSampleSource *source = deviceAPI->getPluginInterface()->createSampleSourcePluginInstance(
@@ -618,7 +615,7 @@ void MainWindow::sampleSinkAdd(Workspace *deviceWorkspace, Workspace *spectrumWo
         deviceIndex = DeviceEnumerator::instance()->getFileOutputDeviceIndex(); // create a file output by default
     }
 
-    sampleSinkCreate(deviceSetIndex, deviceIndex, deviceAPI, m_deviceUIs.back());
+    sampleSinkCreate(deviceSetIndex, deviceIndex, m_deviceUIs.back());
     m_deviceUIs.back()->m_deviceGUI->setWorkspaceIndex(deviceWorkspace->getIndex());
     m_deviceUIs.back()->m_mainSpectrumGUI->setWorkspaceIndex(spectrumWorkspace->getIndex());
     MainSpectrumGUI *mainSpectrumGUI = m_deviceUIs.back()->m_mainSpectrumGUI;
@@ -645,10 +642,10 @@ void MainWindow::sampleSinkAdd(Workspace *deviceWorkspace, Workspace *spectrumWo
 void MainWindow::sampleSinkCreate(
         int deviceSetIndex,
         int deviceIndex,
-        DeviceAPI *deviceAPI,
         DeviceUISet *deviceUISet
 )
 {
+    DeviceAPI *deviceAPI = deviceUISet->m_deviceAPI;
     int selectedDeviceIndex = deviceIndex;
     DeviceEnumerator::instance()->changeTxSelection(deviceSetIndex, deviceIndex);
     const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(deviceIndex);
@@ -725,10 +722,7 @@ void MainWindow::sampleSinkCreate(
         deviceAPI->setBuddyLeader(true);
     }
 
-    // delete previous plugin GUI if it exists
-    if (deviceUISet->m_deviceGUI) {
-        emit deviceUISet->m_deviceGUI->destroy();
-    }
+    // DeviceGUI *oldDeviceGUI = deviceUISet->m_deviceGUI; // store old GUI pointer for later
 
     // constructs new GUI and output object
     DeviceSampleSink *sink = deviceAPI->getPluginInterface()->createSampleSinkPluginInstance(
@@ -844,7 +838,7 @@ void MainWindow::sampleMIMOAdd(Workspace *deviceWorkspace, Workspace *spectrumWo
         deviceIndex = DeviceEnumerator::instance()->getTestMIMODeviceIndex(); // create a test MIMO by default
     }
 
-    sampleMIMOCreate(deviceSetIndex, deviceIndex, deviceAPI, m_deviceUIs.back());
+    sampleMIMOCreate(deviceSetIndex, deviceIndex, m_deviceUIs.back());
     m_deviceUIs.back()->m_deviceGUI->setWorkspaceIndex(deviceWorkspace->getIndex());
     m_deviceUIs.back()->m_mainSpectrumGUI->setWorkspaceIndex(spectrumWorkspace->getIndex());
     MainSpectrumGUI *mainSpectrumGUI = m_deviceUIs.back()->m_mainSpectrumGUI;
@@ -871,10 +865,10 @@ void MainWindow::sampleMIMOAdd(Workspace *deviceWorkspace, Workspace *spectrumWo
 void MainWindow::sampleMIMOCreate(
     int deviceSetIndex,
     int deviceIndex,
-    DeviceAPI *deviceAPI,
     DeviceUISet *deviceUISet
 )
 {
+    DeviceAPI *deviceAPI = deviceUISet->m_deviceAPI;
     int selectedDeviceIndex = deviceIndex;
     DeviceEnumerator::instance()->changeMIMOSelection(deviceSetIndex, deviceIndex);
     const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getMIMOSamplingDevice(deviceIndex);
@@ -917,10 +911,7 @@ void MainWindow::sampleMIMOCreate(
         deviceAPI->setHardwareUserArguments(userArgs);
     }
 
-    // delete previous plugin GUI if it exists
-    if (deviceUISet->m_deviceGUI) {
-        emit deviceUISet->m_deviceGUI->destroy();
-    }
+    // DeviceGUI *oldDeviceGUI = deviceUISet->m_deviceGUI; // store old GUI pointer for later
 
     // constructs new GUI and output object
     DeviceSampleMIMO *mimo = deviceAPI->getPluginInterface()->createSampleMIMOPluginInstance(
@@ -995,6 +986,7 @@ void MainWindow::sampleMIMOCreate(
 
 void MainWindow::removeDeviceSet(int deviceSetIndex)
 {
+    qDebug("MainWindow::removeDeviceSet: index: %d", deviceSetIndex);
     if (deviceSetIndex >= (int) m_deviceUIs.size()) {
         return;
     }
@@ -2513,19 +2505,19 @@ void MainWindow::sampleSourceChange(int deviceSetIndex, int newDeviceIndex, Work
     {
         qDebug("MainWindow::sampleSourceChange: deviceSet %d workspace: %d", deviceSetIndex, workspace->getIndex());
         DeviceUISet *deviceUISet = m_deviceUIs[deviceSetIndex];
-        DeviceGUI *gui = deviceUISet->m_deviceGUI;
-        workspace->removeFromMdiArea(gui);
+        workspace->removeFromMdiArea(deviceUISet->m_deviceGUI);
         // deviceUI->m_deviceAPI->saveSamplingDeviceSettings(m_mainCore->m_settings.getWorkingPreset()); // save old API settings
         deviceUISet->m_deviceAPI->stopDeviceEngine();
 
         // deletes old UI and input object
         deviceUISet->m_deviceAPI->getSampleSource()->setMessageQueueToGUI(nullptr); // have source stop sending messages to the GUI
+
         //deviceUISet->m_deviceGUI->destroy();
         deviceUISet->m_deviceAPI->resetSamplingDeviceId();
         deviceUISet->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceInput(deviceUISet->m_deviceAPI->getSampleSource());
         deviceUISet->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
 
-        sampleSourceCreate(deviceSetIndex, newDeviceIndex, deviceUISet->m_deviceAPI, deviceUISet);
+        sampleSourceCreate(deviceSetIndex, newDeviceIndex, deviceUISet);
         deviceUISet->m_deviceGUI->setWorkspaceIndex(workspace->getIndex());
         workspace->addToMdiArea(deviceUISet->m_deviceGUI);
 
@@ -2554,7 +2546,7 @@ void MainWindow::sampleSinkChange(int deviceSetIndex, int newDeviceIndex, Worksp
         deviceUISet->m_deviceAPI->getPluginInterface()->deleteSampleSinkPluginInstanceOutput(deviceUISet->m_deviceAPI->getSampleSink());
         deviceUISet->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
 
-        sampleSourceCreate(deviceSetIndex, newDeviceIndex, deviceUISet->m_deviceAPI, deviceUISet);
+        sampleSinkCreate(deviceSetIndex, newDeviceIndex, deviceUISet);
         deviceUISet->m_deviceGUI->setWorkspaceIndex(workspace->getIndex());
         workspace->addToMdiArea(deviceUISet->m_deviceGUI);
 
@@ -2582,7 +2574,7 @@ void MainWindow::sampleMIMOChange(int deviceSetIndex, int newDeviceIndex, Worksp
         deviceUISet->m_deviceAPI->resetSamplingDeviceId();
         deviceUISet->m_deviceAPI->getPluginInterface()->deleteSampleMIMOPluginInstanceMIMO(deviceUISet->m_deviceAPI->getSampleMIMO());
 
-        sampleSourceCreate(deviceSetIndex, newDeviceIndex, deviceUISet->m_deviceAPI, deviceUISet);
+        sampleMIMOCreate(deviceSetIndex, newDeviceIndex, deviceUISet);
         deviceUISet->m_deviceGUI->setWorkspaceIndex(workspace->getIndex());
         workspace->addToMdiArea(deviceUISet->m_deviceGUI);
 

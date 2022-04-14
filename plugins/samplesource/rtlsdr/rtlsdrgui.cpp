@@ -78,7 +78,9 @@ RTLSDRGui::RTLSDRGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
 RTLSDRGui::~RTLSDRGui()
 {
+    qDebug("RTLSDRGui::~RTLSDRGui");
 	delete ui;
+    qDebug("RTLSDRGui::~RTLSDRGui: end");
 }
 
 void RTLSDRGui::destroy()
