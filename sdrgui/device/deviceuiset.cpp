@@ -214,6 +214,7 @@ void DeviceUISet::saveDeviceSetSettings(Preset* preset) const
         (int) m_deviceAPI->getSamplingDeviceSequence(),
         (int) m_deviceAPI->getDeviceItemIndex()
     });
+    preset->setDeviceWorkspaceIndex(m_deviceGUI->getWorkspaceIndex());
     preset->clearChannels();
 
     if (m_deviceSourceEngine) // source device

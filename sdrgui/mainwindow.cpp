@@ -357,7 +357,7 @@ MainWindow::~MainWindow()
 	qDebug() << "MainWindow::~MainWindow: end";
 }
 
-void MainWindow::sampleSourceAdd(Workspace *workspace, int deviceIndex)
+void MainWindow::sampleSourceAdd(Workspace *deviceWorkspace, Workspace *spectrumWorkspace, int deviceIndex)
 {
     DSPDeviceSourceEngine *dspDeviceSourceEngine = m_dspEngine->addDeviceSourceEngine();
     dspDeviceSourceEngine->start();
@@ -393,25 +393,26 @@ void MainWindow::sampleSourceAdd(Workspace *workspace, int deviceIndex)
     }
 
     sampleSourceCreate(deviceSetIndex, deviceIndex, deviceAPI, m_deviceUIs.back());
-    m_deviceUIs.back()->m_deviceGUI->setWorkspaceIndex(workspace->getIndex());
-    m_deviceUIs.back()->m_mainSpectrumGUI->setWorkspaceIndex(workspace->getIndex());
+    m_deviceUIs.back()->m_deviceGUI->setWorkspaceIndex(deviceWorkspace->getIndex());
+    m_deviceUIs.back()->m_mainSpectrumGUI->setWorkspaceIndex(spectrumWorkspace->getIndex());
+    MainSpectrumGUI *mainSpectrumGUI = m_deviceUIs.back()->m_mainSpectrumGUI;
 
     QObject::connect(
-        m_deviceUIs.back()->m_mainSpectrumGUI,
+        mainSpectrumGUI,
         &MainSpectrumGUI::moveToWorkspace,
         this,
-        [=](int wsIndexDest){ this->mainSpectrumMove(m_deviceUIs.back()->m_mainSpectrumGUI, wsIndexDest); }
+        [=](int wsIndexDest){ this->mainSpectrumMove(mainSpectrumGUI, wsIndexDest); }
     );
 
     QObject::connect(
         m_deviceUIs.back()->m_deviceGUI,
         &DeviceGUI::addChannelEmitted,
         this,
-        [=](int channelIndex){ this->channelAddClicked(workspace, deviceSetIndex, channelIndex); }
+        [=](int channelIndex){ this->channelAddClicked(deviceWorkspace, deviceSetIndex, channelIndex); }
     );
 
-    workspace->addToMdiArea(m_deviceUIs.back()->m_deviceGUI);
-    workspace->addToMdiArea(m_deviceUIs.back()->m_mainSpectrumGUI);
+    deviceWorkspace->addToMdiArea(m_deviceUIs.back()->m_deviceGUI);
+    spectrumWorkspace->addToMdiArea(m_deviceUIs.back()->m_mainSpectrumGUI);
     emit m_mainCore->deviceSetAdded(deviceSetIndex, deviceAPI);
 }
 
@@ -574,7 +575,7 @@ void MainWindow::sampleSourceCreate(
     mainSpectrumGUI->setTitle(samplingDevice->displayedName.split(" ")[0]);
 }
 
-void MainWindow::sampleSinkAdd(Workspace *workspace, int deviceIndex)
+void MainWindow::sampleSinkAdd(Workspace *deviceWorkspace, Workspace *spectrumWorkspace, int deviceIndex)
 {
     DSPDeviceSinkEngine *dspDeviceSinkEngine = m_dspEngine->addDeviceSinkEngine();
     dspDeviceSinkEngine->start();
@@ -610,25 +611,26 @@ void MainWindow::sampleSinkAdd(Workspace *workspace, int deviceIndex)
     }
 
     sampleSinkCreate(deviceSetIndex, deviceIndex, deviceAPI, m_deviceUIs.back());
-    m_deviceUIs.back()->m_deviceGUI->setWorkspaceIndex(workspace->getIndex());
-    m_deviceUIs.back()->m_mainSpectrumGUI->setWorkspaceIndex(workspace->getIndex());
+    m_deviceUIs.back()->m_deviceGUI->setWorkspaceIndex(deviceWorkspace->getIndex());
+    m_deviceUIs.back()->m_mainSpectrumGUI->setWorkspaceIndex(spectrumWorkspace->getIndex());
+    MainSpectrumGUI *mainSpectrumGUI = m_deviceUIs.back()->m_mainSpectrumGUI;
 
     QObject::connect(
-        m_deviceUIs.back()->m_mainSpectrumGUI,
+        mainSpectrumGUI,
         &MainSpectrumGUI::moveToWorkspace,
         this,
-        [=](int wsIndexDest){ this->mainSpectrumMove(m_deviceUIs.back()->m_mainSpectrumGUI, wsIndexDest); }
+        [=](int wsIndexDest){ this->mainSpectrumMove(mainSpectrumGUI, wsIndexDest); }
     );
 
     QObject::connect(
         m_deviceUIs.back()->m_deviceGUI,
         &DeviceGUI::addChannelEmitted,
         this,
-        [=](int channelIndex){ this->channelAddClicked(workspace, deviceSetIndex, channelIndex); }
+        [=](int channelIndex){ this->channelAddClicked(deviceWorkspace, deviceSetIndex, channelIndex); }
     );
 
-    workspace->addToMdiArea(m_deviceUIs.back()->m_deviceGUI);
-    workspace->addToMdiArea(m_deviceUIs.back()->m_mainSpectrumGUI);
+    deviceWorkspace->addToMdiArea(m_deviceUIs.back()->m_deviceGUI);
+    spectrumWorkspace->addToMdiArea(m_deviceUIs.back()->m_mainSpectrumGUI);
     emit m_mainCore->deviceSetAdded(deviceSetIndex, deviceAPI);
 }
 
@@ -791,7 +793,7 @@ void MainWindow::sampleSinkCreate(
     spectrumGUI->setTitle(samplingDevice->displayedName.split(" ")[0]);
 }
 
-void MainWindow::sampleMIMOAdd(Workspace *workspace, int deviceIndex)
+void MainWindow::sampleMIMOAdd(Workspace *deviceWorkspace, Workspace *spectrumWorkspace, int deviceIndex)
 {
     DSPDeviceMIMOEngine *dspDeviceMIMOEngine = m_dspEngine->addDeviceMIMOEngine();
     dspDeviceMIMOEngine->start();
@@ -835,25 +837,26 @@ void MainWindow::sampleMIMOAdd(Workspace *workspace, int deviceIndex)
     }
 
     sampleMIMOCreate(deviceSetIndex, deviceIndex, deviceAPI, m_deviceUIs.back());
-    m_deviceUIs.back()->m_deviceGUI->setWorkspaceIndex(workspace->getIndex());
-    m_deviceUIs.back()->m_mainSpectrumGUI->setWorkspaceIndex(workspace->getIndex());
+    m_deviceUIs.back()->m_deviceGUI->setWorkspaceIndex(deviceWorkspace->getIndex());
+    m_deviceUIs.back()->m_mainSpectrumGUI->setWorkspaceIndex(spectrumWorkspace->getIndex());
+    MainSpectrumGUI *mainSpectrumGUI = m_deviceUIs.back()->m_mainSpectrumGUI;
 
     QObject::connect(
-        m_deviceUIs.back()->m_mainSpectrumGUI,
+        mainSpectrumGUI,
         &MainSpectrumGUI::moveToWorkspace,
         this,
-        [=](int wsIndexDest){ this->mainSpectrumMove(m_deviceUIs.back()->m_mainSpectrumGUI, wsIndexDest); }
+        [=](int wsIndexDest){ this->mainSpectrumMove(mainSpectrumGUI, wsIndexDest); }
     );
 
     QObject::connect(
         m_deviceUIs.back()->m_deviceGUI,
         &DeviceGUI::addChannelEmitted,
         this,
-        [=](int channelIndex){ this->channelAddClicked(workspace, deviceSetIndex, channelIndex); }
+        [=](int channelIndex){ this->channelAddClicked(deviceWorkspace, deviceSetIndex, channelIndex); }
     );
 
-    workspace->addToMdiArea(m_deviceUIs.back()->m_deviceGUI);
-    workspace->addToMdiArea(m_deviceUIs.back()->m_mainSpectrumGUI);
+    deviceWorkspace->addToMdiArea(m_deviceUIs.back()->m_deviceGUI);
+    spectrumWorkspace->addToMdiArea(m_deviceUIs.back()->m_mainSpectrumGUI);
     emit m_mainCore->deviceSetAdded(deviceSetIndex, deviceAPI);
 }
 
@@ -1351,10 +1354,17 @@ void MainWindow::loadConfiguration(const Configuration *configuration, bool from
                 deviceSetPreset.getSelectedDevice().m_deviceSequence,
                 deviceSetPreset.getSelectedDevice().m_deviceItemIndex
             );
-            int workspaceIndex = deviceSetPreset.getDeviceWorkspaceIndex() < m_workspaces.size() ?
+            qDebug("MainWindow::loadConfiguration: add source %s in workspace %d spectrum in %d",
+                qPrintable(deviceSetPreset.getSelectedDevice().m_deviceId),
+                deviceSetPreset.getDeviceWorkspaceIndex(),
+                deviceSetPreset.getSpectrumWorkspaceIndex());
+            int deviceWorkspaceIndex = deviceSetPreset.getDeviceWorkspaceIndex() < m_workspaces.size() ?
                 deviceSetPreset.getDeviceWorkspaceIndex() :
                 0;
-            sampleSourceAdd(m_workspaces[workspaceIndex], bestDeviceIndex);
+            int spectrumWorkspaceIndex = deviceSetPreset.getSpectrumWorkspaceIndex() < m_workspaces.size() ?
+                deviceSetPreset.getSpectrumWorkspaceIndex() :
+                deviceWorkspaceIndex;
+            sampleSourceAdd(m_workspaces[deviceWorkspaceIndex], m_workspaces[spectrumWorkspaceIndex], bestDeviceIndex);
         }
         else if (deviceSetPreset.isSinkPreset())
         {
@@ -1364,10 +1374,17 @@ void MainWindow::loadConfiguration(const Configuration *configuration, bool from
                 deviceSetPreset.getSelectedDevice().m_deviceSequence,
                 deviceSetPreset.getSelectedDevice().m_deviceItemIndex
             );
-            int workspaceIndex = deviceSetPreset.getDeviceWorkspaceIndex() < m_workspaces.size() ?
+            qDebug("MainWindow::loadConfiguration: add sink %s in workspace %d spectrum in %d",
+                qPrintable(deviceSetPreset.getSelectedDevice().m_deviceId),
+                deviceSetPreset.getDeviceWorkspaceIndex(),
+                deviceSetPreset.getSpectrumWorkspaceIndex());
+            int deviceWorkspaceIndex = deviceSetPreset.getDeviceWorkspaceIndex() < m_workspaces.size() ?
                 deviceSetPreset.getDeviceWorkspaceIndex() :
                 0;
-            sampleSinkAdd(m_workspaces[workspaceIndex], bestDeviceIndex);
+            int spectrumWorkspaceIndex = deviceSetPreset.getSpectrumWorkspaceIndex() < m_workspaces.size() ?
+                deviceSetPreset.getSpectrumWorkspaceIndex() :
+                deviceWorkspaceIndex;
+            sampleSinkAdd(m_workspaces[deviceWorkspaceIndex], m_workspaces[spectrumWorkspaceIndex], bestDeviceIndex);
         } else if (deviceSetPreset.isMIMOPreset())
         {
             int bestDeviceIndex = DeviceEnumerator::instance()->getBestMIMOSamplingDeviceIndex(
@@ -1375,10 +1392,17 @@ void MainWindow::loadConfiguration(const Configuration *configuration, bool from
                 deviceSetPreset.getSelectedDevice().m_deviceSerial,
                 deviceSetPreset.getSelectedDevice().m_deviceSequence
             );
-            int workspaceIndex = deviceSetPreset.getDeviceWorkspaceIndex() < m_workspaces.size() ?
+            qDebug("MainWindow::loadConfiguration: add MIMO %s in workspace %d spectrum in %d",
+                qPrintable(deviceSetPreset.getSelectedDevice().m_deviceId),
+                deviceSetPreset.getDeviceWorkspaceIndex(),
+                deviceSetPreset.getSpectrumWorkspaceIndex());
+            int deviceWorkspaceIndex = deviceSetPreset.getDeviceWorkspaceIndex() < m_workspaces.size() ?
                 deviceSetPreset.getDeviceWorkspaceIndex() :
                 0;
-            sampleMIMOAdd(m_workspaces[workspaceIndex], bestDeviceIndex);
+            int spectrumWorkspaceIndex = deviceSetPreset.getSpectrumWorkspaceIndex() < m_workspaces.size() ?
+                deviceSetPreset.getSpectrumWorkspaceIndex() :
+                deviceWorkspaceIndex;
+            sampleMIMOAdd(m_workspaces[deviceWorkspaceIndex], m_workspaces[spectrumWorkspaceIndex], bestDeviceIndex);
         }
 
         m_deviceUIs.back()->m_deviceGUI->restoreGeometry(deviceSetPreset.getDeviceGeometry());
@@ -1445,6 +1469,10 @@ void MainWindow::saveConfiguration(Configuration *configuration)
         deviceSetPresets.back().setSpectrumWorkspaceIndex(deviceUISet->m_mainSpectrumGUI->getWorkspaceIndex());
         deviceSetPresets.back().setDeviceGeometry(deviceUISet->m_deviceGUI->saveGeometry());
         deviceSetPresets.back().setDeviceWorkspaceIndex(deviceUISet->m_deviceGUI->getWorkspaceIndex());
+        qDebug("MainWindow::saveConfiguration: %s device in workspace %d spectrun in %d",
+            qPrintable(deviceUISet->m_deviceAPI->getSamplingDeviceId()),
+            deviceUISet->m_deviceGUI->getWorkspaceIndex(),
+            deviceUISet->m_mainSpectrumGUI->getWorkspaceIndex());
     }
 
     m_featureUIs[0]->saveFeatureSetSettings(&configuration->getFeatureSetPreset());
@@ -1733,11 +1761,11 @@ bool MainWindow::handleMessage(const Message& cmd)
         // in Server flavor. Set nullptr for workspace if index is out of bonds
 
         if (direction == 1) { // Single stream Tx
-            sampleSinkAdd(nullptr, -1); // create with file output device by default
+            sampleSinkAdd(nullptr, nullptr, -1); // create with file output device by default
         } else if (direction == 0) { // Single stream Rx
-            sampleSourceAdd(nullptr, -1); // create with file input device by default
+            sampleSourceAdd(nullptr, nullptr, -1); // create with file input device by default
         } else if (direction == 2) { // MIMO
-            sampleMIMOAdd(nullptr, -1); // create with testMI MIMO device y default
+            sampleMIMOAdd(nullptr, nullptr, -1); // create with testMI MIMO device y default
         }
 
         return true;
@@ -1886,21 +1914,21 @@ void MainWindow::addWorkspace()
         m_workspaces.back(),
         &Workspace::addRxDevice,
         this,
-        &MainWindow::sampleSourceAdd
+        [=](Workspace *inWorkspace, int deviceIndex) { this->sampleSourceAdd(inWorkspace, inWorkspace, deviceIndex); }
     );
 
     QObject::connect(
         m_workspaces.back(),
         &Workspace::addTxDevice,
         this,
-        &MainWindow::sampleSinkAdd
+        [=](Workspace *inWorkspace, int deviceIndex) { this->sampleSourceAdd(inWorkspace, inWorkspace, deviceIndex); }
     );
 
     QObject::connect(
         m_workspaces.back(),
         &Workspace::addMIMODevice,
         this,
-        &MainWindow::sampleMIMOAdd
+        [=](Workspace *inWorkspace, int deviceIndex) { this->sampleSourceAdd(inWorkspace, inWorkspace, deviceIndex); }
     );
 
     QObject::connect(
@@ -2700,6 +2728,8 @@ void MainWindow::featureMove(FeatureGUI *gui, int wsIndexDestnation)
 void MainWindow::deviceMove(DeviceGUI *gui, int wsIndexDestnation)
 {
     int wsIndexOrigin = gui->getWorkspaceIndex();
+    qDebug("MainWindow::deviceMove: %s from %d to %d",
+        qPrintable(gui->getTitle()), wsIndexOrigin, wsIndexDestnation);
 
     if (wsIndexOrigin == wsIndexDestnation) {
         return;
@@ -2726,6 +2756,8 @@ void MainWindow::channelMove(ChannelGUI *gui, int wsIndexDestnation)
 void MainWindow::mainSpectrumMove(MainSpectrumGUI *gui, int wsIndexDestnation)
 {
     int wsIndexOrigin = gui->getWorkspaceIndex();
+    qDebug("MainWindow::mainSpectrumMove: %s from %d to %d",
+        qPrintable(gui->getTitle()), wsIndexOrigin, wsIndexDestnation);
 
     if (wsIndexOrigin == wsIndexDestnation) {
         return;

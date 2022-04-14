@@ -181,9 +181,9 @@ private slots:
     void removeEmptyWorkspaces();
 	void loadConfiguration(const Configuration *configuration, bool fromDialog = false);
     void saveConfiguration(Configuration *configuration);
-	void sampleSourceAdd(Workspace *workspace, int deviceIndex);
-	void sampleSinkAdd(Workspace *workspace, int deviceIndex);
-	void sampleMIMOAdd(Workspace *workspace, int deviceIndex);
+	void sampleSourceAdd(Workspace *deviceWorkspace, Workspace *spectrumWorkspace, int deviceIndex);
+	void sampleSinkAdd(Workspace *workspace, Workspace *spectrumWorkspace, int deviceIndex);
+	void sampleMIMOAdd(Workspace *workspace, Workspace *spectrumWorkspace, int deviceIndex);
     void sampleDeviceChangeHandler(DeviceGUI *deviceGUI, int newDeviceIndex);
 
 	void on_action_View_Fullscreen_toggled(bool checked);
