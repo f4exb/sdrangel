@@ -28,6 +28,7 @@
 
 #include "mainwindow.h"
 #include "gui/workspaceselectiondialog.h"
+#include "gui/rollupcontents.h"
 
 #include "channelgui.h"
 
@@ -129,7 +130,8 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
     m_topLayout->addWidget(m_sizeGripTopRight, 0, Qt::AlignTop | Qt::AlignRight);
 
     m_centerLayout = new QHBoxLayout();
-    m_centerLayout->addWidget(&m_rollupContents);
+    m_rollupContents = new RollupContents(); // Do not delete! Done in child's destructor with "delete ui"
+    m_centerLayout->addWidget(m_rollupContents);
 
     m_bottomLayout = new QHBoxLayout();
     m_bottomLayout->setContentsMargins(0, 0, 0, 0);
@@ -157,7 +159,7 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
     connect(m_closeButton, SIGNAL(clicked()), this, SLOT(close()));
 
     connect(
-        &m_rollupContents,
+        m_rollupContents,
         &RollupContents::widgetRolled,
         this,
         &ChannelGUI::onWidgetRolled
@@ -258,13 +260,13 @@ void ChannelGUI::onWidgetRolled(QWidget *widget, bool show)
     {
         // qDebug("ChannelGUI::onWidgetRolled: show: %d %d", m_rollupContents.height(), widget->height());
         int dh = m_heightsMap.contains(widget) ? m_heightsMap[widget] - widget->height() : widget->minimumHeight();
-        resize(width(), 52 +  m_rollupContents.height() + dh);
+        resize(width(), 52 + 3 + m_rollupContents->height() + dh);
     }
     else
     {
         // qDebug("ChannelGUI::onWidgetRolled: hide: %d %d", m_rollupContents.height(), widget->height());
         m_heightsMap[widget] = widget->height();
-        resize(width(), 52 +  m_rollupContents.height());
+        resize(width(), 52 + 3 + m_rollupContents->height());
     }
 }
 

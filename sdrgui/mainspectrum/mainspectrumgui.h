@@ -100,7 +100,6 @@ private slots:
     void shrinkWindow();
 
 signals:
-    void forceClose();
     void closing();
     void moveToWorkspace(int workspaceIndex);
     void forceShrink();

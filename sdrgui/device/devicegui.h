@@ -134,7 +134,6 @@ private slots:
     void deviceSetPresetsDialog();
 
 signals:
-    void forceClose();
     void closing();
     void moveToWorkspace(int workspaceIndex);
     void forceShrink();

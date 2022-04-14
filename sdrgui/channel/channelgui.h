@@ -21,7 +21,6 @@
 #include <QMdiSubWindow>
 #include <QMap>
 
-#include "gui/rollupcontents.h"
 #include "export.h"
 
 class QCloseEvent;
@@ -31,6 +30,7 @@ class QPushButton;
 class QVBoxLayout;
 class QHBoxLayout;
 class QSizeGrip;
+class RollupContents;
 
 class SDRGUI_API ChannelGUI : public QMdiSubWindow
 {
@@ -69,7 +69,7 @@ public:
 
 	virtual MessageQueue* getInputMessageQueue() = 0;
 
-    RollupContents *getRollupContents() { return &m_rollupContents; }
+    RollupContents *getRollupContents() { return m_rollupContents; }
     void setTitle(const QString& title);
     void setTitleColor(const QColor& c);
     void setDeviceType(DeviceType type);
@@ -93,7 +93,7 @@ protected:
     int m_deviceSetIndex;
     int m_channelIndex;
     QString m_helpURL;
-    RollupContents m_rollupContents;
+    RollupContents* m_rollupContents;
     ContextMenuType m_contextMenuType;
 
 protected slots:

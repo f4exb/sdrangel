@@ -145,7 +145,7 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
     m_topLayout->addWidget(m_sizeGripTopRight, 0, Qt::AlignTop | Qt::AlignRight);
 
     m_centerLayout = new QHBoxLayout();
-    m_contents = new QWidget();
+    m_contents = new QWidget(); // Do not delete! Done in child's destructor with "delete ui"
     m_centerLayout->addWidget(m_contents);
 
     m_bottomLayout = new QHBoxLayout();
@@ -175,7 +175,6 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
     connect(m_shrinkButton, SIGNAL(clicked()), this, SLOT(shrinkWindow()));
     connect(this, SIGNAL(forceShrink()), this, SLOT(shrinkWindow()));
     connect(m_closeButton, SIGNAL(clicked()), this, SLOT(close()));
-    connect(this, SIGNAL(forceClose()), this, SLOT(close()));
     connect(m_showSpectrumButton, SIGNAL(clicked()), this, SLOT(showSpectrumHandler()));
     connect(m_showAllChannelsButton, SIGNAL(clicked()), this, SLOT(showAllChannelsHandler()));
 
@@ -209,7 +208,6 @@ DeviceGUI::~DeviceGUI()
     delete m_reloadDeviceButton;
     delete m_changeDeviceButton;
     delete m_indexLabel;
-    delete m_contents;
     qDebug("DeviceGUI::~DeviceGUI: end");
 }
 

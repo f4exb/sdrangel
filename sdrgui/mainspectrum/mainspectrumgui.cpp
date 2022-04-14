@@ -135,7 +135,6 @@ MainSpectrumGUI::MainSpectrumGUI(GLSpectrum *spectrum, GLSpectrumGUI *spectrumGU
     connect(m_shrinkButton, SIGNAL(clicked()), this, SLOT(shrinkWindow()));
     connect(this, SIGNAL(forceShrink()), this, SLOT(shrinkWindow()));
     connect(m_hideButton, SIGNAL(clicked()), this, SLOT(hide()));
-    connect(this, SIGNAL(forceClose()), this, SLOT(close()));
 
     shrinkWindow();
 }

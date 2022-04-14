@@ -509,7 +509,7 @@ void MainWindow::sampleSourceCreate(
 
     // delete previous GUI if it exists
     if (deviceUISet->m_deviceGUI) {
-        emit deviceUISet->m_deviceGUI->forceClose();
+        emit deviceUISet->m_deviceGUI->destroy();
     }
 
     // constructs new GUI and input object
@@ -727,7 +727,7 @@ void MainWindow::sampleSinkCreate(
 
     // delete previous plugin GUI if it exists
     if (deviceUISet->m_deviceGUI) {
-        emit deviceUISet->m_deviceGUI->forceClose();
+        emit deviceUISet->m_deviceGUI->destroy();
     }
 
     // constructs new GUI and output object
@@ -919,7 +919,7 @@ void MainWindow::sampleMIMOCreate(
 
     // delete previous plugin GUI if it exists
     if (deviceUISet->m_deviceGUI) {
-        emit deviceUISet->m_deviceGUI->forceClose();
+        emit deviceUISet->m_deviceGUI->destroy();
     }
 
     // constructs new GUI and output object
