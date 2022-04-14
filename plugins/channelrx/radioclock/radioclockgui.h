@@ -31,7 +31,6 @@ class PluginAPI;
 class DeviceUISet;
 class BasebandSampleSink;
 class ScopeVis;
-class ScopeVisXY;
 class RadioClock;
 class RadioClockGUI;
 

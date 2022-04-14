@@ -37,7 +37,6 @@ class PluginAPI;
 class DeviceUISet;
 class BasebandSampleSink;
 class ScopeVis;
-class ScopeVisXY;
 class AISDemod;
 class AISDemodGUI;
 

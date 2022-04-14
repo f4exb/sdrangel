@@ -34,7 +34,6 @@ class PluginAPI;
 class DeviceUISet;
 class BasebandSampleSink;
 class ScopeVis;
-class ScopeVisXY;
 class RadiosondeDemod;
 class RadiosondeDemodGUI;
 class RS41Frame;

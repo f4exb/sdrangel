@@ -33,7 +33,6 @@ class DeviceUISet;
 class BasebandSampleSource;
 class SpectrumVis;
 class ScopeVis;
-class ScopeVisXY;
 
 namespace Ui {
     class IEEE_802_15_4_ModGUI;
