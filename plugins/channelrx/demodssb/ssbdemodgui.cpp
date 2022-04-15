@@ -703,6 +703,7 @@ void SSBDemodGUI::makeUIConnections()
     QObject::connect(ui->volume, &QDial::valueChanged, this, &SSBDemodGUI::on_volume_valueChanged);
     QObject::connect(ui->agc, &ButtonSwitch::toggled, this, &SSBDemodGUI::on_agc_toggled);
     QObject::connect(ui->agcClamping, &ButtonSwitch::toggled, this, &SSBDemodGUI::on_agcClamping_toggled);
+    QObject::connect(ui->agcTimeLog2, &QDial::valueChanged, this, &SSBDemodGUI::on_agcTimeLog2_valueChanged);
     QObject::connect(ui->agcPowerThreshold, &QDial::valueChanged, this, &SSBDemodGUI::on_agcPowerThreshold_valueChanged);
     QObject::connect(ui->agcThresholdGate, &QDial::valueChanged, this, &SSBDemodGUI::on_agcThresholdGate_valueChanged);
     QObject::connect(ui->audioMute, &QToolButton::toggled, this, &SSBDemodGUI::on_audioMute_toggled);
