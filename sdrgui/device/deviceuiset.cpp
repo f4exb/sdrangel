@@ -186,7 +186,11 @@ void DeviceUISet::loadDeviceSetSettings(
     Workspace *currentWorkspace
 )
 {
+    qDebug("DeviceUISet::loadDeviceSetSettings: preset: [%s, %s]",
+        qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
     m_spectrumGUI->deserialize(preset->getSpectrumConfig());
+    m_mainSpectrumGUI->restoreGeometry(preset->getSpectrumGeometry());
+    m_deviceGUI->restoreGeometry(preset->getDeviceGeometry());
     m_deviceAPI->loadSamplingDeviceSettings(preset);
 
     if (!preset->getShowSpectrum()) {
@@ -204,9 +208,12 @@ void DeviceUISet::loadDeviceSetSettings(
 
 void DeviceUISet::saveDeviceSetSettings(Preset* preset) const
 {
+    qDebug("DeviceUISet::saveDeviceSetSettings: preset: [%s, %s]",
+        qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
     preset->setSpectrumConfig(m_spectrumGUI->serialize());
     preset->setSpectrumWorkspaceIndex(m_mainSpectrumGUI->getWorkspaceIndex());
     preset->setSpectrumGeometry(m_mainSpectrumGUI->saveGeometry());
+    preset->setDeviceGeometry(m_deviceGUI->saveGeometry());
     preset->setShowSpectrum(m_spectrumGUI->isVisible());
     preset->setSelectedDevice(Preset::SelectedDevice{
         m_deviceAPI->getSamplingDeviceId(),
