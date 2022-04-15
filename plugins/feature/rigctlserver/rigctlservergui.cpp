@@ -134,7 +134,6 @@ RigCtlServerGUI::RigCtlServerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     m_rigCtlServer = reinterpret_cast<RigCtlServer*>(feature);
     m_rigCtlServer->setMessageQueueToGUI(&m_inputMessageQueue);
 
-	m_featureUISet->addRollupWidget(this);
     m_settings.setRollupState(&m_rollupState);
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));

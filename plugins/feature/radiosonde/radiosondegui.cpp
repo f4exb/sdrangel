@@ -137,8 +137,6 @@ RadiosondeGUI::RadiosondeGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, F
     m_radiosonde = reinterpret_cast<Radiosonde*>(feature);
     m_radiosonde->setMessageQueueToGUI(&m_inputMessageQueue);
 
-    m_featureUISet->addRollupWidget(this);
-
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 

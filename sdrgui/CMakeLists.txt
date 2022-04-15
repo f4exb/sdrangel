@@ -16,8 +16,6 @@ set(sdrgui_SOURCES
     gui/basicfeaturesettingsdialog.cpp
     gui/buttonswitch.cpp
     gui/channeladddialog.cpp
-    gui/channelsdock.cpp
-    gui/channelwindow.cpp
     gui/clickablelabel.cpp
     gui/colormapper.cpp
     gui/commanditem.cpp
@@ -39,9 +37,7 @@ set(sdrgui_SOURCES
     gui/fmpreemphasisdialog.cpp
     gui/featureadddialog.cpp
     gui/featurelayout.cpp
-    gui/featuresdock.cpp
     gui/featurepresetsdialog.cpp
-    gui/featurewindow.cpp
     gui/fftwisdomdialog.cpp
     gui/flowlayout.cpp
     gui/glscope.cpp
@@ -63,7 +59,6 @@ set(sdrgui_SOURCES
     gui/rollupcontents.cpp
     gui/rollupwidget.cpp
     gui/samplingdevicedialog.cpp
-    gui/samplingdevicesdock.cpp
     gui/scaleengine.cpp
     gui/scaledimage.cpp
     gui/sdrangelsplash.cpp
@@ -119,8 +114,6 @@ set(sdrgui_HEADERS
     gui/basicfeaturesettingsdialog.h
     gui/buttonswitch.h
     gui/channeladddialog.h
-    gui/channelsdock.h
-    gui/channelwindow.h
     gui/colormapper.h
     gui/commanditem.h
     gui/commandsdialog.h
@@ -142,9 +135,7 @@ set(sdrgui_HEADERS
     gui/fmpreemphasisdialog.h
     gui/featureadddialog.h
     gui/featurelayout.h
-    gui/featuresdock.h
     gui/featurepresetsdialog.h
-    gui/featurewindow.h
     gui/fftwisdomdialog.h
     gui/flowlayout.h
     gui/glscope.h
@@ -167,7 +158,6 @@ set(sdrgui_HEADERS
     gui/rollupcontents.h
     gui/rollupwidget.h
     gui/samplingdevicedialog.h
-    gui/samplingdevicesdock.h
     gui/scaleengine.h
     gui/scaledimage.h
     gui/sdrangelsplash.h
@@ -210,7 +200,7 @@ set(sdrgui_HEADERS
 )
 
 set(sdrgui_FORMS
-    mainwindow.ui
+    # mainwindow.ui
     gui/aboutdialog.ui
     gui/addpresetdialog.ui
     gui/ambedevicesdialog.ui

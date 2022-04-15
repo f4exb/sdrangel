@@ -169,8 +169,6 @@ DemodAnalyzerGUI::DemodAnalyzerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUI
 	ui->glScope->connectTimer(MainCore::instance()->getMasterTimer());
 	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
-	m_featureUISet->addRollupWidget(this);
-
     m_settings.setSpectrumGUI(ui->spectrumGUI);
     m_settings.setScopeGUI(ui->scopeGUI);
     m_settings.setRollupState(&m_rollupState);

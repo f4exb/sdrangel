@@ -145,8 +145,6 @@ AFCGUI::AFCGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     m_afc = reinterpret_cast<AFC*>(feature);
     m_afc->setMessageQueueToGUI(&m_inputMessageQueue);
 
-	m_featureUISet->addRollupWidget(this);
-
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 

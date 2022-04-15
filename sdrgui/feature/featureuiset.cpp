@@ -36,11 +36,6 @@ FeatureUISet::~FeatureUISet()
     freeFeatures();
 }
 
-void FeatureUISet::addRollupWidget(QWidget *) // TODO: remove
-{
-    // m_featureWindow->addRollupWidget(widget);
-}
-
 void FeatureUISet::registerFeatureInstance(FeatureGUI* featureGUI, Feature *feature)
 {
     m_featureInstanceRegistrations.append(FeatureInstanceRegistration(featureGUI, feature));

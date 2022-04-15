@@ -439,8 +439,6 @@ APRSGUI::APRSGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feat
     m_aprs = reinterpret_cast<APRS*>(feature);
     m_aprs->setMessageQueueToGUI(&m_inputMessageQueue);
 
-    m_featureUISet->addRollupWidget(this);
-
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 

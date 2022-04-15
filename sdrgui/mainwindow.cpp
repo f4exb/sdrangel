@@ -55,8 +55,6 @@
 #include "gui/pluginsdialog.h"
 #include "gui/aboutdialog.h"
 #include "gui/rollupwidget.h"
-#include "gui/channelwindow.h"
-#include "gui/featurewindow.h"
 #include "gui/audiodialog.h"
 #include "gui/loggingdialog.h"
 #include "gui/deviceuserargsdialog.h"

@@ -262,7 +262,6 @@ StarTrackerGUI::StarTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet,
     m_starTracker = reinterpret_cast<StarTracker*>(feature);
     m_starTracker->setMessageQueueToGUI(&m_inputMessageQueue);
 
-    m_featureUISet->addRollupWidget(this);
     m_settings.setRollupState(&m_rollupState);
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));

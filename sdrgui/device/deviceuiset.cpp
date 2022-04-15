@@ -24,7 +24,7 @@
 #include "dsp/dspdevicesinkengine.h"
 #include "gui/glspectrum.h"
 #include "gui/glspectrumgui.h"
-#include "gui/channelwindow.h"
+// #include "gui/channelwindow.h"
 #include "gui/workspace.h"
 #include "device/devicegui.h"
 #include "device/deviceset.h"
@@ -48,7 +48,7 @@ DeviceUISet::DeviceUISet(int deviceSetIndex, DeviceSet *deviceSet)
     m_spectrumGUI = new GLSpectrumGUI;
     m_spectrumGUI->setBuddies(m_spectrumVis, m_spectrum);
     m_mainSpectrumGUI = new MainSpectrumGUI(m_spectrum, m_spectrumGUI);
-    m_channelWindow = new ChannelWindow;
+    // m_channelWindow = new ChannelWindow;
     m_deviceAPI = nullptr;
     m_deviceGUI = nullptr;
     m_deviceSourceEngine = nullptr;
@@ -69,7 +69,7 @@ DeviceUISet::DeviceUISet(int deviceSetIndex, DeviceSet *deviceSet)
 
 DeviceUISet::~DeviceUISet()
 {
-    delete m_channelWindow;
+    // delete m_channelWindow;
     delete m_mainSpectrumGUI;
     // delete m_spectrumGUI; // done above
     // delete m_spectrum;
@@ -95,11 +95,6 @@ void DeviceUISet::setSpectrumScalingFactor(float scalef)
 void DeviceUISet::addChannelMarker(ChannelMarker* channelMarker)
 {
     m_spectrum->addChannelMarker(channelMarker);
-}
-
-void DeviceUISet::addRollupWidget(QWidget *widget)
-{
-    m_channelWindow->addRollupWidget(widget);
 }
 
 void DeviceUISet::registerRxChannelInstance(ChannelAPI *channelAPI, ChannelGUI* channelGUI)

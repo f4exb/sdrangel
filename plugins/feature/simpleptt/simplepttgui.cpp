@@ -158,7 +158,6 @@ SimplePTTGUI::SimplePTTGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Fea
     m_simplePTT = reinterpret_cast<SimplePTT*>(feature);
     m_simplePTT->setMessageQueueToGUI(&m_inputMessageQueue);
 
-	m_featureUISet->addRollupWidget(this);
     m_settings.setRollupState(&m_rollupState);
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));

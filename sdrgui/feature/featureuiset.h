@@ -40,7 +40,6 @@ public:
     FeatureUISet(int tabIndex, FeatureSet *featureSet);
     ~FeatureUISet();
 
-    void addRollupWidget(QWidget *widget); //!< Add feature rollup widget to feature window
     int getNumberOfFeatures() const { return m_featureInstanceRegistrations.size(); }
     void registerFeatureInstance(FeatureGUI* featureGUI, Feature *feature);
     void deleteFeature(int featureIndex);

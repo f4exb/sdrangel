@@ -28,7 +28,7 @@ class SpectrumVis;
 class GLSpectrum;
 class GLSpectrumGUI;
 class MainSpectrumGUI;
-class ChannelWindow;
+// class ChannelWindow;
 class DeviceAPI;
 class DeviceSet;
 class DSPDeviceSourceEngine;
@@ -56,7 +56,7 @@ public:
     GLSpectrum *m_spectrum;
     GLSpectrumGUI *m_spectrumGUI;
     MainSpectrumGUI *m_mainSpectrumGUI;
-    ChannelWindow *m_channelWindow;
+    // ChannelWindow *m_channelWindow;
     DeviceAPI *m_deviceAPI;
     DeviceGUI *m_deviceGUI;
     DSPDeviceSourceEngine *m_deviceSourceEngine;
@@ -76,7 +76,6 @@ public:
     GLSpectrum *getSpectrum() { return m_spectrum; }     //!< Direct spectrum getter
     void setSpectrumScalingFactor(float scalef);
     void addChannelMarker(ChannelMarker* channelMarker); //!< Add channel marker to spectrum
-    void addRollupWidget(QWidget *widget);               //!< Add rollup widget to channel window
 
     int getNumberOfChannels() const { return m_channelInstanceRegistrations.size(); }
     void freeChannels();

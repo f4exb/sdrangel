@@ -276,7 +276,6 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
     connect(&m_objChannelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
 
     m_deviceUISet->addChannelMarker(&m_objChannelMarker);
-    m_deviceUISet->addRollupWidget(this);
 
     // QPixmap pixmapTarget = QPixmap(":/film.png");
     // pixmapTarget = pixmapTarget.scaled(16, 16, Qt::KeepAspectRatio, Qt::SmoothTransformation);
