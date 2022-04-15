@@ -141,7 +141,7 @@ signals:
     void deviceChange(int newDeviceIndex);
     void showSpectrum(int deviceSetIndex);
     void showAllChannels(int deviceSetIndex);
-    void addChannelEmitted(int channelIndex);
+    void addChannelEmitted(int channelPluginIndex);
     void deviceSetPresetsDialogRequested(QPoint, DeviceGUI*);
 };
 

@@ -78,7 +78,7 @@ public:
     void setIndex(int index);
     int getIndex() const { return m_channelIndex; }
     void setDeviceSetIndex(int index);
-    int getDeviceSetIndex() const { return m_channelIndex; }
+    int getDeviceSetIndex() const { return m_deviceSetIndex; }
     void setStatusFrequency(qint64 frequency);
     void setStatusText(const QString& text);
 
@@ -113,6 +113,7 @@ private:
     QPushButton *m_shrinkButton;
     QPushButton *m_hideButton;
     QPushButton *m_closeButton;
+    QPushButton *m_duplicateButton;
     QLabel *m_statusFrequency;
     QLabel *m_statusLabel;
     QVBoxLayout *m_layouts;
@@ -130,11 +131,13 @@ private slots:
     void showHelp();
     void openMoveToWorkspaceDialog();
     void onWidgetRolled(QWidget *widget, bool show);
+    void duplicateChannel();
 
 signals:
     void closing();
     void moveToWorkspace(int workspaceIndex);
     void forceShrink();
+    void duplicateChannelEmitted();
 };
 
 #endif // SDRGUI_CHANNEL_CHANNELGUI_H_

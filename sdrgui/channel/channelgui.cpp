@@ -91,6 +91,12 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
     m_closeButton->setIcon(closeIcon);
     m_closeButton->setToolTip("Close channel");
 
+    m_duplicateButton = new QPushButton();
+    m_duplicateButton->setFixedSize(20, 20);
+    QIcon m_duplicateIcon(":/duplicate.png");
+    m_duplicateButton->setIcon(m_duplicateIcon);
+    m_duplicateButton->setToolTip("Duplicate channel");
+
     m_statusFrequency = new QLabel();
     // QFont font = m_statusFrequency->font();
     // font.setPointSize(8);
@@ -135,7 +141,8 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
 
     m_bottomLayout = new QHBoxLayout();
     m_bottomLayout->setContentsMargins(0, 0, 0, 0);
-    m_bottomLayout->addWidget(m_statusFrequency );
+    m_bottomLayout->addWidget(m_duplicateButton);
+    m_bottomLayout->addWidget(m_statusFrequency);
     m_bottomLayout->addWidget(m_statusLabel);
     m_sizeGripBottomRight = new QSizeGrip(this);
     m_sizeGripBottomRight->setStyleSheet("QSizeGrip { background-color: rgb(128, 128, 128); width: 10px; height: 10px; }");
@@ -157,6 +164,7 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
     connect(this, SIGNAL(forceShrink()), this, SLOT(shrinkWindow()));
     connect(m_hideButton, SIGNAL(clicked()), this, SLOT(hide()));
     connect(m_closeButton, SIGNAL(clicked()), this, SLOT(close()));
+    connect(m_duplicateButton, SIGNAL(clicked()), this, SLOT(duplicateChannel()));
 
     connect(
         m_rollupContents,
@@ -268,6 +276,12 @@ void ChannelGUI::onWidgetRolled(QWidget *widget, bool show)
         m_heightsMap[widget] = widget->height();
         resize(width(), 52 + 3 + m_rollupContents->height());
     }
+}
+
+void ChannelGUI::duplicateChannel()
+{
+    qDebug("ChannelGUI::duplicateChannel");
+    emit duplicateChannelEmitted();
 }
 
 void ChannelGUI::shrinkWindow()

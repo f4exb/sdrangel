@@ -316,7 +316,7 @@ void MainWindow::sampleSourceAdd(Workspace *deviceWorkspace, Workspace *spectrum
         m_deviceUIs.back()->m_deviceGUI,
         &DeviceGUI::addChannelEmitted,
         this,
-        [=](int channelIndex){ this->channelAddClicked(deviceWorkspace, deviceSetIndex, channelIndex); }
+        [=](int channelPluginIndex){ this->channelAddClicked(deviceWorkspace, deviceSetIndex, channelPluginIndex); }
     );
 
     deviceWorkspace->addToMdiArea(m_deviceUIs.back()->m_deviceGUI);
@@ -531,7 +531,7 @@ void MainWindow::sampleSinkAdd(Workspace *deviceWorkspace, Workspace *spectrumWo
         m_deviceUIs.back()->m_deviceGUI,
         &DeviceGUI::addChannelEmitted,
         this,
-        [=](int channelIndex){ this->channelAddClicked(deviceWorkspace, deviceSetIndex, channelIndex); }
+        [=](int channelPluginIndex){ this->channelAddClicked(deviceWorkspace, deviceSetIndex, channelPluginIndex); }
     );
 
     deviceWorkspace->addToMdiArea(m_deviceUIs.back()->m_deviceGUI);
@@ -754,7 +754,7 @@ void MainWindow::sampleMIMOAdd(Workspace *deviceWorkspace, Workspace *spectrumWo
         m_deviceUIs.back()->m_deviceGUI,
         &DeviceGUI::addChannelEmitted,
         this,
-        [=](int channelIndex){ this->channelAddClicked(deviceWorkspace, deviceSetIndex, channelIndex); }
+        [=](int channelPluginIndex){ this->channelAddClicked(deviceWorkspace, deviceSetIndex, channelPluginIndex); }
     );
 
     deviceWorkspace->addToMdiArea(m_deviceUIs.back()->m_deviceGUI);
@@ -2059,7 +2059,7 @@ void MainWindow::sampleSourceChange(int deviceSetIndex, int newDeviceIndex, Work
             deviceUISet->m_deviceGUI,
             &DeviceGUI::addChannelEmitted,
             this,
-            [=](int channelIndex){ this->channelAddClicked(workspace, deviceSetIndex, channelIndex); }
+            [=](int channelPluginIndex){ this->channelAddClicked(workspace, deviceSetIndex, channelPluginIndex); }
         );
     }
 }
@@ -2088,7 +2088,7 @@ void MainWindow::sampleSinkChange(int deviceSetIndex, int newDeviceIndex, Worksp
             deviceUISet->m_deviceGUI,
             &DeviceGUI::addChannelEmitted,
             this,
-            [=](int channelIndex){ this->channelAddClicked(workspace, deviceSetIndex, channelIndex); }
+            [=](int channelPluginIndex){ this->channelAddClicked(workspace, deviceSetIndex, channelPluginIndex); }
         );
     }
 }
@@ -2116,14 +2116,189 @@ void MainWindow::sampleMIMOChange(int deviceSetIndex, int newDeviceIndex, Worksp
             deviceUISet->m_deviceGUI,
             &DeviceGUI::addChannelEmitted,
             this,
-            [=](int channelIndex){ this->channelAddClicked(workspace, deviceSetIndex, channelIndex); }
+            [=](int channelPluginIndex){ this->channelAddClicked(workspace, deviceSetIndex, channelPluginIndex); }
         );
     }
 }
 
-void MainWindow::channelAddClicked(Workspace *workspace, int deviceSetIndex, int channelIndex)
+void MainWindow::channelDuplicate(ChannelGUI *sourceChannelGUI)
 {
-    if (deviceSetIndex >= 0)
+    int deviceSetIndex = sourceChannelGUI->getDeviceSetIndex();
+    int channelIndex = sourceChannelGUI->getIndex();
+
+    qDebug("MainWindow::channelDuplicate: %s at %d:%d in workspace %d",
+        qPrintable(sourceChannelGUI->getTitle()), deviceSetIndex, channelIndex, sourceChannelGUI->getWorkspaceIndex());
+
+    if (deviceSetIndex < (int) m_deviceUIs.size())
+    {
+        DeviceUISet *deviceUI = m_deviceUIs[deviceSetIndex];
+        ChannelAPI *sourceChannelAPI = deviceUI->getChannelAt(channelIndex);
+        DeviceAPI *deviceAPI = deviceUI->m_deviceAPI;
+        ChannelGUI *gui = nullptr;
+
+        if (deviceUI->m_deviceSourceEngine) // source device => Rx channels
+        {
+            PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getRxChannelRegistrations();
+            PluginInterface *pluginInterface = nullptr;
+
+            for (const auto& channelRegistration : *channelRegistrations)
+            {
+                if (channelRegistration.m_channelIdURI == sourceChannelAPI->getURI())
+                {
+                    pluginInterface = channelRegistration.m_plugin;
+                    break;
+                }
+            }
+
+            if (pluginInterface)
+            {
+                ChannelAPI *channelAPI;
+                BasebandSampleSink *rxChannel;
+                pluginInterface->createRxChannel(deviceUI->m_deviceAPI, &rxChannel, &channelAPI);
+                gui = pluginInterface->createRxChannelGUI(deviceUI, rxChannel);
+                deviceUI->registerRxChannelInstance(channelAPI, gui);
+                gui->setDeviceType(ChannelGUI::DeviceRx);
+                gui->setIndex(channelAPI->getIndexInDeviceSet());
+                QByteArray b = sourceChannelGUI->serialize();
+                gui->deserialize(b);
+            }
+        }
+        else if (deviceUI->m_deviceSinkEngine) // sink device => Tx channels
+        {
+            PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getTxChannelRegistrations(); // Available channel plugins
+            PluginInterface *pluginInterface = nullptr;
+
+            for (const auto& channelRegistration : *channelRegistrations)
+            {
+                if (channelRegistration.m_channelIdURI == sourceChannelAPI->getURI())
+                {
+                    pluginInterface = channelRegistration.m_plugin;
+                    break;
+                }
+            }
+
+            if (pluginInterface)
+            {
+                ChannelAPI *channelAPI;
+                BasebandSampleSource *txChannel;
+                pluginInterface->createTxChannel(deviceUI->m_deviceAPI, &txChannel, &channelAPI);
+                gui = pluginInterface->createTxChannelGUI(deviceUI, txChannel);
+                deviceUI->registerTxChannelInstance(channelAPI, gui);
+                gui->setDeviceType(ChannelGUI::DeviceTx);
+                gui->setIndex(channelAPI->getIndexInDeviceSet());
+                QByteArray b = sourceChannelGUI->serialize();
+                gui->deserialize(b);
+            }
+        }
+        else if (deviceUI->m_deviceMIMOEngine) // MIMO device => Any type of channel is possible
+        {
+            PluginAPI::ChannelRegistrations *rxChannelRegistrations = m_pluginManager->getRxChannelRegistrations();
+            PluginAPI::ChannelRegistrations *txChannelRegistrations = m_pluginManager->getTxChannelRegistrations();
+            PluginAPI::ChannelRegistrations *mimoChannelRegistrations = m_pluginManager->getMIMOChannelRegistrations();
+            PluginInterface *pluginInterface = nullptr;
+
+            for (const auto& channelRegistration : *rxChannelRegistrations)
+            {
+                if (channelRegistration.m_channelIdURI == sourceChannelAPI->getURI())
+                {
+                    pluginInterface = channelRegistration.m_plugin;
+                    break;
+                }
+            }
+
+            if (pluginInterface) // Rx channel
+            {
+                ChannelAPI *channelAPI;
+                BasebandSampleSink *rxChannel;
+                pluginInterface->createRxChannel(deviceUI->m_deviceAPI, &rxChannel, &channelAPI);
+                gui = pluginInterface->createRxChannelGUI(deviceUI, rxChannel);
+                deviceUI->registerRxChannelInstance(channelAPI, gui);
+                gui->setDeviceType(ChannelGUI::DeviceMIMO);
+                gui->setIndex(channelAPI->getIndexInDeviceSet());
+                QByteArray b = sourceChannelGUI->serialize();
+                gui->deserialize(b);
+            }
+            else
+            {
+                for (const auto& channelRegistration : *txChannelRegistrations)
+                {
+                    if (channelRegistration.m_channelIdURI == sourceChannelAPI->getURI())
+                    {
+                        pluginInterface = channelRegistration.m_plugin;
+                        break;
+                    }
+                }
+
+                if (pluginInterface) // Tx channel
+                {
+                    ChannelAPI *channelAPI;
+                    BasebandSampleSource *txChannel;
+                    pluginInterface->createTxChannel(deviceUI->m_deviceAPI, &txChannel, &channelAPI);
+                    gui = pluginInterface->createTxChannelGUI(deviceUI, txChannel);
+                    deviceUI->registerTxChannelInstance(channelAPI, gui);
+                    gui->setDeviceType(ChannelGUI::DeviceMIMO);
+                    gui->setIndex(channelAPI->getIndexInDeviceSet());
+                    QByteArray b = sourceChannelGUI->serialize();
+                    gui->deserialize(b);
+                }
+                else
+                {
+                    for (const auto& channelRegistration : *mimoChannelRegistrations)
+                    {
+                        if (channelRegistration.m_channelIdURI == sourceChannelAPI->getURI())
+                        {
+                            pluginInterface = channelRegistration.m_plugin;
+                            break;
+                        }
+                    }
+
+                    if (pluginInterface)
+                    {
+                        ChannelAPI *channelAPI;
+                        MIMOChannel *mimoChannel;
+                        pluginInterface->createMIMOChannel(deviceUI->m_deviceAPI, &mimoChannel, &channelAPI);
+                        gui = pluginInterface->createMIMOChannelGUI(deviceUI, mimoChannel);
+                        deviceUI->registerChannelInstance(channelAPI, gui);
+                        gui->setDeviceType(ChannelGUI::DeviceMIMO);
+                        gui->setIndex(channelAPI->getIndexInDeviceSet());
+                        QByteArray b = sourceChannelGUI->serialize();
+                        gui->deserialize(b);
+                    }
+                }
+            }
+        }
+
+        int workspaceIndex = sourceChannelGUI->getWorkspaceIndex();
+        Workspace *workspace = workspaceIndex < m_workspaces.size() ? m_workspaces[sourceChannelGUI->getWorkspaceIndex()] : nullptr;
+
+        if (gui && workspace)
+        {
+            QObject::connect(
+                gui,
+                &ChannelGUI::moveToWorkspace,
+                this,
+                [=](int wsIndexDest){ this->channelMove(gui, wsIndexDest); }
+            );
+            QObject::connect(
+                gui,
+                &ChannelGUI::duplicateChannelEmitted,
+                this,
+                [=](){ this->channelDuplicate(gui); }
+            );
+
+            gui->setDeviceSetIndex(deviceSetIndex);
+            gui->setToolTip(deviceAPI->getSamplingDeviceDisplayName());
+            gui->setWorkspaceIndex(workspace->getIndex());
+            qDebug("MainWindow::channelDuplicate: adding %s to workspace #%d",
+                qPrintable(gui->getTitle()), workspace->getIndex());
+            workspace->addToMdiArea((QMdiSubWindow*) gui);
+        }
+    }
+}
+
+void MainWindow::channelAddClicked(Workspace *workspace, int deviceSetIndex, int channelPluginIndex)
+{
+    if (deviceSetIndex < (int) m_deviceUIs.size())
     {
         DeviceUISet *deviceUI = m_deviceUIs[deviceSetIndex];
         ChannelGUI *gui = nullptr;
@@ -2132,7 +2307,7 @@ void MainWindow::channelAddClicked(Workspace *workspace, int deviceSetIndex, int
         if (deviceUI->m_deviceSourceEngine) // source device => Rx channels
         {
             PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getRxChannelRegistrations(); // Available channel plugins
-            PluginInterface *pluginInterface = (*channelRegistrations)[channelIndex].m_plugin;
+            PluginInterface *pluginInterface = (*channelRegistrations)[channelPluginIndex].m_plugin;
             ChannelAPI *channelAPI;
             BasebandSampleSink *rxChannel;
             pluginInterface->createRxChannel(deviceUI->m_deviceAPI, &rxChannel, &channelAPI);
@@ -2144,7 +2319,7 @@ void MainWindow::channelAddClicked(Workspace *workspace, int deviceSetIndex, int
         else if (deviceUI->m_deviceSinkEngine) // sink device => Tx channels
         {
             PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getTxChannelRegistrations(); // Available channel plugins
-            PluginInterface *pluginInterface = (*channelRegistrations)[channelIndex].m_plugin;
+            PluginInterface *pluginInterface = (*channelRegistrations)[channelPluginIndex].m_plugin;
             ChannelAPI *channelAPI;
             BasebandSampleSource *txChannel;
             pluginInterface->createTxChannel(deviceUI->m_deviceAPI, &txChannel, &channelAPI);
@@ -2159,12 +2334,12 @@ void MainWindow::channelAddClicked(Workspace *workspace, int deviceSetIndex, int
             int nbRxChannels = deviceUI->getNumberOfAvailableRxChannels();
             int nbTxChannels = deviceUI->getNumberOfAvailableTxChannels();
             qDebug("MainWindow::channelAddClicked: MIMO: dev %d : nbMIMO: %d nbRx: %d nbTx: %d selected: %d",
-                deviceSetIndex, nbMIMOChannels, nbRxChannels, nbTxChannels, channelIndex);
+                deviceSetIndex, nbMIMOChannels, nbRxChannels, nbTxChannels, channelPluginIndex);
 
-            if (channelIndex < nbMIMOChannels)
+            if (channelPluginIndex < nbMIMOChannels)
             {
                 PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getMIMOChannelRegistrations(); // Available channel plugins
-                PluginInterface *pluginInterface = (*channelRegistrations)[channelIndex].m_plugin;
+                PluginInterface *pluginInterface = (*channelRegistrations)[channelPluginIndex].m_plugin;
                 ChannelAPI *channelAPI;
                 MIMOChannel *mimoChannel;
                 pluginInterface->createMIMOChannel(deviceUI->m_deviceAPI, &mimoChannel, &channelAPI);
@@ -2172,10 +2347,10 @@ void MainWindow::channelAddClicked(Workspace *workspace, int deviceSetIndex, int
                 deviceUI->registerChannelInstance(channelAPI, gui);
                 gui->setIndex(channelAPI->getIndexInDeviceSet());
             }
-            else if (channelIndex < nbMIMOChannels + nbRxChannels) // Rx
+            else if (channelPluginIndex < nbMIMOChannels + nbRxChannels) // Rx
             {
                 PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getRxChannelRegistrations(); // Available channel plugins
-                PluginInterface *pluginInterface = (*channelRegistrations)[channelIndex - nbMIMOChannels].m_plugin;
+                PluginInterface *pluginInterface = (*channelRegistrations)[channelPluginIndex - nbMIMOChannels].m_plugin;
                 ChannelAPI *channelAPI;
                 BasebandSampleSink *rxChannel;
                 pluginInterface->createRxChannel(deviceUI->m_deviceAPI, &rxChannel, &channelAPI);
@@ -2183,10 +2358,10 @@ void MainWindow::channelAddClicked(Workspace *workspace, int deviceSetIndex, int
                 deviceUI->registerRxChannelInstance(channelAPI, gui);
                 gui->setIndex(channelAPI->getIndexInDeviceSet());
             }
-            else if (channelIndex < nbMIMOChannels + nbRxChannels + nbTxChannels)
+            else if (channelPluginIndex < nbMIMOChannels + nbRxChannels + nbTxChannels)
             {
                 PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getTxChannelRegistrations(); // Available channel plugins
-                PluginInterface *pluginInterface = (*channelRegistrations)[channelIndex - nbMIMOChannels - nbRxChannels].m_plugin;
+                PluginInterface *pluginInterface = (*channelRegistrations)[channelPluginIndex - nbMIMOChannels - nbRxChannels].m_plugin;
                 ChannelAPI *channelAPI;
                 BasebandSampleSource *txChannel;
                 pluginInterface->createTxChannel(deviceUI->m_deviceAPI, &txChannel, &channelAPI);
@@ -2205,6 +2380,12 @@ void MainWindow::channelAddClicked(Workspace *workspace, int deviceSetIndex, int
                 &ChannelGUI::moveToWorkspace,
                 this,
                 [=](int wsIndexDest){ this->channelMove(gui, wsIndexDest); }
+            );
+            QObject::connect(
+                gui,
+                &ChannelGUI::duplicateChannelEmitted,
+                this,
+                [=](){ this->channelDuplicate(gui); }
             );
 
             gui->setDeviceSetIndex(deviceSetIndex);

@@ -82,6 +82,7 @@ public:
 
 public slots:
     void channelMove(ChannelGUI *gui, int wsIndexDestnation);
+    void channelDuplicate(ChannelGUI *gui);
 
 private:
     enum {
@@ -198,7 +199,7 @@ private slots:
 	void sampleSinkAdd(Workspace *workspace, Workspace *spectrumWorkspace, int deviceIndex);
 	void sampleMIMOAdd(Workspace *workspace, Workspace *spectrumWorkspace, int deviceIndex);
     void samplingDeviceChangeHandler(DeviceGUI *deviceGUI, int newDeviceIndex);
-    void channelAddClicked(Workspace *workspace, int deviceSetIndex, int channelIndex);
+    void channelAddClicked(Workspace *workspace, int deviceSetIndex, int channelPluginIndex);
     void featureAddClicked(Workspace *workspace, int featureIndex);
     void featureMove(FeatureGUI *gui, int wsIndexDestnation);
     void openFeaturePresetsDialog(QPoint p, Workspace *workspace);

@@ -48,7 +48,7 @@ private slots:
     void apply(QAbstractButton*);
 
 signals:
-    void addChannel(int);
+    void addChannel(int channelPluginIndex);
 };
 
 #endif /* SDRGUI_GUI_CHANNELADDDIALOG_H_ */

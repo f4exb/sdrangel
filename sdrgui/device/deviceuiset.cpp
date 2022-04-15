@@ -330,6 +330,12 @@ void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginA
                     this,
                     [=](int wsIndexDest){ MainWindow::getInstance()->channelMove(rxChannelGUI, wsIndexDest); }
                 );
+                QObject::connect(
+                    rxChannelGUI,
+                    &ChannelGUI::duplicateChannelEmitted,
+                    this,
+                    [=](){ MainWindow::getInstance()->channelDuplicate(rxChannelGUI); }
+                );
             }
         }
     }
@@ -443,6 +449,12 @@ void DeviceUISet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginA
                     &ChannelGUI::moveToWorkspace,
                     this,
                     [=](int wsIndexDest){ MainWindow::getInstance()->channelMove(txChannelGUI, wsIndexDest); }
+                );
+                QObject::connect(
+                    txChannelGUI,
+                    &ChannelGUI::duplicateChannelEmitted,
+                    this,
+                    [=](){ MainWindow::getInstance()->channelDuplicate(txChannelGUI); }
                 );
             }
         }
@@ -559,6 +571,12 @@ void DeviceUISet::loadMIMOChannelSettings(const Preset *preset, PluginAPI *plugi
                     &ChannelGUI::moveToWorkspace,
                     this,
                     [=](int wsIndexDest){ MainWindow::getInstance()->channelMove(mimoChannelGUI, wsIndexDest); }
+                );
+                QObject::connect(
+                    mimoChannelGUI,
+                    &ChannelGUI::duplicateChannelEmitted,
+                    this,
+                    [=](){ MainWindow::getInstance()->channelDuplicate(mimoChannelGUI); }
                 );
             }
         }
