@@ -138,7 +138,6 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     splash->showStatusMessage("starting...", Qt::white);
     splash->showStatusMessage("starting...", Qt::white);
 
-	// ui->setupUi(this);
     setWindowIcon(QIcon(":/sdrangel_icon.png"));
     createMenuBar();
 	createStatusBar();
@@ -149,52 +148,6 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
 	setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
 	setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
-
-	// work around broken Qt dock widget ordering
-    // removeDockWidget(ui->inputViewDock);
-	// removeDockWidget(ui->spectraControlDock);
-	// removeDockWidget(ui->presetDock);
-    // removeDockWidget(ui->commandsDock);
-	// removeDockWidget(ui->channelDock);
-    // removeDockWidget(ui->featureDock);
-    // addDockWidget(Qt::LeftDockWidgetArea, ui->inputViewDock);
-	// addDockWidget(Qt::LeftDockWidgetArea, ui->spectraControlDock);
-	// addDockWidget(Qt::LeftDockWidgetArea, ui->presetDock);
-    // addDockWidget(Qt::LeftDockWidgetArea, ui->commandsDock);
-    // tabifyDockWidget(ui->presetDock, ui->commandsDock);
-	// addDockWidget(Qt::RightDockWidgetArea, ui->channelDock);
-	// addDockWidget(Qt::RightDockWidgetArea, ui->featureDock);
-
-	// ui->inputViewDock->show();
-	// ui->spectraControlDock->show();
-	// ui->presetDock->show();
-	// ui->commandsDock->show();
-	// ui->channelDock->show();
-    // ui->featureDock->show();
-
-    // m_spectrumToggleViewAction = new QAction(tr("Spectrum display"));
-    // m_spectrumToggleViewAction->setCheckable(true);
-    // m_spectrumToggleViewAction->setChecked(true);
-    // connect(m_spectrumToggleViewAction, SIGNAL(toggled(bool)), this, SLOT(toggleSpectrumView(bool)));
-
-    // ui->menu_Window->addAction(ui->inputViewDock->toggleViewAction());
-	// ui->menu_Window->addAction(ui->spectraControlDock->toggleViewAction());
-    // ui->menu_Window->addAction(m_spectrumToggleViewAction);
-	// ui->menu_Window->addAction(ui->presetDock->toggleViewAction());
-    // ui->menu_Window->addAction(ui->commandsDock->toggleViewAction());
-	// ui->menu_Window->addAction(ui->channelDock->toggleViewAction());
-    // ui->menu_Window->addAction(ui->featureDock->toggleViewAction());
-
-    // ui->spectraControlDock->setStyleSheet("QAbstractButton#qt_dockwidget_closebutton{qproperty-toolTip: \"Close\";}");
-    // ui->spectraControlDock->setStyleSheet("QAbstractButton#qt_dockwidget_floatbutton{qproperty-toolTip: \"Dock/undock\";}");
-    // ui->presetDock->setStyleSheet("QAbstractButton#qt_dockwidget_closebutton{qproperty-toolTip: \"Close\";}");
-    // ui->presetDock->setStyleSheet("QAbstractButton#qt_dockwidget_floatbutton{qproperty-toolTip: \"Dock/undock\";}");
-
-    // ui->tabInputsView->setStyleSheet("QWidget { background: rgb(50,50,50); } "
-    //         "QToolButton::checked { background: rgb(128,70,0); } "
-    //         "QComboBox::item:selected { color: rgb(255,140,0); } "
-    //         "QTabWidget::pane { border: 1px solid #C06900; } "
-    //         "QTabBar::tab:selected { background: rgb(128,70,0); }");
 
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()), Qt::QueuedConnection);
 
@@ -238,38 +191,13 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     m_pluginManager->loadPluginsNonDiscoverable(m_mainCore->m_settings.getDeviceUserArgs());
 
     splash->showStatusMessage("Add unique feature set...", Qt::white);
-    // QStringList featureNames;
-    // m_pluginManager->listFeatures(featureNames);
-    // ui->featureDock->addAvailableFeatures(featureNames);
-    addFeatureSet();
-    // ui->featureDock->setFeatureUISet(m_featureUIs[0]);
-    // ui->featureDock->setPresets(m_mainCore->m_settings.getFeatureSetPresets());
-    // ui->featureDock->setPluginAPI(m_pluginManager->getPluginAPI());
-
-    // splash->showStatusMessage("load last device or file input...", Qt::white);
-    // qDebug() << "MainWindow::MainWindow: select SampleSource from settings or default (file input)...";
-    // qDebug() << "MainWindow::MainWindow: look for"
-    //     << m_mainCore->m_settings.getSourceDevice()
-    //     << "at index" << m_mainCore->m_settings.getSourceIndex()
-    //     << "and item index" << m_mainCore->m_settings.getSourceItemIndex();
-
-	// int deviceIndex = DeviceEnumerator::instance()->getRxSamplingDeviceIndex(
-    //     m_mainCore->m_settings.getSourceDevice(),
-    //     m_mainCore->m_settings.getSourceIndex(),
-    //     m_mainCore->m_settings.getSourceItemIndex());
-	// sampleSourceAdd(deviceIndex);  // add the first device set with file input device as default if device in settings is not enumerated
-	// m_deviceUIs.back()->m_deviceAPI->setBuddyLeader(true); // the first device is always the leader
-    tabChannelsIndexChanged(); // force channel selection list update
-
+    addFeatureSet(); // Create the uniuefeature set
 	m_apiAdapter = new WebAPIAdapter();
 
     if (!parser.getScratch())
     {
         splash->showStatusMessage("load current configuration...", Qt::white);
         qDebug() << "MainWindow::MainWindow: load current configuration...";
-
-        // loadDeviceSetPresetSettings(m_mainCore->m_settings.getWorkingPreset(), 0);
-        // loadFeatureSetPresetSettings(m_mainCore->m_settings.getWorkingFeatureSetPreset(), 0);
         loadConfiguration(m_mainCore->m_settings.getWorkingConfiguration());
     }
     else
@@ -277,18 +205,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
         qDebug() << "MainWindow::MainWindow: scratch mode: do not load current configuration";
     }
 
-    // splash->showStatusMessage("update preset controls...", Qt::white);
-	// qDebug() << "MainWindow::MainWindow: update preset controls...";
-
-	// updatePresetControls();
-
     splash->showStatusMessage("finishing...", Qt::white);
-	// connect(ui->tabInputsView, SIGNAL(currentChanged(int)), this, SLOT(tabInputViewIndexChanged()));
-    // connect(ui->tabChannels, SIGNAL(currentChanged(int)), this, SLOT(tabChannelsIndexChanged()));
-    // connect(ui->channelDock, SIGNAL(addChannel(int)), this, SLOT(channelAddClicked(int)));
-    // connect(ui->inputViewDock, SIGNAL(deviceChanged(int, int, int)), this, SLOT(samplingDeviceChanged(int, int, int)));
-    // connect(ui->tabFeatures, SIGNAL(currentChanged(int)), this, SLOT(tabFeaturesIndexChanged()));
-    // connect(ui->featureDock, SIGNAL(addFeature(int)), this, SLOT(featureAddClicked(int)));
 
 	QString applicationDirPath = qApp->applicationDirPath();
 
@@ -300,7 +217,6 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     }
 #endif
 
-    // ui->featureDock->setWebAPIAdapter(m_apiAdapter);
 	m_requestMapper = new WebAPIRequestMapper(this);
 	m_requestMapper->setAdapter(m_apiAdapter);
 	m_apiHost = parser.getServerAddress();
@@ -313,17 +229,6 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	this->installEventFilter(m_commandKeyReceiver);
 
     m_dspEngine->setMIMOSupport(true);
-
-    // if (!parser.getMIMOSupport()) {
-    //     ui->menu_Devices->removeAction(ui->action_sampleMIMOAdd);
-    // }
-
-#ifdef __APPLE__
-    ui->menuPreferences->removeAction(ui->action_AMBE);
-#endif
-#if not defined(HAS_LIMERFEUSB)
-    ui->menuPreferences->removeAction(ui->action_LimeRFE);
-#endif
 
     delete splash;
 
@@ -349,12 +254,7 @@ MainWindow::~MainWindow()
 	delete m_dateTimeWidget;
 	delete m_showSystemWidget;
 
-    // disconnect(ui->tabFeatures, SIGNAL(currentChanged(int)), this, SLOT(tabFeaturesIndexChanged()));
-
     removeAllFeatureSets();
-
-	// delete ui;
-    // delete m_spectrumToggleViewAction;
 
 	delete m_commandKeyReceiver;
 
@@ -529,7 +429,7 @@ void MainWindow::sampleSourceCreate(
         deviceGUI,
         &DeviceGUI::deviceChange,
         this,
-        [=](int newDeviceIndex){ this->sampleDeviceChangeHandler(deviceGUI, newDeviceIndex); }
+        [=](int newDeviceIndex){ this->samplingDeviceChangeHandler(deviceGUI, newDeviceIndex); }
     );
     QObject::connect(
         deviceGUI,
@@ -744,7 +644,7 @@ void MainWindow::sampleSinkCreate(
         deviceGUI,
         &DeviceGUI::deviceChange,
         this,
-        [=](int newDeviceIndex){ this->sampleDeviceChangeHandler(deviceGUI, newDeviceIndex); }
+        [=](int newDeviceIndex){ this->samplingDeviceChangeHandler(deviceGUI, newDeviceIndex); }
     );
     QObject::connect(
         deviceGUI,
@@ -933,7 +833,7 @@ void MainWindow::sampleMIMOCreate(
         deviceGUI,
         &DeviceGUI::deviceChange,
         this,
-        [=](int newDeviceIndex){ this->sampleDeviceChangeHandler(deviceGUI, newDeviceIndex); }
+        [=](int newDeviceIndex){ this->samplingDeviceChangeHandler(deviceGUI, newDeviceIndex); }
     );
     QObject::connect(
         deviceGUI,
@@ -1076,7 +976,7 @@ void MainWindow::removeDeviceSet(int deviceSetIndex)
     emit m_mainCore->deviceSetRemoved(deviceSetIndex);
 }
 
-void MainWindow::removeLastDevice()
+void MainWindow::removeLastDeviceSet()
 {
     int removedDeviceSetIndex = m_deviceUIs.size() - 1;
 
@@ -1200,25 +1100,7 @@ void MainWindow::loadSettings()
 
     m_mainCore->m_settings.load();
     m_mainCore->m_settings.sortPresets();
-    // int middleIndex = m_mainCore->m_settings.getPresetCount() / 2;
-    // QTreeWidgetItem *treeItem;
-
-    // for (int i = 0; i < m_mainCore->m_settings.getPresetCount(); ++i)
-    // {
-    //     treeItem = addPresetToTree(m_mainCore->m_settings.getPreset(i));
-
-    //     if (i == middleIndex) {
-    //         ui->presetTree->setCurrentItem(treeItem);
-    //     }
-    // }
-
     m_mainCore->m_settings.sortCommands();
-
-    // for (int i = 0; i < m_mainCore->m_settings.getCommandCount(); ++i)
-    // {
-    //     treeItem = addCommandToTree(m_mainCore->m_settings.getCommand(i));
-    // }
-
     m_mainCore->setLoggingOptions();
 }
 
@@ -1240,9 +1122,6 @@ void MainWindow::loadDeviceSetPresetSettings(const Preset* preset, int deviceSet
     // if (!preset->getLayout().isEmpty()) {
 	//     restoreState(preset->getLayout());
     // }
-
-    // tabifyDockWidget(ui->presetDock, ui->commandsDock); // override this setting
-    // ui->presetDock->raise();
 }
 
 void MainWindow::saveDeviceSetPresetSettings(Preset* preset, int deviceSetIndex)
@@ -1316,7 +1195,7 @@ void MainWindow::loadConfiguration(const Configuration *configuration, bool from
 
     // Device sets
     while (m_deviceUIs.size() > 0) {
-        removeLastDevice();
+        removeLastDeviceSet();
     }
     // Features
     m_featureUIs[0]->freeFeatures();
@@ -1554,12 +1433,16 @@ void MainWindow::createMenuBar()
     QAction *fftAction = preferencesMenu->addAction("FFT");
     fftAction->setToolTip("Set FFT cache");
     QObject::connect(fftAction, &QAction::triggered, this, &MainWindow::on_action_FFT_triggered);
+#ifndef __APPLE__
     QAction *ambeAction = preferencesMenu->addAction("AMBE");
     ambeAction->setToolTip("AMBE options");
     QObject::connect(ambeAction, &QAction::triggered, this, &MainWindow::on_action_AMBE_triggered);
+#endif
+#if defined(HAS_LIMERFEUSB)
     QAction *limeRFEAction = preferencesMenu->addAction("Lime RFE");
     limeRFEAction->setToolTip("Lime RFE options");
     QObject::connect(limeRFEAction, &QAction::triggered, this, &MainWindow::on_action_LimeRFE_triggered);
+#endif
     QMenu *devicesMenu = preferencesMenu->addMenu("Devices");
     QAction *userArgumentsAction = devicesMenu->addAction("User arguments");
     userArgumentsAction->setToolTip("Device custom user arguments");
@@ -1612,38 +1495,18 @@ void MainWindow::closeEvent(QCloseEvent *closeEvent)
     s.setValue("mainWindowGeometry", qCompress(saveGeometry()).toBase64());
     s.setValue("mainWindowState", qCompress(saveState()).toBase64());
 
-    // saveDeviceSetPresetSettings(m_mainCore->m_settings.getWorkingPreset(), 0);
-    // saveFeatureSetPresetSettings(m_mainCore->m_settings.getWorkingFeatureSetPreset(), 0);
     saveConfiguration(m_mainCore->m_settings.getWorkingConfiguration());
     m_mainCore->m_settings.save();
 
     while (m_deviceUIs.size() > 0) {
-        removeLastDevice();
+        removeLastDeviceSet();
     }
 
     closeEvent->accept();
 }
 
-void MainWindow::updatePresetControls()
-{
-	// ui->presetTree->resizeColumnToContents(0);
-
-	// if(ui->presetTree->currentItem() != 0)
-	// {
-	// 	ui->presetDelete->setEnabled(true);
-	// 	ui->presetLoad->setEnabled(true);
-	// }
-	// else
-	// {
-	// 	ui->presetDelete->setEnabled(false);
-	// 	ui->presetLoad->setEnabled(false);
-	// }
-}
-
 void MainWindow::applySettings()
 {
- 	// loadDeviceSetPresetSettings(m_mainCore->m_settings.getWorkingPreset(), 0);
-    // loadFeatureSetPresetSettings(m_mainCore->m_settings.getWorkingFeatureSetPreset(), 0);
     loadConfiguration(m_mainCore->m_settings.getWorkingConfiguration());
 
     m_mainCore->m_settings.sortPresets();
@@ -1717,29 +1580,6 @@ bool MainWindow::handleMessage(const Message& cmd)
     {
         MainCore::MsgDeletePreset& notif = (MainCore::MsgDeletePreset&) cmd;
         const Preset *presetToDelete = notif.getPreset();
-
-        // remove preset from tree
-        // for (int ig = 0; ig < ui->presetTree->topLevelItemCount(); ig++)
-        // {
-        //     QTreeWidgetItem *groupItem = ui->presetTree->topLevelItem(ig);
-        //     if (groupItem->text(0) == presetToDelete->getGroup())
-        //     {
-        //         for (int ip = 0; ip < groupItem->childCount(); ip++)
-        //         {
-        //             QTreeWidgetItem *presetItem = groupItem->child(ip);
-        //             const Preset* preset = qvariant_cast<const Preset*>(presetItem->data(0, Qt::UserRole));
-
-        //             if ((preset->getGroup() == presetToDelete->getGroup()) &&
-        //                 (preset->getCenterFrequency() == presetToDelete->getCenterFrequency()) &&
-        //                 (preset->getDescription() == presetToDelete->getDescription()) &&
-        //                 (preset->getPresetType() == presetToDelete->getPresetType()))
-        //             {
-        //                 groupItem->takeChild(ip);
-        //             }
-        //         }
-        //     }
-        // }
-
         // remove preset from settings
         m_mainCore->m_settings.deletePreset(presetToDelete);
         return true;
@@ -1773,7 +1613,7 @@ bool MainWindow::handleMessage(const Message& cmd)
     else if (MainCore::MsgRemoveLastDeviceSet::match(cmd))
     {
         if (m_deviceUIs.size() > 1) {
-            removeLastDevice();
+            removeLastDeviceSet();
         }
 
         return true;
@@ -2019,317 +1859,11 @@ void MainWindow::commandKeysDisconnect(QObject *object, const char *slot)
     );
 }
 
-void MainWindow::on_presetSave_clicked()
-{
-    // QStringList groups;
-    // QString group;
-    // QString description = "";
-
-    // for(int i = 0; i < ui->presetTree->topLevelItemCount(); i++) {
-    //     groups.append(ui->presetTree->topLevelItem(i)->text(0));
-    // }
-
-    // QTreeWidgetItem* item = ui->presetTree->currentItem();
-
-    // if(item != 0)
-    // {
-    //     if(item->type() == PGroup) {
-    //         group = item->text(0);
-    //     } else if(item->type() == PItem) {
-    //         group = item->parent()->text(0);
-    //         description = item->text(0);
-    //     }
-    // }
-
-    // AddPresetDialog dlg(groups, group, this);
-
-    // if (description.length() > 0) {
-    //     dlg.setDescription(description);
-    // }
-
-    // if(dlg.exec() == QDialog::Accepted) {
-    //     Preset* preset = m_mainCore->m_settings.newPreset(dlg.group(), dlg.description());
-    //     saveDeviceSetPresetSettings(preset, ui->tabInputsView->currentIndex());
-
-    //     ui->presetTree->setCurrentItem(addPresetToTree(preset));
-    // }
-
-    // m_mainCore->m_settings.sortPresets();
-}
-
-void MainWindow::on_presetUpdate_clicked()
-{
-	// QTreeWidgetItem* item = ui->presetTree->currentItem();
-	// const Preset* changedPreset = 0;
-
-	// if(item != 0)
-	// {
-	// 	if(item->type() == PItem)
-	// 	{
-	// 		const Preset* preset = qvariant_cast<const Preset*>(item->data(0, Qt::UserRole));
-
-	// 		if (preset != 0)
-	// 		{
-	// 			Preset* preset_mod = const_cast<Preset*>(preset);
-	// 			saveDeviceSetPresetSettings(preset_mod, ui->tabInputsView->currentIndex());
-	// 			changedPreset = preset;
-	// 		}
-	// 	}
-	// }
-
-	// m_mainCore->m_settings.sortPresets();
-    // ui->presetTree->clear();
-
-    // for (int i = 0; i < m_mainCore->m_settings.getPresetCount(); ++i)
-    // {
-    //     QTreeWidgetItem *item_x = addPresetToTree(m_mainCore->m_settings.getPreset(i));
-    //     const Preset* preset_x = qvariant_cast<const Preset*>(item_x->data(0, Qt::UserRole));
-    //     if (changedPreset &&  (preset_x == changedPreset)) { // set cursor on changed preset
-    //         ui->presetTree->setCurrentItem(item_x);
-    //     }
-    // }
-}
-
-void MainWindow::on_presetEdit_clicked()
-{
-    // QTreeWidgetItem* item = ui->presetTree->currentItem();
-    // QStringList groups;
-    // bool change = false;
-    // const Preset *changedPreset = 0;
-    // QString newGroupName;
-
-    // for(int i = 0; i < ui->presetTree->topLevelItemCount(); i++) {
-    //     groups.append(ui->presetTree->topLevelItem(i)->text(0));
-    // }
-
-    // if(item != 0)
-    // {
-    //     if (item->type() == PItem)
-    //     {
-    //         const Preset* preset = qvariant_cast<const Preset*>(item->data(0, Qt::UserRole));
-    //         AddPresetDialog dlg(groups, preset->getGroup(), this);
-    //         dlg.setDescription(preset->getDescription());
-
-    //         if (dlg.exec() == QDialog::Accepted)
-    //         {
-    //             Preset* preset_mod = const_cast<Preset*>(preset);
-    //             preset_mod->setGroup(dlg.group());
-    //             preset_mod->setDescription(dlg.description());
-    //             change = true;
-    //             changedPreset = preset;
-    //         }
-    //     }
-    //     else if (item->type() == PGroup)
-    //     {
-    //         AddPresetDialog dlg(groups, item->text(0), this);
-    //         dlg.showGroupOnly();
-    //         dlg.setDialogTitle("Edit preset group");
-
-    //         if (dlg.exec() == QDialog::Accepted)
-    //         {
-    //             m_mainCore->m_settings.renamePresetGroup(item->text(0), dlg.group());
-    //             newGroupName = dlg.group();
-    //             change = true;
-    //         }
-    //     }
-    // }
-
-    // if (change)
-    // {
-    //     m_mainCore->m_settings.sortPresets();
-    //     ui->presetTree->clear();
-
-    //     for (int i = 0; i < m_mainCore->m_settings.getPresetCount(); ++i)
-    //     {
-    //         QTreeWidgetItem *item_x = addPresetToTree(m_mainCore->m_settings.getPreset(i));
-    //         const Preset* preset_x = qvariant_cast<const Preset*>(item_x->data(0, Qt::UserRole));
-    //         if (changedPreset &&  (preset_x == changedPreset)) { // set cursor on changed preset
-    //             ui->presetTree->setCurrentItem(item_x);
-    //         }
-    //     }
-
-    //     if (!changedPreset) // on group name change set cursor on the group that has been changed
-    //     {
-    //         for(int i = 0; i < ui->presetTree->topLevelItemCount(); i++)
-    //         {
-    //             QTreeWidgetItem* item = ui->presetTree->topLevelItem(i);
-
-    //             if (item->text(0) == newGroupName) {
-    //                 ui->presetTree->setCurrentItem(item);
-    //             }
-    //         }
-    //     }
-    // }
-}
-
-void MainWindow::on_presetExport_clicked()
-{
-	// QTreeWidgetItem* item = ui->presetTree->currentItem();
-
-	// if(item != 0) {
-	// 	if(item->type() == PItem)
-	// 	{
-	// 		const Preset* preset = qvariant_cast<const Preset*>(item->data(0, Qt::UserRole));
-	// 		QString base64Str = preset->serialize().toBase64();
-	// 		QString fileName = QFileDialog::getSaveFileName(this,
-	// 		    tr("Open preset export file"), ".", tr("Preset export files (*.prex)"), 0, QFileDialog::DontUseNativeDialog);
-
-	// 		if (fileName != "")
-	// 		{
-	// 			QFileInfo fileInfo(fileName);
-
-	// 			if (fileInfo.suffix() != "prex") {
-	// 				fileName += ".prex";
-	// 			}
-
-	// 			QFile exportFile(fileName);
-
-	// 			if (exportFile.open(QIODevice::WriteOnly | QIODevice::Text))
-	// 			{
-	// 				QTextStream outstream(&exportFile);
-	// 				outstream << base64Str;
-	// 				exportFile.close();
-	// 			}
-	// 			else
-	// 			{
-	// 		    	QMessageBox::information(this, tr("Message"), tr("Cannot open file for writing"));
-	// 			}
-	// 		}
-	// 	}
-	// }
-}
-
-void MainWindow::on_presetImport_clicked()
-{
-	// QTreeWidgetItem* item = ui->presetTree->currentItem();
-
-	// if(item != 0)
-	// {
-	// 	QString group;
-
-	// 	if (item->type() == PGroup)	{
-	// 		group = item->text(0);
-	// 	} else if (item->type() == PItem) {
-	// 		group = item->parent()->text(0);
-	// 	} else {
-	// 		return;
-	// 	}
-
-	// 	QString fileName = QFileDialog::getOpenFileName(this,
-	// 	    tr("Open preset export file"), ".", tr("Preset export files (*.prex)"), 0, QFileDialog::DontUseNativeDialog);
-
-	// 	if (fileName != "")
-	// 	{
-	// 		QFile exportFile(fileName);
-
-	// 		if (exportFile.open(QIODevice::ReadOnly | QIODevice::Text))
-	// 		{
-	// 			QByteArray base64Str;
-	// 			QTextStream instream(&exportFile);
-	// 			instream >> base64Str;
-	// 			exportFile.close();
-
-	// 			Preset* preset = m_mainCore->m_settings.newPreset("", "");
-	// 			preset->deserialize(QByteArray::fromBase64(base64Str));
-	// 			preset->setGroup(group); // override with current group
-
-	// 			ui->presetTree->setCurrentItem(addPresetToTree(preset));
-	// 		}
-	// 		else
-	// 		{
-	// 			QMessageBox::information(this, tr("Message"), tr("Cannot open file for reading"));
-	// 		}
-	// 	}
-	// }
-}
-
 void MainWindow::on_action_saveAll_triggered()
 {
-    // saveDeviceSetPresetSettings(m_mainCore->m_settings.getWorkingPreset(), ui->tabInputsView->currentIndex());
-    // saveFeatureSetPresetSettings(m_mainCore->m_settings.getWorkingFeatureSetPreset(), ui->tabFeatures->currentIndex());
     saveConfiguration(m_mainCore->m_settings.getWorkingConfiguration());
     m_mainCore->m_settings.save();
     QMessageBox::information(this, tr("Done"), tr("All curent settings saved"));
-}
-
-void MainWindow::on_presetLoad_clicked()
-{
-	// qDebug() << "MainWindow::on_presetLoad_clicked";
-
-	// QTreeWidgetItem* item = ui->presetTree->currentItem();
-
-	// if(item == 0)
-	// {
-	// 	qDebug("MainWindow::on_presetLoad_clicked: item null");
-	// 	updatePresetControls();
-	// 	return;
-	// }
-
-	// const Preset* preset = qvariant_cast<const Preset*>(item->data(0, Qt::UserRole));
-
-	// if(preset == 0)
-	// {
-	// 	qDebug("MainWindow::on_presetLoad_clicked: preset null");
-	// 	return;
-	// }
-
-	// loadDeviceSetPresetSettings(preset, ui->tabInputsView->currentIndex());
-}
-
-void MainWindow::on_presetDelete_clicked()
-{
-	// QTreeWidgetItem* item = ui->presetTree->currentItem();
-
-	// if (item == 0)
-	// {
-	// 	updatePresetControls();
-	// 	return;
-	// }
-	// else
-	// {
-    //     if (item->type() == PItem)
-    //     {
-    //         const Preset* preset = qvariant_cast<const Preset*>(item->data(0, Qt::UserRole));
-
-    //         if (preset)
-    //         {
-    //             if(QMessageBox::question(this, tr("Delete Preset"), tr("Do you want to delete preset '%1'?").arg(preset->getDescription()), QMessageBox::No | QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
-    //                 delete item;
-    //                 m_mainCore->m_settings.deletePreset(preset);
-    //             }
-    //         }
-    //     }
-    //     else if (item->type() == PGroup)
-    //     {
-    //         if (QMessageBox::question(this,
-    //                 tr("Delete preset group"),
-    //                 tr("Do you want to delete preset group '%1'?")
-    //                     .arg(item->text(0)), QMessageBox::No | QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
-    //         {
-    //             m_mainCore->m_settings.deletePresetGroup(item->text(0));
-
-    //             ui->presetTree->clear();
-
-    //             for (int i = 0; i < m_mainCore->m_settings.getPresetCount(); ++i) {
-    //                 addPresetToTree(m_mainCore->m_settings.getPreset(i));
-    //             }
-    //         }
-    //     }
-	// }
-}
-
-void MainWindow::on_presetTree_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous)
-{
-    (void) current;
-    (void) previous;
-	// updatePresetControls();
-}
-
-void MainWindow::on_presetTree_itemActivated(QTreeWidgetItem *item, int column)
-{
-    (void) item;
-    (void) column;
-	// on_presetLoad_clicked();
 }
 
 void MainWindow::on_action_Quick_Start_triggered()
@@ -2476,7 +2010,7 @@ void MainWindow::on_action_LimeRFE_triggered()
 #endif
 }
 
-void MainWindow::sampleDeviceChangeHandler(DeviceGUI *deviceGUI, int newDeviceIndex)
+void MainWindow::samplingDeviceChangeHandler(DeviceGUI *deviceGUI, int newDeviceIndex)
 {
     int deviceType = (int) deviceGUI->getDeviceType();
     int deviceSetIndex = deviceGUI->getIndex();
@@ -2687,12 +2221,9 @@ void MainWindow::channelAddClicked(Workspace *workspace, int deviceSetIndex, int
 void MainWindow::featureAddClicked(Workspace *workspace, int featureIndex)
 {
     qDebug("MainWindow::featureAddClicked: W%d feature at %d", workspace->getIndex(), featureIndex);
-    // // Do it in the currently selected source tab
-    int currentFeatureTabIndex = 0;
 
-    // if (currentFeatureTabIndex >= 0)
-    // {
-    FeatureUISet *featureUISet = m_featureUIs[currentFeatureTabIndex];
+    int currentFeatureSetIndex = 0; // Do it in the unique set
+    FeatureUISet *featureUISet = m_featureUIs[currentFeatureSetIndex];
     qDebug("MainWindow::featureAddClicked: m_apiAdapter: %p", m_apiAdapter);
     PluginAPI::FeatureRegistrations *featureRegistrations = m_pluginManager->getFeatureRegistrations(); // Available feature plugins
     PluginInterface *pluginInterface = (*featureRegistrations)[featureIndex].m_plugin;
@@ -2709,7 +2240,6 @@ void MainWindow::featureAddClicked(Workspace *workspace, int featureIndex)
         this,
         [=](int wsIndexDest){ this->featureMove(gui, wsIndexDest); }
     );
-    // }
 }
 
 void MainWindow::featureMove(FeatureGUI *gui, int wsIndexDestnation)
@@ -2824,20 +2354,6 @@ void MainWindow::openDeviceSetPresetsDialog(QPoint p, DeviceGUI *deviceGUI)
     dialog.populateTree((int) deviceGUI->getDeviceType());
     dialog.move(p);
     dialog.exec();
-
-    // if (dialog.wasPresetLoaded())
-    // {
-    //     for (int i = 0; i < m_featureUIs[0]->getNumberOfFeatures(); i++)
-    //     {
-    //         FeatureGUI *gui = m_featureUIs[0]->getFeatureGuiAt(i);
-    //         QObject::connect(
-    //             gui,
-    //             &FeatureGUI::moveToWorkspace,
-    //             this,
-    //             [=](int wsIndexDest){ this->featureMove(gui, wsIndexDest); }
-    //         );
-    //     }
-    // }
 }
 
 void MainWindow::deleteFeature(int featureSetIndex, int featureIndex)
@@ -2853,80 +2369,6 @@ void MainWindow::on_action_About_triggered()
 {
 	AboutDialog dlg(m_apiHost.isEmpty() ? "127.0.0.1" : m_apiHost, m_apiPort, m_mainCore->m_settings, this);
 	dlg.exec();
-}
-
-void MainWindow::on_action_removeLastDevice_triggered()
-{
-    if (m_deviceUIs.size() > 1)
-    {
-        removeLastDevice();
-    }
-}
-
-void MainWindow::on_action_addFeatureSet_triggered()
-{
-    addFeatureSet();
-}
-
-void MainWindow::on_action_removeLastFeatureSet_triggered()
-{
-    if (m_featureUIs.size() > 1) {
-        removeFeatureSet(m_featureUIs.size() - 1);
-    }
-}
-
-void MainWindow::tabInputViewIndexChanged()
-{
-    // int inputViewIndex = ui->tabInputsView->currentIndex();
-
-    // if (inputViewIndex >= 0) {
-    //     ui->inputViewDock->setCurrentTabIndex(inputViewIndex);
-    // }
-
-    // if ((inputViewIndex >= 0) && (m_mainCore->m_masterTabIndex >= 0) && (inputViewIndex != m_mainCore->m_masterTabIndex))
-    // {
-    //     DeviceUISet *deviceUI = m_deviceUIs[inputViewIndex];
-    //     DeviceUISet *lastdeviceUI = m_deviceUIs[m_mainCore->m_masterTabIndex];
-    //     lastdeviceUI->m_mainWindowState = saveState();
-    //     restoreState(deviceUI->m_mainWindowState);
-    //     m_mainCore->m_masterTabIndex = inputViewIndex;
-    // }
-
-    // ui->tabSpectra->setCurrentIndex(inputViewIndex);
-    // ui->tabChannels->setCurrentIndex(inputViewIndex);
-    // ui->tabSpectraGUI->setCurrentIndex(inputViewIndex);
-}
-
-void MainWindow::tabChannelsIndexChanged()
-{
-    // int channelsTabIndex = ui->tabChannels->currentIndex();
-
-    // if (channelsTabIndex >= 0)
-    // {
-    //     DeviceUISet *deviceUI = m_deviceUIs[channelsTabIndex];
-    //     QList<QString> channelNames;
-    //     ui->channelDock->resetAvailableChannels();
-
-    //     if (deviceUI->m_deviceSourceEngine) // source device
-    //     {
-    //         m_pluginManager->listRxChannels(channelNames);
-    //         ui->channelDock->addAvailableChannels(channelNames);
-    //     }
-    //     else if (deviceUI->m_deviceSinkEngine) // sink device
-    //     {
-    //         m_pluginManager->listTxChannels(channelNames);
-    //         ui->channelDock->addAvailableChannels(channelNames);
-    //     }
-    //     else if (deviceUI->m_deviceMIMOEngine) // MIMO device
-    //     {
-    //         m_pluginManager->listMIMOChannels(channelNames);
-    //         ui->channelDock->addAvailableChannels(channelNames);
-    //         m_pluginManager->listRxChannels(channelNames);
-    //         ui->channelDock->addAvailableChannels(channelNames);
-    //         m_pluginManager->listTxChannels(channelNames);
-    //         ui->channelDock->addAvailableChannels(channelNames);
-    //     }
-    // }
 }
 
 void MainWindow::updateStatus()

@@ -143,8 +143,6 @@ void MainSettings::save() const
 	QSettings s;
 
 	s.setValue("preferences", qCompress(m_preferences.serialize()).toBase64());
-	// s.setValue("current", qCompress(m_workingPreset.serialize()).toBase64());
-	// s.setValue("current-featureset", qCompress(m_workingFeatureSetPreset.serialize()).toBase64());
     s.setValue("current-configuration", qCompress(m_workingConfiguration.serialize()).toBase64());
 
 	if (m_audioDeviceManager) {

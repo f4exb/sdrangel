@@ -137,11 +137,10 @@ private:
     void createMenuBar();
 	void createStatusBar();
 	void closeEvent(QCloseEvent*);
-	void updatePresetControls();
 	void applySettings();
 
     void removeDeviceSet(int deviceSetIndex);
-    void removeLastDevice();
+    void removeLastDeviceSet();
     void addFeatureSet();
     void removeFeatureSet(unsigned int featureSetIndex);
     void removeAllFeatureSets();
@@ -172,28 +171,9 @@ private:
 private slots:
 	void handleMessages();
     void handleWorkspaceVisibility(Workspace *workspace, bool visibility);
-	void updateStatus();
-    void addWorkspace();
-    void viewAllWorkspaces();
-    void removeEmptyWorkspaces();
-	void loadConfiguration(const Configuration *configuration, bool fromDialog = false);
-    void saveConfiguration(Configuration *configuration);
-	void sampleSourceAdd(Workspace *deviceWorkspace, Workspace *spectrumWorkspace, int deviceIndex);
-	void sampleSinkAdd(Workspace *workspace, Workspace *spectrumWorkspace, int deviceIndex);
-	void sampleMIMOAdd(Workspace *workspace, Workspace *spectrumWorkspace, int deviceIndex);
-    void sampleDeviceChangeHandler(DeviceGUI *deviceGUI, int newDeviceIndex);
 
 	void on_action_View_Fullscreen_toggled(bool checked);
-	void on_presetSave_clicked();
-	void on_presetUpdate_clicked();
-    void on_presetEdit_clicked();
-	void on_presetExport_clicked();
-	void on_presetImport_clicked();
 	void on_action_saveAll_triggered();
-	void on_presetLoad_clicked();
-	void on_presetDelete_clicked();
-	void on_presetTree_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
-	void on_presetTree_itemActivated(QTreeWidgetItem *item, int column);
     void on_action_Configurations_triggered();
 	void on_action_Audio_triggered();
     void on_action_Logging_triggered();
@@ -203,6 +183,21 @@ private slots:
 	void on_action_My_Position_triggered();
     void on_action_DeviceUserArguments_triggered();
     void on_action_commands_triggered();
+    void on_action_Quick_Start_triggered();
+    void on_action_Main_Window_triggered();
+	void on_action_Loaded_Plugins_triggered();
+	void on_action_About_triggered();
+
+	void updateStatus();
+    void addWorkspace();
+    void viewAllWorkspaces();
+    void removeEmptyWorkspaces();
+	void loadConfiguration(const Configuration *configuration, bool fromDialog = false);
+    void saveConfiguration(Configuration *configuration);
+	void sampleSourceAdd(Workspace *deviceWorkspace, Workspace *spectrumWorkspace, int deviceIndex);
+	void sampleSinkAdd(Workspace *workspace, Workspace *spectrumWorkspace, int deviceIndex);
+	void sampleMIMOAdd(Workspace *workspace, Workspace *spectrumWorkspace, int deviceIndex);
+    void samplingDeviceChangeHandler(DeviceGUI *deviceGUI, int newDeviceIndex);
     void channelAddClicked(Workspace *workspace, int deviceSetIndex, int channelIndex);
     void featureAddClicked(Workspace *workspace, int featureIndex);
     void featureMove(FeatureGUI *gui, int wsIndexDestnation);
@@ -212,15 +207,6 @@ private slots:
     void mainSpectrumShow(MainSpectrumGUI *gui);
     void showAllChannels(int deviceSetIndex);
     void openDeviceSetPresetsDialog(QPoint p, DeviceGUI *deviceGUI);
-    void on_action_Quick_Start_triggered();
-    void on_action_Main_Window_triggered();
-	void on_action_Loaded_Plugins_triggered();
-	void on_action_About_triggered();
-	void on_action_removeLastDevice_triggered();
-	void on_action_addFeatureSet_triggered();
-	void on_action_removeLastFeatureSet_triggered();
-	void tabInputViewIndexChanged();
-    void tabChannelsIndexChanged();
 	void commandKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifiers, bool release);
 	void fftWisdomProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
 };
