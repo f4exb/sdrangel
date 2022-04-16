@@ -10,6 +10,8 @@ The plugin is always built.
 
 <h2>Interface</h2>
 
+The top and bottom bars of the device window are described [here](../../../sdrgui/device/readme.md)
+
 ![Test MO sync plugin GUI](../../../doc/img/TestMOSync_plugin.png)
 
 <h3>1: Start/Stop</h3>

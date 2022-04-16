@@ -36,6 +36,8 @@ Then add the following defines on `cmake` command line when compiling SDRangel:
 
 <h2>Interface</h2>
 
+The top and bottom bars of the device window are described [here](../../../sdrgui/device/readme.md)
+
 ![PlutoSDR MIMO plugin GUI](../../../doc/img/PlutoSDRMIMO_plugin.png)
 
 <h3>1. Rx/Tx settings selection</h3>

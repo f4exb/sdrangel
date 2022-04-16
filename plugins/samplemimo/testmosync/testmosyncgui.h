@@ -85,6 +85,7 @@ private slots:
 	void on_startStop_toggled(bool checked);
 	void on_interp_currentIndexChanged(int index);
     void on_spectrumIndex_currentIndexChanged(int index);
+    void openDeviceSettingsDialog(const QPoint& p);
     void updateHardware();
     void updateStatus();
 	void tick();

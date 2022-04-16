@@ -6,6 +6,8 @@ This input sample source plugin gets its samples from an audio device.
 
 <h2>Interface</h2>
 
+The top and bottom bars of the device window are described [here](../../../sdrgui/device/readme.md)
+
 ![Audio input plugin GUI](../../../doc/img/AudioInput_plugin.png)
 
 <h3>1: Start/Stop</h3>

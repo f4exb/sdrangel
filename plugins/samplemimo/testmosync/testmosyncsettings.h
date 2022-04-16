@@ -31,6 +31,10 @@ struct TestMOSyncSettings {
     quint64 m_sampleRate;
     quint32 m_log2Interp;
     fcPos_t  m_fcPosTx;
+    bool m_useReverseAPI;
+    QString m_reverseAPIAddress;
+    uint16_t m_reverseAPIPort;
+    uint16_t m_reverseAPIDeviceIndex;
     int m_workspaceIndex;
     QByteArray m_geometryBytes;
 

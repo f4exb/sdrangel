@@ -17,6 +17,8 @@ If you build it from source and install it in a custom location say: `/opt/insta
 
 <h2>Interface</h2>
 
+The top and bottom bars of the device window are described [here](../../../sdrgui/device/readme.md)
+
 It has a limited number of controls compared to other source interfaces. This is because a lot of things are handled automatically within the Perseus:
 
   - gains

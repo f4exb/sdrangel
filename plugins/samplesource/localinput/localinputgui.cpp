@@ -33,7 +33,6 @@
 #include "ui_localinputgui.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
-#include "gui/crightclickenabler.h"
 #include "gui/basicdevicesettingsdialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
@@ -80,8 +79,7 @@ LocalInputGui::LocalInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
         .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesource/localinput/readme.md";
 
-    CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStop);
-    connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
 	displaySettings();
     makeUIConnections();
@@ -310,21 +308,26 @@ void LocalInputGui::updateStatus()
 
 void LocalInputGui::openDeviceSettingsDialog(const QPoint& p)
 {
-    BasicDeviceSettingsDialog dialog(this);
-    dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
-    dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
-    dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
-    dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
+    if (m_contextMenuType == ContextMenuDeviceSettings)
+    {
+        BasicDeviceSettingsDialog dialog(this);
+        dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
+        dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
+        dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
+        dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
 
-    dialog.move(p);
-    dialog.exec();
+        dialog.move(p);
+        dialog.exec();
 
-    m_settings.m_useReverseAPI = dialog.useReverseAPI();
-    m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
-    m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
-    m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settings.m_useReverseAPI = dialog.useReverseAPI();
+        m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
+        m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
+        m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
-    sendSettings();
+        sendSettings();
+    }
+
+    resetContextMenuType();
 }
 
 void LocalInputGui::makeUIConnections()

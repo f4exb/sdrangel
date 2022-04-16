@@ -28,7 +28,6 @@
 #include "ui_sdrplayv3gui.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
-#include "gui/crightclickenabler.h"
 #include "gui/basicdevicesettingsdialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
@@ -69,8 +68,7 @@ SDRPlayV3Gui::SDRPlayV3Gui(DeviceUISet *deviceUISet, QWidget* parent) :
     connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
     m_statusTimer.start(500);
 
-    CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStop);
-    connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
     ui->tuner->blockSignals(true);
     ui->antenna->blockSignals(true);
@@ -509,21 +507,26 @@ void SDRPlayV3Gui::on_transverter_clicked()
 
 void SDRPlayV3Gui::openDeviceSettingsDialog(const QPoint& p)
 {
-    BasicDeviceSettingsDialog dialog(this);
-    dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
-    dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
-    dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
-    dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
+    if (m_contextMenuType == ContextMenuDeviceSettings)
+    {
+        BasicDeviceSettingsDialog dialog(this);
+        dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
+        dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
+        dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
+        dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
 
-    dialog.move(p);
-    dialog.exec();
+        dialog.move(p);
+        dialog.exec();
 
-    m_settings.m_useReverseAPI = dialog.useReverseAPI();
-    m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
-    m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
-    m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settings.m_useReverseAPI = dialog.useReverseAPI();
+        m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
+        m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
+        m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
-    sendSettings();
+        sendSettings();
+    }
+
+    resetContextMenuType();
 }
 
 void SDRPlayV3Gui::makeUIConnections()

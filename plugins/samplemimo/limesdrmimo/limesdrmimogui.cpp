@@ -28,7 +28,6 @@
 #include "device/deviceuiset.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
-#include "gui/crightclickenabler.h"
 #include "gui/basicdevicesettingsdialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspdevicemimoengine.h"
@@ -100,8 +99,7 @@ LimeSDRMIMOGUI::LimeSDRMIMOGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
     m_limeSDRMIMO->setMessageQueueToGUI(&m_inputMessageQueue);
 
-    CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStopRx);
-    connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
     sendSettings();
     makeUIConnections();
@@ -1126,21 +1124,26 @@ void LimeSDRMIMOGUI::on_antenna_currentIndexChanged(int index)
 
 void LimeSDRMIMOGUI::openDeviceSettingsDialog(const QPoint& p)
 {
-    BasicDeviceSettingsDialog dialog(this);
-    dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
-    dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
-    dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
-    dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
+    if (m_contextMenuType == ContextMenuDeviceSettings)
+    {
+        BasicDeviceSettingsDialog dialog(this);
+        dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
+        dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
+        dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
+        dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
 
-    dialog.move(p);
-    dialog.exec();
+        dialog.move(p);
+        dialog.exec();
 
-    m_settings.m_useReverseAPI = dialog.useReverseAPI();
-    m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
-    m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
-    m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settings.m_useReverseAPI = dialog.useReverseAPI();
+        m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
+        m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
+        m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
-    sendSettings();
+        sendSettings();
+    }
+
+    resetContextMenuType();
 }
 
 void LimeSDRMIMOGUI::makeUIConnections()

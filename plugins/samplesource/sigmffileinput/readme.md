@@ -12,6 +12,8 @@ Note: this plugin is officially supported since version 6.
 
 <h2>Interface</h2>
 
+The top and bottom bars of the device window are described [here](../../../sdrgui/device/readme.md)
+
 ![SigMF File input plugin GUI](../../../doc/img/SigMFFileInput_plugin.png)
 
 <h3>1: Start/Stop</h3>

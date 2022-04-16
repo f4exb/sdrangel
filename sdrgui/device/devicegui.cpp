@@ -48,6 +48,11 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
     m_indexLabel->setText(tr("X:%1").arg(m_deviceSetIndex));
     m_indexLabel->setToolTip("Device type and set index");
 
+    m_settingsButton = new QPushButton();
+    QIcon settingsIcon(":/gear.png");
+    m_settingsButton->setIcon(settingsIcon);
+    m_settingsButton->setToolTip("Common settings");
+
     m_changeDeviceButton = new QPushButton();
     m_changeDeviceButton->setFixedSize(20, 20);
     QIcon changeDeviceIcon(":/swap.png");
@@ -129,6 +134,7 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
     m_topLayout = new QHBoxLayout();
     m_topLayout->setContentsMargins(0, 0, 0, 0);
     m_topLayout->addWidget(m_indexLabel);
+    m_topLayout->addWidget(m_settingsButton);
     m_topLayout->addWidget(m_changeDeviceButton);
     m_topLayout->addWidget(m_reloadDeviceButton);
     m_topLayout->addWidget(m_addChannelsButton);
@@ -166,6 +172,7 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
     QObjectCleanupHandler().add(layout());
     setLayout(m_layouts);
 
+    connect(m_settingsButton, SIGNAL(clicked()), this, SLOT(activateSettingsDialog()));
     connect(m_changeDeviceButton, SIGNAL(clicked()), this, SLOT(openChangeDeviceDialog()));
     connect(m_reloadDeviceButton, SIGNAL(clicked()), this, SLOT(deviceReload()));
     connect(m_addChannelsButton, SIGNAL(clicked()), this, SLOT(openAddChannelsDialog()));
@@ -207,6 +214,7 @@ DeviceGUI::~DeviceGUI()
     delete m_addChannelsButton;
     delete m_reloadDeviceButton;
     delete m_changeDeviceButton;
+    delete m_settingsButton;
     delete m_indexLabel;
     qDebug("DeviceGUI::~DeviceGUI: end");
 }
@@ -253,6 +261,13 @@ void DeviceGUI::deviceReload()
     if (m_currentDeviceIndex >= 0) {
         emit deviceChange(m_currentDeviceIndex);
     }
+}
+
+void DeviceGUI::activateSettingsDialog()
+{
+    QPoint p = QCursor::pos();
+    m_contextMenuType = ContextMenuDeviceSettings;
+    emit customContextMenuRequested(p);
 }
 
 void DeviceGUI::showHelp()

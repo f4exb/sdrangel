@@ -44,6 +44,8 @@ For a group the syntax is the same but the group name is prefixed with `@` like:
 
 <h2>Interface</h2>
 
+The top and bottom bars of the device window are described [here](../../../sdrgui/device/readme.md)
+
 ![LimeSDR input plugin GUI](../../../doc/img/XTRXInput_plugin.png)
 
 <h3>1: Common stream parameters</h3>

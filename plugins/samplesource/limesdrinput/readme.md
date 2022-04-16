@@ -12,6 +12,8 @@ LimeSDR is a 2x2 MIMO device so it has two receiving channels that can run concu
 
 <h2>Interface</h2>
 
+The top and bottom bars of the device window are described [here](../../../sdrgui/device/readme.md)
+
 ![LimeSDR input plugin GUI](../../../doc/img/LimeSDRInput_plugin.png)
 
 <h3>1: Common stream parameters</h3>

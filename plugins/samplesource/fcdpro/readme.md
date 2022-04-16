@@ -6,6 +6,8 @@ This input sample source plugin gets its samples from a [FunCube Dongle (FCD) Pr
 
 <h2>Interface</h2>
 
+The top and bottom bars of the device window are described [here](../../../sdrgui/device/readme.md)
+
 ![FCD Pro input plugin GUI](../../../doc/img/FCDPro_plugin.png)
 
 <h3>1: Common stream parameters</h3>

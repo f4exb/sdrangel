@@ -17,6 +17,8 @@ The plugin is present in the core of the software and thus is always present in 
 
 <h2>Interface</h2>
 
+The top and bottom bars of the device window are described [here](../../../sdrgui/device/readme.md)
+
 ![Metis MISO plugin GUI](../../../doc/img/MetisMISO_plugin.png)
 
 <h3>1: Active stream selection</h3>

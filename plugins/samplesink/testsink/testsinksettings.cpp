@@ -31,6 +31,10 @@ void TestSinkSettings::resetToDefaults()
     m_log2Interp = 0;
     m_spectrumGUI = nullptr;
     m_workspaceIndex = 0;
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
 }
 
 QByteArray TestSinkSettings::serialize() const
@@ -47,7 +51,10 @@ QByteArray TestSinkSettings::serialize() const
 
     s.writeS32(5, m_workspaceIndex);
     s.writeBlob(6, m_geometryBytes);
-
+    s.writeBool(7, m_useReverseAPI);
+    s.writeString(8, m_reverseAPIAddress);
+    s.writeU32(9, m_reverseAPIPort);
+    s.writeU32(10, m_reverseAPIDeviceIndex);
     return s.final();
 }
 
@@ -64,6 +71,7 @@ bool TestSinkSettings::deserialize(const QByteArray& data)
     if (d.getVersion() == 1)
     {
         QByteArray bytetmp;
+        uint32_t uintval;
 
         d.readU64(1, &m_sampleRate, 435000*1000);
         d.readU64(2, &m_sampleRate, 48000);
@@ -77,6 +85,18 @@ bool TestSinkSettings::deserialize(const QByteArray& data)
 
         d.readS32(5, &m_workspaceIndex, 0);
         d.readBlob(6, &m_geometryBytes);
+        d.readBool(7, &m_useReverseAPI, false);
+        d.readString(8, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(9, &uintval, 0);
+
+        if ((uintval > 1023) && (uintval < 65535)) {
+            m_reverseAPIPort = uintval;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(10, &uintval, 0);
+        m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
 
         return true;
     }

@@ -49,8 +49,7 @@ public:
     enum ContextMenuType
     {
         ContextMenuNone,
-        ContextMenuChannelSettings,
-        ContextMenuStreamSettings
+        ContextMenuDeviceSettings
     };
 
 	DeviceGUI(QWidget *parent = nullptr);
@@ -100,6 +99,7 @@ private:
     QString getDeviceTypeTag();
 
     QLabel *m_indexLabel;
+    QPushButton *m_settingsButton;
     QPushButton *m_changeDeviceButton;
     QPushButton *m_reloadDeviceButton;
     QPushButton *m_addChannelsButton;
@@ -124,6 +124,7 @@ private:
     ChannelAddDialog m_channelAddDialog;
 
 private slots:
+    void activateSettingsDialog();
     void openChangeDeviceDialog();
     void openAddChannelsDialog();
     void deviceReload();

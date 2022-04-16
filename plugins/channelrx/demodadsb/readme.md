@@ -2,6 +2,8 @@
 
 <h2>Introduction</h2>
 
+The top and bottom bars of the device window are described [here](../../../sdrgui/device/readme.md)
+
 The ADS-B demodulator plugin can be used to receive and display ADS-B aircraft information. This is information about an aircraft, such as position, altitude, heading and speed, broadcast by aircraft on 1090MHz, in the 1090ES (Extended Squitter) format. 1090ES frames have a chip rate of 2Mchip/s, so the baseband sample rate should be set to be greater than 2MSa/s.
 
 As well as displaying information received via ADS-B, the plugin can also combine information from a number of databases to display more information about the aircraft and flight.

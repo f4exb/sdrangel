@@ -10,6 +10,8 @@ The plugin is always built.
 
 <h2>Interface</h2>
 
+The top and bottom bars of the device window are described [here](../../../sdrgui/device/readme.md)
+
 ![Test sink plugin GUI](../../../doc/img/TestSink.png)
 
 <h3>1: Start/Stop</h3>

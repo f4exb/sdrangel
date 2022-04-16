@@ -40,8 +40,11 @@ For a group the syntax is the same but the group name is prefixed with `@` like:
 ```
 @realtime        -       rtprio          99
 @realtime        -       memlock         unlimited
+```
 
 <h2>Interface</h2>
+
+The top and bottom bars of the device window are described [here](../../../sdrgui/device/readme.md)
 
 ![XTRX output plugin GUI](../../../doc/img/XTRXOutput_plugin.png)
 
