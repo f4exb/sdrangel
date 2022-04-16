@@ -82,6 +82,18 @@ UDPSource::~UDPSource()
     delete m_thread;
 }
 
+void UDPSource::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSourceAPI(this);
+        m_deviceAPI->removeChannelSource(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addChannelSource(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
+}
+
 void UDPSource::start()
 {
 	qDebug("UDPSource::start");

@@ -66,6 +66,8 @@ public:
 	SSBDemod(DeviceAPI *deviceAPI);
 	virtual ~SSBDemod();
 	virtual void destroy() { delete this; }
+    virtual void setDeviceAPI(DeviceAPI *deviceAPI);
+    virtual DeviceAPI *getDeviceAPI() { return m_deviceAPI; }
     SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
 
     using BasebandSampleSink::feed;

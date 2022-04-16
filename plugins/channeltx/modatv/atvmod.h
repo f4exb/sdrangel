@@ -246,6 +246,8 @@ public:
     ATVMod(DeviceAPI *deviceAPI);
     virtual ~ATVMod();
     virtual void destroy() { delete this; }
+    virtual void setDeviceAPI(DeviceAPI *deviceAPI);
+    virtual DeviceAPI *getDeviceAPI() { return m_deviceAPI; }
 
     virtual void start();
     virtual void stop();

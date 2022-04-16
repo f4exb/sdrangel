@@ -58,6 +58,7 @@ public:
     virtual QColor getTitleColor() const  { return m_settings.m_rgbColor; };
     virtual void zetHidden(bool hidden) { m_settings.m_hidden = hidden; }
     virtual bool getHidden() const { return m_settings.m_hidden; }
+    virtual ChannelMarker& getChannelMarker() { return m_channelMarker; }
 
 public slots:
 	void channelMarkerChangedByCursor();

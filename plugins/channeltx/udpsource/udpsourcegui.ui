@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>395</width>
-    <height>403</height>
+    <width>414</width>
+    <height>400</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
@@ -18,7 +24,7 @@
   </property>
   <property name="maximumSize">
    <size>
-    <width>400</width>
+    <width>414</width>
     <height>16777215</height>
    </size>
   </property>
@@ -39,13 +45,13 @@
     <rect>
      <x>2</x>
      <y>2</y>
-     <width>390</width>
+     <width>412</width>
      <height>221</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
-     <width>390</width>
+     <width>412</width>
      <height>0</height>
     </size>
    </property>
@@ -190,6 +196,15 @@
              </color>
             </brush>
            </colorrole>
+           <colorrole role="PlaceholderText">
+            <brush brushstyle="NoBrush">
+             <color alpha="128">
+              <red>26</red>
+              <green>26</green>
+              <blue>26</blue>
+             </color>
+            </brush>
+           </colorrole>
           </active>
           <inactive>
            <colorrole role="Text">
@@ -207,6 +222,15 @@
               <red>255</red>
               <green>255</green>
               <blue>255</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="PlaceholderText">
+            <brush brushstyle="NoBrush">
+             <color alpha="128">
+              <red>26</red>
+              <green>26</green>
+              <blue>26</blue>
              </color>
             </brush>
            </colorrole>
@@ -230,11 +254,21 @@
              </color>
             </brush>
            </colorrole>
+           <colorrole role="PlaceholderText">
+            <brush brushstyle="NoBrush">
+             <color alpha="128">
+              <red>26</red>
+              <green>26</green>
+              <blue>26</blue>
+             </color>
+            </brush>
+           </colorrole>
           </disabled>
          </palette>
         </property>
         <property name="font">
          <font>
+          <family>Liberation Sans</family>
           <pointsize>8</pointsize>
          </font>
         </property>
@@ -1003,6 +1037,12 @@
      <height>156</height>
     </rect>
    </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
    <property name="windowTitle">
     <string>Channel Spectrum</string>
    </property>
@@ -1024,6 +1064,12 @@
     </property>
     <item>
      <widget class="GLSpectrum" name="glSpectrum" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="font">
        <font>
         <family>Liberation Mono</family>
@@ -1046,6 +1092,17 @@
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ValueDialZ</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedialz.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>GLSpectrum</class>
    <extends>QWidget</extends>
    <header>gui/glspectrum.h</header>
@@ -1058,21 +1115,10 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ValueDialZ</class>
-   <extends>QWidget</extends>
-   <header>gui/valuedialz.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>LevelMeterVU</class>
    <extends>QWidget</extends>
    <header>gui/levelmeter.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header location="global">gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
  <resources>

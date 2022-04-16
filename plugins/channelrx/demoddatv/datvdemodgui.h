@@ -58,6 +58,7 @@ public:
     virtual QColor getTitleColor() const  { return m_settings.m_rgbColor; };
     virtual void zetHidden(bool hidden) { m_settings.m_hidden = hidden; }
     virtual bool getHidden() const { return m_settings.m_hidden; }
+    virtual ChannelMarker& getChannelMarker() { return m_channelMarker; }
 
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 
@@ -109,7 +110,7 @@ private:
     PluginAPI* m_objPluginAPI;
     DeviceUISet* m_deviceUISet;
 
-    ChannelMarker m_objChannelMarker;
+    ChannelMarker m_channelMarker;
     RollupState m_rollupState;
     DATVDemod* m_datvDemod;
     MessageQueue m_inputMessageQueue;

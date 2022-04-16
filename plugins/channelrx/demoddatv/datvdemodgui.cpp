@@ -97,7 +97,7 @@ bool DATVDemodGUI::handleMessage(const Message& message)
     {
         DATVDemod::MsgConfigureDATVDemod& cfg = (DATVDemod::MsgConfigureDATVDemod&) message;
         m_settings = cfg.getSettings();
-        m_objChannelMarker.updateSettings(static_cast<const ChannelMarker*>(m_settings.m_channelMarker));
+        m_channelMarker.updateSettings(static_cast<const ChannelMarker*>(m_settings.m_channelMarker));
         displaySettings();
         return true;
     }
@@ -132,14 +132,14 @@ void DATVDemodGUI::handleInputMessages()
 
 void DATVDemodGUI::channelMarkerChangedByCursor()
 {
-    ui->deltaFrequency->setValue(m_objChannelMarker.getCenterFrequency());
-    m_settings.m_centerFrequency = m_objChannelMarker.getCenterFrequency();
+    ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
+    m_settings.m_centerFrequency = m_channelMarker.getCenterFrequency();
     applySettings();
 }
 
 void DATVDemodGUI::channelMarkerHighlightedByCursor()
 {
-    getRollupContents()->setHighlighted(m_objChannelMarker.getHighlighted());
+    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
 }
 
 
@@ -156,7 +156,7 @@ void DATVDemodGUI::onMenuDialogCalled(const QPoint &p)
 {
     if (m_contextMenuType == ContextMenuChannelSettings)
     {
-        BasicChannelSettingsDialog dialog(&m_objChannelMarker, this);
+        BasicChannelSettingsDialog dialog(&m_channelMarker, this);
         dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
         dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
@@ -165,8 +165,8 @@ void DATVDemodGUI::onMenuDialogCalled(const QPoint &p)
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_rgbColor = m_objChannelMarker.getColor().rgb();
-        m_settings.m_title = m_objChannelMarker.getTitle();
+        m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
+        m_settings.m_title = m_channelMarker.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
         m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
@@ -174,7 +174,7 @@ void DATVDemodGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
-        setTitle(m_objChannelMarker.getTitle());
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -188,8 +188,8 @@ void DATVDemodGUI::onMenuDialogCalled(const QPoint &p)
         dialog.exec();
 
         m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
-        m_objChannelMarker.clearStreamIndexes();
-        m_objChannelMarker.addStreamIndex(m_settings.m_streamIndex);
+        m_channelMarker.clearStreamIndexes();
+        m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
         displayStreamIndex();
         applySettings();
     }
@@ -202,7 +202,7 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
     ui(new Ui::DATVDemodGUI),
     m_objPluginAPI(objPluginAPI),
     m_deviceUISet(deviceUISet),
-    m_objChannelMarker(this),
+    m_channelMarker(this),
     m_deviceCenterFrequency(0),
     m_basebandSampleRate(1),
     m_blnBasicSettingsShown(false),
@@ -241,7 +241,7 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
         connect(m_datvDemod->getUDPStream(), &DATVUDPStream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
     }
 
-    m_settings.setChannelMarker(&m_objChannelMarker);
+    m_settings.setChannelMarker(&m_channelMarker);
     m_settings.setRollupState(&m_rollupState);
 
     connect(ui->screenTV_2, &DATVideoRender::onMetaDataChanged, this, &DATVDemodGUI::on_StreamMetaDataChanged);
@@ -264,18 +264,18 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
     ui->rfBandwidth->setColorMapper(ColorMapper(ColorMapper::GrayYellow));
     ui->rfBandwidth->setValueRange(true, 8, 0, 50000000);
 
-    m_objChannelMarker.blockSignals(true);
-    m_objChannelMarker.setColor(Qt::magenta);
-    m_objChannelMarker.setBandwidth(6000000);
-    m_objChannelMarker.setCenterFrequency(0);
-    m_objChannelMarker.setTitle("DATV Demodulator");
-    m_objChannelMarker.blockSignals(false);
-    m_objChannelMarker.setVisible(true);
+    m_channelMarker.blockSignals(true);
+    m_channelMarker.setColor(Qt::magenta);
+    m_channelMarker.setBandwidth(6000000);
+    m_channelMarker.setCenterFrequency(0);
+    m_channelMarker.setTitle("DATV Demodulator");
+    m_channelMarker.blockSignals(false);
+    m_channelMarker.setVisible(true);
 
-    connect(&m_objChannelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
-    connect(&m_objChannelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
+    connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
+    connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
 
-    m_deviceUISet->addChannelMarker(&m_objChannelMarker);
+    m_deviceUISet->addChannelMarker(&m_channelMarker);
 
     // QPixmap pixmapTarget = QPixmap(":/film.png");
     // pixmapTarget = pixmapTarget.scaled(16, 16, Qt::KeepAspectRatio, Qt::SmoothTransformation);
@@ -312,18 +312,18 @@ void DATVDemodGUI::blockApplySettings(bool blnBlock)
 
 void DATVDemodGUI::displaySettings()
 {
-    m_objChannelMarker.blockSignals(true);
-    m_objChannelMarker.setCenterFrequency(m_settings.m_centerFrequency);
-    m_objChannelMarker.setColor(m_settings.m_rgbColor);
-    m_objChannelMarker.setTitle(m_settings.m_title);
-    m_objChannelMarker.blockSignals(false);
-    m_objChannelMarker.setBandwidth(m_settings.m_rfBandwidth);
+    m_channelMarker.blockSignals(true);
+    m_channelMarker.setCenterFrequency(m_settings.m_centerFrequency);
+    m_channelMarker.setColor(m_settings.m_rgbColor);
+    m_channelMarker.setTitle(m_settings.m_title);
+    m_channelMarker.blockSignals(false);
+    m_channelMarker.setBandwidth(m_settings.m_rfBandwidth);
 
     blockApplySettings(true);
 
     setTitleColor(m_settings.m_rgbColor);
-    setWindowTitle(m_objChannelMarker.getTitle());
-    setTitle(m_objChannelMarker.getTitle());
+    setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     ui->deltaFrequency->setValue(m_settings.m_centerFrequency);
     ui->chkAllowDrift->setChecked(m_settings.m_allowDrift);
@@ -475,7 +475,7 @@ void DATVDemodGUI::applySettings(bool force)
     {
         qDebug("DATVDemodGUI::applySettings");
 
-        setTitleColor(m_objChannelMarker.getColor());
+        setTitleColor(m_channelMarker.getColor());
 
         QString msg = tr("DATVDemodGUI::applySettings: force: %1").arg(force ? "true" : "false");
         m_settings.debug(msg);
@@ -488,14 +488,14 @@ void DATVDemodGUI::applySettings(bool force)
 void DATVDemodGUI::leaveEvent(QEvent*)
 {
     blockApplySettings(true);
-    m_objChannelMarker.setHighlighted(false);
+    m_channelMarker.setHighlighted(false);
     blockApplySettings(false);
 }
 
 void DATVDemodGUI::enterEvent(QEvent*)
 {
     blockApplySettings(true);
-    m_objChannelMarker.setHighlighted(true);
+    m_channelMarker.setHighlighted(true);
     blockApplySettings(false);
 }
 
@@ -790,16 +790,16 @@ void DATVDemodGUI::on_StreamDataAvailable(int intBytes, int intPercent, qint64 i
 
 void DATVDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
-    m_objChannelMarker.setCenterFrequency(value);
-    m_settings.m_centerFrequency = m_objChannelMarker.getCenterFrequency();
+    m_channelMarker.setCenterFrequency(value);
+    m_settings.m_centerFrequency = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
     applySettings();
 }
 
 void DATVDemodGUI::on_rfBandwidth_changed(qint64 value)
 {
-    m_objChannelMarker.setBandwidth(value);
-    m_settings.m_rfBandwidth = m_objChannelMarker.getBandwidth();
+    m_channelMarker.setBandwidth(value);
+    m_settings.m_rfBandwidth = m_channelMarker.getBandwidth();
     applySettings();
 }
 

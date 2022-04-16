@@ -101,6 +101,18 @@ FileSink::~FileSink()
     delete m_basebandSink;
 }
 
+void FileSink::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSinkAPI(this);
+        m_deviceAPI->removeChannelSink(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addChannelSink(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
+}
+
 void FileSink::setMessageQueueToGUI(MessageQueue* queue)
 {
     ChannelAPI::setMessageQueueToGUI(queue);

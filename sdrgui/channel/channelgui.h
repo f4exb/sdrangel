@@ -31,6 +31,7 @@ class QVBoxLayout;
 class QHBoxLayout;
 class QSizeGrip;
 class RollupContents;
+class ChannelMarker;
 
 class SDRGUI_API ChannelGUI : public QMdiSubWindow
 {
@@ -66,6 +67,7 @@ public:
     virtual QColor getTitleColor() const  = 0;
     virtual void zetHidden(bool hidden) = 0;
     virtual bool getHidden() const = 0;
+    virtual ChannelMarker& getChannelMarker() = 0;
 
 	virtual MessageQueue* getInputMessageQueue() = 0;
 
@@ -114,6 +116,7 @@ private:
     QPushButton *m_hideButton;
     QPushButton *m_closeButton;
     QPushButton *m_duplicateButton;
+    QPushButton *m_moveToDeviceButton;
     QLabel *m_statusFrequency;
     QLabel *m_statusLabel;
     QVBoxLayout *m_layouts;
@@ -132,12 +135,14 @@ private slots:
     void openMoveToWorkspaceDialog();
     void onWidgetRolled(QWidget *widget, bool show);
     void duplicateChannel();
+    void openMoveToDeviceSetDialog();
 
 signals:
     void closing();
     void moveToWorkspace(int workspaceIndex);
     void forceShrink();
     void duplicateChannelEmitted();
+    void moveToDeviceSet(int deviceSetIndex);
 };
 
 #endif // SDRGUI_CHANNEL_CHANNELGUI_H_

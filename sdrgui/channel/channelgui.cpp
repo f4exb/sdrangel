@@ -28,6 +28,7 @@
 
 #include "mainwindow.h"
 #include "gui/workspaceselectiondialog.h"
+#include "gui/devicesetselectiondialog.h"
 #include "gui/rollupcontents.h"
 
 #include "channelgui.h"
@@ -97,6 +98,12 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
     m_duplicateButton->setIcon(m_duplicateIcon);
     m_duplicateButton->setToolTip("Duplicate channel");
 
+    m_moveToDeviceButton = new QPushButton();
+    m_moveToDeviceButton->setFixedSize(20, 20);
+    QIcon moveRoundIcon(":/exit_round.png");
+    m_moveToDeviceButton->setIcon(moveRoundIcon);
+    m_moveToDeviceButton->setToolTip("Move to another device");
+
     m_statusFrequency = new QLabel();
     // QFont font = m_statusFrequency->font();
     // font.setPointSize(8);
@@ -142,6 +149,7 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
     m_bottomLayout = new QHBoxLayout();
     m_bottomLayout->setContentsMargins(0, 0, 0, 0);
     m_bottomLayout->addWidget(m_duplicateButton);
+    m_bottomLayout->addWidget(m_moveToDeviceButton);
     m_bottomLayout->addWidget(m_statusFrequency);
     m_bottomLayout->addWidget(m_statusLabel);
     m_sizeGripBottomRight = new QSizeGrip(this);
@@ -165,6 +173,7 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
     connect(m_hideButton, SIGNAL(clicked()), this, SLOT(hide()));
     connect(m_closeButton, SIGNAL(clicked()), this, SLOT(close()));
     connect(m_duplicateButton, SIGNAL(clicked()), this, SLOT(duplicateChannel()));
+    connect(m_moveToDeviceButton, SIGNAL(clicked()), this, SLOT(openMoveToDeviceSetDialog()));
 
     connect(
         m_rollupContents,
@@ -185,6 +194,8 @@ ChannelGUI::~ChannelGUI()
     delete m_layouts;
     delete m_statusLabel;
     delete m_statusFrequency;
+    delete m_moveToDeviceButton;
+    delete m_duplicateButton;
     delete m_closeButton;
     delete m_hideButton;
     delete m_shrinkButton;
@@ -280,8 +291,17 @@ void ChannelGUI::onWidgetRolled(QWidget *widget, bool show)
 
 void ChannelGUI::duplicateChannel()
 {
-    qDebug("ChannelGUI::duplicateChannel");
     emit duplicateChannelEmitted();
+}
+
+void ChannelGUI::openMoveToDeviceSetDialog()
+{
+    DeviceSetSelectionDialog dialog(MainWindow::getInstance()->getDeviceUISets(), m_deviceSetIndex, this);
+    dialog.exec();
+
+    if (dialog.hasChanged() && (dialog.getSelectedIndex() != m_deviceSetIndex)) {
+        emit moveToDeviceSet(dialog.getSelectedIndex());
+    }
 }
 
 void ChannelGUI::shrinkWindow()

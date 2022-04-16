@@ -75,6 +75,18 @@ ATVDemod::~ATVDemod()
     delete m_basebandSink;
 }
 
+void ATVDemod::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSinkAPI(this);
+        m_deviceAPI->removeChannelSink(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addChannelSink(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
+}
+
 void ATVDemod::start()
 {
 	qDebug("ATVDemod::start");

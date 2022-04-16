@@ -92,6 +92,18 @@ ChannelAnalyzer::~ChannelAnalyzer()
     qDebug("ChannelAnalyzer::~ChannelAnalyzer: done");
 }
 
+void ChannelAnalyzer::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSinkAPI(this);
+        m_deviceAPI->removeChannelSink(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addChannelSink(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
+}
+
 int ChannelAnalyzer::getChannelSampleRate()
 {
     DeviceSampleSource *source = m_deviceAPI->getSampleSource();

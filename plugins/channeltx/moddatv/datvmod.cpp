@@ -97,6 +97,18 @@ DATVMod::~DATVMod()
     delete m_thread;
 }
 
+void DATVMod::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSourceAPI(this);
+        m_deviceAPI->removeChannelSource(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addChannelSource(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
+}
+
 uint32_t DATVMod::getNumberOfDeviceStreams() const
 {
     return m_deviceAPI->getNbSinkStreams();

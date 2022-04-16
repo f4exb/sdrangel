@@ -73,9 +73,10 @@ public:
 
     void setIndex(int deviceSetIndex);
     int getIndex() const { return m_deviceSetIndex; }
-    GLSpectrum *getSpectrum() { return m_spectrum; }     //!< Direct spectrum getter
+    GLSpectrum *getSpectrum() { return m_spectrum; }        //!< Direct spectrum getter
     void setSpectrumScalingFactor(float scalef);
-    void addChannelMarker(ChannelMarker* channelMarker); //!< Add channel marker to spectrum
+    void addChannelMarker(ChannelMarker* channelMarker);    //!< Add channel marker to spectrum
+    void removeChannelMarker(ChannelMarker* channelMarker); //!< Remove channel marker from spectrum
 
     int getNumberOfChannels() const { return m_channelInstanceRegistrations.size(); }
     void freeChannels();
@@ -94,6 +95,7 @@ public:
     void registerRxChannelInstance(ChannelAPI *channelAPI, ChannelGUI* channelGUI);
     void registerTxChannelInstance(ChannelAPI *channelAPI, ChannelGUI* channelGUI);
     void registerChannelInstance(ChannelAPI *channelAPI, ChannelGUI* channelGUI);
+    void unregisterChannelInstanceAt(int channelIndex);
 
     // These are the number of channel types available for selection
     void setNumberOfAvailableRxChannels(int number) { m_nbAvailableRxChannels = number; }

@@ -91,6 +91,8 @@ public:
     IEEE_802_15_4_Mod(DeviceAPI *deviceAPI);
     ~IEEE_802_15_4_Mod();
     virtual void destroy() { delete this; }
+    virtual void setDeviceAPI(DeviceAPI *deviceAPI);
+    virtual DeviceAPI *getDeviceAPI() { return m_deviceAPI; }
 
     virtual void start();
     virtual void stop();

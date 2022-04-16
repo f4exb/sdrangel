@@ -52,6 +52,8 @@ public:
     ChannelAPI(const QString& name, StreamType streamType);
     virtual ~ChannelAPI() {}
     virtual void destroy() = 0;
+    virtual void setDeviceAPI(DeviceAPI*) = 0;
+    virtual DeviceAPI *getDeviceAPI() = 0;
 
     virtual void getIdentifier(QString& id) = 0;
     virtual QString getIdentifier() const = 0;
@@ -129,8 +131,6 @@ public:
 
     int getDeviceSetIndex() const { return m_deviceSetIndex; }
     void setDeviceSetIndex(int deviceSetIndex) { m_deviceSetIndex = deviceSetIndex; }
-    DeviceAPI *getDeviceAPI() { return m_deviceAPI; }
-    void setDeviceAPI(DeviceAPI *deviceAPI) { m_deviceAPI = deviceAPI; }
     uint64_t getUID() const { return m_uid; }
 
     // MIMO support
@@ -167,7 +167,6 @@ private:
 
     int m_indexInDeviceSet;
     int m_deviceSetIndex;
-    DeviceAPI *m_deviceAPI;
     uint64_t m_uid;
 
 signals:

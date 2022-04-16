@@ -97,6 +97,18 @@ IEEE_802_15_4_Mod::~IEEE_802_15_4_Mod()
     delete m_thread;
 }
 
+void IEEE_802_15_4_Mod::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSourceAPI(this);
+        m_deviceAPI->removeChannelSource(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addChannelSource(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
+}
+
 void IEEE_802_15_4_Mod::start()
 {
     qDebug("IEEE_802_15_4_Mod::start");

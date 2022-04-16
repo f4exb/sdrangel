@@ -6,19 +6,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>363</width>
-    <height>300</height>
+    <width>360</width>
+    <height>278</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
-    <width>0</width>
+    <width>360</width>
     <height>0</height>
    </size>
   </property>
@@ -37,15 +37,15 @@
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">
     <rect>
-     <x>2</x>
-     <y>2</y>
-     <width>341</width>
+     <x>0</x>
+     <y>0</y>
+     <width>358</width>
      <height>271</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
-     <width>280</width>
+     <width>358</width>
      <height>0</height>
     </size>
    </property>

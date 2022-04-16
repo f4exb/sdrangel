@@ -80,6 +80,18 @@ BeamSteeringCWMod::~BeamSteeringCWMod()
     delete m_thread;
 }
 
+void BeamSteeringCWMod::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSinkAPI(this);
+        m_deviceAPI->removeMIMOChannel(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addMIMOChannel(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
+}
+
 void BeamSteeringCWMod::startSources()
 {
     qDebug("BeamSteeringCWMod::startSources");

@@ -27,6 +27,7 @@ set(sdrgui_SOURCES
     gui/cwkeyergui.cpp
     gui/datetimedelegate.cpp
     gui/decimaldelegate.cpp
+    gui/devicesetselectiondialog.cpp
     gui/devicesetpresetsdialog.cpp
     gui/devicestreamselectiondialog.cpp
     gui/deviceuserargsdialog.cpp
@@ -124,6 +125,7 @@ set(sdrgui_HEADERS
     gui/cwkeyergui.h
     gui/datetimedelegate.h
     gui/decimaldelegate.h
+    gui/devicesetselectiondialog.h
     gui/devicesetpresetsdialog.h
     gui/devicestreamselectiondialog.h
     gui/deviceuserargsdialog.h

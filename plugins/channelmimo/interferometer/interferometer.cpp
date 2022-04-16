@@ -82,6 +82,18 @@ Interferometer::~Interferometer()
     delete m_thread;
 }
 
+void Interferometer::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSinkAPI(this);
+        m_deviceAPI->removeMIMOChannel(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addMIMOChannel(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
+}
+
 void Interferometer::startSinks()
 {
     if (m_deviceSampleRate != 0) {

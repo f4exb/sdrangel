@@ -81,8 +81,9 @@ public:
     int getNumberOfWorkspaces() const { return m_workspaces.size(); }
 
 public slots:
-    void channelMove(ChannelGUI *gui, int wsIndexDestnation);
+    void channelMove(ChannelGUI *gui, int wsIndexDestination);
     void channelDuplicate(ChannelGUI *gui);
+    void channelMoveToDeviceSet(ChannelGUI *gui, int dsIndexDestination);
 
 private:
     enum {
@@ -146,6 +147,7 @@ private:
     void removeFeatureSet(unsigned int featureSetIndex);
     void removeAllFeatureSets();
     void deleteChannel(int deviceSetIndex, int channelIndex);
+    void channelDuplicateToDeviceSet(ChannelGUI *sourceChannelGUI, int dsIndexDestination);
     void sampleDeviceChange(int deviceType, int deviceSetIndex, int newDeviceIndex, Workspace *workspace);
     void sampleSourceChange(int deviceSetIndex, int newDeviceIndex, Workspace *workspace);
 	void sampleSinkChange(int deviceSetIndex, int newDeviceIndex, Workspace *workspace);

@@ -98,6 +98,18 @@ NFMMod::~NFMMod()
     delete m_thread;
 }
 
+void NFMMod::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSourceAPI(this);
+        m_deviceAPI->removeChannelSource(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addChannelSource(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
+}
+
 void NFMMod::start()
 {
 	qDebug("NFMMod::start");
