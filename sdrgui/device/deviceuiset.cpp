@@ -298,8 +298,10 @@ void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginA
                             qPrintable((*channelRegistrations)[i].m_channelIdURI),
                             qPrintable(channelConfig.m_channelIdURI));
                     BasebandSampleSink *rxChannel;
-                    (*channelRegistrations)[i].m_plugin->createRxChannel(m_deviceAPI, &rxChannel, &channelAPI);
-                    rxChannelGUI = (*channelRegistrations)[i].m_plugin->createRxChannelGUI(this, rxChannel);
+                    PluginInterface *pluginInterface = (*channelRegistrations)[i].m_plugin;
+                    pluginInterface->createRxChannel(m_deviceAPI, &rxChannel, &channelAPI);
+                    rxChannelGUI = pluginInterface->createRxChannelGUI(this, rxChannel);
+                    rxChannelGUI->setDisplayedame(pluginInterface->getPluginDescriptor().displayedName);
                     registerRxChannelInstance(channelAPI, rxChannelGUI);
                     QObject::connect(
                         rxChannelGUI,
@@ -424,8 +426,10 @@ void DeviceUISet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginA
                             qPrintable((*channelRegistrations)[i].m_channelIdURI),
                             qPrintable(channelConfig.m_channelIdURI));
                     BasebandSampleSource *txChannel;
-                    (*channelRegistrations)[i].m_plugin->createTxChannel(m_deviceAPI, &txChannel, &channelAPI);
-                    txChannelGUI = (*channelRegistrations)[i].m_plugin->createTxChannelGUI(this, txChannel);
+                    PluginInterface *pluginInterface = (*channelRegistrations)[i].m_plugin;
+                    pluginInterface->createTxChannel(m_deviceAPI, &txChannel, &channelAPI);
+                    txChannelGUI = pluginInterface->createTxChannelGUI(this, txChannel);
+                    txChannelGUI->setDisplayedame(pluginInterface->getPluginDescriptor().displayedName);
                     registerTxChannelInstance(channelAPI, txChannelGUI);
                     QObject::connect(
                         txChannelGUI,
@@ -551,9 +555,10 @@ void DeviceUISet::loadMIMOChannelSettings(const Preset *preset, PluginAPI *plugi
                             qPrintable((*channelRegistrations)[i].m_channelIdURI),
                             qPrintable(channelConfig.m_channelIdURI));
                     MIMOChannel *mimoChannel;
-                    (*channelRegistrations)[i].m_plugin->createMIMOChannel(m_deviceAPI, &mimoChannel, &channelAPI);
-                    mimoChannelGUI = (*channelRegistrations)[i].m_plugin->createMIMOChannelGUI(this, mimoChannel);
-                    (*channelRegistrations)[i].m_plugin->createMIMOChannel(m_deviceAPI, &mimoChannel, &channelAPI);
+                    PluginInterface *pluginInterface = (*channelRegistrations)[i].m_plugin;
+                    pluginInterface->createMIMOChannel(m_deviceAPI, &mimoChannel, &channelAPI);
+                    mimoChannelGUI = pluginInterface->createMIMOChannelGUI(this, mimoChannel);
+                    mimoChannelGUI->setDisplayedame(pluginInterface->getPluginDescriptor().displayedName);
                     registerChannelInstance(channelAPI, mimoChannelGUI);
                     QObject::connect(
                         mimoChannelGUI,

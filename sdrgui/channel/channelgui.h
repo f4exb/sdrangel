@@ -75,6 +75,7 @@ public:
     void setTitle(const QString& title);
     void setTitleColor(const QColor& c);
     void setDeviceType(DeviceType type);
+    void setDisplayedame(const QString& name);
     DeviceType getDeviceType() const { return m_deviceType; }
     void setToolTip(const QString& tooltip);
     void setIndex(int index);
@@ -97,6 +98,7 @@ protected:
     QString m_helpURL;
     RollupContents* m_rollupContents;
     ContextMenuType m_contextMenuType;
+    QString m_displayedName;
 
 protected slots:
     void shrinkWindow();

@@ -2362,6 +2362,7 @@ void MainWindow::channelAddClicked(Workspace *workspace, int deviceSetIndex, int
             deviceUI->registerRxChannelInstance(channelAPI, gui);
             gui->setDeviceType(ChannelGUI::DeviceRx);
             gui->setIndex(channelAPI->getIndexInDeviceSet());
+            gui->setDisplayedame(pluginInterface->getPluginDescriptor().displayedName);
         }
         else if (deviceUI->m_deviceSinkEngine) // sink device => Tx channels
         {
@@ -2374,6 +2375,7 @@ void MainWindow::channelAddClicked(Workspace *workspace, int deviceSetIndex, int
             deviceUI->registerTxChannelInstance(channelAPI, gui);
             gui->setDeviceType(ChannelGUI::DeviceTx);
             gui->setIndex(channelAPI->getIndexInDeviceSet());
+            gui->setDisplayedame(pluginInterface->getPluginDescriptor().displayedName);
         }
         else if (deviceUI->m_deviceMIMOEngine) // MIMO device => all possible channels. Depends on index range
         {
@@ -2393,6 +2395,7 @@ void MainWindow::channelAddClicked(Workspace *workspace, int deviceSetIndex, int
                 gui = pluginInterface->createMIMOChannelGUI(deviceUI, mimoChannel);
                 deviceUI->registerChannelInstance(channelAPI, gui);
                 gui->setIndex(channelAPI->getIndexInDeviceSet());
+                gui->setDisplayedame(pluginInterface->getPluginDescriptor().displayedName);
             }
             else if (channelPluginIndex < nbMIMOChannels + nbRxChannels) // Rx
             {
@@ -2404,6 +2407,7 @@ void MainWindow::channelAddClicked(Workspace *workspace, int deviceSetIndex, int
                 gui = pluginInterface->createRxChannelGUI(deviceUI, rxChannel);
                 deviceUI->registerRxChannelInstance(channelAPI, gui);
                 gui->setIndex(channelAPI->getIndexInDeviceSet());
+                gui->setDisplayedame(pluginInterface->getPluginDescriptor().displayedName);
             }
             else if (channelPluginIndex < nbMIMOChannels + nbRxChannels + nbTxChannels)
             {
@@ -2415,6 +2419,7 @@ void MainWindow::channelAddClicked(Workspace *workspace, int deviceSetIndex, int
                 gui = pluginInterface->createTxChannelGUI(deviceUI, txChannel);
                 deviceUI->registerTxChannelInstance(channelAPI, gui);
                 gui->setIndex(channelAPI->getIndexInDeviceSet());
+                gui->setDisplayedame(pluginInterface->getPluginDescriptor().displayedName);
             }
 
             gui->setDeviceType(ChannelGUI::DeviceMIMO);

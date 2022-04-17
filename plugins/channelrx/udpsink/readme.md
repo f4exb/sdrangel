@@ -12,6 +12,8 @@ This plugin is available for Linux and Mac O/S only.
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![UDP Sink plugin GUI](../../../doc/img/UDPsink_plugin.png)
 
 <h3>1: Frequency shift from center frequency of reception</h3>
@@ -30,7 +32,7 @@ Total power in dB relative to a +/- 1.0 amplitude signal sent over UDP.
 
 These parameters are set with the basic channel settings dialog. See: [here](https://github.com/f4exb/sdrangel/blob/master/sdrgui/readme.md#6-channels)
 
-The display is in the format `address:audio port/data port` 
+The display is in the format `address:audio port/data port`
 
 <h3>5: Signal sample rate</h3>
 
@@ -48,14 +50,14 @@ Left: combo box to specify the type of samples that are sent over UDP:
   - `LSB Mono`: AF of the LSB part of a SSB demodulated signal as "mono" (I+Q)*0.7 samples that is one sample per demodulator output sample. This can be used with software that accepts mono type of input.
   - `USB Mono`: AF of the USB part of a SSB demodulated signal as "mono" (I+Q)*0.7 samples that is one sample per demodulator output sample. This can be used with software that accepts mono type of input.
   - `AM Mono`: AF of the envelope demodulated signal i.e. channel magnitude or sqrt(I² + Q²) as "mono" samples that is one sample per demodulator output sample. This can be used with software that accepts mono type of input.
-  - `AM !DC Mono`: Same as above but with a DC block based on magnitude average over a 5 ms period     
-  - `AM BPF Mono`: Same as AM Mono but raw magnitude signal is passed through a bandpass filter with lower cutoff at 300 Hz and higher cutoff at RF bandwidth frequency     
-  
+  - `AM !DC Mono`: Same as above but with a DC block based on magnitude average over a 5 ms period
+  - `AM BPF Mono`: Same as AM Mono but raw magnitude signal is passed through a bandpass filter with lower cutoff at 300 Hz and higher cutoff at RF bandwidth frequency
+
 Right: Sample size in bits:
 
   - `16 bits`: samples are 16 bit signed with little endian layout (S16LE)
   - `24 bits`: samples are 32 bit signed with little endian layout (S32LE) using only the 3 less significant bytes. This means that the range is -2²³ to 2²³ - 1
-  
+
 <h3>7: Signal bandwidth</h3>
 
 The signal is bandpass filtered to this bandwidth (zero frequency centered) before being sent out as raw I/Q samples or before being demodulated for SSB and FM outputs. Thus a 20000 Hz bandwidth for example means +/-10000 Hz around center channel frequency.
@@ -64,7 +66,7 @@ When SSB formats are used only the lower half (LSB) or upper half (USB) of the b
 
 <h3>8: FM deviation</h3>
 
-This is the maximum expected FM deviation in Hz for NFM demodulated samples. Therefore it is active only for `NFM` types of sample formats. A positive deviation of this amount from the central carrier will result in a sample output value of 32767 (0x7FFF) corresponding to a +1.0 real value. A negative deviation of this amount from the central carrier will result in a sample output value of -32768 (0x8000) corresponding to a -1.0 real value.  
+This is the maximum expected FM deviation in Hz for NFM demodulated samples. Therefore it is active only for `NFM` types of sample formats. A positive deviation of this amount from the central carrier will result in a sample output value of 32767 (0x7FFF) corresponding to a +1.0 real value. A negative deviation of this amount from the central carrier will result in a sample output value of -32768 (0x8000) corresponding to a -1.0 real value.
 
 <h3>9: AGC and audio feedback control</h3>
 
@@ -72,7 +74,7 @@ This is the maximum expected FM deviation in Hz for NFM demodulated samples. The
 
 <h4>9.1: Toggle AGC</h4>
 
-It is effective only for AM and SSB. Signal is normalized to +/- 0.5 times the maximum amplitude with a time constant (averaging) of 200 ms. When engaged the squelch gate is fixed at 50 ms. The release time controlled by (15.3) can be increased from the 50 ms default for SSB signals to prevent accidental signal drops due to drops in the voice.  
+It is effective only for AM and SSB. Signal is normalized to +/- 0.5 times the maximum amplitude with a time constant (averaging) of 200 ms. When engaged the squelch gate is fixed at 50 ms. The release time controlled by (15.3) can be increased from the 50 ms default for SSB signals to prevent accidental signal drops due to drops in the voice.
 
 <h4>9.2: Toggle audio feedback</h4>
 
@@ -94,7 +96,7 @@ The changes in the following items only become effective when this button is pre
   - Audio port (9)
   - FM deviation (11)
 
-When any item of these items is changed the button is lit in green until it is pressed. 
+When any item of these items is changed the button is lit in green until it is pressed.
 
 <h3>11: Audio volume</h3>
 
@@ -120,11 +122,11 @@ Use the slider to set the squelch power threshold based on channel input power (
 
 Sets the delay after which a signal constantly above the squelch threshold effectively opens the squelch. The same delay is used for squelch release except for SSB where the gate is fixed at 50 ms and this controls the release time only.
 
-The delay in milliseconds is displayed at the right of the button. 
+The delay in milliseconds is displayed at the right of the button.
 
 <h3>14: Spectrum display</h3>
 
-This is the spectrum display of the channel signal after bandpass filtering. Please refer to the Spectrum display description for details. 
+This is the spectrum display of the channel signal after bandpass filtering. Please refer to the Spectrum display description for details.
 
-This spectrum is centered on the center frequency of the channel (center frequency of reception + channel shift) and is that of a complex signal i.e. there are positive and negative frequencies. The width of the spectrum is proportional of the sample rate. That is for a sample rate of S samples per seconds the spectrum spans from -S/2 to +S/2 Hz. 
+This spectrum is centered on the center frequency of the channel (center frequency of reception + channel shift) and is that of a complex signal i.e. there are positive and negative frequencies. The width of the spectrum is proportional of the sample rate. That is for a sample rate of S samples per seconds the spectrum spans from -S/2 to +S/2 Hz.
 

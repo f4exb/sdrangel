@@ -16,6 +16,8 @@ Note that for aircraft, there is typically a direct line-of-sight to the VOR. Th
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![VOR Demodulator plugin GUI](../../../doc/img/VORDemod_plugin.png)
 
 <h3>1: Level meter in dB</h3>

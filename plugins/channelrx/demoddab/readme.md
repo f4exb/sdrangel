@@ -8,6 +8,8 @@ The DAB demodulator uses a sample rate of 2.048MHz.
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![DAB Demodulator plugin GUI](../../../doc/img/DABDemod_plugin.png)
 
 <h3>1: Frequency shift from center frequency of reception</h3>

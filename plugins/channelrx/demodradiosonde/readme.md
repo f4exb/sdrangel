@@ -4,11 +4,13 @@
 
 This plugin can be used to demodulate RS41 radiosonde weather balloon signals. Radiosondes typically transmit on 400-406MHz and are in the sky around the world for around 1 hour around 00:00 UTC.
 
-RS41 radiosondes transmit data frames every second, containing position, velocity and PTU (Pressure, Temperature and Humidity) readings. The radios use GFSK modulation, with ±2.4kHz deviation at 4,800 baud. Reed Solomon encoding is used for ECC (Error Checking and Correction).
+RS41 radiosondes transmit data frames every second, containing position, velocity and PTU (Pressure, Temperature and Humidity) readings. The radios use GFSK modulation, with ï¿½2.4kHz deviation at 4,800 baud. Reed Solomon encoding is used for ECC (Error Checking and Correction).
 
 The Radiosonde demodulator can forward received data to the [Radiosone feature](../../feature/radiosonde/readme.md), which can plot charts showing how altitude and PTU vary over time, and also plot the position of the radiosonde on the 2D and 3D maps.
 
 <h2>Interface</h2>
+
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
 
 ![Radiosonde Demodulator plugin GUI](../../../doc/img/RadiosondeDemod_plugin.png)
 
@@ -81,18 +83,18 @@ The received frames table displays information about each radiosonde frame recei
 * Serial - The serial number of the radiosonde. Double clicking on this column will search for the radiosone on https://sondehub.org/
 * Frame - Frame number
 * Phase - Flight phase: On ground, Ascent and Descent.
-* Lat (°) - Latitude in degrees, North positive. Double clicking on this column will search for the radiosonde on the Map.
-* Lon (°) - Longitude in degrees, East positive. Double clicking on this column will search for the radiosonde on the Map.
+* Lat (ï¿½) - Latitude in degrees, North positive. Double clicking on this column will search for the radiosonde on the Map.
+* Lon (ï¿½) - Longitude in degrees, East positive. Double clicking on this column will search for the radiosonde on the Map.
 * Alt (m) - Altitude in metres.
 * Spd (km/h)  - Speed over ground in kilometres per hour.
 * VR (m/s) - Vertical climb rate in metres per second.
-* Hdg (°) - Heading in degrees.
+* Hdg (ï¿½) - Heading in degrees.
 * P (hPA) - Air pressure in hectopascals. Not all RS41s include a pressure sensor. A value ending with 'U' indicates a uncalibrated estimate and may be inaccurate.
-* T (°C) - Air temperature in degrees Celsius.  A value ending with 'U' indicates a uncalibrated estimate and may be inaccurate.
+* T (ï¿½C) - Air temperature in degrees Celsius.  A value ending with 'U' indicates a uncalibrated estimate and may be inaccurate.
 * U (%) - Relative humidity in percent.  A value ending with 'U' indicates a uncalibrated estimate and may be inaccurate.
 * Bat (V) - Battery voltage in Volts.
 * Bat - Battery status: OK or low.
-* PCB (°C) - Temperature of PCB.
+* PCB (ï¿½C) - Temperature of PCB.
 * PWM (%) - Humidity sensor heater PWM (Pulse Width Modulation) setting, in percent.
 * TX (%) - Transmit power in percent.
 * Max SF - Maximum subframe number.

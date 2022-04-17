@@ -16,6 +16,8 @@ The ADS-B plugin can send aicraft for display on the [Map Feature](../../feature
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![ADS-B Demodulator plugin settings](../../../doc/img/ADSBDemod_plugin_settings.png)
 
 <h3>1: Frequency shift from center frequency of reception value</h3>

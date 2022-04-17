@@ -50,6 +50,8 @@ The I/Q samples are copied to the baseband to be transmitted by the sink output 
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![File source channel plugin GUI](../../../doc/img/FileSource_plugin.png)
 
 <h3>1: Interpolation factor</h3>

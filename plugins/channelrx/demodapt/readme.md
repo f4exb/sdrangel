@@ -18,6 +18,8 @@ The status of the NOAA POES satellites is available at: https://www.ospo.noaa.go
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![APT Demodulator plugin GUI](../../../doc/img/APTDemod_plugin_settings.png)
 
 <h3>1: Frequency shift from center frequency of reception</h3>
@@ -69,7 +71,7 @@ This includes:
    - Whether to automatically save images on LOS.
    - Whether a combined image including telemetry should be saved.
    - Whether separate images of channel A and B, without telemetry, should be saved.
-   - Whether equidistant cylindrical (plate carrée) project images used for the map, should be saved.
+   - Whether equidistant cylindrical (plate carrï¿½e) project images used for the map, should be saved.
    - Path to save automatically saved images in.
    - The minimum number of scanlines required to be in an image, after noise cropping, for it to be automatically saved.
    - After how many scanlines image processing is applied and updates sent to the map. Lower values require more CPU power.

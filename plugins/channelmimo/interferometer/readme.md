@@ -6,6 +6,8 @@ This MIMO reception only (MI) plugin can be used to study phase difference betwe
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![Interferometer plugin GUI](../../../doc/img/Interferometer_plugin.png)
 
 The interface is divided in 3 sections that will be detailed next:

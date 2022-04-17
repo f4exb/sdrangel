@@ -10,6 +10,8 @@ In practice 4 MS/s with about 300 points per line is the lowest sample rate that
 
 <h1>Interface</h1>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![ATV Modulator plugin GUI](../../../doc/img/ATVMod_plugin.png)
 
 <h2>1: Frequency shift from center frequency of transmission</h2>

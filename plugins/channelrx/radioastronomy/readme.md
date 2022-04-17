@@ -90,6 +90,8 @@ Where:
 
 <h2>1: Settings</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![Settings GUI](../../../doc/img/RadioAstronomy_Settings.png)
 
 <h3>1.1: Frequency shift from center frequency of reception</h3>

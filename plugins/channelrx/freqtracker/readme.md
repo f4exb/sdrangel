@@ -8,6 +8,8 @@ This plugin can be used to track the center frequency of a carrier. It will try 
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![Frequency Tracker plugin GUI](../../../doc/img/FreqTracker_plugin.png)
 
 <h3>1: Frequency shift from center frequency of reception</h3>

@@ -52,6 +52,8 @@ For software built from source if you choose to have `mbelib` support you will n
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![DSD Demodulator plugin GUI](../../../doc/img/DSDdemod_plugin.png)
 
 <h3>A section: settings</h3>

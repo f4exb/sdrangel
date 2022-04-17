@@ -6,6 +6,8 @@ This plugin can be used to listen to a Broadcast FM modulated signal (BFM). In a
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![BFM Demodulator plugin GUI](../../../doc/img/BFMDemod_plugin.png)
 
 The main three areas are:

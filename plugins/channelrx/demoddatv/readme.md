@@ -18,6 +18,8 @@ The whole bandwidth available to the channel is used. That is it runs at the dev
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![DATV Demodulator plugin GUI](../../../doc/img/DATVDemod_plugin.png)
 
 <h3>A: RF settings</h3>

@@ -19,6 +19,8 @@ It adds a dependency to the [libsigmf library](https://github.com/f4exb/libsigmf
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![SigMF File Sink plugin GUI](../../../doc/img/SigMFFileSink_plugin.png)
 
 <h3>1: Frequency shift from center frequency of reception</h3>

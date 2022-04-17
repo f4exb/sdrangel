@@ -19,6 +19,8 @@ Note: this plugin is officially supported since version 6.
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![ChitpChat Modulator plugin GUI](../../../doc/img/ChirpChatMod_plugin.png)
 
 <h3>1: Frequency shift from center frequency of reception</h3>

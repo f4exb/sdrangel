@@ -6,6 +6,8 @@ This plugin can be used to transmit IEEE 802.15.4 frames. The 802.15.4 PHY & RF 
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![802.15.4 Modulator plugin GUI](../../../doc/img/IEEE_802_15_4_Mod_plugin.png)
 
 <h3>1: Frequency shift from center frequency of transmission</h3>

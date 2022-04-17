@@ -6,6 +6,8 @@ This plugin can be used to generate a narrowband frequency modulated signal. "Na
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![NFM Modulator plugin GUI](../../../doc/img/NFMMod_plugin.png)
 
 <h3>1: Frequency shift from center frequency of transmission</h3>

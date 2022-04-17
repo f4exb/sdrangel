@@ -16,6 +16,8 @@ Note that because it uses only the channelizer half band filter chain to achieve
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![Local sink channel plugin GUI](../../../doc/img/LocalSink.png)
 
 <h3>1: Decimation factor</h3>

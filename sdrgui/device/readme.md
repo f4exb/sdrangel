@@ -2,14 +2,13 @@
 
 The device windows have common top and bottom bars
 
-
 ![Device window](../../doc/img/DeviceWindow.png)
 
 <h2>A: Top bar</h2>
 
 ![Device window top bar](../../doc/img/DeviceWindow_top.png)
 
-<h3>A.1 Devcice type and index</h3>
+<h3>A.1 Device type and index</h3>
 
 The format is:
   - Device type:
@@ -19,7 +18,7 @@ The format is:
   - Semicolon separator
   - Device set index. A "device set" is the set of a device and its corresponding channels
 
-THe tooltip shows the device type, sequence number and serial number of the device if it exists.
+The tooltip shows the device type, sequence number and serial number of the device if it exists.
 
 You may click on this area and drag the window with the mouse.
 
@@ -185,7 +184,7 @@ You may click on this area and drag the window with the mouse.
 
 Clicking on this button opens the documentation about the device controls in github in the browser.
 
-<h3>A.9: Move to a workspace</h3>
+<h3>A.9: Move to another workspace</h3>
 
 Opens a dialog to choose a destination workspace to move the device window to. Nothing happens if the same workspace is selected.
 
@@ -195,13 +194,13 @@ Click this button to reduce the window to its minimum size
 
 <h3>A.11: Close window</h3>
 
-Click this button to close the window and removes the channel from the device set.
+Click this button to close the window and removes the device set i.e. the device and all its channels.
 
 <h3>A.12: Top size grip</h3>
 
 You can drag this gray square to resize the window
 
-<h2>B: Botom bar</h2>
+<h2>B: Bottom bar</h2>
 
 ![Device window bottom bar](../../doc/img/DeviceWindow_bottom.png)
 

@@ -24,6 +24,8 @@ The same waveforms can be used to trigger the scope trace
 
 <h2>B. General interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![Channel Analyzer NG plugin GUI](../../../doc/img/ChAnalyzerNG_plugin.png)
 
 The interface is essentially divided in the following sections

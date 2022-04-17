@@ -329,9 +329,14 @@ void ChannelGUI::setDeviceType(DeviceType type)
     updateIndexLabel();
 }
 
+void ChannelGUI::setDisplayedame(const QString& name)
+{
+    m_displayedName = name;
+}
+
 void ChannelGUI::setToolTip(const QString& tooltip)
 {
-    m_indexLabel->setToolTip(tooltip);
+    m_indexLabel->setToolTip(tr("%1 / %2").arg(tooltip).arg(m_displayedName));
 }
 
 void ChannelGUI::setIndex(int index)

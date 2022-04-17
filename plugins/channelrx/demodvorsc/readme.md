@@ -18,6 +18,8 @@ Several instances of this plugin can be created to monitor multiple VORs and col
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![VOR Demodulator plugin GUI](../../../doc/img/VORDemodSC_plugin.png)
 
 <h3>1: Frequency shift from center frequency of reception value</h3>
