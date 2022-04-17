@@ -56,6 +56,8 @@ public:
     virtual void zetHidden(bool hidden) { m_settings.m_hidden = hidden; }
     virtual bool getHidden() const { return m_settings.m_hidden; }
     virtual ChannelMarker& getChannelMarker() { return m_channelMarker; }
+    virtual int getStreamIndex() const { return -1; }
+    virtual void setStreamIndex(int streamIndex) { (void) streamIndex; }
 
 private:
 	Ui::InterferometerGUI* ui;

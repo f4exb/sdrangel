@@ -104,6 +104,11 @@ void ChannelAnalyzer::setDeviceAPI(DeviceAPI *deviceAPI)
     }
 }
 
+uint32_t ChannelAnalyzer::getNumberOfDeviceStreams() const
+{
+    return m_deviceAPI->getNbSourceStreams();
+}
+
 int ChannelAnalyzer::getChannelSampleRate()
 {
     DeviceSampleSource *source = m_deviceAPI->getSampleSource();

@@ -872,8 +872,12 @@ void MainWindow::sampleMIMOCreate(
     deviceGUI->setToolTip(samplingDevice->displayedName);
     deviceGUI->setTitle(samplingDevice->displayedName.split(" ")[0]);
     deviceGUI->setCurrentDeviceIndex(selectedDeviceIndex);
-    QStringList channelNames;
+    QStringList channelNames, tmpChannelNames;
     m_pluginManager->listMIMOChannels(channelNames);
+    m_pluginManager->listRxChannels(tmpChannelNames);
+    channelNames.append(tmpChannelNames);
+    m_pluginManager->listTxChannels(tmpChannelNames);
+    channelNames.append(tmpChannelNames);
     deviceGUI->setChannelNames(channelNames);
     MainSpectrumGUI *spectrumGUI = deviceUISet->m_mainSpectrumGUI;
     spectrumGUI->setDeviceType(MainSpectrumGUI::DeviceMIMO);

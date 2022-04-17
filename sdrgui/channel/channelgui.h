@@ -47,8 +47,7 @@ public:
     enum ContextMenuType
     {
         ContextMenuNone,
-        ContextMenuChannelSettings,
-        ContextMenuStreamSettings
+        ContextMenuChannelSettings
     };
 
 	ChannelGUI(QWidget *parent = nullptr);
@@ -68,6 +67,8 @@ public:
     virtual void zetHidden(bool hidden) = 0;
     virtual bool getHidden() const = 0;
     virtual ChannelMarker& getChannelMarker() = 0;
+    virtual int getStreamIndex() const = 0;
+    virtual void setStreamIndex(int streamIndex) = 0;
 
 	virtual MessageQueue* getInputMessageQueue() = 0;
 
@@ -90,7 +91,7 @@ protected:
     void mousePressEvent(QMouseEvent* event);
     void mouseMoveEvent(QMouseEvent* event);
     void resetContextMenuType() { m_contextMenuType = ContextMenuNone; }
-    void setStreamIndicator(const QString& indicator); // TODO
+    void updateIndexLabel();
 
     DeviceType m_deviceType;
     int m_deviceSetIndex;
@@ -104,7 +105,6 @@ protected slots:
     void shrinkWindow();
 
 private:
-    void updateIndexLabel();
     bool isOnMovingPad();
     QString getDeviceTypeTag();
     static QColor getTitleColor(const QColor& backgroundColor);

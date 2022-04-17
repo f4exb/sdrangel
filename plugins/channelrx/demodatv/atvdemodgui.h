@@ -59,6 +59,8 @@ public:
     virtual void zetHidden(bool hidden) { m_settings.m_hidden = hidden; }
     virtual bool getHidden() const { return m_settings.m_hidden; }
     virtual ChannelMarker& getChannelMarker() { return m_channelMarker; }
+    virtual int getStreamIndex() const { return m_settings.m_streamIndex; }
+    virtual void setStreamIndex(int streamIndex) { m_settings.m_streamIndex = streamIndex; }
 
 public slots:
 	void channelMarkerChangedByCursor();
@@ -90,7 +92,6 @@ private:
 
 	void applySettings(bool force = false);
     void displaySettings();
-    void displayStreamIndex();
     void displayRFBandwidths();
     void applySampleRate();
     void setChannelMarkerBandwidth();
@@ -107,6 +108,7 @@ private:
 private slots:
     void handleSourceMessages();
     void onWidgetRolled(QWidget* widget, bool rollDown);
+    void onMenuDialogCalled(const QPoint& p);
     void tick();
     void on_synchLevel_valueChanged(int value);
     void on_blackLevel_valueChanged(int value);

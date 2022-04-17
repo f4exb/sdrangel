@@ -233,11 +233,6 @@ void ChannelGUI::mouseMoveEvent(QMouseEvent* event)
     }
 }
 
-void ChannelGUI::setStreamIndicator(const QString& indicator)
-{
-    (void) indicator; // TODO
-}
-
 void ChannelGUI::activateSettingsDialog()
 {
     QPoint p = QCursor::pos();
@@ -363,7 +358,12 @@ void ChannelGUI::setStatusText(const QString& text)
 
 void ChannelGUI::updateIndexLabel()
 {
-    m_indexLabel->setText(tr("%1%2:%3").arg(getDeviceTypeTag()).arg(m_deviceSetIndex).arg(m_channelIndex));
+    if ((m_deviceType == DeviceMIMO) && (getStreamIndex() >= 0)) {
+        m_indexLabel->setText(tr("%1%2:%3.%4").arg(getDeviceTypeTag()).arg(m_deviceSetIndex).arg(m_channelIndex).arg(getStreamIndex()));
+    }
+    else {
+        m_indexLabel->setText(tr("%1%2:%3").arg(getDeviceTypeTag()).arg(m_deviceSetIndex).arg(m_channelIndex));
+    }
 }
 
 bool ChannelGUI::isOnMovingPad()

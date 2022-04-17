@@ -59,8 +59,9 @@ public:
     virtual void zetHidden(bool hidden) { m_settings.m_hidden = hidden; }
     virtual bool getHidden() const { return m_settings.m_hidden; }
     virtual ChannelMarker& getChannelMarker() { return m_channelMarker; }
-
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
+    virtual int getStreamIndex() const { return m_settings.m_streamIndex; }
+    virtual void setStreamIndex(int streamIndex) { m_settings.m_streamIndex = streamIndex; }
 
     static const char* const m_strChannelID;
 
@@ -140,7 +141,6 @@ private:
 	void applySettings(bool force = false);
     void displaySettings();
     void displaySystemConfiguration();
-    void displayStreamIndex();
     QString formatBytes(qint64 intBytes);
 
     void displayRRCParameters(bool blnVisible);

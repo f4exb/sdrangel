@@ -63,6 +63,18 @@ void BasicChannelSettingsDialog::setReverseAPIChannelIndex(uint16_t channelIndex
     ui->reverseAPIChannelIndex->setText(tr("%1").arg(m_reverseAPIChannelIndex));
 }
 
+void BasicChannelSettingsDialog::setNumberOfStreams(int numberOfStreams)
+{
+    ui->streamIndex->setMaximum(numberOfStreams - 1);
+    ui->streamIndex->setEnabled(true);
+}
+
+void BasicChannelSettingsDialog::setStreamIndex(int index)
+{
+    m_streamIndex = index;
+    ui->streamIndex->setValue(index);
+}
+
 void BasicChannelSettingsDialog::paintColor()
 {
     QPixmap pm(24, 24);
@@ -130,6 +142,16 @@ void BasicChannelSettingsDialog::on_reverseAPIChannelIndex_editingFinished()
     } else {
         m_reverseAPIChannelIndex = reverseAPIChannelIndex;
     }
+}
+
+void BasicChannelSettingsDialog::on_streamIndex_valueChanged(int value)
+{
+    m_streamIndex = value;
+}
+
+void BasicChannelSettingsDialog::on_titleReset_clicked()
+{
+    ui->title->setText(m_defaultTitle);
 }
 
 void BasicChannelSettingsDialog::accept()

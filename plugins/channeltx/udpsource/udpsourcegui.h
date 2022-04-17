@@ -58,6 +58,8 @@ public:
     virtual void zetHidden(bool hidden) { m_settings.m_hidden = hidden; }
     virtual bool getHidden() const { return m_settings.m_hidden; }
     virtual ChannelMarker& getChannelMarker() { return m_channelMarker; }
+    virtual int getStreamIndex() const { return m_settings.m_streamIndex; }
+    virtual void setStreamIndex(int streamIndex) { m_settings.m_streamIndex = streamIndex; }
 
 public slots:
     void channelMarkerChangedByCursor();
@@ -88,7 +90,6 @@ private:
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
     void displaySettings();
-    void displayStreamIndex();
     void setSampleFormat(int index);
     void setSampleFormatIndex(const UDPSourceSettings::SampleFormat& sampleFormat);
     bool handleMessage(const Message& message);

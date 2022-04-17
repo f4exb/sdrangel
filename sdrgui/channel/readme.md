@@ -35,11 +35,15 @@ Opens a dialog to update the common channel settings
 
 Changes the channel window title
 
-<h4>A.2.2: Channel color</h4>
+<h4>A.2.2: Reset title to default</h4>
+
+Resets the title to the channel type name.
+
+<h4>A.2.3: Channel color</h4>
 
 Changes the color of the window title bar and spectrum overlay. To change the color click on the color square to open a color chooser dialog. The hex rgb value is displayed next to the color square.
 
-<h4>A.2.3: Frequency scale display type</h4>
+<h4>A.2.4: Frequency scale display type</h4>
 
 When the mouse is over the channel window or over the central line in the spectrum a channel parameter is displayed on the frequency scale. This parameter can be:
 
@@ -48,7 +52,11 @@ When the mouse is over the channel window or over the central line in the spectr
   - AdSnd: UDP address and send port
   - AdRcv: UDP address and receive port
 
-<h4>A.2.4: Toggle reverse API feature</h4>
+<h4>A.2.5: Device stream assignment</h4>
+
+If the device is a MIMO device and the channel is single stream based i.e. not MIMO as well this sets the MIMO stream the channel will take its I/Q input from. It is disabled in other cases.
+
+<h4>A.2.6: Toggle reverse API feature</h4>
 
 Use this checkbox to toggle on/off the reverse API feature. With reverse API engaged the changes in the channel settings are forwarded to an API endpoint given by address (5.1.5), port (5.1.6), device index (5.1.7) and channel index (5.1.8) in the same format as the SDRangel REST API channel settings endpoint. With the values of the screenshot the API URL is: `http://127.0.0.1:8888/sdrangel/deviceset/0/channel/0/settings` The JSON payload follows the same format as the SDRangel REST API channel settings. Using the same example this would be:
 
@@ -81,27 +89,27 @@ Note that the PATCH method is used. The full set of parameters is sent only when
 
 More details on this feature can be found on the corresponding Wiki page.
 
-<h4>A.2.5: API address</h4>
+<h4>A.2.7: API address</h4>
 
 This is the IP address of the API endpoint
 
-<h4>A.2.6: API port</h4>
+<h4>A.2.8: API port</h4>
 
 This is the IP port of the API endpoint
 
-<h4>A.2.7: Device index</h4>
+<h4>A.2.9: Device index</h4>
 
 This is the targeted device index
 
-<h4>A.2.8: Channel index</h4>
+<h4>A.2.10: Channel index</h4>
 
 This is the targeted channel index
 
-<h4>A.2.9: Cancel changes and exit dialog</h4>
+<h4>A.2.11: Cancel changes and exit dialog</h4>
 
 Do not make any changes and exit dialog
 
-<h4>A.2.10: Validate and exit dialog</h4>
+<h4>A.2.12: Validate and exit dialog</h4>
 
 Validates the data (saves it in the channel marker object) and exits the dialog
 

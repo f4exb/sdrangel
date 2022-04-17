@@ -24,6 +24,7 @@
 #include "device/deviceuiset.h"
 #include "dsp/scopevis.h"
 #include "dsp/glscopesettings.h"
+#include "gui/basicchannelsettingsdialog.h"
 #include "ui_atvdemodgui.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
@@ -87,7 +88,7 @@ void ATVDemodGUI::displaySettings()
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
     setTitle(m_channelMarker.getTitle());
-    displayStreamIndex();
+    updateIndexLabel();
 
     m_doApplySettings = false;
 
@@ -124,15 +125,6 @@ void ATVDemodGUI::displaySettings()
     updateAbsoluteCenterFrequency();
 
     m_doApplySettings = true;
-}
-
-void ATVDemodGUI::displayStreamIndex()
-{
-    if (m_deviceUISet->m_deviceMIMOEngine) {
-        setStreamIndicator(tr("%1").arg(m_settings.m_streamIndex));
-    } else {
-        setStreamIndicator("S"); // single channel indicator
-    }
 }
 
 void ATVDemodGUI::displayRFBandwidths()
@@ -209,6 +201,53 @@ void ATVDemodGUI::handleSourceMessages()
     }
 }
 
+void ATVDemodGUI::onMenuDialogCalled(const QPoint &p)
+{
+    if (m_contextMenuType == ContextMenuChannelSettings)
+    {
+        BasicChannelSettingsDialog dialog(&m_channelMarker, this);
+        dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
+        dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
+        dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
+        dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
+        dialog.setReverseAPIChannelIndex(m_settings.m_reverseAPIChannelIndex);
+        dialog.setDefaultTitle(m_displayedName);
+
+        if (m_deviceUISet->m_deviceMIMOEngine)
+        {
+            dialog.setNumberOfStreams(m_atvDemod->getNumberOfDeviceStreams());
+            dialog.setStreamIndex(m_settings.m_streamIndex);
+        }
+
+        dialog.move(p);
+        dialog.exec();
+
+        m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
+        m_settings.m_title = m_channelMarker.getTitle();
+        m_settings.m_useReverseAPI = dialog.useReverseAPI();
+        m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
+        m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
+        m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
+
+        setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
+        setTitleColor(m_settings.m_rgbColor);
+
+        if (m_deviceUISet->m_deviceMIMOEngine)
+        {
+            m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
+            m_channelMarker.clearStreamIndexes();
+            m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
+            updateIndexLabel();
+        }
+
+        applySettings();
+    }
+
+    resetContextMenuType();
+}
+
 void ATVDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
@@ -234,6 +273,7 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
     m_helpURL = "plugins/channelrx/demodatv/readme.md";
     setAttribute(Qt::WA_DeleteOnClose, true);
     connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_atvDemod = (ATVDemod*) rxChannel;
     m_atvDemod->setMessageQueueToGUI(getInputMessageQueue());

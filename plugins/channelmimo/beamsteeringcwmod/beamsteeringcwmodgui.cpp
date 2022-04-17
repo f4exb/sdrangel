@@ -99,7 +99,6 @@ BeamSteeringCWModGUI::BeamSteeringCWModGUI(PluginAPI* pluginAPI, DeviceUISet *de
     ui->setupUi(getRollupContents());
     getRollupContents()->arrangeRollups();
     setAttribute(Qt::WA_DeleteOnClose, true);
-    setStreamIndicator("M");
 
     connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
@@ -114,7 +113,7 @@ BeamSteeringCWModGUI::BeamSteeringCWModGUI(PluginAPI* pluginAPI, DeviceUISet *de
     m_channelMarker.addStreamIndex(1);
     m_channelMarker.setColor(m_settings.m_rgbColor);
     m_channelMarker.setCenterFrequency(0);
-    m_channelMarker.setTitle("Beam Steering CW Source");
+    m_channelMarker.setTitle("BeamSteeringCWMod");
     m_channelMarker.setSourceOrSinkStream(false);
     m_channelMarker.blockSignals(false);
     m_channelMarker.setVisible(true); // activate signal on the last setting only
@@ -228,6 +227,7 @@ void BeamSteeringCWModGUI::onMenuDialogCalled(const QPoint &p)
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
         dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
         dialog.setReverseAPIChannelIndex(m_settings.m_reverseAPIChannelIndex);
+        dialog.setDefaultTitle(m_displayedName);
 
         dialog.move(p);
         dialog.exec();

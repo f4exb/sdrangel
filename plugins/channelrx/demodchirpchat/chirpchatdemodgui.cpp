@@ -343,6 +343,14 @@ void ChirpChatDemodGUI::onMenuDialogCalled(const QPoint &p)
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
         dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
         dialog.setReverseAPIChannelIndex(m_settings.m_reverseAPIChannelIndex);
+        dialog.setDefaultTitle(m_displayedName);
+
+        if (m_deviceUISet->m_deviceMIMOEngine)
+        {
+            dialog.setNumberOfStreams(m_chirpChatDemod->getNumberOfDeviceStreams());
+            dialog.setStreamIndex(m_settings.m_streamIndex);
+        }
+
         dialog.move(p);
         dialog.exec();
 
@@ -358,20 +366,14 @@ void ChirpChatDemodGUI::onMenuDialogCalled(const QPoint &p)
         setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
-        applySettings();
-    }
-    else if ((m_contextMenuType == ContextMenuStreamSettings) && (m_deviceUISet->m_deviceMIMOEngine))
-    {
-        DeviceStreamSelectionDialog dialog(this);
-        dialog.setNumberOfStreams(m_chirpChatDemod->getNumberOfDeviceStreams());
-        dialog.setStreamIndex(m_settings.m_streamIndex);
-        dialog.move(p);
-        dialog.exec();
+        if (m_deviceUISet->m_deviceMIMOEngine)
+        {
+            m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
+            m_channelMarker.clearStreamIndexes();
+            m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
+            updateIndexLabel();
+        }
 
-        m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
-        m_channelMarker.clearStreamIndexes();
-        m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
-        displayStreamIndex();
         applySettings();
     }
 
@@ -507,19 +509,11 @@ void ChirpChatDemodGUI::displaySettings()
     ui->messageLengthAuto->setChecked(m_settings.m_autoNbSymbolsMax);
 
     displaySquelch();
+    updateIndexLabel();
 
     getRollupContents()->restoreState(m_rollupState);
     updateAbsoluteCenterFrequency();
     blockApplySettings(false);
-}
-
-void ChirpChatDemodGUI::displayStreamIndex()
-{
-    if (m_deviceUISet->m_deviceMIMOEngine) {
-        setStreamIndicator(tr("%1").arg(m_settings.m_streamIndex));
-    } else {
-        setStreamIndicator("S"); // single channel indicator
-    }
 }
 
 void ChirpChatDemodGUI::displaySquelch()

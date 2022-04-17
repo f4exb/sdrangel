@@ -87,6 +87,11 @@ void ATVDemod::setDeviceAPI(DeviceAPI *deviceAPI)
     }
 }
 
+uint32_t ATVDemod::getNumberOfDeviceStreams() const
+{
+    return m_deviceAPI->getNbSourceStreams();
+}
+
 void ATVDemod::start()
 {
 	qDebug("ATVDemod::start");

@@ -42,6 +42,8 @@ public:
     virtual void zetHidden(bool hidden) { m_settings.m_hidden = hidden; }
     virtual bool getHidden() const { return m_settings.m_hidden; }
     virtual ChannelMarker& getChannelMarker() { return m_channelMarker; }
+    virtual int getStreamIndex() const { return m_settings.m_streamIndex; }
+    virtual void setStreamIndex(int streamIndex) { m_settings.m_streamIndex = streamIndex; }
 
 public slots:
 	void channelMarkerChangedByCursor();
@@ -80,7 +82,6 @@ private:
 	void applyBandwidths(unsigned int spanLog2, bool force = false);
     unsigned int spanLog2Max();
 	void displaySettings();
-    void displayStreamIndex();
 	void displayAGCPowerThreshold(int value);
     void displayAGCThresholdGate(int value);
 	bool handleMessage(const Message& message);

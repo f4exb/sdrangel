@@ -373,6 +373,13 @@ void SSBModGUI::onMenuDialogCalled(const QPoint &p)
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
         dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
         dialog.setReverseAPIChannelIndex(m_settings.m_reverseAPIChannelIndex);
+        dialog.setDefaultTitle(m_displayedName);
+
+        if (m_deviceUISet->m_deviceMIMOEngine)
+        {
+            dialog.setNumberOfStreams(m_ssbMod->getNumberOfDeviceStreams());
+            dialog.setStreamIndex(m_settings.m_streamIndex);
+        }
 
         dialog.move(p);
         dialog.exec();
@@ -389,20 +396,14 @@ void SSBModGUI::onMenuDialogCalled(const QPoint &p)
         setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
-        applySettings();
-    }
-    else if ((m_contextMenuType == ContextMenuStreamSettings) && (m_deviceUISet->m_deviceMIMOEngine))
-    {
-        DeviceStreamSelectionDialog dialog(this);
-        dialog.setNumberOfStreams(m_ssbMod->getNumberOfDeviceStreams());
-        dialog.setStreamIndex(m_settings.m_streamIndex);
-        dialog.move(p);
-        dialog.exec();
+        if (m_deviceUISet->m_deviceMIMOEngine)
+        {
+            m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
+            m_channelMarker.clearStreamIndexes();
+            m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
+            updateIndexLabel();
+        }
 
-        m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
-        m_channelMarker.clearStreamIndexes();
-        m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
-        displayStreamIndex();
         applySettings();
     }
 
@@ -663,7 +664,7 @@ void SSBModGUI::displaySettings()
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
     setTitle(m_channelMarker.getTitle());
-    displayStreamIndex();
+    updateIndexLabel();
 
     blockApplySettings(true);
 
@@ -733,15 +734,6 @@ void SSBModGUI::displaySettings()
     getRollupContents()->restoreState(m_rollupState);
     updateAbsoluteCenterFrequency();
     blockApplySettings(false);
-}
-
-void SSBModGUI::displayStreamIndex()
-{
-    if (m_deviceUISet->m_deviceMIMOEngine) {
-        setStreamIndicator(tr("%1").arg(m_settings.m_streamIndex));
-    } else {
-        setStreamIndicator("S"); // single channel indicator
-    }
 }
 
 void SSBModGUI::leaveEvent(QEvent*)
