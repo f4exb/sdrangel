@@ -268,7 +268,7 @@ void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginA
         PluginAPI::ChannelRegistrations *channelRegistrations = pluginAPI->getRxChannelRegistrations();
 
         // clear list
-        for(int i = 0; i < m_channelInstanceRegistrations.count(); i++)
+        for (int i = 0; i < m_channelInstanceRegistrations.count(); i++)
         {
             qDebug("DeviceUISet::loadRxChannelSettings: destroying old channel [%s]",
                 qPrintable(m_channelInstanceRegistrations[i].m_channelAPI->getURI()));
@@ -289,7 +289,7 @@ void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginA
 
             // create channel instance
 
-            for(int i = 0; i < channelRegistrations->count(); i++)
+            for (int i = 0; i < channelRegistrations->count(); i++)
             {
                 //if((*channelRegistrations)[i].m_channelIdURI == channelConfig.m_channelIdURI)
                 if (ChannelUtils::compareChannelURIs((*channelRegistrations)[i].m_channelIdURI, channelConfig.m_channelIdURI))
@@ -397,7 +397,7 @@ void DeviceUISet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginA
         PluginAPI::ChannelRegistrations *channelRegistrations = pluginAPI->getTxChannelRegistrations();
 
         //  clear list
-        for(int i = 0; i < m_channelInstanceRegistrations.count(); i++)
+        for (int i = 0; i < m_channelInstanceRegistrations.count(); i++)
         {
             qDebug("DeviceUISet::loadTxChannelSettings: destroying old channel [%s]",
                 qPrintable(m_channelInstanceRegistrations[i].m_channelAPI->getURI()));
@@ -410,7 +410,7 @@ void DeviceUISet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginA
         m_deviceSet->clearChannels();
         qDebug("DeviceUISet::loadTxChannelSettings: %d channel(s) in preset", preset->getChannelCount());
 
-        for(int i = 0; i < preset->getChannelCount(); i++)
+        for (int i = 0; i < preset->getChannelCount(); i++)
         {
             const Preset::ChannelConfig& channelConfig = preset->getChannelConfig(i);
             ChannelGUI *txChannelGUI = nullptr;
@@ -418,7 +418,7 @@ void DeviceUISet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginA
 
             // create channel instance
 
-            for(int i = 0; i < channelRegistrations->count(); i++)
+            for (int i = 0; i < channelRegistrations->count(); i++)
             {
                 if ((*channelRegistrations)[i].m_channelIdURI == channelConfig.m_channelIdURI)
                 {
@@ -522,11 +522,8 @@ void DeviceUISet::loadMIMOChannelSettings(const Preset *preset, PluginAPI *plugi
         qDebug("DeviceUISet::loadMIMOChannelSettings: Loading preset [%s | %s]",
             qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
 
-        // Available channel plugins
-        PluginAPI::ChannelRegistrations *channelRegistrations = pluginAPI->getMIMOChannelRegistrations();
-
         // clear list
-        for(int i = 0; i < m_channelInstanceRegistrations.count(); i++)
+        for (int i = 0; i < m_channelInstanceRegistrations.count(); i++)
         {
             qDebug("DeviceUISet::loadMIMOChannelSettings: destroying old channel [%s]",
                 qPrintable(m_channelInstanceRegistrations[i].m_channelAPI->getURI()));
@@ -541,79 +538,133 @@ void DeviceUISet::loadMIMOChannelSettings(const Preset *preset, PluginAPI *plugi
         for (int i = 0; i < preset->getChannelCount(); i++)
         {
             const Preset::ChannelConfig& channelConfig = preset->getChannelConfig(i);
-            ChannelGUI *mimoChannelGUI = nullptr;
+            ChannelGUI *channelGUI = nullptr;
             ChannelAPI *channelAPI = nullptr;
 
-            // create channel instance
-
-            for(int i = 0; i < channelRegistrations->count(); i++)
+            // Available MIMO channel plugins
+            PluginAPI::ChannelRegistrations *channelMIMORegistrations = pluginAPI->getMIMOChannelRegistrations();
+            // create MIMO channel instance
+            for (int i = 0; i < channelMIMORegistrations->count(); i++)
             {
-                //if((*channelRegistrations)[i].m_channelIdURI == channelConfig.m_channelIdURI)
-                if (ChannelUtils::compareChannelURIs((*channelRegistrations)[i].m_channelIdURI, channelConfig.m_channelIdURI))
+                if (ChannelUtils::compareChannelURIs((*channelMIMORegistrations)[i].m_channelIdURI, channelConfig.m_channelIdURI))
                 {
-                    qDebug("DeviceUISet::loadMIMOChannelSettings: creating new channel [%s] from config [%s]",
-                            qPrintable((*channelRegistrations)[i].m_channelIdURI),
+                    qDebug("DeviceUISet::loadMIMOChannelSettings: creating new MIMO channel [%s] from config [%s]",
+                            qPrintable((*channelMIMORegistrations)[i].m_channelIdURI),
                             qPrintable(channelConfig.m_channelIdURI));
                     MIMOChannel *mimoChannel;
-                    PluginInterface *pluginInterface = (*channelRegistrations)[i].m_plugin;
+                    PluginInterface *pluginInterface = (*channelMIMORegistrations)[i].m_plugin;
                     pluginInterface->createMIMOChannel(m_deviceAPI, &mimoChannel, &channelAPI);
-                    mimoChannelGUI = pluginInterface->createMIMOChannelGUI(this, mimoChannel);
-                    mimoChannelGUI->setDisplayedame(pluginInterface->getPluginDescriptor().displayedName);
-                    registerChannelInstance(channelAPI, mimoChannelGUI);
+                    channelGUI = pluginInterface->createMIMOChannelGUI(this, mimoChannel);
+                    channelGUI->setDisplayedame(pluginInterface->getPluginDescriptor().displayedName);
+                    registerChannelInstance(channelAPI, channelGUI);
                     QObject::connect(
-                        mimoChannelGUI,
+                        channelGUI,
                         &ChannelGUI::closing,
                         this,
-                        [=](){ this->handleChannelGUIClosing(mimoChannelGUI); },
+                        [=](){ this->handleChannelGUIClosing(channelGUI); },
                         Qt::QueuedConnection
                     );
                     break;
                 }
             }
 
-            if (mimoChannelGUI && channelAPI)
+            // Available Rx channel plugins
+            PluginAPI::ChannelRegistrations *channelRxRegistrations = pluginAPI->getRxChannelRegistrations();
+            // create Rx channel instance
+            for (int i = 0; i < channelRxRegistrations->count(); i++)
+            {
+                if (ChannelUtils::compareChannelURIs((*channelRxRegistrations)[i].m_channelIdURI, channelConfig.m_channelIdURI))
+                {
+                    qDebug("DeviceUISet::loadMIMOChannelSettings: creating new Rx channel [%s] from config [%s]",
+                            qPrintable((*channelRxRegistrations)[i].m_channelIdURI),
+                            qPrintable(channelConfig.m_channelIdURI));
+                    BasebandSampleSink *rxChannel;
+                    PluginInterface *pluginInterface = (*channelRxRegistrations)[i].m_plugin;
+                    pluginInterface->createRxChannel(m_deviceAPI, &rxChannel, &channelAPI);
+                    channelGUI = pluginInterface->createRxChannelGUI(this, rxChannel);
+                    channelGUI->setDisplayedame(pluginInterface->getPluginDescriptor().displayedName);
+                    registerRxChannelInstance(channelAPI, channelGUI);
+                    QObject::connect(
+                        channelGUI,
+                        &ChannelGUI::closing,
+                        this,
+                        [=](){ this->handleChannelGUIClosing(channelGUI); },
+                        Qt::QueuedConnection
+                    );
+                    break;
+                }
+            }
+
+            // Available Tx channel plugins
+            PluginAPI::ChannelRegistrations *channelTxRegistrations = pluginAPI->getTxChannelRegistrations();
+            // create Tx channel instance
+            for (int i = 0; i < channelTxRegistrations->count(); i++)
+            {
+                if (ChannelUtils::compareChannelURIs((*channelTxRegistrations)[i].m_channelIdURI, channelConfig.m_channelIdURI))
+                {
+                    qDebug("DeviceUISet::loadMIMOChannelSettings: creating new Tx channel [%s] from config [%s]",
+                            qPrintable((*channelTxRegistrations)[i].m_channelIdURI),
+                            qPrintable(channelConfig.m_channelIdURI));
+                    BasebandSampleSource *txChannel;
+                    PluginInterface *pluginInterface = (*channelTxRegistrations)[i].m_plugin;
+                    pluginInterface->createTxChannel(m_deviceAPI, &txChannel, &channelAPI);
+                    channelGUI = pluginInterface->createTxChannelGUI(this, txChannel);
+                    channelGUI->setDisplayedame(pluginInterface->getPluginDescriptor().displayedName);
+                    registerTxChannelInstance(channelAPI, channelGUI);
+                    break;
+                }
+            }
+
+            if (channelGUI && channelAPI)
             {
                 qDebug("DeviceUISet::loadMIMOChannelSettings: deserializing channel [%s]", qPrintable(channelConfig.m_channelIdURI));
-                mimoChannelGUI->deserialize(channelConfig.m_config);
-                int originalWorkspaceIndex = mimoChannelGUI->getWorkspaceIndex();
+                channelGUI->deserialize(channelConfig.m_config);
+                int originalWorkspaceIndex = channelGUI->getWorkspaceIndex();
 
                 if (workspaces && (workspaces->size() > 0) && (originalWorkspaceIndex < workspaces->size())) // restore in original workspace
                 {
-                    (*workspaces)[originalWorkspaceIndex]->addToMdiArea((QMdiSubWindow*) mimoChannelGUI);
+                    (*workspaces)[originalWorkspaceIndex]->addToMdiArea((QMdiSubWindow*) channelGUI);
                 }
                 else if (currentWorkspace) // restore in current workspace
                 {
-                    mimoChannelGUI->setWorkspaceIndex(currentWorkspace->getIndex());
-                    currentWorkspace->addToMdiArea((QMdiSubWindow*) mimoChannelGUI);
+                    channelGUI->setWorkspaceIndex(currentWorkspace->getIndex());
+                    currentWorkspace->addToMdiArea((QMdiSubWindow*) channelGUI);
                 }
 
-                if (mimoChannelGUI->getHidden()) {
-                    mimoChannelGUI->hide();
+                if (channelGUI->getHidden()) {
+                    channelGUI->hide();
                 }
 
-                mimoChannelGUI->restoreGeometry(mimoChannelGUI->getGeometryBytes());
-                mimoChannelGUI->setDeviceType(ChannelGUI::DeviceRx);
-                mimoChannelGUI->setDeviceSetIndex(m_deviceSetIndex);
-                mimoChannelGUI->setIndex(channelAPI->getIndexInDeviceSet());
-                mimoChannelGUI->setToolTip(m_deviceAPI->getSamplingDeviceDisplayName());
+                channelGUI->restoreGeometry(channelGUI->getGeometryBytes());
+                channelGUI->setDeviceType(ChannelGUI::DeviceRx);
+                channelGUI->setDeviceSetIndex(m_deviceSetIndex);
+                channelGUI->setIndex(channelAPI->getIndexInDeviceSet());
+                channelGUI->setToolTip(m_deviceAPI->getSamplingDeviceDisplayName());
 
                 QObject::connect(
-                    mimoChannelGUI,
+                    channelGUI,
+                    &ChannelGUI::closing,
+                    this,
+                    [=](){ this->handleChannelGUIClosing(channelGUI); },
+                    Qt::QueuedConnection
+                );
+                QObject::connect(
+                    channelGUI,
                     &ChannelGUI::moveToWorkspace,
                     this,
-                    [=](int wsIndexDest){ MainWindow::getInstance()->channelMove(mimoChannelGUI, wsIndexDest); }
+                    [=](int wsIndexDest){ MainWindow::getInstance()->channelMove(channelGUI, wsIndexDest); }
                 );
                 QObject::connect(
-                    mimoChannelGUI,
+                    channelGUI,
                     &ChannelGUI::duplicateChannelEmitted,
                     this,
-                    [=](){ MainWindow::getInstance()->channelDuplicate(mimoChannelGUI); }
+                    [=](){ MainWindow::getInstance()->channelDuplicate(channelGUI); }
                 );
                 QObject::connect(
-                    mimoChannelGUI,
+                    channelGUI,
                     &ChannelGUI::moveToDeviceSet,
                     this,
-                    [=](int dsIndexDest){ MainWindow::getInstance()->channelMoveToDeviceSet(mimoChannelGUI, dsIndexDest); }
+                    [=](int dsIndexDest){ MainWindow::getInstance()->channelMoveToDeviceSet(channelGUI, dsIndexDest); }
                 );
             }
         }
