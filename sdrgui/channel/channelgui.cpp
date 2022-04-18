@@ -72,7 +72,7 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
     m_moveButton->setFixedSize(20, 20);
     QIcon moveIcon(":/exit.png");
     m_moveButton->setIcon(moveIcon);
-    m_moveButton->setToolTip("Move to workspace");
+    m_moveButton->setToolTip("Move to another workspace");
 
     m_shrinkButton = new QPushButton();
     m_shrinkButton->setFixedSize(20, 20);
@@ -329,7 +329,7 @@ void ChannelGUI::setDisplayedame(const QString& name)
     m_displayedName = name;
 }
 
-void ChannelGUI::setToolTip(const QString& tooltip)
+void ChannelGUI::setIndexToolTip(const QString& tooltip)
 {
     m_indexLabel->setToolTip(tr("%1 / %2").arg(tooltip).arg(m_displayedName));
 }

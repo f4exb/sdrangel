@@ -39,8 +39,7 @@ public:
     enum ContextMenuType
     {
         ContextMenuNone,
-        ContextMenuChannelSettings,
-        ContextMenuStreamSettings
+        ContextMenuChannelSettings
     };
 
 	FeatureGUI(QWidget *parent = nullptr);
@@ -63,6 +62,7 @@ public:
     void setTitle(const QString& title);
     void setIndex(int index);
     int getIndex() const { return m_featureIndex; }
+    void setDisplayedame(const QString& name);
 
 protected:
     void closeEvent(QCloseEvent *event);
@@ -74,6 +74,7 @@ protected:
     QString m_helpURL;
     RollupContents m_rollupContents;
     ContextMenuType m_contextMenuType;
+    QString m_displayedName;
 
 protected slots:
     void shrinkWindow();

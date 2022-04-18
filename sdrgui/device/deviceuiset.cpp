@@ -338,7 +338,7 @@ void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginA
                 rxChannelGUI->setDeviceType(ChannelGUI::DeviceRx);
                 rxChannelGUI->setDeviceSetIndex(m_deviceSetIndex);
                 rxChannelGUI->setIndex(channelAPI->getIndexInDeviceSet());
-                rxChannelGUI->setToolTip(m_deviceAPI->getSamplingDeviceDisplayName());
+                rxChannelGUI->setIndexToolTip(m_deviceAPI->getSamplingDeviceDisplayName());
 
                 QObject::connect(
                     rxChannelGUI,
@@ -466,7 +466,7 @@ void DeviceUISet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginA
                 txChannelGUI->setDeviceType(ChannelGUI::DeviceRx);
                 txChannelGUI->setDeviceSetIndex(m_deviceSetIndex);
                 txChannelGUI->setIndex(channelAPI->getIndexInDeviceSet());
-                txChannelGUI->setToolTip(m_deviceAPI->getSamplingDeviceDisplayName());
+                txChannelGUI->setIndexToolTip(m_deviceAPI->getSamplingDeviceDisplayName());
 
                 QObject::connect(
                     txChannelGUI,
@@ -639,7 +639,7 @@ void DeviceUISet::loadMIMOChannelSettings(const Preset *preset, PluginAPI *plugi
                 channelGUI->setDeviceType(ChannelGUI::DeviceRx);
                 channelGUI->setDeviceSetIndex(m_deviceSetIndex);
                 channelGUI->setIndex(channelAPI->getIndexInDeviceSet());
-                channelGUI->setToolTip(m_deviceAPI->getSamplingDeviceDisplayName());
+                channelGUI->setIndexToolTip(m_deviceAPI->getSamplingDeviceDisplayName());
 
                 QObject::connect(
                     channelGUI,

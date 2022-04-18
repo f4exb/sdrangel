@@ -178,9 +178,11 @@ void FeatureUISet::loadFeatureSetSettings(
                     qPrintable((*featureRegistrations)[i].m_featureIdURI),
                     qPrintable(featureConfig.m_featureIdURI)
                 );
-                feature = (*featureRegistrations)[i].m_plugin->createFeature(apiAdapter);
-                featureGUI = (*featureRegistrations)[i].m_plugin->createFeatureGUI(this, feature);
+                PluginInterface *pluginInterface = (*featureRegistrations)[i].m_plugin;
+                feature = pluginInterface->createFeature(apiAdapter);
+                featureGUI = pluginInterface->createFeatureGUI(this, feature);
                 registerFeatureInstance(featureGUI, feature);
+                featureGUI->setDisplayedame(pluginInterface->getPluginDescriptor().displayedName);
                 break;
             }
         }

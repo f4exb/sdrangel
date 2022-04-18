@@ -94,7 +94,7 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
     m_moveButton->setFixedSize(20, 20);
     QIcon moveIcon(":/exit.png");
     m_moveButton->setIcon(moveIcon);
-    m_moveButton->setToolTip("Move to workspace");
+    m_moveButton->setToolTip("Move to another workspace");
 
     m_shrinkButton = new QPushButton();
     m_shrinkButton->setFixedSize(20, 20);

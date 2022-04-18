@@ -2153,7 +2153,7 @@ void MainWindow::channelMoveToDeviceSet(ChannelGUI *gui, int dsIndexDestination)
         gui->setIndex(channelAPI->getIndexInDeviceSet());
         gui->setDeviceSetIndex(dsIndexDestination);
         DeviceAPI *destDeviceAPI = destDeviceUI->m_deviceAPI;
-        gui->setToolTip(destDeviceAPI->getSamplingDeviceDisplayName());
+        gui->setIndexToolTip(destDeviceAPI->getSamplingDeviceDisplayName());
         channelAPI->setDeviceAPI(destDeviceAPI);
         deviceUI->removeChannelMarker(&gui->getChannelMarker());
         destDeviceUI->addChannelMarker(&gui->getChannelMarker());
@@ -2338,7 +2338,7 @@ void MainWindow::channelDuplicateToDeviceSet(ChannelGUI *sourceChannelGUI, int d
             );
 
             destChannelGUI->setDeviceSetIndex(dsIndexDestination);
-            destChannelGUI->setToolTip(destDeviceAPI->getSamplingDeviceDisplayName());
+            destChannelGUI->setIndexToolTip(destDeviceAPI->getSamplingDeviceDisplayName());
             destChannelGUI->setWorkspaceIndex(workspace->getIndex());
             qDebug("MainWindow::channelDuplicate: adding %s to workspace #%d",
                 qPrintable(destChannelGUI->getTitle()), workspace->getIndex());
@@ -2451,7 +2451,7 @@ void MainWindow::channelAddClicked(Workspace *workspace, int deviceSetIndex, int
             );
 
             gui->setDeviceSetIndex(deviceSetIndex);
-            gui->setToolTip(deviceAPI->getSamplingDeviceDisplayName());
+            gui->setIndexToolTip(deviceAPI->getSamplingDeviceDisplayName());
             gui->setWorkspaceIndex(workspace->getIndex());
             qDebug("MainWindow::channelAddClicked: adding %s to workspace #%d",
                 qPrintable(gui->getTitle()), workspace->getIndex());
@@ -2475,6 +2475,7 @@ void MainWindow::featureAddClicked(Workspace *workspace, int featureIndex)
     featureUISet->registerFeatureInstance(gui, feature);
     gui->setIndex(feature->getIndexInFeatureSet());
     gui->setWorkspaceIndex(workspace->getIndex());
+    gui->setDisplayedame(pluginInterface->getPluginDescriptor().displayedName);
     workspace->addToMdiArea((QMdiSubWindow*) gui);
 
     QObject::connect(

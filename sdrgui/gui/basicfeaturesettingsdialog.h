@@ -45,10 +45,12 @@ public:
     void setReverseAPIPort(uint16_t port);
     void setReverseAPIFeatureSetIndex(uint16_t featureSetIndex);
     void setReverseAPIFeatureIndex(uint16_t featureIndex);
+    void setDefaultTitle(const QString& title) { m_defaultTitle = title; }
     bool hasChanged() const { return m_hasChanged; }
 
 private slots:
     void on_title_editingFinished();
+    void on_titleReset_clicked();
     void on_reverseAPI_toggled(bool checked);
     void on_reverseAPIAddress_editingFinished();
     void on_reverseAPIPort_editingFinished();
@@ -64,6 +66,7 @@ private:
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIFeatureSetIndex;
     uint16_t m_reverseAPIFeatureIndex;
+    QString m_defaultTitle;
     bool m_hasChanged;
 };
 

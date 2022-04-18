@@ -78,7 +78,7 @@ public:
     void setDeviceType(DeviceType type);
     void setDisplayedame(const QString& name);
     DeviceType getDeviceType() const { return m_deviceType; }
-    void setToolTip(const QString& tooltip);
+    void setIndexToolTip(const QString& tooltip);
     void setIndex(int index);
     int getIndex() const { return m_channelIndex; }
     void setDeviceSetIndex(int index);

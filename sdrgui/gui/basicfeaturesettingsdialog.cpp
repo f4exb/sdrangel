@@ -25,6 +25,12 @@ void BasicFeatureSettingsDialog::setTitle(const QString& title)
     ui->title->blockSignals(false);
 }
 
+void BasicFeatureSettingsDialog::on_titleReset_clicked()
+{
+    ui->title->setText(m_defaultTitle);
+    m_title = ui->title->text();
+}
+
 void BasicFeatureSettingsDialog::on_title_editingFinished()
 {
     m_title = ui->title->text();

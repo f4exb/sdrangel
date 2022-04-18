@@ -67,7 +67,7 @@ FeatureGUI::FeatureGUI(QWidget *parent) :
     m_moveButton->setFixedSize(20, 20);
     QIcon moveIcon(":/exit.png");
     m_moveButton->setIcon(moveIcon);
-    m_moveButton->setToolTip("Move to workspace");
+    m_moveButton->setToolTip("Move to another workspace");
 
     m_shrinkButton = new QPushButton();
     m_shrinkButton->setFixedSize(20, 20);
@@ -260,3 +260,8 @@ void FeatureGUI::setIndex(int index)
     m_indexLabel->setText(tr("F:%1").arg(m_featureIndex));
 }
 
+void FeatureGUI::setDisplayedame(const QString& name)
+{
+    m_displayedName = name;
+    m_indexLabel->setToolTip(tr("%1").arg(m_displayedName));
+}

@@ -307,6 +307,7 @@ void SimplePTTGUI::onMenuDialogCalled(const QPoint &p)
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
         dialog.setReverseAPIFeatureSetIndex(m_settings.m_reverseAPIFeatureSetIndex);
         dialog.setReverseAPIFeatureIndex(m_settings.m_reverseAPIFeatureIndex);
+        dialog.setDefaultTitle(m_displayedName);
 
         dialog.move(p);
         dialog.exec();
@@ -318,7 +319,7 @@ void SimplePTTGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIFeatureSetIndex = dialog.getReverseAPIFeatureSetIndex();
         m_settings.m_reverseAPIFeatureIndex = dialog.getReverseAPIFeatureIndex();
 
-        setWindowTitle(m_settings.m_title);
+        setTitle(m_settings.m_title);
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
