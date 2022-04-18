@@ -2544,14 +2544,17 @@ void MainWindow::mainSpectrumMove(MainSpectrumGUI *gui, int wsIndexDestnation)
 void MainWindow::mainSpectrumShow(MainSpectrumGUI *gui)
 {
     gui->show();
+    gui->raise();
 }
 
 void MainWindow::showAllChannels(int deviceSetIndex)
 {
     DeviceUISet *deviceUISet = m_deviceUIs[deviceSetIndex];
 
-    for (int i = 0; i < deviceUISet->getNumberOfChannels(); i++) {
+    for (int i = 0; i < deviceUISet->getNumberOfChannels(); i++)
+    {
         deviceUISet->getChannelGUIAt(i)->show();
+        deviceUISet->getChannelGUIAt(i)->raise();
     }
 }
 
