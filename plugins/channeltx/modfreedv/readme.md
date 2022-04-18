@@ -179,4 +179,4 @@ The transmitted signal is further decimated by a power of two before being appli
 
 <h3>17: Channel spectrum display</h3>
 
-This is the channel spectrum display. Controls at the bottom of the panel are the same as with the central spectrum display.
+This is the channel spectrum display. Details on the spectrum view and controls can be found [here](../../../sdrgui/gui/spectrum.md)

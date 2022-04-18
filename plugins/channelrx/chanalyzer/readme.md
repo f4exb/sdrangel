@@ -38,7 +38,7 @@ The interface is essentially divided in the following sections
 
 Note 1: the scope trace is updated continuously for sweep times of 1 second or more else the display is refreshed only when the trace finishes.
 
-Note 2: the spectrum view (Channel spectrum) is not presented here.
+Note 2: details on the spectrum view and controls can be found [here](../../../sdrgui/gui/spectrum.md)
 
 <h2>C. Channel controls</h2>
 

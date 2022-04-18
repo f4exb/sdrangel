@@ -70,6 +70,10 @@ This is the relative AF volume from 0 to 10.
 
 Adjust squelch in dB.
 
+<h2>B: Spectrum</h2>
+
+Details on the spectrum view and controls can be found [here](../../../sdrgui/gui/spectrum.md)
+
 <h2>C: RDS display</h2>
 
 ![BFM Demodulator plugin RDS 1](../../../doc/img/BFMDemod_plugin_rds.png)

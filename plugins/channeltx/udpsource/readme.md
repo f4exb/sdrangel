@@ -123,6 +123,6 @@ When any item of these items is changed the button is lit in green until it is p
 
 <h3>21: Spectrum display</h3>
 
-This is the spectrum display of the channel signal before filtering. Please refer to the Spectrum display description for details.
+This is the spectrum display of the channel signal before filtering. Details on the spectrum view and controls can be found [here](../../../sdrgui/gui/spectrum.md)
 
 This spectrum is centered on the center frequency of the channel (center frequency of reception + channel shift) and is that of a complex signal i.e. there are positive and negative frequencies. The width of the spectrum is proportional of the sample rate. That is for a sample rate of S samples per seconds the spectrum spans from -S/2 to +S/2 Hz.

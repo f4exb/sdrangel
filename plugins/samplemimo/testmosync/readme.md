@@ -46,4 +46,4 @@ Use the wheels to adjust the sample rate. Left click on a digit sets the cursor 
 
 <h3>7: Spectrum display</h3>
 
-This is the final output stream spectrum display after interpolation (5). This would be sent to the hardware device. Controls on the bottom of the panel are identical to the ones of the main spectrum display.
+This is the final output stream spectrum display after interpolation (5). This would be sent to the hardware device. Details on the spectrum view and controls can be found [here](../../../sdrgui/gui/spectrum.md)

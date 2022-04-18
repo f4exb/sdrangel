@@ -75,7 +75,7 @@ Average total power in dB relative to a +/- 1.0 amplitude signal received in the
 
 <h2>B. Spectrum view</h2>
 
-This is the same display as with the channel analyzer spectrum view. This is the spectrum of a real signal so it is symmetrical around zero frequency. See Channel Analyzer plugin documentation for details.
+This is the same display as with the channel analyzer spectrum view. This is the spectrum of a real signal so it is symmetrical around zero frequency. Details on the spectrum view and controls can be found [here](../../../sdrgui/gui/spectrum.md)
 
 <h2>C. Scope view</h2>
 

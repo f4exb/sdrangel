@@ -249,4 +249,4 @@ This slider can be used to randomly set the current position in the file when fi
 
 <h3>22: Channel spectrum display</h3>
 
-This is the channel spectrum display. Controls at the bottom of the panel are the same as with the central spectrum display.
+This is the channel spectrum display. Details on the spectrum view and controls can be found [here](../../../sdrgui/gui/spectrum.md)

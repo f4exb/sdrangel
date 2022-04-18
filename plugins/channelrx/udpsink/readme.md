@@ -126,7 +126,7 @@ The delay in milliseconds is displayed at the right of the button.
 
 <h3>14: Spectrum display</h3>
 
-This is the spectrum display of the channel signal after bandpass filtering. Please refer to the Spectrum display description for details.
+This is the spectrum display of the channel signal after bandpass filtering. Details on the spectrum view and controls can be found [here](../../../sdrgui/gui/spectrum.md)
 
 This spectrum is centered on the center frequency of the channel (center frequency of reception + channel shift) and is that of a complex signal i.e. there are positive and negative frequencies. The width of the spectrum is proportional of the sample rate. That is for a sample rate of S samples per seconds the spectrum spans from -S/2 to +S/2 Hz.
 

@@ -268,7 +268,7 @@ This is the UDP address and port to where the decoded message is sent when (12) 
 
 <h3>B: De-chirped spectrum</h3>
 
-This is the spectrum of the de-chirped signal when a ChirpChat signal can be decoded.
+This is the spectrum of the de-chirped signal when a ChirpChat signal can be decoded. Details on the spectrum view and controls can be found [here](../../../sdrgui/gui/spectrum.md)
 
 The frequency span corresponds to the bandwidth of the ChirpChat signal (3). Default FFT size is 2<sup>SF</sup> where SF is the spread factor (7).
 

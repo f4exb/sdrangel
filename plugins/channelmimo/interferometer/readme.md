@@ -12,7 +12,7 @@ The top and bottom bars of the channel window are described [here](../../../sdrg
 
 The interface is divided in 3 sections that will be detailed next:
   - A: settings. These are the plugin controls
-  - B: spectrum (frequency domain). This is a spectrum display analogous to other spectrum displays. Its input varies depending on the correlation function selected
+  - B: spectrum (frequency domain). This is a spectrum display analogous to other spectrum displays. Its input varies depending on the correlation function selected. Details on the spectrum view and controls can be found [here](../../../sdrgui/gui/spectrum.md)
   - C: scope (time domain). This is a scope display analogous to other scope displays. Its input varies depending on the correlation function selected. For FFT type correlation this is not a time domain but a frequency domain display transposed to time analogous to a frequency sweep.
 
 <h2>A. Settings section</h2>

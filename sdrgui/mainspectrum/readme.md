@@ -1,6 +1,6 @@
 <h1>Main spectrum window</h1>
 
-This page details the top and bottom bars of the window and not the spectrum nor the spectrum controls. Documentation on the spectrum display and controls can be found here (TBD)
+This page details the top and bottom bars of the window and not the spectrum nor the spectrum controls. Documentation on the spectrum display and controls can be found [here](../gui/spectrum.md)
 
 ![Channel window](../../doc/img/MainSpectrum.png)
 

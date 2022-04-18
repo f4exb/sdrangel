@@ -101,4 +101,4 @@ The file path currently being written (or last closed) appears at the right of t
 
 <h3>15: Channel spectrum</h3>
 
-This is the spectrum display of the IQ stream seen by the channel. It is the same as all spectrum displays in the program and is identical to the [main window](../../../sdrgui/readme.md#) spectrum display.
+This is the spectrum display of the IQ stream seen by the channel. Details on the spectrum view and controls can be found [here](../../../sdrgui/gui/spectrum.md)
