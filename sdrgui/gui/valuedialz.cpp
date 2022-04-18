@@ -153,11 +153,10 @@ void ValueDialZ::setValueRange(bool positiveOnly, uint numDigits, qint64 min, qi
     {
 		setValue(m_valueMax);
 	}
-    else if (m_value == 0)
+    else if ((m_value == 0) && (m_valueNew == 0))
     {
 	    m_text = formatText(0);
 	    m_textNew = m_text;
-	    m_valueNew = m_value;
 	    update();
     }
 }
