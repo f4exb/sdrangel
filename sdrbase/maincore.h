@@ -745,6 +745,7 @@ public:
     friend class WebAPIAdapter;
     friend class CommandsDialog;
     friend class DeviceSetPresetsDialog;
+    friend class ConfigurationsDialog;
 
 signals:
     void deviceSetAdded(int index, DeviceAPI *device);

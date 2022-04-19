@@ -136,6 +136,34 @@
      </widget>
     </item>
     <item>
+     <widget class="QToolButton" name="configurationExport">
+      <property name="toolTip">
+       <string>Export current configuration to file</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="icon">
+       <iconset resource="../resources/res.qrc">
+        <normaloff>:/export.png</normaloff>:/export.png</iconset>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QToolButton" name="configurationImport">
+      <property name="toolTip">
+       <string>Import configuration from file into current group</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="icon">
+       <iconset resource="../resources/res.qrc">
+        <normaloff>:/import.png</normaloff>:/import.png</iconset>
+      </property>
+     </widget>
+    </item>
+    <item>
      <spacer name="horizontalSpacer">
       <property name="orientation">
        <enum>Qt::Horizontal</enum>

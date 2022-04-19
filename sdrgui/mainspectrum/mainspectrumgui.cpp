@@ -40,6 +40,7 @@ MainSpectrumGUI::MainSpectrumGUI(GLSpectrum *spectrum, GLSpectrumGUI *spectrumGU
 {
     qDebug("MainSpectrumGUI::MainSpectrumGUI: %p", parent);
     setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
+    m_helpURL = "sdrgui/mainspectrum/readme.md";
 
     m_indexLabel = new QLabel();
     m_indexLabel->setFixedSize(32, 16);
@@ -199,7 +200,7 @@ void MainSpectrumGUI::showHelp()
     if (m_helpURL.startsWith("http")) {
         url = m_helpURL;
     } else {
-        url = QString("https://github.com/f4exb/sdrangel/blob/master/%1").arg(m_helpURL); // Something like "plugins/channelrx/chanalyzer/readme.md"
+        url = QString("https://github.com/f4exb/sdrangel/blob/v7/%1").arg(m_helpURL); // Something like "plugins/channelrx/chanalyzer/readme.md"
     }
 
     QDesktopServices::openUrl(QUrl(url));

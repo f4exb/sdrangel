@@ -65,6 +65,8 @@ private slots:
 	void on_configurationSave_clicked();
 	void on_configurationUpdate_clicked();
     void on_configurationEdit_clicked();
+	void on_configurationExport_clicked();
+	void on_configurationImport_clicked();
 	void on_configurationDelete_clicked();
 	void on_configurationLoad_clicked();
 	void on_configurationTree_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);

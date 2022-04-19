@@ -14,10 +14,10 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # configure version
-set(sdrangel_VERSION_MAJOR "6")
-set(sdrangel_VERSION_MINOR "20")
-set(sdrangel_VERSION_PATCH "2")
-set(sdrangel_VERSION_SUFFIX "")
+set(sdrangel_VERSION_MAJOR "7")
+set(sdrangel_VERSION_MINOR "0")
+set(sdrangel_VERSION_PATCH "0")
+set(sdrangel_VERSION_SUFFIX "alpha.1")
 
 # SDRAngel cmake options
 option(DEBUG_OUTPUT "Print debug messages" OFF)

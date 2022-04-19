@@ -18,8 +18,10 @@
 
 #include <QMessageBox>
 #include <QDebug>
+#include <QFileDialog>
 
 #include "gui/addpresetdialog.h"
+#include "maincore.h"
 #include "configurationsdialog.h"
 #include "ui_configurationsdialog.h"
 
@@ -335,6 +337,100 @@ void ConfigurationsDialog::on_configurationLoad_clicked()
 	}
 
 	emit loadConfiguration(configuration);
+}
+
+void ConfigurationsDialog::on_configurationExport_clicked()
+{
+	QTreeWidgetItem* item = ui->configurationsTree->currentItem();
+
+	if (item)
+    {
+		if (item->type() == PItem)
+		{
+			const Configuration* configuration = qvariant_cast<const Configuration*>(item->data(0, Qt::UserRole));
+			QString base64Str = configuration->serialize().toBase64();
+			QString fileName = QFileDialog::getSaveFileName(
+                this,
+			    tr("Open preset export file"),
+                ".",
+                tr("Configuration export files (*.cfgx)"),
+                0,
+                QFileDialog::DontUseNativeDialog
+            );
+
+			if (fileName != "")
+			{
+				QFileInfo fileInfo(fileName);
+
+				if (fileInfo.suffix() != "cfgx") {
+					fileName += ".cfgx";
+				}
+
+				QFile exportFile(fileName);
+
+				if (exportFile.open(QIODevice::WriteOnly | QIODevice::Text))
+				{
+					QTextStream outstream(&exportFile);
+					outstream << base64Str;
+					exportFile.close();
+				}
+				else
+				{
+			    	QMessageBox::information(this, tr("Message"), tr("Cannot open file for writing"));
+				}
+			}
+		}
+	}
+}
+
+void ConfigurationsDialog::on_configurationImport_clicked()
+{
+	QTreeWidgetItem* item = ui->configurationsTree->currentItem();
+
+	if (item)
+	{
+		QString group;
+
+		if (item->type() == PGroup)	{
+			group = item->text(0);
+		} else if (item->type() == PItem) {
+			group = item->parent()->text(0);
+		} else {
+			return;
+		}
+
+		QString fileName = QFileDialog::getOpenFileName(
+            this,
+		    tr("Open preset export file"),
+            ".",
+            tr("Preset export files (*.cfgx)"),
+            0,
+            QFileDialog::DontUseNativeDialog
+        );
+
+		if (fileName != "")
+		{
+			QFile exportFile(fileName);
+
+			if (exportFile.open(QIODevice::ReadOnly | QIODevice::Text))
+			{
+				QByteArray base64Str;
+				QTextStream instream(&exportFile);
+				instream >> base64Str;
+				exportFile.close();
+
+				Configuration* configuration = MainCore::instance()->m_settings.newConfiguration("", "");
+				configuration->deserialize(QByteArray::fromBase64(base64Str));
+				configuration->setGroup(group); // override with current group
+
+				ui->configurationsTree->setCurrentItem(addConfigurationToTree(configuration));
+			}
+			else
+			{
+				QMessageBox::information(this, tr("Message"), tr("Cannot open file for reading"));
+			}
+		}
+	}
 }
 
 void ConfigurationsDialog::on_configurationTree_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous)
