@@ -86,6 +86,8 @@ private:
     QSizeGrip *m_sizeGripBottomRight;
     bool m_drag;
     QPoint m_DragPosition;
+    static const int m_MinimumWidth = 360;
+    static const int m_MinimumHeight = 200 + 20 + 10 + 4*22 + 5;
 
     void closeEvent(QCloseEvent *event);
     void mousePressEvent(QMouseEvent* event);

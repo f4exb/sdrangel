@@ -42,6 +42,8 @@ MainSpectrumGUI::MainSpectrumGUI(GLSpectrum *spectrum, GLSpectrumGUI *spectrumGU
     setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
     m_helpURL = "sdrgui/mainspectrum/readme.md";
 
+    setMinimumSize(m_MinimumWidth, m_MinimumHeight);
+
     m_indexLabel = new QLabel();
     m_indexLabel->setFixedSize(32, 16);
     m_indexLabel->setStyleSheet("QLabel { background-color: rgb(128, 128, 128); qproperty-alignment: AlignCenter; }");
@@ -221,7 +223,7 @@ void MainSpectrumGUI::shrinkWindow()
 {
     qDebug("MainSpectrumGUI::shrinkWindow");
     adjustSize();
-    resize(width(), 360);
+    resize(width(), m_MinimumHeight);
 }
 
 void MainSpectrumGUI::setTitle(const QString& title)
