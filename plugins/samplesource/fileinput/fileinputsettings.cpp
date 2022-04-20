@@ -36,7 +36,6 @@ void FileInputSettings::resetToDefaults()
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
-    m_workspaceIndex = 0;
 }
 
 QByteArray FileInputSettings::serialize() const
@@ -49,8 +48,6 @@ QByteArray FileInputSettings::serialize() const
     s.writeString(5, m_reverseAPIAddress);
     s.writeU32(6, m_reverseAPIPort);
     s.writeU32(7, m_reverseAPIDeviceIndex);
-    s.writeS32(8, m_workspaceIndex);
-    s.writeBlob(9, m_geometryBytes);
 
     return s.final();
 }
@@ -83,8 +80,6 @@ bool FileInputSettings::deserialize(const QByteArray& data)
 
         d.readU32(7, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
-        d.readS32(8, &m_workspaceIndex, 0);
-        d.readBlob(9, &m_geometryBytes);
 
         return true;
     }

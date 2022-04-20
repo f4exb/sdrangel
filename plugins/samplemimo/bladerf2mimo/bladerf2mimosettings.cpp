@@ -58,8 +58,6 @@ void BladeRF2MIMOSettings::resetToDefaults()
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
-
-    m_workspaceIndex = 0;
 }
 
 QByteArray BladeRF2MIMOSettings::serialize() const
@@ -98,9 +96,6 @@ QByteArray BladeRF2MIMOSettings::serialize() const
     s.writeString(52, m_reverseAPIAddress);
     s.writeU32(53, m_reverseAPIPort);
     s.writeU32(54, m_reverseAPIDeviceIndex);
-
-    s.writeS32(55, m_workspaceIndex);
-    s.writeBlob(56, m_geometryBytes);
 
     return s.final();
 }
@@ -162,9 +157,6 @@ bool BladeRF2MIMOSettings::deserialize(const QByteArray& data)
 
         d.readU32(54, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
-
-        d.readS32(55,&m_workspaceIndex, 0);
-        d.readBlob(56, &m_geometryBytes);
 
         return true;
     }

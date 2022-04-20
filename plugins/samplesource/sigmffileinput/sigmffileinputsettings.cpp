@@ -36,7 +36,6 @@ void SigMFFileInputSettings::resetToDefaults()
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
-    m_workspaceIndex = 0;
 }
 
 QByteArray SigMFFileInputSettings::serialize() const
@@ -50,8 +49,6 @@ QByteArray SigMFFileInputSettings::serialize() const
     s.writeString(6, m_reverseAPIAddress);
     s.writeU32(7, m_reverseAPIPort);
     s.writeU32(8, m_reverseAPIDeviceIndex);
-    s.writeS32(9, m_workspaceIndex);
-    s.writeBlob(10, m_geometryBytes);
 
     return s.final();
 }
@@ -85,8 +82,6 @@ bool SigMFFileInputSettings::deserialize(const QByteArray& data)
 
         d.readU32(8, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
-        d.readS32(9, &m_workspaceIndex, 0);
-        d.readBlob(10, &m_geometryBytes);
 
         return true;
     }

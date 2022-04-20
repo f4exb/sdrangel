@@ -46,7 +46,6 @@ void TestSourceSettings::resetToDefaults()
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
-    m_workspaceIndex = 0;
 }
 
 QByteArray TestSourceSettings::serialize() const
@@ -72,8 +71,6 @@ QByteArray TestSourceSettings::serialize() const
     s.writeString(19, m_reverseAPIAddress);
     s.writeU32(20, m_reverseAPIPort);
     s.writeU32(21, m_reverseAPIDeviceIndex);
-    s.writeS32(22, m_workspaceIndex);
-    s.writeBlob(23, m_geometryBytes);
 
     return s.final();
 }
@@ -136,8 +133,6 @@ bool TestSourceSettings::deserialize(const QByteArray& data)
 
         d.readU32(21, &utmp, 0);
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
-        d.readS32(22, &m_workspaceIndex, 0);
-        d.readBlob(23, &m_geometryBytes);
 
         return true;
     }

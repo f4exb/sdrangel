@@ -1266,7 +1266,8 @@ void MainWindow::loadConfiguration(const Configuration *configuration, bool from
                 deviceSetPreset.getSpectrumWorkspaceIndex() :
                 deviceWorkspaceIndex;
             sampleSinkAdd(m_workspaces[deviceWorkspaceIndex], m_workspaces[spectrumWorkspaceIndex], bestDeviceIndex);
-        } else if (deviceSetPreset.isMIMOPreset())
+        }
+        else if (deviceSetPreset.isMIMOPreset())
         {
             int bestDeviceIndex = DeviceEnumerator::instance()->getBestMIMOSamplingDeviceIndex(
                 deviceSetPreset.getSelectedDevice().m_deviceId,
@@ -1350,7 +1351,7 @@ void MainWindow::saveConfiguration(Configuration *configuration)
         deviceSetPresets.back().setSpectrumWorkspaceIndex(deviceUISet->m_mainSpectrumGUI->getWorkspaceIndex());
         deviceSetPresets.back().setDeviceGeometry(deviceUISet->m_deviceGUI->saveGeometry());
         deviceSetPresets.back().setDeviceWorkspaceIndex(deviceUISet->m_deviceGUI->getWorkspaceIndex());
-        qDebug("MainWindow::saveConfiguration: %s device in workspace %d spectrun in %d",
+        qDebug("MainWindow::saveConfiguration: %s device in workspace %d spectrum in %d",
             qPrintable(deviceUISet->m_deviceAPI->getSamplingDeviceId()),
             deviceUISet->m_deviceGUI->getWorkspaceIndex(),
             deviceUISet->m_mainSpectrumGUI->getWorkspaceIndex());

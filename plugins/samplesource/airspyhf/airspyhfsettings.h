@@ -41,8 +41,6 @@ struct AirspyHFSettings
     quint32  m_attenuatorSteps;
 	bool m_dcBlock;
 	bool m_iqCorrection;
-    int m_workspaceIndex;
-    QByteArray m_geometryBytes;
 
     AirspyHFSettings();
 	void resetToDefaults();

@@ -82,7 +82,6 @@ void MetisMISOSettings::resetToDefaults()
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
-    m_workspaceIndex = 0;
 }
 
 QByteArray MetisMISOSettings::serialize() const
@@ -113,8 +112,6 @@ QByteArray MetisMISOSettings::serialize() const
     s.writeU32(22, m_reverseAPIDeviceIndex);
     s.writeS32(23, m_streamIndex);
     s.writeS32(24, m_spectrumStreamIndex);
-    s.writeS32(25, m_workspaceIndex);
-    s.writeBlob(26, m_geometryBytes);
 
     for (int i = 0; i < m_maxReceivers; i++)
     {
@@ -178,8 +175,6 @@ bool MetisMISOSettings::deserialize(const QByteArray& data)
 
         d.readS32(23, &m_streamIndex, 0);
         d.readS32(24, &m_spectrumStreamIndex, 0);
-        d.readS32(25, &m_workspaceIndex, 0);
-        d.readBlob(26, &m_geometryBytes);
 
         return true;
     }

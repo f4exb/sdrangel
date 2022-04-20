@@ -18,8 +18,6 @@
 #ifndef PLUGINS_SAMPLESINK_FILEOUTPUT_FILEOUTPUTSETTINGS_H_
 #define PLUGINS_SAMPLESINK_FILEOUTPUT_FILEOUTPUTSETTINGS_H_
 
-#include <QByteArray>
-
 struct FileOutputSettings {
     quint64 m_centerFrequency;
     quint64 m_sampleRate;
@@ -29,8 +27,6 @@ struct FileOutputSettings {
     QString  m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIDeviceIndex;
-    int m_workspaceIndex;
-    QByteArray m_geometryBytes;
 
     FileOutputSettings();
     void resetToDefaults();

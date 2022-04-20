@@ -59,11 +59,8 @@ public:
 	virtual void resetToDefaults() = 0;
 	virtual QByteArray serialize() const = 0;
 	virtual bool deserialize(const QByteArray& data) = 0;
-    // Data saved in the derived settings
-    virtual void setWorkspaceIndex(int index)= 0;
-    virtual int getWorkspaceIndex() const = 0;
-    virtual void setGeometryBytes(const QByteArray& blob) = 0;
-    virtual QByteArray getGeometryBytes() const = 0;
+    void setWorkspaceIndex(int index) { m_workspaceIndex = index; }
+    int getWorkspaceIndex() const { return m_workspaceIndex; }
 
 	virtual MessageQueue* getInputMessageQueue() = 0;
 
@@ -86,6 +83,7 @@ protected:
 
     DeviceType m_deviceType;
     int m_deviceSetIndex;
+    int m_workspaceIndex;
     QString m_helpURL;
     QWidget *m_contents;
     ContextMenuType m_contextMenuType;

@@ -71,8 +71,6 @@ struct TestMISettings
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIDeviceIndex;
-    int m_workspaceIndex;
-    QByteArray m_geometryBytes;
     std::vector<TestMIStreamSettings> m_streams;
 
 	TestMISettings();

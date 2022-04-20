@@ -30,7 +30,6 @@ void TestSinkSettings::resetToDefaults()
     m_sampleRate = 48000;
     m_log2Interp = 0;
     m_spectrumGUI = nullptr;
-    m_workspaceIndex = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -49,8 +48,6 @@ QByteArray TestSinkSettings::serialize() const
         s.writeBlob(4, m_spectrumGUI->serialize());
     }
 
-    s.writeS32(5, m_workspaceIndex);
-    s.writeBlob(6, m_geometryBytes);
     s.writeBool(7, m_useReverseAPI);
     s.writeString(8, m_reverseAPIAddress);
     s.writeU32(9, m_reverseAPIPort);
@@ -83,8 +80,6 @@ bool TestSinkSettings::deserialize(const QByteArray& data)
             m_spectrumGUI->deserialize(bytetmp);
         }
 
-        d.readS32(5, &m_workspaceIndex, 0);
-        d.readBlob(6, &m_geometryBytes);
         d.readBool(7, &m_useReverseAPI, false);
         d.readString(8, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(9, &uintval, 0);

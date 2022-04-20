@@ -44,7 +44,6 @@ void USRPInputSettings::resetToDefaults()
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
-    m_workspaceIndex = 0;
 }
 
 QByteArray USRPInputSettings::serialize() const
@@ -67,8 +66,6 @@ QByteArray USRPInputSettings::serialize() const
     s.writeU32(14, m_reverseAPIPort);
     s.writeU32(15, m_reverseAPIDeviceIndex);
     s.writeS32(16, m_loOffset);
-    s.writeS32(17, m_workspaceIndex);
-    s.writeBlob(18, m_geometryBytes);
 
     return s.final();
 }
@@ -113,8 +110,6 @@ bool USRPInputSettings::deserialize(const QByteArray& data)
         d.readU32(15, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
         d.readS32(16, &m_loOffset, 0);
-        d.readS32(17, &m_workspaceIndex, 0);
-        d.readBlob(18, &m_geometryBytes);
 
         return true;
     }

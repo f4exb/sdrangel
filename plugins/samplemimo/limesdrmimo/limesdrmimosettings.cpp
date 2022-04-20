@@ -86,8 +86,6 @@ void LimeSDRMIMOSettings::resetToDefaults()
     m_lpfFIRBWTx1 = 2.5e6f;
     m_gainTx1 = 4;
     m_antennaPathTx1 = PATH_RFE_TX_NONE;
-
-    m_workspaceIndex = 0;
 }
 
 QByteArray LimeSDRMIMOSettings::serialize() const
@@ -154,9 +152,6 @@ QByteArray LimeSDRMIMOSettings::serialize() const
     s.writeFloat(92, m_lpfFIRBWTx1);
     s.writeU32(93, m_gainTx1);
     s.writeS32(94, (int) m_antennaPathTx1);
-
-    s.writeS32(95, m_workspaceIndex);
-    s.writeBlob(96, m_geometryBytes);
 
     return s.final();
 }
@@ -252,9 +247,6 @@ bool LimeSDRMIMOSettings::deserialize(const QByteArray& data)
         d.readU32(93, &m_gainTx1, 4);
         d.readS32(94, &intval, 0);
         m_antennaPathTx1 = (PathTxRFE) intval;
-
-        d.readS32(95, &m_workspaceIndex, 0);
-        d.readBlob(96, &m_geometryBytes);
 
         return true;
     }

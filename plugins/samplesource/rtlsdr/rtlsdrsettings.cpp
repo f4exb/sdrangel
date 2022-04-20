@@ -47,7 +47,6 @@ void RTLSDRSettings::resetToDefaults()
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
-    m_workspaceIndex = 0;
 }
 
 QByteArray RTLSDRSettings::serialize() const
@@ -74,8 +73,6 @@ QByteArray RTLSDRSettings::serialize() const
     s.writeU32(19, m_reverseAPIDeviceIndex);
     s.writeBool(20, m_iqOrder);
     s.writeBool(21, m_biasTee);
-    s.writeS32(22, m_workspaceIndex);
-    s.writeBlob(23, m_geometryBytes);
 
 	return s.final();
 }
@@ -124,8 +121,6 @@ bool RTLSDRSettings::deserialize(const QByteArray& data)
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
         d.readBool(20, &m_iqOrder, true);
         d.readBool(21, &m_biasTee, false);
-        d.readS32(22, &m_workspaceIndex, 0);
-        d.readBlob(23, &m_geometryBytes);
 
 		return true;
 	}

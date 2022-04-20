@@ -43,7 +43,6 @@ void HackRFOutputSettings::resetToDefaults()
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
-    m_workspaceIndex = 0;
 }
 
 QByteArray HackRFOutputSettings::serialize() const
@@ -64,8 +63,6 @@ QByteArray HackRFOutputSettings::serialize() const
     s.writeU32(12, m_reverseAPIDeviceIndex);
     s.writeBool(13, m_transverterMode);
     s.writeS64(14, m_transverterDeltaFrequency);
-    s.writeS32(15, m_workspaceIndex);
-    s.writeBlob(16, m_geometryBytes);
 
 	return s.final();
 }
@@ -108,8 +105,6 @@ bool HackRFOutputSettings::deserialize(const QByteArray& data)
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
         d.readBool(13, &m_transverterMode, false);
         d.readS64(14, &m_transverterDeltaFrequency, 0);
-        d.readS32(15, &m_workspaceIndex, 0);
-        d.readBlob(16, &m_geometryBytes);
 
 		return true;
 	}

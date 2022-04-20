@@ -18,8 +18,6 @@
 #ifndef PLUGINS_SAMPLEMIMO_TESTMOSYNC_TESTMOSYNCSETTINGS_H_
 #define PLUGINS_SAMPLEMIMO_TESTMOSYNC_TESTMOSYNCSETTINGS_H_
 
-#include <QByteArray>
-
 struct TestMOSyncSettings {
     typedef enum {
         FC_POS_INFRA = 0,
@@ -35,8 +33,6 @@ struct TestMOSyncSettings {
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIDeviceIndex;
-    int m_workspaceIndex;
-    QByteArray m_geometryBytes;
 
     static const unsigned int m_msThrottle;
 

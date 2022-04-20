@@ -93,9 +93,6 @@ struct XTRXMIMOSettings
     float    m_lpfBWTx1;        //!< LMS analog lowpass filter bandwidth (Hz)
     uint32_t m_gainTx1;         //!< Optimally distributed gain (dB)
     uint32_t m_pwrmodeTx1;
-    // GUI
-    int m_workspaceIndex;
-    QByteArray m_geometryBytes;
 
     XTRXMIMOSettings();
     void resetToDefaults();

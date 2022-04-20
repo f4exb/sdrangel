@@ -27,8 +27,6 @@ struct TestSinkSettings {
     quint64 m_sampleRate;
     quint32 m_log2Interp;
     Serializable *m_spectrumGUI;
-    int m_workspaceIndex;
-    QByteArray m_geometryBytes;
     bool     m_useReverseAPI;
     QString  m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;

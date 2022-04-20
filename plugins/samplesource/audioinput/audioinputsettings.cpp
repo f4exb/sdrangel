@@ -36,7 +36,6 @@ void AudioInputSettings::resetToDefaults()
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
-    m_workspaceIndex = 0;
 }
 
 QByteArray AudioInputSettings::serialize() const
@@ -48,8 +47,6 @@ QByteArray AudioInputSettings::serialize() const
     s.writeFloat(3, m_volume);
     s.writeU32(4, m_log2Decim);
     s.writeS32(5, (int)m_iqMapping);
-    s.writeS32(6, m_workspaceIndex);
-    s.writeBlob(7, m_geometryBytes);
 
     s.writeBool(24, m_useReverseAPI);
     s.writeString(25, m_reverseAPIAddress);
@@ -78,8 +75,6 @@ bool AudioInputSettings::deserialize(const QByteArray& data)
         d.readFloat(3, &m_volume, 1.0f);
         d.readU32(4, &m_log2Decim, 0);
         d.readS32(5, (int *)&m_iqMapping, IQMapping::L);
-        d.readS32(6, &m_workspaceIndex, 0);
-        d.readBlob(7, &m_geometryBytes);
 
         d.readBool(24, &m_useReverseAPI, false);
         d.readString(25, &m_reverseAPIAddress, "127.0.0.1");
