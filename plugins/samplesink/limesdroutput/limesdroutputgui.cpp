@@ -17,6 +17,7 @@
 
 #include <QDebug>
 #include <QMessageBox>
+#include <QResizeEvent>
 
 #include "ui_limesdroutputgui.h"
 #include "gui/colormapper.h"
@@ -45,6 +46,7 @@ LimeSDROutputGUI::LimeSDROutputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_limeSDROutput = (LimeSDROutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
 
     ui->setupUi(getContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getContents()->setStyleSheet(QString(tr("#LimeSDROutputGUI { border: 1px solid %1 }")
         .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesink/limesdroutput/readme.md";
@@ -134,6 +136,12 @@ bool LimeSDROutputGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void LimeSDROutputGUI::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 void LimeSDROutputGUI::updateFrequencyLimits()

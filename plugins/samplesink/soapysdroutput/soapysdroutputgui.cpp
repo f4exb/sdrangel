@@ -17,6 +17,7 @@
 
 #include <QMessageBox>
 #include <QCheckBox>
+#include <QResizeEvent>
 
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
@@ -59,6 +60,7 @@ SoapySDROutputGui::SoapySDROutputGui(DeviceUISet *deviceUISet, QWidget* parent) 
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_sampleSink = (SoapySDROutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
     ui->setupUi(getContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
     getContents()->setStyleSheet(QString(tr("#SoapySDROutputGui { border: 1px solid %1 }")
         .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesink/soapysdroutput/readme.md";
@@ -443,6 +445,11 @@ bool SoapySDROutputGui::deserialize(const QByteArray& data)
     }
 }
 
+void SoapySDROutputGui::resizeEvent(QResizeEvent* size)
+{
+    resize(360, height());
+    size->accept();
+}
 
 bool SoapySDROutputGui::handleMessage(const Message& message)
 {

@@ -47,6 +47,9 @@ public:
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     virtual bool handleMessage(const Message& message);
 
+protected:
+    void resizeEvent(QResizeEvent* size);
+
 private:
     Ui::BladeRF2OutputGui* ui;
 

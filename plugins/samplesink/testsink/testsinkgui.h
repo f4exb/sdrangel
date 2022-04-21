@@ -67,6 +67,8 @@ private:
 	int m_lastEngineState;
 	MessageQueue m_inputMessageQueue;
     SpectrumVis* m_spectrumVis;
+    static const int m_MinimumWidth = 360;
+    static const int m_MinimumHeight = 200 + 20 + 10 + 4*22 + 5;
 
 	void blockApplySettings(bool block) { m_doApplySettings = !block; }
 	void displaySettings();

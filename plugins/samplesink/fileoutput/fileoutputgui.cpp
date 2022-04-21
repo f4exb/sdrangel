@@ -22,6 +22,7 @@
 #include <QString>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QResizeEvent>
 
 #include "ui_fileoutputgui.h"
 #include "plugin/pluginapi.h"
@@ -54,6 +55,7 @@ FileOutputGui::FileOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 {
     setAttribute(Qt::WA_DeleteOnClose, true);
     ui->setupUi(getContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getContents()->setStyleSheet(QString(tr("#FileOutputGui { border: 1px solid %1 }")
         .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesink/fileoutput/readme.md";
@@ -113,6 +115,12 @@ bool FileOutputGui::deserialize(const QByteArray& data)
 		resetToDefaults();
 		return false;
 	}
+}
+
+void FileOutputGui::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 bool FileOutputGui::handleMessage(const Message& message)

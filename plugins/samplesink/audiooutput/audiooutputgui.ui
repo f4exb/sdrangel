@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>360</width>
-    <height>149</height>
+    <height>106</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,7 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>360</width>
-    <height>0</height>
+    <height>106</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>360</width>
+    <height>106</height>
    </size>
   </property>
   <property name="font">
@@ -156,13 +162,6 @@
    </item>
    <item>
     <widget class="Line" name="line">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="Line" name="line_2">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>

@@ -17,6 +17,7 @@
 
 #include <QDebug>
 #include <QMessageBox>
+#include <QResizeEvent>
 
 #include <libbladeRF.h>
 
@@ -49,6 +50,7 @@ BladeRF2OutputGui::BladeRF2OutputGui(DeviceUISet *deviceUISet, QWidget* parent) 
     uint64_t f_min, f_max;
 
     ui->setupUi(getContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getContents()->setStyleSheet(QString(tr("#BladeRF2OutputGui { border: 1px solid %1 }")
         .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesink/bladerf2output/readme.md";	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -121,6 +123,12 @@ bool BladeRF2OutputGui::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void BladeRF2OutputGui::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 void BladeRF2OutputGui::updateFrequencyLimits()
