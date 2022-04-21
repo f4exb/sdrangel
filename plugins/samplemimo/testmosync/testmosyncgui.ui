@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -147,6 +147,12 @@
      </item>
      <item>
       <widget class="QLabel" name="freqUnits">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>47</height>
+        </size>
+       </property>
        <property name="text">
         <string> kHz</string>
        </property>
@@ -263,6 +269,12 @@
      </item>
      <item>
       <widget class="QLabel" name="sampleRateLabel">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>29</height>
+        </size>
+       </property>
        <property name="text">
         <string>SR</string>
        </property>
@@ -326,6 +338,12 @@
     <layout class="QVBoxLayout" name="spectrumLayout">
      <item>
       <widget class="GLSpectrum" name="glSpectrum" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="minimumSize">
         <size>
          <width>200</width>
@@ -349,15 +367,15 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
    <class>ValueDial</class>
    <extends>QWidget</extends>
    <header>gui/valuedial.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
    <class>GLSpectrum</class>

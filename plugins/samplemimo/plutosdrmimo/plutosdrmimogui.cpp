@@ -21,6 +21,7 @@
 #include <QDateTime>
 #include <QString>
 #include <QMessageBox>
+#include <QResizeEvent>
 
 #include "plugin/pluginapi.h"
 #include "device/deviceapi.h"
@@ -69,6 +70,7 @@ PlutoSDRMIMOGUI::PlutoSDRMIMOGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     qDebug("PlutoSDRMIMOGui::PlutoSDRMIMOGui");
     setAttribute(Qt::WA_DeleteOnClose, true);
     ui->setupUi(getContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getContents()->setStyleSheet(QString(tr("#PlutoSDRMIMOGUI { border: 1px solid %1 }")
         .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplemimo/plutosdrmimo/readme.md";
@@ -144,6 +146,12 @@ bool PlutoSDRMIMOGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void PlutoSDRMIMOGUI::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 void PlutoSDRMIMOGUI::displaySettings()
