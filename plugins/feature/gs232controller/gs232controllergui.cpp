@@ -19,6 +19,7 @@
 #include <cmath>
 #include <QMessageBox>
 #include <QSerialPortInfo>
+#include <QResizeEvent>
 
 #include "SWGTargetAzimuthElevation.h"
 
@@ -68,6 +69,12 @@ bool GS232ControllerGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void GS232ControllerGUI::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 bool GS232ControllerGUI::handleMessage(const Message& message)
@@ -141,6 +148,7 @@ GS232ControllerGUI::GS232ControllerGUI(PluginAPI* pluginAPI, FeatureUISet *featu
     m_lastOnTarget(false)
 {
     ui->setupUi(getRollupContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/feature/gs232controller/readme.md";
     setAttribute(Qt::WA_DeleteOnClose, true);

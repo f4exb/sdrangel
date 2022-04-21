@@ -16,6 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QMessageBox>
+#include <QResizeEvent>
 
 #include "feature/featureuiset.h"
 #include "device/deviceset.h"
@@ -63,6 +64,12 @@ bool AFCGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void AFCGUI::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 bool AFCGUI::handleMessage(const Message& message)
@@ -131,6 +138,7 @@ AFCGUI::AFCGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     m_lastFeatureState(0)
 {
 	ui->setupUi(getRollupContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/feature/afc/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);

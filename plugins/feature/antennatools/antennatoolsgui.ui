@@ -6,20 +6,26 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>394</width>
-    <height>523</height>
+    <width>374</width>
+    <height>584</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
-    <width>360</width>
-    <height>0</height>
+    <width>374</width>
+    <height>584</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>374</width>
+    <height>584</height>
    </size>
   </property>
   <property name="font">
@@ -37,10 +43,10 @@
   <widget class="QTabWidget" name="tabWidget">
    <property name="geometry">
     <rect>
-     <x>16</x>
-     <y>19</y>
+     <x>0</x>
+     <y>0</y>
      <width>371</width>
-     <height>481</height>
+     <height>581</height>
     </rect>
    </property>
    <property name="sizePolicy">

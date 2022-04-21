@@ -16,6 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QMessageBox>
+#include <QResizeEvent>
 
 #include "feature/featureuiset.h"
 #include "gui/basicfeaturesettingsdialog.h"
@@ -67,6 +68,12 @@ bool SimplePTTGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void SimplePTTGUI::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 bool SimplePTTGUI::handleMessage(const Message& message)
@@ -151,6 +158,7 @@ SimplePTTGUI::SimplePTTGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Fea
     m_lastFeatureState(0)
 {
 	ui->setupUi(getRollupContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/feature/simpleptt/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);

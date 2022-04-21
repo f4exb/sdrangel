@@ -18,6 +18,8 @@
 
 #include <cmath>
 
+#include <QResizeEvent>
+
 #include "feature/featureuiset.h"
 #include "gui/basicfeaturesettingsdialog.h"
 #include "channel/channelwebapiutils.h"
@@ -68,6 +70,12 @@ bool AntennaToolsGUI::deserialize(const QByteArray& data)
     }
 }
 
+void AntennaToolsGUI::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
+}
+
 bool AntennaToolsGUI::handleMessage(const Message& message)
 {
     if (AntennaTools::MsgConfigureAntennaTools::match(message))
@@ -115,6 +123,7 @@ AntennaToolsGUI::AntennaToolsGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     m_deviceSets(0)
 {
     ui->setupUi(getRollupContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/feature/antennatools/readme.md";
 

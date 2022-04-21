@@ -17,6 +17,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QMessageBox>
+#include <QResizeEvent>
 
 #include "feature/featureuiset.h"
 #include "gui/basicfeaturesettingsdialog.h"
@@ -66,6 +67,12 @@ bool RigCtlServerGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void RigCtlServerGUI::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 bool RigCtlServerGUI::handleMessage(const Message& message)
@@ -127,6 +134,7 @@ RigCtlServerGUI::RigCtlServerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     m_lastFeatureState(0)
 {
 	ui->setupUi(getRollupContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/feature/rigctlserver/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);

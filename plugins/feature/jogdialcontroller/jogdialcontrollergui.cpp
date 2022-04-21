@@ -17,6 +17,7 @@
 
 #include <QMessageBox>
 #include <QMouseEvent>
+#include <QResizeEvent>
 
 #include "feature/featureuiset.h"
 #include "gui/basicfeaturesettingsdialog.h"
@@ -64,6 +65,12 @@ bool JogdialControllerGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void JogdialControllerGUI::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 bool JogdialControllerGUI::handleMessage(const Message& message)
@@ -146,6 +153,7 @@ JogdialControllerGUI::JogdialControllerGUI(PluginAPI* pluginAPI, FeatureUISet *f
     m_selectedChannel(nullptr)
 {
 	ui->setupUi(getRollupContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/feature/jogdialcontroller/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);

@@ -19,6 +19,7 @@
 #include <cmath>
 #include <QMessageBox>
 #include <QLineEdit>
+#include <QResizeEvent>
 
 #include "feature/featureuiset.h"
 #include "gui/basicfeaturesettingsdialog.h"
@@ -66,6 +67,12 @@ bool PERTesterGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void PERTesterGUI::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 bool PERTesterGUI::handleMessage(const Message& message)
@@ -127,6 +134,7 @@ PERTesterGUI::PERTesterGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Fea
     m_lastFeatureState(0)
 {
     ui->setupUi(getRollupContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/feature/pertester/readme.md";
     setAttribute(Qt::WA_DeleteOnClose, true);

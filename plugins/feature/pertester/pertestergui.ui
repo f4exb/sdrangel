@@ -6,26 +6,26 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>350</width>
-    <height>430</height>
+    <width>335</width>
+    <height>472</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
-    <width>320</width>
-    <height>100</height>
+    <width>335</width>
+    <height>472</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>350</width>
-    <height>16777215</height>
+    <width>335</width>
+    <height>472</height>
    </size>
   </property>
   <property name="font">
@@ -40,10 +40,10 @@
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>10</y>
+     <x>2</x>
+     <y>2</y>
      <width>331</width>
-     <height>291</height>
+     <height>341</height>
     </rect>
    </property>
    <property name="windowTitle">
@@ -157,6 +157,12 @@
       </item>
       <item row="1" column="0">
        <widget class="QLabel" name="packetCountLabel">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="text">
          <string>Packets</string>
         </property>
@@ -456,10 +462,10 @@ Substitutions:
   <widget class="QWidget" name="statsContainer" native="true">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>310</y>
+     <x>2</x>
+     <y>352</y>
      <width>331</width>
-     <height>91</height>
+     <height>117</height>
     </rect>
    </property>
    <property name="windowTitle">
