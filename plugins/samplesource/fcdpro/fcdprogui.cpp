@@ -17,6 +17,7 @@
 
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QResizeEvent>
 
 #include "ui_fcdprogui.h"
 #include "gui/colormapper.h"
@@ -44,6 +45,7 @@ FCDProGui::FCDProGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource = (FCDProInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
     ui->setupUi(getContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getContents()->setStyleSheet(QString(tr("#FCDProGui { border: 1px solid %1 }")
         .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesource/fcdpro/readme.md";
@@ -195,6 +197,12 @@ bool FCDProGui::deserialize(const QByteArray& data)
 		resetToDefaults();
 		return false;
 	}
+}
+
+void FCDProGui::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 bool FCDProGui::handleMessage(const Message& message)

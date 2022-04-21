@@ -18,6 +18,7 @@
 #include <QMessageBox>
 #include <QCheckBox>
 #include <QFileDialog>
+#include <QResizeEvent>
 
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
@@ -61,6 +62,7 @@ SoapySDRInputGui::SoapySDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_sampleSource = (SoapySDRInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
     ui->setupUi(getContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
     getContents()->setStyleSheet(QString(tr("#SoapySDRInputGui { border: 1px solid %1 }")
         .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesource/soapysdrinput/readme.md";
@@ -445,6 +447,12 @@ bool SoapySDRInputGui::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void SoapySDRInputGui::resizeEvent(QResizeEvent* size)
+{
+    resize(360, height());
+    size->accept();
 }
 
 bool SoapySDRInputGui::handleMessage(const Message& message)

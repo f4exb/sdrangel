@@ -18,6 +18,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QResizeEvent>
 
 #include "sdrplaygui.h"
 
@@ -43,6 +44,7 @@ SDRPlayGui::SDRPlayGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource = (SDRPlayInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
     ui->setupUi(getContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getContents()->setStyleSheet(QString(tr("#SDRPlayGui { border: 1px solid %1 }")
         .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesource/sdrplay/readme.md";
@@ -122,6 +124,12 @@ bool SDRPlayGui::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void SDRPlayGui::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 bool SDRPlayGui::handleMessage(const Message& message)

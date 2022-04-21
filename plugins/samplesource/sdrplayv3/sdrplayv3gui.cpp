@@ -18,6 +18,7 @@
 
 #include <QDebug>
 #include <QMessageBox>
+#include <QResizeEvent>
 
 #include "sdrplayv3gui.h"
 #include "sdrplayv3input.h"
@@ -43,6 +44,7 @@ SDRPlayV3Gui::SDRPlayV3Gui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sdrPlayV3Input = (SDRPlayV3Input*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
     ui->setupUi(getContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getContents()->setStyleSheet(QString(tr("#SDRPlayV3Gui { border: 1px solid %1 }")
         .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesource/sdrplayv3/readme.md";
@@ -158,6 +160,12 @@ bool SDRPlayV3Gui::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void SDRPlayV3Gui::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 bool SDRPlayV3Gui::handleMessage(const Message& message)

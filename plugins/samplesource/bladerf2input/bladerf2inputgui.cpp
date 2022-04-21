@@ -18,6 +18,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QResizeEvent>
 
 #include <libbladeRF.h>
 
@@ -51,6 +52,7 @@ BladeRF2InputGui::BladeRF2InputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     uint64_t f_min, f_max;
 
     ui->setupUi(getContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getContents()->setStyleSheet(QString(tr("#Bladerf2InputGui { border: 1px solid %1 }")
         .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesource/bladerf2input/readme.md";
@@ -134,6 +136,12 @@ bool BladeRF2InputGui::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void BladeRF2InputGui::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 void BladeRF2InputGui::updateFrequencyLimits()

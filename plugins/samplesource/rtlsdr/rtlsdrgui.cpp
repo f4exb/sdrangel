@@ -18,6 +18,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QResizeEvent>
 
 #include "rtlsdrgui.h"
 
@@ -46,7 +47,7 @@ RTLSDRGui::RTLSDRGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource = (RTLSDRInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
     ui->setupUi(getContents());
-    QString s(tr(""));
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getContents()->setStyleSheet(QString(tr("#RTLSDRGui { border: 1px solid %1 }")
         .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesource/rtlsdr/readme.md";
@@ -124,6 +125,12 @@ bool RTLSDRGui::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void RTLSDRGui::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 bool RTLSDRGui::handleMessage(const Message& message)

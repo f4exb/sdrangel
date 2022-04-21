@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -19,7 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>360</width>
-    <height>0</height>
+    <height>191</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>360</width>
+    <height>191</height>
    </size>
   </property>
   <property name="font">
@@ -29,7 +35,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>FunCubeDongle</string>
+   <string>Audio</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
@@ -49,15 +55,18 @@
    </property>
    <item>
     <layout class="QHBoxLayout" name="layoutFrequency">
-     <property name="topMargin">
-      <number>4</number>
-     </property>
      <item>
       <layout class="QVBoxLayout" name="deviceUILayout">
        <item>
         <layout class="QHBoxLayout" name="deviceButtonsLayout">
          <item>
           <widget class="ButtonSwitch" name="startStop">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="toolTip">
             <string>start/stop acquisition</string>
            </property>
@@ -104,6 +113,31 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>5</width>
+         <height>32</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>5</width>
+         <height>32</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

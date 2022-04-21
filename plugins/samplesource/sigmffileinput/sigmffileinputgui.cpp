@@ -22,6 +22,7 @@
 #include <QString>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QResizeEvent>
 
 #include "ui_sigmffileinputgui.h"
 #include "plugin/pluginapi.h"
@@ -62,6 +63,7 @@ SigMFFileInputGUI::SigMFFileInputGUI(DeviceUISet *deviceUISet, QWidget* parent) 
 {
     setAttribute(Qt::WA_DeleteOnClose, true);
     ui->setupUi(getContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
     getContents()->setStyleSheet(QString(tr("#SigMFFileInputGUI { border: 1px solid %1 }")
         .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesource/sigmffileinput/readme.md";
@@ -127,6 +129,12 @@ bool SigMFFileInputGUI::deserialize(const QByteArray& data)
 		resetToDefaults();
 		return false;
 	}
+}
+
+void SigMFFileInputGUI::resizeEvent(QResizeEvent* size)
+{
+    resize(436, height());
+    size->accept();
 }
 
 void SigMFFileInputGUI::handleInputMessages()

@@ -20,6 +20,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QResizeEvent>
 
 #include <algorithm>
 
@@ -49,6 +50,7 @@ LimeSDRInputGUI::LimeSDRInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_limeSDRInput = (LimeSDRInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
     ui->setupUi(getContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getContents()->setStyleSheet(QString(tr("#LimeSDRInputGUI { border: 1px solid %1 }")
         .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesource/limesdrinput/readme.md";
@@ -140,6 +142,12 @@ bool LimeSDRInputGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void LimeSDRInputGUI::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 bool LimeSDRInputGUI::handleMessage(const Message& message)

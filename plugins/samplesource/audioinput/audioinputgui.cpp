@@ -18,6 +18,7 @@
 
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QResizeEvent>
 
 #include "ui_audioinputgui.h"
 #include "gui/colormapper.h"
@@ -43,6 +44,7 @@ AudioInputGui::AudioInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource = (AudioInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
     ui->setupUi(getContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getContents()->setStyleSheet(QString(tr("#AudioInputGui { border: 1px solid %1 }")
         .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesource/audioinput/readme.md";
@@ -93,6 +95,12 @@ bool AudioInputGui::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void AudioInputGui::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 bool AudioInputGui::handleMessage(const Message& message)

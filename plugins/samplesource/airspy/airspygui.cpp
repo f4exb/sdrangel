@@ -18,6 +18,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QResizeEvent>
 
 #include <libairspy/airspy.h>
 
@@ -47,6 +48,7 @@ AirspyGui::AirspyGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource = (AirspyInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
     ui->setupUi(getContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getContents()->setStyleSheet(QString(tr("#AirspyGui { border: 1px solid %1 }")
         .arg(palette().highlight().color().darker(115).name())));
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -102,6 +104,12 @@ bool AirspyGui::deserialize(const QByteArray& data)
 		resetToDefaults();
 		return false;
 	}
+}
+
+void AirspyGui::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 bool AirspyGui::handleMessage(const Message& message)

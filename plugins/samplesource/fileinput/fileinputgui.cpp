@@ -22,6 +22,7 @@
 #include <QString>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QResizeEvent>
 
 #include "ui_fileinputgui.h"
 #include "plugin/pluginapi.h"
@@ -56,6 +57,7 @@ FileInputGUI::FileInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
 {
     setAttribute(Qt::WA_DeleteOnClose, true);
     ui->setupUi(getContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getContents()->setStyleSheet(QString(tr("#FileInputGUI { border: 1px solid %1 }")
         .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesource/fileinput/readme.md";
@@ -115,6 +117,12 @@ bool FileInputGUI::deserialize(const QByteArray& data)
 		resetToDefaults();
 		return false;
 	}
+}
+
+void FileInputGUI::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 void FileInputGUI::handleInputMessages()

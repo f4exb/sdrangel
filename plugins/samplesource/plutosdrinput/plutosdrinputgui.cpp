@@ -19,6 +19,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QResizeEvent>
 
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
@@ -49,6 +50,7 @@ PlutoSDRInputGui::PlutoSDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource = (PlutoSDRInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
     ui->setupUi(getContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getContents()->setStyleSheet(QString(tr("#PlutoSDRInputGUI { border: 1px solid %1 }")
         .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesource/plutosdrinput/readme.md";
@@ -120,6 +122,12 @@ bool PlutoSDRInputGui::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void PlutoSDRInputGui::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 bool PlutoSDRInputGui::handleMessage(const Message& message)

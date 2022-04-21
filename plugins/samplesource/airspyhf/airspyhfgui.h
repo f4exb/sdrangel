@@ -49,6 +49,9 @@ public:
 	uint32_t getDevSampleRate(unsigned int index);
 	int getDevSampleRateIndex(uint32_t sampleRate);
 
+protected:
+    void resizeEvent(QResizeEvent* size);
+
 private:
 	Ui::AirspyHFGui* ui;
 

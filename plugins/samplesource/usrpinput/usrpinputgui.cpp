@@ -21,6 +21,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QResizeEvent>
 
 #include <algorithm>
 
@@ -50,6 +51,7 @@ USRPInputGUI::USRPInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_usrpInput = (USRPInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
     ui->setupUi(getContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getContents()->setStyleSheet(QString(tr("#USRPInputGUI { border: 1px solid %1 }")
         .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesource/usrpinput/readme.md";
@@ -150,6 +152,12 @@ bool USRPInputGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void USRPInputGUI::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 bool USRPInputGUI::handleMessage(const Message& message)

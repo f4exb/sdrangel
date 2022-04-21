@@ -29,6 +29,7 @@
 #include <QNetworkReply>
 #include <QJsonParseError>
 #include <QJsonObject>
+#include <QResizeEvent>
 
 #include "ui_localinputgui.h"
 #include "gui/colormapper.h"
@@ -75,6 +76,7 @@ LocalInputGui::LocalInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
 	m_startingTimeStampms = 0;
     ui->setupUi(getContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getContents()->setStyleSheet(QString(tr("#LocalInputGui { border: 1px solid %1 }")
         .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesource/localinput/readme.md";
@@ -141,6 +143,12 @@ bool LocalInputGui::deserialize(const QByteArray& data)
     {
         return false;
     }
+}
+
+void LocalInputGui::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 bool LocalInputGui::handleMessage(const Message& message)

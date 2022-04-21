@@ -22,6 +22,7 @@
 #include <QString>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QResizeEvent>
 
 #include "ui_testsourcegui.h"
 #include "plugin/pluginapi.h"
@@ -54,6 +55,7 @@ TestSourceGui::TestSourceGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource = m_deviceUISet->m_deviceAPI->getSampleSource();
 
     ui->setupUi(getContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getContents()->setStyleSheet(QString(tr("#TestSourceGui { border: 1px solid %1 }")
         .arg(palette().highlight().color().darker(115).name())));
     m_helpURL = "plugins/samplesource/testsource/readme.md";
@@ -111,6 +113,12 @@ bool TestSourceGui::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void TestSourceGui::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 void TestSourceGui::on_startStop_toggled(bool checked)
