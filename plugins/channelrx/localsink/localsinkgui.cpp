@@ -223,14 +223,16 @@ int LocalSinkGUI::getLocalDeviceIndexInCombo(int localDeviceIndex)
     return -1;
 }
 
-void LocalSinkGUI::leaveEvent(QEvent*)
+void LocalSinkGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void LocalSinkGUI::enterEvent(QEvent*)
+void LocalSinkGUI::enterEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void LocalSinkGUI::handleSourceMessages()

@@ -622,14 +622,16 @@ void SSBDemodGUI::displayAGCThresholdGate(int value)
     ui->agcThresholdGate->setValue(dialValue);
 }
 
-void SSBDemodGUI::leaveEvent(QEvent*)
+void SSBDemodGUI::leaveEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void SSBDemodGUI::enterEvent(QEvent*)
+void SSBDemodGUI::enterEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void SSBDemodGUI::audioSelect()

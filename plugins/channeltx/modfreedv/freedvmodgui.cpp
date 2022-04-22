@@ -522,14 +522,16 @@ void FreeDVModGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void FreeDVModGUI::leaveEvent(QEvent*)
+void FreeDVModGUI::leaveEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void FreeDVModGUI::enterEvent(QEvent*)
+void FreeDVModGUI::enterEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void FreeDVModGUI::audioSelect()

@@ -315,14 +315,16 @@ void WFMDemodGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void WFMDemodGUI::leaveEvent(QEvent*)
+void WFMDemodGUI::leaveEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void WFMDemodGUI::enterEvent(QEvent*)
+void WFMDemodGUI::enterEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void WFMDemodGUI::audioSelect()

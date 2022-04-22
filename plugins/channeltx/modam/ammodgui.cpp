@@ -480,14 +480,16 @@ void AMModGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void AMModGUI::leaveEvent(QEvent*)
+void AMModGUI::leaveEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void AMModGUI::enterEvent(QEvent*)
+void AMModGUI::enterEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void AMModGUI::audioSelect()

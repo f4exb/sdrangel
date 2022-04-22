@@ -772,14 +772,16 @@ void RadiosondeDemodGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void RadiosondeDemodGUI::leaveEvent(QEvent*)
+void RadiosondeDemodGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void RadiosondeDemodGUI::enterEvent(QEvent*)
+void RadiosondeDemodGUI::enterEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void RadiosondeDemodGUI::tick()

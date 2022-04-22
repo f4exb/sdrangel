@@ -161,9 +161,6 @@ private:
     bool handleMessage(const Message& message);
     void makeUIConnections();
 
-    void leaveEvent(QEvent*);
-    void enterEvent(QEvent*);
-
     void filterMessageRow(int row);
     void filterMessages();
     void resizeTable();

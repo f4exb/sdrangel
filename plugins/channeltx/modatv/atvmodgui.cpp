@@ -818,14 +818,16 @@ void ATVModGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void ATVModGUI::leaveEvent(QEvent*)
+void ATVModGUI::leaveEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void ATVModGUI::enterEvent(QEvent*)
+void ATVModGUI::enterEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void ATVModGUI::tick()

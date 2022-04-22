@@ -595,14 +595,16 @@ void PacketModGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void PacketModGUI::leaveEvent(QEvent*)
+void PacketModGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void PacketModGUI::enterEvent(QEvent*)
+void PacketModGUI::enterEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void PacketModGUI::tick()

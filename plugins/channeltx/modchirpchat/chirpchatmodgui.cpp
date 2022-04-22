@@ -592,14 +592,16 @@ void ChirpChatModGUI::setBandwidths()
     }
 }
 
-void ChirpChatModGUI::leaveEvent(QEvent*)
+void ChirpChatModGUI::leaveEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void ChirpChatModGUI::enterEvent(QEvent*)
+void ChirpChatModGUI::enterEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void ChirpChatModGUI::tick()

@@ -396,14 +396,16 @@ void AMDemodGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void AMDemodGUI::leaveEvent(QEvent*)
+void AMDemodGUI::leaveEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void AMDemodGUI::enterEvent(QEvent*)
+void AMDemodGUI::enterEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void AMDemodGUI::audioSelect()

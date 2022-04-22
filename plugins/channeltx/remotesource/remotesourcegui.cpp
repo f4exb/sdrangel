@@ -271,14 +271,16 @@ void RemoteSourceGUI::displayPosition()
     ui->filterChainText->setText(s);
 }
 
-void RemoteSourceGUI::leaveEvent(QEvent*)
+void RemoteSourceGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void RemoteSourceGUI::enterEvent(QEvent*)
+void RemoteSourceGUI::enterEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void RemoteSourceGUI::handleSourceMessages()

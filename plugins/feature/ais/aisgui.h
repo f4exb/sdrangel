@@ -92,9 +92,6 @@ private:
     void displaySettings();
     bool handleMessage(const Message& message);
 
-    void leaveEvent(QEvent*);
-    void enterEvent(QEvent*);
-
     void sendToMap(const QString &name, const QString &label,
         const QString &image, const QString &text,
         const QString &model, float modelOffset, float labelOffset,

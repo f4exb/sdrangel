@@ -635,14 +635,16 @@ void AISDemodGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void AISDemodGUI::leaveEvent(QEvent*)
+void AISDemodGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void AISDemodGUI::enterEvent(QEvent*)
+void AISDemodGUI::enterEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void AISDemodGUI::tick()

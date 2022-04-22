@@ -198,14 +198,16 @@ void LocalSourceGUI::updateLocalDevices()
     }
 }
 
-void LocalSourceGUI::leaveEvent(QEvent*)
+void LocalSourceGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void LocalSourceGUI::enterEvent(QEvent*)
+void LocalSourceGUI::enterEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void LocalSourceGUI::handleSourceMessages()

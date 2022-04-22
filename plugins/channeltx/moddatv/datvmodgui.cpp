@@ -604,14 +604,16 @@ void DATVModGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void DATVModGUI::leaveEvent(QEvent*)
+void DATVModGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void DATVModGUI::enterEvent(QEvent*)
+void DATVModGUI::enterEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void DATVModGUI::tick()

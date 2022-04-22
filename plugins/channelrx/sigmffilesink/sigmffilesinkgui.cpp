@@ -297,14 +297,16 @@ void SigMFFileSinkGUI::displayPos()
     ui->filterChainIndex->setText(tr("%1").arg(m_fixedShiftIndex));
 }
 
-void SigMFFileSinkGUI::leaveEvent(QEvent*)
+void SigMFFileSinkGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void SigMFFileSinkGUI::enterEvent(QEvent*)
+void SigMFFileSinkGUI::enterEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void SigMFFileSinkGUI::channelMarkerChangedByCursor()

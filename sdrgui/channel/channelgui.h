@@ -21,6 +21,7 @@
 #include <QMdiSubWindow>
 #include <QMap>
 
+#include "gui/framelesswindowresizer.h"
 #include "export.h"
 
 class QCloseEvent;
@@ -87,9 +88,11 @@ public:
     void setStatusText(const QString& text);
 
 protected:
-    void closeEvent(QCloseEvent *event);
-    void mousePressEvent(QMouseEvent* event);
-    void mouseMoveEvent(QMouseEvent* event);
+    void closeEvent(QCloseEvent *event) override;
+    void leaveEvent(QEvent *event) override;
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
+    void mouseMoveEvent(QMouseEvent* event) override;
     void resetContextMenuType() { m_contextMenuType = ContextMenuNone; }
     void updateIndexLabel();
 
@@ -125,11 +128,11 @@ private:
     QHBoxLayout *m_topLayout;
     QHBoxLayout *m_centerLayout;
     QHBoxLayout *m_bottomLayout;
-    QSizeGrip *m_sizeGripTopRight;
     QSizeGrip *m_sizeGripBottomRight;
     bool m_drag;
     QPoint m_DragPosition;
     QMap<QWidget*, int> m_heightsMap;
+    FramelessWindowResizer m_resizer;
 
 private slots:
     void activateSettingsDialog();

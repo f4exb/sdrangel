@@ -284,14 +284,6 @@ void GS232ControllerGUI::updatePipeList(const QList<GS232ControllerSettings::Ava
     // }
 }
 
-void GS232ControllerGUI::leaveEvent(QEvent*)
-{
-}
-
-void GS232ControllerGUI::enterEvent(QEvent*)
-{
-}
-
 void GS232ControllerGUI::onMenuDialogCalled(const QPoint &p)
 {
     if (m_contextMenuType == ContextMenuChannelSettings)

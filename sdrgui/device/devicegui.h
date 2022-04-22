@@ -26,6 +26,7 @@
 #include <QWidget>
 
 #include "gui/channeladddialog.h"
+#include "gui/framelesswindowresizer.h"
 #include "export.h"
 
 class QCloseEvent;
@@ -76,9 +77,11 @@ public:
     void setChannelNames(const QStringList& channelNames) { m_channelAddDialog.addChannelNames(channelNames); }
 
 protected:
-    void closeEvent(QCloseEvent *event);
-    void mousePressEvent(QMouseEvent* event);
-    void mouseMoveEvent(QMouseEvent* event);
+    void closeEvent(QCloseEvent *event) override;
+    void leaveEvent(QEvent *event) override;
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
+    void mouseMoveEvent(QMouseEvent* event) override;
     void resetContextMenuType() { m_contextMenuType = ContextMenuNone; }
 
     DeviceType m_deviceType;
@@ -114,12 +117,12 @@ private:
     QHBoxLayout *m_topLayout;
     QHBoxLayout *m_centerLayout;
     QHBoxLayout *m_bottomLayout;
-    QSizeGrip *m_sizeGripTopRight;
     QSizeGrip *m_sizeGripBottomRight;
     bool m_drag;
     QPoint m_DragPosition;
     int m_currentDeviceIndex; //!< Index in device plugins registrations
     ChannelAddDialog m_channelAddDialog;
+    FramelessWindowResizer m_resizer;
 
 private slots:
     void activateSettingsDialog();
