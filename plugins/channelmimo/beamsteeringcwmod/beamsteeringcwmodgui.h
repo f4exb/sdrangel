@@ -60,6 +60,9 @@ public:
     virtual int getStreamIndex() const { return -1; }
     virtual void setStreamIndex(int streamIndex) { (void) streamIndex; }
 
+protected:
+    void resizeEvent(QResizeEvent* size);
+
 private:
     Ui::BeamSteeringCWModGUI* ui;
     PluginAPI* m_pluginAPI;

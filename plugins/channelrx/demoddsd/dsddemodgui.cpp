@@ -39,6 +39,7 @@
 #include <QDockWidget>
 #include <QMainWindow>
 #include <QDebug>
+#include <QResizeEvent>
 
 #include <complex>
 
@@ -80,6 +81,12 @@ bool DSDDemodGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void DSDDemodGUI::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 bool DSDDemodGUI::handleMessage(const Message& message)
@@ -337,6 +344,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_dsdStatusTextDialog(0)
 {
 	ui->setupUi(getRollupContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/demoddsd/readme.md";
 	ui->screenTV->setColor(true);

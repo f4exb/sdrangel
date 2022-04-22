@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>388</width>
-    <height>446</height>
+    <width>382</width>
+    <height>500</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,8 +18,8 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>352</width>
-    <height>0</height>
+    <width>382</width>
+    <height>500</height>
    </size>
   </property>
   <property name="font">
@@ -39,7 +39,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>390</width>
+     <width>380</width>
      <height>151</height>
     </rect>
    </property>
@@ -634,7 +634,7 @@
     <rect>
      <x>0</x>
      <y>210</y>
-     <width>391</width>
+     <width>380</width>
      <height>171</height>
     </rect>
    </property>
@@ -719,9 +719,9 @@
   <widget class="QWidget" name="scopeContainer" native="true">
    <property name="geometry">
     <rect>
-     <x>20</x>
+     <x>0</x>
      <y>400</y>
-     <width>351</width>
+     <width>380</width>
      <height>341</height>
     </rect>
    </property>
@@ -917,15 +917,15 @@
    <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
-   <class>RollupContents</class>
-   <extends>QWidget</extends>
-   <header>gui/rollupcontents.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>ValueDialZ</class>
    <extends>QWidget</extends>
    <header>gui/valuedialz.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>RollupContents</class>
+   <extends>QWidget</extends>
+   <header>gui/rollupcontents.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

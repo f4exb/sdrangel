@@ -20,6 +20,7 @@
 #include <QDockWidget>
 #include <QMainWindow>
 #include <QMediaMetaData>
+#include <QResizeEvent>
 
 #include "device/deviceuiset.h"
 #include "dsp/dspengine.h"
@@ -78,6 +79,12 @@ bool DATVDemodGUI::deserialize(const QByteArray& arrData)
         resetToDefaults();
         return false;
     }
+}
+
+void DATVDemodGUI::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 bool DATVDemodGUI::handleMessage(const Message& message)
@@ -214,6 +221,7 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
     m_cstlnSetByModcod(false)
 {
     ui->setupUi(getRollupContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/demoddatv/readme.md";
     ui->screenTV->setColor(true);

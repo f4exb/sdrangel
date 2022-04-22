@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -19,7 +19,7 @@
   <property name="minimumSize">
    <size>
     <width>642</width>
-    <height>0</height>
+    <height>670</height>
    </size>
   </property>
   <property name="font">
@@ -508,6 +508,12 @@
      <height>151</height>
     </rect>
    </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
    <property name="windowTitle">
     <string>Baseband Spectrum</string>
    </property>
@@ -529,6 +535,12 @@
     </property>
     <item>
      <widget class="GLSpectrum" name="glSpectrum" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="font">
        <font>
         <family>Liberation Mono</family>
@@ -538,7 +550,14 @@
      </widget>
     </item>
     <item>
-     <widget class="GLSpectrumGUI" name="spectrumGUI" native="true"/>
+     <widget class="GLSpectrumGUI" name="spectrumGUI" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -1884,20 +1903,14 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>RollupContents</class>
-   <extends>QWidget</extends>
-   <header>gui/rollupcontents.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>ButtonSwitch</class>
    <extends>QToolButton</extends>
    <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
-   <class>LevelMeterSignalDB</class>
+   <class>ValueDialZ</class>
    <extends>QWidget</extends>
-   <header>gui/levelmeter.h</header>
+   <header>gui/valuedialz.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -1913,9 +1926,15 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ValueDialZ</class>
+   <class>RollupContents</class>
    <extends>QWidget</extends>
-   <header>gui/valuedialz.h</header>
+   <header>gui/rollupcontents.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>LevelMeterSignalDB</class>
+   <extends>QWidget</extends>
+   <header>gui/levelmeter.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

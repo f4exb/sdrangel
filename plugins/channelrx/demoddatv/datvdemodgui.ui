@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -19,7 +19,7 @@
   <property name="minimumSize">
    <size>
     <width>530</width>
-    <height>442</height>
+    <height>476</height>
    </size>
   </property>
   <property name="maximumSize">
@@ -1394,10 +1394,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>RollupContents</class>
-   <extends>QWidget</extends>
-   <header>gui/rollupcontents.h</header>
-   <container>1</container>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
    <class>ValueDialZ</class>
@@ -1406,15 +1405,16 @@
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>RollupContents</class>
+   <extends>QWidget</extends>
+   <header>gui/rollupcontents.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>LevelMeterSignalDB</class>
    <extends>QWidget</extends>
    <header>gui/levelmeter.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
    <class>DATVideoRender</class>

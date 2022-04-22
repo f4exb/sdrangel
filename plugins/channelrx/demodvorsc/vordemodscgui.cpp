@@ -19,6 +19,7 @@
 #include <limits>
 
 #include <QDebug>
+#include <QResizeEvent>
 
 #include "device/deviceuiset.h"
 #include "dsp/dspengine.h"
@@ -74,6 +75,12 @@ bool VORDemodSCGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void VORDemodSCGUI::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 bool VORDemodSCGUI::handleMessage(const Message& message)
@@ -291,6 +298,7 @@ VORDemodSCGUI::VORDemodSCGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     m_tickCount(0)
 {
     ui->setupUi(getRollupContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/demodvorsc/readme.md";
 

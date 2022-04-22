@@ -18,6 +18,7 @@
 
 #include <QDockWidget>
 #include <QMainWindow>
+#include <QResizeEvent>
 
 #include "atvdemodgui.h"
 
@@ -74,6 +75,12 @@ bool ATVDemodGUI::deserialize(const QByteArray& data)
         applySettings(true); // will have true
         return false;
     }
+}
+
+void ATVDemodGUI::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 void ATVDemodGUI::displaySettings()
@@ -269,6 +276,7 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
         m_basebandSampleRate(48000)
 {
     ui->setupUi(getRollupContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/demodatv/readme.md";
     setAttribute(Qt::WA_DeleteOnClose, true);

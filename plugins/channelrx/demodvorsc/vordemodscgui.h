@@ -64,6 +64,9 @@ public slots:
     void channelMarkerChangedByCursor();
     void channelMarkerHighlightedByCursor();
 
+protected:
+    void resizeEvent(QResizeEvent* size);
+
 private:
     Ui::VORDemodSCGUI* ui;
     PluginAPI* m_pluginAPI;

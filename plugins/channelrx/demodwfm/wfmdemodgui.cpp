@@ -55,6 +55,12 @@ bool WFMDemodGUI::deserialize(const QByteArray& data)
     }
 }
 
+void WFMDemodGUI::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
+}
+
 bool WFMDemodGUI::handleMessage(const Message& message)
 {
     if (WFMDemod::MsgConfigureWFMDemod::match(message))
@@ -219,6 +225,7 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_audioSampleRate(-1)
 {
 	ui->setupUi(getRollupContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/demodwfm/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);

@@ -10,6 +10,12 @@
     <height>458</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="minimumSize">
    <size>
     <width>552</width>
@@ -33,6 +39,12 @@
      <width>550</width>
      <height>100</height>
     </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
    </property>
    <property name="minimumSize">
     <size>
@@ -505,7 +517,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="verticalLayoutWidget">
+  <widget class="QWidget" name="verticalWidget" native="true">
    <property name="geometry">
     <rect>
      <x>0</x>
@@ -514,8 +526,11 @@
      <height>351</height>
     </rect>
    </property>
-   <property name="windowTitle">
-    <string>Channel Spectrum</string>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
    </property>
    <layout class="QVBoxLayout" name="SpectrumLayout">
     <property name="spacing">
@@ -523,6 +538,12 @@
     </property>
     <item>
      <widget class="GLSpectrum" name="glSpectrum" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="minimumSize">
        <size>
         <width>0</width>
@@ -545,12 +566,6 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>RollupContents</class>
-   <extends>QWidget</extends>
-   <header>gui/rollupcontents.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>ButtonSwitch</class>
    <extends>QToolButton</extends>
    <header>gui/buttonswitch.h</header>
@@ -571,6 +586,12 @@
    <class>GLSpectrumGUI</class>
    <extends>QWidget</extends>
    <header>gui/glspectrumgui.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>RollupContents</class>
+   <extends>QWidget</extends>
+   <header>gui/rollupcontents.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

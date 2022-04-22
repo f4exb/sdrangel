@@ -2,6 +2,7 @@
 #include <QDockWidget>
 #include <QMainWindow>
 #include <QDebug>
+#include <QResizeEvent>
 
 #include "ui_nfmdemodgui.h"
 #include "plugin/pluginapi.h"
@@ -53,6 +54,12 @@ bool NFMDemodGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void NFMDemodGUI::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 bool NFMDemodGUI::handleMessage(const Message& message)
@@ -360,6 +367,7 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_tickCount(0)
 {
 	ui->setupUi(getRollupContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/demodnfm/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);

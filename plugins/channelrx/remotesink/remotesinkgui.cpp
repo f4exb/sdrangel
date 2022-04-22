@@ -16,6 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QLocale>
+#include <QResizeEvent>
 
 #include "device/deviceuiset.h"
 #include "gui/basicchannelsettingsdialog.h"
@@ -63,6 +64,12 @@ bool RemoteSinkGUI::deserialize(const QByteArray& data)
     }
 }
 
+void RemoteSinkGUI::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
+}
+
 bool RemoteSinkGUI::handleMessage(const Message& message)
 {
     if (RemoteSink::MsgConfigureRemoteSink::match(message))
@@ -102,6 +109,7 @@ RemoteSinkGUI::RemoteSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
         m_tickCount(0)
 {
     ui->setupUi(getRollupContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/remotesink/readme.md";
     setAttribute(Qt::WA_DeleteOnClose, true);

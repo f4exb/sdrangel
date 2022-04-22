@@ -18,6 +18,7 @@
 #include <QDockWidget>
 #include <QMainWindow>
 #include <QDebug>
+#include <QResizeEvent>
 
 #include "amdemodgui.h"
 #include "amdemodssbdialog.h"
@@ -70,6 +71,12 @@ bool AMDemodGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void AMDemodGUI::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 bool AMDemodGUI::handleMessage(const Message& message)
@@ -260,6 +267,7 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 	m_tickCount(0)
 {
 	ui->setupUi(getRollupContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/demodam/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);

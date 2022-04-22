@@ -16,6 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QLocale>
+#include <QResizeEvent>
 
 #include "device/deviceuiset.h"
 #include "gui/basicchannelsettingsdialog.h"
@@ -68,6 +69,12 @@ bool LocalSinkGUI::deserialize(const QByteArray& data)
     }
 }
 
+void LocalSinkGUI::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
+}
+
 bool LocalSinkGUI::handleMessage(const Message& message)
 {
     if (DSPSignalNotification::match(message))
@@ -106,6 +113,7 @@ LocalSinkGUI::LocalSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
         m_tickCount(0)
 {
     ui->setupUi(getRollupContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getRollupContents()->arrangeRollups();
     m_helpURL = "plugins/channelrx/localsink/readme.md";
     setAttribute(Qt::WA_DeleteOnClose, true);

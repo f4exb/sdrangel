@@ -10,6 +10,12 @@
     <height>680</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="minimumSize">
    <size>
     <width>532</width>
@@ -1180,6 +1186,12 @@
      <height>260</height>
     </rect>
    </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
    <property name="minimumSize">
     <size>
      <width>373</width>
@@ -1207,6 +1219,12 @@
     </property>
     <item>
      <widget class="GLSpectrum" name="glSpectrum" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="minimumSize">
        <size>
         <width>0</width>
@@ -1223,9 +1241,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>RollupContents</class>
+   <class>ValueDialZ</class>
    <extends>QWidget</extends>
-   <header>gui/rollupcontents.h</header>
+   <header>gui/valuedialz.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -1241,9 +1259,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ValueDialZ</class>
+   <class>RollupContents</class>
    <extends>QWidget</extends>
-   <header>gui/valuedialz.h</header>
+   <header>gui/rollupcontents.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

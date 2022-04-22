@@ -44,6 +44,9 @@ public slots:
 	void channelMarkerChangedByCursor();
     void channelMarkerHighlightedByCursor();
 
+protected:
+    void resizeEvent(QResizeEvent* size);
+
 private:
 	Ui::WFMDemodGUI* ui;
 	PluginAPI* m_pluginAPI;
