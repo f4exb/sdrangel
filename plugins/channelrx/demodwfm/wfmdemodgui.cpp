@@ -55,6 +55,14 @@ bool WFMDemodGUI::deserialize(const QByteArray& data)
     }
 }
 
+void WFMDemodGUI::resizeEvent(QResizeEvent* size)
+{
+    int maxWidth = getRollupContents()->maximumWidth();
+    int minHeight = getRollupContents()->minimumHeight() + getRollupContents()->getAdditionalHeiht() + getAdditionalHeight();
+    resize(width() < maxWidth ? width() : maxWidth, minHeight);
+    size->accept();
+}
+
 bool WFMDemodGUI::handleMessage(const Message& message)
 {
     if (WFMDemod::MsgConfigureWFMDemod::match(message))
@@ -218,11 +226,13 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_squelchOpen(false),
     m_audioSampleRate(-1)
 {
-	ui->setupUi(getRollupContents());
-    getRollupContents()->arrangeRollups();
-    m_helpURL = "plugins/channelrx/demodwfm/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
-	connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    m_helpURL = "plugins/channelrx/demodwfm/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 

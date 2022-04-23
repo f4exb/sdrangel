@@ -10,16 +10,22 @@
     <height>170</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="minimumSize">
    <size>
     <width>302</width>
-    <height>0</height>
+    <height>170</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>302</width>
-    <height>16777215</height>
+    <width>560</width>
+    <height>170</height>
    </size>
   </property>
   <property name="font">
@@ -44,12 +50,6 @@
     <size>
      <width>300</width>
      <height>0</height>
-    </size>
-   </property>
-   <property name="maximumSize">
-    <size>
-     <width>300</width>
-     <height>16777215</height>
     </size>
    </property>
    <property name="windowTitle">
@@ -436,15 +436,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>RollupContents</class>
+   <class>ValueDial</class>
    <extends>QWidget</extends>
-   <header>gui/rollupcontents.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>LevelMeterSignalDB</class>
-   <extends>QWidget</extends>
-   <header>gui/levelmeter.h</header>
+   <header>gui/valuedial.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -454,9 +448,15 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ValueDial</class>
+   <class>RollupContents</class>
    <extends>QWidget</extends>
-   <header>gui/valuedial.h</header>
+   <header>gui/rollupcontents.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>LevelMeterSignalDB</class>
+   <extends>QWidget</extends>
+   <header>gui/levelmeter.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

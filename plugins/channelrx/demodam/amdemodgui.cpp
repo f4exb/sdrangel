@@ -18,6 +18,7 @@
 #include <QDockWidget>
 #include <QMainWindow>
 #include <QDebug>
+#include <QResizeEvent>
 
 #include "amdemodgui.h"
 #include "amdemodssbdialog.h"
@@ -70,6 +71,14 @@ bool AMDemodGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void AMDemodGUI::resizeEvent(QResizeEvent* size)
+{
+    int maxWidth = getRollupContents()->maximumWidth();
+    int minHeight = getRollupContents()->minimumHeight() + getRollupContents()->getAdditionalHeiht() + getAdditionalHeight();
+    resize(width() < maxWidth ? width() : maxWidth, minHeight);
+    size->accept();
 }
 
 bool AMDemodGUI::handleMessage(const Message& message)
@@ -259,11 +268,13 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 	m_samUSB(true),
 	m_tickCount(0)
 {
-	ui->setupUi(getRollupContents());
-    getRollupContents()->arrangeRollups();
-    m_helpURL = "plugins/channelrx/demodam/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
-	connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    m_helpURL = "plugins/channelrx/demodam/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_amDemod = reinterpret_cast<AMDemod*>(rxChannel);

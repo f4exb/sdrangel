@@ -55,6 +55,14 @@ bool NFMDemodGUI::deserialize(const QByteArray& data)
     }
 }
 
+void NFMDemodGUI::resizeEvent(QResizeEvent* size)
+{
+    int maxWidth = getRollupContents()->maximumWidth();
+    int minHeight = getRollupContents()->minimumHeight() + getRollupContents()->getAdditionalHeiht() + getAdditionalHeight();
+    resize(width() < maxWidth ? width() : maxWidth, minHeight);
+    size->accept();
+}
+
 bool NFMDemodGUI::handleMessage(const Message& message)
 {
     if (NFMDemodReport::MsgReportCTCSSFreq::match(message))
@@ -359,12 +367,13 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_dcsShowPositive(false),
 	m_tickCount(0)
 {
-	ui->setupUi(getRollupContents());
-    getRollupContents()->arrangeRollups();
-    m_helpURL = "plugins/channelrx/demodnfm/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
-
-	connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    m_helpURL = "plugins/channelrx/demodnfm/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_nfmDemod = reinterpret_cast<NFMDemod*>(rxChannel);
