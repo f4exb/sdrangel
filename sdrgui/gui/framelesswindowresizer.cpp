@@ -181,6 +181,11 @@ void FramelessWindowResizer::mouseMoveEvent(QMouseEvent* event)
             size.setHeight(m_widget->height());
         }
 
+        // Prevent horizontal expansion of horizontal fixed widgets
+        if (m_widget->sizePolicy().horizontalPolicy() == QSizePolicy::Fixed) {
+            size.setWidth(m_widget->width());
+        }
+
         // Move
         if (m_vMove || m_hMove)
         {
