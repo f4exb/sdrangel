@@ -258,9 +258,6 @@ private:
     bool handleMessage(const Message& message);
     void makeUIConnections();
 
-    void leaveEvent(QEvent*);
-    void enterEvent(QEvent*);
-
     void resizeTable();
     QAction *createCheckableItem(QString& text, int idx, bool checked);
 

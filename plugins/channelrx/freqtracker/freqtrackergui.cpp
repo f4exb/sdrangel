@@ -465,14 +465,16 @@ void FreqTrackerGUI::displaySpectrumBandwidth(int spanLog2)
     ui->glSpectrum->setSampleRate(spectrumRate);
 }
 
-void FreqTrackerGUI::leaveEvent(QEvent*)
+void FreqTrackerGUI::leaveEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void FreqTrackerGUI::enterEvent(QEvent*)
+void FreqTrackerGUI::enterEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void FreqTrackerGUI::tick()

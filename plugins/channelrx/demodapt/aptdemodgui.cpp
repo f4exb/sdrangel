@@ -814,14 +814,16 @@ void APTDemodGUI::displayPalettes()
     ui->channels->blockSignals(false);
 }
 
-void APTDemodGUI::leaveEvent(QEvent*)
+void APTDemodGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void APTDemodGUI::enterEvent(QEvent*)
+void APTDemodGUI::enterEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void APTDemodGUI::tick()

@@ -222,14 +222,6 @@ void RadiosondeGUI::displaySettings()
     getRollupContents()->arrangeRollups();
 }
 
-void RadiosondeGUI::leaveEvent(QEvent*)
-{
-}
-
-void RadiosondeGUI::enterEvent(QEvent*)
-{
-}
-
 void RadiosondeGUI::onMenuDialogCalled(const QPoint &p)
 {
     if (m_contextMenuType == ContextMenuChannelSettings)

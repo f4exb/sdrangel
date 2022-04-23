@@ -39,7 +39,8 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
     m_deviceSetIndex(0),
     m_channelIndex(0),
     m_contextMenuType(ContextMenuNone),
-    m_drag(false)
+    m_drag(false),
+    m_resizer(this)
 {
     qDebug("ChannelGUI::ChannelGUI");
     setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
@@ -123,7 +124,7 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
     m_statusLabel->setToolTip("Channel status");
 
     m_layouts = new QVBoxLayout();
-    m_layouts->setContentsMargins(0, 4, 0, 4);
+    m_layouts->setContentsMargins(m_resizer.m_gripSize, 4, m_resizer.m_gripSize, 4);
     m_layouts->setSpacing(2);
 
     m_topLayout = new QHBoxLayout();
@@ -137,10 +138,6 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
     m_topLayout->addWidget(m_shrinkButton);
     m_topLayout->addWidget(m_hideButton);
     m_topLayout->addWidget(m_closeButton);
-    m_sizeGripTopRight = new QSizeGrip(this);
-    m_sizeGripTopRight->setStyleSheet("QSizeGrip { background-color: rgb(128, 128, 128); width: 10px; height: 10px; }");
-    m_sizeGripTopRight->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    m_topLayout->addWidget(m_sizeGripTopRight, 0, Qt::AlignTop | Qt::AlignRight);
 
     m_centerLayout = new QHBoxLayout();
     m_rollupContents = new RollupContents(); // Do not delete! Done in child's destructor with "delete ui"
@@ -153,7 +150,6 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
     m_bottomLayout->addWidget(m_statusFrequency);
     m_bottomLayout->addWidget(m_statusLabel);
     m_sizeGripBottomRight = new QSizeGrip(this);
-    m_sizeGripBottomRight->setStyleSheet("QSizeGrip { background-color: rgb(128, 128, 128); width: 10px; height: 10px; }");
     m_sizeGripBottomRight->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     // m_bottomLayout->addStretch(1);
     m_bottomLayout->addWidget(m_sizeGripBottomRight, 0, Qt::AlignBottom | Qt::AlignRight);
@@ -189,7 +185,6 @@ ChannelGUI::~ChannelGUI()
     delete m_sizeGripBottomRight;
     delete m_bottomLayout;
     delete m_centerLayout;
-    delete m_sizeGripTopRight;
     delete m_topLayout;
     delete m_layouts;
     delete m_statusLabel;
@@ -222,6 +217,15 @@ void ChannelGUI::mousePressEvent(QMouseEvent* event)
         m_DragPosition = event->globalPos() - pos();
         event->accept();
     }
+    else
+    {
+        m_resizer.mousePressEvent(event);
+    }
+}
+
+void ChannelGUI::mouseReleaseEvent(QMouseEvent* event)
+{
+    m_resizer.mouseReleaseEvent(event);
 }
 
 void ChannelGUI::mouseMoveEvent(QMouseEvent* event)
@@ -231,6 +235,16 @@ void ChannelGUI::mouseMoveEvent(QMouseEvent* event)
         move(event->globalPos() - m_DragPosition);
         event->accept();
     }
+    else
+    {
+        m_resizer.mouseMoveEvent(event);
+    }
+}
+
+void ChannelGUI::leaveEvent(QEvent* event)
+{
+    m_resizer.leaveEvent(event);
+    QMdiSubWindow::leaveEvent(event);
 }
 
 void ChannelGUI::activateSettingsDialog()

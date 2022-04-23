@@ -263,14 +263,6 @@ void AFCGUI::updateDeviceSetLists(const AFC::MsgDeviceSetListsReport& report)
     ui->trackedDevice->blockSignals(false);
 }
 
-void AFCGUI::leaveEvent(QEvent*)
-{
-}
-
-void AFCGUI::enterEvent(QEvent*)
-{
-}
-
 void AFCGUI::onMenuDialogCalled(const QPoint &p)
 {
     if (m_contextMenuType == ContextMenuChannelSettings)

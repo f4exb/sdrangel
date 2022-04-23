@@ -388,14 +388,16 @@ void VORDemodSCGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void VORDemodSCGUI::leaveEvent(QEvent*)
+void VORDemodSCGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void VORDemodSCGUI::enterEvent(QEvent*)
+void VORDemodSCGUI::enterEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void VORDemodSCGUI::audioSelect()

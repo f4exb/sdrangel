@@ -579,14 +579,16 @@ void NFMModGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void NFMModGUI::leaveEvent(QEvent*)
+void NFMModGUI::leaveEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void NFMModGUI::enterEvent(QEvent*)
+void NFMModGUI::enterEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void NFMModGUI::audioSelect()

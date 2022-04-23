@@ -333,14 +333,16 @@ void FileSourceGUI::displayRateAndShift()
     m_channelMarker.setBandwidth(channelSampleRate);
 }
 
-void FileSourceGUI::leaveEvent(QEvent*)
+void FileSourceGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void FileSourceGUI::enterEvent(QEvent*)
+void FileSourceGUI::enterEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void FileSourceGUI::handleSourceMessages()

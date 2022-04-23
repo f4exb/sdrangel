@@ -276,14 +276,6 @@ bool RigCtlServerGUI::updateChannelList()
     return false;
 }
 
-void RigCtlServerGUI::leaveEvent(QEvent*)
-{
-}
-
-void RigCtlServerGUI::enterEvent(QEvent*)
-{
-}
-
 void RigCtlServerGUI::onMenuDialogCalled(const QPoint &p)
 {
     if (m_contextMenuType == ContextMenuChannelSettings)

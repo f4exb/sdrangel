@@ -78,9 +78,6 @@ private:
 	bool handleMessage(const Message& message);
     void makeUIConnections();
 
-	void leaveEvent(QEvent*);
-	void enterEvent(QEvent*);
-
 private slots:
 	void onMenuDialogCalled(const QPoint &p);
 	void onWidgetRolled(QWidget* widget, bool rollDown);

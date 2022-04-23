@@ -189,14 +189,6 @@ void PERTesterGUI::displaySettings()
     getRollupContents()->arrangeRollups();
 }
 
-void PERTesterGUI::leaveEvent(QEvent*)
-{
-}
-
-void PERTesterGUI::enterEvent(QEvent*)
-{
-}
-
 void PERTesterGUI::onMenuDialogCalled(const QPoint &p)
 {
     if (m_contextMenuType == ContextMenuChannelSettings)

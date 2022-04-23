@@ -199,14 +199,6 @@ void AntennaToolsGUI::makeUIConnections()
     QObject::connect(ui->dishSurfaceError, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &AntennaToolsGUI::on_dishSurfaceError_valueChanged);
 }
 
-void AntennaToolsGUI::leaveEvent(QEvent*)
-{
-}
-
-void AntennaToolsGUI::enterEvent(QEvent*)
-{
-}
-
 void AntennaToolsGUI::onMenuDialogCalled(const QPoint &p)
 {
     if (m_contextMenuType == ContextMenuChannelSettings)

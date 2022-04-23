@@ -668,14 +668,16 @@ void PagerDemodGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void PagerDemodGUI::leaveEvent(QEvent*)
+void PagerDemodGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void PagerDemodGUI::enterEvent(QEvent*)
+void PagerDemodGUI::enterEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void PagerDemodGUI::tick()

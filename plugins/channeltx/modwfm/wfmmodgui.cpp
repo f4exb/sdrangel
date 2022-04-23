@@ -497,14 +497,16 @@ void WFMModGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void WFMModGUI::leaveEvent(QEvent*)
+void WFMModGUI::leaveEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void WFMModGUI::enterEvent(QEvent*)
+void WFMModGUI::enterEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void WFMModGUI::audioSelect()

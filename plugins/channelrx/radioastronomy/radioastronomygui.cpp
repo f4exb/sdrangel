@@ -2569,14 +2569,16 @@ void RadioAstronomyGUI::displaySettings()
     getRollupContents()->arrangeRollups();
 }
 
-void RadioAstronomyGUI::leaveEvent(QEvent*)
+void RadioAstronomyGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void RadioAstronomyGUI::enterEvent(QEvent*)
+void RadioAstronomyGUI::enterEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void RadioAstronomyGUI::tick()

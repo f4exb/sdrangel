@@ -390,14 +390,16 @@ void RadioClockGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void RadioClockGUI::leaveEvent(QEvent*)
+void RadioClockGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void RadioClockGUI::enterEvent(QEvent*)
+void RadioClockGUI::enterEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void RadioClockGUI::tick()

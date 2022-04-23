@@ -239,14 +239,6 @@ void DemodAnalyzerGUI::updateChannelList()
     }
 }
 
-void DemodAnalyzerGUI::leaveEvent(QEvent*)
-{
-}
-
-void DemodAnalyzerGUI::enterEvent(QEvent*)
-{
-}
-
 void DemodAnalyzerGUI::onMenuDialogCalled(const QPoint &p)
 {
     if (m_contextMenuType == ContextMenuChannelSettings)

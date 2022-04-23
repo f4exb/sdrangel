@@ -76,9 +76,6 @@ private:
     bool handleMessage(const Message& message);
     void makeUIConnections();
 
-    void leaveEvent(QEvent*);
-    void enterEvent(QEvent*);
-
     void calcDipoleLength();
     double calcDipoleFrequency(double totalLength);
     void calcDishFocalLength();

@@ -414,14 +414,16 @@ void FreeDVDemodGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void FreeDVDemodGUI::leaveEvent(QEvent*)
+void FreeDVDemodGUI::leaveEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void FreeDVDemodGUI::enterEvent(QEvent*)
+void FreeDVDemodGUI::enterEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void FreeDVDemodGUI::audioSelect()

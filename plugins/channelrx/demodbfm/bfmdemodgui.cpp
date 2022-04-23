@@ -500,14 +500,16 @@ void BFMDemodGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void BFMDemodGUI::leaveEvent(QEvent*)
+void BFMDemodGUI::leaveEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void BFMDemodGUI::enterEvent(QEvent*)
+void BFMDemodGUI::enterEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void BFMDemodGUI::audioSelect()

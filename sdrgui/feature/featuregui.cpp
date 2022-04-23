@@ -34,7 +34,8 @@ FeatureGUI::FeatureGUI(QWidget *parent) :
     QMdiSubWindow(parent),
     m_featureIndex(0),
     m_contextMenuType(ContextMenuNone),
-    m_drag(false)
+    m_drag(false),
+    m_resizer(this)
 {
     qDebug("FeatureGUI::FeatureGUI");
     setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
@@ -89,7 +90,7 @@ FeatureGUI::FeatureGUI(QWidget *parent) :
     m_statusLabel->setToolTip("Feature status");
 
     m_layouts = new QVBoxLayout();
-    m_layouts->setContentsMargins(0, 4, 0, 4);
+    m_layouts->setContentsMargins(m_resizer.m_gripSize, 4, m_resizer.m_gripSize, 4);
     m_layouts->setSpacing(2);
 
     m_topLayout = new QHBoxLayout();
@@ -102,10 +103,6 @@ FeatureGUI::FeatureGUI(QWidget *parent) :
     m_topLayout->addWidget(m_moveButton);
     m_topLayout->addWidget(m_shrinkButton);
     m_topLayout->addWidget(m_closeButton);
-    m_sizeGripTopRight = new QSizeGrip(this);
-    m_sizeGripTopRight->setStyleSheet("QSizeGrip { background-color: rgb(128, 128, 128); width: 10px; height: 10px; }");
-    m_sizeGripTopRight->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    m_topLayout->addWidget(m_sizeGripTopRight, 0, Qt::AlignTop | Qt::AlignRight);
 
     m_centerLayout = new QHBoxLayout();
     m_centerLayout->addWidget(&m_rollupContents);
@@ -114,7 +111,6 @@ FeatureGUI::FeatureGUI(QWidget *parent) :
     m_bottomLayout->setContentsMargins(0, 0, 0, 0);
     m_bottomLayout->addWidget(m_statusLabel);
     m_sizeGripBottomRight = new QSizeGrip(this);
-    m_sizeGripBottomRight->setStyleSheet("QSizeGrip { background-color: rgb(128, 128, 128); width: 10px; height: 10px; }");
     m_sizeGripBottomRight->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     // m_bottomLayout->addStretch(1);
     m_bottomLayout->addWidget(m_sizeGripBottomRight, 0, Qt::AlignBottom | Qt::AlignRight);
@@ -147,7 +143,6 @@ FeatureGUI::~FeatureGUI()
     delete m_sizeGripBottomRight;
     delete m_bottomLayout;
     delete m_centerLayout;
-    delete m_sizeGripTopRight;
     delete m_topLayout;
     delete m_layouts;
     delete m_statusLabel;
@@ -176,6 +171,15 @@ void FeatureGUI::mousePressEvent(QMouseEvent* event)
         m_DragPosition = event->globalPos() - pos();
         event->accept();
     }
+    else
+    {
+        m_resizer.mousePressEvent(event);
+    }
+}
+
+void FeatureGUI::mouseReleaseEvent(QMouseEvent* event)
+{
+    m_resizer.mouseReleaseEvent(event);
 }
 
 void FeatureGUI::mouseMoveEvent(QMouseEvent* event)
@@ -185,6 +189,16 @@ void FeatureGUI::mouseMoveEvent(QMouseEvent* event)
         move(event->globalPos() - m_DragPosition);
         event->accept();
     }
+    else
+    {
+        m_resizer.mouseMoveEvent(event);
+    }
+}
+
+void FeatureGUI::leaveEvent(QEvent* event)
+{
+    m_resizer.leaveEvent(event);
+    QMdiSubWindow::leaveEvent(event);
 }
 
 void FeatureGUI::activateSettingsDialog()

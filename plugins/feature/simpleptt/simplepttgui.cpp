@@ -296,14 +296,6 @@ void SimplePTTGUI::updateDeviceSetLists()
     ui->txDevice->blockSignals(false);
 }
 
-void SimplePTTGUI::leaveEvent(QEvent*)
-{
-}
-
-void SimplePTTGUI::enterEvent(QEvent*)
-{
-}
-
 void SimplePTTGUI::onMenuDialogCalled(const QPoint &p)
 {
     if (m_contextMenuType == ContextMenuChannelSettings)

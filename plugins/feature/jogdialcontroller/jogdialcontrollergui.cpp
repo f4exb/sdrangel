@@ -237,14 +237,6 @@ void JogdialControllerGUI::updateChannelList()
     }
 }
 
-void JogdialControllerGUI::leaveEvent(QEvent*)
-{
-}
-
-void JogdialControllerGUI::enterEvent(QEvent*)
-{
-}
-
 void JogdialControllerGUI::onMenuDialogCalled(const QPoint &p)
 {
     if (m_contextMenuType == ContextMenuChannelSettings)

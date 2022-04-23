@@ -343,14 +343,6 @@ void SatelliteTrackerGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void SatelliteTrackerGUI::leaveEvent(QEvent*)
-{
-}
-
-void SatelliteTrackerGUI::enterEvent(QEvent*)
-{
-}
-
 void SatelliteTrackerGUI::onMenuDialogCalled(const QPoint &p)
 {
     if (m_contextMenuType == ContextMenuChannelSettings)

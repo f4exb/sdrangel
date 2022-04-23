@@ -569,14 +569,16 @@ void PacketDemodGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void PacketDemodGUI::leaveEvent(QEvent*)
+void PacketDemodGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void PacketDemodGUI::enterEvent(QEvent*)
+void PacketDemodGUI::enterEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void PacketDemodGUI::tick()

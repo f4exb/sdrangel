@@ -605,14 +605,16 @@ QString IEEE_802_15_4_ModGUI::getDisplayValueWithMultiplier(int value)
     }
 }
 
-void IEEE_802_15_4_ModGUI::leaveEvent(QEvent*)
+void IEEE_802_15_4_ModGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void IEEE_802_15_4_ModGUI::enterEvent(QEvent*)
+void IEEE_802_15_4_ModGUI::enterEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void IEEE_802_15_4_ModGUI::tick()

@@ -758,14 +758,16 @@ void NoiseFigureGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void NoiseFigureGUI::leaveEvent(QEvent*)
+void NoiseFigureGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void NoiseFigureGUI::enterEvent(QEvent*)
+void NoiseFigureGUI::enterEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void NoiseFigureGUI::tick()

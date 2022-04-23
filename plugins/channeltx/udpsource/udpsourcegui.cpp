@@ -530,14 +530,16 @@ void UDPSourceGUI::onMenuDialogCalled(const QPoint &p)
     resetContextMenuType();
 }
 
-void UDPSourceGUI::leaveEvent(QEvent*)
+void UDPSourceGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void UDPSourceGUI::enterEvent(QEvent*)
+void UDPSourceGUI::enterEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void UDPSourceGUI::tick()

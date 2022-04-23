@@ -649,14 +649,16 @@ void UDPSinkGUI::onMenuDialogCalled(const QPoint &p)
     resetContextMenuType();
 }
 
-void UDPSinkGUI::leaveEvent(QEvent*)
+void UDPSinkGUI::leaveEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void UDPSinkGUI::enterEvent(QEvent*)
+void UDPSinkGUI::enterEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void UDPSinkGUI::makeUIConnections()

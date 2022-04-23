@@ -192,14 +192,16 @@ void RemoteSinkGUI::displayRateAndShift()
     m_channelMarker.setBandwidth(channelSampleRate);
 }
 
-void RemoteSinkGUI::leaveEvent(QEvent*)
+void RemoteSinkGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void RemoteSinkGUI::enterEvent(QEvent*)
+void RemoteSinkGUI::enterEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void RemoteSinkGUI::handleSourceMessages()

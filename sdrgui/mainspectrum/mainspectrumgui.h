@@ -22,6 +22,7 @@
 #include <QByteArray>
 
 #include "util/messagequeue.h"
+#include "gui/framelesswindowresizer.h"
 #include "export.h"
 
 class GLSpectrum;
@@ -82,16 +83,21 @@ private:
     QHBoxLayout *m_spectrumLayout;
     QHBoxLayout *m_spectrumGUILayout;
     QHBoxLayout *m_bottomLayout;
-    QSizeGrip *m_sizeGripTopRight;
     QSizeGrip *m_sizeGripBottomRight;
     bool m_drag;
     QPoint m_DragPosition;
+    FramelessWindowResizer m_resizer;
     static const int m_MinimumWidth = 360;
     static const int m_MinimumHeight = 200 + 20 + 10 + 4*22 + 5;
 
-    void closeEvent(QCloseEvent *event);
-    void mousePressEvent(QMouseEvent* event);
-    void mouseMoveEvent(QMouseEvent* event);
+protected:
+    void closeEvent(QCloseEvent *event) override;
+    void leaveEvent(QEvent *event) override;
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
+    void mouseMoveEvent(QMouseEvent* event) override;
+
+private:
     bool isOnMovingPad();
     QString getDeviceTypeColor();
     QString getDeviceTypeTag();
