@@ -288,7 +288,23 @@ void SSBDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    getRollupContents()->saveState(m_rollupState);
+    RollupContents *rollupContents = getRollupContents();
+
+    if (rollupContents->hasExpandableWidgets())
+    {
+        qDebug("SSBDemodGUI::onWidgetRolled: set vertical policy expanding");
+        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
+    }
+    else
+    {
+        qDebug("SSBDemodGUI::onWidgetRolled: set vertical policy fixed");
+        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Fixed);
+    }
+
+    int h = rollupContents->height() + rollupContents->getAdditionalHeiht() + getAdditionalHeight();
+    resize(width(), h);
+
+    rollupContents->saveState(m_rollupState);
     applySettings();
 }
 
@@ -308,11 +324,13 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_squelchOpen(false),
     m_audioSampleRate(-1)
 {
-	ui->setupUi(getRollupContents());
-    getRollupContents()->arrangeRollups();
-    m_helpURL = "plugins/channelrx/demodssb/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
-	connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    m_helpURL = "plugins/channelrx/demodssb/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_ssbDemod = (SSBDemod*) rxChannel;
