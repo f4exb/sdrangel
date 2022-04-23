@@ -303,6 +303,8 @@ void ChannelGUI::shrinkWindow()
 {
     qDebug("ChannelGUI::shrinkWindow");
     adjustSize();
+    int h = getRollupContents()->height() + getRollupContents()->getAdditionalHeiht() + getAdditionalHeight();
+    resize(width(), h);
 }
 
 void ChannelGUI::setTitle(const QString& title)

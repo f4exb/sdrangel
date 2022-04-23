@@ -315,8 +315,18 @@ void BFMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
+    RollupContents *rollupContents = getRollupContents();
 
-    getRollupContents()->saveState(m_rollupState);
+    if (rollupContents->hasExpandableWidgets()) {
+        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
+    } else {
+        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Fixed);
+    }
+
+    int h = rollupContents->height() + rollupContents->getAdditionalHeiht() + getAdditionalHeight();
+    resize(width(), h);
+
+    rollupContents->saveState(m_rollupState);
     applySettings();
 }
 
@@ -379,9 +389,14 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_radiotext_AB_flag(false),
 	m_rate(625000)
 {
-	ui->setupUi(getRollupContents());
-    getRollupContents()->arrangeRollups();
+	setAttribute(Qt::WA_DeleteOnClose, true);
 	m_helpURL = "plugins/channelrx/demodbfm/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 8, -99999999, 99999999);
@@ -390,8 +405,6 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioStereo);
     connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect()));
 
-	setAttribute(Qt::WA_DeleteOnClose, true);
-	connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 

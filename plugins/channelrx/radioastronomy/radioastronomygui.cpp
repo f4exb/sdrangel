@@ -1949,7 +1949,18 @@ void RadioAstronomyGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    getRollupContents()->saveState(m_rollupState);
+    RollupContents *rollupContents = getRollupContents();
+
+    if (rollupContents->hasExpandableWidgets()) {
+        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
+    } else {
+        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Fixed);
+    }
+
+    int h = rollupContents->height() + rollupContents->getAdditionalHeiht() + getAdditionalHeight();
+    resize(width(), h);
+
+    rollupContents->saveState(m_rollupState);
     applySettings();
 }
 
@@ -2062,12 +2073,13 @@ RadioAstronomyGUI::RadioAstronomyGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     m_bLAB(0.0f),
     m_downloadingLAB(false)
 {
-    qDebug("RadioAstronomyGUI::RadioAstronomyGUI");
-    ui->setupUi(getRollupContents());
-    getRollupContents()->arrangeRollups();
-
     setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    qDebug("RadioAstronomyGUI::RadioAstronomyGUI");
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_radioAstronomy = reinterpret_cast<RadioAstronomy*>(rxChannel);

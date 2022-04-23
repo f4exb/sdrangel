@@ -103,10 +103,11 @@ BeamSteeringCWModGUI::BeamSteeringCWModGUI(PluginAPI* pluginAPI, DeviceUISet *de
         m_centerFrequency(435000000),
         m_tickCount(0)
 {
+    setAttribute(Qt::WA_DeleteOnClose, true);
+    m_helpURL = "plugins/channelmimo/beamsteeringcwmod/readme.md";
     ui->setupUi(getRollupContents());
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getRollupContents()->arrangeRollups();
-    setAttribute(Qt::WA_DeleteOnClose, true);
 
     connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));

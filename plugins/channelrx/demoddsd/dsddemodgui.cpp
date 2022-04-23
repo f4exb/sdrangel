@@ -85,7 +85,9 @@ bool DSDDemodGUI::deserialize(const QByteArray& data)
 
 void DSDDemodGUI::resizeEvent(QResizeEvent* size)
 {
-    adjustSize();
+    int maxWidth = getRollupContents()->maximumWidth();
+    int minHeight = getRollupContents()->minimumHeight() + getRollupContents()->getAdditionalHeiht() + getAdditionalHeight();
+    resize(width() < maxWidth ? width() : maxWidth, minHeight);
     size->accept();
 }
 
@@ -343,15 +345,17 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_tickCount(0),
 	m_dsdStatusTextDialog(0)
 {
-	ui->setupUi(getRollupContents());
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    getRollupContents()->arrangeRollups();
+	setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/channelrx/demoddsd/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+
 	ui->screenTV->setColor(true);
 	ui->screenTV->resizeTVScreen(200,200);
-	setAttribute(Qt::WA_DeleteOnClose, true);
 
-	connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 

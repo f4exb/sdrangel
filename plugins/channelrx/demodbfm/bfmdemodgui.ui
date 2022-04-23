@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>798</width>
+    <width>644</width>
     <height>755</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>642</width>
+    <width>644</width>
     <height>670</height>
    </size>
   </property>
@@ -40,8 +40,8 @@
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>20</y>
+     <x>0</x>
+     <y>0</y>
      <width>642</width>
      <height>151</height>
     </rect>
@@ -57,19 +57,19 @@
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
     <property name="spacing">
-     <number>3</number>
+     <number>1</number>
     </property>
     <property name="leftMargin">
-     <number>2</number>
+     <number>0</number>
     </property>
     <property name="topMargin">
-     <number>2</number>
+     <number>0</number>
     </property>
     <property name="rightMargin">
-     <number>2</number>
+     <number>0</number>
     </property>
     <property name="bottomMargin">
-     <number>2</number>
+     <number>0</number>
     </property>
     <item>
      <layout class="QHBoxLayout" name="deltaFreqPowLayout">
@@ -502,10 +502,10 @@
   <widget class="QWidget" name="spectrumBox" native="true">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>560</y>
-     <width>311</width>
-     <height>151</height>
+     <x>0</x>
+     <y>460</y>
+     <width>640</width>
+     <height>210</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -514,24 +514,30 @@
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
+   <property name="minimumSize">
+    <size>
+     <width>640</width>
+     <height>0</height>
+    </size>
+   </property>
    <property name="windowTitle">
     <string>Baseband Spectrum</string>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <property name="spacing">
-     <number>3</number>
+     <number>1</number>
     </property>
     <property name="leftMargin">
-     <number>2</number>
+     <number>0</number>
     </property>
     <property name="topMargin">
-     <number>2</number>
+     <number>0</number>
     </property>
     <property name="rightMargin">
-     <number>2</number>
+     <number>0</number>
     </property>
     <property name="bottomMargin">
-     <number>2</number>
+     <number>0</number>
     </property>
     <item>
      <widget class="GLSpectrum" name="glSpectrum" native="true">
@@ -540,6 +546,12 @@
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>640</width>
+        <height>200</height>
+       </size>
       </property>
       <property name="font">
        <font>
@@ -552,7 +564,7 @@
     <item>
      <widget class="GLSpectrumGUI" name="spectrumGUI" native="true">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
@@ -564,9 +576,9 @@
   <widget class="QWidget" name="rdsContainer" native="true">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>170</y>
-     <width>791</width>
+     <x>0</x>
+     <y>160</y>
+     <width>640</width>
      <height>281</height>
     </rect>
    </property>
@@ -582,6 +594,18 @@
    <layout class="QVBoxLayout" name="rdsLayout">
     <property name="spacing">
      <number>1</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
     </property>
     <item>
      <layout class="QHBoxLayout" name="reportLayout">
