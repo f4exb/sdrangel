@@ -407,14 +407,16 @@ void ATVDemodGUI::setRFFiltersSlidersRange(int sampleRate)
     ui->rfOppBWText->setText(QString("%1k").arg((ui->rfOppBW->value() * m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
 }
 
-void ATVDemodGUI::leaveEvent(QEvent*)
+void ATVDemodGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void ATVDemodGUI::enterEvent(QEvent*)
+void ATVDemodGUI::enterEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void ATVDemodGUI::tick()

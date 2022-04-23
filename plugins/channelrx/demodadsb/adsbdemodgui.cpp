@@ -4005,14 +4005,16 @@ void ADSBDemodGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void ADSBDemodGUI::leaveEvent(QEvent*)
+void ADSBDemodGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void ADSBDemodGUI::enterEvent(QEvent*)
+void ADSBDemodGUI::enterEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void ADSBDemodGUI::blockApplySettings(bool block)

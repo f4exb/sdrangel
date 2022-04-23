@@ -532,14 +532,16 @@ void NFMDemodGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void NFMDemodGUI::leaveEvent(QEvent*)
+void NFMDemodGUI::leaveEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void NFMDemodGUI::enterEvent(QEvent*)
+void NFMDemodGUI::enterEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void NFMDemodGUI::setCtcssFreq(Real ctcssFreq)

@@ -736,14 +736,16 @@ void SSBModGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void SSBModGUI::leaveEvent(QEvent*)
+void SSBModGUI::leaveEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void SSBModGUI::enterEvent(QEvent*)
+void SSBModGUI::enterEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void SSBModGUI::audioSelect()

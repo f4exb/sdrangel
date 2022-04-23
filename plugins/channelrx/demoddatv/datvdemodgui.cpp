@@ -479,18 +479,20 @@ void DATVDemodGUI::applySettings(bool force)
     }
 }
 
-void DATVDemodGUI::leaveEvent(QEvent*)
+void DATVDemodGUI::leaveEvent(QEvent* event)
 {
     blockApplySettings(true);
     m_channelMarker.setHighlighted(false);
     blockApplySettings(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void DATVDemodGUI::enterEvent(QEvent*)
+void DATVDemodGUI::enterEvent(QEvent* event)
 {
     blockApplySettings(true);
     m_channelMarker.setHighlighted(true);
     blockApplySettings(false);
+    ChannelGUI::enterEvent(event);
 }
 
 void DATVDemodGUI::audioSelect()

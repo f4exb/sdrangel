@@ -104,9 +104,6 @@ private:
     bool handleMessage(const Message& message);
     void makeUIConnections();
 
-    void leaveEvent(QEvent*);
-    void enterEvent(QEvent*);
-
     void sendToMap(const QString &name, const QString &label,
         const QString &image, const QString &text,
         const QString &model, float labelOffset,

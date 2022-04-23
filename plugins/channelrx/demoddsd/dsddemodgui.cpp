@@ -497,14 +497,16 @@ void DSDDemodGUI::applySettings(bool force)
 	}
 }
 
-void DSDDemodGUI::leaveEvent(QEvent*)
+void DSDDemodGUI::leaveEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void DSDDemodGUI::enterEvent(QEvent*)
+void DSDDemodGUI::enterEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void DSDDemodGUI::blockApplySettings(bool block)

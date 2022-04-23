@@ -257,14 +257,6 @@ void AISGUI::displaySettings()
     getRollupContents()->arrangeRollups();
 }
 
-void AISGUI::leaveEvent(QEvent*)
-{
-}
-
-void AISGUI::enterEvent(QEvent*)
-{
-}
-
 void AISGUI::onMenuDialogCalled(const QPoint &p)
 {
     if (m_contextMenuType == ContextMenuChannelSettings)

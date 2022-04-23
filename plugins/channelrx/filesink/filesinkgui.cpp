@@ -305,14 +305,16 @@ void FileSinkGUI::displayPos()
     ui->filterChainIndex->setText(tr("%1").arg(m_fixedShiftIndex));
 }
 
-void FileSinkGUI::leaveEvent(QEvent*)
+void FileSinkGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void FileSinkGUI::enterEvent(QEvent*)
+void FileSinkGUI::enterEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void FileSinkGUI::channelMarkerChangedByCursor()

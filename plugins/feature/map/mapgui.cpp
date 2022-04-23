@@ -863,14 +863,6 @@ void MapGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void MapGUI::leaveEvent(QEvent*)
-{
-}
-
-void MapGUI::enterEvent(QEvent*)
-{
-}
-
 void MapGUI::onMenuDialogCalled(const QPoint &p)
 {
     if (m_contextMenuType == ContextMenuChannelSettings)

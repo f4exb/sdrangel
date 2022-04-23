@@ -138,9 +138,6 @@ private:
     void redrawMap();
     void makeUIConnections();
 
-    void leaveEvent(QEvent*);
-    void enterEvent(QEvent*);
-
     static QString getDataDir();
     static const QList<RadioTimeTransmitter> m_radioTimeTransmitters;
 

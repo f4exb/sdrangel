@@ -696,14 +696,16 @@ void ChannelAnalyzerGUI::applySettings(bool force)
 	}
 }
 
-void ChannelAnalyzerGUI::leaveEvent(QEvent*)
+void ChannelAnalyzerGUI::leaveEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void ChannelAnalyzerGUI::enterEvent(QEvent*)
+void ChannelAnalyzerGUI::enterEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void ChannelAnalyzerGUI::makeUIConnections()

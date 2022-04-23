@@ -1383,14 +1383,6 @@ void VORLocalizerGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void VORLocalizerGUI::leaveEvent(QEvent*)
-{
-}
-
-void VORLocalizerGUI::enterEvent(QEvent*)
-{
-}
-
 void VORLocalizerGUI::updateStatus()
 {
     int state = m_vorLocalizer->getState();

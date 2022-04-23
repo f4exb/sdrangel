@@ -660,14 +660,6 @@ void APRSGUI::updateChannelList()
     ui->sourcePipes->blockSignals(false);
 }
 
-void APRSGUI::leaveEvent(QEvent*)
-{
-}
-
-void APRSGUI::enterEvent(QEvent*)
-{
-}
-
 void APRSGUI::resizeEvent(QResizeEvent* size)
 {
     // Replot graphs to ensure Axis are visible

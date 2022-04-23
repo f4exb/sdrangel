@@ -451,14 +451,6 @@ void StarTrackerGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void StarTrackerGUI::leaveEvent(QEvent*)
-{
-}
-
-void StarTrackerGUI::enterEvent(QEvent*)
-{
-}
-
 void StarTrackerGUI::onMenuDialogCalled(const QPoint &p)
 {
     if (m_contextMenuType == ContextMenuChannelSettings)

@@ -588,14 +588,16 @@ void DABDemodGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void DABDemodGUI::leaveEvent(QEvent*)
+void DABDemodGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void DABDemodGUI::enterEvent(QEvent*)
+void DABDemodGUI::enterEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void DABDemodGUI::clearProgram()
