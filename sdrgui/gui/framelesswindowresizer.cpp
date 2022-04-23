@@ -124,7 +124,7 @@ void FramelessWindowResizer::mouseReleaseEvent(QMouseEvent* event)
     }
 }
 
-void FramelessWindowResizer::leaveEvent(QEvent* event)
+void FramelessWindowResizer::leaveEvent(QEvent*)
 {
     clearCursor();
 }
@@ -159,6 +159,7 @@ void FramelessWindowResizer::mouseMoveEvent(QMouseEvent* event)
 
         // Get min and max size we can resize to
         QSize minSize, maxSize;
+
         if (m_widget->layout())
         {
             minSize = m_widget->layout()->minimumSize();
@@ -174,6 +175,11 @@ void FramelessWindowResizer::mouseMoveEvent(QMouseEvent* event)
         QSize size = reqSize;
         size = size.expandedTo(minSize);
         size = size.boundedTo(maxSize);
+
+        // Prevent vertical expansion of vertically fixed widgets
+        if (m_widget->sizePolicy().verticalPolicy() == QSizePolicy::Fixed) {
+            size.setHeight(m_widget->height());
+        }
 
         // Move
         if (m_vMove || m_hMove)
