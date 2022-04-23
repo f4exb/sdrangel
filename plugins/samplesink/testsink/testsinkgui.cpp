@@ -51,7 +51,7 @@ TestSinkGui::TestSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
 {
     setAttribute(Qt::WA_DeleteOnClose, true);
     ui->setupUi(getContents());
-    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     setMinimumSize(m_MinimumWidth, m_MinimumHeight);
     getContents()->setStyleSheet(QString(tr("#TestSinkGui { border: 1px solid %1 }")
         .arg(palette().highlight().color().darker(115).name())));
