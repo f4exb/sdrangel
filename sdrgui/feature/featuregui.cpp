@@ -39,6 +39,10 @@ FeatureGUI::FeatureGUI(QWidget *parent) :
 {
     qDebug("FeatureGUI::FeatureGUI");
     setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
+    setObjectName("FeatureGUI");
+    setStyleSheet(QString(tr("#FeatureGUI { border: 1px solid %1; background-color: %2; }")
+        .arg(palette().highlight().color().darker(115).name()))
+        .arg(palette().dark().color().darker(115).name()));
 
     m_indexLabel = new QLabel();
     m_indexLabel->setFixedSize(40, 16);
@@ -90,8 +94,8 @@ FeatureGUI::FeatureGUI(QWidget *parent) :
     m_statusLabel->setToolTip("Feature status");
 
     m_layouts = new QVBoxLayout();
-    m_layouts->setContentsMargins(m_resizer.m_gripSize, 4, m_resizer.m_gripSize, 4);
-    m_layouts->setSpacing(2);
+    m_layouts->setContentsMargins(m_resizer.m_gripSize, m_resizer.m_gripSize, m_resizer.m_gripSize, m_resizer.m_gripSize);
+    m_layouts->setSpacing(0);
 
     m_topLayout = new QHBoxLayout();
     m_topLayout->setContentsMargins(0, 0, 0, 0);
@@ -112,6 +116,7 @@ FeatureGUI::FeatureGUI(QWidget *parent) :
     m_bottomLayout->addWidget(m_statusLabel);
     m_sizeGripBottomRight = new QSizeGrip(this);
     m_sizeGripBottomRight->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    m_sizeGripBottomRight->setFixedHeight(20);
     // m_bottomLayout->addStretch(1);
     m_bottomLayout->addWidget(m_sizeGripBottomRight, 0, Qt::AlignBottom | Qt::AlignRight);
 
@@ -256,6 +261,7 @@ void FeatureGUI::shrinkWindow()
 {
     qDebug("FeatureGUI::shrinkWindow");
     adjustSize();
+    resize(width(), m_rollupContents.height() + getAdditionalHeight());
 }
 
 void FeatureGUI::setTitle(const QString& title)

@@ -54,7 +54,7 @@ public:
     void mouseMoveEvent(QMouseEvent* event);
     void leaveEvent(QEvent* event);
 
-    const int m_gripSize = 3;   // Size in pixels of the border of the window that can be clicked in to resize it
+    const int m_gripSize = 2;   // Size in pixels of the border of the window that can be clicked in to resize it
 
 protected:
     bool mouseOnTopBorder(QPoint pos) const;

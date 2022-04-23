@@ -92,22 +92,6 @@ void RollupContents::setHighlighted(bool highlighted)
     }
 }
 
-int RollupContents::getAdditionalHeiht()
-{
-    int pos = 0;
-
-    for (int i = 0; i < children().count(); ++i)
-    {
-        QWidget* r = qobject_cast<QWidget*>(children()[i]);
-
-        if (r && isRollupChild(r) && !r->isHidden()) {
-            pos += 5;
-        }
-    }
-
-    return pos;
-}
-
 bool RollupContents::hasExpandableWidgets()
 {
     for (int i = 0; i < children().count(); ++i)
@@ -218,7 +202,8 @@ int RollupContents::arrangeRollups()
 void RollupContents::paintEvent(QPaintEvent*)
 {
     QPainter p(this);
-    QColor frameColor = palette().highlight().color().darker(115);
+    QColor frameColor = palette().highlight().color().darker(125);
+    // QColor frameColor = Qt::black;
 
     // Eigenbau
     QFontMetrics fm(font());
@@ -237,9 +222,10 @@ void RollupContents::paintEvent(QPaintEvent*)
     p.setPen(m_highlighted ? Qt::white : frameColor);
     p.setBrush(palette().window());
     QRectF r(rect());
-    r.adjust(0.5, 0.5, -0.5, -0.5);
+    // r.adjust(0.5, 0.5, -0.5, -0.5);
     // p.drawRoundedRect(r, 3.0, 3.0, Qt::AbsoluteSize);
-    p.drawRect(r);
+    // p.drawRect(r);
+    p.fillRect(r, palette().window());
 
     // Rollups
     int pos = 2; // fm.height() + 4;
