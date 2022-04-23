@@ -58,7 +58,7 @@ bool NFMDemodGUI::deserialize(const QByteArray& data)
 void NFMDemodGUI::resizeEvent(QResizeEvent* size)
 {
     int maxWidth = getRollupContents()->maximumWidth();
-    int minHeight = getRollupContents()->minimumHeight() + getRollupContents()->getAdditionalHeiht() + getAdditionalHeight();
+    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
     resize(width() < maxWidth ? width() : maxWidth, minHeight);
     size->accept();
 }

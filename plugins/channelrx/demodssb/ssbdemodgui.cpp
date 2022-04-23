@@ -301,7 +301,7 @@ void SSBDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
         setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Fixed);
     }
 
-    int h = rollupContents->height() + rollupContents->getAdditionalHeiht() + getAdditionalHeight();
+    int h = rollupContents->height() + getAdditionalHeight();
     resize(width(), h);
 
     rollupContents->saveState(m_rollupState);
