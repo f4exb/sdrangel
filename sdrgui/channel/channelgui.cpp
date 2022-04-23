@@ -140,6 +140,7 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
     m_topLayout->addWidget(m_closeButton);
 
     m_centerLayout = new QHBoxLayout();
+    m_centerLayout->setContentsMargins(0, 0, 0, 0);
     m_rollupContents = new RollupContents(); // Do not delete! Done in child's destructor with "delete ui"
     m_centerLayout->addWidget(m_rollupContents);
 

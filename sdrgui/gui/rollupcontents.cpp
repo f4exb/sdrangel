@@ -92,6 +92,36 @@ void RollupContents::setHighlighted(bool highlighted)
     }
 }
 
+int RollupContents::getAdditionalHeiht()
+{
+    int pos = 0;
+
+    for (int i = 0; i < children().count(); ++i)
+    {
+        QWidget* r = qobject_cast<QWidget*>(children()[i]);
+
+        if (r && isRollupChild(r) && !r->isHidden()) {
+            pos += 5;
+        }
+    }
+
+    return pos;
+}
+
+bool RollupContents::hasExpandableWidgets()
+{
+    for (int i = 0; i < children().count(); ++i)
+    {
+        QWidget* r = qobject_cast<QWidget*>(children()[i]);
+
+        if (r && isRollupChild(r) && !r->isHidden() && (r->sizePolicy().verticalPolicy() == QSizePolicy::Expanding)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 int RollupContents::arrangeRollups()
 {
     QFontMetrics fm(font());

@@ -34,6 +34,8 @@ public:
     void saveState(RollupState& state) const;
     void restoreState(const RollupState& state);
     int arrangeRollups();
+    int getAdditionalHeiht();
+    bool hasExpandableWidgets();
 
 signals:
     void widgetRolled(QWidget* widget, bool rollDown);

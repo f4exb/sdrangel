@@ -95,6 +95,7 @@ protected:
     void mouseMoveEvent(QMouseEvent* event) override;
     void resetContextMenuType() { m_contextMenuType = ContextMenuNone; }
     void updateIndexLabel();
+    int getAdditionalHeight() const { return 29 + 26; }
 
     DeviceType m_deviceType;
     int m_deviceSetIndex;
