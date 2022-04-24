@@ -21,6 +21,7 @@
 #include <QFileDialog>
 #include <QTime>
 #include <QDebug>
+#include <QResizeEvent>
 
 #include "device/deviceuiset.h"
 #include "plugin/pluginapi.h"
@@ -71,6 +72,14 @@ bool WFMModGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void WFMModGUI::resizeEvent(QResizeEvent* size)
+{
+    int maxWidth = getRollupContents()->maximumWidth();
+    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
+    resize(width() < maxWidth ? width() : maxWidth, minHeight);
+    size->accept();
 }
 
 bool WFMModGUI::handleMessage(const Message& message)
@@ -357,10 +366,13 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_tickCount(0),
     m_enableNavTime(false)
 {
-	ui->setupUi(getRollupContents());
-    getRollupContents()->arrangeRollups();
-    m_helpURL = "plugins/channeltx/modwfm/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
+    m_helpURL = "plugins/channeltx/modwfm/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 
     blockApplySettings(true);
 
@@ -372,7 +384,6 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
     blockApplySettings(false);
 
-	connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_wfmMod = (WFMMod*) channelTx;

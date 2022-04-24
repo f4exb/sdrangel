@@ -16,6 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QLocale>
+#include <QResizeEvent>
 
 #include "device/deviceuiset.h"
 #include "gui/basicchannelsettingsdialog.h"
@@ -61,6 +62,14 @@ bool BeamSteeringCWModGUI::deserialize(const QByteArray& data)
     }
 }
 
+void BeamSteeringCWModGUI::resizeEvent(QResizeEvent* size)
+{
+    int maxWidth = getRollupContents()->maximumWidth();
+    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
+    resize(width() < maxWidth ? width() : maxWidth, minHeight);
+    size->accept();
+}
+
 bool BeamSteeringCWModGUI::handleMessage(const Message& message)
 {
     if (BeamSteeringCWMod::MsgBasebandNotification::match(message))
@@ -96,11 +105,13 @@ BeamSteeringCWModGUI::BeamSteeringCWModGUI(PluginAPI* pluginAPI, DeviceUISet *de
         m_centerFrequency(435000000),
         m_tickCount(0)
 {
-    ui->setupUi(getRollupContents());
-    getRollupContents()->arrangeRollups();
     setAttribute(Qt::WA_DeleteOnClose, true);
-
-    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    m_helpURL = "plugins/channelmimo/beamSteeringcwmod/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_bsCWSource = (BeamSteeringCWMod*) mimoChannel;

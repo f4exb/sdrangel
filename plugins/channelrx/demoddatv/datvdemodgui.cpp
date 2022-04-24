@@ -20,6 +20,7 @@
 #include <QDockWidget>
 #include <QMainWindow>
 #include <QMediaMetaData>
+#include <QResizeEvent>
 
 #include "device/deviceuiset.h"
 #include "dsp/dspengine.h"
@@ -78,6 +79,14 @@ bool DATVDemodGUI::deserialize(const QByteArray& arrData)
         resetToDefaults();
         return false;
     }
+}
+
+void DATVDemodGUI::resizeEvent(QResizeEvent* size)
+{
+    int maxWidth = getRollupContents()->maximumWidth();
+    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
+    resize(width() < maxWidth ? width() : maxWidth, minHeight);
+    size->accept();
 }
 
 bool DATVDemodGUI::handleMessage(const Message& message)
@@ -213,13 +222,17 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
     m_modcodCodeRateIndex(-1),
     m_cstlnSetByModcod(false)
 {
-    ui->setupUi(getRollupContents());
-    getRollupContents()->arrangeRollups();
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/channelrx/demoddatv/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+
     ui->screenTV->setColor(true);
     ui->screenTV->resizeTVScreen(256,256);
-    setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 

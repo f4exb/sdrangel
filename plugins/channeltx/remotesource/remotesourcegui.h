@@ -62,6 +62,9 @@ public:
 public slots:
     void channelMarkerChangedByCursor();
 
+protected:
+    void resizeEvent(QResizeEvent* size);
+
 private:
     Ui::RemoteSourceGUI* ui;
     PluginAPI* m_pluginAPI;

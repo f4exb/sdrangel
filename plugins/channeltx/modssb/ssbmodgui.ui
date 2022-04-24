@@ -1235,6 +1235,12 @@
     </property>
     <item>
      <widget class="GLSpectrum" name="glSpectrum" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="minimumSize">
        <size>
         <width>200</width>
@@ -1263,17 +1269,6 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
-  </customwidget>
-  <customwidget>
-   <class>ValueDialZ</class>
-   <extends>QWidget</extends>
-   <header>gui/valuedialz.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>GLSpectrum</class>
    <extends>QWidget</extends>
    <header>gui/glspectrum.h</header>
@@ -1286,9 +1281,15 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>TickedSlider</class>
-   <extends>QSlider</extends>
-   <header>gui/tickedslider.h</header>
+   <class>ValueDialZ</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedialz.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
    <class>LevelMeterVU</class>
@@ -1301,6 +1302,11 @@
    <extends>QWidget</extends>
    <header>gui/cwkeyergui.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TickedSlider</class>
+   <extends>QSlider</extends>
+   <header>gui/tickedslider.h</header>
   </customwidget>
  </customwidgets>
  <resources>

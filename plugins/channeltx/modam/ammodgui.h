@@ -63,6 +63,9 @@ public:
 public slots:
     void channelMarkerChangedByCursor();
 
+protected:
+    void resizeEvent(QResizeEvent* size);
+
 private:
     Ui::AMModGUI* ui;
     PluginAPI* m_pluginAPI;

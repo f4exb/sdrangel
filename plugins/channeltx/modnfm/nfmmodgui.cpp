@@ -21,6 +21,7 @@
 #include <QTime>
 #include <QDebug>
 #include <QRegExp>
+#include <QResizeEvent>
 
 #include "device/deviceuiset.h"
 #include "plugin/pluginapi.h"
@@ -72,6 +73,14 @@ bool NFMModGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void NFMModGUI::resizeEvent(QResizeEvent* size)
+{
+    int maxWidth = getRollupContents()->maximumWidth();
+    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
+    resize(width() < maxWidth ? width() : maxWidth, minHeight);
+    size->accept();
 }
 
 bool NFMModGUI::handleMessage(const Message& message)
@@ -424,10 +433,13 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_enableNavTime(false),
     m_dcsCodeValidator(QRegExp("[0-7]{1,3}"))
 {
-	ui->setupUi(getRollupContents());
-    getRollupContents()->arrangeRollups();
-    m_helpURL = "plugins/channeltx/modnfm/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
+    m_helpURL = "plugins/channeltx/modnfm/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 
     ui->channelSpacing->blockSignals(true);
     ui->channelSpacing->clear();
@@ -439,7 +451,6 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     ui->channelSpacing->setCurrentIndex(NFMModSettings::getChannelSpacingIndex(25000));
     ui->channelSpacing->blockSignals(false);
 
-	connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_nfmMod = (NFMMod*) channelTx;
