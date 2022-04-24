@@ -63,7 +63,7 @@ DSPDeviceSourceEngine *DSPEngine::addDeviceSourceEngine()
 {
     m_deviceSourceEngines.push_back(new DSPDeviceSourceEngine(m_deviceSourceEnginesUIDSequence));
     m_deviceSourceEnginesUIDSequence++;
-    m_deviceEngineReferences.push_back(DeviceEngineReference{0, m_deviceSourceEngines.size() - 1});
+    m_deviceEngineReferences.push_back(DeviceEngineReference{0, m_deviceSourceEngines.back(), nullptr, nullptr});
     return m_deviceSourceEngines.back();
 }
 
@@ -72,13 +72,12 @@ void DSPEngine::removeLastDeviceSourceEngine()
     if (m_deviceSourceEngines.size() > 0)
     {
         DSPDeviceSourceEngine *lastDeviceEngine = m_deviceSourceEngines.back();
-        int lastSourceDeviceEngineIndex = m_deviceSourceEngines.size() - 1;
         delete lastDeviceEngine;
         m_deviceSourceEngines.pop_back();
 
         for (int i = 0; i < m_deviceEngineReferences.size(); i++)
         {
-            if (m_deviceEngineReferences[i].deviceEngineIndex == lastSourceDeviceEngineIndex)
+            if (m_deviceEngineReferences[i].m_deviceSourceEngine == lastDeviceEngine)
             {
                 m_deviceEngineReferences.removeAt(i);
                 break;
@@ -91,7 +90,7 @@ DSPDeviceSinkEngine *DSPEngine::addDeviceSinkEngine()
 {
     m_deviceSinkEngines.push_back(new DSPDeviceSinkEngine(m_deviceSinkEnginesUIDSequence));
     m_deviceSinkEnginesUIDSequence++;
-    m_deviceEngineReferences.push_back(DeviceEngineReference{1, m_deviceSinkEngines.size() - 1});
+    m_deviceEngineReferences.push_back(DeviceEngineReference{1, nullptr, m_deviceSinkEngines.back(), nullptr});
     return m_deviceSinkEngines.back();
 }
 
@@ -100,13 +99,12 @@ void DSPEngine::removeLastDeviceSinkEngine()
     if (m_deviceSinkEngines.size() > 0)
     {
         DSPDeviceSinkEngine *lastDeviceEngine = m_deviceSinkEngines.back();
-        int lastSinkDeviceEngineIndex = m_deviceSinkEngines.size() - 1;
         delete lastDeviceEngine;
         m_deviceSinkEngines.pop_back();
 
         for (int i = 0; i < m_deviceEngineReferences.size(); i++)
         {
-            if (m_deviceEngineReferences[i].deviceEngineIndex == lastSinkDeviceEngineIndex)
+            if (m_deviceEngineReferences[i].m_deviceSinkEngine == lastDeviceEngine)
             {
                 m_deviceEngineReferences.removeAt(i);
                 break;
@@ -119,7 +117,7 @@ DSPDeviceMIMOEngine *DSPEngine::addDeviceMIMOEngine()
 {
     m_deviceMIMOEngines.push_back(new DSPDeviceMIMOEngine(m_deviceMIMOEnginesUIDSequence));
     m_deviceMIMOEnginesUIDSequence++;
-    m_deviceEngineReferences.push_back(DeviceEngineReference{2, m_deviceMIMOEngines.size() - 1});
+    m_deviceEngineReferences.push_back(DeviceEngineReference{2, nullptr, nullptr, m_deviceMIMOEngines.back()});
     return m_deviceMIMOEngines.back();
 }
 
@@ -128,13 +126,12 @@ void DSPEngine::removeLastDeviceMIMOEngine()
     if (m_deviceMIMOEngines.size() > 0)
     {
         DSPDeviceMIMOEngine *lastDeviceEngine = m_deviceMIMOEngines.back();
-        int lastMIMODeviceEngineIndex = m_deviceMIMOEngines.size() - 1;
         delete lastDeviceEngine;
         m_deviceMIMOEngines.pop_back();
 
         for (int i = 0; i < m_deviceEngineReferences.size(); i++)
         {
-            if (m_deviceEngineReferences[i].deviceEngineIndex == lastMIMODeviceEngineIndex)
+            if (m_deviceEngineReferences[i].m_deviceMIMOEngine == lastDeviceEngine)
             {
                 m_deviceEngineReferences.removeAt(i);
                 break;
@@ -149,23 +146,23 @@ void DSPEngine::removeDeviceEngineAt(int deviceIndex)
         return;
     }
 
-    if (m_deviceEngineReferences[deviceIndex].deviceEngineTYpe == 0) // source
+    if (m_deviceEngineReferences[deviceIndex].m_deviceEngineType == 0) // source
     {
-        DSPDeviceSourceEngine *deviceEngine = m_deviceSourceEngines[m_deviceEngineReferences[deviceIndex].deviceEngineIndex];
+        DSPDeviceSourceEngine *deviceEngine = m_deviceEngineReferences[deviceIndex].m_deviceSourceEngine;
         delete deviceEngine;
-        m_deviceSourceEngines.removeAt(m_deviceEngineReferences[deviceIndex].deviceEngineIndex);
+        m_deviceSourceEngines.removeAll(deviceEngine);
     }
-    else if (m_deviceEngineReferences[deviceIndex].deviceEngineTYpe == 1) // sink
+    else if (m_deviceEngineReferences[deviceIndex].m_deviceEngineType == 1) // sink
     {
-        DSPDeviceSinkEngine *deviceEngine = m_deviceSinkEngines[m_deviceEngineReferences[deviceIndex].deviceEngineIndex];
+        DSPDeviceSinkEngine *deviceEngine = m_deviceEngineReferences[deviceIndex].m_deviceSinkEngine;
         delete deviceEngine;
-        m_deviceSinkEngines.removeAt(m_deviceEngineReferences[deviceIndex].deviceEngineIndex);
+        m_deviceSinkEngines.removeAll(deviceEngine);
     }
-    else if (m_deviceEngineReferences[deviceIndex].deviceEngineTYpe == 2) // MIMO
+    else if (m_deviceEngineReferences[deviceIndex].m_deviceEngineType == 2) // MIMO
     {
-        DSPDeviceMIMOEngine *deviceEngine = m_deviceMIMOEngines[m_deviceEngineReferences[deviceIndex].deviceEngineIndex];
+        DSPDeviceMIMOEngine *deviceEngine = m_deviceEngineReferences[deviceIndex].m_deviceMIMOEngine;
         delete deviceEngine;
-        m_deviceMIMOEngines.removeAt(m_deviceEngineReferences[deviceIndex].deviceEngineIndex);
+        m_deviceMIMOEngines.removeAll(deviceEngine);
     }
 
     m_deviceEngineReferences.removeAt(deviceIndex);

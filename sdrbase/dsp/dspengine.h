@@ -90,8 +90,10 @@ public:
 private:
     struct DeviceEngineReference
     {
-        int deviceEngineTYpe; //!< 0: Rx, 1: Tx, 2: MIMO
-        int deviceEngineIndex;
+        int m_deviceEngineType; //!< 0: Rx, 1: Tx, 2: MIMO
+        DSPDeviceSourceEngine *m_deviceSourceEngine;
+        DSPDeviceSinkEngine *m_deviceSinkEngine;
+        DSPDeviceMIMOEngine *m_deviceMIMOEngine;
     };
 
 	QList<DSPDeviceSourceEngine*> m_deviceSourceEngines;
