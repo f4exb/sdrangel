@@ -430,12 +430,14 @@ APRSGUI::APRSGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feat
     m_doApplySettings(true),
     m_lastFeatureState(0)
 {
-    ui->setupUi(getRollupContents());
-    getRollupContents()->arrangeRollups();
-    m_helpURL = "plugins/feature/aprs/readme.md";
-
     setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    m_helpURL = "plugins/feature/aprs/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+
     m_aprs = reinterpret_cast<APRS*>(feature);
     m_aprs->setMessageQueueToGUI(&m_inputMessageQueue);
 
@@ -666,7 +668,10 @@ void APRSGUI::resizeEvent(QResizeEvent* size)
     plotWeather();
     plotTelemetry();
     plotMotion();
-    FeatureGUI::resizeEvent(size);
+    int maxWidth = getRollupContents()->maximumWidth();
+    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
+    resize(width() < maxWidth ? width() : maxWidth, minHeight);
+    size->accept();
 }
 
 void APRSGUI::onMenuDialogCalled(const QPoint &p)

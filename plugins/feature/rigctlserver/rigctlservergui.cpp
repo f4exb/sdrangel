@@ -71,7 +71,9 @@ bool RigCtlServerGUI::deserialize(const QByteArray& data)
 
 void RigCtlServerGUI::resizeEvent(QResizeEvent* size)
 {
-    adjustSize();
+    int maxWidth = getRollupContents()->maximumWidth();
+    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
+    resize(width() < maxWidth ? width() : maxWidth, minHeight);
     size->accept();
 }
 
@@ -133,12 +135,14 @@ RigCtlServerGUI::RigCtlServerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
 	m_doApplySettings(true),
     m_lastFeatureState(0)
 {
-	ui->setupUi(getRollupContents());
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    getRollupContents()->arrangeRollups();
-    m_helpURL = "plugins/feature/rigctlserver/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
-	connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    m_helpURL = "plugins/feature/rigctlserver/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+
     m_rigCtlServer = reinterpret_cast<RigCtlServer*>(feature);
     m_rigCtlServer->setMessageQueueToGUI(&m_inputMessageQueue);
 

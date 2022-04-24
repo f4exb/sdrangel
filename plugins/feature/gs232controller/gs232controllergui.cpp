@@ -73,7 +73,9 @@ bool GS232ControllerGUI::deserialize(const QByteArray& data)
 
 void GS232ControllerGUI::resizeEvent(QResizeEvent* size)
 {
-    adjustSize();
+    int maxWidth = getRollupContents()->maximumWidth();
+    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
+    resize(width() < maxWidth ? width() : maxWidth, minHeight);
     size->accept();
 }
 
@@ -147,12 +149,14 @@ GS232ControllerGUI::GS232ControllerGUI(PluginAPI* pluginAPI, FeatureUISet *featu
     m_lastFeatureState(0),
     m_lastOnTarget(false)
 {
-    ui->setupUi(getRollupContents());
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    getRollupContents()->arrangeRollups();
-    m_helpURL = "plugins/feature/gs232controller/readme.md";
     setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    m_helpURL = "plugins/feature/gs232controller/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+
     m_gs232Controller = reinterpret_cast<GS232Controller*>(feature);
     m_gs232Controller->setMessageQueueToGUI(&m_inputMessageQueue);
 

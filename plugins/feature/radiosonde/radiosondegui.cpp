@@ -117,7 +117,18 @@ void RadiosondeGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    getRollupContents()->saveState(m_rollupState);
+    RollupContents *rollupContents = getRollupContents();
+
+    if (rollupContents->hasExpandableWidgets()) {
+        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
+    } else {
+        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Fixed);
+    }
+
+    int h = rollupContents->height() + getAdditionalHeight();
+    resize(width(), h);
+
+    rollupContents->saveState(m_rollupState);
     applySettings();
 }
 
@@ -129,11 +140,14 @@ RadiosondeGUI::RadiosondeGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, F
     m_doApplySettings(true),
     m_lastFeatureState(0)
 {
-    ui->setupUi(getRollupContents());
-    getRollupContents()->arrangeRollups();
-    m_helpURL = "plugins/feature/radiosonde/readme.md";
     setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    m_helpURL = "plugins/feature/radiosonde/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+
     m_radiosonde = reinterpret_cast<Radiosonde*>(feature);
     m_radiosonde->setMessageQueueToGUI(&m_inputMessageQueue);
 

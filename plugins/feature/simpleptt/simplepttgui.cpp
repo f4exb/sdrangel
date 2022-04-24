@@ -72,7 +72,9 @@ bool SimplePTTGUI::deserialize(const QByteArray& data)
 
 void SimplePTTGUI::resizeEvent(QResizeEvent* size)
 {
-    adjustSize();
+    int maxWidth = getRollupContents()->maximumWidth();
+    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
+    resize(width() < maxWidth ? width() : maxWidth, minHeight);
     size->accept();
 }
 
@@ -157,12 +159,14 @@ SimplePTTGUI::SimplePTTGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Fea
 	m_doApplySettings(true),
     m_lastFeatureState(0)
 {
-	ui->setupUi(getRollupContents());
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    getRollupContents()->arrangeRollups();
-    m_helpURL = "plugins/feature/simpleptt/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
-	connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    m_helpURL = "plugins/feature/simpleptt/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+
     m_simplePTT = reinterpret_cast<SimplePTT*>(feature);
     m_simplePTT->setMessageQueueToGUI(&m_inputMessageQueue);
 

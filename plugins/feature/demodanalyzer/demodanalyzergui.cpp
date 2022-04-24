@@ -125,7 +125,18 @@ void DemodAnalyzerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    getRollupContents()->saveState(m_rollupState);
+    RollupContents *rollupContents = getRollupContents();
+
+    if (rollupContents->hasExpandableWidgets()) {
+        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
+    } else {
+        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Fixed);
+    }
+
+    int h = rollupContents->height() + getAdditionalHeight();
+    resize(width(), h);
+
+    rollupContents->saveState(m_rollupState);
     applySettings();
 }
 
@@ -139,11 +150,13 @@ DemodAnalyzerGUI::DemodAnalyzerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUI
     m_lastFeatureState(0),
     m_selectedChannel(nullptr)
 {
-	ui->setupUi(getRollupContents());
-    getRollupContents()->arrangeRollups();
-    m_helpURL = "plugins/feature/demodanalyzer/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
-	connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    m_helpURL = "plugins/feature/demodanalyzer/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 
     m_demodAnalyzer = reinterpret_cast<DemodAnalyzer*>(feature);
     m_demodAnalyzer->setMessageQueueToGUI(&m_inputMessageQueue);

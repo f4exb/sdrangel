@@ -7,11 +7,11 @@
     <x>0</x>
     <y>0</y>
     <width>469</width>
-    <height>761</height>
+    <height>578</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -20,6 +20,12 @@
    <size>
     <width>462</width>
     <height>0</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>700</width>
+    <height>16777215</height>
    </size>
   </property>
   <property name="font">
@@ -148,7 +154,7 @@
     </rect>
    </property>
    <property name="sizePolicy">
-    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
@@ -1448,15 +1454,15 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
-  </customwidget>
-  <customwidget>
    <class>RollupContents</class>
    <extends>QWidget</extends>
    <header>gui/rollupcontents.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
    <class>QChartView</class>

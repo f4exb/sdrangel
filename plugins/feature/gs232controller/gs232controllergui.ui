@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -24,7 +24,7 @@
   </property>
   <property name="maximumSize">
    <size>
-    <width>360</width>
+    <width>560</width>
     <height>16777215</height>
    </size>
   </property>
@@ -542,15 +542,15 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
-  </customwidget>
-  <customwidget>
    <class>RollupContents</class>
    <extends>QWidget</extends>
    <header>gui/rollupcontents.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

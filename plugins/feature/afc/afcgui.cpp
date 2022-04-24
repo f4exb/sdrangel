@@ -68,7 +68,9 @@ bool AFCGUI::deserialize(const QByteArray& data)
 
 void AFCGUI::resizeEvent(QResizeEvent* size)
 {
-    adjustSize();
+    int maxWidth = getRollupContents()->maximumWidth();
+    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
+    resize(width() < maxWidth ? width() : maxWidth, minHeight);
     size->accept();
 }
 
@@ -137,11 +139,13 @@ AFCGUI::AFCGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
 	m_doApplySettings(true),
     m_lastFeatureState(0)
 {
-	ui->setupUi(getRollupContents());
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    getRollupContents()->arrangeRollups();
-    m_helpURL = "plugins/feature/afc/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
+    m_helpURL = "plugins/feature/afc/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 
     ui->targetFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->targetFrequency->setValueRange(10, 0, 9999999999L);
@@ -149,7 +153,6 @@ AFCGUI::AFCGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     ui->toleranceFrequency->setColorMapper(ColorMapper(ColorMapper::GrayYellow));
     ui->toleranceFrequency->setValueRange(5, 0, 99999L);
 
-	connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     m_afc = reinterpret_cast<AFC*>(feature);
     m_afc->setMessageQueueToGUI(&m_inputMessageQueue);
 

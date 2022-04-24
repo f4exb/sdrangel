@@ -6,26 +6,26 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>335</width>
-    <height>472</height>
+    <width>360</width>
+    <height>477</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
-    <width>335</width>
-    <height>472</height>
+    <width>360</width>
+    <height>0</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>335</width>
-    <height>472</height>
+    <width>600</width>
+    <height>16777215</height>
    </size>
   </property>
   <property name="font">
@@ -42,9 +42,15 @@
     <rect>
      <x>2</x>
      <y>2</y>
-     <width>331</width>
+     <width>351</width>
      <height>341</height>
     </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
    </property>
    <property name="windowTitle">
     <string>Settings</string>
@@ -464,7 +470,7 @@ Substitutions:
     <rect>
      <x>2</x>
      <y>352</y>
-     <width>331</width>
+     <width>351</width>
      <height>117</height>
     </rect>
    </property>

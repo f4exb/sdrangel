@@ -162,7 +162,18 @@ void MapGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    getRollupContents()->saveState(m_rollupState);
+    RollupContents *rollupContents = getRollupContents();
+
+    if (rollupContents->hasExpandableWidgets()) {
+        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
+    } else {
+        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Fixed);
+    }
+
+    int h = rollupContents->height() + getAdditionalHeight();
+    resize(width(), h);
+
+    rollupContents->saveState(m_rollupState);
     applySettings();
 }
 
@@ -179,9 +190,13 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     m_radioTimeDialog(this),
     m_cesium(nullptr)
 {
-    ui->setupUi(getRollupContents());
-    getRollupContents()->arrangeRollups();
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/feature/map/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 
     m_osmPort = 0;
     m_templateServer = new OSMTemplateServer(thunderforestAPIKey(), maptilerAPIKey(), m_osmPort);
@@ -201,8 +216,6 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     m_settings.m_modelURL = QString("http://127.0.0.1:%1/3d/").arg(m_webPort);
     m_webServer->addPathSubstitution("3d", m_settings.m_modelDir);
 
-    setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(getRollupContents(), SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     m_map = reinterpret_cast<Map*>(feature);
     m_map->setMessageQueueToGUI(&m_inputMessageQueue);
 

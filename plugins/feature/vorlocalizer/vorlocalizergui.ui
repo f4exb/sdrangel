@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>462</width>
-    <height>893</height>
+    <height>850</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -348,7 +348,7 @@ QToolTip{background-color: white; color: black;}</string>
      <x>0</x>
      <y>110</y>
      <width>461</width>
-     <height>140</height>
+     <height>145</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -356,6 +356,12 @@ QToolTip{background-color: white; color: black;}</string>
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>0</width>
+     <height>145</height>
+    </size>
    </property>
    <property name="windowTitle">
     <string>VORs</string>
@@ -477,7 +483,7 @@ QToolTip{background-color: white; color: black;}</string>
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>260</y>
+     <y>258</y>
      <width>461</width>
      <height>581</height>
     </rect>
