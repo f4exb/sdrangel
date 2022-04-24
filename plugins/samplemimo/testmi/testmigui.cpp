@@ -55,6 +55,11 @@ TestMIGui::TestMIGui(DeviceUISet *deviceUISet, QWidget* parent) :
 {
     qDebug("TestMIGui::TestMIGui");
     setAttribute(Qt::WA_DeleteOnClose, true);
+    m_helpURL = "plugins/samplemimo/testmi/readme.md";
+    ui->setupUi(getContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    getContents()->setStyleSheet("#TestMIGui { background-color: rgb(64, 64, 64); }");
+
     m_sampleMIMO = m_deviceUISet->m_deviceAPI->getSampleMIMO();
     m_streamIndex = 0;
     m_deviceCenterFrequencies.push_back(m_settings.m_streams[0].m_centerFrequency);
@@ -62,10 +67,6 @@ TestMIGui::TestMIGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_deviceSampleRates.push_back(m_settings.m_streams[0].m_sampleRate / (1<<m_settings.m_streams[0].m_log2Decim));
     m_deviceSampleRates.push_back(m_settings.m_streams[1].m_sampleRate / (1<<m_settings.m_streams[1].m_log2Decim));
 
-    ui->setupUi(getContents());
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    getContents()->setStyleSheet("#TestMIGui { background-color: rgb(64, 64, 64); }");
-    m_helpURL = "plugins/samplemimo/testmi/readme.md";
     ui->spectrumSource->addItem("0");
     ui->spectrumSource->addItem("1");
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));

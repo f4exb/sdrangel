@@ -50,11 +50,12 @@ TestSinkGui::TestSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_lastEngineState(DeviceAPI::StNotStarted)
 {
     setAttribute(Qt::WA_DeleteOnClose, true);
-    ui->setupUi(getContents());
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    m_helpURL = "plugins/samplesink/testsink/readme.md";
+    QWidget *contents = getContents();
+	ui->setupUi(contents);
+    setSizePolicy(contents->sizePolicy());
     setMinimumSize(m_MinimumWidth, m_MinimumHeight);
     getContents()->setStyleSheet("#TestSinkGui { background-color: rgb(64, 64, 64); }");
-    m_helpURL = "plugins/samplesink/testsink/readme.md";
     m_sampleSink = (TestSinkOutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
 
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));

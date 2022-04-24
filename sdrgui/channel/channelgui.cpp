@@ -56,6 +56,7 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
     m_indexLabel->setToolTip("Channel index");
 
     m_settingsButton = new QPushButton();
+    m_settingsButton->setFixedSize(20, 20);
     QIcon settingsIcon(":/gear.png");
     m_settingsButton->setIcon(settingsIcon);
     m_settingsButton->setToolTip("Common settings");

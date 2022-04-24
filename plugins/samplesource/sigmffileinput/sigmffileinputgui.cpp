@@ -62,10 +62,11 @@ SigMFFileInputGUI::SigMFFileInputGUI(DeviceUISet *deviceUISet, QWidget* parent) 
 	m_lastEngineState(DeviceAPI::StNotStarted)
 {
     setAttribute(Qt::WA_DeleteOnClose, true);
-    ui->setupUi(getContents());
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
-    getContents()->setStyleSheet("#SigMFFileInputGUI { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplesource/sigmffileinput/readme.md";
+    QWidget *contents = getContents();
+	ui->setupUi(contents);
+    setSizePolicy(contents->sizePolicy());
+    contents->setStyleSheet("#SigMFFileInputGUI { background-color: rgb(64, 64, 64); }");
 
     ui->fileNameText->setText(m_metaFileName);
 	ui->crcLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
@@ -128,12 +129,6 @@ bool SigMFFileInputGUI::deserialize(const QByteArray& data)
 		resetToDefaults();
 		return false;
 	}
-}
-
-void SigMFFileInputGUI::resizeEvent(QResizeEvent* size)
-{
-    resize(436, height());
-    size->accept();
 }
 
 void SigMFFileInputGUI::handleInputMessages()

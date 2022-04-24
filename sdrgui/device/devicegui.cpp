@@ -163,7 +163,7 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
     m_bottomLayout->addWidget(m_statusLabel);
     m_sizeGripBottomRight = new QSizeGrip(this);
     m_sizeGripBottomRight->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    m_sizeGripBottomRight->setFixedHeight(20);
+
     // m_bottomLayout->addStretch(1);
     m_bottomLayout->addWidget(m_sizeGripBottomRight, 0, Qt::AlignBottom | Qt::AlignRight);
 
