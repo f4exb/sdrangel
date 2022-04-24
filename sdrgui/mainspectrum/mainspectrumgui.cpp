@@ -42,6 +42,10 @@ MainSpectrumGUI::MainSpectrumGUI(GLSpectrum *spectrum, GLSpectrumGUI *spectrumGU
     qDebug("MainSpectrumGUI::MainSpectrumGUI: %p", parent);
     setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
     m_helpURL = "sdrgui/mainspectrum/readme.md";
+    setObjectName("MainSpectrumGUI");
+    setStyleSheet(QString(tr("#MainSpectrumGUI { border: 1px solid %1; background-color: %2; }")
+        .arg(palette().highlight().color().darker(115).name()))
+        .arg(palette().window().color().name()));
 
     setMinimumSize(m_MinimumWidth, m_MinimumHeight);
 
@@ -118,6 +122,7 @@ MainSpectrumGUI::MainSpectrumGUI(GLSpectrum *spectrum, GLSpectrumGUI *spectrumGU
     m_bottomLayout->addWidget(m_statusLabel);
     m_sizeGripBottomRight = new QSizeGrip(this);
     m_sizeGripBottomRight->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    m_sizeGripBottomRight->setFixedHeight(10);
     //m_bottomLayout->addStretch(1);
     m_bottomLayout->addWidget(m_sizeGripBottomRight, 0, Qt::AlignBottom | Qt::AlignRight);
 
