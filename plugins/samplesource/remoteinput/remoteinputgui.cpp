@@ -74,8 +74,7 @@ RemoteInputGui::RemoteInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_startingTimeStampms = 0;
     ui->setupUi(getContents());
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    getContents()->setStyleSheet(QString(tr("#RemoteInputGui { border: 1px solid %1 }")
-        .arg(palette().highlight().color().darker(115).name())));
+    getContents()->setStyleSheet("#RemoteInputGui { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplesource/remoteinput/readme.md";
 
     ui->remoteDeviceFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));

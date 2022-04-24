@@ -48,8 +48,7 @@ RTLSDRGui::RTLSDRGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
     ui->setupUi(getContents());
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    getContents()->setStyleSheet(QString(tr("#RTLSDRGui { border: 1px solid %1 }")
-        .arg(palette().highlight().color().darker(115).name())));
+    getContents()->setStyleSheet("#RTLSDRGui { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplesource/rtlsdr/readme.md";
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 	updateFrequencyLimits();

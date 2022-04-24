@@ -64,8 +64,7 @@ TestMIGui::TestMIGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
     ui->setupUi(getContents());
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    getContents()->setStyleSheet(QString(tr("#TestMIGui { border: 1px solid %1 }")
-        .arg(palette().highlight().color().darker(115).name())));
+    getContents()->setStyleSheet("#TestMIGui { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplemimo/testmi/readme.md";
     ui->spectrumSource->addItem("0");
     ui->spectrumSource->addItem("1");

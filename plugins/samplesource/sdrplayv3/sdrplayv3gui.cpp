@@ -45,8 +45,7 @@ SDRPlayV3Gui::SDRPlayV3Gui(DeviceUISet *deviceUISet, QWidget* parent) :
 
     ui->setupUi(getContents());
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    getContents()->setStyleSheet(QString(tr("#SDRPlayV3Gui { border: 1px solid %1 }")
-        .arg(palette().highlight().color().darker(115).name())));
+    getContents()->setStyleSheet("#SDRPlayV3Gui { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplesource/sdrplayv3/readme.md";
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     updateFrequencyLimits();

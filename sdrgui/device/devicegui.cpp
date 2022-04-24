@@ -42,6 +42,10 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
 {
     qDebug("DeviceGUI::DeviceGUI: %p", parent);
     setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
+    setObjectName("DeviceGUI");
+    setStyleSheet(QString(tr("#DeviceGUI { border: 1px solid %1; background-color: %2; }")
+        .arg(palette().highlight().color().darker(115).name()))
+        .arg(palette().dark().color().darker(115).name()));
 
     m_indexLabel = new QLabel();
     m_indexLabel->setFixedSize(32, 16);
@@ -129,8 +133,8 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
     m_showAllChannelsButton->setToolTip("Show all channels");
 
     m_layouts = new QVBoxLayout();
-    m_layouts->setContentsMargins(m_resizer.m_gripSize, 4, m_resizer.m_gripSize, 4);
-    m_layouts->setSpacing(2);
+    m_layouts->setContentsMargins(m_resizer.m_gripSize, m_resizer.m_gripSize, m_resizer.m_gripSize, m_resizer.m_gripSize);
+    m_layouts->setSpacing(0);
 
     m_topLayout = new QHBoxLayout();
     m_topLayout->setContentsMargins(0, 0, 0, 0);
@@ -148,6 +152,7 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
     m_topLayout->addWidget(m_closeButton);
 
     m_centerLayout = new QHBoxLayout();
+    m_centerLayout->setContentsMargins(0, 0, 0, 0);
     m_contents = new QWidget(); // Do not delete! Done in child's destructor with "delete ui"
     m_centerLayout->addWidget(m_contents);
 
@@ -158,6 +163,7 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
     m_bottomLayout->addWidget(m_statusLabel);
     m_sizeGripBottomRight = new QSizeGrip(this);
     m_sizeGripBottomRight->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    m_sizeGripBottomRight->setFixedHeight(20);
     // m_bottomLayout->addStretch(1);
     m_bottomLayout->addWidget(m_sizeGripBottomRight, 0, Qt::AlignBottom | Qt::AlignRight);
 

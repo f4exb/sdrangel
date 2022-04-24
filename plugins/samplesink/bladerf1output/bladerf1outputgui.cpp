@@ -48,8 +48,7 @@ Bladerf1OutputGui::Bladerf1OutputGui(DeviceUISet *deviceUISet, QWidget* parent) 
 
     ui->setupUi(getContents());
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    getContents()->setStyleSheet(QString(tr("#Bladerf1OutputGui { border: 1px solid %1 }")
-        .arg(palette().highlight().color().darker(115).name())));
+    getContents()->setStyleSheet("#Bladerf1OutputGui { background-color: rgb(64, 64, 64); }");
     m_helpURL = "/plugins/samplesink/bladerf1output/readme.md";	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 	ui->centerFrequency->setValueRange(7, BLADERF_FREQUENCY_MIN_XB200/1000, BLADERF_FREQUENCY_MAX/1000);
 

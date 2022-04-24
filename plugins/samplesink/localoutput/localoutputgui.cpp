@@ -64,8 +64,7 @@ LocalOutputGui::LocalOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
     ui->setupUi(getContents());
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    getContents()->setStyleSheet(QString(tr("#LocalOutputGui { border: 1px solid %1 }")
-        .arg(palette().highlight().color().darker(115).name())));
+    getContents()->setStyleSheet("#LocalOutputGui { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplesink/localoutput/readme.md";
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));

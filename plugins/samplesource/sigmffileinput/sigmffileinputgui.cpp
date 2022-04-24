@@ -64,8 +64,7 @@ SigMFFileInputGUI::SigMFFileInputGUI(DeviceUISet *deviceUISet, QWidget* parent) 
     setAttribute(Qt::WA_DeleteOnClose, true);
     ui->setupUi(getContents());
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
-    getContents()->setStyleSheet(QString(tr("#SigMFFileInputGUI { border: 1px solid %1 }")
-        .arg(palette().highlight().color().darker(115).name())));
+    getContents()->setStyleSheet("#SigMFFileInputGUI { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplesource/sigmffileinput/readme.md";
 
     ui->fileNameText->setText(m_metaFileName);

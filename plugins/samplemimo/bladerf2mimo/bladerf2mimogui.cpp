@@ -69,8 +69,7 @@ BladeRF2MIMOGui::BladeRF2MIMOGui(DeviceUISet *deviceUISet, QWidget* parent) :
     setAttribute(Qt::WA_DeleteOnClose, true);
     ui->setupUi(getContents());
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    getContents()->setStyleSheet(QString(tr("#BladeRF2MIMOGui { border: 1px solid %1 }")
-        .arg(palette().highlight().color().darker(115).name())));
+    getContents()->setStyleSheet("#BladeRF2MIMOGui { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplemimo/bladerf2mimo/readme.md";
     m_sampleMIMO = (BladeRF2MIMO*) m_deviceUISet->m_deviceAPI->getSampleMIMO();
 

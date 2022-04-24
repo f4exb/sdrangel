@@ -45,8 +45,7 @@ AudioOutputGui::AudioOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
     ui->setupUi(getContents());
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    getContents()->setStyleSheet(QString(tr("#AudioOutputGui { border: 1px solid %1 }")
-        .arg(palette().highlight().color().darker(115).name())));
+    getContents()->setStyleSheet("#AudioOutputGui { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplesink/audiooutput/readme.md";
 
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));

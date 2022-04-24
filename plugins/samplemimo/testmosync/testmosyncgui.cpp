@@ -53,8 +53,7 @@ TestMOSyncGui::TestMOSyncGui(DeviceUISet *deviceUISet, QWidget* parent) :
     setAttribute(Qt::WA_DeleteOnClose, true);
     ui->setupUi(getContents());
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    getContents()->setStyleSheet(QString(tr("#TestMOSyncGui { border: 1px solid %1 }")
-        .arg(palette().highlight().color().darker(115).name())));
+    getContents()->setStyleSheet("#TestMOSyncGui { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplemimo/testmosync/readme.md";
     m_sampleMIMO = (TestMOSync*) m_deviceUISet->m_deviceAPI->getSampleMIMO();
 

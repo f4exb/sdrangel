@@ -68,8 +68,7 @@ XTRXMIMOGUI::XTRXMIMOGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     setAttribute(Qt::WA_DeleteOnClose, true);
     ui->setupUi(getContents());
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    getContents()->setStyleSheet(QString(tr("#XTRXMIMOGUI { border: 1px solid %1 }")
-        .arg(palette().highlight().color().darker(115).name())));
+    getContents()->setStyleSheet("#XTRXMIMOGUI { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplemimo/xtrxmimo/readme.md";
     m_xtrxMIMO = (XTRXMIMO*) m_deviceUISet->m_deviceAPI->getSampleMIMO();
 
