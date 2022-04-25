@@ -215,6 +215,19 @@ Workspace::~Workspace()
     qDebug("Workspace::~Workspace: end");
 }
 
+void Workspace::setIndex(int index)
+{
+    m_index = index;
+    setWindowTitle(tr("W%1").arg(m_index));
+    setObjectName(tr("W%1").arg(m_index));
+    m_titleLabel->setText(windowTitle());
+}
+
+QList<QMdiSubWindow *> Workspace::getSubWindowList() const
+{
+    return m_mdi->subWindowList();
+}
+
 void Workspace::toggleFloating()
 {
     setFloating(!isFloating());

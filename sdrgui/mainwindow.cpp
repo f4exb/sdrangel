@@ -1830,6 +1830,33 @@ void MainWindow::removeEmptyWorkspaces()
             ++it;
         }
     }
+
+    // Renumerate
+    for (int i = 0; i < m_workspaces.size(); i++)
+    {
+        Workspace *workspace = m_workspaces[i];
+        workspace->setIndex(i);
+        QList<QMdiSubWindow *> subWindows = workspace->getSubWindowList();
+
+        for (auto& subWindow : subWindows)
+        {
+            if (qobject_cast<DeviceGUI*>(subWindow)) {
+                qobject_cast<DeviceGUI*>(subWindow)->setWorkspaceIndex(i);
+            }
+
+            if (qobject_cast<MainSpectrumGUI*>(subWindow)) {
+                qobject_cast<MainSpectrumGUI*>(subWindow)->setWorkspaceIndex(i);
+            }
+
+            if (qobject_cast<ChannelGUI*>(subWindow)) {
+                qobject_cast<ChannelGUI*>(subWindow)->setWorkspaceIndex(i);
+            }
+
+            if (qobject_cast<FeatureGUI*>(subWindow)) {
+                qobject_cast<FeatureGUI*>(subWindow)->setWorkspaceIndex(i);
+            }
+        }
+    }
 }
 
 void MainWindow::on_action_View_Fullscreen_toggled(bool checked)

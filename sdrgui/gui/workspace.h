@@ -40,6 +40,7 @@ public:
     ~Workspace();
 
     int getIndex() const { return m_index; }
+    void setIndex(int index);
     void resetAvailableFeatures() { m_featureAddDialog.resetFeatureNames(); }
     void addAvailableFeatures(const QStringList& featureNames) { m_featureAddDialog.addFeatureNames(featureNames); }
     void addToMdiArea(QMdiSubWindow *sub);
@@ -47,6 +48,7 @@ public:
     int getNumberOfSubWindows() const;
     QByteArray saveMdiGeometry();
     void restoreMdiGeometry(const QByteArray& blob);
+    QList<QMdiSubWindow *> getSubWindowList() const;
 
 private:
     int m_index;
