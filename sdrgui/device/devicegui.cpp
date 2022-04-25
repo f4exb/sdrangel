@@ -193,6 +193,8 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
         this,
         &DeviceGUI::addChannelEmitted
     );
+
+    m_resizer.enableChildMouseTracking();
 }
 
 DeviceGUI::~DeviceGUI()
