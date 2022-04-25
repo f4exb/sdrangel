@@ -318,7 +318,7 @@ void DABDemodGUI::channelMarkerChangedByCursor()
 
 void DABDemodGUI::channelMarkerHighlightedByCursor()
 {
-    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
+    setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void DABDemodGUI::on_deltaFrequency_changed(qint64 value)

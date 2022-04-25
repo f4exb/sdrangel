@@ -194,7 +194,7 @@ void VORDemodSCGUI::channelMarkerChangedByCursor()
 
 void VORDemodSCGUI::channelMarkerHighlightedByCursor()
 {
-    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
+    setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void VORDemodSCGUI::on_deltaFrequency_changed(qint64 value)

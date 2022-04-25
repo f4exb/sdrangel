@@ -148,7 +148,7 @@ void DATVDemodGUI::channelMarkerChangedByCursor()
 
 void DATVDemodGUI::channelMarkerHighlightedByCursor()
 {
-    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
+    setHighlighted(m_channelMarker.getHighlighted());
 }
 
 

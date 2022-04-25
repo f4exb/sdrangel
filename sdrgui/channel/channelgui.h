@@ -96,6 +96,7 @@ protected:
     void resetContextMenuType() { m_contextMenuType = ContextMenuNone; }
     void updateIndexLabel();
     int getAdditionalHeight() const { return 25 + 22; }
+    void setHighlighted(bool highlighted);
 
     DeviceType m_deviceType;
     int m_deviceSetIndex;

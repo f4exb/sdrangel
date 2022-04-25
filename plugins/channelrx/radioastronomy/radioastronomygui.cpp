@@ -1111,7 +1111,7 @@ void RadioAstronomyGUI::channelMarkerChangedByCursor()
 
 void RadioAstronomyGUI::channelMarkerHighlightedByCursor()
 {
-    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
+    setHighlighted(m_channelMarker.getHighlighted());
 }
 
 // Calculate Tsys0 - i.e. receiver noise temperature when there's no source signal, just unwanted noise

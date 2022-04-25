@@ -313,7 +313,7 @@ void PagerDemodGUI::channelMarkerChangedByCursor()
 
 void PagerDemodGUI::channelMarkerHighlightedByCursor()
 {
-    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
+    setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void PagerDemodGUI::on_deltaFrequency_changed(qint64 value)

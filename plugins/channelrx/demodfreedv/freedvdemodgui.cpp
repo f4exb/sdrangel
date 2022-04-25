@@ -133,7 +133,7 @@ void FreeDVDemodGUI::channelMarkerChangedByCursor()
 
 void FreeDVDemodGUI::channelMarkerHighlightedByCursor()
 {
-    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
+    setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void FreeDVDemodGUI::on_deltaFrequency_changed(qint64 value)

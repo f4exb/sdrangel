@@ -2209,7 +2209,7 @@ void ADSBDemodGUI::channelMarkerChangedByCursor()
 
 void ADSBDemodGUI::channelMarkerHighlightedByCursor()
 {
-    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
+    setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void ADSBDemodGUI::on_deltaFrequency_changed(qint64 value)

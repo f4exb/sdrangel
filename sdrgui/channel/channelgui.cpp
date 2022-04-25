@@ -46,8 +46,8 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
     setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
     setObjectName("ChannelGUI");
     setStyleSheet(QString(tr("#ChannelGUI { border: 1px solid %1; background-color: %2; }")
-        .arg(palette().highlight().color().darker(115).name()))
-        .arg(palette().dark().color().darker(115).name()));
+        .arg(palette().highlight().color().darker(115).name())
+        .arg(palette().dark().color().darker(115).name())));
 
     m_indexLabel = new QLabel();
     m_indexLabel->setFixedSize(50, 16);
@@ -393,6 +393,13 @@ void ChannelGUI::updateIndexLabel()
 bool ChannelGUI::isOnMovingPad()
 {
     return m_indexLabel->underMouse() || m_titleLabel->underMouse() || m_statusFrequency->underMouse() || m_statusLabel->underMouse();
+}
+
+void ChannelGUI::setHighlighted(bool highlighted)
+{
+    setStyleSheet(QString(tr("#ChannelGUI { border: 1px solid %1; background-color: %2; }")
+        .arg(highlighted ? "#FFFFFF" : palette().highlight().color().darker(115).name())
+        .arg(palette().dark().color().darker(115).name())));
 }
 
 QString ChannelGUI::getDeviceTypeTag()

@@ -194,7 +194,7 @@ void ATVDemodGUI::channelMarkerChangedByCursor()
 
 void ATVDemodGUI::channelMarkerHighlightedByCursor()
 {
-    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
+    setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void ATVDemodGUI::handleSourceMessages()

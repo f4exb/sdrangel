@@ -325,7 +325,7 @@ void SigMFFileSinkGUI::channelMarkerChangedByCursor()
 
 void SigMFFileSinkGUI::channelMarkerHighlightedByCursor()
 {
-    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
+    setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void SigMFFileSinkGUI::handleSourceMessages()

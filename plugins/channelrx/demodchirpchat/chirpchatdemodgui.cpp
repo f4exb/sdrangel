@@ -162,7 +162,7 @@ void ChirpChatDemodGUI::on_deltaFrequency_changed(qint64 value)
 
 void ChirpChatDemodGUI::channelMarkerHighlightedByCursor()
 {
-    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
+    setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void ChirpChatDemodGUI::on_BW_valueChanged(int value)

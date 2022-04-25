@@ -131,7 +131,7 @@ void AMDemodGUI::channelMarkerChangedByCursor()
 
 void AMDemodGUI::channelMarkerHighlightedByCursor()
 {
-    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
+    setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void AMDemodGUI::on_deltaFrequency_changed(qint64 value)

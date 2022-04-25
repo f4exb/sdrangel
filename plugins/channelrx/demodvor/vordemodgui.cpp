@@ -889,7 +889,7 @@ void VORDemodGUI::channelMarkerChangedByCursor()
 
 void VORDemodGUI::channelMarkerHighlightedByCursor()
 {
-    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
+    setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void VORDemodGUI::on_thresh_valueChanged(int value)

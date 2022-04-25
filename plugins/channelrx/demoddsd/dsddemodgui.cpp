@@ -534,7 +534,7 @@ void DSDDemodGUI::channelMarkerChangedByCursor()
 
 void DSDDemodGUI::channelMarkerHighlightedByCursor()
 {
-    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
+    setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void DSDDemodGUI::audioSelect()

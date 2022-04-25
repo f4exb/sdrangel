@@ -122,7 +122,7 @@ void SSBDemodGUI::channelMarkerChangedByCursor()
 
 void SSBDemodGUI::channelMarkerHighlightedByCursor()
 {
-    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
+    setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void SSBDemodGUI::on_audioBinaural_toggled(bool binaural)

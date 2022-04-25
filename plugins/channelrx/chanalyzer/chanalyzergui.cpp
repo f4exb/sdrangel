@@ -286,7 +286,7 @@ void ChannelAnalyzerGUI::channelMarkerChangedByCursor()
 
 void ChannelAnalyzerGUI::channelMarkerHighlightedByCursor()
 {
-    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
+    setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void ChannelAnalyzerGUI::tick()

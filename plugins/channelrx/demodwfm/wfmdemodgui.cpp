@@ -113,7 +113,7 @@ void WFMDemodGUI::channelMarkerChangedByCursor()
 
 void WFMDemodGUI::channelMarkerHighlightedByCursor()
 {
-    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
+    setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void WFMDemodGUI::on_deltaFrequency_changed(qint64 value)

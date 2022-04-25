@@ -149,7 +149,7 @@ void BFMDemodGUI::channelMarkerChangedByCursor()
 
 void BFMDemodGUI::channelMarkerHighlightedByCursor()
 {
-    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
+    setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void BFMDemodGUI::on_deltaFrequency_changed(qint64 value)

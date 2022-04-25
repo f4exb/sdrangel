@@ -120,7 +120,7 @@ void UDPSinkGUI::channelMarkerChangedByCursor()
 
 void UDPSinkGUI::channelMarkerHighlightedByCursor()
 {
-    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
+    setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void UDPSinkGUI::tick()

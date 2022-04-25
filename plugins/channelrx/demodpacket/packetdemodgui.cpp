@@ -257,7 +257,7 @@ void PacketDemodGUI::channelMarkerChangedByCursor()
 
 void PacketDemodGUI::channelMarkerHighlightedByCursor()
 {
-    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
+    setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void PacketDemodGUI::on_deltaFrequency_changed(qint64 value)

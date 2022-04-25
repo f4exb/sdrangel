@@ -360,7 +360,7 @@ void RadiosondeDemodGUI::channelMarkerChangedByCursor()
 
 void RadiosondeDemodGUI::channelMarkerHighlightedByCursor()
 {
-    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
+    setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void RadiosondeDemodGUI::on_deltaFrequency_changed(qint64 value)

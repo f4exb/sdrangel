@@ -28,7 +28,6 @@
 
 RollupContents::RollupContents(QWidget* parent) :
     QWidget(parent),
-    m_highlighted(false),
     m_streamIndicator("S"),
     // m_channelWidget(true),
     m_newHeight(0)
@@ -80,15 +79,6 @@ void RollupContents::restoreState(const RollupState& state)
                 }
             }
         }
-    }
-}
-
-void RollupContents::setHighlighted(bool highlighted)
-{
-    if (m_highlighted != highlighted)
-    {
-        m_highlighted = highlighted;
-        update();
     }
 }
 
@@ -219,7 +209,7 @@ void RollupContents::paintEvent(QPaintEvent*)
     // p.drawRect(width() - 5, height() - 5, 5, 5);
 
     // Rahmen (frame)
-    p.setPen(m_highlighted ? Qt::white : frameColor);
+    // p.setPen(m_highlighted ? Qt::white : frameColor);
     p.setBrush(palette().window());
     QRectF r(rect());
     // r.adjust(0.5, 0.5, -0.5, -0.5);

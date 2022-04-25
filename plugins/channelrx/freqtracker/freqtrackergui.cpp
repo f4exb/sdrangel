@@ -144,7 +144,7 @@ void FreqTrackerGUI::channelMarkerChangedByCursor()
 
 void FreqTrackerGUI::channelMarkerHighlightedByCursor()
 {
-    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
+    setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void FreqTrackerGUI::on_deltaFrequency_changed(qint64 value)

@@ -333,7 +333,7 @@ void FileSinkGUI::channelMarkerChangedByCursor()
 
 void FileSinkGUI::channelMarkerHighlightedByCursor()
 {
-    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
+    setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void FileSinkGUI::handleSourceMessages()

@@ -307,7 +307,7 @@ void APTDemodGUI::channelMarkerChangedByCursor()
 
 void APTDemodGUI::channelMarkerHighlightedByCursor()
 {
-    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
+    setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void APTDemodGUI::on_deltaFrequency_changed(qint64 value)

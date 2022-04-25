@@ -30,7 +30,6 @@ class SDRGUI_API RollupContents : public QWidget {
 
 public:
     RollupContents(QWidget* parent = nullptr);
-    void setHighlighted(bool highlighted);
     void saveState(RollupState& state) const;
     void restoreState(const RollupState& state);
     int arrangeRollups();
@@ -44,7 +43,6 @@ protected:
         VersionMarker = 0xff
     };
 
-    bool m_highlighted;
     QString m_streamIndicator;
     QString m_helpURL;
 

@@ -168,7 +168,7 @@ void RadioClockGUI::channelMarkerChangedByCursor()
 
 void RadioClockGUI::channelMarkerHighlightedByCursor()
 {
-    getRollupContents()->setHighlighted(m_channelMarker.getHighlighted());
+    setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void RadioClockGUI::on_deltaFrequency_changed(qint64 value)
