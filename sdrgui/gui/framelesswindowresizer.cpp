@@ -34,6 +34,14 @@ FramelessWindowResizer::FramelessWindowResizer(QWidget *widget) :
 {
 }
 
+void FramelessWindowResizer::enableChildMouseTracking()
+{
+    QList<QWidget *> widgets = m_widget->findChildren<QWidget *>();
+    for (auto widget : widgets) {
+        widget->setMouseTracking(true);
+    }
+}
+
 bool FramelessWindowResizer::mouseOnTopBorder(QPoint pos) const
 {
     return (pos.y() >= 0) && (pos.y() < m_gripSize);

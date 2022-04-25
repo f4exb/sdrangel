@@ -140,6 +140,7 @@ MainSpectrumGUI::MainSpectrumGUI(GLSpectrum *spectrum, GLSpectrumGUI *spectrumGU
     connect(this, SIGNAL(forceShrink()), this, SLOT(shrinkWindow()));
     connect(m_hideButton, SIGNAL(clicked()), this, SLOT(hide()));
 
+    m_resizer.enableChildMouseTracking();
     shrinkWindow();
 }
 

@@ -141,6 +141,8 @@ FeatureGUI::FeatureGUI(QWidget *parent) :
         this,
         &FeatureGUI::onWidgetRolled
     );
+
+    m_resizer.enableChildMouseTracking();
 }
 
 FeatureGUI::~FeatureGUI()

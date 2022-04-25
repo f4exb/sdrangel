@@ -28,6 +28,8 @@
 // by clicking and draging on the border
 // The window needs to forward the mousePressEvent, mouseReleaseEvent, mouseMoveEvent
 // and leaveEvent events to this class
+// Child widgets should have mouse tracking enabled, so cursor can be controlled properly
+// This can be achieved by calling enableChildMouseTracking
 class SDRGUI_API FramelessWindowResizer
 {
 private:
@@ -49,6 +51,7 @@ private:
 
 public:
     FramelessWindowResizer(QWidget *widget);
+    void enableChildMouseTracking();
     void mousePressEvent(QMouseEvent* event);
     void mouseReleaseEvent(QMouseEvent* event);
     void mouseMoveEvent(QMouseEvent* event);

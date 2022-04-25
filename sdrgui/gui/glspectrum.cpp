@@ -2565,6 +2565,8 @@ void GLSpectrum::mouseMoveEvent(QMouseEvent* event)
 
         return;
     }
+
+    event->setAccepted(false);
 }
 
 void GLSpectrum::mousePressEvent(QMouseEvent* event)

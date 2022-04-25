@@ -184,6 +184,8 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
         this,
         &ChannelGUI::onWidgetRolled
     );
+
+    m_resizer.enableChildMouseTracking();
 }
 
 ChannelGUI::~ChannelGUI()
