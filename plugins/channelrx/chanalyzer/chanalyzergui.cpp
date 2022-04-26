@@ -730,6 +730,7 @@ void ChannelAnalyzerGUI::makeUIConnections()
     QObject::connect(ui->pllBandwidth, &QDial::valueChanged, this, &ChannelAnalyzerGUI::on_pllBandwidth_valueChanged);
     QObject::connect(ui->pllDampingFactor, &QDial::valueChanged, this, &ChannelAnalyzerGUI::on_pllDampingFactor_valueChanged);
     QObject::connect(ui->pllLoopGain, &QDial::valueChanged, this, &ChannelAnalyzerGUI::on_pllLoopGain_valueChanged);
+    QObject::connect(ui->log2Decim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ChannelAnalyzerGUI::on_log2Decim_currentIndexChanged);
     QObject::connect(ui->useRationalDownsampler, &ButtonSwitch::toggled, this, &ChannelAnalyzerGUI::on_useRationalDownsampler_toggled);
     QObject::connect(ui->signalSelect, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ChannelAnalyzerGUI::on_signalSelect_currentIndexChanged);
     QObject::connect(ui->rrcFilter, &ButtonSwitch::toggled, this, &ChannelAnalyzerGUI::on_rrcFilter_toggled);
