@@ -97,7 +97,7 @@ MainSpectrumGUI::MainSpectrumGUI(GLSpectrum *spectrum, GLSpectrumGUI *spectrumGU
     // m_statusLabel->setToolTip("Spectrum status");
 
     m_layouts = new QVBoxLayout();
-    m_layouts->setContentsMargins(m_resizer.m_gripSize, 4, m_resizer.m_gripSize, 4);
+    m_layouts->setContentsMargins(m_resizer.m_gripSize, m_resizer.m_gripSize, m_resizer.m_gripSize, m_resizer.m_gripSize);
     m_layouts->setSpacing(0);
 
     m_topLayout = new QHBoxLayout();

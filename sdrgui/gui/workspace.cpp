@@ -685,3 +685,23 @@ void Workspace::restoreMdiGeometry(const QByteArray& blob)
 {
     m_mdi->restoreGeometry(qUncompress(blob));
 }
+
+void Workspace::adjustSubWindowsAfterRestore()
+{
+    QList<QMdiSubWindow *> subWindowList = m_mdi->subWindowList();
+
+    for (auto& subWindow : subWindowList)
+    {
+        if ((subWindow->y() >= 20) && (subWindow->y() < 40)) {
+            subWindow->move(subWindow->x(), subWindow->y() - 20);
+        }
+
+        if (qobject_cast<ChannelGUI*>(subWindow)) {
+            subWindow->resize(subWindow->width(), subWindow->height() - 22);
+        }
+
+        if (qobject_cast<FeatureGUI*>(subWindow)) {
+            subWindow->resize(subWindow->width(), subWindow->height() - 8);
+        }
+    }
+}

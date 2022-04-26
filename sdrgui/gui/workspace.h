@@ -57,6 +57,7 @@ public:
     void orderByIndex(QList<FeatureGUI *> &list);
     void orderByIndex(QList<DeviceGUI *> &list);
     void orderByIndex(QList<MainSpectrumGUI *> &list);
+    void adjustSubWindowsAfterRestore();
 
 private:
     int m_index;

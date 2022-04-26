@@ -83,7 +83,7 @@ protected:
     void mouseReleaseEvent(QMouseEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
     void resetContextMenuType() { m_contextMenuType = ContextMenuNone; }
-    int getAdditionalHeight() const { return 26 + 22; }  // height of top and bottom bars
+    int getAdditionalHeight() const { return 22 + 22; }
 
     DeviceType m_deviceType;
     int m_deviceSetIndex;

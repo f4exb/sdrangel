@@ -107,11 +107,6 @@ bool Configuration::deserialize(const QByteArray& data)
 	}
 }
 
-int Configuration::getNumberOfWorkspaces() const
-{
-    return m_workspaceGeometries.size();
-}
-
 void Configuration::clearData()
 {
     m_deviceSetPresets.clear();
