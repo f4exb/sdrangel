@@ -31,6 +31,10 @@ class QStringList;
 class QMdiArea;
 class QMdiSubWindow;
 class QFrame;
+class ChannelGUI;
+class FeatureGUI;
+class DeviceGUI;
+class MainSpectrumGUI;
 
 class SDRGUI_API Workspace : public QDockWidget
 {
@@ -49,6 +53,10 @@ public:
     QByteArray saveMdiGeometry();
     void restoreMdiGeometry(const QByteArray& blob);
     QList<QMdiSubWindow *> getSubWindowList() const;
+    void orderByIndex(QList<ChannelGUI *> &list);
+    void orderByIndex(QList<FeatureGUI *> &list);
+    void orderByIndex(QList<DeviceGUI *> &list);
+    void orderByIndex(QList<MainSpectrumGUI *> &list);
 
 private:
     int m_index;
@@ -61,6 +69,8 @@ private:
     QFrame *m_vline2;
     QPushButton *m_cascadeSubWindows;
     QPushButton *m_tileSubWindows;
+    QPushButton *m_stackSubWindows;
+    QPushButton *m_autoStackSubWindows;
     QWidget *m_titleBar;
     QHBoxLayout *m_titleBarLayout;
     QLabel *m_titleLabel;
@@ -68,6 +78,12 @@ private:
     QPushButton *m_closeButton;
     FeatureAddDialog m_featureAddDialog;
     QMdiArea *m_mdi;
+    bool m_stacking;                // Set when stackSubWindows() is running
+    int m_userChannelMinWidth;      // Minimum width of channels column for stackSubWindows(), set by user resizing a channel window
+
+protected:
+    void resizeEvent(QResizeEvent *event) override;
+    bool eventFilter(QObject *obj, QEvent *event) override;
 
 private slots:
     void addRxDeviceClicked();
@@ -77,6 +93,8 @@ private slots:
     void featurePresetsDialog();
     void cascadeSubWindows();
     void tileSubWindows();
+    void stackSubWindows();
+    void autoStackSubWindows();
     void addFeatureEmitted(int featureIndex);
     void toggleFloating();
 
