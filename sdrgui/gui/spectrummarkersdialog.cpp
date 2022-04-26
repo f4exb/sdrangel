@@ -109,9 +109,9 @@ void SpectrumMarkersDialog::displayHistogramMarker()
         m_histogramMarkers[m_histogramMarkerIndex].m_markerColor.getRgb(&r, &g, &b, &a);
         ui->markerColor->setStyleSheet(tr("QLabel { background-color : rgb(%1,%2,%3); }").arg(r).arg(g).arg(b));
         ui->showMarker->setChecked(m_histogramMarkers[m_histogramMarkerIndex].m_show);
+        ui->fixedPower->setVisible(m_histogramMarkers[m_histogramMarkerIndex].m_markerType == SpectrumHistogramMarker::SpectrumMarkerTypeManual);
+        ui->fixedPowerUnits->setVisible(m_histogramMarkers[m_histogramMarkerIndex].m_markerType == SpectrumHistogramMarker::SpectrumMarkerTypeManual);
     }
-    ui->fixedPower->setVisible(m_histogramMarkers[m_histogramMarkerIndex].m_markerType == SpectrumHistogramMarker::SpectrumMarkerTypeManual);
-    ui->fixedPowerUnits->setVisible(m_histogramMarkers[m_histogramMarkerIndex].m_markerType == SpectrumHistogramMarker::SpectrumMarkerTypeManual);
 
     ui->markerFrequency->blockSignals(false);
     ui->centerFrequency->blockSignals(false);
