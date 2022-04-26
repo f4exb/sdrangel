@@ -16,6 +16,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <algorithm>
+
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
@@ -23,14 +25,23 @@
 #include <QMdiArea>
 #include <QMdiSubWindow>
 #include <QFrame>
+#include <QDebug>
+#include <QApplication>
 
 #include "gui/samplingdevicedialog.h"
+#include "gui/rollupcontents.h"
+#include "channel/channelgui.h"
+#include "feature/featuregui.h"
+#include "device/devicegui.h"
+#include "mainspectrum/mainspectrumgui.h"
 #include "workspace.h"
 
 Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     QDockWidget(parent, flags),
     m_index(index),
-    m_featureAddDialog(this)
+    m_featureAddDialog(this),
+    m_stacking(false),
+    m_userChannelMinWidth(0)
 {
     m_mdi = new QMdiArea(this);
     m_mdi->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
@@ -100,6 +111,19 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     m_tileSubWindows->setToolTip("Tile sub windows");
     m_tileSubWindows->setFixedSize(20, 20);
 
+    m_stackSubWindows = new QPushButton("S");
+    //QIcon stackSubWindowsIcon(":/stack.png");     // FIXME
+    //m_stackSubWindows->setIcon(stackSubWindowsIcon);
+    m_stackSubWindows->setToolTip("Stack sub windows");
+    m_stackSubWindows->setFixedSize(20, 20);
+
+    m_autoStackSubWindows = new QPushButton("AS");
+    m_autoStackSubWindows->setCheckable(true);
+    //QIcon autoStackSubWindowsIcon(":/autostack.png"); // FIXME
+    //m_autoStackSubWindows->setIcon(autoStackSubWindowsIcon);
+    m_autoStackSubWindows->setToolTip("Automatically stack sub windows");
+    m_autoStackSubWindows->setFixedSize(20, 20);
+
     m_normalButton = new QPushButton();
     QIcon normalIcon(":/dock.png");
     m_normalButton->setIcon(normalIcon);
@@ -122,6 +146,8 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     m_titleBarLayout->addWidget(m_vline2);
     m_titleBarLayout->addWidget(m_cascadeSubWindows);
     m_titleBarLayout->addWidget(m_tileSubWindows);
+    m_titleBarLayout->addWidget(m_stackSubWindows);
+    m_titleBarLayout->addWidget(m_autoStackSubWindows);
     m_titleBarLayout->addStretch(1);
     m_titleBarLayout->addWidget(m_normalButton);
     m_titleBarLayout->addWidget(m_closeButton);
@@ -177,6 +203,20 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     );
 
     QObject::connect(
+        m_stackSubWindows,
+        &QPushButton::clicked,
+        this,
+        &Workspace::stackSubWindows
+    );
+
+    QObject::connect(
+        m_autoStackSubWindows,
+        &QPushButton::clicked,
+        this,
+        &Workspace::autoStackSubWindows
+    );
+
+    QObject::connect(
         m_normalButton,
         &QPushButton::clicked,
         this,
@@ -191,6 +231,7 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
         this,
         &Workspace::addFeatureEmitted
     );
+
 }
 
 Workspace::~Workspace()
@@ -198,6 +239,8 @@ Workspace::~Workspace()
     qDebug("Workspace::~Workspace");
     delete m_closeButton;
     delete m_normalButton;
+    delete m_autoStackSubWindows;
+    delete m_stackSubWindows;
     delete m_tileSubWindows;
     delete m_cascadeSubWindows;
     delete m_vline2;
@@ -288,15 +331,344 @@ void Workspace::tileSubWindows()
     m_mdi->tileSubWindows();
 }
 
+void Workspace::orderByIndex(QList<ChannelGUI *> &list)
+{
+    std::sort(list.begin(), list.end(),
+        [](const ChannelGUI *a, const ChannelGUI *b) -> bool
+        {
+            if (a->getDeviceSetIndex() == b->getDeviceSetIndex()) {
+                return a->getIndex() < b->getIndex();
+            } else {
+                return a->getDeviceSetIndex() < b->getDeviceSetIndex();
+            }
+        });
+}
+
+void Workspace::orderByIndex(QList<FeatureGUI *> &list)
+{
+    std::sort(list.begin(), list.end(),
+        [](const FeatureGUI *a, const FeatureGUI *b) -> bool
+        {
+            return a->getIndex() < b->getIndex();
+        });
+}
+
+void Workspace::orderByIndex(QList<DeviceGUI *> &list)
+{
+    std::sort(list.begin(), list.end(),
+        [](const DeviceGUI *a, const DeviceGUI *b) -> bool
+        {
+            return a->getIndex() < b->getIndex();
+        });
+}
+
+void Workspace::orderByIndex(QList<MainSpectrumGUI *> &list)
+{
+    std::sort(list.begin(), list.end(),
+        [](const MainSpectrumGUI *a, const MainSpectrumGUI *b) -> bool
+        {
+            return a->getIndex() < b->getIndex();
+        });
+}
+
+// Try to arrange windows somewhat like in earlier versions of SDRangel
+// Devices and fixed size features stacked on left
+// Spectrum and expandable features stacked in centre
+// Channels stacked on right
+void Workspace::stackSubWindows()
+{
+    // Set a flag so event handler knows if it's this code or the user that
+    // resizes a window
+    m_stacking = true;
+
+    // Categorise windows according to type
+    QList<QMdiSubWindow *> windows = m_mdi->subWindowList(QMdiArea::CreationOrder);
+    QList<DeviceGUI *> devices;
+    QList<MainSpectrumGUI *> spectrums;
+    QList<ChannelGUI *> channels;
+    QList<FeatureGUI *> fixedFeatures;
+    QList<FeatureGUI *> features;
+
+    for (auto window : windows)
+    {
+        if (window->isVisible())
+        {
+            if (window->inherits("DeviceGUI")) {
+                devices.append(qobject_cast<DeviceGUI *>(window));
+            } else if (window->inherits("MainSpectrumGUI")) {
+                spectrums.append(qobject_cast<MainSpectrumGUI *>(window));
+            } else if (window->inherits("ChannelGUI")) {
+                channels.append(qobject_cast<ChannelGUI *>(window));
+            } else if (window->inherits("FeatureGUI")) {
+                if (window->sizePolicy().verticalPolicy() == QSizePolicy::Fixed) {  // Test vertical, as horizontal can be adjusted a little bit
+                    fixedFeatures.append(qobject_cast<FeatureGUI *>(window));
+                } else {
+                    features.append(qobject_cast<FeatureGUI *>(window));
+                }
+            }
+        }
+    }
+
+    // Order windows by device/feature/channel index
+    orderByIndex(devices);
+    orderByIndex(spectrums);
+    orderByIndex(channels);
+    orderByIndex(fixedFeatures);
+    orderByIndex(features);
+
+    // Spacing between windows
+    const int spacing = 2;
+
+    // Calculate width and height needed for devices
+    int deviceMinWidth = 0;
+    int deviceTotalMinHeight = 0;
+    for (auto window : devices)
+    {
+        int winMinWidth = std::max(window->minimumSizeHint().width(), window->minimumWidth());
+        deviceMinWidth = std::max(deviceMinWidth, winMinWidth);
+        deviceTotalMinHeight += window->minimumSizeHint().height() + spacing;
+    }
+
+    // Calculate width & height needed for spectrums
+    int spectrumMinWidth = 0;
+    int spectrumTotalMinHeight = 0;
+    int expandingSpectrums = 0;
+    for (auto window : spectrums)
+    {
+        int winMinWidth = std::max(window->minimumSizeHint().width(), window->minimumWidth());
+        spectrumMinWidth = std::max(spectrumMinWidth, winMinWidth);
+        spectrumTotalMinHeight += window->minimumSizeHint().height() + spacing;
+        expandingSpectrums++;
+    }
+
+    // Calculate width & height needed for channels
+    int channelMinWidth = m_userChannelMinWidth;
+    int channelTotalMinHeight = 0;
+    int expandingChannels = 0;
+    for (auto window : channels)
+    {
+        int winMinWidth = std::max(window->minimumSizeHint().width(), window->minimumWidth());
+        channelMinWidth = std::max(channelMinWidth, winMinWidth);
+        channelTotalMinHeight += window->minimumSizeHint().height() + spacing;
+        if (window->sizePolicy().verticalPolicy() == QSizePolicy::Expanding) {
+            expandingChannels++;
+        }
+    }
+
+    // Calculate width & height needed for features
+    // These are spilt in to two groups - fixed size and expandable
+    int fixedFeaturesWidth = 0;
+    int fixedFeaturesTotalMinHeight = 0;
+    int featuresMinWidth = 0;
+    int featuresTotalMinHeight = 0;
+    int expandingFeatures = 0;
+    for (auto window : fixedFeatures)
+    {
+        int winMinWidth = std::max(window->minimumSizeHint().width(), window->minimumWidth());
+        fixedFeaturesWidth = std::max(fixedFeaturesWidth, winMinWidth);
+        fixedFeaturesTotalMinHeight += window->minimumSizeHint().height() + spacing;
+    }
+    for (auto window : features)
+    {
+        int winMinWidth = std::max(window->minimumSizeHint().width(), window->minimumWidth());
+        featuresMinWidth = std::max(featuresMinWidth, winMinWidth);
+        featuresTotalMinHeight += window->minimumSizeHint().height() + spacing;
+        expandingFeatures++;
+    }
+
+    // Calculate width for left hand column
+    int devicesFeaturesWidth = std::max(deviceMinWidth, fixedFeaturesWidth);
+    // Calculate min width for centre column
+    int spectrumFeaturesMinWidth = std::max(spectrumMinWidth, featuresMinWidth);
+
+    // Calculate spacing between columns
+    int spacing1 = devicesFeaturesWidth > 0 ? spacing : 0;
+    int spacing2 = spectrumFeaturesMinWidth > 0 ? spacing : 0;
+
+    // Will we need scroll bars?
+    QSize mdiSize = m_mdi->size();
+    int minWidth = devicesFeaturesWidth + spacing1 + spectrumFeaturesMinWidth + spacing2 + channelMinWidth;
+    int minHeight = std::max(std::max(deviceTotalMinHeight + fixedFeaturesTotalMinHeight, channelTotalMinHeight), channelTotalMinHeight + featuresTotalMinHeight);
+    bool requiresHScrollBar = minWidth > mdiSize.width();
+    bool requiresVScrollBar = minHeight > mdiSize.height();
+
+    // Reduce available size if scroll bars needed
+    int sbWidth = qApp->style()->pixelMetric(QStyle::PM_ScrollBarExtent);
+    if (requiresVScrollBar) {
+        mdiSize.setWidth(mdiSize.width() - sbWidth);
+    }
+    if (requiresHScrollBar) {
+        mdiSize.setHeight(mdiSize.height() - sbWidth);
+    }
+
+    // Now position the windows
+    int x = 0;
+    int y = 0;
+
+    // Put devices down left hand side
+    for (auto window : devices)
+    {
+        window->move(x, y);
+        y += window->size().height() + spacing;
+    }
+
+    // Put fixed height features underneath devices
+    // Resize them to be same width
+    for (auto window : fixedFeatures)
+    {
+        window->move(x, y);
+        window->resize(devicesFeaturesWidth, window->size().height());
+        y += window->size().height() + spacing;
+    }
+
+    // Calculate width needed for spectrum and features in the centre - use all available space
+    int spectrumFeaturesWidth = std::max(mdiSize.width() - channelMinWidth - devicesFeaturesWidth - spacing1 - spacing2, spectrumFeaturesMinWidth);
+
+    // Put channels on right hand side
+    // Try to resize them horizontally so they are the same width
+    // Share any available vertical space between expanding channels
+
+    x = devicesFeaturesWidth + spacing1 + spectrumFeaturesWidth + spacing2;
+    y = 0;
+    int extraSpacePerWindow;
+    int extraSpaceFirstWindow;
+    if ((channelTotalMinHeight < mdiSize.height()) && (expandingChannels > 0))
+    {
+        extraSpacePerWindow = (mdiSize.height() - channelTotalMinHeight) / expandingChannels;
+        extraSpaceFirstWindow = (mdiSize.height() - channelTotalMinHeight) % expandingChannels;
+    }
+    else
+    {
+        extraSpacePerWindow = 0;
+        extraSpaceFirstWindow = 0;
+    }
+
+    for (auto window : channels)
+    {
+        window->move(x, y);
+        int channelHeight = window->minimumSizeHint().height();
+        if (window->sizePolicy().verticalPolicy() == QSizePolicy::Expanding)
+        {
+            channelHeight += extraSpacePerWindow + extraSpaceFirstWindow;
+            extraSpaceFirstWindow = 0;
+        }
+        window->resize(channelMinWidth, channelHeight);
+        y += window->size().height() + spacing;
+    }
+
+    // Split remaining space in the middle between spectrums and expandable features, with spectrums stacked on top
+    x = devicesFeaturesWidth + spacing1;
+    y = 0;
+    if ((spectrumTotalMinHeight + featuresTotalMinHeight < mdiSize.height()) && (expandingSpectrums + expandingFeatures > 0))
+    {
+        int h = mdiSize.height() - spectrumTotalMinHeight - featuresTotalMinHeight;
+        int f = expandingSpectrums + expandingFeatures;
+        extraSpacePerWindow = h / f;
+        extraSpaceFirstWindow = h % f;
+    }
+    else
+    {
+        extraSpacePerWindow = 0;
+        extraSpaceFirstWindow = 0;
+    }
+
+    for (auto window : spectrums)
+    {
+        window->move(x, y);
+        int w = spectrumFeaturesWidth;
+        int h = window->minimumSizeHint().height() + extraSpacePerWindow + extraSpaceFirstWindow;
+        window->resize(w, h);
+        extraSpaceFirstWindow = 0;
+        y += window->size().height() + spacing;
+    }
+    for (auto window : features)
+    {
+        window->move(x, y);
+        int w = spectrumFeaturesWidth;
+        int h = window->minimumSizeHint().height() + extraSpacePerWindow + extraSpaceFirstWindow;
+        window->resize(w, h);
+        extraSpaceFirstWindow = 0;
+        y += window->size().height() + spacing;
+    }
+
+    m_stacking = false;
+}
+
+void Workspace::autoStackSubWindows()
+{
+    // FIXME: Need to save whether this is checked as a preference
+    if (m_autoStackSubWindows->isChecked()) {
+        stackSubWindows();
+    }
+}
+
+void Workspace::resizeEvent(QResizeEvent *event)
+{
+    QDockWidget::resizeEvent(event);
+    autoStackSubWindows();
+}
+
 void Workspace::addToMdiArea(QMdiSubWindow *sub)
 {
+    // Add event handler to auto-stack when sub window shown or hidden
+    sub->installEventFilter(this);
+    // Can't use Close event, as it's before window is closed, so
+    // catch sub-window destroyed signal instead
+    connect(sub, &QObject::destroyed, this, &Workspace::autoStackSubWindows);
     m_mdi->addSubWindow(sub);
     sub->show();
+    // Auto-stack when sub-window's  widgets are rolled up
+    ChannelGUI *channel = qobject_cast<ChannelGUI *>(sub);
+    if (channel) {
+        connect(channel->getRollupContents(), &RollupContents::widgetRolled, this, &Workspace::autoStackSubWindows);
+    }
+    FeatureGUI *feature = qobject_cast<FeatureGUI *>(sub);
+    if (feature) {
+        connect(feature->getRollupContents(), &RollupContents::widgetRolled, this, &Workspace::autoStackSubWindows);
+    }
 }
 
 void Workspace::removeFromMdiArea(QMdiSubWindow *sub)
 {
     m_mdi->removeSubWindow(sub);
+    sub->removeEventFilter(this);
+    disconnect(sub, &QObject::destroyed, this, &Workspace::autoStackSubWindows);
+    ChannelGUI *channel = qobject_cast<ChannelGUI *>(sub);
+    if (channel) {
+        disconnect(channel->getRollupContents(), &RollupContents::widgetRolled, this, &Workspace::autoStackSubWindows);
+    }
+    FeatureGUI *feature = qobject_cast<FeatureGUI *>(sub);
+    if (feature) {
+        disconnect(feature->getRollupContents(), &RollupContents::widgetRolled, this, &Workspace::autoStackSubWindows);
+    }
+}
+
+bool Workspace::eventFilter(QObject *obj, QEvent *event)
+{
+    if (event->type() == QEvent::Show)
+    {
+        autoStackSubWindows();
+    }
+    else if (event->type() == QEvent::Hide)
+    {
+        autoStackSubWindows();
+    }
+    else if (event->type() == QEvent::Resize)
+    {
+        if (!m_stacking && m_autoStackSubWindows->isChecked())
+        {
+            ChannelGUI *channel = qobject_cast<ChannelGUI *>(obj);
+            if (channel)
+            {
+                // Allow width of channels column to be set by user when they
+                // resize a channel window
+                QResizeEvent *resizeEvent = static_cast<QResizeEvent *>(event);
+                m_userChannelMinWidth = resizeEvent->size().width();
+                stackSubWindows();
+            }
+        }
+    }
+    return QDockWidget::eventFilter(obj, event);
 }
 
 int Workspace::getNumberOfSubWindows() const
