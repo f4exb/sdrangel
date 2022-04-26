@@ -1173,7 +1173,7 @@ void MainWindow::loadConfiguration(const Configuration *configuration, bool from
 	qDebug("MainWindow::loadConfiguration: configuration [%s | %s] %d workspace(s) - %d device set(s) - %d feature(s)",
 		qPrintable(configuration->getGroup()),
 		qPrintable(configuration->getDescription()),
-        configuration->getNumberOfWorkspaces(),
+        configuration->getNumberOfWorkspaceGeometries(),
         configuration->getDeviceSetPresets().size(),
         configuration->getFeatureSetPreset().getFeatureCount()
     );
@@ -1210,7 +1210,7 @@ void MainWindow::loadConfiguration(const Configuration *configuration, bool from
     // Reconstruct
 
     // Workspaces
-    for (int i = 0; i < configuration->getNumberOfWorkspaces(); i++) {
+    for (int i = 0; i < configuration->getNumberOfWorkspaceGeometries(); i++) {
         addWorkspace();
     }
 
@@ -1321,8 +1321,10 @@ void MainWindow::loadConfiguration(const Configuration *configuration, bool from
         waitBox->setInformativeText("Finalizing...");
     }
 
-    for (int i = 0; i < configuration->getNumberOfWorkspaces(); i++) {
+    for (int i = 0; i < configuration->getNumberOfWorkspaceGeometries(); i++)
+    {
         m_workspaces[i]->restoreGeometry(configuration->getWorkspaceGeometries()[i]);
+        m_workspaces[i]->adjustSubWindowsAfterRestore();
     }
 
     if (waitBox)

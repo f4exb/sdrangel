@@ -47,7 +47,7 @@ public:
 	void setDescription(const QString& description) { m_description = description; }
 	const QString& getDescription() const { return m_description; }
 
-    int getNumberOfWorkspaces() const;
+    int getNumberOfWorkspaceGeometries() const { return m_workspaceGeometries.size(); }
     QList<QByteArray>& getWorkspaceGeometries() { return m_workspaceGeometries; }
     const QList<QByteArray>& getWorkspaceGeometries() const { return m_workspaceGeometries; }
     FeatureSetPreset& getFeatureSetPreset() { return m_featureSetPreset; }

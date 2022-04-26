@@ -25,6 +25,10 @@
 #include <QFrame>
 
 #include "gui/samplingdevicedialog.h"
+#include "device/devicegui.h"
+#include "channel/channelgui.h"
+#include "mainspectrum/mainspectrumgui.h"
+#include "feature/featuregui.h"
 #include "workspace.h"
 
 Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
@@ -312,4 +316,24 @@ QByteArray Workspace::saveMdiGeometry()
 void Workspace::restoreMdiGeometry(const QByteArray& blob)
 {
     m_mdi->restoreGeometry(qUncompress(blob));
+}
+
+void Workspace::adjustSubWindowsAfterRestore()
+{
+    QList<QMdiSubWindow *> subWindowList = m_mdi->subWindowList();
+
+    for (auto& subWindow : subWindowList)
+    {
+        if ((subWindow->y() >= 20) && (subWindow->y() < 40)) {
+            subWindow->move(subWindow->x(), subWindow->y() - 20);
+        }
+
+        if (qobject_cast<ChannelGUI*>(subWindow)) {
+            subWindow->resize(subWindow->width(), subWindow->height() - 22);
+        }
+
+        if (qobject_cast<FeatureGUI*>(subWindow)) {
+            subWindow->resize(subWindow->width(), subWindow->height() - 8);
+        }
+    }
 }

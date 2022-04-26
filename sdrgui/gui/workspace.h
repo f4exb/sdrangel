@@ -49,6 +49,7 @@ public:
     QByteArray saveMdiGeometry();
     void restoreMdiGeometry(const QByteArray& blob);
     QList<QMdiSubWindow *> getSubWindowList() const;
+    void adjustSubWindowsAfterRestore();
 
 private:
     int m_index;
