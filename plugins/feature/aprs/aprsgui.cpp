@@ -668,10 +668,6 @@ void APRSGUI::resizeEvent(QResizeEvent* size)
     plotWeather();
     plotTelemetry();
     plotMotion();
-    int maxWidth = getRollupContents()->maximumWidth();
-    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
-    resize(width() < maxWidth ? width() : maxWidth, minHeight);
-    size->accept();
 }
 
 void APRSGUI::onMenuDialogCalled(const QPoint &p)

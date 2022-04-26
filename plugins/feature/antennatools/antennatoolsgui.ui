@@ -6,25 +6,25 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>374</width>
+    <width>360</width>
     <height>584</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
-    <width>374</width>
+    <width>360</width>
     <height>584</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>374</width>
+    <width>560</width>
     <height>584</height>
    </size>
   </property>
@@ -59,7 +59,7 @@
     <string>Calculators</string>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="dipoleTab">
     <attribute name="title">
@@ -70,7 +70,7 @@
       <widget class="QComboBox" name="dipoleFrequencySelect">
        <property name="minimumSize">
         <size>
-         <width>94</width>
+         <width>90</width>
          <height>0</height>
         </size>
        </property>
@@ -266,7 +266,7 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>94</width>
+         <width>90</width>
          <height>0</height>
         </size>
        </property>
