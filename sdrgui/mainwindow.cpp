@@ -113,7 +113,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     m_fftWisdomProcess(nullptr)
 {
 	qDebug() << "MainWindow::MainWindow: start";
-    setWindowTitle("SDRangel v7");
+    setWindowTitle("SDRangel");
 
     m_instance = this;
     m_mainCore->m_logger = logger;
