@@ -662,7 +662,7 @@ void APRSGUI::updateChannelList()
     ui->sourcePipes->blockSignals(false);
 }
 
-void APRSGUI::resizeEvent(QResizeEvent* size)
+void APRSGUI::resizeEvent(QResizeEvent*)
 {
     // Replot graphs to ensure Axis are visible
     plotWeather();

@@ -433,7 +433,7 @@ void MainWindow::sampleSourceCreate(
         deviceGUI,
         &DeviceGUI::showSpectrum,
         this,
-        [=](int deviceSetIndex){ this->mainSpectrumShow(this->m_deviceUIs[deviceSetIndex]->m_mainSpectrumGUI); }
+        &MainWindow::mainSpectrumShow
     );
     QObject::connect(
         deviceGUI,
@@ -648,7 +648,7 @@ void MainWindow::sampleSinkCreate(
         deviceGUI,
         &DeviceGUI::showSpectrum,
         this,
-        [=](int deviceSetIndex){ this->mainSpectrumShow(this->m_deviceUIs[deviceSetIndex]->m_mainSpectrumGUI); }
+        &MainWindow::mainSpectrumShow
     );
     QObject::connect(
         deviceGUI,
@@ -837,7 +837,7 @@ void MainWindow::sampleMIMOCreate(
         deviceGUI,
         &DeviceGUI::showSpectrum,
         this,
-        [=](int deviceSetIndex){ this->mainSpectrumShow(this->m_deviceUIs[deviceSetIndex]->m_mainSpectrumGUI); }
+        &MainWindow::mainSpectrumShow
     );
     QObject::connect(
         deviceGUI,
@@ -973,6 +973,15 @@ void MainWindow::removeDeviceSet(int deviceSetIndex)
     {
         DeviceUISet *deviceUISet = m_deviceUIs[i];
         deviceUISet->setIndex(i);
+        DeviceGUI *deviceGUI = m_deviceUIs[i]->m_deviceGUI;
+        Workspace *deviceWorkspace = m_workspaces[deviceGUI->getWorkspaceIndex()];
+
+        QObject::connect(
+            deviceGUI,
+            &DeviceGUI::addChannelEmitted,
+            this,
+            [=](int channelPluginIndex){ this->channelAddClicked(deviceWorkspace, i, channelPluginIndex); }
+        );
     }
 
     emit m_mainCore->deviceSetRemoved(deviceSetIndex);
@@ -2572,10 +2581,11 @@ void MainWindow::mainSpectrumMove(MainSpectrumGUI *gui, int wsIndexDestnation)
     m_workspaces[wsIndexDestnation]->addToMdiArea(gui);
 }
 
-void MainWindow::mainSpectrumShow(MainSpectrumGUI *gui)
+void MainWindow::mainSpectrumShow(int deviceSetIndex)
 {
-    gui->show();
-    gui->raise();
+    DeviceUISet *deviceUISet = m_deviceUIs[deviceSetIndex];
+    deviceUISet->m_mainSpectrumGUI->show();
+    deviceUISet->m_mainSpectrumGUI->raise();
 }
 
 void MainWindow::showAllChannels(int deviceSetIndex)
