@@ -27,8 +27,8 @@
   </property>
   <property name="maximumSize">
    <size>
-    <width>380</width>
-    <height>231</height>
+    <width>400</width>
+    <height>284</height>
    </size>
   </property>
   <property name="font">

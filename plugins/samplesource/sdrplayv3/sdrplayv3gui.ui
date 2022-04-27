@@ -24,8 +24,8 @@
   </property>
   <property name="maximumSize">
    <size>
-    <width>360</width>
-    <height>234</height>
+    <width>409</width>
+    <height>297</height>
    </size>
   </property>
   <property name="font">
@@ -768,15 +768,15 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
-  </customwidget>
-  <customwidget>
    <class>ValueDial</class>
    <extends>QWidget</extends>
    <header>gui/valuedial.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
    <class>TransverterButton</class>
