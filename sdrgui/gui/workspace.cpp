@@ -30,6 +30,7 @@
 
 #include "gui/samplingdevicedialog.h"
 #include "gui/rollupcontents.h"
+#include "gui/buttonswitch.h"
 #include "channel/channelgui.h"
 #include "feature/featuregui.h"
 #include "device/devicegui.h"
@@ -117,7 +118,8 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     m_stackSubWindows->setToolTip("Stack sub windows");
     m_stackSubWindows->setFixedSize(20, 20);
 
-    m_autoStackSubWindows = new QPushButton("AS");
+    m_autoStackSubWindows = new ButtonSwitch();
+    m_autoStackSubWindows->setText("AS");
     m_autoStackSubWindows->setCheckable(true);
     //QIcon autoStackSubWindowsIcon(":/autostack.png"); // FIXME
     //m_autoStackSubWindows->setIcon(autoStackSubWindowsIcon);

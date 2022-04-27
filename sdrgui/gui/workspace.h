@@ -31,6 +31,7 @@ class QStringList;
 class QMdiArea;
 class QMdiSubWindow;
 class QFrame;
+class ButtonSwitch;
 class ChannelGUI;
 class FeatureGUI;
 class DeviceGUI;
@@ -71,7 +72,7 @@ private:
     QPushButton *m_cascadeSubWindows;
     QPushButton *m_tileSubWindows;
     QPushButton *m_stackSubWindows;
-    QPushButton *m_autoStackSubWindows;
+    ButtonSwitch *m_autoStackSubWindows;
     QWidget *m_titleBar;
     QHBoxLayout *m_titleBarLayout;
     QLabel *m_titleLabel;
