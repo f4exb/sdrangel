@@ -139,10 +139,6 @@ Click this button to hide the channel window
 
 Click this button to close the window and removes the channel from the device set.
 
-<h3>A.9: Top size grip</h3>
-
-You can drag this gray square to resize the window
-
 <h2>B: Bottom bar</h2>
 
 ![Channel window](../../doc/img/ChannelWindow_bottom.png)
@@ -166,8 +162,4 @@ You may click on this area and drag the window with the mouse.
 The status messages appear here if any.
 
 You may click on this area and drag the window with the mouse.
-
-<h3>B.5: Bottom size grip</h3>
-
-You can drag this gray square to resize the window
 

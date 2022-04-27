@@ -98,18 +98,9 @@ Click this button to reduce the window to its minimum size
 
 Closes the window and deletes the feature
 
-<h3>8: Top size grip</h3>
-
-You can drag this gray square to resize the window
-
-<h2>Bottom bar</h2>
-
-<h3>9: Status</h3>
+<h3>8: Status</h3>
 
 Status messages if any appear here.
 
 You may click on this area and drag the window with the mouse.
 
-<h3>10: Bottom size grip</h3>
-
-You can drag this gray square to resize the window

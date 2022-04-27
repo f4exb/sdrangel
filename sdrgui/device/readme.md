@@ -102,56 +102,38 @@ Use the `Cancel` button to exit the dialog without any change
 
 This button activates a close/open sequence to recycle the device. It may be useful when the device is not streaming anymore or in an attempt to clear possible errors. Make sure the streaming is stopped first.
 
-<h3>A.5: Add channels</h3>
-
-Opens a dialog to add one or more channels connected to the device.
-
-![Add channels dialog](../../doc/img/AddChannels_dialog.png)
-
-<h4>A.5.1: Channel selection</h4>
-
-Use this combo to select which channel type to add
-
-<h4>A.5.2: Close dialog</h4>
-
-Use this button to dismiss the dialog
-
-<h4>A.5.3: Add channel</h4>
-
-Add a new channel by clicking on the `Apply` button. You may click it several times to add more channels. The dialog can be dismissed with the `Close` button or the closing window icon `X` on the top bar.
-
-<h3>A.6: Device set presets</h3>
+<h3>A.5: Device set presets</h3>
 
 Opens a dialog to manage device set presets. Device set presets store configurations related to a single device set
 
 ![Presets dialog](../../doc/img/MainWindow_presets_view.png)
 
-<h4>A.6.1: Preset selection</h4>
+<h4>A.5.1: Preset selection</h4>
 You select a preset or a preset group by clicking on its line in the tree view. All actions (6) will be done relative to this preset or preset group.
 
-<h4>A.6.2: Group</h4>
+<h4>A.5.2: Group</h4>
 You can organize your presets into groups. Groups can be collapsed or expanded by using the caret icon on the left.
 
-<h4>A.6.3: Center frequency</h4>
+<h4>A.5.3: Center frequency</h4>
 The center frequency used in this preset is displayed here.
 
-<h4>A.6.4: Rx/Tx indicator</h4>
+<h4>A.5.4: Rx/Tx indicator</h4>
 "R" is displayed for a Rx device set and "T" for a Tx device set
 
-<h4>A.6.5: Preset name</h4>
+<h4>A.5.5: Preset name</h4>
 You can give a name to your preset. Names need not to be unique.
 
-<h4>A.6.6: Preset control or actions</h4>
+<h4>A.5.6: Preset control or actions</h4>
 
 ![Presets controls](../../doc/img/MainWindow_presets.png)
 
-<h5>A.6.6.1: New preset</h5>
+<h5>A.5.6.1: New preset</h5>
 Click on this icon to create a new preset with the current values in the selected sample device tab (Main window: 2).
 
-<h5>A.6.6.2: Update preset</h5>
+<h5>A.5.6.2: Update preset</h5>
 Click on this icon to create a update the selected preset with the current values in the selected sample device tab (Main window: 2). Please note that this does not save the preset immediately on disk to save presets immediately you need to use the save button (4).
 
-<h5>A.6.6.3: Edit preset</h5>
+<h5>A.5.6.3: Edit preset</h5>
 Opens a new window where you can change the group name and description.
 
   - for group items you can rename the group or merge all group presets into an existing group by selecting this existing group
@@ -161,18 +143,36 @@ Opens a new window where you can change the group name and description.
     - assign this preset to a new group by typing in this new group
     - change the description
 
-<h5>A.6.6.4: Export preset</h5>
+<h5>A.5.6.4: Export preset</h5>
 Using the previous icon presets are saved globally in a system dependent place. Using this icon you can export a specific preset in a single file that can be imported on another machine possibly with a different O/S. The preset binary data (BLOB) is saved in Base-64 format.
 
-<h5>A.6.6.5: Import preset</h5>
+<h5>A.5.6.5: Import preset</h5>
 This is the opposite of the previous operation. This will create a new preset in the selected group or the same group as the preset being selected.
 
-<h5>A.6.6.6: Delete preset</h5>
+<h5>A.5.6.6: Delete preset</h5>
 on a preset item: deletes the selected preset.
 on a preset group: deletes the group and all its presets.
 
-<h5>A.6.6.7: Load preset</h5>
+<h5>A.5.6.7: Load preset</h5>
 Applies the selected preset to the current device set (source and channel plugins).
+
+<h3>A.6: Add channels</h3>
+
+Opens a dialog to add one or more channels connected to the device.
+
+![Add channels dialog](../../doc/img/AddChannels_dialog.png)
+
+<h4>A.6.1: Channel selection</h4>
+
+Use this combo to select which channel type to add
+
+<h4>A.6.2: Close dialog</h4>
+
+Use this button to dismiss the dialog
+
+<h4>A.6.3: Add channel</h4>
+
+Add a new channel by clicking on the `Apply` button. You may click it several times to add more channels. The dialog can be dismissed with the `Close` button or the closing window icon `X` on the top bar.
 
 <h3>A.7: Title</h3>
 
@@ -196,10 +196,6 @@ Click this button to reduce the window to its minimum size
 
 Click this button to close the window and removes the device set i.e. the device and all its channels.
 
-<h3>A.12: Top size grip</h3>
-
-You can drag this gray square to resize the window
-
 <h2>B: Bottom bar</h2>
 
 ![Device window bottom bar](../../doc/img/DeviceWindow_bottom.png)
@@ -217,8 +213,3 @@ This will show all hidden channel windows if any. It has no effects on channel w
 The status messages appear here if any.
 
 You may click on this area and drag the window with the mouse.
-
-<h3>A.4: Bottom size grip</h3>
-
-You can drag this gray square to resize the window
-

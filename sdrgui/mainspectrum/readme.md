@@ -44,16 +44,6 @@ Click this button to reduce the window to its minimum size.
 
 Click this button to hide the main spectrum window
 
-<h3>7: Top size grip</h3>
-
-You can drag this gray square to resize the window
-
-<h2>Bottom bar</h2>
-
-<h3>8. Window drag area</h3>
+<h3>7. Window drag area</h3>
 
 You may click on this area and drag the window with the mouse.
-
-<h3>9: Bottom size grip</h3>
-
-You can drag this gray square to resize the window

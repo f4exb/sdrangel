@@ -121,11 +121,24 @@ Arranges windows in the MDI area of the workspace as cascaded windows.
 
 Arranges windows in the MDI area of the workspace as tiled windows.
 
-<h3>1.9: Dock/undock workspace</h3>
+<h3>1.9: Stack windows</h3>
+
+Arranges windowsa in the MDO area of the workspace in a way similar to the arrangement in version 6:
+
+  - Devices are stacked in numerical order top left.
+  - Fixed height features are stacked in order underneath devices and resized to match width of devices
+  - Channels are stacked in device then channel index order down the right and resized horizontally to match and then any available vertical space is shared being vertically expanding channels
+  - Remaining space in the middle is shared between spectrums and expanding features
+
+<h3>1.10: Auto stack windows</h3>
+
+Applies the stacked arrangement above automatically when elements are added.
+
+<h3>1.11: Dock/undock workspace</h3>
 
 use this button to dock or undock the workspace from the main window docking area.
 
-<h3>1.10: Hide workspace</h3>
+<h3>1.12: Hide workspace</h3>
 
 Use this button to hide the workspace. Use the `Workspaces` / `View all` common on the main window the show all (hidden) workspaces.
 
