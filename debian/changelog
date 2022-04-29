@@ -1,3 +1,12 @@
+sdrangel (6.20.3-1) unstable; urgency=medium
+
+  * Removed issue templates
+  * Spectrum markers dialog: fixed issue when there are no histogram markers. Fixes #1200
+  * Add qtspeech5-speechd-plugin as a runtime dependency for Debian. PR #1198
+  * SDRPlayV3: Take LIF downsampling into account when calculating the final bandwidth. PR #1196
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 29 Apr 2022 11:33:12 +0200
+
 sdrangel (6.20.2-1) unstable; urgency=medium
 
   * MainCore: signals to notify changes in devices channels and features. Part of #1139
