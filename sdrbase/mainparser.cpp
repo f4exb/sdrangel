@@ -35,12 +35,14 @@ MainParser::MainParser() :
         "FFTW Wisdom file.",
         "file",
         ""),
-    m_scratchOption("scratch", "Start from scratch (no current config).")
+    m_scratchOption("scratch", "Start from scratch (no current config)."),
+    m_soapyOption("soapy", "Activate Soapy SDR support.")
 {
 
     m_serverAddress = "";   // Bind to any address
     m_serverPort = 8091;
     m_scratch = false;
+    m_soapy = false;
     m_fftwfWindowFileName = "";
 
     m_parser.setApplicationDescription("Software Defined Radio application");
@@ -51,6 +53,7 @@ MainParser::MainParser() :
     m_parser.addOption(m_serverPortOption);
     m_parser.addOption(m_fftwfWisdomOption);
     m_parser.addOption(m_scratchOption);
+    m_parser.addOption(m_soapyOption);
 }
 
 MainParser::~MainParser()
@@ -94,10 +97,11 @@ void MainParser::parse(const QCoreApplication& app)
     }
 
     // FFTWF wisdom file
-
     m_fftwfWindowFileName = m_parser.value(m_fftwfWisdomOption);
 
     // Scratch mode
-
     m_scratch = m_parser.isSet(m_scratchOption);
+
+    // Soapy SDR support
+    m_soapy = m_parser.isSet(m_soapyOption);
 }

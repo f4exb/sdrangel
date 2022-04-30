@@ -59,6 +59,7 @@ MainServer::MainServer(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 
     qDebug() << "MainServer::MainServer: load plugins...";
     m_mainCore->m_pluginManager = new PluginManager(this);
+    m_mainCore->m_pluginManager->setEnableSoapy(parser.getSoapy());
     m_mainCore->m_pluginManager->loadPlugins(QString("pluginssrv"));
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()), Qt::QueuedConnection);

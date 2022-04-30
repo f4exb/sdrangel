@@ -57,6 +57,7 @@ public:
 	~PluginManager();
 
 	PluginAPI *getPluginAPI() { return &m_pluginAPI; }
+    void setEnableSoapy(bool enableSoapy) { m_enableSoapy = enableSoapy; }
 	void loadPlugins(const QString& pluginsSubDir);
 	void loadPluginsPart(const QString& pluginsSubDir);
 	void loadPluginsFinal();
@@ -124,6 +125,7 @@ private:
 
 	PluginAPI m_pluginAPI;
 	Plugins m_plugins;
+    bool m_enableSoapy;
 
 	PluginAPI::ChannelRegistrations m_rxChannelRegistrations;           //!< Channel plugins register here
 	PluginAPI::ChannelRegistrations m_txChannelRegistrations;           //!< Channel plugins register here

@@ -185,6 +185,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 
     m_pluginManager = new PluginManager(this);
     m_mainCore->m_pluginManager = m_pluginManager;
+    m_pluginManager->setEnableSoapy(parser.getSoapy());
     m_pluginManager->loadPlugins(QString("plugins"));
     m_pluginManager->loadPluginsNonDiscoverable(m_mainCore->m_settings.getDeviceUserArgs());
 

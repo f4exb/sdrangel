@@ -53,7 +53,8 @@ const QString PluginManager::m_testMIMODeviceTypeID = "sdrangel.samplemimo.testm
 
 PluginManager::PluginManager(QObject* parent) :
 	QObject(parent),
-    m_pluginAPI(this)
+    m_pluginAPI(this),
+    m_enableSoapy(false)
 {
 }
 
@@ -216,6 +217,12 @@ void PluginManager::loadPluginsDir(const QDir& dir)
     {
         if (QLibrary::isLibrary(fileName))
         {
+            if (!m_enableSoapy && (fileName.contains("libinputsoapysdr") || (fileName.contains("liboutputsoapysdr"))))
+            {
+                qInfo("PluginManager::loadPluginsDir: Soapy SDR disabled skipping %s", qPrintable(fileName));
+                continue;
+            }
+
             qDebug("PluginManager::loadPluginsDir: fileName: %s", qPrintable(fileName));
 
             QPluginLoader* pluginLoader = new QPluginLoader(pluginsDir.absoluteFilePath(fileName));
