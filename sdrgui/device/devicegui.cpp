@@ -275,6 +275,7 @@ void DeviceGUI::openChangeDeviceDialog()
     if (dialog.exec() == QDialog::Accepted)
     {
         m_currentDeviceIndex = dialog.getSelectedDeviceIndex();
+        dialog.setParent(nullptr);
         emit deviceChange(m_currentDeviceIndex);
     }
 }

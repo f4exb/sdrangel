@@ -2080,6 +2080,7 @@ void MainWindow::sampleSourceChange(int deviceSetIndex, int newDeviceIndex, Work
     {
         qDebug("MainWindow::sampleSourceChange: deviceSet %d workspace: %d", deviceSetIndex, workspace->getIndex());
         DeviceUISet *deviceUISet = m_deviceUIs[deviceSetIndex];
+        QPoint p = deviceUISet->m_deviceGUI->pos();
         workspace->removeFromMdiArea(deviceUISet->m_deviceGUI);
         // deviceUI->m_deviceAPI->saveSamplingDeviceSettings(m_mainCore->m_settings.getWorkingPreset()); // save old API settings
         deviceUISet->m_deviceAPI->stopDeviceEngine();
@@ -2087,7 +2088,7 @@ void MainWindow::sampleSourceChange(int deviceSetIndex, int newDeviceIndex, Work
         // deletes old UI and input object
         deviceUISet->m_deviceAPI->getSampleSource()->setMessageQueueToGUI(nullptr); // have source stop sending messages to the GUI
 
-        //deviceUISet->m_deviceGUI->destroy();
+        deviceUISet->m_deviceGUI->destroy();
         deviceUISet->m_deviceAPI->resetSamplingDeviceId();
         deviceUISet->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceInput(deviceUISet->m_deviceAPI->getSampleSource());
         deviceUISet->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
@@ -2095,6 +2096,7 @@ void MainWindow::sampleSourceChange(int deviceSetIndex, int newDeviceIndex, Work
         sampleSourceCreate(deviceSetIndex, newDeviceIndex, deviceUISet);
         deviceUISet->m_deviceGUI->setWorkspaceIndex(workspace->getIndex());
         workspace->addToMdiArea(deviceUISet->m_deviceGUI);
+        deviceUISet->m_deviceGUI->move(p);
 
         QObject::connect(
             deviceUISet->m_deviceGUI,
@@ -2111,12 +2113,14 @@ void MainWindow::sampleSinkChange(int deviceSetIndex, int newDeviceIndex, Worksp
     {
         qDebug("MainWindow::sampleSinkChange: deviceSet %d workspace: %d", deviceSetIndex, workspace->getIndex());
         DeviceUISet *deviceUISet = m_deviceUIs[deviceSetIndex];
+        QPoint p = deviceUISet->m_deviceGUI->pos();
+        workspace->removeFromMdiArea(deviceUISet->m_deviceGUI);
         deviceUISet->m_deviceAPI->saveSamplingDeviceSettings(m_mainCore->m_settings.getWorkingPreset()); // save old API settings
         deviceUISet->m_deviceAPI->stopDeviceEngine();
 
         // deletes old UI and output object
         deviceUISet->m_deviceAPI->getSampleSink()->setMessageQueueToGUI(nullptr); // have sink stop sending messages to the GUI
-        // m_deviceUIs[deviceSetIndex]->m_deviceGUI->destroy();
+        m_deviceUIs[deviceSetIndex]->m_deviceGUI->destroy();
         deviceUISet->m_deviceAPI->resetSamplingDeviceId();
         deviceUISet->m_deviceAPI->getPluginInterface()->deleteSampleSinkPluginInstanceOutput(deviceUISet->m_deviceAPI->getSampleSink());
         deviceUISet->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
@@ -2124,6 +2128,7 @@ void MainWindow::sampleSinkChange(int deviceSetIndex, int newDeviceIndex, Worksp
         sampleSinkCreate(deviceSetIndex, newDeviceIndex, deviceUISet);
         deviceUISet->m_deviceGUI->setWorkspaceIndex(workspace->getIndex());
         workspace->addToMdiArea(deviceUISet->m_deviceGUI);
+        deviceUISet->m_deviceGUI->move(p);
 
         QObject::connect(
             deviceUISet->m_deviceGUI,
@@ -2140,18 +2145,21 @@ void MainWindow::sampleMIMOChange(int deviceSetIndex, int newDeviceIndex, Worksp
     {
         qDebug("MainWindow::sampleSinkChange: deviceSet %d workspace: %d", deviceSetIndex, workspace->getIndex());
         DeviceUISet *deviceUISet = m_deviceUIs[deviceSetIndex];
+        QPoint p = deviceUISet->m_deviceGUI->pos();
+        workspace->removeFromMdiArea(deviceUISet->m_deviceGUI);
         deviceUISet->m_deviceAPI->saveSamplingDeviceSettings(m_mainCore->m_settings.getWorkingPreset()); // save old API settings
         deviceUISet->m_deviceAPI->stopDeviceEngine();
 
         // deletes old UI and output object
         deviceUISet->m_deviceAPI->getSampleMIMO()->setMessageQueueToGUI(nullptr); // have sink stop sending messages to the GUI
-        // m_deviceUIs[tabIndex]->m_deviceGUI->destroy();
+        deviceUISet->m_deviceGUI->destroy();
         deviceUISet->m_deviceAPI->resetSamplingDeviceId();
         deviceUISet->m_deviceAPI->getPluginInterface()->deleteSampleMIMOPluginInstanceMIMO(deviceUISet->m_deviceAPI->getSampleMIMO());
 
         sampleMIMOCreate(deviceSetIndex, newDeviceIndex, deviceUISet);
         deviceUISet->m_deviceGUI->setWorkspaceIndex(workspace->getIndex());
         workspace->addToMdiArea(deviceUISet->m_deviceGUI);
+        deviceUISet->m_deviceGUI->move(p);
 
         QObject::connect(
             deviceUISet->m_deviceGUI,
