@@ -395,11 +395,8 @@ void VorLocalizerWorker::updateChannels()
 
             for (auto rrChannel : rrPlan.m_channels)
             {
-                qDebug() << "VorLocalizerWorker::updateChannels:     RR channel: "
-                    << "channel:" << rrChannel.m_channelAPI
-                    << "index:" << rrChannel.m_channelIndex
-                    << "shift:" << rrChannel.m_frequencyShift
-                    << "navId:" << rrChannel.m_navId;
+                qDebug("VorLocalizerWorker::updateChannels: RR channel: %p index: %d shift: %d navId: %d",
+                    rrChannel.m_channelAPI, rrChannel.m_channelIndex, rrChannel.m_frequencyShift, rrChannel.m_navId);
             }
         }
     }
