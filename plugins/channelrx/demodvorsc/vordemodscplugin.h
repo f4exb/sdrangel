@@ -25,13 +25,13 @@
 class DeviceUISet;
 class BasebandSampleSink;
 
-class VORDemodSCPlugin : public QObject, PluginInterface {
+class VORDemodPlugin : public QObject, PluginInterface {
     Q_OBJECT
     Q_INTERFACES(PluginInterface)
     Q_PLUGIN_METADATA(IID "sdrangel.channel.vordemodsc")
 
 public:
-    explicit VORDemodSCPlugin(QObject* parent = NULL);
+    explicit VORDemodPlugin(QObject* parent = NULL);
 
     const PluginDescriptor& getPluginDescriptor() const;
     void initPlugin(PluginAPI* pluginAPI);

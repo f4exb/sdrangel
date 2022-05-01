@@ -42,19 +42,19 @@
 #include "vordemodscreport.h"
 #include "vordemodsc.h"
 
-MESSAGE_CLASS_DEFINITION(VORDemodSC::MsgConfigureVORDemod, Message)
+MESSAGE_CLASS_DEFINITION(VORDemod::MsgConfigureVORDemod, Message)
 
-const char * const VORDemodSC::m_channelIdURI = "sdrangel.channel.vordemodsc";
-const char * const VORDemodSC::m_channelId = "VORDemodSC";
+const char * const VORDemod::m_channelIdURI = "sdrangel.channel.vordemodsc";
+const char * const VORDemod::m_channelId = "VORDemod";
 
-VORDemodSC::VORDemodSC(DeviceAPI *deviceAPI) :
+VORDemod::VORDemod(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
         m_basebandSampleRate(0)
 {
     setObjectName(m_channelId);
 
-    m_basebandSink = new VORDemodSCBaseband();
+    m_basebandSink = new VORDemodBaseband();
     m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());
     m_basebandSink->moveToThread(&m_thread);
 
@@ -68,24 +68,24 @@ VORDemodSC::VORDemodSC(DeviceAPI *deviceAPI) :
         m_networkManager,
         &QNetworkAccessManager::finished,
         this,
-        &VORDemodSC::networkManagerFinished
+        &VORDemod::networkManagerFinished
     );
     QObject::connect(
         this,
         &ChannelAPI::indexInDeviceSetChanged,
         this,
-        &VORDemodSC::handleIndexInDeviceSetChanged
+        &VORDemod::handleIndexInDeviceSetChanged
     );
 }
 
-VORDemodSC::~VORDemodSC()
+VORDemod::~VORDemod()
 {
-    qDebug("VORDemodSC::~VORDemodSC");
+    qDebug("VORDemod::~VORDemod");
     QObject::disconnect(
         m_networkManager,
         &QNetworkAccessManager::finished,
         this,
-        &VORDemodSC::networkManagerFinished
+        &VORDemod::networkManagerFinished
     );
     delete m_networkManager;
     m_deviceAPI->removeChannelSinkAPI(this);
@@ -98,7 +98,7 @@ VORDemodSC::~VORDemodSC()
     delete m_basebandSink;
 }
 
-void VORDemodSC::setDeviceAPI(DeviceAPI *deviceAPI)
+void VORDemod::setDeviceAPI(DeviceAPI *deviceAPI)
 {
     if (deviceAPI != m_deviceAPI)
     {
@@ -110,20 +110,20 @@ void VORDemodSC::setDeviceAPI(DeviceAPI *deviceAPI)
     }
 }
 
-uint32_t VORDemodSC::getNumberOfDeviceStreams() const
+uint32_t VORDemod::getNumberOfDeviceStreams() const
 {
     return m_deviceAPI->getNbSourceStreams();
 }
 
-void VORDemodSC::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
+void VORDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
 {
     (void) firstOfBurst;
     m_basebandSink->feed(begin, end);
 }
 
-void VORDemodSC::start()
+void VORDemod::start()
 {
-    qDebug("VORDemodSC::start");
+    qDebug("VORDemod::start");
 
     m_basebandSink->reset();
     m_basebandSink->startWork();
@@ -132,24 +132,24 @@ void VORDemodSC::start()
     DSPSignalNotification *dspMsg = new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency);
     m_basebandSink->getInputMessageQueue()->push(dspMsg);
 
-    VORDemodSCBaseband::MsgConfigureVORDemodBaseband *msg = VORDemodSCBaseband::MsgConfigureVORDemodBaseband::create(m_settings, true);
+    VORDemodBaseband::MsgConfigureVORDemodBaseband *msg = VORDemodBaseband::MsgConfigureVORDemodBaseband::create(m_settings, true);
     m_basebandSink->getInputMessageQueue()->push(msg);
 }
 
-void VORDemodSC::stop()
+void VORDemod::stop()
 {
-    qDebug("VORDemodSC::stop");
+    qDebug("VORDemod::stop");
     m_basebandSink->stopWork();
     m_thread.quit();
     m_thread.wait();
 }
 
-bool VORDemodSC::handleMessage(const Message& cmd)
+bool VORDemod::handleMessage(const Message& cmd)
 {
     if (MsgConfigureVORDemod::match(cmd))
     {
         MsgConfigureVORDemod& cfg = (MsgConfigureVORDemod&) cmd;
-        qDebug() << "VORDemodSC::handleMessage: MsgConfigureVORDemod";
+        qDebug() << "VORDemod::handleMessage: MsgConfigureVORDemod";
         applySettings(cfg.getSettings(), cfg.getForce());
 
         return true;
@@ -161,7 +161,7 @@ bool VORDemodSC::handleMessage(const Message& cmd)
         m_centerFrequency = notif.getCenterFrequency();
         // Forward to the sink
         DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
-        qDebug() << "VORDemodSC::handleMessage: DSPSignalNotification";
+        qDebug() << "VORDemod::handleMessage: DSPSignalNotification";
         m_basebandSink->getInputMessageQueue()->push(rep);
         // Forward to GUI if any
         if (m_guiMessageQueue) {
@@ -170,16 +170,16 @@ bool VORDemodSC::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (VORDemodSCReport::MsgReportRadial::match(cmd))
+    else if (VORDemodReport::MsgReportRadial::match(cmd))
     {
-        VORDemodSCReport::MsgReportRadial& report = (VORDemodSCReport::MsgReportRadial&) cmd;
+        VORDemodReport::MsgReportRadial& report = (VORDemodReport::MsgReportRadial&) cmd;
         m_radial = report.getRadial();
         m_refMag = report.getRefMag();
         m_varMag = report.getVarMag();
 
         if (m_guiMessageQueue)
         {
-            VORDemodSCReport::MsgReportRadial *msg = new VORDemodSCReport::MsgReportRadial(report);
+            VORDemodReport::MsgReportRadial *msg = new VORDemodReport::MsgReportRadial(report);
             m_guiMessageQueue->push(msg);
         }
 
@@ -193,14 +193,14 @@ bool VORDemodSC::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (VORDemodSCReport::MsgReportIdent::match(cmd))
+    else if (VORDemodReport::MsgReportIdent::match(cmd))
     {
-        VORDemodSCReport::MsgReportIdent& report = (VORDemodSCReport::MsgReportIdent&) cmd;
+        VORDemodReport::MsgReportIdent& report = (VORDemodReport::MsgReportIdent&) cmd;
         m_morseIdent = report.getIdent();
 
         if (m_guiMessageQueue)
         {
-            VORDemodSCReport::MsgReportIdent *msg = new VORDemodSCReport::MsgReportIdent(report);
+            VORDemodReport::MsgReportIdent *msg = new VORDemodReport::MsgReportIdent(report);
             m_guiMessageQueue->push(msg);
         }
 
@@ -220,9 +220,9 @@ bool VORDemodSC::handleMessage(const Message& cmd)
     }
 }
 
-void VORDemodSC::setCenterFrequency(qint64 frequency)
+void VORDemod::setCenterFrequency(qint64 frequency)
 {
-    VORDemodSCSettings settings = m_settings;
+    VORDemodSettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
     applySettings(settings, false);
 
@@ -233,9 +233,9 @@ void VORDemodSC::setCenterFrequency(qint64 frequency)
     }
 }
 
-void VORDemodSC::applySettings(const VORDemodSCSettings& settings, bool force)
+void VORDemod::applySettings(const VORDemodSettings& settings, bool force)
 {
-    qDebug() << "VORDemodSC::applySettings:"
+    qDebug() << "VORDemod::applySettings:"
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
             << " m_navId: " << settings.m_navId
             << " m_volume: " << settings.m_volume
@@ -290,7 +290,7 @@ void VORDemodSC::applySettings(const VORDemodSCSettings& settings, bool force)
         reverseAPIKeys.append("identThreshold");
     }
 
-    VORDemodSCBaseband::MsgConfigureVORDemodBaseband *msg = VORDemodSCBaseband::MsgConfigureVORDemodBaseband::create(settings, force);
+    VORDemodBaseband::MsgConfigureVORDemodBaseband *msg = VORDemodBaseband::MsgConfigureVORDemodBaseband::create(settings, force);
     m_basebandSink->getInputMessageQueue()->push(msg);
 
     if (settings.m_useReverseAPI)
@@ -313,12 +313,12 @@ void VORDemodSC::applySettings(const VORDemodSCSettings& settings, bool force)
     m_settings = settings;
 }
 
-QByteArray VORDemodSC::serialize() const
+QByteArray VORDemod::serialize() const
 {
     return m_settings.serialize();
 }
 
-bool VORDemodSC::deserialize(const QByteArray& data)
+bool VORDemod::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
@@ -335,7 +335,7 @@ bool VORDemodSC::deserialize(const QByteArray& data)
     }
 }
 
-int VORDemodSC::webapiSettingsGet(
+int VORDemod::webapiSettingsGet(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
 {
@@ -346,20 +346,20 @@ int VORDemodSC::webapiSettingsGet(
     return 200;
 }
 
-int VORDemodSC::webapiSettingsPutPatch(
+int VORDemod::webapiSettingsPutPatch(
         bool force,
         const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
 {
     (void) errorMessage;
-    VORDemodSCSettings settings = m_settings;
+    VORDemodSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
     MsgConfigureVORDemod *msg = MsgConfigureVORDemod::create(settings, force);
     m_inputMessageQueue.push(msg);
 
-    qDebug("VORDemodSC::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
+    qDebug("VORDemod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
         MsgConfigureVORDemod *msgToGUI = MsgConfigureVORDemod::create(settings, force);
@@ -371,8 +371,8 @@ int VORDemodSC::webapiSettingsPutPatch(
     return 200;
 }
 
-void VORDemodSC::webapiUpdateChannelSettings(
-        VORDemodSCSettings& settings,
+void VORDemod::webapiUpdateChannelSettings(
+        VORDemodSettings& settings,
         const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings& response)
 {
@@ -429,7 +429,7 @@ void VORDemodSC::webapiUpdateChannelSettings(
     }
 }
 
-int VORDemodSC::webapiReportGet(
+int VORDemod::webapiReportGet(
         SWGSDRangel::SWGChannelReport& response,
         QString& errorMessage)
 {
@@ -440,7 +440,7 @@ int VORDemodSC::webapiReportGet(
     return 200;
 }
 
-void VORDemodSC::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const VORDemodSCSettings& settings)
+void VORDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const VORDemodSettings& settings)
 {
     response.getVorDemodScSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     response.getVorDemodScSettings()->setNavId(settings.m_navId);
@@ -504,7 +504,7 @@ void VORDemodSC::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& re
     }
 }
 
-void VORDemodSC::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+void VORDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
     double magsqAvg, magsqPeak;
     int nbMagsqSamples;
@@ -532,7 +532,7 @@ void VORDemodSC::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respon
     }
 }
 
-void VORDemodSC::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const VORDemodSCSettings& settings, bool force)
+void VORDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const VORDemodSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -557,10 +557,10 @@ void VORDemodSC::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, 
     delete swgChannelSettings;
 }
 
-void VORDemodSC::sendChannelSettings(
+void VORDemod::sendChannelSettings(
     const QList<ObjectPipe*>& pipes,
     QList<QString>& channelSettingsKeys,
-    const VORDemodSCSettings& settings,
+    const VORDemodSettings& settings,
     bool force)
 {
     for (const auto& pipe : pipes)
@@ -582,7 +582,7 @@ void VORDemodSC::sendChannelSettings(
     }
 }
 
-void VORDemodSC::sendChannelReport(QList<ObjectPipe*>& messagePipes)
+void VORDemod::sendChannelReport(QList<ObjectPipe*>& messagePipes)
 {
     for (const auto& pipe : messagePipes)
     {
@@ -601,17 +601,17 @@ void VORDemodSC::sendChannelReport(QList<ObjectPipe*>& messagePipes)
     }
 }
 
-void VORDemodSC::webapiFormatChannelSettings(
+void VORDemod::webapiFormatChannelSettings(
         QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
-        const VORDemodSCSettings& settings,
+        const VORDemodSettings& settings,
         bool force
 )
 {
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("VORDemodSC"));
+    swgChannelSettings->setChannelType(new QString("VORDemod"));
     swgChannelSettings->setVorDemodScSettings(new SWGSDRangel::SWGVORDemodSCSettings());
     SWGSDRangel::SWGVORDemodSCSettings *swgVORDemodSCSettings = swgChannelSettings->getVorDemodScSettings();
 
@@ -663,13 +663,13 @@ void VORDemodSC::webapiFormatChannelSettings(
     }
 }
 
-void VORDemodSC::networkManagerFinished(QNetworkReply *reply)
+void VORDemod::networkManagerFinished(QNetworkReply *reply)
 {
     QNetworkReply::NetworkError replyError = reply->error();
 
     if (replyError)
     {
-        qWarning() << "VORDemodSC::networkManagerFinished:"
+        qWarning() << "VORDemod::networkManagerFinished:"
                 << " error(" << (int) replyError
                 << "): " << replyError
                 << ": " << reply->errorString();
@@ -678,13 +678,13 @@ void VORDemodSC::networkManagerFinished(QNetworkReply *reply)
     {
         QString answer = reply->readAll();
         answer.chop(1); // remove last \n
-        qDebug("VORDemodSC::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+        qDebug("VORDemod::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
     }
 
     reply->deleteLater();
 }
 
-void VORDemodSC::handleIndexInDeviceSetChanged(int index)
+void VORDemod::handleIndexInDeviceSetChanged(int index)
 {
     if (index < 0) {
         return;

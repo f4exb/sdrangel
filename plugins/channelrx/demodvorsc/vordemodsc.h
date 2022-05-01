@@ -37,33 +37,33 @@ class QThread;
 class DeviceAPI;
 class ObjectPipe;
 
-class VORDemodSC : public BasebandSampleSink, public ChannelAPI {
+class VORDemod : public BasebandSampleSink, public ChannelAPI {
 public:
     class MsgConfigureVORDemod : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        const VORDemodSCSettings& getSettings() const { return m_settings; }
+        const VORDemodSettings& getSettings() const { return m_settings; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureVORDemod* create(const VORDemodSCSettings& settings, bool force)
+        static MsgConfigureVORDemod* create(const VORDemodSettings& settings, bool force)
         {
             return new MsgConfigureVORDemod(settings, force);
         }
 
     private:
-        VORDemodSCSettings m_settings;
+        VORDemodSettings m_settings;
         bool m_force;
 
-        MsgConfigureVORDemod(const VORDemodSCSettings& settings, bool force) :
+        MsgConfigureVORDemod(const VORDemodSettings& settings, bool force) :
             Message(),
             m_settings(settings),
             m_force(force)
         { }
     };
 
-    VORDemodSC(DeviceAPI *deviceAPI);
-    virtual ~VORDemodSC();
+    VORDemod(DeviceAPI *deviceAPI);
+    virtual ~VORDemod();
     virtual void destroy() { delete this; }
     virtual void setDeviceAPI(DeviceAPI *deviceAPI);
     virtual DeviceAPI *getDeviceAPI() { return m_deviceAPI; }
@@ -111,10 +111,10 @@ public:
 
     static void webapiFormatChannelSettings(
             SWGSDRangel::SWGChannelSettings& response,
-            const VORDemodSCSettings& settings);
+            const VORDemodSettings& settings);
 
     static void webapiUpdateChannelSettings(
-            VORDemodSCSettings& settings,
+            VORDemodSettings& settings,
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response);
 
@@ -134,8 +134,8 @@ public:
 private:
     DeviceAPI *m_deviceAPI;
     QThread m_thread;
-    VORDemodSCBaseband* m_basebandSink;
-    VORDemodSCSettings m_settings;
+    VORDemodBaseband* m_basebandSink;
+    VORDemodSettings m_settings;
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
     qint64 m_centerFrequency;
 
@@ -148,20 +148,20 @@ private:
     QNetworkRequest m_networkRequest;
 
     virtual bool handleMessage(const Message& cmd);
-    void applySettings(const VORDemodSCSettings& settings, bool force = false);
+    void applySettings(const VORDemodSettings& settings, bool force = false);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const VORDemodSCSettings& settings, bool force);
+    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const VORDemodSettings& settings, bool force);
     void sendChannelSettings(
         const QList<ObjectPipe*>& pipes,
         QList<QString>& channelSettingsKeys,
-        const VORDemodSCSettings& settings,
+        const VORDemodSettings& settings,
         bool force
     );
     void sendChannelReport(QList<ObjectPipe*>& messagePipes);
     void webapiFormatChannelSettings(
         QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
-        const VORDemodSCSettings& settings,
+        const VORDemodSettings& settings,
         bool force
     );
 

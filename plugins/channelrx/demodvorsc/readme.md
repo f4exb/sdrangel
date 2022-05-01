@@ -1,4 +1,4 @@
-<h1>VOR demodulator plugin - Single channel version</h1>
+<h1>VOR demodulator plugin</h1>
 
 <h2>Introduction</h2>
 

@@ -42,30 +42,30 @@
 #include "vordemodscreport.h"
 #include "vordemodscgui.h"
 
-VORDemodSCGUI* VORDemodSCGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
+VORDemodGUI* VORDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
-    VORDemodSCGUI* gui = new VORDemodSCGUI(pluginAPI, deviceUISet, rxChannel);
+    VORDemodGUI* gui = new VORDemodGUI(pluginAPI, deviceUISet, rxChannel);
     return gui;
 }
 
-void VORDemodSCGUI::destroy()
+void VORDemodGUI::destroy()
 {
     delete this;
 }
 
-void VORDemodSCGUI::resetToDefaults()
+void VORDemodGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
     applySettings(true);
 }
 
-QByteArray VORDemodSCGUI::serialize() const
+QByteArray VORDemodGUI::serialize() const
 {
     return m_settings.serialize();
 }
 
-bool VORDemodSCGUI::deserialize(const QByteArray& data)
+bool VORDemodGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
@@ -77,7 +77,7 @@ bool VORDemodSCGUI::deserialize(const QByteArray& data)
     }
 }
 
-void VORDemodSCGUI::resizeEvent(QResizeEvent* size)
+void VORDemodGUI::resizeEvent(QResizeEvent* size)
 {
     int maxWidth = getRollupContents()->maximumWidth();
     int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
@@ -85,12 +85,12 @@ void VORDemodSCGUI::resizeEvent(QResizeEvent* size)
     size->accept();
 }
 
-bool VORDemodSCGUI::handleMessage(const Message& message)
+bool VORDemodGUI::handleMessage(const Message& message)
 {
-    if (VORDemodSC::MsgConfigureVORDemod::match(message))
+    if (VORDemod::MsgConfigureVORDemod::match(message))
     {
-        qDebug("VORDemodSCGUI::handleMessage: VORDemodSC::MsgConfigureVORDemod");
-        const VORDemodSC::MsgConfigureVORDemod& cfg = (VORDemodSC::MsgConfigureVORDemod&) message;
+        qDebug("VORDemodGUI::handleMessage: VORDemod::MsgConfigureVORDemod");
+        const VORDemod::MsgConfigureVORDemod& cfg = (VORDemod::MsgConfigureVORDemod&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
         displaySettings();
@@ -107,9 +107,9 @@ bool VORDemodSCGUI::handleMessage(const Message& message)
         updateAbsoluteCenterFrequency();
         return true;
     }
-    else if (VORDemodSCReport::MsgReportRadial::match(message))
+    else if (VORDemodReport::MsgReportRadial::match(message))
     {
-        VORDemodSCReport::MsgReportRadial& report = (VORDemodSCReport::MsgReportRadial&) message;
+        VORDemodReport::MsgReportRadial& report = (VORDemodReport::MsgReportRadial&) message;
 
         // Display radial and signal magnitudes
         Real varMagDB = std::round(20.0*std::log10(report.getVarMag()));
@@ -143,9 +143,9 @@ bool VORDemodSCGUI::handleMessage(const Message& message)
 
         return true;
     }
-    else if (VORDemodSCReport::MsgReportIdent::match(message))
+    else if (VORDemodReport::MsgReportIdent::match(message))
     {
-        VORDemodSCReport::MsgReportIdent& report = (VORDemodSCReport::MsgReportIdent&) message;
+        VORDemodReport::MsgReportIdent& report = (VORDemodReport::MsgReportIdent&) message;
 
         QString ident = report.getIdent();
         QString identString = Morse::toString(ident); // Convert Morse to a string
@@ -172,7 +172,7 @@ bool VORDemodSCGUI::handleMessage(const Message& message)
     return false;
 }
 
-void VORDemodSCGUI::handleInputMessages()
+void VORDemodGUI::handleInputMessages()
 {
     Message* message;
 
@@ -185,19 +185,19 @@ void VORDemodSCGUI::handleInputMessages()
     }
 }
 
-void VORDemodSCGUI::channelMarkerChangedByCursor()
+void VORDemodGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
 	applySettings();
 }
 
-void VORDemodSCGUI::channelMarkerHighlightedByCursor()
+void VORDemodGUI::channelMarkerHighlightedByCursor()
 {
     setHighlighted(m_channelMarker.getHighlighted());
 }
 
-void VORDemodSCGUI::on_deltaFrequency_changed(qint64 value)
+void VORDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
@@ -205,34 +205,34 @@ void VORDemodSCGUI::on_deltaFrequency_changed(qint64 value)
     applySettings();
 }
 
-void VORDemodSCGUI::on_thresh_valueChanged(int value)
+void VORDemodGUI::on_thresh_valueChanged(int value)
 {
     ui->threshText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
     m_settings.m_identThreshold = value / 10.0;
     applySettings();
 }
 
-void VORDemodSCGUI::on_volume_valueChanged(int value)
+void VORDemodGUI::on_volume_valueChanged(int value)
 {
     ui->volumeText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
     m_settings.m_volume = value / 10.0;
     applySettings();
 }
 
-void VORDemodSCGUI::on_squelch_valueChanged(int value)
+void VORDemodGUI::on_squelch_valueChanged(int value)
 {
     ui->squelchText->setText(QString("%1 dB").arg(value));
     m_settings.m_squelch = value;
     applySettings();
 }
 
-void VORDemodSCGUI::on_audioMute_toggled(bool checked)
+void VORDemodGUI::on_audioMute_toggled(bool checked)
 {
     m_settings.m_audioMute = checked;
     applySettings();
 }
 
-void VORDemodSCGUI::onWidgetRolled(QWidget* widget, bool rollDown)
+void VORDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
@@ -241,7 +241,7 @@ void VORDemodSCGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     applySettings();
 }
 
-void VORDemodSCGUI::onMenuDialogCalled(const QPoint &p)
+void VORDemodGUI::onMenuDialogCalled(const QPoint &p)
 {
     if (m_contextMenuType == ContextMenuChannelSettings)
     {
@@ -288,9 +288,9 @@ void VORDemodSCGUI::onMenuDialogCalled(const QPoint &p)
     resetContextMenuType();
 }
 
-VORDemodSCGUI::VORDemodSCGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
+VORDemodGUI::VORDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
     ChannelGUI(parent),
-    ui(new Ui::VORDemodSCGUI),
+    ui(new Ui::VORDemodGUI),
     m_pluginAPI(pluginAPI),
     m_deviceUISet(deviceUISet),
     m_channelMarker(this),
@@ -308,7 +308,7 @@ VORDemodSCGUI::VORDemodSCGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
 	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
-    m_vorDemod = reinterpret_cast<VORDemodSC*>(rxChannel);
+    m_vorDemod = reinterpret_cast<VORDemod*>(rxChannel);
     m_vorDemod->setMessageQueueToGUI(getInputMessageQueue());
 
     connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
@@ -323,7 +323,7 @@ VORDemodSCGUI::VORDemodSCGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
 
 	m_channelMarker.blockSignals(true);
 	m_channelMarker.setColor(Qt::yellow);
-    m_channelMarker.setBandwidth(2*VORDemodSCSettings::VORDEMOD_CHANNEL_BANDWIDTH);
+    m_channelMarker.setBandwidth(2*VORDemodSettings::VORDEMOD_CHANNEL_BANDWIDTH);
 	m_channelMarker.setCenterFrequency(0);
     m_channelMarker.setTitle("VOR Demodulator");
     m_channelMarker.blockSignals(false);
@@ -344,30 +344,30 @@ VORDemodSCGUI::VORDemodSCGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     applySettings(true);
 }
 
-VORDemodSCGUI::~VORDemodSCGUI()
+VORDemodGUI::~VORDemodGUI()
 {
     delete ui;
 }
 
-void VORDemodSCGUI::blockApplySettings(bool block)
+void VORDemodGUI::blockApplySettings(bool block)
 {
     m_doApplySettings = !block;
 }
 
-void VORDemodSCGUI::applySettings(bool force)
+void VORDemodGUI::applySettings(bool force)
 {
     if (m_doApplySettings)
     {
-        VORDemodSC::MsgConfigureVORDemod* message = VORDemodSC::MsgConfigureVORDemod::create( m_settings, force);
+        VORDemod::MsgConfigureVORDemod* message = VORDemod::MsgConfigureVORDemod::create( m_settings, force);
         m_vorDemod->getInputMessageQueue()->push(message);
     }
 }
 
-void VORDemodSCGUI::displaySettings()
+void VORDemodGUI::displaySettings()
 {
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
-    m_channelMarker.setBandwidth(2*VORDemodSCSettings::VORDEMOD_CHANNEL_BANDWIDTH);
+    m_channelMarker.setBandwidth(2*VORDemodSettings::VORDEMOD_CHANNEL_BANDWIDTH);
     m_channelMarker.setTitle(m_settings.m_title);
     m_channelMarker.blockSignals(false);
     m_channelMarker.setColor(m_settings.m_rgbColor); // activate signal on the last setting only
@@ -398,21 +398,21 @@ void VORDemodSCGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void VORDemodSCGUI::leaveEvent(QEvent* event)
+void VORDemodGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
     ChannelGUI::leaveEvent(event);
 }
 
-void VORDemodSCGUI::enterEvent(QEvent* event)
+void VORDemodGUI::enterEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);
 }
 
-void VORDemodSCGUI::audioSelect()
+void VORDemodGUI::audioSelect()
 {
-    qDebug("VORDemodSCGUI::audioSelect");
+    qDebug("VORDemodGUI::audioSelect");
     AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName);
     audioSelect.exec();
 
@@ -423,7 +423,7 @@ void VORDemodSCGUI::audioSelect()
     }
 }
 
-void VORDemodSCGUI::tick()
+void VORDemodGUI::tick()
 {
     double magsqAvg, magsqPeak;
     int nbMagsqSamples;
@@ -459,16 +459,16 @@ void VORDemodSCGUI::tick()
     m_tickCount++;
 }
 
-void VORDemodSCGUI::makeUIConnections()
+void VORDemodGUI::makeUIConnections()
 {
-    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &VORDemodSCGUI::on_deltaFrequency_changed);
-    QObject::connect(ui->thresh, &QDial::valueChanged, this, &VORDemodSCGUI::on_thresh_valueChanged);
-    QObject::connect(ui->volume, &QDial::valueChanged, this, &VORDemodSCGUI::on_volume_valueChanged);
-    QObject::connect(ui->squelch, &QDial::valueChanged, this, &VORDemodSCGUI::on_squelch_valueChanged);
-    QObject::connect(ui->audioMute, &QToolButton::toggled, this, &VORDemodSCGUI::on_audioMute_toggled);
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &VORDemodGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->thresh, &QDial::valueChanged, this, &VORDemodGUI::on_thresh_valueChanged);
+    QObject::connect(ui->volume, &QDial::valueChanged, this, &VORDemodGUI::on_volume_valueChanged);
+    QObject::connect(ui->squelch, &QDial::valueChanged, this, &VORDemodGUI::on_squelch_valueChanged);
+    QObject::connect(ui->audioMute, &QToolButton::toggled, this, &VORDemodGUI::on_audioMute_toggled);
 }
 
-void VORDemodSCGUI::updateAbsoluteCenterFrequency()
+void VORDemodGUI::updateAbsoluteCenterFrequency()
 {
     setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

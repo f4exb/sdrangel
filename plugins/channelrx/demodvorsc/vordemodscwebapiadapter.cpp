@@ -33,7 +33,7 @@ int VORDemodSCWebAPIAdapter::webapiSettingsGet(
     (void) errorMessage;
     response.setVorDemodScSettings(new SWGSDRangel::SWGVORDemodSCSettings());
     response.getVorDemodScSettings()->init();
-    VORDemodSC::webapiFormatChannelSettings(response, m_settings);
+    VORDemod::webapiFormatChannelSettings(response, m_settings);
 
     return 200;
 }
@@ -46,7 +46,7 @@ int VORDemodSCWebAPIAdapter::webapiSettingsPutPatch(
 {
     (void) force;
     (void) errorMessage;
-    VORDemodSC::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
+    VORDemod::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
 
     return 200;
 }

@@ -30,7 +30,7 @@
 
 class DownChannelizer;
 
-class VORDemodSCBaseband : public QObject
+class VORDemodBaseband : public QObject
 {
     Q_OBJECT
 public:
@@ -38,27 +38,27 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        const VORDemodSCSettings& getSettings() const { return m_settings; }
+        const VORDemodSettings& getSettings() const { return m_settings; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureVORDemodBaseband* create(const VORDemodSCSettings& settings, bool force)
+        static MsgConfigureVORDemodBaseband* create(const VORDemodSettings& settings, bool force)
         {
             return new MsgConfigureVORDemodBaseband(settings, force);
         }
 
     private:
-        VORDemodSCSettings m_settings;
+        VORDemodSettings m_settings;
         bool m_force;
 
-        MsgConfigureVORDemodBaseband(const VORDemodSCSettings& settings, bool force) :
+        MsgConfigureVORDemodBaseband(const VORDemodSettings& settings, bool force) :
             Message(),
             m_settings(settings),
             m_force(force)
         { }
     };
 
-    VORDemodSCBaseband();
-    ~VORDemodSCBaseband();
+    VORDemodBaseband();
+    ~VORDemodBaseband();
     void reset();
     void startWork();
     void stopWork();
@@ -79,13 +79,13 @@ private:
     int m_channelSampleRate;
     VORDemodSCSink m_sink;
     MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
-    VORDemodSCSettings m_settings;
+    VORDemodSettings m_settings;
     MessageQueue *m_messageQueueToGUI;
     bool m_running;
     QMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
-    void applySettings(const VORDemodSCSettings& settings, bool force = false);
+    void applySettings(const VORDemodSettings& settings, bool force = false);
 
 private slots:
     void handleInputMessages();

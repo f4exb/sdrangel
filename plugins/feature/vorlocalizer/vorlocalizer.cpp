@@ -152,7 +152,7 @@ bool VORLocalizer::handleMessage(const Message& cmd)
         SWGSDRangel::SWGChannelReport* swgChannelReport = report.getSWGReport();
         QString *channelType  = swgChannelReport->getChannelType();
 
-        if (*channelType == "VORDemodSC")
+        if (*channelType == "VORDemod")
         {
             SWGSDRangel::SWGVORDemodSCReport *swgVORDemodSCReport = swgChannelReport->getVorDemodScReport();
             int navId = swgVORDemodSCReport->getNavId();
@@ -165,7 +165,7 @@ bool VORLocalizer::handleMessage(const Message& cmd)
                 m_vorSinglePlans[navId] :
                 false;
 
-            // qDebug() << "VORLocalizer::handleMessage: MainCore::MsgChannelReport(VORDemodSC): "
+            // qDebug() << "VORLocalizer::handleMessage: MainCore::MsgChannelReport(VORDemod): "
             //     << "navId:" << navId
             //     << "singlePlanProvided" << m_vorSinglePlans.contains(navId)
             //     << "singlePlan:" << singlePlan;

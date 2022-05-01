@@ -23,7 +23,7 @@
 
 #include "util/message.h"
 
-class VORDemodSCReport : public QObject
+class VORDemodReport : public QObject
 {
     Q_OBJECT
 public:
@@ -75,8 +75,8 @@ public:
     };
 
 public:
-    VORDemodSCReport() {}
-    ~VORDemodSCReport() {}
+    VORDemodReport() {}
+    ~VORDemodReport() {}
 };
 
 #endif // INCLUDE_VORDEMODSCREPORT_H

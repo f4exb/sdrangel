@@ -29,19 +29,19 @@
 class PluginAPI;
 class DeviceUISet;
 class BasebandSampleSink;
-class VORDemodSC;
-class VORDemodSCGUI;
+class VORDemod;
+class VORDemodGUI;
 
 namespace Ui {
-    class VORDemodSCGUI;
+    class VORDemodGUI;
 }
-class VORDemodSCGUI;
+class VORDemodGUI;
 
-class VORDemodSCGUI : public ChannelGUI {
+class VORDemodGUI : public ChannelGUI {
     Q_OBJECT
 
 public:
-    static VORDemodSCGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel);
+    static VORDemodGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel);
     virtual void destroy();
 
     void resetToDefaults();
@@ -68,23 +68,23 @@ protected:
     void resizeEvent(QResizeEvent* size);
 
 private:
-    Ui::VORDemodSCGUI* ui;
+    Ui::VORDemodGUI* ui;
     PluginAPI* m_pluginAPI;
     DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
     RollupState m_rollupState;
-    VORDemodSCSettings m_settings;
+    VORDemodSettings m_settings;
     qint64 m_deviceCenterFrequency;
     bool m_doApplySettings;
 
-    VORDemodSC* m_vorDemod;
+    VORDemod* m_vorDemod;
     bool m_squelchOpen;
     int m_basebandSampleRate;
     uint32_t m_tickCount;
     MessageQueue m_inputMessageQueue;
 
-    explicit VORDemodSCGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
-    virtual ~VORDemodSCGUI();
+    explicit VORDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
+    virtual ~VORDemodGUI();
 
     void blockApplySettings(bool block);
     void applySettings(bool force = false);

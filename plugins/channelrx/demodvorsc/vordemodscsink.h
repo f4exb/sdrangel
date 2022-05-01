@@ -42,7 +42,7 @@ public:
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
-    void applySettings(const VORDemodSCSettings& settings, bool force = false);
+    void applySettings(const VORDemodSettings& settings, bool force = false);
     void setMessageQueueToChannel(MessageQueue *messageQueue) { m_messageQueueToChannel = messageQueue; }
     void applyAudioSampleRate(int sampleRate);
 
@@ -83,7 +83,7 @@ private:
         double m_magsqPeak;
     };
 
-    VORDemodSCSettings m_settings;
+    VORDemodSettings m_settings;
     int m_channelSampleRate;
     int m_audioSampleRate;
 

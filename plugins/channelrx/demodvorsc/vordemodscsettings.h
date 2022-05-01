@@ -24,7 +24,7 @@
 
 class Serializable;
 
-struct VORDemodSCSettings
+struct VORDemodSettings
 {
     qint32 m_inputFrequencyOffset;
     int m_navId; //!< VOR unique identifier when set by VOR localizer feature
@@ -58,7 +58,7 @@ struct VORDemodSCSettings
     // May as well make it a common audio rate, to possibly avoid decimation
     static const int VORDEMOD_CHANNEL_SAMPLE_RATE = 48000;
 
-    VORDemodSCSettings();
+    VORDemodSettings();
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
     void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
