@@ -27,8 +27,8 @@
 #include "util/morse.h"
 #include "util/units.h"
 
-#include "vordemodsink.h"
-#include "vordemodreport.h"
+#include "vordemodmcsink.h"
+#include "vordemodmcreport.h"
 
 VORDemodMCSink::VORDemodMCSink(const VORDemodMCSettings& settings, int subChannel,
                 MessageQueue *messageQueueToGUI) :

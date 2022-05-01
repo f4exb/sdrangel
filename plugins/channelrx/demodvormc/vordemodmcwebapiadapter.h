@@ -16,37 +16,35 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "SWGChannelSettings.h"
-#include "vordemod.h"
-#include "vordemodwebapiadapter.h"
+#ifndef INCLUDE_VORDEMOD_WEBAPIADAPTER_H
+#define INCLUDE_VORDEMOD_WEBAPIADAPTER_H
 
-VORDemodWebAPIAdapter::VORDemodWebAPIAdapter()
-{}
+#include "channel/channelwebapiadapter.h"
+#include "vordemodmcsettings.h"
 
-VORDemodWebAPIAdapter::~VORDemodWebAPIAdapter()
-{}
+/**
+ * Standalone API adapter only for the settings
+ */
+class VORDemodMCWebAPIAdapter : public ChannelWebAPIAdapter {
+public:
+    VORDemodMCWebAPIAdapter();
+    virtual ~VORDemodMCWebAPIAdapter();
 
-int VORDemodWebAPIAdapter::webapiSettingsGet(
-        SWGSDRangel::SWGChannelSettings& response,
-        QString& errorMessage)
-{
-    (void) errorMessage;
-    response.setVorDemodSettings(new SWGSDRangel::SWGVORDemodSettings());
-    response.getVorDemodSettings()->init();
-    VORDemodMC::webapiFormatChannelSettings(response, m_settings);
+    virtual QByteArray serialize() const { return m_settings.serialize(); }
+    virtual bool deserialize(const QByteArray& data) { return m_settings.deserialize(data); }
 
-    return 200;
-}
+    virtual int webapiSettingsGet(
+            SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
 
-int VORDemodWebAPIAdapter::webapiSettingsPutPatch(
-        bool force,
-        const QStringList& channelSettingsKeys,
-        SWGSDRangel::SWGChannelSettings& response,
-        QString& errorMessage)
-{
-    (void) force;
-    (void) errorMessage;
-    VORDemodMC::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
+    virtual int webapiSettingsPutPatch(
+            bool force,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
 
-    return 200;
-}
+private:
+    VORDemodMCSettings m_settings;
+};
+
+#endif // INCLUDE_VORDEMOD_WEBAPIADAPTER_H

@@ -26,7 +26,7 @@
 #include "util/message.h"
 #include "util/messagequeue.h"
 
-#include "vordemodsink.h"
+#include "vordemodmcsink.h"
 
 class DownChannelizer;
 

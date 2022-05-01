@@ -38,7 +38,7 @@
 #include "util/httpdownloadmanager.h"
 #include "util/azel.h"
 #include "settings/rollupstate.h"
-#include "vordemodsettings.h"
+#include "vordemodmcsettings.h"
 #include "navaid.h"
 
 class PluginAPI;

@@ -1,23 +1,23 @@
-project(vor)
+project(vormc)
 
-set(vor_SOURCES
-    vordemod.cpp
-    vordemodsettings.cpp
-    vordemodbaseband.cpp
-    vordemodsink.cpp
-    vordemodplugin.cpp
-    vordemodwebapiadapter.cpp
-    vordemodreport.cpp
+set(vormc_SOURCES
+    vordemodmc.cpp
+    vordemodmcsettings.cpp
+    vordemodmcbaseband.cpp
+    vordemodmcsink.cpp
+    vordemodmcplugin.cpp
+    vordemodmcwebapiadapter.cpp
+    vordemodmcreport.cpp
 )
 
-set(vor_HEADERS
-    vordemod.h
-    vordemodsettings.h
-    vordemodbaseband.h
-    vordemodsink.h
-    vordemodplugin.h
-    vordemodwebapiadapter.h
-    vordemodreport.h
+set(vormc_HEADERS
+    vordemodmc.h
+    vordemodmcsettings.h
+    vordemodmcbaseband.h
+    vordemodmcsink.h
+    vordemodmcplugin.h
+    vordemodmcwebapiadapter.h
+    vordemodmcreport.h
 )
 
 
@@ -26,33 +26,33 @@ include_directories(
 )
 
 if(NOT SERVER_MODE)
-    set(vor_SOURCES
-        ${vor_SOURCES}
-        vordemodgui.cpp
-        vordemodgui.ui
+    set(vormc_SOURCES
+        ${vormc_SOURCES}
+        vordemodmcgui.cpp
+        vordemodmcgui.ui
         map.qrc
         icons.qrc
     )
-    set(vor_HEADERS
-        ${vor_HEADERS}
-        vordemodgui.h
+    set(vormc_HEADERS
+        ${vormc_HEADERS}
+        vordemodmcgui.h
         navaid.h
         ../demodadsb/csv.h
     )
 
-    set(TARGET_NAME demodvor)
+    set(TARGET_NAME demodvormc)
     set(TARGET_LIB "Qt5::Widgets" Qt5::Quick Qt5::QuickWidgets Qt5::Positioning)
     set(TARGET_LIB_GUI "sdrgui")
     set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
 else()
-    set(TARGET_NAME demodvorsrv)
+    set(TARGET_NAME demodvormcsrv)
     set(TARGET_LIB "")
     set(TARGET_LIB_GUI "")
     set(INSTALL_FOLDER ${INSTALL_PLUGINSSRV_DIR})
 endif()
 
 add_library(${TARGET_NAME} SHARED
-    ${vor_SOURCES}
+    ${vormc_SOURCES}
 )
 
 target_link_libraries(${TARGET_NAME}

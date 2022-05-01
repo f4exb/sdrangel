@@ -28,8 +28,8 @@
 #include "channel/channelapi.h"
 #include "util/message.h"
 
-#include "vordemodbaseband.h"
-#include "vordemodsettings.h"
+#include "vordemodmcbaseband.h"
+#include "vordemodmcsettings.h"
 
 class QNetworkAccessManager;
 class QNetworkReply;

@@ -2,7 +2,7 @@ project(demod)
 
 if (Qt5Quick_FOUND AND Qt5QuickWidgets_FOUND AND Qt5Positioning_FOUND)
     add_subdirectory(demodadsb)
-    add_subdirectory(demodvor)
+    add_subdirectory(demodvormc)
 endif()
 
 add_subdirectory(demodam)

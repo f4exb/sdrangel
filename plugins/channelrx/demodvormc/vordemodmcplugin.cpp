@@ -20,11 +20,11 @@
 #include "plugin/pluginapi.h"
 
 #ifndef SERVER_MODE
-#include "vordemodgui.h"
+#include "vordemodmcgui.h"
 #endif
-#include "vordemod.h"
-#include "vordemodwebapiadapter.h"
-#include "vordemodplugin.h"
+#include "vordemodmc.h"
+#include "vordemodmcwebapiadapter.h"
+#include "vordemodmcplugin.h"
 
 const PluginDescriptor VORDemodMCPlugin::m_pluginDescriptor = {
     VORDemodMC::m_channelId,
@@ -88,5 +88,5 @@ ChannelGUI* VORDemodMCPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, Baseb
 
 ChannelWebAPIAdapter* VORDemodMCPlugin::createChannelWebAPIAdapter() const
 {
-    return new VORDemodWebAPIAdapter();
+    return new VORDemodMCWebAPIAdapter();
 }

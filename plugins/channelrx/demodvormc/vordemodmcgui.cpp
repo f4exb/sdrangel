@@ -27,12 +27,12 @@
 #include <QMessageBox>
 #include <QAction>
 
-#include "vordemodgui.h"
+#include "vordemodmcgui.h"
 
 #include "device/deviceuiset.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
-#include "ui_vordemodgui.h"
+#include "ui_vordemodmcgui.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
@@ -46,9 +46,9 @@
 #include "channel/channelwebapiutils.h"
 #include "maincore.h"
 
-#include "vordemod.h"
-#include "vordemodreport.h"
-#include "vordemodsink.h"
+#include "vordemodmc.h"
+#include "vordemodmcreport.h"
+#include "vordemodmcsink.h"
 
 #define VOR_COL_NAME            0
 #define VOR_COL_FREQUENCY       1
