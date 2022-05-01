@@ -44,13 +44,13 @@
 class PluginAPI;
 class DeviceUISet;
 class BasebandSampleSink;
-class VORDemod;
-class VORDemodGUI;
+class VORDemodMC;
+class VORDemodMCGUI;
 
 namespace Ui {
-    class VORDemodGUI;
+    class VORDemodMCGUI;
 }
-class VORDemodGUI;
+class VORDemodMCGUI;
 
 // Table items for each VOR
 class VORGUI : public QObject {
@@ -58,7 +58,7 @@ class VORGUI : public QObject {
 public:
     NavAid *m_navAid;
     QVariantList m_coordinates;
-    VORDemodGUI *m_gui;
+    VORDemodMCGUI *m_gui;
 
     QTableWidgetItem *m_nameItem;
     QTableWidgetItem *m_frequencyItem;
@@ -73,7 +73,7 @@ public:
     QWidget *m_muteItem;
     QToolButton *m_muteButton;
 
-    VORGUI(NavAid *navAid, VORDemodGUI *gui);
+    VORGUI(NavAid *navAid, VORDemodMCGUI *gui);
 private slots:
     void on_audioMute_toggled(bool checked);
 };
@@ -93,7 +93,7 @@ public:
         selectedRole = Qt::UserRole + 6
     };
 
-    VORModel(VORDemodGUI *gui) :
+    VORModel(VORDemodMCGUI *gui) :
         m_gui(gui),
         m_radialsVisible(true)
     {
@@ -192,7 +192,7 @@ public:
     bool findIntersection(float &lat, float &lon);
 
 private:
-    VORDemodGUI *m_gui;
+    VORDemodMCGUI *m_gui;
     bool m_radialsVisible;
     QList<NavAid *> m_vors;
     QList<bool> m_selected;
@@ -200,11 +200,11 @@ private:
     QList<VORGUI *> m_vorGUIs;
 };
 
-class VORDemodGUI : public ChannelGUI {
+class VORDemodMCGUI : public ChannelGUI {
     Q_OBJECT
 
 public:
-    static VORDemodGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel);
+    static VORDemodMCGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel);
     virtual void destroy();
 
     void resetToDefaults();
@@ -233,16 +233,16 @@ private:
     friend class VORGUI;
     friend class VORModel;
 
-    Ui::VORDemodGUI* ui;
+    Ui::VORDemodMCGUI* ui;
     PluginAPI* m_pluginAPI;
     DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
     RollupState m_rollupState;
-    VORDemodSettings m_settings;
+    VORDemodMCSettings m_settings;
     qint64 m_deviceCenterFrequency;
     bool m_doApplySettings;
 
-    VORDemod* m_vorDemod;
+    VORDemodMC* m_vorDemod;
     bool m_squelchOpen;
     int m_basebandSampleRate;
     uint32_t m_tickCount;
@@ -258,8 +258,8 @@ private:
     AzEl m_azEl;                        // Position of station
     QIcon m_muteIcon;
 
-    explicit VORDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
-    virtual ~VORDemodGUI();
+    explicit VORDemodMCGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
+    virtual ~VORDemodMCGUI();
 
     void blockApplySettings(bool block);
     void applySettings(bool force = false);

@@ -25,15 +25,15 @@
 #include "vordemodbaseband.h"
 #include "vordemodreport.h"
 
-MESSAGE_CLASS_DEFINITION(VORDemodBaseband::MsgConfigureVORDemodBaseband, Message)
+MESSAGE_CLASS_DEFINITION(VORDemodMCBaseband::MsgConfigureVORDemodBaseband, Message)
 
-VORDemodBaseband::VORDemodBaseband() :
+VORDemodMCBaseband::VORDemodMCBaseband() :
     m_running(false),
     m_mutex(QMutex::Recursive),
     m_messageQueueToGUI(nullptr),
     m_basebandSampleRate(0)
 {
-    qDebug("VORDemodBaseband::VORDemodBaseband");
+    qDebug("VORDemodMCBaseband::VORDemodMCBaseband");
 
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
 
@@ -41,7 +41,7 @@ VORDemodBaseband::VORDemodBaseband() :
     DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifoBug, getInputMessageQueue());
 }
 
-VORDemodBaseband::~VORDemodBaseband()
+VORDemodMCBaseband::~VORDemodMCBaseband()
 {
     m_inputMessageQueue.clear();
 
@@ -60,28 +60,28 @@ VORDemodBaseband::~VORDemodBaseband()
     m_channelizers.clear();
 }
 
-void VORDemodBaseband::reset()
+void VORDemodMCBaseband::reset()
 {
     QMutexLocker mutexLocker(&m_mutex);
     m_inputMessageQueue.clear();
     m_sampleFifo.reset();
 }
 
-void VORDemodBaseband::startWork()
+void VORDemodMCBaseband::startWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
     QObject::connect(
         &m_sampleFifo,
         &SampleSinkFifo::dataReady,
         this,
-        &VORDemodBaseband::handleData,
+        &VORDemodMCBaseband::handleData,
         Qt::QueuedConnection
     );
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
     m_running = true;
 }
 
-void VORDemodBaseband::stopWork()
+void VORDemodMCBaseband::stopWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
     disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
@@ -89,17 +89,17 @@ void VORDemodBaseband::stopWork()
         &m_sampleFifo,
         &SampleSinkFifo::dataReady,
         this,
-        &VORDemodBaseband::handleData
+        &VORDemodMCBaseband::handleData
     );
     m_running = false;
 }
 
-void VORDemodBaseband::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
+void VORDemodMCBaseband::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
 {
     m_sampleFifo.write(begin, end);
 }
 
-void VORDemodBaseband::handleData()
+void VORDemodMCBaseband::handleData()
 {
     QMutexLocker mutexLocker(&m_mutex);
 
@@ -128,7 +128,7 @@ void VORDemodBaseband::handleData()
     }
 }
 
-void VORDemodBaseband::handleInputMessages()
+void VORDemodMCBaseband::handleInputMessages()
 {
     Message* message;
 
@@ -140,13 +140,13 @@ void VORDemodBaseband::handleInputMessages()
     }
 }
 
-bool VORDemodBaseband::handleMessage(const Message& cmd)
+bool VORDemodMCBaseband::handleMessage(const Message& cmd)
 {
     if (MsgConfigureVORDemodBaseband::match(cmd))
     {
         QMutexLocker mutexLocker(&m_mutex);
         MsgConfigureVORDemodBaseband& cfg = (MsgConfigureVORDemodBaseband&) cmd;
-        qDebug() << "VORDemodBaseband::handleMessage: MsgConfigureVORDemodBaseband";
+        qDebug() << "VORDemodMCBaseband::handleMessage: MsgConfigureVORDemodBaseband";
 
         applySettings(cfg.getSettings(), cfg.getForce());
 
@@ -156,7 +156,7 @@ bool VORDemodBaseband::handleMessage(const Message& cmd)
     {
         QMutexLocker mutexLocker(&m_mutex);
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
-        qDebug() << "VORDemodBaseband::handleMessage: DSPSignalNotification: basebandSampleRate: " << notif.getSampleRate() << " centerFrequency: " << notif.getCenterFrequency();
+        qDebug() << "VORDemodMCBaseband::handleMessage: DSPSignalNotification: basebandSampleRate: " << notif.getSampleRate() << " centerFrequency: " << notif.getCenterFrequency();
         m_centerFrequency = notif.getCenterFrequency();
         setBasebandSampleRate(notif.getSampleRate());
         m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(m_basebandSampleRate));
@@ -170,14 +170,14 @@ bool VORDemodBaseband::handleMessage(const Message& cmd)
 }
 
 // Calculate offset of VOR center frequency from sample source center frequency
-void VORDemodBaseband::calculateOffset(VORDemodSink *sink)
+void VORDemodMCBaseband::calculateOffset(VORDemodMCSink *sink)
 {
    int frequencyOffset = sink->m_vorFrequencyHz - m_centerFrequency;
    bool outOfBand = std::abs(frequencyOffset)+VORDEMOD_CHANNEL_BANDWIDTH > (m_basebandSampleRate/2);
 
     if (m_messageQueueToGUI != nullptr)
     {
-        VORDemodReport::MsgReportFreqOffset *msg = VORDemodReport::MsgReportFreqOffset::create(sink->m_subChannelId, frequencyOffset, outOfBand);
+        VORDemodMCReport::MsgReportFreqOffset *msg = VORDemodMCReport::MsgReportFreqOffset::create(sink->m_subChannelId, frequencyOffset, outOfBand);
         m_messageQueueToGUI->push(msg);
     }
 
@@ -185,15 +185,15 @@ void VORDemodBaseband::calculateOffset(VORDemodSink *sink)
    sink->m_outOfBand = outOfBand;
 }
 
-void VORDemodBaseband::applySettings(const VORDemodSettings& settings, bool force)
+void VORDemodMCBaseband::applySettings(const VORDemodMCSettings& settings, bool force)
 {
     // Remove sub-channels no longer needed
     for (int i = 0; i < m_sinks.size(); i++)
     {
         if (!settings.m_subChannelSettings.contains(m_sinks[i]->m_subChannelId))
         {
-            qDebug() << "VORDemodBaseband::applySettings: Removing sink " << m_sinks[i]->m_subChannelId;
-            VORDemodSink *sink = m_sinks[i];
+            qDebug() << "VORDemodMCBaseband::applySettings: Removing sink " << m_sinks[i]->m_subChannelId;
+            VORDemodMCSink *sink = m_sinks[i];
             DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(m_sinks[i]->getAudioFifo());
             m_sinks.removeAt(i);
             delete sink;
@@ -217,8 +217,8 @@ void VORDemodBaseband::applySettings(const VORDemodSettings& settings, bool forc
         if (j == m_sinks.size())
         {
             // Add a sub-channel sink
-            qDebug() << "VORDemodBaseband::applySettings: Adding sink " << subChannelSettings->m_id;
-            VORDemodSink *sink = new VORDemodSink(settings, subChannelSettings->m_id, m_messageQueueToGUI);
+            qDebug() << "VORDemodMCBaseband::applySettings: Adding sink " << subChannelSettings->m_id;
+            VORDemodMCSink *sink = new VORDemodMCSink(settings, subChannelSettings->m_id, m_messageQueueToGUI);
             DownChannelizer *channelizer = new DownChannelizer(sink);
             channelizer->setBasebandSampleRate(m_basebandSampleRate);
             DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(sink->getAudioFifo(), getInputMessageQueue());
@@ -269,7 +269,7 @@ void VORDemodBaseband::applySettings(const VORDemodSettings& settings, bool forc
     m_settings = settings;
 }
 
-void VORDemodBaseband::setBasebandSampleRate(int sampleRate)
+void VORDemodMCBaseband::setBasebandSampleRate(int sampleRate)
 {
     m_basebandSampleRate = sampleRate;
     for (int i = 0; i < m_sinks.size(); i++)

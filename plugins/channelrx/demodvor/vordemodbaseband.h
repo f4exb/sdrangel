@@ -30,7 +30,7 @@
 
 class DownChannelizer;
 
-class VORDemodBaseband : public QObject
+class VORDemodMCBaseband : public QObject
 {
     Q_OBJECT
 public:
@@ -38,27 +38,27 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        const VORDemodSettings& getSettings() const { return m_settings; }
+        const VORDemodMCSettings& getSettings() const { return m_settings; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureVORDemodBaseband* create(const VORDemodSettings& settings, bool force)
+        static MsgConfigureVORDemodBaseband* create(const VORDemodMCSettings& settings, bool force)
         {
             return new MsgConfigureVORDemodBaseband(settings, force);
         }
 
     private:
-        VORDemodSettings m_settings;
+        VORDemodMCSettings m_settings;
         bool m_force;
 
-        MsgConfigureVORDemodBaseband(const VORDemodSettings& settings, bool force) :
+        MsgConfigureVORDemodBaseband(const VORDemodMCSettings& settings, bool force) :
             Message(),
             m_settings(settings),
             m_force(force)
         { }
     };
 
-    VORDemodBaseband();
-    ~VORDemodBaseband();
+    VORDemodMCBaseband();
+    ~VORDemodMCBaseband();
     void reset();
     void startWork();
     void stopWork();
@@ -115,10 +115,10 @@ public:
 private:
     SampleSinkFifo m_sampleFifo;
     QList<DownChannelizer *> m_channelizers;
-    QList<VORDemodSink *> m_sinks;
+    QList<VORDemodMCSink *> m_sinks;
     AudioFifo m_audioFifoBug; // FIXME: Removing this results in audio stopping when demod is closed
     MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
-    VORDemodSettings m_settings;
+    VORDemodMCSettings m_settings;
     bool m_running;
     QMutex m_mutex;
     MessageQueue *m_messageQueueToGUI;
@@ -126,8 +126,8 @@ private:
     int m_centerFrequency;
 
     bool handleMessage(const Message& cmd);
-    void calculateOffset(VORDemodSink *sink);
-    void applySettings(const VORDemodSettings& settings, bool force = false);
+    void calculateOffset(VORDemodMCSink *sink);
+    void applySettings(const VORDemodMCSettings& settings, bool force = false);
 
 private slots:
     void handleInputMessages();

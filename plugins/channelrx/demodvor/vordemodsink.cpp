@@ -30,7 +30,7 @@
 #include "vordemodsink.h"
 #include "vordemodreport.h"
 
-VORDemodSink::VORDemodSink(const VORDemodSettings& settings, int subChannel,
+VORDemodMCSink::VORDemodMCSink(const VORDemodMCSettings& settings, int subChannel,
                 MessageQueue *messageQueueToGUI) :
         m_channelFrequencyOffset(0),
         m_outOfBand(true),
@@ -67,11 +67,11 @@ VORDemodSink::VORDemodSink(const VORDemodSettings& settings, int subChannel,
     }
 }
 
-VORDemodSink::~VORDemodSink()
+VORDemodMCSink::~VORDemodMCSink()
 {
 }
 
-void VORDemodSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
+void VORDemodMCSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
 {
     Complex ci;
 
@@ -102,7 +102,7 @@ void VORDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
     }
 }
 
-void VORDemodSink::processOneAudioSample(Complex &ci)
+void VORDemodMCSink::processOneAudioSample(Complex &ci)
 {
     Real re = ci.real() / SDR_RX_SCALEF;
     Real im = ci.imag() / SDR_RX_SCALEF;
@@ -167,7 +167,7 @@ void VORDemodSink::processOneAudioSample(Complex &ci)
 
         if (res != m_audioBufferFill)
         {
-            qDebug("VORDemodSink::processOneAudioSample: %u/%u audio samples written", res, m_audioBufferFill);
+            qDebug("VORDemodMCSink::processOneAudioSample: %u/%u audio samples written", res, m_audioBufferFill);
             m_audioFifo.clear();
         }
 
@@ -176,7 +176,7 @@ void VORDemodSink::processOneAudioSample(Complex &ci)
 }
 
 
-void VORDemodSink::processOneSample(Complex &ci)
+void VORDemodMCSink::processOneSample(Complex &ci)
 {
     Complex ca;
 
@@ -251,7 +251,7 @@ void VORDemodSink::processOneSample(Complex &ci)
 
         if (getMessageQueueToGUI())
         {
-            VORDemodReport::MsgReportRadial *msg = VORDemodReport::MsgReportRadial::create(m_subChannelId, phaseDifference, refMag, varMag);
+            VORDemodMCReport::MsgReportRadial *msg = VORDemodMCReport::MsgReportRadial::create(m_subChannelId, phaseDifference, refMag, varMag);
             getMessageQueueToGUI()->push(msg);
         }
 
@@ -305,7 +305,7 @@ void VORDemodSink::processOneSample(Complex &ci)
                 qDebug() << m_ident << " " << Morse::toString(m_ident);
                 if (getMessageQueueToGUI())
                 {
-                    VORDemodReport::MsgReportIdent *msg = VORDemodReport::MsgReportIdent::create(m_subChannelId, m_ident);
+                    VORDemodMCReport::MsgReportIdent *msg = VORDemodMCReport::MsgReportIdent::create(m_subChannelId, m_ident);
                     getMessageQueueToGUI()->push(msg);
                 }
                 m_ident = "";
@@ -344,7 +344,7 @@ void VORDemodSink::processOneSample(Complex &ci)
                 qDebug() << m_ident << " " << Morse::toString(m_ident);
                 if (getMessageQueueToGUI())
                 {
-                    VORDemodReport::MsgReportIdent *msg = VORDemodReport::MsgReportIdent::create(m_subChannelId, m_ident);
+                    VORDemodMCReport::MsgReportIdent *msg = VORDemodMCReport::MsgReportIdent::create(m_subChannelId, m_ident);
                     getMessageQueueToGUI()->push(msg);
                 }
                 m_ident = "";
@@ -355,9 +355,9 @@ void VORDemodSink::processOneSample(Complex &ci)
     m_prevBit = bit;
 }
 
-void VORDemodSink::applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force)
+void VORDemodMCSink::applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force)
 {
-    qDebug() << "VORDemodSink::applyChannelSettings:"
+    qDebug() << "VORDemodMCSink::applyChannelSettings:"
             << " channelSampleRate: " << channelSampleRate
             << " channelFrequencyOffset: " << channelFrequencyOffset;
 
@@ -395,9 +395,9 @@ void VORDemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
     m_channelFrequencyOffset = channelFrequencyOffset;
 }
 
-void VORDemodSink::applySettings(const VORDemodSettings& settings, bool force)
+void VORDemodMCSink::applySettings(const VORDemodMCSettings& settings, bool force)
 {
-    qDebug() << "VORDemodSink::applySettings:"
+    qDebug() << "VORDemodMCSink::applySettings:"
             << " m_volume: " << settings.m_volume
             << " m_squelch: " << settings.m_squelch
             << " m_audioMute: " << settings.m_audioMute
@@ -411,15 +411,15 @@ void VORDemodSink::applySettings(const VORDemodSettings& settings, bool force)
     m_settings = settings;
 }
 
-void VORDemodSink::applyAudioSampleRate(int sampleRate)
+void VORDemodMCSink::applyAudioSampleRate(int sampleRate)
 {
     if (sampleRate < 0)
     {
-        qWarning("VORDemodSink::applyAudioSampleRate: invalid sample rate: %d", sampleRate);
+        qWarning("VORDemodMCSink::applyAudioSampleRate: invalid sample rate: %d", sampleRate);
         return;
     }
 
-    qDebug("VORDemodSink::applyAudioSampleRate: sampleRate: %d m_channelSampleRate: %d", sampleRate, m_channelSampleRate);
+    qDebug("VORDemodMCSink::applyAudioSampleRate: sampleRate: %d m_channelSampleRate: %d", sampleRate, m_channelSampleRate);
 
     // (ICAO Annex 10 3.3.6.3) - Optional voice audio is 300Hz to 3kHz
     m_audioInterpolator.create(16, VORDEMOD_CHANNEL_SAMPLE_RATE, 3000.0f);

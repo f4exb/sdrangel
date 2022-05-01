@@ -44,7 +44,7 @@ public:
             QString& errorMessage);
 
 private:
-    VORDemodSettings m_settings;
+    VORDemodMCSettings m_settings;
 };
 
 #endif // INCLUDE_VORDEMOD_WEBAPIADAPTER_H

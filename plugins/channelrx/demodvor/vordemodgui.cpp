@@ -390,7 +390,7 @@ static bool calcIntersectionPoint(float lat1, float lon1, float bearing1, float 
     return true;
 }
 
-VORGUI::VORGUI(NavAid *navAid, VORDemodGUI *gui) :
+VORGUI::VORGUI(NavAid *navAid, VORDemodMCGUI *gui) :
     m_navAid(navAid),
     m_gui(gui)
 {
@@ -577,7 +577,7 @@ bool VORModel::findIntersection(float &lat, float &lon)
     return false;
 }
 
-void VORDemodGUI::resizeTable()
+void VORDemodMCGUI::resizeTable()
 {
     // Fill table with a row of dummy data that will size the columns nicely
     // Trailing spaces are for sort arrow
@@ -600,7 +600,7 @@ void VORDemodGUI::resizeTable()
 }
 
 // Columns in table reordered
-void VORDemodGUI::vorData_sectionMoved(int logicalIndex, int oldVisualIndex, int newVisualIndex)
+void VORDemodMCGUI::vorData_sectionMoved(int logicalIndex, int oldVisualIndex, int newVisualIndex)
 {
     (void) oldVisualIndex;
 
@@ -608,7 +608,7 @@ void VORDemodGUI::vorData_sectionMoved(int logicalIndex, int oldVisualIndex, int
 }
 
 // Column in table resized (when hidden size is 0)
-void VORDemodGUI::vorData_sectionResized(int logicalIndex, int oldSize, int newSize)
+void VORDemodMCGUI::vorData_sectionResized(int logicalIndex, int oldSize, int newSize)
 {
     (void) oldSize;
 
@@ -616,13 +616,13 @@ void VORDemodGUI::vorData_sectionResized(int logicalIndex, int oldSize, int newS
 }
 
 // Right click in table header - show column select menu
-void VORDemodGUI::columnSelectMenu(QPoint pos)
+void VORDemodMCGUI::columnSelectMenu(QPoint pos)
 {
     menu->popup(ui->vorData->horizontalHeader()->viewport()->mapToGlobal(pos));
 }
 
 // Hide/show column when menu selected
-void VORDemodGUI::columnSelectMenuChecked(bool checked)
+void VORDemodMCGUI::columnSelectMenuChecked(bool checked)
 {
     (void) checked;
 
@@ -635,7 +635,7 @@ void VORDemodGUI::columnSelectMenuChecked(bool checked)
 }
 
 // Create column select menu item
-QAction *VORDemodGUI::createCheckableItem(QString &text, int idx, bool checked)
+QAction *VORDemodMCGUI::createCheckableItem(QString &text, int idx, bool checked)
 {
     QAction *action = new QAction(text, this);
     action->setCheckable(true);
@@ -646,7 +646,7 @@ QAction *VORDemodGUI::createCheckableItem(QString &text, int idx, bool checked)
 }
 
 // Called when a VOR is selected on the map
-void VORDemodGUI::selectVOR(VORGUI *vorGUI, bool selected)
+void VORDemodMCGUI::selectVOR(VORGUI *vorGUI, bool selected)
 {
     if (selected)
     {
@@ -691,7 +691,7 @@ void VORDemodGUI::selectVOR(VORGUI *vorGUI, bool selected)
     }
 }
 
-void VORDemodGUI::updateVORs()
+void VORDemodMCGUI::updateVORs()
 {
     m_vorModel.removeAllVORs();
     QHash<int, NavAid *>::iterator i = m_vors->begin();
@@ -714,30 +714,30 @@ void VORDemodGUI::updateVORs()
     }
 }
 
-VORDemodGUI* VORDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
+VORDemodMCGUI* VORDemodMCGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
-    VORDemodGUI* gui = new VORDemodGUI(pluginAPI, deviceUISet, rxChannel);
+    VORDemodMCGUI* gui = new VORDemodMCGUI(pluginAPI, deviceUISet, rxChannel);
     return gui;
 }
 
-void VORDemodGUI::destroy()
+void VORDemodMCGUI::destroy()
 {
     delete this;
 }
 
-void VORDemodGUI::resetToDefaults()
+void VORDemodMCGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
     applySettings(true);
 }
 
-QByteArray VORDemodGUI::serialize() const
+QByteArray VORDemodMCGUI::serialize() const
 {
     return m_settings.serialize();
 }
 
-bool VORDemodGUI::deserialize(const QByteArray& data)
+bool VORDemodMCGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
@@ -749,12 +749,12 @@ bool VORDemodGUI::deserialize(const QByteArray& data)
     }
 }
 
-bool VORDemodGUI::handleMessage(const Message& message)
+bool VORDemodMCGUI::handleMessage(const Message& message)
 {
-    if (VORDemod::MsgConfigureVORDemod::match(message))
+    if (VORDemodMC::MsgConfigureVORDemod::match(message))
     {
-        qDebug("VORDemodGUI::handleMessage: VORDemod::MsgConfigureVORDemod");
-        const VORDemod::MsgConfigureVORDemod& cfg = (VORDemod::MsgConfigureVORDemod&) message;
+        qDebug("VORDemodMCGUI::handleMessage: VORDemodMC::MsgConfigureVORDemod");
+        const VORDemodMC::MsgConfigureVORDemod& cfg = (VORDemodMC::MsgConfigureVORDemod&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
         displaySettings();
@@ -769,9 +769,9 @@ bool VORDemodGUI::handleMessage(const Message& message)
         updateAbsoluteCenterFrequency();
         return true;
     }
-    else if (VORDemodReport::MsgReportRadial::match(message))
+    else if (VORDemodMCReport::MsgReportRadial::match(message))
     {
-        VORDemodReport::MsgReportRadial& report = (VORDemodReport::MsgReportRadial&) message;
+        VORDemodMCReport::MsgReportRadial& report = (VORDemodMCReport::MsgReportRadial&) message;
         int subChannelId = report.getSubChannelId();
 
         VORGUI *vorGUI = m_selectedVORs.value(subChannelId);
@@ -806,9 +806,9 @@ bool VORDemodGUI::handleMessage(const Message& message)
 
         return true;
     }
-    else if (VORDemodReport::MsgReportFreqOffset::match(message))
+    else if (VORDemodMCReport::MsgReportFreqOffset::match(message))
     {
-        VORDemodReport::MsgReportFreqOffset& report = (VORDemodReport::MsgReportFreqOffset&) message;
+        VORDemodMCReport::MsgReportFreqOffset& report = (VORDemodMCReport::MsgReportFreqOffset&) message;
         int subChannelId = report.getSubChannelId();
 
         VORGUI *vorGUI = m_selectedVORs.value(subChannelId);
@@ -826,9 +826,9 @@ bool VORDemodGUI::handleMessage(const Message& message)
         else
             vorGUI->m_offsetItem->setForeground(QBrush(Qt::white));
     }
-    else if (VORDemodReport::MsgReportIdent::match(message))
+    else if (VORDemodMCReport::MsgReportIdent::match(message))
     {
-        VORDemodReport::MsgReportIdent& report = (VORDemodReport::MsgReportIdent&) message;
+        VORDemodMCReport::MsgReportIdent& report = (VORDemodMCReport::MsgReportIdent&) message;
         int subChannelId = report.getSubChannelId();
 
         VORGUI *vorGUI = m_selectedVORs.value(subChannelId);
@@ -870,7 +870,7 @@ bool VORDemodGUI::handleMessage(const Message& message)
     return false;
 }
 
-void VORDemodGUI::handleInputMessages()
+void VORDemodMCGUI::handleInputMessages()
 {
     Message* message;
 
@@ -883,43 +883,43 @@ void VORDemodGUI::handleInputMessages()
     }
 }
 
-void VORDemodGUI::channelMarkerChangedByCursor()
+void VORDemodMCGUI::channelMarkerChangedByCursor()
 {
 }
 
-void VORDemodGUI::channelMarkerHighlightedByCursor()
+void VORDemodMCGUI::channelMarkerHighlightedByCursor()
 {
     setHighlighted(m_channelMarker.getHighlighted());
 }
 
-void VORDemodGUI::on_thresh_valueChanged(int value)
+void VORDemodMCGUI::on_thresh_valueChanged(int value)
 {
     ui->threshText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
     m_settings.m_identThreshold = value / 10.0;
     applySettings();
 }
 
-void VORDemodGUI::on_volume_valueChanged(int value)
+void VORDemodMCGUI::on_volume_valueChanged(int value)
 {
     ui->volumeText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
     m_settings.m_volume = value / 10.0;
     applySettings();
 }
 
-void VORDemodGUI::on_squelch_valueChanged(int value)
+void VORDemodMCGUI::on_squelch_valueChanged(int value)
 {
     ui->squelchText->setText(QString("%1 dB").arg(value));
     m_settings.m_squelch = value;
     applySettings();
 }
 
-void VORDemodGUI::on_audioMute_toggled(bool checked)
+void VORDemodMCGUI::on_audioMute_toggled(bool checked)
 {
     m_settings.m_audioMute = checked;
     applySettings();
 }
 
-qint64 VORDemodGUI::fileAgeInDays(QString filename)
+qint64 VORDemodMCGUI::fileAgeInDays(QString filename)
 {
     QFile file(filename);
     if (file.exists())
@@ -933,7 +933,7 @@ qint64 VORDemodGUI::fileAgeInDays(QString filename)
     return -1;
 }
 
-bool VORDemodGUI::confirmDownload(QString filename)
+bool VORDemodMCGUI::confirmDownload(QString filename)
 {
     qint64 age = fileAgeInDays(filename);
     if ((age == -1) || (age > 100))
@@ -951,7 +951,7 @@ bool VORDemodGUI::confirmDownload(QString filename)
     }
 }
 
-QString VORDemodGUI::getDataDir()
+QString VORDemodMCGUI::getDataDir()
 {
     // Get directory to store app data in
     QStringList locations = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation);
@@ -959,7 +959,7 @@ QString VORDemodGUI::getDataDir()
     return locations[0];
 }
 
-QString VORDemodGUI::getOpenAIPVORDBFilename(int i)
+QString VORDemodMCGUI::getOpenAIPVORDBFilename(int i)
 {
     if (countryCodes[i] != nullptr)
         return getDataDir() + "/" + countryCodes[i] + "_nav.aip";
@@ -967,7 +967,7 @@ QString VORDemodGUI::getOpenAIPVORDBFilename(int i)
         return "";
 }
 
-QString VORDemodGUI::getOpenAIPVORDBURL(int i)
+QString VORDemodMCGUI::getOpenAIPVORDBURL(int i)
 {
     if (countryCodes[i] != nullptr)
         return QString(OPENAIP_NAVAIDS_URL).arg(countryCodes[i]);
@@ -975,12 +975,12 @@ QString VORDemodGUI::getOpenAIPVORDBURL(int i)
         return "";
 }
 
-QString VORDemodGUI::getVORDBFilename()
+QString VORDemodMCGUI::getVORDBFilename()
 {
     return getDataDir() + "/vorDatabase.csv";
 }
 
-void VORDemodGUI::updateDownloadProgress(qint64 bytesRead, qint64 totalBytes)
+void VORDemodMCGUI::updateDownloadProgress(qint64 bytesRead, qint64 totalBytes)
 {
     if (m_progressDialog)
     {
@@ -989,7 +989,7 @@ void VORDemodGUI::updateDownloadProgress(qint64 bytesRead, qint64 totalBytes)
     }
 }
 
-void VORDemodGUI::downloadFinished(const QString& filename, bool success)
+void VORDemodMCGUI::downloadFinished(const QString& filename, bool success)
 {
     bool closeDialog = true;
     if (success)
@@ -1022,12 +1022,12 @@ void VORDemodGUI::downloadFinished(const QString& filename, bool success)
         }
         else
         {
-            qDebug() << "VORDemodGUI::downloadFinished: Unexpected filename: " << filename;
+            qDebug() << "VORDemodMCGUI::downloadFinished: Unexpected filename: " << filename;
         }
     }
     else
     {
-        qDebug() << "VORDemodGUI::downloadFinished: Failed: " << filename;
+        qDebug() << "VORDemodMCGUI::downloadFinished: Failed: " << filename;
         QMessageBox::warning(this, "Download failed", QString("Failed to download %1").arg(filename));
     }
     if (closeDialog && m_progressDialog)
@@ -1038,7 +1038,7 @@ void VORDemodGUI::downloadFinished(const QString& filename, bool success)
     }
 }
 
-void VORDemodGUI::on_getOurAirportsVORDB_clicked(bool checked)
+void VORDemodMCGUI::on_getOurAirportsVORDB_clicked(bool checked)
 {
     (void) checked;
 
@@ -1060,7 +1060,7 @@ void VORDemodGUI::on_getOurAirportsVORDB_clicked(bool checked)
     }
 }
 
-void VORDemodGUI::on_getOpenAIPVORDB_clicked(bool checked)
+void VORDemodMCGUI::on_getOpenAIPVORDB_clicked(bool checked)
 {
     (void) checked;
 
@@ -1085,7 +1085,7 @@ void VORDemodGUI::on_getOpenAIPVORDB_clicked(bool checked)
     }
 }
 
-void VORDemodGUI::readNavAids()
+void VORDemodMCGUI::readNavAids()
 {
     m_vors = new QHash<int, NavAid *>();
     for (int countryIndex = 0; countryCodes[countryIndex] != nullptr; countryIndex++)
@@ -1095,14 +1095,14 @@ void VORDemodGUI::readNavAids()
     }
 }
 
-void VORDemodGUI::on_magDecAdjust_clicked(bool checked)
+void VORDemodMCGUI::on_magDecAdjust_clicked(bool checked)
 {
     m_settings.m_magDecAdjust = checked;
     m_vorModel.allVORUpdated();
     applySettings();
 }
 
-void VORDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
+void VORDemodMCGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
@@ -1122,7 +1122,7 @@ void VORDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     applySettings();
 }
 
-void VORDemodGUI::onMenuDialogCalled(const QPoint &p)
+void VORDemodMCGUI::onMenuDialogCalled(const QPoint &p)
 {
     if (m_contextMenuType == ContextMenuChannelSettings)
     {
@@ -1169,9 +1169,9 @@ void VORDemodGUI::onMenuDialogCalled(const QPoint &p)
     resetContextMenuType();
 }
 
-VORDemodGUI::VORDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
+VORDemodMCGUI::VORDemodMCGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
     ChannelGUI(parent),
-    ui(new Ui::VORDemodGUI),
+    ui(new Ui::VORDemodMCGUI),
     m_pluginAPI(pluginAPI),
     m_deviceUISet(deviceUISet),
     m_channelMarker(this),
@@ -1198,9 +1198,9 @@ VORDemodGUI::VORDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_muteIcon.addPixmap(QPixmap("://sound_on.png"), QIcon::Normal, QIcon::Off);
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
-    connect(&m_dlm, &HttpDownloadManager::downloadComplete, this, &VORDemodGUI::downloadFinished);
+    connect(&m_dlm, &HttpDownloadManager::downloadComplete, this, &VORDemodMCGUI::downloadFinished);
 
-    m_vorDemod = reinterpret_cast<VORDemod*>(rxChannel);
+    m_vorDemod = reinterpret_cast<VORDemodMC*>(rxChannel);
     m_vorDemod->setMessageQueueToGUI(getInputMessageQueue());
 
     connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
@@ -1295,26 +1295,26 @@ VORDemodGUI::VORDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     applySettings(true);
 }
 
-VORDemodGUI::~VORDemodGUI()
+VORDemodMCGUI::~VORDemodMCGUI()
 {
     delete ui;
 }
 
-void VORDemodGUI::blockApplySettings(bool block)
+void VORDemodMCGUI::blockApplySettings(bool block)
 {
     m_doApplySettings = !block;
 }
 
-void VORDemodGUI::applySettings(bool force)
+void VORDemodMCGUI::applySettings(bool force)
 {
     if (m_doApplySettings)
     {
-        VORDemod::MsgConfigureVORDemod* message = VORDemod::MsgConfigureVORDemod::create( m_settings, force);
+        VORDemodMC::MsgConfigureVORDemod* message = VORDemodMC::MsgConfigureVORDemod::create( m_settings, force);
         m_vorDemod->getInputMessageQueue()->push(message);
     }
 }
 
-void VORDemodGUI::displaySettings()
+void VORDemodMCGUI::displaySettings()
 {
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(0);
@@ -1358,21 +1358,21 @@ void VORDemodGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void VORDemodGUI::leaveEvent(QEvent* event)
+void VORDemodMCGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
     ChannelGUI::leaveEvent(event);
 }
 
-void VORDemodGUI::enterEvent(QEvent* event)
+void VORDemodMCGUI::enterEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);
 }
 
-void VORDemodGUI::audioSelect()
+void VORDemodMCGUI::audioSelect()
 {
-    qDebug("VORDemodGUI::audioSelect");
+    qDebug("VORDemodMCGUI::audioSelect");
     AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName);
     audioSelect.exec();
 
@@ -1383,7 +1383,7 @@ void VORDemodGUI::audioSelect()
     }
 }
 
-void VORDemodGUI::tick()
+void VORDemodMCGUI::tick()
 {
     double magsqAvg, magsqPeak;
     int nbMagsqSamples;
@@ -1440,19 +1440,19 @@ void VORDemodGUI::tick()
     m_tickCount++;
 }
 
-void VORDemodGUI::makeUIConnections()
+void VORDemodMCGUI::makeUIConnections()
 {
-    QObject::connect(ui->audioMute, &QToolButton::toggled, this, &VORDemodGUI::on_audioMute_toggled);
-    QObject::connect(ui->thresh, &QDial::valueChanged, this, &VORDemodGUI::on_thresh_valueChanged);
-    QObject::connect(ui->volume, &QDial::valueChanged, this, &VORDemodGUI::on_volume_valueChanged);
-    QObject::connect(ui->squelch, &QDial::valueChanged, this, &VORDemodGUI::on_squelch_valueChanged);
-    QObject::connect(ui->audioMute, &QToolButton::toggled, this, &VORDemodGUI::on_audioMute_toggled);
-    QObject::connect(ui->getOurAirportsVORDB, &QPushButton::clicked, this, &VORDemodGUI::on_getOurAirportsVORDB_clicked);
-    QObject::connect(ui->getOpenAIPVORDB, &QPushButton::clicked, this, &VORDemodGUI::on_getOpenAIPVORDB_clicked);
-    QObject::connect(ui->magDecAdjust, &QPushButton::clicked, this, &VORDemodGUI::on_magDecAdjust_clicked);
+    QObject::connect(ui->audioMute, &QToolButton::toggled, this, &VORDemodMCGUI::on_audioMute_toggled);
+    QObject::connect(ui->thresh, &QDial::valueChanged, this, &VORDemodMCGUI::on_thresh_valueChanged);
+    QObject::connect(ui->volume, &QDial::valueChanged, this, &VORDemodMCGUI::on_volume_valueChanged);
+    QObject::connect(ui->squelch, &QDial::valueChanged, this, &VORDemodMCGUI::on_squelch_valueChanged);
+    QObject::connect(ui->audioMute, &QToolButton::toggled, this, &VORDemodMCGUI::on_audioMute_toggled);
+    QObject::connect(ui->getOurAirportsVORDB, &QPushButton::clicked, this, &VORDemodMCGUI::on_getOurAirportsVORDB_clicked);
+    QObject::connect(ui->getOpenAIPVORDB, &QPushButton::clicked, this, &VORDemodMCGUI::on_getOpenAIPVORDB_clicked);
+    QObject::connect(ui->magDecAdjust, &QPushButton::clicked, this, &VORDemodMCGUI::on_magDecAdjust_clicked);
 }
 
-void VORDemodGUI::updateAbsoluteCenterFrequency()
+void VORDemodMCGUI::updateAbsoluteCenterFrequency()
 {
     setStatusFrequency(m_deviceCenterFrequency);
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>VORDemodGUI</class>
+ <class>VORDemodMCGUI</class>
  <widget class="RollupContents" name="VORDemodGUI">
   <property name="geometry">
    <rect>
@@ -32,7 +32,7 @@
    <enum>Qt::StrongFocus</enum>
   </property>
   <property name="windowTitle">
-   <string>VOR Demodulator</string>
+   <string>VOR MC Demodulator</string>
   </property>
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">

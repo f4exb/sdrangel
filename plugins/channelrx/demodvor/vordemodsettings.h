@@ -33,7 +33,7 @@ struct VORDemodSubChannelSettings {
     bool m_audioMute;                   //!< Mute the audio from this VOR
 };
 
-struct VORDemodSettings
+struct VORDemodMCSettings
 {
     Real m_squelch;
     Real m_volume;
@@ -63,7 +63,7 @@ struct VORDemodSettings
 
     QHash<int, VORDemodSubChannelSettings *> m_subChannelSettings;
 
-    VORDemodSettings();
+    VORDemodMCSettings();
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
     void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }

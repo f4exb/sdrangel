@@ -42,16 +42,16 @@
 // May as well make it a common audio rate, to possibly avoid decimation
 #define VORDEMOD_CHANNEL_SAMPLE_RATE 48000
 
-class VORDemodSink : public ChannelSampleSink {
+class VORDemodMCSink : public ChannelSampleSink {
 public:
-    VORDemodSink(const VORDemodSettings& settings, int subChannel,
+    VORDemodMCSink(const VORDemodMCSettings& settings, int subChannel,
                 MessageQueue *messageQueueToGUI);
-    ~VORDemodSink();
+    ~VORDemodMCSink();
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
-    void applySettings(const VORDemodSettings& settings, bool force = false);
+    void applySettings(const VORDemodMCSettings& settings, bool force = false);
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_messageQueueToGUI = messageQueue; }
     void applyAudioSampleRate(int sampleRate);
 
@@ -95,7 +95,7 @@ private:
         double m_magsqPeak;
     };
 
-    VORDemodSettings m_settings;
+    VORDemodMCSettings m_settings;
     int m_channelSampleRate;
     int m_audioSampleRate;
 

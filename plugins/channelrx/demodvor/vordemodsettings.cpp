@@ -23,14 +23,14 @@
 #include "settings/serializable.h"
 #include "vordemodsettings.h"
 
-VORDemodSettings::VORDemodSettings() :
+VORDemodMCSettings::VORDemodMCSettings() :
     m_channelMarker(nullptr),
     m_rollupState(nullptr)
 {
     resetToDefaults();
 }
 
-void VORDemodSettings::resetToDefaults()
+void VORDemodMCSettings::resetToDefaults()
 {
     m_squelch = -60.0;
     m_volume = 2.0;
@@ -59,7 +59,7 @@ void VORDemodSettings::resetToDefaults()
     }
 }
 
-QByteArray VORDemodSettings::serialize() const
+QByteArray VORDemodMCSettings::serialize() const
 {
     SimpleSerializer s(1);
     s.writeS32(3, m_streamIndex);
@@ -102,7 +102,7 @@ QByteArray VORDemodSettings::serialize() const
     return s.final();
 }
 
-bool VORDemodSettings::deserialize(const QByteArray& data)
+bool VORDemodMCSettings::deserialize(const QByteArray& data)
 {
     SimpleDeserializer d(data);
 

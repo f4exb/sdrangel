@@ -26,8 +26,8 @@
 #include "vordemodwebapiadapter.h"
 #include "vordemodplugin.h"
 
-const PluginDescriptor VORDemodPlugin::m_pluginDescriptor = {
-    VORDemod::m_channelId,
+const PluginDescriptor VORDemodMCPlugin::m_pluginDescriptor = {
+    VORDemodMC::m_channelId,
     QStringLiteral("VOR Demodulator"),
     QStringLiteral("6.20.2"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
@@ -36,29 +36,29 @@ const PluginDescriptor VORDemodPlugin::m_pluginDescriptor = {
     QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-VORDemodPlugin::VORDemodPlugin(QObject* parent) :
+VORDemodMCPlugin::VORDemodMCPlugin(QObject* parent) :
     QObject(parent),
     m_pluginAPI(0)
 {
 }
 
-const PluginDescriptor& VORDemodPlugin::getPluginDescriptor() const
+const PluginDescriptor& VORDemodMCPlugin::getPluginDescriptor() const
 {
     return m_pluginDescriptor;
 }
 
-void VORDemodPlugin::initPlugin(PluginAPI* pluginAPI)
+void VORDemodMCPlugin::initPlugin(PluginAPI* pluginAPI)
 {
     m_pluginAPI = pluginAPI;
 
-    m_pluginAPI->registerRxChannel(VORDemod::m_channelIdURI, VORDemod::m_channelId, this);
+    m_pluginAPI->registerRxChannel(VORDemodMC::m_channelIdURI, VORDemodMC::m_channelId, this);
 }
 
-void VORDemodPlugin::createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink **bs, ChannelAPI **cs) const
+void VORDemodMCPlugin::createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink **bs, ChannelAPI **cs) const
 {
     if (bs || cs)
     {
-        VORDemod *instance = new VORDemod(deviceAPI);
+        VORDemodMC *instance = new VORDemodMC(deviceAPI);
 
         if (bs) {
             *bs = instance;
@@ -71,7 +71,7 @@ void VORDemodPlugin::createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink **
 }
 
 #ifdef SERVER_MODE
-ChannelGUI* VORDemodPlugin::createRxChannelGUI(
+ChannelGUI* VORDemodMCPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
         BasebandSampleSink *rxChannel) const
 {
@@ -80,13 +80,13 @@ ChannelGUI* VORDemodPlugin::createRxChannelGUI(
     return 0;
 }
 #else
-ChannelGUI* VORDemodPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
+ChannelGUI* VORDemodMCPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
 {
-    return VORDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
+    return VORDemodMCGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
 #endif
 
-ChannelWebAPIAdapter* VORDemodPlugin::createChannelWebAPIAdapter() const
+ChannelWebAPIAdapter* VORDemodMCPlugin::createChannelWebAPIAdapter() const
 {
     return new VORDemodWebAPIAdapter();
 }
