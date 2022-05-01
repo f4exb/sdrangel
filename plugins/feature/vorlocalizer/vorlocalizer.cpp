@@ -154,8 +154,8 @@ bool VORLocalizer::handleMessage(const Message& cmd)
 
         if (*channelType == "VORDemod")
         {
-            SWGSDRangel::SWGVORDemodSCReport *swgVORDemodSCReport = swgChannelReport->getVorDemodScReport();
-            int navId = swgVORDemodSCReport->getNavId();
+            SWGSDRangel::SWGVORDemodReport *swgVORDemodReport = swgChannelReport->getVorDemodReport();
+            int navId = swgVORDemodReport->getNavId();
 
             if (navId < 0) { // disregard message for unallocated channels
                 return true;
@@ -172,38 +172,38 @@ bool VORLocalizer::handleMessage(const Message& cmd)
 
             if (m_vorChannelReports.contains(navId))
             {
-                m_vorChannelReports[navId].m_radial = swgVORDemodSCReport->getRadial();
-                m_vorChannelReports[navId].m_refMag = swgVORDemodSCReport->getRefMag();
-                m_vorChannelReports[navId].m_varMag = swgVORDemodSCReport->getVarMag();
-                m_vorChannelReports[navId].m_validRadial = swgVORDemodSCReport->getValidRadial() != 0;
-                m_vorChannelReports[navId].m_validRefMag = swgVORDemodSCReport->getValidRefMag() != 0;
-                m_vorChannelReports[navId].m_validVarMag = swgVORDemodSCReport->getValidVarMag() != 0;
-                m_vorChannelReports[navId].m_morseIdent = *swgVORDemodSCReport->getMorseIdent();
+                m_vorChannelReports[navId].m_radial = swgVORDemodReport->getRadial();
+                m_vorChannelReports[navId].m_refMag = swgVORDemodReport->getRefMag();
+                m_vorChannelReports[navId].m_varMag = swgVORDemodReport->getVarMag();
+                m_vorChannelReports[navId].m_validRadial = swgVORDemodReport->getValidRadial() != 0;
+                m_vorChannelReports[navId].m_validRefMag = swgVORDemodReport->getValidRefMag() != 0;
+                m_vorChannelReports[navId].m_validVarMag = swgVORDemodReport->getValidVarMag() != 0;
+                m_vorChannelReports[navId].m_morseIdent = *swgVORDemodReport->getMorseIdent();
             }
             else
             {
                 m_vorChannelReports[navId] = VORChannelReport{
-                    swgVORDemodSCReport->getRadial(),
-                    swgVORDemodSCReport->getRefMag(),
-                    swgVORDemodSCReport->getVarMag(),
+                    swgVORDemodReport->getRadial(),
+                    swgVORDemodReport->getRefMag(),
+                    swgVORDemodReport->getVarMag(),
                     AverageUtil<float, double>(),
                     AverageUtil<float, double>(),
                     AverageUtil<float, double>(),
-                    swgVORDemodSCReport->getValidRadial() != 0,
-                    swgVORDemodSCReport->getValidRefMag() != 0,
-                    swgVORDemodSCReport->getValidVarMag() != 0,
-                    *swgVORDemodSCReport->getMorseIdent()
+                    swgVORDemodReport->getValidRadial() != 0,
+                    swgVORDemodReport->getValidRefMag() != 0,
+                    swgVORDemodReport->getValidVarMag() != 0,
+                    *swgVORDemodReport->getMorseIdent()
                 };
             }
 
             if (m_vorChannelReports[navId].m_validRadial) {
-                m_vorChannelReports[navId].m_radialAvg(swgVORDemodSCReport->getRadial());
+                m_vorChannelReports[navId].m_radialAvg(swgVORDemodReport->getRadial());
             }
             if (m_vorChannelReports[navId].m_validRefMag) {
-                m_vorChannelReports[navId].m_refMagAvg(swgVORDemodSCReport->getRefMag());
+                m_vorChannelReports[navId].m_refMagAvg(swgVORDemodReport->getRefMag());
             }
             if (m_vorChannelReports[navId].m_validVarMag) {
-                m_vorChannelReports[navId].m_varMagAvg(swgVORDemodSCReport->getVarMag());
+                m_vorChannelReports[navId].m_varMagAvg(swgVORDemodReport->getVarMag());
             }
 
             if (getMessageQueueToGUI())
@@ -373,7 +373,7 @@ void VORLocalizer::updateChannels()
             {
                 ChannelAPI *channel = deviceSet->getChannelAt(chi);
 
-                if (channel->getURI() == "sdrangel.channel.vordemodsc")
+                if (channel->getURI() == "sdrangel.channel.vordemod")
                 {
                     if (!m_availableChannels.contains(channel))
                     {
@@ -667,7 +667,7 @@ void VORLocalizer::handleChannelAdded(int deviceSetIndex, ChannelAPI *channel)
     DeviceSet *deviceSet = MainCore::instance()->getDeviceSets()[deviceSetIndex];
     DSPDeviceSourceEngine *deviceSourceEngine =  deviceSet->m_deviceSourceEngine;
 
-    if (deviceSourceEngine && (channel->getURI() == "sdrangel.channel.vordemodsc"))
+    if (deviceSourceEngine && (channel->getURI() == "sdrangel.channel.vordemod"))
     {
         DeviceSampleSource *deviceSource = deviceSourceEngine->getSource();
         quint64 deviceCenterFrequency = deviceSource->getCenterFrequency();

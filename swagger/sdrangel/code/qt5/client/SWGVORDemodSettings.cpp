@@ -28,6 +28,10 @@ SWGVORDemodSettings::SWGVORDemodSettings(QString* json) {
 }
 
 SWGVORDemodSettings::SWGVORDemodSettings() {
+    input_frequency_offset = 0L;
+    m_input_frequency_offset_isSet = false;
+    nav_id = 0;
+    m_nav_id_isSet = false;
     squelch = 0.0f;
     m_squelch_isSet = false;
     volume = 0.0f;
@@ -54,8 +58,6 @@ SWGVORDemodSettings::SWGVORDemodSettings() {
     m_reverse_api_channel_index_isSet = false;
     ident_threshold = 0;
     m_ident_threshold_isSet = false;
-    mag_dec_adjust = 0;
-    m_mag_dec_adjust_isSet = false;
     channel_marker = nullptr;
     m_channel_marker_isSet = false;
     rollup_state = nullptr;
@@ -68,6 +70,10 @@ SWGVORDemodSettings::~SWGVORDemodSettings() {
 
 void
 SWGVORDemodSettings::init() {
+    input_frequency_offset = 0L;
+    m_input_frequency_offset_isSet = false;
+    nav_id = 0;
+    m_nav_id_isSet = false;
     squelch = 0.0f;
     m_squelch_isSet = false;
     volume = 0.0f;
@@ -94,8 +100,6 @@ SWGVORDemodSettings::init() {
     m_reverse_api_channel_index_isSet = false;
     ident_threshold = 0;
     m_ident_threshold_isSet = false;
-    mag_dec_adjust = 0;
-    m_mag_dec_adjust_isSet = false;
     channel_marker = new SWGChannelMarker();
     m_channel_marker_isSet = false;
     rollup_state = new SWGRollupState();
@@ -104,6 +108,8 @@ SWGVORDemodSettings::init() {
 
 void
 SWGVORDemodSettings::cleanup() {
+
+
 
 
 
@@ -119,7 +125,6 @@ SWGVORDemodSettings::cleanup() {
     if(reverse_api_address != nullptr) { 
         delete reverse_api_address;
     }
-
 
 
 
@@ -143,6 +148,10 @@ SWGVORDemodSettings::fromJson(QString &json) {
 
 void
 SWGVORDemodSettings::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&input_frequency_offset, pJson["inputFrequencyOffset"], "qint64", "");
+    
+    ::SWGSDRangel::setValue(&nav_id, pJson["navId"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&squelch, pJson["squelch"], "float", "");
     
     ::SWGSDRangel::setValue(&volume, pJson["volume"], "float", "");
@@ -169,8 +178,6 @@ SWGVORDemodSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&ident_threshold, pJson["identThreshold"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&mag_dec_adjust, pJson["magDecAdjust"], "qint32", "");
-    
     ::SWGSDRangel::setValue(&channel_marker, pJson["channelMarker"], "SWGChannelMarker", "SWGChannelMarker");
     
     ::SWGSDRangel::setValue(&rollup_state, pJson["rollupState"], "SWGRollupState", "SWGRollupState");
@@ -191,6 +198,12 @@ SWGVORDemodSettings::asJson ()
 QJsonObject*
 SWGVORDemodSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(m_input_frequency_offset_isSet){
+        obj->insert("inputFrequencyOffset", QJsonValue(input_frequency_offset));
+    }
+    if(m_nav_id_isSet){
+        obj->insert("navId", QJsonValue(nav_id));
+    }
     if(m_squelch_isSet){
         obj->insert("squelch", QJsonValue(squelch));
     }
@@ -230,9 +243,6 @@ SWGVORDemodSettings::asJsonObject() {
     if(m_ident_threshold_isSet){
         obj->insert("identThreshold", QJsonValue(ident_threshold));
     }
-    if(m_mag_dec_adjust_isSet){
-        obj->insert("magDecAdjust", QJsonValue(mag_dec_adjust));
-    }
     if((channel_marker != nullptr) && (channel_marker->isSet())){
         toJsonValue(QString("channelMarker"), channel_marker, obj, QString("SWGChannelMarker"));
     }
@@ -241,6 +251,26 @@ SWGVORDemodSettings::asJsonObject() {
     }
 
     return obj;
+}
+
+qint64
+SWGVORDemodSettings::getInputFrequencyOffset() {
+    return input_frequency_offset;
+}
+void
+SWGVORDemodSettings::setInputFrequencyOffset(qint64 input_frequency_offset) {
+    this->input_frequency_offset = input_frequency_offset;
+    this->m_input_frequency_offset_isSet = true;
+}
+
+qint32
+SWGVORDemodSettings::getNavId() {
+    return nav_id;
+}
+void
+SWGVORDemodSettings::setNavId(qint32 nav_id) {
+    this->nav_id = nav_id;
+    this->m_nav_id_isSet = true;
 }
 
 float
@@ -373,16 +403,6 @@ SWGVORDemodSettings::setIdentThreshold(qint32 ident_threshold) {
     this->m_ident_threshold_isSet = true;
 }
 
-qint32
-SWGVORDemodSettings::getMagDecAdjust() {
-    return mag_dec_adjust;
-}
-void
-SWGVORDemodSettings::setMagDecAdjust(qint32 mag_dec_adjust) {
-    this->mag_dec_adjust = mag_dec_adjust;
-    this->m_mag_dec_adjust_isSet = true;
-}
-
 SWGChannelMarker*
 SWGVORDemodSettings::getChannelMarker() {
     return channel_marker;
@@ -408,6 +428,12 @@ bool
 SWGVORDemodSettings::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(m_input_frequency_offset_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_nav_id_isSet){
+            isObjectUpdated = true; break;
+        }
         if(m_squelch_isSet){
             isObjectUpdated = true; break;
         }
@@ -445,9 +471,6 @@ SWGVORDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_ident_threshold_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_mag_dec_adjust_isSet){
             isObjectUpdated = true; break;
         }
         if(channel_marker && channel_marker->isSet()){

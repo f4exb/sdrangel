@@ -103,8 +103,8 @@ ChannelSettings:
       $ref: "/doc/swagger/include/UDPSink.yaml#/UDPSinkSettings"
     VORDemodMCSettings:
       $ref: "/doc/swagger/include/VORDemodMC.yaml#/VORDemodMCSettings"
-    VORDemodSCSettings:
-      $ref: "/doc/swagger/include/VORDemodSC.yaml#/VORDemodSCSettings"
+    VORDemodSettings:
+      $ref: "/doc/swagger/include/VORDemod.yaml#/VORDemodSettings"
     WFMDemodSettings:
       $ref: "/doc/swagger/include/WFMDemod.yaml#/WFMDemodSettings"
     WFMModSettings:

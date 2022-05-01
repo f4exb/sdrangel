@@ -103,8 +103,8 @@ ChannelSettings:
       $ref: "http://swgserver:8081/api/swagger/include/UDPSink.yaml#/UDPSinkSettings"
     VORDemodMCSettings:
       $ref: "http://swgserver:8081/api/swagger/include/VORDemodMC.yaml#/VORDemodMCSettings"
-    VORDemodSCSettings:
-      $ref: "http://swgserver:8081/api/swagger/include/VORDemodSC.yaml#/VORDemodSCSettings"
+    VORDemodSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/VORDemod.yaml#/VORDemodSettings"
     WFMDemodSettings:
       $ref: "http://swgserver:8081/api/swagger/include/WFMDemod.yaml#/WFMDemodSettings"
     WFMModSettings:

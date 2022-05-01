@@ -34,6 +34,24 @@ SWGVORDemodReport::SWGVORDemodReport() {
     m_squelch_isSet = false;
     audio_sample_rate = 0;
     m_audio_sample_rate_isSet = false;
+    volume = 0.0f;
+    m_volume_isSet = false;
+    nav_id = 0;
+    m_nav_id_isSet = false;
+    radial = 0.0f;
+    m_radial_isSet = false;
+    ref_mag = 0.0f;
+    m_ref_mag_isSet = false;
+    var_mag = 0.0f;
+    m_var_mag_isSet = false;
+    valid_radial = 0;
+    m_valid_radial_isSet = false;
+    valid_ref_mag = 0;
+    m_valid_ref_mag_isSet = false;
+    valid_var_mag = 0;
+    m_valid_var_mag_isSet = false;
+    morse_ident = nullptr;
+    m_morse_ident_isSet = false;
 }
 
 SWGVORDemodReport::~SWGVORDemodReport() {
@@ -48,6 +66,24 @@ SWGVORDemodReport::init() {
     m_squelch_isSet = false;
     audio_sample_rate = 0;
     m_audio_sample_rate_isSet = false;
+    volume = 0.0f;
+    m_volume_isSet = false;
+    nav_id = 0;
+    m_nav_id_isSet = false;
+    radial = 0.0f;
+    m_radial_isSet = false;
+    ref_mag = 0.0f;
+    m_ref_mag_isSet = false;
+    var_mag = 0.0f;
+    m_var_mag_isSet = false;
+    valid_radial = 0;
+    m_valid_radial_isSet = false;
+    valid_ref_mag = 0;
+    m_valid_ref_mag_isSet = false;
+    valid_var_mag = 0;
+    m_valid_var_mag_isSet = false;
+    morse_ident = new QString("");
+    m_morse_ident_isSet = false;
 }
 
 void
@@ -55,6 +91,17 @@ SWGVORDemodReport::cleanup() {
 
 
 
+
+
+
+
+
+
+
+
+    if(morse_ident != nullptr) { 
+        delete morse_ident;
+    }
 }
 
 SWGVORDemodReport*
@@ -73,6 +120,24 @@ SWGVORDemodReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&squelch, pJson["squelch"], "qint32", "");
     
     ::SWGSDRangel::setValue(&audio_sample_rate, pJson["audioSampleRate"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&volume, pJson["volume"], "float", "");
+    
+    ::SWGSDRangel::setValue(&nav_id, pJson["navId"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&radial, pJson["radial"], "float", "");
+    
+    ::SWGSDRangel::setValue(&ref_mag, pJson["refMag"], "float", "");
+    
+    ::SWGSDRangel::setValue(&var_mag, pJson["varMag"], "float", "");
+    
+    ::SWGSDRangel::setValue(&valid_radial, pJson["validRadial"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&valid_ref_mag, pJson["validRefMag"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&valid_var_mag, pJson["validVarMag"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&morse_ident, pJson["morseIdent"], "QString", "QString");
     
 }
 
@@ -98,6 +163,33 @@ SWGVORDemodReport::asJsonObject() {
     }
     if(m_audio_sample_rate_isSet){
         obj->insert("audioSampleRate", QJsonValue(audio_sample_rate));
+    }
+    if(m_volume_isSet){
+        obj->insert("volume", QJsonValue(volume));
+    }
+    if(m_nav_id_isSet){
+        obj->insert("navId", QJsonValue(nav_id));
+    }
+    if(m_radial_isSet){
+        obj->insert("radial", QJsonValue(radial));
+    }
+    if(m_ref_mag_isSet){
+        obj->insert("refMag", QJsonValue(ref_mag));
+    }
+    if(m_var_mag_isSet){
+        obj->insert("varMag", QJsonValue(var_mag));
+    }
+    if(m_valid_radial_isSet){
+        obj->insert("validRadial", QJsonValue(valid_radial));
+    }
+    if(m_valid_ref_mag_isSet){
+        obj->insert("validRefMag", QJsonValue(valid_ref_mag));
+    }
+    if(m_valid_var_mag_isSet){
+        obj->insert("validVarMag", QJsonValue(valid_var_mag));
+    }
+    if(morse_ident != nullptr && *morse_ident != QString("")){
+        toJsonValue(QString("morseIdent"), morse_ident, obj, QString("QString"));
     }
 
     return obj;
@@ -133,6 +225,96 @@ SWGVORDemodReport::setAudioSampleRate(qint32 audio_sample_rate) {
     this->m_audio_sample_rate_isSet = true;
 }
 
+float
+SWGVORDemodReport::getVolume() {
+    return volume;
+}
+void
+SWGVORDemodReport::setVolume(float volume) {
+    this->volume = volume;
+    this->m_volume_isSet = true;
+}
+
+qint32
+SWGVORDemodReport::getNavId() {
+    return nav_id;
+}
+void
+SWGVORDemodReport::setNavId(qint32 nav_id) {
+    this->nav_id = nav_id;
+    this->m_nav_id_isSet = true;
+}
+
+float
+SWGVORDemodReport::getRadial() {
+    return radial;
+}
+void
+SWGVORDemodReport::setRadial(float radial) {
+    this->radial = radial;
+    this->m_radial_isSet = true;
+}
+
+float
+SWGVORDemodReport::getRefMag() {
+    return ref_mag;
+}
+void
+SWGVORDemodReport::setRefMag(float ref_mag) {
+    this->ref_mag = ref_mag;
+    this->m_ref_mag_isSet = true;
+}
+
+float
+SWGVORDemodReport::getVarMag() {
+    return var_mag;
+}
+void
+SWGVORDemodReport::setVarMag(float var_mag) {
+    this->var_mag = var_mag;
+    this->m_var_mag_isSet = true;
+}
+
+qint32
+SWGVORDemodReport::getValidRadial() {
+    return valid_radial;
+}
+void
+SWGVORDemodReport::setValidRadial(qint32 valid_radial) {
+    this->valid_radial = valid_radial;
+    this->m_valid_radial_isSet = true;
+}
+
+qint32
+SWGVORDemodReport::getValidRefMag() {
+    return valid_ref_mag;
+}
+void
+SWGVORDemodReport::setValidRefMag(qint32 valid_ref_mag) {
+    this->valid_ref_mag = valid_ref_mag;
+    this->m_valid_ref_mag_isSet = true;
+}
+
+qint32
+SWGVORDemodReport::getValidVarMag() {
+    return valid_var_mag;
+}
+void
+SWGVORDemodReport::setValidVarMag(qint32 valid_var_mag) {
+    this->valid_var_mag = valid_var_mag;
+    this->m_valid_var_mag_isSet = true;
+}
+
+QString*
+SWGVORDemodReport::getMorseIdent() {
+    return morse_ident;
+}
+void
+SWGVORDemodReport::setMorseIdent(QString* morse_ident) {
+    this->morse_ident = morse_ident;
+    this->m_morse_ident_isSet = true;
+}
+
 
 bool
 SWGVORDemodReport::isSet(){
@@ -145,6 +327,33 @@ SWGVORDemodReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_audio_sample_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_volume_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_nav_id_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_radial_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_ref_mag_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_var_mag_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_valid_radial_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_valid_ref_mag_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_valid_var_mag_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(morse_ident && *morse_ident != QString("")){
             isObjectUpdated = true; break;
         }
     }while(false);

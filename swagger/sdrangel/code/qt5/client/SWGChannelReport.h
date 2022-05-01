@@ -56,7 +56,7 @@
 #include "SWGUDPSinkReport.h"
 #include "SWGUDPSourceReport.h"
 #include "SWGVORDemodMCReport.h"
-#include "SWGVORDemodSCReport.h"
+#include "SWGVORDemodReport.h"
 #include "SWGWFMDemodReport.h"
 #include "SWGWFMModReport.h"
 #include <QString>
@@ -187,8 +187,8 @@ public:
     SWGVORDemodMCReport* getVorDemodMcReport();
     void setVorDemodMcReport(SWGVORDemodMCReport* vor_demod_mc_report);
 
-    SWGVORDemodSCReport* getVorDemodScReport();
-    void setVorDemodScReport(SWGVORDemodSCReport* vor_demod_sc_report);
+    SWGVORDemodReport* getVorDemodReport();
+    void setVorDemodReport(SWGVORDemodReport* vor_demod_report);
 
     SWGWFMDemodReport* getWfmDemodReport();
     void setWfmDemodReport(SWGWFMDemodReport* wfm_demod_report);
@@ -308,8 +308,8 @@ private:
     SWGVORDemodMCReport* vor_demod_mc_report;
     bool m_vor_demod_mc_report_isSet;
 
-    SWGVORDemodSCReport* vor_demod_sc_report;
-    bool m_vor_demod_sc_report_isSet;
+    SWGVORDemodReport* vor_demod_report;
+    bool m_vor_demod_report_isSet;
 
     SWGWFMDemodReport* wfm_demod_report;
     bool m_wfm_demod_report_isSet;

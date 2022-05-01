@@ -44,6 +44,12 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGVORDemodSettings* fromJson(QString &jsonString) override;
 
+    qint64 getInputFrequencyOffset();
+    void setInputFrequencyOffset(qint64 input_frequency_offset);
+
+    qint32 getNavId();
+    void setNavId(qint32 nav_id);
+
     float getSquelch();
     void setSquelch(float squelch);
 
@@ -83,9 +89,6 @@ public:
     qint32 getIdentThreshold();
     void setIdentThreshold(qint32 ident_threshold);
 
-    qint32 getMagDecAdjust();
-    void setMagDecAdjust(qint32 mag_dec_adjust);
-
     SWGChannelMarker* getChannelMarker();
     void setChannelMarker(SWGChannelMarker* channel_marker);
 
@@ -96,6 +99,12 @@ public:
     virtual bool isSet() override;
 
 private:
+    qint64 input_frequency_offset;
+    bool m_input_frequency_offset_isSet;
+
+    qint32 nav_id;
+    bool m_nav_id_isSet;
+
     float squelch;
     bool m_squelch_isSet;
 
@@ -134,9 +143,6 @@ private:
 
     qint32 ident_threshold;
     bool m_ident_threshold_isSet;
-
-    qint32 mag_dec_adjust;
-    bool m_mag_dec_adjust_isSet;
 
     SWGChannelMarker* channel_marker;
     bool m_channel_marker_isSet;

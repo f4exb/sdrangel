@@ -1,5 +1,5 @@
-VORDemodSCSettings:
-  description: VORDemodSC
+VORDemodSettings:
+  description: VORDemod
   properties:
     inputFrequencyOffset:
       type: integer
@@ -44,8 +44,8 @@ VORDemodSCSettings:
     rollupState:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
 
-VORDemodSCReport:
-  description: VORDemodSC
+VORDemodReport:
+  description: VORDemod
   properties:
     channelPowerDB:
       description: power received in channel (dB)

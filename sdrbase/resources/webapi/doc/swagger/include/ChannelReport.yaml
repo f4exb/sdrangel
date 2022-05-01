@@ -79,8 +79,8 @@ ChannelReport:
       $ref: "/doc/swagger/include/UDPSink.yaml#/UDPSinkReport"
     VORDemodMCReport:
       $ref: "/doc/swagger/include/VORDemodMC.yaml#/VORDemodMCReport"
-    VORDemodSCReport:
-      $ref: "/doc/swagger/include/VORDemodSC.yaml#/VORDemodSCReport"
+    VORDemodReport:
+      $ref: "/doc/swagger/include/VORDemod.yaml#/VORDemodReport"
     WFMDemodReport:
       $ref: "/doc/swagger/include/WFMDemod.yaml#/WFMDemodReport"
     WFMModReport:
