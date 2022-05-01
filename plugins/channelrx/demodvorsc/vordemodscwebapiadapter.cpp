@@ -31,8 +31,8 @@ int VORDemodSCWebAPIAdapter::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setVorDemodSettings(new SWGSDRangel::SWGVORDemodSettings());
-    response.getVorDemodSettings()->init();
+    response.setVorDemodScSettings(new SWGSDRangel::SWGVORDemodSCSettings());
+    response.getVorDemodScSettings()->init();
     VORDemodSC::webapiFormatChannelSettings(response, m_settings);
 
     return 200;

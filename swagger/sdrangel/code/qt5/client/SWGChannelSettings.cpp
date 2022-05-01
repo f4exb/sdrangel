@@ -120,8 +120,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_udp_source_settings_isSet = false;
     udp_sink_settings = nullptr;
     m_udp_sink_settings_isSet = false;
-    vor_demod_settings = nullptr;
-    m_vor_demod_settings_isSet = false;
+    vor_demod_mc_settings = nullptr;
+    m_vor_demod_mc_settings_isSet = false;
     vor_demod_sc_settings = nullptr;
     m_vor_demod_sc_settings_isSet = false;
     wfm_demod_settings = nullptr;
@@ -228,8 +228,8 @@ SWGChannelSettings::init() {
     m_udp_source_settings_isSet = false;
     udp_sink_settings = new SWGUDPSinkSettings();
     m_udp_sink_settings_isSet = false;
-    vor_demod_settings = new SWGVORDemodSettings();
-    m_vor_demod_settings_isSet = false;
+    vor_demod_mc_settings = new SWGVORDemodMCSettings();
+    m_vor_demod_mc_settings_isSet = false;
     vor_demod_sc_settings = new SWGVORDemodSCSettings();
     m_vor_demod_sc_settings_isSet = false;
     wfm_demod_settings = new SWGWFMDemodSettings();
@@ -372,8 +372,8 @@ SWGChannelSettings::cleanup() {
     if(udp_sink_settings != nullptr) { 
         delete udp_sink_settings;
     }
-    if(vor_demod_settings != nullptr) { 
-        delete vor_demod_settings;
+    if(vor_demod_mc_settings != nullptr) { 
+        delete vor_demod_mc_settings;
     }
     if(vor_demod_sc_settings != nullptr) { 
         delete vor_demod_sc_settings;
@@ -489,7 +489,7 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&udp_sink_settings, pJson["UDPSinkSettings"], "SWGUDPSinkSettings", "SWGUDPSinkSettings");
     
-    ::SWGSDRangel::setValue(&vor_demod_settings, pJson["VORDemodSettings"], "SWGVORDemodSettings", "SWGVORDemodSettings");
+    ::SWGSDRangel::setValue(&vor_demod_mc_settings, pJson["VORDemodMCSettings"], "SWGVORDemodMCSettings", "SWGVORDemodMCSettings");
     
     ::SWGSDRangel::setValue(&vor_demod_sc_settings, pJson["VORDemodSCSettings"], "SWGVORDemodSCSettings", "SWGVORDemodSCSettings");
     
@@ -651,8 +651,8 @@ SWGChannelSettings::asJsonObject() {
     if((udp_sink_settings != nullptr) && (udp_sink_settings->isSet())){
         toJsonValue(QString("UDPSinkSettings"), udp_sink_settings, obj, QString("SWGUDPSinkSettings"));
     }
-    if((vor_demod_settings != nullptr) && (vor_demod_settings->isSet())){
-        toJsonValue(QString("VORDemodSettings"), vor_demod_settings, obj, QString("SWGVORDemodSettings"));
+    if((vor_demod_mc_settings != nullptr) && (vor_demod_mc_settings->isSet())){
+        toJsonValue(QString("VORDemodMCSettings"), vor_demod_mc_settings, obj, QString("SWGVORDemodMCSettings"));
     }
     if((vor_demod_sc_settings != nullptr) && (vor_demod_sc_settings->isSet())){
         toJsonValue(QString("VORDemodSCSettings"), vor_demod_sc_settings, obj, QString("SWGVORDemodSCSettings"));
@@ -1127,14 +1127,14 @@ SWGChannelSettings::setUdpSinkSettings(SWGUDPSinkSettings* udp_sink_settings) {
     this->m_udp_sink_settings_isSet = true;
 }
 
-SWGVORDemodSettings*
-SWGChannelSettings::getVorDemodSettings() {
-    return vor_demod_settings;
+SWGVORDemodMCSettings*
+SWGChannelSettings::getVorDemodMcSettings() {
+    return vor_demod_mc_settings;
 }
 void
-SWGChannelSettings::setVorDemodSettings(SWGVORDemodSettings* vor_demod_settings) {
-    this->vor_demod_settings = vor_demod_settings;
-    this->m_vor_demod_settings_isSet = true;
+SWGChannelSettings::setVorDemodMcSettings(SWGVORDemodMCSettings* vor_demod_mc_settings) {
+    this->vor_demod_mc_settings = vor_demod_mc_settings;
+    this->m_vor_demod_mc_settings_isSet = true;
 }
 
 SWGVORDemodSCSettings*
@@ -1310,7 +1310,7 @@ SWGChannelSettings::isSet(){
         if(udp_sink_settings && udp_sink_settings->isSet()){
             isObjectUpdated = true; break;
         }
-        if(vor_demod_settings && vor_demod_settings->isSet()){
+        if(vor_demod_mc_settings && vor_demod_mc_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(vor_demod_sc_settings && vor_demod_sc_settings->isSet()){

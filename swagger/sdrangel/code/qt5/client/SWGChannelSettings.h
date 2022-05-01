@@ -64,8 +64,8 @@
 #include "SWGSigMFFileSinkSettings.h"
 #include "SWGUDPSinkSettings.h"
 #include "SWGUDPSourceSettings.h"
+#include "SWGVORDemodMCSettings.h"
 #include "SWGVORDemodSCSettings.h"
-#include "SWGVORDemodSettings.h"
 #include "SWGWFMDemodSettings.h"
 #include "SWGWFMModSettings.h"
 #include <QString>
@@ -226,8 +226,8 @@ public:
     SWGUDPSinkSettings* getUdpSinkSettings();
     void setUdpSinkSettings(SWGUDPSinkSettings* udp_sink_settings);
 
-    SWGVORDemodSettings* getVorDemodSettings();
-    void setVorDemodSettings(SWGVORDemodSettings* vor_demod_settings);
+    SWGVORDemodMCSettings* getVorDemodMcSettings();
+    void setVorDemodMcSettings(SWGVORDemodMCSettings* vor_demod_mc_settings);
 
     SWGVORDemodSCSettings* getVorDemodScSettings();
     void setVorDemodScSettings(SWGVORDemodSCSettings* vor_demod_sc_settings);
@@ -380,8 +380,8 @@ private:
     SWGUDPSinkSettings* udp_sink_settings;
     bool m_udp_sink_settings_isSet;
 
-    SWGVORDemodSettings* vor_demod_settings;
-    bool m_vor_demod_settings_isSet;
+    SWGVORDemodMCSettings* vor_demod_mc_settings;
+    bool m_vor_demod_mc_settings_isSet;
 
     SWGVORDemodSCSettings* vor_demod_sc_settings;
     bool m_vor_demod_sc_settings_isSet;

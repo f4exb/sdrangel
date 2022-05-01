@@ -1,5 +1,5 @@
-VORDemodSettings:
-  description: VORDemod
+VORDemodMCSettings:
+  description: VORDemodMC
   properties:
     squelch:
       description: power squelch threshold in decibels
@@ -41,8 +41,8 @@ VORDemodSettings:
     rollupState:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
 
-VORDemodReport:
-  description: VORDemod
+VORDemodMCReport:
+  description: VORDemodMC
   properties:
     channelPowerDB:
       description: power received in channel (dB)

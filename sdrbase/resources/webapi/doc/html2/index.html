@@ -3377,8 +3377,8 @@ margin-bottom: 20px;
     "UDPSinkReport" : {
       "$ref" : "#/definitions/UDPSinkReport"
     },
-    "VORDemodReport" : {
-      "$ref" : "#/definitions/VORDemodReport"
+    "VORDemodMCReport" : {
+      "$ref" : "#/definitions/VORDemodMCReport"
     },
     "VORDemodSCReport" : {
       "$ref" : "#/definitions/VORDemodSCReport"
@@ -3538,8 +3538,8 @@ margin-bottom: 20px;
     "UDPSinkSettings" : {
       "$ref" : "#/definitions/UDPSinkSettings"
     },
-    "VORDemodSettings" : {
-      "$ref" : "#/definitions/VORDemodSettings"
+    "VORDemodMCSettings" : {
+      "$ref" : "#/definitions/VORDemodMCSettings"
     },
     "VORDemodSCSettings" : {
       "$ref" : "#/definitions/VORDemodSCSettings"
@@ -13616,7 +13616,7 @@ margin-bottom: 20px;
   },
   "description" : "USRP"
 };
-            defs.VORDemodReport = {
+            defs.VORDemodMCReport = {
   "properties" : {
     "channelPowerDB" : {
       "type" : "number",
@@ -13631,7 +13631,67 @@ margin-bottom: 20px;
       "type" : "integer"
     }
   },
-  "description" : "VORDemod"
+  "description" : "VORDemodMC"
+};
+            defs.VORDemodMCSettings = {
+  "properties" : {
+    "squelch" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power squelch threshold in decibels"
+    },
+    "volume" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "audioMute" : {
+      "type" : "integer"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "audioDeviceName" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    },
+    "identThreshold" : {
+      "type" : "integer",
+      "description" : "Morse code ident threshold (linear SNR)"
+    },
+    "magDecAdjust" : {
+      "type" : "integer",
+      "description" : "Adjust radial lines on map for magnetic declination of VOR"
+    },
+    "channelMarker" : {
+      "$ref" : "#/definitions/ChannelMarker"
+    },
+    "rollupState" : {
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "VORDemodMC"
 };
             defs.VORDemodSCReport = {
   "properties" : {
@@ -13752,66 +13812,6 @@ margin-bottom: 20px;
     }
   },
   "description" : "VORDemodSC"
-};
-            defs.VORDemodSettings = {
-  "properties" : {
-    "squelch" : {
-      "type" : "number",
-      "format" : "float",
-      "description" : "power squelch threshold in decibels"
-    },
-    "volume" : {
-      "type" : "number",
-      "format" : "float"
-    },
-    "audioMute" : {
-      "type" : "integer"
-    },
-    "rgbColor" : {
-      "type" : "integer"
-    },
-    "title" : {
-      "type" : "string"
-    },
-    "audioDeviceName" : {
-      "type" : "string"
-    },
-    "streamIndex" : {
-      "type" : "integer",
-      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
-    },
-    "useReverseAPI" : {
-      "type" : "integer",
-      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
-    },
-    "reverseAPIAddress" : {
-      "type" : "string"
-    },
-    "reverseAPIPort" : {
-      "type" : "integer"
-    },
-    "reverseAPIDeviceIndex" : {
-      "type" : "integer"
-    },
-    "reverseAPIChannelIndex" : {
-      "type" : "integer"
-    },
-    "identThreshold" : {
-      "type" : "integer",
-      "description" : "Morse code ident threshold (linear SNR)"
-    },
-    "magDecAdjust" : {
-      "type" : "integer",
-      "description" : "Adjust radial lines on map for magnetic declination of VOR"
-    },
-    "channelMarker" : {
-      "$ref" : "#/definitions/ChannelMarker"
-    },
-    "rollupState" : {
-      "$ref" : "#/definitions/RollupState"
-    }
-  },
-  "description" : "VORDemod"
 };
             defs.VORLocalizerActions = {
   "properties" : {
@@ -52552,7 +52552,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2022-03-05T04:59:37.901+01:00
+              Generated 2022-05-01T10:49:23.866+02:00
             </div>
           </div>
       </div>

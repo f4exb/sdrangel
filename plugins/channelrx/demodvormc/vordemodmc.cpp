@@ -43,7 +43,7 @@
 
 MESSAGE_CLASS_DEFINITION(VORDemodMC::MsgConfigureVORDemod, Message)
 
-const char * const VORDemodMC::m_channelIdURI = "sdrangel.channel.vordemod";
+const char * const VORDemodMC::m_channelIdURI = "sdrangel.channel.vordemodmc";
 const char * const VORDemodMC::m_channelId = "VORDemodMC";
 
 VORDemodMC::VORDemodMC(DeviceAPI *deviceAPI) :
@@ -277,8 +277,8 @@ int VORDemodMC::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setVorDemodSettings(new SWGSDRangel::SWGVORDemodSettings());
-    response.getVorDemodSettings()->init();
+    response.setVorDemodMcSettings(new SWGSDRangel::SWGVORDemodMCSettings());
+    response.getVorDemodMcSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
     return 200;
 }
@@ -314,53 +314,53 @@ void VORDemodMC::webapiUpdateChannelSettings(
         SWGSDRangel::SWGChannelSettings& response)
 {
     if (channelSettingsKeys.contains("audioMute")) {
-        settings.m_audioMute = response.getVorDemodSettings()->getAudioMute() != 0;
+        settings.m_audioMute = response.getVorDemodMcSettings()->getAudioMute() != 0;
     }
     if (channelSettingsKeys.contains("rgbColor")) {
-        settings.m_rgbColor = response.getVorDemodSettings()->getRgbColor();
+        settings.m_rgbColor = response.getVorDemodMcSettings()->getRgbColor();
     }
     if (channelSettingsKeys.contains("squelch")) {
-        settings.m_squelch = response.getVorDemodSettings()->getSquelch();
+        settings.m_squelch = response.getVorDemodMcSettings()->getSquelch();
     }
     if (channelSettingsKeys.contains("title")) {
-        settings.m_title = *response.getVorDemodSettings()->getTitle();
+        settings.m_title = *response.getVorDemodMcSettings()->getTitle();
     }
     if (channelSettingsKeys.contains("volume")) {
-        settings.m_volume = response.getVorDemodSettings()->getVolume();
+        settings.m_volume = response.getVorDemodMcSettings()->getVolume();
     }
     if (channelSettingsKeys.contains("audioDeviceName")) {
-        settings.m_audioDeviceName = *response.getVorDemodSettings()->getAudioDeviceName();
+        settings.m_audioDeviceName = *response.getVorDemodMcSettings()->getAudioDeviceName();
     }
 
     if (channelSettingsKeys.contains("streamIndex")) {
-        settings.m_streamIndex = response.getVorDemodSettings()->getStreamIndex();
+        settings.m_streamIndex = response.getVorDemodMcSettings()->getStreamIndex();
     }
     if (channelSettingsKeys.contains("useReverseAPI")) {
-        settings.m_useReverseAPI = response.getVorDemodSettings()->getUseReverseApi() != 0;
+        settings.m_useReverseAPI = response.getVorDemodMcSettings()->getUseReverseApi() != 0;
     }
     if (channelSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getVorDemodSettings()->getReverseApiAddress();
+        settings.m_reverseAPIAddress = *response.getVorDemodMcSettings()->getReverseApiAddress();
     }
     if (channelSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getVorDemodSettings()->getReverseApiPort();
+        settings.m_reverseAPIPort = response.getVorDemodMcSettings()->getReverseApiPort();
     }
     if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.getVorDemodSettings()->getReverseApiDeviceIndex();
+        settings.m_reverseAPIDeviceIndex = response.getVorDemodMcSettings()->getReverseApiDeviceIndex();
     }
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
-        settings.m_reverseAPIChannelIndex = response.getVorDemodSettings()->getReverseApiChannelIndex();
+        settings.m_reverseAPIChannelIndex = response.getVorDemodMcSettings()->getReverseApiChannelIndex();
     }
     if (channelSettingsKeys.contains("identThreshold")) {
-        settings.m_identThreshold = response.getVorDemodSettings()->getIdentThreshold();
+        settings.m_identThreshold = response.getVorDemodMcSettings()->getIdentThreshold();
     }
     if (channelSettingsKeys.contains("magDecAdjust")) {
-        settings.m_magDecAdjust = response.getVorDemodSettings()->getMagDecAdjust() != 0;
+        settings.m_magDecAdjust = response.getVorDemodMcSettings()->getMagDecAdjust() != 0;
     }
     if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
-        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getVorDemodSettings()->getChannelMarker());
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getVorDemodMcSettings()->getChannelMarker());
     }
     if (settings.m_rollupState && channelSettingsKeys.contains("rollupState")) {
-        settings.m_rollupState->updateFrom(channelSettingsKeys, response.getVorDemodSettings()->getRollupState());
+        settings.m_rollupState->updateFrom(channelSettingsKeys, response.getVorDemodMcSettings()->getRollupState());
     }
 }
 
@@ -369,72 +369,72 @@ int VORDemodMC::webapiReportGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setVorDemodReport(new SWGSDRangel::SWGVORDemodReport());
-    response.getVorDemodReport()->init();
+    response.setVorDemodMcReport(new SWGSDRangel::SWGVORDemodMCReport());
+    response.getVorDemodMcReport()->init();
     webapiFormatChannelReport(response);
     return 200;
 }
 
 void VORDemodMC::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const VORDemodMCSettings& settings)
 {
-    response.getVorDemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
-    response.getVorDemodSettings()->setRgbColor(settings.m_rgbColor);
-    response.getVorDemodSettings()->setSquelch(settings.m_squelch);
-    response.getVorDemodSettings()->setVolume(settings.m_volume);
+    response.getVorDemodMcSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
+    response.getVorDemodMcSettings()->setRgbColor(settings.m_rgbColor);
+    response.getVorDemodMcSettings()->setSquelch(settings.m_squelch);
+    response.getVorDemodMcSettings()->setVolume(settings.m_volume);
 
-    if (response.getVorDemodSettings()->getTitle()) {
-        *response.getVorDemodSettings()->getTitle() = settings.m_title;
+    if (response.getVorDemodMcSettings()->getTitle()) {
+        *response.getVorDemodMcSettings()->getTitle() = settings.m_title;
     } else {
-        response.getVorDemodSettings()->setTitle(new QString(settings.m_title));
+        response.getVorDemodMcSettings()->setTitle(new QString(settings.m_title));
     }
 
-    if (response.getVorDemodSettings()->getAudioDeviceName()) {
-        *response.getVorDemodSettings()->getAudioDeviceName() = settings.m_audioDeviceName;
+    if (response.getVorDemodMcSettings()->getAudioDeviceName()) {
+        *response.getVorDemodMcSettings()->getAudioDeviceName() = settings.m_audioDeviceName;
     } else {
-        response.getVorDemodSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        response.getVorDemodMcSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
     }
 
-    response.getVorDemodSettings()->setStreamIndex(settings.m_streamIndex);
-    response.getVorDemodSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+    response.getVorDemodMcSettings()->setStreamIndex(settings.m_streamIndex);
+    response.getVorDemodMcSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
-    if (response.getVorDemodSettings()->getReverseApiAddress()) {
-        *response.getVorDemodSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    if (response.getVorDemodMcSettings()->getReverseApiAddress()) {
+        *response.getVorDemodMcSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
     } else {
-        response.getVorDemodSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+        response.getVorDemodMcSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
     }
 
-    response.getVorDemodSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.getVorDemodSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
-    response.getVorDemodSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+    response.getVorDemodMcSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getVorDemodMcSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getVorDemodMcSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
 
-    response.getVorDemodSettings()->setIdentThreshold(settings.m_identThreshold);
-    response.getVorDemodSettings()->setMagDecAdjust(settings.m_magDecAdjust ? 1 : 0);
+    response.getVorDemodMcSettings()->setIdentThreshold(settings.m_identThreshold);
+    response.getVorDemodMcSettings()->setMagDecAdjust(settings.m_magDecAdjust ? 1 : 0);
 
     if (settings.m_channelMarker)
     {
-        if (response.getVorDemodSettings()->getChannelMarker())
+        if (response.getVorDemodMcSettings()->getChannelMarker())
         {
-            settings.m_channelMarker->formatTo(response.getVorDemodSettings()->getChannelMarker());
+            settings.m_channelMarker->formatTo(response.getVorDemodMcSettings()->getChannelMarker());
         }
         else
         {
             SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
             settings.m_channelMarker->formatTo(swgChannelMarker);
-            response.getVorDemodSettings()->setChannelMarker(swgChannelMarker);
+            response.getVorDemodMcSettings()->setChannelMarker(swgChannelMarker);
         }
     }
 
     if (settings.m_rollupState)
     {
-        if (response.getVorDemodSettings()->getRollupState())
+        if (response.getVorDemodMcSettings()->getRollupState())
         {
-            settings.m_rollupState->formatTo(response.getVorDemodSettings()->getRollupState());
+            settings.m_rollupState->formatTo(response.getVorDemodMcSettings()->getRollupState());
         }
         else
         {
             SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
             settings.m_rollupState->formatTo(swgRollupState);
-            response.getVorDemodSettings()->setRollupState(swgRollupState);
+            response.getVorDemodMcSettings()->setRollupState(swgRollupState);
         }
     }
 }
@@ -445,9 +445,9 @@ void VORDemodMC::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respon
     int nbMagsqSamples;
     getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
 
-    response.getVorDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
-    response.getVorDemodReport()->setSquelch(m_basebandSink->getSquelchOpen() ? 1 : 0);
-    response.getVorDemodReport()->setAudioSampleRate(m_basebandSink->getAudioSampleRate());
+    response.getVorDemodMcReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
+    response.getVorDemodMcReport()->setSquelch(m_basebandSink->getSquelchOpen() ? 1 : 0);
+    response.getVorDemodMcReport()->setAudioSampleRate(m_basebandSink->getAudioSampleRate());
 }
 
 void VORDemodMC::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const VORDemodMCSettings& settings, bool force)
@@ -511,8 +511,8 @@ void VORDemodMC::webapiFormatChannelSettings(
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
     swgChannelSettings->setChannelType(new QString("VORDemodMC"));
-    swgChannelSettings->setVorDemodSettings(new SWGSDRangel::SWGVORDemodSettings());
-    SWGSDRangel::SWGVORDemodSettings *swgVORDemodSettings = swgChannelSettings->getVorDemodSettings();
+    swgChannelSettings->setVorDemodMcSettings(new SWGSDRangel::SWGVORDemodMCSettings());
+    SWGSDRangel::SWGVORDemodMCSettings *swgVORDemodSettings = swgChannelSettings->getVorDemodMcSettings();
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
