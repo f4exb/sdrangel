@@ -4357,11 +4357,11 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->setUdpSinkSettings(new SWGSDRangel::SWGUDPSinkSettings());
             channelSettings->getUdpSinkSettings()->fromJsonObject(settingsJsonObject);
         }
-        else if (channelSettingsKey == "VORDemodMCSettings")
-        {
-            channelSettings->setVorDemodMcSettings(new SWGSDRangel::SWGVORDemodMCSettings());
-            channelSettings->getVorDemodMcSettings()->fromJsonObject(settingsJsonObject);
-        }
+        // else if (channelSettingsKey == "VORDemodMCSettings")
+        // {
+        //     channelSettings->setVorDemodMcSettings(new SWGSDRangel::SWGVORDemodMCSettings());
+        //     channelSettings->getVorDemodMcSettings()->fromJsonObject(settingsJsonObject);
+        // }
         else if (channelSettingsKey == "VORDemodSettings")
         {
             channelSettings->setVorDemodSettings(new SWGSDRangel::SWGVORDemodSettings());
@@ -5082,7 +5082,7 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setSsbModSettings(nullptr);
     channelSettings.setUdpSourceSettings(nullptr);
     channelSettings.setUdpSinkSettings(nullptr);
-    channelSettings.setVorDemodMcSettings(nullptr);
+    // channelSettings.setVorDemodMcSettings(nullptr);
     channelSettings.setVorDemodSettings(nullptr);
     channelSettings.setWfmDemodSettings(nullptr);
     channelSettings.setWfmModSettings(nullptr);
@@ -5114,7 +5114,7 @@ void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& chan
     channelReport.setSsbModReport(nullptr);
     channelReport.setUdpSourceReport(nullptr);
     channelReport.setUdpSinkReport(nullptr);
-    channelReport.setVorDemodMcReport(nullptr);
+    // channelReport.setVorDemodMcReport(nullptr);
     channelReport.setVorDemodReport(nullptr);
     channelReport.setWfmDemodReport(nullptr);
     channelReport.setWfmModReport(nullptr);

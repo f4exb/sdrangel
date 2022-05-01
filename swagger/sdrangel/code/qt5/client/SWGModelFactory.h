@@ -302,8 +302,6 @@
 #include "SWGUSRPInputSettings.h"
 #include "SWGUSRPOutputReport.h"
 #include "SWGUSRPOutputSettings.h"
-#include "SWGVORDemodMCReport.h"
-#include "SWGVORDemodMCSettings.h"
 #include "SWGVORDemodReport.h"
 #include "SWGVORDemodSettings.h"
 #include "SWGVORLocalizerActions.h"
@@ -1760,16 +1758,6 @@ namespace SWGSDRangel {
     }
     if(QString("SWGUSRPOutputSettings").compare(type) == 0) {
       SWGUSRPOutputSettings *obj = new SWGUSRPOutputSettings();
-      obj->init();
-      return obj;
-    }
-    if(QString("SWGVORDemodMCReport").compare(type) == 0) {
-      SWGVORDemodMCReport *obj = new SWGVORDemodMCReport();
-      obj->init();
-      return obj;
-    }
-    if(QString("SWGVORDemodMCSettings").compare(type) == 0) {
-      SWGVORDemodMCSettings *obj = new SWGVORDemodMCSettings();
       obj->init();
       return obj;
     }

@@ -55,7 +55,6 @@
 #include "SWGSigMFFileSinkReport.h"
 #include "SWGUDPSinkReport.h"
 #include "SWGUDPSourceReport.h"
-#include "SWGVORDemodMCReport.h"
 #include "SWGVORDemodReport.h"
 #include "SWGWFMDemodReport.h"
 #include "SWGWFMModReport.h"
@@ -184,9 +183,6 @@ public:
     SWGUDPSinkReport* getUdpSinkReport();
     void setUdpSinkReport(SWGUDPSinkReport* udp_sink_report);
 
-    SWGVORDemodMCReport* getVorDemodMcReport();
-    void setVorDemodMcReport(SWGVORDemodMCReport* vor_demod_mc_report);
-
     SWGVORDemodReport* getVorDemodReport();
     void setVorDemodReport(SWGVORDemodReport* vor_demod_report);
 
@@ -304,9 +300,6 @@ private:
 
     SWGUDPSinkReport* udp_sink_report;
     bool m_udp_sink_report_isSet;
-
-    SWGVORDemodMCReport* vor_demod_mc_report;
-    bool m_vor_demod_mc_report_isSet;
 
     SWGVORDemodReport* vor_demod_report;
     bool m_vor_demod_report_isSet;
