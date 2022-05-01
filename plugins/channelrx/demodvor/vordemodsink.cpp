@@ -27,9 +27,9 @@
 #include "util/morse.h"
 #include "util/units.h"
 
-#include "vordemodscreport.h"
-#include "vordemodscsettings.h"
-#include "vordemodscsink.h"
+#include "vordemodreport.h"
+#include "vordemodsettings.h"
+#include "vordemodsink.h"
 
 VORDemodSCSink::VORDemodSCSink() :
         m_channelFrequencyOffset(0),

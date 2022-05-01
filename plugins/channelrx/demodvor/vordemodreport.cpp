@@ -1,5 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2019 Edouard Griffiths, F4EXB.                                  //
 // Copyright (C) 2020 Jon Beniston, M7RCE                                        //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -16,37 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "SWGChannelSettings.h"
-#include "vordemodsc.h"
-#include "vordemodscwebapiadapter.h"
+#include "vordemodreport.h"
 
-VORDemodSCWebAPIAdapter::VORDemodSCWebAPIAdapter()
-{}
-
-VORDemodSCWebAPIAdapter::~VORDemodSCWebAPIAdapter()
-{}
-
-int VORDemodSCWebAPIAdapter::webapiSettingsGet(
-        SWGSDRangel::SWGChannelSettings& response,
-        QString& errorMessage)
-{
-    (void) errorMessage;
-    response.setVorDemodSettings(new SWGSDRangel::SWGVORDemodSettings());
-    response.getVorDemodSettings()->init();
-    VORDemod::webapiFormatChannelSettings(response, m_settings);
-
-    return 200;
-}
-
-int VORDemodSCWebAPIAdapter::webapiSettingsPutPatch(
-        bool force,
-        const QStringList& channelSettingsKeys,
-        SWGSDRangel::SWGChannelSettings& response,
-        QString& errorMessage)
-{
-    (void) force;
-    (void) errorMessage;
-    VORDemod::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
-
-    return 200;
-}
+MESSAGE_CLASS_DEFINITION(VORDemodReport::MsgReportRadial, Message)
+MESSAGE_CLASS_DEFINITION(VORDemodReport::MsgReportIdent, Message)

@@ -37,10 +37,10 @@
 #include "channel/channelwebapiutils.h"
 #include "maincore.h"
 
-#include "ui_vordemodscgui.h"
-#include "vordemodsc.h"
-#include "vordemodscreport.h"
-#include "vordemodscgui.h"
+#include "ui_vordemodgui.h"
+#include "vordemod.h"
+#include "vordemodreport.h"
+#include "vordemodgui.h"
 
 VORDemodGUI* VORDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {

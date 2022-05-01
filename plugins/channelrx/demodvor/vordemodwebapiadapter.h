@@ -1,4 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2019 Edouard Griffiths, F4EXB.                                  //
 // Copyright (C) 2020 Jon Beniston, M7RCE                                        //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -15,7 +16,35 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "vordemodscreport.h"
+#ifndef INCLUDE_VORDEMODSC_WEBAPIADAPTER_H
+#define INCLUDE_VORDEMODSC_WEBAPIADAPTER_H
 
-MESSAGE_CLASS_DEFINITION(VORDemodReport::MsgReportRadial, Message)
-MESSAGE_CLASS_DEFINITION(VORDemodReport::MsgReportIdent, Message)
+#include "channel/channelwebapiadapter.h"
+#include "vordemodsettings.h"
+
+/**
+ * Standalone API adapter only for the settings
+ */
+class VORDemodSCWebAPIAdapter : public ChannelWebAPIAdapter {
+public:
+    VORDemodSCWebAPIAdapter();
+    virtual ~VORDemodSCWebAPIAdapter();
+
+    virtual QByteArray serialize() const { return m_settings.serialize(); }
+    virtual bool deserialize(const QByteArray& data) { return m_settings.deserialize(data); }
+
+    virtual int webapiSettingsGet(
+            SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+            bool force,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
+
+private:
+    VORDemodSettings m_settings;
+};
+
+#endif // INCLUDE_VORDEMODSC_WEBAPIADAPTER_H

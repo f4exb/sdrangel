@@ -39,8 +39,8 @@
 #include "util/db.h"
 #include "maincore.h"
 
-#include "vordemodscreport.h"
-#include "vordemodsc.h"
+#include "vordemodreport.h"
+#include "vordemod.h"
 
 MESSAGE_CLASS_DEFINITION(VORDemod::MsgConfigureVORDemod, Message)
 

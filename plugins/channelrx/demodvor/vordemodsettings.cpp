@@ -21,7 +21,7 @@
 #include "dsp/dspengine.h"
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
-#include "vordemodscsettings.h"
+#include "vordemodsettings.h"
 
 VORDemodSettings::VORDemodSettings() :
     m_channelMarker(nullptr),

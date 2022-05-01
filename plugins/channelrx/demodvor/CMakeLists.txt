@@ -1,23 +1,23 @@
-project(vorsc)
+project(vor)
 
-set(vorsc_SOURCES
-    vordemodsc.cpp
-    vordemodscsettings.cpp
-    vordemodscbaseband.cpp
-    vordemodscsink.cpp
-    vordemodscplugin.cpp
-    vordemodscwebapiadapter.cpp
-    vordemodscreport.cpp
+set(vor_SOURCES
+    vordemod.cpp
+    vordemodsettings.cpp
+    vordemodbaseband.cpp
+    vordemodsink.cpp
+    vordemodplugin.cpp
+    vordemodwebapiadapter.cpp
+    vordemodreport.cpp
 )
 
-set(vorsc_HEADERS
-    vordemodsc.h
-    vordemodscsettings.h
-    vordemodscbaseband.h
-    vordemodscsink.h
-    vordemodscplugin.h
-    vordemodscwebapiadapter.h
-    vordemodscreport.h
+set(vor_HEADERS
+    vordemod.h
+    vordemodsettings.h
+    vordemodbaseband.h
+    vordemodsink.h
+    vordemodplugin.h
+    vordemodwebapiadapter.h
+    vordemodreport.h
 )
 
 include_directories(
@@ -25,29 +25,29 @@ include_directories(
 )
 
 if(NOT SERVER_MODE)
-    set(vorsc_SOURCES
-        ${vorsc_SOURCES}
-        vordemodscgui.cpp
-        vordemodscgui.ui
+    set(vor_SOURCES
+        ${vor_SOURCES}
+        vordemodgui.cpp
+        vordemodgui.ui
     )
-    set(vorsc_HEADERS
-        ${vorsc_HEADERS}
-        vordemodscgui.h
+    set(vor_HEADERS
+        ${vor_HEADERS}
+        vordemodgui.h
     )
 
-    set(TARGET_NAME demodvorsc)
+    set(TARGET_NAME demodvor)
     set(TARGET_LIB "Qt5::Widgets")
     set(TARGET_LIB_GUI "sdrgui")
     set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
 else()
-    set(TARGET_NAME demodvorscsrv)
+    set(TARGET_NAME demodvorsrv)
     set(TARGET_LIB "")
     set(TARGET_LIB_GUI "")
     set(INSTALL_FOLDER ${INSTALL_PLUGINSSRV_DIR})
 endif()
 
 add_library(${TARGET_NAME} SHARED
-    ${vorsc_SOURCES}
+    ${vor_SOURCES}
 )
 
 target_link_libraries(${TARGET_NAME}

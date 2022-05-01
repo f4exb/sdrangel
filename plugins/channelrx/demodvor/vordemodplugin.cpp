@@ -20,15 +20,15 @@
 #include "plugin/pluginapi.h"
 
 #ifndef SERVER_MODE
-#include "vordemodscgui.h"
+#include "vordemodgui.h"
 #endif
-#include "vordemodsc.h"
-#include "vordemodscwebapiadapter.h"
-#include "vordemodscplugin.h"
+#include "vordemod.h"
+#include "vordemodwebapiadapter.h"
+#include "vordemodplugin.h"
 
 const PluginDescriptor VORDemodPlugin::m_pluginDescriptor = {
     VORDemod::m_channelId,
-    QStringLiteral("VOR Single Channel Demodulator"),
+    QStringLiteral("VOR Demodulator"),
     QStringLiteral("6.20.2"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),

@@ -30,7 +30,7 @@
 #include "util/doublebufferfifo.h"
 #include "util/messagequeue.h"
 
-#include "vordemodscsettings.h"
+#include "vordemodsettings.h"
 
 #include <vector>
 

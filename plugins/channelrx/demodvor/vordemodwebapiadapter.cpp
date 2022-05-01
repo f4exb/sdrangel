@@ -16,35 +16,37 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_VORDEMODSC_WEBAPIADAPTER_H
-#define INCLUDE_VORDEMODSC_WEBAPIADAPTER_H
+#include "SWGChannelSettings.h"
+#include "vordemod.h"
+#include "vordemodwebapiadapter.h"
 
-#include "channel/channelwebapiadapter.h"
-#include "vordemodscsettings.h"
+VORDemodSCWebAPIAdapter::VORDemodSCWebAPIAdapter()
+{}
 
-/**
- * Standalone API adapter only for the settings
- */
-class VORDemodSCWebAPIAdapter : public ChannelWebAPIAdapter {
-public:
-    VORDemodSCWebAPIAdapter();
-    virtual ~VORDemodSCWebAPIAdapter();
+VORDemodSCWebAPIAdapter::~VORDemodSCWebAPIAdapter()
+{}
 
-    virtual QByteArray serialize() const { return m_settings.serialize(); }
-    virtual bool deserialize(const QByteArray& data) { return m_settings.deserialize(data); }
+int VORDemodSCWebAPIAdapter::webapiSettingsGet(
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setVorDemodSettings(new SWGSDRangel::SWGVORDemodSettings());
+    response.getVorDemodSettings()->init();
+    VORDemod::webapiFormatChannelSettings(response, m_settings);
 
-    virtual int webapiSettingsGet(
-            SWGSDRangel::SWGChannelSettings& response,
-            QString& errorMessage);
+    return 200;
+}
 
-    virtual int webapiSettingsPutPatch(
-            bool force,
-            const QStringList& channelSettingsKeys,
-            SWGSDRangel::SWGChannelSettings& response,
-            QString& errorMessage);
+int VORDemodSCWebAPIAdapter::webapiSettingsPutPatch(
+        bool force,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage)
+{
+    (void) force;
+    (void) errorMessage;
+    VORDemod::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
 
-private:
-    VORDemodSettings m_settings;
-};
-
-#endif // INCLUDE_VORDEMODSC_WEBAPIADAPTER_H
+    return 200;
+}

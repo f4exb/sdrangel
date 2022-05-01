@@ -24,7 +24,7 @@
 #include "dsp/movingaverage.h"
 #include "util/messagequeue.h"
 #include "settings/rollupstate.h"
-#include "vordemodscsettings.h"
+#include "vordemodsettings.h"
 
 class PluginAPI;
 class DeviceUISet;

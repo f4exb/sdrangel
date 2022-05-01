@@ -28,7 +28,7 @@
 
 const PluginDescriptor VORDemodMCPlugin::m_pluginDescriptor = {
     VORDemodMC::m_channelId,
-    QStringLiteral("VOR Demodulator"),
+    QStringLiteral("VOR Multi Channel Demodulator"),
     QStringLiteral("6.20.2"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
