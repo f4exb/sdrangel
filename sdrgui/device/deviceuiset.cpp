@@ -463,7 +463,7 @@ void DeviceUISet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginA
                 }
 
                 txChannelGUI->restoreGeometry(txChannelGUI->getGeometryBytes());
-                txChannelGUI->setDeviceType(ChannelGUI::DeviceRx);
+                txChannelGUI->setDeviceType(ChannelGUI::DeviceTx);
                 txChannelGUI->setDeviceSetIndex(m_deviceSetIndex);
                 txChannelGUI->setIndex(channelAPI->getIndexInDeviceSet());
                 txChannelGUI->setIndexToolTip(m_deviceAPI->getSamplingDeviceDisplayName());
@@ -636,7 +636,7 @@ void DeviceUISet::loadMIMOChannelSettings(const Preset *preset, PluginAPI *plugi
                 }
 
                 channelGUI->restoreGeometry(channelGUI->getGeometryBytes());
-                channelGUI->setDeviceType(ChannelGUI::DeviceRx);
+                channelGUI->setDeviceType(ChannelGUI::DeviceMIMO);
                 channelGUI->setDeviceSetIndex(m_deviceSetIndex);
                 channelGUI->setIndex(channelAPI->getIndexInDeviceSet());
                 channelGUI->setIndexToolTip(m_deviceAPI->getSamplingDeviceDisplayName());
