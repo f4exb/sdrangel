@@ -37,10 +37,10 @@
 #include "util/messagequeue.h"
 #include "util/httpdownloadmanager.h"
 #include "util/azel.h"
+#include "util/openaip.h"
 #include "settings/rollupstate.h"
 
 #include "vorlocalizersettings.h"
-#include "navaid.h"
 
 class PluginAPI;
 class FeatureUISet;
@@ -239,9 +239,10 @@ private:
     QMenu *menu;                        // Column select context menu
     HttpDownloadManager m_dlm;
     QProgressDialog *m_progressDialog;
+    OpenAIP m_openAIP;
     int m_countryIndex;
     VORModel m_vorModel;
-    QHash<int, NavAid *> *m_vors;
+    QList<NavAid *> m_vors;
     QHash<int, VORGUI *> m_selectedVORs;
     AzEl m_azEl;                        // Position of station
     QIcon m_muteIcon;
@@ -264,19 +265,11 @@ private:
     void calculateFreqOffset(VORGUI *vorGUI);
     void calculateFreqOffsets();
     void updateVORs();
-    QString getOpenAIPVORDBURL(int i);
-    QString getOpenAIPVORDBFilename(int i);
-    QString getVORDBFilename();
     void readNavAids();
-    // Move to util
-    QString getDataDir();
-    qint64 fileAgeInDays(QString filename);
-    bool confirmDownload(QString filename);
     void updateChannelList();
 
 private slots:
     void on_startStop_toggled(bool checked);
-    void on_getOurAirportsVORDB_clicked();
     void on_getOpenAIPVORDB_clicked();
     void on_magDecAdjust_toggled(bool checked);
     void on_rrTime_valueChanged(int value);
@@ -288,11 +281,12 @@ private slots:
     void columnSelectMenuChecked(bool checked = false);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
-    void updateDownloadProgress(qint64 bytesRead, qint64 totalBytes);
-    void downloadFinished(const QString& filename, bool success);
     void handleInputMessages();
     void updateStatus();
     void tick();
+    void downloadingURL(const QString& url);
+    void downloadError(const QString& error);
+    void downloadNavAidsFinished();
 };
 
 #endif // INCLUDE_VORLOCALIZERGUI_H

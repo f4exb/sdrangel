@@ -34,7 +34,6 @@ if(NOT SERVER_MODE)
     set(vor_HEADERS
         ${vor_HEADERS}
         vorlocalizergui.h
-        navaid.h
     )
 
     set(TARGET_NAME vorlocalizer)

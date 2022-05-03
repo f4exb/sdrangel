@@ -47,258 +47,6 @@
 #include "vorlocalizersettings.h"
 #include "vorlocalizergui.h"
 
-static const char *countryCodes[] = {
-    "ad",
-    "ae",
-    "af",
-    "ag",
-    "ai",
-    "al",
-    "am",
-    "an",
-    "ao",
-    "aq",
-    "ar",
-    "as",
-    "at",
-    "au",
-    "aw",
-    "ax",
-    "az",
-    "ba",
-    "bb",
-    "bd",
-    "be",
-    "bf",
-    "bg",
-    "bh",
-    "bi",
-    "bj",
-    "bl",
-    "bm",
-    "bn",
-    "bo",
-    "bq",
-    "br",
-    "bs",
-    "bt",
-    "bv",
-    "bw",
-    "by",
-    "bz",
-    "ca",
-    "cc",
-    "cd",
-    "cf",
-    "cg",
-    "ch",
-    "ci",
-    "ck",
-    "cl",
-    "cm",
-    "cn",
-    "co",
-    "cr",
-    "cu",
-    "cv",
-    "cw",
-    "cx",
-    "cy",
-    "cz",
-    "de",
-    "dj",
-    "dk",
-    "dm",
-    "do",
-    "dz",
-    "ec",
-    "ee",
-    "eg",
-    "eh",
-    "er",
-    "es",
-    "et",
-    "fi",
-    "fj",
-    "fk",
-    "fm",
-    "fo",
-    "fr",
-    "ga",
-    "gb",
-    "ge",
-    "gf",
-    "gg",
-    "gh",
-    "gi",
-    "gl",
-    "gm",
-    "gn",
-    "gp",
-    "gq",
-    "gr",
-    "gs",
-    "gt",
-    "gu",
-    "gw",
-    "gy",
-    "hk",
-    "hm",
-    "hn",
-    "hr",
-    "hu",
-    "id",
-    "ie",
-    "il",
-    "im",
-    "in",
-    "io",
-    "iq",
-    "ir",
-    "is",
-    "it",
-    "je",
-    "jm",
-    "jo",
-    "jp",
-    "ke",
-    "kg",
-    "kh",
-    "ki",
-    "km",
-    "kn",
-    "kp",
-    "kr",
-    "kw",
-    "ky",
-    "kz",
-    "la",
-    "lb",
-    "lc",
-    "li",
-    "lk",
-    "lr",
-    "ls",
-    "lt",
-    "lu",
-    "lv",
-    "ly",
-    "ma",
-    "mc",
-    "md",
-    "me",
-    "mf",
-    "mg",
-    "mh",
-    "mk",
-    "ml",
-    "mm",
-    "mn",
-    "mo",
-    "mp",
-    "mq",
-    "mr",
-    "ms",
-    "mt",
-    "mu",
-    "mv",
-    "mw",
-    "mx",
-    "my",
-    "mz",
-    "na",
-    "nc",
-    "ne",
-    "nf",
-    "ng",
-    "ni",
-    "nl",
-    "no",
-    "np",
-    "nr",
-    "nu",
-    "nz",
-    "om",
-    "pa",
-    "pe",
-    "pf",
-    "pg",
-    "ph",
-    "pk",
-    "pl",
-    "pm",
-    "pn",
-    "pr",
-    "ps",
-    "pt",
-    "pw",
-    "py",
-    "qa",
-    "re",
-    "ro",
-    "rs",
-    "ru",
-    "rw",
-    "sa",
-    "sb",
-    "sc",
-    "sd",
-    "se",
-    "sg",
-    "sh",
-    "si",
-    "sj",
-    "sk",
-    "sl",
-    "sm",
-    "sn",
-    "so",
-    "sr",
-    "ss",
-    "st",
-    "sv",
-    "sx",
-    "sy",
-    "sz",
-    "tc",
-    "td",
-    "tf",
-    "tg",
-    "th",
-    "tj",
-    "tk",
-    "tl",
-    "tm",
-    "tn",
-    "to",
-    "tr",
-    "tt",
-    "tv",
-    "tw",
-    "tz",
-    "ua",
-    "ug",
-    "um",
-    "us",
-    "uy",
-    "uz",
-    "va",
-    "vc",
-    "ve",
-    "vg",
-    "vi",
-    "vn",
-    "vu",
-    "wf",
-    "ws",
-    "ye",
-    "yt",
-    "za",
-    "zm",
-    "zw",
-    nullptr
-};
-
 // Lats and longs in decimal degrees. Distance in metres. Bearing in degrees.
 // https://www.movable-type.co.uk/scripts/latlong.html
 static void calcRadialEndPoint(float startLatitude, float startLongitude, float distance, float bearing, float &endLatitude, float &endLongitude)
@@ -702,7 +450,7 @@ void VORLocalizerGUI::selectVOR(VORGUI *vorGUI, bool selected)
         // Add to settings to create corresponding demodulator
         m_settings.m_subChannelSettings.insert(navId, VORLocalizerSubChannelSettings{
             navId,
-            vorGUI->m_navAid->m_frequencykHz * 1000,
+            (int)(vorGUI->m_navAid->m_frequencykHz * 1000),
             false
         });
 
@@ -725,23 +473,21 @@ void VORLocalizerGUI::selectVOR(VORGUI *vorGUI, bool selected)
 void VORLocalizerGUI::updateVORs()
 {
     m_vorModel.removeAllVORs();
-    QHash<int, NavAid *>::iterator i = m_vors->begin();
     AzEl azEl = m_azEl;
 
-    while (i != m_vors->end())
+    for (auto vor : m_vors)
     {
-        NavAid *vor = i.value();
+        if (vor->m_type.contains("VOR")) // Exclude DMEs
+        {
+            // Calculate distance to VOR from My Position
+            azEl.setTarget(vor->m_latitude, vor->m_longitude, Units::feetToMetres(vor->m_elevation));
+            azEl.calculate();
 
-        // Calculate distance to VOR from My Position
-        azEl.setTarget(vor->m_latitude, vor->m_longitude, Units::feetToMetres(vor->m_elevation));
-        azEl.calculate();
-
-        // Only display VOR if in range
-        if (azEl.getDistance() <= 200000) {
-            m_vorModel.addVOR(vor);
+            // Only display VOR if in range
+            if (azEl.getDistance() <= 200000) {
+                m_vorModel.addVOR(vor);
+            }
         }
-
-        ++i;
     }
 }
 
@@ -807,40 +553,46 @@ bool VORLocalizerGUI::handleMessage(const Message& message)
         int subChannelId = report.getSubChannelId();
 
         VORGUI *vorGUI = m_selectedVORs.value(subChannelId);
+        if (vorGUI)
+        {
+            // Display radial and signal magnitudes in table
 
-        // Display radial and signal magnitudes in table
+            Real varMagDB = std::round(20.0*std::log10(report.getVarMag()));
+            Real refMagDB = std::round(20.0*std::log10(report.getRefMag()));
 
-        Real varMagDB = std::round(20.0*std::log10(report.getVarMag()));
-        Real refMagDB = std::round(20.0*std::log10(report.getRefMag()));
+            bool validRadial = report.getValidRadial();
+            vorGUI->m_radialItem->setData(Qt::DisplayRole, std::round(report.getRadial()));
+            vorGUI->m_navIdItem->setData(Qt::DisplayRole, subChannelId);
 
-        bool validRadial = report.getValidRadial();
-        vorGUI->m_radialItem->setData(Qt::DisplayRole, std::round(report.getRadial()));
-        vorGUI->m_navIdItem->setData(Qt::DisplayRole, subChannelId);
+            if (validRadial) {
+                vorGUI->m_radialItem->setForeground(QBrush(Qt::white));
+            } else {
+                vorGUI->m_radialItem->setForeground(QBrush(Qt::red));
+            }
 
-        if (validRadial) {
-            vorGUI->m_radialItem->setForeground(QBrush(Qt::white));
-        } else {
-            vorGUI->m_radialItem->setForeground(QBrush(Qt::red));
+            vorGUI->m_refMagItem->setData(Qt::DisplayRole, refMagDB);
+
+            if (report.getValidRefMag()) {
+                vorGUI->m_refMagItem->setForeground(QBrush(Qt::white));
+            } else {
+                vorGUI->m_refMagItem->setForeground(QBrush(Qt::red));
+            }
+
+            vorGUI->m_varMagItem->setData(Qt::DisplayRole, varMagDB);
+
+            if (report.getValidVarMag()) {
+                vorGUI->m_varMagItem->setForeground(QBrush(Qt::white));
+            } else {
+                vorGUI->m_varMagItem->setForeground(QBrush(Qt::red));
+            }
+
+            // Update radial on map
+            m_vorModel.setRadial(subChannelId, validRadial, report.getRadial());
         }
-
-        vorGUI->m_refMagItem->setData(Qt::DisplayRole, refMagDB);
-
-        if (report.getValidRefMag()) {
-            vorGUI->m_refMagItem->setForeground(QBrush(Qt::white));
-        } else {
-            vorGUI->m_refMagItem->setForeground(QBrush(Qt::red));
+        else
+        {
+            qDebug() << "VORLocalizerGUI::handleMessage: Got MsgReportRadial for non-existant subChannelId " << subChannelId;
         }
-
-        vorGUI->m_varMagItem->setData(Qt::DisplayRole, varMagDB);
-
-        if (report.getValidVarMag()) {
-            vorGUI->m_varMagItem->setForeground(QBrush(Qt::white));
-        } else {
-            vorGUI->m_varMagItem->setForeground(QBrush(Qt::red));
-        }
-
-        // Update radial on map
-        m_vorModel.setRadial(subChannelId, validRadial, report.getRadial());
 
         return true;
     }
@@ -850,38 +602,45 @@ bool VORLocalizerGUI::handleMessage(const Message& message)
         int subChannelId = report.getSubChannelId();
 
         VORGUI *vorGUI = m_selectedVORs.value(subChannelId);
-
-        QString ident = report.getIdent();
-        // Convert Morse to a string
-        QString identString = Morse::toString(ident);
-        // Idents should only be two or three characters, so filter anything else
-        // other than TEST which indicates a VOR is under maintainance (may also be TST)
-        if (((identString.size() >= 2) && (identString.size() <= 3)) || (identString == "TEST"))
+        if (vorGUI)
         {
-            vorGUI->m_rxIdentItem->setText(identString);
-            vorGUI->m_rxMorseItem->setText(Morse::toSpacedUnicode(ident));
 
-            if (vorGUI->m_navAid->m_ident == identString)
+            QString ident = report.getIdent();
+            // Convert Morse to a string
+            QString identString = Morse::toString(ident);
+            // Idents should only be two or three characters, so filter anything else
+            // other than TEST which indicates a VOR is under maintainance (may also be TST)
+            if (((identString.size() >= 2) && (identString.size() <= 3)) || (identString == "TEST"))
             {
-                // Set colour to green if matching expected ident
-                vorGUI->m_rxIdentItem->setForeground(QBrush(Qt::green));
-                vorGUI->m_rxMorseItem->setForeground(QBrush(Qt::green));
+                vorGUI->m_rxIdentItem->setText(identString);
+                vorGUI->m_rxMorseItem->setText(Morse::toSpacedUnicode(ident));
+
+                if (vorGUI->m_navAid->m_ident == identString)
+                {
+                    // Set colour to green if matching expected ident
+                    vorGUI->m_rxIdentItem->setForeground(QBrush(Qt::green));
+                    vorGUI->m_rxMorseItem->setForeground(QBrush(Qt::green));
+                }
+                else
+                {
+                    // Set colour to green if not matching expected ident
+                    vorGUI->m_rxIdentItem->setForeground(QBrush(Qt::red));
+                    vorGUI->m_rxMorseItem->setForeground(QBrush(Qt::red));
+                }
             }
             else
             {
-                // Set colour to green if not matching expected ident
-                vorGUI->m_rxIdentItem->setForeground(QBrush(Qt::red));
-                vorGUI->m_rxMorseItem->setForeground(QBrush(Qt::red));
+                // Set yellow to indicate we've filtered something (unless red)
+                if (vorGUI->m_rxIdentItem->foreground().color() != Qt::red)
+                {
+                    vorGUI->m_rxIdentItem->setForeground(QBrush(Qt::yellow));
+                    vorGUI->m_rxMorseItem->setForeground(QBrush(Qt::yellow));
+                }
             }
         }
         else
         {
-            // Set yellow to indicate we've filtered something (unless red)
-            if (vorGUI->m_rxIdentItem->foreground().color() != Qt::red)
-            {
-                vorGUI->m_rxIdentItem->setForeground(QBrush(Qt::yellow));
-                vorGUI->m_rxMorseItem->setForeground(QBrush(Qt::yellow));
-            }
+            qDebug() << "VORLocalizerGUI::handleMessage: Got MsgReportIdent for non-existant subChannelId " << subChannelId;
         }
 
         return true;
@@ -938,142 +697,6 @@ void VORLocalizerGUI::handleInputMessages()
     }
 }
 
-qint64 VORLocalizerGUI::fileAgeInDays(QString filename)
-{
-    QFile file(filename);
-
-    if (file.exists())
-    {
-        QDateTime modified = file.fileTime(QFileDevice::FileModificationTime);
-
-        if (modified.isValid()) {
-            return modified.daysTo(QDateTime::currentDateTime());
-        } else {
-            return -1;
-        }
-    }
-
-    return -1;
-}
-
-bool VORLocalizerGUI::confirmDownload(QString filename)
-{
-    qint64 age = fileAgeInDays(filename);
-
-    if ((age == -1) || (age > 100))
-    {
-        return true;
-    }
-    else
-    {
-        QMessageBox::StandardButton reply;
-
-        if (age == 0) {
-            reply = QMessageBox::question(this, "Confirm download", "This file was last downloaded today. Are you sure you wish to redownload it?", QMessageBox::Yes|QMessageBox::No);
-        } else if (age == 1) {
-            reply = QMessageBox::question(this, "Confirm download", "This file was last downloaded yesterday. Are you sure you wish to redownload it?", QMessageBox::Yes|QMessageBox::No);
-        } else {
-            reply = QMessageBox::question(this, "Confirm download", QString("This file was last downloaded %1 days ago. Are you sure you wish to redownload this file?").arg(age), QMessageBox::Yes|QMessageBox::No);
-        }
-
-        return reply == QMessageBox::Yes;
-    }
-}
-
-QString VORLocalizerGUI::getDataDir()
-{
-    // Get directory to store app data in
-    QStringList locations = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation);
-    // First dir is writable
-    return locations[0];
-}
-
-QString VORLocalizerGUI::getOpenAIPVORDBFilename(int i)
-{
-    if (countryCodes[i] != nullptr) {
-        return getDataDir() + "/" + countryCodes[i] + "_nav.aip";
-    } else {
-        return "";
-    }
-}
-
-QString VORLocalizerGUI::getOpenAIPVORDBURL(int i)
-{
-    if (countryCodes[i] != nullptr) {
-        return QString(OPENAIP_NAVAIDS_URL).arg(countryCodes[i]);
-    } else {
-        return "";
-    }
-}
-
-QString VORLocalizerGUI::getVORDBFilename()
-{
-    return getDataDir() + "/vorDatabase.csv";
-}
-
-void VORLocalizerGUI::updateDownloadProgress(qint64 bytesRead, qint64 totalBytes)
-{
-    if (m_progressDialog)
-    {
-        m_progressDialog->setMaximum(totalBytes);
-        m_progressDialog->setValue(bytesRead);
-    }
-}
-
-void VORLocalizerGUI::downloadFinished(const QString& filename, bool success)
-{
-    bool closeDialog = true;
-    if (success)
-    {
-        if (filename == getVORDBFilename())
-        {
-            m_vors = NavAid::readNavAidsDB(filename);
-
-            if (m_vors != nullptr) {
-                updateVORs();
-            }
-        }
-        else if (filename == getOpenAIPVORDBFilename(m_countryIndex))
-        {
-            m_countryIndex++;
-
-            if (countryCodes[m_countryIndex] != nullptr)
-            {
-                QString vorDBFile = getOpenAIPVORDBFilename(m_countryIndex);
-                QString urlString = getOpenAIPVORDBURL(m_countryIndex);
-                QUrl dbURL(urlString);
-                m_progressDialog->setLabelText(QString("Downloading %1.").arg(urlString));
-                m_progressDialog->setValue(m_countryIndex);
-                m_dlm.download(dbURL, vorDBFile);
-                closeDialog = false;
-            }
-            else
-            {
-                readNavAids();
-
-                if (m_vors) {
-                    updateVORs();
-                }
-            }
-        }
-        else
-        {
-            qDebug() << "VORLocalizerGUI::downloadFinished: Unexpected filename: " << filename;
-        }
-    }
-    else
-    {
-        qDebug() << "VORLocalizerGUI::downloadFinished: Failed: " << filename;
-        QMessageBox::warning(this, "Download failed", QString("Failed to download %1").arg(filename));
-    }
-    if (closeDialog && m_progressDialog)
-    {
-        m_progressDialog->close();
-        delete m_progressDialog;
-        m_progressDialog = nullptr;
-    }
-}
-
 void VORLocalizerGUI::on_startStop_toggled(bool checked)
 {
     if (m_doApplySettings)
@@ -1083,59 +706,56 @@ void VORLocalizerGUI::on_startStop_toggled(bool checked)
     }
 }
 
-void VORLocalizerGUI::on_getOurAirportsVORDB_clicked()
-{
-    // Don't try to download while already in progress
-    if (m_progressDialog == nullptr)
-    {
-        QString vorDBFile = getVORDBFilename();
-
-        if (confirmDownload(vorDBFile))
-        {
-            // Download OurAirports navaid database to disk
-            QUrl dbURL(QString(OURAIRPORTS_NAVAIDS_URL));
-            m_progressDialog = new QProgressDialog(this);
-            m_progressDialog->setCancelButton(nullptr);
-            m_progressDialog->setMinimumDuration(500);
-            m_progressDialog->setLabelText(QString("Downloading %1.").arg(OURAIRPORTS_NAVAIDS_URL));
-            QNetworkReply *reply = m_dlm.download(dbURL, vorDBFile);
-            connect(reply, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(updateDownloadProgress(qint64,qint64)));
-        }
-    }
-}
-
 void VORLocalizerGUI::on_getOpenAIPVORDB_clicked()
 {
     // Don't try to download while already in progress
     if (!m_progressDialog)
     {
-        m_countryIndex = 0;
-        QString vorDBFile = getOpenAIPVORDBFilename(m_countryIndex);
+        m_progressDialog = new QProgressDialog(this);
+        m_progressDialog->setMaximum(OpenAIP::m_countryCodes.size());
+        m_progressDialog->setCancelButton(nullptr);
 
-        if (confirmDownload(vorDBFile))
-        {
-            // Download OpenAIP XML to disk
-            QString urlString = getOpenAIPVORDBURL(m_countryIndex);
-            QUrl dbURL(urlString);
-            m_progressDialog = new QProgressDialog(this);
-            m_progressDialog->setCancelButton(nullptr);
-            m_progressDialog->setMinimumDuration(500);
-            m_progressDialog->setMaximum(sizeof(countryCodes)/sizeof(countryCodes[0]));
-            m_progressDialog->setValue(0);
-            m_progressDialog->setLabelText(QString("Downloading %1.").arg(urlString));
-            m_dlm.download(dbURL, vorDBFile);
-        }
+        m_openAIP.downloadNavAids();
     }
 }
 
 void VORLocalizerGUI::readNavAids()
 {
-    m_vors = new QHash<int, NavAid *>();
+    m_vors = OpenAIP::readNavAids();
+    updateVORs();
+}
 
-    for (int countryIndex = 0; countryCodes[countryIndex] != nullptr; countryIndex++)
+void VORLocalizerGUI::downloadingURL(const QString& url)
+{
+    if (m_progressDialog)
     {
-        QString vorDBFile = getOpenAIPVORDBFilename(countryIndex);
-        NavAid::readNavAidsXML(m_vors, vorDBFile);
+        m_progressDialog->setLabelText(QString("Downloading %1.").arg(url));
+        m_progressDialog->setValue(m_progressDialog->value() + 1);
+    }
+}
+
+void VORLocalizerGUI::downloadError(const QString& error)
+{
+    QMessageBox::critical(this, "VOR Localizer", error);
+    if (m_progressDialog)
+    {
+        m_progressDialog->close();
+        delete m_progressDialog;
+        m_progressDialog = nullptr;
+    }
+}
+
+void VORLocalizerGUI::downloadNavAidsFinished()
+{
+    if (m_progressDialog) {
+        m_progressDialog->setLabelText("Reading NAVAIDs.");
+    }
+    readNavAids();
+    if (m_progressDialog)
+    {
+        m_progressDialog->close();
+        delete m_progressDialog;
+        m_progressDialog = nullptr;
     }
 }
 
@@ -1231,7 +851,6 @@ VORLocalizerGUI::VORLocalizerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     m_tickCount(0),
     m_progressDialog(nullptr),
     m_vorModel(this),
-    m_vors(nullptr),
     m_lastFeatureState(0),
     m_rrSecondsCount(0)
 {
@@ -1250,7 +869,9 @@ VORLocalizerGUI::VORLocalizerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     m_muteIcon.addPixmap(QPixmap("://sound_on.png"), QIcon::Normal, QIcon::Off);
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
-    connect(&m_dlm, &HttpDownloadManager::downloadComplete, this, &VORLocalizerGUI::downloadFinished);
+    connect(&m_openAIP, &OpenAIP::downloadingURL, this, &VORLocalizerGUI::downloadingURL);
+    connect(&m_openAIP, &OpenAIP::downloadError, this, &VORLocalizerGUI::downloadError);
+    connect(&m_openAIP, &OpenAIP::downloadNavAidsFinished, this, &VORLocalizerGUI::downloadNavAidsFinished);
 
     m_vorLocalizer = reinterpret_cast<VORLocalizer*>(feature);
     m_vorLocalizer->setMessageQueueToGUI(getInputMessageQueue());
@@ -1293,22 +914,8 @@ VORLocalizerGUI::VORLocalizerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     }
 
     // Read in VOR information if it exists
-    bool useOurAirports = false;
-
-    if (useOurAirports)
-    {
-        m_vors = NavAid::readNavAidsDB(getVORDBFilename());
-        ui->getOpenAIPVORDB->setVisible(false);
-    }
-    else
-    {
-        readNavAids();
-        ui->getOurAirportsVORDB->setVisible(false);
-    }
-
-    if (m_vors) {
-        updateVORs();
-    }
+    readNavAids();
+    ui->getOurAirportsVORDB->setVisible(false);
 
     // Resize the table using dummy data
     resizeTable();
@@ -1346,6 +953,7 @@ VORLocalizerGUI::VORLocalizerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
 VORLocalizerGUI::~VORLocalizerGUI()
 {
     delete ui;
+    qDeleteAll(m_vors);
 }
 
 void VORLocalizerGUI::blockApplySettings(bool block)
@@ -1459,7 +1067,6 @@ void VORLocalizerGUI::tick()
 void VORLocalizerGUI::makeUIConnections()
 {
     QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &VORLocalizerGUI::on_startStop_toggled);
-    QObject::connect(ui->getOurAirportsVORDB, &QPushButton::clicked, this, &VORLocalizerGUI::on_getOurAirportsVORDB_clicked);
     QObject::connect(ui->getOpenAIPVORDB, &QPushButton::clicked, this, &VORLocalizerGUI::on_getOpenAIPVORDB_clicked);
     QObject::connect(ui->magDecAdjust, &ButtonSwitch::toggled, this, &VORLocalizerGUI::on_magDecAdjust_toggled);
     QObject::connect(ui->rrTime, &QDial::valueChanged, this, &VORLocalizerGUI::on_rrTime_valueChanged);
