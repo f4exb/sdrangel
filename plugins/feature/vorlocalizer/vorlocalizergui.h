@@ -287,6 +287,7 @@ private slots:
     void downloadingURL(const QString& url);
     void downloadError(const QString& error);
     void downloadNavAidsFinished();
+    void preferenceChanged(int elementType);
 };
 
 #endif // INCLUDE_VORLOCALIZERGUI_H

@@ -945,6 +945,9 @@ VORLocalizerGUI::VORLocalizerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     ui->rrTurnTimeProgress->setValue(0);
     ui->rrTurnTimeProgress->setToolTip(tr("Round robin turn time %1s").arg(0));
 
+    // Get updated when position changes
+    connect(&MainCore::instance()->getSettings(), &MainSettings::preferenceChanged, this, &VORLocalizerGUI::preferenceChanged);
+
     displaySettings();
     applySettings(true);
     makeUIConnections();
@@ -1061,6 +1064,56 @@ void VORLocalizerGUI::tick()
         ui->rrTurnTimeProgress->setValue(m_rrSecondsCount <= m_settings.m_rrTime ? m_rrSecondsCount : m_settings.m_rrTime);
         ui->rrTurnTimeProgress->setToolTip(tr("Round robin turn time %1s").arg(m_rrSecondsCount));
         m_tickCount = 0;
+    }
+}
+
+void VORLocalizerGUI::preferenceChanged(int elementType)
+{
+    Preferences::ElementType pref = (Preferences::ElementType)elementType;
+    if ((pref == Preferences::Latitude) || (pref == Preferences::Longitude) || (pref == Preferences::Altitude))
+    {
+        Real stationLatitude = MainCore::instance()->getSettings().getLatitude();
+        Real stationLongitude = MainCore::instance()->getSettings().getLongitude();
+        Real stationAltitude = MainCore::instance()->getSettings().getAltitude();
+
+        if (   (stationLatitude != m_azEl.getLocationSpherical().m_latitude)
+            || (stationLongitude != m_azEl.getLocationSpherical().m_longitude)
+            || (stationAltitude != m_azEl.getLocationSpherical().m_altitude))
+        {
+            m_azEl.setLocation(stationLatitude, stationLongitude, stationAltitude);
+
+            // Update distances and what is visible
+            updateVORs();
+
+            // Update icon position on Map
+            QQuickItem *item = ui->map->rootObject();
+            QObject *map = item->findChild<QObject*>("map");
+            if (map != nullptr)
+            {
+                QObject *stationObject = map->findChild<QObject*>("station");
+                if(stationObject != NULL)
+                {
+                    QGeoCoordinate coords = stationObject->property("coordinate").value<QGeoCoordinate>();
+                    coords.setLatitude(stationLatitude);
+                    coords.setLongitude(stationLongitude);
+                    coords.setAltitude(stationAltitude);
+                    stationObject->setProperty("coordinate", QVariant::fromValue(coords));
+                }
+            }
+        }
+    }
+    if (pref == Preferences::StationName)
+    {
+        // Update icon label on Map
+        QQuickItem *item = ui->map->rootObject();
+        QObject *map = item->findChild<QObject*>("map");
+        if (map != nullptr)
+        {
+            QObject *stationObject = map->findChild<QObject*>("station");
+            if(stationObject != NULL) {
+                stationObject->setProperty("stationName", QVariant::fromValue(MainCore::instance()->getSettings().getStationName()));
+            }
+        }
     }
 }
 
