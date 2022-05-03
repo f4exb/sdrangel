@@ -64,7 +64,6 @@ public:
 
     QTableWidgetItem *m_nameItem;
     QTableWidgetItem *m_frequencyItem;
-    QTableWidgetItem *m_navIdItem;
     QTableWidgetItem *m_identItem;
     QTableWidgetItem *m_morseItem;
     QTableWidgetItem *m_radialItem;
@@ -249,6 +248,7 @@ private:
 	QTimer m_statusTimer;
 	int m_lastFeatureState;
     int m_rrSecondsCount;
+    QTimer m_redrawMapTimer;
 
     explicit VORLocalizerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent = nullptr);
     virtual ~VORLocalizerGUI();
@@ -257,6 +257,7 @@ private:
     void applySettings(bool force = false);
     void displaySettings();
     bool handleMessage(const Message& message);
+    void redrawMap();
     void makeUIConnections();
 
     void resizeTable();
@@ -274,7 +275,7 @@ private slots:
     void on_magDecAdjust_toggled(bool checked);
     void on_rrTime_valueChanged(int value);
     void on_centerShift_valueChanged(int value);
-    void on_channelsRefresh_clicked();
+    void channelsRefresh();
     void vorData_sectionMoved(int logicalIndex, int oldVisualIndex, int newVisualIndex);
     void vorData_sectionResized(int logicalIndex, int oldSize, int newSize);
     void columnSelectMenu(QPoint pos);
@@ -288,6 +289,8 @@ private slots:
     void downloadError(const QString& error);
     void downloadNavAidsFinished();
     void preferenceChanged(int elementType);
+    virtual void showEvent(QShowEvent *event);
+    virtual bool eventFilter(QObject *obj, QEvent *event);
 };
 
 #endif // INCLUDE_VORLOCALIZERGUI_H

@@ -55,10 +55,6 @@ Channels may be used in round robin turns if their number is not enough to cover
 
 When there is more than one turn for a device valid radial directions are averaged and the resulting average is used during the round robin loop. Averaging also takes place for reference and variable signal levels.
 
-<h3>9: Refresh VOR demodulators list and allocation</h3>
-
-Use this button to (re)scan the available VOR demodulators in the SDRangel instance and (re)run the round robin allocation.
-
 <h2>B: VOR Table</h2>
 
 The VOR table displays information about selected VORs. To select or deselect a VOR, double click it on the map. The information displayed includes:
@@ -67,7 +63,6 @@ The VOR table displays information about selected VORs. To select or deselect a 
 
 * Name - The name of the VOR. For example: 'LONDON'.
 * Freq (MHz) - The center frequency the VOR transmits on in MHz. The frequency is highlighted in green when the VOR is serviced by a demodulator.
-* Nav Id - This is the VOR unique identifier from the VOR database.
 * Ident - A 2 or 3 character identifier for the VOR. For example: 'LON'.
 * Morse - The Morse code identifier for the VOR. For example: '.-.. --- -.'
 * RX Ident - This contains the demodulated ident. If it matches the expected ident, it will be displayed in green, if not, it will be displayed in red. If an ident is received that is not 2 or 3 characters, it will not be displayed, but the last received ident will be displayed in yellow.

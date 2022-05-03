@@ -137,7 +137,6 @@ VORGUI::VORGUI(NavAid *navAid, VORLocalizerGUI *gui) :
     // These are deleted by QTableWidget
     m_nameItem = new QTableWidgetItem();
     m_frequencyItem = new QTableWidgetItem();
-    m_navIdItem = new QTableWidgetItem();
     m_radialItem = new QTableWidgetItem();
     m_identItem = new QTableWidgetItem();
     m_morseItem = new QTableWidgetItem();
@@ -358,7 +357,6 @@ void VORLocalizerGUI::resizeTable()
     ui->vorData->setRowCount(row + 1);
     ui->vorData->setItem(row, VORLocalizerSettings::VOR_COL_NAME, new QTableWidgetItem("White Sulphur Springs"));
     ui->vorData->setItem(row, VORLocalizerSettings::VOR_COL_FREQUENCY, new QTableWidgetItem("Freq (MHz) "));
-    ui->vorData->setItem(row, VORLocalizerSettings::VOR_COL_NAVID, new QTableWidgetItem("99999999"));
     ui->vorData->setItem(row, VORLocalizerSettings::VOR_COL_IDENT, new QTableWidgetItem("Ident "));
     ui->vorData->setItem(row, VORLocalizerSettings::VOR_COL_MORSE, new QTableWidgetItem(Morse::toSpacedUnicode(morse)));
     ui->vorData->setItem(row, VORLocalizerSettings::VOR_COL_RADIAL, new QTableWidgetItem("Radial (o) "));
@@ -432,8 +430,6 @@ void VORLocalizerGUI::selectVOR(VORGUI *vorGUI, bool selected)
         ui->vorData->setRowCount(row + 1);
         ui->vorData->setItem(row, VORLocalizerSettings::VOR_COL_NAME, vorGUI->m_nameItem);
         ui->vorData->setItem(row, VORLocalizerSettings::VOR_COL_FREQUENCY, vorGUI->m_frequencyItem);
-        ui->vorData->setItem(row, VORLocalizerSettings::VOR_COL_NAVID, vorGUI->m_navIdItem);
-        ui->vorData->setItem(row, VORLocalizerSettings::VOR_COL_IDENT, vorGUI->m_identItem);
         ui->vorData->setItem(row, VORLocalizerSettings::VOR_COL_MORSE, vorGUI->m_morseItem);
         ui->vorData->setItem(row, VORLocalizerSettings::VOR_COL_RADIAL, vorGUI->m_radialItem);
         ui->vorData->setItem(row, VORLocalizerSettings::VOR_COL_RX_IDENT, vorGUI->m_rxIdentItem);
@@ -562,7 +558,6 @@ bool VORLocalizerGUI::handleMessage(const Message& message)
 
             bool validRadial = report.getValidRadial();
             vorGUI->m_radialItem->setData(Qt::DisplayRole, std::round(report.getRadial()));
-            vorGUI->m_navIdItem->setData(Qt::DisplayRole, subChannelId);
 
             if (validRadial) {
                 vorGUI->m_radialItem->setForeground(QBrush(Qt::white));
@@ -780,7 +775,7 @@ void VORLocalizerGUI::on_centerShift_valueChanged(int value)
     applySettings();
 }
 
-void VORLocalizerGUI::on_channelsRefresh_clicked()
+void VORLocalizerGUI::channelsRefresh()
 {
     if (m_doApplySettings)
     {
@@ -915,7 +910,6 @@ VORLocalizerGUI::VORLocalizerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
 
     // Read in VOR information if it exists
     readNavAids();
-    ui->getOurAirportsVORDB->setVisible(false);
 
     // Resize the table using dummy data
     resizeTable();
@@ -950,11 +944,24 @@ VORLocalizerGUI::VORLocalizerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
 
     displaySettings();
     applySettings(true);
+
+    connect(&m_redrawMapTimer, &QTimer::timeout, this, &VORLocalizerGUI::redrawMap);
+    m_redrawMapTimer.setSingleShot(true);
+    ui->map->installEventFilter(this);
+
     makeUIConnections();
+
+    // Update channel list when added/removed
+    connect(MainCore::instance(), &MainCore::channelAdded, this, &VORLocalizerGUI::channelsRefresh);
+    connect(MainCore::instance(), &MainCore::channelRemoved, this, &VORLocalizerGUI::channelsRefresh);
+    // List already opened channels
+    channelsRefresh();
 }
 
 VORLocalizerGUI::~VORLocalizerGUI()
 {
+    disconnect(&m_redrawMapTimer, &QTimer::timeout, this, &VORLocalizerGUI::redrawMap);
+    m_redrawMapTimer.stop();
     delete ui;
     qDeleteAll(m_vors);
 }
@@ -1117,6 +1124,52 @@ void VORLocalizerGUI::preferenceChanged(int elementType)
     }
 }
 
+void VORLocalizerGUI::redrawMap()
+{
+    // An awful workaround for https://bugreports.qt.io/browse/QTBUG-100333
+    // Also used in ADS-B demod
+    QQuickItem *item = ui->map->rootObject();
+    if (item)
+    {
+        QObject *object = item->findChild<QObject*>("map");
+        if (object)
+        {
+            double zoom = object->property("zoomLevel").value<double>();
+            object->setProperty("zoomLevel", QVariant::fromValue(zoom+1));
+            object->setProperty("zoomLevel", QVariant::fromValue(zoom));
+        }
+    }
+}
+
+void VORLocalizerGUI::showEvent(QShowEvent *event)
+{
+    if (!event->spontaneous())
+    {
+        // Workaround for https://bugreports.qt.io/browse/QTBUG-100333
+        // MapQuickItems can be in wrong position when window is first displayed
+        m_redrawMapTimer.start(500);
+    }
+}
+
+bool VORLocalizerGUI::eventFilter(QObject *obj, QEvent *event)
+{
+    if (obj == ui->map)
+    {
+        if (event->type() == QEvent::Resize)
+        {
+            // Workaround for https://bugreports.qt.io/browse/QTBUG-100333
+            // MapQuickItems can be in wrong position after vertical resize
+            QResizeEvent *resizeEvent = static_cast<QResizeEvent *>(event);
+            QSize oldSize = resizeEvent->oldSize();
+            QSize size = resizeEvent->size();
+            if (oldSize.height() != size.height()) {
+                redrawMap();
+            }
+        }
+    }
+    return false;
+}
+
 void VORLocalizerGUI::makeUIConnections()
 {
     QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &VORLocalizerGUI::on_startStop_toggled);
@@ -1124,5 +1177,4 @@ void VORLocalizerGUI::makeUIConnections()
     QObject::connect(ui->magDecAdjust, &ButtonSwitch::toggled, this, &VORLocalizerGUI::on_magDecAdjust_toggled);
     QObject::connect(ui->rrTime, &QDial::valueChanged, this, &VORLocalizerGUI::on_rrTime_valueChanged);
     QObject::connect(ui->centerShift, &QDial::valueChanged, this, &VORLocalizerGUI::on_centerShift_valueChanged);
-    QObject::connect(ui->channelsRefresh, &QPushButton::clicked, this, &VORLocalizerGUI::on_channelsRefresh_clicked);
 }
