@@ -55,8 +55,6 @@ public:
     void featuresetPresetPatch(qint32 feature_set_index, SWGFeaturePresetIdentifier& body);
     void featuresetPresetPost(qint32 feature_set_index, SWGFeaturePresetIdentifier& body);
     void featuresetPresetPut(qint32 feature_set_index, SWGFeaturePresetIdentifier& body);
-    void instanceFeatureSetDelete();
-    void instanceFeatureSetPost();
     
 private:
     void featuresetFEatureSettingsPutCallback (SWGHttpRequestWorker * worker);
@@ -73,8 +71,6 @@ private:
     void featuresetPresetPatchCallback (SWGHttpRequestWorker * worker);
     void featuresetPresetPostCallback (SWGHttpRequestWorker * worker);
     void featuresetPresetPutCallback (SWGHttpRequestWorker * worker);
-    void instanceFeatureSetDeleteCallback (SWGHttpRequestWorker * worker);
-    void instanceFeatureSetPostCallback (SWGHttpRequestWorker * worker);
     
 signals:
     void featuresetFEatureSettingsPutSignal(SWGFeatureSettings* summary);
@@ -91,8 +87,6 @@ signals:
     void featuresetPresetPatchSignal(SWGFeaturePresetIdentifier* summary);
     void featuresetPresetPostSignal(SWGPresetIdentifier* summary);
     void featuresetPresetPutSignal(SWGFeaturePresetIdentifier* summary);
-    void instanceFeatureSetDeleteSignal(SWGSuccessResponse* summary);
-    void instanceFeatureSetPostSignal(SWGSuccessResponse* summary);
     
     void featuresetFEatureSettingsPutSignalE(SWGFeatureSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void featuresetFeatureActionsPostSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
@@ -108,8 +102,6 @@ signals:
     void featuresetPresetPatchSignalE(SWGFeaturePresetIdentifier* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void featuresetPresetPostSignalE(SWGPresetIdentifier* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void featuresetPresetPutSignalE(SWGFeaturePresetIdentifier* summary, QNetworkReply::NetworkError error_type, QString& error_str);
-    void instanceFeatureSetDeleteSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
-    void instanceFeatureSetPostSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     
     void featuresetFEatureSettingsPutSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void featuresetFeatureActionsPostSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
@@ -125,8 +117,6 @@ signals:
     void featuresetPresetPatchSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void featuresetPresetPostSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void featuresetPresetPutSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
-    void instanceFeatureSetDeleteSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
-    void instanceFeatureSetPostSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     
 };
 

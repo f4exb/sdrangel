@@ -1472,8 +1472,6 @@ public:
     static QString instanceFeaturePresetURL;
     static QString instanceDeviceSetsURL;
     static QString instanceDeviceSetURL;
-    static QString instanceFeatureSetsURL;
-    static QString instanceFeatureSetURL;
     static std::regex devicesetURLRe;
     static std::regex devicesetFocusURLRe;
     static std::regex devicesetSpectrumSettingsURLRe;

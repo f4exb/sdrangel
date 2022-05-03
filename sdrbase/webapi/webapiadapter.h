@@ -207,24 +207,12 @@ public:
             SWGSDRangel::SWGDeviceSetList& response,
             SWGSDRangel::SWGErrorResponse& error);
 
-    virtual int instanceFeatureSetsGet(
-            SWGSDRangel::SWGFeatureSetList& response,
-            SWGSDRangel::SWGErrorResponse& error);
-
     virtual int instanceDeviceSetPost(
             int direction,
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
     virtual int instanceDeviceSetDelete(
-            SWGSDRangel::SWGSuccessResponse& response,
-            SWGSDRangel::SWGErrorResponse& error);
-
-    virtual int instanceFeatureSetPost(
-            SWGSDRangel::SWGSuccessResponse& response,
-            SWGSDRangel::SWGErrorResponse& error);
-
-    virtual int instanceFeatureSetDelete(
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
@@ -457,7 +445,6 @@ private:
     void getDeviceSetList(SWGSDRangel::SWGDeviceSetList* deviceSetList);
     void getDeviceSet(SWGSDRangel::SWGDeviceSet *swgDeviceSet, const DeviceSet* deviceSet, int deviceSetIndex);
     void getChannelsDetail(SWGSDRangel::SWGChannelsDetail *channelsDetail, const DeviceSet* deviceSet);
-    void getFeatureSetList(SWGSDRangel::SWGFeatureSetList* featureSetList);
     void getFeatureSet(SWGSDRangel::SWGFeatureSet *swgFeatureSet, const FeatureSet* featureSet, int featureSetIndex);
     static QtMsgType getMsgTypeFromString(const QString& msgTypeString);
     static void getMsgTypeString(const QtMsgType& msgType, QString& level);

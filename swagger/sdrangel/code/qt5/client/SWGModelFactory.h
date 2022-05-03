@@ -111,7 +111,6 @@
 #include "SWGFeaturePresets.h"
 #include "SWGFeatureReport.h"
 #include "SWGFeatureSet.h"
-#include "SWGFeatureSetList.h"
 #include "SWGFeatureSetPreset.h"
 #include "SWGFeatureSettings.h"
 #include "SWGFileInputReport.h"
@@ -803,11 +802,6 @@ namespace SWGSDRangel {
     }
     if(QString("SWGFeatureSet").compare(type) == 0) {
       SWGFeatureSet *obj = new SWGFeatureSet();
-      obj->init();
-      return obj;
-    }
-    if(QString("SWGFeatureSetList").compare(type) == 0) {
-      SWGFeatureSetList *obj = new SWGFeatureSetList();
       obj->init();
       return obj;
     }

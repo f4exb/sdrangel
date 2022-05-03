@@ -75,8 +75,6 @@
 #include "SWGFeaturePresetGroup.h"
 #include "SWGFeaturePresetItem.h"
 #include "SWGFeaturePresetIdentifier.h"
-#include "SWGFeaturePresetTransfer.h"
-#include "SWGFeatureSetList.h"
 #include "SWGFeatureSettings.h"
 #include "SWGFeatureReport.h"
 #include "SWGFeatureActions.h"
@@ -127,8 +125,8 @@ int WebAPIAdapter::instanceSummary(
     SWGSDRangel::SWGDeviceSetList *deviceSetList = response.getDevicesetlist();
     getDeviceSetList(deviceSetList);
 
-    SWGSDRangel::SWGFeatureSetList *featureSetList = response.getFeaturesetlist();
-    getFeatureSetList(featureSetList);
+    SWGSDRangel::SWGFeatureSet *featureSet = response.getFeatureset();
+    getFeatureSet(featureSet, m_mainCore->m_featureSets.back(), 0);
 
     return 200;
 }
@@ -1489,15 +1487,6 @@ int WebAPIAdapter::instanceDeviceSetsGet(
     return 200;
 }
 
-int WebAPIAdapter::instanceFeatureSetsGet(
-        SWGSDRangel::SWGFeatureSetList& response,
-        SWGSDRangel::SWGErrorResponse& error)
-{
-    (void) error;
-    getFeatureSetList(&response);
-    return 200;
-}
-
 int WebAPIAdapter::instanceDeviceSetPost(
         int direction,
         SWGSDRangel::SWGSuccessResponse& response,
@@ -1533,45 +1522,6 @@ int WebAPIAdapter::instanceDeviceSetDelete(
     {
         error.init();
         *error.getMessage() = "No more device sets to be removed";
-
-        return 404;
-    }
-}
-
-int WebAPIAdapter::instanceFeatureSetPost(
-        SWGSDRangel::SWGSuccessResponse& response,
-        SWGSDRangel::SWGErrorResponse& error)
-{
-    (void) error;
-    MainCore::MsgAddFeatureSet *msg = MainCore::MsgAddFeatureSet::create();
-    m_mainCore->m_mainMessageQueue->push(msg);
-
-    response.init();
-    *response.getMessage() = QString("Message to add a new feature set (MsgAddFeatureSet) was submitted successfully");
-
-    return 202;
-}
-
-int WebAPIAdapter::instanceFeatureSetDelete(
-        SWGSDRangel::SWGSuccessResponse& response,
-        SWGSDRangel::SWGErrorResponse& error)
-{
-    unsigned int minFeatureSets = QCoreApplication::applicationName() == "SDRangelSrv" ? 0 : 1;
-
-    if (m_mainCore->m_featureSets.size() > minFeatureSets)
-    {
-        MainCore::MsgRemoveLastFeatureSet *msg = MainCore::MsgRemoveLastFeatureSet::create();
-        m_mainCore->m_mainMessageQueue->push(msg);
-
-        response.init();
-        *response.getMessage() = QString("Message to remove last feature set (MsgRemoveLastFeatureSet) was submitted successfully");
-
-        return 202;
-    }
-    else
-    {
-        error.init();
-        *error.getMessage() = "No more feature sets to be removed";
 
         return 404;
     }
@@ -3743,21 +3693,6 @@ int WebAPIAdapter::featuresetGet(
         *error.getMessage() = QString("There is no feature set with index %1").arg(featureSetIndex);
 
         return 404;
-    }
-}
-
-void WebAPIAdapter::getFeatureSetList(SWGSDRangel::SWGFeatureSetList* featureSetList)
-{
-    featureSetList->init();
-    featureSetList->setFeaturesetcount((int) m_mainCore->m_featureSets.size());
-
-    std::vector<FeatureSet*>::const_iterator it = m_mainCore->m_featureSets.begin();
-
-    for (int i = 0; it != m_mainCore->m_featureSets.end(); ++it, i++)
-    {
-        QList<SWGSDRangel::SWGFeatureSet*> *featureSets = featureSetList->getFeatureSets();
-        featureSets->append(new SWGSDRangel::SWGFeatureSet());
-        getFeatureSet(featureSets->back(), *it, i);
     }
 }
 

@@ -951,23 +951,6 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
 
-  /sdrangel/featuresets:
-    x-swagger-router-controller: instance
-    get:
-      description: Get summary information about feature sets opened in the instance
-      operationId: instanceFeatureSetsGet
-      tags:
-        - Instance
-      responses:
-        "200":
-          description: On success return feature set list
-          schema:
-            $ref: "#/definitions/FeatureSetList"
-        "500":
-          $ref: "#/responses/Response_500"
-        "501":
-          $ref: "#/responses/Response_501"
-
   /sdrangel/deviceset:
     x-swagger-router-controller: instance
     post:
@@ -1941,41 +1924,6 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
 
-  /sdrangel/featureset:
-    x-swagger-router-controller: instance
-    post:
-      description: Add (append) a new feature set
-      operationId: instanceFeatureSetPost
-      tags:
-        - FeatureSet
-      responses:
-        "202":
-          description: Message to add a new feature set was sent successfully
-          schema:
-            $ref: "#/definitions/SuccessResponse"
-        "500":
-          $ref: "#/responses/Response_500"
-        "501":
-          $ref: "#/responses/Response_501"
-    delete:
-      description: Remove last feature set. The GUI version does not remove the first feature set.
-      operationId: instanceFeatureSetDelete
-      tags:
-        - FeatureSet
-      responses:
-        "202":
-          description: Message to remove last feature set was sent successfully
-          schema:
-            $ref: "#/definitions/SuccessResponse"
-        "404":
-          description: "No more feature sets to be deleted"
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-        "500":
-          $ref: "#/responses/Response_500"
-        "501":
-          $ref: "#/responses/Response_501"
-
   /sdrangel/featureset/{featureSetIndex}:
     x-swagger-router-controller: featureset
     get:
@@ -2532,8 +2480,8 @@ definitions:
         $ref: "#/definitions/LoggingInfo"
       devicesetlist:
         $ref: "#/definitions/DeviceSetList"
-      featuresetlist:
-        $ref: "#/definitions/FeatureSetList"
+      featureset:
+        $ref: "#/definitions/FeatureSet"
 
   InstanceConfigResponse:
     description: Preferences, Presets and Commands of the MainSettings saved by Qt
@@ -2773,18 +2721,6 @@ definitions:
         type: array
         items:
           $ref:  "#/definitions/Feature"
-  FeatureSetList:
-    description: "List of feature sets opened in this instance"
-    required:
-      - featuresetcount
-    properties:
-      featuresetcount:
-        description: "Number of feature sets opened in this instance"
-        type: integer
-      featureSets:
-        type: array
-        items:
-          $ref: "#/definitions/FeatureSet"
 
   SpectrumServer:
     description: "Spectrum server state"

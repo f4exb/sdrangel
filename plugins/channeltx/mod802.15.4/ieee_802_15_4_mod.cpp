@@ -31,7 +31,6 @@
 #include "SWGChannelActions.h"
 #include "SWGIEEE_802_15_4_ModReport.h"
 #include "SWGIEEE_802_15_4_ModActions.h"
-#include "SWGIEEE_802_15_4_ModActions_tx.h"
 
 #include <stdio.h>
 #include <complex.h>

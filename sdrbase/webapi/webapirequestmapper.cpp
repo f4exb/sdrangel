@@ -55,8 +55,6 @@
 #include "SWGErrorResponse.h"
 #include "SWGFeaturePresets.h"
 #include "SWGFeaturePresetIdentifier.h"
-#include "SWGFeaturePresetTransfer.h"
-#include "SWGFeatureSetList.h"
 #include "SWGFeatureSettings.h"
 #include "SWGFeatureReport.h"
 #include "SWGFeatureActions.h"
@@ -161,10 +159,6 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
             instanceDeviceSetsService(request, response);
         } else if (path == WebAPIAdapterInterface::instanceDeviceSetURL) {
             instanceDeviceSetService(request, response);
-        } else if (path == WebAPIAdapterInterface::instanceFeatureSetsURL) {
-            instanceFeatureSetsService(request, response);
-        } else if (path == WebAPIAdapterInterface::instanceFeatureSetURL) {
-            instanceFeatureSetService(request, response);
         }
         else
         {
@@ -1475,33 +1469,6 @@ void WebAPIRequestMapper::instanceDeviceSetsService(qtwebapp::HttpRequest& reque
     }
 }
 
-void WebAPIRequestMapper::instanceFeatureSetsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
-{
-    SWGSDRangel::SWGErrorResponse errorResponse;
-    response.setHeader("Content-Type", "application/json");
-    response.setHeader("Access-Control-Allow-Origin", "*");
-
-    if (request.getMethod() == "GET")
-    {
-        SWGSDRangel::SWGFeatureSetList normalResponse;
-        int status = m_adapter->instanceFeatureSetsGet(normalResponse, errorResponse);
-        response.setStatus(status);
-
-        if (status/100 == 2) {
-            response.write(normalResponse.asJson().toUtf8());
-        } else {
-            response.write(errorResponse.asJson().toUtf8());
-        }
-    }
-    else
-    {
-        response.setStatus(405,"Invalid HTTP method");
-        errorResponse.init();
-        *errorResponse.getMessage() = "Invalid HTTP method";
-        response.write(errorResponse.asJson().toUtf8());
-    }
-}
-
 void WebAPIRequestMapper::instanceDeviceSetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
@@ -1536,46 +1503,6 @@ void WebAPIRequestMapper::instanceDeviceSetService(qtwebapp::HttpRequest& reques
     {
         SWGSDRangel::SWGSuccessResponse normalResponse;
         int status = m_adapter->instanceDeviceSetDelete(normalResponse, errorResponse);
-        response.setStatus(status);
-
-        if (status/100 == 2) {
-            response.write(normalResponse.asJson().toUtf8());
-        } else {
-            response.write(errorResponse.asJson().toUtf8());
-        }
-    }
-    else
-    {
-        response.setStatus(405,"Invalid HTTP method");
-        errorResponse.init();
-        *errorResponse.getMessage() = "Invalid HTTP method";
-        response.write(errorResponse.asJson().toUtf8());
-    }
-}
-
-void WebAPIRequestMapper::instanceFeatureSetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
-{
-    SWGSDRangel::SWGErrorResponse errorResponse;
-    response.setHeader("Content-Type", "application/json");
-    response.setHeader("Access-Control-Allow-Origin", "*");
-
-    if (request.getMethod() == "POST")
-    {
-        SWGSDRangel::SWGSuccessResponse normalResponse;
-
-        int status = m_adapter->instanceFeatureSetPost(normalResponse, errorResponse);
-        response.setStatus(status);
-
-        if (status/100 == 2) {
-            response.write(normalResponse.asJson().toUtf8());
-        } else {
-            response.write(errorResponse.asJson().toUtf8());
-        }
-    }
-    else if (request.getMethod() == "DELETE")
-    {
-        SWGSDRangel::SWGSuccessResponse normalResponse;
-        int status = m_adapter->instanceFeatureSetDelete(normalResponse, errorResponse);
         response.setStatus(status);
 
         if (status/100 == 2) {
@@ -3214,17 +3141,6 @@ bool WebAPIRequestMapper::validatePresetTransfer(SWGSDRangel::SWGPresetTransfer&
 bool WebAPIRequestMapper::validatePresetIdentifer(SWGSDRangel::SWGPresetIdentifier& presetIdentifier)
 {
     return (presetIdentifier.getGroupName() && presetIdentifier.getName() && presetIdentifier.getType());
-}
-
-bool WebAPIRequestMapper::validateFeaturePresetTransfer(SWGSDRangel::SWGFeaturePresetTransfer& presetTransfer)
-{
-    SWGSDRangel::SWGFeaturePresetIdentifier *presetIdentifier = presetTransfer.getPreset();
-
-    if (presetIdentifier == 0) {
-        return false;
-    }
-
-    return validateFeaturePresetIdentifer(*presetIdentifier);
 }
 
 bool WebAPIRequestMapper::validateFeaturePresetIdentifer(SWGSDRangel::SWGFeaturePresetIdentifier& presetIdentifier)

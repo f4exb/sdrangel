@@ -31,7 +31,6 @@
 #include "SWGChannelActions.h"
 #include "SWGPacketModReport.h"
 #include "SWGPacketModActions.h"
-#include "SWGPacketModActions_tx.h"
 
 #include <stdio.h>
 #include <complex.h>
