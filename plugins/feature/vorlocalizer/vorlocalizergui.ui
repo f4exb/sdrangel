@@ -223,7 +223,7 @@ QToolTip{background-color: white; color: black;}</string>
       <item>
        <widget class="QLabel" name="centerShiftLabel">
         <property name="text">
-         <string>Sh</string>
+         <string>Δcf</string>
         </property>
        </widget>
       </item>
