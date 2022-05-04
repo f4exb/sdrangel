@@ -2,7 +2,7 @@
 
 <h2>Introduction</h2>
 
-This plugin can control and receive information from single channel VOR demodulators (see [VOR single channel demodulator](../../channelrx/demodvorsc/readme.md) for details) and collate information from multiple VOR demodulators in order to show your position on a map.
+This plugin can control and receive information from VOR demodulators (see [VOR demodulator](../../channelrx/demodvor/readme.md) for details) and collate information from multiple VOR demodulators in order to show your position on a map.
 
 <h2>Interface</h2>
 
@@ -19,7 +19,7 @@ There are 3 sections in this interface:
 
 <h3>1: Start/Stop plugin</h3>
 
-This button starts or stops the plugin
+This button starts or stops the plugin.
 
 <h3>2: Download VOR Database</h3>
 
@@ -35,7 +35,7 @@ Available VOR demodulator channels are allocated to service the selected VORs on
 
 <h3>5: Round robin turn time progress</h3>
 
-Shows the round robin turn time progress
+Shows the round robin turn time progress.
 
 <h3>6: Force averaging over round robin turn time</h3>
 
