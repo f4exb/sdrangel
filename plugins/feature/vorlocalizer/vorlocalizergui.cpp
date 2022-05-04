@@ -430,6 +430,7 @@ void VORLocalizerGUI::selectVOR(VORGUI *vorGUI, bool selected)
         ui->vorData->setRowCount(row + 1);
         ui->vorData->setItem(row, VORLocalizerSettings::VOR_COL_NAME, vorGUI->m_nameItem);
         ui->vorData->setItem(row, VORLocalizerSettings::VOR_COL_FREQUENCY, vorGUI->m_frequencyItem);
+        ui->vorData->setItem(row, VORLocalizerSettings::VOR_COL_IDENT, vorGUI->m_identItem);
         ui->vorData->setItem(row, VORLocalizerSettings::VOR_COL_MORSE, vorGUI->m_morseItem);
         ui->vorData->setItem(row, VORLocalizerSettings::VOR_COL_RADIAL, vorGUI->m_radialItem);
         ui->vorData->setItem(row, VORLocalizerSettings::VOR_COL_RX_IDENT, vorGUI->m_rxIdentItem);
