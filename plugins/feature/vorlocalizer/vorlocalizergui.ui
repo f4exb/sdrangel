@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>462</width>
+    <width>470</width>
     <height>850</height>
    </rect>
   </property>
@@ -40,7 +40,7 @@
      <x>0</x>
      <y>0</y>
      <width>461</width>
-     <height>61</height>
+     <height>31</height>
     </rect>
    </property>
    <property name="minimumSize">
@@ -86,23 +86,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="getOurAirportsVORDB">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="toolTip">
-         <string>Download OurAirports VOR database</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="icons.qrc">
-          <normaloff>:/demodvor/icons/vor.png</normaloff>:/demodvor/icons/vor.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QPushButton" name="getOpenAIPVORDB">
         <property name="toolTip">
          <string>Download OpenAIP VOR database</string>
@@ -133,6 +116,13 @@
         </property>
         <property name="checked">
          <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_3">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
         </property>
        </widget>
       </item>
@@ -180,7 +170,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Sound volume (%)</string>
+         <string>Round robin turn time (s)</string>
         </property>
         <property name="text">
          <string>20s</string>
@@ -224,9 +214,16 @@ QToolTip{background-color: white; color: black;}</string>
        </widget>
       </item>
       <item>
+       <widget class="Line" name="line_2">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="centerShiftLabel">
         <property name="text">
-         <string>Sh</string>
+         <string>Δcf</string>
         </property>
        </widget>
       </item>
@@ -275,22 +272,12 @@ QToolTip{background-color: white; color: black;}</string>
        </widget>
       </item>
       <item>
-       <spacer name="horizontalSpacer_2">
+       <widget class="Line" name="line">
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Vertical</enum>
         </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
+       </widget>
       </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="vorsLayout">
       <item>
        <widget class="QLabel" name="channelsLabel">
         <property name="text">
@@ -306,27 +293,7 @@ QToolTip{background-color: white; color: black;}</string>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="channelsRefresh">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Refresh VOR channels available</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="../../../sdrgui/resources/res.qrc">
-          <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer">
+       <spacer name="horizontalSpacer_2">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
@@ -345,14 +312,14 @@ QToolTip{background-color: white; color: black;}</string>
   <widget class="QWidget" name="dataContainer" native="true">
    <property name="geometry">
     <rect>
-     <x>0</x>
-     <y>110</y>
-     <width>461</width>
-     <height>145</height>
+     <x>10</x>
+     <y>50</y>
+     <width>441</width>
+     <height>710</height>
     </rect>
    </property>
    <property name="sizePolicy">
-    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
@@ -366,178 +333,146 @@ QToolTip{background-color: white; color: black;}</string>
    <property name="windowTitle">
     <string>VORs</string>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayoutTable">
-    <property name="spacing">
-     <number>2</number>
-    </property>
+   <layout class="QVBoxLayout" name="verticalLayout_2">
     <property name="leftMargin">
-     <number>3</number>
+     <number>0</number>
     </property>
     <property name="topMargin">
-     <number>3</number>
+     <number>0</number>
     </property>
     <property name="rightMargin">
-     <number>3</number>
+     <number>0</number>
     </property>
     <property name="bottomMargin">
-     <number>3</number>
+     <number>0</number>
     </property>
     <item>
-     <widget class="QTableWidget" name="vorData">
-      <property name="editTriggers">
-       <set>QAbstractItemView::NoEditTriggers</set>
-      </property>
-      <column>
-       <property name="text">
-        <string>Name</string>
-       </property>
-       <property name="toolTip">
-        <string>Name of the VOR</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Freq (MHz)</string>
-       </property>
-       <property name="toolTip">
-        <string>Frequency of the VOR in MHz</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Nav Id</string>
-       </property>
-       <property name="toolTip">
-        <string>Offset of the VOR's frequency from the current center frequency. Red indicates out of range.</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Ident</string>
-       </property>
-       <property name="toolTip">
-        <string>Ident for the VOR</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Morse</string>
-       </property>
-       <property name="toolTip">
-        <string>Morse code ident for the VOR</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>RX Ident</string>
-       </property>
-       <property name="toolTip">
-        <string>Received ident</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>RX Morse</string>
-       </property>
-       <property name="toolTip">
-        <string>Received Morse code ident</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Radial (°)</string>
-       </property>
-       <property name="toolTip">
-        <string>Calculated radial from the VOR</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Ref (dB)</string>
-       </property>
-       <property name="toolTip">
-        <string>Magnitude of received reference signal in dB</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Var (dB)</string>
-       </property>
-       <property name="toolTip">
-        <string>Magnitude of received variable signal in dB</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Mute</string>
-       </property>
-       <property name="toolTip">
-        <string>Mute/unmute audio from selected VORs</string>
-       </property>
-      </column>
-     </widget>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QWidget" name="mapContainer" native="true">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>258</y>
-     <width>461</width>
-     <height>581</height>
-    </rect>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="windowTitle">
-    <string>Map</string>
-   </property>
-   <layout class="QVBoxLayout" name="verticalLayoutMap" stretch="0">
-    <property name="spacing">
-     <number>2</number>
-    </property>
-    <property name="leftMargin">
-     <number>3</number>
-    </property>
-    <property name="topMargin">
-     <number>3</number>
-    </property>
-    <property name="rightMargin">
-     <number>3</number>
-    </property>
-    <property name="bottomMargin">
-     <number>3</number>
-    </property>
-    <item>
-     <widget class="QQuickWidget" name="map">
+     <widget class="QSplitter" name="splitter">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
-      <property name="minimumSize">
-       <size>
-        <width>100</width>
-        <height>500</height>
-       </size>
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
       </property>
-      <property name="toolTip">
-       <string>VOR map</string>
-      </property>
-      <property name="resizeMode">
-       <enum>QQuickWidget::SizeRootObjectToView</enum>
-      </property>
-      <property name="source">
-       <url>
-        <string/>
-       </url>
-      </property>
+      <widget class="QTableWidget" name="vorData">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>1</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="editTriggers">
+        <set>QAbstractItemView::NoEditTriggers</set>
+       </property>
+       <column>
+        <property name="text">
+         <string>Name</string>
+        </property>
+        <property name="toolTip">
+         <string>Name of the VOR</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Freq (MHz)</string>
+        </property>
+        <property name="toolTip">
+         <string>Frequency of the VOR in MHz</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Ident</string>
+        </property>
+        <property name="toolTip">
+         <string>Ident for the VOR</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Morse</string>
+        </property>
+        <property name="toolTip">
+         <string>Morse code ident for the VOR</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>RX Ident</string>
+        </property>
+        <property name="toolTip">
+         <string>Received ident</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>RX Morse</string>
+        </property>
+        <property name="toolTip">
+         <string>Received Morse code ident</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Radial (°)</string>
+        </property>
+        <property name="toolTip">
+         <string>Calculated radial from the VOR</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Ref (dB)</string>
+        </property>
+        <property name="toolTip">
+         <string>Magnitude of received reference signal in dB</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Var (dB)</string>
+        </property>
+        <property name="toolTip">
+         <string>Magnitude of received variable signal in dB</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Mute</string>
+        </property>
+        <property name="toolTip">
+         <string>Mute/unmute audio from selected VORs</string>
+        </property>
+       </column>
+      </widget>
+      <widget class="QQuickWidget" name="map">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>4</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>500</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>VOR map</string>
+       </property>
+       <property name="resizeMode">
+        <enum>QQuickWidget::SizeRootObjectToView</enum>
+       </property>
+       <property name="source">
+        <url>
+         <string/>
+        </url>
+       </property>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -562,9 +497,7 @@ QToolTip{background-color: white; color: black;}</string>
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>getOurAirportsVORDB</tabstop>
   <tabstop>vorData</tabstop>
-  <tabstop>map</tabstop>
  </tabstops>
  <resources>
   <include location="../../../sdrgui/resources/res.qrc"/>

@@ -401,6 +401,21 @@ void VORDemodSCSink::applySettings(const VORDemodSettings& settings, bool force)
         m_squelchLevel = CalcDb::powerFromdB(settings.m_squelch);
     }
 
+    if (m_settings.m_navId != settings.m_navId)
+    {
+        // Reset state when navId changes, so we don't report old ident for new navId
+        m_binSampleCnt = 0;
+        m_binCnt = 0;
+        m_identNoise = 0.0001f;
+        for (int i = 0; i < m_identBins; i++)
+        {
+            m_identMaxs[i] = 0.0f;
+        }
+        m_ident = "";
+        m_refGoertzel.reset();
+        m_varGoertzel.reset();
+    }
+
     m_settings = settings;
 }
 

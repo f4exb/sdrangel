@@ -121,6 +121,7 @@ private:
         RRDevice m_device;
         int m_bandwidth;
         std::vector<RRChannel> m_channels;
+        bool m_fixedCenterFrequency;    // Devices such as FileInput that can't have center freq changed
 
         RRTurnPlan() = default;
         RRTurnPlan(const RRTurnPlan&) = default;
@@ -157,10 +158,11 @@ private:
     void removeVORChannel(int navId);
     void addVORChannel(const VORLocalizerSubChannelSettings& subChannelSettings);
     void updateChannels(); //!< (re)allocate channels to service VORs
-    void allocateChannel(ChannelAPI *channel, int vorFrequency, int vorNavId, int channelShift);
-    void setDeviceFrequency(int deviceIndex, double targetFrequency);
     void setChannelShift(int deviceIndex, int channelIndex, double targetOffset, int vorNavId);
     void setAudioMute(int vorNavId, bool audioMute);
+    static quint64 getDeviceCenterFrequency(int deviceIndex);
+    static int getDeviceSampleRate(int deviceIndex);
+    static bool hasCenterFrequencySetting(int deviceIndex);
     static void generateIndexCombinations(int length, int subLength, std::vector<std::vector<int>>& indexCombinations);
     static void getVORRanges(const QList<VORLocalizerSettings::VORChannel>& vors, int subLength, std::vector<VORRange>& vorRanges);
     static void filterVORRanges(std::vector<VORRange>& vorRanges, int thresholdBW);

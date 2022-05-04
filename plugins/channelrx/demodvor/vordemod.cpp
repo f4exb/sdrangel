@@ -257,6 +257,12 @@ void VORDemod::applySettings(const VORDemodSettings& settings, bool force)
     }
     if ((m_settings.m_navId != settings.m_navId) || force) {
         reverseAPIKeys.append("navId");
+
+        // Reset state so we don't report old data for new NavId
+        m_radial = 0.0f;
+        m_refMag = -200.0f;
+        m_varMag = -200.0f;
+        m_morseIdent = "";
     }
     if ((m_settings.m_squelch != settings.m_squelch) || force) {
         reverseAPIKeys.append("squelch");
@@ -509,7 +515,6 @@ void VORDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response
     double magsqAvg, magsqPeak;
     int nbMagsqSamples;
     getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
-
     response.getVorDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
     response.getVorDemodReport()->setSquelch(m_basebandSink->getSquelchOpen() ? 1 : 0);
     response.getVorDemodReport()->setAudioSampleRate(m_basebandSink->getAudioSampleRate());
