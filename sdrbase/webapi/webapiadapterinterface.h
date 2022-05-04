@@ -1214,11 +1214,11 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int featuresetGet(
-            int deviceSetIndex,
+            int featureSetIndex,
             SWGSDRangel::SWGFeatureSet& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
-        (void) deviceSetIndex;
+        (void) featureSetIndex;
         (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
@@ -1472,6 +1472,9 @@ public:
     static QString instanceFeaturePresetURL;
     static QString instanceDeviceSetsURL;
     static QString instanceDeviceSetURL;
+    static QString featuresetURL;
+    static QString featuresetFeatureURL;
+    static QString featuresetPresetURL;
     static std::regex devicesetURLRe;
     static std::regex devicesetFocusURLRe;
     static std::regex devicesetSpectrumSettingsURLRe;
@@ -1488,9 +1491,6 @@ public:
     static std::regex devicesetChannelReportURLRe;
     static std::regex devicesetChannelActionsURLRe;
     static std::regex devicesetChannelsReportURLRe;
-    static std::regex featuresetURLRe;
-    static std::regex featuresetFeatureURLRe;
-    static std::regex featuresetPresetURLRe;
     static std::regex featuresetFeatureIndexURLRe;
     static std::regex featuresetFeatureRunURLRe;
     static std::regex featuresetFeatureSettingsURLRe;

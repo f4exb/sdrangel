@@ -1924,34 +1924,24 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
 
-  /sdrangel/featureset/{featureSetIndex}:
+  /sdrangel/featureset:
     x-swagger-router-controller: featureset
     get:
-      description: Get feature set information
+      description: Get features information
       operationId: featuresetGet
       tags:
         - FeatureSet
-      parameters:
-        - in: path
-          name: featureSetIndex
-          type: integer
-          required: true
-          description: Index of feature set in the device set list
       responses:
         "200":
-          description: On success return details on the feature set
+          description: On success return details on the features present in the system
           schema:
             $ref: "#/definitions/FeatureSet"
-        "404":
-          description: Invalid index
-          schema:
-            $ref: "#/definitions/ErrorResponse"
         "500":
           $ref: "#/responses/Response_500"
         "501":
           $ref: "#/responses/Response_501"
 
-  /sdrangel/featureset/{featureSetIndex}/feature:
+  /sdrangel/featureset/feature:
     x-swagger-router-controller: featureset
     post:
       description: add a feature
@@ -1959,11 +1949,6 @@ paths:
       tags:
         - FeatureSet
       parameters:
-        - in: path
-          name: featureSetIndex
-          type: integer
-          required: true
-          description: Index of feature set in the feature set list
         - name: body
           in: body
           description: Feature identification (no settings data)
@@ -1975,10 +1960,6 @@ paths:
           description: Message to add a feature was sent successfully
           schema:
             $ref: "#/definitions/SuccessResponse"
-        "400":
-          description: Invalid feature set index
-          schema:
-            $ref: "#/definitions/ErrorResponse"
         "404":
           description: Feature not found
           schema:
@@ -1988,24 +1969,19 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
 
-  /sdrangel/featureset/{featureSetIndex}/preset:
+  /sdrangel/featureset/preset:
     x-swagger-router-controller: featureset
     patch:
-      description: Load a preset in a feature set
+      description: Load a preset in features
       operationId: featuresetPresetPatch
       tags:
         - FeatureSet
       consumes:
         - application/json
       parameters:
-        - in: path
-          name: featureSetIndex
-          type: integer
-          required: true
-          description: Index of feature set in the feature set list
         - name: body
           in: body
-          description: Load preset settings to the feature set
+          description: Load preset settings to the features
           required: true
           schema:
             $ref: "#/definitions/FeaturePresetIdentifier"
@@ -2019,7 +1995,7 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
         "404":
-          description: No preset or feature set found
+          description: No preset found
           schema:
             $ref: "#/definitions/ErrorResponse"
         "500":
@@ -2027,21 +2003,16 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
     put:
-      description: Update an existing preset with feature set settings.
+      description: Update an existing preset with features settings.
       operationId: featuresetPresetPut
       tags:
         - FeatureSet
       consumes:
         - application/json
       parameters:
-        - in: path
-          name: featureSetIndex
-          type: integer
-          required: true
-          description: Index of feature set in the feature set list
         - name: body
           in: body
-          description: save feature set settings to the preset
+          description: save features settings to the preset
           required: true
           schema:
             $ref: "#/definitions/FeaturePresetIdentifier"
@@ -2055,7 +2026,7 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
         "404":
-          description: No preset or feature set found
+          description: No preset found
           schema:
             $ref: "#/definitions/ErrorResponse"
         "500":
@@ -2063,21 +2034,16 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
     post:
-      description: Create a new preset from a feature set settings.
+      description: Create a new preset from features settings.
       operationId: featuresetPresetPost
       tags:
         - FeatureSet
       consumes:
         - application/json
       parameters:
-        - in: path
-          name: featureSetIndex
-          type: integer
-          required: true
-          description: Index of feature set in the feature set list
         - name: body
           in: body
-          description: save feature set settings on a new preset
+          description: save features settings on a new preset
           required: true
           schema:
             $ref: "#/definitions/FeaturePresetIdentifier"
@@ -2103,7 +2069,7 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
 
-  /sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}:
+  /sdrangel/featureset/feature/{featureIndex}:
     x-swagger-router-controller: featureset
     delete:
       description: delete a feature
@@ -2111,11 +2077,6 @@ paths:
       tags:
         - FeatureSet
       parameters:
-        - in: path
-          name: featureSetIndex
-          type: integer
-          required: true
-          description: Index of feature set in the feature set list
         - in: path
           name: featureIndex
           type: integer
@@ -2127,7 +2088,7 @@ paths:
           schema:
             $ref: "/doc/swagger/include/FeatureSettings.yaml#/FeatureSettings"
         "400":
-          description: Invalid feature set or feature index
+          description: Invalid feature index
           schema:
             $ref: "#/definitions/ErrorResponse"
         "404":
@@ -2139,7 +2100,7 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
 
-  /sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}/run:
+  /sdrangel/featureset/feature/{featureIndex}/run:
     x-swagger-router-controller: featureset
     get:
       description: get feature run status
@@ -2147,11 +2108,6 @@ paths:
       tags:
         - FeatureSet
       parameters:
-        - in: path
-          name: featureSetIndex
-          type: integer
-          required: true
-          description: Index of feature set in the feature set list
         - in: path
           name: featureIndex
           type: integer
@@ -2162,10 +2118,6 @@ paths:
           description: On success return current feature run state
           schema:
             $ref: "#/definitions/DeviceState"
-        "400":
-          description: Invalid feature set index
-          schema:
-            $ref: "#/definitions/ErrorResponse"
         "404":
           description: Feature not found
           schema:
@@ -2181,11 +2133,6 @@ paths:
         - FeatureSet
       parameters:
         - in: path
-          name: featureSetIndex
-          type: integer
-          required: true
-          description: Index of feature set in the feature set list
-        - in: path
           name: featureIndex
           type: integer
           required: true
@@ -2195,10 +2142,6 @@ paths:
           description: On success return state before change
           schema:
             $ref: "#/definitions/DeviceState"
-        "400":
-          description: Invalid feature set index
-          schema:
-            $ref: "#/definitions/ErrorResponse"
         "404":
           description: Feature not found
           schema:
@@ -2213,11 +2156,6 @@ paths:
       tags:
         - FeatureSet
       parameters:
-        - in: path
-          name: featureSetIndex
-          type: integer
-          required: true
-          description: Index of feature set in the feature set list
         - in: path
           name: featureIndex
           type: integer
@@ -2241,7 +2179,7 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
 
-  /sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}/settings:
+  /sdrangel/featureset/feature/{featureIndex}/settings:
     x-swagger-router-controller: featureset
     get:
       description: get a feature settings
@@ -2250,22 +2188,17 @@ paths:
         - FeatureSet
       parameters:
         - in: path
-          name: featureSetIndex
-          type: integer
-          required: true
-          description: Index of feature set in the feature set list
-        - in: path
           name: featureIndex
           type: integer
           required: true
-          description: Index of the feature in the features list for this feature set
+          description: Index of the feature in the features list
       responses:
         "200":
           description: On success return feature settings
           schema:
             $ref: "/doc/swagger/include/FeatureSettings.yaml#/FeatureSettings"
         "400":
-          description: Invalid feature set or feature index
+          description: Invalid feature index
           schema:
             $ref: "#/definitions/ErrorResponse"
         "404":
@@ -2283,15 +2216,10 @@ paths:
         - FeatureSet
       parameters:
         - in: path
-          name: featureSetIndex
-          type: integer
-          required: true
-          description: Index of feature set in the feature set list
-        - in: path
           name: featureIndex
           type: integer
           required: true
-          description: Index of the feature in the features list for this feature set
+          description: Index of the feature in the features list
         - name: body
           in: body
           description: Feature settings to apply
@@ -2304,7 +2232,7 @@ paths:
           schema:
             $ref: "/doc/swagger/include/FeatureSettings.yaml#/FeatureSettings"
         "400":
-          description: Invalid feature set or feature index
+          description: Invalid feature index
           schema:
             $ref: "#/definitions/ErrorResponse"
         "404":
@@ -2322,15 +2250,10 @@ paths:
         - FeatureSet
       parameters:
         - in: path
-          name: featureSetIndex
-          type: integer
-          required: true
-          description: Index of feature set in the feature set list
-        - in: path
           name: featureIndex
           type: integer
           required: true
-          description: Index of the feature in the features list for this feature set
+          description: Index of the feature in the features list
         - name: body
           in: body
           description: Feature settings to apply
@@ -2343,7 +2266,7 @@ paths:
           schema:
             $ref: "/doc/swagger/include/FeatureSettings.yaml#/FeatureSettings"
         "400":
-          description: Invalid feature set or feature index
+          description: Invalid feature index
           schema:
             $ref: "#/definitions/ErrorResponse"
         "404":
@@ -2355,7 +2278,7 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
 
-  /sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}/report:
+  /sdrangel/featureset/feature/{featureIndex}/report:
     x-swagger-router-controller: featureset
     get:
       description: get a feature report
@@ -2364,22 +2287,17 @@ paths:
         - FeatureSet
       parameters:
         - in: path
-          name: featureSetIndex
-          type: integer
-          required: true
-          description: Index of feature set in the feature set list
-        - in: path
           name: featureIndex
           type: integer
           required: true
-          description: Index of the feature in the features list for this feature set
+          description: Index of the feature in the features list
       responses:
         "200":
           description: On success return feature report
           schema:
             $ref: "/doc/swagger/include/FeatureReport.yaml#/FeatureReport"
         "400":
-          description: Invalid feature set or feature index
+          description: Invalid feature index
           schema:
             $ref: "#/definitions/ErrorResponse"
         "404":
@@ -2391,7 +2309,7 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
 
-  /sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}/actions:
+  /sdrangel/featureset/feature/{featureIndex}/actions:
     x-swagger-router-controller: featureset
     post:
       description: post an action or actions on a channel
@@ -2400,15 +2318,10 @@ paths:
         - FeatureSet
       parameters:
         - in: path
-          name: featureSetIndex
-          type: integer
-          required: true
-          description: Index of feature set in the feature set list
-        - in: path
           name: featureIndex
           type: integer
           required: true
-          description: Index of the feature in the features list for this feature set
+          description: Index of the feature in the features list
         - name: body
           in: body
           description: Action(s) to apply to the feature
@@ -2421,7 +2334,7 @@ paths:
           schema:
             $ref: "#/definitions/SuccessResponse"
         "400":
-          description: Invalid feature set or feature index
+          description: Invalid feature index
           schema:
             $ref: "#/definitions/ErrorResponse"
         "404":
@@ -2710,9 +2623,6 @@ definitions:
       - index
       - featurecount
     properties:
-      index:
-        description: "Index in the list of feature sets opened in this instance"
-        type: integer
       featurecount:
         description: "Number of features in the set"
         type: integer

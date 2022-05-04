@@ -98,14 +98,14 @@ private:
     void devicesetChannelReportService(const std::string& deviceSetIndexStr, const std::string& channelIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetChannelActionsService(const std::string& deviceSetIndexStr, const std::string& channelIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
 
-    void featuresetService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
-    void featuresetFeatureService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
-    void featuresetPresetService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
-    void featuresetFeatureIndexService(const std::string& featureSetIndexStr, const std::string& featureIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
-    void featuresetFeatureRunService(const std::string& featureSetIndexStr, const std::string& featureIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
-    void featuresetFeatureSettingsService(const std::string& featureSetIndexStr, const std::string& featureIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
-    void featuresetFeatureReportService(const std::string& featureSetIndexStr, const std::string& featureIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
-    void featuresetFeatureActionsService(const std::string& featureSetIndexStr, const std::string& featureIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void featuresetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void featuresetFeatureService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void featuresetPresetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void featuresetFeatureIndexService(const std::string& featureIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void featuresetFeatureRunService(const std::string& featureIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void featuresetFeatureSettingsService(const std::string& featureIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void featuresetFeatureReportService(const std::string& featureIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void featuresetFeatureActionsService(const std::string& featureIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
 
     bool validatePresetTransfer(SWGSDRangel::SWGPresetTransfer& presetTransfer);
     bool validatePresetIdentifer(SWGSDRangel::SWGPresetIdentifier& presetIdentifier);

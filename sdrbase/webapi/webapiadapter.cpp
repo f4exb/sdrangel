@@ -126,7 +126,7 @@ int WebAPIAdapter::instanceSummary(
     getDeviceSetList(deviceSetList);
 
     SWGSDRangel::SWGFeatureSet *featureSet = response.getFeatureset();
-    getFeatureSet(featureSet, m_mainCore->m_featureSets.back(), 0);
+    getFeatureSet(featureSet, m_mainCore->m_featureSets.back());
 
     return 200;
 }
@@ -3683,7 +3683,7 @@ int WebAPIAdapter::featuresetGet(
     if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainCore->m_featureSets.size()))
     {
         const FeatureSet *featureSet = m_mainCore->m_featureSets[featureSetIndex];
-        getFeatureSet(&response, featureSet, featureSetIndex);
+        getFeatureSet(&response, featureSet);
 
         return 200;
     }
@@ -3696,11 +3696,10 @@ int WebAPIAdapter::featuresetGet(
     }
 }
 
-void WebAPIAdapter::getFeatureSet(SWGSDRangel::SWGFeatureSet *swgFeatureSet, const FeatureSet* featureSet, int featureSetIndex)
+void WebAPIAdapter::getFeatureSet(SWGSDRangel::SWGFeatureSet *swgFeatureSet, const FeatureSet* featureSet)
 {
     swgFeatureSet->init();
     swgFeatureSet->setFeaturecount(featureSet->getNumberOfFeatures());
-    swgFeatureSet->setIndex(featureSetIndex);
     QList<SWGSDRangel::SWGFeature*> *features = swgFeatureSet->getFeatures();
 
     for (int i = 0; i < featureSet->getNumberOfFeatures(); i++)

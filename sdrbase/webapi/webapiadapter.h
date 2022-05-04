@@ -445,7 +445,7 @@ private:
     void getDeviceSetList(SWGSDRangel::SWGDeviceSetList* deviceSetList);
     void getDeviceSet(SWGSDRangel::SWGDeviceSet *swgDeviceSet, const DeviceSet* deviceSet, int deviceSetIndex);
     void getChannelsDetail(SWGSDRangel::SWGChannelsDetail *channelsDetail, const DeviceSet* deviceSet);
-    void getFeatureSet(SWGSDRangel::SWGFeatureSet *swgFeatureSet, const FeatureSet* featureSet, int featureSetIndex);
+    void getFeatureSet(SWGSDRangel::SWGFeatureSet *swgFeatureSet, const FeatureSet* featureSet);
     static QtMsgType getMsgTypeFromString(const QString& msgTypeString);
     static void getMsgTypeString(const QtMsgType& msgType, QString& level);
 };

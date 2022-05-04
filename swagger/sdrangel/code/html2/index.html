@@ -5351,12 +5351,8 @@ margin-bottom: 20px;
   "description" : "Base feature report. Only the feature report corresponding to the feature specified in the featureType field is or should be present."
 };
             defs.FeatureSet = {
-  "required" : [ "featurecount", "index" ],
+  "required" : [ "featurecount" ],
   "properties" : {
-    "index" : {
-      "type" : "integer",
-      "description" : "Index in the list of feature sets opened in this instance"
-    },
     "featurecount" : {
       "type" : "integer",
       "description" : "Number of features in the set"
@@ -29027,7 +29023,7 @@ except ApiException as e:
                         <p class="marked">apply all settings unconditionally (force)</p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="put"><code><span class="pln">/sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}/settings</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="put"><code><span class="pln">/sdrangel/featureset/feature/{featureIndex}/settings</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
@@ -29047,7 +29043,7 @@ except ApiException as e:
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-FeatureSet-featuresetFEatureSettingsPut-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X PUT "http://localhost/sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}/settings"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PUT "http://localhost/sdrangel/featureset/feature/{featureIndex}/settings"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-FeatureSet-featuresetFEatureSettingsPut-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -29063,11 +29059,10 @@ public class FeatureSetApiExample {
     public static void main(String[] args) {
         
         FeatureSetApi apiInstance = new FeatureSetApi();
-        Integer featureSetIndex = 56; // Integer | Index of feature set in the feature set list
-        Integer featureIndex = 56; // Integer | Index of the feature in the features list for this feature set
+        Integer featureIndex = 56; // Integer | Index of the feature in the features list
         FeatureSettings body = ; // FeatureSettings | Feature settings to apply
         try {
-            FeatureSettings result = apiInstance.featuresetFEatureSettingsPut(featureSetIndex, featureIndex, body);
+            FeatureSettings result = apiInstance.featuresetFEatureSettingsPut(featureIndex, body);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling FeatureSetApi#featuresetFEatureSettingsPut");
@@ -29084,11 +29079,10 @@ public class FeatureSetApiExample {
 
     public static void main(String[] args) {
         FeatureSetApi apiInstance = new FeatureSetApi();
-        Integer featureSetIndex = 56; // Integer | Index of feature set in the feature set list
-        Integer featureIndex = 56; // Integer | Index of the feature in the features list for this feature set
+        Integer featureIndex = 56; // Integer | Index of the feature in the features list
         FeatureSettings body = ; // FeatureSettings | Feature settings to apply
         try {
-            FeatureSettings result = apiInstance.featuresetFEatureSettingsPut(featureSetIndex, featureIndex, body);
+            FeatureSettings result = apiInstance.featuresetFEatureSettingsPut(featureIndex, body);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling FeatureSetApi#featuresetFEatureSettingsPut");
@@ -29102,14 +29096,12 @@ public class FeatureSetApiExample {
   <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
   </div> -->
                             <div class="tab-pane" id="examples-FeatureSet-featuresetFEatureSettingsPut-0-objc">
-                              <pre class="prettyprint"><code class="language-cpp">Integer *featureSetIndex = 56; // Index of feature set in the feature set list
-Integer *featureIndex = 56; // Index of the feature in the features list for this feature set
+                              <pre class="prettyprint"><code class="language-cpp">Integer *featureIndex = 56; // Index of the feature in the features list
 FeatureSettings *body = ; // Feature settings to apply
 
 FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
 
-[apiInstance featuresetFEatureSettingsPutWith:featureSetIndex
-    featureIndex:featureIndex
+[apiInstance featuresetFEatureSettingsPutWith:featureIndex
     body:body
               completionHandler: ^(FeatureSettings output, NSError* error) {
                             if (output) {
@@ -29127,9 +29119,7 @@ FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
 
 var api = new SdRangel.FeatureSetApi()
 
-var featureSetIndex = 56; // {Integer} Index of feature set in the feature set list
-
-var featureIndex = 56; // {Integer} Index of the feature in the features list for this feature set
+var featureIndex = 56; // {Integer} Index of the feature in the features list
 
 var body = ; // {FeatureSettings} Feature settings to apply
 
@@ -29141,7 +29131,7 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.featuresetFEatureSettingsPut(featureSetIndex, featureIndex, body, callback);
+api.featuresetFEatureSettingsPut(featureIndex, body, callback);
 </code></pre>
                             </div>
 
@@ -29163,13 +29153,12 @@ namespace Example
         {
             
             var apiInstance = new FeatureSetApi();
-            var featureSetIndex = 56;  // Integer | Index of feature set in the feature set list
-            var featureIndex = 56;  // Integer | Index of the feature in the features list for this feature set
+            var featureIndex = 56;  // Integer | Index of the feature in the features list
             var body = new FeatureSettings(); // FeatureSettings | Feature settings to apply
 
             try
             {
-                FeatureSettings result = apiInstance.featuresetFEatureSettingsPut(featureSetIndex, featureIndex, body);
+                FeatureSettings result = apiInstance.featuresetFEatureSettingsPut(featureIndex, body);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -29187,12 +29176,11 @@ namespace Example
 require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new Swagger\Client\Api\FeatureSetApi();
-$featureSetIndex = 56; // Integer | Index of feature set in the feature set list
-$featureIndex = 56; // Integer | Index of the feature in the features list for this feature set
+$featureIndex = 56; // Integer | Index of the feature in the features list
 $body = ; // FeatureSettings | Feature settings to apply
 
 try {
-    $result = $api_instance->featuresetFEatureSettingsPut($featureSetIndex, $featureIndex, $body);
+    $result = $api_instance->featuresetFEatureSettingsPut($featureIndex, $body);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling FeatureSetApi->featuresetFEatureSettingsPut: ', $e->getMessage(), PHP_EOL;
@@ -29206,12 +29194,11 @@ use SWGSDRangel::Configuration;
 use SWGSDRangel::FeatureSetApi;
 
 my $api_instance = SWGSDRangel::FeatureSetApi->new();
-my $featureSetIndex = 56; # Integer | Index of feature set in the feature set list
-my $featureIndex = 56; # Integer | Index of the feature in the features list for this feature set
+my $featureIndex = 56; # Integer | Index of the feature in the features list
 my $body = SWGSDRangel::Object::FeatureSettings->new(); # FeatureSettings | Feature settings to apply
 
 eval { 
-    my $result = $api_instance->featuresetFEatureSettingsPut(featureSetIndex => $featureSetIndex, featureIndex => $featureIndex, body => $body);
+    my $result = $api_instance->featuresetFEatureSettingsPut(featureIndex => $featureIndex, body => $body);
     print Dumper($result);
 };
 if ($@) {
@@ -29228,12 +29215,11 @@ from pprint import pprint
 
 # create an instance of the API class
 api_instance = swagger_sdrangel.FeatureSetApi()
-featureSetIndex = 56 # Integer | Index of feature set in the feature set list
-featureIndex = 56 # Integer | Index of the feature in the features list for this feature set
+featureIndex = 56 # Integer | Index of the feature in the features list
 body =  # FeatureSettings | Feature settings to apply
 
 try: 
-    api_response = api_instance.featureset_f_eature_settings_put(featureSetIndex, featureIndex, body)
+    api_response = api_instance.featureset_f_eature_settings_put(featureIndex, body)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling FeatureSetApi->featuresetFEatureSettingsPut: %s\n" % e)</code></pre>
@@ -29248,29 +29234,6 @@ except ApiException as e:
                                   <th width="150px">Name</th>
                                   <th>Description</th>
                                 </tr>
-                                  <tr><td style="width:150px;">featureSetIndex*</td>
-<td>
-
-
-    <div id="d2e199_featuresetFEatureSettingsPut_featureSetIndex">
-        <div class="json-schema-view">
-            <div class="primitive">
-                <span class="type">
-                    Integer
-                </span>
-
-                    <div class="inner description">
-                        Index of feature set in the feature set list
-                    </div>
-            </div>
-                <div class="inner required">
-                    Required
-                </div>
-        </div>
-    </div>
-</td>
-</tr>
-
                                   <tr><td style="width:150px;">featureIndex*</td>
 <td>
 
@@ -29283,7 +29246,7 @@ except ApiException as e:
                 </span>
 
                     <div class="inner description">
-                        Index of the feature in the features list for this feature set
+                        Index of the feature in the features list
                     </div>
             </div>
                 <div class="inner required">
@@ -29386,7 +29349,7 @@ $(document).ready(function() {
                                 </div>
                             </div>
 
-                            <h3> Status: 400 - Invalid feature set or feature index </h3>
+                            <h3> Status: 400 - Invalid feature index </h3>
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
@@ -29401,7 +29364,7 @@ $(document).ready(function() {
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
-  "description" : "Invalid feature set or feature index",
+  "description" : "Invalid feature index",
   "schema" : {
     "$ref" : "#/definitions/ErrorResponse"
   }
@@ -29573,7 +29536,7 @@ $(document).ready(function() {
                         <p class="marked">post an action or actions on a channel</p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}/actions</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/sdrangel/featureset/feature/{featureIndex}/actions</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
@@ -29593,7 +29556,7 @@ $(document).ready(function() {
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-FeatureSet-featuresetFeatureActionsPost-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X POST "http://localhost/sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}/actions"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X POST "http://localhost/sdrangel/featureset/feature/{featureIndex}/actions"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureActionsPost-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -29609,11 +29572,10 @@ public class FeatureSetApiExample {
     public static void main(String[] args) {
         
         FeatureSetApi apiInstance = new FeatureSetApi();
-        Integer featureSetIndex = 56; // Integer | Index of feature set in the feature set list
-        Integer featureIndex = 56; // Integer | Index of the feature in the features list for this feature set
+        Integer featureIndex = 56; // Integer | Index of the feature in the features list
         FeatureActions body = ; // FeatureActions | Action(s) to apply to the feature
         try {
-            SuccessResponse result = apiInstance.featuresetFeatureActionsPost(featureSetIndex, featureIndex, body);
+            SuccessResponse result = apiInstance.featuresetFeatureActionsPost(featureIndex, body);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling FeatureSetApi#featuresetFeatureActionsPost");
@@ -29630,11 +29592,10 @@ public class FeatureSetApiExample {
 
     public static void main(String[] args) {
         FeatureSetApi apiInstance = new FeatureSetApi();
-        Integer featureSetIndex = 56; // Integer | Index of feature set in the feature set list
-        Integer featureIndex = 56; // Integer | Index of the feature in the features list for this feature set
+        Integer featureIndex = 56; // Integer | Index of the feature in the features list
         FeatureActions body = ; // FeatureActions | Action(s) to apply to the feature
         try {
-            SuccessResponse result = apiInstance.featuresetFeatureActionsPost(featureSetIndex, featureIndex, body);
+            SuccessResponse result = apiInstance.featuresetFeatureActionsPost(featureIndex, body);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling FeatureSetApi#featuresetFeatureActionsPost");
@@ -29648,14 +29609,12 @@ public class FeatureSetApiExample {
   <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
   </div> -->
                             <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureActionsPost-0-objc">
-                              <pre class="prettyprint"><code class="language-cpp">Integer *featureSetIndex = 56; // Index of feature set in the feature set list
-Integer *featureIndex = 56; // Index of the feature in the features list for this feature set
+                              <pre class="prettyprint"><code class="language-cpp">Integer *featureIndex = 56; // Index of the feature in the features list
 FeatureActions *body = ; // Action(s) to apply to the feature
 
 FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
 
-[apiInstance featuresetFeatureActionsPostWith:featureSetIndex
-    featureIndex:featureIndex
+[apiInstance featuresetFeatureActionsPostWith:featureIndex
     body:body
               completionHandler: ^(SuccessResponse output, NSError* error) {
                             if (output) {
@@ -29673,9 +29632,7 @@ FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
 
 var api = new SdRangel.FeatureSetApi()
 
-var featureSetIndex = 56; // {Integer} Index of feature set in the feature set list
-
-var featureIndex = 56; // {Integer} Index of the feature in the features list for this feature set
+var featureIndex = 56; // {Integer} Index of the feature in the features list
 
 var body = ; // {FeatureActions} Action(s) to apply to the feature
 
@@ -29687,7 +29644,7 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.featuresetFeatureActionsPost(featureSetIndex, featureIndex, body, callback);
+api.featuresetFeatureActionsPost(featureIndex, body, callback);
 </code></pre>
                             </div>
 
@@ -29709,13 +29666,12 @@ namespace Example
         {
             
             var apiInstance = new FeatureSetApi();
-            var featureSetIndex = 56;  // Integer | Index of feature set in the feature set list
-            var featureIndex = 56;  // Integer | Index of the feature in the features list for this feature set
+            var featureIndex = 56;  // Integer | Index of the feature in the features list
             var body = new FeatureActions(); // FeatureActions | Action(s) to apply to the feature
 
             try
             {
-                SuccessResponse result = apiInstance.featuresetFeatureActionsPost(featureSetIndex, featureIndex, body);
+                SuccessResponse result = apiInstance.featuresetFeatureActionsPost(featureIndex, body);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -29733,12 +29689,11 @@ namespace Example
 require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new Swagger\Client\Api\FeatureSetApi();
-$featureSetIndex = 56; // Integer | Index of feature set in the feature set list
-$featureIndex = 56; // Integer | Index of the feature in the features list for this feature set
+$featureIndex = 56; // Integer | Index of the feature in the features list
 $body = ; // FeatureActions | Action(s) to apply to the feature
 
 try {
-    $result = $api_instance->featuresetFeatureActionsPost($featureSetIndex, $featureIndex, $body);
+    $result = $api_instance->featuresetFeatureActionsPost($featureIndex, $body);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling FeatureSetApi->featuresetFeatureActionsPost: ', $e->getMessage(), PHP_EOL;
@@ -29752,12 +29707,11 @@ use SWGSDRangel::Configuration;
 use SWGSDRangel::FeatureSetApi;
 
 my $api_instance = SWGSDRangel::FeatureSetApi->new();
-my $featureSetIndex = 56; # Integer | Index of feature set in the feature set list
-my $featureIndex = 56; # Integer | Index of the feature in the features list for this feature set
+my $featureIndex = 56; # Integer | Index of the feature in the features list
 my $body = SWGSDRangel::Object::FeatureActions->new(); # FeatureActions | Action(s) to apply to the feature
 
 eval { 
-    my $result = $api_instance->featuresetFeatureActionsPost(featureSetIndex => $featureSetIndex, featureIndex => $featureIndex, body => $body);
+    my $result = $api_instance->featuresetFeatureActionsPost(featureIndex => $featureIndex, body => $body);
     print Dumper($result);
 };
 if ($@) {
@@ -29774,12 +29728,11 @@ from pprint import pprint
 
 # create an instance of the API class
 api_instance = swagger_sdrangel.FeatureSetApi()
-featureSetIndex = 56 # Integer | Index of feature set in the feature set list
-featureIndex = 56 # Integer | Index of the feature in the features list for this feature set
+featureIndex = 56 # Integer | Index of the feature in the features list
 body =  # FeatureActions | Action(s) to apply to the feature
 
 try: 
-    api_response = api_instance.featureset_feature_actions_post(featureSetIndex, featureIndex, body)
+    api_response = api_instance.featureset_feature_actions_post(featureIndex, body)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling FeatureSetApi->featuresetFeatureActionsPost: %s\n" % e)</code></pre>
@@ -29794,29 +29747,6 @@ except ApiException as e:
                                   <th width="150px">Name</th>
                                   <th>Description</th>
                                 </tr>
-                                  <tr><td style="width:150px;">featureSetIndex*</td>
-<td>
-
-
-    <div id="d2e199_featuresetFeatureActionsPost_featureSetIndex">
-        <div class="json-schema-view">
-            <div class="primitive">
-                <span class="type">
-                    Integer
-                </span>
-
-                    <div class="inner description">
-                        Index of feature set in the feature set list
-                    </div>
-            </div>
-                <div class="inner required">
-                    Required
-                </div>
-        </div>
-    </div>
-</td>
-</tr>
-
                                   <tr><td style="width:150px;">featureIndex*</td>
 <td>
 
@@ -29829,7 +29759,7 @@ except ApiException as e:
                 </span>
 
                     <div class="inner description">
-                        Index of the feature in the features list for this feature set
+                        Index of the feature in the features list
                     </div>
             </div>
                 <div class="inner required">
@@ -29932,7 +29862,7 @@ $(document).ready(function() {
                                 </div>
                             </div>
 
-                            <h3> Status: 400 - Invalid feature set or feature index </h3>
+                            <h3> Status: 400 - Invalid feature index </h3>
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
@@ -29947,7 +29877,7 @@ $(document).ready(function() {
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
-  "description" : "Invalid feature set or feature index",
+  "description" : "Invalid feature index",
   "schema" : {
     "$ref" : "#/definitions/ErrorResponse"
   }
@@ -30119,7 +30049,7 @@ $(document).ready(function() {
                         <p class="marked">delete a feature</p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="delete"><code><span class="pln">/sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="delete"><code><span class="pln">/sdrangel/featureset/feature/{featureIndex}</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
@@ -30139,7 +30069,7 @@ $(document).ready(function() {
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-FeatureSet-featuresetFeatureDelete-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X DELETE "http://localhost/sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X DELETE "http://localhost/sdrangel/featureset/feature/{featureIndex}"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureDelete-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -30155,10 +30085,9 @@ public class FeatureSetApiExample {
     public static void main(String[] args) {
         
         FeatureSetApi apiInstance = new FeatureSetApi();
-        Integer featureSetIndex = 56; // Integer | Index of feature set in the feature set list
         Integer featureIndex = 56; // Integer | Index of feature in the features list
         try {
-            FeatureSettings result = apiInstance.featuresetFeatureDelete(featureSetIndex, featureIndex);
+            FeatureSettings result = apiInstance.featuresetFeatureDelete(featureIndex);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling FeatureSetApi#featuresetFeatureDelete");
@@ -30175,10 +30104,9 @@ public class FeatureSetApiExample {
 
     public static void main(String[] args) {
         FeatureSetApi apiInstance = new FeatureSetApi();
-        Integer featureSetIndex = 56; // Integer | Index of feature set in the feature set list
         Integer featureIndex = 56; // Integer | Index of feature in the features list
         try {
-            FeatureSettings result = apiInstance.featuresetFeatureDelete(featureSetIndex, featureIndex);
+            FeatureSettings result = apiInstance.featuresetFeatureDelete(featureIndex);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling FeatureSetApi#featuresetFeatureDelete");
@@ -30192,13 +30120,11 @@ public class FeatureSetApiExample {
   <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
   </div> -->
                             <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureDelete-0-objc">
-                              <pre class="prettyprint"><code class="language-cpp">Integer *featureSetIndex = 56; // Index of feature set in the feature set list
-Integer *featureIndex = 56; // Index of feature in the features list
+                              <pre class="prettyprint"><code class="language-cpp">Integer *featureIndex = 56; // Index of feature in the features list
 
 FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
 
-[apiInstance featuresetFeatureDeleteWith:featureSetIndex
-    featureIndex:featureIndex
+[apiInstance featuresetFeatureDeleteWith:featureIndex
               completionHandler: ^(FeatureSettings output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -30215,8 +30141,6 @@ FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
 
 var api = new SdRangel.FeatureSetApi()
 
-var featureSetIndex = 56; // {Integer} Index of feature set in the feature set list
-
 var featureIndex = 56; // {Integer} Index of feature in the features list
 
 
@@ -30227,7 +30151,7 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.featuresetFeatureDelete(featureSetIndex, featureIndex, callback);
+api.featuresetFeatureDelete(featureIndex, callback);
 </code></pre>
                             </div>
 
@@ -30249,12 +30173,11 @@ namespace Example
         {
             
             var apiInstance = new FeatureSetApi();
-            var featureSetIndex = 56;  // Integer | Index of feature set in the feature set list
             var featureIndex = 56;  // Integer | Index of feature in the features list
 
             try
             {
-                FeatureSettings result = apiInstance.featuresetFeatureDelete(featureSetIndex, featureIndex);
+                FeatureSettings result = apiInstance.featuresetFeatureDelete(featureIndex);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -30272,11 +30195,10 @@ namespace Example
 require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new Swagger\Client\Api\FeatureSetApi();
-$featureSetIndex = 56; // Integer | Index of feature set in the feature set list
 $featureIndex = 56; // Integer | Index of feature in the features list
 
 try {
-    $result = $api_instance->featuresetFeatureDelete($featureSetIndex, $featureIndex);
+    $result = $api_instance->featuresetFeatureDelete($featureIndex);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling FeatureSetApi->featuresetFeatureDelete: ', $e->getMessage(), PHP_EOL;
@@ -30290,11 +30212,10 @@ use SWGSDRangel::Configuration;
 use SWGSDRangel::FeatureSetApi;
 
 my $api_instance = SWGSDRangel::FeatureSetApi->new();
-my $featureSetIndex = 56; # Integer | Index of feature set in the feature set list
 my $featureIndex = 56; # Integer | Index of feature in the features list
 
 eval { 
-    my $result = $api_instance->featuresetFeatureDelete(featureSetIndex => $featureSetIndex, featureIndex => $featureIndex);
+    my $result = $api_instance->featuresetFeatureDelete(featureIndex => $featureIndex);
     print Dumper($result);
 };
 if ($@) {
@@ -30311,11 +30232,10 @@ from pprint import pprint
 
 # create an instance of the API class
 api_instance = swagger_sdrangel.FeatureSetApi()
-featureSetIndex = 56 # Integer | Index of feature set in the feature set list
 featureIndex = 56 # Integer | Index of feature in the features list
 
 try: 
-    api_response = api_instance.featureset_feature_delete(featureSetIndex, featureIndex)
+    api_response = api_instance.featureset_feature_delete(featureIndex)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling FeatureSetApi->featuresetFeatureDelete: %s\n" % e)</code></pre>
@@ -30330,29 +30250,6 @@ except ApiException as e:
                                   <th width="150px">Name</th>
                                   <th>Description</th>
                                 </tr>
-                                  <tr><td style="width:150px;">featureSetIndex*</td>
-<td>
-
-
-    <div id="d2e199_featuresetFeatureDelete_featureSetIndex">
-        <div class="json-schema-view">
-            <div class="primitive">
-                <span class="type">
-                    Integer
-                </span>
-
-                    <div class="inner description">
-                        Index of feature set in the feature set list
-                    </div>
-            </div>
-                <div class="inner required">
-                    Required
-                </div>
-        </div>
-    </div>
-</td>
-</tr>
-
                                   <tr><td style="width:150px;">featureIndex*</td>
 <td>
 
@@ -30426,7 +30323,7 @@ except ApiException as e:
                                 </div>
                             </div>
 
-                            <h3> Status: 400 - Invalid feature set or feature index </h3>
+                            <h3> Status: 400 - Invalid feature index </h3>
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
@@ -30441,7 +30338,7 @@ except ApiException as e:
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
-  "description" : "Invalid feature set or feature index",
+  "description" : "Invalid feature index",
   "schema" : {
     "$ref" : "#/definitions/ErrorResponse"
   }
@@ -30613,7 +30510,7 @@ except ApiException as e:
                         <p class="marked">add a feature</p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/sdrangel/featureset/{featureSetIndex}/feature</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/sdrangel/featureset/feature</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
@@ -30633,7 +30530,7 @@ except ApiException as e:
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-FeatureSet-featuresetFeaturePost-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X POST "http://localhost/sdrangel/featureset/{featureSetIndex}/feature"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X POST "http://localhost/sdrangel/featureset/feature"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-FeatureSet-featuresetFeaturePost-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -30649,10 +30546,9 @@ public class FeatureSetApiExample {
     public static void main(String[] args) {
         
         FeatureSetApi apiInstance = new FeatureSetApi();
-        Integer featureSetIndex = 56; // Integer | Index of feature set in the feature set list
         FeatureSettings body = ; // FeatureSettings | Feature identification (no settings data)
         try {
-            SuccessResponse result = apiInstance.featuresetFeaturePost(featureSetIndex, body);
+            SuccessResponse result = apiInstance.featuresetFeaturePost(body);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling FeatureSetApi#featuresetFeaturePost");
@@ -30669,10 +30565,9 @@ public class FeatureSetApiExample {
 
     public static void main(String[] args) {
         FeatureSetApi apiInstance = new FeatureSetApi();
-        Integer featureSetIndex = 56; // Integer | Index of feature set in the feature set list
         FeatureSettings body = ; // FeatureSettings | Feature identification (no settings data)
         try {
-            SuccessResponse result = apiInstance.featuresetFeaturePost(featureSetIndex, body);
+            SuccessResponse result = apiInstance.featuresetFeaturePost(body);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling FeatureSetApi#featuresetFeaturePost");
@@ -30686,13 +30581,11 @@ public class FeatureSetApiExample {
   <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
   </div> -->
                             <div class="tab-pane" id="examples-FeatureSet-featuresetFeaturePost-0-objc">
-                              <pre class="prettyprint"><code class="language-cpp">Integer *featureSetIndex = 56; // Index of feature set in the feature set list
-FeatureSettings *body = ; // Feature identification (no settings data)
+                              <pre class="prettyprint"><code class="language-cpp">FeatureSettings *body = ; // Feature identification (no settings data)
 
 FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
 
-[apiInstance featuresetFeaturePostWith:featureSetIndex
-    body:body
+[apiInstance featuresetFeaturePostWith:body
               completionHandler: ^(SuccessResponse output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -30709,8 +30602,6 @@ FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
 
 var api = new SdRangel.FeatureSetApi()
 
-var featureSetIndex = 56; // {Integer} Index of feature set in the feature set list
-
 var body = ; // {FeatureSettings} Feature identification (no settings data)
 
 
@@ -30721,7 +30612,7 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.featuresetFeaturePost(featureSetIndex, body, callback);
+api.featuresetFeaturePost(body, callback);
 </code></pre>
                             </div>
 
@@ -30743,12 +30634,11 @@ namespace Example
         {
             
             var apiInstance = new FeatureSetApi();
-            var featureSetIndex = 56;  // Integer | Index of feature set in the feature set list
             var body = new FeatureSettings(); // FeatureSettings | Feature identification (no settings data)
 
             try
             {
-                SuccessResponse result = apiInstance.featuresetFeaturePost(featureSetIndex, body);
+                SuccessResponse result = apiInstance.featuresetFeaturePost(body);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -30766,11 +30656,10 @@ namespace Example
 require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new Swagger\Client\Api\FeatureSetApi();
-$featureSetIndex = 56; // Integer | Index of feature set in the feature set list
 $body = ; // FeatureSettings | Feature identification (no settings data)
 
 try {
-    $result = $api_instance->featuresetFeaturePost($featureSetIndex, $body);
+    $result = $api_instance->featuresetFeaturePost($body);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling FeatureSetApi->featuresetFeaturePost: ', $e->getMessage(), PHP_EOL;
@@ -30784,11 +30673,10 @@ use SWGSDRangel::Configuration;
 use SWGSDRangel::FeatureSetApi;
 
 my $api_instance = SWGSDRangel::FeatureSetApi->new();
-my $featureSetIndex = 56; # Integer | Index of feature set in the feature set list
 my $body = SWGSDRangel::Object::FeatureSettings->new(); # FeatureSettings | Feature identification (no settings data)
 
 eval { 
-    my $result = $api_instance->featuresetFeaturePost(featureSetIndex => $featureSetIndex, body => $body);
+    my $result = $api_instance->featuresetFeaturePost(body => $body);
     print Dumper($result);
 };
 if ($@) {
@@ -30805,11 +30693,10 @@ from pprint import pprint
 
 # create an instance of the API class
 api_instance = swagger_sdrangel.FeatureSetApi()
-featureSetIndex = 56 # Integer | Index of feature set in the feature set list
 body =  # FeatureSettings | Feature identification (no settings data)
 
 try: 
-    api_response = api_instance.featureset_feature_post(featureSetIndex, body)
+    api_response = api_instance.featureset_feature_post(body)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling FeatureSetApi->featuresetFeaturePost: %s\n" % e)</code></pre>
@@ -30818,36 +30705,6 @@ except ApiException as e:
 
                           <h2>Parameters</h2>
 
-                            <div class="methodsubtabletitle">Path parameters</div>
-                            <table id="methodsubtable">
-                                <tr>
-                                  <th width="150px">Name</th>
-                                  <th>Description</th>
-                                </tr>
-                                  <tr><td style="width:150px;">featureSetIndex*</td>
-<td>
-
-
-    <div id="d2e199_featuresetFeaturePost_featureSetIndex">
-        <div class="json-schema-view">
-            <div class="primitive">
-                <span class="type">
-                    Integer
-                </span>
-
-                    <div class="inner description">
-                        Index of feature set in the feature set list
-                    </div>
-            </div>
-                <div class="inner required">
-                    Required
-                </div>
-        </div>
-    </div>
-</td>
-</tr>
-
-                            </table>
 
 
                             <div class="methodsubtabletitle">Body parameters</div>
@@ -30936,49 +30793,6 @@ $(document).ready(function() {
                                     </script>
                                   </div>
                                   <input id='responses-featuresetFeaturePost-202-schema-data' type='hidden' value=''></input>
-                                </div>
-                            </div>
-
-                            <h3> Status: 400 - Invalid feature set index </h3>
-
-                            <ul class="nav nav-tabs nav-tabs-examples" >
-                                <li class="active">
-                                  <a data-toggle="tab" href="#responses-featuresetFeaturePost-400-schema">Schema</a>
-                                </li>
-
-                            </ul>
-
-                            <div class="tab-content" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-featuresetFeaturePost-400-schema">
-                                  <div id='responses-featuresetFeaturePost-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
-                                    <script>
-                                      $(document).ready(function() {
-                                        var schemaWrapper = {
-  "description" : "Invalid feature set index",
-  "schema" : {
-    "$ref" : "#/definitions/ErrorResponse"
-  }
-};
-                                        var schema = schemaWrapper.schema;
-                                        if (schema.$ref != null) {
-                                          schema = defsParser.$refs.get(schema.$ref);
-                                        } else {
-                                          schemaWrapper.definitions = Object.assign({}, defs);
-                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
-                                            console.log(err);
-                                          });
-                                        }
-
-                                        //console.log(JSON.stringify(schema));
-                                        var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-featuresetFeaturePost-400-schema-data').val(stringify(schema));
-                                        var result = $('#responses-featuresetFeaturePost-400-schema-400');
-                                        result.empty();
-                                        result.append(view.render());
-                                      });
-                                    </script>
-                                  </div>
-                                  <input id='responses-featuresetFeaturePost-400-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
@@ -31126,7 +30940,7 @@ $(document).ready(function() {
                         <p class="marked">get a feature report</p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}/report</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrangel/featureset/feature/{featureIndex}/report</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
@@ -31146,7 +30960,7 @@ $(document).ready(function() {
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-FeatureSet-featuresetFeatureReportGet-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}/report"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/featureset/feature/{featureIndex}/report"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureReportGet-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -31162,10 +30976,9 @@ public class FeatureSetApiExample {
     public static void main(String[] args) {
         
         FeatureSetApi apiInstance = new FeatureSetApi();
-        Integer featureSetIndex = 56; // Integer | Index of feature set in the feature set list
-        Integer featureIndex = 56; // Integer | Index of the feature in the features list for this feature set
+        Integer featureIndex = 56; // Integer | Index of the feature in the features list
         try {
-            FeatureReport result = apiInstance.featuresetFeatureReportGet(featureSetIndex, featureIndex);
+            FeatureReport result = apiInstance.featuresetFeatureReportGet(featureIndex);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling FeatureSetApi#featuresetFeatureReportGet");
@@ -31182,10 +30995,9 @@ public class FeatureSetApiExample {
 
     public static void main(String[] args) {
         FeatureSetApi apiInstance = new FeatureSetApi();
-        Integer featureSetIndex = 56; // Integer | Index of feature set in the feature set list
-        Integer featureIndex = 56; // Integer | Index of the feature in the features list for this feature set
+        Integer featureIndex = 56; // Integer | Index of the feature in the features list
         try {
-            FeatureReport result = apiInstance.featuresetFeatureReportGet(featureSetIndex, featureIndex);
+            FeatureReport result = apiInstance.featuresetFeatureReportGet(featureIndex);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling FeatureSetApi#featuresetFeatureReportGet");
@@ -31199,13 +31011,11 @@ public class FeatureSetApiExample {
   <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
   </div> -->
                             <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureReportGet-0-objc">
-                              <pre class="prettyprint"><code class="language-cpp">Integer *featureSetIndex = 56; // Index of feature set in the feature set list
-Integer *featureIndex = 56; // Index of the feature in the features list for this feature set
+                              <pre class="prettyprint"><code class="language-cpp">Integer *featureIndex = 56; // Index of the feature in the features list
 
 FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
 
-[apiInstance featuresetFeatureReportGetWith:featureSetIndex
-    featureIndex:featureIndex
+[apiInstance featuresetFeatureReportGetWith:featureIndex
               completionHandler: ^(FeatureReport output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -31222,9 +31032,7 @@ FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
 
 var api = new SdRangel.FeatureSetApi()
 
-var featureSetIndex = 56; // {Integer} Index of feature set in the feature set list
-
-var featureIndex = 56; // {Integer} Index of the feature in the features list for this feature set
+var featureIndex = 56; // {Integer} Index of the feature in the features list
 
 
 var callback = function(error, data, response) {
@@ -31234,7 +31042,7 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.featuresetFeatureReportGet(featureSetIndex, featureIndex, callback);
+api.featuresetFeatureReportGet(featureIndex, callback);
 </code></pre>
                             </div>
 
@@ -31256,12 +31064,11 @@ namespace Example
         {
             
             var apiInstance = new FeatureSetApi();
-            var featureSetIndex = 56;  // Integer | Index of feature set in the feature set list
-            var featureIndex = 56;  // Integer | Index of the feature in the features list for this feature set
+            var featureIndex = 56;  // Integer | Index of the feature in the features list
 
             try
             {
-                FeatureReport result = apiInstance.featuresetFeatureReportGet(featureSetIndex, featureIndex);
+                FeatureReport result = apiInstance.featuresetFeatureReportGet(featureIndex);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -31279,11 +31086,10 @@ namespace Example
 require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new Swagger\Client\Api\FeatureSetApi();
-$featureSetIndex = 56; // Integer | Index of feature set in the feature set list
-$featureIndex = 56; // Integer | Index of the feature in the features list for this feature set
+$featureIndex = 56; // Integer | Index of the feature in the features list
 
 try {
-    $result = $api_instance->featuresetFeatureReportGet($featureSetIndex, $featureIndex);
+    $result = $api_instance->featuresetFeatureReportGet($featureIndex);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling FeatureSetApi->featuresetFeatureReportGet: ', $e->getMessage(), PHP_EOL;
@@ -31297,11 +31103,10 @@ use SWGSDRangel::Configuration;
 use SWGSDRangel::FeatureSetApi;
 
 my $api_instance = SWGSDRangel::FeatureSetApi->new();
-my $featureSetIndex = 56; # Integer | Index of feature set in the feature set list
-my $featureIndex = 56; # Integer | Index of the feature in the features list for this feature set
+my $featureIndex = 56; # Integer | Index of the feature in the features list
 
 eval { 
-    my $result = $api_instance->featuresetFeatureReportGet(featureSetIndex => $featureSetIndex, featureIndex => $featureIndex);
+    my $result = $api_instance->featuresetFeatureReportGet(featureIndex => $featureIndex);
     print Dumper($result);
 };
 if ($@) {
@@ -31318,11 +31123,10 @@ from pprint import pprint
 
 # create an instance of the API class
 api_instance = swagger_sdrangel.FeatureSetApi()
-featureSetIndex = 56 # Integer | Index of feature set in the feature set list
-featureIndex = 56 # Integer | Index of the feature in the features list for this feature set
+featureIndex = 56 # Integer | Index of the feature in the features list
 
 try: 
-    api_response = api_instance.featureset_feature_report_get(featureSetIndex, featureIndex)
+    api_response = api_instance.featureset_feature_report_get(featureIndex)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling FeatureSetApi->featuresetFeatureReportGet: %s\n" % e)</code></pre>
@@ -31337,29 +31141,6 @@ except ApiException as e:
                                   <th width="150px">Name</th>
                                   <th>Description</th>
                                 </tr>
-                                  <tr><td style="width:150px;">featureSetIndex*</td>
-<td>
-
-
-    <div id="d2e199_featuresetFeatureReportGet_featureSetIndex">
-        <div class="json-schema-view">
-            <div class="primitive">
-                <span class="type">
-                    Integer
-                </span>
-
-                    <div class="inner description">
-                        Index of feature set in the feature set list
-                    </div>
-            </div>
-                <div class="inner required">
-                    Required
-                </div>
-        </div>
-    </div>
-</td>
-</tr>
-
                                   <tr><td style="width:150px;">featureIndex*</td>
 <td>
 
@@ -31372,7 +31153,7 @@ except ApiException as e:
                 </span>
 
                     <div class="inner description">
-                        Index of the feature in the features list for this feature set
+                        Index of the feature in the features list
                     </div>
             </div>
                 <div class="inner required">
@@ -31433,7 +31214,7 @@ except ApiException as e:
                                 </div>
                             </div>
 
-                            <h3> Status: 400 - Invalid feature set or feature index </h3>
+                            <h3> Status: 400 - Invalid feature index </h3>
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
@@ -31448,7 +31229,7 @@ except ApiException as e:
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
-  "description" : "Invalid feature set or feature index",
+  "description" : "Invalid feature index",
   "schema" : {
     "$ref" : "#/definitions/ErrorResponse"
   }
@@ -31620,7 +31401,7 @@ except ApiException as e:
                         <p class="marked">stop feature</p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="delete"><code><span class="pln">/sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}/run</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="delete"><code><span class="pln">/sdrangel/featureset/feature/{featureIndex}/run</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
@@ -31640,7 +31421,7 @@ except ApiException as e:
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-FeatureSet-featuresetFeatureRunDelete-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X DELETE "http://localhost/sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}/run"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X DELETE "http://localhost/sdrangel/featureset/feature/{featureIndex}/run"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureRunDelete-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -31656,10 +31437,9 @@ public class FeatureSetApiExample {
     public static void main(String[] args) {
         
         FeatureSetApi apiInstance = new FeatureSetApi();
-        Integer featureSetIndex = 56; // Integer | Index of feature set in the feature set list
         Integer featureIndex = 56; // Integer | Index of feature in the features list
         try {
-            DeviceState result = apiInstance.featuresetFeatureRunDelete(featureSetIndex, featureIndex);
+            DeviceState result = apiInstance.featuresetFeatureRunDelete(featureIndex);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling FeatureSetApi#featuresetFeatureRunDelete");
@@ -31676,10 +31456,9 @@ public class FeatureSetApiExample {
 
     public static void main(String[] args) {
         FeatureSetApi apiInstance = new FeatureSetApi();
-        Integer featureSetIndex = 56; // Integer | Index of feature set in the feature set list
         Integer featureIndex = 56; // Integer | Index of feature in the features list
         try {
-            DeviceState result = apiInstance.featuresetFeatureRunDelete(featureSetIndex, featureIndex);
+            DeviceState result = apiInstance.featuresetFeatureRunDelete(featureIndex);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling FeatureSetApi#featuresetFeatureRunDelete");
@@ -31693,13 +31472,11 @@ public class FeatureSetApiExample {
   <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
   </div> -->
                             <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureRunDelete-0-objc">
-                              <pre class="prettyprint"><code class="language-cpp">Integer *featureSetIndex = 56; // Index of feature set in the feature set list
-Integer *featureIndex = 56; // Index of feature in the features list
+                              <pre class="prettyprint"><code class="language-cpp">Integer *featureIndex = 56; // Index of feature in the features list
 
 FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
 
-[apiInstance featuresetFeatureRunDeleteWith:featureSetIndex
-    featureIndex:featureIndex
+[apiInstance featuresetFeatureRunDeleteWith:featureIndex
               completionHandler: ^(DeviceState output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -31716,8 +31493,6 @@ FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
 
 var api = new SdRangel.FeatureSetApi()
 
-var featureSetIndex = 56; // {Integer} Index of feature set in the feature set list
-
 var featureIndex = 56; // {Integer} Index of feature in the features list
 
 
@@ -31728,7 +31503,7 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.featuresetFeatureRunDelete(featureSetIndex, featureIndex, callback);
+api.featuresetFeatureRunDelete(featureIndex, callback);
 </code></pre>
                             </div>
 
@@ -31750,12 +31525,11 @@ namespace Example
         {
             
             var apiInstance = new FeatureSetApi();
-            var featureSetIndex = 56;  // Integer | Index of feature set in the feature set list
             var featureIndex = 56;  // Integer | Index of feature in the features list
 
             try
             {
-                DeviceState result = apiInstance.featuresetFeatureRunDelete(featureSetIndex, featureIndex);
+                DeviceState result = apiInstance.featuresetFeatureRunDelete(featureIndex);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -31773,11 +31547,10 @@ namespace Example
 require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new Swagger\Client\Api\FeatureSetApi();
-$featureSetIndex = 56; // Integer | Index of feature set in the feature set list
 $featureIndex = 56; // Integer | Index of feature in the features list
 
 try {
-    $result = $api_instance->featuresetFeatureRunDelete($featureSetIndex, $featureIndex);
+    $result = $api_instance->featuresetFeatureRunDelete($featureIndex);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling FeatureSetApi->featuresetFeatureRunDelete: ', $e->getMessage(), PHP_EOL;
@@ -31791,11 +31564,10 @@ use SWGSDRangel::Configuration;
 use SWGSDRangel::FeatureSetApi;
 
 my $api_instance = SWGSDRangel::FeatureSetApi->new();
-my $featureSetIndex = 56; # Integer | Index of feature set in the feature set list
 my $featureIndex = 56; # Integer | Index of feature in the features list
 
 eval { 
-    my $result = $api_instance->featuresetFeatureRunDelete(featureSetIndex => $featureSetIndex, featureIndex => $featureIndex);
+    my $result = $api_instance->featuresetFeatureRunDelete(featureIndex => $featureIndex);
     print Dumper($result);
 };
 if ($@) {
@@ -31812,11 +31584,10 @@ from pprint import pprint
 
 # create an instance of the API class
 api_instance = swagger_sdrangel.FeatureSetApi()
-featureSetIndex = 56 # Integer | Index of feature set in the feature set list
 featureIndex = 56 # Integer | Index of feature in the features list
 
 try: 
-    api_response = api_instance.featureset_feature_run_delete(featureSetIndex, featureIndex)
+    api_response = api_instance.featureset_feature_run_delete(featureIndex)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling FeatureSetApi->featuresetFeatureRunDelete: %s\n" % e)</code></pre>
@@ -31831,29 +31602,6 @@ except ApiException as e:
                                   <th width="150px">Name</th>
                                   <th>Description</th>
                                 </tr>
-                                  <tr><td style="width:150px;">featureSetIndex*</td>
-<td>
-
-
-    <div id="d2e199_featuresetFeatureRunDelete_featureSetIndex">
-        <div class="json-schema-view">
-            <div class="primitive">
-                <span class="type">
-                    Integer
-                </span>
-
-                    <div class="inner description">
-                        Index of feature set in the feature set list
-                    </div>
-            </div>
-                <div class="inner required">
-                    Required
-                </div>
-        </div>
-    </div>
-</td>
-</tr>
-
                                   <tr><td style="width:150px;">featureIndex*</td>
 <td>
 
@@ -32114,7 +31862,7 @@ except ApiException as e:
                         <p class="marked">get feature run status</p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}/run</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrangel/featureset/feature/{featureIndex}/run</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
@@ -32134,7 +31882,7 @@ except ApiException as e:
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-FeatureSet-featuresetFeatureRunGet-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}/run"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/featureset/feature/{featureIndex}/run"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureRunGet-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -32150,10 +31898,9 @@ public class FeatureSetApiExample {
     public static void main(String[] args) {
         
         FeatureSetApi apiInstance = new FeatureSetApi();
-        Integer featureSetIndex = 56; // Integer | Index of feature set in the feature set list
         Integer featureIndex = 56; // Integer | Index of feature in the features list
         try {
-            DeviceState result = apiInstance.featuresetFeatureRunGet(featureSetIndex, featureIndex);
+            DeviceState result = apiInstance.featuresetFeatureRunGet(featureIndex);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling FeatureSetApi#featuresetFeatureRunGet");
@@ -32170,10 +31917,9 @@ public class FeatureSetApiExample {
 
     public static void main(String[] args) {
         FeatureSetApi apiInstance = new FeatureSetApi();
-        Integer featureSetIndex = 56; // Integer | Index of feature set in the feature set list
         Integer featureIndex = 56; // Integer | Index of feature in the features list
         try {
-            DeviceState result = apiInstance.featuresetFeatureRunGet(featureSetIndex, featureIndex);
+            DeviceState result = apiInstance.featuresetFeatureRunGet(featureIndex);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling FeatureSetApi#featuresetFeatureRunGet");
@@ -32187,13 +31933,11 @@ public class FeatureSetApiExample {
   <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
   </div> -->
                             <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureRunGet-0-objc">
-                              <pre class="prettyprint"><code class="language-cpp">Integer *featureSetIndex = 56; // Index of feature set in the feature set list
-Integer *featureIndex = 56; // Index of feature in the features list
+                              <pre class="prettyprint"><code class="language-cpp">Integer *featureIndex = 56; // Index of feature in the features list
 
 FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
 
-[apiInstance featuresetFeatureRunGetWith:featureSetIndex
-    featureIndex:featureIndex
+[apiInstance featuresetFeatureRunGetWith:featureIndex
               completionHandler: ^(DeviceState output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -32210,8 +31954,6 @@ FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
 
 var api = new SdRangel.FeatureSetApi()
 
-var featureSetIndex = 56; // {Integer} Index of feature set in the feature set list
-
 var featureIndex = 56; // {Integer} Index of feature in the features list
 
 
@@ -32222,7 +31964,7 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.featuresetFeatureRunGet(featureSetIndex, featureIndex, callback);
+api.featuresetFeatureRunGet(featureIndex, callback);
 </code></pre>
                             </div>
 
@@ -32244,12 +31986,11 @@ namespace Example
         {
             
             var apiInstance = new FeatureSetApi();
-            var featureSetIndex = 56;  // Integer | Index of feature set in the feature set list
             var featureIndex = 56;  // Integer | Index of feature in the features list
 
             try
             {
-                DeviceState result = apiInstance.featuresetFeatureRunGet(featureSetIndex, featureIndex);
+                DeviceState result = apiInstance.featuresetFeatureRunGet(featureIndex);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -32267,11 +32008,10 @@ namespace Example
 require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new Swagger\Client\Api\FeatureSetApi();
-$featureSetIndex = 56; // Integer | Index of feature set in the feature set list
 $featureIndex = 56; // Integer | Index of feature in the features list
 
 try {
-    $result = $api_instance->featuresetFeatureRunGet($featureSetIndex, $featureIndex);
+    $result = $api_instance->featuresetFeatureRunGet($featureIndex);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling FeatureSetApi->featuresetFeatureRunGet: ', $e->getMessage(), PHP_EOL;
@@ -32285,11 +32025,10 @@ use SWGSDRangel::Configuration;
 use SWGSDRangel::FeatureSetApi;
 
 my $api_instance = SWGSDRangel::FeatureSetApi->new();
-my $featureSetIndex = 56; # Integer | Index of feature set in the feature set list
 my $featureIndex = 56; # Integer | Index of feature in the features list
 
 eval { 
-    my $result = $api_instance->featuresetFeatureRunGet(featureSetIndex => $featureSetIndex, featureIndex => $featureIndex);
+    my $result = $api_instance->featuresetFeatureRunGet(featureIndex => $featureIndex);
     print Dumper($result);
 };
 if ($@) {
@@ -32306,11 +32045,10 @@ from pprint import pprint
 
 # create an instance of the API class
 api_instance = swagger_sdrangel.FeatureSetApi()
-featureSetIndex = 56 # Integer | Index of feature set in the feature set list
 featureIndex = 56 # Integer | Index of feature in the features list
 
 try: 
-    api_response = api_instance.featureset_feature_run_get(featureSetIndex, featureIndex)
+    api_response = api_instance.featureset_feature_run_get(featureIndex)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling FeatureSetApi->featuresetFeatureRunGet: %s\n" % e)</code></pre>
@@ -32325,29 +32063,6 @@ except ApiException as e:
                                   <th width="150px">Name</th>
                                   <th>Description</th>
                                 </tr>
-                                  <tr><td style="width:150px;">featureSetIndex*</td>
-<td>
-
-
-    <div id="d2e199_featuresetFeatureRunGet_featureSetIndex">
-        <div class="json-schema-view">
-            <div class="primitive">
-                <span class="type">
-                    Integer
-                </span>
-
-                    <div class="inner description">
-                        Index of feature set in the feature set list
-                    </div>
-            </div>
-                <div class="inner required">
-                    Required
-                </div>
-        </div>
-    </div>
-</td>
-</tr>
-
                                   <tr><td style="width:150px;">featureIndex*</td>
 <td>
 
@@ -32418,49 +32133,6 @@ except ApiException as e:
                                     </script>
                                   </div>
                                   <input id='responses-featuresetFeatureRunGet-200-schema-data' type='hidden' value=''></input>
-                                </div>
-                            </div>
-
-                            <h3> Status: 400 - Invalid feature set index </h3>
-
-                            <ul class="nav nav-tabs nav-tabs-examples" >
-                                <li class="active">
-                                  <a data-toggle="tab" href="#responses-featuresetFeatureRunGet-400-schema">Schema</a>
-                                </li>
-
-                            </ul>
-
-                            <div class="tab-content" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-featuresetFeatureRunGet-400-schema">
-                                  <div id='responses-featuresetFeatureRunGet-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
-                                    <script>
-                                      $(document).ready(function() {
-                                        var schemaWrapper = {
-  "description" : "Invalid feature set index",
-  "schema" : {
-    "$ref" : "#/definitions/ErrorResponse"
-  }
-};
-                                        var schema = schemaWrapper.schema;
-                                        if (schema.$ref != null) {
-                                          schema = defsParser.$refs.get(schema.$ref);
-                                        } else {
-                                          schemaWrapper.definitions = Object.assign({}, defs);
-                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
-                                            console.log(err);
-                                          });
-                                        }
-
-                                        //console.log(JSON.stringify(schema));
-                                        var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-featuresetFeatureRunGet-400-schema-data').val(stringify(schema));
-                                        var result = $('#responses-featuresetFeatureRunGet-400-schema-400');
-                                        result.empty();
-                                        result.append(view.render());
-                                      });
-                                    </script>
-                                  </div>
-                                  <input id='responses-featuresetFeatureRunGet-400-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
@@ -32608,7 +32280,7 @@ except ApiException as e:
                         <p class="marked">start feature</p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}/run</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/sdrangel/featureset/feature/{featureIndex}/run</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
@@ -32628,7 +32300,7 @@ except ApiException as e:
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-FeatureSet-featuresetFeatureRunPost-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X POST "http://localhost/sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}/run"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X POST "http://localhost/sdrangel/featureset/feature/{featureIndex}/run"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureRunPost-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -32644,10 +32316,9 @@ public class FeatureSetApiExample {
     public static void main(String[] args) {
         
         FeatureSetApi apiInstance = new FeatureSetApi();
-        Integer featureSetIndex = 56; // Integer | Index of feature set in the feature set list
         Integer featureIndex = 56; // Integer | Index of feature in the features list
         try {
-            DeviceState result = apiInstance.featuresetFeatureRunPost(featureSetIndex, featureIndex);
+            DeviceState result = apiInstance.featuresetFeatureRunPost(featureIndex);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling FeatureSetApi#featuresetFeatureRunPost");
@@ -32664,10 +32335,9 @@ public class FeatureSetApiExample {
 
     public static void main(String[] args) {
         FeatureSetApi apiInstance = new FeatureSetApi();
-        Integer featureSetIndex = 56; // Integer | Index of feature set in the feature set list
         Integer featureIndex = 56; // Integer | Index of feature in the features list
         try {
-            DeviceState result = apiInstance.featuresetFeatureRunPost(featureSetIndex, featureIndex);
+            DeviceState result = apiInstance.featuresetFeatureRunPost(featureIndex);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling FeatureSetApi#featuresetFeatureRunPost");
@@ -32681,13 +32351,11 @@ public class FeatureSetApiExample {
   <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
   </div> -->
                             <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureRunPost-0-objc">
-                              <pre class="prettyprint"><code class="language-cpp">Integer *featureSetIndex = 56; // Index of feature set in the feature set list
-Integer *featureIndex = 56; // Index of feature in the features list
+                              <pre class="prettyprint"><code class="language-cpp">Integer *featureIndex = 56; // Index of feature in the features list
 
 FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
 
-[apiInstance featuresetFeatureRunPostWith:featureSetIndex
-    featureIndex:featureIndex
+[apiInstance featuresetFeatureRunPostWith:featureIndex
               completionHandler: ^(DeviceState output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -32704,8 +32372,6 @@ FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
 
 var api = new SdRangel.FeatureSetApi()
 
-var featureSetIndex = 56; // {Integer} Index of feature set in the feature set list
-
 var featureIndex = 56; // {Integer} Index of feature in the features list
 
 
@@ -32716,7 +32382,7 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.featuresetFeatureRunPost(featureSetIndex, featureIndex, callback);
+api.featuresetFeatureRunPost(featureIndex, callback);
 </code></pre>
                             </div>
 
@@ -32738,12 +32404,11 @@ namespace Example
         {
             
             var apiInstance = new FeatureSetApi();
-            var featureSetIndex = 56;  // Integer | Index of feature set in the feature set list
             var featureIndex = 56;  // Integer | Index of feature in the features list
 
             try
             {
-                DeviceState result = apiInstance.featuresetFeatureRunPost(featureSetIndex, featureIndex);
+                DeviceState result = apiInstance.featuresetFeatureRunPost(featureIndex);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -32761,11 +32426,10 @@ namespace Example
 require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new Swagger\Client\Api\FeatureSetApi();
-$featureSetIndex = 56; // Integer | Index of feature set in the feature set list
 $featureIndex = 56; // Integer | Index of feature in the features list
 
 try {
-    $result = $api_instance->featuresetFeatureRunPost($featureSetIndex, $featureIndex);
+    $result = $api_instance->featuresetFeatureRunPost($featureIndex);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling FeatureSetApi->featuresetFeatureRunPost: ', $e->getMessage(), PHP_EOL;
@@ -32779,11 +32443,10 @@ use SWGSDRangel::Configuration;
 use SWGSDRangel::FeatureSetApi;
 
 my $api_instance = SWGSDRangel::FeatureSetApi->new();
-my $featureSetIndex = 56; # Integer | Index of feature set in the feature set list
 my $featureIndex = 56; # Integer | Index of feature in the features list
 
 eval { 
-    my $result = $api_instance->featuresetFeatureRunPost(featureSetIndex => $featureSetIndex, featureIndex => $featureIndex);
+    my $result = $api_instance->featuresetFeatureRunPost(featureIndex => $featureIndex);
     print Dumper($result);
 };
 if ($@) {
@@ -32800,11 +32463,10 @@ from pprint import pprint
 
 # create an instance of the API class
 api_instance = swagger_sdrangel.FeatureSetApi()
-featureSetIndex = 56 # Integer | Index of feature set in the feature set list
 featureIndex = 56 # Integer | Index of feature in the features list
 
 try: 
-    api_response = api_instance.featureset_feature_run_post(featureSetIndex, featureIndex)
+    api_response = api_instance.featureset_feature_run_post(featureIndex)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling FeatureSetApi->featuresetFeatureRunPost: %s\n" % e)</code></pre>
@@ -32819,29 +32481,6 @@ except ApiException as e:
                                   <th width="150px">Name</th>
                                   <th>Description</th>
                                 </tr>
-                                  <tr><td style="width:150px;">featureSetIndex*</td>
-<td>
-
-
-    <div id="d2e199_featuresetFeatureRunPost_featureSetIndex">
-        <div class="json-schema-view">
-            <div class="primitive">
-                <span class="type">
-                    Integer
-                </span>
-
-                    <div class="inner description">
-                        Index of feature set in the feature set list
-                    </div>
-            </div>
-                <div class="inner required">
-                    Required
-                </div>
-        </div>
-    </div>
-</td>
-</tr>
-
                                   <tr><td style="width:150px;">featureIndex*</td>
 <td>
 
@@ -32912,49 +32551,6 @@ except ApiException as e:
                                     </script>
                                   </div>
                                   <input id='responses-featuresetFeatureRunPost-200-schema-data' type='hidden' value=''></input>
-                                </div>
-                            </div>
-
-                            <h3> Status: 400 - Invalid feature set index </h3>
-
-                            <ul class="nav nav-tabs nav-tabs-examples" >
-                                <li class="active">
-                                  <a data-toggle="tab" href="#responses-featuresetFeatureRunPost-400-schema">Schema</a>
-                                </li>
-
-                            </ul>
-
-                            <div class="tab-content" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-featuresetFeatureRunPost-400-schema">
-                                  <div id='responses-featuresetFeatureRunPost-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
-                                    <script>
-                                      $(document).ready(function() {
-                                        var schemaWrapper = {
-  "description" : "Invalid feature set index",
-  "schema" : {
-    "$ref" : "#/definitions/ErrorResponse"
-  }
-};
-                                        var schema = schemaWrapper.schema;
-                                        if (schema.$ref != null) {
-                                          schema = defsParser.$refs.get(schema.$ref);
-                                        } else {
-                                          schemaWrapper.definitions = Object.assign({}, defs);
-                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
-                                            console.log(err);
-                                          });
-                                        }
-
-                                        //console.log(JSON.stringify(schema));
-                                        var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-featuresetFeatureRunPost-400-schema-data').val(stringify(schema));
-                                        var result = $('#responses-featuresetFeatureRunPost-400-schema-400');
-                                        result.empty();
-                                        result.append(view.render());
-                                      });
-                                    </script>
-                                  </div>
-                                  <input id='responses-featuresetFeatureRunPost-400-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
@@ -33102,7 +32698,7 @@ except ApiException as e:
                         <p class="marked">get a feature settings</p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}/settings</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrangel/featureset/feature/{featureIndex}/settings</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
@@ -33122,7 +32718,7 @@ except ApiException as e:
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-FeatureSet-featuresetFeatureSettingsGet-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}/settings"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/featureset/feature/{featureIndex}/settings"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureSettingsGet-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -33138,10 +32734,9 @@ public class FeatureSetApiExample {
     public static void main(String[] args) {
         
         FeatureSetApi apiInstance = new FeatureSetApi();
-        Integer featureSetIndex = 56; // Integer | Index of feature set in the feature set list
-        Integer featureIndex = 56; // Integer | Index of the feature in the features list for this feature set
+        Integer featureIndex = 56; // Integer | Index of the feature in the features list
         try {
-            FeatureSettings result = apiInstance.featuresetFeatureSettingsGet(featureSetIndex, featureIndex);
+            FeatureSettings result = apiInstance.featuresetFeatureSettingsGet(featureIndex);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling FeatureSetApi#featuresetFeatureSettingsGet");
@@ -33158,10 +32753,9 @@ public class FeatureSetApiExample {
 
     public static void main(String[] args) {
         FeatureSetApi apiInstance = new FeatureSetApi();
-        Integer featureSetIndex = 56; // Integer | Index of feature set in the feature set list
-        Integer featureIndex = 56; // Integer | Index of the feature in the features list for this feature set
+        Integer featureIndex = 56; // Integer | Index of the feature in the features list
         try {
-            FeatureSettings result = apiInstance.featuresetFeatureSettingsGet(featureSetIndex, featureIndex);
+            FeatureSettings result = apiInstance.featuresetFeatureSettingsGet(featureIndex);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling FeatureSetApi#featuresetFeatureSettingsGet");
@@ -33175,13 +32769,11 @@ public class FeatureSetApiExample {
   <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
   </div> -->
                             <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureSettingsGet-0-objc">
-                              <pre class="prettyprint"><code class="language-cpp">Integer *featureSetIndex = 56; // Index of feature set in the feature set list
-Integer *featureIndex = 56; // Index of the feature in the features list for this feature set
+                              <pre class="prettyprint"><code class="language-cpp">Integer *featureIndex = 56; // Index of the feature in the features list
 
 FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
 
-[apiInstance featuresetFeatureSettingsGetWith:featureSetIndex
-    featureIndex:featureIndex
+[apiInstance featuresetFeatureSettingsGetWith:featureIndex
               completionHandler: ^(FeatureSettings output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -33198,9 +32790,7 @@ FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
 
 var api = new SdRangel.FeatureSetApi()
 
-var featureSetIndex = 56; // {Integer} Index of feature set in the feature set list
-
-var featureIndex = 56; // {Integer} Index of the feature in the features list for this feature set
+var featureIndex = 56; // {Integer} Index of the feature in the features list
 
 
 var callback = function(error, data, response) {
@@ -33210,7 +32800,7 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.featuresetFeatureSettingsGet(featureSetIndex, featureIndex, callback);
+api.featuresetFeatureSettingsGet(featureIndex, callback);
 </code></pre>
                             </div>
 
@@ -33232,12 +32822,11 @@ namespace Example
         {
             
             var apiInstance = new FeatureSetApi();
-            var featureSetIndex = 56;  // Integer | Index of feature set in the feature set list
-            var featureIndex = 56;  // Integer | Index of the feature in the features list for this feature set
+            var featureIndex = 56;  // Integer | Index of the feature in the features list
 
             try
             {
-                FeatureSettings result = apiInstance.featuresetFeatureSettingsGet(featureSetIndex, featureIndex);
+                FeatureSettings result = apiInstance.featuresetFeatureSettingsGet(featureIndex);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -33255,11 +32844,10 @@ namespace Example
 require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new Swagger\Client\Api\FeatureSetApi();
-$featureSetIndex = 56; // Integer | Index of feature set in the feature set list
-$featureIndex = 56; // Integer | Index of the feature in the features list for this feature set
+$featureIndex = 56; // Integer | Index of the feature in the features list
 
 try {
-    $result = $api_instance->featuresetFeatureSettingsGet($featureSetIndex, $featureIndex);
+    $result = $api_instance->featuresetFeatureSettingsGet($featureIndex);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling FeatureSetApi->featuresetFeatureSettingsGet: ', $e->getMessage(), PHP_EOL;
@@ -33273,11 +32861,10 @@ use SWGSDRangel::Configuration;
 use SWGSDRangel::FeatureSetApi;
 
 my $api_instance = SWGSDRangel::FeatureSetApi->new();
-my $featureSetIndex = 56; # Integer | Index of feature set in the feature set list
-my $featureIndex = 56; # Integer | Index of the feature in the features list for this feature set
+my $featureIndex = 56; # Integer | Index of the feature in the features list
 
 eval { 
-    my $result = $api_instance->featuresetFeatureSettingsGet(featureSetIndex => $featureSetIndex, featureIndex => $featureIndex);
+    my $result = $api_instance->featuresetFeatureSettingsGet(featureIndex => $featureIndex);
     print Dumper($result);
 };
 if ($@) {
@@ -33294,11 +32881,10 @@ from pprint import pprint
 
 # create an instance of the API class
 api_instance = swagger_sdrangel.FeatureSetApi()
-featureSetIndex = 56 # Integer | Index of feature set in the feature set list
-featureIndex = 56 # Integer | Index of the feature in the features list for this feature set
+featureIndex = 56 # Integer | Index of the feature in the features list
 
 try: 
-    api_response = api_instance.featureset_feature_settings_get(featureSetIndex, featureIndex)
+    api_response = api_instance.featureset_feature_settings_get(featureIndex)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling FeatureSetApi->featuresetFeatureSettingsGet: %s\n" % e)</code></pre>
@@ -33313,29 +32899,6 @@ except ApiException as e:
                                   <th width="150px">Name</th>
                                   <th>Description</th>
                                 </tr>
-                                  <tr><td style="width:150px;">featureSetIndex*</td>
-<td>
-
-
-    <div id="d2e199_featuresetFeatureSettingsGet_featureSetIndex">
-        <div class="json-schema-view">
-            <div class="primitive">
-                <span class="type">
-                    Integer
-                </span>
-
-                    <div class="inner description">
-                        Index of feature set in the feature set list
-                    </div>
-            </div>
-                <div class="inner required">
-                    Required
-                </div>
-        </div>
-    </div>
-</td>
-</tr>
-
                                   <tr><td style="width:150px;">featureIndex*</td>
 <td>
 
@@ -33348,7 +32911,7 @@ except ApiException as e:
                 </span>
 
                     <div class="inner description">
-                        Index of the feature in the features list for this feature set
+                        Index of the feature in the features list
                     </div>
             </div>
                 <div class="inner required">
@@ -33409,7 +32972,7 @@ except ApiException as e:
                                 </div>
                             </div>
 
-                            <h3> Status: 400 - Invalid feature set or feature index </h3>
+                            <h3> Status: 400 - Invalid feature index </h3>
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
@@ -33424,7 +32987,7 @@ except ApiException as e:
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
-  "description" : "Invalid feature set or feature index",
+  "description" : "Invalid feature index",
   "schema" : {
     "$ref" : "#/definitions/ErrorResponse"
   }
@@ -33596,7 +33159,7 @@ except ApiException as e:
                         <p class="marked">apply settings differentially (no force)</p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="patch"><code><span class="pln">/sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}/settings</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="patch"><code><span class="pln">/sdrangel/featureset/feature/{featureIndex}/settings</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
@@ -33616,7 +33179,7 @@ except ApiException as e:
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-FeatureSet-featuresetFeatureSettingsPatch-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X PATCH "http://localhost/sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}/settings"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PATCH "http://localhost/sdrangel/featureset/feature/{featureIndex}/settings"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureSettingsPatch-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -33632,11 +33195,10 @@ public class FeatureSetApiExample {
     public static void main(String[] args) {
         
         FeatureSetApi apiInstance = new FeatureSetApi();
-        Integer featureSetIndex = 56; // Integer | Index of feature set in the feature set list
-        Integer featureIndex = 56; // Integer | Index of the feature in the features list for this feature set
+        Integer featureIndex = 56; // Integer | Index of the feature in the features list
         FeatureSettings body = ; // FeatureSettings | Feature settings to apply
         try {
-            FeatureSettings result = apiInstance.featuresetFeatureSettingsPatch(featureSetIndex, featureIndex, body);
+            FeatureSettings result = apiInstance.featuresetFeatureSettingsPatch(featureIndex, body);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling FeatureSetApi#featuresetFeatureSettingsPatch");
@@ -33653,11 +33215,10 @@ public class FeatureSetApiExample {
 
     public static void main(String[] args) {
         FeatureSetApi apiInstance = new FeatureSetApi();
-        Integer featureSetIndex = 56; // Integer | Index of feature set in the feature set list
-        Integer featureIndex = 56; // Integer | Index of the feature in the features list for this feature set
+        Integer featureIndex = 56; // Integer | Index of the feature in the features list
         FeatureSettings body = ; // FeatureSettings | Feature settings to apply
         try {
-            FeatureSettings result = apiInstance.featuresetFeatureSettingsPatch(featureSetIndex, featureIndex, body);
+            FeatureSettings result = apiInstance.featuresetFeatureSettingsPatch(featureIndex, body);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling FeatureSetApi#featuresetFeatureSettingsPatch");
@@ -33671,14 +33232,12 @@ public class FeatureSetApiExample {
   <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
   </div> -->
                             <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureSettingsPatch-0-objc">
-                              <pre class="prettyprint"><code class="language-cpp">Integer *featureSetIndex = 56; // Index of feature set in the feature set list
-Integer *featureIndex = 56; // Index of the feature in the features list for this feature set
+                              <pre class="prettyprint"><code class="language-cpp">Integer *featureIndex = 56; // Index of the feature in the features list
 FeatureSettings *body = ; // Feature settings to apply
 
 FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
 
-[apiInstance featuresetFeatureSettingsPatchWith:featureSetIndex
-    featureIndex:featureIndex
+[apiInstance featuresetFeatureSettingsPatchWith:featureIndex
     body:body
               completionHandler: ^(FeatureSettings output, NSError* error) {
                             if (output) {
@@ -33696,9 +33255,7 @@ FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
 
 var api = new SdRangel.FeatureSetApi()
 
-var featureSetIndex = 56; // {Integer} Index of feature set in the feature set list
-
-var featureIndex = 56; // {Integer} Index of the feature in the features list for this feature set
+var featureIndex = 56; // {Integer} Index of the feature in the features list
 
 var body = ; // {FeatureSettings} Feature settings to apply
 
@@ -33710,7 +33267,7 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.featuresetFeatureSettingsPatch(featureSetIndex, featureIndex, body, callback);
+api.featuresetFeatureSettingsPatch(featureIndex, body, callback);
 </code></pre>
                             </div>
 
@@ -33732,13 +33289,12 @@ namespace Example
         {
             
             var apiInstance = new FeatureSetApi();
-            var featureSetIndex = 56;  // Integer | Index of feature set in the feature set list
-            var featureIndex = 56;  // Integer | Index of the feature in the features list for this feature set
+            var featureIndex = 56;  // Integer | Index of the feature in the features list
             var body = new FeatureSettings(); // FeatureSettings | Feature settings to apply
 
             try
             {
-                FeatureSettings result = apiInstance.featuresetFeatureSettingsPatch(featureSetIndex, featureIndex, body);
+                FeatureSettings result = apiInstance.featuresetFeatureSettingsPatch(featureIndex, body);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -33756,12 +33312,11 @@ namespace Example
 require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new Swagger\Client\Api\FeatureSetApi();
-$featureSetIndex = 56; // Integer | Index of feature set in the feature set list
-$featureIndex = 56; // Integer | Index of the feature in the features list for this feature set
+$featureIndex = 56; // Integer | Index of the feature in the features list
 $body = ; // FeatureSettings | Feature settings to apply
 
 try {
-    $result = $api_instance->featuresetFeatureSettingsPatch($featureSetIndex, $featureIndex, $body);
+    $result = $api_instance->featuresetFeatureSettingsPatch($featureIndex, $body);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling FeatureSetApi->featuresetFeatureSettingsPatch: ', $e->getMessage(), PHP_EOL;
@@ -33775,12 +33330,11 @@ use SWGSDRangel::Configuration;
 use SWGSDRangel::FeatureSetApi;
 
 my $api_instance = SWGSDRangel::FeatureSetApi->new();
-my $featureSetIndex = 56; # Integer | Index of feature set in the feature set list
-my $featureIndex = 56; # Integer | Index of the feature in the features list for this feature set
+my $featureIndex = 56; # Integer | Index of the feature in the features list
 my $body = SWGSDRangel::Object::FeatureSettings->new(); # FeatureSettings | Feature settings to apply
 
 eval { 
-    my $result = $api_instance->featuresetFeatureSettingsPatch(featureSetIndex => $featureSetIndex, featureIndex => $featureIndex, body => $body);
+    my $result = $api_instance->featuresetFeatureSettingsPatch(featureIndex => $featureIndex, body => $body);
     print Dumper($result);
 };
 if ($@) {
@@ -33797,12 +33351,11 @@ from pprint import pprint
 
 # create an instance of the API class
 api_instance = swagger_sdrangel.FeatureSetApi()
-featureSetIndex = 56 # Integer | Index of feature set in the feature set list
-featureIndex = 56 # Integer | Index of the feature in the features list for this feature set
+featureIndex = 56 # Integer | Index of the feature in the features list
 body =  # FeatureSettings | Feature settings to apply
 
 try: 
-    api_response = api_instance.featureset_feature_settings_patch(featureSetIndex, featureIndex, body)
+    api_response = api_instance.featureset_feature_settings_patch(featureIndex, body)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling FeatureSetApi->featuresetFeatureSettingsPatch: %s\n" % e)</code></pre>
@@ -33817,29 +33370,6 @@ except ApiException as e:
                                   <th width="150px">Name</th>
                                   <th>Description</th>
                                 </tr>
-                                  <tr><td style="width:150px;">featureSetIndex*</td>
-<td>
-
-
-    <div id="d2e199_featuresetFeatureSettingsPatch_featureSetIndex">
-        <div class="json-schema-view">
-            <div class="primitive">
-                <span class="type">
-                    Integer
-                </span>
-
-                    <div class="inner description">
-                        Index of feature set in the feature set list
-                    </div>
-            </div>
-                <div class="inner required">
-                    Required
-                </div>
-        </div>
-    </div>
-</td>
-</tr>
-
                                   <tr><td style="width:150px;">featureIndex*</td>
 <td>
 
@@ -33852,7 +33382,7 @@ except ApiException as e:
                 </span>
 
                     <div class="inner description">
-                        Index of the feature in the features list for this feature set
+                        Index of the feature in the features list
                     </div>
             </div>
                 <div class="inner required">
@@ -33955,7 +33485,7 @@ $(document).ready(function() {
                                 </div>
                             </div>
 
-                            <h3> Status: 400 - Invalid feature set or feature index </h3>
+                            <h3> Status: 400 - Invalid feature index </h3>
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
@@ -33970,7 +33500,7 @@ $(document).ready(function() {
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
-  "description" : "Invalid feature set or feature index",
+  "description" : "Invalid feature index",
   "schema" : {
     "$ref" : "#/definitions/ErrorResponse"
   }
@@ -34139,10 +33669,10 @@ $(document).ready(function() {
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">Get feature set information</p>
+                        <p class="marked">Get features information</p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrangel/featureset/{featureSetIndex}</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrangel/featureset</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
@@ -34162,7 +33692,7 @@ $(document).ready(function() {
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-FeatureSet-featuresetGet-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/featureset/{featureSetIndex}"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/featureset"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-FeatureSet-featuresetGet-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -34178,9 +33708,8 @@ public class FeatureSetApiExample {
     public static void main(String[] args) {
         
         FeatureSetApi apiInstance = new FeatureSetApi();
-        Integer featureSetIndex = 56; // Integer | Index of feature set in the device set list
         try {
-            FeatureSet result = apiInstance.featuresetGet(featureSetIndex);
+            FeatureSet result = apiInstance.featuresetGet();
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling FeatureSetApi#featuresetGet");
@@ -34197,9 +33726,8 @@ public class FeatureSetApiExample {
 
     public static void main(String[] args) {
         FeatureSetApi apiInstance = new FeatureSetApi();
-        Integer featureSetIndex = 56; // Integer | Index of feature set in the device set list
         try {
-            FeatureSet result = apiInstance.featuresetGet(featureSetIndex);
+            FeatureSet result = apiInstance.featuresetGet();
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling FeatureSetApi#featuresetGet");
@@ -34213,12 +33741,11 @@ public class FeatureSetApiExample {
   <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
   </div> -->
                             <div class="tab-pane" id="examples-FeatureSet-featuresetGet-0-objc">
-                              <pre class="prettyprint"><code class="language-cpp">Integer *featureSetIndex = 56; // Index of feature set in the device set list
-
+                              <pre class="prettyprint"><code class="language-cpp">
 FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
 
-[apiInstance featuresetGetWith:featureSetIndex
-              completionHandler: ^(FeatureSet output, NSError* error) {
+[apiInstance featuresetGetWithCompletionHandler: 
+              ^(FeatureSet output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
                             }
@@ -34234,9 +33761,6 @@ FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
 
 var api = new SdRangel.FeatureSetApi()
 
-var featureSetIndex = 56; // {Integer} Index of feature set in the device set list
-
-
 var callback = function(error, data, response) {
   if (error) {
     console.error(error);
@@ -34244,7 +33768,7 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.featuresetGet(featureSetIndex, callback);
+api.featuresetGet(callback);
 </code></pre>
                             </div>
 
@@ -34266,11 +33790,10 @@ namespace Example
         {
             
             var apiInstance = new FeatureSetApi();
-            var featureSetIndex = 56;  // Integer | Index of feature set in the device set list
 
             try
             {
-                FeatureSet result = apiInstance.featuresetGet(featureSetIndex);
+                FeatureSet result = apiInstance.featuresetGet();
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -34288,10 +33811,9 @@ namespace Example
 require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new Swagger\Client\Api\FeatureSetApi();
-$featureSetIndex = 56; // Integer | Index of feature set in the device set list
 
 try {
-    $result = $api_instance->featuresetGet($featureSetIndex);
+    $result = $api_instance->featuresetGet();
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling FeatureSetApi->featuresetGet: ', $e->getMessage(), PHP_EOL;
@@ -34305,10 +33827,9 @@ use SWGSDRangel::Configuration;
 use SWGSDRangel::FeatureSetApi;
 
 my $api_instance = SWGSDRangel::FeatureSetApi->new();
-my $featureSetIndex = 56; # Integer | Index of feature set in the device set list
 
 eval { 
-    my $result = $api_instance->featuresetGet(featureSetIndex => $featureSetIndex);
+    my $result = $api_instance->featuresetGet();
     print Dumper($result);
 };
 if ($@) {
@@ -34325,10 +33846,9 @@ from pprint import pprint
 
 # create an instance of the API class
 api_instance = swagger_sdrangel.FeatureSetApi()
-featureSetIndex = 56 # Integer | Index of feature set in the device set list
 
 try: 
-    api_response = api_instance.featureset_get(featureSetIndex)
+    api_response = api_instance.featureset_get()
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling FeatureSetApi->featuresetGet: %s\n" % e)</code></pre>
@@ -34337,43 +33857,13 @@ except ApiException as e:
 
                           <h2>Parameters</h2>
 
-                            <div class="methodsubtabletitle">Path parameters</div>
-                            <table id="methodsubtable">
-                                <tr>
-                                  <th width="150px">Name</th>
-                                  <th>Description</th>
-                                </tr>
-                                  <tr><td style="width:150px;">featureSetIndex*</td>
-<td>
-
-
-    <div id="d2e199_featuresetGet_featureSetIndex">
-        <div class="json-schema-view">
-            <div class="primitive">
-                <span class="type">
-                    Integer
-                </span>
-
-                    <div class="inner description">
-                        Index of feature set in the device set list
-                    </div>
-            </div>
-                <div class="inner required">
-                    Required
-                </div>
-        </div>
-    </div>
-</td>
-</tr>
-
-                            </table>
 
 
 
 
 
                           <h2>Responses</h2>
-                            <h3> Status: 200 - On success return details on the feature set </h3>
+                            <h3> Status: 200 - On success return details on the features present in the system </h3>
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
@@ -34388,7 +33878,7 @@ except ApiException as e:
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
-  "description" : "On success return details on the feature set",
+  "description" : "On success return details on the features present in the system",
   "schema" : {
     "$ref" : "#/definitions/FeatureSet"
   }
@@ -34413,49 +33903,6 @@ except ApiException as e:
                                     </script>
                                   </div>
                                   <input id='responses-featuresetGet-200-schema-data' type='hidden' value=''></input>
-                                </div>
-                            </div>
-
-                            <h3> Status: 404 - Invalid index </h3>
-
-                            <ul class="nav nav-tabs nav-tabs-examples" >
-                                <li class="active">
-                                  <a data-toggle="tab" href="#responses-featuresetGet-404-schema">Schema</a>
-                                </li>
-
-                            </ul>
-
-                            <div class="tab-content" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-featuresetGet-404-schema">
-                                  <div id='responses-featuresetGet-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
-                                    <script>
-                                      $(document).ready(function() {
-                                        var schemaWrapper = {
-  "description" : "Invalid index",
-  "schema" : {
-    "$ref" : "#/definitions/ErrorResponse"
-  }
-};
-                                        var schema = schemaWrapper.schema;
-                                        if (schema.$ref != null) {
-                                          schema = defsParser.$refs.get(schema.$ref);
-                                        } else {
-                                          schemaWrapper.definitions = Object.assign({}, defs);
-                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
-                                            console.log(err);
-                                          });
-                                        }
-
-                                        //console.log(JSON.stringify(schema));
-                                        var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-featuresetGet-404-schema-data').val(stringify(schema));
-                                        var result = $('#responses-featuresetGet-404-schema-404');
-                                        result.empty();
-                                        result.append(view.render());
-                                      });
-                                    </script>
-                                  </div>
-                                  <input id='responses-featuresetGet-404-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
@@ -34557,10 +34004,10 @@ except ApiException as e:
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">Load a preset in a feature set</p>
+                        <p class="marked">Load a preset in features</p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="patch"><code><span class="pln">/sdrangel/featureset/{featureSetIndex}/preset</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="patch"><code><span class="pln">/sdrangel/featureset/preset</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
@@ -34580,7 +34027,7 @@ except ApiException as e:
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-FeatureSet-featuresetPresetPatch-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X PATCH "http://localhost/sdrangel/featureset/{featureSetIndex}/preset"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PATCH "http://localhost/sdrangel/featureset/preset"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-FeatureSet-featuresetPresetPatch-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -34596,10 +34043,9 @@ public class FeatureSetApiExample {
     public static void main(String[] args) {
         
         FeatureSetApi apiInstance = new FeatureSetApi();
-        Integer featureSetIndex = 56; // Integer | Index of feature set in the feature set list
-        FeaturePresetIdentifier body = ; // FeaturePresetIdentifier | Load preset settings to the feature set
+        FeaturePresetIdentifier body = ; // FeaturePresetIdentifier | Load preset settings to the features
         try {
-            FeaturePresetIdentifier result = apiInstance.featuresetPresetPatch(featureSetIndex, body);
+            FeaturePresetIdentifier result = apiInstance.featuresetPresetPatch(body);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling FeatureSetApi#featuresetPresetPatch");
@@ -34616,10 +34062,9 @@ public class FeatureSetApiExample {
 
     public static void main(String[] args) {
         FeatureSetApi apiInstance = new FeatureSetApi();
-        Integer featureSetIndex = 56; // Integer | Index of feature set in the feature set list
-        FeaturePresetIdentifier body = ; // FeaturePresetIdentifier | Load preset settings to the feature set
+        FeaturePresetIdentifier body = ; // FeaturePresetIdentifier | Load preset settings to the features
         try {
-            FeaturePresetIdentifier result = apiInstance.featuresetPresetPatch(featureSetIndex, body);
+            FeaturePresetIdentifier result = apiInstance.featuresetPresetPatch(body);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling FeatureSetApi#featuresetPresetPatch");
@@ -34633,13 +34078,11 @@ public class FeatureSetApiExample {
   <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
   </div> -->
                             <div class="tab-pane" id="examples-FeatureSet-featuresetPresetPatch-0-objc">
-                              <pre class="prettyprint"><code class="language-cpp">Integer *featureSetIndex = 56; // Index of feature set in the feature set list
-FeaturePresetIdentifier *body = ; // Load preset settings to the feature set
+                              <pre class="prettyprint"><code class="language-cpp">FeaturePresetIdentifier *body = ; // Load preset settings to the features
 
 FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
 
-[apiInstance featuresetPresetPatchWith:featureSetIndex
-    body:body
+[apiInstance featuresetPresetPatchWith:body
               completionHandler: ^(FeaturePresetIdentifier output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -34656,9 +34099,7 @@ FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
 
 var api = new SdRangel.FeatureSetApi()
 
-var featureSetIndex = 56; // {Integer} Index of feature set in the feature set list
-
-var body = ; // {FeaturePresetIdentifier} Load preset settings to the feature set
+var body = ; // {FeaturePresetIdentifier} Load preset settings to the features
 
 
 var callback = function(error, data, response) {
@@ -34668,7 +34109,7 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.featuresetPresetPatch(featureSetIndex, body, callback);
+api.featuresetPresetPatch(body, callback);
 </code></pre>
                             </div>
 
@@ -34690,12 +34131,11 @@ namespace Example
         {
             
             var apiInstance = new FeatureSetApi();
-            var featureSetIndex = 56;  // Integer | Index of feature set in the feature set list
-            var body = new FeaturePresetIdentifier(); // FeaturePresetIdentifier | Load preset settings to the feature set
+            var body = new FeaturePresetIdentifier(); // FeaturePresetIdentifier | Load preset settings to the features
 
             try
             {
-                FeaturePresetIdentifier result = apiInstance.featuresetPresetPatch(featureSetIndex, body);
+                FeaturePresetIdentifier result = apiInstance.featuresetPresetPatch(body);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -34713,11 +34153,10 @@ namespace Example
 require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new Swagger\Client\Api\FeatureSetApi();
-$featureSetIndex = 56; // Integer | Index of feature set in the feature set list
-$body = ; // FeaturePresetIdentifier | Load preset settings to the feature set
+$body = ; // FeaturePresetIdentifier | Load preset settings to the features
 
 try {
-    $result = $api_instance->featuresetPresetPatch($featureSetIndex, $body);
+    $result = $api_instance->featuresetPresetPatch($body);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling FeatureSetApi->featuresetPresetPatch: ', $e->getMessage(), PHP_EOL;
@@ -34731,11 +34170,10 @@ use SWGSDRangel::Configuration;
 use SWGSDRangel::FeatureSetApi;
 
 my $api_instance = SWGSDRangel::FeatureSetApi->new();
-my $featureSetIndex = 56; # Integer | Index of feature set in the feature set list
-my $body = SWGSDRangel::Object::FeaturePresetIdentifier->new(); # FeaturePresetIdentifier | Load preset settings to the feature set
+my $body = SWGSDRangel::Object::FeaturePresetIdentifier->new(); # FeaturePresetIdentifier | Load preset settings to the features
 
 eval { 
-    my $result = $api_instance->featuresetPresetPatch(featureSetIndex => $featureSetIndex, body => $body);
+    my $result = $api_instance->featuresetPresetPatch(body => $body);
     print Dumper($result);
 };
 if ($@) {
@@ -34752,11 +34190,10 @@ from pprint import pprint
 
 # create an instance of the API class
 api_instance = swagger_sdrangel.FeatureSetApi()
-featureSetIndex = 56 # Integer | Index of feature set in the feature set list
-body =  # FeaturePresetIdentifier | Load preset settings to the feature set
+body =  # FeaturePresetIdentifier | Load preset settings to the features
 
 try: 
-    api_response = api_instance.featureset_preset_patch(featureSetIndex, body)
+    api_response = api_instance.featureset_preset_patch(body)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling FeatureSetApi->featuresetPresetPatch: %s\n" % e)</code></pre>
@@ -34765,36 +34202,6 @@ except ApiException as e:
 
                           <h2>Parameters</h2>
 
-                            <div class="methodsubtabletitle">Path parameters</div>
-                            <table id="methodsubtable">
-                                <tr>
-                                  <th width="150px">Name</th>
-                                  <th>Description</th>
-                                </tr>
-                                  <tr><td style="width:150px;">featureSetIndex*</td>
-<td>
-
-
-    <div id="d2e199_featuresetPresetPatch_featureSetIndex">
-        <div class="json-schema-view">
-            <div class="primitive">
-                <span class="type">
-                    Integer
-                </span>
-
-                    <div class="inner description">
-                        Index of feature set in the feature set list
-                    </div>
-            </div>
-                <div class="inner required">
-                    Required
-                </div>
-        </div>
-    </div>
-</td>
-</tr>
-
-                            </table>
 
 
                             <div class="methodsubtabletitle">Body parameters</div>
@@ -34812,7 +34219,7 @@ $(document).ready(function() {
   var schemaWrapper = {
   "in" : "body",
   "name" : "body",
-  "description" : "Load preset settings to the feature set",
+  "description" : "Load preset settings to the features",
   "required" : true,
   "schema" : {
     "$ref" : "#/definitions/FeaturePresetIdentifier"
@@ -34929,7 +34336,7 @@ $(document).ready(function() {
                                 </div>
                             </div>
 
-                            <h3> Status: 404 - No preset or feature set found </h3>
+                            <h3> Status: 404 - No preset found </h3>
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
@@ -34944,7 +34351,7 @@ $(document).ready(function() {
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
-  "description" : "No preset or feature set found",
+  "description" : "No preset found",
   "schema" : {
     "$ref" : "#/definitions/ErrorResponse"
   }
@@ -35070,10 +34477,10 @@ $(document).ready(function() {
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">Create a new preset from a feature set settings.</p>
+                        <p class="marked">Create a new preset from features settings.</p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/sdrangel/featureset/{featureSetIndex}/preset</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/sdrangel/featureset/preset</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
@@ -35093,7 +34500,7 @@ $(document).ready(function() {
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-FeatureSet-featuresetPresetPost-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X POST "http://localhost/sdrangel/featureset/{featureSetIndex}/preset"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X POST "http://localhost/sdrangel/featureset/preset"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-FeatureSet-featuresetPresetPost-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -35109,10 +34516,9 @@ public class FeatureSetApiExample {
     public static void main(String[] args) {
         
         FeatureSetApi apiInstance = new FeatureSetApi();
-        Integer featureSetIndex = 56; // Integer | Index of feature set in the feature set list
-        FeaturePresetIdentifier body = ; // FeaturePresetIdentifier | save feature set settings on a new preset
+        FeaturePresetIdentifier body = ; // FeaturePresetIdentifier | save features settings on a new preset
         try {
-            PresetIdentifier result = apiInstance.featuresetPresetPost(featureSetIndex, body);
+            PresetIdentifier result = apiInstance.featuresetPresetPost(body);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling FeatureSetApi#featuresetPresetPost");
@@ -35129,10 +34535,9 @@ public class FeatureSetApiExample {
 
     public static void main(String[] args) {
         FeatureSetApi apiInstance = new FeatureSetApi();
-        Integer featureSetIndex = 56; // Integer | Index of feature set in the feature set list
-        FeaturePresetIdentifier body = ; // FeaturePresetIdentifier | save feature set settings on a new preset
+        FeaturePresetIdentifier body = ; // FeaturePresetIdentifier | save features settings on a new preset
         try {
-            PresetIdentifier result = apiInstance.featuresetPresetPost(featureSetIndex, body);
+            PresetIdentifier result = apiInstance.featuresetPresetPost(body);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling FeatureSetApi#featuresetPresetPost");
@@ -35146,13 +34551,11 @@ public class FeatureSetApiExample {
   <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
   </div> -->
                             <div class="tab-pane" id="examples-FeatureSet-featuresetPresetPost-0-objc">
-                              <pre class="prettyprint"><code class="language-cpp">Integer *featureSetIndex = 56; // Index of feature set in the feature set list
-FeaturePresetIdentifier *body = ; // save feature set settings on a new preset
+                              <pre class="prettyprint"><code class="language-cpp">FeaturePresetIdentifier *body = ; // save features settings on a new preset
 
 FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
 
-[apiInstance featuresetPresetPostWith:featureSetIndex
-    body:body
+[apiInstance featuresetPresetPostWith:body
               completionHandler: ^(PresetIdentifier output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -35169,9 +34572,7 @@ FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
 
 var api = new SdRangel.FeatureSetApi()
 
-var featureSetIndex = 56; // {Integer} Index of feature set in the feature set list
-
-var body = ; // {FeaturePresetIdentifier} save feature set settings on a new preset
+var body = ; // {FeaturePresetIdentifier} save features settings on a new preset
 
 
 var callback = function(error, data, response) {
@@ -35181,7 +34582,7 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.featuresetPresetPost(featureSetIndex, body, callback);
+api.featuresetPresetPost(body, callback);
 </code></pre>
                             </div>
 
@@ -35203,12 +34604,11 @@ namespace Example
         {
             
             var apiInstance = new FeatureSetApi();
-            var featureSetIndex = 56;  // Integer | Index of feature set in the feature set list
-            var body = new FeaturePresetIdentifier(); // FeaturePresetIdentifier | save feature set settings on a new preset
+            var body = new FeaturePresetIdentifier(); // FeaturePresetIdentifier | save features settings on a new preset
 
             try
             {
-                PresetIdentifier result = apiInstance.featuresetPresetPost(featureSetIndex, body);
+                PresetIdentifier result = apiInstance.featuresetPresetPost(body);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -35226,11 +34626,10 @@ namespace Example
 require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new Swagger\Client\Api\FeatureSetApi();
-$featureSetIndex = 56; // Integer | Index of feature set in the feature set list
-$body = ; // FeaturePresetIdentifier | save feature set settings on a new preset
+$body = ; // FeaturePresetIdentifier | save features settings on a new preset
 
 try {
-    $result = $api_instance->featuresetPresetPost($featureSetIndex, $body);
+    $result = $api_instance->featuresetPresetPost($body);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling FeatureSetApi->featuresetPresetPost: ', $e->getMessage(), PHP_EOL;
@@ -35244,11 +34643,10 @@ use SWGSDRangel::Configuration;
 use SWGSDRangel::FeatureSetApi;
 
 my $api_instance = SWGSDRangel::FeatureSetApi->new();
-my $featureSetIndex = 56; # Integer | Index of feature set in the feature set list
-my $body = SWGSDRangel::Object::FeaturePresetIdentifier->new(); # FeaturePresetIdentifier | save feature set settings on a new preset
+my $body = SWGSDRangel::Object::FeaturePresetIdentifier->new(); # FeaturePresetIdentifier | save features settings on a new preset
 
 eval { 
-    my $result = $api_instance->featuresetPresetPost(featureSetIndex => $featureSetIndex, body => $body);
+    my $result = $api_instance->featuresetPresetPost(body => $body);
     print Dumper($result);
 };
 if ($@) {
@@ -35265,11 +34663,10 @@ from pprint import pprint
 
 # create an instance of the API class
 api_instance = swagger_sdrangel.FeatureSetApi()
-featureSetIndex = 56 # Integer | Index of feature set in the feature set list
-body =  # FeaturePresetIdentifier | save feature set settings on a new preset
+body =  # FeaturePresetIdentifier | save features settings on a new preset
 
 try: 
-    api_response = api_instance.featureset_preset_post(featureSetIndex, body)
+    api_response = api_instance.featureset_preset_post(body)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling FeatureSetApi->featuresetPresetPost: %s\n" % e)</code></pre>
@@ -35278,36 +34675,6 @@ except ApiException as e:
 
                           <h2>Parameters</h2>
 
-                            <div class="methodsubtabletitle">Path parameters</div>
-                            <table id="methodsubtable">
-                                <tr>
-                                  <th width="150px">Name</th>
-                                  <th>Description</th>
-                                </tr>
-                                  <tr><td style="width:150px;">featureSetIndex*</td>
-<td>
-
-
-    <div id="d2e199_featuresetPresetPost_featureSetIndex">
-        <div class="json-schema-view">
-            <div class="primitive">
-                <span class="type">
-                    Integer
-                </span>
-
-                    <div class="inner description">
-                        Index of feature set in the feature set list
-                    </div>
-            </div>
-                <div class="inner required">
-                    Required
-                </div>
-        </div>
-    </div>
-</td>
-</tr>
-
-                            </table>
 
 
                             <div class="methodsubtabletitle">Body parameters</div>
@@ -35325,7 +34692,7 @@ $(document).ready(function() {
   var schemaWrapper = {
   "in" : "body",
   "name" : "body",
-  "description" : "save feature set settings on a new preset",
+  "description" : "save features settings on a new preset",
   "required" : true,
   "schema" : {
     "$ref" : "#/definitions/FeaturePresetIdentifier"
@@ -35626,10 +34993,10 @@ $(document).ready(function() {
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">Update an existing preset with feature set settings.</p>
+                        <p class="marked">Update an existing preset with features settings.</p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="put"><code><span class="pln">/sdrangel/featureset/{featureSetIndex}/preset</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="put"><code><span class="pln">/sdrangel/featureset/preset</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
@@ -35649,7 +35016,7 @@ $(document).ready(function() {
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-FeatureSet-featuresetPresetPut-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X PUT "http://localhost/sdrangel/featureset/{featureSetIndex}/preset"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PUT "http://localhost/sdrangel/featureset/preset"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-FeatureSet-featuresetPresetPut-0-java">
                             <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
@@ -35665,10 +35032,9 @@ public class FeatureSetApiExample {
     public static void main(String[] args) {
         
         FeatureSetApi apiInstance = new FeatureSetApi();
-        Integer featureSetIndex = 56; // Integer | Index of feature set in the feature set list
-        FeaturePresetIdentifier body = ; // FeaturePresetIdentifier | save feature set settings to the preset
+        FeaturePresetIdentifier body = ; // FeaturePresetIdentifier | save features settings to the preset
         try {
-            FeaturePresetIdentifier result = apiInstance.featuresetPresetPut(featureSetIndex, body);
+            FeaturePresetIdentifier result = apiInstance.featuresetPresetPut(body);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling FeatureSetApi#featuresetPresetPut");
@@ -35685,10 +35051,9 @@ public class FeatureSetApiExample {
 
     public static void main(String[] args) {
         FeatureSetApi apiInstance = new FeatureSetApi();
-        Integer featureSetIndex = 56; // Integer | Index of feature set in the feature set list
-        FeaturePresetIdentifier body = ; // FeaturePresetIdentifier | save feature set settings to the preset
+        FeaturePresetIdentifier body = ; // FeaturePresetIdentifier | save features settings to the preset
         try {
-            FeaturePresetIdentifier result = apiInstance.featuresetPresetPut(featureSetIndex, body);
+            FeaturePresetIdentifier result = apiInstance.featuresetPresetPut(body);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling FeatureSetApi#featuresetPresetPut");
@@ -35702,13 +35067,11 @@ public class FeatureSetApiExample {
   <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
   </div> -->
                             <div class="tab-pane" id="examples-FeatureSet-featuresetPresetPut-0-objc">
-                              <pre class="prettyprint"><code class="language-cpp">Integer *featureSetIndex = 56; // Index of feature set in the feature set list
-FeaturePresetIdentifier *body = ; // save feature set settings to the preset
+                              <pre class="prettyprint"><code class="language-cpp">FeaturePresetIdentifier *body = ; // save features settings to the preset
 
 FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
 
-[apiInstance featuresetPresetPutWith:featureSetIndex
-    body:body
+[apiInstance featuresetPresetPutWith:body
               completionHandler: ^(FeaturePresetIdentifier output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -35725,9 +35088,7 @@ FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
 
 var api = new SdRangel.FeatureSetApi()
 
-var featureSetIndex = 56; // {Integer} Index of feature set in the feature set list
-
-var body = ; // {FeaturePresetIdentifier} save feature set settings to the preset
+var body = ; // {FeaturePresetIdentifier} save features settings to the preset
 
 
 var callback = function(error, data, response) {
@@ -35737,7 +35098,7 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.featuresetPresetPut(featureSetIndex, body, callback);
+api.featuresetPresetPut(body, callback);
 </code></pre>
                             </div>
 
@@ -35759,12 +35120,11 @@ namespace Example
         {
             
             var apiInstance = new FeatureSetApi();
-            var featureSetIndex = 56;  // Integer | Index of feature set in the feature set list
-            var body = new FeaturePresetIdentifier(); // FeaturePresetIdentifier | save feature set settings to the preset
+            var body = new FeaturePresetIdentifier(); // FeaturePresetIdentifier | save features settings to the preset
 
             try
             {
-                FeaturePresetIdentifier result = apiInstance.featuresetPresetPut(featureSetIndex, body);
+                FeaturePresetIdentifier result = apiInstance.featuresetPresetPut(body);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -35782,11 +35142,10 @@ namespace Example
 require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new Swagger\Client\Api\FeatureSetApi();
-$featureSetIndex = 56; // Integer | Index of feature set in the feature set list
-$body = ; // FeaturePresetIdentifier | save feature set settings to the preset
+$body = ; // FeaturePresetIdentifier | save features settings to the preset
 
 try {
-    $result = $api_instance->featuresetPresetPut($featureSetIndex, $body);
+    $result = $api_instance->featuresetPresetPut($body);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling FeatureSetApi->featuresetPresetPut: ', $e->getMessage(), PHP_EOL;
@@ -35800,11 +35159,10 @@ use SWGSDRangel::Configuration;
 use SWGSDRangel::FeatureSetApi;
 
 my $api_instance = SWGSDRangel::FeatureSetApi->new();
-my $featureSetIndex = 56; # Integer | Index of feature set in the feature set list
-my $body = SWGSDRangel::Object::FeaturePresetIdentifier->new(); # FeaturePresetIdentifier | save feature set settings to the preset
+my $body = SWGSDRangel::Object::FeaturePresetIdentifier->new(); # FeaturePresetIdentifier | save features settings to the preset
 
 eval { 
-    my $result = $api_instance->featuresetPresetPut(featureSetIndex => $featureSetIndex, body => $body);
+    my $result = $api_instance->featuresetPresetPut(body => $body);
     print Dumper($result);
 };
 if ($@) {
@@ -35821,11 +35179,10 @@ from pprint import pprint
 
 # create an instance of the API class
 api_instance = swagger_sdrangel.FeatureSetApi()
-featureSetIndex = 56 # Integer | Index of feature set in the feature set list
-body =  # FeaturePresetIdentifier | save feature set settings to the preset
+body =  # FeaturePresetIdentifier | save features settings to the preset
 
 try: 
-    api_response = api_instance.featureset_preset_put(featureSetIndex, body)
+    api_response = api_instance.featureset_preset_put(body)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling FeatureSetApi->featuresetPresetPut: %s\n" % e)</code></pre>
@@ -35834,36 +35191,6 @@ except ApiException as e:
 
                           <h2>Parameters</h2>
 
-                            <div class="methodsubtabletitle">Path parameters</div>
-                            <table id="methodsubtable">
-                                <tr>
-                                  <th width="150px">Name</th>
-                                  <th>Description</th>
-                                </tr>
-                                  <tr><td style="width:150px;">featureSetIndex*</td>
-<td>
-
-
-    <div id="d2e199_featuresetPresetPut_featureSetIndex">
-        <div class="json-schema-view">
-            <div class="primitive">
-                <span class="type">
-                    Integer
-                </span>
-
-                    <div class="inner description">
-                        Index of feature set in the feature set list
-                    </div>
-            </div>
-                <div class="inner required">
-                    Required
-                </div>
-        </div>
-    </div>
-</td>
-</tr>
-
-                            </table>
 
 
                             <div class="methodsubtabletitle">Body parameters</div>
@@ -35881,7 +35208,7 @@ $(document).ready(function() {
   var schemaWrapper = {
   "in" : "body",
   "name" : "body",
-  "description" : "save feature set settings to the preset",
+  "description" : "save features settings to the preset",
   "required" : true,
   "schema" : {
     "$ref" : "#/definitions/FeaturePresetIdentifier"
@@ -35998,7 +35325,7 @@ $(document).ready(function() {
                                 </div>
                             </div>
 
-                            <h3> Status: 404 - No preset or feature set found </h3>
+                            <h3> Status: 404 - No preset found </h3>
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
@@ -36013,7 +35340,7 @@ $(document).ready(function() {
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
-  "description" : "No preset or feature set found",
+  "description" : "No preset found",
   "schema" : {
     "$ref" : "#/definitions/ErrorResponse"
   }
@@ -51396,7 +50723,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2022-05-03T04:22:59.079+02:00
+              Generated 2022-05-04T08:35:39.790+02:00
             </div>
           </div>
       </div>

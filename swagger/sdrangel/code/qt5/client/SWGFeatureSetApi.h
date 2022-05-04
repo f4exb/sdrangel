@@ -41,20 +41,20 @@ public:
     QString basePath;
     QMap<QString, QString> defaultHeaders;
 
-    void featuresetFEatureSettingsPut(qint32 feature_set_index, qint32 feature_index, SWGFeatureSettings& body);
-    void featuresetFeatureActionsPost(qint32 feature_set_index, qint32 feature_index, SWGFeatureActions& body);
-    void featuresetFeatureDelete(qint32 feature_set_index, qint32 feature_index);
-    void featuresetFeaturePost(qint32 feature_set_index, SWGFeatureSettings& body);
-    void featuresetFeatureReportGet(qint32 feature_set_index, qint32 feature_index);
-    void featuresetFeatureRunDelete(qint32 feature_set_index, qint32 feature_index);
-    void featuresetFeatureRunGet(qint32 feature_set_index, qint32 feature_index);
-    void featuresetFeatureRunPost(qint32 feature_set_index, qint32 feature_index);
-    void featuresetFeatureSettingsGet(qint32 feature_set_index, qint32 feature_index);
-    void featuresetFeatureSettingsPatch(qint32 feature_set_index, qint32 feature_index, SWGFeatureSettings& body);
-    void featuresetGet(qint32 feature_set_index);
-    void featuresetPresetPatch(qint32 feature_set_index, SWGFeaturePresetIdentifier& body);
-    void featuresetPresetPost(qint32 feature_set_index, SWGFeaturePresetIdentifier& body);
-    void featuresetPresetPut(qint32 feature_set_index, SWGFeaturePresetIdentifier& body);
+    void featuresetFEatureSettingsPut(qint32 feature_index, SWGFeatureSettings& body);
+    void featuresetFeatureActionsPost(qint32 feature_index, SWGFeatureActions& body);
+    void featuresetFeatureDelete(qint32 feature_index);
+    void featuresetFeaturePost(SWGFeatureSettings& body);
+    void featuresetFeatureReportGet(qint32 feature_index);
+    void featuresetFeatureRunDelete(qint32 feature_index);
+    void featuresetFeatureRunGet(qint32 feature_index);
+    void featuresetFeatureRunPost(qint32 feature_index);
+    void featuresetFeatureSettingsGet(qint32 feature_index);
+    void featuresetFeatureSettingsPatch(qint32 feature_index, SWGFeatureSettings& body);
+    void featuresetGet();
+    void featuresetPresetPatch(SWGFeaturePresetIdentifier& body);
+    void featuresetPresetPost(SWGFeaturePresetIdentifier& body);
+    void featuresetPresetPut(SWGFeaturePresetIdentifier& body);
     
 private:
     void featuresetFEatureSettingsPutCallback (SWGHttpRequestWorker * worker);
