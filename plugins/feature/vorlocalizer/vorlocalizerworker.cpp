@@ -24,7 +24,11 @@
 #include "SWGErrorResponse.h"
 
 #include "device/deviceset.h"
+#include "device/deviceapi.h"
+#include "dsp/devicesamplesource.h"
+#include "dsp/devicesamplesink.h"
 #include "channel/channelapi.h"
+#include "channel/channelwebapiutils.h"
 #include "webapi/webapiadapterinterface.h"
 #include "webapi/webapiutils.h"
 #include "maincore.h"
@@ -78,6 +82,7 @@ void VorLocalizerWorker::started()
     m_rrTimer.start(m_settings.m_rrTime * 1000);
     disconnect(thread(), SIGNAL(started()), this, SLOT(started()));
 }
+
 void VorLocalizerWorker::stopWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
@@ -205,6 +210,53 @@ void VorLocalizerWorker::updateHardware()
     m_mutex.unlock();
 }
 
+quint64 VorLocalizerWorker::getDeviceCenterFrequency(int deviceIndex)
+{
+    std::vector<DeviceSet*> deviceSets = MainCore::instance()->getDeviceSets();
+    if (deviceIndex < deviceSets.size())
+    {
+        DeviceSet *deviceSet = deviceSets[deviceIndex];
+        if (deviceSet->m_deviceSourceEngine)
+        {
+            DeviceSampleSource *source = deviceSet->m_deviceAPI->getSampleSource();
+            return source->getCenterFrequency();
+        }
+        else if (deviceSet->m_deviceSinkEngine)
+        {
+            DeviceSampleSink *sink = deviceSet->m_deviceAPI->getSampleSink();
+            return sink->getCenterFrequency();
+        }
+    }
+    return 0;
+}
+
+int VorLocalizerWorker::getDeviceSampleRate(int deviceIndex)
+{
+    std::vector<DeviceSet*> deviceSets = MainCore::instance()->getDeviceSets();
+    if (deviceIndex < deviceSets.size())
+    {
+        DeviceSet *deviceSet = deviceSets[deviceIndex];
+        if (deviceSet->m_deviceSourceEngine)
+        {
+            DeviceSampleSource *source = deviceSet->m_deviceAPI->getSampleSource();
+            return source->getSampleRate();
+        }
+        else if (deviceSet->m_deviceSinkEngine)
+        {
+            DeviceSampleSink *sink = deviceSet->m_deviceAPI->getSampleSink();
+            return sink->getSampleRate();
+        }
+    }
+    return 0;
+}
+
+// Does this device have a center frequency setting (FileInput doesn't)
+bool VorLocalizerWorker::hasCenterFrequencySetting(int deviceIndex)
+{
+    double deviceFrequency;
+    return !ChannelWebAPIUtils::getCenterFrequency(deviceIndex, deviceFrequency);
+}
+
 void VorLocalizerWorker::removeVORChannel(int navId)
 {
     qDebug("VorLocalizerWorker::removeVORChannel: %d", navId);
@@ -294,7 +346,12 @@ void VorLocalizerWorker::updateChannels()
             RRTurnPlan turnPlan(deviceChannel);
             int fMin = vorList.front().m_frequency;
             int fMax = vorList.back().m_frequency;
-            int devFreq = (fMin + fMax) / 2;
+            int devFreq;
+            if (turnPlan.m_fixedCenterFrequency) {
+                devFreq = getDeviceCenterFrequency(turnPlan.m_device.m_deviceIndex);
+            } else {
+                devFreq = (fMin + fMax) / 2;
+            }
             turnPlan.m_device.m_frequency = devFreq;
             int iCh = 0;
 
@@ -321,7 +378,6 @@ void VorLocalizerWorker::updateChannels()
                         ++it;
                     }
                 }
-
                 iCh++;
             }
 
@@ -359,7 +415,12 @@ void VorLocalizerWorker::updateChannels()
             RRTurnPlan turnPlan(deviceChannel);
             int fMin = vorList.front().m_frequency;
             int fMax = vorList.back().m_frequency;
-            int devFreq = (fMin + fMax) / 2;
+            int devFreq;
+            if (turnPlan.m_fixedCenterFrequency) {
+                devFreq = getDeviceCenterFrequency(turnPlan.m_device.m_deviceIndex);
+            } else {
+                devFreq = (fMin + fMax) / 2;
+            }
             turnPlan.m_device.m_frequency = devFreq;
             int iCh = 0;
 
@@ -404,69 +465,6 @@ void VorLocalizerWorker::updateChannels()
     m_rrTurnCounters.resize(deviceCount);
     std::fill(m_rrTurnCounters.begin(), m_rrTurnCounters.end(), 0);
     rrNextTurn();
-}
-
-void VorLocalizerWorker::allocateChannel(ChannelAPI *channel, int vorFrequency, int vorNavId, int channelShift)
-{
-    VORLocalizerSettings::AvailableChannel& availableChannel = m_availableChannels->operator[](channel);
-    qDebug() << "VorLocalizerWorker::allocateChannel:"
-            << " vorNavId:" << vorNavId
-            << " vorFrequency:" << vorFrequency
-            << " channelShift:" << channelShift
-            << " deviceIndex:" << availableChannel.m_deviceSetIndex
-            << " channelIndex:" << availableChannel.m_channelIndex;
-    double deviceFrequency = vorFrequency - channelShift;
-    setDeviceFrequency(availableChannel.m_deviceSetIndex, deviceFrequency);
-    setChannelShift(availableChannel.m_deviceSetIndex, availableChannel.m_channelIndex, channelShift, vorNavId);
-    availableChannel.m_navId = vorNavId;
-}
-
-void VorLocalizerWorker::setDeviceFrequency(int deviceIndex, double targetFrequency)
-{
-    SWGSDRangel::SWGDeviceSettings deviceSettingsResponse;
-    SWGSDRangel::SWGErrorResponse errorResponse;
-    int httpRC;
-
-    // Get current device center frequency
-    httpRC = m_webAPIAdapterInterface->devicesetDeviceSettingsGet(
-        deviceIndex,
-        deviceSettingsResponse,
-        errorResponse
-    );
-
-    if (httpRC/100 != 2)
-    {
-        qWarning("VorLocalizerWorker::setDeviceFrequency: get device frequency error %d: %s",
-            httpRC, qPrintable(*errorResponse.getMessage()));
-    }
-
-    QJsonObject *jsonObj = deviceSettingsResponse.asJsonObject();
-
-    // Update centerFrequency
-    WebAPIUtils::setSubObjectDouble(*jsonObj, "centerFrequency", targetFrequency);
-    QStringList deviceSettingsKeys;
-    deviceSettingsKeys.append("centerFrequency");
-    deviceSettingsResponse.init();
-    deviceSettingsResponse.fromJsonObject(*jsonObj);
-    SWGSDRangel::SWGErrorResponse errorResponse2;
-
-    httpRC = m_webAPIAdapterInterface->devicesetDeviceSettingsPutPatch(
-        deviceIndex,
-        false, // PATCH
-        deviceSettingsKeys,
-        deviceSettingsResponse,
-        errorResponse2
-    );
-
-    if (httpRC/100 == 2)
-    {
-        qDebug("VorLocalizerWorker::setDeviceFrequency: set device frequency %f OK", targetFrequency);
-    }
-    else
-    {
-        qWarning("VorLocalizerWorker::setDeviceFrequency: set device frequency error %d: %s",
-            httpRC, qPrintable(*errorResponse2.getMessage()));
-    }
 }
 
 void VorLocalizerWorker::setChannelShift(int deviceIndex, int channelIndex, double targetOffset, int vorNavId)
@@ -674,14 +672,16 @@ void VorLocalizerWorker::getChannelsByDevice(
     for (; itr != availableChannels->end(); ++itr)
     {
         devicesChannelsMap[itr->m_deviceSetIndex].m_device.m_deviceIndex = itr->m_deviceSetIndex;
-        devicesChannelsMap[itr->m_deviceSetIndex].m_bandwidth = itr->m_basebandSampleRate;
+        devicesChannelsMap[itr->m_deviceSetIndex].m_bandwidth = getDeviceSampleRate(itr->m_deviceSetIndex); // Get b/w of device, not channel, as the latter may be decimated
         devicesChannelsMap[itr->m_deviceSetIndex].m_channels.push_back(RRChannel{itr->m_channelAPI, itr->m_channelIndex, 0, -1});
     }
 
-    QMap<int, RRTurnPlan>::const_iterator itm = devicesChannelsMap.begin();
+    QMap<int, RRTurnPlan>::iterator itm = devicesChannelsMap.begin();
     devicesChannels.clear();
 
-    for (; itm != devicesChannelsMap.end(); ++itm) {
+    for (; itm != devicesChannelsMap.end(); ++itm)
+    {
+        itm->m_fixedCenterFrequency = hasCenterFrequencySetting(itm->m_device.m_deviceIndex);
         devicesChannels.push_back(*itm);
     }
 
@@ -700,23 +700,32 @@ void VorLocalizerWorker::rrNextTurn()
         unsigned int turnCount = m_rrTurnCounters[iDevPlan];
         int deviceIndex = rrPlan[turnCount].m_device.m_deviceIndex;
         int deviceFrequency = rrPlan[turnCount].m_device.m_frequency - m_settings.m_centerShift;
+
         qDebug() << "VorLocalizerWorker::rrNextTurn: "
             << "turn:" << turnCount
             << "device:" << deviceIndex
             << "frequency:" << deviceFrequency - m_settings.m_centerShift;
-        setDeviceFrequency(deviceIndex, deviceFrequency);
+
+        if (!rrPlan[turnCount].m_fixedCenterFrequency) {
+            ChannelWebAPIUtils::setCenterFrequency(deviceIndex, deviceFrequency);
+        }
 
         for (auto channel : rrPlan[turnCount].m_channels)
         {
+            int shift = channel.m_frequencyShift;
+            if (!rrPlan[turnCount].m_fixedCenterFrequency) {
+                shift += m_settings.m_centerShift;
+            }
+
             qDebug() << "VorLocalizerWorker::rrNextTurn: "
                 << "device:" << deviceIndex
                 << "channel:" << channel.m_channelIndex
-                << "shift:" <<  channel.m_frequencyShift + m_settings.m_centerShift
+                << "shift:" << shift
                 << "navId:" << channel.m_navId;
             setChannelShift(
                 deviceIndex,
                 channel.m_channelIndex,
-                channel.m_frequencyShift + m_settings.m_centerShift,
+                shift,
                 channel.m_navId
             );
             m_channelAllocations[channel.m_navId] = ChannelAllocation{
