@@ -412,6 +412,8 @@ void VORDemodSCSink::applySettings(const VORDemodSettings& settings, bool force)
             m_identMaxs[i] = 0.0f;
         }
         m_ident = "";
+        m_refGoertzel.reset();
+        m_varGoertzel.reset();
     }
 
     m_settings = settings;

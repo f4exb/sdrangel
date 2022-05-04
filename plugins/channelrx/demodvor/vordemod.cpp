@@ -260,8 +260,8 @@ void VORDemod::applySettings(const VORDemodSettings& settings, bool force)
 
         // Reset state so we don't report old data for new NavId
         m_radial = 0.0f;
-        m_refMag = 0.0f;
-        m_varMag = 0.0f;
+        m_refMag = -200.0f;
+        m_varMag = -200.0f;
         m_morseIdent = "";
     }
     if ((m_settings.m_squelch != settings.m_squelch) || force) {
