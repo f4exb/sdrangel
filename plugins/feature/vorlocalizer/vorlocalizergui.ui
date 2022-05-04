@@ -170,7 +170,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Sound volume (%)</string>
+         <string>Round robin turn time (s)</string>
         </property>
         <property name="text">
          <string>20s</string>
