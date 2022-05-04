@@ -698,6 +698,12 @@ void VORLocalizerGUI::on_startStop_toggled(bool checked)
     {
         VORLocalizer::MsgStartStop *message = VORLocalizer::MsgStartStop::create(checked);
         m_vorLocalizer->getInputMessageQueue()->push(message);
+
+        if (checked)
+        {
+            // Refresh channels in case device b/w has changed
+            channelsRefresh();
+        }
     }
 }
 
@@ -954,6 +960,8 @@ VORLocalizerGUI::VORLocalizerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     // Update channel list when added/removed
     connect(MainCore::instance(), &MainCore::channelAdded, this, &VORLocalizerGUI::channelsRefresh);
     connect(MainCore::instance(), &MainCore::channelRemoved, this, &VORLocalizerGUI::channelsRefresh);
+    // Also replan when device changed (as bandwidth may change or may becomed fixed center freq)
+    connect(MainCore::instance(), &MainCore::deviceChanged, this, &VORLocalizerGUI::channelsRefresh);
     // List already opened channels
     channelsRefresh();
 }
