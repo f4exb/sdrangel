@@ -407,3 +407,16 @@ const QByteArray* Preset::findBestDeviceConfigSoapy(const QString& sourceId, con
 		return &(it->m_config);
 	}
 }
+
+QString Preset::getPresetTypeChar(PresetType presetType)
+{
+    if (presetType == PresetSource) {
+        return "R";
+    } else if (presetType == PresetSink) {
+        return "T";
+    } else if (presetType == PresetMIMO) {
+        return "M";
+    } else {
+        return "X";
+    }
+}

@@ -89,6 +89,7 @@ public:
 	bool isMIMOPreset() const { return m_presetType == PresetMIMO; }
     PresetType getPresetType() const { return m_presetType; }
     void setPresetType(PresetType presetType) { m_presetType = presetType; }
+    static QString getPresetTypeChar(PresetType presetType);
 
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);

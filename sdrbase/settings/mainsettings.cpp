@@ -238,6 +238,16 @@ void MainSettings::deletePreset(const Preset* preset)
 	delete (Preset*)preset;
 }
 
+QByteArray MainSettings::serializePreset(const Preset* preset) const
+{
+    return preset->serialize();
+}
+
+bool MainSettings::deserializePreset(const QByteArray& blob, Preset* preset)
+{
+    return preset->deserialize(blob);
+}
+
 void MainSettings::deletePresetGroup(const QString& groupName)
 {
     Presets::iterator it = m_presets.begin();
@@ -474,6 +484,16 @@ void MainSettings::deleteConfiguration(const Configuration *configuration)
 {
 	m_configurations.removeAll((Configuration*) configuration);
 	delete (Configuration*) configuration;
+}
+
+QByteArray MainSettings::serializeConfiguration(const Configuration *configuration) const
+{
+    return configuration->serialize();
+}
+
+bool MainSettings::deserializeConfiguration(const QByteArray& blob, Configuration *configuration)
+{
+    return configuration->deserialize(blob);
 }
 
 const Configuration* MainSettings::getConfiguration(const QString& groupName, const QString& description) const

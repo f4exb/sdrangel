@@ -213,7 +213,7 @@ void VorLocalizerWorker::updateHardware()
 quint64 VorLocalizerWorker::getDeviceCenterFrequency(int deviceIndex)
 {
     std::vector<DeviceSet*> deviceSets = MainCore::instance()->getDeviceSets();
-    if (deviceIndex < deviceSets.size())
+    if (deviceIndex < (int) deviceSets.size())
     {
         DeviceSet *deviceSet = deviceSets[deviceIndex];
         if (deviceSet->m_deviceSourceEngine)
@@ -233,7 +233,7 @@ quint64 VorLocalizerWorker::getDeviceCenterFrequency(int deviceIndex)
 int VorLocalizerWorker::getDeviceSampleRate(int deviceIndex)
 {
     std::vector<DeviceSet*> deviceSets = MainCore::instance()->getDeviceSets();
-    if (deviceIndex < deviceSets.size())
+    if (deviceIndex < (int) deviceSets.size())
     {
         DeviceSet *deviceSet = deviceSets[deviceIndex];
         if (deviceSet->m_deviceSourceEngine)

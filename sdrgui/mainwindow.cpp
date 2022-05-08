@@ -1599,6 +1599,28 @@ bool MainWindow::handleMessage(const Message& cmd)
         m_mainCore->m_settings.deletePreset(presetToDelete);
         return true;
     }
+    else if (MainCore::MsgLoadConfiguration::match(cmd))
+    {
+        MainCore::MsgLoadConfiguration& notif = (MainCore::MsgLoadConfiguration&) cmd;
+        const Configuration *configuration = notif.getConfiguration();
+        loadConfiguration(configuration, false);
+        return true;
+    }
+    else if (MainCore::MsgSaveConfiguration::match(cmd))
+    {
+        MainCore::MsgSaveConfiguration& notif = (MainCore::MsgSaveConfiguration&) cmd;
+        Configuration *configuration = notif.getConfiguration();
+        saveConfiguration(configuration);
+        return true;
+    }
+    else if (MainCore::MsgDeleteConfiguration::match(cmd))
+    {
+        MainCore::MsgDeleteConfiguration& notif = (MainCore::MsgDeleteConfiguration&) cmd;
+        const Configuration *configurationToDelete = notif.getConfiguration();
+        // remove configuration from settings
+        m_mainCore->m_settings.deleteConfiguration(configurationToDelete);
+        return true;
+    }
     else if (MainCore::MsgDeleteFeatureSetPreset::match(cmd))
     {
         MainCore::MsgDeleteFeatureSetPreset& notif = (MainCore::MsgDeleteFeatureSetPreset&) cmd;

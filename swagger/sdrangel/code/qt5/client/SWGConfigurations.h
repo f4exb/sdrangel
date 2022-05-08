@@ -11,56 +11,56 @@
  */
 
 /*
- * SWGPresetImport.h
+ * SWGConfigurations.h
  *
- * Details to import new preset from file
+ * Configuration presets
  */
 
-#ifndef SWGPresetImport_H_
-#define SWGPresetImport_H_
+#ifndef SWGConfigurations_H_
+#define SWGConfigurations_H_
 
 #include <QJsonObject>
 
 
-#include "SWGPresetIdentifier.h"
-#include <QString>
+#include "SWGConfigurationGroup.h"
+#include <QList>
 
 #include "SWGObject.h"
 #include "export.h"
 
 namespace SWGSDRangel {
 
-class SWG_API SWGPresetImport: public SWGObject {
+class SWG_API SWGConfigurations: public SWGObject {
 public:
-    SWGPresetImport();
-    SWGPresetImport(QString* json);
-    virtual ~SWGPresetImport();
+    SWGConfigurations();
+    SWGConfigurations(QString* json);
+    virtual ~SWGConfigurations();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGPresetImport* fromJson(QString &jsonString) override;
+    virtual SWGConfigurations* fromJson(QString &jsonString) override;
 
-    SWGPresetIdentifier* getPreset();
-    void setPreset(SWGPresetIdentifier* preset);
+    qint32 getNbGroups();
+    void setNbGroups(qint32 nb_groups);
 
-    QString* getFilePath();
-    void setFilePath(QString* file_path);
+    QList<SWGConfigurationGroup*>* getGroups();
+    void setGroups(QList<SWGConfigurationGroup*>* groups);
 
 
     virtual bool isSet() override;
 
 private:
-    SWGPresetIdentifier* preset;
-    bool m_preset_isSet;
+    qint32 nb_groups;
+    bool m_nb_groups_isSet;
 
-    QString* file_path;
-    bool m_file_path_isSet;
+    QList<SWGConfigurationGroup*>* groups;
+    bool m_groups_isSet;
 
 };
 
 }
 
-#endif /* SWGPresetImport_H_ */
+#endif /* SWGConfigurations_H_ */

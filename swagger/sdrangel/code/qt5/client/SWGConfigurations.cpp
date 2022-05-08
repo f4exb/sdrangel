@@ -11,7 +11,7 @@
  */
 
 
-#include "SWGPresetImport.h"
+#include "SWGConfigurations.h"
 
 #include "SWGHelpers.h"
 
@@ -22,42 +22,44 @@
 
 namespace SWGSDRangel {
 
-SWGPresetImport::SWGPresetImport(QString* json) {
+SWGConfigurations::SWGConfigurations(QString* json) {
     init();
     this->fromJson(*json);
 }
 
-SWGPresetImport::SWGPresetImport() {
-    preset = nullptr;
-    m_preset_isSet = false;
-    file_path = nullptr;
-    m_file_path_isSet = false;
+SWGConfigurations::SWGConfigurations() {
+    nb_groups = 0;
+    m_nb_groups_isSet = false;
+    groups = nullptr;
+    m_groups_isSet = false;
 }
 
-SWGPresetImport::~SWGPresetImport() {
+SWGConfigurations::~SWGConfigurations() {
     this->cleanup();
 }
 
 void
-SWGPresetImport::init() {
-    preset = new SWGPresetIdentifier();
-    m_preset_isSet = false;
-    file_path = new QString("");
-    m_file_path_isSet = false;
+SWGConfigurations::init() {
+    nb_groups = 0;
+    m_nb_groups_isSet = false;
+    groups = new QList<SWGConfigurationGroup*>();
+    m_groups_isSet = false;
 }
 
 void
-SWGPresetImport::cleanup() {
-    if(preset != nullptr) { 
-        delete preset;
-    }
-    if(file_path != nullptr) { 
-        delete file_path;
+SWGConfigurations::cleanup() {
+
+    if(groups != nullptr) { 
+        auto arr = groups;
+        for(auto o: *arr) { 
+            delete o;
+        }
+        delete groups;
     }
 }
 
-SWGPresetImport*
-SWGPresetImport::fromJson(QString &json) {
+SWGConfigurations*
+SWGConfigurations::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -66,15 +68,15 @@ SWGPresetImport::fromJson(QString &json) {
 }
 
 void
-SWGPresetImport::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&preset, pJson["preset"], "SWGPresetIdentifier", "SWGPresetIdentifier");
+SWGConfigurations::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&nb_groups, pJson["nbGroups"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&file_path, pJson["filePath"], "QString", "QString");
     
+    ::SWGSDRangel::setValue(&groups, pJson["groups"], "QList", "SWGConfigurationGroup");
 }
 
 QString
-SWGPresetImport::asJson ()
+SWGConfigurations::asJson ()
 {
     QJsonObject* obj = this->asJsonObject();
 
@@ -85,47 +87,47 @@ SWGPresetImport::asJson ()
 }
 
 QJsonObject*
-SWGPresetImport::asJsonObject() {
+SWGConfigurations::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if((preset != nullptr) && (preset->isSet())){
-        toJsonValue(QString("preset"), preset, obj, QString("SWGPresetIdentifier"));
+    if(m_nb_groups_isSet){
+        obj->insert("nbGroups", QJsonValue(nb_groups));
     }
-    if(file_path != nullptr && *file_path != QString("")){
-        toJsonValue(QString("filePath"), file_path, obj, QString("QString"));
+    if(groups && groups->size() > 0){
+        toJsonArray((QList<void*>*)groups, obj, "groups", "SWGConfigurationGroup");
     }
 
     return obj;
 }
 
-SWGPresetIdentifier*
-SWGPresetImport::getPreset() {
-    return preset;
+qint32
+SWGConfigurations::getNbGroups() {
+    return nb_groups;
 }
 void
-SWGPresetImport::setPreset(SWGPresetIdentifier* preset) {
-    this->preset = preset;
-    this->m_preset_isSet = true;
+SWGConfigurations::setNbGroups(qint32 nb_groups) {
+    this->nb_groups = nb_groups;
+    this->m_nb_groups_isSet = true;
 }
 
-QString*
-SWGPresetImport::getFilePath() {
-    return file_path;
+QList<SWGConfigurationGroup*>*
+SWGConfigurations::getGroups() {
+    return groups;
 }
 void
-SWGPresetImport::setFilePath(QString* file_path) {
-    this->file_path = file_path;
-    this->m_file_path_isSet = true;
+SWGConfigurations::setGroups(QList<SWGConfigurationGroup*>* groups) {
+    this->groups = groups;
+    this->m_groups_isSet = true;
 }
 
 
 bool
-SWGPresetImport::isSet(){
+SWGConfigurations::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(preset && preset->isSet()){
+        if(m_nb_groups_isSet){
             isObjectUpdated = true; break;
         }
-        if(file_path && *file_path != QString("")){
+        if(groups && (groups->size() > 0)){
             isObjectUpdated = true; break;
         }
     }while(false);

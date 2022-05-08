@@ -167,6 +167,69 @@ public:
         { }
     };
 
+    class SDRBASE_API MsgLoadConfiguration : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const Configuration *getConfiguration() const { return m_configuration; }
+
+        static MsgLoadConfiguration* create(const Configuration *configuration)
+        {
+            return new MsgLoadConfiguration(configuration);
+        }
+
+    private:
+        const Configuration *m_configuration;
+
+        MsgLoadConfiguration(const Configuration *configuration) :
+            Message(),
+            m_configuration(configuration)
+        { }
+    };
+
+    class SDRBASE_API MsgSaveConfiguration : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        Configuration *getConfiguration() const { return m_configuration; }
+        bool isNewConfiguration() const { return m_newConfiguration; }
+
+        static MsgSaveConfiguration* create(Configuration *configuration, bool newConfiguration)
+        {
+            return new MsgSaveConfiguration(configuration, newConfiguration);
+        }
+
+    private:
+        Configuration *m_configuration;
+        bool m_newConfiguration;
+
+        MsgSaveConfiguration(Configuration *configuration, bool newConfiguration) :
+            Message(),
+            m_configuration(configuration),
+            m_newConfiguration(newConfiguration)
+        { }
+    };
+
+    class SDRBASE_API MsgDeleteConfiguration : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const Configuration *getConfiguration() const { return m_configuration; }
+
+        static MsgDeleteConfiguration* create(const Configuration *configuration)
+        {
+            return new MsgDeleteConfiguration(configuration);
+        }
+
+    private:
+        const Configuration *m_configuration;
+
+        MsgDeleteConfiguration(const Configuration *configuration) :
+            Message(),
+            m_configuration(configuration)
+        { }
+    };
+
     class SDRBASE_API MsgLoadFeatureSetPreset : public Message {
         MESSAGE_CLASS_DECLARATION
 

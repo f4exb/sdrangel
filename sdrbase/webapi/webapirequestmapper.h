@@ -76,6 +76,11 @@ private:
     void instancePresetsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instancePresetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instancePresetFileService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void instancePresetBlobService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void instanceConfigurationsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void instanceConfigurationService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void instanceConfigurationFileService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void instanceConfigurationBlobService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceFeaturePresetsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceFeaturePresetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceDeviceSetsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
@@ -124,6 +129,8 @@ private:
     bool validateAMBEDevices(SWGSDRangel::SWGAMBEDevices& ambeDevices, QJsonObject& jsonObject);
     bool validateLimeRFEConfig(SWGSDRangel::SWGLimeRFESettings& limeRFESettings, QJsonObject& jsonObject, QStringList& limeRFESettingsKeys);
     bool validateConfig(SWGSDRangel::SWGInstanceConfigResponse& config, QJsonObject& jsonObject, WebAPIAdapterInterface::ConfigKeys& configKeys);
+    bool validateConfigurationIdentifier(SWGSDRangel::SWGConfigurationIdentifier& configurationIdentifier);
+    bool validateConfigurationImportExport(SWGSDRangel::SWGConfigurationImportExport& configuratopmImportExport);
 
     bool appendFeatureSetPresetKeys(
         SWGSDRangel::SWGFeatureSetPreset *preset,

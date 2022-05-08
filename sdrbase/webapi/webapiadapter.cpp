@@ -57,6 +57,12 @@
 #include "SWGPresetItem.h"
 #include "SWGPresetTransfer.h"
 #include "SWGPresetIdentifier.h"
+#include "SWGPresetExport.h"
+#include "SWGConfigurations.h"
+#include "SWGConfigurationIdentifier.h"
+#include "SWGConfigurationImportExport.h"
+#include "SWGBase64Blob.h"
+#include "SWGFilePath.h"
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
@@ -1169,7 +1175,7 @@ int WebAPIAdapter::instancePresetsGet(
         swgPresets->append(new SWGSDRangel::SWGPresetItem);
         swgPresets->back()->init();
         swgPresets->back()->setCenterFrequency(preset->getCenterFrequency());
-        *swgPresets->back()->getType() = preset->isSourcePreset() ? "R" : preset->isSinkPreset() ? "T" : preset->isMIMOPreset() ? "M" : "X";
+        *swgPresets->back()->getType() = Preset::getPresetTypeChar(preset->getPresetType());
         *swgPresets->back()->getName() = preset->getDescription();
         nbPresetsThisGroup++;
     }
@@ -1241,7 +1247,7 @@ int WebAPIAdapter::instancePresetPatch(
     response.init();
     response.setCenterFrequency(selectedPreset->getCenterFrequency());
     *response.getGroupName() = selectedPreset->getGroup();
-    *response.getType() = selectedPreset->isSourcePreset() ? "R" : selectedPreset->isSinkPreset() ? "T" : selectedPreset->isMIMOPreset() ? "M" : "X";
+    *response.getType() = Preset::getPresetTypeChar(selectedPreset->getPresetType());
     *response.getName() = selectedPreset->getDescription();
 
     return 202;
@@ -1310,7 +1316,7 @@ int WebAPIAdapter::instancePresetPut(
     response.init();
     response.setCenterFrequency(selectedPreset->getCenterFrequency());
     *response.getGroupName() = selectedPreset->getGroup();
-    *response.getType() = selectedPreset->isSourcePreset() ? "R" : selectedPreset->isSinkPreset() ? "T": selectedPreset->isMIMOPreset() ? "M" : "X";
+    *response.getType() = Preset::getPresetTypeChar(selectedPreset->getPresetType());
     *response.getName() = selectedPreset->getDescription();
 
     return 202;
@@ -1373,7 +1379,7 @@ int WebAPIAdapter::instancePresetPost(
     response.init();
     response.setCenterFrequency(selectedPreset->getCenterFrequency());
     *response.getGroupName() = selectedPreset->getGroup();
-    *response.getType() = selectedPreset->isSourcePreset() ? "R" : selectedPreset->isSinkPreset() ? "T" : selectedPreset->isMIMOPreset() ? "M" : "X";
+    *response.getType() = Preset::getPresetTypeChar(selectedPreset->getPresetType());
     *response.getName() = selectedPreset->getDescription();
 
     return 202;
@@ -1390,6 +1396,7 @@ int WebAPIAdapter::instancePresetDelete(
 
     if (selectedPreset == 0)
     {
+        error.init();
         *error.getMessage() = QString("There is no preset [%1, %2, %3 %4]")
                 .arg(*response.getGroupName())
                 .arg(response.getCenterFrequency())
@@ -1400,13 +1407,556 @@ int WebAPIAdapter::instancePresetDelete(
 
     response.setCenterFrequency(selectedPreset->getCenterFrequency());
     *response.getGroupName() = selectedPreset->getGroup();
-    *response.getType() = selectedPreset->isSourcePreset() ? "R" : selectedPreset->isSinkPreset() ? "T" : selectedPreset->isMIMOPreset() ? "M" : "X";
+    *response.getType() = Preset::getPresetTypeChar(selectedPreset->getPresetType());
     *response.getName() = selectedPreset->getDescription();
 
     MainCore::MsgDeletePreset *msg = MainCore::MsgDeletePreset::create(const_cast<Preset*>(selectedPreset));
     m_mainCore->m_mainMessageQueue->push(msg);
 
     return 202;
+}
+
+int WebAPIAdapter::instancePresetFilePut(
+        SWGSDRangel::SWGFilePath& query,
+        SWGSDRangel::SWGPresetIdentifier& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    QString filePath = *query.getFilePath();
+
+    if (QFileInfo::exists(filePath))
+    {
+        QFile file(filePath);
+
+        if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
+            QByteArray base64Str;
+            QTextStream instream(&file);
+            instream >> base64Str;
+            file.close();
+            Preset *newPreset = m_mainCore->m_settings.newPreset("TBD", "TBD");
+
+            if (newPreset->deserialize(QByteArray::fromBase64(base64Str)))
+            {
+                response.init();
+                *response.getGroupName() = newPreset->getGroup();
+                response.setCenterFrequency(newPreset->getCenterFrequency());
+                *response.getName() = newPreset->getDescription();
+                *response.getType() = Preset::getPresetTypeChar(newPreset->getPresetType());
+                return 202;
+            }
+            else
+            {
+                error.init();
+                *error.getMessage() = QString("Cannot deserialize preset from file %1").arg(filePath);
+                return 400;
+            }
+        }
+        else
+        {
+            error.init();
+            *error.getMessage() = QString("Cannot read file %1").arg(filePath);
+            return 500;
+        }
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("File %1 is not found").arg(filePath);
+        return 404;
+    }
+}
+
+int WebAPIAdapter::instancePresetFilePost(
+        SWGSDRangel::SWGPresetExport& query,
+        SWGSDRangel::SWGPresetIdentifier& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    QString filePath = *query.getFilePath();
+
+    if (QFileInfo(filePath).absoluteDir().exists())
+    {
+        SWGSDRangel::SWGPresetIdentifier *presetId = query.getPreset();
+        const Preset *selectedPreset = m_mainCore->m_settings.getPreset(
+            *presetId->getGroupName(),
+            presetId->getCenterFrequency(),
+            *presetId->getName(),
+            *presetId->getType());
+
+        if (selectedPreset)
+        {
+            QString base64Str = selectedPreset->serialize().toBase64();
+            QFileInfo fileInfo(filePath);
+
+            if (fileInfo.suffix() != "prex") {
+                filePath += ".prex";
+            }
+
+            QFile file(filePath);
+
+            if (file.open(QIODevice::ReadWrite | QIODevice::Text))
+            {
+                QTextStream outstream(&file);
+                outstream << base64Str;
+                file.close();
+                response.init();
+                *response.getGroupName() = selectedPreset->getGroup();
+                response.setCenterFrequency(selectedPreset->getCenterFrequency());
+                *response.getName() = selectedPreset->getDescription();
+                *response.getType() = Preset::getPresetTypeChar(selectedPreset->getPresetType());
+                return 200;
+            }
+            else
+            {
+                error.init();
+                *error.getMessage() = QString("Cannot open %1 for writing").arg(filePath);
+                return 500;
+            }
+        }
+        else
+        {
+            error.init();
+            *error.getMessage() = QString("There is no preset [%1, %2, %3, %4]")
+                .arg(*presetId->getGroupName())
+                .arg(presetId->getCenterFrequency())
+                .arg(*presetId->getName())
+                .arg(*presetId->getType());
+            return 404;
+        }
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("File %1 directory does not exist").arg(filePath);
+        return 404;
+    }
+}
+
+int WebAPIAdapter::instancePresetBlobPut(
+        SWGSDRangel::SWGBase64Blob& query,
+        SWGSDRangel::SWGPresetIdentifier& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    QString *base64Str = query.getBlob();
+
+    if (base64Str)
+    {
+        Preset *newPreset = m_mainCore->m_settings.newPreset("TBD", "TBD");
+
+        if (newPreset)
+        {
+            QByteArray blob = QByteArray::fromBase64(base64Str->toUtf8());
+
+            if (newPreset->deserialize(blob))
+            {
+                response.init();
+                *response.getGroupName() = newPreset->getGroup();
+                response.setCenterFrequency(newPreset->getCenterFrequency());
+                *response.getName() = newPreset->getDescription();
+                *response.getType() = Preset::getPresetTypeChar(newPreset->getPresetType());
+                return 202;
+            }
+            else
+            {
+                m_mainCore->m_settings.deletePreset(newPreset);
+                error.init();
+                *error.getMessage() = QString("Could not deserialize blob to preset");
+                return 400;
+            }
+        }
+        else
+        {
+            error.init();
+            *error.getMessage() = QString("Cannot create new preset");
+            return 500;
+        }
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("Blob not specified");
+        return 400;
+    }
+}
+
+int WebAPIAdapter::instancePresetBlobPost(
+        SWGSDRangel::SWGPresetIdentifier& query,
+        SWGSDRangel::SWGBase64Blob& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    const Preset *selectedPreset = m_mainCore->m_settings.getPreset(
+        *query.getGroupName(),
+        query.getCenterFrequency(),
+        *query.getName(),
+        *query.getType());
+
+    if (selectedPreset)
+    {
+        QString base64Str = selectedPreset->serialize().toBase64();
+        response.init();
+        *response.getBlob() = base64Str;
+        return 200;
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no preset [%1, %2, %3, %4]")
+            .arg(*query.getGroupName())
+            .arg(query.getCenterFrequency())
+            .arg(*query.getName())
+            .arg(*query.getType());
+        return 404;
+    }
+}
+
+int WebAPIAdapter::instanceConfigurationsGet(
+        SWGSDRangel::SWGConfigurations& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    (void) error;
+    int nbConfigurations = m_mainCore->m_settings.getConfigurationCount();
+    int nbGroups = 0;
+    int nbConfigurationsThisGroup = 0;
+    QString groupName;
+    response.init();
+    QList<SWGSDRangel::SWGConfigurationGroup*> *groups = response.getGroups();
+    QList<SWGSDRangel::SWGConfigurationItem*> *swgConfigurations = nullptr;
+    int i = 0;
+
+    // Configurations are sorted by group first
+
+    for (; i < nbConfigurations; i++)
+    {
+        const Configuration *configuration = m_mainCore->m_settings.getConfiguration(i);
+
+        if ((i == 0) || (groupName != configuration->getGroup())) // new group
+        {
+            if (i > 0) {
+                groups->back()->setNbConfigurations(nbConfigurationsThisGroup);
+            }
+
+            groups->append(new SWGSDRangel::SWGConfigurationGroup);
+            groups->back()->init();
+            groupName = configuration->getGroup();
+            *groups->back()->getGroupName() = groupName;
+            swgConfigurations = groups->back()->getConfigurations();
+            nbGroups++;
+            nbConfigurationsThisGroup = 0;
+        }
+
+        swgConfigurations->append(new SWGSDRangel::SWGConfigurationItem);
+        swgConfigurations->back()->init();
+        *swgConfigurations->back()->getName() = configuration->getDescription();
+        nbConfigurationsThisGroup++;
+    }
+
+    if (i > 0) {
+        groups->back()->setNbConfigurations(nbConfigurationsThisGroup);
+    }
+
+    response.setNbGroups(nbGroups);
+
+    return 200;
+}
+
+int WebAPIAdapter::instanceConfigurationPatch(
+        SWGSDRangel::SWGConfigurationIdentifier& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    SWGSDRangel::SWGConfigurationIdentifier *configurationIdentifier = &response;
+
+    const Configuration *selectedConfiguration = m_mainCore->m_settings.getConfiguration(
+        *configurationIdentifier->getGroupName(),
+        *configurationIdentifier->getName()
+    );
+
+    if (selectedConfiguration == nullptr)
+    {
+        error.init();
+        *error.getMessage() = QString("There is no configuration [%1, %2]")
+                .arg(*configurationIdentifier->getGroupName())
+                .arg(*configurationIdentifier->getName());
+        return 404;
+    }
+
+    MainCore::MsgLoadConfiguration *msg = MainCore::MsgLoadConfiguration::create(selectedConfiguration);
+    m_mainCore->m_mainMessageQueue->push(msg);
+
+    response.init();
+    *response.getGroupName() = selectedConfiguration->getGroup();
+    *response.getName() = selectedConfiguration->getDescription();
+
+    return 202;
+}
+
+int WebAPIAdapter::instanceConfigurationPut(
+        SWGSDRangel::SWGConfigurationIdentifier& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    SWGSDRangel::SWGConfigurationIdentifier *configurationIdentifier = &response;
+
+    const Configuration *selectedConfiguration = m_mainCore->m_settings.getConfiguration(
+        *configurationIdentifier->getGroupName(),
+        *configurationIdentifier->getName()
+    );
+
+    if (selectedConfiguration == nullptr)
+    {
+        error.init();
+        *error.getMessage() = QString("There is no configuration [%1, %2]")
+                .arg(*configurationIdentifier->getGroupName())
+                .arg(*configurationIdentifier->getName());
+        return 404;
+    }
+
+    MainCore::MsgSaveConfiguration *msg = MainCore::MsgSaveConfiguration::create(const_cast<Configuration*>(selectedConfiguration), false);
+    m_mainCore->m_mainMessageQueue->push(msg);
+
+    response.init();
+    *response.getGroupName() = selectedConfiguration->getGroup();
+    *response.getName() = selectedConfiguration->getDescription();
+
+    return 202;
+}
+
+int WebAPIAdapter::instanceConfigurationPost(
+        SWGSDRangel::SWGConfigurationIdentifier& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    SWGSDRangel::SWGConfigurationIdentifier *configurationIdentifier = &response;
+
+    const Configuration *selectedConfiguration = m_mainCore->m_settings.getConfiguration(
+        *configurationIdentifier->getGroupName(),
+        *configurationIdentifier->getName()
+    );
+
+    if (selectedConfiguration == nullptr) // save on a new preset
+    {
+        selectedConfiguration = m_mainCore->m_settings.newConfiguration(
+            *configurationIdentifier->getGroupName(),
+            *configurationIdentifier->getName()
+        );
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("Preset already exists [%1, %2]")
+            .arg(*configurationIdentifier->getGroupName())
+            .arg(*configurationIdentifier->getName());
+        return 409;
+    }
+
+    MainCore::MsgSaveConfiguration *msg = MainCore::MsgSaveConfiguration::create(const_cast<Configuration*>(selectedConfiguration), true);
+    m_mainCore->m_mainMessageQueue->push(msg);
+
+    response.init();
+    *response.getGroupName() = selectedConfiguration->getGroup();
+    *response.getName() = selectedConfiguration->getDescription();
+
+    return 202;
+}
+
+int WebAPIAdapter::instanceConfigurationDelete(
+        SWGSDRangel::SWGConfigurationIdentifier& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    const Configuration *selectedConfiguration = m_mainCore->m_settings.getConfiguration(
+        *response.getGroupName(),
+        *response.getName());
+
+    if (selectedConfiguration == nullptr)
+    {
+        error.init();
+        *error.getMessage() = QString("There is no configuration [%1, %2]")
+            .arg(*response.getGroupName())
+            .arg(*response.getName());
+        return 404;
+    }
+
+    *response.getGroupName() = selectedConfiguration->getGroup();
+    *response.getName() = selectedConfiguration->getDescription();
+
+    MainCore::MsgDeleteConfiguration *msg = MainCore::MsgDeleteConfiguration::create(const_cast<Configuration*>(selectedConfiguration));
+    m_mainCore->m_mainMessageQueue->push(msg);
+
+    return 202;
+}
+
+int WebAPIAdapter::instanceConfigurationFilePut(
+        SWGSDRangel::SWGFilePath& query,
+        SWGSDRangel::SWGConfigurationIdentifier& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    QString filePath = *query.getFilePath();
+
+    if (QFileInfo::exists(filePath))
+    {
+        QFile file(filePath);
+
+        if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
+            QByteArray base64Str;
+            QTextStream instream(&file);
+            instream >> base64Str;
+            file.close();
+            Configuration *newConfiguration = m_mainCore->m_settings.newConfiguration("TBD", "TBD");
+
+            if (newConfiguration->deserialize(QByteArray::fromBase64(base64Str)))
+            {
+                response.init();
+                *response.getGroupName() = newConfiguration->getGroup();
+                *response.getName() = newConfiguration->getDescription();
+                return 202;
+            }
+            else
+            {
+                error.init();
+                *error.getMessage() = QString("Cannot deserialize configuration from file %1").arg(filePath);
+                return 400;
+            }
+        }
+        else
+        {
+            error.init();
+            *error.getMessage() = QString("Cannot read file %1").arg(filePath);
+            return 500;
+        }
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("File %1 is not found").arg(filePath);
+        return 404;
+    }
+}
+
+int WebAPIAdapter::instanceConfigurationFilePost(
+        SWGSDRangel::SWGConfigurationImportExport& query,
+        SWGSDRangel::SWGConfigurationIdentifier& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    QString filePath = *query.getFilePath();
+
+    if (QFileInfo(filePath).absoluteDir().exists())
+    {
+        SWGSDRangel::SWGConfigurationIdentifier *configurationId = query.getConfiguration();
+        const Configuration *selectedConfiguration = m_mainCore->m_settings.getConfiguration(
+            *configurationId->getGroupName(),
+            *configurationId->getName());
+
+        if (selectedConfiguration)
+        {
+            QString base64Str = selectedConfiguration->serialize().toBase64();
+            QFileInfo fileInfo(filePath);
+
+            if (fileInfo.suffix() != "cfgx") {
+                filePath += ".cfgx";
+            }
+
+            QFile file(filePath);
+
+            if (file.open(QIODevice::ReadWrite | QIODevice::Text))
+            {
+                QTextStream outstream(&file);
+                outstream << base64Str;
+                file.close();
+                response.init();
+                *response.getGroupName() = selectedConfiguration->getGroup();
+                *response.getName() = selectedConfiguration->getDescription();
+                return 200;
+            }
+            else
+            {
+                error.init();
+                *error.getMessage() = QString("Cannot open file %1 for writing").arg(filePath);
+                return 500;
+            }
+        }
+        else
+        {
+            error.init();
+            *error.getMessage() = QString("There is no configuration [%1, %2]")
+                .arg(*configurationId->getGroupName())
+                .arg(*configurationId->getName());
+            return 404;
+        }
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("File %1 directory does not exist").arg(filePath);
+        return 404;
+    }
+}
+
+int WebAPIAdapter::instanceConfigurationBlobPut(
+        SWGSDRangel::SWGBase64Blob& query,
+        SWGSDRangel::SWGConfigurationIdentifier& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    QString *base64Str = query.getBlob();
+
+    if (base64Str)
+    {
+        Configuration *newConfiguration = m_mainCore->m_settings.newConfiguration("TBD", "TBD");
+
+        if (newConfiguration)
+        {
+            QByteArray blob = QByteArray::fromBase64(base64Str->toUtf8());
+
+            if (newConfiguration->deserialize(blob))
+            {
+                response.init();
+                *response.getGroupName() = newConfiguration->getGroup();
+                *response.getName() = newConfiguration->getDescription();
+                return 202;
+            }
+            else
+            {
+                m_mainCore->m_settings.deleteConfiguration(newConfiguration);
+                error.init();
+                *error.getMessage() = QString("Could not deserialize blob");
+                return 400;
+            }
+        }
+        else
+        {
+            error.init();
+            *error.getMessage() = QString("Cannot create new configuration");
+            return 500;
+        }
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("Blob not specified");
+        return 400;
+    }
+}
+
+int WebAPIAdapter::instanceConfigurationBlobPost(
+        SWGSDRangel::SWGConfigurationIdentifier& query,
+        SWGSDRangel::SWGBase64Blob& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    const Configuration *selectedConfiguration = m_mainCore->m_settings.getConfiguration(
+        *query.getGroupName(),
+        *query.getName());
+
+    if (selectedConfiguration)
+    {
+        QString base64Str = selectedConfiguration->serialize().toBase64();
+        response.init();
+        *response.getBlob() = base64Str;
+        return 200;
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no configuration [%1, %2]")
+            .arg(*query.getGroupName())
+            .arg(*query.getName());
+        return 404;
+    }
 }
 
 int WebAPIAdapter::instanceFeaturePresetsGet(

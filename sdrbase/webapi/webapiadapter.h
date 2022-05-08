@@ -195,6 +195,66 @@ public:
             SWGSDRangel::SWGPresetIdentifier& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int instancePresetFilePut(
+            SWGSDRangel::SWGFilePath& query,
+            SWGSDRangel::SWGPresetIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instancePresetFilePost(
+            SWGSDRangel::SWGPresetExport& query,
+            SWGSDRangel::SWGPresetIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instancePresetBlobPut(
+            SWGSDRangel::SWGBase64Blob& query,
+            SWGSDRangel::SWGPresetIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instancePresetBlobPost(
+            SWGSDRangel::SWGPresetIdentifier& query,
+            SWGSDRangel::SWGBase64Blob& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceConfigurationsGet(
+            SWGSDRangel::SWGConfigurations& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceConfigurationPatch(
+            SWGSDRangel::SWGConfigurationIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceConfigurationPut(
+            SWGSDRangel::SWGConfigurationIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceConfigurationPost(
+            SWGSDRangel::SWGConfigurationIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceConfigurationDelete(
+            SWGSDRangel::SWGConfigurationIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceConfigurationFilePut(
+            SWGSDRangel::SWGFilePath& query,
+            SWGSDRangel::SWGConfigurationIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceConfigurationFilePost(
+            SWGSDRangel::SWGConfigurationImportExport& query,
+            SWGSDRangel::SWGConfigurationIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceConfigurationBlobPut(
+            SWGSDRangel::SWGBase64Blob& query,
+            SWGSDRangel::SWGConfigurationIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceConfigurationBlobPost(
+            SWGSDRangel::SWGConfigurationIdentifier& query,
+            SWGSDRangel::SWGBase64Blob& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
     virtual int instanceFeaturePresetsGet(
             SWGSDRangel::SWGFeaturePresets& response,
             SWGSDRangel::SWGErrorResponse& error);

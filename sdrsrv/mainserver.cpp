@@ -133,6 +133,14 @@ bool MainServer::handleMessage(const Message& cmd)
         m_mainCore->m_settings.deletePreset(presetToDelete);
         return true;
     }
+    else if (MainCore::MsgDeleteConfiguration::match(cmd))
+    {
+        MainCore::MsgDeleteConfiguration& notif = (MainCore::MsgDeleteConfiguration&) cmd;
+        const Configuration *configuationToDelete = notif.getConfiguration();
+        // remove configuration from settings
+        m_mainCore->m_settings.deleteConfiguration(configuationToDelete);
+        return true;
+    }
     else if (MainCore::MsgLoadFeatureSetPreset::match(cmd))
     {
         MainCore::MsgLoadFeatureSetPreset& notif = (MainCore::MsgLoadFeatureSetPreset&) cmd;

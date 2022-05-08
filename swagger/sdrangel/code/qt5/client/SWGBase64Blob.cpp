@@ -11,7 +11,7 @@
  */
 
 
-#include "SWGPresetImport.h"
+#include "SWGBase64Blob.h"
 
 #include "SWGHelpers.h"
 
@@ -22,42 +22,35 @@
 
 namespace SWGSDRangel {
 
-SWGPresetImport::SWGPresetImport(QString* json) {
+SWGBase64Blob::SWGBase64Blob(QString* json) {
     init();
     this->fromJson(*json);
 }
 
-SWGPresetImport::SWGPresetImport() {
-    preset = nullptr;
-    m_preset_isSet = false;
-    file_path = nullptr;
-    m_file_path_isSet = false;
+SWGBase64Blob::SWGBase64Blob() {
+    blob = nullptr;
+    m_blob_isSet = false;
 }
 
-SWGPresetImport::~SWGPresetImport() {
+SWGBase64Blob::~SWGBase64Blob() {
     this->cleanup();
 }
 
 void
-SWGPresetImport::init() {
-    preset = new SWGPresetIdentifier();
-    m_preset_isSet = false;
-    file_path = new QString("");
-    m_file_path_isSet = false;
+SWGBase64Blob::init() {
+    blob = new QString("");
+    m_blob_isSet = false;
 }
 
 void
-SWGPresetImport::cleanup() {
-    if(preset != nullptr) { 
-        delete preset;
-    }
-    if(file_path != nullptr) { 
-        delete file_path;
+SWGBase64Blob::cleanup() {
+    if(blob != nullptr) { 
+        delete blob;
     }
 }
 
-SWGPresetImport*
-SWGPresetImport::fromJson(QString &json) {
+SWGBase64Blob*
+SWGBase64Blob::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -66,15 +59,13 @@ SWGPresetImport::fromJson(QString &json) {
 }
 
 void
-SWGPresetImport::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&preset, pJson["preset"], "SWGPresetIdentifier", "SWGPresetIdentifier");
-    
-    ::SWGSDRangel::setValue(&file_path, pJson["filePath"], "QString", "QString");
+SWGBase64Blob::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&blob, pJson["blob"], "QString", "QString");
     
 }
 
 QString
-SWGPresetImport::asJson ()
+SWGBase64Blob::asJson ()
 {
     QJsonObject* obj = this->asJsonObject();
 
@@ -85,47 +76,31 @@ SWGPresetImport::asJson ()
 }
 
 QJsonObject*
-SWGPresetImport::asJsonObject() {
+SWGBase64Blob::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if((preset != nullptr) && (preset->isSet())){
-        toJsonValue(QString("preset"), preset, obj, QString("SWGPresetIdentifier"));
-    }
-    if(file_path != nullptr && *file_path != QString("")){
-        toJsonValue(QString("filePath"), file_path, obj, QString("QString"));
+    if(blob != nullptr && *blob != QString("")){
+        toJsonValue(QString("blob"), blob, obj, QString("QString"));
     }
 
     return obj;
 }
 
-SWGPresetIdentifier*
-SWGPresetImport::getPreset() {
-    return preset;
-}
-void
-SWGPresetImport::setPreset(SWGPresetIdentifier* preset) {
-    this->preset = preset;
-    this->m_preset_isSet = true;
-}
-
 QString*
-SWGPresetImport::getFilePath() {
-    return file_path;
+SWGBase64Blob::getBlob() {
+    return blob;
 }
 void
-SWGPresetImport::setFilePath(QString* file_path) {
-    this->file_path = file_path;
-    this->m_file_path_isSet = true;
+SWGBase64Blob::setBlob(QString* blob) {
+    this->blob = blob;
+    this->m_blob_isSet = true;
 }
 
 
 bool
-SWGPresetImport::isSet(){
+SWGBase64Blob::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(preset && preset->isSet()){
-            isObjectUpdated = true; break;
-        }
-        if(file_path && *file_path != QString("")){
+        if(blob && *blob != QString("")){
             isObjectUpdated = true; break;
         }
     }while(false);

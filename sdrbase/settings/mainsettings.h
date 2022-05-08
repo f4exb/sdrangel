@@ -37,6 +37,8 @@ public:
 	Preset* newPreset(const QString& group, const QString& description);
     void addPreset(Preset *preset);
 	void deletePreset(const Preset* preset);
+    QByteArray serializePreset(const Preset* preset) const;
+    bool deserializePreset(const QByteArray& blob, Preset* preset);
 	int getPresetCount() const { return m_presets.count(); }
 	const Preset* getPreset(int index) const { return m_presets[index]; }
 	const Preset* getPreset(const QString& groupName, quint64 centerFrequency, const QString& description, const QString& type) const;
@@ -75,6 +77,8 @@ public:
     Configuration* newConfiguration(const QString& group, const QString& description);
     void addConfiguration(Configuration *configuration);
     void deleteConfiguration(const Configuration *configuration);
+    QByteArray serializeConfiguration(const Configuration *configuration) const;
+    bool deserializeConfiguration(const QByteArray& blob, Configuration *configuration);
     int getConfigurationCount() const { return m_configurations.size(); }
 	const Configuration* getConfiguration(int index) const { return m_configurations[index]; }
 	const Configuration* getConfiguration(const QString& groupName, const QString& description) const;

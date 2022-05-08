@@ -821,7 +821,7 @@ paths:
   /sdrangel/preset/file:
     x-swagger-router-controller: instance
     put:
-      description: import a preset from file as a new preset (server only).
+      description: import a preset from file as a new preset.
       operationId: instancePresetFilePut
       tags:
         - Instance
@@ -830,10 +830,10 @@ paths:
       parameters:
         - name: body
           in: body
-          description: import details
+          description: File path
           required: true
           schema:
-            $ref: "#/definitions/PresetImport"
+            $ref: "#/definitions/FilePath"
       responses:
         "200":
           description: On success return preset identification
@@ -876,6 +876,337 @@ paths:
             $ref: "#/definitions/ErrorResponse"
         "404":
           description: Preset or file path not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
+  /sdrangel/preset/blob:
+    x-swagger-router-controller: instance
+    put:
+      description: deserialize base64 blob to a new preset.
+      operationId: instancePresetBlobPut
+      tags:
+        - Instance
+      consumes:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: Blob in base64 format
+          required: true
+          schema:
+            $ref: "#/definitions/Base64Blob"
+      responses:
+        "200":
+          description: On success return preset identification
+          schema:
+            $ref: "#/definitions/PresetIdentifier"
+        "400":
+          description: Invalid JSON request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    post:
+      description: serialize a preset to a base64 blob.
+      operationId: instancePresetBlobPost
+      tags:
+        - Instance
+      consumes:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: Preset identification
+          required: true
+          schema:
+            $ref: "#/definitions/PresetIdentifier"
+      responses:
+        "200":
+          description: On success return blob
+          schema:
+            $ref: "#/definitions/Base64Blob"
+        "400":
+          description: Invalid JSON request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Preset not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
+  /sdrangel/configurations:
+    x-swagger-router-controller: instance
+    get:
+      description: List all configurations in the instance
+      operationId: instanceConfigurationsGet
+      tags:
+        - Instance
+      responses:
+        "200":
+          description: On success return configurations list
+          schema:
+            $ref: "#/definitions/Configurations"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
+  /sdrangel/configuration:
+    x-swagger-router-controller: instance
+    patch:
+      description: Load a configuration
+      operationId: instanceConfigurationPatch
+      tags:
+        - Instance
+      consumes:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: Load configuration settings
+          required: true
+          schema:
+            $ref: "#/definitions/ConfigurationIdentifier"
+      responses:
+        "202":
+          description: On successful sending of the message the selected configuration identification is returned
+          schema:
+            $ref: "#/definitions/ConfigurationIdentifier"
+        "400":
+          description: Invalid JSON request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: No configuration found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    put:
+      description: Update an existing configuration with current setup.
+      operationId: instanceConfigurationPut
+      tags:
+        - Instance
+      consumes:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: save setup to the configuration
+          required: true
+          schema:
+            $ref: "#/definitions/ConfigurationIdentifier"
+      responses:
+        "202":
+          description: On successful sending of the message the selected configuration identification is returned
+          schema:
+            $ref: "#/definitions/ConfigurationIdentifier"
+        "400":
+          description: Invalid JSON request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: No configuration found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    post:
+      description: Create a new configuration from the current setup.
+      operationId: instanceConfigurationPost
+      tags:
+        - Instance
+      consumes:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: save setup in a new configuration
+          required: true
+          schema:
+            $ref: "#/definitions/ConfigurationIdentifier"
+      responses:
+        "202":
+          description: On successful sending of the message the created configuration identification is returned
+          schema:
+            $ref: "#/definitions/ConfigurationIdentifier"
+        "400":
+          description: Invalid JSON request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "409":
+          description: Configuration already exists
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    delete:
+      description: Deletes a configuration
+      operationId: instanceConfigurationDelete
+      tags:
+        - Instance
+      consumes:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: delete this configuration
+          required: true
+          schema:
+            $ref: "#/definitions/ConfigurationIdentifier"
+      responses:
+        "202":
+          description: On successful sending of the message the selected configuration identification is returned
+          schema:
+            $ref: "#/definitions/ConfigurationIdentifier"
+        "400":
+          description: Invalid JSON request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Configuration not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
+  /sdrangel/configuration/file:
+    x-swagger-router-controller: instance
+    put:
+      description: import a configuration from file as a new configuration.
+      operationId: instanceConfigurationFilePut
+      tags:
+        - Instance
+      consumes:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: File path
+          required: true
+          schema:
+            $ref: "#/definitions/FilePath"
+      responses:
+        "200":
+          description: On success return configuration identification
+          schema:
+            $ref: "#/definitions/ConfigurationIdentifier"
+        "400":
+          description: Invalid JSON request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: File not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    post:
+      description: export a configuration to file.
+      operationId: instanceConfigurationFilePost
+      tags:
+        - Instance
+      consumes:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: export details
+          required: true
+          schema:
+            $ref: "#/definitions/ConfigurationImportExport"
+      responses:
+        "200":
+          description: On success return configuration identification
+          schema:
+            $ref: "#/definitions/ConfigurationIdentifier"
+        "400":
+          description: Invalid JSON request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Configuration or file path not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
+  /sdrangel/configuration/blob:
+    x-swagger-router-controller: instance
+    put:
+      description: deserialize base64 blob to a new configuration.
+      operationId: instanceConfigurationBlobPut
+      tags:
+        - Instance
+      consumes:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: Blob in base64 format
+          required: true
+          schema:
+            $ref: "#/definitions/Base64Blob"
+      responses:
+        "200":
+          description: On success return configuration identification
+          schema:
+            $ref: "#/definitions/ConfigurationIdentifier"
+        "400":
+          description: Invalid JSON request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    post:
+      description: serialize a configuration to a base64 blob.
+      operationId: instanceConfigurationBlobPost
+      tags:
+        - Instance
+      consumes:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: configuration identification
+          required: true
+          schema:
+            $ref: "#/definitions/ConfigurationIdentifier"
+      responses:
+        "200":
+          description: On success return blob
+          schema:
+            $ref: "#/definitions/Base64Blob"
+        "400":
+          description: Invalid JSON request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Preset not found
           schema:
             $ref: "#/definitions/ErrorResponse"
         "500":
@@ -3034,28 +3365,106 @@ definitions:
         $ref: "#/definitions/PresetIdentifier"
 
   PresetImport:
-    description: "Details to import preset from file in preset list"
+    description: "Details to import new preset from file"
     required:
       - filePath
     properties:
-      groupName:
-        description: "If present overrides imported preset group name with this name"
-        type: string
-      description:
-        description: "If present overrides imported preset description with this description"
-        type: string
+      preset:
+        description: "New preset details"
+        $ref: "#/definitions/PresetIdentifier"
       filePath:
         description: "Path of the import file"
         type: string
 
   PresetExport:
-    description: "Details to export a preset to file"
+    description: "Details to export a preset to a file"
+    properties:
+      filePath:
+        description: "Path of the export file"
+        type: string
+      preset:
+        description: "Preset to export"
+        $ref: "#/definitions/PresetIdentifier"
+
+  Base64Blob:
+    description: "Binary blob in base64 format"
+    required:
+      - blob
+    properties:
+      blob:
+        description: "Blob in base64"
+        type: string
+
+  FilePath:
+    description: "File path"
+    required:
+      - filePath
+    properties:
+      filePath:
+        description: "File path"
+        type: string
+
+  Configurations:
+    description: "Configuration presets"
+    required:
+      - nbGroups
+    properties:
+      nbGroups:
+        description: "Number of configuration groups"
+        type: integer
+      groups:
+        type: array
+        items:
+          $ref: "#/definitions/ConfigurationGroup"
+
+  ConfigurationGroup:
+    description: "Group of configuration"
+    required:
+      - groupName
+      - nbPresets
+    properties:
+      groupName:
+        description: "Name of the configuration group"
+        type: string
+      nbConfigurations:
+        description: "Number of configurations in the group"
+        type: integer
+      configurations:
+        type: array
+        items:
+          $ref: "#/definitions/ConfigurationItem"
+
+  ConfigurationIdentifier:
+    description: "Configuration item"
+    required:
+      - groupName
+      - name
+    properties:
+      groupName:
+        description: "Name of the preset group"
+        type: string
+      name:
+        description: "Descriptive name of the preset"
+        type: string
+
+  ConfigurationItem:
+    description: "Configuration preset item"
+    required:
+      - name
+    properties:
+      name:
+        description: "Descriptive name of the configuration"
+        type: string
+
+  ConfigurationImportExport:
+    description: "Details to impprt/export a configuration from/to file"
     properties:
       filePath:
         description: "Path of the import file"
         type: string
-      preset:
-        $ref: "#/definitions/PresetIdentifier"
+      configuration:
+        description: "On import new configuration details. On export configuration to export from"
+        $ref: "#/definitions/ConfigurationIdentifier"
 
   FeaturePresets:
     description: "Feature settings presets"

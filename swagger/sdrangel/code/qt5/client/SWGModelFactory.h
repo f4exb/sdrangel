@@ -54,6 +54,7 @@
 #include "SWGBFMDemodReport.h"
 #include "SWGBFMDemodSettings.h"
 #include "SWGBandwidth.h"
+#include "SWGBase64Blob.h"
 #include "SWGBeamSteeringCWModSettings.h"
 #include "SWGBladeRF1InputSettings.h"
 #include "SWGBladeRF1OutputSettings.h"
@@ -80,6 +81,11 @@
 #include "SWGChirpChatModSettings.h"
 #include "SWGCommand.h"
 #include "SWGComplex.h"
+#include "SWGConfigurationGroup.h"
+#include "SWGConfigurationIdentifier.h"
+#include "SWGConfigurationImportExport.h"
+#include "SWGConfigurationItem.h"
+#include "SWGConfigurations.h"
 #include "SWGDABDemodSettings.h"
 #include "SWGDATVDemodReport.h"
 #include "SWGDATVDemodSettings.h"
@@ -116,6 +122,7 @@
 #include "SWGFileInputReport.h"
 #include "SWGFileInputSettings.h"
 #include "SWGFileOutputSettings.h"
+#include "SWGFilePath.h"
 #include "SWGFileSinkActions.h"
 #include "SWGFileSinkReport.h"
 #include "SWGFileSinkSettings.h"
@@ -520,6 +527,11 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGBase64Blob").compare(type) == 0) {
+      SWGBase64Blob *obj = new SWGBase64Blob();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGBeamSteeringCWModSettings").compare(type) == 0) {
       SWGBeamSteeringCWModSettings *obj = new SWGBeamSteeringCWModSettings();
       obj->init();
@@ -647,6 +659,31 @@ namespace SWGSDRangel {
     }
     if(QString("SWGComplex").compare(type) == 0) {
       SWGComplex *obj = new SWGComplex();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGConfigurationGroup").compare(type) == 0) {
+      SWGConfigurationGroup *obj = new SWGConfigurationGroup();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGConfigurationIdentifier").compare(type) == 0) {
+      SWGConfigurationIdentifier *obj = new SWGConfigurationIdentifier();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGConfigurationImportExport").compare(type) == 0) {
+      SWGConfigurationImportExport *obj = new SWGConfigurationImportExport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGConfigurationItem").compare(type) == 0) {
+      SWGConfigurationItem *obj = new SWGConfigurationItem();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGConfigurations").compare(type) == 0) {
+      SWGConfigurations *obj = new SWGConfigurations();
       obj->init();
       return obj;
     }
@@ -827,6 +864,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGFileOutputSettings").compare(type) == 0) {
       SWGFileOutputSettings *obj = new SWGFileOutputSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGFilePath").compare(type) == 0) {
+      SWGFilePath *obj = new SWGFilePath();
       obj->init();
       return obj;
     }

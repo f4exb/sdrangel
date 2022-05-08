@@ -893,6 +893,498 @@ SWGInstanceApi::instanceConfigPutCallback(SWGHttpRequestWorker * worker) {
 }
 
 void
+SWGInstanceApi::instanceConfigurationBlobPost(SWGConfigurationIdentifier& body) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/configuration/blob");
+
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "POST");
+
+
+    
+    QString output = body.asJson();
+    input.request_body.append(output.toUtf8());
+    
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGInstanceApi::instanceConfigurationBlobPostCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGInstanceApi::instanceConfigurationBlobPostCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGBase64Blob* output = static_cast<SWGBase64Blob*>(create(json, QString("SWGBase64Blob")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit instanceConfigurationBlobPostSignal(output);
+    } else {
+        emit instanceConfigurationBlobPostSignalE(output, error_type, error_str);
+        emit instanceConfigurationBlobPostSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
+SWGInstanceApi::instanceConfigurationBlobPut(SWGBase64Blob& body) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/configuration/blob");
+
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "PUT");
+
+
+    
+    QString output = body.asJson();
+    input.request_body.append(output.toUtf8());
+    
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGInstanceApi::instanceConfigurationBlobPutCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGInstanceApi::instanceConfigurationBlobPutCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGConfigurationIdentifier* output = static_cast<SWGConfigurationIdentifier*>(create(json, QString("SWGConfigurationIdentifier")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit instanceConfigurationBlobPutSignal(output);
+    } else {
+        emit instanceConfigurationBlobPutSignalE(output, error_type, error_str);
+        emit instanceConfigurationBlobPutSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
+SWGInstanceApi::instanceConfigurationDelete(SWGConfigurationIdentifier& body) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/configuration");
+
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "DELETE");
+
+
+    
+    QString output = body.asJson();
+    input.request_body.append(output.toUtf8());
+    
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGInstanceApi::instanceConfigurationDeleteCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGInstanceApi::instanceConfigurationDeleteCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGConfigurationIdentifier* output = static_cast<SWGConfigurationIdentifier*>(create(json, QString("SWGConfigurationIdentifier")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit instanceConfigurationDeleteSignal(output);
+    } else {
+        emit instanceConfigurationDeleteSignalE(output, error_type, error_str);
+        emit instanceConfigurationDeleteSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
+SWGInstanceApi::instanceConfigurationFilePost(SWGConfigurationImportExport& body) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/configuration/file");
+
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "POST");
+
+
+    
+    QString output = body.asJson();
+    input.request_body.append(output.toUtf8());
+    
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGInstanceApi::instanceConfigurationFilePostCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGInstanceApi::instanceConfigurationFilePostCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGConfigurationIdentifier* output = static_cast<SWGConfigurationIdentifier*>(create(json, QString("SWGConfigurationIdentifier")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit instanceConfigurationFilePostSignal(output);
+    } else {
+        emit instanceConfigurationFilePostSignalE(output, error_type, error_str);
+        emit instanceConfigurationFilePostSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
+SWGInstanceApi::instanceConfigurationFilePut(SWGFilePath& body) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/configuration/file");
+
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "PUT");
+
+
+    
+    QString output = body.asJson();
+    input.request_body.append(output.toUtf8());
+    
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGInstanceApi::instanceConfigurationFilePutCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGInstanceApi::instanceConfigurationFilePutCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGConfigurationIdentifier* output = static_cast<SWGConfigurationIdentifier*>(create(json, QString("SWGConfigurationIdentifier")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit instanceConfigurationFilePutSignal(output);
+    } else {
+        emit instanceConfigurationFilePutSignalE(output, error_type, error_str);
+        emit instanceConfigurationFilePutSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
+SWGInstanceApi::instanceConfigurationPatch(SWGConfigurationIdentifier& body) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/configuration");
+
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "PATCH");
+
+
+    
+    QString output = body.asJson();
+    input.request_body.append(output.toUtf8());
+    
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGInstanceApi::instanceConfigurationPatchCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGInstanceApi::instanceConfigurationPatchCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGConfigurationIdentifier* output = static_cast<SWGConfigurationIdentifier*>(create(json, QString("SWGConfigurationIdentifier")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit instanceConfigurationPatchSignal(output);
+    } else {
+        emit instanceConfigurationPatchSignalE(output, error_type, error_str);
+        emit instanceConfigurationPatchSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
+SWGInstanceApi::instanceConfigurationPost(SWGConfigurationIdentifier& body) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/configuration");
+
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "POST");
+
+
+    
+    QString output = body.asJson();
+    input.request_body.append(output.toUtf8());
+    
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGInstanceApi::instanceConfigurationPostCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGInstanceApi::instanceConfigurationPostCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGConfigurationIdentifier* output = static_cast<SWGConfigurationIdentifier*>(create(json, QString("SWGConfigurationIdentifier")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit instanceConfigurationPostSignal(output);
+    } else {
+        emit instanceConfigurationPostSignalE(output, error_type, error_str);
+        emit instanceConfigurationPostSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
+SWGInstanceApi::instanceConfigurationPut(SWGConfigurationIdentifier& body) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/configuration");
+
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "PUT");
+
+
+    
+    QString output = body.asJson();
+    input.request_body.append(output.toUtf8());
+    
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGInstanceApi::instanceConfigurationPutCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGInstanceApi::instanceConfigurationPutCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGConfigurationIdentifier* output = static_cast<SWGConfigurationIdentifier*>(create(json, QString("SWGConfigurationIdentifier")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit instanceConfigurationPutSignal(output);
+    } else {
+        emit instanceConfigurationPutSignalE(output, error_type, error_str);
+        emit instanceConfigurationPutSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
+SWGInstanceApi::instanceConfigurationsGet() {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/configurations");
+
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "GET");
+
+
+
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGInstanceApi::instanceConfigurationsGetCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGInstanceApi::instanceConfigurationsGetCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGConfigurations* output = static_cast<SWGConfigurations*>(create(json, QString("SWGConfigurations")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit instanceConfigurationsGetSignal(output);
+    } else {
+        emit instanceConfigurationsGetSignalE(output, error_type, error_str);
+        emit instanceConfigurationsGetSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
 SWGInstanceApi::instanceDelete() {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel");
@@ -1712,6 +2204,116 @@ SWGInstanceApi::instanceLoggingPutCallback(SWGHttpRequestWorker * worker) {
 }
 
 void
+SWGInstanceApi::instancePresetBlobPost(SWGPresetIdentifier& body) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/preset/blob");
+
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "POST");
+
+
+    
+    QString output = body.asJson();
+    input.request_body.append(output.toUtf8());
+    
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGInstanceApi::instancePresetBlobPostCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGInstanceApi::instancePresetBlobPostCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGBase64Blob* output = static_cast<SWGBase64Blob*>(create(json, QString("SWGBase64Blob")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit instancePresetBlobPostSignal(output);
+    } else {
+        emit instancePresetBlobPostSignalE(output, error_type, error_str);
+        emit instancePresetBlobPostSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
+SWGInstanceApi::instancePresetBlobPut(SWGBase64Blob& body) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/preset/blob");
+
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "PUT");
+
+
+    
+    QString output = body.asJson();
+    input.request_body.append(output.toUtf8());
+    
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGInstanceApi::instancePresetBlobPutCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGInstanceApi::instancePresetBlobPutCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGPresetIdentifier* output = static_cast<SWGPresetIdentifier*>(create(json, QString("SWGPresetIdentifier")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit instancePresetBlobPutSignal(output);
+    } else {
+        emit instancePresetBlobPutSignalE(output, error_type, error_str);
+        emit instancePresetBlobPutSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
 SWGInstanceApi::instancePresetDelete(SWGPresetIdentifier& body) {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/preset");
@@ -1822,7 +2424,7 @@ SWGInstanceApi::instancePresetFilePostCallback(SWGHttpRequestWorker * worker) {
 }
 
 void
-SWGInstanceApi::instancePresetFilePut(SWGPresetImport& body) {
+SWGInstanceApi::instancePresetFilePut(SWGFilePath& body) {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/preset/file");
 

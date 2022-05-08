@@ -11,18 +11,19 @@
  */
 
 /*
- * SWGPresetImport.h
+ * SWGConfigurationGroup.h
  *
- * Details to import new preset from file
+ * Group of configuration
  */
 
-#ifndef SWGPresetImport_H_
-#define SWGPresetImport_H_
+#ifndef SWGConfigurationGroup_H_
+#define SWGConfigurationGroup_H_
 
 #include <QJsonObject>
 
 
-#include "SWGPresetIdentifier.h"
+#include "SWGConfigurationItem.h"
+#include <QList>
 #include <QString>
 
 #include "SWGObject.h"
@@ -30,37 +31,43 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGPresetImport: public SWGObject {
+class SWG_API SWGConfigurationGroup: public SWGObject {
 public:
-    SWGPresetImport();
-    SWGPresetImport(QString* json);
-    virtual ~SWGPresetImport();
+    SWGConfigurationGroup();
+    SWGConfigurationGroup(QString* json);
+    virtual ~SWGConfigurationGroup();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGPresetImport* fromJson(QString &jsonString) override;
+    virtual SWGConfigurationGroup* fromJson(QString &jsonString) override;
 
-    SWGPresetIdentifier* getPreset();
-    void setPreset(SWGPresetIdentifier* preset);
+    QString* getGroupName();
+    void setGroupName(QString* group_name);
 
-    QString* getFilePath();
-    void setFilePath(QString* file_path);
+    qint32 getNbConfigurations();
+    void setNbConfigurations(qint32 nb_configurations);
+
+    QList<SWGConfigurationItem*>* getConfigurations();
+    void setConfigurations(QList<SWGConfigurationItem*>* configurations);
 
 
     virtual bool isSet() override;
 
 private:
-    SWGPresetIdentifier* preset;
-    bool m_preset_isSet;
+    QString* group_name;
+    bool m_group_name_isSet;
 
-    QString* file_path;
-    bool m_file_path_isSet;
+    qint32 nb_configurations;
+    bool m_nb_configurations_isSet;
+
+    QList<SWGConfigurationItem*>* configurations;
+    bool m_configurations_isSet;
 
 };
 
 }
 
-#endif /* SWGPresetImport_H_ */
+#endif /* SWGConfigurationGroup_H_ */

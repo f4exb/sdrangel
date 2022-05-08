@@ -51,6 +51,14 @@ namespace SWGSDRangel
     class SWGPresetIdentifier;
     class SWGPresetImport;
     class SWGPresetExport;
+    class SWGPresetDeserialize;
+    class SWGPresetSerialize;
+    class SWGBase64Blob;
+    class SWGFilePath;
+    class SWGConfigurations;
+    class SWGConfigurationIdentifier;
+    class SWGConfigurationImportExport;
+    class SWGConfigurationDeserialize;
     class SWGDeviceSetList;
     class SWGDeviceSet;
     class SWGDeviceListItem;
@@ -625,7 +633,7 @@ public:
      * returns the Http status code (default 501: not implemented)
      */
     virtual int instancePresetFilePut(
-            SWGSDRangel::SWGPresetImport& query,
+            SWGSDRangel::SWGFilePath& query,
             SWGSDRangel::SWGPresetIdentifier& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
@@ -643,6 +651,172 @@ public:
     virtual int instancePresetFilePost(
             SWGSDRangel::SWGPresetExport& query,
             SWGSDRangel::SWGPresetIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) query;
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/preset/blob (PUT) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instancePresetBlobPut(
+            SWGSDRangel::SWGBase64Blob& query,
+            SWGSDRangel::SWGPresetIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) query;
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/preset/blob (POST) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instancePresetBlobPost(
+            SWGSDRangel::SWGPresetIdentifier& query,
+            SWGSDRangel::SWGBase64Blob& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) query;
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/presets (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceConfigurationsGet(
+            SWGSDRangel::SWGConfigurations& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/configuration (PATCH) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceConfigurationPatch(
+            SWGSDRangel::SWGConfigurationIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/configuration (PUT) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceConfigurationPut(
+            SWGSDRangel::SWGConfigurationIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/configuration (POST) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceConfigurationPost(
+            SWGSDRangel::SWGConfigurationIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/configuration (DELETE) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceConfigurationDelete(
+            SWGSDRangel::SWGConfigurationIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/configuration/file (PUT) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceConfigurationFilePut(
+            SWGSDRangel::SWGFilePath& query,
+            SWGSDRangel::SWGConfigurationIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) query;
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/configuration/file (POST) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceConfigurationFilePost(
+            SWGSDRangel::SWGConfigurationImportExport& query,
+            SWGSDRangel::SWGConfigurationIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) query;
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/configuration/blob (PUT) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceConfigurationBlobPut(
+            SWGSDRangel::SWGBase64Blob& query,
+            SWGSDRangel::SWGConfigurationIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) query;
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/configuration/blob (POST) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceConfigurationBlobPost(
+            SWGSDRangel::SWGConfigurationIdentifier& query,
+            SWGSDRangel::SWGBase64Blob& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
         (void) query;
@@ -1468,6 +1642,11 @@ public:
     static QString instancePresetsURL;
     static QString instancePresetURL;
     static QString instancePresetFileURL;
+    static QString instancePresetBlobURL;
+    static QString instanceConfigurationsURL;
+    static QString instanceConfigurationURL;
+    static QString instanceConfigurationFileURL;
+    static QString instanceConfigurationBlobURL;
     static QString instanceFeaturePresetsURL;
     static QString instanceFeaturePresetURL;
     static QString instanceDeviceSetsURL;

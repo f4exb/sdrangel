@@ -11,7 +11,7 @@
  */
 
 
-#include "SWGPresetImport.h"
+#include "SWGConfigurationItem.h"
 
 #include "SWGHelpers.h"
 
@@ -22,42 +22,35 @@
 
 namespace SWGSDRangel {
 
-SWGPresetImport::SWGPresetImport(QString* json) {
+SWGConfigurationItem::SWGConfigurationItem(QString* json) {
     init();
     this->fromJson(*json);
 }
 
-SWGPresetImport::SWGPresetImport() {
-    preset = nullptr;
-    m_preset_isSet = false;
-    file_path = nullptr;
-    m_file_path_isSet = false;
+SWGConfigurationItem::SWGConfigurationItem() {
+    name = nullptr;
+    m_name_isSet = false;
 }
 
-SWGPresetImport::~SWGPresetImport() {
+SWGConfigurationItem::~SWGConfigurationItem() {
     this->cleanup();
 }
 
 void
-SWGPresetImport::init() {
-    preset = new SWGPresetIdentifier();
-    m_preset_isSet = false;
-    file_path = new QString("");
-    m_file_path_isSet = false;
+SWGConfigurationItem::init() {
+    name = new QString("");
+    m_name_isSet = false;
 }
 
 void
-SWGPresetImport::cleanup() {
-    if(preset != nullptr) { 
-        delete preset;
-    }
-    if(file_path != nullptr) { 
-        delete file_path;
+SWGConfigurationItem::cleanup() {
+    if(name != nullptr) { 
+        delete name;
     }
 }
 
-SWGPresetImport*
-SWGPresetImport::fromJson(QString &json) {
+SWGConfigurationItem*
+SWGConfigurationItem::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -66,15 +59,13 @@ SWGPresetImport::fromJson(QString &json) {
 }
 
 void
-SWGPresetImport::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&preset, pJson["preset"], "SWGPresetIdentifier", "SWGPresetIdentifier");
-    
-    ::SWGSDRangel::setValue(&file_path, pJson["filePath"], "QString", "QString");
+SWGConfigurationItem::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&name, pJson["name"], "QString", "QString");
     
 }
 
 QString
-SWGPresetImport::asJson ()
+SWGConfigurationItem::asJson ()
 {
     QJsonObject* obj = this->asJsonObject();
 
@@ -85,47 +76,31 @@ SWGPresetImport::asJson ()
 }
 
 QJsonObject*
-SWGPresetImport::asJsonObject() {
+SWGConfigurationItem::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if((preset != nullptr) && (preset->isSet())){
-        toJsonValue(QString("preset"), preset, obj, QString("SWGPresetIdentifier"));
-    }
-    if(file_path != nullptr && *file_path != QString("")){
-        toJsonValue(QString("filePath"), file_path, obj, QString("QString"));
+    if(name != nullptr && *name != QString("")){
+        toJsonValue(QString("name"), name, obj, QString("QString"));
     }
 
     return obj;
 }
 
-SWGPresetIdentifier*
-SWGPresetImport::getPreset() {
-    return preset;
-}
-void
-SWGPresetImport::setPreset(SWGPresetIdentifier* preset) {
-    this->preset = preset;
-    this->m_preset_isSet = true;
-}
-
 QString*
-SWGPresetImport::getFilePath() {
-    return file_path;
+SWGConfigurationItem::getName() {
+    return name;
 }
 void
-SWGPresetImport::setFilePath(QString* file_path) {
-    this->file_path = file_path;
-    this->m_file_path_isSet = true;
+SWGConfigurationItem::setName(QString* name) {
+    this->name = name;
+    this->m_name_isSet = true;
 }
 
 
 bool
-SWGPresetImport::isSet(){
+SWGConfigurationItem::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(preset && preset->isSet()){
-            isObjectUpdated = true; break;
-        }
-        if(file_path && *file_path != QString("")){
+        if(name && *name != QString("")){
             isObjectUpdated = true; break;
         }
     }while(false);

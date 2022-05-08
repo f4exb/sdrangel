@@ -117,7 +117,6 @@ int ChannelAnalyzer::getChannelSampleRate()
         m_basebandSampleRate = source->getSampleRate();
     }
 
-    qDebug("ChannelAnalyzer::getChannelSampleRate: %d", m_basebandSampleRate);
     return m_basebandSampleRate;
 }
 

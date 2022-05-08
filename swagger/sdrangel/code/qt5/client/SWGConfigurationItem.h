@@ -11,18 +11,17 @@
  */
 
 /*
- * SWGPresetImport.h
+ * SWGConfigurationItem.h
  *
- * Details to import new preset from file
+ * Configuration preset item
  */
 
-#ifndef SWGPresetImport_H_
-#define SWGPresetImport_H_
+#ifndef SWGConfigurationItem_H_
+#define SWGConfigurationItem_H_
 
 #include <QJsonObject>
 
 
-#include "SWGPresetIdentifier.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -30,37 +29,31 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGPresetImport: public SWGObject {
+class SWG_API SWGConfigurationItem: public SWGObject {
 public:
-    SWGPresetImport();
-    SWGPresetImport(QString* json);
-    virtual ~SWGPresetImport();
+    SWGConfigurationItem();
+    SWGConfigurationItem(QString* json);
+    virtual ~SWGConfigurationItem();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGPresetImport* fromJson(QString &jsonString) override;
+    virtual SWGConfigurationItem* fromJson(QString &jsonString) override;
 
-    SWGPresetIdentifier* getPreset();
-    void setPreset(SWGPresetIdentifier* preset);
-
-    QString* getFilePath();
-    void setFilePath(QString* file_path);
+    QString* getName();
+    void setName(QString* name);
 
 
     virtual bool isSet() override;
 
 private:
-    SWGPresetIdentifier* preset;
-    bool m_preset_isSet;
-
-    QString* file_path;
-    bool m_file_path_isSet;
+    QString* name;
+    bool m_name_isSet;
 
 };
 
 }
 
-#endif /* SWGPresetImport_H_ */
+#endif /* SWGConfigurationItem_H_ */
