@@ -14754,6 +14754,13 @@ margin-bottom: 20px;
                     <li data-group="Instance" data-name="instanceSummary" class="">
                       <a href="#api-Instance-instanceSummary">instanceSummary</a>
                     </li>
+                  <li class="nav-header" data-group="Workspace"><a href="#api-Workspace">API Methods - Workspace</a></li>
+                    <li data-group="Workspace" data-name="instanceWorkspaceAdd" class="">
+                      <a href="#api-Workspace-instanceWorkspaceAdd">instanceWorkspaceAdd</a>
+                    </li>
+                    <li data-group="Workspace" data-name="instanceWorkspacesDeleteEmpty" class="">
+                      <a href="#api-Workspace-instanceWorkspacesDeleteEmpty">instanceWorkspacesDeleteEmpty</a>
+                    </li>
           </ul>
         </nav>
       </div>
@@ -55812,6 +55819,677 @@ except ApiException as e:
                       </div>
                       <hr>
                   </section>
+                <section id="api-Workspace">
+                  <h1>Workspace</h1>
+                    <div id="api-Workspace-instanceWorkspaceAdd">
+                      <article id="api-Workspace-instanceWorkspaceAdd-0" data-group="User" data-name="instanceWorkspaceAdd" data-version="0">
+                        <div class="pull-left">
+                          <h1>instanceWorkspaceAdd</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">Add new workspace</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/sdrangel/workspace</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Workspace-instanceWorkspaceAdd-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Workspace-instanceWorkspaceAdd-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Workspace-instanceWorkspaceAdd-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Workspace-instanceWorkspaceAdd-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Workspace-instanceWorkspaceAdd-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Workspace-instanceWorkspaceAdd-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Workspace-instanceWorkspaceAdd-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Workspace-instanceWorkspaceAdd-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Workspace-instanceWorkspaceAdd-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Workspace-instanceWorkspaceAdd-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Workspace-instanceWorkspaceAdd-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Workspace-instanceWorkspaceAdd-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X POST "http://localhost/sdrangel/workspace"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Workspace-instanceWorkspaceAdd-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.WorkspaceApi;
+
+import java.io.File;
+import java.util.*;
+
+public class WorkspaceApiExample {
+
+    public static void main(String[] args) {
+        
+        WorkspaceApi apiInstance = new WorkspaceApi();
+        try {
+            SuccessResponse result = apiInstance.instanceWorkspaceAdd();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling WorkspaceApi#instanceWorkspaceAdd");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Workspace-instanceWorkspaceAdd-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.WorkspaceApi;
+
+public class WorkspaceApiExample {
+
+    public static void main(String[] args) {
+        WorkspaceApi apiInstance = new WorkspaceApi();
+        try {
+            SuccessResponse result = apiInstance.instanceWorkspaceAdd();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling WorkspaceApi#instanceWorkspaceAdd");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Workspace-instanceWorkspaceAdd-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Workspace-instanceWorkspaceAdd-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+WorkspaceApi *apiInstance = [[WorkspaceApi alloc] init];
+
+[apiInstance instanceWorkspaceAddWithCompletionHandler: 
+              ^(SuccessResponse output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Workspace-instanceWorkspaceAdd-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.WorkspaceApi()
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.instanceWorkspaceAdd(callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Workspace-instanceWorkspaceAdd-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Workspace-instanceWorkspaceAdd-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class instanceWorkspaceAddExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new WorkspaceApi();
+
+            try
+            {
+                SuccessResponse result = apiInstance.instanceWorkspaceAdd();
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling WorkspaceApi.instanceWorkspaceAdd: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Workspace-instanceWorkspaceAdd-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\WorkspaceApi();
+
+try {
+    $result = $api_instance->instanceWorkspaceAdd();
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling WorkspaceApi->instanceWorkspaceAdd: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Workspace-instanceWorkspaceAdd-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::WorkspaceApi;
+
+my $api_instance = SWGSDRangel::WorkspaceApi->new();
+
+eval { 
+    my $result = $api_instance->instanceWorkspaceAdd();
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling WorkspaceApi->instanceWorkspaceAdd: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Workspace-instanceWorkspaceAdd-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.WorkspaceApi()
+
+try: 
+    api_response = api_instance.instance_workspace_add()
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling WorkspaceApi->instanceWorkspaceAdd: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 202 -  </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceWorkspaceAdd-202-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceWorkspaceAdd-202-schema">
+                                  <div id='responses-instanceWorkspaceAdd-202-schema-202' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "schema" : {
+    "$ref" : "#/definitions/SuccessResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceWorkspaceAdd-202-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceWorkspaceAdd-202-schema-202');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceWorkspaceAdd-202-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceWorkspaceAdd-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceWorkspaceAdd-500-schema">
+                                  <div id='responses-instanceWorkspaceAdd-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceWorkspaceAdd-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceWorkspaceAdd-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceWorkspaceAdd-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceWorkspaceAdd-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceWorkspaceAdd-501-schema">
+                                  <div id='responses-instanceWorkspaceAdd-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceWorkspaceAdd-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceWorkspaceAdd-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceWorkspaceAdd-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-Workspace-instanceWorkspacesDeleteEmpty">
+                      <article id="api-Workspace-instanceWorkspacesDeleteEmpty-0" data-group="User" data-name="instanceWorkspacesDeleteEmpty" data-version="0">
+                        <div class="pull-left">
+                          <h1>instanceWorkspacesDeleteEmpty</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">Delete empty workspaces</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="delete"><code><span class="pln">/sdrangel/workspace</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Workspace-instanceWorkspacesDeleteEmpty-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Workspace-instanceWorkspacesDeleteEmpty-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Workspace-instanceWorkspacesDeleteEmpty-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Workspace-instanceWorkspacesDeleteEmpty-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Workspace-instanceWorkspacesDeleteEmpty-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Workspace-instanceWorkspacesDeleteEmpty-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Workspace-instanceWorkspacesDeleteEmpty-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Workspace-instanceWorkspacesDeleteEmpty-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Workspace-instanceWorkspacesDeleteEmpty-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Workspace-instanceWorkspacesDeleteEmpty-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Workspace-instanceWorkspacesDeleteEmpty-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Workspace-instanceWorkspacesDeleteEmpty-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X DELETE "http://localhost/sdrangel/workspace"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Workspace-instanceWorkspacesDeleteEmpty-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.WorkspaceApi;
+
+import java.io.File;
+import java.util.*;
+
+public class WorkspaceApiExample {
+
+    public static void main(String[] args) {
+        
+        WorkspaceApi apiInstance = new WorkspaceApi();
+        try {
+            SuccessResponse result = apiInstance.instanceWorkspacesDeleteEmpty();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling WorkspaceApi#instanceWorkspacesDeleteEmpty");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Workspace-instanceWorkspacesDeleteEmpty-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.WorkspaceApi;
+
+public class WorkspaceApiExample {
+
+    public static void main(String[] args) {
+        WorkspaceApi apiInstance = new WorkspaceApi();
+        try {
+            SuccessResponse result = apiInstance.instanceWorkspacesDeleteEmpty();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling WorkspaceApi#instanceWorkspacesDeleteEmpty");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Workspace-instanceWorkspacesDeleteEmpty-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Workspace-instanceWorkspacesDeleteEmpty-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+WorkspaceApi *apiInstance = [[WorkspaceApi alloc] init];
+
+[apiInstance instanceWorkspacesDeleteEmptyWithCompletionHandler: 
+              ^(SuccessResponse output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Workspace-instanceWorkspacesDeleteEmpty-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.WorkspaceApi()
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.instanceWorkspacesDeleteEmpty(callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Workspace-instanceWorkspacesDeleteEmpty-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Workspace-instanceWorkspacesDeleteEmpty-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class instanceWorkspacesDeleteEmptyExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new WorkspaceApi();
+
+            try
+            {
+                SuccessResponse result = apiInstance.instanceWorkspacesDeleteEmpty();
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling WorkspaceApi.instanceWorkspacesDeleteEmpty: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Workspace-instanceWorkspacesDeleteEmpty-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\WorkspaceApi();
+
+try {
+    $result = $api_instance->instanceWorkspacesDeleteEmpty();
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling WorkspaceApi->instanceWorkspacesDeleteEmpty: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Workspace-instanceWorkspacesDeleteEmpty-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::WorkspaceApi;
+
+my $api_instance = SWGSDRangel::WorkspaceApi->new();
+
+eval { 
+    my $result = $api_instance->instanceWorkspacesDeleteEmpty();
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling WorkspaceApi->instanceWorkspacesDeleteEmpty: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Workspace-instanceWorkspacesDeleteEmpty-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.WorkspaceApi()
+
+try: 
+    api_response = api_instance.instance_workspaces_delete_empty()
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling WorkspaceApi->instanceWorkspacesDeleteEmpty: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 202 -  </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceWorkspacesDeleteEmpty-202-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceWorkspacesDeleteEmpty-202-schema">
+                                  <div id='responses-instanceWorkspacesDeleteEmpty-202-schema-202' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "schema" : {
+    "$ref" : "#/definitions/SuccessResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceWorkspacesDeleteEmpty-202-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceWorkspacesDeleteEmpty-202-schema-202');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceWorkspacesDeleteEmpty-202-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceWorkspacesDeleteEmpty-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceWorkspacesDeleteEmpty-500-schema">
+                                  <div id='responses-instanceWorkspacesDeleteEmpty-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceWorkspacesDeleteEmpty-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceWorkspacesDeleteEmpty-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceWorkspacesDeleteEmpty-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceWorkspacesDeleteEmpty-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceWorkspacesDeleteEmpty-501-schema">
+                                  <div id='responses-instanceWorkspacesDeleteEmpty-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceWorkspacesDeleteEmpty-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceWorkspacesDeleteEmpty-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceWorkspacesDeleteEmpty-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                  </section>
           </div>
           <div id="footer">
             <div id="api-_footer">
@@ -55825,7 +56503,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2022-05-08T19:09:57.985+02:00
+              Generated 2022-05-09T01:10:06.823+02:00
             </div>
           </div>
       </div>

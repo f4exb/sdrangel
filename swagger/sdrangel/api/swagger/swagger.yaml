@@ -1282,6 +1282,37 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
 
+  /sdrangel/workspace:
+    x-swagger-router-controller: instance
+    post:
+      description: Add new workspace
+      operationId: InstanceWorkspaceAdd
+      tags:
+        - Workspace
+      responses:
+        "202":
+          descriptions: Successful sending of the message
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    delete:
+      description: Delete empty workspaces
+      operationId: InstanceWorkspacesDeleteEmpty
+      tags:
+        - Workspace
+      responses:
+        "202":
+          descriptions: Successful sending of the message
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
   /sdrangel/deviceset:
     x-swagger-router-controller: instance
     post:

@@ -869,6 +869,34 @@ public:
     }
 
     /**
+     * Handler of /sdrangel/workspace (POST) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceWorkspacePost(
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/workspace (DELETE) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceWorkspaceDelete(
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
      * Handler of /sdrangel/deviceset (POST) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
      * returns the Http status code (default 501: not implemented)
      */
@@ -1651,6 +1679,7 @@ public:
     static QString instanceFeaturePresetURL;
     static QString instanceDeviceSetsURL;
     static QString instanceDeviceSetURL;
+    static QString instanceWorkspaceURL;
     static QString featuresetURL;
     static QString featuresetFeatureURL;
     static QString featuresetPresetURL;

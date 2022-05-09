@@ -1621,6 +1621,16 @@ bool MainWindow::handleMessage(const Message& cmd)
         m_mainCore->m_settings.deleteConfiguration(configurationToDelete);
         return true;
     }
+    else if (MainCore::MsgDeleteEmptyWorkspaces::match(cmd))
+    {
+        removeEmptyWorkspaces();
+        return true;
+    }
+    else if (MainCore::MsgAddWorkspace::match(cmd))
+    {
+        addWorkspace();
+        return true;
+    }
     else if (MainCore::MsgDeleteFeatureSetPreset::match(cmd))
     {
         MainCore::MsgDeleteFeatureSetPreset& notif = (MainCore::MsgDeleteFeatureSetPreset&) cmd;

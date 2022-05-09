@@ -230,6 +230,36 @@ public:
         { }
     };
 
+    class SDRBASE_API MsgAddWorkspace : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgAddWorkspace* create()
+        {
+            return new MsgAddWorkspace();
+        }
+
+    private:
+        MsgAddWorkspace() :
+            Message()
+        { }
+    };
+
+    class SDRBASE_API MsgDeleteEmptyWorkspaces : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgDeleteEmptyWorkspaces* create()
+        {
+            return new MsgDeleteEmptyWorkspaces();
+        }
+
+    private:
+        MsgDeleteEmptyWorkspaces() :
+            Message()
+        { }
+    };
+
     class SDRBASE_API MsgLoadFeatureSetPreset : public Message {
         MESSAGE_CLASS_DECLARATION
 

@@ -2077,6 +2077,34 @@ int WebAPIAdapter::instanceDeviceSetDelete(
     }
 }
 
+int WebAPIAdapter::instanceWorkspacePost(
+        SWGSDRangel::SWGSuccessResponse& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    (void) error;
+    MainCore::MsgAddWorkspace *msg = MainCore::MsgAddWorkspace::create();
+    m_mainCore->m_mainMessageQueue->push(msg);
+
+    response.init();
+    *response.getMessage() = QString("Message to add a new workspace (MsgAddWorkspace) was submitted successfully");
+
+    return 202;
+}
+
+int WebAPIAdapter::instanceWorkspaceDelete(
+        SWGSDRangel::SWGSuccessResponse& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    (void) error;
+    MainCore::MsgDeleteEmptyWorkspaces *msg = MainCore::MsgDeleteEmptyWorkspaces::create();
+    m_mainCore->m_mainMessageQueue->push(msg);
+
+    response.init();
+    *response.getMessage() = QString("Message to delete empty workspaces (MsgDeleteEmptyWorkspaces) was submitted successfully");
+
+    return 202;
+}
+
 int WebAPIAdapter::devicesetGet(
         int deviceSetIndex,
         SWGSDRangel::SWGDeviceSet& response,

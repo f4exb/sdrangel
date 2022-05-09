@@ -49,6 +49,7 @@ QString WebAPIAdapterInterface::instanceFeaturePresetsURL = "/sdrangel/featurepr
 QString WebAPIAdapterInterface::instanceFeaturePresetURL = "/sdrangel/featurepreset";
 QString WebAPIAdapterInterface::instanceDeviceSetsURL = "/sdrangel/devicesets";
 QString WebAPIAdapterInterface::instanceDeviceSetURL = "/sdrangel/deviceset";
+QString WebAPIAdapterInterface::instanceWorkspaceURL = "/sdrangel/workspace";
 QString WebAPIAdapterInterface::featuresetURL("/sdrangel/featureset");
 QString WebAPIAdapterInterface::featuresetFeatureURL("/sdrangel/featureset/feature");
 QString WebAPIAdapterInterface::featuresetPresetURL("/sdrangel/featureset/preset");
