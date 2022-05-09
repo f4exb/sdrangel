@@ -20,6 +20,7 @@
 #include <QCoreApplication>
 #include <QList>
 #include <QSysInfo>
+#include <QTextStream>
 
 #include "maincore.h"
 #include "loggerwithfile.h"
