@@ -79,6 +79,7 @@ bool StarTrackerGUI::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
+        m_feature->setWorkspaceIndex(m_settings.m_workspaceIndex);
         displaySettings();
         applySettings(true);
         return true;
@@ -265,6 +266,7 @@ StarTrackerGUI::StarTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet,
     m_moonRA(0.0),
     m_moonDec(0.0)
 {
+    m_feature = feature;
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/feature/startracker/readme.md";
     RollupContents *rollupContents = getRollupContents();
@@ -395,6 +397,12 @@ StarTrackerGUI::~StarTrackerGUI()
     );
     delete m_networkManager;
     delete ui;
+}
+
+void StarTrackerGUI::setWorkspaceIndex(int index)
+{
+    m_settings.m_workspaceIndex = index;
+    m_feature->setWorkspaceIndex(index);
 }
 
 void StarTrackerGUI::blockApplySettings(bool block)

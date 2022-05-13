@@ -23,6 +23,7 @@
 #include <QBuffer>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGDATVDemodSettings.h"
 #include "SWGChannelReport.h"
 
@@ -304,6 +305,15 @@ int DATVDemod::webapiSettingsGet(
     response.setDatvDemodSettings(new SWGSDRangel::SWGDATVDemodSettings());
     response.getDatvDemodSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int DATVDemod::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

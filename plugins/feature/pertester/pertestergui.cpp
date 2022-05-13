@@ -58,6 +58,7 @@ bool PERTesterGUI::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
+        m_feature->setWorkspaceIndex(m_settings.m_workspaceIndex);
         displaySettings();
         applySettings(true);
         return true;
@@ -135,6 +136,7 @@ PERTesterGUI::PERTesterGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Fea
     m_doApplySettings(true),
     m_lastFeatureState(0)
 {
+    m_feature = feature;
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/feature/pertester/readme.md";
     RollupContents *rollupContents = getRollupContents();
@@ -162,6 +164,12 @@ PERTesterGUI::PERTesterGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Fea
 PERTesterGUI::~PERTesterGUI()
 {
     delete ui;
+}
+
+void PERTesterGUI::setWorkspaceIndex(int index)
+{
+    m_settings.m_workspaceIndex = index;
+    m_feature->setWorkspaceIndex(index);
 }
 
 void PERTesterGUI::blockApplySettings(bool block)

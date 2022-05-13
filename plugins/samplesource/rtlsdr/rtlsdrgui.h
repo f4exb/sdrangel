@@ -53,7 +53,6 @@ protected:
 private:
 	Ui::RTLSDRGui* ui;
 
-	DeviceUISet* m_deviceUISet;
     bool m_doApplySettings;
 	bool m_forceSettings;
 	RTLSDRSettings m_settings;

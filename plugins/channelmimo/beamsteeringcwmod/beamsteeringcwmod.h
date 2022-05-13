@@ -134,6 +134,10 @@ public:
             SWGSDRangel::SWGChannelSettings& response,
             QString& errorMessage);
 
+    virtual int webapiWorkspaceGet(
+            SWGSDRangel::SWGWorkspaceInfo& query,
+            QString& errorMessage);
+
     static void webapiFormatChannelSettings(
         SWGSDRangel::SWGChannelSettings& response,
         const BeamSteeringCWModSettings& settings);

@@ -42,7 +42,6 @@
 TestSourceGui::TestSourceGui(DeviceUISet *deviceUISet, QWidget* parent) :
     DeviceGUI(parent),
     ui(new Ui::TestSourceGui),
-    m_deviceUISet(deviceUISet),
     m_settings(),
     m_doApplySettings(true),
     m_forceSettings(true),
@@ -51,6 +50,7 @@ TestSourceGui::TestSourceGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_lastEngineState(DeviceAPI::StNotStarted)
 {
     qDebug("TestSourceGui::TestSourceGui");
+    m_deviceUISet = deviceUISet;
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_sampleSource = m_deviceUISet->m_deviceAPI->getSampleSource();
 

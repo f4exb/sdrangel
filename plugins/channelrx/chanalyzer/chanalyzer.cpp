@@ -25,6 +25,7 @@
 #include <stdio.h>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGChannelAnalyzerSettings.h"
 
 #include "device/deviceapi.h"
@@ -330,6 +331,15 @@ int ChannelAnalyzer::webapiSettingsGet(
     response.setChannelAnalyzerSettings(new SWGSDRangel::SWGChannelAnalyzerSettings());
     response.getChannelAnalyzerSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int ChannelAnalyzer::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

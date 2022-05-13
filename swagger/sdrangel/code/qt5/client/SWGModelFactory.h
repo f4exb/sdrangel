@@ -317,6 +317,7 @@
 #include "SWGWFMDemodSettings.h"
 #include "SWGWFMModReport.h"
 #include "SWGWFMModSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGXtrxInputReport.h"
 #include "SWGXtrxInputSettings.h"
 #include "SWGXtrxMIMOReport.h"
@@ -1839,6 +1840,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGWFMModSettings").compare(type) == 0) {
       SWGWFMModSettings *obj = new SWGWFMModSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGWorkspaceInfo").compare(type) == 0) {
+      SWGWorkspaceInfo *obj = new SWGWorkspaceInfo();
       obj->init();
       return obj;
     }

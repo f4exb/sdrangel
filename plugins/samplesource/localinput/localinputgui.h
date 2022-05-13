@@ -53,7 +53,6 @@ protected:
 private:
 	Ui::LocalInputGui* ui;
 
-	DeviceUISet* m_deviceUISet;
     LocalInputSettings m_settings;        //!< current settings
 	LocalInput* m_sampleSource;
     bool m_acquisition;

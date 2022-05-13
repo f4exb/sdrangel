@@ -132,6 +132,7 @@ bool APRSGUI::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
+        m_feature->setWorkspaceIndex(m_settings.m_workspaceIndex);
         displaySettings();
         applySettings(true);
         return true;
@@ -430,6 +431,7 @@ APRSGUI::APRSGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feat
     m_doApplySettings(true),
     m_lastFeatureState(0)
 {
+    m_feature = feature;
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/feature/aprs/readme.md";
     RollupContents *rollupContents = getRollupContents();
@@ -570,6 +572,12 @@ APRSGUI::APRSGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feat
 APRSGUI::~APRSGUI()
 {
     delete ui;
+}
+
+void APRSGUI::setWorkspaceIndex(int index)
+{
+    m_settings.m_workspaceIndex = index;
+    m_feature->setWorkspaceIndex(index);
 }
 
 void APRSGUI::blockApplySettings(bool block)

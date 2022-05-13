@@ -43,7 +43,6 @@
 TestMIGui::TestMIGui(DeviceUISet *deviceUISet, QWidget* parent) :
     DeviceGUI(parent),
     ui(new Ui::TestMIGui),
-    m_deviceUISet(deviceUISet),
     m_settings(),
     m_streamIndex(0),
     m_spectrumStreamIndex(0),
@@ -54,6 +53,7 @@ TestMIGui::TestMIGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_lastEngineState(DeviceAPI::StNotStarted)
 {
     qDebug("TestMIGui::TestMIGui");
+    m_deviceUISet = deviceUISet;
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/samplemimo/testmi/readme.md";
     ui->setupUi(getContents());

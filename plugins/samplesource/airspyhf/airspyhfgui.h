@@ -55,7 +55,6 @@ protected:
 private:
 	Ui::AirspyHFGui* ui;
 
-	DeviceUISet* m_deviceUISet;
 	bool m_doApplySettings;
 	bool m_forceSettings;
 	AirspyHFSettings m_settings;

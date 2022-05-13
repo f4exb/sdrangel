@@ -22,6 +22,7 @@
 #include <QNetworkReply>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 
 #include "device/deviceapi.h"
 #include "dsp/hbfilterchainconverter.h"
@@ -302,6 +303,15 @@ int Interferometer::webapiSettingsGet(
     response.setInterferometerSettings(new SWGSDRangel::SWGInterferometerSettings());
     response.getInterferometerSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int Interferometer::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

@@ -52,7 +52,6 @@ protected:
 private:
     Ui::LimeSDROutputGUI* ui;
 
-    DeviceUISet* m_deviceUISet;
     LimeSDROutput* m_limeSDROutput; //!< Same object as above but gives easy access to LimeSDROutput methods and attributes that are used intensively
     LimeSDROutputSettings m_settings;
     bool m_sampleRateMode; //!< true: device, false: base band sample rate update mode

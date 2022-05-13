@@ -56,6 +56,7 @@ bool JogdialControllerGUI::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
+        m_feature->setWorkspaceIndex(m_settings.m_workspaceIndex);
         displaySettings();
         applySettings(true);
         return true;
@@ -154,6 +155,7 @@ JogdialControllerGUI::JogdialControllerGUI(PluginAPI* pluginAPI, FeatureUISet *f
     m_lastFeatureState(0),
     m_selectedChannel(nullptr)
 {
+    m_feature = feature;
 	setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/feature/jogdialcontroller/readme.md";
     RollupContents *rollupContents = getRollupContents();
@@ -184,6 +186,12 @@ JogdialControllerGUI::JogdialControllerGUI(PluginAPI* pluginAPI, FeatureUISet *f
 JogdialControllerGUI::~JogdialControllerGUI()
 {
 	delete ui;
+}
+
+void JogdialControllerGUI::setWorkspaceIndex(int index)
+{
+    m_settings.m_workspaceIndex = index;
+    m_feature->setWorkspaceIndex(index);
 }
 
 void JogdialControllerGUI::blockApplySettings(bool block)

@@ -29,6 +29,7 @@
 #include <complex.h>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGFreqTrackerSettings.h"
 #include "SWGChannelReport.h"
 #include "SWGFreqTrackerReport.h"
@@ -341,6 +342,15 @@ int FreqTracker::webapiSettingsGet(
     response.setFreqTrackerSettings(new SWGSDRangel::SWGFreqTrackerSettings());
     response.getFreqTrackerSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int FreqTracker::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

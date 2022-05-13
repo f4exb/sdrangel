@@ -53,7 +53,6 @@ protected:
 private:
 	Ui::KiwiSDRGui* ui;
 
-	DeviceUISet* m_deviceUISet;
 	KiwiSDRSettings m_settings;
     QTimer m_updateTimer;
     QTimer m_statusTimer;

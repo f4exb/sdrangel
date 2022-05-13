@@ -46,7 +46,6 @@
 LocalOutputGui::LocalOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	DeviceGUI(parent),
 	ui(new Ui::LocalOutputGui),
-	m_deviceUISet(deviceUISet),
 	m_settings(),
 	m_sampleSink(0),
 	m_acquisition(false),
@@ -58,6 +57,7 @@ LocalOutputGui::LocalOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_doApplySettings(true),
     m_forceSettings(true)
 {
+    m_deviceUISet = deviceUISet;
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_paletteGreenText.setColor(QPalette::WindowText, Qt::green);
     m_paletteWhiteText.setColor(QPalette::WindowText, Qt::white);

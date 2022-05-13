@@ -52,7 +52,6 @@ protected:
 private:
 	Ui::TestSourceGui* ui;
 
-	DeviceUISet* m_deviceUISet;
 	TestSourceSettings m_settings;
     QTimer m_updateTimer;
     QTimer m_statusTimer;

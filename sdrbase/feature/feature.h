@@ -150,6 +150,8 @@ public:
 	MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
     void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
     MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
+    void setWorkspaceIndex(int index) { m_workspaceIndex = index; }
+    int getWorkspaceIndex() const { return m_workspaceIndex; }
 
 protected:
     MessageQueue m_inputMessageQueue;
@@ -169,6 +171,7 @@ private:
     QString m_uri;  //!< Unique non modifiable identifier attached to channel type
     uint64_t m_uid;
     int m_indexInFeatureSet;
+    int m_workspaceIndex;
 
 signals:
     void indexInFeatureSetChanged(int index);

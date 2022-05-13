@@ -36,7 +36,6 @@
 Bladerf1InputGui::Bladerf1InputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	DeviceGUI(parent),
 	ui(new Ui::Bladerf1InputGui),
-	m_deviceUISet(deviceUISet),
 	m_forceSettings(true),
 	m_doApplySettings(true),
 	m_settings(),
@@ -45,6 +44,7 @@ Bladerf1InputGui::Bladerf1InputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_sampleRate(0),
 	m_lastEngineState(DeviceAPI::StNotStarted)
 {
+    m_deviceUISet = deviceUISet;
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_sampleSource = (Bladerf1Input*) m_deviceUISet->m_deviceAPI->getSampleSource();
 

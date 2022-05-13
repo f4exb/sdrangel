@@ -26,6 +26,7 @@
 #include <QThread>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGChannelReport.h"
 #include "SWGChirpChatModReport.h"
 
@@ -455,6 +456,15 @@ int ChirpChatMod::webapiSettingsGet(
     response.getChirpChatModSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
 
+    return 200;
+}
+
+int ChirpChatMod::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

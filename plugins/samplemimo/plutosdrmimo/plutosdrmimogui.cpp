@@ -47,7 +47,6 @@
 PlutoSDRMIMOGUI::PlutoSDRMIMOGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     DeviceGUI(parent),
     ui(new Ui::PlutoSDRMIMOGUI),
-    m_deviceUISet(deviceUISet),
     m_settings(),
     m_rxElseTx(true),
     m_streamIndex(0),
@@ -68,6 +67,7 @@ PlutoSDRMIMOGUI::PlutoSDRMIMOGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleRateMode(true)
 {
     qDebug("PlutoSDRMIMOGui::PlutoSDRMIMOGui");
+    m_deviceUISet = deviceUISet;
     setAttribute(Qt::WA_DeleteOnClose, true);
     ui->setupUi(getContents());
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);

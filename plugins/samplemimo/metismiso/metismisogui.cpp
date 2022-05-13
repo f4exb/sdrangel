@@ -43,7 +43,6 @@
 MetisMISOGui::MetisMISOGui(DeviceUISet *deviceUISet, QWidget* parent) :
     DeviceGUI(parent),
     ui(new Ui::MetisMISOGui),
-    m_deviceUISet(deviceUISet),
     m_settings(),
     m_doApplySettings(true),
     m_forceSettings(true),
@@ -52,6 +51,7 @@ MetisMISOGui::MetisMISOGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_lastEngineState(DeviceAPI::StNotStarted)
 {
     qDebug("MetisMISOGui::MetisMISOGui");
+    m_deviceUISet = deviceUISet;
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_sampleMIMO = m_deviceUISet->m_deviceAPI->getSampleMIMO();
     m_rxSampleRate = 48000;

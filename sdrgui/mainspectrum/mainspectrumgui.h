@@ -54,7 +54,7 @@ public:
     void setToolTip(const QString& tooltip);
     void setIndex(int index);
     int getIndex() const { return m_deviceSetIndex; }
-    void setWorkspaceIndex(int index) { m_workspaceIndex = index; }
+    void setWorkspaceIndex(int index);
     int getWorkspaceIndex() const { return m_workspaceIndex; }
     void setGeometryBytes(const QByteArray& blob) { m_geometryBytes = blob; }
     const QByteArray& getGeometryBytes() const { return m_geometryBytes; }

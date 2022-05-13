@@ -53,7 +53,6 @@ protected:
 private:
 	Ui::LocalOutputGui* ui;
 
-	DeviceUISet* m_deviceUISet;
     LocalOutputSettings m_settings;        //!< current settings
 	LocalOutput* m_sampleSink;
     bool m_acquisition;

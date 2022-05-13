@@ -24,6 +24,7 @@
 #include <QThread>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGChannelReport.h"
 #include "SWGRemoteSourceReport.h"
 
@@ -297,6 +298,15 @@ int RemoteSource::webapiSettingsGet(
     response.setRemoteSourceSettings(new SWGSDRangel::SWGRemoteSourceSettings());
     response.getRemoteSourceSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int RemoteSource::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

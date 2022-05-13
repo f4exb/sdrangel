@@ -52,7 +52,6 @@ protected:
 private:
 	Ui::TestMIGui* ui;
 
-	DeviceUISet* m_deviceUISet;
 	TestMISettings m_settings;
     int m_streamIndex; //!< Current stream index being dealt with
     int m_spectrumStreamIndex; //!< Index of the stream displayed on main spectrum

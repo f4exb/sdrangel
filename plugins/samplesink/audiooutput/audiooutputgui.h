@@ -52,7 +52,6 @@ protected:
 private:
     Ui::AudioOutputGui* ui;
 
-    DeviceUISet* m_deviceUISet;
     AudioOutput* m_audioOutput;
     bool m_doApplySettings;
     bool m_forceSettings;

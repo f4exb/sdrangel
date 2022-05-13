@@ -55,7 +55,6 @@ protected:
 private:
 	Ui::RemoteInputGui* ui;
 
-	DeviceUISet* m_deviceUISet;
     RemoteInputSettings m_settings;        //!< current settings
 	RemoteInput::RemoteChannelSettings m_remoteChannelSettings;
 	double m_remoteShiftFrequencyFactor;  //!< Remote channel frequency shift factor

@@ -29,6 +29,7 @@
 #include <complex.h>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGPacketDemodSettings.h"
 #include "SWGChannelReport.h"
 #include "SWGMapItem.h"
@@ -404,6 +405,15 @@ int PacketDemod::webapiSettingsGet(
     response.setPacketDemodSettings(new SWGSDRangel::SWGPacketDemodSettings());
     response.getPacketDemodSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int PacketDemod::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

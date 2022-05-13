@@ -84,7 +84,6 @@ protected:
 private:
 	Ui::RemoteOutputGui* ui;
 
-	DeviceUISet* m_deviceUISet;
 	RemoteOutputSettings m_settings;        //!< current settings
 	RemoteOutputSettings m_controlSettings; //!< settings last sent to device via control port
 	QTimer m_updateTimer;

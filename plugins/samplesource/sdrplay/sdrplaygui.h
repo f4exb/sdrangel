@@ -53,7 +53,6 @@ protected:
 private:
     Ui::SDRPlayGui* ui;
 
-    DeviceUISet* m_deviceUISet;
     bool m_doApplySettings;
     bool m_forceSettings;
     SDRPlaySettings m_settings;

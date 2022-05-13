@@ -48,7 +48,6 @@ void RigCtlServerGUI::resetToDefaults()
 
 QByteArray RigCtlServerGUI::serialize() const
 {
-    qDebug("RigCtlServerGUI::serialize: %d", m_settings.m_channelIndex);
     return m_settings.serialize();
 }
 
@@ -56,7 +55,7 @@ bool RigCtlServerGUI::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        qDebug("RigCtlServerGUI::deserialize: %d", m_settings.m_channelIndex);
+        m_feature->setWorkspaceIndex(m_settings.m_workspaceIndex);
         updateDeviceSetList();
         displaySettings();
         applySettings(true);
@@ -135,6 +134,7 @@ RigCtlServerGUI::RigCtlServerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
 	m_doApplySettings(true),
     m_lastFeatureState(0)
 {
+    m_feature = feature;
 	setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/feature/rigctlserver/readme.md";
     RollupContents *rollupContents = getRollupContents();
@@ -163,6 +163,12 @@ RigCtlServerGUI::RigCtlServerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
 RigCtlServerGUI::~RigCtlServerGUI()
 {
 	delete ui;
+}
+
+void RigCtlServerGUI::setWorkspaceIndex(int index)
+{
+    m_settings.m_workspaceIndex = index;
+    m_feature->setWorkspaceIndex(index);
 }
 
 void RigCtlServerGUI::blockApplySettings(bool block)

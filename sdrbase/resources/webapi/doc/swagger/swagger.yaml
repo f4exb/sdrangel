@@ -1584,6 +1584,63 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
 
+  /sdrangel/deviceset/{deviceSetIndex}/spectrum/workspace:
+    x-swagger-router-controller: deviceset
+    get:
+      description: Get main spectrum UI workspace information (GUI)
+      operationId: devicesetSpectrumWorkspaceGet
+      tags:
+        - DeviceSet
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+      responses:
+        "200":
+          description: On success return main spectrum UI workspace index
+          schema:
+            $ref: "#/definitions/WorkspaceInfo"
+        "404":
+          description: Invalid index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    put:
+      description: move main spectrum UI to workspace (GUI)
+      operationId: devicesetSpectrumWorkspacePut
+      tags:
+        - DeviceSet
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+        - name: body
+          in: body
+          description: Destination workspace information
+          required: true
+          schema:
+            $ref: "#/definitions/WorkspaceInfo"
+      responses:
+        "202":
+          description: Message to perform action was sent successfully
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        "400":
+          description: Invalid device set or workspace index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
   /sdrangel/deviceset/{deviceSetIndex}/device:
     x-swagger-router-controller: deviceset
     put:
@@ -1605,7 +1662,7 @@ paths:
             $ref: "#/definitions/DeviceListItem"
       responses:
         "202":
-          description: On successful semdomg of the message it returns the details of the device being set
+          description: On successful semding of the message it returns the details of the device being set
           schema:
             $ref: "#/definitions/DeviceListItem"
         "400":
@@ -2021,6 +2078,63 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
 
+  /sdrangel/deviceset/{deviceSetIndex}/device/workspace:
+    x-swagger-router-controller: deviceset
+    get:
+      description: get device UI workspace information (GUI)
+      operationId: devicesetDeviceWorkspaceGet
+      tags:
+        - DeviceSet
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+      responses:
+        "200":
+          description: On success return workspace information
+          schema:
+            $ref: "#/definitions/WorkspaceInfo"
+        "400":
+          description: Invalid device set index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    put:
+      description: move device UI to workspace (GUI)
+      operationId: devicesetDeviceWorkspacePut
+      tags:
+        - DeviceSet
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+        - name: body
+          in: body
+          description: Destination workspace information
+          required: true
+          schema:
+            $ref: "#/definitions/WorkspaceInfo"
+      responses:
+        "202":
+          description: Message to perform action was sent successfully
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        "400":
+          description: Invalid device set or workspace index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
   /sdrangel/deviceset/{deviceSetIndex}/channel:
     x-swagger-router-controller: deviceset
     post:
@@ -2279,6 +2393,73 @@ paths:
             $ref: "#/definitions/ErrorResponse"
         "404":
           description: Device or channel not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
+  /sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/workspace:
+    x-swagger-router-controller: deviceset
+    get:
+      description: get channel UI workspace information (GUI)
+      operationId: devicesetChannelWorkspaceGet
+      tags:
+        - DeviceSet
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+        - in: path
+          name: channelIndex
+          type: integer
+          required: true
+          description: Index of the channel in the channels list for this device set
+      responses:
+        "200":
+          description: On success return workspace information
+          schema:
+            $ref: "#/definitions/WorkspaceInfo"
+        "400":
+          description: Invalid device set index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    put:
+      description: move channel UI to workspace (GUI)
+      operationId: devicesetChannelWorkspacePut
+      tags:
+        - DeviceSet
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+        - in: path
+          name: channelIndex
+          type: integer
+          required: true
+          description: Index of the channel in the channels list for this device set
+        - name: body
+          in: body
+          description: Destination workspace information
+          required: true
+          schema:
+            $ref: "#/definitions/WorkspaceInfo"
+      responses:
+        "202":
+          description: Message to perform action was sent successfully
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        "400":
+          description: Invalid device set or workspace index
           schema:
             $ref: "#/definitions/ErrorResponse"
         "500":
@@ -2708,6 +2889,63 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
 
+  /sdrangel/featureset/feature/{featureIndex}/workspace:
+    x-swagger-router-controller: featureset
+    get:
+      description: get feature UI workspace information (GUI)
+      operationId: featuresetFeatureWorkspaceGet
+      tags:
+        - FeatureSet
+      parameters:
+        - in: path
+          name: featureIndex
+          type: integer
+          required: true
+          description: Index of feature in the feature set
+      responses:
+        "200":
+          description: On success return workspace information
+          schema:
+            $ref: "#/definitions/WorkspaceInfo"
+        "400":
+          description: Invalid feature set index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    put:
+      description: move feature UI to workspace (GUI)
+      operationId: featuresetFeatureWorkspacePut
+      tags:
+        - FeatureSet
+      parameters:
+        - in: path
+          name: featureIndex
+          type: integer
+          required: true
+          description: Index of feature in the feature set
+        - name: body
+          in: body
+          description: Destination workspace information
+          required: true
+          schema:
+            $ref: "#/definitions/WorkspaceInfo"
+      responses:
+        "202":
+          description: Message to perform action was sent successfully
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        "400":
+          description: Invalid device set or workspace index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
   /swagger:
     x-swagger-pipe: swagger_raw
 
@@ -3116,6 +3354,14 @@ definitions:
         items:
           $ref:  "#/definitions/Channel"
 
+  WorkspaceInfo:
+    description: "Workspace information"
+    required:
+      - index
+    properties:
+      index:
+        description: index of workspace in the list of workspaces
+        type: integer
 
   AudioDevices:
     description: "List of audio devices available in the system"

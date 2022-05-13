@@ -54,7 +54,6 @@ protected:
 private:
 	Ui::FileOutputGui* ui;
 
-	DeviceUISet* m_deviceUISet;
 	bool m_doApplySettings;
 	bool m_forceSettings;
 	FileOutputSettings m_settings;

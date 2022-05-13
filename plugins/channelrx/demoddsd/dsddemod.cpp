@@ -29,6 +29,7 @@
 #include <QThread>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGDSDDemodSettings.h"
 #include "SWGChannelReport.h"
 #include "SWGDSDDemodReport.h"
@@ -365,6 +366,15 @@ int DSDDemod::webapiSettingsGet(
     response.setDsdDemodSettings(new SWGSDRangel::SWGDSDDemodSettings());
     response.getDsdDemodSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int DSDDemod::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

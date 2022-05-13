@@ -51,7 +51,6 @@ public:
 private:
 	Ui::TestMOSyncGui* ui;
 
-	DeviceUISet* m_deviceUISet;
 	bool m_doApplySettings;
 	bool m_forceSettings;
 	TestMOSyncSettings m_settings;

@@ -54,7 +54,6 @@ protected:
 private:
 	Ui::PerseusGui* ui;
 
-	DeviceUISet* m_deviceUISet;
 	bool m_doApplySettings;
 	bool m_forceSettings;
 	PerseusSettings m_settings;

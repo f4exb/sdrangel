@@ -29,6 +29,7 @@
 #include <QThread>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
@@ -335,6 +336,15 @@ int RemoteSink::webapiSettingsGet(
     response.setRemoteSinkSettings(new SWGSDRangel::SWGRemoteSinkSettings());
     response.getRemoteSinkSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int RemoteSink::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

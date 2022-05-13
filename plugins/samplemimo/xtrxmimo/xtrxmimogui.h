@@ -51,7 +51,6 @@ protected:
 private:
 	Ui::XTRXMIMOGUI* ui;
 
-	DeviceUISet* m_deviceUISet;
 	XTRXMIMOSettings m_settings;
     bool m_rxElseTx;   //!< Which side is being dealt with
     int m_streamIndex; //!< Current stream index being dealt with

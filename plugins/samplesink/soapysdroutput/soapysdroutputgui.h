@@ -73,7 +73,6 @@ private:
 
     Ui::SoapySDROutputGui* ui;
 
-    DeviceUISet* m_deviceUISet;
     bool m_forceSettings;
     bool m_doApplySettings;
     SoapySDROutputSettings m_settings;

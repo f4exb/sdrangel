@@ -63,6 +63,7 @@ bool RadiosondeGUI::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
+        m_feature->setWorkspaceIndex(m_settings.m_workspaceIndex);
         displaySettings();
         applySettings(true);
         return true;
@@ -140,6 +141,7 @@ RadiosondeGUI::RadiosondeGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, F
     m_doApplySettings(true),
     m_lastFeatureState(0)
 {
+    m_feature = feature;
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/feature/radiosonde/readme.md";
     RollupContents *rollupContents = getRollupContents();
@@ -201,6 +203,12 @@ RadiosondeGUI::~RadiosondeGUI()
 {
     qDeleteAll(m_radiosondes);
     delete ui;
+}
+
+void RadiosondeGUI::setWorkspaceIndex(int index)
+{
+    m_settings.m_workspaceIndex = index;
+    m_feature->setWorkspaceIndex(index);
 }
 
 void RadiosondeGUI::blockApplySettings(bool block)

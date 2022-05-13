@@ -71,7 +71,6 @@ private:
 
     Ui::SoapySDRInputGui* ui;
 
-    DeviceUISet* m_deviceUISet;
     bool m_forceSettings;
     bool m_doApplySettings;
     SoapySDRInputSettings m_settings;

@@ -58,24 +58,28 @@ std::regex WebAPIAdapterInterface::devicesetURLRe("^/sdrangel/deviceset/([0-9]{1
 std::regex WebAPIAdapterInterface::devicesetFocusURLRe("^/sdrangel/deviceset/([0-9]{1,2})/focus$");
 std::regex WebAPIAdapterInterface::devicesetSpectrumSettingsURLRe("^/sdrangel/deviceset/([0-9]{1,2})/spectrum/settings$");
 std::regex WebAPIAdapterInterface::devicesetSpectrumServerURLRe("^/sdrangel/deviceset/([0-9]{1,2})/spectrum/server$");
+std::regex WebAPIAdapterInterface::devicesetSpectrumWorkspaceURLRe("^/sdrangel/deviceset/([0-9]{1,2})/spectrum/workspace$");
 std::regex WebAPIAdapterInterface::devicesetDeviceURLRe("^/sdrangel/deviceset/([0-9]{1,2})/device$");
 std::regex WebAPIAdapterInterface::devicesetDeviceSettingsURLRe("^/sdrangel/deviceset/([0-9]{1,2})/device/settings$");
 std::regex WebAPIAdapterInterface::devicesetDeviceRunURLRe("^/sdrangel/deviceset/([0-9]{1,2})/device/run$");
 std::regex WebAPIAdapterInterface::devicesetDeviceSubsystemRunURLRe("^/sdrangel/deviceset/([0-9]{1,2})/subdevice/([0-9]{1,2})/run$");
 std::regex WebAPIAdapterInterface::devicesetDeviceReportURLRe("^/sdrangel/deviceset/([0-9]{1,2})/device/report$");
 std::regex WebAPIAdapterInterface::devicesetDeviceActionsURLRe("^/sdrangel/deviceset/([0-9]{1,2})/device/actions$");
+std::regex WebAPIAdapterInterface::devicesetDeviceWorkspaceURLRe("^/sdrangel/deviceset/([0-9]{1,2})/device/workspace$");
 std::regex WebAPIAdapterInterface::devicesetChannelsReportURLRe("^/sdrangel/deviceset/([0-9]{1,2})/channels/report$");
 std::regex WebAPIAdapterInterface::devicesetChannelURLRe("^/sdrangel/deviceset/([0-9]{1,2})/channel$");
 std::regex WebAPIAdapterInterface::devicesetChannelIndexURLRe("^/sdrangel/deviceset/([0-9]{1,2})/channel/([0-9]{1,2})$");
 std::regex WebAPIAdapterInterface::devicesetChannelSettingsURLRe("^/sdrangel/deviceset/([0-9]{1,2})/channel/([0-9]{1,2})/settings$");
 std::regex WebAPIAdapterInterface::devicesetChannelReportURLRe("^/sdrangel/deviceset/([0-9]{1,2})/channel/([0-9]{1,2})/report");
 std::regex WebAPIAdapterInterface::devicesetChannelActionsURLRe("^/sdrangel/deviceset/([0-9]{1,2})/channel/([0-9]{1,2})/actions");
+std::regex WebAPIAdapterInterface::devicesetChannelWorkspaceURLRe("^/sdrangel/deviceset/([0-9]{1,2})/channel/([0-9]{1,2})/workspace");
 
 std::regex WebAPIAdapterInterface::featuresetFeatureIndexURLRe("^/sdrangel/featureset/feature/([0-9]{1,2})$");
 std::regex WebAPIAdapterInterface::featuresetFeatureRunURLRe("^/sdrangel/featureset/feature/([0-9]{1,2})/run$");
 std::regex WebAPIAdapterInterface::featuresetFeatureSettingsURLRe("^/sdrangel/featureset/feature/([0-9]{1,2})/settings$");
 std::regex WebAPIAdapterInterface::featuresetFeatureReportURLRe("^/sdrangel/featureset/feature/([0-9]{1,2})/report$");
 std::regex WebAPIAdapterInterface::featuresetFeatureActionsURLRe("^/sdrangel/featureset/feature/([0-9]{1,2})/actions$");
+std::regex WebAPIAdapterInterface::featuresetFeatureWorkspaceURLRe("^/sdrangel/featureset/feature/([0-9]{1,2})/workspace$");
 
 void WebAPIAdapterInterface::ConfigKeys::debug() const
 {

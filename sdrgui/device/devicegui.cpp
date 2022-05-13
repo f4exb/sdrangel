@@ -29,10 +29,13 @@
 #include "mainwindow.h"
 #include "gui/workspaceselectiondialog.h"
 #include "gui/samplingdevicedialog.h"
+#include "device/deviceuiset.h"
+#include "device/deviceapi.h"
 #include "devicegui.h"
 
 DeviceGUI::DeviceGUI(QWidget *parent) :
     QMdiSubWindow(parent),
+    m_deviceUISet(nullptr),
     m_deviceType(DeviceRx),
     m_deviceSetIndex(0),
     m_contextMenuType(ContextMenuNone),
@@ -221,6 +224,15 @@ DeviceGUI::~DeviceGUI()
     delete m_settingsButton;
     delete m_indexLabel;
     qDebug("DeviceGUI::~DeviceGUI: end");
+}
+
+void DeviceGUI::setWorkspaceIndex(int index)
+{
+    m_workspaceIndex = index;
+
+    if (m_deviceUISet) {
+        m_deviceUISet->m_deviceAPI->setWorkspaceIndex(index);
+    }
 }
 
 void DeviceGUI::closeEvent(QCloseEvent *event)

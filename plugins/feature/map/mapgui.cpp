@@ -72,6 +72,7 @@ bool MapGUI::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
+        m_feature->setWorkspaceIndex(m_settings.m_workspaceIndex);
         displaySettings();
         applySettings(true);
         return true;
@@ -190,6 +191,7 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     m_radioTimeDialog(this),
     m_cesium(nullptr)
 {
+    m_feature = feature;
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/feature/map/readme.md";
     RollupContents *rollupContents = getRollupContents();
@@ -301,6 +303,12 @@ MapGUI::~MapGUI()
         delete m_webServer;
     }
     delete ui;
+}
+
+void MapGUI::setWorkspaceIndex(int index)
+{
+    m_settings.m_workspaceIndex = index;
+    m_feature->setWorkspaceIndex(index);
 }
 
 // Update a map item or image

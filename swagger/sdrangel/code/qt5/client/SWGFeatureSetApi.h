@@ -24,6 +24,7 @@
 #include "SWGFeatureSettings.h"
 #include "SWGPresetIdentifier.h"
 #include "SWGSuccessResponse.h"
+#include "SWGWorkspaceInfo.h"
 
 #include <QObject>
 
@@ -51,6 +52,8 @@ public:
     void featuresetFeatureRunPost(qint32 feature_index);
     void featuresetFeatureSettingsGet(qint32 feature_index);
     void featuresetFeatureSettingsPatch(qint32 feature_index, SWGFeatureSettings& body);
+    void featuresetFeatureWorkspaceGet(qint32 feature_index);
+    void featuresetFeatureWorkspacePut(qint32 feature_index, SWGWorkspaceInfo& body);
     void featuresetGet();
     void featuresetPresetPatch(SWGFeaturePresetIdentifier& body);
     void featuresetPresetPost(SWGFeaturePresetIdentifier& body);
@@ -67,6 +70,8 @@ private:
     void featuresetFeatureRunPostCallback (SWGHttpRequestWorker * worker);
     void featuresetFeatureSettingsGetCallback (SWGHttpRequestWorker * worker);
     void featuresetFeatureSettingsPatchCallback (SWGHttpRequestWorker * worker);
+    void featuresetFeatureWorkspaceGetCallback (SWGHttpRequestWorker * worker);
+    void featuresetFeatureWorkspacePutCallback (SWGHttpRequestWorker * worker);
     void featuresetGetCallback (SWGHttpRequestWorker * worker);
     void featuresetPresetPatchCallback (SWGHttpRequestWorker * worker);
     void featuresetPresetPostCallback (SWGHttpRequestWorker * worker);
@@ -83,6 +88,8 @@ signals:
     void featuresetFeatureRunPostSignal(SWGDeviceState* summary);
     void featuresetFeatureSettingsGetSignal(SWGFeatureSettings* summary);
     void featuresetFeatureSettingsPatchSignal(SWGFeatureSettings* summary);
+    void featuresetFeatureWorkspaceGetSignal(SWGWorkspaceInfo* summary);
+    void featuresetFeatureWorkspacePutSignal(SWGSuccessResponse* summary);
     void featuresetGetSignal(SWGFeatureSet* summary);
     void featuresetPresetPatchSignal(SWGFeaturePresetIdentifier* summary);
     void featuresetPresetPostSignal(SWGPresetIdentifier* summary);
@@ -98,6 +105,8 @@ signals:
     void featuresetFeatureRunPostSignalE(SWGDeviceState* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void featuresetFeatureSettingsGetSignalE(SWGFeatureSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void featuresetFeatureSettingsPatchSignalE(SWGFeatureSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void featuresetFeatureWorkspaceGetSignalE(SWGWorkspaceInfo* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void featuresetFeatureWorkspacePutSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void featuresetGetSignalE(SWGFeatureSet* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void featuresetPresetPatchSignalE(SWGFeaturePresetIdentifier* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void featuresetPresetPostSignalE(SWGPresetIdentifier* summary, QNetworkReply::NetworkError error_type, QString& error_str);
@@ -113,6 +122,8 @@ signals:
     void featuresetFeatureRunPostSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void featuresetFeatureSettingsGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void featuresetFeatureSettingsPatchSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void featuresetFeatureWorkspaceGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void featuresetFeatureWorkspacePutSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void featuresetGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void featuresetPresetPatchSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void featuresetPresetPostSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);

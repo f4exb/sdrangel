@@ -37,6 +37,7 @@ namespace SWGSDRangel
     class SWGChannelSettings;
     class SWGChannelReport;
     class SWGChannelActions;
+    class SWGWorkspaceInfo;
 }
 
 class SDRBASE_API ChannelAPI : public QObject {
@@ -118,6 +119,17 @@ public:
     {
         (void) query;
         (void) channelActionsKeys;
+        errorMessage = "Not implemented"; return 501;
+    }
+
+    /**
+     * API adapter for the channel UI workspace GET requests
+     */
+    virtual int webapiWorkspaceGet(
+            SWGSDRangel::SWGWorkspaceInfo& query,
+            QString& errorMessage)
+    {
+        (void) query;
         errorMessage = "Not implemented"; return 501;
     }
 

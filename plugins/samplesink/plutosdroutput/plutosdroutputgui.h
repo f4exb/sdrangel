@@ -53,7 +53,6 @@ protected:
 
 private:
     Ui::PlutoSDROutputGUI* ui;
-    DeviceUISet* m_deviceUISet;
     PlutoSDROutputSettings m_settings;
     bool m_sampleRateMode; //!< true: device, false: base band sample rate update mode
     bool m_forceSettings;

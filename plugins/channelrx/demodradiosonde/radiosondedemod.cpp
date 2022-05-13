@@ -29,6 +29,7 @@
 #include <complex.h>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGChannelReport.h"
 
 #include "dsp/dspengine.h"
@@ -436,6 +437,15 @@ int RadiosondeDemod::webapiSettingsGet(
     response.setRadiosondeDemodSettings(new SWGSDRangel::SWGRadiosondeDemodSettings());
     response.getRadiosondeDemodSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int RadiosondeDemod::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

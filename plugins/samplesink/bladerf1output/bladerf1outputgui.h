@@ -52,7 +52,6 @@ protected:
 private:
 	Ui::Bladerf1OutputGui* ui;
 
-	DeviceUISet* m_deviceUISet;
 	bool m_doApplySettings;
 	bool m_forceSettings;
 	BladeRF1OutputSettings m_settings;

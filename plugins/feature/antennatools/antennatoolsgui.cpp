@@ -59,6 +59,7 @@ bool AntennaToolsGUI::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
+        m_feature->setWorkspaceIndex(m_settings.m_workspaceIndex);
         displaySettings();
         applySettings(true);
         return true;
@@ -133,6 +134,7 @@ AntennaToolsGUI::AntennaToolsGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     m_doApplySettings(true),
     m_deviceSets(0)
 {
+    m_feature = feature;
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/feature/antennatools/readme.md";
     RollupContents *rollupContents = getRollupContents();
@@ -161,6 +163,12 @@ AntennaToolsGUI::AntennaToolsGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
 AntennaToolsGUI::~AntennaToolsGUI()
 {
     delete ui;
+}
+
+void AntennaToolsGUI::setWorkspaceIndex(int index)
+{
+    m_settings.m_workspaceIndex = index;
+    m_feature->setWorkspaceIndex(index);
 }
 
 void AntennaToolsGUI::blockApplySettings(bool block)

@@ -36,6 +36,7 @@
 #include "dsp/dspdevicesinkengine.h"
 #include "dsp/dspdevicemimoengine.h"
 #include "dsp/dspengine.h"
+#include "dsp/spectrumvis.h"
 #include "plugin/pluginapi.h"
 #include "plugin/pluginmanager.h"
 #include "channel/channelapi.h"
@@ -68,6 +69,7 @@
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
 #include "SWGDeviceActions.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGChannelsDetail.h"
 #include "SWGChannelSettings.h"
 #include "SWGChannelReport.h"
@@ -2254,6 +2256,48 @@ int WebAPIAdapter::devicesetSpectrumServerDelete(
     }
 }
 
+int WebAPIAdapter::devicesetSpectrumWorkspaceGet(
+        int deviceSetIndex,
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
+    {
+        const DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
+        response.setIndex(deviceSet->m_spectrumVis->getWorkspaceIndex());
+        return 200;
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+        return 404;
+    }
+}
+
+int WebAPIAdapter::devicesetSpectrumWorkspacePut(
+        int deviceSetIndex,
+        SWGSDRangel::SWGWorkspaceInfo& query,
+        SWGSDRangel::SWGSuccessResponse& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
+    {
+        int workspaceIndex = query.getIndex();
+        MainCore::MsgMoveMainSpectrumUIToWorkspace *msg = MainCore::MsgMoveMainSpectrumUIToWorkspace::create(deviceSetIndex, workspaceIndex);
+        m_mainCore->m_mainMessageQueue->push(msg);
+        response.init();
+        *response.getMessage() = QString("Message to move a main spectrum to workspace (MsgMoveMainSpectrumUIToWorkspace) was submitted successfully");
+        return 202;
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+        return 404;
+    }
+}
+
 int WebAPIAdapter::devicesetDevicePut(
         int deviceSetIndex,
         SWGSDRangel::SWGDeviceListItem& query,
@@ -2505,6 +2549,47 @@ int WebAPIAdapter::devicesetDeviceActionsPost(
     }
     else
     {
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+        return 404;
+    }
+}
+
+int WebAPIAdapter::devicesetDeviceWorkspaceGet(
+        int deviceSetIndex,
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
+    {
+        response.setIndex(m_mainCore->m_deviceSets[deviceSetIndex]->m_deviceAPI->getWorkspaceIndex());
+        return 200;
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+        return 404;
+    }
+}
+
+int WebAPIAdapter::devicesetDeviceWorkspacePut(
+        int deviceSetIndex,
+        SWGSDRangel::SWGWorkspaceInfo& query,
+        SWGSDRangel::SWGSuccessResponse& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
+    {
+        int workspaceIndex = query.getIndex();
+        MainCore::MsgMoveDeviceUIToWorkspace *msg = MainCore::MsgMoveDeviceUIToWorkspace::create(deviceSetIndex, workspaceIndex);
+        m_mainCore->m_mainMessageQueue->push(msg);
+        response.init();
+        *response.getMessage() = QString("Message to move a device UI to workspace (MsgMoveDeviceUIToWorkspace) was submitted successfully");
+        return 202;
+    }
+    else
+    {
+        error.init();
         *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
         return 404;
     }
@@ -3380,6 +3465,129 @@ int WebAPIAdapter::devicesetChannelActionsPost(
     }
 }
 
+int WebAPIAdapter::devicesetChannelWorkspaceGet(
+        int deviceSetIndex,
+        int channelIndex,
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    error.init();
+
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
+    {
+        DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
+
+        if (deviceSet->m_deviceSourceEngine) // Single Rx
+        {
+            ChannelAPI *channelAPI = deviceSet->m_deviceAPI->getChanelSinkAPIAt(channelIndex);
+
+            if (channelAPI == nullptr)
+            {
+                *error.getMessage() = QString("There is no channel with index %1").arg(channelIndex);
+                return 404;
+            }
+            else
+            {
+                return channelAPI->webapiWorkspaceGet(response, *error.getMessage());
+            }
+        }
+        else if (deviceSet->m_deviceSinkEngine) // Single Tx
+        {
+            ChannelAPI *channelAPI = deviceSet->m_deviceAPI->getChanelSourceAPIAt(channelIndex);
+
+            if (channelAPI == 0)
+            {
+                *error.getMessage() = QString("There is no channel with index %1").arg(channelIndex);
+                return 404;
+            }
+            else
+            {
+                return channelAPI->webapiWorkspaceGet(response, *error.getMessage());
+            }
+        }
+        else if (deviceSet->m_deviceMIMOEngine) // MIMO
+        {
+            int nbSinkChannels = deviceSet->m_deviceAPI->getNbSinkChannels();
+            int nbSourceChannels = deviceSet->m_deviceAPI->getNbSourceChannels();
+            int nbMIMOChannels = deviceSet->m_deviceAPI->getNbMIMOChannels();
+            ChannelAPI *channelAPI = nullptr;
+
+            if (channelIndex < nbSinkChannels)
+            {
+                channelAPI = deviceSet->m_deviceAPI->getChanelSinkAPIAt(channelIndex);
+            }
+            else if (channelIndex < nbSinkChannels + nbSourceChannels)
+            {
+                channelAPI = deviceSet->m_deviceAPI->getChanelSourceAPIAt(channelIndex - nbSinkChannels);
+            }
+            else if (channelIndex < nbSinkChannels + nbSourceChannels + nbMIMOChannels)
+            {
+                channelAPI = deviceSet->m_deviceAPI->getMIMOChannelAPIAt(channelIndex - nbSinkChannels - nbSourceChannels);
+            }
+            else
+            {
+                *error.getMessage() = QString("There is no channel with index %1").arg(channelIndex);
+                return 404;
+            }
+
+            if (channelAPI)
+            {
+                return channelAPI->webapiWorkspaceGet(response, *error.getMessage());
+            }
+            else
+            {
+                *error.getMessage() = QString("There is no channel with index %1").arg(channelIndex);
+                return 404;
+            }
+        }
+        else
+        {
+            *error.getMessage() = QString("DeviceSet error");
+            return 500;
+        }
+    }
+    else
+    {
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+        return 404;
+    }
+}
+
+int WebAPIAdapter::devicesetChannelWorkspacePut(
+            int deviceSetIndex,
+            int channelIndex,
+            SWGSDRangel::SWGWorkspaceInfo& query,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error)
+{
+    error.init();
+
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
+    {
+        DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
+
+        if ((channelIndex >= 0) && (channelIndex < deviceSet->getNumberOfChannels()))
+        {
+            int workspaceIndex = query.getIndex();
+            MainCore::MsgMoveChannelUIToWorkspace *msg = MainCore::MsgMoveChannelUIToWorkspace::create(deviceSetIndex, channelIndex, workspaceIndex);
+            m_mainCore->m_mainMessageQueue->push(msg);
+            response.init();
+            *response.getMessage() = QString("Message to move a channel UI to workspace (MsgMoveChannelUIToWorkspace) was submitted successfully");
+            return 202;
+        }
+        else
+        {
+            *error.getMessage() = QString("There is no channel with index %1 in device set %2").arg(channelIndex).arg(deviceSetIndex);
+            return 404;
+        }
+    }
+    else
+    {
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+        return 404;
+    }
+}
+
 int WebAPIAdapter::devicesetChannelSettingsPutPatch(
         int deviceSetIndex,
         int channelIndex,
@@ -3958,6 +4166,49 @@ int WebAPIAdapter::featuresetFeatureActionsPost(
     else
     {
         *error.getMessage() = QString("There is no feature set with index %1").arg(featureIndex);
+        return 404;
+    }
+}
+
+int WebAPIAdapter::featuresetFeatureWorkspaceGet(
+        int featureIndex,
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    if ((featureIndex >= 0) && (featureIndex < (int) m_mainCore->m_featureSets.size()))
+    {
+        FeatureSet *featureSet = m_mainCore->m_featureSets[0];
+        Feature *feature = featureSet->getFeatureAt(featureIndex);
+        response.setIndex(feature->getWorkspaceIndex());
+        return 200;
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no feature with index %1").arg(featureIndex);
+        return 404;
+    }
+}
+
+int WebAPIAdapter::featuresetFeatureWorkspacePut(
+        int featureIndex,
+        SWGSDRangel::SWGWorkspaceInfo& query,
+        SWGSDRangel::SWGSuccessResponse& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    if ((featureIndex >= 0) && (featureIndex < (int) m_mainCore->m_featureSets.size()))
+    {
+        int workspaceIndex = query.getIndex();
+        MainCore::MsgMoveFeatureUIToWorkspace *msg = MainCore::MsgMoveFeatureUIToWorkspace::create(featureIndex, workspaceIndex);
+        m_mainCore->m_mainMessageQueue->push(msg);
+        response.init();
+        *response.getMessage() = QString("Message to move a feature UI to workspace (MsgMoveFeatureUIToWorkspace) was submitted successfully");
+        return 202;
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no feature with index %1").arg(featureIndex);
         return 404;
     }
 }

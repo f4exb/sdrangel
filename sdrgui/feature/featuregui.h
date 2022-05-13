@@ -32,6 +32,7 @@ class QPushButton;
 class QVBoxLayout;
 class QHBoxLayout;
 class QSizeGrip;
+class Feature;
 
 class SDRGUI_API FeatureGUI : public QMdiSubWindow
 {
@@ -74,6 +75,7 @@ protected:
     void resetContextMenuType() { m_contextMenuType = ContextMenuNone; }
     int getAdditionalHeight() const { return 22 + 22; } // height of top and bottom bars
 
+    Feature *m_feature;
     int m_featureIndex;
     QString m_helpURL;
     RollupContents m_rollupContents;

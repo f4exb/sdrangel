@@ -34,12 +34,12 @@
 AudioOutputGui::AudioOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     DeviceGUI(parent),
     ui(new Ui::AudioOutputGui),
-    m_deviceUISet(deviceUISet),
     m_doApplySettings(true),
     m_forceSettings(true),
     m_settings(),
     m_centerFrequency(0)
 {
+    m_deviceUISet = deviceUISet;
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_audioOutput = (AudioOutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
 

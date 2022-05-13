@@ -22,6 +22,7 @@
 #include <QThread>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGFreeDVDemodSettings.h"
 #include "SWGChannelReport.h"
 #include "SWGFreeDVDemodReport.h"
@@ -306,6 +307,15 @@ int FreeDVDemod::webapiSettingsGet(
     response.setFreeDvDemodSettings(new SWGSDRangel::SWGFreeDVDemodSettings());
     response.getFreeDvDemodSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int FreeDVDemod::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

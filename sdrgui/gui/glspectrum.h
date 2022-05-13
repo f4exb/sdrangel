@@ -170,6 +170,7 @@ public:
         m_displayStreamIndex = streamIndex;
     }
     void setSpectrumVis(SpectrumVis *spectrumVis) { m_spectrumVis = spectrumVis; }
+    SpectrumVis *getSpectrumVis() { return m_spectrumVis; }
     const QList<SpectrumHistogramMarker>& getHistogramMarkers() const { return m_histogramMarkers; }
     QList<SpectrumHistogramMarker>& getHistogramMarkers() { return m_histogramMarkers; }
     void setHistogramMarkers(const QList<SpectrumHistogramMarker>& histogramMarkers);

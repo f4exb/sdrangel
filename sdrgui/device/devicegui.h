@@ -37,6 +37,8 @@ class QPushButton;
 class QVBoxLayout;
 class QHBoxLayout;
 class QSizeGrip;
+class DeviceUISet;
+
 class SDRGUI_API DeviceGUI : public QMdiSubWindow {
     Q_OBJECT
 public:
@@ -60,7 +62,7 @@ public:
 	virtual void resetToDefaults() = 0;
 	virtual QByteArray serialize() const = 0;
 	virtual bool deserialize(const QByteArray& data) = 0;
-    void setWorkspaceIndex(int index) { m_workspaceIndex = index; }
+    void setWorkspaceIndex(int index);
     int getWorkspaceIndex() const { return m_workspaceIndex; }
 
 	virtual MessageQueue* getInputMessageQueue() = 0;
@@ -85,6 +87,7 @@ protected:
     void resetContextMenuType() { m_contextMenuType = ContextMenuNone; }
     int getAdditionalHeight() const { return 22 + 22; }
 
+    DeviceUISet* m_deviceUISet;
     DeviceType m_deviceType;
     int m_deviceSetIndex;
     int m_workspaceIndex;

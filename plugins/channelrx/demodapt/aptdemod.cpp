@@ -29,6 +29,7 @@
 #include <complex.h>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGAPTDemodSettings.h"
 #include "SWGChannelReport.h"
 #include "SWGChannelActions.h"
@@ -417,6 +418,15 @@ int APTDemod::webapiSettingsGet(
     response.setAptDemodSettings(new SWGSDRangel::SWGAPTDemodSettings());
     response.getAptDemodSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int APTDemod::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

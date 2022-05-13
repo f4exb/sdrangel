@@ -112,6 +112,7 @@ bool AISGUI::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
+        m_feature->setWorkspaceIndex(m_settings.m_workspaceIndex);
         displaySettings();
         applySettings(true);
         return true;
@@ -189,6 +190,7 @@ AISGUI::AISGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     m_doApplySettings(true),
     m_lastFeatureState(0)
 {
+    m_feature = feature;
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/feature/ais/readme.md";
     RollupContents *rollupContents = getRollupContents();
@@ -239,6 +241,12 @@ AISGUI::~AISGUI()
 {
     qDeleteAll(m_vessels);
     delete ui;
+}
+
+void AISGUI::setWorkspaceIndex(int index)
+{
+    m_settings.m_workspaceIndex = index;
+    m_feature->setWorkspaceIndex(index);
 }
 
 void AISGUI::blockApplySettings(bool block)

@@ -24,6 +24,7 @@
 #include <QBuffer>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
@@ -365,6 +366,15 @@ int LocalSink::webapiSettingsGet(
     response.setLocalSinkSettings(new SWGSDRangel::SWGLocalSinkSettings());
     response.getLocalSinkSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int LocalSink::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

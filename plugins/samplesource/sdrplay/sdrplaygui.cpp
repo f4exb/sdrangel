@@ -36,10 +36,10 @@
 SDRPlayGui::SDRPlayGui(DeviceUISet *deviceUISet, QWidget* parent) :
     DeviceGUI(parent),
     ui(new Ui::SDRPlayGui),
-    m_deviceUISet(deviceUISet),
     m_doApplySettings(true),
     m_forceSettings(true)
 {
+    m_deviceUISet = deviceUISet;
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_sampleSource = (SDRPlayInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 

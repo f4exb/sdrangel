@@ -27,6 +27,7 @@
 #include <complex.h>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGVORDemodSettings.h"
 #include "SWGChannelReport.h"
 #include "SWGVORDemodReport.h"
@@ -349,6 +350,15 @@ int VORDemod::webapiSettingsGet(
     response.setVorDemodSettings(new SWGSDRangel::SWGVORDemodSettings());
     response.getVorDemodSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int VORDemod::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

@@ -31,6 +31,7 @@
 #include <complex.h>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGChannelReport.h"
 #include "SWGChannelActions.h"
 #include "SWGRadioAstronomyActions.h"
@@ -837,6 +838,15 @@ int RadioAstronomy::webapiSettingsGet(
     response.setRadioAstronomySettings(new SWGSDRangel::SWGRadioAstronomySettings());
     response.getRadioAstronomySettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int RadioAstronomy::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

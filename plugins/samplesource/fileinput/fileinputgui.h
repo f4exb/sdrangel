@@ -53,7 +53,6 @@ protected:
 private:
 	Ui::FileInputGUI* ui;
 
-	DeviceUISet* m_deviceUISet;
 	FileInputSettings m_settings;
 	bool m_doApplySettings;
 	QTimer m_statusTimer;

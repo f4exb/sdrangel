@@ -52,7 +52,6 @@ protected:
 private:
     Ui::XTRXInputGUI* ui;
 
-    DeviceUISet* m_deviceUISet;
     XTRXInput* m_XTRXInput; //!< Same object as above but gives easy access to XTRXInput methods and attributes that are used intensively
     XTRXInputSettings m_settings;
     bool m_sampleRateMode; //!< true: device, false: base band sample rate update mode

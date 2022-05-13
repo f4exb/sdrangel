@@ -53,7 +53,6 @@ protected:
 private:
     Ui::AudioInputGui* ui;
 
-    DeviceUISet* m_deviceUISet;
     bool m_doApplySettings;
     bool m_forceSettings;
     AudioInputSettings m_settings;

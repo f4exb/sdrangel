@@ -60,6 +60,7 @@ bool GS232ControllerGUI::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
+        m_feature->setWorkspaceIndex(m_settings.m_workspaceIndex);
         displaySettings();
         applySettings(true);
         return true;
@@ -149,6 +150,7 @@ GS232ControllerGUI::GS232ControllerGUI(PluginAPI* pluginAPI, FeatureUISet *featu
     m_lastFeatureState(0),
     m_lastOnTarget(false)
 {
+    m_feature = feature;
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/feature/gs232controller/readme.md";
     RollupContents *rollupContents = getRollupContents();
@@ -181,6 +183,12 @@ GS232ControllerGUI::GS232ControllerGUI(PluginAPI* pluginAPI, FeatureUISet *featu
 GS232ControllerGUI::~GS232ControllerGUI()
 {
     delete ui;
+}
+
+void GS232ControllerGUI::setWorkspaceIndex(int index)
+{
+    m_settings.m_workspaceIndex = index;
+    m_feature->setWorkspaceIndex(index);
 }
 
 void GS232ControllerGUI::blockApplySettings(bool block)

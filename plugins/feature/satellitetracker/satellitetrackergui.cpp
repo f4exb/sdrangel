@@ -73,6 +73,7 @@ bool SatelliteTrackerGUI::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
+        m_feature->setWorkspaceIndex(m_settings.m_workspaceIndex);
         updateSelectedSats();
         displaySettings();
         qDebug() << " deserialize " << m_settings.m_satellites;
@@ -259,6 +260,7 @@ SatelliteTrackerGUI::SatelliteTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *fea
     m_polarChart(nullptr),
     m_geostationarySatVisible(false)
 {
+    m_feature = feature;
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/feature/satellitetracker/readme.md";
     RollupContents *rollupContents = getRollupContents();
@@ -325,6 +327,12 @@ SatelliteTrackerGUI::SatelliteTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *fea
 SatelliteTrackerGUI::~SatelliteTrackerGUI()
 {
     delete ui;
+}
+
+void SatelliteTrackerGUI::setWorkspaceIndex(int index)
+{
+    m_settings.m_workspaceIndex = index;
+    m_feature->setWorkspaceIndex(index);
 }
 
 void SatelliteTrackerGUI::blockApplySettings(bool block)

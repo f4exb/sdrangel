@@ -431,6 +431,121 @@ SWGDeviceSetApi::devicesetChannelSettingsPutCallback(SWGHttpRequestWorker * work
 }
 
 void
+SWGDeviceSetApi::devicesetChannelWorkspaceGet(qint32 device_set_index, qint32 channel_index) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/workspace");
+
+    QString device_set_indexPathParam("{"); device_set_indexPathParam.append("deviceSetIndex").append("}");
+    fullPath.replace(device_set_indexPathParam, stringValue(device_set_index));
+    QString channel_indexPathParam("{"); channel_indexPathParam.append("channelIndex").append("}");
+    fullPath.replace(channel_indexPathParam, stringValue(channel_index));
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "GET");
+
+
+
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGDeviceSetApi::devicesetChannelWorkspaceGetCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGDeviceSetApi::devicesetChannelWorkspaceGetCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGWorkspaceInfo* output = static_cast<SWGWorkspaceInfo*>(create(json, QString("SWGWorkspaceInfo")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit devicesetChannelWorkspaceGetSignal(output);
+    } else {
+        emit devicesetChannelWorkspaceGetSignalE(output, error_type, error_str);
+        emit devicesetChannelWorkspaceGetSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
+SWGDeviceSetApi::devicesetChannelWorkspacePut(qint32 device_set_index, qint32 channel_index, SWGWorkspaceInfo& body) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/workspace");
+
+    QString device_set_indexPathParam("{"); device_set_indexPathParam.append("deviceSetIndex").append("}");
+    fullPath.replace(device_set_indexPathParam, stringValue(device_set_index));
+    QString channel_indexPathParam("{"); channel_indexPathParam.append("channelIndex").append("}");
+    fullPath.replace(channel_indexPathParam, stringValue(channel_index));
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "PUT");
+
+
+    
+    QString output = body.asJson();
+    input.request_body.append(output.toUtf8());
+    
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGDeviceSetApi::devicesetChannelWorkspacePutCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGDeviceSetApi::devicesetChannelWorkspacePutCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGSuccessResponse* output = static_cast<SWGSuccessResponse*>(create(json, QString("SWGSuccessResponse")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit devicesetChannelWorkspacePutSignal(output);
+    } else {
+        emit devicesetChannelWorkspacePutSignalE(output, error_type, error_str);
+        emit devicesetChannelWorkspacePutSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
 SWGDeviceSetApi::devicesetChannelsReportGet(qint32 device_set_index) {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}/channels/report");
@@ -1163,6 +1278,117 @@ SWGDeviceSetApi::devicesetDeviceSubsystemRunPostCallback(SWGHttpRequestWorker * 
 }
 
 void
+SWGDeviceSetApi::devicesetDeviceWorkspaceGet(qint32 device_set_index) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}/device/workspace");
+
+    QString device_set_indexPathParam("{"); device_set_indexPathParam.append("deviceSetIndex").append("}");
+    fullPath.replace(device_set_indexPathParam, stringValue(device_set_index));
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "GET");
+
+
+
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGDeviceSetApi::devicesetDeviceWorkspaceGetCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGDeviceSetApi::devicesetDeviceWorkspaceGetCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGWorkspaceInfo* output = static_cast<SWGWorkspaceInfo*>(create(json, QString("SWGWorkspaceInfo")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit devicesetDeviceWorkspaceGetSignal(output);
+    } else {
+        emit devicesetDeviceWorkspaceGetSignalE(output, error_type, error_str);
+        emit devicesetDeviceWorkspaceGetSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
+SWGDeviceSetApi::devicesetDeviceWorkspacePut(qint32 device_set_index, SWGWorkspaceInfo& body) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}/device/workspace");
+
+    QString device_set_indexPathParam("{"); device_set_indexPathParam.append("deviceSetIndex").append("}");
+    fullPath.replace(device_set_indexPathParam, stringValue(device_set_index));
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "PUT");
+
+
+    
+    QString output = body.asJson();
+    input.request_body.append(output.toUtf8());
+    
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGDeviceSetApi::devicesetDeviceWorkspacePutCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGDeviceSetApi::devicesetDeviceWorkspacePutCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGSuccessResponse* output = static_cast<SWGSuccessResponse*>(create(json, QString("SWGSuccessResponse")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit devicesetDeviceWorkspacePutSignal(output);
+    } else {
+        emit devicesetDeviceWorkspacePutSignalE(output, error_type, error_str);
+        emit devicesetDeviceWorkspacePutSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
 SWGDeviceSetApi::devicesetFocusPatch(qint32 device_set_index) {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}/focus");
@@ -1597,6 +1823,117 @@ SWGDeviceSetApi::devicesetSpectrumSettingsPutCallback(SWGHttpRequestWorker * wor
     } else {
         emit devicesetSpectrumSettingsPutSignalE(output, error_type, error_str);
         emit devicesetSpectrumSettingsPutSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
+SWGDeviceSetApi::devicesetSpectrumWorkspaceGet(qint32 device_set_index) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}/spectrum/workspace");
+
+    QString device_set_indexPathParam("{"); device_set_indexPathParam.append("deviceSetIndex").append("}");
+    fullPath.replace(device_set_indexPathParam, stringValue(device_set_index));
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "GET");
+
+
+
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGDeviceSetApi::devicesetSpectrumWorkspaceGetCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGDeviceSetApi::devicesetSpectrumWorkspaceGetCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGWorkspaceInfo* output = static_cast<SWGWorkspaceInfo*>(create(json, QString("SWGWorkspaceInfo")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit devicesetSpectrumWorkspaceGetSignal(output);
+    } else {
+        emit devicesetSpectrumWorkspaceGetSignalE(output, error_type, error_str);
+        emit devicesetSpectrumWorkspaceGetSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
+SWGDeviceSetApi::devicesetSpectrumWorkspacePut(qint32 device_set_index, SWGWorkspaceInfo& body) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}/spectrum/workspace");
+
+    QString device_set_indexPathParam("{"); device_set_indexPathParam.append("deviceSetIndex").append("}");
+    fullPath.replace(device_set_indexPathParam, stringValue(device_set_index));
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "PUT");
+
+
+    
+    QString output = body.asJson();
+    input.request_body.append(output.toUtf8());
+    
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGDeviceSetApi::devicesetSpectrumWorkspacePutCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGDeviceSetApi::devicesetSpectrumWorkspacePutCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGSuccessResponse* output = static_cast<SWGSuccessResponse*>(create(json, QString("SWGSuccessResponse")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit devicesetSpectrumWorkspacePutSignal(output);
+    } else {
+        emit devicesetSpectrumWorkspacePutSignalE(output, error_type, error_str);
+        emit devicesetSpectrumWorkspacePutSignalEFull(worker, error_type, error_str);
     }
 }
 

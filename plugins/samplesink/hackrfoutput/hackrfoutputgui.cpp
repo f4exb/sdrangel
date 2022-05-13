@@ -37,7 +37,6 @@
 HackRFOutputGui::HackRFOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	DeviceGUI(parent),
 	ui(new Ui::HackRFOutputGui),
-	m_deviceUISet(deviceUISet),
 	m_forceSettings(true),
 	m_settings(),
     m_sampleRateMode(true),
@@ -45,6 +44,7 @@ HackRFOutputGui::HackRFOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_lastEngineState(DeviceAPI::StNotStarted),
 	m_doApplySettings(true)
 {
+    m_deviceUISet = deviceUISet;
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_deviceSampleSink = (HackRFOutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
 

@@ -321,6 +321,17 @@ public:
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int devicesetSpectrumWorkspaceGet(
+            int deviceSetIndex,
+            SWGSDRangel::SWGWorkspaceInfo& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetSpectrumWorkspacePut(
+            int deviceSetIndex,
+            SWGSDRangel::SWGWorkspaceInfo& query,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
     virtual int devicesetDevicePut(
             int deviceSetIndex,
             SWGSDRangel::SWGDeviceListItem& query,
@@ -336,6 +347,17 @@ public:
             int deviceSetIndex,
             const QStringList& deviceActionsKeys,
             SWGSDRangel::SWGDeviceActions& query,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetDeviceWorkspaceGet(
+            int deviceSetIndex,
+            SWGSDRangel::SWGWorkspaceInfo& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetDeviceWorkspacePut(
+            int deviceSetIndex,
+            SWGSDRangel::SWGWorkspaceInfo& query,
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
@@ -429,6 +451,19 @@ public:
             SWGSDRangel::SWGChannelReport& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int devicesetChannelWorkspaceGet(
+            int deviceSetIndex,
+            int channelIndex,
+            SWGSDRangel::SWGWorkspaceInfo& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetChannelWorkspacePut(
+            int deviceSetIndex,
+            int channelIndex,
+            SWGSDRangel::SWGWorkspaceInfo& query,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
     virtual int featuresetGet(
             int deviceSetIndex,
             SWGSDRangel::SWGFeatureSet& response,
@@ -504,6 +539,17 @@ public:
             int featureIndex,
             const QStringList& featureActionsKeys,
             SWGSDRangel::SWGFeatureActions& query,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int featuresetFeatureWorkspaceGet(
+            int featureIndex,
+            SWGSDRangel::SWGWorkspaceInfo& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int featuresetFeatureWorkspacePut(
+            int featureIndex,
+            SWGSDRangel::SWGWorkspaceInfo& query,
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 

@@ -43,7 +43,6 @@
 SigMFFileInputGUI::SigMFFileInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
 	DeviceGUI(parent),
 	ui(new Ui::SigMFFileInputGUI),
-	m_deviceUISet(deviceUISet),
 	m_settings(),
     m_currentTrackIndex(0),
 	m_doApplySettings(true),
@@ -61,6 +60,7 @@ SigMFFileInputGUI::SigMFFileInputGUI(DeviceUISet *deviceUISet, QWidget* parent) 
 	m_enableFullNavTime(false),
 	m_lastEngineState(DeviceAPI::StNotStarted)
 {
+    m_deviceUISet = deviceUISet;
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/samplesource/sigmffileinput/readme.md";
     QWidget *contents = getContents();

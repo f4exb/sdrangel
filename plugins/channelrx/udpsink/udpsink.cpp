@@ -24,6 +24,7 @@
 #include <QThread>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGUDPSinkSettings.h"
 #include "SWGChannelReport.h"
 #include "SWGUDPSinkReport.h"
@@ -323,6 +324,15 @@ int UDPSink::webapiSettingsGet(
     response.setUdpSinkSettings(new SWGSDRangel::SWGUDPSinkSettings());
     response.getUdpSinkSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int UDPSink::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

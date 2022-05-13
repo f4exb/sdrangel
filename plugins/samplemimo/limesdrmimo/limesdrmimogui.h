@@ -51,7 +51,6 @@ protected:
 private:
 	Ui::LimeSDRMIMOGUI* ui;
 
-	DeviceUISet* m_deviceUISet;
 	LimeSDRMIMOSettings m_settings;
     bool m_rxElseTx;   //!< Which side is being dealt with
     int m_streamIndex; //!< Current stream index being dealt with

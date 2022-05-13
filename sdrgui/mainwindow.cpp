@@ -1754,6 +1754,66 @@ bool MainWindow::handleMessage(const Message& cmd)
         deleteFeature(notif.getFeatureSetIndex(), notif.getFeatureIndex());
         return true;
     }
+    else if (MainCore::MsgMoveDeviceUIToWorkspace::match(cmd))
+    {
+        MainCore::MsgMoveDeviceUIToWorkspace& notif = (MainCore::MsgMoveDeviceUIToWorkspace&) cmd;
+        int deviceSetIndex = notif.getDeviceSetIndex();
+
+        if (deviceSetIndex < (int) m_deviceUIs.size())
+        {
+            DeviceUISet *deviceUISet = m_deviceUIs[deviceSetIndex];
+            DeviceGUI *gui = deviceUISet->m_deviceGUI;
+            deviceMove(gui, notif.getWorkspaceIndex());
+        }
+
+        return true;
+    }
+    else if (MainCore::MsgMoveMainSpectrumUIToWorkspace::match(cmd))
+    {
+        MainCore::MsgMoveMainSpectrumUIToWorkspace& notif = (MainCore::MsgMoveMainSpectrumUIToWorkspace&) cmd;
+        int deviceSetIndex = notif.getDeviceSetIndex();
+
+        if (deviceSetIndex < (int) m_deviceUIs.size())
+        {
+            DeviceUISet *deviceUISet = m_deviceUIs[deviceSetIndex];
+            MainSpectrumGUI *gui = deviceUISet->m_mainSpectrumGUI;
+            mainSpectrumMove(gui, notif.getWorkspaceIndex());
+        }
+
+        return true;
+    }
+    else if (MainCore::MsgMoveFeatureUIToWorkspace::match(cmd))
+    {
+        MainCore::MsgMoveFeatureUIToWorkspace& notif = (MainCore::MsgMoveFeatureUIToWorkspace&) cmd;
+        int featureIndex = notif.getFeatureIndex();
+
+        if (featureIndex < (int) m_featureUIs[0]->getNumberOfFeatures())
+        {
+            FeatureGUI *gui = m_featureUIs[0]->getFeatureGuiAt(featureIndex);
+            featureMove(gui, notif.getWorkspaceIndex());
+        }
+
+        return true;
+    }
+    else if (MainCore::MsgMoveChannelUIToWorkspace::match(cmd))
+    {
+        MainCore::MsgMoveChannelUIToWorkspace& notif = (MainCore::MsgMoveChannelUIToWorkspace&) cmd;
+        int deviceSetIndex = notif.getDeviceSetIndex();
+
+        if (deviceSetIndex < (int) m_deviceUIs.size())
+        {
+            int channelIndex = notif.getChannelIndex();
+            DeviceUISet *deviceUISet = m_deviceUIs[deviceSetIndex];
+
+            if (channelIndex < deviceUISet->getNumberOfChannels())
+            {
+                ChannelGUI *gui = deviceUISet->getChannelGUIAt(channelIndex);
+                channelMove(gui, notif.getWorkspaceIndex());
+            }
+        }
+
+        return true;
+    }
     else if (MainCore::MsgApplySettings::match(cmd))
     {
         applySettings();

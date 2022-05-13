@@ -51,7 +51,6 @@ protected:
 private:
 	Ui::BladeRF2MIMOGui* ui;
 
-	DeviceUISet* m_deviceUISet;
 	BladeRF2MIMOSettings m_settings;
     bool m_rxElseTx;   //!< Which side is being dealt with
     int m_streamIndex; //!< Current stream index being dealt with

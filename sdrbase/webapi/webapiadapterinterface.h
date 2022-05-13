@@ -66,6 +66,7 @@ namespace SWGSDRangel
     class SWGDeviceState;
     class SWGDeviceReport;
     class SWGDeviceActions;
+    class SWGWorkspaceInfo;
     class SWGChannelsDetail;
     class SWGChannelSettings;
     class SWGChannelReport;
@@ -1085,6 +1086,40 @@ public:
     }
 
     /**
+     * Handler of /sdrangel/deviceset/{devicesetIndex}/spectrum/workspace (GET)
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int devicesetSpectrumWorkspaceGet(
+            int deviceSetIndex,
+            SWGSDRangel::SWGWorkspaceInfo& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) deviceSetIndex;
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/deviceset/{devicesetIndex}/spectrum/workspace (GET)
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int devicesetSpectrumWorkspacePut(
+            int deviceSetIndex,
+            SWGSDRangel::SWGWorkspaceInfo& query,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) deviceSetIndex;
+        (void) query;
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
      * Handler of /sdrangel/deviceset/{devicesetIndex}/device (PUT) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
      * returns the Http status code (default 501: not implemented)
      */
@@ -1294,6 +1329,40 @@ public:
     }
 
     /**
+     * Handler of /sdrangel/deviceset/{devicesetIndex}/device/workspace (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int devicesetDeviceWorkspaceGet(
+            int deviceSetIndex,
+            SWGSDRangel::SWGWorkspaceInfo& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) deviceSetIndex;
+        (void) response;
+        error.init();
+        *error.getMessage() = QString("Function not implemented");
+        return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/deviceset/{devicesetIndex}/device/workspace (PUT) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int devicesetDeviceWorkspacePut(
+            int deviceSetIndex,
+            SWGSDRangel::SWGWorkspaceInfo& query,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) deviceSetIndex;
+        (void) query;
+        (void) response;
+        error.init();
+        *error.getMessage() = QString("Function not implemented");
+        return 501;
+    }
+
+    /**
      * Handler of /sdrangel/deviceset/{deviceSetIndex}/channel (POST) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
      * returns the Http status code (default 501: not implemented)
      */
@@ -1372,7 +1441,7 @@ public:
 
 
     /**
-     * Handler of /sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/settings (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * Handler of /sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/report (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
      * returns the Http status code (default 501: not implemented)
      */
     virtual int devicesetChannelReportGet(
@@ -1404,6 +1473,44 @@ public:
         (void) deviceSetIndex;
         (void) channelIndex;
         (void) channelActionsKeys;
+        (void) query;
+        (void) response;
+        error.init();
+        *error.getMessage() = QString("Function not implemented");
+        return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/workspace (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int devicesetChannelWorkspaceGet(
+            int deviceSetIndex,
+            int channelIndex,
+            SWGSDRangel::SWGWorkspaceInfo& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) deviceSetIndex;
+        (void) channelIndex;
+        (void) response;
+        error.init();
+        *error.getMessage() = QString("Function not implemented");
+        return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/workspace (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int devicesetChannelWorkspacePut(
+            int deviceSetIndex,
+            int channelIndex,
+            SWGSDRangel::SWGWorkspaceInfo& query,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) deviceSetIndex;
+        (void) channelIndex;
         (void) query;
         (void) response;
         error.init();
@@ -1649,6 +1756,40 @@ public:
         return 501;
     }
 
+    /**
+     * Handler of /sdrangel/featureset/feature/{featureIndex}/workspace (GET)
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int featuresetFeatureWorkspaceGet(
+            int featureIndex,
+            SWGSDRangel::SWGWorkspaceInfo& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) featureIndex;
+        (void) response;
+        error.init();
+        *error.getMessage() = QString("Function not implemented");
+        return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/featureset/feature/{featureIndex}/workspace (PUT)
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int featuresetFeatureWorkspacePut(
+            int featureIndex,
+            SWGSDRangel::SWGWorkspaceInfo& query,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) featureIndex;
+        (void) query;
+        (void) response;
+        error.init();
+        *error.getMessage() = QString("Function not implemented");
+        return 501;
+    }
+
     static QString instanceSummaryURL;
     static QString instanceConfigURL;
     static QString instanceDevicesURL;
@@ -1687,23 +1828,27 @@ public:
     static std::regex devicesetFocusURLRe;
     static std::regex devicesetSpectrumSettingsURLRe;
     static std::regex devicesetSpectrumServerURLRe;
+    static std::regex devicesetSpectrumWorkspaceURLRe;
     static std::regex devicesetDeviceURLRe;
     static std::regex devicesetDeviceSettingsURLRe;
     static std::regex devicesetDeviceRunURLRe;
     static std::regex devicesetDeviceSubsystemRunURLRe;
     static std::regex devicesetDeviceReportURLRe;
     static std::regex devicesetDeviceActionsURLRe;
+    static std::regex devicesetDeviceWorkspaceURLRe;
     static std::regex devicesetChannelURLRe;
     static std::regex devicesetChannelIndexURLRe;
     static std::regex devicesetChannelSettingsURLRe;
     static std::regex devicesetChannelReportURLRe;
     static std::regex devicesetChannelActionsURLRe;
+    static std::regex devicesetChannelWorkspaceURLRe;
     static std::regex devicesetChannelsReportURLRe;
     static std::regex featuresetFeatureIndexURLRe;
     static std::regex featuresetFeatureRunURLRe;
     static std::regex featuresetFeatureSettingsURLRe;
     static std::regex featuresetFeatureReportURLRe;
     static std::regex featuresetFeatureActionsURLRe;
+    static std::regex featuresetFeatureWorkspaceURLRe;
 };
 
 

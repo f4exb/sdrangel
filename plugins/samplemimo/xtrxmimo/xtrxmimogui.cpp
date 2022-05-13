@@ -44,7 +44,6 @@
 XTRXMIMOGUI::XTRXMIMOGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     DeviceGUI(parent),
     ui(new Ui::XTRXMIMOGUI),
-    m_deviceUISet(deviceUISet),
     m_settings(),
     m_rxElseTx(true),
     m_streamIndex(0),
@@ -65,6 +64,7 @@ XTRXMIMOGUI::XTRXMIMOGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleRateMode(true)
 {
     qDebug("XTRXMIMOGUI::XTRXMIMOGUI");
+    m_deviceUISet = deviceUISet;
     setAttribute(Qt::WA_DeleteOnClose, true);
     ui->setupUi(getContents());
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);

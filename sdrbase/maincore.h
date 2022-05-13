@@ -640,6 +640,97 @@ public:
         { }
     };
 
+    class SDRBASE_API MsgMoveDeviceUIToWorkspace : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getDeviceSetIndex() const { return m_deviceSetIndex; }
+        int getWorkspaceIndex() const { return m_workspaceIndex; }
+
+        static MsgMoveDeviceUIToWorkspace* create(int deviceSetIndex, int workspceIndex) {
+            return new MsgMoveDeviceUIToWorkspace(deviceSetIndex, workspceIndex);
+        }
+
+    private:
+        int m_deviceSetIndex;
+        int m_workspaceIndex;
+
+        MsgMoveDeviceUIToWorkspace(int deviceSetIndex, int workspceIndex) :
+            Message(),
+            m_deviceSetIndex(deviceSetIndex),
+            m_workspaceIndex(workspceIndex)
+        { }
+    };
+
+    class SDRBASE_API MsgMoveMainSpectrumUIToWorkspace : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getDeviceSetIndex() const { return m_deviceSetIndex; }
+        int getWorkspaceIndex() const { return m_workspaceIndex; }
+
+        static MsgMoveMainSpectrumUIToWorkspace* create(int deviceSetIndex, int workspceIndex) {
+            return new MsgMoveMainSpectrumUIToWorkspace(deviceSetIndex, workspceIndex);
+        }
+
+    private:
+        int m_deviceSetIndex;
+        int m_workspaceIndex;
+
+        MsgMoveMainSpectrumUIToWorkspace(int deviceSetIndex, int workspceIndex) :
+            Message(),
+            m_deviceSetIndex(deviceSetIndex),
+            m_workspaceIndex(workspceIndex)
+        { }
+    };
+
+    class SDRBASE_API MsgMoveFeatureUIToWorkspace : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getFeatureIndex() const { return m_featureIndex; }
+        int getWorkspaceIndex() const { return m_workspaceIndex; }
+
+        static MsgMoveFeatureUIToWorkspace* create(int featureIndex, int workspceIndex) {
+            return new MsgMoveFeatureUIToWorkspace(featureIndex, workspceIndex);
+        }
+
+    private:
+        int m_featureIndex;
+        int m_workspaceIndex;
+
+        MsgMoveFeatureUIToWorkspace(int featureIndex, int workspceIndex) :
+            Message(),
+            m_featureIndex(featureIndex),
+            m_workspaceIndex(workspceIndex)
+        { }
+    };
+
+    class SDRBASE_API MsgMoveChannelUIToWorkspace : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getDeviceSetIndex() const { return m_deviceSetIndex; }
+        int getChannelIndex() const { return m_channelIndex; }
+        int getWorkspaceIndex() const { return m_workspaceIndex; }
+
+        static MsgMoveChannelUIToWorkspace* create(int deviceSetIndex, int channelIndex, int workspceIndex) {
+            return new MsgMoveChannelUIToWorkspace(deviceSetIndex, channelIndex, workspceIndex);
+        }
+
+    private:
+        int m_deviceSetIndex;
+        int m_channelIndex;
+        int m_workspaceIndex;
+
+        MsgMoveChannelUIToWorkspace(int deviceSetIndex, int channelIndex, int workspceIndex) :
+            Message(),
+            m_deviceSetIndex(deviceSetIndex),
+            m_channelIndex(channelIndex),
+            m_workspaceIndex(workspceIndex)
+        { }
+    };
+
     // Message to Map feature to display an item on the map
     class SDRBASE_API MsgMapItem : public Message {
         MESSAGE_CLASS_DECLARATION

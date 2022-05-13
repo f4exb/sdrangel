@@ -24,6 +24,7 @@
 #include <QBuffer>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGChannelReport.h"
 #include "SWGChannelActions.h"
 
@@ -391,6 +392,15 @@ int SigMFFileSink::webapiSettingsGet(
     response.setSigMfFileSinkSettings(new SWGSDRangel::SWGSigMFFileSinkSettings());
     response.getSigMfFileSinkSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int SigMFFileSink::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

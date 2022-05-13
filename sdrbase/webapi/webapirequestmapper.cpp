@@ -52,6 +52,7 @@
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
 #include "SWGDeviceActions.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGChannelsDetail.h"
 #include "SWGChannelSettings.h"
 #include "SWGChannelReport.h"
@@ -198,6 +199,8 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
                 devicesetSpectrumSettingsService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetSpectrumServerURLRe)) {
                 devicesetSpectrumServerService(std::string(desc_match[1]), request, response);
+            } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetSpectrumWorkspaceURLRe)) {
+                devicesetSpectrumWorkspaceService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetDeviceSettingsURLRe)) {
                 devicesetDeviceSettingsService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetDeviceRunURLRe)) {
@@ -208,6 +211,8 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
                 devicesetDeviceReportService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetDeviceActionsURLRe)) {
                 devicesetDeviceActionsService(std::string(desc_match[1]), request, response);
+            } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetDeviceWorkspaceURLRe)) {
+                devicesetDeviceWorkspaceService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetChannelsReportURLRe)) {
                 devicesetChannelsReportService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetChannelURLRe)) {
@@ -220,6 +225,8 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
                 devicesetChannelReportService(std::string(desc_match[1]), std::string(desc_match[2]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetChannelActionsURLRe)) {
                 devicesetChannelActionsService(std::string(desc_match[1]), std::string(desc_match[2]), request, response);
+            } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetChannelWorkspaceURLRe)) {
+                devicesetChannelWorkspaceService(std::string(desc_match[1]), std::string(desc_match[2]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::featuresetFeatureIndexURLRe)) {
                 featuresetFeatureIndexService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::featuresetFeatureRunURLRe)) {
@@ -230,6 +237,8 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
                 featuresetFeatureReportService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::featuresetFeatureActionsURLRe)) {
                 featuresetFeatureActionsService(std::string(desc_match[1]), request, response);
+            } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::featuresetFeatureWorkspaceURLRe)) {
+                featuresetFeatureWorkspaceService(std::string(desc_match[1]), request, response);
             }
             else // serve static documentation pages
             {
@@ -2259,6 +2268,80 @@ void WebAPIRequestMapper::devicesetSpectrumServerService(const std::string& inde
     }
 }
 
+void WebAPIRequestMapper::devicesetSpectrumWorkspaceService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
+
+    try
+    {
+        int deviceSetIndex = boost::lexical_cast<int>(indexStr);
+
+        if (request.getMethod() == "GET")
+        {
+            SWGSDRangel::SWGWorkspaceInfo normalResponse;
+            int status = m_adapter->devicesetSpectrumWorkspaceGet(deviceSetIndex, normalResponse, errorResponse);
+            response.setStatus(status);
+
+            if (status/100 == 2) {
+                response.write(normalResponse.asJson().toUtf8());
+            } else {
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+        else if (request.getMethod() == "PUT")
+        {
+            QString jsonStr = request.getBody();
+            QJsonObject jsonObject;
+
+            if (parseJsonBody(jsonStr, jsonObject, response))
+            {
+                SWGSDRangel::SWGWorkspaceInfo query;
+                SWGSDRangel::SWGSuccessResponse normalResponse;
+
+                if (validateWorkspaceInfo(query, jsonObject))
+                {
+                    int status = m_adapter->devicesetSpectrumWorkspacePut(
+                        deviceSetIndex,
+                        query,
+                        normalResponse,
+                        errorResponse
+                    );
+                    response.setStatus(status);
+
+                    if (status/100 == 2) {
+                        response.write(normalResponse.asJson().toUtf8());
+                    } else {
+                        response.write(errorResponse.asJson().toUtf8());
+                    }
+                }
+                else
+                {
+                    response.setStatus(400,"Invalid JSON request");
+                    errorResponse.init();
+                    *errorResponse.getMessage() = "Invalid JSON request";
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+            }
+            else
+            {
+                response.setStatus(400,"Invalid JSON format");
+                errorResponse.init();
+                *errorResponse.getMessage() = "Invalid JSON format";
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+    }
+    catch (const boost::bad_lexical_cast &e)
+    {
+        errorResponse.init();
+        *errorResponse.getMessage() = "Wrong integer conversion on device set index";
+        response.setStatus(400,"Invalid data");
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
 void WebAPIRequestMapper::devicesetDeviceService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
@@ -2578,6 +2661,80 @@ void WebAPIRequestMapper::devicesetDeviceReportService(const std::string& indexS
         response.setStatus(405,"Invalid HTTP method");
         errorResponse.init();
         *errorResponse.getMessage() = "Invalid HTTP method";
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
+void WebAPIRequestMapper::devicesetDeviceWorkspaceService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
+
+    try
+    {
+        int deviceSetIndex = boost::lexical_cast<int>(indexStr);
+
+        if (request.getMethod() == "GET")
+        {
+            SWGSDRangel::SWGWorkspaceInfo normalResponse;
+            int status = m_adapter->devicesetDeviceWorkspaceGet(deviceSetIndex, normalResponse, errorResponse);
+            response.setStatus(status);
+
+            if (status/100 == 2) {
+                response.write(normalResponse.asJson().toUtf8());
+            } else {
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+        else if (request.getMethod() == "PUT")
+        {
+            QString jsonStr = request.getBody();
+            QJsonObject jsonObject;
+
+            if (parseJsonBody(jsonStr, jsonObject, response))
+            {
+                SWGSDRangel::SWGWorkspaceInfo query;
+                SWGSDRangel::SWGSuccessResponse normalResponse;
+
+                if (validateWorkspaceInfo(query, jsonObject))
+                {
+                    int status = m_adapter->devicesetDeviceWorkspacePut(
+                        deviceSetIndex,
+                        query,
+                        normalResponse,
+                        errorResponse
+                    );
+                    response.setStatus(status);
+
+                    if (status/100 == 2) {
+                        response.write(normalResponse.asJson().toUtf8());
+                    } else {
+                        response.write(errorResponse.asJson().toUtf8());
+                    }
+                }
+                else
+                {
+                    response.setStatus(400,"Invalid JSON request");
+                    errorResponse.init();
+                    *errorResponse.getMessage() = "Invalid JSON request";
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+            }
+            else
+            {
+                response.setStatus(400,"Invalid JSON format");
+                errorResponse.init();
+                *errorResponse.getMessage() = "Invalid JSON format";
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+    }
+    catch(const boost::bad_lexical_cast &e)
+    {
+        errorResponse.init();
+        *errorResponse.getMessage() = "Wrong integer conversion on device set index";
+        response.setStatus(400,"Invalid data");
         response.write(errorResponse.asJson().toUtf8());
     }
 }
@@ -2983,6 +3140,94 @@ void WebAPIRequestMapper::devicesetChannelActionsService(
                         query,
                         normalResponse,
                         errorResponse);
+                    response.setStatus(status);
+
+                    if (status/100 == 2) {
+                        response.write(normalResponse.asJson().toUtf8());
+                    } else {
+                        response.write(errorResponse.asJson().toUtf8());
+                    }
+                }
+                else
+                {
+                    response.setStatus(400,"Invalid JSON request");
+                    errorResponse.init();
+                    *errorResponse.getMessage() = "Invalid JSON request";
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+            }
+            else
+            {
+                response.setStatus(400,"Invalid JSON format");
+                errorResponse.init();
+                *errorResponse.getMessage() = "Invalid JSON format";
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+        else
+        {
+            response.setStatus(405,"Invalid HTTP method");
+            errorResponse.init();
+            *errorResponse.getMessage() = "Invalid HTTP method";
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    catch(const boost::bad_lexical_cast &e)
+    {
+        errorResponse.init();
+        *errorResponse.getMessage() = "Wrong integer conversion on index";
+        response.setStatus(400,"Invalid data");
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
+
+void WebAPIRequestMapper::devicesetChannelWorkspaceService(
+        const std::string& deviceSetIndexStr,
+        const std::string& channelIndexStr,
+        qtwebapp::HttpRequest& request,
+        qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
+
+    try
+    {
+        int deviceSetIndex = boost::lexical_cast<int>(deviceSetIndexStr);
+        int channelIndex = boost::lexical_cast<int>(channelIndexStr);
+
+        if (request.getMethod() == "GET")
+        {
+            SWGSDRangel::SWGWorkspaceInfo normalResponse;
+            int status = m_adapter->devicesetChannelWorkspaceGet(deviceSetIndex, channelIndex, normalResponse, errorResponse);
+            response.setStatus(status);
+
+            if (status/100 == 2) {
+                response.write(normalResponse.asJson().toUtf8());
+            } else {
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+        else if (request.getMethod() == "PUT")
+        {
+            QString jsonStr = request.getBody();
+            QJsonObject jsonObject;
+
+            if (parseJsonBody(jsonStr, jsonObject, response))
+            {
+                SWGSDRangel::SWGWorkspaceInfo query;
+                SWGSDRangel::SWGSuccessResponse normalResponse;
+
+                if (validateWorkspaceInfo(query, jsonObject))
+                {
+                    int status = m_adapter->devicesetChannelWorkspacePut(
+                        deviceSetIndex,
+                        channelIndex,
+                        query,
+                        normalResponse,
+                        errorResponse
+                    );
                     response.setStatus(status);
 
                     if (status/100 == 2) {
@@ -3514,6 +3759,90 @@ void WebAPIRequestMapper::featuresetFeatureActionsService(
                         query,
                         normalResponse,
                         errorResponse);
+                    response.setStatus(status);
+
+                    if (status/100 == 2) {
+                        response.write(normalResponse.asJson().toUtf8());
+                    } else {
+                        response.write(errorResponse.asJson().toUtf8());
+                    }
+                }
+                else
+                {
+                    response.setStatus(400,"Invalid JSON request");
+                    errorResponse.init();
+                    *errorResponse.getMessage() = "Invalid JSON request";
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+            }
+            else
+            {
+                response.setStatus(400,"Invalid JSON format");
+                errorResponse.init();
+                *errorResponse.getMessage() = "Invalid JSON format";
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+        else
+        {
+            response.setStatus(405,"Invalid HTTP method");
+            errorResponse.init();
+            *errorResponse.getMessage() = "Invalid HTTP method";
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    catch(const boost::bad_lexical_cast &e)
+    {
+        errorResponse.init();
+        *errorResponse.getMessage() = "Wrong integer conversion on index";
+        response.setStatus(400,"Invalid data");
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
+void WebAPIRequestMapper::featuresetFeatureWorkspaceService(
+        const std::string& featureIndexStr,
+        qtwebapp::HttpRequest& request,
+        qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
+
+    try
+    {
+        int featureIndex = boost::lexical_cast<int>(featureIndexStr);
+
+        if (request.getMethod() == "GET")
+        {
+            SWGSDRangel::SWGWorkspaceInfo normalResponse;
+            int status = m_adapter->featuresetFeatureWorkspaceGet(featureIndex, normalResponse, errorResponse);
+            response.setStatus(status);
+
+            if (status/100 == 2) {
+                response.write(normalResponse.asJson().toUtf8());
+            } else {
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+        else if (request.getMethod() == "PUT")
+        {
+            QString jsonStr = request.getBody();
+            QJsonObject jsonObject;
+
+            if (parseJsonBody(jsonStr, jsonObject, response))
+            {
+                SWGSDRangel::SWGWorkspaceInfo query;
+                SWGSDRangel::SWGSuccessResponse normalResponse;
+
+                if (validateWorkspaceInfo(query, jsonObject))
+                {
+                    int status = m_adapter->featuresetFeatureWorkspacePut(
+                        featureIndex,
+                        query,
+                        normalResponse,
+                        errorResponse
+                    );
                     response.setStatus(status);
 
                     if (status/100 == 2) {
@@ -4235,6 +4564,17 @@ bool WebAPIRequestMapper::validateSpectrumSettings(SWGSDRangel::SWGGLSpectrum& s
     // }
 
     return true;
+}
+
+bool WebAPIRequestMapper::validateWorkspaceInfo(SWGSDRangel::SWGWorkspaceInfo& workspaceInfo, QJsonObject& jsonObject)
+{
+    if (jsonObject.contains("index"))
+    {
+        workspaceInfo.setIndex(jsonObject["index"].toInt());
+        return true;
+    }
+
+    return false;
 }
 
 bool WebAPIRequestMapper::validateConfig(

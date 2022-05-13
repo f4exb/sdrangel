@@ -49,7 +49,6 @@ public:
 private:
 	Ui::FCDProGui* ui;
 
-	DeviceUISet* m_deviceUISet;
 	bool m_doApplySettings;
 	bool m_forceSettings;
 	FCDProSettings m_settings;

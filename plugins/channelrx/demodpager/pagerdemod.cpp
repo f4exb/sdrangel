@@ -25,6 +25,7 @@
 #include <QThread>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGChannelReport.h"
 
 #include "dsp/dspengine.h"
@@ -389,6 +390,15 @@ int PagerDemod::webapiSettingsGet(
     response.setPagerDemodSettings(new SWGSDRangel::SWGPagerDemodSettings());
     response.getPagerDemodSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int PagerDemod::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

@@ -28,6 +28,7 @@
 #include <complex.h>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGDABDemodSettings.h"
 #include "SWGChannelReport.h"
 #include "SWGMapItem.h"
@@ -419,6 +420,15 @@ int DABDemod::webapiSettingsGet(
     response.setDabDemodSettings(new SWGSDRangel::SWGDABDemodSettings());
     response.getDabDemodSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int DABDemod::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

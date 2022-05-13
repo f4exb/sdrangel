@@ -50,7 +50,6 @@ public:
 private:
 	Ui::SigMFFileInputGUI* ui;
 
-	DeviceUISet* m_deviceUISet;
 	SigMFFileInputSettings m_settings;
     int m_currentTrackIndex;
 	bool m_doApplySettings;

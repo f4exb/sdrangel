@@ -52,7 +52,6 @@ public:
 private:
 	Ui::TestSinkGui* ui;
 
-	DeviceUISet* m_deviceUISet;
 	bool m_doApplySettings;
 	bool m_forceSettings;
 	TestSinkSettings m_settings;

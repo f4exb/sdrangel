@@ -52,7 +52,6 @@ protected:
 private:
 	Ui::MetisMISOGui* ui;
 
-	DeviceUISet* m_deviceUISet;
 	MetisMISOSettings m_settings;
     int m_rxSampleRate;
     int m_txSampleRate;

@@ -62,7 +62,6 @@ protected:
 private:
 	Ui::HackRFOutputGui* ui;
 
-	DeviceUISet* m_deviceUISet;
 	bool m_forceSettings;
 	HackRFOutputSettings m_settings;
     bool m_sampleRateMode; //!< true: device, false: base band sample rate update mode

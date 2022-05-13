@@ -55,6 +55,7 @@ bool AFCGUI::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
+        m_feature->setWorkspaceIndex(m_settings.m_workspaceIndex);
         displaySettings();
         applySettings(true);
         return true;
@@ -139,6 +140,7 @@ AFCGUI::AFCGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
 	m_doApplySettings(true),
     m_lastFeatureState(0)
 {
+    m_feature = feature;
 	setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/feature/afc/readme.md";
     RollupContents *rollupContents = getRollupContents();
@@ -177,6 +179,12 @@ AFCGUI::AFCGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
 AFCGUI::~AFCGUI()
 {
 	delete ui;
+}
+
+void AFCGUI::setWorkspaceIndex(int index)
+{
+    m_settings.m_workspaceIndex = index;
+    m_feature->setWorkspaceIndex(index);
 }
 
 void AFCGUI::blockApplySettings(bool block)

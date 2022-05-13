@@ -48,7 +48,6 @@ public:
 private:
 	Ui::Bladerf1InputGui* ui;
 
-	DeviceUISet* m_deviceUISet;
 	bool m_forceSettings;
 	bool m_doApplySettings;
 	BladeRF1InputSettings m_settings;

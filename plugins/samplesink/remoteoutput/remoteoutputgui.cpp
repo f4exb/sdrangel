@@ -44,7 +44,6 @@
 RemoteOutputSinkGui::RemoteOutputSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	DeviceGUI(parent),
 	ui(new Ui::RemoteOutputGui),
-	m_deviceUISet(deviceUISet),
 	m_settings(),
 	m_remoteOutput(0),
 	m_deviceCenterFrequency(0),
@@ -56,6 +55,7 @@ RemoteOutputSinkGui::RemoteOutputSinkGui(DeviceUISet *deviceUISet, QWidget* pare
 	m_forceSettings(true),
     m_remoteAPIConnected(false)
 {
+    m_deviceUISet = deviceUISet;
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_countUnrecoverable = 0;
     m_countRecovered = 0;

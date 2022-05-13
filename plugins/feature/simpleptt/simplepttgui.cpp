@@ -59,6 +59,7 @@ bool SimplePTTGUI::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
+        m_feature->setWorkspaceIndex(m_settings.m_workspaceIndex);
         displaySettings();
         applySettings(true);
         return true;
@@ -159,6 +160,7 @@ SimplePTTGUI::SimplePTTGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Fea
 	m_doApplySettings(true),
     m_lastFeatureState(0)
 {
+    m_feature = feature;
 	setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/feature/simpleptt/readme.md";
     RollupContents *rollupContents = getRollupContents();
@@ -197,6 +199,12 @@ SimplePTTGUI::SimplePTTGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Fea
 SimplePTTGUI::~SimplePTTGUI()
 {
 	delete ui;
+}
+
+void SimplePTTGUI::setWorkspaceIndex(int index)
+{
+    m_settings.m_workspaceIndex = index;
+    m_feature->setWorkspaceIndex(index);
 }
 
 void SimplePTTGUI::blockApplySettings(bool block)

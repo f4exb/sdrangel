@@ -28,6 +28,7 @@
 #include "gui/glspectrum.h"
 #include "gui/glspectrumgui.h"
 #include "gui/workspaceselectiondialog.h"
+#include "dsp/spectrumvis.h"
 #include "mainspectrumgui.h"
 
 MainSpectrumGUI::MainSpectrumGUI(GLSpectrum *spectrum, GLSpectrumGUI *spectrumGUI, QWidget *parent) :
@@ -164,6 +165,12 @@ MainSpectrumGUI::~MainSpectrumGUI()
     delete m_spacerLabel;
     delete m_indexLabel;
     qDebug("MainSpectrumGUI::~MainSpectrumGUI: end");
+}
+
+void MainSpectrumGUI::setWorkspaceIndex(int index)
+{
+    m_workspaceIndex = index;
+    m_spectrum->getSpectrumVis()->setWorkspaceIndex(index);
 }
 
 void MainSpectrumGUI::closeEvent(QCloseEvent *event)

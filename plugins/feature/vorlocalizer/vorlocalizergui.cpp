@@ -515,6 +515,7 @@ bool VORLocalizerGUI::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
+        m_feature->setWorkspaceIndex(m_settings.m_workspaceIndex);
         displaySettings();
         applySettings(true);
         return true;
@@ -856,6 +857,7 @@ VORLocalizerGUI::VORLocalizerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     m_lastFeatureState(0),
     m_rrSecondsCount(0)
 {
+    m_feature = feature;
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/feature/vorlocalizer/readme.md";
     RollupContents *rollupContents = getRollupContents();
@@ -973,6 +975,12 @@ VORLocalizerGUI::~VORLocalizerGUI()
     m_redrawMapTimer.stop();
     delete ui;
     qDeleteAll(m_vors);
+}
+
+void VORLocalizerGUI::setWorkspaceIndex(int index)
+{
+    m_settings.m_workspaceIndex = index;
+    m_feature->setWorkspaceIndex(index);
 }
 
 void VORLocalizerGUI::blockApplySettings(bool block)

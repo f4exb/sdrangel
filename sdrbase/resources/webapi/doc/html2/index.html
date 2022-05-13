@@ -14040,6 +14040,16 @@ margin-bottom: 20px;
   },
   "description" : "WFMMod"
 };
+            defs.WorkspaceInfo = {
+  "required" : [ "index" ],
+  "properties" : {
+    "index" : {
+      "type" : "integer",
+      "description" : "index of workspace in the list of workspaces"
+    }
+  },
+  "description" : "Workspace information"
+};
             defs.XtrxInputReport = {
   "properties" : {
     "success" : {
@@ -14491,6 +14501,12 @@ margin-bottom: 20px;
                     <li data-group="DeviceSet" data-name="devicesetChannelSettingsPut" class="">
                       <a href="#api-DeviceSet-devicesetChannelSettingsPut">devicesetChannelSettingsPut</a>
                     </li>
+                    <li data-group="DeviceSet" data-name="devicesetChannelWorkspaceGet" class="">
+                      <a href="#api-DeviceSet-devicesetChannelWorkspaceGet">devicesetChannelWorkspaceGet</a>
+                    </li>
+                    <li data-group="DeviceSet" data-name="devicesetChannelWorkspacePut" class="">
+                      <a href="#api-DeviceSet-devicesetChannelWorkspacePut">devicesetChannelWorkspacePut</a>
+                    </li>
                     <li data-group="DeviceSet" data-name="devicesetChannelsReportGet" class="">
                       <a href="#api-DeviceSet-devicesetChannelsReportGet">devicesetChannelsReportGet</a>
                     </li>
@@ -14530,6 +14546,12 @@ margin-bottom: 20px;
                     <li data-group="DeviceSet" data-name="devicesetDeviceSubsystemRunPost" class="">
                       <a href="#api-DeviceSet-devicesetDeviceSubsystemRunPost">devicesetDeviceSubsystemRunPost</a>
                     </li>
+                    <li data-group="DeviceSet" data-name="devicesetDeviceWorkspaceGet" class="">
+                      <a href="#api-DeviceSet-devicesetDeviceWorkspaceGet">devicesetDeviceWorkspaceGet</a>
+                    </li>
+                    <li data-group="DeviceSet" data-name="devicesetDeviceWorkspacePut" class="">
+                      <a href="#api-DeviceSet-devicesetDeviceWorkspacePut">devicesetDeviceWorkspacePut</a>
+                    </li>
                     <li data-group="DeviceSet" data-name="devicesetFocusPatch" class="">
                       <a href="#api-DeviceSet-devicesetFocusPatch">devicesetFocusPatch</a>
                     </li>
@@ -14553,6 +14575,12 @@ margin-bottom: 20px;
                     </li>
                     <li data-group="DeviceSet" data-name="devicesetSpectrumSettingsPut" class="">
                       <a href="#api-DeviceSet-devicesetSpectrumSettingsPut">devicesetSpectrumSettingsPut</a>
+                    </li>
+                    <li data-group="DeviceSet" data-name="devicesetSpectrumWorkspaceGet" class="">
+                      <a href="#api-DeviceSet-devicesetSpectrumWorkspaceGet">devicesetSpectrumWorkspaceGet</a>
+                    </li>
+                    <li data-group="DeviceSet" data-name="devicesetSpectrumWorkspacePut" class="">
+                      <a href="#api-DeviceSet-devicesetSpectrumWorkspacePut">devicesetSpectrumWorkspacePut</a>
                     </li>
                     <li data-group="DeviceSet" data-name="instanceDeviceSetDelete" class="">
                       <a href="#api-DeviceSet-instanceDeviceSetDelete">instanceDeviceSetDelete</a>
@@ -14590,6 +14618,12 @@ margin-bottom: 20px;
                     </li>
                     <li data-group="FeatureSet" data-name="featuresetFeatureSettingsPatch" class="">
                       <a href="#api-FeatureSet-featuresetFeatureSettingsPatch">featuresetFeatureSettingsPatch</a>
+                    </li>
+                    <li data-group="FeatureSet" data-name="featuresetFeatureWorkspaceGet" class="">
+                      <a href="#api-FeatureSet-featuresetFeatureWorkspaceGet">featuresetFeatureWorkspaceGet</a>
+                    </li>
+                    <li data-group="FeatureSet" data-name="featuresetFeatureWorkspacePut" class="">
+                      <a href="#api-FeatureSet-featuresetFeatureWorkspacePut">featuresetFeatureWorkspacePut</a>
                     </li>
                     <li data-group="FeatureSet" data-name="featuresetGet" class="">
                       <a href="#api-FeatureSet-featuresetGet">featuresetGet</a>
@@ -18427,6 +18461,960 @@ $(document).ready(function() {
                         </article>
                       </div>
                       <hr>
+                    <div id="api-DeviceSet-devicesetChannelWorkspaceGet">
+                      <article id="api-DeviceSet-devicesetChannelWorkspaceGet-0" data-group="User" data-name="devicesetChannelWorkspaceGet" data-version="0">
+                        <div class="pull-left">
+                          <h1>devicesetChannelWorkspaceGet</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">get channel UI workspace information (GUI)</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/workspace</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-DeviceSet-devicesetChannelWorkspaceGet-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetChannelWorkspaceGet-0-java">Java</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetChannelWorkspaceGet-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetChannelWorkspaceGet-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetChannelWorkspaceGet-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetChannelWorkspaceGet-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetChannelWorkspaceGet-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetChannelWorkspaceGet-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetChannelWorkspaceGet-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetChannelWorkspaceGet-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetChannelWorkspaceGet-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-DeviceSet-devicesetChannelWorkspaceGet-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/workspace"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetChannelWorkspaceGet-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.DeviceSetApi;
+
+import java.io.File;
+import java.util.*;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        Integer channelIndex = 56; // Integer | Index of the channel in the channels list for this device set
+        try {
+            WorkspaceInfo result = apiInstance.devicesetChannelWorkspaceGet(deviceSetIndex, channelIndex);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetChannelWorkspaceGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetChannelWorkspaceGet-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.DeviceSetApi;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        Integer channelIndex = 56; // Integer | Index of the channel in the channels list for this device set
+        try {
+            WorkspaceInfo result = apiInstance.devicesetChannelWorkspaceGet(deviceSetIndex, channelIndex);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetChannelWorkspaceGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-DeviceSet-devicesetChannelWorkspaceGet-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetChannelWorkspaceGet-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Integer *deviceSetIndex = 56; // Index of device set in the device set list
+Integer *channelIndex = 56; // Index of the channel in the channels list for this device set
+
+DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
+
+[apiInstance devicesetChannelWorkspaceGetWith:deviceSetIndex
+    channelIndex:channelIndex
+              completionHandler: ^(WorkspaceInfo output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetChannelWorkspaceGet-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.DeviceSetApi()
+
+var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
+
+var channelIndex = 56; // {Integer} Index of the channel in the channels list for this device set
+
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.devicesetChannelWorkspaceGet(deviceSetIndex, channelIndex, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-DeviceSet-devicesetChannelWorkspaceGet-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetChannelWorkspaceGet-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class devicesetChannelWorkspaceGetExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new DeviceSetApi();
+            var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
+            var channelIndex = 56;  // Integer | Index of the channel in the channels list for this device set
+
+            try
+            {
+                WorkspaceInfo result = apiInstance.devicesetChannelWorkspaceGet(deviceSetIndex, channelIndex);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling DeviceSetApi.devicesetChannelWorkspaceGet: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetChannelWorkspaceGet-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\DeviceSetApi();
+$deviceSetIndex = 56; // Integer | Index of device set in the device set list
+$channelIndex = 56; // Integer | Index of the channel in the channels list for this device set
+
+try {
+    $result = $api_instance->devicesetChannelWorkspaceGet($deviceSetIndex, $channelIndex);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling DeviceSetApi->devicesetChannelWorkspaceGet: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetChannelWorkspaceGet-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::DeviceSetApi;
+
+my $api_instance = SWGSDRangel::DeviceSetApi->new();
+my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
+my $channelIndex = 56; # Integer | Index of the channel in the channels list for this device set
+
+eval { 
+    my $result = $api_instance->devicesetChannelWorkspaceGet(deviceSetIndex => $deviceSetIndex, channelIndex => $channelIndex);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling DeviceSetApi->devicesetChannelWorkspaceGet: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetChannelWorkspaceGet-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.DeviceSetApi()
+deviceSetIndex = 56 # Integer | Index of device set in the device set list
+channelIndex = 56 # Integer | Index of the channel in the channels list for this device set
+
+try: 
+    api_response = api_instance.deviceset_channel_workspace_get(deviceSetIndex, channelIndex)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DeviceSetApi->devicesetChannelWorkspaceGet: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">deviceSetIndex*</td>
+<td>
+
+
+    <div id="d2e199_devicesetChannelWorkspaceGet_deviceSetIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of device set in the device set list
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                  <tr><td style="width:150px;">channelIndex*</td>
+<td>
+
+
+    <div id="d2e199_devicesetChannelWorkspaceGet_channelIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of the channel in the channels list for this device set
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - On success return workspace information </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetChannelWorkspaceGet-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetChannelWorkspaceGet-200-schema">
+                                  <div id='responses-devicesetChannelWorkspaceGet-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On success return workspace information",
+  "schema" : {
+    "$ref" : "#/definitions/WorkspaceInfo"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetChannelWorkspaceGet-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetChannelWorkspaceGet-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetChannelWorkspaceGet-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 400 - Invalid device set index </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetChannelWorkspaceGet-400-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetChannelWorkspaceGet-400-schema">
+                                  <div id='responses-devicesetChannelWorkspaceGet-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid device set index",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetChannelWorkspaceGet-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetChannelWorkspaceGet-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetChannelWorkspaceGet-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetChannelWorkspaceGet-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetChannelWorkspaceGet-500-schema">
+                                  <div id='responses-devicesetChannelWorkspaceGet-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetChannelWorkspaceGet-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetChannelWorkspaceGet-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetChannelWorkspaceGet-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetChannelWorkspaceGet-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetChannelWorkspaceGet-501-schema">
+                                  <div id='responses-devicesetChannelWorkspaceGet-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetChannelWorkspaceGet-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetChannelWorkspaceGet-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetChannelWorkspaceGet-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-DeviceSet-devicesetChannelWorkspacePut">
+                      <article id="api-DeviceSet-devicesetChannelWorkspacePut-0" data-group="User" data-name="devicesetChannelWorkspacePut" data-version="0">
+                        <div class="pull-left">
+                          <h1>devicesetChannelWorkspacePut</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">move channel UI to workspace (GUI)</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="put"><code><span class="pln">/sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/workspace</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-DeviceSet-devicesetChannelWorkspacePut-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetChannelWorkspacePut-0-java">Java</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetChannelWorkspacePut-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetChannelWorkspacePut-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetChannelWorkspacePut-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetChannelWorkspacePut-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetChannelWorkspacePut-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetChannelWorkspacePut-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetChannelWorkspacePut-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetChannelWorkspacePut-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetChannelWorkspacePut-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-DeviceSet-devicesetChannelWorkspacePut-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PUT "http://localhost/sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/workspace"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetChannelWorkspacePut-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.DeviceSetApi;
+
+import java.io.File;
+import java.util.*;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        Integer channelIndex = 56; // Integer | Index of the channel in the channels list for this device set
+        WorkspaceInfo body = ; // WorkspaceInfo | Destination workspace information
+        try {
+            SuccessResponse result = apiInstance.devicesetChannelWorkspacePut(deviceSetIndex, channelIndex, body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetChannelWorkspacePut");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetChannelWorkspacePut-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.DeviceSetApi;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        Integer channelIndex = 56; // Integer | Index of the channel in the channels list for this device set
+        WorkspaceInfo body = ; // WorkspaceInfo | Destination workspace information
+        try {
+            SuccessResponse result = apiInstance.devicesetChannelWorkspacePut(deviceSetIndex, channelIndex, body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetChannelWorkspacePut");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-DeviceSet-devicesetChannelWorkspacePut-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetChannelWorkspacePut-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Integer *deviceSetIndex = 56; // Index of device set in the device set list
+Integer *channelIndex = 56; // Index of the channel in the channels list for this device set
+WorkspaceInfo *body = ; // Destination workspace information
+
+DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
+
+[apiInstance devicesetChannelWorkspacePutWith:deviceSetIndex
+    channelIndex:channelIndex
+    body:body
+              completionHandler: ^(SuccessResponse output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetChannelWorkspacePut-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.DeviceSetApi()
+
+var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
+
+var channelIndex = 56; // {Integer} Index of the channel in the channels list for this device set
+
+var body = ; // {WorkspaceInfo} Destination workspace information
+
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.devicesetChannelWorkspacePut(deviceSetIndex, channelIndex, body, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-DeviceSet-devicesetChannelWorkspacePut-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetChannelWorkspacePut-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class devicesetChannelWorkspacePutExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new DeviceSetApi();
+            var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
+            var channelIndex = 56;  // Integer | Index of the channel in the channels list for this device set
+            var body = new WorkspaceInfo(); // WorkspaceInfo | Destination workspace information
+
+            try
+            {
+                SuccessResponse result = apiInstance.devicesetChannelWorkspacePut(deviceSetIndex, channelIndex, body);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling DeviceSetApi.devicesetChannelWorkspacePut: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetChannelWorkspacePut-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\DeviceSetApi();
+$deviceSetIndex = 56; // Integer | Index of device set in the device set list
+$channelIndex = 56; // Integer | Index of the channel in the channels list for this device set
+$body = ; // WorkspaceInfo | Destination workspace information
+
+try {
+    $result = $api_instance->devicesetChannelWorkspacePut($deviceSetIndex, $channelIndex, $body);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling DeviceSetApi->devicesetChannelWorkspacePut: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetChannelWorkspacePut-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::DeviceSetApi;
+
+my $api_instance = SWGSDRangel::DeviceSetApi->new();
+my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
+my $channelIndex = 56; # Integer | Index of the channel in the channels list for this device set
+my $body = SWGSDRangel::Object::WorkspaceInfo->new(); # WorkspaceInfo | Destination workspace information
+
+eval { 
+    my $result = $api_instance->devicesetChannelWorkspacePut(deviceSetIndex => $deviceSetIndex, channelIndex => $channelIndex, body => $body);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling DeviceSetApi->devicesetChannelWorkspacePut: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetChannelWorkspacePut-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.DeviceSetApi()
+deviceSetIndex = 56 # Integer | Index of device set in the device set list
+channelIndex = 56 # Integer | Index of the channel in the channels list for this device set
+body =  # WorkspaceInfo | Destination workspace information
+
+try: 
+    api_response = api_instance.deviceset_channel_workspace_put(deviceSetIndex, channelIndex, body)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DeviceSetApi->devicesetChannelWorkspacePut: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">deviceSetIndex*</td>
+<td>
+
+
+    <div id="d2e199_devicesetChannelWorkspacePut_deviceSetIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of device set in the device set list
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                  <tr><td style="width:150px;">channelIndex*</td>
+<td>
+
+
+    <div id="d2e199_devicesetChannelWorkspacePut_channelIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of the channel in the channels list for this device set
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+                            <div class="methodsubtabletitle">Body parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">body <span style="color:red;">*</span></td>
+<td>
+
+
+<script>
+$(document).ready(function() {
+  var schemaWrapper = {
+  "in" : "body",
+  "name" : "body",
+  "description" : "Destination workspace information",
+  "required" : true,
+  "schema" : {
+    "$ref" : "#/definitions/WorkspaceInfo"
+  }
+};
+  var schema = schemaWrapper.schema;
+  if (schema.$ref != null) {
+    schema = defsParser.$refs.get(schema.$ref);
+  } else {
+    schemaWrapper.definitions = Object.assign({}, defs);
+    $RefParser.dereference(schemaWrapper).catch(function(err) {
+      console.log(err);
+    });
+  }
+
+  var view = new JSONSchemaView(schema,2,{isBodyParam: true});
+  var result = $('#d2e199_devicesetChannelWorkspacePut_body');
+  result.empty();
+  result.append(view.render());
+});
+</script>
+<div id="d2e199_devicesetChannelWorkspacePut_body"></div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 202 - Message to perform action was sent successfully </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetChannelWorkspacePut-202-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetChannelWorkspacePut-202-schema">
+                                  <div id='responses-devicesetChannelWorkspacePut-202-schema-202' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Message to perform action was sent successfully",
+  "schema" : {
+    "$ref" : "#/definitions/SuccessResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetChannelWorkspacePut-202-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetChannelWorkspacePut-202-schema-202');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetChannelWorkspacePut-202-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 400 - Invalid device set or workspace index </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetChannelWorkspacePut-400-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetChannelWorkspacePut-400-schema">
+                                  <div id='responses-devicesetChannelWorkspacePut-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid device set or workspace index",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetChannelWorkspacePut-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetChannelWorkspacePut-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetChannelWorkspacePut-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetChannelWorkspacePut-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetChannelWorkspacePut-500-schema">
+                                  <div id='responses-devicesetChannelWorkspacePut-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetChannelWorkspacePut-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetChannelWorkspacePut-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetChannelWorkspacePut-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetChannelWorkspacePut-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetChannelWorkspacePut-501-schema">
+                                  <div id='responses-devicesetChannelWorkspacePut-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetChannelWorkspacePut-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetChannelWorkspacePut-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetChannelWorkspacePut-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
                     <div id="api-DeviceSet-devicesetChannelsReportGet">
                       <article id="api-DeviceSet-devicesetChannelsReportGet-0" data-group="User" data-name="devicesetChannelsReportGet" data-version="0">
                         <div class="pull-left">
@@ -19696,7 +20684,7 @@ $(document).ready(function() {
 
 
                           <h2>Responses</h2>
-                            <h3> Status: 202 - On successful semdomg of the message it returns the details of the device being set </h3>
+                            <h3> Status: 202 - On successful semding of the message it returns the details of the device being set </h3>
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
@@ -19711,7 +20699,7 @@ $(document).ready(function() {
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
-  "description" : "On successful semdomg of the message it returns the details of the device being set",
+  "description" : "On successful semding of the message it returns the details of the device being set",
   "schema" : {
     "$ref" : "#/definitions/DeviceListItem"
   }
@@ -24810,6 +25798,894 @@ $(document).ready(function() {
                         </article>
                       </div>
                       <hr>
+                    <div id="api-DeviceSet-devicesetDeviceWorkspaceGet">
+                      <article id="api-DeviceSet-devicesetDeviceWorkspaceGet-0" data-group="User" data-name="devicesetDeviceWorkspaceGet" data-version="0">
+                        <div class="pull-left">
+                          <h1>devicesetDeviceWorkspaceGet</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">get device UI workspace information (GUI)</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrangel/deviceset/{deviceSetIndex}/device/workspace</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-DeviceSet-devicesetDeviceWorkspaceGet-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceWorkspaceGet-0-java">Java</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceWorkspaceGet-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetDeviceWorkspaceGet-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceWorkspaceGet-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceWorkspaceGet-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetDeviceWorkspaceGet-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceWorkspaceGet-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceWorkspaceGet-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceWorkspaceGet-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceWorkspaceGet-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-DeviceSet-devicesetDeviceWorkspaceGet-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/deviceset/{deviceSetIndex}/device/workspace"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceWorkspaceGet-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.DeviceSetApi;
+
+import java.io.File;
+import java.util.*;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        try {
+            WorkspaceInfo result = apiInstance.devicesetDeviceWorkspaceGet(deviceSetIndex);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetDeviceWorkspaceGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceWorkspaceGet-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.DeviceSetApi;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        try {
+            WorkspaceInfo result = apiInstance.devicesetDeviceWorkspaceGet(deviceSetIndex);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetDeviceWorkspaceGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceWorkspaceGet-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceWorkspaceGet-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Integer *deviceSetIndex = 56; // Index of device set in the device set list
+
+DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
+
+[apiInstance devicesetDeviceWorkspaceGetWith:deviceSetIndex
+              completionHandler: ^(WorkspaceInfo output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceWorkspaceGet-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.DeviceSetApi()
+
+var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
+
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.devicesetDeviceWorkspaceGet(deviceSetIndex, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-DeviceSet-devicesetDeviceWorkspaceGet-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceWorkspaceGet-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class devicesetDeviceWorkspaceGetExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new DeviceSetApi();
+            var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
+
+            try
+            {
+                WorkspaceInfo result = apiInstance.devicesetDeviceWorkspaceGet(deviceSetIndex);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling DeviceSetApi.devicesetDeviceWorkspaceGet: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceWorkspaceGet-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\DeviceSetApi();
+$deviceSetIndex = 56; // Integer | Index of device set in the device set list
+
+try {
+    $result = $api_instance->devicesetDeviceWorkspaceGet($deviceSetIndex);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling DeviceSetApi->devicesetDeviceWorkspaceGet: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceWorkspaceGet-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::DeviceSetApi;
+
+my $api_instance = SWGSDRangel::DeviceSetApi->new();
+my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
+
+eval { 
+    my $result = $api_instance->devicesetDeviceWorkspaceGet(deviceSetIndex => $deviceSetIndex);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling DeviceSetApi->devicesetDeviceWorkspaceGet: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceWorkspaceGet-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.DeviceSetApi()
+deviceSetIndex = 56 # Integer | Index of device set in the device set list
+
+try: 
+    api_response = api_instance.deviceset_device_workspace_get(deviceSetIndex)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DeviceSetApi->devicesetDeviceWorkspaceGet: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">deviceSetIndex*</td>
+<td>
+
+
+    <div id="d2e199_devicesetDeviceWorkspaceGet_deviceSetIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of device set in the device set list
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - On success return workspace information </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceWorkspaceGet-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceWorkspaceGet-200-schema">
+                                  <div id='responses-devicesetDeviceWorkspaceGet-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On success return workspace information",
+  "schema" : {
+    "$ref" : "#/definitions/WorkspaceInfo"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceWorkspaceGet-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceWorkspaceGet-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceWorkspaceGet-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 400 - Invalid device set index </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceWorkspaceGet-400-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceWorkspaceGet-400-schema">
+                                  <div id='responses-devicesetDeviceWorkspaceGet-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid device set index",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceWorkspaceGet-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceWorkspaceGet-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceWorkspaceGet-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceWorkspaceGet-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceWorkspaceGet-500-schema">
+                                  <div id='responses-devicesetDeviceWorkspaceGet-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceWorkspaceGet-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceWorkspaceGet-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceWorkspaceGet-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceWorkspaceGet-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceWorkspaceGet-501-schema">
+                                  <div id='responses-devicesetDeviceWorkspaceGet-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceWorkspaceGet-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceWorkspaceGet-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceWorkspaceGet-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-DeviceSet-devicesetDeviceWorkspacePut">
+                      <article id="api-DeviceSet-devicesetDeviceWorkspacePut-0" data-group="User" data-name="devicesetDeviceWorkspacePut" data-version="0">
+                        <div class="pull-left">
+                          <h1>devicesetDeviceWorkspacePut</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">move device UI to workspace (GUI)</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="put"><code><span class="pln">/sdrangel/deviceset/{deviceSetIndex}/device/workspace</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-DeviceSet-devicesetDeviceWorkspacePut-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceWorkspacePut-0-java">Java</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceWorkspacePut-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetDeviceWorkspacePut-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceWorkspacePut-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceWorkspacePut-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetDeviceWorkspacePut-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceWorkspacePut-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceWorkspacePut-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceWorkspacePut-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceWorkspacePut-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-DeviceSet-devicesetDeviceWorkspacePut-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PUT "http://localhost/sdrangel/deviceset/{deviceSetIndex}/device/workspace"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceWorkspacePut-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.DeviceSetApi;
+
+import java.io.File;
+import java.util.*;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        WorkspaceInfo body = ; // WorkspaceInfo | Destination workspace information
+        try {
+            SuccessResponse result = apiInstance.devicesetDeviceWorkspacePut(deviceSetIndex, body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetDeviceWorkspacePut");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceWorkspacePut-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.DeviceSetApi;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        WorkspaceInfo body = ; // WorkspaceInfo | Destination workspace information
+        try {
+            SuccessResponse result = apiInstance.devicesetDeviceWorkspacePut(deviceSetIndex, body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetDeviceWorkspacePut");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceWorkspacePut-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceWorkspacePut-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Integer *deviceSetIndex = 56; // Index of device set in the device set list
+WorkspaceInfo *body = ; // Destination workspace information
+
+DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
+
+[apiInstance devicesetDeviceWorkspacePutWith:deviceSetIndex
+    body:body
+              completionHandler: ^(SuccessResponse output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceWorkspacePut-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.DeviceSetApi()
+
+var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
+
+var body = ; // {WorkspaceInfo} Destination workspace information
+
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.devicesetDeviceWorkspacePut(deviceSetIndex, body, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-DeviceSet-devicesetDeviceWorkspacePut-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceWorkspacePut-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class devicesetDeviceWorkspacePutExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new DeviceSetApi();
+            var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
+            var body = new WorkspaceInfo(); // WorkspaceInfo | Destination workspace information
+
+            try
+            {
+                SuccessResponse result = apiInstance.devicesetDeviceWorkspacePut(deviceSetIndex, body);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling DeviceSetApi.devicesetDeviceWorkspacePut: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceWorkspacePut-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\DeviceSetApi();
+$deviceSetIndex = 56; // Integer | Index of device set in the device set list
+$body = ; // WorkspaceInfo | Destination workspace information
+
+try {
+    $result = $api_instance->devicesetDeviceWorkspacePut($deviceSetIndex, $body);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling DeviceSetApi->devicesetDeviceWorkspacePut: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceWorkspacePut-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::DeviceSetApi;
+
+my $api_instance = SWGSDRangel::DeviceSetApi->new();
+my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
+my $body = SWGSDRangel::Object::WorkspaceInfo->new(); # WorkspaceInfo | Destination workspace information
+
+eval { 
+    my $result = $api_instance->devicesetDeviceWorkspacePut(deviceSetIndex => $deviceSetIndex, body => $body);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling DeviceSetApi->devicesetDeviceWorkspacePut: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceWorkspacePut-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.DeviceSetApi()
+deviceSetIndex = 56 # Integer | Index of device set in the device set list
+body =  # WorkspaceInfo | Destination workspace information
+
+try: 
+    api_response = api_instance.deviceset_device_workspace_put(deviceSetIndex, body)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DeviceSetApi->devicesetDeviceWorkspacePut: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">deviceSetIndex*</td>
+<td>
+
+
+    <div id="d2e199_devicesetDeviceWorkspacePut_deviceSetIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of device set in the device set list
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+                            <div class="methodsubtabletitle">Body parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">body <span style="color:red;">*</span></td>
+<td>
+
+
+<script>
+$(document).ready(function() {
+  var schemaWrapper = {
+  "in" : "body",
+  "name" : "body",
+  "description" : "Destination workspace information",
+  "required" : true,
+  "schema" : {
+    "$ref" : "#/definitions/WorkspaceInfo"
+  }
+};
+  var schema = schemaWrapper.schema;
+  if (schema.$ref != null) {
+    schema = defsParser.$refs.get(schema.$ref);
+  } else {
+    schemaWrapper.definitions = Object.assign({}, defs);
+    $RefParser.dereference(schemaWrapper).catch(function(err) {
+      console.log(err);
+    });
+  }
+
+  var view = new JSONSchemaView(schema,2,{isBodyParam: true});
+  var result = $('#d2e199_devicesetDeviceWorkspacePut_body');
+  result.empty();
+  result.append(view.render());
+});
+</script>
+<div id="d2e199_devicesetDeviceWorkspacePut_body"></div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 202 - Message to perform action was sent successfully </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceWorkspacePut-202-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceWorkspacePut-202-schema">
+                                  <div id='responses-devicesetDeviceWorkspacePut-202-schema-202' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Message to perform action was sent successfully",
+  "schema" : {
+    "$ref" : "#/definitions/SuccessResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceWorkspacePut-202-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceWorkspacePut-202-schema-202');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceWorkspacePut-202-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 400 - Invalid device set or workspace index </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceWorkspacePut-400-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceWorkspacePut-400-schema">
+                                  <div id='responses-devicesetDeviceWorkspacePut-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid device set or workspace index",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceWorkspacePut-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceWorkspacePut-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceWorkspacePut-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceWorkspacePut-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceWorkspacePut-500-schema">
+                                  <div id='responses-devicesetDeviceWorkspacePut-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceWorkspacePut-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceWorkspacePut-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceWorkspacePut-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceWorkspacePut-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceWorkspacePut-501-schema">
+                                  <div id='responses-devicesetDeviceWorkspacePut-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceWorkspacePut-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceWorkspacePut-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceWorkspacePut-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
                     <div id="api-DeviceSet-devicesetFocusPatch">
                       <article id="api-DeviceSet-devicesetFocusPatch-0" data-group="User" data-name="devicesetFocusPatch" data-version="0">
                         <div class="pull-left">
@@ -28381,6 +30257,894 @@ $(document).ready(function() {
                                     </script>
                                   </div>
                                   <input id='responses-devicesetSpectrumSettingsPut-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-DeviceSet-devicesetSpectrumWorkspaceGet">
+                      <article id="api-DeviceSet-devicesetSpectrumWorkspaceGet-0" data-group="User" data-name="devicesetSpectrumWorkspaceGet" data-version="0">
+                        <div class="pull-left">
+                          <h1>devicesetSpectrumWorkspaceGet</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">Get main spectrum UI workspace information (GUI)</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrangel/deviceset/{deviceSetIndex}/spectrum/workspace</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-DeviceSet-devicesetSpectrumWorkspaceGet-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumWorkspaceGet-0-java">Java</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumWorkspaceGet-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetSpectrumWorkspaceGet-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumWorkspaceGet-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumWorkspaceGet-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetSpectrumWorkspaceGet-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumWorkspaceGet-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumWorkspaceGet-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumWorkspaceGet-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumWorkspaceGet-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-DeviceSet-devicesetSpectrumWorkspaceGet-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/deviceset/{deviceSetIndex}/spectrum/workspace"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumWorkspaceGet-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.DeviceSetApi;
+
+import java.io.File;
+import java.util.*;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        try {
+            WorkspaceInfo result = apiInstance.devicesetSpectrumWorkspaceGet(deviceSetIndex);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetSpectrumWorkspaceGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumWorkspaceGet-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.DeviceSetApi;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        try {
+            WorkspaceInfo result = apiInstance.devicesetSpectrumWorkspaceGet(deviceSetIndex);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetSpectrumWorkspaceGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumWorkspaceGet-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumWorkspaceGet-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Integer *deviceSetIndex = 56; // Index of device set in the device set list
+
+DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
+
+[apiInstance devicesetSpectrumWorkspaceGetWith:deviceSetIndex
+              completionHandler: ^(WorkspaceInfo output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumWorkspaceGet-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.DeviceSetApi()
+
+var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
+
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.devicesetSpectrumWorkspaceGet(deviceSetIndex, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumWorkspaceGet-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumWorkspaceGet-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class devicesetSpectrumWorkspaceGetExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new DeviceSetApi();
+            var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
+
+            try
+            {
+                WorkspaceInfo result = apiInstance.devicesetSpectrumWorkspaceGet(deviceSetIndex);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling DeviceSetApi.devicesetSpectrumWorkspaceGet: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumWorkspaceGet-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\DeviceSetApi();
+$deviceSetIndex = 56; // Integer | Index of device set in the device set list
+
+try {
+    $result = $api_instance->devicesetSpectrumWorkspaceGet($deviceSetIndex);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling DeviceSetApi->devicesetSpectrumWorkspaceGet: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumWorkspaceGet-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::DeviceSetApi;
+
+my $api_instance = SWGSDRangel::DeviceSetApi->new();
+my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
+
+eval { 
+    my $result = $api_instance->devicesetSpectrumWorkspaceGet(deviceSetIndex => $deviceSetIndex);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling DeviceSetApi->devicesetSpectrumWorkspaceGet: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumWorkspaceGet-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.DeviceSetApi()
+deviceSetIndex = 56 # Integer | Index of device set in the device set list
+
+try: 
+    api_response = api_instance.deviceset_spectrum_workspace_get(deviceSetIndex)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DeviceSetApi->devicesetSpectrumWorkspaceGet: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">deviceSetIndex*</td>
+<td>
+
+
+    <div id="d2e199_devicesetSpectrumWorkspaceGet_deviceSetIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of device set in the device set list
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - On success return main spectrum UI workspace index </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetSpectrumWorkspaceGet-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetSpectrumWorkspaceGet-200-schema">
+                                  <div id='responses-devicesetSpectrumWorkspaceGet-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On success return main spectrum UI workspace index",
+  "schema" : {
+    "$ref" : "#/definitions/WorkspaceInfo"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetSpectrumWorkspaceGet-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetSpectrumWorkspaceGet-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetSpectrumWorkspaceGet-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - Invalid index </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetSpectrumWorkspaceGet-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetSpectrumWorkspaceGet-404-schema">
+                                  <div id='responses-devicesetSpectrumWorkspaceGet-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid index",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetSpectrumWorkspaceGet-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetSpectrumWorkspaceGet-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetSpectrumWorkspaceGet-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetSpectrumWorkspaceGet-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetSpectrumWorkspaceGet-500-schema">
+                                  <div id='responses-devicesetSpectrumWorkspaceGet-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetSpectrumWorkspaceGet-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetSpectrumWorkspaceGet-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetSpectrumWorkspaceGet-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetSpectrumWorkspaceGet-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetSpectrumWorkspaceGet-501-schema">
+                                  <div id='responses-devicesetSpectrumWorkspaceGet-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetSpectrumWorkspaceGet-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetSpectrumWorkspaceGet-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetSpectrumWorkspaceGet-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-DeviceSet-devicesetSpectrumWorkspacePut">
+                      <article id="api-DeviceSet-devicesetSpectrumWorkspacePut-0" data-group="User" data-name="devicesetSpectrumWorkspacePut" data-version="0">
+                        <div class="pull-left">
+                          <h1>devicesetSpectrumWorkspacePut</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">move main spectrum UI to workspace (GUI)</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="put"><code><span class="pln">/sdrangel/deviceset/{deviceSetIndex}/spectrum/workspace</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-DeviceSet-devicesetSpectrumWorkspacePut-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumWorkspacePut-0-java">Java</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumWorkspacePut-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetSpectrumWorkspacePut-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumWorkspacePut-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumWorkspacePut-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetSpectrumWorkspacePut-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumWorkspacePut-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumWorkspacePut-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumWorkspacePut-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumWorkspacePut-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-DeviceSet-devicesetSpectrumWorkspacePut-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PUT "http://localhost/sdrangel/deviceset/{deviceSetIndex}/spectrum/workspace"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumWorkspacePut-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.DeviceSetApi;
+
+import java.io.File;
+import java.util.*;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        WorkspaceInfo body = ; // WorkspaceInfo | Destination workspace information
+        try {
+            SuccessResponse result = apiInstance.devicesetSpectrumWorkspacePut(deviceSetIndex, body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetSpectrumWorkspacePut");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumWorkspacePut-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.DeviceSetApi;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        WorkspaceInfo body = ; // WorkspaceInfo | Destination workspace information
+        try {
+            SuccessResponse result = apiInstance.devicesetSpectrumWorkspacePut(deviceSetIndex, body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetSpectrumWorkspacePut");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumWorkspacePut-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumWorkspacePut-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Integer *deviceSetIndex = 56; // Index of device set in the device set list
+WorkspaceInfo *body = ; // Destination workspace information
+
+DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
+
+[apiInstance devicesetSpectrumWorkspacePutWith:deviceSetIndex
+    body:body
+              completionHandler: ^(SuccessResponse output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumWorkspacePut-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.DeviceSetApi()
+
+var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
+
+var body = ; // {WorkspaceInfo} Destination workspace information
+
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.devicesetSpectrumWorkspacePut(deviceSetIndex, body, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumWorkspacePut-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumWorkspacePut-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class devicesetSpectrumWorkspacePutExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new DeviceSetApi();
+            var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
+            var body = new WorkspaceInfo(); // WorkspaceInfo | Destination workspace information
+
+            try
+            {
+                SuccessResponse result = apiInstance.devicesetSpectrumWorkspacePut(deviceSetIndex, body);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling DeviceSetApi.devicesetSpectrumWorkspacePut: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumWorkspacePut-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\DeviceSetApi();
+$deviceSetIndex = 56; // Integer | Index of device set in the device set list
+$body = ; // WorkspaceInfo | Destination workspace information
+
+try {
+    $result = $api_instance->devicesetSpectrumWorkspacePut($deviceSetIndex, $body);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling DeviceSetApi->devicesetSpectrumWorkspacePut: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumWorkspacePut-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::DeviceSetApi;
+
+my $api_instance = SWGSDRangel::DeviceSetApi->new();
+my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
+my $body = SWGSDRangel::Object::WorkspaceInfo->new(); # WorkspaceInfo | Destination workspace information
+
+eval { 
+    my $result = $api_instance->devicesetSpectrumWorkspacePut(deviceSetIndex => $deviceSetIndex, body => $body);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling DeviceSetApi->devicesetSpectrumWorkspacePut: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumWorkspacePut-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.DeviceSetApi()
+deviceSetIndex = 56 # Integer | Index of device set in the device set list
+body =  # WorkspaceInfo | Destination workspace information
+
+try: 
+    api_response = api_instance.deviceset_spectrum_workspace_put(deviceSetIndex, body)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DeviceSetApi->devicesetSpectrumWorkspacePut: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">deviceSetIndex*</td>
+<td>
+
+
+    <div id="d2e199_devicesetSpectrumWorkspacePut_deviceSetIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of device set in the device set list
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+                            <div class="methodsubtabletitle">Body parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">body <span style="color:red;">*</span></td>
+<td>
+
+
+<script>
+$(document).ready(function() {
+  var schemaWrapper = {
+  "in" : "body",
+  "name" : "body",
+  "description" : "Destination workspace information",
+  "required" : true,
+  "schema" : {
+    "$ref" : "#/definitions/WorkspaceInfo"
+  }
+};
+  var schema = schemaWrapper.schema;
+  if (schema.$ref != null) {
+    schema = defsParser.$refs.get(schema.$ref);
+  } else {
+    schemaWrapper.definitions = Object.assign({}, defs);
+    $RefParser.dereference(schemaWrapper).catch(function(err) {
+      console.log(err);
+    });
+  }
+
+  var view = new JSONSchemaView(schema,2,{isBodyParam: true});
+  var result = $('#d2e199_devicesetSpectrumWorkspacePut_body');
+  result.empty();
+  result.append(view.render());
+});
+</script>
+<div id="d2e199_devicesetSpectrumWorkspacePut_body"></div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 202 - Message to perform action was sent successfully </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetSpectrumWorkspacePut-202-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetSpectrumWorkspacePut-202-schema">
+                                  <div id='responses-devicesetSpectrumWorkspacePut-202-schema-202' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Message to perform action was sent successfully",
+  "schema" : {
+    "$ref" : "#/definitions/SuccessResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetSpectrumWorkspacePut-202-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetSpectrumWorkspacePut-202-schema-202');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetSpectrumWorkspacePut-202-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 400 - Invalid device set or workspace index </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetSpectrumWorkspacePut-400-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetSpectrumWorkspacePut-400-schema">
+                                  <div id='responses-devicesetSpectrumWorkspacePut-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid device set or workspace index",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetSpectrumWorkspacePut-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetSpectrumWorkspacePut-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetSpectrumWorkspacePut-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetSpectrumWorkspacePut-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetSpectrumWorkspacePut-500-schema">
+                                  <div id='responses-devicesetSpectrumWorkspacePut-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetSpectrumWorkspacePut-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetSpectrumWorkspacePut-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetSpectrumWorkspacePut-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetSpectrumWorkspacePut-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetSpectrumWorkspacePut-501-schema">
+                                  <div id='responses-devicesetSpectrumWorkspacePut-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetSpectrumWorkspacePut-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetSpectrumWorkspacePut-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetSpectrumWorkspacePut-501-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
@@ -33784,6 +36548,894 @@ $(document).ready(function() {
                                     </script>
                                   </div>
                                   <input id='responses-featuresetFeatureSettingsPatch-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-FeatureSet-featuresetFeatureWorkspaceGet">
+                      <article id="api-FeatureSet-featuresetFeatureWorkspaceGet-0" data-group="User" data-name="featuresetFeatureWorkspaceGet" data-version="0">
+                        <div class="pull-left">
+                          <h1>featuresetFeatureWorkspaceGet</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">get feature UI workspace information (GUI)</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrangel/featureset/feature/{featureIndex}/workspace</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-FeatureSet-featuresetFeatureWorkspaceGet-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-FeatureSet-featuresetFeatureWorkspaceGet-0-java">Java</a></li>
+                          <li class=""><a href="#examples-FeatureSet-featuresetFeatureWorkspaceGet-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-FeatureSet-featuresetFeatureWorkspaceGet-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-FeatureSet-featuresetFeatureWorkspaceGet-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-FeatureSet-featuresetFeatureWorkspaceGet-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-FeatureSet-featuresetFeatureWorkspaceGet-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-FeatureSet-featuresetFeatureWorkspaceGet-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-FeatureSet-featuresetFeatureWorkspaceGet-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-FeatureSet-featuresetFeatureWorkspaceGet-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-FeatureSet-featuresetFeatureWorkspaceGet-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-FeatureSet-featuresetFeatureWorkspaceGet-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/featureset/feature/{featureIndex}/workspace"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureWorkspaceGet-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.FeatureSetApi;
+
+import java.io.File;
+import java.util.*;
+
+public class FeatureSetApiExample {
+
+    public static void main(String[] args) {
+        
+        FeatureSetApi apiInstance = new FeatureSetApi();
+        Integer featureIndex = 56; // Integer | Index of feature in the feature set
+        try {
+            WorkspaceInfo result = apiInstance.featuresetFeatureWorkspaceGet(featureIndex);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling FeatureSetApi#featuresetFeatureWorkspaceGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureWorkspaceGet-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.FeatureSetApi;
+
+public class FeatureSetApiExample {
+
+    public static void main(String[] args) {
+        FeatureSetApi apiInstance = new FeatureSetApi();
+        Integer featureIndex = 56; // Integer | Index of feature in the feature set
+        try {
+            WorkspaceInfo result = apiInstance.featuresetFeatureWorkspaceGet(featureIndex);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling FeatureSetApi#featuresetFeatureWorkspaceGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureWorkspaceGet-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureWorkspaceGet-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Integer *featureIndex = 56; // Index of feature in the feature set
+
+FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
+
+[apiInstance featuresetFeatureWorkspaceGetWith:featureIndex
+              completionHandler: ^(WorkspaceInfo output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureWorkspaceGet-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.FeatureSetApi()
+
+var featureIndex = 56; // {Integer} Index of feature in the feature set
+
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.featuresetFeatureWorkspaceGet(featureIndex, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-FeatureSet-featuresetFeatureWorkspaceGet-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureWorkspaceGet-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class featuresetFeatureWorkspaceGetExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new FeatureSetApi();
+            var featureIndex = 56;  // Integer | Index of feature in the feature set
+
+            try
+            {
+                WorkspaceInfo result = apiInstance.featuresetFeatureWorkspaceGet(featureIndex);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling FeatureSetApi.featuresetFeatureWorkspaceGet: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureWorkspaceGet-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\FeatureSetApi();
+$featureIndex = 56; // Integer | Index of feature in the feature set
+
+try {
+    $result = $api_instance->featuresetFeatureWorkspaceGet($featureIndex);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling FeatureSetApi->featuresetFeatureWorkspaceGet: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureWorkspaceGet-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::FeatureSetApi;
+
+my $api_instance = SWGSDRangel::FeatureSetApi->new();
+my $featureIndex = 56; # Integer | Index of feature in the feature set
+
+eval { 
+    my $result = $api_instance->featuresetFeatureWorkspaceGet(featureIndex => $featureIndex);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling FeatureSetApi->featuresetFeatureWorkspaceGet: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureWorkspaceGet-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.FeatureSetApi()
+featureIndex = 56 # Integer | Index of feature in the feature set
+
+try: 
+    api_response = api_instance.featureset_feature_workspace_get(featureIndex)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling FeatureSetApi->featuresetFeatureWorkspaceGet: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">featureIndex*</td>
+<td>
+
+
+    <div id="d2e199_featuresetFeatureWorkspaceGet_featureIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of feature in the feature set
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - On success return workspace information </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-featuresetFeatureWorkspaceGet-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-featuresetFeatureWorkspaceGet-200-schema">
+                                  <div id='responses-featuresetFeatureWorkspaceGet-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On success return workspace information",
+  "schema" : {
+    "$ref" : "#/definitions/WorkspaceInfo"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-featuresetFeatureWorkspaceGet-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-featuresetFeatureWorkspaceGet-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-featuresetFeatureWorkspaceGet-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 400 - Invalid feature set index </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-featuresetFeatureWorkspaceGet-400-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-featuresetFeatureWorkspaceGet-400-schema">
+                                  <div id='responses-featuresetFeatureWorkspaceGet-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid feature set index",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-featuresetFeatureWorkspaceGet-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-featuresetFeatureWorkspaceGet-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-featuresetFeatureWorkspaceGet-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-featuresetFeatureWorkspaceGet-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-featuresetFeatureWorkspaceGet-500-schema">
+                                  <div id='responses-featuresetFeatureWorkspaceGet-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-featuresetFeatureWorkspaceGet-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-featuresetFeatureWorkspaceGet-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-featuresetFeatureWorkspaceGet-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-featuresetFeatureWorkspaceGet-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-featuresetFeatureWorkspaceGet-501-schema">
+                                  <div id='responses-featuresetFeatureWorkspaceGet-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-featuresetFeatureWorkspaceGet-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-featuresetFeatureWorkspaceGet-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-featuresetFeatureWorkspaceGet-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-FeatureSet-featuresetFeatureWorkspacePut">
+                      <article id="api-FeatureSet-featuresetFeatureWorkspacePut-0" data-group="User" data-name="featuresetFeatureWorkspacePut" data-version="0">
+                        <div class="pull-left">
+                          <h1>featuresetFeatureWorkspacePut</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">move feature UI to workspace (GUI)</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="put"><code><span class="pln">/sdrangel/featureset/feature/{featureIndex}/workspace</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-FeatureSet-featuresetFeatureWorkspacePut-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-FeatureSet-featuresetFeatureWorkspacePut-0-java">Java</a></li>
+                          <li class=""><a href="#examples-FeatureSet-featuresetFeatureWorkspacePut-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-FeatureSet-featuresetFeatureWorkspacePut-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-FeatureSet-featuresetFeatureWorkspacePut-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-FeatureSet-featuresetFeatureWorkspacePut-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-FeatureSet-featuresetFeatureWorkspacePut-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-FeatureSet-featuresetFeatureWorkspacePut-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-FeatureSet-featuresetFeatureWorkspacePut-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-FeatureSet-featuresetFeatureWorkspacePut-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-FeatureSet-featuresetFeatureWorkspacePut-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-FeatureSet-featuresetFeatureWorkspacePut-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PUT "http://localhost/sdrangel/featureset/feature/{featureIndex}/workspace"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureWorkspacePut-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.FeatureSetApi;
+
+import java.io.File;
+import java.util.*;
+
+public class FeatureSetApiExample {
+
+    public static void main(String[] args) {
+        
+        FeatureSetApi apiInstance = new FeatureSetApi();
+        Integer featureIndex = 56; // Integer | Index of feature in the feature set
+        WorkspaceInfo body = ; // WorkspaceInfo | Destination workspace information
+        try {
+            SuccessResponse result = apiInstance.featuresetFeatureWorkspacePut(featureIndex, body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling FeatureSetApi#featuresetFeatureWorkspacePut");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureWorkspacePut-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.FeatureSetApi;
+
+public class FeatureSetApiExample {
+
+    public static void main(String[] args) {
+        FeatureSetApi apiInstance = new FeatureSetApi();
+        Integer featureIndex = 56; // Integer | Index of feature in the feature set
+        WorkspaceInfo body = ; // WorkspaceInfo | Destination workspace information
+        try {
+            SuccessResponse result = apiInstance.featuresetFeatureWorkspacePut(featureIndex, body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling FeatureSetApi#featuresetFeatureWorkspacePut");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureWorkspacePut-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureWorkspacePut-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Integer *featureIndex = 56; // Index of feature in the feature set
+WorkspaceInfo *body = ; // Destination workspace information
+
+FeatureSetApi *apiInstance = [[FeatureSetApi alloc] init];
+
+[apiInstance featuresetFeatureWorkspacePutWith:featureIndex
+    body:body
+              completionHandler: ^(SuccessResponse output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureWorkspacePut-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.FeatureSetApi()
+
+var featureIndex = 56; // {Integer} Index of feature in the feature set
+
+var body = ; // {WorkspaceInfo} Destination workspace information
+
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.featuresetFeatureWorkspacePut(featureIndex, body, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-FeatureSet-featuresetFeatureWorkspacePut-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureWorkspacePut-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class featuresetFeatureWorkspacePutExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new FeatureSetApi();
+            var featureIndex = 56;  // Integer | Index of feature in the feature set
+            var body = new WorkspaceInfo(); // WorkspaceInfo | Destination workspace information
+
+            try
+            {
+                SuccessResponse result = apiInstance.featuresetFeatureWorkspacePut(featureIndex, body);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling FeatureSetApi.featuresetFeatureWorkspacePut: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureWorkspacePut-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\FeatureSetApi();
+$featureIndex = 56; // Integer | Index of feature in the feature set
+$body = ; // WorkspaceInfo | Destination workspace information
+
+try {
+    $result = $api_instance->featuresetFeatureWorkspacePut($featureIndex, $body);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling FeatureSetApi->featuresetFeatureWorkspacePut: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureWorkspacePut-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::FeatureSetApi;
+
+my $api_instance = SWGSDRangel::FeatureSetApi->new();
+my $featureIndex = 56; # Integer | Index of feature in the feature set
+my $body = SWGSDRangel::Object::WorkspaceInfo->new(); # WorkspaceInfo | Destination workspace information
+
+eval { 
+    my $result = $api_instance->featuresetFeatureWorkspacePut(featureIndex => $featureIndex, body => $body);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling FeatureSetApi->featuresetFeatureWorkspacePut: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-FeatureSet-featuresetFeatureWorkspacePut-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.FeatureSetApi()
+featureIndex = 56 # Integer | Index of feature in the feature set
+body =  # WorkspaceInfo | Destination workspace information
+
+try: 
+    api_response = api_instance.featureset_feature_workspace_put(featureIndex, body)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling FeatureSetApi->featuresetFeatureWorkspacePut: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">featureIndex*</td>
+<td>
+
+
+    <div id="d2e199_featuresetFeatureWorkspacePut_featureIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of feature in the feature set
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+                            <div class="methodsubtabletitle">Body parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">body <span style="color:red;">*</span></td>
+<td>
+
+
+<script>
+$(document).ready(function() {
+  var schemaWrapper = {
+  "in" : "body",
+  "name" : "body",
+  "description" : "Destination workspace information",
+  "required" : true,
+  "schema" : {
+    "$ref" : "#/definitions/WorkspaceInfo"
+  }
+};
+  var schema = schemaWrapper.schema;
+  if (schema.$ref != null) {
+    schema = defsParser.$refs.get(schema.$ref);
+  } else {
+    schemaWrapper.definitions = Object.assign({}, defs);
+    $RefParser.dereference(schemaWrapper).catch(function(err) {
+      console.log(err);
+    });
+  }
+
+  var view = new JSONSchemaView(schema,2,{isBodyParam: true});
+  var result = $('#d2e199_featuresetFeatureWorkspacePut_body');
+  result.empty();
+  result.append(view.render());
+});
+</script>
+<div id="d2e199_featuresetFeatureWorkspacePut_body"></div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 202 - Message to perform action was sent successfully </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-featuresetFeatureWorkspacePut-202-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-featuresetFeatureWorkspacePut-202-schema">
+                                  <div id='responses-featuresetFeatureWorkspacePut-202-schema-202' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Message to perform action was sent successfully",
+  "schema" : {
+    "$ref" : "#/definitions/SuccessResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-featuresetFeatureWorkspacePut-202-schema-data').val(stringify(schema));
+                                        var result = $('#responses-featuresetFeatureWorkspacePut-202-schema-202');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-featuresetFeatureWorkspacePut-202-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 400 - Invalid device set or workspace index </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-featuresetFeatureWorkspacePut-400-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-featuresetFeatureWorkspacePut-400-schema">
+                                  <div id='responses-featuresetFeatureWorkspacePut-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid device set or workspace index",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-featuresetFeatureWorkspacePut-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-featuresetFeatureWorkspacePut-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-featuresetFeatureWorkspacePut-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-featuresetFeatureWorkspacePut-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-featuresetFeatureWorkspacePut-500-schema">
+                                  <div id='responses-featuresetFeatureWorkspacePut-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-featuresetFeatureWorkspacePut-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-featuresetFeatureWorkspacePut-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-featuresetFeatureWorkspacePut-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-featuresetFeatureWorkspacePut-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-featuresetFeatureWorkspacePut-501-schema">
+                                  <div id='responses-featuresetFeatureWorkspacePut-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-featuresetFeatureWorkspacePut-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-featuresetFeatureWorkspacePut-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-featuresetFeatureWorkspacePut-501-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
@@ -56503,7 +60155,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2022-05-09T01:10:06.823+02:00
+              Generated 2022-05-13T21:51:44.838+02:00
             </div>
           </div>
       </div>
