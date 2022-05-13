@@ -217,7 +217,7 @@ void PluginManager::loadPluginsDir(const QDir& dir)
     {
         if (QLibrary::isLibrary(fileName))
         {
-            if (!m_enableSoapy && (fileName.contains("libinputsoapysdr") || (fileName.contains("liboutputsoapysdr"))))
+            if (!m_enableSoapy && fileName.contains("soapysdr"))
             {
                 qInfo("PluginManager::loadPluginsDir: Soapy SDR disabled skipping %s", qPrintable(fileName));
                 continue;
