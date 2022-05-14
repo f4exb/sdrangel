@@ -342,7 +342,8 @@ void MainWindow::sampleSourceCreate(
     deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
     deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getRxPluginInterface(deviceIndex));
 
-    qDebug() << "MainWindow::sampleSourceImplement:"
+    qDebug() << "MainWindow::sampleSourceCreate:"
+        << "deviceSetIndex:" << deviceSetIndex
         << "deviceIndex:" << deviceIndex
         << "hardwareId:" << samplingDevice->hardwareId
         << "sequence:" << samplingDevice->sequence
@@ -352,7 +353,7 @@ void MainWindow::sampleSourceCreate(
 
     if (deviceAPI->getSamplingDeviceId().size() == 0) // non existent device => replace by default
     {
-        qDebug("MainWindow::sampleSourceAdd: non existent device replaced by File Input");
+        qDebug("MainWindow::sampleSourceCreate: non existent device replaced by File Input");
         int fileInputDeviceIndex = DeviceEnumerator::instance()->getFileInputDeviceIndex();
         selectedDeviceIndex = fileInputDeviceIndex;
         samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(fileInputDeviceIndex);
@@ -557,7 +558,8 @@ void MainWindow::sampleSinkCreate(
     deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
     deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getTxPluginInterface(deviceIndex));
 
-    qDebug() << "MainWindow::sampleSinkImplement:"
+    qDebug() << "MainWindow::sampleSinkCreate:"
+        << "deviceSetIndex:" << deviceSetIndex
         << "newDeviceIndex:" << deviceIndex
         << "hardwareId:" << samplingDevice->hardwareId
         << "sequence:" << samplingDevice->sequence
@@ -567,7 +569,7 @@ void MainWindow::sampleSinkCreate(
 
     if (deviceAPI->getSamplingDeviceId().size() == 0) // non existent device => replace by default
     {
-        qDebug("MainWindow::sampleSinkImplement: non existent device replaced by File Sink");
+        qDebug("MainWindow::sampleSinkCreate: non existent device replaced by File Sink");
         int fileSinkDeviceIndex = DeviceEnumerator::instance()->getFileOutputDeviceIndex();
         selectedDeviceIndex = fileSinkDeviceIndex;
         const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(fileSinkDeviceIndex);
@@ -780,7 +782,8 @@ void MainWindow::sampleMIMOCreate(
     deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
     deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getMIMOPluginInterface(deviceIndex));
 
-    qDebug() << "MainWindow::sampleMIMOImplement:"
+    qDebug() << "MainWindow::sampleMIMOCreate:"
+        << "deviceSetIndex" << deviceSetIndex
         << "newDeviceIndex:" << deviceIndex
         << "hardwareId:" << samplingDevice->hardwareId
         << "sequence:" << samplingDevice->sequence
@@ -790,7 +793,7 @@ void MainWindow::sampleMIMOCreate(
 
     if (deviceAPI->getSamplingDeviceId().size() == 0) // non existent device => replace by default
     {
-        qDebug("MainWindow::sampleMIMOImplement: non existent device replaced by Test MIMO");
+        qDebug("MainWindow::sampleMIMOCreate: non existent device replaced by Test MIMO");
         int testMIMODeviceIndex = DeviceEnumerator::instance()->getTestMIMODeviceIndex();
         selectedDeviceIndex = testMIMODeviceIndex;
         const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getMIMOSamplingDevice(testMIMODeviceIndex);
@@ -916,6 +919,7 @@ void MainWindow::removeDeviceSet(int deviceSetIndex)
 
 	    deviceEngine->stop();
 	    m_dspEngine->removeDeviceEngineAt(deviceSetIndex);
+        DeviceEnumerator::instance()->removeRxSelection(deviceSetIndex);
 
 	    delete sourceAPI;
     }
@@ -939,6 +943,7 @@ void MainWindow::removeDeviceSet(int deviceSetIndex)
 
 	    deviceEngine->stop();
 	    m_dspEngine->removeDeviceEngineAt(deviceSetIndex);
+        DeviceEnumerator::instance()->removeTxSelection(deviceSetIndex);
 
 	    delete sinkAPI;
     }
@@ -962,6 +967,7 @@ void MainWindow::removeDeviceSet(int deviceSetIndex)
 
 	    deviceEngine->stop();
 	    m_dspEngine->removeDeviceEngineAt(deviceSetIndex);
+        DeviceEnumerator::instance()->removeMIMOSelection(deviceSetIndex);
 
 	    delete mimoAPI;
     }
