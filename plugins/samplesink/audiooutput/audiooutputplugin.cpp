@@ -29,13 +29,13 @@
 #endif
 
 const PluginDescriptor AudioOutputPlugin::m_pluginDescriptor = {
-    QString("AudioOutput"),
-	QString("Audio output"),
-	QString("6.20.2"),
-	QString("(c) Edouard Griffiths, F4EXB"),
-	QString("https://github.com/f4exb/sdrangel"),
+    QStringLiteral("AudioOutput"),
+	QStringLiteral("Audio output"),
+    QStringLiteral("7.0.0"),
+	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
+	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,
-	QString("https://github.com/f4exb/sdrangel")
+	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
 const QString AudioOutputPlugin::m_hardwareID = "AudioOutput";

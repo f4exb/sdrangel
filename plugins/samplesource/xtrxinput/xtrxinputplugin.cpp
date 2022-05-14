@@ -38,7 +38,7 @@
 const PluginDescriptor XTRXInputPlugin::m_pluginDescriptor = {
     QStringLiteral("XTRX"),
     QStringLiteral("XTRX Input"),
-    QStringLiteral("6.20.2"),
+    QStringLiteral("7.0.0"),
     QStringLiteral("(c) Edouard Griffiths, F4EXB"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,
