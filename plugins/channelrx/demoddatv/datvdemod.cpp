@@ -23,6 +23,7 @@
 #include <QBuffer>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGDATVDemodSettings.h"
 #include "SWGChannelReport.h"
 
@@ -88,6 +89,18 @@ DATVDemod::~DATVDemod()
     m_basebandSink->deleteLater();
 }
 
+void DATVDemod::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSinkAPI(this);
+        m_deviceAPI->removeChannelSink(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addChannelSink(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
+}
+
 void DATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
 {
     (void) firstOfBurst;
@@ -137,6 +150,11 @@ bool DATVDemod::handleMessage(const Message& cmd)
         // Forward to the sink
         DSPSignalNotification* notifToSink = new DSPSignalNotification(notif); // make a copy
         m_basebandSink->getInputMessageQueue()->push(notifToSink);
+
+        // Forward to GUI if any
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
+        }
 
         return true;
     }
@@ -287,6 +305,15 @@ int DATVDemod::webapiSettingsGet(
     response.setDatvDemodSettings(new SWGSDRangel::SWGDATVDemodSettings());
     response.getDatvDemodSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int DATVDemod::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

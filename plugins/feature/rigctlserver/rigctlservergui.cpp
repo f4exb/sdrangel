@@ -17,6 +17,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QMessageBox>
+#include <QResizeEvent>
 
 #include "feature/featureuiset.h"
 #include "gui/basicfeaturesettingsdialog.h"
@@ -47,7 +48,6 @@ void RigCtlServerGUI::resetToDefaults()
 
 QByteArray RigCtlServerGUI::serialize() const
 {
-    qDebug("RigCtlServerGUI::serialize: %d", m_settings.m_channelIndex);
     return m_settings.serialize();
 }
 
@@ -55,7 +55,7 @@ bool RigCtlServerGUI::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        qDebug("RigCtlServerGUI::deserialize: %d", m_settings.m_channelIndex);
+        m_feature->setWorkspaceIndex(m_settings.m_workspaceIndex);
         updateDeviceSetList();
         displaySettings();
         applySettings(true);
@@ -66,6 +66,14 @@ bool RigCtlServerGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void RigCtlServerGUI::resizeEvent(QResizeEvent* size)
+{
+    int maxWidth = getRollupContents()->maximumWidth();
+    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
+    resize(width() < maxWidth ? width() : maxWidth, minHeight);
+    size->accept();
 }
 
 bool RigCtlServerGUI::handleMessage(const Message& message)
@@ -114,7 +122,7 @@ void RigCtlServerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -126,15 +134,18 @@ RigCtlServerGUI::RigCtlServerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
 	m_doApplySettings(true),
     m_lastFeatureState(0)
 {
-	ui->setupUi(this);
-    m_helpURL = "plugins/feature/rigctlserver/readme.md";
+    m_feature = feature;
 	setAttribute(Qt::WA_DeleteOnClose, true);
-    setChannelWidget(false);
-	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    m_helpURL = "plugins/feature/rigctlserver/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+
     m_rigCtlServer = reinterpret_cast<RigCtlServer*>(feature);
     m_rigCtlServer->setMessageQueueToGUI(&m_inputMessageQueue);
 
-	m_featureUISet->addRollupWidget(this);
     m_settings.setRollupState(&m_rollupState);
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
@@ -146,11 +157,18 @@ RigCtlServerGUI::RigCtlServerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     updateDeviceSetList();
     displaySettings();
 	applySettings(true);
+    makeUIConnections();
 }
 
 RigCtlServerGUI::~RigCtlServerGUI()
 {
 	delete ui;
+}
+
+void RigCtlServerGUI::setWorkspaceIndex(int index)
+{
+    m_settings.m_workspaceIndex = index;
+    m_feature->setWorkspaceIndex(index);
 }
 
 void RigCtlServerGUI::blockApplySettings(bool block)
@@ -162,10 +180,11 @@ void RigCtlServerGUI::displaySettings()
 {
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_settings.m_title);
+    setTitle(m_settings.m_title);
     blockApplySettings(true);
     ui->rigCtrlPort->setValue(m_settings.m_rigCtlPort);
     ui->maxFrequencyOffset->setValue(m_settings.m_maxFrequencyOffset);
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -267,31 +286,22 @@ bool RigCtlServerGUI::updateChannelList()
     return false;
 }
 
-void RigCtlServerGUI::leaveEvent(QEvent*)
-{
-}
-
-void RigCtlServerGUI::enterEvent(QEvent*)
-{
-}
-
 void RigCtlServerGUI::onMenuDialogCalled(const QPoint &p)
 {
     if (m_contextMenuType == ContextMenuChannelSettings)
     {
         BasicFeatureSettingsDialog dialog(this);
         dialog.setTitle(m_settings.m_title);
-        dialog.setColor(m_settings.m_rgbColor);
         dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
         dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
         dialog.setReverseAPIFeatureSetIndex(m_settings.m_reverseAPIFeatureSetIndex);
         dialog.setReverseAPIFeatureIndex(m_settings.m_reverseAPIFeatureIndex);
+        dialog.setDefaultTitle(m_displayedName);
 
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_rgbColor = dialog.getColor().rgb();
         m_settings.m_title = dialog.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
@@ -299,7 +309,7 @@ void RigCtlServerGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIFeatureSetIndex = dialog.getReverseAPIFeatureSetIndex();
         m_settings.m_reverseAPIFeatureIndex = dialog.getReverseAPIFeatureIndex();
 
-        setWindowTitle(m_settings.m_title);
+        setTitle(m_settings.m_title);
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -397,4 +407,15 @@ void RigCtlServerGUI::applySettings(bool force)
 	    RigCtlServer::MsgConfigureRigCtlServer* message = RigCtlServer::MsgConfigureRigCtlServer::create( m_settings, force);
 	    m_rigCtlServer->getInputMessageQueue()->push(message);
 	}
+}
+
+void RigCtlServerGUI::makeUIConnections()
+{
+	QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &RigCtlServerGUI::on_startStop_toggled);
+	QObject::connect(ui->enable, &QCheckBox::toggled, this, &RigCtlServerGUI::on_enable_toggled);
+	QObject::connect(ui->devicesRefresh, &QPushButton::clicked, this, &RigCtlServerGUI::on_devicesRefresh_clicked);
+	QObject::connect(ui->device, qOverload<int>(&QComboBox::currentIndexChanged), this, &RigCtlServerGUI::on_device_currentIndexChanged);
+	QObject::connect(ui->channel, qOverload<int>(&QComboBox::currentIndexChanged), this, &RigCtlServerGUI::on_channel_currentIndexChanged);
+	QObject::connect(ui->rigCtrlPort, qOverload<int>(&QSpinBox::valueChanged), this, &RigCtlServerGUI::on_rigCtrlPort_valueChanged);
+	QObject::connect(ui->maxFrequencyOffset, qOverload<int>(&QSpinBox::valueChanged), this, &RigCtlServerGUI::on_maxFrequencyOffset_valueChanged);
 }

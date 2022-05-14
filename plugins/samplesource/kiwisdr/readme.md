@@ -6,6 +6,8 @@ This plugin is designed to enable connection to publicly available [KiwiSDR](htt
 
 <h2>Interface</h2>
 
+The top and bottom bars of the device window are described [here](../../../sdrgui/device/readme.md)
+
 ![KiwiSDR input plugin GUI](../../../doc/img/KiwiSDRInput_plugin.png)
 
 <h3>1: Start/Stop</h3>

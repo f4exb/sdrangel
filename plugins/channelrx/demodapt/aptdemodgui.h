@@ -75,6 +75,17 @@ public:
     bool deserialize(const QByteArray& data);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     virtual bool eventFilter(QObject *watched, QEvent *event) override;
+    virtual void setWorkspaceIndex(int index) { m_settings.m_workspaceIndex = index; };
+    virtual int getWorkspaceIndex() const { return m_settings.m_workspaceIndex; };
+    virtual void setGeometryBytes(const QByteArray& blob) { m_settings.m_geometryBytes = blob; };
+    virtual QByteArray getGeometryBytes() const { return m_settings.m_geometryBytes; };
+    virtual QString getTitle() const { return m_settings.m_title; };
+    virtual QColor getTitleColor() const  { return m_settings.m_rgbColor; };
+    virtual void zetHidden(bool hidden) { m_settings.m_hidden = hidden; }
+    virtual bool getHidden() const { return m_settings.m_hidden; }
+    virtual ChannelMarker& getChannelMarker() { return m_channelMarker; }
+    virtual int getStreamIndex() const { return m_settings.m_streamIndex; }
+    virtual void setStreamIndex(int streamIndex) { m_settings.m_streamIndex = streamIndex; }
 
 public slots:
     void channelMarkerChangedByCursor();
@@ -87,6 +98,7 @@ private:
     ChannelMarker m_channelMarker;
     RollupState m_rollupState;
     APTDemodSettings m_settings;
+    qint64 m_deviceCenterFrequency;
     bool m_doApplySettings;
 
     APTDemod* m_aptDemod;
@@ -113,8 +125,10 @@ private:
     void displaySettings();
     void displayPalettes();
     void displayLabels();
-    void displayStreamIndex();
     bool handleMessage(const Message& message);
+    void makeUIConnections();
+    void updateAbsoluteCenterFrequency();
+
     void deleteImageFromMap(const QString &name);
     void resetDecoder();
 
@@ -144,7 +158,7 @@ private slots:
     void on_zoomIn_clicked();
     void on_zoomOut_clicked();
     void on_zoomAll_clicked(bool checked=false);
-    void on_image_zoomed();
+    void onImageZoomed();
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void handleInputMessages();

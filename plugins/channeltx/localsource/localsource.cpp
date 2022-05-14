@@ -23,6 +23,7 @@
 #include <QThread>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
@@ -38,7 +39,6 @@
 #include "localsourcebaseband.h"
 
 MESSAGE_CLASS_DEFINITION(LocalSource::MsgConfigureLocalSource, Message)
-MESSAGE_CLASS_DEFINITION(LocalSource::MsgBasebandSampleRateNotification, Message)
 
 const char* const LocalSource::m_channelIdURI = "sdrangel.channel.localsource";
 const char* const LocalSource::m_channelId = "LocalSource";
@@ -85,6 +85,18 @@ LocalSource::~LocalSource()
     delete m_thread;
 }
 
+void LocalSource::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSourceAPI(this);
+        m_deviceAPI->removeChannelSource(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addChannelSource(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
+}
+
 void LocalSource::start()
 {
 	qDebug("LocalSource::start");
@@ -122,10 +134,8 @@ bool LocalSource::handleMessage(const Message& cmd)
         DSPSignalNotification *msg = new DSPSignalNotification(cfg.getSampleRate(), cfg.getCenterFrequency());
         m_basebandSource->getInputMessageQueue()->push(msg);
 
-        if (m_guiMessageQueue)
-        {
-            MsgBasebandSampleRateNotification *msg = MsgBasebandSampleRateNotification::create(cfg.getSampleRate());
-            m_guiMessageQueue->push(msg);
+        if (m_guiMessageQueue) {
+            m_guiMessageQueue->push(new DSPSignalNotification(cfg));
         }
 
         return true;
@@ -353,6 +363,15 @@ int LocalSource::webapiSettingsGet(
     response.setLocalSourceSettings(new SWGSDRangel::SWGLocalSourceSettings());
     response.getLocalSourceSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int LocalSource::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

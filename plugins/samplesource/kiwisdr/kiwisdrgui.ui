@@ -7,11 +7,11 @@
     <x>0</x>
     <y>0</y>
     <width>360</width>
-    <height>120</height>
+    <height>106</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -19,7 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>360</width>
-    <height>120</height>
+    <height>106</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>380</width>
+    <height>143</height>
    </size>
   </property>
   <property name="font">
@@ -52,9 +58,6 @@
    </property>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_freq">
-     <property name="topMargin">
-      <number>4</number>
-     </property>
      <item>
       <layout class="QVBoxLayout" name="deviceUILayout">
        <item>
@@ -131,7 +134,10 @@
        <property name="font">
         <font>
          <family>Liberation Mono</family>
-         <pointsize>20</pointsize>
+         <pointsize>16</pointsize>
+         <weight>50</weight>
+         <italic>false</italic>
+         <bold>false</bold>
         </font>
        </property>
        <property name="cursor">
@@ -307,19 +313,6 @@
       </widget>
      </item>
     </layout>
-   </item>
-   <item>
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
    </item>
   </layout>
  </widget>

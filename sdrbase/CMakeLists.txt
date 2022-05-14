@@ -176,6 +176,7 @@ set(sdrbase_SOURCES
     pipes/objectpipe.cpp
     pipes/objectpipesregistrations.cpp
 
+    settings/configuration.cpp
     settings/featuresetpreset.cpp
     settings/preferences.cpp
     settings/preset.cpp
@@ -389,6 +390,7 @@ set(sdrbase_HEADERS
     plugin/pluginapi.h
     plugin/pluginmanager.h
 
+    settings/configuration.h
     settings/featuresetpreset.h
     settings/preferences.h
     settings/preset.h

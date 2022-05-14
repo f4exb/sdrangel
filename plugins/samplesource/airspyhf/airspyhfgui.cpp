@@ -18,6 +18,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QResizeEvent>
 
 #include <libairspyhf/airspyhf.h>
 
@@ -27,7 +28,6 @@
 #include "ui_airspyhfgui.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
-#include "gui/crightclickenabler.h"
 #include "gui/basicdevicesettingsdialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
@@ -36,16 +36,20 @@
 AirspyHFGui::AirspyHFGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	DeviceGUI(parent),
 	ui(new Ui::AirspyHFGui),
-	m_deviceUISet(deviceUISet),
 	m_doApplySettings(true),
 	m_forceSettings(true),
 	m_settings(),
 	m_sampleSource(0),
 	m_lastEngineState(DeviceAPI::StNotStarted)
 {
+    m_deviceUISet = deviceUISet;
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_sampleSource = (AirspyHFInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
-    ui->setupUi(this);
+    ui->setupUi(getContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    getContents()->setStyleSheet("#AirspyHFGui { background-color: rgb(64, 64, 64); }");
+    m_helpURL = "plugins/samplesource/airspyhf/readme.md";
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 	updateFrequencyLimits();
 
@@ -53,8 +57,7 @@ AirspyHFGui::AirspyHFGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(500);
 
-    CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStop);
-    connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
 	displaySettings();
 
@@ -64,6 +67,7 @@ AirspyHFGui::AirspyHFGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);
 
     sendSettings();
+    makeUIConnections();
 }
 
 AirspyHFGui::~AirspyHFGui()
@@ -99,6 +103,12 @@ bool AirspyHFGui::deserialize(const QByteArray& data)
 		resetToDefaults();
 		return false;
 	}
+}
+
+void AirspyHFGui::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 bool AirspyHFGui::handleMessage(const Message& message)
@@ -450,19 +460,42 @@ int AirspyHFGui::getDevSampleRateIndex(uint32_t sampeRate)
 
 void AirspyHFGui::openDeviceSettingsDialog(const QPoint& p)
 {
-    BasicDeviceSettingsDialog dialog(this);
-    dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
-    dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
-    dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
-    dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
+    if (m_contextMenuType == ContextMenuDeviceSettings)
+    {
+        BasicDeviceSettingsDialog dialog(this);
+        dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
+        dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
+        dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
+        dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
 
-    dialog.move(p);
-    dialog.exec();
+        dialog.move(p);
+        dialog.exec();
 
-    m_settings.m_useReverseAPI = dialog.useReverseAPI();
-    m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
-    m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
-    m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settings.m_useReverseAPI = dialog.useReverseAPI();
+        m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
+        m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
+        m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
-    sendSettings();
+        sendSettings();
+    }
+
+    resetContextMenuType();
+}
+
+void AirspyHFGui::makeUIConnections()
+{
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &AirspyHFGui::on_centerFrequency_changed);
+    QObject::connect(ui->LOppm, &QSlider::valueChanged, this, &AirspyHFGui::on_LOppm_valueChanged);
+    QObject::connect(ui->resetLOppm, &QPushButton::clicked, this, &AirspyHFGui::on_resetLOppm_clicked);
+    QObject::connect(ui->dcOffset, &ButtonSwitch::toggled, this, &AirspyHFGui::on_dcOffset_toggled);
+    QObject::connect(ui->iqImbalance, &ButtonSwitch::toggled, this, &AirspyHFGui::on_iqImbalance_toggled);
+    QObject::connect(ui->sampleRate, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AirspyHFGui::on_sampleRate_currentIndexChanged);
+    QObject::connect(ui->decim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AirspyHFGui::on_decim_currentIndexChanged);
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &AirspyHFGui::on_startStop_toggled);
+    QObject::connect(ui->transverter, &TransverterButton::clicked, this, &AirspyHFGui::on_transverter_clicked);
+    QObject::connect(ui->band, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AirspyHFGui::on_band_currentIndexChanged);
+    QObject::connect(ui->dsp, &ButtonSwitch::toggled, this, &AirspyHFGui::on_dsp_toggled);
+    QObject::connect(ui->lna, &ButtonSwitch::toggled, this, &AirspyHFGui::on_lna_toggled);
+    QObject::connect(ui->agc, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AirspyHFGui::on_agc_currentIndexChanged);
+    QObject::connect(ui->att, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AirspyHFGui::on_att_currentIndexChanged);
 }

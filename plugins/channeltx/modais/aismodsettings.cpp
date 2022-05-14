@@ -69,6 +69,8 @@ void AISModSettings::resetToDefaults()
     m_udpEnabled = false;
     m_udpAddress = "127.0.0.1";
     m_udpPort = 9998;
+    m_workspaceIndex = 0;
+    m_hidden = false;
 }
 
 bool AISModSettings::setMode(QString mode)
@@ -180,6 +182,10 @@ QByteArray AISModSettings::serialize() const
         s.writeBlob(40, m_rollupState->serialize());
     }
 
+    s.writeS32(41, m_workspaceIndex);
+    s.writeBlob(42, m_geometryBytes);
+    s.writeBool(43, m_hidden);
+
     return s.final();
 }
 
@@ -266,6 +272,10 @@ bool AISModSettings::deserialize(const QByteArray& data)
             d.readBlob(40, &bytetmp);
             m_rollupState->deserialize(bytetmp);
         }
+
+        d.readS32(41, &m_workspaceIndex, 0);
+        d.readBlob(42, &m_geometryBytes);
+        d.readBool(43, &m_hidden, false);
 
         return true;
     }

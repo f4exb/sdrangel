@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>SSBModGUI</class>
- <widget class="RollupWidget" name="SSBModGUI">
+ <widget class="RollupContents" name="SSBModGUI">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>430</width>
-    <height>643</height>
+    <width>414</width>
+    <height>331</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
-    <width>430</width>
+    <width>414</width>
     <height>0</height>
    </size>
   </property>
@@ -36,13 +36,13 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>430</width>
+     <width>412</width>
      <height>331</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
-     <width>385</width>
+     <width>412</width>
      <height>0</height>
     </size>
    </property>
@@ -503,6 +503,7 @@
         </property>
         <property name="font">
          <font>
+          <family>Liberation Sans</family>
           <pointsize>8</pointsize>
          </font>
         </property>
@@ -524,6 +525,7 @@
         </property>
         <property name="font">
          <font>
+          <family>Liberation Sans</family>
           <pointsize>8</pointsize>
          </font>
         </property>
@@ -536,6 +538,7 @@
        <widget class="QLabel" name="lsbLabel">
         <property name="font">
          <font>
+          <family>Liberation Sans</family>
           <pointsize>8</pointsize>
          </font>
         </property>
@@ -557,6 +560,7 @@
         </property>
         <property name="font">
          <font>
+          <family>Liberation Sans</family>
           <pointsize>8</pointsize>
          </font>
         </property>
@@ -572,6 +576,7 @@
        <widget class="QLabel" name="usbLabel">
         <property name="font">
          <font>
+          <family>Liberation Sans</family>
           <pointsize>8</pointsize>
          </font>
         </property>
@@ -593,6 +598,7 @@
         </property>
         <property name="font">
          <font>
+          <family>Liberation Sans</family>
           <pointsize>8</pointsize>
          </font>
         </property>
@@ -1202,6 +1208,12 @@
      <height>284</height>
     </rect>
    </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
    <property name="windowTitle">
     <string>Channel Spectrum</string>
    </property>
@@ -1223,6 +1235,12 @@
     </property>
     <item>
      <widget class="GLSpectrum" name="glSpectrum" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="minimumSize">
        <size>
         <width>200</width>
@@ -1245,9 +1263,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>RollupWidget</class>
+   <class>RollupContents</class>
    <extends>QWidget</extends>
-   <header>gui/rollupwidget.h</header>
+   <header>gui/rollupcontents.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -1263,9 +1281,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>LevelMeterVU</class>
+   <class>ValueDialZ</class>
    <extends>QWidget</extends>
-   <header>gui/levelmeter.h</header>
+   <header>gui/valuedialz.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -1274,15 +1292,15 @@
    <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
-   <class>CWKeyerGUI</class>
+   <class>LevelMeterVU</class>
    <extends>QWidget</extends>
-   <header>gui/cwkeyergui.h</header>
+   <header>gui/levelmeter.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ValueDialZ</class>
+   <class>CWKeyerGUI</class>
    <extends>QWidget</extends>
-   <header>gui/valuedialz.h</header>
+   <header>gui/cwkeyergui.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

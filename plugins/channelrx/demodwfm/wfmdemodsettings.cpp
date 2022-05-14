@@ -52,6 +52,8 @@ void WFMDemodSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
+    m_workspaceIndex = 0;
+    m_hidden = false;
 }
 
 QByteArray WFMDemodSettings::serialize() const
@@ -80,6 +82,10 @@ QByteArray WFMDemodSettings::serialize() const
     if (m_rollupState) {
         s.writeBlob(18, m_rollupState->serialize());
     }
+
+    s.writeS32(19, m_workspaceIndex);
+    s.writeBlob(20, m_geometryBytes);
+    s.writeBool(21, m_hidden);
 
     return s.final();
 }
@@ -142,6 +148,10 @@ bool WFMDemodSettings::deserialize(const QByteArray& data)
             d.readBlob(18, &bytetmp);
             m_rollupState->deserialize(bytetmp);
         }
+
+        d.readS32(19, &m_workspaceIndex, 0);
+        d.readBlob(20, &m_geometryBytes);
+        d.readBool(21, &m_hidden, false);
 
         return true;
     }

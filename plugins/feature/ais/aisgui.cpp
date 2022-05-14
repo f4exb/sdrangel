@@ -112,6 +112,7 @@ bool AISGUI::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
+        m_feature->setWorkspaceIndex(m_settings.m_workspaceIndex);
         displaySettings();
         applySettings(true);
         return true;
@@ -166,7 +167,18 @@ void AISGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    RollupContents *rollupContents = getRollupContents();
+
+    if (rollupContents->hasExpandableWidgets()) {
+        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
+    } else {
+        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Fixed);
+    }
+
+    int h = rollupContents->height() + getAdditionalHeight();
+    resize(width(), h);
+
+    rollupContents->saveState(m_rollupState);
     applySettings();
 }
 
@@ -178,15 +190,17 @@ AISGUI::AISGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     m_doApplySettings(true),
     m_lastFeatureState(0)
 {
-    ui->setupUi(this);
-    m_helpURL = "plugins/feature/ais/readme.md";
+    m_feature = feature;
     setAttribute(Qt::WA_DeleteOnClose, true);
-    setChannelWidget(false);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    m_helpURL = "plugins/feature/ais/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+
     m_ais = reinterpret_cast<AIS*>(feature);
     m_ais->setMessageQueueToGUI(&m_inputMessageQueue);
-
-    m_featureUISet->addRollupWidget(this);
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
@@ -229,6 +243,12 @@ AISGUI::~AISGUI()
     delete ui;
 }
 
+void AISGUI::setWorkspaceIndex(int index)
+{
+    m_settings.m_workspaceIndex = index;
+    m_feature->setWorkspaceIndex(index);
+}
+
 void AISGUI::blockApplySettings(bool block)
 {
     m_doApplySettings = !block;
@@ -238,6 +258,7 @@ void AISGUI::displaySettings()
 {
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_settings.m_title);
+    setTitle(m_settings.m_title);
     blockApplySettings(true);
 
     // Order and size columns
@@ -253,17 +274,9 @@ void AISGUI::displaySettings()
         header->moveSection(header->visualIndex(i), m_settings.m_vesselColumnIndexes[i]);
     }
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
-    arrangeRollups();
-}
-
-void AISGUI::leaveEvent(QEvent*)
-{
-}
-
-void AISGUI::enterEvent(QEvent*)
-{
+    getRollupContents()->arrangeRollups();
 }
 
 void AISGUI::onMenuDialogCalled(const QPoint &p)
@@ -272,17 +285,16 @@ void AISGUI::onMenuDialogCalled(const QPoint &p)
     {
         BasicFeatureSettingsDialog dialog(this);
         dialog.setTitle(m_settings.m_title);
-        dialog.setColor(m_settings.m_rgbColor);
         dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
         dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
         dialog.setReverseAPIFeatureSetIndex(m_settings.m_reverseAPIFeatureSetIndex);
         dialog.setReverseAPIFeatureIndex(m_settings.m_reverseAPIFeatureIndex);
+        dialog.setDefaultTitle(m_displayedName);
 
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_rgbColor = dialog.getColor().rgb();
         m_settings.m_title = dialog.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
@@ -290,7 +302,7 @@ void AISGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIFeatureSetIndex = dialog.getReverseAPIFeatureSetIndex();
         m_settings.m_reverseAPIFeatureIndex = dialog.getReverseAPIFeatureIndex();
 
-        setWindowTitle(m_settings.m_title);
+        setTitle(m_settings.m_title);
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();

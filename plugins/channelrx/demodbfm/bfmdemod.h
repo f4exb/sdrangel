@@ -70,6 +70,8 @@ public:
 	BFMDemod(DeviceAPI *deviceAPI);
 	virtual ~BFMDemod();
     virtual void destroy() { delete this; }
+    virtual void setDeviceAPI(DeviceAPI *deviceAPI);
+    virtual DeviceAPI *getDeviceAPI() { return m_deviceAPI; }
     SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
     void setBasebandMessageQueueToGUI(MessageQueue *messageQueue) { m_basebandSink->setMessageQueueToGUI(messageQueue); }
 
@@ -117,6 +119,10 @@ public:
 
     virtual int webapiSettingsGet(
             SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiWorkspaceGet(
+            SWGSDRangel::SWGWorkspaceInfo& response,
             QString& errorMessage);
 
     virtual int webapiSettingsPutPatch(

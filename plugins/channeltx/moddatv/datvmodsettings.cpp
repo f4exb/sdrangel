@@ -57,6 +57,8 @@ void DATVModSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
+    m_workspaceIndex = 0;
+    m_hidden = false;
 }
 
 QByteArray DATVModSettings::serialize() const
@@ -92,6 +94,10 @@ QByteArray DATVModSettings::serialize() const
     if (m_rollupState) {
         s.writeBlob(29, m_rollupState->serialize());
     }
+
+    s.writeS32(30, m_workspaceIndex);
+    s.writeBlob(31, m_geometryBytes);
+    s.writeBool(32, m_hidden);
 
     return s.final();
 }
@@ -162,6 +168,10 @@ bool DATVModSettings::deserialize(const QByteArray& data)
             d.readBlob(29, &bytetmp);
             m_rollupState->deserialize(bytetmp);
         }
+
+        d.readS32(30, &m_workspaceIndex, 0);
+        d.readBlob(31, &m_geometryBytes);
+        d.readBool(32, &m_hidden, false);
 
         return true;
     }

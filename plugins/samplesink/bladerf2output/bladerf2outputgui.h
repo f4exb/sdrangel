@@ -47,10 +47,12 @@ public:
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     virtual bool handleMessage(const Message& message);
 
+protected:
+    void resizeEvent(QResizeEvent* size);
+
 private:
     Ui::BladeRF2OutputGui* ui;
 
-    DeviceUISet* m_deviceUISet;
     bool m_doApplySettings;
     bool m_forceSettings;
     BladeRF2OutputSettings m_settings;
@@ -76,6 +78,7 @@ private:
     void setCenterFrequencySetting(uint64_t kHzValue);
     float getGainDB(int gainValue);
     int getGainValue(float gainDB);
+    void makeUIConnections();
 
 private slots:
     void handleInputMessages();

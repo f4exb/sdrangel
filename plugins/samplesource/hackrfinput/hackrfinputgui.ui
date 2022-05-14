@@ -6,20 +6,26 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>310</width>
-    <height>300</height>
+    <width>360</width>
+    <height>230</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
-    <width>310</width>
-    <height>300</height>
+    <width>360</width>
+    <height>230</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>380</width>
+    <height>272</height>
    </size>
   </property>
   <property name="font">
@@ -116,13 +122,13 @@
        <property name="minimumSize">
         <size>
          <width>32</width>
-         <height>50</height>
+         <height>0</height>
         </size>
        </property>
        <property name="font">
         <font>
          <family>Liberation Mono</family>
-         <pointsize>20</pointsize>
+         <pointsize>16</pointsize>
         </font>
        </property>
        <property name="cursor">
@@ -243,7 +249,7 @@
       </widget>
      </item>
      <item row="0" column="3">
-       <widget class="ButtonSwitch" name="autoBBF">
+      <widget class="ButtonSwitch" name="autoBBF">
        <property name="toolTip">
         <string>Bandpass Filter auto select</string>
        </property>
@@ -655,23 +661,6 @@
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="padLayout">
-     <item>
-      <spacer name="verticalSpacer">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>40</height>
-        </size>
-       </property>
-      </spacer>
      </item>
     </layout>
    </item>

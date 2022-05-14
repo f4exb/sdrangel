@@ -53,6 +53,8 @@ void RemoteSinkSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
+    m_workspaceIndex = 0;
+    m_hidden = false;
 }
 
 QByteArray RemoteSinkSettings::serialize() const
@@ -82,6 +84,10 @@ QByteArray RemoteSinkSettings::serialize() const
     if (m_channelMarker) {
         s.writeBlob(17, m_channelMarker->serialize());
     }
+
+    s.writeS32(18, m_workspaceIndex);
+    s.writeBlob(19, m_geometryBytes);
+    s.writeBool(20, m_hidden);
 
     return s.final();
 }
@@ -154,6 +160,10 @@ bool RemoteSinkSettings::deserialize(const QByteArray& data)
             d.readBlob(17, &bytetmp);
             m_channelMarker->deserialize(bytetmp);
         }
+
+        d.readS32(18, &m_workspaceIndex, 0);
+        d.readBlob(19, &m_geometryBytes);
+        d.readBool(20, &m_hidden, false);
 
         return true;
     }

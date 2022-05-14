@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>IEEE_802_15_4_ModGUI</class>
- <widget class="RollupWidget" name="IEEE_802_15_4_ModGUI">
+ <widget class="RollupContents" name="IEEE_802_15_4_ModGUI">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>605</width>
+    <width>622</width>
     <height>937</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
-    <width>0</width>
+    <width>600</width>
     <height>0</height>
    </size>
   </property>
@@ -40,15 +40,15 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>2</x>
-     <y>2</y>
+     <x>0</x>
+     <y>0</y>
      <width>600</width>
      <height>151</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
-     <width>600</width>
+     <width>598</width>
      <height>0</height>
     </size>
    </property>
@@ -586,14 +586,14 @@
     </rect>
    </property>
    <property name="sizePolicy">
-    <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
    <property name="minimumSize">
     <size>
-     <width>600</width>
+     <width>598</width>
      <height>0</height>
     </size>
    </property>
@@ -634,9 +634,15 @@
      <height>284</height>
     </rect>
    </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
    <property name="minimumSize">
     <size>
-     <width>600</width>
+     <width>598</width>
      <height>0</height>
     </size>
    </property>
@@ -661,6 +667,12 @@
     </property>
     <item>
      <widget class="GLScope" name="glScope" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="minimumSize">
        <size>
         <width>200</width>
@@ -689,9 +701,15 @@
      <height>284</height>
     </rect>
    </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
    <property name="minimumSize">
     <size>
-     <width>600</width>
+     <width>598</width>
      <height>0</height>
     </size>
    </property>
@@ -716,6 +734,12 @@
     </property>
     <item>
      <widget class="GLSpectrum" name="glSpectrum" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="minimumSize">
        <size>
         <width>200</width>
@@ -738,15 +762,21 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>RollupWidget</class>
+   <class>RollupContents</class>
    <extends>QWidget</extends>
-   <header>gui/rollupwidget.h</header>
+   <header>gui/rollupcontents.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ValueDialZ</class>
+   <class>GLSpectrum</class>
    <extends>QWidget</extends>
-   <header>gui/valuedialz.h</header>
+   <header>gui/glspectrum.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>GLSpectrumGUI</class>
+   <extends>QWidget</extends>
+   <header>gui/glspectrumgui.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -762,21 +792,15 @@
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>ValueDialZ</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedialz.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>ButtonSwitch</class>
    <extends>QToolButton</extends>
    <header>gui/buttonswitch.h</header>
-  </customwidget>
-  <customwidget>
-   <class>GLSpectrum</class>
-   <extends>QWidget</extends>
-   <header>gui/glspectrum.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>GLSpectrumGUI</class>
-   <extends>QWidget</extends>
-   <header>gui/glspectrumgui.h</header>
-   <container>1</container>
   </customwidget>
   <customwidget>
    <class>LevelMeterVU</class>

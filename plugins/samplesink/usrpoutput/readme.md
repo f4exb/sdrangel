@@ -6,6 +6,8 @@ This output sample sink plugin sends its samples to a [USRP device](https://www.
 
 <h2>Interface</h2>
 
+The top and bottom bars of the device window are described [here](../../../sdrgui/device/readme.md)
+
 ![USRP output plugin GUI](../../../doc/img/USRPOutput_plugin.png)
 
 <h3>1: Start/Stop</h3>
@@ -18,7 +20,7 @@ Device start / stop button.
 
 <h3>2A: Sample rate</h3>
 
-This is the sample rate at which IQ samples are transfered from SDRangel to the device, in kS/s (k) or MS/s (M). 
+This is the sample rate at which IQ samples are transfered from SDRangel to the device, in kS/s (k) or MS/s (M).
 
 <h3>2B: Stream sample rate</h3>
 

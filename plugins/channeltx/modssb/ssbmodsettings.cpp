@@ -75,6 +75,8 @@ void SSBModSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
+    m_workspaceIndex = 0;
+    m_hidden = false;
 }
 
 QByteArray SSBModSettings::serialize() const
@@ -126,6 +128,10 @@ QByteArray SSBModSettings::serialize() const
     if (m_rollupState) {
         s.writeBlob(31, m_rollupState->serialize());
     }
+
+    s.writeS32(32, m_workspaceIndex);
+    s.writeBlob(33, m_geometryBytes);
+    s.writeBool(34, m_hidden);
 
     return s.final();
 }
@@ -218,6 +224,10 @@ bool SSBModSettings::deserialize(const QByteArray& data)
             d.readBlob(31, &bytetmp);
             m_rollupState->deserialize(bytetmp);
         }
+
+        d.readS32(32, &m_workspaceIndex, 0);
+        d.readBlob(33, &m_geometryBytes);
+        d.readBool(34, &m_hidden, false);
 
         return true;
     }

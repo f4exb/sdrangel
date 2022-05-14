@@ -26,6 +26,7 @@
 #include <QThread>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGChannelReport.h"
 #include "SWGChirpChatModReport.h"
 
@@ -93,6 +94,18 @@ ChirpChatMod::~ChirpChatMod()
     delete m_thread;
 }
 
+void ChirpChatMod::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSourceAPI(this);
+        m_deviceAPI->removeChannelSource(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addChannelSource(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
+}
+
 void ChirpChatMod::start()
 {
 	qDebug("ChirpChatMod::start");
@@ -132,10 +145,8 @@ bool ChirpChatMod::handleMessage(const Message& cmd)
         m_basebandSource->getInputMessageQueue()->push(rep);
 
         // Forward to the GUI
-        if (getMessageQueueToGUI())
-        {
-            DSPSignalNotification* repToGUI = new DSPSignalNotification(notif); // make a copy
-            getMessageQueueToGUI()->push(repToGUI);
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
         }
 
         return true;
@@ -445,6 +456,15 @@ int ChirpChatMod::webapiSettingsGet(
     response.getChirpChatModSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
 
+    return 200;
+}
+
+int ChirpChatMod::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

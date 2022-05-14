@@ -24,6 +24,7 @@
 #include "plugin/pluginapi.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
+#include "gui/basicdevicesettingsdialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "dsp/spectrumvis.h"
@@ -38,7 +39,6 @@
 TestMOSyncGui::TestMOSyncGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	DeviceGUI(parent),
 	ui(new Ui::TestMOSyncGui),
-	m_deviceUISet(deviceUISet),
 	m_doApplySettings(true),
 	m_forceSettings(true),
 	m_settings(),
@@ -49,7 +49,14 @@ TestMOSyncGui::TestMOSyncGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_tickCount(0),
 	m_lastEngineState(DeviceAPI::StNotStarted)
 {
-	ui->setupUi(this);
+    m_deviceUISet = deviceUISet;
+    setAttribute(Qt::WA_DeleteOnClose, true);
+    m_helpURL = "plugins/samplemimo/testmosync/readme.md";
+    QWidget *contents = getContents();
+	ui->setupUi(contents);
+    setSizePolicy(contents->sizePolicy());
+
+    getContents()->setStyleSheet("#TestMOSyncGui { background-color: rgb(64, 64, 64); }");
     m_sampleMIMO = (TestMOSync*) m_deviceUISet->m_deviceAPI->getSampleMIMO();
 
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -70,6 +77,7 @@ TestMOSyncGui::TestMOSyncGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_statusTimer.start(500);
 
 	displaySettings();
+    makeUIConnections();
 
     m_sampleMIMO->setMessageQueueToGUI(&m_inputMessageQueue);
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
@@ -77,6 +85,8 @@ TestMOSyncGui::TestMOSyncGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_deviceUISet->m_spectrum->setDisplayedStream(false, 0);
     m_deviceUISet->m_deviceAPI->setSpectrumSinkInput(false, 0);
     m_deviceUISet->setSpectrumScalingFactor(SDR_TX_SCALEF);
+
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 }
 
 TestMOSyncGui::~TestMOSyncGui()
@@ -281,4 +291,37 @@ void TestMOSyncGui::on_spectrumIndex_currentIndexChanged(int index)
 
 void TestMOSyncGui::tick()
 {
+}
+
+void TestMOSyncGui::openDeviceSettingsDialog(const QPoint& p)
+{
+    if (m_contextMenuType == ContextMenuDeviceSettings)
+    {
+        BasicDeviceSettingsDialog dialog(this);
+        dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
+        dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
+        dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
+        dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
+
+        dialog.move(p);
+        dialog.exec();
+
+        m_settings.m_useReverseAPI = dialog.useReverseAPI();
+        m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
+        m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
+        m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+
+        sendSettings();
+    }
+
+    resetContextMenuType();
+}
+
+void TestMOSyncGui::makeUIConnections()
+{
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &TestMOSyncGui::on_centerFrequency_changed);
+    QObject::connect(ui->sampleRate, &ValueDial::changed, this, &TestMOSyncGui::on_sampleRate_changed);
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &TestMOSyncGui::on_startStop_toggled);
+    QObject::connect(ui->interp, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TestMOSyncGui::on_interp_currentIndexChanged);
+    QObject::connect(ui->spectrumIndex, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TestMOSyncGui::on_spectrumIndex_currentIndexChanged);
 }

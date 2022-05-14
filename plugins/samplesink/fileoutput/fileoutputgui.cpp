@@ -22,11 +22,13 @@
 #include <QString>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QResizeEvent>
 
 #include "ui_fileoutputgui.h"
 #include "plugin/pluginapi.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
+#include "gui/basicdevicesettingsdialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 
@@ -39,7 +41,6 @@
 FileOutputGui::FileOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	DeviceGUI(parent),
 	ui(new Ui::FileOutputGui),
-	m_deviceUISet(deviceUISet),
 	m_doApplySettings(true),
 	m_forceSettings(true),
 	m_settings(),
@@ -51,7 +52,13 @@ FileOutputGui::FileOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_tickCount(0),
 	m_lastEngineState(DeviceAPI::StNotStarted)
 {
-	ui->setupUi(this);
+    m_deviceUISet = deviceUISet;
+    setAttribute(Qt::WA_DeleteOnClose, true);
+    ui->setupUi(getContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    getContents()->setStyleSheet("#FileOutputGui { background-color: rgb(64, 64, 64); }");
+    m_helpURL = "plugins/samplesink/fileoutput/readme.md";
+    ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 	ui->centerFrequency->setValueRange(7, 0, pow(10,7));
@@ -67,9 +74,11 @@ FileOutputGui::FileOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_statusTimer.start(500);
 
 	displaySettings();
+    makeUIConnections();
 
     m_deviceSampleSink = (FileOutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 }
 
 FileOutputGui::~FileOutputGui()
@@ -105,6 +114,12 @@ bool FileOutputGui::deserialize(const QByteArray& data)
 		resetToDefaults();
 		return false;
 	}
+}
+
+void FileOutputGui::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 bool FileOutputGui::handleMessage(const Message& message)
@@ -315,4 +330,37 @@ void FileOutputGui::tick()
 		FileOutput::MsgConfigureFileOutputStreamTiming* message = FileOutput::MsgConfigureFileOutputStreamTiming::create();
 		m_deviceSampleSink->getInputMessageQueue()->push(message);
 	}
+}
+
+void FileOutputGui::openDeviceSettingsDialog(const QPoint& p)
+{
+    if (m_contextMenuType == ContextMenuDeviceSettings)
+    {
+        BasicDeviceSettingsDialog dialog(this);
+        dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
+        dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
+        dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
+        dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
+
+        dialog.move(p);
+        dialog.exec();
+
+        m_settings.m_useReverseAPI = dialog.useReverseAPI();
+        m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
+        m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
+        m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+
+        sendSettings();
+    }
+
+    resetContextMenuType();
+}
+
+void FileOutputGui::makeUIConnections()
+{
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &FileOutputGui::on_centerFrequency_changed);
+    QObject::connect(ui->sampleRate, &ValueDial::changed, this, &FileOutputGui::on_sampleRate_changed);
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &FileOutputGui::on_startStop_toggled);
+    QObject::connect(ui->showFileDialog, &QPushButton::clicked, this, &FileOutputGui::on_showFileDialog_clicked);
+    QObject::connect(ui->interp, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FileOutputGui::on_interp_currentIndexChanged);
 }

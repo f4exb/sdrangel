@@ -46,6 +46,17 @@ public:
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
+    virtual void setWorkspaceIndex(int index) { m_settings.m_workspaceIndex = index; };
+    virtual int getWorkspaceIndex() const { return m_settings.m_workspaceIndex; };
+    virtual void setGeometryBytes(const QByteArray& blob) { m_settings.m_geometryBytes = blob; };
+    virtual QByteArray getGeometryBytes() const { return m_settings.m_geometryBytes; };
+    virtual QString getTitle() const { return m_settings.m_title; };
+    virtual QColor getTitleColor() const  { return m_settings.m_rgbColor; };
+    virtual void zetHidden(bool hidden) { m_settings.m_hidden = hidden; }
+    virtual bool getHidden() const { return m_settings.m_hidden; }
+    virtual ChannelMarker& getChannelMarker() { return m_channelMarker; }
+    virtual int getStreamIndex() const { return m_settings.m_streamIndex; }
+    virtual void setStreamIndex(int streamIndex) { m_settings.m_streamIndex = streamIndex; }
 
 private slots:
 	void channelMarkerChangedByCursor();
@@ -89,6 +100,7 @@ private:
 	ChannelMarker m_channelMarker;
 	RollupState m_rollupState;
 	ChirpChatDemodSettings m_settings;
+    qint64 m_deviceCenterFrequency;
     int m_basebandSampleRate;
 	bool m_doApplySettings;
 
@@ -103,7 +115,6 @@ private:
     void blockApplySettings(bool block);
 	void applySettings(bool force = false);
 	void displaySettings();
-    void displayStreamIndex();
     void displaySquelch();
     void setBandwidths();
     void showLoRaMessage(const Message& message);
@@ -115,6 +126,8 @@ private:
 	QString getParityStr(int parityStatus);
     void resetLoRaStatus();
 	bool handleMessage(const Message& message);
+    void makeUIConnections();
+    void updateAbsoluteCenterFrequency();
 };
 
 #endif // INCLUDE_CHIRPCHATDEMODGUI_H

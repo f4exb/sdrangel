@@ -31,6 +31,7 @@
 #include <complex.h>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGChannelReport.h"
 #include "SWGChannelActions.h"
 #include "SWGRadioAstronomyActions.h"
@@ -152,6 +153,18 @@ RadioAstronomy::~RadioAstronomy()
         stop();
     }
     delete m_worker;
+}
+
+void RadioAstronomy::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSinkAPI(this);
+        m_deviceAPI->removeChannelSink(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addChannelSink(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
 }
 
 uint32_t RadioAstronomy::getNumberOfDeviceStreams() const
@@ -825,6 +838,15 @@ int RadioAstronomy::webapiSettingsGet(
     response.setRadioAstronomySettings(new SWGSDRangel::SWGRadioAstronomySettings());
     response.getRadioAstronomySettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int RadioAstronomy::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

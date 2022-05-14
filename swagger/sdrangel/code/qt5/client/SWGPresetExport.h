@@ -13,7 +13,7 @@
 /*
  * SWGPresetExport.h
  *
- * Details to export a preset to file
+ * Details to export a preset to a file
  */
 
 #ifndef SWGPresetExport_H_

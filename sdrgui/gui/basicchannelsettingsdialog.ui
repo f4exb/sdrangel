@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>135</height>
+    <height>158</height>
    </rect>
   </property>
   <property name="font">
@@ -39,6 +39,26 @@
       <widget class="QLineEdit" name="title">
        <property name="toolTip">
         <string>Channel marker title</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="titleReset">
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Reset title to channel type name</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
        </property>
       </widget>
      </item>
@@ -95,6 +115,26 @@
          <string>Title</string>
         </property>
        </item>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="streamIndexLabel">
+       <property name="text">
+        <string>Stream</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="streamIndex">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="toolTip">
+        <string>Stream index for MIMO device and single stream channel</string>
+       </property>
+       <property name="maximum">
+        <number>0</number>
+       </property>
       </widget>
      </item>
      <item>
@@ -272,7 +312,9 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../resources/res.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

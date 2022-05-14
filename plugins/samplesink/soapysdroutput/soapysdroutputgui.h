@@ -54,6 +54,9 @@ public:
     virtual bool deserialize(const QByteArray& data);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 
+protected:
+    void resizeEvent(QResizeEvent* size);
+
 private:
     void createRangesControl(
             ItemSettingGUI **settingGUI,
@@ -70,7 +73,6 @@ private:
 
     Ui::SoapySDROutputGui* ui;
 
-    DeviceUISet* m_deviceUISet;
     bool m_forceSettings;
     bool m_doApplySettings;
     SoapySDROutputSettings m_settings;
@@ -107,6 +109,7 @@ private:
     void updateSampleRateAndFrequency();
     void updateFrequencyLimits();
     void setCenterFrequencySetting(uint64_t kHzValue);
+    void makeUIConnections();
 
 private slots:
     void handleInputMessages();

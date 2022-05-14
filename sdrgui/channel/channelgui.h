@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2020 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2020-2022 Edouard Griffiths, F4EXB                              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -18,33 +18,138 @@
 #ifndef SDRGUI_CHANNEL_CHANNELGUI_H_
 #define SDRGUI_CHANNEL_CHANNELGUI_H_
 
-#include "gui/rollupwidget.h"
+#include <QMdiSubWindow>
+#include <QMap>
+
+#include "gui/framelesswindowresizer.h"
 #include "export.h"
 
 class QCloseEvent;
 class MessageQueue;
+class QLabel;
+class QPushButton;
+class QVBoxLayout;
+class QHBoxLayout;
+class QSizeGrip;
+class RollupContents;
+class ChannelMarker;
 
-class SDRGUI_API ChannelGUI : public RollupWidget
+class SDRGUI_API ChannelGUI : public QMdiSubWindow
 {
     Q_OBJECT
 public:
-	ChannelGUI(QWidget *parent = nullptr) :
-        RollupWidget(parent)
-    { }
-	virtual ~ChannelGUI() { }
+    enum DeviceType
+    {
+        DeviceRx,
+        DeviceTx,
+        DeviceMIMO
+    };
+
+    enum ContextMenuType
+    {
+        ContextMenuNone,
+        ContextMenuChannelSettings
+    };
+
+	ChannelGUI(QWidget *parent = nullptr);
+	virtual ~ChannelGUI();
 	virtual void destroy() = 0;
 
 	virtual void resetToDefaults() = 0;
 	virtual QByteArray serialize() const = 0;
 	virtual bool deserialize(const QByteArray& data) = 0;
+    // Data saved in the derived settings
+    virtual void setWorkspaceIndex(int index)= 0;
+    virtual int getWorkspaceIndex() const = 0;
+    virtual void setGeometryBytes(const QByteArray& blob) = 0;
+    virtual QByteArray getGeometryBytes() const = 0;
+    virtual QString getTitle() const = 0;
+    virtual QColor getTitleColor() const  = 0;
+    virtual void zetHidden(bool hidden) = 0;
+    virtual bool getHidden() const = 0;
+    virtual ChannelMarker& getChannelMarker() = 0;
+    virtual int getStreamIndex() const = 0;
+    virtual void setStreamIndex(int streamIndex) = 0;
 
 	virtual MessageQueue* getInputMessageQueue() = 0;
 
+    RollupContents *getRollupContents() { return m_rollupContents; }
+    void setTitle(const QString& title);
+    void setTitleColor(const QColor& c);
+    void setDeviceType(DeviceType type);
+    void setDisplayedame(const QString& name);
+    DeviceType getDeviceType() const { return m_deviceType; }
+    void setIndexToolTip(const QString& tooltip);
+    void setIndex(int index);
+    int getIndex() const { return m_channelIndex; }
+    void setDeviceSetIndex(int index);
+    int getDeviceSetIndex() const { return m_deviceSetIndex; }
+    void setStatusFrequency(qint64 frequency);
+    void setStatusText(const QString& text);
+
 protected:
-    void closeEvent(QCloseEvent *event);
+    void closeEvent(QCloseEvent *event) override;
+    void leaveEvent(QEvent *event) override;
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
+    void mouseMoveEvent(QMouseEvent* event) override;
+    void resetContextMenuType() { m_contextMenuType = ContextMenuNone; }
+    void updateIndexLabel();
+    int getAdditionalHeight() const { return 22 + 22; }  // height of top and bottom bars
+    void setHighlighted(bool highlighted);
+
+    DeviceType m_deviceType;
+    int m_deviceSetIndex;
+    int m_channelIndex;
+    QString m_helpURL;
+    RollupContents* m_rollupContents;
+    ContextMenuType m_contextMenuType;
+    QString m_displayedName;
+
+protected slots:
+    void shrinkWindow();
+
+private:
+    bool isOnMovingPad();
+    QString getDeviceTypeTag();
+    static QColor getTitleColor(const QColor& backgroundColor);
+
+    QLabel *m_indexLabel;
+    QPushButton *m_settingsButton;
+    QLabel *m_titleLabel;
+    QPushButton *m_helpButton;
+    QPushButton *m_moveButton;
+    QPushButton *m_shrinkButton;
+    QPushButton *m_hideButton;
+    QPushButton *m_closeButton;
+    QPushButton *m_duplicateButton;
+    QPushButton *m_moveToDeviceButton;
+    QLabel *m_statusFrequency;
+    QLabel *m_statusLabel;
+    QVBoxLayout *m_layouts;
+    QHBoxLayout *m_topLayout;
+    QHBoxLayout *m_centerLayout;
+    QHBoxLayout *m_bottomLayout;
+    QSizeGrip *m_sizeGripBottomRight;
+    bool m_drag;
+    QPoint m_DragPosition;
+    QMap<QWidget*, int> m_heightsMap;
+    FramelessWindowResizer m_resizer;
+
+private slots:
+    void activateSettingsDialog();
+    void showHelp();
+    void openMoveToWorkspaceDialog();
+    void onWidgetRolled(QWidget *widget, bool show);
+    void duplicateChannel();
+    void openMoveToDeviceSetDialog();
 
 signals:
     void closing();
+    void moveToWorkspace(int workspaceIndex);
+    void forceShrink();
+    void duplicateChannelEmitted();
+    void moveToDeviceSet(int deviceSetIndex);
 };
 
 #endif // SDRGUI_CHANNEL_CHANNELGUI_H_

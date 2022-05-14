@@ -52,6 +52,9 @@ public:
     virtual bool deserialize(const QByteArray& data);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 
+protected:
+    void resizeEvent(QResizeEvent* size);
+
 private:
     void createRangesControl(
             ItemSettingGUI **settingGUI,
@@ -64,10 +67,10 @@ private:
     void createIndividualGainsControl(const std::vector<DeviceSoapySDRParams::GainSetting>& individualGainsList);
     void createCorrectionsControl();
     void createArgumentsControl(const SoapySDR::ArgInfoList& argInfoList, bool deviceArguments);
+    void makeUIConnections();
 
     Ui::SoapySDRInputGui* ui;
 
-    DeviceUISet* m_deviceUISet;
     bool m_forceSettings;
     bool m_doApplySettings;
     SoapySDRInputSettings m_settings;

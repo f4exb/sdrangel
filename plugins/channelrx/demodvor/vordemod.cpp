@@ -16,8 +16,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "vordemod.h"
-
 #include <QTime>
 #include <QDebug>
 #include <QNetworkAccessManager>
@@ -29,6 +27,7 @@
 #include <complex.h>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGVORDemodSettings.h"
 #include "SWGChannelReport.h"
 #include "SWGVORDemodReport.h"
@@ -40,6 +39,9 @@
 #include "settings/serializable.h"
 #include "util/db.h"
 #include "maincore.h"
+
+#include "vordemodreport.h"
+#include "vordemod.h"
 
 MESSAGE_CLASS_DEFINITION(VORDemod::MsgConfigureVORDemod, Message)
 
@@ -54,6 +56,7 @@ VORDemod::VORDemod(DeviceAPI *deviceAPI) :
     setObjectName(m_channelId);
 
     m_basebandSink = new VORDemodBaseband();
+    m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());
     m_basebandSink->moveToThread(&m_thread);
 
     applySettings(m_settings, true);
@@ -94,6 +97,18 @@ VORDemod::~VORDemod()
     }
 
     delete m_basebandSink;
+}
+
+void VORDemod::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSinkAPI(this);
+        m_deviceAPI->removeChannelSink(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addChannelSink(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
 }
 
 uint32_t VORDemod::getNumberOfDeviceStreams() const
@@ -150,10 +165,52 @@ bool VORDemod::handleMessage(const Message& cmd)
         qDebug() << "VORDemod::handleMessage: DSPSignalNotification";
         m_basebandSink->getInputMessageQueue()->push(rep);
         // Forward to GUI if any
+        if (m_guiMessageQueue) {
+            m_guiMessageQueue->push(new DSPSignalNotification(notif));
+        }
+
+        return true;
+    }
+    else if (VORDemodReport::MsgReportRadial::match(cmd))
+    {
+        VORDemodReport::MsgReportRadial& report = (VORDemodReport::MsgReportRadial&) cmd;
+        m_radial = report.getRadial();
+        m_refMag = report.getRefMag();
+        m_varMag = report.getVarMag();
+
         if (m_guiMessageQueue)
         {
-            rep = new DSPSignalNotification(notif);
-            m_guiMessageQueue->push(rep);
+            VORDemodReport::MsgReportRadial *msg = new VORDemodReport::MsgReportRadial(report);
+            m_guiMessageQueue->push(msg);
+        }
+
+        MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
+        QList<ObjectPipe*> pipes;
+        messagePipes.getMessagePipes(this, "report", pipes);
+
+        if (pipes.size() > 0) {
+            sendChannelReport(pipes);
+        }
+
+        return true;
+    }
+    else if (VORDemodReport::MsgReportIdent::match(cmd))
+    {
+        VORDemodReport::MsgReportIdent& report = (VORDemodReport::MsgReportIdent&) cmd;
+        m_morseIdent = report.getIdent();
+
+        if (m_guiMessageQueue)
+        {
+            VORDemodReport::MsgReportIdent *msg = new VORDemodReport::MsgReportIdent(report);
+            m_guiMessageQueue->push(msg);
+        }
+
+        MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
+        QList<ObjectPipe*> pipes;
+        messagePipes.getMessagePipes(this, "report", pipes);
+
+        if (pipes.size() > 0) {
+            sendChannelReport(pipes);
         }
 
         return true;
@@ -164,9 +221,24 @@ bool VORDemod::handleMessage(const Message& cmd)
     }
 }
 
+void VORDemod::setCenterFrequency(qint64 frequency)
+{
+    VORDemodSettings settings = m_settings;
+    settings.m_inputFrequencyOffset = frequency;
+    applySettings(settings, false);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureVORDemod *msgToGUI = MsgConfigureVORDemod::create(settings, false);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+}
+
 void VORDemod::applySettings(const VORDemodSettings& settings, bool force)
 {
     qDebug() << "VORDemod::applySettings:"
+            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
+            << " m_navId: " << settings.m_navId
             << " m_volume: " << settings.m_volume
             << " m_squelch: " << settings.m_squelch
             << " m_audioMute: " << settings.m_audioMute
@@ -181,6 +253,18 @@ void VORDemod::applySettings(const VORDemodSettings& settings, bool force)
 
     QList<QString> reverseAPIKeys;
 
+    if ((m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset) || force) {
+        reverseAPIKeys.append("inputFrequencyOffset");
+    }
+    if ((m_settings.m_navId != settings.m_navId) || force) {
+        reverseAPIKeys.append("navId");
+
+        // Reset state so we don't report old data for new NavId
+        m_radial = 0.0f;
+        m_refMag = -200.0f;
+        m_varMag = -200.0f;
+        m_morseIdent = "";
+    }
     if ((m_settings.m_squelch != settings.m_squelch) || force) {
         reverseAPIKeys.append("squelch");
     }
@@ -211,10 +295,6 @@ void VORDemod::applySettings(const VORDemodSettings& settings, bool force)
 
     if ((m_settings.m_identThreshold != settings.m_identThreshold) || force) {
         reverseAPIKeys.append("identThreshold");
-    }
-
-    if ((m_settings.m_magDecAdjust != settings.m_magDecAdjust) || force) {
-        reverseAPIKeys.append("magDecAdjust");
     }
 
     VORDemodBaseband::MsgConfigureVORDemodBaseband *msg = VORDemodBaseband::MsgConfigureVORDemodBaseband::create(settings, force);
@@ -273,6 +353,15 @@ int VORDemod::webapiSettingsGet(
     return 200;
 }
 
+int VORDemod::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
+    return 200;
+}
+
 int VORDemod::webapiSettingsPutPatch(
         bool force,
         const QStringList& channelSettingsKeys,
@@ -303,6 +392,12 @@ void VORDemod::webapiUpdateChannelSettings(
         const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings& response)
 {
+    if (channelSettingsKeys.contains("inputFrequencyOffset")) {
+        settings.m_inputFrequencyOffset = response.getVorDemodSettings()->getInputFrequencyOffset();
+    }
+    if (channelSettingsKeys.contains("navId")) {
+        settings.m_navId = response.getVorDemodSettings()->getNavId();
+    }
     if (channelSettingsKeys.contains("audioMute")) {
         settings.m_audioMute = response.getVorDemodSettings()->getAudioMute() != 0;
     }
@@ -321,7 +416,6 @@ void VORDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("audioDeviceName")) {
         settings.m_audioDeviceName = *response.getVorDemodSettings()->getAudioDeviceName();
     }
-
     if (channelSettingsKeys.contains("streamIndex")) {
         settings.m_streamIndex = response.getVorDemodSettings()->getStreamIndex();
     }
@@ -342,9 +436,6 @@ void VORDemod::webapiUpdateChannelSettings(
     }
     if (channelSettingsKeys.contains("identThreshold")) {
         settings.m_identThreshold = response.getVorDemodSettings()->getIdentThreshold();
-    }
-    if (channelSettingsKeys.contains("magDecAdjust")) {
-        settings.m_magDecAdjust = response.getVorDemodSettings()->getMagDecAdjust() != 0;
     }
     if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
         settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getVorDemodSettings()->getChannelMarker());
@@ -367,6 +458,8 @@ int VORDemod::webapiReportGet(
 
 void VORDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const VORDemodSettings& settings)
 {
+    response.getVorDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    response.getVorDemodSettings()->setNavId(settings.m_navId);
     response.getVorDemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
     response.getVorDemodSettings()->setRgbColor(settings.m_rgbColor);
     response.getVorDemodSettings()->setSquelch(settings.m_squelch);
@@ -396,9 +489,7 @@ void VORDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     response.getVorDemodSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getVorDemodSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getVorDemodSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
-
     response.getVorDemodSettings()->setIdentThreshold(settings.m_identThreshold);
-    response.getVorDemodSettings()->setMagDecAdjust(settings.m_magDecAdjust ? 1 : 0);
 
     if (settings.m_channelMarker)
     {
@@ -434,10 +525,26 @@ void VORDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response
     double magsqAvg, magsqPeak;
     int nbMagsqSamples;
     getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
-
     response.getVorDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
     response.getVorDemodReport()->setSquelch(m_basebandSink->getSquelchOpen() ? 1 : 0);
     response.getVorDemodReport()->setAudioSampleRate(m_basebandSink->getAudioSampleRate());
+    response.getVorDemodReport()->setNavId(m_settings.m_navId);
+    response.getVorDemodReport()->setRadial(m_radial);
+    response.getVorDemodReport()->setRefMag(m_refMag);
+    response.getVorDemodReport()->setVarMag(m_varMag);
+    float refMagDB = std::round(20.0*std::log10(m_refMag));
+    float varMagDB = std::round(20.0*std::log10(m_varMag));
+    bool validRefMag = refMagDB > m_settings.m_refThresholdDB;
+    bool validVarMag = varMagDB > m_settings.m_varThresholdDB;
+    response.getVorDemodReport()->setValidRadial(validRefMag && validVarMag ? 1 : 0);
+    response.getVorDemodReport()->setValidRefMag(validRefMag ? 1 : 0);
+    response.getVorDemodReport()->setValidVarMag(validVarMag ? 1 : 0);
+
+    if (response.getVorDemodReport()->getMorseIdent()) {
+        *response.getVorDemodReport()->getMorseIdent() = m_morseIdent;
+    } else {
+        response.getVorDemodReport()->setMorseIdent(new QString(m_morseIdent));
+    }
 }
 
 void VORDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const VORDemodSettings& settings, bool force)
@@ -490,6 +597,25 @@ void VORDemod::sendChannelSettings(
     }
 }
 
+void VORDemod::sendChannelReport(QList<ObjectPipe*>& messagePipes)
+{
+    for (const auto& pipe : messagePipes)
+    {
+        MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+
+        if (messageQueue)
+        {
+            SWGSDRangel::SWGChannelReport *swgChannelReport = new SWGSDRangel::SWGChannelReport();
+            swgChannelReport->setDirection(0);
+            swgChannelReport->setChannelType(new QString(m_channelId));
+            swgChannelReport->setVorDemodReport(new SWGSDRangel::SWGVORDemodReport());
+            webapiFormatChannelReport(*swgChannelReport);
+            MainCore::MsgChannelReport *msg = MainCore::MsgChannelReport::create(this, swgChannelReport);
+            messageQueue->push(msg);
+        }
+    }
+}
+
 void VORDemod::webapiFormatChannelSettings(
         QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
@@ -506,6 +632,12 @@ void VORDemod::webapiFormatChannelSettings(
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
+    if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
+        swgVORDemodSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    }
+    if (channelSettingsKeys.contains("navId") || force) {
+        swgVORDemodSettings->setNavId(settings.m_navId);
+    }
     if (channelSettingsKeys.contains("audioMute") || force) {
         swgVORDemodSettings->setAudioMute(settings.m_audioMute ? 1 : 0);
     }
@@ -528,10 +660,7 @@ void VORDemod::webapiFormatChannelSettings(
         swgVORDemodSettings->setStreamIndex(settings.m_streamIndex);
     }
     if (channelSettingsKeys.contains("identThreshold") || force) {
-        swgVORDemodSettings->setIdentThreshold(settings.m_identThreshold);
-    }
-    if (channelSettingsKeys.contains("magDecAdjust") || force) {
-        swgVORDemodSettings->setMagDecAdjust(settings.m_magDecAdjust ? 1 : 0);
+        swgVORDemodSettings->setAudioMute(settings.m_identThreshold);
     }
 
     if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
@@ -581,4 +710,5 @@ void VORDemod::handleIndexInDeviceSetChanged(int index)
         .arg(m_deviceAPI->getDeviceSetIndex())
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
+    m_basebandSink->setAudioFifoLabel(fifoLabel);
 }

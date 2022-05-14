@@ -198,6 +198,17 @@ public:
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
+    virtual void setWorkspaceIndex(int index) { m_settings.m_workspaceIndex = index; };
+    virtual int getWorkspaceIndex() const { return m_settings.m_workspaceIndex; };
+    virtual void setGeometryBytes(const QByteArray& blob) { m_settings.m_geometryBytes = blob; };
+    virtual QByteArray getGeometryBytes() const { return m_settings.m_geometryBytes; };
+    virtual QString getTitle() const { return m_settings.m_title; };
+    virtual QColor getTitleColor() const  { return m_settings.m_rgbColor; };
+    virtual void zetHidden(bool hidden) { m_settings.m_hidden = hidden; }
+    virtual bool getHidden() const { return m_settings.m_hidden; }
+    virtual ChannelMarker& getChannelMarker() { return m_channelMarker; }
+    virtual int getStreamIndex() const { return m_settings.m_streamIndex; }
+    virtual void setStreamIndex(int streamIndex) { m_settings.m_streamIndex = streamIndex; }
 
 public slots:
     void channelMarkerChangedByCursor();
@@ -210,6 +221,7 @@ private:
     ChannelMarker m_channelMarker;
     RollupState m_rollupState;
     RadioAstronomySettings m_settings;
+    qint64 m_deviceCenterFrequency;
     bool m_doApplySettings;
     QList<RadioAstronomySettings::AvailableFeature> m_availableFeatures;
 
@@ -318,12 +330,14 @@ private:
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
     void displaySettings();
-    void displayStreamIndex();
     void displaySpectrumLineFrequency();
     void displayRunModeSettings();
     void updateAvailableFeatures();
     void updateRotatorList(const QList<RadioAstronomySettings::AvailableFeature>& rotators);
     bool handleMessage(const Message& message);
+    void makeUIConnections();
+    void updateAbsoluteCenterFrequency();
+
     double degreesToSteradian(double deg) const;
     double hpbwToSteradians(double hpbw) const;
     double calcOmegaA() const;

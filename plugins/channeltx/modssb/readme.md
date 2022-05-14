@@ -6,6 +6,8 @@ This plugin can be used to generate a single sideband or double sidebands modula
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![SSB Modulator plugin GUI](../../../doc/img/SSBModulator_plugin.png)
 
 &#9758; In order to toggle USB or LSB mode in SSB mode you have to set the "BW" in channel filter cutoff control (8) to a positive (USB) or negative (LSB) value. The above screenshot shows a USB setup. See the (7) to (9) paragraphs below for details.
@@ -247,4 +249,4 @@ This slider can be used to randomly set the current position in the file when fi
 
 <h3>22: Channel spectrum display</h3>
 
-This is the channel spectrum display. Controls at the bottom of the panel are the same as with the central spectrum display.
+This is the channel spectrum display. Details on the spectrum view and controls can be found [here](../../../sdrgui/gui/spectrum.md)

@@ -71,6 +71,7 @@ QByteArray TestSourceSettings::serialize() const
     s.writeString(19, m_reverseAPIAddress);
     s.writeU32(20, m_reverseAPIPort);
     s.writeU32(21, m_reverseAPIDeviceIndex);
+
     return s.final();
 }
 

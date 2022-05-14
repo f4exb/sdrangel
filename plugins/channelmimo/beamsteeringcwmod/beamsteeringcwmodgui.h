@@ -48,6 +48,17 @@ public:
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
+    virtual void setWorkspaceIndex(int index) { m_settings.m_workspaceIndex = index; };
+    virtual int getWorkspaceIndex() const { return m_settings.m_workspaceIndex; };
+    virtual void setGeometryBytes(const QByteArray& blob) { m_settings.m_geometryBytes = blob; };
+    virtual QByteArray getGeometryBytes() const { return m_settings.m_geometryBytes; };
+    virtual QString getTitle() const { return m_settings.m_title; };
+    virtual QColor getTitleColor() const  { return m_settings.m_rgbColor; };
+    virtual void zetHidden(bool hidden) { m_settings.m_hidden = hidden; }
+    virtual bool getHidden() const { return m_settings.m_hidden; }
+    virtual ChannelMarker& getChannelMarker() { return m_channelMarker; }
+    virtual int getStreamIndex() const { return -1; }
+    virtual void setStreamIndex(int streamIndex) { (void) streamIndex; }
 
 private:
     Ui::BeamSteeringCWModGUI* ui;
@@ -74,12 +85,16 @@ private:
     void displaySettings();
     void displayRateAndShift();
     bool handleMessage(const Message& message);
+    void makeUIConnections();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);
 
     void applyInterpolation();
     void applyPosition();
+
+protected:
+    void resizeEvent(QResizeEvent* size);
 
 private slots:
     void handleSourceMessages();

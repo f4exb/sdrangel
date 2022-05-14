@@ -16,17 +16,19 @@ set(sdrgui_SOURCES
     gui/basicfeaturesettingsdialog.cpp
     gui/buttonswitch.cpp
     gui/channeladddialog.cpp
-    gui/channelsdock.cpp
-    gui/channelwindow.cpp
     gui/clickablelabel.cpp
     gui/colormapper.cpp
     gui/commanditem.cpp
+    gui/commandsdialog.cpp
     gui/commandoutputdialog.cpp
+    gui/configurationsdialog.cpp
     gui/crightclickenabler.cpp
     gui/customtextedit.cpp
     gui/cwkeyergui.cpp
     gui/datetimedelegate.cpp
     gui/decimaldelegate.cpp
+    gui/devicesetselectiondialog.cpp
+    gui/devicesetpresetsdialog.cpp
     gui/devicestreamselectiondialog.cpp
     gui/deviceuserargsdialog.cpp
     gui/dmsspinbox.cpp
@@ -36,11 +38,10 @@ set(sdrgui_SOURCES
     gui/fmpreemphasisdialog.cpp
     gui/featureadddialog.cpp
     gui/featurelayout.cpp
-    gui/featuresdock.cpp
     gui/featurepresetsdialog.cpp
-    gui/featurewindow.cpp
     gui/fftwisdomdialog.cpp
     gui/flowlayout.cpp
+    gui/framelesswindowresizer.cpp
     gui/glscope.cpp
     gui/glscopegui.cpp
     gui/glshadercolors.cpp
@@ -57,9 +58,9 @@ set(sdrgui_SOURCES
     gui/mypositiondialog.cpp
     gui/pluginsdialog.cpp
     gui/presetitem.cpp
+    gui/rollupcontents.cpp
     gui/rollupwidget.cpp
     gui/samplingdevicedialog.cpp
-    gui/samplingdevicesdock.cpp
     gui/scaleengine.cpp
     gui/scaledimage.cpp
     gui/sdrangelsplash.cpp
@@ -73,17 +74,22 @@ set(sdrgui_SOURCES
     gui/tvscreenanalog.cpp
     gui/valuedial.cpp
     gui/valuedialz.cpp
+    gui/workspace.cpp
+    gui/workspaceselectiondialog.cpp
     gui/wsspectrumsettingsdialog.cpp
     gui/wrappingdatetimeedit.cpp
 
     dsp/scopevisxy.cpp
 
+    device/devicegui.cpp
     device/deviceuiset.cpp
 
     channel/channelgui.cpp
 
     feature/featuregui.cpp
     feature/featureuiset.cpp
+
+    mainspectrum/mainspectrumgui.cpp
 
     soapygui/discreterangegui.cpp
     soapygui/intervalrangegui.cpp
@@ -110,16 +116,18 @@ set(sdrgui_HEADERS
     gui/basicfeaturesettingsdialog.h
     gui/buttonswitch.h
     gui/channeladddialog.h
-    gui/channelsdock.h
-    gui/channelwindow.h
     gui/colormapper.h
     gui/commanditem.h
+    gui/commandsdialog.h
     gui/commandoutputdialog.h
+    gui/configurationsdialog.h
     gui/crightclickenabler.h
     gui/customtextedit.h
     gui/cwkeyergui.h
     gui/datetimedelegate.h
     gui/decimaldelegate.h
+    gui/devicesetselectiondialog.h
+    gui/devicesetpresetsdialog.h
     gui/devicestreamselectiondialog.h
     gui/deviceuserargsdialog.h
     gui/dmsspinbox.h
@@ -130,11 +138,10 @@ set(sdrgui_HEADERS
     gui/fmpreemphasisdialog.h
     gui/featureadddialog.h
     gui/featurelayout.h
-    gui/featuresdock.h
     gui/featurepresetsdialog.h
-    gui/featurewindow.h
     gui/fftwisdomdialog.h
     gui/flowlayout.h
+    gui/framelesswindowresizer.h
     gui/glscope.h
     gui/glscopegui.h
     gui/glshadercolors.h
@@ -152,9 +159,9 @@ set(sdrgui_HEADERS
     gui/physicalunit.h
     gui/pluginsdialog.h
     gui/presetitem.h
+    gui/rollupcontents.h
     gui/rollupwidget.h
     gui/samplingdevicedialog.h
-    gui/samplingdevicesdock.h
     gui/scaleengine.h
     gui/scaledimage.h
     gui/sdrangelsplash.h
@@ -168,11 +175,14 @@ set(sdrgui_HEADERS
     gui/tvscreenanalog.h
     gui/valuedial.h
     gui/valuedialz.h
+    gui/workspace.h
+    gui/workspaceselectiondialog.h
     gui/wsspectrumsettingsdialog.h
     gui/wrappingdatetimeedit.h
 
     dsp/scopevisxy.h
 
+    device/devicegui.h
     device/deviceuiset.h
 
     channel/channelgui.h
@@ -180,7 +190,7 @@ set(sdrgui_HEADERS
     feature/featuregui.h
     feature/featureuiset.h
 
-    device/devicegui.h
+    mainspectrum/mainspectrumgui.h
 
     soapygui/discreterangegui.h
     soapygui/intervalrangegui.h
@@ -194,7 +204,7 @@ set(sdrgui_HEADERS
 )
 
 set(sdrgui_FORMS
-    mainwindow.ui
+    # mainwindow.ui
     gui/aboutdialog.ui
     gui/addpresetdialog.ui
     gui/ambedevicesdialog.ui
@@ -202,8 +212,11 @@ set(sdrgui_FORMS
     gui/basicdevicesettingsdialog.ui
     gui/basicfeaturesettingsdialog.ui
     gui/channeladddialog.ui
+    gui/commandsdialog.ui
     gui/commandoutputdialog.ui
+    gui/configurationsdialog.ui
     gui/cwkeyergui.ui
+    gui/devicesetpresetsdialog.ui
     gui/devicestreamselectiondialog.ui
     gui/deviceuserargsdialog.ui
     gui/editcommanddialog.ui
@@ -224,6 +237,7 @@ set(sdrgui_FORMS
     gui/myposdialog.ui
     gui/transverterdialog.ui
     gui/loggingdialog.ui
+    gui/workspaceselectiondialog.ui
     gui/wsspectrumsettingsdialog.ui
     soapygui/discreterangegui.ui
     soapygui/intervalrangegui.ui

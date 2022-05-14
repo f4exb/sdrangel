@@ -27,11 +27,11 @@
 #include <QThread>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGChannelReport.h"
 #include "SWGChannelActions.h"
 #include "SWGPacketModReport.h"
 #include "SWGPacketModActions.h"
-#include "SWGPacketModActions_tx.h"
 
 #include <stdio.h>
 #include <complex.h>
@@ -103,6 +103,18 @@ PacketMod::~PacketMod()
     delete m_thread;
 }
 
+void PacketMod::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSourceAPI(this);
+        m_deviceAPI->removeChannelSource(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addChannelSource(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
+}
+
 void PacketMod::start()
 {
     qDebug("PacketMod::start");
@@ -147,6 +159,10 @@ bool PacketMod::handleMessage(const Message& cmd)
         DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
         qDebug() << "PacketMod::handleMessage: DSPSignalNotification";
         m_basebandSource->getInputMessageQueue()->push(rep);
+        // Forward to GUI if any
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
+        }
 
         return true;
     }
@@ -474,6 +490,15 @@ int PacketMod::webapiSettingsGet(
     response.getPacketModSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
 
+    return 200;
+}
+
+int PacketMod::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

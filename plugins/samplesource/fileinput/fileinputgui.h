@@ -37,7 +37,7 @@ class FileInputGUI : public DeviceGUI {
 	Q_OBJECT
 
 public:
-	explicit FileInputGUI(DeviceUISet *deviceUISet, QWidget* parent = 0);
+	explicit FileInputGUI(DeviceUISet *deviceUISet, QWidget* parent = nullptr);
 	virtual ~FileInputGUI();
 	virtual void destroy();
 
@@ -47,10 +47,12 @@ public:
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 	virtual bool handleMessage(const Message& message);
 
+protected:
+    void resizeEvent(QResizeEvent* size);
+
 private:
 	Ui::FileInputGUI* ui;
 
-	DeviceUISet* m_deviceUISet;
 	FileInputSettings m_settings;
 	bool m_doApplySettings;
 	QTimer m_statusTimer;
@@ -81,6 +83,7 @@ private:
 	void updateWithStreamTime();
     void setAccelerationCombo();
     void setNumberStr(int n, QString& s);
+    void makeUIConnections();
 
 private slots:
     void handleInputMessages();

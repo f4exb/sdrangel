@@ -86,6 +86,7 @@ QByteArray LimeSDRInputSettings::serialize() const
     s.writeU32(26, m_reverseAPIPort);
     s.writeU32(27, m_reverseAPIDeviceIndex);
     s.writeBool(28, m_iqOrder);
+
     return s.final();
 }
 

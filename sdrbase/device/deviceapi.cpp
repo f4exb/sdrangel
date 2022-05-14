@@ -44,6 +44,7 @@ DeviceAPI::DeviceAPI(
     m_pluginInterface(nullptr),
     m_masterTimer(DSPEngine::instance()->getMasterTimer()),
     m_samplingDeviceSequence(0),
+    m_workspaceIndex(0),
     m_buddySharedPtr(nullptr),
     m_isBuddyLeader(false),
     m_deviceSourceEngine(deviceSourceEngine),
@@ -818,4 +819,10 @@ void DeviceAPI::renumerateChannels()
             m_mimoChannelAPIs.at(mimoIndex)->setDeviceAPI(this);
         }
     }
+}
+
+void DeviceAPI::setDeviceSetIndex(int deviceSetIndex)
+{
+    m_deviceTabIndex = deviceSetIndex;
+    renumerateChannels();
 }

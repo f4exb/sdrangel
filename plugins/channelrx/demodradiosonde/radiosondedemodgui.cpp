@@ -324,6 +324,16 @@ bool RadiosondeDemodGUI::handleMessage(const Message& frame)
         frameReceived(report.getMessage(), report.getDateTime(), report.getErrorsCorrected(), report.getThreshold());
         return true;
     }
+    else if (DSPSignalNotification::match(frame))
+    {
+        const DSPSignalNotification& notif = (const DSPSignalNotification&) frame;
+        m_deviceCenterFrequency = notif.getCenterFrequency();
+        m_basebandSampleRate = notif.getSampleRate();
+        ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
+        return true;
+    }
 
     return false;
 }
@@ -357,6 +367,7 @@ void RadiosondeDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -477,7 +488,18 @@ void RadiosondeDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
         }
     }
 
-    saveState(m_rollupState);
+    RollupContents *rollupContents = getRollupContents();
+
+    if (rollupContents->hasExpandableWidgets()) {
+        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
+    } else {
+        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Fixed);
+    }
+
+    int h = rollupContents->height() + getAdditionalHeight();
+    resize(width(), h);
+
+    rollupContents->saveState(m_rollupState);
     applySettings();
 }
 
@@ -491,6 +513,14 @@ void RadiosondeDemodGUI::onMenuDialogCalled(const QPoint &p)
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
         dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
         dialog.setReverseAPIChannelIndex(m_settings.m_reverseAPIChannelIndex);
+        dialog.setDefaultTitle(m_displayedName);
+
+        if (m_deviceUISet->m_deviceMIMOEngine)
+        {
+            dialog.setNumberOfStreams(m_radiosondeDemod->getNumberOfDeviceStreams());
+            dialog.setStreamIndex(m_settings.m_streamIndex);
+        }
+
         dialog.move(p);
         dialog.exec();
 
@@ -503,22 +533,17 @@ void RadiosondeDemodGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
-        applySettings();
-    }
-    else if ((m_contextMenuType == ContextMenuStreamSettings) && (m_deviceUISet->m_deviceMIMOEngine))
-    {
-        DeviceStreamSelectionDialog dialog(this);
-        dialog.setNumberOfStreams(m_radiosondeDemod->getNumberOfDeviceStreams());
-        dialog.setStreamIndex(m_settings.m_streamIndex);
-        dialog.move(p);
-        dialog.exec();
+        if (m_deviceUISet->m_deviceMIMOEngine)
+        {
+            m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
+            m_channelMarker.clearStreamIndexes();
+            m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
+            updateIndexLabel();
+        }
 
-        m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
-        m_channelMarker.clearStreamIndexes();
-        m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
-        displayStreamIndex();
         applySettings();
     }
 
@@ -531,14 +556,18 @@ RadiosondeDemodGUI::RadiosondeDemodGUI(PluginAPI* pluginAPI, DeviceUISet *device
     m_pluginAPI(pluginAPI),
     m_deviceUISet(deviceUISet),
     m_channelMarker(this),
+    m_deviceCenterFrequency(0),
+    m_basebandSampleRate(1),
     m_doApplySettings(true),
     m_tickCount(0)
 {
-    ui->setupUi(this);
-    m_helpURL = "plugins/channelrx/demodradiosonde/readme.md";
-
     setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    m_helpURL = "plugins/channelrx/demodradiosonde/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_radiosondeDemod = reinterpret_cast<RadiosondeDemod*>(rxChannel);
@@ -594,7 +623,6 @@ RadiosondeDemodGUI::RadiosondeDemodGUI(PluginAPI* pluginAPI, DeviceUISet *device
     m_settings.setRollupState(&m_rollupState);
 
     m_deviceUISet->addChannelMarker(&m_channelMarker);
-    m_deviceUISet->addRollupWidget(this);
 
     connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
@@ -634,6 +662,7 @@ RadiosondeDemodGUI::RadiosondeDemodGUI(PluginAPI* pluginAPI, DeviceUISet *device
     ui->scopeContainer->setVisible(false);
 
     displaySettings();
+    makeUIConnections();
     applySettings(true);
 }
 
@@ -707,6 +736,7 @@ void RadiosondeDemodGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
 
@@ -721,7 +751,7 @@ void RadiosondeDemodGUI::displaySettings()
     ui->thresholdText->setText(QString("%1").arg(m_settings.m_correlationThreshold));
     ui->threshold->setValue(m_settings.m_correlationThreshold);
 
-    displayStreamIndex();
+    updateIndexLabel();
 
     ui->filterSerial->setText(m_settings.m_filterSerial);
 
@@ -749,27 +779,21 @@ void RadiosondeDemodGUI::displaySettings()
 
     filter();
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
-void RadiosondeDemodGUI::displayStreamIndex()
-{
-    if (m_deviceUISet->m_deviceMIMOEngine) {
-        setStreamIndicator(tr("%1").arg(m_settings.m_streamIndex));
-    } else {
-        setStreamIndicator("S"); // single channel indicator
-    }
-}
-
-void RadiosondeDemodGUI::leaveEvent(QEvent*)
+void RadiosondeDemodGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void RadiosondeDemodGUI::enterEvent(QEvent*)
+void RadiosondeDemodGUI::enterEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void RadiosondeDemodGUI::tick()
@@ -892,4 +916,26 @@ void RadiosondeDemodGUI::on_logOpen_clicked()
             }
         }
     }
+}
+
+void RadiosondeDemodGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &RadiosondeDemodGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &RadiosondeDemodGUI::on_rfBW_valueChanged);
+    QObject::connect(ui->fmDev, &QSlider::valueChanged, this, &RadiosondeDemodGUI::on_fmDev_valueChanged);
+    QObject::connect(ui->threshold, &QDial::valueChanged, this, &RadiosondeDemodGUI::on_threshold_valueChanged);
+    QObject::connect(ui->filterSerial, &QLineEdit::editingFinished, this, &RadiosondeDemodGUI::on_filterSerial_editingFinished);
+    QObject::connect(ui->clearTable, &QPushButton::clicked, this, &RadiosondeDemodGUI::on_clearTable_clicked);
+    QObject::connect(ui->udpEnabled, &QCheckBox::clicked, this, &RadiosondeDemodGUI::on_udpEnabled_clicked);
+    QObject::connect(ui->udpAddress, &QLineEdit::editingFinished, this, &RadiosondeDemodGUI::on_udpAddress_editingFinished);
+    QObject::connect(ui->udpPort, &QLineEdit::editingFinished, this, &RadiosondeDemodGUI::on_udpPort_editingFinished);
+    QObject::connect(ui->frames, &QTableWidget::cellDoubleClicked, this, &RadiosondeDemodGUI::on_frames_cellDoubleClicked);
+    QObject::connect(ui->logEnable, &ButtonSwitch::clicked, this, &RadiosondeDemodGUI::on_logEnable_clicked);
+    QObject::connect(ui->logFilename, &QToolButton::clicked, this, &RadiosondeDemodGUI::on_logFilename_clicked);
+    QObject::connect(ui->logOpen, &QToolButton::clicked, this, &RadiosondeDemodGUI::on_logOpen_clicked);
+}
+
+void RadiosondeDemodGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

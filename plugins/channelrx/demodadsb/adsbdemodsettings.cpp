@@ -96,6 +96,8 @@ void ADSBDemodSettings::resetToDefaults()
     m_displayPhotos = true;
     m_verboseModelMatching = false;
     m_airfieldElevation = 0;
+    m_workspaceIndex = 0;
+    m_hidden = false;
 }
 
 QByteArray ADSBDemodSettings::serialize() const
@@ -172,6 +174,9 @@ QByteArray ADSBDemodSettings::serialize() const
     s.writeString(56, m_importMaxLatitude);
     s.writeString(57, m_importMinLongitude);
     s.writeString(58, m_importMaxLongitude);
+    s.writeS32(59, m_workspaceIndex);
+    s.writeBlob(60, m_geometryBytes);
+    s.writeBool(61, m_hidden);
 
     for (int i = 0; i < ADSBDEMOD_COLUMNS; i++) {
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -298,6 +303,9 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         d.readString(56, &m_importMaxLatitude, "");
         d.readString(57, &m_importMinLongitude, "");
         d.readString(58, &m_importMaxLongitude, "");
+        d.readS32(59, &m_workspaceIndex, 0);
+        d.readBlob(60, &m_geometryBytes);
+        d.readBool(61, &m_hidden, false);
 
         for (int i = 0; i < ADSBDEMOD_COLUMNS; i++) {
             d.readS32(100 + i, &m_columnIndexes[i], i);

@@ -50,7 +50,6 @@ public:
 private:
 	Ui::SigMFFileInputGUI* ui;
 
-	DeviceUISet* m_deviceUISet;
 	SigMFFileInputSettings m_settings;
     int m_currentTrackIndex;
 	bool m_doApplySettings;
@@ -94,6 +93,7 @@ private:
     void setAccelerationCombo();
     void setNumberStr(int n, QString& s);
 	bool handleMessage(const Message& message);
+    void makeUIConnections();
 
 private slots:
     void handleInputMessages();

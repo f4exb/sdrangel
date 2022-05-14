@@ -973,10 +973,16 @@ bool RadioAstronomyGUI::handleMessage(const Message& message)
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
         m_basebandSampleRate = notif.getSampleRate();
         m_centerFrequency = notif.getCenterFrequency();
+        ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
+
         if (m_settings.m_tempGalLink) {
             calcGalacticBackgroundTemp();
         }
+
         updateTSys0();
+
         return true;
     }
     else if (RadioAstronomy::MsgReportAvailableFeatures::match(message))
@@ -1199,6 +1205,7 @@ void RadioAstronomyGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -1942,7 +1949,18 @@ void RadioAstronomyGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    RollupContents *rollupContents = getRollupContents();
+
+    if (rollupContents->hasExpandableWidgets()) {
+        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
+    } else {
+        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Fixed);
+    }
+
+    int h = rollupContents->height() + getAdditionalHeight();
+    resize(width(), h);
+
+    rollupContents->saveState(m_rollupState);
     applySettings();
 }
 
@@ -1956,6 +1974,14 @@ void RadioAstronomyGUI::onMenuDialogCalled(const QPoint &p)
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
         dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
         dialog.setReverseAPIChannelIndex(m_settings.m_reverseAPIChannelIndex);
+        dialog.setDefaultTitle(m_displayedName);
+
+        if (m_deviceUISet->m_deviceMIMOEngine)
+        {
+            dialog.setNumberOfStreams(m_radioAstronomy->getNumberOfDeviceStreams());
+            dialog.setStreamIndex(m_settings.m_streamIndex);
+        }
+
         dialog.move(p);
         dialog.exec();
 
@@ -1968,22 +1994,17 @@ void RadioAstronomyGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
-        applySettings();
-    }
-    else if ((m_contextMenuType == ContextMenuStreamSettings) && (m_deviceUISet->m_deviceMIMOEngine))
-    {
-        DeviceStreamSelectionDialog dialog(this);
-        dialog.setNumberOfStreams(m_radioAstronomy->getNumberOfDeviceStreams());
-        dialog.setStreamIndex(m_settings.m_streamIndex);
-        dialog.move(p);
-        dialog.exec();
+        if (m_deviceUISet->m_deviceMIMOEngine)
+        {
+            m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
+            m_channelMarker.clearStreamIndexes();
+            m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
+            updateIndexLabel();
+        }
 
-        m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
-        m_channelMarker.clearStreamIndexes();
-        m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
-        displayStreamIndex();
         applySettings();
     }
 
@@ -1996,6 +2017,7 @@ RadioAstronomyGUI::RadioAstronomyGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     m_pluginAPI(pluginAPI),
     m_deviceUISet(deviceUISet),
     m_channelMarker(this),
+    m_deviceCenterFrequency(0),
     m_doApplySettings(true),
     m_basebandSampleRate(0),
     m_centerFrequency(0),
@@ -2052,10 +2074,13 @@ RadioAstronomyGUI::RadioAstronomyGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     m_downloadingLAB(false)
 {
     qDebug("RadioAstronomyGUI::RadioAstronomyGUI");
-    ui->setupUi(this);
-
     setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    m_helpURL = "plugins/channelrx/radioastronomy/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_radioAstronomy = reinterpret_cast<RadioAstronomy*>(rxChannel);
@@ -2102,7 +2127,6 @@ RadioAstronomyGUI::RadioAstronomyGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     m_settings.setRollupState(&m_rollupState);
 
     m_deviceUISet->addChannelMarker(&m_channelMarker);
-    m_deviceUISet->addRollupWidget(this);
 
     connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
@@ -2217,6 +2241,7 @@ RadioAstronomyGUI::RadioAstronomyGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
 
     displaySettings();
+    makeUIConnections();
     applySettings(true);
 
     create2DImage();
@@ -2354,6 +2379,7 @@ void RadioAstronomyGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
@@ -2536,7 +2562,7 @@ void RadioAstronomyGUI::displaySettings()
     ui->sweep2Delay->setValue(m_settings.m_sweep2Delay);
     displayRunModeSettings();
 
-    displayStreamIndex();
+    updateIndexLabel();
 
     // Order and size columns
     QHeaderView *header = ui->powerTable->horizontalHeader();
@@ -2550,28 +2576,22 @@ void RadioAstronomyGUI::displaySettings()
         header->moveSection(header->visualIndex(i), m_settings.m_powerTableColumnIndexes[i]);
     }
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
-    arrangeRollups();
+    getRollupContents()->arrangeRollups();
 }
 
-void RadioAstronomyGUI::displayStreamIndex()
-{
-    if (m_deviceUISet->m_deviceMIMOEngine) {
-        setStreamIndicator(tr("%1").arg(m_settings.m_streamIndex));
-    } else {
-        setStreamIndicator("S"); // single channel indicator
-    }
-}
-
-void RadioAstronomyGUI::leaveEvent(QEvent*)
+void RadioAstronomyGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void RadioAstronomyGUI::enterEvent(QEvent*)
+void RadioAstronomyGUI::enterEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void RadioAstronomyGUI::tick()
@@ -2796,7 +2816,7 @@ void RadioAstronomyGUI::updatePowerChartWidgetsVisibility()
     ui->powerMarkerTableWidgets->setVisible(powerChart && (m_settings.m_powerPeaks || m_settings.m_powerMarkers));
     ui->power2DScaleWidgets->setVisible(!powerChart);
     ui->power2DColourScaleWidgets->setVisible(!powerChart);
-    arrangeRollups();
+    getRollupContents()->arrangeRollups();
 }
 
 int RadioAstronomyGUI::powerYUnitsToIndex(RadioAstronomySettings::PowerYUnits units)
@@ -2915,7 +2935,7 @@ void RadioAstronomyGUI::updateSpectrumChartWidgetsVisibility()
     ui->spectrumPeak->setVisible(fft);
     ui->saveSpectrumChartImages->setVisible(fft);
 
-    arrangeRollups();
+    getRollupContents()->arrangeRollups();
 }
 
 // Calulate mean, RMS and standard deviation
@@ -5130,7 +5150,7 @@ void RadioAstronomyGUI::on_powerShowPeak_toggled(bool checked)
             m_powerChart->legend()->markers(m_powerPeakSeries)[0]->setVisible(false);
         }
     }
-    arrangeRollups();
+    getRollupContents()->arrangeRollups();
 }
 
 void RadioAstronomyGUI::on_spectrumPeak_toggled(bool checked)
@@ -5148,7 +5168,7 @@ void RadioAstronomyGUI::on_spectrumPeak_toggled(bool checked)
             clearLoSMarker("Max");
         }
     }
-    arrangeRollups();
+    getRollupContents()->arrangeRollups();
 }
 
 void RadioAstronomyGUI::on_powerShowMarker_toggled(bool checked)
@@ -5164,7 +5184,7 @@ void RadioAstronomyGUI::on_powerShowMarker_toggled(bool checked)
         }
     }
     updatePowerSelect();
-    arrangeRollups();
+    getRollupContents()->arrangeRollups();
 }
 
 void RadioAstronomyGUI::on_powerShowAvg_toggled(bool checked)
@@ -5172,7 +5192,7 @@ void RadioAstronomyGUI::on_powerShowAvg_toggled(bool checked)
     m_settings.m_powerAvg = checked;
     applySettings();
     ui->powerChartAvgWidgets->setVisible(checked);
-    arrangeRollups();
+    getRollupContents()->arrangeRollups();
     if (checked) {
         calcAverages();
     }
@@ -5291,7 +5311,7 @@ void RadioAstronomyGUI::on_spectrumMarker_toggled(bool checked)
         clearLoSMarker("M2");
     }
     updateSpectrumSelect();
-    arrangeRollups();
+    getRollupContents()->arrangeRollups();
 }
 
 void RadioAstronomyGUI::on_spectrumTemp_toggled(bool checked)
@@ -5301,7 +5321,7 @@ void RadioAstronomyGUI::on_spectrumTemp_toggled(bool checked)
     ui->spectrumGaussianWidgets->setVisible(checked);
     m_fftGaussianSeries->setVisible(checked);
     updateSpectrumSelect();
-    arrangeRollups();
+    getRollupContents()->arrangeRollups();
 }
 
 void RadioAstronomyGUI::on_spectrumShowLegend_toggled(bool checked)
@@ -5326,7 +5346,7 @@ void RadioAstronomyGUI::on_spectrumShowRefLine_toggled(bool checked)
         m_fftDopplerAxis->setVisible(m_settings.m_spectrumRefLine);
     }
     updateDistanceColumns();
-    arrangeRollups();
+    getRollupContents()->arrangeRollups();
 }
 
 void RadioAstronomyGUI::on_spectrumShowLAB_toggled(bool checked)
@@ -5650,7 +5670,7 @@ void RadioAstronomyGUI::on_powerShowGaussian_clicked(bool checked)
     ui->powerGaussianWidgets->setVisible(checked);
     m_powerGaussianSeries->setVisible(checked);
     updatePowerSelect();
-    arrangeRollups();
+    getRollupContents()->arrangeRollups();
 }
 
 void RadioAstronomyGUI::plotPowerGaussian()
@@ -5896,7 +5916,7 @@ void RadioAstronomyGUI::displayRunModeSettings()
     ui->sweepStatus->setVisible(sweep);
     ui->runLayout->activate();         // Needed otherwise height of rollup doesn't seem to be reduced
     ui->statusLayout->activate();      // going from sweep to single/continuous
-    arrangeRollups();
+    getRollupContents()->arrangeRollups();
 }
 
 void RadioAstronomyGUI::on_runMode_currentIndexChanged(int index)
@@ -5973,7 +5993,7 @@ void RadioAstronomyGUI::on_sweepStartAtTime_currentIndexChanged(int index)
 {
     m_settings.m_sweepStartAtTime = ui->sweepStartAtTime->currentIndex() == 1;
     ui->sweepStartDateTime->setVisible(index == 1);
-    arrangeRollups();
+    getRollupContents()->arrangeRollups();
     applySettings();
 }
 
@@ -6032,4 +6052,117 @@ void RadioAstronomyGUI::resizeEvent(QResizeEvent* size)
     calcSpectrumChartTickCount(m_fftDopplerAxis, width);
     calcSpectrumChartTickCount(m_calXAxis, width);
     ChannelGUI::resizeEvent(size);
+}
+
+void RadioAstronomyGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &RadioAstronomyGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->sampleRate, &ValueDialZ::changed, this, &RadioAstronomyGUI::on_sampleRate_changed);
+    QObject::connect(ui->rfBW, &ValueDialZ::changed, this, &RadioAstronomyGUI::on_rfBW_changed);
+    QObject::connect(ui->integration, &ValueDialZ::changed, this, &RadioAstronomyGUI::on_integration_changed);
+    QObject::connect(ui->fftSize, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RadioAstronomyGUI::on_fftSize_currentIndexChanged);
+    QObject::connect(ui->fftWindow, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RadioAstronomyGUI::on_fftWindow_currentIndexChanged);
+    QObject::connect(ui->filterFreqs, &QLineEdit::editingFinished, this, &RadioAstronomyGUI::on_filterFreqs_editingFinished);
+    QObject::connect(ui->starTracker, &QComboBox::currentTextChanged, this, &RadioAstronomyGUI::on_starTracker_currentTextChanged);
+    QObject::connect(ui->rotator, &QComboBox::currentTextChanged, this, &RadioAstronomyGUI::on_rotator_currentTextChanged);
+    QObject::connect(ui->showSensors, &QToolButton::clicked, this, &RadioAstronomyGUI::on_showSensors_clicked);
+    QObject::connect(ui->tempRXSelect, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RadioAstronomyGUI::on_tempRXSelect_currentIndexChanged);
+    QObject::connect(ui->tempRX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_tempRX_valueChanged);
+    QObject::connect(ui->tempCMB, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_tempCMB_valueChanged);
+    QObject::connect(ui->tempGal, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_tempGal_valueChanged);
+    QObject::connect(ui->tempSP, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_tempSP_valueChanged);
+    QObject::connect(ui->tempAtm, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_tempAtm_valueChanged);
+    QObject::connect(ui->tempAir, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_tempAir_valueChanged);
+    QObject::connect(ui->zenithOpacity, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_zenithOpacity_valueChanged);
+    QObject::connect(ui->elevation, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_elevation_valueChanged);
+    QObject::connect(ui->tempAtmLink, &ButtonSwitch::toggled, this, &RadioAstronomyGUI::on_tempAtmLink_toggled);
+    QObject::connect(ui->tempAirLink, &ButtonSwitch::toggled, this, &RadioAstronomyGUI::on_tempAirLink_toggled);
+    QObject::connect(ui->tempGalLink, &ButtonSwitch::toggled, this, &RadioAstronomyGUI::on_tempGalLink_toggled);
+    QObject::connect(ui->elevationLink, &ButtonSwitch::toggled, this, &RadioAstronomyGUI::on_elevationLink_toggled);
+    QObject::connect(ui->gainVariation, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_gainVariation_valueChanged);
+    QObject::connect(ui->omegaAUnits, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RadioAstronomyGUI::on_omegaAUnits_currentIndexChanged);
+    QObject::connect(ui->sourceType, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RadioAstronomyGUI::on_sourceType_currentIndexChanged);
+    QObject::connect(ui->omegaS, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_omegaS_valueChanged);
+    QObject::connect(ui->omegaSUnits, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RadioAstronomyGUI::on_omegaSUnits_currentIndexChanged);
+    QObject::connect(ui->spectrumChartSelect, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RadioAstronomyGUI::on_spectrumChartSelect_currentIndexChanged);
+    QObject::connect(ui->showCalSettings, &QToolButton::clicked, this, &RadioAstronomyGUI::on_showCalSettings_clicked);
+    QObject::connect(ui->startCalHot, &QToolButton::clicked, this, &RadioAstronomyGUI::on_startCalHot_clicked);
+    QObject::connect(ui->startCalCold, &QToolButton::clicked, this, &RadioAstronomyGUI::on_startCalCold_clicked);
+    QObject::connect(ui->recalibrate, &ButtonSwitch::toggled, this, &RadioAstronomyGUI::on_recalibrate_toggled);
+    QObject::connect(ui->spectrumShowLegend, &ButtonSwitch::toggled, this, &RadioAstronomyGUI::on_spectrumShowLegend_toggled);
+    QObject::connect(ui->spectrumShowRefLine, &ButtonSwitch::toggled, this, &RadioAstronomyGUI::on_spectrumShowRefLine_toggled);
+    QObject::connect(ui->spectrumTemp, &ButtonSwitch::toggled, this, &RadioAstronomyGUI::on_spectrumTemp_toggled);
+    QObject::connect(ui->spectrumMarker, &ButtonSwitch::toggled, this, &RadioAstronomyGUI::on_spectrumMarker_toggled);
+    QObject::connect(ui->spectrumPeak, &ButtonSwitch::toggled, this, &RadioAstronomyGUI::on_spectrumPeak_toggled);
+    QObject::connect(ui->spectrumReverseXAxis, &ButtonSwitch::toggled, this, &RadioAstronomyGUI::on_spectrumReverseXAxis_toggled);
+    QObject::connect(ui->savePowerData, &QToolButton::clicked, this, &RadioAstronomyGUI::on_savePowerData_clicked);
+    QObject::connect(ui->savePowerChartImage, &QToolButton::clicked, this, &RadioAstronomyGUI::on_savePowerChartImage_clicked);
+    QObject::connect(ui->saveSpectrumData, &QToolButton::clicked, this, &RadioAstronomyGUI::on_saveSpectrumData_clicked);
+    QObject::connect(ui->loadSpectrumData, &QToolButton::clicked, this, &RadioAstronomyGUI::on_loadSpectrumData_clicked);
+    QObject::connect(ui->saveSpectrumChartImage, &QToolButton::clicked, this, &RadioAstronomyGUI::on_saveSpectrumChartImage_clicked);
+    QObject::connect(ui->saveSpectrumChartImages, &QToolButton::clicked, this, &RadioAstronomyGUI::on_saveSpectrumChartImages_clicked);
+    QObject::connect(ui->clearData, &QToolButton::clicked, this, &RadioAstronomyGUI::on_clearData_clicked);
+    QObject::connect(ui->clearCal, &QToolButton::clicked, this, &RadioAstronomyGUI::on_clearCal_clicked);
+    QObject::connect(ui->spectrumAutoscale, &QToolButton::toggled, this, &RadioAstronomyGUI::on_spectrumAutoscale_toggled);
+    QObject::connect(ui->spectrumAutoscaleX, &QToolButton::clicked, this, &RadioAstronomyGUI::on_spectrumAutoscaleX_clicked);
+    QObject::connect(ui->spectrumAutoscaleY, &QToolButton::clicked, this, &RadioAstronomyGUI::on_spectrumAutoscaleY_clicked);
+    QObject::connect(ui->spectrumReference, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_spectrumReference_valueChanged);
+    QObject::connect(ui->spectrumRange, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_spectrumRange_valueChanged);
+    QObject::connect(ui->spectrumCenterFreq, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_spectrumCenterFreq_valueChanged);
+    QObject::connect(ui->spectrumSpan, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_spectrumSpan_valueChanged);
+    QObject::connect(ui->spectrumYUnits, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RadioAstronomyGUI::on_spectrumYUnits_currentIndexChanged);
+    QObject::connect(ui->spectrumBaseline, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RadioAstronomyGUI::on_spectrumBaseline_currentIndexChanged);
+    QObject::connect(ui->spectrumIndex, &QSlider::valueChanged, this, &RadioAstronomyGUI::on_spectrumIndex_valueChanged);
+    QObject::connect(ui->spectrumLine, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RadioAstronomyGUI::on_spectrumLine_currentIndexChanged);
+    QObject::connect(ui->spectrumLineFrequency, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_spectrumLineFrequency_valueChanged);
+    QObject::connect(ui->refFrame, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RadioAstronomyGUI::on_refFrame_currentIndexChanged);
+    QObject::connect(ui->sunDistanceToGC, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_sunDistanceToGC_valueChanged);
+    QObject::connect(ui->sunOrbitalVelocity, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_sunOrbitalVelocity_valueChanged);
+    QObject::connect(ui->spectrumGaussianFreq, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_spectrumGaussianFreq_valueChanged);
+    QObject::connect(ui->spectrumGaussianAmp, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_spectrumGaussianAmp_valueChanged);
+    QObject::connect(ui->spectrumGaussianFloor, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_spectrumGaussianFloor_valueChanged);
+    QObject::connect(ui->spectrumGaussianFWHM, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_spectrumGaussianFWHM_valueChanged);
+    QObject::connect(ui->spectrumGaussianTurb, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_spectrumGaussianTurb_valueChanged);
+    QObject::connect(ui->spectrumTemperature, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_spectrumTemperature_valueChanged);
+    QObject::connect(ui->spectrumShowLAB, &ButtonSwitch::toggled, this, &RadioAstronomyGUI::on_spectrumShowLAB_toggled);
+    QObject::connect(ui->spectrumShowDistance, &ButtonSwitch::toggled, this, &RadioAstronomyGUI::on_spectrumShowDistance_toggled);
+    QObject::connect(ui->tCalHotSelect, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RadioAstronomyGUI::on_tCalHotSelect_currentIndexChanged);
+    QObject::connect(ui->tCalHot, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_tCalHot_valueChanged);
+    QObject::connect(ui->tCalColdSelect, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RadioAstronomyGUI::on_tCalColdSelect_currentIndexChanged);
+    QObject::connect(ui->tCalCold, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_tCalCold_valueChanged);
+    QObject::connect(ui->powerChartSelect, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RadioAstronomyGUI::on_powerChartSelect_currentIndexChanged);
+    QObject::connect(ui->powerYUnits, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RadioAstronomyGUI::on_powerYUnits_currentIndexChanged);
+    QObject::connect(ui->powerShowMarker, &ButtonSwitch::toggled, this, &RadioAstronomyGUI::on_powerShowMarker_toggled);
+    QObject::connect(ui->powerShowAirTemp, &ButtonSwitch::toggled, this, &RadioAstronomyGUI::on_powerShowAirTemp_toggled);
+    QObject::connect(ui->powerShowPeak, &ButtonSwitch::toggled, this, &RadioAstronomyGUI::on_powerShowPeak_toggled);
+    QObject::connect(ui->powerShowAvg, &ButtonSwitch::toggled, this, &RadioAstronomyGUI::on_powerShowAvg_toggled);
+    QObject::connect(ui->powerShowLegend, &ButtonSwitch::toggled, this, &RadioAstronomyGUI::on_powerShowLegend_toggled);
+    QObject::connect(ui->powerAutoscale, &QToolButton::toggled, this, &RadioAstronomyGUI::on_powerAutoscale_toggled);
+    QObject::connect(ui->powerAutoscaleY, &QToolButton::clicked, this, &RadioAstronomyGUI::on_powerAutoscaleY_clicked);
+    QObject::connect(ui->powerAutoscaleX, &QToolButton::clicked, this, &RadioAstronomyGUI::on_powerAutoscaleX_clicked);
+    QObject::connect(ui->powerReference, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_powerReference_valueChanged);
+    QObject::connect(ui->powerRange, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_powerRange_valueChanged);
+    QObject::connect(ui->powerStartTime, &WrappingDateTimeEdit::dateTimeChanged, this, &RadioAstronomyGUI::on_powerStartTime_dateTimeChanged);
+    QObject::connect(ui->powerEndTime, &WrappingDateTimeEdit::dateTimeChanged, this, &RadioAstronomyGUI::on_powerEndTime_dateTimeChanged);
+    QObject::connect(ui->powerShowGaussian, &ButtonSwitch::clicked, this, &RadioAstronomyGUI::on_powerShowGaussian_clicked);
+    QObject::connect(ui->powerGaussianCenter, &WrappingDateTimeEdit::dateTimeChanged, this, &RadioAstronomyGUI::on_powerGaussianCenter_dateTimeChanged);
+    QObject::connect(ui->powerGaussianAmp, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_powerGaussianAmp_valueChanged);
+    QObject::connect(ui->powerGaussianFloor, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_powerGaussianFloor_valueChanged);
+    QObject::connect(ui->powerGaussianFWHM, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_powerGaussianFWHM_valueChanged);
+    QObject::connect(ui->powerGaussianHPBW, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_powerGaussianHPBW_valueChanged);
+    QObject::connect(ui->runMode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RadioAstronomyGUI::on_runMode_currentIndexChanged);
+    QObject::connect(ui->sweepType, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RadioAstronomyGUI::on_sweepType_currentIndexChanged);
+    QObject::connect(ui->startStop, &ButtonSwitch::clicked, this, &RadioAstronomyGUI::on_startStop_clicked);
+    QObject::connect(ui->sweepStartAtTime, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RadioAstronomyGUI::on_sweepStartAtTime_currentIndexChanged);
+    QObject::connect(ui->sweepStartDateTime, &QDateTimeEdit::dateTimeChanged, this, &RadioAstronomyGUI::on_sweepStartDateTime_dateTimeChanged);
+    QObject::connect(ui->powerColourAutoscale, &QToolButton::toggled, this, &RadioAstronomyGUI::on_powerColourAutoscale_toggled);
+    QObject::connect(ui->powerColourScaleMin, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_powerColourScaleMin_valueChanged);
+    QObject::connect(ui->powerColourScaleMax, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RadioAstronomyGUI::on_powerColourScaleMax_valueChanged);
+    QObject::connect(ui->powerColourPalette, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RadioAstronomyGUI::on_powerColourPalette_currentIndexChanged);
+    QObject::connect(ui->powerTable, &QTableWidget::cellDoubleClicked, this, &RadioAstronomyGUI::on_powerTable_cellDoubleClicked);
+}
+
+void RadioAstronomyGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

@@ -46,10 +46,12 @@ public:
 	bool deserialize(const QByteArray& data);
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 
+protected:
+    void resizeEvent(QResizeEvent* size);
+
 private:
 	Ui::TestSourceGui* ui;
 
-	DeviceUISet* m_deviceUISet;
 	TestSourceSettings m_settings;
     QTimer m_updateTimer;
     QTimer m_statusTimer;
@@ -71,6 +73,7 @@ private:
     void updateAmpFineLimit();
     void updateFrequencyShiftLimit();
 	bool handleMessage(const Message& message);
+    void makeUIConnections();
 
 private slots:
     void handleInputMessages();

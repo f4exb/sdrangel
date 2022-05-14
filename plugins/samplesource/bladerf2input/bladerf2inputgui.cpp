@@ -18,13 +18,13 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QResizeEvent>
 
 #include <libbladeRF.h>
 
 #include "ui_bladerf2inputgui.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
-#include "gui/crightclickenabler.h"
 #include "gui/basicdevicesettingsdialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
@@ -36,7 +36,6 @@
 BladeRF2InputGui::BladeRF2InputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     DeviceGUI(parent),
     ui(new Ui::Bladerf2InputGui),
-    m_deviceUISet(deviceUISet),
     m_forceSettings(true),
     m_doApplySettings(true),
     m_settings(),
@@ -45,12 +44,17 @@ BladeRF2InputGui::BladeRF2InputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleRate(0),
     m_lastEngineState(DeviceAPI::StNotStarted)
 {
+    m_deviceUISet = deviceUISet;
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_sampleSource = (BladeRF2Input*) m_deviceUISet->m_deviceAPI->getSampleSource();
     int max, min, step;
     float scale;
     uint64_t f_min, f_max;
 
-    ui->setupUi(this);
+    ui->setupUi(getContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    getContents()->setStyleSheet("#Bladerf2InputGui { background-color: rgb(64, 64, 64); }");
+    m_helpURL = "plugins/samplesource/bladerf2input/readme.md";
 
     m_sampleSource->getFrequencyRange(f_min, f_max, step, scale);
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -87,8 +91,7 @@ BladeRF2InputGui::BladeRF2InputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
     m_statusTimer.start(500);
 
-    CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStop);
-    connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
     displaySettings();
 
@@ -96,6 +99,7 @@ BladeRF2InputGui::BladeRF2InputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);
 
     sendSettings();
+    makeUIConnections();
 }
 
 BladeRF2InputGui::~BladeRF2InputGui()
@@ -131,6 +135,12 @@ bool BladeRF2InputGui::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void BladeRF2InputGui::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 void BladeRF2InputGui::updateFrequencyLimits()
@@ -510,21 +520,26 @@ void BladeRF2InputGui::updateStatus()
 
 void BladeRF2InputGui::openDeviceSettingsDialog(const QPoint& p)
 {
-    BasicDeviceSettingsDialog dialog(this);
-    dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
-    dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
-    dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
-    dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
+    if (m_contextMenuType == ContextMenuDeviceSettings)
+    {
+        BasicDeviceSettingsDialog dialog(this);
+        dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
+        dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
+        dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
+        dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
 
-    dialog.move(p);
-    dialog.exec();
+        dialog.move(p);
+        dialog.exec();
 
-    m_settings.m_useReverseAPI = dialog.useReverseAPI();
-    m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
-    m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
-    m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settings.m_useReverseAPI = dialog.useReverseAPI();
+        m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
+        m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
+        m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
-    sendSettings();
+        sendSettings();
+    }
+
+    resetContextMenuType();
 }
 
 float BladeRF2InputGui::getGainDB(int gainValue)
@@ -541,4 +556,22 @@ int BladeRF2InputGui::getGainValue(float gainDB)
     // qDebug("BladeRF2InputGui::getGainValue: gainDB: %f m_gainMin: %d m_gainMax: %d m_gainStep: %d m_gainScale: %f gain: %d",
     //     gainDB, m_gainMin, m_gainMax, m_gainStep, m_gainScale, gain);
     return gain;
+}
+
+void BladeRF2InputGui::makeUIConnections()
+{
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &BladeRF2InputGui::on_centerFrequency_changed);
+    QObject::connect(ui->LOppm, &QSlider::valueChanged, this, &BladeRF2InputGui::on_LOppm_valueChanged);
+    QObject::connect(ui->sampleRate, &ValueDial::changed, this, &BladeRF2InputGui::on_sampleRate_changed);
+    QObject::connect(ui->dcOffset, &ButtonSwitch::toggled, this, &BladeRF2InputGui::on_dcOffset_toggled);
+    QObject::connect(ui->iqImbalance, &ButtonSwitch::toggled, this, &BladeRF2InputGui::on_iqImbalance_toggled);
+    QObject::connect(ui->biasTee, &ButtonSwitch::toggled, this, &BladeRF2InputGui::on_biasTee_toggled);
+    QObject::connect(ui->bandwidth, &ValueDial::changed, this, &BladeRF2InputGui::on_bandwidth_changed);
+    QObject::connect(ui->decim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &BladeRF2InputGui::on_decim_currentIndexChanged);
+    QObject::connect(ui->fcPos, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &BladeRF2InputGui::on_fcPos_currentIndexChanged);
+    QObject::connect(ui->gainMode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &BladeRF2InputGui::on_gainMode_currentIndexChanged);
+    QObject::connect(ui->gain, &QSlider::valueChanged, this, &BladeRF2InputGui::on_gain_valueChanged);
+    QObject::connect(ui->transverter, &TransverterButton::clicked, this, &BladeRF2InputGui::on_transverter_clicked);
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &BladeRF2InputGui::on_startStop_toggled);
+    QObject::connect(ui->sampleRateMode, &QToolButton::toggled, this, &BladeRF2InputGui::on_sampleRateMode_toggled);
 }

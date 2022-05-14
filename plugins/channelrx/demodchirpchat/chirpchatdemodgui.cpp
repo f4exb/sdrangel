@@ -81,6 +81,7 @@ bool ChirpChatDemodGUI::handleMessage(const Message& message)
     if (DSPSignalNotification::match(message))
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getCenterFrequency();
         int basebandSampleRate = notif.getSampleRate();
         qDebug() << "ChirpChatDemodGUI::handleMessage: DSPSignalNotification: m_basebandSampleRate: " << basebandSampleRate;
 
@@ -89,6 +90,10 @@ bool ChirpChatDemodGUI::handleMessage(const Message& message)
             m_basebandSampleRate = basebandSampleRate;
             setBandwidths();
         }
+
+        ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
 
         return true;
     }
@@ -151,6 +156,7 @@ void ChirpChatDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -323,7 +329,18 @@ void ChirpChatDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    RollupContents *rollupContents = getRollupContents();
+
+    if (rollupContents->hasExpandableWidgets()) {
+        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
+    } else {
+        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Fixed);
+    }
+
+    int h = rollupContents->height() + getAdditionalHeight();
+    resize(width(), h);
+
+    rollupContents->saveState(m_rollupState);
     applySettings();
 }
 
@@ -337,10 +354,17 @@ void ChirpChatDemodGUI::onMenuDialogCalled(const QPoint &p)
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
         dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
         dialog.setReverseAPIChannelIndex(m_settings.m_reverseAPIChannelIndex);
+        dialog.setDefaultTitle(m_displayedName);
+
+        if (m_deviceUISet->m_deviceMIMOEngine)
+        {
+            dialog.setNumberOfStreams(m_chirpChatDemod->getNumberOfDeviceStreams());
+            dialog.setStreamIndex(m_settings.m_streamIndex);
+        }
+
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
         m_settings.m_title = m_channelMarker.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
@@ -350,22 +374,17 @@ void ChirpChatDemodGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
-        applySettings();
-    }
-    else if ((m_contextMenuType == ContextMenuStreamSettings) && (m_deviceUISet->m_deviceMIMOEngine))
-    {
-        DeviceStreamSelectionDialog dialog(this);
-        dialog.setNumberOfStreams(m_chirpChatDemod->getNumberOfDeviceStreams());
-        dialog.setStreamIndex(m_settings.m_streamIndex);
-        dialog.move(p);
-        dialog.exec();
+        if (m_deviceUISet->m_deviceMIMOEngine)
+        {
+            m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
+            m_channelMarker.clearStreamIndexes();
+            m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
+            updateIndexLabel();
+        }
 
-        m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
-        m_channelMarker.clearStreamIndexes();
-        m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
-        displayStreamIndex();
         applySettings();
     }
 
@@ -378,14 +397,18 @@ ChirpChatDemodGUI::ChirpChatDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
+    m_deviceCenterFrequency(0),
     m_basebandSampleRate(250000),
 	m_doApplySettings(true),
     m_tickCount(0)
 {
-	ui->setupUi(this);
-    m_helpURL = "plugins/channelrx/demodchirpchat/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
-	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    m_helpURL = "plugins/channelrx/demodchirpchat/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_chirpChatDemod = (ChirpChatDemod*) rxChannel;
@@ -412,7 +435,6 @@ ChirpChatDemodGUI::ChirpChatDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
 
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
-	m_deviceUISet->addRollupWidget(this);
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
 
@@ -424,6 +446,7 @@ ChirpChatDemodGUI::ChirpChatDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
 
     setBandwidths();
 	displaySettings();
+    makeUIConnections();
     resetLoRaStatus();
 	applySettings(true);
 }
@@ -459,6 +482,7 @@ void ChirpChatDemodGUI::displaySettings()
     m_channelMarker.blockSignals(false);
     m_channelMarker.setColor(m_settings.m_rgbColor);
     setTitleColor(m_settings.m_rgbColor);
+    setTitle(m_channelMarker.getTitle());
 
 	ui->glSpectrum->setSampleRate(thisBW);
 	ui->glSpectrum->setCenterFrequency(thisBW/2);
@@ -498,18 +522,11 @@ void ChirpChatDemodGUI::displaySettings()
     ui->messageLengthAuto->setChecked(m_settings.m_autoNbSymbolsMax);
 
     displaySquelch();
+    updateIndexLabel();
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
-}
-
-void ChirpChatDemodGUI::displayStreamIndex()
-{
-    if (m_deviceUISet->m_deviceMIMOEngine) {
-        setStreamIndicator(tr("%1").arg(m_settings.m_streamIndex));
-    } else {
-        setStreamIndicator("S"); // single channel indicator
-    }
 }
 
 void ChirpChatDemodGUI::displaySquelch()
@@ -767,3 +784,30 @@ void ChirpChatDemodGUI::tick()
     }
 }
 
+void ChirpChatDemodGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &ChirpChatDemodGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->BW, &QSlider::valueChanged, this, &ChirpChatDemodGUI::on_BW_valueChanged);
+    QObject::connect(ui->Spread, &QSlider::valueChanged, this, &ChirpChatDemodGUI::on_Spread_valueChanged);
+    QObject::connect(ui->deBits, &QSlider::valueChanged, this, &ChirpChatDemodGUI::on_deBits_valueChanged);
+    QObject::connect(ui->fftWindow, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ChirpChatDemodGUI::on_fftWindow_currentIndexChanged);
+    QObject::connect(ui->preambleChirps, &QSlider::valueChanged, this, &ChirpChatDemodGUI::on_preambleChirps_valueChanged);
+    QObject::connect(ui->scheme, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ChirpChatDemodGUI::on_scheme_currentIndexChanged);
+    QObject::connect(ui->mute, &QToolButton::toggled, this, &ChirpChatDemodGUI::on_mute_toggled);
+    QObject::connect(ui->clear, &QPushButton::clicked, this, &ChirpChatDemodGUI::on_clear_clicked);
+    QObject::connect(ui->eomSquelch, &QDial::valueChanged, this, &ChirpChatDemodGUI::on_eomSquelch_valueChanged);
+    QObject::connect(ui->messageLength, &QDial::valueChanged, this, &ChirpChatDemodGUI::on_messageLength_valueChanged);
+    QObject::connect(ui->messageLengthAuto, &QCheckBox::stateChanged, this, &ChirpChatDemodGUI::on_messageLengthAuto_stateChanged);
+    QObject::connect(ui->header, &QCheckBox::stateChanged, this, &ChirpChatDemodGUI::on_header_stateChanged);
+    QObject::connect(ui->fecParity, &QDial::valueChanged, this, &ChirpChatDemodGUI::on_fecParity_valueChanged);
+    QObject::connect(ui->crc, &QCheckBox::stateChanged, this, &ChirpChatDemodGUI::on_crc_stateChanged);
+    QObject::connect(ui->packetLength, &QDial::valueChanged, this, &ChirpChatDemodGUI::on_packetLength_valueChanged);
+    QObject::connect(ui->udpSend, &QCheckBox::stateChanged, this, &ChirpChatDemodGUI::on_udpSend_stateChanged);
+    QObject::connect(ui->udpAddress, &QLineEdit::editingFinished, this, &ChirpChatDemodGUI::on_udpAddress_editingFinished);
+    QObject::connect(ui->udpPort, &QLineEdit::editingFinished, this, &ChirpChatDemodGUI::on_udpPort_editingFinished);
+}
+
+void ChirpChatDemodGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
+}

@@ -24,6 +24,7 @@
 #include <QBuffer>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
@@ -41,7 +42,6 @@
 #include "localsink.h"
 
 MESSAGE_CLASS_DEFINITION(LocalSink::MsgConfigureLocalSink, Message)
-MESSAGE_CLASS_DEFINITION(LocalSink::MsgBasebandSampleRateNotification, Message)
 
 const char* const LocalSink::m_channelIdURI = "sdrangel.channel.localsink";
 const char* const LocalSink::m_channelId = "LocalSink";
@@ -94,6 +94,18 @@ LocalSink::~LocalSink()
     delete m_thread;
 }
 
+void LocalSink::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSinkAPI(this);
+        m_deviceAPI->removeChannelSink(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addChannelSink(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
+}
+
 uint32_t LocalSink::getNumberOfDeviceStreams() const
 {
     return m_deviceAPI->getNbSourceStreams();
@@ -138,10 +150,8 @@ bool LocalSink::handleMessage(const Message& cmd)
         DSPSignalNotification *msg = new DSPSignalNotification(notif.getSampleRate(), notif.getCenterFrequency());
         m_basebandSink->getInputMessageQueue()->push(msg);
 
-        if (getMessageQueueToGUI())
-        {
-            MsgBasebandSampleRateNotification *msg = MsgBasebandSampleRateNotification::create(notif.getSampleRate());
-            getMessageQueueToGUI()->push(msg);
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
         }
 
         return true;
@@ -356,6 +366,15 @@ int LocalSink::webapiSettingsGet(
     response.setLocalSinkSettings(new SWGSDRangel::SWGLocalSinkSettings());
     response.getLocalSinkSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int LocalSink::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

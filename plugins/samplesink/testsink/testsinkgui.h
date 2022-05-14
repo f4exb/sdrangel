@@ -52,7 +52,6 @@ public:
 private:
 	Ui::TestSinkGui* ui;
 
-	DeviceUISet* m_deviceUISet;
 	bool m_doApplySettings;
 	bool m_forceSettings;
 	TestSinkSettings m_settings;
@@ -67,12 +66,15 @@ private:
 	int m_lastEngineState;
 	MessageQueue m_inputMessageQueue;
     SpectrumVis* m_spectrumVis;
+    static const int m_MinimumWidth = 360;
+    static const int m_MinimumHeight = 200 + 20 + 10 + 4*22 + 5;
 
 	void blockApplySettings(bool block) { m_doApplySettings = !block; }
 	void displaySettings();
 	void sendSettings();
 	void updateSampleRateAndFrequency();
 	bool handleMessage(const Message& message);
+    void makeUIConnections();
 
 private slots:
     void handleInputMessages();
@@ -80,6 +82,7 @@ private slots:
     void on_sampleRate_changed(quint64 value);
 	void on_startStop_toggled(bool checked);
 	void on_interp_currentIndexChanged(int index);
+    void openDeviceSettingsDialog(const QPoint& p);
     void updateHardware();
     void updateStatus();
 	void tick();

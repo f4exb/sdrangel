@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>AISDemodGUI</class>
- <widget class="RollupWidget" name="AISDemodGUI">
+ <widget class="RollupContents" name="AISDemodGUI">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>404</width>
-    <height>764</height>
+    <width>388</width>
+    <height>446</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -487,7 +487,7 @@
        <widget class="QComboBox" name="udpFormat">
         <property name="minimumSize">
          <size>
-          <width>60</width>
+          <width>66</width>
           <height>0</height>
          </size>
         </property>
@@ -912,9 +912,14 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>RollupWidget</class>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
+   <class>RollupContents</class>
    <extends>QWidget</extends>
-   <header>gui/rollupwidget.h</header>
+   <header>gui/rollupcontents.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -928,11 +933,6 @@
    <extends>QWidget</extends>
    <header>gui/levelmeter.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
    <class>GLScope</class>

@@ -45,10 +45,12 @@ public:
 	bool deserialize(const QByteArray& data);
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 
+protected:
+    void resizeEvent(QResizeEvent* size);
+
 private:
 	Ui::XTRXMIMOGUI* ui;
 
-	DeviceUISet* m_deviceUISet;
 	XTRXMIMOSettings m_settings;
     bool m_rxElseTx;   //!< Which side is being dealt with
     int m_streamIndex; //!< Current stream index being dealt with
@@ -85,6 +87,7 @@ private:
     void updateADCRate();
     void updateDACRate();
 	bool handleMessage(const Message& message);
+    void makeUIConnections();
 
 private slots:
     void handleInputMessages();

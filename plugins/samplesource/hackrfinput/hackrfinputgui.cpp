@@ -20,12 +20,12 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QResizeEvent>
 
 #include <libhackrf/hackrf.h>
 
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
-#include "gui/crightclickenabler.h"
 #include "gui/basicdevicesettingsdialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
@@ -38,7 +38,6 @@
 HackRFInputGui::HackRFInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	DeviceGUI(parent),
 	ui(new Ui::HackRFInputGui),
-	m_deviceUISet(deviceUISet),
 	m_settings(),
     m_sampleRateMode(true),
 	m_forceSettings(true),
@@ -46,9 +45,14 @@ HackRFInputGui::HackRFInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_sampleSource(NULL),
 	m_lastEngineState(DeviceAPI::StNotStarted)
 {
+    m_deviceUISet = deviceUISet;
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_sampleSource = (HackRFInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
-    ui->setupUi(this);
+    ui->setupUi(getContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    getContents()->setStyleSheet("#HackRFInputGui { background-color: rgb(64, 64, 64); }");
+    m_helpURL = "plugins/samplesource/hackrfinput/readme.md";
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 	ui->centerFrequency->setValueRange(7, 0U, 7250000U);
 
@@ -59,8 +63,7 @@ HackRFInputGui::HackRFInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(500);
 
-    CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStop);
-    connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
 	displaySettings();
 	displayBandwidths();
@@ -69,11 +72,14 @@ HackRFInputGui::HackRFInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);
 
     sendSettings();
+    makeUIConnections();
 }
 
 HackRFInputGui::~HackRFInputGui()
 {
+    qDebug("HackRFInputGui::~HackRFInputGui");
 	delete ui;
+    qDebug("HackRFInputGui::~HackRFInputGui: end");
 }
 
 void HackRFInputGui::destroy()
@@ -107,6 +113,12 @@ bool HackRFInputGui::deserialize(const QByteArray& data)
 		resetToDefaults();
 		return false;
 	}
+}
+
+void HackRFInputGui::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 bool HackRFInputGui::handleMessage(const Message& message)
@@ -490,19 +502,44 @@ void HackRFInputGui::updateStatus()
 
 void HackRFInputGui::openDeviceSettingsDialog(const QPoint& p)
 {
-    BasicDeviceSettingsDialog dialog(this);
-    dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
-    dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
-    dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
-    dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
+    if (m_contextMenuType == ContextMenuDeviceSettings)
+    {
+        BasicDeviceSettingsDialog dialog(this);
+        dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
+        dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
+        dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
+        dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
 
-    dialog.move(p);
-    dialog.exec();
+        dialog.move(p);
+        dialog.exec();
 
-    m_settings.m_useReverseAPI = dialog.useReverseAPI();
-    m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
-    m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
-    m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settings.m_useReverseAPI = dialog.useReverseAPI();
+        m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
+        m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
+        m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
-    sendSettings();
+        sendSettings();
+    }
+
+    resetContextMenuType();
+}
+
+void HackRFInputGui::makeUIConnections()
+{
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &HackRFInputGui::on_centerFrequency_changed);
+    QObject::connect(ui->sampleRate, &ValueDial::changed, this, &HackRFInputGui::on_sampleRate_changed);
+    QObject::connect(ui->LOppm, &QSlider::valueChanged, this, &HackRFInputGui::on_LOppm_valueChanged);
+    QObject::connect(ui->dcOffset, &ButtonSwitch::toggled, this, &HackRFInputGui::on_dcOffset_toggled);
+    QObject::connect(ui->iqImbalance, &ButtonSwitch::toggled, this, &HackRFInputGui::on_iqImbalance_toggled);
+    QObject::connect(ui->autoBBF, &ButtonSwitch::toggled, this, &HackRFInputGui::on_autoBBF_toggled);
+    QObject::connect(ui->biasT, &QCheckBox::stateChanged, this, &HackRFInputGui::on_biasT_stateChanged);
+    QObject::connect(ui->decim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &HackRFInputGui::on_decim_currentIndexChanged);
+    QObject::connect(ui->fcPos, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &HackRFInputGui::on_fcPos_currentIndexChanged);
+    QObject::connect(ui->lnaExt, &QCheckBox::stateChanged, this, &HackRFInputGui::on_lnaExt_stateChanged);
+    QObject::connect(ui->lna, &QSlider::valueChanged, this, &HackRFInputGui::on_lna_valueChanged);
+    QObject::connect(ui->bbFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &HackRFInputGui::on_bbFilter_currentIndexChanged);
+    QObject::connect(ui->vga, &QSlider::valueChanged, this, &HackRFInputGui::on_vga_valueChanged);
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &HackRFInputGui::on_startStop_toggled);
+    QObject::connect(ui->sampleRateMode, &QToolButton::toggled, this, &HackRFInputGui::on_sampleRateMode_toggled);
+    QObject::connect(ui->transverter, &TransverterButton::clicked, this, &HackRFInputGui::on_transverter_clicked);
 }

@@ -29,6 +29,7 @@
 #include <complex.h>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGFreqTrackerSettings.h"
 #include "SWGChannelReport.h"
 #include "SWGFreqTrackerReport.h"
@@ -101,6 +102,18 @@ FreqTracker::~FreqTracker()
     delete m_thread;
 }
 
+void FreqTracker::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSinkAPI(this);
+        m_deviceAPI->removeChannelSink(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addChannelSink(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
+}
+
 uint32_t FreqTracker::getNumberOfDeviceStreams() const
 {
     return m_deviceAPI->getNbSourceStreams();
@@ -142,10 +155,8 @@ bool FreqTracker::handleMessage(const Message& cmd)
         qDebug() << "FreqTracker::handleMessage: DSPSignalNotification";
         m_basebandSink->getInputMessageQueue()->push(rep);
 
-        if (getMessageQueueToGUI())
-        {
-            DSPSignalNotification *msg = new DSPSignalNotification(notif);
-            getMessageQueueToGUI()->push(msg);
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
         }
 
         return true;
@@ -331,6 +342,15 @@ int FreqTracker::webapiSettingsGet(
     response.setFreqTrackerSettings(new SWGSDRangel::SWGFreqTrackerSettings());
     response.getFreqTrackerSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int FreqTracker::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

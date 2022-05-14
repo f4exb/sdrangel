@@ -45,10 +45,12 @@ public:
 	bool deserialize(const QByteArray& data);
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 
+protected:
+    void resizeEvent(QResizeEvent* size);
+
 private:
 	Ui::LimeSDRMIMOGUI* ui;
 
-	DeviceUISet* m_deviceUISet;
 	LimeSDRMIMOSettings m_settings;
     bool m_rxElseTx;   //!< Which side is being dealt with
     int m_streamIndex; //!< Current stream index being dealt with
@@ -96,6 +98,7 @@ private:
     void updateSampleRateAndFrequency();
     void sendSettings();
 	bool handleMessage(const Message& message);
+    void makeUIConnections();
 
 private slots:
     void handleInputMessages();

@@ -1,25 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>AMDemodGUI</class>
- <widget class="RollupWidget" name="AMDemodGUI">
+ <widget class="RollupContents" name="AMDemodGUI">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>396</width>
-    <height>170</height>
+    <width>360</width>
+    <height>155</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
-    <width>352</width>
+    <width>360</width>
     <height>0</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>560</width>
+    <height>16777215</height>
    </size>
   </property>
   <property name="font">
@@ -39,13 +45,13 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>390</width>
-     <height>131</height>
+     <width>358</width>
+     <height>151</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
-     <width>350</width>
+     <width>358</width>
      <height>0</height>
     </size>
    </property>
@@ -428,9 +434,15 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>RollupWidget</class>
+   <class>ValueDialZ</class>
    <extends>QWidget</extends>
-   <header>gui/rollupwidget.h</header>
+   <header>gui/valuedialz.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>RollupContents</class>
+   <extends>QWidget</extends>
+   <header>gui/rollupcontents.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -443,12 +455,6 @@
    <class>ButtonSwitch</class>
    <extends>QToolButton</extends>
    <header>gui/buttonswitch.h</header>
-  </customwidget>
-  <customwidget>
-   <class>ValueDialZ</class>
-   <extends>QWidget</extends>
-   <header>gui/valuedialz.h</header>
-   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>

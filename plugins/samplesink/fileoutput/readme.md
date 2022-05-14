@@ -18,6 +18,8 @@ The plugin is always built.
 
 <h2>Interface</h2>
 
+The top and bottom bars of the device window are described [here](../../../sdrgui/device/readme.md)
+
 ![File output plugin GUI](../../../doc/img/FileOutput_plugin.png)
 
 <h3>1: Start/Stop</h3>

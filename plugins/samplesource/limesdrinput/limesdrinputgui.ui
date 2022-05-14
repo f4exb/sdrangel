@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>360</width>
-    <height>290</height>
+    <width>370</width>
+    <height>209</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,8 +18,14 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>360</width>
-    <height>290</height>
+    <width>370</width>
+    <height>209</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>390</width>
+    <height>266</height>
    </size>
   </property>
   <property name="font">
@@ -128,7 +134,7 @@
        <property name="font">
         <font>
          <family>Liberation Mono</family>
-         <pointsize>20</pointsize>
+         <pointsize>16</pointsize>
          <weight>50</weight>
          <bold>false</bold>
         </font>
@@ -1080,6 +1086,7 @@
        </property>
        <property name="font">
         <font>
+         <family>Ubuntu</family>
          <pointsize>8</pointsize>
         </font>
        </property>
@@ -1153,30 +1160,6 @@ QToolTip{background-color: white; color: black;}</string>
      </item>
     </layout>
    </item>
-   <item>
-    <widget class="Line" name="line_vga2">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="padLayout">
-     <item>
-      <spacer name="verticalPadSpacer">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>40</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-    </layout>
-   </item>
   </layout>
  </widget>
  <customwidgets>
@@ -1192,11 +1175,6 @@ QToolTip{background-color: white; color: black;}</string>
    <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
-   <class>ExternalClockButton</class>
-   <extends>QToolButton</extends>
-   <header>gui/externalclockbutton.h</header>
-  </customwidget>
-  <customwidget>
    <class>ValueDialZ</class>
    <extends>QWidget</extends>
    <header>gui/valuedialz.h</header>
@@ -1206,6 +1184,11 @@ QToolTip{background-color: white; color: black;}</string>
    <class>TransverterButton</class>
    <extends>QPushButton</extends>
    <header>gui/transverterbutton.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ExternalClockButton</class>
+   <extends>QToolButton</extends>
+   <header>gui/externalclockbutton.h</header>
   </customwidget>
  </customwidgets>
  <resources>

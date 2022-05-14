@@ -21,8 +21,10 @@
 
 #include "gui/addpresetdialog.h"
 #include "feature/featureuiset.h"
-#include "featurepresetsdialog.h"
 #include "settings/featuresetpreset.h"
+#include "maincore.h"
+
+#include "featurepresetsdialog.h"
 #include "ui_featurepresetsdialog.h"
 
 FeaturePresetsDialog::FeaturePresetsDialog(QWidget* parent) :
@@ -31,7 +33,10 @@ FeaturePresetsDialog::FeaturePresetsDialog(QWidget* parent) :
     m_featureSetPresets(nullptr),
     m_featureUISet(nullptr),
     m_pluginAPI(nullptr),
-    m_apiAdapter(nullptr)
+    m_apiAdapter(nullptr),
+    m_currentWorkspace(nullptr),
+    m_workspaces(nullptr),
+    m_presetLoaded(false)
 {
     ui->setupUi(this);
 }
@@ -186,10 +191,6 @@ void FeaturePresetsDialog::on_presetUpdate_clicked()
             ui->presetsTree->setCurrentItem(item_x);
         }
     }
-}
-
-void FeaturePresetsDialog::on_settingsSave_clicked()
-{
 }
 
 void FeaturePresetsDialog::on_presetEdit_clicked()
@@ -375,7 +376,8 @@ void FeaturePresetsDialog::loadPresetSettings(const FeatureSetPreset* preset)
 		qPrintable(preset->getGroup()),
 		qPrintable(preset->getDescription()));
 
-    m_featureUISet->loadFeatureSetSettings(preset, m_pluginAPI, m_apiAdapter);
+    m_featureUISet->loadFeatureSetSettings(preset, m_pluginAPI, m_apiAdapter, m_workspaces, m_currentWorkspace);
+    m_presetLoaded = true;
 }
 
 void FeaturePresetsDialog::sortFeatureSetPresets()

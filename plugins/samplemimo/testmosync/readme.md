@@ -10,6 +10,8 @@ The plugin is always built.
 
 <h2>Interface</h2>
 
+The top and bottom bars of the device window are described [here](../../../sdrgui/device/readme.md)
+
 ![Test MO sync plugin GUI](../../../doc/img/TestMOSync_plugin.png)
 
 <h3>1: Start/Stop</h3>
@@ -44,4 +46,4 @@ Use the wheels to adjust the sample rate. Left click on a digit sets the cursor 
 
 <h3>7: Spectrum display</h3>
 
-This is the final output stream spectrum display after interpolation (5). This would be sent to the hardware device. Controls on the bottom of the panel are identical to the ones of the main spectrum display.
+This is the final output stream spectrum display after interpolation (5). This would be sent to the hardware device. Details on the spectrum view and controls can be found [here](../../../sdrgui/gui/spectrum.md)

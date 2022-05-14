@@ -8,6 +8,8 @@ This MIMO transmission only (MO) plugin can be used to drive a 2 channel MO devi
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![Beam steering CW plugin GUI](../../../doc/img/BeamsteeringCWMod_plugin.png)
 
 <h3>1: Channel output</h3>

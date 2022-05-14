@@ -55,7 +55,19 @@ public:
 					m_config(config)
 		{ }
 	};
-	typedef QList<DeviceConfig> DeviceeConfigs;
+	typedef QList<DeviceConfig> DeviceConfigs;
+
+    struct SelectedDevice
+    {
+		QString m_deviceId;
+		QString m_deviceSerial;
+		int m_deviceSequence;
+        int m_deviceItemIndex;
+
+        SelectedDevice() = default;
+        SelectedDevice(const SelectedDevice&) = default;
+        SelectedDevice& operator=(const SelectedDevice&) = default;
+    };
 
     enum PresetType
     {
@@ -77,6 +89,7 @@ public:
 	bool isMIMOPreset() const { return m_presetType == PresetMIMO; }
     PresetType getPresetType() const { return m_presetType; }
     void setPresetType(PresetType presetType) { m_presetType = presetType; }
+    static QString getPresetTypeChar(PresetType presetType);
 
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
@@ -90,6 +103,16 @@ public:
 
 	void setSpectrumConfig(const QByteArray& data) { m_spectrumConfig = data; }
 	const QByteArray& getSpectrumConfig() const { return m_spectrumConfig; }
+    void setSpectrumGeometry(const QByteArray& data) { m_spectrumGeometry = data; }
+	const QByteArray& getSpectrumGeometry() const { return m_spectrumGeometry; }
+    void setSpectrumWorkspaceIndex(int workspaceIndex) { m_spectrumWorkspaceIndex = workspaceIndex; }
+	int getSpectrumWorkspaceIndex() const { return m_spectrumWorkspaceIndex; }
+    void setSelectedDevice(const SelectedDevice& selectedDevice) { m_selectedDevice = selectedDevice; }
+    SelectedDevice getSelectedDevice() const { return m_selectedDevice; }
+    void setDeviceGeometry(const QByteArray& data) { m_deviceGeometry = data; }
+	const QByteArray& getDeviceGeometry() const { return m_deviceGeometry; }
+    void setDeviceWorkspaceIndex(int workspaceIndex) { m_deviceWorkspaceIndex = workspaceIndex; }
+	int getDeviceWorkspaceIndex() const { return m_deviceWorkspaceIndex; }
 
 	bool hasDCOffsetCorrection() const { return m_dcOffsetCorrection; }
     void setDCOffsetCorrection(bool dcOffsetCorrection) { m_dcOffsetCorrection = dcOffsetCorrection; }
@@ -154,6 +177,11 @@ protected:
 
 	// general configuration
 	QByteArray m_spectrumConfig;
+    QByteArray m_spectrumGeometry;
+    int m_spectrumWorkspaceIndex;
+    QByteArray m_deviceGeometry;
+    int m_deviceWorkspaceIndex;
+    SelectedDevice m_selectedDevice;
 
 	// dc offset and i/q imbalance correction TODO: move it into the source data
 	bool m_dcOffsetCorrection;
@@ -163,14 +191,14 @@ protected:
 	ChannelConfigs m_channelConfigs;
 
 	// devices and configurations
-	DeviceeConfigs m_deviceConfigs;
+	DeviceConfigs m_deviceConfigs;
 
 	// screen and dock layout
 	bool m_showSpectrum;
 	QByteArray m_layout;
 
 private:
-	const QByteArray* findBestDeviceConfigSoapy(const QString& sourceId, const QString& deviceSerial) const;
+	const QByteArray* findBestDeviceConfigSoapy(const QString& deviceId, const QString& deviceSerial) const;
 };
 
 Q_DECLARE_METATYPE(const Preset*)

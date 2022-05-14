@@ -6,8 +6,9 @@ This input sample source plugin gets its samples from a [USRP device](https://ww
 
 <h2>Interface</h2>
 
-![USRP input plugin GUI](../../../doc/img/USRPInput_plugin.png)
+The top and bottom bars of the device window are described [here](../../../sdrgui/device/readme.md)
 
+![USRP input plugin GUI](../../../doc/img/USRPInput_plugin.png)
 
 <h3>1: Start/Stop</h3>
 
@@ -19,7 +20,7 @@ Device start / stop button.
 
 <h3>2A: Sample rate</h3>
 
-This is the sample rate at which IQ samples are transfered the device to SDRangel, in kS/s (k) or MS/s (M). 
+This is the sample rate at which IQ samples are transfered the device to SDRangel, in kS/s (k) or MS/s (M).
 
 <h3>2B: Stream sample rate</h3>
 
@@ -130,7 +131,7 @@ This label turns green when data is being received from the device.
 
   - **O**: turns red if stream experiences overruns
   - **T**: turns red if stream experiences timeouts
-  
+
 The stream warning indicators are reset when the acqusition is started.
 
 <h2>Dependendices</h2>

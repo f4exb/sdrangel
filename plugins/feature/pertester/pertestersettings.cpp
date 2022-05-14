@@ -50,6 +50,7 @@ void PERTesterSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIFeatureSetIndex = 0;
     m_reverseAPIFeatureIndex = 0;
+    m_workspaceIndex = 0;
 }
 
 QByteArray PERTesterSettings::serialize() const
@@ -77,6 +78,8 @@ QByteArray PERTesterSettings::serialize() const
     if (m_rollupState) {
         s.writeBlob(27, m_rollupState->serialize());
     }
+
+    s.writeS32(28, m_workspaceIndex);
 
     return s.final();
 }
@@ -145,6 +148,9 @@ bool PERTesterSettings::deserialize(const QByteArray& data)
             d.readBlob(27, &bytetmp);
             m_rollupState->deserialize(bytetmp);
         }
+
+        d.readS32(28, &m_workspaceIndex, 0);
+        d.readBlob(29, &m_geometryBytes);
 
         return true;
     }

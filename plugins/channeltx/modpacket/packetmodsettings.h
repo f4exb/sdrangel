@@ -83,6 +83,9 @@ struct PacketModSettings
     QString m_udpAddress;
     uint16_t m_udpPort;
     Serializable *m_rollupState;
+    int m_workspaceIndex;
+    QByteArray m_geometryBytes;
+    bool m_hidden;
 
     PacketModSettings();
     void resetToDefaults();

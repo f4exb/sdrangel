@@ -48,9 +48,11 @@ public:
     virtual bool deserialize(const QByteArray& data);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 
+protected:
+    void resizeEvent(QResizeEvent* size);
+
 private:
     Ui::PlutoSDRInputGUI* ui;
-    DeviceUISet* m_deviceUISet;
     PlutoSDRInputSettings m_settings;
     bool m_sampleRateMode; //!< true: device, false: base band sample rate update mode
     bool m_forceSettings;
@@ -74,6 +76,7 @@ private:
     void setSampleRateLimits();
     void updateFrequencyLimits();
     bool handleMessage(const Message& message);
+    void makeUIConnections();
 
 private slots:
     void on_startStop_toggled(bool checked);

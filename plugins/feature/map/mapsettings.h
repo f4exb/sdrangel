@@ -90,6 +90,8 @@ struct MapSettings
     Serializable *m_rollupState;
     bool m_map2DEnabled;
     QString m_mapType;          // "Street Map", "Satellite Map", etc.. as selected in combobox
+    int m_workspaceIndex;
+    QByteArray m_geometryBytes;
 
     // 3D Map settings
     bool m_map3DEnabled;

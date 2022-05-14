@@ -48,7 +48,6 @@ public:
 private:
     Ui::Bladerf2InputGui* ui;
 
-    DeviceUISet* m_deviceUISet;
     bool m_forceSettings;
     bool m_doApplySettings;
     BladeRF2InputSettings m_settings;
@@ -77,6 +76,10 @@ private:
     int getGainValue(float gainDB);
     void blockApplySettings(bool block);
     bool handleMessage(const Message& message);
+    void makeUIConnections();
+
+protected:
+    void resizeEvent(QResizeEvent* size);
 
 private slots:
     void handleInputMessages();

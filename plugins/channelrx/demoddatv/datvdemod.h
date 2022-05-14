@@ -43,8 +43,10 @@ public:
 
     DATVDemod(DeviceAPI *);
     virtual ~DATVDemod();
-
     virtual void destroy() { delete this; }
+    virtual void setDeviceAPI(DeviceAPI *deviceAPI);
+    virtual DeviceAPI *getDeviceAPI() { return m_deviceAPI; }
+
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual QString getIdentifier() const { return objectName(); }
     virtual void getTitle(QString& title) { title = objectName(); }
@@ -74,6 +76,10 @@ public:
 
     virtual int webapiSettingsGet(
             SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiWorkspaceGet(
+            SWGSDRangel::SWGWorkspaceInfo& response,
             QString& errorMessage);
 
     virtual int webapiSettingsPutPatch(

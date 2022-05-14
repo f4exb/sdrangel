@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>359</width>
-    <height>106</height>
+    <width>364</width>
+    <height>137</height>
    </rect>
   </property>
   <property name="font">
@@ -357,32 +357,23 @@
       </widget>
      </item>
      <item>
-      <widget class="ButtonSwitch" name="freeze">
-       <property name="toolTip">
-        <string>Play/Pause spectrum display</string>
+      <widget class="QLabel" name="fillLabel1">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
-       <property name="icon">
-        <iconset resource="../resources/res.qrc">
-         <normaloff>:/pause.png</normaloff>
-         <normalon>:/play.png</normalon>:/pause.png</iconset>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
+       <property name="minimumSize">
         <size>
-         <width>40</width>
-         <height>20</height>
+         <width>5</width>
+         <height>22</height>
         </size>
        </property>
-      </spacer>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -539,61 +530,23 @@
       </widget>
      </item>
      <item>
-      <widget class="ButtonSwitch" name="wsSpectrum">
-       <property name="toolTip">
-        <string>Left: toggle websocket spectrum - Right: websocket spectrum parameters</string>
+      <widget class="QLabel" name="fillLabel2">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
-       <property name="icon">
-        <iconset>
-         <normalon>:/stream.png</normalon>
-        </iconset>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="markers">
-       <property name="toolTip">
-        <string>Open spectrum markers dialog</string>
-       </property>
-       <property name="icon">
-        <iconset>
-         <normalon>:/gridpolar.png</normalon>
-        </iconset>
-       </property>
-       <property name="checkable">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="ButtonSwitch" name="calibration">
-       <property name="toolTip">
-        <string>Left: toggle relative / calibrated power - Right: open calibration dialog</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../resources/res.qrc">
-         <normaloff>:/ruler.png</normaloff>:/ruler.png</iconset>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_3">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
+       <property name="minimumSize">
         <size>
-         <width>40</width>
-         <height>20</height>
+         <width>5</width>
+         <height>22</height>
         </size>
        </property>
-      </spacer>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -604,6 +557,12 @@
      </property>
      <item>
       <widget class="QPushButton" name="clearSpectrum">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="toolTip">
         <string>Clear spectrum histogram</string>
        </property>
@@ -874,17 +833,111 @@
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+      <widget class="QLabel" name="fillLabel3">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
-       <property name="sizeHint" stdset="0">
+       <property name="minimumSize">
         <size>
-         <width>40</width>
-         <height>20</height>
+         <width>5</width>
+         <height>22</height>
         </size>
        </property>
-      </spacer>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="Line4Layout">
+     <item>
+      <widget class="ButtonSwitch" name="freeze">
+       <property name="toolTip">
+        <string>Play/Pause spectrum display</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/pause.png</normaloff>
+         <normalon>:/play.png</normalon>:/pause.png</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="wsSpectrum">
+       <property name="toolTip">
+        <string>Left: toggle websocket spectrum - Right: websocket spectrum parameters</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normalon>:/stream.png</normalon>
+        </iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="markers">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="toolTip">
+        <string>Open spectrum markers dialog</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normalon>:/gridpolar.png</normalon>
+        </iconset>
+       </property>
+       <property name="checkable">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="calibration">
+       <property name="toolTip">
+        <string>Left: toggle relative / calibrated power - Right: open calibration dialog</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/ruler.png</normaloff>:/ruler.png</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="fillLabel4">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>5</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

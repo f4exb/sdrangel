@@ -29,6 +29,7 @@
 #include <QThread>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGDSDDemodSettings.h"
 #include "SWGChannelReport.h"
 #include "SWGDSDDemodReport.h"
@@ -98,6 +99,18 @@ DSDDemod::~DSDDemod()
     delete m_thread;
 }
 
+void DSDDemod::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSinkAPI(this);
+        m_deviceAPI->removeChannelSink(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addChannelSink(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
+}
+
 uint32_t DSDDemod::getNumberOfDeviceStreams() const
 {
     return m_deviceAPI->getNbSourceStreams();
@@ -149,6 +162,10 @@ bool DSDDemod::handleMessage(const Message& cmd)
         DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
         qDebug() << "DSDDemod::handleMessage: DSPSignalNotification";
         m_basebandSink->getInputMessageQueue()->push(rep);
+        // Forward to GUI if any
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
+        }
 
 	    return true;
     }
@@ -349,6 +366,15 @@ int DSDDemod::webapiSettingsGet(
     response.setDsdDemodSettings(new SWGSDRangel::SWGDSDDemodSettings());
     response.getDsdDemodSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int DSDDemod::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

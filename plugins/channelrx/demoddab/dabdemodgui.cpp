@@ -200,15 +200,22 @@ bool DABDemodGUI::handleMessage(const Message& message)
     else if (DSPSignalNotification::match(message))
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getCenterFrequency();
         m_basebandSampleRate = notif.getSampleRate();
+        ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
         bool srTooLow = m_basebandSampleRate < 2048000;
         ui->warning->setVisible(srTooLow);
+
         if (srTooLow) {
             ui->warning->setText("Sample rate must be >= 2048000");
         } else {
             ui->warning->setText("");
         }
-        arrangeRollups();
+
+        getRollupContents()->arrangeRollups();
+        updateAbsoluteCenterFrequency();
+
         return true;
     }
     else if (DABDemod::MsgDABEnsembleName::match(message))
@@ -281,7 +288,7 @@ bool DABDemodGUI::handleMessage(const Message& message)
             ui->motImage->resize(ui->motImage->width(), pixmap.height());
             ui->motImage->setVisible(true);
             ui->motImage->setPixmap(pixmap, pixmap.size());
-            arrangeRollups();
+            getRollupContents()->arrangeRollups();
         }
         return true;
     }
@@ -318,6 +325,7 @@ void DABDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -384,7 +392,18 @@ void DABDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    RollupContents *rollupContents = getRollupContents();
+
+    if (rollupContents->hasExpandableWidgets()) {
+        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
+    } else {
+        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Fixed);
+    }
+
+    int h = rollupContents->height() + getAdditionalHeight();
+    resize(width(), h);
+
+    rollupContents->saveState(m_rollupState);
     applySettings();
 }
 
@@ -398,6 +417,14 @@ void DABDemodGUI::onMenuDialogCalled(const QPoint &p)
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
         dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
         dialog.setReverseAPIChannelIndex(m_settings.m_reverseAPIChannelIndex);
+        dialog.setDefaultTitle(m_displayedName);
+
+        if (m_deviceUISet->m_deviceMIMOEngine)
+        {
+            dialog.setNumberOfStreams(m_dabDemod->getNumberOfDeviceStreams());
+            dialog.setStreamIndex(m_settings.m_streamIndex);
+        }
+
         dialog.move(p);
         dialog.exec();
 
@@ -410,22 +437,17 @@ void DABDemodGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
-        applySettings();
-    }
-    else if ((m_contextMenuType == ContextMenuStreamSettings) && (m_deviceUISet->m_deviceMIMOEngine))
-    {
-        DeviceStreamSelectionDialog dialog(this);
-        dialog.setNumberOfStreams(m_dabDemod->getNumberOfDeviceStreams());
-        dialog.setStreamIndex(m_settings.m_streamIndex);
-        dialog.move(p);
-        dialog.exec();
+        if (m_deviceUISet->m_deviceMIMOEngine)
+        {
+            m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
+            m_channelMarker.clearStreamIndexes();
+            m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
+            updateIndexLabel();
+        }
 
-        m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
-        m_channelMarker.clearStreamIndexes();
-        m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
-        displayStreamIndex();
         applySettings();
     }
 
@@ -438,15 +460,18 @@ DABDemodGUI::DABDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_pluginAPI(pluginAPI),
     m_deviceUISet(deviceUISet),
     m_channelMarker(this),
+    m_deviceCenterFrequency(0),
     m_doApplySettings(true),
     m_tickCount(0),
     m_channelFreq(0.0)
 {
-    ui->setupUi(this);
-    m_helpURL = "plugins/channelrx/demoddab/readme.md";
-
     setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    m_helpURL = "plugins/channelrx/demoddab/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_dabDemod = reinterpret_cast<DABDemod*>(rxChannel);
@@ -478,7 +503,6 @@ DABDemodGUI::DABDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_settings.setRollupState(&m_rollupState);
 
     m_deviceUISet->addChannelMarker(&m_channelMarker);
-    m_deviceUISet->addRollupWidget(this);
 
     connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
@@ -506,6 +530,7 @@ DABDemodGUI::DABDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     connect(ui->programs->horizontalHeader(), SIGNAL(sectionResized(int, int, int)), SLOT(programs_sectionResized(int, int, int)));
 
     displaySettings();
+    makeUIConnections();
     applySettings(true);
 }
 
@@ -539,6 +564,7 @@ void DABDemodGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
 
@@ -551,7 +577,7 @@ void DABDemodGUI::displaySettings()
     ui->rfBWText->setText(QString("%1k").arg(m_settings.m_rfBandwidth / 1000.0, 0, 'f', 1));
     ui->rfBW->setValue(m_settings.m_rfBandwidth / 100.0);
 
-    displayStreamIndex();
+    updateIndexLabel();
 
     ui->filter->setText(m_settings.m_filter);
 
@@ -569,27 +595,21 @@ void DABDemodGUI::displaySettings()
 
     filter();
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
-void DABDemodGUI::displayStreamIndex()
-{
-    if (m_deviceUISet->m_deviceMIMOEngine) {
-        setStreamIndicator(tr("%1").arg(m_settings.m_streamIndex));
-    } else {
-        setStreamIndicator("S"); // single channel indicator
-    }
-}
-
-void DABDemodGUI::leaveEvent(QEvent*)
+void DABDemodGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void DABDemodGUI::enterEvent(QEvent*)
+void DABDemodGUI::enterEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void DABDemodGUI::clearProgram()
@@ -605,7 +625,7 @@ void DABDemodGUI::clearProgram()
     ui->data->setText("");
     ui->motImage->setPixmap(QPixmap());
     ui->motImage->setVisible(false);
-    arrangeRollups();
+    getRollupContents()->arrangeRollups();
 }
 
 void DABDemodGUI::resetService()
@@ -691,4 +711,21 @@ void DABDemodGUI::tick()
     }
 
     m_tickCount++;
+}
+
+void DABDemodGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &DABDemodGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->audioMute, &QToolButton::toggled, this, &DABDemodGUI::on_audioMute_toggled);
+    QObject::connect(ui->volume, &QSlider::valueChanged, this, &DABDemodGUI::on_volume_valueChanged);
+    QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &DABDemodGUI::on_rfBW_valueChanged);
+    QObject::connect(ui->filter, &QLineEdit::editingFinished, this, &DABDemodGUI::on_filter_editingFinished);
+    QObject::connect(ui->clearTable, &QPushButton::clicked, this, &DABDemodGUI::on_clearTable_clicked);
+    QObject::connect(ui->programs, &QTableWidget::cellDoubleClicked, this, &DABDemodGUI::on_programs_cellDoubleClicked);
+    QObject::connect(ui->channel, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DABDemodGUI::on_channel_currentIndexChanged);
+}
+
+void DABDemodGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

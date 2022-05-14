@@ -506,3 +506,92 @@ int DeviceEnumerator::getMIMOSamplingDeviceIndex(const QString& deviceId, int se
 
     return -1;
 }
+
+int DeviceEnumerator::getBestRxSamplingDeviceIndex(const QString& deviceId, const QString& deviceSerial, int deviceSequence, int deviceItemIndex)
+{
+    return getBestSamplingDeviceIndex(m_rxEnumeration, deviceId, deviceSerial, deviceSequence, deviceItemIndex);
+}
+
+int DeviceEnumerator::getBestTxSamplingDeviceIndex(const QString& deviceId, const QString& deviceSerial, int deviceSequence, int deviceItemIndex)
+{
+    return getBestSamplingDeviceIndex(m_txEnumeration, deviceId, deviceSerial, deviceSequence, deviceItemIndex);
+}
+
+int DeviceEnumerator::getBestMIMOSamplingDeviceIndex(const QString& deviceId, const QString& deviceSerial, int deviceSequence)
+{
+    return getBestSamplingDeviceIndex(m_mimoEnumeration, deviceId, deviceSerial, deviceSequence, -1);
+}
+
+int DeviceEnumerator::getBestSamplingDeviceIndex(
+    const DevicesEnumeration& devicesEnumeration,
+    const QString& deviceId,
+    const QString& deviceSerial,
+    int deviceSequence,
+    int deviceItemIndex
+)
+{
+    DevicesEnumeration::const_iterator it = devicesEnumeration.begin();
+    DevicesEnumeration::const_iterator itFirstOfKind = devicesEnumeration.end();
+    DevicesEnumeration::const_iterator itMatchSequence = devicesEnumeration.end();
+
+    for (; it != devicesEnumeration.end(); ++it)
+    {
+		if ((it->m_samplingDevice.id == deviceId) &&
+            (
+                ((deviceItemIndex < 0) || (deviceItemIndex > it->m_samplingDevice.deviceNbItems)) || // take first if item index is negative or out of range
+                ((deviceItemIndex <= it->m_samplingDevice.deviceNbItems) && (deviceItemIndex == it->m_samplingDevice.deviceItemIndex)) // take exact item index if in range
+            )
+        )
+		{
+			if (itFirstOfKind == devicesEnumeration.end()) {
+				itFirstOfKind = it;
+			}
+
+			if (deviceSerial.isNull() || deviceSerial.isEmpty())
+			{
+				if (it->m_samplingDevice.sequence == deviceSequence) {
+					break;
+				}
+			}
+			else
+			{
+				if (it->m_samplingDevice.serial == deviceSerial) {
+					break;
+				} else if(it->m_samplingDevice.sequence == deviceSequence) {
+					itMatchSequence = it;
+				}
+			}
+		}
+    }
+
+	if (it == devicesEnumeration.end()) // no exact match
+	{
+		if (itMatchSequence != devicesEnumeration.end()) // match sequence and device type ?
+		{
+			qDebug("DeviceEnumerator::getBestSamplingDeviceIndex: sequence matched: id: %s ser: %s seq: %d",
+				qPrintable(itMatchSequence->m_samplingDevice.id),
+                qPrintable(itMatchSequence->m_samplingDevice.serial),
+                itMatchSequence->m_samplingDevice.sequence);
+            return itMatchSequence - devicesEnumeration.begin();
+		}
+		else if (itFirstOfKind != devicesEnumeration.end()) // match just device type ?
+		{
+			qDebug("DeviceEnumerator::getBestSamplingDeviceIndex: first of kind matched: id: %s ser: %s seq: %d",
+				qPrintable(itFirstOfKind->m_samplingDevice.id),
+                qPrintable(itFirstOfKind->m_samplingDevice.serial),
+                itFirstOfKind->m_samplingDevice.sequence);
+            return itFirstOfKind - devicesEnumeration.begin();
+		}
+		else // definitely not found !
+		{
+			qDebug("DeviceEnumerator::getBestSamplingDeviceIndex: no match");
+			return -1;
+		}
+	}
+	else // exact match
+	{
+		qDebug("DeviceEnumerator::getBestSamplingDeviceIndex: serial matched (exact): id: %s ser: %s",
+			qPrintable(it->m_samplingDevice.id), qPrintable(it->m_samplingDevice.serial));
+        return it - devicesEnumeration.begin();
+	}
+}

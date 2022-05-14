@@ -78,10 +78,12 @@ public:
 	bool deserialize(const QByteArray& data);
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 
+protected:
+    void resizeEvent(QResizeEvent* size);
+
 private:
 	Ui::RemoteOutputGui* ui;
 
-	DeviceUISet* m_deviceUISet;
 	RemoteOutputSettings m_settings;        //!< current settings
 	RemoteOutputSettings m_controlSettings; //!< settings last sent to device via control port
 	QTimer m_updateTimer;
@@ -123,6 +125,7 @@ private:
 	void displayEventStatus(int recoverableCount, int unrecoverableCount);
     void displayEventTimer();
 	bool handleMessage(const Message& message);
+    void makeUIConnections();
 
 private slots:
     void handleInputMessages();

@@ -1,14 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>InterferometerGUI</class>
- <widget class="RollupWidget" name="InterferometerGUI">
+ <widget class="RollupContents" name="InterferometerGUI">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>739</width>
-    <height>778</height>
+    <width>720</width>
+    <height>770</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
@@ -30,9 +36,15 @@
     <rect>
      <x>0</x>
      <y>10</y>
-     <width>631</width>
+     <width>718</width>
      <height>81</height>
     </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>718</width>
+     <height>0</height>
+    </size>
    </property>
    <property name="windowTitle">
     <string>Settings</string>
@@ -352,9 +364,15 @@
      <height>284</height>
     </rect>
    </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
    <property name="minimumSize">
     <size>
-     <width>716</width>
+     <width>718</width>
      <height>0</height>
     </size>
    </property>
@@ -379,6 +397,12 @@
     </property>
     <item>
      <widget class="GLSpectrum" name="glSpectrum" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="minimumSize">
        <size>
         <width>200</width>
@@ -407,9 +431,15 @@
      <height>334</height>
     </rect>
    </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
    <property name="minimumSize">
     <size>
-     <width>716</width>
+     <width>718</width>
      <height>0</height>
     </size>
    </property>
@@ -434,6 +464,12 @@
     </property>
     <item>
      <widget class="GLScope" name="glScope" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="minimumSize">
        <size>
         <width>200</width>
@@ -456,9 +492,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>RollupWidget</class>
+   <class>RollupContents</class>
    <extends>QWidget</extends>
-   <header>gui/rollupwidget.h</header>
+   <header>gui/rollupcontents.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

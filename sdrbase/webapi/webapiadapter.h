@@ -195,6 +195,66 @@ public:
             SWGSDRangel::SWGPresetIdentifier& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int instancePresetFilePut(
+            SWGSDRangel::SWGFilePath& query,
+            SWGSDRangel::SWGPresetIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instancePresetFilePost(
+            SWGSDRangel::SWGPresetExport& query,
+            SWGSDRangel::SWGPresetIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instancePresetBlobPut(
+            SWGSDRangel::SWGBase64Blob& query,
+            SWGSDRangel::SWGPresetIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instancePresetBlobPost(
+            SWGSDRangel::SWGPresetIdentifier& query,
+            SWGSDRangel::SWGBase64Blob& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceConfigurationsGet(
+            SWGSDRangel::SWGConfigurations& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceConfigurationPatch(
+            SWGSDRangel::SWGConfigurationIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceConfigurationPut(
+            SWGSDRangel::SWGConfigurationIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceConfigurationPost(
+            SWGSDRangel::SWGConfigurationIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceConfigurationDelete(
+            SWGSDRangel::SWGConfigurationIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceConfigurationFilePut(
+            SWGSDRangel::SWGFilePath& query,
+            SWGSDRangel::SWGConfigurationIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceConfigurationFilePost(
+            SWGSDRangel::SWGConfigurationImportExport& query,
+            SWGSDRangel::SWGConfigurationIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceConfigurationBlobPut(
+            SWGSDRangel::SWGBase64Blob& query,
+            SWGSDRangel::SWGConfigurationIdentifier& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceConfigurationBlobPost(
+            SWGSDRangel::SWGConfigurationIdentifier& query,
+            SWGSDRangel::SWGBase64Blob& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
     virtual int instanceFeaturePresetsGet(
             SWGSDRangel::SWGFeaturePresets& response,
             SWGSDRangel::SWGErrorResponse& error);
@@ -207,10 +267,6 @@ public:
             SWGSDRangel::SWGDeviceSetList& response,
             SWGSDRangel::SWGErrorResponse& error);
 
-    virtual int instanceFeatureSetsGet(
-            SWGSDRangel::SWGFeatureSetList& response,
-            SWGSDRangel::SWGErrorResponse& error);
-
     virtual int instanceDeviceSetPost(
             int direction,
             SWGSDRangel::SWGSuccessResponse& response,
@@ -220,11 +276,11 @@ public:
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
-    virtual int instanceFeatureSetPost(
+    virtual int instanceWorkspacePost(
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
-    virtual int instanceFeatureSetDelete(
+    virtual int instanceWorkspaceDelete(
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
@@ -265,6 +321,17 @@ public:
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int devicesetSpectrumWorkspaceGet(
+            int deviceSetIndex,
+            SWGSDRangel::SWGWorkspaceInfo& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetSpectrumWorkspacePut(
+            int deviceSetIndex,
+            SWGSDRangel::SWGWorkspaceInfo& query,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
     virtual int devicesetDevicePut(
             int deviceSetIndex,
             SWGSDRangel::SWGDeviceListItem& query,
@@ -280,6 +347,17 @@ public:
             int deviceSetIndex,
             const QStringList& deviceActionsKeys,
             SWGSDRangel::SWGDeviceActions& query,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetDeviceWorkspaceGet(
+            int deviceSetIndex,
+            SWGSDRangel::SWGWorkspaceInfo& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetDeviceWorkspacePut(
+            int deviceSetIndex,
+            SWGSDRangel::SWGWorkspaceInfo& query,
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
@@ -373,6 +451,19 @@ public:
             SWGSDRangel::SWGChannelReport& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int devicesetChannelWorkspaceGet(
+            int deviceSetIndex,
+            int channelIndex,
+            SWGSDRangel::SWGWorkspaceInfo& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetChannelWorkspacePut(
+            int deviceSetIndex,
+            int channelIndex,
+            SWGSDRangel::SWGWorkspaceInfo& query,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
     virtual int featuresetGet(
             int deviceSetIndex,
             SWGSDRangel::SWGFeatureSet& response,
@@ -451,14 +542,24 @@ public:
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int featuresetFeatureWorkspaceGet(
+            int featureIndex,
+            SWGSDRangel::SWGWorkspaceInfo& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int featuresetFeatureWorkspacePut(
+            int featureIndex,
+            SWGSDRangel::SWGWorkspaceInfo& query,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
 private:
     MainCore *m_mainCore;
 
     void getDeviceSetList(SWGSDRangel::SWGDeviceSetList* deviceSetList);
     void getDeviceSet(SWGSDRangel::SWGDeviceSet *swgDeviceSet, const DeviceSet* deviceSet, int deviceSetIndex);
     void getChannelsDetail(SWGSDRangel::SWGChannelsDetail *channelsDetail, const DeviceSet* deviceSet);
-    void getFeatureSetList(SWGSDRangel::SWGFeatureSetList* featureSetList);
-    void getFeatureSet(SWGSDRangel::SWGFeatureSet *swgFeatureSet, const FeatureSet* featureSet, int featureSetIndex);
+    void getFeatureSet(SWGSDRangel::SWGFeatureSet *swgFeatureSet, const FeatureSet* featureSet);
     static QtMsgType getMsgTypeFromString(const QString& msgTypeString);
     static void getMsgTypeString(const QtMsgType& msgType, QString& level);
 };

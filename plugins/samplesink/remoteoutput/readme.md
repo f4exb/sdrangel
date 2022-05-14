@@ -16,6 +16,8 @@ The plugin will be built only if the [CM256cc library](https://github.com/f4exb/
 
 <h2>Interface</h2>
 
+The top and bottom bars of the device window are described [here](../../../sdrgui/device/readme.md)
+
 ![SDR Remote output plugin GUI](../../../doc/img/RemoteOutput_plugin.png)
 
 <h3>1: Start/Stop</h3>

@@ -8,6 +8,8 @@ This plugin can be used to demodulate a signal following the [FreeDV digital voi
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![FreeDV Demodulator plugin GUI](../../../doc/img/FreeDVDemod_plugin.png)
 
 <h3>1: Frequency shift from center frequency of reception</h3>
@@ -21,7 +23,7 @@ Average total power in dB relative to a +/- 1.0 amplitude signal received in the
 <h3>3: Manual re-synchronization</h3>
 
 This works only for the presently disabled 700D mode. Use this push button to force loosing and re-acquiring synchronisation.
-  
+
 <h3>4: FreeDV mode</h3>
 
 Use this combo box to select which FreeDV standard is used. The following are supported:
@@ -30,7 +32,7 @@ Use this combo box to select which FreeDV standard is used. The following are su
   - `1600`: OFDM (16 QPSK carriers) narrowband (1.4 kHz) with 700 b/s compressed voice
   - `800XA`: FSK-4 narrowband (2 kHz) with 700 b/s compressed voice
   - `700C`: Another OFDM (14 QPSK carriers) narrowband (1.5 kHz) mode with 700 b/s compressed voice
-  
+
 <h3>5: Level meter in dB</h3>
 
   - top bar (green): average value
@@ -86,7 +88,7 @@ The transmitted signal is further decimated by a power of two before being appli
   - 4: 6 kHz (2400A) or 1 kHz (other modes)
   - 8: 3 kHz (2400A) or 0.5 kHz (other modes)
   - 16: 1.5 kHz (2400A) or 0.25 kHz (other modes)
-  
+
 <h3>9: Spectrum display</h3>
 
 This is the spectrum display of the analog signal that enters the modem before AGC and volume control. Controls on the bottom of the panel are identical to the ones of the main spectrum display. It should be optimally centered using the frequency offset control (1) depending on the expected FreeDV mode:

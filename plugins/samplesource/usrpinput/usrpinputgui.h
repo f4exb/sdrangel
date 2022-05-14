@@ -50,12 +50,13 @@ public:
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
-    virtual bool handleMessage(const Message& message);
+
+protected:
+    void resizeEvent(QResizeEvent* size);
 
 private:
     Ui::USRPInputGUI* ui;
 
-    DeviceUISet* m_deviceUISet;
     USRPInput* m_usrpInput; //!< Same object as above but gives easy access to USRPInput methods and attributes that are used intensively
     USRPInputSettings m_settings;
     bool m_sampleRateMode; //!< true: device, false: base band sample rate update mode
@@ -79,6 +80,8 @@ private:
     void updateSampleRate();
     void updateFrequencyLimits();
     void blockApplySettings(bool block);
+    bool handleMessage(const Message& message);
+    void makeUIConnections();
 
 private slots:
     void handleInputMessages();

@@ -37,10 +37,10 @@
 #include "util/messagequeue.h"
 #include "util/httpdownloadmanager.h"
 #include "util/azel.h"
+#include "util/openaip.h"
 #include "settings/rollupstate.h"
 
 #include "vorlocalizersettings.h"
-#include "navaid.h"
 
 class PluginAPI;
 class FeatureUISet;
@@ -64,7 +64,6 @@ public:
 
     QTableWidgetItem *m_nameItem;
     QTableWidgetItem *m_frequencyItem;
-    QTableWidgetItem *m_navIdItem;
     QTableWidgetItem *m_identItem;
     QTableWidgetItem *m_morseItem;
     QTableWidgetItem *m_radialItem;
@@ -214,6 +213,10 @@ public:
     bool deserialize(const QByteArray& data);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     void selectVOR(VORGUI *vorGUI, bool selected);
+    virtual void setWorkspaceIndex(int index);
+    virtual int getWorkspaceIndex() const { return m_settings.m_workspaceIndex; }
+    virtual void setGeometryBytes(const QByteArray& blob) { m_settings.m_geometryBytes = blob; }
+    virtual QByteArray getGeometryBytes() const { return m_settings.m_geometryBytes; }
 
 private:
     friend class VORGUI;
@@ -235,15 +238,17 @@ private:
     QMenu *menu;                        // Column select context menu
     HttpDownloadManager m_dlm;
     QProgressDialog *m_progressDialog;
+    OpenAIP m_openAIP;
     int m_countryIndex;
     VORModel m_vorModel;
-    QHash<int, NavAid *> *m_vors;
+    QList<NavAid *> m_vors;
     QHash<int, VORGUI *> m_selectedVORs;
     AzEl m_azEl;                        // Position of station
     QIcon m_muteIcon;
 	QTimer m_statusTimer;
 	int m_lastFeatureState;
     int m_rrSecondsCount;
+    QTimer m_redrawMapTimer;
 
     explicit VORLocalizerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent = nullptr);
     virtual ~VORLocalizerGUI();
@@ -252,9 +257,8 @@ private:
     void applySettings(bool force = false);
     void displaySettings();
     bool handleMessage(const Message& message);
-
-    void leaveEvent(QEvent*);
-    void enterEvent(QEvent*);
+    void redrawMap();
+    void makeUIConnections();
 
     void resizeTable();
     QAction *createCheckableItem(QString& text, int idx, bool checked);
@@ -262,35 +266,31 @@ private:
     void calculateFreqOffset(VORGUI *vorGUI);
     void calculateFreqOffsets();
     void updateVORs();
-    QString getOpenAIPVORDBURL(int i);
-    QString getOpenAIPVORDBFilename(int i);
-    QString getVORDBFilename();
     void readNavAids();
-    // Move to util
-    QString getDataDir();
-    qint64 fileAgeInDays(QString filename);
-    bool confirmDownload(QString filename);
     void updateChannelList();
 
 private slots:
     void on_startStop_toggled(bool checked);
-    void on_getOurAirportsVORDB_clicked();
     void on_getOpenAIPVORDB_clicked();
     void on_magDecAdjust_toggled(bool checked);
     void on_rrTime_valueChanged(int value);
     void on_centerShift_valueChanged(int value);
-    void on_channelsRefresh_clicked();
+    void channelsRefresh();
     void vorData_sectionMoved(int logicalIndex, int oldVisualIndex, int newVisualIndex);
     void vorData_sectionResized(int logicalIndex, int oldSize, int newSize);
     void columnSelectMenu(QPoint pos);
     void columnSelectMenuChecked(bool checked = false);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
-    void updateDownloadProgress(qint64 bytesRead, qint64 totalBytes);
-    void downloadFinished(const QString& filename, bool success);
     void handleInputMessages();
     void updateStatus();
     void tick();
+    void downloadingURL(const QString& url);
+    void downloadError(const QString& error);
+    void downloadNavAidsFinished();
+    void preferenceChanged(int elementType);
+    virtual void showEvent(QShowEvent *event);
+    virtual bool eventFilter(QObject *obj, QEvent *event);
 };
 
 #endif // INCLUDE_VORLOCALIZERGUI_H

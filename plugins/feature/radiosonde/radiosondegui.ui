@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>RadiosondeGUI</class>
- <widget class="RollupWidget" name="RadiosondeGUI">
+ <widget class="RollupContents" name="RadiosondeGUI">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -20,12 +20,6 @@
    <size>
     <width>320</width>
     <height>100</height>
-   </size>
-  </property>
-  <property name="maximumSize">
-   <size>
-    <width>16777215</width>
-    <height>16777215</height>
    </size>
   </property>
   <property name="font">
@@ -426,9 +420,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>RollupWidget</class>
+   <class>RollupContents</class>
    <extends>QWidget</extends>
-   <header>gui/rollupwidget.h</header>
+   <header>gui/rollupcontents.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

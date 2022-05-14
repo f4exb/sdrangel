@@ -6,6 +6,8 @@ This plugin can be used to listen to a Broadcast FM modulated signal (BFM). In a
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![BFM Demodulator plugin GUI](../../../doc/img/BFMDemod_plugin.png)
 
 The main three areas are:
@@ -67,6 +69,10 @@ This is the relative AF volume from 0 to 10.
 <h3>A.12: Squelch</h3>
 
 Adjust squelch in dB.
+
+<h2>B: Spectrum</h2>
+
+Details on the spectrum view and controls can be found [here](../../../sdrgui/gui/spectrum.md)
 
 <h2>C: RDS display</h2>
 

@@ -15,7 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "gui/featurewindow.h"
+#include "gui/workspace.h"
 #include "plugin/pluginapi.h"
 #include "settings/featuresetpreset.h"
 #include "feature/featureutils.h"
@@ -27,7 +27,6 @@
 
 FeatureUISet::FeatureUISet(int tabIndex, FeatureSet *featureSet)
 {
-    m_featureWindow = new FeatureWindow;
     m_featureTabIndex = tabIndex;
     m_featureSet = featureSet;
 }
@@ -35,12 +34,6 @@ FeatureUISet::FeatureUISet(int tabIndex, FeatureSet *featureSet)
 FeatureUISet::~FeatureUISet()
 {
     freeFeatures();
-    delete m_featureWindow;
-}
-
-void FeatureUISet::addRollupWidget(QWidget *widget)
-{
-    m_featureWindow->addRollupWidget(widget);
 }
 
 void FeatureUISet::registerFeatureInstance(FeatureGUI* featureGUI, Feature *feature)
@@ -94,6 +87,11 @@ void FeatureUISet::deleteFeature(int featureIndex)
         m_featureInstanceRegistrations.removeAt(featureIndex);
         m_featureSet->removeFeatureInstanceAt(featureIndex);
     }
+
+    // Renumerate
+    for (int i = 0; i < m_featureInstanceRegistrations.count(); i++) {
+        m_featureInstanceRegistrations.at(i).m_gui->setIndex(i);
+    }
 }
 
 const Feature *FeatureUISet::getFeatureAt(int featureIndex) const
@@ -114,7 +112,31 @@ Feature *FeatureUISet::getFeatureAt(int featureIndex)
     }
 }
 
-void FeatureUISet::loadFeatureSetSettings(const FeatureSetPreset *preset, PluginAPI *pluginAPI, WebAPIAdapterInterface *apiAdapter)
+const FeatureGUI *FeatureUISet::getFeatureGuiAt(int featureIndex) const
+{
+    if ((featureIndex >= 0) && (featureIndex < m_featureInstanceRegistrations.count())) {
+        return m_featureInstanceRegistrations.at(featureIndex).m_gui;
+    } else{
+        return nullptr;
+    }
+}
+
+FeatureGUI *FeatureUISet::getFeatureGuiAt(int featureIndex)
+{
+    if ((featureIndex >= 0) && (featureIndex < m_featureInstanceRegistrations.count())) {
+        return m_featureInstanceRegistrations.at(featureIndex).m_gui;
+    } else{
+        return nullptr;
+    }
+}
+
+void FeatureUISet::loadFeatureSetSettings(
+    const FeatureSetPreset *preset,
+    PluginAPI *pluginAPI,
+    WebAPIAdapterInterface *apiAdapter,
+    QList<Workspace*> *workspaces,
+    Workspace *currentWorkspace
+)
 {
     qDebug("FeatureUISet::loadFeatureSetSettings: Loading preset [%s | %s]",
         qPrintable(preset->getGroup()),
@@ -144,6 +166,7 @@ void FeatureUISet::loadFeatureSetSettings(const FeatureSetPreset *preset, Plugin
     {
         const FeatureSetPreset::FeatureConfig& featureConfig = preset->getFeatureConfig(i);
         FeatureGUI *featureGUI = nullptr;
+        Feature *feature = nullptr;
 
         // create feature instance
 
@@ -155,11 +178,11 @@ void FeatureUISet::loadFeatureSetSettings(const FeatureSetPreset *preset, Plugin
                     qPrintable((*featureRegistrations)[i].m_featureIdURI),
                     qPrintable(featureConfig.m_featureIdURI)
                 );
-                Feature *feature =
-                        (*featureRegistrations)[i].m_plugin->createFeature(apiAdapter);
-                featureGUI =
-                        (*featureRegistrations)[i].m_plugin->createFeatureGUI(this, feature);
+                PluginInterface *pluginInterface = (*featureRegistrations)[i].m_plugin;
+                feature = pluginInterface->createFeature(apiAdapter);
+                featureGUI = pluginInterface->createFeatureGUI(this, feature);
                 registerFeatureInstance(featureGUI, feature);
+                featureGUI->setDisplayedame(pluginInterface->getPluginDescriptor().displayedName);
                 break;
             }
         }
@@ -167,9 +190,22 @@ void FeatureUISet::loadFeatureSetSettings(const FeatureSetPreset *preset, Plugin
         if (featureGUI)
         {
             qDebug("FeatureUISet::loadFeatureSetSettings: deserializing feature [%s]",
-                qPrintable(featureConfig.m_featureIdURI)
-            );
+                qPrintable(featureConfig.m_featureIdURI));
             featureGUI->deserialize(featureConfig.m_config);
+            featureGUI->setIndex(feature->getIndexInFeatureSet());
+            int originalWorkspaceIndex = featureGUI->getWorkspaceIndex();
+
+            if (workspaces && (workspaces->size() > 0) && (originalWorkspaceIndex < workspaces->size())) // restore in original workspace
+            {
+                (*workspaces)[originalWorkspaceIndex]->addToMdiArea((QMdiSubWindow*) featureGUI);
+                featureGUI->restoreGeometry(featureGUI->getGeometryBytes());
+            }
+            else if (currentWorkspace) // restore in current workspace
+            {
+                featureGUI->setWorkspaceIndex(currentWorkspace->getIndex());
+                currentWorkspace->addToMdiArea((QMdiSubWindow*) featureGUI);
+                featureGUI->restoreGeometry(featureGUI->getGeometryBytes());
+            }
         }
     }
 }
@@ -181,6 +217,8 @@ void FeatureUISet::saveFeatureSetSettings(FeatureSetPreset *preset)
         qDebug("FeatureUISet::saveFeatureSetSettings: saving feature [%s]",
             qPrintable(m_featureInstanceRegistrations.at(i).m_feature->getURI())
         );
+        FeatureGUI *featureGUI = m_featureInstanceRegistrations.at(i).m_gui;
+        featureGUI->setGeometryBytes(featureGUI->saveGeometry());
         preset->addFeature(
             m_featureInstanceRegistrations.at(i).m_feature->getURI(),
             m_featureInstanceRegistrations.at(i).m_gui->serialize()
@@ -200,5 +238,10 @@ void FeatureUISet::handleClosingFeatureGUI(FeatureGUI *featureGUI)
             m_featureInstanceRegistrations.erase(it);
             break;
         }
+    }
+
+    // Renumerate
+    for (int i = 0; i < m_featureInstanceRegistrations.count(); i++) {
+        m_featureInstanceRegistrations.at(i).m_gui->setIndex(i);
     }
 }

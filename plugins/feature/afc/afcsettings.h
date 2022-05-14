@@ -40,6 +40,8 @@ struct AFCSettings
     uint16_t m_reverseAPIFeatureSetIndex;
     uint16_t m_reverseAPIFeatureIndex;
     Serializable *m_rollupState;
+    int m_workspaceIndex;
+    QByteArray m_geometryBytes;
 
     AFCSettings();
     void resetToDefaults();

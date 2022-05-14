@@ -8,6 +8,8 @@ This plugin can be used to generate a signal following the [FreeDV digital voice
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![FreeDV Modulator plugin GUI](../../../doc/img/FreeDVMod_plugin.png)
 
 <h3>1: Frequency shift from center frequency of transmission</h3>
@@ -177,4 +179,4 @@ The transmitted signal is further decimated by a power of two before being appli
 
 <h3>17: Channel spectrum display</h3>
 
-This is the channel spectrum display. Controls at the bottom of the panel are the same as with the central spectrum display.
+This is the channel spectrum display. Details on the spectrum view and controls can be found [here](../../../sdrgui/gui/spectrum.md)

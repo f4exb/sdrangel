@@ -10,6 +10,8 @@ This plugin requires the SDRplay API V3.07 to have been installed and for the se
 
 <h2>Interface</h2>
 
+The top and bottom bars of the device window are described [here](../../../sdrgui/device/readme.md)
+
 ![SDRplay v3 plugin GUI](../../../doc/img/SDRPlayV3_plugin.png)
 
 <h3>1: Start/Stop</h3>

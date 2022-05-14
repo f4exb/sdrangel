@@ -29,6 +29,7 @@
 #include <complex.h>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGChannelReport.h"
 
 #include "dsp/dspengine.h"
@@ -97,6 +98,18 @@ AISDemod::~AISDemod()
     delete m_basebandSink;
 }
 
+void AISDemod::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSinkAPI(this);
+        m_deviceAPI->removeChannelSink(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addChannelSink(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
+}
+
 uint32_t AISDemod::getNumberOfDeviceStreams() const
 {
     return m_deviceAPI->getNbSourceStreams();
@@ -150,6 +163,10 @@ bool AISDemod::handleMessage(const Message& cmd)
         DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
         qDebug() << "AISDemod::handleMessage: DSPSignalNotification";
         m_basebandSink->getInputMessageQueue()->push(rep);
+
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
+        }
 
         return true;
     }
@@ -399,6 +416,15 @@ int AISDemod::webapiSettingsGet(
     response.setAisDemodSettings(new SWGSDRangel::SWGAISDemodSettings());
     response.getAisDemodSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int AISDemod::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

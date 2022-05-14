@@ -64,6 +64,8 @@ public:
     ChannelAnalyzer(DeviceAPI *deviceAPI);
 	virtual ~ChannelAnalyzer();
 	virtual void destroy() { delete this; }
+    virtual void setDeviceAPI(DeviceAPI *deviceAPI);
+    virtual DeviceAPI *getDeviceAPI() { return m_deviceAPI; }
     SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
     ScopeVis *getScopeVis() { return &m_scopeVis; }
     void setScopeVis(ScopeVis *scopeVis) { m_basebandSink->setScopeVis(scopeVis); }
@@ -94,6 +96,7 @@ public:
 
     virtual int getNbSinkStreams() const { return 1; }
     virtual int getNbSourceStreams() const { return 0; }
+    uint32_t getNumberOfDeviceStreams() const;
 
     virtual qint64 getStreamCenterFrequency(int streamIndex, bool sinkElseSource) const
     {
@@ -104,6 +107,10 @@ public:
 
     virtual int webapiSettingsGet(
             SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiWorkspaceGet(
+            SWGSDRangel::SWGWorkspaceInfo& response,
             QString& errorMessage);
 
     virtual int webapiSettingsPutPatch(

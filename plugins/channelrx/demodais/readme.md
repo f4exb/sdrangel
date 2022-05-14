@@ -16,6 +16,8 @@ The AIS specification is ITU-R M.1371-5: https://www.itu.int/dms_pubrec/itu-r/re
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![AIS Demodulator plugin GUI](../../../doc/img/AISDemod_plugin.png)
 
 <h3>1: Frequency shift from center frequency of reception</h3>

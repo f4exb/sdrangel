@@ -22,6 +22,7 @@
 #include <QThread>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGFreeDVDemodSettings.h"
 #include "SWGChannelReport.h"
 #include "SWGFreeDVDemodReport.h"
@@ -89,6 +90,18 @@ FreeDVDemod::~FreeDVDemod()
     delete m_thread;
 }
 
+void FreeDVDemod::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSinkAPI(this);
+        m_deviceAPI->removeChannelSink(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addChannelSink(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
+}
+
 uint32_t FreeDVDemod::getNumberOfDeviceStreams() const
 {
     return m_deviceAPI->getNbSourceStreams();
@@ -151,6 +164,10 @@ bool FreeDVDemod::handleMessage(const Message& cmd)
         DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
         qDebug() << "FreeDVDemod::handleMessage: DSPSignalNotification";
         m_basebandSink->getInputMessageQueue()->push(rep);
+        // Forward to GUI if any
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
+        }
 
         return true;
     }
@@ -290,6 +307,15 @@ int FreeDVDemod::webapiSettingsGet(
     response.setFreeDvDemodSettings(new SWGSDRangel::SWGFreeDVDemodSettings());
     response.getFreeDvDemodSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int FreeDVDemod::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

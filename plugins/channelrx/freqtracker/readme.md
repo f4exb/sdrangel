@@ -8,6 +8,8 @@ This plugin can be used to track the center frequency of a carrier. It will try 
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![Frequency Tracker plugin GUI](../../../doc/img/FreqTracker_plugin.png)
 
 <h3>1: Frequency shift from center frequency of reception</h3>
@@ -106,4 +108,4 @@ The channel signal is decimated by a power of two before being applied to the ch
 
 <h3>12: Channel spectrum</h3>
 
-This is the spectrum display of the tracker channel. When the tracker is locked to the signal the center of the channel should fall almost in the middle of the signal spectrum (ideally in the middle when the tracker error is zero). Thus the locking can be followed dynamically and it can be more reliable than the lock indicator. A channel marker shows the tracker offset from the channel center frequency (tracker error). Its width is the tracker error tolerance and is &plusmn;1/1000th of the channel width.  Controls on the bottom of the panel are identical to the ones of the main spectrum display.
+This is the spectrum display of the tracker channel. When the tracker is locked to the signal the center of the channel should fall almost in the middle of the signal spectrum (ideally in the middle when the tracker error is zero). Thus the locking can be followed dynamically and it can be more reliable than the lock indicator. A channel marker shows the tracker offset from the channel center frequency (tracker error). Its width is the tracker error tolerance and is &plusmn;1/1000th of the channel width.  Details on the spectrum view and controls can be found [here](../../../sdrgui/gui/spectrum.md)

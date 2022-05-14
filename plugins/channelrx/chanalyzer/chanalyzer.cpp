@@ -25,6 +25,7 @@
 #include <stdio.h>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGChannelAnalyzerSettings.h"
 
 #include "device/deviceapi.h"
@@ -92,6 +93,23 @@ ChannelAnalyzer::~ChannelAnalyzer()
     qDebug("ChannelAnalyzer::~ChannelAnalyzer: done");
 }
 
+void ChannelAnalyzer::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSinkAPI(this);
+        m_deviceAPI->removeChannelSink(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addChannelSink(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
+}
+
+uint32_t ChannelAnalyzer::getNumberOfDeviceStreams() const
+{
+    return m_deviceAPI->getNbSourceStreams();
+}
+
 int ChannelAnalyzer::getChannelSampleRate()
 {
     DeviceSampleSource *source = m_deviceAPI->getSampleSource();
@@ -100,7 +118,6 @@ int ChannelAnalyzer::getChannelSampleRate()
         m_basebandSampleRate = source->getSampleRate();
     }
 
-    qDebug("ChannelAnalyzer::getChannelSampleRate: %d", m_basebandSampleRate);
     return m_basebandSampleRate;
 }
 
@@ -314,6 +331,15 @@ int ChannelAnalyzer::webapiSettingsGet(
     response.setChannelAnalyzerSettings(new SWGSDRangel::SWGChannelAnalyzerSettings());
     response.getChannelAnalyzerSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int ChannelAnalyzer::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

@@ -27,6 +27,10 @@ struct TestSinkSettings {
     quint64 m_sampleRate;
     quint32 m_log2Interp;
     Serializable *m_spectrumGUI;
+    bool     m_useReverseAPI;
+    QString  m_reverseAPIAddress;
+    uint16_t m_reverseAPIPort;
+    uint16_t m_reverseAPIDeviceIndex;
 
     TestSinkSettings();
     void resetToDefaults();

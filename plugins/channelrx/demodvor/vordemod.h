@@ -16,8 +16,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_VORDEMOD_H
-#define INCLUDE_VORDEMOD_H
+#ifndef INCLUDE_VORDEMODSC_H
+#define INCLUDE_VORDEMODSC_H
 
 #include <vector>
 
@@ -65,6 +65,8 @@ public:
     VORDemod(DeviceAPI *deviceAPI);
     virtual ~VORDemod();
     virtual void destroy() { delete this; }
+    virtual void setDeviceAPI(DeviceAPI *deviceAPI);
+    virtual DeviceAPI *getDeviceAPI() { return m_deviceAPI; }
 
     using BasebandSampleSink::feed;
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
@@ -77,8 +79,8 @@ public:
     virtual QString getIdentifier() const { return objectName(); }
     virtual const QString& getURI() const { return getName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
-    virtual qint64 getCenterFrequency() const { return 0; }
-    virtual void setCenterFrequency(qint64) {}
+    virtual qint64 getCenterFrequency() const { return m_settings.m_inputFrequencyOffset; }
+    virtual void setCenterFrequency(qint64 frequency);
 
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
@@ -95,6 +97,10 @@ public:
 
     virtual int webapiSettingsGet(
             SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiWorkspaceGet(
+            SWGSDRangel::SWGWorkspaceInfo& response,
             QString& errorMessage);
 
     virtual int webapiSettingsPutPatch(
@@ -123,10 +129,6 @@ public:
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) {
         m_basebandSink->getMagSqLevels(avg, peak, nbSamples);
     }
-    void setMessageQueueToGUI(MessageQueue* queue) override {
-        ChannelAPI::setMessageQueueToGUI(queue);
-        m_basebandSink->setMessageQueueToGUI(queue);
-    }
 
     uint32_t getNumberOfDeviceStreams() const;
 
@@ -141,6 +143,11 @@ private:
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
     qint64 m_centerFrequency;
 
+    float m_radial; //!< current detected radial
+    float m_refMag; //!< current reference signal magnitude
+    float m_varMag; //!< current variable signal magnitude
+    QString m_morseIdent; //!< identification morse code transcript
+
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
@@ -154,6 +161,7 @@ private:
         const VORDemodSettings& settings,
         bool force
     );
+    void sendChannelReport(QList<ObjectPipe*>& messagePipes);
     void webapiFormatChannelSettings(
         QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
@@ -166,4 +174,4 @@ private slots:
     void handleIndexInDeviceSetChanged(int index);
 };
 
-#endif // INCLUDE_VORDEMOD_H
+#endif // INCLUDE_VORDEMODSC_H

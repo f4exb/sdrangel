@@ -31,6 +31,10 @@ void TestMOSyncSettings::resetToDefaults()
     m_sampleRate = 48000;
     m_log2Interp = 0;
     m_fcPosTx = FC_POS_CENTER;
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
 }
 
 QByteArray TestMOSyncSettings::serialize() const
@@ -40,6 +44,10 @@ QByteArray TestMOSyncSettings::serialize() const
     s.writeU64(1, m_sampleRate);
     s.writeU32(2, m_log2Interp);
     s.writeS32(3, (int) m_fcPosTx);
+    s.writeBool(6, m_useReverseAPI);
+    s.writeString(7, m_reverseAPIAddress);
+    s.writeU32(8, m_reverseAPIPort);
+    s.writeU32(9, m_reverseAPIDeviceIndex);
 
     return s.final();
 }
@@ -57,11 +65,24 @@ bool TestMOSyncSettings::deserialize(const QByteArray& data)
     if (d.getVersion() == 1)
     {
         int intval;
+        uint32_t utmp;
 
         d.readU64(1, &m_sampleRate, 48000);
         d.readU32(2, &m_log2Interp, 0);
-        d.readS32(38, &intval, 2);
+        d.readS32(3, &intval, 2);
         m_fcPosTx = (fcPos_t) intval;
+        d.readBool(1, &m_useReverseAPI, false);
+        d.readString(2, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(3, &utmp, 0);
+
+        if ((utmp > 1023) && (utmp < 65535)) {
+            m_reverseAPIPort = utmp;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(4, &utmp, 0);
+        m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
 
         return true;
     }

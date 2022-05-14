@@ -27,6 +27,8 @@ Then add the following defines on `cmake` command line when compiling SDRangel:
 
 <h2>Interface</h2>
 
+The top and bottom bars of the device window are described [here](../../../sdrgui/device/readme.md)
+
 ![PlutoSDR input plugin GUI](../../../doc/img/PlutoSDRInput_plugin.png)
 
 <h3>1: Common stream parameters</h3>

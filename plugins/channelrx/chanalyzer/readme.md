@@ -24,6 +24,8 @@ The same waveforms can be used to trigger the scope trace
 
 <h2>B. General interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![Channel Analyzer NG plugin GUI](../../../doc/img/ChAnalyzerNG_plugin.png)
 
 The interface is essentially divided in the following sections
@@ -36,7 +38,7 @@ The interface is essentially divided in the following sections
 
 Note 1: the scope trace is updated continuously for sweep times of 1 second or more else the display is refreshed only when the trace finishes.
 
-Note 2: the spectrum view (Channel spectrum) is not presented here.
+Note 2: details on the spectrum view and controls can be found [here](../../../sdrgui/gui/spectrum.md)
 
 <h2>C. Channel controls</h2>
 

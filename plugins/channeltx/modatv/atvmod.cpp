@@ -27,6 +27,7 @@
 #include <QThread>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGChannelReport.h"
 #include "SWGATVModReport.h"
 
@@ -92,6 +93,18 @@ ATVMod::~ATVMod()
     m_deviceAPI->removeChannelSource(this);
     delete m_basebandSource;
     delete m_thread;
+}
+
+void ATVMod::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSourceAPI(this);
+        m_deviceAPI->removeChannelSource(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addChannelSource(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
 }
 
 uint32_t ATVMod::getNumberOfDeviceStreams() const
@@ -161,6 +174,10 @@ bool ATVMod::handleMessage(const Message& cmd)
         DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
         qDebug() << "ATVMod::handleMessage: DSPSignalNotification";
         m_basebandSource->getInputMessageQueue()->push(rep);
+        // Forward to GUI if any
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
+        }
 
         return true;
     }
@@ -387,6 +404,15 @@ int ATVMod::webapiSettingsGet(
     response.setAtvModSettings(new SWGSDRangel::SWGATVModSettings());
     response.getAtvModSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int ATVMod::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

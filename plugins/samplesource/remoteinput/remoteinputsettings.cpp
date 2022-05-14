@@ -95,6 +95,7 @@ bool RemoteInputSettings::deserialize(const QByteArray& data)
 
         d.readU32(14, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
+
         return true;
     }
     else

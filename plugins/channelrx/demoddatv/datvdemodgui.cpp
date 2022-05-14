@@ -20,19 +20,21 @@
 #include <QDockWidget>
 #include <QMainWindow>
 #include <QMediaMetaData>
+#include <QResizeEvent>
 
 #include "device/deviceuiset.h"
 #include "dsp/dspengine.h"
+#include "dsp/dspcommands.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
-#include "ui_datvdemodgui.h"
 #include "gui/crightclickenabler.h"
 #include "gui/audioselectdialog.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
 #include "mainwindow.h"
 
+#include "ui_datvdemodgui.h"
 #include "datvdemodreport.h"
 #include "datvdvbs2ldpcdialog.h"
 #include "datvdemodgui.h"
@@ -79,6 +81,14 @@ bool DATVDemodGUI::deserialize(const QByteArray& arrData)
     }
 }
 
+void DATVDemodGUI::resizeEvent(QResizeEvent* size)
+{
+    int maxWidth = getRollupContents()->maximumWidth();
+    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
+    resize(width() < maxWidth ? width() : maxWidth, minHeight);
+    size->accept();
+}
+
 bool DATVDemodGUI::handleMessage(const Message& message)
 {
     if (DATVDemodReport::MsgReportModcodCstlnChange::match(message))
@@ -96,8 +106,18 @@ bool DATVDemodGUI::handleMessage(const Message& message)
     {
         DATVDemod::MsgConfigureDATVDemod& cfg = (DATVDemod::MsgConfigureDATVDemod&) message;
         m_settings = cfg.getSettings();
-        m_objChannelMarker.updateSettings(static_cast<const ChannelMarker*>(m_settings.m_channelMarker));
+        m_channelMarker.updateSettings(static_cast<const ChannelMarker*>(m_settings.m_channelMarker));
         displaySettings();
+        return true;
+    }
+    else if (DSPSignalNotification::match(message))
+    {
+        DSPSignalNotification& notif = (DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getCenterFrequency();
+        m_basebandSampleRate = notif.getSampleRate();
+        ui->deltaFrequency->setValueRange(false, 8, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
         return true;
     }
     else
@@ -121,14 +141,14 @@ void DATVDemodGUI::handleInputMessages()
 
 void DATVDemodGUI::channelMarkerChangedByCursor()
 {
-    ui->deltaFrequency->setValue(m_objChannelMarker.getCenterFrequency());
-    m_settings.m_centerFrequency = m_objChannelMarker.getCenterFrequency();
+    ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
+    m_settings.m_centerFrequency = m_channelMarker.getCenterFrequency();
     applySettings();
 }
 
 void DATVDemodGUI::channelMarkerHighlightedByCursor()
 {
-    setHighlighted(m_objChannelMarker.getHighlighted());
+    setHighlighted(m_channelMarker.getHighlighted());
 }
 
 
@@ -137,7 +157,7 @@ void DATVDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -145,18 +165,25 @@ void DATVDemodGUI::onMenuDialogCalled(const QPoint &p)
 {
     if (m_contextMenuType == ContextMenuChannelSettings)
     {
-        BasicChannelSettingsDialog dialog(&m_objChannelMarker, this);
+        BasicChannelSettingsDialog dialog(&m_channelMarker, this);
         dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
         dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
         dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
         dialog.setReverseAPIChannelIndex(m_settings.m_reverseAPIChannelIndex);
+        dialog.setDefaultTitle(m_displayedName);
+
+        if (m_deviceUISet->m_deviceMIMOEngine)
+        {
+            dialog.setNumberOfStreams(m_datvDemod->getNumberOfDeviceStreams());
+            dialog.setStreamIndex(m_settings.m_streamIndex);
+        }
+
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_centerFrequency = m_objChannelMarker.getCenterFrequency();
-        m_settings.m_rgbColor = m_objChannelMarker.getColor().rgb();
-        m_settings.m_title = m_objChannelMarker.getTitle();
+        m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
+        m_settings.m_title = m_channelMarker.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
         m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
@@ -164,22 +191,17 @@ void DATVDemodGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
-        applySettings();
-    }
-    else if ((m_contextMenuType == ContextMenuStreamSettings) && (m_deviceUISet->m_deviceMIMOEngine))
-    {
-        DeviceStreamSelectionDialog dialog(this);
-        dialog.setNumberOfStreams(m_datvDemod->getNumberOfDeviceStreams());
-        dialog.setStreamIndex(m_settings.m_streamIndex);
-        dialog.move(p);
-        dialog.exec();
+        if (m_deviceUISet->m_deviceMIMOEngine)
+        {
+            m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
+            m_channelMarker.clearStreamIndexes();
+            m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
+            updateIndexLabel();
+        }
 
-        m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
-        m_objChannelMarker.clearStreamIndexes();
-        m_objChannelMarker.addStreamIndex(m_settings.m_streamIndex);
-        displayStreamIndex();
         applySettings();
     }
 
@@ -187,23 +209,30 @@ void DATVDemodGUI::onMenuDialogCalled(const QPoint &p)
 }
 
 DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* objParent) :
-        ChannelGUI(objParent),
-        ui(new Ui::DATVDemodGUI),
-        m_objPluginAPI(objPluginAPI),
-        m_deviceUISet(deviceUISet),
-        m_objChannelMarker(this),
-        m_blnBasicSettingsShown(false),
-        m_blnDoApplySettings(true),
-        m_modcodModulationIndex(-1),
-        m_modcodCodeRateIndex(-1),
-        m_cstlnSetByModcod(false)
+    ChannelGUI(objParent),
+    ui(new Ui::DATVDemodGUI),
+    m_objPluginAPI(objPluginAPI),
+    m_deviceUISet(deviceUISet),
+    m_channelMarker(this),
+    m_deviceCenterFrequency(0),
+    m_basebandSampleRate(1),
+    m_blnBasicSettingsShown(false),
+    m_blnDoApplySettings(true),
+    m_modcodModulationIndex(-1),
+    m_modcodCodeRateIndex(-1),
+    m_cstlnSetByModcod(false)
 {
-    ui->setupUi(this);
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/channelrx/demoddatv/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+
     ui->screenTV->setColor(true);
     ui->screenTV->resizeTVScreen(256,256);
-    setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
@@ -227,7 +256,7 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
         connect(m_datvDemod->getUDPStream(), &DATVUDPStream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
     }
 
-    m_settings.setChannelMarker(&m_objChannelMarker);
+    m_settings.setChannelMarker(&m_channelMarker);
     m_settings.setRollupState(&m_rollupState);
 
     connect(ui->screenTV_2, &DATVideoRender::onMetaDataChanged, this, &DATVDemodGUI::on_StreamMetaDataChanged);
@@ -250,19 +279,18 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
     ui->rfBandwidth->setColorMapper(ColorMapper(ColorMapper::GrayYellow));
     ui->rfBandwidth->setValueRange(true, 8, 0, 50000000);
 
-    m_objChannelMarker.blockSignals(true);
-    m_objChannelMarker.setColor(Qt::magenta);
-    m_objChannelMarker.setBandwidth(6000000);
-    m_objChannelMarker.setCenterFrequency(0);
-    m_objChannelMarker.setTitle("DATV Demodulator");
-    m_objChannelMarker.blockSignals(false);
-    m_objChannelMarker.setVisible(true);
+    m_channelMarker.blockSignals(true);
+    m_channelMarker.setColor(Qt::magenta);
+    m_channelMarker.setBandwidth(6000000);
+    m_channelMarker.setCenterFrequency(0);
+    m_channelMarker.setTitle("DATV Demodulator");
+    m_channelMarker.blockSignals(false);
+    m_channelMarker.setVisible(true);
 
-    connect(&m_objChannelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
-    connect(&m_objChannelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
+    connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
+    connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
 
-    m_deviceUISet->addChannelMarker(&m_objChannelMarker);
-    m_deviceUISet->addRollupWidget(this);
+    m_deviceUISet->addChannelMarker(&m_channelMarker);
 
     // QPixmap pixmapTarget = QPixmap(":/film.png");
     // pixmapTarget = pixmapTarget.scaled(16, 16, Qt::KeepAspectRatio, Qt::SmoothTransformation);
@@ -283,10 +311,12 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
     ui->playerIndicator->setStyleSheet("QLabel { background-color: gray; border-radius: 8px; }");
     ui->udpIndicator->setStyleSheet("QLabel { background-color: gray; border-radius: 8px; }");
     resetToDefaults(); // does applySettings()
+    makeUIConnections();
 }
 
 DATVDemodGUI::~DATVDemodGUI()
 {
+    ui->screenTV->setParent(nullptr); // Prefer memory leak to core dump... ~TVScreen() is buggy
     delete ui;
 }
 
@@ -297,17 +327,18 @@ void DATVDemodGUI::blockApplySettings(bool blnBlock)
 
 void DATVDemodGUI::displaySettings()
 {
-    m_objChannelMarker.blockSignals(true);
-    m_objChannelMarker.setCenterFrequency(m_settings.m_centerFrequency);
-    m_objChannelMarker.setColor(m_settings.m_rgbColor);
-    m_objChannelMarker.setTitle(m_settings.m_title);
-    m_objChannelMarker.blockSignals(false);
-    m_objChannelMarker.setBandwidth(m_settings.m_rfBandwidth);
+    m_channelMarker.blockSignals(true);
+    m_channelMarker.setCenterFrequency(m_settings.m_centerFrequency);
+    m_channelMarker.setColor(m_settings.m_rgbColor);
+    m_channelMarker.setTitle(m_settings.m_title);
+    m_channelMarker.blockSignals(false);
+    m_channelMarker.setBandwidth(m_settings.m_rfBandwidth);
 
     blockApplySettings(true);
 
     setTitleColor(m_settings.m_rgbColor);
-    setWindowTitle(m_objChannelMarker.getTitle());
+    setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     ui->deltaFrequency->setValue(m_settings.m_centerFrequency);
     ui->chkAllowDrift->setChecked(m_settings.m_allowDrift);
@@ -395,7 +426,9 @@ void DATVDemodGUI::displaySettings()
         connect(m_datvDemod->getUDPStream(), &DATVUDPStream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
     }
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
+    updateIndexLabel();
     blockApplySettings(false);
 }
 
@@ -443,22 +476,13 @@ void DATVDemodGUI::displaySystemConfiguration()
     ui->cmbFEC->blockSignals(false);
 }
 
-void DATVDemodGUI::displayStreamIndex()
-{
-    if (m_deviceUISet->m_deviceMIMOEngine) {
-        setStreamIndicator(tr("%1").arg(m_settings.m_streamIndex));
-    } else {
-        setStreamIndicator("S"); // single channel indicator
-    }
-}
-
 void DATVDemodGUI::applySettings(bool force)
 {
     if (m_blnDoApplySettings)
     {
         qDebug("DATVDemodGUI::applySettings");
 
-        setTitleColor(m_objChannelMarker.getColor());
+        setTitleColor(m_channelMarker.getColor());
 
         QString msg = tr("DATVDemodGUI::applySettings: force: %1").arg(force ? "true" : "false");
         m_settings.debug(msg);
@@ -468,18 +492,20 @@ void DATVDemodGUI::applySettings(bool force)
     }
 }
 
-void DATVDemodGUI::leaveEvent(QEvent*)
+void DATVDemodGUI::leaveEvent(QEvent* event)
 {
     blockApplySettings(true);
-    m_objChannelMarker.setHighlighted(false);
+    m_channelMarker.setHighlighted(false);
     blockApplySettings(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void DATVDemodGUI::enterEvent(QEvent*)
+void DATVDemodGUI::enterEvent(QEvent* event)
 {
     blockApplySettings(true);
-    m_objChannelMarker.setHighlighted(true);
+    m_channelMarker.setHighlighted(true);
     blockApplySettings(false);
+    ChannelGUI::enterEvent(event);
 }
 
 void DATVDemodGUI::audioSelect()
@@ -656,7 +682,7 @@ void DATVDemodGUI::on_cmbStandard_currentIndexChanged(int index)
     applySettings();
 }
 
-void DATVDemodGUI::on_cmbModulation_currentIndexChanged(const QString &arg1)
+void DATVDemodGUI::on_cmbModulation_currentIndexChanged(int arg1)
 {
     (void) arg1;
     QString strModulation = ui->cmbModulation->currentText();
@@ -674,7 +700,7 @@ void DATVDemodGUI::on_cmbModulation_currentIndexChanged(const QString &arg1)
     applySettings();
 }
 
-void DATVDemodGUI::on_cmbFEC_currentIndexChanged(const QString &arg1)
+void DATVDemodGUI::on_cmbFEC_currentIndexChanged(int arg1)
 {
     (void) arg1;
     QString strFEC = ui->cmbFEC->currentText();
@@ -773,15 +799,16 @@ void DATVDemodGUI::on_StreamDataAvailable(int intBytes, int intPercent, qint64 i
 
 void DATVDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
-    m_objChannelMarker.setCenterFrequency(value);
-    m_settings.m_centerFrequency = m_objChannelMarker.getCenterFrequency();
+    m_channelMarker.setCenterFrequency(value);
+    m_settings.m_centerFrequency = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
 void DATVDemodGUI::on_rfBandwidth_changed(qint64 value)
 {
-    m_objChannelMarker.setBandwidth(value);
-    m_settings.m_rfBandwidth = m_objChannelMarker.getBandwidth();
+    m_channelMarker.setBandwidth(value);
+    m_settings.m_rfBandwidth = m_channelMarker.getBandwidth();
     applySettings();
 }
 
@@ -918,4 +945,38 @@ void DATVDemodGUI::on_udpTSPort_editingFinished()
     m_settings.m_udpTSPort = udpPort;
     ui->udpTSPort->setText(tr("%1").arg(udpPort));
     applySettings();
+}
+
+void DATVDemodGUI::makeUIConnections()
+{
+    QObject::connect(ui->cmbStandard, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DATVDemodGUI::on_cmbStandard_currentIndexChanged);
+    QObject::connect(ui->cmbModulation, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DATVDemodGUI::on_cmbModulation_currentIndexChanged);
+    QObject::connect(ui->cmbFEC, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DATVDemodGUI::on_cmbFEC_currentIndexChanged);
+    QObject::connect(ui->softLDPC, &QCheckBox::clicked, this, &DATVDemodGUI::on_softLDPC_clicked);
+    QObject::connect(ui->maxBitflips, QOverload<int>::of(&QSpinBox::valueChanged), this, &DATVDemodGUI::on_maxBitflips_valueChanged);
+    QObject::connect(ui->chkViterbi, &QCheckBox::clicked, this, &DATVDemodGUI::on_chkViterbi_clicked);
+    QObject::connect(ui->chkHardMetric, &QCheckBox::clicked, this, &DATVDemodGUI::on_chkHardMetric_clicked);
+    QObject::connect(ui->resetDefaults, &QPushButton::clicked, this, &DATVDemodGUI::on_resetDefaults_clicked);
+    QObject::connect(ui->spiSymbolRate, QOverload<int>::of(&QSpinBox::valueChanged), this, &DATVDemodGUI::on_spiSymbolRate_valueChanged);
+    QObject::connect(ui->spiNotchFilters, QOverload<int>::of(&QSpinBox::valueChanged), this, &DATVDemodGUI::on_spiNotchFilters_valueChanged);
+    QObject::connect(ui->chkAllowDrift, &QCheckBox::clicked, this, &DATVDemodGUI::on_chkAllowDrift_clicked);
+    QObject::connect(ui->fullScreen, &QPushButton::clicked, this, &DATVDemodGUI::on_fullScreen_clicked);
+    QObject::connect(ui->chkFastlock, &QCheckBox::clicked, this, &DATVDemodGUI::on_chkFastlock_clicked);
+    QObject::connect(ui->cmbFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DATVDemodGUI::on_cmbFilter_currentIndexChanged);
+    QObject::connect(ui->spiRollOff, QOverload<int>::of(&QSpinBox::valueChanged), this, &DATVDemodGUI::on_spiRollOff_valueChanged);
+    QObject::connect(ui->spiExcursion, QOverload<int>::of(&QSpinBox::valueChanged), this, &DATVDemodGUI::on_spiExcursion_valueChanged);
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &DATVDemodGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->rfBandwidth, &ValueDialZ::changed, this, &DATVDemodGUI::on_rfBandwidth_changed);
+    QObject::connect(ui->audioMute, &QToolButton::toggled, this, &DATVDemodGUI::on_audioMute_toggled);
+    QObject::connect(ui->audioVolume, &QSlider::valueChanged, this, &DATVDemodGUI::on_audioVolume_valueChanged);
+    QObject::connect(ui->videoMute, &QToolButton::toggled, this, &DATVDemodGUI::on_videoMute_toggled);
+    QObject::connect(ui->udpTS, &ButtonSwitch::clicked, this, &DATVDemodGUI::on_udpTS_clicked);
+    QObject::connect(ui->udpTSAddress, &QLineEdit::editingFinished, this, &DATVDemodGUI::on_udpTSAddress_editingFinished);
+    QObject::connect(ui->udpTSPort, &QLineEdit::editingFinished, this, &DATVDemodGUI::on_udpTSPort_editingFinished);
+    QObject::connect(ui->playerEnable, &QCheckBox::clicked, this, &DATVDemodGUI::on_playerEnable_clicked);
+}
+
+void DATVDemodGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_centerFrequency);
 }

@@ -20,13 +20,13 @@
 #include "vordemod.h"
 #include "vordemodwebapiadapter.h"
 
-VORDemodWebAPIAdapter::VORDemodWebAPIAdapter()
+VORDemodSCWebAPIAdapter::VORDemodSCWebAPIAdapter()
 {}
 
-VORDemodWebAPIAdapter::~VORDemodWebAPIAdapter()
+VORDemodSCWebAPIAdapter::~VORDemodSCWebAPIAdapter()
 {}
 
-int VORDemodWebAPIAdapter::webapiSettingsGet(
+int VORDemodSCWebAPIAdapter::webapiSettingsGet(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
 {
@@ -38,7 +38,7 @@ int VORDemodWebAPIAdapter::webapiSettingsGet(
     return 200;
 }
 
-int VORDemodWebAPIAdapter::webapiSettingsPutPatch(
+int VORDemodSCWebAPIAdapter::webapiSettingsPutPatch(
         bool force,
         const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings& response,

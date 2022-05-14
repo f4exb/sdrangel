@@ -75,7 +75,10 @@ bool SigMFFileSinkGUI::handleMessage(const Message& message)
     if (DSPSignalNotification::match(message))
     {
         DSPSignalNotification notif = (const DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getCenterFrequency();
         m_basebandSampleRate = notif.getSampleRate();
+        ui->deltaFrequency->setValueRange(false, 8, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
         displayRate();
 
         if (m_fixedPosition)
@@ -165,16 +168,20 @@ SigMFFileSinkGUI::SigMFFileSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
         m_pluginAPI(pluginAPI),
         m_deviceUISet(deviceUISet),
         m_channelMarker(this),
+        m_deviceCenterFrequency(0),
         m_running(false),
         m_fixedShiftIndex(0),
         m_basebandSampleRate(0),
         m_fixedPosition(false),
         m_tickCount(0)
 {
-    ui->setupUi(this);
-    m_helpURL = "plugins/channelrx/sigmffilesink/readme.md";
     setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    m_helpURL = "plugins/channelrx/sigmffilesink/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_sigMFFileSink = (SigMFFileSink*) channelrx;
@@ -201,7 +208,6 @@ SigMFFileSinkGUI::SigMFFileSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
     m_settings.setRollupState(&m_rollupState);
 
     m_deviceUISet->addChannelMarker(&m_channelMarker);
-    m_deviceUISet->addRollupWidget(this);
 
 	connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
@@ -209,6 +215,7 @@ SigMFFileSinkGUI::SigMFFileSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
     connect(&(m_deviceUISet->m_deviceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 
     displaySettings();
+    makeUIConnections();
     applySettings(true);
 }
 
@@ -244,6 +251,7 @@ void SigMFFileSinkGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
 
@@ -270,20 +278,12 @@ void SigMFFileSinkGUI::displaySettings()
         ui->squelchedRecording->blockSignals(false);
     }
 
-    displayStreamIndex();
+    updateIndexLabel();
     setPosFromFrequency();
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
-}
-
-void SigMFFileSinkGUI::displayStreamIndex()
-{
-    if (m_deviceUISet->m_deviceMIMOEngine) {
-        setStreamIndicator(tr("%1").arg(m_settings.m_streamIndex));
-    } else {
-        setStreamIndicator("S"); // single channel indicator
-    }
 }
 
 void SigMFFileSinkGUI::displayRate()
@@ -299,14 +299,16 @@ void SigMFFileSinkGUI::displayPos()
     ui->filterChainIndex->setText(tr("%1").arg(m_fixedShiftIndex));
 }
 
-void SigMFFileSinkGUI::leaveEvent(QEvent*)
+void SigMFFileSinkGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void SigMFFileSinkGUI::enterEvent(QEvent*)
+void SigMFFileSinkGUI::enterEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void SigMFFileSinkGUI::channelMarkerChangedByCursor()
@@ -344,7 +346,18 @@ void SigMFFileSinkGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    RollupContents *rollupContents = getRollupContents();
+
+    if (rollupContents->hasExpandableWidgets()) {
+        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
+    } else {
+        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Fixed);
+    }
+
+    int h = rollupContents->height() + getAdditionalHeight();
+    resize(width(), h);
+
+    rollupContents->saveState(m_rollupState);
     applySettings();
 }
 
@@ -358,6 +371,13 @@ void SigMFFileSinkGUI::onMenuDialogCalled(const QPoint &p)
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
         dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
         dialog.setReverseAPIChannelIndex(m_settings.m_reverseAPIChannelIndex);
+        dialog.setDefaultTitle(m_displayedName);
+
+        if (m_deviceUISet->m_deviceMIMOEngine)
+        {
+            dialog.setNumberOfStreams(m_sigMFFileSink->getNumberOfDeviceStreams());
+            dialog.setStreamIndex(m_settings.m_streamIndex);
+        }
 
         dialog.move(p);
         dialog.exec();
@@ -371,22 +391,17 @@ void SigMFFileSinkGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
-        applySettings();
-    }
-    else if ((m_contextMenuType == ContextMenuStreamSettings) && (m_deviceUISet->m_deviceMIMOEngine))
-    {
-        DeviceStreamSelectionDialog dialog(this);
-        dialog.setNumberOfStreams(m_sigMFFileSink->getNumberOfDeviceStreams());
-        dialog.setStreamIndex(m_settings.m_streamIndex);
-        dialog.move(p);
-        dialog.exec();
+        if (m_deviceUISet->m_deviceMIMOEngine)
+        {
+            m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
+            m_channelMarker.clearStreamIndexes();
+            m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
+            updateIndexLabel();
+        }
 
-        m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
-        m_channelMarker.clearStreamIndexes();
-        m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
-        displayStreamIndex();
         applySettings();
     }
 
@@ -399,6 +414,7 @@ void SigMFFileSinkGUI::on_deltaFrequency_changed(qint64 value)
     {
         m_channelMarker.setCenterFrequency(value);
         m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+        updateAbsoluteCenterFrequency();
         setPosFromFrequency();
         applySettings();
     }
@@ -533,6 +549,7 @@ void SigMFFileSinkGUI::setFrequencyFromPos()
     m_channelMarker.setCenterFrequency(inputFrequencyOffset);
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
 }
 
 void SigMFFileSinkGUI::setPosFromFrequency()
@@ -586,3 +603,22 @@ QString SigMFFileSinkGUI::displayScaled(uint64_t value, int precision)
     }
 }
 
+void SigMFFileSinkGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &SigMFFileSinkGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->decimationFactor, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SigMFFileSinkGUI::on_decimationFactor_currentIndexChanged);
+    QObject::connect(ui->fixedPosition, &QCheckBox::toggled, this, &SigMFFileSinkGUI::on_fixedPosition_toggled);
+    QObject::connect(ui->position, &QSlider::valueChanged, this, &SigMFFileSinkGUI::on_position_valueChanged);
+    QObject::connect(ui->spectrumSquelch, &ButtonSwitch::toggled, this, &SigMFFileSinkGUI::on_spectrumSquelch_toggled);
+    QObject::connect(ui->squelchLevel, &QDial::valueChanged, this, &SigMFFileSinkGUI::on_squelchLevel_valueChanged);
+    QObject::connect(ui->preRecordTime, &QDial::valueChanged, this, &SigMFFileSinkGUI::on_preRecordTime_valueChanged);
+    QObject::connect(ui->postSquelchTime, &QDial::valueChanged, this, &SigMFFileSinkGUI::on_postSquelchTime_valueChanged);
+    QObject::connect(ui->squelchedRecording, &ButtonSwitch::toggled, this, &SigMFFileSinkGUI::on_squelchedRecording_toggled);
+    QObject::connect(ui->record, &ButtonSwitch::toggled, this, &SigMFFileSinkGUI::on_record_toggled);
+    QObject::connect(ui->showFileDialog, &QPushButton::clicked, this, &SigMFFileSinkGUI::on_showFileDialog_clicked);
+}
+
+void SigMFFileSinkGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
+}

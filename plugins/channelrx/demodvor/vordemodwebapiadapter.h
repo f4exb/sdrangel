@@ -16,8 +16,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_VORDEMOD_WEBAPIADAPTER_H
-#define INCLUDE_VORDEMOD_WEBAPIADAPTER_H
+#ifndef INCLUDE_VORDEMODSC_WEBAPIADAPTER_H
+#define INCLUDE_VORDEMODSC_WEBAPIADAPTER_H
 
 #include "channel/channelwebapiadapter.h"
 #include "vordemodsettings.h"
@@ -25,10 +25,10 @@
 /**
  * Standalone API adapter only for the settings
  */
-class VORDemodWebAPIAdapter : public ChannelWebAPIAdapter {
+class VORDemodSCWebAPIAdapter : public ChannelWebAPIAdapter {
 public:
-    VORDemodWebAPIAdapter();
-    virtual ~VORDemodWebAPIAdapter();
+    VORDemodSCWebAPIAdapter();
+    virtual ~VORDemodSCWebAPIAdapter();
 
     virtual QByteArray serialize() const { return m_settings.serialize(); }
     virtual bool deserialize(const QByteArray& data) { return m_settings.deserialize(data); }
@@ -47,4 +47,4 @@ private:
     VORDemodSettings m_settings;
 };
 
-#endif // INCLUDE_VORDEMOD_WEBAPIADAPTER_H
+#endif // INCLUDE_VORDEMODSC_WEBAPIADAPTER_H

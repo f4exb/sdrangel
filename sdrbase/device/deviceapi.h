@@ -117,12 +117,16 @@ public:
     uint32_t getSamplingDeviceSequence() const { return m_samplingDeviceSequence; }
     const QString& getHardwareUserArguments() const { return m_hardwareUserArguments; }
 
+    void setWorkspaceIndex(int index) { m_workspaceIndex = index; }
+    int getWorkspaceIndex() const { return m_workspaceIndex; }
+
     void setDeviceNbItems(uint32_t nbItems);
     void setDeviceItemIndex(uint32_t index);
     uint32_t getDeviceNbItems() const { return m_deviceNbItems; }
     uint32_t getDeviceItemIndex() const { return m_deviceItemIndex; }
 
     int getDeviceSetIndex() const { return m_deviceTabIndex; }
+    void setDeviceSetIndex(int deviceSetIndex);
     PluginInterface *getPluginInterface() { return m_pluginInterface; }
 
     void getDeviceEngineStateStr(QString& state, int subsystemIndex = 0);
@@ -182,6 +186,7 @@ protected:
     QString m_samplingDeviceDisplayName; //!< The human readable name identifying this instance
     uint32_t m_samplingDeviceSequence;   //!< The device sequence. >0 when more than one device of the same type is connected
     QString m_hardwareUserArguments;     //!< User given arguments to be used at hardware level i.e. for the hardware device and device sequence
+    int m_workspaceIndex;                //!< Used only by the GUI but accessible via web API
 
     // Buddies (single Rx or single Tx)
 

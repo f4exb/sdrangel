@@ -56,6 +56,8 @@ void BFMDemodSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
+    m_workspaceIndex = 0;
+    m_hidden = false;
 }
 
 QByteArray BFMDemodSettings::serialize() const
@@ -93,6 +95,9 @@ QByteArray BFMDemodSettings::serialize() const
     }
 
     s.writeBool(21, m_rdsActive);
+    s.writeS32(22, m_workspaceIndex);
+    s.writeBlob(23, m_geometryBytes);
+    s.writeBool(24, m_hidden);
 
     return s.final();
 }
@@ -167,6 +172,9 @@ bool BFMDemodSettings::deserialize(const QByteArray& data)
         }
 
         d.readBool(21, &m_rdsActive, false);
+        d.readS32(22, &m_workspaceIndex, 0);
+        d.readBlob(23, &m_geometryBytes);
+        d.readBool(24, &m_hidden, false);
 
         return true;
     }

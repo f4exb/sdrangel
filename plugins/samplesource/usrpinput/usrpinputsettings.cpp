@@ -66,6 +66,7 @@ QByteArray USRPInputSettings::serialize() const
     s.writeU32(14, m_reverseAPIPort);
     s.writeU32(15, m_reverseAPIDeviceIndex);
     s.writeS32(16, m_loOffset);
+
     return s.final();
 }
 

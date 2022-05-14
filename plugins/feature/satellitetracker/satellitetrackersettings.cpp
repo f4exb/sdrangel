@@ -78,6 +78,8 @@ void SatelliteTrackerSettings::resetToDefaults()
     m_dateTimeSelect = NOW;
     m_mapFeature = "";
     m_fileInputDevice = "";
+    m_workspaceIndex = 0;
+
     for (int i = 0; i < SAT_COL_COLUMNS; i++)
     {
         m_columnIndexes[i] = i;
@@ -134,6 +136,8 @@ QByteArray SatelliteTrackerSettings::serialize() const
     s.writeS32(42, (int)m_dateTimeSelect);
     s.writeString(43, m_mapFeature);
     s.writeString(44, m_fileInputDevice);
+    s.writeS32(45, m_workspaceIndex);
+    s.writeBlob(46, m_geometryBytes);
 
     for (int i = 0; i < SAT_COL_COLUMNS; i++) {
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -225,6 +229,8 @@ bool SatelliteTrackerSettings::deserialize(const QByteArray& data)
         d.readS32(42, (int *)&m_dateTimeSelect, (int)NOW);
         d.readString(43, &m_mapFeature, "");
         d.readString(44, &m_fileInputDevice, "");
+        d.readS32(45, &m_workspaceIndex, 0);
+        d.readBlob(46, &m_geometryBytes);
 
         for (int i = 0; i < SAT_COL_COLUMNS; i++) {
             d.readS32(100 + i, &m_columnIndexes[i], i);

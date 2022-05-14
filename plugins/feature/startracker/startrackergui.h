@@ -66,6 +66,10 @@ public:
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
+    virtual void setWorkspaceIndex(int index);
+    virtual int getWorkspaceIndex() const { return m_settings.m_workspaceIndex; }
+    virtual void setGeometryBytes(const QByteArray& blob) { m_settings.m_geometryBytes = blob; }
+    virtual QByteArray getGeometryBytes() const { return m_settings.m_geometryBytes; }
 
 private:
     Ui::StarTrackerGUI* ui;
@@ -153,9 +157,7 @@ private:
     void raDecChanged();
     void updateChartSubSelect();
     void updateSolarFlux(bool all);
-
-    void leaveEvent(QEvent*);
-    void enterEvent(QEvent*);
+    void makeUIConnections();
 
 private slots:
     void onMenuDialogCalled(const QPoint &p);

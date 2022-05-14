@@ -24,6 +24,7 @@
 #include "feature/featureset.h"
 #include "feature/feature.h"
 #include "device/deviceset.h"
+#include "device/deviceapi.h"
 #include "channel/channelapi.h"
 
 #include "maincore.h"
@@ -34,6 +35,11 @@ MESSAGE_CLASS_DEFINITION(MainCore::MsgDeleteInstance, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgLoadPreset, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgSavePreset, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgDeletePreset, Message)
+MESSAGE_CLASS_DEFINITION(MainCore::MsgLoadConfiguration, Message)
+MESSAGE_CLASS_DEFINITION(MainCore::MsgSaveConfiguration, Message)
+MESSAGE_CLASS_DEFINITION(MainCore::MsgDeleteConfiguration, Message)
+MESSAGE_CLASS_DEFINITION(MainCore::MsgAddWorkspace, Message)
+MESSAGE_CLASS_DEFINITION(MainCore::MsgDeleteEmptyWorkspaces, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgLoadFeatureSetPreset, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgSaveFeatureSetPreset, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgDeleteFeatureSetPreset, Message)
@@ -51,6 +57,10 @@ MESSAGE_CLASS_DEFINITION(MainCore::MsgChannelReport, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgChannelSettings, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgChannelDemodReport, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgChannelDemodQuery, Message)
+MESSAGE_CLASS_DEFINITION(MainCore::MsgMoveDeviceUIToWorkspace, Message)
+MESSAGE_CLASS_DEFINITION(MainCore::MsgMoveMainSpectrumUIToWorkspace, Message)
+MESSAGE_CLASS_DEFINITION(MainCore::MsgMoveFeatureUIToWorkspace, Message)
+MESSAGE_CLASS_DEFINITION(MainCore::MsgMoveChannelUIToWorkspace, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgMapItem, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgPacket, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgTargetAzimuthElevation, Message)
@@ -194,6 +204,24 @@ void MainCore::removeLastDeviceSet()
         DeviceSet *deviceSet = m_deviceSets.back();
         m_deviceSetsMap.remove(deviceSet);
         m_deviceSets.pop_back();
+    }
+}
+
+void MainCore::removeDeviceSet(int deviceSetIndex)
+{
+    if (deviceSetIndex < (int) m_deviceSets.size())
+    {
+        DeviceSet *deviceSet = m_deviceSets[deviceSetIndex];
+        m_deviceSetsMap.remove(deviceSet);
+        m_deviceSets.erase(m_deviceSets.begin() + deviceSetIndex);
+        delete deviceSet;
+    }
+
+    // Renumerate
+    for (int i = 0; i < (int) m_deviceSets.size(); i++)
+    {
+        m_deviceSets[i]->m_deviceAPI->setDeviceSetIndex(i);
+        m_deviceSets[i]->setIndex(i);
     }
 }
 

@@ -29,6 +29,7 @@
 #include <complex.h>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGAPTDemodSettings.h"
 #include "SWGChannelReport.h"
 #include "SWGChannelActions.h"
@@ -113,6 +114,18 @@ APTDemod::~APTDemod()
     }
 
     delete m_basebandSink;
+}
+
+void APTDemod::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSinkAPI(this);
+        m_deviceAPI->removeChannelSink(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addChannelSink(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
 }
 
 uint32_t APTDemod::getNumberOfDeviceStreams() const
@@ -209,8 +222,9 @@ bool APTDemod::handleMessage(const Message& cmd)
         qDebug() << "APTDemod::handleMessage: DSPSignalNotification";
         m_basebandSink->getInputMessageQueue()->push(rep);
         // Forward to GUI if any
-        if (m_guiMessageQueue)
+        if (m_guiMessageQueue) {
             m_guiMessageQueue->push(new DSPSignalNotification(notif));
+        }
 
         return true;
     }
@@ -404,6 +418,15 @@ int APTDemod::webapiSettingsGet(
     response.setAptDemodSettings(new SWGSDRangel::SWGAPTDemodSettings());
     response.getAptDemodSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int APTDemod::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

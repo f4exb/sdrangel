@@ -10,6 +10,8 @@ Note that because it uses only the channelizer half band filter chain to achieve
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![Local source channel plugin GUI](../../../doc/img/LocalSource.png)
 
 <h3>1: Interpolation factor</h3>

@@ -6,6 +6,8 @@ This plugin can be used to listen to a single sideband or double sidebands modul
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![SSB Demodulator plugin GUI](../../../doc/img/SSBDemod_plugin.png)
 
 &#9758; In order to toggle USB or LSB mode in SSB mode you have to set the "BW" in channel filter cutoff control (9) to a positive (USB) or negative (LSB) value. The above screenshot shows a LSB setup. See the (8) to (10) paragraphs below for details.
@@ -152,4 +154,4 @@ If you right click on it a dialog will open to select the audio output device. S
 
 <h3>14: Spectrum display</h3>
 
-This is the spectrum display of the demodulated signal (SSB) or translated signal (DSB). Controls on the bottom of the panel are identical to the ones of the main spectrum display.
+This is the spectrum display of the demodulated signal (SSB) or translated signal (DSB). Controls on the bottom of the panel are identical to the ones of the main spectrum display. Details on the spectrum view and controls can be found [here](../../../sdrgui/gui/spectrum.md)

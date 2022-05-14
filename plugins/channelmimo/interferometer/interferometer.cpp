@@ -22,6 +22,7 @@
 #include <QNetworkReply>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 
 #include "device/deviceapi.h"
 #include "dsp/hbfilterchainconverter.h"
@@ -80,6 +81,18 @@ Interferometer::~Interferometer()
     m_deviceAPI->removeMIMOChannel(this);
     delete m_basebandSink;
     delete m_thread;
+}
+
+void Interferometer::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSinkAPI(this);
+        m_deviceAPI->removeMIMOChannel(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addMIMOChannel(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
 }
 
 void Interferometer::startSinks()
@@ -290,6 +303,15 @@ int Interferometer::webapiSettingsGet(
     response.setInterferometerSettings(new SWGSDRangel::SWGInterferometerSettings());
     response.getInterferometerSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int Interferometer::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

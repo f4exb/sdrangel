@@ -46,10 +46,12 @@ public:
     bool deserialize(const QByteArray& data);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 
+protected:
+    void resizeEvent(QResizeEvent* size);
+
 private:
     Ui::AudioOutputGui* ui;
 
-    DeviceUISet* m_deviceUISet;
     AudioOutput* m_audioOutput;
     bool m_doApplySettings;
     bool m_forceSettings;
@@ -65,6 +67,7 @@ private:
     void sendSettings();
     void updateSampleRateAndFrequency();
     bool handleMessage(const Message& message);
+    void makeUIConnections();
 
 private slots:
     void handleInputMessages();

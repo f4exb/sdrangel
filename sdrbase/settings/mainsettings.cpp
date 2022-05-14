@@ -52,8 +52,9 @@ void MainSettings::load()
 	QSettings s;
 
 	m_preferences.deserialize(qUncompress(QByteArray::fromBase64(s.value("preferences").toByteArray())));
-	m_workingPreset.deserialize(qUncompress(QByteArray::fromBase64(s.value("current").toByteArray())));
-	m_workingFeatureSetPreset.deserialize(qUncompress(QByteArray::fromBase64(s.value("current-featureset").toByteArray())));
+	// m_workingPreset.deserialize(qUncompress(QByteArray::fromBase64(s.value("current").toByteArray())));
+	// m_workingFeatureSetPreset.deserialize(qUncompress(QByteArray::fromBase64(s.value("current-featureset").toByteArray())));
+    m_workingConfiguration.deserialize(qUncompress(QByteArray::fromBase64(s.value("current-configuration").toByteArray())));
 
 	if (m_audioDeviceManager) {
 	    m_audioDeviceManager->deserialize(qUncompress(QByteArray::fromBase64(s.value("audio").toByteArray())));
@@ -115,6 +116,22 @@ void MainSettings::load()
 
             s.endGroup();
         }
+		else if (groups[i].startsWith("configuration"))
+        {
+            s.beginGroup(groups[i]);
+            Configuration* configuration = new Configuration;
+
+            if (configuration->deserialize(qUncompress(QByteArray::fromBase64(s.value("data").toByteArray()))))
+            {
+                m_configurations.append(configuration);
+            }
+            else
+            {
+                delete configuration;
+            }
+
+            s.endGroup();
+        }
 	}
 
     m_hardwareDeviceUserArgs.deserialize(qUncompress(QByteArray::fromBase64(s.value("hwDeviceUserArgs").toByteArray())));
@@ -126,8 +143,7 @@ void MainSettings::save() const
 	QSettings s;
 
 	s.setValue("preferences", qCompress(m_preferences.serialize()).toBase64());
-	s.setValue("current", qCompress(m_workingPreset.serialize()).toBase64());
-	s.setValue("current-featureset", qCompress(m_workingFeatureSetPreset.serialize()).toBase64());
+    s.setValue("current-configuration", qCompress(m_workingConfiguration.serialize()).toBase64());
 
 	if (m_audioDeviceManager) {
 	    s.setValue("audio", qCompress(m_audioDeviceManager->serialize()).toBase64());
@@ -171,6 +187,14 @@ void MainSettings::save() const
 		s.endGroup();
 	}
 
+	for (int i = 0; i < m_configurations.count(); ++i)
+	{
+		QString group = QString("configuration-%1").arg(i + 1);
+		s.beginGroup(group);
+		s.setValue("data", qCompress(m_configurations[i]->serialize()).toBase64());
+		s.endGroup();
+	}
+
     s.setValue("hwDeviceUserArgs", qCompress(m_hardwareDeviceUserArgs.serialize()).toBase64());
     s.setValue("limeRFEUSBCalib", qCompress(m_limeRFEUSBCalib.serialize()).toBase64());
 }
@@ -181,6 +205,7 @@ void MainSettings::initialize()
     clearCommands();
     clearPresets();
     clearFeatureSetPresets();
+    clearConfigurations();
 }
 
 void MainSettings::resetToDefaults()
@@ -188,6 +213,7 @@ void MainSettings::resetToDefaults()
 	m_preferences.resetToDefaults();
 	m_workingPreset.resetToDefaults();
     m_workingFeatureSetPreset.resetToDefaults();
+    m_workingConfiguration.resetToDefaults();
 }
 
 // DeviceSet presets
@@ -210,6 +236,16 @@ void MainSettings::deletePreset(const Preset* preset)
 {
 	m_presets.removeAll((Preset*)preset);
 	delete (Preset*)preset;
+}
+
+QByteArray MainSettings::serializePreset(const Preset* preset) const
+{
+    return preset->serialize();
+}
+
+bool MainSettings::deserializePreset(const QByteArray& blob, Preset* preset)
+{
+    return preset->deserialize(blob);
 }
 
 void MainSettings::deletePresetGroup(const QString& groupName)
@@ -395,7 +431,7 @@ void MainSettings::renameFeatureSetPresetGroup(const QString& oldGroupName, cons
 
     for (int i = 0; i < nbPresets; i++)
     {
-        if (getPreset(i)->getGroup() == oldGroupName)
+        if (getFeatureSetPreset(i)->getGroup() == oldGroupName)
         {
             FeatureSetPreset *preset_mod = const_cast<FeatureSetPreset*>(getFeatureSetPreset(i));
             preset_mod->setGroup(newGroupName);
@@ -426,4 +462,94 @@ void MainSettings::clearFeatureSetPresets()
     }
 
     m_featureSetPresets.clear();
+}
+
+// Configurations
+
+Configuration* MainSettings::newConfiguration(const QString& group, const QString& description)
+{
+	Configuration* configuration = new Configuration();
+	configuration->setGroup(group);
+	configuration->setDescription(description);
+    m_configurations.append(configuration);
+	return configuration;
+}
+
+void MainSettings::addConfiguration(Configuration *configuration)
+{
+    m_configurations.append(configuration);
+}
+
+void MainSettings::deleteConfiguration(const Configuration *configuration)
+{
+	m_configurations.removeAll((Configuration*) configuration);
+	delete (Configuration*) configuration;
+}
+
+QByteArray MainSettings::serializeConfiguration(const Configuration *configuration) const
+{
+    return configuration->serialize();
+}
+
+bool MainSettings::deserializeConfiguration(const QByteArray& blob, Configuration *configuration)
+{
+    return configuration->deserialize(blob);
+}
+
+const Configuration* MainSettings::getConfiguration(const QString& groupName, const QString& description) const
+{
+    int nbConfigurations = getConfigurationCount();
+
+    for (int i = 0; i < nbConfigurations; i++)
+    {
+        if ((getConfiguration(i)->getGroup() == groupName) &&
+            (getConfiguration(i)->getDescription() == description))
+        {
+            return getConfiguration(i);
+        }
+    }
+
+    return nullptr;
+}
+
+void MainSettings::sortConfigurations()
+{
+    std::sort(m_configurations.begin(), m_configurations.end(), Configuration::configCompare);
+}
+
+void MainSettings::renameConfigurationGroup(const QString& oldGroupName, const QString& newGroupName)
+{
+    int nbConfigurations = getConfigurationCount();
+
+    for (int i = 0; i < nbConfigurations; i++)
+    {
+        if (getConfiguration(i)->getGroup() == oldGroupName)
+        {
+            Configuration *configuration_mod = const_cast<Configuration*>(getConfiguration(i));
+            configuration_mod->setGroup(newGroupName);
+        }
+    }
+}
+
+void MainSettings::deleteConfigurationGroup(const QString& groupName)
+{
+    Configurations::iterator it = m_configurations.begin();
+
+    while (it != m_configurations.end())
+    {
+        if ((*it)->getGroup() == groupName) {
+            it = m_configurations.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+void MainSettings::clearConfigurations()
+{
+    foreach (Configuration *configuration, m_configurations) {
+        delete configuration;
+    }
+
+    m_configurations.clear();
 }

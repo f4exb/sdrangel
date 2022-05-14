@@ -6,6 +6,8 @@ This input sample source plugin gets its samples from a [HackRF device](https://
 
 <h2>Interface</h2>
 
+The top and bottom bars of the device window are described [here](../../../sdrgui/device/readme.md)
+
 ![HackRF input plugin GUI](../../../doc/img/HackRFInput_plugin.png)
 
 <h3>1: Common stream parameters</h3>

@@ -104,7 +104,11 @@ bool IEEE_802_15_4_ModGUI::handleMessage(const Message& message)
     if (DSPSignalNotification::match(message))
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getCenterFrequency();
         m_basebandSampleRate = notif.getSampleRate();
+        ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
         m_scopeVis->setLiveRate(m_basebandSampleRate);
         checkSampleRate();
         return true;
@@ -172,6 +176,7 @@ void IEEE_802_15_4_ModGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -310,18 +315,23 @@ void IEEE_802_15_4_ModGUI::on_udpPort_editingFinished()
     applySettings();
 }
 
-void IEEE_802_15_4_ModGUI::on_udpBytesFormat_clicked(bool checked)
-{
-    m_settings.m_udpBytesFormat = checked;
-    applySettings();
-}
-
 void IEEE_802_15_4_ModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    RollupContents *rollupContents = getRollupContents();
+
+    if (rollupContents->hasExpandableWidgets()) {
+        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
+    } else {
+        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Fixed);
+    }
+
+    int h = rollupContents->height() + getAdditionalHeight();
+    resize(width(), h);
+
+    rollupContents->saveState(m_rollupState);
     applySettings();
 }
 
@@ -335,10 +345,17 @@ void IEEE_802_15_4_ModGUI::onMenuDialogCalled(const QPoint &p)
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
         dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
         dialog.setReverseAPIChannelIndex(m_settings.m_reverseAPIChannelIndex);
+        dialog.setDefaultTitle(m_displayedName);
+
+        if (m_deviceUISet->m_deviceMIMOEngine)
+        {
+            dialog.setNumberOfStreams(m_IEEE_802_15_4_Mod->getNumberOfDeviceStreams());
+            dialog.setStreamIndex(m_settings.m_streamIndex);
+        }
+
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
         m_settings.m_title = m_channelMarker.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
@@ -348,22 +365,17 @@ void IEEE_802_15_4_ModGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
-        applySettings();
-    }
-    else if ((m_contextMenuType == ContextMenuStreamSettings) && (m_deviceUISet->m_deviceMIMOEngine))
-    {
-        DeviceStreamSelectionDialog dialog(this);
-        dialog.setNumberOfStreams(m_IEEE_802_15_4_Mod->getNumberOfDeviceStreams());
-        dialog.setStreamIndex(m_settings.m_streamIndex);
-        dialog.move(p);
-        dialog.exec();
+        if (m_deviceUISet->m_deviceMIMOEngine)
+        {
+            m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
+            m_channelMarker.clearStreamIndexes();
+            m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
+            updateIndexLabel();
+        }
 
-        m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
-        m_channelMarker.clearStreamIndexes();
-        m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
-        displayStreamIndex();
         applySettings();
     }
 
@@ -376,14 +388,17 @@ IEEE_802_15_4_ModGUI::IEEE_802_15_4_ModGUI(PluginAPI* pluginAPI, DeviceUISet *de
     m_pluginAPI(pluginAPI),
     m_deviceUISet(deviceUISet),
     m_channelMarker(this),
+    m_deviceCenterFrequency(0),
     m_doApplySettings(true),
     m_basebandSampleRate(12000000)
 {
-    ui->setupUi(this);
-    m_helpURL = "plugins/channeltx/mod802.15.4/readme.md";
     setAttribute(Qt::WA_DeleteOnClose, true);
-
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    m_helpURL = "plugins/channeltx/mod802.15.4/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_IEEE_802_15_4_Mod = (IEEE_802_15_4_Mod*) channelTx;
@@ -453,7 +468,6 @@ IEEE_802_15_4_ModGUI::IEEE_802_15_4_ModGUI(PluginAPI* pluginAPI, DeviceUISet *de
     m_channelMarker.setVisible(true); // activate signal on the last setting only
 
     m_deviceUISet->addChannelMarker(&m_channelMarker);
-    m_deviceUISet->addRollupWidget(this);
 
     connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
 
@@ -466,6 +480,7 @@ IEEE_802_15_4_ModGUI::IEEE_802_15_4_ModGUI(PluginAPI* pluginAPI, DeviceUISet *de
     ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
 
     displaySettings();
+    makeUIConnections();
     applySettings();
 }
 
@@ -507,7 +522,8 @@ void IEEE_802_15_4_ModGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
-    displayStreamIndex();
+    setTitle(m_channelMarker.getTitle());
+    updateIndexLabel();
 
     blockApplySettings(true);
 
@@ -567,7 +583,8 @@ void IEEE_802_15_4_ModGUI::displaySettings()
     ui->udpAddress->setText(m_settings.m_udpAddress);
     ui->udpPort->setText(QString::number(m_settings.m_udpPort));
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
@@ -600,23 +617,16 @@ QString IEEE_802_15_4_ModGUI::getDisplayValueWithMultiplier(int value)
     }
 }
 
-void IEEE_802_15_4_ModGUI::displayStreamIndex()
-{
-    if (m_deviceUISet->m_deviceMIMOEngine) {
-        setStreamIndicator(tr("%1").arg(m_settings.m_streamIndex));
-    } else {
-        setStreamIndicator("S"); // single channel indicator
-    }
-}
-
-void IEEE_802_15_4_ModGUI::leaveEvent(QEvent*)
+void IEEE_802_15_4_ModGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void IEEE_802_15_4_ModGUI::enterEvent(QEvent*)
+void IEEE_802_15_4_ModGUI::enterEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void IEEE_802_15_4_ModGUI::tick()
@@ -624,4 +634,25 @@ void IEEE_802_15_4_ModGUI::tick()
     double powDb = CalcDb::dbPower(m_IEEE_802_15_4_Mod->getMagSq());
     m_channelPowerDbAvg(powDb);
     ui->channelPower->setText(tr("%1 dB").arg(m_channelPowerDbAvg.asDouble(), 0, 'f', 1));
+}
+
+void IEEE_802_15_4_ModGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &IEEE_802_15_4_ModGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->phy, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &IEEE_802_15_4_ModGUI::on_phy_currentIndexChanged);
+    QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &IEEE_802_15_4_ModGUI::on_rfBW_valueChanged);
+    QObject::connect(ui->gain, &QDial::valueChanged, this, &IEEE_802_15_4_ModGUI::on_gain_valueChanged);
+    QObject::connect(ui->channelMute, &QToolButton::toggled, this, &IEEE_802_15_4_ModGUI::on_channelMute_toggled);
+    QObject::connect(ui->txButton, &QToolButton::clicked, this, &IEEE_802_15_4_ModGUI::on_txButton_clicked);
+    QObject::connect(ui->frame, &QLineEdit::editingFinished, this, &IEEE_802_15_4_ModGUI::on_frame_editingFinished);
+    QObject::connect(ui->frame, &QLineEdit::returnPressed, this, &IEEE_802_15_4_ModGUI::on_frame_returnPressed);
+    QObject::connect(ui->repeat, &ButtonSwitch::toggled, this, &IEEE_802_15_4_ModGUI::on_repeat_toggled);
+    QObject::connect(ui->udpEnabled, &QCheckBox::clicked, this, &IEEE_802_15_4_ModGUI::on_udpEnabled_clicked);
+    QObject::connect(ui->udpAddress, &QLineEdit::editingFinished, this, &IEEE_802_15_4_ModGUI::on_udpAddress_editingFinished);
+    QObject::connect(ui->udpPort, &QLineEdit::editingFinished, this, &IEEE_802_15_4_ModGUI::on_udpPort_editingFinished);
+}
+
+void IEEE_802_15_4_ModGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

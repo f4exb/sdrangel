@@ -40,6 +40,7 @@ class DSPDeviceSourceEngine;
 class DSPDeviceSinkEngine;
 class Indicator;
 class GLSpectrumGUI;
+class MainSpectrumGUI;
 class PluginAPI;
 class ChannelGUI;
 class ChannelMarker;
@@ -56,25 +57,33 @@ class Preset;
 class Command;
 class FeatureSetPreset;
 class CommandKeyReceiver;
+class ConfigurationsDialog;
 
-namespace Ui {
-	class MainWindow;
-}
+class QMenuBar;
+class Workspace;
+
+// namespace Ui {
+// 	class MainWindow;
+// }
 
 class SDRGUI_API MainWindow : public QMainWindow {
 	Q_OBJECT
 
 public:
-	explicit MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parser, QWidget* parent = 0);
+	explicit MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parser, QWidget* parent = nullptr);
 	~MainWindow();
 	static MainWindow *getInstance() { return m_instance; } // Main Window is de facto a singleton so this just returns its reference
 	MessageQueue* getInputMessageQueue() { return &m_inputMessageQueue; }
-	void addViewAction(QAction* action);
-	void setDeviceGUI(int deviceTabIndex, QWidget* gui, const QString& deviceDisplayName, int deviceType = 0);
     const PluginManager *getPluginManager() const { return m_pluginManager; }
     std::vector<DeviceUISet*>& getDeviceUISets() { return m_deviceUIs; }
     void commandKeysConnect(QObject *object, const char *slot);
     void commandKeysDisconnect(QObject *object, const char *slot);
+    int getNumberOfWorkspaces() const { return m_workspaces.size(); }
+
+public slots:
+    void channelMove(ChannelGUI *gui, int wsIndexDestination);
+    void channelDuplicate(ChannelGUI *gui);
+    void channelMoveToDeviceSet(ChannelGUI *gui, int dsIndexDestination);
 
 private:
     enum {
@@ -90,7 +99,9 @@ private:
 	};
 
 	static MainWindow *m_instance;
-	Ui::MainWindow* ui;
+    QList<Workspace*> m_workspaces;
+    Workspace *m_currentWorkspace;
+	// Ui::MainWindow* ui;
 	MessageQueue m_inputMessageQueue;
     MainCore *m_mainCore;
 	std::vector<DeviceUISet*> m_deviceUIs;
@@ -103,14 +114,9 @@ private:
 	QTimer m_statusTimer;
 	int m_lastEngineState;
 
+    QMenuBar *m_menuBar;
 	QLabel* m_dateTimeWidget;
 	QLabel* m_showSystemWidget;
-
-	QWidget* m_inputGUI;
-
-	int m_sampleRate;
-	quint64 m_centerFrequency;
-	std::string m_sampleFileName;
 
 	WebAPIRequestMapper *m_requestMapper;
 	WebAPIServer *m_apiServer;
@@ -124,58 +130,54 @@ private:
 	QProcess *m_fftWisdomProcess;
 
 	void loadSettings();
-	void loadPresetSettings(const Preset* preset, int tabIndex);
-	void savePresetSettings(Preset* preset, int tabIndex);
-	void loadFeatureSetPresetSettings(const FeatureSetPreset* preset, int featureSetIndex);
+	void loadDeviceSetPresetSettings(const Preset* preset, int deviceSetIndex);
+	void saveDeviceSetPresetSettings(Preset* preset, int deviceSetIndex);
+	void loadFeatureSetPresetSettings(const FeatureSetPreset* preset, int featureSetIndex, Workspace *workspace);
 	void saveFeatureSetPresetSettings(FeatureSetPreset* preset, int featureSetIndex);
-	void saveCommandSettings();
 
 	QString openGLVersion();
+    void createMenuBar();
 	void createStatusBar();
 	void closeEvent(QCloseEvent*);
-	void updatePresetControls();
-	QTreeWidgetItem* addPresetToTree(const Preset* preset);
-	QTreeWidgetItem* addCommandToTree(const Command* command);
 	void applySettings();
 
-	void addSourceDevice(int deviceIndex);
-	void addSinkDevice();
-	void addMIMODevice();
-    void removeLastDevice();
+    void removeDeviceSet(int deviceSetIndex);
+    void removeLastDeviceSet();
     void addFeatureSet();
-    void removeFeatureSet(unsigned int tabIndex);
+    void removeFeatureSet(unsigned int featureSetIndex);
     void removeAllFeatureSets();
     void deleteChannel(int deviceSetIndex, int channelIndex);
-    void sampleSourceChanged(int tabIndex, int newDeviceIndex);
-	void sampleSinkChanged(int tabIndex, int newDeviceIndex);
-	void sampleMIMOChanged(int tabIndex, int newDeviceIndex);
+    void channelDuplicateToDeviceSet(ChannelGUI *sourceChannelGUI, int dsIndexDestination);
+    void sampleDeviceChange(int deviceType, int deviceSetIndex, int newDeviceIndex, Workspace *workspace);
+    void sampleSourceChange(int deviceSetIndex, int newDeviceIndex, Workspace *workspace);
+	void sampleSinkChange(int deviceSetIndex, int newDeviceIndex, Workspace *workspace);
+	void sampleMIMOChange(int deviceSetIndex, int newDeviceIndex, Workspace *workspace);
+    void sampleSourceCreate(
+        int deviceSetIndex,
+        int deviceIndex,
+        DeviceUISet *deviceUISet
+    );
+    void sampleSinkCreate(
+        int deviceSetIndex,
+        int deviceIndex,
+        DeviceUISet *deviceUISet
+    );
+    void sampleMIMOCreate(
+        int deviceSetIndex,
+        int deviceIndex,
+        DeviceUISet *deviceUISet
+    );
     void deleteFeature(int featureSetIndex, int featureIndex);
 
     bool handleMessage(const Message& cmd);
-	void restoreDeviceTabs();
 
 private slots:
 	void handleMessages();
-	void updateStatus();
+    void handleWorkspaceVisibility(Workspace *workspace, bool visibility);
+
 	void on_action_View_Fullscreen_toggled(bool checked);
-	void on_presetSave_clicked();
-	void on_presetUpdate_clicked();
-    void on_presetEdit_clicked();
-	void on_presetExport_clicked();
-	void on_presetImport_clicked();
-	void on_settingsSave_clicked();
-	void on_presetLoad_clicked();
-	void on_presetDelete_clicked();
-	void on_presetTree_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
-	void on_presetTree_itemActivated(QTreeWidgetItem *item, int column);
-	void on_commandNew_clicked();
-    void on_commandDuplicate_clicked();
-    void on_commandEdit_clicked();
-    void on_commandDelete_clicked();
-    void on_commandRun_clicked();
-    void on_commandOutput_clicked();
-    void on_commandsSave_clicked();
-    void on_commandKeyboardConnect_toggled(bool checked);
+	void on_action_saveAll_triggered();
+    void on_action_Configurations_triggered();
 	void on_action_Audio_triggered();
     void on_action_Logging_triggered();
 	void on_action_FFT_triggered();
@@ -183,25 +185,33 @@ private slots:
     void on_action_LimeRFE_triggered();
 	void on_action_My_Position_triggered();
     void on_action_DeviceUserArguments_triggered();
-    void samplingDeviceChanged(int deviceType, int tabIndex, int newDeviceIndex);
-    void channelAddClicked(int channelIndex);
-    void featureAddClicked(int featureIndex);
+    void on_action_commands_triggered();
     void on_action_Quick_Start_triggered();
     void on_action_Main_Window_triggered();
 	void on_action_Loaded_Plugins_triggered();
 	void on_action_About_triggered();
-	void on_action_addSourceDevice_triggered();
-	void on_action_addSinkDevice_triggered();
-    void on_action_addMIMODevice_triggered();
-	void on_action_removeLastDevice_triggered();
-	void on_action_addFeatureSet_triggered();
-	void on_action_removeLastFeatureSet_triggered();
-	void tabInputViewIndexChanged();
-    void tabChannelsIndexChanged();
-	void tabFeaturesIndexChanged();
+
+	void updateStatus();
+    void addWorkspace();
+    void viewAllWorkspaces();
+    void removeEmptyWorkspaces();
+	void loadConfiguration(const Configuration *configuration, bool fromDialog = false);
+    void saveConfiguration(Configuration *configuration);
+	void sampleSourceAdd(Workspace *deviceWorkspace, Workspace *spectrumWorkspace, int deviceIndex);
+	void sampleSinkAdd(Workspace *workspace, Workspace *spectrumWorkspace, int deviceIndex);
+	void sampleMIMOAdd(Workspace *workspace, Workspace *spectrumWorkspace, int deviceIndex);
+    void samplingDeviceChangeHandler(DeviceGUI *deviceGUI, int newDeviceIndex);
+    void channelAddClicked(Workspace *workspace, int deviceSetIndex, int channelPluginIndex);
+    void featureAddClicked(Workspace *workspace, int featureIndex);
+    void featureMove(FeatureGUI *gui, int wsIndexDestnation);
+    void openFeaturePresetsDialog(QPoint p, Workspace *workspace);
+    void deviceMove(DeviceGUI *gui, int wsIndexDestnation);
+    void mainSpectrumMove(MainSpectrumGUI *gui, int wsIndexDestnation);
+    void mainSpectrumShow(int deviceSetIndex);
+    void showAllChannels(int deviceSetIndex);
+    void openDeviceSetPresetsDialog(QPoint p, DeviceGUI *deviceGUI);
 	void commandKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifiers, bool release);
 	void fftWisdomProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
-	void toggleSpectrumView(bool checked);
 };
 
 #endif // INCLUDE_MAINWINDOW_H

@@ -6,6 +6,8 @@ This output plugin sends its samples to an audio device.
 
 <h2>Interface</h2>
 
+The top and bottom bars of the device window are described [here](../../../sdrgui/device/readme.md)
+
 ![Audio output plugin GUI](../../../doc/img/AudioOutput_plugin.png)
 
 <h3>1: Start/Stop</h3>

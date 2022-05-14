@@ -52,20 +52,19 @@ public:
 	DSPDeviceMIMOEngine *addDeviceMIMOEngine();
 	void removeLastDeviceMIMOEngine();
 
+    void removeDeviceEngineAt(int deviceIndex);
+
 	AudioDeviceManager *getAudioDeviceManager() { return &m_audioDeviceManager; }
 	AMBEEngine *getAMBEEngine() { return &m_ambeEngine; }
 
     uint32_t getDeviceSourceEnginesNumber() const { return m_deviceSourceEngines.size(); }
-    DSPDeviceSourceEngine *getDeviceSourceEngineByIndex(uint deviceIndex) { return m_deviceSourceEngines[deviceIndex]; }
-    DSPDeviceSourceEngine *getDeviceSourceEngineByUID(uint uid);
+    DSPDeviceSourceEngine *getDeviceSourceEngineByIndex(unsigned int deviceIndex) { return m_deviceSourceEngines[deviceIndex]; }
 
     uint32_t getDeviceSinkEnginesNumber() const { return m_deviceSinkEngines.size(); }
-    DSPDeviceSinkEngine *getDeviceSinkEngineByIndex(uint deviceIndex) { return m_deviceSinkEngines[deviceIndex]; }
-    DSPDeviceSinkEngine *getDeviceSinkEngineByUID(uint uid);
+    DSPDeviceSinkEngine *getDeviceSinkEngineByIndex(unsigned int deviceIndex) { return m_deviceSinkEngines[deviceIndex]; }
 
     uint32_t getDeviceMIMOEnginesNumber() const { return m_deviceMIMOEngines.size(); }
-    DSPDeviceMIMOEngine *getDeviceMIMOEngineByIndex(uint deviceIndex) { return m_deviceMIMOEngines[deviceIndex]; }
-    DSPDeviceMIMOEngine *getDeviceMIMOEngineByUID(uint uid);
+    DSPDeviceMIMOEngine *getDeviceMIMOEngineByIndex(unsigned int deviceIndex) { return m_deviceMIMOEngines[deviceIndex]; }
 
 	// Serial DV methods:
 
@@ -89,12 +88,21 @@ public:
     FFTFactory *getFFTFactory() { return m_fftFactory; }
 
 private:
-	std::vector<DSPDeviceSourceEngine*> m_deviceSourceEngines;
-	uint m_deviceSourceEnginesUIDSequence;
-	std::vector<DSPDeviceSinkEngine*> m_deviceSinkEngines;
-	uint m_deviceSinkEnginesUIDSequence;
-	std::vector<DSPDeviceMIMOEngine*> m_deviceMIMOEngines;
-	uint m_deviceMIMOEnginesUIDSequence;
+    struct DeviceEngineReference
+    {
+        int m_deviceEngineType; //!< 0: Rx, 1: Tx, 2: MIMO
+        DSPDeviceSourceEngine *m_deviceSourceEngine;
+        DSPDeviceSinkEngine *m_deviceSinkEngine;
+        DSPDeviceMIMOEngine *m_deviceMIMOEngine;
+    };
+
+	QList<DSPDeviceSourceEngine*> m_deviceSourceEngines;
+	unsigned int m_deviceSourceEnginesUIDSequence;
+	QList<DSPDeviceSinkEngine*> m_deviceSinkEngines;
+	unsigned int m_deviceSinkEnginesUIDSequence;
+	QList<DSPDeviceMIMOEngine*> m_deviceMIMOEngines;
+	unsigned int m_deviceMIMOEnginesUIDSequence;
+    QList<DeviceEngineReference> m_deviceEngineReferences;
     AudioDeviceManager m_audioDeviceManager;
     int m_audioInputDeviceIndex;
     int m_audioOutputDeviceIndex;

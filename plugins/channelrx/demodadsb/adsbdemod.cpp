@@ -31,6 +31,7 @@
 #include <QThread>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGADSBDemodSettings.h"
 #include "SWGChannelReport.h"
 #include "SWGADSBDemodReport.h"
@@ -107,6 +108,18 @@ ADSBDemod::~ADSBDemod()
     delete m_worker;
     delete m_basebandSink;
     delete m_thread;
+}
+
+void ADSBDemod::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSinkAPI(this);
+        m_deviceAPI->removeChannelSink(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addChannelSink(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
 }
 
 uint32_t ADSBDemod::getNumberOfDeviceStreams() const
@@ -359,6 +372,15 @@ int ADSBDemod::webapiSettingsGet(
     response.setAdsbDemodSettings(new SWGSDRangel::SWGADSBDemodSettings());
     response.getAdsbDemodSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int ADSBDemod::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

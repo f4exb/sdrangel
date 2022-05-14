@@ -76,6 +76,7 @@ void ChannelAnalyzerGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
 
@@ -97,7 +98,8 @@ void ChannelAnalyzerGUI::displaySettings()
     QString rolloffStr = QString::number(m_settings.m_rrcRolloff/100.0, 'f', 2);
     ui->rrcRolloffText->setText(rolloffStr);
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
@@ -181,7 +183,7 @@ void ChannelAnalyzerGUI::setPLLVisibility()
     else
         ui->pllPskOrder->setCurrentIndex(i);
     ui->pllPskOrder->blockSignals(false);
-    arrangeRollups();
+    getRollupContents()->arrangeRollups();
 }
 
 void ChannelAnalyzerGUI::setSpectrumDisplay()
@@ -232,6 +234,10 @@ bool ChannelAnalyzerGUI::handleMessage(const Message& message)
     {
         DSPSignalNotification& cmd = (DSPSignalNotification&) message;
         m_basebandSampleRate = cmd.getSampleRate();
+        m_deviceCenterFrequency = cmd.getCenterFrequency();
+        ui->deltaFrequency->setValueRange(false, 8, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
         qDebug("ChannelAnalyzerGUI::handleMessage: DSPSignalNotification: m_basebandSampleRate: %d", m_basebandSampleRate);
         setSinkSampleRate();
 
@@ -274,6 +280,7 @@ void ChannelAnalyzerGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
 	applySettings();
 }
 
@@ -387,6 +394,7 @@ void ChannelAnalyzerGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -450,7 +458,18 @@ void ChannelAnalyzerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    RollupContents *rollupContents = getRollupContents();
+
+    if (rollupContents->hasExpandableWidgets()) {
+        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
+    } else {
+        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Fixed);
+    }
+
+    int h = rollupContents->height() + getAdditionalHeight();
+    resize(width(), h);
+
+    rollupContents->saveState(m_rollupState);
     applySettings();
 }
 
@@ -464,10 +483,17 @@ void ChannelAnalyzerGUI::onMenuDialogCalled(const QPoint& p)
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
         dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
         dialog.setReverseAPIChannelIndex(m_settings.m_reverseAPIChannelIndex);
+        dialog.setDefaultTitle(m_displayedName);
+
+        if (m_deviceUISet->m_deviceMIMOEngine)
+        {
+            dialog.setNumberOfStreams(m_channelAnalyzer->getNumberOfDeviceStreams());
+            dialog.setStreamIndex(m_settings.m_streamIndex);
+        }
+
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
         m_settings.m_title = m_channelMarker.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
@@ -477,7 +503,16 @@ void ChannelAnalyzerGUI::onMenuDialogCalled(const QPoint& p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
+
+        if (m_deviceUISet->m_deviceMIMOEngine)
+        {
+            m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
+            m_channelMarker.clearStreamIndexes();
+            m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
+            updateIndexLabel();
+        }
 
         applySettings();
     }
@@ -494,11 +529,13 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *device
 	m_doApplySettings(true),
 	m_basebandSampleRate(48000)
 {
-	ui->setupUi(this);
-    m_helpURL = "plugins/channelrx/chanalyzer/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
-	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
-
+    m_helpURL = "plugins/channelrx/chanalyzer/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_channelAnalyzer = (ChannelAnalyzer*) rxChannel;
@@ -540,7 +577,6 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *device
 	setTitleColor(m_channelMarker.getColor());
 
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
-	m_deviceUISet->addRollupWidget(this);
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
 	ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
@@ -555,6 +591,7 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *device
 	connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
 	displaySettings();
+    makeUIConnections();
 	applySettings(true);
 }
 
@@ -671,13 +708,39 @@ void ChannelAnalyzerGUI::applySettings(bool force)
 	}
 }
 
-void ChannelAnalyzerGUI::leaveEvent(QEvent*)
+void ChannelAnalyzerGUI::leaveEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void ChannelAnalyzerGUI::enterEvent(QEvent*)
+void ChannelAnalyzerGUI::enterEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
+void ChannelAnalyzerGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &ChannelAnalyzerGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->rationalDownSamplerRate, &ValueDial::changed, this, &ChannelAnalyzerGUI::on_rationalDownSamplerRate_changed);
+    QObject::connect(ui->pll, &QToolButton::toggled, this, &ChannelAnalyzerGUI::on_pll_toggled);
+    QObject::connect(ui->pllType, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ChannelAnalyzerGUI::on_pllType_currentIndexChanged);
+    QObject::connect(ui->pllPskOrder, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ChannelAnalyzerGUI::on_pllPskOrder_currentIndexChanged);
+    QObject::connect(ui->pllBandwidth, &QDial::valueChanged, this, &ChannelAnalyzerGUI::on_pllBandwidth_valueChanged);
+    QObject::connect(ui->pllDampingFactor, &QDial::valueChanged, this, &ChannelAnalyzerGUI::on_pllDampingFactor_valueChanged);
+    QObject::connect(ui->pllLoopGain, &QDial::valueChanged, this, &ChannelAnalyzerGUI::on_pllLoopGain_valueChanged);
+    QObject::connect(ui->log2Decim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ChannelAnalyzerGUI::on_log2Decim_currentIndexChanged);
+    QObject::connect(ui->useRationalDownsampler, &ButtonSwitch::toggled, this, &ChannelAnalyzerGUI::on_useRationalDownsampler_toggled);
+    QObject::connect(ui->signalSelect, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ChannelAnalyzerGUI::on_signalSelect_currentIndexChanged);
+    QObject::connect(ui->rrcFilter, &ButtonSwitch::toggled, this, &ChannelAnalyzerGUI::on_rrcFilter_toggled);
+    QObject::connect(ui->rrcRolloff, &QDial::valueChanged, this, &ChannelAnalyzerGUI::on_rrcRolloff_valueChanged);
+    QObject::connect(ui->BW, &QSlider::valueChanged, this, &ChannelAnalyzerGUI::on_BW_valueChanged);
+    QObject::connect(ui->lowCut, &QSlider::valueChanged, this, &ChannelAnalyzerGUI::on_lowCut_valueChanged);
+    QObject::connect(ui->ssb, &QCheckBox::toggled, this, &ChannelAnalyzerGUI::on_ssb_toggled);
+}
+
+void ChannelAnalyzerGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
+}

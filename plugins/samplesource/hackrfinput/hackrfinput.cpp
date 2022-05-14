@@ -87,7 +87,7 @@ void HackRFInput::destroy()
 
 bool HackRFInput::openDevice()
 {
-    if (m_dev != 0)
+    if (m_dev)
     {
         closeDevice();
     }
@@ -109,7 +109,7 @@ bool HackRFInput::openDevice()
             return false;
         }
 
-        if (buddySharedParams->m_dev == 0) // device is not opened by buddy
+        if (buddySharedParams->m_dev == nullptr) // device is not opened by buddy
         {
             qCritical("HackRFInput::openDevice: could not get HackRF handle from buddy");
             return false;
@@ -123,12 +123,14 @@ bool HackRFInput::openDevice()
         if ((m_dev = DeviceHackRF::open_hackrf(qPrintable(m_deviceAPI->getSamplingDeviceSerial()))) == 0)
         {
             qCritical("HackRFInput::openDevice: could not open HackRF %s", qPrintable(m_deviceAPI->getSamplingDeviceSerial()));
+            m_dev = nullptr;
             return false;
         }
 
         m_sharedParams.m_dev = m_dev;
     }
 
+    qDebug("HackRFInput::openDevice: success");
     return true;
 }
 
@@ -172,7 +174,7 @@ void HackRFInput::closeDevice()
     {
         qDebug("HackRFInput::closeDevice: closing device since Tx side is not open");
 
-        if(m_dev != 0) // close BladeRF
+        if (m_dev) // close HackRF
         {
             hackrf_close(m_dev);
             //hackrf_exit(); // TODO: this may not work if several HackRF Devices are running concurrently. It should be handled globally in the application
@@ -180,7 +182,7 @@ void HackRFInput::closeDevice()
     }
 
     m_sharedParams.m_dev = 0;
-    m_dev = 0;
+    m_dev = nullptr;
 }
 
 void HackRFInput::stop()

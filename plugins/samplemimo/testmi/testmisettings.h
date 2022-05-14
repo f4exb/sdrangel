@@ -65,7 +65,8 @@ struct TestMIStreamSettings {
 	void resetToDefaults();
 };
 
-struct TestMISettings {
+struct TestMISettings
+{
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;

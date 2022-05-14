@@ -16,8 +16,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_VORDEMODSINK_H
-#define INCLUDE_VORDEMODSINK_H
+#ifndef INCLUDE_VORDEMODSCSINK_H
+#define INCLUDE_VORDEMODSCSINK_H
 
 #include "dsp/channelsamplesink.h"
 #include "dsp/nco.h"
@@ -34,31 +34,23 @@
 
 #include <vector>
 
-// Highest frequency is the FM subcarrier at up to ~11kHz
-// However, old VORs can have 0.005% frequency offset, which is 6kHz
-#define VORDEMOD_CHANNEL_BANDWIDTH 18000
-// Sample rate needs to be at least twice the above
-// Also need to consider impact frequency resolution of Goertzel filters
-// May as well make it a common audio rate, to possibly avoid decimation
-#define VORDEMOD_CHANNEL_SAMPLE_RATE 48000
-
-class VORDemodSink : public ChannelSampleSink {
+class VORDemodSCSink : public ChannelSampleSink {
 public:
-    VORDemodSink(const VORDemodSettings& settings, int subChannel,
-                MessageQueue *messageQueueToGUI);
-    ~VORDemodSink();
+    VORDemodSCSink();
+    ~VORDemodSCSink();
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
     void applySettings(const VORDemodSettings& settings, bool force = false);
-    void setMessageQueueToGUI(MessageQueue *messageQueue) { m_messageQueueToGUI = messageQueue; }
+    void setMessageQueueToChannel(MessageQueue *messageQueue) { m_messageQueueToChannel = messageQueue; }
     void applyAudioSampleRate(int sampleRate);
 
     int getAudioSampleRate() const { return m_audioSampleRate; }
     double getMagSq() const { return m_magsq; }
     bool getSquelchOpen() const { return m_squelchOpen; }
     AudioFifo *getAudioFifo() { return &m_audioFifo; }
+    void setAudioFifoLabel(const QString& label) { m_audioFifo.setLabel(label); }
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples)
     {
@@ -78,11 +70,7 @@ public:
         m_magsqCount = 0;
     }
 
-    int m_subChannelId; // The id for the VOR this demod sink was created for
-    int m_vorFrequencyHz; // The VORs frequency
-    int m_frequencyOffset;  // Different between sample source center frequeny and VOR center frequency
     int m_channelFrequencyOffset;
-    bool m_outOfBand;
 
 private:
     struct MagSqLevelsStore
@@ -114,6 +102,7 @@ private:
     int  m_magsqCount;
     MagSqLevelsStore m_magSqLevelStore;
 
+    MessageQueue *m_messageQueueToChannel;
     MessageQueue *m_messageQueueToGUI;
 
     MovingAverageUtil<Real, double, 16> m_movingAverage;
@@ -150,7 +139,7 @@ private:
 
     void processOneSample(Complex &ci);
     void processOneAudioSample(Complex &ci);
-    MessageQueue *getMessageQueueToGUI() { return m_messageQueueToGUI; }
+    MessageQueue *getMessageQueueToChannel() { return m_messageQueueToChannel; }
 };
 
-#endif // INCLUDE_VORDEMODSINK_H
+#endif // INCLUDE_VORDEMODSCSINK_H

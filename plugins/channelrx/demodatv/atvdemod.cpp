@@ -75,6 +75,23 @@ ATVDemod::~ATVDemod()
     delete m_basebandSink;
 }
 
+void ATVDemod::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSinkAPI(this);
+        m_deviceAPI->removeChannelSink(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addChannelSink(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
+}
+
+uint32_t ATVDemod::getNumberOfDeviceStreams() const
+{
+    return m_deviceAPI->getNbSourceStreams();
+}
+
 void ATVDemod::start()
 {
 	qDebug("ATVDemod::start");
@@ -127,10 +144,8 @@ bool ATVDemod::handleMessage(const Message& cmd)
         m_basebandSink->getInputMessageQueue()->push(notifToSink);
 
         // Forward to GUI
-        if (getMessageQueueToGUI())
-        {
-            DSPSignalNotification *notifToGUI = new DSPSignalNotification(notif);
-            getMessageQueueToGUI()->push(notifToGUI);
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
         }
 
         return true;

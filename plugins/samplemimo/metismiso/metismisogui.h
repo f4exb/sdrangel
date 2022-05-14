@@ -46,10 +46,12 @@ public:
 	bool deserialize(const QByteArray& data);
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 
+protected:
+    void resizeEvent(QResizeEvent* size);
+
 private:
 	Ui::MetisMISOGui* ui;
 
-	DeviceUISet* m_deviceUISet;
 	MetisMISOSettings m_settings;
     int m_rxSampleRate;
     int m_txSampleRate;
@@ -74,6 +76,7 @@ private:
 	void sendSettings();
 	void setCenterFrequency(qint64 centerFrequency);
 	bool handleMessage(const Message& message);
+    void makeUIConnections();
 
 private slots:
     void handleInputMessages();

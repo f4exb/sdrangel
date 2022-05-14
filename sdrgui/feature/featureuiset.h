@@ -25,13 +25,13 @@
 #include "export.h"
 
 class QWidget;
-class FeatureWindow;
 class FeatureGUI;
 class PluginAPI;
 class FeatureSet;
 class Feature;
 class FeatureSetPreset;
 class WebAPIAdapterInterface;
+class Workspace;
 
 class SDRGUI_API FeatureUISet : public QObject
 {
@@ -40,16 +40,22 @@ public:
     FeatureUISet(int tabIndex, FeatureSet *featureSet);
     ~FeatureUISet();
 
-    void addRollupWidget(QWidget *widget); //!< Add feature rollup widget to feature window
     int getNumberOfFeatures() const { return m_featureInstanceRegistrations.size(); }
     void registerFeatureInstance(FeatureGUI* featureGUI, Feature *feature);
     void deleteFeature(int featureIndex);
     const Feature *getFeatureAt(int featureIndex) const;
     Feature *getFeatureAt(int featureIndex);
-    void loadFeatureSetSettings(const FeatureSetPreset* preset, PluginAPI *pluginAPI, WebAPIAdapterInterface *apiAdapter);
+    const FeatureGUI *getFeatureGuiAt(int featureIndex) const;
+    FeatureGUI *getFeatureGuiAt(int featureIndex);
+    void loadFeatureSetSettings(
+        const FeatureSetPreset* preset,
+        PluginAPI *pluginAPI,
+        WebAPIAdapterInterface *apiAdapter,
+        QList<Workspace*> *workspaces,
+        Workspace *currentWorkspace
+    );
     void saveFeatureSetSettings(FeatureSetPreset* preset);
-
-    FeatureWindow *m_featureWindow;
+    void freeFeatures();
 
 private:
     struct FeatureInstanceRegistration
@@ -76,7 +82,6 @@ private:
     int m_featureTabIndex;
     FeatureSet *m_featureSet;
 
-    void freeFeatures();
 
 private slots:
     void handleClosingFeatureGUI(FeatureGUI *featureGUI);

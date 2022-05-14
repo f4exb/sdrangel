@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>MapGUI</class>
- <widget class="RollupWidget" name="MapGUI">
+ <widget class="RollupContents" name="MapGUI">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -339,7 +339,7 @@
         </url>
        </property>
       </widget>
-      <widget class="QWebEngineView" name="web" native="true">
+      <widget class="QWebEngineView" name="web">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -365,9 +365,9 @@
    <header location="global">QtQuickWidgets/QQuickWidget</header>
   </customwidget>
   <customwidget>
-   <class>RollupWidget</class>
+   <class>QWebEngineView</class>
    <extends>QWidget</extends>
-   <header>gui/rollupwidget.h</header>
+   <header location="global">QtWebEngineWidgets/QWebEngineView</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -376,9 +376,9 @@
    <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
-   <class>QWebEngineView</class>
+   <class>RollupContents</class>
    <extends>QWidget</extends>
-   <header location="global">QWebEngineView</header>
+   <header>gui/rollupcontents.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

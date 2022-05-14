@@ -37,6 +37,7 @@ namespace SWGSDRangel
     class SWGChannelSettings;
     class SWGChannelReport;
     class SWGChannelActions;
+    class SWGWorkspaceInfo;
 }
 
 class SDRBASE_API ChannelAPI : public QObject {
@@ -52,6 +53,8 @@ public:
     ChannelAPI(const QString& name, StreamType streamType);
     virtual ~ChannelAPI() {}
     virtual void destroy() = 0;
+    virtual void setDeviceAPI(DeviceAPI*) = 0;
+    virtual DeviceAPI *getDeviceAPI() = 0;
 
     virtual void getIdentifier(QString& id) = 0;
     virtual QString getIdentifier() const = 0;
@@ -119,6 +122,17 @@ public:
         errorMessage = "Not implemented"; return 501;
     }
 
+    /**
+     * API adapter for the channel UI workspace GET requests
+     */
+    virtual int webapiWorkspaceGet(
+            SWGSDRangel::SWGWorkspaceInfo& query,
+            QString& errorMessage)
+    {
+        (void) query;
+        errorMessage = "Not implemented"; return 501;
+    }
+
     int getIndexInDeviceSet() const { return m_indexInDeviceSet; }
 
     void setIndexInDeviceSet(int indexInDeviceSet)
@@ -129,8 +143,6 @@ public:
 
     int getDeviceSetIndex() const { return m_deviceSetIndex; }
     void setDeviceSetIndex(int deviceSetIndex) { m_deviceSetIndex = deviceSetIndex; }
-    DeviceAPI *getDeviceAPI() { return m_deviceAPI; }
-    void setDeviceAPI(DeviceAPI *deviceAPI) { m_deviceAPI = deviceAPI; }
     uint64_t getUID() const { return m_uid; }
 
     // MIMO support
@@ -167,7 +179,6 @@ private:
 
     int m_indexInDeviceSet;
     int m_deviceSetIndex;
-    DeviceAPI *m_deviceAPI;
     uint64_t m_uid;
 
 signals:

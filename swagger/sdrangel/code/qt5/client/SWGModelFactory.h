@@ -54,6 +54,7 @@
 #include "SWGBFMDemodReport.h"
 #include "SWGBFMDemodSettings.h"
 #include "SWGBandwidth.h"
+#include "SWGBase64Blob.h"
 #include "SWGBeamSteeringCWModSettings.h"
 #include "SWGBladeRF1InputSettings.h"
 #include "SWGBladeRF1OutputSettings.h"
@@ -80,6 +81,11 @@
 #include "SWGChirpChatModSettings.h"
 #include "SWGCommand.h"
 #include "SWGComplex.h"
+#include "SWGConfigurationGroup.h"
+#include "SWGConfigurationIdentifier.h"
+#include "SWGConfigurationImportExport.h"
+#include "SWGConfigurationItem.h"
+#include "SWGConfigurations.h"
 #include "SWGDABDemodSettings.h"
 #include "SWGDATVDemodReport.h"
 #include "SWGDATVDemodSettings.h"
@@ -111,12 +117,12 @@
 #include "SWGFeaturePresets.h"
 #include "SWGFeatureReport.h"
 #include "SWGFeatureSet.h"
-#include "SWGFeatureSetList.h"
 #include "SWGFeatureSetPreset.h"
 #include "SWGFeatureSettings.h"
 #include "SWGFileInputReport.h"
 #include "SWGFileInputSettings.h"
 #include "SWGFileOutputSettings.h"
+#include "SWGFilePath.h"
 #include "SWGFileSinkActions.h"
 #include "SWGFileSinkReport.h"
 #include "SWGFileSinkSettings.h"
@@ -303,8 +309,6 @@
 #include "SWGUSRPOutputReport.h"
 #include "SWGUSRPOutputSettings.h"
 #include "SWGVORDemodReport.h"
-#include "SWGVORDemodSCReport.h"
-#include "SWGVORDemodSCSettings.h"
 #include "SWGVORDemodSettings.h"
 #include "SWGVORLocalizerActions.h"
 #include "SWGVORLocalizerReport.h"
@@ -313,6 +317,7 @@
 #include "SWGWFMDemodSettings.h"
 #include "SWGWFMModReport.h"
 #include "SWGWFMModSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGXtrxInputReport.h"
 #include "SWGXtrxInputSettings.h"
 #include "SWGXtrxMIMOReport.h"
@@ -523,6 +528,11 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGBase64Blob").compare(type) == 0) {
+      SWGBase64Blob *obj = new SWGBase64Blob();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGBeamSteeringCWModSettings").compare(type) == 0) {
       SWGBeamSteeringCWModSettings *obj = new SWGBeamSteeringCWModSettings();
       obj->init();
@@ -650,6 +660,31 @@ namespace SWGSDRangel {
     }
     if(QString("SWGComplex").compare(type) == 0) {
       SWGComplex *obj = new SWGComplex();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGConfigurationGroup").compare(type) == 0) {
+      SWGConfigurationGroup *obj = new SWGConfigurationGroup();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGConfigurationIdentifier").compare(type) == 0) {
+      SWGConfigurationIdentifier *obj = new SWGConfigurationIdentifier();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGConfigurationImportExport").compare(type) == 0) {
+      SWGConfigurationImportExport *obj = new SWGConfigurationImportExport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGConfigurationItem").compare(type) == 0) {
+      SWGConfigurationItem *obj = new SWGConfigurationItem();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGConfigurations").compare(type) == 0) {
+      SWGConfigurations *obj = new SWGConfigurations();
       obj->init();
       return obj;
     }
@@ -808,11 +843,6 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
-    if(QString("SWGFeatureSetList").compare(type) == 0) {
-      SWGFeatureSetList *obj = new SWGFeatureSetList();
-      obj->init();
-      return obj;
-    }
     if(QString("SWGFeatureSetPreset").compare(type) == 0) {
       SWGFeatureSetPreset *obj = new SWGFeatureSetPreset();
       obj->init();
@@ -835,6 +865,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGFileOutputSettings").compare(type) == 0) {
       SWGFileOutputSettings *obj = new SWGFileOutputSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGFilePath").compare(type) == 0) {
+      SWGFilePath *obj = new SWGFilePath();
       obj->init();
       return obj;
     }
@@ -1768,16 +1803,6 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
-    if(QString("SWGVORDemodSCReport").compare(type) == 0) {
-      SWGVORDemodSCReport *obj = new SWGVORDemodSCReport();
-      obj->init();
-      return obj;
-    }
-    if(QString("SWGVORDemodSCSettings").compare(type) == 0) {
-      SWGVORDemodSCSettings *obj = new SWGVORDemodSCSettings();
-      obj->init();
-      return obj;
-    }
     if(QString("SWGVORDemodSettings").compare(type) == 0) {
       SWGVORDemodSettings *obj = new SWGVORDemodSettings();
       obj->init();
@@ -1815,6 +1840,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGWFMModSettings").compare(type) == 0) {
       SWGWFMModSettings *obj = new SWGWFMModSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGWorkspaceInfo").compare(type) == 0) {
+      SWGWorkspaceInfo *obj = new SWGWorkspaceInfo();
       obj->init();
       return obj;
     }

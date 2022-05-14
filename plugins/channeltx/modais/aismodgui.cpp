@@ -25,6 +25,7 @@
 #include "dsp/spectrumvis.h"
 #include "dsp/scopevis.h"
 #include "dsp/glscopesettings.h"
+#include "dsp/dspcommands.h"
 #include "device/deviceuiset.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
@@ -96,6 +97,16 @@ bool AISModGUI::handleMessage(const Message& message)
         ui->message->setText(m_settings.m_data);
         return true;
     }
+    else if (DSPSignalNotification::match(message))
+    {
+        const DSPSignalNotification& notif = (const DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getCenterFrequency();
+        m_basebandSampleRate = notif.getSampleRate();
+        ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
+        return true;
+    }
     else
     {
         return false;
@@ -127,6 +138,7 @@ void AISModGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -331,7 +343,18 @@ void AISModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    RollupContents *rollupContents = getRollupContents();
+
+    if (rollupContents->hasExpandableWidgets()) {
+        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
+    } else {
+        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Fixed);
+    }
+
+    int h = rollupContents->height() + getAdditionalHeight();
+    resize(width(), h);
+
+    rollupContents->saveState(m_rollupState);
     applySettings();
 }
 
@@ -345,10 +368,17 @@ void AISModGUI::onMenuDialogCalled(const QPoint &p)
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
         dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
         dialog.setReverseAPIChannelIndex(m_settings.m_reverseAPIChannelIndex);
+        dialog.setDefaultTitle(m_displayedName);
+
+        if (m_deviceUISet->m_deviceMIMOEngine)
+        {
+            dialog.setNumberOfStreams(m_aisMod->getNumberOfDeviceStreams());
+            dialog.setStreamIndex(m_settings.m_streamIndex);
+        }
+
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
         m_settings.m_title = m_channelMarker.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
@@ -358,22 +388,17 @@ void AISModGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
-        applySettings();
-    }
-    else if ((m_contextMenuType == ContextMenuStreamSettings) && (m_deviceUISet->m_deviceMIMOEngine))
-    {
-        DeviceStreamSelectionDialog dialog(this);
-        dialog.setNumberOfStreams(m_aisMod->getNumberOfDeviceStreams());
-        dialog.setStreamIndex(m_settings.m_streamIndex);
-        dialog.move(p);
-        dialog.exec();
+        if (m_deviceUISet->m_deviceMIMOEngine)
+        {
+            m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
+            m_channelMarker.clearStreamIndexes();
+            m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
+            updateIndexLabel();
+        }
 
-        m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
-        m_channelMarker.clearStreamIndexes();
-        m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
-        displayStreamIndex();
         applySettings();
     }
 
@@ -386,13 +411,17 @@ AISModGUI::AISModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_pluginAPI(pluginAPI),
     m_deviceUISet(deviceUISet),
     m_channelMarker(this),
+    m_deviceCenterFrequency(0),
+    m_basebandSampleRate(1),
     m_doApplySettings(true)
 {
-    ui->setupUi(this);
-    m_helpURL = "plugins/channeltx/modais/readme.md";
     setAttribute(Qt::WA_DeleteOnClose, true);
-
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    m_helpURL = "plugins/channeltx/modais/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_aisMod = (AISMod*) channelTx;
@@ -462,7 +491,6 @@ AISModGUI::AISModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_channelMarker.setVisible(true); // activate signal on the last setting only
 
     m_deviceUISet->addChannelMarker(&m_channelMarker);
-    m_deviceUISet->addRollupWidget(this);
 
     connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
 
@@ -478,6 +506,7 @@ AISModGUI::AISModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     ui->spectrumContainer->setVisible(false);
 
     displaySettings();
+    makeUIConnections();
     applySettings();
 }
 
@@ -518,7 +547,8 @@ void AISModGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
-    displayStreamIndex();
+    setTitle(m_channelMarker.getTitle());
+    updateIndexLabel();
 
     blockApplySettings(true);
 
@@ -552,27 +582,21 @@ void AISModGUI::displaySettings()
     ui->heading->setValue(m_settings.m_heading);
     ui->message->setText(m_settings.m_data);
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
-void AISModGUI::displayStreamIndex()
-{
-    if (m_deviceUISet->m_deviceMIMOEngine) {
-        setStreamIndicator(tr("%1").arg(m_settings.m_streamIndex));
-    } else {
-        setStreamIndicator("S"); // single channel indicator
-    }
-}
-
-void AISModGUI::leaveEvent(QEvent*)
+void AISModGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void AISModGUI::enterEvent(QEvent*)
+void AISModGUI::enterEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void AISModGUI::tick()
@@ -580,4 +604,37 @@ void AISModGUI::tick()
     double powDb = CalcDb::dbPower(m_aisMod->getMagSq());
     m_channelPowerDbAvg(powDb);
     ui->channelPower->setText(tr("%1 dB").arg(m_channelPowerDbAvg.asDouble(), 0, 'f', 1));
+}
+
+void AISModGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &AISModGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->mode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AISModGUI::on_mode_currentIndexChanged);
+    QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &AISModGUI::on_rfBW_valueChanged);
+    QObject::connect(ui->fmDev, &QSlider::valueChanged, this, &AISModGUI::on_fmDev_valueChanged);
+    QObject::connect(ui->bt, &QSlider::valueChanged, this, &AISModGUI::on_bt_valueChanged);
+    QObject::connect(ui->gain, &QDial::valueChanged, this, &AISModGUI::on_gain_valueChanged);
+    QObject::connect(ui->channelMute, &QToolButton::toggled, this, &AISModGUI::on_channelMute_toggled);
+    QObject::connect(ui->txButton, &QPushButton::clicked, this, &AISModGUI::on_txButton_clicked);
+    QObject::connect(ui->encode, &QToolButton::clicked, this, &AISModGUI::on_encode_clicked);
+    QObject::connect(ui->msgId, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AISModGUI::on_msgId_currentIndexChanged);
+    QObject::connect(ui->mmsi, &QLineEdit::editingFinished, this, &AISModGUI::on_mmsi_editingFinished);
+    QObject::connect(ui->status, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AISModGUI::on_status_currentIndexChanged);
+    QObject::connect(ui->latitude, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &AISModGUI::on_latitude_valueChanged);
+    QObject::connect(ui->longitude, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &AISModGUI::on_longitude_valueChanged);
+    QObject::connect(ui->insertPosition, &QToolButton::clicked, this, &AISModGUI::on_insertPosition_clicked);
+    QObject::connect(ui->course, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &AISModGUI::on_course_valueChanged);
+    QObject::connect(ui->speed, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &AISModGUI::on_speed_valueChanged);
+    QObject::connect(ui->heading, QOverload<int>::of(&QSpinBox::valueChanged), this, &AISModGUI::on_heading_valueChanged);
+    QObject::connect(ui->message, &QLineEdit::editingFinished, this, &AISModGUI::on_message_editingFinished);
+    QObject::connect(ui->message, &QLineEdit::returnPressed, this, &AISModGUI::on_message_returnPressed);
+    QObject::connect(ui->repeat, &ButtonSwitch::toggled, this, &AISModGUI::on_repeat_toggled);
+    QObject::connect(ui->udpEnabled, &QCheckBox::clicked, this, &AISModGUI::on_udpEnabled_clicked);
+    QObject::connect(ui->udpAddress, &QLineEdit::editingFinished, this, &AISModGUI::on_udpAddress_editingFinished);
+    QObject::connect(ui->udpPort, &QLineEdit::editingFinished, this, &AISModGUI::on_udpPort_editingFinished);
+}
+
+void AISModGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

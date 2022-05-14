@@ -65,6 +65,8 @@ When installed the Red Pitaya SoapySDR plugin lists a Red Pitaya device even if 
 
 <h2>Interface</h2>
 
+The top and bottom bars of the device window are described [here](../../../sdrgui/device/readme.md)
+
 ![SoapySDR input plugin GUI](../../../doc/img/SoapySDROutput_plugin1.png)
 
 The top part described by number tags is common for all devices. The bottom part under the "A" tag depends on the SoapySDR device implementation. The corresponding widgets are stacked vertically inside a scrollable area as there may be many controls depending on how the device interface is implemented in SoapySDR. Move the slider on the right to see all parameters available.

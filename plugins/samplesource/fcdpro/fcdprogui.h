@@ -49,7 +49,6 @@ public:
 private:
 	Ui::FCDProGui* ui;
 
-	DeviceUISet* m_deviceUISet;
 	bool m_doApplySettings;
 	bool m_forceSettings;
 	FCDProSettings m_settings;
@@ -68,6 +67,10 @@ private:
 	void updateSampleRateAndFrequency();
     void updateFrequencyLimits();
 	bool handleMessage(const Message& message);
+    void makeUIConnections();
+
+protected:
+    void resizeEvent(QResizeEvent* size);
 
 private slots:
     void handleInputMessages();

@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>AntennaToolsGUI</class>
- <widget class="RollupWidget" name="AntennaToolsGUI">
+ <widget class="RollupContents" name="AntennaToolsGUI">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>394</width>
-    <height>523</height>
+    <width>360</width>
+    <height>584</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -19,7 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>360</width>
-    <height>0</height>
+    <height>584</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>560</width>
+    <height>584</height>
    </size>
   </property>
   <property name="font">
@@ -37,10 +43,10 @@
   <widget class="QTabWidget" name="tabWidget">
    <property name="geometry">
     <rect>
-     <x>16</x>
-     <y>19</y>
+     <x>0</x>
+     <y>0</y>
      <width>371</width>
-     <height>481</height>
+     <height>581</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -53,7 +59,7 @@
     <string>Calculators</string>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="dipoleTab">
     <attribute name="title">
@@ -64,7 +70,7 @@
       <widget class="QComboBox" name="dipoleFrequencySelect">
        <property name="minimumSize">
         <size>
-         <width>94</width>
+         <width>90</width>
          <height>0</height>
         </size>
        </property>
@@ -260,7 +266,7 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>94</width>
+         <width>90</width>
          <height>0</height>
         </size>
        </property>
@@ -503,9 +509,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>RollupWidget</class>
+   <class>RollupContents</class>
    <extends>QWidget</extends>
-   <header>gui/rollupwidget.h</header>
+   <header>gui/rollupcontents.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

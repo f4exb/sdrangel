@@ -10,6 +10,8 @@ The noise figure will vary with frequency and gain settings. Typically, the nois
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![Noise figure plugin GUI](../../../doc/img/NoiseFigure_plugin.png)
 
 <h3>1: Measurement frequency shift from center</h3>

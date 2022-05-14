@@ -22,12 +22,12 @@
 #include <QString>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QResizeEvent>
 
 #include "ui_testsourcegui.h"
 #include "plugin/pluginapi.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
-#include "gui/crightclickenabler.h"
 #include "gui/basicdevicesettingsdialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
@@ -42,7 +42,6 @@
 TestSourceGui::TestSourceGui(DeviceUISet *deviceUISet, QWidget* parent) :
     DeviceGUI(parent),
     ui(new Ui::TestSourceGui),
-    m_deviceUISet(deviceUISet),
     m_settings(),
     m_doApplySettings(true),
     m_forceSettings(true),
@@ -51,9 +50,14 @@ TestSourceGui::TestSourceGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_lastEngineState(DeviceAPI::StNotStarted)
 {
     qDebug("TestSourceGui::TestSourceGui");
+    m_deviceUISet = deviceUISet;
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_sampleSource = m_deviceUISet->m_deviceAPI->getSampleSource();
 
-    ui->setupUi(this);
+    ui->setupUi(getContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    getContents()->setStyleSheet("#TestSourceGui { background-color: rgb(64, 64, 64); }");
+    m_helpURL = "plugins/samplesource/testsource/readme.md";
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->centerFrequency->setValueRange(7, 0, 9999999);
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
@@ -63,6 +67,7 @@ TestSourceGui::TestSourceGui(DeviceUISet *deviceUISet, QWidget* parent) :
     ui->frequencyShiftLabel->setText(QString("%1").arg(QChar(0x94, 0x03)));
 
     displaySettings();
+    makeUIConnections();
 
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
     connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
@@ -71,8 +76,7 @@ TestSourceGui::TestSourceGui(DeviceUISet *deviceUISet, QWidget* parent) :
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
     m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);
 
-    CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStop);
-    connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 }
 
 TestSourceGui::~TestSourceGui()
@@ -108,6 +112,12 @@ bool TestSourceGui::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void TestSourceGui::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 void TestSourceGui::on_startStop_toggled(bool checked)
@@ -487,19 +497,46 @@ void TestSourceGui::updateSampleRateAndFrequency()
 
 void TestSourceGui::openDeviceSettingsDialog(const QPoint& p)
 {
-    BasicDeviceSettingsDialog dialog(this);
-    dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
-    dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
-    dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
-    dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
+    if (m_contextMenuType == ContextMenuDeviceSettings)
+    {
+        BasicDeviceSettingsDialog dialog(this);
+        dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
+        dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
+        dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
+        dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
 
-    dialog.move(p);
-    dialog.exec();
+        dialog.move(p);
+        dialog.exec();
 
-    m_settings.m_useReverseAPI = dialog.useReverseAPI();
-    m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
-    m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
-    m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settings.m_useReverseAPI = dialog.useReverseAPI();
+        m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
+        m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
+        m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
-    sendSettings();
+        sendSettings();
+    }
+
+    resetContextMenuType();
+}
+
+void TestSourceGui::makeUIConnections()
+{
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &TestSourceGui::on_startStop_toggled);
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &TestSourceGui::on_centerFrequency_changed);
+    QObject::connect(ui->autoCorr, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TestSourceGui::on_autoCorr_currentIndexChanged);
+    QObject::connect(ui->frequencyShift, &ValueDialZ::changed, this, &TestSourceGui::on_frequencyShift_changed);
+    QObject::connect(ui->decimation, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TestSourceGui::on_decimation_currentIndexChanged);
+    QObject::connect(ui->fcPos, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TestSourceGui::on_fcPos_currentIndexChanged);
+    QObject::connect(ui->sampleRate, &ValueDial::changed, this, &TestSourceGui::on_sampleRate_changed);
+    QObject::connect(ui->sampleSize, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TestSourceGui::on_sampleSize_currentIndexChanged);
+    QObject::connect(ui->amplitudeCoarse, &QSlider::valueChanged, this, &TestSourceGui::on_amplitudeCoarse_valueChanged);
+    QObject::connect(ui->amplitudeFine, &QSlider::valueChanged, this, &TestSourceGui::on_amplitudeFine_valueChanged);
+    QObject::connect(ui->modulation, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TestSourceGui::on_modulation_currentIndexChanged);
+    QObject::connect(ui->modulationFrequency, &QDial::valueChanged, this, &TestSourceGui::on_modulationFrequency_valueChanged);
+    QObject::connect(ui->amModulation, &QDial::valueChanged, this, &TestSourceGui::on_amModulation_valueChanged);
+    QObject::connect(ui->fmDeviation, &QDial::valueChanged, this, &TestSourceGui::on_fmDeviation_valueChanged);
+    QObject::connect(ui->dcBias, &QSlider::valueChanged, this, &TestSourceGui::on_dcBias_valueChanged);
+    QObject::connect(ui->iBias, &QSlider::valueChanged, this, &TestSourceGui::on_iBias_valueChanged);
+    QObject::connect(ui->qBias, &QSlider::valueChanged, this, &TestSourceGui::on_qBias_valueChanged);
+    QObject::connect(ui->phaseImbalance, &QSlider::valueChanged, this, &TestSourceGui::on_phaseImbalance_valueChanged);
 }

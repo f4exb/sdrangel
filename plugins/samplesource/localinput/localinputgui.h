@@ -47,10 +47,12 @@ public:
 	bool deserialize(const QByteArray& data);
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 
+protected:
+    void resizeEvent(QResizeEvent* size);
+
 private:
 	Ui::LocalInputGui* ui;
 
-	DeviceUISet* m_deviceUISet;
     LocalInputSettings m_settings;        //!< current settings
 	LocalInput* m_sampleSource;
     bool m_acquisition;
@@ -100,6 +102,7 @@ private:
     void sendSettings();
 	void updateSampleRateAndFrequency();
 	bool handleMessage(const Message& message);
+    void makeUIConnections();
 
 private slots:
     void handleInputMessages();

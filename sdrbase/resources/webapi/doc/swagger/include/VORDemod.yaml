@@ -1,6 +1,12 @@
 VORDemodSettings:
   description: VORDemod
   properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    navId:
+      description: VOR unique identifier when set by VOR localizer feature
+      type: integer
     squelch:
       description: power squelch threshold in decibels
       type: number
@@ -33,9 +39,6 @@ VORDemodSettings:
     identThreshold:
       description: Morse code ident threshold (linear SNR)
       type: integer
-    magDecAdjust:
-      description: Adjust radial lines on map for magnetic declination of VOR
-      type: integer
     channelMarker:
       $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
     rollupState:
@@ -53,3 +56,42 @@ VORDemodReport:
       type: integer
     audioSampleRate:
       type: integer
+    volume:
+      type: number
+      format: float
+    navId:
+      description: VOR unique identifier when set by VOR localizer feature
+      type: integer
+    radial:
+      description: current detected radial (degrees)
+      type: number
+      format: float
+    refMag:
+      description: current reference signal magnitude (dB)
+      type: number
+      format: float
+    varMag:
+      description: current variable signal magnitude (dB)
+      type: number
+      format: float
+    validRadial:
+      type: integer
+      description: >
+        Radial validity estimation
+          * 0 - Radial is invalid
+          * 1 - Radial is valid
+    validRefMag:
+      type: integer
+      description: >
+        Reference signal magnitude validity
+          * 0 - Magnitude below threshold
+          * 1 - Magnitude above threshold
+    validVarMag:
+      type: integer
+      description: >
+        Variable signal magnitude validity
+          * 0 - Magnitude below threshold
+          * 1 - Magnitude above threshold
+    morseIdent:
+      description: current identification morse code transcript
+      type: string

@@ -14,6 +14,8 @@ Note: if you use binary distributions this is included in the bundle.
 
 <h2>Interface</h2>
 
+The top and bottom bars of the device window are described [here](../../../sdrgui/device/readme.md)
+
 For controls 10 to 13 to be effective you will need a recent version (up to date in January 2019) of both libairspy and the firmware.
 
 ![AirspyHF input plugin GUI](../../../doc/img/AirspyHFInput_plugin.png)

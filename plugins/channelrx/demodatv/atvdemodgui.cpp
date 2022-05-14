@@ -18,12 +18,14 @@
 
 #include <QDockWidget>
 #include <QMainWindow>
+#include <QResizeEvent>
 
 #include "atvdemodgui.h"
 
 #include "device/deviceuiset.h"
 #include "dsp/scopevis.h"
 #include "dsp/glscopesettings.h"
+#include "gui/basicchannelsettingsdialog.h"
 #include "ui_atvdemodgui.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
@@ -75,6 +77,14 @@ bool ATVDemodGUI::deserialize(const QByteArray& data)
     }
 }
 
+void ATVDemodGUI::resizeEvent(QResizeEvent* size)
+{
+    int maxWidth = getRollupContents()->maximumWidth();
+    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
+    resize(width() < maxWidth ? width() : maxWidth, minHeight);
+    size->accept();
+}
+
 void ATVDemodGUI::displaySettings()
 {
     m_channelMarker.blockSignals(true);
@@ -86,7 +96,8 @@ void ATVDemodGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
-    displayStreamIndex();
+    setTitle(m_channelMarker.getTitle());
+    updateIndexLabel();
 
     m_doApplySettings = false;
 
@@ -119,18 +130,10 @@ void ATVDemodGUI::displaySettings()
     ui->amScaleOffsetText->setText(QString("%1").arg(m_settings.m_amOffsetFactor));
 
     applySampleRate();
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
 
     m_doApplySettings = true;
-}
-
-void ATVDemodGUI::displayStreamIndex()
-{
-    if (m_deviceUISet->m_deviceMIMOEngine) {
-        setStreamIndicator(tr("%1").arg(m_settings.m_streamIndex));
-    } else {
-        setStreamIndicator("S"); // single channel indicator
-    }
 }
 
 void ATVDemodGUI::displayRFBandwidths()
@@ -167,6 +170,10 @@ bool ATVDemodGUI::handleMessage(const Message& message)
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
         m_basebandSampleRate = notif.getSampleRate();
+        m_deviceCenterFrequency = notif.getCenterFrequency();
+        ui->deltaFrequency->setValueRange(false, 8, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
         applySampleRate();
 
         return true;
@@ -203,12 +210,59 @@ void ATVDemodGUI::handleSourceMessages()
     }
 }
 
+void ATVDemodGUI::onMenuDialogCalled(const QPoint &p)
+{
+    if (m_contextMenuType == ContextMenuChannelSettings)
+    {
+        BasicChannelSettingsDialog dialog(&m_channelMarker, this);
+        dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
+        dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
+        dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
+        dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
+        dialog.setReverseAPIChannelIndex(m_settings.m_reverseAPIChannelIndex);
+        dialog.setDefaultTitle(m_displayedName);
+
+        if (m_deviceUISet->m_deviceMIMOEngine)
+        {
+            dialog.setNumberOfStreams(m_atvDemod->getNumberOfDeviceStreams());
+            dialog.setStreamIndex(m_settings.m_streamIndex);
+        }
+
+        dialog.move(p);
+        dialog.exec();
+
+        m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
+        m_settings.m_title = m_channelMarker.getTitle();
+        m_settings.m_useReverseAPI = dialog.useReverseAPI();
+        m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
+        m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
+        m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
+
+        setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
+        setTitleColor(m_settings.m_rgbColor);
+
+        if (m_deviceUISet->m_deviceMIMOEngine)
+        {
+            m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
+            m_channelMarker.clearStreamIndexes();
+            m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
+            updateIndexLabel();
+        }
+
+        applySettings();
+    }
+
+    resetContextMenuType();
+}
+
 void ATVDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -218,14 +272,19 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
         m_pluginAPI(objPluginAPI),
         m_deviceUISet(deviceUISet),
         m_channelMarker(this),
+        m_deviceCenterFrequency(0),
         m_doApplySettings(false),
         m_intTickCount(0),
         m_basebandSampleRate(48000)
 {
-    ui->setupUi(this);
-    m_helpURL = "plugins/channelrx/demodatv/readme.md";
     setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    m_helpURL = "plugins/channelrx/demodatv/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_atvDemod = (ATVDemod*) rxChannel;
     m_atvDemod->setMessageQueueToGUI(getInputMessageQueue());
@@ -253,7 +312,6 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
     setTitleColor(m_channelMarker.getColor());
 
     m_deviceUISet->addChannelMarker(&m_channelMarker);
-    m_deviceUISet->addRollupWidget(this);
 
     ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
 
@@ -278,6 +336,8 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
 
     QChar delta = QChar(0x94, 0x03);
     ui->fmDeviationLabel->setText(delta);
+
+    makeUIConnections();
 }
 
 ATVDemodGUI::~ATVDemodGUI()
@@ -358,14 +418,16 @@ void ATVDemodGUI::setRFFiltersSlidersRange(int sampleRate)
     ui->rfOppBWText->setText(QString("%1k").arg((ui->rfOppBW->value() * m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
 }
 
-void ATVDemodGUI::leaveEvent(QEvent*)
+void ATVDemodGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void ATVDemodGUI::enterEvent(QEvent*)
+void ATVDemodGUI::enterEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void ATVDemodGUI::tick()
@@ -495,6 +557,7 @@ void ATVDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_settings.m_inputFrequencyOffset = value;
     m_channelMarker.setCenterFrequency(value);
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -563,4 +626,33 @@ void ATVDemodGUI::topTimeUpdate()
         ui->topTimeText->setText(tr("%1 ms").arg(nominalTopTime * 1000.0, 0, 'f', 2));
     else
         ui->topTimeText->setText(tr("%1 s").arg(nominalTopTime * 1.0, 0, 'f', 2));
+}
+
+void ATVDemodGUI::makeUIConnections()
+{
+    QObject::connect(ui->synchLevel, &QSlider::valueChanged, this, &ATVDemodGUI::on_synchLevel_valueChanged);
+    QObject::connect(ui->blackLevel, &QSlider::valueChanged, this, &ATVDemodGUI::on_blackLevel_valueChanged);
+    QObject::connect(ui->hSync, &QCheckBox::clicked, this, &ATVDemodGUI::on_hSync_clicked);
+    QObject::connect(ui->vSync, &QCheckBox::clicked, this, &ATVDemodGUI::on_vSync_clicked);
+    QObject::connect(ui->invertVideo, &QCheckBox::clicked, this, &ATVDemodGUI::on_invertVideo_clicked);
+    QObject::connect(ui->halfImage, &QCheckBox::clicked, this, &ATVDemodGUI::on_halfImage_clicked);
+    QObject::connect(ui->modulation, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ATVDemodGUI::on_modulation_currentIndexChanged);
+    QObject::connect(ui->nbLines, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ATVDemodGUI::on_nbLines_currentIndexChanged);
+    QObject::connect(ui->fps, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ATVDemodGUI::on_fps_currentIndexChanged);
+    QObject::connect(ui->standard, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ATVDemodGUI::on_standard_currentIndexChanged);
+    QObject::connect(ui->reset, &QPushButton::clicked, this, &ATVDemodGUI::on_reset_clicked);
+    QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &ATVDemodGUI::on_rfBW_valueChanged);
+    QObject::connect(ui->rfOppBW, &QSlider::valueChanged, this, &ATVDemodGUI::on_rfOppBW_valueChanged);
+    QObject::connect(ui->rfFiltering, &ButtonSwitch::toggled, this, &ATVDemodGUI::on_rfFiltering_toggled);
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &ATVDemodGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->bfo, &QDial::valueChanged, this, &ATVDemodGUI::on_bfo_valueChanged);
+    QObject::connect(ui->fmDeviation, &QDial::valueChanged, this, &ATVDemodGUI::on_fmDeviation_valueChanged);
+    QObject::connect(ui->amScaleFactor, &QDial::valueChanged, this, &ATVDemodGUI::on_amScaleFactor_valueChanged);
+    QObject::connect(ui->amScaleOffset, &QDial::valueChanged, this, &ATVDemodGUI::on_amScaleOffset_valueChanged);
+    QObject::connect(ui->screenTabWidget, &QTabWidget::currentChanged, this, &ATVDemodGUI::on_screenTabWidget_currentChanged);
+}
+
+void ATVDemodGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

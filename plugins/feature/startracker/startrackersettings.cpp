@@ -82,6 +82,7 @@ void StarTrackerSettings::resetToDefaults()
     m_weatherUpdatePeriod = 60;
     m_drawSunOnSkyTempChart = true;
     m_drawMoonOnSkyTempChart = true;
+    m_workspaceIndex = 0;
 }
 
 QByteArray StarTrackerSettings::serialize() const
@@ -135,6 +136,9 @@ QByteArray StarTrackerSettings::serialize() const
     if (m_rollupState) {
         s.writeBlob(44, m_rollupState->serialize());
     }
+
+    s.writeS32(45, m_workspaceIndex);
+    s.writeBlob(46, m_geometryBytes);
 
     return s.final();
 }
@@ -220,6 +224,9 @@ bool StarTrackerSettings::deserialize(const QByteArray& data)
             d.readBlob(44, &bytetmp);
             m_rollupState->deserialize(bytetmp);
         }
+
+        d.readS32(45, &m_workspaceIndex, 0);
+        d.readBlob(46, &m_geometryBytes);
 
         return true;
     }

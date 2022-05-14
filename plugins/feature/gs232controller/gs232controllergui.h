@@ -45,6 +45,13 @@ public:
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
+    virtual void setWorkspaceIndex(int index);
+    virtual int getWorkspaceIndex() const { return m_settings.m_workspaceIndex; }
+    virtual void setGeometryBytes(const QByteArray& blob) { m_settings.m_geometryBytes = blob; }
+    virtual QByteArray getGeometryBytes() const { return m_settings.m_geometryBytes; }
+
+protected:
+    void resizeEvent(QResizeEvent* size);
 
 private:
     Ui::GS232ControllerGUI* ui;
@@ -71,9 +78,7 @@ private:
     void updatePipeList(const QList<GS232ControllerSettings::AvailableChannelOrFeature>& sources);
     void updateSerialPortList();
     bool handleMessage(const Message& message);
-
-    void leaveEvent(QEvent*);
-    void enterEvent(QEvent*);
+    void makeUIConnections();
 
 private slots:
     void onMenuDialogCalled(const QPoint &p);

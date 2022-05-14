@@ -22,6 +22,7 @@
 #include <QThread>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGChannelReport.h"
 #include "SWGUDPSourceReport.h"
 
@@ -80,6 +81,18 @@ UDPSource::~UDPSource()
     m_deviceAPI->removeChannelSource(this);
     delete m_basebandSource;
     delete m_thread;
+}
+
+void UDPSource::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSourceAPI(this);
+        m_deviceAPI->removeChannelSource(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addChannelSource(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
 }
 
 void UDPSource::start()
@@ -145,6 +158,10 @@ bool UDPSource::handleMessage(const Message& cmd)
         DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
         qDebug() << "UDPSource::handleMessage: DSPSignalNotification";
         m_basebandSource->getInputMessageQueue()->push(rep);
+        // Forward to GUI if any
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
+        }
 
         return true;
     }
@@ -321,6 +338,15 @@ int UDPSource::webapiSettingsGet(
     response.setUdpSourceSettings(new SWGSDRangel::SWGUDPSourceSettings());
     response.getUdpSourceSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int UDPSource::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

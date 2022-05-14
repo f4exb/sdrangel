@@ -139,6 +139,8 @@ public:
 	virtual ~SpectrumVis();
 
     void setGLSpectrum(GLSpectrumInterface* glSpectrum) { m_glSpectrum = glSpectrum; }
+    void setWorkspaceIndex(int index) { m_workspaceIndex = index; }
+    int getWorkspaceIndex() const { return m_workspaceIndex; }
 
     void setScalef(Real scalef);
     void configureWSSpectrum(const QString& address, uint16_t port);
@@ -211,6 +213,7 @@ private:
 	FFTEngine* m_fft;
 	FFTWindow m_window;
     unsigned int m_fftEngineSequence;
+    int m_workspaceIndex;
 
 	std::vector<Complex> m_fftBuffer;
 	std::vector<Real> m_powerSpectrum; //!< displayable power spectrum

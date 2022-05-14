@@ -21,13 +21,13 @@
 #include <QDateTime>
 #include <QString>
 #include <QMessageBox>
+#include <QResizeEvent>
 
 #include "plugin/pluginapi.h"
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
-#include "gui/crightclickenabler.h"
 #include "gui/basicdevicesettingsdialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspdevicemimoengine.h"
@@ -47,7 +47,6 @@
 PlutoSDRMIMOGUI::PlutoSDRMIMOGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     DeviceGUI(parent),
     ui(new Ui::PlutoSDRMIMOGUI),
-    m_deviceUISet(deviceUISet),
     m_settings(),
     m_rxElseTx(true),
     m_streamIndex(0),
@@ -68,7 +67,12 @@ PlutoSDRMIMOGUI::PlutoSDRMIMOGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleRateMode(true)
 {
     qDebug("PlutoSDRMIMOGui::PlutoSDRMIMOGui");
-    ui->setupUi(this);
+    m_deviceUISet = deviceUISet;
+    setAttribute(Qt::WA_DeleteOnClose, true);
+    ui->setupUi(getContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    getContents()->setStyleSheet("#PlutoSDRMIMOGUI { background-color: rgb(64, 64, 64); }");
+    m_helpURL = "plugins/samplemimo/plutosdrmimo/readme.md";
     m_sampleMIMO = (PlutoSDRMIMO*) m_deviceUISet->m_deviceAPI->getSampleMIMO();
 
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -89,8 +93,7 @@ PlutoSDRMIMOGUI::PlutoSDRMIMOGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     ui->swDecimLabel->setText(QString::fromUtf8("S\u2193"));
     ui->lpFIRDecimationLabel->setText(QString::fromUtf8("\u2193"));
 
-    CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStopRx);
-    connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
     blockApplySettings(true);
     displaySettings();
@@ -102,6 +105,8 @@ PlutoSDRMIMOGUI::PlutoSDRMIMOGUI(DeviceUISet *deviceUISet, QWidget* parent) :
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
     m_sampleMIMO->setMessageQueueToGUI(&m_inputMessageQueue);
+
+    makeUIConnections();
 }
 
 PlutoSDRMIMOGUI::~PlutoSDRMIMOGUI()
@@ -140,6 +145,12 @@ bool PlutoSDRMIMOGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void PlutoSDRMIMOGUI::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 void PlutoSDRMIMOGUI::displaySettings()
@@ -875,19 +886,56 @@ void PlutoSDRMIMOGUI::on_sampleRateMode_toggled(bool checked)
 
 void PlutoSDRMIMOGUI::openDeviceSettingsDialog(const QPoint& p)
 {
-    BasicDeviceSettingsDialog dialog(this);
-    dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
-    dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
-    dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
-    dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
+    if (m_contextMenuType == ContextMenuDeviceSettings)
+    {
+        BasicDeviceSettingsDialog dialog(this);
+        dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
+        dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
+        dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
+        dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
 
-    dialog.move(p);
-    dialog.exec();
+        dialog.move(p);
+        dialog.exec();
 
-    m_settings.m_useReverseAPI = dialog.useReverseAPI();
-    m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
-    m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
-    m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settings.m_useReverseAPI = dialog.useReverseAPI();
+        m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
+        m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
+        m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
-    sendSettings();
+        sendSettings();
+    }
+
+    resetContextMenuType();
+}
+
+void PlutoSDRMIMOGUI::makeUIConnections()
+{
+	QObject::connect(ui->streamSide, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PlutoSDRMIMOGUI::on_streamSide_currentIndexChanged);
+	QObject::connect(ui->streamIndex, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PlutoSDRMIMOGUI::on_streamIndex_currentIndexChanged);
+	QObject::connect(ui->spectrumSide, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PlutoSDRMIMOGUI::on_spectrumSide_currentIndexChanged);
+	QObject::connect(ui->spectrumIndex, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PlutoSDRMIMOGUI::on_spectrumIndex_currentIndexChanged);
+	QObject::connect(ui->startStopRx, &ButtonSwitch::toggled, this, &PlutoSDRMIMOGUI::on_startStopRx_toggled);
+	QObject::connect(ui->startStopTx, &ButtonSwitch::toggled, this, &PlutoSDRMIMOGUI::on_startStopTx_toggled);
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &PlutoSDRMIMOGUI::on_centerFrequency_changed);
+    QObject::connect(ui->loPPM, &QSlider::valueChanged, this, &PlutoSDRMIMOGUI::on_loPPM_valueChanged);
+    QObject::connect(ui->dcOffset, &ButtonSwitch::toggled, this, &PlutoSDRMIMOGUI::on_dcOffset_toggled);
+    QObject::connect(ui->iqImbalance, &ButtonSwitch::toggled, this, &PlutoSDRMIMOGUI::on_iqImbalance_toggled);
+	QObject::connect(ui->sampleRate, &ValueDial::changed, this, &PlutoSDRMIMOGUI::on_sampleRate_changed);
+    QObject::connect(ui->sampleRateMode, &QToolButton::toggled, this, &PlutoSDRMIMOGUI::on_sampleRateMode_toggled);
+    QObject::connect(ui->fcPos, QOverload<int>::of(&QComboBox::currentIndexChanged),this, &PlutoSDRMIMOGUI::on_fcPos_currentIndexChanged);
+    QObject::connect(ui->swDecim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PlutoSDRMIMOGUI::on_swDecim_currentIndexChanged);
+    QObject::connect(ui->gainLock, &QToolButton::toggled, this, &PlutoSDRMIMOGUI::on_gainLock_toggled);
+	QObject::connect(ui->gainMode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PlutoSDRMIMOGUI::on_gainMode_currentIndexChanged);
+	QObject::connect(ui->gain, &QDial::valueChanged, this, &PlutoSDRMIMOGUI::on_gain_valueChanged);
+	QObject::connect(ui->att, &QDial::valueChanged, this, &PlutoSDRMIMOGUI::on_att_valueChanged);
+	QObject::connect(ui->transverter, &TransverterButton::clicked, this, &PlutoSDRMIMOGUI::on_transverter_clicked);
+    QObject::connect(ui->rfDCOffset, &ButtonSwitch::toggled, this, &PlutoSDRMIMOGUI::on_rfDCOffset_toggled);
+    QObject::connect(ui->bbDCOffset, &ButtonSwitch::toggled, this, &PlutoSDRMIMOGUI::on_bbDCOffset_toggled);
+    QObject::connect(ui->hwIQImbalance, &ButtonSwitch::toggled, this, &PlutoSDRMIMOGUI::on_hwIQImbalance_toggled);
+    QObject::connect(ui->lpf, &ValueDial::changed, this, &PlutoSDRMIMOGUI::on_lpf_changed);
+    QObject::connect(ui->lpFIREnable, &ButtonSwitch::toggled, this, &PlutoSDRMIMOGUI::on_lpFIREnable_toggled);
+    QObject::connect(ui->lpFIR, &ValueDial::changed, this, &PlutoSDRMIMOGUI::on_lpFIR_changed);
+    QObject::connect(ui->lpFIRDecimation, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PlutoSDRMIMOGUI::on_lpFIRDecimation_currentIndexChanged);
+    QObject::connect(ui->lpFIRGain, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PlutoSDRMIMOGUI::on_lpFIRGain_currentIndexChanged);
+    QObject::connect(ui->antenna, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PlutoSDRMIMOGUI::on_antenna_currentIndexChanged);
 }

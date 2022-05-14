@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
@@ -50,6 +51,33 @@ public:
     qint32 getAudioSampleRate();
     void setAudioSampleRate(qint32 audio_sample_rate);
 
+    float getVolume();
+    void setVolume(float volume);
+
+    qint32 getNavId();
+    void setNavId(qint32 nav_id);
+
+    float getRadial();
+    void setRadial(float radial);
+
+    float getRefMag();
+    void setRefMag(float ref_mag);
+
+    float getVarMag();
+    void setVarMag(float var_mag);
+
+    qint32 getValidRadial();
+    void setValidRadial(qint32 valid_radial);
+
+    qint32 getValidRefMag();
+    void setValidRefMag(qint32 valid_ref_mag);
+
+    qint32 getValidVarMag();
+    void setValidVarMag(qint32 valid_var_mag);
+
+    QString* getMorseIdent();
+    void setMorseIdent(QString* morse_ident);
+
 
     virtual bool isSet() override;
 
@@ -62,6 +90,33 @@ private:
 
     qint32 audio_sample_rate;
     bool m_audio_sample_rate_isSet;
+
+    float volume;
+    bool m_volume_isSet;
+
+    qint32 nav_id;
+    bool m_nav_id_isSet;
+
+    float radial;
+    bool m_radial_isSet;
+
+    float ref_mag;
+    bool m_ref_mag_isSet;
+
+    float var_mag;
+    bool m_var_mag_isSet;
+
+    qint32 valid_radial;
+    bool m_valid_radial_isSet;
+
+    qint32 valid_ref_mag;
+    bool m_valid_ref_mag_isSet;
+
+    qint32 valid_var_mag;
+    bool m_valid_var_mag_isSet;
+
+    QString* morse_ident;
+    bool m_morse_ident_isSet;
 
 };
 

@@ -142,6 +142,8 @@ public:
     PacketMod(DeviceAPI *deviceAPI);
     virtual ~PacketMod();
     virtual void destroy() { delete this; }
+    virtual void setDeviceAPI(DeviceAPI *deviceAPI);
+    virtual DeviceAPI *getDeviceAPI() { return m_deviceAPI; }
 
     virtual void start();
     virtual void stop();
@@ -171,6 +173,10 @@ public:
     virtual int webapiSettingsGet(
                 SWGSDRangel::SWGChannelSettings& response,
                 QString& errorMessage);
+
+    virtual int webapiWorkspaceGet(
+            SWGSDRangel::SWGWorkspaceInfo& response,
+            QString& errorMessage);
 
     virtual int webapiSettingsPutPatch(
                 bool force,

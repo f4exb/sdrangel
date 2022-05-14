@@ -22,12 +22,12 @@
 #include <QString>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QResizeEvent>
 
 #include "ui_sigmffileinputgui.h"
 #include "plugin/pluginapi.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
-#include "gui/crightclickenabler.h"
 #include "gui/basicdevicesettingsdialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
@@ -43,7 +43,6 @@
 SigMFFileInputGUI::SigMFFileInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
 	DeviceGUI(parent),
 	ui(new Ui::SigMFFileInputGUI),
-	m_deviceUISet(deviceUISet),
 	m_settings(),
     m_currentTrackIndex(0),
 	m_doApplySettings(true),
@@ -61,7 +60,13 @@ SigMFFileInputGUI::SigMFFileInputGUI(DeviceUISet *deviceUISet, QWidget* parent) 
 	m_enableFullNavTime(false),
 	m_lastEngineState(DeviceAPI::StNotStarted)
 {
-	ui->setupUi(this);
+    m_deviceUISet = deviceUISet;
+    setAttribute(Qt::WA_DeleteOnClose, true);
+    m_helpURL = "plugins/samplesource/sigmffileinput/readme.md";
+    QWidget *contents = getContents();
+	ui->setupUi(contents);
+    setSizePolicy(contents->sizePolicy());
+    contents->setStyleSheet("#SigMFFileInputGUI { background-color: rgb(64, 64, 64); }");
 
     ui->fileNameText->setText(m_metaFileName);
 	ui->crcLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
@@ -71,11 +76,11 @@ SigMFFileInputGUI::SigMFFileInputGUI(DeviceUISet *deviceUISet, QWidget* parent) 
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(500);
 
-    CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStop);
-    connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
 	setAccelerationCombo();
 	displaySettings();
+    makeUIConnections();
     updateStartStop();
 
 	ui->trackNavTimeSlider->setEnabled(false);
@@ -663,19 +668,39 @@ void SigMFFileInputGUI::setNumberStr(int n, QString& s)
 
 void SigMFFileInputGUI::openDeviceSettingsDialog(const QPoint& p)
 {
-    BasicDeviceSettingsDialog dialog(this);
-    dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
-    dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
-    dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
-    dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
+    if (m_contextMenuType == ContextMenuDeviceSettings)
+    {
+        BasicDeviceSettingsDialog dialog(this);
+        dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
+        dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
+        dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
+        dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
 
-    dialog.move(p);
-    dialog.exec();
+        dialog.move(p);
+        dialog.exec();
 
-    m_settings.m_useReverseAPI = dialog.useReverseAPI();
-    m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
-    m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
-    m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settings.m_useReverseAPI = dialog.useReverseAPI();
+        m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
+        m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
+        m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
-    sendSettings();
+        sendSettings();
+    }
+
+    resetContextMenuType();
+}
+
+void SigMFFileInputGUI::makeUIConnections()
+{
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &SigMFFileInputGUI::on_startStop_toggled);
+    QObject::connect(ui->infoDetails, &QPushButton::clicked, this, &SigMFFileInputGUI::on_infoDetails_clicked);
+    QObject::connect(ui->captureTable, &QTableWidget::itemSelectionChanged, this, &SigMFFileInputGUI::on_captureTable_itemSelectionChanged);
+    QObject::connect(ui->trackNavTimeSlider, &QSlider::valueChanged, this, &SigMFFileInputGUI::on_trackNavTimeSlider_valueChanged);
+    QObject::connect(ui->playTrack, &ButtonSwitch::toggled, this, &SigMFFileInputGUI::on_playTrack_toggled);
+    QObject::connect(ui->playTrackLoop, &ButtonSwitch::toggled, this, &SigMFFileInputGUI::on_playTrackLoop_toggled);
+    QObject::connect(ui->fullNavTimeSlider, &QSlider::valueChanged, this, &SigMFFileInputGUI::on_fullNavTimeSlider_valueChanged);
+    QObject::connect(ui->playFull, &ButtonSwitch::toggled, this, &SigMFFileInputGUI::on_playFull_toggled);
+    QObject::connect(ui->playFullLoop, &ButtonSwitch::toggled, this, &SigMFFileInputGUI::on_playFullLoop_toggled);
+    QObject::connect(ui->showFileDialog, &QPushButton::clicked, this, &SigMFFileInputGUI::on_showFileDialog_clicked);
+    QObject::connect(ui->acceleration, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SigMFFileInputGUI::on_acceleration_currentIndexChanged);
 }

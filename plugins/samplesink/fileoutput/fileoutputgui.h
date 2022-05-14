@@ -48,10 +48,12 @@ public:
 	bool deserialize(const QByteArray& data);
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 
+protected:
+    void resizeEvent(QResizeEvent* size);
+
 private:
 	Ui::FileOutputGui* ui;
 
-	DeviceUISet* m_deviceUISet;
 	bool m_doApplySettings;
 	bool m_forceSettings;
 	FileOutputSettings m_settings;
@@ -76,6 +78,7 @@ private:
 	void updateWithStreamTime();
 	void updateSampleRateAndFrequency();
 	bool handleMessage(const Message& message);
+    void makeUIConnections();
 
 private slots:
     void handleInputMessages();
@@ -84,6 +87,7 @@ private slots:
 	void on_startStop_toggled(bool checked);
 	void on_showFileDialog_clicked(bool checked);
 	void on_interp_currentIndexChanged(int index);
+    void openDeviceSettingsDialog(const QPoint& p);
     void updateHardware();
     void updateStatus();
 	void tick();

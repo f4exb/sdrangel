@@ -31,6 +31,7 @@
 #include <QThread>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGChannelReport.h"
 //#include "SWGDATVModReport.h"
 
@@ -95,6 +96,18 @@ DATVMod::~DATVMod()
     m_deviceAPI->removeChannelSource(this);
     delete m_basebandSource;
     delete m_thread;
+}
+
+void DATVMod::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSourceAPI(this);
+        m_deviceAPI->removeChannelSource(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addChannelSource(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
 }
 
 uint32_t DATVMod::getNumberOfDeviceStreams() const
@@ -164,6 +177,10 @@ bool DATVMod::handleMessage(const Message& cmd)
         DSPSignalNotification* rep = new DSPSignalNotification(notif);
         qDebug() << "DATVMod::handleMessage: DSPSignalNotification";
         m_basebandSource->getInputMessageQueue()->push(rep);
+        // Forward to GUI if any
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
+        }
 
         return true;
     }
@@ -353,6 +370,15 @@ int DATVMod::webapiSettingsGet(
     response.setDatvModSettings(new SWGSDRangel::SWGDATVModSettings());
     response.getDatvModSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int DATVMod::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

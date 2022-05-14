@@ -63,6 +63,8 @@ public:
     ATVDemod(DeviceAPI *deviceAPI);
 	virtual ~ATVDemod();
 	virtual void destroy() { delete this; }
+    virtual void setDeviceAPI(DeviceAPI *deviceAPI);
+    virtual DeviceAPI *getDeviceAPI() { return m_deviceAPI; }
 
     using BasebandSampleSink::feed;
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
@@ -95,6 +97,7 @@ public:
     double getMagSq() const { return m_basebandSink->getMagSq(); } //!< Beware this is scaled to 2^30
     bool getBFOLocked() { return m_basebandSink->getBFOLocked(); }
     void setVideoTabIndex(int videoTabIndex) { m_basebandSink->setVideoTabIndex(videoTabIndex); }
+    uint32_t getNumberOfDeviceStreams() const;
 
     static const char* const m_channelIdURI;
     static const char* const m_channelId;

@@ -28,10 +28,8 @@ SWGPresetImport::SWGPresetImport(QString* json) {
 }
 
 SWGPresetImport::SWGPresetImport() {
-    group_name = nullptr;
-    m_group_name_isSet = false;
-    description = nullptr;
-    m_description_isSet = false;
+    preset = nullptr;
+    m_preset_isSet = false;
     file_path = nullptr;
     m_file_path_isSet = false;
 }
@@ -42,21 +40,16 @@ SWGPresetImport::~SWGPresetImport() {
 
 void
 SWGPresetImport::init() {
-    group_name = new QString("");
-    m_group_name_isSet = false;
-    description = new QString("");
-    m_description_isSet = false;
+    preset = new SWGPresetIdentifier();
+    m_preset_isSet = false;
     file_path = new QString("");
     m_file_path_isSet = false;
 }
 
 void
 SWGPresetImport::cleanup() {
-    if(group_name != nullptr) { 
-        delete group_name;
-    }
-    if(description != nullptr) { 
-        delete description;
+    if(preset != nullptr) { 
+        delete preset;
     }
     if(file_path != nullptr) { 
         delete file_path;
@@ -74,9 +67,7 @@ SWGPresetImport::fromJson(QString &json) {
 
 void
 SWGPresetImport::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&group_name, pJson["groupName"], "QString", "QString");
-    
-    ::SWGSDRangel::setValue(&description, pJson["description"], "QString", "QString");
+    ::SWGSDRangel::setValue(&preset, pJson["preset"], "SWGPresetIdentifier", "SWGPresetIdentifier");
     
     ::SWGSDRangel::setValue(&file_path, pJson["filePath"], "QString", "QString");
     
@@ -96,11 +87,8 @@ SWGPresetImport::asJson ()
 QJsonObject*
 SWGPresetImport::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if(group_name != nullptr && *group_name != QString("")){
-        toJsonValue(QString("groupName"), group_name, obj, QString("QString"));
-    }
-    if(description != nullptr && *description != QString("")){
-        toJsonValue(QString("description"), description, obj, QString("QString"));
+    if((preset != nullptr) && (preset->isSet())){
+        toJsonValue(QString("preset"), preset, obj, QString("SWGPresetIdentifier"));
     }
     if(file_path != nullptr && *file_path != QString("")){
         toJsonValue(QString("filePath"), file_path, obj, QString("QString"));
@@ -109,24 +97,14 @@ SWGPresetImport::asJsonObject() {
     return obj;
 }
 
-QString*
-SWGPresetImport::getGroupName() {
-    return group_name;
+SWGPresetIdentifier*
+SWGPresetImport::getPreset() {
+    return preset;
 }
 void
-SWGPresetImport::setGroupName(QString* group_name) {
-    this->group_name = group_name;
-    this->m_group_name_isSet = true;
-}
-
-QString*
-SWGPresetImport::getDescription() {
-    return description;
-}
-void
-SWGPresetImport::setDescription(QString* description) {
-    this->description = description;
-    this->m_description_isSet = true;
+SWGPresetImport::setPreset(SWGPresetIdentifier* preset) {
+    this->preset = preset;
+    this->m_preset_isSet = true;
 }
 
 QString*
@@ -144,10 +122,7 @@ bool
 SWGPresetImport::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(group_name && *group_name != QString("")){
-            isObjectUpdated = true; break;
-        }
-        if(description && *description != QString("")){
+        if(preset && preset->isSet()){
             isObjectUpdated = true; break;
         }
         if(file_path && *file_path != QString("")){

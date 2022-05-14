@@ -32,6 +32,8 @@ VORDemodSettings::VORDemodSettings() :
 
 void VORDemodSettings::resetToDefaults()
 {
+    m_inputFrequencyOffset = 0;
+    m_navId = -1;
     m_squelch = -60.0;
     m_volume = 2.0;
     m_audioMute = false;
@@ -44,22 +46,18 @@ void VORDemodSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
+    m_workspaceIndex = 0;
+    m_hidden = false;
 
     m_identThreshold = 2.0;
     m_refThresholdDB = -45.0;
     m_varThresholdDB = -90.0;
-    m_magDecAdjust = true;
-
-    for (int i = 0; i < VORDEMOD_COLUMNS; i++)
-    {
-        m_columnIndexes[i] = i;
-        m_columnSizes[i] = -1; // Autosize
-    }
 }
 
 QByteArray VORDemodSettings::serialize() const
 {
     SimpleSerializer s(1);
+    s.writeS32(1, m_inputFrequencyOffset);
     s.writeS32(3, m_streamIndex);
     s.writeS32(4, m_volume*10);
     s.writeS32(5, m_squelch);
@@ -79,19 +77,14 @@ QByteArray VORDemodSettings::serialize() const
     s.writeReal(20, m_identThreshold);
     s.writeReal(21, m_refThresholdDB);
     s.writeReal(22, m_varThresholdDB);
-    s.writeBool(23, m_magDecAdjust);
 
     if (m_rollupState) {
-        s.writeBlob(24, m_rollupState->serialize());
+        s.writeBlob(23, m_rollupState->serialize());
     }
 
-    for (int i = 0; i < VORDEMOD_COLUMNS; i++) {
-        s.writeS32(100 + i, m_columnIndexes[i]);
-    }
-
-    for (int i = 0; i < VORDEMOD_COLUMNS; i++) {
-        s.writeS32(200 + i, m_columnSizes[i]);
-    }
+    s.writeS32(24, m_workspaceIndex);
+    s.writeBlob(25, m_geometryBytes);
+    s.writeBool(26, m_hidden);
 
     return s.final();
 }
@@ -113,6 +106,7 @@ bool VORDemodSettings::deserialize(const QByteArray& data)
         uint32_t utmp;
         QString strtmp;
 
+        d.readS32(1, &m_inputFrequencyOffset, 0);
         d.readS32(3, &m_streamIndex, 0);
         d.readS32(4, &tmp, 20);
         m_volume = tmp * 0.1;
@@ -145,21 +139,16 @@ bool VORDemodSettings::deserialize(const QByteArray& data)
         d.readReal(20, &m_identThreshold, 2.0);
         d.readReal(21, &m_refThresholdDB, -45.0);
         d.readReal(22, &m_varThresholdDB, -90.0);
-        d.readBool(23, &m_magDecAdjust, true);
 
         if (m_rollupState)
         {
-            d.readBlob(24, &bytetmp);
+            d.readBlob(23, &bytetmp);
             m_rollupState->deserialize(bytetmp);
         }
 
-        for (int i = 0; i < VORDEMOD_COLUMNS; i++) {
-            d.readS32(100 + i, &m_columnIndexes[i], i);
-        }
-
-        for (int i = 0; i < VORDEMOD_COLUMNS; i++) {
-            d.readS32(200 + i, &m_columnSizes[i], -1);
-        }
+        d.readS32(24, &m_workspaceIndex, 0);
+        d.readBlob(25, &m_geometryBytes);
+        d.readBool(26, &m_hidden, false);
 
         return true;
     }

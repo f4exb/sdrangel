@@ -64,7 +64,6 @@
 #include "SWGSigMFFileSinkSettings.h"
 #include "SWGUDPSinkSettings.h"
 #include "SWGUDPSourceSettings.h"
-#include "SWGVORDemodSCSettings.h"
 #include "SWGVORDemodSettings.h"
 #include "SWGWFMDemodSettings.h"
 #include "SWGWFMModSettings.h"
@@ -229,9 +228,6 @@ public:
     SWGVORDemodSettings* getVorDemodSettings();
     void setVorDemodSettings(SWGVORDemodSettings* vor_demod_settings);
 
-    SWGVORDemodSCSettings* getVorDemodScSettings();
-    void setVorDemodScSettings(SWGVORDemodSCSettings* vor_demod_sc_settings);
-
     SWGWFMDemodSettings* getWfmDemodSettings();
     void setWfmDemodSettings(SWGWFMDemodSettings* wfm_demod_settings);
 
@@ -382,9 +378,6 @@ private:
 
     SWGVORDemodSettings* vor_demod_settings;
     bool m_vor_demod_settings_isSet;
-
-    SWGVORDemodSCSettings* vor_demod_sc_settings;
-    bool m_vor_demod_sc_settings_isSet;
 
     SWGWFMDemodSettings* wfm_demod_settings;
     bool m_wfm_demod_settings_isSet;

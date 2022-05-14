@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>RigCtlServerGUI</class>
- <widget class="RollupWidget" name="RigCtlServerGUI">
+ <widget class="RollupContents" name="RigCtlServerGUI">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>320</width>
-    <height>189</height>
+    <width>330</width>
+    <height>173</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
-    <width>320</width>
-    <height>100</height>
+    <width>330</width>
+    <height>173</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>320</width>
-    <height>16777215</height>
+    <width>560</width>
+    <height>173</height>
    </size>
   </property>
   <property name="font">
@@ -40,9 +40,9 @@
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>301</width>
+     <x>2</x>
+     <y>2</y>
+     <width>328</width>
      <height>171</height>
     </rect>
    </property>
@@ -264,15 +264,15 @@ Default is 10000.</string>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>RollupWidget</class>
-   <extends>QWidget</extends>
-   <header>gui/rollupwidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>ButtonSwitch</class>
    <extends>QToolButton</extends>
    <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
+   <class>RollupContents</class>
+   <extends>QWidget</extends>
+   <header>gui/rollupcontents.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>

@@ -28,7 +28,6 @@ ChannelAPI::ChannelAPI(const QString& uri, StreamType streamType) :
     m_uri(uri),
     m_indexInDeviceSet(-1),
     m_deviceSetIndex(0),
-    m_deviceAPI(0),
     m_uid(UidCalculator::getNewObjectId())
 {
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));

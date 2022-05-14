@@ -25,6 +25,7 @@
 #include "plugin/pluginapi.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
+#include "gui/basicdevicesettingsdialog.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
@@ -38,7 +39,6 @@
 TestSinkGui::TestSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	DeviceGUI(parent),
 	ui(new Ui::TestSinkGui),
-	m_deviceUISet(deviceUISet),
 	m_doApplySettings(true),
 	m_forceSettings(true),
 	m_settings(),
@@ -48,7 +48,14 @@ TestSinkGui::TestSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_tickCount(0),
 	m_lastEngineState(DeviceAPI::StNotStarted)
 {
-	ui->setupUi(this);
+    m_deviceUISet = deviceUISet;
+    setAttribute(Qt::WA_DeleteOnClose, true);
+    m_helpURL = "plugins/samplesink/testsink/readme.md";
+    QWidget *contents = getContents();
+	ui->setupUi(contents);
+    setSizePolicy(contents->sizePolicy());
+    setMinimumSize(m_MinimumWidth, m_MinimumHeight);
+    getContents()->setStyleSheet("#TestSinkGui { background-color: rgb(64, 64, 64); }");
     m_sampleSink = (TestSinkOutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
 
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -69,8 +76,10 @@ TestSinkGui::TestSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_statusTimer.start(500);
 
 	displaySettings();
+    makeUIConnections();
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 }
 
 TestSinkGui::~TestSinkGui()
@@ -256,4 +265,36 @@ void TestSinkGui::on_startStop_toggled(bool checked)
 
 void TestSinkGui::tick()
 {
+}
+
+void TestSinkGui::openDeviceSettingsDialog(const QPoint& p)
+{
+    if (m_contextMenuType == ContextMenuDeviceSettings)
+    {
+        BasicDeviceSettingsDialog dialog(this);
+        dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
+        dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
+        dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
+        dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
+
+        dialog.move(p);
+        dialog.exec();
+
+        m_settings.m_useReverseAPI = dialog.useReverseAPI();
+        m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
+        m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
+        m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+
+        sendSettings();
+    }
+
+    resetContextMenuType();
+}
+
+void TestSinkGui::makeUIConnections()
+{
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &TestSinkGui::on_centerFrequency_changed);
+    QObject::connect(ui->sampleRate, &ValueDial::changed, this, &TestSinkGui::on_sampleRate_changed);
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &TestSinkGui::on_startStop_toggled);
+    QObject::connect(ui->interp, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TestSinkGui::on_interp_currentIndexChanged);
 }

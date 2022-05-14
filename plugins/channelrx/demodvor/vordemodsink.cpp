@@ -27,14 +27,13 @@
 #include "util/morse.h"
 #include "util/units.h"
 
-#include "vordemodsink.h"
 #include "vordemodreport.h"
+#include "vordemodsettings.h"
+#include "vordemodsink.h"
 
-VORDemodSink::VORDemodSink(const VORDemodSettings& settings, int subChannel,
-                MessageQueue *messageQueueToGUI) :
+VORDemodSCSink::VORDemodSCSink() :
         m_channelFrequencyOffset(0),
-        m_outOfBand(true),
-        m_channelSampleRate(VORDEMOD_CHANNEL_SAMPLE_RATE),
+        m_channelSampleRate(VORDemodSettings::VORDEMOD_CHANNEL_SAMPLE_RATE),
         m_audioSampleRate(48000),
         m_squelchCount(0),
         m_squelchOpen(false),
@@ -42,41 +41,31 @@ VORDemodSink::VORDemodSink(const VORDemodSettings& settings, int subChannel,
         m_magsqSum(0.0f),
         m_magsqPeak(0.0f),
         m_magsqCount(0),
-        m_messageQueueToGUI(messageQueueToGUI),
         m_volumeAGC(0.003),
         m_audioFifo(48000),
         m_refPrev(0.0f),
         m_movingAverageIdent(5000),
         m_prevBit(0),
         m_bitTime(0),
-        m_varGoertzel(30, VORDEMOD_CHANNEL_SAMPLE_RATE),
-        m_refGoertzel(30, VORDEMOD_CHANNEL_SAMPLE_RATE)
+        m_varGoertzel(30, VORDemodSettings::VORDEMOD_CHANNEL_SAMPLE_RATE),
+        m_refGoertzel(30, VORDemodSettings::VORDEMOD_CHANNEL_SAMPLE_RATE)
 {
-    m_audioBuffer.resize(1<<14);
-    m_audioBufferFill = 0;
+	m_audioBuffer.resize(1<<14);
+	m_audioBufferFill = 0;
 
-    m_magsq = 0.0;
+	m_magsq = 0.0;
 
-    qDebug() << "Sink " << subChannel;
-    if (subChannel >= 0)
-    {
-        m_subChannelId = subChannel;
-        m_vorFrequencyHz = settings.m_subChannelSettings[subChannel]->m_frequency;
-
-        applySettings(settings, true);
-    }
+	applySettings(m_settings, true);
+    applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 }
 
-VORDemodSink::~VORDemodSink()
+VORDemodSCSink::~VORDemodSCSink()
 {
 }
 
-void VORDemodSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
+void VORDemodSCSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
 {
     Complex ci;
-
-    if (m_outOfBand)
-        return;
 
     for (SampleVector::const_iterator it = begin; it != end; ++it)
     {
@@ -102,7 +91,7 @@ void VORDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
     }
 }
 
-void VORDemodSink::processOneAudioSample(Complex &ci)
+void VORDemodSCSink::processOneAudioSample(Complex &ci)
 {
     Real re = ci.real() / SDR_RX_SCALEF;
     Real im = ci.imag() / SDR_RX_SCALEF;
@@ -137,7 +126,7 @@ void VORDemodSink::processOneAudioSample(Complex &ci)
 
     m_squelchOpen = (m_squelchCount >= (unsigned int)m_audioSampleRate / 20);
 
-    if (m_squelchOpen && !m_settings.m_audioMute && !m_settings.m_subChannelSettings.value(m_subChannelId)->m_audioMute)
+    if (m_squelchOpen && !m_settings.m_audioMute)
     {
         Real demod;
 
@@ -167,7 +156,7 @@ void VORDemodSink::processOneAudioSample(Complex &ci)
 
         if (res != m_audioBufferFill)
         {
-            qDebug("VORDemodSink::processOneAudioSample: %u/%u audio samples written", res, m_audioBufferFill);
+            qDebug("VORDemodSCSink::processOneAudioSample: %u/%u audio samples written", res, m_audioBufferFill);
             m_audioFifo.clear();
         }
 
@@ -176,7 +165,7 @@ void VORDemodSink::processOneAudioSample(Complex &ci)
 }
 
 
-void VORDemodSink::processOneSample(Complex &ci)
+void VORDemodSCSink::processOneSample(Complex &ci)
 {
     Complex ca;
 
@@ -208,7 +197,7 @@ void VORDemodSink::processOneSample(Complex &ci)
     // Calculate phase of 30Hz variable AM signal
     double varPhase;
     double varMag;
-    if (m_varGoertzel.size() == VORDEMOD_CHANNEL_SAMPLE_RATE - 1)
+    if (m_varGoertzel.size() == VORDemodSettings::VORDEMOD_CHANNEL_SAMPLE_RATE - 1)
     {
         m_varGoertzel.goertzel(mag);
         varPhase = Units::radiansToDegrees(m_varGoertzel.phase());
@@ -231,13 +220,13 @@ void VORDemodSink::processOneSample(Complex &ci)
     m_refPrev = fmfilt;
 
     // Calculate phase of 30Hz reference FM signal
-    if (m_refGoertzel.size() == VORDEMOD_CHANNEL_SAMPLE_RATE - 1)
+    if (m_refGoertzel.size() == VORDemodSettings::VORDEMOD_CHANNEL_SAMPLE_RATE - 1)
     {
         m_refGoertzel.goertzel(phi);
         float phaseDeg = Units::radiansToDegrees(m_refGoertzel.phase());
         double refMag = m_refGoertzel.mag();
         int groupDelay = (301-1)/2;
-        float filterPhaseShift = 360.0*30.0*groupDelay/VORDEMOD_CHANNEL_SAMPLE_RATE;
+        float filterPhaseShift = 360.0*30.0*groupDelay/VORDemodSettings::VORDEMOD_CHANNEL_SAMPLE_RATE;
         float shiftedPhase = phaseDeg + filterPhaseShift;
 
         // Calculate difference in phase, which is the radial
@@ -249,10 +238,10 @@ void VORDemodSink::processOneSample(Complex &ci)
 
         // qDebug() << "Ref phase: " << phaseDeg << " var phase " << varPhase;
 
-        if (getMessageQueueToGUI())
+        if (getMessageQueueToChannel())
         {
-            VORDemodReport::MsgReportRadial *msg = VORDemodReport::MsgReportRadial::create(m_subChannelId, phaseDifference, refMag, varMag);
-            getMessageQueueToGUI()->push(msg);
+            VORDemodReport::MsgReportRadial *msg = VORDemodReport::MsgReportRadial::create(phaseDifference, refMag, varMag);
+            getMessageQueueToChannel()->push(msg);
         }
 
         m_refGoertzel.reset();
@@ -302,12 +291,14 @@ void VORDemodSink::processOneSample(Complex &ci)
         {
             if (m_ident != "")
             {
-                qDebug() << m_ident << " " << Morse::toString(m_ident);
-                if (getMessageQueueToGUI())
+                qDebug() << "VORDemodSCSink::processOneSample:" << m_ident << " " << Morse::toString(m_ident);
+
+                if (getMessageQueueToChannel())
                 {
-                    VORDemodReport::MsgReportIdent *msg = VORDemodReport::MsgReportIdent::create(m_subChannelId, m_ident);
-                    getMessageQueueToGUI()->push(msg);
+                    VORDemodReport::MsgReportIdent *msg = VORDemodReport::MsgReportIdent::create(m_ident);
+                    getMessageQueueToChannel()->push(msg);
                 }
+
                 m_ident = "";
             }
         }
@@ -341,12 +332,14 @@ void VORDemodSink::processOneSample(Complex &ci)
             m_ident = m_ident.simplified();
             if (m_ident != "")
             {
-                qDebug() << m_ident << " " << Morse::toString(m_ident);
-                if (getMessageQueueToGUI())
+                qDebug() << "VORDemodSCSink::processOneSample:" << m_ident << " " << Morse::toString(m_ident);
+
+                if (getMessageQueueToChannel())
                 {
-                    VORDemodReport::MsgReportIdent *msg = VORDemodReport::MsgReportIdent::create(m_subChannelId, m_ident);
-                    getMessageQueueToGUI()->push(msg);
+                    VORDemodReport::MsgReportIdent *msg = VORDemodReport::MsgReportIdent::create(m_ident);
+                    getMessageQueueToChannel()->push(msg);
                 }
+
                 m_ident = "";
             }
             m_bitTime = 0;
@@ -355,9 +348,9 @@ void VORDemodSink::processOneSample(Complex &ci)
     m_prevBit = bit;
 }
 
-void VORDemodSink::applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force)
+void VORDemodSCSink::applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force)
 {
-    qDebug() << "VORDemodSink::applyChannelSettings:"
+    qDebug() << "VORDemodSCSink::applyChannelSettings:"
             << " channelSampleRate: " << channelSampleRate
             << " channelFrequencyOffset: " << channelFrequencyOffset;
 
@@ -369,17 +362,17 @@ void VORDemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
 
     if ((m_channelSampleRate != channelSampleRate) || force)
     {
-        m_interpolator.create(16, channelSampleRate, VORDEMOD_CHANNEL_BANDWIDTH);
+        m_interpolator.create(16, channelSampleRate, VORDemodSettings::VORDEMOD_CHANNEL_BANDWIDTH);
         m_interpolatorDistanceRemain = 0;
-        m_interpolatorDistance = (Real) channelSampleRate / (Real) VORDEMOD_CHANNEL_SAMPLE_RATE;
+        m_interpolatorDistance = (Real) channelSampleRate / (Real) VORDemodSettings::VORDEMOD_CHANNEL_SAMPLE_RATE;
 
-        m_samplesPerDot7wpm = VORDEMOD_CHANNEL_SAMPLE_RATE*60/(50*7);
-        m_samplesPerDot10wpm = VORDEMOD_CHANNEL_SAMPLE_RATE*60/(50*10);
+        m_samplesPerDot7wpm = VORDemodSettings::VORDEMOD_CHANNEL_SAMPLE_RATE*60/(50*7);
+        m_samplesPerDot10wpm = VORDemodSettings::VORDEMOD_CHANNEL_SAMPLE_RATE*60/(50*10);
 
-        m_ncoIdent.setFreq(-1020, VORDEMOD_CHANNEL_SAMPLE_RATE);  // +-50Hz source offset allowed
-        m_ncoRef.setFreq(-9960, VORDEMOD_CHANNEL_SAMPLE_RATE);
-        m_lowpassIdent.create(301, VORDEMOD_CHANNEL_SAMPLE_RATE, 100.0f);
-        m_lowpassRef.create(301, VORDEMOD_CHANNEL_SAMPLE_RATE, 600.0f); // Max deviation is 480Hz
+        m_ncoIdent.setFreq(-1020, VORDemodSettings::VORDEMOD_CHANNEL_SAMPLE_RATE);  // +-50Hz source offset allowed
+        m_ncoRef.setFreq(-9960, VORDemodSettings::VORDEMOD_CHANNEL_SAMPLE_RATE);
+        m_lowpassIdent.create(301, VORDemodSettings::VORDEMOD_CHANNEL_SAMPLE_RATE, 100.0f);
+        m_lowpassRef.create(301, VORDemodSettings::VORDEMOD_CHANNEL_SAMPLE_RATE, 600.0f); // Max deviation is 480Hz
         m_movingAverageIdent.resize(m_samplesPerDot10wpm/5);  // Needs to be short enough for noise floor calculation
 
         m_binSampleCnt = 0;
@@ -395,9 +388,9 @@ void VORDemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
     m_channelFrequencyOffset = channelFrequencyOffset;
 }
 
-void VORDemodSink::applySettings(const VORDemodSettings& settings, bool force)
+void VORDemodSCSink::applySettings(const VORDemodSettings& settings, bool force)
 {
-    qDebug() << "VORDemodSink::applySettings:"
+    qDebug() << "VORDemodSCSink::applySettings:"
             << " m_volume: " << settings.m_volume
             << " m_squelch: " << settings.m_squelch
             << " m_audioMute: " << settings.m_audioMute
@@ -408,23 +401,38 @@ void VORDemodSink::applySettings(const VORDemodSettings& settings, bool force)
         m_squelchLevel = CalcDb::powerFromdB(settings.m_squelch);
     }
 
+    if (m_settings.m_navId != settings.m_navId)
+    {
+        // Reset state when navId changes, so we don't report old ident for new navId
+        m_binSampleCnt = 0;
+        m_binCnt = 0;
+        m_identNoise = 0.0001f;
+        for (int i = 0; i < m_identBins; i++)
+        {
+            m_identMaxs[i] = 0.0f;
+        }
+        m_ident = "";
+        m_refGoertzel.reset();
+        m_varGoertzel.reset();
+    }
+
     m_settings = settings;
 }
 
-void VORDemodSink::applyAudioSampleRate(int sampleRate)
+void VORDemodSCSink::applyAudioSampleRate(int sampleRate)
 {
     if (sampleRate < 0)
     {
-        qWarning("VORDemodSink::applyAudioSampleRate: invalid sample rate: %d", sampleRate);
+        qWarning("VORDemodSCSink::applyAudioSampleRate: invalid sample rate: %d", sampleRate);
         return;
     }
 
-    qDebug("VORDemodSink::applyAudioSampleRate: sampleRate: %d m_channelSampleRate: %d", sampleRate, m_channelSampleRate);
+    qDebug("VORDemodSCSink::applyAudioSampleRate: sampleRate: %d m_channelSampleRate: %d", sampleRate, m_channelSampleRate);
 
     // (ICAO Annex 10 3.3.6.3) - Optional voice audio is 300Hz to 3kHz
-    m_audioInterpolator.create(16, VORDEMOD_CHANNEL_SAMPLE_RATE, 3000.0f);
+    m_audioInterpolator.create(16, VORDemodSettings::VORDEMOD_CHANNEL_SAMPLE_RATE, 3000.0f);
     m_audioInterpolatorDistanceRemain = 0;
-    m_audioInterpolatorDistance = (Real) VORDEMOD_CHANNEL_SAMPLE_RATE / (Real) sampleRate;
+    m_audioInterpolatorDistance = (Real) VORDemodSettings::VORDEMOD_CHANNEL_SAMPLE_RATE / (Real) sampleRate;
     m_bandpass.create(301, sampleRate, 300.0f, 3000.0f);
     m_audioFifo.setSize(sampleRate);
     m_squelchDelayLine.resize(sampleRate/5);

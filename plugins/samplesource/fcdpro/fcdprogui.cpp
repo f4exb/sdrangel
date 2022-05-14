@@ -17,11 +17,11 @@
 
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QResizeEvent>
 
 #include "ui_fcdprogui.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
-#include "gui/crightclickenabler.h"
 #include "gui/basicdevicesettingsdialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
@@ -35,15 +35,19 @@
 FCDProGui::FCDProGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	DeviceGUI(parent),
 	ui(new Ui::FCDProGui),
-	m_deviceUISet(deviceUISet),
 	m_forceSettings(true),
 	m_settings(),
 	m_sampleSource(NULL),
 	m_lastEngineState(DeviceAPI::StNotStarted)
 {
+    m_deviceUISet = deviceUISet;
+    setAttribute(Qt::WA_DeleteOnClose, true);
     m_sampleSource = (FCDProInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
-	ui->setupUi(this);
+    ui->setupUi(getContents());
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    getContents()->setStyleSheet("#FCDProGui { background-color: rgb(64, 64, 64); }");
+    m_helpURL = "plugins/samplesource/fcdpro/readme.md";
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     updateFrequencyLimits();
 
@@ -147,10 +151,10 @@ FCDProGui::FCDProGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(500);
 
-    CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStop);
-    connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
 	displaySettings();
+    makeUIConnections();
 
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
     m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);
@@ -192,6 +196,12 @@ bool FCDProGui::deserialize(const QByteArray& data)
 		resetToDefaults();
 		return false;
 	}
+}
+
+void FCDProGui::resizeEvent(QResizeEvent* size)
+{
+    adjustSize();
+    size->accept();
 }
 
 bool FCDProGui::handleMessage(const Message& message)
@@ -534,19 +544,47 @@ void FCDProGui::updateHardware()
 
 void FCDProGui::openDeviceSettingsDialog(const QPoint& p)
 {
-    BasicDeviceSettingsDialog dialog(this);
-    dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
-    dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
-    dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
-    dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
+    if (m_contextMenuType == ContextMenuDeviceSettings)
+    {
+        BasicDeviceSettingsDialog dialog(this);
+        dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
+        dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
+        dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
+        dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
 
-    dialog.move(p);
-    dialog.exec();
+        dialog.move(p);
+        dialog.exec();
 
-    m_settings.m_useReverseAPI = dialog.useReverseAPI();
-    m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
-    m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
-    m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settings.m_useReverseAPI = dialog.useReverseAPI();
+        m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
+        m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
+        m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
-    sendSettings();
+        sendSettings();
+    }
+
+    resetContextMenuType();
+}
+
+void FCDProGui::makeUIConnections()
+{
+    QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &FCDProGui::on_centerFrequency_changed);
+    QObject::connect(ui->ppm, &QSlider::valueChanged, this, &FCDProGui::on_ppm_valueChanged);
+    QObject::connect(ui->dcOffset, &ButtonSwitch::toggled, this, &FCDProGui::on_dcOffset_toggled);
+    QObject::connect(ui->iqImbalance, &ButtonSwitch::toggled, this, &FCDProGui::on_iqImbalance_toggled);
+    QObject::connect(ui->lnaGain, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FCDProGui::on_lnaGain_currentIndexChanged);
+    QObject::connect(ui->rfFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FCDProGui::on_rfFilter_currentIndexChanged);
+    QObject::connect(ui->lnaEnhance, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FCDProGui::on_lnaEnhance_currentIndexChanged);
+    QObject::connect(ui->band, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FCDProGui::on_band_currentIndexChanged);
+    QObject::connect(ui->mixGain, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FCDProGui::on_mixGain_currentIndexChanged);
+    QObject::connect(ui->mixFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FCDProGui::on_mixFilter_currentIndexChanged);
+    QObject::connect(ui->bias, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FCDProGui::on_bias_currentIndexChanged);
+    QObject::connect(ui->mode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FCDProGui::on_mode_currentIndexChanged);
+    QObject::connect(ui->rcFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FCDProGui::on_rcFilter_currentIndexChanged);
+    QObject::connect(ui->ifFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FCDProGui::on_ifFilter_currentIndexChanged);
+    QObject::connect(ui->decim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FCDProGui::on_decim_currentIndexChanged);
+    QObject::connect(ui->fcPos, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FCDProGui::on_fcPos_currentIndexChanged);
+    QObject::connect(ui->setDefaults, &QPushButton::clicked, this, &FCDProGui::on_setDefaults_clicked);
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &FCDProGui::on_startStop_toggled);
+    QObject::connect(ui->transverter, &TransverterButton::clicked, this, &FCDProGui::on_transverter_clicked);
 }

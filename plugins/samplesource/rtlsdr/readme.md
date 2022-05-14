@@ -12,6 +12,8 @@ If you want to benefit from the direct sampling you will have to compile and ins
 
 <h2>Interface</h2>
 
+The top and bottom bars of the device window are described [here](../../../sdrgui/device/readme.md)
+
 ![RTLSDR input plugin GUI](../../../doc/img/RTLSDR_plugin.png)
 
 <h3>1: Common stream parameters</h3>

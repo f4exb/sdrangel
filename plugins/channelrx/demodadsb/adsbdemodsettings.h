@@ -116,6 +116,10 @@ struct ADSBDemodSettings
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIDeviceIndex;
     uint16_t m_reverseAPIChannelIndex;
+    int m_workspaceIndex;
+    QByteArray m_geometryBytes;
+    bool m_hidden;
+
     int m_columnIndexes[ADSBDEMOD_COLUMNS];//!< How the columns are ordered in the table
     int m_columnSizes[ADSBDEMOD_COLUMNS];  //!< Size of the coumns in the table
 

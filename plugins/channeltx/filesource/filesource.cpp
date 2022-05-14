@@ -24,6 +24,7 @@
 #include <QThread>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGChannelReport.h"
 #include "SWGChannelActions.h"
 #include "SWGFileSourceReport.h"
@@ -40,7 +41,6 @@
 
 #include "filesourcebaseband.h"
 
-MESSAGE_CLASS_DEFINITION(FileSource::MsgSampleRateNotification, Message)
 MESSAGE_CLASS_DEFINITION(FileSource::MsgConfigureFileSource, Message)
 MESSAGE_CLASS_DEFINITION(FileSource::MsgConfigureFileSourceWork, Message)
 MESSAGE_CLASS_DEFINITION(FileSource::MsgConfigureFileSourceStreamTiming, Message)
@@ -93,6 +93,18 @@ FileSource::~FileSource()
     delete m_thread;
 }
 
+void FileSource::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSourceAPI(this);
+        m_deviceAPI->removeChannelSource(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addChannelSource(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
+}
+
 void FileSource::start()
 {
 	qDebug("FileSource::start");
@@ -134,8 +146,7 @@ bool FileSource::handleMessage(const Message& cmd)
         if (m_guiMessageQueue)
         {
             qDebug() << "FileSource::handleMessage: DSPSignalNotification: push to GUI";
-            MsgSampleRateNotification *msg = MsgSampleRateNotification::create(notif.getSampleRate());
-            m_guiMessageQueue->push(msg);
+            m_guiMessageQueue->push(new DSPSignalNotification(notif));
         }
 
         return true;
@@ -309,6 +320,15 @@ int FileSource::webapiSettingsGet(
     response.setFileSourceSettings(new SWGSDRangel::SWGFileSourceSettings());
     response.getFileSourceSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int FileSource::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

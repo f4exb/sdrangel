@@ -55,6 +55,8 @@ void AISDemodSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
+    m_workspaceIndex = 0;
+    m_hidden = false;
 
     for (int i = 0; i < AISDEMOD_MESSAGE_COLUMNS; i++)
     {
@@ -99,6 +101,10 @@ QByteArray AISDemodSettings::serialize() const
     if (m_rollupState) {
         s.writeBlob(25, m_rollupState->serialize());
     }
+
+    s.writeS32(26, m_workspaceIndex);
+    s.writeBlob(27, m_geometryBytes);
+    s.writeBool(28, m_hidden);
 
     for (int i = 0; i < AISDEMOD_MESSAGE_COLUMNS; i++)
         s.writeS32(100 + i, m_messageColumnIndexes[i]);
@@ -182,6 +188,10 @@ bool AISDemodSettings::deserialize(const QByteArray& data)
             d.readBlob(25, &bytetmp);
             m_rollupState->deserialize(bytetmp);
         }
+
+        d.readS32(26, &m_workspaceIndex, 0);
+        d.readBlob(27, &m_geometryBytes);
+        d.readBool(28, &m_hidden, false);
 
         for (int i = 0; i < AISDEMOD_MESSAGE_COLUMNS; i++) {
             d.readS32(100 + i, &m_messageColumnIndexes[i], i);

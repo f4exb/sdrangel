@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - master
+      - v7
     tags:
       - 'v*'
   pull_request:

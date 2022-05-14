@@ -28,6 +28,7 @@
 #include <QBuffer>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGChannelReport.h"
 #include "SWGChirpChatDemodReport.h"
 
@@ -95,6 +96,18 @@ ChirpChatDemod::~ChirpChatDemod()
     m_deviceAPI->removeChannelSink(this);
     delete m_basebandSink;
     delete m_thread;
+}
+
+void ChirpChatDemod::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSinkAPI(this);
+        m_deviceAPI->removeChannelSink(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addChannelSink(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
 }
 
 uint32_t ChirpChatDemod::getNumberOfDeviceStreams() const
@@ -285,10 +298,8 @@ bool ChirpChatDemod::handleMessage(const Message& cmd)
         qDebug() << "ChirpChatDemod::handleMessage: DSPSignalNotification: m_basebandSampleRate: " << m_basebandSampleRate;
         m_basebandSink->getInputMessageQueue()->push(rep);
 
-        if (getMessageQueueToGUI())
-        {
-            DSPSignalNotification* repToGUI = new DSPSignalNotification(notif); // make a copy
-            getMessageQueueToGUI()->push(repToGUI);
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new DSPSignalNotification(notif)); // make a copy
         }
 
         return true;
@@ -497,6 +508,15 @@ int ChirpChatDemod::webapiSettingsGet(
     response.getChirpChatDemodSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
 
+    return 200;
+}
+
+int ChirpChatDemod::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

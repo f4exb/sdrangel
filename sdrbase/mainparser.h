@@ -34,19 +34,23 @@ public:
 
     const QString& getServerAddress() const { return m_serverAddress; }
     uint16_t getServerPort() const { return m_serverPort; }
-    bool getMIMOSupport() const { return m_mimoSupport; }
+    bool getScratch() const { return m_scratch; }
+    bool getSoapy() const { return m_soapy; }
     const QString& getFFTWFWisdomFileName() const { return m_fftwfWindowFileName; }
 
 private:
     QString  m_serverAddress;
     uint16_t m_serverPort;
     QString  m_fftwfWindowFileName;
-    bool m_mimoSupport; //!< obtained from major version
+    bool m_scratch;
+    bool m_soapy;
 
     QCommandLineParser m_parser;
     QCommandLineOption m_serverAddressOption;
     QCommandLineOption m_serverPortOption;
     QCommandLineOption m_fftwfWisdomOption;
+    QCommandLineOption m_scratchOption;
+    QCommandLineOption m_soapyOption;
 };
 
 

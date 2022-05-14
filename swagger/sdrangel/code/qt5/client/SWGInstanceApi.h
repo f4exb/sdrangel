@@ -20,12 +20,16 @@
 #include "SWGAudioDevices.h"
 #include "SWGAudioInputDevice.h"
 #include "SWGAudioOutputDevice.h"
+#include "SWGBase64Blob.h"
+#include "SWGConfigurationIdentifier.h"
+#include "SWGConfigurationImportExport.h"
+#include "SWGConfigurations.h"
 #include "SWGDVSerialDevices.h"
 #include "SWGDeviceSetList.h"
 #include "SWGErrorResponse.h"
 #include "SWGFeaturePresetIdentifier.h"
 #include "SWGFeaturePresets.h"
-#include "SWGFeatureSetList.h"
+#include "SWGFilePath.h"
 #include "SWGInstanceChannelsResponse.h"
 #include "SWGInstanceConfigResponse.h"
 #include "SWGInstanceDevicesResponse.h"
@@ -38,7 +42,6 @@
 #include "SWGLoggingInfo.h"
 #include "SWGPresetExport.h"
 #include "SWGPresetIdentifier.h"
-#include "SWGPresetImport.h"
 #include "SWGPresetTransfer.h"
 #include "SWGPresets.h"
 #include "SWGSuccessResponse.h"
@@ -75,12 +78,20 @@ public:
     void instanceConfigGet();
     void instanceConfigPatch(SWGInstanceConfigResponse& body);
     void instanceConfigPut(SWGInstanceConfigResponse& body);
+    void instanceConfigurationBlobPost(SWGConfigurationIdentifier& body);
+    void instanceConfigurationBlobPut(SWGBase64Blob& body);
+    void instanceConfigurationDelete(SWGConfigurationIdentifier& body);
+    void instanceConfigurationFilePost(SWGConfigurationImportExport& body);
+    void instanceConfigurationFilePut(SWGFilePath& body);
+    void instanceConfigurationPatch(SWGConfigurationIdentifier& body);
+    void instanceConfigurationPost(SWGConfigurationIdentifier& body);
+    void instanceConfigurationPut(SWGConfigurationIdentifier& body);
+    void instanceConfigurationsGet();
     void instanceDelete();
     void instanceDeviceSetsGet();
     void instanceDevices(qint32 direction);
     void instanceFeaturePresetDelete(SWGFeaturePresetIdentifier& body);
     void instanceFeaturePresetGet();
-    void instanceFeatureSetsGet();
     void instanceFeatures();
     void instanceLimeRFEConfigGet(QString* serial);
     void instanceLimeRFEConfigPut(SWGLimeRFESettings& body);
@@ -91,9 +102,11 @@ public:
     void instanceLocationPut(SWGLocationInformation& body);
     void instanceLoggingGet();
     void instanceLoggingPut(SWGLoggingInfo& body);
+    void instancePresetBlobPost(SWGPresetIdentifier& body);
+    void instancePresetBlobPut(SWGBase64Blob& body);
     void instancePresetDelete(SWGPresetIdentifier& body);
     void instancePresetFilePost(SWGPresetExport& body);
-    void instancePresetFilePut(SWGPresetImport& body);
+    void instancePresetFilePut(SWGFilePath& body);
     void instancePresetGet();
     void instancePresetPatch(SWGPresetTransfer& body);
     void instancePresetPost(SWGPresetTransfer& body);
@@ -117,12 +130,20 @@ private:
     void instanceConfigGetCallback (SWGHttpRequestWorker * worker);
     void instanceConfigPatchCallback (SWGHttpRequestWorker * worker);
     void instanceConfigPutCallback (SWGHttpRequestWorker * worker);
+    void instanceConfigurationBlobPostCallback (SWGHttpRequestWorker * worker);
+    void instanceConfigurationBlobPutCallback (SWGHttpRequestWorker * worker);
+    void instanceConfigurationDeleteCallback (SWGHttpRequestWorker * worker);
+    void instanceConfigurationFilePostCallback (SWGHttpRequestWorker * worker);
+    void instanceConfigurationFilePutCallback (SWGHttpRequestWorker * worker);
+    void instanceConfigurationPatchCallback (SWGHttpRequestWorker * worker);
+    void instanceConfigurationPostCallback (SWGHttpRequestWorker * worker);
+    void instanceConfigurationPutCallback (SWGHttpRequestWorker * worker);
+    void instanceConfigurationsGetCallback (SWGHttpRequestWorker * worker);
     void instanceDeleteCallback (SWGHttpRequestWorker * worker);
     void instanceDeviceSetsGetCallback (SWGHttpRequestWorker * worker);
     void instanceDevicesCallback (SWGHttpRequestWorker * worker);
     void instanceFeaturePresetDeleteCallback (SWGHttpRequestWorker * worker);
     void instanceFeaturePresetGetCallback (SWGHttpRequestWorker * worker);
-    void instanceFeatureSetsGetCallback (SWGHttpRequestWorker * worker);
     void instanceFeaturesCallback (SWGHttpRequestWorker * worker);
     void instanceLimeRFEConfigGetCallback (SWGHttpRequestWorker * worker);
     void instanceLimeRFEConfigPutCallback (SWGHttpRequestWorker * worker);
@@ -133,6 +154,8 @@ private:
     void instanceLocationPutCallback (SWGHttpRequestWorker * worker);
     void instanceLoggingGetCallback (SWGHttpRequestWorker * worker);
     void instanceLoggingPutCallback (SWGHttpRequestWorker * worker);
+    void instancePresetBlobPostCallback (SWGHttpRequestWorker * worker);
+    void instancePresetBlobPutCallback (SWGHttpRequestWorker * worker);
     void instancePresetDeleteCallback (SWGHttpRequestWorker * worker);
     void instancePresetFilePostCallback (SWGHttpRequestWorker * worker);
     void instancePresetFilePutCallback (SWGHttpRequestWorker * worker);
@@ -159,12 +182,20 @@ signals:
     void instanceConfigGetSignal(SWGInstanceConfigResponse* summary);
     void instanceConfigPatchSignal(SWGSuccessResponse* summary);
     void instanceConfigPutSignal(SWGSuccessResponse* summary);
+    void instanceConfigurationBlobPostSignal(SWGBase64Blob* summary);
+    void instanceConfigurationBlobPutSignal(SWGConfigurationIdentifier* summary);
+    void instanceConfigurationDeleteSignal(SWGConfigurationIdentifier* summary);
+    void instanceConfigurationFilePostSignal(SWGConfigurationIdentifier* summary);
+    void instanceConfigurationFilePutSignal(SWGConfigurationIdentifier* summary);
+    void instanceConfigurationPatchSignal(SWGConfigurationIdentifier* summary);
+    void instanceConfigurationPostSignal(SWGConfigurationIdentifier* summary);
+    void instanceConfigurationPutSignal(SWGConfigurationIdentifier* summary);
+    void instanceConfigurationsGetSignal(SWGConfigurations* summary);
     void instanceDeleteSignal(SWGInstanceSummaryResponse* summary);
     void instanceDeviceSetsGetSignal(SWGDeviceSetList* summary);
     void instanceDevicesSignal(SWGInstanceDevicesResponse* summary);
     void instanceFeaturePresetDeleteSignal(SWGFeaturePresetIdentifier* summary);
     void instanceFeaturePresetGetSignal(SWGFeaturePresets* summary);
-    void instanceFeatureSetsGetSignal(SWGFeatureSetList* summary);
     void instanceFeaturesSignal(SWGInstanceFeaturesResponse* summary);
     void instanceLimeRFEConfigGetSignal(SWGLimeRFESettings* summary);
     void instanceLimeRFEConfigPutSignal(SWGSuccessResponse* summary);
@@ -175,6 +206,8 @@ signals:
     void instanceLocationPutSignal(SWGLocationInformation* summary);
     void instanceLoggingGetSignal(SWGLoggingInfo* summary);
     void instanceLoggingPutSignal(SWGLoggingInfo* summary);
+    void instancePresetBlobPostSignal(SWGBase64Blob* summary);
+    void instancePresetBlobPutSignal(SWGPresetIdentifier* summary);
     void instancePresetDeleteSignal(SWGPresetIdentifier* summary);
     void instancePresetFilePostSignal(SWGPresetIdentifier* summary);
     void instancePresetFilePutSignal(SWGPresetIdentifier* summary);
@@ -200,12 +233,20 @@ signals:
     void instanceConfigGetSignalE(SWGInstanceConfigResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceConfigPatchSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceConfigPutSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceConfigurationBlobPostSignalE(SWGBase64Blob* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceConfigurationBlobPutSignalE(SWGConfigurationIdentifier* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceConfigurationDeleteSignalE(SWGConfigurationIdentifier* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceConfigurationFilePostSignalE(SWGConfigurationIdentifier* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceConfigurationFilePutSignalE(SWGConfigurationIdentifier* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceConfigurationPatchSignalE(SWGConfigurationIdentifier* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceConfigurationPostSignalE(SWGConfigurationIdentifier* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceConfigurationPutSignalE(SWGConfigurationIdentifier* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceConfigurationsGetSignalE(SWGConfigurations* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceDeleteSignalE(SWGInstanceSummaryResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceDeviceSetsGetSignalE(SWGDeviceSetList* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceDevicesSignalE(SWGInstanceDevicesResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceFeaturePresetDeleteSignalE(SWGFeaturePresetIdentifier* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceFeaturePresetGetSignalE(SWGFeaturePresets* summary, QNetworkReply::NetworkError error_type, QString& error_str);
-    void instanceFeatureSetsGetSignalE(SWGFeatureSetList* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceFeaturesSignalE(SWGInstanceFeaturesResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceLimeRFEConfigGetSignalE(SWGLimeRFESettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceLimeRFEConfigPutSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
@@ -216,6 +257,8 @@ signals:
     void instanceLocationPutSignalE(SWGLocationInformation* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceLoggingGetSignalE(SWGLoggingInfo* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceLoggingPutSignalE(SWGLoggingInfo* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instancePresetBlobPostSignalE(SWGBase64Blob* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instancePresetBlobPutSignalE(SWGPresetIdentifier* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instancePresetDeleteSignalE(SWGPresetIdentifier* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instancePresetFilePostSignalE(SWGPresetIdentifier* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instancePresetFilePutSignalE(SWGPresetIdentifier* summary, QNetworkReply::NetworkError error_type, QString& error_str);
@@ -241,12 +284,20 @@ signals:
     void instanceConfigGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceConfigPatchSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceConfigPutSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceConfigurationBlobPostSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceConfigurationBlobPutSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceConfigurationDeleteSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceConfigurationFilePostSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceConfigurationFilePutSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceConfigurationPatchSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceConfigurationPostSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceConfigurationPutSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceConfigurationsGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceDeleteSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceDeviceSetsGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceDevicesSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceFeaturePresetDeleteSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceFeaturePresetGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
-    void instanceFeatureSetsGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceFeaturesSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceLimeRFEConfigGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceLimeRFEConfigPutSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
@@ -257,6 +308,8 @@ signals:
     void instanceLocationPutSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceLoggingGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceLoggingPutSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instancePresetBlobPostSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instancePresetBlobPutSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void instancePresetDeleteSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void instancePresetFilePostSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void instancePresetFilePutSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);

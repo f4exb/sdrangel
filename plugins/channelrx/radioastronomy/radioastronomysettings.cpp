@@ -163,6 +163,8 @@ void RadioAstronomySettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
+    m_workspaceIndex = 0;
+    m_hidden = false;
 
     for (int i = 0; i < RADIOASTRONOMY_POWERTABLE_COLUMNS; i++)
     {
@@ -305,6 +307,9 @@ QByteArray RadioAstronomySettings::serialize() const
     s.writeU32(186, m_reverseAPIPort);
     s.writeU32(187, m_reverseAPIDeviceIndex);
     s.writeU32(188, m_reverseAPIChannelIndex);
+    s.writeS32(189, m_workspaceIndex);
+    s.writeBlob(190, m_geometryBytes);
+    s.writeBool(191, m_hidden);
 
     for (int i = 0; i < RADIOASTRONOMY_POWERTABLE_COLUMNS; i++) {
         s.writeS32(400 + i, m_powerTableColumnIndexes[i]);
@@ -472,6 +477,9 @@ bool RadioAstronomySettings::deserialize(const QByteArray& data)
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
         d.readU32(188, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
+        d.readS32(189, &m_workspaceIndex, 0);
+        d.readBlob(190, &m_geometryBytes);
+        d.readBool(191, &m_hidden, false);
 
         for (int i = 0; i < RADIOASTRONOMY_POWERTABLE_COLUMNS; i++) {
             d.readS32(400 + i, &m_powerTableColumnIndexes[i], i);

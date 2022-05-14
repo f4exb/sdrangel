@@ -37,6 +37,8 @@ The BladeRF Host library is also provided by many Linux distributions (check its
 
 <h2>Interface</h2>
 
+The top and bottom bars of the device window are described [here](../../../sdrgui/device/readme.md)
+
 ![BladeRF1 output plugin GUI](../../../doc/img/BladeRF1Output_plugin.png)
 
 <h3>1: Start/Stop</h3>

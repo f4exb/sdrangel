@@ -29,6 +29,7 @@
 #include <QThread>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
@@ -99,6 +100,18 @@ RemoteSink::~RemoteSink()
     delete m_basebandSink;
 }
 
+void RemoteSink::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSinkAPI(this);
+        m_deviceAPI->removeChannelSink(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addChannelSink(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
+}
+
 uint32_t RemoteSink::getNumberOfDeviceStreams() const
 {
     return m_deviceAPI->getNbSourceStreams();
@@ -155,10 +168,8 @@ bool RemoteSink::handleMessage(const Message& cmd)
         m_basebandSink->getInputMessageQueue()->push(msgToBaseband);
 
         // Forward to the GUI
-        if (getMessageQueueToGUI())
-        {
-            DSPSignalNotification* msgToGUI = new DSPSignalNotification(notif); // make a copy
-            getMessageQueueToGUI()->push(msgToGUI);
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
         }
 
 	    return true;
@@ -325,6 +336,15 @@ int RemoteSink::webapiSettingsGet(
     response.setRemoteSinkSettings(new SWGSDRangel::SWGRemoteSinkSettings());
     response.getRemoteSinkSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int RemoteSink::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

@@ -6,6 +6,8 @@ This output sample sink plugin sends its samples to a [HackRF device](https://gr
 
 <h2>Interface</h2>
 
+The top and bottom bars of the device window are described [here](../../../sdrgui/device/readme.md)
+
 ![HackRF output plugin GUI](../../../doc/img/HackRFOutput_plugin.png)
 
 <h3>1: Start/Stop</h3>

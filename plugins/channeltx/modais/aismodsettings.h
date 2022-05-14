@@ -87,6 +87,9 @@ struct AISModSettings
     QString m_udpAddress;
     uint16_t m_udpPort;
     Serializable *m_rollupState;
+    int m_workspaceIndex;
+    QByteArray m_geometryBytes;
+    bool m_hidden;
 
     // Sample rate is multiple of 9600 baud rate (use even multiple so Gausian filter has odd number of taps)
     // Is there any benefit to having this higher?

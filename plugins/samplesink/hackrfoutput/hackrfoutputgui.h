@@ -56,10 +56,12 @@ public:
 	bool deserialize(const QByteArray& data);
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 
+protected:
+    void resizeEvent(QResizeEvent* size);
+
 private:
 	Ui::HackRFOutputGui* ui;
 
-	DeviceUISet* m_deviceUISet;
 	bool m_forceSettings;
 	HackRFOutputSettings m_settings;
     bool m_sampleRateMode; //!< true: device, false: base band sample rate update mode
@@ -81,6 +83,7 @@ private:
     void updateFrequencyLimits();
     void blockApplySettings(bool block);
 	bool handleMessage(const Message& message);
+    void makeUIConnections();
 
 private slots:
     void handleInputMessages();

@@ -23,6 +23,8 @@ Note: this plugin is officially supported since version 6.
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![ChirpChat Demodulator plugin GUI](../../../doc/img/ChirpChatDemod_plugin.png)
 
 <h3>1: Frequency shift from center frequency of reception</h3>
@@ -266,7 +268,7 @@ This is the UDP address and port to where the decoded message is sent when (12) 
 
 <h3>B: De-chirped spectrum</h3>
 
-This is the spectrum of the de-chirped signal when a ChirpChat signal can be decoded.
+This is the spectrum of the de-chirped signal when a ChirpChat signal can be decoded. Details on the spectrum view and controls can be found [here](../../../sdrgui/gui/spectrum.md)
 
 The frequency span corresponds to the bandwidth of the ChirpChat signal (3). Default FFT size is 2<sup>SF</sup> where SF is the spread factor (7).
 

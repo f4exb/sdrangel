@@ -6,6 +6,8 @@ This plugin can be used to demodulate POCSAG pager messages.
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![Pager Demodulator plugin GUI](../../../doc/img/PagerDemod_plugin.png)
 
 <h3>1: Frequency shift from center frequency of reception</h3>

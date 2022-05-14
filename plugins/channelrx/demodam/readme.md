@@ -6,6 +6,8 @@ This plugin can be used to listen to a narrowband amplitude modulated signal. "N
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![AM Demodulator plugin GUI](../../../doc/img/AMDemod_plugin.png)
 
 <h3>1: Frequency shift from center frequency of reception</h3>
@@ -40,7 +42,7 @@ If you right click on it it will open a dialog to select the audio output device
 
 <h3>7:Bandpass boxcar filter toggle</h3>
 
-Use this button to enable or disable the bandpass boxcar (sharp) filter with low cutoff at 300 Hz and high cutoff at half the RF bandwidth. This may help readability of low signals on air traffic communications but degrades audio on comfortable AM broadcast transmissions. 
+Use this button to enable or disable the bandpass boxcar (sharp) filter with low cutoff at 300 Hz and high cutoff at half the RF bandwidth. This may help readability of low signals on air traffic communications but degrades audio on comfortable AM broadcast transmissions.
 
 <h3>8: RF bandwidth</h3>
 

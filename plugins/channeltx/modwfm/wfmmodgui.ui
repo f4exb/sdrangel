@@ -1,25 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>WFMModGUI</class>
- <widget class="RollupWidget" name="WFMModGUI">
+ <widget class="RollupContents" name="WFMModGUI">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>298</width>
+    <width>360</width>
     <height>300</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
-    <width>0</width>
+    <width>360</width>
     <height>0</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>560</width>
+    <height>16777215</height>
    </size>
   </property>
   <property name="font">
@@ -765,15 +771,15 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>RollupWidget</class>
+   <class>RollupContents</class>
    <extends>QWidget</extends>
-   <header>gui/rollupwidget.h</header>
+   <header>gui/rollupcontents.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>LevelMeterVU</class>
+   <class>ValueDialZ</class>
    <extends>QWidget</extends>
-   <header>gui/levelmeter.h</header>
+   <header>gui/valuedialz.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -782,15 +788,15 @@
    <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
-   <class>CWKeyerGUI</class>
+   <class>LevelMeterVU</class>
    <extends>QWidget</extends>
-   <header>gui/cwkeyergui.h</header>
+   <header>gui/levelmeter.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ValueDialZ</class>
+   <class>CWKeyerGUI</class>
    <extends>QWidget</extends>
-   <header>gui/valuedialz.h</header>
+   <header>gui/cwkeyergui.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -10,6 +10,8 @@ Experimental modes with smaller number of lines and FPS values can be used in co
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![ATV Demodulator plugin GUI](../../../doc/img/ATVDemod_plugin.png)
 
 The interface is divided into three collapsable sections:

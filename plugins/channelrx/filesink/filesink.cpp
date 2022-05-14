@@ -24,6 +24,7 @@
 #include <QBuffer>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGChannelReport.h"
 #include "SWGChannelActions.h"
 
@@ -101,6 +102,18 @@ FileSink::~FileSink()
     delete m_basebandSink;
 }
 
+void FileSink::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSinkAPI(this);
+        m_deviceAPI->removeChannelSink(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addChannelSink(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
+}
+
 void FileSink::setMessageQueueToGUI(MessageQueue* queue)
 {
     ChannelAPI::setMessageQueueToGUI(queue);
@@ -170,10 +183,8 @@ bool FileSink::handleMessage(const Message& cmd)
         DSPSignalNotification *notif = new DSPSignalNotification(cfg);
         m_basebandSink->getInputMessageQueue()->push(notif);
 
-        if (getMessageQueueToGUI())
-        {
-            DSPSignalNotification *notifToGUI = new DSPSignalNotification(cfg);
-            getMessageQueueToGUI()->push(notifToGUI);
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new DSPSignalNotification(cfg));
         }
 
         return true;
@@ -381,6 +392,15 @@ int FileSink::webapiSettingsGet(
     response.setFileSinkSettings(new SWGSDRangel::SWGFileSinkSettings());
     response.getFileSinkSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int FileSink::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

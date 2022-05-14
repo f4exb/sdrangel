@@ -18,8 +18,6 @@
 #ifndef PLUGINS_SAMPLESINK_FILEOUTPUT_FILEOUTPUTSETTINGS_H_
 #define PLUGINS_SAMPLESINK_FILEOUTPUT_FILEOUTPUTSETTINGS_H_
 
-#include <QByteArray>
-
 struct FileOutputSettings {
     quint64 m_centerFrequency;
     quint64 m_sampleRate;

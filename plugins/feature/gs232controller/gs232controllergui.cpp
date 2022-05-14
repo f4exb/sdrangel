@@ -19,6 +19,7 @@
 #include <cmath>
 #include <QMessageBox>
 #include <QSerialPortInfo>
+#include <QResizeEvent>
 
 #include "SWGTargetAzimuthElevation.h"
 
@@ -59,6 +60,7 @@ bool GS232ControllerGUI::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
+        m_feature->setWorkspaceIndex(m_settings.m_workspaceIndex);
         displaySettings();
         applySettings(true);
         return true;
@@ -68,6 +70,14 @@ bool GS232ControllerGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void GS232ControllerGUI::resizeEvent(QResizeEvent* size)
+{
+    int maxWidth = getRollupContents()->maximumWidth();
+    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
+    resize(width() < maxWidth ? width() : maxWidth, minHeight);
+    size->accept();
 }
 
 bool GS232ControllerGUI::handleMessage(const Message& message)
@@ -127,7 +137,7 @@ void GS232ControllerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -140,15 +150,17 @@ GS232ControllerGUI::GS232ControllerGUI(PluginAPI* pluginAPI, FeatureUISet *featu
     m_lastFeatureState(0),
     m_lastOnTarget(false)
 {
-    ui->setupUi(this);
-    m_helpURL = "plugins/feature/gs232controller/readme.md";
+    m_feature = feature;
     setAttribute(Qt::WA_DeleteOnClose, true);
-    setChannelWidget(false);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    m_helpURL = "plugins/feature/gs232controller/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+
     m_gs232Controller = reinterpret_cast<GS232Controller*>(feature);
     m_gs232Controller->setMessageQueueToGUI(&m_inputMessageQueue);
-
-    m_featureUISet->addRollupWidget(this);
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
@@ -165,11 +177,18 @@ GS232ControllerGUI::GS232ControllerGUI(PluginAPI* pluginAPI, FeatureUISet *featu
 
     displaySettings();
     applySettings(true);
+    makeUIConnections();
 }
 
 GS232ControllerGUI::~GS232ControllerGUI()
 {
     delete ui;
+}
+
+void GS232ControllerGUI::setWorkspaceIndex(int index)
+{
+    m_settings.m_workspaceIndex = index;
+    m_feature->setWorkspaceIndex(index);
 }
 
 void GS232ControllerGUI::blockApplySettings(bool block)
@@ -181,6 +200,7 @@ void GS232ControllerGUI::displaySettings()
 {
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_settings.m_title);
+    setTitle(m_settings.m_title);
     blockApplySettings(true);
     ui->azimuth->setValue(m_settings.m_azimuth);
     ui->elevation->setValue(m_settings.m_elevation);
@@ -202,7 +222,7 @@ void GS232ControllerGUI::displaySettings()
     ui->elevationMin->setValue(m_settings.m_elevationMin);
     ui->elevationMax->setValue(m_settings.m_elevationMax);
     ui->tolerance->setValue(m_settings.m_tolerance);
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     updateConnectionWidgets();
     blockApplySettings(false);
 }
@@ -284,31 +304,22 @@ void GS232ControllerGUI::updatePipeList(const QList<GS232ControllerSettings::Ava
     // }
 }
 
-void GS232ControllerGUI::leaveEvent(QEvent*)
-{
-}
-
-void GS232ControllerGUI::enterEvent(QEvent*)
-{
-}
-
 void GS232ControllerGUI::onMenuDialogCalled(const QPoint &p)
 {
     if (m_contextMenuType == ContextMenuChannelSettings)
     {
         BasicFeatureSettingsDialog dialog(this);
         dialog.setTitle(m_settings.m_title);
-        dialog.setColor(m_settings.m_rgbColor);
         dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
         dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
         dialog.setReverseAPIFeatureSetIndex(m_settings.m_reverseAPIFeatureSetIndex);
         dialog.setReverseAPIFeatureIndex(m_settings.m_reverseAPIFeatureIndex);
+        dialog.setDefaultTitle(m_displayedName);
 
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_rgbColor = dialog.getColor().rgb();
         m_settings.m_title = dialog.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
@@ -316,7 +327,7 @@ void GS232ControllerGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIFeatureSetIndex = dialog.getReverseAPIFeatureSetIndex();
         m_settings.m_reverseAPIFeatureIndex = dialog.getReverseAPIFeatureIndex();
 
-        setWindowTitle(m_settings.m_title);
+        setTitle(m_settings.m_title);
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -527,4 +538,26 @@ void GS232ControllerGUI::applySettings(bool force)
         GS232Controller::MsgConfigureGS232Controller* message = GS232Controller::MsgConfigureGS232Controller::create(m_settings, force);
         m_gs232Controller->getInputMessageQueue()->push(message);
     }
+}
+
+void GS232ControllerGUI::makeUIConnections()
+{
+    QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &GS232ControllerGUI::on_startStop_toggled);
+    QObject::connect(ui->protocol, qOverload<int>(&QComboBox::currentIndexChanged), this, &GS232ControllerGUI::on_protocol_currentIndexChanged);
+    QObject::connect(ui->connection, qOverload<int>(&QComboBox::currentIndexChanged), this, &GS232ControllerGUI::on_connection_currentIndexChanged);
+    QObject::connect(ui->serialPort, qOverload<int>(&QComboBox::currentIndexChanged), this, &GS232ControllerGUI::on_serialPort_currentIndexChanged);
+    QObject::connect(ui->host, &QLineEdit::editingFinished, this, &GS232ControllerGUI::on_host_editingFinished);
+    QObject::connect(ui->port, qOverload<int>(&QSpinBox::valueChanged), this, &GS232ControllerGUI::on_port_valueChanged);
+    QObject::connect(ui->baudRate, qOverload<int>(&QComboBox::currentIndexChanged), this, &GS232ControllerGUI::on_baudRate_currentIndexChanged);
+    QObject::connect(ui->track, &QCheckBox::stateChanged, this, &GS232ControllerGUI::on_track_stateChanged);
+    QObject::connect(ui->azimuth, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &GS232ControllerGUI::on_azimuth_valueChanged);
+    QObject::connect(ui->elevation, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &GS232ControllerGUI::on_elevation_valueChanged);
+    QObject::connect(ui->sources, &QComboBox::currentTextChanged, this, &GS232ControllerGUI::on_sources_currentTextChanged);
+    QObject::connect(ui->azimuthOffset, qOverload<int>(&QSpinBox::valueChanged), this, &GS232ControllerGUI::on_azimuthOffset_valueChanged);
+    QObject::connect(ui->elevationOffset, qOverload<int>(&QSpinBox::valueChanged), this, &GS232ControllerGUI::on_elevationOffset_valueChanged);
+    QObject::connect(ui->azimuthMin, qOverload<int>(&QSpinBox::valueChanged), this, &GS232ControllerGUI::on_azimuthMin_valueChanged);
+    QObject::connect(ui->azimuthMax, qOverload<int>(&QSpinBox::valueChanged), this, &GS232ControllerGUI::on_azimuthMax_valueChanged);
+    QObject::connect(ui->elevationMin, qOverload<int>(&QSpinBox::valueChanged), this, &GS232ControllerGUI::on_elevationMin_valueChanged);
+    QObject::connect(ui->elevationMax, qOverload<int>(&QSpinBox::valueChanged), this, &GS232ControllerGUI::on_elevationMax_valueChanged);
+    QObject::connect(ui->tolerance, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &GS232ControllerGUI::on_tolerance_valueChanged);
 }

@@ -68,6 +68,8 @@ struct GS232ControllerSettings
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIFeatureSetIndex;
     uint16_t m_reverseAPIFeatureIndex;
+    int m_workspaceIndex;
+    QByteArray m_geometryBytes;
 
     GS232ControllerSettings();
     void resetToDefaults();

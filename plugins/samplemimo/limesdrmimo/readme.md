@@ -10,6 +10,8 @@ This MIMO plugin sends and receives its samples to/from a [LimeSDR device](https
 
 <h2>Interface</h2>
 
+The top and bottom bars of the device window are described [here](../../../sdrgui/device/readme.md)
+
 ![LimeSDR MIMO plugin GUI](../../../doc/img/LimeSDRMIMO_plugin.png)
 
 <h3>1. Rx/Tx settings selection</h3>

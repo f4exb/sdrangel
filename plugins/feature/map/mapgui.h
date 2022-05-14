@@ -72,6 +72,10 @@ public:
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
+    virtual void setWorkspaceIndex(int index);
+    virtual int getWorkspaceIndex() const { return m_settings.m_workspaceIndex; }
+    virtual void setGeometryBytes(const QByteArray& blob) { m_settings.m_geometryBytes = blob; }
+    virtual QByteArray getGeometryBytes() const { return m_settings.m_geometryBytes; }
     AzEl *getAzEl() { return &m_azEl; }
     Map *getMap() { return m_map; }
     QQuickItem *getMapItem();
@@ -132,9 +136,7 @@ private:
     QString maptilerAPIKey() const;
     QString cesiumIonAPIKey() const;
     void redrawMap();
-
-    void leaveEvent(QEvent*);
-    void enterEvent(QEvent*);
+    void makeUIConnections();
 
     static QString getDataDir();
     static const QList<RadioTimeTransmitter> m_radioTimeTransmitters;

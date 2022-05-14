@@ -167,6 +167,99 @@ public:
         { }
     };
 
+    class SDRBASE_API MsgLoadConfiguration : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const Configuration *getConfiguration() const { return m_configuration; }
+
+        static MsgLoadConfiguration* create(const Configuration *configuration)
+        {
+            return new MsgLoadConfiguration(configuration);
+        }
+
+    private:
+        const Configuration *m_configuration;
+
+        MsgLoadConfiguration(const Configuration *configuration) :
+            Message(),
+            m_configuration(configuration)
+        { }
+    };
+
+    class SDRBASE_API MsgSaveConfiguration : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        Configuration *getConfiguration() const { return m_configuration; }
+        bool isNewConfiguration() const { return m_newConfiguration; }
+
+        static MsgSaveConfiguration* create(Configuration *configuration, bool newConfiguration)
+        {
+            return new MsgSaveConfiguration(configuration, newConfiguration);
+        }
+
+    private:
+        Configuration *m_configuration;
+        bool m_newConfiguration;
+
+        MsgSaveConfiguration(Configuration *configuration, bool newConfiguration) :
+            Message(),
+            m_configuration(configuration),
+            m_newConfiguration(newConfiguration)
+        { }
+    };
+
+    class SDRBASE_API MsgDeleteConfiguration : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const Configuration *getConfiguration() const { return m_configuration; }
+
+        static MsgDeleteConfiguration* create(const Configuration *configuration)
+        {
+            return new MsgDeleteConfiguration(configuration);
+        }
+
+    private:
+        const Configuration *m_configuration;
+
+        MsgDeleteConfiguration(const Configuration *configuration) :
+            Message(),
+            m_configuration(configuration)
+        { }
+    };
+
+    class SDRBASE_API MsgAddWorkspace : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgAddWorkspace* create()
+        {
+            return new MsgAddWorkspace();
+        }
+
+    private:
+        MsgAddWorkspace() :
+            Message()
+        { }
+    };
+
+    class SDRBASE_API MsgDeleteEmptyWorkspaces : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgDeleteEmptyWorkspaces* create()
+        {
+            return new MsgDeleteEmptyWorkspaces();
+        }
+
+    private:
+        MsgDeleteEmptyWorkspaces() :
+            Message()
+        { }
+    };
+
     class SDRBASE_API MsgLoadFeatureSetPreset : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -547,6 +640,97 @@ public:
         { }
     };
 
+    class SDRBASE_API MsgMoveDeviceUIToWorkspace : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getDeviceSetIndex() const { return m_deviceSetIndex; }
+        int getWorkspaceIndex() const { return m_workspaceIndex; }
+
+        static MsgMoveDeviceUIToWorkspace* create(int deviceSetIndex, int workspceIndex) {
+            return new MsgMoveDeviceUIToWorkspace(deviceSetIndex, workspceIndex);
+        }
+
+    private:
+        int m_deviceSetIndex;
+        int m_workspaceIndex;
+
+        MsgMoveDeviceUIToWorkspace(int deviceSetIndex, int workspceIndex) :
+            Message(),
+            m_deviceSetIndex(deviceSetIndex),
+            m_workspaceIndex(workspceIndex)
+        { }
+    };
+
+    class SDRBASE_API MsgMoveMainSpectrumUIToWorkspace : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getDeviceSetIndex() const { return m_deviceSetIndex; }
+        int getWorkspaceIndex() const { return m_workspaceIndex; }
+
+        static MsgMoveMainSpectrumUIToWorkspace* create(int deviceSetIndex, int workspceIndex) {
+            return new MsgMoveMainSpectrumUIToWorkspace(deviceSetIndex, workspceIndex);
+        }
+
+    private:
+        int m_deviceSetIndex;
+        int m_workspaceIndex;
+
+        MsgMoveMainSpectrumUIToWorkspace(int deviceSetIndex, int workspceIndex) :
+            Message(),
+            m_deviceSetIndex(deviceSetIndex),
+            m_workspaceIndex(workspceIndex)
+        { }
+    };
+
+    class SDRBASE_API MsgMoveFeatureUIToWorkspace : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getFeatureIndex() const { return m_featureIndex; }
+        int getWorkspaceIndex() const { return m_workspaceIndex; }
+
+        static MsgMoveFeatureUIToWorkspace* create(int featureIndex, int workspceIndex) {
+            return new MsgMoveFeatureUIToWorkspace(featureIndex, workspceIndex);
+        }
+
+    private:
+        int m_featureIndex;
+        int m_workspaceIndex;
+
+        MsgMoveFeatureUIToWorkspace(int featureIndex, int workspceIndex) :
+            Message(),
+            m_featureIndex(featureIndex),
+            m_workspaceIndex(workspceIndex)
+        { }
+    };
+
+    class SDRBASE_API MsgMoveChannelUIToWorkspace : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getDeviceSetIndex() const { return m_deviceSetIndex; }
+        int getChannelIndex() const { return m_channelIndex; }
+        int getWorkspaceIndex() const { return m_workspaceIndex; }
+
+        static MsgMoveChannelUIToWorkspace* create(int deviceSetIndex, int channelIndex, int workspceIndex) {
+            return new MsgMoveChannelUIToWorkspace(deviceSetIndex, channelIndex, workspceIndex);
+        }
+
+    private:
+        int m_deviceSetIndex;
+        int m_channelIndex;
+        int m_workspaceIndex;
+
+        MsgMoveChannelUIToWorkspace(int deviceSetIndex, int channelIndex, int workspceIndex) :
+            Message(),
+            m_deviceSetIndex(deviceSetIndex),
+            m_channelIndex(channelIndex),
+            m_workspaceIndex(workspceIndex)
+        { }
+    };
+
     // Message to Map feature to display an item on the map
     class SDRBASE_API MsgMapItem : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -725,6 +909,7 @@ public:
     void removeLastFeatureSet();
     void appendDeviceSet(int deviceType);
     void removeLastDeviceSet();
+    void removeDeviceSet(int deviceSetIndex);
     // slave mode - channels
     void addChannelInstance(DeviceSet *deviceSet, ChannelAPI *channelAPI);
     void removeChannelInstanceAt(DeviceSet *deviceSet, int channelIndex);
@@ -742,6 +927,9 @@ public:
     friend class MainServer;
     friend class MainWindow;
     friend class WebAPIAdapter;
+    friend class CommandsDialog;
+    friend class DeviceSetPresetsDialog;
+    friend class ConfigurationsDialog;
 
 signals:
     void deviceSetAdded(int index, DeviceAPI *device);

@@ -27,6 +27,7 @@
 #include <QThread>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGChannelReport.h"
 #include "SWGChannelActions.h"
 
@@ -99,6 +100,18 @@ AISMod::~AISMod()
     delete m_thread;
 }
 
+void AISMod::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSourceAPI(this);
+        m_deviceAPI->removeChannelSource(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addChannelSource(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
+}
+
 void AISMod::start()
 {
     qDebug("AISMod::start");
@@ -164,6 +177,10 @@ bool AISMod::handleMessage(const Message& cmd)
         DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
         qDebug() << "AISMod::handleMessage: DSPSignalNotification";
         m_basebandSource->getInputMessageQueue()->push(rep);
+        // Forward to GUI if any
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
+        }
         return true;
     }
     else if (MainCore::MsgChannelDemodQuery::match(cmd))
@@ -524,6 +541,15 @@ int AISMod::webapiSettingsGet(
     response.getAisModSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
 
+    return 200;
+}
+
+int AISMod::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

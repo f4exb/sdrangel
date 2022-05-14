@@ -58,7 +58,7 @@ public:
     bool getRelease() const { return m_release; }
     QString getKeyLabel() const;
 
-    void run(const QString& apiAddress, int apiPort, int deviceSetIndex);
+    void run(const QString& apiAddress, int apiPort, int deviceSetIndex = 0);
     void kill();
     QProcess::ProcessState getLastProcessState() const;
     bool getLastProcessError(QProcess::ProcessError& error) const;

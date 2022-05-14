@@ -51,7 +51,6 @@ public:
 private:
 	Ui::TestMOSyncGui* ui;
 
-	DeviceUISet* m_deviceUISet;
 	bool m_doApplySettings;
 	bool m_forceSettings;
 	TestMOSyncSettings m_settings;
@@ -72,6 +71,7 @@ private:
 	void sendSettings();
 	void updateSampleRateAndFrequency();
 	bool handleMessage(const Message& message);
+    void makeUIConnections();
 
 private slots:
     void handleInputMessages();
@@ -80,6 +80,7 @@ private slots:
 	void on_startStop_toggled(bool checked);
 	void on_interp_currentIndexChanged(int index);
     void on_spectrumIndex_currentIndexChanged(int index);
+    void openDeviceSettingsDialog(const QPoint& p);
     void updateHardware();
     void updateStatus();
 	void tick();

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>SSBDemodGUI</class>
- <widget class="RollupWidget" name="SSBDemodGUI">
+ <widget class="RollupContents" name="SSBDemodGUI">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -530,6 +530,7 @@
         </property>
         <property name="font">
          <font>
+          <family>Liberation Sans</family>
           <pointsize>8</pointsize>
          </font>
         </property>
@@ -551,6 +552,7 @@
         </property>
         <property name="font">
          <font>
+          <family>Liberation Sans</family>
           <pointsize>8</pointsize>
          </font>
         </property>
@@ -563,6 +565,7 @@
        <widget class="QLabel" name="lsbLabel">
         <property name="font">
          <font>
+          <family>Liberation Sans</family>
           <pointsize>8</pointsize>
          </font>
         </property>
@@ -584,6 +587,7 @@
         </property>
         <property name="font">
          <font>
+          <family>Liberation Sans</family>
           <pointsize>8</pointsize>
          </font>
         </property>
@@ -599,6 +603,7 @@
        <widget class="QLabel" name="usbLabel">
         <property name="font">
          <font>
+          <family>Liberation Sans</family>
           <pointsize>8</pointsize>
          </font>
         </property>
@@ -620,6 +625,7 @@
         </property>
         <property name="font">
          <font>
+          <family>Liberation Sans</family>
           <pointsize>8</pointsize>
          </font>
         </property>
@@ -915,6 +921,12 @@
      <height>284</height>
     </rect>
    </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
    <property name="windowTitle">
     <string>Channel Spectrum</string>
    </property>
@@ -936,6 +948,12 @@
     </property>
     <item>
      <widget class="GLSpectrum" name="glSpectrum" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="minimumSize">
        <size>
         <width>200</width>
@@ -951,22 +969,46 @@
      </widget>
     </item>
     <item>
-     <widget class="GLSpectrumGUI" name="spectrumGUI" native="true"/>
+     <widget class="GLSpectrumGUI" name="spectrumGUI" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>30</height>
+       </size>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>RollupWidget</class>
+   <class>RollupContents</class>
    <extends>QWidget</extends>
-   <header>gui/rollupwidget.h</header>
+   <header>gui/rollupcontents.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
    <class>LevelMeterSignalDB</class>
    <extends>QWidget</extends>
    <header>gui/levelmeter.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ValueDialZ</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedialz.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -980,17 +1022,6 @@
    <extends>QWidget</extends>
    <header>gui/glspectrumgui.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ValueDialZ</class>
-   <extends>QWidget</extends>
-   <header>gui/valuedialz.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
    <class>TickedSlider</class>

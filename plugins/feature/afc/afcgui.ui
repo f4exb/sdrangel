@@ -1,24 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>AFCGUI</class>
- <widget class="RollupWidget" name="AFCGUI">
+ <widget class="RollupContents" name="AFCGUI">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>340</width>
-    <height>160</height>
+    <width>320</width>
+    <height>100</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
-    <width>340</width>
+    <width>320</width>
+    <height>100</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>560</width>
     <height>100</height>
    </size>
   </property>
@@ -37,7 +43,7 @@
      <x>0</x>
      <y>0</y>
      <width>340</width>
-     <height>151</height>
+     <height>111</height>
     </rect>
    </property>
    <property name="windowTitle">
@@ -407,9 +413,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>RollupWidget</class>
+   <class>RollupContents</class>
    <extends>QWidget</extends>
-   <header>gui/rollupwidget.h</header>
+   <header>gui/rollupcontents.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

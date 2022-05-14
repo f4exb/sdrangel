@@ -45,10 +45,12 @@ public:
 	bool deserialize(const QByteArray& data);
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 
+protected:
+    void resizeEvent(QResizeEvent* size);
+
 private:
 	Ui::BladeRF2MIMOGui* ui;
 
-	DeviceUISet* m_deviceUISet;
 	BladeRF2MIMOSettings m_settings;
     bool m_rxElseTx;   //!< Which side is being dealt with
     int m_streamIndex; //!< Current stream index being dealt with
@@ -97,6 +99,7 @@ private:
     int getGainValue(float gainDB, int gainMin, int gainMax, int gainStep, float gainScale);
 	float setGainFromValue(int value);
 	bool handleMessage(const Message& message);
+    void makeUIConnections();
 
 private slots:
     void handleInputMessages();

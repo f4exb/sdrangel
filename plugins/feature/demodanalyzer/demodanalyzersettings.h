@@ -52,6 +52,8 @@ struct DemodAnalyzerSettings
     Serializable *m_spectrumGUI;
     Serializable *m_scopeGUI;
     Serializable *m_rollupState;
+    int m_workspaceIndex;
+    QByteArray m_geometryBytes;
 
     DemodAnalyzerSettings();
     void resetToDefaults();

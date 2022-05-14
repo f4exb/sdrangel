@@ -76,38 +76,46 @@ private:
     void instancePresetsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instancePresetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instancePresetFileService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void instancePresetBlobService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void instanceConfigurationsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void instanceConfigurationService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void instanceConfigurationFileService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void instanceConfigurationBlobService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceFeaturePresetsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceFeaturePresetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceDeviceSetsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceDeviceSetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
-    void instanceFeatureSetsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
-    void instanceFeatureSetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void instanceWorkspaceService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
 
     void devicesetService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetFocusService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetSpectrumSettingsService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetSpectrumServerService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void devicesetSpectrumWorkspaceService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetDeviceService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetDeviceSettingsService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetDeviceRunService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetDeviceSubsystemRunService(const std::string& indexStr, const std::string& subsystemIndexStr,qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetDeviceReportService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetDeviceActionsService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void devicesetDeviceWorkspaceService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetChannelsReportService(const std::string& deviceSetIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetChannelService(const std::string& deviceSetIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetChannelIndexService(const std::string& deviceSetIndexStr, const std::string& channelIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetChannelSettingsService(const std::string& deviceSetIndexStr, const std::string& channelIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetChannelReportService(const std::string& deviceSetIndexStr, const std::string& channelIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetChannelActionsService(const std::string& deviceSetIndexStr, const std::string& channelIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void devicesetChannelWorkspaceService(const std::string& deviceSetIndexStr, const std::string& channelIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
 
-    void featuresetService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
-    void featuresetFeatureService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
-    void featuresetPresetService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
-    void featuresetFeatureIndexService(const std::string& featureSetIndexStr, const std::string& featureIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
-    void featuresetFeatureRunService(const std::string& featureSetIndexStr, const std::string& featureIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
-    void featuresetFeatureSettingsService(const std::string& featureSetIndexStr, const std::string& featureIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
-    void featuresetFeatureReportService(const std::string& featureSetIndexStr, const std::string& featureIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
-    void featuresetFeatureActionsService(const std::string& featureSetIndexStr, const std::string& featureIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void featuresetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void featuresetFeatureService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void featuresetPresetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void featuresetFeatureIndexService(const std::string& featureIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void featuresetFeatureRunService(const std::string& featureIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void featuresetFeatureSettingsService(const std::string& featureIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void featuresetFeatureReportService(const std::string& featureIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void featuresetFeatureActionsService(const std::string& featureIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void featuresetFeatureWorkspaceService(const std::string& featureIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
 
     bool validatePresetTransfer(SWGSDRangel::SWGPresetTransfer& presetTransfer);
     bool validatePresetIdentifer(SWGSDRangel::SWGPresetIdentifier& presetIdentifier);
@@ -118,7 +126,6 @@ private:
     bool validateDeviceActions(SWGSDRangel::SWGDeviceActions& deviceActions, QJsonObject& jsonObject, QStringList& deviceActionsKeys);
     bool validateChannelSettings(SWGSDRangel::SWGChannelSettings& channelSettings, QJsonObject& jsonObject, QStringList& channelSettingsKeys);
     bool validateChannelActions(SWGSDRangel::SWGChannelActions& channelActions, QJsonObject& jsonObject, QStringList& channelActionsKeys);
-    bool validateFeaturePresetTransfer(SWGSDRangel::SWGFeaturePresetTransfer& presetTransfer);
     bool validateFeaturePresetIdentifer(SWGSDRangel::SWGFeaturePresetIdentifier& presetIdentifier);
     bool validateFeatureSettings(SWGSDRangel::SWGFeatureSettings& featureSettings, QJsonObject& jsonObject, QStringList& featureSettingsKeys);
     bool validateFeatureActions(SWGSDRangel::SWGFeatureActions& featureActions, QJsonObject& jsonObject, QStringList& featureActionsKeys);
@@ -127,6 +134,9 @@ private:
     bool validateAMBEDevices(SWGSDRangel::SWGAMBEDevices& ambeDevices, QJsonObject& jsonObject);
     bool validateLimeRFEConfig(SWGSDRangel::SWGLimeRFESettings& limeRFESettings, QJsonObject& jsonObject, QStringList& limeRFESettingsKeys);
     bool validateConfig(SWGSDRangel::SWGInstanceConfigResponse& config, QJsonObject& jsonObject, WebAPIAdapterInterface::ConfigKeys& configKeys);
+    bool validateWorkspaceInfo(SWGSDRangel::SWGWorkspaceInfo& workspaceInfo, QJsonObject& jsonObject);
+    bool validateConfigurationIdentifier(SWGSDRangel::SWGConfigurationIdentifier& configurationIdentifier);
+    bool validateConfigurationImportExport(SWGSDRangel::SWGConfigurationImportExport& configuratopmImportExport);
 
     bool appendFeatureSetPresetKeys(
         SWGSDRangel::SWGFeatureSetPreset *preset,

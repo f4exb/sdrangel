@@ -10,6 +10,8 @@ This plugin is available for Linux and Mac O/S only.
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![UDP Source plugin GUI](../../../doc/img/UDPsource_plugin.png)
 
 <h3>1: Frequency shift from center frequency of reception</h3>
@@ -30,7 +32,7 @@ Use this button to switch off the RF on the channel. The background of the butto
 
 <h3>5: UDP address and port</h3>
 
-Enter the network interface address and listening port. The display is in the format `address:data port` 
+Enter the network interface address and listening port. The display is in the format `address:data port`
 
 <h3>6: Join multicast group</h3>
 
@@ -57,7 +59,7 @@ Combo box to specify the type of samples that are received and sent in the chann
 <h3>10: Mono/Stereo input</h3>
 
 This toggles switches between 1 channel (mono) and 2 channels (stereo) input samples format.
-  
+
 <h3>11: Output signal bandwidth</h3>
 
 The signal is bandpass filtered to this bandwidth (zero frequency centered) before being sent out in the channel. In SSB modes only half of the filter is used (LSB: lower, USB: upper). Thus to send a signal with 3000 Hz bandwidth a bandwidth of 6000 Hz must be selected. In addition in SSB modes a 300 Hz highpass filter is applied.
@@ -72,9 +74,9 @@ this is the AM percentage modulation when a +/- 1.0 amplitude modulating signal 
 
 <h3>14: Squelch</h3>
 
-The slider sets the squelch power threshold based on channel input power (2). At the right of the slider the value in dB is displayed. 
+The slider sets the squelch power threshold based on channel input power (2). At the right of the slider the value in dB is displayed.
 
-The button sets the delay after which a signal constantly above the squelch threshold effectively opens the squelch. The same delay is used for squelch release. The delay in milliseconds is displayed at the right of the button. 
+The button sets the delay after which a signal constantly above the squelch threshold effectively opens the squelch. The same delay is used for squelch release. The delay in milliseconds is displayed at the right of the button.
 
 <h3>15: Input and output Gains</h3>
 
@@ -94,7 +96,7 @@ This gauge shows the percentage of deviation from a R/W pointer distance of half
 
 There is an automatic correction to try to maintain the half buffer distance between read and write pointers. This adjust the sample rate and therefore some wiggling around the nominal sample rate can occur. This should be hardly noticeable for most modulations but can be problematic with very narrowband modulations like WSPR.
 
-The buffer consists in 512 bytes frames so that a normalized UDP block can be placed in one frame. Half the number of frames is calculated as the sample rate divided by 375. This results in a fixed average delay 0f 341 ms for sample rates of 48 kS/s and above. 
+The buffer consists in 512 bytes frames so that a normalized UDP block can be placed in one frame. Half the number of frames is calculated as the sample rate divided by 375. This results in a fixed average delay 0f 341 ms for sample rates of 48 kS/s and above.
 
 <h3>18: Reset input buffer R/W pointers</h3>
 
@@ -117,10 +119,10 @@ The changes in the following items only become effective when this button is pre
   - FM deviation (12)
   - AM percentage (13)
 
-When any item of these items is changed the button is lit in green until it is pressed. 
+When any item of these items is changed the button is lit in green until it is pressed.
 
 <h3>21: Spectrum display</h3>
 
-This is the spectrum display of the channel signal before filtering. Please refer to the Spectrum display description for details. 
+This is the spectrum display of the channel signal before filtering. Details on the spectrum view and controls can be found [here](../../../sdrgui/gui/spectrum.md)
 
-This spectrum is centered on the center frequency of the channel (center frequency of reception + channel shift) and is that of a complex signal i.e. there are positive and negative frequencies. The width of the spectrum is proportional of the sample rate. That is for a sample rate of S samples per seconds the spectrum spans from -S/2 to +S/2 Hz. 
+This spectrum is centered on the center frequency of the channel (center frequency of reception + channel shift) and is that of a complex signal i.e. there are positive and negative frequencies. The width of the spectrum is proportional of the sample rate. That is for a sample rate of S samples per seconds the spectrum spans from -S/2 to +S/2 Hz.

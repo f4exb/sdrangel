@@ -49,10 +49,12 @@ public:
 	bool deserialize(const QByteArray& data);
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 
+protected:
+    void resizeEvent(QResizeEvent* size);
+
 private:
 	Ui::RemoteInputGui* ui;
 
-	DeviceUISet* m_deviceUISet;
     RemoteInputSettings m_settings;        //!< current settings
 	RemoteInput::RemoteChannelSettings m_remoteChannelSettings;
 	double m_remoteShiftFrequencyFactor;  //!< Remote channel frequency shift factor
@@ -116,6 +118,7 @@ private:
 	void applyPosition();
 	void applyRemoteSettings();
 	bool handleMessage(const Message& message);
+    void makeUIConnections();
 
 private slots:
     void handleInputMessages();

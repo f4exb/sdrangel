@@ -74,20 +74,20 @@ struct VORLocalizerSettings
     uint16_t m_reverseAPIFeatureSetIndex;
     uint16_t m_reverseAPIFeatureIndex;
     Serializable *m_rollupState;
+    int m_workspaceIndex;
+    QByteArray m_geometryBytes;
 
-
-    static const int VORDEMOD_COLUMNS  = 11;
+    static const int VORDEMOD_COLUMNS  = 10;
     static const int VOR_COL_NAME      =  0;
     static const int VOR_COL_FREQUENCY =  1;
-    static const int VOR_COL_NAVID     =  2;
-    static const int VOR_COL_IDENT     =  3;
-    static const int VOR_COL_MORSE     =  4;
-    static const int VOR_COL_RX_IDENT  =  5;
-    static const int VOR_COL_RX_MORSE  =  6;
-    static const int VOR_COL_RADIAL    =  7;
-    static const int VOR_COL_REF_MAG   =  8;
-    static const int VOR_COL_VAR_MAG   =  9;
-    static const int VOR_COL_MUTE      = 10;
+    static const int VOR_COL_IDENT     =  2;
+    static const int VOR_COL_MORSE     =  3;
+    static const int VOR_COL_RX_IDENT  =  4;
+    static const int VOR_COL_RX_MORSE  =  5;
+    static const int VOR_COL_RADIAL    =  6;
+    static const int VOR_COL_REF_MAG   =  7;
+    static const int VOR_COL_VAR_MAG   =  8;
+    static const int VOR_COL_MUTE      =  9;
 
     int m_columnIndexes[VORDEMOD_COLUMNS];//!< How the columns are ordered in the table
     int m_columnSizes[VORDEMOD_COLUMNS];  //!< Size of the coumns in the table

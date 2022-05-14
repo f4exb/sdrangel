@@ -57,6 +57,9 @@ struct RadiosondeDemodSettings
     uint16_t m_reverseAPIChannelIndex;
     Serializable *m_scopeGUI;
     Serializable *m_rollupState;
+    int m_workspaceIndex;
+    QByteArray m_geometryBytes;
+    bool m_hidden;
 
     int m_frameColumnIndexes[RADIOSONDEDEMOD_FRAME_COLUMNS];//!< How the columns are ordered in the table
     int m_frameColumnSizes[RADIOSONDEDEMOD_FRAME_COLUMNS];  //!< Size of the columns in the table

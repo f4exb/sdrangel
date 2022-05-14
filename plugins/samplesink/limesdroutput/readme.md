@@ -32,6 +32,8 @@ Then add the following defines on `cmake` command line:
 
 <h2>Interface</h2>
 
+The top and bottom bars of the device window are described [here](../../../sdrgui/device/readme.md)
+
 ![LimeSDR output plugin GUI](../../../doc/img/LimeSDROutput_plugin.png)
 
 <h3>1: Start/Stop</h3>

@@ -88,8 +88,10 @@ public:
     BeamSteeringCWMod(DeviceAPI *deviceAPI);
 	virtual ~BeamSteeringCWMod();
 	virtual void destroy() { delete this; }
+    virtual void setDeviceAPI(DeviceAPI *deviceAPI);
+    virtual DeviceAPI *getDeviceAPI() { return m_deviceAPI; }
 
-	virtual void startSinks() {}
+    virtual void startSinks() {}
 	virtual void stopSinks() {}
     virtual void startSources(); //!< thread start()
     virtual void stopSources(); //!< thread exit() and wait()
@@ -130,6 +132,10 @@ public:
             bool force,
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiWorkspaceGet(
+            SWGSDRangel::SWGWorkspaceInfo& query,
             QString& errorMessage);
 
     static void webapiFormatChannelSettings(

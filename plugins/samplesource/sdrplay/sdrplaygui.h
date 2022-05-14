@@ -47,10 +47,12 @@ public:
     virtual bool deserialize(const QByteArray& data);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 
+protected:
+    void resizeEvent(QResizeEvent* size);
+
 private:
     Ui::SDRPlayGui* ui;
 
-    DeviceUISet* m_deviceUISet;
     bool m_doApplySettings;
     bool m_forceSettings;
     SDRPlaySettings m_settings;
@@ -67,6 +69,7 @@ private:
     void sendSettings();
     void updateSampleRateAndFrequency();
     bool handleMessage(const Message& message);
+    void makeUIConnections();
 
 private slots:
     void updateHardware();

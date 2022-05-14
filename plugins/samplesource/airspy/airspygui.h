@@ -44,13 +44,16 @@ public:
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 	virtual MessageQueue* getInputMessageQueue() { return &m_inputMessageQueue; }
+
 	uint32_t getDevSampleRate(unsigned int index);
 	int getDevSampleRateIndex(uint32_t sampleRate);
+
+protected:
+    void resizeEvent(QResizeEvent* size);
 
 private:
 	Ui::AirspyGui* ui;
 
-	DeviceUISet* m_deviceUISet;
 	bool m_doApplySettings;
 	bool m_forceSettings;
 	AirspySettings m_settings;
@@ -70,6 +73,7 @@ private:
     void updateSampleRateAndFrequency();
     void updateFrequencyLimits();
 	bool handleMessage(const Message& message);
+    void makeUIConnections();
 
 private slots:
 	void on_centerFrequency_changed(quint64 value);

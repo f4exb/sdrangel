@@ -6,6 +6,8 @@ This plugin can be used to listen to a narrowband FM modulated signal. "Narrowba
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![NFM Demodulator plugin GUI](../../../doc/img/NFMdemod_plugin.png)
 
 <h3>1: Frequency shift from center frequency of reception value</h3>

@@ -22,6 +22,7 @@
 #include <QNetworkReply>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 
 #include "device/deviceapi.h"
 #include "dsp/hbfilterchainconverter.h"
@@ -78,6 +79,18 @@ BeamSteeringCWMod::~BeamSteeringCWMod()
     m_deviceAPI->removeMIMOChannel(this);
     delete m_basebandSource;
     delete m_thread;
+}
+
+void BeamSteeringCWMod::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSinkAPI(this);
+        m_deviceAPI->removeMIMOChannel(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addMIMOChannel(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
 }
 
 void BeamSteeringCWMod::startSources()
@@ -268,6 +281,15 @@ int BeamSteeringCWMod::webapiSettingsGet(
     response.setBeamSteeringCwModSettings(new SWGSDRangel::SWGBeamSteeringCWModSettings());
     response.getBeamSteeringCwModSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int BeamSteeringCWMod::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

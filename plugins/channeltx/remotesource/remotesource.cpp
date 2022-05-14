@@ -24,6 +24,7 @@
 #include <QThread>
 
 #include "SWGChannelSettings.h"
+#include "SWGWorkspaceInfo.h"
 #include "SWGChannelReport.h"
 #include "SWGRemoteSourceReport.h"
 
@@ -42,7 +43,6 @@
 MESSAGE_CLASS_DEFINITION(RemoteSource::MsgConfigureRemoteSource, Message)
 MESSAGE_CLASS_DEFINITION(RemoteSource::MsgQueryStreamData, Message)
 MESSAGE_CLASS_DEFINITION(RemoteSource::MsgReportStreamData, Message)
-MESSAGE_CLASS_DEFINITION(RemoteSource::MsgBasebandSampleRateNotification, Message)
 
 const char* const RemoteSource::m_channelIdURI = "sdrangel.channeltx.remotesource";
 const char* const RemoteSource::m_channelId ="RemoteSource";
@@ -89,6 +89,18 @@ RemoteSource::~RemoteSource()
     delete m_thread;
 }
 
+void RemoteSource::setDeviceAPI(DeviceAPI *deviceAPI)
+{
+    if (deviceAPI != m_deviceAPI)
+    {
+        m_deviceAPI->removeChannelSourceAPI(this);
+        m_deviceAPI->removeChannelSource(this);
+        m_deviceAPI = deviceAPI;
+        m_deviceAPI->addChannelSource(this);
+        m_deviceAPI->addChannelSinkAPI(this);
+    }
+}
+
 void RemoteSource::start()
 {
     qDebug("RemoteSource::start");
@@ -124,10 +136,8 @@ bool RemoteSource::handleMessage(const Message& cmd)
         calculateFrequencyOffset(m_settings.m_log2Interp, m_settings.m_filterChainHash); // This is when device sample rate changes
         m_centerFrequency = notif.getCenterFrequency();
 
-        if (m_guiMessageQueue)
-        {
-            MsgBasebandSampleRateNotification *msg = MsgBasebandSampleRateNotification::create(notif.getSampleRate());
-            m_guiMessageQueue->push(msg);
+        if (m_guiMessageQueue) {
+            m_guiMessageQueue->push(new DSPSignalNotification(notif));
         }
 
         return true;
@@ -288,6 +298,15 @@ int RemoteSource::webapiSettingsGet(
     response.setRemoteSourceSettings(new SWGSDRangel::SWGRemoteSourceSettings());
     response.getRemoteSourceSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
+    return 200;
+}
+
+int RemoteSource::webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setIndex(m_settings.m_workspaceIndex);
     return 200;
 }
 

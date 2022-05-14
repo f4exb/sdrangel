@@ -88,5 +88,5 @@ ChannelGUI* VORDemodPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, Baseban
 
 ChannelWebAPIAdapter* VORDemodPlugin::createChannelWebAPIAdapter() const
 {
-    return new VORDemodWebAPIAdapter();
+    return new VORDemodSCWebAPIAdapter();
 }

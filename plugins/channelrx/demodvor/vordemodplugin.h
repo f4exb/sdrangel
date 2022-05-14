@@ -16,8 +16,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_VORDEMODPLUGIN_H
-#define INCLUDE_VORDEMODPLUGIN_H
+#ifndef INCLUDE_VORDEMODSCPLUGIN_H
+#define INCLUDE_VORDEMODSCPLUGIN_H
 
 #include <QObject>
 #include "plugin/plugininterface.h"
@@ -46,4 +46,4 @@ private:
     PluginAPI* m_pluginAPI;
 };
 
-#endif // INCLUDE_VORDEMODPLUGIN_H
+#endif // INCLUDE_VORDEMODSCPLUGIN_H

@@ -47,10 +47,12 @@ public:
 	bool deserialize(const QByteArray& data);
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 
+protected:
+    void resizeEvent(QResizeEvent* size);
+
 private:
 	Ui::RTLSDRGui* ui;
 
-	DeviceUISet* m_deviceUISet;
     bool m_doApplySettings;
 	bool m_forceSettings;
 	RTLSDRSettings m_settings;
@@ -73,6 +75,7 @@ private:
 	void updateFrequencyLimits();
     void blockApplySettings(bool block);
 	bool handleMessage(const Message& message);
+    void makeUIConnections();
 
 private slots:
     void handleInputMessages();

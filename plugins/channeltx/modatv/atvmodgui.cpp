@@ -21,6 +21,7 @@
 #include <QTime>
 #include <QDebug>
 #include <QMessageBox>
+#include <QResizeEvent>
 
 #include <cmath>
 
@@ -28,6 +29,7 @@
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "dsp/dspengine.h"
+#include "dsp/dspcommands.h"
 #include "util/db.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
@@ -54,6 +56,8 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
+    m_deviceCenterFrequency(0),
+    m_basebandSampleRate(1),
 	m_doApplySettings(true),
     m_videoLength(0),
     m_videoFrameRate(48000),
@@ -63,10 +67,13 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_camBusyFPSMessageBox(0),
     m_rfSliderDivisor(100000)
 {
-	ui->setupUi(this);
-    m_helpURL = "plugins/channeltx/modatv/readme.md";
 	setAttribute(Qt::WA_DeleteOnClose, true);
-	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    m_helpURL = "plugins/channeltx/modatv/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_atvMod = (ATVMod*) channelTx;
@@ -92,7 +99,6 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_settings.setRollupState(&m_rollupState);
 
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
-	m_deviceUISet->addRollupWidget(this);
 
 	connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
 
@@ -112,6 +118,7 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     ui->fmExcursionLabel->setText(delta);
 
     displaySettings();
+    makeUIConnections();
     applySettings(true);
 }
 
@@ -145,6 +152,14 @@ bool ATVModGUI::deserialize(const QByteArray& data)
         applySettings(true); // will have true
         return false;
     }
+}
+
+void ATVModGUI::resizeEvent(QResizeEvent* size)
+{
+    int maxWidth = getRollupContents()->maximumWidth();
+    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
+    resize(width() < maxWidth ? width() : maxWidth, minHeight);
+    size->accept();
 }
 
 bool ATVModGUI::handleMessage(const Message& message)
@@ -224,6 +239,16 @@ bool ATVModGUI::handleMessage(const Message& message)
     {
         const ATVMod::MsgConfigureVideoFileName& cfg = (ATVMod::MsgConfigureVideoFileName&) message;
         ui->videoFileText->setText(cfg.getFileName());
+        return true;
+    }
+    else if (DSPSignalNotification::match(message))
+    {
+        const DSPSignalNotification& notif = (const DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getCenterFrequency();
+        m_basebandSampleRate = notif.getSampleRate();
+        ui->deltaFrequency->setValueRange(false, 8, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
         return true;
     }
     else
@@ -433,6 +458,7 @@ void ATVModGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = value;
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -671,7 +697,7 @@ void ATVModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -685,11 +711,17 @@ void ATVModGUI::onMenuDialogCalled(const QPoint &p)
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
         dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
         dialog.setReverseAPIChannelIndex(m_settings.m_reverseAPIChannelIndex);
+        dialog.setDefaultTitle(m_displayedName);
+
+        if (m_deviceUISet->m_deviceMIMOEngine)
+        {
+            dialog.setNumberOfStreams(m_atvMod->getNumberOfDeviceStreams());
+            dialog.setStreamIndex(m_settings.m_streamIndex);
+        }
 
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
         m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
         m_settings.m_title = m_channelMarker.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
@@ -699,22 +731,17 @@ void ATVModGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
-        applySettings();
-    }
-    else if ((m_contextMenuType == ContextMenuStreamSettings) && (m_deviceUISet->m_deviceMIMOEngine))
-    {
-        DeviceStreamSelectionDialog dialog(this);
-        dialog.setNumberOfStreams(m_atvMod->getNumberOfDeviceStreams());
-        dialog.setStreamIndex(m_settings.m_streamIndex);
-        dialog.move(p);
-        dialog.exec();
+        if (m_deviceUISet->m_deviceMIMOEngine)
+        {
+            m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
+            m_channelMarker.clearStreamIndexes();
+            m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
+            updateIndexLabel();
+        }
 
-        m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
-        m_channelMarker.clearStreamIndexes();
-        m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
-        displayStreamIndex();
         applySettings();
     }
 
@@ -750,7 +777,8 @@ void ATVModGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
-    displayStreamIndex();
+    setTitle(m_channelMarker.getTitle());
+    updateIndexLabel();
 
     blockApplySettings(true);
 
@@ -796,27 +824,21 @@ void ATVModGUI::displaySettings()
     ui->playVideo->setChecked(m_settings.m_videoPlay);
     ui->playLoop->setChecked(m_settings.m_videoPlayLoop);
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
-void ATVModGUI::displayStreamIndex()
-{
-    if (m_deviceUISet->m_deviceMIMOEngine) {
-        setStreamIndicator(tr("%1").arg(m_settings.m_streamIndex));
-    } else {
-        setStreamIndicator("S"); // single channel indicator
-    }
-}
-
-void ATVModGUI::leaveEvent(QEvent*)
+void ATVModGUI::leaveEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void ATVModGUI::enterEvent(QEvent*)
+void ATVModGUI::enterEvent(QEvent* event)
 {
 	m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void ATVModGUI::tick()
@@ -867,3 +889,36 @@ void ATVModGUI::updateWithStreamTime()
     }
 }
 
+void ATVModGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &ATVModGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->channelMute, &QToolButton::toggled, this, &ATVModGUI::on_channelMute_toggled);
+    QObject::connect(ui->forceDecimator, &ButtonSwitch::toggled, this, &ATVModGUI::on_forceDecimator_toggled);
+    QObject::connect(ui->modulation, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ATVModGUI::on_modulation_currentIndexChanged);
+    QObject::connect(ui->rfScaling, &QDial::valueChanged, this, &ATVModGUI::on_rfScaling_valueChanged);
+    QObject::connect(ui->fmExcursion, &QDial::valueChanged, this, &ATVModGUI::on_fmExcursion_valueChanged);
+    QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &ATVModGUI::on_rfBW_valueChanged);
+    QObject::connect(ui->rfOppBW, &QSlider::valueChanged, this, &ATVModGUI::on_rfOppBW_valueChanged);
+    QObject::connect(ui->nbLines, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ATVModGUI::on_nbLines_currentIndexChanged);
+    QObject::connect(ui->fps, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ATVModGUI::on_fps_currentIndexChanged);
+    QObject::connect(ui->standard, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ATVModGUI::on_standard_currentIndexChanged);
+    QObject::connect(ui->invertVideo, &QCheckBox::clicked, this, &ATVModGUI::on_invertVideo_clicked);
+    QObject::connect(ui->uniformLevel, &QDial::valueChanged, this, &ATVModGUI::on_uniformLevel_valueChanged);
+    QObject::connect(ui->inputSelect, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ATVModGUI::on_inputSelect_currentIndexChanged);
+    QObject::connect(ui->imageFileDialog, &QPushButton::clicked, this, &ATVModGUI::on_imageFileDialog_clicked);
+    QObject::connect(ui->videoFileDialog, &QPushButton::clicked, this, &ATVModGUI::on_videoFileDialog_clicked);
+    QObject::connect(ui->playVideo, &ButtonSwitch::toggled, this, &ATVModGUI::on_playVideo_toggled);
+    QObject::connect(ui->playLoop, &ButtonSwitch::toggled, this, &ATVModGUI::on_playLoop_toggled);
+    QObject::connect(ui->navTimeSlider, &QSlider::valueChanged, this, &ATVModGUI::on_navTimeSlider_valueChanged);
+    QObject::connect(ui->playCamera, &ButtonSwitch::toggled, this, &ATVModGUI::on_playCamera_toggled);
+    QObject::connect(ui->camSelect, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ATVModGUI::on_camSelect_currentIndexChanged);
+    QObject::connect(ui->cameraManualFPSEnable, &ButtonSwitch::toggled, this, &ATVModGUI::on_cameraManualFPSEnable_toggled);
+    QObject::connect(ui->cameraManualFPS, &QDial::valueChanged, this, &ATVModGUI::on_cameraManualFPS_valueChanged);
+    QObject::connect(ui->overlayTextShow, &ButtonSwitch::toggled, this, &ATVModGUI::on_overlayTextShow_toggled);
+    QObject::connect(ui->overlayText, &QLineEdit::textEdited, this, &ATVModGUI::on_overlayText_textEdited);
+}
+
+void ATVModGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
+}

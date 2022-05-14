@@ -69,6 +69,7 @@ void GS232ControllerSettings::resetToDefaults()
     m_connection = SERIAL;
     m_host = "127.0.0.1";
     m_port = 4533;
+    m_workspaceIndex = 0;
 }
 
 QByteArray GS232ControllerSettings::serialize() const
@@ -103,6 +104,9 @@ QByteArray GS232ControllerSettings::serialize() const
     if (m_rollupState) {
         s.writeBlob(26, m_rollupState->serialize());
     }
+
+    s.writeS32(27, m_workspaceIndex);
+    s.writeBlob(28, m_geometryBytes);
 
     return s.final();
 }
@@ -162,6 +166,9 @@ bool GS232ControllerSettings::deserialize(const QByteArray& data)
             d.readBlob(26, &bytetmp);
             m_rollupState->deserialize(bytetmp);
         }
+
+        d.readS32(27, &m_workspaceIndex, 0);
+        d.readBlob(28, &m_geometryBytes);
 
         return true;
     }

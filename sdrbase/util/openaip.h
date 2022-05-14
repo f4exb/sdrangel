@@ -50,7 +50,6 @@ struct SDRBASE_API Airspace {
     };
 
     QString m_category;         // A-G, GLIDING, DANGER, PROHIBITED, TMZ
-    int m_id;
     QString m_country;          // GB
     QString m_name;             // BIGGIN HILL ATZ 129.405    - TODO: Extract frequency so we can tune to it
     AltLimit m_top;             // Top of airspace
@@ -139,11 +138,7 @@ struct SDRBASE_API Airspace {
 
                         while(xmlReader.readNextStartElement())
                         {
-                            if (xmlReader.name() == QLatin1String("ID"))
-                            {
-                                airspace->m_id = xmlReader.readElementText().toInt();
-                            }
-                            else if (xmlReader.name() == QLatin1String("COUNTRY"))
+                            if (xmlReader.name() == QLatin1String("COUNTRY"))
                             {
                                 airspace->m_country = xmlReader.readElementText();
                             }
@@ -237,7 +232,7 @@ struct SDRBASE_API Airspace {
 };
 
 struct SDRBASE_API NavAid {
-
+    int m_id;                   // Unique ID needed by VOR feature - Don't use value from database as that's 96-bit
     QString m_ident;            // 2 or 3 character ident
     QString m_type;             // NDB, VOR, VOR-DME or VORTAC
     QString m_name;
@@ -258,6 +253,7 @@ struct SDRBASE_API NavAid {
     // OpenAIP XML file
     static QList<NavAid *> readXML(const QString &filename)
     {
+        int uniqueId = 1;
         QList<NavAid *> navAidInfo;
         QFile file(filename);
         if (file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -352,6 +348,7 @@ struct SDRBASE_API NavAid {
                                 }
                             }
                             NavAid *navAid = new NavAid();
+                            navAid->m_id = uniqueId++;
                             navAid->m_ident = id;
                             // Check idents conform to our filtering rules
                             if (navAid->m_ident.size() < 2) {

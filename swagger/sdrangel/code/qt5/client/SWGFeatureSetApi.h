@@ -24,6 +24,7 @@
 #include "SWGFeatureSettings.h"
 #include "SWGPresetIdentifier.h"
 #include "SWGSuccessResponse.h"
+#include "SWGWorkspaceInfo.h"
 
 #include <QObject>
 
@@ -41,22 +42,22 @@ public:
     QString basePath;
     QMap<QString, QString> defaultHeaders;
 
-    void featuresetFEatureSettingsPut(qint32 feature_set_index, qint32 feature_index, SWGFeatureSettings& body);
-    void featuresetFeatureActionsPost(qint32 feature_set_index, qint32 feature_index, SWGFeatureActions& body);
-    void featuresetFeatureDelete(qint32 feature_set_index, qint32 feature_index);
-    void featuresetFeaturePost(qint32 feature_set_index, SWGFeatureSettings& body);
-    void featuresetFeatureReportGet(qint32 feature_set_index, qint32 feature_index);
-    void featuresetFeatureRunDelete(qint32 feature_set_index, qint32 feature_index);
-    void featuresetFeatureRunGet(qint32 feature_set_index, qint32 feature_index);
-    void featuresetFeatureRunPost(qint32 feature_set_index, qint32 feature_index);
-    void featuresetFeatureSettingsGet(qint32 feature_set_index, qint32 feature_index);
-    void featuresetFeatureSettingsPatch(qint32 feature_set_index, qint32 feature_index, SWGFeatureSettings& body);
-    void featuresetGet(qint32 feature_set_index);
-    void featuresetPresetPatch(qint32 feature_set_index, SWGFeaturePresetIdentifier& body);
-    void featuresetPresetPost(qint32 feature_set_index, SWGFeaturePresetIdentifier& body);
-    void featuresetPresetPut(qint32 feature_set_index, SWGFeaturePresetIdentifier& body);
-    void instanceFeatureSetDelete();
-    void instanceFeatureSetPost();
+    void featuresetFEatureSettingsPut(qint32 feature_index, SWGFeatureSettings& body);
+    void featuresetFeatureActionsPost(qint32 feature_index, SWGFeatureActions& body);
+    void featuresetFeatureDelete(qint32 feature_index);
+    void featuresetFeaturePost(SWGFeatureSettings& body);
+    void featuresetFeatureReportGet(qint32 feature_index);
+    void featuresetFeatureRunDelete(qint32 feature_index);
+    void featuresetFeatureRunGet(qint32 feature_index);
+    void featuresetFeatureRunPost(qint32 feature_index);
+    void featuresetFeatureSettingsGet(qint32 feature_index);
+    void featuresetFeatureSettingsPatch(qint32 feature_index, SWGFeatureSettings& body);
+    void featuresetFeatureWorkspaceGet(qint32 feature_index);
+    void featuresetFeatureWorkspacePut(qint32 feature_index, SWGWorkspaceInfo& body);
+    void featuresetGet();
+    void featuresetPresetPatch(SWGFeaturePresetIdentifier& body);
+    void featuresetPresetPost(SWGFeaturePresetIdentifier& body);
+    void featuresetPresetPut(SWGFeaturePresetIdentifier& body);
     
 private:
     void featuresetFEatureSettingsPutCallback (SWGHttpRequestWorker * worker);
@@ -69,12 +70,12 @@ private:
     void featuresetFeatureRunPostCallback (SWGHttpRequestWorker * worker);
     void featuresetFeatureSettingsGetCallback (SWGHttpRequestWorker * worker);
     void featuresetFeatureSettingsPatchCallback (SWGHttpRequestWorker * worker);
+    void featuresetFeatureWorkspaceGetCallback (SWGHttpRequestWorker * worker);
+    void featuresetFeatureWorkspacePutCallback (SWGHttpRequestWorker * worker);
     void featuresetGetCallback (SWGHttpRequestWorker * worker);
     void featuresetPresetPatchCallback (SWGHttpRequestWorker * worker);
     void featuresetPresetPostCallback (SWGHttpRequestWorker * worker);
     void featuresetPresetPutCallback (SWGHttpRequestWorker * worker);
-    void instanceFeatureSetDeleteCallback (SWGHttpRequestWorker * worker);
-    void instanceFeatureSetPostCallback (SWGHttpRequestWorker * worker);
     
 signals:
     void featuresetFEatureSettingsPutSignal(SWGFeatureSettings* summary);
@@ -87,12 +88,12 @@ signals:
     void featuresetFeatureRunPostSignal(SWGDeviceState* summary);
     void featuresetFeatureSettingsGetSignal(SWGFeatureSettings* summary);
     void featuresetFeatureSettingsPatchSignal(SWGFeatureSettings* summary);
+    void featuresetFeatureWorkspaceGetSignal(SWGWorkspaceInfo* summary);
+    void featuresetFeatureWorkspacePutSignal(SWGSuccessResponse* summary);
     void featuresetGetSignal(SWGFeatureSet* summary);
     void featuresetPresetPatchSignal(SWGFeaturePresetIdentifier* summary);
     void featuresetPresetPostSignal(SWGPresetIdentifier* summary);
     void featuresetPresetPutSignal(SWGFeaturePresetIdentifier* summary);
-    void instanceFeatureSetDeleteSignal(SWGSuccessResponse* summary);
-    void instanceFeatureSetPostSignal(SWGSuccessResponse* summary);
     
     void featuresetFEatureSettingsPutSignalE(SWGFeatureSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void featuresetFeatureActionsPostSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
@@ -104,12 +105,12 @@ signals:
     void featuresetFeatureRunPostSignalE(SWGDeviceState* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void featuresetFeatureSettingsGetSignalE(SWGFeatureSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void featuresetFeatureSettingsPatchSignalE(SWGFeatureSettings* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void featuresetFeatureWorkspaceGetSignalE(SWGWorkspaceInfo* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void featuresetFeatureWorkspacePutSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void featuresetGetSignalE(SWGFeatureSet* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void featuresetPresetPatchSignalE(SWGFeaturePresetIdentifier* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void featuresetPresetPostSignalE(SWGPresetIdentifier* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void featuresetPresetPutSignalE(SWGFeaturePresetIdentifier* summary, QNetworkReply::NetworkError error_type, QString& error_str);
-    void instanceFeatureSetDeleteSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
-    void instanceFeatureSetPostSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     
     void featuresetFEatureSettingsPutSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void featuresetFeatureActionsPostSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
@@ -121,12 +122,12 @@ signals:
     void featuresetFeatureRunPostSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void featuresetFeatureSettingsGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void featuresetFeatureSettingsPatchSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void featuresetFeatureWorkspaceGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void featuresetFeatureWorkspacePutSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void featuresetGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void featuresetPresetPatchSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void featuresetPresetPostSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void featuresetPresetPutSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
-    void instanceFeatureSetDeleteSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
-    void instanceFeatureSetPostSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     
 };
 

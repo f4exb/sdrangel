@@ -17,6 +17,8 @@ Although the atomic clocks used to transmit the timecode are extremely accurate,
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![Radio clock plugin GUI](../../../doc/img/RadioClock_plugin.png)
 
 <h3>1: Frequency shift from center frequency of reception</h3>

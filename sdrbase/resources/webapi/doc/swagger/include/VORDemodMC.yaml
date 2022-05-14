@@ -1,0 +1,55 @@
+VORDemodMCSettings:
+  description: VORDemodMC
+  properties:
+    squelch:
+      description: power squelch threshold in decibels
+      type: number
+      format: float
+    volume:
+      type: number
+      format: float
+    audioMute:
+      type: integer
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    audioDeviceName:
+      type: string
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+    identThreshold:
+      description: Morse code ident threshold (linear SNR)
+      type: integer
+    magDecAdjust:
+      description: Adjust radial lines on map for magnetic declination of VOR
+      type: integer
+    channelMarker:
+      $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+    rollupState:
+      $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+
+VORDemodMCReport:
+  description: VORDemodMC
+  properties:
+    channelPowerDB:
+      description: power received in channel (dB)
+      type: number
+      format: float
+    squelch:
+      description: squelch status (1 if open else 0)
+      type: integer
+    audioSampleRate:
+      type: integer

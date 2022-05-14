@@ -113,6 +113,28 @@
     <file>zoomall.png</file>
     <file>zoomin.png</file>
     <file>zoomout.png</file>
+    <file>rx.png</file>
+    <file>tx.png</file>
+    <file>mimo.png</file>
+    <file>tool.png</file>
+    <file>tool_add.png</file>
+    <file>tool_star.png</file>
+    <file>gear.png</file>
+    <file>corner_topleft.png</file>
+    <file>corner_topright.png</file>
+    <file>corner_botleft.png</file>
+    <file>corner_botright.png</file>
+    <file>cross.png</file>
+    <file>cascade.png</file>
+    <file>tiles.png</file>
+    <file>dock.png</file>
+    <file>help.png</file>
+    <file>shrink.png</file>
+    <file>exit.png</file>
+    <file>hide.png</file>
+    <file>channels.png</file>
+    <file>channels_add.png</file>
+    <file>exit_round.png</file>
     <file>LiberationMono-Regular.ttf</file>
     <file>LiberationSans-Regular.ttf</file>
   </qresource>

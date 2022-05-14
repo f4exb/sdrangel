@@ -54,6 +54,13 @@ void ATVDemodSettings::resetToDefaults()
     m_udpAddress = "127.0.0.1";
     m_udpPort = 9999;
     m_streamIndex = 0;
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
+    m_reverseAPIChannelIndex = 0;
+    m_workspaceIndex = 0;
+    m_hidden = false;
 }
 
 QByteArray ATVDemodSettings::serialize() const
@@ -91,6 +98,15 @@ QByteArray ATVDemodSettings::serialize() const
         s.writeBlob(25, m_rollupState->serialize());
     }
 
+    s.writeBool(26, m_useReverseAPI);
+    s.writeString(27, m_reverseAPIAddress);
+    s.writeU32(28, m_reverseAPIPort);
+    s.writeU32(29, m_reverseAPIDeviceIndex);
+    s.writeU32(30, m_reverseAPIChannelIndex);
+    s.writeS32(31, m_workspaceIndex);
+    s.writeBlob(32, m_geometryBytes);
+    s.writeBool(33, m_hidden);
+
     return s.final();
 }
 
@@ -108,6 +124,7 @@ bool ATVDemodSettings::deserialize(const QByteArray& arrData)
     {
         QByteArray bytetmp;
         int tmp;
+        uint32_t utmp;
 
         d.readS64(1, &m_inputFrequencyOffset, 0);
         // TODO: rgb color
@@ -151,6 +168,24 @@ bool ATVDemodSettings::deserialize(const QByteArray& arrData)
             d.readBlob(25, &bytetmp);
             m_rollupState->deserialize(bytetmp);
         }
+
+        d.readBool(26, &m_useReverseAPI, false);
+        d.readString(27, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(28, &utmp, 0);
+
+        if ((utmp > 1023) && (utmp < 65535)) {
+            m_reverseAPIPort = utmp;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(29, &utmp, 0);
+        m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
+        d.readU32(30, &utmp, 0);
+        m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
+        d.readS32(31, &m_workspaceIndex, 0);
+        d.readBlob(32, &m_geometryBytes);
+        d.readBool(33, &m_hidden, false);
 
         return true;
     }

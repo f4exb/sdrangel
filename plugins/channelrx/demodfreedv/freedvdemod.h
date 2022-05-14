@@ -77,6 +77,8 @@ public:
     FreeDVDemod(DeviceAPI *deviceAPI);
 	virtual ~FreeDVDemod();
 	virtual void destroy() { delete this; }
+    virtual void setDeviceAPI(DeviceAPI *deviceAPI);
+    virtual DeviceAPI *getDeviceAPI() { return m_deviceAPI; }
     SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
 
     using BasebandSampleSink::feed;
@@ -121,6 +123,10 @@ public:
 
     virtual int webapiSettingsGet(
             SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiWorkspaceGet(
+            SWGSDRangel::SWGWorkspaceInfo& response,
             QString& errorMessage);
 
     virtual int webapiSettingsPutPatch(

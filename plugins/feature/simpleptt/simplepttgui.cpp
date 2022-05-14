@@ -16,6 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QMessageBox>
+#include <QResizeEvent>
 
 #include "feature/featureuiset.h"
 #include "gui/basicfeaturesettingsdialog.h"
@@ -58,6 +59,7 @@ bool SimplePTTGUI::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
+        m_feature->setWorkspaceIndex(m_settings.m_workspaceIndex);
         displaySettings();
         applySettings(true);
         return true;
@@ -67,6 +69,14 @@ bool SimplePTTGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void SimplePTTGUI::resizeEvent(QResizeEvent* size)
+{
+    int maxWidth = getRollupContents()->maximumWidth();
+    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
+    resize(width() < maxWidth ? width() : maxWidth, minHeight);
+    size->accept();
 }
 
 bool SimplePTTGUI::handleMessage(const Message& message)
@@ -138,7 +148,7 @@ void SimplePTTGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -150,15 +160,18 @@ SimplePTTGUI::SimplePTTGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Fea
 	m_doApplySettings(true),
     m_lastFeatureState(0)
 {
-	ui->setupUi(this);
-    m_helpURL = "plugins/feature/simpleptt/readme.md";
+    m_feature = feature;
 	setAttribute(Qt::WA_DeleteOnClose, true);
-    setChannelWidget(false);
-	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    m_helpURL = "plugins/feature/simpleptt/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+
     m_simplePTT = reinterpret_cast<SimplePTT*>(feature);
     m_simplePTT->setMessageQueueToGUI(&m_inputMessageQueue);
 
-	m_featureUISet->addRollupWidget(this);
     m_settings.setRollupState(&m_rollupState);
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
@@ -180,11 +193,18 @@ SimplePTTGUI::SimplePTTGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Fea
     updateDeviceSetLists();
     displaySettings();
 	applySettings(true);
+    makeUIConnections();
 }
 
 SimplePTTGUI::~SimplePTTGUI()
 {
 	delete ui;
+}
+
+void SimplePTTGUI::setWorkspaceIndex(int index)
+{
+    m_settings.m_workspaceIndex = index;
+    m_feature->setWorkspaceIndex(index);
 }
 
 void SimplePTTGUI::blockApplySettings(bool block)
@@ -196,10 +216,11 @@ void SimplePTTGUI::displaySettings()
 {
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_settings.m_title);
+    setTitle(m_settings.m_title);
     blockApplySettings(true);
     ui->rxtxDelay->setValue(m_settings.m_rx2TxDelayMs);
     ui->txrxDelay->setValue(m_settings.m_tx2RxDelayMs);
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     ui->vox->setChecked(m_settings.m_vox);
     ui->voxEnable->setChecked(m_settings.m_voxEnable);
     ui->voxLevel->setValue(m_settings.m_voxLevel);
@@ -287,31 +308,22 @@ void SimplePTTGUI::updateDeviceSetLists()
     ui->txDevice->blockSignals(false);
 }
 
-void SimplePTTGUI::leaveEvent(QEvent*)
-{
-}
-
-void SimplePTTGUI::enterEvent(QEvent*)
-{
-}
-
 void SimplePTTGUI::onMenuDialogCalled(const QPoint &p)
 {
     if (m_contextMenuType == ContextMenuChannelSettings)
     {
         BasicFeatureSettingsDialog dialog(this);
         dialog.setTitle(m_settings.m_title);
-        dialog.setColor(m_settings.m_rgbColor);
         dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
         dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
         dialog.setReverseAPIFeatureSetIndex(m_settings.m_reverseAPIFeatureSetIndex);
         dialog.setReverseAPIFeatureIndex(m_settings.m_reverseAPIFeatureIndex);
+        dialog.setDefaultTitle(m_displayedName);
 
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_rgbColor = dialog.getColor().rgb();
         m_settings.m_title = dialog.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
@@ -319,7 +331,7 @@ void SimplePTTGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIFeatureSetIndex = dialog.getReverseAPIFeatureSetIndex();
         m_settings.m_reverseAPIFeatureIndex = dialog.getReverseAPIFeatureIndex();
 
-        setWindowTitle(m_settings.m_title);
+        setTitle(m_settings.m_title);
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -478,4 +490,19 @@ void SimplePTTGUI::audioSelect()
         m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
         applySettings();
     }
+}
+
+void SimplePTTGUI::makeUIConnections()
+{
+	QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &SimplePTTGUI::on_startStop_toggled);
+	QObject::connect(ui->devicesRefresh, &QPushButton::clicked, this, &SimplePTTGUI::on_devicesRefresh_clicked);
+	QObject::connect(ui->rxDevice, qOverload<int>(&QComboBox::currentIndexChanged), this, &SimplePTTGUI::on_rxDevice_currentIndexChanged);
+	QObject::connect(ui->txDevice, qOverload<int>(&QComboBox::currentIndexChanged), this, &SimplePTTGUI::on_txDevice_currentIndexChanged);
+	QObject::connect(ui->rxtxDelay, qOverload<int>(&QSpinBox::valueChanged), this, &SimplePTTGUI::on_rxtxDelay_valueChanged);
+	QObject::connect(ui->txrxDelay, qOverload<int>(&QSpinBox::valueChanged), this, &SimplePTTGUI::on_txrxDelay_valueChanged);
+	QObject::connect(ui->ptt, &ButtonSwitch::toggled, this, &SimplePTTGUI::on_ptt_toggled);
+	QObject::connect(ui->vox, &ButtonSwitch::toggled, this, &SimplePTTGUI::on_vox_toggled);
+	QObject::connect(ui->voxEnable, &QCheckBox::clicked, this, &SimplePTTGUI::on_voxEnable_clicked);
+	QObject::connect(ui->voxLevel, &QDial::valueChanged, this, &SimplePTTGUI::on_voxLevel_valueChanged);
+	QObject::connect(ui->voxHold, qOverload<int>(&QSpinBox::valueChanged), this, &SimplePTTGUI::on_voxHold_valueChanged);
 }

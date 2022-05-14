@@ -17,6 +17,7 @@
 
 #include <QMessageBox>
 #include <QMouseEvent>
+#include <QResizeEvent>
 
 #include "feature/featureuiset.h"
 #include "gui/basicfeaturesettingsdialog.h"
@@ -55,6 +56,7 @@ bool JogdialControllerGUI::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
+        m_feature->setWorkspaceIndex(m_settings.m_workspaceIndex);
         displaySettings();
         applySettings(true);
         return true;
@@ -64,6 +66,14 @@ bool JogdialControllerGUI::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void JogdialControllerGUI::resizeEvent(QResizeEvent* size)
+{
+    int maxWidth = getRollupContents()->maximumWidth();
+    int minHeight = getRollupContents()->minimumHeight() + getAdditionalHeight();
+    resize(width() < maxWidth ? width() : maxWidth, minHeight);
+    size->accept();
 }
 
 bool JogdialControllerGUI::handleMessage(const Message& message)
@@ -132,7 +142,7 @@ void JogdialControllerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    getRollupContents()->saveState(m_rollupState);
     applySettings();
 }
 
@@ -145,16 +155,17 @@ JogdialControllerGUI::JogdialControllerGUI(PluginAPI* pluginAPI, FeatureUISet *f
     m_lastFeatureState(0),
     m_selectedChannel(nullptr)
 {
-	ui->setupUi(this);
-    m_helpURL = "plugins/feature/jogdialcontroller/readme.md";
+    m_feature = feature;
 	setAttribute(Qt::WA_DeleteOnClose, true);
-    setChannelWidget(false);
-	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    m_helpURL = "plugins/feature/jogdialcontroller/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 
     m_jogdialController = reinterpret_cast<JogdialController*>(feature);
     m_jogdialController->setMessageQueueToGUI(&m_inputMessageQueue);
-
-	m_featureUISet->addRollupWidget(this);
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
@@ -169,11 +180,18 @@ JogdialControllerGUI::JogdialControllerGUI(PluginAPI* pluginAPI, FeatureUISet *f
 
     displaySettings();
 	applySettings(true);
+    makeUIConnections();
 }
 
 JogdialControllerGUI::~JogdialControllerGUI()
 {
 	delete ui;
+}
+
+void JogdialControllerGUI::setWorkspaceIndex(int index)
+{
+    m_settings.m_workspaceIndex = index;
+    m_feature->setWorkspaceIndex(index);
 }
 
 void JogdialControllerGUI::blockApplySettings(bool block)
@@ -185,8 +203,9 @@ void JogdialControllerGUI::displaySettings()
 {
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_settings.m_title);
+    setTitle(m_settings.m_title);
     blockApplySettings(true);
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
 
@@ -229,31 +248,22 @@ void JogdialControllerGUI::updateChannelList()
     }
 }
 
-void JogdialControllerGUI::leaveEvent(QEvent*)
-{
-}
-
-void JogdialControllerGUI::enterEvent(QEvent*)
-{
-}
-
 void JogdialControllerGUI::onMenuDialogCalled(const QPoint &p)
 {
     if (m_contextMenuType == ContextMenuChannelSettings)
     {
         BasicFeatureSettingsDialog dialog(this);
         dialog.setTitle(m_settings.m_title);
-        dialog.setColor(m_settings.m_rgbColor);
         dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
         dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
         dialog.setReverseAPIFeatureSetIndex(m_settings.m_reverseAPIFeatureSetIndex);
         dialog.setReverseAPIFeatureIndex(m_settings.m_reverseAPIFeatureIndex);
+        dialog.setDefaultTitle(m_displayedName);
 
         dialog.move(p);
         dialog.exec();
 
-        m_settings.m_rgbColor = dialog.getColor().rgb();
         m_settings.m_title = dialog.getTitle();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
@@ -261,7 +271,7 @@ void JogdialControllerGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIFeatureSetIndex = dialog.getReverseAPIFeatureSetIndex();
         m_settings.m_reverseAPIFeatureIndex = dialog.getReverseAPIFeatureIndex();
 
-        setWindowTitle(m_settings.m_title);
+        setTitle(m_settings.m_title);
         setTitleColor(m_settings.m_rgbColor);
 
         applySettings();
@@ -361,4 +371,11 @@ void JogdialControllerGUI::focusOutEvent(QFocusEvent*)
     qDebug("JogdialControllerGUI::focusOutEvent");
     ui->focusIndicator->setStyleSheet("QLabel { background-color: gray; border-radius: 8px; }"); // gray
     ui->focusIndicator->setToolTip("Idle");
+}
+
+void JogdialControllerGUI::makeUIConnections()
+{
+	QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &JogdialControllerGUI::on_startStop_toggled);
+	QObject::connect(ui->devicesRefresh, &QPushButton::clicked, this, &JogdialControllerGUI::on_devicesRefresh_clicked);
+	QObject::connect(ui->channels, qOverload<int>(&QComboBox::currentIndexChanged), this, &JogdialControllerGUI::on_channels_currentIndexChanged);
 }

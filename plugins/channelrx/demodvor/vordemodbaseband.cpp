@@ -28,36 +28,24 @@
 MESSAGE_CLASS_DEFINITION(VORDemodBaseband::MsgConfigureVORDemodBaseband, Message)
 
 VORDemodBaseband::VORDemodBaseband() :
-    m_running(false),
-    m_mutex(QMutex::Recursive),
     m_messageQueueToGUI(nullptr),
-    m_basebandSampleRate(0)
+    m_running(false),
+    m_mutex(QMutex::Recursive)
 {
     qDebug("VORDemodBaseband::VORDemodBaseband");
-
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
+    m_channelizer = new DownChannelizer(&m_sink);
 
-    // FIXME: If we remove this audio stops working when this demod is closed
-    DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(&m_audioFifoBug, getInputMessageQueue());
+    DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(m_sink.getAudioFifo(), getInputMessageQueue());
+    m_sink.applyAudioSampleRate(DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate());
+    m_channelSampleRate = 0;
 }
 
 VORDemodBaseband::~VORDemodBaseband()
 {
     m_inputMessageQueue.clear();
-
-    for (int i = 0; i < m_sinks.size(); i++)
-    {
-        DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(m_sinks[i]->getAudioFifo());
-        delete m_sinks[i];
-    }
-    m_sinks.clear();
-
-    // FIXME: If we remove this audio stops working when this demod is closed
-    DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(&m_audioFifoBug);
-
-    for (int i = 0; i < m_channelizers.size(); i++)
-        delete m_channelizers[i];
-    m_channelizers.clear();
+    DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(m_sink.getAudioFifo());
+    delete m_channelizer;
 }
 
 void VORDemodBaseband::reset()
@@ -65,6 +53,7 @@ void VORDemodBaseband::reset()
     QMutexLocker mutexLocker(&m_mutex);
     m_inputMessageQueue.clear();
     m_sampleFifo.reset();
+    m_channelSampleRate = 0;
 }
 
 void VORDemodBaseband::startWork()
@@ -114,14 +103,12 @@ void VORDemodBaseband::handleData()
 
         // first part of FIFO data
         if (part1begin != part1end) {
-            for (int i = 0; i < m_channelizers.size(); i++)
-                m_channelizers[i]->feed(part1begin, part1end);
+            m_channelizer->feed(part1begin, part1end);
         }
 
         // second part of FIFO data (used when block wraps around)
         if(part2begin != part2end) {
-            for (int i = 0; i < m_channelizers.size(); i++)
-                m_channelizers[i]->feed(part2begin, part2end);
+            m_channelizer->feed(part2begin, part2end);
         }
 
         m_sampleFifo.readCommit((unsigned int) count);
@@ -157,9 +144,15 @@ bool VORDemodBaseband::handleMessage(const Message& cmd)
         QMutexLocker mutexLocker(&m_mutex);
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
         qDebug() << "VORDemodBaseband::handleMessage: DSPSignalNotification: basebandSampleRate: " << notif.getSampleRate() << " centerFrequency: " << notif.getCenterFrequency();
-        m_centerFrequency = notif.getCenterFrequency();
-        setBasebandSampleRate(notif.getSampleRate());
-        m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(m_basebandSampleRate));
+        m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(notif.getSampleRate()));
+        m_channelizer->setBasebandSampleRate(notif.getSampleRate());
+        m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+
+        if (m_channelSampleRate != m_channelizer->getChannelSampleRate())
+        {
+            m_sink.applyAudioSampleRate(m_sink.getAudioSampleRate()); // reapply when channel sample rate changes
+            m_channelSampleRate = m_channelizer->getChannelSampleRate();
+        }
 
         return true;
     }
@@ -169,80 +162,17 @@ bool VORDemodBaseband::handleMessage(const Message& cmd)
     }
 }
 
-// Calculate offset of VOR center frequency from sample source center frequency
-void VORDemodBaseband::calculateOffset(VORDemodSink *sink)
-{
-   int frequencyOffset = sink->m_vorFrequencyHz - m_centerFrequency;
-   bool outOfBand = std::abs(frequencyOffset)+VORDEMOD_CHANNEL_BANDWIDTH > (m_basebandSampleRate/2);
-
-    if (m_messageQueueToGUI != nullptr)
-    {
-        VORDemodReport::MsgReportFreqOffset *msg = VORDemodReport::MsgReportFreqOffset::create(sink->m_subChannelId, frequencyOffset, outOfBand);
-        m_messageQueueToGUI->push(msg);
-    }
-
-   sink->m_frequencyOffset = frequencyOffset;
-   sink->m_outOfBand = outOfBand;
-}
-
 void VORDemodBaseband::applySettings(const VORDemodSettings& settings, bool force)
 {
-    // Remove sub-channels no longer needed
-    for (int i = 0; i < m_sinks.size(); i++)
+    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
     {
-        if (!settings.m_subChannelSettings.contains(m_sinks[i]->m_subChannelId))
+        m_channelizer->setChannelization(m_sink.getAudioSampleRate(), settings.m_inputFrequencyOffset);
+        m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+
+        if (m_channelSampleRate != m_channelizer->getChannelSampleRate())
         {
-            qDebug() << "VORDemodBaseband::applySettings: Removing sink " << m_sinks[i]->m_subChannelId;
-            VORDemodSink *sink = m_sinks[i];
-            DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(m_sinks[i]->getAudioFifo());
-            m_sinks.removeAt(i);
-            delete sink;
-            DownChannelizer *channelizer = m_channelizers[i];
-            m_channelizers.removeAt(i);
-            delete channelizer;
-        }
-    }
-
-    // Add new sub channels
-    QHash<int, VORDemodSubChannelSettings *>::const_iterator itr = settings.m_subChannelSettings.begin();
-    while (itr != settings.m_subChannelSettings.end())
-    {
-        VORDemodSubChannelSettings *subChannelSettings = itr.value();
-        int j;
-        for (j = 0; j < m_sinks.size(); j++)
-        {
-            if (subChannelSettings->m_id == m_sinks[j]->m_subChannelId)
-                break;
-        }
-        if (j == m_sinks.size())
-        {
-            // Add a sub-channel sink
-            qDebug() << "VORDemodBaseband::applySettings: Adding sink " << subChannelSettings->m_id;
-            VORDemodSink *sink = new VORDemodSink(settings, subChannelSettings->m_id, m_messageQueueToGUI);
-            DownChannelizer *channelizer = new DownChannelizer(sink);
-            channelizer->setBasebandSampleRate(m_basebandSampleRate);
-            DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(sink->getAudioFifo(), getInputMessageQueue());
-            sink->applyAudioSampleRate(DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate());
-
-            m_sinks.append(sink);
-            m_channelizers.append(channelizer);
-
-            calculateOffset(sink);
-
-            channelizer->setChannelization(VORDEMOD_CHANNEL_SAMPLE_RATE, sink->m_frequencyOffset);
-            sink->applyChannelSettings(channelizer->getChannelSampleRate(), channelizer->getChannelFrequencyOffset(), true);
-            sink->applyAudioSampleRate(sink->getAudioSampleRate());
-        }
-        ++itr;
-    }
-
-    if (force)
-    {
-        for (int i = 0; i < m_sinks.size(); i++)
-        {
-            m_channelizers[i]->setChannelization(VORDEMOD_CHANNEL_SAMPLE_RATE, m_sinks[i]->m_frequencyOffset);
-            m_sinks[i]->applyChannelSettings(m_channelizers[i]->getChannelSampleRate(), m_channelizers[i]->getChannelFrequencyOffset());
-            m_sinks[i]->applyAudioSampleRate(m_sinks[i]->getAudioSampleRate()); // reapply in case of channel sample rate change
+            m_sink.applyAudioSampleRate(m_sink.getAudioSampleRate()); // reapply when channel sample rate changes
+            m_channelSampleRate = m_channelizer->getChannelSampleRate();
         }
     }
 
@@ -250,33 +180,20 @@ void VORDemodBaseband::applySettings(const VORDemodSettings& settings, bool forc
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_audioDeviceName);
-        for (int i = 0; i < m_sinks.size(); i++)
-        {
-            audioDeviceManager->removeAudioSink(m_sinks[i]->getAudioFifo());
-            audioDeviceManager->addAudioSink(m_sinks[i]->getAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
-            int audioSampleRate = audioDeviceManager->getOutputSampleRate(audioDeviceIndex);
+        //qDebug("AMDemod::applySettings: audioDeviceName: %s audioDeviceIndex: %d", qPrintable(settings.m_audioDeviceName), audioDeviceIndex);
+        audioDeviceManager->removeAudioSink(m_sink.getAudioFifo());
+        audioDeviceManager->addAudioSink(m_sink.getAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
+        int audioSampleRate = audioDeviceManager->getOutputSampleRate(audioDeviceIndex);
 
-            if (m_sinks[i]->getAudioSampleRate() != audioSampleRate)
-            {
-                m_sinks[i]->applyAudioSampleRate(audioSampleRate);
-            }
+        if (m_sink.getAudioSampleRate() != audioSampleRate)
+        {
+            m_channelizer->setChannelization(audioSampleRate, settings.m_inputFrequencyOffset);
+            m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+            m_sink.applyAudioSampleRate(audioSampleRate);
         }
     }
 
-    for (int i = 0; i < m_sinks.size(); i++)
-        m_sinks[i]->applySettings(settings, force);
+    m_sink.applySettings(settings, force);
 
     m_settings = settings;
-}
-
-void VORDemodBaseband::setBasebandSampleRate(int sampleRate)
-{
-    m_basebandSampleRate = sampleRate;
-    for (int i = 0; i < m_sinks.size(); i++)
-    {
-        m_channelizers[i]->setBasebandSampleRate(sampleRate);
-        calculateOffset(m_sinks[i]);
-        m_sinks[i]->applyChannelSettings(m_channelizers[i]->getChannelSampleRate(), m_channelizers[i]->getChannelFrequencyOffset());
-        m_sinks[i]->applyAudioSampleRate(m_sinks[i]->getAudioSampleRate()); // reapply in case of channel sample rate change
-    }
 }

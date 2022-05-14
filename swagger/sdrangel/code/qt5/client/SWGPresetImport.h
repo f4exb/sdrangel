@@ -13,7 +13,7 @@
 /*
  * SWGPresetImport.h
  *
- * Details to import preset from file in preset list
+ * Details to import new preset from file
  */
 
 #ifndef SWGPresetImport_H_
@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include "SWGPresetIdentifier.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -42,11 +43,8 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGPresetImport* fromJson(QString &jsonString) override;
 
-    QString* getGroupName();
-    void setGroupName(QString* group_name);
-
-    QString* getDescription();
-    void setDescription(QString* description);
+    SWGPresetIdentifier* getPreset();
+    void setPreset(SWGPresetIdentifier* preset);
 
     QString* getFilePath();
     void setFilePath(QString* file_path);
@@ -55,11 +53,8 @@ public:
     virtual bool isSet() override;
 
 private:
-    QString* group_name;
-    bool m_group_name_isSet;
-
-    QString* description;
-    bool m_description_isSet;
+    SWGPresetIdentifier* preset;
+    bool m_preset_isSet;
 
     QString* file_path;
     bool m_file_path_isSet;

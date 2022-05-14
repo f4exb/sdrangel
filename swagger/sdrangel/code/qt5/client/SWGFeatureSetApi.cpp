@@ -29,12 +29,10 @@ SWGFeatureSetApi::SWGFeatureSetApi(QString host, QString basePath) {
 }
 
 void
-SWGFeatureSetApi::featuresetFEatureSettingsPut(qint32 feature_set_index, qint32 feature_index, SWGFeatureSettings& body) {
+SWGFeatureSetApi::featuresetFEatureSettingsPut(qint32 feature_index, SWGFeatureSettings& body) {
     QString fullPath;
-    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}/settings");
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset/feature/{featureIndex}/settings");
 
-    QString feature_set_indexPathParam("{"); feature_set_indexPathParam.append("featureSetIndex").append("}");
-    fullPath.replace(feature_set_indexPathParam, stringValue(feature_set_index));
     QString feature_indexPathParam("{"); feature_indexPathParam.append("featureIndex").append("}");
     fullPath.replace(feature_indexPathParam, stringValue(feature_index));
 
@@ -88,12 +86,10 @@ SWGFeatureSetApi::featuresetFEatureSettingsPutCallback(SWGHttpRequestWorker * wo
 }
 
 void
-SWGFeatureSetApi::featuresetFeatureActionsPost(qint32 feature_set_index, qint32 feature_index, SWGFeatureActions& body) {
+SWGFeatureSetApi::featuresetFeatureActionsPost(qint32 feature_index, SWGFeatureActions& body) {
     QString fullPath;
-    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}/actions");
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset/feature/{featureIndex}/actions");
 
-    QString feature_set_indexPathParam("{"); feature_set_indexPathParam.append("featureSetIndex").append("}");
-    fullPath.replace(feature_set_indexPathParam, stringValue(feature_set_index));
     QString feature_indexPathParam("{"); feature_indexPathParam.append("featureIndex").append("}");
     fullPath.replace(feature_indexPathParam, stringValue(feature_index));
 
@@ -147,12 +143,10 @@ SWGFeatureSetApi::featuresetFeatureActionsPostCallback(SWGHttpRequestWorker * wo
 }
 
 void
-SWGFeatureSetApi::featuresetFeatureDelete(qint32 feature_set_index, qint32 feature_index) {
+SWGFeatureSetApi::featuresetFeatureDelete(qint32 feature_index) {
     QString fullPath;
-    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}");
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset/feature/{featureIndex}");
 
-    QString feature_set_indexPathParam("{"); feature_set_indexPathParam.append("featureSetIndex").append("}");
-    fullPath.replace(feature_set_indexPathParam, stringValue(feature_set_index));
     QString feature_indexPathParam("{"); feature_indexPathParam.append("featureIndex").append("}");
     fullPath.replace(feature_indexPathParam, stringValue(feature_index));
 
@@ -203,12 +197,10 @@ SWGFeatureSetApi::featuresetFeatureDeleteCallback(SWGHttpRequestWorker * worker)
 }
 
 void
-SWGFeatureSetApi::featuresetFeaturePost(qint32 feature_set_index, SWGFeatureSettings& body) {
+SWGFeatureSetApi::featuresetFeaturePost(SWGFeatureSettings& body) {
     QString fullPath;
-    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset/{featureSetIndex}/feature");
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset/feature");
 
-    QString feature_set_indexPathParam("{"); feature_set_indexPathParam.append("featureSetIndex").append("}");
-    fullPath.replace(feature_set_indexPathParam, stringValue(feature_set_index));
 
 
     SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
@@ -260,12 +252,10 @@ SWGFeatureSetApi::featuresetFeaturePostCallback(SWGHttpRequestWorker * worker) {
 }
 
 void
-SWGFeatureSetApi::featuresetFeatureReportGet(qint32 feature_set_index, qint32 feature_index) {
+SWGFeatureSetApi::featuresetFeatureReportGet(qint32 feature_index) {
     QString fullPath;
-    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}/report");
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset/feature/{featureIndex}/report");
 
-    QString feature_set_indexPathParam("{"); feature_set_indexPathParam.append("featureSetIndex").append("}");
-    fullPath.replace(feature_set_indexPathParam, stringValue(feature_set_index));
     QString feature_indexPathParam("{"); feature_indexPathParam.append("featureIndex").append("}");
     fullPath.replace(feature_indexPathParam, stringValue(feature_index));
 
@@ -316,12 +306,10 @@ SWGFeatureSetApi::featuresetFeatureReportGetCallback(SWGHttpRequestWorker * work
 }
 
 void
-SWGFeatureSetApi::featuresetFeatureRunDelete(qint32 feature_set_index, qint32 feature_index) {
+SWGFeatureSetApi::featuresetFeatureRunDelete(qint32 feature_index) {
     QString fullPath;
-    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}/run");
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset/feature/{featureIndex}/run");
 
-    QString feature_set_indexPathParam("{"); feature_set_indexPathParam.append("featureSetIndex").append("}");
-    fullPath.replace(feature_set_indexPathParam, stringValue(feature_set_index));
     QString feature_indexPathParam("{"); feature_indexPathParam.append("featureIndex").append("}");
     fullPath.replace(feature_indexPathParam, stringValue(feature_index));
 
@@ -372,12 +360,10 @@ SWGFeatureSetApi::featuresetFeatureRunDeleteCallback(SWGHttpRequestWorker * work
 }
 
 void
-SWGFeatureSetApi::featuresetFeatureRunGet(qint32 feature_set_index, qint32 feature_index) {
+SWGFeatureSetApi::featuresetFeatureRunGet(qint32 feature_index) {
     QString fullPath;
-    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}/run");
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset/feature/{featureIndex}/run");
 
-    QString feature_set_indexPathParam("{"); feature_set_indexPathParam.append("featureSetIndex").append("}");
-    fullPath.replace(feature_set_indexPathParam, stringValue(feature_set_index));
     QString feature_indexPathParam("{"); feature_indexPathParam.append("featureIndex").append("}");
     fullPath.replace(feature_indexPathParam, stringValue(feature_index));
 
@@ -428,12 +414,10 @@ SWGFeatureSetApi::featuresetFeatureRunGetCallback(SWGHttpRequestWorker * worker)
 }
 
 void
-SWGFeatureSetApi::featuresetFeatureRunPost(qint32 feature_set_index, qint32 feature_index) {
+SWGFeatureSetApi::featuresetFeatureRunPost(qint32 feature_index) {
     QString fullPath;
-    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}/run");
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset/feature/{featureIndex}/run");
 
-    QString feature_set_indexPathParam("{"); feature_set_indexPathParam.append("featureSetIndex").append("}");
-    fullPath.replace(feature_set_indexPathParam, stringValue(feature_set_index));
     QString feature_indexPathParam("{"); feature_indexPathParam.append("featureIndex").append("}");
     fullPath.replace(feature_indexPathParam, stringValue(feature_index));
 
@@ -484,12 +468,10 @@ SWGFeatureSetApi::featuresetFeatureRunPostCallback(SWGHttpRequestWorker * worker
 }
 
 void
-SWGFeatureSetApi::featuresetFeatureSettingsGet(qint32 feature_set_index, qint32 feature_index) {
+SWGFeatureSetApi::featuresetFeatureSettingsGet(qint32 feature_index) {
     QString fullPath;
-    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}/settings");
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset/feature/{featureIndex}/settings");
 
-    QString feature_set_indexPathParam("{"); feature_set_indexPathParam.append("featureSetIndex").append("}");
-    fullPath.replace(feature_set_indexPathParam, stringValue(feature_set_index));
     QString feature_indexPathParam("{"); feature_indexPathParam.append("featureIndex").append("}");
     fullPath.replace(feature_indexPathParam, stringValue(feature_index));
 
@@ -540,12 +522,10 @@ SWGFeatureSetApi::featuresetFeatureSettingsGetCallback(SWGHttpRequestWorker * wo
 }
 
 void
-SWGFeatureSetApi::featuresetFeatureSettingsPatch(qint32 feature_set_index, qint32 feature_index, SWGFeatureSettings& body) {
+SWGFeatureSetApi::featuresetFeatureSettingsPatch(qint32 feature_index, SWGFeatureSettings& body) {
     QString fullPath;
-    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}/settings");
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset/feature/{featureIndex}/settings");
 
-    QString feature_set_indexPathParam("{"); feature_set_indexPathParam.append("featureSetIndex").append("}");
-    fullPath.replace(feature_set_indexPathParam, stringValue(feature_set_index));
     QString feature_indexPathParam("{"); feature_indexPathParam.append("featureIndex").append("}");
     fullPath.replace(feature_indexPathParam, stringValue(feature_index));
 
@@ -599,12 +579,121 @@ SWGFeatureSetApi::featuresetFeatureSettingsPatchCallback(SWGHttpRequestWorker * 
 }
 
 void
-SWGFeatureSetApi::featuresetGet(qint32 feature_set_index) {
+SWGFeatureSetApi::featuresetFeatureWorkspaceGet(qint32 feature_index) {
     QString fullPath;
-    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset/{featureSetIndex}");
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset/feature/{featureIndex}/workspace");
 
-    QString feature_set_indexPathParam("{"); feature_set_indexPathParam.append("featureSetIndex").append("}");
-    fullPath.replace(feature_set_indexPathParam, stringValue(feature_set_index));
+    QString feature_indexPathParam("{"); feature_indexPathParam.append("featureIndex").append("}");
+    fullPath.replace(feature_indexPathParam, stringValue(feature_index));
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "GET");
+
+
+
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGFeatureSetApi::featuresetFeatureWorkspaceGetCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGFeatureSetApi::featuresetFeatureWorkspaceGetCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGWorkspaceInfo* output = static_cast<SWGWorkspaceInfo*>(create(json, QString("SWGWorkspaceInfo")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit featuresetFeatureWorkspaceGetSignal(output);
+    } else {
+        emit featuresetFeatureWorkspaceGetSignalE(output, error_type, error_str);
+        emit featuresetFeatureWorkspaceGetSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
+SWGFeatureSetApi::featuresetFeatureWorkspacePut(qint32 feature_index, SWGWorkspaceInfo& body) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset/feature/{featureIndex}/workspace");
+
+    QString feature_indexPathParam("{"); feature_indexPathParam.append("featureIndex").append("}");
+    fullPath.replace(feature_indexPathParam, stringValue(feature_index));
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "PUT");
+
+
+    
+    QString output = body.asJson();
+    input.request_body.append(output.toUtf8());
+    
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGFeatureSetApi::featuresetFeatureWorkspacePutCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGFeatureSetApi::featuresetFeatureWorkspacePutCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGSuccessResponse* output = static_cast<SWGSuccessResponse*>(create(json, QString("SWGSuccessResponse")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit featuresetFeatureWorkspacePutSignal(output);
+    } else {
+        emit featuresetFeatureWorkspacePutSignalE(output, error_type, error_str);
+        emit featuresetFeatureWorkspacePutSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
+SWGFeatureSetApi::featuresetGet() {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset");
+
 
 
     SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
@@ -653,12 +742,10 @@ SWGFeatureSetApi::featuresetGetCallback(SWGHttpRequestWorker * worker) {
 }
 
 void
-SWGFeatureSetApi::featuresetPresetPatch(qint32 feature_set_index, SWGFeaturePresetIdentifier& body) {
+SWGFeatureSetApi::featuresetPresetPatch(SWGFeaturePresetIdentifier& body) {
     QString fullPath;
-    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset/{featureSetIndex}/preset");
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset/preset");
 
-    QString feature_set_indexPathParam("{"); feature_set_indexPathParam.append("featureSetIndex").append("}");
-    fullPath.replace(feature_set_indexPathParam, stringValue(feature_set_index));
 
 
     SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
@@ -710,12 +797,10 @@ SWGFeatureSetApi::featuresetPresetPatchCallback(SWGHttpRequestWorker * worker) {
 }
 
 void
-SWGFeatureSetApi::featuresetPresetPost(qint32 feature_set_index, SWGFeaturePresetIdentifier& body) {
+SWGFeatureSetApi::featuresetPresetPost(SWGFeaturePresetIdentifier& body) {
     QString fullPath;
-    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset/{featureSetIndex}/preset");
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset/preset");
 
-    QString feature_set_indexPathParam("{"); feature_set_indexPathParam.append("featureSetIndex").append("}");
-    fullPath.replace(feature_set_indexPathParam, stringValue(feature_set_index));
 
 
     SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
@@ -767,12 +852,10 @@ SWGFeatureSetApi::featuresetPresetPostCallback(SWGHttpRequestWorker * worker) {
 }
 
 void
-SWGFeatureSetApi::featuresetPresetPut(qint32 feature_set_index, SWGFeaturePresetIdentifier& body) {
+SWGFeatureSetApi::featuresetPresetPut(SWGFeaturePresetIdentifier& body) {
     QString fullPath;
-    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset/{featureSetIndex}/preset");
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset/preset");
 
-    QString feature_set_indexPathParam("{"); feature_set_indexPathParam.append("featureSetIndex").append("}");
-    fullPath.replace(feature_set_indexPathParam, stringValue(feature_set_index));
 
 
     SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
@@ -820,110 +903,6 @@ SWGFeatureSetApi::featuresetPresetPutCallback(SWGHttpRequestWorker * worker) {
     } else {
         emit featuresetPresetPutSignalE(output, error_type, error_str);
         emit featuresetPresetPutSignalEFull(worker, error_type, error_str);
-    }
-}
-
-void
-SWGFeatureSetApi::instanceFeatureSetDelete() {
-    QString fullPath;
-    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset");
-
-
-
-    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
-    SWGHttpRequestInput input(fullPath, "DELETE");
-
-
-
-
-
-    foreach(QString key, this->defaultHeaders.keys()) {
-        input.headers.insert(key, this->defaultHeaders.value(key));
-    }
-
-    connect(worker,
-            &SWGHttpRequestWorker::on_execution_finished,
-            this,
-            &SWGFeatureSetApi::instanceFeatureSetDeleteCallback);
-
-    worker->execute(&input);
-}
-
-void
-SWGFeatureSetApi::instanceFeatureSetDeleteCallback(SWGHttpRequestWorker * worker) {
-    QString msg;
-    QString error_str = worker->error_str;
-    QNetworkReply::NetworkError error_type = worker->error_type;
-
-    if (worker->error_type == QNetworkReply::NoError) {
-        msg = QString("Success! %1 bytes").arg(worker->response.length());
-    }
-    else {
-        msg = "Error: " + worker->error_str;
-    }
-
-
-    QString json(worker->response);
-    SWGSuccessResponse* output = static_cast<SWGSuccessResponse*>(create(json, QString("SWGSuccessResponse")));
-    worker->deleteLater();
-
-    if (worker->error_type == QNetworkReply::NoError) {
-        emit instanceFeatureSetDeleteSignal(output);
-    } else {
-        emit instanceFeatureSetDeleteSignalE(output, error_type, error_str);
-        emit instanceFeatureSetDeleteSignalEFull(worker, error_type, error_str);
-    }
-}
-
-void
-SWGFeatureSetApi::instanceFeatureSetPost() {
-    QString fullPath;
-    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featureset");
-
-
-
-    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
-    SWGHttpRequestInput input(fullPath, "POST");
-
-
-
-
-
-    foreach(QString key, this->defaultHeaders.keys()) {
-        input.headers.insert(key, this->defaultHeaders.value(key));
-    }
-
-    connect(worker,
-            &SWGHttpRequestWorker::on_execution_finished,
-            this,
-            &SWGFeatureSetApi::instanceFeatureSetPostCallback);
-
-    worker->execute(&input);
-}
-
-void
-SWGFeatureSetApi::instanceFeatureSetPostCallback(SWGHttpRequestWorker * worker) {
-    QString msg;
-    QString error_str = worker->error_str;
-    QNetworkReply::NetworkError error_type = worker->error_type;
-
-    if (worker->error_type == QNetworkReply::NoError) {
-        msg = QString("Success! %1 bytes").arg(worker->response.length());
-    }
-    else {
-        msg = "Error: " + worker->error_str;
-    }
-
-
-    QString json(worker->response);
-    SWGSuccessResponse* output = static_cast<SWGSuccessResponse*>(create(json, QString("SWGSuccessResponse")));
-    worker->deleteLater();
-
-    if (worker->error_type == QNetworkReply::NoError) {
-        emit instanceFeatureSetPostSignal(output);
-    } else {
-        emit instanceFeatureSetPostSignalE(output, error_type, error_str);
-        emit instanceFeatureSetPostSignalEFull(worker, error_type, error_str);
     }
 }
 

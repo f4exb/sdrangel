@@ -44,6 +44,8 @@ void LocalSourceSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
+    m_workspaceIndex = 0;
+    m_hidden = false;
 }
 
 QByteArray LocalSourceSettings::serialize() const
@@ -68,6 +70,10 @@ QByteArray LocalSourceSettings::serialize() const
     if (m_channelMarker) {
         s.writeBlob(16, m_channelMarker->serialize());
     }
+
+    s.writeS32(17, m_workspaceIndex);
+    s.writeBlob(18, m_geometryBytes);
+    s.writeBool(19, m_hidden);
 
     return s.final();
 }
@@ -121,6 +127,10 @@ bool LocalSourceSettings::deserialize(const QByteArray& data)
             d.readBlob(16, &bytetmp);
             m_channelMarker->deserialize(bytetmp);
         }
+
+        d.readS32(17, &m_workspaceIndex, 0);
+        d.readBlob(18, &m_geometryBytes);
+        d.readBool(19, &m_hidden, false);
 
         return true;
     }

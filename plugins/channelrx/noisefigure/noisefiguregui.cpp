@@ -269,7 +269,11 @@ bool NoiseFigureGUI::handleMessage(const Message& message)
     else if (DSPSignalNotification::match(message))
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
+        m_deviceCenterFrequency = notif.getSampleRate();
         m_basebandSampleRate = notif.getSampleRate();
+        ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+        updateAbsoluteCenterFrequency();
         updateBW();
         return true;
     }
@@ -323,6 +327,7 @@ void NoiseFigureGUI::on_deltaFrequency_changed(qint64 value)
 {
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -532,7 +537,18 @@ void NoiseFigureGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) widget;
     (void) rollDown;
 
-    saveState(m_rollupState);
+    RollupContents *rollupContents = getRollupContents();
+
+    if (rollupContents->hasExpandableWidgets()) {
+        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Expanding);
+    } else {
+        setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Fixed);
+    }
+
+    int h = rollupContents->height() + getAdditionalHeight();
+    resize(width(), h);
+
+    rollupContents->saveState(m_rollupState);
     applySettings();
 }
 
@@ -546,6 +562,14 @@ void NoiseFigureGUI::onMenuDialogCalled(const QPoint &p)
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
         dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
         dialog.setReverseAPIChannelIndex(m_settings.m_reverseAPIChannelIndex);
+        dialog.setDefaultTitle(m_displayedName);
+
+        if (m_deviceUISet->m_deviceMIMOEngine)
+        {
+            dialog.setNumberOfStreams(m_noiseFigure->getNumberOfDeviceStreams());
+            dialog.setStreamIndex(m_settings.m_streamIndex);
+        }
+
         dialog.move(p);
         dialog.exec();
 
@@ -558,22 +582,17 @@ void NoiseFigureGUI::onMenuDialogCalled(const QPoint &p)
         m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
+        setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
-        applySettings();
-    }
-    else if ((m_contextMenuType == ContextMenuStreamSettings) && (m_deviceUISet->m_deviceMIMOEngine))
-    {
-        DeviceStreamSelectionDialog dialog(this);
-        dialog.setNumberOfStreams(m_noiseFigure->getNumberOfDeviceStreams());
-        dialog.setStreamIndex(m_settings.m_streamIndex);
-        dialog.move(p);
-        dialog.exec();
+        if (m_deviceUISet->m_deviceMIMOEngine)
+        {
+            m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
+            m_channelMarker.clearStreamIndexes();
+            m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
+            updateIndexLabel();
+        }
 
-        m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
-        m_channelMarker.clearStreamIndexes();
-        m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
-        displayStreamIndex();
         applySettings();
     }
 
@@ -586,17 +605,20 @@ NoiseFigureGUI::NoiseFigureGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
     m_pluginAPI(pluginAPI),
     m_deviceUISet(deviceUISet),
     m_channelMarker(this),
+    m_deviceCenterFrequency(0),
     m_doApplySettings(true),
     m_basebandSampleRate(1000000),
     m_tickCount(0),
     m_runningTest(false),
     m_chart(nullptr)
 {
-    ui->setupUi(this);
-    m_helpURL = "plugins/channelrx/noisefigure/readme.md";
-
     setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    m_helpURL = "plugins/channelrx/noisefigure/readme.md";
+    RollupContents *rollupContents = getRollupContents();
+	ui->setupUi(rollupContents);
+    setSizePolicy(rollupContents->sizePolicy());
+    rollupContents->arrangeRollups();
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_noiseFigure = reinterpret_cast<NoiseFigure*>(rxChannel);
@@ -622,7 +644,6 @@ NoiseFigureGUI::NoiseFigureGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
     m_settings.setRollupState(&m_rollupState);
 
     m_deviceUISet->addChannelMarker(&m_channelMarker);
-    m_deviceUISet->addRollupWidget(this);
 
     connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
@@ -656,6 +677,7 @@ NoiseFigureGUI::NoiseFigureGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
     ui->results->setItemDelegateForColumn(RESULTS_COL_FLOOR, new DecimalDelegate(1));
 
     displaySettings();
+    makeUIConnections();
     applySettings(true);
 }
 
@@ -706,6 +728,7 @@ void NoiseFigureGUI::displaySettings()
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_channelMarker.getTitle());
+    setTitle(m_channelMarker.getTitle());
 
     blockApplySettings(true);
 
@@ -727,7 +750,7 @@ void NoiseFigureGUI::displaySettings()
     ui->fftSize->setCurrentIndex(log2(m_settings.m_fftSize) - 6);
     updateBW();
 
-    displayStreamIndex();
+    updateIndexLabel();
 
     // Order and size columns
     QHeaderView *header = ui->results->horizontalHeader();
@@ -742,27 +765,21 @@ void NoiseFigureGUI::displaySettings()
         header->moveSection(header->visualIndex(i), m_settings.m_resultsColumnIndexes[i]);
     }
 
-    restoreState(m_rollupState);
+    getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
-void NoiseFigureGUI::displayStreamIndex()
-{
-    if (m_deviceUISet->m_deviceMIMOEngine) {
-        setStreamIndicator(tr("%1").arg(m_settings.m_streamIndex));
-    } else {
-        setStreamIndicator("S"); // single channel indicator
-    }
-}
-
-void NoiseFigureGUI::leaveEvent(QEvent*)
+void NoiseFigureGUI::leaveEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(false);
+    ChannelGUI::leaveEvent(event);
 }
 
-void NoiseFigureGUI::enterEvent(QEvent*)
+void NoiseFigureGUI::enterEvent(QEvent* event)
 {
     m_channelMarker.setHighlighted(true);
+    ChannelGUI::enterEvent(event);
 }
 
 void NoiseFigureGUI::tick()
@@ -783,4 +800,31 @@ void NoiseFigureGUI::tick()
     }
 
     m_tickCount++;
+}
+
+void NoiseFigureGUI::makeUIConnections()
+{
+    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &NoiseFigureGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->fftCount, &QSlider::valueChanged, this, &NoiseFigureGUI::on_fftCount_valueChanged);
+    QObject::connect(ui->setting, &QComboBox::currentTextChanged, this, &NoiseFigureGUI::on_setting_currentTextChanged);
+    QObject::connect(ui->frequencySpec, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &NoiseFigureGUI::on_frequencySpec_currentIndexChanged);
+    QObject::connect(ui->start, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &NoiseFigureGUI::on_start_valueChanged);
+    QObject::connect(ui->stop, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &NoiseFigureGUI::on_stop_valueChanged);
+    QObject::connect(ui->steps, QOverload<int>::of(&QSpinBox::valueChanged), this, &NoiseFigureGUI::on_steps_valueChanged);
+    QObject::connect(ui->step, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &NoiseFigureGUI::on_step_valueChanged);
+    QObject::connect(ui->list, &QLineEdit::editingFinished, this, &NoiseFigureGUI::on_list_editingFinished);
+    QObject::connect(ui->fftSize, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &NoiseFigureGUI::on_fftSize_currentIndexChanged);
+    QObject::connect(ui->startStop, &ButtonSwitch::clicked, this, &NoiseFigureGUI::on_startStop_clicked);
+    QObject::connect(ui->saveResults, &QToolButton::clicked, this, &NoiseFigureGUI::on_saveResults_clicked);
+    QObject::connect(ui->clearResults, &QToolButton::clicked, this, &NoiseFigureGUI::on_clearResults_clicked);
+    QObject::connect(ui->enr, &QToolButton::clicked, this, &NoiseFigureGUI::on_enr_clicked);
+    QObject::connect(ui->control, &QToolButton::clicked, this, &NoiseFigureGUI::on_control_clicked);
+    QObject::connect(ui->chartSelect, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &NoiseFigureGUI::on_chartSelect_currentIndexChanged);
+    QObject::connect(ui->openReference, &QToolButton::clicked, this, &NoiseFigureGUI::on_openReference_clicked);
+    QObject::connect(ui->clearReference, &QToolButton::clicked, this, &NoiseFigureGUI::on_clearReference_clicked);
+}
+
+void NoiseFigureGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }

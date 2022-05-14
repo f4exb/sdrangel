@@ -45,10 +45,12 @@ public:
     bool deserialize(const QByteArray& data);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 
+protected:
+    void resizeEvent(QResizeEvent* size);
+
 private:
     Ui::LimeSDRInputGUI* ui;
 
-    DeviceUISet* m_deviceUISet;
     LimeSDRInput* m_limeSDRInput; //!< Same object as above but gives easy access to LimeSDRInput methods and attributes that are used intensively
     LimeSDRInputSettings m_settings;
     bool m_sampleRateMode; //!< true: device, false: base band sample rate update mode
@@ -74,6 +76,7 @@ private:
     void updateFrequencyLimits();
     void blockApplySettings(bool block);
     bool handleMessage(const Message& message);
+    void makeUIConnections();
 
 private slots:
     void handleInputMessages();

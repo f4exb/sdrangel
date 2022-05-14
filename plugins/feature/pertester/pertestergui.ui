@@ -1,30 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>PERTesterGUI</class>
- <widget class="RollupWidget" name="PERTesterGUI">
+ <widget class="RollupContents" name="PERTesterGUI">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>350</width>
-    <height>430</height>
+    <width>360</width>
+    <height>477</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
-    <width>320</width>
-    <height>100</height>
+    <width>360</width>
+    <height>0</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>350</width>
+    <width>600</width>
     <height>16777215</height>
    </size>
   </property>
@@ -35,16 +35,22 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>GS-232 Rotator Controller</string>
+   <string>Packet Error Rate Tester</string>
   </property>
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>331</width>
-     <height>291</height>
+     <x>2</x>
+     <y>2</y>
+     <width>351</width>
+     <height>341</height>
     </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
    </property>
    <property name="windowTitle">
     <string>Settings</string>
@@ -157,6 +163,12 @@
       </item>
       <item row="1" column="0">
        <widget class="QLabel" name="packetCountLabel">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="text">
          <string>Packets</string>
         </property>
@@ -456,10 +468,10 @@ Substitutions:
   <widget class="QWidget" name="statsContainer" native="true">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>310</y>
-     <width>331</width>
-     <height>91</height>
+     <x>2</x>
+     <y>352</y>
+     <width>351</width>
+     <height>117</height>
     </rect>
    </property>
    <property name="windowTitle">
@@ -555,15 +567,15 @@ Substitutions:
  </widget>
  <customwidgets>
   <customwidget>
-   <class>RollupWidget</class>
-   <extends>QWidget</extends>
-   <header>gui/rollupwidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>ButtonSwitch</class>
    <extends>QToolButton</extends>
    <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
+   <class>RollupContents</class>
+   <extends>QWidget</extends>
+   <header>gui/rollupcontents.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <tabstops>

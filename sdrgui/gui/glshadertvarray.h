@@ -55,9 +55,7 @@ public:
     bool SelectRow(int intLine);
     bool SetDataColor(int intCol,QRgb objColor);
 
-
 protected:
-
     QOpenGLShaderProgram *m_objProgram;
     int m_matrixLoc;
     int m_textureLoc;
@@ -65,13 +63,13 @@ protected:
     static const QString m_strVertexShaderSourceArray;
     static const QString m_strFragmentShaderSourceColored;
 
-    QImage *m_objImage=NULL;
-    QOpenGLTexture *m_objTexture=NULL;
+    QImage *m_objImage;
+    QOpenGLTexture *m_objTexture;
 
     int m_intCols;
     int m_intRows;
 
-    QRgb * m_objCurrentRow;
+    QRgb *m_objCurrentRow;
 
     bool m_blnInitialized;
     bool m_blnColor;

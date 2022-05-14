@@ -48,6 +48,8 @@ The header takes an integer number of 16 (4 bytes) or 24 (8 bytes) bits samples.
 
 <h2>Interface</h2>
 
+The top and bottom bars of the device window are described [here](../../../sdrgui/device/readme.md)
+
 ![File input plugin GUI](../../../doc/img/FileInput_plugin.png)
 
 <h3>1: Start/Stop</h3>

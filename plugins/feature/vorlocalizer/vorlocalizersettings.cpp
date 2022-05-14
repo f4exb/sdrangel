@@ -41,7 +41,7 @@ void VORLocalizerSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIFeatureSetIndex = 0;
     m_reverseAPIFeatureIndex = 0;
-
+    m_workspaceIndex = 0;
 
     for (int i = 0; i < VORDEMOD_COLUMNS; i++)
     {
@@ -68,6 +68,9 @@ QByteArray VORLocalizerSettings::serialize() const
     if (m_rollupState) {
         s.writeBlob(19, m_rollupState->serialize());
     }
+
+    s.writeS32(20, m_workspaceIndex);
+    s.writeBlob(21, m_geometryBytes);
 
     for (int i = 0; i < VORDEMOD_COLUMNS; i++) {
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -122,6 +125,9 @@ bool VORLocalizerSettings::deserialize(const QByteArray& data)
             d.readBlob(19, &bytetmp);
             m_rollupState->deserialize(bytetmp);
         }
+
+        d.readS32(20, &m_workspaceIndex, 0);
+        d.readBlob(21, &m_geometryBytes);
 
         for (int i = 0; i < VORDEMOD_COLUMNS; i++) {
             d.readS32(100 + i, &m_columnIndexes[i], i);

@@ -19,6 +19,8 @@ It adds a dependency to the [libsigmf library](https://github.com/f4exb/libsigmf
 
 <h2>Interface</h2>
 
+The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
+
 ![SigMF File Sink plugin GUI](../../../doc/img/SigMFFileSink_plugin.png)
 
 <h3>1: Frequency shift from center frequency of reception</h3>
@@ -100,4 +102,4 @@ The path of the selected meta file appears at the right of the button. If it is 
 
 <h3>15: Channel spectrum</h3>
 
-This is the spectrum display of the IQ stream seen by the channel. It is the same as all spectrum displays in the program and is identical to the [main window](../../../sdrgui/readme.md#) spectrum display.
+This is the spectrum display of the IQ stream seen by the channel. Details on the spectrum view and controls can be found [here](../../../sdrgui/gui/spectrum.md)

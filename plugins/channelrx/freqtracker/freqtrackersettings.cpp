@@ -52,6 +52,8 @@ void FreqTrackerSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
+    m_workspaceIndex = 0;
+    m_hidden = false;
 }
 
 QByteArray FreqTrackerSettings::serialize() const
@@ -90,6 +92,10 @@ QByteArray FreqTrackerSettings::serialize() const
     if (m_rollupState) {
         s.writeBlob(23, m_rollupState->serialize());
     }
+
+    s.writeS32(24, m_workspaceIndex);
+    s.writeBlob(25, m_geometryBytes);
+    s.writeBool(26, m_hidden);
 
     return s.final();
 }
@@ -169,6 +175,10 @@ bool FreqTrackerSettings::deserialize(const QByteArray& data)
             d.readBlob(23, &bytetmp);
             m_rollupState->deserialize(bytetmp);
         }
+
+        d.readS32(24, &m_workspaceIndex, 0);
+        d.readBlob(25, &m_geometryBytes);
+        d.readBool(26, &m_hidden, false);
 
         return true;
     }

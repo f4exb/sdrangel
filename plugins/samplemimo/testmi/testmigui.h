@@ -46,10 +46,12 @@ public:
 	bool deserialize(const QByteArray& data);
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 
+protected:
+    void resizeEvent(QResizeEvent* size);
+
 private:
 	Ui::TestMIGui* ui;
 
-	DeviceUISet* m_deviceUISet;
 	TestMISettings m_settings;
     int m_streamIndex; //!< Current stream index being dealt with
     int m_spectrumStreamIndex; //!< Index of the stream displayed on main spectrum
@@ -73,6 +75,7 @@ private:
     void updateAmpFineLimit();
     void updateFrequencyShiftLimit();
 	bool handleMessage(const Message& message);
+    void makeUIConnections();
 
 private slots:
     void handleInputMessages();

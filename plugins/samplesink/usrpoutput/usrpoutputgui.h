@@ -53,10 +53,12 @@ public:
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     virtual bool handleMessage(const Message& message);
 
+protected:
+    void resizeEvent(QResizeEvent* size);
+
 private:
     Ui::USRPOutputGUI* ui;
 
-    DeviceUISet* m_deviceUISet;
     USRPOutput* m_usrpOutput; //!< Same object as above but gives easy access to USRPOutput methods and attributes that are used intensively
     USRPOutputSettings m_settings;
     bool m_sampleRateMode; //!< true: device, false: base band sample rate update mode
@@ -80,6 +82,7 @@ private:
     void updateSampleRate();
     void updateFrequencyLimits();
     void blockApplySettings(bool block);
+    void makeUIConnections();
 
 private slots:
     void handleInputMessages();

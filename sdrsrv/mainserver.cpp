@@ -59,6 +59,7 @@ MainServer::MainServer(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 
     qDebug() << "MainServer::MainServer: load plugins...";
     m_mainCore->m_pluginManager = new PluginManager(this);
+    m_mainCore->m_pluginManager->setEnableSoapy(parser.getSoapy());
     m_mainCore->m_pluginManager->loadPlugins(QString("pluginssrv"));
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()), Qt::QueuedConnection);
@@ -76,7 +77,7 @@ MainServer::MainServer(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     m_apiServer = new WebAPIServer(parser.getServerAddress(), parser.getServerPort(), m_requestMapper);
     m_apiServer->start();
 
-    m_dspEngine->setMIMOSupport(parser.getMIMOSupport());
+    m_dspEngine->setMIMOSupport(true);
 
     qDebug() << "MainServer::MainServer: end";
 }
@@ -130,6 +131,14 @@ bool MainServer::handleMessage(const Message& cmd)
         const Preset *presetToDelete = notif.getPreset();
         // remove preset from settings
         m_mainCore->m_settings.deletePreset(presetToDelete);
+        return true;
+    }
+    else if (MainCore::MsgDeleteConfiguration::match(cmd))
+    {
+        MainCore::MsgDeleteConfiguration& notif = (MainCore::MsgDeleteConfiguration&) cmd;
+        const Configuration *configuationToDelete = notif.getConfiguration();
+        // remove configuration from settings
+        m_mainCore->m_settings.deleteConfiguration(configuationToDelete);
         return true;
     }
     else if (MainCore::MsgLoadFeatureSetPreset::match(cmd))

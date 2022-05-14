@@ -59,6 +59,8 @@ void ChannelAnalyzerSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
+    m_workspaceIndex = 0;
+    m_hidden = false;
 }
 
 QByteArray ChannelAnalyzerSettings::serialize() const
@@ -105,6 +107,9 @@ QByteArray ChannelAnalyzerSettings::serialize() const
     s.writeU32(26, m_reverseAPIDeviceIndex);
     s.writeU32(27, m_reverseAPIChannelIndex);
     s.writeS32(28, m_streamIndex);
+    s.writeS32(29, m_workspaceIndex);
+    s.writeBlob(30, m_geometryBytes);
+    s.writeBool(31, m_hidden);
 
     return s.final();
 }
@@ -179,6 +184,9 @@ bool ChannelAnalyzerSettings::deserialize(const QByteArray& data)
         d.readU32(27, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
         d.readS32(28, &m_streamIndex, 0);
+        d.readS32(29, &m_workspaceIndex, 0);
+        d.readBlob(30, &m_geometryBytes);
+        d.readBool(31, &m_hidden, false);
 
         return true;
     }
