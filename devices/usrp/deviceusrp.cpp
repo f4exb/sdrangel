@@ -45,8 +45,8 @@ void DeviceUSRP::enumOriginDevices(const QString& hardwareId, PluginInterface::O
         for(unsigned i = 0; i != dev_addrs.size(); i++)
         {
             QString id = QString::fromStdString(dev_addrs[i].to_string());
-            QString name = QString::fromStdString(dev_addrs[i].get("name"));
-            QString serial = QString::fromStdString(dev_addrs[i].get("serial"));
+            QString name = QString::fromStdString(dev_addrs[i].get("name", "N/A"));
+            QString serial = QString::fromStdString(dev_addrs[i].get("serial", "N/A"));
             QString displayedName(QString("%1[%2:$1] %3").arg(name).arg(i).arg(serial));
 
             qDebug() << "DeviceUSRP::enumOriginDevices: found USRP device " << displayedName;
