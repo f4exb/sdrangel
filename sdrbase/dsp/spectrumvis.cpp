@@ -27,13 +27,6 @@
 
 #include "spectrumvis.h"
 
-#ifndef LINUX
-inline double log2(double n)
-{
-	return log(n) / log(2.0);
-}
-#endif
-
 MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgConfigureSpectrumVis, Message)
 MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgConfigureScalingFactor, Message)
 MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgConfigureWSpectrumOpenClose, Message)
