@@ -61,6 +61,7 @@ MainServer::MainServer(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     m_mainCore->m_pluginManager = new PluginManager(this);
     m_mainCore->m_pluginManager->setEnableSoapy(parser.getSoapy());
     m_mainCore->m_pluginManager->loadPlugins(QString("pluginssrv"));
+    addFeatureSet(); // Create the uniuefeature set
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()), Qt::QueuedConnection);
     m_mainCore->m_masterTimer.start(50);
