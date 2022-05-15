@@ -10,7 +10,7 @@ As well as displaying information received via ADS-B, the plugin can also combin
 
 ![ADS-B Demodulator plugin GUI](../../../doc/img/ADSBDemod_plugin.png)
 
-The ADS-B plugin can send aicraft for display on the [Map Feature](../../feature/map/readme.md) alongside objects from other plugins and in 3D.
+The ADS-B plugin can send aircraft for display on the [Map Feature](../../feature/map/readme.md) alongside objects from other plugins and in 3D.
 
 ![ADS-B on 3D Map](../../../doc/img/ADSBDemod_plugin_map_3d.png)
 
@@ -60,7 +60,7 @@ This sets the correlation threshold in dB between the received signal and expect
 
 <h3>9: Download Opensky-Network Aircraft Database</h3>
 
-Clicking this will download the [Opensky-Network](https://opensky-network.org/) aircraft database. This database contains information about aircrafts, such as registration, aircraft model and owner details, that is not broadcast via ADS-B. Once downloaded, this additional information will be displayed in the table alongside the ADS-B data. The database should only need to be downloaded once, as it is saved to disk, and it is recommended to download it before enabling the demodulator.
+Clicking this will download the [Opensky-Network](https://opensky-network.org/) aircraft database. This database contains information about aircraft, such as registration, aircraft model and owner details, that is not broadcast via ADS-B. Once downloaded, this additional information will be displayed in the table alongside the ADS-B data. The database should only need to be downloaded once, as it is saved to disk, and it is recommended to download it before enabling the demodulator.
 
 <h3>10: Download OurAirports Airport Databases</h3>
 
@@ -122,13 +122,13 @@ As a client:
 
 As a server:
 
-* For OpenSky Network, check Enable Server and set Port to 30005. You can check for successfull feeding at: https://opensky-network.org/my-opensky
+* For OpenSky Network, check Enable Server and set Port to 30005. You can check for successful feeding at: https://opensky-network.org/my-opensky
 
 The Beast binary and Hex formats are as detailed here: https://wiki.jetvision.de/wiki/Mode-S_Beast:Data_Output_Formats
 
 When Enable import is checked, aircraft data for aircraft anywhere in the world can be imported from OpenSky Network.
 A username and password are not required, but when specified, this allows the update period to be reduced to 5 seconds instead of 10 seconds.
-To limit network traffic and processing power requirements, a geographical region can be set via the mininum and maximum latitude and longitude fields.
+To limit network traffic and processing power requirements, a geographical region can be set via the minimum and maximum latitude and longitude fields.
 
 <h3>17: Open Notifications Dialog</h3>
 
@@ -226,7 +226,7 @@ The table displays the decoded ADS-B data for each aircraft along side data avai
 
 ![ADS-B Demodulator Data](../../../doc/img/ADSBDemod_plugin_table.png)
 
-* ICAO ID - 24-bit hexidecimal ICAO aircraft address. This is unique for each aircraft. (ADS-B)
+* ICAO ID - 24-bit hexadecimal ICAO aircraft address. This is unique for each aircraft. (ADS-B)
 * Callsign - Aircraft callsign (which is sometimes also the flight number). (ADS-B)
 * Aircraft - The aircraft model. (DB)
 * Airline - The logo of the operator of the aircraft (or owner if no operator known). (DB)
@@ -248,7 +248,7 @@ The table displays the decoded ADS-B data for each aircraft along side data avai
 * Owner - The owner of the aircraft. (DB)
 * Updated - The local time at which the last ADS-B message was received.
 * RX Frames - A count of the number of ADS-B frames received from this aircraft.
-* Correlation - Displays the minimun, average and maximum of the preamable correlation in dB for each recevied frame. These values can be used to help select a threshold setting. This correlation value is the ratio between the presence and absence of the signal corresponding to the "ones" and the "zeros" of the sync word adjusted by the bits ratio. It can be interpreted as a SNR estimation.
+* Correlation - Displays the minimum, average and maximum of the preamable correlation in dB for each received frame. These values can be used to help select a threshold setting. This correlation value is the ratio between the presence and absence of the signal corresponding to the "ones" and the "zeros" of the sync word adjusted by the bits ratio. It can be interpreted as a SNR estimation.
 * RSSI - This Received Signal Strength Indicator is based on the signal power during correlation estimation. This is the power sum during the expected presence of the signal i.e. the "ones" of the sync word.
 * Flight status - scheduled, active, landed, cancelled, incident or diverted. (API)
 * Dep - Departure airport. (API)
@@ -268,12 +268,12 @@ If an ADS-B frame has not been received from an aircraft for 60 seconds, the air
 * Left click on a header to sort the table by the data in that column.
 * Double clicking in an ICAO ID cell will open a Web browser and search for the corresponding aircraft on https://www.planespotters.net/
 * Double clicking in an Callsign cell will open a Web browser and search for the corresponding flight on https://www.flightradar24.com/
-* Double clicking in an Az/El cell will set the aircraft as the active target. The azimuth and elevation to the aicraft will be sent to a rotator controller plugin. The aircraft information box will be coloured green, rather than blue, on the map.
+* Double clicking in an Az/El cell will set the aircraft as the active target. The azimuth and elevation to the aircraft will be sent to a rotator controller plugin. The aircraft information box will be coloured green, rather than blue, on the map.
 * Double clicking on any other cell in the table will centre the map on the corresponding aircraft.
 
 <h2>Map</h2>
 
-The map displays aircraft locations and data geographically. Four types of map can be chosen from in the Display Settings dialog: Aviation, Avation (Dark), Street and Satellite.
+The map displays aircraft locations and data geographically. Four types of map can be chosen from in the Display Settings dialog: Aviation, Aviation (Dark), Street and Satellite.
 
 ![ADS-B Demodulator Map](../../../doc/img/ADSBDemod_plugin_map.png)
 
@@ -285,7 +285,7 @@ If My Position is not set correctly, the position of aircraft may not be compute
 Aircraft are only placed upon the map when a position can be calculated, which can require several frames to be received.
 
 * To pan around the map, click the left mouse button and drag. To zoom in or out, use the mouse scroll wheel.
-* Left clicking on an aicraft will highlight the corresponding row in the table for the aircraft and the information box on the map will be coloured orange, rather than blue.
+* Left clicking on an aircraft will highlight the corresponding row in the table for the aircraft and the information box on the map will be coloured orange, rather than blue.
 * Double clicking on an aircraft will set it as the active target and the information box will be coloured green.
 * Left clicking the information box next to an aircraft will reveal more information. It can be closed by clicking it again.
 * Left clicking the information box next to an airport will reveal ATC frequencies for the airport (if the OurAirports database has been downloaded.). This information box can be closed by left clicking on the airport identifier. Double clicking on one of the listed frequencies, will set it as the centre frequency on the selected SDRangel device set (15). The Az/El row gives the azimuth and elevation of the airport from the location set under Preferences > My Position. Double clicking on this row will set the airport as the active target.

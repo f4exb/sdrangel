@@ -20,7 +20,7 @@ Device start / stop button.
 
 <h3>2A: Sample rate</h3>
 
-This is the sample rate at which IQ samples are transfered from SDRangel to the device, in kS/s (k) or MS/s (M).
+This is the sample rate at which IQ samples are transferred from SDRangel to the device, in kS/s (k) or MS/s (M).
 
 <h3>2B: Stream sample rate</h3>
 

@@ -22,7 +22,7 @@ Average total power in dB relative to a +/- 1.0 amplitude signal received in the
 
 <h3>3: Manual re-synchronization</h3>
 
-This works only for the presently disabled 700D mode. Use this push button to force loosing and re-acquiring synchronisation.
+This works only for the presently disabled 700D mode. Use this push button to force losing and re-acquiring synchronisation.
 
 <h3>4: FreeDV mode</h3>
 

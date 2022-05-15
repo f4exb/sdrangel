@@ -108,6 +108,6 @@ The signals available include:
 - GotM - Indicates when a marker is detected. For WWVB only.
 
 As an example of how this can be used, we can plot the MagSq as X and the calculated TH as Y, which can help to set the value of the
-TH setting to an approproate level.
+TH setting to an appropriate level.
 
 ![Radio clock plugin GUI](../../../doc/img/RadioClock_waveforms.png)

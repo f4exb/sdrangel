@@ -135,7 +135,7 @@ Type in the text of the marker to be displayed when it is selected (see "Annotat
 
 <h3>5. Export markers to .csv file</h3>
 
-Export the markers to a .csv file. Colums are
+Export the markers to a .csv file. Columns are
   - **Start**: start frequency in Hz
   - **Width**: width in Hz
   - **Text**: marker text when selected
@@ -175,7 +175,7 @@ Sort markers  by increasing starting frequency
 
 <h3>12. Show start/center frequency</h3>
 
-The start of center frequency in Hz is displayed when the center or start inpu frequency (8) is selected respectively.
+The start of center frequency in Hz is displayed when the center or start input frequency (8) is selected respectively.
 
 <h3>13. Show stop frequency</h3>
 

@@ -107,7 +107,7 @@ This is the Spread Factor parameter of the ChirpChat signal. This is the log2 of
 
 The LoRa standard specifies 0 (no DE) or 2 (DE active). The ChirpChat DE range is extended to all values between 0 and 4 bits.
 
-This is the log2 of the number of FFT bins used for one symbol. Extending the numbe of FFT bins per symbol decreases the probabilty to detect the wrong symbol as an adjacent bin. It can also overcome frequency drift on long messages.
+This is the log2 of the number of FFT bins used for one symbol. Extending the numbe of FFT bins per symbol decreases the probability to detect the wrong symbol as an adjacent bin. It can also overcome frequency drift on long messages.
 
 In practice it is difficult to make correct decodes if only one FFT bin is used to code one symbol (DE=0) therefore it is recommended to use a DE factor of 2 or more. With medium SNR DE=1 can still achieve good results.
 
@@ -233,9 +233,9 @@ The format of a message line is the following:
 ![ChirpChat Demodulator message bytes window](../../../doc/img/ChirpChatDemod_message_binary.png)
 
   - 1: Timestamp in HH:NN:SS format
-  - 2: Sync word. This is the sync word (byte) displayed in hex. Corrsponds to (A.5) in the current message.
-  - 3: De-chirped signal level. This is the de-chirped signal level in dB. Corrsponds to (5) in the current message.
-  - 4: De-chirped signal to noise ratio. This is the de-chirped signal to noise ratio in dB. Corrsponds to (6) in the current message.
+  - 2: Sync word. This is the sync word (byte) displayed in hex. Corresponds to (A.5) in the current message.
+  - 3: De-chirped signal level. This is the de-chirped signal level in dB. Corresponds to (5) in the current message.
+  - 4: De-chirped signal to noise ratio. This is the de-chirped signal to noise ratio in dB. Corresponds to (6) in the current message.
   - 5: Header FEC status. Corresponds to (A.12) indicator in the current message:
     - **n/a**: unknown or not applicable
     - **err**: unrecoverable error
@@ -272,7 +272,7 @@ This is the spectrum of the de-chirped signal when a ChirpChat signal can be dec
 
 The frequency span corresponds to the bandwidth of the ChirpChat signal (3). Default FFT size is 2<sup>SF</sup> where SF is the spread factor (7).
 
-Sequences of successful ChirpChat signal demodulation are separated by blank lines (genreated with a string of high value bins).
+Sequences of successful ChirpChat signal demodulation are separated by blank lines (generated with a string of high value bins).
 
 Controls are the usual controls of spectrum displays with the following restrictions:
 

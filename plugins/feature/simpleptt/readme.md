@@ -66,10 +66,10 @@ Use this combo to select which Rx device is controlled
 
 Use this combo to select which Tx device is controlled
 
-<h3>8: Transistion delay from Rx to Tx</h3>
+<h3>8: Transition delay from Rx to Tx</h3>
 
 Value in milliseconds between Rx stop and Tx start
 
-<h3>9: Transistion delay from Tx to Rx</h3>
+<h3>9: Transition delay from Tx to Rx</h3>
 
 Value in milliseconds between Tx stop and Rx start

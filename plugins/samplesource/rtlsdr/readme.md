@@ -98,7 +98,7 @@ Use this checkbox to activate the special RTLSDR direct sampling. This can be us
 
 <h3>11: Offset tuning</h3>
 
-This controls the offset tuning. Some RF frontends like the obsolete E4000 implement this feature and it can seriously reduce the central DC peak without digital correction. This does not work for the R820T and R820T2 that are very popular on which it will produce no effect. However these RF frontends exhibit a central DC peak much smaller than on the E4000 and can be easly corrected digitally via control (3).
+This controls the offset tuning. Some RF frontends like the obsolete E4000 implement this feature and it can seriously reduce the central DC peak without digital correction. This does not work for the R820T and R820T2 that are very popular on which it will produce no effect. However these RF frontends exhibit a central DC peak much smaller than on the E4000 and can be easily corrected digitally via control (3).
 
 <h3>12: RF bandwidth</h3>
 

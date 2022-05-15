@@ -14,7 +14,7 @@ This plugin can be used to view digital amateur analog television transmissions 
 
 The whole bandwidth available to the channel is used. That is it runs at the device sample rate possibly downsampled by a power of two in the source plugin.
 
-&#9888; Note that DVB-S2 support is experimental. You may need to move some settings back and forth to achieve constellation lock and decode. For exmple change mode or slightly move back and forth center frequency.
+&#9888; Note that DVB-S2 support is experimental. You may need to move some settings back and forth to achieve constellation lock and decode. For example change mode or slightly move back and forth center frequency.
 
 <h2>Interface</h2>
 
@@ -92,7 +92,7 @@ Depends on the standard.
   - DVB-S: Normally only QPSK and BPSK (later addition) are supported in the standard but amateur radio use has a little bit abused of the standard so PSK6, QAM16, QAM64 and QAM256 are also supported
   - DVB-S2: QPSK, PSK8, APSK16, APSK32, APSK64e (DVB-S2X)
 
-The constallations are as follows:
+The constellations are as follows:
 
   - BPSK: binary phase shift keying. Symbols are in &#960;/4 and -3&#960;/4 positions.
   - QPSK: quadrature phase shift keying. Symbols are in &#960;/4, 3&#960;/4, -3&#960;/4 and -&#960;/4 positions.

@@ -114,7 +114,7 @@ The level corresponds to the channel power above which the squelch gate opens.
 
 <h4>A.9: Squelch time gate</h4>
 
-Number of milliseconds following squelch gate opening after which the signal is declared open. There is a delay line for the samples so samples applied to the decoder actually start at the beginning of the gate period not loosing any samples. 0 means squelch is declared open with no delay.
+Number of milliseconds following squelch gate opening after which the signal is declared open. There is a delay line for the samples so samples applied to the decoder actually start at the beginning of the gate period not losing any samples. 0 means squelch is declared open with no delay.
 
 <h4>A.10: High-pass filter for audio</h4>
 

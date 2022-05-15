@@ -90,7 +90,7 @@ The value in (9) is added (in dB) to all calibrated power values if "Cor" is sel
 
 <h3>12. Export calibrated points to .csv</h3>
 
-Export the calibrated points to a .csv file. Colums are:
+Export the calibrated points to a .csv file. Columns are:
 
   - **Frequency**: frequency in Hz of the point
   - **Relative**: relative power in dB

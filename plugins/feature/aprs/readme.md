@@ -28,7 +28,7 @@ Pressing this button shows the APRS Settings Dialog. This dialog allows you to e
 * A serverside filter, that specifies which packets should be forwarded from the internet to SDRangel. See http://www.aprs-is.net/javAPRSFilter.aspx
 m/50 will send you packets within 50 km of the last known position of the station corresponding to the callsign used to log in with.
 If you do not have a corresponding station, you can specify a location by passing a latitude and longitude. E.g: r/lat/lon/50
-* The units in which altitudes are displyed (Feet or metres).
+* The units in which altitudes are displayed (Feet or metres).
 * The units in which object speeds are displayed (Knots, MPH or KPH).
 * The units in which temperature is displayed (Fahrenheit or Celsius).
 * The units in which rainfall is displayed (Hundredths of an inch or millimetres).

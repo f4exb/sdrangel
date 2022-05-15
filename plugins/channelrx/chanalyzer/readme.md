@@ -316,7 +316,7 @@ This is for future use when more than one incoming complex signals can be applie
 
 The amplitude range (vertical scale) can be set to any value from 1e-10 to 9.999e+10. Values are entered as mantissa (6.3 and 6.4) and exponent (6.5) values.
 
-I/Q signal range is +/-1 however values larger than 1 are accomodated for the general usage of the scope in other plugins.
+I/Q signal range is +/-1 however values larger than 1 are accommodated for the general usage of the scope in other plugins.
 
 When displayed signal can be negative (+/- scale) the range is -range to +range. When displayed signal is positive (ex: magnitudes) the range is 0 to 2&times;range.
 
@@ -359,7 +359,7 @@ This displays the unit multiplier for values on the vertical scale of the displa
 
 The amplitude range can be offset by any value from -5&times;10<sup>-10</sup> to 5&times;10<sup>10</sup>.
 
-I/Q signal range is +/-1 however values larger than 1 are accomodated for the general usage of the scope in other plugins.
+I/Q signal range is +/-1 however values larger than 1 are accommodated for the general usage of the scope in other plugins.
 
 ![Channel Analyzer NG plugin amplitude offset control](../../../doc/img/ChAnalyzerNG_plugin_ampOffset.png)
 
@@ -401,7 +401,7 @@ This area shows the current trace color. When clicking on it a color chooser dia
 
 <h3>11. Save traces in memory</h3>
 
-While in memory mode (see E.13 next) use this button to save the bank of traces in memory (50 last traces) to file. A file dialog will open to let you choose the file name and locaion. By default the file extension is `.trcm`.
+While in memory mode (see E.13 next) use this button to save the bank of traces in memory (50 last traces) to file. A file dialog will open to let you choose the file name and location. By default the file extension is `.trcm`.
 
 <h3>12. Load traces into memory</h3>
 

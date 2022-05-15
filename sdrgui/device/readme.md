@@ -82,7 +82,7 @@ Validates the data (saves it in the channel marker object) and exits the dialog
 
 <h3>A.3: Change device</h3>
 
-Opens a dialog that lets you choose a different devuce
+Opens a dialog that lets you choose a different device
 
 ![Main Window sampling devices dialog](../../doc/img/MainWindow_SDDialog.png)
 

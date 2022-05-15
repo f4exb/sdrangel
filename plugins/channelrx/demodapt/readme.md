@@ -67,7 +67,7 @@ When clicked, shows additional APT Demodulator settings.
 This includes:
 
    - Whether the APT demodulator can be controlled by the Satellite Tracker feature. When checked, the image decoder will be enabled and reset on AOS and the satellite pass direction will be used to control image rotation. The decoder will be stopped on LOS.
-   - Which satellites the APT demodulator will respond to AOS and LOS indications from the Satellite Tracker. This can be used to simulataneously decode images from multiple satellites, by having multiple instances of the APT Demodulator and setting a unique satellite name for each demodulator.
+   - Which satellites the APT demodulator will respond to AOS and LOS indications from the Satellite Tracker. This can be used to simultaneously decode images from multiple satellites, by having multiple instances of the APT Demodulator and setting a unique satellite name for each demodulator.
    - Whether to automatically save images on LOS.
    - Whether a combined image including telemetry should be saved.
    - Whether separate images of channel A and B, without telemetry, should be saved.
@@ -134,7 +134,7 @@ When checked, histogram equalisation is performed, which can enhance the contras
 
 <h3>20: Overlay precipitation</h3>
 
-When checked, precipitation is detected from the IR channel and overlayed on both channels using a colour palette.
+When checked, precipitation is detected from the IR channel and overlaid on both channels using a colour palette.
 
 This option will not work if linear (18) or histogram equalisation (19) has been applied.
 

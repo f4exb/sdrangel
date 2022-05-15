@@ -86,4 +86,4 @@ The received packets table displays the contents of the packets that have been r
 * Type - The AX.25 frame type.
 * PID - Protocol Identifier.
 * Data (ASCII) - The AX.25 information field displayed as ASCII.
-* Data (Hex) - The AX.25 information field displayed as hexidecimal.
+* Data (Hex) - The AX.25 information field displayed as hexadecimal.

@@ -31,7 +31,7 @@ When checked, radials on the map will drawn adjusted for magnetic declination. F
 
 <h3>4: Round robin turn time</h3>
 
-Available VOR demodulator channels are allocated to service the selected VORs on the map and displayed in the VOR table (B). There could be less available channels than the number of VORs to service in which case the channel(s) of the same device can be used to service VORs in turn in a round robin fashion. This sets the time in seconds dedicated to each turn. More details on channels allocation agorithm is given in (7).
+Available VOR demodulator channels are allocated to service the selected VORs on the map and displayed in the VOR table (B). There could be less available channels than the number of VORs to service in which case the channel(s) of the same device can be used to service VORs in turn in a round robin fashion. This sets the time in seconds dedicated to each turn. More details on channels allocation algorithm is given in (7).
 
 <h3>5: Round robin turn time progress</h3>
 
@@ -51,7 +51,7 @@ This combo is not used to select anything but just to show the VOR demodulators 
 
 The display is `Rn:m` where `n` is the device set index and `m` the channel index in the device set.
 
-Channels may be used in round robin turns if their number is not enough to cover all VORs. The allocation algorithm will use devices with multiple channels first in order to accomodate several VORs with just one device. The baseband must be large enough to fit the VORs simultaneously. If there are VORs remaining more turns are added with just one channel being used. It is always possible to service any number of VORs with a single channel.
+Channels may be used in round robin turns if their number is not enough to cover all VORs. The allocation algorithm will use devices with multiple channels first in order to accommodate several VORs with just one device. The baseband must be large enough to fit the VORs simultaneously. If there are VORs remaining more turns are added with just one channel being used. It is always possible to service any number of VORs with a single channel.
 
 When there is more than one turn for a device valid radial directions are averaged and the resulting average is used during the round robin loop. Averaging also takes place for reference and variable signal levels.
 
