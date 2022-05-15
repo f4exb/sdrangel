@@ -1,3 +1,29 @@
+sdrangel (7.0.0-beta.2) unstable; urgency=medium
+
+  * Fixed remaining v7 branch references
+  * SSB and NFM demod: do not process samples if channel sample rate is not set yet (==0)
+  * Added changelog for Debian
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 15 May 2022 09:33:12 +0200
+
+sdrangel (7.0.0-beta.1) unstable; urgency=medium
+
+  * See: https://github.com/f4exb/sdrangel/releases/tag/v7.0.0-beta.1
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 14 May 2022 18:33:12 +0200
+
+sdrangel (7.0.0-alpha.4) unstable; urgency=medium
+
+  * See: https://github.com/f4exb/sdrangel/releases/tag/v7.0.0-alpha.4
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 14 May 2022 11:33:12 +0200
+
+sdrangel (7.0.0-alpha.3) unstable; urgency=medium
+
+  * See: https://github.com/f4exb/sdrangel/releases/tag/v7.0.0-alpha.3
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 2 May 2022 11:33:12 +0200
+
 sdrangel (6.20.3-1) unstable; urgency=medium
 
   * Removed issue templates
@@ -6,6 +32,18 @@ sdrangel (6.20.3-1) unstable; urgency=medium
   * SDRPlayV3: Take LIF downsampling into account when calculating the final bandwidth. PR #1196
 
   -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 29 Apr 2022 11:33:12 +0200
+
+sdrangel (7.0.0-alpha.2) unstable; urgency=medium
+
+  * See: https://github.com/f4exb/sdrangel/releases/tag/v7.0.0-alpha.2
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 28 Apr 2022 11:33:12 +0200
+
+sdrangel (7.0.0-alpha.1) unstable; urgency=medium
+
+  * See: https://github.com/f4exb/sdrangel/releases/tag/v7.0.0-alpha.1
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 19 Apr 2022 11:33:12 +0200
 
 sdrangel (6.20.2-1) unstable; urgency=medium
 

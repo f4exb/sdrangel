@@ -17,7 +17,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(sdrangel_VERSION_MAJOR "7")
 set(sdrangel_VERSION_MINOR "0")
 set(sdrangel_VERSION_PATCH "0")
-set(sdrangel_VERSION_SUFFIX "beta.1")
+set(sdrangel_VERSION_SUFFIX "beta.2")
 
 # SDRAngel cmake options
 option(DEBUG_OUTPUT "Print debug messages" OFF)
