@@ -6,7 +6,7 @@ Configuraitons stores the complete setup of a SDRangel instance:
   - Device sets
   - Features
 
-It also stores the geometry of all windows and workspaces so that the entire aspect of a configuraiton of the instance can be saved and retrieved. A default configuration is saved at program exit and retrieved at the next prograp start. Use the `--scratch` command line option to skip the retrieval of the default configuration and start with an empty setup.
+It also stores the geometry of all windows and workspaces so that the entire aspect of a configuration of the instance can be saved and retrieved. A default configuration is saved at program exit and retrieved at the next prograp start. Use the `--scratch` command line option to skip the retrieval of the default configuration and start with an empty setup.
 
 ![Workspaces feature presets](../doc/img/Configurations.png)
 
@@ -38,7 +38,7 @@ Delete selected configuration or selected group
 
 <h3>8: Load configuration</h3>
 
-Load configuraiton in the current instance. All components and workspaces are deleted first.
+Load configuration in the current instance. All components and workspaces are deleted first.
 
 <h3>9: Close dialog</h3>
 

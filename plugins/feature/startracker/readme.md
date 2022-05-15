@@ -153,7 +153,7 @@ For all other target settings, this sisplays the calculated galactic longitude t
 
 <h3>21: b - Galactic Latitude</h3>
 
-When the target is set to Custom l/b, you specify the galactic lattitude (angle in degrees) of the target object.
+When the target is set to Custom l/b, you specify the galactic latitude (angle in degrees) of the target object.
 
 For all other target settings, displays the calculated galactic latitude to the object.
 
@@ -208,7 +208,7 @@ This can be useful to help identify spiral arms in hydrogen line observations.
 
 ![Galactic line of sight](../../../doc/img/StarTracker_milkyway.png)
 
-Two images of the Milky Way are availble: a purely graphical image and one annotated with the names of the major spiral arms and a grid with distance and galactic longitude.
+Two images of the Milky Way are available: a purely graphical image and one annotated with the names of the major spiral arms and a grid with distance and galactic longitude.
 
 ![Galactic line of sight](../../../doc/img/StarTracker_milkywayannotated.png)
 
@@ -298,7 +298,7 @@ To convert FITS images between projections, use Montage:
 
     sudo apg-get install montage wcslib-tools
 
-Create header for desired output image. E.g. For galatic coordinates, 0.3deg per pixel, covering 360/180 degrees:
+Create header for desired output image. E.g. For galactic coordinates, 0.3deg per pixel, covering 360/180 degrees:
 
     mHdr -c ga -p 1200 -h 180.0 "0.0 +0.0" 360 header.hdr
 

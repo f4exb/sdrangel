@@ -62,7 +62,7 @@ Check this button to repeated transmit a packet. Right click to open the dialog 
 
 <h3>13: Insert position</h3>
 
-Inserts position as APRS formatted latitude and longitude in to the current cursor position within the data field. Lattitude and longitude can be specified under Preferences > My position.
+Inserts position as APRS formatted latitude and longitude in to the current cursor position within the data field. Latitude and longitude can be specified under Preferences > My position.
 
 <h3>14: To</h3>
 

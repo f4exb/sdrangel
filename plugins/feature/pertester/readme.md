@@ -40,7 +40,7 @@ Specify the interval in seconds between packet transmissions.
 
 <h3>6: Packet</h3>
 
-Specify the contents of the packet to transmit and expect to be received. Data should be entered in hexidecimal bytes (E.g: 00 11 22 33 44).
+Specify the contents of the packet to transmit and expect to be received. Data should be entered in hexadecimal bytes (E.g: 00 11 22 33 44).
 
 The exact format required will depend on the underlying protocol being used. For AX.25 using the Packet modulator, LoRo using the ChirpChat modulator, AIS and 802.15.4, it is not necessary to include the trailing CRC, as this is appended automatically by the SDRangel modulators.
 
@@ -62,7 +62,7 @@ This:
 * Encodes MYCALL as a 7-byte AX.25 source address.
 * Inserts hex value 0x03.
 * Inserts hex value 0xf0.
-* Inserts a 32-bit packet identifer.
+* Inserts a 32-bit packet identifier.
 * Inserts the 5 bytes of the ASCII encoding of Hello.
 * Inserts a random payload of between 0 and 100 bytes.
 

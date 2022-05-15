@@ -56,7 +56,7 @@ It is also used to signal PLL lock with a green background. Note that the lock s
 
 <h4>7.2 Alpha factor of frequency error EMA</h4>
 
-The frequency error is passed throug an Exponential Moving Average (EMA) stage to smooth it out. This is the decrease factor or alpha in the formula:
+The frequency error is passed through an Exponential Moving Average (EMA) stage to smooth it out. This is the decrease factor or alpha in the formula:
 
 S<sub>i</sub> = &alpha; x<sub>i</sub> + S<sub>i-1</sub>
 

@@ -8,7 +8,7 @@ Forward Error Correction with a Cauchy MDS block erasure codec is used to preven
 
 The remote SDRangel instance to which the data stream is sent is controlled via its REST API using a separate control software for example [SDRangelcli](https://github.com/f4exb/sdrangelcli)
 
-The sample size used in the I/Q stream is the Rx sample size of the local instance. Possible conversion takes place in the remote Remote source channel plugin to match the Rx sample size of the remote instance. Best performace is obtained when both instances use the same sample size.
+The sample size used in the I/Q stream is the Rx sample size of the local instance. Possible conversion takes place in the remote Remote source channel plugin to match the Rx sample size of the remote instance. Best performance is obtained when both instances use the same sample size.
 
 <h2>Build</h2>
 

@@ -70,7 +70,7 @@ When pressed, the message field will be set to a hex encoded string that represe
 
 Select a message type:
 
-   - Scheduled postion report
+   - Scheduled position report
    - Assigned position report
    - Special position report
    - Base station report
@@ -85,11 +85,11 @@ For position reports, specify the status of the vessel.
 
 <h3>17: Latitude</h3>
 
-Specifiy the latitude of the vessel or station in decimal degrees, North positive.
+Specify the latitude of the vessel or station in decimal degrees, North positive.
 
 <h3>18: Longitude</h3>
 
-Specifiy the longitude of the vessel or station in decimal degrees, East positive.
+Specify the longitude of the vessel or station in decimal degrees, East positive.
 
 <h3>19: Insert position</h3>
 

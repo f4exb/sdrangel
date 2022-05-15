@@ -16,7 +16,7 @@ The format is:
   - Semicolon separator
   - Channel index in device set
 
-Aditionally when the channel is a single stream channel and attached to a MIMO device:
+Additionally when the channel is a single stream channel and attached to a MIMO device:
 
   - Dot separator
   - Stream index

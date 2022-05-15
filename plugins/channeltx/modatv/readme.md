@@ -267,7 +267,7 @@ This is the device number used by OpenCV which on Linux systems correspond to th
 
 <h2>16. Camera image size</h2>
 
-This is the width x height camera iamge size in pixels
+This is the width x height camera image size in pixels
 
 <h2>17. System camera FPS</h2>
 

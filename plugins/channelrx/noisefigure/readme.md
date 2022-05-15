@@ -116,7 +116,7 @@ Plots the results (NF, T or Y) vs frequency as a line chart.
 
 <h3>16: Open reference data</h3>
 
-A set of reference data in .csv format can be loaded for comparisons with the measurement results. The first column of the .csv file should contain frequency and the second the noise figure in dB. The first row should contain a header (E.g. "Frequency,NF" allthough the exact text is ignored).
+A set of reference data in .csv format can be loaded for comparisons with the measurement results. The first column of the .csv file should contain frequency and the second the noise figure in dB. The first row should contain a header (E.g. "Frequency,NF" although the exact text is ignored).
 
 ![SDRPlay Duo Noise figure comparison](../../../doc/img/NoiseFigure_plugin_duo_comparison.png)
 

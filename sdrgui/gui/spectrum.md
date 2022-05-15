@@ -21,7 +21,7 @@ It comprises the spectrum display itself and the controls generally placed at th
 
 <h3>Status line</h3>
 
-![Spectrum Statuss](../../doc/img/Spectrum_Status.png)
+![Spectrum Status](../../doc/img/Spectrum_Status.png)
 
 A status line is displayed at the left of the top margin. It displays the following items from left to right:
 
@@ -231,7 +231,7 @@ Thus if the FPS capping is 20 (50 ms) the refresh period will be in fact 107 ms 
 
 <h4>B.3.5: Logarithmic/linear scale</h4>
 
-Use this toggle button to switch between spectrum logarithmic and linear scale display. The face of the button will change to represent either a logaritmic or linear curve.
+Use this toggle button to switch between spectrum logarithmic and linear scale display. The face of the button will change to represent either a logarithmic or linear curve.
 
 When in linear mode the range control (B.3.3) has no effect because the actual range is between 0 and the reference level. The reference level in dB (B.3.2) still applies but is translated to a linear value e.g -40 dB is 1e-4. In linear mode the scale numbers are formatted using scientific notation so that they always occupy the same space.
 

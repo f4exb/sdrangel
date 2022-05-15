@@ -17,11 +17,11 @@ The interface is divided in 3 sections that will be detailed next:
 
 <h2>A. Settings section</h2>
 
-![Interferometer plugin setings GUI](../../../doc/img/Interferometer_settings.png)
+![Interferometer plugin settings GUI](../../../doc/img/Interferometer_settings.png)
 
 <h3>A.1. Decimation</h3>
 
-Input streams frome baseband are decimated by a power of two. Use this combo to select from 0 (no decimation) to 64 (2^6). The resulting channel sample rate is displayed next (A.2)
+Input streams from baseband are decimated by a power of two. Use this combo to select from 0 (no decimation) to 64 (2^6). The resulting channel sample rate is displayed next (A.2)
 
 <h3>A.2. Channel sample rate</h3>
 
@@ -131,7 +131,7 @@ Thus a possible procedure to determine DOA could be the following:
 2. Make an assumption for the wave to come from the positive or negative angles side
 3. Rotate the antennas axis slightly and if the DOA angle moves in the direction corresponding to your assumption (2) then the assumption is correct and the wave is coming from the side corresponding to your assumption. You can then refine the antenna axis direction to obtain a &pi;/2 or -&pi;/2 angle depending from which side the wave is coming. The scope `DOAP` projection is for waves coming from the positive angles side and `DOAN` for the negative angles side
 4. If when performing previous step (3) the DOA angle moves in the opposite direction to the one corresponding to your assumption then the wave is coming from the opposite side w.r to your assumption. You can then refine the antenna axis direction to obtain a &plusmn;&pi;/2 DOA as in (3).
-5. Once the  &plusmn;&pi;/2 DOA angle (zero phase difference) is obtained at &lambda;/2 distance betweeen antennas you can move your antennas further apart to refine the &plusmn;&pi;/2 DOA angle.
+5. Once the  &plusmn;&pi;/2 DOA angle (zero phase difference) is obtained at &lambda;/2 distance between antennas you can move your antennas further apart to refine the &plusmn;&pi;/2 DOA angle.
 
 <h3>A.5. Phase difference correction</h3>
 

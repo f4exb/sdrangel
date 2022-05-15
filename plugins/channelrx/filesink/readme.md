@@ -2,11 +2,11 @@
 
 <h2>Introduction</h2>
 
-Use this plugin to record its channel IQ data in [sdriq](../../samplesource/fileinput/readme.md#introduction) or signed 16-bit PCM `.wav` format. The baseband sample rate can be decimated by a factor of two and its center shifted to accomodate different requirements than recording the full baseband. More than one such plugin can be used in the same baseband to record different parts of the baseband spectrum. Of course in this case file output collision should be avoided.
+Use this plugin to record its channel IQ data in [sdriq](../../samplesource/fileinput/readme.md#introduction) or signed 16-bit PCM `.wav` format. The baseband sample rate can be decimated by a factor of two and its center shifted to accommodate different requirements than recording the full baseband. More than one such plugin can be used in the same baseband to record different parts of the baseband spectrum. Of course in this case file output collision should be avoided.
 
 Such files can be read in SDRangel using the [File input plugin](../../samplesource/fileinput/readme.md).
 
-Each recording is written in a new file with the starting timestamp before the `.sdriq` extension in `yyyy-MM-ddTHH_mm_ss_zzz` format. It keeps the first dot limted groups of the filename before the `.sdriq` or `.wav` extension if there are two such groups or before the two last groups if there are more than two groups. Examples:
+Each recording is written in a new file with the starting timestamp before the `.sdriq` extension in `yyyy-MM-ddTHH_mm_ss_zzz` format. It keeps the first dot limited groups of the filename before the `.sdriq` or `.wav` extension if there are two such groups or before the two last groups if there are more than two groups. Examples:
 
   - Given file name: `test.sdriq` then a recording file will be like: `test.2020-08-05T21_39_07_974.sdriq`
   - Given file name: `test.2020-08-05T20_36_15_974.sdriq` then a recording file will be like (with timestamp updated): `test.2020-08-05T21_41_21_173.sdriq`
@@ -34,7 +34,7 @@ Use this control to decimate the baseband samples by a power of two. Consequentl
 
 <h3>3: Channel (sink) sample rate</h3>
 
-Shows the channel sink sample rate in kS/s. The recod capture is effectively recorded at this rate.
+Shows the channel sink sample rate in kS/s. The record capture is effectively recorded at this rate.
 
 <h3>4: Number of recordings in session</h3>
 
@@ -83,13 +83,13 @@ This applies to spectrum squelch triggered recording only. This is the number of
 
 This is useful if you want to record a bunch of transient bursts or just make sure that the recording does not stop too abruptly.
 
-<h3>12: Enable/disble spectrum squelch triggered recording</h3>
+<h3>12: Enable/disable spectrum squelch triggered recording</h3>
 
 Use this button to effectively apply spectrum squelch to recording. In this mode recording on and off will be under the control of the squelch system. Thus when active the normal record button (13) is disabled. However its color changes to reflect the recording status as described next.
 
 <h3>13: Record button</h3>
 
-Use this button to start/stop recording unconditionnaly. Note that start/stop recording is opening/closing a new file in the same session. Until the file is changed with (14) the same file root will be used until the device is stopped or channel plugin is dismissed.
+Use this button to start/stop recording unconditionally. Note that start/stop recording is opening/closing a new file in the same session. Until the file is changed with (14) the same file root will be used until the device is stopped or channel plugin is dismissed.
 
 The button turns red if recording is active.
 

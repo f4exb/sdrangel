@@ -34,7 +34,7 @@ Normal sequence of operations:
 
 <h2>ptt_active.py</h2>
 
-PTT (Push To Talk) actively listening system. For a pair of given device set indexes it actively listens to start and stop commands on the corresponding devices to swich over to the other
+PTT (Push To Talk) actively listening system. For a pair of given device set indexes it actively listens to start and stop commands on the corresponding devices to switch over to the other
 
 Options are:
 
@@ -276,7 +276,7 @@ This file drives how channels in the connected SDRangel instance are managed.
         {                           // Channel information - at least one required
             "index": 0,             // Index of channel in deviceset - required
             "fc_pos": "usb",        // Center frequency position in hotspot - optional: default center
-                                    // lsb: center frequency at end of hotspot (higer frequency)
+                                    // lsb: center frequency at end of hotspot (higher frequency)
                                     // usb: center frequency at beginning of hotspot (lower frequency)
                                     // canter: center frequency at mid-point of hotspot (center frequency)
             "fc_shift": -300        // Center frequency constant shift from computed frequency - optional
@@ -295,7 +295,7 @@ This file drives how channels in the connected SDRangel instance are managed.
 
 Refer to supervisord documentation.
 
-Esample of `superscanner.conf` file to put in your `/etc//etc/supervisor/conf.d/` folder (add it in the `[incude]` section of `/etc/supervisor/supervisord.conf`). Environment variable `PYTHONUNBUFFERED=1` is important for the log tail to work correctly.
+Esample of `superscanner.conf` file to put in your `/etc//etc/supervisor/conf.d/` folder (add it in the `[include]` section of `/etc/supervisor/supervisord.conf`). Environment variable `PYTHONUNBUFFERED=1` is important for the log tail to work correctly.
 
 ```
 [program:superscanner]

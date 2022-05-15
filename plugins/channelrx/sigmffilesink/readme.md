@@ -2,9 +2,9 @@
 
 <h2>Introduction</h2>
 
-Use this plugin to record its channel IQ data in [SigMF](https://github.com/gnuradio/SigMF/blob/master/sigmf-spec.md) format. The baseband sample rate can be decimated by a factor of two and its center shifted to accomodate different requirements than recording the full baseband. More than one such plugin can be used in the same baseband to record different parts of the baseband spectrum. Of course in this case file output collision should be avoided.
+Use this plugin to record its channel IQ data in [SigMF](https://github.com/gnuradio/SigMF/blob/master/sigmf-spec.md) format. The baseband sample rate can be decimated by a factor of two and its center shifted to accommodate different requirements than recording the full baseband. More than one such plugin can be used in the same baseband to record different parts of the baseband spectrum. Of course in this case file output collision should be avoided.
 
-Such files can be read in SDRangel using the [SigMF file input plugin](../../samplesource/sigmffileinput/readme.md). This plugin will use extensions to the basic SigMF specification that are specific to SDRangel. However any other software if correctly implemented should ignore these extensions and still be able to read the file possibily with a loss in functionnality.
+Such files can be read in SDRangel using the [SigMF file input plugin](../../samplesource/sigmffileinput/readme.md). This plugin will use extensions to the basic SigMF specification that are specific to SDRangel. However any other software if correctly implemented should ignore these extensions and still be able to read the file possibly with a loss in functionality.
 
 As per SigMF specifications two files are created in fact.
   - One with `.sigmf-meta` extension contains meta data and details to find the different captures in the data file blob. It is written in JSON format and is human readable. You can refer to SigMF documentation in the link at top to read about the details.
@@ -35,7 +35,7 @@ Use this control to decimate the baseband samples by a power of two. Consequentl
 
 <h3>3: Channel (sink) sample rate</h3>
 
-Shows the channel sink sample rate in kS/s. The recod capture is effectively recorded at this rate.
+Shows the channel sink sample rate in kS/s. The record capture is effectively recorded at this rate.
 
 <h3>4: Number of record captures</h3>
 
@@ -84,7 +84,7 @@ This applies to spectrum squelch triggered recording only. This is the number of
 
 This is useful if you want to record a bunch of transient bursts or just make sure that the recording does not stop too abruptly.
 
-<h3>12: Enable/disble spectrum squelch triggered recording</h3>
+<h3>12: Enable/disable spectrum squelch triggered recording</h3>
 
 Use this button to effectively apply spectrum squelch to recording. In this mode recording on and off will be under the control of the squelch system. Thus when active the normal record button (13) is disabled. However its color changes to reflect the recording status as described next.
 

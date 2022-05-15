@@ -116,7 +116,7 @@ Shows counters of received message by type.
   - **TDC**: Transparent Data Channel
   - **IH_**: In House applications
   - **RP_**: Radio Paging
-  - **TMC**: Traffic Message Channnel (C.28)
+  - **TMC**: Traffic Message Channel (C.28)
   - **EWS**: Emergency Warning System (C.19)
   - **EON**: Enhanced Other Networks information (C.24, 25, 26, 27)
 
@@ -142,7 +142,7 @@ The "PIN" label lights up if a PIN message is received next is the country code 
 
 The "BAS" indicator lights up if a BAS message is received. Next os the program service name
 
-<h3>C.14: Trafic Announcement identification</h3>
+<h3>C.14: Traffic Announcement identification</h3>
 
 The "TA" indicator lights up if a TA message is received
 
@@ -166,7 +166,7 @@ The "AID" indicator lights up if a AID message is received. Next is the applicat
 
 The "EWS" indicator lights up if a EWS message is received. Next is the emergency warning system raw data
 
-<h3>C.20: Curent text line</h3>
+<h3>C.20: Current text line</h3>
 
 The "TXT" indicator ligths up if a text element is received. Next the current radio text line is displayed.
 

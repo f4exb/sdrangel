@@ -14,7 +14,7 @@ The top and bottom bars of the channel window are described [here](../../../sdrg
 
 ![ATV Demodulator plugin GUI](../../../doc/img/ATVDemod_plugin.png)
 
-The interface is divided into three collapsable sections:
+The interface is divided into three collapsible sections:
 
   - A: the RF settings
   - B: the video settings
@@ -57,7 +57,7 @@ Let's take an example with a 625 lines 12 frames/s video signal in a 2500 kS/s b
 
 <h4>Fractional remainder</h4>
 
-This is the fractional part of Sb &divide; (l &times; F). The demodulator can accomodate a non integral value of points per horizontal line. This value represents the fraction of a point needed to complete the real number of points per line.
+This is the fractional part of Sb &divide; (l &times; F). The demodulator can accommodate a non integral value of points per horizontal line. This value represents the fraction of a point needed to complete the real number of points per line.
 
 With the previous example this value is 0.333... rounded to 0.33 in the display. Thus a line contains effectively 333.333... points.
 
@@ -84,7 +84,7 @@ Average total power in dB relative to a &#177;1.0 amplitude signal generated in 
   - **FM1**: this is Frequency Modulation with approximative demodulation algorithm not using atan2
   - **FM2**: this is Frequency Modulation with less approximative demodulation algorithm still not using atan2
   - **FM3**: this is Frequency Modulation with atan2 approximation for phase calculation and then a discrete differentiation is applied
-  - **AM**: this is Amplitude Modulation. It can be used for vestigial sideband transmissions in conjunction with the asymetrical filter (11, 12, 13)
+  - **AM**: this is Amplitude Modulation. It can be used for vestigial sideband transmissions in conjunction with the asymmetrical filter (11, 12, 13)
   - **USB**: &#9888; USB demodulation synchronous to the carrier (experimental)
   - **LSB**: &#9888; LSB demodulation synchronous to the carrier (experimental)
 
@@ -104,7 +104,7 @@ Using this button you can adjust the nominal FM deviation as a percentage of the
 
 <h3>9: AM signal range correction factor</h3>
 
-This is a factor in % applied to the detected AM signal range. Because of possible overshoots the detected range may be artificially reduced from the original causing possible errors on the different detection lavels on the video signal. This control lets you correct this. Watch the video signal in the scope tab for fine tuning. It affects only AM signals.
+This is a factor in % applied to the detected AM signal range. Because of possible overshoots the detected range may be artificially reduced from the original causing possible errors on the different detection levels on the video signal. This control lets you correct this. Watch the video signal in the scope tab for fine tuning. It affects only AM signals.
 
 <h3>10: AM signal range offset correction factor</h3>
 

@@ -30,7 +30,7 @@ The value to the right of the target elevation, is the current elevation read fr
 <h3>4: Track</h3>
 
 When checked, the target azimuth and elevation will be controlled by the Channel or Feature Source (5).
-For example, this allows an aircraft to be tracked, by setting the Source to the ADS-B Demodulator plugin, or the Moon to be tracked by settng Source to the Star Tracker plugin.
+For example, this allows an aircraft to be tracked, by setting the Source to the ADS-B Demodulator plugin, or the Moon to be tracked by setting Source to the Star Tracker plugin.
 
 <h3>5: Source</h3>
 

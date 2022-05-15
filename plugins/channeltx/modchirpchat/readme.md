@@ -81,7 +81,7 @@ This is the Spread Factor parameter of the ChirpChat signal. This is the log2 of
 
 The LoRa standard specifies 0 (no DE) or 2 (DE active). The ChirpChat range is extended to all values between 0 and 4 bits.
 
-This is the log2 of the number of frequency shifts separating two consecutive shifts that represent a symbol. On the receiving side this decreases the probabilty to detect the wrong symbol as an adjacent FFT bin. It can also overcome frequency drift on long messages.
+This is the log2 of the number of frequency shifts separating two consecutive shifts that represent a symbol. On the receiving side this decreases the probability to detect the wrong symbol as an adjacent FFT bin. It can also overcome frequency drift on long messages.
 
 In practice it is difficult on the Rx side to make correct decodes if only one FFT bin is used to code one symbol (DE=0). It is therefore recommended to use a factor of 1 or more.
 

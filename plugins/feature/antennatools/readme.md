@@ -55,7 +55,7 @@ A half wave dipole in free space with total length being half the wavelength of 
 To eliminate this reactance, the dipole should be shortened. The amount it needs to be shortened by depends upon the ratio of the diameter of the dipole to wavelength,
 with factors ranging from 0.98 for a thin dipole (0.00001 wavelengths) to 0.94 (thickness of 0.008 wavelengths) with a commonly used value of 0.95.
 
-The calculator doesn't use an analytical formula for this, as the reactance also depends on the enviroment (such as distance to ground), so some experimentation
+The calculator doesn't use an analytical formula for this, as the reactance also depends on the environment (such as distance to ground), so some experimentation
 is needed in finding the true value.
 
 <h2>Parabolic Dish Calculator</h2>
