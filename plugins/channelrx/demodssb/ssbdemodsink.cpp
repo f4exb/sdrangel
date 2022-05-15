@@ -92,6 +92,10 @@ SSBDemodSink::~SSBDemodSink()
 
 void SSBDemodSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
 {
+    if (m_channelSampleRate == 0) {
+        return;
+    }
+
     Complex ci;
 
 	for(SampleVector::const_iterator it = begin; it < end; ++it)
@@ -240,7 +244,7 @@ void SSBDemodSink::processOneSample(Complex &ci)
             uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
 
             if (res != m_audioBufferFill) {
-                qDebug("SSBDemodSink::feed: %u/%u samples written", res, m_audioBufferFill);
+                qDebug("SSBDemodSink::processOneSample: %u/%u samples written", res, m_audioBufferFill);
             }
 
             m_audioBufferFill = 0;

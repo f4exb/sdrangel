@@ -78,6 +78,10 @@ NFMDemodSink::NFMDemodSink() :
 
 void NFMDemodSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
 {
+    if (m_channelSampleRate == 0) {
+        return;
+    }
+
     for (SampleVector::const_iterator it = begin; it != end; ++it)
     {
         Complex c(it->real(), it->imag());
@@ -244,8 +248,8 @@ void NFMDemodSink::processOneSample(Complex &ci)
 
         if (res != m_audioBufferFill)
         {
-            qDebug("NFMDemodSink::feed: %u/%u audio samples written", res, m_audioBufferFill);
-            qDebug("NFMDemodSink::feed: m_audioSampleRate: %u m_channelSampleRate: %d", m_audioSampleRate, m_channelSampleRate);
+            qDebug("NFMDemodSink::processOneSample: %u/%u audio samples written m_audioSampleRate: %u m_channelSampleRate: %d",
+                res, m_audioBufferFill, m_audioSampleRate, m_channelSampleRate);
         }
 
         m_audioBufferFill = 0;
