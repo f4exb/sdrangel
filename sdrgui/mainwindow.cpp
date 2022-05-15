@@ -2008,12 +2008,12 @@ void MainWindow::on_action_saveAll_triggered()
 
 void MainWindow::on_action_Quick_Start_triggered()
 {
-    QDesktopServices::openUrl(QUrl("https://github.com/f4exb/sdrangel/wiki/Quick-start-v7"));
+    QDesktopServices::openUrl(QUrl("https://github.com/f4exb/sdrangel/wiki/Quick-start"));
 }
 
 void MainWindow::on_action_Main_Window_triggered()
 {
-    QDesktopServices::openUrl(QUrl("https://github.com/f4exb/sdrangel/blob/v7/sdrgui/readme.md"));
+    QDesktopServices::openUrl(QUrl("https://github.com/f4exb/sdrangel/blob/master/sdrgui/readme.md"));
 }
 
 void MainWindow::on_action_Loaded_Plugins_triggered()
