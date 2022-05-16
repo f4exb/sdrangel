@@ -64,7 +64,6 @@ if(APPLE AND BUNDLE AND BUILD_GUI)
   foreach(file \${SDRANGEL_REMOVE_LIB})
     file(REMOVE \"\${file}\")
   endforeach()
-  " COMPONENT Runtime)
 
   # TODO: code/dmg signature
   #   see https://github.com/cjcliffe/CubicSDR
