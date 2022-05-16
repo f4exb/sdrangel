@@ -87,6 +87,10 @@ target_link_libraries(${TARGET_NAME}
     ${SWRESAMPLE_LIBRARIES}
 )
 
+if(FFMPEG_EXTERNAL)
+    add_dependencies(${TARGET_NAME} ffmpeg)
+endif()
+
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
 
 # Install debug symbols

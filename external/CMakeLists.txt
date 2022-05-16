@@ -169,6 +169,8 @@ if (WIN32)
     install(FILES "${EXTERNAL_LIBRARY_FOLDER}/vcredist/${VCREDIST_FILE}" DESTINATION "${INSTALL_BIN_DIR}")
 endif (WIN32)
 
+set(MACOS_EXTERNAL_LIBS_FIXUP "${CMAKE_BINARY_DIR}/${INSTALL_LIB_DIR}")
+
 if (AUTO_EXTERNAL_LIBRARIES)
     find_package(Codec2)
     find_package(CM256cc)
@@ -182,7 +184,366 @@ if (AUTO_EXTERNAL_LIBRARIES)
     find_package(LibAIRSPYHF)
     find_package(LibPerseus)
     find_package(LibRTLSDR)
+    find_package(LibUSB)
+    find_package(Opus)
+    find_package(Boost)
 endif (AUTO_EXTERNAL_LIBRARIES)
+
+# While some of the following projects are not installed (to save time & space), some have to
+# be so that on MacOS, the paths embedded in the libraries to other libraries are correct (as they are set to
+# install path, not build). This is required for macdeployqt to be able to find them
+
+if (NOT LIBUSB_FOUND OR LIBUSB_EXTERNAL)
+    # Cloning git repo doesn't include configure, so we download the bz2 which does
+    ExternalProject_Add(libusb
+            URL https://github.com/libusb/libusb/releases/download/v1.0.26/libusb-1.0.26.tar.bz2
+            PREFIX "${EXTERNAL_BUILD_LIBRARIES}/libusb"
+            CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=<INSTALL_DIR>
+            BUILD_COMMAND ${MAKE}
+            TEST_COMMAND ""
+            )
+    ExternalProject_Get_Property(libusb install_dir)
+    set(LIBUSB_DEPENDS libusb)
+    set(LIBUSB_FOUND ON CACHE INTERNAL "")
+    set(LIBUSB_EXTERNAL ON CACHE INTERNAL "")
+    set(LIBUSB_INCLUDE_DIR "${install_dir}/include/libusb-1.0" CACHE INTERNAL "")
+    if (WIN32)
+        set(LIBUSB_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/libusb.lib" CACHE INTERNAL "")
+    elseif (LINUX)
+        set(LIBUSB_LIBRARIES "${install_dir}/lib${LIB_SUFFIX}/libusb-1.0${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    elseif (APPLE)
+        set(LIBUSB_LIBRARIES "${install_dir}/lib/libusb-1.0${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+        set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${install_dir}/lib")
+    endif ()
+endif (NOT LIBUSB_FOUND OR LIBUSB_EXTERNAL)
+
+if (NOT OPUS_FOUND OR OPUS_EXTERNAL)
+    ExternalProject_Add(opus
+            GIT_REPOSITORY https://github.com/xiph/opus
+            GIT_TAG v1.3.1
+            PREFIX "${EXTERNAL_BUILD_LIBRARIES}/opus"
+            CMAKE_ARGS ${COMMON_CMAKE_ARGS} -DOPUS_BUILD_SHARED_LIBRARY=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+            TEST_COMMAND ""
+            )
+    ExternalProject_Get_Property(opus install_dir)
+    set(OPUS_DEPENDS opus)
+    set(OPUS_FOUND ON CACHE INTERNAL "")
+    set(OPUS_EXTERNAL ON CACHE INTERNAL "")
+    set(OPUS_INCLUDE_DIRS "${install_dir}/include" CACHE INTERNAL "")
+    set(OPUS_PKG_CONFIG_DIR "${install_dir}/lib/pkgconfig" CACHE INTERNAL "")
+    if (WIN32)
+        set(OPUS_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/libopus.lib" CACHE INTERNAL "")
+    elseif (LINUX)
+        set(OPUS_LIBRARIES "${install_dir}/lib${LIB_SUFFIX}/libopus${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    elseif (APPLE)
+        set(OPUS_LIBRARIES "${install_dir}/lib/libopus${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+        set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${install_dir}/lib")
+    endif ()
+endif (NOT OPUS_FOUND OR OPUS_EXTERNAL)
+
+if (NOT ZLIB_FOUND OR ZLIB_EXTERNAL)
+    ExternalProject_Add(zlib
+            URL https://zlib.net/zlib-1.2.12.tar.gz
+            PREFIX "${EXTERNAL_BUILD_LIBRARIES}/zlib"
+            CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=<INSTALL_DIR>
+            TEST_COMMAND ""
+            )
+    ExternalProject_Get_Property(zlib install_dir)
+    set(ZLIB_DEPENDS zlib)
+    set(ZLIB_FOUND ON CACHE INTERNAL "")
+    set(ZLIB_EXTERNAL ON CACHE INTERNAL "")
+    set(ZLIB_INCLUDE_DIRS "${install_dir}/include" CACHE INTERNAL "")
+    if (WIN32)
+        set(ZLIB_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/libz.lib" CACHE INTERNAL "")
+    elseif (LINUX)
+        set(ZLIB_LIBRARIES "${install_dir}/lib${LIB_SUFFIX}/libz${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    elseif (APPLE)
+        set(ZLIB_LIBRARIES "${install_dir}/lib/libz${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+        set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${install_dir}/lib")
+    endif ()
+endif (NOT ZLIB_FOUND OR ZLIB_EXTERNAL)
+
+if (NOT FAAD_FOUND OR FAAD_EXTERNAL)
+    ExternalProject_Add(faad
+            URL https://downloads.sourceforge.net/project/faac/faad2-src/faad2-2.8.0/faad2-2.8.8.tar.gz
+            PREFIX "${EXTERNAL_BUILD_LIBRARIES}/faad"
+            CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=<INSTALL_DIR>
+            TEST_COMMAND ""
+            )
+    ExternalProject_Get_Property(faad source_dir binary_dir install_dir)
+    set(FAAD_DEPENDS faad)
+    set(FAAD_FOUND ON CACHE INTERNAL "")
+    set(FAAD_EXTERNAL ON CACHE INTERNAL "")
+    set(FAAD_INCLUDE_DIR "${install_dir}/include" CACHE INTERNAL "")
+    if (WIN32)
+        set(FAAD_LIBRARY "${SDRANGEL_BINARY_LIB_DIR}/libfaad.lib" CACHE INTERNAL "")
+    elseif (LINUX)
+        set(FAAD_LIBRARY "${install_dir}/lib${LIB_SUFFIX}/libfaad${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    elseif (APPLE)
+        set(FAAD_LIBRARY "${install_dir}/lib/libfaad${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+        set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${install_dir}/lib")
+    endif ()
+endif (NOT FAAD_FOUND OR FAAD_EXTERNAL)
+
+if (NOT FFTW3F_FOUND OR FFTW3F_EXTERNAL)
+    ExternalProject_Add(fftw3f
+            URL http://fftw.org/fftw-3.3.10.tar.gz
+            PREFIX "${EXTERNAL_BUILD_LIBRARIES}/fftw3f"
+            CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> --enable-float
+            BUILD_COMMAND ${MAKE}
+            INSTALL_COMMAND ""
+            TEST_COMMAND ""
+            )
+    ExternalProject_Get_Property(fftw3f source_dir binary_dir)
+    set(FFTW3F_FOUND ON CACHE INTERNAL "")
+    set(FFTW3F_EXTERNAL ON CACHE INTERNAL "")
+    set(FFTW3F_INCLUDE_DIRS "${source_dir}/api" "${binary_dir}" CACHE INTERNAL "")
+    if (WIN32)
+        set(FFTW3F_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/libfftw3f.lib" CACHE INTERNAL "")
+    elseif (LINUX)
+        set(FFTW3F_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libfftw3f${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    elseif (APPLE)
+        set(FFTW3F_LIBRARIES "${binary_dir}/.libs/libfftw3f.a" CACHE INTERNAL "")
+    endif ()
+endif (NOT FFTW3F_FOUND OR FFTW3F_EXTERNAL)
+
+
+# Can't build Boost using ExternalProject_Add, as we want to use find_package(Boost) as it defines many variables,
+# and using find_package requires Boost to have already been built
+# So instead, we use FetchContent and build Boost at CMake configure time
+include(FetchContent)
+FetchContent_Declare(boost
+    URL https://boostorg.jfrog.io/artifactory/main/release/1.79.0/source/boost_1_79_0.tar.gz
+)
+
+find_package(Boost QUIET)
+if (NOT Boost_FOUND OR Boost_EXTERNAL)
+
+    message("Downloading Boost")
+    FetchContent_MakeAvailable(boost)
+
+    # Add path to where Boost is built
+    set(CMAKE_PREFIX_PATH ${boost_BINARY_DIR})
+
+    # Check to see if already built - Don't build again
+    find_package(Boost QUIET)
+    if(NOT Boost_FOUND)
+        execute_process(
+            COMMAND ./bootstrap.sh --prefix=${boost_BINARY_DIR}
+             WORKING_DIRECTORY ${boost_SOURCE_DIR}
+        )
+        execute_process(
+            COMMAND ./b2
+            WORKING_DIRECTORY ${boost_SOURCE_DIR}
+        )
+        execute_process(
+            COMMAND ./b2 install
+            WORKING_DIRECTORY ${boost_SOURCE_DIR}
+        )
+        message("Boost built in ${boost_BINARY_DIR}")
+    endif()
+
+    # Cache binary dir so we know it was built in subsequent builds
+    set(boost_BINARY_DIR ${boost_BINARY_DIR} CACHE INTERNAL "")
+
+    # Check it was built and import the variables
+    find_package(Boost REQUIRED)
+
+    if (APPLE)
+        set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${boost_BINARY_DIR}/lib")
+    endif()
+else()
+    if (DEFINED boost_BINARY_DIR)
+        if (APPLE)
+            set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${boost_BINARY_DIR}/lib")
+        endif()
+    endif()
+endif()
+
+if (NOT FFMEG_FOUND OR FFMPEG_EXTERNAL)
+
+    # Libs only used by ffmpeg
+
+    # They are installed so ffmpeg can use pkg-config to find them
+
+    if (NOT X264_FOUND OR X264_EXTERNAL)
+        # x264's configure script forces a full rebuild each time, so set UPDATE_DISCONNECTED
+        # so it's only downloaded
+        ExternalProject_Add(x264
+            GIT_REPOSITORY https://code.videolan.org/videolan/x264.git
+            UPDATE_DISCONNECTED TRUE
+            PREFIX "${EXTERNAL_BUILD_LIBRARIES}/x264"
+            CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> --enable-shared
+            BUILD_COMMAND ${MAKE}
+            TEST_COMMAND ""
+            )
+        ExternalProject_Get_Property(x264 install_dir)
+        set(X264_DEPENDS x264)
+        set(X264_PKG_CONFIG_DIR "${install_dir}/lib/pkgconfig")
+        set(X264_FOUND ON CACHE INTERNAL "")
+        set(X264_EXTERNAL ON CACHE INTERNAL "")
+        if (APPLE)
+            set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${install_dir}/lib")
+        endif ()
+    endif (NOT X264_FOUND OR X264_EXTERNAL)
+
+    if (NOT X265_FOUND OR X265_EXTERNAL)
+        ExternalProject_Add(x265
+            GIT_REPOSITORY https://bitbucket.org/multicoreware/x265_git.git
+            PREFIX "${EXTERNAL_BUILD_LIBRARIES}/x265"
+            SOURCE_SUBDIR "source"
+            CMAKE_ARGS ${COMMON_CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+            TEST_COMMAND ""
+            )
+        ExternalProject_Get_Property(x265 install_dir)
+        set(X265_DEPENDS x265)
+        set(X265_PKG_CONFIG_DIR "${install_dir}/lib/pkgconfig")
+        set(X265_FOUND ON CACHE INTERNAL "")
+        set(X265_EXTERNAL ON CACHE INTERNAL "")
+        if (APPLE)
+            set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${install_dir}/lib")
+        endif ()
+    endif (NOT X265_FOUND OR X265_EXTERNAL)
+
+    if (NOT FDK_AAC_FOUND OR FDK_AAC_EXTERNAL)
+        ExternalProject_Add(fdk_aac
+            GIT_REPOSITORY https://github.com/mstorsjo/fdk-aac.git
+            PREFIX "${EXTERNAL_BUILD_LIBRARIES}/fdk-aac"
+            CMAKE_ARGS ${COMMON_CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+            TEST_COMMAND ""
+            )
+        ExternalProject_Get_Property(fdk_aac install_dir)
+        set(FDK_AAC_DEPENDS fdk_aac)
+        set(FDK_AAC_PKG_CONFIG_DIR "${install_dir}/lib/pkgconfig")
+        set(FDK_AAC_FOUND ON CACHE INTERNAL "")
+        set(FDK_AAC_EXTERNAL ON CACHE INTERNAL "")
+        if (APPLE)
+            set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${install_dir}/lib")
+        endif ()
+    endif (NOT FDK_AAC_FOUND OR FDK_AAC_EXTERNAL)
+
+    # https://www.mpg123.de/download.shtml
+    if (NOT MPG123_FOUND OR MPG123_EXTERNAL)
+        ExternalProject_Add(mpg123
+            URL https://downloads.sourceforge.net/project/mpg123/mpg123/1.29.3/mpg123-1.29.3.tar.bz2
+            PREFIX "${EXTERNAL_BUILD_LIBRARIES}/mpg123"
+            CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> --enable-shared
+            BUILD_COMMAND ${MAKE}
+            TEST_COMMAND ""
+            )
+        ExternalProject_Get_Property(mpg123 install_dir)
+        set(MPG123_DEPENDS mpg123)
+        set(MPG123_PKG_CONFIG_DIR "${install_dir}/lib/pkgconfig")
+        set(MPG123_FOUND ON CACHE INTERNAL "")
+        set(MPG123_EXTERNAL ON CACHE INTERNAL "")
+        if (APPLE)
+            set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${install_dir}/lib")
+        endif ()
+    endif (NOT MPG123_FOUND OR MPG123_EXTERNAL)
+
+    if (NOT LAME_FOUND OR LAME_EXTERNAL)
+        ExternalProject_Add(lame
+            SVN_REPOSITORY https://svn.code.sf.net/p/lame/svn/trunk/lame
+            UPDATE_DISCONNECTED TRUE
+            DEPENDS ${MPG123_DEPENDS}
+            PREFIX "${EXTERNAL_BUILD_LIBRARIES}/lame"
+            CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env PKG_CONFIG_PATH=${MPG123_PKG_CONFIG_DIR} <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> --enable-shared
+            BUILD_COMMAND ${MAKE}
+            TEST_COMMAND ""
+            )
+        ExternalProject_Get_Property(lame install_dir)
+        set(LAME_DEPENDS lame)
+        # ffmpeg doesn't try to use pkg-config for lame, as it doesn't include a .pc file
+        #set(LAME_PKG_CONFIG_DIR "${install_dir}/lib/pkgconfig")
+        set(LAME_EXTRA_CFLAGS "-I${install_dir}/include")
+        set(LAME_EXTRA_LDFLAGS "-L${install_dir}/lib")
+        set(LAME_FOUND ON CACHE INTERNAL "")
+        set(LAME_EXTERNAL ON CACHE INTERNAL "")
+        if (APPLE)
+            set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${install_dir}/lib")
+        endif ()
+    endif (NOT LAME_FOUND OR LAME_EXTERNAL)
+
+    # We have to install this so OpenCV can find it
+    # OpenCV doesn't currently build with ffmpeg 5, so use 4
+    ExternalProject_Add(ffmpeg
+            GIT_REPOSITORY https://github.com/FFmpeg/FFmpeg.git
+            GIT_TAG n4.4.2
+            DEPENDS ${X264_DEPENDS} ${X265_DEPENDS} ${OPUS_DEPENDS} ${FDK_AAC_DEPENDS} ${LAME_DEPENDS}
+            PREFIX "${EXTERNAL_BUILD_LIBRARIES}/ffmpeg"
+            CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env PKG_CONFIG_PATH=${X264_PKG_CONFIG_DIR}:${X265_PKG_CONFIG_DIR}:${OPUS_PKG_CONFIG_DIR}:${FDK_AAC_PKG_CONFIG_DIR} <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> --enable-shared --enable-gpl --enable-nonfree --enable-libx264 --enable-libx265 --enable-libopus --enable-libfdk-aac --enable-libmp3lame --extra-ldflags=${LAME_EXTRA_LDFLAGS} --extra-cflags=${LAME_EXTRA_CFLAGS}
+            BUILD_COMMAND ${MAKE}
+            TEST_COMMAND ""
+            )
+    ExternalProject_Get_Property(ffmpeg install_dir)
+    set(FFMPEG_DEPENDS ffmpeg)
+    set(FFMPEG_INSTALL_DIR "${install_dir}")
+    set(FFMPEG_FOUND ON CACHE INTERNAL "")
+    set(FFMPEG_EXTERNAL ON CACHE INTERNAL "")
+    set(FFMPEG_INCLUDE_DIRS "${install_dir}/include" CACHE INTERNAL "")
+    set(AVCODEC_INCLUDE_DIRS "${install_dir}/include" CACHE INTERNAL "")
+    set(AVFORMAT_INCLUDE_DIRS "${install_dir}/include" CACHE INTERNAL "")
+    set(AVUTIL_INCLUDE_DIRS "${install_dir}/include" CACHE INTERNAL "")
+    set(SWRESAMPLE_INCLUDE_DIRS "${install_dir}/include" CACHE INTERNAL "")
+    set(SWSCALE_INCLUDE_DIRS "${install_dir}/include" CACHE INTERNAL "")
+    set(AVCODEC_LIBRARIES "${install_dir}/lib/libavcodec${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    set(AVFORMAT_LIBRARIES "${install_dir}/lib/libavformat${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    set(AVUTIL_LIBRARIES "${install_dir}/lib/libavutil${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    set(SWRESAMPLE_LIBRARIES "${install_dir}/lib/libswresample${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    set(SWSCALE_LIBRARIES "${install_dir}/lib/libswscale${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    if (APPLE)
+        set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${install_dir}/lib")
+    endif ()
+
+endif (NOT FFMPEG_FOUND OR FFMPEG_EXTERNAL)
+
+if (NOT OpenCV_FOUND OR OpenCV_EXTERNAL)
+    ExternalProject_Add(opencv
+            GIT_REPOSITORY https://github.com/opencv/opencv.git
+            GIT_TAG 4.5.5
+            DEPENDS "${FFMPEG_DEPENDS}"
+            PREFIX "${EXTERNAL_BUILD_LIBRARIES}/opencv"
+            CMAKE_ARGS ${COMMON_CMAKE_ARGS} -DWITH_FFMPEG=ON -DCMAKE_PREFIX_PATH=${FFMPEG_INSTALL_DIR}
+            INSTALL_COMMAND ""
+            TEST_COMMAND ""
+            )
+    ExternalProject_Get_Property(opencv source_dir binary_dir)
+    set(OpenCV_FOUND ON CACHE INTERNAL "")
+    set(OpenCV_EXTERNAL ON CACHE INTERNAL "")
+    set(OpenCV_INCLUDE_DIRS
+        "${source_dir}/modules/calib3d/include"
+        "${source_dir}/modules/core/include"
+        "${source_dir}/modules/dnn/include"
+        "${source_dir}/modules/features2d/include"
+        "${source_dir}/modules/flann/include"
+        "${source_dir}/modules/gapi/include"
+        "${source_dir}/modules/highgui/include"
+        "${source_dir}/modules/imgcodecs/include"
+        "${source_dir}/modules/imgproc/include"
+        "${source_dir}/modules/java/include"
+        "${source_dir}/modules/java/include"
+        "${source_dir}/modules/js/include"
+        "${source_dir}/modules/ml/include"
+        "${source_dir}/modules/obj/include"
+        "${source_dir}/modules/objdetect/include"
+        "${source_dir}/modules/photo/include"
+        "${source_dir}/modules/python/include"
+        "${source_dir}/modules/stitching/include"
+        "${source_dir}/modules/ts/include"
+        "${source_dir}/modules/video/include"
+        "${source_dir}/modules/videoio/include"
+        "${source_dir}/modules/world/include"
+        "${binary_dir}"
+        CACHE INTERNAL "")
+    if (WIN32)
+        set(OpenCV_LIBS "${SDRANGEL_BINARY_LIB_DIR}/libopencv.lib" CACHE INTERNAL "")
+    elseif (LINUX)
+        set(OpenCV_LIBS "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libopencv${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    elseif (APPLE)
+        set(OpenCV_LIBS "${binary_dir}/lib/libopencv_core${CMAKE_SHARED_LIBRARY_SUFFIX};${binary_dir}/lib/libopencv_core${CMAKE_SHARED_LIBRARY_SUFFIX};${binary_dir}/lib/libopencv_highgui${CMAKE_SHARED_LIBRARY_SUFFIX};${binary_dir}/lib/libopencv_video${CMAKE_SHARED_LIBRARY_SUFFIX};${binary_dir}/lib/libopencv_videoio${CMAKE_SHARED_LIBRARY_SUFFIX};${binary_dir}/lib/libopencv_imgproc${CMAKE_SHARED_LIBRARY_SUFFIX};${binary_dir}/lib/libopencv_imgcodecs${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+        set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/lib")
+    endif ()
+endif (NOT OpenCV_FOUND OR OpenCV_EXTERNAL)
 
 if (NOT WIN32 AND (NOT CODEC2_FOUND OR CODEC2_EXTERNAL))
     # needs speexdsp
@@ -210,14 +571,15 @@ if (NOT WIN32 AND (NOT CODEC2_FOUND OR CODEC2_EXTERNAL))
     elseif (LINUX)
         set(CODEC2_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libcodec2${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
         makeLink("${source_dir}/src" "${source_dir}/src/codec2" codec2)
-    else ()
+    elseif (APPLE)
         set(CODEC2_LIBRARIES "${binary_dir}/src/libcodec2${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
         # some source include "codec2/comp.h" and some without codec2
         makeLink("${source_dir}/src" "${source_dir}/src/codec2" codec2)
+        set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/src")
     endif ()
 endif (NOT WIN32 AND (NOT CODEC2_FOUND OR CODEC2_EXTERNAL))
 
-if (NOT APPLE AND (NOT CM256CC_FOUND OR CM256CC_EXTERNAL))
+if (NOT CM256CC_FOUND OR CM256CC_EXTERNAL)
     # needs boost
     if (WIN32)
         set(CM256CC_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/cm256cc.lib" CACHE INTERNAL "")
@@ -251,7 +613,7 @@ if (NOT APPLE AND (NOT CM256CC_FOUND OR CM256CC_EXTERNAL))
                 FILES_MATCHING PATTERN "libcm256cc*${CMAKE_SHARED_LIBRARY_SUFFIX}")
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}")
     endif ()
-endif (NOT APPLE AND (NOT CM256CC_FOUND OR CM256CC_EXTERNAL))
+endif (NOT CM256CC_FOUND OR CM256CC_EXTERNAL)
 
 if ((NOT LIBDSDCC_FOUND OR LIBDSDCC_EXTERNAL) AND (NOT LIBMBE_FOUND OR LIBMBE_EXTERNAL))
     set(USE_MBELIB OFF)
@@ -411,10 +773,10 @@ set(SGP4_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/sgp4/src/sgp4/libsgp4" CACHE I
 if (WIN32)
     install(FILES "${SDRANGEL_BINARY_BIN_DIR}/sgp4s${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
 elseif (APPLE)
-    set(SGP4_LIBRARIES "${binary_dir}/libsgp4s${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
-    install(DIRECTORY "${binary_dir}/" DESTINATION "${INSTALL_LIB_DIR}"
+    set(SGP4_LIBRARIES "${binary_dir}/libsgp4/libsgp4s${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    install(DIRECTORY "${binary_dir}/libsgp4" DESTINATION "${INSTALL_LIB_DIR}"
             FILES_MATCHING PATTERN "libsgp4s*${CMAKE_SHARED_LIBRARY_SUFFIX}")
-    set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/")
+    set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/libsgp4")
 endif ()
 
 
@@ -473,6 +835,7 @@ if (ZLIB_FOUND AND FAAD_FOUND)
         ExternalProject_Add(dab
                 GIT_REPOSITORY https://github.com/srcejon/dab-cmdline.git
                 GIT_TAG msvc
+                DEPENDS ${ZLIB_DEPENDS} ${FAAD_DEPENDS}
                 PREFIX "${EXTERNAL_BUILD_LIBRARIES}/dab"
                 SOURCE_SUBDIR "library"
                 CMAKE_ARGS ${COMMON_CMAKE_ARGS}
@@ -663,7 +1026,7 @@ if (WIN32 OR APPLE)
         ExternalProject_Add(rtlsdr
                 GIT_REPOSITORY https://github.com/osmocom/rtl-sdr.git
                 GIT_TAG ${RTLSDR_TAG}
-                DEPENDS ${PTHREADS4W_DEPENDS}
+                DEPENDS ${PTHREADS4W_DEPENDS} ${LIBUSB_DEPENDS}
                 PREFIX "${EXTERNAL_BUILD_LIBRARIES}/rtlsdr"
                 CMAKE_ARGS ${COMMON_CMAKE_ARGS}
                 -DINSTALL_UDEV_RULES=${RTLSDR_UDEV}
@@ -692,14 +1055,17 @@ if (WIN32 OR APPLE)
 
     if (ENABLE_LIMESUITE)
         # needs pkgconfig, libusb
+        # We have to install this, as makeCopy("${source_dir}/src/limeRFE/limeRFE.h" "${source_dir}/src/lime/limeRFE.h" limesuite)
+        # causes git stash to fail
         if (WIN32)
             set(LIMESUITE_LIBRARY "${SDRANGEL_BINARY_LIB_DIR}/LimeSuite.lib" CACHE INTERNAL "")
         endif ()
         ExternalProject_Add(limesuite
                 GIT_REPOSITORY https://github.com/f4exb/LimeSuite.git
                 GIT_TAG "msvc_fix"
+                DEPENDS ${LIBUSB_DEPENDS}
                 PREFIX "${EXTERNAL_BUILD_LIBRARIES}/limesuite"
-                CMAKE_ARGS ${COMMON_CMAKE_ARGS}
+                CMAKE_ARGS ${COMMON_CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
                 -DLIME_SUITE_EXTVER=release
                 -DENABLE_GUI=OFF
                 -DENABLE_NOVENARF7=OFF
@@ -707,25 +1073,27 @@ if (WIN32 OR APPLE)
                 -DENABLE_OCTAVE=OFF
                 -DENABLE_QUICKTEST=OFF
                 -DENABLE_EXAMPLES=OFF
-                -DENABLE_LIME_UTIL=OFF
+                -DENABLE_LIME_UTIL=ON
                 -DENABLE_SIMD_FLAGS=SSE3
+                -DENABLE_FX3=ON
                 -DFX3_SDK_PATH=${FX3SDK_DIR}
+                -DLIBUSB_1_LIBRARY=${LIBUSB_LIBRARIES}
+                -DLIBUSB_1_INCLUDE_DIR=${LIBUSB_INCLUDE_DIR}
                 BUILD_BYPRODUCTS "${LIMESUITE_LIBRARY}"
-                INSTALL_COMMAND ""
                 TEST_COMMAND ""
                 )
-        ExternalProject_Get_Property(limesuite source_dir binary_dir)
+        ExternalProject_Get_Property(limesuite source_dir binary_dir install_dir)
         set(LIMESUITE_FOUND ON CACHE INTERNAL "")
         set(LIMESUITE_EXTERNAL ON CACHE INTERNAL "")
-        set(LIMESUITE_INCLUDE_DIR "${source_dir}/src" CACHE INTERNAL "")
+        set(LIMESUITE_INCLUDE_DIR "${install_dir}/include" CACHE INTERNAL "")
         if (WIN32)
             install(FILES "${SDRANGEL_BINARY_BIN_DIR}/LimeSuite${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
             makeCopy("${source_dir}/src/limeRFE/limeRFE.h" "${source_dir}/src/lime/limeRFE.h" limesuite)
         elseif (APPLE)
-            set(LIMESUITE_LIBRARY "${binary_dir}/src/libLimeSuite${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
-            install(DIRECTORY "${binary_dir}/src/" DESTINATION "${INSTALL_LIB_DIR}"
+            set(LIMESUITE_LIBRARY "${install_dir}/lib/libLimeSuite${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+            install(DIRECTORY "${intstall_dir}/lib/" DESTINATION "${INSTALL_LIB_DIR}"
                     FILES_MATCHING PATTERN "libLimeSuite*${CMAKE_SHARED_LIBRARY_SUFFIX}")
-            set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/src/")
+            set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${install_dir}/lib/")
         endif ()
     endif (ENABLE_LIMESUITE)
 
@@ -736,6 +1104,7 @@ if (WIN32 OR APPLE)
         ExternalProject_Add(soapysdr
                 GIT_REPOSITORY https://github.com/pothosware/SoapySDR.git
                 GIT_TAG ${SOAPYSDR_TAG}
+                DEPENDS ${LIBUSB_DEPENDS}
                 PREFIX "${EXTERNAL_BUILD_LIBRARIES}/soapysdr"
                 CMAKE_ARGS ${COMMON_CMAKE_ARGS}
                 -DENABLE_PYTHON=OFF
@@ -768,10 +1137,12 @@ if (WIN32 OR APPLE)
             set(AIRSPY_LIBUSB_INCLUDE_DIR ${LIBUSB_INCLUDE_DIR}/libusb-1.0)
         endif ()
         # needs libusb, pthreads
+        # We need to set CMAKE_INSTALL_NAME_DIR, otherwise path to libs is set to install path of /usr/local/
+        # but as we don't install, macdeployqt will fail to find them
         ExternalProject_Add(airspy
                 GIT_REPOSITORY https://github.com/airspy/airspyone_host
                 GIT_TAG ${AIRSPY_TAG}
-                DEPENDS ${PTHREADS4W_DEPENDS}
+                DEPENDS ${PTHREADS4W_DEPENDS} ${LIBUSB_DEPENDS}
                 PREFIX "${EXTERNAL_BUILD_LIBRARIES}/airspy"
                 SOURCE_SUBDIR "libairspy"
                 CMAKE_ARGS ${COMMON_CMAKE_ARGS}
@@ -779,11 +1150,14 @@ if (WIN32 OR APPLE)
                 -DLIBUSB_INCLUDE_DIR=${AIRSPY_LIBUSB_INCLUDE_DIR}
                 -DTHREADS_PTHREADS_INCLUDE_DIR=${PTHREADS4W_INCLUDE_DIR}
                 -DTHREADS_PTHREADS_WIN32_LIBRARY=${PTHREADS4W_LIBRARIES}
+                -DCMAKE_INSTALL_NAME_DIR=<BINARY_DIR>/src
                 BUILD_BYPRODUCTS "${LIBAIRSPY_LIBRARIES}"
                 INSTALL_COMMAND ""
                 TEST_COMMAND ""
                 )
-        add_dependencies(airspy pthreads4w)
+        if (WIN32)
+            add_dependencies(airspy pthreads4w)
+        endif ()
         ExternalProject_Get_Property(airspy source_dir binary_dir)
         set(LIBAIRSPY_FOUND ON CACHE INTERNAL "")
         set(LIBAIRSPY_EXTERNAL ON CACHE INTERNAL "")
@@ -793,11 +1167,11 @@ if (WIN32 OR APPLE)
             makeCopy("${binary_dir}/../airspy-tools/src/airspy${CMAKE_SHARED_LIBRARY_SUFFIX}" "${SDRANGEL_BINARY_BIN_DIR}/airspy${CMAKE_SHARED_LIBRARY_SUFFIX}" airspy)
             install(FILES "${SDRANGEL_BINARY_BIN_DIR}/airspy${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
         elseif (APPLE)
-            set(LIBAIRSPY_LIBRARIES "${binary_dir}/libairspy/src/libairspy${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+            set(LIBAIRSPY_LIBRARIES "${binary_dir}/src/libairspy${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
             makeLink("${source_dir}/libairspy/src" "${source_dir}/libairspy/src/libairspy" airspy)
             install(DIRECTORY "${binary_dir}/libairspy/src/" DESTINATION "${INSTALL_LIB_DIR}"
                     FILES_MATCHING PATTERN "libairspy*${CMAKE_SHARED_LIBRARY_SUFFIX}")
-            set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/libairspy/src")
+            set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/src")
         endif ()
     endif (ENABLE_AIRSPY)
 
@@ -811,18 +1185,21 @@ if (WIN32 OR APPLE)
         ExternalProject_Add(airspyhf
                 GIT_REPOSITORY https://github.com/airspy/airspyhf.git
                 GIT_TAG ${AIRSPYHF_TAG}
-                DEPENDS ${PTHREADS4W_DEPENDS}
+                DEPENDS ${PTHREADS4W_DEPENDS} ${LIBUSB_DEPENDS}
                 PREFIX "${EXTERNAL_BUILD_LIBRARIES}/airspyhf"
                 CMAKE_ARGS ${COMMON_CMAKE_ARGS}
                 -DLIBUSB_LIBRARIES=${LIBUSB_LIBRARIES}
                 -DLIBUSB_INCLUDE_DIR=${AIRSPYHF_LIBUSB_INCLUDE_DIR}
                 -DTHREADS_PTHREADS_INCLUDE_DIR=${PTHREADS4W_INCLUDE_DIR}
                 -DTHREADS_PTHREADS_WIN32_LIBRARY=${PTHREADS4W_LIBRARIES}
+                -DCMAKE_INSTALL_NAME_DIR=<BINARY_DIR>/libairspyhf/src
                 BUILD_BYPRODUCTS "${LIBAIRSPYHF_LIBRARIES}"
                 INSTALL_COMMAND ""
                 TEST_COMMAND ""
                 )
-        add_dependencies(airspyhf pthreads4w)
+        if (WIN32)
+            add_dependencies(airspyhf pthreads4w)
+        endif()
         ExternalProject_Get_Property(airspyhf source_dir binary_dir)
         set(LIBAIRSPYHF_FOUND ON CACHE INTERNAL "")
         set(LIBAIRSPYHF_EXTERNAL ON CACHE INTERNAL "")
@@ -851,7 +1228,7 @@ if (WIN32 OR APPLE)
                 GIT_REPOSITORY https://github.com/mossmann/hackrf.git
                 GIT_TAG ${HACKRF_TAG}
                 GIT_SUBMODULES ""
-                DEPENDS ${PTHREADS4W_DEPENDS}
+                DEPENDS ${PTHREADS4W_DEPENDS} ${LIBUSB_DEPENDS}
                 PREFIX "${EXTERNAL_BUILD_LIBRARIES}/hackrf"
                 SOURCE_SUBDIR "host/libhackrf"
                 CMAKE_ARGS ${COMMON_CMAKE_ARGS}
@@ -865,7 +1242,9 @@ if (WIN32 OR APPLE)
                 INSTALL_COMMAND ""
                 TEST_COMMAND ""
                 )
-        add_dependencies(hackrf pthreads4w)
+        if (WIN32)
+            add_dependencies(hackrf pthreads4w)
+        endif()
         ExternalProject_Get_Property(hackrf source_dir binary_dir)
         set(LIBHACKRF_FOUND ON CACHE INTERNAL "")
         set(LIBHACKRF_EXTERNAL ON CACHE INTERNAL "")
@@ -930,7 +1309,7 @@ if (WIN32 OR APPLE)
         ExternalProject_Add(libiio
                 GIT_REPOSITORY https://github.com/analogdevicesinc/libiio.git
                 GIT_TAG ${LIBIIO_TAG}
-                DEPENDS ${PTHREADS4W_DEPENDS} ${LIBXML2_DEPENDS}
+                DEPENDS ${PTHREADS4W_DEPENDS} ${LIBXML2_DEPENDS} ${LIBUSB_DEPENDS}
                 PREFIX "${EXTERNAL_BUILD_LIBRARIES}/libiio"
                 CMAKE_ARGS ${COMMON_CMAKE_ARGS}
                 -DLIBUSB_LIBRARIES=${LIBUSB_LIBRARIES}
@@ -949,7 +1328,9 @@ if (WIN32 OR APPLE)
                 INSTALL_COMMAND ""
                 TEST_COMMAND ""
                 )
-        add_dependencies(libiio pthreads4w)
+        if (WIN32)
+            add_dependencies(libiio pthreads4w)
+        endif()
         ExternalProject_Get_Property(libiio source_dir binary_dir)
         set(LIBIIO_FOUND ON CACHE INTERNAL "")
         set(LIBIIO_EXTERNAL ON CACHE INTERNAL "")
@@ -960,7 +1341,7 @@ if (WIN32 OR APPLE)
             set(LIBIIO_LIBRARIES "${binary_dir}/libiio${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
             install(DIRECTORY "${binary_dir}/" DESTINATION "${INSTALL_LIB_DIR}"
                     FILES_MATCHING PATTERN "libiio*${CMAKE_SHARED_LIBRARY_SUFFIX}")
-            string(REPLACE "v" "" IIO_VERSION ${IIO_TAG})
+            string(REPLACE "v" "" IIO_VERSION ${LIBIIO_TAG})
             makeCopy("${binary_dir}/libiio.framework/Versions/${IIO_VERSION}/libiio" "${binary_dir}/libiio${CMAKE_SHARED_LIBRARY_SUFFIX}" libiio)
             add_custom_command(TARGET libiio POST_BUILD COMMAND install_name_tool -id "${binary_dir}/libiio${CMAKE_SHARED_LIBRARY_SUFFIX}" "${binary_dir}/libiio${CMAKE_SHARED_LIBRARY_SUFFIX}")
             set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}")
@@ -975,14 +1356,14 @@ if (WIN32 OR APPLE)
         ExternalProject_Add(bladerf
                 GIT_REPOSITORY https://github.com/Nuand/bladeRF.git
                 GIT_TAG ${BLADERF_TAG}
-                DEPENDS ${PTHREADS4W_DEPENDS}
+                DEPENDS ${PTHREADS4W_DEPENDS} ${LIBUSB_DEPENDS}
                 PREFIX "${EXTERNAL_BUILD_LIBRARIES}/bladerf"
                 SOURCE_SUBDIR "host"
                 CMAKE_ARGS ${COMMON_CMAKE_ARGS}
                 -DPKG_CONFIG_EXECUTABLE=${PKG_CONFIG_EXECUTABLE}
                 -DENABLE_BACKEND_USB=ON
                 -DENABLE_BACKEND_LIBUSB=ON
-                -DLIBUSB_HEADER_FILE=${LIBUSB_INCLUDE_DIR}/libusb-1.0/libusb.h
+                -DLIBUSB_HEADER_FILE=${LIBUSB_INCLUDE_DIR}/libusb.h
                 -Dusb_LIBRARY=${LIBUSB_LIBRARIES}
                 -DLIBUSB_PATH=${EXTERNAL_LIBRARY_FOLDER}/libusb
                 -DTHREADS_PTHREADS_INCLUDE_DIR=${PTHREADS4W_INCLUDE_DIR}
@@ -996,7 +1377,9 @@ if (WIN32 OR APPLE)
                 INSTALL_COMMAND ""
                 TEST_COMMAND ""
                 )
-        add_dependencies(bladerf pthreads4w)
+        if (WIN32)
+            add_dependencies(bladerf pthreads4w)
+        endif()
         ExternalProject_Get_Property(bladerf source_dir binary_dir)
         set(LIBBLADERF_FOUND ON CACHE INTERNAL "")
         set(LIBBLADERF_EXTERNAL ON CACHE INTERNAL "")
@@ -1004,10 +1387,45 @@ if (WIN32 OR APPLE)
         if (WIN32)
             install(FILES "${SDRANGEL_BINARY_BIN_DIR}/bladeRF${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
         elseif (APPLE)
-            set(LIBBLADERF_LIBRARIES "${binary_dir}/host/output/libbladeRF${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
-            install(DIRECTORY "${binary_dir}/host/output/" DESTINATION "${INSTALL_LIB_DIR}"
+            set(LIBBLADERF_LIBRARIES "${binary_dir}/output/libbladeRF${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+            install(DIRECTORY "${binary_dir}/output/" DESTINATION "${INSTALL_LIB_DIR}"
                     FILES_MATCHING PATTERN "libbladeRF*${CMAKE_SHARED_LIBRARY_SUFFIX}")
-            set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/host/output")
+            set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/output")
         endif ()
     endif (ENABLE_BLADERF)
+
+    if (ENABLE_USRP AND Boost_FOUND)
+        ExternalProject_Add(uhd
+                GIT_REPOSITORY https://github.com/EttusResearch/uhd.git
+                GIT_TAG v4.2.0.0
+                DEPENDS ${LIBUSB_DEPENDS} ${Boost_DEPENDS}
+                PREFIX "${EXTERNAL_BUILD_LIBRARIES}/uhd"
+                SOURCE_SUBDIR "host"
+                CMAKE_ARGS ${COMMON_CMAKE_ARGS}
+                    -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+                    -DBoost_INCLUDE_DIR=${Boost_INCLUDE_DIR}
+                    -DLIBUSB_LIBRARIES=${LIBUSB_LIBRARIES}
+                    -DLIBUSB_INCLUDE_DIR=${LIBUSB_INCLUDE_DIR}
+                    -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
+                    -DCMAKE_INSTALL_NAME_DIR=<INSTALL_DIR>/lib
+                TEST_COMMAND ""
+                )
+        ExternalProject_Get_Property(uhd install_dir)
+        set(UHD_FOUND ON CACHE INTERNAL "")
+        set(UHD_EXTERNAL ON CACHE INTERNAL "")
+        set(UHD_INCLUDE_DIR "${install_dir}/include" CACHE INTERNAL "")
+        if (WIN32)
+            install(FILES "${SDRANGEL_BINARY_BIN_DIR}/uhd${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
+        elseif (APPLE)
+            set(UHD_LIBRARIES "${install_dir}/lib/libuhd${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+            #install(DIRECTORY "${binary_dir}/host/" DESTINATION "${INSTALL_LIB_DIR}"
+            #        FILES_MATCHING PATTERN "libuhd*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+            set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${install_dir}/lib")
+        endif ()
+    endif (ENABLE_USRP)
+
 endif (WIN32 OR APPLE)
+
+# Set CACHE so variable is visible in cpack CMakeFile
+set(MACOS_EXTERNAL_LIBS_FIXUP ${MACOS_EXTERNAL_LIBS_FIXUP} CACHE INTERNAL "")
+

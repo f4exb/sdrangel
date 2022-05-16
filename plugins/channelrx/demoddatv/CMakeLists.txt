@@ -102,6 +102,10 @@ if (LINUX)
     install(TARGETS ldpctool DESTINATION ${INSTALL_BIN_DIR})
 endif()
 
+if(FFMPEG_EXTERNAL)
+    add_dependencies(${TARGET_NAME} ffmpeg)
+endif()
+
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
 
 # Install debug symbols

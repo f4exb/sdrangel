@@ -281,17 +281,21 @@ elseif (WIN32)
   )
 endif()
 
-# TODO: check if(DEFINED) and fix macports -D
-# fix install path
-set(CMAKE_INSTALL_RPATH
-  "${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}" CACHE
-  PATH "Library Install RPath" FORCE)
-# Allow RPATH to files outside the build tree
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-# force full path
-set(CMAKE_INSTALL_NAME_DIR
-  "${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}" CACHE
-  PATH "Library Install Name Destination Directory" FORCE)
+# When building a bundle on MacOS, we want to keep build paths in the library
+# so macdeployqt can find them. The following code is only for installing
+if (NOT BUNDLE)
+  # TODO: check if(DEFINED) and fix macports -D
+  # fix install path
+  set(CMAKE_INSTALL_RPATH
+    "${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}" CACHE
+    PATH "Library Install RPath" FORCE)
+  # Allow RPATH to files outside the build tree
+  set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+  # force full path
+  set(CMAKE_INSTALL_NAME_DIR
+    "${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}" CACHE
+    PATH "Library Install Name Destination Directory" FORCE)
+endif()
 
 # enable 24 bit receiving path
 if (RX_SAMPLE_24BIT)
@@ -346,21 +350,7 @@ endif()
 
 # other requirements
 find_package(PkgConfig REQUIRED)
-find_package(Boost REQUIRED)
-find_package(FFTW3F REQUIRED)
-find_package(LibUSB REQUIRED)  # used by so many packages
-find_package(OpenCV OPTIONAL_COMPONENTS core highgui imgproc imgcodecs videoio) # channeltx/modatv
-find_package(LibSigMF) # SigMF recording files support
-if(NOT WIN32)
-    find_package(ZLIB) # For DAB
-    find_package(FAAD) # For DAB
-endif()
 
-if (LIBSIGMF_FOUND AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    add_definitions(-DHAS_LIBSIGMF)
-endif()
-
-# macOS compatibility
 if(APPLE)
   find_package(ICONV)
 endif()
@@ -388,20 +378,30 @@ if(WIN32)
   )
 endif()
 
-# include external cmake if needed
+# When ENABLE_EXTERNAL_LIBRARIES is ON, we can build most of the required 3rd party libraries from source
 if(ENABLE_EXTERNAL_LIBRARIES)
     add_subdirectory(external)
+    find_package(Boost REQUIRED)
 else()
+    find_package(Boost REQUIRED)
+    find_package(FFTW3F REQUIRED)
+    find_package(LibUSB REQUIRED)  # used by so many packages
+    find_package(OpenCV OPTIONAL_COMPONENTS core highgui imgproc imgcodecs videoio) # channeltx/modatv
+    find_package(LibSigMF) # SigMF recording files support
+    find_package(ZLIB) # For DAB
+    find_package(FAAD) # For DAB
     find_package(Codec2)
-    if (NOT APPLE)
-        find_package(CM256cc)
-    endif()
+    find_package(CM256cc)
     find_package(LibMbe)
     find_package(SerialDV REQUIRED)
     find_package(LibDSDcc)
     find_package(Sgp4)
     find_package(AptDec)
     find_package(LibDAB)
+endif()
+
+if (LIBSIGMF_FOUND AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    add_definitions(-DHAS_LIBSIGMF)
 endif()
 
 # Devices

@@ -61,6 +61,10 @@ target_link_libraries(${TARGET_NAME}
         "${OpenCV_LIBS}"
 )
 
+if(OpenCV_EXTERNAL)
+    add_dependencies(${TARGET_NAME} opencv)
+endif()
+
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
 
 # Install debug symbols

@@ -12,6 +12,7 @@ endfunction (QUERY_QMAKE)
 query_qmake (QT_INSTALL_PLUGINS QT_PLUGINS_DIR)
 query_qmake (QT_INSTALL_IMPORTS QT_IMPORTS_DIR)
 query_qmake (QT_INSTALL_QML QT_QML_DIR)
+query_qmake (QT_INSTALL_LIBS QT_LIBS_DIR)
 
 if(APPLE AND BUNDLE AND BUILD_GUI)
 
@@ -26,44 +27,17 @@ if(APPLE AND BUNDLE AND BUILD_GUI)
     set (CPACK_MACOS_PACKAGE_ARCHITECTURE noarch)
   endif (SW_VERS_PROGRAM)
 
+  # Create script that runs macdeployqt
+  configure_file("${CMAKE_SOURCE_DIR}/cmake/cpack/deploy_mac.cmake.in" "${PROJECT_BINARY_DIR}/deploy_mac.cmake" @ONLY)
+
   set(CPACK_GENERATOR "Bundle")
   set(CPACK_BINARY_DRAGNDROP ON)
   set(CPACK_BUNDLE_NAME "${APPLICATION_NAME}")
   set(CPACK_BUNDLE_ICON "${CMAKE_SOURCE_DIR}/cmake/cpack/sdrangel_icon.icns")
   set(CPACK_BUNDLE_PLIST "${CMAKE_BINARY_DIR}/Info.plist")
-  set(CPACK_BUNDLE_STARTUP_COMMAND "${CMAKE_SOURCE_DIR}/cmake/cpack/sdrangel.sh")
   set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/cmake/cpack/sdrangel_icon.icns")
   set(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION}_${CPACK_MACOS_PACKAGE_ARCHITECTURE}_${CMAKE_SYSTEM_PROCESSOR}")
-
-  # Copy Qt Plugins; fixup_bundle doesn't do that
-  install (
-    DIRECTORY
-    "${QT_PLUGINS_DIR}/platforms"
-    "${QT_PLUGINS_DIR}/audio"
-    "${QT_PLUGINS_DIR}/accessible"
-    "${QT_PLUGINS_DIR}/imageformats"
-    "${QT_PLUGINS_DIR}/mediaservice"
-    "${QT_PLUGINS_DIR}/playlistformats"
-    "${QT_PLUGINS_DIR}/styles"
-    "${QT_PLUGINS_DIR}/iconengines"
-    DESTINATION "../PlugIns"
-    CONFIGURATIONS Release MinSizeRel
-    COMPONENT runtime
-    FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}"
-    PATTERN "*minimal*${CMAKE_SHARED_LIBRARY_SUFFIX}" EXCLUDE
-    PATTERN "*offscreen*${CMAKE_SHARED_LIBRARY_SUFFIX}" EXCLUDE
-    PATTERN "*quick*${CMAKE_SHARED_LIBRARY_SUFFIX}" EXCLUDE
-    PATTERN "*_debug${CMAKE_SHARED_LIBRARY_SUFFIX}" EXCLUDE
-    )
-  # add plugins path for Mac Bundle
-  install (CODE "
-  get_filename_component (the_qt_conf \"\${CMAKE_INSTALL_PREFIX}/qt.conf\" REALPATH)
-  file (WRITE \"\${the_qt_conf}\"
-\"
-[Paths]
-Plugins = ../PlugIns
-\")"
-    )
+  set(CPACK_PRE_BUILD_SCRIPTS "${PROJECT_BINARY_DIR}/deploy_mac.cmake")
 
   # copy SoapySDR Modules
   # probably libmirsdrapi-rsp.dylib can't be re-distribuited
@@ -78,18 +52,6 @@ Plugins = ../PlugIns
         )
     endforeach()
   endif()
-
-  install(CODE "
-  file(GLOB_RECURSE SDRANGEL_PLUGINS
-    \"\${CMAKE_INSTALL_PREFIX}/${INSTALL_PLUGINS_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
-  file(GLOB_RECURSE SDRANGEL_PLUGINSSRV
-  \"\${CMAKE_INSTALL_PREFIX}/${INSTALL_PLUGINSSRV_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
-  file(GLOB_RECURSE QTPLUGINS \"\${CMAKE_INSTALL_PREFIX}/../PlugIns/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
-  file(GLOB_RECURSE SOAPYSDR_PLUGINS \"\${CMAKE_INSTALL_PREFIX}/../Frameworks/SoapySDR/modules${SOAPY_SDR_ABI_VERSION}/*.so\")
-
-  set(BU_CHMOD_BUNDLE_ITEMS ON)
-  include(BundleUtilities)
-  fixup_bundle(\"\${CMAKE_INSTALL_PREFIX}/${CMAKE_PROJECT_NAME}\" \"\${SDRANGEL_PLUGINS};\${SDRANGEL_PLUGINSSRV};\${QTPLUGINS};\${SOAPYSDR_PLUGINS}\" \"${CMAKE_LIBRARY_OUTPUT_DIRECTORY};${MACOS_EXTERNAL_LIBS_FIXUP}\")
 
   # remove non distribuitable file
   if(ENABLE_MIRSDRAPI AND OFF)
