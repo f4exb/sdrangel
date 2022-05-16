@@ -1393,8 +1393,8 @@ QString MainWindow::openGLVersion()
             int minor = glCurrentContext->format().minorVersion();
             bool es = glCurrentContext->isOpenGLES();
             QString version = QString("%1.%2%3").arg(major).arg(minor).arg(es ? " ES" : "");
-            // Waterfall doesn't work if major version is less than 3, so display in red
-            if (major < 3) {
+            // Waterfall doesn't work if version is less than 2.1, so display in red
+            if ((major < 2) || ((major == 2) && (minor == 0))) {
                 version = "<span style=\"color:red\">" + version + "</span>";
             }
             return version;
