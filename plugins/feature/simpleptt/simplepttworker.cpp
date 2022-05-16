@@ -226,20 +226,7 @@ void SimplePTTWorker::updateHardware()
     SWGSDRangel::SWGErrorResponse error;
     m_updateTimer.stop();
     m_mutex.unlock();
-
-    if (turnDevice(true))
-    {
-        m_webAPIAdapterInterface->devicesetFocusPatch(
-            m_tx ? m_settings.m_txDeviceSetIndex : m_settings.m_rxDeviceSetIndex, response, error);
-
-        if (m_msgQueueToGUI)
-        {
-            SimplePTTReport::MsgRadioState *msg = SimplePTTReport::MsgRadioState::create(
-                m_tx ? SimplePTTReport::RadioTx : SimplePTTReport::RadioRx
-            );
-            m_msgQueueToGUI->push(msg);
-        }
-    }
+    turnDevice(true);
 }
 
 bool SimplePTTWorker::turnDevice(bool on)

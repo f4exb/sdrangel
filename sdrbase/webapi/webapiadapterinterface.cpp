@@ -55,7 +55,6 @@ QString WebAPIAdapterInterface::featuresetFeatureURL("/sdrangel/featureset/featu
 QString WebAPIAdapterInterface::featuresetPresetURL("/sdrangel/featureset/preset");
 
 std::regex WebAPIAdapterInterface::devicesetURLRe("^/sdrangel/deviceset/([0-9]{1,2})$");
-std::regex WebAPIAdapterInterface::devicesetFocusURLRe("^/sdrangel/deviceset/([0-9]{1,2})/focus$");
 std::regex WebAPIAdapterInterface::devicesetSpectrumSettingsURLRe("^/sdrangel/deviceset/([0-9]{1,2})/spectrum/settings$");
 std::regex WebAPIAdapterInterface::devicesetSpectrumServerURLRe("^/sdrangel/deviceset/([0-9]{1,2})/spectrum/server$");
 std::regex WebAPIAdapterInterface::devicesetSpectrumWorkspaceURLRe("^/sdrangel/deviceset/([0-9]{1,2})/spectrum/workspace$");

@@ -289,11 +289,6 @@ public:
             SWGSDRangel::SWGDeviceSet& response,
             SWGSDRangel::SWGErrorResponse& error);
 
-    virtual int devicesetFocusPatch(
-            int deviceSetIndex,
-            SWGSDRangel::SWGSuccessResponse& response,
-            SWGSDRangel::SWGErrorResponse& error);
-
     virtual int devicesetSpectrumSettingsGet(
             int deviceSetIndex,
             SWGSDRangel::SWGGLSpectrum& response,

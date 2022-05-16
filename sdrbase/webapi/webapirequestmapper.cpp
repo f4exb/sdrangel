@@ -193,8 +193,6 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
                 devicesetService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetDeviceURLRe)) {
                 devicesetDeviceService(std::string(desc_match[1]), request, response);
-            } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetFocusURLRe)) {
-                devicesetFocusService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetSpectrumSettingsURLRe)) {
                 devicesetSpectrumSettingsService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetSpectrumServerURLRe)) {
@@ -2075,46 +2073,6 @@ void WebAPIRequestMapper::devicesetService(const std::string& indexStr, qtwebapp
         response.setStatus(405,"Invalid HTTP method");
         errorResponse.init();
         *errorResponse.getMessage() = "Invalid HTTP method";
-        response.write(errorResponse.asJson().toUtf8());
-    }
-}
-
-void WebAPIRequestMapper::devicesetFocusService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
-{
-    SWGSDRangel::SWGErrorResponse errorResponse;
-    response.setHeader("Content-Type", "application/json");
-    response.setHeader("Access-Control-Allow-Origin", "*");
-
-    try
-    {
-        int deviceSetIndex = boost::lexical_cast<int>(indexStr);
-
-        if (request.getMethod() == "PATCH")
-        {
-            SWGSDRangel::SWGSuccessResponse normalResponse;
-            int status = m_adapter->devicesetFocusPatch(deviceSetIndex, normalResponse, errorResponse);
-
-            response.setStatus(status);
-
-            if (status/100 == 2) {
-                response.write(normalResponse.asJson().toUtf8());
-            } else {
-                response.write(errorResponse.asJson().toUtf8());
-            }
-        }
-        else
-        {
-            response.setStatus(405,"Invalid HTTP method");
-            errorResponse.init();
-            *errorResponse.getMessage() = "Invalid HTTP method";
-            response.write(errorResponse.asJson().toUtf8());
-        }
-    }
-    catch (const boost::bad_lexical_cast &e)
-    {
-        errorResponse.init();
-        *errorResponse.getMessage() = "Wrong integer conversion on device set index";
-        response.setStatus(400,"Invalid data");
         response.write(errorResponse.asJson().toUtf8());
     }
 }

@@ -58,26 +58,6 @@ class SDRBASE_API MainCore : public QObject
 {
     Q_OBJECT
 public:
-	class SDRBASE_API MsgDeviceSetFocus : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        int getDeviceSetIndex() const { return m_deviceSetIndex; }
-
-        static MsgDeviceSetFocus* create(int deviceSetIndex)
-        {
-            return new MsgDeviceSetFocus(deviceSetIndex);
-        }
-
-    private:
-        int m_deviceSetIndex;
-
-        MsgDeviceSetFocus(int deviceSetIndex) :
-            Message(),
-            m_deviceSetIndex(deviceSetIndex)
-        { }
-    };
-
 	class SDRBASE_API MsgDVSerial : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -372,34 +352,6 @@ public:
 
     private:
         MsgRemoveLastDeviceSet() :
-            Message()
-        { }
-    };
-
-    class SDRBASE_API MsgAddFeatureSet : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        static MsgAddFeatureSet* create() {
-            return new MsgAddFeatureSet();
-        }
-
-    private:
-        MsgAddFeatureSet() :
-            Message()
-        { }
-    };
-
-    class SDRBASE_API MsgRemoveLastFeatureSet : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        static MsgRemoveLastFeatureSet* create() {
-            return new MsgRemoveLastFeatureSet();
-        }
-
-    private:
-        MsgRemoveLastFeatureSet() :
             Message()
         { }
     };

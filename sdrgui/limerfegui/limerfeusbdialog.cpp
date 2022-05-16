@@ -664,10 +664,6 @@ void LimeRFEUSBDialog::stopStartRx(bool start)
         if (deviceSourceEngine->initAcquisition()) {
             deviceSourceEngine->startAcquisition();
         }
-
-        MainCore *mainCore = MainCore::instance();
-        MainCore::MsgDeviceSetFocus *msg = MainCore::MsgDeviceSetFocus::create(m_rxDeviceSetIndex[rxDeviceSetSequence]);
-        mainCore->getMainMessageQueue()->push(msg);
     }
     else
     {
@@ -690,10 +686,6 @@ void LimeRFEUSBDialog::stopStartTx(bool start)
         if (deviceSinkEngine->initGeneration()) {
             deviceSinkEngine->startGeneration();
         }
-
-        MainCore *mainCore = MainCore::instance();
-        MainCore::MsgDeviceSetFocus *msg = MainCore::MsgDeviceSetFocus::create(m_txDeviceSetIndex[txDeviceSetSequence]);
-        mainCore->getMainMessageQueue()->push(msg);
     }
     else
     {

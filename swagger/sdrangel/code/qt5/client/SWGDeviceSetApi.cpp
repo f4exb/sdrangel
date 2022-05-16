@@ -1389,60 +1389,6 @@ SWGDeviceSetApi::devicesetDeviceWorkspacePutCallback(SWGHttpRequestWorker * work
 }
 
 void
-SWGDeviceSetApi::devicesetFocusPatch(qint32 device_set_index) {
-    QString fullPath;
-    fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}/focus");
-
-    QString device_set_indexPathParam("{"); device_set_indexPathParam.append("deviceSetIndex").append("}");
-    fullPath.replace(device_set_indexPathParam, stringValue(device_set_index));
-
-
-    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
-    SWGHttpRequestInput input(fullPath, "PATCH");
-
-
-
-
-
-    foreach(QString key, this->defaultHeaders.keys()) {
-        input.headers.insert(key, this->defaultHeaders.value(key));
-    }
-
-    connect(worker,
-            &SWGHttpRequestWorker::on_execution_finished,
-            this,
-            &SWGDeviceSetApi::devicesetFocusPatchCallback);
-
-    worker->execute(&input);
-}
-
-void
-SWGDeviceSetApi::devicesetFocusPatchCallback(SWGHttpRequestWorker * worker) {
-    QString msg;
-    QString error_str = worker->error_str;
-    QNetworkReply::NetworkError error_type = worker->error_type;
-
-    if (worker->error_type == QNetworkReply::NoError) {
-        msg = QString("Success! %1 bytes").arg(worker->response.length());
-    }
-    else {
-        msg = "Error: " + worker->error_str;
-    }
-
-
-    QString json(worker->response);
-    SWGSuccessResponse* output = static_cast<SWGSuccessResponse*>(create(json, QString("SWGSuccessResponse")));
-    worker->deleteLater();
-
-    if (worker->error_type == QNetworkReply::NoError) {
-        emit devicesetFocusPatchSignal(output);
-    } else {
-        emit devicesetFocusPatchSignalE(output, error_type, error_str);
-        emit devicesetFocusPatchSignalEFull(worker, error_type, error_str);
-    }
-}
-
-void
 SWGDeviceSetApi::devicesetGet(qint32 device_set_index) {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}");
