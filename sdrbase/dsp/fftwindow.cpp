@@ -51,7 +51,7 @@ void FFTWindow::create(Function function, int n)
 		return;
 	}
 
-	switch(function) {
+	switch (function) {
 		case Flattop:
 			wFunc = flatTop;
 			break;
@@ -71,6 +71,10 @@ void FFTWindow::create(Function function, int n)
 		case Hanning:
 			wFunc = hanning;
 			break;
+
+        case Blackman:
+            wFunc = blackman;
+            break;
 
 		case Rectangle:
 		default:

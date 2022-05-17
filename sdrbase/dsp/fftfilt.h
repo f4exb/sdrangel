@@ -9,6 +9,7 @@
 #include <cmath>
 
 #include "gfft.h"
+#include "fftwindow.h"
 #include "export.h"
 
 //----------------------------------------------------------------------
@@ -25,9 +26,9 @@ public:
 	~fftfilt();
 // f1 < f2 ==> bandpass
 // f1 > f2 ==> band reject
-	void create_filter(float f1, float f2);
-	void create_dsb_filter(float f2);
-    void create_asym_filter(float fopp, float fin); //!< two different filters for in band and opposite band
+	void create_filter(float f1, float f2, FFTWindow::Function wf = FFTWindow::Blackman);
+	void create_dsb_filter(float f2, FFTWindow::Function wf = FFTWindow::Blackman);
+    void create_asym_filter(float fopp, float fin, FFTWindow::Function wf = FFTWindow::Blackman); //!< two different filters for in band and opposite band
     void create_rrc_filter(float fb, float a); //!< root raised cosine. fb is half the band pass
 
 	int noFilt(const cmplx& in, cmplx **out);

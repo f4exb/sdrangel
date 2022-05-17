@@ -101,6 +101,11 @@
          <string>Kai</string>
         </property>
        </item>
+       <item>
+        <property name="text">
+         <string>Black</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item>

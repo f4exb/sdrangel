@@ -112,7 +112,7 @@ fftfilt::~fftfilt()
 	if (ovlbuf) delete [] ovlbuf;
 }
 
-void fftfilt::create_filter(float f1, float f2)
+void fftfilt::create_filter(float f1, float f2, FFTWindow::Function wf)
 {
 	// initialize the filter to zero
 	std::fill(filter, filter + flen, cmplx{0, 0});
@@ -135,8 +135,12 @@ void fftfilt::create_filter(float f1, float f2)
 	if (b_highpass && f2 < f1)
 		filter[flen2 / 2] += 1;
 
-	for (int i = 0; i < flen2; i++)
-		filter[i] *= _blackman(i, flen2);
+    FFTWindow fwin;
+    fwin.create(wf, flen2);
+    fwin.apply(filter);
+
+	// for (int i = 0; i < flen2; i++)
+	// 	filter[i] *= _blackman(i, flen2);
 
 	fft->ComplexFFT(filter); // filter was expressed in the time domain (impulse response)
 
@@ -153,15 +157,19 @@ void fftfilt::create_filter(float f1, float f2)
 }
 
 // Double the size of FFT used for equivalent SSB filter or assume FFT is half the size of the one used for SSB
-void fftfilt::create_dsb_filter(float f2)
+void fftfilt::create_dsb_filter(float f2, FFTWindow::Function wf)
 {
 	// initialize the filter to zero
 	std::fill(filter, filter + flen, cmplx{0, 0});
 
 	for (int i = 0; i < flen2; i++) {
 		filter[i] = fsinc(f2, i, flen2);
-		filter[i] *= _blackman(i, flen2);
+		// filter[i] *= _blackman(i, flen2);
 	}
+
+    FFTWindow fwin;
+    fwin.create(wf, flen2);
+    fwin.apply(filter);
 
 	fft->ComplexFFT(filter); // filter was expressed in the time domain (impulse response)
 
@@ -179,7 +187,7 @@ void fftfilt::create_dsb_filter(float f2)
 
 // Double the size of FFT used for equivalent SSB filter or assume FFT is half the size of the one used for SSB
 // used with runAsym for in band / opposite band asymmetrical filtering. Can be used for vestigial sideband modulation.
-void fftfilt::create_asym_filter(float fopp, float fin)
+void fftfilt::create_asym_filter(float fopp, float fin, FFTWindow::Function wf)
 {
     // in band
     // initialize the filter to zero
@@ -187,8 +195,12 @@ void fftfilt::create_asym_filter(float fopp, float fin)
 
     for (int i = 0; i < flen2; i++) {
         filter[i] = fsinc(fin, i, flen2);
-        filter[i] *= _blackman(i, flen2);
+        // filter[i] *= _blackman(i, flen2);
     }
+
+    FFTWindow fwin;
+    fwin.create(wf, flen2);
+    fwin.apply(filter);
 
     fft->ComplexFFT(filter); // filter was expressed in the time domain (impulse response)
 
@@ -209,9 +221,10 @@ void fftfilt::create_asym_filter(float fopp, float fin)
 
     for (int i = 0; i < flen2; i++) {
         filterOpp[i] = fsinc(fopp, i, flen2);
-        filterOpp[i] *= _blackman(i, flen2);
+        // filterOpp[i] *= _blackman(i, flen2);
     }
 
+    fwin.apply(filterOpp);
     fft->ComplexFFT(filterOpp); // filter was expressed in the time domain (impulse response)
 
     // normalize the output filter for unity gain

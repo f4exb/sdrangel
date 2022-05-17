@@ -33,7 +33,8 @@ public:
 		Hamming,
 		Hanning,
 		Rectangle,
-		Kaiser
+		Kaiser,
+        Blackman
 	};
 
 	FFTWindow();
@@ -69,6 +70,11 @@ private:
 		// amplitude correction = 2.79
 		return (0.35875 - 0.48829 * cos((2.0 * M_PI * i) / n) + 0.14128 * cos((4.0 * M_PI * i) / n) - 0.01168 * cos((6.0 * M_PI * i) / n)) * 2.79;
 	}
+
+    static inline Real blackman(Real n, Real i)
+    {
+        return (0.42438 - 0.49734 * cos(2.0 * M_PI * i / n) + 0.078279 * cos(4.0 * M_PI * i / n)) * 2.37;
+    }
 
 	static inline Real hamming(Real n, Real i)
 	{
