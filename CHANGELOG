@@ -1,9 +1,15 @@
+sdrangel (7.0.0-1) unstable; urgency=medium
+
+  * New top level UI released
+  * Fixed audio FIFO write overflows in modulators using audio input. Also fixes #1236 in SSB modulator
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 17 May 2022 20:24:16 +0200
+
 sdrangel (7.0.0beta4-1) unstable; urgency=medium
 
   * Fixed missing bits in API. Fixes #1247
 
   -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 16 May 2022 18:43:31 +0200
-
 sdrangel (7.0.0beta3-1) unstable; urgency=medium
 
   * MainServer: fix adding unique featureset
