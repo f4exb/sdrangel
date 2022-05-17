@@ -193,7 +193,10 @@ endif (AUTO_EXTERNAL_LIBRARIES)
 # be so that on MacOS, the paths embedded in the libraries to other libraries are correct (as they are set to
 # install path, not build). This is required for macdeployqt to be able to find them
 
-if (NOT LIBUSB_FOUND OR LIBUSB_EXTERNAL)
+# Some of the following projects are disabled for WIN32, as we use precompiled
+# versions from sdrangel-windows-libraries
+
+if (NOT LIBUSB_FOUND AND NOT WIN32)
     # Cloning git repo doesn't include configure, so we download the bz2 which does
     ExternalProject_Add(libusb
             URL https://github.com/libusb/libusb/releases/download/v1.0.26/libusb-1.0.26.tar.bz2
@@ -215,9 +218,9 @@ if (NOT LIBUSB_FOUND OR LIBUSB_EXTERNAL)
         set(LIBUSB_LIBRARIES "${install_dir}/lib/libusb-1.0${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${install_dir}/lib")
     endif ()
-endif (NOT LIBUSB_FOUND OR LIBUSB_EXTERNAL)
+endif (NOT LIBUSB_FOUND AND NOT WIN32)
 
-if (NOT OPUS_FOUND OR OPUS_EXTERNAL)
+if (NOT OPUS_FOUND AND NOT WIN32)
     ExternalProject_Add(opus
             GIT_REPOSITORY https://github.com/xiph/opus
             GIT_TAG v1.3.1
@@ -239,9 +242,9 @@ if (NOT OPUS_FOUND OR OPUS_EXTERNAL)
         set(OPUS_LIBRARIES "${install_dir}/lib/libopus${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${install_dir}/lib")
     endif ()
-endif (NOT OPUS_FOUND OR OPUS_EXTERNAL)
+endif (NOT OPUS_FOUND AND NOT WIN32)
 
-if (NOT ZLIB_FOUND OR ZLIB_EXTERNAL)
+if (NOT ZLIB_FOUND AND NOT WIN32)
     ExternalProject_Add(zlib
             URL https://zlib.net/zlib-1.2.12.tar.gz
             PREFIX "${EXTERNAL_BUILD_LIBRARIES}/zlib"
@@ -261,9 +264,9 @@ if (NOT ZLIB_FOUND OR ZLIB_EXTERNAL)
         set(ZLIB_LIBRARIES "${install_dir}/lib/libz${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${install_dir}/lib")
     endif ()
-endif (NOT ZLIB_FOUND OR ZLIB_EXTERNAL)
+endif (NOT ZLIB_FOUND AND NOT WIN32)
 
-if (NOT FAAD_FOUND OR FAAD_EXTERNAL)
+if (NOT FAAD_FOUND AND NOT WIN32)
     ExternalProject_Add(faad
             URL https://downloads.sourceforge.net/project/faac/faad2-src/faad2-2.8.0/faad2-2.8.8.tar.gz
             PREFIX "${EXTERNAL_BUILD_LIBRARIES}/faad"
@@ -283,9 +286,9 @@ if (NOT FAAD_FOUND OR FAAD_EXTERNAL)
         set(FAAD_LIBRARY "${install_dir}/lib/libfaad${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${install_dir}/lib")
     endif ()
-endif (NOT FAAD_FOUND OR FAAD_EXTERNAL)
+endif (NOT FAAD_FOUND AND NOT WIN32)
 
-if (NOT FFTW3F_FOUND OR FFTW3F_EXTERNAL)
+if (NOT FFTW3F_FOUND AND NOT WIN32)
     ExternalProject_Add(fftw3f
             URL http://fftw.org/fftw-3.3.10.tar.gz
             PREFIX "${EXTERNAL_BUILD_LIBRARIES}/fftw3f"
@@ -306,8 +309,7 @@ if (NOT FFTW3F_FOUND OR FFTW3F_EXTERNAL)
     elseif (APPLE)
         set(FFTW3F_LIBRARIES "${binary_dir}/.libs/libfftw3f.a" CACHE INTERNAL "")
     endif ()
-endif (NOT FFTW3F_FOUND OR FFTW3F_EXTERNAL)
-
+endif (NOT FFTW3F_FOUND AND NOT WIN32)
 
 # Can't build Boost using ExternalProject_Add, as we want to use find_package(Boost) as it defines many variables,
 # and using find_package requires Boost to have already been built
@@ -318,7 +320,7 @@ FetchContent_Declare(boost
 )
 
 find_package(Boost QUIET)
-if (NOT Boost_FOUND OR Boost_EXTERNAL)
+if (NOT Boost_FOUND AND NOT WIN32)
 
     message("Downloading Boost")
     FetchContent_MakeAvailable(boost)
@@ -361,7 +363,7 @@ else()
     endif()
 endif()
 
-if (NOT FFMEG_FOUND OR FFMPEG_EXTERNAL)
+if (NOT FFMEG_FOUND AND NOT WIN32)
 
     # Libs only used by ffmpeg
 
@@ -496,9 +498,9 @@ if (NOT FFMEG_FOUND OR FFMPEG_EXTERNAL)
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${install_dir}/lib")
     endif ()
 
-endif (NOT FFMPEG_FOUND OR FFMPEG_EXTERNAL)
+endif (NOT FFMPEG_FOUND AND NOT WIN32)
 
-if (NOT OpenCV_FOUND OR OpenCV_EXTERNAL)
+if (NOT OpenCV_FOUND AND NOT WIN32)
     ExternalProject_Add(opencv
             GIT_REPOSITORY https://github.com/opencv/opencv.git
             GIT_TAG 4.5.5
@@ -545,9 +547,9 @@ if (NOT OpenCV_FOUND OR OpenCV_EXTERNAL)
         set(OpenCV_LIBS "${binary_dir}/lib/libopencv_core${CMAKE_SHARED_LIBRARY_SUFFIX};${binary_dir}/lib/libopencv_core${CMAKE_SHARED_LIBRARY_SUFFIX};${binary_dir}/lib/libopencv_highgui${CMAKE_SHARED_LIBRARY_SUFFIX};${binary_dir}/lib/libopencv_video${CMAKE_SHARED_LIBRARY_SUFFIX};${binary_dir}/lib/libopencv_videoio${CMAKE_SHARED_LIBRARY_SUFFIX};${binary_dir}/lib/libopencv_imgproc${CMAKE_SHARED_LIBRARY_SUFFIX};${binary_dir}/lib/libopencv_imgcodecs${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/lib")
     endif ()
-endif (NOT OpenCV_FOUND OR OpenCV_EXTERNAL)
+endif (NOT OpenCV_FOUND AND NOT WIN32)
 
-if (NOT WIN32 AND (NOT CODEC2_FOUND OR CODEC2_EXTERNAL))
+if ((NOT CODEC2_FOUND OR CODEC2_EXTERNAL) AND NOT WIN32)
     # needs speexdsp
     if (WIN32)
         set(CODEC2_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/codec2.lib" CACHE INTERNAL "")
@@ -580,7 +582,7 @@ if (NOT WIN32 AND (NOT CODEC2_FOUND OR CODEC2_EXTERNAL))
         makeLink("${source_dir}/src" "${source_dir}/src/codec2" codec2)
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/src")
     endif ()
-endif (NOT WIN32 AND (NOT CODEC2_FOUND OR CODEC2_EXTERNAL))
+endif ((NOT CODEC2_FOUND OR CODEC2_EXTERNAL) AND NOT WIN32)
 
 if (NOT CM256CC_FOUND OR CM256CC_EXTERNAL)
     # needs boost
@@ -1402,7 +1404,7 @@ if (WIN32 OR APPLE)
         endif ()
     endif (ENABLE_BLADERF)
 
-    if (ENABLE_USRP AND Boost_FOUND)
+    if (ENABLE_USRP AND Boost_FOUND AND NOT WIN32)
         ExternalProject_Add(uhd
                 GIT_REPOSITORY https://github.com/EttusResearch/uhd.git
                 GIT_TAG v4.2.0.0
@@ -1426,11 +1428,9 @@ if (WIN32 OR APPLE)
             install(FILES "${SDRANGEL_BINARY_BIN_DIR}/uhd${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
         elseif (APPLE)
             set(UHD_LIBRARIES "${install_dir}/lib/libuhd${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
-            #install(DIRECTORY "${binary_dir}/host/" DESTINATION "${INSTALL_LIB_DIR}"
-            #        FILES_MATCHING PATTERN "libuhd*${CMAKE_SHARED_LIBRARY_SUFFIX}")
             set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${install_dir}/lib")
         endif ()
-    endif (ENABLE_USRP)
+    endif (ENABLE_USRP AND Boost_FOUND AND NOT WIN32)
 
 endif (WIN32 OR APPLE)
 
