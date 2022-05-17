@@ -41,9 +41,6 @@ SSBModBaseband::SSBModBaseband() :
         Qt::QueuedConnection
     );
 
-	DSPEngine::instance()->getAudioDeviceManager()->addAudioSource(m_source.getAudioFifo(), getInputMessageQueue());
-    m_source.applyAudioSampleRate(DSPEngine::instance()->getAudioDeviceManager()->getInputSampleRate());
-
     DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(m_source.getFeedbackAudioFifo(), getInputMessageQueue());
     m_source.applyFeedbackAudioSampleRate(DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate());
 
@@ -205,7 +202,6 @@ void SSBModBaseband::applySettings(const SSBModSettings& settings, bool force)
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
         audioDeviceManager->removeAudioSource(getAudioFifo());
-        audioDeviceManager->addAudioSource(getAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
         int audioSampleRate = audioDeviceManager->getInputSampleRate(audioDeviceIndex);
 
         if (getAudioSampleRate() != audioSampleRate)
@@ -215,6 +211,18 @@ void SSBModBaseband::applySettings(const SSBModSettings& settings, bool force)
             m_source.applyAudioSampleRate(audioSampleRate);
             DSPSignalNotification *msg = new DSPSignalNotification(getAudioSampleRate()/(1<<m_settings.m_spanLog2), 0);
             m_spectrumVis->getInputMessageQueue()->push(msg);
+        }
+    }
+
+    if ((settings.m_modAFInput != m_settings.m_modAFInput) || force)
+    {
+        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+        int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
+
+        if (settings.m_modAFInput == SSBModSettings::SSBModInputAudio) {
+            audioDeviceManager->addAudioSource(getAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
+        } else {
+            audioDeviceManager->removeAudioSource(getAudioFifo());
         }
     }
 

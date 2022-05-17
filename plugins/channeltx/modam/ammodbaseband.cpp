@@ -40,9 +40,6 @@ AMModBaseband::AMModBaseband() :
         Qt::QueuedConnection
     );
 
-	DSPEngine::instance()->getAudioDeviceManager()->addAudioSource(m_source.getAudioFifo(), getInputMessageQueue());
-    m_source.applyAudioSampleRate(DSPEngine::instance()->getAudioDeviceManager()->getInputSampleRate());
-
     DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(m_source.getFeedbackAudioFifo(), getInputMessageQueue());
     m_source.applyFeedbackAudioSampleRate(DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate());
 
@@ -199,7 +196,6 @@ void AMModBaseband::applySettings(const AMModSettings& settings, bool force)
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
         audioDeviceManager->removeAudioSource(getAudioFifo());
-        audioDeviceManager->addAudioSource(getAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
         int audioSampleRate = audioDeviceManager->getInputSampleRate(audioDeviceIndex);
 
         if (getAudioSampleRate() != audioSampleRate)
@@ -207,6 +203,18 @@ void AMModBaseband::applySettings(const AMModSettings& settings, bool force)
             m_channelizer->setChannelization(audioSampleRate, settings.m_inputFrequencyOffset);
             m_source.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
             m_source.applyAudioSampleRate(audioSampleRate);
+        }
+    }
+
+    if ((settings.m_modAFInput != m_settings.m_modAFInput) || force)
+    {
+        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+        int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
+
+        if (settings.m_modAFInput == AMModSettings::AMModInputAudio) {
+            audioDeviceManager->addAudioSource(getAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
+        } else {
+            audioDeviceManager->removeAudioSource(getAudioFifo());
         }
     }
 

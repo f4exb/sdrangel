@@ -200,19 +200,6 @@ bool MainServer::handleMessage(const Message& cmd)
         }
         return true;
     }
-    else if (MainCore::MsgAddFeatureSet::match(cmd))
-    {
-        addFeatureSet();
-        return true;
-    }
-    else if (MainCore::MsgRemoveLastFeatureSet::match(cmd))
-    {
-        if (m_mainCore->m_featureSets.size() != 0) {
-            removeFeatureSet(m_mainCore->m_featureSets.size() - 1);
-        }
-
-        return true;
-    }
     else if (MainCore::MsgAddChannel::match(cmd))
     {
         MainCore::MsgAddChannel& notif = (MainCore::MsgAddChannel&) cmd;
@@ -228,14 +215,14 @@ bool MainServer::handleMessage(const Message& cmd)
     else if (MainCore::MsgAddFeature::match(cmd))
     {
         MainCore::MsgAddFeature& notif = (MainCore::MsgAddFeature&) cmd;
-        addFeature(notif.getFeatureSetIndex(), notif.getFeatureRegistrationIndex());
+        addFeature(0, notif.getFeatureRegistrationIndex());
 
         return true;
     }
     else if (MainCore::MsgDeleteFeature::match(cmd))
     {
         MainCore::MsgDeleteFeature& notif = (MainCore::MsgDeleteFeature&) cmd;
-        deleteFeature(notif.getFeatureSetIndex(), notif.getFeatureIndex());
+        deleteFeature(0, notif.getFeatureIndex());
         return true;
     }
     else if (MainCore::MsgApplySettings::match(cmd))

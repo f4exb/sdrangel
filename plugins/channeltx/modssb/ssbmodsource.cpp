@@ -17,7 +17,7 @@
 
 #include <QDebug>
 
-#include "dsp/basebandsamplesink.h"
+#include "dsp/spectrumvis.h"
 #include "dsp/misc.h"
 #include "dsp/datafifo.h"
 #include "util/messagequeue.h"
@@ -31,6 +31,7 @@ const int SSBModSource::m_levelNbSamples = 480; // every 10ms
 SSBModSource::SSBModSource() :
     m_channelSampleRate(48000),
     m_channelFrequencyOffset(0),
+    m_spectrumSink(nullptr),
     m_audioSampleRate(48000),
     m_audioFifo(12000),
     m_feedbackAudioFifo(48000),
@@ -40,6 +41,8 @@ SSBModSource::SSBModSource() :
     m_ifstream(nullptr),
     m_mutex(QMutex::Recursive)
 {
+    m_audioFifo.setLabel("SSBModSource.m_audioFifo");
+    m_feedbackAudioFifo.setLabel("SSBModSource.m_feedbackAudioFifo");
     m_SSBFilter = new fftfilt(m_settings.m_lowCutoff / m_audioSampleRate, m_settings.m_bandwidth / m_audioSampleRate, m_ssbFftLen);
     m_DSBFilter = new fftfilt((2.0f * m_settings.m_bandwidth) / m_audioSampleRate, 2 * m_ssbFftLen);
     m_SSBFilterBuffer = new Complex[m_ssbFftLen>>1]; // filter returns data exactly half of its size

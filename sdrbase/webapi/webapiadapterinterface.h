@@ -986,22 +986,6 @@ public:
     }
 
     /**
-     * Handler of /sdrangel/deviceset/{devicesetIndex}/focus (PATCH) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
-     * returns the Http status code (default 501: not implemented)
-     */
-    virtual int devicesetFocusPatch(
-            int deviceSetIndex,
-            SWGSDRangel::SWGSuccessResponse& response,
-            SWGSDRangel::SWGErrorResponse& error)
-    {
-        (void) deviceSetIndex;
-        (void) response;
-        error.init();
-        *error.getMessage() = QString("Function not implemented");
-        return 501;
-    }
-
-    /**
      * Handler of /sdrangel/deviceset/{devicesetIndex}/spectrum/settings (GET)
      * returns the Http status code (default 501: not implemented)
      */
@@ -1825,7 +1809,6 @@ public:
     static QString featuresetFeatureURL;
     static QString featuresetPresetURL;
     static std::regex devicesetURLRe;
-    static std::regex devicesetFocusURLRe;
     static std::regex devicesetSpectrumSettingsURLRe;
     static std::regex devicesetSpectrumServerURLRe;
     static std::regex devicesetSpectrumWorkspaceURLRe;

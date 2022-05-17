@@ -2059,9 +2059,7 @@ int WebAPIAdapter::instanceDeviceSetDelete(
         SWGSDRangel::SWGSuccessResponse& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
-    unsigned int minFeatureSets = QCoreApplication::applicationName() == "SDRangelSrv" ? 0 : 1;
-
-    if (m_mainCore->m_deviceSets.size() > minFeatureSets)
+    if (m_mainCore->m_deviceSets.size() > 0)
     {
         MainCore::MsgRemoveLastDeviceSet *msg = MainCore::MsgRemoveLastDeviceSet::create();
         m_mainCore->m_mainMessageQueue->push(msg);
@@ -2119,30 +2117,6 @@ int WebAPIAdapter::devicesetGet(
         getDeviceSet(&response, deviceSet, deviceSetIndex);
 
         return 200;
-    }
-    else
-    {
-        error.init();
-        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
-
-        return 404;
-    }
-}
-
-int WebAPIAdapter::devicesetFocusPatch(
-        int deviceSetIndex,
-        SWGSDRangel::SWGSuccessResponse& response,
-        SWGSDRangel::SWGErrorResponse& error)
-{
-    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
-    {
-        MainCore::MsgDeviceSetFocus *msg = MainCore::MsgDeviceSetFocus::create(deviceSetIndex);
-        m_mainCore->m_mainMessageQueue->push(msg);
-
-        response.init();
-        *response.getMessage() = QString("Message to focus on device set (MsgDeviceSetFocus) was submitted successfully");
-
-        return 202;
     }
     else
     {

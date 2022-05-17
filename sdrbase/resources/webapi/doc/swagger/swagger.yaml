@@ -1381,37 +1381,6 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
 
-  /sdrangel/deviceset/{deviceSetIndex}/focus:
-    x-swagger-router-controller: deviceset
-    patch:
-      description: Set focus on device set (GUI only)
-      operationId: devicesetFocusPatch
-      tags:
-        - DeviceSet
-      parameters:
-        - in: path
-          name: deviceSetIndex
-          type: integer
-          required: true
-          description: Index of device set in the device set list
-      responses:
-        "202":
-          description: Message to focus on device set was sent successfully
-          schema:
-            $ref: "#/definitions/SuccessResponse"
-        "400":
-          description: Unsupported (srver instance)
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-        "404":
-          description: Invalid index
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-        "500":
-          $ref: "#/responses/Response_500"
-        "501":
-          $ref: "#/responses/Response_501"
-
   /sdrangel/deviceset/{deviceSetIndex}/spectrum/settings:
     x-swagger-router-controller: deviceset
     get:

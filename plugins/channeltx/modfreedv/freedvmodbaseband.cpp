@@ -40,9 +40,6 @@ FreeDVModBaseband::FreeDVModBaseband() :
         Qt::QueuedConnection
     );
 
-	DSPEngine::instance()->getAudioDeviceManager()->addAudioSource(m_source.getAudioFifo(), getInputMessageQueue());
-    m_source.applyAudioSampleRate(DSPEngine::instance()->getAudioDeviceManager()->getInputSampleRate());
-
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }
 
@@ -195,11 +192,22 @@ void FreeDVModBaseband::applySettings(const FreeDVModSettings& settings, bool fo
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
         audioDeviceManager->removeAudioSource(getAudioFifo());
-        audioDeviceManager->addAudioSource(getAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
         int audioSampleRate = audioDeviceManager->getInputSampleRate(audioDeviceIndex);
 
         if (getAudioSampleRate() != audioSampleRate) {
             m_source.applyAudioSampleRate(audioSampleRate);
+        }
+    }
+
+    if ((settings.m_modAFInput != m_settings.m_modAFInput) || force)
+    {
+        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+        int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
+
+        if (settings.m_modAFInput == FreeDVModSettings::FreeDVModInputAudio) {
+            audioDeviceManager->addAudioSource(getAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
+        } else {
+            audioDeviceManager->removeAudioSource(getAudioFifo());
         }
     }
 

@@ -29,7 +29,6 @@
 
 #include "maincore.h"
 
-MESSAGE_CLASS_DEFINITION(MainCore::MsgDeviceSetFocus, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgDVSerial, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgDeleteInstance, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgLoadPreset, Message)
@@ -45,8 +44,6 @@ MESSAGE_CLASS_DEFINITION(MainCore::MsgSaveFeatureSetPreset, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgDeleteFeatureSetPreset, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgAddDeviceSet, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgRemoveLastDeviceSet, Message)
-MESSAGE_CLASS_DEFINITION(MainCore::MsgAddFeatureSet, Message)
-MESSAGE_CLASS_DEFINITION(MainCore::MsgRemoveLastFeatureSet, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgSetDevice, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgAddChannel, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgDeleteChannel, Message)
@@ -164,6 +161,13 @@ Feature *MainCore::getFeature(unsigned int featureSetIndex, int featureIndex)
 void MainCore::appendFeatureSet()
 {
     int newIndex = m_featureSets.size();
+
+    if (newIndex != 0)
+    {
+        qWarning("MainCore::appendFeatureSet: attempt to add more than one feature set (%d)", newIndex);
+        return;
+    }
+
     FeatureSet *featureSet = new FeatureSet(newIndex);
     m_featureSets.push_back(featureSet);
     m_featureSetsMap.insert(featureSet, newIndex);

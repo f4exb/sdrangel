@@ -1,11 +1,17 @@
-sdrangel (7.0.0-beta.3) unstable; urgency=medium
+sdrangel (7.0.0beta4-1) unstable; urgency=medium
+
+  * Fixed missing bits in API. Fixes #1247
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 16 May 2022 18:43:31 +0200
+
+sdrangel (7.0.0beta3-1) unstable; urgency=medium
 
   * MainServer: fix adding unique featureset
   * Fix typing errors in readme's. PR #1245
 
   -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 15 May 2022 21:34:30 +0200
 
-sdrangel (7.0.0-beta.2) unstable; urgency=medium
+sdrangel (7.0.0beta2-1) unstable; urgency=medium
 
   * Fixed remaining v7 branch references
   * SSB and NFM demod: do not process samples if channel sample rate is not set yet (==0)
@@ -13,19 +19,19 @@ sdrangel (7.0.0-beta.2) unstable; urgency=medium
 
   -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 15 May 2022 09:33:12 +0200
 
-sdrangel (7.0.0-beta.1) unstable; urgency=medium
+sdrangel (7.0.0beta1-1) unstable; urgency=medium
 
   * See: https://github.com/f4exb/sdrangel/releases/tag/v7.0.0-beta.1
 
   -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 14 May 2022 18:33:12 +0200
 
-sdrangel (7.0.0-alpha.4) unstable; urgency=medium
+sdrangel (7.0.0alpha4-1) unstable; urgency=medium
 
   * See: https://github.com/f4exb/sdrangel/releases/tag/v7.0.0-alpha.4
 
   -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 14 May 2022 11:33:12 +0200
 
-sdrangel (7.0.0-alpha.3) unstable; urgency=medium
+sdrangel (7.0.0alpha3-1) unstable; urgency=medium
 
   * See: https://github.com/f4exb/sdrangel/releases/tag/v7.0.0-alpha.3
 
@@ -40,13 +46,13 @@ sdrangel (6.20.3-1) unstable; urgency=medium
 
   -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 29 Apr 2022 11:33:12 +0200
 
-sdrangel (7.0.0-alpha.2) unstable; urgency=medium
+sdrangel (7.0.0alpha2-1) unstable; urgency=medium
 
   * See: https://github.com/f4exb/sdrangel/releases/tag/v7.0.0-alpha.2
 
   -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 28 Apr 2022 11:33:12 +0200
 
-sdrangel (7.0.0-alpha.1) unstable; urgency=medium
+sdrangel (7.0.0alpha1-1) unstable; urgency=medium
 
   * See: https://github.com/f4exb/sdrangel/releases/tag/v7.0.0-alpha.1
 

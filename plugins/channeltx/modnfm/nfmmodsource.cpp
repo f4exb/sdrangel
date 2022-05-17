@@ -40,6 +40,8 @@ NFMModSource::NFMModSource() :
     m_ifstream(nullptr),
     m_mutex(QMutex::Recursive)
 {
+    m_audioFifo.setLabel("NFMModSource.m_audioFifo");
+    m_feedbackAudioFifo.setLabel("NFMModSource.m_feedbackAudioFifo");
 	m_audioBuffer.resize(24000);
 	m_audioBufferFill = 0;
 	m_audioReadBuffer.resize(24000);

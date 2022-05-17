@@ -37,6 +37,8 @@ AMModSource::AMModSource() :
     m_ifstream(nullptr),
     m_mutex(QMutex::Recursive)
 {
+    m_audioFifo.setLabel("AMModSource.m_audioFifo");
+    m_feedbackAudioFifo.setLabel("AMModSource.m_feedbackAudioFifo");
 	m_audioBuffer.resize(24000);
 	m_audioBufferFill = 0;
 	m_audioReadBuffer.resize(24000);

@@ -1075,11 +1075,17 @@ void MainWindow::removeLastDeviceSet()
 
 void MainWindow::addFeatureSet()
 {
-    int tabIndex = m_featureUIs.size();
+    int newFeatureSetIndex = m_featureUIs.size();
+
+    if (newFeatureSetIndex != 0)
+    {
+        qWarning("MainWindow::addFeatureSet: attempt to add more than one feature set (%d)", newFeatureSetIndex);
+        return;
+    }
+
     m_mainCore->appendFeatureSet();
-    m_featureUIs.push_back(new FeatureUISet(tabIndex, m_mainCore->m_featureSets[tabIndex]));
-    // ui->tabFeatures->addTab(m_featureUIs.back()->m_featureWindow, QString("F%1").arg(tabIndex));
-    emit m_mainCore->featureSetAdded(tabIndex);
+    m_featureUIs.push_back(new FeatureUISet(newFeatureSetIndex, m_mainCore->m_featureSets[newFeatureSetIndex]));
+    emit m_mainCore->featureSetAdded(newFeatureSetIndex);
 }
 
 void MainWindow::removeFeatureSet(unsigned int tabIndex)
@@ -1572,11 +1578,10 @@ bool MainWindow::handleMessage(const Message& cmd)
     }
     else if (MainCore::MsgSavePreset::match(cmd))
     {
-        // MainCore::MsgSavePreset& notif = (MainCore::MsgSavePreset&) cmd;
-        // saveDeviceSetPresetSettings(notif.getPreset(), notif.getDeviceSetIndex());
-        // if (notif.isNewPreset()) { ui->presetTree->setCurrentItem(addPresetToTree(notif.getPreset())); }
-        // m_mainCore->m_settings.sortPresets();
-        // m_mainCore->m_settings.save();
+        MainCore::MsgSavePreset& notif = (MainCore::MsgSavePreset&) cmd;
+        saveDeviceSetPresetSettings(notif.getPreset(), notif.getDeviceSetIndex());
+        m_mainCore->m_settings.sortPresets();
+        m_mainCore->m_settings.save();
         return true;
     }
     else if (MainCore::MsgLoadFeatureSetPreset::match(cmd))
@@ -1650,22 +1655,22 @@ bool MainWindow::handleMessage(const Message& cmd)
         MainCore::MsgAddDeviceSet& notif = (MainCore::MsgAddDeviceSet&) cmd;
         int direction = notif.getDirection();
 
-        // TODO: implement add workspace API. Will have to give the workspace index that will be ignored
-        // in Server flavor. Set nullptr for workspace if index is out of bonds
-
-        if (direction == 1) { // Single stream Tx
-            sampleSinkAdd(nullptr, nullptr, -1); // create with file output device by default
-        } else if (direction == 0) { // Single stream Rx
-            sampleSourceAdd(nullptr, nullptr, -1); // create with file input device by default
-        } else if (direction == 2) { // MIMO
-            sampleMIMOAdd(nullptr, nullptr, -1); // create with testMI MIMO device y default
+        if (m_workspaces.size() > 0)
+        {
+            if (direction == 1) { // Single stream Tx
+                sampleSinkAdd(m_workspaces[0], m_workspaces[0], -1); // create with file output device by default
+            } else if (direction == 0) { // Single stream Rx
+                sampleSourceAdd(m_workspaces[0], m_workspaces[0], -1); // create with file input device by default
+            } else if (direction == 2) { // MIMO
+                sampleMIMOAdd(m_workspaces[0], m_workspaces[0], -1); // create with testMI MIMO device by default
+            }
         }
 
         return true;
     }
     else if (MainCore::MsgRemoveLastDeviceSet::match(cmd))
     {
-        if (m_deviceUIs.size() > 1) {
+        if (m_deviceUIs.size() > 0) {
             removeLastDeviceSet();
         }
 
@@ -1674,59 +1679,49 @@ bool MainWindow::handleMessage(const Message& cmd)
     else if (MainCore::MsgSetDevice::match(cmd))
     {
         MainCore::MsgSetDevice& notif = (MainCore::MsgSetDevice&) cmd;
+        int deviceSetIndex = notif.getDeviceSetIndex();
 
-        // TODO: implement add workspace API. Will have to give the workspace index that will be ignored
-        // in Server flavor. Set nullptr for workspace if index is out of bonds
-
-        sampleDeviceChange(notif.getDeviceType(), notif.getDeviceSetIndex(), notif.getDeviceIndex(), nullptr);
-
-        return true;
-    }
-    else if (MainCore::MsgAddFeatureSet::match(cmd))
-    {
-        addFeatureSet();
-        return true;
-    }
-    else if (MainCore::MsgRemoveLastFeatureSet::match(cmd))
-    {
-        if (m_mainCore->m_featureSets.size() != 0) {
-            removeFeatureSet(m_mainCore->m_featureSets.size() - 1);
+        if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_deviceUIs.size()))
+        {
+            Workspace *workspace = m_workspaces[m_deviceUIs[deviceSetIndex]->m_deviceGUI->getWorkspaceIndex()];
+            sampleDeviceChange(notif.getDeviceType(), notif.getDeviceSetIndex(), notif.getDeviceIndex(), workspace);
         }
 
         return true;
     }
     else if (MainCore::MsgAddChannel::match(cmd))
     {
-        // MainCore::MsgAddChannel& notif = (MainCore::MsgAddChannel&) cmd;
-        // ui->tabInputsView->setCurrentIndex(notif.getDeviceSetIndex());
-        // int currentChannelTabIndex = ui->tabChannels->currentIndex();
+        MainCore::MsgAddChannel& notif = (MainCore::MsgAddChannel&) cmd;
+        int deviceSetIndex = notif.getDeviceSetIndex();
 
-        // if (currentChannelTabIndex >= 0)
-        // {
-        //     DeviceUISet *deviceUI = m_deviceUIs[currentChannelTabIndex];
-        //     int channelRegistrationIndex;
+        if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_deviceUIs.size()))
+        {
+            DeviceUISet *deviceUISet = m_deviceUIs[deviceSetIndex];
+            int deviceWorkspaceIndex = deviceUISet->m_deviceGUI->getWorkspaceIndex();
+            deviceWorkspaceIndex = deviceWorkspaceIndex < m_workspaces.size() ? deviceWorkspaceIndex : 0;
+            int channelRegistrationIndex;
 
-        //     if (deviceUI->m_deviceMIMOEngine)
-        //     {
-        //         int nbMIMOChannels = deviceUI->getNumberOfAvailableMIMOChannels();
-        //         int nbRxChannels = deviceUI->getNumberOfAvailableRxChannels();
-        //         int direction = notif.getDirection();
+            if (deviceUISet->m_deviceMIMOEngine)
+            {
+                int nbMIMOChannels = deviceUISet->getNumberOfAvailableMIMOChannels();
+                int nbRxChannels = deviceUISet->getNumberOfAvailableRxChannels();
+                int direction = notif.getDirection();
 
-        //         if (direction == 2) {
-        //             channelRegistrationIndex = notif.getChannelRegistrationIndex();
-        //         } else if (direction == 0) {
-        //             channelRegistrationIndex = nbMIMOChannels + notif.getChannelRegistrationIndex();
-        //         } else {
-        //             channelRegistrationIndex = nbMIMOChannels + nbRxChannels + notif.getChannelRegistrationIndex();
-        //         }
-        //     }
-        //     else
-        //     {
-        //         channelRegistrationIndex = notif.getChannelRegistrationIndex();
-        //     }
+                if (direction == 2) {
+                    channelRegistrationIndex = notif.getChannelRegistrationIndex();
+                } else if (direction == 0) {
+                    channelRegistrationIndex = nbMIMOChannels + notif.getChannelRegistrationIndex();
+                } else {
+                    channelRegistrationIndex = nbMIMOChannels + nbRxChannels + notif.getChannelRegistrationIndex();
+                }
+            }
+            else
+            {
+                channelRegistrationIndex = notif.getChannelRegistrationIndex();
+            }
 
-        //     channelAddClicked(channelRegistrationIndex);
-        // }
+            channelAddClicked(m_workspaces[deviceWorkspaceIndex], deviceSetIndex, channelRegistrationIndex);
+        }
 
         return true;
     }
@@ -1736,28 +1731,20 @@ bool MainWindow::handleMessage(const Message& cmd)
         deleteChannel(notif.getDeviceSetIndex(), notif.getChannelIndex());
         return true;
     }
-    else if (MainCore::MsgDeviceSetFocus::match(cmd))
-    {
-        // MainCore::MsgDeviceSetFocus& notif = (MainCore::MsgDeviceSetFocus&) cmd;
-        // int index = notif.getDeviceSetIndex();
-        // if ((index >= 0) && (index < (int) m_deviceUIs.size())) {
-        //     ui->tabInputsView->setCurrentIndex(index);
-        // }
-
-        return true;
-    }
     else if (MainCore::MsgAddFeature::match(cmd))
     {
-        // MainCore::MsgAddFeature& notif = (MainCore::MsgAddFeature&) cmd;
-        // ui->tabFeatures->setCurrentIndex(notif.getFeatureSetIndex());
-        // featureAddClicked(notif.getFeatureRegistrationIndex());
+        MainCore::MsgAddFeature& notif = (MainCore::MsgAddFeature&) cmd;
+
+        if (m_workspaces.size() > 0) {
+            featureAddClicked(m_workspaces[0], notif.getFeatureRegistrationIndex());
+        }
 
         return true;
     }
     else if (MainCore::MsgDeleteFeature::match(cmd))
     {
         MainCore::MsgDeleteFeature& notif = (MainCore::MsgDeleteFeature&) cmd;
-        deleteFeature(notif.getFeatureSetIndex(), notif.getFeatureIndex());
+        deleteFeature(0, notif.getFeatureIndex());
         return true;
     }
     else if (MainCore::MsgMoveDeviceUIToWorkspace::match(cmd))

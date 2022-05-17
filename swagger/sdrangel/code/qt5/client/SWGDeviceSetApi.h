@@ -71,7 +71,6 @@ public:
     void devicesetDeviceSubsystemRunPost(qint32 device_set_index, qint32 subsystem_index, SWGDeviceSettings& body);
     void devicesetDeviceWorkspaceGet(qint32 device_set_index);
     void devicesetDeviceWorkspacePut(qint32 device_set_index, SWGWorkspaceInfo& body);
-    void devicesetFocusPatch(qint32 device_set_index);
     void devicesetGet(qint32 device_set_index);
     void devicesetSpectrumServerDelete(qint32 device_set_index);
     void devicesetSpectrumServerGet(qint32 device_set_index);
@@ -109,7 +108,6 @@ private:
     void devicesetDeviceSubsystemRunPostCallback (SWGHttpRequestWorker * worker);
     void devicesetDeviceWorkspaceGetCallback (SWGHttpRequestWorker * worker);
     void devicesetDeviceWorkspacePutCallback (SWGHttpRequestWorker * worker);
-    void devicesetFocusPatchCallback (SWGHttpRequestWorker * worker);
     void devicesetGetCallback (SWGHttpRequestWorker * worker);
     void devicesetSpectrumServerDeleteCallback (SWGHttpRequestWorker * worker);
     void devicesetSpectrumServerGetCallback (SWGHttpRequestWorker * worker);
@@ -147,7 +145,6 @@ signals:
     void devicesetDeviceSubsystemRunPostSignal(SWGDeviceState* summary);
     void devicesetDeviceWorkspaceGetSignal(SWGWorkspaceInfo* summary);
     void devicesetDeviceWorkspacePutSignal(SWGSuccessResponse* summary);
-    void devicesetFocusPatchSignal(SWGSuccessResponse* summary);
     void devicesetGetSignal(SWGDeviceSet* summary);
     void devicesetSpectrumServerDeleteSignal(SWGSuccessResponse* summary);
     void devicesetSpectrumServerGetSignal(SWGSpectrumServer* summary);
@@ -184,7 +181,6 @@ signals:
     void devicesetDeviceSubsystemRunPostSignalE(SWGDeviceState* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetDeviceWorkspaceGetSignalE(SWGWorkspaceInfo* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetDeviceWorkspacePutSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
-    void devicesetFocusPatchSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetGetSignalE(SWGDeviceSet* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetSpectrumServerDeleteSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetSpectrumServerGetSignalE(SWGSpectrumServer* summary, QNetworkReply::NetworkError error_type, QString& error_str);
@@ -221,7 +217,6 @@ signals:
     void devicesetDeviceSubsystemRunPostSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetDeviceWorkspaceGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetDeviceWorkspacePutSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
-    void devicesetFocusPatchSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetSpectrumServerDeleteSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetSpectrumServerGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
