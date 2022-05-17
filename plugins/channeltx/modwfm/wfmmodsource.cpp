@@ -39,6 +39,8 @@ WFMModSource::WFMModSource() :
     m_ifstream(nullptr),
     m_mutex(QMutex::Recursive)
 {
+    m_audioFifo.setLabel("WFMModSource.m_audioFifo");
+    m_feedbackAudioFifo.setLabel("WFMModSource.m_feedbackAudioFifo");
     m_rfFilter = new fftfilt(-62500.0 / 384000.0, 62500.0 / 384000.0, m_rfFilterFFTLength);
     m_rfFilterBuffer = new Complex[m_rfFilterFFTLength];
     std::fill(m_rfFilterBuffer, m_rfFilterBuffer+m_rfFilterFFTLength, Complex{0,0});

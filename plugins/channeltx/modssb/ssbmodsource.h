@@ -36,8 +36,8 @@
 
 #include "ssbmodsettings.h"
 
-class BasebandSampleSink;
 class ChannelAPI;
+class SpectrumVis;
 
 class SSBModSource : public QObject, public ChannelSampleSource
 {
@@ -68,7 +68,7 @@ public:
     }
     void applySettings(const SSBModSettings& settings, bool force = false);
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = 0);
-    void setSpectrumSink(BasebandSampleSink *sampleSink) { m_spectrumSink = sampleSink; }
+    void setSpectrumSink(SpectrumVis *sampleSink) { m_spectrumSink = sampleSink; }
 
 private:
     int m_channelSampleRate;
@@ -101,7 +101,7 @@ private:
 	int m_DSBFilterBufferIndex;
 	static const int m_ssbFftLen;
 
-	BasebandSampleSink* m_spectrumSink;
+	SpectrumVis* m_spectrumSink;
 	SampleVector m_sampleBuffer;
 
     fftfilt::cmplx m_sum;

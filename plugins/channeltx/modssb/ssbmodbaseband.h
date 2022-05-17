@@ -72,7 +72,7 @@ public:
     void setInputFileStream(std::ifstream *ifstream) { m_source.setInputFileStream(ifstream); }
     AudioFifo *getAudioFifo() { return m_source.getAudioFifo(); }
     AudioFifo *getFeedbackAudioFifo() { return m_source.getFeedbackAudioFifo(); }
-    void setSpectrumSink(SpectrumVis *sampleSink) { m_spectrumVis = sampleSink; m_source.setSpectrumSink((BasebandSampleSink *) sampleSink); }
+    void setSpectrumSink(SpectrumVis *sampleSink) { m_spectrumVis = sampleSink; m_source.setSpectrumSink(sampleSink); }
     void setChannel(ChannelAPI *channel);
 
 signals:

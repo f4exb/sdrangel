@@ -49,6 +49,7 @@ FreeDVModSource::FreeDVModSource() :
 	m_scaleFactor(SDR_TX_SCALEF),
     m_mutex(QMutex::Recursive)
 {
+    m_audioFifo.setLabel("FreeDVModSource.m_audioFifo");
     m_SSBFilter = new fftfilt(m_lowCutoff / m_audioSampleRate, m_hiCutoff / m_audioSampleRate, m_ssbFftLen);
     m_SSBFilterBuffer = new Complex[m_ssbFftLen>>1]; // filter returns data exactly half of its size
     std::fill(m_SSBFilterBuffer, m_SSBFilterBuffer+(m_ssbFftLen>>1), Complex{0,0});
