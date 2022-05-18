@@ -187,16 +187,28 @@ if (AUTO_EXTERNAL_LIBRARIES)
     find_package(LibUSB)
     find_package(Opus)
     find_package(Boost)
+    find_package(ZLIB)
+    find_package(UHD)
+    find_package(FFmpeg COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE)
+    find_package(FAAD)
+    find_package(FFTW3F)
+    find_package(OpenCV OPTIONAL_COMPONENTS core highgui imgproc imgcodecs videoio)
 endif (AUTO_EXTERNAL_LIBRARIES)
 
 # While some of the following projects are not installed (to save time & space), some have to
 # be so that on MacOS, the paths embedded in the libraries to other libraries are correct (as they are set to
 # install path, not build). This is required for macdeployqt to be able to find them
 
-# Some of the following projects are disabled for WIN32, as we use precompiled
-# versions from sdrangel-windows-libraries
+# Some of the following projects are currently built only for MacOS
+# For WIN32, we use precompiled versions from sdrangel-windows-libraries
+# For LINUX, we require system pacakges to be installed
+if (MACOS)
+    set(USE_PRECOMPILED_LIBS FALSE)
+else()
+    set(USE_PRECOMPILED_LIBS TRUE)
+endif()
 
-if (NOT LIBUSB_FOUND AND NOT WIN32)
+if (NOT LIBUSB_FOUND AND NOT USE_PRECOMPILED_LIBS)
     # Cloning git repo doesn't include configure, so we download the bz2 which does
     ExternalProject_Add(libusb
             URL https://github.com/libusb/libusb/releases/download/v1.0.26/libusb-1.0.26.tar.bz2
@@ -218,9 +230,9 @@ if (NOT LIBUSB_FOUND AND NOT WIN32)
         set(LIBUSB_LIBRARIES "${install_dir}/lib/libusb-1.0${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${install_dir}/lib")
     endif ()
-endif (NOT LIBUSB_FOUND AND NOT WIN32)
+endif (NOT LIBUSB_FOUND AND NOT USE_PRECOMPILED_LIBS)
 
-if (NOT OPUS_FOUND AND NOT WIN32)
+if (NOT OPUS_FOUND AND NOT USE_PRECOMPILED_LIBS)
     ExternalProject_Add(opus
             GIT_REPOSITORY https://github.com/xiph/opus
             GIT_TAG v1.3.1
@@ -242,9 +254,9 @@ if (NOT OPUS_FOUND AND NOT WIN32)
         set(OPUS_LIBRARIES "${install_dir}/lib/libopus${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${install_dir}/lib")
     endif ()
-endif (NOT OPUS_FOUND AND NOT WIN32)
+endif (NOT OPUS_FOUND AND NOT USE_PRECOMPILED_LIBS)
 
-if (NOT ZLIB_FOUND AND NOT WIN32)
+if (NOT ZLIB_FOUND AND NOT USE_PRECOMPILED_LIBS)
     ExternalProject_Add(zlib
             URL https://zlib.net/zlib-1.2.12.tar.gz
             PREFIX "${EXTERNAL_BUILD_LIBRARIES}/zlib"
@@ -264,9 +276,9 @@ if (NOT ZLIB_FOUND AND NOT WIN32)
         set(ZLIB_LIBRARIES "${install_dir}/lib/libz${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${install_dir}/lib")
     endif ()
-endif (NOT ZLIB_FOUND AND NOT WIN32)
+endif (NOT ZLIB_FOUND AND NOT USE_PRECOMPILED_LIBS)
 
-if (NOT FAAD_FOUND AND NOT WIN32)
+if (NOT FAAD_FOUND AND NOT USE_PRECOMPILED_LIBS)
     ExternalProject_Add(faad
             URL https://downloads.sourceforge.net/project/faac/faad2-src/faad2-2.8.0/faad2-2.8.8.tar.gz
             PREFIX "${EXTERNAL_BUILD_LIBRARIES}/faad"
@@ -286,9 +298,9 @@ if (NOT FAAD_FOUND AND NOT WIN32)
         set(FAAD_LIBRARY "${install_dir}/lib/libfaad${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${install_dir}/lib")
     endif ()
-endif (NOT FAAD_FOUND AND NOT WIN32)
+endif (NOT FAAD_FOUND AND NOT USE_PRECOMPILED_LIBS)
 
-if (NOT FFTW3F_FOUND AND NOT WIN32)
+if (NOT FFTW3F_FOUND AND NOT USE_PRECOMPILED_LIBS)
     ExternalProject_Add(fftw3f
             URL http://fftw.org/fftw-3.3.10.tar.gz
             PREFIX "${EXTERNAL_BUILD_LIBRARIES}/fftw3f"
@@ -309,7 +321,7 @@ if (NOT FFTW3F_FOUND AND NOT WIN32)
     elseif (APPLE)
         set(FFTW3F_LIBRARIES "${binary_dir}/.libs/libfftw3f.a" CACHE INTERNAL "")
     endif ()
-endif (NOT FFTW3F_FOUND AND NOT WIN32)
+endif (NOT FFTW3F_FOUND AND NOT USE_PRECOMPILED_LIBS)
 
 # Can't build Boost using ExternalProject_Add, as we want to use find_package(Boost) as it defines many variables,
 # and using find_package requires Boost to have already been built
@@ -320,7 +332,7 @@ FetchContent_Declare(boost
 )
 
 find_package(Boost QUIET)
-if (NOT Boost_FOUND AND NOT WIN32)
+if (NOT Boost_FOUND AND NOT USE_PRECOMPILED_LIBS)
 
     message("Downloading Boost")
     FetchContent_MakeAvailable(boost)
@@ -363,7 +375,7 @@ else()
     endif()
 endif()
 
-if (NOT FFMEG_FOUND AND NOT WIN32)
+if (NOT FFMEG_FOUND AND NOT USE_PRECOMPILED_LIBS)
 
     # Libs only used by ffmpeg
 
@@ -498,9 +510,9 @@ if (NOT FFMEG_FOUND AND NOT WIN32)
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${install_dir}/lib")
     endif ()
 
-endif (NOT FFMPEG_FOUND AND NOT WIN32)
+endif (NOT FFMPEG_FOUND AND NOT USE_PRECOMPILED_LIBS)
 
-if (NOT OpenCV_FOUND AND NOT WIN32)
+if (NOT OpenCV_FOUND AND NOT USE_PRECOMPILED_LIBS)
     ExternalProject_Add(opencv
             GIT_REPOSITORY https://github.com/opencv/opencv.git
             GIT_TAG 4.5.5
@@ -547,9 +559,9 @@ if (NOT OpenCV_FOUND AND NOT WIN32)
         set(OpenCV_LIBS "${binary_dir}/lib/libopencv_core${CMAKE_SHARED_LIBRARY_SUFFIX};${binary_dir}/lib/libopencv_core${CMAKE_SHARED_LIBRARY_SUFFIX};${binary_dir}/lib/libopencv_highgui${CMAKE_SHARED_LIBRARY_SUFFIX};${binary_dir}/lib/libopencv_video${CMAKE_SHARED_LIBRARY_SUFFIX};${binary_dir}/lib/libopencv_videoio${CMAKE_SHARED_LIBRARY_SUFFIX};${binary_dir}/lib/libopencv_imgproc${CMAKE_SHARED_LIBRARY_SUFFIX};${binary_dir}/lib/libopencv_imgcodecs${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/lib")
     endif ()
-endif (NOT OpenCV_FOUND AND NOT WIN32)
+endif (NOT OpenCV_FOUND AND NOT USE_PRECOMPILED_LIBS)
 
-if ((NOT CODEC2_FOUND OR CODEC2_EXTERNAL) AND NOT WIN32)
+if ((NOT CODEC2_FOUND OR CODEC2_EXTERNAL) AND NOT USE_PRECOMPILED_LIBS)
     # needs speexdsp
     if (WIN32)
         set(CODEC2_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/codec2.lib" CACHE INTERNAL "")
@@ -582,7 +594,7 @@ if ((NOT CODEC2_FOUND OR CODEC2_EXTERNAL) AND NOT WIN32)
         makeLink("${source_dir}/src" "${source_dir}/src/codec2" codec2)
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/src")
     endif ()
-endif ((NOT CODEC2_FOUND OR CODEC2_EXTERNAL) AND NOT WIN32)
+endif ((NOT CODEC2_FOUND OR CODEC2_EXTERNAL) AND NOT USE_PRECOMPILED_LIBS)
 
 if (NOT CM256CC_FOUND OR CM256CC_EXTERNAL)
     # needs boost
