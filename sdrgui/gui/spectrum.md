@@ -162,12 +162,14 @@ Controls the intensity of the grid display
 
 Use this combo box to select which window is applied to the FFT:
   - **Bart**: Bartlett
-  - **B-H**: Blackmann-Harris
+  - **B-H**: 4 term Blackman-Harris
   - **FT**: Flat top
   - **Ham**: Hamming
   - **Han**: Hanning (default)
   - **Rec**: Rectangular (no window)
   - **Kai**: Kaiser with alpha = 2.15 (beta = 6.76) gives sidelobes &lt; -70dB
+  - **Blackman**: Blackman (3 term)
+  - **B-H7**: 7 term Blackman-Harris
 
 <h4>B.2.2. FFT size</h4>
 

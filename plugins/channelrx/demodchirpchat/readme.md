@@ -92,12 +92,14 @@ Decode errors are very likely to happen when this value falls below 4 dB.
 A choice of FFT Windows to apply to the FFT performed on the de-chirped signal is provided. These are the same windows as those used in the spectrum display. The effect of windowing is to reduce the spill over in adjacent bins at the expense of a flatter top and fatter main lobe. When the purpose is frequency detection this is not what is desired necessarily and thus the "Rectangular" window (i.e. no window) should be chosen. However a variety of windows is provided to experiment with. Experimentally the best alternative to "Rectangular" is "Kaiser" then "Bartlett" and "Hanning". The complete list is:
 
   - **Bart**: Bartlett
-  - **B-H**:
+  - **B-H**: 4 term Blackman-Harris
   - **FT**: Flat Top
   - **Ham**: Hamming
   - **Han**: Hanning
   - **Rec**: Rectangular (no window)
   - **Kai**: Kaiser with &alpha; = &pi;
+  - **Black**: Blackman (3 term)
+  - **B-H7**: 7 term Blackman-Harris
 
 <h3>8: Spread Factor</h3>
 
