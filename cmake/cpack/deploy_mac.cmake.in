@@ -1,0 +1,42 @@
+# This CPACK_PRE_BUILD_SCRIPTS script is used to copy all required Qt and other 3rd party libraries (SDR drivers and codecs) in to the .app bundle
+# It is run in a staging area (${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app) after all targets have been installed (E.g. sdrangel exe and plugins)
+# The copying of frameworks and libraries is mostly done by 'macdeployqt', however, in order for 'macdeployqt' to copy libraries built by external/CMakeLists.txt,
+# we first need to add RPATHs into the libraries giving the locations of any libraries they might depend on. 
+# These paths are in the variable MACOS_EXTERNAL_LIBS_FIXUP set in externals/CMakeLists.txt
+# Is there an easier way to this?
+
+# Copy executable that will be run when icon in /Applications is clicked
+message ("Copying default executable to SDRangel.app/Contents/MacOS/SDRangel")
+execute_process (COMMAND mkdir ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app/Contents/MacOS/)
+execute_process (COMMAND cp /opt/build/sdrangel/build/sdrangel ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app/Contents/MacOS/SDRangel)
+
+
+# Add RPATHS to libraries so macdeployqt can find out and copy all dependencies
+message ("Adding RPATHs to executables and libraries")
+
+# Get list of 3rd party library directories
+set (EXTERNAL_LIB_DIRS  @MACOS_EXTERNAL_LIBS_FIXUP@)
+list (REMOVE_DUPLICATES EXTERNAL_LIB_DIRS)
+
+# Add RPATH to exectuable in staging area
+foreach(RPATH_DIR ${EXTERNAL_LIB_DIRS})
+  message("Add RPATH ${RPATH_DIR}")
+  execute_process(COMMAND /usr/bin/install_name_tool -add_rpath ${RPATH_DIR} ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app/Contents/MacOS/SDRangel)
+endforeach()
+
+# Add RPATH to libraries in build directory
+foreach(RPATH_DIR_1 ${EXTERNAL_LIB_DIRS})
+  file(GLOB LIBS_TO_FIX  ${RPATH_DIR_1}/*.dylib)
+  foreach (LIB_TO_FIX ${LIBS_TO_FIX})
+      foreach(RPATH_DIR @MACOS_EXTERNAL_LIBS_FIXUP@)
+          message("Add RPATH ${RPATH_DIR} to ${LIB_TO_FIX}")
+          # We set ERROR_QUIET to ignore errors regarding failing to add duplicate paths
+          execute_process(COMMAND /usr/bin/install_name_tool -add_rpath ${RPATH_DIR} ${LIB_TO_FIX} ERROR_QUIET)
+      endforeach()
+   endforeach()
+endforeach()
+
+# Run macdeployqt which should copy all libraries and frameworks and Qt plugins and qml
+message ("Running macdeployqt in ${CPACK_TEMPORARY_INSTALL_DIRECTORY}")
+execute_process ( COMMAND macdeployqt ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app -always-overwrite -verbose=1 -qmldir=@CMAKE_CURRENT_SOURCE_DIR@/../../plugins/feature/map )
+

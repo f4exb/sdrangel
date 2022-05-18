@@ -133,6 +133,13 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
 
 int main(int argc, char* argv[])
 {
+#ifdef __APPLE__
+    // Enable WebGL in QtWebEngine when OpenGL is only version 2.1 (Needed for 3D Map)
+    // This can be removed when we eventually request a 4.1 OpenGL context
+    // This needs to be executed before any other Qt code
+    qputenv("QTWEBENGINE_CHROMIUM_FLAGS", "--ignore-gpu-blacklist");
+#endif
+
 	qtwebapp::LoggerWithFile *logger = new qtwebapp::LoggerWithFile(qApp);
     logger->installMsgHandler();
 	int res = runQtApplication(argc, argv, logger);
