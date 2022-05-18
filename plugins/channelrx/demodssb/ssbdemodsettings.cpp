@@ -188,7 +188,8 @@ bool SSBDemodSettings::deserialize(const QByteArray& data)
             d.readS32(102+ 10*i, &tmp, 3);
             m_filterBank[i].m_lowCutoff = tmp * 100.0;
             d.readS32(103 + 10*i, &tmp, (int) FFTWindow::Blackman);
-            m_filterBank[i].m_fftWindow = (FFTWindow::Function) (tmp < 0 ? 0 : tmp > (int) FFTWindow::Blackman ? (int) FFTWindow::Blackman : tmp);
+            m_filterBank[i].m_fftWindow =
+                (FFTWindow::Function) (tmp < 0 ? 0 : tmp > (int) FFTWindow::BlackmanHarris7 ? (int) FFTWindow::BlackmanHarris7 : tmp);
         }
 
         return true;

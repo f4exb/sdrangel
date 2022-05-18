@@ -34,7 +34,8 @@ public:
 		Hanning,
 		Rectangle,
 		Kaiser,
-        Blackman
+        Blackman,
+        BlackmanHarris7
 	};
 
 	FFTWindow();
@@ -65,15 +66,31 @@ private:
 		return (2.0 / (n - 1.0)) * ( (n - 1.0) / 2.0 - fabs(i - (n - 1.0) / 2.0)) * 2.0;
 	}
 
-	static inline Real blackmanHarris(Real n, Real i)
+	static inline Real blackmanHarris(Real n, Real i) // 4 term Blackman-Harris
 	{
 		// amplitude correction = 2.79
-		return (0.35875 - 0.48829 * cos((2.0 * M_PI * i) / n) + 0.14128 * cos((4.0 * M_PI * i) / n) - 0.01168 * cos((6.0 * M_PI * i) / n)) * 2.79;
+		return (0.35875
+            - 0.48829 * cos((2.0 * M_PI * i) / n)
+            + 0.14128 * cos((4.0 * M_PI * i) / n)
+            - 0.01168 * cos((6.0 * M_PI * i) / n)) * 2.79;
 	}
 
-    static inline Real blackman(Real n, Real i)
+	static inline Real blackmanHarris7(Real n, Real i) // 7 term Blackman-Harris
+	{
+		return (0.27105
+            - 0.43330 * cos((2.0 * M_PI * i) / n)
+            + 0.21812 * cos((4.0 * M_PI * i) / n)
+            - 0.065925 * cos((6.0 * M_PI * i) / n)
+            + 0.010812 * cos((8.0 * M_PI * i) / n)
+            - 0.00077658 * cos((10.0 * M_PI * i) / n)
+            + 0.000013887 * cos((12.0 * M_PI * i) / n)) * 3.72;
+	}
+
+    static inline Real blackman(Real n, Real i) // 3 term Blackman
     {
-        return (0.42438 - 0.49734 * cos(2.0 * M_PI * i / n) + 0.078279 * cos(4.0 * M_PI * i / n)) * 2.37;
+        return (0.42438
+            - 0.49734 * cos(2.0 * M_PI * i / n)
+            + 0.078279 * cos(4.0 * M_PI * i / n)) * 2.37;
     }
 
 	static inline Real hamming(Real n, Real i)

@@ -76,6 +76,10 @@ void FFTWindow::create(Function function, int n)
             wFunc = blackman;
             break;
 
+        case BlackmanHarris7:
+            wFunc = blackmanHarris7;
+            break;
+
 		case Rectangle:
 		default:
 			wFunc = rectangle;

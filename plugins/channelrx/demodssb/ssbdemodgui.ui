@@ -415,6 +415,11 @@
           <string>Black</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>B-H7</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>
