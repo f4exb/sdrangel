@@ -291,8 +291,8 @@ void SSBDemodSink::applyAudioSampleRate(int sampleRate)
     m_interpolatorDistanceRemain = 0;
     m_interpolatorDistance = (Real) m_channelSampleRate / (Real) sampleRate;
 
-    SSBFilter->create_filter(m_LowCutoff / (float) sampleRate, m_Bandwidth / (float) sampleRate, m_settings.m_fftWindow);
-    DSBFilter->create_dsb_filter((2.0f * m_Bandwidth) / (float) sampleRate, m_settings.m_fftWindow);
+    SSBFilter->create_filter(m_LowCutoff / (float) sampleRate, m_Bandwidth / (float) sampleRate, m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow);
+    DSBFilter->create_dsb_filter((2.0f * m_Bandwidth) / (float) sampleRate, m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow);
 
     int agcNbSamples = (sampleRate / 1000) * (1<<m_settings.m_agcTimeLog2);
     int agcThresholdGate = (sampleRate / 1000) * m_settings.m_agcThresholdGate; // ms
@@ -336,10 +336,12 @@ void SSBDemodSink::applySettings(const SSBDemodSettings& settings, bool force)
 {
     qDebug() << "SSBDemodSink::applySettings:"
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " m_lowCutoff: " << settings.m_lowCutoff
+            << " m_filterIndex: " << settings.m_filterIndex
+            << " [m_spanLog2: " << settings.m_filterBank[settings.m_filterIndex].m_spanLog2
+            << " m_rfBandwidth: " << settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth
+            << " m_lowCutoff: " << settings.m_filterBank[settings.m_filterIndex].m_lowCutoff
+            << " m_fftWindow: " << settings.m_filterBank[settings.m_filterIndex].m_fftWindow << "]"
             << " m_volume: " << settings.m_volume
-            << " m_spanLog2: " << settings.m_spanLog2
             << " m_audioBinaual: " << settings.m_audioBinaural
             << " m_audioFlipChannels: " << settings.m_audioFlipChannels
             << " m_dsb: " << settings.m_dsb
@@ -358,14 +360,14 @@ void SSBDemodSink::applySettings(const SSBDemodSettings& settings, bool force)
             << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
             << " force: " << force;
 
-    if((m_settings.m_rfBandwidth != settings.m_rfBandwidth) ||
-        (m_settings.m_lowCutoff != settings.m_lowCutoff) ||
-        (m_settings.m_fftWindow != settings.m_fftWindow) || force)
+    if((m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth != settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth) ||
+        (m_settings.m_filterBank[m_settings.m_filterIndex].m_lowCutoff != settings.m_filterBank[settings.m_filterIndex].m_lowCutoff) ||
+        (m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow != settings.m_filterBank[settings.m_filterIndex].m_fftWindow) || force)
     {
         float band, lowCutoff;
 
-        band = settings.m_rfBandwidth;
-        lowCutoff = settings.m_lowCutoff;
+        band = settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth;
+        lowCutoff = settings.m_filterBank[settings.m_filterIndex].m_lowCutoff;
 
         if (band < 0) {
             band = -band;
@@ -388,8 +390,8 @@ void SSBDemodSink::applySettings(const SSBDemodSettings& settings, bool force)
         m_interpolator.create(16, m_channelSampleRate, interpolatorBandwidth, 2.0f);
         m_interpolatorDistanceRemain = 0;
         m_interpolatorDistance = (Real) m_channelSampleRate / (Real) m_audioSampleRate;
-        SSBFilter->create_filter(m_LowCutoff / (float) m_audioSampleRate, m_Bandwidth / (float) m_audioSampleRate, settings.m_fftWindow);
-        DSBFilter->create_dsb_filter((2.0f * m_Bandwidth) / (float) m_audioSampleRate, settings.m_fftWindow);
+        SSBFilter->create_filter(m_LowCutoff / (float) m_audioSampleRate, m_Bandwidth / (float) m_audioSampleRate, settings.m_filterBank[settings.m_filterIndex].m_fftWindow);
+        DSBFilter->create_dsb_filter((2.0f * m_Bandwidth) / (float) m_audioSampleRate, settings.m_filterBank[settings.m_filterIndex].m_fftWindow);
     }
 
     if ((m_settings.m_volume != settings.m_volume) || force)
@@ -441,7 +443,7 @@ void SSBDemodSink::applySettings(const SSBDemodSettings& settings, bool force)
             << " agcClamping: " << agcClamping;
     }
 
-    m_spanLog2 = settings.m_spanLog2;
+    m_spanLog2 = settings.m_filterBank[settings.m_filterIndex].m_spanLog2;
     m_audioBinaual = settings.m_audioBinaural;
     m_audioFlipChannels = settings.m_audioFlipChannels;
     m_dsb = settings.m_dsb;

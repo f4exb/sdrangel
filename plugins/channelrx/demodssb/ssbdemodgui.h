@@ -108,6 +108,7 @@ private slots:
 	void on_spanLog2_valueChanged(int value);
 	void on_flipSidebands_clicked(bool checked);
     void on_fftWindow_currentIndexChanged(int index);
+    void on_filterIndex_valueChanged(int value);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void handleInputMessages();

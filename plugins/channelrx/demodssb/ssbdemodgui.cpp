@@ -47,7 +47,7 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
         ui->BW->setMaximum(480);
         ui->lowCut->setMaximum(480);
         displaySettings();
-        applyBandwidths(m_settings.m_spanLog2, true); // does applySettings(true)
+        applyBandwidths(m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2, true); // does applySettings(true)
         return true;
     }
     else
@@ -56,7 +56,7 @@ bool SSBDemodGUI::deserialize(const QByteArray& data)
         ui->BW->setMaximum(480);
         ui->lowCut->setMaximum(480);
         displaySettings();
-        applyBandwidths(m_settings.m_spanLog2, true); // does applySettings(true)
+        applyBandwidths(m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2, true); // does applySettings(true)
         return false;
     }
 }
@@ -238,8 +238,22 @@ void SSBDemodGUI::on_flipSidebands_clicked(bool checked)
 
 void SSBDemodGUI::on_fftWindow_currentIndexChanged(int index)
 {
-    m_settings.m_fftWindow = (FFTWindow::Function) index;
+    m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow = (FFTWindow::Function) index;
     applySettings();
+}
+
+void SSBDemodGUI::on_filterIndex_valueChanged(int value)
+{
+    if ((value < 0) || (value >= 10)) {
+        return;
+    }
+
+    ui->filterIndexText->setText(tr("%1").arg(value));
+    m_settings.m_filterIndex = value;
+    ui->BW->setMaximum(480);
+    ui->lowCut->setMaximum(480);
+    displaySettings();
+    applyBandwidths(m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2, true); // does applySettings(true)
 }
 
 void SSBDemodGUI::onMenuDialogCalled(const QPoint &p)
@@ -391,7 +405,7 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	displaySettings();
     makeUIConnections();
 
-	applyBandwidths(m_settings.m_spanLog2, true); // does applySettings(true)
+	applyBandwidths(m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2, true); // does applySettings(true)
 }
 
 SSBDemodGUI::~SSBDemodGUI()
@@ -518,9 +532,9 @@ void SSBDemodGUI::applyBandwidths(unsigned int spanLog2, bool force)
     ui->channelPowerMeter->setRange(SSBDemodSettings::m_minPowerThresholdDB, 0);
 
     m_settings.m_dsb = dsb;
-    m_settings.m_spanLog2 = spanLog2;
-    m_settings.m_rfBandwidth = bw * 100;
-    m_settings.m_lowCutoff = lw * 100;
+    m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2 = spanLog2;
+    m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth = bw * 100;
+    m_settings.m_filterBank[m_settings.m_filterIndex].m_lowCutoff = lw * 100;
 
     applySettings(force);
 
@@ -536,19 +550,25 @@ void SSBDemodGUI::displaySettings()
 {
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
-    m_channelMarker.setBandwidth(m_settings.m_rfBandwidth * 2);
+    m_channelMarker.setBandwidth(m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth * 2);
     m_channelMarker.setTitle(m_settings.m_title);
-    m_channelMarker.setLowCutoff(m_settings.m_lowCutoff);
+    m_channelMarker.setLowCutoff(m_settings.m_filterBank[m_settings.m_filterIndex].m_lowCutoff);
 
     ui->flipSidebands->setEnabled(!m_settings.m_dsb);
 
-    if (m_settings.m_dsb) {
+    if (m_settings.m_dsb)
+    {
         m_channelMarker.setSidebands(ChannelMarker::dsb);
-    } else {
-        if (m_settings.m_rfBandwidth < 0) {
+    }
+    else
+    {
+        if (m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth < 0)
+        {
             m_channelMarker.setSidebands(ChannelMarker::lsb);
             ui->dsb->setIcon(m_iconDSBLSB);
-        } else {
+        }
+        else
+        {
             m_channelMarker.setSidebands(ChannelMarker::usb);
             ui->dsb->setIcon(m_iconDSBUSB);
         }
@@ -571,36 +591,38 @@ void SSBDemodGUI::displaySettings()
     ui->audioFlipChannels->setChecked(m_settings.m_audioFlipChannels);
     ui->audioMute->setChecked(m_settings.m_audioMute);
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
-    ui->fftWindow->setCurrentIndex((int) m_settings.m_fftWindow);
+    ui->fftWindow->setCurrentIndex((int) m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow);
 
     // Prevent uncontrolled triggering of applyBandwidths
     ui->spanLog2->blockSignals(true);
     ui->dsb->blockSignals(true);
     ui->BW->blockSignals(true);
+    ui->filterIndex->blockSignals(true);
+
+    ui->filterIndex->setValue(m_settings.m_filterIndex);
+    ui->filterIndexText->setText(tr("%1").arg(m_settings.m_filterIndex));
 
     ui->dsb->setChecked(m_settings.m_dsb);
-    ui->spanLog2->setValue(1 + ui->spanLog2->maximum() - m_settings.m_spanLog2);
+    ui->spanLog2->setValue(1 + ui->spanLog2->maximum() - m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2);
 
-    ui->BW->setValue(m_settings.m_rfBandwidth / 100.0);
-    QString s = QString::number(m_settings.m_rfBandwidth/1000.0, 'f', 1);
+    ui->BW->setValue(m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth / 100.0);
+    QString s = QString::number(m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth/1000.0, 'f', 1);
 
-    if (m_settings.m_dsb)
-    {
+    if (m_settings.m_dsb) {
         ui->BWText->setText(tr("%1%2k").arg(QChar(0xB1, 0x00)).arg(s));
-    }
-    else
-    {
+    } else {
         ui->BWText->setText(tr("%1k").arg(s));
     }
 
     ui->spanLog2->blockSignals(false);
     ui->dsb->blockSignals(false);
     ui->BW->blockSignals(false);
+    ui->filterIndex->blockSignals(false);
 
     // The only one of the four signals triggering applyBandwidths will trigger it once only with all other values
     // set correctly and therefore validate the settings and apply them to dependent widgets
-    ui->lowCut->setValue(m_settings.m_lowCutoff / 100.0);
-    ui->lowCutText->setText(tr("%1k").arg(m_settings.m_lowCutoff / 1000.0));
+    ui->lowCut->setValue(m_settings.m_filterBank[m_settings.m_filterIndex].m_lowCutoff / 100.0);
+    ui->lowCutText->setText(tr("%1k").arg(m_settings.m_filterBank[m_settings.m_filterIndex].m_lowCutoff / 1000.0));
 
     int volume = CalcDb::dbPower(m_settings.m_volume);
     ui->volume->setValue(volume);
@@ -727,6 +749,7 @@ void SSBDemodGUI::makeUIConnections()
     QObject::connect(ui->spanLog2, &QSlider::valueChanged, this, &SSBDemodGUI::on_spanLog2_valueChanged);
     QObject::connect(ui->flipSidebands, &QPushButton::clicked, this, &SSBDemodGUI::on_flipSidebands_clicked);
     QObject::connect(ui->fftWindow, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SSBDemodGUI::on_fftWindow_currentIndexChanged);
+    QObject::connect(ui->filterIndex, &QDial::valueChanged, this, &SSBDemodGUI::on_filterIndex_valueChanged);
 }
 
 void SSBDemodGUI::updateAbsoluteCenterFrequency()

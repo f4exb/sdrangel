@@ -195,10 +195,12 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
 {
     qDebug() << "SSBDemod::applySettings:"
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " m_lowCutoff: " << settings.m_lowCutoff
+            << " m_filterIndex: " << settings.m_filterIndex
+            << " [m_spanLog2: " << settings.m_filterBank[settings.m_filterIndex].m_spanLog2
+            << " m_rfBandwidth: " << settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth
+            << " m_lowCutoff: " << settings.m_filterBank[settings.m_filterIndex].m_lowCutoff
+            << " m_fftWindow: " << settings.m_filterBank[settings.m_filterIndex].m_fftWindow << "]"
             << " m_volume: " << settings.m_volume
-            << " m_spanLog2: " << settings.m_spanLog2
             << " m_audioBinaual: " << settings.m_audioBinaural
             << " m_audioFlipChannels: " << settings.m_audioFlipChannels
             << " m_dsb: " << settings.m_dsb
@@ -222,10 +224,10 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
     if((m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset) || force) {
         reverseAPIKeys.append("inputFrequencyOffset");
     }
-    if((m_settings.m_rfBandwidth != settings.m_rfBandwidth) || force) {
+    if((m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth != settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth) || force) {
         reverseAPIKeys.append("rfBandwidth");
     }
-    if((m_settings.m_lowCutoff != settings.m_lowCutoff) || force) {
+    if((m_settings.m_filterBank[m_settings.m_filterIndex].m_lowCutoff != settings.m_filterBank[settings.m_filterIndex].m_lowCutoff) || force) {
         reverseAPIKeys.append("lowCutoff");
     }
     if ((m_settings.m_volume != settings.m_volume) || force) {
@@ -246,7 +248,7 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force) {
         reverseAPIKeys.append("audioDeviceName");
     }
-    if ((m_settings.m_spanLog2 != settings.m_spanLog2) || force) {
+    if ((m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2 != settings.m_filterBank[settings.m_filterIndex].m_spanLog2) || force) {
         reverseAPIKeys.append("spanLog2");
     }
     if ((m_settings.m_audioBinaural != settings.m_audioBinaural) || force) {
@@ -279,12 +281,12 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
     }
 
     if ((settings.m_dsb != m_settings.m_dsb)
-     || (settings.m_rfBandwidth != m_settings.m_rfBandwidth)
-     || (settings.m_lowCutoff != m_settings.m_lowCutoff) || force)
+     || (settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth != m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth)
+     || (settings.m_filterBank[settings.m_filterIndex].m_lowCutoff != m_settings.m_filterBank[m_settings.m_filterIndex].m_lowCutoff) || force)
     {
         SpectrumSettings spectrumSettings = m_spectrumVis.getSettings();
         spectrumSettings.m_ssb = !settings.m_dsb;
-        spectrumSettings.m_usb = (settings.m_lowCutoff < settings.m_rfBandwidth);
+        spectrumSettings.m_usb = (settings.m_filterBank[settings.m_filterIndex].m_lowCutoff < settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth);
         SpectrumVis::MsgConfigureSpectrumVis *msg = SpectrumVis::MsgConfigureSpectrumVis::create(spectrumSettings, false);
         m_spectrumVis.getInputMessageQueue()->push(msg);
     }
@@ -411,16 +413,16 @@ void SSBDemod::webapiUpdateChannelSettings(
         settings.m_inputFrequencyOffset = response.getSsbDemodSettings()->getInputFrequencyOffset();
     }
     if (channelSettingsKeys.contains("rfBandwidth")) {
-        settings.m_rfBandwidth = response.getSsbDemodSettings()->getRfBandwidth();
+        settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth = response.getSsbDemodSettings()->getRfBandwidth();
     }
     if (channelSettingsKeys.contains("lowCutoff")) {
-        settings.m_lowCutoff = response.getSsbDemodSettings()->getLowCutoff();
+        settings.m_filterBank[settings.m_filterIndex].m_lowCutoff = response.getSsbDemodSettings()->getLowCutoff();
     }
     if (channelSettingsKeys.contains("volume")) {
         settings.m_volume = response.getSsbDemodSettings()->getVolume();
     }
     if (channelSettingsKeys.contains("spanLog2")) {
-        settings.m_spanLog2 = response.getSsbDemodSettings()->getSpanLog2();
+        settings.m_filterBank[settings.m_filterIndex].m_spanLog2 = response.getSsbDemodSettings()->getSpanLog2();
     }
     if (channelSettingsKeys.contains("audioBinaural")) {
         settings.m_audioBinaural = response.getSsbDemodSettings()->getAudioBinaural() != 0;
@@ -502,10 +504,10 @@ void SSBDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
 {
     response.getSsbDemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
     response.getSsbDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
-    response.getSsbDemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
-    response.getSsbDemodSettings()->setLowCutoff(settings.m_lowCutoff);
+    response.getSsbDemodSettings()->setRfBandwidth(settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth);
+    response.getSsbDemodSettings()->setLowCutoff(settings.m_filterBank[settings.m_filterIndex].m_lowCutoff);
     response.getSsbDemodSettings()->setVolume(settings.m_volume);
-    response.getSsbDemodSettings()->setSpanLog2(settings.m_spanLog2);
+    response.getSsbDemodSettings()->setSpanLog2(settings.m_filterBank[settings.m_filterIndex].m_spanLog2);
     response.getSsbDemodSettings()->setAudioBinaural(settings.m_audioBinaural ? 1 : 0);
     response.getSsbDemodSettings()->setAudioFlipChannels(settings.m_audioFlipChannels ? 1 : 0);
     response.getSsbDemodSettings()->setDsb(settings.m_dsb ? 1 : 0);
@@ -669,16 +671,16 @@ void SSBDemod::webapiFormatChannelSettings(
         swgSSBDemodSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     }
     if (channelSettingsKeys.contains("rfBandwidth") || force) {
-        swgSSBDemodSettings->setRfBandwidth(settings.m_rfBandwidth);
+        swgSSBDemodSettings->setRfBandwidth(settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth);
     }
     if (channelSettingsKeys.contains("lowCutoff") || force) {
-        swgSSBDemodSettings->setLowCutoff(settings.m_lowCutoff);
+        swgSSBDemodSettings->setLowCutoff(settings.m_filterBank[settings.m_filterIndex].m_lowCutoff);
     }
     if (channelSettingsKeys.contains("volume") || force) {
         swgSSBDemodSettings->setVolume(settings.m_volume);
     }
     if (channelSettingsKeys.contains("spanLog2") || force) {
-        swgSSBDemodSettings->setSpanLog2(settings.m_spanLog2);
+        swgSSBDemodSettings->setSpanLog2(settings.m_filterBank[settings.m_filterIndex].m_spanLog2);
     }
     if (channelSettingsKeys.contains("audioBinaural") || force) {
         swgSSBDemodSettings->setAudioBinaural(settings.m_audioBinaural ? 1 : 0);

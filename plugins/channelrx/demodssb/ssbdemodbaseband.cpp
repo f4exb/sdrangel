@@ -163,11 +163,11 @@ void SSBDemodBaseband::applySettings(const SSBDemodSettings& settings, bool forc
         }
     }
 
-    if ((settings.m_spanLog2 != m_settings.m_spanLog2) || force)
+    if ((settings.m_filterBank[settings.m_filterIndex].m_spanLog2 != m_settings.m_filterBank[settings.m_filterIndex].m_spanLog2) || force)
     {
         if (m_spectrumVis)
         {
-            DSPSignalNotification *msg = new DSPSignalNotification(m_audioSampleRate/(1<<settings.m_spanLog2), 0);
+            DSPSignalNotification *msg = new DSPSignalNotification(m_audioSampleRate/(1<<settings.m_filterBank[settings.m_filterIndex].m_spanLog2), 0);
             m_spectrumVis->getInputMessageQueue()->push(msg);
         }
     }
@@ -194,7 +194,7 @@ void SSBDemodBaseband::applySettings(const SSBDemodSettings& settings, bool forc
 
             if (m_spectrumVis)
             {
-                DSPSignalNotification *msg = new DSPSignalNotification(m_audioSampleRate/(1<<m_settings.m_spanLog2), 0);
+                DSPSignalNotification *msg = new DSPSignalNotification(m_audioSampleRate/(1<<m_settings.m_filterBank[settings.m_filterIndex].m_spanLog2), 0);
                 m_spectrumVis->getInputMessageQueue()->push(msg);
             }
         }

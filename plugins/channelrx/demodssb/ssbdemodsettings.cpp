@@ -35,6 +35,7 @@ SSBDemodSettings::SSBDemodSettings() :
     m_spectrumGUI(nullptr),
     m_rollupState(nullptr)
 {
+    m_filterBank.resize(10);
     resetToDefaults();
 }
 
@@ -49,10 +50,7 @@ void SSBDemodSettings::resetToDefaults()
     m_agcPowerThreshold = -100;
     m_agcThresholdGate = 4;
     m_agcTimeLog2 = 7;
-    m_rfBandwidth = 3000;
-    m_lowCutoff = 300;
     m_volume = 1.0;
-    m_spanLog2 = 3;
     m_inputFrequencyOffset = 0;
     m_rgbColor = QColor(0, 255, 0).rgb();
     m_title = "SSB Demodulator";
@@ -65,14 +63,13 @@ void SSBDemodSettings::resetToDefaults()
     m_reverseAPIChannelIndex = 0;
     m_workspaceIndex = 0;
     m_hidden = false;
-    m_fftWindow = FFTWindow::Blackman;
+    m_filterIndex = 0;
 }
 
 QByteArray SSBDemodSettings::serialize() const
 {
     SimpleSerializer s(1);
     s.writeS32(1, m_inputFrequencyOffset);
-    s.writeS32(2, m_rfBandwidth / 100.0);
     s.writeS32(3, m_volume * 10.0);
 
     if (m_spectrumGUI) {
@@ -80,8 +77,6 @@ QByteArray SSBDemodSettings::serialize() const
     }
 
     s.writeU32(5, m_rgbColor);
-    s.writeS32(6, m_lowCutoff / 100.0);
-    s.writeS32(7, m_spanLog2);
     s.writeBool(8, m_audioBinaural);
     s.writeBool(9, m_audioFlipChannels);
     s.writeBool(10, m_dsb);
@@ -106,7 +101,15 @@ QByteArray SSBDemodSettings::serialize() const
     s.writeS32(25, m_workspaceIndex);
     s.writeBlob(26, m_geometryBytes);
     s.writeBool(27, m_hidden);
-    s.writeS32(28, (int) m_fftWindow);
+    s.writeU32(29, m_filterIndex);
+
+    for (unsigned int i = 0; i <  10; i++)
+    {
+        s.writeS32(100 + 10*i, m_filterBank[i].m_spanLog2);
+        s.writeS32(101 + 10*i, m_filterBank[i].m_rfBandwidth / 100.0);
+        s.writeS32(102 + 10*i, m_filterBank[i].m_lowCutoff / 100.0);
+        s.writeS32(103 + 10*i, (int) m_filterBank[i].m_fftWindow);
+    }
 
     return s.final();
 }
@@ -129,8 +132,6 @@ bool SSBDemodSettings::deserialize(const QByteArray& data)
         QString strtmp;
 
         d.readS32(1, &m_inputFrequencyOffset, 0);
-        d.readS32(2, &tmp, 30);
-        m_rfBandwidth = tmp * 100.0;
         d.readS32(3, &tmp, 30);
         m_volume = tmp / 10.0;
 
@@ -141,9 +142,6 @@ bool SSBDemodSettings::deserialize(const QByteArray& data)
         }
 
         d.readU32(5, &m_rgbColor);
-        d.readS32(6, &tmp, 30);
-        m_lowCutoff = tmp * 100.0;
-        d.readS32(7, &m_spanLog2, 3);
         d.readBool(8, &m_audioBinaural, false);
         d.readBool(9, &m_audioFlipChannels, false);
         d.readBool(10, &m_dsb, false);
@@ -179,8 +177,19 @@ bool SSBDemodSettings::deserialize(const QByteArray& data)
         d.readS32(25, &m_workspaceIndex, 0);
         d.readBlob(26, &m_geometryBytes);
         d.readBool(27, &m_hidden, false);
-        d.readS32(28, &tmp, (int) FFTWindow::Blackman);
-        m_fftWindow = (FFTWindow::Function) (tmp < 0 ? 0 : tmp > (int) FFTWindow::Blackman ? (int) FFTWindow::Blackman : tmp);
+        d.readU32(29, &utmp, 0);
+        m_filterIndex = utmp < 10 ? utmp : 0;
+
+        for (unsigned int i = 0; (i < 10); i++)
+        {
+            d.readS32(100 + 10*i, &m_filterBank[i].m_spanLog2, 3);
+            d.readS32(101 + 10*i, &tmp, 30);
+            m_filterBank[i].m_rfBandwidth = tmp * 100.0;
+            d.readS32(102+ 10*i, &tmp, 3);
+            m_filterBank[i].m_lowCutoff = tmp * 100.0;
+            d.readS32(103 + 10*i, &tmp, (int) FFTWindow::Blackman);
+            m_filterBank[i].m_fftWindow = (FFTWindow::Function) (tmp < 0 ? 0 : tmp > (int) FFTWindow::Blackman ? (int) FFTWindow::Blackman : tmp);
+        }
 
         return true;
     }

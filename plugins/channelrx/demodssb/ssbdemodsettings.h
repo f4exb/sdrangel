@@ -24,13 +24,28 @@
 
 class Serializable;
 
+struct SSBDemodFilterSettings
+{
+    int  m_spanLog2;
+    Real m_rfBandwidth;
+    Real m_lowCutoff;
+    FFTWindow::Function m_fftWindow;
+
+    SSBDemodFilterSettings() :
+        m_spanLog2(3),
+        m_rfBandwidth(3000),
+        m_lowCutoff(300),
+        m_fftWindow(FFTWindow::Blackman)
+    {}
+};
+
 struct SSBDemodSettings
 {
     qint32 m_inputFrequencyOffset;
-    Real m_rfBandwidth;
-    Real m_lowCutoff;
+    // Real m_rfBandwidth;
+    // Real m_lowCutoff;
     Real m_volume;
-    int  m_spanLog2;
+    // int  m_spanLog2;
     bool m_audioBinaural;
     bool m_audioFlipChannels;
     bool m_dsb;
@@ -52,7 +67,9 @@ struct SSBDemodSettings
     int m_workspaceIndex;
     QByteArray m_geometryBytes;
     bool m_hidden;
-    FFTWindow::Function m_fftWindow;
+    // FFTWindow::Function m_fftWindow;
+    std::vector<SSBDemodFilterSettings> m_filterBank;
+    unsigned int m_filterIndex;
 
     Serializable *m_channelMarker;
     Serializable *m_spectrumGUI;
