@@ -1362,6 +1362,9 @@ if (WIN32 OR APPLE)
         # needs pkgconfig, libusb, pthreads
         if (WIN32)
             set(LIBBLADERF_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/bladeRF.lib" CACHE INTERNAL "")
+            set(LIBBLADERF_LIBUSB_HEADER_FILE ${LIBUSB_INCLUDE_DIR}/libusb-1.0/libusb.h)
+        else ()
+            set(LIBBLADERF_LIBUSB_HEADER_FILE ${LIBUSB_INCLUDE_DIR}/libusb.h)
         endif ()
         ExternalProject_Add(bladerf
                 GIT_REPOSITORY https://github.com/Nuand/bladeRF.git
@@ -1373,7 +1376,7 @@ if (WIN32 OR APPLE)
                 -DPKG_CONFIG_EXECUTABLE=${PKG_CONFIG_EXECUTABLE}
                 -DENABLE_BACKEND_USB=ON
                 -DENABLE_BACKEND_LIBUSB=ON
-                -DLIBUSB_HEADER_FILE=${LIBUSB_INCLUDE_DIR}/libusb.h
+                -DLIBUSB_HEADER_FILE=${LIBBLADERF_LIBUSB_HEADER_FILE}
                 -Dusb_LIBRARY=${LIBUSB_LIBRARIES}
                 -DLIBUSB_PATH=${EXTERNAL_LIBRARY_FOLDER}/libusb
                 -DTHREADS_PTHREADS_INCLUDE_DIR=${PTHREADS4W_INCLUDE_DIR}
