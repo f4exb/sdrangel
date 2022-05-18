@@ -78,7 +78,7 @@ for:
       # not sdrplay with soapysdr; libairspyhf-dev is too old (no lna)
       - sh: |
           sudo apt-get -y install build-essential cmake git xxd \
-            devscripts fakeroot debhelper libfftw3-dev qtbase5-dev libqt5opengl5-dev \
+            devscripts fakeroot debhelper libfftw3-dev qtbase5-dev libopengl-dev libqt5opengl5-dev \
             qttools5-dev qttools5-dev-tools qtmultimedia5-dev libqt5multimedia5-plugins libqt5websockets5-dev \
             libqt5quick5 qtwebengine5-dev qtbase5-private-dev \
             qml-module-qtlocation qml-module-qtpositioning qml-module-qtquick-window2 qml-module-qtquick-dialogs \
