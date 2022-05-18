@@ -20,6 +20,8 @@
 
 #include <QByteArray>
 
+#include "dsp/fftwindow.h"
+
 class Serializable;
 
 struct SSBDemodSettings
@@ -50,6 +52,7 @@ struct SSBDemodSettings
     int m_workspaceIndex;
     QByteArray m_geometryBytes;
     bool m_hidden;
+    FFTWindow::Function m_fftWindow;
 
     Serializable *m_channelMarker;
     Serializable *m_spectrumGUI;

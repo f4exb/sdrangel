@@ -65,6 +65,7 @@ void SSBDemodSettings::resetToDefaults()
     m_reverseAPIChannelIndex = 0;
     m_workspaceIndex = 0;
     m_hidden = false;
+    m_fftWindow = FFTWindow::Blackman;
 }
 
 QByteArray SSBDemodSettings::serialize() const
@@ -105,6 +106,7 @@ QByteArray SSBDemodSettings::serialize() const
     s.writeS32(25, m_workspaceIndex);
     s.writeBlob(26, m_geometryBytes);
     s.writeBool(27, m_hidden);
+    s.writeS32(28, (int) m_fftWindow);
 
     return s.final();
 }
@@ -177,6 +179,8 @@ bool SSBDemodSettings::deserialize(const QByteArray& data)
         d.readS32(25, &m_workspaceIndex, 0);
         d.readBlob(26, &m_geometryBytes);
         d.readBool(27, &m_hidden, false);
+        d.readS32(28, &tmp, (int) FFTWindow::Blackman);
+        m_fftWindow = (FFTWindow::Function) (tmp < 0 ? 0 : tmp > (int) FFTWindow::Blackman ? (int) FFTWindow::Blackman : tmp);
 
         return true;
     }

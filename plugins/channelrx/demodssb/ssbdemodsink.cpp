@@ -291,8 +291,8 @@ void SSBDemodSink::applyAudioSampleRate(int sampleRate)
     m_interpolatorDistanceRemain = 0;
     m_interpolatorDistance = (Real) m_channelSampleRate / (Real) sampleRate;
 
-    SSBFilter->create_filter(m_LowCutoff / (float) sampleRate, m_Bandwidth / (float) sampleRate);
-    DSBFilter->create_dsb_filter((2.0f * m_Bandwidth) / (float) sampleRate);
+    SSBFilter->create_filter(m_LowCutoff / (float) sampleRate, m_Bandwidth / (float) sampleRate, m_settings.m_fftWindow);
+    DSBFilter->create_dsb_filter((2.0f * m_Bandwidth) / (float) sampleRate, m_settings.m_fftWindow);
 
     int agcNbSamples = (sampleRate / 1000) * (1<<m_settings.m_agcTimeLog2);
     int agcThresholdGate = (sampleRate / 1000) * m_settings.m_agcThresholdGate; // ms
@@ -359,7 +359,8 @@ void SSBDemodSink::applySettings(const SSBDemodSettings& settings, bool force)
             << " force: " << force;
 
     if((m_settings.m_rfBandwidth != settings.m_rfBandwidth) ||
-        (m_settings.m_lowCutoff != settings.m_lowCutoff) || force)
+        (m_settings.m_lowCutoff != settings.m_lowCutoff) ||
+        (m_settings.m_fftWindow != settings.m_fftWindow) || force)
     {
         float band, lowCutoff;
 
@@ -387,8 +388,8 @@ void SSBDemodSink::applySettings(const SSBDemodSettings& settings, bool force)
         m_interpolator.create(16, m_channelSampleRate, interpolatorBandwidth, 2.0f);
         m_interpolatorDistanceRemain = 0;
         m_interpolatorDistance = (Real) m_channelSampleRate / (Real) m_audioSampleRate;
-        SSBFilter->create_filter(m_LowCutoff / (float) m_audioSampleRate, m_Bandwidth / (float) m_audioSampleRate);
-        DSBFilter->create_dsb_filter((2.0f * m_Bandwidth) / (float) m_audioSampleRate);
+        SSBFilter->create_filter(m_LowCutoff / (float) m_audioSampleRate, m_Bandwidth / (float) m_audioSampleRate, settings.m_fftWindow);
+        DSBFilter->create_dsb_filter((2.0f * m_Bandwidth) / (float) m_audioSampleRate, settings.m_fftWindow);
     }
 
     if ((m_settings.m_volume != settings.m_volume) || force)

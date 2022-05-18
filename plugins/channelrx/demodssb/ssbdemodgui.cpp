@@ -236,6 +236,12 @@ void SSBDemodGUI::on_flipSidebands_clicked(bool checked)
     ui->lowCut->setValue(-lcValue);
 }
 
+void SSBDemodGUI::on_fftWindow_currentIndexChanged(int index)
+{
+    m_settings.m_fftWindow = (FFTWindow::Function) index;
+    applySettings();
+}
+
 void SSBDemodGUI::onMenuDialogCalled(const QPoint &p)
 {
     if (m_contextMenuType == ContextMenuChannelSettings)
@@ -565,6 +571,7 @@ void SSBDemodGUI::displaySettings()
     ui->audioFlipChannels->setChecked(m_settings.m_audioFlipChannels);
     ui->audioMute->setChecked(m_settings.m_audioMute);
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
+    ui->fftWindow->setCurrentIndex((int) m_settings.m_fftWindow);
 
     // Prevent uncontrolled triggering of applyBandwidths
     ui->spanLog2->blockSignals(true);
@@ -719,6 +726,7 @@ void SSBDemodGUI::makeUIConnections()
     QObject::connect(ui->audioMute, &QToolButton::toggled, this, &SSBDemodGUI::on_audioMute_toggled);
     QObject::connect(ui->spanLog2, &QSlider::valueChanged, this, &SSBDemodGUI::on_spanLog2_valueChanged);
     QObject::connect(ui->flipSidebands, &QPushButton::clicked, this, &SSBDemodGUI::on_flipSidebands_clicked);
+    QObject::connect(ui->fftWindow, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SSBDemodGUI::on_fftWindow_currentIndexChanged);
 }
 
 void SSBDemodGUI::updateAbsoluteCenterFrequency()
