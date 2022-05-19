@@ -193,15 +193,21 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     addFeatureSet(); // Create the uniuefeature set
 	m_apiAdapter = new WebAPIAdapter();
 
-    if (!parser.getScratch())
+    if (parser.getScratch())
+    {
+        qDebug() << "MainWindow::MainWindow: scratch mode: do not load current configuration";
+    }
+    else
     {
         splash->showStatusMessage("load current configuration...", Qt::white);
         qDebug() << "MainWindow::MainWindow: load current configuration...";
         loadConfiguration(m_mainCore->m_settings.getWorkingConfiguration());
-    }
-    else
-    {
-        qDebug() << "MainWindow::MainWindow: scratch mode: do not load current configuration";
+
+        if (m_workspaces.size() == 0)
+        {
+            qDebug() << "MainWindow::MainWindow: no or empty current configuration, creating empty workspace...";
+            addWorkspace();
+        }
     }
 
     splash->showStatusMessage("finishing...", Qt::white);
@@ -1232,8 +1238,10 @@ void MainWindow::loadConfiguration(const Configuration *configuration, bool from
     // Reconstruct
 
     // Workspaces
-    for (int i = 0; i < configuration->getNumberOfWorkspaceGeometries(); i++) {
+    for (int i = 0; i < configuration->getNumberOfWorkspaceGeometries(); i++)
+    {
         addWorkspace();
+        m_workspaces[i]->setAutoStackOption(configuration->getWorkspaceAutoStackOptions()[i]);
     }
 
     if (m_workspaces.size() <= 0) { // cannot go further if there are no workspaces
@@ -1383,8 +1391,10 @@ void MainWindow::saveConfiguration(Configuration *configuration)
 
     m_featureUIs[0]->saveFeatureSetSettings(&configuration->getFeatureSetPreset());
 
-    for (const auto& workspace : m_workspaces) {
+    for (const auto& workspace : m_workspaces)
+    {
         configuration->getWorkspaceGeometries().push_back(workspace->saveGeometry());
+        configuration->getWorkspaceAutoStackOptions().push_back(workspace->getAutoStackOption());
     }
 }
 

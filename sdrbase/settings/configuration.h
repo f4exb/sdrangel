@@ -50,6 +50,8 @@ public:
     int getNumberOfWorkspaceGeometries() const { return m_workspaceGeometries.size(); }
     QList<QByteArray>& getWorkspaceGeometries() { return m_workspaceGeometries; }
     const QList<QByteArray>& getWorkspaceGeometries() const { return m_workspaceGeometries; }
+    QList<bool>& getWorkspaceAutoStackOptions() { return m_workspaceAutoStackOptions; }
+    const QList<bool>& getWorkspaceAutoStackOptions() const { return m_workspaceAutoStackOptions; }
     FeatureSetPreset& getFeatureSetPreset() { return m_featureSetPreset; }
     const FeatureSetPreset& getFeatureSetPreset() const { return m_featureSetPreset; }
     QList<Preset>& getDeviceSetPresets() { return m_deviceSetPresets; }
@@ -73,6 +75,7 @@ private:
 	QString m_group;
 	QString m_description;
     QList<QByteArray> m_workspaceGeometries;
+    QList<bool> m_workspaceAutoStackOptions;
     FeatureSetPreset m_featureSetPreset;
     QList<Preset> m_deviceSetPresets;
 };

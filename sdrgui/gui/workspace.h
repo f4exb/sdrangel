@@ -53,6 +53,8 @@ public:
     int getNumberOfSubWindows() const;
     QByteArray saveMdiGeometry();
     void restoreMdiGeometry(const QByteArray& blob);
+    bool getAutoStackOption() const;
+    void setAutoStackOption(bool autoStack);
     QList<QMdiSubWindow *> getSubWindowList() const;
     void orderByIndex(QList<ChannelGUI *> &list);
     void orderByIndex(QList<FeatureGUI *> &list);

@@ -58,6 +58,13 @@ QByteArray Configuration::serialize() const
         s.writeBlob(201 + i, m_deviceSetPresets[i].serialize());
     }
 
+    nitems = m_workspaceAutoStackOptions.size() < 99 ? m_workspaceAutoStackOptions.size() : 99;
+    s.writeS32(300, nitems);
+
+    for (int i = 0; i < nitems; i++) {
+        s.writeBool(301 + i, m_workspaceAutoStackOptions[i]);
+    }
+
 	return s.final();
 }
 
@@ -96,6 +103,14 @@ bool Configuration::deserialize(const QByteArray& data)
             d.readBlob(201 + i, &b);
             m_deviceSetPresets.push_back(Preset());
             m_deviceSetPresets.back().deserialize(b);
+        }
+
+        d.readS32(300, &nitems, 0);
+
+        for (int i = 0; i < nitems; i++)
+        {
+            m_workspaceAutoStackOptions.push_back(true);
+            d.readBool(301 + i, &m_workspaceAutoStackOptions.back());
         }
 
 		return true;

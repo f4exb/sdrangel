@@ -688,6 +688,16 @@ void Workspace::restoreMdiGeometry(const QByteArray& blob)
     m_mdi->restoreGeometry(qUncompress(blob));
 }
 
+bool Workspace::getAutoStackOption() const
+{
+    return m_autoStackSubWindows->isChecked();
+}
+
+void Workspace::setAutoStackOption(bool autoStack)
+{
+    m_autoStackSubWindows->doToggle(autoStack);
+}
+
 void Workspace::adjustSubWindowsAfterRestore()
 {
     QList<QMdiSubWindow *> subWindowList = m_mdi->subWindowList();
