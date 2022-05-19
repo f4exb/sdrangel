@@ -1,3 +1,16 @@
+sdrangel (7.0.1-1) unstable; urgency=medium
+
+  * Added ability to build a package for MacOS. PR #1249
+  * Warn if OpenGL is < 2.1, rather than 3.0, as it runs fine with 2.1. PR #1249
+  * Added 3 term Blackman and 7 term Blackman-Harris FFT windows
+  * SSB Demod: added control of FFT filter window. Part of #1224
+  * SSB Demod: implement switchable filter bank. Part of #1224
+  * Main Window: create empty workspace if none in default configuration. Part of #1250
+  * Save/restore auto-stack function in workspaces. Part of #1250
+  * Fixed ButtonSwitch background color with stylesheets
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 19 May 2022 26:02:31 +0200
+
 sdrangel (7.0.0-1) unstable; urgency=medium
 
   * New top level UI released
