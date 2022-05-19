@@ -4,17 +4,32 @@ SSBDemodSettings:
     inputFrequencyOffset:
       type: integer
       format: int64
+    filterIndex:
+      type: integer
+    spanLog2:
+      type: integer
     rfBandwidth:
       type: number
       format: float
     lowCutoff:
       type: number
       format: float
+    fftWindow:
+      type: integer
+      description: >
+        FFT Window index (FFTWindow::Function):
+          * 0 - Bartlett
+          * 1 - Blackman-Harris 4 term
+          * 2 - Flattop
+          * 3 - Hamming
+          * 4 - Hanning
+          * 5 - Rectangle
+          * 6 - Kaiser
+          * 7 - Blackman 3 term
+          * 8 - Blackman-Harris 7 term
     volume:
       type: number
       format: float
-    spanLog2:
-      type: integer
     audioBinaural:
       description: Audio binaural mode (1 if active else 0)
       type: integer

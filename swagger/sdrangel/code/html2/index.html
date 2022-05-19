@@ -3680,7 +3680,7 @@ margin-bottom: 20px;
     },
     "fftWindow" : {
       "type" : "integer",
-      "description" : "FFT Window index (FFTWindow::Function):\n  * 0 - Bartlett\n  * 1 - BlackmanHarris\n  * 2 - Flattop\n  * 3 - Hamming\n  * 4 - Hanning\n  * 5 - Rectangle\n  * 6 - Kaiser\n"
+      "description" : "FFT Window index (FFTWindow::Function):\n  * 0 - Bartlett\n  * 1 - Blackman-Harris 4 term\n  * 2 - Flattop\n  * 3 - Hamming\n  * 4 - Hanning\n  * 5 - Rectangle\n  * 6 - Kaiser\n  * 7 - Blackman 3 term\n  * 8 - Blackman-Harris 7 term\n"
     },
     "codingScheme" : {
       "type" : "integer",
@@ -6242,7 +6242,7 @@ margin-bottom: 20px;
     },
     "fftWindow" : {
       "type" : "integer",
-      "description" : "See FFTWindow"
+      "description" : "FFT Window index (FFTWindow::Function):\n  * 0 - Bartlett\n  * 1 - Blackman-Harris 4 term\n  * 2 - Flattop\n  * 3 - Hamming\n  * 4 - Hanning\n  * 5 - Rectangle\n  * 6 - Kaiser\n  * 7 - Blackman 3 term\n  * 8 - Blackman-Harris 7 term\n"
     },
     "refLevel" : {
       "type" : "number",
@@ -11188,6 +11188,12 @@ margin-bottom: 20px;
       "type" : "integer",
       "format" : "int64"
     },
+    "filterIndex" : {
+      "type" : "integer"
+    },
+    "spanLog2" : {
+      "type" : "integer"
+    },
     "rfBandwidth" : {
       "type" : "number",
       "format" : "float"
@@ -11196,12 +11202,13 @@ margin-bottom: 20px;
       "type" : "number",
       "format" : "float"
     },
+    "fftWindow" : {
+      "type" : "integer",
+      "description" : "FFT Window index (FFTWindow::Function):\n  * 0 - Bartlett\n  * 1 - Blackman-Harris 4 term\n  * 2 - Flattop\n  * 3 - Hamming\n  * 4 - Hanning\n  * 5 - Rectangle\n  * 6 - Kaiser\n  * 7 - Blackman 3 term\n  * 8 - Blackman-Harris 7 term\n"
+    },
     "volume" : {
       "type" : "number",
       "format" : "float"
-    },
-    "spanLog2" : {
-      "type" : "integer"
     },
     "audioBinaural" : {
       "type" : "integer",
@@ -59691,7 +59698,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2022-05-16T19:55:17.622+02:00
+              Generated 2022-05-19T00:27:23.053+02:00
             </div>
           </div>
       </div>

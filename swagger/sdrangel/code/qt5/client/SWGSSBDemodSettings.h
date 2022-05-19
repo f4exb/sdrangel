@@ -48,17 +48,23 @@ public:
     qint64 getInputFrequencyOffset();
     void setInputFrequencyOffset(qint64 input_frequency_offset);
 
+    qint32 getFilterIndex();
+    void setFilterIndex(qint32 filter_index);
+
+    qint32 getSpanLog2();
+    void setSpanLog2(qint32 span_log2);
+
     float getRfBandwidth();
     void setRfBandwidth(float rf_bandwidth);
 
     float getLowCutoff();
     void setLowCutoff(float low_cutoff);
 
+    qint32 getFftWindow();
+    void setFftWindow(qint32 fft_window);
+
     float getVolume();
     void setVolume(float volume);
-
-    qint32 getSpanLog2();
-    void setSpanLog2(qint32 span_log2);
 
     qint32 getAudioBinaural();
     void setAudioBinaural(qint32 audio_binaural);
@@ -130,17 +136,23 @@ private:
     qint64 input_frequency_offset;
     bool m_input_frequency_offset_isSet;
 
+    qint32 filter_index;
+    bool m_filter_index_isSet;
+
+    qint32 span_log2;
+    bool m_span_log2_isSet;
+
     float rf_bandwidth;
     bool m_rf_bandwidth_isSet;
 
     float low_cutoff;
     bool m_low_cutoff_isSet;
 
+    qint32 fft_window;
+    bool m_fft_window_isSet;
+
     float volume;
     bool m_volume_isSet;
-
-    qint32 span_log2;
-    bool m_span_log2_isSet;
 
     qint32 audio_binaural;
     bool m_audio_binaural_isSet;

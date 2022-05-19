@@ -85,8 +85,18 @@ GLSpectrum:
     fftOverlap:
       type: integer
     fftWindow:
-      description: See FFTWindow
       type: integer
+      description: >
+        FFT Window index (FFTWindow::Function):
+          * 0 - Bartlett
+          * 1 - Blackman-Harris 4 term
+          * 2 - Flattop
+          * 3 - Hamming
+          * 4 - Hanning
+          * 5 - Rectangle
+          * 6 - Kaiser
+          * 7 - Blackman 3 term
+          * 8 - Blackman-Harris 7 term
     refLevel:
       type: number
       format: float

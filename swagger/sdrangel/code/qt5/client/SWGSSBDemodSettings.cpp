@@ -30,14 +30,18 @@ SWGSSBDemodSettings::SWGSSBDemodSettings(QString* json) {
 SWGSSBDemodSettings::SWGSSBDemodSettings() {
     input_frequency_offset = 0L;
     m_input_frequency_offset_isSet = false;
+    filter_index = 0;
+    m_filter_index_isSet = false;
+    span_log2 = 0;
+    m_span_log2_isSet = false;
     rf_bandwidth = 0.0f;
     m_rf_bandwidth_isSet = false;
     low_cutoff = 0.0f;
     m_low_cutoff_isSet = false;
+    fft_window = 0;
+    m_fft_window_isSet = false;
     volume = 0.0f;
     m_volume_isSet = false;
-    span_log2 = 0;
-    m_span_log2_isSet = false;
     audio_binaural = 0;
     m_audio_binaural_isSet = false;
     audio_flip_channels = 0;
@@ -90,14 +94,18 @@ void
 SWGSSBDemodSettings::init() {
     input_frequency_offset = 0L;
     m_input_frequency_offset_isSet = false;
+    filter_index = 0;
+    m_filter_index_isSet = false;
+    span_log2 = 0;
+    m_span_log2_isSet = false;
     rf_bandwidth = 0.0f;
     m_rf_bandwidth_isSet = false;
     low_cutoff = 0.0f;
     m_low_cutoff_isSet = false;
+    fft_window = 0;
+    m_fft_window_isSet = false;
     volume = 0.0f;
     m_volume_isSet = false;
-    span_log2 = 0;
-    m_span_log2_isSet = false;
     audio_binaural = 0;
     m_audio_binaural_isSet = false;
     audio_flip_channels = 0;
@@ -159,6 +167,8 @@ SWGSSBDemodSettings::cleanup() {
 
 
 
+
+
     if(title != nullptr) { 
         delete title;
     }
@@ -197,13 +207,17 @@ void
 SWGSSBDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&input_frequency_offset, pJson["inputFrequencyOffset"], "qint64", "");
     
+    ::SWGSDRangel::setValue(&filter_index, pJson["filterIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&span_log2, pJson["spanLog2"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&rf_bandwidth, pJson["rfBandwidth"], "float", "");
     
     ::SWGSDRangel::setValue(&low_cutoff, pJson["lowCutoff"], "float", "");
     
-    ::SWGSDRangel::setValue(&volume, pJson["volume"], "float", "");
+    ::SWGSDRangel::setValue(&fft_window, pJson["fftWindow"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&span_log2, pJson["spanLog2"], "qint32", "");
+    ::SWGSDRangel::setValue(&volume, pJson["volume"], "float", "");
     
     ::SWGSDRangel::setValue(&audio_binaural, pJson["audioBinaural"], "qint32", "");
     
@@ -266,17 +280,23 @@ SWGSSBDemodSettings::asJsonObject() {
     if(m_input_frequency_offset_isSet){
         obj->insert("inputFrequencyOffset", QJsonValue(input_frequency_offset));
     }
+    if(m_filter_index_isSet){
+        obj->insert("filterIndex", QJsonValue(filter_index));
+    }
+    if(m_span_log2_isSet){
+        obj->insert("spanLog2", QJsonValue(span_log2));
+    }
     if(m_rf_bandwidth_isSet){
         obj->insert("rfBandwidth", QJsonValue(rf_bandwidth));
     }
     if(m_low_cutoff_isSet){
         obj->insert("lowCutoff", QJsonValue(low_cutoff));
     }
+    if(m_fft_window_isSet){
+        obj->insert("fftWindow", QJsonValue(fft_window));
+    }
     if(m_volume_isSet){
         obj->insert("volume", QJsonValue(volume));
-    }
-    if(m_span_log2_isSet){
-        obj->insert("spanLog2", QJsonValue(span_log2));
     }
     if(m_audio_binaural_isSet){
         obj->insert("audioBinaural", QJsonValue(audio_binaural));
@@ -355,6 +375,26 @@ SWGSSBDemodSettings::setInputFrequencyOffset(qint64 input_frequency_offset) {
     this->m_input_frequency_offset_isSet = true;
 }
 
+qint32
+SWGSSBDemodSettings::getFilterIndex() {
+    return filter_index;
+}
+void
+SWGSSBDemodSettings::setFilterIndex(qint32 filter_index) {
+    this->filter_index = filter_index;
+    this->m_filter_index_isSet = true;
+}
+
+qint32
+SWGSSBDemodSettings::getSpanLog2() {
+    return span_log2;
+}
+void
+SWGSSBDemodSettings::setSpanLog2(qint32 span_log2) {
+    this->span_log2 = span_log2;
+    this->m_span_log2_isSet = true;
+}
+
 float
 SWGSSBDemodSettings::getRfBandwidth() {
     return rf_bandwidth;
@@ -375,6 +415,16 @@ SWGSSBDemodSettings::setLowCutoff(float low_cutoff) {
     this->m_low_cutoff_isSet = true;
 }
 
+qint32
+SWGSSBDemodSettings::getFftWindow() {
+    return fft_window;
+}
+void
+SWGSSBDemodSettings::setFftWindow(qint32 fft_window) {
+    this->fft_window = fft_window;
+    this->m_fft_window_isSet = true;
+}
+
 float
 SWGSSBDemodSettings::getVolume() {
     return volume;
@@ -383,16 +433,6 @@ void
 SWGSSBDemodSettings::setVolume(float volume) {
     this->volume = volume;
     this->m_volume_isSet = true;
-}
-
-qint32
-SWGSSBDemodSettings::getSpanLog2() {
-    return span_log2;
-}
-void
-SWGSSBDemodSettings::setSpanLog2(qint32 span_log2) {
-    this->span_log2 = span_log2;
-    this->m_span_log2_isSet = true;
 }
 
 qint32
@@ -613,16 +653,22 @@ SWGSSBDemodSettings::isSet(){
         if(m_input_frequency_offset_isSet){
             isObjectUpdated = true; break;
         }
+        if(m_filter_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_span_log2_isSet){
+            isObjectUpdated = true; break;
+        }
         if(m_rf_bandwidth_isSet){
             isObjectUpdated = true; break;
         }
         if(m_low_cutoff_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_volume_isSet){
+        if(m_fft_window_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_span_log2_isSet){
+        if(m_volume_isSet){
             isObjectUpdated = true; break;
         }
         if(m_audio_binaural_isSet){
