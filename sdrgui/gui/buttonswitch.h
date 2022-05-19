@@ -13,12 +13,6 @@ public:
 	void doToggle(bool checked);
     void setColor(QColor color);
     void resetColor();
-
-private slots:
-	void onToggled(bool checked);
-
-private:
-	QPalette m_originalPalette;
 };
 
 #endif // INCLUDE_BUTTONSWITCH_H

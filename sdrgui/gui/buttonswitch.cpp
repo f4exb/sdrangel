@@ -5,51 +5,24 @@ ButtonSwitch::ButtonSwitch(QWidget* parent) :
 	QToolButton(parent)
 {
 	setCheckable(true);
-	m_originalPalette = palette();
-	connect(this, SIGNAL(toggled(bool)), this, SLOT(onToggled(bool)));
-}
-
-void ButtonSwitch::onToggled(bool checked)
-{
-    blockSignals(true);
-    setChecked(checked);
-    blockSignals(false);
-
-	if (checked)
-    {
-		QPalette p = m_originalPalette;
-		p.setColor(QPalette::Button, QColor(0x80, 0x46, 0x00));
-		setPalette(p);
-	}
-    else
-    {
-		setPalette(m_originalPalette);
-	}
+    setStyleSheet(QString("QToolButton{ background-color: %1; } QToolButton:checked{ background-color: %2; }")
+        .arg(palette().button().color().name())
+        .arg(palette().highlight().color().darker(150).name()));
 }
 
 void ButtonSwitch::doToggle(bool checked)
 {
-    onToggled(checked);
+    setChecked(checked);
 }
 
 void ButtonSwitch::setColor(QColor color)
 {
-    QPalette p = m_originalPalette;
-    p.setColor(QPalette::Button, color);
-    setPalette(p);
+    setStyleSheet(QString("QToolButton{ background-color: %1; }").arg(color.name()));
 }
 
 void ButtonSwitch::resetColor()
 {
-    if (isChecked())
-    {
-		QPalette p = m_originalPalette;
-		p.setColor(QPalette::Button, QColor(0x80, 0x46, 0x00));
-		setPalette(p);
-    }
-    else
-    {
-        setPalette(m_originalPalette);
-    }
-
+    setStyleSheet(QString("QToolButton{ background-color: %1; } QToolButton:checked{ background-color: %2; }")
+        .arg(palette().button().color().name())
+        .arg(palette().highlight().color().darker(150).name()));
 }
