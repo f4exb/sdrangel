@@ -127,4 +127,5 @@ void Configuration::clearData()
     m_deviceSetPresets.clear();
     m_featureSetPreset.clearFeatures();
     m_workspaceGeometries.clear();
+    m_workspaceAutoStackOptions.clear();
 }
