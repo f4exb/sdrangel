@@ -202,7 +202,7 @@ endif (AUTO_EXTERNAL_LIBRARIES)
 # Some of the following projects are currently built only for MacOS
 # For WIN32, we use precompiled versions from sdrangel-windows-libraries
 # For LINUX, we require system pacakges to be installed
-if (MACOS)
+if (APPLE)
     set(USE_PRECOMPILED_LIBS FALSE)
 else()
     set(USE_PRECOMPILED_LIBS TRUE)
