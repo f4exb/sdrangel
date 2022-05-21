@@ -35,3 +35,7 @@ if (Qt5Charts_FOUND)
     add_subdirectory(radiosonde)
     add_subdirectory(startracker)
 endif()
+
+if (ENABLE_LIMESUITE AND LIMESUITE_FOUND)
+    add_subdirectory(limerfe)
+endif()
