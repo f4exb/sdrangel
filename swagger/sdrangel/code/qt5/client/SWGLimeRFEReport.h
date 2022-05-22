@@ -11,13 +11,13 @@
  */
 
 /*
- * SWGLimeRFEPower.h
+ * SWGLimeRFEReport.h
  *
- * report of forward and reflected power measurements TO BE DECOMMISSIONED
+ * LimeRFE
  */
 
-#ifndef SWGLimeRFEPower_H_
-#define SWGLimeRFEPower_H_
+#ifndef SWGLimeRFEReport_H_
+#define SWGLimeRFEReport_H_
 
 #include <QJsonObject>
 
@@ -28,37 +28,37 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGLimeRFEPower: public SWGObject {
+class SWG_API SWGLimeRFEReport: public SWGObject {
 public:
-    SWGLimeRFEPower();
-    SWGLimeRFEPower(QString* json);
-    virtual ~SWGLimeRFEPower();
+    SWGLimeRFEReport();
+    SWGLimeRFEReport(QString* json);
+    virtual ~SWGLimeRFEReport();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGLimeRFEPower* fromJson(QString &jsonString) override;
+    virtual SWGLimeRFEReport* fromJson(QString &jsonString) override;
 
-    qint32 getForward();
-    void setForward(qint32 forward);
+    qint32 getForwardPower();
+    void setForwardPower(qint32 forward_power);
 
-    qint32 getReflected();
-    void setReflected(qint32 reflected);
+    qint32 getReflectedPower();
+    void setReflectedPower(qint32 reflected_power);
 
 
     virtual bool isSet() override;
 
 private:
-    qint32 forward;
-    bool m_forward_isSet;
+    qint32 forward_power;
+    bool m_forward_power_isSet;
 
-    qint32 reflected;
-    bool m_reflected_isSet;
+    qint32 reflected_power;
+    bool m_reflected_power_isSet;
 
 };
 
 }
 
-#endif /* SWGLimeRFEPower_H_ */
+#endif /* SWGLimeRFEReport_H_ */

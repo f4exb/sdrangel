@@ -980,6 +980,33 @@ void LimeRFEGUI::tick()
     refreshPower();
 }
 
+bool LimeRFEGUI::handleMessage(const Message& message)
+{
+    if (LimeRFE::MsgConfigureLimeRFE::match(message))
+    {
+        qDebug("LimeRFEGUI::handleMessage: LimeRFE::MsgConfigureLimeRFE");
+        const LimeRFE::MsgConfigureLimeRFE& cfg = (LimeRFE::MsgConfigureLimeRFE&) message;
+        m_settings = cfg.getSettings();
+        displaySettings();
+        highlightApplyButton(cfg.getForce());
+        return true;
+    }
+
+	return false;
+}
+
+void LimeRFEGUI::handleInputMessages()
+{
+    Message* message;
+
+    while ((message = getInputMessageQueue()->pop()))
+    {
+        if (handleMessage(*message)) {
+            delete message;
+        }
+    }
+}
+
 void LimeRFEGUI::makeUIConnections()
 {
     QObject::connect(ui->openDevice, &QPushButton::clicked, this, &LimeRFEGUI::on_openDevice_clicked);

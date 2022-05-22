@@ -5273,6 +5273,9 @@ margin-bottom: 20px;
     "GS232ControllerActions" : {
       "$ref" : "#/definitions/GS232ControllerActions"
     },
+    "LimeRFEActions" : {
+      "$ref" : "#/definitions/LimeRFEActions"
+    },
     "MapActions" : {
       "$ref" : "#/definitions/MapActions"
     },
@@ -5409,6 +5412,9 @@ margin-bottom: 20px;
     "GS232ControllerReport" : {
       "$ref" : "#/definitions/GS232ControllerReport"
     },
+    "LimeRFEReport" : {
+      "$ref" : "#/definitions/LimeRFEReport"
+    },
     "MapReport" : {
       "$ref" : "#/definitions/MapReport"
     },
@@ -5503,6 +5509,9 @@ margin-bottom: 20px;
     },
     "GS232ControllerSettings" : {
       "$ref" : "#/definitions/GS232ControllerSettings"
+    },
+    "LimeRFESettings" : {
+      "$ref" : "#/definitions/LimeRFESettings"
     },
     "MapSettings" : {
       "$ref" : "#/definitions/MapSettings"
@@ -7070,6 +7079,30 @@ margin-bottom: 20px;
   },
   "description" : "KiwiSDR"
 };
+            defs.LimeRFEActions = {
+  "properties" : {
+    "selectChannel" : {
+      "type" : "integer",
+      "description" : "Select channel\n  * 0 - Rx\n  * 1 - Tx\n"
+    },
+    "deviceSetIndex" : {
+      "type" : "integer"
+    },
+    "switchChannel" : {
+      "type" : "integer",
+      "description" : "Switch on or off\n  * 0 - Off\n  * 1 - On\n"
+    },
+    "fromToSettings" : {
+      "type" : "integer",
+      "description" : "Move from/to settings to/from device\n  * 0 - From device to settings. The toGUI button in GUI mode\n  * 1 - From settings to device. The Apply button in GUI mode\n"
+    },
+    "openCloseDevice" : {
+      "type" : "integer",
+      "description" : "Open or close device\n  * 0 - Close device\n  * 1 - Open device\n"
+    }
+  },
+  "description" : "LimeRFE"
+};
             defs.LimeRFEDevice = {
   "properties" : {
     "deviceRef" : {
@@ -7107,10 +7140,29 @@ margin-bottom: 20px;
       "description" : "relative reflected power in centi-Bels"
     }
   },
-  "description" : "report of forward and reflected power measurements"
+  "description" : "report of forward and reflected power measurements TO BE DECOMMISSIONED"
+};
+            defs.LimeRFEReport = {
+  "properties" : {
+    "forwardPower" : {
+      "type" : "integer",
+      "description" : "relative forward power in centi-Bels"
+    },
+    "reflectedPower" : {
+      "type" : "integer",
+      "description" : "relative reflected power in centi-Bels"
+    }
+  },
+  "description" : "LimeRFE"
 };
             defs.LimeRFESettings = {
   "properties" : {
+    "title" : {
+      "type" : "string"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
     "devicePath" : {
       "type" : "string",
       "description" : "Path to the device serial interface (ex /dev/ttyUSB2)"
@@ -7170,6 +7222,10 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "SWR measurement source (LimeRFEController::SWRSource)\n  * 0 - External\n  * 1 - Cellular\n"
     },
+    "txRxDriven" : {
+      "type" : "integer",
+      "description" : "Boolean 1 if Tx is copy of Rx else 0"
+    },
     "rxOn" : {
       "type" : "integer",
       "description" : "Boolean 1 if Rx is active else 0"
@@ -7177,6 +7233,25 @@ margin-bottom: 20px;
     "txOn" : {
       "type" : "integer",
       "description" : "Boolean 1 if Tx is active else 0"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIFeatureSetIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIFeatureIndex" : {
+      "type" : "integer"
+    },
+    "rollupState" : {
+      "$ref" : "#/definitions/RollupState"
     }
   },
   "description" : "LimeRFE"
@@ -59698,7 +59773,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2022-05-19T00:27:23.053+02:00
+              Generated 2022-05-21T22:11:42.796+02:00
             </div>
           </div>
       </div>

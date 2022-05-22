@@ -24,6 +24,7 @@
 
 #include "SWGAFCReport.h"
 #include "SWGGS232ControllerReport.h"
+#include "SWGLimeRFEReport.h"
 #include "SWGMapReport.h"
 #include "SWGPERTesterReport.h"
 #include "SWGRigCtlServerReport.h"
@@ -60,6 +61,9 @@ public:
     SWGGS232ControllerReport* getGs232ControllerReport();
     void setGs232ControllerReport(SWGGS232ControllerReport* gs232_controller_report);
 
+    SWGLimeRFEReport* getLimeRfeReport();
+    void setLimeRfeReport(SWGLimeRFEReport* lime_rfe_report);
+
     SWGMapReport* getMapReport();
     void setMapReport(SWGMapReport* map_report);
 
@@ -93,6 +97,9 @@ private:
 
     SWGGS232ControllerReport* gs232_controller_report;
     bool m_gs232_controller_report_isSet;
+
+    SWGLimeRFEReport* lime_rfe_report;
+    bool m_lime_rfe_report_isSet;
 
     SWGMapReport* map_report;
     bool m_map_report_isSet;

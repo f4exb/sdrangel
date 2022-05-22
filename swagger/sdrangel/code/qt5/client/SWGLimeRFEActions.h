@@ -11,13 +11,13 @@
  */
 
 /*
- * SWGLimeRFEPower.h
+ * SWGLimeRFEActions.h
  *
- * report of forward and reflected power measurements TO BE DECOMMISSIONED
+ * LimeRFE
  */
 
-#ifndef SWGLimeRFEPower_H_
-#define SWGLimeRFEPower_H_
+#ifndef SWGLimeRFEActions_H_
+#define SWGLimeRFEActions_H_
 
 #include <QJsonObject>
 
@@ -28,37 +28,55 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGLimeRFEPower: public SWGObject {
+class SWG_API SWGLimeRFEActions: public SWGObject {
 public:
-    SWGLimeRFEPower();
-    SWGLimeRFEPower(QString* json);
-    virtual ~SWGLimeRFEPower();
+    SWGLimeRFEActions();
+    SWGLimeRFEActions(QString* json);
+    virtual ~SWGLimeRFEActions();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGLimeRFEPower* fromJson(QString &jsonString) override;
+    virtual SWGLimeRFEActions* fromJson(QString &jsonString) override;
 
-    qint32 getForward();
-    void setForward(qint32 forward);
+    qint32 getSelectChannel();
+    void setSelectChannel(qint32 select_channel);
 
-    qint32 getReflected();
-    void setReflected(qint32 reflected);
+    qint32 getDeviceSetIndex();
+    void setDeviceSetIndex(qint32 device_set_index);
+
+    qint32 getSwitchChannel();
+    void setSwitchChannel(qint32 switch_channel);
+
+    qint32 getFromToSettings();
+    void setFromToSettings(qint32 from_to_settings);
+
+    qint32 getOpenCloseDevice();
+    void setOpenCloseDevice(qint32 open_close_device);
 
 
     virtual bool isSet() override;
 
 private:
-    qint32 forward;
-    bool m_forward_isSet;
+    qint32 select_channel;
+    bool m_select_channel_isSet;
 
-    qint32 reflected;
-    bool m_reflected_isSet;
+    qint32 device_set_index;
+    bool m_device_set_index_isSet;
+
+    qint32 switch_channel;
+    bool m_switch_channel_isSet;
+
+    qint32 from_to_settings;
+    bool m_from_to_settings_isSet;
+
+    qint32 open_close_device;
+    bool m_open_close_device_isSet;
 
 };
 
 }
 
-#endif /* SWGLimeRFEPower_H_ */
+#endif /* SWGLimeRFEActions_H_ */

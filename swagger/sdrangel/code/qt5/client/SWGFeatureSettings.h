@@ -29,6 +29,7 @@
 #include "SWGDemodAnalyzerSettings.h"
 #include "SWGGS232ControllerSettings.h"
 #include "SWGJogdialControllerSettings.h"
+#include "SWGLimeRFESettings.h"
 #include "SWGMapSettings.h"
 #include "SWGPERTesterSettings.h"
 #include "SWGRadiosondeSettings.h"
@@ -87,6 +88,9 @@ public:
     SWGGS232ControllerSettings* getGs232ControllerSettings();
     void setGs232ControllerSettings(SWGGS232ControllerSettings* gs232_controller_settings);
 
+    SWGLimeRFESettings* getLimeRfeSettings();
+    void setLimeRfeSettings(SWGLimeRFESettings* lime_rfe_settings);
+
     SWGMapSettings* getMapSettings();
     void setMapSettings(SWGMapSettings* map_settings);
 
@@ -144,6 +148,9 @@ private:
 
     SWGGS232ControllerSettings* gs232_controller_settings;
     bool m_gs232_controller_settings_isSet;
+
+    SWGLimeRFESettings* lime_rfe_settings;
+    bool m_lime_rfe_settings_isSet;
 
     SWGMapSettings* map_settings;
     bool m_map_settings_isSet;

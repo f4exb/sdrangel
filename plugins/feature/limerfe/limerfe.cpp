@@ -20,14 +20,20 @@
 
 #include "SWGDeviceState.h"
 #include "SWGErrorResponse.h"
+#include "SWGFeatureSettings.h"
+#include "SWGFeatureReport.h"
+#include "SWGFeatureActions.h"
 
 #include "util/simpleserializer.h"
 #include "util/serialutil.h"
+#include "settings/serializable.h"
 #include "webapi/webapiadapterinterface.h"
 
 #include "limerfe.h"
 
 MESSAGE_CLASS_DEFINITION(LimeRFE::MsgConfigureLimeRFE, Message)
+MESSAGE_CLASS_DEFINITION(LimeRFE::MsgReportSetRx, Message)
+MESSAGE_CLASS_DEFINITION(LimeRFE::MsgReportSetTx, Message)
 
 const char* const LimeRFE::m_featureIdURI = "sdrangel.feature.limerfe";
 const char* const LimeRFE::m_featureId = "LimeRFE";
@@ -99,9 +105,23 @@ void LimeRFE::listComPorts()
     }
 }
 
+void LimeRFE::applySettings(const LimeRFESettings& settings, bool force)
+{
+    (void) force;
+    m_settings = settings;
+}
+
 bool LimeRFE::handleMessage(const Message& cmd)
 {
-    (void) cmd;
+	if (MsgConfigureLimeRFE::match(cmd))
+	{
+        MsgConfigureLimeRFE& cfg = (MsgConfigureLimeRFE&) cmd;
+        qDebug() << "LimeRFE::handleMessage: MsgConfigureLimeRFE";
+        applySettings(cfg.getSettings(), cfg.getForce());
+
+		return true;
+	}
+
     return false;
 }
 
@@ -257,15 +277,30 @@ int LimeRFE::setRx(LimeRFESettings& settings, bool rxOn)
         return -1;
     }
 
-    int mode = rxOn && settings.m_txOn ?
-        RFE_MODE_TXRX : rxOn ?
-            RFE_MODE_RX : settings.m_txOn ?
-                RFE_MODE_TX :  RFE_MODE_NONE;
+    int mode = RFE_MODE_NONE;
 
+    if (rxOn)
+    {
+        if (settings.m_txOn) {
+            mode = RFE_MODE_TXRX;
+        } else {
+            mode = RFE_MODE_RX;
+        }
+    }
+    else
+    {
+        if (settings.m_txOn) {
+            mode = RFE_MODE_TX;
+        }
+    }
+
+    qDebug("LimeRFE::setRx: switch %s mode: %d", rxOn ? "on" : "off", mode);
     int rc = RFE_Mode(m_rfeDevice, mode);
 
     if (rc == 0) {
         settings.m_rxOn = rxOn;
+    } else {
+        qInfo("LimeRFE::setRx: %s", getError(rc).c_str());
     }
 
     return rc;
@@ -277,15 +312,30 @@ int LimeRFE::setTx(LimeRFESettings& settings, bool txOn)
         return -1;
     }
 
-    int mode = txOn && settings.m_rxOn ?
-        RFE_MODE_TXRX : txOn ?
-            RFE_MODE_TX : settings.m_rxOn ?
-                RFE_MODE_RX :  RFE_MODE_NONE;
+    int mode = RFE_MODE_NONE;
 
+    if (txOn)
+    {
+        if (settings.m_rxOn) {
+            mode = RFE_MODE_TXRX;
+        } else {
+            mode = RFE_MODE_TX;
+        }
+    }
+    else
+    {
+        if (settings.m_rxOn) {
+            mode = RFE_MODE_RX;
+        }
+    }
+
+    qDebug("LimeRFE::setTx: switch %s mode: %d", txOn ? "on" : "off", mode);
     int rc = RFE_Mode(m_rfeDevice, mode);
 
     if (rc == 0) {
         settings.m_txOn = txOn;
+    } else {
+        qInfo("LimeRFE::setTx: %s", getError(rc).c_str());
     }
 
     return rc;
@@ -713,4 +763,340 @@ void LimeRFE::networkManagerFinished(QNetworkReply *reply)
     }
 
     reply->deleteLater();
+}
+
+int LimeRFE::webapiSettingsGet(
+    SWGSDRangel::SWGFeatureSettings& response,
+    QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setLimeRfeSettings(new SWGSDRangel::SWGLimeRFESettings());
+    response.getLimeRfeSettings()->init();
+    webapiFormatFeatureSettings(response, m_settings);
+    return 200;
+}
+
+int LimeRFE::webapiSettingsPutPatch(
+    bool force,
+    const QStringList& featureSettingsKeys,
+    SWGSDRangel::SWGFeatureSettings& response,
+    QString& errorMessage)
+{
+    (void) errorMessage;
+    LimeRFESettings settings = m_settings;
+    webapiUpdateFeatureSettings(settings, featureSettingsKeys, response);
+
+    MsgConfigureLimeRFE *msg = MsgConfigureLimeRFE::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    qDebug("LimeRFE::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureLimeRFE *msgToGUI = MsgConfigureLimeRFE::create(settings, true);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatFeatureSettings(response, settings);
+
+    return 200;
+}
+
+int LimeRFE::webapiReportGet(
+    SWGSDRangel::SWGFeatureReport& response,
+    QString& errorMessage)
+{
+    response.setLimeRfeReport(new SWGSDRangel::SWGLimeRFEReport());
+    response.getLimeRfeReport()->init();
+    return webapiFormatFeatureReport(response, errorMessage);
+}
+
+int LimeRFE::webapiActionsPost(
+    const QStringList& featureActionsKeys,
+    SWGSDRangel::SWGFeatureActions& query,
+    QString& errorMessage)
+{
+    SWGSDRangel::SWGLimeRFEActions *swgLimeRFEActions = query.getLimeRfeActions();
+
+    if (swgLimeRFEActions)
+    {
+        bool unknownAction = true;
+        int channel = -1;
+        int deviceSetIndex = -1;
+
+        if (featureActionsKeys.contains("selectChannel"))
+        {
+            channel = swgLimeRFEActions->getSelectChannel();
+            unknownAction = false;
+        }
+
+        if (featureActionsKeys.contains("deviceSetIndex"))
+        {
+            deviceSetIndex = swgLimeRFEActions->getDeviceSetIndex();
+            unknownAction = false;
+        }
+
+        if (featureActionsKeys.contains("openCloseDevice") && (swgLimeRFEActions->getOpenCloseDevice() != 0))
+        {
+            int rc = openDevice(m_settings.m_devicePath.toStdString());
+            unknownAction = false;
+
+            if (rc != 0)
+            {
+                errorMessage = QString("Open %1: %2").arg(m_settings.m_devicePath).arg(getError(rc).c_str());
+                return 500;
+            }
+        }
+
+        if (featureActionsKeys.contains("fromToSettings") && (swgLimeRFEActions->getFromToSettings() != 0))
+        {
+            settingsToState(m_settings);
+            unknownAction = false;
+        }
+
+        if ((channel >= 0) && featureActionsKeys.contains("switchChannel"))
+        {
+            if (channel == 0)
+            {
+                bool on = swgLimeRFEActions->getSwitchChannel() != 0;
+                int rc = setRx(m_settings, on);
+
+                if (rc != 0)
+                {
+                    errorMessage = QString("Set Rx %1 %2: %3").arg(m_settings.m_devicePath).arg(on).arg(getError(rc).c_str());
+                    return 500;
+                }
+
+                if (getMessageQueueToGUI())
+                {
+                    MsgConfigureLimeRFE *msg = MsgConfigureLimeRFE::create(m_settings, false);
+                    getMessageQueueToGUI()->push(msg);
+                }
+            }
+            else
+            {
+                bool on = swgLimeRFEActions->getSwitchChannel() != 0;
+                int rc = setTx(m_settings, swgLimeRFEActions->getSwitchChannel() != 0);
+
+                if (rc != 0)
+                {
+                    errorMessage = QString("Set Tx %1 %2: %3").arg(m_settings.m_devicePath).arg(on).arg(getError(rc).c_str());
+                    return 500;
+                }
+
+                if (getMessageQueueToGUI())
+                {
+                    MsgConfigureLimeRFE *msg = MsgConfigureLimeRFE::create(m_settings, false);
+                    getMessageQueueToGUI()->push(msg);
+                }
+            }
+
+            if (deviceSetIndex >= 0) {
+                turnDevice(deviceSetIndex, swgLimeRFEActions->getSwitchChannel() != 0);
+            }
+
+            unknownAction = false;
+        }
+
+        if (featureActionsKeys.contains("fromToSettings") && (swgLimeRFEActions->getFromToSettings() == 0))
+        {
+            stateToSettings(m_settings);
+            unknownAction = false;
+
+            if (getMessageQueueToGUI())
+            {
+                MsgConfigureLimeRFE *msg = MsgConfigureLimeRFE::create(m_settings, false);
+                getMessageQueueToGUI()->push(msg);
+            }
+        }
+
+        if (featureActionsKeys.contains("openCloseDevice") && (swgLimeRFEActions->getOpenCloseDevice() == 0))
+        {
+            closeDevice();
+            unknownAction = false;
+        }
+
+        if (unknownAction)
+        {
+            errorMessage = "Unknown action";
+            return 400;
+        }
+        else
+        {
+            return 202;
+        }
+    }
+    else
+    {
+        errorMessage = "Missing SimplePTTActions in query";
+        return 400;
+    }
+}
+
+void LimeRFE::webapiFormatFeatureSettings(
+    SWGSDRangel::SWGFeatureSettings& response,
+    const LimeRFESettings& settings)
+{
+    if (response.getLimeRfeSettings()->getTitle()) {
+        *response.getLimeRfeSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getLimeRfeSettings()->setTitle(new QString(settings.m_title));
+    }
+
+    response.getLimeRfeSettings()->setRgbColor(settings.m_rgbColor);
+    response.getLimeRfeSettings()->setDevicePath(new QString(settings.m_devicePath));
+    response.getLimeRfeSettings()->setRxChannels((int) settings.m_rxChannels);
+    response.getLimeRfeSettings()->setRxWidebandChannel((int) settings.m_rxWidebandChannel);
+    response.getLimeRfeSettings()->setRxHamChannel((int) settings.m_rxHAMChannel);
+    response.getLimeRfeSettings()->setRxCellularChannel((int) settings.m_rxCellularChannel);
+    response.getLimeRfeSettings()->setRxPort((int) settings.m_rxPort);
+    response.getLimeRfeSettings()->setRxOn(settings.m_rxOn ? 1 : 0);
+    response.getLimeRfeSettings()->setAmfmNotch(settings.m_amfmNotch ? 1 : 0);
+    response.getLimeRfeSettings()->setAttenuationFactor(settings.m_attenuationFactor);
+    response.getLimeRfeSettings()->setTxChannels((int) settings.m_txChannels);
+    response.getLimeRfeSettings()->setTxWidebandChannel((int) settings.m_txWidebandChannel);
+    response.getLimeRfeSettings()->setTxHamChannel((int) settings.m_txHAMChannel);
+    response.getLimeRfeSettings()->setTxCellularChannel((int) settings.m_txCellularChannel);
+    response.getLimeRfeSettings()->setTxPort((int) settings.m_txPort);
+    response.getLimeRfeSettings()->setTxOn(settings.m_txOn ? 1 : 0);
+    response.getLimeRfeSettings()->setSwrEnable(settings.m_swrEnable ? 1 : 0);
+    response.getLimeRfeSettings()->setSwrSource((int) settings.m_swrSource);
+    response.getLimeRfeSettings()->setTxRxDriven(settings.m_txRxDriven ? 1 : 0);
+
+    response.getLimeRfeSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getLimeRfeSettings()->getReverseApiAddress()) {
+        *response.getLimeRfeSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getLimeRfeSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getLimeRfeSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getLimeRfeSettings()->setReverseApiFeatureSetIndex(settings.m_reverseAPIFeatureSetIndex);
+    response.getLimeRfeSettings()->setReverseApiFeatureIndex(settings.m_reverseAPIFeatureIndex);
+
+    if (settings.m_rollupState)
+    {
+        if (response.getLimeRfeSettings()->getRollupState())
+        {
+            settings.m_rollupState->formatTo(response.getLimeRfeSettings()->getRollupState());
+        }
+        else
+        {
+            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            settings.m_rollupState->formatTo(swgRollupState);
+            response.getLimeRfeSettings()->setRollupState(swgRollupState);
+        }
+    }
+}
+
+void LimeRFE::webapiUpdateFeatureSettings(
+    LimeRFESettings& settings,
+    const QStringList& featureSettingsKeys,
+    SWGSDRangel::SWGFeatureSettings& response)
+{
+    if (featureSettingsKeys.contains("title")) {
+        settings.m_title = *response.getLimeRfeSettings()->getTitle();
+    }
+    if (featureSettingsKeys.contains("rgbColor")) {
+        settings.m_rgbColor = response.getLimeRfeSettings()->getRgbColor();
+    }
+    if (featureSettingsKeys.contains("devicePath")) {
+        settings.m_devicePath = *response.getLimeRfeSettings()->getDevicePath();
+    }
+    if (featureSettingsKeys.contains("rxChannels")) {
+        settings.m_rxChannels = (LimeRFESettings::ChannelGroups) response.getLimeRfeSettings()->getRxChannels();
+    }
+    if (featureSettingsKeys.contains("rxWidebandChannel")) {
+        settings.m_rxWidebandChannel = (LimeRFESettings::WidebandChannel) response.getLimeRfeSettings()->getRxWidebandChannel();
+    }
+    if (featureSettingsKeys.contains("rxHAMChannel")) {
+        settings.m_rxHAMChannel = (LimeRFESettings::HAMChannel) response.getLimeRfeSettings()->getRxHamChannel();
+    }
+    if (featureSettingsKeys.contains("rxCellularChannel")) {
+        settings.m_rxCellularChannel = (LimeRFESettings::CellularChannel) response.getLimeRfeSettings()->getRxCellularChannel();
+    }
+    if (featureSettingsKeys.contains("rxPort")) {
+        settings.m_rxPort = (LimeRFESettings::RxPort) response.getLimeRfeSettings()->getRxPort();
+    }
+    if (featureSettingsKeys.contains("rxOn")) {
+        settings.m_rxOn = response.getLimeRfeSettings()->getRxOn() != 0;
+    }
+    if (featureSettingsKeys.contains("amfmNotch")) {
+        settings.m_amfmNotch = response.getLimeRfeSettings()->getAmfmNotch() != 0;
+    }
+    if (featureSettingsKeys.contains("attenuationFactor")) {
+        settings.m_attenuationFactor = response.getLimeRfeSettings()->getAttenuationFactor();
+    }
+    if (featureSettingsKeys.contains("txChannels")) {
+        settings.m_txChannels = (LimeRFESettings::ChannelGroups) response.getLimeRfeSettings()->getTxChannels();
+    }
+    if (featureSettingsKeys.contains("txWidebandChannel")) {
+        settings.m_txWidebandChannel = (LimeRFESettings::WidebandChannel) response.getLimeRfeSettings()->getTxWidebandChannel();
+    }
+    if (featureSettingsKeys.contains("txHAMChannel")) {
+        settings.m_txHAMChannel = (LimeRFESettings::HAMChannel) response.getLimeRfeSettings()->getTxHamChannel();
+    }
+    if (featureSettingsKeys.contains("txCellularChannel")) {
+        settings.m_txCellularChannel = (LimeRFESettings::CellularChannel) response.getLimeRfeSettings()->getTxCellularChannel();
+    }
+    if (featureSettingsKeys.contains("txPort")) {
+        settings.m_txPort = (LimeRFESettings::TxPort) response.getLimeRfeSettings()->getTxPort();
+    }
+    if (featureSettingsKeys.contains("txOn")) {
+        settings.m_txOn = response.getLimeRfeSettings()->getTxOn() != 0;
+    }
+    if (featureSettingsKeys.contains("swrEnable")) {
+        settings.m_swrEnable = response.getLimeRfeSettings()->getSwrEnable() != 0;
+    }
+    if (featureSettingsKeys.contains("swrSource")) {
+        settings.m_swrSource = (LimeRFESettings::SWRSource) response.getLimeRfeSettings()->getSwrSource();
+    }
+    if (featureSettingsKeys.contains("txRxDriven")) {
+        settings.m_txRxDriven = response.getLimeRfeSettings()->getTxRxDriven() != 0;
+    }
+    if (featureSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getLimeRfeSettings()->getUseReverseApi() != 0;
+    }
+    if (featureSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getLimeRfeSettings()->getReverseApiAddress();
+    }
+    if (featureSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getLimeRfeSettings()->getReverseApiPort();
+    }
+    if (featureSettingsKeys.contains("reverseAPIFeatureSetIndex")) {
+        settings.m_reverseAPIFeatureSetIndex = response.getLimeRfeSettings()->getReverseApiFeatureSetIndex();
+    }
+    if (featureSettingsKeys.contains("reverseAPIFeatureIndex")) {
+        settings.m_reverseAPIFeatureIndex = response.getLimeRfeSettings()->getReverseApiFeatureIndex();
+    }
+    if (settings.m_rollupState && featureSettingsKeys.contains("rollupState")) {
+        settings.m_rollupState->updateFrom(featureSettingsKeys, response.getLimeRfeSettings()->getRollupState());
+    }
+}
+
+int LimeRFE::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response, QString& errorMessage)
+{
+    int fwdPower;
+    int rc = getFwdPower(fwdPower);
+
+    if (rc != 0)
+    {
+        errorMessage = QString("Error getting forward power from LimeRFE device %1: %2")
+            .arg(m_settings.m_devicePath).arg(getError(rc).c_str());
+        return 500;
+    }
+
+    int refPower;
+    rc = getRefPower(refPower);
+
+    if (rc != 0)
+    {
+        errorMessage = QString("Error getting reflected power from LimeRFE device %1: %2")
+            .arg(m_settings.m_devicePath).arg(getError(rc).c_str());
+        return 500;
+    }
+
+    response.getLimeRfeReport()->setForwardPower(fwdPower);
+    response.getLimeRfeReport()->setReflectedPower(refPower);
+    return 200;
 }

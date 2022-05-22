@@ -158,9 +158,11 @@
 #include "SWGJogdialControllerSettings.h"
 #include "SWGKiwiSDRReport.h"
 #include "SWGKiwiSDRSettings.h"
+#include "SWGLimeRFEActions.h"
 #include "SWGLimeRFEDevice.h"
 #include "SWGLimeRFEDevices.h"
 #include "SWGLimeRFEPower.h"
+#include "SWGLimeRFEReport.h"
 #include "SWGLimeRFESettings.h"
 #include "SWGLimeSdrInputReport.h"
 #include "SWGLimeSdrInputSettings.h"
@@ -1048,6 +1050,11 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGLimeRFEActions").compare(type) == 0) {
+      SWGLimeRFEActions *obj = new SWGLimeRFEActions();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGLimeRFEDevice").compare(type) == 0) {
       SWGLimeRFEDevice *obj = new SWGLimeRFEDevice();
       obj->init();
@@ -1060,6 +1067,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGLimeRFEPower").compare(type) == 0) {
       SWGLimeRFEPower *obj = new SWGLimeRFEPower();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGLimeRFEReport").compare(type) == 0) {
+      SWGLimeRFEReport *obj = new SWGLimeRFEReport();
       obj->init();
       return obj;
     }

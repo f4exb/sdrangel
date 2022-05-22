@@ -17,6 +17,8 @@ FeatureActions:
       $ref: "http://swgserver:8081/api/swagger/include/AFC.yaml#/AFCActions"
     GS232ControllerActions:
       $ref: "http://swgserver:8081/api/swagger/include/GS232Controller.yaml#/GS232ControllerActions"
+    LimeRFEActions:
+      $ref: "http://swgserver:8081/api/swagger/include/LimeRFE.yaml#/LimeRFEActions"
     MapActions:
       $ref: "http://swgserver:8081/api/swagger/include/Map.yaml#/MapActions"
     PERTesterActions:

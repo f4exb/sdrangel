@@ -5602,6 +5602,11 @@ bool WebAPIRequestMapper::getFeatureActions(
             featureActions->setGs232ControllerActions(new SWGSDRangel::SWGGS232ControllerActions());
             featureActions->getGs232ControllerActions()->fromJsonObject(actionsJsonObject);
         }
+        else if (featureActionsKey == "LimeRFEActions")
+        {
+            featureActions->setLimeRfeActions(new SWGSDRangel::SWGLimeRFEActions());
+            featureActions->getLimeRfeActions()->fromJsonObject(actionsJsonObject);
+        }
         else if (featureActionsKey == "MapActions")
         {
             featureActions->setMapActions(new SWGSDRangel::SWGMapActions());

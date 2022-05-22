@@ -27,6 +27,8 @@ FeatureSettings:
       $ref: "/doc/swagger/include/JogdialController.yaml#/JogdialControllerSettings"
     GS232ControllerSettings:
       $ref: "/doc/swagger/include/GS232Controller.yaml#/GS232ControllerSettings"
+    LimeRFESettings:
+      $ref: "/doc/swagger/include/LimeRFE.yaml#/LimeRFESettings"
     MapSettings:
       $ref: "/doc/swagger/include/Map.yaml#/MapSettings"
     PERTesterSettings:

@@ -100,11 +100,13 @@ private:
     void stopStartTx(bool start);
     void syncRxTx();
     void highlightApplyButton(bool highlight);
+    bool handleMessage(const Message& message);
     void makeUIConnections();
 
 private slots:
 	void onMenuDialogCalled(const QPoint &p);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
+    void handleInputMessages();
     void on_openDevice_clicked();
     void on_closeDevice_clicked();
     void on_deviceToGUI_clicked();

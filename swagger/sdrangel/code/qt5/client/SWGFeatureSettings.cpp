@@ -48,6 +48,8 @@ SWGFeatureSettings::SWGFeatureSettings() {
     m_jogdial_controller_settings_isSet = false;
     gs232_controller_settings = nullptr;
     m_gs232_controller_settings_isSet = false;
+    lime_rfe_settings = nullptr;
+    m_lime_rfe_settings_isSet = false;
     map_settings = nullptr;
     m_map_settings_isSet = false;
     per_tester_settings = nullptr;
@@ -92,6 +94,8 @@ SWGFeatureSettings::init() {
     m_jogdial_controller_settings_isSet = false;
     gs232_controller_settings = new SWGGS232ControllerSettings();
     m_gs232_controller_settings_isSet = false;
+    lime_rfe_settings = new SWGLimeRFESettings();
+    m_lime_rfe_settings_isSet = false;
     map_settings = new SWGMapSettings();
     m_map_settings_isSet = false;
     per_tester_settings = new SWGPERTesterSettings();
@@ -137,6 +141,9 @@ SWGFeatureSettings::cleanup() {
     }
     if(gs232_controller_settings != nullptr) { 
         delete gs232_controller_settings;
+    }
+    if(lime_rfe_settings != nullptr) { 
+        delete lime_rfe_settings;
     }
     if(map_settings != nullptr) { 
         delete map_settings;
@@ -194,6 +201,8 @@ SWGFeatureSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&jogdial_controller_settings, pJson["JogdialControllerSettings"], "SWGJogdialControllerSettings", "SWGJogdialControllerSettings");
     
     ::SWGSDRangel::setValue(&gs232_controller_settings, pJson["GS232ControllerSettings"], "SWGGS232ControllerSettings", "SWGGS232ControllerSettings");
+    
+    ::SWGSDRangel::setValue(&lime_rfe_settings, pJson["LimeRFESettings"], "SWGLimeRFESettings", "SWGLimeRFESettings");
     
     ::SWGSDRangel::setValue(&map_settings, pJson["MapSettings"], "SWGMapSettings", "SWGMapSettings");
     
@@ -256,6 +265,9 @@ SWGFeatureSettings::asJsonObject() {
     }
     if((gs232_controller_settings != nullptr) && (gs232_controller_settings->isSet())){
         toJsonValue(QString("GS232ControllerSettings"), gs232_controller_settings, obj, QString("SWGGS232ControllerSettings"));
+    }
+    if((lime_rfe_settings != nullptr) && (lime_rfe_settings->isSet())){
+        toJsonValue(QString("LimeRFESettings"), lime_rfe_settings, obj, QString("SWGLimeRFESettings"));
     }
     if((map_settings != nullptr) && (map_settings->isSet())){
         toJsonValue(QString("MapSettings"), map_settings, obj, QString("SWGMapSettings"));
@@ -385,6 +397,16 @@ SWGFeatureSettings::setGs232ControllerSettings(SWGGS232ControllerSettings* gs232
     this->m_gs232_controller_settings_isSet = true;
 }
 
+SWGLimeRFESettings*
+SWGFeatureSettings::getLimeRfeSettings() {
+    return lime_rfe_settings;
+}
+void
+SWGFeatureSettings::setLimeRfeSettings(SWGLimeRFESettings* lime_rfe_settings) {
+    this->lime_rfe_settings = lime_rfe_settings;
+    this->m_lime_rfe_settings_isSet = true;
+}
+
 SWGMapSettings*
 SWGFeatureSettings::getMapSettings() {
     return map_settings;
@@ -498,6 +520,9 @@ SWGFeatureSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(gs232_controller_settings && gs232_controller_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(lime_rfe_settings && lime_rfe_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(map_settings && map_settings->isSet()){

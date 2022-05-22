@@ -59,6 +59,44 @@ public:
         { }
     };
 
+    class MsgReportSetRx : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool isOn() const { return m_on; }
+
+        static MsgReportSetRx* create(bool on) {
+            return new MsgReportSetRx(on);
+        }
+
+    private:
+        bool m_on;
+
+        MsgReportSetRx(bool on) :
+            Message(),
+            m_on(on)
+        { }
+    };
+
+    class MsgReportSetTx : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool isOn() const { return m_on; }
+
+        static MsgReportSetTx* create(bool on) {
+            return new MsgReportSetTx(on);
+        }
+
+    private:
+        bool m_on;
+
+        MsgReportSetTx(bool on) :
+            Message(),
+            m_on(on)
+        { }
+    };
+
     LimeRFE(WebAPIAdapterInterface *webAPIAdapterInterface);
     virtual ~LimeRFE();
     virtual void destroy() { delete this; }
@@ -70,6 +108,34 @@ public:
 
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
+
+    virtual int webapiSettingsGet(
+            SWGSDRangel::SWGFeatureSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+            bool force,
+            const QStringList& featureSettingsKeys,
+            SWGSDRangel::SWGFeatureSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGFeatureReport& response,
+            QString& errorMessage);
+
+    virtual int webapiActionsPost(
+            const QStringList& featureActionsKeys,
+            SWGSDRangel::SWGFeatureActions& query,
+            QString& errorMessage);
+
+    static void webapiFormatFeatureSettings(
+        SWGSDRangel::SWGFeatureSettings& response,
+        const LimeRFESettings& settings);
+
+    static void webapiUpdateFeatureSettings(
+            LimeRFESettings& settings,
+            const QStringList& featureSettingsKeys,
+            SWGSDRangel::SWGFeatureSettings& response);
 
     LimeRFEUSBCalib *getCalib() { return &m_calib; }
 
@@ -108,6 +174,8 @@ private:
     void start();
     void stop();
     void listComPorts();
+    void applySettings(const LimeRFESettings& settings, bool force = false);
+    int webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response, QString& errorMessage);
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
