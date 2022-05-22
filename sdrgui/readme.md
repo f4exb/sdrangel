@@ -22,7 +22,6 @@ The menu items from left to right are:
     - _Logging_: opens a dialog to choose logging options. See "Logging" paragraph next for details
     - _FFT_: opens a dialog to run the `fftwf-wisdom` utility with a choice of direct and possibly reverse FFT sizes. It produces a so called wisdom file `fftw-wisdom` that speeds up FFT allocations. It is created at a default location and will be used at next invocations of SDRangel. See "FFT" paragraph next for details.
     - _AMBE_: Opens a dialog to select AMBE3000 serial devices or AMBE server addresses to use for AMBE digital voice processing. If none is selected AMBE frames decoding will be done with mbelib if available else no audio will be produced for AMBE digital voice. See "AMBE"paragraph next for details.
-    - _Lime RFE_: Presemt only if LimeSuite library is available. This opens a dialog to control a LimeRFE device via USB. The details are provided [here](limerfeusbgui.md).
     - _My Position_: opens a dialog to enter your station ("My Position") coordinates in decimal degrees with north latitudes positive and east longitudes positive. This is used whenever positional data is to be displayed (APRS, DPRS, ...). For it now only works with D-Star $$CRC frames. See [DSD demod plugin](../plugins/channelrx/demoddsd/readme.md) for details on how to decode Digital Voice modes.
     - _Devices_: section to deal with devices settings
       - _User arguments_: opens a dialog to let the user give arguments specific to a device and its instance (sequence) in the system

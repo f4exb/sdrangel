@@ -1,36 +1,46 @@
-<h1>LimeRFE USB control</h1>
+<h1>LimeRFE USB controller</h1>
 
-The LimeRFE or Lime RF Front End is a power amplifier and LNA board designed to augment the capabilities of the LimeSDR in order to build an operational radio solution. The usage is not limited to LimeSDR any Rx or Tx device can be connected to it. The LimeRFE can be controlled directly via its USB port independently of a LimeSDR device. This interface allows exactly that from the SDRangel GUI.
+<h2>Introduction</h2>
 
-To open the LimeRFE USB dialog open the Preferences sub-menu from the top bar and click on the `LimeRFE` item. This item is available only when the code is compiled with the `LimeRFE` branch of LimeSuite.
+This plugin supports the [LimeRFE](https://github.com/myriadrf/LimeRFE) board. This board hosts a hardware power amplifier (PA) module with appropriate filtering and support circuitry to augment primarily but not only the LimeSDR, LimeSDR Mini, and LimeNET Micro platforms, providing a complete solution that addresses real life applications ranging from HAM radio to standards-compliant cellular network implementations.
 
-The dialog is non-modal so that it can be left open and keep the control on LimeRFE while other functions can be used.
+As mentioned above it can be connected to a wide variety of SDR receivers and transmitters and this feature supports the synchronization with any receiver or trasmiiter device sets.
 
-Whenever a change requires the LimeRFE configuration to be changed to become effective the "Apply" button (6) becomes green to suggest it should be activated.
+This plugin depends on [LimeSuite](https://github.com/myriadrf/LimeSuite) that should be available in your system in order to be compiled.
 
-&#9888; Disclaimer: please use this interface and the LimeRFE sensibly by making sure you are licensed to operate it on the selected frequencies. If you are a licensed amateur radio you should make sure you operate on the bands allocated in your region as some bands are exclusive to a specific region or country.
+<h2>Interface</h2>
 
-![LimeRFE USB dialog](../doc/img/LimeRFEUSB_dialog.png)
+![LimeRFE controller GUI](../../../doc/img/LimeRFE_plugin.png)
 
-<h2>1. USB serial devices list</h2>
+When starting you need first to open the LimeRFE device with button (2). You havr to select the appropriate serial device from (1). Note that all serial USB based devices are listed. You need to identify which one corresponds to the LimeRFE board you want to target.
+
+Once opened successfully (check status message in 6) you will apply the settings using the Apply button (5). Whenever the settings are changed this button lits in green showing that you may press it to update the board. Conversely the "to GUI" button (4) reads the settings from the board and updates the GUI.
+
+<h3>1. USB serial devices list</h3>
 
 This combo lists all USB serial devices list available in the system regardless if they are LimeRFE or other devices. You must specify the device corresponding to a LimeRFE device to be able to open it successfully with (2)
 
-<h2>2. Open device</h2>
+<h3>2. Open device</h3>
 
 Click on this button to open the serial device selected by (1). You need to open the device successfully prior to any operation. The open status is displayed in the status window (5).
 
-<h2>3. Close device</h2>
+<h3>3. Close device</h3>
 
 If you have more than one LimeRFE connected to your system you have to close one before opening another by using this button.
 
-<h2>4. Pull device configuration to GUI</h2>
+<h3>4. Pull device configuration to GUI</h3>
 
 Use this button to retrieve the LimeRFE device current configuration and populate the GUI with its data.
 
+<h3>5. Apply changes</h3>
+
+Use this button to apply configuration changes. You must press this button to make any of your changes active. Whenever a change requires the LimeRFE configuration to be changed to become effective this button becomes green to suggest it should be activated.
+
+<h3>6. Status window</h3
+
 <h2>A. Rx channel control</h2>
 
-![LimeRFE USB Rx dialog](../doc/img/LimeRFEUSB_dialog_rx.png)
+![LimeRFE Rx section](../../../doc/img/LimeRFE_plugin_rx.png)
 
 <h3>A.1. Rx channel group</h3>
 
@@ -85,7 +95,7 @@ Toggle AM/FM broadcast bands notch filter.
 
 <h2>B. Tx channel control</h2>
 
-![LimeRFE USB Tx dialog](../doc/img/LimeRFEUSB_dialog_tx.png)
+![LimeRFE Tx section](../../../doc/img/LimeRFE_plugin_tx.png)
 
 <h3>B.1 Copy Rx band settings</h3>
 
@@ -106,9 +116,12 @@ Select which port to connect the Rx to:
   - **Tx/Rx (J3)**: this is the J3 port combining Rx and Tx. When cellular bands are selected this is connected to a duplexer internally
   - **Tx (J4)**: Tx connected port only. Can be used to split Rx and Tx to drive a higher power P.A. for example
 
+
+This is where status messages are displayed.
+
 <h2>C. Power and SWR</h2>
 
-![LimeRFE USB power dialog](../doc/img/LimeRFEUSB_dialog_power.png)
+![LimeRFE power section](../../../doc/img/LimeRFE_plugin_power.png)
 
 <h3>C.1 Activate power measurement</h3>
 
@@ -118,52 +131,46 @@ Check this box to enable power measurements.
 
 Use this button to refresh the power measurements.
 
-<h3>C.3 Forward power (relative)</h3>
-
-This is the relative forward direction power in dB.
-
-<h3>C.4 Reflected power (relative)</h3>
-
-This is the relative reverse direction power in dB.
-
-<h3>C.5 Return loss</h3>
-
-This is the return loss in dB and is exactly (C.3) minus (C.4).
-
-<h3>C.6 Voltage Standing Wave Ratio</h3>
-
-This is the VSWR computed from the return loss in (C.5)
-
-<h3>C.7 Power measurement source</h3>
+<h3>C.3 Power measurement source</h3>
 
 Use this combo to select the power measurement source:
 
   - **EXT**: External: select this when a dual directional coupler is connected to `Ref` (J17) and `Fwd` (J18) ports
   - **CEL**: Cellular: select this to use the internal coupler when cellular bands are engaged
 
-<h3>C.8 Monitor power continuously</h3>
+<h3>C.4 Monitor power continuously</h3>
 
 Use this switch to activate the continuous monitoring. A measurement will be taken every 500ms.
 
-<h3>C.9 Power correction</h3>
+<h3>C.5 Power correction</h3>
 
 Use a power meter and apply this correction to obtain the real delivered power in dBm. There is one correction factor by band. The values are saved in the persistent settings.
 
-<h3>C.10 Corrected power</h3>
+<h3>C.6 Coupler relative power measurements</h3>
 
-This is the corrected power in dBm and is exactly (C.3) plus (C.9).
+  - **Fwd**: This is the relative forward direction power in dB.
+  - **Ref**: This is the relative reverse direction power in dB.
+  - **RL**: This is the return loss in dB and is exactly Fwd minus Ref
 
-<h3>C.11 Corrected power in Watts</h3>
+<h3>C.7 Voltage Standing Wave Ratio</h3>
+
+This is the VSWR computed from the return loss RL in (C.6)
+
+<h3>C.8 Corrected power in dBm</h3>
+
+This is the corrected power in dBm and is exactly Fwd in (C.6) plus correction in (C.8).
+
+<h3>C.9 Corrected power in Watts</h3>
 
 This is the corrected power in Watts.
 
-<h3>C.12 Corrected power averaging</h3>
+<h3>C.10 Corrected power averaging</h3>
 
 Use this switch to activate the averaging of corrected power. This is a moving average over 10 measurements thus over a 5s period.
 
-<h2>D. Rx/Tx mode selection</h2>
+<h2>D. Control</h2>
 
-![LimeRFE USB mode dialog](../doc/img/LimeRFEUSB_dialog_mode.png)
+![LimeRFE control section](../../../doc/img/LimeRFE_plugin_control.png)
 
 <h3>D.1 Rx mode</h3>
 
@@ -192,15 +199,3 @@ Select the Tx device set index with which you want to synchronize the Tx switch 
 <h3>D.7 Refresh device sets indexes</h3>
 
 When the configuration of device sets changes you can use this button to refresh the device set indexes in (D.5) and (D.6).
-
-<h2>5. Status window</h2>
-
-This is where status messages are displayed.
-
-<h2>6. Apply changes</h2>
-
-Use this button to apply configuration changes. You must press this button to make any of your changes active. Whenever a change requires the LimeRFE configuration to be changed to become effective this button becomes green to suggest it should be activated.
-
-<h2>7. Close dialog</h2>
-
-This dismisses the dialog.
