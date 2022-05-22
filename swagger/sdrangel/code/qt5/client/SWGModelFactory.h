@@ -161,7 +161,6 @@
 #include "SWGLimeRFEActions.h"
 #include "SWGLimeRFEDevice.h"
 #include "SWGLimeRFEDevices.h"
-#include "SWGLimeRFEPower.h"
 #include "SWGLimeRFEReport.h"
 #include "SWGLimeRFESettings.h"
 #include "SWGLimeSdrInputReport.h"
@@ -1062,11 +1061,6 @@ namespace SWGSDRangel {
     }
     if(QString("SWGLimeRFEDevices").compare(type) == 0) {
       SWGLimeRFEDevices *obj = new SWGLimeRFEDevices();
-      obj->init();
-      return obj;
-    }
-    if(QString("SWGLimeRFEPower").compare(type) == 0) {
-      SWGLimeRFEPower *obj = new SWGLimeRFEPower();
       obj->init();
       return obj;
     }

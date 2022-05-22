@@ -146,32 +146,6 @@ public:
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
-#ifdef HAS_LIMERFEUSB
-    virtual int instanceLimeRFESerialGet(
-            SWGSDRangel::SWGLimeRFEDevices& response,
-            SWGSDRangel::SWGErrorResponse& error);
-
-    virtual int instanceLimeRFEConfigGet(
-            const QString& serial,
-            SWGSDRangel::SWGLimeRFESettings& response,
-            SWGSDRangel::SWGErrorResponse& error);
-
-    virtual int instanceLimeRFEConfigPut(
-            SWGSDRangel::SWGLimeRFESettings& query,
-            SWGSDRangel::SWGSuccessResponse& response,
-            SWGSDRangel::SWGErrorResponse& error);
-
-    virtual int instanceLimeRFERunPut(
-            SWGSDRangel::SWGLimeRFESettings& query,
-            SWGSDRangel::SWGSuccessResponse& response,
-            SWGSDRangel::SWGErrorResponse& error);
-
-    virtual int instanceLimeRFEPowerGet(
-            const QString& serial,
-            SWGSDRangel::SWGLimeRFEPower& response,
-            SWGSDRangel::SWGErrorResponse& error);
-#endif
-
     virtual int instancePresetsGet(
             SWGSDRangel::SWGPresets& response,
             SWGSDRangel::SWGErrorResponse& error);
