@@ -146,8 +146,10 @@ public:
     int configure();
     int getState();
     static std::string getError(int errorCode);
-    int setRx(LimeRFESettings& settings, bool rxOn);
-    int setTx(LimeRFESettings& settings, bool txOn);
+    int setRx(bool rxOn);
+    int setTx(bool txOn);
+    bool getRx() const { return m_rxOn; };
+    bool getTx() const { return m_txOn; };
     bool turnDevice(int deviceSetIndex, bool on);
     int getFwdPower(int& powerDB);
     int getRefPower(int& powerDB);
@@ -161,6 +163,8 @@ public:
 private:
     LimeRFESettings m_settings;
     LimeRFEUSBCalib m_calib;
+    bool m_rxOn;
+    bool m_txOn;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;

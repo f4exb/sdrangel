@@ -128,6 +128,8 @@ LimeRFEGUI::LimeRFEGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature
 	ui(new Ui::LimeRFEGUI),
 	m_pluginAPI(pluginAPI),
     m_featureUISet(featureUISet),
+    m_rxOn(false),
+    m_txOn(false),
 	m_doApplySettings(true),
     m_rxTxToggle(false),
     m_currentPowerCorrection(0.0),
@@ -200,9 +202,9 @@ void LimeRFEGUI::displayMode()
 {
     QString s;
 
-    if (m_settings.m_rxOn)
+    if (m_rxOn)
     {
-        if (m_settings.m_txOn) {
+        if (m_txOn) {
             s = "Rx/Tx";
         } else {
             s = "Rx";
@@ -210,7 +212,7 @@ void LimeRFEGUI::displayMode()
     }
     else
     {
-        if (m_settings.m_txOn) {
+        if (m_txOn) {
             s = "Tx";
         } else {
             s = "None";
@@ -222,20 +224,20 @@ void LimeRFEGUI::displayMode()
     ui->modeRx->blockSignals(true);
     ui->modeTx->blockSignals(true);
 
-    if (m_settings.m_rxOn) {
+    if (m_rxOn) {
 		ui->modeRx->setStyleSheet("QToolButton { background-color : green; }");
     } else {
 		ui->modeRx->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
     }
 
-    if (m_settings.m_txOn) {
+    if (m_txOn) {
         ui->modeTx->setStyleSheet("QToolButton { background-color : red; }");
     } else {
 		ui->modeTx->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
     }
 
-    ui->modeRx->setChecked(m_settings.m_rxOn);
-    ui->modeTx->setChecked(m_settings.m_txOn);
+    ui->modeRx->setChecked(m_rxOn);
+    ui->modeTx->setChecked(m_txOn);
 
     ui->modeRx->blockSignals(false);
     ui->modeTx->blockSignals(false);
@@ -674,6 +676,8 @@ void LimeRFEGUI::on_deviceToGUI_clicked()
     }
 
     m_limeRFE->stateToSettings(m_settings);
+    m_rxOn = m_limeRFE->getRx();
+    m_txOn = m_limeRFE->getTx();
     displaySettings();
     highlightApplyButton(false);
 }
@@ -830,14 +834,14 @@ void LimeRFEGUI::on_deviceSetSync_clicked()
 
 void LimeRFEGUI::syncRxTx()
 {
-    if (!m_settings.m_txOn) {
-        stopStartTx(m_settings.m_txOn);
+    if (!m_txOn) {
+        stopStartTx(m_txOn);
     }
 
-    stopStartRx(m_settings.m_rxOn);
+    stopStartRx(m_rxOn);
 
-    if (m_settings.m_txOn) {
-        stopStartTx(m_settings.m_txOn);
+    if (m_txOn) {
+        stopStartTx(m_txOn);
     }
 }
 
@@ -865,30 +869,30 @@ void LimeRFEGUI::on_modeRx_toggled(bool checked)
 {
     int rc;
     ui->statusText->clear();
-    m_settings.m_rxOn = checked;
+    m_rxOn = checked;
 
     if (m_rxTxToggle)
     {
-        m_settings.m_txOn = !checked;
+        m_txOn = !checked;
 
         if (checked) // Rx on
         {
-            rc = m_limeRFE->setTx(m_settings, false); // stop Tx first
+            rc = m_limeRFE->setTx(false); // stop Tx first
             ui->statusText->append(QString("Stop TX: %1").arg(m_limeRFE->getError(rc).c_str()));
         }
 
-        rc = m_limeRFE->setRx(m_settings, m_settings.m_rxOn); // Rx on or off
+        rc = m_limeRFE->setRx(m_rxOn); // Rx on or off
         ui->statusText->append(QString("RX: %1").arg(m_limeRFE->getError(rc).c_str()));
 
         if (!checked) // Rx off
         {
-            rc = m_limeRFE->setTx(m_settings, true); // start Tx next
+            rc = m_limeRFE->setTx(true); // start Tx next
             ui->statusText->append(QString("Start TX: %1").arg(m_limeRFE->getError(rc).c_str()));
         }
     }
     else
     {
-        rc = m_limeRFE->setRx(m_settings, m_settings.m_rxOn);
+        rc = m_limeRFE->setRx(m_rxOn);
         ui->statusText->setText(m_limeRFE->getError(rc).c_str());
     }
 
@@ -903,30 +907,30 @@ void LimeRFEGUI::on_modeTx_toggled(bool checked)
 {
     int rc;
     ui->statusText->clear();
-    m_settings.m_txOn = checked;
+    m_txOn = checked;
 
     if (m_rxTxToggle)
     {
-        m_settings.m_rxOn = !checked;
+        m_rxOn = !checked;
 
         if (checked) // Tx on
         {
-            rc = m_limeRFE->setRx(m_settings, false); // stop Rx first
+            rc = m_limeRFE->setRx(false); // stop Rx first
             ui->statusText->append(QString("Stop RX: %1").arg(m_limeRFE->getError(rc).c_str()));
         }
 
-        rc = m_limeRFE->setTx(m_settings, m_settings.m_txOn); // Tx on or off
+        rc = m_limeRFE->setTx(m_txOn); // Tx on or off
         ui->statusText->append(QString("TX: %1").arg(m_limeRFE->getError(rc).c_str()));
 
         if (!checked) // Tx off
         {
-            rc = m_limeRFE->setRx(m_settings, true); // start Rx next
+            rc = m_limeRFE->setRx(true); // start Rx next
             ui->statusText->append(QString("Start RX: %1").arg(m_limeRFE->getError(rc).c_str()));
         }
     }
     else
     {
-        rc = m_limeRFE->setTx(m_settings, m_settings.m_txOn);
+        rc = m_limeRFE->setTx(m_txOn);
         ui->statusText->setText(m_limeRFE->getError(rc).c_str());
     }
 
@@ -941,10 +945,10 @@ void LimeRFEGUI::on_rxTxToggle_clicked()
 {
     m_rxTxToggle = ui->rxTxToggle->isChecked();
 
-    if (m_rxTxToggle && m_settings.m_rxOn && m_settings.m_txOn)
+    if (m_rxTxToggle && m_rxOn && m_txOn)
     {
-        m_settings.m_txOn = false;
-        int rc = m_limeRFE->setTx(m_settings, m_settings.m_txOn);
+        m_txOn = false;
+        int rc = m_limeRFE->setTx(m_txOn);
         ui->statusText->setText(m_limeRFE->getError(rc).c_str());
         displayMode();
 
@@ -989,6 +993,22 @@ bool LimeRFEGUI::handleMessage(const Message& message)
         m_settings = cfg.getSettings();
         displaySettings();
         highlightApplyButton(cfg.getForce());
+        return true;
+    }
+    else if (LimeRFE::MsgReportSetRx::match(message))
+    {
+        bool on = ((LimeRFE::MsgReportSetRx&) message).isOn();
+        qDebug("LimeRFEGUI::handleMessage: LimeRFE::MsgReportSetRx: %s", on ? "on" : "off");
+        m_rxOn = on;
+        displaySettings();
+        return true;
+    }
+    else if (LimeRFE::MsgReportSetTx::match(message))
+    {
+        bool on = ((LimeRFE::MsgReportSetTx&) message).isOn();
+        qDebug("LimeRFEGUI::handleMessage: LimeRFE::MsgReportSetTx: %s", on ? "on" : "off");
+        m_txOn = on;
+        displaySettings();
         return true;
     }
 

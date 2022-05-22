@@ -109,12 +109,6 @@ LimeRFESettings:
     txRxDriven:
       description: Boolean 1 if Tx is copy of Rx else 0
       type: integer
-    rxOn:
-      description: Boolean 1 if Rx is active else 0
-      type: integer
-    txOn:
-      description: Boolean 1 if Tx is active else 0
-      type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
@@ -132,6 +126,12 @@ LimeRFESettings:
 LimeRFEReport:
   description: LimeRFE
   properties:
+    rxOn:
+      description: Boolean 1 if Rx is active else 0
+      type: integer
+    txOn:
+      description: Boolean 1 if Tx is active else 0
+      type: integer
     forwardPower:
       description: relative forward power in centi-Bels
       type: integer
@@ -157,6 +157,9 @@ LimeRFEActions:
         Switch on or off
           * 0 - Off
           * 1 - On
+    getState:
+      type: integer
+      description: Set to non zero value to get the board state
     fromToSettings:
       type: integer
       description: >

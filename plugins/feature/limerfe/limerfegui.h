@@ -65,6 +65,8 @@ private:
 	LimeRFESettings m_settings;
     LimeRFEUSBCalib* m_limeRFEUSBCalib;
 	RollupState m_rollupState;
+    bool m_rxOn;
+    bool m_txOn;
 	bool m_doApplySettings;
     bool m_rxTxToggle;
     QTimer m_timer;

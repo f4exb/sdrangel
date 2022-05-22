@@ -97,8 +97,6 @@ struct LimeRFESettings
     SWRSource m_swrSource;
     // Rx/Tx
     bool m_txRxDriven; //!< Tx settings set according to Rx settings
-    bool m_rxOn;
-    bool m_txOn;
     // Common
     QString m_devicePath;
     QString m_title;

@@ -48,8 +48,6 @@ void LimeRFESettings::resetToDefaults()
     m_swrEnable = false;
     m_swrSource = SWRExternal;
     m_txRxDriven = false;
-    m_rxOn = false;
-    m_txOn = false;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -79,8 +77,6 @@ QByteArray LimeRFESettings::serialize() const
     s.writeS32(16, (int) m_swrSource);
 
     s.writeBool(20, m_txRxDriven);
-    s.writeBool(21, m_rxOn);
-    s.writeBool(22, m_txOn);
 
     s.writeString(30, m_title);
     s.writeU32(31, m_rgbColor);
@@ -145,8 +141,6 @@ bool LimeRFESettings::deserialize(const QByteArray& data)
         m_swrSource = (SWRSource) tmp;
 
         d.readBool(20, &m_txRxDriven, false);
-        d.readBool(21, &m_rxOn, false);
-        d.readBool(22, &m_txOn, false);
 
         d.readString(30, &m_title, "Lime RFE");
         d.readU32(31, &m_rgbColor, QColor(50, 205, 50).rgb());

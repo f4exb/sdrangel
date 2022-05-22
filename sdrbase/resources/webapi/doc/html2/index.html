@@ -7092,6 +7092,10 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Switch on or off\n  * 0 - Off\n  * 1 - On\n"
     },
+    "getState" : {
+      "type" : "integer",
+      "description" : "Set to non zero value to get the board state"
+    },
     "fromToSettings" : {
       "type" : "integer",
       "description" : "Move from/to settings to/from device\n  * 0 - From device to settings. The toGUI button in GUI mode\n  * 1 - From settings to device. The Apply button in GUI mode\n"
@@ -7144,6 +7148,14 @@ margin-bottom: 20px;
 };
             defs.LimeRFEReport = {
   "properties" : {
+    "rxOn" : {
+      "type" : "integer",
+      "description" : "Boolean 1 if Rx is active else 0"
+    },
+    "txOn" : {
+      "type" : "integer",
+      "description" : "Boolean 1 if Tx is active else 0"
+    },
     "forwardPower" : {
       "type" : "integer",
       "description" : "relative forward power in centi-Bels"
@@ -7225,14 +7237,6 @@ margin-bottom: 20px;
     "txRxDriven" : {
       "type" : "integer",
       "description" : "Boolean 1 if Tx is copy of Rx else 0"
-    },
-    "rxOn" : {
-      "type" : "integer",
-      "description" : "Boolean 1 if Rx is active else 0"
-    },
-    "txOn" : {
-      "type" : "integer",
-      "description" : "Boolean 1 if Tx is active else 0"
     },
     "useReverseAPI" : {
       "type" : "integer",
@@ -59773,7 +59777,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2022-05-21T22:11:42.796+02:00
+              Generated 2022-05-22T12:29:41.738+02:00
             </div>
           </div>
       </div>

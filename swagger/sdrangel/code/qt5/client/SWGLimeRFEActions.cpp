@@ -34,6 +34,8 @@ SWGLimeRFEActions::SWGLimeRFEActions() {
     m_device_set_index_isSet = false;
     switch_channel = 0;
     m_switch_channel_isSet = false;
+    get_state = 0;
+    m_get_state_isSet = false;
     from_to_settings = 0;
     m_from_to_settings_isSet = false;
     open_close_device = 0;
@@ -52,6 +54,8 @@ SWGLimeRFEActions::init() {
     m_device_set_index_isSet = false;
     switch_channel = 0;
     m_switch_channel_isSet = false;
+    get_state = 0;
+    m_get_state_isSet = false;
     from_to_settings = 0;
     m_from_to_settings_isSet = false;
     open_close_device = 0;
@@ -60,6 +64,7 @@ SWGLimeRFEActions::init() {
 
 void
 SWGLimeRFEActions::cleanup() {
+
 
 
 
@@ -83,6 +88,8 @@ SWGLimeRFEActions::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&device_set_index, pJson["deviceSetIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&switch_channel, pJson["switchChannel"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&get_state, pJson["getState"], "qint32", "");
     
     ::SWGSDRangel::setValue(&from_to_settings, pJson["fromToSettings"], "qint32", "");
     
@@ -112,6 +119,9 @@ SWGLimeRFEActions::asJsonObject() {
     }
     if(m_switch_channel_isSet){
         obj->insert("switchChannel", QJsonValue(switch_channel));
+    }
+    if(m_get_state_isSet){
+        obj->insert("getState", QJsonValue(get_state));
     }
     if(m_from_to_settings_isSet){
         obj->insert("fromToSettings", QJsonValue(from_to_settings));
@@ -154,6 +164,16 @@ SWGLimeRFEActions::setSwitchChannel(qint32 switch_channel) {
 }
 
 qint32
+SWGLimeRFEActions::getGetState() {
+    return get_state;
+}
+void
+SWGLimeRFEActions::setGetState(qint32 get_state) {
+    this->get_state = get_state;
+    this->m_get_state_isSet = true;
+}
+
+qint32
 SWGLimeRFEActions::getFromToSettings() {
     return from_to_settings;
 }
@@ -185,6 +205,9 @@ SWGLimeRFEActions::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_switch_channel_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_get_state_isSet){
             isObjectUpdated = true; break;
         }
         if(m_from_to_settings_isSet){

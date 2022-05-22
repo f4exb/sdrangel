@@ -28,6 +28,10 @@ SWGLimeRFEReport::SWGLimeRFEReport(QString* json) {
 }
 
 SWGLimeRFEReport::SWGLimeRFEReport() {
+    rx_on = 0;
+    m_rx_on_isSet = false;
+    tx_on = 0;
+    m_tx_on_isSet = false;
     forward_power = 0;
     m_forward_power_isSet = false;
     reflected_power = 0;
@@ -40,6 +44,10 @@ SWGLimeRFEReport::~SWGLimeRFEReport() {
 
 void
 SWGLimeRFEReport::init() {
+    rx_on = 0;
+    m_rx_on_isSet = false;
+    tx_on = 0;
+    m_tx_on_isSet = false;
     forward_power = 0;
     m_forward_power_isSet = false;
     reflected_power = 0;
@@ -48,6 +56,8 @@ SWGLimeRFEReport::init() {
 
 void
 SWGLimeRFEReport::cleanup() {
+
+
 
 
 }
@@ -63,6 +73,10 @@ SWGLimeRFEReport::fromJson(QString &json) {
 
 void
 SWGLimeRFEReport::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&rx_on, pJson["rxOn"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&tx_on, pJson["txOn"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&forward_power, pJson["forwardPower"], "qint32", "");
     
     ::SWGSDRangel::setValue(&reflected_power, pJson["reflectedPower"], "qint32", "");
@@ -83,6 +97,12 @@ SWGLimeRFEReport::asJson ()
 QJsonObject*
 SWGLimeRFEReport::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(m_rx_on_isSet){
+        obj->insert("rxOn", QJsonValue(rx_on));
+    }
+    if(m_tx_on_isSet){
+        obj->insert("txOn", QJsonValue(tx_on));
+    }
     if(m_forward_power_isSet){
         obj->insert("forwardPower", QJsonValue(forward_power));
     }
@@ -91,6 +111,26 @@ SWGLimeRFEReport::asJsonObject() {
     }
 
     return obj;
+}
+
+qint32
+SWGLimeRFEReport::getRxOn() {
+    return rx_on;
+}
+void
+SWGLimeRFEReport::setRxOn(qint32 rx_on) {
+    this->rx_on = rx_on;
+    this->m_rx_on_isSet = true;
+}
+
+qint32
+SWGLimeRFEReport::getTxOn() {
+    return tx_on;
+}
+void
+SWGLimeRFEReport::setTxOn(qint32 tx_on) {
+    this->tx_on = tx_on;
+    this->m_tx_on_isSet = true;
 }
 
 qint32
@@ -118,6 +158,12 @@ bool
 SWGLimeRFEReport::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(m_rx_on_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_tx_on_isSet){
+            isObjectUpdated = true; break;
+        }
         if(m_forward_power_isSet){
             isObjectUpdated = true; break;
         }

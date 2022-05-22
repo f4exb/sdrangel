@@ -64,10 +64,6 @@ SWGLimeRFESettings::SWGLimeRFESettings() {
     m_swr_source_isSet = false;
     tx_rx_driven = 0;
     m_tx_rx_driven_isSet = false;
-    rx_on = 0;
-    m_rx_on_isSet = false;
-    tx_on = 0;
-    m_tx_on_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -124,10 +120,6 @@ SWGLimeRFESettings::init() {
     m_swr_source_isSet = false;
     tx_rx_driven = 0;
     m_tx_rx_driven_isSet = false;
-    rx_on = 0;
-    m_rx_on_isSet = false;
-    tx_on = 0;
-    m_tx_on_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -151,8 +143,6 @@ SWGLimeRFESettings::cleanup() {
     if(device_path != nullptr) { 
         delete device_path;
     }
-
-
 
 
 
@@ -226,10 +216,6 @@ SWGLimeRFESettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&swr_source, pJson["swrSource"], "qint32", "");
     
     ::SWGSDRangel::setValue(&tx_rx_driven, pJson["txRxDriven"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&rx_on, pJson["rxOn"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&tx_on, pJson["txOn"], "qint32", "");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -312,12 +298,6 @@ SWGLimeRFESettings::asJsonObject() {
     }
     if(m_tx_rx_driven_isSet){
         obj->insert("txRxDriven", QJsonValue(tx_rx_driven));
-    }
-    if(m_rx_on_isSet){
-        obj->insert("rxOn", QJsonValue(rx_on));
-    }
-    if(m_tx_on_isSet){
-        obj->insert("txOn", QJsonValue(tx_on));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -522,26 +502,6 @@ SWGLimeRFESettings::setTxRxDriven(qint32 tx_rx_driven) {
 }
 
 qint32
-SWGLimeRFESettings::getRxOn() {
-    return rx_on;
-}
-void
-SWGLimeRFESettings::setRxOn(qint32 rx_on) {
-    this->rx_on = rx_on;
-    this->m_rx_on_isSet = true;
-}
-
-qint32
-SWGLimeRFESettings::getTxOn() {
-    return tx_on;
-}
-void
-SWGLimeRFESettings::setTxOn(qint32 tx_on) {
-    this->tx_on = tx_on;
-    this->m_tx_on_isSet = true;
-}
-
-qint32
 SWGLimeRFESettings::getUseReverseApi() {
     return use_reverse_api;
 }
@@ -658,12 +618,6 @@ SWGLimeRFESettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_tx_rx_driven_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_rx_on_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_tx_on_isSet){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){

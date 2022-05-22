@@ -50,6 +50,9 @@ public:
     qint32 getSwitchChannel();
     void setSwitchChannel(qint32 switch_channel);
 
+    qint32 getGetState();
+    void setGetState(qint32 get_state);
+
     qint32 getFromToSettings();
     void setFromToSettings(qint32 from_to_settings);
 
@@ -68,6 +71,9 @@ private:
 
     qint32 switch_channel;
     bool m_switch_channel_isSet;
+
+    qint32 get_state;
+    bool m_get_state_isSet;
 
     qint32 from_to_settings;
     bool m_from_to_settings_isSet;

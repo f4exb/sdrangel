@@ -995,7 +995,6 @@ int WebAPIAdapter::instanceLimeRFEConfigGet(
     response.setRxHamChannel((int) settings.m_rxHAMChannel);
     response.setRxCellularChannel((int) settings.m_rxCellularChannel);
     response.setRxPort((int) settings.m_rxPort);
-    response.setRxOn(settings.m_rxOn ? 1 : 0);
     response.setAmfmNotch(settings.m_amfmNotch ? 1 : 0);
     response.setAttenuationFactor(settings.m_attenuationFactor);
     response.setTxChannels((int) settings.m_txChannels);
@@ -1003,7 +1002,6 @@ int WebAPIAdapter::instanceLimeRFEConfigGet(
     response.setTxHamChannel((int) settings.m_txHAMChannel);
     response.setTxCellularChannel((int) settings.m_txCellularChannel);
     response.setTxPort((int) settings.m_txPort);
-    response.setTxOn(settings.m_txOn ? 1 : 0);
     response.setSwrEnable(settings.m_swrEnable ? 1 : 0);
     response.setSwrSource((int) settings.m_swrSource);
 
@@ -1032,7 +1030,6 @@ int WebAPIAdapter::instanceLimeRFEConfigPut(
     settings.m_rxHAMChannel = (LimeRFEController::HAMChannel) query.getRxHamChannel();
     settings.m_rxCellularChannel = (LimeRFEController::CellularChannel) query.getRxCellularChannel();
     settings.m_rxPort = (LimeRFEController::RxPort) query.getRxPort();
-    settings.m_rxOn = query.getRxOn() != 0;
     settings.m_amfmNotch = query.getAmfmNotch() != 0;
     settings.m_attenuationFactor = query.getAttenuationFactor();
     settings.m_txChannels = (LimeRFEController::ChannelGroups) query.getTxChannels();
@@ -1040,7 +1037,6 @@ int WebAPIAdapter::instanceLimeRFEConfigPut(
     settings.m_txHAMChannel = (LimeRFEController::HAMChannel) query.getTxHamChannel();
     settings.m_txCellularChannel = (LimeRFEController::CellularChannel) query.getTxCellularChannel();
     settings.m_txPort = (LimeRFEController::TxPort) query.getTxPort();
-    settings.m_txOn = query.getTxOn() != 0;
     settings.m_swrEnable = query.getSwrEnable() != 0;
     settings.m_swrSource = (LimeRFEController::SWRSource) query.getSwrSource();
 
@@ -1078,9 +1074,6 @@ int WebAPIAdapter::instanceLimeRFERunPut(
     }
 
     LimeRFEController::LimeRFESettings settings;
-    settings.m_rxOn = query.getRxOn() != 0;
-    settings.m_txOn = query.getTxOn() != 0;
-
     rc = controller.setRx(settings, settings.m_rxOn);
 
     if (rc != 0)

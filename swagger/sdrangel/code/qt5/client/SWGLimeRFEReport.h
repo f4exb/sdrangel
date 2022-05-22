@@ -41,6 +41,12 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGLimeRFEReport* fromJson(QString &jsonString) override;
 
+    qint32 getRxOn();
+    void setRxOn(qint32 rx_on);
+
+    qint32 getTxOn();
+    void setTxOn(qint32 tx_on);
+
     qint32 getForwardPower();
     void setForwardPower(qint32 forward_power);
 
@@ -51,6 +57,12 @@ public:
     virtual bool isSet() override;
 
 private:
+    qint32 rx_on;
+    bool m_rx_on_isSet;
+
+    qint32 tx_on;
+    bool m_tx_on_isSet;
+
     qint32 forward_power;
     bool m_forward_power_isSet;
 

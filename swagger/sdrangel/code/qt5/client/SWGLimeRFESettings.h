@@ -97,12 +97,6 @@ public:
     qint32 getTxRxDriven();
     void setTxRxDriven(qint32 tx_rx_driven);
 
-    qint32 getRxOn();
-    void setRxOn(qint32 rx_on);
-
-    qint32 getTxOn();
-    void setTxOn(qint32 tx_on);
-
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -178,12 +172,6 @@ private:
 
     qint32 tx_rx_driven;
     bool m_tx_rx_driven_isSet;
-
-    qint32 rx_on;
-    bool m_rx_on_isSet;
-
-    qint32 tx_on;
-    bool m_tx_on_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;
