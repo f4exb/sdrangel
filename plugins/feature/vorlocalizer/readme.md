@@ -27,7 +27,7 @@ Pressing this button downloads the OpenAIP.net Navaid database, which contains t
 
 <h3>3: Draw Radials Adjusted for Magnetic Declination</h3>
 
-When checked, radials on the map will drawn adjusted for magnetic declination. For example, if a VOR has a magnetic declination of 5 degrees, and the radial is calculated at 0 degrees, the radial will be drawn to magnetic North, i.e. -5 degress from true North. If not checked, the same radial would be drawn to true North (i.e 0 degrees), which may result in a less accurate position estimate.
+When checked, radials on the map will drawn adjusted for magnetic declination. For example, if a VOR has a magnetic declination of 5 degrees, and the radial is calculated at 0 degrees, the radial will be drawn to magnetic North, i.e. -5 degrees from true North. If not checked, the same radial would be drawn to true North (i.e 0 degrees), which may result in a less accurate position estimate.
 
 <h3>4: Round robin turn time</h3>
 
