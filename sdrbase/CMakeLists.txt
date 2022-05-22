@@ -31,19 +31,6 @@ else(FFTW3F_FOUND)
     add_definitions(-DUSE_KISSFFT)
 endif(FFTW3F_FOUND)
 
-if (LIMESUITE_FOUND)
-    set(sdrbase_SOURCES
-        ${sdrbase_SOURCES}
-        limerfe/limerfecontroller.cpp
-    )
-    set(sdrbase_HEADERS
-        ${sdrbase_HEADERS}
-        limerfe/limerfecontroller.h
-    )
-    include_directories(${LIMESUITE_INCLUDE_DIR})
-    set(sdrbase_LIMERFE_LIB ${LIMESUITE_LIBRARY})
-endif (LIMESUITE_FOUND)
-
 if (LIBSIGMF_FOUND AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(sdrbase_SOURCES
         ${sdrbase_SOURCES}
@@ -164,8 +151,6 @@ set(sdrbase_SOURCES
     feature/featureset.cpp
     feature/featureutils.cpp
     feature/featurewebapiutils.cpp
-
-    limerfe/limerfeusbcalib.cpp
 
     pipes/datafifostore.cpp
     pipes/datapipes.cpp
@@ -372,8 +357,6 @@ set(sdrbase_HEADERS
     feature/featureset.h
     feature/featureutils.h
     feature/featurewebapiutils.h
-
-    limerfe/limerfeusbcalib.h
 
     pipes/datafifostore.h
     pipes/datapipes.h
