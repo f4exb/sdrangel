@@ -68,7 +68,7 @@ UDP port number to forward received messages to.
 
 <h3>12: UDP format</h3>
 
-The format the messages are forwared via UDP in. This can be either binary (which is useful for SDRangel's PERTester feature) or NMEA (which is useful for 3rd party applications such as OpenCPN).
+The format the messages are forwarded via UDP in. This can be either binary (which is useful for SDRangel's PERTester feature) or NMEA (which is useful for 3rd party applications such as OpenCPN).
 
 <h3>13: Start/stop Logging Messages to .csv File</h3>
 

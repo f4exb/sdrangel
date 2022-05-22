@@ -53,7 +53,7 @@ The workspace has a top bar with the following controls:
 
 <h3>1.1: Workspace index</h3>
 
-Shows the index of the workspaces in the list of workspaces as a "W" followd by the index.
+Shows the index of the workspaces in the list of workspaces as a "W" followed by the index.
 
 <h3>1.2: Create new receiver</h3>
 
