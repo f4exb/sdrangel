@@ -147,7 +147,6 @@ LimeRFEGUI::LimeRFEGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature
 
     m_limeRFE = reinterpret_cast<LimeRFE*>(feature);
     m_limeRFE->setMessageQueueToGUI(&m_inputMessageQueue);
-    m_limeRFEUSBCalib = m_limeRFE->getCalib();
 
     for (const auto& comPortName : m_limeRFE->getComPorts()) {
         ui->device->addItem(comPortName);
@@ -556,9 +555,9 @@ double LimeRFEGUI::getPowerCorrection()
 {
     int index = getPowerCorectionIndex();
 
-    QMap<int, double>::const_iterator it = m_limeRFEUSBCalib->m_calibrations.find(index);
+    QMap<int, double>::const_iterator it = m_settings.m_calib.m_calibrations.find(index);
 
-    if (it != m_limeRFEUSBCalib->m_calibrations.end()) {
+    if (it != m_settings.m_calib.m_calibrations.end()) {
         return it.value();
     } else {
         return 0.0;
@@ -573,7 +572,7 @@ void LimeRFEGUI::setPowerCorrection(double dbValue)
         return;
     }
 
-    m_limeRFEUSBCalib->m_calibrations[index] = dbValue;
+    m_settings.m_calib.m_calibrations[index] = dbValue;
 }
 
 void LimeRFEGUI::updateAbsPower(double powerCorrDB)

@@ -93,6 +93,7 @@ QByteArray LimeRFESettings::serialize() const
     s.writeS32(38, m_workspaceIndex);
     s.writeBlob(39, m_geometryBytes);
     s.writeString(40, m_devicePath);
+    s.writeBlob(41, m_calib.serialize());
 
     return s.final();
 }
@@ -168,6 +169,8 @@ bool LimeRFESettings::deserialize(const QByteArray& data)
         d.readS32(38, &m_workspaceIndex, 0);
         d.readBlob(39, &m_geometryBytes);
         d.readString(40, &m_devicePath, "");
+        d.readBlob(41, &bytetmp);
+        m_calib.deserialize(bytetmp);
 
         return true;
     }

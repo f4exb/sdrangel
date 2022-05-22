@@ -21,6 +21,8 @@
 #include <QByteArray>
 #include <QString>
 
+#include "limerfeusbcalib.h"
+
 class Serializable;
 
 struct LimeRFESettings
@@ -109,6 +111,7 @@ struct LimeRFESettings
     Serializable *m_rollupState;
     int m_workspaceIndex;
     QByteArray m_geometryBytes;
+    LimeRFEUSBCalib m_calib;
 
     LimeRFESettings();
     void resetToDefaults();

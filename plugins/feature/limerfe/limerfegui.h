@@ -31,7 +31,6 @@ class PluginAPI;
 class FeatureUISet;
 class Feature;
 class LimeRFE;
-class LimeRFEUSBCalib;
 class DSPDeviceSourceEngine;
 class DSPDeviceSinkEngine;
 
@@ -63,7 +62,6 @@ private:
 	PluginAPI* m_pluginAPI;
 	FeatureUISet* m_featureUISet;
 	LimeRFESettings m_settings;
-    LimeRFEUSBCalib* m_limeRFEUSBCalib;
 	RollupState m_rollupState;
     bool m_rxOn;
     bool m_txOn;

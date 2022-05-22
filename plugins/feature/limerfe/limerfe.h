@@ -28,7 +28,6 @@
 #include "util/message.h"
 
 #include "limerfesettings.h"
-#include "limerfeusbcalib.h"
 
 class QNetworkReply;
 class QNetworkAccessManager;
@@ -137,8 +136,6 @@ public:
             const QStringList& featureSettingsKeys,
             SWGSDRangel::SWGFeatureSettings& response);
 
-    LimeRFEUSBCalib *getCalib() { return &m_calib; }
-
     int openDevice(const std::string& serialDeviceName);
     void closeDevice();
 
@@ -162,7 +159,6 @@ public:
 
 private:
     LimeRFESettings m_settings;
-    LimeRFEUSBCalib m_calib;
     bool m_rxOn;
     bool m_txOn;
 

@@ -128,10 +128,7 @@ bool LimeRFE::handleMessage(const Message& cmd)
 QByteArray LimeRFE::serialize() const
 {
     SimpleSerializer s(1);
-
     s.writeBlob(1, m_settings.serialize());
-    s.writeBlob(2, m_calib.serialize());
-
     return s.final();
 }
 
@@ -148,31 +145,21 @@ bool LimeRFE::deserialize(const QByteArray& data)
     if (d.getVersion() == 1)
     {
         QByteArray bytetmp;
-        bool ret;
-
         d.readBlob(1, &bytetmp);
 
         if (m_settings.deserialize(bytetmp))
         {
             MsgConfigureLimeRFE *msg = MsgConfigureLimeRFE::create(m_settings, true);
             m_inputMessageQueue.push(msg);
-            ret = true;
+            return true;
         }
         else
         {
             m_settings.resetToDefaults();
             MsgConfigureLimeRFE *msg = MsgConfigureLimeRFE::create(m_settings, true);
             m_inputMessageQueue.push(msg);
-            ret = false;
+            return false;
         }
-
-        d.readBlob(2, &bytetmp);
-
-        if (!m_calib.deserialize(bytetmp)) {
-            ret = false;
-        }
-
-        return ret;
     }
     else
     {
