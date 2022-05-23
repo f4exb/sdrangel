@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2020 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2022 Edouard Griffiths, F4EXB.                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,44 +15,37 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_LIMERFE_LIMERFEUSBCALIB_H_
-#define SDRBASE_LIMERFE_LIMERFEUSBCALIB_H_
+#include "SWGFeatureSettings.h"
+#include "limerfe.h"
+#include "limerfewebapiadapter.h"
 
-#include <QMap>
+LimeRFEWebAPIAdapter::LimeRFEWebAPIAdapter()
+{}
 
-class QByteArray;
+LimeRFEWebAPIAdapter::~LimeRFEWebAPIAdapter()
+{}
 
-class LimeRFEUSBCalib
+int LimeRFEWebAPIAdapter::webapiSettingsGet(
+        SWGSDRangel::SWGFeatureSettings& response,
+        QString& errorMessage)
 {
-public:
-    QByteArray serialize() const;
-    bool deserialize(const QByteArray& data);
+    (void) errorMessage;
+    response.setDemodAnalyzerSettings(new SWGSDRangel::SWGDemodAnalyzerSettings());
+    response.getDemodAnalyzerSettings()->init();
+    LimeRFE::webapiFormatFeatureSettings(response, m_settings);
 
-    enum ChannelRange
-    {
-        WidebandLow,  //!< 1 - 1000 MHz
-        WidebandHigh, //!< 1000 - 4000 MHz
-        HAM_30MHz,    //!< Up to 30 MHz
-        HAM_50_70MHz,
-        HAM_144_146MHz,
-        HAM_220_225MHz,
-        HAM_430_440MHz,
-        HAM_902_928MHz,
-        HAM_1240_1325MHz,
-        HAM_2300_2450MHz,
-        HAM_3300_3500MHz,
-        CellularBand1,
-        CellularBand2,
-        CellularBand3,
-        CellularBand7,
-        CellularBand38
-    };
+    return 200;
+}
 
-    QMap<int, double> m_calibrations; //!< Channel range to calibration value in floating point decibels
+int LimeRFEWebAPIAdapter::webapiSettingsPutPatch(
+        bool force,
+        const QStringList& featureSettingsKeys,
+        SWGSDRangel::SWGFeatureSettings& response,
+        QString& errorMessage)
+{
+    (void) force; // no action
+    (void) errorMessage;
+    LimeRFE::webapiUpdateFeatureSettings(m_settings, featureSettingsKeys, response);
 
-private:
-    void serializeCalibMap(QByteArray& data) const;
-    void deserializeCalibMap(QByteArray& data);
-};
-
-#endif // SDRBASE_LIMERFE_LIMERFEUSBCALIB_H_
+    return 200;
+}

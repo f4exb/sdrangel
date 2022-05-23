@@ -5,9 +5,7 @@ set(limerfe_SOURCES
     limerfesettings.cpp
     limerfeusbcalib.cpp
     limerfeplugin.cpp
-    # limerfeworker.cpp
-    # limerfereport.cpp
-    # limerfewebapiadapter.cpp
+    limerfewebapiadapter.cpp
 )
 
 set(limerfe_HEADERS
@@ -15,9 +13,7 @@ set(limerfe_HEADERS
     limerfesettings.h
     limerfeusbcalib.h
     limerfeplugin.h
-    # limerfeworker.h
-    # limerfereport.h
-    # limerfewebapiadapter.h
+    limerfewebapiadapter.h
 )
 
 include_directories(
