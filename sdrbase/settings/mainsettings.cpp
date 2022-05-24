@@ -7,7 +7,6 @@
 #include "settings/mainsettings.h"
 #include "commands/command.h"
 #include "audio/audiodevicemanager.h"
-#include "ambe/ambeengine.h"
 
 MainSettings::MainSettings() :
     m_audioDeviceManager(nullptr)

@@ -20,8 +20,6 @@
 #include <QDebug>
 #include <QElapsedTimer>
 
-#include "ambe/ambeengine.h"
-
 #include "mainbench.h"
 
 MainBench *MainBench::m_instance = 0;
