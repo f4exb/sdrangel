@@ -566,6 +566,12 @@ void DSDDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getDsdDemodSettings()->getReverseApiChannelIndex();
     }
+    if (channelSettingsKeys.contains("ambeFeatureIndex")) {
+        settings.m_ambeFeatureIndex = response.getDsdDemodSettings()->getAmbeFeatureIndex();
+    }
+    if (channelSettingsKeys.contains("connectAMBE")) {
+        settings.m_connectAMBE = response.getDsdDemodSettings()->getConnectAmbe() != 0;
+    }
     if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
         settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getDsdDemodSettings()->getChannelMarker());
     }
@@ -632,6 +638,8 @@ void DSDDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     response.getDsdDemodSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getDsdDemodSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getDsdDemodSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+    response.getDsdDemodSettings()->setAmbeFeatureIndex(settings.m_ambeFeatureIndex);
+    response.getDsdDemodSettings()->setConnectAmbe(settings.m_connectAMBE ? 1 : 0);
 
     if (settings.m_channelMarker)
     {
@@ -817,6 +825,12 @@ void DSDDemod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgDSDDemodSettings->setStreamIndex(settings.m_streamIndex);
+    }
+    if (channelSettingsKeys.contains("ambeFeatureIndex") || force) {
+        swgDSDDemodSettings->setAmbeFeatureIndex(settings.m_ambeFeatureIndex);
+    }
+    if (channelSettingsKeys.contains("connectAMBE") || force) {
+        swgDSDDemodSettings->setConnectAmbe(settings.m_connectAMBE ? 1 : 0);
     }
 
     if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))

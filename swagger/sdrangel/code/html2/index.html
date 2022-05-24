@@ -4605,6 +4605,14 @@ margin-bottom: 20px;
     },
     "rollupState" : {
       "$ref" : "#/definitions/RollupState"
+    },
+    "ambeFeatureIndex" : {
+      "type" : "integer",
+      "description" : "index of AMBE controller feature to be used for AMBE frames decoding"
+    },
+    "connectAMBE" : {
+      "type" : "integer",
+      "description" : "Decode frames with AMBE feature\n  * 0 - Do not decode frames with AMBE feature\n  * 1 - Decode frames with AMBE feature\n"
     }
   },
   "description" : "DSDDemod"
@@ -57761,7 +57769,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2022-05-22T20:12:13.506+02:00
+              Generated 2022-05-24T15:35:23.001+02:00
             </div>
           </div>
       </div>
