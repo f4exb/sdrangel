@@ -61,7 +61,6 @@
 #include "gui/sdrangelsplash.h"
 #include "gui/mypositiondialog.h"
 #include "gui/fftwisdomdialog.h"
-#include "gui/ambedevicesdialog.h"
 #include "gui/workspace.h"
 #include "gui/featurepresetsdialog.h"
 #include "gui/devicesetpresetsdialog.h"

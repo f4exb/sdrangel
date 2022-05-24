@@ -205,7 +205,6 @@ set(sdrgui_FORMS
     # mainwindow.ui
     gui/aboutdialog.ui
     gui/addpresetdialog.ui
-    gui/ambedevicesdialog.ui
     gui/basicchannelsettingsdialog.ui
     gui/basicdevicesettingsdialog.ui
     gui/basicfeaturesettingsdialog.ui
