@@ -33,7 +33,6 @@
 #include "SWGInstanceFeaturesResponse.h"
 #include "SWGAudioDevices.h"
 #include "SWGLocationInformation.h"
-#include "SWGDVSerialDevices.h"
 #include "SWGAMBEDevices.h"
 #include "SWGLimeRFEDevices.h"
 #include "SWGLimeRFESettings.h"
@@ -138,10 +137,6 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
             instanceAudioOutputCleanupService(request, response);
         } else if (path == WebAPIAdapterInterface::instanceLocationURL) {
             instanceLocationService(request, response);
-        } else if (path == WebAPIAdapterInterface::instanceAMBESerialURL) {
-            instanceAMBESerialService(request, response);
-        } else if (path == WebAPIAdapterInterface::instanceAMBEDevicesURL) {
-            instanceAMBEDevicesService(request, response);
         } else if (path == WebAPIAdapterInterface::instancePresetsURL) {
             instancePresetsService(request, response);
         } else if (path == WebAPIAdapterInterface::instancePresetURL) {
@@ -787,118 +782,6 @@ void WebAPIRequestMapper::instanceLocationService(qtwebapp::HttpRequest& request
             response.setStatus(400,"Invalid JSON format");
             errorResponse.init();
             *errorResponse.getMessage() = "Invalid JSON format";
-            response.write(errorResponse.asJson().toUtf8());
-        }
-    }
-    else
-    {
-        response.setStatus(405,"Invalid HTTP method");
-        errorResponse.init();
-        *errorResponse.getMessage() = "Invalid HTTP method";
-        response.write(errorResponse.asJson().toUtf8());
-    }
-}
-
-void WebAPIRequestMapper::instanceAMBESerialService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
-{
-    SWGSDRangel::SWGErrorResponse errorResponse;
-    response.setHeader("Content-Type", "application/json");
-    response.setHeader("Access-Control-Allow-Origin", "*");
-
-    if (request.getMethod() == "GET")
-    {
-        SWGSDRangel::SWGDVSerialDevices normalResponse;
-
-        int status = m_adapter->instanceAMBESerialGet(normalResponse, errorResponse);
-        response.setStatus(status);
-
-        if (status/100 == 2) {
-            response.write(normalResponse.asJson().toUtf8());
-        } else {
-            response.write(errorResponse.asJson().toUtf8());
-        }
-    }
-    else
-    {
-        response.setStatus(405,"Invalid HTTP method");
-        errorResponse.init();
-        *errorResponse.getMessage() = "Invalid HTTP method";
-        response.write(errorResponse.asJson().toUtf8());
-    }
-}
-
-void WebAPIRequestMapper::instanceAMBEDevicesService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
-{
-    SWGSDRangel::SWGErrorResponse errorResponse;
-    response.setHeader("Content-Type", "application/json");
-    response.setHeader("Access-Control-Allow-Origin", "*");
-
-    if (request.getMethod() == "GET")
-    {
-        SWGSDRangel::SWGAMBEDevices normalResponse;
-
-        int status = m_adapter->instanceAMBEDevicesGet(normalResponse, errorResponse);
-        response.setStatus(status);
-
-        if (status/100 == 2) {
-            response.write(normalResponse.asJson().toUtf8());
-        } else {
-            response.write(errorResponse.asJson().toUtf8());
-        }
-    }
-    else if ((request.getMethod() == "PATCH") || (request.getMethod() == "PUT"))
-    {
-        SWGSDRangel::SWGAMBEDevices query;
-        SWGSDRangel::SWGAMBEDevices normalResponse;
-        QString jsonStr = request.getBody();
-        QJsonObject jsonObject;
-
-        if (parseJsonBody(jsonStr, jsonObject, response))
-        {
-            if (validateAMBEDevices(query, jsonObject))
-            {
-                int status;
-
-                if (request.getMethod() == "PATCH") {
-                    status = m_adapter->instanceAMBEDevicesPatch(query, normalResponse, errorResponse);
-                } else {
-                    status = m_adapter->instanceAMBEDevicesPut(query, normalResponse, errorResponse);
-                }
-
-                response.setStatus(status);
-
-                if (status/100 == 2) {
-                    response.write(normalResponse.asJson().toUtf8());
-                } else {
-                    response.write(errorResponse.asJson().toUtf8());
-                }
-            }
-            else
-            {
-                response.setStatus(400,"Invalid JSON request");
-                errorResponse.init();
-                *errorResponse.getMessage() = "Invalid JSON request";
-                response.write(errorResponse.asJson().toUtf8());
-            }
-        }
-        else
-        {
-            response.setStatus(400,"Invalid JSON format");
-            errorResponse.init();
-            *errorResponse.getMessage() = "Invalid JSON format";
-            response.write(errorResponse.asJson().toUtf8());
-        }
-    }
-    else if (request.getMethod() == "DELETE")
-    {
-        SWGSDRangel::SWGSuccessResponse normalResponse;
-
-        int status = m_adapter->instanceAMBEDevicesDelete(normalResponse, errorResponse);
-        response.setStatus(status);
-
-        if (status/100 == 2) {
-            response.write(normalResponse.asJson().toUtf8());
-        } else {
             response.write(errorResponse.asJson().toUtf8());
         }
     }
@@ -4055,47 +3938,6 @@ bool WebAPIRequestMapper::validateAudioOutputDevice(
         audioOutputDeviceKeys.append("udpPort");
     }
     return true;
-}
-
-bool WebAPIRequestMapper::validateAMBEDevices(SWGSDRangel::SWGAMBEDevices& ambeDevices, QJsonObject& jsonObject)
-{
-    if (jsonObject.contains("nbDevices"))
-    {
-        int nbDevices = jsonObject["nbDevices"].toInt();
-
-        if (jsonObject.contains("ambeDevices"))
-        {
-            QJsonArray ambeDevicesJson = jsonObject["ambeDevices"].toArray();
-
-            if (nbDevices != ambeDevicesJson.size()) {
-                return false;
-            }
-
-            ambeDevices.init();
-            ambeDevices.setNbDevices(nbDevices);
-            QList<SWGSDRangel::SWGAMBEDevice *> *ambeList = ambeDevices.getAmbeDevices();
-
-            for (int i = 0; i < nbDevices; i++)
-            {
-                QJsonObject ambeDeviceJson = ambeDevicesJson.at(i).toObject();
-                if (ambeDeviceJson.contains("deviceRef") && ambeDeviceJson.contains("delete"))
-                {
-                    ambeList->push_back(new SWGSDRangel::SWGAMBEDevice());
-                    ambeList->back()->init();
-                    ambeList->back()->setDeviceRef(new QString(ambeDeviceJson["deviceRef"].toString()));
-                    ambeList->back()->setDelete(ambeDeviceJson["delete"].toInt());
-                }
-                else
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-    }
-
-    return false;
 }
 
 bool WebAPIRequestMapper::validateSpectrumSettings(SWGSDRangel::SWGGLSpectrum& spectrumSettings, QJsonObject& jsonObject, QStringList& spectrumSettingsKeys)

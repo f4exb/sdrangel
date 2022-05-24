@@ -22,8 +22,8 @@
 #include <QJsonObject>
 
 
-#include "SWGAMBEDevices_2.h"
-#include "SWGDVSerialDevices_2.h"
+#include "SWGAMBEDevices.h"
+#include "SWGDVSerialDevices.h"
 
 #include "SWGObject.h"
 #include "export.h"
@@ -43,20 +43,20 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGAMBEReport* fromJson(QString &jsonString) override;
 
-    SWGDVSerialDevices_2* getSerial();
-    void setSerial(SWGDVSerialDevices_2* serial);
+    SWGDVSerialDevices* getSerial();
+    void setSerial(SWGDVSerialDevices* serial);
 
-    SWGAMBEDevices_2* getDevices();
-    void setDevices(SWGAMBEDevices_2* devices);
+    SWGAMBEDevices* getDevices();
+    void setDevices(SWGAMBEDevices* devices);
 
 
     virtual bool isSet() override;
 
 private:
-    SWGDVSerialDevices_2* serial;
+    SWGDVSerialDevices* serial;
     bool m_serial_isSet;
 
-    SWGAMBEDevices_2* devices;
+    SWGAMBEDevices* devices;
     bool m_devices_isSet;
 
 };

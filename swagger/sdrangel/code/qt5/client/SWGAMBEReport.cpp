@@ -40,9 +40,9 @@ SWGAMBEReport::~SWGAMBEReport() {
 
 void
 SWGAMBEReport::init() {
-    serial = new SWGDVSerialDevices_2();
+    serial = new SWGDVSerialDevices();
     m_serial_isSet = false;
-    devices = new SWGAMBEDevices_2();
+    devices = new SWGAMBEDevices();
     m_devices_isSet = false;
 }
 
@@ -67,9 +67,9 @@ SWGAMBEReport::fromJson(QString &json) {
 
 void
 SWGAMBEReport::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&serial, pJson["serial"], "SWGDVSerialDevices_2", "SWGDVSerialDevices_2");
+    ::SWGSDRangel::setValue(&serial, pJson["serial"], "SWGDVSerialDevices", "SWGDVSerialDevices");
     
-    ::SWGSDRangel::setValue(&devices, pJson["devices"], "SWGAMBEDevices_2", "SWGAMBEDevices_2");
+    ::SWGSDRangel::setValue(&devices, pJson["devices"], "SWGAMBEDevices", "SWGAMBEDevices");
     
 }
 
@@ -88,31 +88,31 @@ QJsonObject*
 SWGAMBEReport::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if((serial != nullptr) && (serial->isSet())){
-        toJsonValue(QString("serial"), serial, obj, QString("SWGDVSerialDevices_2"));
+        toJsonValue(QString("serial"), serial, obj, QString("SWGDVSerialDevices"));
     }
     if((devices != nullptr) && (devices->isSet())){
-        toJsonValue(QString("devices"), devices, obj, QString("SWGAMBEDevices_2"));
+        toJsonValue(QString("devices"), devices, obj, QString("SWGAMBEDevices"));
     }
 
     return obj;
 }
 
-SWGDVSerialDevices_2*
+SWGDVSerialDevices*
 SWGAMBEReport::getSerial() {
     return serial;
 }
 void
-SWGAMBEReport::setSerial(SWGDVSerialDevices_2* serial) {
+SWGAMBEReport::setSerial(SWGDVSerialDevices* serial) {
     this->serial = serial;
     this->m_serial_isSet = true;
 }
 
-SWGAMBEDevices_2*
+SWGAMBEDevices*
 SWGAMBEReport::getDevices() {
     return devices;
 }
 void
-SWGAMBEReport::setDevices(SWGAMBEDevices_2* devices) {
+SWGAMBEReport::setDevices(SWGAMBEDevices* devices) {
     this->devices = devices;
     this->m_devices_isSet = true;
 }

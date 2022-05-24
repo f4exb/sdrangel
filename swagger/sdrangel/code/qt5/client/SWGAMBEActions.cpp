@@ -40,7 +40,7 @@ SWGAMBEActions::~SWGAMBEActions() {
 
 void
 SWGAMBEActions::init() {
-    update_devices = new SWGAMBEDevices_2();
+    update_devices = new SWGAMBEDevices();
     m_update_devices_isSet = false;
     remove_all = 0;
     m_remove_all_isSet = false;
@@ -65,7 +65,7 @@ SWGAMBEActions::fromJson(QString &json) {
 
 void
 SWGAMBEActions::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&update_devices, pJson["updateDevices"], "SWGAMBEDevices_2", "SWGAMBEDevices_2");
+    ::SWGSDRangel::setValue(&update_devices, pJson["updateDevices"], "SWGAMBEDevices", "SWGAMBEDevices");
     
     ::SWGSDRangel::setValue(&remove_all, pJson["removeAll"], "qint32", "");
     
@@ -86,7 +86,7 @@ QJsonObject*
 SWGAMBEActions::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if((update_devices != nullptr) && (update_devices->isSet())){
-        toJsonValue(QString("updateDevices"), update_devices, obj, QString("SWGAMBEDevices_2"));
+        toJsonValue(QString("updateDevices"), update_devices, obj, QString("SWGAMBEDevices"));
     }
     if(m_remove_all_isSet){
         obj->insert("removeAll", QJsonValue(remove_all));
@@ -95,12 +95,12 @@ SWGAMBEActions::asJsonObject() {
     return obj;
 }
 
-SWGAMBEDevices_2*
+SWGAMBEDevices*
 SWGAMBEActions::getUpdateDevices() {
     return update_devices;
 }
 void
-SWGAMBEActions::setUpdateDevices(SWGAMBEDevices_2* update_devices) {
+SWGAMBEActions::setUpdateDevices(SWGAMBEDevices* update_devices) {
     this->update_devices = update_devices;
     this->m_update_devices_isSet = true;
 }

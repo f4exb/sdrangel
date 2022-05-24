@@ -22,7 +22,7 @@
 #include <QJsonObject>
 
 
-#include "SWGAMBEDevices_2.h"
+#include "SWGAMBEDevices.h"
 
 #include "SWGObject.h"
 #include "export.h"
@@ -42,8 +42,8 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGAMBEActions* fromJson(QString &jsonString) override;
 
-    SWGAMBEDevices_2* getUpdateDevices();
-    void setUpdateDevices(SWGAMBEDevices_2* update_devices);
+    SWGAMBEDevices* getUpdateDevices();
+    void setUpdateDevices(SWGAMBEDevices* update_devices);
 
     qint32 getRemoveAll();
     void setRemoveAll(qint32 remove_all);
@@ -52,7 +52,7 @@ public:
     virtual bool isSet() override;
 
 private:
-    SWGAMBEDevices_2* update_devices;
+    SWGAMBEDevices* update_devices;
     bool m_update_devices_isSet;
 
     qint32 remove_all;

@@ -23,10 +23,10 @@ AMBEReport:
   description: AMBE
   properties:
     serial:
-      description: List of available DV serial devices
+      description: List of AMBE serial devices in the system
       $ref: "/doc/swagger/include/AMBE.yaml#/definitions/DVSerialDevices"
     devices:
-      description: List of AMBE devices (serial or address) used for AMBE frames processing
+      description: List of AMBE devices or servers in use
       $ref: "/doc/swagger/include/AMBE.yaml#/definitions/AMBEDevices"
 
 AMBEActions:

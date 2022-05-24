@@ -330,7 +330,7 @@ void AMBE::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response)
 {
     // serial
 
-    SWGSDRangel::SWGDVSerialDevices_2 *swgDVSerialDevices = response.getAmbeReport()->getSerial();
+    SWGSDRangel::SWGDVSerialDevices *swgDVSerialDevices = response.getAmbeReport()->getSerial();
     swgDVSerialDevices->init();
 
     QList<QString> qDeviceNames;
@@ -347,7 +347,7 @@ void AMBE::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response)
 
     // devices
 
-    SWGSDRangel::SWGAMBEDevices_2 *swgAMBEDevices = response.getAmbeReport()->getDevices();
+    SWGSDRangel::SWGAMBEDevices *swgAMBEDevices = response.getAmbeReport()->getDevices();
     swgAMBEDevices->init();
 
     qDeviceNames.clear();
@@ -393,7 +393,7 @@ int AMBE::webapiActionsPost(
         {
             unknownAction = false;
             bool updated = false;
-            SWGSDRangel::SWGAMBEDevices_2 *swgAMBEDevices = swgAMBEActions->getUpdateDevices();
+            SWGSDRangel::SWGAMBEDevices *swgAMBEDevices = swgAMBEActions->getUpdateDevices();
             QList<SWGSDRangel::SWGAMBEDevice *> *ambeList = swgAMBEDevices->getAmbeDevices();
 
             for (QList<SWGSDRangel::SWGAMBEDevice *>::const_iterator it = ambeList->begin(); it != ambeList->end(); ++it)
