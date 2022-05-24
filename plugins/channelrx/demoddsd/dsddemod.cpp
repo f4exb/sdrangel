@@ -319,13 +319,13 @@ void DSDDemod::applySettings(const DSDDemodSettings& settings, bool force)
             for (const auto& feature : m_availableAMBEFeatures)
             {
                 if (feature.m_featureIndex == settings.m_ambeFeatureIndex) {
-                    m_basebandSink->setAMBEFeatureMessageQueue(feature.m_feature->getInputMessageQueue());
+                    m_basebandSink->setAMBEFeature(feature.m_feature);
                 }
             }
         }
         else
         {
-            m_basebandSink->setAMBEFeatureMessageQueue(nullptr);
+            m_basebandSink->setAMBEFeature(nullptr);
         }
     }
 
@@ -880,7 +880,7 @@ void DSDDemod::handleFeatureAdded(int featureSetIndex, Feature *feature)
         m_availableAMBEFeatures[feature] = DSDDemodSettings::AvailableAMBEFeature{feature->getIndexInFeatureSet(), feature};
 
         if (m_settings.m_connectAMBE && (m_settings.m_ambeFeatureIndex == feature->getIndexInFeatureSet())) {
-            m_basebandSink->setAMBEFeatureMessageQueue(feature->getInputMessageQueue());
+            m_basebandSink->setAMBEFeature(feature);
         }
 
         notifyUpdateAMBEFeatures();
@@ -898,7 +898,7 @@ void DSDDemod::handleFeatureRemoved(int featureSetIndex, Feature *feature)
         if (m_settings.m_ambeFeatureIndex == m_availableAMBEFeatures[feature].m_featureIndex)
         {
             m_settings.m_connectAMBE = false;
-            m_basebandSink->setAMBEFeatureMessageQueue(nullptr);
+            m_basebandSink->setAMBEFeature(nullptr);
         }
 
         m_availableAMBEFeatures.remove(feature);

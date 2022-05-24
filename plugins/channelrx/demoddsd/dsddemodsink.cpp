@@ -35,6 +35,7 @@
 #include "dsp/basebandsamplesink.h"
 #include "dsp/datafifo.h"
 #include "dsp/dspcommands.h"
+#include "feature/feature.h"
 #include "audio/audiooutputdevice.h"
 #include "util/db.h"
 #include "util/messagequeue.h"
@@ -45,7 +46,7 @@
 DSDDemodSink::DSDDemodSink() :
     m_channelSampleRate(48000),
     m_channelFrequencyOffset(0),
-    m_ambeFeatureMessageQueue(nullptr),
+    m_ambeFeature(nullptr),
     m_audioSampleRate(48000),
     m_interpolatorDistance(0.0f),
     m_interpolatorDistanceRemain(0.0f),
@@ -232,31 +233,23 @@ void DSDDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
             }
 
             // if (DSPEngine::instance()->hasDVSerialSupport())
-            if (m_ambeFeatureMessageQueue)
+            if (m_ambeFeature)
             {
                 if ((m_settings.m_slot1On) && m_dsdDecoder.mbeDVReady1())
                 {
                     if (!m_settings.m_audioMute)
                     {
-                        m_ambeFeatureMessageQueue->push(
-                            new DSPPushMbeFrame(
-                                m_dsdDecoder.getMbeDVFrame1(),
-                                m_dsdDecoder.getMbeRateIndex(),
-                                m_settings.m_volume * 10.0,
-                                m_settings.m_tdmaStereo ? 1 : 3, // left or both channels
-                                m_settings.m_highPassFilter,
-                                m_audioSampleRate/8000, // upsample from native 8k
-                                &m_audioFifo1
-                            )
+                        DSPPushMbeFrame *msg = new DSPPushMbeFrame(
+                            m_dsdDecoder.getMbeDVFrame1(),
+                            m_dsdDecoder.getMbeRateIndex(),
+                            m_settings.m_volume * 10.0,
+                            m_settings.m_tdmaStereo ? 1 : 3, // left or both channels
+                            m_settings.m_highPassFilter,
+                            m_audioSampleRate/8000, // upsample from native 8k
+                            &m_audioFifo1
                         );
-                        // DSPEngine::instance()->pushMbeFrame(
-                        //         m_dsdDecoder.getMbeDVFrame1(),
-                        //         m_dsdDecoder.getMbeRateIndex(),
-                        //         m_settings.m_volume * 10.0,
-                        //         m_settings.m_tdmaStereo ? 1 : 3, // left or both channels
-                        //         m_settings.m_highPassFilter,
-                        //         m_audioSampleRate/8000, // upsample from native 8k
-                        //         &m_audioFifo1);
+                        m_ambeFeature->handleMessage(*msg);
+                        delete msg;
                     }
 
                     m_dsdDecoder.resetMbeDV1();
@@ -266,25 +259,17 @@ void DSDDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
                 {
                     if (!m_settings.m_audioMute)
                     {
-                        m_ambeFeatureMessageQueue->push(
-                            new DSPPushMbeFrame(
-                                m_dsdDecoder.getMbeDVFrame2(),
-                                m_dsdDecoder.getMbeRateIndex(),
-                                m_settings.m_volume * 10.0,
-                                m_settings.m_tdmaStereo ? 2 : 3, // right or both channels
-                                m_settings.m_highPassFilter,
-                                m_audioSampleRate/8000, // upsample from native 8k
-                                &m_audioFifo2
-                            )
+                        DSPPushMbeFrame *msg = new DSPPushMbeFrame(
+                            m_dsdDecoder.getMbeDVFrame2(),
+                            m_dsdDecoder.getMbeRateIndex(),
+                            m_settings.m_volume * 10.0,
+                            m_settings.m_tdmaStereo ? 2 : 3, // right or both channels
+                            m_settings.m_highPassFilter,
+                            m_audioSampleRate/8000, // upsample from native 8k
+                            &m_audioFifo2
                         );
-                        // DSPEngine::instance()->pushMbeFrame(
-                        //         m_dsdDecoder.getMbeDVFrame2(),
-                        //         m_dsdDecoder.getMbeRateIndex(),
-                        //         m_settings.m_volume * 10.0,
-                        //         m_settings.m_tdmaStereo ? 2 : 3, // right or both channels
-                        //         m_settings.m_highPassFilter,
-                        //         m_audioSampleRate/8000, // upsample from native 8k
-                        //         &m_audioFifo2);
+                        m_ambeFeature->handleMessage(*msg);
+                        delete msg;
                     }
 
                     m_dsdDecoder.resetMbeDV2();
@@ -295,7 +280,7 @@ void DSDDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
         }
 	}
 
-    if (!m_ambeFeatureMessageQueue)
+    if (!m_ambeFeature)
 	// if (!DSPEngine::instance()->hasDVSerialSupport())
 	{
 	    if (m_settings.m_slot1On)
