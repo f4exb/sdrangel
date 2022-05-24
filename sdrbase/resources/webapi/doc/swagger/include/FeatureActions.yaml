@@ -15,6 +15,8 @@ FeatureActions:
       type: integer
     AFCActions:
       $ref: "/doc/swagger/include/AFC.yaml#/AFCActions"
+    AMBEActions:
+      $ref: "/doc/swagger/include/AMBE.yaml#/AMBEActions"
     GS232ControllerActions:
       $ref: "/doc/swagger/include/GS232Controller.yaml#/GS232ControllerActions"
     LimeRFEActions:

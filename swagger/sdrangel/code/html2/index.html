@@ -1249,7 +1249,33 @@ margin-bottom: 20px;
   },
   "description" : "AIS settings"
 };
+            defs.AMBEActions = {
+  "properties" : {
+    "updateDevices" : {
+      "description" : "Add or remove AMBE devices (serial or address) int the list to be used for AMBE frames processing",
+      "$ref" : "#/definitions/AMBEDevices_2"
+    },
+    "removeAll" : {
+      "type" : "integer",
+      "description" : "Set to a non zero value to remove all AMBE devices from the list of used AMBE devices"
+    }
+  },
+  "description" : "AMBE"
+};
             defs.AMBEDevice = {
+  "properties" : {
+    "deviceRef" : {
+      "type" : "string",
+      "description" : "Serial device name or server address"
+    },
+    "delete" : {
+      "type" : "integer",
+      "description" : "1 if device is to be removed from active list"
+    }
+  },
+  "description" : "AMBE devices active in the system"
+};
+            defs.AMBEDevice_2 = {
   "properties" : {
     "deviceRef" : {
       "type" : "string",
@@ -1278,6 +1304,66 @@ margin-bottom: 20px;
     }
   },
   "description" : "List of AMBE devices (serial or server address)"
+};
+            defs.AMBEDevices_2 = {
+  "required" : [ "nbDevices" ],
+  "properties" : {
+    "nbDevices" : {
+      "type" : "integer",
+      "description" : "Number of DV serial devices"
+    },
+    "ambeDevices" : {
+      "type" : "array",
+      "description" : "List of AMBE devices",
+      "items" : {
+        "$ref" : "#/definitions/AMBEDevice"
+      }
+    }
+  },
+  "description" : "List of AMBE devices (serial or server address)"
+};
+            defs.AMBEReport = {
+  "properties" : {
+    "serial" : {
+      "description" : "List of available DV serial devices",
+      "$ref" : "#/definitions/DVSerialDevices_2"
+    },
+    "devices" : {
+      "description" : "List of AMBE devices (serial or address) used for AMBE frames processing",
+      "$ref" : "#/definitions/AMBEDevices_2"
+    }
+  },
+  "description" : "AMBE"
+};
+            defs.AMBESettings = {
+  "properties" : {
+    "title" : {
+      "type" : "string"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIFeatureSetIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIFeatureIndex" : {
+      "type" : "integer"
+    },
+    "rollupState" : {
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "AMBE"
 };
             defs.AMDemodReport = {
   "properties" : {
@@ -4626,7 +4712,33 @@ margin-bottom: 20px;
   },
   "description" : "DV serial device details"
 };
+            defs.DVSerialDevice_2 = {
+  "properties" : {
+    "deviceName" : {
+      "type" : "string",
+      "description" : "Name of the serial device in the system"
+    }
+  },
+  "description" : "DV serial device details"
+};
             defs.DVSerialDevices = {
+  "required" : [ "nbDevices" ],
+  "properties" : {
+    "nbDevices" : {
+      "type" : "integer",
+      "description" : "Number of DV serial devices"
+    },
+    "dvSerialDevices" : {
+      "type" : "array",
+      "description" : "Device names of DV serial devices",
+      "items" : {
+        "$ref" : "#/definitions/DVSerialDevice"
+      }
+    }
+  },
+  "description" : "List of DV serial devices available in the system"
+};
+            defs.DVSerialDevices_2 = {
   "required" : [ "nbDevices" ],
   "properties" : {
     "nbDevices" : {
@@ -5278,6 +5390,9 @@ margin-bottom: 20px;
     "AFCActions" : {
       "$ref" : "#/definitions/AFCActions"
     },
+    "AMBEActions" : {
+      "$ref" : "#/definitions/AMBEActions"
+    },
     "GS232ControllerActions" : {
       "$ref" : "#/definitions/GS232ControllerActions"
     },
@@ -5417,6 +5532,9 @@ margin-bottom: 20px;
     "AFCReport" : {
       "$ref" : "#/definitions/AFCReport"
     },
+    "AMBEReport" : {
+      "$ref" : "#/definitions/AMBEReport"
+    },
     "GS232ControllerReport" : {
       "$ref" : "#/definitions/GS232ControllerReport"
     },
@@ -5502,6 +5620,9 @@ margin-bottom: 20px;
     },
     "AISSettings" : {
       "$ref" : "#/definitions/AISSettings"
+    },
+    "AMBESettings" : {
+      "$ref" : "#/definitions/AMBESettings"
     },
     "AntennaToolsSettings" : {
       "$ref" : "#/definitions/AntennaToolsSettings"
@@ -57769,7 +57890,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2022-05-24T15:35:23.001+02:00
+              Generated 2022-05-24T21:52:35.030+02:00
             </div>
           </div>
       </div>

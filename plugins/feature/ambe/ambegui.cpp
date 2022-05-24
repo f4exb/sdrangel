@@ -178,6 +178,25 @@ bool AMBEGUI::handleMessage(const Message& message)
         displaySettings();
         return true;
     }
+    else if (AMBE::MsgReportDevices::match(message))
+    {
+        qDebug("AMBEGUI::handleMessage: AMBE::MsgReportDevices");
+        AMBE::MsgReportDevices& cfg = (AMBE::MsgReportDevices&) message;
+        ui->ambeSerialDevices->clear();
+        ui->statusText->setText("Updated all devices lists");
+
+        for (const auto& ambeDevice : cfg.getAvailableDevices()) {
+            ui->ambeSerialDevices->addItem(ambeDevice);
+        }
+
+        ui->ambeDeviceRefs->clear();
+
+        for (const auto& inUseDevice : cfg.getUsedDevices()) {
+            ui->ambeDeviceRefs->addItem(inUseDevice);
+        }
+
+        return true;
+    }
 
 	return false;
 }
@@ -196,27 +215,25 @@ void AMBEGUI::handleInputMessages()
 
 void AMBEGUI::populateSerialList()
 {
-    std::vector<QString> ambeSerialDevices;
+    QList<QString> ambeSerialDevices;
     m_ambe->getAMBEEngine()->scan(ambeSerialDevices);
     ui->ambeSerialDevices->clear();
-    std::vector<QString>::const_iterator it = ambeSerialDevices.begin();
 
-    for (; it != ambeSerialDevices.end(); ++it) {
-        ui->ambeSerialDevices->addItem(QString(*it));
+    for (const auto& ambeDevice : ambeSerialDevices) {
+        ui->ambeSerialDevices->addItem(ambeDevice);
     }
 }
 
 void AMBEGUI::refreshInUseList()
 {
-    std::vector<QString> inUseDevices;
+    QList<QString> inUseDevices;
     m_ambe->getAMBEEngine()->getDeviceRefs(inUseDevices);
     ui->ambeDeviceRefs->clear();
-    std::vector<QString>::const_iterator it = inUseDevices.begin();
 
-    for (; it != inUseDevices.end(); ++it)
+    for (const auto& inUseDevice : inUseDevices)
     {
-        qDebug("AMBEGUI::refreshInUseList: %s", qPrintable(*it));
-        ui->ambeDeviceRefs->addItem(*it);
+        qDebug("AMBEGUI::refreshInUseList: %s", qPrintable(inUseDevice));
+        ui->ambeDeviceRefs->addItem(inUseDevice);
     }
 }
 void AMBEGUI::on_importSerial_clicked()
@@ -295,6 +312,12 @@ void AMBEGUI::on_refreshAmbeList_clicked()
     ui->statusText->setText("In use refreshed");
 }
 
+void AMBEGUI::on_refreshSerial_clicked()
+{
+    populateSerialList();
+    ui->statusText->setText("Serial refreshed");
+}
+
 void AMBEGUI::on_clearAmbeList_clicked()
 {
     if (ui->ambeDeviceRefs->count() == 0)
@@ -338,6 +361,7 @@ void AMBEGUI::makeUIConnections()
     QObject::connect(ui->importAllSerial, &QPushButton::clicked, this, &AMBEGUI::on_importAllSerial_clicked);
     QObject::connect(ui->removeAmbeDevice, &QPushButton::clicked, this, &AMBEGUI::on_removeAmbeDevice_clicked);
     QObject::connect(ui->refreshAmbeList, &QPushButton::clicked, this, &AMBEGUI::on_refreshAmbeList_clicked);
+    QObject::connect(ui->refreshSerial, &QPushButton::clicked, this, &AMBEGUI::on_refreshSerial_clicked);
     QObject::connect(ui->clearAmbeList, &QPushButton::clicked, this, &AMBEGUI::on_clearAmbeList_clicked);
     QObject::connect(ui->importAddress, &QPushButton::clicked, this, &AMBEGUI::on_importAddress_clicked);
 }

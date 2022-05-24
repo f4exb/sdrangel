@@ -54,6 +54,7 @@ AMBEEngine::~AMBEEngine()
 #if defined(_WIN32)
 void AMBEEngine::getComList()
 {
+    qDebug("AMBEEngine::getComList: Win");
     m_comList.clear();
     m_comList8250.clear();
     char comCStr[16];
@@ -74,6 +75,7 @@ void AMBEEngine::scan(std::vector<QString>& ambeDevices)
 #elif defined(__APPLE__)
 void AMBEEngine::getComList()
 {
+    qDebug("AMBEEngine::getComList: Apple");
 }
 void AMBEEngine::scan(std::vector<QString>& ambeDevices)
 {
@@ -82,6 +84,7 @@ void AMBEEngine::scan(std::vector<QString>& ambeDevices)
 #else
 void AMBEEngine::getComList()
 {
+    qDebug("AMBEEngine::getComList: Linux");
     int n;
     struct dirent **namelist;
     m_comList.clear();
@@ -197,9 +200,10 @@ std::string AMBEEngine::get_driver(const std::string& tty)
     return "";
 }
 
-void AMBEEngine::scan(std::vector<QString>& ambeDevices)
+void AMBEEngine::scan(QList<QString>& ambeDevices)
 {
-    getComList();
+    qDebug("AMBEEngine::scan");
+    AMBEEngine::getComList();
     std::vector<std::string>::const_iterator it = m_comList.begin();
     ambeDevices.clear();
 
@@ -287,7 +291,7 @@ void AMBEEngine::releaseAll()
     m_controllers.clear();
 }
 
-void AMBEEngine::getDeviceRefs(std::vector<QString>& deviceNames)
+void AMBEEngine::getDeviceRefs(QList<QString>& deviceNames)
 {
     std::vector<AMBEController>::const_iterator it = m_controllers.begin();
 
@@ -341,62 +345,4 @@ void AMBEEngine::pushMbeFrame(
             qDebug("AMBEEngine::pushMbeFrame: no DV device available. MBE frame dropped");
         }
     }
-}
-
-QByteArray AMBEEngine::serialize() const
-{
-    qDebug("AMBEEngine::serialize");
-    QStringList qDeviceList;
-    std::vector<AMBEController>::const_iterator it = m_controllers.begin();
-
-    while (it != m_controllers.end())
-    {
-        qDebug("AMBEEngine::serialize: %s", it->device.c_str());
-        qDeviceList << QString(it->device.c_str());
-        ++it;
-    }
-
-    QByteArray data;
-    QDataStream *stream = new QDataStream(&data, QIODevice::WriteOnly);
-    (*stream) << qDeviceList;
-    delete stream;
-
-    return data;
-}
-
-bool AMBEEngine::deserialize(const QByteArray& data)
-{
-    if (data.size() <= 0)
-    {
-        qDebug("AMBEEngine::deserialize: invalid or no data");
-        return false;
-    }
-
-    QStringList qDeviceList;
-    QDataStream *stream = new QDataStream(data);
-    (*stream) >> qDeviceList;
-    delete stream;
-
-    releaseAll();
-
-    for (int i = 0; i < qDeviceList.size(); ++i)
-    {
-        qDebug(" AMBEEngine::deserialize: %s", qDeviceList.at(i).toStdString().c_str());
-        registerController(qDeviceList.at(i).toStdString());
-    }
-
-    return true;
-}
-
-void AMBEEngine::formatTo(SWGSDRangel::SWGObject *swgObject) const
-{
-    (void) swgObject;
-    // TODO
-}
-
-void AMBEEngine::updateFrom(const QStringList& keys, const SWGSDRangel::SWGObject *swgObject)
-{
-    (void) keys;
-    (void) swgObject;
-    // TODO
 }

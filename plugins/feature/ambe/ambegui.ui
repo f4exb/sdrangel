@@ -116,7 +116,7 @@
       <item>
        <widget class="QPushButton" name="removeAmbeDevice">
         <property name="toolTip">
-         <string>Release all devices and servers</string>
+         <string>Remove selected device or server</string>
         </property>
         <property name="text">
          <string/>
@@ -124,20 +124,6 @@
         <property name="icon">
          <iconset resource="../../../sdrgui/resources/res.qrc">
           <normaloff>:/bin.png</normaloff>:/bin.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="refreshAmbeList">
-        <property name="toolTip">
-         <string>Refresh list of devices and servers in use</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="../../../sdrgui/resources/res.qrc">
-          <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
         </property>
        </widget>
       </item>
@@ -152,6 +138,20 @@
         <property name="icon">
          <iconset resource="../../../sdrgui/resources/res.qrc">
           <normaloff>:/sweep.png</normaloff>:/sweep.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="refreshAmbeList">
+        <property name="toolTip">
+         <string>Refresh list of devices and servers in use</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
         </property>
        </widget>
       </item>
@@ -225,6 +225,20 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="refreshSerial">
+        <property name="toolTip">
+         <string>Refresh AMBE serial devices list</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -250,7 +264,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>List of available AMBE serial devices available</string>
+         <string>List of AMBE serial devices in the system</string>
         </property>
        </widget>
       </item>

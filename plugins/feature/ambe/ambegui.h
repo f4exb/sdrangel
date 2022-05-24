@@ -85,6 +85,7 @@ private slots:
     void on_importAllSerial_clicked();
     void on_removeAmbeDevice_clicked();
     void on_refreshAmbeList_clicked();
+    void on_refreshSerial_clicked();
     void on_clearAmbeList_clicked();
     void on_importAddress_clicked();
 };

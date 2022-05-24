@@ -57,6 +57,26 @@ public:
         { }
     };
 
+    class MsgReportDevices : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        QList<QString>& getAvailableDevices() { return m_availableDevices; }
+        QList<QString>& getUsedDevices() { return m_usedDevices; }
+
+        static MsgReportDevices* create() {
+            return new MsgReportDevices();
+        }
+
+    private:
+        QList<QString> m_availableDevices;
+        QList<QString> m_usedDevices;
+
+        MsgReportDevices() :
+            Message()
+        {}
+    };
+
     AMBE(WebAPIAdapterInterface *webAPIAdapterInterface);
     virtual ~AMBE();
     virtual void destroy() { delete this; }
@@ -71,6 +91,34 @@ public:
 
     AMBEEngine *getAMBEEngine() { return &m_ambeEngine; }
 
+    virtual int webapiSettingsGet(
+            SWGSDRangel::SWGFeatureSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+            bool force,
+            const QStringList& featureSettingsKeys,
+            SWGSDRangel::SWGFeatureSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGFeatureReport& response,
+            QString& errorMessage);
+
+    virtual int webapiActionsPost(
+            const QStringList& featureActionsKeys,
+            SWGSDRangel::SWGFeatureActions& query,
+            QString& errorMessage);
+
+    static void webapiFormatFeatureSettings(
+        SWGSDRangel::SWGFeatureSettings& response,
+        const AMBESettings& settings);
+
+    static void webapiUpdateFeatureSettings(
+            AMBESettings& settings,
+            const QStringList& featureSettingsKeys,
+            SWGSDRangel::SWGFeatureSettings& response);
+
     static const char* const m_featureIdURI;
     static const char* const m_featureId;
 
@@ -84,6 +132,8 @@ private:
     void start();
     void stop();
     void applySettings(const AMBESettings& settings, bool force = false);
+    void webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response);
+    void webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const AMBESettings& settings, bool force);
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);

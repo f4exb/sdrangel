@@ -17,6 +17,8 @@ FeatureSettings:
       $ref: "/doc/swagger/include/AFC.yaml#/AFCSettings"
     AISSettings:
       $ref: "/doc/swagger/include/AIS.yaml#/AISSettings"
+    AMBESettings:
+      $ref: "/doc/swagger/include/AMBE.yaml#/AMBESettings"
     AntennaToolsSettings:
       $ref: "/doc/swagger/include/AntennaTools.yaml#/AntennaToolsSettings"
     APRSSettings:

@@ -270,6 +270,7 @@ const QMap<QString, QString> WebAPIUtils::m_mimoDeviceHwIdToActionsKey = {
 const QMap<QString, QString> WebAPIUtils::m_featureTypeToSettingsKey = {
     {"AFC", "AFCSettings"},
     {"AIS", "AISSettings"},
+    {"AMBE", "AMBESettings"},
     {"AntennaTools", "AntennaToolsSettings"},
     {"APRS", "APRSSettings"},
     {"DemodAnalyzer", "DemodAnalyzerSettings"},
@@ -288,6 +289,7 @@ const QMap<QString, QString> WebAPIUtils::m_featureTypeToSettingsKey = {
 
 const QMap<QString, QString> WebAPIUtils::m_featureTypeToActionsKey = {
     {"AFC", "AFCActions"},
+    {"AMBE", "AMBEActions"},
     {"GS232Controller", "GS232ControllerActions"},
     {"LimeRFE", "LimeRFEActions"},
     {"Map", "MapActions"},
@@ -302,6 +304,7 @@ const QMap<QString, QString> WebAPIUtils::m_featureTypeToActionsKey = {
 const QMap<QString, QString> WebAPIUtils::m_featureURIToSettingsKey = {
     {"sdrangel.feature.afc", "AFCSettings"},
     {"sdrangel.feature.ais", "AISSSettings"},
+    {"sdrangel.feature.ambe", "AMBESSettings"},
     {"sdrangel.feature.antennatools", "AntennaToolsSettings"},
     {"sdrangel.feature.aprs", "APRSSettings"},
     {"sdrangel.feature.demodanalyzer", "DemodAnalyzerSettings"},

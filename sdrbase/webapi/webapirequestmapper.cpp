@@ -5300,6 +5300,11 @@ bool WebAPIRequestMapper::getFeatureActions(
             featureActions->setAfcActions(new SWGSDRangel::SWGAFCActions());
             featureActions->getAfcActions()->fromJsonObject(actionsJsonObject);
         }
+        else if (featureActionsKey == "AMBEActions")
+        {
+            featureActions->setAmbeActions(new SWGSDRangel::SWGAMBEActions());
+            featureActions->getAmbeActions()->fromJsonObject(actionsJsonObject);
+        }
         else if (featureActionsKey == "GS232ControllerActions")
         {
             featureActions->setGs232ControllerActions(new SWGSDRangel::SWGGS232ControllerActions());

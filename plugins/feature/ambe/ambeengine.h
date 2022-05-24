@@ -25,26 +25,25 @@
 #include <QObject>
 #include <QMutex>
 #include <QString>
+#include <QList>
 #include <QByteArray>
-
-#include "settings/serializable.h"
 
 class QThread;
 class AMBEWorker;
 class AudioFifo;
 
-class AMBEEngine : public QObject, public Serializable
+class AMBEEngine : public QObject
 {
     Q_OBJECT
 public:
     AMBEEngine();
     ~AMBEEngine();
 
-    void scan(std::vector<QString>& ambeDevices);
+    void scan(QList<QString>& ambeDevices);
     void releaseAll();
 
     int getNbDevices() const { return m_controllers.size(); }   //!< number of devices used
-    void getDeviceRefs(std::vector<QString>& devicesRefs);  //!< reference of the devices used (device path or url)
+    void getDeviceRefs(QList<QString>& devicesRefs);      //!< reference of the devices used (device path or url)
     bool registerController(const std::string& deviceRef);      //!< create a new controller for the device in reference
     void releaseController(const std::string& deviceRef);       //!< release controller resources for the device in reference
 
@@ -56,11 +55,6 @@ public:
             bool useHP,
             int upsampling,
             AudioFifo *audioFifo);
-
-    virtual QByteArray serialize() const;
-    virtual bool deserialize(const QByteArray& data);
-    virtual void formatTo(SWGSDRangel::SWGObject *swgObject) const; //!< Serialize to API
-    virtual void updateFrom(const QStringList& keys, const SWGSDRangel::SWGObject *swgObject); //!< Deserialize from API
 
 private:
     struct AMBEController

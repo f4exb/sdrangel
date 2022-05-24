@@ -23,6 +23,7 @@
 
 
 #include "SWGAFCReport.h"
+#include "SWGAMBEReport.h"
 #include "SWGGS232ControllerReport.h"
 #include "SWGLimeRFEReport.h"
 #include "SWGMapReport.h"
@@ -57,6 +58,9 @@ public:
 
     SWGAFCReport* getAfcReport();
     void setAfcReport(SWGAFCReport* afc_report);
+
+    SWGAMBEReport* getAmbeReport();
+    void setAmbeReport(SWGAMBEReport* ambe_report);
 
     SWGGS232ControllerReport* getGs232ControllerReport();
     void setGs232ControllerReport(SWGGS232ControllerReport* gs232_controller_report);
@@ -94,6 +98,9 @@ private:
 
     SWGAFCReport* afc_report;
     bool m_afc_report_isSet;
+
+    SWGAMBEReport* ambe_report;
+    bool m_ambe_report_isSet;
 
     SWGGS232ControllerReport* gs232_controller_report;
     bool m_gs232_controller_report_isSet;

@@ -25,8 +25,13 @@
 #include "SWGAISModReport.h"
 #include "SWGAISModSettings.h"
 #include "SWGAISSettings.h"
+#include "SWGAMBEActions.h"
 #include "SWGAMBEDevice.h"
+#include "SWGAMBEDevice_2.h"
 #include "SWGAMBEDevices.h"
+#include "SWGAMBEDevices_2.h"
+#include "SWGAMBEReport.h"
+#include "SWGAMBESettings.h"
 #include "SWGAMDemodReport.h"
 #include "SWGAMDemodSettings.h"
 #include "SWGAMModReport.h"
@@ -94,7 +99,9 @@
 #include "SWGDSDDemodReport.h"
 #include "SWGDSDDemodSettings.h"
 #include "SWGDVSerialDevice.h"
+#include "SWGDVSerialDevice_2.h"
 #include "SWGDVSerialDevices.h"
+#include "SWGDVSerialDevices_2.h"
 #include "SWGDemodAnalyzerSettings.h"
 #include "SWGDeviceActions.h"
 #include "SWGDeviceConfig.h"
@@ -384,13 +391,38 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGAMBEActions").compare(type) == 0) {
+      SWGAMBEActions *obj = new SWGAMBEActions();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGAMBEDevice").compare(type) == 0) {
       SWGAMBEDevice *obj = new SWGAMBEDevice();
       obj->init();
       return obj;
     }
+    if(QString("SWGAMBEDevice_2").compare(type) == 0) {
+      SWGAMBEDevice_2 *obj = new SWGAMBEDevice_2();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGAMBEDevices").compare(type) == 0) {
       SWGAMBEDevices *obj = new SWGAMBEDevices();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGAMBEDevices_2").compare(type) == 0) {
+      SWGAMBEDevices_2 *obj = new SWGAMBEDevices_2();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGAMBEReport").compare(type) == 0) {
+      SWGAMBEReport *obj = new SWGAMBEReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGAMBESettings").compare(type) == 0) {
+      SWGAMBESettings *obj = new SWGAMBESettings();
       obj->init();
       return obj;
     }
@@ -729,8 +761,18 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGDVSerialDevice_2").compare(type) == 0) {
+      SWGDVSerialDevice_2 *obj = new SWGDVSerialDevice_2();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGDVSerialDevices").compare(type) == 0) {
       SWGDVSerialDevices *obj = new SWGDVSerialDevices();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDVSerialDevices_2").compare(type) == 0) {
+      SWGDVSerialDevices_2 *obj = new SWGDVSerialDevices_2();
       obj->init();
       return obj;
     }

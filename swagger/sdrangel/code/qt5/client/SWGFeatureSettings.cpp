@@ -38,6 +38,8 @@ SWGFeatureSettings::SWGFeatureSettings() {
     m_afc_settings_isSet = false;
     ais_settings = nullptr;
     m_ais_settings_isSet = false;
+    ambe_settings = nullptr;
+    m_ambe_settings_isSet = false;
     antenna_tools_settings = nullptr;
     m_antenna_tools_settings_isSet = false;
     aprs_settings = nullptr;
@@ -84,6 +86,8 @@ SWGFeatureSettings::init() {
     m_afc_settings_isSet = false;
     ais_settings = new SWGAISSettings();
     m_ais_settings_isSet = false;
+    ambe_settings = new SWGAMBESettings();
+    m_ambe_settings_isSet = false;
     antenna_tools_settings = new SWGAntennaToolsSettings();
     m_antenna_tools_settings_isSet = false;
     aprs_settings = new SWGAPRSSettings();
@@ -126,6 +130,9 @@ SWGFeatureSettings::cleanup() {
     }
     if(ais_settings != nullptr) { 
         delete ais_settings;
+    }
+    if(ambe_settings != nullptr) { 
+        delete ambe_settings;
     }
     if(antenna_tools_settings != nullptr) { 
         delete antenna_tools_settings;
@@ -192,6 +199,8 @@ SWGFeatureSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&ais_settings, pJson["AISSettings"], "SWGAISSettings", "SWGAISSettings");
     
+    ::SWGSDRangel::setValue(&ambe_settings, pJson["AMBESettings"], "SWGAMBESettings", "SWGAMBESettings");
+    
     ::SWGSDRangel::setValue(&antenna_tools_settings, pJson["AntennaToolsSettings"], "SWGAntennaToolsSettings", "SWGAntennaToolsSettings");
     
     ::SWGSDRangel::setValue(&aprs_settings, pJson["APRSSettings"], "SWGAPRSSettings", "SWGAPRSSettings");
@@ -250,6 +259,9 @@ SWGFeatureSettings::asJsonObject() {
     }
     if((ais_settings != nullptr) && (ais_settings->isSet())){
         toJsonValue(QString("AISSettings"), ais_settings, obj, QString("SWGAISSettings"));
+    }
+    if((ambe_settings != nullptr) && (ambe_settings->isSet())){
+        toJsonValue(QString("AMBESettings"), ambe_settings, obj, QString("SWGAMBESettings"));
     }
     if((antenna_tools_settings != nullptr) && (antenna_tools_settings->isSet())){
         toJsonValue(QString("AntennaToolsSettings"), antenna_tools_settings, obj, QString("SWGAntennaToolsSettings"));
@@ -345,6 +357,16 @@ void
 SWGFeatureSettings::setAisSettings(SWGAISSettings* ais_settings) {
     this->ais_settings = ais_settings;
     this->m_ais_settings_isSet = true;
+}
+
+SWGAMBESettings*
+SWGFeatureSettings::getAmbeSettings() {
+    return ambe_settings;
+}
+void
+SWGFeatureSettings::setAmbeSettings(SWGAMBESettings* ambe_settings) {
+    this->ambe_settings = ambe_settings;
+    this->m_ambe_settings_isSet = true;
 }
 
 SWGAntennaToolsSettings*
@@ -505,6 +527,9 @@ SWGFeatureSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(ais_settings && ais_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(ambe_settings && ambe_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(antenna_tools_settings && antenna_tools_settings->isSet()){

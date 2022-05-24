@@ -9,6 +9,8 @@ FeatureReport:
       type: string
     AFCReport:
       $ref: "http://swgserver:8081/api/swagger/include/AFC.yaml#/AFCReport"
+    AMBEReport:
+      $ref: "http://swgserver:8081/api/swagger/include/AMBE.yaml#/AMBEReport"
     GS232ControllerReport:
       $ref: "http://swgserver:8081/api/swagger/include/GS232Controller.yaml#/GS232ControllerReport"
     LimeRFEReport:

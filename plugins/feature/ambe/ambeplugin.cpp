@@ -24,7 +24,7 @@
 #endif
 #include "ambe.h"
 #include "ambeplugin.h"
-// #include "simplepttwebapiadapter.h"
+#include "ambewebapiadapter.h"
 
 const PluginDescriptor AMBEPlugin::m_pluginDescriptor = {
     AMBE::m_featureId,
@@ -76,5 +76,5 @@ Feature* AMBEPlugin::createFeature(WebAPIAdapterInterface* webAPIAdapterInterfac
 
 FeatureWebAPIAdapter* AMBEPlugin::createFeatureWebAPIAdapter() const
 {
-	return nullptr; // TODO new SimplePTTWebAPIAdapter();
+	return new AMBEWebAPIAdapter();
 }
