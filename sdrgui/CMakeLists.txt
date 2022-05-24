@@ -8,7 +8,6 @@ set(sdrgui_SOURCES
     mainwindow.cpp
     gui/aboutdialog.cpp
     gui/addpresetdialog.cpp
-    gui/ambedevicesdialog.cpp
     gui/audiodialog.cpp
     gui/audioselectdialog.cpp
     gui/basicchannelsettingsdialog.cpp
@@ -108,7 +107,6 @@ set(sdrgui_HEADERS
     mainwindow.h
     gui/aboutdialog.h
     gui/addpresetdialog.h
-    gui/ambedevicesdialog.h
     gui/audiodialog.h
     gui/audioselectdialog.h
     gui/basicchannelsettingsdialog.h

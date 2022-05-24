@@ -52,8 +52,6 @@ set(sdrbase_SERIALDV_LIB ${LIBSERIALDV_LIBRARY})
 
 set(sdrbase_SOURCES
     ${sdrbase_SOURCES}
-    ambe/ambeengine.cpp
-    ambe/ambeworker.cpp
 
     audio/audiocompressor.cpp
     audio/audiocompressorsnd.cpp
@@ -227,8 +225,6 @@ set(sdrbase_SOURCES
 
 set(sdrbase_HEADERS
     ${sdrbase_HEADERS}
-    ambe/ambeengine.h
-    ambe/ambeworker.h
 
     audio/audiocompressor.h
     audio/audiocompressorsnd.h

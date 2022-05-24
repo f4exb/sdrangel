@@ -53,7 +53,6 @@ private:
     void testDecimateIF();
     void testDecimateFI();
     void testDecimateFF();
-    void testAMBE();
     void testGolay2312();
     void decimateII(const qint16 *buf, int len);
     void decimateInfII(const qint16 *buf, int len);

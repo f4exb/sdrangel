@@ -10,8 +10,7 @@
 #include "ambe/ambeengine.h"
 
 MainSettings::MainSettings() :
-    m_audioDeviceManager(nullptr),
-    m_ambeEngine(nullptr)
+    m_audioDeviceManager(nullptr)
 {
 	resetToDefaults();
     qInfo("MainSettings::MainSettings: settings file: format: %d location: %s", getFileFormat(), qPrintable(getFileLocation()));
@@ -59,10 +58,6 @@ void MainSettings::load()
 	if (m_audioDeviceManager) {
 	    m_audioDeviceManager->deserialize(qUncompress(QByteArray::fromBase64(s.value("audio").toByteArray())));
 	}
-
-    if (m_ambeEngine) {
-        m_ambeEngine->deserialize(qUncompress(QByteArray::fromBase64(s.value("ambe").toByteArray())));
-    }
 
 	QStringList groups = s.childGroups();
 
@@ -147,10 +142,6 @@ void MainSettings::save() const
 	if (m_audioDeviceManager) {
 	    s.setValue("audio", qCompress(m_audioDeviceManager->serialize()).toBase64());
 	}
-
-    if (m_ambeEngine) {
-        s.setValue("ambe", qCompress(m_ambeEngine->serialize()).toBase64());
-    }
 
 	QStringList groups = s.childGroups();
 

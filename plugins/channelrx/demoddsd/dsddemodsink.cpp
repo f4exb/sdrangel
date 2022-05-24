@@ -92,7 +92,7 @@ void DSDDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
 
 	m_scopeSampleBuffer.clear();
 
-	m_dsdDecoder.enableMbelib(!DSPEngine::instance()->hasDVSerialSupport()); // disable mbelib if DV serial support is present and activated else enable it
+	m_dsdDecoder.enableMbelib(!m_ambeFeature); // disable mbelib if DV serial support is present and activated else enable it
 
 	for (SampleVector::const_iterator it = begin; it != end; ++it)
 	{
@@ -281,7 +281,6 @@ void DSDDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
 	}
 
     if (!m_ambeFeature)
-	// if (!DSPEngine::instance()->hasDVSerialSupport())
 	{
 	    if (m_settings.m_slot1On)
 	    {

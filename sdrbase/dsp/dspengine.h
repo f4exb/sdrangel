@@ -26,7 +26,6 @@
 #include "audio/audiodevicemanager.h"
 #include "audio/audiooutputdevice.h"
 #include "export.h"
-#include "ambe/ambeengine.h"
 
 class DSPDeviceSourceEngine;
 class DSPDeviceSinkEngine;
@@ -55,7 +54,6 @@ public:
     void removeDeviceEngineAt(int deviceIndex);
 
 	AudioDeviceManager *getAudioDeviceManager() { return &m_audioDeviceManager; }
-	AMBEEngine *getAMBEEngine() { return &m_ambeEngine; }
 
     uint32_t getDeviceSourceEnginesNumber() const { return m_deviceSourceEngines.size(); }
     DSPDeviceSourceEngine *getDeviceSourceEngineByIndex(unsigned int deviceIndex) { return m_deviceSourceEngines[deviceIndex]; }
@@ -65,20 +63,6 @@ public:
 
     uint32_t getDeviceMIMOEnginesNumber() const { return m_deviceMIMOEngines.size(); }
     DSPDeviceMIMOEngine *getDeviceMIMOEngineByIndex(unsigned int deviceIndex) { return m_deviceMIMOEngines[deviceIndex]; }
-
-	// Serial DV methods:
-
-	bool hasDVSerialSupport();
-	void setDVSerialSupport(bool support);
-	void getDVSerialNames(std::vector<std::string>& deviceNames);
-	void pushMbeFrame(
-	        const unsigned char *mbeFrame,
-	        int mbeRateIndex,
-	        int mbeVolumeIndex,
-	        unsigned char channels,
-	        bool useHP,
-	        int upsampling,
-	        AudioFifo *audioFifo);
 
     const QTimer& getMasterTimer() const { return m_masterTimer; }
     void setMIMOSupport(bool mimoSupport) { m_mimoSupport = mimoSupport; }
@@ -109,7 +93,6 @@ private:
     QTimer m_masterTimer;
 	bool m_dvSerialSupport;
     bool m_mimoSupport;
-	AMBEEngine m_ambeEngine;
     FFTFactory *m_fftFactory;
 };
 
