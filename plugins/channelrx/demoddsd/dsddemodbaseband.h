@@ -75,6 +75,7 @@ public:
     void setChannel(ChannelAPI *channel);
     void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
     void setAudioFifoLabel(const QString& label) { m_sink.setAudioFifoLabel(label); }
+    void setAMBEFeatureMessageQueue(MessageQueue *ambeFeatureMessageQueue) { m_sink.setAmbeFeatureMessageQueue(ambeFeatureMessageQueue); }
 
 private:
     SampleSinkFifo m_sampleFifo;

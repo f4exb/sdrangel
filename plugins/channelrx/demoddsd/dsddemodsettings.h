@@ -21,9 +21,20 @@
 #include <QByteArray>
 
 class Serializable;
+class Feature;
 
 struct DSDDemodSettings
 {
+    struct AvailableAMBEFeature
+    {
+        int m_featureIndex;
+        Feature *m_feature;
+
+        AvailableAMBEFeature() = default;
+        AvailableAMBEFeature(const AvailableAMBEFeature&) = default;
+        AvailableAMBEFeature& operator=(const AvailableAMBEFeature&) = default;
+    };
+
     qint64 m_inputFrequencyOffset;
     Real  m_rfBandwidth;
     Real  m_fmDeviation;
@@ -55,6 +66,8 @@ struct DSDDemodSettings
     int m_workspaceIndex;
     QByteArray m_geometryBytes;
     bool m_hidden;
+    int m_ambeFeatureIndex;
+    bool m_connectAMBE;
 
     Serializable *m_channelMarker;
     Serializable *m_rollupState;

@@ -61,6 +61,8 @@ void DSDDemodSettings::resetToDefaults()
     m_reverseAPIChannelIndex = 0;
     m_workspaceIndex = 0;
     m_hidden = false;
+    m_ambeFeatureIndex = -1;
+    m_connectAMBE = false;
 }
 
 QByteArray DSDDemodSettings::serialize() const
@@ -107,6 +109,8 @@ QByteArray DSDDemodSettings::serialize() const
     s.writeS32(32, m_workspaceIndex);
     s.writeBlob(33, m_geometryBytes);
     s.writeBool(34, m_hidden);
+    s.writeS32(35, m_ambeFeatureIndex);
+    s.writeBool(36, m_connectAMBE);
 
     return s.final();
 }
@@ -190,6 +194,8 @@ bool DSDDemodSettings::deserialize(const QByteArray& data)
         d.readS32(32, &m_workspaceIndex, 0);
         d.readBlob(33, &m_geometryBytes);
         d.readBool(34, &m_hidden, false);
+        d.readS32(35, &m_ambeFeatureIndex, -1);
+        d.readBool(36, &m_connectAMBE, false);
 
         return true;
     }

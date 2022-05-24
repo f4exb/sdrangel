@@ -83,6 +83,7 @@ public:
     }
 
     const char *updateAndGetStatusText();
+    void setAmbeFeatureMessageQueue(MessageQueue *queue) { m_ambeFeatureMessageQueue = queue; }
 
 private:
     struct MagSqLevelsStore
@@ -114,6 +115,7 @@ private:
 	int m_channelFrequencyOffset;
 	DSDDemodSettings m_settings;
     ChannelAPI *m_channel;
+    MessageQueue *m_ambeFeatureMessageQueue;
     int m_audioSampleRate;
     QVector<qint16> m_demodBuffer;
     int m_demodBufferFill;

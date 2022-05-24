@@ -62,6 +62,38 @@ public:
         { }
     };
 
+    class MsgQueryAvailableAMBEFeatures : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgQueryAvailableAMBEFeatures* create() {
+            return new MsgQueryAvailableAMBEFeatures();
+        }
+
+    protected:
+        MsgQueryAvailableAMBEFeatures() :
+            Message()
+        { }
+    };
+
+    class MsgReportAvailableAMBEFeatures : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        QList<DSDDemodSettings::AvailableAMBEFeature>& getFeatures() { return m_availableFeatures; }
+
+        static MsgReportAvailableAMBEFeatures* create() {
+            return new MsgReportAvailableAMBEFeatures();
+        }
+
+    private:
+        QList<DSDDemodSettings::AvailableAMBEFeature> m_availableFeatures;
+
+        MsgReportAvailableAMBEFeatures() :
+            Message()
+        {}
+    };
+
     DSDDemod(DeviceAPI *deviceAPI);
 	virtual ~DSDDemod();
 	virtual void destroy() { delete this; }
@@ -140,6 +172,7 @@ private:
     DSDDemodBaseband *m_basebandSink;
 	DSDDemodSettings m_settings;
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
+    QHash<Feature*, DSDDemodSettings::AvailableAMBEFeature> m_availableAMBEFeatures;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
@@ -148,6 +181,8 @@ private:
 
 	virtual bool handleMessage(const Message& cmd);
     void applySettings(const DSDDemodSettings& settings, bool force = false);
+    void scanAvailableAMBEFeatures();
+    void notifyUpdateAMBEFeatures();
     void sendSampleRateToDemodAnalyzer();
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const DSDDemodSettings& settings, bool force);
@@ -167,6 +202,8 @@ private:
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
     void handleIndexInDeviceSetChanged(int index);
+    void handleFeatureAdded(int featureSetIndex, Feature *feature);
+    void handleFeatureRemoved(int featureSetIndex, Feature *feature);
 };
 
 #endif // INCLUDE_DSDDEMOD_H

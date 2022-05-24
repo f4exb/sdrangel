@@ -113,6 +113,13 @@ bool DSDDemodGUI::handleMessage(const Message& message)
         updateAbsoluteCenterFrequency();
         return true;
     }
+    else if (DSDDemod::MsgReportAvailableAMBEFeatures::match(message))
+    {
+        DSDDemod::MsgReportAvailableAMBEFeatures& report = (DSDDemod::MsgReportAvailableAMBEFeatures&) message;
+        m_availableAMBEFeatures = report.getFeatures();
+        updateAMBEFeaturesList();
+        return true;
+    }
     else
     {
         return false;
@@ -260,6 +267,19 @@ void DSDDemodGUI::on_symbolPLLLock_toggled(bool checked)
         ui->symbolPLLLock->setStyleSheet("QToolButton { background:rgb(53,53,53); }");
     }
     m_settings.m_pllLock = checked;
+    applySettings();
+}
+
+void DSDDemodGUI::on_ambeSupport_clicked(bool checked)
+{
+    m_settings.m_connectAMBE = checked;
+    m_settings.m_ambeFeatureIndex = m_availableAMBEFeatures[ui->ambeFeatures->currentIndex()].m_featureIndex;
+    applySettings();
+}
+
+void DSDDemodGUI::on_ambeFeatures_currentIndexChanged(int index)
+{
+    m_settings.m_ambeFeatureIndex = m_availableAMBEFeatures[index].m_featureIndex;
     applySettings();
 }
 
@@ -490,11 +510,48 @@ void DSDDemodGUI::displaySettings()
     ui->traceDecayText->setText(QString("%1").arg(m_settings.m_traceDecay));
     m_scopeVisXY->setDecay(m_settings.m_traceDecay);
 
+    ui->ambeSupport->setChecked(m_settings.m_connectAMBE);
+
+    for (int i = 0; i < ui->ambeFeatures->count(); i++)
+    {
+        if (ui->ambeFeatures->itemData(i).toInt() == m_settings.m_ambeFeatureIndex)
+        {
+            ui->ambeFeatures->setCurrentIndex(i);
+            break;
+        }
+    }
+
     updateIndexLabel();
 
     getRollupContents()->restoreState(m_rollupState);
     updateAbsoluteCenterFrequency();
     blockApplySettings(false);
+}
+
+void DSDDemodGUI::updateAMBEFeaturesList()
+{
+    ui->ambeFeatures->blockSignals(true);
+    ui->ambeSupport->blockSignals(true);
+    ui->ambeFeatures->clear();
+    bool unsetAMBE = true;
+
+    for (int i = 0; i < m_availableAMBEFeatures.count(); i++)
+    {
+        ui->ambeFeatures->addItem(tr("F:%1").arg(m_availableAMBEFeatures[i].m_featureIndex), m_availableAMBEFeatures[i].m_featureIndex);
+
+        if (m_settings.m_ambeFeatureIndex == m_availableAMBEFeatures[i].m_featureIndex)
+        {
+            unsetAMBE = false;
+            ui->ambeFeatures->setCurrentIndex(i);
+        }
+    }
+
+    if (unsetAMBE) {
+        ui->ambeSupport->setChecked(false);
+    }
+
+    ui->ambeSupport->blockSignals(false);
+    ui->ambeFeatures->blockSignals(false);
 }
 
 void DSDDemodGUI::applySettings(bool force)
@@ -658,6 +715,8 @@ void DSDDemodGUI::makeUIConnections()
     QObject::connect(ui->audioMute, &QToolButton::toggled, this, &DSDDemodGUI::on_audioMute_toggled);
     QObject::connect(ui->symbolPLLLock, &QToolButton::toggled, this, &DSDDemodGUI::on_symbolPLLLock_toggled);
     QObject::connect(ui->viewStatusLog, &QPushButton::clicked, this, &DSDDemodGUI::on_viewStatusLog_clicked);
+    QObject::connect(ui->ambeSupport, &QCheckBox::clicked, this, &DSDDemodGUI::on_ambeSupport_clicked);
+    QObject::connect(ui->ambeFeatures, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DSDDemodGUI::on_ambeFeatures_currentIndexChanged);
 }
 
 void DSDDemodGUI::updateAbsoluteCenterFrequency()

@@ -39,6 +39,7 @@
 #include "dsp/dspcommands.h"
 #include "device/deviceapi.h"
 #include "feature/feature.h"
+#include "feature/featureset.h"
 #include "settings/serializable.h"
 #include "util/db.h"
 #include "maincore.h"
@@ -46,6 +47,8 @@
 #include "dsddemod.h"
 
 MESSAGE_CLASS_DEFINITION(DSDDemod::MsgConfigureDSDDemod, Message)
+MESSAGE_CLASS_DEFINITION(DSDDemod::MsgQueryAvailableAMBEFeatures, Message)
+MESSAGE_CLASS_DEFINITION(DSDDemod::MsgReportAvailableAMBEFeatures, Message)
 
 const char* const DSDDemod::m_channelIdURI = "sdrangel.channel.dsddemod";
 const char* const DSDDemod::m_channelId = "DSDDemod";
@@ -82,6 +85,20 @@ DSDDemod::DSDDemod(DeviceAPI *deviceAPI) :
         this,
         &DSDDemod::handleIndexInDeviceSetChanged
     );
+    QObject::connect(
+        MainCore::instance(),
+        &MainCore::featureAdded,
+        this,
+        &DSDDemod::handleFeatureAdded
+    );
+    QObject::connect(
+        MainCore::instance(),
+        &MainCore::featureRemoved,
+        this,
+        &DSDDemod::handleFeatureRemoved
+    );
+
+    scanAvailableAMBEFeatures();
 }
 
 DSDDemod::~DSDDemod()
@@ -176,6 +193,11 @@ bool DSDDemod::handleMessage(const Message& cmd)
 
         return true;
     }
+    else if (MsgQueryAvailableAMBEFeatures::match(cmd))
+    {
+        notifyUpdateAMBEFeatures();
+        return true;
+    }
 	else
 	{
 		return false;
@@ -219,6 +241,8 @@ void DSDDemod::applySettings(const DSDDemodSettings& settings, bool force)
             << " m_traceStroke: " << settings.m_traceStroke
             << " m_traceDecay: " << settings.m_traceDecay
             << " m_streamIndex: " << settings.m_streamIndex
+            << " m_ambeFeatureIndex: " << settings.m_ambeFeatureIndex
+            << " m_connectAMBE: " << settings.m_connectAMBE
             << " force: " << force;
 
     QList<QString> reverseAPIKeys;
@@ -280,6 +304,30 @@ void DSDDemod::applySettings(const DSDDemodSettings& settings, bool force)
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force) {
         reverseAPIKeys.append("audioDeviceName");
     }
+    if ((settings.m_ambeFeatureIndex != m_settings.m_ambeFeatureIndex) || force) {
+        reverseAPIKeys.append("ambeFeatureIndex");
+    }
+    if ((settings.m_connectAMBE != m_settings.m_connectAMBE) || force) {
+        reverseAPIKeys.append("connectAMBE");
+    }
+
+    if ((m_settings.m_connectAMBE != settings.m_connectAMBE)
+    ||  (m_settings.m_ambeFeatureIndex != settings.m_ambeFeatureIndex) || force)
+    {
+        if (settings.m_connectAMBE)
+        {
+            for (const auto& feature : m_availableAMBEFeatures)
+            {
+                if (feature.m_featureIndex == settings.m_ambeFeatureIndex) {
+                    m_basebandSink->setAMBEFeatureMessageQueue(feature.m_feature->getInputMessageQueue());
+                }
+            }
+        }
+        else
+        {
+            m_basebandSink->setAMBEFeatureMessageQueue(nullptr);
+        }
+    }
 
     if (m_settings.m_streamIndex != settings.m_streamIndex)
     {
@@ -336,6 +384,32 @@ bool DSDDemod::deserialize(const QByteArray& data)
         MsgConfigureDSDDemod *msg = MsgConfigureDSDDemod::create(m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
+    }
+}
+
+void DSDDemod::scanAvailableAMBEFeatures()
+{
+    MainCore *mainCore = MainCore::instance();
+    int nbFeatures = mainCore->getFeatureeSets()[0]->getNumberOfFeatures();
+    m_availableAMBEFeatures.clear();
+
+    for (int i = 0; i < nbFeatures; i++)
+    {
+        Feature *feature = mainCore->getFeatureeSets()[0]->getFeatureAt(i);
+
+        if (feature->getURI() == "sdrangel.feature.ambe") {
+            m_availableAMBEFeatures[feature] = DSDDemodSettings::AvailableAMBEFeature{i, feature};
+        }
+    }
+}
+
+void DSDDemod::notifyUpdateAMBEFeatures()
+{
+    if (getMessageQueueToGUI())
+    {
+        MsgReportAvailableAMBEFeatures *msg = MsgReportAvailableAMBEFeatures::create();
+        msg->getFeatures() = m_availableAMBEFeatures.values();
+        getMessageQueueToGUI()->push(msg);
     }
 }
 
@@ -793,4 +867,41 @@ void DSDDemod::handleIndexInDeviceSetChanged(int index)
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
     m_basebandSink->setAudioFifoLabel(fifoLabel);
+}
+
+void DSDDemod::handleFeatureAdded(int featureSetIndex, Feature *feature)
+{
+    if (featureSetIndex != 0) {
+        return;
+    }
+
+    if ((feature->getURI() == "sdrangel.feature.ambe") && !m_availableAMBEFeatures.contains(feature))
+    {
+        m_availableAMBEFeatures[feature] = DSDDemodSettings::AvailableAMBEFeature{feature->getIndexInFeatureSet(), feature};
+
+        if (m_settings.m_connectAMBE && (m_settings.m_ambeFeatureIndex == feature->getIndexInFeatureSet())) {
+            m_basebandSink->setAMBEFeatureMessageQueue(feature->getInputMessageQueue());
+        }
+
+        notifyUpdateAMBEFeatures();
+    }
+}
+
+void DSDDemod::handleFeatureRemoved(int featureSetIndex, Feature *feature)
+{
+    if (featureSetIndex != 0) {
+        return;
+    }
+
+    if (m_availableAMBEFeatures.contains(feature))
+    {
+        if (m_settings.m_ambeFeatureIndex == m_availableAMBEFeatures[feature].m_featureIndex)
+        {
+            m_settings.m_connectAMBE = false;
+            m_basebandSink->setAMBEFeatureMessageQueue(nullptr);
+        }
+
+        m_availableAMBEFeatures.remove(feature);
+        notifyUpdateAMBEFeatures();
+    }
 }

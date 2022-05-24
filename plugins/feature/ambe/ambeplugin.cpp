@@ -1,6 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016 F4EXB                                                      //
-// written by Edouard Griffiths                                                  //
+// Copyright (C) 2022 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -16,20 +15,20 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "dsddemodplugin.h"
 
 #include <QtPlugin>
 #include "plugin/pluginapi.h"
-#ifndef SERVER_MODE
-#include "dsddemodgui.h"
-#endif
-#include "dsddemod.h"
-#include "dsddemodwebapiadapter.h"
-#include "dsddemodplugin.h"
 
-const PluginDescriptor DSDDemodPlugin::m_pluginDescriptor = {
-    DSDDemod::m_channelId,
-	QStringLiteral("DSD Demodulator"),
+#ifndef SERVER_MODE
+#include "ambegui.h"
+#endif
+#include "ambe.h"
+#include "ambeplugin.h"
+// #include "simplepttwebapiadapter.h"
+
+const PluginDescriptor AMBEPlugin::m_pluginDescriptor = {
+    AMBE::m_featureId,
+	QStringLiteral("AMBE Controller"),
     QStringLiteral("7.2.0"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
@@ -37,58 +36,45 @@ const PluginDescriptor DSDDemodPlugin::m_pluginDescriptor = {
 	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-DSDDemodPlugin::DSDDemodPlugin(QObject* parent) :
+AMBEPlugin::AMBEPlugin(QObject* parent) :
 	QObject(parent),
-	m_pluginAPI(0)
+	m_pluginAPI(nullptr)
 {
 }
 
-const PluginDescriptor& DSDDemodPlugin::getPluginDescriptor() const
+const PluginDescriptor& AMBEPlugin::getPluginDescriptor() const
 {
 	return m_pluginDescriptor;
 }
 
-void DSDDemodPlugin::initPlugin(PluginAPI* pluginAPI)
+void AMBEPlugin::initPlugin(PluginAPI* pluginAPI)
 {
 	m_pluginAPI = pluginAPI;
 
-	// register DSD demodulator
-	m_pluginAPI->registerRxChannel(DSDDemod::m_channelIdURI, DSDDemod::m_channelId, this);
-}
-
-void DSDDemodPlugin::createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink **bs, ChannelAPI **cs) const
-{
-	if (bs || cs)
-	{
-		DSDDemod *instance = new DSDDemod(deviceAPI);
-
-		if (bs) {
-			*bs = instance;
-		}
-
-		if (cs) {
-			*cs = instance;
-		}
-	}
+	// register Simple PTT feature
+	m_pluginAPI->registerFeature(AMBE::m_featureIdURI, AMBE::m_featureId, this);
 }
 
 #ifdef SERVER_MODE
-ChannelGUI* DSDDemodPlugin::createRxChannelGUI(
-        DeviceUISet *deviceUISet,
-        BasebandSampleSink *rxChannel) const
+FeatureGUI* AMBEPlugin::createFeatureGUI(FeatureUISet *featureUISet, Feature *feature) const
 {
-	(void) deviceUISet;
-	(void) rxChannel;
+	(void) featureUISet;
+	(void) feature;
     return nullptr;
 }
 #else
-ChannelGUI* DSDDemodPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
+FeatureGUI* AMBEPlugin::createFeatureGUI(FeatureUISet *featureUISet, Feature *feature) const
 {
-	return DSDDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
+	return AMBEGUI::create(m_pluginAPI, featureUISet, feature);
 }
 #endif
 
-ChannelWebAPIAdapter* DSDDemodPlugin::createChannelWebAPIAdapter() const
+Feature* AMBEPlugin::createFeature(WebAPIAdapterInterface* webAPIAdapterInterface) const
 {
-	return new DSDDemodWebAPIAdapter();
+    return new AMBE(webAPIAdapterInterface);
+}
+
+FeatureWebAPIAdapter* AMBEPlugin::createFeatureWebAPIAdapter() const
+{
+	return nullptr; // TODO new SimplePTTWebAPIAdapter();
 }
