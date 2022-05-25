@@ -1,3 +1,9 @@
+sdrangel (7.2.0-1) unstable; urgency=medium
+
+  * Support hardware AMBE decoding wih a new feature plugin. Implements #1254
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 25 May 2022 16:35:36 +0200
+
 sdrangel (7.1.0-1) unstable; urgency=medium
 
   * Support LimeRFE wtih a new feature plugin. Implements #1251
