@@ -192,7 +192,12 @@ bool AMBEGUI::handleMessage(const Message& message)
         ui->ambeDeviceRefs->clear();
 
         for (const auto& inUseDevice : cfg.getUsedDevices()) {
-            ui->ambeDeviceRefs->addItem(inUseDevice);
+            ui->ambeDeviceRefs->addItem(
+                tr("%1 - %2|%3")
+                    .arg(inUseDevice.m_devicePath)
+                    .arg(inUseDevice.m_successCount)
+                    .arg(inUseDevice.m_failureCount)
+            );
         }
 
         return true;
@@ -226,14 +231,19 @@ void AMBEGUI::populateSerialList()
 
 void AMBEGUI::refreshInUseList()
 {
-    QList<QString> inUseDevices;
+    QList<AMBEEngine::DeviceRef> inUseDevices;
     m_ambe->getAMBEEngine()->getDeviceRefs(inUseDevices);
     ui->ambeDeviceRefs->clear();
 
     for (const auto& inUseDevice : inUseDevices)
     {
-        qDebug("AMBEGUI::refreshInUseList: %s", qPrintable(inUseDevice));
-        ui->ambeDeviceRefs->addItem(inUseDevice);
+        qDebug("AMBEGUI::refreshInUseList: %s", qPrintable(inUseDevice.m_devicePath));
+        ui->ambeDeviceRefs->addItem(
+            tr("%1 - %2|%3")
+                .arg(inUseDevice.m_devicePath)
+                .arg(inUseDevice.m_successCount)
+                .arg(inUseDevice.m_failureCount)
+        );
     }
 }
 void AMBEGUI::on_importSerial_clicked()
@@ -253,7 +263,7 @@ void AMBEGUI::on_importSerial_clicked()
     {
         if (m_ambe->getAMBEEngine()->registerController(serialName.toStdString()))
         {
-            ui->ambeDeviceRefs->addItem(serialName);
+            ui->ambeDeviceRefs->addItem(tr("%1 - 0|0").arg(serialName));
             ui->statusText->setText(tr("%1 added").arg(serialName));
         }
         else
@@ -300,7 +310,7 @@ void AMBEGUI::on_removeAmbeDevice_clicked()
         return;
     }
 
-    QString deviceName = deviceItem->text();
+    QString deviceName = deviceItem->text().split(" ").at(0);
     m_ambe->getAMBEEngine()->releaseController(deviceName.toStdString());
     ui->statusText->setText(tr("%1 removed").arg(deviceName));
     refreshInUseList();

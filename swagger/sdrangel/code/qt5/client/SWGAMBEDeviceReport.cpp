@@ -11,7 +11,7 @@
  */
 
 
-#include "SWGAMBEReport.h"
+#include "SWGAMBEDeviceReport.h"
 
 #include "SWGHelpers.h"
 
@@ -22,46 +22,45 @@
 
 namespace SWGSDRangel {
 
-SWGAMBEReport::SWGAMBEReport(QString* json) {
+SWGAMBEDeviceReport::SWGAMBEDeviceReport(QString* json) {
     init();
     this->fromJson(*json);
 }
 
-SWGAMBEReport::SWGAMBEReport() {
-    serial = nullptr;
-    m_serial_isSet = false;
-    devices = nullptr;
-    m_devices_isSet = false;
+SWGAMBEDeviceReport::SWGAMBEDeviceReport() {
+    device_path = nullptr;
+    m_device_path_isSet = false;
+    success_count = 0;
+    m_success_count_isSet = false;
+    failure_count = 0;
+    m_failure_count_isSet = false;
 }
 
-SWGAMBEReport::~SWGAMBEReport() {
+SWGAMBEDeviceReport::~SWGAMBEDeviceReport() {
     this->cleanup();
 }
 
 void
-SWGAMBEReport::init() {
-    serial = new SWGDVSerialDevices();
-    m_serial_isSet = false;
-    devices = new QList<SWGAMBEDeviceReport*>();
-    m_devices_isSet = false;
+SWGAMBEDeviceReport::init() {
+    device_path = new QString("");
+    m_device_path_isSet = false;
+    success_count = 0;
+    m_success_count_isSet = false;
+    failure_count = 0;
+    m_failure_count_isSet = false;
 }
 
 void
-SWGAMBEReport::cleanup() {
-    if(serial != nullptr) { 
-        delete serial;
+SWGAMBEDeviceReport::cleanup() {
+    if(device_path != nullptr) { 
+        delete device_path;
     }
-    if(devices != nullptr) { 
-        auto arr = devices;
-        for(auto o: *arr) { 
-            delete o;
-        }
-        delete devices;
-    }
+
+
 }
 
-SWGAMBEReport*
-SWGAMBEReport::fromJson(QString &json) {
+SWGAMBEDeviceReport*
+SWGAMBEDeviceReport::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -70,15 +69,17 @@ SWGAMBEReport::fromJson(QString &json) {
 }
 
 void
-SWGAMBEReport::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&serial, pJson["serial"], "SWGDVSerialDevices", "SWGDVSerialDevices");
+SWGAMBEDeviceReport::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&device_path, pJson["devicePath"], "QString", "QString");
     
+    ::SWGSDRangel::setValue(&success_count, pJson["successCount"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&devices, pJson["devices"], "QList", "SWGAMBEDeviceReport");
+    ::SWGSDRangel::setValue(&failure_count, pJson["failureCount"], "qint32", "");
+    
 }
 
 QString
-SWGAMBEReport::asJson ()
+SWGAMBEDeviceReport::asJson ()
 {
     QJsonObject* obj = this->asJsonObject();
 
@@ -89,47 +90,63 @@ SWGAMBEReport::asJson ()
 }
 
 QJsonObject*
-SWGAMBEReport::asJsonObject() {
+SWGAMBEDeviceReport::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if((serial != nullptr) && (serial->isSet())){
-        toJsonValue(QString("serial"), serial, obj, QString("SWGDVSerialDevices"));
+    if(device_path != nullptr && *device_path != QString("")){
+        toJsonValue(QString("devicePath"), device_path, obj, QString("QString"));
     }
-    if(devices && devices->size() > 0){
-        toJsonArray((QList<void*>*)devices, obj, "devices", "SWGAMBEDeviceReport");
+    if(m_success_count_isSet){
+        obj->insert("successCount", QJsonValue(success_count));
+    }
+    if(m_failure_count_isSet){
+        obj->insert("failureCount", QJsonValue(failure_count));
     }
 
     return obj;
 }
 
-SWGDVSerialDevices*
-SWGAMBEReport::getSerial() {
-    return serial;
+QString*
+SWGAMBEDeviceReport::getDevicePath() {
+    return device_path;
 }
 void
-SWGAMBEReport::setSerial(SWGDVSerialDevices* serial) {
-    this->serial = serial;
-    this->m_serial_isSet = true;
+SWGAMBEDeviceReport::setDevicePath(QString* device_path) {
+    this->device_path = device_path;
+    this->m_device_path_isSet = true;
 }
 
-QList<SWGAMBEDeviceReport*>*
-SWGAMBEReport::getDevices() {
-    return devices;
+qint32
+SWGAMBEDeviceReport::getSuccessCount() {
+    return success_count;
 }
 void
-SWGAMBEReport::setDevices(QList<SWGAMBEDeviceReport*>* devices) {
-    this->devices = devices;
-    this->m_devices_isSet = true;
+SWGAMBEDeviceReport::setSuccessCount(qint32 success_count) {
+    this->success_count = success_count;
+    this->m_success_count_isSet = true;
+}
+
+qint32
+SWGAMBEDeviceReport::getFailureCount() {
+    return failure_count;
+}
+void
+SWGAMBEDeviceReport::setFailureCount(qint32 failure_count) {
+    this->failure_count = failure_count;
+    this->m_failure_count_isSet = true;
 }
 
 
 bool
-SWGAMBEReport::isSet(){
+SWGAMBEDeviceReport::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(serial && serial->isSet()){
+        if(device_path && *device_path != QString("")){
             isObjectUpdated = true; break;
         }
-        if(devices && (devices->size() > 0)){
+        if(m_success_count_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_failure_count_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

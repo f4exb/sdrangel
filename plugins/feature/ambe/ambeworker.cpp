@@ -33,7 +33,9 @@ AMBEWorker::AMBEWorker() :
     m_upsamplerLastValue(0.0f),
     m_phase(0),
     m_upsampling(1),
-    m_volume(1.0f)
+    m_volume(1.0f),
+    m_successCount(0),
+    m_failureCount(0)
 {
     m_audioBuffer.resize(48000);
     m_audioBufferFill = 0;
@@ -119,10 +121,13 @@ void AMBEWorker::handleInputMessages()
 
                     m_audioBufferFill = 0;
                 }
+
+                m_successCount++;
             }
             else
             {
                 qDebug("AMBEWorker::handleInputMessages: MsgMbeDecode: decode failed");
+                m_failureCount++;
             }
         }
 

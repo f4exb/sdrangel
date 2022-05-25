@@ -115,6 +115,8 @@ public:
     void stop();
     bool isAvailable();
     bool hasFifo(AudioFifo *audioFifo);
+    uint32_t getSuccessCount() const { return m_successCount; }
+    uint32_t getFailureCount() const { return m_failureCount; }
 
     void postTest()
     {
@@ -151,6 +153,8 @@ private:
     float m_volume;
     float m_upsamplingFactors[7];
     AudioCompressor m_compressor;
+    uint32_t m_successCount;
+    uint32_t m_failureCount;
 };
 
 #endif // SDRBASE_AMBE_AMBEWORKER_H_

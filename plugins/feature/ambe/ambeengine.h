@@ -36,6 +36,13 @@ class AMBEEngine : public QObject
 {
     Q_OBJECT
 public:
+    struct DeviceRef
+    {
+        QString m_devicePath;    //!< device path or url
+        uint32_t m_successCount; //!< number of frames successfully decoded
+        uint32_t m_failureCount; //!< number of frames failing decoding
+    };
+
     AMBEEngine();
     ~AMBEEngine();
 
@@ -43,7 +50,7 @@ public:
     void releaseAll();
 
     int getNbDevices() const { return m_controllers.size(); }   //!< number of devices used
-    void getDeviceRefs(QList<QString>& devicesRefs);      //!< reference of the devices used (device path or url)
+    void getDeviceRefs(QList<DeviceRef>& devicesRefs);          //!< reference of the devices used
     bool registerController(const std::string& deviceRef);      //!< create a new controller for the device in reference
     void releaseController(const std::string& deviceRef);       //!< release controller resources for the device in reference
 
@@ -67,6 +74,9 @@ private:
         QThread *thread;
         AMBEWorker *worker;
         std::string device;
+
+        uint32_t getSuccessCount() const;
+        uint32_t getFailureCount() const;
     };
 
 #ifndef _WIN32

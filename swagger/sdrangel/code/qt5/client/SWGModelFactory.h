@@ -27,6 +27,7 @@
 #include "SWGAISSettings.h"
 #include "SWGAMBEActions.h"
 #include "SWGAMBEDevice.h"
+#include "SWGAMBEDeviceReport.h"
 #include "SWGAMBEDevices.h"
 #include "SWGAMBEReport.h"
 #include "SWGAMBESettings.h"
@@ -394,6 +395,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGAMBEDevice").compare(type) == 0) {
       SWGAMBEDevice *obj = new SWGAMBEDevice();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGAMBEDeviceReport").compare(type) == 0) {
+      SWGAMBEDeviceReport *obj = new SWGAMBEDeviceReport();
       obj->init();
       return obj;
     }

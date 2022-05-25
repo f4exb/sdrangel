@@ -43,6 +43,16 @@
 #include "ambeworker.h"
 #include "ambeengine.h"
 
+uint32_t AMBEEngine::AMBEController::getSuccessCount() const
+{
+    return worker ? worker->getSuccessCount() : 0;
+}
+
+uint32_t AMBEEngine::AMBEController::getFailureCount() const
+{
+    return worker ? worker->getFailureCount() : 0;
+}
+
 AMBEEngine::AMBEEngine()
 {}
 
@@ -291,13 +301,13 @@ void AMBEEngine::releaseAll()
     m_controllers.clear();
 }
 
-void AMBEEngine::getDeviceRefs(QList<QString>& deviceNames)
+void AMBEEngine::getDeviceRefs(QList<DeviceRef>& deviceRefs)
 {
     std::vector<AMBEController>::const_iterator it = m_controllers.begin();
 
     while (it != m_controllers.end())
     {
-        deviceNames.push_back(QString(it->device.c_str()));
+        deviceRefs.push_back(DeviceRef{QString(it->device.c_str()), it->getSuccessCount(), it->getFailureCount()});
         ++it;
     }
 }

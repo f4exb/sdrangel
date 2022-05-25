@@ -11,57 +11,61 @@
  */
 
 /*
- * SWGAMBEReport.h
+ * SWGAMBEDeviceReport.h
  *
- * AMBE
+ * Report of AMBE device in use
  */
 
-#ifndef SWGAMBEReport_H_
-#define SWGAMBEReport_H_
+#ifndef SWGAMBEDeviceReport_H_
+#define SWGAMBEDeviceReport_H_
 
 #include <QJsonObject>
 
 
-#include "SWGAMBEDeviceReport.h"
-#include "SWGDVSerialDevices.h"
-#include <QList>
+#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
 
 namespace SWGSDRangel {
 
-class SWG_API SWGAMBEReport: public SWGObject {
+class SWG_API SWGAMBEDeviceReport: public SWGObject {
 public:
-    SWGAMBEReport();
-    SWGAMBEReport(QString* json);
-    virtual ~SWGAMBEReport();
+    SWGAMBEDeviceReport();
+    SWGAMBEDeviceReport(QString* json);
+    virtual ~SWGAMBEDeviceReport();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGAMBEReport* fromJson(QString &jsonString) override;
+    virtual SWGAMBEDeviceReport* fromJson(QString &jsonString) override;
 
-    SWGDVSerialDevices* getSerial();
-    void setSerial(SWGDVSerialDevices* serial);
+    QString* getDevicePath();
+    void setDevicePath(QString* device_path);
 
-    QList<SWGAMBEDeviceReport*>* getDevices();
-    void setDevices(QList<SWGAMBEDeviceReport*>* devices);
+    qint32 getSuccessCount();
+    void setSuccessCount(qint32 success_count);
+
+    qint32 getFailureCount();
+    void setFailureCount(qint32 failure_count);
 
 
     virtual bool isSet() override;
 
 private:
-    SWGDVSerialDevices* serial;
-    bool m_serial_isSet;
+    QString* device_path;
+    bool m_device_path_isSet;
 
-    QList<SWGAMBEDeviceReport*>* devices;
-    bool m_devices_isSet;
+    qint32 success_count;
+    bool m_success_count_isSet;
+
+    qint32 failure_count;
+    bool m_failure_count_isSet;
 
 };
 
 }
 
-#endif /* SWGAMBEReport_H_ */
+#endif /* SWGAMBEDeviceReport_H_ */

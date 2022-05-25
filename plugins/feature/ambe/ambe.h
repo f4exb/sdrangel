@@ -62,7 +62,7 @@ public:
 
     public:
         QList<QString>& getAvailableDevices() { return m_availableDevices; }
-        QList<QString>& getUsedDevices() { return m_usedDevices; }
+        QList<AMBEEngine::DeviceRef>& getUsedDevices() { return m_usedDevices; }
 
         static MsgReportDevices* create() {
             return new MsgReportDevices();
@@ -70,7 +70,7 @@ public:
 
     private:
         QList<QString> m_availableDevices;
-        QList<QString> m_usedDevices;
+        QList<AMBEEngine::DeviceRef> m_usedDevices;
 
         MsgReportDevices() :
             Message()

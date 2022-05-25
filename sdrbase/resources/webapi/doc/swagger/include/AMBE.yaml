@@ -27,7 +27,9 @@ AMBEReport:
       $ref: "/doc/swagger/include/AMBE.yaml#/definitions/DVSerialDevices"
     devices:
       description: List of AMBE devices or servers in use
-      $ref: "/doc/swagger/include/AMBE.yaml#/definitions/AMBEDevices"
+      type: array
+      items:
+        $ref: "/doc/swagger/include/AMBE.yaml#/definitions/AMBEDeviceReport"
 
 AMBEActions:
   description: AMBE
@@ -86,3 +88,16 @@ definitions:
       delete:
         description: "1 if device is to be removed from active list"
         type: integer
+
+  AMBEDeviceReport:
+    description: "Report of AMBE device in use"
+    properties:
+      devicePath:
+        type: string
+        description: AMBE device full path or AMBE server URL
+      successCount:
+        type: integer
+        description: number of frames decoded successfully
+      failureCount:
+        type: integer
+        description: number of frames that failed to decode

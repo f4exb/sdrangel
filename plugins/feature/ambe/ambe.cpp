@@ -347,20 +347,16 @@ void AMBE::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response)
 
     // devices
 
-    SWGSDRangel::SWGAMBEDevices *swgAMBEDevices = response.getAmbeReport()->getDevices();
-    swgAMBEDevices->init();
+    response.getAmbeReport()->setDevices(new QList<SWGSDRangel::SWGAMBEDeviceReport*>);
+    QList<AMBEEngine::DeviceRef> deviceRefs;
+    getAMBEEngine()->getDeviceRefs(deviceRefs);
 
-    qDeviceNames.clear();
-    getAMBEEngine()->getDeviceRefs(qDeviceNames);
-    swgAMBEDevices->setNbDevices((int) qDeviceNames.size());
-    QList<SWGSDRangel::SWGAMBEDevice*> *ambeDeviceNamesList = swgAMBEDevices->getAmbeDevices();
-
-    for (const auto& deviceName : qDeviceNames)
+    for (auto& deviceRef : deviceRefs)
     {
-        ambeDeviceNamesList->append(new SWGSDRangel::SWGAMBEDevice);
-        ambeDeviceNamesList->back()->init();
-        *ambeDeviceNamesList->back()->getDeviceRef() = deviceName;
-        ambeDeviceNamesList->back()->setDelete(0);
+        response.getAmbeReport()->getDevices()->append(new SWGSDRangel::SWGAMBEDeviceReport);
+        response.getAmbeReport()->getDevices()->back()->setDevicePath(new QString(deviceRef.m_devicePath));
+        response.getAmbeReport()->getDevices()->back()->setSuccessCount(deviceRef.m_successCount);
+        response.getAmbeReport()->getDevices()->back()->setFailureCount(deviceRef.m_failureCount);
     }
 }
 

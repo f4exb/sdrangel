@@ -1275,6 +1275,23 @@ margin-bottom: 20px;
   },
   "description" : "AMBE devices active in the system"
 };
+            defs.AMBEDeviceReport = {
+  "properties" : {
+    "devicePath" : {
+      "type" : "string",
+      "description" : "AMBE device full path or AMBE server URL"
+    },
+    "successCount" : {
+      "type" : "integer",
+      "description" : "number of frames decoded successfully"
+    },
+    "failureCount" : {
+      "type" : "integer",
+      "description" : "number of frames that failed to decode"
+    }
+  },
+  "description" : "Report of AMBE device in use"
+};
             defs.AMBEDevices = {
   "required" : [ "nbDevices" ],
   "properties" : {
@@ -1299,8 +1316,11 @@ margin-bottom: 20px;
       "$ref" : "#/definitions/DVSerialDevices"
     },
     "devices" : {
+      "type" : "array",
       "description" : "List of AMBE devices or servers in use",
-      "$ref" : "#/definitions/AMBEDevices"
+      "items" : {
+        "$ref" : "#/definitions/AMBEDeviceReport"
+      }
     }
   },
   "description" : "AMBE"
@@ -56040,7 +56060,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2022-05-24T23:13:14.725+02:00
+              Generated 2022-05-25T12:47:57.273+02:00
             </div>
           </div>
       </div>
