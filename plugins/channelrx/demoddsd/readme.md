@@ -590,3 +590,11 @@ This is the one side deviation in kHz (&#177;) leading to maximum (100%) deviati
 <h4>B.18: Gain after discriminator</h4>
 
 This is the gain applied to the output of the discriminator before the decoder. Normally this would be set at unit gain 1.0 while the FM deviation is adjusted. However this can be used to extend the range of FM adjustment.
+
+<h4>B.19: Activate AMBE hardware feature</h3>
+
+Connects to an [AMBE Feature](../../feature/ambe/readme.md) to process AMBE frames in hardware
+
+<h4>B.20: AMBE feature index for hardware decoding</h4>
+
+Select the AMBE feature index used to process AMBE frames in hardware. If no AMBE feature is present then the list is empty. The list is automatically updated when an AMBE feature is added or removed.
