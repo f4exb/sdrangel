@@ -24,7 +24,7 @@
 #endif
 #include "limerfe.h"
 #include "limerfeplugin.h"
-// #include "simplepttwebapiadapter.h"
+#include "limerfewebapiadapter.h"
 
 const PluginDescriptor LimeRFEPlugin::m_pluginDescriptor = {
     LimeRFE::m_featureId,
@@ -76,5 +76,5 @@ Feature* LimeRFEPlugin::createFeature(WebAPIAdapterInterface* webAPIAdapterInter
 
 FeatureWebAPIAdapter* LimeRFEPlugin::createFeatureWebAPIAdapter() const
 {
-	return nullptr; // TODO new SimplePTTWebAPIAdapter();
+	return new LimeRFEWebAPIAdapter();
 }
