@@ -6,7 +6,7 @@ set(ambe_SOURCES
     ambeplugin.cpp
     ambeengine.cpp
     ambeworker.cpp
-    # ambewebapiadapter.cpp
+    ambewebapiadapter.cpp
 )
 
 set(ambe_HEADERS
@@ -15,7 +15,7 @@ set(ambe_HEADERS
     ambeplugin.h
     ambeengine.h
     ambeworker.h
-    # ambewebapiadapter.h
+    ambewebapiadapter.h
 )
 
 include_directories(
