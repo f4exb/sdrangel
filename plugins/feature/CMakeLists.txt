@@ -40,6 +40,6 @@ if (ENABLE_LIMESUITE AND LIMESUITE_FOUND)
     add_subdirectory(limerfe)
 endif()
 
-if (LIBSERIALDV_FOUND)
+if (LINUX AND LIBSERIALDV_FOUND)
     add_subdirectory(ambe)
 endif()

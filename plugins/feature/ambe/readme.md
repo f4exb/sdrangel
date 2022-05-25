@@ -4,13 +4,13 @@
 
 Control AMBE3000 serial a.k.a. DV serial devices or AMBE server addresses to use for AMBE digital voice processing.
 
+&#9888; Note: this plugin is supported in Linux only.
+
 DV serial devices are supported using the [SerialDV](https://github.com/f4exb/serialDV) library that is a mandatory requirement for this feature to be compiled. Therefore you have to compile and install SerialDV in your system. Please refer to this project Readme.md to compile and install SerialDV. f you install it in a custom location say `/opt/install/serialdv` you will need to add this define to the cmake command: `-DSERIALDV_DIR=/opt/install/serialdv`
 
 To effectively use serial DV devices for AMBE decoding you will have to add at least one device to the list of AMBE devices (6) in use.
 
 Although such serial devices work with a serial interface at 400 kb in practice maybe for other reasons they are capable of handling only one conversation at a time. The software will allocate the device dynamically to a conversation with an inactivity timeout of 1 second so that conversations do not get interrupted constantly making the audio output too choppy. In practice you will have to have as many devices listed in (6) as the number of conversations you would like to be handled in parallel.
-
-Note also that hardware serial devices are not supported in Windows because of trouble with COM port support (contributors welcome!).
 
 ---
 &#9888; With kernel 4.4.52 and maybe other 4.4 versions the default for FTDI devices (that is in the ftdi_sio kernel module) is not to set it as low latency. This results in the ThumbDV dongle not working anymore because its response is too slow to sustain the normal AMBE packets flow. The solution is to force low latency by changing the variable for your device (ex: /dev/ttyUSB0) as follows:
@@ -28,7 +28,7 @@ Newer kernels do not seem to have this issue.
 
 <h3>1: AMBE server address and port or direct input</h3>
 
-Use this freeflow text input box to specify either the address and port of an AMBE server in the form: &lt;IPv4 address>:&lt;port> or any directly attached physical device address like a COM port on Windows.
+Use this freeflow text input box to specify either the address and port of an AMBE server in the form: &lt;IPv4 address>:&lt;port> or any directly attached physical device address.
 
 <h3>2: Import above address or device</h3>
 
