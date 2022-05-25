@@ -34,7 +34,7 @@
 
 class AudioFifo;
 
-class SDRBASE_API AMBEWorker : public QObject {
+class AMBEWorker : public QObject {
     Q_OBJECT
 public:
     class MsgTest : public Message
