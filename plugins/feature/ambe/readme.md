@@ -4,8 +4,6 @@
 
 Control AMBE3000 serial a.k.a. DV serial devices or AMBE server addresses to use for AMBE digital voice processing.
 
-&#9888; Note: this plugin is supported in Linux only.
-
 DV serial devices are supported using the [SerialDV](https://github.com/f4exb/serialDV) library that is a mandatory requirement for this feature to be compiled. Therefore you have to compile and install SerialDV in your system. Please refer to this project Readme.md to compile and install SerialDV. f you install it in a custom location say `/opt/install/serialdv` you will need to add this define to the cmake command: `-DSERIALDV_DIR=/opt/install/serialdv`
 
 To effectively use serial DV devices for AMBE decoding you will have to add at least one device to the list of AMBE devices (6) in use.

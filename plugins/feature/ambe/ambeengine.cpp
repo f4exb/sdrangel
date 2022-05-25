@@ -78,7 +78,7 @@ void AMBEEngine::getComList()
 }
 
 // Do not activate serial support at all for windows
-void AMBEEngine::scan(std::vector<QString>& ambeDevices)
+void AMBEEngine::scan(QList<QString>& ambeDevices)
 {
     (void) ambeDevices;
 }
@@ -87,7 +87,7 @@ void AMBEEngine::getComList()
 {
     qDebug("AMBEEngine::getComList: Apple");
 }
-void AMBEEngine::scan(std::vector<QString>& ambeDevices)
+void AMBEEngine::scan(QList<QString>& ambeDevices)
 {
     (void) ambeDevices;
 }

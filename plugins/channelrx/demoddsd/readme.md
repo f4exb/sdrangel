@@ -18,8 +18,6 @@ To enable this plugin at compile time you will need to have DSDcc installed in y
 
 <h2>DV serial device support</h2>
 
-&#9888; This is supported in Linux only since the AMBE feature plugin is supported in Linux only.
-
 You can use a serial device connected to your system that implements and exposes the packet interface of the AMBE3000 chip. This can be for example a ThumbDV USB dongle. You may also connect to an AMBE server instance over the network. This is supported via the [AMBE feature](../../feature/ambe/readme.md).
 
 If no AMBE features are active or the AMBE support is not engaged (B.19) AMBE decoding will take place with Mbelib. Possible copyright issues apart (see next) the audio quality with the DVSI AMBE chip is much better.
