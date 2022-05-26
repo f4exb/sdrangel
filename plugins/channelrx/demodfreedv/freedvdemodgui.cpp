@@ -520,6 +520,7 @@ void FreeDVDemodGUI::makeUIConnections()
     QObject::connect(ui->volumeIn, &QDial::valueChanged, this, &FreeDVDemodGUI::on_volumeIn_valueChanged);
     QObject::connect(ui->agc, &ButtonSwitch::toggled, this, &FreeDVDemodGUI::on_agc_toggled);
     QObject::connect(ui->audioMute, &QToolButton::toggled, this, &FreeDVDemodGUI::on_audioMute_toggled);
+    QObject::connect(ui->spanLog2, &QSlider::valueChanged, this, &FreeDVDemodGUI::on_spanLog2_valueChanged);
 }
 
 void FreeDVDemodGUI::updateAbsoluteCenterFrequency()

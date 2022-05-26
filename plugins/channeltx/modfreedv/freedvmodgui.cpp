@@ -635,6 +635,7 @@ void FreeDVModGUI::makeUIConnections()
     QObject::connect(ui->morseKeyer, &ButtonSwitch::toggled, this, &FreeDVModGUI::on_morseKeyer_toggled);
     QObject::connect(ui->navTimeSlider, &QSlider::valueChanged, this, &FreeDVModGUI::on_navTimeSlider_valueChanged);
     QObject::connect(ui->showFileDialog, &QPushButton::clicked, this, &FreeDVModGUI::on_showFileDialog_clicked);
+    QObject::connect(ui->spanLog2, &QSlider::valueChanged, this, &FreeDVModGUI::on_spanLog2_valueChanged);
 }
 
 void FreeDVModGUI::updateAbsoluteCenterFrequency()
