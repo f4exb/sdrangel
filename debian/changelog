@@ -1,3 +1,9 @@
+sdrangel (7.2.1-1) unstable; urgency=medium
+
+  * AMBE feature: fixed many errors preventing build on Windows and MacOS. Issue #1254
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 26 May 2022 03:12:00 +0200
+
 sdrangel (7.2.0-1) unstable; urgency=medium
 
   * Support hardware AMBE decoding wih a new feature plugin. Implements #1254
