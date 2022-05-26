@@ -4471,6 +4471,11 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->setDabDemodSettings(new SWGSDRangel::SWGDABDemodSettings());
             channelSettings->getDabDemodSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "DOA2Settings")
+        {
+            channelSettings->setDoa2Settings(new SWGSDRangel::SWGDOA2Settings());
+            channelSettings->getDoa2Settings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "DSDDemodSettings")
         {
             channelSettings->setDsdDemodSettings(new SWGSDRangel::SWGDSDDemodSettings());

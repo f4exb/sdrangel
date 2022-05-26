@@ -3543,6 +3543,9 @@ margin-bottom: 20px;
     "DABDemodSettings" : {
       "$ref" : "#/definitions/DABDemodSettings"
     },
+    "DOA2Settings" : {
+      "$ref" : "#/definitions/DOA2Settings"
+    },
     "DSDDemodSettings" : {
       "$ref" : "#/definitions/DSDDemodSettings"
     },
@@ -4522,6 +4525,55 @@ margin-bottom: 20px;
     }
   },
   "description" : "DATVMod"
+};
+            defs.DOA2Settings = {
+  "properties" : {
+    "correlationType" : {
+      "type" : "integer",
+      "description" : "see DOA2Settings::CorrelationType"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "log2Decim" : {
+      "type" : "integer"
+    },
+    "filterChainHash" : {
+      "type" : "integer"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    },
+    "spectrumConfig" : {
+      "$ref" : "#/definitions/GLSpectrum"
+    },
+    "scopeConfig" : {
+      "$ref" : "#/definitions/GLScope"
+    },
+    "channelMarker" : {
+      "$ref" : "#/definitions/ChannelMarker"
+    },
+    "rollupState" : {
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "DOA2"
 };
             defs.DSDDemodReport = {
   "properties" : {
@@ -56060,7 +56112,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2022-05-25T12:47:57.273+02:00
+              Generated 2022-05-27T00:17:01.671+02:00
             </div>
           </div>
       </div>

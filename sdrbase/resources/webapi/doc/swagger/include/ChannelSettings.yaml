@@ -49,6 +49,8 @@ ChannelSettings:
       $ref: "/doc/swagger/include/DATVDemod.yaml#/DATVDemodSettings"
     DABDemodSettings:
       $ref: "/doc/swagger/include/DABDemod.yaml#/DABDemodSettings"
+    DOA2Settings:
+      $ref: "/doc/swagger/include/DOA2.yaml#/DOA2Settings"
     DSDDemodSettings:
       $ref: "/doc/swagger/include/DSDDemod.yaml#/DSDDemodSettings"
     FileSinkSettings:
