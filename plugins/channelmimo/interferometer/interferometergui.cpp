@@ -79,6 +79,7 @@ bool InterferometerGUI::handleMessage(const Message& message)
         m_sampleRate = notif.getSampleRate();
         m_centerFrequency = notif.getCenterFrequency();
         displayRateAndShift();
+        updateAbsoluteCenterFrequency();
         return true;
     }
     else if (Interferometer::MsgConfigureInterferometer::match(message))
@@ -206,6 +207,7 @@ void InterferometerGUI::displaySettings()
     ui->phaseCorrection->setValue(m_settings.m_phase);
     ui->phaseCorrectionText->setText(tr("%1").arg(m_settings.m_phase));
     getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
@@ -345,6 +347,7 @@ void InterferometerGUI::applyPosition()
     ui->filterChainText->setText(s);
 
     displayRateAndShift();
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -361,4 +364,9 @@ void InterferometerGUI::makeUIConnections()
     QObject::connect(ui->position, &QSlider::valueChanged, this, &InterferometerGUI::on_position_valueChanged);
     QObject::connect(ui->phaseCorrection, &QSlider::valueChanged, this, &InterferometerGUI::on_phaseCorrection_valueChanged);
     QObject::connect(ui->correlationType, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &InterferometerGUI::on_correlationType_currentIndexChanged);
+}
+
+void InterferometerGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_centerFrequency + m_shiftFrequencyFactor * m_sampleRate);
 }

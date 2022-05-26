@@ -78,6 +78,7 @@ bool BeamSteeringCWModGUI::handleMessage(const Message& message)
         m_basebandSampleRate = notif.getSampleRate();
         m_centerFrequency = notif.getCenterFrequency();
         displayRateAndShift();
+        updateAbsoluteCenterFrequency();
         return true;
     }
     else if (BeamSteeringCWMod::MsgConfigureBeamSteeringCWMod::match(message))
@@ -182,6 +183,7 @@ void BeamSteeringCWModGUI::displaySettings()
     applyInterpolation();
     ui->steeringDegreesText->setText(tr("%1").arg(m_settings.m_steerDegrees));
     getRollupContents()->restoreState(m_rollupState);
+    updateAbsoluteCenterFrequency();
     blockApplySettings(false);
 }
 
@@ -308,6 +310,7 @@ void BeamSteeringCWModGUI::applyPosition()
     ui->filterChainText->setText(s);
 
     displayRateAndShift();
+    updateAbsoluteCenterFrequency();
     applySettings();
 }
 
@@ -324,4 +327,9 @@ void BeamSteeringCWModGUI::makeUIConnections()
     QObject::connect(ui->interpolationFactor, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &BeamSteeringCWModGUI::on_interpolationFactor_currentIndexChanged);
     QObject::connect(ui->position, &QSlider::valueChanged, this, &BeamSteeringCWModGUI::on_position_valueChanged);
     QObject::connect(ui->steeringDegrees, &QSlider::valueChanged, this, &BeamSteeringCWModGUI::on_steeringDegrees_valueChanged);
+}
+
+void BeamSteeringCWModGUI::updateAbsoluteCenterFrequency()
+{
+    setStatusFrequency(m_centerFrequency + m_shiftFrequencyFactor * m_basebandSampleRate);
 }
