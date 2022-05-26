@@ -455,7 +455,7 @@ void FreeDVModSource::applyFreeDVMode(FreeDVModSettings::FreeDVMode mode)
     {
     case FreeDVModSettings::FreeDVMode700C:
         fdv_mode = FREEDV_MODE_700C;
-        m_scaleFactor = SDR_TX_SCALEF / 3.2f;
+        m_scaleFactor = SDR_TX_SCALEF / 6.4f;
         break;
     case FreeDVModSettings::FreeDVMode700D:
         fdv_mode = FREEDV_MODE_700D;
@@ -463,16 +463,16 @@ void FreeDVModSource::applyFreeDVMode(FreeDVModSettings::FreeDVMode mode)
         break;
     case FreeDVModSettings::FreeDVMode800XA:
         fdv_mode = FREEDV_MODE_800XA;
-        m_scaleFactor = SDR_TX_SCALEF / 8.2f;
+        m_scaleFactor = SDR_TX_SCALEF / 10.3f;
         break;
     case FreeDVModSettings::FreeDVMode1600:
         fdv_mode = FREEDV_MODE_1600;
-        m_scaleFactor = SDR_TX_SCALEF / 3.2f;
+        m_scaleFactor = SDR_TX_SCALEF / 4.0f;
         break;
     case FreeDVModSettings::FreeDVMode2400A:
     default:
         fdv_mode = FREEDV_MODE_2400A;
-        m_scaleFactor = SDR_TX_SCALEF / 8.2f;
+        m_scaleFactor = SDR_TX_SCALEF / 10.3f;
         break;
     }
 
