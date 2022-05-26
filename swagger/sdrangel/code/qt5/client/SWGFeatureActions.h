@@ -23,7 +23,9 @@
 
 
 #include "SWGAFCActions.h"
+#include "SWGAMBEActions.h"
 #include "SWGGS232ControllerActions.h"
+#include "SWGLimeRFEActions.h"
 #include "SWGMapActions.h"
 #include "SWGPERTesterActions.h"
 #include "SWGRigCtlServerActions.h"
@@ -63,8 +65,14 @@ public:
     SWGAFCActions* getAfcActions();
     void setAfcActions(SWGAFCActions* afc_actions);
 
+    SWGAMBEActions* getAmbeActions();
+    void setAmbeActions(SWGAMBEActions* ambe_actions);
+
     SWGGS232ControllerActions* getGs232ControllerActions();
     void setGs232ControllerActions(SWGGS232ControllerActions* gs232_controller_actions);
+
+    SWGLimeRFEActions* getLimeRfeActions();
+    void setLimeRfeActions(SWGLimeRFEActions* lime_rfe_actions);
 
     SWGMapActions* getMapActions();
     void setMapActions(SWGMapActions* map_actions);
@@ -103,8 +111,14 @@ private:
     SWGAFCActions* afc_actions;
     bool m_afc_actions_isSet;
 
+    SWGAMBEActions* ambe_actions;
+    bool m_ambe_actions_isSet;
+
     SWGGS232ControllerActions* gs232_controller_actions;
     bool m_gs232_controller_actions_isSet;
+
+    SWGLimeRFEActions* lime_rfe_actions;
+    bool m_lime_rfe_actions_isSet;
 
     SWGMapActions* map_actions;
     bool m_map_actions_isSet;

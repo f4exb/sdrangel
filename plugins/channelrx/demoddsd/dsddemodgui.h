@@ -90,6 +90,7 @@ private:
     qint64 m_deviceCenterFrequency;
     int m_basebandSampleRate;
 	bool m_doApplySettings;
+    QList<DSDDemodSettings::AvailableAMBEFeature> m_availableAMBEFeatures;
 
     ScopeVisXY* m_scopeVisXY;
 
@@ -117,6 +118,7 @@ private:
 	void blockApplySettings(bool block);
 	void applySettings(bool force = false);
     void displaySettings();
+    void updateAMBEFeaturesList();
 	void updateMyPosition();
 	bool handleMessage(const Message& message);
     void makeUIConnections();
@@ -145,6 +147,8 @@ private slots:
     void on_highPassFilter_toggled(bool checked);
     void on_audioMute_toggled(bool checked);
     void on_symbolPLLLock_toggled(bool checked);
+    void on_ambeSupport_clicked(bool checked);
+    void on_ambeFeatures_currentIndexChanged(int index);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void on_viewStatusLog_clicked();

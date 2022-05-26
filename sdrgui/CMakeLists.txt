@@ -8,7 +8,6 @@ set(sdrgui_SOURCES
     mainwindow.cpp
     gui/aboutdialog.cpp
     gui/addpresetdialog.cpp
-    gui/ambedevicesdialog.cpp
     gui/audiodialog.cpp
     gui/audioselectdialog.cpp
     gui/basicchannelsettingsdialog.cpp
@@ -108,7 +107,6 @@ set(sdrgui_HEADERS
     mainwindow.h
     gui/aboutdialog.h
     gui/addpresetdialog.h
-    gui/ambedevicesdialog.h
     gui/audiodialog.h
     gui/audioselectdialog.h
     gui/basicchannelsettingsdialog.h
@@ -207,7 +205,6 @@ set(sdrgui_FORMS
     # mainwindow.ui
     gui/aboutdialog.ui
     gui/addpresetdialog.ui
-    gui/ambedevicesdialog.ui
     gui/basicchannelsettingsdialog.ui
     gui/basicdevicesettingsdialog.ui
     gui/basicfeaturesettingsdialog.ui
@@ -245,23 +242,6 @@ set(sdrgui_FORMS
     soapygui/complexfactorgui.ui
     soapygui/arginfogui.ui
 )
-
-if (LIMESUITE_FOUND)
-  set(sdrgui_SOURCES
-    ${sdrgui_SOURCES}
-    limerfegui/limerfeusbdialog.cpp
-  )
-  set(sdrgui_HEADERS
-    ${sdrgui_HEADERS}
-    limerfegui/limerfeusbdialog.h
-  )
-  set(sdrgui_FORMS
-    ${sdrgui_FORMS}
-    limerfegui/limerfeusbdialog.ui
-  )
-  include_directories(${LIMESUITE_INCLUDE_DIR})
-  set(sdrgui_LIMERFE_LIB ${LIMESUITE_LIBRARY})
-endif (LIMESUITE_FOUND)
 
 qt5_wrap_ui(sdrgui_FORMS_HEADERS ${sdrgui_FORMS})
 

@@ -72,7 +72,15 @@ DSDDemodSettings:
       $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
     rollupState:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
-
+    ambeFeatureIndex:
+      type: integer
+      description: index of AMBE controller feature to be used for AMBE frames decoding
+    connectAMBE:
+      type: integer
+      description: >
+        Decode frames with AMBE feature
+          * 0 - Do not decode frames with AMBE feature
+          * 1 - Decode frames with AMBE feature
 DSDDemodReport:
   description: DSDDemod
   properties:

@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include "SWGRollupState.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -41,6 +42,12 @@ public:
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGLimeRFESettings* fromJson(QString &jsonString) override;
+
+    QString* getTitle();
+    void setTitle(QString* title);
+
+    qint32 getRgbColor();
+    void setRgbColor(qint32 rgb_color);
 
     QString* getDevicePath();
     void setDevicePath(QString* device_path);
@@ -87,16 +94,37 @@ public:
     qint32 getSwrSource();
     void setSwrSource(qint32 swr_source);
 
-    qint32 getRxOn();
-    void setRxOn(qint32 rx_on);
+    qint32 getTxRxDriven();
+    void setTxRxDriven(qint32 tx_rx_driven);
 
-    qint32 getTxOn();
-    void setTxOn(qint32 tx_on);
+    qint32 getUseReverseApi();
+    void setUseReverseApi(qint32 use_reverse_api);
+
+    QString* getReverseApiAddress();
+    void setReverseApiAddress(QString* reverse_api_address);
+
+    qint32 getReverseApiPort();
+    void setReverseApiPort(qint32 reverse_api_port);
+
+    qint32 getReverseApiFeatureSetIndex();
+    void setReverseApiFeatureSetIndex(qint32 reverse_api_feature_set_index);
+
+    qint32 getReverseApiFeatureIndex();
+    void setReverseApiFeatureIndex(qint32 reverse_api_feature_index);
+
+    SWGRollupState* getRollupState();
+    void setRollupState(SWGRollupState* rollup_state);
 
 
     virtual bool isSet() override;
 
 private:
+    QString* title;
+    bool m_title_isSet;
+
+    qint32 rgb_color;
+    bool m_rgb_color_isSet;
+
     QString* device_path;
     bool m_device_path_isSet;
 
@@ -142,11 +170,26 @@ private:
     qint32 swr_source;
     bool m_swr_source_isSet;
 
-    qint32 rx_on;
-    bool m_rx_on_isSet;
+    qint32 tx_rx_driven;
+    bool m_tx_rx_driven_isSet;
 
-    qint32 tx_on;
-    bool m_tx_on_isSet;
+    qint32 use_reverse_api;
+    bool m_use_reverse_api_isSet;
+
+    QString* reverse_api_address;
+    bool m_reverse_api_address_isSet;
+
+    qint32 reverse_api_port;
+    bool m_reverse_api_port_isSet;
+
+    qint32 reverse_api_feature_set_index;
+    bool m_reverse_api_feature_set_index_isSet;
+
+    qint32 reverse_api_feature_index;
+    bool m_reverse_api_feature_index_isSet;
+
+    SWGRollupState* rollup_state;
+    bool m_rollup_state_isSet;
 
 };
 

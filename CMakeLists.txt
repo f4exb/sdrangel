@@ -15,7 +15,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # configure version
 set(sdrangel_VERSION_MAJOR "7")
-set(sdrangel_VERSION_MINOR "0")
+set(sdrangel_VERSION_MINOR "2")
 set(sdrangel_VERSION_PATCH "1")
 set(sdrangel_VERSION_SUFFIX "")
 
@@ -393,7 +393,7 @@ else()
     find_package(Codec2)
     find_package(CM256cc)
     find_package(LibMbe)
-    find_package(SerialDV REQUIRED)
+    find_package(SerialDV)
     find_package(LibDSDcc)
     find_package(Sgp4)
     find_package(AptDec)

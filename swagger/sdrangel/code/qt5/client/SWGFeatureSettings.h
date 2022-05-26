@@ -24,11 +24,13 @@
 
 #include "SWGAFCSettings.h"
 #include "SWGAISSettings.h"
+#include "SWGAMBESettings.h"
 #include "SWGAPRSSettings.h"
 #include "SWGAntennaToolsSettings.h"
 #include "SWGDemodAnalyzerSettings.h"
 #include "SWGGS232ControllerSettings.h"
 #include "SWGJogdialControllerSettings.h"
+#include "SWGLimeRFESettings.h"
 #include "SWGMapSettings.h"
 #include "SWGPERTesterSettings.h"
 #include "SWGRadiosondeSettings.h"
@@ -72,6 +74,9 @@ public:
     SWGAISSettings* getAisSettings();
     void setAisSettings(SWGAISSettings* ais_settings);
 
+    SWGAMBESettings* getAmbeSettings();
+    void setAmbeSettings(SWGAMBESettings* ambe_settings);
+
     SWGAntennaToolsSettings* getAntennaToolsSettings();
     void setAntennaToolsSettings(SWGAntennaToolsSettings* antenna_tools_settings);
 
@@ -86,6 +91,9 @@ public:
 
     SWGGS232ControllerSettings* getGs232ControllerSettings();
     void setGs232ControllerSettings(SWGGS232ControllerSettings* gs232_controller_settings);
+
+    SWGLimeRFESettings* getLimeRfeSettings();
+    void setLimeRfeSettings(SWGLimeRFESettings* lime_rfe_settings);
 
     SWGMapSettings* getMapSettings();
     void setMapSettings(SWGMapSettings* map_settings);
@@ -130,6 +138,9 @@ private:
     SWGAISSettings* ais_settings;
     bool m_ais_settings_isSet;
 
+    SWGAMBESettings* ambe_settings;
+    bool m_ambe_settings_isSet;
+
     SWGAntennaToolsSettings* antenna_tools_settings;
     bool m_antenna_tools_settings_isSet;
 
@@ -144,6 +155,9 @@ private:
 
     SWGGS232ControllerSettings* gs232_controller_settings;
     bool m_gs232_controller_settings_isSet;
+
+    SWGLimeRFESettings* lime_rfe_settings;
+    bool m_lime_rfe_settings_isSet;
 
     SWGMapSettings* map_settings;
     bool m_map_settings_isSet;

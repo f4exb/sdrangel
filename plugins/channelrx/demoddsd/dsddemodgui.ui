@@ -1231,6 +1231,29 @@
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
+      <widget class="QCheckBox" name="ambeSupport">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>170</y>
+         <width>71</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>AMBE</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="ambeFeatures">
+       <property name="geometry">
+        <rect>
+         <x>80</x>
+         <y>170</y>
+         <width>50</width>
+         <height>20</height>
+        </rect>
+       </property>
+      </widget>
      </widget>
     </item>
    </layout>

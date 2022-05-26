@@ -134,6 +134,12 @@ public:
     SWGRollupState* getRollupState();
     void setRollupState(SWGRollupState* rollup_state);
 
+    qint32 getAmbeFeatureIndex();
+    void setAmbeFeatureIndex(qint32 ambe_feature_index);
+
+    qint32 getConnectAmbe();
+    void setConnectAmbe(qint32 connect_ambe);
+
 
     virtual bool isSet() override;
 
@@ -227,6 +233,12 @@ private:
 
     SWGRollupState* rollup_state;
     bool m_rollup_state_isSet;
+
+    qint32 ambe_feature_index;
+    bool m_ambe_feature_index_isSet;
+
+    qint32 connect_ambe;
+    bool m_connect_ambe_isSet;
 
 };
 

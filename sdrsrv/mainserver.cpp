@@ -51,7 +51,6 @@ MainServer::MainServer(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     m_mainCore->m_logger = logger;
     m_mainCore->m_mainMessageQueue = &m_inputMessageQueue;
     m_mainCore->m_settings.setAudioDeviceManager(m_dspEngine->getAudioDeviceManager());
-    m_mainCore->m_settings.setAMBEEngine(m_dspEngine->getAMBEEngine());
     m_mainCore->m_masterTabIndex = -1;
 
     qDebug() << "MainServer::MainServer: create FFT factory...";

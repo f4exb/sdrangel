@@ -9,6 +9,7 @@
         <file>webapi/doc/swagger/include/AIS.yaml</file>
         <file>webapi/doc/swagger/include/AISDemod.yaml</file>
         <file>webapi/doc/swagger/include/AISMod.yaml</file>
+        <file>webapi/doc/swagger/include/AMBE.yaml</file>
         <file>webapi/doc/swagger/include/AMDemod.yaml</file>
         <file>webapi/doc/swagger/include/AMMod.yaml</file>
         <file>webapi/doc/swagger/include/AntennaTools.yaml</file>

@@ -1,0 +1,103 @@
+AMBESettings:
+  description: AMBE
+  properties:
+    title:
+      type: string
+    rgbColor:
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIFeatureSetIndex:
+      type: integer
+    reverseAPIFeatureIndex:
+      type: integer
+    rollupState:
+      $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+
+AMBEReport:
+  description: AMBE
+  properties:
+    serial:
+      description: List of AMBE serial devices in the system
+      $ref: "/doc/swagger/include/AMBE.yaml#/definitions/DVSerialDevices"
+    devices:
+      description: List of AMBE devices or servers in use
+      type: array
+      items:
+        $ref: "/doc/swagger/include/AMBE.yaml#/definitions/AMBEDeviceReport"
+
+AMBEActions:
+  description: AMBE
+  properties:
+    updateDevices:
+      description: Add or remove AMBE devices (serial or address) int the list to be used for AMBE frames processing
+      $ref: "/doc/swagger/include/AMBE.yaml#/definitions/AMBEDevices"
+    removeAll:
+      type: integer
+      description: Set to a non zero value to remove all AMBE devices from the list of used AMBE devices
+
+
+definitions:
+
+  DVSerialDevices:
+    description: "List of DV serial devices available in the system"
+    required:
+      - nbDevices
+    properties:
+      nbDevices:
+        description: "Number of DV serial devices"
+        type: integer
+      dvSerialDevices:
+        description: "Device names of DV serial devices"
+        type: array
+        items:
+          $ref: "#/definitions/DVSerialDevice"
+
+  DVSerialDevice:
+    description: "DV serial device details"
+    properties:
+      deviceName:
+        description: "Name of the serial device in the system"
+        type: string
+
+  AMBEDevices:
+    description: "List of AMBE devices (serial or server address)"
+    required:
+      - nbDevices
+    properties:
+      nbDevices:
+        description: "Number of DV serial devices"
+        type: integer
+      ambeDevices:
+        description: "List of AMBE devices"
+        type: array
+        items:
+          $ref: "#/definitions/AMBEDevice"
+
+  AMBEDevice:
+    description: "AMBE devices active in the system"
+    properties:
+      deviceRef:
+        description: "Serial device name or server address"
+        type: string
+      delete:
+        description: "1 if device is to be removed from active list"
+        type: integer
+
+  AMBEDeviceReport:
+    description: "Report of AMBE device in use"
+    properties:
+      devicePath:
+        type: string
+        description: AMBE device full path or AMBE server URL
+      successCount:
+        type: integer
+        description: number of frames decoded successfully
+      failureCount:
+        type: integer
+        description: number of frames that failed to decode

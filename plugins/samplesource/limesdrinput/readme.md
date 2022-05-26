@@ -161,7 +161,7 @@ Use this button to adjust the global gain of the LNA, TIA and PGA. LimeSuite sof
 
 <h4>8.3: LNA manual gain</h4>
 
-Use this button to adjust the gain of tha LNA when manual gain mode is set (8.1). Gain can be set between 1 and 30 dB in 1 dB steps. However the hardware has 3 dB steps for the lower gain values so increasing or decreasing by one step does not always produce a change. The value in dB appears at the right of the button.
+Use this button to adjust the gain of the LNA when manual gain mode is set (8.1). Gain can be set between 1 and 30 dB in 1 dB steps. However the hardware has 3 dB steps for the lower gain values so increasing or decreasing by one step does not always produce a change. The value in dB appears at the right of the button.
 
 <h4>8.4: TIA manual gain</h4>
 
@@ -169,7 +169,7 @@ Use this combo to select the TIA gain in dB when manual gain mode is set (8.1). 
 
 <h4>8.5: PGA manual gain</h4>
 
-Use this button to adjust the gain of tha PGA when manual gain mode is set (8.1). Gain can be set between 0 and 32 dB in 1 dB steps. The value in dB appears at the right of the button.
+Use this button to adjust the gain of the PGA when manual gain mode is set (8.1). Gain can be set between 0 and 32 dB in 1 dB steps. The value in dB appears at the right of the button.
 
 <h3>9: Antenna select</h3>
 

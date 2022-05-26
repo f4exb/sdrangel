@@ -1,0 +1,980 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>LimeRFEGUI</class>
+ <widget class="RollupContents" name="LimeRFEGUI">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>392</width>
+    <height>667</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>390</width>
+    <height>667</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>560</width>
+    <height>667</height>
+   </size>
+  </property>
+  <property name="font">
+   <font>
+    <family>Liberation Sans</family>
+    <pointsize>9</pointsize>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>LimeRFE USB controller</string>
+  </property>
+  <widget class="QWidget" name="settingsContainer" native="true">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>391</width>
+     <height>372</height>
+    </rect>
+   </property>
+   <property name="windowTitle">
+    <string>Settings</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>3</number>
+    </property>
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
+     <number>2</number>
+    </property>
+    <item>
+     <layout class="QHBoxLayout" name="deviceLayout1">
+      <item>
+       <widget class="QLabel" name="deviceLabel">
+        <property name="text">
+         <string>Dev</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="device">
+        <property name="minimumSize">
+         <size>
+          <width>220</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Device</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="openDevice">
+        <property name="maximumSize">
+         <size>
+          <width>60</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Open device</string>
+        </property>
+        <property name="text">
+         <string>Open</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="closeDevice">
+        <property name="maximumSize">
+         <size>
+          <width>60</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Close Device</string>
+        </property>
+        <property name="text">
+         <string>Close</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="deviceLayout2">
+      <item>
+       <widget class="QPushButton" name="deviceToGUI">
+        <property name="toolTip">
+         <string>Transfer data to GUI</string>
+        </property>
+        <property name="text">
+         <string>to GUI</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="apply">
+        <property name="toolTip">
+         <string>Apply changes</string>
+        </property>
+        <property name="text">
+         <string>Apply</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_7">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="Line" name="line">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="rxTitleLayout">
+      <item>
+       <widget class="QLabel" name="rxChannelLabel">
+        <property name="text">
+         <string>Rx channel</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="rxLayout1">
+      <item>
+       <widget class="QComboBox" name="rxChannelGroup">
+        <property name="minimumSize">
+         <size>
+          <width>120</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Rx channel group</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>Wideband</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>HAM</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Cellular</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="rxChannel">
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Rx channel range</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="rxLayout2">
+      <item>
+       <widget class="QLabel" name="rxPortLabel_2">
+        <property name="text">
+         <string>Rx port</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="rxPort">
+        <property name="maximumSize">
+         <size>
+          <width>99</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Rx port</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>Tx/Rx (J3)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Tx/Rx HF (J5)</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="attenuationLabel">
+        <property name="text">
+         <string>Att</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="attenuation">
+        <property name="toolTip">
+         <string>Rx attenuation</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>0</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>6</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>8</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>10</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>12</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>14</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="attenuationUnits">
+        <property name="text">
+         <string>dB</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="amFmNotchFilter">
+        <property name="toolTip">
+         <string>AM/FM notch filter</string>
+        </property>
+        <property name="text">
+         <string>Notch</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="Line" name="line_2">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="txTitleLayout">
+      <item>
+       <widget class="QLabel" name="txChannelLabel">
+        <property name="text">
+         <string>Tx channel</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="txFollowsRx">
+        <property name="toolTip">
+         <string>Channel same as Rx</string>
+        </property>
+        <property name="text">
+         <string>Same as Rx</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_6">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="txLayout1">
+      <item>
+       <widget class="QComboBox" name="txChannelGroup">
+        <property name="minimumSize">
+         <size>
+          <width>120</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Rx channel group</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>Wideband</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>HAM</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Cellular</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="txChannel">
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Rx channel range</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="txLayout2">
+      <item>
+       <widget class="QLabel" name="txPortLabel">
+        <property name="minimumSize">
+         <size>
+          <width>47</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Tx port</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="txPort">
+        <property name="toolTip">
+         <string>Tx port</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>Tx/Rx (J3)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Tx (J4)</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="powerContainer" native="true">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>373</y>
+     <width>391</width>
+     <height>121</height>
+    </rect>
+   </property>
+   <property name="windowTitle">
+    <string>Power</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_3">
+    <property name="spacing">
+     <number>3</number>
+    </property>
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
+     <number>2</number>
+    </property>
+    <item>
+     <layout class="QHBoxLayout" name="powerSetLayout">
+      <item>
+       <widget class="QCheckBox" name="powerEnable">
+        <property name="toolTip">
+         <string>Enable power measurements</string>
+        </property>
+        <property name="text">
+         <string>Pwr</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="powerRefresh">
+        <property name="toolTip">
+         <string>Refresh power</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="powerSource">
+        <property name="toolTip">
+         <string>Power measurement source (EXTernal, CELlular)</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>EXT</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>CEL</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="powerAutoRefresh">
+        <property name="toolTip">
+         <string>Auto refresh power</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/play.png</normaloff>:/play.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="powerCorrLabel">
+        <property name="text">
+         <string>Corr</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="powerCorrValue">
+        <property name="maximumSize">
+         <size>
+          <width>60</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::ClickFocus</enum>
+        </property>
+        <property name="toolTip">
+         <string>Power correction in dBm</string>
+        </property>
+        <property name="text">
+         <string>-00.0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="powerReadingsLayout">
+      <property name="rightMargin">
+       <number>10</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="powerFwdLabel">
+        <property name="text">
+         <string>Fwd</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="powerFwdText">
+        <property name="toolTip">
+         <string>Relative forward power in dB</string>
+        </property>
+        <property name="text">
+         <string>00.0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_4">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="powerRefLabel">
+        <property name="text">
+         <string>Ref</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="powerRefText">
+        <property name="toolTip">
+         <string>Relative reflected power in dB</string>
+        </property>
+        <property name="text">
+         <string>00.0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_5">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="returnLossLabel">
+        <property name="text">
+         <string>RL</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="returnLossText">
+        <property name="toolTip">
+         <string>Return loss in dB</string>
+        </property>
+        <property name="text">
+         <string>00.0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="powerUnits">
+        <property name="text">
+         <string>dB</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_6">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="swrLabel">
+        <property name="text">
+         <string>VSWR</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="swrText">
+        <property name="toolTip">
+         <string>Voltage Standing Wave Ratio</string>
+        </property>
+        <property name="text">
+         <string>1.000</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="absPowerLayout">
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Abs power</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="powerAbsDbText">
+        <property name="toolTip">
+         <string>Corrected forward power in dBm</string>
+        </property>
+        <property name="text">
+         <string>-00.0 dBm</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="powerAbsWText">
+        <property name="toolTip">
+         <string>Corrected forward power in Watts</string>
+        </property>
+        <property name="text">
+         <string>0.000 W</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="powerAbsAvg">
+        <property name="toolTip">
+         <string>Corrected power averaging</string>
+        </property>
+        <property name="text">
+         <string>Avg</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_4">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="controlContainer" native="true">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>495</y>
+     <width>391</width>
+     <height>171</height>
+    </rect>
+   </property>
+   <property name="windowTitle">
+    <string>Control</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <property name="spacing">
+     <number>3</number>
+    </property>
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
+     <number>2</number>
+    </property>
+    <item>
+     <layout class="QHBoxLayout" name="modeLayout">
+      <item>
+       <widget class="QLabel" name="modeLabel">
+        <property name="text">
+         <string>Mode</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="modeText">
+        <property name="minimumSize">
+         <size>
+          <width>110</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Rx/Tx state</string>
+        </property>
+        <property name="text">
+         <string>None</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="deviceSetSync">
+        <property name="toolTip">
+         <string>DeviceSet synchronization</string>
+        </property>
+        <property name="text">
+         <string>Rx/Tx Sync</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_5">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="rtxLayout">
+      <item>
+       <widget class="QToolButton" name="modeRx">
+        <property name="toolTip">
+         <string>Switch Rx</string>
+        </property>
+        <property name="text">
+         <string>RX</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="modeTx">
+        <property name="toolTip">
+         <string>Switch Tx</string>
+        </property>
+        <property name="text">
+         <string>TX</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="rxTxToggle">
+        <property name="toolTip">
+         <string>Rx/Tx toggle</string>
+        </property>
+        <property name="text">
+         <string>Toggle</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="deviceSetRxLabel">
+        <property name="text">
+         <string>Rx</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="deviceSetRx">
+        <property name="toolTip">
+         <string>Index of Rx DeviceSet </string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="deviceSetTxLabel">
+        <property name="text">
+         <string>Tx</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="deviceSetTx">
+        <property name="toolTip">
+         <string>Index of Tx DeviceSet </string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="deviceSetRefresh">
+        <property name="toolTip">
+         <string>Refresh DeviceSet indexes</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="statusLayout">
+      <item>
+       <widget class="QTextBrowser" name="statusText">
+        <property name="toolTip">
+         <string>Messages</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
+   <class>RollupContents</class>
+   <extends>QWidget</extends>
+   <header>gui/rollupcontents.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+ </resources>
+ <connections/>
+</ui>

@@ -28,6 +28,10 @@ SWGLimeRFESettings::SWGLimeRFESettings(QString* json) {
 }
 
 SWGLimeRFESettings::SWGLimeRFESettings() {
+    title = nullptr;
+    m_title_isSet = false;
+    rgb_color = 0;
+    m_rgb_color_isSet = false;
     device_path = nullptr;
     m_device_path_isSet = false;
     rx_channels = 0;
@@ -58,10 +62,20 @@ SWGLimeRFESettings::SWGLimeRFESettings() {
     m_swr_enable_isSet = false;
     swr_source = 0;
     m_swr_source_isSet = false;
-    rx_on = 0;
-    m_rx_on_isSet = false;
-    tx_on = 0;
-    m_tx_on_isSet = false;
+    tx_rx_driven = 0;
+    m_tx_rx_driven_isSet = false;
+    use_reverse_api = 0;
+    m_use_reverse_api_isSet = false;
+    reverse_api_address = nullptr;
+    m_reverse_api_address_isSet = false;
+    reverse_api_port = 0;
+    m_reverse_api_port_isSet = false;
+    reverse_api_feature_set_index = 0;
+    m_reverse_api_feature_set_index_isSet = false;
+    reverse_api_feature_index = 0;
+    m_reverse_api_feature_index_isSet = false;
+    rollup_state = nullptr;
+    m_rollup_state_isSet = false;
 }
 
 SWGLimeRFESettings::~SWGLimeRFESettings() {
@@ -70,6 +84,10 @@ SWGLimeRFESettings::~SWGLimeRFESettings() {
 
 void
 SWGLimeRFESettings::init() {
+    title = new QString("");
+    m_title_isSet = false;
+    rgb_color = 0;
+    m_rgb_color_isSet = false;
     device_path = new QString("");
     m_device_path_isSet = false;
     rx_channels = 0;
@@ -100,14 +118,28 @@ SWGLimeRFESettings::init() {
     m_swr_enable_isSet = false;
     swr_source = 0;
     m_swr_source_isSet = false;
-    rx_on = 0;
-    m_rx_on_isSet = false;
-    tx_on = 0;
-    m_tx_on_isSet = false;
+    tx_rx_driven = 0;
+    m_tx_rx_driven_isSet = false;
+    use_reverse_api = 0;
+    m_use_reverse_api_isSet = false;
+    reverse_api_address = new QString("");
+    m_reverse_api_address_isSet = false;
+    reverse_api_port = 0;
+    m_reverse_api_port_isSet = false;
+    reverse_api_feature_set_index = 0;
+    m_reverse_api_feature_set_index_isSet = false;
+    reverse_api_feature_index = 0;
+    m_reverse_api_feature_index_isSet = false;
+    rollup_state = new SWGRollupState();
+    m_rollup_state_isSet = false;
 }
 
 void
 SWGLimeRFESettings::cleanup() {
+    if(title != nullptr) { 
+        delete title;
+    }
+
     if(device_path != nullptr) { 
         delete device_path;
     }
@@ -127,6 +159,15 @@ SWGLimeRFESettings::cleanup() {
 
 
 
+    if(reverse_api_address != nullptr) { 
+        delete reverse_api_address;
+    }
+
+
+
+    if(rollup_state != nullptr) { 
+        delete rollup_state;
+    }
 }
 
 SWGLimeRFESettings*
@@ -140,6 +181,10 @@ SWGLimeRFESettings::fromJson(QString &json) {
 
 void
 SWGLimeRFESettings::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&device_path, pJson["devicePath"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&rx_channels, pJson["rxChannels"], "qint32", "");
@@ -170,9 +215,19 @@ SWGLimeRFESettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&swr_source, pJson["swrSource"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&rx_on, pJson["rxOn"], "qint32", "");
+    ::SWGSDRangel::setValue(&tx_rx_driven, pJson["txRxDriven"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&tx_on, pJson["txOn"], "qint32", "");
+    ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&reverse_api_address, pJson["reverseAPIAddress"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&reverse_api_port, pJson["reverseAPIPort"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&reverse_api_feature_set_index, pJson["reverseAPIFeatureSetIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&reverse_api_feature_index, pJson["reverseAPIFeatureIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&rollup_state, pJson["rollupState"], "SWGRollupState", "SWGRollupState");
     
 }
 
@@ -190,6 +245,12 @@ SWGLimeRFESettings::asJson ()
 QJsonObject*
 SWGLimeRFESettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(title != nullptr && *title != QString("")){
+        toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
+    if(m_rgb_color_isSet){
+        obj->insert("rgbColor", QJsonValue(rgb_color));
+    }
     if(device_path != nullptr && *device_path != QString("")){
         toJsonValue(QString("devicePath"), device_path, obj, QString("QString"));
     }
@@ -235,14 +296,49 @@ SWGLimeRFESettings::asJsonObject() {
     if(m_swr_source_isSet){
         obj->insert("swrSource", QJsonValue(swr_source));
     }
-    if(m_rx_on_isSet){
-        obj->insert("rxOn", QJsonValue(rx_on));
+    if(m_tx_rx_driven_isSet){
+        obj->insert("txRxDriven", QJsonValue(tx_rx_driven));
     }
-    if(m_tx_on_isSet){
-        obj->insert("txOn", QJsonValue(tx_on));
+    if(m_use_reverse_api_isSet){
+        obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
+    }
+    if(reverse_api_address != nullptr && *reverse_api_address != QString("")){
+        toJsonValue(QString("reverseAPIAddress"), reverse_api_address, obj, QString("QString"));
+    }
+    if(m_reverse_api_port_isSet){
+        obj->insert("reverseAPIPort", QJsonValue(reverse_api_port));
+    }
+    if(m_reverse_api_feature_set_index_isSet){
+        obj->insert("reverseAPIFeatureSetIndex", QJsonValue(reverse_api_feature_set_index));
+    }
+    if(m_reverse_api_feature_index_isSet){
+        obj->insert("reverseAPIFeatureIndex", QJsonValue(reverse_api_feature_index));
+    }
+    if((rollup_state != nullptr) && (rollup_state->isSet())){
+        toJsonValue(QString("rollupState"), rollup_state, obj, QString("SWGRollupState"));
     }
 
     return obj;
+}
+
+QString*
+SWGLimeRFESettings::getTitle() {
+    return title;
+}
+void
+SWGLimeRFESettings::setTitle(QString* title) {
+    this->title = title;
+    this->m_title_isSet = true;
+}
+
+qint32
+SWGLimeRFESettings::getRgbColor() {
+    return rgb_color;
+}
+void
+SWGLimeRFESettings::setRgbColor(qint32 rgb_color) {
+    this->rgb_color = rgb_color;
+    this->m_rgb_color_isSet = true;
 }
 
 QString*
@@ -396,23 +492,73 @@ SWGLimeRFESettings::setSwrSource(qint32 swr_source) {
 }
 
 qint32
-SWGLimeRFESettings::getRxOn() {
-    return rx_on;
+SWGLimeRFESettings::getTxRxDriven() {
+    return tx_rx_driven;
 }
 void
-SWGLimeRFESettings::setRxOn(qint32 rx_on) {
-    this->rx_on = rx_on;
-    this->m_rx_on_isSet = true;
+SWGLimeRFESettings::setTxRxDriven(qint32 tx_rx_driven) {
+    this->tx_rx_driven = tx_rx_driven;
+    this->m_tx_rx_driven_isSet = true;
 }
 
 qint32
-SWGLimeRFESettings::getTxOn() {
-    return tx_on;
+SWGLimeRFESettings::getUseReverseApi() {
+    return use_reverse_api;
 }
 void
-SWGLimeRFESettings::setTxOn(qint32 tx_on) {
-    this->tx_on = tx_on;
-    this->m_tx_on_isSet = true;
+SWGLimeRFESettings::setUseReverseApi(qint32 use_reverse_api) {
+    this->use_reverse_api = use_reverse_api;
+    this->m_use_reverse_api_isSet = true;
+}
+
+QString*
+SWGLimeRFESettings::getReverseApiAddress() {
+    return reverse_api_address;
+}
+void
+SWGLimeRFESettings::setReverseApiAddress(QString* reverse_api_address) {
+    this->reverse_api_address = reverse_api_address;
+    this->m_reverse_api_address_isSet = true;
+}
+
+qint32
+SWGLimeRFESettings::getReverseApiPort() {
+    return reverse_api_port;
+}
+void
+SWGLimeRFESettings::setReverseApiPort(qint32 reverse_api_port) {
+    this->reverse_api_port = reverse_api_port;
+    this->m_reverse_api_port_isSet = true;
+}
+
+qint32
+SWGLimeRFESettings::getReverseApiFeatureSetIndex() {
+    return reverse_api_feature_set_index;
+}
+void
+SWGLimeRFESettings::setReverseApiFeatureSetIndex(qint32 reverse_api_feature_set_index) {
+    this->reverse_api_feature_set_index = reverse_api_feature_set_index;
+    this->m_reverse_api_feature_set_index_isSet = true;
+}
+
+qint32
+SWGLimeRFESettings::getReverseApiFeatureIndex() {
+    return reverse_api_feature_index;
+}
+void
+SWGLimeRFESettings::setReverseApiFeatureIndex(qint32 reverse_api_feature_index) {
+    this->reverse_api_feature_index = reverse_api_feature_index;
+    this->m_reverse_api_feature_index_isSet = true;
+}
+
+SWGRollupState*
+SWGLimeRFESettings::getRollupState() {
+    return rollup_state;
+}
+void
+SWGLimeRFESettings::setRollupState(SWGRollupState* rollup_state) {
+    this->rollup_state = rollup_state;
+    this->m_rollup_state_isSet = true;
 }
 
 
@@ -420,6 +566,12 @@ bool
 SWGLimeRFESettings::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_rgb_color_isSet){
+            isObjectUpdated = true; break;
+        }
         if(device_path && *device_path != QString("")){
             isObjectUpdated = true; break;
         }
@@ -465,10 +617,25 @@ SWGLimeRFESettings::isSet(){
         if(m_swr_source_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_rx_on_isSet){
+        if(m_tx_rx_driven_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_tx_on_isSet){
+        if(m_use_reverse_api_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(reverse_api_address && *reverse_api_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_feature_set_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_feature_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(rollup_state && rollup_state->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

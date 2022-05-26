@@ -32,8 +32,12 @@ SWGFeatureReport::SWGFeatureReport() {
     m_feature_type_isSet = false;
     afc_report = nullptr;
     m_afc_report_isSet = false;
+    ambe_report = nullptr;
+    m_ambe_report_isSet = false;
     gs232_controller_report = nullptr;
     m_gs232_controller_report_isSet = false;
+    lime_rfe_report = nullptr;
+    m_lime_rfe_report_isSet = false;
     map_report = nullptr;
     m_map_report_isSet = false;
     per_tester_report = nullptr;
@@ -60,8 +64,12 @@ SWGFeatureReport::init() {
     m_feature_type_isSet = false;
     afc_report = new SWGAFCReport();
     m_afc_report_isSet = false;
+    ambe_report = new SWGAMBEReport();
+    m_ambe_report_isSet = false;
     gs232_controller_report = new SWGGS232ControllerReport();
     m_gs232_controller_report_isSet = false;
+    lime_rfe_report = new SWGLimeRFEReport();
+    m_lime_rfe_report_isSet = false;
     map_report = new SWGMapReport();
     m_map_report_isSet = false;
     per_tester_report = new SWGPERTesterReport();
@@ -86,8 +94,14 @@ SWGFeatureReport::cleanup() {
     if(afc_report != nullptr) { 
         delete afc_report;
     }
+    if(ambe_report != nullptr) { 
+        delete ambe_report;
+    }
     if(gs232_controller_report != nullptr) { 
         delete gs232_controller_report;
+    }
+    if(lime_rfe_report != nullptr) { 
+        delete lime_rfe_report;
     }
     if(map_report != nullptr) { 
         delete map_report;
@@ -127,7 +141,11 @@ SWGFeatureReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&afc_report, pJson["AFCReport"], "SWGAFCReport", "SWGAFCReport");
     
+    ::SWGSDRangel::setValue(&ambe_report, pJson["AMBEReport"], "SWGAMBEReport", "SWGAMBEReport");
+    
     ::SWGSDRangel::setValue(&gs232_controller_report, pJson["GS232ControllerReport"], "SWGGS232ControllerReport", "SWGGS232ControllerReport");
+    
+    ::SWGSDRangel::setValue(&lime_rfe_report, pJson["LimeRFEReport"], "SWGLimeRFEReport", "SWGLimeRFEReport");
     
     ::SWGSDRangel::setValue(&map_report, pJson["MapReport"], "SWGMapReport", "SWGMapReport");
     
@@ -165,8 +183,14 @@ SWGFeatureReport::asJsonObject() {
     if((afc_report != nullptr) && (afc_report->isSet())){
         toJsonValue(QString("AFCReport"), afc_report, obj, QString("SWGAFCReport"));
     }
+    if((ambe_report != nullptr) && (ambe_report->isSet())){
+        toJsonValue(QString("AMBEReport"), ambe_report, obj, QString("SWGAMBEReport"));
+    }
     if((gs232_controller_report != nullptr) && (gs232_controller_report->isSet())){
         toJsonValue(QString("GS232ControllerReport"), gs232_controller_report, obj, QString("SWGGS232ControllerReport"));
+    }
+    if((lime_rfe_report != nullptr) && (lime_rfe_report->isSet())){
+        toJsonValue(QString("LimeRFEReport"), lime_rfe_report, obj, QString("SWGLimeRFEReport"));
     }
     if((map_report != nullptr) && (map_report->isSet())){
         toJsonValue(QString("MapReport"), map_report, obj, QString("SWGMapReport"));
@@ -213,6 +237,16 @@ SWGFeatureReport::setAfcReport(SWGAFCReport* afc_report) {
     this->m_afc_report_isSet = true;
 }
 
+SWGAMBEReport*
+SWGFeatureReport::getAmbeReport() {
+    return ambe_report;
+}
+void
+SWGFeatureReport::setAmbeReport(SWGAMBEReport* ambe_report) {
+    this->ambe_report = ambe_report;
+    this->m_ambe_report_isSet = true;
+}
+
 SWGGS232ControllerReport*
 SWGFeatureReport::getGs232ControllerReport() {
     return gs232_controller_report;
@@ -221,6 +255,16 @@ void
 SWGFeatureReport::setGs232ControllerReport(SWGGS232ControllerReport* gs232_controller_report) {
     this->gs232_controller_report = gs232_controller_report;
     this->m_gs232_controller_report_isSet = true;
+}
+
+SWGLimeRFEReport*
+SWGFeatureReport::getLimeRfeReport() {
+    return lime_rfe_report;
+}
+void
+SWGFeatureReport::setLimeRfeReport(SWGLimeRFEReport* lime_rfe_report) {
+    this->lime_rfe_report = lime_rfe_report;
+    this->m_lime_rfe_report_isSet = true;
 }
 
 SWGMapReport*
@@ -304,7 +348,13 @@ SWGFeatureReport::isSet(){
         if(afc_report && afc_report->isSet()){
             isObjectUpdated = true; break;
         }
+        if(ambe_report && ambe_report->isSet()){
+            isObjectUpdated = true; break;
+        }
         if(gs232_controller_report && gs232_controller_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(lime_rfe_report && lime_rfe_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(map_report && map_report->isSet()){

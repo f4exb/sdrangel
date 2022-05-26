@@ -9,8 +9,12 @@ FeatureReport:
       type: string
     AFCReport:
       $ref: "/doc/swagger/include/AFC.yaml#/AFCReport"
+    AMBEReport:
+      $ref: "/doc/swagger/include/AMBE.yaml#/AMBEReport"
     GS232ControllerReport:
       $ref: "/doc/swagger/include/GS232Controller.yaml#/GS232ControllerReport"
+    LimeRFEReport:
+      $ref: "/doc/swagger/include/LimeRFE.yaml#/LimeRFEReport"
     MapReport:
       $ref: "/doc/swagger/include/Map.yaml#/MapReport"
     PERTesterReport:

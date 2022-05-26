@@ -88,6 +88,10 @@ SWGDSDDemodSettings::SWGDSDDemodSettings() {
     m_channel_marker_isSet = false;
     rollup_state = nullptr;
     m_rollup_state_isSet = false;
+    ambe_feature_index = 0;
+    m_ambe_feature_index_isSet = false;
+    connect_ambe = 0;
+    m_connect_ambe_isSet = false;
 }
 
 SWGDSDDemodSettings::~SWGDSDDemodSettings() {
@@ -156,6 +160,10 @@ SWGDSDDemodSettings::init() {
     m_channel_marker_isSet = false;
     rollup_state = new SWGRollupState();
     m_rollup_state_isSet = false;
+    ambe_feature_index = 0;
+    m_ambe_feature_index_isSet = false;
+    connect_ambe = 0;
+    m_connect_ambe_isSet = false;
 }
 
 void
@@ -200,6 +208,8 @@ SWGDSDDemodSettings::cleanup() {
     if(rollup_state != nullptr) { 
         delete rollup_state;
     }
+
+
 }
 
 SWGDSDDemodSettings*
@@ -272,6 +282,10 @@ SWGDSDDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&channel_marker, pJson["channelMarker"], "SWGChannelMarker", "SWGChannelMarker");
     
     ::SWGSDRangel::setValue(&rollup_state, pJson["rollupState"], "SWGRollupState", "SWGRollupState");
+    
+    ::SWGSDRangel::setValue(&ambe_feature_index, pJson["ambeFeatureIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&connect_ambe, pJson["connectAMBE"], "qint32", "");
     
 }
 
@@ -378,6 +392,12 @@ SWGDSDDemodSettings::asJsonObject() {
     }
     if((rollup_state != nullptr) && (rollup_state->isSet())){
         toJsonValue(QString("rollupState"), rollup_state, obj, QString("SWGRollupState"));
+    }
+    if(m_ambe_feature_index_isSet){
+        obj->insert("ambeFeatureIndex", QJsonValue(ambe_feature_index));
+    }
+    if(m_connect_ambe_isSet){
+        obj->insert("connectAMBE", QJsonValue(connect_ambe));
     }
 
     return obj;
@@ -683,6 +703,26 @@ SWGDSDDemodSettings::setRollupState(SWGRollupState* rollup_state) {
     this->m_rollup_state_isSet = true;
 }
 
+qint32
+SWGDSDDemodSettings::getAmbeFeatureIndex() {
+    return ambe_feature_index;
+}
+void
+SWGDSDDemodSettings::setAmbeFeatureIndex(qint32 ambe_feature_index) {
+    this->ambe_feature_index = ambe_feature_index;
+    this->m_ambe_feature_index_isSet = true;
+}
+
+qint32
+SWGDSDDemodSettings::getConnectAmbe() {
+    return connect_ambe;
+}
+void
+SWGDSDDemodSettings::setConnectAmbe(qint32 connect_ambe) {
+    this->connect_ambe = connect_ambe;
+    this->m_connect_ambe_isSet = true;
+}
+
 
 bool
 SWGDSDDemodSettings::isSet(){
@@ -776,6 +816,12 @@ SWGDSDDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(rollup_state && rollup_state->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(m_ambe_feature_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_connect_ambe_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

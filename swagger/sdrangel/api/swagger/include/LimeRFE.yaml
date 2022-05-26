@@ -1,6 +1,10 @@
 LimeRFESettings:
   description: LimeRFE
   properties:
+    title:
+      type: string
+    rgbColor:
+      type: integer
     devicePath:
       description: Path to the device serial interface (ex /dev/ttyUSB2)
       type: string
@@ -102,19 +106,69 @@ LimeRFESettings:
         SWR measurement source (LimeRFEController::SWRSource)
           * 0 - External
           * 1 - Cellular
+    txRxDriven:
+      description: Boolean 1 if Tx is copy of Rx else 0
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIFeatureSetIndex:
+      type: integer
+    reverseAPIFeatureIndex:
+      type: integer
+    rollupState:
+      $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+
+LimeRFEReport:
+  description: LimeRFE
+  properties:
     rxOn:
       description: Boolean 1 if Rx is active else 0
       type: integer
     txOn:
       description: Boolean 1 if Tx is active else 0
       type: integer
-
-LimeRFEPower:
-  description: report of forward and reflected power measurements
-  properties:
-    forward:
+    forwardPower:
       description: relative forward power in centi-Bels
       type: integer
-    reflected:
+    reflectedPower:
       description: relative reflected power in centi-Bels
       type: integer
+
+LimeRFEActions:
+  description: LimeRFE
+  properties:
+    selectChannel:
+      type: integer
+      description: >
+        Select channel
+          * 0 - Rx
+          * 1 - Tx
+    deviceSetIndex:
+      type: integer
+      dexcription: Index of device set to synchronize switch with
+    switchChannel:
+      type: integer
+      description: >
+        Switch on or off
+          * 0 - Off
+          * 1 - On
+    getState:
+      type: integer
+      description: Set to non zero value to get the board state
+    fromToSettings:
+      type: integer
+      description: >
+        Move from/to settings to/from device
+          * 0 - From device to settings. The toGUI button in GUI mode
+          * 1 - From settings to device. The Apply button in GUI mode
+    openCloseDevice:
+      type: integer
+      description: >
+        Open or close device
+          * 0 - Close device
+          * 1 - Open device

@@ -168,37 +168,6 @@ void DSPEngine::removeDeviceEngineAt(int deviceIndex)
     m_deviceEngineReferences.removeAt(deviceIndex);
 }
 
-bool DSPEngine::hasDVSerialSupport()
-{
-    return m_ambeEngine.getNbDevices() > 0;
-}
-
-void DSPEngine::setDVSerialSupport(bool support)
-{ (void) support; }
-
-void DSPEngine::getDVSerialNames(std::vector<std::string>& deviceNames)
-{
-    std::vector<QString> qDeviceRefs;
-    m_ambeEngine.getDeviceRefs(qDeviceRefs);
-    deviceNames.clear();
-
-    for (std::vector<QString>::const_iterator it = qDeviceRefs.begin(); it != qDeviceRefs.end(); ++it) {
-        deviceNames.push_back(it->toStdString());
-    }
-}
-
-void DSPEngine::pushMbeFrame(
-        const unsigned char *mbeFrame,
-        int mbeRateIndex,
-        int mbeVolumeIndex,
-        unsigned char channels,
-        bool useHP,
-        int upsampling,
-        AudioFifo *audioFifo)
-{
-    m_ambeEngine.pushMbeFrame(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, useHP, upsampling, audioFifo);
-}
-
 void DSPEngine::createFFTFactory(const QString& fftWisdomFileName)
 {
     m_fftFactory = new FFTFactory(fftWisdomFileName);

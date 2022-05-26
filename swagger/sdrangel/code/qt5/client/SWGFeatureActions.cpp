@@ -36,8 +36,12 @@ SWGFeatureActions::SWGFeatureActions() {
     m_originator_feature_index_isSet = false;
     afc_actions = nullptr;
     m_afc_actions_isSet = false;
+    ambe_actions = nullptr;
+    m_ambe_actions_isSet = false;
     gs232_controller_actions = nullptr;
     m_gs232_controller_actions_isSet = false;
+    lime_rfe_actions = nullptr;
+    m_lime_rfe_actions_isSet = false;
     map_actions = nullptr;
     m_map_actions_isSet = false;
     per_tester_actions = nullptr;
@@ -68,8 +72,12 @@ SWGFeatureActions::init() {
     m_originator_feature_index_isSet = false;
     afc_actions = new SWGAFCActions();
     m_afc_actions_isSet = false;
+    ambe_actions = new SWGAMBEActions();
+    m_ambe_actions_isSet = false;
     gs232_controller_actions = new SWGGS232ControllerActions();
     m_gs232_controller_actions_isSet = false;
+    lime_rfe_actions = new SWGLimeRFEActions();
+    m_lime_rfe_actions_isSet = false;
     map_actions = new SWGMapActions();
     m_map_actions_isSet = false;
     per_tester_actions = new SWGPERTesterActions();
@@ -96,8 +104,14 @@ SWGFeatureActions::cleanup() {
     if(afc_actions != nullptr) { 
         delete afc_actions;
     }
+    if(ambe_actions != nullptr) { 
+        delete ambe_actions;
+    }
     if(gs232_controller_actions != nullptr) { 
         delete gs232_controller_actions;
+    }
+    if(lime_rfe_actions != nullptr) { 
+        delete lime_rfe_actions;
     }
     if(map_actions != nullptr) { 
         delete map_actions;
@@ -141,7 +155,11 @@ SWGFeatureActions::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&afc_actions, pJson["AFCActions"], "SWGAFCActions", "SWGAFCActions");
     
+    ::SWGSDRangel::setValue(&ambe_actions, pJson["AMBEActions"], "SWGAMBEActions", "SWGAMBEActions");
+    
     ::SWGSDRangel::setValue(&gs232_controller_actions, pJson["GS232ControllerActions"], "SWGGS232ControllerActions", "SWGGS232ControllerActions");
+    
+    ::SWGSDRangel::setValue(&lime_rfe_actions, pJson["LimeRFEActions"], "SWGLimeRFEActions", "SWGLimeRFEActions");
     
     ::SWGSDRangel::setValue(&map_actions, pJson["MapActions"], "SWGMapActions", "SWGMapActions");
     
@@ -185,8 +203,14 @@ SWGFeatureActions::asJsonObject() {
     if((afc_actions != nullptr) && (afc_actions->isSet())){
         toJsonValue(QString("AFCActions"), afc_actions, obj, QString("SWGAFCActions"));
     }
+    if((ambe_actions != nullptr) && (ambe_actions->isSet())){
+        toJsonValue(QString("AMBEActions"), ambe_actions, obj, QString("SWGAMBEActions"));
+    }
     if((gs232_controller_actions != nullptr) && (gs232_controller_actions->isSet())){
         toJsonValue(QString("GS232ControllerActions"), gs232_controller_actions, obj, QString("SWGGS232ControllerActions"));
+    }
+    if((lime_rfe_actions != nullptr) && (lime_rfe_actions->isSet())){
+        toJsonValue(QString("LimeRFEActions"), lime_rfe_actions, obj, QString("SWGLimeRFEActions"));
     }
     if((map_actions != nullptr) && (map_actions->isSet())){
         toJsonValue(QString("MapActions"), map_actions, obj, QString("SWGMapActions"));
@@ -253,6 +277,16 @@ SWGFeatureActions::setAfcActions(SWGAFCActions* afc_actions) {
     this->m_afc_actions_isSet = true;
 }
 
+SWGAMBEActions*
+SWGFeatureActions::getAmbeActions() {
+    return ambe_actions;
+}
+void
+SWGFeatureActions::setAmbeActions(SWGAMBEActions* ambe_actions) {
+    this->ambe_actions = ambe_actions;
+    this->m_ambe_actions_isSet = true;
+}
+
 SWGGS232ControllerActions*
 SWGFeatureActions::getGs232ControllerActions() {
     return gs232_controller_actions;
@@ -261,6 +295,16 @@ void
 SWGFeatureActions::setGs232ControllerActions(SWGGS232ControllerActions* gs232_controller_actions) {
     this->gs232_controller_actions = gs232_controller_actions;
     this->m_gs232_controller_actions_isSet = true;
+}
+
+SWGLimeRFEActions*
+SWGFeatureActions::getLimeRfeActions() {
+    return lime_rfe_actions;
+}
+void
+SWGFeatureActions::setLimeRfeActions(SWGLimeRFEActions* lime_rfe_actions) {
+    this->lime_rfe_actions = lime_rfe_actions;
+    this->m_lime_rfe_actions_isSet = true;
 }
 
 SWGMapActions*
@@ -350,7 +394,13 @@ SWGFeatureActions::isSet(){
         if(afc_actions && afc_actions->isSet()){
             isObjectUpdated = true; break;
         }
+        if(ambe_actions && ambe_actions->isSet()){
+            isObjectUpdated = true; break;
+        }
         if(gs232_controller_actions && gs232_controller_actions->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(lime_rfe_actions && lime_rfe_actions->isSet()){
             isObjectUpdated = true; break;
         }
         if(map_actions && map_actions->isSet()){

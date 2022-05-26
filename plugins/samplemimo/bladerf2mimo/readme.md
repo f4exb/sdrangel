@@ -104,7 +104,7 @@ With SR as the sample rate before decimation Fc is calculated as:
 
 For Rx streams the I/Q stream from the BladeRF ADC is downsampled by a power of two before being sent to the passband.
 
-For Tx strams the baseband stream is interpolated by this value before being sent to the BladeRF device.
+For Tx streams the baseband stream is interpolated by this value before being sent to the BladeRF device.
 
 Possible values are increasing powers of two: 1 (no decimation or interpolation), 2, 4, 8, 16, 32, 64.
 

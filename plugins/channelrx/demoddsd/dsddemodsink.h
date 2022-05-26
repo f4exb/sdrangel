@@ -36,6 +36,7 @@
 
 class BasebandSampleSink;
 class ChannelAPI;
+class Feature;
 
 class DSDDemodSink : public ChannelSampleSink {
 public:
@@ -83,6 +84,7 @@ public:
     }
 
     const char *updateAndGetStatusText();
+    void setAmbeFeature(Feature *feature) { m_ambeFeature = feature; }
 
 private:
     struct MagSqLevelsStore
@@ -114,6 +116,7 @@ private:
 	int m_channelFrequencyOffset;
 	DSDDemodSettings m_settings;
     ChannelAPI *m_channel;
+    Feature *m_ambeFeature;
     int m_audioSampleRate;
     QVector<qint16> m_demodBuffer;
     int m_demodBufferFill;

@@ -41,8 +41,6 @@ namespace SWGSDRangel
     class SWGAudioInputDevice;
     class SWGAudioOutputDevice;
     class SWGLocationInformation;
-    class SWGDVSerialDevices;
-    class SWGAMBEDevices;
     class SWGLimeRFEDevices;
     class SWGLimeRFESettings;
     class SWGLimeRFEPower;
@@ -402,80 +400,6 @@ public:
     }
 
     /**
-     * Handler of /sdrangel/ambe/serial (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
-     * returns the Http status code (default 501: not implemented)
-     */
-    virtual int instanceAMBESerialGet(
-            SWGSDRangel::SWGDVSerialDevices& response,
-            SWGSDRangel::SWGErrorResponse& error)
-    {
-        (void) response;
-        error.init();
-    	*error.getMessage() = QString("Function not implemented");
-    	return 501;
-    }
-
-    /**
-     * Handler of /sdrangel/ambe/devices (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
-     * returns the Http status code (default 501: not implemented)
-     */
-    virtual int instanceAMBEDevicesGet(
-            SWGSDRangel::SWGAMBEDevices& response,
-            SWGSDRangel::SWGErrorResponse& error)
-    {
-        (void) response;
-        error.init();
-    	*error.getMessage() = QString("Function not implemented");
-    	return 501;
-    }
-
-    /**
-     * Handler of /sdrangel/ambe/devices (PUT) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
-     * returns the Http status code (default 501: not implemented)
-     */
-    virtual int instanceAMBEDevicesPut(
-            SWGSDRangel::SWGAMBEDevices& query,
-            SWGSDRangel::SWGAMBEDevices& response,
-            SWGSDRangel::SWGErrorResponse& error)
-    {
-        (void) query;
-        (void) response;
-        error.init();
-    	*error.getMessage() = QString("Function not implemented");
-    	return 501;
-    }
-
-    /**
-     * Handler of /sdrangel/ambe/devices (PATCH) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
-     * returns the Http status code (default 501: not implemented)
-     */
-    virtual int instanceAMBEDevicesPatch(
-            SWGSDRangel::SWGAMBEDevices& query,
-            SWGSDRangel::SWGAMBEDevices& response,
-            SWGSDRangel::SWGErrorResponse& error)
-    {
-        (void) query;
-        (void) response;
-        error.init();
-    	*error.getMessage() = QString("Function not implemented");
-    	return 501;
-    }
-
-    /**
-     * Handler of /sdrangel/ambe/devices (DELETE) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
-     * returns the Http status code (default 501: not implemented)
-     */
-    virtual int instanceAMBEDevicesDelete(
-            SWGSDRangel::SWGSuccessResponse& response,
-            SWGSDRangel::SWGErrorResponse& error)
-    {
-        (void) response;
-    	error.init();
-    	*error.getMessage() = QString("Function not implemented");
-    	return 501;
-    }
-
-    /**
      * Handler of /sdrangel/limerfe/serial (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
      * returns the Http status code (default 501: not implemented)
      */
@@ -531,22 +455,6 @@ public:
             SWGSDRangel::SWGErrorResponse& error)
     {
         (void) query;
-        (void) response;
-    	error.init();
-    	*error.getMessage() = QString("Function not implemented");
-    	return 501;
-    }
-
-    /**
-     * Handler of /sdrangel/limerfe/power (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
-     * returns the Http status code (default 501: not implemented)
-     */
-    virtual int instanceLimeRFEPowerGet(
-            const QString& serial,
-            SWGSDRangel::SWGLimeRFEPower& response,
-            SWGSDRangel::SWGErrorResponse& error)
-    {
-        (void) serial;
         (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
@@ -1786,12 +1694,6 @@ public:
     static QString instanceAudioInputCleanupURL;
     static QString instanceAudioOutputCleanupURL;
     static QString instanceLocationURL;
-    static QString instanceAMBESerialURL;
-    static QString instanceAMBEDevicesURL;
-    static QString instanceLimeRFESerialURL;
-    static QString instanceLimeRFEConfigURL;
-    static QString instanceLimeRFERunURL;
-    static QString instanceLimeRFEPowerURL;
     static QString instancePresetsURL;
     static QString instancePresetURL;
     static QString instancePresetFileURL;

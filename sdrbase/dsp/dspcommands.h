@@ -345,4 +345,45 @@ private:
     AudioType m_autioType;
 };
 
+class SDRBASE_API DSPPushMbeFrame : public Message {
+	MESSAGE_CLASS_DECLARATION
+
+public:
+	DSPPushMbeFrame(
+        const unsigned char *mbeFrame,
+        int mbeRateIndex,
+        int mbeVolumeIndex,
+        unsigned char channels,
+        bool useHP,
+        int upsampling,
+        AudioFifo *audioFifo
+    ) :
+		Message(),
+		m_mbeFrame(mbeFrame),
+		m_mbeRateIndex(mbeRateIndex),
+        m_mbeVolumeIndex(mbeVolumeIndex),
+        m_channels(channels),
+        m_useHP(useHP),
+        m_upsampling(upsampling),
+        m_audioFifo(audioFifo)
+	{ }
+
+	const unsigned char * getMbeFrame() const { return m_mbeFrame; }
+	int getMbeRateIndex() const { return m_mbeRateIndex; }
+    int getMbeVolumeIndex() const { return m_mbeVolumeIndex; }
+    unsigned char getChannels() const { return m_channels; }
+    bool getUseHP() const { return m_useHP; }
+    int getUpsampling() const { return m_upsampling; }
+    AudioFifo *getAudioFifo() const { return m_audioFifo; }
+
+private:
+    const unsigned char *m_mbeFrame;
+    int m_mbeRateIndex;
+    int m_mbeVolumeIndex;
+    unsigned char m_channels;
+    bool m_useHP;
+    int m_upsampling;
+    AudioFifo *m_audioFifo;
+};
+
 #endif // INCLUDE_DSPCOMMANDS_H

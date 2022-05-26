@@ -61,7 +61,6 @@
 #include "gui/sdrangelsplash.h"
 #include "gui/mypositiondialog.h"
 #include "gui/fftwisdomdialog.h"
-#include "gui/ambedevicesdialog.h"
 #include "gui/workspace.h"
 #include "gui/featurepresetsdialog.h"
 #include "gui/devicesetpresetsdialog.h"
@@ -97,10 +96,6 @@
 #include <QSplashScreen>
 #include <QProgressDialog>
 
-#if defined(HAS_LIMERFEUSB)
-#include "limerfegui/limerfeusbdialog.h"
-#endif
-
 MainWindow *MainWindow::m_instance = 0;
 
 MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parser, QWidget* parent) :
@@ -120,7 +115,6 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     m_mainCore->m_masterTabIndex = 0;
     m_mainCore->m_mainMessageQueue = &m_inputMessageQueue;
 	m_mainCore->m_settings.setAudioDeviceManager(m_dspEngine->getAudioDeviceManager());
-    m_mainCore->m_settings.setAMBEEngine(m_dspEngine->getAMBEEngine());
 
     QFontDatabase::addApplicationFont(":/LiberationSans-Regular.ttf");
     QFontDatabase::addApplicationFont(":/LiberationMono-Regular.ttf");
@@ -1470,16 +1464,6 @@ void MainWindow::createMenuBar()
     QAction *fftAction = preferencesMenu->addAction("&FFT...");
     fftAction->setToolTip("Set FFT cache");
     QObject::connect(fftAction, &QAction::triggered, this, &MainWindow::on_action_FFT_triggered);
-#ifndef __APPLE__
-    QAction *ambeAction = preferencesMenu->addAction("A&MBE...");
-    ambeAction->setToolTip("AMBE options");
-    QObject::connect(ambeAction, &QAction::triggered, this, &MainWindow::on_action_AMBE_triggered);
-#endif
-#if defined(HAS_LIMERFEUSB)
-    QAction *limeRFEAction = preferencesMenu->addAction("Lime &RFE...");
-    limeRFEAction->setToolTip("Lime RFE options");
-    QObject::connect(limeRFEAction, &QAction::triggered, this, &MainWindow::on_action_LimeRFE_triggered);
-#endif
     QMenu *devicesMenu = preferencesMenu->addMenu("&Devices");
     QAction *userArgumentsAction = devicesMenu->addAction("&User arguments...");
     userArgumentsAction->setToolTip("Device custom user arguments");
@@ -2125,26 +2109,6 @@ void MainWindow::fftWisdomProcessFinished(int exitCode, QProcess::ExitStatus exi
 
     delete m_fftWisdomProcess;
     m_fftWisdomProcess = nullptr;
-}
-
-void MainWindow::on_action_AMBE_triggered()
-{
-    qDebug("MainWindow::on_action_AMBE_triggered");
-#ifndef __APPLE__
-    AMBEDevicesDialog ambeDevicesDialog(m_dspEngine->getAMBEEngine(), this);
-    ambeDevicesDialog.exec();
-#endif
-}
-
-void MainWindow::on_action_LimeRFE_triggered()
-{
-    qDebug("MainWindow::on_action_LimeRFE_triggered");
-#if defined(HAS_LIMERFEUSB)
-    qDebug("MainWindow::on_action_LimeRFE_triggered: activated");
-    LimeRFEUSBDialog *limeRFEUSBDialog = new LimeRFEUSBDialog(m_mainCore->m_settings.getLimeRFEUSBCalib(), this);
-    limeRFEUSBDialog->setModal(false);
-    limeRFEUSBDialog->show();
-#endif
 }
 
 void MainWindow::samplingDeviceChangeHandler(DeviceGUI *deviceGUI, int newDeviceIndex)

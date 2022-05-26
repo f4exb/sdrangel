@@ -4,7 +4,6 @@
 #include <QObject>
 #include <QString>
 #include "device/deviceuserargs.h"
-#include "limerfe/limerfeusbcalib.h"
 #include "preferences.h"
 #include "preset.h"
 #include "featuresetpreset.h"
@@ -14,7 +13,6 @@
 
 class Command;
 class AudioDeviceManager;
-class AMBEEngine;
 
 
 class SDRBASE_API MainSettings : public QObject {
@@ -182,10 +180,8 @@ public:
 	}
 
 	DeviceUserArgs& getDeviceUserArgs() { return m_hardwareDeviceUserArgs; }
-	LimeRFEUSBCalib& getLimeRFEUSBCalib() { return m_limeRFEUSBCalib; }
 	const AudioDeviceManager *getAudioDeviceManager() const { return m_audioDeviceManager; }
 	void setAudioDeviceManager(AudioDeviceManager *audioDeviceManager) { m_audioDeviceManager = audioDeviceManager; }
-    void setAMBEEngine(AMBEEngine *ambeEngine) { m_ambeEngine = ambeEngine; }
 
 signals:
 	void preferenceChanged(int);
@@ -205,8 +201,6 @@ protected:
     typedef QList<Configuration*> Configurations;
     Configurations m_configurations;
 	DeviceUserArgs m_hardwareDeviceUserArgs;
-	LimeRFEUSBCalib m_limeRFEUSBCalib;
-    AMBEEngine *m_ambeEngine;
 };
 
 #endif // INCLUDE_SETTINGS_H

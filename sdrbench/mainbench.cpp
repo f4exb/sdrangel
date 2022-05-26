@@ -20,8 +20,6 @@
 #include <QDebug>
 #include <QElapsedTimer>
 
-#include "ambe/ambeengine.h"
-
 #include "mainbench.h"
 
 MainBench *MainBench::m_instance = 0;
@@ -62,8 +60,6 @@ void MainBench::run()
         testDecimateFI();
     } else if (m_parser.getTestType() == ParserBench::TestDecimatorsFF) {
         testDecimateFF();
-    } else if (m_parser.getTestType() == ParserBench::TestAMBE) {
-        testAMBE();
     } else if (m_parser.getTestType() == ParserBench::TestGolay2312) {
         testGolay2312();
     } else {
@@ -196,19 +192,6 @@ void MainBench::testDecimateFF()
     qDebug() << "MainBench::testDecimateFF: cleanup test data";
     delete[] buf;
 }
-
-void MainBench::testAMBE()
-{
-    qDebug() << "MainBench::testAMBE";
-    AMBEEngine ambeEngine;
-    std::vector<QString> ambeDevices;
-    ambeEngine.scan(ambeDevices);
-
-    for (std::vector<QString>::const_iterator it = ambeDevices.begin(); it != ambeDevices.end(); ++it) {
-        qDebug("MainBench::testAMBE: detected AMBE device %s", qPrintable(*it));
-    }
-}
-
 
 void MainBench::decimateII(const qint16* buf, int len)
 {

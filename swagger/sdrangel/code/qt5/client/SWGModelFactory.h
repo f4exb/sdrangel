@@ -25,8 +25,12 @@
 #include "SWGAISModReport.h"
 #include "SWGAISModSettings.h"
 #include "SWGAISSettings.h"
+#include "SWGAMBEActions.h"
 #include "SWGAMBEDevice.h"
+#include "SWGAMBEDeviceReport.h"
 #include "SWGAMBEDevices.h"
+#include "SWGAMBEReport.h"
+#include "SWGAMBESettings.h"
 #include "SWGAMDemodReport.h"
 #include "SWGAMDemodSettings.h"
 #include "SWGAMModReport.h"
@@ -158,9 +162,10 @@
 #include "SWGJogdialControllerSettings.h"
 #include "SWGKiwiSDRReport.h"
 #include "SWGKiwiSDRSettings.h"
+#include "SWGLimeRFEActions.h"
 #include "SWGLimeRFEDevice.h"
 #include "SWGLimeRFEDevices.h"
-#include "SWGLimeRFEPower.h"
+#include "SWGLimeRFEReport.h"
 #include "SWGLimeRFESettings.h"
 #include "SWGLimeSdrInputReport.h"
 #include "SWGLimeSdrInputSettings.h"
@@ -383,13 +388,33 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGAMBEActions").compare(type) == 0) {
+      SWGAMBEActions *obj = new SWGAMBEActions();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGAMBEDevice").compare(type) == 0) {
       SWGAMBEDevice *obj = new SWGAMBEDevice();
       obj->init();
       return obj;
     }
+    if(QString("SWGAMBEDeviceReport").compare(type) == 0) {
+      SWGAMBEDeviceReport *obj = new SWGAMBEDeviceReport();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGAMBEDevices").compare(type) == 0) {
       SWGAMBEDevices *obj = new SWGAMBEDevices();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGAMBEReport").compare(type) == 0) {
+      SWGAMBEReport *obj = new SWGAMBEReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGAMBESettings").compare(type) == 0) {
+      SWGAMBESettings *obj = new SWGAMBESettings();
       obj->init();
       return obj;
     }
@@ -1048,6 +1073,11 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGLimeRFEActions").compare(type) == 0) {
+      SWGLimeRFEActions *obj = new SWGLimeRFEActions();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGLimeRFEDevice").compare(type) == 0) {
       SWGLimeRFEDevice *obj = new SWGLimeRFEDevice();
       obj->init();
@@ -1058,8 +1088,8 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
-    if(QString("SWGLimeRFEPower").compare(type) == 0) {
-      SWGLimeRFEPower *obj = new SWGLimeRFEPower();
+    if(QString("SWGLimeRFEReport").compare(type) == 0) {
+      SWGLimeRFEReport *obj = new SWGLimeRFEReport();
       obj->init();
       return obj;
     }

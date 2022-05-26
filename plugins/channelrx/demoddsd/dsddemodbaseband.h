@@ -29,6 +29,7 @@
 
 class DownChannelizer;
 class ChannelAPI;
+class Feature;
 
 class DSDDemodBaseband : public QObject
 {
@@ -75,6 +76,7 @@ public:
     void setChannel(ChannelAPI *channel);
     void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
     void setAudioFifoLabel(const QString& label) { m_sink.setAudioFifoLabel(label); }
+    void setAMBEFeature(Feature *ambeFeature) { m_sink.setAmbeFeature(ambeFeature); }
 
 private:
     SampleSinkFifo m_sampleFifo;

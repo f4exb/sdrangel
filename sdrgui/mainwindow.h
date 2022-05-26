@@ -181,8 +181,6 @@ private slots:
 	void on_action_Audio_triggered();
     void on_action_Logging_triggered();
 	void on_action_FFT_triggered();
-    void on_action_AMBE_triggered();
-    void on_action_LimeRFE_triggered();
 	void on_action_My_Position_triggered();
     void on_action_DeviceUserArguments_triggered();
     void on_action_commands_triggered();

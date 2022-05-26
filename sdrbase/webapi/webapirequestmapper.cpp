@@ -33,11 +33,9 @@
 #include "SWGInstanceFeaturesResponse.h"
 #include "SWGAudioDevices.h"
 #include "SWGLocationInformation.h"
-#include "SWGDVSerialDevices.h"
 #include "SWGAMBEDevices.h"
 #include "SWGLimeRFEDevices.h"
 #include "SWGLimeRFESettings.h"
-#include "SWGLimeRFEPower.h"
 #include "SWGPresets.h"
 #include "SWGPresetTransfer.h"
 #include "SWGPresetIdentifier.h"
@@ -139,18 +137,6 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
             instanceAudioOutputCleanupService(request, response);
         } else if (path == WebAPIAdapterInterface::instanceLocationURL) {
             instanceLocationService(request, response);
-        } else if (path == WebAPIAdapterInterface::instanceAMBESerialURL) {
-            instanceAMBESerialService(request, response);
-        } else if (path == WebAPIAdapterInterface::instanceAMBEDevicesURL) {
-            instanceAMBEDevicesService(request, response);
-        } else if (path == WebAPIAdapterInterface::instanceLimeRFESerialURL) {
-            instanceLimeRFESerialService(request, response);
-        } else if (path == WebAPIAdapterInterface::instanceLimeRFEConfigURL) {
-            instanceLimeRFEConfigService(request, response);
-        } else if (path == WebAPIAdapterInterface::instanceLimeRFERunURL) {
-            instanceLimeRFERunService(request, response);
-        } else if (path == WebAPIAdapterInterface::instanceLimeRFEPowerURL) {
-            instanceLimeRFEPowerService(request, response);
         } else if (path == WebAPIAdapterInterface::instancePresetsURL) {
             instancePresetsService(request, response);
         } else if (path == WebAPIAdapterInterface::instancePresetURL) {
@@ -796,315 +782,6 @@ void WebAPIRequestMapper::instanceLocationService(qtwebapp::HttpRequest& request
             response.setStatus(400,"Invalid JSON format");
             errorResponse.init();
             *errorResponse.getMessage() = "Invalid JSON format";
-            response.write(errorResponse.asJson().toUtf8());
-        }
-    }
-    else
-    {
-        response.setStatus(405,"Invalid HTTP method");
-        errorResponse.init();
-        *errorResponse.getMessage() = "Invalid HTTP method";
-        response.write(errorResponse.asJson().toUtf8());
-    }
-}
-
-void WebAPIRequestMapper::instanceAMBESerialService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
-{
-    SWGSDRangel::SWGErrorResponse errorResponse;
-    response.setHeader("Content-Type", "application/json");
-    response.setHeader("Access-Control-Allow-Origin", "*");
-
-    if (request.getMethod() == "GET")
-    {
-        SWGSDRangel::SWGDVSerialDevices normalResponse;
-
-        int status = m_adapter->instanceAMBESerialGet(normalResponse, errorResponse);
-        response.setStatus(status);
-
-        if (status/100 == 2) {
-            response.write(normalResponse.asJson().toUtf8());
-        } else {
-            response.write(errorResponse.asJson().toUtf8());
-        }
-    }
-    else
-    {
-        response.setStatus(405,"Invalid HTTP method");
-        errorResponse.init();
-        *errorResponse.getMessage() = "Invalid HTTP method";
-        response.write(errorResponse.asJson().toUtf8());
-    }
-}
-
-void WebAPIRequestMapper::instanceAMBEDevicesService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
-{
-    SWGSDRangel::SWGErrorResponse errorResponse;
-    response.setHeader("Content-Type", "application/json");
-    response.setHeader("Access-Control-Allow-Origin", "*");
-
-    if (request.getMethod() == "GET")
-    {
-        SWGSDRangel::SWGAMBEDevices normalResponse;
-
-        int status = m_adapter->instanceAMBEDevicesGet(normalResponse, errorResponse);
-        response.setStatus(status);
-
-        if (status/100 == 2) {
-            response.write(normalResponse.asJson().toUtf8());
-        } else {
-            response.write(errorResponse.asJson().toUtf8());
-        }
-    }
-    else if ((request.getMethod() == "PATCH") || (request.getMethod() == "PUT"))
-    {
-        SWGSDRangel::SWGAMBEDevices query;
-        SWGSDRangel::SWGAMBEDevices normalResponse;
-        QString jsonStr = request.getBody();
-        QJsonObject jsonObject;
-
-        if (parseJsonBody(jsonStr, jsonObject, response))
-        {
-            if (validateAMBEDevices(query, jsonObject))
-            {
-                int status;
-
-                if (request.getMethod() == "PATCH") {
-                    status = m_adapter->instanceAMBEDevicesPatch(query, normalResponse, errorResponse);
-                } else {
-                    status = m_adapter->instanceAMBEDevicesPut(query, normalResponse, errorResponse);
-                }
-
-                response.setStatus(status);
-
-                if (status/100 == 2) {
-                    response.write(normalResponse.asJson().toUtf8());
-                } else {
-                    response.write(errorResponse.asJson().toUtf8());
-                }
-            }
-            else
-            {
-                response.setStatus(400,"Invalid JSON request");
-                errorResponse.init();
-                *errorResponse.getMessage() = "Invalid JSON request";
-                response.write(errorResponse.asJson().toUtf8());
-            }
-        }
-        else
-        {
-            response.setStatus(400,"Invalid JSON format");
-            errorResponse.init();
-            *errorResponse.getMessage() = "Invalid JSON format";
-            response.write(errorResponse.asJson().toUtf8());
-        }
-    }
-    else if (request.getMethod() == "DELETE")
-    {
-        SWGSDRangel::SWGSuccessResponse normalResponse;
-
-        int status = m_adapter->instanceAMBEDevicesDelete(normalResponse, errorResponse);
-        response.setStatus(status);
-
-        if (status/100 == 2) {
-            response.write(normalResponse.asJson().toUtf8());
-        } else {
-            response.write(errorResponse.asJson().toUtf8());
-        }
-    }
-    else
-    {
-        response.setStatus(405,"Invalid HTTP method");
-        errorResponse.init();
-        *errorResponse.getMessage() = "Invalid HTTP method";
-        response.write(errorResponse.asJson().toUtf8());
-    }
-}
-
-void WebAPIRequestMapper::instanceLimeRFESerialService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
-{
-    SWGSDRangel::SWGErrorResponse errorResponse;
-    response.setHeader("Content-Type", "application/json");
-    response.setHeader("Access-Control-Allow-Origin", "*");
-
-    if (request.getMethod() == "GET")
-    {
-        SWGSDRangel::SWGLimeRFEDevices normalResponse;
-
-        int status = m_adapter->instanceLimeRFESerialGet(normalResponse, errorResponse);
-        response.setStatus(status);
-
-        if (status/100 == 2) {
-            response.write(normalResponse.asJson().toUtf8());
-        } else {
-            response.write(errorResponse.asJson().toUtf8());
-        }
-    }
-    else
-    {
-        response.setStatus(405,"Invalid HTTP method");
-        errorResponse.init();
-        *errorResponse.getMessage() = "Invalid HTTP method";
-        response.write(errorResponse.asJson().toUtf8());
-    }
-}
-
-void WebAPIRequestMapper::instanceLimeRFEConfigService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
-{
-    SWGSDRangel::SWGErrorResponse errorResponse;
-    response.setHeader("Content-Type", "application/json");
-    response.setHeader("Access-Control-Allow-Origin", "*");
-
-    if (request.getMethod() == "GET")
-    {
-        QByteArray serialStr = request.getParameter("serial");
-        SWGSDRangel::SWGLimeRFESettings normalResponse;
-
-        int status = m_adapter->instanceLimeRFEConfigGet(serialStr, normalResponse, errorResponse);
-        response.setStatus(status);
-
-        if (status/100 == 2) {
-            response.write(normalResponse.asJson().toUtf8());
-        } else {
-            response.write(errorResponse.asJson().toUtf8());
-        }
-    }
-    else if (request.getMethod() == "PUT")
-    {
-        SWGSDRangel::SWGLimeRFESettings query;
-        SWGSDRangel::SWGSuccessResponse normalResponse;
-        QString jsonStr = request.getBody();
-        QJsonObject jsonObject;
-
-        if (parseJsonBody(jsonStr, jsonObject, response))
-        {
-            QStringList limeRFESettingsKeys;
-
-            if (validateLimeRFEConfig(query, jsonObject, limeRFESettingsKeys))
-            {
-                if (limeRFESettingsKeys.contains("devicePath"))
-                {
-                    int status = m_adapter->instanceLimeRFEConfigPut(query, normalResponse, errorResponse);
-                    response.setStatus(status);
-
-                    if (status/100 == 2) {
-                        response.write(normalResponse.asJson().toUtf8());
-                    } else {
-                        response.write(errorResponse.asJson().toUtf8());
-                    }
-                }
-                else
-                {
-                    response.setStatus(400,"LimeRFE device path expected in JSON body");
-                    errorResponse.init();
-                    *errorResponse.getMessage() = "Invalid request";
-                    response.write(errorResponse.asJson().toUtf8());
-                }
-            }
-            else
-            {
-                response.setStatus(400,"Invalid JSON format");
-                errorResponse.init();
-                *errorResponse.getMessage() = "Invalid JSON format";
-                response.write(errorResponse.asJson().toUtf8());
-            }
-        }
-        else
-        {
-            response.setStatus(400,"Invalid JSON format");
-            errorResponse.init();
-            *errorResponse.getMessage() = "Invalid JSON format";
-            response.write(errorResponse.asJson().toUtf8());
-        }
-    }
-    else
-    {
-        response.setStatus(405,"Invalid HTTP method");
-        errorResponse.init();
-        *errorResponse.getMessage() = "Invalid HTTP method";
-        response.write(errorResponse.asJson().toUtf8());
-    }
-}
-
-void WebAPIRequestMapper::instanceLimeRFERunService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
-{
-    SWGSDRangel::SWGErrorResponse errorResponse;
-    response.setHeader("Content-Type", "application/json");
-    response.setHeader("Access-Control-Allow-Origin", "*");
-
-    if (request.getMethod() == "PUT")
-    {
-        SWGSDRangel::SWGLimeRFESettings query;
-        QString jsonStr = request.getBody();
-        QJsonObject jsonObject;
-
-        if (parseJsonBody(jsonStr, jsonObject, response))
-        {
-            QStringList limeRFESettingsKeys;
-
-            if (validateLimeRFEConfig(query, jsonObject, limeRFESettingsKeys))
-            {
-                if (limeRFESettingsKeys.contains("devicePath"))
-                {
-                    SWGSDRangel::SWGSuccessResponse normalResponse;
-                    int status = m_adapter->instanceLimeRFERunPut(query, normalResponse, errorResponse);
-                    response.setStatus(status);
-
-                    if (status/100 == 2) {
-                        response.write(normalResponse.asJson().toUtf8());
-                    } else {
-                        response.write(errorResponse.asJson().toUtf8());
-                    }
-                }
-                else
-                {
-                    response.setStatus(400,"LimeRFE device path expected in JSON body");
-                    errorResponse.init();
-                    *errorResponse.getMessage() = "Invalid JSON format";
-                    response.write(errorResponse.asJson().toUtf8());
-                }
-            }
-            else
-            {
-                response.setStatus(400,"Invalid JSON format");
-                errorResponse.init();
-                *errorResponse.getMessage() = "Invalid JSON format";
-                response.write(errorResponse.asJson().toUtf8());
-            }
-        }
-        else
-        {
-            response.setStatus(400,"Invalid JSON format");
-            errorResponse.init();
-            *errorResponse.getMessage() = "Invalid JSON format";
-            response.write(errorResponse.asJson().toUtf8());
-        }
-    }
-    else
-    {
-        response.setStatus(405,"Invalid HTTP method");
-        errorResponse.init();
-        *errorResponse.getMessage() = "Invalid HTTP method";
-        response.write(errorResponse.asJson().toUtf8());
-    }
-}
-
-void WebAPIRequestMapper::instanceLimeRFEPowerService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
-{
-    SWGSDRangel::SWGErrorResponse errorResponse;
-    response.setHeader("Content-Type", "application/json");
-    response.setHeader("Access-Control-Allow-Origin", "*");
-
-    if (request.getMethod() == "GET")
-    {
-        QByteArray serialStr = request.getParameter("serial");
-        SWGSDRangel::SWGLimeRFEPower normalResponse;
-
-        int status = m_adapter->instanceLimeRFEPowerGet(serialStr, normalResponse, errorResponse);
-        response.setStatus(status);
-
-        if (status/100 == 2) {
-            response.write(normalResponse.asJson().toUtf8());
-        } else {
             response.write(errorResponse.asJson().toUtf8());
         }
     }
@@ -4263,138 +3940,6 @@ bool WebAPIRequestMapper::validateAudioOutputDevice(
     return true;
 }
 
-bool WebAPIRequestMapper::validateAMBEDevices(SWGSDRangel::SWGAMBEDevices& ambeDevices, QJsonObject& jsonObject)
-{
-    if (jsonObject.contains("nbDevices"))
-    {
-        int nbDevices = jsonObject["nbDevices"].toInt();
-
-        if (jsonObject.contains("ambeDevices"))
-        {
-            QJsonArray ambeDevicesJson = jsonObject["ambeDevices"].toArray();
-
-            if (nbDevices != ambeDevicesJson.size()) {
-                return false;
-            }
-
-            ambeDevices.init();
-            ambeDevices.setNbDevices(nbDevices);
-            QList<SWGSDRangel::SWGAMBEDevice *> *ambeList = ambeDevices.getAmbeDevices();
-
-            for (int i = 0; i < nbDevices; i++)
-            {
-                QJsonObject ambeDeviceJson = ambeDevicesJson.at(i).toObject();
-                if (ambeDeviceJson.contains("deviceRef") && ambeDeviceJson.contains("delete"))
-                {
-                    ambeList->push_back(new SWGSDRangel::SWGAMBEDevice());
-                    ambeList->back()->init();
-                    ambeList->back()->setDeviceRef(new QString(ambeDeviceJson["deviceRef"].toString()));
-                    ambeList->back()->setDelete(ambeDeviceJson["delete"].toInt());
-                }
-                else
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-    }
-
-    return false;
-}
-
-bool WebAPIRequestMapper::validateLimeRFEConfig(SWGSDRangel::SWGLimeRFESettings& limeRFESettings, QJsonObject& jsonObject, QStringList& limeRFESettingsKeys)
-{
-    if (jsonObject.contains("devicePath"))
-    {
-        limeRFESettings.setDevicePath(new QString(jsonObject["devicePath"].toString()));
-        limeRFESettingsKeys.append("devicePath");
-    }
-    if (jsonObject.contains("rxChannels"))
-    {
-        limeRFESettings.setRxChannels(jsonObject["rxChannels"].toInt());
-        limeRFESettingsKeys.append("rxChannels");
-    }
-    if (jsonObject.contains("rxWidebandChannel"))
-    {
-        limeRFESettings.setRxWidebandChannel(jsonObject["rxWidebandChannel"].toInt());
-        limeRFESettingsKeys.append("rxWidebandChannel");
-    }
-    if (jsonObject.contains("rxHAMChannel"))
-    {
-        limeRFESettings.setRxHamChannel(jsonObject["rxHAMChannel"].toInt());
-        limeRFESettingsKeys.append("rxHAMChannel");
-    }
-    if (jsonObject.contains("rxCellularChannel"))
-    {
-        limeRFESettings.setRxCellularChannel(jsonObject["rxCellularChannel"].toInt());
-        limeRFESettingsKeys.append("rxCellularChannel");
-    }
-    if (jsonObject.contains("rxPort"))
-    {
-        limeRFESettings.setRxPort(jsonObject["rxPort"].toInt());
-        limeRFESettingsKeys.append("rxPort");
-    }
-    if (jsonObject.contains("attenuationFactor"))
-    {
-        limeRFESettings.setAttenuationFactor(jsonObject["attenuationFactor"].toInt());
-        limeRFESettingsKeys.append("attenuationFactor");
-    }
-    if (jsonObject.contains("amfmNotch"))
-    {
-        limeRFESettings.setAmfmNotch(jsonObject["amfmNotch"].toInt());
-        limeRFESettingsKeys.append("amfmNotch");
-    }
-    if (jsonObject.contains("txChannels"))
-    {
-        limeRFESettings.setTxChannels(jsonObject["txChannels"].toInt());
-        limeRFESettingsKeys.append("txChannels");
-    }
-    if (jsonObject.contains("txWidebandChannel"))
-    {
-        limeRFESettings.setTxWidebandChannel(jsonObject["txWidebandChannel"].toInt());
-        limeRFESettingsKeys.append("txWidebandChannel");
-    }
-    if (jsonObject.contains("txHAMChannel"))
-    {
-        limeRFESettings.setTxHamChannel(jsonObject["txHAMChannel"].toInt());
-        limeRFESettingsKeys.append("txHAMChannel");
-    }
-    if (jsonObject.contains("txCellularChannel"))
-    {
-        limeRFESettings.setTxCellularChannel(jsonObject["txCellularChannel"].toInt());
-        limeRFESettingsKeys.append("txCellularChannel");
-    }
-    if (jsonObject.contains("txPort"))
-    {
-        limeRFESettings.setTxPort(jsonObject["txPort"].toInt());
-        limeRFESettingsKeys.append("txPort");
-    }
-    if (jsonObject.contains("rxOn"))
-    {
-        limeRFESettings.setRxOn(jsonObject["rxOn"].toInt());
-        limeRFESettingsKeys.append("rxOn");
-    }
-    if (jsonObject.contains("txOn"))
-    {
-        limeRFESettings.setTxOn(jsonObject["txOn"].toInt());
-        limeRFESettingsKeys.append("txOn");
-    }
-    if (jsonObject.contains("swrEnable"))
-    {
-        limeRFESettings.setSwrEnable(jsonObject["swrEnable"].toInt());
-        limeRFESettingsKeys.append("swrEnable");
-    }
-    if (jsonObject.contains("swrSource"))
-    {
-        limeRFESettings.setSwrSource(jsonObject["swrSource"].toInt());
-        limeRFESettingsKeys.append("swrSource");
-    }
-
-    return true;
-}
-
 bool WebAPIRequestMapper::validateSpectrumSettings(SWGSDRangel::SWGGLSpectrum& spectrumSettings, QJsonObject& jsonObject, QStringList& spectrumSettingsKeys)
 {
     extractKeys(jsonObject, spectrumSettingsKeys);
@@ -5597,10 +5142,20 @@ bool WebAPIRequestMapper::getFeatureActions(
             featureActions->setAfcActions(new SWGSDRangel::SWGAFCActions());
             featureActions->getAfcActions()->fromJsonObject(actionsJsonObject);
         }
+        else if (featureActionsKey == "AMBEActions")
+        {
+            featureActions->setAmbeActions(new SWGSDRangel::SWGAMBEActions());
+            featureActions->getAmbeActions()->fromJsonObject(actionsJsonObject);
+        }
         else if (featureActionsKey == "GS232ControllerActions")
         {
             featureActions->setGs232ControllerActions(new SWGSDRangel::SWGGS232ControllerActions());
             featureActions->getGs232ControllerActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (featureActionsKey == "LimeRFEActions")
+        {
+            featureActions->setLimeRfeActions(new SWGSDRangel::SWGLimeRFEActions());
+            featureActions->getLimeRfeActions()->fromJsonObject(actionsJsonObject);
         }
         else if (featureActionsKey == "MapActions")
         {

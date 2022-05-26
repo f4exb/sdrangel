@@ -18,26 +18,9 @@ To enable this plugin at compile time you will need to have DSDcc installed in y
 
 <h2>DV serial device support</h2>
 
-You can use a serial device connected to your system that implements and exposes the packet interface of the AMBE3000 chip. This can be for example a ThumbDV USB dongle. You may also connect to an AMBE server instance over the network.
+You can use a serial device connected to your system that implements and exposes the packet interface of the AMBE3000 chip. This can be for example a ThumbDV USB dongle. You may also connect to an AMBE server instance over the network. This is supported via the [AMBE feature](../../feature/ambe/readme.md).
 
-DV serial devices are supported using the [SerialDV](https://github.com/f4exb/serialDV) library that is a mandatory requirement. Therefore you have to compile and install it in your system. Please refer to this project Readme.md to compile and install SerialDV. f you install it in a custom location say `/opt/install/serialdv` you will need to add this define to the cmake command: `-DSERIALDV_DIR=/opt/install/serialdv`
-
-To effectively use serial DV devices for AMBE decoding you will have to add at least one device to the list of AMBE devices in use using the `AMBE devices control` dialog opened with the `AMBE` option in the `Preferences` menu. The list of devices is saved in the program preferences so that they are persistent across program stop/start. However if the device name or server address changes in between the corresponding reference will be lost.
-
-Although such serial devices work with a serial interface at 400 kb in practice maybe for other reasons they are capable of handling only one conversation at a time. The software will allocate the device dynamically to a conversation with an inactivity timeout of 1 second so that conversations do not get interrupted constantly making the audio output too choppy. In practice you will have to have as many devices connected to your system as the number of conversations you would like to be handled in parallel.
-
-Note also that hardware serial devices are not supported in Windows because of trouble with COM port support (contributors welcome!).
-
-If no AMBE devices or servers are activated with the `AMBE devices control` AMBE decoding will take place with Mbelib. Possible copyright issues apart (see next) the audio quality with the DVSI AMBE chip is much better.
-
----
-&#9888; With kernel 4.4.52 and maybe other 4.4 versions the default for FTDI devices (that is in the ftdi_sio kernel module) is not to set it as low latency. This results in the ThumbDV dongle not working anymore because its response is too slow to sustain the normal AMBE packets flow. The solution is to force low latency by changing the variable for your device (ex: /dev/ttyUSB0) as follows:
-
-`echo 1 | sudo tee /sys/bus/usb-serial/devices/ttyUSB0/latency_timer` or `sudo setserial /dev/ttyUSB0 low_latency`
-
-Newer kernels do not seem to have this issue.
-
----
+If no AMBE features are active or the AMBE support is not engaged (B.19) AMBE decoding will take place with Mbelib. Possible copyright issues apart (see next) the audio quality with the DVSI AMBE chip is much better.
 
 <h2>Mbelib support</h2>
 
@@ -590,3 +573,11 @@ This is the one side deviation in kHz (&#177;) leading to maximum (100%) deviati
 <h4>B.18: Gain after discriminator</h4>
 
 This is the gain applied to the output of the discriminator before the decoder. Normally this would be set at unit gain 1.0 while the FM deviation is adjusted. However this can be used to extend the range of FM adjustment.
+
+<h4>B.19: Activate AMBE hardware feature</h3>
+
+Connects to an [AMBE Feature](../../feature/ambe/readme.md) to process AMBE frames in hardware
+
+<h4>B.20: AMBE feature index for hardware decoding</h4>
+
+Select the AMBE feature index used to process AMBE frames in hardware. If no AMBE feature is present then the list is empty. The list is automatically updated when an AMBE feature is added or removed.

@@ -17,6 +17,8 @@ FeatureSettings:
       $ref: "http://swgserver:8081/api/swagger/include/AFC.yaml#/AFCSettings"
     AISSettings:
       $ref: "http://swgserver:8081/api/swagger/include/AIS.yaml#/AISSettings"
+    AMBESettings:
+      $ref: "http://swgserver:8081/api/swagger/include/AMBE.yaml#/AMBESettings"
     AntennaToolsSettings:
       $ref: "http://swgserver:8081/api/swagger/include/AntennaTools.yaml#/AntennaToolsSettings"
     APRSSettings:
@@ -27,6 +29,8 @@ FeatureSettings:
       $ref: "http://swgserver:8081/api/swagger/include/JogdialController.yaml#/JogdialControllerSettings"
     GS232ControllerSettings:
       $ref: "http://swgserver:8081/api/swagger/include/GS232Controller.yaml#/GS232ControllerSettings"
+    LimeRFESettings:
+      $ref: "http://swgserver:8081/api/swagger/include/LimeRFE.yaml#/LimeRFESettings"
     MapSettings:
       $ref: "http://swgserver:8081/api/swagger/include/Map.yaml#/MapSettings"
     PERTesterSettings:

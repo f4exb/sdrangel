@@ -115,63 +115,6 @@ public:
             SWGSDRangel::SWGLocationInformation& response,
             SWGSDRangel::SWGErrorResponse& error);
 
-    virtual int instanceDVSerialGet(
-            SWGSDRangel::SWGDVSerialDevices& response,
-            SWGSDRangel::SWGErrorResponse& error);
-
-    virtual int instanceDVSerialPatch(
-            bool dvserial,
-            SWGSDRangel::SWGDVSerialDevices& response,
-            SWGSDRangel::SWGErrorResponse& error);
-
-    virtual int instanceAMBESerialGet(
-            SWGSDRangel::SWGDVSerialDevices& response,
-            SWGSDRangel::SWGErrorResponse& error);
-
-    virtual int instanceAMBEDevicesGet(
-            SWGSDRangel::SWGAMBEDevices& response,
-            SWGSDRangel::SWGErrorResponse& error);
-
-    virtual int instanceAMBEDevicesPut(
-            SWGSDRangel::SWGAMBEDevices& query,
-            SWGSDRangel::SWGAMBEDevices& response,
-            SWGSDRangel::SWGErrorResponse& error);
-
-    virtual int instanceAMBEDevicesPatch(
-            SWGSDRangel::SWGAMBEDevices& query,
-            SWGSDRangel::SWGAMBEDevices& response,
-            SWGSDRangel::SWGErrorResponse& error);
-
-    virtual int instanceAMBEDevicesDelete(
-            SWGSDRangel::SWGSuccessResponse& response,
-            SWGSDRangel::SWGErrorResponse& error);
-
-#ifdef HAS_LIMERFEUSB
-    virtual int instanceLimeRFESerialGet(
-            SWGSDRangel::SWGLimeRFEDevices& response,
-            SWGSDRangel::SWGErrorResponse& error);
-
-    virtual int instanceLimeRFEConfigGet(
-            const QString& serial,
-            SWGSDRangel::SWGLimeRFESettings& response,
-            SWGSDRangel::SWGErrorResponse& error);
-
-    virtual int instanceLimeRFEConfigPut(
-            SWGSDRangel::SWGLimeRFESettings& query,
-            SWGSDRangel::SWGSuccessResponse& response,
-            SWGSDRangel::SWGErrorResponse& error);
-
-    virtual int instanceLimeRFERunPut(
-            SWGSDRangel::SWGLimeRFESettings& query,
-            SWGSDRangel::SWGSuccessResponse& response,
-            SWGSDRangel::SWGErrorResponse& error);
-
-    virtual int instanceLimeRFEPowerGet(
-            const QString& serial,
-            SWGSDRangel::SWGLimeRFEPower& response,
-            SWGSDRangel::SWGErrorResponse& error);
-#endif
-
     virtual int instancePresetsGet(
             SWGSDRangel::SWGPresets& response,
             SWGSDRangel::SWGErrorResponse& error);

@@ -35,7 +35,6 @@ public:
         TestDecimatorsFF,
         TestDecimatorsInfII,
         TestDecimatorsSupII,
-        TestAMBE,
         TestGolay2312
     } TestType;
 
