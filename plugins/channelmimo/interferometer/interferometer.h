@@ -120,7 +120,6 @@ public:
         return m_frequencyOffset;
     }
 
-	MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
     virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
     MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
 
@@ -162,7 +161,6 @@ private:
     ScopeVis m_scopeSink;
     InterferometerBaseband* m_basebandSink;
     InterferometerSettings m_settings;
-	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     MessageQueue *m_guiMessageQueue;  //!< Input message queue to the GUI
 
     QNetworkAccessManager *m_networkManager;

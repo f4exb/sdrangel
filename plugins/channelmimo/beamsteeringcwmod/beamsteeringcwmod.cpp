@@ -54,7 +54,6 @@ BeamSteeringCWMod::BeamSteeringCWMod(DeviceAPI *deviceAPI) :
     m_basebandSource->moveToThread(m_thread);
     m_deviceAPI->addMIMOChannel(this);
     m_deviceAPI->addMIMOChannelAPI(this);
-    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(

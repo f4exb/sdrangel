@@ -53,10 +53,10 @@ Interferometer::Interferometer(DeviceAPI *deviceAPI) :
     m_thread = new QThread(this);
     m_basebandSink = new InterferometerBaseband(m_fftSize);
     m_basebandSink->setSpectrumSink(&m_spectrumVis);
+    m_basebandSink->setScopeSink(&m_scopeSink);
     m_basebandSink->moveToThread(m_thread);
     m_deviceAPI->addMIMOChannel(this);
     m_deviceAPI->addMIMOChannelAPI(this);
-    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
