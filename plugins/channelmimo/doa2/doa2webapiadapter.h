@@ -47,20 +47,17 @@ public:
     static void webapiFormatChannelSettings(
             SWGSDRangel::SWGChannelSettings& response,
             const DOA2Settings& settings,
-            const GLScopeSettings& scopeSettings,
-            const SpectrumSettings& spectrumSettings);
+            const GLScopeSettings& scopeSettings);
 
     static void webapiUpdateChannelSettings(
             DOA2Settings& settings,
             GLScopeSettings& scopeSettings,
-            SpectrumSettings& spectrumSettings,
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response);
 
 private:
     DOA2Settings m_settings;
     GLScopeSettings m_glScopeSettings;
-    SpectrumSettings m_SpectrumSettings;
 
     static int qColorToInt(const QColor& color);
     static QColor intToQColor(int intColor);

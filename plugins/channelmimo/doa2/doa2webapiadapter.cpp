@@ -23,7 +23,6 @@
 DOA2WebAPIAdapter::DOA2WebAPIAdapter()
 {
     m_settings.setScopeGUI(&m_glScopeSettings);
-    m_settings.setSpectrumGUI(&m_SpectrumSettings);
 }
 
 DOA2WebAPIAdapter::~DOA2WebAPIAdapter()
@@ -36,15 +35,14 @@ int DOA2WebAPIAdapter::webapiSettingsGet(
     (void) errorMessage;
     response.setDoa2Settings(new SWGSDRangel::SWGDOA2Settings());
     response.getDoa2Settings()->init();
-    webapiFormatChannelSettings(response, m_settings, m_glScopeSettings, m_SpectrumSettings);
+    webapiFormatChannelSettings(response, m_settings, m_glScopeSettings);
     return 200;
 }
 
 void DOA2WebAPIAdapter::webapiFormatChannelSettings(
         SWGSDRangel::SWGChannelSettings& response,
         const DOA2Settings& settings,
-        const GLScopeSettings& scopeSettings,
-        const SpectrumSettings& spectrumSettings)
+        const GLScopeSettings& scopeSettings)
 {
     response.getDoa2Settings()->setCorrelationType((int) settings.m_correlationType);
     response.getDoa2Settings()->setRgbColor(settings.m_rgbColor);
@@ -111,25 +109,6 @@ void DOA2WebAPIAdapter::webapiFormatChannelSettings(
         swgScope->getTriggersData()->back()->setTriggerPositiveEdge(triggerIt->m_triggerPositiveEdge ? 1 : 0);
         swgScope->getTriggersData()->back()->setTriggerRepeat(triggerIt->m_triggerRepeat);
     }
-
-    // spectrum
-    SWGSDRangel::SWGGLSpectrum *swgSpectrum = new SWGSDRangel::SWGGLSpectrum();
-    swgSpectrum->init();
-    response.getDoa2Settings()->setSpectrumConfig(swgSpectrum);
-    swgSpectrum->setAveragingMode((int) spectrumSettings.m_averagingMode);
-    swgSpectrum->setAveragingValue(SpectrumSettings::getAveragingValue(spectrumSettings.m_averagingIndex, spectrumSettings.m_averagingMode));
-    swgSpectrum->setDecay(spectrumSettings.m_decay);
-    swgSpectrum->setDecayDivisor(spectrumSettings.m_decayDivisor);
-    swgSpectrum->setDisplayCurrent(spectrumSettings.m_displayCurrent ? 1 : 0);
-    swgSpectrum->setDisplayGrid(spectrumSettings.m_displayGrid ? 1 : 0);
-    swgSpectrum->setDisplayGridIntensity(spectrumSettings.m_displayGridIntensity);
-    swgSpectrum->setDisplayHistogram(spectrumSettings.m_displayHistogram ? 1 : 0);
-    swgSpectrum->setDisplayMaxHold(spectrumSettings.m_displayMaxHold ? 1 : 0);
-    swgSpectrum->setDisplayTraceIntensity(spectrumSettings.m_displayTraceIntensity);
-    swgSpectrum->setDisplayWaterfall(spectrumSettings.m_displayWaterfall ? 1 : 0);
-    swgSpectrum->setFftOverlap(spectrumSettings.m_fftOverlap);
-    swgSpectrum->setFftSize(spectrumSettings.m_fftSize);
-    swgSpectrum->setFpsPeriodMs(spectrumSettings.m_fpsPeriodMs);
 }
 
 int DOA2WebAPIAdapter::webapiSettingsPutPatch(
@@ -140,14 +119,13 @@ int DOA2WebAPIAdapter::webapiSettingsPutPatch(
 {
     (void) force; // no action
     (void) errorMessage;
-    webapiUpdateChannelSettings(m_settings, m_glScopeSettings, m_SpectrumSettings, channelSettingsKeys, response);
+    webapiUpdateChannelSettings(m_settings, m_glScopeSettings, channelSettingsKeys, response);
     return 200;
 }
 
 void DOA2WebAPIAdapter::webapiUpdateChannelSettings(
         DOA2Settings& settings,
         GLScopeSettings& scopeSettings,
-        SpectrumSettings& spectrumSettings,
         const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings& response)
 {
@@ -318,54 +296,6 @@ void DOA2WebAPIAdapter::webapiUpdateChannelSettings(
                     }
                 }
             }
-        }
-    }
-    // spectrum
-    if (channelSettingsKeys.contains("spectrumConfig"))
-    {
-        if (channelSettingsKeys.contains("spectrumConfig.averagingMode")) {
-            spectrumSettings.m_averagingMode = (SpectrumSettings::AveragingMode) response.getDoa2Settings()->getSpectrumConfig()->getAveragingMode();
-        }
-        if (channelSettingsKeys.contains("spectrumConfig.averagingValue"))
-        {
-            spectrumSettings.m_averagingValue = response.getDoa2Settings()->getSpectrumConfig()->getAveragingValue();
-            spectrumSettings.m_averagingIndex = SpectrumSettings::getAveragingIndex(spectrumSettings.m_averagingValue, spectrumSettings.m_averagingMode);
-        }
-        if (channelSettingsKeys.contains("spectrumConfig.decay")) {
-            spectrumSettings.m_decay = response.getDoa2Settings()->getSpectrumConfig()->getDecay();
-        }
-        if (channelSettingsKeys.contains("spectrumConfig.decayDivisor")) {
-            spectrumSettings.m_decayDivisor = response.getDoa2Settings()->getSpectrumConfig()->getDecayDivisor();
-        }
-        if (channelSettingsKeys.contains("spectrumConfig.displayCurrent")) {
-            spectrumSettings.m_displayCurrent = response.getDoa2Settings()->getSpectrumConfig()->getDisplayCurrent() != 0;
-        }
-        if (channelSettingsKeys.contains("spectrumConfig.displayGrid")) {
-            spectrumSettings.m_displayGrid = response.getDoa2Settings()->getSpectrumConfig()->getDisplayGrid() != 0;
-        }
-        if (channelSettingsKeys.contains("spectrumConfig.displayGridIntensity")) {
-            spectrumSettings.m_displayGridIntensity = response.getDoa2Settings()->getSpectrumConfig()->getDisplayGridIntensity();
-        }
-        if (channelSettingsKeys.contains("spectrumConfig.displayHistogram")) {
-            spectrumSettings.m_displayHistogram = response.getDoa2Settings()->getSpectrumConfig()->getDisplayHistogram() != 0;
-        }
-        if (channelSettingsKeys.contains("spectrumConfig.displayMaxHold")) {
-            spectrumSettings.m_displayMaxHold = response.getDoa2Settings()->getSpectrumConfig()->getDisplayMaxHold() != 0;
-        }
-        if (channelSettingsKeys.contains("spectrumConfig.displayTraceIntensity")) {
-            spectrumSettings.m_displayTraceIntensity = response.getDoa2Settings()->getSpectrumConfig()->getDisplayTraceIntensity();
-        }
-        if (channelSettingsKeys.contains("spectrumConfig.displayWaterfall")) {
-            spectrumSettings.m_displayWaterfall = response.getDoa2Settings()->getSpectrumConfig()->getDisplayWaterfall() != 0;
-        }
-        if (channelSettingsKeys.contains("spectrumConfig.fftOverlap")) {
-            spectrumSettings.m_fftOverlap = response.getDoa2Settings()->getSpectrumConfig()->getFftOverlap();
-        }
-        if (channelSettingsKeys.contains("spectrumConfig.fftSize")) {
-            spectrumSettings.m_fftSize = response.getDoa2Settings()->getSpectrumConfig()->getFftSize();
-        }
-        if (channelSettingsKeys.contains("spectrumConfig.fpsPeriodMs")) {
-            spectrumSettings.m_fpsPeriodMs = response.getDoa2Settings()->getSpectrumConfig()->getFpsPeriodMs();
         }
     }
 }

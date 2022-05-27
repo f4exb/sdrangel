@@ -29,11 +29,13 @@ if (NOT SERVER_MODE)
     set(doa2_SOURCES
         ${doa2_SOURCES}
         doa2gui.cpp
+        doa2compass.cpp
         doa2gui.ui
     )
     set(doa2_HEADERS
         ${doa2_HEADERS}
         doa2gui.h
+        doa2compass.cpp
     )
 
     set(TARGET_NAME doa2)

@@ -355,78 +355,11 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="spectrumContainer" native="true">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>98</y>
-     <width>720</width>
-     <height>284</height>
-    </rect>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="minimumSize">
-    <size>
-     <width>718</width>
-     <height>0</height>
-    </size>
-   </property>
-   <property name="windowTitle">
-    <string>Frequency domain</string>
-   </property>
-   <layout class="QVBoxLayout" name="verticalLayoutSpectrum">
-    <property name="spacing">
-     <number>2</number>
-    </property>
-    <property name="leftMargin">
-     <number>2</number>
-    </property>
-    <property name="topMargin">
-     <number>2</number>
-    </property>
-    <property name="rightMargin">
-     <number>2</number>
-    </property>
-    <property name="bottomMargin">
-     <number>2</number>
-    </property>
-    <item>
-     <widget class="GLSpectrum" name="glSpectrum" native="true">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>200</width>
-        <height>250</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <family>Liberation Mono</family>
-        <pointsize>8</pointsize>
-       </font>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="GLSpectrumGUI" name="spectrumGUI" native="true"/>
-    </item>
-   </layout>
-  </widget>
   <widget class="QWidget" name="scopeContainer" native="true">
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>390</y>
+     <y>98</y>
      <width>720</width>
      <height>334</height>
     </rect>
@@ -489,24 +422,61 @@
     </item>
    </layout>
   </widget>
+  <widget class="QWidget" name="doaContainer" native="true">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>432</y>
+     <width>720</width>
+     <height>284</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>718</width>
+     <height>0</height>
+    </size>
+   </property>
+   <property name="windowTitle">
+    <string>DOA</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayoutSpectrum">
+    <property name="spacing">
+     <number>2</number>
+    </property>
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>12</number>
+    </property>
+    <property name="bottomMargin">
+     <number>2</number>
+    </property>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="DOA2Compass" name="compass" native="true"/>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
  </widget>
  <customwidgets>
   <customwidget>
    <class>RollupContents</class>
    <extends>QWidget</extends>
    <header>gui/rollupcontents.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>GLSpectrum</class>
-   <extends>QWidget</extends>
-   <header>gui/glspectrum.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>GLSpectrumGUI</class>
-   <extends>QWidget</extends>
-   <header>gui/glspectrumgui.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -519,6 +489,12 @@
    <class>GLScopeGUI</class>
    <extends>QWidget</extends>
    <header>gui/glscopegui.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>DOA2Compass</class>
+   <extends>QWidget</extends>
+   <header>doa2compass.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

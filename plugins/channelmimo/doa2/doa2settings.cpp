@@ -25,7 +25,6 @@
 
 DOA2Settings::DOA2Settings() :
     m_channelMarker(nullptr),
-    m_spectrumGUI(nullptr),
     m_scopeGUI(nullptr),
     m_rollupState(nullptr)
 {
@@ -35,7 +34,7 @@ DOA2Settings::DOA2Settings() :
 void DOA2Settings::resetToDefaults()
 {
     m_correlationType = CorrelationAdd;
-    m_rgbColor = QColor(250, 174, 120).rgb();
+    m_rgbColor = QColor(250, 120, 120).rgb();
     m_title = "DOA 2 sources";
     m_log2Decim = 0;
     m_filterChainHash = 0;
@@ -67,9 +66,6 @@ QByteArray DOA2Settings::serialize() const
     s.writeBlob(14, m_geometryBytes);
     s.writeBool(15, m_hidden);
 
-    if (m_spectrumGUI) {
-        s.writeBlob(20, m_spectrumGUI->serialize());
-    }
     if (m_scopeGUI) {
         s.writeBlob(21, m_scopeGUI->serialize());
     }
@@ -125,12 +121,6 @@ bool DOA2Settings::deserialize(const QByteArray& data)
         d.readS32(13, &m_workspaceIndex);
         d.readBlob(14, &m_geometryBytes);
         d.readBool(15, &m_hidden, false);
-
-        if (m_spectrumGUI)
-        {
-            d.readBlob(20, &bytetmp);
-            m_spectrumGUI->deserialize(bytetmp);
-        }
 
         if (m_scopeGUI)
         {

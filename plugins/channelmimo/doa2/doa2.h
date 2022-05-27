@@ -22,7 +22,6 @@
 #include <QNetworkRequest>
 
 #include "dsp/mimochannel.h"
-#include "dsp/spectrumvis.h"
 #include "dsp/scopevis.h"
 #include "channel/channelapi.h"
 #include "util/messagequeue.h"
@@ -124,7 +123,6 @@ public:
     virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
     MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
 
-    SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
     ScopeVis *getScopeVis() { return &m_scopeSink; }
     void applyChannelSettings(uint32_t log2Decim, uint32_t filterChainHash);
 
@@ -158,7 +156,6 @@ public:
 private:
     DeviceAPI *m_deviceAPI;
     QThread *m_thread;
-    SpectrumVis m_spectrumVis;
     ScopeVis m_scopeSink;
     DOA2Baseband* m_basebandSink;
     DOA2Settings m_settings;

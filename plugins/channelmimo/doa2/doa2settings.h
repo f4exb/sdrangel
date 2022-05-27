@@ -53,7 +53,6 @@ struct DOA2Settings
     bool m_hidden;
 
     Serializable *m_channelMarker;
-    Serializable *m_spectrumGUI;
     Serializable *m_scopeGUI;
     Serializable *m_rollupState;
 
@@ -61,7 +60,6 @@ struct DOA2Settings
     void resetToDefaults();
     void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
-    void setSpectrumGUI(Serializable *spectrumGUI) { m_spectrumGUI = spectrumGUI; }
     void setScopeGUI(Serializable *scopeGUI) { m_scopeGUI = scopeGUI; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);

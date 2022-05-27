@@ -30,7 +30,6 @@ class PluginAPI;
 class DeviceUISet;
 class MIMOChannel;
 class DOA2;
-class SpectrumVis;
 class ScopeVis;
 
 namespace Ui {
@@ -72,7 +71,6 @@ private:
     bool m_doApplySettings;
     MovingAverageUtil<double, double, 40> m_channelPowerAvg;
     DOA2 *m_doa2;
-	SpectrumVis* m_spectrumVis;
 	ScopeVis* m_scopeVis;
 	MessageQueue m_inputMessageQueue;
     uint32_t m_tickCount;

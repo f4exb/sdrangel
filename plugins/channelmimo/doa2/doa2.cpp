@@ -43,7 +43,6 @@ const int DOA2::m_fftSize = 4096;
 DOA2::DOA2(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamMIMO),
     m_deviceAPI(deviceAPI),
-    m_spectrumVis(SDR_RX_SCALEF),
     m_guiMessageQueue(nullptr),
     m_frequencyOffset(0),
     m_deviceSampleRate(48000)
@@ -52,7 +51,6 @@ DOA2::DOA2(DeviceAPI *deviceAPI) :
 
     m_thread = new QThread(this);
     m_basebandSink = new DOA2Baseband(m_fftSize);
-    m_basebandSink->setSpectrumSink(&m_spectrumVis);
     m_basebandSink->setScopeSink(&m_scopeSink);
     m_basebandSink->moveToThread(m_thread);
     m_deviceAPI->addMIMOChannel(this);
@@ -375,9 +373,6 @@ void DOA2::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getDoa2Settings()->getReverseApiChannelIndex();
     }
-    if (settings.m_spectrumGUI && channelSettingsKeys.contains("spectrumConfig")) {
-        settings.m_spectrumGUI->updateFrom(channelSettingsKeys, response.getDoa2Settings()->getSpectrumConfig());
-    }
     if (settings.m_scopeGUI && channelSettingsKeys.contains("scopeConfig")) {
         settings.m_scopeGUI->updateFrom(channelSettingsKeys, response.getDoa2Settings()->getScopeConfig());
     }
@@ -412,20 +407,6 @@ void DOA2::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response
     response.getDoa2Settings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getDoa2Settings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getDoa2Settings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
-
-    if (settings.m_spectrumGUI)
-    {
-        if (response.getDoa2Settings()->getSpectrumConfig())
-        {
-            settings.m_spectrumGUI->formatTo(response.getDoa2Settings()->getSpectrumConfig());
-        }
-        else
-        {
-            SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
-            settings.m_spectrumGUI->formatTo(swgGLSpectrum);
-            response.getDoa2Settings()->setSpectrumConfig(swgGLSpectrum);
-        }
-    }
 
     if (settings.m_scopeGUI)
     {
@@ -547,13 +528,6 @@ void DOA2::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("filterChainHash") || force) {
         swgDOA2Settings->setFilterChainHash(settings.m_filterChainHash);
-    }
-
-    if (settings.m_spectrumGUI)
-    {
-        if (channelSettingsKeys.contains("spectrumConfig") || force) {
-            settings.m_spectrumGUI->formatTo(swgDOA2Settings->getSpectrumConfig());
-        }
     }
 
     if (settings.m_scopeGUI)

@@ -48,8 +48,6 @@ SWGDOA2Settings::SWGDOA2Settings() {
     m_reverse_api_device_index_isSet = false;
     reverse_api_channel_index = 0;
     m_reverse_api_channel_index_isSet = false;
-    spectrum_config = nullptr;
-    m_spectrum_config_isSet = false;
     scope_config = nullptr;
     m_scope_config_isSet = false;
     channel_marker = nullptr;
@@ -84,8 +82,6 @@ SWGDOA2Settings::init() {
     m_reverse_api_device_index_isSet = false;
     reverse_api_channel_index = 0;
     m_reverse_api_channel_index_isSet = false;
-    spectrum_config = new SWGGLSpectrum();
-    m_spectrum_config_isSet = false;
     scope_config = new SWGGLScope();
     m_scope_config_isSet = false;
     channel_marker = new SWGChannelMarker();
@@ -110,9 +106,6 @@ SWGDOA2Settings::cleanup() {
 
 
 
-    if(spectrum_config != nullptr) { 
-        delete spectrum_config;
-    }
     if(scope_config != nullptr) { 
         delete scope_config;
     }
@@ -154,8 +147,6 @@ SWGDOA2Settings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&reverse_api_device_index, pJson["reverseAPIDeviceIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&reverse_api_channel_index, pJson["reverseAPIChannelIndex"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&spectrum_config, pJson["spectrumConfig"], "SWGGLSpectrum", "SWGGLSpectrum");
     
     ::SWGSDRangel::setValue(&scope_config, pJson["scopeConfig"], "SWGGLScope", "SWGGLScope");
     
@@ -208,9 +199,6 @@ SWGDOA2Settings::asJsonObject() {
     }
     if(m_reverse_api_channel_index_isSet){
         obj->insert("reverseAPIChannelIndex", QJsonValue(reverse_api_channel_index));
-    }
-    if((spectrum_config != nullptr) && (spectrum_config->isSet())){
-        toJsonValue(QString("spectrumConfig"), spectrum_config, obj, QString("SWGGLSpectrum"));
     }
     if((scope_config != nullptr) && (scope_config->isSet())){
         toJsonValue(QString("scopeConfig"), scope_config, obj, QString("SWGGLScope"));
@@ -325,16 +313,6 @@ SWGDOA2Settings::setReverseApiChannelIndex(qint32 reverse_api_channel_index) {
     this->m_reverse_api_channel_index_isSet = true;
 }
 
-SWGGLSpectrum*
-SWGDOA2Settings::getSpectrumConfig() {
-    return spectrum_config;
-}
-void
-SWGDOA2Settings::setSpectrumConfig(SWGGLSpectrum* spectrum_config) {
-    this->spectrum_config = spectrum_config;
-    this->m_spectrum_config_isSet = true;
-}
-
 SWGGLScope*
 SWGDOA2Settings::getScopeConfig() {
     return scope_config;
@@ -398,9 +376,6 @@ SWGDOA2Settings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_reverse_api_channel_index_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(spectrum_config && spectrum_config->isSet()){
             isObjectUpdated = true; break;
         }
         if(scope_config && scope_config->isSet()){

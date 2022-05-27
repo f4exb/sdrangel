@@ -87,7 +87,6 @@ bool DOA2GUI::handleMessage(const Message& message)
         const DOA2::MsgConfigureDOA2& notif = (const DOA2::MsgConfigureDOA2&) message;
         m_settings = notif.getSettings();
         ui->scopeGUI->updateSettings();
-        ui->spectrumGUI->updateSettings();
         m_channelMarker.updateSettings(static_cast<const ChannelMarker*>(m_settings.m_channelMarker));
         displaySettings();
         return true;
@@ -117,19 +116,11 @@ DOA2GUI::DOA2GUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *ch
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_doa2 = (DOA2*) channelMIMO;
-    m_spectrumVis = m_doa2->getSpectrumVis();
-    m_spectrumVis->setGLSpectrum(ui->glSpectrum);
     m_scopeVis = m_doa2->getScopeVis();
     m_scopeVis->setGLScope(ui->glScope);
     m_doa2->setMessageQueueToGUI(getInputMessageQueue());
     m_sampleRate = m_doa2->getDeviceSampleRate();
 
-	ui->glSpectrum->setDisplayWaterfall(true);
-	ui->glSpectrum->setDisplayMaxHold(true);
-    ui->glSpectrum->setCenterFrequency(0);
-    ui->glSpectrum->setSampleRate(m_sampleRate);
-	ui->glSpectrum->setSsbSpectrum(false);
-    ui->glSpectrum->setLsbDisplay(false);
     ui->glScope->setTraceModulo(DOA2::m_fftSize);
 
 	ui->glScope->connectTimer(MainCore::instance()->getMasterTimer());
@@ -146,11 +137,9 @@ DOA2GUI::DOA2GUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *ch
     m_settings.setChannelMarker(&m_channelMarker);
     m_settings.setRollupState(&m_rollupState);
     m_settings.setScopeGUI(ui->scopeGUI);
-    m_settings.setSpectrumGUI(ui->spectrumGUI);
 
     m_deviceUISet->addChannelMarker(&m_channelMarker);
 
-	ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
 	ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
 
     m_scopeVis->setTraceChunkSize(DOA2::m_fftSize); // Set scope trace length unit to FFT size
@@ -220,7 +209,6 @@ void DOA2GUI::displayRateAndShift()
     ui->channelRateText->setText(tr("%1k").arg(QString::number(channelSampleRate / 1000.0, 'g', 5)));
     m_channelMarker.setCenterFrequency(shift);
     m_channelMarker.setBandwidth(channelSampleRate);
-    ui->glSpectrum->setSampleRate(channelSampleRate);
     m_scopeVis->setLiveRate(channelSampleRate);
 }
 

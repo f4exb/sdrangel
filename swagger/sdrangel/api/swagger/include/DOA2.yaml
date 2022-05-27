@@ -23,8 +23,6 @@ DOA2Settings:
       type: integer
     reverseAPIChannelIndex:
       type: integer
-    spectrumConfig:
-      $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"
     scopeConfig:
       $ref: "http://swgserver:8081/api/swagger/include/GLScope.yaml#/GLScope"
     channelMarker:

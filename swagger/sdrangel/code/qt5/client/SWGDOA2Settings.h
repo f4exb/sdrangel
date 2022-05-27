@@ -24,7 +24,6 @@
 
 #include "SWGChannelMarker.h"
 #include "SWGGLScope.h"
-#include "SWGGLSpectrum.h"
 #include "SWGRollupState.h"
 #include <QString>
 
@@ -76,9 +75,6 @@ public:
     qint32 getReverseApiChannelIndex();
     void setReverseApiChannelIndex(qint32 reverse_api_channel_index);
 
-    SWGGLSpectrum* getSpectrumConfig();
-    void setSpectrumConfig(SWGGLSpectrum* spectrum_config);
-
     SWGGLScope* getScopeConfig();
     void setScopeConfig(SWGGLScope* scope_config);
 
@@ -121,9 +117,6 @@ private:
 
     qint32 reverse_api_channel_index;
     bool m_reverse_api_channel_index_isSet;
-
-    SWGGLSpectrum* spectrum_config;
-    bool m_spectrum_config_isSet;
 
     SWGGLScope* scope_config;
     bool m_scope_config_isSet;

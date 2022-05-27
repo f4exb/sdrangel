@@ -105,7 +105,6 @@ public:
 
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
 
-    void setSpectrumSink(BasebandSampleSink *spectrumSink) { m_spectrumSink = spectrumSink; }
     void setScopeSink(ScopeVis *scopeSink) { m_scopeSink = scopeSink; }
     void setPhase(int phase) { m_correlator.setPhase(phase); }
 
@@ -123,7 +122,6 @@ private:
     int m_sizes[2];
     DOA2StreamSink m_sinks[2];
     DownChannelizer *m_channelizers[2];
-    BasebandSampleSink *m_spectrumSink;
     ScopeVis *m_scopeSink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     QMutex m_mutex;

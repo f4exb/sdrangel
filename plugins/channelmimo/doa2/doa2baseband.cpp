@@ -33,7 +33,6 @@ MESSAGE_CLASS_DEFINITION(DOA2Baseband::MsgConfigureCorrelation, Message)
 
 DOA2Baseband::DOA2Baseband(int fftSize) :
     m_correlator(fftSize),
-    m_spectrumSink(nullptr),
     m_scopeSink(nullptr),
     m_mutex(QMutex::Recursive)
 {
@@ -148,21 +147,6 @@ void DOA2Baseband::run()
             std::vector<SampleVector::const_iterator> vbegin;
             vbegin.push_back(m_correlator.m_tcorr.begin());
             m_scopeSink->feed(vbegin, m_correlator.m_processed);
-        }
-
-        if (m_spectrumSink)
-        {
-            if ((m_correlator.getCorrType() == DOA2Settings::CorrelationFFT)
-             || (m_correlator.getCorrType() == DOA2Settings::CorrelationIFFT)
-             || (m_correlator.getCorrType() == DOA2Settings::CorrelationIFFT2)
-             || (m_correlator.getCorrType() == DOA2Settings::CorrelationIFFTStar))
-            {
-                m_spectrumSink->feed(m_correlator.m_scorr.begin(), m_correlator.m_scorr.begin() + m_correlator.m_processed, false);
-            }
-            else
-            {
-                m_spectrumSink->feed(m_correlator.m_tcorr.begin(), m_correlator.m_tcorr.begin() + m_correlator.m_processed, false);
-            }
         }
     }
 
