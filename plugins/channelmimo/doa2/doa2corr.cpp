@@ -119,7 +119,7 @@ Sample invfft2star(const std::complex<float>& a) { //!< Complex float to Sample 
 }
 
 DOA2Correlator::DOA2Correlator(int fftSize) :
-    m_corrType(DOA2Settings::CorrelationAdd),
+    m_corrType(DOA2Settings::CorrelationFFT),
     m_fftSize(fftSize)
 {
     setPhase(0);
@@ -177,23 +177,8 @@ bool DOA2Correlator::performCorr(
             case DOA2Settings::Correlation1:
                 results = performOpCorr(data0, size0, data1, size1, sSecond);
                 break;
-            case DOA2Settings::CorrelationAdd:
-                results = performOpCorr(data0, size0, data1, size1, sAdd);
-                break;
-            case DOA2Settings::CorrelationMultiply:
-                results = performOpCorr(data0, size0, data1, size1, sMulConj);
-                break;
-            case DOA2Settings::CorrelationIFFT:
-                results = performIFFTCorr(data0, size0, data1, size1);
-                break;
-            case DOA2Settings::CorrelationIFFTStar:
-                results = performIFFTCorr(data0, size0, data1, size1, true);
-                break;
             case DOA2Settings::CorrelationFFT:
                 results = performFFTProd(data0, size0, data1, size1);
-                break;
-            case DOA2Settings::CorrelationIFFT2:
-                results = performIFFT2Corr(data0, size0, data1, size1);
                 break;
             default:
                 break;
@@ -201,10 +186,7 @@ bool DOA2Correlator::performCorr(
     }
     else if ((m_phase == -180) || (m_phase == 180))
     {
-        if ((m_corrType == DOA2Settings::CorrelationIFFT)
-         || (m_corrType == DOA2Settings::CorrelationIFFT2)
-         || (m_corrType == DOA2Settings::CorrelationIFFTStar)
-         || (m_corrType == DOA2Settings::CorrelationFFT))
+        if (m_corrType == DOA2Settings::CorrelationFFT)
         {
             if (size1 > m_data1p.size()) {
                 m_data1p.resize(size1);
@@ -228,23 +210,8 @@ bool DOA2Correlator::performCorr(
             case DOA2Settings::Correlation1:
                 results = performOpCorr(data0, size0, data1, size1, sSecondInv);
                 break;
-            case DOA2Settings::CorrelationAdd:
-                results = performOpCorr(data0, size0, data1, size1, sAddInv);
-                break;
-            case DOA2Settings::CorrelationMultiply:
-                results = performOpCorr(data0, size0, data1, size1, sMulConjInv);
-                break;
-            case DOA2Settings::CorrelationIFFT:
-                results = performIFFTCorr(data0, size0, m_data1p, size1);
-                break;
-            case DOA2Settings::CorrelationIFFTStar:
-                results = performIFFTCorr(data0, size0, m_data1p, size1, true);
-                break;
             case DOA2Settings::CorrelationFFT:
                 results = performFFTProd(data0, size0, m_data1p, size1);
-                break;
-            case DOA2Settings::CorrelationIFFT2:
-                results = performIFFT2Corr(data0, size0, m_data1p, size1);
                 break;
             default:
                 break;
@@ -280,23 +247,8 @@ bool DOA2Correlator::performCorr(
             case DOA2Settings::Correlation1:
                 results = performOpCorr(data0, size0, m_data1p, size1, sSecond);
                 break;
-            case DOA2Settings::CorrelationAdd:
-                results = performOpCorr(data0, size0, m_data1p, size1, sAdd);
-                break;
-            case DOA2Settings::CorrelationMultiply:
-                results = performOpCorr(data0, size0, m_data1p, size1, sMulConj);
-                break;
-            case DOA2Settings::CorrelationIFFT:
-                results = performIFFTCorr(data0, size0, m_data1p, size1);
-                break;
-            case DOA2Settings::CorrelationIFFTStar:
-                results = performIFFTCorr(data0, size0, m_data1p, size1, true);
-                break;
             case DOA2Settings::CorrelationFFT:
                 results = performFFTProd(data0, size0, m_data1p, size1);
-                break;
-            case DOA2Settings::CorrelationIFFT2:
-                results = performIFFT2Corr(data0, size0, m_data1p, size1);
                 break;
             default:
                 break;
@@ -329,239 +281,6 @@ bool DOA2Correlator::performOpCorr(
     m_remaining[0] = size0 - size;
     m_remaining[1] = size1 - size;
     return true;
-}
-
-bool DOA2Correlator::performIFFTCorr(
-    const SampleVector& data0,
-    unsigned int size0,
-    const SampleVector& data1,
-    unsigned int size1,
-    bool star
-)
-{
-    unsigned int size = std::min(size0, size1);
-    int nfft = 0;
-    SampleVector::const_iterator begin0 = data0.begin();
-    SampleVector::const_iterator begin1 = data1.begin();
-    adjustSCorrSize(size);
-    adjustTCorrSize(size);
-
-    while (size >= m_fftSize)
-    {
-        // FFT[0]
-        std::transform(
-            begin0,
-            begin0 + m_fftSize,
-            m_fft[0]->in(),
-            s2c
-        );
-        m_window.apply(m_fft[0]->in());
-        std::fill(m_fft[0]->in() + m_fftSize, m_fft[0]->in() + 2*m_fftSize, std::complex<float>{0, 0});
-        m_fft[0]->transform();
-
-        // FFT[1]
-        std::transform(
-            begin1,
-            begin1 + m_fftSize,
-            m_fft[1]->in(),
-            s2c
-        );
-        m_window.apply(m_fft[1]->in());
-        std::fill(m_fft[1]->in() + m_fftSize, m_fft[1]->in() + 2*m_fftSize, std::complex<float>{0, 0});
-        m_fft[1]->transform();
-
-        // conjugate FFT[1]
-        std::transform(
-            m_fft[1]->out(),
-            m_fft[1]->out() + 2*m_fftSize,
-            m_dataj,
-            [](const std::complex<float>& c) -> std::complex<float> {
-                return std::conj(c);
-            }
-        );
-
-        // product of FFT[1]* with FFT[0] and store in inverse FFT input
-        std::transform(
-            m_fft[0]->out(),
-            m_fft[0]->out() + 2*m_fftSize,
-            m_dataj,
-            m_invFFT->in(),
-            [](std::complex<float>& a, const std::complex<float>& b) -> std::complex<float> {
-                return (a*b);
-            }
-        );
-
-        // copy product to correlation spectrum - convert and scale to FFT size and Hanning window
-        std::transform(
-            m_invFFT->in(),
-            m_invFFT->in() + m_fftSize,
-            m_scorr.begin() + nfft*m_fftSize,
-            [this](const std::complex<float>& a) -> Sample {
-                Sample s;
-                s.setReal(a.real()*(SDR_RX_SCALEF/m_fftSize));
-                s.setImag(a.imag()*(SDR_RX_SCALEF/m_fftSize));
-                return s;
-            }
-        );
-
-        // do the inverse FFT to get time correlation
-        m_invFFT->transform();
-
-        if (star)
-        {
-            // sum first half with the reversed second half as one is the conjugate of the other this should yield constant phase
-            *m_tcorr.begin() = invfft2star(m_invFFT->out()[0]); // t = 0
-            std::reverse(m_invFFT->out() + m_fftSize, m_invFFT->out() + 2*m_fftSize);
-            std::transform(
-                m_invFFT->out() + 1,
-                m_invFFT->out() + m_fftSize,
-                m_invFFT->out() + m_fftSize,
-                m_tcorr.begin() + nfft*m_fftSize,
-                [](const std::complex<float>& a, const std::complex<float>& b) -> Sample {
-                    Sample s;
-                    std::complex<float> sum = a + b;
-                    s.setReal(sum.real()/12.0f);
-                    s.setImag(sum.imag()/12.0f);
-                    return s;
-                }
-            );
-        }
-        else
-        {
-            std::transform(
-                m_invFFT->out(),
-                m_invFFT->out() + m_fftSize,
-                m_tcorr.begin() + nfft*m_fftSize,
-                [](const std::complex<float>& a) -> Sample {
-                    Sample s;
-                    s.setReal(a.real()/6.0f);
-                    s.setImag(a.imag()/6.0f);
-                    return s;
-                }
-            );
-        }
-
-        size -= m_fftSize;
-        begin0 += m_fftSize;
-        begin1 += m_fftSize;
-        nfft++;
-    }
-
-    // update the samples counters
-    m_processed = nfft*m_fftSize;
-    m_remaining[0] = size0 - nfft*m_fftSize;
-    m_remaining[1] = size1 - nfft*m_fftSize;
-
-    return nfft > 0;
-}
-
-bool DOA2Correlator::performIFFT2Corr(
-    const SampleVector& data0,
-    unsigned int size0,
-    const SampleVector& data1,
-    unsigned int size1
-)
-{
-    unsigned int size = std::min(size0, size1);
-    int nfft = 0;
-    SampleVector::const_iterator begin0 = data0.begin();
-    SampleVector::const_iterator begin1 = data1.begin();
-    adjustSCorrSize(size);
-    adjustTCorrSize(size);
-
-    while (size >= m_fftSize)
-    {
-        // FFT[0]
-        std::transform(
-            begin0,
-            begin0 + m_fftSize,
-            m_fft2[0]->in(),
-            s2c
-        );
-        m_window.apply(m_fft2[0]->in());
-        m_fft2[0]->transform();
-
-        // FFT[1]
-        std::transform(
-            begin1,
-            begin1 + m_fftSize,
-            m_fft2[1]->in(),
-            s2c
-        );
-        m_window.apply(m_fft2[1]->in());
-        m_fft2[1]->transform();
-
-        // conjugate FFT[1]
-        std::transform(
-            m_fft2[1]->out(),
-            m_fft2[1]->out() + m_fftSize,
-            m_dataj,
-            [](const std::complex<float>& c) -> std::complex<float> {
-                return std::conj(c);
-            }
-        );
-
-        // product of FFT[1]* with FFT[0] and store in inverse FFT input
-        std::transform(
-            m_fft2[0]->out(),
-            m_fft2[0]->out() + m_fftSize,
-            m_dataj,
-            m_invFFT2->in(),
-            [](std::complex<float>& a, const std::complex<float>& b) -> std::complex<float> {
-                return (a*b);
-            }
-        );
-
-        // copy product to correlation spectrum - convert and scale to FFT size
-        std::transform(
-            m_invFFT2->in(),
-            m_invFFT2->in() + m_fftSize,
-            m_scorr.begin() + nfft*m_fftSize,
-            [this](const std::complex<float>& a) -> Sample {
-                Sample s;
-                s.setReal(a.real()*(SDR_RX_SCALEF/m_fftSize));
-                s.setImag(a.imag()*(SDR_RX_SCALEF/m_fftSize));
-                return s;
-            }
-        );
-
-        // do the inverse FFT to get time correlation
-        m_invFFT2->transform();
-        std::transform(
-            m_invFFT2->out() + m_fftSize/2,
-            m_invFFT2->out() + m_fftSize,
-            m_tcorr.begin() + nfft*m_fftSize,
-            [](const std::complex<float>& a) -> Sample {
-                Sample s;
-                s.setReal(a.real()/3.0f);
-                s.setImag(a.imag()/3.0f);
-                return s;
-            }
-        );
-        std::transform(
-            m_invFFT2->out(),
-            m_invFFT2->out() + m_fftSize/2,
-            m_tcorr.begin() + nfft*m_fftSize + m_fftSize/2,
-            [](const std::complex<float>& a) -> Sample {
-                Sample s;
-                s.setReal(a.real()/3.0f);
-                s.setImag(a.imag()/3.0f);
-                return s;
-            }
-        );
-
-        size -= m_fftSize;
-        begin0 += m_fftSize;
-        begin1 += m_fftSize;
-        nfft++;
-    }
-
-    // update the samples counters
-    m_processed = nfft*m_fftSize;
-    m_remaining[0] = size0 - nfft*m_fftSize;
-    m_remaining[1] = size1 - nfft*m_fftSize;
-
-    return nfft > 0;
 }
 
 bool DOA2Correlator::performFFTProd(

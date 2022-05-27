@@ -33,7 +33,7 @@ DOA2Settings::DOA2Settings() :
 
 void DOA2Settings::resetToDefaults()
 {
-    m_correlationType = CorrelationAdd;
+    m_correlationType = CorrelationFFT;
     m_rgbColor = QColor(250, 120, 120).rgb();
     m_title = "DOA 2 sources";
     m_log2Decim = 0;
@@ -98,7 +98,7 @@ bool DOA2Settings::deserialize(const QByteArray& data)
         d.readS32(2, &tmp, 0);
         m_correlationType = (CorrelationType) tmp;
         d.readU32(3, &m_rgbColor);
-        d.readString(4, &m_title, "Interpolator");
+        d.readString(4, &m_title, "DOA 2 sources");
         d.readU32(5, &utmp, 0);
         m_log2Decim = utmp > 6 ? 6 : utmp;
         d.readU32(6, &m_filterChainHash, 0);

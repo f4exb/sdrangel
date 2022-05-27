@@ -29,12 +29,7 @@ struct DOA2Settings
     {
         Correlation0,
         Correlation1,
-        CorrelationAdd,
-        CorrelationMultiply,
-        CorrelationIFFT,
-        CorrelationIFFTStar,
         CorrelationFFT,
-        CorrelationIFFT2
     };
 
     CorrelationType m_correlationType;

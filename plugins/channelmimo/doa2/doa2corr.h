@@ -62,19 +62,6 @@ private:
         unsigned int size1,
         Sample sampleOp(const Sample& a, const Sample& b)
     );
-    bool performIFFTCorr( //!< Returns true if results were produced
-        const SampleVector& data0,
-        unsigned int size0,
-        const SampleVector& data1,
-        unsigned int size1,
-        bool star = false
-    );
-    bool performIFFT2Corr( //!< Returns true if results were produced
-        const SampleVector& data0,
-        unsigned int size0,
-        const SampleVector& data1,
-        unsigned int size1
-    );
     bool performFFTProd( //!< Returns true if results were produced
         const SampleVector& data0,
         unsigned int size0,

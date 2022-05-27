@@ -179,7 +179,7 @@
         <item>
          <widget class="QComboBox" name="correlationType">
           <property name="toolTip">
-           <string>Correlation type</string>
+           <string>Scope correlation type</string>
           </property>
           <item>
            <property name="text">
@@ -193,32 +193,7 @@
           </item>
           <item>
            <property name="text">
-            <string>A+B</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>A.B*</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>IFFT</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>IFFT*</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
             <string>FFT</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>IFFT2</string>
            </property>
           </item>
          </widget>
@@ -377,7 +352,7 @@
     </size>
    </property>
    <property name="windowTitle">
-    <string>Time domain</string>
+    <string>Scope</string>
    </property>
    <layout class="QVBoxLayout" name="verticalLayoutScope">
     <property name="spacing">
@@ -465,7 +440,14 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="DOA2Compass" name="compass" native="true"/>
+       <widget class="DOA2Compass" name="compass" native="true">
+        <property name="font">
+         <font>
+          <family>Liberation Sans</family>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
