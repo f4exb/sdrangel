@@ -151,6 +151,11 @@ DOA2GUI::DOA2GUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *ch
     makeUIConnections();
     displayRateAndShift();
     applySettings(true);
+
+    // Test
+    ui->compass->setAzNeg(85);
+    ui->compass->setAzPos(315);
+    ui->compass->setAzAnt(20);
 }
 
 DOA2GUI::~DOA2GUI()

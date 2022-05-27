@@ -31,70 +31,93 @@ public:
     ///
     /// \brief Set all data (yaw, alt, height)
     ///
-    /// \param y - yaw ( in degree)
-    /// \param a - altitude ( in m)
-    /// \param h - height from ground (in m)
+    /// \param azPos - forward (positive angles side relative to antennas direction) azimuth (in degrees)
+    /// \param azNeg - reverse (negatve angles side relative to antennas direction) azimuth (in degrees)
+    /// \param azAnt - antennas azimuth from 1 (connected to stream 0) to 2 (connected to stream 1)
     ///
-    void setData(double y, double a, double h) {
-        m_yaw = y;
-        m_alt = a;
-        m_h   = h;
+    void setData(double azPos, double azNeg, double azAnt) {
+        m_azPos = azPos;
+        m_azNeg = azNeg;
+        m_azAnt = azAnt;
 
-        if( m_yaw < 0   ) m_yaw = 360 + m_yaw;
-        if( m_yaw > 360 ) m_yaw = m_yaw - 360;
+        if( m_azPos < 0   ) m_azPos = 360 + m_azPos;
+        if( m_azPos > 360 ) m_azPos = m_azPos - 360;
 
-        emit canvasReplot();
-    }
+        if( m_azNeg < 0   ) m_azNeg = 360 + m_azNeg;
+        if( m_azNeg > 360 ) m_azNeg = m_azNeg - 360;
 
-    ///
-    /// \brief Set yaw angle (in degree)
-    /// \param val - yaw angle (in degree)
-    ///
-    void setYaw(double val) {
-        m_yaw  = val;
-        if( m_yaw < 0   ) m_yaw = 360 + m_yaw;
-        if( m_yaw > 360 ) m_yaw = m_yaw - 360;
+        if( azAnt < 0   ) azAnt = 360 + azAnt;
+        if( azAnt > 360 ) azAnt = azAnt - 360;
 
         emit canvasReplot();
     }
 
     ///
-    /// \brief Set altitude value
-    /// \param val - altitude (in m)
+    /// \brief Set forward azimoth (in degree)
+    /// \param val - forward azimoth (in degree)
     ///
-    void setAlt(double val) {
-        m_alt = val;
+    void setAzPos(double val)
+    {
+        m_azPos  = val;
+        if( m_azPos < 0   ) m_azPos = 360 + m_azPos;
+        if( m_azPos > 360 ) m_azPos = m_azPos - 360;
 
         emit canvasReplot();
     }
 
     ///
-    /// \brief Set height from ground
-    /// \param val - height (in m)
+    /// \brief Set reverse azimoth (in degree)
+    /// \param val - reverse azimoth (in degree)
     ///
-    void setH(double val) {
-        m_h = val;
+    void setAzNeg(double val)
+    {
+        m_azNeg  = val;
+        if( m_azNeg < 0   ) m_azNeg = 360 + m_azNeg;
+        if( m_azNeg > 360 ) m_azNeg = m_azNeg - 360;
 
         emit canvasReplot();
     }
 
     ///
-    /// \brief Get yaw angle
-    /// \return yaw angle (in degree)
+    /// \brief Set antennas azimoth (in degree)
+    /// \param val - antennas azimoth (in degree)
     ///
-    double getYaw() {return m_yaw;}
+    void setAzAnt(double val)
+    {
+        m_azAnt  = val;
+        if( m_azAnt < 0   ) m_azAnt = 360 + m_azAnt;
+        if( m_azAnt > 360 ) m_azAnt = m_azAnt - 360;
+
+        emit canvasReplot();
+    }
 
     ///
-    /// \brief Get altitude value
-    /// \return altitude (in m)
+    /// \brief Draw legend in the center of the compass
+    /// \param drawLegend - true to draw legend else false
     ///
-    double getAlt() {return m_alt;}
+    void drawLegend(bool drawLegend)
+    {
+        m_drawLegend = drawLegend;
+        emit canvasReplot();
+    }
 
     ///
-    /// \brief Get height from ground
-    /// \return height from ground (in m)
+    /// \brief Get forward azimuth
+    /// \return forward azimuth (in degree)
     ///
-    double getH()   {return m_h;}
+    double getAzPos() const {return m_azPos; }
+
+    ///
+    /// \brief Get reverse azimuth
+    /// \return reverse azimuth (in degree)
+    ///
+    double getAzNeg() const {return m_azNeg; }
+
+    ///
+    /// \brief Get antennas azimuth
+    /// \return antennas azimuth (in degree)
+    ///
+    double getAzAnt() const {return m_azAnt; }
 
 signals:
     void canvasReplot(void);
@@ -105,15 +128,15 @@ protected slots:
 protected:
     void paintEvent(QPaintEvent *event);
     void resizeEvent(QResizeEvent *event);
-    void keyPressEvent(QKeyEvent *event);
 
 protected:
     int     m_sizeMin, m_sizeMax;               ///< widget min/max size (in pixel)
     int     m_size, m_offset;                   ///< widget size and offset size
+    bool    m_drawLegend;                       ///< draw legend in the center
 
-    double  m_yaw;                              ///< yaw angle (in degree)
-    double  m_alt;                              ///< altitude (in m)
-    double  m_h;                                ///< height from ground (in m)
+    double  m_azPos;                            ///< forward (+) azimuth (in degree)
+    double  m_azNeg;                            ///< reverse (-) azimuth (in degree)
+    double  m_azAnt;                            ///< antennas azimuth from 1 (connected to stream 0) to 2 (connected to stream 1)
 };
 
 #endif // INCLUDE_DOA2COMPASS_H
