@@ -38,6 +38,7 @@ struct DOA2Settings
     uint32_t m_log2Decim;
     uint32_t m_filterChainHash;
     int m_phase;
+    int m_antennaAz;
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;

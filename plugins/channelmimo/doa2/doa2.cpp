@@ -293,6 +293,16 @@ void DOA2::applyChannelSettings(uint32_t log2Decim, uint32_t filterChainHash)
     m_basebandSink->getInputMessageQueue()->push(msg);
 }
 
+float DOA2::getPhi() const
+{
+    return m_basebandSink ? m_basebandSink->getPhi() : 0.0f;
+}
+
+float DOA2::getPositiveDOA() const
+{
+    return std::acos(getPhi()/M_PI)*(180/M_PI);
+}
+
 int DOA2::webapiSettingsGet(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)

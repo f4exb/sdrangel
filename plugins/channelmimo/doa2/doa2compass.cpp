@@ -87,7 +87,7 @@ void DOA2Compass::paintEvent(QPaintEvent *)
     }
 
 
-    // draw yaw lines
+    // draw compass lines
     {
         int     nyawLines = 36;
         float   rotAng = 360.0 / nyawLines;
@@ -150,7 +150,7 @@ void DOA2Compass::paintEvent(QPaintEvent *)
         painter.rotate(m_azAnt);
 
         painter.setPen(Qt::NoPen);
-        painter.setBrush(QBrush(Qt::white));
+        painter.setBrush(QBrush(QColor(192, 192, 192)));
         QPointF pointsN[3] = {
             QPointF(fx1, fy1),
             QPointF(fx2, fy2),

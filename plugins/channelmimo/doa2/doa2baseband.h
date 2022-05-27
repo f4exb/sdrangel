@@ -110,13 +110,21 @@ public:
 
 	void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int streamIndex);
     void setBasebandSampleRate(unsigned int sampleRate);
+    float getPhi() const { return m_phi; }
 
 private:
     void processFifo(const std::vector<SampleVector>& data, unsigned int ibegin, unsigned int iend);
     void run();
     bool handleMessage(const Message& cmd);
+    void processDOA(const std::vector<Complex>::iterator& begin, int nbSamples);
 
     DOA2Correlator m_correlator;
+    DOA2Settings::CorrelationType m_correlationType;
+    int m_fftSize;
+    int m_samplesCount;
+    float m_magSum;
+    float m_wphSum;
+    float m_phi;
     SampleMIFifo m_sampleMIFifo;
     std::vector<SampleVector::const_iterator> m_vbegin;
     int m_sizes[2];

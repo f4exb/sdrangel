@@ -46,10 +46,10 @@ public:
     int getFullFFTSize() const { return 2*m_fftSize; }
     void setPhase(int phase);
 
-    SampleVector m_scorr; //!< raw correlation result (spectrum) - Sample vector expected
-    SampleVector m_tcorr; //!< correlation result (time or spectrum inverse FFT) - Sample vector expected
-    int m_processed;      //!< number of samples processed at the end of correlation
-    int m_remaining[2];   //!< number of samples remaining per member at the end of correlation
+    SampleVector m_tcorr;         //!< correlation result (time or spectrum inverse FFT) - Sample vector expected
+    std::vector<Complex> m_xcorr; //!< correlation result of inverse FFT of FFT prod with conjugate (performFFTProd) for DOA processing
+    int m_processed;              //!< number of samples processed at the end of correlation
+    int m_remaining[2];           //!< number of samples remaining per member at the end of correlation
 
 signals:
     void dataReady(int start, int stop);
@@ -68,8 +68,8 @@ private:
         const SampleVector& data1,
         unsigned int size1
     );
-    void adjustSCorrSize(int size);
     void adjustTCorrSize(int size);
+    void adjustXCorrSize(int size);
 
     DOA2Settings::CorrelationType m_corrType;
     unsigned int m_fftSize;          //!< FFT length
@@ -86,8 +86,8 @@ private:
     SampleVector m_data0w;           //!< windowed data 0
     SampleVector m_data1w;           //!< windowed data 1
     SampleVector m_data1p;           //!< data1 with phase correction
-    int m_scorrSize;                 //!< spectrum correlations vector size
     int m_tcorrSize;                 //!< time correlations vector size
+    int m_xcorrSize;                 //!< DOA correlations vector size
     int m_phase;   //!< phase correction
     int64_t m_sin; //!< scaled sine of phase correction
     int64_t m_cos; //!< scaled cosine of phase correction

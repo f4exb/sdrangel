@@ -45,6 +45,7 @@ void DOA2Settings::resetToDefaults()
     m_reverseAPIChannelIndex = 0;
     m_workspaceIndex = 0;
     m_hidden = false;
+    m_antennaAz = 0;
 }
 
 QByteArray DOA2Settings::serialize() const
@@ -65,6 +66,7 @@ QByteArray DOA2Settings::serialize() const
     s.writeS32(13,m_workspaceIndex);
     s.writeBlob(14, m_geometryBytes);
     s.writeBool(15, m_hidden);
+    s.writeS32(16, m_antennaAz);
 
     if (m_scopeGUI) {
         s.writeBlob(21, m_scopeGUI->serialize());
@@ -121,6 +123,8 @@ bool DOA2Settings::deserialize(const QByteArray& data)
         d.readS32(13, &m_workspaceIndex);
         d.readBlob(14, &m_geometryBytes);
         d.readBool(15, &m_hidden, false);
+        d.readS32(16, &tmp, 0);
+        m_antennaAz = tmp < 0 ? 0 : tmp > 359 ? 359 : tmp;
 
         if (m_scopeGUI)
         {

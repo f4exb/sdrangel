@@ -33,6 +33,12 @@ MESSAGE_CLASS_DEFINITION(DOA2Baseband::MsgConfigureCorrelation, Message)
 
 DOA2Baseband::DOA2Baseband(int fftSize) :
     m_correlator(fftSize),
+    m_correlationType(DOA2Settings::CorrelationFFT),
+    m_fftSize(fftSize),
+    m_samplesCount(0),
+    m_magSum(0.0f),
+    m_wphSum(0.0f),
+    m_phi(0.0f),
     m_scopeSink(nullptr),
     m_mutex(QMutex::Recursive)
 {
@@ -142,6 +148,10 @@ void DOA2Baseband::run()
 {
     if (m_correlator.performCorr(m_sinks[0].getData(), m_sinks[0].getSize(), m_sinks[1].getData(), m_sinks[1].getSize()))
     {
+        if (m_correlationType == DOA2Settings::CorrelationType::CorrelationFFT) {
+            processDOA(m_correlator.m_xcorr.begin(), m_correlator.m_processed);
+        }
+
         if (m_scopeSink)
         {
             std::vector<SampleVector::const_iterator> vbegin;
@@ -221,12 +231,12 @@ bool DOA2Baseband::handleMessage(const Message& cmd)
     {
         QMutexLocker mutexLocker(&m_mutex);
         MsgConfigureCorrelation& cfg = (MsgConfigureCorrelation&) cmd;
-        DOA2Settings::CorrelationType correlationType = cfg.getCorrelationType();
+        m_correlationType = cfg.getCorrelationType();
 
         qDebug() << "DOA2Baseband::handleMessage: MsgConfigureCorrelation:"
-                << " correlationType: " << correlationType;
+                << " correlationType: " << m_correlationType;
 
-        m_correlator.setCorrType(correlationType);
+        m_correlator.setCorrType(m_correlationType);
 
         return true;
     }
@@ -243,5 +253,26 @@ void DOA2Baseband ::setBasebandSampleRate(unsigned int sampleRate)
     {
         m_channelizers[istream]->setBasebandSampleRate(sampleRate);
         m_sinks[istream].reset();
+    }
+}
+
+void DOA2Baseband::processDOA(const std::vector<Complex>::iterator& begin, int nbSamples)
+{
+    const std::vector<Complex>::iterator end = begin + nbSamples;
+
+    for (std::vector<Complex>::iterator it = begin; it != end; ++it)
+    {
+        float ph = std::arg(*it);
+        float mag = std::norm(*it);
+        m_magSum += mag;
+        m_wphSum += mag*ph;
+
+        if (++m_samplesCount == m_fftSize)
+        {
+            m_phi = m_wphSum / m_magSum;
+            m_magSum = 0;
+            m_wphSum = 0;
+            m_samplesCount = 0;
+        }
     }
 }

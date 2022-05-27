@@ -152,6 +152,8 @@ DOA2GUI::DOA2GUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *ch
     displayRateAndShift();
     applySettings(true);
 
+    connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
+
     // Test
     ui->compass->setAzNeg(85);
     ui->compass->setAzPos(315);
@@ -200,6 +202,8 @@ void DOA2GUI::displaySettings()
     applyDecimation();
     ui->phaseCorrection->setValue(m_settings.m_phase);
     ui->phaseCorrectionText->setText(tr("%1").arg(m_settings.m_phase));
+    ui->compass->setAzAnt(m_settings.m_antennaAz);
+    ui->antAz->setValue(m_settings.m_antennaAz);
     getRollupContents()->restoreState(m_rollupState);
     updateAbsoluteCenterFrequency();
     blockApplySettings(false);
@@ -318,6 +322,14 @@ void DOA2GUI::on_correlationType_currentIndexChanged(int index)
     applySettings();
 }
 
+void DOA2GUI::on_antAz_valueChanged(int value)
+{
+    m_settings.m_antennaAz = value;
+    ui->compass->setAzAnt(value);
+    updateDOA();
+    applySettings();
+}
+
 void DOA2GUI::applyDecimation()
 {
     uint32_t maxHash = 1;
@@ -346,7 +358,9 @@ void DOA2GUI::applyPosition()
 
 void DOA2GUI::tick()
 {
-    if (++m_tickCount == 20) { // once per second
+    if (++m_tickCount == 20) // once per second
+    {
+        updateDOA();
         m_tickCount = 0;
     }
 }
@@ -357,9 +371,21 @@ void DOA2GUI::makeUIConnections()
     QObject::connect(ui->position, &QSlider::valueChanged, this, &DOA2GUI::on_position_valueChanged);
     QObject::connect(ui->phaseCorrection, &QSlider::valueChanged, this, &DOA2GUI::on_phaseCorrection_valueChanged);
     QObject::connect(ui->correlationType, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DOA2GUI::on_correlationType_currentIndexChanged);
+    QObject::connect(ui->antAz, QOverload<int>::of(&QSpinBox::valueChanged), this, &DOA2GUI::on_antAz_valueChanged);
 }
 
 void DOA2GUI::updateAbsoluteCenterFrequency()
 {
     setStatusFrequency(m_centerFrequency + m_shiftFrequencyFactor * m_sampleRate);
+}
+
+void DOA2GUI::updateDOA()
+{
+    float doaAngle = m_doa2->getPositiveDOA();
+    float posAngle = ui->antAz->value() - doaAngle; // DOA angles are trigonometric but displayed angles are clockwise
+    float negAngle = ui->antAz->value() + doaAngle;
+    ui->compass->setAzPos(posAngle);
+    ui->compass->setAzNeg(negAngle);
+    ui->posText->setText(tr("%1").arg(ui->compass->getAzPos(), 0, 'f', 0));
+    ui->negText->setText(tr("%1").arg(ui->compass->getAzNeg(), 0, 'f', 0));
 }

@@ -335,7 +335,7 @@
     <rect>
      <x>0</x>
      <y>98</y>
-     <width>720</width>
+     <width>718</width>
      <height>334</height>
     </rect>
    </property>
@@ -402,8 +402,8 @@
     <rect>
      <x>0</x>
      <y>432</y>
-     <width>720</width>
-     <height>284</height>
+     <width>718</width>
+     <height>85</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -438,9 +438,115 @@
      <number>2</number>
     </property>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="1">
+       <layout class="QHBoxLayout" name="doaValuesLayout">
+        <item>
+         <widget class="QLabel" name="posLabel">
+          <property name="text">
+           <string>Pos</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="posText">
+          <property name="text">
+           <string>000</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="spcLabel1">
+          <property name="minimumSize">
+           <size>
+            <width>10</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="negLabel">
+          <property name="text">
+           <string>Neg</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="negText">
+          <property name="text">
+           <string>000</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="spcLabel1_2">
+          <property name="minimumSize">
+           <size>
+            <width>10</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="antLabel">
+          <property name="text">
+           <string>Ant</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="antAz">
+          <property name="minimumSize">
+           <size>
+            <width>60</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="wrapping">
+           <bool>true</bool>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+          <property name="maximum">
+           <number>359</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item row="1" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout"/>
+      </item>
+      <item row="0" column="0" rowspan="2">
        <widget class="DOA2Compass" name="compass" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>359</width>
+          <height>200</height>
+         </size>
+        </property>
         <property name="font">
          <font>
           <family>Liberation Sans</family>

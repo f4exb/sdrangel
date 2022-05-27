@@ -138,10 +138,10 @@ DOA2Correlator::DOA2Correlator(int fftSize) :
     m_invFFT2Sequence = fftFactory->getEngine(fftSize, true, &m_invFFT2);
 
     m_dataj = new std::complex<float>[2*fftSize]; // receives actual FFT result hence twice the data FFT size
-    m_scorr.resize(fftSize);
     m_tcorr.resize(fftSize);
-    m_scorrSize = fftSize;
+    m_xcorr.resize(fftSize);
     m_tcorrSize = fftSize;
+    m_xcorrSize = fftSize;
 }
 
 DOA2Correlator::~DOA2Correlator()
@@ -268,6 +268,7 @@ bool DOA2Correlator::performOpCorr(
 {
     unsigned int size = std::min(size0, size1);
     adjustTCorrSize(size);
+    adjustXCorrSize(size);
 
     std::transform(
         data0.begin(),
@@ -294,8 +295,8 @@ bool DOA2Correlator::performFFTProd(
     int nfft = 0;
     SampleVector::const_iterator begin0 = data0.begin();
     SampleVector::const_iterator begin1 = data1.begin();
-    adjustSCorrSize(size);
     adjustTCorrSize(size);
+    adjustXCorrSize(size);
 
     while (size >= m_fftSize)
     {
@@ -340,21 +341,22 @@ bool DOA2Correlator::performFFTProd(
             }
         );
 
-        // copy product to time domain - re-order, convert and scale to FFT size
-        std::transform(
+        // copy to complex vector for DOA with re-orderong
+        std::copy(
             m_invFFT2->in(),
             m_invFFT2->in() + m_fftSize/2,
-            m_tcorr.begin() + nfft*m_fftSize + m_fftSize/2,
-            [](const std::complex<float>& a) -> Sample {
-                Sample s;
-                s.setReal(a.real()/2.0f);
-                s.setImag(a.imag()/2.0f);
-                return s;
-            }
+            m_xcorr.begin() + nfft*m_fftSize + m_fftSize/2
         );
-        std::transform(
+        std::copy(
             m_invFFT2->in() + m_fftSize/2,
             m_invFFT2->in() + m_fftSize,
+            m_xcorr.begin() + nfft*m_fftSize
+        );
+
+        // convert and scale to FFT size for scope time domain display
+        std::transform(
+            m_xcorr.begin() + nfft*m_fftSize,
+            m_xcorr.begin() + nfft*m_fftSize + m_fftSize,
             m_tcorr.begin() + nfft*m_fftSize,
             [](const std::complex<float>& a) -> Sample {
                 Sample s;
@@ -364,14 +366,29 @@ bool DOA2Correlator::performFFTProd(
             }
         );
 
-        // feed spectrum with the sum
-        std::transform(
-            begin0,
-            begin0 + m_fftSize,
-            begin1,
-            m_scorr.begin() + nfft*m_fftSize,
-            sAdd
-        );
+        // copy product to time domain - re-order, convert and scale to FFT size
+        // std::transform(
+        //     m_invFFT2->in(),
+        //     m_invFFT2->in() + m_fftSize/2,
+        //     m_tcorr.begin() + nfft*m_fftSize + m_fftSize/2,
+        //     [](const std::complex<float>& a) -> Sample {
+        //         Sample s;
+        //         s.setReal(a.real()/2.0f);
+        //         s.setImag(a.imag()/2.0f);
+        //         return s;
+        //     }
+        // );
+        // std::transform(
+        //     m_invFFT2->in() + m_fftSize/2,
+        //     m_invFFT2->in() + m_fftSize,
+        //     m_tcorr.begin() + nfft*m_fftSize,
+        //     [](const std::complex<float>& a) -> Sample {
+        //         Sample s;
+        //         s.setReal(a.real()/2.0f);
+        //         s.setImag(a.imag()/2.0f);
+        //         return s;
+        //     }
+        // );
 
         size -= m_fftSize;
         begin0 += m_fftSize;
@@ -387,17 +404,6 @@ bool DOA2Correlator::performFFTProd(
     return nfft > 0;
 }
 
-void DOA2Correlator::adjustSCorrSize(int size)
-{
-    int nFFTSize = (size/m_fftSize)*m_fftSize;
-
-    if (nFFTSize > m_scorrSize)
-    {
-        m_scorr.resize(nFFTSize);
-        m_scorrSize = nFFTSize;
-    }
-}
-
 void DOA2Correlator::adjustTCorrSize(int size)
 {
     int nFFTSize = (size/m_fftSize)*m_fftSize;
@@ -406,6 +412,17 @@ void DOA2Correlator::adjustTCorrSize(int size)
     {
         m_tcorr.resize(nFFTSize);
         m_tcorrSize = nFFTSize;
+    }
+}
+
+void DOA2Correlator::adjustXCorrSize(int size)
+{
+    int nFFTSize = (size/m_fftSize)*m_fftSize;
+
+    if (nFFTSize > m_xcorrSize)
+    {
+        m_xcorr.resize(nFFTSize);
+        m_xcorrSize = nFFTSize;
     }
 }
 

@@ -87,6 +87,7 @@ private:
     bool handleMessage(const Message& message);
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();
+    void updateDOA();
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
@@ -97,6 +98,7 @@ private slots:
     void on_position_valueChanged(int value);
     void on_phaseCorrection_valueChanged(int value);
     void on_correlationType_currentIndexChanged(int index);
+    void on_antAz_valueChanged(int value);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
 	void tick();

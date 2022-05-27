@@ -125,6 +125,8 @@ public:
 
     ScopeVis *getScopeVis() { return &m_scopeSink; }
     void applyChannelSettings(uint32_t log2Decim, uint32_t filterChainHash);
+    float getPhi() const;
+    float getPositiveDOA() const;
 
     virtual int webapiSettingsGet(
             SWGSDRangel::SWGChannelSettings& response,
