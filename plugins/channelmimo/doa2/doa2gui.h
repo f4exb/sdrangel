@@ -90,6 +90,7 @@ private:
     bool handleMessage(const Message& message);
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();
+    void updateScopeFScale();
     void updateDOA();
 
 	void leaveEvent(QEvent*);

@@ -333,6 +333,7 @@ void DOA2GUI::onMenuDialogCalled(const QPoint &p)
 void DOA2GUI::on_decimationFactor_currentIndexChanged(int index)
 {
     m_settings.m_log2Decim = index;
+    updateScopeFScale();
     applyDecimation();
 }
 
@@ -352,6 +353,7 @@ void DOA2GUI::on_phaseCorrection_valueChanged(int value)
 void DOA2GUI::on_correlationType_currentIndexChanged(int index)
 {
     m_settings.m_correlationType = (DOA2Settings::CorrelationType) index;
+    updateScopeFScale();
     applySettings();
 }
 
@@ -438,6 +440,19 @@ void DOA2GUI::updateAbsoluteCenterFrequency()
     setStatusFrequency(cf);
     m_hwl = 1.5e+8 / cf;
     ui->halfWLText->setText(tr("%1").arg(m_hwl*1000, 5, 'f', 0));
+    updateScopeFScale();
+}
+
+void DOA2GUI::updateScopeFScale()
+{
+    if (m_settings.m_correlationType == DOA2Settings::CorrelationType::CorrelationFFT) {
+        ui->glScope->setXScaleFreq(true);
+    } else {
+        ui->glScope->setXScaleFreq(false);
+    }
+
+    ui->glScope->setXScaleCenterFrequency(m_centerFrequency);
+    ui->glScope->setXScaleFrequencySpan(m_sampleRate / (1<<m_settings.m_log2Decim));
 }
 
 void DOA2GUI::updateDOA()
