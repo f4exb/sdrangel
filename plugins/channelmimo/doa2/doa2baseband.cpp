@@ -40,6 +40,8 @@ DOA2Baseband::DOA2Baseband(int fftSize) :
     m_wphSum(0.0f),
     m_phi(0.0f),
     m_magThreshold(0.0f),
+    m_fftAvg(1),
+    m_fftAvgCount(0),
     m_scopeSink(nullptr),
     m_mutex(QMutex::Recursive)
 {
@@ -257,6 +259,16 @@ void DOA2Baseband ::setBasebandSampleRate(unsigned int sampleRate)
     }
 }
 
+void DOA2Baseband::setFFTAveraging(int nbFFT)
+{
+    qDebug("DOA2Baseband::setFFTAveraging: %d", nbFFT);
+    m_fftAvg = nbFFT < 1 ? 1 : nbFFT;
+    m_fftAvgCount = 0;
+    m_magSum = 0;
+    m_wphSum = 0;
+    m_samplesCount = 0;
+}
+
 void DOA2Baseband::processDOA(const std::vector<Complex>::iterator& begin, int nbSamples)
 {
     const std::vector<Complex>::iterator end = begin + nbSamples;
@@ -274,8 +286,13 @@ void DOA2Baseband::processDOA(const std::vector<Complex>::iterator& begin, int n
 
         if (++m_samplesCount == m_fftSize)
         {
-            if (m_wphSum != 0) {
-                m_phi = m_wphSum / m_magSum;
+            if (m_wphSum != 0)
+            {
+                if (++m_fftAvgCount == m_fftAvg)
+                {
+                    m_phi = m_wphSum / m_magSum;
+                    m_fftAvgCount = 0;
+                }
             }
 
             m_magSum = 0;

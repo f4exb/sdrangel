@@ -105,6 +105,16 @@ public:
     }
 
     ///
+    /// \brief Set blind scector color
+    /// \param val - blind sector color
+    ///
+    void setBlindColor(const QColor& color)
+    {
+        m_blindColor  = color;
+        emit canvasReplot();
+    }
+
+    ///
     /// \brief Draw legend in the center of the compass
     /// \param drawLegend - true to draw legend else false
     ///
@@ -151,6 +161,7 @@ protected:
     double  m_azNeg;                            ///< reverse (-) azimuth (in degree)
     double  m_azAnt;                            ///< antennas azimuth from 1 (connected to stream 0) to 2 (connected to stream 1)
     double  m_blindAngle;                       //!< half the angle around antenna direction where DOA cannot be processed (when baseline distance exceeds half wavelength)
+    QColor  m_blindColor;
 };
 
 #endif // INCLUDE_DOA2COMPASS_H

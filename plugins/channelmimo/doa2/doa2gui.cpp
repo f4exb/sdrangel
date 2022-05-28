@@ -80,6 +80,7 @@ bool DOA2GUI::handleMessage(const Message& message)
         m_centerFrequency = notif.getCenterFrequency();
         displayRateAndShift();
         updateAbsoluteCenterFrequency();
+        setFFTAveragingToolitp();
         return true;
     }
     else if (DOA2::MsgConfigureDOA2::match(message))
@@ -205,6 +206,8 @@ void DOA2GUI::displaySettings()
     ui->baselineDistance->setValue(m_settings.m_basebandDistance);
     ui->squelch->setValue(m_settings.m_squelchdB);
     ui->squelchText->setText(tr("%1").arg(m_settings.m_squelchdB, 3));
+    ui->fftAveraging->setCurrentIndex(m_settings.m_fftAveragingIndex);
+    setFFTAveragingToolitp();
     getRollupContents()->restoreState(m_rollupState);
     updateAbsoluteCenterFrequency();
     blockApplySettings(false);
@@ -220,6 +223,35 @@ void DOA2GUI::displayRateAndShift()
     m_channelMarker.setCenterFrequency(shift);
     m_channelMarker.setBandwidth(channelSampleRate);
     m_scopeVis->setLiveRate(channelSampleRate);
+}
+
+void DOA2GUI::setFFTAveragingToolitp()
+{
+    float channelSampleRate = ((float) m_sampleRate) / (1<<m_settings.m_log2Decim);
+    float averagingTime = (DOA2::m_fftSize * DOA2Settings::getAveragingValue(m_settings.m_fftAveragingIndex)) /
+        channelSampleRate;
+    QString s;
+    setNumberStr(averagingTime, 2, s);
+    ui->fftAveraging->setToolTip(QString("Number of averaging FFTs (avg time: %1s)").arg(s));
+}
+
+void DOA2GUI::setNumberStr(float v, int decimalPlaces, QString& s)
+{
+    if (v < 1e-6) {
+        s = tr("%1n").arg(v*1e9, 0, 'f', decimalPlaces);
+    } else if (v < 1e-3) {
+        s = tr("%1µ").arg(v*1e6, 0, 'f', decimalPlaces);
+    } else if (v < 1.0) {
+        s = tr("%1m").arg(v*1e3, 0, 'f', decimalPlaces);
+    } else if (v < 1e3) {
+        s = tr("%1").arg(v, 0, 'f', decimalPlaces);
+    } else if (v < 1e6) {
+        s = tr("%1k").arg(v*1e-3, 0, 'f', decimalPlaces);
+    } else if (v < 1e9) {
+        s = tr("%1M").arg(v*1e-6, 0, 'f', decimalPlaces);
+    } else {
+        s = tr("%1G").arg(v*1e-9, 0, 'f', decimalPlaces);
+    }
 }
 
 void DOA2GUI::leaveEvent(QEvent*)
@@ -345,6 +377,14 @@ void DOA2GUI::on_squelch_valueChanged(int value)
     applySettings();
 }
 
+void DOA2GUI::on_fftAveraging_currentIndexChanged(int index)
+{
+    qDebug("DOA2GUI::on_averaging_currentIndexChanged: %d", index);
+    m_settings.m_fftAveragingIndex = index;
+    applySettings();
+    setFFTAveragingToolitp();
+}
+
 void DOA2GUI::applyDecimation()
 {
     uint32_t maxHash = 1;
@@ -389,6 +429,7 @@ void DOA2GUI::makeUIConnections()
     QObject::connect(ui->antAz, QOverload<int>::of(&QSpinBox::valueChanged), this, &DOA2GUI::on_antAz_valueChanged);
     QObject::connect(ui->baselineDistance, QOverload<int>::of(&QSpinBox::valueChanged), this, &DOA2GUI::on_baselineDistance_valueChanged);
     QObject::connect(ui->squelch, &QDial::valueChanged, this, &DOA2GUI::on_squelch_valueChanged);
+    QObject::connect(ui->fftAveraging, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DOA2GUI::on_fftAveraging_currentIndexChanged);
 }
 
 void DOA2GUI::updateAbsoluteCenterFrequency()
@@ -402,11 +443,11 @@ void DOA2GUI::updateAbsoluteCenterFrequency()
 void DOA2GUI::updateDOA()
 {
     float cosTheta = (m_doa2->getPhi() * m_hwl * 1000.0) / (M_PI * m_settings.m_basebandDistance);
-    float blindAngle = ((cosTheta < -1.0) || (cosTheta > 1.0) ? 0 : std::acos(m_hwl * 1000.0 / m_settings.m_basebandDistance)) * (180/M_PI);
+    float blindAngle = (m_settings.m_basebandDistance > m_hwl * 1000.0) ? std::acos((m_hwl * 1000.0) / m_settings.m_basebandDistance) * (180/M_PI) : 0;
+    ui->compass->setBlindAngle(blindAngle);
     float doaAngle = std::acos(cosTheta < -1.0 ? -1.0 : cosTheta > 1.0 ? 1.0 : cosTheta) * (180/M_PI);
     float posAngle = ui->antAz->value() - doaAngle; // DOA angles are trigonometric but displayed angles are clockwise
     float negAngle = ui->antAz->value() + doaAngle;
-    ui->compass->setBlindAngle(blindAngle);
     ui->compass->setAzPos(posAngle);
     ui->compass->setAzNeg(negAngle);
     ui->posText->setText(tr("%1").arg(ui->compass->getAzPos(), 3, 'f', 0, QLatin1Char('0')));

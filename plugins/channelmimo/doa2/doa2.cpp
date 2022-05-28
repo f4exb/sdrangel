@@ -23,6 +23,7 @@
 
 #include "SWGChannelSettings.h"
 #include "SWGWorkspaceInfo.h"
+#include "SWGChannelReport.h"
 
 #include "device/deviceapi.h"
 #include "dsp/hbfilterchainconverter.h"
@@ -46,7 +47,8 @@ DOA2::DOA2(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_guiMessageQueue(nullptr),
     m_frequencyOffset(0),
-    m_deviceSampleRate(48000)
+    m_deviceSampleRate(48000),
+    m_deviceCenterFrequency(435000000)
 {
     setObjectName(m_channelId);
 
@@ -136,6 +138,7 @@ void DOA2::applySettings(const DOA2Settings& settings, bool force)
         << "m_antennaAz:" << settings.m_antennaAz
         << "m_basebandDistance: " << settings.m_basebandDistance
         << "m_squelchdB: " << settings.m_squelchdB
+        << "m_fftAveragingIndex: "<< settings.m_fftAveragingIndex
         << "m_useReverseAPI: " << settings.m_useReverseAPI
         << "m_reverseAPIAddress: " << settings.m_reverseAPIAddress
         << "m_reverseAPIPort: " << settings.m_reverseAPIPort
@@ -171,6 +174,12 @@ void DOA2::applySettings(const DOA2Settings& settings, bool force)
     {
         reverseAPIKeys.append("squelchdB");
         m_basebandSink->setMagThreshold(CalcDb::powerFromdB(settings.m_squelchdB));
+    }
+
+    if ((m_settings.m_fftAveragingIndex != settings.m_fftAveragingIndex) || force)
+    {
+        reverseAPIKeys.append("m_fftAveragingIndex");
+        m_basebandSink->setFFTAveraging(DOA2Settings::getAveragingValue(settings.m_fftAveragingIndex));
     }
 
     if ((m_settings.m_log2Decim != settings.m_log2Decim)
@@ -237,6 +246,7 @@ bool DOA2::handleMessage(const Message& cmd)
         if (notif.getSourceOrSink()) // deals with source messages only
         {
             m_deviceSampleRate = notif.getSampleRate();
+            m_deviceCenterFrequency = notif.getCenterFrequency();
             calculateFrequencyOffset(); // This is when device sample rate changes
 
             // Notify baseband sink of input sample rate change
@@ -363,6 +373,17 @@ int DOA2::webapiSettingsPutPatch(
     return 200;
 }
 
+int DOA2::webapiReportGet(
+        SWGSDRangel::SWGChannelReport& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setDoa2Report(new SWGSDRangel::SWGDOA2Report());
+    response.getDoa2Report()->init();
+    webapiFormatChannelReport(response);
+    return 200;
+}
+
 void DOA2::webapiUpdateChannelSettings(
         DOA2Settings& settings,
         const QStringList& channelSettingsKeys,
@@ -382,6 +403,22 @@ void DOA2::webapiUpdateChannelSettings(
     {
         settings.m_filterChainHash = response.getDoa2Settings()->getFilterChainHash();
         validateFilterChainHash(settings);
+    }
+
+    if (channelSettingsKeys.contains("phase")) {
+        settings.m_phase = response.getDoa2Settings()->getPhase();
+    }
+    if (channelSettingsKeys.contains("antennaAz")) {
+        settings.m_antennaAz = response.getDoa2Settings()->getAntennaAz();
+    }
+    if (channelSettingsKeys.contains("basebandDistance")) {
+        settings.m_basebandDistance = response.getDoa2Settings()->getBasebandDistance();
+    }
+    if (channelSettingsKeys.contains("squelchdB")) {
+        settings.m_squelchdB = response.getDoa2Settings()->getSquelchdB();
+    }
+    if (channelSettingsKeys.contains("fftAveragingValue")) {
+        settings.m_fftAveragingIndex = DOA2Settings::getAveragingIndex(response.getDoa2Settings()->getFftAveragingValue());
     }
 
     if (channelSettingsKeys.contains("useReverseAPI")) {
@@ -422,6 +459,11 @@ void DOA2::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response
 
     response.getDoa2Settings()->setLog2Decim(settings.m_log2Decim);
     response.getDoa2Settings()->setFilterChainHash(settings.m_filterChainHash);
+    response.getDoa2Settings()->setPhase(settings.m_phase);
+    response.getDoa2Settings()->setAntennaAz(settings.m_antennaAz);
+    response.getDoa2Settings()->setBasebandDistance(settings.m_basebandDistance);
+    response.getDoa2Settings()->setSquelchdB(settings.m_squelchdB);
+    response.getDoa2Settings()->setFftAveragingValue(DOA2Settings::getAveragingValue(settings.m_fftAveragingIndex));
     response.getDoa2Settings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
     if (response.getDoa2Settings()->getReverseApiAddress()) {
@@ -475,6 +517,26 @@ void DOA2::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response
             response.getDoa2Settings()->setRollupState(swgRollupState);
         }
     }
+}
+
+void DOA2::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+{
+    float phi = normalizeAngle(getPhi() * (180/M_PI), 180.0f);
+    response.getDoa2Report()->setPhi(phi);
+
+    float hwl = 1.5e8 / (m_deviceCenterFrequency + m_frequencyOffset);
+    float cosTheta = (getPhi() * hwl * 1000.0) / (M_PI * m_settings.m_basebandDistance);
+    // float blindAngle = ((cosTheta < -1.0) || (cosTheta > 1.0) ? 0 : std::acos(hwl * 1000.0 / m_settings.m_basebandDistance)) * (180/M_PI);
+    float doaAngle = std::acos(cosTheta < -1.0 ? -1.0 : cosTheta > 1.0 ? 1.0 : cosTheta) * (180/M_PI);
+    qDebug("DOA2::webapiFormatChannelReport: phi: %f cosT: %f DOAngle: %f", getPhi(), cosTheta, doaAngle);
+    float posAngle = normalizeAngle(m_settings.m_antennaAz - doaAngle, 360.0f); // DOA angles are trigonometric but displayed angles are clockwise
+    float negAngle = normalizeAngle(m_settings.m_antennaAz + doaAngle, 360.0f);
+    response.getDoa2Report()->setPosAz(posAngle);
+    response.getDoa2Report()->setNegAz(negAngle);
+
+    response.getDoa2Report()->setFftSize(m_fftSize);
+    int channelSampleRate = m_deviceSampleRate / (1<<m_settings.m_log2Decim);
+    response.getDoa2Report()->setChannelSampleRate(channelSampleRate);
 }
 
 void DOA2::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const DOA2Settings& settings, bool force)
@@ -555,6 +617,21 @@ void DOA2::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("filterChainHash") || force) {
         swgDOA2Settings->setFilterChainHash(settings.m_filterChainHash);
     }
+    if (channelSettingsKeys.contains("phase") || force) {
+        swgDOA2Settings->setPhase(settings.m_phase);
+    }
+    if (channelSettingsKeys.contains("antennaAz") || force) {
+        swgDOA2Settings->setAntennaAz(settings.m_antennaAz);
+    }
+    if (channelSettingsKeys.contains("basebandDistance") || force) {
+        swgDOA2Settings->setBasebandDistance(settings.m_basebandDistance);
+    }
+    if (channelSettingsKeys.contains("squelchdB") || force) {
+        swgDOA2Settings->setSquelchdB(settings.m_squelchdB);
+    }
+    if (channelSettingsKeys.contains("fftAveragingValue") || force) {
+        swgDOA2Settings->setFftAveragingValue(DOA2Settings::getAveragingValue(settings.m_fftAveragingIndex));
+    }
 
     if (settings.m_scopeGUI)
     {
@@ -597,4 +674,11 @@ void DOA2::networkManagerFinished(QNetworkReply *reply)
     }
 
     reply->deleteLater();
+}
+
+float DOA2::normalizeAngle(float angle, float max)
+{
+    if (angle < 0)   { return max + angle; }
+    if (angle > max) { return angle - max; }
+    return angle;
 }

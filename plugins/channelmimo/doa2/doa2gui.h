@@ -85,6 +85,8 @@ private:
     void applyPosition();
 	void displaySettings();
     void displayRateAndShift();
+    void setFFTAveragingToolitp();
+    static void setNumberStr(float v, int decimalPlaces, QString& s);
     bool handleMessage(const Message& message);
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();
@@ -102,6 +104,7 @@ private slots:
     void on_antAz_valueChanged(int value);
     void on_baselineDistance_valueChanged(int value);
     void on_squelch_valueChanged(int value);
+    void on_fftAveraging_currentIndexChanged(int index);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
 	void tick();

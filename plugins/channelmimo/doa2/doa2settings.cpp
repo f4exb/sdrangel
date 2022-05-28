@@ -48,6 +48,7 @@ void DOA2Settings::resetToDefaults()
     m_antennaAz = 0;
     m_basebandDistance = 500;
     m_squelchdB = -50;
+    m_fftAveragingIndex = 0;
 }
 
 QByteArray DOA2Settings::serialize() const
@@ -71,6 +72,7 @@ QByteArray DOA2Settings::serialize() const
     s.writeS32(16, m_antennaAz);
     s.writeU32(17, m_basebandDistance);
     s.writeS32(18, m_squelchdB);
+    s.writeS32(19, m_fftAveragingIndex);
 
     if (m_scopeGUI) {
         s.writeBlob(21, m_scopeGUI->serialize());
@@ -132,6 +134,12 @@ bool DOA2Settings::deserialize(const QByteArray& data)
         d.readU32(17, &utmp, 500);
         m_basebandDistance = utmp == 0 ? 1 : utmp;
         d.readS32(18, &m_squelchdB, -50);
+        d.readS32(19, &tmp, 0);
+        m_fftAveragingIndex = tmp < 0 ?
+            0 :
+            tmp > 3*m_averagingMaxExponent + 3 ?
+                3*m_averagingMaxExponent + 3:
+                tmp;
 
         if (m_scopeGUI)
         {
@@ -158,4 +166,57 @@ bool DOA2Settings::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+int DOA2Settings::getAveragingValue(int averagingIndex)
+{
+    if (averagingIndex <= 0) {
+        return 1;
+    }
+
+    int v = averagingIndex - 1;
+    int m = pow(10.0, v/3 > m_averagingMaxExponent ? m_averagingMaxExponent : v/3);
+    int x = 1;
+
+    if (v % 3 == 0) {
+        x = 2;
+    } else if (v % 3 == 1) {
+        x = 5;
+    } else if (v % 3 == 2) {
+        x = 10;
+    }
+
+    return x * m;
+}
+
+int DOA2Settings::getAveragingIndex(int averagingValue)
+{
+    if (averagingValue <= 1) {
+        return 0;
+    }
+
+    int v = averagingValue;
+    int j = 0;
+
+    for (int i = 0; i <= m_averagingMaxExponent; i++)
+    {
+        if (v < 20)
+        {
+            if (v < 2) {
+                j = 0;
+            } else if (v < 5) {
+                j = 1;
+            } else if (v < 10) {
+                j = 2;
+            } else {
+                j = 3;
+            }
+
+            return 3*i + j;
+        }
+
+        v /= 10;
+    }
+
+    return 3*m_averagingMaxExponent + 3;
 }

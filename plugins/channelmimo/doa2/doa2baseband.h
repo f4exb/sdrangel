@@ -112,6 +112,7 @@ public:
     void setBasebandSampleRate(unsigned int sampleRate);
     float getPhi() const { return m_phi; }
     void setMagThreshold(float threshold) { m_magThreshold = threshold * SDR_RX_SCALED * SDR_RX_SCALED; }
+    void setFFTAveraging(int nbFFT);
 
 private:
     void processFifo(const std::vector<SampleVector>& data, unsigned int ibegin, unsigned int iend);
@@ -122,11 +123,13 @@ private:
     DOA2Correlator m_correlator;
     DOA2Settings::CorrelationType m_correlationType;
     int m_fftSize;
-    int m_samplesCount;
-    float m_magSum;
-    float m_wphSum;
-    float m_phi;
-    double m_magThreshold;
+    int m_samplesCount;    //!< Number of samples processed by DOA
+    float m_magSum;        //!< Squared magnitudes accumulator
+    float m_wphSum;        //!< Phase difference accumulator (averaging weighted by squared magnitude)
+    float m_phi;           //!< Resulting calculated phase difference
+    double m_magThreshold; //!< Squared magnitude scaled threshold
+    int m_fftAvg;          //!< Average over a certain number of FFTs
+    int m_fftAvgCount;     //!< FFT averaging counter
     SampleMIFifo m_sampleMIFifo;
     std::vector<SampleVector::const_iterator> m_vbegin;
     int m_sizes[2];

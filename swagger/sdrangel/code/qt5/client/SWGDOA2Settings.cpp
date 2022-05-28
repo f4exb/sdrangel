@@ -38,6 +38,16 @@ SWGDOA2Settings::SWGDOA2Settings() {
     m_log2_decim_isSet = false;
     filter_chain_hash = 0;
     m_filter_chain_hash_isSet = false;
+    phase = 0;
+    m_phase_isSet = false;
+    antenna_az = 0;
+    m_antenna_az_isSet = false;
+    baseband_distance = 0;
+    m_baseband_distance_isSet = false;
+    squelchd_b = 0;
+    m_squelchd_b_isSet = false;
+    fft_averaging_value = 0;
+    m_fft_averaging_value_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -72,6 +82,16 @@ SWGDOA2Settings::init() {
     m_log2_decim_isSet = false;
     filter_chain_hash = 0;
     m_filter_chain_hash_isSet = false;
+    phase = 0;
+    m_phase_isSet = false;
+    antenna_az = 0;
+    m_antenna_az_isSet = false;
+    baseband_distance = 0;
+    m_baseband_distance_isSet = false;
+    squelchd_b = 0;
+    m_squelchd_b_isSet = false;
+    fft_averaging_value = 0;
+    m_fft_averaging_value_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -97,6 +117,11 @@ SWGDOA2Settings::cleanup() {
     if(title != nullptr) { 
         delete title;
     }
+
+
+
+
+
 
 
 
@@ -137,6 +162,16 @@ SWGDOA2Settings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&log2_decim, pJson["log2Decim"], "qint32", "");
     
     ::SWGSDRangel::setValue(&filter_chain_hash, pJson["filterChainHash"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&phase, pJson["phase"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&antenna_az, pJson["antennaAz"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&baseband_distance, pJson["basebandDistance"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&squelchd_b, pJson["squelchdB"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&fft_averaging_value, pJson["fftAveragingValue"], "qint32", "");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -184,6 +219,21 @@ SWGDOA2Settings::asJsonObject() {
     }
     if(m_filter_chain_hash_isSet){
         obj->insert("filterChainHash", QJsonValue(filter_chain_hash));
+    }
+    if(m_phase_isSet){
+        obj->insert("phase", QJsonValue(phase));
+    }
+    if(m_antenna_az_isSet){
+        obj->insert("antennaAz", QJsonValue(antenna_az));
+    }
+    if(m_baseband_distance_isSet){
+        obj->insert("basebandDistance", QJsonValue(baseband_distance));
+    }
+    if(m_squelchd_b_isSet){
+        obj->insert("squelchdB", QJsonValue(squelchd_b));
+    }
+    if(m_fft_averaging_value_isSet){
+        obj->insert("fftAveragingValue", QJsonValue(fft_averaging_value));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -261,6 +311,56 @@ void
 SWGDOA2Settings::setFilterChainHash(qint32 filter_chain_hash) {
     this->filter_chain_hash = filter_chain_hash;
     this->m_filter_chain_hash_isSet = true;
+}
+
+qint32
+SWGDOA2Settings::getPhase() {
+    return phase;
+}
+void
+SWGDOA2Settings::setPhase(qint32 phase) {
+    this->phase = phase;
+    this->m_phase_isSet = true;
+}
+
+qint32
+SWGDOA2Settings::getAntennaAz() {
+    return antenna_az;
+}
+void
+SWGDOA2Settings::setAntennaAz(qint32 antenna_az) {
+    this->antenna_az = antenna_az;
+    this->m_antenna_az_isSet = true;
+}
+
+qint32
+SWGDOA2Settings::getBasebandDistance() {
+    return baseband_distance;
+}
+void
+SWGDOA2Settings::setBasebandDistance(qint32 baseband_distance) {
+    this->baseband_distance = baseband_distance;
+    this->m_baseband_distance_isSet = true;
+}
+
+qint32
+SWGDOA2Settings::getSquelchdB() {
+    return squelchd_b;
+}
+void
+SWGDOA2Settings::setSquelchdB(qint32 squelchd_b) {
+    this->squelchd_b = squelchd_b;
+    this->m_squelchd_b_isSet = true;
+}
+
+qint32
+SWGDOA2Settings::getFftAveragingValue() {
+    return fft_averaging_value;
+}
+void
+SWGDOA2Settings::setFftAveragingValue(qint32 fft_averaging_value) {
+    this->fft_averaging_value = fft_averaging_value;
+    this->m_fft_averaging_value_isSet = true;
 }
 
 qint32
@@ -361,6 +461,21 @@ SWGDOA2Settings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_filter_chain_hash_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_phase_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_antenna_az_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_baseband_distance_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_squelchd_b_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_fft_averaging_value_isSet){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){

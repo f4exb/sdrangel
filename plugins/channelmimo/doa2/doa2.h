@@ -138,6 +138,10 @@ public:
             SWGSDRangel::SWGChannelSettings& response,
             QString& errorMessage);
 
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGChannelReport& response,
+            QString& errorMessage);
+
     virtual int webapiWorkspaceGet(
             SWGSDRangel::SWGWorkspaceInfo& query,
             QString& errorMessage);
@@ -168,12 +172,14 @@ private:
 
     int64_t m_frequencyOffset;
     uint32_t m_deviceSampleRate;
+    qint64 m_deviceCenterFrequency;
     int m_count0, m_count1;
 
 	virtual bool handleMessage(const Message& cmd); //!< Processing of a message. Returns true if message has actually been processed
     void applySettings(const DOA2Settings& settings, bool force = false);
     static void validateFilterChainHash(DOA2Settings& settings);
     void calculateFrequencyOffset();
+    void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const DOA2Settings& settings, bool force);
     void sendChannelSettings(
         const QList<ObjectPipe*>& pipes,
@@ -187,6 +193,7 @@ private:
         const DOA2Settings& settings,
         bool force
     );
+    static float normalizeAngle(float angle, float max);
 
 private slots:
     void handleInputMessages();

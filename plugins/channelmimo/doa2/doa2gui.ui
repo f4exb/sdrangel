@@ -476,7 +476,7 @@
           <item>
            <widget class="QLabel" name="posText">
             <property name="toolTip">
-             <string>Port side arrival angle (degrees)</string>
+             <string>Port side (positive) arrival angle (degrees)</string>
             </property>
             <property name="text">
              <string>000</string>
@@ -506,7 +506,7 @@
           <item>
            <widget class="QLabel" name="negText">
             <property name="toolTip">
-             <string>Starboard side arrival angle (degrees)</string>
+             <string>Starboard side (negative) arrival angle (degrees)</string>
             </property>
             <property name="text">
              <string>000</string>
@@ -718,6 +718,140 @@
             <property name="text">
              <string>dB</string>
             </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="spcLabel1_4">
+            <property name="minimumSize">
+             <size>
+              <width>10</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="fftAveragingLabel">
+            <property name="text">
+             <string>FFT avg</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="fftAveraging">
+            <property name="minimumSize">
+             <size>
+              <width>55</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>45</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Number of averaging FFTs</string>
+            </property>
+            <item>
+             <property name="text">
+              <string>1</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>2</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>5</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>10</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>20</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>50</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>100</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>200</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>500</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>1k</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>2k</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>5k</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>10k</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>20k</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>50k</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>1e5</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>2e5</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>5e5</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>1M</string>
+             </property>
+            </item>
            </widget>
           </item>
           <item>

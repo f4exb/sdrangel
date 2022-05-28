@@ -42,6 +42,7 @@ DOA2Compass::DOA2Compass(QWidget *parent)
     m_azNeg  = 0.0;
     m_azAnt  = 0.0;
     m_blindAngle = 0.0;
+    m_blindColor = QColor(48, 48, 48);
 }
 
 DOA2Compass::~DOA2Compass()
@@ -90,7 +91,7 @@ void DOA2Compass::paintEvent(QPaintEvent *)
     // draw blind angle
     if (m_blindAngle != 0)
     {
-        painter.setBrush(QColor(48, 48, 48));
+        painter.setBrush(m_blindColor);
         painter.setPen(Qt::NoPen);
         painter.rotate(m_azAnt - 90);
         painter.drawPie(-m_size/2, -m_size/2, m_size, m_size, -m_blindAngle*16, m_blindAngle*32);

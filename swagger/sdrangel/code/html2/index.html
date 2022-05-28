@@ -3397,6 +3397,9 @@ margin-bottom: 20px;
     "DATVModReport" : {
       "$ref" : "#/definitions/DATVModReport"
     },
+    "DOA2Report" : {
+      "$ref" : "#/definitions/DOA2Report"
+    },
     "DSDDemodReport" : {
       "$ref" : "#/definitions/DSDDemodReport"
     },
@@ -4526,6 +4529,31 @@ margin-bottom: 20px;
   },
   "description" : "DATVMod"
 };
+            defs.DOA2Report = {
+  "properties" : {
+    "phi" : {
+      "type" : "integer",
+      "description" : "Raw phase difference in degrees from 0 to 180"
+    },
+    "posAz" : {
+      "type" : "integer",
+      "description" : "Calculated port side (positive) arrival angle in degrees from 0 to 180"
+    },
+    "negAz" : {
+      "type" : "integer",
+      "description" : "Calculated starboard side (negative) arrival angle in degrees from 0 to 180"
+    },
+    "fftSize" : {
+      "type" : "integer",
+      "description" : "Size of FFT used in correlation"
+    },
+    "channelSampleRate" : {
+      "type" : "integer",
+      "description" : "Channel sample rate (then used in FFT) in S/s"
+    }
+  },
+  "description" : "DOA2"
+};
             defs.DOA2Settings = {
   "properties" : {
     "correlationType" : {
@@ -4543,6 +4571,26 @@ margin-bottom: 20px;
     },
     "filterChainHash" : {
       "type" : "integer"
+    },
+    "phase" : {
+      "type" : "integer",
+      "description" : "Phase difference correction in degrees from -180 to +180"
+    },
+    "antennaAz" : {
+      "type" : "integer",
+      "description" : "Antennas azimuth from antenna 1 to antenna 2 in degrees from 0 to 359"
+    },
+    "basebandDistance" : {
+      "type" : "integer",
+      "description" : "Antennas baseline distance in millimeters from 1 to 99999"
+    },
+    "squelchdB" : {
+      "type" : "integer",
+      "description" : "Porcessing squared magnitude threshold (squelch) in dB from -140 t0 0"
+    },
+    "fftAveragingValue" : {
+      "type" : "integer",
+      "description" : "Number of FFTs to average over. Use 1, 2, 5 or 10 times 10^0 to 10^5 (1 to 1M)"
     },
     "useReverseAPI" : {
       "type" : "integer",
@@ -56109,7 +56157,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2022-05-27T09:54:03.529+02:00
+              Generated 2022-05-28T12:29:36.569+02:00
             </div>
           </div>
       </div>

@@ -60,6 +60,21 @@ public:
     qint32 getFilterChainHash();
     void setFilterChainHash(qint32 filter_chain_hash);
 
+    qint32 getPhase();
+    void setPhase(qint32 phase);
+
+    qint32 getAntennaAz();
+    void setAntennaAz(qint32 antenna_az);
+
+    qint32 getBasebandDistance();
+    void setBasebandDistance(qint32 baseband_distance);
+
+    qint32 getSquelchdB();
+    void setSquelchdB(qint32 squelchd_b);
+
+    qint32 getFftAveragingValue();
+    void setFftAveragingValue(qint32 fft_averaging_value);
+
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -102,6 +117,21 @@ private:
 
     qint32 filter_chain_hash;
     bool m_filter_chain_hash_isSet;
+
+    qint32 phase;
+    bool m_phase_isSet;
+
+    qint32 antenna_az;
+    bool m_antenna_az_isSet;
+
+    qint32 baseband_distance;
+    bool m_baseband_distance_isSet;
+
+    qint32 squelchd_b;
+    bool m_squelchd_b_isSet;
+
+    qint32 fft_averaging_value;
+    bool m_fft_averaging_value_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;

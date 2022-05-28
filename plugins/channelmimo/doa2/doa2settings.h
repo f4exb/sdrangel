@@ -41,6 +41,7 @@ struct DOA2Settings
     int m_antennaAz;
     uint32_t m_basebandDistance; //!< in millimeters
     int m_squelchdB;
+    int m_fftAveragingIndex;
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;
@@ -61,6 +62,9 @@ struct DOA2Settings
     void setScopeGUI(Serializable *scopeGUI) { m_scopeGUI = scopeGUI; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    static int getAveragingValue(int averagingIndex);
+    static int getAveragingIndex(int averagingValue);
+    static const int m_averagingMaxExponent = 5; //!< Max 1M (10 * 10^5)
 };
 
 #endif // INCLUDE_DOA2SETTINGS_H
