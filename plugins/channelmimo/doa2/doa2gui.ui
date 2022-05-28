@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>720</width>
-    <height>770</height>
+    <height>642</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -403,7 +403,7 @@
      <x>0</x>
      <y>432</y>
      <width>718</width>
-     <height>85</height>
+     <height>202</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -428,132 +428,327 @@
     <property name="leftMargin">
      <number>2</number>
     </property>
-    <property name="topMargin">
-     <number>2</number>
-    </property>
-    <property name="rightMargin">
-     <number>12</number>
-    </property>
     <property name="bottomMargin">
      <number>2</number>
     </property>
     <item>
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="1">
-       <layout class="QHBoxLayout" name="doaValuesLayout">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
-         <widget class="QLabel" name="posLabel">
-          <property name="text">
-           <string>Pos</string>
+         <widget class="DOA2Compass" name="compass" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="posText">
-          <property name="text">
-           <string>000</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="spcLabel1">
           <property name="minimumSize">
            <size>
-            <width>10</width>
-            <height>0</height>
+            <width>359</width>
+            <height>200</height>
            </size>
           </property>
-          <property name="text">
-           <string/>
+          <property name="font">
+           <font>
+            <family>Liberation Sans</family>
+            <pointsize>9</pointsize>
+           </font>
           </property>
          </widget>
         </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <property name="leftMargin">
+         <number>6</number>
+        </property>
         <item>
-         <widget class="QLabel" name="negLabel">
-          <property name="text">
-           <string>Neg</string>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="doaValuesLayout">
+          <item>
+           <widget class="QLabel" name="posLabel">
+            <property name="text">
+             <string>Pos</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="posText">
+            <property name="toolTip">
+             <string>Port side arrival angle (degrees)</string>
+            </property>
+            <property name="text">
+             <string>000</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="spcLabel1">
+            <property name="minimumSize">
+             <size>
+              <width>10</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="negLabel">
+            <property name="text">
+             <string>Neg</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="negText">
+            <property name="toolTip">
+             <string>Starboard side arrival angle (degrees)</string>
+            </property>
+            <property name="text">
+             <string>000</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="spcLabel1_2">
+            <property name="minimumSize">
+             <size>
+              <width>10</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="antLabel">
+            <property name="text">
+             <string>Ant</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="antAz">
+            <property name="minimumSize">
+             <size>
+              <width>60</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Antennas line azimuth (degrees)</string>
+            </property>
+            <property name="wrapping">
+             <bool>true</bool>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+            <property name="maximum">
+             <number>359</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="azUnits">
+            <property name="text">
+             <string>d</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
         </item>
         <item>
-         <widget class="QLabel" name="negText">
-          <property name="text">
-           <string>000</string>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="baselineLayout">
+          <item>
+           <widget class="QLabel" name="halfWLLabel">
+            <property name="text">
+             <string>L/2</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="halfWLText">
+            <property name="toolTip">
+             <string>Half wavelength (mm)</string>
+            </property>
+            <property name="text">
+             <string>00000</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="spcLabel1_3">
+            <property name="minimumSize">
+             <size>
+              <width>10</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="baselineDistLabel">
+            <property name="text">
+             <string>D</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="baselineDistance">
+            <property name="toolTip">
+             <string>Baseline distance (mm)</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>99999</number>
+            </property>
+            <property name="value">
+             <number>500</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="disanceUnits">
+            <property name="text">
+             <string>mm</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
         </item>
         <item>
-         <widget class="QLabel" name="spcLabel1_2">
-          <property name="minimumSize">
-           <size>
-            <width>10</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="squelchLayout">
+          <item>
+           <widget class="QLabel" name="squelchLabel">
+            <property name="text">
+             <string>Sq</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDial" name="squelch">
+            <property name="maximumSize">
+             <size>
+              <width>24</width>
+              <height>24</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Squelch threshold (dB)</string>
+            </property>
+            <property name="minimum">
+             <number>-140</number>
+            </property>
+            <property name="maximum">
+             <number>0</number>
+            </property>
+            <property name="singleStep">
+             <number>1</number>
+            </property>
+            <property name="pageStep">
+             <number>1</number>
+            </property>
+            <property name="value">
+             <number>-50</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="squelchText">
+            <property name="minimumSize">
+             <size>
+              <width>28</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Squelch threshold (dB)</string>
+            </property>
+            <property name="text">
+             <string>-100</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="squelchUnits">
+            <property name="text">
+             <string>dB</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_4">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
         </item>
         <item>
-         <widget class="QLabel" name="antLabel">
-          <property name="text">
-           <string>Ant</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QSpinBox" name="antAz">
-          <property name="minimumSize">
-           <size>
-            <width>60</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="wrapping">
-           <bool>true</bool>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-          <property name="maximum">
-           <number>359</number>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer">
+         <spacer name="verticalSpacer">
           <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+           <enum>Qt::Vertical</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
-            <width>40</width>
-            <height>20</height>
+            <width>20</width>
+            <height>40</height>
            </size>
           </property>
          </spacer>
         </item>
        </layout>
-      </item>
-      <item row="1" column="1">
-       <layout class="QHBoxLayout" name="horizontalLayout"/>
-      </item>
-      <item row="0" column="0" rowspan="2">
-       <widget class="DOA2Compass" name="compass" native="true">
-        <property name="minimumSize">
-         <size>
-          <width>359</width>
-          <height>200</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>Liberation Sans</family>
-          <pointsize>9</pointsize>
-         </font>
-        </property>
-       </widget>
       </item>
      </layout>
     </item>

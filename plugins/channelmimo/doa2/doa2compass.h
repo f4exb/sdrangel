@@ -92,6 +92,19 @@ public:
     }
 
     ///
+    /// \brief Set half blind angle (in degree)
+    /// \param val - half blind angle (in degree)
+    ///
+    void setBlindAngle(double val)
+    {
+        m_blindAngle  = val;
+        if( m_blindAngle < 0   ) m_blindAngle = 360 + m_blindAngle;
+        if( m_blindAngle > 360 ) m_blindAngle = m_blindAngle - 360;
+
+        emit canvasReplot();
+    }
+
+    ///
     /// \brief Draw legend in the center of the compass
     /// \param drawLegend - true to draw legend else false
     ///
@@ -137,6 +150,7 @@ protected:
     double  m_azPos;                            ///< forward (+) azimuth (in degree)
     double  m_azNeg;                            ///< reverse (-) azimuth (in degree)
     double  m_azAnt;                            ///< antennas azimuth from 1 (connected to stream 0) to 2 (connected to stream 1)
+    double  m_blindAngle;                       //!< half the angle around antenna direction where DOA cannot be processed (when baseline distance exceeds half wavelength)
 };
 
 #endif // INCLUDE_DOA2COMPASS_H

@@ -28,6 +28,7 @@
 #include "dsp/hbfilterchainconverter.h"
 #include "dsp/dspcommands.h"
 #include "feature/feature.h"
+#include "util/db.h"
 #include "maincore.h"
 
 #include "doa2baseband.h"
@@ -132,6 +133,9 @@ void DOA2::applySettings(const DOA2Settings& settings, bool force)
         << "m_filterChainHash: " << settings.m_filterChainHash
         << "m_log2Decim: " << settings.m_log2Decim
         << "m_phase: " << settings.m_phase
+        << "m_antennaAz:" << settings.m_antennaAz
+        << "m_basebandDistance: " << settings.m_basebandDistance
+        << "m_squelchdB: " << settings.m_squelchdB
         << "m_useReverseAPI: " << settings.m_useReverseAPI
         << "m_reverseAPIAddress: " << settings.m_reverseAPIAddress
         << "m_reverseAPIPort: " << settings.m_reverseAPIPort
@@ -155,6 +159,18 @@ void DOA2::applySettings(const DOA2Settings& settings, bool force)
     }
     if ((m_settings.m_title != settings.m_title) || force) {
         reverseAPIKeys.append("title");
+    }
+    if ((m_settings.m_antennaAz != settings.m_antennaAz) || force) {
+        reverseAPIKeys.append("antennaAz");
+    }
+    if ((m_settings.m_basebandDistance != settings.m_basebandDistance) || force) {
+        reverseAPIKeys.append("basebandDistance");
+    }
+
+    if ((m_settings.m_squelchdB != settings.m_squelchdB) || force)
+    {
+        reverseAPIKeys.append("squelchdB");
+        m_basebandSink->setMagThreshold(CalcDb::powerFromdB(settings.m_squelchdB));
     }
 
     if ((m_settings.m_log2Decim != settings.m_log2Decim)

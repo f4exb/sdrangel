@@ -74,6 +74,7 @@ private:
 	ScopeVis* m_scopeVis;
 	MessageQueue m_inputMessageQueue;
     uint32_t m_tickCount;
+    double m_hwl; //!< Half wavelength at center frequency
 
 	explicit DOA2GUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *rxChannel, QWidget* parent = nullptr);
 	virtual ~DOA2GUI();
@@ -99,6 +100,8 @@ private slots:
     void on_phaseCorrection_valueChanged(int value);
     void on_correlationType_currentIndexChanged(int index);
     void on_antAz_valueChanged(int value);
+    void on_baselineDistance_valueChanged(int value);
+    void on_squelch_valueChanged(int value);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
 	void tick();

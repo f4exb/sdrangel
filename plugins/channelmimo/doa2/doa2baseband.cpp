@@ -39,6 +39,7 @@ DOA2Baseband::DOA2Baseband(int fftSize) :
     m_magSum(0.0f),
     m_wphSum(0.0f),
     m_phi(0.0f),
+    m_magThreshold(0.0f),
     m_scopeSink(nullptr),
     m_mutex(QMutex::Recursive)
 {
@@ -263,13 +264,20 @@ void DOA2Baseband::processDOA(const std::vector<Complex>::iterator& begin, int n
     for (std::vector<Complex>::iterator it = begin; it != end; ++it)
     {
         float ph = std::arg(*it);
-        float mag = std::norm(*it);
-        m_magSum += mag;
-        m_wphSum += mag*ph;
+        double mag = std::norm(*it);
+
+        if (mag  > m_magThreshold)
+        {
+            m_magSum += mag;
+            m_wphSum += mag*ph;
+        }
 
         if (++m_samplesCount == m_fftSize)
         {
-            m_phi = m_wphSum / m_magSum;
+            if (m_wphSum != 0) {
+                m_phi = m_wphSum / m_magSum;
+            }
+
             m_magSum = 0;
             m_wphSum = 0;
             m_samplesCount = 0;

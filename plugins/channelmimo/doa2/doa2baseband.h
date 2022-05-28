@@ -111,6 +111,7 @@ public:
 	void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int streamIndex);
     void setBasebandSampleRate(unsigned int sampleRate);
     float getPhi() const { return m_phi; }
+    void setMagThreshold(float threshold) { m_magThreshold = threshold * SDR_RX_SCALED * SDR_RX_SCALED; }
 
 private:
     void processFifo(const std::vector<SampleVector>& data, unsigned int ibegin, unsigned int iend);
@@ -125,6 +126,7 @@ private:
     float m_magSum;
     float m_wphSum;
     float m_phi;
+    double m_magThreshold;
     SampleMIFifo m_sampleMIFifo;
     std::vector<SampleVector::const_iterator> m_vbegin;
     int m_sizes[2];

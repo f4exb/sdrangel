@@ -154,10 +154,8 @@ DOA2GUI::DOA2GUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *ch
 
     connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
-    // Test
-    ui->compass->setAzNeg(85);
-    ui->compass->setAzPos(315);
-    ui->compass->setAzAnt(20);
+    ui->halfWLLabel->setText(QString("%1/2").arg(QChar(0xBB, 0x03)));
+    ui->azUnits->setText(QString("%1").arg(QChar(0260)));
 }
 
 DOA2GUI::~DOA2GUI()
@@ -204,6 +202,9 @@ void DOA2GUI::displaySettings()
     ui->phaseCorrectionText->setText(tr("%1").arg(m_settings.m_phase));
     ui->compass->setAzAnt(m_settings.m_antennaAz);
     ui->antAz->setValue(m_settings.m_antennaAz);
+    ui->baselineDistance->setValue(m_settings.m_basebandDistance);
+    ui->squelch->setValue(m_settings.m_squelchdB);
+    ui->squelchText->setText(tr("%1").arg(m_settings.m_squelchdB, 3));
     getRollupContents()->restoreState(m_rollupState);
     updateAbsoluteCenterFrequency();
     blockApplySettings(false);
@@ -330,6 +331,20 @@ void DOA2GUI::on_antAz_valueChanged(int value)
     applySettings();
 }
 
+void DOA2GUI::on_baselineDistance_valueChanged(int value)
+{
+    m_settings.m_basebandDistance = value < 1 ? 1 : value;
+    updateDOA();
+    applySettings();
+}
+
+void DOA2GUI::on_squelch_valueChanged(int value)
+{
+    m_settings.m_squelchdB = value;
+    ui->squelchText->setText(tr("%1").arg(m_settings.m_squelchdB, 3));
+    applySettings();
+}
+
 void DOA2GUI::applyDecimation()
 {
     uint32_t maxHash = 1;
@@ -372,20 +387,28 @@ void DOA2GUI::makeUIConnections()
     QObject::connect(ui->phaseCorrection, &QSlider::valueChanged, this, &DOA2GUI::on_phaseCorrection_valueChanged);
     QObject::connect(ui->correlationType, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DOA2GUI::on_correlationType_currentIndexChanged);
     QObject::connect(ui->antAz, QOverload<int>::of(&QSpinBox::valueChanged), this, &DOA2GUI::on_antAz_valueChanged);
+    QObject::connect(ui->baselineDistance, QOverload<int>::of(&QSpinBox::valueChanged), this, &DOA2GUI::on_baselineDistance_valueChanged);
+    QObject::connect(ui->squelch, &QDial::valueChanged, this, &DOA2GUI::on_squelch_valueChanged);
 }
 
 void DOA2GUI::updateAbsoluteCenterFrequency()
 {
-    setStatusFrequency(m_centerFrequency + m_shiftFrequencyFactor * m_sampleRate);
+    qint64 cf = m_centerFrequency + m_shiftFrequencyFactor * m_sampleRate;
+    setStatusFrequency(cf);
+    m_hwl = 1.5e+8 / cf;
+    ui->halfWLText->setText(tr("%1").arg(m_hwl*1000, 5, 'f', 0));
 }
 
 void DOA2GUI::updateDOA()
 {
-    float doaAngle = m_doa2->getPositiveDOA();
+    float cosTheta = (m_doa2->getPhi() * m_hwl * 1000.0) / (M_PI * m_settings.m_basebandDistance);
+    float blindAngle = ((cosTheta < -1.0) || (cosTheta > 1.0) ? 0 : std::acos(m_hwl * 1000.0 / m_settings.m_basebandDistance)) * (180/M_PI);
+    float doaAngle = std::acos(cosTheta < -1.0 ? -1.0 : cosTheta > 1.0 ? 1.0 : cosTheta) * (180/M_PI);
     float posAngle = ui->antAz->value() - doaAngle; // DOA angles are trigonometric but displayed angles are clockwise
     float negAngle = ui->antAz->value() + doaAngle;
+    ui->compass->setBlindAngle(blindAngle);
     ui->compass->setAzPos(posAngle);
     ui->compass->setAzNeg(negAngle);
-    ui->posText->setText(tr("%1").arg(ui->compass->getAzPos(), 0, 'f', 0));
-    ui->negText->setText(tr("%1").arg(ui->compass->getAzNeg(), 0, 'f', 0));
+    ui->posText->setText(tr("%1").arg(ui->compass->getAzPos(), 3, 'f', 0, QLatin1Char('0')));
+    ui->negText->setText(tr("%1").arg(ui->compass->getAzNeg(), 3, 'f', 0, QLatin1Char('0')));
 }

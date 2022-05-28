@@ -41,6 +41,7 @@ DOA2Compass::DOA2Compass(QWidget *parent)
     m_azPos  = 0.0;
     m_azNeg  = 0.0;
     m_azAnt  = 0.0;
+    m_blindAngle = 0.0;
 }
 
 DOA2Compass::~DOA2Compass()
@@ -86,6 +87,20 @@ void DOA2Compass::paintEvent(QPaintEvent *)
         painter.drawEllipse(-m_size/2, -m_size/2, m_size, m_size);
     }
 
+    // draw blind angle
+    if (m_blindAngle != 0)
+    {
+        painter.setBrush(QColor(48, 48, 48));
+        painter.setPen(Qt::NoPen);
+        painter.rotate(m_azAnt - 90);
+        painter.drawPie(-m_size/2, -m_size/2, m_size, m_size, -m_blindAngle*16, m_blindAngle*32);
+        painter.rotate(180);
+        painter.drawPie(-m_size/2, -m_size/2, m_size, m_size, -m_blindAngle*16, m_blindAngle*32);
+        painter.rotate(-m_azAnt - 90);
+        painter.setBrush(Qt::NoBrush);
+        painter.setPen(whitePen);
+        painter.drawEllipse(-m_size/2, -m_size/2, m_size, m_size);
+    }
 
     // draw compass lines
     {
@@ -222,7 +237,7 @@ void DOA2Compass::paintEvent(QPaintEvent *)
         painter.rotate(m_azNeg);
 
         painter.setPen(Qt::NoPen);
-        painter.setBrush(QBrush(QColor(0x80, 0x80, 0xFF, 0xA0)));
+        painter.setBrush(QBrush(QColor(0x80, 0xFF, 0x80, 0xA0)));
         QPointF points[3] = {
             QPointF(fx1, fy1),
             QPointF(fx2, fy2),
@@ -230,7 +245,7 @@ void DOA2Compass::paintEvent(QPaintEvent *)
         };
         painter.drawPolygon(points, 3);
 
-        painter.setPen(QColor(0x80, 0x80, 0xFF, 0xE0));
+        painter.setPen(QColor(0x80, 0xFF, 0x80, 0xE0));
         painter.drawLine(0, 0, 0, fyl);
 
         painter.rotate(-m_azNeg);

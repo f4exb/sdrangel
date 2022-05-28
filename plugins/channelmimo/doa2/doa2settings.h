@@ -39,6 +39,8 @@ struct DOA2Settings
     uint32_t m_filterChainHash;
     int m_phase;
     int m_antennaAz;
+    uint32_t m_basebandDistance; //!< in millimeters
+    int m_squelchdB;
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;

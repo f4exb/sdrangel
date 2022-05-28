@@ -46,6 +46,8 @@ void DOA2Settings::resetToDefaults()
     m_workspaceIndex = 0;
     m_hidden = false;
     m_antennaAz = 0;
+    m_basebandDistance = 500;
+    m_squelchdB = -50;
 }
 
 QByteArray DOA2Settings::serialize() const
@@ -67,6 +69,8 @@ QByteArray DOA2Settings::serialize() const
     s.writeBlob(14, m_geometryBytes);
     s.writeBool(15, m_hidden);
     s.writeS32(16, m_antennaAz);
+    s.writeU32(17, m_basebandDistance);
+    s.writeS32(18, m_squelchdB);
 
     if (m_scopeGUI) {
         s.writeBlob(21, m_scopeGUI->serialize());
@@ -125,6 +129,9 @@ bool DOA2Settings::deserialize(const QByteArray& data)
         d.readBool(15, &m_hidden, false);
         d.readS32(16, &tmp, 0);
         m_antennaAz = tmp < 0 ? 0 : tmp > 359 ? 359 : tmp;
+        d.readU32(17, &utmp, 500);
+        m_basebandDistance = utmp == 0 ? 1 : utmp;
+        d.readS32(18, &m_squelchdB, -50);
 
         if (m_scopeGUI)
         {
