@@ -324,6 +324,22 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QPushButton" name="centerPosition">
+          <property name="maximumSize">
+           <size>
+            <width>24</width>
+            <height>24</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Center in passband</string>
+          </property>
+          <property name="text">
+           <string>C</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
      </layout>
@@ -588,11 +604,20 @@
           </item>
           <item>
            <widget class="QLabel" name="halfWLText">
+            <property name="minimumSize">
+             <size>
+              <width>40</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="toolTip">
              <string>Half wavelength (mm)</string>
             </property>
             <property name="text">
              <string>00000</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
           </item>

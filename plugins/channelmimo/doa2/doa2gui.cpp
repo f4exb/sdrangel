@@ -387,6 +387,22 @@ void DOA2GUI::on_fftAveraging_currentIndexChanged(int index)
     setFFTAveragingToolitp();
 }
 
+void DOA2GUI::on_centerPosition_clicked()
+{
+    uint32_t filterChainHash = 1;
+    uint32_t mul = 1;
+
+    for (uint32_t i = 1; i < m_settings.m_log2Decim; i++)
+    {
+        mul *= 3;
+        filterChainHash += mul;
+    }
+
+    m_settings.m_filterChainHash = filterChainHash;
+    ui->position->setValue(m_settings.m_filterChainHash);
+    applyPosition();
+}
+
 void DOA2GUI::applyDecimation()
 {
     uint32_t maxHash = 1;
@@ -432,6 +448,7 @@ void DOA2GUI::makeUIConnections()
     QObject::connect(ui->baselineDistance, QOverload<int>::of(&QSpinBox::valueChanged), this, &DOA2GUI::on_baselineDistance_valueChanged);
     QObject::connect(ui->squelch, &QDial::valueChanged, this, &DOA2GUI::on_squelch_valueChanged);
     QObject::connect(ui->fftAveraging, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DOA2GUI::on_fftAveraging_currentIndexChanged);
+    QObject::connect(ui->centerPosition, &QPushButton::clicked, this, &DOA2GUI::on_centerPosition_clicked);
 }
 
 void DOA2GUI::updateAbsoluteCenterFrequency()

@@ -106,6 +106,7 @@ private slots:
     void on_baselineDistance_valueChanged(int value);
     void on_squelch_valueChanged(int value);
     void on_fftAveraging_currentIndexChanged(int index);
+    void on_centerPosition_clicked();
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
 	void tick();

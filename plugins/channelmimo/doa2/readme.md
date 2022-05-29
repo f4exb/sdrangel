@@ -87,6 +87,10 @@ The slider moves the channel center frequency roughly from the lower to the high
   - **1**: centered
   - **2**: higher half-band
 
+<h3>A.8. Center filter in passband</h3>
+
+Use this button to center the filter in the middle of the passband automatically. This sets all filters to center i.e CCC...
+
 The resulting filter chain sequence is represented in (A.3)
 
 <h2>B. Scope display</h2>
