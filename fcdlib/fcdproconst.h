@@ -10,6 +10,8 @@
 
 #include <string>
 
+#include "export.h"
+
 typedef enum
 {
 	FCDPRO_TLG_N5_0DB=0,
@@ -320,7 +322,7 @@ typedef struct
 	std::string label;
 } fcdpro_if_gain6;
 
-class FCDProConstants
+class FCDLIB_API FCDProConstants
 {
 public:
 	static const fcdpro_lna_gain lna_gains[];

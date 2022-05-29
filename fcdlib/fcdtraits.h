@@ -20,6 +20,8 @@
 
 #include <inttypes.h>
 
+#include "export.h"
+
 typedef enum
 {
     Pro,
@@ -27,7 +29,7 @@ typedef enum
 } fcd_type;
 
 template <fcd_type FCDType>
-struct fcd_traits
+struct FCDLIB_API fcd_traits
 {
 	static const uint16_t vendorId = 0x0;
 	static const uint16_t productId = 0x0;
@@ -45,7 +47,7 @@ struct fcd_traits
 };
 
 template<>
-struct fcd_traits<Pro>
+struct FCDLIB_API fcd_traits<Pro>
 {
 	static const uint16_t vendorId = 0x04D8;
 	static const uint16_t productId = 0xFB56;
@@ -63,7 +65,7 @@ struct fcd_traits<Pro>
 };
 
 template<>
-struct fcd_traits<ProPlus>
+struct FCDLIB_API fcd_traits<ProPlus>
 {
 	static const uint16_t vendorId = 0x04D8;
 	static const uint16_t productId = 0xFB31;
