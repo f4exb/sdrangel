@@ -33,6 +33,8 @@ ChannelReport:
       $ref: "http://swgserver:8081/api/swagger/include/DATVDemod.yaml#/DATVDemodReport"
     DATVModReport:
       $ref: "http://swgserver:8081/api/swagger/include/DATVMod.yaml#/DATVModReport"
+    DOA2Report:
+      $ref: "http://swgserver:8081/api/swagger/include/DOA2.yaml#/DOA2Report"
     DSDDemodReport:
       $ref: "http://swgserver:8081/api/swagger/include/DSDDemod.yaml#/DSDDemodReport"
     IEEE_802_15_4_ModReport:

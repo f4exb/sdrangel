@@ -1,0 +1,65 @@
+DOA2Settings:
+  description: DOA2
+  properties:
+    correlationType:
+      description: see DOA2Settings::CorrelationType
+      type: integer
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    log2Decim:
+      type: integer
+    filterChainHash:
+      type: integer
+    phase:
+      type: integer
+      description: Phase difference correction in degrees from -180 to +180
+    antennaAz:
+      type: integer
+      description: Antennas azimuth from antenna 1 to antenna 2 in degrees from 0 to 359
+    basebandDistance:
+      type: integer
+      description: Antennas baseline distance in millimeters from 1 to 99999
+    squelchdB:
+      type: integer
+      description: Porcessing squared magnitude threshold (squelch) in dB from -140 t0 0
+    fftAveragingValue:
+      type: integer
+      description: Number of FFTs to average over. Use 1, 2, 5 or 10 times 10^0 to 10^5 (1 to 1M)
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+    scopeConfig:
+      $ref: "/doc/swagger/include/GLScope.yaml#/GLScope"
+    channelMarker:
+      $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+    rollupState:
+      $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+
+DOA2Report:
+  description: DOA2
+  properties:
+    phi:
+      type: integer
+      description: Raw phase difference in degrees from 0 to 180
+    posAz:
+      type: integer
+      description: Calculated port side (positive) arrival angle in degrees from 0 to 180
+    negAz:
+      type: integer
+      description: Calculated starboard side (negative) arrival angle in degrees from 0 to 180
+    fftSize:
+      type: integer
+      description: Size of FFT used in correlation
+    channelSampleRate:
+      type: integer
+      description: Channel sample rate (then used in FFT) in S/s

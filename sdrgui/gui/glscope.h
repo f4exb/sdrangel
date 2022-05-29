@@ -86,6 +86,11 @@ public:
     virtual const QAtomicInt& getProcessingTraceIndex() const { return m_processingTraceIndex; }
     void setTraceModulo(int modulo) { m_traceModulo = modulo; }
 
+    void setXScaleFreq(bool set) { m_xScaleFreq = set; m_configChanged = true; }
+    bool isXScaleFreq() const { return m_xScaleFreq; }
+    void setXScaleCenterFrequency(qint64 cf) { m_xScaleCenterFrequency = cf; m_configChanged = true; }
+    void setXScaleFrequencySpan(int span) { m_xScaleFrequencySpan = span; m_configChanged = true; }
+
 signals:
     void sampleRateChanged(int);
     void traceSizeChanged(uint32_t);
@@ -187,6 +192,9 @@ private:
     ScaleEngine m_x2Scale; //!< Display #2 X scale. Time scale
     ScaleEngine m_y1Scale; //!< Display #1 Y scale. Always connected to trace #0 (X trace)
     ScaleEngine m_y2Scale; //!< Display #2 Y scale. Connected to highlighted Y trace (#1..n)
+    bool m_xScaleFreq;              //!< Force frequency display on time line for correlation modes
+    qint64 m_xScaleCenterFrequency; //!< Frequency time line mode center frequency
+    int m_xScaleFrequencySpan;      //!< Frequency time line mode frequency span
 
     QFont m_channelOverlayFont;
     QFont m_textOverlayFont;

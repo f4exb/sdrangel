@@ -8,7 +8,7 @@
 # but make the configuration dirty
 
 # which version/tag/checkout to use
-set(CODEC2_TAG "v0.9.2")
+set(CODEC2_TAG "v1.0.3")
 set(CM256CC_TAG c0e92b92aca3d1d36c990b642b937c64d363c559)
 set(MBELIB_TAG fe83b32c6a60cdd7bce8cecf3c7a0b9ec87a7667)
 set(SERIALDV_TAG "v1.1.4")

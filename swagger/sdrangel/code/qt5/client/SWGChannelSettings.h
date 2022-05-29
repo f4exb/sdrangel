@@ -38,6 +38,7 @@
 #include "SWGDABDemodSettings.h"
 #include "SWGDATVDemodSettings.h"
 #include "SWGDATVModSettings.h"
+#include "SWGDOA2Settings.h"
 #include "SWGDSDDemodSettings.h"
 #include "SWGFileSinkSettings.h"
 #include "SWGFileSourceSettings.h"
@@ -146,6 +147,9 @@ public:
 
     SWGDABDemodSettings* getDabDemodSettings();
     void setDabDemodSettings(SWGDABDemodSettings* dab_demod_settings);
+
+    SWGDOA2Settings* getDoa2Settings();
+    void setDoa2Settings(SWGDOA2Settings* doa2_settings);
 
     SWGDSDDemodSettings* getDsdDemodSettings();
     void setDsdDemodSettings(SWGDSDDemodSettings* dsd_demod_settings);
@@ -297,6 +301,9 @@ private:
 
     SWGDABDemodSettings* dab_demod_settings;
     bool m_dab_demod_settings_isSet;
+
+    SWGDOA2Settings* doa2_settings;
+    bool m_doa2_settings_isSet;
 
     SWGDSDDemodSettings* dsd_demod_settings;
     bool m_dsd_demod_settings_isSet;

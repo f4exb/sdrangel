@@ -75,6 +75,9 @@ GLScope::GLScope(QWidget *parent) :
     m_x1Scale.setOrientation(Qt::Horizontal);
     m_x2Scale.setFont(font());
     m_x2Scale.setOrientation(Qt::Horizontal);
+    m_xScaleFreq = false;
+    m_xScaleCenterFrequency = 0;
+    m_xScaleFrequencySpan = 48000;
 
     m_channelOverlayFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
     m_channelOverlayFont.setBold(true);
@@ -1077,12 +1080,23 @@ void GLScope::applyConfig()
 
     // scales
 
-    m_x1Scale.setRange(Unit::Time, t_start, t_start + t_len); // time scale
-
-    if (m_displayMode == DisplayPol) {
-        setYScale(m_x2Scale, 0); // polar scale (X)
+    if (m_xScaleFreq) {
+        m_x1Scale.setRange(Unit::Frequency, m_xScaleCenterFrequency - (m_xScaleFrequencySpan/2), m_xScaleCenterFrequency + (m_xScaleFrequencySpan/2));
     } else {
-        m_x2Scale.setRange(Unit::Time, t_start, t_start + t_len); // time scale
+        m_x1Scale.setRange(Unit::Time, t_start, t_start + t_len); // time scale
+    }
+
+    if (m_displayMode == DisplayPol)
+    {
+        setYScale(m_x2Scale, 0); // polar scale (X)
+    }
+    else
+    {
+        if (m_xScaleFreq) {
+            m_x2Scale.setRange(Unit::Time, t_start, t_start + t_len); // time scale
+        } else {
+            m_x2Scale.setRange(Unit::Frequency, m_xScaleCenterFrequency - (m_xScaleFrequencySpan/2), m_xScaleCenterFrequency + (m_xScaleFrequencySpan/2));
+        }
     }
 
     if (m_traces->size() > 0) {
