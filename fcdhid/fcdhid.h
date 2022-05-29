@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "fcdhidcmd.h"
-#include "hidapi/hidapi.h"
+#include "hidapi.h"
 
 #include <inttypes.h>
 

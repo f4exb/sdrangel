@@ -398,6 +398,7 @@ else()
     find_package(Sgp4)
     find_package(AptDec)
     find_package(LibDAB)
+    find_package(HIDAPI)
 endif()
 
 if (LIBSIGMF_FOUND AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -447,8 +448,6 @@ endif()
 if(ENABLE_USRP)
   find_package(UHD)
 endif()
-
-find_package(HIDAPI)
 
 if(ENABLE_FUNCUBE AND UNIX AND LIBUSB_FOUND AND HIDAPI_FOUND)
     add_subdirectory(fcdlib)

@@ -61,7 +61,7 @@ target_link_libraries(${TARGET_NAME}
         "${OpenCV_LIBS}"
 )
 
-if(OpenCV_EXTERNAL)
+if(DEFINED OpenCV_DEPENDS)
     add_dependencies(${TARGET_NAME} opencv)
 endif()
 
