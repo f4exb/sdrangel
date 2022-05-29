@@ -1,3 +1,15 @@
+sdrangel (7.3.0-1) unstable; urgency=medium
+
+  * New Direction Of Arrival with 2 sources MI plugin. Implements #444
+  * Upgraded codec2 to v1.0.3. Fixes #1256
+  * FreeDV mod: improved output power
+  * FreeDV plugins: fixed spanLog2 GUI connection
+  * Fixed Interferometer and BeamSteeringCW absolute center frequency display
+  * Fixed Interferometer and BeamSteeringCW MIMO channel plugins
+  * Fixed Mac build. PR #1257
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Thu, 26 May 2022 03:12:00 +0200
+
 sdrangel (7.2.1-1) unstable; urgency=medium
 
   * AMBE feature: fixed many errors preventing build on Windows and MacOS. Issue #1254
