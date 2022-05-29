@@ -24,11 +24,6 @@
 
 #include "doa2corr.h"
 
-std::complex<float> s2c(const Sample& s)
-{
-    return std::complex<float>{s.real() / SDR_RX_SCALEF, s.imag() / SDR_RX_SCALEF};
-}
-
 std::complex<float> s2cNorm(const Sample& s)
 {
     float x = s.real() / SDR_RX_SCALEF;
@@ -52,69 +47,10 @@ Sample sSecondInv(const Sample& a, const Sample& b) {
     return Sample{-b.real(), -b.imag()};
 }
 
-Sample sAdd(const Sample& a, const Sample& b) { //!< Sample addition
-    return Sample{(a.real()+b.real())/2, (a.imag()+b.imag())/2};
-}
-
-Sample sAddInv(const Sample& a, const Sample& b) { //!< Sample addition
-    return Sample{(a.real()-b.real())/2, (a.imag()+b.imag())/2};
-}
-
-Sample sMulConj(const Sample& a, const Sample& b) { //!< Sample multiply with conjugate
-    Sample s;
-    // Integer processing
-    int64_t ax = a.real();
-    int64_t ay = a.imag();
-    int64_t bx = b.real();
-    int64_t by = b.imag();
-    int64_t x = ax*bx + ay*by;
-    int64_t y = ay*bx - ax*by;
-    s.setReal(x>>(SDR_RX_SAMP_SZ-1));
-    s.setImag(y>>(SDR_RX_SAMP_SZ-1));
-    // Floating point processing (in practice there is no significant performance difference)
-    // float ax = a.real() / SDR_RX_SCALEF;
-    // float ay = a.imag() / SDR_RX_SCALEF;
-    // float bx = b.real() / SDR_RX_SCALEF;
-    // float by = b.imag() / SDR_RX_SCALEF;
-    // float x = ax*bx + ay*by;
-    // float y = ay*bx - ax*by;
-    // s.setReal(x*SDR_RX_SCALEF);
-    // s.setImag(y*SDR_RX_SCALEF);
-    return s;
-}
-
-Sample sMulConjInv(const Sample& a, const Sample& b) { //!< Sample multiply with conjugate
-    Sample s;
-    // Integer processing
-    int64_t ax = a.real();
-    int64_t ay = a.imag();
-    int64_t bx = -b.real();
-    int64_t by = -b.imag();
-    int64_t x = ax*bx + ay*by;
-    int64_t y = ay*bx - ax*by;
-    s.setReal(x>>(SDR_RX_SAMP_SZ-1));
-    s.setImag(y>>(SDR_RX_SAMP_SZ-1));
-    return s;
-}
-
 Sample invfft2s(const std::complex<float>& a) { //!< Complex float to Sample for 1 side time correlation
     Sample s;
     s.setReal(a.real()/2.0f);
     s.setImag(a.imag()/2.0f);
-    return s;
-}
-
-Sample invfft2s2(const std::complex<float>& a) { //!< Complex float to Sample for 2 sides time correlation
-    Sample s;
-    s.setReal(a.real());
-    s.setImag(a.imag());
-    return s;
-}
-
-Sample invfft2star(const std::complex<float>& a) { //!< Complex float to Sample for 1 side time correlation
-    Sample s;
-    s.setReal(a.real()/2.82842712475f); // 2*sqrt(2)
-    s.setImag(a.imag()/2.82842712475f);
     return s;
 }
 
@@ -125,17 +61,12 @@ DOA2Correlator::DOA2Correlator(int fftSize) :
     setPhase(0);
     FFTFactory *fftFactory = DSPEngine::instance()->getFFTFactory();
     m_window.create(FFTWindow::Function::Hanning, fftSize);
-    m_data0w.resize(m_fftSize);
-    m_data1w.resize(m_fftSize);
 
-    for (int i = 0; i < 2; i++)
-    {
-        m_fftSequences[i] = fftFactory->getEngine(2*fftSize, false, &m_fft[i]); // internally twice the data FFT size
-        m_fft2Sequences[i] = fftFactory->getEngine(fftSize, false, &m_fft2[i]);
+    for (int i = 0; i < 2; i++) {
+        m_fftSequences[i] = fftFactory->getEngine(fftSize, false, &m_fft[i]);
     }
 
-    m_invFFTSequence = fftFactory->getEngine(2*fftSize, true, &m_invFFT);
-    m_invFFT2Sequence = fftFactory->getEngine(fftSize, true, &m_invFFT2);
+    m_invFFTSequence = fftFactory->getEngine(fftSize, true, &m_invFFT);
 
     m_dataj = new std::complex<float>[2*fftSize]; // receives actual FFT result hence twice the data FFT size
     m_tcorr.resize(fftSize);
@@ -147,14 +78,11 @@ DOA2Correlator::DOA2Correlator(int fftSize) :
 DOA2Correlator::~DOA2Correlator()
 {
     FFTFactory *fftFactory = DSPEngine::instance()->getFFTFactory();
-    fftFactory->releaseEngine(2*m_fftSize, true, m_invFFTSequence);
-    fftFactory->releaseEngine(m_fftSize, true, m_invFFT2Sequence);
+    fftFactory->releaseEngine(m_fftSize, true, m_invFFTSequence);
     delete[] m_dataj;
 
-    for (int i = 0; i < 2; i++)
-    {
-        fftFactory->releaseEngine(2*m_fftSize, false, m_fftSequences[i]);
-        fftFactory->releaseEngine(m_fftSize, false, m_fft2Sequences[i]);
+    for (int i = 0; i < 2; i++) {
+        fftFactory->releaseEngine(m_fftSize, false, m_fftSequences[i]);
     }
 }
 
@@ -304,26 +232,26 @@ bool DOA2Correlator::performFFTProd(
         std::transform(
             begin0,
             begin0 + m_fftSize,
-            m_fft2[0]->in(),
+            m_fft[0]->in(),
             s2cNorm
         );
-        m_window.apply(m_fft2[0]->in());
-        m_fft2[0]->transform();
+        m_window.apply(m_fft[0]->in());
+        m_fft[0]->transform();
 
         // FFT[1]
         std::transform(
             begin1,
             begin1 + m_fftSize,
-            m_fft2[1]->in(),
+            m_fft[1]->in(),
             s2cNorm
         );
-        m_window.apply(m_fft2[1]->in());
-        m_fft2[1]->transform();
+        m_window.apply(m_fft[1]->in());
+        m_fft[1]->transform();
 
         // conjugate FFT[1]
         std::transform(
-            m_fft2[1]->out(),
-            m_fft2[1]->out() + m_fftSize,
+            m_fft[1]->out(),
+            m_fft[1]->out() + m_fftSize,
             m_dataj,
             [](const std::complex<float>& c) -> std::complex<float> {
                 return std::conj(c);
@@ -332,10 +260,10 @@ bool DOA2Correlator::performFFTProd(
 
         // product of FFT[1]* with FFT[0] and store in both results
         std::transform(
-            m_fft2[0]->out(),
-            m_fft2[0]->out() + m_fftSize,
+            m_fft[0]->out(),
+            m_fft[0]->out() + m_fftSize,
             m_dataj,
-            m_invFFT2->in(),
+            m_invFFT->in(),
             [this](std::complex<float>& a, const std::complex<float>& b) -> std::complex<float> {
                 return (a*b);
             }
@@ -343,13 +271,13 @@ bool DOA2Correlator::performFFTProd(
 
         // copy to complex vector for DOA with re-orderong
         std::copy(
-            m_invFFT2->in(),
-            m_invFFT2->in() + m_fftSize/2,
+            m_invFFT->in(),
+            m_invFFT->in() + m_fftSize/2,
             m_xcorr.begin() + nfft*m_fftSize + m_fftSize/2
         );
         std::copy(
-            m_invFFT2->in() + m_fftSize/2,
-            m_invFFT2->in() + m_fftSize,
+            m_invFFT->in() + m_fftSize/2,
+            m_invFFT->in() + m_fftSize,
             m_xcorr.begin() + nfft*m_fftSize
         );
 
@@ -368,8 +296,8 @@ bool DOA2Correlator::performFFTProd(
 
         // copy product to time domain - re-order, convert and scale to FFT size
         // std::transform(
-        //     m_invFFT2->in(),
-        //     m_invFFT2->in() + m_fftSize/2,
+        //     m_invFFT->in(),
+        //     m_invFFT->in() + m_fftSize/2,
         //     m_tcorr.begin() + nfft*m_fftSize + m_fftSize/2,
         //     [](const std::complex<float>& a) -> Sample {
         //         Sample s;
@@ -379,8 +307,8 @@ bool DOA2Correlator::performFFTProd(
         //     }
         // );
         // std::transform(
-        //     m_invFFT2->in() + m_fftSize/2,
-        //     m_invFFT2->in() + m_fftSize,
+        //     m_invFFT->in() + m_fftSize/2,
+        //     m_invFFT->in() + m_fftSize,
         //     m_tcorr.begin() + nfft*m_fftSize,
         //     [](const std::complex<float>& a) -> Sample {
         //         Sample s;

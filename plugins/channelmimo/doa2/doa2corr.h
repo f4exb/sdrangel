@@ -73,18 +73,12 @@ private:
 
     DOA2Settings::CorrelationType m_corrType;
     unsigned int m_fftSize;          //!< FFT length
-    FFTEngine *m_fft[2];             //!< FFT engines (double FFT)
-    FFTEngine *m_invFFT;             //!< Inverse FFT engine (double FFT)
-    FFTEngine *m_fft2[2];            //!< FFT engines
-    FFTEngine *m_invFFT2;            //!< Inverse FFT engine
-    unsigned int m_fftSequences[2];  //!< FFT factory engine sequences
-    unsigned int m_invFFTSequence;   //!< Inverse FFT engine sequence
-    unsigned int m_fft2Sequences[2]; //!< FFT engines sequences
-    unsigned int m_invFFT2Sequence;  //!< Inverse FFT engine sequence
+    FFTEngine *m_fft[2];             //!< FFT engines
+    FFTEngine *m_invFFT;             //!< Inverse FFT engine
+    unsigned int m_fftSequences[2];  //!< FFT engines sequences
+    unsigned int m_invFFTSequence;  //!< Inverse FFT engine sequence
     FFTWindow m_window;              //!< FFT window
     std::complex<float> *m_dataj;    //!< conjuate of FFT transform
-    SampleVector m_data0w;           //!< windowed data 0
-    SampleVector m_data1w;           //!< windowed data 1
     SampleVector m_data1p;           //!< data1 with phase correction
     int m_tcorrSize;                 //!< time correlations vector size
     int m_xcorrSize;                 //!< DOA correlations vector size
