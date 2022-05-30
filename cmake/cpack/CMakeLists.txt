@@ -176,6 +176,14 @@ elseif(WIN32 OR MINGW)
     )
   endforeach(codec2_dll)
 
+  file(GLOB HIDAPI_DLLS "${HIDAPI_DLL_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+  foreach(hidapi_dll ${HIDAPI_DLLS})
+    get_filename_component(hidapi_dll_name "${hidapi_dll}"  NAME)
+    add_custom_target(copy_hidapi_${hidapi_dll_name} ALL
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different "${hidapi_dll}" "${SDRANGEL_BINARY_BIN_DIR}/"
+    )
+  endforeach(hidapi_dll)
+
   if(ENABLE_USRP AND UHD_FOUND)
     file(GLOB UHD_DLLS "${UHD_DLL_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}")
     foreach(uhd_dll ${UHD_DLLS})
@@ -247,6 +255,9 @@ elseif(WIN32 OR MINGW)
     install(FILES "${GFN_LIBUSB_DIR}/libusb-1.0${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
     # codec2
     install(DIRECTORY "${CODEC2_DLL_DIR}/" DESTINATION "${INSTALL_LIB_DIR}"
+      FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    # hidapi
+    install(DIRECTORY "${HIDAPI_DLL_DIR}/" DESTINATION "${INSTALL_LIB_DIR}"
       FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}")
     # uhd
     install(DIRECTORY "${UHD_DLL_DIR}/" DESTINATION "${INSTALL_LIB_DIR}"
