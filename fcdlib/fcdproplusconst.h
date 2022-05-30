@@ -10,6 +10,8 @@
 
 #include <string>
 
+#include "export.h"
+
 typedef enum
 {
 	FCDPROPLUS_TRF_0_4,
@@ -49,7 +51,7 @@ typedef struct
 	std::string label;
 } fcdproplus_if_filter;
 
-class FCDProPlusConstants
+class FCDLIB_API FCDProPlusConstants
 {
 public:
 	static const fcdproplus_rf_filter rf_filters[];

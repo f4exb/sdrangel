@@ -26,4 +26,9 @@ target_link_libraries(fcdhid
     ${ICONV_LIBRARY}
 )
 
+set_target_properties(fcdhid PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS true)
+if (MSVC)
+    set_target_properties(fcdhid PROPERTIES INTERPROCEDURAL_OPTIMIZATION false)
+endif()
+
 install(TARGETS fcdhid DESTINATION ${INSTALL_LIB_DIR})
