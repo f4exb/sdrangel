@@ -115,6 +115,16 @@ public:
     }
 
     ///
+    /// \brief Draw border along blind angle
+    /// \param drawLegend - true to draw border along blind angle
+    ///
+    void setBlindAngleBorder(bool value)
+    {
+        m_blindAngleBorder = value;
+        emit canvasReplot();
+    }
+
+    ///
     /// \brief Draw legend in the center of the compass
     /// \param drawLegend - true to draw legend else false
     ///
@@ -162,6 +172,7 @@ protected:
     double  m_azAnt;                            ///< antennas azimuth from 1 (connected to stream 0) to 2 (connected to stream 1)
     double  m_blindAngle;                       //!< half the angle around antenna direction where DOA cannot be processed (when baseline distance exceeds half wavelength)
     QColor  m_blindColor;
+    bool    m_blindAngleBorder;
 };
 
 #endif // INCLUDE_DOA2COMPASS_H

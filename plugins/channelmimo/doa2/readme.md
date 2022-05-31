@@ -2,7 +2,7 @@
 
 <h2>Introduction</h2>
 
-This MIMO reception only (MI) plugin can be used to determine the direction of arrival (DOA) of an incoming wave on a 2 antenna system connected to a coherent dual receiving device in MIMO (thus MI) mode like BladeRF3, LimeSDR USB, Pluto+. It is assume that antenna 1 is connected to stream 0 and antenna 2 is connected to stream 1. The direction of the antenna system goes from antenna 1 to antenna 2.
+This MIMO reception only (MI) plugin can be used to determine the direction of arrival (DOA) of an incoming wave on a 2 antenna system connected to a coherent dual receiving device in MIMO (thus MI) mode like BladeRF2 or Pluto+. It is assumed that antenna 1 is connected to stream 0 and antenna 2 is connected to stream 1. The direction of the antenna system goes from antenna 1 to antenna 2. The actual connections to RF ports is usually inverted so that antenna 1 is connected to port RX2 and antenna 2 to port RX1. See the table at the end of the document listing details of some known devices.
 
 Example of setup:
 
@@ -195,13 +195,13 @@ This angle can be displayed on the scope when `DOAP` (positive angles) or `DOAN`
 
 In general the angle can be calculated from the baseline distance D (distance between antennas) with the following formula:
 
-&phi; = &pi; d / (&lambda;/2)
-&phi; = &pi; D cos(&theta;) / (&lambda;/2)
+&phi; = &pi; d / (&lambda;/2) &rArr;
+&phi; = &pi; D cos(&theta;) / (&lambda;/2) &rArr;
 cos(&theta;) = (&phi; / &pi;) . ((&lambda;/2) / D)
 
-If D is larger than half the wavelength (&lambda;/2) then a section in front of antenna 2 and at the back of antenna 1 cannot be reached since cos(&theta;) will lie in an interval smaller than [-1:1]. This section is shown on the compass with a darker background (C.1.4)
+If D is larger than half the wavelength (&lambda;/2) then a section in front of antenna 2 and at the back of antenna 1 cannot be reached since cos(&theta;) will lie in an interval smaller than [-1:1]. The value of half the sector angle is calculated assuming &phi;/&pi; = 1 and thus cos(&theta;0) = (&lambda;/2)/D  This section is shown on the compass with a darker background (C.1.4)
 
-If D is smaller than half the wavelength some incorrect values can be read as some angles will ovelap. Unless you have a hint about the wave direction this mode of operation is not recommended,
+If D is smaller than half the wavelength for the larger values of &phi; the resulting cos(&theta;) will lie outside the [-1:1] interval. In order to compute the acos the value is clamped to -1 or 1. Therefore some angles are inaccessible. Half the sector angle is given by cos(&theta;0) = D/(&lambda;/2).
 
 There are two possible angles for the incoming wave leading to the same phase difference. One from the port side of the antenna system (positive) and the other from the starboard side (negative).
 
@@ -209,7 +209,7 @@ To disambiguate readings one may turn the antenna system then the correct side w
 
 For best results the antenna system should be clear of possible reflectors including your own body that can affect the incoming direct wave. Ideally you should also start the procedure with a distance between antennas (baseline distance) of half the wavelength of the signal of interest.
 
-Then a possible procedure to determine DOA is the following:
+<h3>possible procedure to determine DOA</h3>
 
 1. Arrange antennas axis so that the phase difference &phi; is zero or DOA angle &theta; is roughly &pi;/2
 2. Make an assumption for the wave to come from the positive (port) or negative (starboard) angles side and take it as the DOA angle
@@ -217,5 +217,42 @@ Then a possible procedure to determine DOA is the following:
 4. If when performing previous step (3) the DOA angle is significantly moving in absolute value then the wave is coming from the opposite side of the antenna system. Then take the other side angle reading as valid.
 5. Once the  &plusmn;&pi;/2 DOA angle (zero phase difference) is obtained at &lambda;/2 distance between antennas you can move your antennas further apart to refine the &plusmn;&pi;/2 DOA angle.
 
+<h3>Device settings</h3>
 
+The actual connections to RF ports depends on each device to get the angles right. BladeRF and Pluto+ have constant corrections and do not require calibration for each new masurement. This is not the case of LimeSDR USB or XTRX however and it makes them not practical for this application.
+
+Known corrections and connections for some devices:
+
+<table>
+    <tr>
+        <th>Device</th>
+        <th>Correction</th>
+        <th>A (ant 1)</th>
+        <th>B (ant 2)</th>
+    </tr>
+    <tr>
+        <td>Pluto+</td>
+        <td>&plusmn;180 &deg;</td>
+        <td>RX2</td>
+        <td>RX1</td>
+    </tr>
+    <tr>
+        <td>BladeRF2</td>
+        <td>0 &deg;</td>
+        <td>RX2</td>
+        <td>RX1</td>
+    </tr>
+    <tr>
+        <td>LimeSDR USB</td>
+        <td>variable</td>
+        <td>RX2</td>
+        <td>RX1</td>
+    </tr>
+    <tr>
+        <td>XTRX</td>
+        <td>variable</td>
+        <td>RX2</td>
+        <td>RX1</td>
+    </tr>
+</table>
 

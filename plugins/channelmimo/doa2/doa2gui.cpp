@@ -145,6 +145,7 @@ DOA2GUI::DOA2GUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *ch
 
     m_scopeVis->setTraceChunkSize(DOA2::m_fftSize); // Set scope trace length unit to FFT size
     ui->scopeGUI->traceLengthChange();
+    ui->compass->setBlindAngleBorder(true);
 
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 
@@ -475,7 +476,11 @@ void DOA2GUI::updateScopeFScale()
 void DOA2GUI::updateDOA()
 {
     float cosTheta = (m_doa2->getPhi() * m_hwl * 1000.0) / (M_PI * m_settings.m_basebandDistance);
-    float blindAngle = (m_settings.m_basebandDistance > m_hwl * 1000.0) ? std::acos((m_hwl * 1000.0) / m_settings.m_basebandDistance) * (180/M_PI) : 0;
+    float blindAngle = (m_settings.m_basebandDistance > m_hwl * 1000.0) ?
+        std::acos((m_hwl * 1000.0) / m_settings.m_basebandDistance) * (180/M_PI) :
+        (m_settings.m_basebandDistance < m_hwl * 1000.0) ?
+            std::acos(m_settings.m_basebandDistance / (m_hwl * 1000.0)) * (180/M_PI):
+            0;
     ui->compass->setBlindAngle(blindAngle);
     float doaAngle = std::acos(cosTheta < -1.0 ? -1.0 : cosTheta > 1.0 ? 1.0 : cosTheta) * (180/M_PI);
     float posAngle = ui->antAz->value() - doaAngle; // DOA angles are trigonometric but displayed angles are clockwise
