@@ -31,6 +31,7 @@
 #include <termios.h>
 #include <sys/ioctl.h>
 #include <linux/serial.h>
+#include "util/serialutil.h"
 #endif
 
 #include <chrono>
@@ -95,35 +96,20 @@ void AMBEEngine::scan(QList<QString>& ambeDevices)
 void AMBEEngine::getComList()
 {
     qDebug("AMBEEngine::getComList: Linux");
-    int n;
-    struct dirent **namelist;
     m_comList.clear();
     m_comList8250.clear();
     const char* sysdir = "/sys/class/tty/";
 
-    // Scan through /sys/class/tty - it contains all tty-devices in the system
-    n = scandir(sysdir, &namelist, NULL, alphasort);
-    if (n < 0)
+    std::vector<std::string> comPorts;
+    SerialUtil::getComPorts(comPorts, "ttyUSB[0-9]+"); // in Linux the AMBE devices will be listed as ttyUSBx
+    for (std::vector<std::string>::iterator it = comPorts.begin(); it != comPorts.end(); ++it)
     {
-        perror("scandir");
-    }
-    else
-    {
-        while (n--)
-        {
-            if (strcmp(namelist[n]->d_name, "..") && strcmp(namelist[n]->d_name, "."))
-            {
-                // Construct full absolute file path
-                std::string devicedir = sysdir;
-                devicedir += namelist[n]->d_name;
-                // Register the device
-                register_comport(m_comList, m_comList8250, devicedir);
-            }
-
-            free(namelist[n]);
-        }
-
-        free(namelist);
+        // Construct full absolute file path
+        std::string devicedir = sysdir;
+        it->erase(0,5); // remove /dev/
+        devicedir += *it;
+        // Register the device
+        register_comport(m_comList, m_comList8250, devicedir);
     }
 
     // Only non-serial8250 has been added to comList without any further testing
