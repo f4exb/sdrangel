@@ -199,9 +199,9 @@ In general the angle can be calculated from the baseline distance D (distance be
 &phi; = &pi; D cos(&theta;) / (&lambda;/2) &rArr;
 cos(&theta;) = (&phi; / &pi;) . ((&lambda;/2) / D)
 
-If D is larger than half the wavelength (&lambda;/2) then a section in front of antenna 2 and at the back of antenna 1 cannot be reached since cos(&theta;) will lie in an interval smaller than [-1:1]. The value of half the sector angle is calculated assuming &phi;/&pi; = 1 and thus cos(&theta;0) = (&lambda;/2)/D  This section is shown on the compass with a darker background (C.1.4)
+If D is larger than &lambda;/2 the possible values of cos(&theta;) do not cover the whole [-1:1] interval and thus there is a blind sector at the front of antenna 2 and the back of antenna 1 which is shown onthe compass as a darker area (C.1.4). However signals coming from this blind sector will fold into the valid sector. Putting antennas further apart than &lambda;/2 can give more accurate measurements inside the valid sector at the condition you already validated the assunption that the incoming wave angle is insde the valid sector and that no significant signal from the blind sector can influence the masurement. One can imagine having a pair of directive antennas placed at a distance for which the valid sector matches the antenna system lobe for final accurate measurement.
 
-If D is smaller than half the wavelength for the larger values of &phi; the resulting cos(&theta;) will lie outside the [-1:1] interval. In order to compute the acos the value is clamped to -1 or 1. Therefore some angles are inaccessible. Half the sector angle is given by cos(&theta;0) = D/(&lambda;/2).
+If D is smaller than &lambda;/2 extreme incoming angles (0 or &pi;) yield smaller &phi; which will be compensated by the (&lambda;/2) / D factor however with less accuracy.
 
 There are two possible angles for the incoming wave leading to the same phase difference. One from the port side of the antenna system (positive) and the other from the starboard side (negative).
 

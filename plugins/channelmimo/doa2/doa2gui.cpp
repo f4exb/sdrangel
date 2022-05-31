@@ -475,12 +475,10 @@ void DOA2GUI::updateScopeFScale()
 
 void DOA2GUI::updateDOA()
 {
-    float cosTheta = (m_doa2->getPhi() * m_hwl * 1000.0) / (M_PI * m_settings.m_basebandDistance);
+    float cosTheta = (m_doa2->getPhi()/M_PI) * ((m_hwl * 1000.0) / m_settings.m_basebandDistance);
     float blindAngle = (m_settings.m_basebandDistance > m_hwl * 1000.0) ?
         std::acos((m_hwl * 1000.0) / m_settings.m_basebandDistance) * (180/M_PI) :
-        (m_settings.m_basebandDistance < m_hwl * 1000.0) ?
-            std::acos(m_settings.m_basebandDistance / (m_hwl * 1000.0)) * (180/M_PI):
-            0;
+        0;
     ui->compass->setBlindAngle(blindAngle);
     float doaAngle = std::acos(cosTheta < -1.0 ? -1.0 : cosTheta > 1.0 ? 1.0 : cosTheta) * (180/M_PI);
     float posAngle = ui->antAz->value() - doaAngle; // DOA angles are trigonometric but displayed angles are clockwise

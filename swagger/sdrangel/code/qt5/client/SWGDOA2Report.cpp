@@ -34,6 +34,8 @@ SWGDOA2Report::SWGDOA2Report() {
     m_pos_az_isSet = false;
     neg_az = 0;
     m_neg_az_isSet = false;
+    blind_angle = 0;
+    m_blind_angle_isSet = false;
     fft_size = 0;
     m_fft_size_isSet = false;
     channel_sample_rate = 0;
@@ -52,6 +54,8 @@ SWGDOA2Report::init() {
     m_pos_az_isSet = false;
     neg_az = 0;
     m_neg_az_isSet = false;
+    blind_angle = 0;
+    m_blind_angle_isSet = false;
     fft_size = 0;
     m_fft_size_isSet = false;
     channel_sample_rate = 0;
@@ -60,6 +64,7 @@ SWGDOA2Report::init() {
 
 void
 SWGDOA2Report::cleanup() {
+
 
 
 
@@ -83,6 +88,8 @@ SWGDOA2Report::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&pos_az, pJson["posAz"], "qint32", "");
     
     ::SWGSDRangel::setValue(&neg_az, pJson["negAz"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&blind_angle, pJson["blindAngle"], "qint32", "");
     
     ::SWGSDRangel::setValue(&fft_size, pJson["fftSize"], "qint32", "");
     
@@ -112,6 +119,9 @@ SWGDOA2Report::asJsonObject() {
     }
     if(m_neg_az_isSet){
         obj->insert("negAz", QJsonValue(neg_az));
+    }
+    if(m_blind_angle_isSet){
+        obj->insert("blindAngle", QJsonValue(blind_angle));
     }
     if(m_fft_size_isSet){
         obj->insert("fftSize", QJsonValue(fft_size));
@@ -154,6 +164,16 @@ SWGDOA2Report::setNegAz(qint32 neg_az) {
 }
 
 qint32
+SWGDOA2Report::getBlindAngle() {
+    return blind_angle;
+}
+void
+SWGDOA2Report::setBlindAngle(qint32 blind_angle) {
+    this->blind_angle = blind_angle;
+    this->m_blind_angle_isSet = true;
+}
+
+qint32
 SWGDOA2Report::getFftSize() {
     return fft_size;
 }
@@ -185,6 +205,9 @@ SWGDOA2Report::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_neg_az_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_blind_angle_isSet){
             isObjectUpdated = true; break;
         }
         if(m_fft_size_isSet){

@@ -50,6 +50,9 @@ public:
     qint32 getNegAz();
     void setNegAz(qint32 neg_az);
 
+    qint32 getBlindAngle();
+    void setBlindAngle(qint32 blind_angle);
+
     qint32 getFftSize();
     void setFftSize(qint32 fft_size);
 
@@ -68,6 +71,9 @@ private:
 
     qint32 neg_az;
     bool m_neg_az_isSet;
+
+    qint32 blind_angle;
+    bool m_blind_angle_isSet;
 
     qint32 fft_size;
     bool m_fft_size_isSet;

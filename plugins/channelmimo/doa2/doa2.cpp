@@ -525,8 +525,11 @@ void DOA2::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
     response.getDoa2Report()->setPhi(phi);
 
     float hwl = 1.5e8 / (m_deviceCenterFrequency + m_frequencyOffset);
-    float cosTheta = (getPhi() * hwl * 1000.0) / (M_PI * m_settings.m_basebandDistance);
-    // float blindAngle = ((cosTheta < -1.0) || (cosTheta > 1.0) ? 0 : std::acos(hwl * 1000.0 / m_settings.m_basebandDistance)) * (180/M_PI);
+    float cosTheta = (getPhi()/M_PI) * ((hwl * 1000.0) / m_settings.m_basebandDistance);
+    float blindAngle = (m_settings.m_basebandDistance > hwl * 1000.0) ?
+        std::acos((hwl * 1000.0) / m_settings.m_basebandDistance) * (180/M_PI) :
+        0;
+    response.getDoa2Report()->setBlindAngle((int) blindAngle);
     float doaAngle = std::acos(cosTheta < -1.0 ? -1.0 : cosTheta > 1.0 ? 1.0 : cosTheta) * (180/M_PI);
     qDebug("DOA2::webapiFormatChannelReport: phi: %f cosT: %f DOAngle: %f", getPhi(), cosTheta, doaAngle);
     float posAngle = normalizeAngle(m_settings.m_antennaAz - doaAngle, 360.0f); // DOA angles are trigonometric but displayed angles are clockwise
