@@ -90,7 +90,7 @@ You can choose between linear and barycentric rational interpolation, and the di
 <h3>13: Open Noise Source Control dialog</h3>
 
 Opens the noise source control dialog, to allow setting how the plugin turns the power to the noise source off and on. Two control methods are supported: A program or script can be run to turn the power on or off,
-or the VISA library (if installed) can be used to send SCPI commands to a programmable power supply or other test equipment. If a VISA library is not found, the VISA and SCPI fields will be disabled.
+or the VISA library (if installed) can be used to send SCPI commands to a programmable power supply or other test equipment.
 
 The delay setting determines how long after the noise source's power is turned on or off, before the noise figure measurement starts. This should be long enough to allow the noise source output to settle, but
 not too long so that tests over a large number of frequencies take a long time to run. The ideal value will vary with the noise source and power supply.
