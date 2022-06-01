@@ -1,3 +1,14 @@
+sdrangel (7.3.1-1) unstable; urgency=medium
+
+  * DOA2 plugin: various fixes
+  * Funcube for Windows and Mac. PR #1261
+  * XTRX MIMO GUI: fixed GUI window size
+  * AMBR feature: fixed TTY devices search to limit conflicts
+  * NoiseFigure plugin: Fix #1269 and #1268. PR #1269
+  * USRP: Add support for non-discoverable devices and user arguments. PR #1271
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Wed, 01 Jun 2022 19:30:17 +0200
+
 sdrangel (7.3.0-1) unstable; urgency=medium
 
   * New Direction Of Arrival with 2 sources MI plugin. Implements #444
