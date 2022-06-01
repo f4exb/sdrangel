@@ -35,7 +35,7 @@
 const PluginDescriptor USRPOutputPlugin::m_pluginDescriptor = {
     QStringLiteral("USRP"),
     QStringLiteral("URSP Output"),
-    QStringLiteral("7.0.0"),
+    QStringLiteral("7.3.1"),
     QStringLiteral("(c) Jon Beniston, M7RCE and Edouard Griffiths, F4EXB"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,
@@ -43,7 +43,7 @@ const PluginDescriptor USRPOutputPlugin::m_pluginDescriptor = {
 };
 
 static constexpr const char* const m_hardwareID = "USRP";
-static constexpr const char* const m_deviceTypeID = USRPOUTPUT_DEVICE_TYPE_ID;
+const char* const USRPOutputPlugin::m_deviceTypeID = USRPOUTPUT_DEVICE_TYPE_ID;
 
 USRPOutputPlugin::USRPOutputPlugin(QObject* parent) :
     QObject(parent)

@@ -52,7 +52,7 @@ void DeviceUSRP::enumOriginDevices(const QString& hardwareId, PluginInterface::O
             qDebug() << "DeviceUSRP::enumOriginDevices: found USRP device " << displayedName;
 
             DeviceUSRPParams usrpParams;
-            usrpParams.open(id.toStdString().c_str(), true);
+            usrpParams.open(id, true);
             usrpParams.close();
 
             originDevices.append(PluginInterface::OriginDevice(

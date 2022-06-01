@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>360</width>
-    <height>174</height>
+    <height>192</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>360</width>
-    <height>174</height>
+    <height>192</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>380</width>
-    <height>221</height>
+    <height>192</height>
    </size>
   </property>
   <property name="font">
@@ -56,7 +56,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_freq">
      <property name="topMargin">
-      <number>4</number>
+      <number>2</number>
      </property>
      <item>
       <layout class="QVBoxLayout" name="freqLeftLayout">
@@ -145,7 +145,6 @@
         <font>
          <family>Liberation Mono</family>
          <pointsize>16</pointsize>
-         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
@@ -162,12 +161,6 @@
      </item>
      <item>
       <layout class="QVBoxLayout" name="freqRightLayout">
-       <property name="leftMargin">
-        <number>6</number>
-       </property>
-       <property name="rightMargin">
-        <number>6</number>
-       </property>
        <item>
         <layout class="QHBoxLayout" name="freqRightTopLayout">
          <item>
@@ -224,6 +217,13 @@
       </layout>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="Line" name="line_5">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -359,7 +359,6 @@
         <font>
          <family>Liberation Mono</family>
          <pointsize>12</pointsize>
-         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
@@ -455,6 +454,13 @@
     </layout>
    </item>
    <item>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="gainLayout">
      <property name="topMargin">
       <number>2</number>
@@ -535,13 +541,6 @@
       </widget>
      </item>
      <item>
-      <widget class="Line" name="line_3">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
       <spacer name="horizontalSpacer_5">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -553,13 +552,6 @@
         </size>
        </property>
       </spacer>
-     </item>
-     <item>
-      <widget class="Line" name="line_4">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
      </item>
      <item>
       <widget class="ButtonSwitch" name="dcOffset">
@@ -623,7 +615,6 @@
         <font>
          <family>Liberation Mono</family>
          <pointsize>12</pointsize>
-         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>
@@ -674,7 +665,6 @@
         <font>
          <family>Liberation Mono</family>
          <pointsize>12</pointsize>
-         <weight>50</weight>
          <bold>false</bold>
         </font>
        </property>

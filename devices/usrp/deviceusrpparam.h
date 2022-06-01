@@ -74,7 +74,7 @@ struct DEVICES_API DeviceUSRPParams
     /**
      * Opens and initialize the device and obtain information (# channels, ranges, ...)
      */
-    bool open(const char *deviceStr, bool channelNumOnly);
+    bool open(const QString &deviceStr, bool channelNumOnly);
     void close();
     uhd::usrp::multi_usrp::sptr getDevice() { return m_dev; }
 

@@ -22,7 +22,7 @@ Use this button to import the selected device in the panel above (1) to the pane
 
 <h2>3 Non discoverable device hardware ID</h2>
 
-Some devices cannot be discovered automatically. This is the case for networked devices in particular the PlutoSDR. In conjunctions with (4) and (5) you can define devices that can be added to the list of available devices for selection. Note that you will need to restart SDRangel for this to be effective.
+Some devices cannot be discovered automatically. This is the case for networked devices in particular the PlutoSDR and some USRPs. In conjunctions with (4) and (5) you can define devices that can be added to the list of available devices for selection. Note that you will need to restart SDRangel for this to be effective.
 
 Once the device is defined user arguments like the IP address can be specified for it.
 

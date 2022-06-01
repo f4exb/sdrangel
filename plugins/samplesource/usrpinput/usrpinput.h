@@ -208,7 +208,7 @@ public:
             const QStringList& deviceSettingsKeys,
             SWGSDRangel::SWGDeviceSettings& response);
 
-    std::size_t getChannelIndex();
+    int getChannelIndex();
     void getLORange(float& minF, float& maxF) const;
     void getSRRange(float& minF, float& maxF) const;
     void getLPRange(float& minF, float& maxF) const;
