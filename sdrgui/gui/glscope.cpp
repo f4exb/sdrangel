@@ -1093,9 +1093,9 @@ void GLScope::applyConfig()
     else
     {
         if (m_xScaleFreq) {
-            m_x2Scale.setRange(Unit::Time, t_start, t_start + t_len); // time scale
-        } else {
             m_x2Scale.setRange(Unit::Frequency, m_xScaleCenterFrequency - (m_xScaleFrequencySpan/2), m_xScaleCenterFrequency + (m_xScaleFrequencySpan/2));
+        } else {
+            m_x2Scale.setRange(Unit::Time, t_start, t_start + t_len); // time scale
         }
     }
 
