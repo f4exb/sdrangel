@@ -17,8 +17,6 @@
 
 #include <QDebug>
 
-#include "util/visa.h"
-
 #include "noisefigurecontroldialog.h"
 
 NoiseFigureControlDialog::NoiseFigureControlDialog(NoiseFigureSettings *settings, QWidget* parent) :
@@ -33,13 +31,6 @@ NoiseFigureControlDialog::NoiseFigureControlDialog(NoiseFigureSettings *settings
     ui->powerOnSCPI->setPlainText(settings->m_powerOnSCPI);
     ui->powerOffSCPI->setPlainText(settings->m_powerOffSCPI);
     ui->delay->setValue(settings->m_powerDelay);
-    VISA visa;
-    if (!visa.isAvailable())
-    {
-        ui->device->setEnabled(false);
-        ui->powerOnSCPI->setEnabled(false);
-        ui->powerOffSCPI->setEnabled(false);
-    }
 }
 
 NoiseFigureControlDialog::~NoiseFigureControlDialog()

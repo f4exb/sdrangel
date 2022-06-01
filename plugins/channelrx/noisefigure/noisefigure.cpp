@@ -311,7 +311,7 @@ void NoiseFigure::nextState()
             }
         }
         m_state = SET_SWEEP_VALUE;
-        QTimer::singleShot(0, this, SLOT(nextState()));
+        QTimer::singleShot(0, this, &NoiseFigure::nextState);
         break;
 
     case SET_SWEEP_VALUE:
@@ -320,7 +320,7 @@ void NoiseFigure::nextState()
         {
             qDebug() << "NoiseFigure::nextState: Set " << m_settings.m_setting << " to " << m_sweepValue;
             m_state = POWER_ON;
-            QTimer::singleShot(100, this, SLOT(nextState()));
+            QTimer::singleShot(100, this, &NoiseFigure::nextState);
         } else
         {
             qDebug() << "NoiseFigure::nextState: Unable to set " << m_settings.m_setting << " to " << m_sweepValue;
@@ -330,7 +330,7 @@ void NoiseFigure::nextState()
     case POWER_ON:
         // Power on noise source
         powerOn();
-        QTimer::singleShot(m_settings.m_powerDelay * 1000.0, this, SLOT(nextState()));
+        QTimer::singleShot(m_settings.m_powerDelay * 1000.0, this, &NoiseFigure::nextState);
         m_state = MEASURE_ON;
         break;
 
@@ -343,7 +343,7 @@ void NoiseFigure::nextState()
     case POWER_OFF:
         // Power off noise source
         powerOff();
-        QTimer::singleShot(m_settings.m_powerDelay * 1000.0, this, SLOT(nextState()));
+        QTimer::singleShot(m_settings.m_powerDelay * 1000.0, this, &NoiseFigure::nextState);
         m_state = MEASURE_OFF;
         break;
 
@@ -392,7 +392,7 @@ void NoiseFigure::nextState()
                 m_sweepValue += m_settings.m_step * scaleFactor;
             }
             m_state = SET_SWEEP_VALUE;
-            QTimer::singleShot(0, this, SLOT(nextState()));
+            QTimer::singleShot(0, this, &NoiseFigure::nextState);
         }
         break;
     }
@@ -490,14 +490,14 @@ bool NoiseFigure::handleMessage(const Message& cmd)
             if (!m_settings.m_visaDevice.isEmpty())
             {
                 if (openVISADevice()) {
-                    QTimer::singleShot(0, this, SLOT(nextState()));
+                    QTimer::singleShot(0, this, &NoiseFigure::nextState);
                 } else if (getMessageQueueToGUI()) {
                     getMessageQueueToGUI()->push(MsgFinished::create(QString("Failed to open VISA device %1").arg(m_settings.m_visaDevice)));
                 }
             }
             else
             {
-                QTimer::singleShot(0, this, SLOT(nextState()));
+                QTimer::singleShot(0, this, &NoiseFigure::nextState);
             }
         }
         else
