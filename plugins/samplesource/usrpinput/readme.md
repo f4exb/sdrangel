@@ -4,6 +4,8 @@
 
 This input sample source plugin gets its samples from a [USRP device](https://www.ettus.com/product-categories/usrp-bus-series/).
 
+When using a USRP device over a network, you have to create a non discoverable device reference in the [user arguments dialog](https://github.com/f4exb/sdrangel/blob/master/sdrgui/deviceuserargs.md) from the main window Preferences > Devices menu. You must use the USRP hardware ID then specify the device address with an addr parameter in the user arguments for example: addr=192.168.1.10. Note that this will become effective once SDRangel is restarted.
+
 <h2>Interface</h2>
 
 The top and bottom bars of the device window are described [here](../../../sdrgui/device/readme.md)

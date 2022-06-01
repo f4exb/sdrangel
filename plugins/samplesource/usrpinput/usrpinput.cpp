@@ -212,9 +212,24 @@ bool USRPInput::openDevice()
         qDebug("USRPInput::openDevice: open device here");
 
         m_deviceShared.m_deviceParams = new DeviceUSRPParams();
-        char serial[256];
-        strcpy(serial, qPrintable(m_deviceAPI->getSamplingDeviceSerial()));
-        m_deviceShared.m_deviceParams->open(serial, false);
+        QString deviceStr;
+        // If a non-discoverable device, serial with be of the form USRP-N
+        if (m_deviceAPI->getSamplingDeviceSerial().startsWith("USRP"))
+        {
+            deviceStr = m_deviceAPI->getHardwareUserArguments();
+        }
+        else
+        {
+            deviceStr = m_deviceAPI->getSamplingDeviceSerial();
+            if (m_deviceAPI->getHardwareUserArguments().size() != 0) {
+                deviceStr = deviceStr + ',' + m_deviceAPI->getHardwareUserArguments();
+            }
+        }
+        if (!m_deviceShared.m_deviceParams->open(deviceStr, false))
+        {
+            qCritical("USRPInput::openDevice: failed to open device");
+            return false;
+        }
         m_deviceShared.m_channel = requestedChannel; // acknowledge the requested channel
     }
 
@@ -499,33 +514,69 @@ void USRPInput::setCenterFrequency(qint64 centerFrequency)
     }
 }
 
-std::size_t USRPInput::getChannelIndex()
+int USRPInput::getChannelIndex()
 {
     return m_deviceShared.m_channel;
 }
 
 void USRPInput::getLORange(float& minF, float& maxF) const
 {
-    minF = m_deviceShared.m_deviceParams->m_loRangeRx.start();
-    maxF = m_deviceShared.m_deviceParams->m_loRangeRx.stop();
+    try
+    {
+        minF = m_deviceShared.m_deviceParams->m_loRangeRx.start();
+        maxF = m_deviceShared.m_deviceParams->m_loRangeRx.stop();
+    }
+    catch (std::exception& e)
+    {
+        qDebug() << "USRPInput::getLORange: exception: " << e.what();
+        minF = 0.0f;
+        maxF = 0.0f;
+    }
 }
 
 void USRPInput::getSRRange(float& minF, float& maxF) const
 {
-    minF = m_deviceShared.m_deviceParams->m_srRangeRx.start();
-    maxF = m_deviceShared.m_deviceParams->m_srRangeRx.stop();
+    try
+    {
+        minF = m_deviceShared.m_deviceParams->m_srRangeRx.start();
+        maxF = m_deviceShared.m_deviceParams->m_srRangeRx.stop();
+    }
+    catch (std::exception& e)
+    {
+        qDebug() << "USRPInput::getSRRange: exception: " << e.what();
+        minF = 0.0f;
+        maxF = 0.0f;
+    }
 }
 
 void USRPInput::getLPRange(float& minF, float& maxF) const
 {
-    minF = m_deviceShared.m_deviceParams->m_lpfRangeRx.start();
-    maxF = m_deviceShared.m_deviceParams->m_lpfRangeRx.stop();
+    try
+    {
+        minF = m_deviceShared.m_deviceParams->m_lpfRangeRx.start();
+        maxF = m_deviceShared.m_deviceParams->m_lpfRangeRx.stop();
+    }
+    catch (std::exception& e)
+    {
+        qDebug() << "USRPInput::getLPRange: exception: " << e.what();
+        minF = 0.0f;
+        maxF = 0.0f;
+    }
 }
 
 void USRPInput::getGainRange(float& minF, float& maxF) const
 {
-    minF = m_deviceShared.m_deviceParams->m_gainRangeRx.start();
-    maxF = m_deviceShared.m_deviceParams->m_gainRangeRx.stop();
+    try
+    {
+        minF = m_deviceShared.m_deviceParams->m_gainRangeRx.start();
+        maxF = m_deviceShared.m_deviceParams->m_gainRangeRx.stop();
+    }
+    catch (std::exception& e)
+    {
+        qDebug() << "USRPInput::getGainRange: exception: " << e.what();
+        minF = 0.0f;
+        maxF = 0.0f;
+    }
 }
 
 QStringList USRPInput::getRxAntennas() const
