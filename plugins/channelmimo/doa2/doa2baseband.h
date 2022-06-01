@@ -118,7 +118,7 @@ private:
     void processFifo(const std::vector<SampleVector>& data, unsigned int ibegin, unsigned int iend);
     void run();
     bool handleMessage(const Message& cmd);
-    void processDOA(const std::vector<Complex>::iterator& begin, int nbSamples);
+    void processDOA(const std::vector<Complex>::iterator& begin, int nbSamples, bool reverse = true);
 
     DOA2Correlator m_correlator;
     DOA2Settings::CorrelationType m_correlationType;

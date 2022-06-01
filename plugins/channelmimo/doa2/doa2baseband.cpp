@@ -269,7 +269,7 @@ void DOA2Baseband::setFFTAveraging(int nbFFT)
     m_samplesCount = 0;
 }
 
-void DOA2Baseband::processDOA(const std::vector<Complex>::iterator& begin, int nbSamples)
+void DOA2Baseband::processDOA(const std::vector<Complex>::iterator& begin, int nbSamples, bool reverse)
 {
     const std::vector<Complex>::iterator end = begin + nbSamples;
 
@@ -290,7 +290,7 @@ void DOA2Baseband::processDOA(const std::vector<Complex>::iterator& begin, int n
             {
                 if (++m_fftAvgCount == m_fftAvg)
                 {
-                    m_phi = m_wphSum / m_magSum;
+                    m_phi = reverse ? -(m_wphSum / m_magSum) : (m_wphSum / m_magSum);
                     m_fftAvgCount = 0;
                 }
             }

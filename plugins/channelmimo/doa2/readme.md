@@ -2,7 +2,12 @@
 
 <h2>Introduction</h2>
 
-This MIMO reception only (MI) plugin can be used to determine the direction of arrival (DOA) of an incoming wave on a 2 antenna system connected to a coherent dual receiving device in MIMO (thus MI) mode like BladeRF2 or Pluto+. It is assumed that antenna 1 is connected to stream 0 and antenna 2 is connected to stream 1. The direction of the antenna system goes from antenna 1 to antenna 2. The actual connections to RF ports is usually inverted so that antenna 1 is connected to port RX2 and antenna 2 to port RX1. See the table at the end of the document listing details of some known devices.
+This MIMO reception only (MI) plugin can be used to determine the direction of arrival (DOA) of an incoming wave on a 2 antenna system connected to a coherent dual receiving device in MIMO (thus MI) mode like BladeRF2 or Pluto+. It is assumed that antenna A (or 1) (reference) is connected to stream 0 and antenna B (or 2) is connected to stream 1. The direction of the antenna system goes from antenna 1 to antenna 2.
+
+When a wave comes from the front i.e. it reaches B before A then A will lag with respect to B and thus B is in advance and since A is the reference the difference of phase (&phi;) is negative from 0 (at right angle) to -&pi; (from B). When the wave comes from the back then &phi; is positive from 0 (at right angle) to &pi; (from A)
+
+
+Usually stream 0 is connected to RX1 port and stream 1 to RX2 port. See the table at the end of the document listing details of some known devices.
 
 Example of setup:
 
@@ -233,26 +238,26 @@ Known corrections and connections for some devices:
     <tr>
         <td>Pluto+</td>
         <td>&plusmn;180 &deg;</td>
-        <td>RX2</td>
         <td>RX1</td>
+        <td>RX2</td>
     </tr>
     <tr>
         <td>BladeRF2</td>
         <td>0 &deg;</td>
-        <td>RX2</td>
         <td>RX1</td>
+        <td>RX2</td>
     </tr>
     <tr>
         <td>LimeSDR USB</td>
         <td>variable</td>
-        <td>RX2</td>
         <td>RX1</td>
+        <td>RX2</td>
     </tr>
     <tr>
         <td>XTRX</td>
         <td>variable</td>
-        <td>RX2</td>
         <td>RX1</td>
+        <td>RX2</td>
     </tr>
 </table>
 
