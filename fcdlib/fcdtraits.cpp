@@ -20,12 +20,12 @@
 const char *fcd_traits<Pro>::alsaDeviceName = "hw:CARD=V10";
 const char *fcd_traits<ProPlus>::alsaDeviceName = "hw:CARD=V20";
 
-#if defined(_WIN32)
-const char *fcd_traits<Pro>::qtDeviceName = "FUNcube Dongle V1.0";
-const char *fcd_traits<ProPlus>::qtDeviceName = "FUNcube Dongle V2.0";
-#else
+#if defined(__linux__)
 const char *fcd_traits<Pro>::qtDeviceName = "FUNcube_Dongle_V1.0";
 const char *fcd_traits<ProPlus>::qtDeviceName = "FUNcube_Dongle_V2.0";
+#else
+const char *fcd_traits<Pro>::qtDeviceName = "FUNcube Dongle V1.0";
+const char *fcd_traits<ProPlus>::qtDeviceName = "FUNcube Dongle V2.0";
 #endif
 
 const char *fcd_traits<Pro>::hardwareID = "FCDPro";
