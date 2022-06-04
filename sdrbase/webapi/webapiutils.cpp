@@ -47,6 +47,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelURIToSettingsKey = {
     {"sdrangel.channel.freedvdemod", "FreeDVDemodSettings"},
     {"sdrangel.channeltx.freedvmod", "FreeDVModSettings"},
     {"sdrangel.channel.freqtracker", "FreqTrackerSettings"},
+    {"sdrangel.channel.m17demod", "M17DemodSettings"},
     {"sdrangel.channel.nfmdemod", "NFMDemodSettings"},
     {"de.maintech.sdrangelove.channel.nfm", "NFMDemodSettings"}, // remap
     {"sdrangel.channeltx.modnfm", "NFMModSettings"},
@@ -153,6 +154,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelTypeToSettingsKey = {
     {"FreeDVMod", "FreeDVModSettings"},
     {"FreqTracker", "FreqTrackerSettings"},
     {"IEEE_802_15_4_Mod", "IEEE_802_15_4_ModSettings"},
+    {"M17Demod", "M17DemodSettings"},
     {"NFMDemod", "NFMDemodSettings"},
     {"NFMMod", "NFMModSettings"},
     {"NoiseFigure", "NoiseFigureSettings"},

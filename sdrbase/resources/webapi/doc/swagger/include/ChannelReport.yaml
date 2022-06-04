@@ -49,6 +49,8 @@ ChannelReport:
       $ref: "/doc/swagger/include/FreeDVMod.yaml#/FreeDVModReport"
     FreqTrackerReport:
       $ref: "/doc/swagger/include/FreqTracker.yaml#/FreqTrackerReport"
+    M17DemodReport:
+      $ref: "/doc/swagger/include/M17Demod.yaml#/M17DemodReport"
     NFMDemodReport:
       $ref: "/doc/swagger/include/NFMDemod.yaml#/NFMDemodReport"
     NFMModReport:

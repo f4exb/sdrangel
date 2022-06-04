@@ -183,6 +183,8 @@
 #include "SWGLocalSourceSettings.h"
 #include "SWGLocationInformation.h"
 #include "SWGLoggingInfo.h"
+#include "SWGM17DemodReport.h"
+#include "SWGM17DemodSettings.h"
 #include "SWGMapActions.h"
 #include "SWGMapAnimation.h"
 #include "SWGMapCoordinate.h"
@@ -1177,6 +1179,16 @@ namespace SWGSDRangel {
     }
     if(QString("SWGLoggingInfo").compare(type) == 0) {
       SWGLoggingInfo *obj = new SWGLoggingInfo();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGM17DemodReport").compare(type) == 0) {
+      SWGM17DemodReport *obj = new SWGM17DemodReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGM17DemodSettings").compare(type) == 0) {
+      SWGM17DemodSettings *obj = new SWGM17DemodSettings();
       obj->init();
       return obj;
     }

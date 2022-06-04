@@ -4521,6 +4521,11 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->setNfmDemodSettings(new SWGSDRangel::SWGNFMDemodSettings());
             channelSettings->getNfmDemodSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "M17DemodSettings")
+        {
+            channelSettings->setM17DemodSettings(new SWGSDRangel::SWGM17DemodSettings());
+            channelSettings->getM17DemodSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "NFMModSettings")
         {
             channelSettings->setNfmModSettings(new SWGSDRangel::SWGNFMModSettings());

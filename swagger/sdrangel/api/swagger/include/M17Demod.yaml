@@ -1,0 +1,82 @@
+M17DemodSettings:
+  description: M17Demod
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    rfBandwidth:
+      type: number
+      format: float
+    fmDeviation:
+      type: number
+      format: float
+    demodGain:
+      type: number
+      format: float
+    volume:
+      type: number
+      format: float
+    baudRate:
+      type: integer
+    squelchGate:
+      type: integer
+    squelch:
+      type: number
+      format: float
+    audioMute:
+      type: integer
+    syncOrConstellation:
+      type: integer
+    pllLock:
+      type: integer
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    audioDeviceName:
+      type: string
+    highPassFilter:
+      type: integer
+    traceLengthMutliplier:
+      description: multiply by 50ms
+      type: integer
+    traceStroke:
+      description: 0 to 255
+      type: integer
+    traceDecay:
+      description: 0 to 255
+      type: integer
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+    channelMarker:
+      $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+    rollupState:
+      $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+
+M17DemodReport:
+  description: M17Demod
+  properties:
+    channelPowerDB:
+      description: power transmitted in channel (dB)
+      type: number
+      format: float
+    audioSampleRate:
+      type: integer
+    channelSampleRate:
+      type: integer
+    squelch:
+      description: squelch status (1 if open else 0)
+      type: integer
+

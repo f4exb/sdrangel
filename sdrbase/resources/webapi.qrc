@@ -69,6 +69,7 @@
         <file>webapi/doc/swagger/include/LocalSource.yaml</file>
         <file>webapi/doc/swagger/include/Map.yaml</file>
         <file>webapi/doc/swagger/include/MetisMISO.yaml</file>
+        <file>webapi/doc/swagger/include/M17Demod.yaml</file>
         <file>webapi/doc/swagger/include/NFMDemod.yaml</file>
         <file>webapi/doc/swagger/include/NFMMod.yaml</file>
         <file>webapi/doc/swagger/include/NoiseFigure.yaml</file>

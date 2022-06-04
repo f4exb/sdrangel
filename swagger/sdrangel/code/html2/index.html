@@ -3421,6 +3421,9 @@ margin-bottom: 20px;
     "FreqTrackerReport" : {
       "$ref" : "#/definitions/FreqTrackerReport"
     },
+    "M17DemodReport" : {
+      "$ref" : "#/definitions/M17DemodReport"
+    },
     "NFMDemodReport" : {
       "$ref" : "#/definitions/NFMDemodReport"
     },
@@ -3572,6 +3575,9 @@ margin-bottom: 20px;
     },
     "IEEE_802_15_4_ModSettings" : {
       "$ref" : "#/definitions/IEEE_802_15_4_ModSettings"
+    },
+    "M17DemodSettings" : {
+      "$ref" : "#/definitions/M17DemodSettings"
     },
     "NFMDemodSettings" : {
       "$ref" : "#/definitions/NFMDemodSettings"
@@ -8210,6 +8216,120 @@ margin-bottom: 20px;
     }
   },
   "description" : "Logging parameters setting"
+};
+            defs.M17DemodReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power transmitted in channel (dB)"
+    },
+    "audioSampleRate" : {
+      "type" : "integer"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    },
+    "squelch" : {
+      "type" : "integer",
+      "description" : "squelch status (1 if open else 0)"
+    }
+  },
+  "description" : "M17Demod"
+};
+            defs.M17DemodSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "fmDeviation" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "demodGain" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "volume" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "baudRate" : {
+      "type" : "integer"
+    },
+    "squelchGate" : {
+      "type" : "integer"
+    },
+    "squelch" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "audioMute" : {
+      "type" : "integer"
+    },
+    "syncOrConstellation" : {
+      "type" : "integer"
+    },
+    "pllLock" : {
+      "type" : "integer"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "audioDeviceName" : {
+      "type" : "string"
+    },
+    "highPassFilter" : {
+      "type" : "integer"
+    },
+    "traceLengthMutliplier" : {
+      "type" : "integer",
+      "description" : "multiply by 50ms"
+    },
+    "traceStroke" : {
+      "type" : "integer",
+      "description" : "0 to 255"
+    },
+    "traceDecay" : {
+      "type" : "integer",
+      "description" : "0 to 255"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    },
+    "channelMarker" : {
+      "$ref" : "#/definitions/ChannelMarker"
+    },
+    "rollupState" : {
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "M17Demod"
 };
             defs.MapActions = {
   "properties" : {
@@ -56169,7 +56289,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2022-06-04T08:51:44.121+02:00
+              Generated 2022-06-05T00:26:14.019+02:00
             </div>
           </div>
       </div>

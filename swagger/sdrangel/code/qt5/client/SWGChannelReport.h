@@ -41,6 +41,7 @@
 #include "SWGFreeDVModReport.h"
 #include "SWGFreqTrackerReport.h"
 #include "SWGIEEE_802_15_4_ModReport.h"
+#include "SWGM17DemodReport.h"
 #include "SWGNFMDemodReport.h"
 #include "SWGNFMModReport.h"
 #include "SWGNoiseFigureReport.h"
@@ -141,6 +142,9 @@ public:
 
     SWGFreqTrackerReport* getFreqTrackerReport();
     void setFreqTrackerReport(SWGFreqTrackerReport* freq_tracker_report);
+
+    SWGM17DemodReport* getM17DemodReport();
+    void setM17DemodReport(SWGM17DemodReport* m17_demod_report);
 
     SWGNFMDemodReport* getNfmDemodReport();
     void setNfmDemodReport(SWGNFMDemodReport* nfm_demod_report);
@@ -262,6 +266,9 @@ private:
 
     SWGFreqTrackerReport* freq_tracker_report;
     bool m_freq_tracker_report_isSet;
+
+    SWGM17DemodReport* m17_demod_report;
+    bool m_m17_demod_report_isSet;
 
     SWGNFMDemodReport* nfm_demod_report;
     bool m_nfm_demod_report_isSet;

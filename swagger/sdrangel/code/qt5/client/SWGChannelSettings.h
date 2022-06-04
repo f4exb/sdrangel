@@ -49,6 +49,7 @@
 #include "SWGInterferometerSettings.h"
 #include "SWGLocalSinkSettings.h"
 #include "SWGLocalSourceSettings.h"
+#include "SWGM17DemodSettings.h"
 #include "SWGNFMDemodSettings.h"
 #include "SWGNFMModSettings.h"
 #include "SWGNoiseFigureSettings.h"
@@ -174,6 +175,9 @@ public:
 
     SWGIEEE_802_15_4_ModSettings* getIeee802154ModSettings();
     void setIeee802154ModSettings(SWGIEEE_802_15_4_ModSettings* ieee_802_15_4_mod_settings);
+
+    SWGM17DemodSettings* getM17DemodSettings();
+    void setM17DemodSettings(SWGM17DemodSettings* m17_demod_settings);
 
     SWGNFMDemodSettings* getNfmDemodSettings();
     void setNfmDemodSettings(SWGNFMDemodSettings* nfm_demod_settings);
@@ -328,6 +332,9 @@ private:
 
     SWGIEEE_802_15_4_ModSettings* ieee_802_15_4_mod_settings;
     bool m_ieee_802_15_4_mod_settings_isSet;
+
+    SWGM17DemodSettings* m17_demod_settings;
+    bool m_m17_demod_settings_isSet;
 
     SWGNFMDemodSettings* nfm_demod_settings;
     bool m_nfm_demod_settings_isSet;

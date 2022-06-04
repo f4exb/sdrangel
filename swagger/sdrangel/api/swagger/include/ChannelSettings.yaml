@@ -67,6 +67,8 @@ ChannelSettings:
       $ref: "http://swgserver:8081/api/swagger/include/Interferometer.yaml#/InterferometerSettings"
     IEEE_802_15_4_ModSettings:
       $ref: "http://swgserver:8081/api/swagger/include/IEEE_802_15_4_Mod.yaml#/IEEE_802_15_4_ModSettings"
+    M17DemodSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/M17Demod.yaml#/M17DemodSettings"
     NFMDemodSettings:
       $ref: "http://swgserver:8081/api/swagger/include/NFMDemod.yaml#/NFMDemodSettings"
     NFMModSettings:

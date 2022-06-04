@@ -86,6 +86,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_interferometer_settings_isSet = false;
     ieee_802_15_4_mod_settings = nullptr;
     m_ieee_802_15_4_mod_settings_isSet = false;
+    m17_demod_settings = nullptr;
+    m_m17_demod_settings_isSet = false;
     nfm_demod_settings = nullptr;
     m_nfm_demod_settings_isSet = false;
     nfm_mod_settings = nullptr;
@@ -194,6 +196,8 @@ SWGChannelSettings::init() {
     m_interferometer_settings_isSet = false;
     ieee_802_15_4_mod_settings = new SWGIEEE_802_15_4_ModSettings();
     m_ieee_802_15_4_mod_settings_isSet = false;
+    m17_demod_settings = new SWGM17DemodSettings();
+    m_m17_demod_settings_isSet = false;
     nfm_demod_settings = new SWGNFMDemodSettings();
     m_nfm_demod_settings_isSet = false;
     nfm_mod_settings = new SWGNFMModSettings();
@@ -320,6 +324,9 @@ SWGChannelSettings::cleanup() {
     }
     if(ieee_802_15_4_mod_settings != nullptr) { 
         delete ieee_802_15_4_mod_settings;
+    }
+    if(m17_demod_settings != nullptr) { 
+        delete m17_demod_settings;
     }
     if(nfm_demod_settings != nullptr) { 
         delete nfm_demod_settings;
@@ -454,6 +461,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&interferometer_settings, pJson["InterferometerSettings"], "SWGInterferometerSettings", "SWGInterferometerSettings");
     
     ::SWGSDRangel::setValue(&ieee_802_15_4_mod_settings, pJson["IEEE_802_15_4_ModSettings"], "SWGIEEE_802_15_4_ModSettings", "SWGIEEE_802_15_4_ModSettings");
+    
+    ::SWGSDRangel::setValue(&m17_demod_settings, pJson["M17DemodSettings"], "SWGM17DemodSettings", "SWGM17DemodSettings");
     
     ::SWGSDRangel::setValue(&nfm_demod_settings, pJson["NFMDemodSettings"], "SWGNFMDemodSettings", "SWGNFMDemodSettings");
     
@@ -599,6 +608,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((ieee_802_15_4_mod_settings != nullptr) && (ieee_802_15_4_mod_settings->isSet())){
         toJsonValue(QString("IEEE_802_15_4_ModSettings"), ieee_802_15_4_mod_settings, obj, QString("SWGIEEE_802_15_4_ModSettings"));
+    }
+    if((m17_demod_settings != nullptr) && (m17_demod_settings->isSet())){
+        toJsonValue(QString("M17DemodSettings"), m17_demod_settings, obj, QString("SWGM17DemodSettings"));
     }
     if((nfm_demod_settings != nullptr) && (nfm_demod_settings->isSet())){
         toJsonValue(QString("NFMDemodSettings"), nfm_demod_settings, obj, QString("SWGNFMDemodSettings"));
@@ -957,6 +969,16 @@ SWGChannelSettings::setIeee802154ModSettings(SWGIEEE_802_15_4_ModSettings* ieee_
     this->m_ieee_802_15_4_mod_settings_isSet = true;
 }
 
+SWGM17DemodSettings*
+SWGChannelSettings::getM17DemodSettings() {
+    return m17_demod_settings;
+}
+void
+SWGChannelSettings::setM17DemodSettings(SWGM17DemodSettings* m17_demod_settings) {
+    this->m17_demod_settings = m17_demod_settings;
+    this->m_m17_demod_settings_isSet = true;
+}
+
 SWGNFMDemodSettings*
 SWGChannelSettings::getNfmDemodSettings() {
     return nfm_demod_settings;
@@ -1257,6 +1279,9 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(ieee_802_15_4_mod_settings && ieee_802_15_4_mod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(m17_demod_settings && m17_demod_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(nfm_demod_settings && nfm_demod_settings->isSet()){
