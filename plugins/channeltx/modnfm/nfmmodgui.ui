@@ -279,6 +279,42 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="ButtonSwitch" name="preEmphasis">
+        <property name="minimumSize">
+         <size>
+          <width>24</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Pre-emphasis (120us) on/off</string>
+        </property>
+        <property name="text">
+         <string>P</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="bpf">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Audio high pass filter for CTCSS on/off</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/filter_highpass.png</normaloff>:/filter_highpass.png</iconset>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item>

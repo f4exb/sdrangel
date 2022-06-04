@@ -66,6 +66,8 @@ void NFMModSettings::resetToDefaults()
     m_dcsOn = false;
     m_dcsCode = 0023;
     m_dcsPositive = false;
+    m_preEmphasisOn = true;
+    m_bpfOn = true;
     m_rgbColor = QColor(255, 0, 0).rgb();
     m_title = "NFM Modulator";
     m_modAFInput = NFMModInputAF::NFMModInputNone;
@@ -98,15 +100,16 @@ QByteArray NFMModSettings::serialize() const
     if (m_cwKeyerGUI) {
         s.writeBlob(8, m_cwKeyerGUI->serialize());
     } else { // standalone operation with presets
-        s.writeBlob(6, m_cwKeyerSettings.serialize());
+        s.writeBlob(8, m_cwKeyerSettings.serialize());
     }
+
+    s.writeBool(9, m_ctcssOn);
+    s.writeS32(10, m_ctcssIndex);
 
     if (m_channelMarker) {
         s.writeBlob(11, m_channelMarker->serialize());
     }
 
-    s.writeBool(9, m_ctcssOn);
-    s.writeS32(10, m_ctcssIndex);
     s.writeString(12, m_title);
     s.writeS32(13, (int) m_modAFInput);
     s.writeString(14, m_audioDeviceName);
@@ -130,6 +133,8 @@ QByteArray NFMModSettings::serialize() const
     s.writeS32(28, m_workspaceIndex);
     s.writeBlob(29, m_geometryBytes);
     s.writeBool(30, m_hidden);
+    s.writeBool(31, m_preEmphasisOn);
+    s.writeBool(32, m_bpfOn);
 
     return s.final();
 }
@@ -217,6 +222,8 @@ bool NFMModSettings::deserialize(const QByteArray& data)
         d.readS32(28, &m_workspaceIndex, 0);
         d.readBlob(29, &m_geometryBytes);
         d.readBool(30, &m_hidden, false);
+        d.readBool(31, &m_preEmphasisOn, true);
+        d.readBool(32, &m_bpfOn, true);
 
         return true;
     }

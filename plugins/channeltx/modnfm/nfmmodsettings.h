@@ -54,6 +54,8 @@ struct NFMModSettings
     bool m_dcsOn;
     int m_dcsCode;
     bool m_dcsPositive;
+    bool m_preEmphasisOn;
+    bool m_bpfOn;
     quint32 m_rgbColor;
     QString m_title;
     NFMModInputAF m_modAFInput;

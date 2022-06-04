@@ -144,7 +144,12 @@ void NFMModSource::modulateSample()
 	Real t0, t1, t;
 
     pullAF(t0);
-    m_preemphasisFilter.process(t0, t);
+
+    if (m_settings.m_preEmphasisOn) {
+        m_preemphasisFilter.process(t0, t);
+    } else {
+        t = t0;
+    }
 
     if (m_settings.m_feedbackAudioEnable) {
         pushFeedback(t * m_settings.m_feedbackVolumeFactor * 16384.0f);
@@ -156,8 +161,10 @@ void NFMModSource::modulateSample()
         t1 = (0.85f * m_bandpass.filter(t) + 0.15f * 0.625f * m_ctcssNco.next()) * 1.2f;
     } else if (m_settings.m_dcsOn) {
         t1 = (0.9f * m_bandpass.filter(t) + 0.1f * 0.625f * m_dcsMod.next()) * 1.2f;
-    } else {
+    } else if (m_settings.m_bpfOn) {
         t1 = m_bandpass.filter(t) * 1.2f;
+    } else {
+        t1 = m_lowpass.filter(t) * 1.2f;
     }
 
     m_modPhasor += (m_settings.m_fmDeviation / (float) m_audioSampleRate) * t1;
@@ -350,7 +357,7 @@ void NFMModSource::applyAudioSampleRate(int sampleRate)
     m_interpolatorConsumed = false;
     m_interpolatorDistance = (Real) sampleRate / (Real) m_channelSampleRate;
     m_interpolator.create(48, sampleRate, m_settings.m_rfBandwidth / 2.2, 3.0);
-    m_lowpass.create(301, sampleRate, 250.0);
+    m_lowpass.create(301, sampleRate, m_settings.m_afBandwidth);
     m_bandpass.create(301, sampleRate, 300.0, m_settings.m_afBandwidth);
     m_toneNco.setFreq(m_settings.m_toneFrequency, sampleRate);
     m_ctcssNco.setFreq(NFMModSettings::getCTCSSFreq(m_settings.m_ctcssIndex), sampleRate);

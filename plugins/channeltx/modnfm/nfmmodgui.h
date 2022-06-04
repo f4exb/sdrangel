@@ -114,6 +114,7 @@ private slots:
     void on_channelSpacingApply_clicked();
     void on_rfBW_valueChanged(int value);
     void on_afBW_valueChanged(int value);
+    void on_preEmphasis_toggled(bool checked);
     void on_fmDev_valueChanged(int value);
     void on_toneFrequency_valueChanged(int value);
     void on_volume_valueChanged(int value);
@@ -132,6 +133,7 @@ private slots:
     void on_dcsOn_toggled(bool checked);
     void on_dcsCode_editingFinished();
     void on_dcsPositive_toggled(bool checked);
+    void on_bpf_toggled(bool checked);
 
     void on_feedbackEnable_toggled(bool checked);
     void on_feedbackVolume_valueChanged(int value);

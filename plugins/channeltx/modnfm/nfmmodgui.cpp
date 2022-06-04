@@ -202,6 +202,12 @@ void NFMModGUI::on_afBW_valueChanged(int value)
 	applySettings();
 }
 
+void NFMModGUI::on_preEmphasis_toggled(bool checked)
+{
+    m_settings.m_preEmphasisOn = checked;
+    applySettings();
+}
+
 void NFMModGUI::on_fmDev_valueChanged(int value)
 {
 	ui->fmDevText->setText(QString("%1%2k").arg(QChar(0xB1, 0x00)).arg(value / 10.0, 0, 'f', 1));
@@ -349,6 +355,12 @@ void NFMModGUI::on_dcsCode_editingFinished()
 void NFMModGUI::on_dcsPositive_toggled(bool checked)
 {
     m_settings.m_dcsPositive = checked;
+    applySettings();
+}
+
+void NFMModGUI::on_bpf_toggled(bool checked)
+{
+    m_settings.m_bpfOn = checked;
     applySettings();
 }
 
@@ -546,6 +558,7 @@ void NFMModGUI::displaySettings()
 
     ui->afBWText->setText(QString("%1k").arg(m_settings.m_afBandwidth / 1000.0, 0, 'f', 1));
     ui->afBW->setValue(m_settings.m_afBandwidth / 100.0);
+    ui->preEmphasis->setChecked(m_settings.m_preEmphasisOn);
 
     ui->fmDevText->setText(QString("%1%2k").arg(QChar(0xB1, 0x00)).arg(m_settings.m_fmDeviation / 2000.0, 0, 'f', 1));
     ui->fmDev->setValue(m_settings.m_fmDeviation / 200.0);
@@ -567,6 +580,7 @@ void NFMModGUI::displaySettings()
     ui->dcsOn->setEnabled(!m_settings.m_ctcssOn);
     ui->dcsCode->setText(tr("%1").arg(m_settings.m_dcsCode, 3, 8, QLatin1Char('0')));
     ui->dcsPositive->setChecked(m_settings.m_dcsPositive);
+    ui->bpf->setChecked(m_settings.m_bpfOn);
 
     ui->channelMute->setChecked(m_settings.m_channelMute);
     ui->playLoop->setChecked(m_settings.m_playLoop);
@@ -707,6 +721,7 @@ void NFMModGUI::makeUIConnections()
     QObject::connect(ui->channelSpacingApply, &QPushButton::clicked, this, &NFMModGUI::on_channelSpacingApply_clicked);
     QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &NFMModGUI::on_rfBW_valueChanged);
     QObject::connect(ui->afBW, &QSlider::valueChanged, this, &NFMModGUI::on_afBW_valueChanged);
+    QObject::connect(ui->preEmphasis, &QCheckBox::toggled, this, &NFMModGUI::on_preEmphasis_toggled);
     QObject::connect(ui->fmDev, &QSlider::valueChanged, this, &NFMModGUI::on_fmDev_valueChanged);
     QObject::connect(ui->toneFrequency, &QDial::valueChanged, this, &NFMModGUI::on_toneFrequency_valueChanged);
     QObject::connect(ui->volume, &QDial::valueChanged, this, &NFMModGUI::on_volume_valueChanged);
@@ -723,6 +738,7 @@ void NFMModGUI::makeUIConnections()
     QObject::connect(ui->dcsOn, &QCheckBox::toggled, this, &NFMModGUI::on_dcsOn_toggled);
     QObject::connect(ui->dcsCode, &QLineEdit::editingFinished, this, &NFMModGUI::on_dcsCode_editingFinished);
     QObject::connect(ui->dcsPositive, &QCheckBox::toggled, this, &NFMModGUI::on_dcsPositive_toggled);
+    QObject::connect(ui->bpf, &QCheckBox::toggled, this, &NFMModGUI::on_bpf_toggled);
     QObject::connect(ui->feedbackEnable, &QToolButton::toggled, this, &NFMModGUI::on_feedbackEnable_toggled);
     QObject::connect(ui->feedbackVolume, &QDial::valueChanged, this, &NFMModGUI::on_feedbackVolume_valueChanged);
 }
