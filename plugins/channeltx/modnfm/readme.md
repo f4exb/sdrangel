@@ -94,9 +94,11 @@ When you are lost with the RF, AF bandwidths and FM deviation settings you can a
 
 When changing the RF bandwidth the channel spacing selection in the combo box is adjusted to fit within this bandwidth.
 
-<h3>5: Audio frequency bandwidth</h3>
+<h3>5: Audio Filters</h3>
 
-This is the bandwidth in khz of the modulating signal filtered before modulation.
+  - The slider controls the bandwidth in khz of the modulating signal filtered before modulation.
+  - The "P" switch button next activates or de-activates pre-emphasis (fixed 120 &mu;s)
+  - The rightmost button next activates or de-activates 300 Hz highpass filter when no CTCSS nor DCS is active
 
 <h3>6: RF bandwidth</h3>
 
