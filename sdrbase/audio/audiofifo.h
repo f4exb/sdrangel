@@ -34,6 +34,7 @@ public:
 	~AudioFifo();
 
 	bool setSize(uint32_t numSamples);
+    bool setSampleSize(uint32_t sampleSize, uint32_t numSamples);
 
 	uint32_t write(const quint8* data, uint32_t numSamples);
 	uint32_t read(quint8* data, uint32_t numSamples);
@@ -53,7 +54,7 @@ private:
 
 	qint8* m_fifo;
 
-	const uint32_t m_sampleSize;
+	uint32_t m_sampleSize;
 
 	uint32_t m_size;
 	uint32_t m_fill;

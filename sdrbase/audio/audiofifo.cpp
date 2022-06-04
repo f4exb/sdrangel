@@ -63,6 +63,13 @@ bool AudioFifo::setSize(uint32_t numSamples)
 	return create(numSamples);
 }
 
+bool AudioFifo::setSampleSize(uint32_t sampleSize, uint32_t numSamples)
+{
+	QMutexLocker mutexLocker(&m_mutex);
+    m_sampleSize = sampleSize;
+	return create(numSamples);
+}
+
 uint32_t AudioFifo::write(const quint8* data, uint32_t numSamples)
 {
 	uint32_t total;
