@@ -96,6 +96,12 @@ public:
     qint32 getModAfInput();
     void setModAfInput(qint32 mod_af_input);
 
+    qint32 getPreEmphasisOn();
+    void setPreEmphasisOn(qint32 pre_emphasis_on);
+
+    qint32 getBpfOn();
+    void setBpfOn(qint32 bpf_on);
+
     qint32 getStreamIndex();
     void setStreamIndex(qint32 stream_index);
 
@@ -177,6 +183,12 @@ private:
 
     qint32 mod_af_input;
     bool m_mod_af_input_isSet;
+
+    qint32 pre_emphasis_on;
+    bool m_pre_emphasis_on_isSet;
+
+    qint32 bpf_on;
+    bool m_bpf_on_isSet;
 
     qint32 stream_index;
     bool m_stream_index_isSet;

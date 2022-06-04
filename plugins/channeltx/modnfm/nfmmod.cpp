@@ -566,6 +566,12 @@ void NFMMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("dcsPositive")) {
         settings.m_dcsPositive = response.getNfmModSettings()->getDcsPositive() != 0;
     }
+    if (channelSettingsKeys.contains("preEmphasisOn")) {
+        settings.m_preEmphasisOn = response.getNfmModSettings()->getPreEmphasisOn() != 0;
+    }
+    if (channelSettingsKeys.contains("bpfOn")) {
+        settings.m_bpfOn = response.getNfmModSettings()->getBpfOn() != 0;
+    }
     if (channelSettingsKeys.contains("streamIndex")) {
         settings.m_streamIndex = response.getNfmModSettings()->getStreamIndex();
     }
@@ -638,6 +644,8 @@ void NFMMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
     response.getNfmModSettings()->setDcsCode(settings.m_dcsCode);
     response.getNfmModSettings()->setDcsOn(settings.m_dcsOn ? 1 : 0);
     response.getNfmModSettings()->setDcsPositive(settings.m_dcsPositive ? 1 : 0);
+    response.getNfmModSettings()->setPreEmphasisOn(settings.m_preEmphasisOn ? 1 : 0);
+    response.getNfmModSettings()->setBpfOn(settings.m_bpfOn ? 1 : 0);
     response.getNfmModSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
     if (response.getNfmModSettings()->getReverseApiAddress()) {
@@ -834,6 +842,12 @@ void NFMMod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("dcsPositive") || force) {
         swgNFMModSettings->setDcsPositive(settings.m_dcsPositive ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("preEmphasisOn") || force) {
+        swgNFMModSettings->setPreEmphasisOn(settings.m_preEmphasisOn ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("bpfOn") || force) {
+        swgNFMModSettings->setBpfOn(settings.m_bpfOn ? 1 : 0);
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgNFMModSettings->setStreamIndex(settings.m_streamIndex);

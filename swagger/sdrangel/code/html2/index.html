@@ -8951,6 +8951,14 @@ margin-bottom: 20px;
     "modAFInput" : {
       "type" : "integer"
     },
+    "preEmphasisOn" : {
+      "type" : "integer",
+      "description" : "Activate pre-emphasis filter: * 0 - inactive * 1 - active\n"
+    },
+    "bpfOn" : {
+      "type" : "integer",
+      "description" : "Activate audio highpass filter when no CTCSS nor DCS: * 0 - inactive * 1 - active\n"
+    },
     "streamIndex" : {
       "type" : "integer",
       "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
@@ -56161,7 +56169,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2022-05-31T23:33:55.570+02:00
+              Generated 2022-06-04T08:51:44.121+02:00
             </div>
           </div>
       </div>

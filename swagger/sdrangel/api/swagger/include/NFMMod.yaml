@@ -53,6 +53,18 @@ NFMModSettings:
       type: string
     modAFInput:
       type: integer
+    preEmphasisOn:
+      type: integer
+      description: >
+        Activate pre-emphasis filter:
+        * 0 - inactive
+        * 1 - active
+    bpfOn:
+      type: integer
+      description: >
+        Activate audio highpass filter when no CTCSS nor DCS:
+        * 0 - inactive
+        * 1 - active
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
