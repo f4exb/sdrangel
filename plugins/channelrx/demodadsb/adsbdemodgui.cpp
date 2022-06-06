@@ -3626,6 +3626,8 @@ void ADSBDemodGUI::applyMapSettings()
     // Create the map using the specified provider
     QQmlProperty::write(item, "mapProvider", m_settings.m_mapProvider);
     QVariantMap parameters;
+    QString mapType;
+
     if (m_settings.m_mapProvider == "osm")
     {
         // Use our repo, so we can append API key and redefine transmit maps
@@ -3638,27 +3640,39 @@ void ADSBDemodGUI::applyMapSettings()
         if (!dir.exists()) {
             dir.mkpath(cachePath);
         }
+        switch (m_settings.m_mapType)
+        {
+        case ADSBDemodSettings::AVIATION_LIGHT:
+            mapType = "Transit Map";
+            break;
+        case ADSBDemodSettings::AVIATION_DARK:
+            mapType = "Night Transit Map";
+            break;
+        case ADSBDemodSettings::STREET:
+            mapType = "Street Map";
+            break;
+        case ADSBDemodSettings::SATELLITE:
+            mapType = "Satellite Map";
+            break;
+        }
     }
     else if (m_settings.m_mapProvider == "mapboxgl")
     {
-        parameters["mapboxgl.access_token"] = m_settings.m_mapBoxAPIKey;
-    }
-
-    QString mapType; // Only for osm maps
-    switch (m_settings.m_mapType)
-    {
-    case ADSBDemodSettings::AVIATION_LIGHT:
-        mapType = "Transit Map";
-        break;
-    case ADSBDemodSettings::AVIATION_DARK:
-        mapType = "Night Transit Map";
-        break;
-    case ADSBDemodSettings::STREET:
-        mapType = "Street Map";
-        break;
-    case ADSBDemodSettings::SATELLITE:
-        mapType = "Satellite Map";
-        break;
+        switch (m_settings.m_mapType)
+        {
+        case ADSBDemodSettings::AVIATION_LIGHT:
+            mapType = "mapbox://styles/mapbox/light-v9";
+            break;
+        case ADSBDemodSettings::AVIATION_DARK:
+            mapType = "mapbox://styles/mapbox/dark-v9";
+            break;
+        case ADSBDemodSettings::STREET:
+            mapType = "mapbox://styles/mapbox/streets-v10";
+            break;
+        case ADSBDemodSettings::SATELLITE:
+            mapType = "mapbox://styles/mapbox/satellite-v9";
+            break;
+        }
     }
 
     QVariant retVal;

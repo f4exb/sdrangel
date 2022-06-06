@@ -47,7 +47,6 @@ ADSBDemodDisplayDialog::ADSBDemodDisplayDialog(ADSBDemodSettings *settings, QWid
     ui->airspaceRange->setValue(settings->m_airspaceRange);
     ui->mapProvider->setCurrentText(settings->m_mapProvider);
     ui->mapType->setCurrentIndex((int)settings->m_mapType);
-    ui->mapBoxAPIKey->setText(settings->m_mapBoxAPIKey);
     ui->navAids->setChecked(settings->m_displayNavAids);
     ui->photos->setChecked(settings->m_displayPhotos);
     ui->verboseModelMatching->setChecked(settings->m_verboseModelMatching);
@@ -81,7 +80,6 @@ void ADSBDemodDisplayDialog::accept()
     m_settings->m_airspaceRange = ui->airspaceRange->value();
     m_settings->m_mapProvider = ui->mapProvider->currentText();
     m_settings->m_mapType = (ADSBDemodSettings::MapType)ui->mapType->currentIndex();
-    m_settings->m_mapBoxAPIKey = ui->mapBoxAPIKey->text();
     m_settings->m_displayNavAids = ui->navAids->isChecked();
     m_settings->m_displayPhotos = ui->photos->isChecked();
     m_settings->m_verboseModelMatching = ui->verboseModelMatching->isChecked();

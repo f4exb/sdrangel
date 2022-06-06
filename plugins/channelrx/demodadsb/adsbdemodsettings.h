@@ -161,8 +161,7 @@ struct ADSBDemodSettings
         AVIATION_DARK,
         STREET,
         SATELLITE
-    } m_mapType;                        //!< For osm maps
-    QString m_mapBoxAPIKey;
+    } m_mapType;
     bool m_displayNavAids;
     bool m_displayPhotos;
     Serializable *m_rollupState;

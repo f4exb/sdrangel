@@ -118,7 +118,7 @@ Item {
                         activeMapType = supportedMapTypes[i]
                     }
                 }
-                lightIcons = requestedMapType == "Night Transit Map"
+                lightIcons = (requestedMapType == "Night Transit Map") || (requestedMapType == "mapbox://styles/mapbox/dark-v9")
             }
 
         }

@@ -98,7 +98,6 @@ void ADSBDemodSettings::resetToDefaults()
     m_mapProvider = "osm";
 #endif
     m_mapType = AVIATION_LIGHT;
-    m_mapBoxAPIKey = "";
     m_displayNavAids = true;
     m_displayPhotos = true;
     m_verboseModelMatching = false;
@@ -186,7 +185,6 @@ QByteArray ADSBDemodSettings::serialize() const
     s.writeBool(61, m_hidden);
     s.writeString(62, m_checkWXAPIKey);
     s.writeString(63, m_mapProvider);
-    s.writeString(64, m_mapBoxAPIKey);
 
     for (int i = 0; i < ADSBDEMOD_COLUMNS; i++) {
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -322,7 +320,6 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
 #else
         d.readString(63, &m_mapProvider, "osm");
 #endif
-        d.readString(64, &m_mapBoxAPIKey, "");
 
         for (int i = 0; i < ADSBDEMOD_COLUMNS; i++) {
             d.readS32(100 + i, &m_columnIndexes[i], i);
