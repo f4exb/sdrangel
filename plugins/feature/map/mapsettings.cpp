@@ -83,7 +83,11 @@ MapSettings::~MapSettings()
 void MapSettings::resetToDefaults()
 {
     m_displayNames = true;
+#if QT_VERSION == QT_VERSION_CHECK(5, 15, 3)
+    m_mapProvider = "mapboxgl"; // osm maps do not work in Qt 5.15.3 - https://github.com/f4exb/sdrangel/issues/1169
+#else
     m_mapProvider = "osm";
+#endif
     m_thunderforestAPIKey = "";
     m_maptilerAPIKey = "";
     m_mapBoxAPIKey = "";
@@ -169,7 +173,11 @@ bool MapSettings::deserialize(const QByteArray& data)
         QByteArray blob;
 
         d.readBool(1, &m_displayNames, true);
+#if QT_VERSION == QT_VERSION_CHECK(5, 15, 3)
+        d.readString(2, &m_mapProvider, "mapboxgl"); // osm maps do not work in Qt 5.15.3 - https://github.com/f4exb/sdrangel/issues/1169
+#else
         d.readString(2, &m_mapProvider, "osm");
+#endif
         d.readString(3, &m_mapBoxAPIKey, "");
         d.readString(4, &m_mapBoxStyles, "");
         d.readString(8, &m_title, "Map");
