@@ -440,14 +440,26 @@ QVariant AirportModel::data(const QModelIndex &index, int role) const
     else if (role == AirportModel::airportDataRole)
     {
         if (m_showFreq[row])
-            return QVariant::fromValue(m_airportDataFreq[row]);
+        {
+            QString text = m_airportDataFreq[row];
+            if (!m_metar[row].isEmpty()) {
+                text = text + "\n" + m_metar[row];
+            }
+            return QVariant::fromValue(text);
+        }
         else
             return QVariant::fromValue(m_airports[row]->m_ident);
     }
     else if (role == AirportModel::airportDataRowsRole)
     {
         if (m_showFreq[row])
-            return QVariant::fromValue(m_airportDataFreqRows[row]);
+        {
+            int rows = m_airportDataFreqRows[row];
+            if (!m_metar[row].isEmpty()) {
+                rows += 1 + m_metar[row].count("\n");
+            }
+            return QVariant::fromValue(rows);
+        }
         else
             return 1;
     }
@@ -487,6 +499,9 @@ bool AirportModel::setData(const QModelIndex &index, const QVariant& value, int 
         {
             m_showFreq[row] = showFreq;
             emit dataChanged(index, index);
+            if (showFreq) {
+                emit requestMetar(m_airports[row]->m_ident);
+            }
         }
         return true;
     }
@@ -3609,34 +3624,55 @@ void ADSBDemodGUI::applyMapSettings()
     }
 
     // Create the map using the specified provider
-    QQmlProperty::write(item, "mapProvider", "osm");
+    QQmlProperty::write(item, "mapProvider", m_settings.m_mapProvider);
     QVariantMap parameters;
-    // Use our repo, so we can append API key and redefine transmit maps
-    parameters["osm.mapping.providersrepository.address"] = QString("http://127.0.0.1:%1/").arg(m_osmPort);
-    // Use ADS-B specific cache, as we use different transmit maps
-    QString cachePath = QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation) + "/QtLocation/5.8/tiles/osm/sdrangel_adsb";
-    parameters["osm.mapping.cache.directory"] = cachePath;
-    // On Linux, we need to create the directory
-    QDir dir(cachePath);
-    if (!dir.exists()) {
-        dir.mkpath(cachePath);
-    }
-
     QString mapType;
-    switch (m_settings.m_mapType)
+
+    if (m_settings.m_mapProvider == "osm")
     {
-    case ADSBDemodSettings::AVIATION_LIGHT:
-        mapType = "Transit Map";
-        break;
-    case ADSBDemodSettings::AVIATION_DARK:
-        mapType = "Night Transit Map";
-        break;
-    case ADSBDemodSettings::STREET:
-        mapType = "Street Map";
-        break;
-    case ADSBDemodSettings::SATELLITE:
-        mapType = "Satellite Map";
-        break;
+        // Use our repo, so we can append API key and redefine transmit maps
+        parameters["osm.mapping.providersrepository.address"] = QString("http://127.0.0.1:%1/").arg(m_osmPort);
+        // Use ADS-B specific cache, as we use different transmit maps
+        QString cachePath = QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation) + "/QtLocation/5.8/tiles/osm/sdrangel_adsb";
+        parameters["osm.mapping.cache.directory"] = cachePath;
+        // On Linux, we need to create the directory
+        QDir dir(cachePath);
+        if (!dir.exists()) {
+            dir.mkpath(cachePath);
+        }
+        switch (m_settings.m_mapType)
+        {
+        case ADSBDemodSettings::AVIATION_LIGHT:
+            mapType = "Transit Map";
+            break;
+        case ADSBDemodSettings::AVIATION_DARK:
+            mapType = "Night Transit Map";
+            break;
+        case ADSBDemodSettings::STREET:
+            mapType = "Street Map";
+            break;
+        case ADSBDemodSettings::SATELLITE:
+            mapType = "Satellite Map";
+            break;
+        }
+    }
+    else if (m_settings.m_mapProvider == "mapboxgl")
+    {
+        switch (m_settings.m_mapType)
+        {
+        case ADSBDemodSettings::AVIATION_LIGHT:
+            mapType = "mapbox://styles/mapbox/light-v9";
+            break;
+        case ADSBDemodSettings::AVIATION_DARK:
+            mapType = "mapbox://styles/mapbox/dark-v9";
+            break;
+        case ADSBDemodSettings::STREET:
+            mapType = "mapbox://styles/mapbox/streets-v10";
+            break;
+        case ADSBDemodSettings::SATELLITE:
+            mapType = "mapbox://styles/mapbox/satellite-v9";
+            break;
+        }
     }
 
     QVariant retVal;
@@ -3829,6 +3865,9 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     // Get updated when position changes
     connect(&MainCore::instance()->getSettings(), &MainSettings::preferenceChanged, this, &ADSBDemodGUI::preferenceChanged);
 
+    // Get airport weather when requested
+    connect(&m_airportModel, &AirportModel::requestMetar, this, &ADSBDemodGUI::requestMetar);
+
     // Add airports within range of My Position
     if (m_airportInfo != nullptr) {
         updateAirports();
@@ -3841,6 +3880,7 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_speech = new QTextToSpeech(this);
 
     m_flightInformation = nullptr;
+    m_aviationWeather = nullptr;
 
     connect(&m_planeSpotters, &PlaneSpotters::aircraftPhoto, this, &ADSBDemodGUI::aircraftPhoto);
     connect(ui->photo, &ClickableLabel::clicked, this, &ADSBDemodGUI::photoClicked);
@@ -3897,6 +3937,10 @@ ADSBDemodGUI::~ADSBDemodGUI()
     {
         disconnect(m_flightInformation, &FlightInformation::flightUpdated, this, &ADSBDemodGUI::flightInformationUpdated);
         delete m_flightInformation;
+    }
+    if (m_aviationWeather)
+    {
+        delete m_aviationWeather;
     }
     qDeleteAll(m_airspaces);
     qDeleteAll(m_navAids);
@@ -4009,6 +4053,7 @@ void ADSBDemodGUI::displaySettings()
         ui->stats->setText("");
 
     initFlightInformation();
+    initAviationWeather();
 
     applyMapSettings();
     applyImportSettings();
@@ -4197,9 +4242,9 @@ void ADSBDemodGUI::initFlightInformation()
         delete m_flightInformation;
         m_flightInformation = nullptr;
     }
-    if (!m_settings.m_apiKey.isEmpty())
+    if (!m_settings.m_aviationstackAPIKey.isEmpty())
     {
-        m_flightInformation = FlightInformation::create(m_settings.m_apiKey);
+        m_flightInformation = FlightInformation::create(m_settings.m_aviationstackAPIKey);
         if (m_flightInformation) {
             connect(m_flightInformation, &FlightInformation::flightUpdated, this, &ADSBDemodGUI::flightInformationUpdated);
         }
@@ -4675,6 +4720,35 @@ void ADSBDemodGUI::preferenceChanged(int elementType)
             }
         }
     }
+}
+
+void ADSBDemodGUI::initAviationWeather()
+{
+    if (m_aviationWeather)
+    {
+        disconnect(m_aviationWeather, &AviationWeather::weatherUpdated, this, &ADSBDemodGUI::weatherUpdated);
+        delete m_aviationWeather;
+        m_aviationWeather = nullptr;
+    }
+    if (!m_settings.m_checkWXAPIKey.isEmpty())
+    {
+        m_aviationWeather = AviationWeather::create(m_settings.m_checkWXAPIKey);
+        if (m_aviationWeather) {
+            connect(m_aviationWeather, &AviationWeather::weatherUpdated, this, &ADSBDemodGUI::weatherUpdated);
+        }
+    }
+}
+
+void ADSBDemodGUI::requestMetar(const QString& icao)
+{
+    if (m_aviationWeather) {
+        m_aviationWeather->getWeather(icao);
+    }
+}
+
+void ADSBDemodGUI::weatherUpdated(const AviationWeather::METAR &metar)
+{
+    m_airportModel.updateWeather(metar.m_icao, metar.m_text, metar.decoded());
 }
 
 void ADSBDemodGUI::makeUIConnections()

@@ -33,6 +33,7 @@
 #include "dsp/dsptypes.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
+#include "util/aviationweather.h"
 #include "util/messagequeue.h"
 #include "util/azel.h"
 #include "util/movingaverage.h"
@@ -431,6 +432,7 @@ public:
         m_azimuth.append(az);
         m_elevation.append(el);
         m_range.append(distance);
+        m_metar.append("");
         endInsertRows();
     }
 
@@ -446,6 +448,7 @@ public:
             m_azimuth.removeAt(row);
             m_elevation.removeAt(row);
             m_range.removeAt(row);
+            m_metar.removeAt(row);
             endRemoveRows();
         }
     }
@@ -461,6 +464,7 @@ public:
             m_azimuth.clear();
             m_elevation.clear();
             m_range.clear();
+            m_metar.clear();
             endRemoveRows();
         }
     }
@@ -520,6 +524,20 @@ public:
         return roles;
     }
 
+    void updateWeather(const QString &icao, const QString &text, const QString &decoded)
+    {
+        for (int i = 0; i < m_airports.size(); i++)
+        {
+            if (m_airports[i]->m_ident == icao)
+            {
+                m_metar[i] = "METAR: " + text + "\n" + decoded;
+                QModelIndex idx = index(i);
+                emit dataChanged(idx, idx);
+                break;
+            }
+        }
+    }
+
 private:
     ADSBDemodGUI *m_gui;
     QList<AirportInformation *> m_airports;
@@ -529,6 +547,10 @@ private:
     QList<float> m_azimuth;
     QList<float> m_elevation;
     QList<float> m_range;
+    QList<QString> m_metar;
+
+signals:
+    void requestMetar(const QString& icao);
 };
 
 // Airspace data model used by QML map item
@@ -826,6 +848,7 @@ private:
     QMenu *menu;                        // Column select context menu
     FlightInformation *m_flightInformation;
     PlaneSpotters m_planeSpotters;
+    AviationWeather *m_aviationWeather;
     QString m_photoLink;
     WebAPIAdapterInterface *m_webAPIAdapterInterface;
     HttpDownloadManager m_dlm;
@@ -901,6 +924,7 @@ private:
     Aircraft* findAircraftByFlight(const QString& flight);
     QString dataTimeToShortString(QDateTime dt);
     void initFlightInformation();
+    void initAviationWeather();
     void applyMapSettings();
     void updatePhotoText(Aircraft *aircraft);
     void updatePhotoFlightInformation(Aircraft *aircraft);
@@ -959,6 +983,8 @@ private slots:
     void import();
     void handleImportReply(QNetworkReply* reply);
     void preferenceChanged(int elementType);
+    void requestMetar(const QString& icao);
+    void weatherUpdated(const AviationWeather::METAR &metar);
 
 signals:
     void homePositionChanged();

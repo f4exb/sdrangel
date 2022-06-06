@@ -147,13 +147,15 @@ struct ADSBDemodSettings
     float m_interpolatorTapsPerPhase;
 
     QList<NotificationSettings *> m_notificationSettings;
-    QString m_apiKey;                   //!< aviationstack.com API key
+    QString m_aviationstackAPIKey;      //!< aviationstack.com API key
+    QString m_checkWXAPIKey;            //!< checkwxapi.com API key
 
     QString m_logFilename;
     bool m_logEnabled;
 
     QStringList m_airspaces;            //!< Airspace names to display
     float m_airspaceRange;              //!< How far away we display airspace (mkm)
+    QString m_mapProvider;
     enum MapType {
         AVIATION_LIGHT,                 //!< White map with no place names
         AVIATION_DARK,
