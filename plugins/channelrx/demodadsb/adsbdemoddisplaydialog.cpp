@@ -35,7 +35,8 @@ ADSBDemodDisplayDialog::ADSBDemodDisplayDialog(ADSBDemodSettings *settings, QWid
     ui->units->setCurrentIndex((int)settings->m_siUnits);
     ui->displayStats->setChecked(settings->m_displayDemodStats);
     ui->autoResizeTableColumns->setChecked(settings->m_autoResizeTableColumns);
-    ui->apiKey->setText(settings->m_apiKey);
+    ui->aviationstackAPIKey->setText(settings->m_aviationstackAPIKey);
+    ui->checkWXAPIKey->setText(settings->m_checkWXAPIKey);
     for (const auto& airspace: settings->m_airspaces)
     {
         QList<QListWidgetItem *> items = ui->airspaces->findItems(airspace, Qt::MatchExactly);
@@ -65,7 +66,8 @@ void ADSBDemodDisplayDialog::accept()
     m_settings->m_siUnits = ui->units->currentIndex() == 0 ? false : true;
     m_settings->m_displayDemodStats = ui->displayStats->isChecked();
     m_settings->m_autoResizeTableColumns = ui->autoResizeTableColumns->isChecked();
-    m_settings->m_apiKey = ui->apiKey->text();
+    m_settings->m_aviationstackAPIKey = ui->aviationstackAPIKey->text();
+    m_settings->m_checkWXAPIKey = ui->checkWXAPIKey->text();
     m_settings->m_airspaces = QStringList();
     for (int i = 0; i < ui->airspaces->count(); i++)
     {

@@ -440,14 +440,26 @@ QVariant AirportModel::data(const QModelIndex &index, int role) const
     else if (role == AirportModel::airportDataRole)
     {
         if (m_showFreq[row])
-            return QVariant::fromValue(m_airportDataFreq[row]);
+        {
+            QString text = m_airportDataFreq[row];
+            if (!m_metar[row].isEmpty()) {
+                text = text + "\n" + m_metar[row];
+            }
+            return QVariant::fromValue(text);
+        }
         else
             return QVariant::fromValue(m_airports[row]->m_ident);
     }
     else if (role == AirportModel::airportDataRowsRole)
     {
         if (m_showFreq[row])
-            return QVariant::fromValue(m_airportDataFreqRows[row]);
+        {
+            int rows = m_airportDataFreqRows[row];
+            if (!m_metar[row].isEmpty()) {
+                rows += 1 + m_metar[row].count("\n");
+            }
+            return QVariant::fromValue(rows);
+        }
         else
             return 1;
     }
@@ -487,6 +499,9 @@ bool AirportModel::setData(const QModelIndex &index, const QVariant& value, int 
         {
             m_showFreq[row] = showFreq;
             emit dataChanged(index, index);
+            if (showFreq) {
+                emit requestMetar(m_airports[row]->m_ident);
+            }
         }
         return true;
     }
@@ -3829,6 +3844,9 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     // Get updated when position changes
     connect(&MainCore::instance()->getSettings(), &MainSettings::preferenceChanged, this, &ADSBDemodGUI::preferenceChanged);
 
+    // Get airport weather when requested
+    connect(&m_airportModel, &AirportModel::requestMetar, this, &ADSBDemodGUI::requestMetar);
+
     // Add airports within range of My Position
     if (m_airportInfo != nullptr) {
         updateAirports();
@@ -3841,6 +3859,7 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_speech = new QTextToSpeech(this);
 
     m_flightInformation = nullptr;
+    m_aviationWeather = nullptr;
 
     connect(&m_planeSpotters, &PlaneSpotters::aircraftPhoto, this, &ADSBDemodGUI::aircraftPhoto);
     connect(ui->photo, &ClickableLabel::clicked, this, &ADSBDemodGUI::photoClicked);
@@ -3897,6 +3916,10 @@ ADSBDemodGUI::~ADSBDemodGUI()
     {
         disconnect(m_flightInformation, &FlightInformation::flightUpdated, this, &ADSBDemodGUI::flightInformationUpdated);
         delete m_flightInformation;
+    }
+    if (m_aviationWeather)
+    {
+        delete m_aviationWeather;
     }
     qDeleteAll(m_airspaces);
     qDeleteAll(m_navAids);
@@ -4009,6 +4032,7 @@ void ADSBDemodGUI::displaySettings()
         ui->stats->setText("");
 
     initFlightInformation();
+    initAviationWeather();
 
     applyMapSettings();
     applyImportSettings();
@@ -4197,9 +4221,9 @@ void ADSBDemodGUI::initFlightInformation()
         delete m_flightInformation;
         m_flightInformation = nullptr;
     }
-    if (!m_settings.m_apiKey.isEmpty())
+    if (!m_settings.m_aviationstackAPIKey.isEmpty())
     {
-        m_flightInformation = FlightInformation::create(m_settings.m_apiKey);
+        m_flightInformation = FlightInformation::create(m_settings.m_aviationstackAPIKey);
         if (m_flightInformation) {
             connect(m_flightInformation, &FlightInformation::flightUpdated, this, &ADSBDemodGUI::flightInformationUpdated);
         }
@@ -4675,6 +4699,40 @@ void ADSBDemodGUI::preferenceChanged(int elementType)
             }
         }
     }
+}
+
+void ADSBDemodGUI::initAviationWeather()
+{
+    if (m_aviationWeather)
+    {
+        disconnect(m_aviationWeather, &AviationWeather::weatherUpdated, this, &ADSBDemodGUI::weatherUpdated);
+        delete m_aviationWeather;
+        m_aviationWeather = nullptr;
+    }
+    if (!m_settings.m_checkWXAPIKey.isEmpty())
+    {
+        m_aviationWeather = AviationWeather::create(m_settings.m_checkWXAPIKey);
+        if (m_aviationWeather) {
+            connect(m_aviationWeather, &AviationWeather::weatherUpdated, this, &ADSBDemodGUI::weatherUpdated);
+        }
+    }
+}
+
+void ADSBDemodGUI::requestMetar(const QString& icao)
+{
+    if (m_aviationWeather)
+    {
+        m_aviationWeather->getWeather(icao);
+    }
+    else
+    {
+        qDebug() << "ADSBDemodGUI::requestMetar - m_aviationWeather not initialised";
+    }
+}
+
+void ADSBDemodGUI::weatherUpdated(const AviationWeather::METAR &metar)
+{
+    m_airportModel.updateWeather(metar.m_icao, metar.m_text, metar.decoded());
 }
 
 void ADSBDemodGUI::makeUIConnections()

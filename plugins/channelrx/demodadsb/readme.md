@@ -90,6 +90,8 @@ Clicking the Display Settings button will open the Display Settings dialog, whic
 
 You can also enter an [avaiationstack](https://aviationstack.com/product) API key, needed to download flight information (such as departure and arrival airports and times).
 
+A [CheckWX](https://www.checkwxapi.com/) API key can be entered in order to download airport weather (METARs) which can be displayed on the map.
+
 ![ADS-B Demodulator display settings](../../../doc/img/ADSBDemod_plugin_displaysettings.png)
 
 <h3>13: Display Flight Path</h3>
@@ -288,7 +290,11 @@ Aircraft are only placed upon the map when a position can be calculated, which c
 * Left clicking on an aircraft will highlight the corresponding row in the table for the aircraft and the information box on the map will be coloured orange, rather than blue.
 * Double clicking on an aircraft will set it as the active target and the information box will be coloured green.
 * Left clicking the information box next to an aircraft will reveal more information. It can be closed by clicking it again.
-* Left clicking the information box next to an airport will reveal ATC frequencies for the airport (if the OurAirports database has been downloaded.). This information box can be closed by left clicking on the airport identifier. Double clicking on one of the listed frequencies, will set it as the centre frequency on the selected SDRangel device set (15). The Az/El row gives the azimuth and elevation of the airport from the location set under Preferences > My Position. Double clicking on this row will set the airport as the active target.
+* Left clicking the information box next to an airport will reveal ATC frequencies for the airport (if the OurAirports database has been downloaded) and METAR weather information (if the CheckWX API key has been entered).
+The METAR for the airport is downloaded each time the information box is opened.
+This information box can be closed by left clicking on the airport identifier.
+Double clicking on one of the listed frequencies, will set it as the centre frequency on the selected SDRangel device set (21).
+The Az/El row gives the azimuth and elevation of the airport from the location set under Preferences > My Position. Double clicking on this row will set the airport as the active target.
 
 <h2>Attribution</h2>
 

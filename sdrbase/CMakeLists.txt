@@ -167,6 +167,7 @@ set(sdrbase_SOURCES
     settings/rollupstate.cpp
 
     util/ais.cpp
+    util/aviationweather.cpp
     util/ax25.cpp
     util/aprs.cpp
     util/astronomy.cpp
@@ -377,6 +378,7 @@ set(sdrbase_HEADERS
     settings/rollupstate.h
 
     util/ais.h
+    util/aviationweather.h
     util/ax25.h
     util/aprs.h
     util/astronomy.h

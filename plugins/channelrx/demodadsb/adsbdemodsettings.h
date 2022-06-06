@@ -147,7 +147,8 @@ struct ADSBDemodSettings
     float m_interpolatorTapsPerPhase;
 
     QList<NotificationSettings *> m_notificationSettings;
-    QString m_apiKey;                   //!< aviationstack.com API key
+    QString m_aviationstackAPIKey;      //!< aviationstack.com API key
+    QString m_checkWXAPIKey;            //!< checkwxapi.com API key
 
     QString m_logFilename;
     bool m_logEnabled;
