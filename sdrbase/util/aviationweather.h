@@ -73,10 +73,10 @@ public:
             if (m_dateTime.isValid()) {
                 s.append(QString("Observed: %1").arg(m_dateTime.toString()));
             }
-            if (!isnan(m_windDirection) && !isnan(m_windSpeed)) {
+            if (!std::isnan(m_windDirection) && !std::isnan(m_windSpeed)) {
                 s.append(QString("Wind: %1%2 / %3 knts").arg(m_windDirection).arg(QChar(0xb0)).arg(m_windSpeed));
             }
-            if (!isnan(m_windGusts) ) {
+            if (!std::isnan(m_windGusts) ) {
                 s.append(QString("Gusts: %1 knts").arg(m_windGusts));
             }
             if (!m_visibility.isEmpty()) {
@@ -85,22 +85,22 @@ public:
             if (!m_conditions.isEmpty()) {
                 s.append(QString("Conditions: %1").arg(m_conditions.join(", ")));
             }
-            if (!isnan(m_ceiling)) {
+            if (!std::isnan(m_ceiling)) {
                 s.append(QString("Ceiling: %1 ft").arg(m_ceiling));
             }
             if (!m_clouds.isEmpty()) {
                 s.append(QString("Clouds: %1").arg(m_clouds.join(", ")));
             }
-            if (!isnan(m_temperature)) {
+            if (!std::isnan(m_temperature)) {
                 s.append(QString("Temperature: %1 %2C").arg(m_temperature).arg(QChar(0xb0)));
             }
-            if (!isnan(m_dewpoint)) {
+            if (!std::isnan(m_dewpoint)) {
                 s.append(QString("Dewpoint: %1 %2C").arg(m_dewpoint).arg(QChar(0xb0)));
             }
-            if (!isnan(m_pressure)) {
+            if (!std::isnan(m_pressure)) {
                 s.append(QString("Pressure: %1 hPa").arg(m_pressure));
             }
-            if (!isnan(m_humidity)) {
+            if (!std::isnan(m_humidity)) {
                 s.append(QString("Humidity: %1 %").arg(m_humidity));
             }
             if (!m_flightCateogory.isEmpty()) {
