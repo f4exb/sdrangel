@@ -3624,20 +3624,27 @@ void ADSBDemodGUI::applyMapSettings()
     }
 
     // Create the map using the specified provider
-    QQmlProperty::write(item, "mapProvider", "osm");
+    QQmlProperty::write(item, "mapProvider", m_settings.m_mapProvider);
     QVariantMap parameters;
-    // Use our repo, so we can append API key and redefine transmit maps
-    parameters["osm.mapping.providersrepository.address"] = QString("http://127.0.0.1:%1/").arg(m_osmPort);
-    // Use ADS-B specific cache, as we use different transmit maps
-    QString cachePath = QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation) + "/QtLocation/5.8/tiles/osm/sdrangel_adsb";
-    parameters["osm.mapping.cache.directory"] = cachePath;
-    // On Linux, we need to create the directory
-    QDir dir(cachePath);
-    if (!dir.exists()) {
-        dir.mkpath(cachePath);
+    if (m_settings.m_mapProvider == "osm")
+    {
+        // Use our repo, so we can append API key and redefine transmit maps
+        parameters["osm.mapping.providersrepository.address"] = QString("http://127.0.0.1:%1/").arg(m_osmPort);
+        // Use ADS-B specific cache, as we use different transmit maps
+        QString cachePath = QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation) + "/QtLocation/5.8/tiles/osm/sdrangel_adsb";
+        parameters["osm.mapping.cache.directory"] = cachePath;
+        // On Linux, we need to create the directory
+        QDir dir(cachePath);
+        if (!dir.exists()) {
+            dir.mkpath(cachePath);
+        }
+    }
+    else if (m_settings.m_mapProvider == "mapboxgl")
+    {
+        parameters["mapboxgl.access_token"] = m_settings.m_mapBoxAPIKey;
     }
 
-    QString mapType;
+    QString mapType; // Only for osm maps
     switch (m_settings.m_mapType)
     {
     case ADSBDemodSettings::AVIATION_LIGHT:

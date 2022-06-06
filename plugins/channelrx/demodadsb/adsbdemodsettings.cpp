@@ -92,7 +92,13 @@ void ADSBDemodSettings::resetToDefaults()
     m_logEnabled = false;
     m_airspaces = QStringList({"A", "D", "TMZ"});
     m_airspaceRange = 500.0f;
+#if QT_VERSION == QT_VERSION_CHECK(5, 15, 3)
+    m_mapProvider = "mapboxgl"; // osm maps do not work in Qt 5.15.3 - https://github.com/f4exb/sdrangel/issues/1169
+#else
+    m_mapProvider = "osm";
+#endif
     m_mapType = AVIATION_LIGHT;
+    m_mapBoxAPIKey = "";
     m_displayNavAids = true;
     m_displayPhotos = true;
     m_verboseModelMatching = false;
@@ -179,6 +185,8 @@ QByteArray ADSBDemodSettings::serialize() const
     s.writeBlob(60, m_geometryBytes);
     s.writeBool(61, m_hidden);
     s.writeString(62, m_checkWXAPIKey);
+    s.writeString(63, m_mapProvider);
+    s.writeString(64, m_mapBoxAPIKey);
 
     for (int i = 0; i < ADSBDEMOD_COLUMNS; i++) {
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -309,6 +317,12 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         d.readBlob(60, &m_geometryBytes);
         d.readBool(61, &m_hidden, false);
         d.readString(62, &m_checkWXAPIKey, "");
+#if QT_VERSION == QT_VERSION_CHECK(5, 15, 3)
+        d.readString(63, &m_mapProvider, "mapboxgl"); // osm maps do not work in Qt 5.15.3 - https://github.com/f4exb/sdrangel/issues/1169
+#else
+        d.readString(63, &m_mapProvider, "osm");
+#endif
+        d.readString(64, &m_mapBoxAPIKey, "");
 
         for (int i = 0; i < ADSBDEMOD_COLUMNS; i++) {
             d.readS32(100 + i, &m_columnIndexes[i], i);

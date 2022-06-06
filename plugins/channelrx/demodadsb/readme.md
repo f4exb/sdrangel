@@ -75,7 +75,9 @@ Clicking this will download the [OpenAIP](https://www.openaip.net/) airspace and
 Clicking the Display Settings button will open the Display Settings dialog, which allows you to choose:
 
 * The units for altitude, speed and vertical climb rate. These can be either ft (feet), kn (knots) and ft/min (feet per minute), or m (metres), kph (kilometers per hour) and m/s (metres per second).
-* The type of map that will be displayed. This can either be a light or dark aviation map (with no place names to reduce clutter), a street map or satellite imagery.
+* The map provider. This can be osm for OpenStreetMaps or mapboxgl for Mabbox. mapboxgl is not supported on Windows. mapboxgl should be used on Linux with Qt 5.15.3, as osm maps will cause SDRangel to hang with this specific version of Qt.
+* The type of map that will be displayed, when the map provider is osm. This can either be a light or dark aviation map (with no place names to reduce clutter), a street map or satellite imagery.
+* A [Mapbox](https://www.mapbox.com/) API key, as required to use mapboxgl map provider.
 * The minimum size airport that will be displayed on the map: small, medium or large. Use small to display GA airfields, medium for regional airports and large for international airports.
 * Whether or not to display heliports.
 * The distance (in kilometres), from the location set under Preferences > My Position, at which airports will be displayed on the map. Displaying too many airports will slow down drawing of the map.

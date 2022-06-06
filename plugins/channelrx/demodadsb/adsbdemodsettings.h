@@ -155,12 +155,14 @@ struct ADSBDemodSettings
 
     QStringList m_airspaces;            //!< Airspace names to display
     float m_airspaceRange;              //!< How far away we display airspace (mkm)
+    QString m_mapProvider;
     enum MapType {
         AVIATION_LIGHT,                 //!< White map with no place names
         AVIATION_DARK,
         STREET,
         SATELLITE
-    } m_mapType;
+    } m_mapType;                        //!< For osm maps
+    QString m_mapBoxAPIKey;
     bool m_displayNavAids;
     bool m_displayPhotos;
     Serializable *m_rollupState;
