@@ -4727,13 +4727,8 @@ void ADSBDemodGUI::initAviationWeather()
 
 void ADSBDemodGUI::requestMetar(const QString& icao)
 {
-    if (m_aviationWeather)
-    {
+    if (m_aviationWeather) {
         m_aviationWeather->getWeather(icao);
-    }
-    else
-    {
-        qDebug() << "ADSBDemodGUI::requestMetar - m_aviationWeather not initialised";
     }
 }
 
