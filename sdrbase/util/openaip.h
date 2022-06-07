@@ -270,8 +270,11 @@ struct SDRBASE_API NavAid {
                         if ((typeRef == QLatin1String("NDB"))
                             || (typeRef == QLatin1String("DME"))
                             || (typeRef == QLatin1String("VOR"))
-                            || (typeRef== QLatin1String("VOR-DME"))
-                            || (typeRef == QLatin1String("VORTAC")))
+                            || (typeRef == QLatin1String("VOR-DME"))
+                            || (typeRef == QLatin1String("VORTAC"))
+                            || (typeRef == QLatin1String("DVOR"))
+                            || (typeRef == QLatin1String("DVOR-DME"))
+                            || (typeRef == QLatin1String("DVORTAC")))
                         {
                             QString type = typeRef.toString();
                             QString name;

@@ -6,5 +6,8 @@
     <file>map/VOR.png</file>
     <file>map/VOR-DME.png</file>
     <file>map/VORTAC.png</file>
+    <file>map/DVOR.png</file>
+    <file>map/DVOR-DME.png</file>
+    <file>map/DVORTAC.png</file>
   </qresource>
 </RCC>
