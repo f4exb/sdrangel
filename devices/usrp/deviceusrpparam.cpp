@@ -50,10 +50,13 @@ bool DeviceUSRPParams::open(const QString &deviceStr, bool channelNumOnly)
             m_loRangeTx = m_dev->get_fe_tx_freq_range();
 
             // For some devices (B210), rx/tx_rates vary with master_clock_rate
+            // which can be set automatically by UHD. For other devices,
+            // master_clock_rate must be set manually (currently as a device arg)
             // Note master_clock_rate is rate between FPGA and RFIC
             // tx/rx_rate is rate between PC and FPGA
             uhd::meta_range_t clockRange = m_dev->get_master_clock_rate_range();
-            if (clockRange.start() == clockRange.stop())
+            uhd::property_tree::sptr properties = m_dev->get_device()->get_tree();
+            if ((clockRange.start() == clockRange.stop()) || !properties->exists("/mboards/0/auto_tick_rate"))
             {
                 m_srRangeRx = m_dev->get_rx_rates();
                 m_srRangeTx = m_dev->get_tx_rates();
@@ -73,9 +76,7 @@ bool DeviceUSRPParams::open(const QString &deviceStr, bool channelNumOnly)
                 m_srRangeTx = uhd::meta_range_t(std::min(txLow.start(), txHigh.start()), std::max(txLow.stop(), txHigh.stop()));
 
                 // Need to restore automatic clock rate
-                uhd::property_tree::sptr properties = m_dev->get_device()->get_tree();
-                if (properties->exists("/mboards/0/auto_tick_rate"))
-                {
+                if (properties->exists("/mboards/0/auto_tick_rate")) {
                     properties->access<bool>("/mboards/0/auto_tick_rate").set(true);
                 }
             }
