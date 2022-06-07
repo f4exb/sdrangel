@@ -32,6 +32,7 @@
 #include "util/doublebufferfifo.h"
 
 #include "m17demodsettings.h"
+#include "m17demodprocessor.h"
 
 class BasebandSampleSink;
 class ChannelAPI;
@@ -75,6 +76,28 @@ public:
         m_magsqCount = 0;
     }
 
+    void getDiagnostics(
+        bool& dcd,
+        float& evm,
+        float& deviation,
+        float& offset,
+        int& status,
+        float& clock,
+        int& sampleIndex,
+        int& syncIndex,
+        int& clockIndex,
+        int& viterbiCost
+    ) const
+    {
+        m_m17DemodProcessor.getDiagnostics(dcd, evm, deviation, offset, status, clock, sampleIndex, syncIndex, clockIndex, viterbiCost);
+    }
+
+    uint32_t getLSFCount() const { return m_m17DemodProcessor.getLSFCount(); }
+    const QString& getSrcCall() const { return m_m17DemodProcessor.getSrcCall(); }
+    const QString& getDestcCall() const { return m_m17DemodProcessor.getDestcCall(); }
+    const QString& getTypeInfo() const { return m_m17DemodProcessor.getTypeInfo(); }
+    uint16_t getCRC() const { return m_m17DemodProcessor.getCRC(); }
+
 private:
     struct MagSqLevelsStore
     {
@@ -108,6 +131,7 @@ private:
 	int m_squelchGate;
 	double m_squelchLevel;
 	bool m_squelchOpen;
+    bool m_squelchWasOpen;
     DoubleBufferFIFO<Real> m_squelchDelayLine;
 
     MovingAverageUtil<Real, double, 16> m_movingAverage;
@@ -128,7 +152,12 @@ private:
 	BasebandSampleSink* m_scopeXY;
 	bool m_scopeEnabled;
 
+    float m_latitude;
+    float m_longitude;
+
     PhaseDiscriminators m_phaseDiscri;
+
+    M17DemodProcessor m_m17DemodProcessor;
 };
 
 #endif // INCLUDE_DSDDEMODSINK_H

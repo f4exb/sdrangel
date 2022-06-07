@@ -720,26 +720,38 @@
         <string>No Sync______</string>
        </property>
       </widget>
-      <widget class="QLabel" name="symbolSyncQualityText">
+      <widget class="QLabel" name="dcdLabel">
        <property name="geometry">
         <rect>
          <x>10</x>
          <y>40</y>
-         <width>25</width>
-         <height>28</height>
+         <width>22</width>
+         <height>22</height>
         </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
        <property name="minimumSize">
         <size>
-         <width>25</width>
-         <height>0</height>
+         <width>22</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>22</width>
+         <height>22</height>
         </size>
        </property>
        <property name="toolTip">
         <string>Symbol synchronization rate (%)</string>
        </property>
        <property name="text">
-        <string>000</string>
+        <string/>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

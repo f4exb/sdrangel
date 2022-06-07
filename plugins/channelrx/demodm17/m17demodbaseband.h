@@ -74,6 +74,28 @@ public:
     void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
     void setAudioFifoLabel(const QString& label) { m_sink.setAudioFifoLabel(label); }
 
+    void getDiagnostics(
+        bool& dcd,
+        float& evm,
+        float& deviation,
+        float& offset,
+        int& status,
+        float& clock,
+        int& sampleIndex,
+        int& syncIndex,
+        int& clockIndex,
+        int& viterbiCost
+    ) const
+    {
+        m_sink.getDiagnostics(dcd, evm, deviation, offset, status, clock, sampleIndex, syncIndex, clockIndex, viterbiCost);
+    }
+
+    uint32_t getLSFCount() const { return m_sink.getLSFCount(); }
+    const QString& getSrcCall() const { return m_sink.getSrcCall(); }
+    const QString& getDestcCall() const { return m_sink.getDestcCall(); }
+    const QString& getTypeInfo() const { return m_sink.getTypeInfo(); }
+    uint16_t getCRC() const { return m_sink.getCRC(); }
+
 private:
     SampleSinkFifo m_sampleFifo;
     DownChannelizer *m_channelizer;

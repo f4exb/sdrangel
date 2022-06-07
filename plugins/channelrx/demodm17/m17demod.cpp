@@ -198,7 +198,6 @@ void M17Demod::applySettings(const M17DemodSettings& settings, bool force)
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
             << " m_rfBandwidth: " << settings.m_rfBandwidth
             << " m_fmDeviation: " << settings.m_fmDeviation
-            << " m_demodGain: " << settings.m_demodGain
             << " m_volume: " << settings.m_volume
             << " m_baudRate: " << settings.m_baudRate
             << " m_squelchGate" << settings.m_squelchGate
@@ -218,17 +217,11 @@ void M17Demod::applySettings(const M17DemodSettings& settings, bool force)
     if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
         reverseAPIKeys.append("inputFrequencyOffset");
     }
-    if ((settings.m_demodGain != m_settings.m_demodGain) || force) {
-        reverseAPIKeys.append("demodGain");
-    }
     if ((settings.m_audioMute != m_settings.m_audioMute) || force) {
         reverseAPIKeys.append("audioMute");
     }
     if ((settings.m_syncOrConstellation != m_settings.m_syncOrConstellation) || force) {
         reverseAPIKeys.append("syncOrConstellation");
-    }
-    if ((settings.m_demodGain != m_settings.m_demodGain) || force) {
-        reverseAPIKeys.append("demodGain");
     }
     if ((settings.m_traceLengthMutliplier != m_settings.m_traceLengthMutliplier) || force) {
         reverseAPIKeys.append("traceLengthMutliplier");
@@ -394,9 +387,6 @@ void M17Demod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("fmDeviation")) {
         settings.m_fmDeviation = response.getM17DemodSettings()->getFmDeviation();
     }
-    if (channelSettingsKeys.contains("demodGain")) {
-        settings.m_demodGain = response.getM17DemodSettings()->getDemodGain();
-    }
     if (channelSettingsKeys.contains("volume")) {
         settings.m_volume = response.getM17DemodSettings()->getVolume();
     }
@@ -478,7 +468,6 @@ void M17Demod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     response.getM17DemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     response.getM17DemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
     response.getM17DemodSettings()->setFmDeviation(settings.m_fmDeviation);
-    response.getM17DemodSettings()->setDemodGain(settings.m_demodGain);
     response.getM17DemodSettings()->setVolume(settings.m_volume);
     response.getM17DemodSettings()->setBaudRate(settings.m_baudRate);
     response.getM17DemodSettings()->setSquelchGate(settings.m_squelchGate);
@@ -631,9 +620,6 @@ void M17Demod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("fmDeviation") || force) {
         swgM17DemodSettings->setFmDeviation(settings.m_fmDeviation);
-    }
-    if (channelSettingsKeys.contains("demodGain") || force) {
-        swgM17DemodSettings->setDemodGain(settings.m_demodGain);
     }
     if (channelSettingsKeys.contains("volume") || force) {
         swgM17DemodSettings->setVolume(settings.m_volume);

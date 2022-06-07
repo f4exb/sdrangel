@@ -148,13 +148,6 @@ void M17DemodGUI::on_rfBW_valueChanged(int value)
 	applySettings();
 }
 
-void M17DemodGUI::on_demodGain_valueChanged(int value)
-{
-    m_settings.m_demodGain = value / 100.0;
-    ui->demodGainText->setText(QString("%1").arg(value / 100.0, 0, 'f', 2));
-	applySettings();
-}
-
 void M17DemodGUI::on_fmDeviation_valueChanged(int value)
 {
     m_settings.m_fmDeviation = value * 100.0;
@@ -301,11 +294,9 @@ M17DemodGUI::M17DemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_doApplySettings(true),
 	m_enableCosineFiltering(false),
 	m_syncOrConstellation(false),
-	m_slot1On(false),
-	m_slot2On(false),
-	m_tdmaStereo(false),
 	m_squelchOpen(false),
     m_audioSampleRate(-1),
+    m_lsfCount(0),
 	m_tickCount(0)
 {
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -370,6 +361,9 @@ M17DemodGUI::M17DemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_settings.setChannelMarker(&m_channelMarker);
     m_settings.setRollupState(&m_rollupState);
 
+    ui->dcdLabel->setPixmap(QIcon(":/carrier.png").pixmap(QSize(20, 20)));
+    ui->lockLabel->setPixmap(QIcon(":/locked.png").pixmap(QSize(20, 20)));
+
 	updateMyPosition();
 	displaySettings();
     makeUIConnections();
@@ -424,9 +418,6 @@ void M17DemodGUI::displaySettings()
 
     ui->squelchGate->setValue(m_settings.m_squelchGate);
     ui->squelchGateText->setText(QString("%1").arg(ui->squelchGate->value() * 10.0, 0, 'f', 0));
-
-    ui->demodGain->setValue(m_settings.m_demodGain * 100.0);
-    ui->demodGainText->setText(QString("%1").arg(ui->demodGain->value() / 100.0, 0, 'f', 2));
 
     ui->volume->setValue(m_settings.m_volume * 10.0);
     ui->volumeText->setText(QString("%1").arg(ui->volume->value() / 10.0, 0, 'f', 1));
@@ -543,14 +534,77 @@ void M17DemodGUI::tick()
         m_squelchOpen = squelchOpen;
 	}
 
+    if (m_tickCount % 10 == 0)
+    {
+        bool dcd;
+        float evm;
+        float deviation;
+        float offset;
+        int status;
+        float clock;
+        int sampleIndex;
+        int syncIndex;
+        int clockIndex;
+        int viterbiCost;
+
+        m_m17Demod->getDiagnostics(dcd, evm, deviation, offset, status, clock, sampleIndex, syncIndex, clockIndex, viterbiCost);
+
+        if (dcd) {
+            ui->dcdLabel->setStyleSheet("QLabel { background-color : green; }");
+        } else {
+            ui->dcdLabel->setStyleSheet(tr("QLabel { background-color : %1; }").arg(palette().button().color().name()));
+        }
+
+        if (status == 0) { // unlocked
+            ui->lockLabel->setStyleSheet(tr("QLabel { background-color : %1; }").arg(palette().button().color().name()));
+        } else {
+            ui->lockLabel->setStyleSheet("QLabel { background-color : green; }");
+        }
+
+        ui->syncText->setText(getStatus(status));
+        ui->evmText->setText(tr("%1").arg(evm*100.0f, 3, 'f', 1));
+        ui->deviationText->setText(tr("%1").arg(deviation, 2, 'f', 1));
+        ui->offsetText->setText(tr("%1").arg(offset, 3, 'f', 2));
+        ui->viterbiText->setText(tr("%1").arg(viterbiCost));
+        ui->clockText->setText(tr("%1").arg(clock, 2, 'f', 1));
+        ui->sampleText->setText(tr("%1, %2, %3").arg(sampleIndex).arg(syncIndex).arg(clockIndex));
+
+        if (m_m17Demod->getLSFCount() != m_lsfCount)
+        {
+            ui->sourceText->setText(m_m17Demod->getSrcCall());
+            ui->destText->setText(m_m17Demod->getDestcCall());
+            ui->typeText->setText(m_m17Demod->getTypeInfo());
+            ui->crcText->setText(tr("%1").arg(m_m17Demod->getCRC(), 4, 16, QChar('0')));
+            m_lsfCount = m_m17Demod->getLSFCount();
+        }
+    }
+
 	m_tickCount++;
+}
+
+QString M17DemodGUI::getStatus(int status)
+{
+    if (status == 0) {
+        return "Unlocked";
+    } else if (status == 1) {
+        return "LSF";
+    } else if (status == 2) {
+        return "Stream";
+    } else if (status == 3) {
+        return "Packet";
+    } else if (status == 4) {
+        return "BERT";
+    } else if (status == 5) {
+        return "Frame";
+    } else {
+        return "Unknown";
+    }
 }
 
 void M17DemodGUI::makeUIConnections()
 {
     QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &M17DemodGUI::on_deltaFrequency_changed);
     QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &M17DemodGUI::on_rfBW_valueChanged);
-    QObject::connect(ui->demodGain, &QSlider::valueChanged, this, &M17DemodGUI::on_demodGain_valueChanged);
     QObject::connect(ui->volume, &QDial::valueChanged, this, &M17DemodGUI::on_volume_valueChanged);
     QObject::connect(ui->baudRate, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &M17DemodGUI::on_baudRate_currentIndexChanged);
     QObject::connect(ui->syncOrConstellation, &QToolButton::toggled, this, &M17DemodGUI::on_syncOrConstellation_toggled);

@@ -128,6 +128,28 @@ public:
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) { m_basebandSink->getMagSqLevels(avg, peak, nbSamples); }
     int getAudioSampleRate() const { return m_basebandSink->getAudioSampleRate(); }
 
+    void getDiagnostics(
+        bool& dcd,
+        float& evm,
+        float& deviation,
+        float& offset,
+        int& status,
+        float& clock,
+        int& sampleIndex,
+        int& syncIndex,
+        int& clockIndex,
+        int& viterbiCost
+    ) const
+    {
+        m_basebandSink->getDiagnostics(dcd, evm, deviation, offset, status, clock, sampleIndex, syncIndex, clockIndex, viterbiCost);
+    }
+
+    uint32_t getLSFCount() const { return m_basebandSink->getLSFCount(); }
+    const QString& getSrcCall() const { return m_basebandSink->getSrcCall(); }
+    const QString& getDestcCall() const { return m_basebandSink->getDestcCall(); }
+    const QString& getTypeInfo() const { return m_basebandSink->getTypeInfo(); }
+    uint16_t getCRC() const { return m_basebandSink->getCRC(); }
+
     static const char* const m_channelIdURI;
     static const char* const m_channelId;
 

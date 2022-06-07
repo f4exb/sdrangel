@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>530</width>
+    <width>482</width>
     <height>392</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>530</width>
+    <width>482</width>
     <height>392</height>
    </size>
   </property>
@@ -42,7 +42,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>528</width>
+     <width>480</width>
      <height>172</height>
     </rect>
    </property>
@@ -54,7 +54,7 @@
    </property>
    <property name="minimumSize">
     <size>
-     <width>528</width>
+     <width>480</width>
      <height>0</height>
     </size>
    </property>
@@ -532,7 +532,7 @@
       <item>
        <widget class="QLabel" name="sourceLabel">
         <property name="text">
-         <string>Source</string>
+         <string>Src</string>
         </property>
        </widget>
       </item>
@@ -544,6 +544,15 @@
           <height>0</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Source callsign</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Box</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
+        </property>
         <property name="text">
          <string>...</string>
         </property>
@@ -552,7 +561,7 @@
       <item>
        <widget class="QLabel" name="destLabel">
         <property name="text">
-         <string>Dest</string>
+         <string>Dst</string>
         </property>
        </widget>
       </item>
@@ -563,6 +572,73 @@
           <width>80</width>
           <height>0</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>Destination callsign</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Box</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="typeLabel">
+        <property name="text">
+         <string>Typ</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="typeText">
+        <property name="minimumSize">
+         <size>
+          <width>110</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Data stream type information</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Box</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="crcLabel">
+        <property name="text">
+         <string>CRC</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="crcText">
+        <property name="minimumSize">
+         <size>
+          <width>30</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>CRC for the LSF data</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Box</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
         </property>
         <property name="text">
          <string>...</string>
@@ -589,7 +665,7 @@
   <widget class="QWidget" name="scopeWidget" native="true">
    <property name="geometry">
     <rect>
-     <x>10</x>
+     <x>0</x>
      <y>180</y>
      <width>480</width>
      <height>210</height>
@@ -646,8 +722,8 @@
         <rect>
          <x>10</x>
          <y>10</y>
-         <width>59</width>
-         <height>20</height>
+         <width>60</width>
+         <height>24</height>
         </rect>
        </property>
        <property name="sizePolicy">
@@ -683,7 +759,7 @@
          <x>80</x>
          <y>10</y>
          <width>110</width>
-         <height>25</height>
+         <height>24</height>
         </rect>
        </property>
        <property name="minimumSize">
@@ -695,7 +771,7 @@
        <property name="maximumSize">
         <size>
          <width>16777215</width>
-         <height>25</height>
+         <height>24</height>
         </size>
        </property>
        <property name="font">
@@ -705,7 +781,7 @@
         </font>
        </property>
        <property name="toolTip">
-        <string>Synchronized on this frame type</string>
+        <string>Synchronization status</string>
        </property>
        <property name="frameShape">
         <enum>QFrame::Box</enum>
@@ -714,66 +790,59 @@
         <enum>QFrame::Sunken</enum>
        </property>
        <property name="lineWidth">
-        <number>2</number>
+        <number>1</number>
        </property>
        <property name="text">
         <string>No Sync______</string>
        </property>
       </widget>
-      <widget class="QLabel" name="symbolSyncQualityText">
+      <widget class="QLabel" name="dcdLabel">
        <property name="geometry">
         <rect>
-         <x>10</x>
-         <y>40</y>
-         <width>25</width>
-         <height>28</height>
+         <x>194</x>
+         <y>10</y>
+         <width>24</width>
+         <height>24</height>
         </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
        <property name="minimumSize">
         <size>
-         <width>25</width>
-         <height>0</height>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
         </size>
        </property>
        <property name="toolTip">
-        <string>Symbol synchronization rate (%)</string>
+        <string>Data Carrier Detect (DCD)</string>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::Box</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Sunken</enum>
        </property>
        <property name="text">
-        <string>000</string>
+        <string/>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
-      <widget class="QLabel" name="zcPosText">
+      <widget class="QLabel" name="deviationLabel">
        <property name="geometry">
         <rect>
-         <x>40</x>
-         <y>40</y>
-         <width>25</width>
-         <height>28</height>
-        </rect>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>25</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Zero crossing relative position in number of samples (&lt;0 sampling point lags, &gt;0 it leads)</string>
-       </property>
-       <property name="text">
-        <string>-00</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-      <widget class="QLabel" name="inCarrierPosText">
-       <property name="geometry">
-        <rect>
-         <x>80</x>
+         <x>84</x>
          <y>40</y>
          <width>25</width>
          <height>28</height>
@@ -789,13 +858,13 @@
         <string>Carrier relative position (%) when synchronized</string>
        </property>
        <property name="text">
-        <string>-00</string>
+        <string>Dev</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
        </property>
       </widget>
-      <widget class="QLabel" name="inLevelText">
+      <widget class="QLabel" name="deviationText">
        <property name="geometry">
         <rect>
          <x>110</x>
@@ -814,7 +883,7 @@
         <string>Carrier input level (%) when synchronized</string>
        </property>
        <property name="text">
-        <string>000</string>
+        <string>0.0</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -824,7 +893,7 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>70</y>
+         <y>100</y>
          <width>23</width>
          <height>22</height>
         </rect>
@@ -848,9 +917,9 @@
        <property name="geometry">
         <rect>
          <x>50</x>
-         <y>107</y>
-         <width>141</width>
-         <height>16</height>
+         <y>135</y>
+         <width>154</width>
+         <height>22</height>
         </rect>
        </property>
        <property name="toolTip">
@@ -876,7 +945,7 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>100</y>
+         <y>130</y>
          <width>25</width>
          <height>29</height>
         </rect>
@@ -888,8 +957,8 @@
       <widget class="QLabel" name="fmDeviationText">
        <property name="geometry">
         <rect>
-         <x>200</x>
-         <y>100</y>
+         <x>205</x>
+         <y>130</y>
          <width>50</width>
          <height>29</height>
         </rect>
@@ -907,58 +976,11 @@
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
-      <widget class="QLabel" name="demodGainLabel">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>130</y>
-         <width>28</width>
-         <height>30</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Gain</string>
-       </property>
-      </widget>
-      <widget class="QSlider" name="demodGain">
-       <property name="geometry">
-        <rect>
-         <x>50</x>
-         <y>137</y>
-         <width>141</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Gain after discriminator</string>
-       </property>
-       <property name="minimum">
-        <number>50</number>
-       </property>
-       <property name="maximum">
-        <number>200</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-       <property name="sliderPosition">
-        <number>100</number>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
       <widget class="QDial" name="traceLength">
        <property name="geometry">
         <rect>
          <x>40</x>
-         <y>68</y>
+         <y>100</y>
          <width>24</width>
          <height>24</height>
         </rect>
@@ -988,10 +1010,10 @@
       <widget class="QLabel" name="traceLengthText">
        <property name="geometry">
         <rect>
-         <x>70</x>
-         <y>73</y>
+         <x>68</x>
+         <y>100</y>
          <width>31</width>
-         <height>16</height>
+         <height>22</height>
         </rect>
        </property>
        <property name="toolTip">
@@ -1004,33 +1026,11 @@
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
-      <widget class="QLabel" name="demodGainText">
-       <property name="geometry">
-        <rect>
-         <x>200</x>
-         <y>130</y>
-         <width>50</width>
-         <height>29</height>
-        </rect>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>50</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>0.00</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
       <widget class="QDial" name="traceStroke">
        <property name="geometry">
         <rect>
-         <x>110</x>
-         <y>70</y>
+         <x>108</x>
+         <y>100</y>
          <width>24</width>
          <height>24</height>
         </rect>
@@ -1060,10 +1060,10 @@
       <widget class="QLabel" name="traceStrokeText">
        <property name="geometry">
         <rect>
-         <x>130</x>
-         <y>73</y>
+         <x>128</x>
+         <y>100</y>
          <width>31</width>
-         <height>16</height>
+         <height>22</height>
         </rect>
        </property>
        <property name="toolTip">
@@ -1079,8 +1079,8 @@
       <widget class="QDial" name="traceDecay">
        <property name="geometry">
         <rect>
-         <x>170</x>
-         <y>70</y>
+         <x>168</x>
+         <y>100</y>
          <width>24</width>
          <height>24</height>
         </rect>
@@ -1110,10 +1110,10 @@
       <widget class="QLabel" name="traceDecayText">
        <property name="geometry">
         <rect>
-         <x>190</x>
-         <y>73</y>
+         <x>188</x>
+         <y>100</y>
          <width>31</width>
-         <height>16</height>
+         <height>22</height>
         </rect>
        </property>
        <property name="toolTip">
@@ -1121,6 +1121,299 @@
        </property>
        <property name="text">
         <string>000</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="QLabel" name="lockLabel">
+       <property name="geometry">
+        <rect>
+         <x>222</x>
+         <y>10</y>
+         <width>24</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Locked state</string>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::Box</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Sunken</enum>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="QLabel" name="evmLabel">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>40</y>
+         <width>27</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>27</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Carrier relative position (%) when synchronized</string>
+       </property>
+       <property name="text">
+        <string>EVM</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="QLabel" name="evmText">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>40</y>
+         <width>38</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>30</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Error Vector Magnitude (%) when synchronized</string>
+       </property>
+       <property name="text">
+        <string>00.0</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="QLabel" name="offsetLabel">
+       <property name="geometry">
+        <rect>
+         <x>142</x>
+         <y>40</y>
+         <width>25</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>25</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Carrier relative position (%) when synchronized</string>
+       </property>
+       <property name="text">
+        <string>Ofs</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="QLabel" name="offsetText">
+       <property name="geometry">
+        <rect>
+         <x>170</x>
+         <y>40</y>
+         <width>35</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>25</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Carrier input level (%) when synchronized</string>
+       </property>
+       <property name="text">
+        <string>0.00</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="QLabel" name="viterbiLabel">
+       <property name="geometry">
+        <rect>
+         <x>178</x>
+         <y>65</y>
+         <width>25</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>25</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Carrier relative position (%) when synchronized</string>
+       </property>
+       <property name="text">
+        <string>Vit</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="QLabel" name="viterbiText">
+       <property name="geometry">
+        <rect>
+         <x>203</x>
+         <y>65</y>
+         <width>25</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>25</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Carrier input level (%) when synchronized</string>
+       </property>
+       <property name="text">
+        <string>128</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="QLabel" name="clockLabel">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>65</y>
+         <width>25</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>25</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Carrier relative position (%) when synchronized</string>
+       </property>
+       <property name="text">
+        <string>Clk</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="QLabel" name="clockText">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>65</y>
+         <width>25</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>25</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Carrier input level (%) when synchronized</string>
+       </property>
+       <property name="text">
+        <string>0</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="QLabel" name="sampleLabel">
+       <property name="geometry">
+        <rect>
+         <x>80</x>
+         <y>65</y>
+         <width>35</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>25</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Carrier relative position (%) when synchronized</string>
+       </property>
+       <property name="text">
+        <string>Samp</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="QLabel" name="sampleText">
+       <property name="geometry">
+        <rect>
+         <x>120</x>
+         <y>65</y>
+         <width>46</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>25</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Carrier input level (%) when synchronized</string>
+       </property>
+       <property name="text">
+        <string>0, 0, 0</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

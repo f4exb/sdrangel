@@ -30,7 +30,6 @@ struct M17DemodSettings
     qint64 m_inputFrequencyOffset;
     Real  m_rfBandwidth;
     Real  m_fmDeviation;
-    Real  m_demodGain;
     Real  m_volume;
     int  m_baudRate;
     int  m_squelchGate;

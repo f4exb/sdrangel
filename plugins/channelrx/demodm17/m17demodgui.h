@@ -87,12 +87,10 @@ private:
 	M17Demod* m_m17Demod;
 	bool m_enableCosineFiltering;
 	bool m_syncOrConstellation;
-	bool m_slot1On;
-    bool m_slot2On;
-    bool m_tdmaStereo;
     bool m_audioMute;
 	bool m_squelchOpen;
     int  m_audioSampleRate;
+    uint32_t m_lsfCount;
 	uint32_t m_tickCount;
 
 	float m_myLatitude;
@@ -112,6 +110,7 @@ private:
 	bool handleMessage(const Message& message);
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();
+    QString getStatus(int status);
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
@@ -119,7 +118,6 @@ private:
 private slots:
     void on_deltaFrequency_changed(qint64 value);
     void on_rfBW_valueChanged(int index);
-    void on_demodGain_valueChanged(int value);
     void on_volume_valueChanged(int value);
     void on_baudRate_currentIndexChanged(int index);
     void on_syncOrConstellation_toggled(bool checked);

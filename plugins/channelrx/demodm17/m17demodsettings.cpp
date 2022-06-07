@@ -35,7 +35,6 @@ void M17DemodSettings::resetToDefaults()
     m_inputFrequencyOffset = 0;
     m_rfBandwidth = 12500.0;
     m_fmDeviation = 3500.0;
-    m_demodGain = 1.0;
     m_volume = 2.0;
     m_baudRate = 4800;
     m_squelchGate = 5; // 10s of ms at 48000 Hz sample rate. Corresponds to 2400 for AGC attack
@@ -64,7 +63,6 @@ QByteArray M17DemodSettings::serialize() const
     SimpleSerializer s(1);
     s.writeS32(1, m_inputFrequencyOffset);
     s.writeS32(2, m_rfBandwidth/100.0);
-    s.writeS32(3, m_demodGain*100.0);
     s.writeS32(4, m_fmDeviation/100.0);
     s.writeS32(5, m_squelch);
     s.writeU32(7, m_rgbColor);
@@ -130,7 +128,6 @@ bool M17DemodSettings::deserialize(const QByteArray& data)
         d.readS32(2, &tmp, 125);
         m_rfBandwidth = tmp * 100.0;
         d.readS32(3, &tmp, 125);
-        m_demodGain = tmp / 100.0;
         d.readS32(4, &tmp, 50);
         m_fmDeviation = tmp * 100.0;
         d.readS32(5, &tmp, -40);

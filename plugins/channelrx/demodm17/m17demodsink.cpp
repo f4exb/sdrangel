@@ -53,6 +53,7 @@ M17DemodSink::M17DemodSink() :
     m_squelchGate(0),
     m_squelchLevel(1e-4),
     m_squelchOpen(false),
+    m_squelchWasOpen(false),
     m_squelchDelayLine(24000),
     m_audioFifo(48000),
     m_scopeXY(nullptr),
@@ -62,6 +63,7 @@ M17DemodSink::M17DemodSink() :
 	m_audioBufferFill = 0;
     m_demodBuffer.resize(1<<12);
     m_demodBufferFill = 0;
+    m_m17DemodProcessor.setAudioFifo(&m_audioFifo);
 
 	m_sampleBuffer = new FixReal[1<<17]; // 128 kS
 	m_sampleBufferIndex = 0;
@@ -105,14 +107,13 @@ void M17DemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
 
             m_magsqSum += magsq;
 
-            if (magsq > m_magsqPeak)
-            {
+            if (magsq > m_magsqPeak) {
                 m_magsqPeak = magsq;
             }
 
             m_magsqCount++;
 
-            Real demod = m_phaseDiscri.phaseDiscriminator(ci) * m_settings.m_demodGain; // [-1.0:1.0]
+            Real demod = m_phaseDiscri.phaseDiscriminator(ci);
             m_sampleCount++;
 
             // AF processing
@@ -155,12 +156,14 @@ void M17DemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
             {
                 if (m_squelchGate > 0)
                 {
-                    sampleM17 = m_squelchDelayLine.readBack(m_squelchGate) * 32768.0f;   // DSD decoder takes int16 samples
+                    sampleM17 = m_squelchDelayLine.readBack(m_squelchGate) * 32768.0f;   // M17 decoder takes int16 samples
+                    m_m17DemodProcessor.pushSample(sampleM17);
                     sample = m_squelchDelayLine.readBack(m_squelchGate) * SDR_RX_SCALEF; // scale to sample size
                 }
                 else
                 {
                     sampleM17 = demod * 32768.0f;   // M17 decoder takes int16 samples
+                    m_m17DemodProcessor.pushSample(sampleM17);
                     sample = demod * SDR_RX_SCALEF; // scale to sample size
                 }
             }
@@ -168,9 +171,15 @@ void M17DemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
             {
                 sampleM17 = 0;
                 sample = 0;
+
+                if (m_squelchWasOpen)
+                {
+                    m_m17DemodProcessor.resetInfo();
+                    m_m17DemodProcessor.setDCDOff(); // indicate loss of carrier
+                }
             }
 
-            // m_dsdDecoder.pushSample(sampleM17);
+            m_squelchWasOpen = m_squelchOpen;
 
             m_demodBuffer[m_demodBufferFill] = sampleM17;
             ++m_demodBufferFill;
@@ -230,39 +239,6 @@ void M17DemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
         }
 	}
 
-    // if (!m_ambeFeature)
-	// {
-	//     if (m_settings.m_slot1On)
-	//     {
-	//         int nbAudioSamples;
-	//         short *dsdAudio = m_dsdDecoder.getAudio1(nbAudioSamples);
-
-	//         if (nbAudioSamples > 0)
-	//         {
-	//             if (!m_settings.m_audioMute) {
-	//                 m_audioFifo1.write((const quint8*) dsdAudio, nbAudioSamples);
-	//             }
-
-	//             m_dsdDecoder.resetAudio1();
-	//         }
-	//     }
-
-    //     if (m_settings.m_slot2On)
-    //     {
-    //         int nbAudioSamples;
-    //         short *dsdAudio = m_dsdDecoder.getAudio2(nbAudioSamples);
-
-    //         if (nbAudioSamples > 0)
-    //         {
-    //             if (!m_settings.m_audioMute) {
-    //                 m_audioFifo2.write((const quint8*) dsdAudio, nbAudioSamples);
-    //             }
-
-    //             m_dsdDecoder.resetAudio2();
-    //         }
-    //     }
-	// }
-
     if ((m_scopeXY != nullptr) && (m_scopeEnabled))
     {
         m_scopeXY->feed(m_scopeSampleBuffer.begin(), m_scopeSampleBuffer.end(), true); // true = real samples for what it's worth
@@ -285,7 +261,7 @@ void M17DemodSink::applyAudioSampleRate(int sampleRate)
         qDebug("M17DemodSink::applyAudioSampleRate: audio will sound best with sample rates that are integer multiples of 8 kS/s");
     }
 
-    // m_dsdDecoder.setUpsampling(upsampling);
+    m_m17DemodProcessor.setUpsampling(upsampling);
     m_audioSampleRate = sampleRate;
 
     QList<ObjectPipe*> pipes;
@@ -332,7 +308,6 @@ void M17DemodSink::applySettings(const M17DemodSettings& settings, bool force)
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
             << " m_rfBandwidth: " << settings.m_rfBandwidth
             << " m_fmDeviation: " << settings.m_fmDeviation
-            << " m_demodGain: " << settings.m_demodGain
             << " m_volume: " << settings.m_volume
             << " m_baudRate: " << settings.m_baudRate
             << " m_squelchGate" << settings.m_squelchGate
@@ -355,8 +330,7 @@ void M17DemodSink::applySettings(const M17DemodSettings& settings, bool force)
         //m_phaseDiscri.setFMScaling((float) settings.m_rfBandwidth / (float) settings.m_fmDeviation);
     }
 
-    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force)
-    {
+    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force) {
         m_phaseDiscri.setFMScaling(48000.0f / (2.0f*settings.m_fmDeviation));
     }
 
@@ -366,15 +340,16 @@ void M17DemodSink::applySettings(const M17DemodSettings& settings, bool force)
         m_squelchCount = 0; // reset squelch open counter
     }
 
-    if ((settings.m_squelch != m_settings.m_squelch) || force)
-    {
-        // input is a value in dB
-        m_squelchLevel = std::pow(10.0, settings.m_squelch / 10.0);
+    if ((settings.m_squelch != m_settings.m_squelch) || force) {
+        m_squelchLevel = std::pow(10.0, settings.m_squelch / 10.0); // input is a value in dB
     }
 
-    if ((settings.m_volume != m_settings.m_volume) || force)
-    {
-        // m_dsdDecoder.setAudioGain(settings.m_volume);
+    if ((settings.m_audioMute != m_settings.m_audioMute) || force) {
+        m_m17DemodProcessor.setAudioMute(settings.m_audioMute);
+    }
+
+    if ((settings.m_volume != m_settings.m_volume) || force) {
+        m_m17DemodProcessor.setVolume(settings.m_volume);
     }
 
     if ((settings.m_baudRate != m_settings.m_baudRate) || force)
@@ -382,9 +357,8 @@ void M17DemodSink::applySettings(const M17DemodSettings& settings, bool force)
         // m_dsdDecoder.setBaudRate(settings.m_baudRate);
     }
 
-    if ((settings.m_highPassFilter != m_settings.m_highPassFilter) || force)
-    {
-        // m_dsdDecoder.useHPMbelib(settings.m_highPassFilter);
+    if ((settings.m_highPassFilter != m_settings.m_highPassFilter) || force) {
+        m_m17DemodProcessor.setHP(settings.m_highPassFilter);
     }
 
     m_settings = settings;
@@ -392,6 +366,7 @@ void M17DemodSink::applySettings(const M17DemodSettings& settings, bool force)
 
 void M17DemodSink::configureMyPosition(float myLatitude, float myLongitude)
 {
-    // m_dsdDecoder.setMyPoint(myLatitude, myLongitude);
+    m_latitude = myLatitude;
+    m_longitude = myLongitude;
 }
 
