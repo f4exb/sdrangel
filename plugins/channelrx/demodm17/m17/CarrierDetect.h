@@ -13,22 +13,21 @@
 namespace mobilinkd
 {
 
-template <typename FloatType>
 struct CarrierDetect
 {
-    using result_t = std::tuple<bool, FloatType>;
+    using result_t = std::tuple<bool, float>;
 
-    BaseIirFilter<FloatType, 3> filter_;
-    FloatType lock_;
-    FloatType unlock_;
+    BaseIirFilter<3> filter_;
+    float lock_;
+    float unlock_;
     bool locked_ = false;
 
-    CarrierDetect(std::array<FloatType, 3> const& b, std::array<FloatType, 3> const& a, FloatType lock_level, FloatType unlock_level)
+    CarrierDetect(std::array<float, 3> const& b, std::array<float, 3> const& a, float lock_level, float unlock_level)
     : filter_(b, a), lock_(lock_level), unlock_(unlock_level)
     {
     }
-    
-    result_t operator()(FloatType value)
+
+    result_t operator()(float value)
     {
         auto filtered = filter_(std::abs(value));
         if (locked_ && (filtered > unlock_)) locked_ = false;

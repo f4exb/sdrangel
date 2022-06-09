@@ -59,19 +59,19 @@ constexpr size_t llr_size()
     return llr_limit<N>() * 6 + 1;
 }
 
-template<typename FloatType, size_t LLR>
-constexpr std::array<std::tuple<FloatType, std::tuple<int8_t, int8_t>>, llr_size<LLR>()> make_llr_map()
+template<size_t LLR>
+constexpr std::array<std::tuple<float, std::tuple<int8_t, int8_t>>, llr_size<LLR>()> make_llr_map()
 {
     constexpr size_t size = llr_size<LLR>();
-    std::array<std::tuple<FloatType, std::tuple<int8_t, int8_t>>, size> result;
+    std::array<std::tuple<float, std::tuple<int8_t, int8_t>>, size> result;
 
     constexpr int8_t limit = llr_limit<LLR>();
-    constexpr FloatType inc = 1.0 / FloatType(limit);
+    constexpr float inc = 1.0 / float(limit);
     int8_t i = limit;
     int8_t j = limit;
 
     // Output must be ordered by k, ascending.
-    FloatType k = -3.0 + inc;
+    float k = -3.0 + inc;
     for (size_t index = 0; index != size; ++index)
     {
         auto& a = result[index];
@@ -124,17 +124,17 @@ inline int from_4fsk(int symbol)
     }
 }
 
-template <typename FloatType, size_t LLR>
-auto llr(FloatType sample)
+template <size_t LLR>
+auto llr(float sample)
 {
-    static auto symbol_map = detail::make_llr_map<FloatType, LLR>();
-    static constexpr FloatType MAX_VALUE = 3.0;
-    static constexpr FloatType MIN_VALUE = -3.0;
+    static auto symbol_map = detail::make_llr_map<LLR>();
+    static constexpr float MAX_VALUE = 3.0;
+    static constexpr float MIN_VALUE = -3.0;
 
-    FloatType s = std::min(MAX_VALUE, std::max(MIN_VALUE, sample));
+    float s = std::min(MAX_VALUE, std::max(MIN_VALUE, sample));
 
     auto it = std::lower_bound(symbol_map.begin(), symbol_map.end(), s,
-        [](std::tuple<FloatType, std::tuple<int8_t, int8_t>> const& e, FloatType s){
+        [](std::tuple<float, std::tuple<int8_t, int8_t>> const& e, float s){
             return std::get<0>(e) < s;
         });
 

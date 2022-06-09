@@ -9,11 +9,10 @@
 namespace mobilinkd
 {
 
-template <typename T, size_t N = 10>
+template <size_t N = 10>
 struct DeviationError
 {
-    using float_type = T;
-    using array_t = std::array<float_type, N>;
+    using array_t = std::array<float, N>;
 
     array_t minima_{0};
     array_t maxima_{0};
@@ -23,18 +22,18 @@ struct DeviationError
     bool max_rolled_ = false;
     size_t min_count_ = 0;
     size_t max_count_ = 0;
-    float_type min_estimate_ = 0.0;
-    float_type max_estimate_ = 0.0;
+    float min_estimate_ = 0.0;
+    float max_estimate_ = 0.0;
 
-    const float_type ZERO = 0.0;
+    const float ZERO = 0.0;
 
     DeviationError()
     {
         minima_.fill(0.0);
         maxima_.fill(0.0);
     }
-    
-    float_type operator()(float_type sample)
+
+    float operator()(float sample)
     {
         if (sample > ZERO)
         {

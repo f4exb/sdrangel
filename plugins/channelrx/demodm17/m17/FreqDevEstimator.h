@@ -24,29 +24,28 @@ namespace mobilinkd {
  * Estimates are expected to be updated at each sync word.  But they can
  * be updated more frequently, such as during the preamble.
  */
-template <typename FloatType>
 class FreqDevEstimator
 {
-    using sample_filter_t = BaseIirFilter<FloatType, 3>;
+    using sample_filter_t = BaseIirFilter<3>;
 
     // IIR with Nyquist of 1/4.
-    static const std::array<FloatType, 3> dc_b;
-    static const std::array<FloatType, 3> dc_a;
+    static const std::array<float, 3> dc_b;
+    static const std::array<float, 3> dc_a;
 
-    static constexpr FloatType MAX_DC_ERROR = 0.2;
+    static constexpr float MAX_DC_ERROR = 0.2;
 
-    FloatType min_est_ = 0.0;
-	FloatType max_est_ = 0.0;
-	FloatType min_cutoff_ = 0.0;
-	FloatType max_cutoff_ = 0.0;
-	FloatType min_var_ = 0.0;
-	FloatType max_var_ = 0.0;
+    float min_est_ = 0.0;
+	float max_est_ = 0.0;
+	float min_cutoff_ = 0.0;
+	float max_cutoff_ = 0.0;
+	float min_var_ = 0.0;
+	float max_var_ = 0.0;
 	size_t min_count_ = 0;
 	size_t max_count_ = 0;
-	FloatType deviation_ = 0.0;
-	FloatType offset_ = 0.0;
-	FloatType error_ = 0.0;
-	FloatType idev_ = 1.0;
+	float deviation_ = 0.0;
+	float offset_ = 0.0;
+	float error_ = 0.0;
+	float idev_ = 1.0;
     sample_filter_t dc_filter_{dc_b, dc_a};
 
 public:
@@ -63,7 +62,7 @@ public:
 		max_cutoff_ = 0.0;
 	}
 
-	void sample(FloatType sample)
+	void sample(float sample)
 	{
 		if (sample < 1.5 * min_est_)
 		{
@@ -76,7 +75,7 @@ public:
 		{
 			min_count_ += 1;
 			min_est_ += sample;
-			FloatType var = (min_est_ / min_count_) - sample;
+			float var = (min_est_ / min_count_) - sample;
 			min_var_ += var * var;
 		}
 		else if (sample > 1.5 * max_est_)
@@ -90,7 +89,7 @@ public:
 		{
 			max_count_ += 1;
 			max_est_ += sample;
-			FloatType var = (max_est_ / max_count_) - sample;
+			float var = (max_est_ / max_count_) - sample;
 			max_var_ += var * var;
 		}
 	}
@@ -104,8 +103,8 @@ public:
 	void update()
 	{
 		if (max_count_ < 2 || min_count_ < 2) return;
-		FloatType max_ = max_est_ / max_count_;
-		FloatType min_ = min_est_ / min_count_;
+		float max_ = max_est_ / max_count_;
+		float min_ = min_est_ / min_count_;
 		deviation_ = (max_ - min_) / 6.0;
 		offset_ =  dc_filter_(std::max(std::min(max_ + min_, deviation_ * MAX_DC_ERROR), deviation_ * -MAX_DC_ERROR));
 		error_ = (std::sqrt(max_var_ / (max_count_ - 1)) + std::sqrt(min_var_ / (min_count_ - 1))) * 0.5;
@@ -120,10 +119,10 @@ public:
 		min_var_ = 0.0;
 	}
 
-	FloatType deviation() const { return deviation_; }
-	FloatType offset() const { return offset_; }
-	FloatType error() const { return error_; }
-	FloatType idev() const { return idev_; }
+	float deviation() const { return deviation_; }
+	float offset() const { return offset_; }
+	float error() const { return error_; }
+	float idev() const { return idev_; }
 };
 
 } // mobilinkd

@@ -16,7 +16,7 @@ namespace mobilinkd
 
 namespace detail
 {
-static const auto rrc_taps = std::array<double, 79>{
+static const auto rrc_taps = std::array<float, 79>{
     -0.009265784007800534, -0.006136551625729697, -0.001125978562075172, 0.004891777252042491,
     0.01071805138282269, 0.01505751553351295, 0.01679337935001369, 0.015256245142156299,
     0.01042830577908502, 0.003031522725559901,  -0.0055333532968188165, -0.013403099825723372,
@@ -39,8 +39,8 @@ static const auto rrc_taps = std::array<double, 79>{
     -0.001125978562075172, -0.006136551625729697, -0.009265784007800534
 };
 
-static const auto evm_b = std::array<double, 3>{0.02008337, 0.04016673, 0.02008337};
-static const auto evm_a = std::array<double, 3>{1.0, -1.56101808, 0.64135154};
+static const auto evm_b = std::array<float, 3>{0.02008337, 0.04016673, 0.02008337};
+static const auto evm_a = std::array<float, 3>{1.0, -1.56101808, 0.64135154};
 } // detail
 
 struct Fsk4Demod
@@ -48,17 +48,17 @@ struct Fsk4Demod
     using demod_result_t = std::tuple<double, double, int, double>;
     using result_t = std::tuple<double, double, int, double, double, double, double>;
 
-    BaseFirFilter<double, std::tuple_size<decltype(detail::rrc_taps)>::value> rrc = makeFirFilter(detail::rrc_taps);
-    PhaseEstimator<double> phase = PhaseEstimator<double>(48000, 4800);
-    DeviationError<double> deviation;
-    FrequencyError<double, 32> frequency;
-    SymbolEvm<double,  std::tuple_size<decltype(detail::evm_b)>::value> symbol_evm = makeSymbolEvm(makeIirFilter(detail::evm_b, detail::evm_a));
+    BaseFirFilter<std::tuple_size<decltype(detail::rrc_taps)>::value> rrc = makeFirFilter(detail::rrc_taps);
+    PhaseEstimator phase = PhaseEstimator(48000, 4800);
+    DeviationError<10> deviation;
+    FrequencyError<32> frequency;
+    SymbolEvm<std::tuple_size<decltype(detail::evm_b)>::value> symbol_evm = makeSymbolEvm(makeIirFilter(detail::evm_b, detail::evm_a));
 
     double sample_rate = 48000;
     double symbol_rate = 4800;
     double unlock_gain = 0.02;
     double lock_gain = 0.001;
-    std::array<double, 3> samples{0};
+    std::array<float, 3> samples{0};
     double t = 0;
     double dt = symbol_rate / sample_rate;
     double ideal_dt = dt;

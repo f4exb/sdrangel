@@ -11,15 +11,15 @@
 namespace mobilinkd
 {
 
-template <typename FloatType, size_t N = 32>
+template <size_t N = 32>
 struct FrequencyError
 {
-    using float_type = FloatType;
-    using array_t = std::array<FloatType, N>;
-    using filter_type = BaseIirFilter<FloatType, 3>;
+    using float_type = float;
+    using array_t = std::array<float, N>;
+    using filter_type = BaseIirFilter<3>;
 
-    static constexpr std::array<FloatType, 3> evm_b{0.02008337, 0.04016673, 0.02008337};
-    static constexpr std::array<FloatType, 3> evm_a{1.0, -1.56101808, 0.64135154};
+    static constexpr std::array<float, 3> evm_b{0.02008337, 0.04016673, 0.02008337};
+    static constexpr std::array<float, 3> evm_a{1.0, -1.56101808, 0.64135154};
 
     array_t samples_{0};
     size_t index_ = 0;
@@ -33,10 +33,10 @@ struct FrequencyError
     {
         samples_.fill(0.0);
     }
-    
+
     auto operator()(float_type sample)
     {
-        FloatType evm = 0;
+        float evm = 0;
         bool use = true;
 
         if (sample > 2)

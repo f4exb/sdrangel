@@ -25,23 +25,23 @@ namespace mobilinkd {
  *
  * Note: the input to this DCD must be unfiltered (raw) baseband input.
  */
-template <typename FloatType, size_t SampleRate, size_t Accuracy = 1000>
+template <size_t SampleRate, size_t Accuracy = 1000>
 struct DataCarrierDetect
 {
-    using ComplexType = std::complex<FloatType>;
-    using NDFT = NSlidingDFT<FloatType, SampleRate, SampleRate / Accuracy, 2>;
+    using ComplexType = std::complex<float>;
+    using NDFT = NSlidingDFT<SampleRate, SampleRate / Accuracy, 2>;
 
     NDFT dft_;
-    FloatType ltrigger_;
-    FloatType htrigger_;
-    FloatType level_1 = 0.0;
-    FloatType level_2 = 0.0;
-    FloatType level_ = 0.0;
+    float ltrigger_;
+    float htrigger_;
+    float level_1 = 0.0;
+    float level_2 = 0.0;
+    float level_ = 0.0;
     bool triggered_ = false;
 
     DataCarrierDetect(
         size_t freq1, size_t freq2,
-        FloatType ltrigger = 2.0, FloatType htrigger = 5.0)
+        float ltrigger = 2.0, float htrigger = 5.0)
     : dft_({freq1, freq2}), ltrigger_(ltrigger), htrigger_(htrigger)
     {
     }
@@ -50,7 +50,7 @@ struct DataCarrierDetect
      * Accept unfiltered baseband input and output a decision on whether
      * a carrier has been detected after every @tparam BlockSize inputs.
      */
-    void operator()(FloatType sample)
+    void operator()(float sample)
     {
         auto result = dft_(sample);
         level_1 += std::norm(result[0]);
@@ -69,7 +69,7 @@ struct DataCarrierDetect
     }
 
 
-    FloatType level() const { return level_; }
+    float level() const { return level_; }
     bool dcd() const { return triggered_; }
 };
 

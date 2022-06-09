@@ -595,7 +595,7 @@ public:
     static baseband_t symbols_to_baseband(const symbols_t& symbols)
     {
         // Generated using scikit-commpy
-        static const auto rrc_taps = std::array<double, 79>{
+        static const auto rrc_taps = std::array<float, 79>{
             -0.009265784007800534, -0.006136551625729697, -0.001125978562075172, 0.004891777252042491,
             0.01071805138282269, 0.01505751553351295, 0.01679337935001369, 0.015256245142156299,
             0.01042830577908502, 0.003031522725559901,  -0.0055333532968188165, -0.013403099825723372,
@@ -617,7 +617,7 @@ public:
             0.01679337935001369, 0.01505751553351295, 0.01071805138282269, 0.004891777252042491,
             -0.001125978562075172, -0.006136551625729697, -0.009265784007800534
         };
-        static BaseFirFilter<double, std::tuple_size<decltype(rrc_taps)>::value> rrc = makeFirFilter(rrc_taps);
+        static BaseFirFilter<std::tuple_size<decltype(rrc_taps)>::value> rrc = makeFirFilter(rrc_taps);
 
         std::array<int16_t, 1920> baseband;
         baseband.fill(0);

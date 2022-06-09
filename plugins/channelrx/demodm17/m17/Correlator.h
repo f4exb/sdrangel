@@ -15,32 +15,31 @@
 
 namespace mobilinkd {
 
-template <typename FloatType>
 struct Correlator
 {
 	static constexpr size_t SYMBOLS = 8;
 	static constexpr size_t SAMPLES_PER_SYMBOL = 10;
 
-	using value_type = FloatType;
-    using buffer_t = std::array<FloatType, SYMBOLS * SAMPLES_PER_SYMBOL>;
+	using value_type = float;
+    using buffer_t = std::array<float, SYMBOLS * SAMPLES_PER_SYMBOL>;
     using sync_t = std::array<int8_t, SYMBOLS>;
-    using sample_filter_t = BaseIirFilter<FloatType, 3>;
+    using sample_filter_t = BaseIirFilter<3>;
 
     buffer_t buffer_;
 
-    FloatType limit_ = 0.;
+    float limit_ = 0.;
     size_t symbol_pos_ = 0;
     size_t buffer_pos_ = 0;
     size_t prev_buffer_pos_ = 0;
     int code = -1;
 
     // IIR with Nyquist of 1/240.
-    static const std::array<FloatType,3> b;
-    static const std::array<FloatType,3> a;
+    static const std::array<float,3> b;
+    static const std::array<float,3> a;
     sample_filter_t sample_filter{b, a};
     std::array<int, SYMBOLS> tmp;
 
-    void sample(FloatType value)
+    void sample(float value)
     {
         limit_ = sample_filter(std::abs(value));
         buffer_[buffer_pos_] = value;
@@ -48,9 +47,9 @@ struct Correlator
         if (++buffer_pos_ == buffer_.size()) buffer_pos_ = 0;
     }
 
-    FloatType correlate(sync_t sync)
+    float correlate(sync_t sync)
     {
-        FloatType result = 0.;
+        float result = 0.;
         size_t pos = prev_buffer_pos_ + SAMPLES_PER_SYMBOL;
 
         for (size_t i = 0; i != sync.size(); ++i)
@@ -63,7 +62,7 @@ struct Correlator
         return result;
     }
 
-    FloatType limit() const {return limit_;}
+    float limit() const {return limit_;}
     size_t index() const {return prev_buffer_pos_ % SAMPLES_PER_SYMBOL;}
 
     /**
@@ -78,10 +77,10 @@ struct Correlator
      * second holds true for the sync words used for M17.  The third will
      * hold true if passed the timing index from a triggered sync word.
      */
-    std::tuple<FloatType, FloatType> outer_symbol_levels(size_t sample_index)
+    std::tuple<float, float> outer_symbol_levels(size_t sample_index)
     {
-        FloatType min_sum = 0;
-        FloatType max_sum = 0;
+        float min_sum = 0;
+        float max_sum = 0;
         size_t min_count = 0;
         size_t max_count = 0;
         size_t index = 0;

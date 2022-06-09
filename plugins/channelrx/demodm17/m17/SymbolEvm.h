@@ -13,23 +13,23 @@
 namespace mobilinkd
 {
 
-template <typename FloatType, size_t N>
+template <size_t N>
 struct SymbolEvm
 {
-    using filter_type = BaseIirFilter<FloatType, N>;
+    using filter_type = BaseIirFilter<float, N>;
     using symbol_t = int;
-    using result_type = std::tuple<symbol_t, FloatType>;
+    using result_type = std::tuple<symbol_t, float>;
 
     filter_type filter_;
-    FloatType erasure_limit_;
-    FloatType evm_ = 0.0;
+    float erasure_limit_;
+    float evm_ = 0.0;
 
-    SymbolEvm(filter_type&& filter, FloatType erasure_limit = 0.0) :
+    SymbolEvm(filter_type&& filter, float erasure_limit = 0.0) :
         filter_(std::forward<filter_type>(filter)),
         erasure_limit_(erasure_limit)
     {}
 
-    FloatType evm() const { return evm_; }
+    float evm() const { return evm_; }
 
     /**
      * Decode a normalized sample into a symbol.  Symbols
@@ -37,10 +37,10 @@ struct SymbolEvm
      * is set, symbols outside this limit are 'erased' and
      * returned as 0.
      */
-    result_type operator()(FloatType sample)
+    result_type operator()(float sample)
     {
         symbol_t symbol;
-        FloatType evm;
+        float evm;
 
         sample = std::min(3.0, std::max(-3.0, sample));
 
@@ -73,13 +73,13 @@ struct SymbolEvm
     }
 };
 
-template <typename FloatType, size_t N>
-SymbolEvm<FloatType, N> makeSymbolEvm(
-    BaseIirFilter<FloatType, N>&& filter,
-    FloatType erasure_limit = 0.0f
+template <size_t N>
+SymbolEvm<N> makeSymbolEvm(
+    BaseIirFilter<N>&& filter,
+    float erasure_limit = 0.0f
 )
 {
-    return std::move(SymbolEvm<FloatType, N>(std::move(filter), erasure_limit));
+    return std::move(SymbolEvm<float, N>(std::move(filter), erasure_limit));
 }
 
 } // mobilinkd

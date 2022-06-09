@@ -96,7 +96,7 @@ private:
     bool m_noiseBlanker;
     struct CODEC2 *m_codec2;
     static M17DemodProcessor *m_this;
-    mobilinkd::M17Demodulator<float> m_demod;
+    mobilinkd::M17Demodulator m_demod;
     AudioFifo *m_audioFifo;
     bool m_audioMute;
     AudioVector m_audioBuffer;
