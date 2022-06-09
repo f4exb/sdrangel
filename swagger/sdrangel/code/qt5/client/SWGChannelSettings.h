@@ -50,6 +50,7 @@
 #include "SWGLocalSinkSettings.h"
 #include "SWGLocalSourceSettings.h"
 #include "SWGM17DemodSettings.h"
+#include "SWGM17ModSettings.h"
 #include "SWGNFMDemodSettings.h"
 #include "SWGNFMModSettings.h"
 #include "SWGNoiseFigureSettings.h"
@@ -178,6 +179,9 @@ public:
 
     SWGM17DemodSettings* getM17DemodSettings();
     void setM17DemodSettings(SWGM17DemodSettings* m17_demod_settings);
+
+    SWGM17ModSettings* getM17ModSettings();
+    void setM17ModSettings(SWGM17ModSettings* m17_mod_settings);
 
     SWGNFMDemodSettings* getNfmDemodSettings();
     void setNfmDemodSettings(SWGNFMDemodSettings* nfm_demod_settings);
@@ -335,6 +339,9 @@ private:
 
     SWGM17DemodSettings* m17_demod_settings;
     bool m_m17_demod_settings_isSet;
+
+    SWGM17ModSettings* m17_mod_settings;
+    bool m_m17_mod_settings_isSet;
 
     SWGNFMDemodSettings* nfm_demod_settings;
     bool m_nfm_demod_settings_isSet;

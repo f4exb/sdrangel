@@ -1,0 +1,64 @@
+project(modm17)
+
+set(modm17_SOURCES
+    m17mod.cpp
+    m17modbaseband.cpp
+    m17modsource.cpp
+	m17modplugin.cpp
+    m17modsettings.cpp
+    m17modwebapiadapter.cpp
+)
+
+set(modm17_HEADERS
+	m17mod.h
+    m17modbaseband.h
+    m17modsource.h
+	m17modplugin.h
+    m17modsettings.h
+    m17modwebapiadapter.h
+)
+
+include_directories(
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+)
+
+if(NOT SERVER_MODE)
+    set(modm17_SOURCES
+        ${modm17_SOURCES}
+        m17modgui.cpp
+        m17modgui.ui
+    )
+    set(modm17_HEADERS
+        ${modm17_HEADERS}
+        m17modgui.h
+    )
+
+    set(TARGET_NAME modm17)
+    set(TARGET_LIB "Qt5::Widgets")
+    set(TARGET_LIB_GUI "sdrgui")
+    set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
+else()
+    set(TARGET_NAME modm17srv)
+    set(TARGET_LIB "")
+    set(TARGET_LIB_GUI "")
+    set(INSTALL_FOLDER ${INSTALL_PLUGINSSRV_DIR})
+endif()
+
+add_library(${TARGET_NAME} SHARED
+	${modm17_SOURCES}
+)
+
+target_link_libraries(${TARGET_NAME}
+    Qt5::Core
+    ${TARGET_LIB}
+	sdrbase
+	${TARGET_LIB_GUI}
+    swagger
+)
+
+install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
+
+# Install debug symbols
+if (WIN32)
+    install(FILES $<TARGET_PDB_FILE:${TARGET_NAME}> CONFIGURATIONS Debug RelWithDebInfo DESTINATION ${INSTALL_FOLDER} )
+endif()

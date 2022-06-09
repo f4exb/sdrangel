@@ -185,6 +185,8 @@
 #include "SWGLoggingInfo.h"
 #include "SWGM17DemodReport.h"
 #include "SWGM17DemodSettings.h"
+#include "SWGM17ModReport.h"
+#include "SWGM17ModSettings.h"
 #include "SWGMapActions.h"
 #include "SWGMapAnimation.h"
 #include "SWGMapCoordinate.h"
@@ -1189,6 +1191,16 @@ namespace SWGSDRangel {
     }
     if(QString("SWGM17DemodSettings").compare(type) == 0) {
       SWGM17DemodSettings *obj = new SWGM17DemodSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGM17ModReport").compare(type) == 0) {
+      SWGM17ModReport *obj = new SWGM17ModReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGM17ModSettings").compare(type) == 0) {
+      SWGM17ModSettings *obj = new SWGM17ModSettings();
       obj->init();
       return obj;
     }

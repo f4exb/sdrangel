@@ -51,6 +51,8 @@ ChannelReport:
       $ref: "/doc/swagger/include/FreqTracker.yaml#/FreqTrackerReport"
     M17DemodReport:
       $ref: "/doc/swagger/include/M17Demod.yaml#/M17DemodReport"
+    M17ModReport:
+      $ref: "/doc/swagger/include/M17Mod.yaml#/M17ModReport"
     NFMDemodReport:
       $ref: "/doc/swagger/include/NFMDemod.yaml#/NFMDemodReport"
     NFMModReport:

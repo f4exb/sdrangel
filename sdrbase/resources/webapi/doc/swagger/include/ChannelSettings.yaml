@@ -69,6 +69,8 @@ ChannelSettings:
       $ref: "/doc/swagger/include/IEEE_802_15_4_Mod.yaml#/IEEE_802_15_4_ModSettings"
     M17DemodSettings:
       $ref: "/doc/swagger/include/M17Demod.yaml#/M17DemodSettings"
+    M17ModSettings:
+      $ref: "/doc/swagger/include/M17Mod.yaml#/M17ModSettings"
     NFMDemodSettings:
       $ref: "/doc/swagger/include/NFMDemod.yaml#/NFMDemodSettings"
     NFMModSettings:

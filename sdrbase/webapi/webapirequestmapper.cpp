@@ -4516,15 +4516,20 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->setInterferometerSettings(new SWGSDRangel::SWGInterferometerSettings());
             channelSettings->getInterferometerSettings()->fromJsonObject(settingsJsonObject);
         }
-        else if (channelSettingsKey == "NFMDemodSettings")
-        {
-            channelSettings->setNfmDemodSettings(new SWGSDRangel::SWGNFMDemodSettings());
-            channelSettings->getNfmDemodSettings()->fromJsonObject(settingsJsonObject);
-        }
         else if (channelSettingsKey == "M17DemodSettings")
         {
             channelSettings->setM17DemodSettings(new SWGSDRangel::SWGM17DemodSettings());
             channelSettings->getM17DemodSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (channelSettingsKey == "M17ModSettings")
+        {
+            channelSettings->setM17ModSettings(new SWGSDRangel::SWGM17ModSettings());
+            channelSettings->getM17ModSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (channelSettingsKey == "NFMDemodSettings")
+        {
+            channelSettings->setNfmDemodSettings(new SWGSDRangel::SWGNFMDemodSettings());
+            channelSettings->getNfmDemodSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "NFMModSettings")
         {

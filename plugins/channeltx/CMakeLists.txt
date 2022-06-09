@@ -61,4 +61,5 @@ endif()
 
 if (ENABLE_CHANNELTX_MODFREEDV AND CODEC2_FOUND)
     add_subdirectory(modfreedv)
+    add_subdirectory(modm17)
 endif(CODEC2_FOUND)
