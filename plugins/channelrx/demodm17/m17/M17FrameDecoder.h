@@ -274,6 +274,7 @@ struct M17FrameDecoder
         std::array<int8_t, 272> tmp;
         std::copy(buffer.begin() + 96, buffer.end(), tmp.begin());
 
+        depuncture(tmp, depuncture_buffer.stream, P2);
         viterbi_cost = viterbi_.decode(depuncture_buffer.stream, decode_buffer.stream);
         to_byte_array(decode_buffer.stream, output_buffer.stream);
 

@@ -109,6 +109,7 @@
      <property name="font">
       <font>
        <family>Liberation Mono</family>
+       <pointsize>9</pointsize>
       </font>
      </property>
      <property name="toolTip">
@@ -148,32 +149,32 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>DSDStatusTextDialog</receiver>
+   <receiver>M17StatusTextDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>257</x>
-     <y>194</y>
+     <x>369</x>
+     <y>357</y>
     </hint>
     <hint type="destinationlabel">
-     <x>157</x>
-     <y>203</y>
+     <x>369</x>
+     <y>189</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>DSDStatusTextDialog</receiver>
+   <receiver>M17StatusTextDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>314</x>
-     <y>194</y>
+     <x>369</x>
+     <y>357</y>
     </hint>
     <hint type="destinationlabel">
-     <x>286</x>
-     <y>203</y>
+     <x>369</x>
+     <y>189</y>
     </hint>
    </hints>
   </connection>

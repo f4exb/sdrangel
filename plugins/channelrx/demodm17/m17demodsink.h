@@ -96,7 +96,9 @@ public:
     const QString& getSrcCall() const { return m_m17DemodProcessor.getSrcCall(); }
     const QString& getDestcCall() const { return m_m17DemodProcessor.getDestcCall(); }
     const QString& getTypeInfo() const { return m_m17DemodProcessor.getTypeInfo(); }
+    bool getStreamElsePacket() const { return m_m17DemodProcessor.getStreamElsePacket(); }
     uint16_t getCRC() const { return m_m17DemodProcessor.getCRC(); }
+    int getStdPacketProtocol() const { return (int) m_m17DemodProcessor.getStdPacketProtocol(); }
 
 private:
     struct MagSqLevelsStore

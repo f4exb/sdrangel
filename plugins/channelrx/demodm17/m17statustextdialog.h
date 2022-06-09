@@ -36,7 +36,6 @@ public:
 
 private:
     Ui::M17StatusTextDialog* ui;
-    QString m_lastLine;
 
 private slots:
     void on_clear_clicked();

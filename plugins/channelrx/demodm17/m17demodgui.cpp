@@ -157,8 +157,8 @@ void M17DemodGUI::on_fmDeviation_valueChanged(int value)
 
 void M17DemodGUI::on_volume_valueChanged(int value)
 {
-    m_settings.m_volume= value / 10.0;
-    ui->volumeText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
+    m_settings.m_volume= value / 100.0;
+    ui->volumeText->setText(QString("%1").arg(value / 100.0, 0, 'f', 2));
     applySettings();
 }
 
@@ -419,8 +419,8 @@ void M17DemodGUI::displaySettings()
     ui->squelchGate->setValue(m_settings.m_squelchGate);
     ui->squelchGateText->setText(QString("%1").arg(ui->squelchGate->value() * 10.0, 0, 'f', 0));
 
-    ui->volume->setValue(m_settings.m_volume * 10.0);
-    ui->volumeText->setText(QString("%1").arg(ui->volume->value() / 10.0, 0, 'f', 1));
+    ui->volume->setValue(m_settings.m_volume * 100.0);
+    ui->volumeText->setText(QString("%1").arg(ui->volume->value() / 100.0, 0, 'f', 2));
 
     ui->syncOrConstellation->setChecked(m_settings.m_syncOrConstellation);
     ui->audioMute->setChecked(m_settings.m_audioMute);
@@ -561,10 +561,10 @@ void M17DemodGUI::tick()
             ui->lockLabel->setStyleSheet("QLabel { background-color : green; }");
         }
 
-        ui->syncText->setText(getStatus(status));
+        ui->syncText->setText(getStatus(status, m_m17Demod->getStreamElsePacket(), m_m17Demod->getStdPacketProtocol()));
         ui->evmText->setText(tr("%1").arg(evm*100.0f, 3, 'f', 1));
-        ui->deviationText->setText(tr("%1").arg(deviation, 2, 'f', 1));
-        ui->offsetText->setText(tr("%1").arg(offset, 3, 'f', 2));
+        ui->deviationText->setText(tr("%1").arg(deviation/1.5f, 3, 'f', 2));
+        ui->offsetText->setText(tr("%1").arg(offset/1.5f, 3, 'f', 2));
         ui->viterbiText->setText(tr("%1").arg(viterbiCost));
         ui->clockText->setText(tr("%1").arg(clock, 2, 'f', 1));
         ui->sampleText->setText(tr("%1, %2, %3").arg(sampleIndex).arg(syncIndex).arg(clockIndex));
@@ -575,27 +575,47 @@ void M17DemodGUI::tick()
             ui->destText->setText(m_m17Demod->getDestcCall());
             ui->typeText->setText(m_m17Demod->getTypeInfo());
             ui->crcText->setText(tr("%1").arg(m_m17Demod->getCRC(), 4, 16, QChar('0')));
+
+            if (ui->activateStatusLog->isChecked() && (m_m17Demod->getLSFCount() != 0))
+            {
+                QString s = tr("Src: %1 Dst: %2 Typ: %3 CRC: %4")
+                    .arg(m_m17Demod->getSrcCall())
+                    .arg(m_m17Demod->getDestcCall())
+                    .arg(m_m17Demod->getTypeInfo())
+                    .arg(m_m17Demod->getCRC(), 4, 16, QChar('0'));
+                m_m17StatusTextDialog.addLine(s);
+            }
+
             m_lsfCount = m_m17Demod->getLSFCount();
         }
+
     }
 
 	m_tickCount++;
 }
 
-QString M17DemodGUI::getStatus(int status)
+QString M17DemodGUI::getStatus(int status, bool streamElsePacket, int packetProtocol)
 {
     if (status == 0) {
         return "Unlocked";
-    } else if (status == 1) {
-        return "LSF";
-    } else if (status == 2) {
-        return "Stream";
-    } else if (status == 3) {
-        return "Packet";
     } else if (status == 4) {
         return "BERT";
-    } else if (status == 5) {
-        return "Frame";
+    } else if (streamElsePacket) {
+        return "Stream";
+    } else if (packetProtocol == 0) {
+        return "Raw";
+    } else if (packetProtocol == 1) {
+        return "AX.25";
+    } else if (packetProtocol == 2) {
+        return "APRS";
+    } else if (packetProtocol == 3) {
+        return "6LoWPAN";
+    } else if (packetProtocol == 4) {
+        return "IPv4";
+    } else if (packetProtocol == 5) {
+        return "SMS";
+    } else if (packetProtocol == 6) {
+        return "Winlink";
     } else {
         return "Unknown";
     }

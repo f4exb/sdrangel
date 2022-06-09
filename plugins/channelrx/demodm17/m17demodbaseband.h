@@ -94,7 +94,9 @@ public:
     const QString& getSrcCall() const { return m_sink.getSrcCall(); }
     const QString& getDestcCall() const { return m_sink.getDestcCall(); }
     const QString& getTypeInfo() const { return m_sink.getTypeInfo(); }
+    bool getStreamElsePacket() const { return m_sink.getStreamElsePacket(); }
     uint16_t getCRC() const { return m_sink.getCRC(); }
+    int getStdPacketProtocol() const { return m_sink.getStdPacketProtocol(); }
 
 private:
     SampleSinkFifo m_sampleFifo;

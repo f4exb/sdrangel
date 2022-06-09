@@ -57,7 +57,7 @@ constexpr std::array<std::array<uint8_t, (1 << Trellis_::k)>, (1 << Trellis_::K)
         for (size_t j = 0; j != (1 << Trellis_::k); ++j)
         {
             size_t l = update_memory<Trellis_::K, Trellis_::k>(i, j) & (NumStates - 1);
-            result[l][k] = i; 
+            result[l][k] = i;
         }
     }
     return result;
@@ -156,7 +156,7 @@ struct Viterbi
 
     /**
      * Viterbi soft decoder using LLR inputs where 0 == erasure.
-     * 
+     *
      * @return path metric for estimating BER.
      */
     template <size_t IN, size_t OUT>
@@ -198,7 +198,7 @@ struct Viterbi
                     cost1[j] += std::abs(cost_[j][1] + s1);
                 }
             }
-            
+
             for (size_t j = 0; j != BUTTERFLY_SIZE; ++j)
             {
                 calculate_path_metric(cost0, cost1, history_[hindex], j);

@@ -40,7 +40,7 @@ M17DemodProcessor::M17DemodProcessor() :
 {
     m_this = this;
     m_codec2 = ::codec2_create(CODEC2_MODE_3200);
-    m_audioBuffer.resize(48000);
+    m_audioBuffer.resize(12000);
     m_audioBufferFill = 0;
     m_srcCall = "";
     m_destCall = "";
@@ -212,14 +212,16 @@ bool M17DemodProcessor::decode_lsf(mobilinkd::M17FrameDecoder::lsf_buffer_t cons
         }
     }
 
-    qDebug() << "M17DemodProcessor::decode_lsf: " << oss.str().c_str();
     m_lsfCount++;
+    qDebug() << "M17DemodProcessor::decode_lsf: " << m_lsfCount << ":" << oss.str().c_str();
     return true;
 }
 
 void M17DemodProcessor::decode_type(uint16_t type)
 {
-    if (type & 1) // bit 0
+    m_streamElsePacket = type & 1; // bit 0
+
+    if (m_streamElsePacket)
     {
         m_typeInfo = "STR:"; // Stream mode
 
@@ -268,6 +270,7 @@ void M17DemodProcessor::resetInfo()
     m_srcCall = "";
     m_destCall = "";
     m_typeInfo = "";
+    m_streamElsePacket = true;
     m_metadata.fill(0);
     m_crc = 0;
     m_lsfCount = 0;
@@ -301,33 +304,58 @@ bool M17DemodProcessor::decode_packet(mobilinkd::M17FrameDecoder::packet_buffer_
     if (packet_segment[25] & 0x80) // last frame of packet.
     {
         size_t packet_size = (packet_segment[25] & 0x7F) >> 2;
-        packet_size = std::min(packet_size, size_t(25));
+        packet_size = std::min(packet_size, size_t(25)); // on last frame this is the remainder byte count
+        m_packetFrameCounter = 0;
 
         for (size_t i = 0; i != packet_size; ++i) {
             m_currentPacket.push_back(packet_segment[i]);
         }
 
+        if (m_currentPacket.size() < 3) {
+            qDebug() << "M17DemodProcessor::decode_packet: too small:" << m_currentPacket.size();
+            return false;
+        }
+
         boost::crc_optimal<16, 0x1021, 0xFFFF, 0xFFFF, true, true> crc;
         crc.process_bytes(&m_currentPacket.front(), m_currentPacket.size());
-        uint16_t checksum = crc.checksum();
+        uint16_t calcChecksum = crc.checksum();
+        uint16_t xmitChecksum = m_currentPacket.back() + (1<<8) * m_currentPacket.end()[-2];
 
-        if (checksum == 0x0f47)
+        if (calcChecksum == xmitChecksum) // (checksum == 0x0f47)
         {
-            std::string ax25;
-            ax25.reserve(m_currentPacket.size());
+            uint8_t protocol = m_currentPacket.front();
+            m_stdPacketProtocol = protocol < (int) StdPacketUnknown ? (StdPacketProtocol) protocol : StdPacketUnknown;
+            qDebug() << "M17DemodProcessor::decode_packet: protocol: " << m_stdPacketProtocol;
 
-            for (auto c : m_currentPacket) {
-                ax25.push_back(char(c));
+            if (m_stdPacketProtocol == StdPacketAX25)
+            {
+                std::string ax25;
+                ax25.reserve(m_currentPacket.size());
+
+                for (auto c : m_currentPacket) {
+                    ax25.push_back(char(c));
+                }
+
+                mobilinkd::ax25_frame frame(ax25);
+                std::ostringstream oss;
+                mobilinkd::write(oss, frame); // TODO: get details
+                qDebug() << "M17DemodProcessor::decode_packet: AX25:" << oss.str().c_str();
+            }
+            else if (m_stdPacketProtocol == StdPacketSMS)
+            {
+                std::ostringstream oss;
+
+                for (std::vector<uint8_t>::const_iterator it = m_currentPacket.begin()+1; it < m_currentPacket.end()-2; ++it) {
+                    oss << *it;
+                }
+
+                qDebug() << "M17DemodProcessor::decode_packet: SMS:" << oss.str().c_str();
             }
 
-            mobilinkd::ax25_frame frame(ax25);
-            std::ostringstream oss;
-            mobilinkd::write(oss, frame); // TODO: get details
-            qDebug() << "M17DemodProcessor::decode_packet: " << oss.str().c_str();
             return true;
         }
 
-        qWarning() << "M17DemodProcessor::decode_packet: Packet checksum error: " << std::hex << checksum << std::dec;
+        qWarning() << "M17DemodProcessor::decode_packet: Packet checksum error: " << std::hex << calcChecksum << "vs" << xmitChecksum << std::dec;
         return false;
     }
 
@@ -450,8 +478,8 @@ void M17DemodProcessor::upsample(int upsampling, const int16_t *in, int nbSample
         for (int j = 1; j <= upsampling; j++)
         {
             upsample = (qint16) m_upsamplingFilter.runLP(cur*m_upsamplingFactors[j] + prev*m_upsamplingFactors[upsampling-j]);
-            m_audioBuffer[m_audioBufferFill].l = upsample; //m_compressor.compress(upsample);
-            m_audioBuffer[m_audioBufferFill].r = upsample; //m_compressor.compress(upsample);
+            m_audioBuffer[m_audioBufferFill].l = m_compressor.compress(upsample);
+            m_audioBuffer[m_audioBufferFill].r = m_compressor.compress(upsample);
 
             if (m_audioBufferFill < m_audioBuffer.size() - 1) {
                 ++m_audioBufferFill;
@@ -490,5 +518,14 @@ void M17DemodProcessor::setVolumeFactors()
 
     for (int i = 1; i <= m_upsampling; i++) {
         m_upsamplingFactors[i] = (i*m_volume) / (float) m_upsampling;
+    }
+}
+
+M17DemodProcessor::StdPacketProtocol M17DemodProcessor::getStdPacketProtocol() const
+{
+    if (m_streamElsePacket) {
+        return StdPacketUnknown;
+    } else {
+        return m_stdPacketProtocol;
     }
 }

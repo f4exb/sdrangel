@@ -30,6 +30,18 @@ class M17DemodProcessor : public QObject
 {
     Q_OBJECT
 public:
+    enum StdPacketProtocol
+    {
+        StdPacketRaw,
+        StdPacketAX25,
+        StdPacketAPRS,
+        StdPacket6LoWPAN,
+        StdPacketIPv4,
+        StdPacketSMS,
+        StdPacketWinlink,
+        StdPacketUnknown
+    };
+
     M17DemodProcessor();
     ~M17DemodProcessor();
 
@@ -47,7 +59,9 @@ public:
     const QString& getSrcCall() const { return m_srcCall; }
     const QString& getDestcCall() const { return m_destCall; }
     const QString& getTypeInfo() const { return m_typeInfo; }
+    bool getStreamElsePacket() const { return m_streamElsePacket; }
     uint16_t getCRC() const { return m_crc; }
+    StdPacketProtocol getStdPacketProtocol() const;
 
     void getDiagnostics(
         bool& dcd,
@@ -110,9 +124,11 @@ private:
     QString m_srcCall;
     QString m_destCall;
     QString m_typeInfo;
+    bool m_streamElsePacket;
     std::array<uint8_t, 14> m_metadata;
     uint16_t m_crc;
     uint32_t m_lsfCount; // Incremented each time a new LSF is decoded. Reset when lock is lost.
+    StdPacketProtocol m_stdPacketProtocol;
 
     static bool handle_frame(mobilinkd::M17FrameDecoder::output_buffer_t const& frame, int viterbi_cost);
     static void diagnostic_callback(

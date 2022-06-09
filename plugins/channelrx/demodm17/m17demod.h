@@ -148,7 +148,9 @@ public:
     const QString& getSrcCall() const { return m_basebandSink->getSrcCall(); }
     const QString& getDestcCall() const { return m_basebandSink->getDestcCall(); }
     const QString& getTypeInfo() const { return m_basebandSink->getTypeInfo(); }
+    bool getStreamElsePacket() const { return m_basebandSink->getStreamElsePacket(); }
     uint16_t getCRC() const { return m_basebandSink->getCRC(); }
+    int getStdPacketProtocol() const { return m_basebandSink->getStdPacketProtocol(); }
 
     static const char* const m_channelIdURI;
     static const char* const m_channelId;

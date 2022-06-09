@@ -110,7 +110,7 @@ private:
 	bool handleMessage(const Message& message);
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();
-    QString getStatus(int status);
+    QString getStatus(int status, bool streamElsePacket, int packetProtocol);
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
