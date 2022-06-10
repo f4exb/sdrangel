@@ -13,9 +13,11 @@
 #include <tuple>
 #include <limits>
 
+#include "export.h"
+
 namespace mobilinkd {
 
-struct Correlator
+struct M17_API Correlator
 {
 	static constexpr size_t SYMBOLS = 8;
 	static constexpr size_t SAMPLES_PER_SYMBOL = 10;

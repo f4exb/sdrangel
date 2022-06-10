@@ -10,6 +10,8 @@
 #include <cmath>
 #include <cstddef>
 
+#include "export.h"
+
 namespace mobilinkd {
 
 /**
@@ -24,7 +26,7 @@ namespace mobilinkd {
  * Estimates are expected to be updated at each sync word.  But they can
  * be updated more frequently, such as during the preamble.
  */
-class FreqDevEstimator
+class M17_API FreqDevEstimator
 {
     using sample_filter_t = BaseIirFilter<3>;
 

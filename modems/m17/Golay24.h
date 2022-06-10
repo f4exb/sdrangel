@@ -9,6 +9,8 @@
 #include <algorithm>
 #include <utility>
 
+#include "export.h"
+
 namespace mobilinkd {
 
 // Parts are adapted from:
@@ -79,7 +81,7 @@ constexpr array<T, N> sort(array<T, N> array)
 } // Golay24_detail
 
 
-struct Golay24
+struct M17_API Golay24
 {
     #pragma pack(push, 1)
     struct SyndromeMapEntry

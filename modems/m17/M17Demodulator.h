@@ -18,15 +18,11 @@
 #include <optional>
 #include <tuple>
 
+#include "export.h"
+
 namespace mobilinkd {
 
-namespace detail
-{
-
-
-} // detail
-
-struct M17Demodulator
+struct M17_API M17Demodulator
 {
 	static const uint16_t SAMPLE_RATE = 48000;
 	static const uint16_t SYMBOL_RATE = 4800;

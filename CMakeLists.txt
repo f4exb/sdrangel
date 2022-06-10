@@ -546,6 +546,7 @@ add_subdirectory(qrtplib)
 add_subdirectory(swagger)
 add_subdirectory(devices)
 add_subdirectory(sdrbench)
+add_subdirectory(modems)
 
 if (BUILD_GUI)
     add_subdirectory(sdrgui)

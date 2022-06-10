@@ -10,10 +10,6 @@ set(m17_SOURCES
     m17demodbaudrates.cpp
     m17demodprocessor.cpp
     m17demodfilters.cpp
-    m17/Golay24.cpp
-    m17/M17Demodulator.cpp
-    m17/FreqDevEstimator.cpp
-    m17/Correlator.cpp
 )
 
 set(m17_HEADERS
@@ -26,15 +22,12 @@ set(m17_HEADERS
     m17demodbaudrates.h
     m17demodprocessor.h
     m17demodfilters.h
-    m17/Golay24.h
-    m17/M17Demodulator.h
-    m17/FreqDevEstimator.h
-    m17/Correlator.h
 )
 
 include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${CODEC2_INCLUDE_DIR}
+    ${CMAKE_SOURCE_DIR}/modems
 )
 
 if(NOT SERVER_MODE)
@@ -76,6 +69,7 @@ target_link_libraries(${TARGET_NAME}
 	${TARGET_LIB_GUI}
     swagger
     ${CODEC2_LIBRARIES}
+    modems
 )
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
