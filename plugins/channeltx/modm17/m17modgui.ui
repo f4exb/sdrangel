@@ -369,7 +369,7 @@
       <item>
        <widget class="ButtonSwitch" name="tone">
         <property name="toolTip">
-         <string>Tone modulation (1 kHz)</string>
+         <string>FM tone modulation</string>
         </property>
         <property name="text">
          <string>...</string>
@@ -389,7 +389,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Tone frequency</string>
+         <string>FM tone frequency</string>
         </property>
         <property name="minimum">
          <number>10</number>
@@ -414,7 +414,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Tone frequency (kHz)</string>
+         <string>FM tone frequency (kHz)</string>
         </property>
         <property name="text">
          <string>1.00k</string>
