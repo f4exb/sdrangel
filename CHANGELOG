@@ -1,3 +1,20 @@
+sdrangel (7.3.2-1) unstable; urgency=medium
+
+  * Use libusb 1.0.26 on Windows
+  * NFM mod: make pre-emphasis and CTCSS highpass filter optional
+  * ADS-B: Add support for displaying airport weather (METARs) from CheckWX. PR #1280
+  * ADS-B: Add mapboxgl support, as osm maps do not work in Qt 5.15.3. PR #1280
+  * ADS-B: Support different map types for mapboxgl. PR #1280
+  * Map: Default to mapboxgl for Qt 5.15.3, as osm doesn't work. PR #1280
+  * Disable NAN and INF optimisations, as NANs are used in some code. PR #1281
+  * VOR Localizer: Add support for DVORs. PR #1282
+  * Add DVORs to ADS-B. PR #1282
+  * USRP: Check if device supports automatic clock rate. Issue #1278
+  * Radio Clock: fixed common channel settings menu trigger. Fixes #1286
+  * Features: fixed common settings menu placement. Issue #1286
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sun, 12 Jun 2022 21:42:51 +0200
+
 sdrangel (7.3.1-1) unstable; urgency=medium
 
   * DOA2 plugin: various fixes
