@@ -42,7 +42,9 @@ void M17ModSettings::resetToDefaults()
     m_playLoop = false;
     m_rgbColor = QColor(255, 0, 255).rgb();
     m_title = "M17 Modulator";
-    m_modAFInput = M17ModInputAF::M17ModInputNone;
+    m_m17Mode = M17Mode::M17ModeNone;
+    m_audioType = AudioType::AudioNone;
+    m_packetType = PacketType::PacketNone;
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
     m_feedbackAudioDeviceName = AudioDeviceManager::m_defaultDeviceName;
     m_feedbackVolumeFactor = 0.5f;
@@ -55,6 +57,16 @@ void M17ModSettings::resetToDefaults()
     m_reverseAPIChannelIndex = 0;
     m_workspaceIndex = 0;
     m_hidden = false;
+    m_sourceCall = "";
+    m_destCall = "";
+    m_insertPosition = false;
+    m_can = 10;
+    m_smsText = "";
+    m_aprsCallsign = "MYCALL";
+    m_aprsTo = "APRS";
+    m_aprsVia = "WIDE2-2";
+    m_aprsData = ">Using SDRangel";
+    m_aprsInsertPosition = 0;
 }
 
 QByteArray M17ModSettings::serialize() const
@@ -67,13 +79,15 @@ QByteArray M17ModSettings::serialize() const
     s.writeU32(5, m_rgbColor);
     s.writeReal(6, m_toneFrequency);
     s.writeReal(7, m_volumeFactor);
+    s.writeS32(8, (int) m_m17Mode);
+    s.writeS32(9, (int) m_audioType);
+    s.writeS32(10, (int) m_packetType);
 
     if (m_channelMarker) {
         s.writeBlob(11, m_channelMarker->serialize());
     }
 
     s.writeString(12, m_title);
-    s.writeS32(13, (int) m_modAFInput);
     s.writeString(14, m_audioDeviceName);
     s.writeBool(15, m_useReverseAPI);
     s.writeString(16, m_reverseAPIAddress);
@@ -92,6 +106,19 @@ QByteArray M17ModSettings::serialize() const
     s.writeS32(28, m_workspaceIndex);
     s.writeBlob(29, m_geometryBytes);
     s.writeBool(30, m_hidden);
+
+    s.writeString(40, m_sourceCall);
+    s.writeString(41, m_destCall);
+    s.writeBool(42, m_insertPosition);
+    s.writeU32(43, m_can);
+
+    s.writeString(50, m_smsText);
+
+    s.writeString(60, m_aprsCallsign);
+    s.writeString(61, m_aprsTo);
+    s.writeString(62, m_aprsVia);
+    s.writeString(63, m_aprsData);
+    s.writeBool(64, m_aprsInsertPosition);
 
     return s.final();
 }
@@ -119,7 +146,13 @@ bool M17ModSettings::deserialize(const QByteArray& data)
         d.readU32(5, &m_rgbColor);
         d.readReal(6, &m_toneFrequency, 1000.0);
         d.readReal(7, &m_volumeFactor, 1.0);
-        d.readBlob(8, &bytetmp);
+        d.readS32(8, &tmp, 0);
+        m_m17Mode = tmp < 0 ? M17ModeNone : tmp > (int) M17ModeM17BERT ? M17ModeM17BERT : (M17Mode) tmp;
+        d.readS32(9, &tmp, 0);
+        m_audioType = tmp < 0 ? AudioNone : tmp > (int) AudioInput ? AudioInput : (AudioType) tmp;
+        m_packetType = tmp < 0 ? PacketNone : tmp > (int) PacketSMS ? PacketSMS : (PacketType) tmp;
+
+        d.readBlob(11, &bytetmp);
 
         if (m_channelMarker)
         {
@@ -128,13 +161,6 @@ bool M17ModSettings::deserialize(const QByteArray& data)
         }
 
         d.readString(12, &m_title, "M17 Modulator");
-
-        d.readS32(13, &tmp, 0);
-        if ((tmp < 0) || (tmp > (int) M17ModInputAF::M17ModInputTone)) {
-            m_modAFInput = M17ModInputNone;
-        } else {
-            m_modAFInput = (M17ModInputAF) tmp;
-        }
 
         d.readString(14, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
         d.readBool(15, &m_useReverseAPI, false);
@@ -166,6 +192,20 @@ bool M17ModSettings::deserialize(const QByteArray& data)
         d.readS32(28, &m_workspaceIndex, 0);
         d.readBlob(29, &m_geometryBytes);
         d.readBool(30, &m_hidden, false);
+
+        d.readString(40, &m_sourceCall, "");
+        d.readString(41, &m_destCall, "");
+        d.readBool(42, &m_insertPosition, false);
+        d.readU32(43, &utmp);
+        m_can = utmp < 255 ? utmp : 255;
+
+        d.readString(50, &m_smsText, "");
+
+        d.readString(60, &m_aprsCallsign, "MYCALL");
+        d.readString(61, &m_aprsTo, "");
+        d.readString(62, &m_aprsVia, "");
+        d.readString(63, &m_aprsData, "");
+        d.readBool(64, &m_aprsInsertPosition, false);
 
         return true;
     }

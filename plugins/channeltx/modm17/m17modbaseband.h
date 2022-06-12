@@ -70,6 +70,7 @@ public:
     AudioFifo *getAudioFifo() { return m_source.getAudioFifo(); }
     AudioFifo *getFeedbackAudioFifo() { return m_source.getFeedbackAudioFifo(); }
     void setChannel(ChannelAPI *channel);
+    void sendPacket() { m_source.sendPacket(); }
 
 signals:
 	/**

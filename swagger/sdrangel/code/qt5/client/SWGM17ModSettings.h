@@ -74,8 +74,14 @@ public:
     QString* getAudioDeviceName();
     void setAudioDeviceName(QString* audio_device_name);
 
-    qint32 getModAfInput();
-    void setModAfInput(qint32 mod_af_input);
+    qint32 getM17Mode();
+    void setM17Mode(qint32 m17_mode);
+
+    qint32 getAudioType();
+    void setAudioType(qint32 audio_type);
+
+    qint32 getPacketType();
+    void setPacketType(qint32 packet_type);
 
     qint32 getStreamIndex();
     void setStreamIndex(qint32 stream_index);
@@ -135,8 +141,14 @@ private:
     QString* audio_device_name;
     bool m_audio_device_name_isSet;
 
-    qint32 mod_af_input;
-    bool m_mod_af_input_isSet;
+    qint32 m17_mode;
+    bool m_m17_mode_isSet;
+
+    qint32 audio_type;
+    bool m_audio_type_isSet;
+
+    qint32 packet_type;
+    bool m_packet_type_isSet;
 
     qint32 stream_index;
     bool m_stream_index_isSet;

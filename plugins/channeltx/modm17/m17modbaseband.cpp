@@ -196,12 +196,12 @@ void M17ModBaseband::applySettings(const M17ModSettings& settings, bool force)
         }
     }
 
-    if ((settings.m_modAFInput != m_settings.m_modAFInput) || force)
+    if ((settings.m_audioType != m_settings.m_audioType) || force)
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
 
-        if (settings.m_modAFInput == M17ModSettings::M17ModInputAudio) {
+        if (settings.m_audioType == M17ModSettings::AudioInput) {
             audioDeviceManager->addAudioSource(getAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
         } else {
             audioDeviceManager->removeAudioSource(getAudioFifo());

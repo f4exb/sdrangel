@@ -26,8 +26,15 @@ M17ModSettings:
       type: string
     audioDeviceName:
       type: string
-    modAFInput:
+    m17Mode:
       type: integer
+      description: M17Mode
+    audioType:
+      type: integer
+      description: AudioType
+    packetType:
+      type: integer
+      description: PacketType
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer

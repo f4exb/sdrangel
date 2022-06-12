@@ -29,22 +29,28 @@ class M17ModProcessor : public QObject
 {
     Q_OBJECT
 public:
-    class MsgSendPacket : public Message {
+    class MsgSendSMS : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        const QByteArray& getPacket() const { return m_packet; }
+        const QString& getSourceCall() const { return m_sourceCall; }
+        const QString& getDestCall() const { return m_destCall; }
+        const QString& getSMSText() const { return m_smsText; }
 
-        static MsgSendPacket* create(const QByteArray& packet) {
-            return new MsgSendPacket(packet);
+        static MsgSendSMS* create(const QString& sourceCall, const QString& destCall, const QString& smsText) {
+            return new MsgSendSMS(sourceCall, destCall, smsText);
         }
 
     private:
-        QByteArray m_packet;
+        QString m_sourceCall;
+        QString m_destCall;
+        QString m_smsText;
 
-        MsgSendPacket(const QByteArray& bytes) :
+        MsgSendSMS(const QString& sourceCall, const QString& destCall, const QString& smsText) :
             Message(),
-            m_packet(bytes)
+            m_sourceCall(sourceCall),
+            m_destCall(destCall),
+            m_smsText(smsText)
         { }
     };
 
@@ -59,6 +65,7 @@ private:
     AudioFifo m_basebandFifo; //!< Samples are 16 bit integer baseband 48 kS/s samples
 
     bool handleMessage(const Message& cmd);
+    void processPacket(const QString& sourceCall, const QString& destCall, const QByteArray& packetBytes);
 
 private slots:
     void handleInputMessages();

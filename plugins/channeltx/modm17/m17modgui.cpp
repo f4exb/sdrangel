@@ -182,6 +182,22 @@ void M17ModGUI::on_toneFrequency_valueChanged(int value)
     applySettings();
 }
 
+void M17ModGUI::on_fmAudio_toggled(bool checked)
+{
+    m_fmAudioMode = checked;
+
+    if ((checked) && (m_settings.m_m17Mode == M17ModSettings::M17Mode::M17ModeM17Audio))
+    {
+        m_settings.m_m17Mode = M17ModSettings::M17Mode::M17ModeFMAudio;
+        applySettings();
+    }
+    else if ((!checked) && (m_settings.m_m17Mode == M17ModSettings::M17Mode::M17ModeFMAudio))
+    {
+        m_settings.m_m17Mode = M17ModSettings::M17Mode::M17ModeM17Audio;
+        applySettings();
+    }
+}
+
 void M17ModGUI::on_channelMute_toggled(bool checked)
 {
     m_settings.m_channelMute = checked;
@@ -196,9 +212,13 @@ void M17ModGUI::on_playLoop_toggled(bool checked)
 
 void M17ModGUI::on_play_toggled(bool checked)
 {
-    ui->tone->setEnabled(!checked); // release other source inputs
-    ui->mic->setEnabled(!checked);
-    m_settings.m_modAFInput = checked ? M17ModSettings::M17ModInputFile : M17ModSettings::M17ModInputNone;
+    m_settings.m_audioType = checked ? M17ModSettings::AudioFile : M17ModSettings::AudioNone;
+    m_settings.m_m17Mode = checked ?
+        m_fmAudioMode ?
+            M17ModSettings::M17Mode::M17ModeFMAudio
+            : M17ModSettings::M17Mode::M17ModeM17Audio
+        : M17ModSettings::M17ModeNone;
+    displayModes();
     applySettings();
     ui->navTimeSlider->setEnabled(!checked);
     m_enableNavTime = !checked;
@@ -206,17 +226,20 @@ void M17ModGUI::on_play_toggled(bool checked)
 
 void M17ModGUI::on_tone_toggled(bool checked)
 {
-    ui->play->setEnabled(!checked); // release other source inputs
-    ui->mic->setEnabled(!checked);
-    m_settings.m_modAFInput = checked ? M17ModSettings::M17ModInputTone : M17ModSettings::M17ModInputNone;
+    m_settings.m_m17Mode = checked ? M17ModSettings::M17ModeFMTone : M17ModSettings::M17ModeNone;
+    displayModes();
     applySettings();
 }
 
 void M17ModGUI::on_mic_toggled(bool checked)
 {
-    ui->play->setEnabled(!checked); // release other source inputs
-    ui->tone->setEnabled(!checked); // release other source inputs
-    m_settings.m_modAFInput = checked ? M17ModSettings::M17ModInputAudio : M17ModSettings::M17ModInputNone;
+    m_settings.m_audioType = checked ? M17ModSettings::AudioInput : M17ModSettings::AudioNone;
+    m_settings.m_m17Mode = checked ?
+        m_fmAudioMode ?
+            M17ModSettings::M17Mode::M17ModeFMAudio
+            : M17ModSettings::M17Mode::M17ModeM17Audio
+        : M17ModSettings::M17ModeNone;
+    displayModes();
     applySettings();
 }
 
@@ -259,6 +282,66 @@ void M17ModGUI::on_showFileDialog_clicked(bool checked)
         ui->play->setEnabled(true);
         configureFileName();
     }
+}
+
+void M17ModGUI::on_packetMode_toggled(bool checked)
+{
+    m_settings.m_m17Mode = checked ? M17ModSettings::M17ModeM17Packet : M17ModSettings::M17ModeNone;
+    displayModes();
+    applySettings();
+}
+
+void M17ModGUI::on_sendPacket_clicked(bool)
+{
+    m_m17Mod->sendPacket();
+}
+
+void M17ModGUI::on_loopPacket_toggled(bool checked)
+{
+    (void) checked;
+    // TODO
+}
+
+void M17ModGUI::on_loopPacketInterval_valueChanged(int value)
+{
+    (void) value;
+    // TODO
+}
+
+void M17ModGUI::on_packetDataWidget_currentChanged(int index)
+{
+    m_settings.m_packetType = indexToPacketType(index);
+    applySettings();
+}
+
+void M17ModGUI::on_source_editingFinished()
+{
+    m_settings.m_sourceCall = ui->source->text();
+    applySettings();
+}
+
+void M17ModGUI::on_destination_editingFinished()
+{
+    m_settings.m_destCall = ui->destination->text();
+    applySettings();
+}
+
+void M17ModGUI::on_insertPosition_toggled(bool checked)
+{
+    m_settings.m_insertPosition = checked;
+    applySettings();
+}
+
+void M17ModGUI::on_can_valueChanged(int value)
+{
+    m_settings.m_can = value;
+    applySettings();
+}
+
+void M17ModGUI::on_smsText_editingFinished()
+{
+    m_settings.m_smsText = ui->smsText->toPlainText();
+    applySettings();
 }
 
 void M17ModGUI::configureFileName()
@@ -333,6 +416,7 @@ M17ModGUI::M17ModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_deviceCenterFrequency(0),
     m_basebandSampleRate(1),
 	m_doApplySettings(true),
+    m_fmAudioMode(false),
     m_recordLength(0),
     m_recordSampleRate(48000),
     m_samplesCount(0),
@@ -447,21 +531,99 @@ void M17ModGUI::displaySettings()
     ui->channelMute->setChecked(m_settings.m_channelMute);
     ui->playLoop->setChecked(m_settings.m_playLoop);
 
-    ui->tone->setEnabled((m_settings.m_modAFInput == M17ModSettings::M17ModInputAF::M17ModInputTone) || (m_settings.m_modAFInput == M17ModSettings::M17ModInputAF::M17ModInputNone));
-    ui->mic->setEnabled((m_settings.m_modAFInput == M17ModSettings::M17ModInputAF::M17ModInputAudio) || (m_settings.m_modAFInput == M17ModSettings::M17ModInputAF::M17ModInputNone));
-    ui->play->setEnabled((m_settings.m_modAFInput == M17ModSettings::M17ModInputAF::M17ModInputFile) || (m_settings.m_modAFInput == M17ModSettings::M17ModInputAF::M17ModInputNone));
-
-    ui->tone->setChecked(m_settings.m_modAFInput == M17ModSettings::M17ModInputAF::M17ModInputTone);
-    ui->mic->setChecked(m_settings.m_modAFInput == M17ModSettings::M17ModInputAF::M17ModInputAudio);
-    ui->play->setChecked(m_settings.m_modAFInput == M17ModSettings::M17ModInputAF::M17ModInputFile);
+    displayModes();
+    ui->fmAudio->setChecked(m_fmAudioMode);
+    ui->packetDataWidget->setCurrentIndex(packetTypeToIndex(m_settings.m_packetType));
 
     ui->feedbackEnable->setChecked(m_settings.m_feedbackAudioEnable);
     ui->feedbackVolume->setValue(roundf(m_settings.m_feedbackVolumeFactor * 100.0));
     ui->feedbackVolumeText->setText(QString("%1").arg(m_settings.m_feedbackVolumeFactor, 0, 'f', 2));
 
+    ui->source->setText(m_settings.m_sourceCall);
+    ui->destination->setText(m_settings.m_destCall);
+    ui->insertPosition->setChecked(m_settings.m_insertPosition);
+    ui->can->setValue(m_settings.m_can);
+
+    ui->smsText->setText(m_settings.m_smsText);
+
+    ui->aprsFromText->setText(m_settings.m_aprsCallsign);
+    ui->aprsData->setText(m_settings.m_aprsData);
+    ui->aprsTo->lineEdit()->setText(m_settings.m_aprsTo);
+    ui->aprsVia->lineEdit()->setText(m_settings.m_aprsVia);
+
     getRollupContents()->restoreState(m_rollupState);
     updateAbsoluteCenterFrequency();
     blockApplySettings(false);
+}
+
+void M17ModGUI::displayModes()
+{
+    qDebug("M17ModGUI::displayModes: m_m17Mode: %d m_audioType: %d",
+        (int) m_settings.m_m17Mode, (int) m_settings.m_audioType);
+
+    if (m_settings.m_m17Mode ==  M17ModSettings::M17Mode::M17ModeM17Packet)
+    {
+        ui->packetMode->setChecked(true);
+        ui->packetMode->setEnabled(true);
+        ui->tone->setChecked(false);
+        ui->mic->setChecked(false);
+        ui->play->setChecked(false);
+        ui->tone->setEnabled(false);
+        ui->mic->setEnabled(false);
+        ui->play->setEnabled(false);
+    }
+    else if (m_settings.m_m17Mode ==  M17ModSettings::M17Mode::M17ModeFMTone)
+    {
+        ui->tone->setChecked(true);
+        ui->tone->setEnabled(true);
+        ui->packetMode->setChecked(false);
+        ui->mic->setChecked(false);
+        ui->play->setChecked(false);
+        ui->packetMode->setEnabled(false);
+        ui->mic->setEnabled(false);
+        ui->play->setEnabled(false);
+    }
+    else if ((m_settings.m_m17Mode ==  M17ModSettings::M17Mode::M17ModeFMAudio) ||
+        (m_settings.m_m17Mode ==  M17ModSettings::M17Mode::M17ModeM17Audio))
+    {
+        ui->tone->setChecked(false);
+        ui->packetMode->setChecked(false);
+        ui->tone->setEnabled(false);
+        ui->packetMode->setEnabled(false);
+
+        if (m_settings.m_audioType == M17ModSettings::AudioType::AudioInput)
+        {
+            ui->mic->setChecked(true);
+            ui->mic->setEnabled(true);
+            ui->play->setChecked(false);
+            ui->play->setEnabled(false);
+        }
+        else if (m_settings.m_audioType == M17ModSettings::AudioType::AudioFile)
+        {
+            ui->play->setChecked(true);
+            ui->play->setEnabled(true);
+            ui->mic->setChecked(false);
+            ui->mic->setEnabled(false);
+        }
+        else if (m_settings.m_audioType == M17ModSettings::AudioType::AudioNone)
+        {
+            ui->mic->setChecked(false);
+            ui->play->setChecked(false);
+            ui->mic->setEnabled(true);
+            ui->play->setEnabled(true);
+        }
+    }
+    else if (m_settings.m_m17Mode == M17ModSettings::M17Mode::M17ModeNone)
+    {
+        ui->packetMode->setChecked(false);
+        ui->tone->setChecked(false);
+        ui->mic->setChecked(false);
+        ui->play->setChecked(false);
+        ui->packetMode->setEnabled(true);
+        ui->tone->setEnabled(true);
+        ui->mic->setEnabled(true);
+        ui->play->setEnabled(true);
+    }
 }
 
 void M17ModGUI::leaveEvent(QEvent* event)
@@ -534,7 +696,7 @@ void M17ModGUI::tick()
         m_feedbackAudioSampleRate = feedbackAudioSampleRate;
     }
 
-    if (((++m_tickCount & 0xf) == 0) && (m_settings.m_modAFInput == M17ModSettings::M17ModInputFile))
+    if (((++m_tickCount & 0xf) == 0) && (m_settings.m_audioType == M17ModSettings::AudioFile))
     {
         M17Mod::MsgConfigureFileSourceStreamTiming* message = M17Mod::MsgConfigureFileSourceStreamTiming::create();
         m_m17Mod->getInputMessageQueue()->push(message);
@@ -591,9 +753,41 @@ void M17ModGUI::makeUIConnections()
     QObject::connect(ui->showFileDialog, &QPushButton::clicked, this, &M17ModGUI::on_showFileDialog_clicked);
     QObject::connect(ui->feedbackEnable, &QToolButton::toggled, this, &M17ModGUI::on_feedbackEnable_toggled);
     QObject::connect(ui->feedbackVolume, &QDial::valueChanged, this, &M17ModGUI::on_feedbackVolume_valueChanged);
+    QObject::connect(ui->fmAudio, &ButtonSwitch::toggled, this, &M17ModGUI::on_fmAudio_toggled);
+    QObject::connect(ui->packetMode, &ButtonSwitch::toggled, this, &M17ModGUI::on_packetMode_toggled);
+    QObject::connect(ui->sendPacket, &QPushButton::clicked, this, &M17ModGUI::on_sendPacket_clicked);
+    QObject::connect(ui->loopPacket, &ButtonSwitch::toggled, this, &M17ModGUI::on_loopPacket_toggled);
+    QObject::connect(ui->loopPacketInterval, &QDial::valueChanged, this, &M17ModGUI::on_loopPacketInterval_valueChanged);
+    QObject::connect(ui->smsText, &CustomTextEdit::editingFinished, this, &M17ModGUI::on_smsText_editingFinished);
 }
 
 void M17ModGUI::updateAbsoluteCenterFrequency()
 {
     setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
+}
+
+M17ModSettings::PacketType M17ModGUI::indexToPacketType(int index)
+{
+    switch(index)
+    {
+        case 0:
+            return M17ModSettings::PacketType::PacketSMS;
+        case 1:
+            return M17ModSettings::PacketType::PacketAPRS;
+        default:
+            return M17ModSettings::PacketType::PacketNone;
+    }
+}
+
+int M17ModGUI::packetTypeToIndex(M17ModSettings::PacketType type)
+{
+    switch(type)
+    {
+        case M17ModSettings::PacketType::PacketSMS:
+            return 0;
+        case M17ModSettings::PacketType::PacketAPRS:
+            return 1;
+        default:
+            return -1;
+    }
 }

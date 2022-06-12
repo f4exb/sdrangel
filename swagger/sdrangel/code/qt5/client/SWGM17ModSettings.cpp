@@ -48,8 +48,12 @@ SWGM17ModSettings::SWGM17ModSettings() {
     m_title_isSet = false;
     audio_device_name = nullptr;
     m_audio_device_name_isSet = false;
-    mod_af_input = 0;
-    m_mod_af_input_isSet = false;
+    m17_mode = 0;
+    m_m17_mode_isSet = false;
+    audio_type = 0;
+    m_audio_type_isSet = false;
+    packet_type = 0;
+    m_packet_type_isSet = false;
     stream_index = 0;
     m_stream_index_isSet = false;
     use_reverse_api = 0;
@@ -94,8 +98,12 @@ SWGM17ModSettings::init() {
     m_title_isSet = false;
     audio_device_name = new QString("");
     m_audio_device_name_isSet = false;
-    mod_af_input = 0;
-    m_mod_af_input_isSet = false;
+    m17_mode = 0;
+    m_m17_mode_isSet = false;
+    audio_type = 0;
+    m_audio_type_isSet = false;
+    packet_type = 0;
+    m_packet_type_isSet = false;
     stream_index = 0;
     m_stream_index_isSet = false;
     use_reverse_api = 0;
@@ -130,6 +138,8 @@ SWGM17ModSettings::cleanup() {
     if(audio_device_name != nullptr) { 
         delete audio_device_name;
     }
+
+
 
 
 
@@ -178,7 +188,11 @@ SWGM17ModSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&audio_device_name, pJson["audioDeviceName"], "QString", "QString");
     
-    ::SWGSDRangel::setValue(&mod_af_input, pJson["modAFInput"], "qint32", "");
+    ::SWGSDRangel::setValue(&m17_mode, pJson["m17Mode"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&audio_type, pJson["audioType"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&packet_type, pJson["packetType"], "qint32", "");
     
     ::SWGSDRangel::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
     
@@ -242,8 +256,14 @@ SWGM17ModSettings::asJsonObject() {
     if(audio_device_name != nullptr && *audio_device_name != QString("")){
         toJsonValue(QString("audioDeviceName"), audio_device_name, obj, QString("QString"));
     }
-    if(m_mod_af_input_isSet){
-        obj->insert("modAFInput", QJsonValue(mod_af_input));
+    if(m_m17_mode_isSet){
+        obj->insert("m17Mode", QJsonValue(m17_mode));
+    }
+    if(m_audio_type_isSet){
+        obj->insert("audioType", QJsonValue(audio_type));
+    }
+    if(m_packet_type_isSet){
+        obj->insert("packetType", QJsonValue(packet_type));
     }
     if(m_stream_index_isSet){
         obj->insert("streamIndex", QJsonValue(stream_index));
@@ -374,13 +394,33 @@ SWGM17ModSettings::setAudioDeviceName(QString* audio_device_name) {
 }
 
 qint32
-SWGM17ModSettings::getModAfInput() {
-    return mod_af_input;
+SWGM17ModSettings::getM17Mode() {
+    return m17_mode;
 }
 void
-SWGM17ModSettings::setModAfInput(qint32 mod_af_input) {
-    this->mod_af_input = mod_af_input;
-    this->m_mod_af_input_isSet = true;
+SWGM17ModSettings::setM17Mode(qint32 m17_mode) {
+    this->m17_mode = m17_mode;
+    this->m_m17_mode_isSet = true;
+}
+
+qint32
+SWGM17ModSettings::getAudioType() {
+    return audio_type;
+}
+void
+SWGM17ModSettings::setAudioType(qint32 audio_type) {
+    this->audio_type = audio_type;
+    this->m_audio_type_isSet = true;
+}
+
+qint32
+SWGM17ModSettings::getPacketType() {
+    return packet_type;
+}
+void
+SWGM17ModSettings::setPacketType(qint32 packet_type) {
+    this->packet_type = packet_type;
+    this->m_packet_type_isSet = true;
 }
 
 qint32
@@ -498,7 +538,13 @@ SWGM17ModSettings::isSet(){
         if(audio_device_name && *audio_device_name != QString("")){
             isObjectUpdated = true; break;
         }
-        if(m_mod_af_input_isSet){
+        if(m_m17_mode_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_audio_type_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_packet_type_isSet){
             isObjectUpdated = true; break;
         }
         if(m_stream_index_isSet){

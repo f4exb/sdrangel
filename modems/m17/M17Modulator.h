@@ -39,6 +39,7 @@ public:
     using codec_frame_t = std::array<uint8_t, 16>;
     using payload_t = std::array<uint8_t, 34>;      // Bytes in the payload of a data frame.
     using frame_t = std::array<uint8_t, 46>;        // M17 frame (without sync word).
+    using packet_t = std::array<uint8_t, 25>;       // Packet payload
 
     static constexpr std::array<uint8_t, 2> SYNC_WORD = {0x32, 0x43};
     static constexpr std::array<uint8_t, 2> LSF_SYNC_WORD = {0x55, 0xF7};
@@ -55,6 +56,31 @@ public:
         }
 
         return 0;
+    }
+
+    template <typename T, size_t N>
+    static std::array<int8_t, N * 4> bytes_to_symbols(const std::array<T, N>& bytes)
+    {
+        std::array<int8_t, N * 4> result;
+        size_t index = 0;
+
+        for (auto b : bytes)
+        {
+            for (size_t i = 0; i != 4; ++i)
+            {
+                result[index++] = bits_to_symbol(b >> 6);
+                b <<= 2;
+            }
+        }
+
+        return result;
+    }
+
+    static
+    void make_preamble(std::array<uint8_t, 48>& preamble_bytes)
+    {
+        // Preamble is simple... bytes -> symbols.
+        preamble_bytes.fill(0x77);
     }
 
     /**
@@ -109,7 +135,7 @@ public:
     /**
      * Construct the link setup frame and split into LICH segments.
      */
-    void make_link_setup(lich_t& lich, mobilinkd::M17Modulator::frame_t lsf)
+    void make_link_setup(lich_t& lich, mobilinkd::M17Modulator::frame_t lsf_frame)
     {
         using namespace mobilinkd;
 
@@ -141,12 +167,14 @@ public:
         }
 
         auto encoded = conv_encode(lsf);
+        auto size = puncture_bytes(encoded, lsf_frame, P1);
 
-        auto size = puncture_bytes(encoded, lsf, P1);
-        assert(size == 368);
+        if (size != 368) {
+            std::cerr << "make_link_setup: incorrect size (not 368)" << size;
+        }
 
-        interleaver_.interleave(lsf);
-        randomizer_(lsf);
+        interleaver_.interleave(lsf_frame);
+        randomizer_(lsf_frame);
     }
 
     /**
@@ -168,7 +196,7 @@ public:
      * Assemble the audio frame payload by appending the frame number, encoded audio,
      * and CRC, then convolutionally coding and puncturing the data.
      */
-    payload_t make_payload(uint16_t frame_number, const codec_frame_t& payload)
+    payload_t make_audio_payload(uint16_t frame_number, const codec_frame_t& payload)
     {
         std::array<uint8_t, 20> data;   // FN, Audio, CRC = 2 + 16 + 2;
         data[0] = uint8_t((frame_number >> 8) & 0xFF);
@@ -188,7 +216,47 @@ public:
 
         payload_t punctured;
         auto size = puncture_bytes(encoded, punctured, mobilinkd::P2);
-        assert(size == 272);
+
+        if (size != 272) {
+            std::cerr << "mobilinkd::M17Modulator::make_audio_payload: incorrect size (not 272)" << size;
+        }
+
+        return punctured;
+    }
+
+    frame_t make_packet_frame(uint8_t packet_number, bool last_packet, packet_t packet, int packet_size)
+    {
+        std::array<uint8_t, 26> packet_assembly;
+        packet_assembly.fill(0);
+        std::copy(packet.begin(), packet.begin() + packet_size, packet_assembly.begin());
+
+        if (packet_number == 0) {
+            crc_.reset();
+        }
+
+        for (int i = 0; i < packet_size; i++) {
+            crc_(packet[i]);
+        }
+
+        if (last_packet)
+        {
+            packet_assembly[25] = 0x80 | (packet_size<<2);
+            packet_assembly[packet_size]   = crc_.get_bytes()[1];
+            packet_assembly[packet_size+1] = crc_.get_bytes()[0];
+        }
+        else
+        {
+            packet_assembly[25] = (packet_number<<2);
+        }
+
+        std::array<uint8_t, 2*26+1> encoded = conv_encode(packet_assembly);
+        frame_t punctured;
+        auto size = puncture_bytes(encoded, punctured, mobilinkd::P3);
+
+        if (size != 368) {
+            std::cerr << "mobilinkd::M17Modulator::make_packet_frame: incorrect size (not 368)" << size;
+        }
+
         return punctured;
     }
 
@@ -278,24 +346,6 @@ private:
         std::copy(callsign.begin(), callsign.end(), call.begin());
         encoded_call = LinkSetupFrame::encode_callsign(call);
         return encoded_call;
-    }
-
-    template <typename T, size_t N>
-    static std::array<int8_t, N * 4> bytes_to_symbols(const std::array<T, N>& bytes)
-    {
-        std::array<int8_t, N * 4> result;
-        size_t index = 0;
-
-        for (auto b : bytes)
-        {
-            for (size_t i = 0; i != 4; ++i)
-            {
-                result[index++] = bits_to_symbol(b >> 6);
-                b <<= 2;
-            }
-        }
-
-        return result;
     }
 
     template <typename T, size_t N>

@@ -233,6 +233,7 @@ public:
     uint32_t getNumberOfDeviceStreams() const;
     int getAudioSampleRate() const;
     int getFeedbackAudioSampleRate() const;
+    void sendPacket();
 
     static const char* const m_channelIdURI;
     static const char* const m_channelId;

@@ -76,6 +76,7 @@ private:
     qint64 m_deviceCenterFrequency;
     int m_basebandSampleRate;
     bool m_doApplySettings;
+    bool m_fmAudioMode;
 
     M17Mod* m_m17Mod;
     MovingAverageUtil<double, double, 20> m_channelPowerDbAvg;
@@ -88,7 +89,6 @@ private:
     int m_feedbackAudioSampleRate;
     std::size_t m_tickCount;
     bool m_enableNavTime;
-    M17ModSettings::M17ModInputAF m_modAFInput;
     MessageQueue m_inputMessageQueue;
     QRegExpValidator m_dcsCodeValidator;
 
@@ -98,11 +98,14 @@ private:
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
     void displaySettings();
+    void displayModes();
     void updateWithStreamData();
     void updateWithStreamTime();
     bool handleMessage(const Message& message);
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();
+    M17ModSettings::PacketType indexToPacketType(int index);
+    int packetTypeToIndex(M17ModSettings::PacketType type);
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);
@@ -115,6 +118,7 @@ private slots:
     void on_rfBW_valueChanged(int value);
     void on_fmDev_valueChanged(int value);
     void on_toneFrequency_valueChanged(int value);
+    void on_fmAudio_toggled(bool checked);
     void on_volume_valueChanged(int value);
     void on_channelMute_toggled(bool checked);
     void on_tone_toggled(bool checked);
@@ -127,6 +131,17 @@ private slots:
 
     void on_feedbackEnable_toggled(bool checked);
     void on_feedbackVolume_valueChanged(int value);
+
+    void on_packetMode_toggled(bool checked);
+    void on_sendPacket_clicked(bool checked);
+    void on_loopPacket_toggled(bool checked);
+    void on_loopPacketInterval_valueChanged(int value);
+    void on_packetDataWidget_currentChanged(int index);
+    void on_source_editingFinished();
+    void on_destination_editingFinished();
+    void on_insertPosition_toggled(bool checked);
+    void on_can_valueChanged(int value);
+    void on_smsText_editingFinished();
 
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);

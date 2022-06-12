@@ -26,12 +26,28 @@ class Serializable;
 
 struct M17ModSettings
 {
-    enum M17ModInputAF
+    enum M17Mode
     {
-        M17ModInputNone,
-        M17ModInputFile,
-        M17ModInputAudio,
-        M17ModInputTone
+        M17ModeNone,
+        M17ModeFMTone,
+        M17ModeFMAudio,
+        M17ModeM17Audio,
+        M17ModeM17Packet,
+        M17ModeM17BERT
+    };
+
+    enum AudioType
+    {
+        AudioNone,
+        AudioFile,
+        AudioInput
+    };
+
+    enum PacketType
+    {
+        PacketNone,
+        PacketSMS,
+        PacketAPRS
     };
 
     qint64 m_inputFrequencyOffset;
@@ -43,7 +59,9 @@ struct M17ModSettings
     bool m_playLoop;
     quint32 m_rgbColor;
     QString m_title;
-    M17ModInputAF m_modAFInput;
+    M17Mode m_m17Mode;
+    AudioType m_audioType;
+    PacketType m_packetType;
     QString m_audioDeviceName;         //!< This is the audio device you get the audio samples from
     QString m_feedbackAudioDeviceName; //!< This is the audio device you send the audio samples to for audio feedback
     float m_feedbackVolumeFactor;
@@ -57,6 +75,19 @@ struct M17ModSettings
     int m_workspaceIndex;
     QByteArray m_geometryBytes;
     bool m_hidden;
+
+    QString m_sourceCall;
+    QString m_destCall;
+    bool m_insertPosition;
+    uint8_t m_can;
+
+    QString m_smsText;
+
+    QString m_aprsCallsign;
+    QString m_aprsTo;
+    QString m_aprsVia;
+    QString m_aprsData;
+    bool m_aprsInsertPosition;
 
     Serializable *m_channelMarker;
     Serializable *m_rollupState;

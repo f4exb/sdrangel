@@ -21,6 +21,7 @@
 #include "util/messagequeue.h"
 #include "maincore.h"
 
+#include "m17modprocessor.h"
 #include "m17modsource.h"
 
 const int M17ModSource::m_levelNbSamples = 480; // every 10ms
@@ -53,12 +54,15 @@ M17ModSource::M17ModSource() :
 
 	m_magsq = 0.0;
 
+    m_processor = new M17ModProcessor();
+
     applySettings(m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 }
 
 M17ModSource::~M17ModSource()
 {
+    delete m_processor;
 }
 
 void M17ModSource::pull(SampleVector::iterator begin, unsigned int nbSamples)
@@ -140,25 +144,40 @@ void M17ModSource::pullAudio(unsigned int nbSamplesAudio)
 void M17ModSource::modulateSample()
 {
 	Real t1, t;
+    bool carrier;
 
-    pullAF(t);
+    if ((m_settings.m_m17Mode == M17ModSettings::M17ModeFMTone) || (m_settings.m_m17Mode == M17ModSettings::M17ModeFMAudio)) {
+        pullAF(t, carrier);
+    } else if (m_settings.m_m17Mode != M17ModSettings::M17ModeNone) {
+        pullM17(t, carrier);
+    } else {
+        t = 0;
+    }
 
     if (m_settings.m_feedbackAudioEnable) {
         pushFeedback(t * m_settings.m_feedbackVolumeFactor * 16384.0f);
     }
 
-    calculateLevel(t);
-    t1 = m_lowpass.filter(t) * 1.2f;
+    if (carrier)
+    {
+        calculateLevel(t);
+        t1 = m_lowpass.filter(t) * 1.2f;
 
-    m_modPhasor += (m_settings.m_fmDeviation / (float) m_audioSampleRate) * t1;
+        m_modPhasor += (m_settings.m_fmDeviation / (float) m_audioSampleRate) * t1;
 
-    // limit phasor range to ]-pi,pi]
-    if (m_modPhasor > M_PI) {
-        m_modPhasor -= (2.0f * M_PI);
+        // limit phasor range to ]-pi,pi]
+        if (m_modPhasor > M_PI) {
+            m_modPhasor -= (2.0f * M_PI);
+        }
+
+        m_modSample.real(cos(m_modPhasor) * 0.891235351562f * SDR_TX_SCALEF); // -1 dB
+        m_modSample.imag(sin(m_modPhasor) * 0.891235351562f * SDR_TX_SCALEF);
     }
-
-    m_modSample.real(cos(m_modPhasor) * 0.891235351562f * SDR_TX_SCALEF); // -1 dB
-    m_modSample.imag(sin(m_modPhasor) * 0.891235351562f * SDR_TX_SCALEF);
+    else
+    {
+        m_modSample.real(0.0f);
+        m_modSample.imag(0.0f);
+    }
 
     m_demodBuffer[m_demodBufferFill] = t1 * std::numeric_limits<int16_t>::max();
     ++m_demodBufferFill;
@@ -186,61 +205,72 @@ void M17ModSource::modulateSample()
     }
 }
 
-void M17ModSource::pullAF(Real& sample)
+void M17ModSource::pullAF(Real& sample, bool& carrier)
 {
-    switch (m_settings.m_modAFInput)
-    {
-    case M17ModSettings::M17ModInputTone:
-        sample = m_toneNco.next();
-        break;
-    case M17ModSettings::M17ModInputFile:
-        // sox f4exb_call.wav --encoding float --endian little f4exb_call.raw
-        // ffplay -f f32le -ar 48k -ac 1 f4exb_call.raw
-        if (m_ifstream && m_ifstream->is_open())
-        {
-            if (m_ifstream->eof())
-            {
-            	if (m_settings.m_playLoop)
-            	{
-                    m_ifstream->clear();
-                    m_ifstream->seekg(0, std::ios::beg);
-            	}
-            }
+    carrier = true;
 
-            if (m_ifstream->eof())
+    if (m_settings.m_m17Mode == M17ModSettings::M17ModeFMTone)
+    {
+        sample = m_toneNco.next();
+    }
+    else if (m_settings.m_m17Mode == M17ModSettings::M17ModeFMAudio)
+    {
+        if (m_settings.m_audioType == M17ModSettings::AudioFile)
+        {
+            // sox f4exb_call.wav --encoding float --endian little f4exb_call.raw
+            // ffplay -f f32le -ar 48k -ac 1 f4exb_call.raw
+            if (m_ifstream && m_ifstream->is_open())
             {
-            	sample = 0.0f;
+                if (m_ifstream->eof())
+                {
+                    if (m_settings.m_playLoop)
+                    {
+                        m_ifstream->clear();
+                        m_ifstream->seekg(0, std::ios::beg);
+                    }
+                }
+
+                if (m_ifstream->eof())
+                {
+                    sample = 0.0f;
+                }
+                else
+                {
+                    m_ifstream->read(reinterpret_cast<char*>(&sample), sizeof(Real));
+                    sample *= m_settings.m_volumeFactor;
+                }
             }
             else
             {
-            	m_ifstream->read(reinterpret_cast<char*>(&sample), sizeof(Real));
-            	sample *= m_settings.m_volumeFactor;
+                sample = 0.0f;
+            }
+        }
+        else if (m_settings.m_audioType == M17ModSettings::AudioInput)
+        {
+            if (m_audioBufferFill < m_audioBuffer.size())
+            {
+                sample = ((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r) / 65536.0f) * m_settings.m_volumeFactor;
+                m_audioBufferFill++;
+            }
+            else
+            {
+                unsigned int size = m_audioBuffer.size();
+                qDebug("NFMModSource::pullAF: starve audio samples: size: %u", size);
+                sample = ((m_audioBuffer[size-1].l + m_audioBuffer[size-1].r) / 65536.0f) * m_settings.m_volumeFactor;
             }
         }
         else
         {
             sample = 0.0f;
         }
-        break;
-    case M17ModSettings::M17ModInputAudio:
-        if (m_audioBufferFill < m_audioBuffer.size())
-        {
-            sample = ((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r) / 65536.0f) * m_settings.m_volumeFactor;
-            m_audioBufferFill++;
-        }
-        else
-        {
-            unsigned int size = m_audioBuffer.size();
-            qDebug("NFMModSource::pullAF: starve audio samples: size: %u", size);
-            sample = ((m_audioBuffer[size-1].l + m_audioBuffer[size-1].r) / 65536.0f) * m_settings.m_volumeFactor;
-        }
-
-        break;
-    case M17ModSettings::M17ModInputNone:
-    default:
-        sample = 0.0f;
-        break;
     }
+}
+
+void M17ModSource::pullM17(Real& sample, bool& carrier)
+{
+    // TODO
+    carrier = false;
+    sample = 0.0f;
 }
 
 void M17ModSource::pushFeedback(Real sample)
@@ -368,9 +398,9 @@ void M17ModSource::applySettings(const M17ModSettings& settings, bool force)
         m_toneNco.setFreq(settings.m_toneFrequency, m_audioSampleRate);
     }
 
-    if ((settings.m_modAFInput != m_settings.m_modAFInput) || force)
+    if ((settings.m_audioType != m_settings.m_audioType) || force)
     {
-        if (settings.m_modAFInput == M17ModSettings::M17ModInputAudio) {
+        if (settings.m_audioType == M17ModSettings::AudioInput) {
             connect(&m_audioFifo, SIGNAL(dataReady()), this, SLOT(handleAudio()));
         } else {
             disconnect(&m_audioFifo, SIGNAL(dataReady()), this, SLOT(handleAudio()));
@@ -414,5 +444,18 @@ void M17ModSource::handleAudio()
         if (m_audioReadBufferFill + nbRead + 4096 < m_audioReadBuffer.size()) {
             m_audioReadBufferFill += nbRead;
         }
+    }
+}
+
+void M17ModSource::sendPacket()
+{
+    if (m_settings.m_packetType == M17ModSettings::PacketType::PacketSMS)
+    {
+        M17ModProcessor::MsgSendSMS *msg = M17ModProcessor::MsgSendSMS::create(
+            m_settings.m_sourceCall,
+            m_settings.m_destCall,
+            m_settings.m_smsText
+        );
+        m_processor->getInputMessageQueue()->push(msg);
     }
 }

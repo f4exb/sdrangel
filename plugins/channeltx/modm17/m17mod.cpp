@@ -294,7 +294,9 @@ void M17Mod::applySettings(const M17ModSettings& settings, bool force)
             << " m_toneFrequency: " << settings.m_toneFrequency
             << " m_channelMute: " << settings.m_channelMute
             << " m_playLoop: " << settings.m_playLoop
-            << " m_modAFInput " << settings.m_modAFInput
+            << " m_m17Mode " << settings.m_m17Mode
+            << " m_audioType " << settings.m_audioType
+            << " m_packetType " << settings.m_packetType
             << " m_audioDeviceName: " << settings.m_audioDeviceName
             << " m_useReverseAPI: " << settings.m_useReverseAPI
             << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
@@ -320,8 +322,14 @@ void M17Mod::applySettings(const M17ModSettings& settings, bool force)
     if ((settings.m_playLoop != m_settings.m_playLoop) || force) {
         reverseAPIKeys.append("playLoop");
     }
-    if ((settings.m_modAFInput != m_settings.m_modAFInput) || force) {
-        reverseAPIKeys.append("modAFInput");
+    if ((settings.m_audioType != m_settings.m_audioType) || force) {
+        reverseAPIKeys.append("audioType");
+    }
+    if ((settings.m_packetType != m_settings.m_packetType) || force) {
+        reverseAPIKeys.append("packetType");
+    }
+    if ((settings.m_m17Mode != m_settings.m_m17Mode) || force) {
+        reverseAPIKeys.append("m17Mode");
     }
     if((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
         reverseAPIKeys.append("rfBandwidth");
@@ -470,8 +478,14 @@ void M17Mod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("inputFrequencyOffset")) {
         settings.m_inputFrequencyOffset = response.getM17ModSettings()->getInputFrequencyOffset();
     }
-    if (channelSettingsKeys.contains("modAFInput")) {
-        settings.m_modAFInput = (M17ModSettings::M17ModInputAF) response.getM17ModSettings()->getModAfInput();
+    if (channelSettingsKeys.contains("m17Mode")) {
+        settings.m_m17Mode = (M17ModSettings::M17Mode) response.getM17ModSettings()->getM17Mode();
+    }
+    if (channelSettingsKeys.contains("audioType")) {
+        settings.m_audioType = (M17ModSettings::AudioType) response.getM17ModSettings()->getAudioType();
+    }
+    if (channelSettingsKeys.contains("packetType")) {
+        settings.m_packetType = (M17ModSettings::PacketType) response.getM17ModSettings()->getPacketType();
     }
     if (channelSettingsKeys.contains("playLoop")) {
         settings.m_playLoop = response.getM17ModSettings()->getPlayLoop() != 0;
@@ -533,7 +547,9 @@ void M17Mod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
     response.getM17ModSettings()->setChannelMute(settings.m_channelMute ? 1 : 0);
     response.getM17ModSettings()->setFmDeviation(settings.m_fmDeviation);
     response.getM17ModSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
-    response.getM17ModSettings()->setModAfInput((int) settings.m_modAFInput);
+    response.getM17ModSettings()->setM17Mode((int) settings.m_m17Mode);
+    response.getM17ModSettings()->setAudioType((int) settings.m_audioType);
+    response.getM17ModSettings()->setPacketType((int) settings.m_packetType);
     response.getM17ModSettings()->setPlayLoop(settings.m_playLoop ? 1 : 0);
     response.getM17ModSettings()->setRfBandwidth(settings.m_rfBandwidth);
     response.getM17ModSettings()->setRgbColor(settings.m_rgbColor);
@@ -673,8 +689,14 @@ void M17Mod::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
         swgM17ModSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     }
-    if (channelSettingsKeys.contains("modAFInput") || force) {
-        swgM17ModSettings->setModAfInput((int) settings.m_modAFInput);
+    if (channelSettingsKeys.contains("m17Mode") || force) {
+        swgM17ModSettings->setM17Mode((int) settings.m_m17Mode);
+    }
+    if (channelSettingsKeys.contains("audioType") || force) {
+        swgM17ModSettings->setAudioType((int) settings.m_audioType);
+    }
+    if (channelSettingsKeys.contains("packetType") || force) {
+        swgM17ModSettings->setPacketType((int) settings.m_packetType);
     }
     if (channelSettingsKeys.contains("audioDeviceName") || force) {
         swgM17ModSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
@@ -763,4 +785,9 @@ int M17Mod::getAudioSampleRate() const
 int M17Mod::getFeedbackAudioSampleRate() const
 {
     return m_basebandSource->getFeedbackAudioSampleRate();
+}
+
+void M17Mod::sendPacket()
+{
+    m_basebandSource->sendPacket();
 }

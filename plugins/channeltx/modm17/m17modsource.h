@@ -37,6 +37,7 @@
 #include "m17modsettings.h"
 
 class ChannelAPI;
+class M17ModProcessor;
 
 class M17ModSource : public QObject, public ChannelSampleSource
 {
@@ -66,6 +67,8 @@ public:
     }
     void applySettings(const M17ModSettings& settings, bool force = false);
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
+
+    void sendPacket();
 
 private:
     int m_channelSampleRate;
@@ -115,6 +118,7 @@ private:
     Real m_levelSum;
 
     std::ifstream *m_ifstream;
+    M17ModProcessor *m_processor;
 
     QMutex m_mutex;
 
@@ -122,7 +126,8 @@ private:
     static const float m_preemphasis;
 
     void processOneSample(Complex& ci);
-    void pullAF(Real& sample);
+    void pullAF(Real& sample, bool& carrier);
+    void pullM17(Real& sample, bool& carrier);
     void pullAudio(unsigned int nbSamples);
     void pushFeedback(Real sample);
     void calculateLevel(Real& sample);
