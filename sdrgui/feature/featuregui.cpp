@@ -211,7 +211,7 @@ void FeatureGUI::leaveEvent(QEvent* event)
 
 void FeatureGUI::activateSettingsDialog()
 {
-    QPoint p = mapFromGlobal(QCursor::pos());
+    QPoint p = QCursor::pos();
     m_contextMenuType = ContextMenuChannelSettings;
     emit customContextMenuRequested(p);
 }
