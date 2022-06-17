@@ -119,8 +119,11 @@ private:
 
     std::ifstream *m_ifstream;
     M17ModProcessor *m_processor;
+    HighPassFilterRC m_preemphasisFilter;
 
     QMutex m_mutex;
+    int16_t m_basebandMin;
+    int16_t m_basebandMax;
 
     static const int m_levelNbSamples;
     static const float m_preemphasis;

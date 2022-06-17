@@ -25,6 +25,7 @@
 #include "m17modsource.h"
 
 const int M17ModSource::m_levelNbSamples = 480; // every 10ms
+const float M17ModSource::m_preemphasis = 120.0e-6; // 120us
 
 M17ModSource::M17ModSource() :
     m_channelSampleRate(48000),
@@ -37,6 +38,7 @@ M17ModSource::M17ModSource() :
 	m_peakLevel(0.0f),
 	m_levelSum(0.0f),
     m_ifstream(nullptr),
+    m_preemphasisFilter(m_preemphasis*48000),
     m_mutex(QMutex::Recursive)
 {
     m_audioFifo.setLabel("M17ModSource.m_audioFifo");
@@ -53,6 +55,8 @@ M17ModSource::M17ModSource() :
     m_demodBufferFill = 0;
 
 	m_magsq = 0.0;
+    m_basebandMax = 0;
+    m_basebandMin = 0;
 
     m_processor = new M17ModProcessor();
 
@@ -268,9 +272,30 @@ void M17ModSource::pullAF(Real& sample, bool& carrier)
 
 void M17ModSource::pullM17(Real& sample, bool& carrier)
 {
-    // TODO
-    carrier = false;
-    sample = 0.0f;
+    quint8 bbSampleBytes[2];
+    carrier = m_processor->getBasebandFifo()->readOne(bbSampleBytes);
+    int16_t basbandSample = bbSampleBytes[0] | (bbSampleBytes[1]<<8);
+
+    if (carrier)
+    {
+        if (basbandSample > m_basebandMax)
+        {
+            qDebug("M17ModSource::pullM17: max: %d", basbandSample);
+            m_basebandMax = basbandSample;
+        }
+
+        if (basbandSample < m_basebandMin)
+        {
+            qDebug("M17ModSource::pullM17: min: %d", basbandSample);
+            m_basebandMin = basbandSample;
+        }
+
+        sample = basbandSample / 32768.0f;
+    }
+    else
+    {
+        sample = 0.0f;
+    }
 }
 
 void M17ModSource::pushFeedback(Real sample)
@@ -351,6 +376,7 @@ void M17ModSource::applyAudioSampleRate(int sampleRate)
     m_interpolator.create(48, sampleRate, m_settings.m_rfBandwidth / 2.2, 3.0);
     m_lowpass.create(301, sampleRate, m_settings.m_rfBandwidth);
     m_toneNco.setFreq(m_settings.m_toneFrequency, sampleRate);
+    m_preemphasisFilter.configure(m_preemphasis*sampleRate);
     m_audioSampleRate = sampleRate;
     applyFeedbackAudioSampleRate(m_feedbackAudioSampleRate);
 
@@ -449,6 +475,8 @@ void M17ModSource::handleAudio()
 
 void M17ModSource::sendPacket()
 {
+    qDebug("M17ModSource::sendPacket: %d", (int) m_settings.m_packetType);
+
     if (m_settings.m_packetType == M17ModSettings::PacketType::PacketSMS)
     {
         M17ModProcessor::MsgSendSMS *msg = M17ModProcessor::MsgSendSMS::create(

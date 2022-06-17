@@ -567,7 +567,7 @@
        <widget class="QLabel" name="sourceText">
         <property name="minimumSize">
          <size>
-          <width>80</width>
+          <width>90</width>
           <height>0</height>
          </size>
         </property>
@@ -602,7 +602,7 @@
        <widget class="QLabel" name="destText">
         <property name="minimumSize">
          <size>
-          <width>80</width>
+          <width>90</width>
           <height>0</height>
          </size>
         </property>
@@ -637,7 +637,7 @@
        <widget class="QLabel" name="typeText">
         <property name="minimumSize">
          <size>
-          <width>110</width>
+          <width>120</width>
           <height>0</height>
          </size>
         </property>

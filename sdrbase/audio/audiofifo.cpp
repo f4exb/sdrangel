@@ -160,6 +160,19 @@ uint32_t AudioFifo::read(quint8* data, uint32_t numSamples)
 	return total;
 }
 
+bool AudioFifo::readOne(quint8* data)
+{
+	if ((!m_fifo) || isEmpty()) {
+		return false;
+	}
+
+    memcpy(data, m_fifo + (m_head * m_sampleSize), m_sampleSize);
+    m_head += 1;
+    m_head %= m_size;
+    m_fill -= 1;
+    return true;
+}
+
 uint AudioFifo::drain(uint32_t numSamples)
 {
 	QMutexLocker mutexLocker(&m_mutex);

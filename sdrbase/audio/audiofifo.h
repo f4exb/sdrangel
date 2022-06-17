@@ -38,6 +38,7 @@ public:
 
 	uint32_t write(const quint8* data, uint32_t numSamples);
 	uint32_t read(quint8* data, uint32_t numSamples);
+    bool readOne(quint8* data);
 
 	uint32_t drain(uint32_t numSamples);
 	void clear();

@@ -5,6 +5,7 @@ set(modems_SOURCES
     m17/FreqDevEstimator.cpp
     m17/Golay24.cpp
     m17/M17Demodulator.cpp
+    m17/M17Modulator.cpp
 )
 
 set(modems_HEADERS
@@ -28,7 +29,6 @@ set(modems_HEADERS
     m17/M17FrameDecoder.h
     m17/M17Framer.h
     m17/M17Modulator.h
-    m17/M17Modulator.orig.h
     m17/M17Randomizer.h
     m17/M17Synchronizer.h
     m17/PhaseEstimator.h

@@ -12,6 +12,7 @@
 #include <type_traits>
 #include <tuple>
 #include <limits>
+#include <iostream>
 
 #include "export.h"
 
@@ -46,7 +47,10 @@ struct M17_API Correlator
         limit_ = sample_filter(std::abs(value));
         buffer_[buffer_pos_] = value;
         prev_buffer_pos_ = buffer_pos_;
-        if (++buffer_pos_ == buffer_.size()) buffer_pos_ = 0;
+
+        if (++buffer_pos_ == buffer_.size()) {
+            buffer_pos_ = 0;
+        }
     }
 
     float correlate(sync_t sync)
@@ -56,11 +60,13 @@ struct M17_API Correlator
 
         for (size_t i = 0; i != sync.size(); ++i)
         {
-            if (pos >= buffer_.size())
+            if (pos >= buffer_.size()) {
                 pos -= buffer_.size(); // wrapped
+            }
             result += sync[i] * buffer_[pos];
             pos += SAMPLES_PER_SYMBOL;
         }
+
         return result;
     }
 
@@ -128,8 +134,14 @@ struct SyncWord
 	value_type magnitude_1_ = 1.;
 	value_type magnitude_2_ = -1.;
 
-	SyncWord(buffer_t&& sync_word, value_type magnitude_1, value_type magnitude_2 = std::numeric_limits<value_type>::lowest())
-	: sync_word_(std::move(sync_word)), magnitude_1_(magnitude_1), magnitude_2_(magnitude_2)
+	SyncWord(
+        buffer_t&& sync_word,
+        value_type magnitude_1,
+        value_type magnitude_2 = std::numeric_limits<value_type>::lowest()
+    ) :
+        sync_word_(std::move(sync_word)),
+        magnitude_1_(magnitude_1),
+        magnitude_2_(magnitude_2)
 	{}
 
 	value_type triggered(Correlator& correlator)
@@ -154,6 +166,7 @@ struct SyncWord
 				samples_.fill(0);
 				triggered_ = true;
 			}
+
 			samples_[correlator.index()] = value;
 		}
 		else
@@ -165,18 +178,22 @@ struct SyncWord
 				timing_index_ = 0;
 				peak_value = value;
 				uint8_t index = 0;
-				for (auto f : samples_)
+
+            	for (auto f : samples_)
 				{
 					if (abs(f) > abs(peak_value))
 					{
 						peak_value = f;
 						timing_index_ = index;
 					}
+
 					index += 1;
 				}
+
 				updated_ = peak_value > 0 ? 1 : -1;
 			}
 		}
+
 		return timing_index_;
 	}
 

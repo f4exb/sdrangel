@@ -21,6 +21,7 @@
 #include <QObject>
 #include <QByteArray>
 
+#include "m17/M17Modulator.h"
 #include "util/message.h"
 #include "util/messagequeue.h"
 #include "audio/audiofifo.h"
@@ -58,14 +59,19 @@ public:
     ~M17ModProcessor();
 
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
-    AudioFifo *getSymbolFifo() { return &m_basebandFifo; }
+    AudioFifo *getBasebandFifo() { return &m_basebandFifo; }
 
 private:
     MessageQueue m_inputMessageQueue;
     AudioFifo m_basebandFifo; //!< Samples are 16 bit integer baseband 48 kS/s samples
+    mobilinkd::M17Modulator m_m17Modulator;
 
     bool handleMessage(const Message& cmd);
     void processPacket(const QString& sourceCall, const QString& destCall, const QByteArray& packetBytes);
+    void test(const QString& sourceCall, const QString& destCall);
+    void send_preamble();
+    void send_eot();
+    void output_baseband(std::array<uint8_t, 2> sync_word, const std::array<int8_t, 368>& frame);
 
 private slots:
     void handleInputMessages();

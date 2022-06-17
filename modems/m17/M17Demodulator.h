@@ -51,10 +51,9 @@ struct M17_API M17Demodulator
 	DataCarrierDetect<SAMPLE_RATE, 500> dcd{2500, 4000, 1.0, 4.0};
 	ClockRecovery<SAMPLE_RATE, SYMBOL_RATE> clock_recovery;
 
-	collelator_t correlator;
-	sync_word_t preamble_sync{{+3,-3,+3,-3,+3,-3,+3,-3}, 29.f};
-	sync_word_t lsf_sync{{+3,+3,+3,+3,-3,-3,+3,-3}, 32.f, -31.f};	// LSF or STREAM (inverted)
-	sync_word_t packet_sync{{3,-3,3,3,-3,-3,-3,-3}, 31.f, -31.f};	// PACKET or BERT (inverted)
+	sync_word_t preamble_sync{{+3, -3, +3, -3, +3, -3, +3, -3}, 29.f};
+	sync_word_t lsf_sync{     {+3, +3, +3, +3, -3, -3, +3, -3}, 32.f, -31.f};	// LSF or STREAM (inverted)
+	sync_word_t packet_sync{  {+3, -3, +3, +3, -3, -3, -3, -3}, 31.f, -31.f};	// PACKET or BERT (inverted)
 
 	FreqDevEstimator dev;
 	float idev;
@@ -79,8 +78,11 @@ struct M17_API M17Demodulator
 	diagnostic_callback_t diagnostic_callback;
 
 	M17Demodulator(callback_t callback)	:
-        decoder(callback)
-	{}
+        decoder(callback),
+        initializing_count_(1920)
+	{
+        demodState = DemodState::UNLOCKED;
+    }
 
 	virtual ~M17Demodulator() {}
 
@@ -95,14 +97,12 @@ struct M17_API M17Demodulator
 	void do_bert_sync();
 	void do_frame(float filtered_sample);
 
-	bool locked() const
-	{
+	bool locked() const {
 		return dcd_;
 	}
 
-	void passall(bool enabled)
-	{
-	passall_ = enabled;
+	void passall(bool enabled) {
+	    passall_ = enabled;
 		// decoder.passall(enabled);
 	}
 
@@ -112,12 +112,13 @@ struct M17_API M17Demodulator
 	}
 
 	void update_values(uint8_t index);
-
 	void operator()(const float input);
 
 private:
     static const std::array<float, 150> rrc_taps;
     BaseFirFilter<rrc_taps.size()> demod_filter{rrc_taps};
+  	collelator_t correlator;
+    int16_t initializing_count_;
 };
 
 } // mobilinkd

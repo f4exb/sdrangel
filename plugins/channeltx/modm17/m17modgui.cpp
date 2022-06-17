@@ -759,6 +759,8 @@ void M17ModGUI::makeUIConnections()
     QObject::connect(ui->loopPacket, &ButtonSwitch::toggled, this, &M17ModGUI::on_loopPacket_toggled);
     QObject::connect(ui->loopPacketInterval, &QDial::valueChanged, this, &M17ModGUI::on_loopPacketInterval_valueChanged);
     QObject::connect(ui->smsText, &CustomTextEdit::editingFinished, this, &M17ModGUI::on_smsText_editingFinished);
+    QObject::connect(ui->source, &QLineEdit::editingFinished, this, &M17ModGUI::on_source_editingFinished);
+    QObject::connect(ui->destination, &QLineEdit::editingFinished, this, &M17ModGUI::on_destination_editingFinished);
 }
 
 void M17ModGUI::updateAbsoluteCenterFrequency()
@@ -775,7 +777,7 @@ M17ModSettings::PacketType M17ModGUI::indexToPacketType(int index)
         case 1:
             return M17ModSettings::PacketType::PacketAPRS;
         default:
-            return M17ModSettings::PacketType::PacketNone;
+            return M17ModSettings::PacketType::PacketSMS;
     }
 }
 
@@ -788,6 +790,6 @@ int M17ModGUI::packetTypeToIndex(M17ModSettings::PacketType type)
         case M17ModSettings::PacketType::PacketAPRS:
             return 1;
         default:
-            return -1;
+            return 0;
     }
 }

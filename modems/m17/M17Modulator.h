@@ -41,9 +41,12 @@ public:
     using frame_t = std::array<uint8_t, 46>;        // M17 frame (without sync word).
     using packet_t = std::array<uint8_t, 25>;       // Packet payload
 
-    static constexpr std::array<uint8_t, 2> SYNC_WORD = {0x32, 0x43};
-    static constexpr std::array<uint8_t, 2> LSF_SYNC_WORD = {0x55, 0xF7};
-    static constexpr std::array<uint8_t, 2> DATA_SYNC_WORD = {0xFF, 0x5D};
+    static const std::array<uint8_t, 2> SYNC_WORD;
+    static const std::array<uint8_t, 2> LSF_SYNC_WORD;
+    static const std::array<uint8_t, 2> STREAM_SYNC_WORD;
+    static const std::array<uint8_t, 2> PACKET_SYNC_WORD;
+    static const std::array<uint8_t, 2> BERT_SYNC_WORD;
+    static const std::array<uint8_t, 2> EOT_SYNC;
 
     static constexpr int8_t bits_to_symbol(uint8_t bits)
     {
@@ -59,11 +62,22 @@ public:
     }
 
     template <typename T, size_t N>
+    static std::array<int8_t, N / 2> bits_to_symbols(const std::array<T, N>& bits)
+    {
+        std::array<int8_t, N / 2> result;
+        size_t index = 0;
+        for (size_t i = 0; i != N; i += 2)
+        {
+            result[index++] = bits_to_symbol((bits[i] << 1) | bits[i + 1]);
+        }
+        return result;
+    }
+
+    template <typename T, size_t N>
     static std::array<int8_t, N * 4> bytes_to_symbols(const std::array<T, N>& bytes)
     {
         std::array<int8_t, N * 4> result;
         size_t index = 0;
-
         for (auto b : bytes)
         {
             for (size_t i = 0; i != 4; ++i)
@@ -72,160 +86,116 @@ public:
                 b <<= 2;
             }
         }
-
         return result;
     }
 
-    static
-    void make_preamble(std::array<uint8_t, 48>& preamble_bytes)
+    /*
+    * Converts a suite of 192 symbols (from the 384 bits of a frame) into 1920 16 bit integer samples to be used
+    * in the final FM modulator (baseband). Sample rate is expected to be 48 kS/s. This is the original 48 kS/s
+    * 16 bit audio output of the modulator.
+    */
+    template <size_t N>
+    std::array<int16_t, N*10> symbols_to_baseband(std::array<int8_t, N> symbols, bool invert = false)
     {
-        // Preamble is simple... bytes -> symbols.
-        preamble_bytes.fill(0x77);
+        std::array<int16_t, N*10> baseband;
+        baseband.fill(0);
+
+        for (size_t i = 0; i != symbols.size(); ++i) {
+            baseband[i * 10] = symbols[i];
+        }
+
+        for (auto& b : baseband) {
+            b = rrc(b) * 7168.0 * (invert ? -1.0 : 1.0);
+        }
+
+        return baseband;
     }
 
-    /**
-     * Encode each LSF segment into a Golay-encoded LICH segment bitstream.
-     */
-    static
-    lich_segment_t make_lich_segment(std::array<uint8_t, 5> segment, uint8_t segment_number)
+    static std::array<int8_t, 368> make_lsf(lsf_t& lsf, const std::string& src, const std::string& dest, int8_t can = 10, bool streamElsePacket = false)
     {
-        lich_segment_t result;
-        uint16_t tmp;
-        uint32_t encoded;
-
-        tmp = segment[0] << 4 | ((segment[1] >> 4) & 0x0F);
-        encoded = mobilinkd::Golay24::encode24(tmp);
-
-        for (size_t i = 0; i != 24; ++i)
-        {
-            assign_bit_index(result, i, (encoded & (1 << 23)) != 0);
-            encoded <<= 1;
-        }
-
-        tmp = ((segment[1] & 0x0F) << 8) | segment[2];
-        encoded = mobilinkd::Golay24::encode24(tmp);
-
-        for (size_t i = 24; i != 48; ++i)
-        {
-            assign_bit_index(result, i, (encoded & (1 << 23)) != 0);
-            encoded <<= 1;
-        }
-
-        tmp = segment[3] << 4 | ((segment[4] >> 4) & 0x0F);
-        encoded = mobilinkd::Golay24::encode24(tmp);
-
-        for (size_t i = 48; i != 72; ++i)
-        {
-            assign_bit_index(result, i, (encoded & (1 << 23)) != 0);
-            encoded <<= 1;
-        }
-
-        tmp = ((segment[4] & 0x0F) << 8) | (segment_number << 5);
-        encoded = mobilinkd::Golay24::encode24(tmp);
-
-        for (size_t i = 72; i != 96; ++i)
-        {
-            assign_bit_index(result, i, (encoded & (1 << 23)) != 0);
-            encoded <<= 1;
-        }
-
-        return result;
-    }
-
-    /**
-     * Construct the link setup frame and split into LICH segments.
-     */
-    void make_link_setup(lich_t& lich, mobilinkd::M17Modulator::frame_t lsf_frame)
-    {
-        using namespace mobilinkd;
-
-        lsf_t lsf;
         lsf.fill(0);
 
-        auto rit = std::copy(source_.begin(), source_.end(), lsf.begin());
-        std::copy(dest_.begin(), dest_.end(), rit);
-        lsf[12] = 0;
-        lsf[13] = 5;
+        M17Randomizer<368> randomizer;
+        PolynomialInterleaver<45, 92, 368> interleaver;
+        CRC16<0x5935, 0xFFFF> crc;
 
-        crc_.reset();
+        mobilinkd::LinkSetupFrame::call_t callsign;
+        callsign.fill(0);
+        std::copy(src.begin(), src.end(), callsign.begin());
+        auto encoded_src = mobilinkd::LinkSetupFrame::encode_callsign(callsign);
 
-        for (size_t i = 0; i != 28; ++i) {
-            crc_(lsf[i]);
+        mobilinkd::LinkSetupFrame::encoded_call_t encoded_dest = {0xff,0xff,0xff,0xff,0xff,0xff};
+
+        if (!dest.empty())
+        {
+            callsign.fill(0);
+            std::copy(dest.begin(), dest.end(), callsign.begin());
+            encoded_dest = mobilinkd::LinkSetupFrame::encode_callsign(callsign);
         }
 
-        auto checksum = crc_.get_bytes();
+        auto rit = std::copy(encoded_dest.begin(), encoded_dest.end(), lsf.begin());
+        std::copy(encoded_src.begin(), encoded_src.end(), rit);
+
+        lsf[12] = can >> 1;
+        lsf[13] = (streamElsePacket ? 5 : 4) | ((can & 1) << 7);
+
+        crc.reset();
+
+        for (size_t i = 0; i != 28; ++i) {
+            crc(lsf[i]);
+        }
+
+        std::array<uint8_t, 2> checksum = crc.get_bytes();
         lsf[28] = checksum[0];
         lsf[29] = checksum[1];
 
-        // Build LICH segments
-        for (size_t i = 0; i != lich.size(); ++i)
+        std::array<uint8_t, 488> encoded;
+        size_t index = 0;
+        uint32_t memory = 0;
+
+        for (auto b : lsf)
         {
-            std::array<uint8_t, 5> segment;
-            std::copy(lsf.begin() + i * 5, lsf.begin() + (i + 1) * 5, segment.begin());
-            auto lich_segment = make_lich_segment(segment, i);
-            std::copy(lich_segment.begin(), lich_segment.end(), lich[i].begin());
+            for (size_t i = 0; i != 8; ++i)
+            {
+                uint32_t x = (b & 0x80) >> 7;
+                b <<= 1;
+                memory = mobilinkd::update_memory<4>(memory, x);
+                encoded[index++] = mobilinkd::convolve_bit(031, memory);
+                encoded[index++] = mobilinkd::convolve_bit(027, memory);
+            }
         }
 
-        auto encoded = conv_encode(lsf);
-        auto size = puncture_bytes(encoded, lsf_frame, P1);
+        // Flush the encoder.
+        for (size_t i = 0; i != 4; ++i)
+        {
+            memory = mobilinkd::update_memory<4>(memory, 0);
+            encoded[index++] = mobilinkd::convolve_bit(031, memory);
+            encoded[index++] = mobilinkd::convolve_bit(027, memory);
+        }
+
+        std::array<int8_t, 368> punctured;
+        auto size = puncture(encoded, punctured, P1);
 
         if (size != 368) {
-            std::cerr << "make_link_setup: incorrect size (not 368)" << size;
+            std::cerr << "mobilinkd::M17Modulator::make_lsf: incorrect size (not 368)" << size;
         }
 
-        interleaver_.interleave(lsf_frame);
-        randomizer_(lsf_frame);
-    }
-
-    /**
-     * Append the LICH and Convolutionally encoded payload, interleave and randomize
-     * the frame bits, and produce the frame.
-     */
-    void make_audio_frame(const lich_segment_t& lich, const payload_t& data, mobilinkd::M17Modulator::frame_t& frame)
-    {
-        using namespace mobilinkd;
-
-        auto it = std::copy(lich.begin(), lich.end(), frame.begin());
-        std::copy(data.begin(), data.end(), it);
-
-        interleaver_.interleave(frame);
-        randomizer_(frame);
-    }
-
-    /**
-     * Assemble the audio frame payload by appending the frame number, encoded audio,
-     * and CRC, then convolutionally coding and puncturing the data.
-     */
-    payload_t make_audio_payload(uint16_t frame_number, const codec_frame_t& payload)
-    {
-        std::array<uint8_t, 20> data;   // FN, Audio, CRC = 2 + 16 + 2;
-        data[0] = uint8_t((frame_number >> 8) & 0xFF);
-        data[1] = uint8_t(frame_number & 0xFF);
-        std::copy(payload.begin(), payload.end(), data.begin() + 2);
-        crc_.reset();
-
-        for (size_t i = 0; i != 18; ++i) {
-            crc_(data[i]);
-        }
-
-        auto checksum = crc_.get_bytes();
-        data[18] = checksum[0];
-        data[19] = checksum[1];
-
-        auto encoded = conv_encode(data);
-
-        payload_t punctured;
-        auto size = puncture_bytes(encoded, punctured, mobilinkd::P2);
-
-        if (size != 272) {
-            std::cerr << "mobilinkd::M17Modulator::make_audio_payload: incorrect size (not 272)" << size;
-        }
+        interleaver.interleave(punctured);
+        randomizer.randomize(punctured);
 
         return punctured;
     }
 
-    frame_t make_packet_frame(uint8_t packet_number, bool last_packet, packet_t packet, int packet_size)
+    std::array<int8_t, 368> make_packet_frame(
+        uint8_t packet_number,
+        int packet_size,
+        bool last_packet,
+        const std::array<uint8_t, 25> packet
+    )
     {
+        M17Randomizer<368> randomizer;
+        PolynomialInterleaver<45, 92, 368> interleaver;
+
         std::array<uint8_t, 26> packet_assembly;
         packet_assembly.fill(0);
         std::copy(packet.begin(), packet.begin() + packet_size, packet_assembly.begin());
@@ -240,75 +210,71 @@ public:
 
         if (last_packet)
         {
-            packet_assembly[25] = 0x80 | (packet_size<<2);
+            packet_assembly[25] = 0x80 | ((packet_size+2)<<2); // sent packet size includes CRC
             packet_assembly[packet_size]   = crc_.get_bytes()[1];
             packet_assembly[packet_size+1] = crc_.get_bytes()[0];
+            std::cerr << "M17Modulator::make_packet_frame:" << std::hex << (int) crc_.get_bytes()[1] << ":" <<  (int) crc_.get_bytes()[0] << std::endl;
         }
         else
         {
             packet_assembly[25] = (packet_number<<2);
         }
 
-        std::array<uint8_t, 2*26+1> encoded = conv_encode(packet_assembly);
-        frame_t punctured;
-        auto size = puncture_bytes(encoded, punctured, mobilinkd::P3);
+        std::array<uint8_t, 420> encoded;
+        size_t index = 0;
+        uint32_t memory = 0;
+        uint8_t b;
+
+        for (int bi = 0; bi < 25; bi++)
+        {
+            b = packet_assembly[bi];
+
+            for (size_t i = 0; i != 8; ++i)
+            {
+                uint32_t x = (b & 0x80) >> 7;
+                b <<= 1;
+                memory = mobilinkd::update_memory<4>(memory, x);
+                encoded[index++] = mobilinkd::convolve_bit(031, memory);
+                encoded[index++] = mobilinkd::convolve_bit(027, memory);
+            }
+        }
+
+        b = packet_assembly[25];
+
+        for (size_t i = 0; i != 6; ++i)
+        {
+            uint32_t x = (b & 0x80) >> 7;
+            b <<= 1;
+            memory = mobilinkd::update_memory<4>(memory, x);
+            encoded[index++] = mobilinkd::convolve_bit(031, memory);
+            encoded[index++] = mobilinkd::convolve_bit(027, memory);
+        }
+
+        // Flush the encoder.
+        for (size_t i = 0; i != 4; ++i)
+        {
+            memory = mobilinkd::update_memory<4>(memory, 0);
+            encoded[index++] = mobilinkd::convolve_bit(031, memory);
+            encoded[index++] = mobilinkd::convolve_bit(027, memory);
+        }
+
+        std::array<int8_t, 368> punctured;
+        auto size = puncture(encoded, punctured, P3);
 
         if (size != 368) {
             std::cerr << "mobilinkd::M17Modulator::make_packet_frame: incorrect size (not 368)" << size;
         }
 
+        interleaver.interleave(punctured);
+        randomizer.randomize(punctured);
+
         return punctured;
-    }
-
-    /*
-    * Converts a suite of 192 symbols (from the 384 bits of a frame) into 1920 16 bit integer samples to be used
-    * in the final FM modulator (baseband). Sample rate is expected to be 48 kS/s. This is the original 48 kS/s
-    * 16 bit audio output of the modulator.
-    */
-    static baseband_t symbols_to_baseband(const symbols_t& symbols)
-    {
-        // Generated using scikit-commpy
-        static const auto rrc_taps = std::array<float, 79>{
-            -0.009265784007800534, -0.006136551625729697, -0.001125978562075172, 0.004891777252042491,
-            0.01071805138282269, 0.01505751553351295, 0.01679337935001369, 0.015256245142156299,
-            0.01042830577908502, 0.003031522725559901,  -0.0055333532968188165, -0.013403099825723372,
-            -0.018598682349642525, -0.01944761739590459, -0.015005271935951746, -0.0053887880354343935,
-            0.008056525910253532, 0.022816244158307273, 0.035513467692208076, 0.04244131815783876,
-            0.04025481153629372, 0.02671818654865632, 0.0013810216516704976, -0.03394615682795165,
-            -0.07502635967975885, -0.11540977897637611, -0.14703962203941534, -0.16119995609538576,
-            -0.14969512896336504, -0.10610329539459686, -0.026921412469634916, 0.08757875030779196,
-            0.23293327870303457, 0.4006012210123992, 0.5786324696325503, 0.7528286479934068,
-            0.908262741447522, 1.0309661131633199, 1.1095611856548013, 1.1366197723675815,
-            1.1095611856548013, 1.0309661131633199, 0.908262741447522, 0.7528286479934068,
-            0.5786324696325503,  0.4006012210123992, 0.23293327870303457, 0.08757875030779196,
-            -0.026921412469634916, -0.10610329539459686, -0.14969512896336504, -0.16119995609538576,
-            -0.14703962203941534, -0.11540977897637611, -0.07502635967975885, -0.03394615682795165,
-            0.0013810216516704976, 0.02671818654865632, 0.04025481153629372,  0.04244131815783876,
-            0.035513467692208076, 0.022816244158307273, 0.008056525910253532, -0.0053887880354343935,
-            -0.015005271935951746, -0.01944761739590459, -0.018598682349642525, -0.013403099825723372,
-            -0.0055333532968188165, 0.003031522725559901, 0.01042830577908502, 0.015256245142156299,
-            0.01679337935001369, 0.01505751553351295, 0.01071805138282269, 0.004891777252042491,
-            -0.001125978562075172, -0.006136551625729697, -0.009265784007800534
-        };
-        static BaseFirFilter<std::tuple_size<decltype(rrc_taps)>::value> rrc = makeFirFilter(rrc_taps);
-
-        std::array<int16_t, 1920> baseband;
-        baseband.fill(0);
-
-        for (size_t i = 0; i != symbols.size(); ++i) {
-            baseband[i * 10] = symbols[i];
-        }
-
-        for (auto& b : baseband) {
-            b = rrc(b) * 25;
-        }
-
-        return baseband;
     }
 
     M17Modulator(const std::string& source, const std::string& dest = "") :
         source_(encode_callsign(source)),
-        dest_(encode_callsign(dest))
+        dest_(encode_callsign(dest)),
+        rrc(makeFirFilter(rrc_taps))
     { }
 
     /**
@@ -327,11 +293,11 @@ public:
     }
 
 private:
-    M17ByteRandomizer<46> randomizer_;
-    PolynomialInterleaver<45, 92, 368> interleaver_;
-    CRC16<0x5935, 0xFFFF> crc_;
     LinkSetupFrame::encoded_call_t source_;
     LinkSetupFrame::encoded_call_t dest_;
+    BaseFirFilter<150> rrc;
+    static const std::array<float, 150> rrc_taps;
+    CRC16<0x5935, 0xFFFF> crc_;
 
     static LinkSetupFrame::encoded_call_t encode_callsign(std::string callsign)
     {

@@ -45,7 +45,6 @@ struct M17ModSettings
 
     enum PacketType
     {
-        PacketNone,
         PacketSMS,
         PacketAPRS
     };

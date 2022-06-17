@@ -15,9 +15,9 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <boost/crc.hpp>
-#include <boost/program_options.hpp>
-#include <boost/optional.hpp>
+// #include <boost/crc.hpp>
+// #include <boost/program_options.hpp>
+// #include <boost/optional.hpp>
 #include <codec2/codec2.h>
 
 #include <QDebug>
@@ -278,7 +278,6 @@ void M17DemodProcessor::resetInfo()
 
 void M17DemodProcessor::setDCDOff()
 {
-    qDebug("M17DemodProcessor::setDCDOff");
     m_demod.dcd_off();
 }
 
@@ -301,25 +300,36 @@ void M17DemodProcessor::append_packet(std::vector<uint8_t>& result, mobilinkd::M
 
 bool M17DemodProcessor::decode_packet(mobilinkd::M17FrameDecoder::packet_buffer_t const& packet_segment)
 {
+    // qDebug() << tr("M17DemodProcessor::decode_packet: 0x%1").arg((int) packet_segment[25], 2, 16, QChar('0'));
     if (packet_segment[25] & 0x80) // last frame of packet.
     {
         size_t packet_size = (packet_segment[25] & 0x7F) >> 2;
         packet_size = std::min(packet_size, size_t(25)); // on last frame this is the remainder byte count
         m_packetFrameCounter = 0;
 
-        for (size_t i = 0; i != packet_size; ++i) {
+        for (size_t i = 0; i < packet_size; ++i) {
             m_currentPacket.push_back(packet_segment[i]);
         }
 
-        if (m_currentPacket.size() < 3) {
+        if (m_currentPacket.size() < 3)
+        {
             qDebug() << "M17DemodProcessor::decode_packet: too small:" << m_currentPacket.size();
             return false;
         }
+        else
+        {
+            qDebug() << "M17DemodProcessor::decode_packet: last chunk size:" << packet_size << " packet size:" << m_currentPacket.size();
+        }
 
-        boost::crc_optimal<16, 0x1021, 0xFFFF, 0xFFFF, true, true> crc;
-        crc.process_bytes(&m_currentPacket.front(), m_currentPacket.size());
-        uint16_t calcChecksum = crc.checksum();
-        uint16_t xmitChecksum = m_currentPacket.back() + (1<<8) * m_currentPacket.end()[-2];
+        mobilinkd::CRC16<0x5935, 0xFFFF> crc16;
+        crc16.reset();
+
+        for (std::vector<uint8_t>::const_iterator it = m_currentPacket.begin(); it != m_currentPacket.end() - 2; ++it) {
+            crc16(*it);
+        }
+
+        uint16_t calcChecksum = crc16.get_bytes()[0] + (crc16.get_bytes()[1]<<8);
+        uint16_t xmitChecksum = m_currentPacket.back() + (m_currentPacket.end()[-2]<<8);
 
         if (calcChecksum == xmitChecksum) // (checksum == 0x0f47)
         {
@@ -355,7 +365,9 @@ bool M17DemodProcessor::decode_packet(mobilinkd::M17FrameDecoder::packet_buffer_
             return true;
         }
 
-        qWarning() << "M17DemodProcessor::decode_packet: Packet checksum error: " << std::hex << calcChecksum << "vs" << xmitChecksum << std::dec;
+        QString ccrc = tr("0x%1").arg(calcChecksum, 4, 16, QChar('0'));
+        QString xcrc = tr("0x%1").arg(xmitChecksum, 4, 16, QChar('0'));
+        qWarning() << "M17DemodProcessor::decode_packet: Packet checksum error: " << ccrc << "vs" << xcrc;
         return false;
     }
 
@@ -368,11 +380,15 @@ bool M17DemodProcessor::decode_packet(mobilinkd::M17FrameDecoder::packet_buffer_
         return false;
     }
 
-    m_packetFrameCounter++;
+    if (m_packetFrameCounter == 0) {
+        m_currentPacket.clear();
+    }
 
-    for (size_t i = 0; i != 25; ++i) {
+    for (size_t i = 0; i < 25; ++i) {
         m_currentPacket.push_back(packet_segment[i]);
     }
+
+    m_packetFrameCounter++;
 
     return true;
 }

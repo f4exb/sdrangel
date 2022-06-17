@@ -15,6 +15,7 @@
 #include <cstddef>
 #include <functional>
 #include <iostream>
+#include <iomanip>
 
 namespace mobilinkd
 {
@@ -23,16 +24,13 @@ namespace mobilinkd
 template <typename C, size_t N>
 void dump(const std::array<C,N>& data, char header = 'D')
 {
-    putchar(header);
-    putchar('=');
-    for (auto c : data)
-    {
-        const char hex[] = "0123456789ABCDEF";
-        putchar(hex[uint8_t(c)>>4]);
-        putchar(hex[uint8_t(c)&0xf]);
+    std::cerr << header << " = ";
+
+    for (auto c : data) {
+        std::cerr << std::hex << std::setw(2) << std::setfill('0') << (int) c << " ";
     }
-    putchar('\r');
-    putchar('\n');
+
+    std::cerr << std::dec << std::endl;
 }
 
 struct M17FrameDecoder
@@ -98,14 +96,13 @@ struct M17FrameDecoder
     callback_t callback_;
 
     output_buffer_t output_buffer;
-    depunctured_buffer_t depuncture_buffer;
     decode_buffer_t decode_buffer;
     uint16_t frame_number = 0;
 
     uint8_t lich_segments{0};       ///< one bit per received LICH fragment.
 
-    M17FrameDecoder(callback_t callback)
-    : callback_(callback)
+    M17FrameDecoder(callback_t callback) :
+        callback_(callback)
     {}
 
     void update_state(std::array<uint8_t, 240>& lsf_output)
@@ -149,13 +146,15 @@ struct M17FrameDecoder
      * @param viterbi_cost
      * @return
      */
-    DecodeResult decode_lsf(input_buffer_t&, int& viterbi_cost)
+    DecodeResult decode_lsf(input_buffer_t& buffer, int& viterbi_cost)
     {
+        depunctured_buffer_t depuncture_buffer;
+        depuncture(buffer, depuncture_buffer.lsf, P1);
         viterbi_cost = viterbi_.decode(depuncture_buffer.lsf, decode_buffer.lsf);
         to_byte_array(decode_buffer.lsf, output_buffer.lsf);
 
+        // std::cerr << "M17FrameDecoder::decode_lsf: vierbi:" << viterbi_cost << std::endl;
         // dump(output_buffer.lsf);
-        // printf("cost = %lu\n", viterbi_cost);
 
         crc_.reset();
         for (auto c : output_buffer.lsf) crc_(c);
@@ -167,6 +166,11 @@ struct M17FrameDecoder
             output_buffer.type = FrameType::LSF;
             callback_(output_buffer, viterbi_cost);
             return DecodeResult::OK;
+        }
+        else
+        {
+            std::cerr << "M17FrameDecoder::decode_lsf: bad CRC:" << std::endl;
+            dump(output_buffer.lsf);
         }
 
         lich_segments = 0;
@@ -260,6 +264,7 @@ struct M17FrameDecoder
 
     DecodeResult decode_bert(input_buffer_t&, int& viterbi_cost)
     {
+        depunctured_buffer_t depuncture_buffer;
         viterbi_cost = viterbi_.decode(depuncture_buffer.bert, decode_buffer.bert);
         to_byte_array(decode_buffer.bert, output_buffer.bert);
 
@@ -273,6 +278,7 @@ struct M17FrameDecoder
     {
         std::array<int8_t, 272> tmp;
         std::copy(buffer.begin() + 96, buffer.end(), tmp.begin());
+        depunctured_buffer_t depuncture_buffer;
 
         depuncture(tmp, depuncture_buffer.stream, P2);
         viterbi_cost = viterbi_.decode(depuncture_buffer.stream, decode_buffer.stream);
@@ -298,8 +304,10 @@ struct M17FrameDecoder
      * @param frame_type is either BASIC_PACKET or FULL_PACKET.
      * @return the result of decoding the packet frame.
      */
-    DecodeResult decode_packet(input_buffer_t&, int& viterbi_cost, FrameType type)
+    DecodeResult decode_packet(input_buffer_t& buffer, int& viterbi_cost, FrameType type)
     {
+        depunctured_buffer_t depuncture_buffer;
+        depuncture(buffer, depuncture_buffer.packet, P3);
         viterbi_cost = viterbi_.decode(depuncture_buffer.packet, decode_buffer.packet);
         to_byte_array(decode_buffer.packet, output_buffer.packet);
 

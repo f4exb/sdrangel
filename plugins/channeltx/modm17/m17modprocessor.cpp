@@ -19,9 +19,12 @@
 
 #include "m17modprocessor.h"
 
-M17ModProcessor::M17ModProcessor()
+MESSAGE_CLASS_DEFINITION(M17ModProcessor::MsgSendSMS, Message)
+
+M17ModProcessor::M17ModProcessor() :
+    m_m17Modulator("MYCALL", "")
 {
-    m_basebandFifo.setSampleSize(sizeof(int16_t), 48000);
+    m_basebandFifo.setSampleSize(sizeof(int16_t), 96000);
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }
 
@@ -37,6 +40,7 @@ bool M17ModProcessor::handleMessage(const Message& cmd)
         packetBytes.prepend(0x05); // SMS standard type
         packetBytes.truncate(798); // Maximum packet size is 798 payload + 2 bytes CRC = 800 bytes (32*25)
         processPacket(notif.getSourceCall(), notif.getDestCall(), packetBytes);
+        // test(notif.getSourceCall(), notif.getDestCall());
         return true;
     }
 
@@ -56,44 +60,85 @@ void M17ModProcessor::handleInputMessages()
 	}
 }
 
+void M17ModProcessor::test(const QString& sourceCall, const QString& destCall)
+{
+    m_m17Modulator.source(sourceCall.toStdString());
+    m_m17Modulator.dest(destCall.toStdString());
+
+    for (int i = 0; i < 25; i++) {
+        send_preamble();
+    }
+}
+
 void M17ModProcessor::processPacket(const QString& sourceCall, const QString& destCall, const QByteArray& packetBytes)
 {
-    mobilinkd::M17Modulator modulator(sourceCall.toStdString(), destCall.toStdString());
-    // preamble
-    std::array<uint8_t, 48> preamble_bytes;
-    mobilinkd::M17Modulator::make_preamble(preamble_bytes);
-    std::array<int8_t, 48 * 4> fullframe_symbols = mobilinkd::M17Modulator::bytes_to_symbols(preamble_bytes);
-    std::array<int16_t, 1920> baseband = mobilinkd::M17Modulator::symbols_to_baseband(fullframe_symbols);
-    m_basebandFifo.write((const quint8*) baseband.data(), 1920);
+    qDebug("M17ModProcessor::processPacket: %s to %s: %s", qPrintable(sourceCall), qPrintable(destCall), qPrintable(packetBytes));
+    m_m17Modulator.source(sourceCall.toStdString());
+    m_m17Modulator.dest(destCall.toStdString());
+
+    send_preamble(); // preamble
+
     // LSF
-    mobilinkd::M17Modulator::lich_t lichSegments; // Not used for packet
-    mobilinkd::M17Modulator::frame_t frame;
-    modulator.make_link_setup(lichSegments, frame);
-    std::array<int8_t, 46 * 4> frame_symbols = mobilinkd::M17Modulator::bytes_to_symbols(frame);
-    std::copy(mobilinkd::M17Modulator::LSF_SYNC_WORD.begin(), mobilinkd::M17Modulator::LSF_SYNC_WORD.end(), fullframe_symbols.begin());
-    std::copy(frame_symbols.begin(), frame_symbols.end(), fullframe_symbols.begin()+2);
-    baseband = mobilinkd::M17Modulator::symbols_to_baseband(fullframe_symbols);
-    m_basebandFifo.write((const quint8*) baseband.data(), 1920);
+    std::array<uint8_t, 30> lsf;
+    std::array<int8_t, 368> lsf_frame = mobilinkd::M17Modulator::make_lsf(lsf, sourceCall.toStdString(), destCall.toStdString());
+    output_baseband(mobilinkd::M17Modulator::LSF_SYNC_WORD, lsf_frame);
+
     // Packets
-    std::copy(mobilinkd::M17Modulator::DATA_SYNC_WORD.begin(), mobilinkd::M17Modulator::DATA_SYNC_WORD.end(), fullframe_symbols.begin());
-    mobilinkd::M17Modulator::packet_t packet;
     int remainderCount = packetBytes.size();
     int packetCount = 0;
+    std::array<int8_t, 368> packet_frame;
+    // std::copy(mobilinkd::M17Modulator::DATA_SYNC_WORD.begin(), mobilinkd::M17Modulator::DATA_SYNC_WORD.end(), fullframe_symbols.begin());
+    mobilinkd::M17Modulator::packet_t packet;
 
     while (remainderCount > 25)
     {
         std::copy(packetBytes.begin() + (packetCount*25), packetBytes.begin() + ((packetCount+1)*25), packet.begin());
-        frame = modulator.make_packet_frame(packetCount, false, packet, 25);
-        std::copy(frame_symbols.begin(), frame_symbols.end(), fullframe_symbols.begin()+2);
-        baseband = mobilinkd::M17Modulator::symbols_to_baseband(fullframe_symbols);
-        m_basebandFifo.write((const quint8*) baseband.data(), 1920);
+        packet_frame = m_m17Modulator.make_packet_frame(packetCount, 25, false, packet);
+        output_baseband(mobilinkd::M17Modulator::PACKET_SYNC_WORD, packet_frame);
         remainderCount -= 25;
         packetCount++;
     }
 
     std::copy(packetBytes.begin() + (packetCount*25), packetBytes.begin() + (packetCount*25) + remainderCount, packet.begin());
-    frame = modulator.make_packet_frame(packetCount, true, packet, remainderCount);
-    std::copy(frame_symbols.begin(), frame_symbols.end(), fullframe_symbols.begin()+2);
-    baseband = mobilinkd::M17Modulator::symbols_to_baseband(fullframe_symbols);
+    packet_frame = m_m17Modulator.make_packet_frame(packetCount, remainderCount, true, packet);
+    output_baseband(mobilinkd::M17Modulator::PACKET_SYNC_WORD, packet_frame);
+    qDebug("M17ModProcessor::processPacket: last: packetCount: %d remainderCount: %d", packetCount, remainderCount);
+
+    send_eot(); // EOT
+}
+
+void M17ModProcessor::send_preamble()
+{
+    // Preamble is simple... bytes -> symbols -> baseband.
+    std::array<uint8_t, 48> preamble_bytes;
+    preamble_bytes.fill(0x77);
+    std::array<int8_t, 192> preamble_symbols = mobilinkd::M17Modulator::bytes_to_symbols(preamble_bytes);
+    std::array<int16_t, 1920> preamble_baseband = m_m17Modulator.symbols_to_baseband(preamble_symbols);
+    m_basebandFifo.write((const quint8*) preamble_baseband.data(), 1920);
+}
+
+void M17ModProcessor::send_eot()
+{
+    std::array<uint8_t, 2> EOT_SYNC = { 0x55, 0x5D };
+    std::array<uint8_t, 48> eot_bytes;
+
+    for (unsigned int i = 0; i < eot_bytes.size(); i += 2) {
+        std::copy(EOT_SYNC.begin(), EOT_SYNC.end(), eot_bytes.begin() + i);
+    }
+
+    std::array<int8_t, 192> eot_symbols = mobilinkd::M17Modulator::bytes_to_symbols(eot_bytes);
+    std::array<int16_t, 1920> eot_baseband = m_m17Modulator.symbols_to_baseband(eot_symbols);
+    m_basebandFifo.write((const quint8*) eot_baseband.data(), 1920);
+}
+
+void M17ModProcessor::output_baseband(std::array<uint8_t, 2> sync_word, const std::array<int8_t, 368>& frame)
+{
+    std::array<int8_t, 184> symbols = mobilinkd::M17Modulator::bits_to_symbols(frame); // 368 bits -> 184 dibit symbols
+    std::array<int8_t, 8> sw = mobilinkd::M17Modulator::bytes_to_symbols(sync_word); // 16 bits -> 8 dibit symbols
+
+    std::array<int8_t, 192> temp; // 384 = 368 + 16 bits -> 192 dibit symbols
+    auto fit = std::copy(sw.begin(), sw.end(), temp.begin()); // start with sync word dibits
+    std::copy(symbols.begin(), symbols.end(), fit); // then the frame dibits
+    std::array<int16_t, 1920> baseband = m_m17Modulator.symbols_to_baseband(temp); // 1920 48 kS/s int16_t samples
     m_basebandFifo.write((const quint8*) baseband.data(), 1920);
 }

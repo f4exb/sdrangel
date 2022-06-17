@@ -44,7 +44,7 @@ void M17ModSettings::resetToDefaults()
     m_title = "M17 Modulator";
     m_m17Mode = M17Mode::M17ModeNone;
     m_audioType = AudioType::AudioNone;
-    m_packetType = PacketType::PacketNone;
+    m_packetType = PacketType::PacketSMS;
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
     m_feedbackAudioDeviceName = AudioDeviceManager::m_defaultDeviceName;
     m_feedbackVolumeFactor = 0.5f;
@@ -150,7 +150,7 @@ bool M17ModSettings::deserialize(const QByteArray& data)
         m_m17Mode = tmp < 0 ? M17ModeNone : tmp > (int) M17ModeM17BERT ? M17ModeM17BERT : (M17Mode) tmp;
         d.readS32(9, &tmp, 0);
         m_audioType = tmp < 0 ? AudioNone : tmp > (int) AudioInput ? AudioInput : (AudioType) tmp;
-        m_packetType = tmp < 0 ? PacketNone : tmp > (int) PacketSMS ? PacketSMS : (PacketType) tmp;
+        m_packetType = tmp < 0 ? PacketSMS : tmp > (int) PacketAPRS ? PacketAPRS : (PacketType) tmp;
 
         d.readBlob(11, &bytetmp);
 
