@@ -21,6 +21,7 @@ void Preferences::resetToDefaults()
 	m_logFileName = "sdrangel.log";
 	m_consoleMinLogLevel = QtDebugMsg;
     m_fileMinLogLevel = QtDebugMsg;
+    m_multisampling = 0;
 }
 
 QByteArray Preferences::serialize() const
@@ -39,6 +40,7 @@ QByteArray Preferences::serialize() const
     s.writeString((int) StationName, m_stationName);
     s.writeFloat((int) Altitude, m_altitude);
 	s.writeS32((int) SourceItemIndex, m_sourceItemIndex);
+    s.writeS32((int) Multisampling, m_multisampling);
 	return s.final();
 }
 
@@ -91,6 +93,8 @@ bool Preferences::deserialize(const QByteArray& data)
         } else {
             m_fileMinLogLevel = QtDebugMsg;
         }
+
+        d.readS32((int) Multisampling, &m_multisampling, 0);
 
 		return true;
 	} else

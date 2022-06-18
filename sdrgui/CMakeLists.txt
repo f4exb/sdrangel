@@ -45,10 +45,12 @@ set(sdrgui_SOURCES
     gui/glscopegui.cpp
     gui/glshadercolors.cpp
     gui/glshadersimple.cpp
+    gui/glshaderspectrogram.cpp
     gui/glshadertextured.cpp
     gui/glshadertvarray.cpp
     gui/glspectrum.cpp
     gui/glspectrumgui.cpp
+    gui/graphicsdialog.cpp
     gui/graphicsviewzoom.cpp
     gui/httpdownloadmanagergui.cpp
     gui/indicator.cpp
@@ -144,10 +146,12 @@ set(sdrgui_HEADERS
     gui/glscopegui.h
     gui/glshadercolors.h
     gui/glshadersimple.h
+    gui/glshaderspectrogram.h
     gui/glshadertvarray.h
     gui/glshadertextured.h
     gui/glspectrum.h
     gui/glspectrumgui.h
+    gui/graphicsdialog.h
     gui/graphicsviewzoom.h
     gui/httpdownloadmanagergui.h
     gui/indicator.h
@@ -224,6 +228,7 @@ set(sdrgui_FORMS
     gui/fftwisdomdialog.ui
     gui/glscopegui.ui
     gui/glspectrumgui.ui
+    gui/graphicsdialog.ui
     gui/pluginsdialog.ui
     gui/audiodialog.ui
     gui/audioselectdialog.ui

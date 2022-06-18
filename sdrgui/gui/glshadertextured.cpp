@@ -144,16 +144,16 @@ void GLShaderTextured::subTextureMutable(int xOffset, int yOffset, int width, in
 	glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 }
 
-void GLShaderTextured::drawSurface(const QMatrix4x4& transformMatrix, GLfloat *textureCoords, GLfloat *vertices, int nbVertices)
+void GLShaderTextured::drawSurface(const QMatrix4x4& transformMatrix, GLfloat *textureCoords, GLfloat *vertices, int nbVertices, int nbComponents)
 {
     if (m_useImmutableStorage) {
-	    draw(GL_TRIANGLE_FAN, transformMatrix, textureCoords, vertices, nbVertices);
+	    draw(GL_TRIANGLE_FAN, transformMatrix, textureCoords, vertices, nbVertices, nbComponents);
     } else {
-        drawMutable(GL_TRIANGLE_FAN, transformMatrix, textureCoords, vertices, nbVertices);
+        drawMutable(GL_TRIANGLE_FAN, transformMatrix, textureCoords, vertices, nbVertices, nbComponents);
     }
 }
 
-void GLShaderTextured::draw(unsigned int mode, const QMatrix4x4& transformMatrix, GLfloat *textureCoords, GLfloat *vertices, int nbVertices)
+void GLShaderTextured::draw(unsigned int mode, const QMatrix4x4& transformMatrix, GLfloat *textureCoords, GLfloat *vertices, int nbVertices, int nbComponents)
 {
 	if (!m_texture)
     {
@@ -167,7 +167,7 @@ void GLShaderTextured::draw(unsigned int mode, const QMatrix4x4& transformMatrix
 	m_texture->bind();
 	m_program->setUniformValue(m_textureLoc, 0); // Use texture unit 0 which magically contains our texture
 	f->glEnableVertexAttribArray(0); // vertex
-	f->glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+	f->glVertexAttribPointer(0, nbComponents, GL_FLOAT, GL_FALSE, 0, vertices);
 	f->glEnableVertexAttribArray(1); // texture coordinates
 	f->glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, textureCoords);
 	f->glDrawArrays(mode, 0, nbVertices);
@@ -175,7 +175,7 @@ void GLShaderTextured::draw(unsigned int mode, const QMatrix4x4& transformMatrix
 	m_program->release();
 }
 
-void GLShaderTextured::drawMutable(unsigned int mode, const QMatrix4x4& transformMatrix, GLfloat *textureCoords, GLfloat *vertices, int nbVertices)
+void GLShaderTextured::drawMutable(unsigned int mode, const QMatrix4x4& transformMatrix, GLfloat *textureCoords, GLfloat *vertices, int nbVertices, int nbComponents)
 {
 	if (!m_textureId)
     {
@@ -188,7 +188,7 @@ void GLShaderTextured::drawMutable(unsigned int mode, const QMatrix4x4& transfor
 	glBindTexture(GL_TEXTURE_2D, m_textureId);
 	m_program->setUniformValue(m_textureLoc, 0); // Use texture unit 0 which magically contains our texture
 	glEnableVertexAttribArray(0); // vertex
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+	glVertexAttribPointer(0, nbComponents, GL_FLOAT, GL_FALSE, 0, vertices);
 	glEnableVertexAttribArray(1); // texture coordinates
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, textureCoords);
 	glDrawArrays(mode, 0, nbVertices);

@@ -60,32 +60,32 @@ void GLShaderSimple::initializeGL()
 	m_program->release();
 }
 
-void GLShaderSimple::drawPoints(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices)
+void GLShaderSimple::drawPoints(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices, int nbComponents)
 {
-    draw(GL_POINTS, transformMatrix, color, vertices, nbVertices);
+    draw(GL_POINTS, transformMatrix, color, vertices, nbVertices, nbComponents);
 }
 
-void GLShaderSimple::drawPolyline(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices)
+void GLShaderSimple::drawPolyline(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices, int nbComponents)
 {
-	draw(GL_LINE_STRIP, transformMatrix, color, vertices, nbVertices);
+	draw(GL_LINE_STRIP, transformMatrix, color, vertices, nbVertices, nbComponents);
 }
 
-void GLShaderSimple::drawSegments(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices)
+void GLShaderSimple::drawSegments(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices, int nbComponents)
 {
-	draw(GL_LINES, transformMatrix, color, vertices, nbVertices);
+	draw(GL_LINES, transformMatrix, color, vertices, nbVertices, nbComponents);
 }
 
-void GLShaderSimple::drawContour(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices)
+void GLShaderSimple::drawContour(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices, int nbComponents)
 {
-	draw(GL_LINE_LOOP, transformMatrix, color, vertices, nbVertices);
+	draw(GL_LINE_LOOP, transformMatrix, color, vertices, nbVertices, nbComponents);
 }
 
-void GLShaderSimple::drawSurface(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices)
+void GLShaderSimple::drawSurface(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices, int nbComponents)
 {
-	draw(GL_TRIANGLE_FAN, transformMatrix, color, vertices, nbVertices);
+	draw(GL_TRIANGLE_FAN, transformMatrix, color, vertices, nbVertices, nbComponents);
 }
 
-void GLShaderSimple::draw(unsigned int mode, const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices)
+void GLShaderSimple::draw(unsigned int mode, const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices, int nbComponents)
 {
 	QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
 	m_program->bind();
@@ -95,7 +95,7 @@ void GLShaderSimple::draw(unsigned int mode, const QMatrix4x4& transformMatrix, 
 	f->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	f->glLineWidth(1.0f);
 	f->glEnableVertexAttribArray(0); // vertex
-	f->glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+	f->glVertexAttribPointer(0, nbComponents, GL_FLOAT, GL_FALSE, 0, vertices);
 	f->glDrawArrays(mode, 0, nbVertices);
 	f->glDisableVertexAttribArray(0);
 	m_program->release();

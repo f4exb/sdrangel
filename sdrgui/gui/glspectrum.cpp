@@ -23,8 +23,10 @@
 #include <QOpenGLFunctions>
 #include <QPainter>
 #include <QFontDatabase>
+#include "maincore.h"
 #include "dsp/spectrumvis.h"
 #include "gui/glspectrum.h"
+#include "settings/mainsettings.h"
 #include "util/messagequeue.h"
 #include "util/db.h"
 
@@ -79,6 +81,16 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
     m_displayWaterfall(true),
     m_ssbSpectrum(false),
     m_lsbDisplay(false),
+    m_3DSpectrogramBuffer(nullptr),
+    m_3DSpectrogramBufferPos(0),
+    m_3DSpectrogramTextureHeight(-1),
+    m_3DSpectrogramTexturePos(0),
+    m_display3DSpectrogram(false),
+    m_rotate3DSpectrogram(false),
+    m_pan3DSpectrogram(false),
+    m_scaleZ3DSpectrogram(false),
+    m_3DSpectrogramStyle(SpectrumSettings::Outline),
+    m_3DSpectrogramColorMap("Angel"),
     m_histogramBuffer(nullptr),
     m_histogram(nullptr),
     m_displayHistogram(true),
@@ -91,8 +103,18 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
     m_calibrationGain(1.0),
     m_calibrationShiftdB(0.0),
     m_calibrationInterpMode(SpectrumSettings::CalibInterpLinear),
-    m_messageQueueToGUI(nullptr)
+    m_messageQueueToGUI(nullptr),
+    m_openGLLogger(nullptr)
 {
+    // Enable multisampling anti-aliasing (MSAA)
+    int multisamples = MainCore::instance()->getSettings().getMultisampling();
+    if (multisamples > 0)
+    {
+        QSurfaceFormat format;
+        format.setSamples(multisamples);
+        setFormat(format);
+    }
+
     setObjectName("GLSpectrum");
     setAutoFillBackground(false);
     setAttribute(Qt::WA_OpaquePaintEvent, true);
@@ -179,6 +201,10 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
     m_timer.setTimerType(Qt::PreciseTimer);
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
     m_timer.start(m_fpsPeriodMs);
+
+    // Handle KeyEvents
+    setFocusPolicy(Qt::StrongFocus);
+    installEventFilter(this);
 }
 
 GLSpectrum::~GLSpectrum()
@@ -191,6 +217,12 @@ GLSpectrum::~GLSpectrum()
         m_waterfallBuffer = nullptr;
     }
 
+    if (m_3DSpectrogramBuffer)
+    {
+        delete m_3DSpectrogramBuffer;
+        m_3DSpectrogramBuffer = nullptr;
+    }
+
     if (m_histogramBuffer)
     {
         delete m_histogramBuffer;
@@ -201,6 +233,12 @@ GLSpectrum::~GLSpectrum()
     {
         delete[] m_histogram;
         m_histogram = nullptr;
+    }
+
+    if (m_openGLLogger)
+    {
+        delete m_openGLLogger;
+        m_openGLLogger = nullptr;
     }
 }
 
@@ -292,6 +330,31 @@ void GLSpectrum::setDisplayWaterfall(bool display)
     }
     m_changesPending = true;
     stopDrag();
+    m_mutex.unlock();
+    update();
+}
+
+void GLSpectrum::setDisplay3DSpectrogram(bool display)
+{
+    m_mutex.lock();
+    m_display3DSpectrogram = display;
+    m_changesPending = true;
+    stopDrag();
+    m_mutex.unlock();
+    update();
+}
+
+void GLSpectrum::set3DSpectrogramStyle(SpectrumSettings::SpectrogramStyle style)
+{
+    m_3DSpectrogramStyle = style;
+    update();
+}
+
+void GLSpectrum::set3DSpectrogramColorMap(const QString &colorMap)
+{
+    m_mutex.lock();
+    m_3DSpectrogramColorMap = colorMap;
+    m_changesPending = true;
     m_mutex.unlock();
     update();
 }
@@ -537,6 +600,7 @@ void GLSpectrum::newSpectrum(const Real *spectrum, int nbBins, int fftSize)
     }
 
     updateWaterfall(spectrum);
+    update3DSpectrogram(spectrum);
     updateHistogram(spectrum);
 }
 
@@ -560,6 +624,29 @@ void GLSpectrum::updateWaterfall(const Real *spectrum)
         }
 
         m_waterfallBufferPos++;
+    }
+}
+
+void GLSpectrum::update3DSpectrogram(const Real *spectrum)
+{
+    if (m_3DSpectrogramBufferPos < m_3DSpectrogramBuffer->height())
+    {
+        quint8* pix = (quint8*)m_3DSpectrogramBuffer->scanLine(m_3DSpectrogramBufferPos);
+
+        for (int i = 0; i < m_nbBins; i++)
+        {
+            int v = (int)((spectrum[i] - m_referenceLevel) * 2.4 * 100.0 / m_powerRange + 240.0);
+
+            if (v > 255) {
+                v = 255;
+            } else if (v < 0) {
+                v = 0;
+            }
+
+            *pix++ = v;
+        }
+
+        m_3DSpectrogramBufferPos++;
     }
 }
 
@@ -691,6 +778,27 @@ void GLSpectrum::initializeGL()
         else {
             qDebug() << "GLSpectrum::initializeGL: current context is invalid";
         }
+
+        if (   (MainCore::instance()->getSettings().getConsoleMinLogLevel() <= QtDebugMsg)
+            || (MainCore::instance()->getSettings().getFileMinLogLevel() <= QtDebugMsg))
+        {
+            // Enable OpenGL debugging
+            QSurfaceFormat format = glCurrentContext->format();
+            format.setOption(QSurfaceFormat::DebugContext);
+            glCurrentContext->setFormat(format);
+
+            if (glCurrentContext->hasExtension(QByteArrayLiteral("GL_KHR_debug")))
+            {
+                m_openGLLogger = new QOpenGLDebugLogger(this);
+                m_openGLLogger->initialize();
+                connect(m_openGLLogger, &QOpenGLDebugLogger::messageLogged, this, &GLSpectrum::openGLDebug);
+                m_openGLLogger->startLogging(QOpenGLDebugLogger::SynchronousLogging);
+            }
+            else
+            {
+                qDebug() << "GLSpectrum::initializeGL: GL_KHR_debug not available";
+            }
+        }
     }
     else
     {
@@ -711,6 +819,14 @@ void GLSpectrum::initializeGL()
     m_glShaderHistogram.initializeGL();
     m_glShaderTextOverlay.initializeGL();
     m_glShaderInfo.initializeGL();
+    m_glShaderSpectrogram.initializeGL();
+    m_glShaderSpectrogramTimeScale.initializeGL();
+    m_glShaderSpectrogramPowerScale.initializeGL();
+}
+
+void GLSpectrum::openGLDebug(const QOpenGLDebugMessage &debugMessage)
+{
+    qDebug() << "GLSpectrum::openGLDebug: " << debugMessage;
 }
 
 void GLSpectrum::resizeGL(int width, int height)
@@ -753,11 +869,43 @@ void GLSpectrum::paintGL()
 
     QOpenGLFunctions *glFunctions = QOpenGLContext::currentContext()->functions();
     glFunctions->glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glFunctions->glClear(GL_COLOR_BUFFER_BIT);
+    glFunctions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // paint waterfall
-    if (m_displayWaterfall)
+    QMatrix4x4 spectrogramGridMatrix;
+    spectrogramGridMatrix.translate(0.0f, 0.0f, -1.65f);
+    m_glShaderSpectrogram.applyScaleRotate(spectrogramGridMatrix);
+    spectrogramGridMatrix.translate(-0.5f, -0.5f, 0.0f);
+    m_glShaderSpectrogram.applyPerspective(spectrogramGridMatrix);
+
+    if (m_display3DSpectrogram)
     {
+        // paint 3D spectrogram
+        if (m_3DSpectrogramTexturePos + m_3DSpectrogramBufferPos < m_3DSpectrogramTextureHeight)
+        {
+            m_glShaderSpectrogram.subTexture(0, m_3DSpectrogramTexturePos, m_nbBins, m_3DSpectrogramBufferPos,  m_3DSpectrogramBuffer->scanLine(0));
+            m_3DSpectrogramTexturePos += m_3DSpectrogramBufferPos;
+        }
+        else
+        {
+            int breakLine = m_3DSpectrogramTextureHeight - m_3DSpectrogramTexturePos;
+            int linesLeft = m_3DSpectrogramTexturePos + m_3DSpectrogramBufferPos - m_3DSpectrogramTextureHeight;
+            m_glShaderSpectrogram.subTexture(0, m_3DSpectrogramTexturePos, m_nbBins, breakLine,  m_3DSpectrogramBuffer->scanLine(0));
+            m_glShaderSpectrogram.subTexture(0, 0, m_nbBins, linesLeft,  m_3DSpectrogramBuffer->scanLine(breakLine));
+            m_3DSpectrogramTexturePos = linesLeft;
+        }
+
+        m_3DSpectrogramBufferPos = 0;
+
+        float prop_y = m_3DSpectrogramTexturePos / (m_3DSpectrogramTextureHeight - 1.0);
+
+        // Temporarily reduce viewport to waterfall area so anything outside is clipped
+        glFunctions->glViewport(0, m_3DSpectrogramBottom, width(), m_waterfallHeight);
+        m_glShaderSpectrogram.drawSurface(m_3DSpectrogramStyle, prop_y, m_invertedWaterfall);
+        glFunctions->glViewport(0, 0, width(), height());
+    }
+    else if (m_displayWaterfall)
+    {
+        // paint 2D waterfall
         {
             GLfloat vtx1[] = {
                     0, m_invertedWaterfall ? 0.0f : 1.0f,
@@ -960,7 +1108,7 @@ void GLSpectrum::paintGL()
     }
 
     // paint frequency scale
-    if (m_displayWaterfall || m_displayMaxHold || m_displayCurrent || m_displayHistogram )
+    if (m_displayWaterfall || m_displayMaxHold || m_displayCurrent || m_displayHistogram)
     {
         {
             GLfloat vtx1[] = {
@@ -1013,6 +1161,74 @@ void GLSpectrum::paintGL()
                 }
             }
         }
+    }
+
+    // paint 3D spectrogram scales
+    if (m_display3DSpectrogram && m_displayGrid)
+    {
+        glFunctions->glViewport(0, m_3DSpectrogramBottom, width(), m_waterfallHeight);
+        {
+            float l = m_spectrogramTimePixmap.width() / (float) width();
+            float r = m_rightMargin / (float) width();
+            float h = m_frequencyPixmap.height() / (float) m_waterfallHeight;
+
+            GLfloat vtx1[] = {
+                    -l, -h,
+                   1+r, -h,
+                   1+r,  0,
+                    -l,  0
+            };
+            GLfloat tex1[] = {
+                    0, 1,
+                    1, 1,
+                    1, 0,
+                    0, 0
+            };
+
+            m_glShaderFrequencyScale.drawSurface(spectrogramGridMatrix, tex1, vtx1, 4);
+        }
+
+        {
+            float w = m_spectrogramTimePixmap.width() / (float) width();
+            float h = (m_bottomMargin/2) / (float) m_waterfallHeight;      // m_bottomMargin is fm.ascent
+
+            GLfloat vtx1[] = {
+                    -w, 0.0-h,
+                     0, 0.0-h,
+                     0, 1.0+h,
+                    -w, 1.0+h
+            };
+            GLfloat tex1[] = {
+                    0, 1,
+                    1, 1,
+                    1, 0,
+                    0, 0
+            };
+
+            m_glShaderSpectrogramTimeScale.drawSurface(spectrogramGridMatrix, tex1, vtx1, 4);
+        }
+
+        {
+            float w = m_spectrogramPowerPixmap.width() / (float) width();
+            float h = m_topMargin / (float) m_spectrogramPowerPixmap.height();
+
+            GLfloat vtx1[] = {
+                    -w, 1.0, 0.0,
+                    0,  1.0, 0.0,
+                    0,  1.0, 1.0+h,
+                    -w, 1.0, 1.0+h,
+            };
+            GLfloat tex1[] = {
+                    0, 1,
+                    1, 1,
+                    1, 0,
+                    0, 0
+            };
+
+            m_glShaderSpectrogramPowerScale.drawSurface(spectrogramGridMatrix, tex1, vtx1, 4, 3);
+        }
+
+        glFunctions->glViewport(0, 0, width(), height());
     }
 
     // paint max hold lines on top of histogram
@@ -1152,6 +1368,128 @@ void GLSpectrum::paintGL()
             QVector4D color(1.0f, 1.0f, 1.0f, (float) m_displayGridIntensity / 100.0f);
             m_glShaderSimple.drawSegments(m_glWaterfallBoxMatrix, color, q3, 2*effectiveTicks);
         }
+    }
+
+    // paint 3D spectrogram grid - this is drawn on top of signal, so that appears slightly transparent
+    // x-axis is freq, y time and z power
+    if (m_displayGrid && m_display3DSpectrogram)
+    {
+        const ScaleEngine::TickList* tickList;
+        const ScaleEngine::Tick* tick;
+
+        glFunctions->glViewport(0, m_3DSpectrogramBottom, width(), m_waterfallHeight);
+
+        tickList = &m_powerScale.getTickList();
+        {
+            GLfloat *q3 = m_q3TickPower.m_array;
+            int effectiveTicks = 0;
+
+            for (int i= 0; i < tickList->count(); i++)
+            {
+                tick = &(*tickList)[i];
+
+                if (tick->major)
+                {
+                    if (tick->textSize > 0)
+                    {
+                        float y = tick->pos / m_powerScale.getSize();
+                        q3[6*effectiveTicks] = 0.0;
+                        q3[6*effectiveTicks+1] = 1.0;
+                        q3[6*effectiveTicks+2] = y;
+                        q3[6*effectiveTicks+3] = 1.0;
+                        q3[6*effectiveTicks+4] = 1.0;
+                        q3[6*effectiveTicks+5] = y;
+                        effectiveTicks++;
+                    }
+                }
+            }
+
+            QVector4D color(1.0f, 1.0f, 1.0f, (float) m_displayGridIntensity / 100.0f);
+            m_glShaderSimple.drawSegments(spectrogramGridMatrix, color, q3, 2*effectiveTicks, 3);
+        }
+
+        tickList = &m_timeScale.getTickList();
+        {
+            GLfloat *q3 = m_q3TickTime.m_array;
+            int effectiveTicks = 0;
+
+            for (int i= 0; i < tickList->count(); i++)
+            {
+                tick = &(*tickList)[i];
+
+                if (tick->major)
+                {
+                    if (tick->textSize > 0)
+                    {
+                        float y = tick->pos / m_timeScale.getSize();
+                        q3[4*effectiveTicks] = 0.0;
+                        q3[4*effectiveTicks+1] = 1.0 - y;
+                        q3[4*effectiveTicks+2] = 1.0;
+                        q3[4*effectiveTicks+3] = 1.0 - y;
+                        effectiveTicks++;
+                    }
+                }
+            }
+
+            QVector4D color(1.0f, 1.0f, 1.0f, (float) m_displayGridIntensity / 100.0f);
+            m_glShaderSimple.drawSegments(spectrogramGridMatrix, color, q3, 2*effectiveTicks);
+        }
+
+        tickList = &m_frequencyScale.getTickList();
+        {
+            GLfloat *q3 = m_q3TickFrequency.m_array;
+            int effectiveTicks = 0;
+
+            for (int i= 0; i < tickList->count(); i++)
+            {
+                tick = &(*tickList)[i];
+
+                if (tick->major)
+                {
+                    if (tick->textSize > 0)
+                    {
+                        float x = tick->pos / m_frequencyScale.getSize();
+                        q3[4*effectiveTicks] = x;
+                        q3[4*effectiveTicks+1] = -0.0;
+                        q3[4*effectiveTicks+2] = x;
+                        q3[4*effectiveTicks+3] = 1.0;
+                        effectiveTicks++;
+                    }
+                }
+            }
+
+            QVector4D color(1.0f, 1.0f, 1.0f, (float) m_displayGridIntensity / 100.0f);
+            m_glShaderSimple.drawSegments(spectrogramGridMatrix, color, q3, 2*effectiveTicks);
+        }
+        {
+            GLfloat *q3 = m_q3TickFrequency.m_array;
+            int effectiveTicks = 0;
+
+            for (int i= 0; i < tickList->count(); i++)
+            {
+                tick = &(*tickList)[i];
+
+                if (tick->major)
+                {
+                    if (tick->textSize > 0)
+                    {
+                        float x = tick->pos / m_frequencyScale.getSize();
+                        q3[6*effectiveTicks] = x;
+                        q3[6*effectiveTicks+1] = 1.0;
+                        q3[6*effectiveTicks+2] = 0.0;
+                        q3[6*effectiveTicks+3] = x;
+                        q3[6*effectiveTicks+4] = 1.0;
+                        q3[6*effectiveTicks+5] = 1.0;
+                        effectiveTicks++;
+                    }
+                }
+            }
+
+            QVector4D color(1.0f, 1.0f, 1.0f, (float) m_displayGridIntensity / 100.0f);
+            m_glShaderSimple.drawSegments(spectrogramGridMatrix, color, q3, 2*effectiveTicks, 3);
+        }
+
+        glFunctions->glViewport(0, 0, width(), height());
     }
 
     // paint histogram grid
@@ -1566,7 +1904,7 @@ void GLSpectrum::applyChanges()
     m_rightMargin = fm.horizontalAdvance("000");
 
     // displays both histogram and waterfall
-    if (m_displayWaterfall && (m_displayHistogram | m_displayMaxHold | m_displayCurrent))
+    if ((m_displayWaterfall || m_display3DSpectrogram) && (m_displayHistogram | m_displayMaxHold | m_displayCurrent))
     {
         m_waterfallHeight = height() * m_waterfallShare - 1;
 
@@ -1611,24 +1949,9 @@ void GLSpectrum::applyChanges()
             m_timeScale.setRange(Unit::Time, 0, 1);
         }
 
-        m_powerScale.setSize(m_histogramHeight);
-
-        if (m_linear)
-        {
-            Real referenceLevel = m_useCalibration ? m_referenceLevel * m_calibrationGain : m_referenceLevel;
-            m_powerScale.setRange(Unit::Scientific, 0.0f, referenceLevel);
-        }
-        else
-        {
-            Real referenceLevel = m_useCalibration ? m_referenceLevel + m_calibrationShiftdB : m_referenceLevel;
-            m_powerScale.setRange(Unit::Decibel, referenceLevel - m_powerRange, referenceLevel);
-        }
-
         m_leftMargin = m_timeScale.getScaleWidth();
 
-        if (m_powerScale.getScaleWidth() > m_leftMargin) {
-            m_leftMargin = m_powerScale.getScaleWidth();
-        }
+        setPowerScale(m_histogramHeight);
 
         m_leftMargin += 2 * M;
 
@@ -1688,8 +2011,8 @@ void GLSpectrum::applyChanges()
             -2.0f
         );
     }
-    // displays waterfall only
-    else if (m_displayWaterfall)
+    // displays waterfall/3D spectrogram only
+    else if (m_displayWaterfall || m_display3DSpectrogram)
     {
         m_histogramHeight = 0;
         histogramTop = 0;
@@ -1725,6 +2048,9 @@ void GLSpectrum::applyChanges()
         }
 
         m_leftMargin = m_timeScale.getScaleWidth();
+
+        setPowerScale((height() - m_topMargin - m_bottomMargin) / 2.0);
+
         m_leftMargin += 2 * M;
 
         setFrequencyScale();
@@ -1772,10 +2098,10 @@ void GLSpectrum::applyChanges()
         m_waterfallHeight = 0;
         m_histogramHeight = height() - m_topMargin - m_frequencyScaleHeight;
 
-        m_powerScale.setSize(m_histogramHeight);
-        Real referenceLevel = m_useCalibration ? m_referenceLevel + m_calibrationShiftdB : m_referenceLevel;
-        m_powerScale.setRange(Unit::Decibel, referenceLevel - m_powerRange, referenceLevel);
-        m_leftMargin = m_powerScale.getScaleWidth();
+        m_leftMargin = 0;
+
+        setPowerScale(m_histogramHeight);
+
         m_leftMargin += 2 * M;
 
         setFrequencyScale();
@@ -1830,6 +2156,9 @@ void GLSpectrum::applyChanges()
         m_waterfallHeight = 0;
     }
 
+    m_glShaderSpectrogram.setScaleX(((width() - m_leftMargin - m_rightMargin) / (float)m_waterfallHeight));
+    m_glShaderSpectrogram.setScaleZ((m_histogramHeight != 0 ? m_histogramHeight : m_waterfallHeight / 4)  / (float)(width() - m_leftMargin - m_rightMargin));
+
     // bounding boxes
     m_frequencyScaleRect = QRect(
         0,
@@ -1874,6 +2203,13 @@ void GLSpectrum::applyChanges()
             (float) (width() - m_leftMargin - m_rightMargin) / (float) width(),
             (float) (m_waterfallHeight) / (float) height()
         );
+    }
+
+    m_glShaderSpectrogram.setAspectRatio((width() - m_leftMargin - m_rightMargin) / (float)m_waterfallHeight);
+
+    m_3DSpectrogramBottom = m_bottomMargin;
+    if (!m_invertedWaterfall) {
+        m_3DSpectrogramBottom += m_histogramHeight + m_frequencyScaleHeight + 1;
     }
 
     // channel overlays
@@ -2034,7 +2370,7 @@ void GLSpectrum::applyChanges()
     // prepare left scales (time and power)
     {
         m_leftMarginPixmap = QPixmap(m_leftMargin - 1, height());
-        m_leftMarginPixmap.fill(Qt::black);
+        m_leftMarginPixmap.fill(Qt::transparent);
         {
             QPainter painter(&m_leftMarginPixmap);
             painter.setPen(QColor(0xf0, 0xf0, 0xff));
@@ -2066,7 +2402,7 @@ void GLSpectrum::applyChanges()
         m_glShaderLeftScale.initTexture(m_leftMarginPixmap.toImage());
     }
     // prepare frequency scale
-    if (m_displayWaterfall || m_displayHistogram || m_displayMaxHold || m_displayCurrent){
+    if (m_displayWaterfall || m_display3DSpectrogram || m_displayHistogram || m_displayMaxHold || m_displayCurrent) {
         m_frequencyPixmap = QPixmap(width(), m_frequencyScaleHeight);
         m_frequencyPixmap.fill(Qt::transparent);
         {
@@ -2135,6 +2471,55 @@ void GLSpectrum::applyChanges()
 
         m_glShaderFrequencyScale.initTexture(m_frequencyPixmap.toImage());
     }
+    // prepare left scale for spectrogram (time)
+    {
+        m_spectrogramTimePixmap = QPixmap(m_leftMargin - 1, fm.ascent() + m_waterfallHeight);
+        m_spectrogramTimePixmap.fill(Qt::transparent);
+        {
+            QPainter painter(&m_spectrogramTimePixmap);
+            painter.setPen(QColor(0xf0, 0xf0, 0xff));
+            painter.setFont(font());
+            const ScaleEngine::TickList* tickList;
+            const ScaleEngine::Tick* tick;
+            if (m_display3DSpectrogram) {
+                tickList = &m_timeScale.getTickList();
+                for (int i = 0; i < tickList->count(); i++) {
+                    tick = &(*tickList)[i];
+                    if (tick->major) {
+                        if (tick->textSize > 0)
+                            painter.drawText(QPointF(m_leftMargin - M - tick->textSize, fm.height() + tick->textPos), tick->text);
+                    }
+                }
+            }
+        }
+
+        m_glShaderSpectrogramTimeScale.initTexture(m_spectrogramTimePixmap.toImage());
+    }
+    // prepare vertical scale for spectrogram (power)
+    {
+        int h = m_histogramHeight != 0 ? m_histogramHeight : m_waterfallHeight / 4;
+        m_spectrogramPowerPixmap = QPixmap(m_leftMargin - 1, m_topMargin + h);
+        m_spectrogramPowerPixmap.fill(Qt::transparent);
+        {
+            QPainter painter(&m_spectrogramPowerPixmap);
+            painter.setPen(QColor(0xf0, 0xf0, 0xff));
+            painter.setFont(font());
+            const ScaleEngine::TickList* tickList;
+            const ScaleEngine::Tick* tick;
+            if (m_display3DSpectrogram) {
+                tickList = &m_powerScale.getTickList();
+                for (int i = 0; i < tickList->count(); i++) {
+                    tick = &(*tickList)[i];
+                    if (tick->major) {
+                        if (tick->textSize > 0)
+                            painter.drawText(QPointF(m_leftMargin - M - tick->textSize, m_topMargin + h - tick->textPos - 1), tick->text);
+                    }
+                }
+            }
+        }
+
+        m_glShaderSpectrogramPowerScale.initTexture(m_spectrogramPowerPixmap.toImage());
+    }
 
     // Top info line
     m_glInfoBoxMatrix.setToIdentity();
@@ -2188,7 +2573,18 @@ void GLSpectrum::applyChanges()
         m_waterfallBuffer->fill(qRgb(0x00, 0x00, 0x00));
         m_glShaderWaterfall.initTexture(*m_waterfallBuffer);
         m_waterfallBufferPos = 0;
+
+        if (m_3DSpectrogramBuffer) {
+            delete m_3DSpectrogramBuffer;
+        }
+
+        m_3DSpectrogramBuffer = new QImage(m_nbBins, m_waterfallHeight, QImage::Format_Grayscale8);
+
+        m_3DSpectrogramBuffer->fill(qRgb(0x00, 0x00, 0x00));
+        m_glShaderSpectrogram.initTexture(*m_3DSpectrogramBuffer);
+        m_3DSpectrogramBufferPos = 0;
     }
+    m_glShaderSpectrogram.initColorMapTexture(m_3DSpectrogramColorMap);
 
     if (fftSizeChanged)
     {
@@ -2218,11 +2614,13 @@ void GLSpectrum::applyChanges()
     {
         m_waterfallTextureHeight = m_waterfallHeight;
         m_waterfallTexturePos = 0;
+        m_3DSpectrogramTextureHeight = m_waterfallHeight;
+        m_3DSpectrogramTexturePos = 0;
     }
 
     m_q3TickTime.allocate(4*m_timeScale.getTickList().count());
     m_q3TickFrequency.allocate(4*m_frequencyScale.getTickList().count());
-    m_q3TickPower.allocate(4*m_powerScale.getTickList().count());
+    m_q3TickPower.allocate(6*m_powerScale.getTickList().count());   // 6 as we need 3d points for 3D spectrogram
     updateHistogramMarkers();
     updateWaterfallMarkers();
     updateSortedAnnotationMarkers();
@@ -2461,6 +2859,37 @@ void GLSpectrum::updateCalibrationPoints()
 
 void GLSpectrum::mouseMoveEvent(QMouseEvent* event)
 {
+    if (m_rotate3DSpectrogram)
+    {
+        // Rotate 3D Spectrogram
+        QPointF delta = m_mousePrevLocalPos - event->localPos();
+        m_mousePrevLocalPos = event->localPos();
+        m_glShaderSpectrogram.rotateZ(-delta.x()/2.0f);
+        m_glShaderSpectrogram.rotateX(-delta.y()/2.0f);
+        repaint(); // Force repaint in case acquisition is stopped
+        return;
+    }
+    if (m_pan3DSpectrogram)
+    {
+        // Pan 3D Spectrogram
+        QPointF delta = m_mousePrevLocalPos - event->localPos();
+        m_mousePrevLocalPos = event->localPos();
+        m_glShaderSpectrogram.translateX(-delta.x()/2.0f/500.0f);
+        m_glShaderSpectrogram.translateY(delta.y()/2.0f/500.0f);
+        repaint(); // Force repaint in case acquisition is stopped
+        return;
+    }
+
+    if (m_scaleZ3DSpectrogram)
+    {
+        // Scale 3D Spectrogram in Z dimension
+        QPointF delta = m_mousePrevLocalPos - event->localPos();
+        m_mousePrevLocalPos = event->localPos();
+        m_glShaderSpectrogram.userScaleZ(1.0+(float)delta.y()/20.0);
+        repaint(); // Force repaint in case acquisition is stopped
+        return;
+    }
+
     if (m_displayWaterfall || m_displayHistogram || m_displayMaxHold || m_displayCurrent)
     {
         if (m_frequencyScaleRect.contains(event->pos()))
@@ -2573,6 +3002,20 @@ void GLSpectrum::mousePressEvent(QMouseEvent* event)
 {
     const QPointF& ep = event->localPos();
 
+    if ((event->button() == Qt::MiddleButton) && m_display3DSpectrogram && pointInWaterfallOrSpectrogram(ep))
+    {
+        m_pan3DSpectrogram = true;
+        m_mousePrevLocalPos = ep;
+        return;
+    }
+
+    if ((event->button() == Qt::RightButton) && m_display3DSpectrogram && pointInWaterfallOrSpectrogram(ep))
+    {
+        m_scaleZ3DSpectrogram = true;
+        m_mousePrevLocalPos = ep;
+        return;
+    }
+
     if (event->button() == Qt::RightButton)
     {
         QPointF pHis = ep;
@@ -2681,7 +3124,7 @@ void GLSpectrum::mousePressEvent(QMouseEvent* event)
             frequency = m_frequencyScale.getRangeMin() + pWat.x()*m_frequencyScale.getRange();
             float time = m_timeScale.getRangeMin() + pWat.y()*m_timeScale.getRange();
 
-            if ((pWat.x() >= 0) && (pWat.x() <= 1) && (pWat.y() >= 0) && (pWat.y() <= 1))
+            if ((pWat.x() >= 0) && (pWat.x() <= 1) && (pWat.y() >= 0) && (pWat.y() <= 1) && !m_display3DSpectrogram)
             {
                 if (m_waterfallMarkers.size() < SpectrumWaterfallMarker::m_maxNbOfMarkers)
                 {
@@ -2726,6 +3169,16 @@ void GLSpectrum::mousePressEvent(QMouseEvent* event)
         else if (event->modifiers() & Qt::AltModifier)
         {
             frequencyPan(event);
+        }
+        else if (m_display3DSpectrogram)
+        {
+            // Detect click and drag to rotate 3D spectrogram
+            if (pointInWaterfallOrSpectrogram(ep))
+            {
+                m_rotate3DSpectrogram = true;
+                m_mousePrevLocalPos = ep;
+                return;
+            }
         }
 
         if ((m_markersDisplay == SpectrumSettings::MarkersDisplayAnnotations) &&
@@ -2794,6 +3247,9 @@ void GLSpectrum::mousePressEvent(QMouseEvent* event)
 
 void GLSpectrum::mouseReleaseEvent(QMouseEvent*)
 {
+    m_pan3DSpectrogram = false;
+    m_rotate3DSpectrogram = false;
+    m_scaleZ3DSpectrogram = false;
     if (m_cursorState == CSSplitterMoving)
     {
         releaseMouse();
@@ -2808,12 +3264,32 @@ void GLSpectrum::mouseReleaseEvent(QMouseEvent*)
 
 void GLSpectrum::wheelEvent(QWheelEvent *event)
 {
-    if (event->modifiers() & Qt::ShiftModifier) {
-        channelMarkerMove(event, 100);
-    } else if (event->modifiers() & Qt::ControlModifier) {
-        channelMarkerMove(event, 10);
-    } else {
-        channelMarkerMove(event, 1);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+    const QPointF& ep = event->position();
+#else
+    const QPointF& ep = event->pos();
+#endif
+    if (pointInWaterfallOrSpectrogram(ep))
+    {
+        // Scale 3D spectrogram when mouse wheel moved
+        // Some mice use delta in steps of 120 for 15 degrees
+        // for one step of mouse wheel
+        // Other mice/trackpads use smaller values
+        int delta = event->angleDelta().y();
+        if (delta != 0) {
+             m_glShaderSpectrogram.verticalAngle(-5.0*delta/120.0);
+        }
+        repaint(); // Force repaint in case acquisition is stopped
+    }
+    else
+    {
+        if (event->modifiers() & Qt::ShiftModifier) {
+            channelMarkerMove(event, 100);
+        } else if (event->modifiers() & Qt::ControlModifier) {
+            channelMarkerMove(event, 10);
+        } else {
+            channelMarkerMove(event, 1);
+        }
     }
 }
 
@@ -2973,6 +3449,26 @@ void GLSpectrum::setFrequencyScale()
     m_frequencyScale.setMakeOpposite(m_lsbDisplay);
 }
 
+void GLSpectrum::setPowerScale(int height)
+{
+    m_powerScale.setSize(height);
+
+    if (m_linear)
+    {
+        Real referenceLevel = m_useCalibration ? m_referenceLevel * m_calibrationGain : m_referenceLevel;
+        m_powerScale.setRange(Unit::Scientific, 0.0f, referenceLevel);
+    }
+    else
+    {
+        Real referenceLevel = m_useCalibration ? m_referenceLevel + m_calibrationShiftdB : m_referenceLevel;
+        m_powerScale.setRange(Unit::Decibel, referenceLevel - m_powerRange, referenceLevel);
+    }
+
+    if (m_powerScale.getScaleWidth() > m_leftMargin) {
+        m_leftMargin = m_powerScale.getScaleWidth();
+    }
+}
+
 void GLSpectrum::getFrequencyZoom(int64_t& centerFrequency, int& frequencySpan)
 {
     frequencySpan = (m_frequencyZoomFactor == 1) ?
@@ -3031,6 +3527,17 @@ void GLSpectrum::channelMarkerMove(QWheelEvent *event, int mul)
     }
 
     zoom(event);
+}
+
+// Return if specified point is within the bounds of the waterfall / 3D spectrogram screen area
+bool GLSpectrum::pointInWaterfallOrSpectrogram(const QPointF &point) const
+{
+    // m_waterfallRect is normalised to [0,1]
+    QPointF pWat = point;
+    pWat.rx() = (point.x()/width() - m_waterfallRect.left()) / m_waterfallRect.width();
+    pWat.ry() = (point.y()/height() - m_waterfallRect.top()) / m_waterfallRect.height();
+
+    return (pWat.x() >= 0) && (pWat.x() <= 1) && (pWat.y() >= 0) && (pWat.y() <= 1);
 }
 
 void GLSpectrum::enterEvent(QEvent* event)
@@ -3109,6 +3616,9 @@ void GLSpectrum::cleanup()
     m_glShaderWaterfall.cleanup();
     m_glShaderTextOverlay.cleanup();
     m_glShaderInfo.cleanup();
+    m_glShaderSpectrogram.cleanup();
+    m_glShaderSpectrogramTimeScale.cleanup();
+    m_glShaderSpectrogramPowerScale.cleanup();
     //doneCurrent();
 }
 
@@ -3266,5 +3776,90 @@ void GLSpectrum::formatTextInfo(QString& info)
         getFrequencyZoom(centerFrequency, frequencySpan);
         info.append(tr("CF:%1 ").arg(displayScaled(centerFrequency, 'f', getPrecision(centerFrequency/frequencySpan), true)));
         info.append(tr("SP:%1 ").arg(displayScaled(frequencySpan, 'f', 3, true)));
+    }
+}
+
+bool GLSpectrum::eventFilter(QObject *object, QEvent *event)
+{
+    if (event->type() == QEvent::KeyPress)
+    {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+        switch (keyEvent->key())
+        {
+        case Qt::Key_Up:
+            if (keyEvent->modifiers() & Qt::ShiftModifier) {
+                m_glShaderSpectrogram.lightRotateX(-5.0f);
+            } else if (keyEvent->modifiers() & Qt::AltModifier) {
+                m_glShaderSpectrogram.lightTranslateY(0.05);
+            } else if (keyEvent->modifiers() & Qt::ControlModifier) {
+                m_glShaderSpectrogram.translateY(0.05);
+            } else {
+                m_glShaderSpectrogram.rotateX(-5.0f);
+            }
+            break;
+        case Qt::Key_Down:
+            if (keyEvent->modifiers() & Qt::ShiftModifier) {
+                m_glShaderSpectrogram.lightRotateX(5.0f);
+            } else if (keyEvent->modifiers() & Qt::AltModifier) {
+                m_glShaderSpectrogram.lightTranslateY(-0.05);
+            } else if (keyEvent->modifiers() & Qt::ControlModifier) {
+                m_glShaderSpectrogram.translateY(-0.05);
+            } else {
+                m_glShaderSpectrogram.rotateX(5.0f);
+            }
+            break;
+        case Qt::Key_Left:
+            if (keyEvent->modifiers() & Qt::ShiftModifier) {
+                m_glShaderSpectrogram.lightRotateZ(5.0f);
+            } else if (keyEvent->modifiers() & Qt::AltModifier) {
+                m_glShaderSpectrogram.lightTranslateX(-0.05);
+            } else if (keyEvent->modifiers() & Qt::ControlModifier) {
+                m_glShaderSpectrogram.translateX(-0.05);
+            } else {
+                m_glShaderSpectrogram.rotateZ(5.0f);
+            }
+            break;
+        case Qt::Key_Right:
+            if (keyEvent->modifiers() & Qt::ShiftModifier) {
+                m_glShaderSpectrogram.lightRotateZ(-5.0f);
+            } else if (keyEvent->modifiers() & Qt::AltModifier) {
+                m_glShaderSpectrogram.lightTranslateX(0.05);
+            } else if (keyEvent->modifiers() & Qt::ControlModifier) {
+                m_glShaderSpectrogram.translateX(0.05);
+            } else {
+                m_glShaderSpectrogram.rotateZ(-5.0f);
+            }
+            break;
+        case Qt::Key_Plus:
+            if (keyEvent->modifiers() & Qt::ControlModifier) {
+                m_glShaderSpectrogram.userScaleZ(1.1f);
+            } else {
+                m_glShaderSpectrogram.verticalAngle(-1.0f);
+            }
+            break;
+        case Qt::Key_Minus:
+            if (keyEvent->modifiers() & Qt::ControlModifier) {
+                m_glShaderSpectrogram.userScaleZ(0.9f);
+            } else {
+                m_glShaderSpectrogram.verticalAngle(1.0f);
+            }
+            break;
+        case Qt::Key_R:
+            m_glShaderSpectrogram.reset();
+            break;
+        case Qt::Key_F:
+            // Project straight down and scale to view, so it's a bit like 2D
+            m_glShaderSpectrogram.reset();
+            m_glShaderSpectrogram.rotateX(45.0f);
+            m_glShaderSpectrogram.verticalAngle(-9.0f);
+            m_glShaderSpectrogram.userScaleZ(0.0f);
+            break;
+        }
+        repaint(); // Force repaint in case acquisition is stopped
+        return true;
+    }
+    else
+    {
+        return QOpenGLWidget::eventFilter(object, event);
     }
 }

@@ -172,6 +172,7 @@ set(sdrbase_SOURCES
     util/aprs.cpp
     util/astronomy.cpp
     util/azel.cpp
+    util/colormap.cpp
     util/coordinates.cpp
     util/crc.cpp
     util/CRC64.cpp
@@ -383,6 +384,7 @@ set(sdrbase_HEADERS
     util/aprs.h
     util/astronomy.h
     util/azel.h
+    util/colormap.h
     util/coordinates.h
     util/CRC64.h
     util/csv.h

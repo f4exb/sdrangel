@@ -41,12 +41,12 @@ public:
 	void initializeGL();
 	void initTexture(const QImage& image, QOpenGLTexture::WrapMode wrapMode = QOpenGLTexture::Repeat);
 	void subTexture(int xOffset, int yOffset, int width, int height, const void *pixels);
-	void drawSurface(const QMatrix4x4& transformMatrix, GLfloat* textureCoords, GLfloat *vertices, int nbVertices);
+	void drawSurface(const QMatrix4x4& transformMatrix, GLfloat* textureCoords, GLfloat *vertices, int nbVertices, int nbComponents=2);
 	void cleanup();
 
 private:
-	void draw(unsigned int mode, const QMatrix4x4& transformMatrix, GLfloat *textureCoords, GLfloat *vertices, int nbVertices);
-    void drawMutable(unsigned int mode, const QMatrix4x4& transformMatrix, GLfloat *textureCoords, GLfloat *vertices, int nbVertices);
+	void draw(unsigned int mode, const QMatrix4x4& transformMatrix, GLfloat *textureCoords, GLfloat *vertices, int nbVertices, int nbComponents);
+    void drawMutable(unsigned int mode, const QMatrix4x4& transformMatrix, GLfloat *textureCoords, GLfloat *vertices, int nbVertices, int nbComponents);
 	void initTextureImmutable(const QImage& image, QOpenGLTexture::WrapMode wrapMode = QOpenGLTexture::Repeat);
 	void subTextureImmutable(int xOffset, int yOffset, int width, int height, const void *pixels);
 	void initTextureMutable(const QImage& image, QOpenGLTexture::WrapMode wrapMode = QOpenGLTexture::Repeat);

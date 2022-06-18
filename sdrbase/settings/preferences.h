@@ -21,7 +21,8 @@ public:
         FileMinLogLevel,
         StationName,
         Altitude,
-        SourceItemIndex
+        SourceItemIndex,
+        Multisampling
     };
 
     Preferences();
@@ -71,6 +72,9 @@ public:
 	const QString& getLogFileName() const { return m_logFileName; }
 	void setLogFileName(const QString& value) { m_logFileName = value; }
 
+    int getMultisampling() const { return m_multisampling; }
+    void setMultisampling(int samples) { m_multisampling = samples; }
+
 protected:
 	QString m_sourceDevice; //!< Identification of the source used in R0 tab (GUI flavor) at startup
 	int m_sourceIndex;      //!< Index of the source used in R0 tab (GUI flavor) at startup
@@ -88,6 +92,8 @@ protected:
     QtMsgType m_fileMinLogLevel;
 	bool m_useLogFile;
 	QString m_logFileName;
+
+    int m_multisampling;    //!< Number of samples to use for multisampling anti-aliasing (typically 0 or 4)
 };
 
 #endif // INCLUDE_PREFERENCES_H
