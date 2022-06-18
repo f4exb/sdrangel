@@ -37,7 +37,7 @@ public:
 	GLShaderColors();
 	~GLShaderColors();
 
-	void initializeGL();
+	void initializeGL(float openGLVersion);
     void drawPoints(const QMatrix4x4& transformMatrix, GLfloat *vertices, GLfloat *colors, GLfloat alpha, int nbVertices);
 	void drawPolyline(const QMatrix4x4& transformMatrix, GLfloat *vertices, GLfloat *colors, GLfloat alpha, int nbVertices);
 	void drawSegments(const QMatrix4x4& transformMatrix, GLfloat *vertices, GLfloat *colors, GLfloat alpha, int nbVertices);
@@ -51,7 +51,9 @@ private:
 	QOpenGLShaderProgram *m_program;
 	int m_matrixLoc;
     int m_alphaLoc;
+	static const QString m_vertexShaderSourceSimple2;
 	static const QString m_vertexShaderSourceSimple;
+	static const QString m_fragmentShaderSourceColored2;
 	static const QString m_fragmentShaderSourceColored;
 };
 

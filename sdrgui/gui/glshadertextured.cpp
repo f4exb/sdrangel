@@ -40,21 +40,31 @@ GLShaderTextured::~GLShaderTextured()
 	cleanup();
 }
 
-void GLShaderTextured::initializeGL()
+void GLShaderTextured::initializeGL(float openGLVersion)
 {
     initializeOpenGLFunctions();
     m_useImmutableStorage = useImmutableStorage();
     qDebug() << "GLShaderTextured::initializeGL: m_useImmutableStorage: " << m_useImmutableStorage;
 
-	m_program = new QOpenGLShaderProgram;
-
-	if (!m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, m_vertexShaderSourceTextured)) {
-		qDebug() << "GLShaderTextured::initializeGL: error in vertex shader: " << m_program->log();
-	}
-
-	if (!m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, m_fragmentShaderSourceTextured)) {
-		qDebug() << "GLShaderTextured::initializeGL: error in fragment shader: " << m_program->log();
-	}
+    m_program = new QOpenGLShaderProgram;
+    if (openGLVersion >= 3.3f)
+    {
+        if (!m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, m_vertexShaderSourceTextured)) {
+            qDebug() << "GLShaderTextured::initializeGL: error in vertex shader: " << m_program->log();
+        }
+        if (!m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, m_fragmentShaderSourceTextured)) {
+            qDebug() << "GLShaderTextured::initializeGL: error in fragment shader: " << m_program->log();
+        }
+    }
+    else
+    {
+        if (!m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, m_vertexShaderSourceTextured2)) {
+            qDebug() << "GLShaderTextured::initializeGL: error in vertex shader: " << m_program->log();
+        }
+        if (!m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, m_fragmentShaderSourceTextured2)) {
+            qDebug() << "GLShaderTextured::initializeGL: error in fragment shader: " << m_program->log();
+        }
+    }
 
 	m_program->bindAttributeLocation("vertex", 0);
 	m_program->bindAttributeLocation("texCoord", 1);
@@ -248,7 +258,7 @@ bool GLShaderTextured::useImmutableStorage()
     return false;
 }
 
-const QString GLShaderTextured::m_vertexShaderSourceTextured = QString(
+const QString GLShaderTextured::m_vertexShaderSourceTextured2 = QString(
 		"uniform highp mat4 uMatrix;\n"
 		"attribute highp vec4 vertex;\n"
 		"attribute highp vec2 texCoord;\n"
@@ -259,10 +269,32 @@ const QString GLShaderTextured::m_vertexShaderSourceTextured = QString(
 		"}\n"
 		);
 
-const QString GLShaderTextured::m_fragmentShaderSourceTextured = QString(
+const QString GLShaderTextured::m_vertexShaderSourceTextured = QString(
+        "#version 330\n"
+		"uniform highp mat4 uMatrix;\n"
+		"in highp vec4 vertex;\n"
+		"in highp vec2 texCoord;\n"
+		"out mediump vec2 texCoordVar;\n"
+		"void main() {\n"
+		"    gl_Position = uMatrix * vertex;\n"
+		"    texCoordVar = texCoord;\n"
+		"}\n"
+		);
+
+const QString GLShaderTextured::m_fragmentShaderSourceTextured2 = QString(
 		"uniform lowp sampler2D uTexture;\n"
 		"varying mediump vec2 texCoordVar;\n"
 		"void main() {\n"
 		"    gl_FragColor = texture2D(uTexture, texCoordVar);\n"
+		"}\n"
+		);
+
+const QString GLShaderTextured::m_fragmentShaderSourceTextured = QString(
+        "#version 330\n"
+		"uniform lowp sampler2D uTexture;\n"
+		"in mediump vec2 texCoordVar;\n"
+        "out vec4 fragColor;\n"
+		"void main() {\n"
+		"    fragColor = texture(uTexture, texCoordVar);\n"
 		"}\n"
 		);

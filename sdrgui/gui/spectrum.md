@@ -327,7 +327,7 @@ This dropdown determines how the 3D Spectrogram data is rendered.
   - Lines: The data points are connected by lines.
   - Solid: The data are rendeded as a solid surface with constant illumination.
   - Outline: The data are rendered as a solid surface with outlines of the polygons highlighted.
-  - Shaded: The data are rendeder as a solid surface with a combination of ambient and diffuse lighting.
+  - Shaded: The data are rendeder as a solid surface with a combination of ambient and diffuse lighting. This requires OpenGL 3.3 or greater.
 
 <h4>B.5.2: Color Map</h4>
 

@@ -36,7 +36,7 @@ public:
     GLShaderSpectrogram();
     ~GLShaderSpectrogram();
 
-    void initializeGL();
+    void initializeGL(float openGLVersion);
     void initColorMapTexture(const QString &colorMapName);
     void initTexture(const QImage& image);
     void subTexture(int xOffset, int yOffset, int width, int height, const void *pixels);
@@ -85,7 +85,7 @@ private:
     QOpenGLShaderProgram *m_programForLocs;     // Which program the locations are for
     int m_textureTransformLoc;
     int m_vertexTransformLoc;
-    int m_textureLoc;
+    int m_dataTextureLoc;
     int m_limitLoc;
     int m_brightnessLoc;
     int m_colorMapLoc;
@@ -93,9 +93,11 @@ private:
     int m_lightPosLoc;
 
     bool m_useImmutableStorage;
+    static const QString m_vertexShader2;
     static const QString m_vertexShader;
     static const QString m_geometryShader;
     static const QString m_fragmentShaderShaded;
+    static const QString m_fragmentShaderSimple2;
     static const QString m_fragmentShaderSimple;
 
     QOpenGLBuffer m_vertexBuf;

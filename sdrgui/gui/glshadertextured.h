@@ -38,7 +38,7 @@ public:
 	GLShaderTextured();
 	~GLShaderTextured();
 
-	void initializeGL();
+	void initializeGL(float openGLVersion);
 	void initTexture(const QImage& image, QOpenGLTexture::WrapMode wrapMode = QOpenGLTexture::Repeat);
 	void subTexture(int xOffset, int yOffset, int width, int height, const void *pixels);
 	void drawSurface(const QMatrix4x4& transformMatrix, GLfloat* textureCoords, GLfloat *vertices, int nbVertices, int nbComponents=2);
@@ -59,7 +59,9 @@ private:
 	int m_matrixLoc;
 	int m_textureLoc;
     bool m_useImmutableStorage;
+	static const QString m_vertexShaderSourceTextured2;
 	static const QString m_vertexShaderSourceTextured;
+	static const QString m_fragmentShaderSourceTextured2;
 	static const QString m_fragmentShaderSourceTextured;
 };
 

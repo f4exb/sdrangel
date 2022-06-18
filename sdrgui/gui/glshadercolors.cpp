@@ -36,17 +36,28 @@ GLShaderColors::~GLShaderColors()
 	cleanup();
 }
 
-void GLShaderColors::initializeGL()
+void GLShaderColors::initializeGL(float openGLVersion)
 {
 	m_program = new QOpenGLShaderProgram;
 
-	if (!m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, m_vertexShaderSourceSimple)) {
-		qDebug() << "GLShaderColors::initializeGL: error in vertex shader: " << m_program->log();
-	}
-
-	if (!m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, m_fragmentShaderSourceColored)) {
-		qDebug() << "GLShaderColors::initializeGL: error in fragment shader: " << m_program->log();
-	}
+    if (openGLVersion >= 3.3)
+    {
+        if (!m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, m_vertexShaderSourceSimple)) {
+            qDebug() << "GLShaderColors::initializeGL: error in vertex shader: " << m_program->log();
+        }
+        if (!m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, m_fragmentShaderSourceColored)) {
+            qDebug() << "GLShaderColors::initializeGL: error in fragment shader: " << m_program->log();
+        }
+    }
+    else
+    {
+        if (!m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, m_vertexShaderSourceSimple2)) {
+            qDebug() << "GLShaderColors::initializeGL: error in vertex shader: " << m_program->log();
+        }
+        if (!m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, m_fragmentShaderSourceColored2)) {
+            qDebug() << "GLShaderColors::initializeGL: error in fragment shader: " << m_program->log();
+        }
+    }
 
 	m_program->bindAttributeLocation("vertex", 0);
 	m_program->bindAttributeLocation("v_color", 1);
@@ -118,7 +129,7 @@ void GLShaderColors::cleanup()
 	}
 }
 
-const QString GLShaderColors::m_vertexShaderSourceSimple = QString(
+const QString GLShaderColors::m_vertexShaderSourceSimple2 = QString(
 		"uniform highp mat4 uMatrix;\n"
 		"attribute highp vec4 vertex;\n"
         "attribute vec3 v_color;\n"
@@ -129,10 +140,32 @@ const QString GLShaderColors::m_vertexShaderSourceSimple = QString(
 		"}\n"
 		);
 
-const QString GLShaderColors::m_fragmentShaderSourceColored = QString(
+const QString GLShaderColors::m_vertexShaderSourceSimple = QString(
+        "#version 330\n"
+		"uniform highp mat4 uMatrix;\n"
+		"in highp vec4 vertex;\n"
+        "in vec3 v_color;\n"
+        "out vec3 f_color;\n"
+        "void main() {\n"
+		"    gl_Position = uMatrix * vertex;\n"
+        "    f_color = v_color;\n"
+		"}\n"
+		);
+
+const QString GLShaderColors::m_fragmentShaderSourceColored2 = QString(
         "uniform mediump float uAlpha;\n"
         "varying vec3 f_color;\n"
 		"void main() {\n"
 		"    gl_FragColor = vec4(f_color.r, f_color.g, f_color.b, uAlpha);\n"
+		"}\n"
+		);
+
+const QString GLShaderColors::m_fragmentShaderSourceColored = QString(
+        "#version 330\n"
+        "uniform mediump float uAlpha;\n"
+        "in vec3 f_color;\n"
+        "out vec4 fragColor;\n"
+		"void main() {\n"
+		"    fragColor = vec4(f_color.r, f_color.g, f_color.b, uAlpha);\n"
 		"}\n"
 		);
