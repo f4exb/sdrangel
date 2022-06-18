@@ -272,9 +272,8 @@ void M17ModSource::pullAF(Real& sample, bool& carrier)
 
 void M17ModSource::pullM17(Real& sample, bool& carrier)
 {
-    quint8 bbSampleBytes[2];
-    carrier = m_processor->getBasebandFifo()->readOne(bbSampleBytes);
-    int16_t basbandSample = bbSampleBytes[0] | (bbSampleBytes[1]<<8);
+    int16_t basbandSample;
+    carrier = m_processor->getBasebandFifo()->readOne(&basbandSample) != 0;
 
     if (carrier)
     {

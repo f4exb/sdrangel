@@ -24,7 +24,7 @@ MESSAGE_CLASS_DEFINITION(M17ModProcessor::MsgSendSMS, Message)
 M17ModProcessor::M17ModProcessor() :
     m_m17Modulator("MYCALL", "")
 {
-    m_basebandFifo.setSampleSize(sizeof(int16_t), 96000);
+    m_basebandFifo.setSize(96000);
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }
 
@@ -114,7 +114,7 @@ void M17ModProcessor::send_preamble()
     preamble_bytes.fill(0x77);
     std::array<int8_t, 192> preamble_symbols = mobilinkd::M17Modulator::bytes_to_symbols(preamble_bytes);
     std::array<int16_t, 1920> preamble_baseband = m_m17Modulator.symbols_to_baseband(preamble_symbols);
-    m_basebandFifo.write((const quint8*) preamble_baseband.data(), 1920);
+    m_basebandFifo.write(preamble_baseband.data(), 1920);
 }
 
 void M17ModProcessor::send_eot()
@@ -128,7 +128,7 @@ void M17ModProcessor::send_eot()
 
     std::array<int8_t, 192> eot_symbols = mobilinkd::M17Modulator::bytes_to_symbols(eot_bytes);
     std::array<int16_t, 1920> eot_baseband = m_m17Modulator.symbols_to_baseband(eot_symbols);
-    m_basebandFifo.write((const quint8*) eot_baseband.data(), 1920);
+    m_basebandFifo.write(eot_baseband.data(), 1920);
 }
 
 void M17ModProcessor::output_baseband(std::array<uint8_t, 2> sync_word, const std::array<int8_t, 368>& frame)
@@ -140,5 +140,5 @@ void M17ModProcessor::output_baseband(std::array<uint8_t, 2> sync_word, const st
     auto fit = std::copy(sw.begin(), sw.end(), temp.begin()); // start with sync word dibits
     std::copy(symbols.begin(), symbols.end(), fit); // then the frame dibits
     std::array<int16_t, 1920> baseband = m_m17Modulator.symbols_to_baseband(temp); // 1920 48 kS/s int16_t samples
-    m_basebandFifo.write((const quint8*) baseband.data(), 1920);
+    m_basebandFifo.write(baseband.data(), 1920);
 }

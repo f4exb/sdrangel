@@ -5,6 +5,7 @@ set(modm17_SOURCES
     m17modbaseband.cpp
     m17modsource.cpp
     m17modprocessor.cpp
+    m17modfifo.cpp
 	m17modplugin.cpp
     m17modsettings.cpp
     m17modwebapiadapter.cpp
@@ -15,6 +16,7 @@ set(modm17_HEADERS
     m17modbaseband.h
     m17modsource.h
     m17modprocessor.h
+    m17modfifo.h
 	m17modplugin.h
     m17modsettings.h
     m17modwebapiadapter.h

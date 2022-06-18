@@ -24,7 +24,7 @@
 #include "m17/M17Modulator.h"
 #include "util/message.h"
 #include "util/messagequeue.h"
-#include "audio/audiofifo.h"
+#include "m17modfifo.h"
 
 class M17ModProcessor : public QObject
 {
@@ -59,11 +59,11 @@ public:
     ~M17ModProcessor();
 
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
-    AudioFifo *getBasebandFifo() { return &m_basebandFifo; }
+    M17ModFIFO *getBasebandFifo() { return &m_basebandFifo; }
 
 private:
     MessageQueue m_inputMessageQueue;
-    AudioFifo m_basebandFifo; //!< Samples are 16 bit integer baseband 48 kS/s samples
+    M17ModFIFO m_basebandFifo; //!< Samples are 16 bit integer baseband 48 kS/s samples
     mobilinkd::M17Modulator m_m17Modulator;
 
     bool handleMessage(const Message& cmd);
