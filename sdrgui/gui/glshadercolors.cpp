@@ -36,11 +36,11 @@ GLShaderColors::~GLShaderColors()
 	cleanup();
 }
 
-void GLShaderColors::initializeGL(float openGLVersion)
+void GLShaderColors::initializeGL(int majorVersion, int minorVersion)
 {
 	m_program = new QOpenGLShaderProgram;
 
-    if (openGLVersion >= 3.3)
+    if ((majorVersion > 3) || ((majorVersion == 3) && (minorVersion >= 3)))
     {
         if (!m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, m_vertexShaderSourceSimple)) {
             qDebug() << "GLShaderColors::initializeGL: error in vertex shader: " << m_program->log();

@@ -766,7 +766,8 @@ void GLSpectrum::updateHistogram(const Real *spectrum)
 void GLSpectrum::initializeGL()
 {
     QOpenGLContext *glCurrentContext =  QOpenGLContext::currentContext();
-    float openGLVersion = 0.0f;
+    int majorVersion = 0;
+    int minorVersion = 0;
 
     if (glCurrentContext)
     {
@@ -776,8 +777,8 @@ void GLSpectrum::initializeGL()
                 << " major: " << (QOpenGLContext::currentContext()->format()).majorVersion()
                 << " minor: " << (QOpenGLContext::currentContext()->format()).minorVersion()
                 << " ES: " << (QOpenGLContext::currentContext()->isOpenGLES() ? "yes" : "no");
-            openGLVersion = (QOpenGLContext::currentContext()->format()).majorVersion()
-                            + ((QOpenGLContext::currentContext()->format()).minorVersion() / 10.0);
+            majorVersion = (QOpenGLContext::currentContext()->format()).majorVersion();
+            minorVersion = (QOpenGLContext::currentContext()->format()).minorVersion();
         }
         else {
             qDebug() << "GLSpectrum::initializeGL: current context is invalid";
@@ -816,16 +817,16 @@ void GLSpectrum::initializeGL()
     glFunctions->initializeOpenGLFunctions();
 
     //glDisable(GL_DEPTH_TEST);
-    m_glShaderSimple.initializeGL(openGLVersion);
-    m_glShaderLeftScale.initializeGL(openGLVersion);
-    m_glShaderFrequencyScale.initializeGL(openGLVersion);
-    m_glShaderWaterfall.initializeGL(openGLVersion);
-    m_glShaderHistogram.initializeGL(openGLVersion);
-    m_glShaderTextOverlay.initializeGL(openGLVersion);
-    m_glShaderInfo.initializeGL(openGLVersion);
-    m_glShaderSpectrogram.initializeGL(openGLVersion);
-    m_glShaderSpectrogramTimeScale.initializeGL(openGLVersion);
-    m_glShaderSpectrogramPowerScale.initializeGL(openGLVersion);
+    m_glShaderSimple.initializeGL(majorVersion, minorVersion);
+    m_glShaderLeftScale.initializeGL(majorVersion, minorVersion);
+    m_glShaderFrequencyScale.initializeGL(majorVersion, minorVersion);
+    m_glShaderWaterfall.initializeGL(majorVersion, minorVersion);
+    m_glShaderHistogram.initializeGL(majorVersion, minorVersion);
+    m_glShaderTextOverlay.initializeGL(majorVersion, minorVersion);
+    m_glShaderInfo.initializeGL(majorVersion, minorVersion);
+    m_glShaderSpectrogram.initializeGL(majorVersion, minorVersion);
+    m_glShaderSpectrogramTimeScale.initializeGL(majorVersion, minorVersion);
+    m_glShaderSpectrogramPowerScale.initializeGL(majorVersion, minorVersion);
 }
 
 void GLSpectrum::openGLDebug(const QOpenGLDebugMessage &debugMessage)

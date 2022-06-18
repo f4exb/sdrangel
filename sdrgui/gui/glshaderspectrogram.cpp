@@ -75,13 +75,13 @@ GLShaderSpectrogram::~GLShaderSpectrogram()
     cleanup();
 }
 
-void GLShaderSpectrogram::initializeGL(float openGLVersion)
+void GLShaderSpectrogram::initializeGL(int majorVersion, int minorVersion)
 {
     initializeOpenGLFunctions();
     m_useImmutableStorage = useImmutableStorage();
     qDebug() << "GLShaderSpectrogram::initializeGL: m_useImmutableStorage: " << m_useImmutableStorage;
 
-    if (openGLVersion >= 3.3)
+    if ((majorVersion > 3) || ((majorVersion == 3) && (minorVersion >= 3)))
     {
         m_programShaded = new QOpenGLShaderProgram;
         if (!m_programShaded->addShaderFromSourceCode(QOpenGLShader::Vertex, m_vertexShader)) {

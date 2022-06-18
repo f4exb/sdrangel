@@ -36,7 +36,7 @@ public:
     GLShaderSpectrogram();
     ~GLShaderSpectrogram();
 
-    void initializeGL(float openGLVersion);
+    void initializeGL(int majorVersion, int minorVersion);
     void initColorMapTexture(const QString &colorMapName);
     void initTexture(const QImage& image);
     void subTexture(int xOffset, int yOffset, int width, int height, const void *pixels);

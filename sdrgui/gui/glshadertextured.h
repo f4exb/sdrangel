@@ -38,7 +38,7 @@ public:
 	GLShaderTextured();
 	~GLShaderTextured();
 
-	void initializeGL(float openGLVersion);
+	void initializeGL(int majorVersion, int minorVersion);
 	void initTexture(const QImage& image, QOpenGLTexture::WrapMode wrapMode = QOpenGLTexture::Repeat);
 	void subTexture(int xOffset, int yOffset, int width, int height, const void *pixels);
 	void drawSurface(const QMatrix4x4& transformMatrix, GLfloat* textureCoords, GLfloat *vertices, int nbVertices, int nbComponents=2);

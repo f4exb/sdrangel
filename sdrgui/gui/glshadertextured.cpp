@@ -40,14 +40,14 @@ GLShaderTextured::~GLShaderTextured()
 	cleanup();
 }
 
-void GLShaderTextured::initializeGL(float openGLVersion)
+void GLShaderTextured::initializeGL(int majorVersion, int minorVersion)
 {
     initializeOpenGLFunctions();
     m_useImmutableStorage = useImmutableStorage();
     qDebug() << "GLShaderTextured::initializeGL: m_useImmutableStorage: " << m_useImmutableStorage;
 
     m_program = new QOpenGLShaderProgram;
-    if (openGLVersion >= 3.3f)
+    if ((majorVersion > 3) || ((majorVersion == 3) && (minorVersion >= 3)))
     {
         if (!m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, m_vertexShaderSourceTextured)) {
             qDebug() << "GLShaderTextured::initializeGL: error in vertex shader: " << m_program->log();
