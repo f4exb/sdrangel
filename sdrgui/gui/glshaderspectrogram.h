@@ -40,7 +40,7 @@ public:
     void initColorMapTexture(const QString &colorMapName);
     void initTexture(const QImage& image);
     void subTexture(int xOffset, int yOffset, int width, int height, const void *pixels);
-    void drawSurface(SpectrumSettings::SpectrogramStyle style, float textureOffset, bool invert);
+    void drawSurface(SpectrumSettings::SpectrogramStyle style, const QMatrix4x4& vertexTransform, float textureOffset, bool invert);
     void cleanup();
     void translateX(float distance);
     void translateY(float distance);
@@ -61,7 +61,7 @@ public:
     void lightRotateX(float degrees);
     void lightRotateY(float degrees);
     void lightRotateZ(float degrees);
-    void applyScaleRotate(QMatrix4x4 &matrix);
+    void applyTransform(QMatrix4x4 &matrix);
     void applyPerspective(QMatrix4x4 &matrix);
 
 private:

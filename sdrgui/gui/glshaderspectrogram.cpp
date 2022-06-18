@@ -310,7 +310,7 @@ void GLShaderSpectrogram::subTextureMutable(int xOffset, int yOffset, int width,
     glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, width, height, GL_LUMINANCE, GL_UNSIGNED_BYTE, pixels);
 }
 
-void GLShaderSpectrogram::drawSurface(SpectrumSettings::SpectrogramStyle style, float textureOffset, bool invert)
+void GLShaderSpectrogram::drawSurface(SpectrumSettings::SpectrogramStyle style, const QMatrix4x4& vertexTransform, float textureOffset, bool invert)
 {
     if ((m_useImmutableStorage && !m_texture) || (!m_useImmutableStorage && !m_textureId))
     {
@@ -324,17 +324,6 @@ void GLShaderSpectrogram::drawSurface(SpectrumSettings::SpectrogramStyle style, 
     } else {
         program = m_programSimple;
     }
-
-    // Note that translation to the origin and rotation
-    // needs to be performed in reverse order to what you
-    // might normally expect
-    // See: https://bugreports.qt.io/browse/QTBUG-20752
-
-    QMatrix4x4 vertexTransform;
-    vertexTransform.translate(0.0f, 0.0f, -1.65f);
-    applyScaleRotate(vertexTransform);
-    vertexTransform.translate(-0.5f, -0.5f, 0.0f);
-    applyPerspective(vertexTransform);
 
     float rot = invert ? 1.0 : -1.0;
     QMatrix4x4 textureTransform(
@@ -652,14 +641,20 @@ void GLShaderSpectrogram::lightRotateZ(float degrees)
     m_lightRotZ += degrees;
 }
 
-void GLShaderSpectrogram::applyScaleRotate(QMatrix4x4 &matrix)
+void GLShaderSpectrogram::applyTransform(QMatrix4x4 &matrix)
 {
-    // As above, this is in reverse
-    matrix.translate(m_translateX, m_translateY, m_translateZ);
-    matrix.rotate(m_rotX, 1.0f, 0.0f, 0.0f);
+    // Note that translation to the origin and rotation
+    // needs to be performed in reverse order to what you
+    // might normally expect
+    // See: https://bugreports.qt.io/browse/QTBUG-20752
+    matrix.translate(0.0f, 0.0f, -1.65f);                       // Camera position
+    matrix.translate(m_translateX, m_translateY, m_translateZ); // User camera position adjustment
+    matrix.rotate(m_rotX, 1.0f, 0.0f, 0.0f);                    // User rotation
     matrix.rotate(m_rotY, 0.0f, 1.0f, 0.0f);
     matrix.rotate(m_rotZ, 0.0f, 0.0f, 1.0f);
-    matrix.scale(m_scaleX, m_scaleY, m_scaleZ * m_userScaleZ);
+    matrix.scale(m_scaleX, m_scaleY, m_scaleZ * m_userScaleZ);  // Scaling
+    matrix.translate(-0.5f, -0.5f, 0.0f);                       // Centre at origin for correct rotation
+    applyPerspective(matrix);
 }
 
 void GLShaderSpectrogram::applyPerspective(QMatrix4x4 &matrix)

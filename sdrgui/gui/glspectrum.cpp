@@ -872,13 +872,10 @@ void GLSpectrum::paintGL()
     glFunctions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     QMatrix4x4 spectrogramGridMatrix;
-    spectrogramGridMatrix.translate(0.0f, 0.0f, -1.65f);
-    m_glShaderSpectrogram.applyScaleRotate(spectrogramGridMatrix);
-    spectrogramGridMatrix.translate(-0.5f, -0.5f, 0.0f);
-    m_glShaderSpectrogram.applyPerspective(spectrogramGridMatrix);
 
     if (m_display3DSpectrogram)
     {
+        m_glShaderSpectrogram.applyTransform(spectrogramGridMatrix);
         // paint 3D spectrogram
         if (m_3DSpectrogramTexturePos + m_3DSpectrogramBufferPos < m_3DSpectrogramTextureHeight)
         {
@@ -900,7 +897,7 @@ void GLSpectrum::paintGL()
 
         // Temporarily reduce viewport to waterfall area so anything outside is clipped
         glFunctions->glViewport(0, m_3DSpectrogramBottom, width(), m_waterfallHeight);
-        m_glShaderSpectrogram.drawSurface(m_3DSpectrogramStyle, prop_y, m_invertedWaterfall);
+        m_glShaderSpectrogram.drawSurface(m_3DSpectrogramStyle, spectrogramGridMatrix, prop_y, m_invertedWaterfall);
         glFunctions->glViewport(0, 0, width(), height());
     }
     else if (m_displayWaterfall)
@@ -1168,15 +1165,15 @@ void GLSpectrum::paintGL()
     {
         glFunctions->glViewport(0, m_3DSpectrogramBottom, width(), m_waterfallHeight);
         {
-            float l = m_spectrogramTimePixmap.width() / (float) width();
-            float r = m_rightMargin / (float) width();
-            float h = m_frequencyPixmap.height() / (float) m_waterfallHeight;
+            GLfloat l = m_spectrogramTimePixmap.width() / (GLfloat) width();
+            GLfloat r = m_rightMargin / (GLfloat) width();
+            GLfloat h = m_frequencyPixmap.height() / (GLfloat) m_waterfallHeight;
 
             GLfloat vtx1[] = {
-                    -l, -h,
-                   1+r, -h,
-                   1+r,  0,
-                    -l,  0
+                       -l, -h,
+                   1.0f+r, -h,
+                   1.0f+r,  0.0f,
+                       -l,  0.0f
             };
             GLfloat tex1[] = {
                     0, 1,
@@ -1189,14 +1186,14 @@ void GLSpectrum::paintGL()
         }
 
         {
-            float w = m_spectrogramTimePixmap.width() / (float) width();
-            float h = (m_bottomMargin/2) / (float) m_waterfallHeight;      // m_bottomMargin is fm.ascent
+            GLfloat w = m_spectrogramTimePixmap.width() / (GLfloat) width();
+            GLfloat h = (m_bottomMargin/2) / (GLfloat) m_waterfallHeight;      // m_bottomMargin is fm.ascent
 
             GLfloat vtx1[] = {
-                    -w, 0.0-h,
-                     0, 0.0-h,
-                     0, 1.0+h,
-                    -w, 1.0+h
+                    -w, 0.0f-h,
+                  0.0f, 0.0f-h,
+                  0.0f, 1.0f+h,
+                    -w, 1.0f+h
             };
             GLfloat tex1[] = {
                     0, 1,
@@ -1209,14 +1206,14 @@ void GLSpectrum::paintGL()
         }
 
         {
-            float w = m_spectrogramPowerPixmap.width() / (float) width();
-            float h = m_topMargin / (float) m_spectrogramPowerPixmap.height();
+            GLfloat w = m_spectrogramPowerPixmap.width() / (GLfloat) width();
+            GLfloat h = m_topMargin / (GLfloat) m_spectrogramPowerPixmap.height();
 
             GLfloat vtx1[] = {
-                    -w, 1.0, 0.0,
-                    0,  1.0, 0.0,
-                    0,  1.0, 1.0+h,
-                    -w, 1.0, 1.0+h,
+                    -w, 1.0f, 0.0f,
+                  0.0f, 1.0f, 0.0f,
+                  0.0f, 1.0f, 1.0f+h,
+                    -w, 1.0f, 1.0f+h,
             };
             GLfloat tex1[] = {
                     0, 1,
