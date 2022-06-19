@@ -23,6 +23,7 @@
 #include <QOpenGLFunctions>
 #include <QPainter>
 #include <QFontDatabase>
+#include <QWindow>
 #include "maincore.h"
 #include "dsp/spectrumvis.h"
 #include "gui/glspectrum.h"
@@ -784,10 +785,11 @@ void GLSpectrum::initializeGL()
             qDebug() << "GLSpectrum::initializeGL: current context is invalid";
         }
 
-        if (   (MainCore::instance()->getSettings().getConsoleMinLogLevel() <= QtDebugMsg)
-            || (MainCore::instance()->getSettings().getFileMinLogLevel() <= QtDebugMsg))
+        // Enable OpenGL debugging
+        // Disable for release, as some OpenGL drivers are quite verbose and output
+        // info on every frame
+        if (false)
         {
-            // Enable OpenGL debugging
             QSurfaceFormat format = glCurrentContext->format();
             format.setOption(QSurfaceFormat::DebugContext);
             glCurrentContext->setFormat(format);
@@ -877,6 +879,7 @@ void GLSpectrum::paintGL()
     glFunctions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     QMatrix4x4 spectrogramGridMatrix;
+    int devicePixelRatio;
 
     if (m_display3DSpectrogram)
     {
@@ -901,9 +904,14 @@ void GLSpectrum::paintGL()
         float prop_y = m_3DSpectrogramTexturePos / (m_3DSpectrogramTextureHeight - 1.0);
 
         // Temporarily reduce viewport to waterfall area so anything outside is clipped
-        glFunctions->glViewport(0, m_3DSpectrogramBottom, width(), m_waterfallHeight);
+        if (window()->windowHandle()) {
+            devicePixelRatio = window()->windowHandle()->devicePixelRatio();
+        } else {
+            devicePixelRatio = 1;
+        }
+        glFunctions->glViewport(0, m_3DSpectrogramBottom*devicePixelRatio, width()*devicePixelRatio, m_waterfallHeight*devicePixelRatio);
         m_glShaderSpectrogram.drawSurface(m_3DSpectrogramStyle, spectrogramGridMatrix, prop_y, m_invertedWaterfall);
-        glFunctions->glViewport(0, 0, width(), height());
+        glFunctions->glViewport(0, 0, width()*devicePixelRatio, height()*devicePixelRatio);
     }
     else if (m_displayWaterfall)
     {
@@ -1168,7 +1176,7 @@ void GLSpectrum::paintGL()
     // paint 3D spectrogram scales
     if (m_display3DSpectrogram && m_displayGrid)
     {
-        glFunctions->glViewport(0, m_3DSpectrogramBottom, width(), m_waterfallHeight);
+        glFunctions->glViewport(0, m_3DSpectrogramBottom*devicePixelRatio, width()*devicePixelRatio, m_waterfallHeight*devicePixelRatio);
         {
             GLfloat l = m_spectrogramTimePixmap.width() / (GLfloat) width();
             GLfloat r = m_rightMargin / (GLfloat) width();
@@ -1230,7 +1238,7 @@ void GLSpectrum::paintGL()
             m_glShaderSpectrogramPowerScale.drawSurface(spectrogramGridMatrix, tex1, vtx1, 4, 3);
         }
 
-        glFunctions->glViewport(0, 0, width(), height());
+        glFunctions->glViewport(0, 0, width()*devicePixelRatio, height()*devicePixelRatio);
     }
 
     // paint max hold lines on top of histogram
@@ -1379,7 +1387,7 @@ void GLSpectrum::paintGL()
         const ScaleEngine::TickList* tickList;
         const ScaleEngine::Tick* tick;
 
-        glFunctions->glViewport(0, m_3DSpectrogramBottom, width(), m_waterfallHeight);
+        glFunctions->glViewport(0, m_3DSpectrogramBottom*devicePixelRatio, width()*devicePixelRatio, m_waterfallHeight*devicePixelRatio);
 
         tickList = &m_powerScale.getTickList();
         {
@@ -1491,7 +1499,7 @@ void GLSpectrum::paintGL()
             m_glShaderSimple.drawSegments(spectrogramGridMatrix, color, q3, 2*effectiveTicks, 3);
         }
 
-        glFunctions->glViewport(0, 0, width(), height());
+        glFunctions->glViewport(0, 0, width()*devicePixelRatio, height()*devicePixelRatio);
     }
 
     // paint histogram grid
