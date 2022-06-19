@@ -32,9 +32,9 @@ GLShaderTextured::GLShaderTextured() :
     m_verticesBuf(nullptr),
     m_textureCoordsBuf(nullptr),
 	m_texture(nullptr),
+    m_textureId(0),
     m_vertexLoc(0),
     m_texCoordLoc(0),
-    m_textureId(0),
 	m_matrixLoc(0),
 	m_textureLoc(0),
     m_useImmutableStorage(true)
@@ -60,6 +60,10 @@ void GLShaderTextured::initializeGL(int majorVersion, int minorVersion)
         if (!m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, m_fragmentShaderSourceTextured)) {
             qDebug() << "GLShaderTextured::initializeGL: error in fragment shader: " << m_program->log();
         }
+
+        m_vao = new QOpenGLVertexArrayObject();
+        m_vao->create();
+        m_vao->bind();
     }
     else
     {
@@ -85,9 +89,6 @@ void GLShaderTextured::initializeGL(int majorVersion, int minorVersion)
 	m_textureLoc = m_program->uniformLocation("uTexture");
     if (m_vao)
     {
-        m_vao = new QOpenGLVertexArrayObject();
-        m_vao->create();
-        m_vao->bind();
         m_verticesBuf = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
         m_verticesBuf->setUsagePattern(QOpenGLBuffer::DynamicDraw);
         m_verticesBuf->create();

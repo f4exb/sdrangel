@@ -51,6 +51,10 @@ void GLShaderSimple::initializeGL(int majorVersion, int minorVersion)
         if (!m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, m_fragmentShaderSourceColored)) {
             qDebug() << "GLShaderSimple::initializeGL: error in fragment shader: " << m_program->log();
         }
+
+        m_vao = new QOpenGLVertexArrayObject();
+        m_vao->create();
+        m_vao->bind();
     }
     else
     {
@@ -74,9 +78,6 @@ void GLShaderSimple::initializeGL(int majorVersion, int minorVersion)
 	m_colorLoc = m_program->uniformLocation("uColour");
     if (m_vao)
     {
-        m_vao = new QOpenGLVertexArrayObject();
-        m_vao->create();
-        m_vao->bind();
         m_verticesBuf = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
         m_verticesBuf->setUsagePattern(QOpenGLBuffer::DynamicDraw);
         m_verticesBuf->create();
