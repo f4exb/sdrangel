@@ -24,6 +24,8 @@
 
 #include <QString>
 #include <QOpenGLFunctions>
+#include <QOpenGLVertexArrayObject>
+#include <QOpenGLBuffer>
 
 #include "export.h"
 
@@ -49,6 +51,9 @@ private:
 	void draw(unsigned int mode, const QMatrix4x4& transformMatrix, GLfloat *vertices, GLfloat *colors, GLfloat alpha, int nbVertices);
 
 	QOpenGLShaderProgram *m_program;
+    QOpenGLVertexArrayObject *m_vao;
+    QOpenGLBuffer *m_verticesBuf;
+    QOpenGLBuffer *m_colorBuf;
 	int m_matrixLoc;
     int m_alphaLoc;
 	static const QString m_vertexShaderSourceSimple2;

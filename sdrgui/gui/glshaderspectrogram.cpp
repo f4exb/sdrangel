@@ -169,9 +169,20 @@ void GLShaderSpectrogram::initGrid(int elements)
     m_vertexBuf->bind();
     m_vertexBuf->allocate(&vertices[0], vertices.size() * sizeof(QVector2D));
 
-    // Create an array of indices into the vertex array that traces both horizontal and vertical lines
+    if (m_vao)
+    {
+        m_programShaded->enableAttributeArray(m_coord2dLoc);
+        m_programShaded->setAttributeBuffer(m_coord2dLoc, GL_FLOAT, 0, 2);
+        m_programSimple->enableAttributeArray(m_coord2dLoc);
+        m_programSimple->setAttributeBuffer(m_coord2dLoc, GL_FLOAT, 0, 2);
+        m_vao->release();
+    }
+
     std::vector<GLuint> indices(m_gridElements * m_gridElements * 6);
-    int i = 0;
+    int i;
+
+    // Create an array of indices into the vertex array that traces both horizontal and vertical lines
+    i = 0;
 
     for (int y = 0; y < e1; y++) {
         for (int x = 0; x < m_gridElements; x++) {
@@ -190,7 +201,7 @@ void GLShaderSpectrogram::initGrid(int elements)
     m_index0Buf->bind();
     m_index0Buf->allocate(&indices[0], m_gridElements * (e1) * 4 * sizeof(GLuint));
 
-    // Create another array of indices that describes all the triangles needed to create a completely filled surface
+    // Create an array of indices that describes all the triangles needed to create a completely filled surface
     i = 0;
 
     for (int y = 0; y < m_gridElements; y++) {
@@ -208,11 +219,7 @@ void GLShaderSpectrogram::initGrid(int elements)
     m_index1Buf->bind();
     m_index1Buf->allocate(&indices[0], indices.size() * sizeof(GLuint));
 
-    if (m_vao)
-    {
-        m_vao->release();
-    }
-    else
+    if (!m_vao)
     {
         QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
         f->glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -438,28 +445,23 @@ void GLShaderSpectrogram::drawSurface(SpectrumSettings::SpectrogramStyle style, 
         program->setUniformValueArray(m_lightPosLoc, lightPos, 1, 3);
     }
 
-    if (m_vao) {
-        m_vao->bind();
-    }
-
     f->glEnable(GL_DEPTH_TEST);
 
     f->glPolygonOffset(1, 0);
     f->glEnable(GL_POLYGON_OFFSET_FILL);
 
-    m_vertexBuf->bind();
     if (m_vao)
     {
-        program->enableAttributeArray(m_coord2dLoc);
-        program->setAttributeBuffer(m_coord2dLoc, GL_FLOAT, 0, 2);
+        m_vao->bind();
     }
     else
     {
+        m_vertexBuf->bind();
         f->glEnableVertexAttribArray(m_coord2dLoc);
         f->glVertexAttribPointer(m_coord2dLoc, 2, GL_FLOAT, GL_FALSE, 0, 0);
     }
-
     m_index1Buf->bind();
+
     switch (style)
     {
     case SpectrumSettings::Points:
@@ -486,21 +488,14 @@ void GLShaderSpectrogram::drawSurface(SpectrumSettings::SpectrogramStyle style, 
         f->glDrawElements(GL_LINES, m_gridElements * (m_gridElements+1) * 4, GL_UNSIGNED_INT, 0);
     }
 
-    if (m_vao) {
-        program->disableAttributeArray(m_coord2dLoc);
-    } else {
-        f->glDisableVertexAttribArray(m_coord2dLoc);
-    }
-
     if (m_vao)
     {
         m_vao->release();
-        m_vertexBuf->release();
         m_index0Buf->release();
-        m_index1Buf->release();
     }
     else
     {
+        f->glDisableVertexAttribArray(m_coord2dLoc);
         // Need to do this, otherwise nothing else is drawn by other shaders
         f->glBindBuffer(GL_ARRAY_BUFFER, 0);
         f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

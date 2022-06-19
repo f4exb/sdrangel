@@ -27,6 +27,9 @@
 
 GLShaderColors::GLShaderColors() :
 	m_program(nullptr),
+    m_vao(nullptr),
+    m_verticesBuf(nullptr),
+    m_colorBuf(nullptr),
     m_matrixLoc(0),
     m_alphaLoc(0)
 { }
@@ -48,6 +51,10 @@ void GLShaderColors::initializeGL(int majorVersion, int minorVersion)
         if (!m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, m_fragmentShaderSourceColored)) {
             qDebug() << "GLShaderColors::initializeGL: error in fragment shader: " << m_program->log();
         }
+
+        m_vao = new QOpenGLVertexArrayObject();
+        m_vao->create();
+        m_vao->bind();
     }
     else
     {
@@ -69,6 +76,16 @@ void GLShaderColors::initializeGL(int majorVersion, int minorVersion)
 	m_program->bind();
 	m_matrixLoc = m_program->uniformLocation("uMatrix");
     m_alphaLoc = m_program->uniformLocation("uAlpha");
+    if (m_vao)
+    {
+        m_verticesBuf = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+        m_verticesBuf->setUsagePattern(QOpenGLBuffer::DynamicDraw);
+        m_verticesBuf->create();
+        m_colorBuf = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+        m_colorBuf->setUsagePattern(QOpenGLBuffer::DynamicDraw);
+        m_colorBuf->create();
+        m_vao->release();
+    }
 	m_program->release();
 }
 
@@ -106,27 +123,50 @@ void GLShaderColors::draw(unsigned int mode, const QMatrix4x4& transformMatrix, 
 	f->glEnable(GL_BLEND);
 	f->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	f->glLineWidth(1.0f);
-	f->glEnableVertexAttribArray(0); // vertex
-	f->glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, vertices);
-    f->glEnableVertexAttribArray(1); // colors
-    f->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, colors);
+    if (m_vao)
+    {
+        m_vao->bind();
+
+        m_verticesBuf->bind();
+        m_verticesBuf->allocate(vertices, nbVertices * 2 * sizeof(GL_FLOAT));
+        m_program->enableAttributeArray(0);
+        m_program->setAttributeBuffer(0, GL_FLOAT, 0, 2);
+
+        m_colorBuf->bind();
+        m_colorBuf->allocate(colors, nbVertices * 3 * sizeof(GL_FLOAT));
+        m_program->enableAttributeArray(1);
+        m_program->setAttributeBuffer(1, GL_FLOAT, 0, 3);
+    }
+    else
+    {
+        f->glEnableVertexAttribArray(0); // vertex
+        f->glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+        f->glEnableVertexAttribArray(1); // colors
+        f->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, colors);
+    }
 	f->glDrawArrays(mode, 0, nbVertices);
-	f->glDisableVertexAttribArray(0);
-    f->glDisableVertexAttribArray(1);
+    if (m_vao)
+    {
+        m_vao->release();
+    }
+    else
+    {
+        f->glDisableVertexAttribArray(0);
+        f->glDisableVertexAttribArray(1);
+    }
 	m_program->release();
 }
 
 void GLShaderColors::cleanup()
 {
-	if (!QOpenGLContext::currentContext()) {
-		return;
-	}
-
-	if (m_program)
-	{
-		delete m_program;
-		m_program = nullptr;
-	}
+    delete m_program;
+    m_program = nullptr;
+    delete m_vao;
+    m_vao = nullptr;
+    delete m_verticesBuf;
+    m_verticesBuf = nullptr;
+    delete m_colorBuf;
+    m_colorBuf = nullptr;
 }
 
 const QString GLShaderColors::m_vertexShaderSourceSimple2 = QString(
