@@ -26,7 +26,10 @@
 #include "gui/glshadersimple.h"
 
 GLShaderSimple::GLShaderSimple() :
-	m_program(0),
+	m_program(nullptr),
+    m_vao(nullptr),
+    m_verticesBuf(nullptr),
+    m_vertexLoc(0),
     m_matrixLoc(0),
 	m_colorLoc(0)
 { }
@@ -66,8 +69,19 @@ void GLShaderSimple::initializeGL(int majorVersion, int minorVersion)
 	}
 
 	m_program->bind();
+    m_vertexLoc = m_program->attributeLocation("vertex");
 	m_matrixLoc = m_program->uniformLocation("uMatrix");
 	m_colorLoc = m_program->uniformLocation("uColour");
+    if (m_vao)
+    {
+        m_vao = new QOpenGLVertexArrayObject();
+        m_vao->create();
+        m_vao->bind();
+        m_verticesBuf = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+        m_verticesBuf->setUsagePattern(QOpenGLBuffer::DynamicDraw);
+        m_verticesBuf->create();
+        m_vao->release();
+    }
 	m_program->release();
 }
 
@@ -102,23 +116,42 @@ void GLShaderSimple::draw(unsigned int mode, const QMatrix4x4& transformMatrix, 
 	m_program->bind();
 	m_program->setUniformValue(m_matrixLoc, transformMatrix);
 	m_program->setUniformValue(m_colorLoc, color);
+    if (m_vao)
+    {
+        m_vao->bind();
+
+        m_verticesBuf->bind();
+        m_verticesBuf->allocate(vertices, nbVertices * nbComponents * sizeof(GL_FLOAT));
+        m_program->enableAttributeArray(m_vertexLoc);
+        m_program->setAttributeBuffer(m_vertexLoc, GL_FLOAT, 0, nbComponents);
+    }
+    else
+    {
+    	f->glEnableVertexAttribArray(m_vertexLoc); // vertex
+    	f->glVertexAttribPointer(m_vertexLoc, nbComponents, GL_FLOAT, GL_FALSE, 0, vertices);
+    }
+
 	f->glEnable(GL_BLEND);
 	f->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	f->glLineWidth(1.0f);
-	f->glEnableVertexAttribArray(0); // vertex
-	f->glVertexAttribPointer(0, nbComponents, GL_FLOAT, GL_FALSE, 0, vertices);
 	f->glDrawArrays(mode, 0, nbVertices);
-	f->glDisableVertexAttribArray(0);
+
+    if (m_vao) {
+        m_vao->release();
+    } else {
+	   f->glDisableVertexAttribArray(m_vertexLoc);
+    }
 	m_program->release();
 }
 
 void GLShaderSimple::cleanup()
 {
-	if (QOpenGLContext::currentContext() && m_program)
-	{
-		delete m_program;
-		m_program = nullptr;
-	}
+    delete m_program;
+    m_program = nullptr;
+    delete m_vao;
+    m_vao = nullptr;
+    delete m_verticesBuf;
+    m_verticesBuf = nullptr;
 }
 
 const QString GLShaderSimple::m_vertexShaderSourceSimple2 = QString(

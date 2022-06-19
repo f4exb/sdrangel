@@ -18,6 +18,7 @@
 
 #include <QOpenGLShaderProgram>
 #include <QOpenGLFunctions>
+#include <QOpenGLFunctions_3_3_Core>
 #include <QOpenGLContext>
 #include <QtOpenGL>
 #include <QImage>
@@ -36,6 +37,7 @@ GLShaderSpectrogram::GLShaderSpectrogram() :
     m_colorMapTexture(nullptr),
     m_colorMapTextureId(0),
     m_programForLocs(nullptr),
+    m_coord2dLoc(0),
     m_textureTransformLoc(0),
     m_vertexTransformLoc(0),
     m_dataTextureLoc(0),
@@ -45,9 +47,10 @@ GLShaderSpectrogram::GLShaderSpectrogram() :
     m_lightDirLoc(0),
     m_lightPosLoc(0),
     m_useImmutableStorage(true),
-    m_vertexBuf(QOpenGLBuffer::VertexBuffer),
-    m_index0Buf(QOpenGLBuffer::IndexBuffer),
-    m_index1Buf(QOpenGLBuffer::IndexBuffer),
+    m_vao(nullptr),
+    m_vertexBuf(nullptr),
+    m_index0Buf(nullptr),
+    m_index1Buf(nullptr),
     m_translateX(0.0),
     m_translateY(0.0),
     m_translateZ(0.0),
@@ -107,6 +110,10 @@ void GLShaderSpectrogram::initializeGL(int majorVersion, int minorVersion)
         if (!m_programSimple->link()) {
             qDebug() << "GLShaderSpectrogram::initializeGL: error linking shader: " << m_programSimple->log();
         }
+
+        m_vao = new QOpenGLVertexArrayObject();
+        m_vao->create();
+        m_vao->bind();
     }
     else
     {
@@ -120,6 +127,20 @@ void GLShaderSpectrogram::initializeGL(int majorVersion, int minorVersion)
         if (!m_programSimple->link()) {
             qDebug() << "GLShaderSpectrogram::initializeGL: error linking shader: " << m_programSimple->log();
         }
+    }
+
+    m_vertexBuf = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+    m_vertexBuf->setUsagePattern(QOpenGLBuffer::StaticDraw);
+    m_vertexBuf->create();
+    m_index0Buf = new QOpenGLBuffer(QOpenGLBuffer::IndexBuffer);
+    m_index0Buf->setUsagePattern(QOpenGLBuffer::StaticDraw);
+    m_index0Buf->create();
+    m_index1Buf = new QOpenGLBuffer(QOpenGLBuffer::IndexBuffer);
+    m_index1Buf->setUsagePattern(QOpenGLBuffer::StaticDraw);
+    m_index1Buf->create();
+
+    if (m_vao) {
+        m_vao->release();
     }
 }
 
@@ -141,17 +162,12 @@ void GLShaderSpectrogram::initGrid(int elements)
         }
     }
 
-    m_vertexBuf.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    m_vertexBuf.create();
+    if (m_vao) {
+        m_vao->bind();
+    }
 
-    m_index0Buf.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    m_index0Buf.create();
-
-    m_index1Buf.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    m_index1Buf.create();
-
-    m_vertexBuf.bind();
-    m_vertexBuf.allocate(&vertices[0], vertices.size() * sizeof(QVector2D));
+    m_vertexBuf->bind();
+    m_vertexBuf->allocate(&vertices[0], vertices.size() * sizeof(QVector2D));
 
     // Create an array of indices into the vertex array that traces both horizontal and vertical lines
     std::vector<GLuint> indices(m_gridElements * m_gridElements * 6);
@@ -171,8 +187,8 @@ void GLShaderSpectrogram::initGrid(int elements)
         }
     }
 
-    m_index0Buf.bind();
-    m_index0Buf.allocate(&indices[0], m_gridElements * (e1) * 4 * sizeof(GLuint));
+    m_index0Buf->bind();
+    m_index0Buf->allocate(&indices[0], m_gridElements * (e1) * 4 * sizeof(GLuint));
 
     // Create another array of indices that describes all the triangles needed to create a completely filled surface
     i = 0;
@@ -189,12 +205,19 @@ void GLShaderSpectrogram::initGrid(int elements)
         }
     }
 
-    m_index1Buf.bind();
-    m_index1Buf.allocate(&indices[0], indices.size() * sizeof(GLuint));
+    m_index1Buf->bind();
+    m_index1Buf->allocate(&indices[0], indices.size() * sizeof(GLuint));
 
-    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    f->glBindBuffer(GL_ARRAY_BUFFER, 0);
-    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    if (m_vao)
+    {
+        m_vao->release();
+    }
+    else
+    {
+        QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+        f->glBindBuffer(GL_ARRAY_BUFFER, 0);
+        f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    }
 }
 
 void GLShaderSpectrogram::initColorMapTexture(const QString &colorMapName)
@@ -356,6 +379,7 @@ void GLShaderSpectrogram::drawSurface(SpectrumSettings::SpectrogramStyle style, 
 
     if (program != m_programForLocs)
     {
+        m_coord2dLoc = program->attributeLocation("coord2d");
         m_textureTransformLoc = program->uniformLocation("textureTransform");
         m_vertexTransformLoc = program->uniformLocation("vertexTransform");
         m_dataTextureLoc = program->uniformLocation("dataTexture");
@@ -414,17 +438,28 @@ void GLShaderSpectrogram::drawSurface(SpectrumSettings::SpectrogramStyle style, 
         program->setUniformValueArray(m_lightPosLoc, lightPos, 1, 3);
     }
 
+    if (m_vao) {
+        m_vao->bind();
+    }
+
     f->glEnable(GL_DEPTH_TEST);
 
     f->glPolygonOffset(1, 0);
     f->glEnable(GL_POLYGON_OFFSET_FILL);
 
-    int attribute_coord2d = program->attributeLocation("coord2d");
-    f->glEnableVertexAttribArray(attribute_coord2d);
-    m_vertexBuf.bind();
-    f->glVertexAttribPointer(attribute_coord2d, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    m_vertexBuf->bind();
+    if (m_vao)
+    {
+        program->enableAttributeArray(m_coord2dLoc);
+        program->setAttributeBuffer(m_coord2dLoc, GL_FLOAT, 0, 2);
+    }
+    else
+    {
+        f->glEnableVertexAttribArray(m_coord2dLoc);
+        f->glVertexAttribPointer(m_coord2dLoc, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    }
 
-    m_index1Buf.bind();
+    m_index1Buf->bind();
     switch (style)
     {
     case SpectrumSettings::Points:
@@ -447,14 +482,29 @@ void GLShaderSpectrogram::drawSurface(SpectrumSettings::SpectrogramStyle style, 
     {
         // Draw the outline
         program->setUniformValue(m_brightnessLoc, 1.5f);
-        m_index0Buf.bind();
+        m_index0Buf->bind();
         f->glDrawElements(GL_LINES, m_gridElements * (m_gridElements+1) * 4, GL_UNSIGNED_INT, 0);
     }
 
-    f->glDisableVertexAttribArray(attribute_coord2d);
-    // Need to do this, otherwise nothing else is drawn...
-    f->glBindBuffer(GL_ARRAY_BUFFER, 0);
-    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    if (m_vao) {
+        program->disableAttributeArray(m_coord2dLoc);
+    } else {
+        f->glDisableVertexAttribArray(m_coord2dLoc);
+    }
+
+    if (m_vao)
+    {
+        m_vao->release();
+        m_vertexBuf->release();
+        m_index0Buf->release();
+        m_index1Buf->release();
+    }
+    else
+    {
+        // Need to do this, otherwise nothing else is drawn by other shaders
+        f->glBindBuffer(GL_ARRAY_BUFFER, 0);
+        f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    }
 
     // If this is left enabled, channel markers aren't drawn properly
     f->glDisable(GL_DEPTH_TEST);
@@ -464,28 +514,24 @@ void GLShaderSpectrogram::drawSurface(SpectrumSettings::SpectrogramStyle style, 
 
 void GLShaderSpectrogram::cleanup()
 {
+    delete m_programShaded;
+    m_programShaded = nullptr;
+    delete m_programSimple;
+    m_programSimple = nullptr;
+    m_programForLocs = nullptr;
+    delete m_texture;
+    m_texture = nullptr;
+    delete m_colorMapTexture;
+    m_colorMapTexture = nullptr;
+    delete m_vertexBuf;
+    m_vertexBuf = nullptr;
+    delete m_index0Buf;
+    m_index0Buf = nullptr;
+    delete m_index1Buf;
+    m_index1Buf = nullptr;
+
     if (!QOpenGLContext::currentContext()) {
         return;
-    }
-
-    if (m_programShaded)
-    {
-        delete m_programShaded;
-        m_programShaded = nullptr;
-    }
-
-    if (m_programSimple)
-    {
-        delete m_programSimple;
-        m_programSimple = nullptr;
-    }
-
-    m_programForLocs = nullptr;
-
-    if (m_texture)
-    {
-        delete m_texture;
-        m_texture = nullptr;
     }
 
     if (m_textureId)
@@ -498,12 +544,6 @@ void GLShaderSpectrogram::cleanup()
     {
         glDeleteTextures(1, &m_colorMapTextureId);
         m_colorMapTextureId = 0;
-    }
-
-    if (m_colorMapTexture)
-    {
-        delete m_colorMapTexture;
-        m_colorMapTexture = nullptr;
     }
 }
 

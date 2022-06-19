@@ -25,6 +25,8 @@
 #include <QString>
 #include <QOpenGLTexture>
 #include <QOpenGLFunctions>
+#include <QOpenGLVertexArrayObject>
+#include <QOpenGLBuffer>
 
 #include "export.h"
 
@@ -54,8 +56,13 @@ private:
     bool useImmutableStorage();
 
 	QOpenGLShaderProgram *m_program;
+    QOpenGLVertexArrayObject *m_vao;
+    QOpenGLBuffer *m_verticesBuf;
+    QOpenGLBuffer *m_textureCoordsBuf;
 	QOpenGLTexture *m_texture;
     unsigned int m_textureId;
+    int m_vertexLoc;
+    int m_texCoordLoc;
 	int m_matrixLoc;
 	int m_textureLoc;
     bool m_useImmutableStorage;

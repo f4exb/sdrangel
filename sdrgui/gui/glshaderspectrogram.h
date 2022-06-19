@@ -83,6 +83,7 @@ private:
     unsigned int m_colorMapTextureId;
 
     QOpenGLShaderProgram *m_programForLocs;     // Which program the locations are for
+    int m_coord2dLoc;
     int m_textureTransformLoc;
     int m_vertexTransformLoc;
     int m_dataTextureLoc;
@@ -100,9 +101,10 @@ private:
     static const QString m_fragmentShaderSimple2;
     static const QString m_fragmentShaderSimple;
 
-    QOpenGLBuffer m_vertexBuf;
-    QOpenGLBuffer m_index0Buf;
-    QOpenGLBuffer m_index1Buf;
+    QOpenGLVertexArrayObject *m_vao;
+    QOpenGLBuffer *m_vertexBuf;
+    QOpenGLBuffer *m_index0Buf;
+    QOpenGLBuffer *m_index1Buf;
 
     float m_translateX;
     float m_translateY;

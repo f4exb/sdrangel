@@ -28,7 +28,12 @@
 
 GLShaderTextured::GLShaderTextured() :
 	m_program(nullptr),
+    m_vao(nullptr),
+    m_verticesBuf(nullptr),
+    m_textureCoordsBuf(nullptr),
 	m_texture(nullptr),
+    m_vertexLoc(0),
+    m_texCoordLoc(0),
     m_textureId(0),
 	m_matrixLoc(0),
 	m_textureLoc(0),
@@ -74,8 +79,23 @@ void GLShaderTextured::initializeGL(int majorVersion, int minorVersion)
 	}
 
 	m_program->bind();
+	m_vertexLoc = m_program->attributeLocation("vertex");
+	m_texCoordLoc = m_program->attributeLocation("texCoord");
 	m_matrixLoc = m_program->uniformLocation("uMatrix");
 	m_textureLoc = m_program->uniformLocation("uTexture");
+    if (m_vao)
+    {
+        m_vao = new QOpenGLVertexArrayObject();
+        m_vao->create();
+        m_vao->bind();
+        m_verticesBuf = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+        m_verticesBuf->setUsagePattern(QOpenGLBuffer::DynamicDraw);
+        m_verticesBuf->create();
+        m_textureCoordsBuf = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+        m_textureCoordsBuf->setUsagePattern(QOpenGLBuffer::DynamicDraw);
+        m_textureCoordsBuf->create();
+        m_vao->release();
+    }
 	m_program->release();
 }
 
@@ -176,12 +196,39 @@ void GLShaderTextured::draw(unsigned int mode, const QMatrix4x4& transformMatrix
 	m_program->setUniformValue(m_matrixLoc, transformMatrix);
 	m_texture->bind();
 	m_program->setUniformValue(m_textureLoc, 0); // Use texture unit 0 which magically contains our texture
-	f->glEnableVertexAttribArray(0); // vertex
-	f->glVertexAttribPointer(0, nbComponents, GL_FLOAT, GL_FALSE, 0, vertices);
-	f->glEnableVertexAttribArray(1); // texture coordinates
-	f->glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, textureCoords);
+    if (m_vao)
+    {
+        m_vao->bind();
+
+        m_verticesBuf->bind();
+        m_verticesBuf->allocate(vertices, nbVertices * nbComponents * sizeof(GL_FLOAT));
+        m_program->enableAttributeArray(m_vertexLoc);
+        m_program->setAttributeBuffer(m_vertexLoc, GL_FLOAT, 0, nbComponents);
+
+        m_textureCoordsBuf->bind();
+        m_textureCoordsBuf->allocate(textureCoords, nbVertices * 2 * sizeof(GL_FLOAT));
+        m_program->enableAttributeArray(m_texCoordLoc);
+        m_program->setAttributeBuffer(m_texCoordLoc, GL_FLOAT, 0, 2);
+    }
+    else
+    {
+    	f->glEnableVertexAttribArray(m_vertexLoc); // vertex
+    	f->glVertexAttribPointer(m_vertexLoc, nbComponents, GL_FLOAT, GL_FALSE, 0, vertices);
+    	f->glEnableVertexAttribArray(m_texCoordLoc); // texture coordinates
+    	f->glVertexAttribPointer(m_texCoordLoc, 2, GL_FLOAT, GL_FALSE, 0, textureCoords);
+    }
+
 	f->glDrawArrays(mode, 0, nbVertices);
-	f->glDisableVertexAttribArray(0);
+
+    if (m_vao)
+    {
+        m_vao->release();
+    }
+    else
+    {
+	   f->glDisableVertexAttribArray(m_vertexLoc);
+	   f->glDisableVertexAttribArray(m_texCoordLoc);
+    }
 	m_program->release();
 }
 
@@ -197,31 +244,31 @@ void GLShaderTextured::drawMutable(unsigned int mode, const QMatrix4x4& transfor
 	m_program->setUniformValue(m_matrixLoc, transformMatrix);
 	glBindTexture(GL_TEXTURE_2D, m_textureId);
 	m_program->setUniformValue(m_textureLoc, 0); // Use texture unit 0 which magically contains our texture
-	glEnableVertexAttribArray(0); // vertex
-	glVertexAttribPointer(0, nbComponents, GL_FLOAT, GL_FALSE, 0, vertices);
-	glEnableVertexAttribArray(1); // texture coordinates
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, textureCoords);
+	glEnableVertexAttribArray(m_vertexLoc); // vertex
+	glVertexAttribPointer(m_vertexLoc, nbComponents, GL_FLOAT, GL_FALSE, 0, vertices);
+	glEnableVertexAttribArray(m_texCoordLoc); // texture coordinates
+	glVertexAttribPointer(m_texCoordLoc, 2, GL_FLOAT, GL_FALSE, 0, textureCoords);
 	glDrawArrays(mode, 0, nbVertices);
-	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(m_vertexLoc);
+	glDisableVertexAttribArray(m_texCoordLoc);
 	m_program->release();
 }
 
 void GLShaderTextured::cleanup()
 {
+    delete m_program;
+    m_program = nullptr;
+    delete m_vao;
+    m_vao = nullptr;
+    delete m_verticesBuf;
+    m_verticesBuf = nullptr;
+    delete m_textureCoordsBuf;
+    m_textureCoordsBuf = nullptr;
+    delete m_texture;
+    m_texture = nullptr;
+
 	if (!QOpenGLContext::currentContext()) {
 		return;
-	}
-
-	if (m_program)
-    {
-		delete m_program;
-		m_program = nullptr;
-	}
-
-	if (m_texture)
-    {
-		delete m_texture;
-		m_texture = nullptr;
 	}
 
     if (m_textureId)
