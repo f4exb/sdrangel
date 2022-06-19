@@ -44,6 +44,7 @@
 #include "m17demod.h"
 
 MESSAGE_CLASS_DEFINITION(M17Demod::MsgConfigureM17Demod, Message)
+MESSAGE_CLASS_DEFINITION(M17Demod::MsgReportSMS, Message)
 
 const char* const M17Demod::m_channelIdURI = "sdrangel.channel.m17demod";
 const char* const M17Demod::m_channelId = "M17Demod";
@@ -60,6 +61,7 @@ M17Demod::M17Demod(DeviceAPI *deviceAPI) :
     m_thread = new QThread(this);
     m_basebandSink = new M17DemodBaseband();
     m_basebandSink->setChannel(this);
+    m_basebandSink->setDemodInputMessageQueue(&m_inputMessageQueue);
     m_basebandSink->moveToThread(m_thread);
 
     applySettings(m_settings, true);
@@ -170,6 +172,16 @@ bool M17Demod::handleMessage(const Message& cmd)
     {
         qDebug() << "M17Demod::handleMessage: MsgChannelDemodQuery";
         sendSampleRateToDemodAnalyzer();
+
+        return true;
+    }
+    else if (MsgReportSMS::match(cmd))
+    {
+        MsgReportSMS& report = (MsgReportSMS&) cmd;
+        // Forward to GUI if any
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new MsgReportSMS(report));
+        }
 
         return true;
     }

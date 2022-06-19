@@ -19,6 +19,7 @@
 #include <QDockWidget>
 #include <QMainWindow>
 #include <QDebug>
+#include <QScrollBar>
 
 #include <complex>
 
@@ -111,6 +112,23 @@ bool M17DemodGUI::handleMessage(const Message& message)
         ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
         ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
         updateAbsoluteCenterFrequency();
+        return true;
+    }
+    else if (M17Demod::MsgReportSMS::match(message))
+    {
+        const M17Demod::MsgReportSMS& report = (M17Demod::MsgReportSMS&) message;
+        QDateTime dt = QDateTime::currentDateTime();
+        QString dateStr = dt.toString("HH:mm:ss");
+        QTextCursor cursor = ui->smsLog->textCursor();
+        cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
+        cursor.insertText(tr("=== %1 %2 to %3 ===\n%4\n")
+            .arg(dateStr)
+            .arg(report.getSource())
+            .arg(report.getDest())
+            .arg(report.getSMS())
+        );
+        ui->smsLog->verticalScrollBar()->setValue(ui->smsLog->verticalScrollBar()->maximum());
+
         return true;
     }
     else

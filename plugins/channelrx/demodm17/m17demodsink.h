@@ -99,6 +99,7 @@ public:
     bool getStreamElsePacket() const { return m_m17DemodProcessor.getStreamElsePacket(); }
     uint16_t getCRC() const { return m_m17DemodProcessor.getCRC(); }
     int getStdPacketProtocol() const { return (int) m_m17DemodProcessor.getStdPacketProtocol(); }
+    void setDemodInputMessageQueue(MessageQueue *messageQueue) { m_m17DemodProcessor.setDemodInputMessageQueue(messageQueue); }
 
 private:
     struct MagSqLevelsStore

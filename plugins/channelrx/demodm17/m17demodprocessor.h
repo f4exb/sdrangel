@@ -25,6 +25,7 @@
 #include "m17demodfilters.h"
 
 class AudioFifo;
+class MessageQueue;
 
 class M17DemodProcessor : public QObject
 {
@@ -45,6 +46,7 @@ public:
     M17DemodProcessor();
     ~M17DemodProcessor();
 
+    void setDemodInputMessageQueue(MessageQueue *messageQueue) { m_demodInputMessageQueue = messageQueue; }
     void pushSample(qint16 sample);
     void setDisplayLSF(bool displayLSF) { m_displayLSF = displayLSF; }
     void setNoiseBlanker(bool noiseBlanker) { m_noiseBlanker = noiseBlanker; }
@@ -129,6 +131,8 @@ private:
     uint16_t m_crc;
     uint32_t m_lsfCount; // Incremented each time a new LSF is decoded. Reset when lock is lost.
     StdPacketProtocol m_stdPacketProtocol;
+
+    MessageQueue *m_demodInputMessageQueue;
 
     static bool handle_frame(mobilinkd::M17FrameDecoder::output_buffer_t const& frame, int viterbi_cost);
     static void diagnostic_callback(

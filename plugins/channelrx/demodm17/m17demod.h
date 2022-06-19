@@ -45,8 +45,7 @@ public:
         const M17DemodSettings& getSettings() const { return m_settings; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureM17Demod* create(const M17DemodSettings& settings, bool force)
-        {
+        static MsgConfigureM17Demod* create(const M17DemodSettings& settings, bool force) {
             return new MsgConfigureM17Demod(settings, force);
         }
 
@@ -58,6 +57,31 @@ public:
             Message(),
             m_settings(settings),
             m_force(force)
+        { }
+    };
+
+    class MsgReportSMS : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const QString& getSource() const { return m_source; }
+        const QString& getDest() const { return m_dest; }
+        const QString& getSMS() const { return m_sms; }
+
+        static MsgReportSMS* create(const QString& source, const QString& dest, const QString& sms) {
+            return new MsgReportSMS(source, dest, sms);
+        }
+
+    private:
+        QString m_source;
+        QString m_dest;
+        QString m_sms;
+
+        MsgReportSMS(const QString& source, const QString& dest, const QString& sms) :
+            Message(),
+            m_source(source),
+            m_dest(dest),
+            m_sms(sms)
         { }
     };
 

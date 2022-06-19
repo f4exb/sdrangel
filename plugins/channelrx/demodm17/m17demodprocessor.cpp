@@ -25,6 +25,7 @@
 #include "audio/audiofifo.h"
 
 #include "m17/ax25_frame.h"
+#include "m17demod.h"
 #include "m17demodprocessor.h"
 
 M17DemodProcessor* M17DemodProcessor::m_this = nullptr;
@@ -36,7 +37,8 @@ M17DemodProcessor::M17DemodProcessor() :
     m_demod(handle_frame),
     m_audioFifo(nullptr),
     m_audioMute(false),
-    m_volume(1.0f)
+    m_volume(1.0f),
+    m_demodInputMessageQueue(nullptr)
 {
     m_this = this;
     m_codec2 = ::codec2_create(CODEC2_MODE_3200);
@@ -359,7 +361,20 @@ bool M17DemodProcessor::decode_packet(mobilinkd::M17FrameDecoder::packet_buffer_
                     oss << *it;
                 }
 
-                qDebug() << "M17DemodProcessor::decode_packet: SMS:" << oss.str().c_str();
+                qDebug() << "M17DemodProcessor::decode_packet: "
+                    << " From:" << getSrcCall()
+                    << " To:" << getDestcCall()
+                    << " SMS:" << oss.str().c_str();
+
+                if (m_demodInputMessageQueue)
+                {
+                    M17Demod::MsgReportSMS *msg = M17Demod::MsgReportSMS::create(
+                        getSrcCall(),
+                        getDestcCall(),
+                        QString(oss.str().c_str())
+                    );
+                    m_demodInputMessageQueue->push(msg);
+                }
             }
 
             return true;

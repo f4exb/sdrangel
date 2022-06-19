@@ -97,6 +97,7 @@ public:
     bool getStreamElsePacket() const { return m_sink.getStreamElsePacket(); }
     uint16_t getCRC() const { return m_sink.getCRC(); }
     int getStdPacketProtocol() const { return m_sink.getStdPacketProtocol(); }
+    void setDemodInputMessageQueue(MessageQueue *messageQueue) { m_sink.setDemodInputMessageQueue(messageQueue); }
 
 private:
     SampleSinkFifo m_sampleFifo;
