@@ -313,8 +313,8 @@ void GLShaderSpectrogram::initTextureMutable(const QImage& image)
 
     glGenTextures(1, &m_textureId);
     glBindTexture(GL_TEXTURE_2D, m_textureId);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE,
-        image.width(), image.height(), 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, image.constScanLine(0));
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED,
+        image.width(), image.height(), 0, GL_RED, GL_UNSIGNED_BYTE, image.constScanLine(0));
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -341,7 +341,7 @@ void GLShaderSpectrogram::subTextureImmutable(int xOffset, int yOffset, int widt
 
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     m_texture->bind();
-    f->glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, width, height, GL_LUMINANCE, GL_UNSIGNED_BYTE, pixels);
+    f->glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, width, height, GL_RED, GL_UNSIGNED_BYTE, pixels);
 }
 
 void GLShaderSpectrogram::subTextureMutable(int xOffset, int yOffset, int width, int height, const void *pixels)
@@ -353,7 +353,7 @@ void GLShaderSpectrogram::subTextureMutable(int xOffset, int yOffset, int width,
     }
 
     glBindTexture(GL_TEXTURE_2D, m_textureId);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, width, height, GL_LUMINANCE, GL_UNSIGNED_BYTE, pixels);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, width, height, GL_RED, GL_UNSIGNED_BYTE, pixels);
 }
 
 void GLShaderSpectrogram::drawSurface(SpectrumSettings::SpectrogramStyle style, const QMatrix4x4& vertexTransform, float textureOffset, bool invert)
