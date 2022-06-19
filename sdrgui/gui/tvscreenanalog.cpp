@@ -21,52 +21,101 @@
 
 #include "tvscreenanalog.h"
 
+static const char* vertexShaderSource2 =
+    "attribute highp vec4 vertex;\n"
+    "attribute highp vec2 texCoord;\n"
+    "varying highp vec2 texCoordVar;\n"
+    "void main() {\n"
+    "    gl_Position = vertex;\n"
+    "    texCoordVar = texCoord;\n"
+    "}\n";
+
 static const char* vertexShaderSource =
-"attribute highp vec4 vertex;\n"
-"attribute highp vec2 texCoord;\n"
-"varying highp vec2 texCoordVar;\n"
-"void main() {\n"
-"    gl_Position = vertex;\n"
-"    texCoordVar = texCoord;\n"
-"}\n";
+    "#version 330\n"
+    "in highp vec4 vertex;\n"
+    "in highp vec2 texCoord;\n"
+    "out highp vec2 texCoordVar;\n"
+    "void main() {\n"
+    "    gl_Position = vertex;\n"
+    "    texCoordVar = texCoord;\n"
+    "}\n";
+
+static const char* fragmentShaderSource2 =
+    "uniform highp sampler2D tex1;\n"
+    "uniform highp sampler2D tex2;\n"
+    "uniform highp float imw;\n"
+    "uniform highp float imh;\n"
+    "uniform highp float tlw;\n"
+    "uniform highp float tlh;\n"
+    "varying highp vec2 texCoordVar;\n"
+    "void main() {\n"
+    "    float tlhw = 0.5 * tlw;"
+    "    float tlhh = 0.5 * tlh;"
+    "    float tys = (texCoordVar.y + tlhh) * imh;\n"
+    "    float p1y = floor(tys) * tlh - tlhh;\n"
+    "    float p3y = p1y + tlh;\n"
+    "    float tshift1 = texture2D(tex2, vec2(0.0, p1y)).r;\n"
+    "    float tshift3 = texture2D(tex2, vec2(0.0, p3y)).r;\n"
+    "    float shift1 = (1.0 - tshift1 * 2.0) * tlw;\n"
+    "    float shift3 = (1.0 - tshift3 * 2.0) * tlw;\n"
+    "    float txs1 = (texCoordVar.x + shift1 + tlhw) * imw;\n"
+    "    float txs3 = (texCoordVar.x + shift3 + tlhw) * imw;\n"
+    "    float p1x = floor(txs1) * tlw - tlhw;\n"
+    "    float p3x = floor(txs3) * tlw - tlhw;\n"
+    "    float p2x = p1x + tlw;\n"
+    "    float p4x = p3x + tlw;\n"
+    "    float p1 = texture2D(tex1, vec2(p1x, p1y)).r;\n"
+    "    float p2 = texture2D(tex1, vec2(p2x, p1y)).r;\n"
+    "    float p3 = texture2D(tex1, vec2(p3x, p3y)).r;\n"
+    "    float p4 = texture2D(tex1, vec2(p4x, p3y)).r;\n"
+    "    float p12 = mix(p1, p2, fract(txs1));\n"
+    "    float p34 = mix(p3, p4, fract(txs3));\n"
+    "    float p = mix(p12, p34, fract(tys));\n"
+    "    gl_FragColor = vec4(p);\n"
+    "}\n";
 
 static const char* fragmentShaderSource =
-"uniform highp sampler2D tex1;\n"
-"uniform highp sampler2D tex2;\n"
-"uniform highp float imw;\n"
-"uniform highp float imh;\n"
-"uniform highp float tlw;\n"
-"uniform highp float tlh;\n"
-"varying highp vec2 texCoordVar;\n"
-"void main() {\n"
-"    float tlhw = 0.5 * tlw;"
-"    float tlhh = 0.5 * tlh;"
-"    float tys = (texCoordVar.y + tlhh) * imh;\n"
-"    float p1y = floor(tys) * tlh - tlhh;\n"
-"    float p3y = p1y + tlh;\n"
-"    float tshift1 = texture2D(tex2, vec2(0.0, p1y)).r;\n"
-"    float tshift3 = texture2D(tex2, vec2(0.0, p3y)).r;\n"
-"    float shift1 = (1.0 - tshift1 * 2.0) * tlw;\n"
-"    float shift3 = (1.0 - tshift3 * 2.0) * tlw;\n"
-"    float txs1 = (texCoordVar.x + shift1 + tlhw) * imw;\n"
-"    float txs3 = (texCoordVar.x + shift3 + tlhw) * imw;\n"
-"    float p1x = floor(txs1) * tlw - tlhw;\n"
-"    float p3x = floor(txs3) * tlw - tlhw;\n"
-"    float p2x = p1x + tlw;\n"
-"    float p4x = p3x + tlw;\n"
-"    float p1 = texture2D(tex1, vec2(p1x, p1y)).r;\n"
-"    float p2 = texture2D(tex1, vec2(p2x, p1y)).r;\n"
-"    float p3 = texture2D(tex1, vec2(p3x, p3y)).r;\n"
-"    float p4 = texture2D(tex1, vec2(p4x, p3y)).r;\n"
-"    float p12 = mix(p1, p2, fract(txs1));\n"
-"    float p34 = mix(p3, p4, fract(txs3));\n"
-"    float p = mix(p12, p34, fract(tys));\n"
-"    gl_FragColor = vec4(p);\n"
-"}\n";
+    "#version 330\n"
+    "uniform highp sampler2D tex1;\n"
+    "uniform highp sampler2D tex2;\n"
+    "uniform highp float imw;\n"
+    "uniform highp float imh;\n"
+    "uniform highp float tlw;\n"
+    "uniform highp float tlh;\n"
+    "in highp vec2 texCoordVar;\n"
+    "out vec4 fragColor;\n"
+    "void main() {\n"
+    "    float tlhw = 0.5 * tlw;"
+    "    float tlhh = 0.5 * tlh;"
+    "    float tys = (texCoordVar.y + tlhh) * imh;\n"
+    "    float p1y = floor(tys) * tlh - tlhh;\n"
+    "    float p3y = p1y + tlh;\n"
+    "    float tshift1 = texture2D(tex2, vec2(0.0, p1y)).r;\n"
+    "    float tshift3 = texture2D(tex2, vec2(0.0, p3y)).r;\n"
+    "    float shift1 = (1.0 - tshift1 * 2.0) * tlw;\n"
+    "    float shift3 = (1.0 - tshift3 * 2.0) * tlw;\n"
+    "    float txs1 = (texCoordVar.x + shift1 + tlhw) * imw;\n"
+    "    float txs3 = (texCoordVar.x + shift3 + tlhw) * imw;\n"
+    "    float p1x = floor(txs1) * tlw - tlhw;\n"
+    "    float p3x = floor(txs3) * tlw - tlhw;\n"
+    "    float p2x = p1x + tlw;\n"
+    "    float p4x = p3x + tlw;\n"
+    "    float p1 = texture(tex1, vec2(p1x, p1y)).r;\n"
+    "    float p2 = texture(tex1, vec2(p2x, p1y)).r;\n"
+    "    float p3 = texture(tex1, vec2(p3x, p3y)).r;\n"
+    "    float p4 = texture(tex1, vec2(p4x, p3y)).r;\n"
+    "    float p12 = mix(p1, p2, fract(txs1));\n"
+    "    float p34 = mix(p3, p4, fract(txs3));\n"
+    "    float p = mix(p12, p34, fract(tys));\n"
+    "    fragColor = vec4(p);\n"
+    "}\n";
 
 TVScreenAnalog::TVScreenAnalog(QWidget *parent)	:
 	QOpenGLWidget(parent),
 	m_shader(nullptr),
+    m_vao(nullptr),
+    m_verticesBuf(nullptr),
+    m_textureCoordsBuf(nullptr),
 	m_imageTexture(nullptr),
 	m_lineShiftsTexture(nullptr)
 {
@@ -107,7 +156,14 @@ void TVScreenAnalog::cleanup()
 		delete m_lineShiftsTexture;
 		m_lineShiftsTexture = nullptr;
 	}
-}
+
+    delete m_verticesBuf;
+    m_verticesBuf = nullptr;
+    delete m_textureCoordsBuf;
+    m_textureCoordsBuf = nullptr;
+    delete m_vao;
+    m_vao = nullptr;
+ }
 
 TVScreenAnalogBuffer *TVScreenAnalog::getBackBuffer()
 {
@@ -147,21 +203,52 @@ void TVScreenAnalog::initializeGL()
 
 	m_shader = new QOpenGLShaderProgram(this);
 
-	if (!m_shader->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSource))
-	{
-		qWarning()
-			<< "TVScreenAnalog::initializeGL: error in vertex shader:"
-			<< m_shader->log();
-		return;
-	}
+    int majorVersion = 0, minorVersion = 0;
+    if (QOpenGLContext::currentContext())
+    {
+        majorVersion = QOpenGLContext::currentContext()->format().majorVersion();
+        minorVersion = QOpenGLContext::currentContext()->format().minorVersion();
+    }
+    if ((majorVersion > 3) || ((majorVersion == 3) && (minorVersion >= 3)))
+    {
+        if (!m_shader->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSource))
+        {
+            qWarning()
+                << "TVScreenAnalog::initializeGL: error in vertex shader:"
+                << m_shader->log();
+            return;
+        }
 
-	if (!m_shader->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentShaderSource))
-	{
-		qWarning()
-			<< "TVScreenAnalog::initializeGL: error in fragment shader:"
-			<< m_shader->log();
-		return;
-	}
+        if (!m_shader->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentShaderSource))
+        {
+            qWarning()
+                << "TVScreenAnalog::initializeGL: error in fragment shader:"
+                << m_shader->log();
+            return;
+        }
+
+        m_vao = new QOpenGLVertexArrayObject();
+        m_vao->create();
+        m_vao->bind();
+    }
+    else
+    {
+        if (!m_shader->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSource2))
+        {
+            qWarning()
+                << "TVScreenAnalog::initializeGL: error in vertex shader:"
+                << m_shader->log();
+            return;
+        }
+
+        if (!m_shader->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentShaderSource2))
+        {
+            qWarning()
+                << "TVScreenAnalog::initializeGL: error in fragment shader:"
+                << m_shader->log();
+            return;
+        }
+    }
 
 	if (!m_shader->link())
 	{
@@ -179,6 +266,16 @@ void TVScreenAnalog::initializeGL()
 	m_imageHeightLoc = m_shader->uniformLocation("imh");
 	m_texelWidthLoc = m_shader->uniformLocation("tlw");
 	m_texelHeightLoc = m_shader->uniformLocation("tlh");
+    if (m_vao)
+    {
+        m_verticesBuf = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+        m_verticesBuf->setUsagePattern(QOpenGLBuffer::DynamicDraw);
+        m_verticesBuf->create();
+        m_textureCoordsBuf = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+        m_textureCoordsBuf->setUsagePattern(QOpenGLBuffer::DynamicDraw);
+        m_textureCoordsBuf->create();
+        m_vao->release();
+    }
 }
 
 void TVScreenAnalog::initializeTextures(TVScreenAnalogBuffer *buffer)
@@ -280,13 +377,40 @@ void TVScreenAnalog::paintGL()
 		1.0f, 1.0f
 	};
 
-	glVertexAttribPointer(m_vertexAttribIndex, 2, GL_FLOAT, GL_FALSE, 0, vertices);
-	glEnableVertexAttribArray(m_vertexAttribIndex);
-	glVertexAttribPointer(m_texCoordAttribIndex, 2, GL_FLOAT, GL_FALSE, 0, arrTextureCoords);
-	glEnableVertexAttribArray(m_texCoordAttribIndex);
+    if (m_vao)
+    {
+        m_vao->bind();
+
+        m_verticesBuf->bind();
+        m_verticesBuf->allocate(vertices, 4 * 2 * sizeof(GL_FLOAT));
+        m_shader->enableAttributeArray(m_vertexAttribIndex);
+        m_shader->setAttributeBuffer(m_vertexAttribIndex, GL_FLOAT, 0, 2);
+
+        // As these coords are constant, this could be moved into the init method
+        m_textureCoordsBuf->bind();
+        m_textureCoordsBuf->allocate(arrTextureCoords, 4 * 2 * sizeof(GL_FLOAT));
+        m_shader->enableAttributeArray(m_texCoordAttribIndex);
+        m_shader->setAttributeBuffer(m_texCoordAttribIndex, GL_FLOAT, 0, 2);
+    }
+    else
+    {
+        glVertexAttribPointer(m_vertexAttribIndex, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+        glEnableVertexAttribArray(m_vertexAttribIndex);
+        glVertexAttribPointer(m_texCoordAttribIndex, 2, GL_FLOAT, GL_FALSE, 0, arrTextureCoords);
+        glEnableVertexAttribArray(m_texCoordAttribIndex);
+    }
+
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-	glDisableVertexAttribArray(m_vertexAttribIndex);
-	glDisableVertexAttribArray(m_texCoordAttribIndex);
+
+    if (m_vao)
+    {
+        m_vao->release();
+    }
+    else
+    {
+	   glDisableVertexAttribArray(m_vertexAttribIndex);
+	   glDisableVertexAttribArray(m_texCoordAttribIndex);
+    }
 
 	m_shader->release();
 }

@@ -178,7 +178,13 @@ void TVScreen::paintGL()
 
     if ((m_askedCols != 0) && (m_askedRows != 0))
     {
-        m_glShaderArray.initializeGL(m_askedCols, m_askedRows);
+        int major = 0, minor = 0;
+        if (QOpenGLContext::currentContext())
+        {
+            major = QOpenGLContext::currentContext()->format().majorVersion();
+            minor = QOpenGLContext::currentContext()->format().minorVersion();
+        }
+        m_glShaderArray.initializeGL(major, minor, m_askedCols, m_askedRows);
         m_askedCols = 0;
         m_askedRows = 0;
     }

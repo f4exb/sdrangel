@@ -31,6 +31,8 @@
 #include <QOpenGLTexture>
 #include <QOpenGLFunctions>
 #include <QOpenGLShaderProgram>
+#include <QOpenGLVertexArrayObject>
+#include <QOpenGLBuffer>
 
 class TVScreenAnalogBuffer
 {
@@ -130,6 +132,9 @@ class SDRGUI_API TVScreenAnalog : public QOpenGLWidget, protected QOpenGLFunctio
 	TVScreenAnalogBuffer *m_backBuffer;
 
 	QOpenGLShaderProgram *m_shader;
+    QOpenGLVertexArrayObject *m_vao;
+    QOpenGLBuffer *m_verticesBuf;
+    QOpenGLBuffer *m_textureCoordsBuf;
 	QOpenGLTexture *m_imageTexture;
 	QOpenGLTexture *m_lineShiftsTexture;
 
