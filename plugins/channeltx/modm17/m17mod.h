@@ -24,6 +24,7 @@
 
 #include <QMutex>
 #include <QNetworkRequest>
+#include <QTimer>
 
 #include "dsp/basebandsamplesource.h"
 #include "channel/channelapi.h"
@@ -261,6 +262,8 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
+    QTimer m_loopPacketTimer;
+
     virtual bool handleMessage(const Message& cmd);
     void applySettings(const M17ModSettings& settings, bool force = false);
     void sendSampleRateToDemodAnalyzer();
@@ -283,6 +286,7 @@ private:
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
+    void packetLoopTimeout();
 };
 
 

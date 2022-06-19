@@ -298,14 +298,16 @@ void M17ModGUI::on_sendPacket_clicked(bool)
 
 void M17ModGUI::on_loopPacket_toggled(bool checked)
 {
-    (void) checked;
-    // TODO
+    m_settings.m_loopPacket = checked;
+    applySettings();
 }
 
 void M17ModGUI::on_loopPacketInterval_valueChanged(int value)
 {
+    ui->loopPacketIntervalText->setText(tr("%1").arg(value));
+    m_settings.m_loopPacketInterval = value;
     (void) value;
-    // TODO
+    applySettings();
 }
 
 void M17ModGUI::on_packetDataWidget_currentChanged(int index)
@@ -543,6 +545,10 @@ void M17ModGUI::displaySettings()
     ui->destination->setText(m_settings.m_destCall);
     ui->insertPosition->setChecked(m_settings.m_insertPosition);
     ui->can->setValue(m_settings.m_can);
+
+    ui->loopPacket->setChecked(m_settings.m_loopPacket);
+    ui->loopPacketInterval->setValue(m_settings.m_loopPacketInterval);
+    ui->loopPacketIntervalText->setText(tr("%1").arg(m_settings.m_loopPacketInterval));
 
     ui->smsText->setText(m_settings.m_smsText);
 

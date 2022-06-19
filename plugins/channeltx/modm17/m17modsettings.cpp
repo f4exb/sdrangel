@@ -61,6 +61,8 @@ void M17ModSettings::resetToDefaults()
     m_destCall = "";
     m_insertPosition = false;
     m_can = 10;
+    m_loopPacket = false;
+    m_loopPacketInterval = 60;
     m_smsText = "";
     m_aprsCallsign = "MYCALL";
     m_aprsTo = "APRS";
@@ -113,6 +115,8 @@ QByteArray M17ModSettings::serialize() const
     s.writeU32(43, m_can);
 
     s.writeString(50, m_smsText);
+    s.writeBool(51, m_loopPacket);
+    s.writeU32(52, m_loopPacketInterval);
 
     s.writeString(60, m_aprsCallsign);
     s.writeString(61, m_aprsTo);
@@ -200,6 +204,8 @@ bool M17ModSettings::deserialize(const QByteArray& data)
         m_can = utmp < 255 ? utmp : 255;
 
         d.readString(50, &m_smsText, "");
+        d.readBool(51, &m_loopPacket, false);
+        d.readU32(52, &m_loopPacketInterval, 60);
 
         d.readString(60, &m_aprsCallsign, "MYCALL");
         d.readString(61, &m_aprsTo, "");

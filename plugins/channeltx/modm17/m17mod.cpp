@@ -61,6 +61,7 @@ M17Mod::M17Mod(DeviceAPI *deviceAPI) :
 	m_sampleRate(48000)
 {
 	setObjectName(m_channelId);
+    m_loopPacketTimer.setInterval(m_settings.m_loopPacketInterval*1000);
 
     m_thread = new QThread(this);
     m_basebandSource = new M17ModBaseband();
@@ -79,6 +80,12 @@ M17Mod::M17Mod(DeviceAPI *deviceAPI) :
         &QNetworkAccessManager::finished,
         this,
         &M17Mod::networkManagerFinished
+    );
+    QObject::connect(
+        &m_loopPacketTimer,
+        &QTimer::timeout,
+        this,
+        &M17Mod::packetLoopTimeout
     );
 }
 
@@ -342,6 +349,23 @@ void M17Mod::applySettings(const M17ModSettings& settings, bool force)
     }
     if ((settings.m_feedbackAudioDeviceName != m_settings.m_feedbackAudioDeviceName) || force) {
         reverseAPIKeys.append("feedbackAudioDeviceName");
+    }
+
+    if ((settings.m_loopPacketInterval != m_settings.m_loopPacketInterval) || force)
+    {
+        reverseAPIKeys.append("loopPacketInterval");
+        m_loopPacketTimer.setInterval(settings.m_loopPacketInterval*1000);
+    }
+
+    if ((settings.m_loopPacket != m_settings.m_loopPacket) || force)
+    {
+        reverseAPIKeys.append("loopPacket");
+
+        if (settings.m_loopPacket) {
+            m_loopPacketTimer.start(settings.m_loopPacketInterval*1000);
+        } else {
+            m_loopPacketTimer.stop();
+        }
     }
 
     if (m_settings.m_streamIndex != settings.m_streamIndex)
@@ -762,6 +786,13 @@ void M17Mod::networkManagerFinished(QNetworkReply *reply)
     reply->deleteLater();
 }
 
+void M17Mod::packetLoopTimeout()
+{
+    if (m_settings.m_m17Mode == M17ModSettings::M17ModeM17Packet) {
+        m_basebandSource->sendPacket();
+    }
+}
+
 double M17Mod::getMagSq() const
 {
     return m_basebandSource->getMagSq();
@@ -789,5 +820,7 @@ int M17Mod::getFeedbackAudioSampleRate() const
 
 void M17Mod::sendPacket()
 {
-    m_basebandSource->sendPacket();
+    if (m_settings.m_m17Mode == M17ModSettings::M17ModeM17Packet) {
+        m_basebandSource->sendPacket();
+    }
 }

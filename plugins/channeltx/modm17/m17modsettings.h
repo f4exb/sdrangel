@@ -81,6 +81,8 @@ struct M17ModSettings
     uint8_t m_can;
 
     QString m_smsText;
+    bool m_loopPacket;
+    uint32_t m_loopPacketInterval;
 
     QString m_aprsCallsign;
     QString m_aprsTo;
