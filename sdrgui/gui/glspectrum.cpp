@@ -1898,6 +1898,7 @@ void GLSpectrum::applyChanges()
     if (m_nbBins <= 0) {
         return;
     }
+
     QFontMetrics fm(font());
     int M = fm.horizontalAdvance("-");
 
