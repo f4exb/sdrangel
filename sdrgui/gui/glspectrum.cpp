@@ -1898,7 +1898,6 @@ void GLSpectrum::applyChanges()
     if (m_nbBins <= 0) {
         return;
     }
-
     QFontMetrics fm(font());
     int M = fm.horizontalAdvance("-");
 
@@ -2581,7 +2580,9 @@ void GLSpectrum::applyChanges()
         m_waterfallBuffer = new QImage(m_nbBins, m_waterfallHeight, QImage::Format_ARGB32);
 
         m_waterfallBuffer->fill(qRgb(0x00, 0x00, 0x00));
-        m_glShaderWaterfall.initTexture(*m_waterfallBuffer);
+        if (m_waterfallHeight > 0) {
+            m_glShaderWaterfall.initTexture(*m_waterfallBuffer);
+        }
         m_waterfallBufferPos = 0;
 
         if (m_3DSpectrogramBuffer) {
@@ -2591,7 +2592,9 @@ void GLSpectrum::applyChanges()
         m_3DSpectrogramBuffer = new QImage(m_nbBins, m_waterfallHeight, QImage::Format_Grayscale8);
 
         m_3DSpectrogramBuffer->fill(qRgb(0x00, 0x00, 0x00));
-        m_glShaderSpectrogram.initTexture(*m_3DSpectrogramBuffer);
+        if (m_waterfallHeight > 0) {
+            m_glShaderSpectrogram.initTexture(*m_3DSpectrogramBuffer);
+        }
         m_3DSpectrogramBufferPos = 0;
     }
     m_glShaderSpectrogram.initColorMapTexture(m_3DSpectrogramColorMap);
