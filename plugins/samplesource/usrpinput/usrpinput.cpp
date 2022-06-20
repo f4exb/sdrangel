@@ -823,8 +823,15 @@ bool USRPInput::applySettings(const USRPInputSettings& settings, bool preGetStre
             {
                 if (settings.m_gainMode == USRPInputSettings::GAIN_AUTO)
                 {
-                    m_deviceShared.m_deviceParams->getDevice()->set_rx_agc(true, m_deviceShared.m_channel);
-                    qDebug() << "USRPInput::applySettings: AGC enabled for channel " << m_deviceShared.m_channel;
+                    try
+                    {
+                        m_deviceShared.m_deviceParams->getDevice()->set_rx_agc(true, m_deviceShared.m_channel);
+                        qDebug() << "USRPInput::applySettings: AGC enabled for channel " << m_deviceShared.m_channel;
+                    }
+                    catch (uhd::not_implemented_error &e)
+                    {
+                        qDebug() << "USRPInput::applySettings: AGC not implemented on this radio. Please set to manual.";
+                    }
                 }
                 else
                 {
