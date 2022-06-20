@@ -36,6 +36,7 @@
 #include "rdsdemod.h"
 #include "bfmdemodsettings.h"
 
+class ChannelAPI;
 class BasebandSampleSink;
 
 class BFMDemodSink : public ChannelSampleSink {
@@ -46,6 +47,7 @@ public:
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
     void setSpectrumSink(BasebandSampleSink* spectrumSink) { m_spectrumSink = spectrumSink; }
+    void setChannel(ChannelAPI *channel) { m_channel = channel; }
 
 	double getMagSq() const { return m_magsq; }
 
@@ -103,6 +105,7 @@ private:
 		RSRunning
 	};
 
+    ChannelAPI *m_channel;
     int m_channelSampleRate;
     int m_channelFrequencyOffset;
 	BFMDemodSettings m_settings;
@@ -158,6 +161,9 @@ private:
 	PhaseDiscriminators m_phaseDiscri;
 
     BasebandSampleSink *m_spectrumSink;
+
+    QVector<qint16> m_demodBuffer;
+    int m_demodBufferFill;
 };
 
 #endif // INCLUDE_BFMDEMODSINK_H
