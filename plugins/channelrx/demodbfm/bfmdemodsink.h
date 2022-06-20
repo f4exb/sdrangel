@@ -20,6 +20,8 @@
 
 #include <vector>
 
+#include <QVector>
+
 #include "dsp/channelsamplesink.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
