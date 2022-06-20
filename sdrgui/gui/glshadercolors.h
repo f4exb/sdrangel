@@ -24,6 +24,8 @@
 
 #include <QString>
 #include <QOpenGLFunctions>
+#include <QOpenGLVertexArrayObject>
+#include <QOpenGLBuffer>
 
 #include "export.h"
 
@@ -37,7 +39,7 @@ public:
 	GLShaderColors();
 	~GLShaderColors();
 
-	void initializeGL();
+	void initializeGL(int majorVersion, int minorVersion);
     void drawPoints(const QMatrix4x4& transformMatrix, GLfloat *vertices, GLfloat *colors, GLfloat alpha, int nbVertices);
 	void drawPolyline(const QMatrix4x4& transformMatrix, GLfloat *vertices, GLfloat *colors, GLfloat alpha, int nbVertices);
 	void drawSegments(const QMatrix4x4& transformMatrix, GLfloat *vertices, GLfloat *colors, GLfloat alpha, int nbVertices);
@@ -49,9 +51,14 @@ private:
 	void draw(unsigned int mode, const QMatrix4x4& transformMatrix, GLfloat *vertices, GLfloat *colors, GLfloat alpha, int nbVertices);
 
 	QOpenGLShaderProgram *m_program;
+    QOpenGLVertexArrayObject *m_vao;
+    QOpenGLBuffer *m_verticesBuf;
+    QOpenGLBuffer *m_colorBuf;
 	int m_matrixLoc;
     int m_alphaLoc;
+	static const QString m_vertexShaderSourceSimple2;
 	static const QString m_vertexShaderSourceSimple;
+	static const QString m_fragmentShaderSourceColored2;
 	static const QString m_fragmentShaderSourceColored;
 };
 

@@ -56,6 +56,7 @@
 #include "gui/aboutdialog.h"
 #include "gui/rollupwidget.h"
 #include "gui/audiodialog.h"
+#include "gui/graphicsdialog.h"
 #include "gui/loggingdialog.h"
 #include "gui/deviceuserargsdialog.h"
 #include "gui/sdrangelsplash.h"
@@ -1455,6 +1456,9 @@ void MainWindow::createMenuBar()
     QAction *audioAction = preferencesMenu->addAction("&Audio...");
     audioAction->setToolTip("Audio preferences");
     QObject::connect(audioAction, &QAction::triggered, this, &MainWindow::on_action_Audio_triggered);
+    QAction *graphicsAction = preferencesMenu->addAction("&Graphics...");
+    graphicsAction->setToolTip("Graphics preferences");
+    QObject::connect(graphicsAction, &QAction::triggered, this, &MainWindow::on_action_Graphics_triggered);
     QAction *loggingAction = preferencesMenu->addAction("&Logging...");
     loggingAction->setToolTip("Logging preferences");
     QObject::connect(loggingAction, &QAction::triggered, this, &MainWindow::on_action_Logging_triggered);
@@ -2027,6 +2031,12 @@ void MainWindow::on_action_Audio_triggered()
 {
 	AudioDialogX audioDialog(m_dspEngine->getAudioDeviceManager(), this);
 	audioDialog.exec();
+}
+
+void MainWindow::on_action_Graphics_triggered()
+{
+    GraphicsDialog graphicsDialog(m_mainCore->m_settings, this);
+    graphicsDialog.exec();
 }
 
 void MainWindow::on_action_Logging_triggered()

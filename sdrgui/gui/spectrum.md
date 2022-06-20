@@ -315,3 +315,39 @@ Use the toggle button to switch between relative and calibrated power readings.
 
 Right click to open the [calibration management dialog](spectrumcalibration.md)
 
+<h3>B.5: 3D Spectrogram Controls</h3>
+
+The 3D Spectrogram controls are only visible when the 3D Spectrogram is being displayed.
+
+<h4>B.5.1: Style</h4>
+
+This dropdown determines how the 3D Spectrogram data is rendered.
+
+  - Points: The data are rendeded as points.
+  - Lines: The data points are connected by lines.
+  - Solid: The data are rendeded as a solid surface with constant illumination.
+  - Outline: The data are rendered as a solid surface with outlines of the polygons highlighted.
+  - Shaded: The data are rendeder as a solid surface with a combination of ambient and diffuse lighting. This requires OpenGL 3.3 or greater.
+
+<h4>B.5.2: Color Map</h4>
+
+This dropdown allows the selection of a number of pre-defined color maps that are used for rendering the 3D Spectrogram.
+'Angel' is the default SDRangel color map.
+
+<h2>3D Spectrogram Controls</h2>
+
+The 3D Spectrogram view can be controlled by mouse/trackpad:
+
+  - Left button: Rotate
+  - Middle button: Pan
+  - Right button: Scale Z axis (power)
+  - Wheel/pinch: Zoom
+
+Or keyboard:
+
+  - Arrow: Rotate
+  - CTRL Arrow: Pan
+  - '+'/'-': Zoom
+  - CTRL '+'/'-': Scale Z axis (power)
+  - 'r': Reset view to default
+  - 'f': Flat view (top down)

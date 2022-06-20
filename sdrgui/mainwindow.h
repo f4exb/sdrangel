@@ -179,6 +179,7 @@ private slots:
 	void on_action_saveAll_triggered();
     void on_action_Configurations_triggered();
 	void on_action_Audio_triggered();
+	void on_action_Graphics_triggered();
     void on_action_Logging_triggered();
 	void on_action_FFT_triggered();
 	void on_action_My_Position_triggered();

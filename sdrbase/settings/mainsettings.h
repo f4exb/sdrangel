@@ -183,6 +183,13 @@ public:
 	const AudioDeviceManager *getAudioDeviceManager() const { return m_audioDeviceManager; }
 	void setAudioDeviceManager(AudioDeviceManager *audioDeviceManager) { m_audioDeviceManager = audioDeviceManager; }
 
+    int getMultisampling() const { return m_preferences.getMultisampling(); }
+    void setMultisampling(int samples)
+    {
+        m_preferences.setMultisampling(samples);
+        emit preferenceChanged(Preferences::Multisampling);
+    }
+
 signals:
 	void preferenceChanged(int);
 

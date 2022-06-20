@@ -27,11 +27,14 @@
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
 #include <QMatrix4x4>
+#include <QPoint>
 #include <QOpenGLWidget>
+#include <QOpenGLDebugLogger>
 #include "gui/scaleengine.h"
 #include "gui/glshadersimple.h"
 #include "gui/glshadertextured.h"
 #include "dsp/glspectruminterface.h"
+#include "gui/glshaderspectrogram.h"
 #include "dsp/spectrummarkers.h"
 #include "dsp/channelmarker.h"
 #include "dsp/spectrumsettings.h"
@@ -42,6 +45,7 @@
 class QOpenGLShaderProgram;
 class MessageQueue;
 class SpectrumVis;
+class QOpenGLDebugLogger;
 
 class SDRGUI_API GLSpectrum : public QOpenGLWidget, public GLSpectrumInterface {
     Q_OBJECT
@@ -140,6 +144,9 @@ public:
     void setDecayDivisor(int decayDivisor);
     void setHistoStroke(int stroke);
     void setDisplayWaterfall(bool display);
+    void setDisplay3DSpectrogram(bool display);
+    void set3DSpectrogramStyle(SpectrumSettings::SpectrogramStyle style);
+    void set3DSpectrogramColorMap(const QString &colorMap);
     void setSsbSpectrum(bool ssbSpectrum);
     void setLsbDisplay(bool lsbDisplay);
     void setInvertedWaterfall(bool inv);
@@ -292,6 +299,21 @@ private:
     bool m_ssbSpectrum;
     bool m_lsbDisplay;
 
+    QImage* m_3DSpectrogramBuffer;
+    int m_3DSpectrogramBufferPos;
+    int m_3DSpectrogramTextureHeight;
+    int m_3DSpectrogramTexturePos;
+    bool m_display3DSpectrogram;
+    bool m_rotate3DSpectrogram;     //!< Set when mouse is pressed in 3D spectrogram area for rotation when mouse is moved
+    bool m_pan3DSpectrogram;
+    bool m_scaleZ3DSpectrogram;
+    QPointF m_mousePrevLocalPos;    //!< Position of the mouse for last event
+    int m_3DSpectrogramBottom;
+    QPixmap m_spectrogramTimePixmap;
+    QPixmap m_spectrogramPowerPixmap;
+    SpectrumSettings::SpectrogramStyle m_3DSpectrogramStyle;
+    QString m_3DSpectrogramColorMap;
+
     QRgb m_histogramPalette[240];
     QImage* m_histogramBuffer;
     quint8* m_histogram; //!< Spectrum phosphor matrix of FFT width and PSD height scaled to 100. values [0..239]
@@ -316,6 +338,9 @@ private:
     GLShaderTextured m_glShaderHistogram;
     GLShaderTextured m_glShaderTextOverlay;
     GLShaderTextured m_glShaderInfo;
+    GLShaderSpectrogram m_glShaderSpectrogram;
+    GLShaderTextured m_glShaderSpectrogramTimeScale;
+    GLShaderTextured m_glShaderSpectrogramPowerScale;
     int m_matrixLoc;
     int m_colorLoc;
     bool m_useCalibration;
@@ -328,8 +353,10 @@ private:
     IncrementalArray<GLfloat> m_q3FFT;
 
     MessageQueue *m_messageQueueToGUI;
+    QOpenGLDebugLogger *m_openGLLogger;
 
     void updateWaterfall(const Real *spectrum);
+    void update3DSpectrogram(const Real *spectrum);
     void updateHistogram(const Real *spectrum);
 
     void initializeGL();
@@ -354,7 +381,9 @@ private:
     void resetFrequencyZoom();
     void updateFFTLimits();
     void setFrequencyScale();
+    void setPowerScale(int height);
     void getFrequencyZoom(int64_t& centerFrequency, int& frequencySpan);
+    bool pointInWaterfallOrSpectrogram(const QPointF &point) const;
 
     void enterEvent(QEvent* event);
     void leaveEvent(QEvent* event);
@@ -394,6 +423,8 @@ private slots:
     void tick();
     void channelMarkerChanged();
     void channelMarkerDestroyed(QObject* object);
+    void openGLDebug(const QOpenGLDebugMessage &debugMessage);
+    bool eventFilter(QObject *object, QEvent *event);
 };
 
 #endif // INCLUDE_GLSPECTRUM_H

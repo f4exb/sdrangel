@@ -20,25 +20,48 @@
 
 #include "gui/glshadertvarray.h"
 
-const QString GLShaderTVArray::m_strVertexShaderSourceArray = QString(
+const QString GLShaderTVArray::m_strVertexShaderSourceArray2 = QString(
         "uniform highp mat4 uMatrix;\n"
-                "attribute highp vec4 vertex;\n"
-                "attribute highp vec2 texCoord;\n"
-                "varying mediump vec2 texCoordVar;\n"
-                "void main() {\n"
-                "    gl_Position = uMatrix * vertex;\n"
-                "    texCoordVar = texCoord;\n"
-                "}\n");
+        "attribute highp vec4 vertex;\n"
+        "attribute highp vec2 texCoord;\n"
+        "varying mediump vec2 texCoordVar;\n"
+        "void main() {\n"
+        "    gl_Position = uMatrix * vertex;\n"
+        "    texCoordVar = texCoord;\n"
+        "}\n");
+
+const QString GLShaderTVArray::m_strVertexShaderSourceArray = QString(
+        "#version 330\n"
+        "uniform highp mat4 uMatrix;\n"
+        "in highp vec4 vertex;\n"
+        "in highp vec2 texCoord;\n"
+        "out mediump vec2 texCoordVar;\n"
+        "void main() {\n"
+        "    gl_Position = uMatrix * vertex;\n"
+        "    texCoordVar = texCoord;\n"
+        "}\n");
+
+const QString GLShaderTVArray::m_strFragmentShaderSourceColored2 = QString(
+        "uniform lowp sampler2D uTexture;\n"
+        "varying mediump vec2 texCoordVar;\n"
+        "void main() {\n"
+        "    gl_FragColor = texture2D(uTexture, texCoordVar);\n"
+        "}\n");
 
 const QString GLShaderTVArray::m_strFragmentShaderSourceColored = QString(
+        "#version 330\n"
         "uniform lowp sampler2D uTexture;\n"
-                "varying mediump vec2 texCoordVar;\n"
-                "void main() {\n"
-                "    gl_FragColor = texture2D(uTexture, texCoordVar);\n"
-                "}\n");
+        "in mediump vec2 texCoordVar;\n"
+        "out vec4 fragColor;\n"
+        "void main() {\n"
+        "    fragColor = texture(uTexture, texCoordVar);\n"
+        "}\n");
 
 GLShaderTVArray::GLShaderTVArray(bool blnColor) :
     m_objProgram(nullptr),
+    m_vao(nullptr),
+    m_verticesBuf(nullptr),
+    m_textureCoordsBuf(nullptr),
     m_matrixLoc(0),
     m_textureLoc(0),
     m_objImage(nullptr),
@@ -59,7 +82,7 @@ GLShaderTVArray::~GLShaderTVArray()
     cleanup();
 }
 
-void GLShaderTVArray::initializeGL(int intCols, int intRows)
+void GLShaderTVArray::initializeGL(int majorVersion, int minorVersion, int intCols, int intRows)
 {
     QMatrix4x4 objQMatrix;
 
@@ -73,20 +96,43 @@ void GLShaderTVArray::initializeGL(int intCols, int intRows)
     if (!m_objProgram)
     {
         m_objProgram = new QOpenGLShaderProgram();
-
-        if (!m_objProgram->addShaderFromSourceCode(QOpenGLShader::Vertex,
-                m_strVertexShaderSourceArray))
+        if ((majorVersion > 3) || ((majorVersion == 3) && (minorVersion >= 3)))
         {
-            qDebug() << "GLShaderArray::initializeGL: error in vertex shader: "
-                    << m_objProgram->log();
+            if (!m_objProgram->addShaderFromSourceCode(QOpenGLShader::Vertex,
+                    m_strVertexShaderSourceArray))
+            {
+                qDebug() << "GLShaderArray::initializeGL: error in vertex shader: "
+                        << m_objProgram->log();
+            }
+
+            if (!m_objProgram->addShaderFromSourceCode(QOpenGLShader::Fragment,
+                    m_strFragmentShaderSourceColored))
+            {
+                qDebug()
+                        << "GLShaderArray::initializeGL: error in fragment shader: "
+                        << m_objProgram->log();
+            }
+
+            m_vao = new QOpenGLVertexArrayObject();
+            m_vao->create();
+            m_vao->bind();
         }
-
-        if (!m_objProgram->addShaderFromSourceCode(QOpenGLShader::Fragment,
-                m_strFragmentShaderSourceColored))
+        else
         {
-            qDebug()
-                    << "GLShaderArray::initializeGL: error in fragment shader: "
-                    << m_objProgram->log();
+            if (!m_objProgram->addShaderFromSourceCode(QOpenGLShader::Vertex,
+                    m_strVertexShaderSourceArray2))
+            {
+                qDebug() << "GLShaderArray::initializeGL: error in vertex shader: "
+                        << m_objProgram->log();
+            }
+
+            if (!m_objProgram->addShaderFromSourceCode(QOpenGLShader::Fragment,
+                    m_strFragmentShaderSourceColored2))
+            {
+                qDebug()
+                        << "GLShaderArray::initializeGL: error in fragment shader: "
+                        << m_objProgram->log();
+            }
         }
 
         m_objProgram->bindAttributeLocation("vertex", 0);
@@ -100,6 +146,16 @@ void GLShaderTVArray::initializeGL(int intCols, int intRows)
         m_objProgram->bind();
         m_objProgram->setUniformValue(m_matrixLoc, objQMatrix);
         m_objProgram->setUniformValue(m_textureLoc, 0);
+        if (m_vao)
+        {
+            m_verticesBuf = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+            m_verticesBuf->setUsagePattern(QOpenGLBuffer::DynamicDraw);
+            m_verticesBuf->create();
+            m_textureCoordsBuf = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+            m_textureCoordsBuf->setUsagePattern(QOpenGLBuffer::DynamicDraw);
+            m_textureCoordsBuf->create();
+            m_vao->release();
+        }
         m_objProgram->release();
     }
 
@@ -232,17 +288,41 @@ void GLShaderTVArray::RenderPixels(unsigned char *chrData)
     ptrF->glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_intCols, m_intRows, GL_RGBA,
             GL_UNSIGNED_BYTE, m_objImage->bits());
 
-    ptrF->glEnableVertexAttribArray(0); // vertex
-    ptrF->glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, arrVertices);
+    if (m_vao)
+    {
+        m_vao->bind();
 
-    ptrF->glEnableVertexAttribArray(1); // texture coordinates
-    ptrF->glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, arrTextureCoords);
+        m_verticesBuf->bind();
+        m_verticesBuf->allocate(arrVertices, intNbVertices * 2 * sizeof(GL_FLOAT));
+        m_objProgram->enableAttributeArray(0);
+        m_objProgram->setAttributeBuffer(0, GL_FLOAT, 0, 2);
+
+        m_textureCoordsBuf->bind();
+        m_textureCoordsBuf->allocate(arrTextureCoords, intNbVertices * 2 * sizeof(GL_FLOAT));
+        m_objProgram->enableAttributeArray(1);
+        m_objProgram->setAttributeBuffer(1, GL_FLOAT, 0, 2);
+    }
+    else
+    {
+        ptrF->glEnableVertexAttribArray(0); // vertex
+        ptrF->glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, arrVertices);
+
+        ptrF->glEnableVertexAttribArray(1); // texture coordinates
+        ptrF->glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, arrTextureCoords);
+    }
 
     ptrF->glDrawArrays(GL_TRIANGLES, 0, intNbVertices);
 
     //cleanup
-    ptrF->glDisableVertexAttribArray(0);
-    ptrF->glDisableVertexAttribArray(1);
+    if (m_vao)
+    {
+        m_vao->release();
+    }
+    else
+    {
+        ptrF->glDisableVertexAttribArray(0);
+        ptrF->glDisableVertexAttribArray(1);
+    }
 
     //*********************//
 
@@ -294,6 +374,13 @@ void GLShaderTVArray::cleanup()
         delete m_objImage;
         m_objImage = nullptr;
     }
+
+    delete m_verticesBuf;
+    m_verticesBuf = nullptr;
+    delete m_textureCoordsBuf;
+    m_textureCoordsBuf = nullptr;
+    delete m_vao;
+    m_vao = nullptr;
 }
 
 bool GLShaderTVArray::SelectRow(int intLine)

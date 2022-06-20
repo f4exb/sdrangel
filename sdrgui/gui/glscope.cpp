@@ -156,6 +156,8 @@ void GLScope::newTraces(std::vector<float *> *traces, int traceIndex, std::vecto
 void GLScope::initializeGL()
 {
     QOpenGLContext *glCurrentContext = QOpenGLContext::currentContext();
+    int majorVersion = 0;
+    int minorVersion = 0;
 
     if (glCurrentContext)
     {
@@ -165,6 +167,8 @@ void GLScope::initializeGL()
                 << " major: " << (QOpenGLContext::currentContext()->format()).majorVersion()
                 << " minor: " << (QOpenGLContext::currentContext()->format()).minorVersion()
                 << " ES: " << (QOpenGLContext::currentContext()->isOpenGLES() ? "yes" : "no");
+            majorVersion = (QOpenGLContext::currentContext()->format()).majorVersion();
+            minorVersion = (QOpenGLContext::currentContext()->format()).minorVersion();
         }
         else
         {
@@ -205,14 +209,14 @@ void GLScope::initializeGL()
     glFunctions->initializeOpenGLFunctions();
 
     //glDisable(GL_DEPTH_TEST);
-    m_glShaderSimple.initializeGL();
-    m_glShaderColors.initializeGL();
-    m_glShaderLeft1Scale.initializeGL();
-    m_glShaderBottom1Scale.initializeGL();
-    m_glShaderLeft2Scale.initializeGL();
-    m_glShaderBottom2Scale.initializeGL();
-    m_glShaderPowerOverlay.initializeGL();
-    m_glShaderTextOverlay.initializeGL();
+    m_glShaderSimple.initializeGL(majorVersion, minorVersion);
+    m_glShaderColors.initializeGL(majorVersion, minorVersion);
+    m_glShaderLeft1Scale.initializeGL(majorVersion, minorVersion);
+    m_glShaderBottom1Scale.initializeGL(majorVersion, minorVersion);
+    m_glShaderLeft2Scale.initializeGL(majorVersion, minorVersion);
+    m_glShaderBottom2Scale.initializeGL(majorVersion, minorVersion);
+    m_glShaderPowerOverlay.initializeGL(majorVersion, minorVersion);
+    m_glShaderTextOverlay.initializeGL(majorVersion, minorVersion);
 }
 
 void GLScope::resizeGL(int width, int height)

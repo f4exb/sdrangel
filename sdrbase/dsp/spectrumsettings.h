@@ -52,6 +52,15 @@ public:
 		CalibInterpLog     //!< log power (dB linear)
 	};
 
+    enum SpectrogramStyle
+    {
+        Points,
+        Lines,
+        Solid,
+        Outline,
+        Shaded
+    };
+
 	int m_fftSize;
 	int m_fftOverlap;
 	FFTWindow::Function m_fftWindow;
@@ -66,6 +75,7 @@ public:
 	bool m_displayWaterfall;
 	bool m_invertedWaterfall;
     Real m_waterfallShare;
+    bool m_display3DSpectrogram;
 	bool m_displayMaxHold;
 	bool m_displayCurrent;
 	bool m_displayHistogram;
@@ -86,6 +96,8 @@ public:
 	QList<SpectrumCalibrationPoint> m_calibrationPoints;
 	bool m_useCalibration;
 	CalibrationInterpolationMode m_calibrationInterpMode; //!< How is power interpolated between calibration points
+    SpectrogramStyle m_3DSpectrogramStyle;
+    QString m_3DSpectrogramColorMap;
 	static const int m_log2FFTSizeMin = 6;   // 64
 	static const int m_log2FFTSizeMax = 15;  // 32k
 

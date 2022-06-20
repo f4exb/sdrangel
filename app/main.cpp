@@ -22,6 +22,8 @@
 #include <QStyleFactory>
 #include <QFontDatabase>
 #include <QSysInfo>
+#include <QGLFormat>
+#include <QSurfaceFormat>
 
 #include "loggerwithfile.h"
 #include "mainwindow.h"
@@ -134,10 +136,19 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
 int main(int argc, char* argv[])
 {
 #ifdef __APPLE__
-    // Enable WebGL in QtWebEngine when OpenGL is only version 2.1 (Needed for 3D Map)
-    // This can be removed when we eventually request a 4.1 OpenGL context
-    // This needs to be executed before any other Qt code
-    qputenv("QTWEBENGINE_CHROMIUM_FLAGS", "--ignore-gpu-blacklist");
+    // Request OpenGL 3.3 context, needed for glspectrum and 3D Map feature
+    // Note that Mac only supports CoreProfile, so any deprecated OpenGL 2 features
+    // will not work. Because of this, we have two versions of the shaders:
+    // OpenGL 2 versions for compatiblity with older drivers and OpenGL 3.3
+    // versions for newer drivers
+    QGLFormat fmt;
+    fmt.setVersion(3, 3);
+    fmt.setProfile(QGLFormat::CoreProfile);
+    QGLFormat::setDefaultFormat(fmt);
+    QSurfaceFormat sfc;
+    sfc.setVersion(3, 3);
+    sfc.setProfile(QSurfaceFormat::CoreProfile);
+    QSurfaceFormat::setDefaultFormat(sfc);
 #endif
 
 	qtwebapp::LoggerWithFile *logger = new qtwebapp::LoggerWithFile(qApp);

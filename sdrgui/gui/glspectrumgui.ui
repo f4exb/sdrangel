@@ -123,13 +123,13 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>45</width>
+         <width>50</width>
          <height>0</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>45</width>
+         <width>50</width>
          <height>16777215</height>
         </size>
        </property>
@@ -479,7 +479,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Spectrum maximum FPS (NL for No Limit)</string>
+        <string>Spectrum maximum FPS</string>
        </property>
        <property name="currentIndex">
         <number>0</number>
@@ -791,6 +791,95 @@
        </property>
        <property name="autoRaise">
         <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="spectrogram">
+       <property name="toolTip">
+        <string>Display 3D spectrogram</string>
+       </property>
+       <property name="text">
+        <string>3D Spectrogram</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/3dspectrogram.png</normaloff>:/3dspectrogram.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="autoRaise">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="spectrogramStyle">
+       <property name="minimumSize">
+        <size>
+         <width>80</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>80</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>3D Spectrogram Style</string>
+       </property>
+       <item>
+        <property name="text">
+         <string>Points</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Lines</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Solid</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Outline</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Shaded</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="spectrogramColorMap">
+       <property name="minimumSize">
+        <size>
+         <width>70</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>80</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>3D Spectrogram Color Map</string>
        </property>
       </widget>
      </item>

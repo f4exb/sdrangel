@@ -25,6 +25,8 @@
 #include <QString>
 #include <QOpenGLTexture>
 #include <QOpenGLFunctions>
+#include <QOpenGLVertexArrayObject>
+#include <QOpenGLBuffer>
 
 #include "export.h"
 
@@ -35,32 +37,39 @@ class QImage;
 class SDRGUI_API GLShaderTextured : protected QOpenGLFunctions
 {
 public:
-	GLShaderTextured();
-	~GLShaderTextured();
+    GLShaderTextured();
+    ~GLShaderTextured();
 
-	void initializeGL();
-	void initTexture(const QImage& image, QOpenGLTexture::WrapMode wrapMode = QOpenGLTexture::Repeat);
-	void subTexture(int xOffset, int yOffset, int width, int height, const void *pixels);
-	void drawSurface(const QMatrix4x4& transformMatrix, GLfloat* textureCoords, GLfloat *vertices, int nbVertices);
-	void cleanup();
+    void initializeGL(int majorVersion, int minorVersion);
+    void initTexture(const QImage& image, QOpenGLTexture::WrapMode wrapMode = QOpenGLTexture::Repeat);
+    void subTexture(int xOffset, int yOffset, int width, int height, const void *pixels);
+    void drawSurface(const QMatrix4x4& transformMatrix, GLfloat* textureCoords, GLfloat *vertices, int nbVertices, int nbComponents=2);
+    void cleanup();
 
 private:
-	void draw(unsigned int mode, const QMatrix4x4& transformMatrix, GLfloat *textureCoords, GLfloat *vertices, int nbVertices);
-    void drawMutable(unsigned int mode, const QMatrix4x4& transformMatrix, GLfloat *textureCoords, GLfloat *vertices, int nbVertices);
-	void initTextureImmutable(const QImage& image, QOpenGLTexture::WrapMode wrapMode = QOpenGLTexture::Repeat);
-	void subTextureImmutable(int xOffset, int yOffset, int width, int height, const void *pixels);
-	void initTextureMutable(const QImage& image, QOpenGLTexture::WrapMode wrapMode = QOpenGLTexture::Repeat);
-	void subTextureMutable(int xOffset, int yOffset, int width, int height, const void *pixels);
+    void draw(unsigned int mode, const QMatrix4x4& transformMatrix, GLfloat *textureCoords, GLfloat *vertices, int nbVertices, int nbComponents);
+    void drawMutable(unsigned int mode, const QMatrix4x4& transformMatrix, GLfloat *textureCoords, GLfloat *vertices, int nbVertices, int nbComponents);
+    void initTextureImmutable(const QImage& image, QOpenGLTexture::WrapMode wrapMode = QOpenGLTexture::Repeat);
+    void subTextureImmutable(int xOffset, int yOffset, int width, int height, const void *pixels);
+    void initTextureMutable(const QImage& image, QOpenGLTexture::WrapMode wrapMode = QOpenGLTexture::Repeat);
+    void subTextureMutable(int xOffset, int yOffset, int width, int height, const void *pixels);
     bool useImmutableStorage();
 
-	QOpenGLShaderProgram *m_program;
-	QOpenGLTexture *m_texture;
+    QOpenGLShaderProgram *m_program;
+    QOpenGLVertexArrayObject *m_vao;
+    QOpenGLBuffer *m_verticesBuf;
+    QOpenGLBuffer *m_textureCoordsBuf;
+    QOpenGLTexture *m_texture;
     unsigned int m_textureId;
-	int m_matrixLoc;
-	int m_textureLoc;
+    int m_vertexLoc;
+    int m_texCoordLoc;
+    int m_matrixLoc;
+    int m_textureLoc;
     bool m_useImmutableStorage;
-	static const QString m_vertexShaderSourceTextured;
-	static const QString m_fragmentShaderSourceTextured;
+    static const QString m_vertexShaderSourceTextured2;
+    static const QString m_vertexShaderSourceTextured;
+    static const QString m_fragmentShaderSourceTextured2;
+    static const QString m_fragmentShaderSourceTextured;
 };
 
 #endif /* INCLUDE_GUI_GLSHADERTEXTURED_H_ */

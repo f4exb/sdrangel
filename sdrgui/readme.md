@@ -19,6 +19,7 @@ The menu items from left to right are:
   - Preferences:
     - _Configurations_: opens a dialog to manage instance configurations. See configurations dialog documentation [here](configurations.md)
     - _Audio_: opens a dialog to choose the audio output device. See the audio management documentation [here](audio.md)
+    - _Graphics_: opens a dialog to choose graphics options.
     - _Logging_: opens a dialog to choose logging options. See "Logging" paragraph next for details
     - _FFT_: opens a dialog to run the `fftwf-wisdom` utility with a choice of direct and possibly reverse FFT sizes. It produces a so called wisdom file `fftw-wisdom` that speeds up FFT allocations. It is created at a default location and will be used at next invocations of SDRangel. See "FFT" paragraph next for details.
     - _My Position_: opens a dialog to enter your station ("My Position") coordinates in decimal degrees with north latitudes positive and east longitudes positive. This is used whenever positional data is to be displayed (APRS, DPRS, ...). For it now only works with D-Star $$CRC frames. See [DSD demod plugin](../plugins/channelrx/demoddsd/readme.md) for details on how to decode Digital Voice modes.
@@ -428,6 +429,20 @@ This will delete the currently selected command or if selection is a group this 
 <h5>2.3.6.8: Activate keyboard bindings</h5>
 
 Use this button to activate the keyboard bindings. Note that you need to have this button selected (its background should be lit in beige/orange) for the key bindings to be effective.
+
+<h3>2.4: Graphics</h3>
+
+When clicking on the Graphics submenu a dialog opens for setting graphics options.
+
+![Main Window Graphics](../doc/img/MainWindow_graphics.png)
+
+<h4>2.4.1</h4>
+
+Multisampling (MSAA) determines whether multisampling anti-aliasing is used to removed the jagged edges of lines when rendering 2D and 3D spectra.
+The higher the number of samples chosen, the better quality the anti-aliasing will be, but higher values require more GPU processing and memory.
+
+Changing this option will only take effect when spectrum windows are recreated (not just hidden then made visible again), so in some cases it
+may be necessary to restart SDRangel to see the difference.
 
 <h2>3: Help</h2>
 

@@ -31,6 +31,7 @@
 #include "gui/spectrummarkersdialog.h"
 #include "gui/spectrumcalibrationpointsdialog.h"
 #include "gui/flowlayout.h"
+#include "util/colormap.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "ui_glspectrumgui.h"
@@ -69,6 +70,9 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
     ui->refLevel->setStyleSheet(levelStyle);
     ui->levelRange->setStyleSheet(levelStyle);
     ui->fftOverlap->setStyleSheet(levelStyle);
+
+    ui->spectrogramColorMap->addItems(ColorMap::getColorMapNames());
+    ui->spectrogramColorMap->setCurrentText("Angel");
 
     connect(&m_messageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
@@ -154,6 +158,11 @@ void GLSpectrumGUI::displaySettings()
     ui->decayDivisor->setSliderPosition(m_settings.m_decayDivisor);
     ui->stroke->setSliderPosition(m_settings.m_histogramStroke);
     ui->waterfall->setChecked(m_settings.m_displayWaterfall);
+    ui->spectrogram->setChecked(m_settings.m_display3DSpectrogram);
+    ui->spectrogramStyle->setCurrentIndex((int) m_settings.m_3DSpectrogramStyle);
+    ui->spectrogramStyle->setVisible(m_settings.m_display3DSpectrogram);
+    ui->spectrogramColorMap->setCurrentText(m_settings.m_3DSpectrogramColorMap);
+    ui->spectrogramColorMap->setVisible(m_settings.m_display3DSpectrogram);
     ui->maxHold->setChecked(m_settings.m_displayMaxHold);
     ui->current->setChecked(m_settings.m_displayCurrent);
     ui->histogram->setChecked(m_settings.m_displayHistogram);
@@ -235,6 +244,9 @@ void GLSpectrumGUI::applySettings()
 void GLSpectrumGUI::applySpectrumSettings()
 {
     m_glSpectrum->setDisplayWaterfall(m_settings.m_displayWaterfall);
+    m_glSpectrum->setDisplay3DSpectrogram(m_settings.m_display3DSpectrogram);
+    m_glSpectrum->set3DSpectrogramStyle(m_settings.m_3DSpectrogramStyle);
+    m_glSpectrum->set3DSpectrogramColorMap(m_settings.m_3DSpectrogramColorMap);
     m_glSpectrum->setInvertedWaterfall(m_settings.m_invertedWaterfall);
     m_glSpectrum->setDisplayMaxHold(m_settings.m_displayMaxHold);
     m_glSpectrum->setDisplayCurrent(m_settings.m_displayCurrent);
@@ -451,9 +463,42 @@ void GLSpectrumGUI::on_stroke_valueChanged(int index)
     applySettings();
 }
 
+void GLSpectrumGUI::on_spectrogramStyle_currentIndexChanged(int index)
+{
+    m_settings.m_3DSpectrogramStyle = (SpectrumSettings::SpectrogramStyle)index;
+    applySettings();
+}
+
+void GLSpectrumGUI::on_spectrogramColorMap_currentIndexChanged(int index)
+{
+    (void) index;
+    m_settings.m_3DSpectrogramColorMap = ui->spectrogramColorMap->currentText();
+    applySettings();
+}
+
 void GLSpectrumGUI::on_waterfall_toggled(bool checked)
 {
     m_settings.m_displayWaterfall = checked;
+    if (checked)
+    {
+        blockApplySettings(true);
+        ui->spectrogram->setChecked(false);
+        blockApplySettings(false);
+    }
+    applySettings();
+}
+
+void GLSpectrumGUI::on_spectrogram_toggled(bool checked)
+{
+    m_settings.m_display3DSpectrogram = checked;
+    if (checked)
+    {
+        blockApplySettings(true);
+        ui->waterfall->setChecked(false);
+        blockApplySettings(false);
+    }
+    ui->spectrogramStyle->setVisible(m_settings.m_display3DSpectrogram);
+    ui->spectrogramColorMap->setVisible(m_settings.m_display3DSpectrogram);
     applySettings();
 }
 

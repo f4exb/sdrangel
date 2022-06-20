@@ -27,46 +27,77 @@
 #include "gui/glshadertextured.h"
 
 GLShaderTextured::GLShaderTextured() :
-	m_program(nullptr),
-	m_texture(nullptr),
+    m_program(nullptr),
+    m_vao(nullptr),
+    m_verticesBuf(nullptr),
+    m_textureCoordsBuf(nullptr),
+    m_texture(nullptr),
     m_textureId(0),
-	m_matrixLoc(0),
-	m_textureLoc(0),
+    m_vertexLoc(0),
+    m_texCoordLoc(0),
+    m_matrixLoc(0),
+    m_textureLoc(0),
     m_useImmutableStorage(true)
 { }
 
 GLShaderTextured::~GLShaderTextured()
 {
-	cleanup();
+    cleanup();
 }
 
-void GLShaderTextured::initializeGL()
+void GLShaderTextured::initializeGL(int majorVersion, int minorVersion)
 {
     initializeOpenGLFunctions();
     m_useImmutableStorage = useImmutableStorage();
     qDebug() << "GLShaderTextured::initializeGL: m_useImmutableStorage: " << m_useImmutableStorage;
 
-	m_program = new QOpenGLShaderProgram;
+    m_program = new QOpenGLShaderProgram;
+    if ((majorVersion > 3) || ((majorVersion == 3) && (minorVersion >= 3)))
+    {
+        if (!m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, m_vertexShaderSourceTextured)) {
+            qDebug() << "GLShaderTextured::initializeGL: error in vertex shader: " << m_program->log();
+        }
+        if (!m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, m_fragmentShaderSourceTextured)) {
+            qDebug() << "GLShaderTextured::initializeGL: error in fragment shader: " << m_program->log();
+        }
 
-	if (!m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, m_vertexShaderSourceTextured)) {
-		qDebug() << "GLShaderTextured::initializeGL: error in vertex shader: " << m_program->log();
-	}
+        m_vao = new QOpenGLVertexArrayObject();
+        m_vao->create();
+        m_vao->bind();
+    }
+    else
+    {
+        if (!m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, m_vertexShaderSourceTextured2)) {
+            qDebug() << "GLShaderTextured::initializeGL: error in vertex shader: " << m_program->log();
+        }
+        if (!m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, m_fragmentShaderSourceTextured2)) {
+            qDebug() << "GLShaderTextured::initializeGL: error in fragment shader: " << m_program->log();
+        }
+    }
 
-	if (!m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, m_fragmentShaderSourceTextured)) {
-		qDebug() << "GLShaderTextured::initializeGL: error in fragment shader: " << m_program->log();
-	}
+    m_program->bindAttributeLocation("vertex", 0);
+    m_program->bindAttributeLocation("texCoord", 1);
 
-	m_program->bindAttributeLocation("vertex", 0);
-	m_program->bindAttributeLocation("texCoord", 1);
+    if (!m_program->link()) {
+        qDebug() << "GLShaderTextured::initializeGL: error linking shader: " << m_program->log();
+    }
 
-	if (!m_program->link()) {
-		qDebug() << "GLShaderTextured::initializeGL: error linking shader: " << m_program->log();
-	}
-
-	m_program->bind();
-	m_matrixLoc = m_program->uniformLocation("uMatrix");
-	m_textureLoc = m_program->uniformLocation("uTexture");
-	m_program->release();
+    m_program->bind();
+    m_vertexLoc = m_program->attributeLocation("vertex");
+    m_texCoordLoc = m_program->attributeLocation("texCoord");
+    m_matrixLoc = m_program->uniformLocation("uMatrix");
+    m_textureLoc = m_program->uniformLocation("uTexture");
+    if (m_vao)
+    {
+        m_verticesBuf = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+        m_verticesBuf->setUsagePattern(QOpenGLBuffer::DynamicDraw);
+        m_verticesBuf->create();
+        m_textureCoordsBuf = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+        m_textureCoordsBuf->setUsagePattern(QOpenGLBuffer::DynamicDraw);
+        m_textureCoordsBuf->create();
+        m_vao->release();
+    }
+    m_program->release();
 }
 
 void GLShaderTextured::initTexture(const QImage& image, QOpenGLTexture::WrapMode wrapMode)
@@ -80,34 +111,34 @@ void GLShaderTextured::initTexture(const QImage& image, QOpenGLTexture::WrapMode
 
 void GLShaderTextured::initTextureImmutable(const QImage& image, QOpenGLTexture::WrapMode wrapMode)
 {
-	if (m_texture) {
-		delete m_texture;
-	}
+    if (m_texture) {
+        delete m_texture;
+    }
 
-	m_texture = new QOpenGLTexture(image);
+    m_texture = new QOpenGLTexture(image);
 
-	m_texture->setMinificationFilter(QOpenGLTexture::Linear);
-	m_texture->setMagnificationFilter(QOpenGLTexture::Linear);
-	m_texture->setWrapMode(wrapMode);
+    m_texture->setMinificationFilter(QOpenGLTexture::Linear);
+    m_texture->setMagnificationFilter(QOpenGLTexture::Linear);
+    m_texture->setWrapMode(wrapMode);
 }
 
 void GLShaderTextured::initTextureMutable(const QImage& image, QOpenGLTexture::WrapMode wrapMode)
 {
-	if (m_textureId)
+    if (m_textureId)
     {
-		glDeleteTextures(1, &m_textureId);
-		m_textureId = 0;
-	}
+        glDeleteTextures(1, &m_textureId);
+        m_textureId = 0;
+    }
 
-	glGenTextures(1, &m_textureId);
-	glBindTexture(GL_TEXTURE_2D, m_textureId);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8,
-		image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.constScanLine(0));
+    glGenTextures(1, &m_textureId);
+    glBindTexture(GL_TEXTURE_2D, m_textureId);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8,
+        image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.constScanLine(0));
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapMode);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMode);
 }
 
 void GLShaderTextured::subTexture(int xOffset, int yOffset, int width, int height, const void *pixels)
@@ -121,98 +152,125 @@ void GLShaderTextured::subTexture(int xOffset, int yOffset, int width, int heigh
 
 void GLShaderTextured::subTextureImmutable(int xOffset, int yOffset, int width, int height, const void *pixels)
 {
-	if (!m_texture)
+    if (!m_texture)
     {
-		qDebug("GLShaderTextured::subTextureImmutable: no texture defined. Doing nothing");
-		return;
-	}
+        qDebug("GLShaderTextured::subTextureImmutable: no texture defined. Doing nothing");
+        return;
+    }
 
-	QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-	m_texture->bind();
-	f->glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+    m_texture->bind();
+    f->glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 }
 
 void GLShaderTextured::subTextureMutable(int xOffset, int yOffset, int width, int height, const void *pixels)
 {
-	if (!m_textureId)
+    if (!m_textureId)
     {
-		qDebug("GLShaderTextured::subTextureMutable: no texture defined. Doing nothing");
-		return;
-	}
+        qDebug("GLShaderTextured::subTextureMutable: no texture defined. Doing nothing");
+        return;
+    }
 
-	glBindTexture(GL_TEXTURE_2D, m_textureId);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+    glBindTexture(GL_TEXTURE_2D, m_textureId);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 }
 
-void GLShaderTextured::drawSurface(const QMatrix4x4& transformMatrix, GLfloat *textureCoords, GLfloat *vertices, int nbVertices)
+void GLShaderTextured::drawSurface(const QMatrix4x4& transformMatrix, GLfloat *textureCoords, GLfloat *vertices, int nbVertices, int nbComponents)
 {
     if (m_useImmutableStorage) {
-	    draw(GL_TRIANGLE_FAN, transformMatrix, textureCoords, vertices, nbVertices);
+        draw(GL_TRIANGLE_FAN, transformMatrix, textureCoords, vertices, nbVertices, nbComponents);
     } else {
-        drawMutable(GL_TRIANGLE_FAN, transformMatrix, textureCoords, vertices, nbVertices);
+        drawMutable(GL_TRIANGLE_FAN, transformMatrix, textureCoords, vertices, nbVertices, nbComponents);
     }
 }
 
-void GLShaderTextured::draw(unsigned int mode, const QMatrix4x4& transformMatrix, GLfloat *textureCoords, GLfloat *vertices, int nbVertices)
+void GLShaderTextured::draw(unsigned int mode, const QMatrix4x4& transformMatrix, GLfloat *textureCoords, GLfloat *vertices, int nbVertices, int nbComponents)
 {
-	if (!m_texture)
+    if (!m_texture)
     {
-		qDebug("GLShaderTextured::draw: no texture defined. Doing nothing");
-		return;
-	}
+        qDebug("GLShaderTextured::draw: no texture defined. Doing nothing");
+        return;
+    }
 
-	QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-	m_program->bind();
-	m_program->setUniformValue(m_matrixLoc, transformMatrix);
-	m_texture->bind();
-	m_program->setUniformValue(m_textureLoc, 0); // Use texture unit 0 which magically contains our texture
-	f->glEnableVertexAttribArray(0); // vertex
-	f->glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, vertices);
-	f->glEnableVertexAttribArray(1); // texture coordinates
-	f->glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, textureCoords);
-	f->glDrawArrays(mode, 0, nbVertices);
-	f->glDisableVertexAttribArray(0);
-	m_program->release();
+    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+    m_program->bind();
+    m_program->setUniformValue(m_matrixLoc, transformMatrix);
+    m_texture->bind();
+    m_program->setUniformValue(m_textureLoc, 0); // Use texture unit 0 which magically contains our texture
+    if (m_vao)
+    {
+        m_vao->bind();
+
+        m_verticesBuf->bind();
+        m_verticesBuf->allocate(vertices, nbVertices * nbComponents * sizeof(GL_FLOAT));
+        m_program->enableAttributeArray(m_vertexLoc);
+        m_program->setAttributeBuffer(m_vertexLoc, GL_FLOAT, 0, nbComponents);
+
+        m_textureCoordsBuf->bind();
+        m_textureCoordsBuf->allocate(textureCoords, nbVertices * 2 * sizeof(GL_FLOAT));
+        m_program->enableAttributeArray(m_texCoordLoc);
+        m_program->setAttributeBuffer(m_texCoordLoc, GL_FLOAT, 0, 2);
+    }
+    else
+    {
+        f->glEnableVertexAttribArray(m_vertexLoc); // vertex
+        f->glVertexAttribPointer(m_vertexLoc, nbComponents, GL_FLOAT, GL_FALSE, 0, vertices);
+        f->glEnableVertexAttribArray(m_texCoordLoc); // texture coordinates
+        f->glVertexAttribPointer(m_texCoordLoc, 2, GL_FLOAT, GL_FALSE, 0, textureCoords);
+    }
+
+    f->glDrawArrays(mode, 0, nbVertices);
+
+    if (m_vao)
+    {
+        m_vao->release();
+    }
+    else
+    {
+       f->glDisableVertexAttribArray(m_vertexLoc);
+       f->glDisableVertexAttribArray(m_texCoordLoc);
+    }
+    m_program->release();
 }
 
-void GLShaderTextured::drawMutable(unsigned int mode, const QMatrix4x4& transformMatrix, GLfloat *textureCoords, GLfloat *vertices, int nbVertices)
+void GLShaderTextured::drawMutable(unsigned int mode, const QMatrix4x4& transformMatrix, GLfloat *textureCoords, GLfloat *vertices, int nbVertices, int nbComponents)
 {
-	if (!m_textureId)
+    if (!m_textureId)
     {
-		qDebug("GLShaderTextured::drawMutable: no texture defined. Doing nothing");
-		return;
-	}
+        qDebug("GLShaderTextured::drawMutable: no texture defined. Doing nothing");
+        return;
+    }
 
-	m_program->bind();
-	m_program->setUniformValue(m_matrixLoc, transformMatrix);
-	glBindTexture(GL_TEXTURE_2D, m_textureId);
-	m_program->setUniformValue(m_textureLoc, 0); // Use texture unit 0 which magically contains our texture
-	glEnableVertexAttribArray(0); // vertex
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, vertices);
-	glEnableVertexAttribArray(1); // texture coordinates
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, textureCoords);
-	glDrawArrays(mode, 0, nbVertices);
-	glDisableVertexAttribArray(0);
-	m_program->release();
+    m_program->bind();
+    m_program->setUniformValue(m_matrixLoc, transformMatrix);
+    glBindTexture(GL_TEXTURE_2D, m_textureId);
+    m_program->setUniformValue(m_textureLoc, 0); // Use texture unit 0 which magically contains our texture
+    glEnableVertexAttribArray(m_vertexLoc); // vertex
+    glVertexAttribPointer(m_vertexLoc, nbComponents, GL_FLOAT, GL_FALSE, 0, vertices);
+    glEnableVertexAttribArray(m_texCoordLoc); // texture coordinates
+    glVertexAttribPointer(m_texCoordLoc, 2, GL_FLOAT, GL_FALSE, 0, textureCoords);
+    glDrawArrays(mode, 0, nbVertices);
+    glDisableVertexAttribArray(m_vertexLoc);
+    glDisableVertexAttribArray(m_texCoordLoc);
+    m_program->release();
 }
 
 void GLShaderTextured::cleanup()
 {
-	if (!QOpenGLContext::currentContext()) {
-		return;
-	}
+    delete m_program;
+    m_program = nullptr;
+    delete m_vao;
+    m_vao = nullptr;
+    delete m_verticesBuf;
+    m_verticesBuf = nullptr;
+    delete m_textureCoordsBuf;
+    m_textureCoordsBuf = nullptr;
+    delete m_texture;
+    m_texture = nullptr;
 
-	if (m_program)
-    {
-		delete m_program;
-		m_program = nullptr;
-	}
-
-	if (m_texture)
-    {
-		delete m_texture;
-		m_texture = nullptr;
-	}
+    if (!QOpenGLContext::currentContext()) {
+        return;
+    }
 
     if (m_textureId)
     {
@@ -248,21 +306,43 @@ bool GLShaderTextured::useImmutableStorage()
     return false;
 }
 
+const QString GLShaderTextured::m_vertexShaderSourceTextured2 = QString(
+        "uniform highp mat4 uMatrix;\n"
+        "attribute highp vec4 vertex;\n"
+        "attribute highp vec2 texCoord;\n"
+        "varying mediump vec2 texCoordVar;\n"
+        "void main() {\n"
+        "    gl_Position = uMatrix * vertex;\n"
+        "    texCoordVar = texCoord;\n"
+        "}\n"
+        );
+
 const QString GLShaderTextured::m_vertexShaderSourceTextured = QString(
-		"uniform highp mat4 uMatrix;\n"
-		"attribute highp vec4 vertex;\n"
-		"attribute highp vec2 texCoord;\n"
-		"varying mediump vec2 texCoordVar;\n"
-		"void main() {\n"
-		"    gl_Position = uMatrix * vertex;\n"
-		"    texCoordVar = texCoord;\n"
-		"}\n"
-		);
+        "#version 330\n"
+        "uniform highp mat4 uMatrix;\n"
+        "in highp vec4 vertex;\n"
+        "in highp vec2 texCoord;\n"
+        "out mediump vec2 texCoordVar;\n"
+        "void main() {\n"
+        "    gl_Position = uMatrix * vertex;\n"
+        "    texCoordVar = texCoord;\n"
+        "}\n"
+        );
+
+const QString GLShaderTextured::m_fragmentShaderSourceTextured2 = QString(
+        "uniform lowp sampler2D uTexture;\n"
+        "varying mediump vec2 texCoordVar;\n"
+        "void main() {\n"
+        "    gl_FragColor = texture2D(uTexture, texCoordVar);\n"
+        "}\n"
+        );
 
 const QString GLShaderTextured::m_fragmentShaderSourceTextured = QString(
-		"uniform lowp sampler2D uTexture;\n"
-		"varying mediump vec2 texCoordVar;\n"
-		"void main() {\n"
-		"    gl_FragColor = texture2D(uTexture, texCoordVar);\n"
-		"}\n"
-		);
+        "#version 330\n"
+        "uniform lowp sampler2D uTexture;\n"
+        "in mediump vec2 texCoordVar;\n"
+        "out vec4 fragColor;\n"
+        "void main() {\n"
+        "    fragColor = texture(uTexture, texCoordVar);\n"
+        "}\n"
+        );
