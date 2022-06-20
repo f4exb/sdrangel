@@ -26,22 +26,22 @@
 #include "gui/glshadersimple.h"
 
 GLShaderSimple::GLShaderSimple() :
-	m_program(nullptr),
+    m_program(nullptr),
     m_vao(nullptr),
     m_verticesBuf(nullptr),
     m_vertexLoc(0),
     m_matrixLoc(0),
-	m_colorLoc(0)
+    m_colorLoc(0)
 { }
 
 GLShaderSimple::~GLShaderSimple()
 {
-	cleanup();
+    cleanup();
 }
 
 void GLShaderSimple::initializeGL(int majorVersion, int minorVersion)
 {
-	m_program = new QOpenGLShaderProgram;
+    m_program = new QOpenGLShaderProgram;
 
     if ((majorVersion > 3) || ((majorVersion == 3) && (minorVersion >= 3)))
     {
@@ -66,16 +66,16 @@ void GLShaderSimple::initializeGL(int majorVersion, int minorVersion)
         }
     }
 
-	m_program->bindAttributeLocation("vertex", 0);
+    m_program->bindAttributeLocation("vertex", 0);
 
-	if (!m_program->link()) {
-		qDebug() << "GLShaderSimple::initializeGL: error linking shader: " << m_program->log();
-	}
+    if (!m_program->link()) {
+        qDebug() << "GLShaderSimple::initializeGL: error linking shader: " << m_program->log();
+    }
 
-	m_program->bind();
+    m_program->bind();
     m_vertexLoc = m_program->attributeLocation("vertex");
-	m_matrixLoc = m_program->uniformLocation("uMatrix");
-	m_colorLoc = m_program->uniformLocation("uColour");
+    m_matrixLoc = m_program->uniformLocation("uMatrix");
+    m_colorLoc = m_program->uniformLocation("uColour");
     if (m_vao)
     {
         m_verticesBuf = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
@@ -83,7 +83,7 @@ void GLShaderSimple::initializeGL(int majorVersion, int minorVersion)
         m_verticesBuf->create();
         m_vao->release();
     }
-	m_program->release();
+    m_program->release();
 }
 
 void GLShaderSimple::drawPoints(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices, int nbComponents)
@@ -93,30 +93,30 @@ void GLShaderSimple::drawPoints(const QMatrix4x4& transformMatrix, const QVector
 
 void GLShaderSimple::drawPolyline(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices, int nbComponents)
 {
-	draw(GL_LINE_STRIP, transformMatrix, color, vertices, nbVertices, nbComponents);
+    draw(GL_LINE_STRIP, transformMatrix, color, vertices, nbVertices, nbComponents);
 }
 
 void GLShaderSimple::drawSegments(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices, int nbComponents)
 {
-	draw(GL_LINES, transformMatrix, color, vertices, nbVertices, nbComponents);
+    draw(GL_LINES, transformMatrix, color, vertices, nbVertices, nbComponents);
 }
 
 void GLShaderSimple::drawContour(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices, int nbComponents)
 {
-	draw(GL_LINE_LOOP, transformMatrix, color, vertices, nbVertices, nbComponents);
+    draw(GL_LINE_LOOP, transformMatrix, color, vertices, nbVertices, nbComponents);
 }
 
 void GLShaderSimple::drawSurface(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices, int nbComponents)
 {
-	draw(GL_TRIANGLE_FAN, transformMatrix, color, vertices, nbVertices, nbComponents);
+    draw(GL_TRIANGLE_FAN, transformMatrix, color, vertices, nbVertices, nbComponents);
 }
 
 void GLShaderSimple::draw(unsigned int mode, const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices, int nbComponents)
 {
-	QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-	m_program->bind();
-	m_program->setUniformValue(m_matrixLoc, transformMatrix);
-	m_program->setUniformValue(m_colorLoc, color);
+    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+    m_program->bind();
+    m_program->setUniformValue(m_matrixLoc, transformMatrix);
+    m_program->setUniformValue(m_colorLoc, color);
     if (m_vao)
     {
         m_vao->bind();
@@ -128,21 +128,21 @@ void GLShaderSimple::draw(unsigned int mode, const QMatrix4x4& transformMatrix, 
     }
     else
     {
-    	f->glEnableVertexAttribArray(m_vertexLoc); // vertex
-    	f->glVertexAttribPointer(m_vertexLoc, nbComponents, GL_FLOAT, GL_FALSE, 0, vertices);
+        f->glEnableVertexAttribArray(m_vertexLoc); // vertex
+        f->glVertexAttribPointer(m_vertexLoc, nbComponents, GL_FLOAT, GL_FALSE, 0, vertices);
     }
 
-	f->glEnable(GL_BLEND);
-	f->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	f->glLineWidth(1.0f);
-	f->glDrawArrays(mode, 0, nbVertices);
+    f->glEnable(GL_BLEND);
+    f->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    f->glLineWidth(1.0f);
+    f->glDrawArrays(mode, 0, nbVertices);
 
     if (m_vao) {
         m_vao->release();
     } else {
-	   f->glDisableVertexAttribArray(m_vertexLoc);
+       f->glDisableVertexAttribArray(m_vertexLoc);
     }
-	m_program->release();
+    m_program->release();
 }
 
 void GLShaderSimple::cleanup()
@@ -156,34 +156,34 @@ void GLShaderSimple::cleanup()
 }
 
 const QString GLShaderSimple::m_vertexShaderSourceSimple2 = QString(
-		"uniform highp mat4 uMatrix;\n"
-		"attribute highp vec4 vertex;\n"
-		"void main() {\n"
-		"    gl_Position = uMatrix * vertex;\n"
-		"}\n"
-		);
+        "uniform highp mat4 uMatrix;\n"
+        "attribute highp vec4 vertex;\n"
+        "void main() {\n"
+        "    gl_Position = uMatrix * vertex;\n"
+        "}\n"
+        );
 
 const QString GLShaderSimple::m_vertexShaderSourceSimple = QString(
         "#version 330\n"
-		"uniform highp mat4 uMatrix;\n"
-		"in highp vec4 vertex;\n"
-		"void main() {\n"
-		"    gl_Position = uMatrix * vertex;\n"
-		"}\n"
-		);
+        "uniform highp mat4 uMatrix;\n"
+        "in highp vec4 vertex;\n"
+        "void main() {\n"
+        "    gl_Position = uMatrix * vertex;\n"
+        "}\n"
+        );
 
 const QString GLShaderSimple::m_fragmentShaderSourceColored2 = QString(
-		"uniform mediump vec4 uColour;\n"
-		"void main() {\n"
-		"    gl_FragColor = uColour;\n"
-		"}\n"
-		);
+        "uniform mediump vec4 uColour;\n"
+        "void main() {\n"
+        "    gl_FragColor = uColour;\n"
+        "}\n"
+        );
 
 const QString GLShaderSimple::m_fragmentShaderSourceColored = QString(
         "#version 330\n"
         "out vec4 fragColor;\n"
-		"uniform mediump vec4 uColour;\n"
-		"void main() {\n"
-		"    fragColor = uColour;\n"
-		"}\n"
-		);
+        "uniform mediump vec4 uColour;\n"
+        "void main() {\n"
+        "    fragColor = uColour;\n"
+        "}\n"
+        );
