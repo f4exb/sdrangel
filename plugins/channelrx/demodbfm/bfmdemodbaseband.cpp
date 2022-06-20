@@ -69,6 +69,11 @@ void BFMDemodBaseband::feed(const SampleVector::const_iterator& begin, const Sam
     m_sampleFifo.write(begin, end);
 }
 
+void BFMDemodBaseband::setChannel(ChannelAPI *channel)
+{
+    m_sink.setChannel(channel);
+}
+
 void BFMDemodBaseband::handleData()
 {
     QMutexLocker mutexLocker(&m_mutex);

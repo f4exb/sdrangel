@@ -27,7 +27,10 @@
 #include "dsp/dspcommands.h"
 #include "dsp/devicesamplemimo.h"
 #include "dsp/basebandsamplesink.h"
+#include "dsp/datafifo.h"
+#include "pipes/datapipes.h"
 #include "util/db.h"
+#include "maincore.h"
 
 #include "rdsparser.h"
 #include "bfmdemodsink.h"
@@ -36,6 +39,7 @@ const Real BFMDemodSink::default_deemphasis = 50.0; // 50 us
 const int  BFMDemodSink::default_excursion = 750000; // +/- 75 kHz
 
 BFMDemodSink::BFMDemodSink() :
+    m_channel(nullptr),
     m_channelSampleRate(48000),
     m_channelFrequencyOffset(0),
     m_audioSampleRate(48000),
@@ -74,6 +78,9 @@ BFMDemodSink::BFMDemodSink() :
 
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
+
+    m_demodBuffer.resize(1<<13);
+    m_demodBufferFill = 0;
 
 	applySettings(m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
@@ -211,6 +218,9 @@ void BFMDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
 					m_audioBuffer[m_audioBufferFill].r = sample;
 				}
 
+                m_demodBuffer[m_demodBufferFill++] = m_audioBuffer[m_audioBufferFill].l;
+                m_demodBuffer[m_demodBufferFill++] = m_audioBuffer[m_audioBufferFill].r;
+
 				++m_audioBufferFill;
 
 				if (m_audioBufferFill >= m_audioBuffer.size())
@@ -223,6 +233,28 @@ void BFMDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
 
 					m_audioBufferFill = 0;
 				}
+
+                if (m_demodBufferFill >= m_demodBuffer.size())
+                {
+                    QList<ObjectPipe*> dataPipes;
+                    MainCore::instance()->getDataPipes().getDataPipes(m_channel, "demod", dataPipes);
+
+                    if (dataPipes.size() > 0)
+                    {
+                        QList<ObjectPipe*>::iterator it = dataPipes.begin();
+
+                        for (; it != dataPipes.end(); ++it)
+                        {
+                            DataFifo *fifo = qobject_cast<DataFifo*>((*it)->m_element);
+
+                            if (fifo) {
+                                fifo->write((quint8*) &m_demodBuffer[0], m_demodBuffer.size() * sizeof(qint16), DataFifo::DataTypeCI16);
+                            }
+                        }
+                    }
+
+                    m_demodBufferFill = 0;
+                }
 
 				m_interpolatorDistanceRemain += m_interpolatorDistance;
 			}

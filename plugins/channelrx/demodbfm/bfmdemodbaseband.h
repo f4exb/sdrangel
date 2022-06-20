@@ -65,6 +65,7 @@ public:
     int getChannelSampleRate() const;
     void setBasebandSampleRate(int sampleRate);
     void setSpectrumSink(SpectrumVis* spectrumSink) { m_spectrumVis = spectrumSink; m_sink.setSpectrumSink((BasebandSampleSink*) spectrumSink); }
+    void setChannel(ChannelAPI *channel);
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_messageQueueToGUI = messageQueue; }
 
     int getAudioSampleRate() const { return m_sink.getAudioSampleRate(); }
