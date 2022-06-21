@@ -419,7 +419,7 @@ void GLShaderSpectrogram::drawSurface(SpectrumSettings::SpectrogramStyle style, 
     program->setUniformValue(m_dataTextureLoc, 0);         // set uniform to texture unit?
     program->setUniformValue(m_colorMapLoc, 1);
 
-    program->setUniformValue(m_limitLoc, 1.5f*1.0f/(float)(m_gridElements));
+    program->setUniformValue(m_limitLoc, 1.4f*1.0f/(float)(m_texture->height()));
 
     if (style == SpectrumSettings::Outline)
     {
