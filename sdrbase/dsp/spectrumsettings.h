@@ -61,6 +61,13 @@ public:
         Shaded
     };
 
+    enum SpectrumStyle
+    {
+        Line,
+        Fill,
+        Gradient
+    };
+
 	int m_fftSize;
 	int m_fftOverlap;
 	FFTWindow::Function m_fftWindow;
@@ -97,7 +104,8 @@ public:
 	bool m_useCalibration;
 	CalibrationInterpolationMode m_calibrationInterpMode; //!< How is power interpolated between calibration points
     SpectrogramStyle m_3DSpectrogramStyle;
-    QString m_3DSpectrogramColorMap;
+    QString m_colorMap;
+    SpectrumStyle m_spectrumStyle;
 	static const int m_log2FFTSizeMin = 6;   // 64
 	static const int m_log2FFTSizeMax = 15;  // 32k
 

@@ -96,8 +96,9 @@ private slots:
 	void on_decay_valueChanged(int index);
 	void on_decayDivisor_valueChanged(int index);
 	void on_stroke_valueChanged(int index);
+    void on_spectrumStyle_currentIndexChanged(int index);
     void on_spectrogramStyle_currentIndexChanged(int index);
-    void on_spectrogramColorMap_currentIndexChanged(int index);
+    void on_colorMap_currentIndexChanged(int index);
 	void on_gridIntensity_valueChanged(int index);
 	void on_traceIntensity_valueChanged(int index);
 	void on_averagingMode_currentIndexChanged(int index);

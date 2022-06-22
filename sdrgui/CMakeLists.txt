@@ -44,6 +44,7 @@ set(sdrgui_SOURCES
     gui/glscope.cpp
     gui/glscopegui.cpp
     gui/glshadercolors.cpp
+    gui/glshadercolormap.cpp
     gui/glshadersimple.cpp
     gui/glshaderspectrogram.cpp
     gui/glshadertextured.cpp
@@ -145,6 +146,7 @@ set(sdrgui_HEADERS
     gui/glscope.h
     gui/glscopegui.h
     gui/glshadercolors.h
+    gui/glshadercolormap.h
     gui/glshadersimple.h
     gui/glshaderspectrogram.h
     gui/glshadertvarray.h
