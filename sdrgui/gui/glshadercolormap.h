@@ -41,7 +41,7 @@ public:
 
     void initializeGL(int majorVersion, int minorVersion);
     void initColorMapTexture(const QString &colorMapName);
-    void drawSurfaceStrip(const QMatrix4x4& transformMatrix, GLfloat *vertices, int nbVertices, float scale);
+    void drawSurfaceStrip(const QMatrix4x4& transformMatrix, GLfloat *vertices, int nbVertices, float scale, float alpha);
     void cleanup();
 
 private:
@@ -58,6 +58,7 @@ private:
     int m_matrixLoc;
     int m_colorMapLoc;
     int m_scaleLoc;
+    int m_alphaLoc;
     bool m_useImmutableStorage;
     static const QString m_vertexShaderSourceColorMap2;
     static const QString m_vertexShaderSourceColorMap;

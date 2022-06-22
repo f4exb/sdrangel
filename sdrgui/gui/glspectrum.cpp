@@ -1345,7 +1345,7 @@ void GLSpectrum::paintGL()
 
             QVector4D color(1.0f, 1.0f, 0.25f, (float) m_displayTraceIntensity / 100.0f);
             if (m_spectrumStyle == SpectrumSettings::Gradient) {
-                m_glShaderColorMap.drawSurfaceStrip(m_glHistogramSpectrumMatrix, q3, 2*m_nbBins, bottom);
+                m_glShaderColorMap.drawSurfaceStrip(m_glHistogramSpectrumMatrix, q3, 2*m_nbBins, bottom, 0.75f);
             } else {
                 m_glShaderSimple.drawSurfaceStrip(m_glHistogramSpectrumMatrix, color, q3, 2*m_nbBins);
             }

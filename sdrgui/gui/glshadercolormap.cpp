@@ -37,6 +37,7 @@ GLShaderColorMap::GLShaderColorMap() :
     m_matrixLoc(0),
     m_colorMapLoc(0),
     m_scaleLoc(0),
+    m_alphaLoc(0),
     m_useImmutableStorage(true)
 { }
 
@@ -86,6 +87,7 @@ void GLShaderColorMap::initializeGL(int majorVersion, int minorVersion)
     m_matrixLoc = m_program->uniformLocation("uMatrix");
     m_colorMapLoc = m_program->uniformLocation("colorMap");
     m_scaleLoc = m_program->uniformLocation("scale");
+    m_alphaLoc = m_program->uniformLocation("alpha");
     if (m_vao)
     {
         m_verticesBuf = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
@@ -149,7 +151,7 @@ void GLShaderColorMap::initColorMapTextureMutable(const QString &colorMapName)
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, QOpenGLTexture::Repeat);
 }
 
-void GLShaderColorMap::drawSurfaceStrip(const QMatrix4x4& transformMatrix, GLfloat *vertices, int nbVertices, float scale)
+void GLShaderColorMap::drawSurfaceStrip(const QMatrix4x4& transformMatrix, GLfloat *vertices, int nbVertices, float scale, float alpha)
 {
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     m_program->bind();
@@ -157,6 +159,7 @@ void GLShaderColorMap::drawSurfaceStrip(const QMatrix4x4& transformMatrix, GLflo
     m_colorMapTexture->bind();
     m_program->setUniformValue(m_colorMapLoc, 0); // Texture unit 0 for color map
     m_program->setUniformValue(m_scaleLoc, scale);
+    m_program->setUniformValue(m_alphaLoc, alpha);
     if (m_vao)
     {
         m_vao->bind();
@@ -172,6 +175,8 @@ void GLShaderColorMap::drawSurfaceStrip(const QMatrix4x4& transformMatrix, GLflo
         f->glVertexAttribPointer(m_vertexLoc, 2, GL_FLOAT, GL_FALSE, 0, vertices);
     }
 
+    f->glEnable(GL_BLEND);
+    f->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     f->glDrawArrays(GL_TRIANGLE_STRIP, 0, nbVertices);
 
     if (m_vao)
@@ -256,21 +261,23 @@ const QString GLShaderColorMap::m_vertexShaderSourceColorMap = QString(
         );
 
 const QString GLShaderColorMap::m_fragmentShaderSourceColorMap2 = QString(
+        "uniform float alpha;\n"
         "uniform float scale;\n"
         "uniform highp sampler1D colorMap;\n"
         "varying float y;\n"
         "void main() {\n"
-        "    gl_FragColor = texture1D(colorMap, 1.0-(y/scale));\n"
+        "    gl_FragColor = vec4(texture1D(colorMap, 1.0-(y/scale)).rgb, alpha);\n"
         "}\n"
         );
 
 const QString GLShaderColorMap::m_fragmentShaderSourceColorMap = QString(
         "#version 330\n"
+        "uniform float alpha;\n"
         "uniform float scale;\n"
         "uniform sampler1D colorMap;\n"
         "in float y;\n"
         "out vec4 fragColor;\n"
         "void main() {\n"
-        "   fragColor = texture(colorMap, 1.0-(y/scale));\n"
+        "   fragColor = vec4(texture(colorMap, 1.0-(y/scale)).rgb, alpha);\n"
         "}\n"
         );
