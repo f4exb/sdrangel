@@ -24,7 +24,7 @@
 #include <QVector4D>
 #include <QDebug>
 
-#include "gui/GLShaderColorMap.h"
+#include "gui/glshadercolormap.h"
 #include "util/colormap.h"
 
 GLShaderColorMap::GLShaderColorMap() :
