@@ -3399,6 +3399,20 @@ void GLSpectrum::zoom(QWheelEvent *event)
 
     if ((pwx >= 0.0f) && (pwx <= 1.0f))
     {
+        // When we zoom, we want the frequency under the cursor to remain the same
+
+        // Determine frequency at cursor position
+        float zoomFreq = m_frequencyScale.getRangeMin() + pwx*m_frequencyScale.getRange();
+
+        // Calculate current centre frequency
+        float currentCF = (m_frequencyZoomFactor == 1) ? m_centerFrequency : ((m_frequencyZoomPos - 0.5) * m_sampleRate + m_centerFrequency);
+
+        // Calculate difference from frequency under cursor to centre frequency
+        float freqDiff = (currentCF - zoomFreq);
+
+        // Calculate what that difference would be if there was no zoom
+        float freqDiffZoom1 = freqDiff * m_frequencyZoomFactor;
+
         if (event->angleDelta().y() > 0) // zoom in
         {
             if (m_frequencyZoomFactor < m_maxFrequencyZoom) {
@@ -3416,7 +3430,17 @@ void GLSpectrum::zoom(QWheelEvent *event)
             }
         }
 
-        frequencyZoom(pwx);
+        // Calculate what frequency difference should be at new zoom
+        float zoomedFreqDiff = freqDiffZoom1 / m_frequencyZoomFactor;
+        // Then calculate what the center frequency should be
+        float zoomedCF = zoomFreq + zoomedFreqDiff;
+
+        // Calculate zoom position which will set the desired center frequency
+        float zoomPos = (zoomedCF - m_centerFrequency) / m_sampleRate + 0.5;
+        zoomPos = std::max(0.0f, zoomPos);
+        zoomPos = std::min(1.0f, zoomPos);
+
+        frequencyZoom(zoomPos);
     }
     else
     {
@@ -3445,13 +3469,9 @@ void GLSpectrum::zoom(QWheelEvent *event)
     }
 }
 
-void GLSpectrum::frequencyZoom(float pw)
+void GLSpectrum::frequencyZoom(float zoomPos)
 {
-    m_frequencyZoomPos += (pw - 0.5f) * (1.0f / m_frequencyZoomFactor);
-    float lim = 0.5f / m_frequencyZoomFactor;
-    m_frequencyZoomPos = m_frequencyZoomPos < lim ? lim : m_frequencyZoomPos > 1 - lim ? 1 - lim : m_frequencyZoomPos;
-
-    qDebug("GLSpectrum::frequencyZoom: pw: %f p: %f z: %f", pw, m_frequencyZoomPos, m_frequencyZoomFactor);
+    m_frequencyZoomPos = zoomPos;
     updateFFTLimits();
 }
 
