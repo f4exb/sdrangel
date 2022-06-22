@@ -91,7 +91,7 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
     m_pan3DSpectrogram(false),
     m_scaleZ3DSpectrogram(false),
     m_3DSpectrogramStyle(SpectrumSettings::Outline),
-    m_3DSpectrogramColorMap("Angel"),
+    m_colorMapName("Angel"),
     m_histogramBuffer(nullptr),
     m_histogram(nullptr),
     m_displayHistogram(true),
@@ -345,16 +345,22 @@ void GLSpectrum::setDisplay3DSpectrogram(bool display)
     update();
 }
 
+void GLSpectrum::setSpectrumStyle(SpectrumSettings::SpectrumStyle style)
+{
+    m_spectrumStyle = style;
+    update();
+}
+
 void GLSpectrum::set3DSpectrogramStyle(SpectrumSettings::SpectrogramStyle style)
 {
     m_3DSpectrogramStyle = style;
     update();
 }
 
-void GLSpectrum::set3DSpectrogramColorMap(const QString &colorMap)
+void GLSpectrum::setColorMapName(const QString &colorMapName)
 {
     m_mutex.lock();
-    m_3DSpectrogramColorMap = colorMap;
+    m_colorMapName = colorMapName;
     m_changesPending = true;
     m_mutex.unlock();
     update();
@@ -824,6 +830,7 @@ void GLSpectrum::initializeGL()
     m_glShaderFrequencyScale.initializeGL(majorVersion, minorVersion);
     m_glShaderWaterfall.initializeGL(majorVersion, minorVersion);
     m_glShaderHistogram.initializeGL(majorVersion, minorVersion);
+    m_glShaderColorMap.initializeGL(majorVersion, minorVersion);
     m_glShaderTextOverlay.initializeGL(majorVersion, minorVersion);
     m_glShaderInfo.initializeGL(majorVersion, minorVersion);
     m_glShaderSpectrogram.initializeGL(majorVersion, minorVersion);
@@ -1264,6 +1271,30 @@ void GLSpectrum::paintGL()
             // m_referenceLevel - m_powerRange : bottom
             m_maxHold[i] = ((j - 99) * m_powerRange) / 99.0 + m_referenceLevel;
         }
+        // Fill under max hold line
+        if (m_spectrumStyle != SpectrumSettings::Line)
+        {
+            GLfloat *q3 = m_q3ColorMap.m_array;
+            for (int i = 0; i < m_nbBins; i++)
+            {
+                Real v = m_maxHold[i] - m_referenceLevel;
+
+                if (v > 0) {
+                    v = 0;
+                } else if (v < -m_powerRange) {
+                    v = -m_powerRange;
+                }
+
+                q3[4*i] = (GLfloat)i;
+                q3[4*i+1] = -m_powerRange;
+                q3[4*i+2] = (GLfloat)i;
+                q3[4*i+3] = v;
+            }
+
+            QVector4D color(0.5f, 0.0f, 0.0f, (float) m_displayTraceIntensity / 100.0f);
+            m_glShaderSimple.drawSurfaceStrip(m_glHistogramSpectrumMatrix, color, q3, 2*m_nbBins);
+        }
+        // Max hold line
         {
             GLfloat *q3 = m_q3FFT.m_array;
 
@@ -1289,10 +1320,40 @@ void GLSpectrum::paintGL()
     // paint current spectrum line on top of histogram
     if ((m_displayCurrent) && m_currentSpectrum)
     {
-        {
-            Real bottom = -m_powerRange;
-            GLfloat *q3 = m_q3FFT.m_array;
+        Real bottom = -m_powerRange;
+        GLfloat *q3;
 
+        if (m_spectrumStyle != SpectrumSettings::Line)
+        {
+            q3 = m_q3ColorMap.m_array;
+            // Fill under line
+            for (int i = 0; i < m_nbBins; i++)
+            {
+                Real v = m_currentSpectrum[i] - m_referenceLevel;
+
+                if (v > 0) {
+                    v = 0;
+                } else if (v < bottom) {
+                    v = bottom;
+                }
+
+                q3[4*i] = (GLfloat)i;
+                q3[4*i+1] = bottom;
+                q3[4*i+2] = (GLfloat)i;
+                q3[4*i+3] = v;
+            }
+
+            QVector4D color(1.0f, 1.0f, 0.25f, (float) m_displayTraceIntensity / 100.0f);
+            if (m_spectrumStyle == SpectrumSettings::Gradient) {
+                m_glShaderColorMap.drawSurfaceStrip(m_glHistogramSpectrumMatrix, q3, 2*m_nbBins, bottom, 0.75f);
+            } else {
+                m_glShaderSimple.drawSurfaceStrip(m_glHistogramSpectrumMatrix, color, q3, 2*m_nbBins);
+            }
+        }
+
+        {
+            // Draw line
+            q3 = m_q3FFT.m_array;
             for (int i = 0; i < m_nbBins; i++)
             {
                 Real v = m_currentSpectrum[i] - m_referenceLevel;
@@ -1305,9 +1366,15 @@ void GLSpectrum::paintGL()
 
                 q3[2*i] = (Real) i;
                 q3[2*i+1] = v;
+
             }
 
-            QVector4D color(1.0f, 1.0f, 0.25f, (float) m_displayTraceIntensity / 100.0f);
+            QVector4D color;
+            if (m_spectrumStyle == SpectrumSettings::Gradient) {
+                color = QVector4D(m_colorMap[255*3], m_colorMap[255*3+1], m_colorMap[255*3+2], (float) m_displayTraceIntensity / 100.0f);
+            } else {
+                color = QVector4D(1.0f, 1.0f, 0.25f, (float) m_displayTraceIntensity / 100.0f);
+            }
             m_glShaderSimple.drawPolyline(m_glHistogramSpectrumMatrix, color, q3, m_nbBins);
         }
     }
@@ -2598,7 +2665,17 @@ void GLSpectrum::applyChanges()
         }
         m_3DSpectrogramBufferPos = 0;
     }
-    m_glShaderSpectrogram.initColorMapTexture(m_3DSpectrogramColorMap);
+    m_glShaderSpectrogram.initColorMapTexture(m_colorMapName);
+    m_glShaderColorMap.initColorMapTexture(m_colorMapName);
+    m_colorMap = ColorMap::getColorMap(m_colorMapName);
+    // Why only 240 entries in the palette?
+    for (int i = 0; i <= 239; i++)
+    {
+        ((quint8*)&m_waterfallPalette[i])[0] = (quint8)(m_colorMap[i*3] * 255.0);
+        ((quint8*)&m_waterfallPalette[i])[1] = (quint8)(m_colorMap[i*3+1] * 255.0);
+        ((quint8*)&m_waterfallPalette[i])[2] = (quint8)(m_colorMap[i*3+2] * 255.0);
+        ((quint8*)&m_waterfallPalette[i])[3] = 255;
+    }
 
     if (fftSizeChanged)
     {
@@ -2622,6 +2699,9 @@ void GLSpectrum::applyChanges()
         memset(m_histogram, 0x00, 100 * m_nbBins);
 
         m_q3FFT.allocate(2*m_nbBins);
+
+        m_q3ColorMap.allocate(4*m_nbBins);
+        std::fill(m_q3ColorMap.m_array, m_q3ColorMap.m_array+4*m_nbBins, 0.0f);
     }
 
     if (fftSizeChanged || windowSizeChanged)

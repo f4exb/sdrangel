@@ -33,6 +33,7 @@
 #include "gui/scaleengine.h"
 #include "gui/glshadersimple.h"
 #include "gui/glshadertextured.h"
+#include "gui/glshadercolormap.h"
 #include "dsp/glspectruminterface.h"
 #include "gui/glshaderspectrogram.h"
 #include "dsp/spectrummarkers.h"
@@ -41,6 +42,7 @@
 #include "export.h"
 #include "util/incrementalarray.h"
 #include "util/message.h"
+#include "util/colormap.h"
 
 class QOpenGLShaderProgram;
 class MessageQueue;
@@ -146,7 +148,8 @@ public:
     void setDisplayWaterfall(bool display);
     void setDisplay3DSpectrogram(bool display);
     void set3DSpectrogramStyle(SpectrumSettings::SpectrogramStyle style);
-    void set3DSpectrogramColorMap(const QString &colorMap);
+    void setColorMapName(const QString &colorMapName);
+    void setSpectrumStyle(SpectrumSettings::SpectrumStyle style);
     void setSsbSpectrum(bool ssbSpectrum);
     void setLsbDisplay(bool lsbDisplay);
     void setInvertedWaterfall(bool inv);
@@ -312,7 +315,9 @@ private:
     QPixmap m_spectrogramTimePixmap;
     QPixmap m_spectrogramPowerPixmap;
     SpectrumSettings::SpectrogramStyle m_3DSpectrogramStyle;
-    QString m_3DSpectrogramColorMap;
+    QString m_colorMapName;
+    SpectrumSettings::SpectrumStyle m_spectrumStyle;
+    const float *m_colorMap;
 
     QRgb m_histogramPalette[240];
     QImage* m_histogramBuffer;
@@ -336,6 +341,7 @@ private:
     GLShaderTextured m_glShaderFrequencyScale;
     GLShaderTextured m_glShaderWaterfall;
     GLShaderTextured m_glShaderHistogram;
+    GLShaderColorMap m_glShaderColorMap;
     GLShaderTextured m_glShaderTextOverlay;
     GLShaderTextured m_glShaderInfo;
     GLShaderSpectrogram m_glShaderSpectrogram;
@@ -351,6 +357,7 @@ private:
     IncrementalArray<GLfloat> m_q3TickFrequency;
     IncrementalArray<GLfloat> m_q3TickPower;
     IncrementalArray<GLfloat> m_q3FFT;
+    IncrementalArray<GLfloat> m_q3ColorMap;
 
     MessageQueue *m_messageQueueToGUI;
     QOpenGLDebugLogger *m_openGLLogger;

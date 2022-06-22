@@ -111,6 +111,11 @@ void GLShaderSimple::drawSurface(const QMatrix4x4& transformMatrix, const QVecto
     draw(GL_TRIANGLE_FAN, transformMatrix, color, vertices, nbVertices, nbComponents);
 }
 
+void GLShaderSimple::drawSurfaceStrip(const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices, int nbComponents)
+{
+    draw(GL_TRIANGLE_STRIP, transformMatrix, color, vertices, nbVertices, nbComponents);
+}
+
 void GLShaderSimple::draw(unsigned int mode, const QMatrix4x4& transformMatrix, const QVector4D& color, GLfloat *vertices, int nbVertices, int nbComponents)
 {
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();

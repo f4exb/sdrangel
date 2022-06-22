@@ -66,7 +66,8 @@ void SpectrumSettings::resetToDefaults()
 	m_useCalibration = false;
 	m_calibrationInterpMode = CalibInterpLinear;
     m_3DSpectrogramStyle = Outline;
-    m_3DSpectrogramColorMap = "Angel";
+    m_colorMap = "Angel";
+    m_spectrumStyle = Line;
 }
 
 QByteArray SpectrumSettings::serialize() const
@@ -104,8 +105,9 @@ QByteArray SpectrumSettings::serialize() const
 	s.writeS32(30, (int) m_calibrationInterpMode);
     s.writeBool(31, m_display3DSpectrogram);
     s.writeS32(32, (int) m_3DSpectrogramStyle);
-    s.writeString(33, m_3DSpectrogramColorMap);
-	s.writeS32(100, m_histogramMarkers.size());
+    s.writeString(33, m_colorMap);
+    s.writeS32(34, (int) m_spectrumStyle);
+    s.writeS32(100, m_histogramMarkers.size());
 
 	for (int i = 0; i < m_histogramMarkers.size(); i++) {
 		s.writeBlob(101+i, m_histogramMarkers[i].serialize());
@@ -204,7 +206,8 @@ bool SpectrumSettings::deserialize(const QByteArray& data)
 		m_calibrationInterpMode = (CalibrationInterpolationMode) tmp;
         d.readBool(31, &m_display3DSpectrogram, false);
         d.readS32(32, (int*)&m_3DSpectrogramStyle, (int)Outline);
-        d.readString(33, &m_3DSpectrogramColorMap, "Angel");
+        d.readString(33, &m_colorMap, "Angel");
+        d.readS32(34, (int*)&m_spectrumStyle, (int)Line);
 
 		int histogramMarkersSize;
 		d.readS32(100, &histogramMarkersSize, 0);

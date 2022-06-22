@@ -724,6 +724,40 @@
       </widget>
      </item>
      <item>
+      <widget class="QComboBox" name="spectrumStyle">
+       <property name="minimumSize">
+        <size>
+         <width>80</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>80</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Spectrum Style</string>
+       </property>
+       <item>
+        <property name="text">
+         <string>Line</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Fill</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Gradient</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
       <widget class="QDial" name="traceIntensity">
        <property name="maximumSize">
         <size>
@@ -865,7 +899,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="spectrogramColorMap">
+      <widget class="QComboBox" name="colorMap">
        <property name="minimumSize">
         <size>
          <width>70</width>
@@ -879,7 +913,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>3D Spectrogram Color Map</string>
+        <string>Color Map</string>
        </property>
       </widget>
      </item>
