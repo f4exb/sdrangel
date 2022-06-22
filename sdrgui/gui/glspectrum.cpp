@@ -3403,7 +3403,6 @@ void GLSpectrum::zoom(QWheelEvent *event)
 
         // Determine frequency at cursor position
         float zoomFreq = m_frequencyScale.getRangeMin() + pwx*m_frequencyScale.getRange();
-        //float zoomFreq2 = ((pwx - 0.5) *  m_sampleRate/m_frequencyZoomFactor + ((m_frequencyZoomPos - 0.5)* m_sampleRate + m_centerFrequency));
 
         // Calculate current centre frequency
         float currentCF = (m_frequencyZoomFactor == 1) ? m_centerFrequency : ((m_frequencyZoomPos - 0.5) * m_sampleRate + m_centerFrequency);
