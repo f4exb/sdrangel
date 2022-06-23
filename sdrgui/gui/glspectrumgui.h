@@ -96,7 +96,6 @@ private slots:
 	void on_decay_valueChanged(int index);
 	void on_decayDivisor_valueChanged(int index);
 	void on_stroke_valueChanged(int index);
-    void on_spectrumStyle_currentIndexChanged(int index);
     void on_spectrogramStyle_currentIndexChanged(int index);
     void on_colorMap_currentIndexChanged(int index);
 	void on_gridIntensity_valueChanged(int index);
@@ -111,7 +110,9 @@ private slots:
 	void on_spectrogram_toggled(bool checked);
 	void on_histogram_toggled(bool checked);
 	void on_maxHold_toggled(bool checked);
-	void on_current_toggled(bool checked);
+    void on_currentLine_toggled(bool checked);
+    void on_currentFill_toggled(bool checked);
+    void on_currentGradient_toggled(bool checked);
 	void on_invertWaterfall_toggled(bool checked);
 	void on_grid_toggled(bool checked);
 	void on_clearSpectrum_clicked(bool checked);

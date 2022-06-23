@@ -49,15 +49,17 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
     ui->setupUi(this);
 
     // Use the custom flow layout for the 3 main horizontal layouts (lines)
+    ui->verticalLayout->removeItem(ui->Line5Layout);
     ui->verticalLayout->removeItem(ui->Line4Layout);
     ui->verticalLayout->removeItem(ui->Line3Layout);
     ui->verticalLayout->removeItem(ui->Line2Layout);
     ui->verticalLayout->removeItem(ui->Line1Layout);
     FlowLayout *flowLayout = new FlowLayout(nullptr, 1, 1, 1);
     flowLayout->addItem(ui->Line3Layout);
+    flowLayout->addItem(ui->Line4Layout);
     flowLayout->addItem(ui->Line1Layout);
     flowLayout->addItem(ui->Line2Layout);
-    flowLayout->addItem(ui->Line4Layout);
+    flowLayout->addItem(ui->Line5Layout);
     ui->verticalLayout->addItem(flowLayout);
 
     on_linscale_toggled(false);
@@ -162,9 +164,16 @@ void GLSpectrumGUI::displaySettings()
     ui->spectrogramStyle->setCurrentIndex((int) m_settings.m_3DSpectrogramStyle);
     ui->spectrogramStyle->setVisible(m_settings.m_display3DSpectrogram);
     ui->colorMap->setCurrentText(m_settings.m_colorMap);
-    ui->spectrumStyle->setCurrentIndex((int) m_settings.m_spectrumStyle);
+    ui->currentLine->blockSignals(true);
+    ui->currentFill->blockSignals(true);
+    ui->currentGradient->blockSignals(true);
+    ui->currentLine->setChecked(m_settings.m_displayCurrent && (m_settings.m_spectrumStyle == SpectrumSettings::SpectrumStyle::Line));
+    ui->currentFill->setChecked(m_settings.m_displayCurrent && (m_settings.m_spectrumStyle == SpectrumSettings::SpectrumStyle::Fill));
+    ui->currentGradient->setChecked(m_settings.m_displayCurrent && (m_settings.m_spectrumStyle == SpectrumSettings::SpectrumStyle::Gradient));
+    ui->currentLine->blockSignals(false);
+    ui->currentFill->blockSignals(false);
+    ui->currentGradient->blockSignals(false);
     ui->maxHold->setChecked(m_settings.m_displayMaxHold);
-    ui->current->setChecked(m_settings.m_displayCurrent);
     ui->histogram->setChecked(m_settings.m_displayHistogram);
     ui->invertWaterfall->setChecked(m_settings.m_invertedWaterfall);
     ui->grid->setChecked(m_settings.m_displayGrid);
@@ -464,12 +473,6 @@ void GLSpectrumGUI::on_stroke_valueChanged(int index)
     applySettings();
 }
 
-void GLSpectrumGUI::on_spectrumStyle_currentIndexChanged(int index)
-{
-    m_settings.m_spectrumStyle = (SpectrumSettings::SpectrumStyle)index;
-    applySettings();
-}
-
 void GLSpectrumGUI::on_spectrogramStyle_currentIndexChanged(int index)
 {
     m_settings.m_3DSpectrogramStyle = (SpectrumSettings::SpectrogramStyle)index;
@@ -520,8 +523,41 @@ void GLSpectrumGUI::on_maxHold_toggled(bool checked)
     applySettings();
 }
 
-void GLSpectrumGUI::on_current_toggled(bool checked)
+void GLSpectrumGUI::on_currentLine_toggled(bool checked)
 {
+    ui->currentFill->blockSignals(true);
+    ui->currentGradient->blockSignals(true);
+    ui->currentFill->setChecked(false);
+    ui->currentGradient->setChecked(false);
+    ui->currentFill->blockSignals(false);
+    ui->currentGradient->blockSignals(false);
+    m_settings.m_spectrumStyle = SpectrumSettings::SpectrumStyle::Line;
+    m_settings.m_displayCurrent = checked;
+    applySettings();
+}
+
+void GLSpectrumGUI::on_currentFill_toggled(bool checked)
+{
+    ui->currentLine->blockSignals(true);
+    ui->currentGradient->blockSignals(true);
+    ui->currentLine->setChecked(false);
+    ui->currentGradient->setChecked(false);
+    ui->currentLine->blockSignals(false);
+    ui->currentGradient->blockSignals(false);
+    m_settings.m_spectrumStyle = SpectrumSettings::SpectrumStyle::Fill;
+    m_settings.m_displayCurrent = checked;
+    applySettings();
+}
+
+void GLSpectrumGUI::on_currentGradient_toggled(bool checked)
+{
+    ui->currentLine->blockSignals(true);
+    ui->currentFill->blockSignals(true);
+    ui->currentLine->setChecked(false);
+    ui->currentFill->setChecked(false);
+    ui->currentLine->blockSignals(false);
+    ui->currentFill->blockSignals(false);
+    m_settings.m_spectrumStyle = SpectrumSettings::SpectrumStyle::Gradient;
     m_settings.m_displayCurrent = checked;
     applySettings();
 }

@@ -1,5 +1,9 @@
 <RCC>
   <qresource prefix="/">
+    <file>bell_red.png</file>
+    <file>bell_fill.png</file>
+    <file>bell_gradient.png</file>
+    <file>bell_line.png</file>
     <file>ruler.png</file>
     <file>sort.png</file>
     <file>audio_mic.png</file>

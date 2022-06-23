@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>364</width>
-    <height>137</height>
+    <width>630</width>
+    <height>151</height>
    </rect>
   </property>
   <property name="font">
@@ -566,6 +566,54 @@
       <number>1</number>
      </property>
      <item>
+      <widget class="ButtonSwitch" name="grid">
+       <property name="toolTip">
+        <string>Toggle the scale grid</string>
+       </property>
+       <property name="text">
+        <string>Grid</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/grid.png</normaloff>:/grid.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDial" name="gridIntensity">
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="cursor">
+        <cursorShape>ArrowCursor</cursorShape>
+       </property>
+       <property name="toolTip">
+        <string>Grid intensity</string>
+       </property>
+       <property name="maximum">
+        <number>100</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+       <property name="value">
+        <number>5</number>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="clearSpectrum">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -602,6 +650,29 @@
        <property name="icon">
         <iconset resource="../resources/res.qrc">
          <normaloff>:/histogram.png</normaloff>:/histogram.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="maxHold">
+       <property name="toolTip">
+        <string>Display max hold</string>
+       </property>
+       <property name="text">
+        <string>Max Hold</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/bell_red.png</normaloff>:/bell_red.png</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -678,30 +749,30 @@
       </widget>
      </item>
      <item>
-      <widget class="ButtonSwitch" name="maxHold">
-       <property name="toolTip">
-        <string>Display max hold</string>
+      <widget class="QLabel" name="fillLabel3">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
-       <property name="text">
-        <string>Max Hold</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../resources/res.qrc">
-         <normaloff>:/maxhold.png</normaloff>:/maxhold.png</iconset>
-       </property>
-       <property name="iconSize">
+       <property name="minimumSize">
         <size>
-         <width>16</width>
-         <height>16</height>
+         <width>5</width>
+         <height>22</height>
         </size>
        </property>
-       <property name="checkable">
-        <bool>true</bool>
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="Line4Layout">
      <item>
-      <widget class="ButtonSwitch" name="current">
+      <widget class="ButtonSwitch" name="currentLine">
        <property name="toolTip">
         <string>Display live spectrum</string>
        </property>
@@ -710,7 +781,7 @@
        </property>
        <property name="icon">
         <iconset resource="../resources/res.qrc">
-         <normaloff>:/current.png</normaloff>:/current.png</iconset>
+         <normaloff>:/bell_line.png</normaloff>:/bell_line.png</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -724,37 +795,49 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="spectrumStyle">
-       <property name="minimumSize">
-        <size>
-         <width>80</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>80</width>
-         <height>16777215</height>
-        </size>
-       </property>
+      <widget class="ButtonSwitch" name="currentFill">
        <property name="toolTip">
-        <string>Spectrum Style</string>
+        <string>Display live spectrum</string>
        </property>
-       <item>
-        <property name="text">
-         <string>Line</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Fill</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Gradient</string>
-        </property>
-       </item>
+       <property name="text">
+        <string>Max Hold</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/bell_fill.png</normaloff>:/bell_fill.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="currentGradient">
+       <property name="toolTip">
+        <string>Display live spectrum</string>
+       </property>
+       <property name="text">
+        <string>Max Hold</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/bell_gradient.png</normaloff>:/bell_gradient.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
      <item>
@@ -776,6 +859,25 @@
        </property>
        <property name="value">
         <number>50</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="colorMap">
+       <property name="minimumSize">
+        <size>
+         <width>70</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>80</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Color Map</string>
        </property>
       </widget>
      </item>
@@ -898,96 +1000,10 @@
        </item>
       </widget>
      </item>
-     <item>
-      <widget class="QComboBox" name="colorMap">
-       <property name="minimumSize">
-        <size>
-         <width>70</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>80</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Color Map</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="ButtonSwitch" name="grid">
-       <property name="toolTip">
-        <string>Toggle the scale grid</string>
-       </property>
-       <property name="text">
-        <string>Grid</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../resources/res.qrc">
-         <normaloff>:/grid.png</normaloff>:/grid.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>16</width>
-         <height>16</height>
-        </size>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QDial" name="gridIntensity">
-       <property name="maximumSize">
-        <size>
-         <width>24</width>
-         <height>24</height>
-        </size>
-       </property>
-       <property name="cursor">
-        <cursorShape>ArrowCursor</cursorShape>
-       </property>
-       <property name="toolTip">
-        <string>Grid intensity</string>
-       </property>
-       <property name="maximum">
-        <number>100</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-       <property name="value">
-        <number>5</number>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="fillLabel3">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>5</width>
-         <height>22</height>
-        </size>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="Line4Layout">
+    <layout class="QHBoxLayout" name="Line5Layout">
      <item>
       <widget class="ButtonSwitch" name="freeze">
        <property name="toolTip">
@@ -1083,11 +1099,6 @@
    <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
- <tabstops>
-  <tabstop>maxHold</tabstop>
-  <tabstop>invertWaterfall</tabstop>
-  <tabstop>grid</tabstop>
- </tabstops>
  <resources>
   <include location="../resources/res.qrc"/>
  </resources>
