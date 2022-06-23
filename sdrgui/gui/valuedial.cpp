@@ -553,13 +553,13 @@ void ValueDial::keyPressEvent(QKeyEvent *value)
 
     if (c >= QChar('0') && (c <= QChar('9')))
     {
-        int d = c.toLatin1() - '0';
-        quint64 e = findExponent(m_cursor);
-        quint64 v = (m_value / e) % 10;
-
         if (m_animationState != 0) {
             m_value = m_valueNew;
         }
+
+        int d = c.toLatin1() - '0';
+        quint64 e = findExponent(m_cursor);
+        quint64 v = (m_value / e) % 10;
 
         v = m_value - v * e;
         v += d * e;

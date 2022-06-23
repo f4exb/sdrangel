@@ -619,15 +619,15 @@ void ValueDialZ::keyPressEvent(QKeyEvent* value)
     }
     else if ((c >= QChar('0')) && (c <= QChar('9')) && (m_cursor > 0)) // digits
     {
+        if(m_animationState != 0) {
+            m_value = m_valueNew;
+        }
+
         int d = c.toLatin1() - '0';
         quint64 e = findExponent(m_cursor);
         quint64 value = abs(m_value);
         int sign = m_value < 0 ? -1 : 1;
         quint64 v = (value / e) % 10;
-
-        if(m_animationState != 0) {
-            m_value = m_valueNew;
-        }
 
         v = value - v * e;
         v += d * e;
