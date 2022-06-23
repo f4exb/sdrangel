@@ -101,6 +101,7 @@ private slots:
     void on_aMarkerColor_clicked();
     void on_aMarkerShowState_currentIndexChanged(int state);
     void on_aMarkerShowStateAll_clicked();
+    void on_aMarkerText_textEdited();
     void on_aMarkerText_editingFinished();
     void on_aMarker_valueChanged(int value);
     void on_aMarkerAdd_clicked();
