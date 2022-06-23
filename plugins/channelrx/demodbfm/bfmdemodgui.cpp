@@ -867,6 +867,7 @@ void BFMDemodGUI::makeUIConnections()
     QObject::connect(ui->showPilot, &ButtonSwitch::clicked, this, &BFMDemodGUI::on_showPilot_clicked);
     QObject::connect(ui->rds, &ButtonSwitch::clicked, this, &BFMDemodGUI::on_rds_clicked);
     QObject::connect(ui->clearData, &QPushButton::clicked, this, &BFMDemodGUI::on_clearData_clicked);
+    QObject::connect(ui->go2ClearPrevText, &QPushButton::clicked, this, &BFMDemodGUI::on_go2ClearPrevText_clicked);
 }
 
 void BFMDemodGUI::updateAbsoluteCenterFrequency()
