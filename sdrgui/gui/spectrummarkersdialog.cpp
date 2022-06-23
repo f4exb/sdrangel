@@ -639,6 +639,18 @@ void SpectrumMarkersDialog::on_aMarkerShowStateAll_clicked()
     }
 }
 
+// We don't get aMarkerText_editingFinished signal until after aMarkerToggleFrequency_toggled
+// when that button is pressed, so save the text immediately when edited, so it isn't lost
+// after call to displayAnnotationMarker
+void SpectrumMarkersDialog::on_aMarkerText_textEdited()
+{
+    if (m_annotationMarkers.size() == 0) {
+        return;
+    }
+
+    m_annotationMarkers[m_annotationMarkerIndex].m_text = ui->aMarkerText->text();
+}
+
 void SpectrumMarkersDialog::on_aMarkerText_editingFinished()
 {
     if (m_annotationMarkers.size() == 0) {
@@ -795,7 +807,7 @@ void SpectrumMarkersDialog::on_aMarkersExport_clicked()
                     stream << marker.m_startFrequency << ","
                         << marker.m_bandwidth << ","
                         << marker.m_text << ","
-                        << (marker.m_show ? "1" : "0") << ","
+                        << ((int)marker.m_show) << ","
                         << marker.m_markerColor.red() << ","
                         << marker.m_markerColor.green() << ","
                         << marker.m_markerColor.blue() << "\n";
