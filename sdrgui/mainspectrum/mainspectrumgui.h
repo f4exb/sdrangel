@@ -87,8 +87,8 @@ private:
     bool m_drag;
     QPoint m_DragPosition;
     FramelessWindowResizer m_resizer;
-    static const int m_MinimumWidth = 360;
-    static const int m_MinimumHeight = 200 + 20 + 10 + 4*22 + 5;
+    static const int m_MinimumWidth = 380;
+    static const int m_MinimumHeight = 200 + 20 + 10 + 6*22 + 5;
 
 protected:
     void closeEvent(QCloseEvent *event) override;
