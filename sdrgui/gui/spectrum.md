@@ -87,7 +87,7 @@ When the mouse is inside the time scale (waterfall) the overlap is increased by 
 
 <h2>B. Spectrum controls</h2>
 
-Controls are organized in 4 blocks arranged in a flow layout so that the size of the control area can adapt to the width of the spectrum arranging the blocks from 3 to 1 line as the spectrum widens. The buttons and various controls in each block remain at the same place.
+Controls are organized in 6 blocks arranged in a flow layout so that the size of the control area can adapt to the width of the spectrum arranging the blocks from 4 to 1 line as the spectrum widens. The buttons and various controls in each block remain at the same place.
 
 Narrow (4 lines):
 
