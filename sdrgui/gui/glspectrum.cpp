@@ -92,6 +92,8 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
     m_scaleZ3DSpectrogram(false),
     m_3DSpectrogramStyle(SpectrumSettings::Outline),
     m_colorMapName("Angel"),
+    m_scrollFrequency(false),
+    m_scrollStartCenterFreq(0),
     m_histogramBuffer(nullptr),
     m_histogram(nullptr),
     m_displayHistogram(true),
@@ -2984,6 +2986,19 @@ void GLSpectrum::mouseMoveEvent(QMouseEvent* event)
         return;
     }
 
+    if (m_scrollFrequency)
+    {
+        // Request containing widget to adjust center frequency
+        // Not all containers will support this - mainly for MainSpectrumGUI
+        // This can be a little slow on some SDRs, so we use delta from where
+        // button was originally pressed rather than do it incrementally
+        QPointF delta = m_mousePrevLocalPos - event->localPos();
+        float histogramWidth = width() - m_leftMargin - m_rightMargin;
+        qint64 frequency = (qint64)(m_scrollStartCenterFreq + delta.x()/histogramWidth * m_frequencyScale.getRange());
+        emit requestCenterFrequency(frequency);
+        return;
+    }
+
     if (m_displayWaterfall || m_displayHistogram || m_displayMaxHold || m_displayCurrent)
     {
         if (m_frequencyScaleRect.contains(event->pos()))
@@ -3035,8 +3050,18 @@ void GLSpectrum::mouseMoveEvent(QMouseEvent* event)
     }
     else if (m_cursorState == CSChannelMoving)
     {
-        Real freq = m_frequencyScale.getValueFromPos(event->x() - m_leftMarginPixmap.width() - 1) - m_centerFrequency;
+        // Determine if user is trying to move the channel outside of the current frequency range
+        // and if so, request an adjustment to the center frequency
+        Real freqAbs = m_frequencyScale.getValueFromPos(event->x() - m_leftMarginPixmap.width() - 1);
+        Real freqMin = m_centerFrequency - m_sampleRate / 2.0f;
+        Real freqMax = m_centerFrequency + m_sampleRate / 2.0f;
+        if (freqAbs < freqMin) {
+            emit requestCenterFrequency(m_centerFrequency - (freqMin - freqAbs));
+        } else if (freqAbs > freqMax) {
+            emit requestCenterFrequency(m_centerFrequency + (freqAbs - freqMax));
+        }
 
+        Real freq = freqAbs - m_centerFrequency;
         if (m_channelMarkerStates[m_cursorChannel]->m_channelMarker->getMovable()
             && (m_channelMarkerStates[m_cursorChannel]->m_channelMarker->getSourceOrSinkStream() == m_displaySourceOrSink)
             && m_channelMarkerStates[m_cursorChannel]->m_channelMarker->streamIndexApplies(m_displayStreamIndex))
@@ -3095,6 +3120,14 @@ void GLSpectrum::mouseMoveEvent(QMouseEvent* event)
 void GLSpectrum::mousePressEvent(QMouseEvent* event)
 {
     const QPointF& ep = event->localPos();
+
+    if ((event->button() == Qt::MiddleButton) && (m_displayMaxHold || m_displayCurrent || m_displayHistogram) && pointInHistogram(ep))
+    {
+        m_scrollFrequency = true;
+        m_scrollStartCenterFreq = m_centerFrequency;
+        m_mousePrevLocalPos = ep;
+        return;
+    }
 
     if ((event->button() == Qt::MiddleButton) && m_display3DSpectrogram && pointInWaterfallOrSpectrogram(ep))
     {
@@ -3341,6 +3374,7 @@ void GLSpectrum::mousePressEvent(QMouseEvent* event)
 
 void GLSpectrum::mouseReleaseEvent(QMouseEvent*)
 {
+    m_scrollFrequency = false;
     m_pan3DSpectrogram = false;
     m_rotate3DSpectrogram = false;
     m_scaleZ3DSpectrogram = false;
@@ -3652,6 +3686,17 @@ bool GLSpectrum::pointInWaterfallOrSpectrogram(const QPointF &point) const
     pWat.ry() = (point.y()/height() - m_waterfallRect.top()) / m_waterfallRect.height();
 
     return (pWat.x() >= 0) && (pWat.x() <= 1) && (pWat.y() >= 0) && (pWat.y() <= 1);
+}
+
+// Return if specified point is within the bounds of the histogram screen area
+bool GLSpectrum::pointInHistogram(const QPointF &point) const
+{
+    // m_histogramRect is normalised to [0,1]
+    QPointF p = point;
+    p.rx() = (point.x()/width() - m_histogramRect.left()) / m_histogramRect.width();
+    p.ry() = (point.y()/height() - m_histogramRect.top()) / m_histogramRect.height();
+
+    return (p.x() >= 0) && (p.x() <= 1) && (p.y() >= 0) && (p.y() <= 1);
 }
 
 void GLSpectrum::enterEvent(QEvent* event)

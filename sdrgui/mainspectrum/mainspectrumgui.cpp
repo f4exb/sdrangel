@@ -29,6 +29,7 @@
 #include "gui/glspectrumgui.h"
 #include "gui/workspaceselectiondialog.h"
 #include "dsp/spectrumvis.h"
+#include "channel/channelwebapiutils.h"
 #include "mainspectrumgui.h"
 
 MainSpectrumGUI::MainSpectrumGUI(GLSpectrum *spectrum, GLSpectrumGUI *spectrumGUI, QWidget *parent) :
@@ -140,6 +141,8 @@ MainSpectrumGUI::MainSpectrumGUI(GLSpectrum *spectrum, GLSpectrumGUI *spectrumGU
     connect(m_shrinkButton, SIGNAL(clicked()), this, SLOT(shrinkWindow()));
     connect(this, SIGNAL(forceShrink()), this, SLOT(shrinkWindow()));
     connect(m_hideButton, SIGNAL(clicked()), this, SLOT(hide()));
+
+    connect(spectrum, &GLSpectrum::requestCenterFrequency, this, &MainSpectrumGUI::onRequestCenterFrequency);
 
     m_resizer.enableChildMouseTracking();
     shrinkWindow();
@@ -316,4 +319,11 @@ QString MainSpectrumGUI::getDeviceTypeTag()
         default:
             return "X";
     }
+}
+
+// Handle request from GLSpectrum to adjust center frequency
+void MainSpectrumGUI::onRequestCenterFrequency(qint64 frequency)
+{
+    double frequencyInHz = (double)frequency;
+    ChannelWebAPIUtils::setCenterFrequency(m_deviceSetIndex, frequencyInHz);
 }
