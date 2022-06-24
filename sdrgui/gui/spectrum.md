@@ -89,7 +89,7 @@ When the mouse is inside the time scale (waterfall) the overlap is increased by 
 
 Controls are organized in 4 blocks arranged in a flow layout so that the size of the control area can adapt to the width of the spectrum arranging the blocks from 3 to 1 line as the spectrum widens. The buttons and various controls in each block remain at the same place.
 
-Narrow (3 lines):
+Narrow (4 lines):
 
 ![Spectrum GUI](../../doc/img/MainWindow_spectrum_gui_narrow.png)
 
@@ -97,68 +97,104 @@ Wide (1 line):
 
 ![Spectrum GUI](../../doc/img/MainWindow_spectrum_gui_wide.png)
 
-The 4 blocks are detailed next:
+The 6 blocks are detailed next:
 
 ![Spectrum GUI](../../doc/img/MainWindow_spectrum_gui.png)
 
-<h3>B.1: Spectrum display control line 1</h3>
-
-![Spectrum GUI C](../../doc/img/MainWindow_spectrum_gui_C.png)
-
-<h4>B.1.1: Clear spectrum</h4>
-
-This resets the maximum spectrum trace and phosphor remanence
-
-<h4>B.1.2: Phosphor display</h4>
-
-Toggles the phosphor display on the spectrum
-
-<h4>B.1.3: Phosphor display stroke and max hold decay</h4>
-
-This controls the decay rate of the stroke when phosphor display is engaged (B.1.2). The histogram pixel value is diminished by this value each time a new FFT is produced. A value of zero means no decay and thus phosphor history and max hold (red line) will be kept until the clear button (B.1.1) is pressed.
-
-<h4>B.1.4: Phosphor display stroke and max hold decay divisor</h4>
-
-When phosphor display is engaged (B.1.2) and stroke decay is 1 (B.1.3) this divides the unit decay by this value by diminishing histogram pixel value by one each time a number of FFTs equal to this number have been produced. Thus the actual decay rate is 1 over this value. This allow setting a slower decay rate than one unit for each new FFT.
-
-<h4>B.1.5: Phosphor display stroke strength</h4>
-
-This controls the stroke strength when phosphor display is engaged (B.1.2). The histogram value is incremented by this value at each new FFT until the maximum (red) is reached.
-
-<h4>B.1.6: Maximum hold trace</h4>
-
-Toggles the maximum hold trace display (red trace) on the spectrum
-
-<h4>B.1.7: Current trace</h4>
-
-Toggles the current trace display (yellow trace) on the spectrum
-
-<h4>B.1.8: Trace intensity</h4>
-
-This controls the intensity of the maximum (B.1.6) and current (B.1.7) spectrum trace
-
-<h4>B.1.9: Waterfall/spectrum placement</h4>
-
-Toggles the spectrum on top or on bottom versus waterfall
-
-<h4>B.1.10: Waterfall</h4>
-
-Toggles the waterfall display
-
-<h4>B.1.11: Grid</h4>
-
-Toggles the grid display
-
-<h4>B.1.12: Grid intensity</h4>
-
-Controls the intensity of the grid display
-
-<h3>B.2: Spectrum display control block #2</h3>
+<h3>B.1: Grid phosphor and max controls (histogram) - block #1</h3>
 
 ![Spectrum GUI A](../../doc/img/MainWindow_spectrum_gui_A.png)
 
+<h4>B.1.1: Grid</h4>
 
-<h4>B.2.1. FFT window selector</h4>
+Toggles the grid display
+
+<h4>B.1.2: Grid intensity</h4>
+
+Controls the intensity of the grid display
+
+<h4>B.1.3: Reset spectrum histogram</h4>
+
+This resets the maximum spectrum trace and phosphor remanence
+
+<h4>B.1.4: Phosphor display</h4>
+
+Toggles the phosphor display on the spectrum
+
+<h4>B.1.5: Maximum hold trace</h4>
+
+Toggles the maximum hold trace display (red trace) on the spectrum
+
+<h4>B.1.6: Phosphor display stroke and max hold decay</h4>
+
+This controls the decay rate of the stroke when phosphor display is engaged (B.1.4). The histogram pixel value is diminished by this value each time a new FFT is produced. A value of zero means no decay and thus phosphor history and max hold (red line) will be kept until the clear button (B.1.3) is pressed.
+
+<h4>B.1.7: Phosphor display stroke and max hold decay divisor</h4>
+
+When phosphor display is engaged (B.1.4) and stroke decay is 1 (B.1.6) this divides the unit decay by this value by diminishing histogram pixel value by one each time a number of FFTs equal to this number have been produced. Thus the actual decay rate is 1 over this value. This allow setting a slower decay rate than one unit for each new FFT.
+
+<h4>B.1.8: Phosphor display stroke strength</h4>
+
+This controls the stroke strength when phosphor display is engaged (B.1.4). The histogram value is incremented by this value at each new FFT until the maximum (red) is reached.
+
+<h3>B.2: Spectrum display controls - block #2</h3>
+
+![Spectrum GUI A](../../doc/img/MainWindow_spectrum_gui_B.png)
+
+<h4>B.2.1: Current trace with line style</h4>
+
+Toggles the current trace display as a yellow line on the spectrum
+
+<h4>B.2.2: Current trace with fill style</h4>
+
+Toggles the current trace display as a yellow line on the spectrum with the surface below the line filled with yellow color
+
+<h4>B.2.3: Current trace with gradient style</h4>
+
+Toggles the current trace display as a white line on the spectrum with the surface below the line filled with a gradient of colors corresponding to the color map (B.2.5)
+
+<h4>B.2.4: Trace intensity</h4>
+
+This controls the intensity of the maximum (B.1.5) and current (B.2.1-3) spectrum lines
+
+<h4>B.2.5: Color Map</h4>
+
+This dropdown allows the selection of a number of pre-defined color maps that are used for rendering the gradient filling of spectrum, the 2D waterfall and the 3D Spectrogram. 'Angel' is the default SDRangel color map that was the unique color map until v7.4.
+
+<h3>B.3: Waterfall and 3D spectrogram controls - block #3</h3>
+
+![Spectrum GUI C](../../doc/img/MainWindow_spectrum_gui_C.png)
+
+<h4>B.3.1: Waterfall/spectrum placement</h4>
+
+Toggles the spectrum on bottom (off) or on top (on) versus waterfall/spectrogram. It changes the direction of flow of the waterfall or spectrogram so that it always goes from the spectrum side to the opposite side.
+
+<h4>B.3.2: Waterfall (2D)</h4>
+
+Toggles the waterfall display
+
+<h4>B.3.3: 3D Spectrgram</h4>
+
+Toggles the 3D spectrogram display. Controls inside the spectrogram window are described at the bottom of this page
+
+<h4>B.3.4: 3D spectrogram style</h4>
+
+This control is only visible when the 3D Spectrogram is being displayed.
+
+This dropdown determines how the 3D Spectrogram data is rendered.
+
+  - **Points**: The data are rendeded as points.
+  - **Lines**: The data points are connected by lines.
+  - **Solid**: The data are rendeded as a solid surface with constant illumination.
+  - **Outline**: The data are rendered as a solid surface with outlines of the polygons highlighted.
+  - **Shaded**: The data are rendeder as a solid surface with a combination of ambient and diffuse lighting. This requires OpenGL 3.3 or greater.
+
+<h3>B.4: Spectrum FFT controls - block #4</h3>
+
+![Spectrum GUI D](../../doc/img/MainWindow_spectrum_gui_D.png)
+
+
+<h4>B.4.1. FFT window selector</h4>
 
 Use this combo box to select which window is applied to the FFT:
   - **Bart**: Bartlett
@@ -171,7 +207,7 @@ Use this combo box to select which window is applied to the FFT:
   - **Blackman**: Blackman (3 term)
   - **B-H7**: 7 term Blackman-Harris
 
-<h4>B.2.2. FFT size</h4>
+<h4>B.4.2. FFT size</h4>
 
 Select the size of the FFT window among these values:
   - 128
@@ -181,13 +217,13 @@ Select the size of the FFT window among these values:
   - 2k = 2048
   - 4k = 4096
 
-<h4>B.2.3: FFT Overlap</h4>
+<h4>B.4.3: FFT Overlap</h4>
 
 FFT Overlap in number of samples over half of the FFT size. The percentage of overlap appears in the tooltip. Ranges from 0 (no overlap) to half the FFT size minus one (maximum overlap).
 
 Example with a FFT of 1k (1024) and an overlap of 128 the overlap percentage is 128 &divide; 512 = 25%
 
-<h4>B.2.4: Averaging mode</h4>
+<h4>B.4.4: Averaging mode</h4>
 
 Use this combo to select which averaging mode is applied:
   - **No**: no averaging. Disables averaging regardless of the number of averaged samples (B.2.5). This is the default option
@@ -195,7 +231,7 @@ Use this combo to select which averaging mode is applied:
   - **Fix**: fixed average. Average is done over the amount of samples specified next (B.2.5) and a result is produced at the end of the corresponding period then the next block of averaged samples is processed. There is one complete FFT line produced every FFT sampling period multiplied by the number of averaged samples (4.6). The time scale on the waterfall display is updated accordingly.
   - **Max**: this is not an averaging but a max hold. It will retain the maximum value over the amount of samples specified next (B.2.5). Similarly to the fixed average a result is produced at the end of the corresponding period which results in slowing down the waterfall display. The point of this mode is to make outlying short bursts within the "averaging" period stand out. With averaging they would only cause a modest increase and could be missed out.
 
-<h4>B.2.5: Number of averaged samples</h4>
+<h4>B.4.5: Number of averaged samples</h4>
 
 Each FFT bin (squared magnitude) is averaged or max'ed over a number of samples. This combo allows selecting the number of samples between these values: 1 (no averaging), 2, 5, 10, 20, 50, 100, 200, 500, 1k (1000) for all modes and in addition 2k, 5k, 10k, 20k, 50k, 1e5 (100000), 2e5, 5e5, 1M (1000000) for "fixed" and "max" modes. Averaging reduces the noise variance and can be used to better detect weak continuous signals. The fixed averaging mode allows long time monitoring on the waterfall. The max mode helps showing short bursts that may appear during the "averaging" period.
 
@@ -203,23 +239,24 @@ The resulting spectrum refresh period appears in the tooltip taking sample rate,
 
 Period = ((((FFT_size &divide; 2) - overlap) &times; 2) &divide; sample_rate) &times; averaging_size
 
-<h3>B.3: Spectrum display control block #3</h3>
+<h3>B.5: Spectrum display controls - block #5</h3>
 
-![Spectrum GUI B](../../doc/img/MainWindow_spectrum_gui_B.png)
+![Spectrum GUI E](../../doc/img/MainWindow_spectrum_gui_E.png)
 
-<h4>B.3.1: Autoscale</h4>
+
+<h4>B.5.1: Autoscale</h4>
 
 Scales spectrum by setting reference level and range automatically based on maximum and minimum levels. Takes the average of FFT size &divide; 32 minima for the minimum and 10 dB over maximum for the maximum.
 
-<h4>B.3.2: Reference level</h4>
+<h4>B.5.2: Reference level</h4>
 
 This is the level in dB at the top of the display range. You can select values between 0 and -110 in 1 dB steps
 
-<h4>B.3.3: Range</h4>
+<h4>B.5.3: Range</h4>
 
 This is the range of display in dB. You can select values between 1 and 100 in 1 dB steps
 
-<h4>B.3.4: FPS capping</h4>
+<h4>B.5.4: FPS capping</h4>
 
 The refresh rate of the spectrum is capped by this value in FPS i.e the refresh period in seconds is 1 &divide; FPS. The default value is 20 and corresponds to general usage. You may use a lower value to limit GPU usage and power consumption. You may also use a higher value for an even more reactive display. "NL" corresponds to "No Limit". With "No Limit" the spectrum update will be triggered immediately when a new FFT is calculated. Note that actual refresh rate will be limited by other factors related to hardware and graphics drivers.
 
@@ -231,21 +268,21 @@ Example with a FFT size of 1k (1024) and no overlap, a baseband rate of 48 kS/s 
 
 Thus if the FPS capping is 20 (50 ms) the refresh period will be in fact 107 ms (&approx; 9 FPS) anyway.
 
-<h4>B.3.5: Logarithmic/linear scale</h4>
+<h4>B.5.5: Logarithmic/linear scale</h4>
 
 Use this toggle button to switch between spectrum logarithmic and linear scale display. The face of the button will change to represent either a logarithmic or linear curve.
 
 When in linear mode the range control (B.3.3) has no effect because the actual range is between 0 and the reference level. The reference level in dB (B.3.2) still applies but is translated to a linear value e.g -40 dB is 1e-4. In linear mode the scale numbers are formatted using scientific notation so that they always occupy the same space.
 
-<h3>B.4: Spectrum display control block #4</h3>
+<h3>B.6: Spectrum miscellaneous controls - block #6</h3>
 
-![Spectrum GUI D](../../doc/img/MainWindow_spectrum_gui_D.png)
+![Spectrum GUI F](../../doc/img/MainWindow_spectrum_gui_F.png)
 
-<h4>B.4.1: Play/Pause spectrum</h4>
+<h4>B.6.1: Play/Pause spectrum</h4>
 
 Use this button to freeze the spectrum update. Useful when making measurements with the markers.
 
-<h4>B.4.2: Spectrum server control</h4>
+<h4>B.6.2: Spectrum server control</h4>
 
 A websockets based server can be used to send spectrum data to clients. An example of such client can be found in the [SDRangelSpectrum](https://github.com/f4exb/sdrangelspectrum) project.
 
@@ -305,36 +342,20 @@ The server only sends data. Control including FFT details is done via the REST A
 
 </table>
 
-<h4>B.4.3: Spectrum markers dialog</h4>
+<h4>B.6.3: Spectrum markers dialog</h4>
 
 Opens the [spectrum markers dialog](spectrummarkers.md)
 
-<h4>B.4.4: Spectrum calibration</h4>
+<h4>B.6.4: Spectrum calibration</h4>
 
 Use the toggle button to switch between relative and calibrated power readings.
 
 Right click to open the [calibration management dialog](spectrumcalibration.md)
 
-<h3>B.5: 3D Spectrogram Controls</h3>
-
-The 3D Spectrogram controls are only visible when the 3D Spectrogram is being displayed.
-
-<h4>B.5.1: Style</h4>
-
-This dropdown determines how the 3D Spectrogram data is rendered.
-
-  - Points: The data are rendeded as points.
-  - Lines: The data points are connected by lines.
-  - Solid: The data are rendeded as a solid surface with constant illumination.
-  - Outline: The data are rendered as a solid surface with outlines of the polygons highlighted.
-  - Shaded: The data are rendeder as a solid surface with a combination of ambient and diffuse lighting. This requires OpenGL 3.3 or greater.
-
-<h4>B.5.2: Color Map</h4>
-
-This dropdown allows the selection of a number of pre-defined color maps that are used for rendering the 3D Spectrogram.
-'Angel' is the default SDRangel color map.
 
 <h2>3D Spectrogram Controls</h2>
+
+![3D Spectrogram](../../doc/img/MainWindow_3D_spectrogram.png)
 
 The 3D Spectrogram view can be controlled by mouse/trackpad:
 
