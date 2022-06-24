@@ -319,6 +319,9 @@ private:
     SpectrumSettings::SpectrumStyle m_spectrumStyle;
     const float *m_colorMap;
 
+    bool m_scrollFrequency;
+    qint64 m_scrollStartCenterFreq;
+
     QRgb m_histogramPalette[240];
     QImage* m_histogramBuffer;
     quint8* m_histogram; //!< Spectrum phosphor matrix of FFT width and PSD height scaled to 100. values [0..239]
@@ -391,6 +394,7 @@ private:
     void setPowerScale(int height);
     void getFrequencyZoom(int64_t& centerFrequency, int& frequencySpan);
     bool pointInWaterfallOrSpectrogram(const QPointF &point) const;
+    bool pointInHistogram(const QPointF &point) const;
 
     void enterEvent(QEvent* event);
     void leaveEvent(QEvent* event);
@@ -432,6 +436,10 @@ private slots:
     void channelMarkerDestroyed(QObject* object);
     void openGLDebug(const QOpenGLDebugMessage &debugMessage);
     bool eventFilter(QObject *object, QEvent *event);
+
+signals:
+    // Emitted when user tries to scroll to frequency currently out of range
+    void requestCenterFrequency(qint64 frequency);
 };
 
 #endif // INCLUDE_GLSPECTRUM_H

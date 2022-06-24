@@ -106,6 +106,7 @@ private slots:
     void showHelp();
     void openMoveToWorkspaceDialog();
     void shrinkWindow();
+    void onRequestCenterFrequency(qint64 frequency);
 
 signals:
     void closing();
