@@ -4,7 +4,7 @@ The spectrum markers are controlled with this dialog. Note that spectrum markers
 
 <h2>General interface</h2>
 
-![Spectrum Markers dialog](../doc/img/Spectrum_Markers_dialog.png)
+![Spectrum Markers dialog](../../doc/img/Spectrum_Markers_dialog.png)
 
 <h3>1. Sub-dialog selection</h3>
 
@@ -21,10 +21,11 @@ This lets you selects which markers are displayed
   - **None**: no markers are displayed
   - **Spec**: spectrum markers (histogram and waterfall) are displayed
   - **Anno**: spectrum annotations are displayed
+  - **All**: both markers and annotations are displayed
 
 <h2>Histogram markers tab</h2>
 
-![Spectrum Markers histogram dialog](../doc/img/Spectrum_Markers_dialog_hist.png)
+![Spectrum Markers histogram dialog](../../doc/img/Spectrum_Markers_dialog_hist.png)
 
 <h3>1. Marker frequency</h3>
 
@@ -73,7 +74,7 @@ Use this slider to adjust the power position of the marker. The units are in dB 
 
 <h2>Waterfall markers tab</h2>
 
-![Spectrum Markers waterfall dialog](../doc/img/Spectrum_Markers_dialog_wat.png)
+![Spectrum Markers waterfall dialog](../../doc/img/Spectrum_Markers_dialog_wat.png)
 
 <h3>1. Marker frequency</h3>
 
@@ -114,7 +115,7 @@ This slider lets you control the exponent part E of the time mark so that t(s) =
 
 <h2>Annotation markers tab</h2>
 
-![Spectrum Markers annotation dialog](../doc/img/Spectrum_Markers_dialog_anno.png)
+![Spectrum Markers annotation dialog](../../doc/img/Spectrum_Markers_dialog_anno.png)
 
 <h3>1. Marker selection</h3>
 
@@ -192,6 +193,7 @@ Select how the marker is displayed
   - **Hidden**: marker is hidden
   - **Top**: only the top area or line is displayed
   - **Full**: marker is displayed in full with line limits and text
+  - **Text**: top area with text is displayed
 
 <h3>16: Apply show state to all</h3>
 
@@ -199,6 +201,6 @@ Click on this button to apply the current marker show state (15) to all markers
 
 <h3>Annotations on spectrum display</h3>
 
-![Spectrum Markers annotation spectrum](../doc/img/Spectrum_Markers_dialog_anno_spectrum.png)
+![Spectrum Markers annotation spectrum](../../doc/img/Spectrum_Markers_dialog_anno_spectrum.png)
 
 In "top" state the markers are displayed as short lines or thin areas on the top of the spectrum. Click in the marker area to toggle between "full" and "top" states. For line markers (bandwidth 0 Hz) click close to the right of line marker.
