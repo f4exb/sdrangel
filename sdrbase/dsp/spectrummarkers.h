@@ -161,7 +161,8 @@ struct SDRBASE_API SpectrumAnnotationMarker
     {
         Hidden,
         ShowTop,
-        ShowFull
+        ShowFull,
+        ShowText
     };
 
     qint64 m_startFrequency;

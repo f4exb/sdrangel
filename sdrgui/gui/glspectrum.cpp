@@ -1381,9 +1381,10 @@ void GLSpectrum::paintGL()
         }
     }
 
-    if (m_markersDisplay == SpectrumSettings::MarkersDisplaySpectrum) {
+    if (m_markersDisplay & SpectrumSettings::MarkersDisplaySpectrum) {
         drawSpectrumMarkers();
-    } else if (m_markersDisplay == SpectrumSettings::MarkersDisplayAnnotations) {
+    }
+    if (m_markersDisplay & SpectrumSettings::MarkersDisplayAnnotations) {
         drawAnnotationMarkers();
     }
 
@@ -1910,28 +1911,27 @@ void GLSpectrum::drawAnnotationMarkers()
             m_glShaderSimple.drawSurface(m_glHistogramBoxMatrix, color, q3, 4);
         }
 
-        if (marker->m_show == SpectrumAnnotationMarker::ShowFull)
+        // Always draw a line in the top area, so we can see where bands start/stop when contiguous
+        // When show is ShowFull, we draw at full height of spectrum
+        bool full = marker->m_show == SpectrumAnnotationMarker::ShowFull;
+
+        GLfloat d1[] {
+            marker->m_startPos, full ? 0 : htop,
+            marker->m_startPos, full ? 1 : h,
+        };
+        m_glShaderSimple.drawSegments(m_glHistogramBoxMatrix, color, d1, 2);
+
+        if (marker->m_bandwidth != 0)
         {
-            QVector4D color(
-                marker->m_markerColor.redF(),
-                marker->m_markerColor.greenF(),
-                marker->m_markerColor.blueF(), 0.5f
-            );
-            GLfloat d1[] {
-                marker->m_startPos, 0,
-                marker->m_startPos, 1,
+            GLfloat d2[] {
+                marker->m_stopPos, full ? 0 : htop,
+                marker->m_stopPos, full ? 1 : h,
             };
-            m_glShaderSimple.drawSegments(m_glHistogramBoxMatrix, color, d1, 2);
+            m_glShaderSimple.drawSegments(m_glHistogramBoxMatrix, color, d2, 2);
+        }
 
-            if (marker->m_bandwidth != 0)
-            {
-                GLfloat d2[] {
-                    marker->m_stopPos, 0,
-                    marker->m_stopPos, 1,
-                };
-                m_glShaderSimple.drawSegments(m_glHistogramBoxMatrix, color, d2, 2);
-            }
-
+        if ((marker->m_show == SpectrumAnnotationMarker::ShowFull) || (marker->m_show == SpectrumAnnotationMarker::ShowText))
+        {
             float txtpos = marker->m_startPos < 0.5f ?
                 marker->m_startPos :
                 marker->m_stopPos;
@@ -2824,7 +2824,7 @@ void GLSpectrum::updateWaterfallMarkers()
 
 void GLSpectrum::updateAnnotationMarkers()
 {
-    if (m_markersDisplay != SpectrumSettings::MarkersDisplayAnnotations) {
+    if (!(m_markersDisplay & SpectrumSettings::MarkersDisplayAnnotations)) {
         return;
     }
 
@@ -2840,7 +2840,7 @@ void GLSpectrum::updateAnnotationMarkers()
 
 void GLSpectrum::updateSortedAnnotationMarkers()
 {
-    if (m_markersDisplay != SpectrumSettings::MarkersDisplayAnnotations) {
+    if (!(m_markersDisplay & SpectrumSettings::MarkersDisplayAnnotations)) {
         return;
     }
 
@@ -2864,7 +2864,7 @@ void GLSpectrum::updateSortedAnnotationMarkers()
 
 void GLSpectrum::updateMarkersDisplay()
 {
-    if (m_markersDisplay == SpectrumSettings::MarkersDisplayAnnotations) {
+    if (m_markersDisplay & SpectrumSettings::MarkersDisplayAnnotations) {
         updateAnnotationMarkers();
     }
 }
@@ -3308,7 +3308,7 @@ void GLSpectrum::mousePressEvent(QMouseEvent* event)
             }
         }
 
-        if ((m_markersDisplay == SpectrumSettings::MarkersDisplayAnnotations) &&
+        if ((m_markersDisplay & SpectrumSettings::MarkersDisplayAnnotations) &&
             (ep.y() <= m_histogramRect.top()*height() + m_annotationMarkerHeight + 2.0f))
         {
             QPointF pHis;
@@ -3327,8 +3327,18 @@ void GLSpectrum::mousePressEvent(QMouseEvent* event)
 
                 if (((*iMarker)->m_startFrequency < selectedFrequency) && (selectedFrequency <= stopFrequency) && !selected)
                 {
-                    (*iMarker)->m_show = (*iMarker)->m_show == SpectrumAnnotationMarker::ShowFull ?
-						SpectrumAnnotationMarker::ShowTop : SpectrumAnnotationMarker::ShowFull;
+                    switch ((*iMarker)->m_show)
+                    {
+                    case SpectrumAnnotationMarker::ShowTop:
+                        (*iMarker)->m_show = SpectrumAnnotationMarker::ShowText;
+                        break;
+                    case SpectrumAnnotationMarker::ShowText:
+                        (*iMarker)->m_show = SpectrumAnnotationMarker::ShowFull;
+                        break;
+                    case SpectrumAnnotationMarker::ShowFull:
+                        (*iMarker)->m_show = SpectrumAnnotationMarker::ShowTop;
+                        break;
+                    }
                     selected = true;
                 }
             }

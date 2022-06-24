@@ -39,11 +39,13 @@ public:
         AvgModeMax
     };
 
+    // Bitmask for which selection of markers to display
     enum MarkersDisplay
     {
-        MarkersDisplayNone,
-        MarkersDisplaySpectrum,
-		MarkersDisplayAnnotations
+        MarkersDisplayNone = 0,
+        MarkersDisplaySpectrum = 0x1,
+        MarkersDisplayAnnotations = 0x2,
+        MarkersDisplayAll = 0x3
     };
 
 	enum CalibrationInterpolationMode
