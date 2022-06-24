@@ -112,6 +112,7 @@ signals:
     void closing();
     void moveToWorkspace(int workspaceIndex);
     void forceShrink();
+    void requestCenterFrequency(int deviceSetIndex, qint64 frequency); // an action from the user to move device center frequency
 };
 
 

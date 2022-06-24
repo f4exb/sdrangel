@@ -207,6 +207,7 @@ private slots:
     void deviceMove(DeviceGUI *gui, int wsIndexDestnation);
     void mainSpectrumMove(MainSpectrumGUI *gui, int wsIndexDestnation);
     void mainSpectrumShow(int deviceSetIndex);
+    void mainSpectrumRequestDeviceCenterFrequency(int deviceSetIndex, qint64 deviceCenterFrequency);
     void showAllChannels(int deviceSetIndex);
     void openDeviceSetPresetsDialog(QPoint p, DeviceGUI *deviceGUI);
 	void commandKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifiers, bool release);

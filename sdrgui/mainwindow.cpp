@@ -319,6 +319,13 @@ void MainWindow::sampleSourceAdd(Workspace *deviceWorkspace, Workspace *spectrum
         [=](int channelPluginIndex){ this->channelAddClicked(deviceWorkspace, deviceSetIndex, channelPluginIndex); }
     );
 
+    QObject::connect(
+        mainSpectrumGUI,
+        &MainSpectrumGUI::requestCenterFrequency,
+        this,
+        &MainWindow::mainSpectrumRequestDeviceCenterFrequency
+    );
+
     deviceWorkspace->addToMdiArea(m_deviceUIs.back()->m_deviceGUI);
     spectrumWorkspace->addToMdiArea(m_deviceUIs.back()->m_mainSpectrumGUI);
     emit m_mainCore->deviceSetAdded(deviceSetIndex, deviceAPI);
@@ -533,6 +540,13 @@ void MainWindow::sampleSinkAdd(Workspace *deviceWorkspace, Workspace *spectrumWo
         &DeviceGUI::addChannelEmitted,
         this,
         [=](int channelPluginIndex){ this->channelAddClicked(deviceWorkspace, deviceSetIndex, channelPluginIndex); }
+    );
+
+    QObject::connect(
+        mainSpectrumGUI,
+        &MainSpectrumGUI::requestCenterFrequency,
+        this,
+        &MainWindow::mainSpectrumRequestDeviceCenterFrequency
     );
 
     deviceWorkspace->addToMdiArea(m_deviceUIs.back()->m_deviceGUI);
@@ -2664,6 +2678,19 @@ void MainWindow::mainSpectrumShow(int deviceSetIndex)
     DeviceUISet *deviceUISet = m_deviceUIs[deviceSetIndex];
     deviceUISet->m_mainSpectrumGUI->show();
     deviceUISet->m_mainSpectrumGUI->raise();
+}
+
+void MainWindow::mainSpectrumRequestDeviceCenterFrequency(int deviceSetIndex, qint64 deviceCenterFrequency)
+{
+    DeviceUISet *deviceUISet = m_deviceUIs[deviceSetIndex];
+    DeviceAPI *deviceAPI = deviceUISet->m_deviceAPI;
+
+    if (deviceAPI->getSampleSource()) {
+        deviceAPI->getSampleSource()->setCenterFrequency(deviceCenterFrequency);
+    } else if (deviceAPI->getSampleSink()) {
+        deviceAPI->getSampleSink()->setCenterFrequency(deviceCenterFrequency);
+    }
+    // Not implemented for MIMO
 }
 
 void MainWindow::showAllChannels(int deviceSetIndex)
