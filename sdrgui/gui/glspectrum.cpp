@@ -3363,7 +3363,7 @@ void GLSpectrum::wheelEvent(QWheelEvent *event)
 #else
     const QPointF& ep = event->pos();
 #endif
-    if (pointInWaterfallOrSpectrogram(ep))
+    if (m_display3DSpectrogram && pointInWaterfallOrSpectrogram(ep))
     {
         // Scale 3D spectrogram when mouse wheel moved
         // Some mice use delta in steps of 120 for 15 degrees
