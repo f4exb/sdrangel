@@ -1673,6 +1673,11 @@ Max - Marker will move according to the maximum power at the marker frequency</s
               <string>Full</string>
              </property>
             </item>
+            <item>
+             <property name="text">
+              <string>Text</string>
+             </property>
+            </item>
            </widget>
           </item>
           <item>
@@ -1730,7 +1735,8 @@ Max - Marker will move according to the maximum power at the marker frequency</s
 
 None - Hide all markers
 Spec - Show histogram and waterfall markers
-Anno - Show annotation markers</string>
+Anno - Show annotation markers
+All  - Show all markers</string>
        </property>
        <item>
         <property name="text">
@@ -1745,6 +1751,11 @@ Anno - Show annotation markers</string>
        <item>
         <property name="text">
          <string>Anno</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>All</string>
         </property>
        </item>
       </widget>
