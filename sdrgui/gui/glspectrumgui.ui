@@ -1074,6 +1074,30 @@
       </widget>
      </item>
      <item>
+      <widget class="QComboBox" name="gotoMarker">
+       <property name="minimumSize">
+        <size>
+         <width>65</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>65</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Set frequency to marker</string>
+       </property>
+       <item>
+        <property name="text">
+         <string>Go to...</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
       <widget class="QLabel" name="fillLabel4">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">

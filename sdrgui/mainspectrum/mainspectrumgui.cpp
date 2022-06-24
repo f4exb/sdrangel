@@ -142,6 +142,7 @@ MainSpectrumGUI::MainSpectrumGUI(GLSpectrum *spectrum, GLSpectrumGUI *spectrumGU
     connect(m_hideButton, SIGNAL(clicked()), this, SLOT(hide()));
 
     connect(spectrum, &GLSpectrum::requestCenterFrequency, this, &MainSpectrumGUI::onRequestCenterFrequency);
+    connect(spectrumGUI, &GLSpectrumGUI::requestCenterFrequency, this, &MainSpectrumGUI::onRequestCenterFrequency);
 
     m_resizer.enableChildMouseTracking();
     shrinkWindow();
@@ -320,7 +321,7 @@ QString MainSpectrumGUI::getDeviceTypeTag()
     }
 }
 
-// Handle request from GLSpectrum to adjust center frequency
+// Handle request from GLSpectrum/GLSpectrumGUI to adjust center frequency
 void MainSpectrumGUI::onRequestCenterFrequency(qint64 frequency)
 {
     emit requestCenterFrequency(m_deviceSetIndex, frequency);

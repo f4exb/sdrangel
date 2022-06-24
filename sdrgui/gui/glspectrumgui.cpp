@@ -222,6 +222,7 @@ void GLSpectrumGUI::displaySettings()
     ui->linscale->setChecked(m_settings.m_linear);
     setAveragingToolitp();
     ui->calibration->setChecked(m_settings.m_useCalibration);
+    displayGotoMarkers();
 
     ui->fftWindow->blockSignals(false);
     ui->averaging->blockSignals(false);
@@ -230,6 +231,38 @@ void GLSpectrumGUI::displaySettings()
     blockApplySettings(false);
 }
 
+void GLSpectrumGUI::displayGotoMarkers()
+{
+    ui->gotoMarker->clear();
+    ui->gotoMarker->addItem("Go to...");
+    for (auto marker : m_settings.m_annoationMarkers)
+    {
+        if (marker.m_show != SpectrumAnnotationMarker::Hidden)
+        {
+            qint64 freq = marker.m_startFrequency + marker.m_bandwidth/2;
+            QString freqString = displayScaled(freq, 'f', 3, true);
+            ui->gotoMarker->addItem(QString("%1 - %2").arg(marker.m_text).arg(freqString));
+        }
+    }
+    ui->gotoMarker->setVisible(ui->gotoMarker->count() > 1);
+}
+
+QString GLSpectrumGUI::displayScaled(int64_t value, char type, int precision, bool showMult)
+{
+    int64_t posValue = (value < 0) ? -value : value;
+
+    if (posValue < 1000) {
+        return tr("%1").arg(QString::number(value, type, precision));
+    } else if (posValue < 1000000) {
+        return tr("%1%2").arg(QString::number(value / 1000.0, type, precision)).arg(showMult ? "k" : "");
+    } else if (posValue < 1000000000) {
+        return tr("%1%2").arg(QString::number(value / 1000000.0, type, precision)).arg(showMult ? "M" : "");
+    } else if (posValue < 1000000000000) {
+        return tr("%1%2").arg(QString::number(value / 1000000000.0, type, precision)).arg(showMult ? "G" : "");
+    } else {
+        return tr("%1").arg(QString::number(value, 'e', precision));
+    }
+}
 void GLSpectrumGUI::blockApplySettings(bool block)
 {
     m_doApplySettings = !block;
@@ -609,6 +642,27 @@ void GLSpectrumGUI::on_calibration_toggled(bool checked)
 {
     m_settings.m_useCalibration = checked;
     applySettings();
+}
+
+void GLSpectrumGUI::on_gotoMarker_currentIndexChanged(int index)
+{
+    if (index == 0) {
+        return;
+    }
+    int i = 1;
+    for (auto marker : m_settings.m_annoationMarkers)
+    {
+        if (marker.m_show != SpectrumAnnotationMarker::Hidden)
+        {
+            if (i == index)
+            {
+                emit requestCenterFrequency(marker.m_startFrequency + marker.m_bandwidth/2);
+                break;
+            }
+            i++;
+        }
+    }
+    ui->gotoMarker->setCurrentIndex(0); // Redisplay "Goto..."
 }
 
 void GLSpectrumGUI::setAveragingCombo()

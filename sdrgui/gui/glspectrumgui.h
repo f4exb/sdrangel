@@ -84,6 +84,8 @@ private:
 	void setFFTSizeToolitp();
 	void setMaximumOverlap();
 	bool handleMessage(const Message& message);
+    void displayGotoMarkers();
+    QString displayScaled(int64_t value, char type, int precision, bool showMult);
 
 private slots:
 	void on_fftWindow_currentIndexChanged(int index);
@@ -118,6 +120,7 @@ private slots:
 	void on_clearSpectrum_clicked(bool checked);
     void on_freeze_toggled(bool checked);
 	void on_calibration_toggled(bool checked);
+    void on_gotoMarker_currentIndexChanged(int index);
 
 	void handleInputMessages();
     void openWebsocketSpectrumSettingsDialog(const QPoint& p);
@@ -128,6 +131,10 @@ private slots:
 	void updateAnnotationMarkers();
 	void updateMarkersDisplay();
 	void updateCalibrationPoints();
+
+signals:
+    // Emitted when user selects an annotation marker
+    void requestCenterFrequency(qint64 frequency);
 };
 
 #endif // INCLUDE_GLSPECTRUMGUI_H
