@@ -38,10 +38,22 @@ else()
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO "${BUILD_PLUGINSSRV_DIR}")
 endif()
 
-add_subdirectory(channelmimo)
-add_subdirectory(channelrx)
-add_subdirectory(channeltx)
-add_subdirectory(feature)
+if (ENABLE_CHANNELMIMO)
+    add_subdirectory(channelmimo)
+endif()
+
+if (ENABLE_CHANNELRX)
+    add_subdirectory(channelrx)
+endif()
+
+if (ENABLE_CHANNELTX)
+    add_subdirectory(channeltx)
+endif()
+
+if (ENABLE_FEATURE)
+    add_subdirectory(feature)
+endif()
+
 add_subdirectory(samplemimo)
 add_subdirectory(samplesource)
 add_subdirectory(samplesink)
