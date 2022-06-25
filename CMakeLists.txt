@@ -48,7 +48,7 @@ option(ENABLE_PACK_MIRSDRAPI "Enable inclusion of the mirsdr-api library - for p
 option(ENABLE_USRP "Enable USRP support" ON)
 
 # Channel Rx enablers
-option(ENABLE_CHANNELRX, "Enable channelrx plugins" ON)
+option(ENABLE_CHANNELRX "Enable channelrx plugins" ON)
 option(ENABLE_CHANNELRX_DEMODADSB "Enable channelrx demodadsb plugin" ON)
 option(ENABLE_CHANNELRX_DEMODAM "Enable channelrx demodam plugin" ON)
 option(ENABLE_CHANNELRX_DEMODDATV "Enable channelrx demoddatv plugin" ON)
@@ -79,7 +79,7 @@ option(ENABLE_CHANNELRX_DEMODAPT "Enable channelrx demodapt plugin" ON)
 option(ENABLE_CHANNELRX_DEMODDSD "Enable channelrx demoddsd plugin" ON)
 
 # Channel Tx enablers
-option(ENABLE_CHANNELTX, "Enable channeltx plugins" ON)
+option(ENABLE_CHANNELTX "Enable channeltx plugins" ON)
 option(ENABLE_CHANNELTX_MODNFM "Enable channeltx modnfm plugin" ON)
 option(ENABLE_CHANNELTX_MODAIS "Enable channeltx modais plugin" ON)
 option(ENABLE_CHANNELTX_LOCALSOURCE "Enable channeltx localsource plugin" ON)
@@ -103,7 +103,7 @@ option(ENABLE_CHANNELMIMO_DOA2 "Enable channelmimo doa2 plugin" ON)
 option(ENABLE_CHANNELMIMO_BEAMSTEERINGCWMOD "Enable channelmimo beamsteeringcwmod plugin" ON)
 
 # Feature enablers
-option(ENABLE_FEATURE, "Enable feature plugins" ON)
+option(ENABLE_FEATURE "Enable feature plugins" ON)
 option(ENABLE_FEATURE_LIMERFE "Enable feature limerfe plugin" ON)
 option(ENABLE_FEATURE_VORLOCALIZER "Enable feature vorlocalizer plugin" ON)
 option(ENABLE_FEATURE_JOGDIALCONTROLLER "Enable feature jogdialcontroller plugin" ON)
