@@ -1,12 +1,12 @@
 **/core*
 CMakeLists.txt.user*
+CMakeUserPresets.json
 build*/
 debug/
 qtbuild/*
 sdriq/*
 presets/*
 LOCAL/*
-sdrangelove.supp
 .cproject
 .flatpak-builder/
 .project
