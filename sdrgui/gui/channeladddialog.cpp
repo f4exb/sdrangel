@@ -46,7 +46,7 @@ void ChannelAddDialog::addChannelNames(const QStringList& channelNames)
 
 void ChannelAddDialog::apply(QAbstractButton *button)
 {
-    if (button == (QAbstractButton*) ui->buttonBox->button(QDialogButtonBox::Apply))
+    if ((ui->channelSelect->count() > 0) && (button == (QAbstractButton*) ui->buttonBox->button(QDialogButtonBox::Apply)))
     {
         int selectedChannelIndex = ui->channelSelect->currentIndex();
         emit(addChannel(selectedChannelIndex));

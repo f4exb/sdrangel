@@ -46,7 +46,7 @@ void FeatureAddDialog::addFeatureNames(const QStringList& featureNames)
 
 void FeatureAddDialog::apply(QAbstractButton *button)
 {
-    if (button == (QAbstractButton*) ui->buttonBox->button(QDialogButtonBox::Apply))
+    if ((ui->featureSelect->count() > 0) && (button == (QAbstractButton*) ui->buttonBox->button(QDialogButtonBox::Apply)))
     {
         int selectedFeatureIndex = ui->featureSelect->currentIndex();
         emit(addFeature(selectedFeatureIndex));
