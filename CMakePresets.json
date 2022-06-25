@@ -1,0 +1,39 @@
+{
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "default",
+            "binaryDir": "build-default",
+            "cacheVariables": {
+                "AIRSPYHF_DIR": "/opt/install/libairspyhf",
+                "AIRSPY_DIR": "/opt/install/libairspy",
+                "APT_DIR": "/opt/install/aptdec",
+                "BLADERF_DIR": "/opt/install/libbladeRF",
+                "CM256CC_DIR": "/opt/install/cm256cc",
+                "CODEC2_DIR": "/opt/install/codec2",
+                "DAB_DIR": "/opt/install/libdab",
+                "DSDCC_DIR": "/opt/install/dsdcc",
+                "HACKRF_DIR": "/opt/install/libhackrf",
+                "IIO_DIR": "/opt/install/libiio",
+                "LIBSIGMF_DIR": "/opt/install/libsigmf",
+                "LIMESUITE_DIR": "/opt/install/LimeSuite",
+                "MBE_DIR": "/opt/install/mbelib",
+                "MIRISDR_DIR": "/opt/install/libmirisdr",
+                "PERSEUS_DIR": "/opt/install/libperseus",
+                "RTLSDR_DIR": "/opt/install/librtlsdr",
+                "SERIALDV_DIR": "/opt/install/serialdv",
+                "SGP4_DIR": "/opt/install/sgp4",
+                "SOAPYSDR_DIR": "/opt/install/SoapySDR",
+                "UHD_DIR": "/opt/install/uhd",
+                "XTRX_DIR": "/opt/install/xtrx-images",
+                "CMAKE_INSTALL_PREFIX": "/opt/install/sdrangel"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+          "name": "default",
+          "configurePreset": "default"
+        }
+    ]
+}
