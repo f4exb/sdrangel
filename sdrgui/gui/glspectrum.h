@@ -201,6 +201,8 @@ public:
     void setCalibrationPoints(const QList<SpectrumCalibrationPoint>& calibrationPoints);
     SpectrumSettings::CalibrationInterpolationMode& getCalibrationInterpMode() { return m_calibrationInterpMode; }
     void setCalibrationInterpMode(SpectrumSettings::CalibrationInterpolationMode mode);
+    void setIsDeviceSpectrum(bool isDeviceSpectrum) { m_isDeviceSpectrum = isDeviceSpectrum; }
+    bool isDeviceSpectrum() const { return m_isDeviceSpectrum; }
 
 private:
     struct ChannelMarkerState {
@@ -364,6 +366,7 @@ private:
 
     MessageQueue *m_messageQueueToGUI;
     QOpenGLDebugLogger *m_openGLLogger;
+    bool m_isDeviceSpectrum;
 
     void updateWaterfall(const Real *spectrum);
     void update3DSpectrogram(const Real *spectrum);

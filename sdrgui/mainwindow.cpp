@@ -1025,7 +1025,7 @@ void MainWindow::removeLastDeviceSet()
         m_deviceUIs.back()->m_deviceGUI->destroy();
         m_deviceUIs.back()->m_deviceAPI->resetSamplingDeviceId();
         m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceInput(
-            m_deviceUIs.back()->m_deviceAPI->getSampleSource());
+        m_deviceUIs.back()->m_deviceAPI->getSampleSource());
         m_deviceUIs.back()->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
 
 	    DeviceAPI *sourceAPI = m_deviceUIs.back()->m_deviceAPI;
@@ -1048,7 +1048,7 @@ void MainWindow::removeLastDeviceSet()
         m_deviceUIs.back()->m_deviceGUI->destroy();
 	    m_deviceUIs.back()->m_deviceAPI->resetSamplingDeviceId();
 	    m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->deleteSampleSinkPluginInstanceOutput(
-	        m_deviceUIs.back()->m_deviceAPI->getSampleSink());
+        m_deviceUIs.back()->m_deviceAPI->getSampleSink());
         m_deviceUIs.back()->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
 
 	    DeviceAPI *sinkAPI = m_deviceUIs.back()->m_deviceAPI;
@@ -1072,7 +1072,7 @@ void MainWindow::removeLastDeviceSet()
         m_deviceUIs.back()->m_deviceGUI->destroy();
 	    m_deviceUIs.back()->m_deviceAPI->resetSamplingDeviceId();
 	    m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->deleteSampleMIMOPluginInstanceMIMO(
-	        m_deviceUIs.back()->m_deviceAPI->getSampleMIMO());
+        m_deviceUIs.back()->m_deviceAPI->getSampleMIMO());
 
 	    DeviceAPI *mimoAPI = m_deviceUIs.back()->m_deviceAPI;
 	    delete m_deviceUIs.back();

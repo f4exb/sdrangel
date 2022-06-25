@@ -107,7 +107,8 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
     m_calibrationShiftdB(0.0),
     m_calibrationInterpMode(SpectrumSettings::CalibInterpLinear),
     m_messageQueueToGUI(nullptr),
-    m_openGLLogger(nullptr)
+    m_openGLLogger(nullptr),
+    m_isDeviceSpectrum(false)
 {
     // Enable multisampling anti-aliasing (MSAA)
     int multisamples = MainCore::instance()->getSettings().getMultisampling();

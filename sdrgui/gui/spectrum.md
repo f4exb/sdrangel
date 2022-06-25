@@ -352,6 +352,9 @@ Use the toggle button to switch between relative and calibrated power readings.
 
 Right click to open the [calibration management dialog](spectrumcalibration.md)
 
+<h4>B.6.5: Go to annotation marker</h4>
+
+This combo only appears if the spectrum display is the spectrum of a device (i.e. main spectrum) and if there are visible annotation markers. It allows to set the device center frequency to the frequency of the selected annotation marker.
 
 <h2>3D Spectrogram Controls</h2>
 

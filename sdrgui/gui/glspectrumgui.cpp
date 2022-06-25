@@ -235,6 +235,7 @@ void GLSpectrumGUI::displayGotoMarkers()
 {
     ui->gotoMarker->clear();
     ui->gotoMarker->addItem("Go to...");
+
     for (auto marker : m_settings.m_annoationMarkers)
     {
         if (marker.m_show != SpectrumAnnotationMarker::Hidden)
@@ -244,7 +245,8 @@ void GLSpectrumGUI::displayGotoMarkers()
             ui->gotoMarker->addItem(QString("%1 - %2").arg(marker.m_text).arg(freqString));
         }
     }
-    ui->gotoMarker->setVisible(ui->gotoMarker->count() > 1);
+
+    ui->gotoMarker->setVisible(m_glSpectrum && m_glSpectrum->isDeviceSpectrum() && (ui->gotoMarker->count() > 1));
 }
 
 QString GLSpectrumGUI::displayScaled(int64_t value, char type, int precision, bool showMult)
@@ -263,6 +265,7 @@ QString GLSpectrumGUI::displayScaled(int64_t value, char type, int precision, bo
         return tr("%1").arg(QString::number(value, 'e', precision));
     }
 }
+
 void GLSpectrumGUI::blockApplySettings(bool block)
 {
     m_doApplySettings = !block;
@@ -465,6 +468,7 @@ void GLSpectrumGUI::on_markers_clicked(bool checked)
     m_settings.m_annoationMarkers = m_glSpectrum->getAnnotationMarkers();
     m_settings.m_markersDisplay = m_glSpectrum->getMarkersDisplay();
 
+    displayGotoMarkers();
     applySettings();
 }
 
