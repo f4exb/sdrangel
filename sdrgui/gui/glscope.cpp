@@ -203,8 +203,6 @@ void GLScope::initializeGL()
         }
     }
 
-    connect(glCurrentContext, &QOpenGLContext::aboutToBeDestroyed, this, &GLScope::cleanup);
-
     QOpenGLFunctions *glFunctions = QOpenGLContext::currentContext()->functions();
     glFunctions->initializeOpenGLFunctions();
 

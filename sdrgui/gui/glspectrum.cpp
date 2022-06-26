@@ -822,8 +822,6 @@ void GLSpectrum::initializeGL()
         return;
     }
 
-    connect(glCurrentContext, &QOpenGLContext::aboutToBeDestroyed, this, &GLSpectrum::cleanup);
-
     QOpenGLFunctions *glFunctions = QOpenGLContext::currentContext()->functions();
     glFunctions->initializeOpenGLFunctions();
 
