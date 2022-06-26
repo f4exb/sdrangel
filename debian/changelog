@@ -1,3 +1,26 @@
+sdrangel (7.4.0-1) unstable; urgency=medium
+
+  * 3D Spectrogram and OpenGL code fixes. PR #1291
+  * USRP: fixed possible KeyError exception. Fixes #1284. PR #1288
+  * Add support for Broadcast FM Demod audio in Demod Analyzer. PR #1292
+  * Spectrum: Prevent null texture warning when only histogram is displayed. PR #1294
+  * 3D Spectrogram: Fixes #1297. PR #1298
+  * External libraries: removed unnecessary SerialDV dependency to fix MSVC builds
+  * Spectrum: And fill and gradient styles. PR #1299
+  * Allow 2D waterfall color map to be changed. PR #1299
+  * Change frequency zoom so that frequency under cursor remains the same. PR #1300
+  * Spectrum markers dialog: Fix show field in CSV export. PR #1301
+  * Value dial: Check for completed animation before using m_value. PR #1303
+  * Reworked spectrum GUI controls
+  * Spectrum: Fix mouse wheel to zoom in waterfall. PR #1304
+  * Spectrum: Allow frequency scolling with mouse. PR #1305
+  * Spectrum markers: Allow all to be displayed. PR #1306
+  * SpectrumGUI: Go to combo to set center frequency from annotation marker. PR #1309
+  * Added minimal default cmake preset
+  * Added cmake enablers for all non sampling device plugins. Fixes #1308
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sun, 26 Jun 2022 04:25:21 +0200
+
 sdrangel (7.3.2-1) unstable; urgency=medium
 
   * Use libusb 1.0.26 on Windows
