@@ -50,6 +50,7 @@ AirspyGui::AirspyGui(DeviceUISet *deviceUISet, QWidget* parent) :
     ui->setupUi(getContents());
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     getContents()->setStyleSheet("#AirspyGui { background-color: rgb(64, 64, 64); }");
+    m_helpURL = "plugins/samplesource/airspy/readme.md";
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 	updateFrequencyLimits();
 
