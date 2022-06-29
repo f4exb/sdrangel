@@ -835,7 +835,11 @@ bool USRPInput::applySettings(const USRPInputSettings& settings, bool preGetStre
                 }
                 else
                 {
-                    m_deviceShared.m_deviceParams->getDevice()->set_rx_agc(false, m_deviceShared.m_channel);
+                    try {
+                        m_deviceShared.m_deviceParams->getDevice()->set_rx_agc(false, m_deviceShared.m_channel);
+                    } catch (uhd::not_implemented_error &e) {
+                        // Ignore
+                    }
                     m_deviceShared.m_deviceParams->getDevice()->set_rx_gain(settings.m_gain, m_deviceShared.m_channel);
                     qDebug() << "USRPInput::applySettings: AGC disabled for channel " << m_deviceShared.m_channel << " set to " << settings.m_gain;
                 }
@@ -903,10 +907,20 @@ bool USRPInput::applySettings(const USRPInputSettings& settings, bool preGetStre
             // Need to re-set bandwidth and AGG after changing samplerate (and possibly clock source)
             m_deviceShared.m_deviceParams->getDevice()->set_rx_bandwidth(settings.m_lpfBW, m_deviceShared.m_channel);
             if (settings.m_gainMode == USRPInputSettings::GAIN_AUTO)
-                m_deviceShared.m_deviceParams->getDevice()->set_rx_agc(true, m_deviceShared.m_channel);
+            {
+                try {
+                    m_deviceShared.m_deviceParams->getDevice()->set_rx_agc(true, m_deviceShared.m_channel);
+                } catch (uhd::not_implemented_error &e) {
+                    // Error message should have been output above
+                }
+            }
             else
             {
-                m_deviceShared.m_deviceParams->getDevice()->set_rx_agc(false, m_deviceShared.m_channel);
+                try {
+                    m_deviceShared.m_deviceParams->getDevice()->set_rx_agc(false, m_deviceShared.m_channel);
+                } catch (uhd::not_implemented_error &e) {
+                    // Ignore
+                }
                 m_deviceShared.m_deviceParams->getDevice()->set_rx_gain(settings.m_gain, m_deviceShared.m_channel);
             }
         }
