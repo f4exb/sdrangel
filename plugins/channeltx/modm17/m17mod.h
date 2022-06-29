@@ -38,6 +38,7 @@ class QThread;
 class DeviceAPI;
 class M17ModBaseband;
 class ObjectPipe;
+class BasebandSampleSink;
 
 class M17Mod : public BasebandSampleSource, public ChannelAPI {
 public:

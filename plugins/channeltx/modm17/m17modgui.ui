@@ -1175,23 +1175,13 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
-       <widget class="TVScreen" name="screenTV" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
+       <widget class="QFrame" name="frame">
         <property name="minimumSize">
          <size>
-          <width>100</width>
+          <width>0</width>
           <height>100</height>
          </size>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QFrame" name="frame">
         <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
@@ -1354,12 +1344,6 @@
    <class>ButtonSwitch</class>
    <extends>QToolButton</extends>
    <header>gui/buttonswitch.h</header>
-  </customwidget>
-  <customwidget>
-   <class>TVScreen</class>
-   <extends>QWidget</extends>
-   <header>gui/tvscreen.h</header>
-   <container>1</container>
   </customwidget>
   <customwidget>
    <class>LevelMeterVU</class>

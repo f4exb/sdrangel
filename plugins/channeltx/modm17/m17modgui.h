@@ -78,7 +78,6 @@ private:
     int m_basebandSampleRate;
     bool m_doApplySettings;
     bool m_fmAudioMode;
-    ScopeVisXY* m_scopeVisXY;
 
     M17Mod* m_m17Mod;
     MovingAverageUtil<double, double, 20> m_channelPowerDbAvg;

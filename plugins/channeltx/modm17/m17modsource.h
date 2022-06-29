@@ -39,6 +39,7 @@
 
 class ChannelAPI;
 class M17ModProcessor;
+class BasebandSampleSink;
 
 class M17ModSource : public QObject, public ChannelSampleSource
 {

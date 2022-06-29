@@ -18,6 +18,7 @@
 #include <QDebug>
 
 #include "dsp/datafifo.h"
+#include "dsp/basebandsamplesink.h"
 #include "util/messagequeue.h"
 #include "maincore.h"
 
