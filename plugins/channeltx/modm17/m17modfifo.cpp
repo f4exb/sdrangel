@@ -18,7 +18,8 @@
 #include "m17modfifo.h"
 
 M17ModFIFO::M17ModFIFO() :
-	m_fifo(nullptr)
+	m_fifo(nullptr),
+    m_fifoEmpty(true)
 {
 	m_size = 0;
 	m_writeIndex = 0;
@@ -103,8 +104,17 @@ uint32_t M17ModFIFO::readOne(int16_t* data)
 
     if (m_readIndex == m_writeIndex)
     {
+        if (!m_fifoEmpty) {
+            qDebug("M17ModFIFO::readOne: FIFO gets empty");
+        }
+
+        m_fifoEmpty = true;
         *data = 0;
         return 0;
+    }
+    else
+    {
+        m_fifoEmpty = false;
     }
 
     *data = m_fifo[m_readIndex++];
@@ -112,3 +122,11 @@ uint32_t M17ModFIFO::readOne(int16_t* data)
     return 1;
 }
 
+int M17ModFIFO::getFill() const
+{
+    if (m_readIndex > m_writeIndex) {
+        return m_size - (m_readIndex - m_writeIndex);
+    } else {
+        return m_writeIndex - m_readIndex;
+    }
+}

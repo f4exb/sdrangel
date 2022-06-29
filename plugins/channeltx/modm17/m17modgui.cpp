@@ -29,6 +29,7 @@
 #include "util/db.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
+#include "dsp/scopevisxy.h"
 #include "gui/crightclickenabler.h"
 #include "gui/audioselectdialog.h"
 #include "gui/basicchannelsettingsdialog.h"
@@ -435,8 +436,26 @@ M17ModGUI::M17ModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     setSizePolicy(rollupContents->sizePolicy());
     rollupContents->arrangeRollups();
 	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
-
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
+
+	ui->screenTV->setColor(true);
+	ui->screenTV->resizeTVScreen(100,100);
+
+	m_scopeVisXY = new ScopeVisXY(ui->screenTV);
+	m_scopeVisXY->setScale(2.0);
+	m_scopeVisXY->setPixelsPerFrame(4001);
+	m_scopeVisXY->setPlotRGB(qRgb(0, 220, 250));
+	m_scopeVisXY->setGridRGB(qRgb(255, 255, 128));
+
+	for (float x = -0.84; x < 1.0; x += 0.56)
+	{
+		for (float y = -0.84; y < 1.0; y += 0.56)
+		{
+			m_scopeVisXY->addGraticulePoint(std::complex<float>(x, y));
+		}
+	}
+
+	m_scopeVisXY->calculateGraticule(100,100);
 
 	m_m17Mod = (M17Mod*) channelTx;
 	m_m17Mod->setMessageQueueToGUI(getInputMessageQueue());
@@ -484,6 +503,8 @@ M17ModGUI::M17ModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
 M17ModGUI::~M17ModGUI()
 {
+    delete m_scopeVisXY;
+    ui->screenTV->setParent(nullptr); // Prefer memory leak to core dump... ~TVScreen() is buggy
 	delete ui;
 }
 
@@ -556,6 +577,10 @@ void M17ModGUI::displaySettings()
     ui->aprsData->setText(m_settings.m_aprsData);
     ui->aprsTo->lineEdit()->setText(m_settings.m_aprsTo);
     ui->aprsVia->lineEdit()->setText(m_settings.m_aprsVia);
+
+    m_scopeVisXY->setPixelsPerFrame(400*960); // 48000 / 50. Chunks of 50 ms.
+    m_scopeVisXY->setStroke(220);
+    m_scopeVisXY->setDecay(200);
 
     getRollupContents()->restoreState(m_rollupState);
     updateAbsoluteCenterFrequency();

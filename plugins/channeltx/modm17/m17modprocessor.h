@@ -22,9 +22,11 @@
 #include <QByteArray>
 
 #include "m17/M17Modulator.h"
+#include "dsp/dsptypes.h"
 #include "util/message.h"
 #include "util/messagequeue.h"
 #include "m17modfifo.h"
+#include "m17moddecimator.h"
 
 class M17ModProcessor : public QObject
 {
@@ -55,6 +57,91 @@ public:
         { }
     };
 
+    class MsgSendAudio : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const QString& getSourceCall() const { return m_sourceCall; }
+        const QString& getDestCall() const { return m_destCall; }
+        std::vector<int16_t>& getAudioBuffer() { return m_audioBuffer; }
+
+        static MsgSendAudio* create(const QString& sourceCall, const QString& destCall) {
+            return new MsgSendAudio(sourceCall, destCall);
+        }
+
+    private:
+        QString m_sourceCall;
+        QString m_destCall;
+        std::vector<int16_t> m_audioBuffer;
+
+        MsgSendAudio(const QString& sourceCall, const QString& destCall) :
+            Message(),
+            m_sourceCall(sourceCall),
+            m_destCall(destCall)
+        { }
+    };
+
+    class MsgSendAudioFrame : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const QString& getSourceCall() const { return m_sourceCall; }
+        const QString& getDestCall() const { return m_destCall; }
+        std::array<int16_t, 1920>& getAudioFrame() { return m_audioFrame; }
+
+        static MsgSendAudioFrame* create(const QString& sourceCall, const QString& destCall) {
+            return new MsgSendAudioFrame(sourceCall, destCall);
+        }
+
+    private:
+        QString m_sourceCall;
+        QString m_destCall;
+        std::array<int16_t, 1920> m_audioFrame;
+
+        MsgSendAudioFrame(const QString& sourceCall, const QString& destCall) :
+            Message(),
+            m_sourceCall(sourceCall),
+            m_destCall(destCall)
+        { }
+    };
+
+    class MsgStartAudio : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const QString& getSourceCall() const { return m_sourceCall; }
+        const QString& getDestCall() const { return m_destCall; }
+
+        static MsgStartAudio* create(const QString& sourceCall, const QString& destCall) {
+            return new MsgStartAudio(sourceCall, destCall);
+        }
+
+    private:
+        QString m_sourceCall;
+        QString m_destCall;
+
+        MsgStartAudio(const QString& sourceCall, const QString& destCall) :
+            Message(),
+            m_sourceCall(sourceCall),
+            m_destCall(destCall)
+        { }
+    };
+
+    class MsgStopAudio : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgStopAudio* create() {
+            return new MsgStopAudio();
+        }
+
+    private:
+
+        MsgStopAudio() :
+            Message()
+        { }
+    };
+
     M17ModProcessor();
     ~M17ModProcessor();
 
@@ -64,10 +151,24 @@ public:
 private:
     MessageQueue m_inputMessageQueue;
     M17ModFIFO m_basebandFifo; //!< Samples are 16 bit integer baseband 48 kS/s samples
+    int m_basebandFifoHigh;
+    int m_basebandFifoLow;
+    M17ModDecimator m_decimator; //!< 48k -> 8k decimator
     mobilinkd::M17Modulator m_m17Modulator;
+    std::array<mobilinkd::M17Modulator::lich_segment_t, 6> m_lich; //!< LICH bits
+    int m_lichSegmentIndex;
+    std::array<int16_t, 320*6> m_audioFrame;
+    int m_audioFrameIndex;
+    uint16_t m_audioFrameNumber;
+    struct CODEC2 *m_codec2;
 
     bool handleMessage(const Message& cmd);
     void processPacket(const QString& sourceCall, const QString& destCall, const QByteArray& packetBytes);
+    void audioStart(const QString& sourceCall, const QString& destCall);
+    void audioStop();
+    void processAudio(const std::vector<int16_t>& audioBuffer);
+    void processAudioFrame();
+    std::array<uint8_t, 16> encodeAudio(std::array<int16_t, 320*6>& audioFrame);
     void test(const QString& sourceCall, const QString& destCall);
     void send_preamble();
     void send_eot();

@@ -33,7 +33,7 @@ public:
     using baseband_t = std::array<int16_t, 1920>;   // One frame of baseband data @ 48ksps
     using bitstream_t = std::array<uint8_t, 48>;    // M17 frame of bits (in bytes).
     using lsf_t = std::array<uint8_t, 30>;          // Link setup frame bytes.
-    using lich_segment_t = std::array<uint8_t, 12>; // Golay-encoded LICH.
+    using lich_segment_t = std::array<uint8_t, 96>; // Golay-encoded LICH bits.
     using lich_t = std::array<lich_segment_t, 6>;   // All LICH segments.
     using audio_frame_t = std::array<int16_t, 320>;
     using codec_frame_t = std::array<uint8_t, 16>;
@@ -186,6 +186,103 @@ public:
         return punctured;
     }
 
+    static lich_segment_t make_lich_segment(std::array<uint8_t, 5> segment, uint8_t segment_number)
+    {
+        lich_segment_t result;
+        uint16_t tmp;
+        uint32_t encoded;
+
+        tmp = segment[0];
+        tmp <<= 4;
+        tmp |= ((segment[1] >> 4) & 0x0F);
+        // tmp = segment[0] << 4 | ((segment[1] >> 4) & 0x0F);
+        encoded = mobilinkd::Golay24::encode24(tmp);
+
+        for (size_t i = 0; i != 24; ++i)
+        {
+            result[i] = (encoded & (1 << 23)) != 0 ? 1 : 0;
+            encoded <<= 1;
+        }
+
+        tmp = segment[1] & 0x0F;
+        tmp <<= 8;
+        tmp |= segment[2];
+        // tmp = ((segment[1] & 0x0F) << 8) | segment[2];
+        encoded = mobilinkd::Golay24::encode24(tmp);
+
+        for (size_t i = 24; i != 48; ++i)
+        {
+            result[i] = (encoded & (1 << 23)) != 0 ? 1 : 0;
+            encoded <<= 1;
+        }
+
+        tmp = segment[3];
+        tmp <<= 4;
+        tmp |= ((segment[4] >> 4) & 0x0F);
+        // tmp = segment[3] << 4 | ((segment[4] >> 4) & 0x0F);
+        encoded = mobilinkd::Golay24::encode24(tmp);
+
+        for (size_t i = 48; i != 72; ++i)
+        {
+            result[i] = (encoded & (1 << 23)) != 0 ? 1 : 0;
+            encoded <<= 1;
+        }
+
+        tmp = segment[4] & 0x0F;
+        tmp <<= 8;
+        tmp |= (segment_number << 5);
+        // tmp = ((segment[4] & 0x0F) << 8) | (segment_number << 5);
+        encoded = mobilinkd::Golay24::encode24(tmp);
+
+        for (size_t i = 72; i != 96; ++i)
+        {
+            result[i] = (encoded & (1 << 23)) != 0 ? 1 : 0;
+            encoded <<= 1;
+        }
+
+        return result;
+    }
+
+    static std::array<int8_t, 272> make_stream_data_frame(uint16_t frame_number, const codec_frame_t& payload)
+    {
+        std::array<uint8_t, 18> data;   // FN, payload = 2 + 16;
+        data[0] = uint8_t((frame_number >> 8) & 0xFF);
+        data[1] = uint8_t(frame_number & 0xFF);
+        std::copy(payload.begin(), payload.end(), data.begin() + 2);
+        std::array<uint8_t, 296> encoded;
+        size_t index = 0;
+        uint32_t memory = 0;
+
+        for (auto b : data)
+        {
+            for (size_t i = 0; i != 8; ++i)
+            {
+                uint32_t x = (b & 0x80) >> 7;
+                b <<= 1;
+                memory = mobilinkd::update_memory<4>(memory, x);
+                encoded[index++] = mobilinkd::convolve_bit(031, memory);
+                encoded[index++] = mobilinkd::convolve_bit(027, memory);
+            }
+        }
+
+        // Flush the encoder.
+        for (size_t i = 0; i != 4; ++i)
+        {
+            memory = mobilinkd::update_memory<4>(memory, 0);
+            encoded[index++] = mobilinkd::convolve_bit(031, memory);
+            encoded[index++] = mobilinkd::convolve_bit(027, memory);
+        }
+
+        std::array<int8_t, 272> punctured;
+        auto size = mobilinkd::puncture(encoded, punctured, mobilinkd::P2);
+
+        if (size != 272) {
+            std::cerr << "mobilinkd::M17Modulator::make_stream_data_frame: incorrect size (not 272)" << size;
+        }
+
+        return punctured;
+    }
+
     std::array<int8_t, 368> make_packet_frame(
         uint8_t packet_number,
         int packet_size,
@@ -269,6 +366,15 @@ public:
         randomizer.randomize(punctured);
 
         return punctured;
+    }
+
+    static void interleave_and_randomize(std::array<int8_t, 368>& punctured)
+    {
+        M17Randomizer<368> randomizer;
+        PolynomialInterleaver<45, 92, 368> interleaver;
+
+        interleaver.interleave(punctured);
+        randomizer.randomize(punctured);
     }
 
     M17Modulator(const std::string& source, const std::string& dest = "") :

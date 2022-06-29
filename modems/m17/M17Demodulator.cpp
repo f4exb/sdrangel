@@ -403,7 +403,7 @@ void M17Demodulator::do_frame(float filtered_sample)
 
 	if (len != 0)
 	{
-        std::cerr << "M17Demodulator::do_frame: sync_word_type:" << (int) sync_word_type << " len:" << len << std::endl;
+        // std::cerr << "M17Demodulator::do_frame: sync_word_type:" << (int) sync_word_type << " len:" << len << std::endl;
 		need_clock_update_ = true;
 		M17FrameDecoder::input_buffer_t buffer;
 		std::copy(tmp, tmp + len, buffer.begin());

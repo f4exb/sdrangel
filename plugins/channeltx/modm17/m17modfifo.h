@@ -30,8 +30,10 @@ public:
 	~M17ModFIFO();
 
 	void setSize(uint32_t numSamples);
+    uint32_t getSize() const { return m_size; }
 	uint32_t write(const int16_t* data, uint32_t numSamples);
     uint32_t readOne(int16_t* data);
+    int getFill() const;
 
 private:
 	QMutex m_mutex;
@@ -39,6 +41,7 @@ private:
     uint32_t m_size;
     int m_writeIndex;
     int m_readIndex;
+    bool m_fifoEmpty;
 
     void create(uint32_t numSamples);
 };

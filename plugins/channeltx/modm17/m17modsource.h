@@ -21,6 +21,7 @@
 #include <QObject>
 #include <QMutex>
 #include <QVector>
+#include <QThread>
 
 #include <iostream>
 #include <fstream>
@@ -105,6 +106,8 @@ private:
     AudioVector m_audioReadBuffer;
     unsigned int m_audioReadBufferFill;
     AudioFifo m_audioFifo;
+    bool m_m17PullAudio;
+    int m_m17PullCount;
 
     int m_feedbackAudioSampleRate;
     AudioVector m_feedbackAudioBuffer;
@@ -119,11 +122,10 @@ private:
 
     std::ifstream *m_ifstream;
     M17ModProcessor *m_processor;
+    QThread m_processorThread;
     HighPassFilterRC m_preemphasisFilter;
 
     QMutex m_mutex;
-    int16_t m_basebandMin;
-    int16_t m_basebandMax;
 
     static const int m_levelNbSamples;
     static const float m_preemphasis;

@@ -47,6 +47,8 @@ M17ModSource::M17ModSource() :
 	m_audioBufferFill = 0;
 	m_audioReadBuffer.resize(24000);
 	m_audioReadBufferFill = 0;
+    m_m17PullAudio = false;
+    m_m17PullCount = 0;
 
 	m_feedbackAudioBuffer.resize(1<<14);
 	m_feedbackAudioBufferFill = 0;
@@ -55,10 +57,10 @@ M17ModSource::M17ModSource() :
     m_demodBufferFill = 0;
 
 	m_magsq = 0.0;
-    m_basebandMax = 0;
-    m_basebandMin = 0;
 
     m_processor = new M17ModProcessor();
+    m_processor->moveToThread(&m_processorThread);
+    m_processorThread.start();
 
     applySettings(m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
@@ -66,6 +68,8 @@ M17ModSource::M17ModSource() :
 
 M17ModSource::~M17ModSource()
 {
+    m_processorThread.exit();
+    m_processorThread.wait();
     delete m_processor;
 }
 
@@ -123,8 +127,9 @@ void M17ModSource::pullOne(Sample& sample)
 
 void M17ModSource::prefetch(unsigned int nbSamples)
 {
-    unsigned int nbSamplesAudio = nbSamples * ((Real) m_audioSampleRate / (Real) m_channelSampleRate);
-    pullAudio(nbSamplesAudio);
+    (void) nbSamples;
+    // unsigned int nbSamplesAudio = nbSamples * ((Real) m_audioSampleRate / (Real) m_channelSampleRate);
+    // pullAudio(nbSamplesAudio);
 }
 
 void M17ModSource::pullAudio(unsigned int nbSamplesAudio)
@@ -136,6 +141,41 @@ void M17ModSource::pullAudio(unsigned int nbSamplesAudio)
     }
 
     std::copy(&m_audioReadBuffer[0], &m_audioReadBuffer[nbSamplesAudio], &m_audioBuffer[0]);
+
+    if (m_settings.m_m17Mode == M17ModSettings::M17ModeM17Audio)
+    {
+        if (!m_m17PullAudio)
+        {
+            M17ModProcessor::MsgStartAudio *msg = M17ModProcessor::MsgStartAudio::create(m_settings.m_sourceCall, m_settings.m_destCall);
+            m_processor->getInputMessageQueue()->push(msg);
+            m_m17PullAudio = true;
+        }
+
+        M17ModProcessor::MsgSendAudio *msg = M17ModProcessor::MsgSendAudio::create(m_settings.m_sourceCall, m_settings.m_destCall);
+        std::vector<int16_t>& audioBuffer = msg->getAudioBuffer();
+        audioBuffer.resize(nbSamplesAudio);
+
+        std::transform(
+            &m_audioReadBuffer[0],
+            &m_audioReadBuffer[nbSamplesAudio],
+            audioBuffer.begin(),
+            [](const AudioSample& s) -> int16_t {
+                return (s.l + s.r) / 2;
+            }
+        );
+
+        m_processor->getInputMessageQueue()->push(msg);
+    }
+    else
+    {
+        if (m_m17PullAudio)
+        {
+            M17ModProcessor::MsgStopAudio *msg = M17ModProcessor::MsgStopAudio::create();
+            m_processor->getInputMessageQueue()->push(msg);
+            m_m17PullAudio = false;
+        }
+    }
+
     m_audioBufferFill = 0;
 
     if (m_audioReadBufferFill > nbSamplesAudio) // copy back remaining samples at the start of the read buffer
@@ -152,10 +192,8 @@ void M17ModSource::modulateSample()
 
     if ((m_settings.m_m17Mode == M17ModSettings::M17ModeFMTone) || (m_settings.m_m17Mode == M17ModSettings::M17ModeFMAudio)) {
         pullAF(t, carrier);
-    } else if (m_settings.m_m17Mode != M17ModSettings::M17ModeNone) {
-        pullM17(t, carrier);
     } else {
-        t = 0;
+        pullM17(t, carrier);
     }
 
     if (m_settings.m_feedbackAudioEnable) {
@@ -272,29 +310,70 @@ void M17ModSource::pullAF(Real& sample, bool& carrier)
 
 void M17ModSource::pullM17(Real& sample, bool& carrier)
 {
-    int16_t basbandSample;
-    carrier = m_processor->getBasebandFifo()->readOne(&basbandSample) != 0;
-
-    if (carrier)
+    // Prefetch file data if buffer is low
+    if (m_settings.m_m17Mode == M17ModSettings::M17ModeM17Audio)
     {
-        if (basbandSample > m_basebandMax)
+        if (!m_m17PullAudio)
         {
-            qDebug("M17ModSource::pullM17: max: %d", basbandSample);
-            m_basebandMax = basbandSample;
+            M17ModProcessor::MsgStartAudio *msg = M17ModProcessor::MsgStartAudio::create(m_settings.m_sourceCall, m_settings.m_destCall);
+            m_processor->getInputMessageQueue()->push(msg);
+            m_m17PullAudio = true;
         }
 
-        if (basbandSample < m_basebandMin)
+        if ((m_settings.m_audioType == M17ModSettings::AudioFile)
+         &&  m_ifstream
+         && (m_ifstream->is_open())
+         && (m_processor->getBasebandFifo()->getFill() < 1920) && (m_m17PullCount > 192))
         {
-            qDebug("M17ModSource::pullM17: min: %d", basbandSample);
-            m_basebandMin = basbandSample;
-        }
+            if (m_ifstream->eof() && m_settings.m_playLoop)
+            {
+                m_ifstream->clear();
+                m_ifstream->seekg(0, std::ios::beg);
+            }
 
-        sample = basbandSample / 32768.0f;
+            M17ModProcessor::MsgSendAudioFrame *msg = M17ModProcessor::MsgSendAudioFrame::create(m_settings.m_sourceCall, m_settings.m_destCall);
+            std::array<int16_t, 1920>& audioFrame = msg->getAudioFrame();
+            std::vector<float> fileBuffer;
+            fileBuffer.resize(1920);
+            std::fill(fileBuffer.begin(), fileBuffer.end(), 0.0f);
+
+            if (!m_ifstream->eof()) {
+                m_ifstream->read(reinterpret_cast<char*>(fileBuffer.data()), sizeof(float)*1920);
+            }
+
+            std::transform(
+                fileBuffer.begin(),
+                fileBuffer.end(),
+                audioFrame.begin(),
+                [this](const float& fs) -> int16_t {
+                    return fs * 32768.0f * m_settings.m_volumeFactor;
+                }
+            );
+
+            m_processor->getInputMessageQueue()->push(msg);
+            m_m17PullCount = 0;
+        }
     }
     else
     {
+        if (m_m17PullAudio)
+        {
+            M17ModProcessor::MsgStopAudio *msg = M17ModProcessor::MsgStopAudio::create();
+            m_processor->getInputMessageQueue()->push(msg);
+            m_m17PullAudio = false;
+        }
+    }
+
+    int16_t basbandSample;
+    carrier = m_processor->getBasebandFifo()->readOne(&basbandSample) != 0;
+
+    if (carrier) {
+        sample = basbandSample / 32768.0f;
+    } else {
         sample = 0.0f;
     }
+
+    m_m17PullCount++;
 }
 
 void M17ModSource::pushFeedback(Real sample)
