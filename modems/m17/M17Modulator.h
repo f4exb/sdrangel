@@ -111,7 +111,7 @@ public:
         return baseband;
     }
 
-    static std::array<int8_t, 368> make_lsf(lsf_t& lsf, const std::string& src, const std::string& dest, int8_t can = 10, bool streamElsePacket = false)
+    static std::array<int8_t, 368> make_lsf(lsf_t& lsf, const std::string& src, const std::string& dest, uint8_t can = 10, bool streamElsePacket = false)
     {
         lsf.fill(0);
 
@@ -380,6 +380,7 @@ public:
     M17Modulator(const std::string& source, const std::string& dest = "") :
         source_(encode_callsign(source)),
         dest_(encode_callsign(dest)),
+        can_(10),
         rrc(makeFirFilter(rrc_taps))
     { }
 
@@ -398,9 +399,17 @@ public:
         dest_ = encode_callsign(callsign);
     }
 
+    /**
+     * Set the Channel Access Number (0..15)
+     */
+    void can(uint8_t can) {
+        can_ = can & 0xF;
+    }
+
 private:
     LinkSetupFrame::encoded_call_t source_;
     LinkSetupFrame::encoded_call_t dest_;
+    uint8_t can_;
     BaseFirFilter<150> rrc;
     static const std::array<float, 150> rrc_taps;
     CRC16<0x5935, 0xFFFF> crc_;

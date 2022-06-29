@@ -38,46 +38,25 @@ public:
     public:
         const QString& getSourceCall() const { return m_sourceCall; }
         const QString& getDestCall() const { return m_destCall; }
+        uint8_t getCAN() const { return m_can; }
         const QString& getSMSText() const { return m_smsText; }
 
-        static MsgSendSMS* create(const QString& sourceCall, const QString& destCall, const QString& smsText) {
-            return new MsgSendSMS(sourceCall, destCall, smsText);
+        static MsgSendSMS* create(const QString& sourceCall, const QString& destCall, uint8_t can, const QString& smsText) {
+            return new MsgSendSMS(sourceCall, destCall, can, smsText);
         }
 
     private:
         QString m_sourceCall;
         QString m_destCall;
+        uint8_t m_can;
         QString m_smsText;
 
-        MsgSendSMS(const QString& sourceCall, const QString& destCall, const QString& smsText) :
+        MsgSendSMS(const QString& sourceCall, const QString& destCall, uint8_t can, const QString& smsText) :
             Message(),
             m_sourceCall(sourceCall),
             m_destCall(destCall),
+            m_can(can),
             m_smsText(smsText)
-        { }
-    };
-
-    class MsgSendAudio : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        const QString& getSourceCall() const { return m_sourceCall; }
-        const QString& getDestCall() const { return m_destCall; }
-        std::vector<int16_t>& getAudioBuffer() { return m_audioBuffer; }
-
-        static MsgSendAudio* create(const QString& sourceCall, const QString& destCall) {
-            return new MsgSendAudio(sourceCall, destCall);
-        }
-
-    private:
-        QString m_sourceCall;
-        QString m_destCall;
-        std::vector<int16_t> m_audioBuffer;
-
-        MsgSendAudio(const QString& sourceCall, const QString& destCall) :
-            Message(),
-            m_sourceCall(sourceCall),
-            m_destCall(destCall)
         { }
     };
 
@@ -111,19 +90,22 @@ public:
     public:
         const QString& getSourceCall() const { return m_sourceCall; }
         const QString& getDestCall() const { return m_destCall; }
+        uint8_t getCAN() const { return m_can; }
 
-        static MsgStartAudio* create(const QString& sourceCall, const QString& destCall) {
-            return new MsgStartAudio(sourceCall, destCall);
+        static MsgStartAudio* create(const QString& sourceCall, const QString& destCall, uint8_t can) {
+            return new MsgStartAudio(sourceCall, destCall, can);
         }
 
     private:
         QString m_sourceCall;
         QString m_destCall;
+        uint8_t m_can;
 
-        MsgStartAudio(const QString& sourceCall, const QString& destCall) :
+        MsgStartAudio(const QString& sourceCall, const QString& destCall, uint8_t can) :
             Message(),
             m_sourceCall(sourceCall),
-            m_destCall(destCall)
+            m_destCall(destCall),
+            m_can(can)
         { }
     };
 
@@ -163,10 +145,9 @@ private:
     struct CODEC2 *m_codec2;
 
     bool handleMessage(const Message& cmd);
-    void processPacket(const QString& sourceCall, const QString& destCall, const QByteArray& packetBytes);
-    void audioStart(const QString& sourceCall, const QString& destCall);
+    void processPacket(const QString& sourceCall, const QString& destCall, uint8_t can, const QByteArray& packetBytes);
+    void audioStart(const QString& sourceCall, const QString& destCall, uint8_t can);
     void audioStop();
-    void processAudio(const std::vector<int16_t>& audioBuffer);
     void processAudioFrame();
     std::array<uint8_t, 16> encodeAudio(std::array<int16_t, 320*6>& audioFrame);
     void test(const QString& sourceCall, const QString& destCall);

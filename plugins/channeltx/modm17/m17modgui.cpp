@@ -767,6 +767,7 @@ void M17ModGUI::makeUIConnections()
     QObject::connect(ui->smsText, &CustomTextEdit::editingFinished, this, &M17ModGUI::on_smsText_editingFinished);
     QObject::connect(ui->source, &QLineEdit::editingFinished, this, &M17ModGUI::on_source_editingFinished);
     QObject::connect(ui->destination, &QLineEdit::editingFinished, this, &M17ModGUI::on_destination_editingFinished);
+    QObject::connect(ui->can, QOverload<int>::of(&QSpinBox::valueChanged), this, &M17ModGUI::on_can_valueChanged);
 }
 
 void M17ModGUI::updateAbsoluteCenterFrequency()

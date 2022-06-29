@@ -22,7 +22,6 @@
 #include "m17modprocessor.h"
 
 MESSAGE_CLASS_DEFINITION(M17ModProcessor::MsgSendSMS, Message)
-MESSAGE_CLASS_DEFINITION(M17ModProcessor::MsgSendAudio, Message)
 MESSAGE_CLASS_DEFINITION(M17ModProcessor::MsgSendAudioFrame, Message)
 MESSAGE_CLASS_DEFINITION(M17ModProcessor::MsgStartAudio, Message)
 MESSAGE_CLASS_DEFINITION(M17ModProcessor::MsgStopAudio, Message)
@@ -54,15 +53,8 @@ bool M17ModProcessor::handleMessage(const Message& cmd)
         QByteArray packetBytes = notif.getSMSText().toUtf8();
         packetBytes.prepend(0x05); // SMS standard type
         packetBytes.truncate(798); // Maximum packet size is 798 payload + 2 bytes CRC = 800 bytes (32*25)
-        processPacket(notif.getSourceCall(), notif.getDestCall(), packetBytes);
+        processPacket(notif.getSourceCall(), notif.getDestCall(), notif.getCAN(), packetBytes);
         // test(notif.getSourceCall(), notif.getDestCall());
-        return true;
-    }
-    else if (MsgSendAudio::match(cmd))
-    {
-        MsgSendAudio& notif = (MsgSendAudio&) cmd;
-        // qDebug("M17ModProcessor::handleMessage: MsgSendAudio: %lu samples", notif.getAudioBuffer().size());
-        processAudio(notif.getAudioBuffer());
         return true;
     }
     else if (MsgSendAudioFrame::match(cmd))
@@ -77,7 +69,7 @@ bool M17ModProcessor::handleMessage(const Message& cmd)
         MsgStartAudio& notif = (MsgStartAudio&) cmd;
         qDebug("M17ModProcessor::handleMessage: MsgStartAudio: %s to %s",
             qPrintable(notif.getSourceCall()), qPrintable(notif.getDestCall()));
-        audioStart(notif.getSourceCall(), notif.getDestCall());
+        audioStart(notif.getSourceCall(), notif.getDestCall(), notif.getCAN());
         return true;
     }
     else if (MsgStopAudio::match(cmd))
@@ -113,7 +105,7 @@ void M17ModProcessor::test(const QString& sourceCall, const QString& destCall)
     }
 }
 
-void M17ModProcessor::processPacket(const QString& sourceCall, const QString& destCall, const QByteArray& packetBytes)
+void M17ModProcessor::processPacket(const QString& sourceCall, const QString& destCall, uint8_t can, const QByteArray& packetBytes)
 {
     qDebug("M17ModProcessor::processPacket: %s to %s: %s", qPrintable(sourceCall), qPrintable(destCall), qPrintable(packetBytes));
     m_m17Modulator.source(sourceCall.toStdString());
@@ -123,7 +115,7 @@ void M17ModProcessor::processPacket(const QString& sourceCall, const QString& de
 
     // LSF
     std::array<uint8_t, 30> lsf;
-    std::array<int8_t, 368> lsf_frame = mobilinkd::M17Modulator::make_lsf(lsf, sourceCall.toStdString(), destCall.toStdString());
+    std::array<int8_t, 368> lsf_frame = mobilinkd::M17Modulator::make_lsf(lsf, sourceCall.toStdString(), destCall.toStdString(), can);
     output_baseband(mobilinkd::M17Modulator::LSF_SYNC_WORD, lsf_frame);
 
     // Packets
@@ -150,18 +142,19 @@ void M17ModProcessor::processPacket(const QString& sourceCall, const QString& de
     send_eot(); // EOT
 }
 
-void M17ModProcessor::audioStart(const QString& sourceCall, const QString& destCall)
+void M17ModProcessor::audioStart(const QString& sourceCall, const QString& destCall, uint8_t can)
 {
     qDebug("M17ModProcessor::audioStart");
     m_m17Modulator.source(sourceCall.toStdString());
     m_m17Modulator.dest(destCall.toStdString());
+    m_m17Modulator.can(can);
     m_audioFrameNumber = 0;
 
     send_preamble(); // preamble
 
     // LSF
     std::array<uint8_t, 30> lsf;
-    std::array<int8_t, 368> lsf_frame = mobilinkd::M17Modulator::make_lsf(lsf, sourceCall.toStdString(), destCall.toStdString());
+    std::array<int8_t, 368> lsf_frame = mobilinkd::M17Modulator::make_lsf(lsf, sourceCall.toStdString(), destCall.toStdString(), can, true);
     output_baseband(mobilinkd::M17Modulator::LSF_SYNC_WORD, lsf_frame);
 
     // Prepare LICH
@@ -197,46 +190,6 @@ void M17ModProcessor::send_preamble()
     m_basebandFifo.write(preamble_baseband.data(), 1920);
 }
 
-void M17ModProcessor::processAudio(const std::vector<int16_t>& audioBuffer)
-{
-    int audioBufferRemainder = audioBuffer.size();
-    std::vector<int16_t>::const_iterator audioBufferIt = audioBuffer.begin();
-    int audioFrameRemainder = m_audioFrame.size() - m_audioFrameIndex;
-
-    if (audioBufferRemainder < audioFrameRemainder) {
-        qDebug("M17ModProcessor::processAudio: too few samples: %d/%d", audioBufferRemainder, audioFrameRemainder);
-    }
-
-    while (audioBufferRemainder >= (int) m_audioFrame.size())
-    {
-        m_audioFrame.fill(0);
-
-        std::copy(
-            audioBufferIt,
-            audioBufferIt + audioFrameRemainder,
-            m_audioFrame.begin() + m_audioFrameIndex);
-
-        if (m_basebandFifo.getFill() < m_basebandFifoHigh) {
-            processAudioFrame();
-        }
-
-        if (m_basebandFifo.getFill() < m_basebandFifoLow)
-        {
-            qDebug("M17ModProcessor::processAudio: repeat frame: %d", m_basebandFifo.getFill());
-            // m_audioFrame.fill(0);
-            processAudioFrame();
-        }
-
-        audioBufferRemainder -= audioFrameRemainder;
-        audioBufferIt += audioFrameRemainder;
-        m_audioFrameIndex = 0;
-        audioFrameRemainder = m_audioFrame.size();
-    }
-
-    std::copy(audioBufferIt, audioBuffer.end(), m_audioFrame.begin());
-    m_audioFrameIndex = audioBufferRemainder;
-}
-
 void M17ModProcessor::processAudioFrame()
 {
     std::array<uint8_t, 16> audioPayload = encodeAudio(m_audioFrame);
@@ -265,7 +218,6 @@ std::array<uint8_t, 16> M17ModProcessor::encodeAudio(std::array<int16_t, 320*6>&
     std::array<int16_t, 320> audioFrame8k;
     m_decimator.decimate(audioFrame.data(), audioFrame8k.data(), 320);
     std::array<uint8_t, 16> result;
-    // result.fill(0); // test
     codec2_encode(m_codec2, &result[0], const_cast<int16_t*>(&audioFrame8k[0]));
     codec2_encode(m_codec2, &result[8], const_cast<int16_t*>(&audioFrame8k[160]));
     return result;

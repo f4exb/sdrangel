@@ -231,7 +231,7 @@ void M17ModSource::pullAF(Real& sample, bool& carrier)
     {
         if (m_settings.m_audioType == M17ModSettings::AudioFile)
         {
-            // sox f4exb_call.wav --encoding float --endian little f4exb_call.raw
+            // sox f4exb_call.wav --encoding float --endian little --rate 48k f4exb_call.raw
             // ffplay -f f32le -ar 48k -ac 1 f4exb_call.raw
             if (m_ifstream && m_ifstream->is_open())
             {
@@ -287,7 +287,10 @@ void M17ModSource::pullM17(Real& sample, bool& carrier)
     {
         if (!m_m17PullAudio)
         {
-            M17ModProcessor::MsgStartAudio *msg = M17ModProcessor::MsgStartAudio::create(m_settings.m_sourceCall, m_settings.m_destCall);
+            M17ModProcessor::MsgStartAudio *msg = M17ModProcessor::MsgStartAudio::create(
+                m_settings.m_sourceCall,
+                m_settings.m_destCall,
+                m_settings.m_can);
             m_processor->getInputMessageQueue()->push(msg);
             m_m17PullAudio = true;
         }
@@ -569,6 +572,7 @@ void M17ModSource::sendPacket()
         M17ModProcessor::MsgSendSMS *msg = M17ModProcessor::MsgSendSMS::create(
             m_settings.m_sourceCall,
             m_settings.m_destCall,
+            m_settings.m_can,
             m_settings.m_smsText
         );
         m_processor->getInputMessageQueue()->push(msg);
