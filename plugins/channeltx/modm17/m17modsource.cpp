@@ -47,6 +47,7 @@ M17ModSource::M17ModSource() :
 	m_audioBufferFill = 0;
 	m_audioReadBuffer.resize(24000);
 	m_audioReadBufferFill = 0;
+    m_audioReadBufferIndex = 0;
     m_m17PullAudio = false;
     m_m17PullCount = 0;
 
@@ -127,9 +128,11 @@ void M17ModSource::pullOne(Sample& sample)
 
 void M17ModSource::prefetch(unsigned int nbSamples)
 {
-    (void) nbSamples;
-    // unsigned int nbSamplesAudio = nbSamples * ((Real) m_audioSampleRate / (Real) m_channelSampleRate);
-    // pullAudio(nbSamplesAudio);
+    if ((m_settings.m_m17Mode == M17ModSettings::M17ModeFMAudio))
+    {
+        unsigned int nbSamplesAudio = nbSamples * ((Real) m_audioSampleRate / (Real) m_channelSampleRate);
+        pullAudio(nbSamplesAudio);
+    }
 }
 
 void M17ModSource::pullAudio(unsigned int nbSamplesAudio)
@@ -141,41 +144,6 @@ void M17ModSource::pullAudio(unsigned int nbSamplesAudio)
     }
 
     std::copy(&m_audioReadBuffer[0], &m_audioReadBuffer[nbSamplesAudio], &m_audioBuffer[0]);
-
-    if (m_settings.m_m17Mode == M17ModSettings::M17ModeM17Audio)
-    {
-        if (!m_m17PullAudio)
-        {
-            M17ModProcessor::MsgStartAudio *msg = M17ModProcessor::MsgStartAudio::create(m_settings.m_sourceCall, m_settings.m_destCall);
-            m_processor->getInputMessageQueue()->push(msg);
-            m_m17PullAudio = true;
-        }
-
-        M17ModProcessor::MsgSendAudio *msg = M17ModProcessor::MsgSendAudio::create(m_settings.m_sourceCall, m_settings.m_destCall);
-        std::vector<int16_t>& audioBuffer = msg->getAudioBuffer();
-        audioBuffer.resize(nbSamplesAudio);
-
-        std::transform(
-            &m_audioReadBuffer[0],
-            &m_audioReadBuffer[nbSamplesAudio],
-            audioBuffer.begin(),
-            [](const AudioSample& s) -> int16_t {
-                return (s.l + s.r) / 2;
-            }
-        );
-
-        m_processor->getInputMessageQueue()->push(msg);
-    }
-    else
-    {
-        if (m_m17PullAudio)
-        {
-            M17ModProcessor::MsgStopAudio *msg = M17ModProcessor::MsgStopAudio::create();
-            m_processor->getInputMessageQueue()->push(msg);
-            m_m17PullAudio = false;
-        }
-    }
-
     m_audioBufferFill = 0;
 
     if (m_audioReadBufferFill > nbSamplesAudio) // copy back remaining samples at the start of the read buffer
@@ -190,14 +158,17 @@ void M17ModSource::modulateSample()
 	Real t1, t;
     bool carrier;
 
-    if ((m_settings.m_m17Mode == M17ModSettings::M17ModeFMTone) || (m_settings.m_m17Mode == M17ModSettings::M17ModeFMAudio)) {
+    if ((m_settings.m_m17Mode == M17ModSettings::M17ModeFMTone) || (m_settings.m_m17Mode == M17ModSettings::M17ModeFMAudio))
+    {
         pullAF(t, carrier);
-    } else {
-        pullM17(t, carrier);
-    }
 
-    if (m_settings.m_feedbackAudioEnable) {
-        pushFeedback(t * m_settings.m_feedbackVolumeFactor * 16384.0f);
+        if (m_settings.m_feedbackAudioEnable) {
+            pushFeedback(t * m_settings.m_feedbackVolumeFactor * 16384.0f);
+        }
+    }
+    else
+    {
+        pullM17(t, carrier);
     }
 
     if (carrier)
@@ -310,7 +281,7 @@ void M17ModSource::pullAF(Real& sample, bool& carrier)
 
 void M17ModSource::pullM17(Real& sample, bool& carrier)
 {
-    // Prefetch file data if buffer is low
+    // Prefetch audio data if buffer is low
     if (m_settings.m_m17Mode == M17ModSettings::M17ModeM17Audio)
     {
         if (!m_m17PullAudio)
@@ -320,35 +291,64 @@ void M17ModSource::pullM17(Real& sample, bool& carrier)
             m_m17PullAudio = true;
         }
 
-        if ((m_settings.m_audioType == M17ModSettings::AudioFile)
-         &&  m_ifstream
-         && (m_ifstream->is_open())
-         && (m_processor->getBasebandFifo()->getFill() < 1920) && (m_m17PullCount > 192))
+        if ((m_processor->getBasebandFifo()->getFill() < 1920) && (m_m17PullCount > 192))
         {
-            if (m_ifstream->eof() && m_settings.m_playLoop)
-            {
-                m_ifstream->clear();
-                m_ifstream->seekg(0, std::ios::beg);
-            }
-
             M17ModProcessor::MsgSendAudioFrame *msg = M17ModProcessor::MsgSendAudioFrame::create(m_settings.m_sourceCall, m_settings.m_destCall);
             std::array<int16_t, 1920>& audioFrame = msg->getAudioFrame();
-            std::vector<float> fileBuffer;
-            fileBuffer.resize(1920);
-            std::fill(fileBuffer.begin(), fileBuffer.end(), 0.0f);
 
-            if (!m_ifstream->eof()) {
-                m_ifstream->read(reinterpret_cast<char*>(fileBuffer.data()), sizeof(float)*1920);
-            }
+            if (m_settings.m_audioType == M17ModSettings::AudioFile)
+            {
+                if (m_ifstream && m_ifstream->is_open())
+                {
+                    std::vector<float> fileBuffer;
+                    fileBuffer.resize(1920);
+                    std::fill(fileBuffer.begin(), fileBuffer.end(), 0.0f);
 
-            std::transform(
-                fileBuffer.begin(),
-                fileBuffer.end(),
-                audioFrame.begin(),
-                [this](const float& fs) -> int16_t {
-                    return fs * 32768.0f * m_settings.m_volumeFactor;
+                    if (m_ifstream->eof() && m_settings.m_playLoop)
+                    {
+                        m_ifstream->clear();
+                        m_ifstream->seekg(0, std::ios::beg);
+                    }
+
+                    if (!m_ifstream->eof()) {
+                        m_ifstream->read(reinterpret_cast<char*>(fileBuffer.data()), sizeof(float)*1920);
+                    }
+
+                    std::transform(
+                        fileBuffer.begin(),
+                        fileBuffer.end(),
+                        audioFrame.begin(),
+                        [this](const float& fs) -> int16_t {
+                            return fs * 32768.0f * m_settings.m_volumeFactor;
+                        }
+                    );
+
+                    if (m_settings.m_feedbackAudioEnable) {
+                        pushFeedback(audioFrame);
+                    }
                 }
-            );
+            }
+            else if (m_settings.m_audioType == M17ModSettings::AudioInput)
+            {
+                std::transform(
+                    m_audioReadBuffer.begin(),
+                    m_audioReadBuffer.begin() + 1920,
+                    audioFrame.begin(),
+                    [this](const AudioSample& s) -> int16_t {
+                        return (s.l + s.r) * m_settings.m_volumeFactor;
+                    }
+                );
+
+                if (m_settings.m_feedbackAudioEnable) {
+                    pushFeedback(audioFrame);
+                }
+
+                if (m_audioReadBufferFill > 1920) // copy back remaining samples at the start of the read buffer
+                {
+                    std::copy(&m_audioReadBuffer[1920], &m_audioReadBuffer[m_audioReadBufferFill], &m_audioReadBuffer[0]);
+                    m_audioReadBufferFill = m_audioReadBufferFill - 1920; // adjust current read buffer fill pointer
+                }
+            }
 
             m_processor->getInputMessageQueue()->push(msg);
             m_m17PullCount = 0;
@@ -364,6 +364,7 @@ void M17ModSource::pullM17(Real& sample, bool& carrier)
         }
     }
 
+    // get sample from processor FIFO
     int16_t basbandSample;
     carrier = m_processor->getBasebandFifo()->readOne(&basbandSample) != 0;
 
@@ -376,6 +377,13 @@ void M17ModSource::pullM17(Real& sample, bool& carrier)
     m_m17PullCount++;
 }
 
+void M17ModSource::pushFeedback(std::array<int16_t, 1920>& audioFrame)
+{
+    for (const auto& sample : audioFrame) {
+        pushFeedback(sample * m_settings.m_feedbackVolumeFactor);
+    }
+}
+
 void M17ModSource::pushFeedback(Real sample)
 {
     Complex c(sample, sample);
@@ -385,7 +393,7 @@ void M17ModSource::pushFeedback(Real sample)
     {
         while (!m_feedbackInterpolator.interpolate(&m_feedbackInterpolatorDistanceRemain, c, &ci))
         {
-            processOneSample(ci);
+            processOneFeedbackSample(ci);
             m_feedbackInterpolatorDistanceRemain += m_feedbackInterpolatorDistance;
         }
     }
@@ -393,13 +401,13 @@ void M17ModSource::pushFeedback(Real sample)
     {
         if (m_feedbackInterpolator.decimate(&m_feedbackInterpolatorDistanceRemain, c, &ci))
         {
-            processOneSample(ci);
+            processOneFeedbackSample(ci);
             m_feedbackInterpolatorDistanceRemain += m_feedbackInterpolatorDistance;
         }
     }
 }
 
-void M17ModSource::processOneSample(Complex& ci)
+void M17ModSource::processOneFeedbackSample(Complex& ci)
 {
     m_feedbackAudioBuffer[m_feedbackAudioBufferFill].l = ci.real();
     m_feedbackAudioBuffer[m_feedbackAudioBufferFill].r = ci.imag();
@@ -411,7 +419,7 @@ void M17ModSource::processOneSample(Complex& ci)
 
         if (res != m_feedbackAudioBufferFill)
         {
-            qDebug("M17ModSource::pushFeedback: %u/%u audio samples written m_feedbackInterpolatorDistance: %f",
+            qDebug("M17ModSource::processOneFeedbackSample: %u/%u audio samples written m_feedbackInterpolatorDistance: %f",
                 res, m_feedbackAudioBufferFill, m_feedbackInterpolatorDistance);
             m_feedbackAudioFifo.clear();
         }

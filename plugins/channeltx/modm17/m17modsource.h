@@ -105,6 +105,7 @@ private:
     unsigned int m_audioBufferFill;
     AudioVector m_audioReadBuffer;
     unsigned int m_audioReadBufferFill;
+    unsigned int m_audioReadBufferIndex;
     AudioFifo m_audioFifo;
     bool m_m17PullAudio;
     int m_m17PullCount;
@@ -130,11 +131,12 @@ private:
     static const int m_levelNbSamples;
     static const float m_preemphasis;
 
-    void processOneSample(Complex& ci);
+    void processOneFeedbackSample(Complex& ci);
     void pullAF(Real& sample, bool& carrier);
     void pullM17(Real& sample, bool& carrier);
     void pullAudio(unsigned int nbSamples);
     void pushFeedback(Real sample);
+    void pushFeedback(std::array<int16_t, 1920>& audioFrame);
     void calculateLevel(Real& sample);
     void modulateSample();
 
