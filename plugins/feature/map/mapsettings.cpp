@@ -30,7 +30,7 @@ const QStringList MapSettings::m_pipeTypes = {
     QStringLiteral("AIS"),
     QStringLiteral("APRS"),
     QStringLiteral("APTDemod"),
-    QStringLiteral("RadioSonde"),
+    QStringLiteral("Radiosonde"),
     QStringLiteral("StarTracker"),
     QStringLiteral("SatelliteTracker")
 };
@@ -66,7 +66,7 @@ MapSettings::MapSettings() :
     m_itemSettings.insert("StarTracker", new MapItemSettings("StarTracker", QColor(230, 230, 230), true, 3));
     m_itemSettings.insert("SatelliteTracker", new MapItemSettings("SatelliteTracker", QColor(0, 0, 255), false, 0, modelMinPixelSize));
     m_itemSettings.insert("Beacons", new MapItemSettings("Beacons", QColor(255, 0, 0), true, 8));
-    m_itemSettings.insert("RadioSonde", new MapItemSettings("RadioSonde", QColor(102, 0, 102), false, 11, modelMinPixelSize));
+    m_itemSettings.insert("Radiosonde", new MapItemSettings("Radiosonde", QColor(102, 0, 102), false, 11, modelMinPixelSize));
     m_itemSettings.insert("Radio Time Transmitters", new MapItemSettings("Radio Time Transmitters", QColor(255, 0, 0), true, 8));
     m_itemSettings.insert("Radar", new MapItemSettings("Radar", QColor(255, 0, 0), true, 8));
     MapItemSettings *stationItemSettings = new MapItemSettings("Station", QColor(255, 0, 0), true, 11);
