@@ -91,8 +91,11 @@ endif()
 
 if (ENABLE_CHANNELRX_DEMODFREEDV AND CODEC2_FOUND)
     add_subdirectory(demodfreedv)
+endif()
+
+if (ENABLE_CHANNELRX_DEMODM17 AND CODEC2_FOUND)
     add_subdirectory(demodm17)
-endif(CODEC2_FOUND)
+endif()
 
 if (ENABLE_CHANNELRX_SIGMFFILESINK AND LIBSIGMF_FOUND AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     add_subdirectory(sigmffilesink)
