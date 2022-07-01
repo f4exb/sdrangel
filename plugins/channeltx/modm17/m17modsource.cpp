@@ -55,8 +55,8 @@ M17ModSource::M17ModSource() :
 	m_feedbackAudioBuffer.resize(1<<14);
 	m_feedbackAudioBufferFill = 0;
 
-    m_demodBuffer.resize(1<<12);
-    m_demodBufferFill = 0;
+    m_modBuffer.resize(1<<12);
+    m_modBufferFill = 0;
 
 	m_magsq = 0.0;
 
@@ -193,10 +193,10 @@ void M17ModSource::modulateSample()
         m_modSample.imag(0.0f);
     }
 
-    m_demodBuffer[m_demodBufferFill] = t1 * std::numeric_limits<int16_t>::max();
-    ++m_demodBufferFill;
+    m_modBuffer[m_modBufferFill] = t1 * std::numeric_limits<int16_t>::max();
+    ++m_modBufferFill;
 
-    if (m_demodBufferFill >= m_demodBuffer.size())
+    if (m_modBufferFill >= m_modBuffer.size())
     {
         QList<ObjectPipe*> dataPipes;
         MainCore::instance()->getDataPipes().getDataPipes(m_channel, "demod", dataPipes);
@@ -210,12 +210,12 @@ void M17ModSource::modulateSample()
                 DataFifo *fifo = qobject_cast<DataFifo*>((*it)->m_element);
 
                 if (fifo) {
-                    fifo->write((quint8*) &m_demodBuffer[0], m_demodBuffer.size() * sizeof(qint16), DataFifo::DataTypeI16);
+                    fifo->write((quint8*) &m_modBuffer[0], m_modBuffer.size() * sizeof(qint16), DataFifo::DataTypeI16);
                 }
             }
         }
 
-        m_demodBufferFill = 0;
+        m_modBufferFill = 0;
     }
 }
 

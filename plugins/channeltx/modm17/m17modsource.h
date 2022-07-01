@@ -93,8 +93,8 @@ private:
     Real m_feedbackInterpolatorDistanceRemain;
     bool m_feedbackInterpolatorConsumed;
 
-    QVector<qint16> m_demodBuffer;
-    int m_demodBufferFill;
+    QVector<qint16> m_modBuffer;
+    int m_modBufferFill;
 
     Lowpass<Real> m_lowpass;
 
