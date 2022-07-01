@@ -175,7 +175,7 @@ void M17ModSource::modulateSample()
     if (carrier)
     {
         calculateLevel(t);
-        t1 = m_lowpass.filter(t) * 1.2f;
+        t1 = m_lowpass.filter(t) * 1.5f;
 
         m_modPhasor += (m_settings.m_fmDeviation / (float) m_audioSampleRate) * t1;
 
