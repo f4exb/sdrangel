@@ -66,9 +66,18 @@ bool M17ModProcessor::handleMessage(const Message& cmd)
         M17ModAX25 modAX25;
         QString strData;
 
-        if (notif.getInsertPosition()) {
-            strData += "!" + formatAPRSPosition();
-        } else {
+        if (notif.getInsertPosition())
+        {
+            if (m_insertPositionToggle) {
+                strData += "!" + formatAPRSPosition();
+            } else {
+                strData = notif.getData();
+            }
+
+            m_insertPositionToggle = !m_insertPositionToggle;
+        }
+        else
+        {
             strData = notif.getData();
         }
 

@@ -523,6 +523,13 @@ void M17ModSource::applySettings(const M17ModSettings& settings, bool force)
         }
     }
 
+    if ((settings.m_insertPosition != m_settings.m_insertPosition) || force)
+    {
+        if (settings.m_insertPosition) {
+            m_processor->resetInsertPositionToggle();
+        }
+    }
+
     m_settings = settings;
 }
 

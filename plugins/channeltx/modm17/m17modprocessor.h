@@ -188,6 +188,7 @@ public:
 
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     M17ModFIFO *getBasebandFifo() { return &m_basebandFifo; }
+    void resetInsertPositionToggle() { m_insertPositionToggle = true; }
 
 private:
     MessageQueue m_inputMessageQueue;
@@ -202,6 +203,7 @@ private:
     int m_audioFrameIndex;
     uint16_t m_audioFrameNumber;
     struct CODEC2 *m_codec2;
+    bool m_insertPositionToggle;
 
     bool handleMessage(const Message& cmd);
     void processPacket(const QString& sourceCall, const QString& destCall, uint8_t can, const QByteArray& packetBytes);
