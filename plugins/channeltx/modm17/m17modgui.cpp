@@ -347,6 +347,36 @@ void M17ModGUI::on_smsText_editingFinished()
     applySettings();
 }
 
+void M17ModGUI::on_aprsFromText_editingFinished()
+{
+    m_settings.m_aprsCallsign = ui->aprsFromText->text();
+    applySettings();
+}
+
+void M17ModGUI::on_aprsTo_currentTextChanged(const QString &text)
+{
+    m_settings.m_aprsTo = text;
+    applySettings();
+}
+
+void M17ModGUI::on_aprsVia_currentTextChanged(const QString &text)
+{
+    m_settings.m_aprsVia = text;
+    applySettings();
+}
+
+void M17ModGUI::on_aprsData_editingFinished()
+{
+    m_settings.m_aprsData = ui->aprsData->text();
+    applySettings();
+}
+
+void M17ModGUI::on_aprsInsertPosition_toggled(bool checked)
+{
+    m_settings.m_aprsInsertPosition = checked;
+    applySettings();
+}
+
 void M17ModGUI::configureFileName()
 {
     qDebug() << "M17ModGUI::configureFileName: " << m_fileName.toStdString().c_str();
@@ -556,6 +586,7 @@ void M17ModGUI::displaySettings()
     ui->aprsData->setText(m_settings.m_aprsData);
     ui->aprsTo->lineEdit()->setText(m_settings.m_aprsTo);
     ui->aprsVia->lineEdit()->setText(m_settings.m_aprsVia);
+    ui->aprsInsertPosition->setChecked(m_settings.m_aprsInsertPosition);
 
     getRollupContents()->restoreState(m_rollupState);
     updateAbsoluteCenterFrequency();
@@ -764,7 +795,13 @@ void M17ModGUI::makeUIConnections()
     QObject::connect(ui->sendPacket, &QPushButton::clicked, this, &M17ModGUI::on_sendPacket_clicked);
     QObject::connect(ui->loopPacket, &ButtonSwitch::toggled, this, &M17ModGUI::on_loopPacket_toggled);
     QObject::connect(ui->loopPacketInterval, &QDial::valueChanged, this, &M17ModGUI::on_loopPacketInterval_valueChanged);
+    QObject::connect(ui->packetDataWidget, &QTabWidget::currentChanged, this, &M17ModGUI::on_packetDataWidget_currentChanged);
     QObject::connect(ui->smsText, &CustomTextEdit::editingFinished, this, &M17ModGUI::on_smsText_editingFinished);
+    QObject::connect(ui->aprsFromText, &QLineEdit::editingFinished, this, &M17ModGUI::on_aprsFromText_editingFinished);
+    QObject::connect(ui->aprsTo, &QComboBox::currentTextChanged, this, &M17ModGUI::on_aprsTo_currentTextChanged);
+    QObject::connect(ui->aprsVia, &QComboBox::currentTextChanged, this, &M17ModGUI::on_aprsVia_currentTextChanged);
+    QObject::connect(ui->aprsData, &QLineEdit::editingFinished, this, &M17ModGUI::on_aprsData_editingFinished);
+    QObject::connect(ui->aprsInsertPosition, &ButtonSwitch::toggled, this, &M17ModGUI::on_aprsInsertPosition_toggled);
     QObject::connect(ui->source, &QLineEdit::editingFinished, this, &M17ModGUI::on_source_editingFinished);
     QObject::connect(ui->destination, &QLineEdit::editingFinished, this, &M17ModGUI::on_destination_editingFinished);
     QObject::connect(ui->can, QOverload<int>::of(&QSpinBox::valueChanged), this, &M17ModGUI::on_can_valueChanged);

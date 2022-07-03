@@ -20,6 +20,8 @@
 #include <QMainWindow>
 #include <QDebug>
 #include <QScrollBar>
+#include <QMessageBox>
+#include <QFileDialog>
 
 #include <complex>
 
@@ -30,6 +32,7 @@
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
+#include "util/csv.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
 #include "gui/crightclickenabler.h"
@@ -128,6 +131,43 @@ bool M17DemodGUI::handleMessage(const Message& message)
             .arg(report.getSMS())
         );
         ui->smsLog->verticalScrollBar()->setValue(ui->smsLog->verticalScrollBar()->maximum());
+
+        return true;
+    }
+    else if (M17Demod::MsgReportAPRS::match(message))
+    {
+        const M17Demod::MsgReportAPRS& report = (M17Demod::MsgReportAPRS&) message;
+        // Is scroll bar at bottom
+        QScrollBar *sb = ui->aprsPackets->verticalScrollBar();
+        bool scrollToBottom = sb->value() == sb->maximum();
+
+        ui->aprsPackets->setSortingEnabled(false);
+        int row = ui->aprsPackets->rowCount();
+        ui->aprsPackets->setRowCount(row + 1);
+
+        QTableWidgetItem *fromItem = new QTableWidgetItem();
+        QTableWidgetItem *toItem = new QTableWidgetItem();
+        QTableWidgetItem *viaItem = new QTableWidgetItem();
+        QTableWidgetItem *typeItem = new QTableWidgetItem();
+        QTableWidgetItem *pidItem = new QTableWidgetItem();
+        QTableWidgetItem *dataASCIIItem = new QTableWidgetItem();
+        ui->aprsPackets->setItem(row, 0, fromItem);
+        ui->aprsPackets->setItem(row, 1, toItem);
+        ui->aprsPackets->setItem(row, 2, viaItem);
+        ui->aprsPackets->setItem(row, 3, typeItem);
+        ui->aprsPackets->setItem(row, 4, pidItem);
+        ui->aprsPackets->setItem(row, 5, dataASCIIItem);
+        fromItem->setText(report.getFrom());
+        toItem->setText(report.getTo());
+        viaItem->setText(report.getVia());
+        typeItem->setText(report.getType());
+        pidItem->setText(report.getPID());
+        dataASCIIItem->setText(report.getData());
+        ui->aprsPackets->setSortingEnabled(true);
+
+        if (scrollToBottom) {
+            ui->aprsPackets->scrollToBottom();
+        }
 
         return true;
     }
@@ -237,6 +277,11 @@ void M17DemodGUI::on_highPassFilter_toggled(bool checked)
 {
     m_settings.m_highPassFilter = checked;
     applySettings();
+}
+
+void M17DemodGUI::on_aprsClearTable_clicked()
+{
+    ui->aprsPackets->setRowCount(0);
 }
 
 void M17DemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
@@ -655,6 +700,7 @@ void M17DemodGUI::makeUIConnections()
     QObject::connect(ui->highPassFilter, &ButtonSwitch::toggled, this, &M17DemodGUI::on_highPassFilter_toggled);
     QObject::connect(ui->audioMute, &QToolButton::toggled, this, &M17DemodGUI::on_audioMute_toggled);
     QObject::connect(ui->viewStatusLog, &QPushButton::clicked, this, &M17DemodGUI::on_viewStatusLog_clicked);
+    QObject::connect(ui->aprsClearTable, &QPushButton::clicked, this, &M17DemodGUI::on_aprsClearTable_clicked);
 }
 
 void M17DemodGUI::updateAbsoluteCenterFrequency()

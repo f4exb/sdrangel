@@ -732,7 +732,7 @@
        <enum>QTabWidget::East</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="settingsTab">
        <property name="toolTip">
@@ -1549,6 +1549,90 @@
        <attribute name="toolTip">
         <string>APRS</string>
        </attribute>
+       <widget class="QTableWidget" name="aprsPackets">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>24</y>
+          <width>480</width>
+          <height>186</height>
+         </rect>
+        </property>
+        <property name="toolTip">
+         <string>Received packets</string>
+        </property>
+        <property name="editTriggers">
+         <set>QAbstractItemView::NoEditTriggers</set>
+        </property>
+        <column>
+         <property name="text">
+          <string>From</string>
+         </property>
+         <property name="toolTip">
+          <string>Source callsign/address</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>To</string>
+         </property>
+         <property name="toolTip">
+          <string>Destination callsign/address</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Via</string>
+         </property>
+         <property name="toolTip">
+          <string>Repeater addresses</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Type</string>
+         </property>
+         <property name="toolTip">
+          <string>AX.25 frame type</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>PID</string>
+         </property>
+         <property name="toolTip">
+          <string>Layer 3 protocol ID</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Data (ASCII)</string>
+         </property>
+         <property name="toolTip">
+          <string>Packet data as ASCII</string>
+         </property>
+        </column>
+       </widget>
+       <widget class="QPushButton" name="aprsClearTable">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>24</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="toolTip">
+         <string>Clear packets from table</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/bin.png</normaloff>:/bin.png</iconset>
+        </property>
+       </widget>
       </widget>
      </widget>
     </item>

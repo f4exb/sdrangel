@@ -18,10 +18,13 @@
 #include <codec2/codec2.h>
 
 #include "m17/M17Modulator.h"
+#include "maincore.h"
 
+#include "m17modax25.h"
 #include "m17modprocessor.h"
 
 MESSAGE_CLASS_DEFINITION(M17ModProcessor::MsgSendSMS, Message)
+MESSAGE_CLASS_DEFINITION(M17ModProcessor::MsgSendAPRS, Message)
 MESSAGE_CLASS_DEFINITION(M17ModProcessor::MsgSendAudioFrame, Message)
 MESSAGE_CLASS_DEFINITION(M17ModProcessor::MsgStartAudio, Message)
 MESSAGE_CLASS_DEFINITION(M17ModProcessor::MsgStopAudio, Message)
@@ -55,6 +58,24 @@ bool M17ModProcessor::handleMessage(const Message& cmd)
         packetBytes.truncate(798); // Maximum packet size is 798 payload + 2 bytes CRC = 800 bytes (32*25)
         processPacket(notif.getSourceCall(), notif.getDestCall(), notif.getCAN(), packetBytes);
         // test(notif.getSourceCall(), notif.getDestCall());
+        return true;
+    }
+    else if (MsgSendAPRS::match(cmd))
+    {
+        const MsgSendAPRS& notif = (const MsgSendAPRS&) cmd;
+        M17ModAX25 modAX25;
+        QString strData;
+
+        if (notif.getInsertPosition()) {
+            strData += "!" + formatAPRSPosition();
+        } else {
+            strData = notif.getData();
+        }
+
+        QByteArray packetBytes = modAX25.makePacket(notif.getCall(), notif.getTo(), notif.getVia(), strData);
+        packetBytes.prepend(0x02); // APRS standard type
+        packetBytes.truncate(798); // Maximum packet size is 798 payload + 2 bytes CRC = 800 bytes (32*25)
+        processPacket(notif.getSourceCall(), notif.getDestCall(), notif.getCAN(), packetBytes);
         return true;
     }
     else if (MsgSendAudioFrame::match(cmd))
@@ -247,4 +268,48 @@ void M17ModProcessor::output_baseband(std::array<uint8_t, 2> sync_word, const st
     std::copy(symbols.begin(), symbols.end(), fit); // then the frame dibits
     std::array<int16_t, 1920> baseband = m_m17Modulator.symbols_to_baseband(temp); // 1920 48 kS/s int16_t samples
     m_basebandFifo.write(baseband.data(), 1920);
+}
+
+QString M17ModProcessor::formatAPRSPosition()
+{
+    float latitude = MainCore::instance()->getSettings().getLatitude();
+    float longitude = MainCore::instance()->getSettings().getLongitude();
+
+    int latDeg, latMin, latFrac, latNorth;
+    int longDeg, longMin, longFrac, longEast;
+
+    // Convert decimal latitude to degrees, min and hundreths of a minute
+    latNorth = latitude >= 0.0f;
+    latitude = abs(latitude);
+    latDeg = (int) latitude;
+    latitude -= (float) latDeg;
+    latitude *= 60.0f;
+    latMin = (int) latitude;
+    latitude -= (float) latMin;
+    latitude *= 100.0f;
+    latFrac = round(latitude);
+
+    // Convert decimal longitude
+    longEast = longitude >= 0.0f;
+    longitude = abs(longitude);
+    longDeg = (int) longitude;
+    longitude -= (float) longDeg;
+    longitude *= 60.0f;
+    longMin = (int) longitude;
+    longitude -= (float) longMin;
+    longitude *= 100.0f;
+    longFrac = round(longitude);
+
+    // Insert position with house symbol (-) in to data field
+    QString latStr = QString("%1%2.%3%4")
+        .arg(latDeg, 2, 10, QChar('0'))
+        .arg(latMin, 2, 10, QChar('0'))
+        .arg(latFrac, 2, 10, QChar('0'))
+        .arg(latNorth ? 'N' : 'S');
+    QString longStr = QString("%1%2.%3%4")
+        .arg(longDeg, 3, 10, QChar('0'))
+        .arg(longMin, 2, 10, QChar('0'))
+        .arg(longFrac, 2, 10, QChar('0'))
+        .arg(longEast ? 'E' : 'W');
+    return QString("%1/%2-").arg(latStr).arg(longStr);
 }

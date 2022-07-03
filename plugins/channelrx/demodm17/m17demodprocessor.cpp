@@ -23,6 +23,7 @@
 #include <QDebug>
 
 #include "audio/audiofifo.h"
+#include "util/ax25.h"
 
 #include "m17/ax25_frame.h"
 #include "m17demod.h"
@@ -147,10 +148,6 @@ void M17DemodProcessor::diagnostic_callback(
         snprintf(buffer, 40, "BER: %-1.6lf (%u bits)", ber, m_this->m_prbs.bits());
         oss << buffer;
         qDebug() << "M17DemodProcessor::diagnostic_callback: " << oss.str().c_str();
-    }
-
-    if (status == 0) { // unlocked
-        m_this->resetInfo();
     }
 }
 
@@ -361,9 +358,9 @@ bool M17DemodProcessor::decode_packet(mobilinkd::M17FrameDecoder::packet_buffer_
                     oss << *it;
                 }
 
-                qDebug() << "M17DemodProcessor::decode_packet: "
-                    << " From:" << getSrcCall()
-                    << " To:" << getDestcCall()
+                qDebug() << "M17DemodProcessor::decode SMS_packet: "
+                    << " Src:" << getSrcCall()
+                    << " Dest:" << getDestcCall()
                     << " SMS:" << oss.str().c_str();
 
                 if (m_demodInputMessageQueue)
@@ -374,6 +371,40 @@ bool M17DemodProcessor::decode_packet(mobilinkd::M17FrameDecoder::packet_buffer_
                         QString(oss.str().c_str())
                     );
                     m_demodInputMessageQueue->push(msg);
+                }
+            }
+            else if (m_stdPacketProtocol == StdPacketAPRS)
+            {
+                AX25Packet ax25;
+                QByteArray packet = QByteArray(reinterpret_cast<const char*>(&m_currentPacket[1]), m_currentPacket.size()-3);
+
+                if (ax25.decode(packet))
+                {
+                    qDebug() << "M17DemodProcessor::decode APRS_packet: "
+                        << " Src:" << getSrcCall()
+                        << " Dest:" << getDestcCall()
+                        << " From:" << ax25.m_from
+                        << " To: " << ax25.m_to
+                        << " Via: " << ax25.m_via
+                        << " Type: " << ax25.m_type
+                        << " PID: " << ax25.m_pid
+                        << " Data: " << ax25.m_dataASCII;
+
+                    if (m_demodInputMessageQueue)
+                    {
+                        M17Demod::MsgReportAPRS *msg = M17Demod::MsgReportAPRS::create(
+                            getSrcCall(),
+                            getDestcCall(),
+                            ax25.m_from,
+                            ax25.m_to,
+                            ax25.m_via,
+                            ax25.m_type,
+                            ax25.m_pid,
+                            ax25.m_dataASCII
+                        );
+                        msg->getPacket() = packet;
+                        m_demodInputMessageQueue->push(msg);
+                    }
                 }
             }
 

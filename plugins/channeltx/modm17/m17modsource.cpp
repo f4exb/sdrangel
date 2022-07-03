@@ -577,4 +577,18 @@ void M17ModSource::sendPacket()
         );
         m_processor->getInputMessageQueue()->push(msg);
     }
+    else if (m_settings.m_packetType == M17ModSettings::PacketType::PacketAPRS)
+    {
+        M17ModProcessor::MsgSendAPRS *msg = M17ModProcessor::MsgSendAPRS::create(
+            m_settings.m_sourceCall,
+            m_settings.m_destCall,
+            m_settings.m_can,
+            m_settings.m_aprsCallsign,
+            m_settings.m_aprsTo,
+            m_settings.m_aprsVia,
+            m_settings.m_aprsData,
+            m_settings.m_aprsInsertPosition
+        );
+        m_processor->getInputMessageQueue()->push(msg);
+    }
 }

@@ -111,6 +111,7 @@ private:
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();
     QString getStatus(int status, bool streamElsePacket, int packetProtocol);
+    void packetReceived(QByteArray packet);
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
@@ -129,6 +130,7 @@ private slots:
     void on_squelch_valueChanged(int value);
     void on_highPassFilter_toggled(bool checked);
     void on_audioMute_toggled(bool checked);
+    void on_aprsClearTable_clicked();
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void on_viewStatusLog_clicked();

@@ -7,6 +7,7 @@ set(modm17_SOURCES
     m17modprocessor.cpp
     m17modfifo.cpp
     m17moddecimator.cpp
+    m17modax25.cpp
 	m17modplugin.cpp
     m17modsettings.cpp
     m17modwebapiadapter.cpp
@@ -19,6 +20,7 @@ set(modm17_HEADERS
     m17modprocessor.h
     m17modfifo.h
     m17moddecimator.h
+    m17modax25.h
 	m17modplugin.h
     m17modsettings.h
     m17modwebapiadapter.h

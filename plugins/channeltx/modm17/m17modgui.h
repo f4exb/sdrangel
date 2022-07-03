@@ -142,7 +142,14 @@ private slots:
     void on_destination_editingFinished();
     void on_insertPosition_toggled(bool checked);
     void on_can_valueChanged(int value);
+
     void on_smsText_editingFinished();
+
+    void on_aprsFromText_editingFinished();
+    void on_aprsTo_currentTextChanged(const QString &text);
+    void on_aprsVia_currentTextChanged(const QString &text);
+    void on_aprsData_editingFinished();
+    void on_aprsInsertPosition_toggled(bool checked);
 
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);

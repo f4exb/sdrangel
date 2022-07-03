@@ -45,6 +45,7 @@
 
 MESSAGE_CLASS_DEFINITION(M17Demod::MsgConfigureM17Demod, Message)
 MESSAGE_CLASS_DEFINITION(M17Demod::MsgReportSMS, Message)
+MESSAGE_CLASS_DEFINITION(M17Demod::MsgReportAPRS, Message)
 
 const char* const M17Demod::m_channelIdURI = "sdrangel.channel.m17demod";
 const char* const M17Demod::m_channelId = "M17Demod";
@@ -181,6 +182,27 @@ bool M17Demod::handleMessage(const Message& cmd)
         // Forward to GUI if any
         if (getMessageQueueToGUI()) {
             getMessageQueueToGUI()->push(new MsgReportSMS(report));
+        }
+
+        return true;
+    }
+    else if (MsgReportAPRS::match(cmd))
+    {
+        MsgReportAPRS& report = (MsgReportAPRS&) cmd;
+        // Forward to GUI if any
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new MsgReportAPRS(report));
+        }
+
+        // Forward to APRS and other packet features
+        QList<ObjectPipe*> packetsPipes;
+        MainCore::instance()->getMessagePipes().getMessagePipes(this, "packets", packetsPipes);
+
+        for (const auto& pipe : packetsPipes)
+        {
+            MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+            MainCore::MsgPacket *msg = MainCore::MsgPacket::create(this, report.getPacket(), QDateTime::currentDateTime());
+            messageQueue->push(msg);
         }
 
         return true;

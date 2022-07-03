@@ -60,6 +60,65 @@ public:
         { }
     };
 
+    class MsgSendAPRS : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const QString& getSourceCall() const { return m_sourceCall; }
+        const QString& getDestCall() const { return m_destCall; }
+        uint8_t getCAN() const { return m_can; }
+        const QString& getCall() const { return m_call; }
+        const QString& getTo() const { return m_to; }
+        const QString& getVia() const { return m_via; }
+        const QString& getData() const { return m_data; }
+        bool getInsertPosition() const { return m_insertPosition; }
+
+        static MsgSendAPRS* create(
+            const QString& sourceCall,
+            const QString& destCall,
+            uint8_t can,
+            const QString& call,
+            const QString& to,
+            const QString& via,
+            const QString& data,
+            bool insertPosition
+        )
+        {
+            return new MsgSendAPRS(sourceCall, destCall, can, call, to, via, data, insertPosition);
+        }
+
+    private:
+        QString m_sourceCall;
+        QString m_destCall;
+        uint8_t m_can;
+        QString m_call;
+        QString m_to;
+        QString m_via;
+        QString m_data;
+        bool m_insertPosition;
+
+        MsgSendAPRS(
+            const QString& sourceCall,
+            const QString& destCall,
+            uint8_t can,
+            const QString& call,
+            const QString& to,
+            const QString& via,
+            const QString& data,
+            bool insertPosition
+        ) :
+            Message(),
+            m_sourceCall(sourceCall),
+            m_destCall(destCall),
+            m_can(can),
+            m_call(call),
+            m_to(to),
+            m_via(via),
+            m_data(data),
+            m_insertPosition(insertPosition)
+        { }
+    };
+
     class MsgSendAudioFrame : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -154,6 +213,7 @@ private:
     void send_preamble();
     void send_eot();
     void output_baseband(std::array<uint8_t, 2> sync_word, const std::array<int8_t, 368>& frame);
+    QString formatAPRSPosition();
 
 private slots:
     void handleInputMessages();

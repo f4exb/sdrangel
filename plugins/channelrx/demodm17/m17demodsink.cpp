@@ -174,7 +174,10 @@ void M17DemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
 
                 if (m_squelchWasOpen)
                 {
-                    m_m17DemodProcessor.resetInfo();
+                    if (m_m17DemodProcessor.getStreamElsePacket()) { // if packet kepp last values
+                        m_m17DemodProcessor.resetInfo();
+                    }
+
                     m_m17DemodProcessor.setDCDOff(); // indicate loss of carrier
                 }
             }

@@ -85,6 +85,67 @@ public:
         { }
     };
 
+    class MsgReportAPRS : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const QString& getSource() const { return m_source; }
+        const QString& getDest() const { return m_dest; }
+        const QString& getFrom() const { return m_from; }
+        const QString& getTo() const { return m_to; }
+        const QString& getVia() const { return m_via; }
+        const QString& getType() const { return m_type; }
+        const QString& getPID() const { return m_pid; }
+        const QString& getData() const { return m_data; }
+        QByteArray& getPacket() { return m_packet; }
+
+        static MsgReportAPRS* create(
+            const QString& source,
+            const QString& dest,
+            const QString& from,
+            const QString& to,
+            const QString& via,
+            const QString& type,
+            const QString& pid,
+            const QString& data
+        )
+        {
+            return new MsgReportAPRS(source, dest, from, to, via, type, pid, data);
+        }
+
+    private:
+        QString m_source;
+        QString m_dest;
+        QString m_from;
+        QString m_to;
+        QString m_via;
+        QString m_type;
+        QString m_pid;
+        QString m_data;
+        QByteArray m_packet;
+
+        MsgReportAPRS(
+            const QString& source,
+            const QString& dest,
+            const QString& from,
+            const QString& to,
+            const QString& via,
+            const QString& type,
+            const QString& pid,
+            const QString& data
+        ) :
+            Message(),
+            m_source(source),
+            m_dest(dest),
+            m_from(from),
+            m_to(to),
+            m_via(via),
+            m_type(type),
+            m_pid(pid),
+            m_data(data)
+        { }
+    };
+
     M17Demod(DeviceAPI *deviceAPI);
 	virtual ~M17Demod();
 	virtual void destroy() { delete this; }
