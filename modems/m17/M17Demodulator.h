@@ -1,4 +1,4 @@
-// Copyright 2020-2021 Rob Riggs <rob@mobilinkd.com>
+// Copyright 2020-2021 Rob Riggs <rob@modemm17.com>
 // All rights reserved.
 
 #pragma once
@@ -20,7 +20,7 @@
 
 #include "export.h"
 
-namespace mobilinkd {
+namespace modemm17 {
 
 struct M17_API M17Demodulator
 {
@@ -121,4 +121,4 @@ private:
     int16_t initializing_count_;
 };
 
-} // mobilinkd
+} // modemm17

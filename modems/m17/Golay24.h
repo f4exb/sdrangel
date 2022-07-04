@@ -1,4 +1,4 @@
-// Copyright 2020 Rob Riggs <rob@mobilinkd.com>
+// Copyright 2020 Rob Riggs <rob@modemm17.com>
 // All rights reserved.
 
 #pragma once
@@ -11,7 +11,7 @@
 
 #include "export.h"
 
-namespace mobilinkd {
+namespace modemm17 {
 
 // Parts are adapted from:
 // http://aqdi.com/articles/using-the-golay-error-detection-and-correction-code-3/
@@ -108,4 +108,4 @@ private:
     static std::array<SyndromeMapEntry, LUT_SIZE> make_lut();
 };
 
-} // mobilinkd
+} // modemm17

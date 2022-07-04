@@ -1,4 +1,4 @@
-// Copyright 2012-2021 Rob Riggs <rob@mobilinkd.com>
+// Copyright 2012-2021 Rob Riggs <rob@modemm17.com>
 // All rights reserved.
 
 #pragma once
@@ -17,7 +17,7 @@
 #include <vector>
 
 
-namespace mobilinkd {
+namespace modemm17 {
 
 struct ax25_frame
 {
@@ -262,4 +262,4 @@ void write(std::ostream& os, const ax25_frame& frame)
     os << "Info: " << std::endl << frame.info() << std::endl;
 }
 
-} // mobilinkd
+} // modemm17

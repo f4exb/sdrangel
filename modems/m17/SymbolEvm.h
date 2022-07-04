@@ -1,4 +1,4 @@
-// Copyright 2020 Mobilinkd LLC.
+// Copyright 2020 modemm17 LLC.
 
 #pragma once
 
@@ -10,7 +10,7 @@
 #include <optional>
 #include <tuple>
 
-namespace mobilinkd
+namespace modemm17
 {
 
 template <size_t N>
@@ -82,4 +82,4 @@ SymbolEvm<N> makeSymbolEvm(
     return std::move(SymbolEvm<float, N>(std::move(filter), erasure_limit));
 }
 
-} // mobilinkd
+} // modemm17

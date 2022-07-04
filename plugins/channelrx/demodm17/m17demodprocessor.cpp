@@ -65,9 +65,9 @@ void M17DemodProcessor::pushSample(qint16 sample)
     m_demod(sample / 22000.0f);
 }
 
-bool M17DemodProcessor::handle_frame(mobilinkd::M17FrameDecoder::output_buffer_t const& frame, int viterbi_cost)
+bool M17DemodProcessor::handle_frame(modemm17::M17FrameDecoder::output_buffer_t const& frame, int viterbi_cost)
 {
-    using FrameType = mobilinkd::M17FrameDecoder::FrameType;
+    using FrameType = modemm17::M17FrameDecoder::FrameType;
 
     bool result = true;
 
@@ -151,7 +151,7 @@ void M17DemodProcessor::diagnostic_callback(
     }
 }
 
-bool M17DemodProcessor::decode_lich(mobilinkd::M17FrameDecoder::lich_buffer_t const& lich)
+bool M17DemodProcessor::decode_lich(modemm17::M17FrameDecoder::lich_buffer_t const& lich)
 {
     uint8_t fragment_number = lich[5];   // Get fragment number.
     fragment_number = (fragment_number >> 5) & 7;
@@ -159,17 +159,17 @@ bool M17DemodProcessor::decode_lich(mobilinkd::M17FrameDecoder::lich_buffer_t co
     return true;
 }
 
-bool M17DemodProcessor::decode_lsf(mobilinkd::M17FrameDecoder::lsf_buffer_t const& lsf)
+bool M17DemodProcessor::decode_lsf(modemm17::M17FrameDecoder::lsf_buffer_t const& lsf)
 {
-    mobilinkd::LinkSetupFrame::encoded_call_t encoded_call;
+    modemm17::LinkSetupFrame::encoded_call_t encoded_call;
     std::ostringstream oss;
 
     std::copy(lsf.begin() + 6, lsf.begin() + 12, encoded_call.begin());
-    mobilinkd::LinkSetupFrame::call_t src = mobilinkd::LinkSetupFrame::decode_callsign(encoded_call);
+    modemm17::LinkSetupFrame::call_t src = modemm17::LinkSetupFrame::decode_callsign(encoded_call);
     m_srcCall = QString(src.data());
 
     std::copy(lsf.begin(), lsf.begin() + 6, encoded_call.begin());
-    mobilinkd::LinkSetupFrame::call_t dest = mobilinkd::LinkSetupFrame::decode_callsign(encoded_call);
+    modemm17::LinkSetupFrame::call_t dest = modemm17::LinkSetupFrame::decode_callsign(encoded_call);
     m_destCall = QString(dest.data());
 
     uint16_t type = (lsf[12] << 8) | lsf[13];
@@ -280,7 +280,7 @@ void M17DemodProcessor::setDCDOff()
     m_demod.dcd_off();
 }
 
-void M17DemodProcessor::append_packet(std::vector<uint8_t>& result, mobilinkd::M17FrameDecoder::lsf_buffer_t in)
+void M17DemodProcessor::append_packet(std::vector<uint8_t>& result, modemm17::M17FrameDecoder::lsf_buffer_t in)
 {
     uint8_t out = 0;
     size_t b = 0;
@@ -297,7 +297,7 @@ void M17DemodProcessor::append_packet(std::vector<uint8_t>& result, mobilinkd::M
     }
 }
 
-bool M17DemodProcessor::decode_packet(mobilinkd::M17FrameDecoder::packet_buffer_t const& packet_segment)
+bool M17DemodProcessor::decode_packet(modemm17::M17FrameDecoder::packet_buffer_t const& packet_segment)
 {
     // qDebug() << tr("M17DemodProcessor::decode_packet: 0x%1").arg((int) packet_segment[25], 2, 16, QChar('0'));
     if (packet_segment[25] & 0x80) // last frame of packet.
@@ -320,7 +320,7 @@ bool M17DemodProcessor::decode_packet(mobilinkd::M17FrameDecoder::packet_buffer_
             qDebug() << "M17DemodProcessor::decode_packet: last chunk size:" << packet_size << " packet size:" << m_currentPacket.size();
         }
 
-        mobilinkd::CRC16<0x5935, 0xFFFF> crc16;
+        modemm17::CRC16<0x5935, 0xFFFF> crc16;
         crc16.reset();
 
         for (std::vector<uint8_t>::const_iterator it = m_currentPacket.begin(); it != m_currentPacket.end() - 2; ++it) {
@@ -345,9 +345,9 @@ bool M17DemodProcessor::decode_packet(mobilinkd::M17FrameDecoder::packet_buffer_
                     ax25.push_back(char(c));
                 }
 
-                mobilinkd::ax25_frame frame(ax25);
+                modemm17::ax25_frame frame(ax25);
                 std::ostringstream oss;
-                mobilinkd::write(oss, frame); // TODO: get details
+                modemm17::write(oss, frame); // TODO: get details
                 qDebug() << "M17DemodProcessor::decode_packet: AX25:" << oss.str().c_str();
             }
             else if (m_stdPacketProtocol == StdPacketSMS)
@@ -439,7 +439,7 @@ bool M17DemodProcessor::decode_packet(mobilinkd::M17FrameDecoder::packet_buffer_
     return true;
 }
 
-bool M17DemodProcessor::decode_bert(mobilinkd::M17FrameDecoder::bert_buffer_t const& bert)
+bool M17DemodProcessor::decode_bert(modemm17::M17FrameDecoder::bert_buffer_t const& bert)
 {
     for (int j = 0; j != 24; ++j)
     {
@@ -463,7 +463,7 @@ bool M17DemodProcessor::decode_bert(mobilinkd::M17FrameDecoder::bert_buffer_t co
     return true;
 }
 
-bool M17DemodProcessor::demodulate_audio(mobilinkd::M17FrameDecoder::audio_buffer_t const& audio, int viterbi_cost)
+bool M17DemodProcessor::demodulate_audio(modemm17::M17FrameDecoder::audio_buffer_t const& audio, int viterbi_cost)
 {
     bool result = true;
     std::array<int16_t, 160> buf; // 8k audio

@@ -1,4 +1,4 @@
-// Copyright 2015-2021 Mobilinkd LLC.
+// Copyright 2015-2021 modemm17 LLC.
 
 #pragma once
 
@@ -7,7 +7,7 @@
 #include <array>
 #include <cstddef>
 
-namespace mobilinkd
+namespace modemm17
 {
 
 template <size_t N>
@@ -49,4 +49,4 @@ BaseIirFilter<N> makeIirFilter(
 	return std::move(BaseIirFilter<N>(b, a));
 }
 
-} // mobilinkd
+} // modemm17

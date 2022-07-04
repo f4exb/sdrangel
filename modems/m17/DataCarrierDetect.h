@@ -1,4 +1,4 @@
-// Copyright 2021 Mobilinkd LLC.
+// Copyright 2021 modemm17 LLC.
 
 #pragma once
 
@@ -8,7 +8,7 @@
 #include <complex>
 #include <cstddef>
 
-namespace mobilinkd {
+namespace modemm17 {
 
 /**
  * Data carrier detection using the difference of two DFTs, one in-band and
@@ -73,4 +73,4 @@ struct DataCarrierDetect
     bool dcd() const { return triggered_; }
 };
 
-} // mobilinkd
+} // modemm17

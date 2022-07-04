@@ -1,4 +1,4 @@
-// Copyright 2020 Mobilinkd LLC.
+// Copyright 2020 modemm17 LLC.
 
 #pragma once
 
@@ -8,7 +8,7 @@
 
 #include "Util.h"
 
-namespace mobilinkd
+namespace modemm17
 {
 
 inline constexpr uint32_t convolve_bit(uint32_t poly, uint32_t memory)
@@ -23,4 +23,4 @@ inline constexpr uint32_t update_memory(uint32_t memory, uint32_t input)
 }
 
 
-} // mobilinkd
+} // modemm17

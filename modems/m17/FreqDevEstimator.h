@@ -1,4 +1,4 @@
-// Copyright 2021 Rob Riggs <rob@mobilinkd.com>
+// Copyright 2021 Rob Riggs <rob@modemm17.com>
 // All rights reserved.
 
 #pragma once
@@ -12,7 +12,7 @@
 
 #include "export.h"
 
-namespace mobilinkd {
+namespace modemm17 {
 
 /**
  * Deviation and zero-offset estimator.
@@ -127,4 +127,4 @@ public:
 	float idev() const { return idev_; }
 };
 
-} // mobilinkd
+} // modemm17

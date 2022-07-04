@@ -1,7 +1,7 @@
 #include "Util.h"
 #include "Golay24.h"
 
-namespace mobilinkd {
+namespace modemm17 {
 
 std::array<Golay24::SyndromeMapEntry, Golay24::LUT_SIZE> Golay24::LUT = Golay24::make_lut();
 
@@ -134,4 +134,4 @@ std::array<Golay24::SyndromeMapEntry, Golay24::LUT_SIZE> Golay24::make_lut()
     return tmp;
 }
 
-} // mobilinkd
+} // modemm17

@@ -1,4 +1,4 @@
-// Copyright 2020 Mobilinkd LLC.
+// Copyright 2020 modemm17 LLC.
 
 #pragma once
 
@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <cstddef>
 
-namespace mobilinkd
+namespace modemm17
 {
 
 namespace detail
@@ -76,4 +76,4 @@ struct M17ByteRandomizer
 };
 
 
-} // mobilinkd
+} // modemm17

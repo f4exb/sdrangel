@@ -1,4 +1,4 @@
-// Copyright 2020 Mobilinkd LLC.
+// Copyright 2020 modemm17 LLC.
 
 #pragma once
 
@@ -7,7 +7,7 @@
 
 #include "Util.h"
 
-namespace mobilinkd
+namespace modemm17
 {
 
 struct M17Synchronizer
@@ -33,4 +33,4 @@ struct M17Synchronizer
     void reset() { buffer_ = 0; }
 };
 
-} // mobilinkd
+} // modemm17

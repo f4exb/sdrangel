@@ -1,4 +1,4 @@
-// Copyright 2020 Mobilinkd LLC.
+// Copyright 2020 modemm17 LLC.
 
 #pragma once
 
@@ -8,7 +8,7 @@
 #include <stdexcept>
 #include <algorithm>
 
-namespace mobilinkd
+namespace modemm17
 {
 
 struct LinkSetupFrame
@@ -128,4 +128,4 @@ struct LinkSetupFrame
     }
 };
 
-} // mobilinkd
+} // modemm17

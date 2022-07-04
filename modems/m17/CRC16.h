@@ -1,4 +1,4 @@
-// Copyright 2020 Mobilinkd LLC.
+// Copyright 2020 modemm17 LLC.
 
 #pragma once
 
@@ -6,7 +6,7 @@
 #include <array>
 #include <cstddef>
 
-namespace mobilinkd
+namespace modemm17
 {
 
 template <uint16_t Poly = 0x5935, uint16_t Init = 0xFFFF>
@@ -48,7 +48,7 @@ struct CRC16
         }
         return reg & MASK;
     }
-         
+
     uint16_t get()
     {
         auto reg = reg_;
@@ -60,7 +60,7 @@ struct CRC16
         }
         return reg;
     }
-         
+
     std::array<uint8_t, 2> get_bytes()
     {
         auto crc = get();
@@ -69,4 +69,4 @@ struct CRC16
     }
 };
 
-} // mobilinkd
+} // modemm17

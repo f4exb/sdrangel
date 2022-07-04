@@ -1,4 +1,4 @@
-// Copyright 2020 Mobilinkd LLC.
+// Copyright 2020 modemm17 LLC.
 
 #pragma once
 
@@ -10,7 +10,7 @@
 #include <cmath>
 #include <tuple>
 
-namespace mobilinkd
+namespace modemm17
 {
 
 struct CarrierDetect
@@ -37,4 +37,4 @@ struct CarrierDetect
     }
 };
 
-} // mobilinkd
+} // modemm17

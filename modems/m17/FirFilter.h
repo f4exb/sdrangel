@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Mobilinkd LLC.
+// Copyright 2015-2020 modemm17 LLC.
 
 #pragma once
 
@@ -7,7 +7,7 @@
 #include <array>
 #include <cstddef>
 
-namespace mobilinkd
+namespace modemm17
 {
 
 template <size_t N>
@@ -56,4 +56,4 @@ BaseFirFilter<N> makeFirFilter(const std::array<float, N>& taps)
 }
 
 
-} // mobilinkd
+} // modemm17

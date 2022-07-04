@@ -1,4 +1,4 @@
-// Copyright 2020 Mobilinkd LLC.
+// Copyright 2020 modemm17 LLC.
 
 #pragma once
 
@@ -7,7 +7,7 @@
 #include <cstddef>
 #include <tuple>
 
-namespace mobilinkd
+namespace modemm17
 {
 
 template <size_t N = 368>
@@ -51,12 +51,12 @@ struct M17Framer
         }
         return 0;
     }
-    
+
     void reset()
-    { 
+    {
         buffer_.fill(0);
         index_ = 0;
     }
 };
 
-} // mobilinkd
+} // modemm17

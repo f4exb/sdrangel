@@ -1,4 +1,4 @@
-// Copyright 2020 Mobilinkd LLC.
+// Copyright 2020 modemm17 LLC.
 
 #pragma once
 
@@ -11,7 +11,7 @@
 #include <limits>
 
 
-namespace mobilinkd
+namespace modemm17
 {
 
 // The make_bitset stuff only works as expected in GCC10 and later.
@@ -425,4 +425,4 @@ constexpr int popcount( T x ) noexcept
     return count;
 }
 
-} // mobilinkd
+} // modemm17

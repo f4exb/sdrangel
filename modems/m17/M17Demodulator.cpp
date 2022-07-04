@@ -1,6 +1,6 @@
 #include "M17Demodulator.h"
 
-namespace mobilinkd {
+namespace modemm17 {
 
 // const std::array<float, 150> M17Demodulator::rrc_taps = std::array<float, 150>{
 //      0.0029364388513841593,  0.0031468394550958484,  0.002699564567597445,   0.001661182944400927,   0.00023319405581230247,
@@ -587,4 +587,4 @@ void M17Demodulator::operator()(const float input)
 	}
 }
 
-} // mobilinkd
+} // modemm17

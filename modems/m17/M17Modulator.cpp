@@ -1,6 +1,6 @@
 #include "M17Modulator.h"
 
-namespace mobilinkd
+namespace modemm17
 {
 
 /*
@@ -108,5 +108,5 @@ const std::array<float, 150> M17Modulator::rrc_taps = std::array<float, 150>{
     +2.729505e-03, +2.987740e-03, +2.576674e-03, +1.628891e-03, +3.898184e-04,
 };
 
-} // namespace mobilinkd
+} // namespace modemm17
 

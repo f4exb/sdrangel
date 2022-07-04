@@ -1,4 +1,4 @@
-// Copyright 2021 Mobilinkd LLC.
+// Copyright 2021 modemm17 LLC.
 
 #pragma once
 
@@ -17,7 +17,7 @@
 #include <iostream>
 #include <iomanip>
 
-namespace mobilinkd
+namespace modemm17
 {
 
 
@@ -403,4 +403,4 @@ struct M17FrameDecoder
     State state() const { return state_; }
 };
 
-} // mobilinkd
+} // modemm17

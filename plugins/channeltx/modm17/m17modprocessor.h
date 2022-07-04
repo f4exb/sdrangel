@@ -241,14 +241,14 @@ private:
     int m_basebandFifoHigh;
     int m_basebandFifoLow;
     M17ModDecimator m_decimator; //!< 48k -> 8k decimator
-    mobilinkd::M17Modulator m_m17Modulator;
-    std::array<mobilinkd::M17Modulator::lich_segment_t, 6> m_lich; //!< LICH bits
+    modemm17::M17Modulator m_m17Modulator;
+    std::array<modemm17::M17Modulator::lich_segment_t, 6> m_lich; //!< LICH bits
     int m_lichSegmentIndex;
     std::array<int16_t, 320*6> m_audioFrame;
     int m_audioFrameIndex;
     uint16_t m_audioFrameNumber;
     struct CODEC2 *m_codec2;
-    mobilinkd::PRBS9 m_prbs;
+    modemm17::PRBS9 m_prbs;
     bool m_insertPositionToggle;
 
     bool handleMessage(const Message& cmd);

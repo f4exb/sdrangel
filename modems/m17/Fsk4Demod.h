@@ -1,4 +1,4 @@
-// Copyright 2020 Mobilinkd LLC.
+// Copyright 2020 modemm17 LLC.
 
 #pragma once
 
@@ -11,7 +11,7 @@
 #include <array>
 #include <tuple>
 
-namespace mobilinkd
+namespace modemm17
 {
 
 namespace detail
@@ -153,4 +153,4 @@ struct Fsk4Demod
     }
 };
 
-} // mobilinkd
+} // modemm17

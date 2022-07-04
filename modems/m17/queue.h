@@ -8,7 +8,7 @@
 #include <condition_variable>
 #include <mutex>
 
-namespace mobilinkd
+namespace modemm17
 {
 
 /**
@@ -31,7 +31,7 @@ private:
     mutable mutex_type mutex_;
     std::condition_variable full_;
     std::condition_variable empty_;
-    
+
     queue(queue&) = delete;
     queue& operator=(const queue&) = delete;
 
@@ -53,7 +53,7 @@ public:
 
     /// A pointer to an element stored in a Queue.
     using const_pointer = const value_type*;
-    
+
     queue()
     {}
 
@@ -66,11 +66,11 @@ public:
      *  in the queue (default is forever, duration::max()).
      *
      * @return true if a value was returned, otherwise false.
-     * 
+     *
      * @note The return value me be false if either the timeout expires
      *  or the queue is closed.
      */
-    template<class Clock> 
+    template<class Clock>
     bool get_until(reference val, std::chrono::time_point<Clock> when)
     {
         lock_type lock(mutex_);
@@ -96,7 +96,7 @@ public:
         {
             state_ == State::CLOSED;
         }
-        
+
         full_.notify_one();
 
         return true;
@@ -111,11 +111,11 @@ public:
      *  in the queue (default is forever, duration::max()).
      *
      * @return true if a value was returned, otherwise false.
-     * 
+     *
      * @note The return value me be false if either the timeout expires
      *  or the queue is closed.
      */
-    template<class Rep = int64_t, class Period = std::ratio<1>> 
+    template<class Rep = int64_t, class Period = std::ratio<1>>
     bool get(reference val, std::chrono::duration<Rep, Period> timeout = std::chrono::duration<Rep, Period>::max())
     {
         lock_type lock(mutex_);
@@ -141,12 +141,12 @@ public:
         {
             state_ == State::CLOSED;
         }
-        
+
         full_.notify_one();
 
         return true;
     };
-    
+
     /**
      * Put an item on the queue.
      *
@@ -155,11 +155,11 @@ public:
      *  for more items on the queue (default is forever -- duration::max()).
      *
      * @return true if a value was put on the queue, otherwise false.
-     * 
+     *
      * @note The return value me be false if either the timeout expires
      *  or the queue is closed.
      */
-    template<typename U, class Rep = int64_t, class Period = std::ratio<1>> 
+    template<typename U, class Rep = int64_t, class Period = std::ratio<1>>
     bool put(U&& val, std::chrono::duration<Rep, Period> timeout = std::chrono::duration<Rep, Period>::max())
     {
         // Get the queue mutex.
@@ -169,11 +169,11 @@ public:
         {
             if (timeout.count() == 0)
             {
-                return false; 
+                return false;
             }
 
             auto expiration = std::chrono::system_clock::now() + timeout;
-            
+
             while (SIZE == size_)
             {
                 if (State::OPEN != state_)
@@ -187,7 +187,7 @@ public:
                 }
             }
         }
-        
+
         if (State::OPEN != state_)
         {
             return false;
@@ -197,7 +197,7 @@ public:
         size_ += 1;
 
         empty_.notify_one();
-        
+
         return true;
     };
 
@@ -206,16 +206,16 @@ public:
         guard_type lock(mutex_);
 
         state_ = (queue_.empty() ? State::CLOSED : State::CLOSING);
-        
+
         full_.notify_all();
         empty_.notify_all();
     }
-    
+
     bool is_open() const
     {
         return State::OPEN == state_;
     }
-        
+
     bool is_closed() const
     {
         return State::CLOSED == state_;
@@ -229,7 +229,7 @@ public:
         guard_type lock(mutex_);
         return size_;
     }
-    
+
     /**
      *  @return the number of items in the queue.
      */
@@ -248,4 +248,4 @@ public:
     }
 };
 
-} // mobilinkd
+} // modemm17

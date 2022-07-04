@@ -1,4 +1,4 @@
-// Copyright 2020 Mobilinkd LLC.
+// Copyright 2020 modemm17 LLC.
 
 #pragma once
 
@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <cassert>
 
-namespace mobilinkd
+namespace modemm17
 {
 
 /**
@@ -47,4 +47,4 @@ struct PhaseEstimator
     }
 };
 
-} // mobilinkd
+} // modemm17

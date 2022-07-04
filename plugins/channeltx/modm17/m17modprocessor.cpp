@@ -166,28 +166,28 @@ void M17ModProcessor::processPacket(const QString& sourceCall, const QString& de
 
     // LSF
     std::array<uint8_t, 30> lsf;
-    std::array<int8_t, 368> lsf_frame = mobilinkd::M17Modulator::make_lsf(lsf, sourceCall.toStdString(), destCall.toStdString(), can);
-    output_baseband(mobilinkd::M17Modulator::LSF_SYNC_WORD, lsf_frame);
+    std::array<int8_t, 368> lsf_frame = modemm17::M17Modulator::make_lsf(lsf, sourceCall.toStdString(), destCall.toStdString(), can);
+    output_baseband(modemm17::M17Modulator::LSF_SYNC_WORD, lsf_frame);
 
     // Packets
     int remainderCount = packetBytes.size();
     int packetCount = 0;
     std::array<int8_t, 368> packet_frame;
-    // std::copy(mobilinkd::M17Modulator::DATA_SYNC_WORD.begin(), mobilinkd::M17Modulator::DATA_SYNC_WORD.end(), fullframe_symbols.begin());
-    mobilinkd::M17Modulator::packet_t packet;
+    // std::copy(modemm17::M17Modulator::DATA_SYNC_WORD.begin(), modemm17::M17Modulator::DATA_SYNC_WORD.end(), fullframe_symbols.begin());
+    modemm17::M17Modulator::packet_t packet;
 
     while (remainderCount > 25)
     {
         std::copy(packetBytes.begin() + (packetCount*25), packetBytes.begin() + ((packetCount+1)*25), packet.begin());
         packet_frame = m_m17Modulator.make_packet_frame(packetCount, 25, false, packet);
-        output_baseband(mobilinkd::M17Modulator::PACKET_SYNC_WORD, packet_frame);
+        output_baseband(modemm17::M17Modulator::PACKET_SYNC_WORD, packet_frame);
         remainderCount -= 25;
         packetCount++;
     }
 
     std::copy(packetBytes.begin() + (packetCount*25), packetBytes.begin() + (packetCount*25) + remainderCount, packet.begin());
     packet_frame = m_m17Modulator.make_packet_frame(packetCount, remainderCount, true, packet);
-    output_baseband(mobilinkd::M17Modulator::PACKET_SYNC_WORD, packet_frame);
+    output_baseband(modemm17::M17Modulator::PACKET_SYNC_WORD, packet_frame);
     qDebug("M17ModProcessor::processPacket: last: packetCount: %d remainderCount: %d", packetCount, remainderCount);
 
     send_eot(); // EOT
@@ -205,15 +205,15 @@ void M17ModProcessor::audioStart(const QString& sourceCall, const QString& destC
 
     // LSF
     std::array<uint8_t, 30> lsf;
-    std::array<int8_t, 368> lsf_frame = mobilinkd::M17Modulator::make_lsf(lsf, sourceCall.toStdString(), destCall.toStdString(), can, true);
-    output_baseband(mobilinkd::M17Modulator::LSF_SYNC_WORD, lsf_frame);
+    std::array<int8_t, 368> lsf_frame = modemm17::M17Modulator::make_lsf(lsf, sourceCall.toStdString(), destCall.toStdString(), can, true);
+    output_baseband(modemm17::M17Modulator::LSF_SYNC_WORD, lsf_frame);
 
     // Prepare LICH
     for (size_t i = 0; i < m_lich.size(); ++i)
     {
         std::array<uint8_t, 5> segment;
         std::copy(lsf.begin() + i*5, lsf.begin() + (i + 1)*5, segment.begin());
-        mobilinkd::M17Modulator::lich_segment_t lich_segment = mobilinkd::M17Modulator::make_lich_segment(segment, i);
+        modemm17::M17Modulator::lich_segment_t lich_segment = modemm17::M17Modulator::make_lich_segment(segment, i);
         std::copy(lich_segment.begin(), lich_segment.end(), m_lich[i].begin());
     }
 }
@@ -236,7 +236,7 @@ void M17ModProcessor::send_preamble()
     // Preamble is simple... bytes -> symbols -> baseband.
     std::array<uint8_t, 48> preamble_bytes;
     preamble_bytes.fill(0x77);
-    std::array<int8_t, 192> preamble_symbols = mobilinkd::M17Modulator::bytes_to_symbols(preamble_bytes);
+    std::array<int8_t, 192> preamble_symbols = modemm17::M17Modulator::bytes_to_symbols(preamble_bytes);
     std::array<int16_t, 1920> preamble_baseband = m_m17Modulator.symbols_to_baseband(preamble_symbols);
     m_basebandFifo.write(preamble_baseband.data(), 1920);
 }
@@ -244,7 +244,7 @@ void M17ModProcessor::send_preamble()
 void M17ModProcessor::processAudioFrame()
 {
     std::array<uint8_t, 16> audioPayload = encodeAudio(m_audioFrame);
-    std::array<int8_t, 272> audioDataBits = mobilinkd::M17Modulator::make_stream_data_frame(m_audioFrameNumber++, audioPayload);
+    std::array<int8_t, 272> audioDataBits = modemm17::M17Modulator::make_stream_data_frame(m_audioFrameNumber++, audioPayload);
 
     if (m_audioFrameNumber == 0x8000) {
         m_audioFrameNumber = 0;
@@ -259,16 +259,16 @@ void M17ModProcessor::processAudioFrame()
     std::array<int8_t, 368> temp;
     auto it = std::copy(lich.begin(), lich.end(), temp.begin());
     std::copy(audioDataBits.begin(), audioDataBits.end(), it);
-    mobilinkd::M17Modulator::interleave_and_randomize(temp);
+    modemm17::M17Modulator::interleave_and_randomize(temp);
 
-    output_baseband(mobilinkd::M17Modulator::STREAM_SYNC_WORD, temp);
+    output_baseband(modemm17::M17Modulator::STREAM_SYNC_WORD, temp);
 }
 
 void M17ModProcessor::processBERTFrame()
 {
-    std::array<int8_t, 368> temp = mobilinkd::M17Modulator::make_bert_frame(m_prbs);
-    mobilinkd::M17Modulator::interleave_and_randomize(temp);
-    output_baseband(mobilinkd::M17Modulator::BERT_SYNC_WORD, temp);
+    std::array<int8_t, 368> temp = modemm17::M17Modulator::make_bert_frame(m_prbs);
+    modemm17::M17Modulator::interleave_and_randomize(temp);
+    output_baseband(modemm17::M17Modulator::BERT_SYNC_WORD, temp);
 }
 
 std::array<uint8_t, 16> M17ModProcessor::encodeAudio(std::array<int16_t, 320*6>& audioFrame)
@@ -290,15 +290,15 @@ void M17ModProcessor::send_eot()
         std::copy(EOT_SYNC.begin(), EOT_SYNC.end(), eot_bytes.begin() + i);
     }
 
-    std::array<int8_t, 192> eot_symbols = mobilinkd::M17Modulator::bytes_to_symbols(eot_bytes);
+    std::array<int8_t, 192> eot_symbols = modemm17::M17Modulator::bytes_to_symbols(eot_bytes);
     std::array<int16_t, 1920> eot_baseband = m_m17Modulator.symbols_to_baseband(eot_symbols);
     m_basebandFifo.write(eot_baseband.data(), 1920);
 }
 
 void M17ModProcessor::output_baseband(std::array<uint8_t, 2> sync_word, const std::array<int8_t, 368>& frame)
 {
-    std::array<int8_t, 184> symbols = mobilinkd::M17Modulator::bits_to_symbols(frame); // 368 bits -> 184 dibit symbols
-    std::array<int8_t, 8> sw = mobilinkd::M17Modulator::bytes_to_symbols(sync_word); // 16 bits -> 8 dibit symbols
+    std::array<int8_t, 184> symbols = modemm17::M17Modulator::bits_to_symbols(frame); // 368 bits -> 184 dibit symbols
+    std::array<int8_t, 8> sw = modemm17::M17Modulator::bytes_to_symbols(sync_word); // 16 bits -> 8 dibit symbols
 
     std::array<int8_t, 192> temp; // 384 = 368 + 16 bits -> 192 dibit symbols
     auto fit = std::copy(sw.begin(), sw.end(), temp.begin()); // start with sync word dibits

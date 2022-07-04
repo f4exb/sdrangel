@@ -1,4 +1,4 @@
-// Copyright 2020-2021 Mobilinkd LLC.
+// Copyright 2020-2021 modemm17 LLC.
 
 // make CXXFLAGS="$(pkg-config --cflags gtest) $(pkg-config --libs gtest) -I. -O3" tests/TrellisTest
 
@@ -11,7 +11,7 @@
 #include <cstdlib>
 #include <cstdint>
 
-namespace mobilinkd
+namespace modemm17
 {
 
 inline constexpr std::array<int8_t, 61> make_p1() {
@@ -147,4 +147,4 @@ constexpr Trellis<K, n> makeTrellis(std::array<uint32_t, n> polys)
     return Trellis<K, n>(polys);
 }
 
-} // mobilinkd
+} // modemm17

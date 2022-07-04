@@ -1,4 +1,4 @@
-// Copyright 2020 Mobilinkd LLC.
+// Copyright 2020 modemm17 LLC.
 
 #pragma once
 
@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <numeric>
 
-namespace mobilinkd
+namespace modemm17
 {
 
 template <size_t N = 10>
@@ -92,4 +92,4 @@ struct DeviationError
     }
 };
 
-} // mobilinkd
+} // modemm17

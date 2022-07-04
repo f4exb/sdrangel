@@ -1,4 +1,4 @@
-// Copyright 2021 Mobilinkd LLC.
+// Copyright 2021 modemm17 LLC.
 
 #pragma once
 
@@ -8,7 +8,7 @@
 #include <numeric>
 #include <cassert>
 
-namespace mobilinkd
+namespace modemm17
 {
 
 /**
@@ -239,4 +239,4 @@ public:
     }
 };
 
-} // mobilinkd
+} // modemm17

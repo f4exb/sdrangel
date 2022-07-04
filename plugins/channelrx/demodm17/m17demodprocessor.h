@@ -93,12 +93,12 @@ public:
 private:
     std::vector<uint8_t> m_currentPacket;
     size_t m_packetFrameCounter;
-    mobilinkd::PRBS9 m_prbs;
+    modemm17::PRBS9 m_prbs;
     bool m_displayLSF;
     bool m_noiseBlanker;
     struct CODEC2 *m_codec2;
     static M17DemodProcessor *m_this;
-    mobilinkd::M17Demodulator m_demod;
+    modemm17::M17Demodulator m_demod;
     AudioFifo *m_audioFifo;
     bool m_audioMute;
     AudioVector m_audioBuffer;
@@ -134,7 +134,7 @@ private:
 
     MessageQueue *m_demodInputMessageQueue;
 
-    static bool handle_frame(mobilinkd::M17FrameDecoder::output_buffer_t const& frame, int viterbi_cost);
+    static bool handle_frame(modemm17::M17FrameDecoder::output_buffer_t const& frame, int viterbi_cost);
     static void diagnostic_callback(
         bool dcd,
         float evm,
@@ -147,13 +147,13 @@ private:
         int clock_index,
         int viterbi_cost
     );
-    bool decode_lsf(mobilinkd::M17FrameDecoder::lsf_buffer_t const& lsf);
-    bool decode_lich(mobilinkd::M17FrameDecoder::lich_buffer_t const& lich);
-    bool decode_packet(mobilinkd::M17FrameDecoder::packet_buffer_t const& packet_segment);
-    bool decode_bert(mobilinkd::M17FrameDecoder::bert_buffer_t const& bert);
-    bool demodulate_audio(mobilinkd::M17FrameDecoder::audio_buffer_t const& audio, int viterbi_cost);
+    bool decode_lsf(modemm17::M17FrameDecoder::lsf_buffer_t const& lsf);
+    bool decode_lich(modemm17::M17FrameDecoder::lich_buffer_t const& lich);
+    bool decode_packet(modemm17::M17FrameDecoder::packet_buffer_t const& packet_segment);
+    bool decode_bert(modemm17::M17FrameDecoder::bert_buffer_t const& bert);
+    bool demodulate_audio(modemm17::M17FrameDecoder::audio_buffer_t const& audio, int viterbi_cost);
     void decode_type(uint16_t type);
-    void append_packet(std::vector<uint8_t>& result, mobilinkd::M17FrameDecoder::lsf_buffer_t in);
+    void append_packet(std::vector<uint8_t>& result, modemm17::M17FrameDecoder::lsf_buffer_t in);
 
     void processAudio(const std::array<int16_t, 160>& in);
     void upsample(int upsampling, const int16_t *in, int nbSamplesIn);

@@ -18,7 +18,7 @@
 #include <iostream>
 #include <memory>
 
-namespace mobilinkd
+namespace modemm17
 {
 
 /**
@@ -119,18 +119,18 @@ public:
         PolynomialInterleaver<45, 92, 368> interleaver;
         CRC16<0x5935, 0xFFFF> crc;
 
-        mobilinkd::LinkSetupFrame::call_t callsign;
+        modemm17::LinkSetupFrame::call_t callsign;
         callsign.fill(0);
         std::copy(src.begin(), src.end(), callsign.begin());
-        auto encoded_src = mobilinkd::LinkSetupFrame::encode_callsign(callsign);
+        auto encoded_src = modemm17::LinkSetupFrame::encode_callsign(callsign);
 
-        mobilinkd::LinkSetupFrame::encoded_call_t encoded_dest = {0xff,0xff,0xff,0xff,0xff,0xff};
+        modemm17::LinkSetupFrame::encoded_call_t encoded_dest = {0xff,0xff,0xff,0xff,0xff,0xff};
 
         if (!dest.empty())
         {
             callsign.fill(0);
             std::copy(dest.begin(), dest.end(), callsign.begin());
-            encoded_dest = mobilinkd::LinkSetupFrame::encode_callsign(callsign);
+            encoded_dest = modemm17::LinkSetupFrame::encode_callsign(callsign);
         }
 
         auto rit = std::copy(encoded_dest.begin(), encoded_dest.end(), lsf.begin());
@@ -159,25 +159,25 @@ public:
             {
                 uint32_t x = (b & 0x80) >> 7;
                 b <<= 1;
-                memory = mobilinkd::update_memory<4>(memory, x);
-                encoded[index++] = mobilinkd::convolve_bit(031, memory);
-                encoded[index++] = mobilinkd::convolve_bit(027, memory);
+                memory = modemm17::update_memory<4>(memory, x);
+                encoded[index++] = modemm17::convolve_bit(031, memory);
+                encoded[index++] = modemm17::convolve_bit(027, memory);
             }
         }
 
         // Flush the encoder.
         for (size_t i = 0; i != 4; ++i)
         {
-            memory = mobilinkd::update_memory<4>(memory, 0);
-            encoded[index++] = mobilinkd::convolve_bit(031, memory);
-            encoded[index++] = mobilinkd::convolve_bit(027, memory);
+            memory = modemm17::update_memory<4>(memory, 0);
+            encoded[index++] = modemm17::convolve_bit(031, memory);
+            encoded[index++] = modemm17::convolve_bit(027, memory);
         }
 
         std::array<int8_t, 368> punctured;
         auto size = puncture(encoded, punctured, P1);
 
         if (size != 368) {
-            std::cerr << "mobilinkd::M17Modulator::make_lsf: incorrect size (not 368)" << size;
+            std::cerr << "modemm17::M17Modulator::make_lsf: incorrect size (not 368)" << size;
         }
 
         interleaver.interleave(punctured);
@@ -196,7 +196,7 @@ public:
         tmp <<= 4;
         tmp |= ((segment[1] >> 4) & 0x0F);
         // tmp = segment[0] << 4 | ((segment[1] >> 4) & 0x0F);
-        encoded = mobilinkd::Golay24::encode24(tmp);
+        encoded = modemm17::Golay24::encode24(tmp);
 
         for (size_t i = 0; i != 24; ++i)
         {
@@ -208,7 +208,7 @@ public:
         tmp <<= 8;
         tmp |= segment[2];
         // tmp = ((segment[1] & 0x0F) << 8) | segment[2];
-        encoded = mobilinkd::Golay24::encode24(tmp);
+        encoded = modemm17::Golay24::encode24(tmp);
 
         for (size_t i = 24; i != 48; ++i)
         {
@@ -220,7 +220,7 @@ public:
         tmp <<= 4;
         tmp |= ((segment[4] >> 4) & 0x0F);
         // tmp = segment[3] << 4 | ((segment[4] >> 4) & 0x0F);
-        encoded = mobilinkd::Golay24::encode24(tmp);
+        encoded = modemm17::Golay24::encode24(tmp);
 
         for (size_t i = 48; i != 72; ++i)
         {
@@ -232,7 +232,7 @@ public:
         tmp <<= 8;
         tmp |= (segment_number << 5);
         // tmp = ((segment[4] & 0x0F) << 8) | (segment_number << 5);
-        encoded = mobilinkd::Golay24::encode24(tmp);
+        encoded = modemm17::Golay24::encode24(tmp);
 
         for (size_t i = 72; i != 96; ++i)
         {
@@ -259,25 +259,25 @@ public:
             {
                 uint32_t x = (b & 0x80) >> 7;
                 b <<= 1;
-                memory = mobilinkd::update_memory<4>(memory, x);
-                encoded[index++] = mobilinkd::convolve_bit(031, memory);
-                encoded[index++] = mobilinkd::convolve_bit(027, memory);
+                memory = modemm17::update_memory<4>(memory, x);
+                encoded[index++] = modemm17::convolve_bit(031, memory);
+                encoded[index++] = modemm17::convolve_bit(027, memory);
             }
         }
 
         // Flush the encoder.
         for (size_t i = 0; i != 4; ++i)
         {
-            memory = mobilinkd::update_memory<4>(memory, 0);
-            encoded[index++] = mobilinkd::convolve_bit(031, memory);
-            encoded[index++] = mobilinkd::convolve_bit(027, memory);
+            memory = modemm17::update_memory<4>(memory, 0);
+            encoded[index++] = modemm17::convolve_bit(031, memory);
+            encoded[index++] = modemm17::convolve_bit(027, memory);
         }
 
         std::array<int8_t, 272> punctured;
-        auto size = mobilinkd::puncture(encoded, punctured, mobilinkd::P2);
+        auto size = modemm17::puncture(encoded, punctured, modemm17::P2);
 
         if (size != 272) {
-            std::cerr << "mobilinkd::M17Modulator::make_stream_data_frame: incorrect size (not 272)" << size;
+            std::cerr << "modemm17::M17Modulator::make_stream_data_frame: incorrect size (not 272)" << size;
         }
 
         return punctured;
@@ -330,9 +330,9 @@ public:
             {
                 uint32_t x = (b & 0x80) >> 7;
                 b <<= 1;
-                memory = mobilinkd::update_memory<4>(memory, x);
-                encoded[index++] = mobilinkd::convolve_bit(031, memory);
-                encoded[index++] = mobilinkd::convolve_bit(027, memory);
+                memory = modemm17::update_memory<4>(memory, x);
+                encoded[index++] = modemm17::convolve_bit(031, memory);
+                encoded[index++] = modemm17::convolve_bit(027, memory);
             }
         }
 
@@ -342,24 +342,24 @@ public:
         {
             uint32_t x = (b & 0x80) >> 7;
             b <<= 1;
-            memory = mobilinkd::update_memory<4>(memory, x);
-            encoded[index++] = mobilinkd::convolve_bit(031, memory);
-            encoded[index++] = mobilinkd::convolve_bit(027, memory);
+            memory = modemm17::update_memory<4>(memory, x);
+            encoded[index++] = modemm17::convolve_bit(031, memory);
+            encoded[index++] = modemm17::convolve_bit(027, memory);
         }
 
         // Flush the encoder.
         for (size_t i = 0; i != 4; ++i)
         {
-            memory = mobilinkd::update_memory<4>(memory, 0);
-            encoded[index++] = mobilinkd::convolve_bit(031, memory);
-            encoded[index++] = mobilinkd::convolve_bit(027, memory);
+            memory = modemm17::update_memory<4>(memory, 0);
+            encoded[index++] = modemm17::convolve_bit(031, memory);
+            encoded[index++] = modemm17::convolve_bit(027, memory);
         }
 
         std::array<int8_t, 368> punctured;
         auto size = puncture(encoded, punctured, P3);
 
         if (size != 368) {
-            std::cerr << "mobilinkd::M17Modulator::make_packet_frame: incorrect size (not 368)" << size;
+            std::cerr << "modemm17::M17Modulator::make_packet_frame: incorrect size (not 368)" << size;
         }
 
         interleaver.interleave(punctured);
@@ -438,7 +438,7 @@ public:
         auto size = puncture(encoded, punctured, P2);
 
         if (size != 368) {
-            std::cerr << "mobilinkd::M17Modulator::make_bert_frame: incorrect size (not 368)" << size;
+            std::cerr << "modemm17::M17Modulator::make_bert_frame: incorrect size (not 368)" << size;
         }
 
         return punctured;
@@ -498,7 +498,7 @@ private:
             return encoded_call;
         }
 
-        mobilinkd::LinkSetupFrame::call_t call;
+        modemm17::LinkSetupFrame::call_t call;
         call.fill(0);
         std::copy(callsign.begin(), callsign.end(), call.begin());
         encoded_call = LinkSetupFrame::encode_callsign(call);
@@ -566,4 +566,4 @@ private:
     }
 };
 
-} // mobilinkd
+} // modemm17

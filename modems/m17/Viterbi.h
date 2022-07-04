@@ -1,4 +1,4 @@
-// Copyright 2020 Mobilinkd LLC.
+// Copyright 2020 modemm17 LLC.
 
 #pragma once
 
@@ -13,7 +13,7 @@
 #include <iterator>
 #include <limits>
 
-namespace mobilinkd
+namespace modemm17
 {
 
 /**
@@ -239,4 +239,4 @@ struct Viterbi
     }
 };
 
-} // mobilinkd
+} // modemm17
