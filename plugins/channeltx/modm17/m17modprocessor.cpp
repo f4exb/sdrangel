@@ -28,6 +28,9 @@ MESSAGE_CLASS_DEFINITION(M17ModProcessor::MsgSendAPRS, Message)
 MESSAGE_CLASS_DEFINITION(M17ModProcessor::MsgSendAudioFrame, Message)
 MESSAGE_CLASS_DEFINITION(M17ModProcessor::MsgStartAudio, Message)
 MESSAGE_CLASS_DEFINITION(M17ModProcessor::MsgStopAudio, Message)
+MESSAGE_CLASS_DEFINITION(M17ModProcessor::MsgStartBERT, Message)
+MESSAGE_CLASS_DEFINITION(M17ModProcessor::MsgSendBERTFrame, Message)
+MESSAGE_CLASS_DEFINITION(M17ModProcessor::MsgStopBERT, Message)
 
 M17ModProcessor::M17ModProcessor() :
     m_m17Modulator("MYCALL", ""),
@@ -106,6 +109,24 @@ bool M17ModProcessor::handleMessage(const Message& cmd)
     {
         qDebug("M17ModProcessor::handleMessage: MsgStopAudio");
         audioStop();
+        return true;
+    }
+    else if (MsgStartBERT::match(cmd))
+    {
+        qDebug("M17ModProcessor::handleMessage: MsgStartBERT");
+        m_prbs.reset();
+        send_preamble(); // preamble
+        return true;
+    }
+    else if (MsgSendBERTFrame::match(cmd))
+    {
+        processBERTFrame();
+        return true;
+    }
+    else if (MsgStopBERT::match(cmd))
+    {
+        qDebug("M17ModProcessor::handleMessage: MsgStopBERT");
+        send_eot(); // EOT
         return true;
     }
 
@@ -241,6 +262,13 @@ void M17ModProcessor::processAudioFrame()
     mobilinkd::M17Modulator::interleave_and_randomize(temp);
 
     output_baseband(mobilinkd::M17Modulator::STREAM_SYNC_WORD, temp);
+}
+
+void M17ModProcessor::processBERTFrame()
+{
+    std::array<int8_t, 368> temp = mobilinkd::M17Modulator::make_bert_frame(m_prbs);
+    mobilinkd::M17Modulator::interleave_and_randomize(temp);
+    output_baseband(mobilinkd::M17Modulator::BERT_SYNC_WORD, temp);
 }
 
 std::array<uint8_t, 16> M17ModProcessor::encodeAudio(std::array<int16_t, 320*6>& audioFrame)

@@ -368,6 +368,82 @@ public:
         return punctured;
     }
 
+    static std::array<int8_t, 368> make_bert_frame(PRBS9& prbs)
+    {
+        std::array<uint8_t, 25> data;   // 24.6125 bytes, 197 bits
+
+        // Generate the data.
+        for (size_t i = 0; i != data.size() - 1; ++i)
+        {
+            uint8_t byte = 0;
+
+            for (int i = 0; i != 8; ++i)
+            {
+                byte <<= 1;
+                byte |= prbs.generate();
+            }
+
+            data[i] = byte;
+        }
+
+        uint8_t byte = 0;
+
+        for (int i = 0; i != 5; ++i)
+        {
+            byte <<= 1;
+            byte |= prbs.generate();
+        }
+
+        byte <<= 3;
+        data[24] = byte;
+
+        std::array<uint8_t, 402> encoded;
+        size_t index = 0;
+        uint32_t memory = 0;
+
+        for (size_t i = 0; i != data.size() - 1; ++i)
+        {
+            auto b = data[i];
+
+            for (size_t j = 0; j != 8; ++j)
+            {
+                uint32_t x = (b & 0x80) >> 7;
+                b <<= 1;
+                memory = update_memory<4>(memory, x);
+                encoded[index++] = convolve_bit(031, memory);
+                encoded[index++] = convolve_bit(027, memory);
+            }
+        }
+
+        auto b = data[24];
+
+        for (size_t j = 0; j != 5; ++j)
+        {
+            uint32_t x = (b & 0x80) >> 7;
+            b <<= 1;
+            memory = update_memory<4>(memory, x);
+            encoded[index++] = convolve_bit(031, memory);
+            encoded[index++] = convolve_bit(027, memory);
+        }
+
+        // Flush the encoder.
+        for (size_t i = 0; i != 4; ++i)
+        {
+            memory = update_memory<4>(memory, 0);
+            encoded[index++] = convolve_bit(031, memory);
+            encoded[index++] = convolve_bit(027, memory);
+        }
+
+        std::array<int8_t, 368> punctured;
+        auto size = puncture(encoded, punctured, P2);
+
+        if (size != 368) {
+            std::cerr << "mobilinkd::M17Modulator::make_bert_frame: incorrect size (not 368)" << size;
+        }
+
+        return punctured;
+    }
+
     static void interleave_and_randomize(std::array<int8_t, 368>& punctured)
     {
         M17Randomizer<368> randomizer;

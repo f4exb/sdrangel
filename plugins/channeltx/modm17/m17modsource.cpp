@@ -51,6 +51,7 @@ M17ModSource::M17ModSource() :
     m_audioReadBufferIndex = 0;
     m_m17PullAudio = false;
     m_m17PullCount = 0;
+    m_m17PullBERT = false;
 
 	m_feedbackAudioBuffer.resize(1<<14);
 	m_feedbackAudioBufferFill = 0;
@@ -358,6 +359,22 @@ void M17ModSource::pullM17(Real& sample, bool& carrier)
             m_m17PullCount = 0;
         }
     }
+    else if (m_settings.m_m17Mode == M17ModSettings::M17ModeM17BERT)
+    {
+        if (!m_m17PullBERT)
+        {
+            M17ModProcessor::MsgStartBERT *msg = M17ModProcessor::MsgStartBERT::create();
+            m_processor->getInputMessageQueue()->push(msg);
+            m_m17PullBERT = true;
+        }
+
+        if ((m_processor->getBasebandFifo()->getFill() < 1920) && (m_m17PullCount > 192))
+        {
+            M17ModProcessor::MsgSendBERTFrame *msg = M17ModProcessor::MsgSendBERTFrame::create();
+            m_processor->getInputMessageQueue()->push(msg);
+            m_m17PullCount = 0;
+        }
+    }
     else
     {
         if (m_m17PullAudio)
@@ -365,6 +382,12 @@ void M17ModSource::pullM17(Real& sample, bool& carrier)
             M17ModProcessor::MsgStopAudio *msg = M17ModProcessor::MsgStopAudio::create();
             m_processor->getInputMessageQueue()->push(msg);
             m_m17PullAudio = false;
+        }
+        else if (m_m17PullBERT)
+        {
+            M17ModProcessor::MsgStopBERT *msg = M17ModProcessor::MsgStopBERT::create();
+            m_processor->getInputMessageQueue()->push(msg);
+            m_m17PullBERT = false;
         }
     }
 

@@ -110,6 +110,7 @@ private:
     AudioFifo m_audioFifo;
     bool m_m17PullAudio;
     int m_m17PullCount;
+    bool m_m17PullBERT;
 
     int m_feedbackAudioSampleRate;
     AudioVector m_feedbackAudioBuffer;

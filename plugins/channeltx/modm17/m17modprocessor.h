@@ -183,6 +183,51 @@ public:
         { }
     };
 
+    class MsgStartBERT : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgStartBERT* create() {
+            return new MsgStartBERT();
+        }
+
+    private:
+
+        MsgStartBERT() :
+            Message()
+        { }
+    };
+
+    class MsgSendBERTFrame : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgSendBERTFrame* create() {
+            return new MsgSendBERTFrame();
+        }
+
+    private:
+
+        MsgSendBERTFrame() :
+            Message()
+        { }
+    };
+
+    class MsgStopBERT : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgStopBERT* create() {
+            return new MsgStopBERT();
+        }
+
+    private:
+
+        MsgStopBERT() :
+            Message()
+        { }
+    };
+
     M17ModProcessor();
     ~M17ModProcessor();
 
@@ -203,6 +248,7 @@ private:
     int m_audioFrameIndex;
     uint16_t m_audioFrameNumber;
     struct CODEC2 *m_codec2;
+    mobilinkd::PRBS9 m_prbs;
     bool m_insertPositionToggle;
 
     bool handleMessage(const Message& cmd);
@@ -211,6 +257,7 @@ private:
     void audioStop();
     void processAudioFrame();
     std::array<uint8_t, 16> encodeAudio(std::array<int16_t, 320*6>& audioFrame);
+    void processBERTFrame();
     void test(const QString& sourceCall, const QString& destCall);
     void send_preamble();
     void send_eot();

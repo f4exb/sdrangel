@@ -98,7 +98,7 @@ void M17Demodulator::dcd_off()
     if (diagnostic_callback)
     {
         diagnostic_callback(
-            int(dcd_),
+            dcd_,
             dev.error(),
             dev.deviation(),
             dev.offset(),
@@ -482,7 +482,7 @@ void M17Demodulator::operator()(const float input)
 			if (diagnostic_callback)
 			{
 				diagnostic_callback(
-                    int(dcd_),
+                    dcd_,
                     dev.error(),
                     dev.deviation(),
                     dev.offset(),
@@ -570,7 +570,7 @@ void M17Demodulator::operator()(const float input)
 		if (diagnostic_callback)
 		{
 			diagnostic_callback(
-                int(dcd_),
+                dcd_,
                 dev.error(),
                 dev.deviation(),
                 dev.offset(),

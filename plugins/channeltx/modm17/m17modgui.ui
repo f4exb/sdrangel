@@ -858,6 +858,16 @@
         </property>
        </spacer>
       </item>
+      <item>
+       <widget class="ButtonSwitch" name="bertMode">
+        <property name="toolTip">
+         <string>BERT mode</string>
+        </property>
+        <property name="text">
+         <string>BERT</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item>

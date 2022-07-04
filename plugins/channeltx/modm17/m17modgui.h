@@ -134,6 +134,7 @@ private slots:
     void on_feedbackVolume_valueChanged(int value);
 
     void on_packetMode_toggled(bool checked);
+    void on_bertMode_toggled(bool checked);
     void on_sendPacket_clicked(bool checked);
     void on_loopPacket_toggled(bool checked);
     void on_loopPacketInterval_valueChanged(int value);

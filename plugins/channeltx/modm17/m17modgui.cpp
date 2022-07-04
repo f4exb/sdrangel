@@ -292,6 +292,13 @@ void M17ModGUI::on_packetMode_toggled(bool checked)
     applySettings();
 }
 
+void M17ModGUI::on_bertMode_toggled(bool checked)
+{
+    m_settings.m_m17Mode = checked ? M17ModSettings::M17ModeM17BERT : M17ModSettings::M17ModeNone;
+    displayModes();
+    applySettings();
+}
+
 void M17ModGUI::on_sendPacket_clicked(bool)
 {
     m_m17Mod->sendPacket();
@@ -602,6 +609,19 @@ void M17ModGUI::displayModes()
     {
         ui->packetMode->setChecked(true);
         ui->packetMode->setEnabled(true);
+        ui->bertMode->setChecked(false);
+        ui->tone->setChecked(false);
+        ui->mic->setChecked(false);
+        ui->play->setChecked(false);
+        ui->bertMode->setEnabled(false);
+        ui->tone->setEnabled(false);
+        ui->mic->setEnabled(false);
+        ui->play->setEnabled(false);
+    }
+    if (m_settings.m_m17Mode ==  M17ModSettings::M17Mode::M17ModeM17BERT)
+    {
+        ui->bertMode->setChecked(true);
+        ui->bertMode->setEnabled(true);
         ui->tone->setChecked(false);
         ui->mic->setChecked(false);
         ui->play->setChecked(false);
@@ -614,9 +634,11 @@ void M17ModGUI::displayModes()
         ui->tone->setChecked(true);
         ui->tone->setEnabled(true);
         ui->packetMode->setChecked(false);
+        ui->bertMode->setChecked(false);
         ui->mic->setChecked(false);
         ui->play->setChecked(false);
         ui->packetMode->setEnabled(false);
+        ui->bertMode->setEnabled(true);
         ui->mic->setEnabled(false);
         ui->play->setEnabled(false);
     }
@@ -625,8 +647,10 @@ void M17ModGUI::displayModes()
     {
         ui->tone->setChecked(false);
         ui->packetMode->setChecked(false);
+        ui->bertMode->setChecked(false);
         ui->tone->setEnabled(false);
         ui->packetMode->setEnabled(false);
+        ui->bertMode->setEnabled(true);
 
         if (m_settings.m_audioType == M17ModSettings::AudioType::AudioInput)
         {
@@ -653,10 +677,12 @@ void M17ModGUI::displayModes()
     else if (m_settings.m_m17Mode == M17ModSettings::M17Mode::M17ModeNone)
     {
         ui->packetMode->setChecked(false);
+        ui->bertMode->setChecked(false);
         ui->tone->setChecked(false);
         ui->mic->setChecked(false);
         ui->play->setChecked(false);
         ui->packetMode->setEnabled(true);
+        ui->bertMode->setEnabled(true);
         ui->tone->setEnabled(true);
         ui->mic->setEnabled(true);
         ui->play->setEnabled(true);
@@ -792,6 +818,7 @@ void M17ModGUI::makeUIConnections()
     QObject::connect(ui->feedbackVolume, &QDial::valueChanged, this, &M17ModGUI::on_feedbackVolume_valueChanged);
     QObject::connect(ui->fmAudio, &ButtonSwitch::toggled, this, &M17ModGUI::on_fmAudio_toggled);
     QObject::connect(ui->packetMode, &ButtonSwitch::toggled, this, &M17ModGUI::on_packetMode_toggled);
+    QObject::connect(ui->bertMode, &ButtonSwitch::toggled, this, &M17ModGUI::on_bertMode_toggled);
     QObject::connect(ui->sendPacket, &QPushButton::clicked, this, &M17ModGUI::on_sendPacket_clicked);
     QObject::connect(ui->loopPacket, &ButtonSwitch::toggled, this, &M17ModGUI::on_loopPacket_toggled);
     QObject::connect(ui->loopPacketInterval, &QDial::valueChanged, this, &M17ModGUI::on_loopPacketInterval_valueChanged);
