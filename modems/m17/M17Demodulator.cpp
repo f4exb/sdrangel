@@ -1,3 +1,6 @@
+#include <QDebug>
+#include <QString>
+
 #include "M17Demodulator.h"
 
 namespace modemm17 {
@@ -103,6 +106,7 @@ void M17Demodulator::dcd_off()
             dev.deviation(),
             dev.offset(),
             (int) demodState,
+            (int) sync_word_type,
             clock_recovery.clock_estimate(),
             sample_index,
             sync_sample_index,
@@ -210,7 +214,7 @@ void M17Demodulator::do_lsf_sync()
 
 		if (sync_triggered > 0.1)
         {
-            std::cerr << "M17Demodulator::do_lsf_sync: preamble:" << sync_triggered << std::endl;
+            qDebug() << "modemm17::M17Demodulator::do_lsf_sync: preamble:" << sync_triggered;
 			return;
 		}
 
@@ -218,11 +222,11 @@ void M17Demodulator::do_lsf_sync()
 		bert_triggered = packet_sync.triggered(correlator);
 
         if (sync_triggered != 0) {
-            std::cerr << "M17Demodulator::do_lsf_sync: sync_triggered:" << sync_triggered << std::endl;
+            qDebug() << "modemm17::M17Demodulator::do_lsf_sync: sync_triggered:" << sync_triggered;
         }
 
         if (bert_triggered != 0) {
-            std::cerr << "M17Demodulator::do_lsf_sync: bert_triggered:" << bert_triggered << std::endl;
+            qDebug() << "modemm17::M17Demodulator::do_lsf_sync: bert_triggered:" << bert_triggered;
         }
 
         if (bert_triggered < 0)
@@ -232,7 +236,7 @@ void M17Demodulator::do_lsf_sync()
 			update_values(sample_index);
 			demodState = DemodState::FRAME;
 			sync_word_type = M17FrameDecoder::SyncWordType::BERT;
-            std::cerr << "M17Demodulator::do_lsf_sync: BERT:" << (int) sync_word_type << std::endl;
+            qDebug() << "modemm17::M17Demodulator::do_lsf_sync: BERT:" << (int) sync_word_type;
 		}
         else if (bert_triggered > 0)
         {
@@ -241,7 +245,7 @@ void M17Demodulator::do_lsf_sync()
 			update_values(sample_index);
 			demodState = DemodState::FRAME;
 			sync_word_type = M17FrameDecoder::SyncWordType::PACKET;
-            std::cerr << "M17Demodulator::do_lsf_sync: PACKET:" << (int) sync_word_type << std::endl;
+            qDebug() << "modemm17::M17Demodulator::do_lsf_sync: PACKET:" << (int) sync_word_type;
         }
 		else if (std::abs(sync_triggered) > 0.1)
 		{
@@ -253,13 +257,13 @@ void M17Demodulator::do_lsf_sync()
 			{
 				demodState = DemodState::FRAME;
 				sync_word_type = M17FrameDecoder::SyncWordType::LSF;
-                std::cerr << "M17Demodulator::do_lsf_sync: LSF:" << (int) sync_word_type << std::endl;
+                qDebug() << "modemm17::M17Demodulator::do_lsf_sync: LSF:" << (int) sync_word_type;
 			}
 			else
 			{
 				demodState = DemodState::FRAME;
 				sync_word_type = M17FrameDecoder::SyncWordType::STREAM;
-                std::cerr << "M17Demodulator::do_lsf_sync: STREAM:" << (int) sync_word_type << std::endl;
+                qDebug() << "modemm17::M17Demodulator::do_lsf_sync: STREAM:" << (int) sync_word_type;
 			}
 		}
 		else if (++missing_sync_count > 192)
@@ -267,7 +271,7 @@ void M17Demodulator::do_lsf_sync()
 			demodState = DemodState::UNLOCKED;
             decoder.reset();
 			missing_sync_count = 0;
-            std::cerr << "M17Demodulator::do_lsf_sync: UNLOCKED:" << (int) sync_word_type << std::endl;
+            qDebug() << "modemm17::M17Demodulator::do_lsf_sync: UNLOCKED:" << (int) sync_word_type;
 		}
 		else
 		{
@@ -403,7 +407,6 @@ void M17Demodulator::do_frame(float filtered_sample)
 
 	if (len != 0)
 	{
-        // std::cerr << "M17Demodulator::do_frame: sync_word_type:" << (int) sync_word_type << " len:" << len << std::endl;
 		need_clock_update_ = true;
 		M17FrameDecoder::input_buffer_t buffer;
 		std::copy(tmp, tmp + len, buffer.begin());
@@ -411,6 +414,11 @@ void M17Demodulator::do_frame(float filtered_sample)
 		cost_count = viterbi_cost > 90 ? cost_count + 1 : 0;
 		cost_count = viterbi_cost > 100 ? cost_count + 1 : cost_count;
 		cost_count = viterbi_cost > 110 ? cost_count + 1 : cost_count;
+        // qDebug() << "modemm17::M17Demodulator::do_frame: "
+        //     << "sync_word_type:" << (int) sync_word_type
+        //     << " len:" << len
+        //     << " viterbi_cost: " << viterbi_cost
+        //     << " cost_count" << cost_count;
 
 		if (cost_count > 75)
 		{
@@ -487,6 +495,7 @@ void M17Demodulator::operator()(const float input)
                     dev.deviation(),
                     dev.offset(),
                     (int) demodState,
+                    (int) sync_word_type,
 					clock_recovery.clock_estimate(),
                     sample_index,
                     sync_sample_index,
@@ -575,6 +584,7 @@ void M17Demodulator::operator()(const float input)
                 dev.deviation(),
                 dev.offset(),
                 (int) demodState,
+                (int) sync_word_type,
 				clock_recovery.clock_estimate(),
                 sample_index,
                 sync_sample_index,

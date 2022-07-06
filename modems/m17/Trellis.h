@@ -47,7 +47,7 @@ constexpr auto P1 = std::array<int8_t, 61>{
     1, 0, 1, 1  // M15
 };
 
-/// Puncture matrix for audio frames. Rate 6/11.
+/// Puncture matrix for audio and BERT frames. Rate 11/12.
 constexpr auto P2 = std::array<int8_t, 12>{
     1, 1, 1, 1, 1, 1,
     1, 1, 1, 1, 1, 0};

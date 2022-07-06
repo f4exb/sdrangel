@@ -1,5 +1,8 @@
 #pragma once
 
+#include <QDebug>
+#include <QString>
+
 #include "FirFilter.h"
 #include "LinkSetupFrame.h"
 #include "CRC16.h"
@@ -177,7 +180,7 @@ public:
         auto size = puncture(encoded, punctured, P1);
 
         if (size != 368) {
-            std::cerr << "modemm17::M17Modulator::make_lsf: incorrect size (not 368)" << size;
+            qWarning() << "modemm17::M17Modulator::make_lsf: incorrect size (not 368)" << size;
         }
 
         interleaver.interleave(punctured);
@@ -277,7 +280,7 @@ public:
         auto size = modemm17::puncture(encoded, punctured, modemm17::P2);
 
         if (size != 272) {
-            std::cerr << "modemm17::M17Modulator::make_stream_data_frame: incorrect size (not 272)" << size;
+            qWarning() << "modemm17::M17Modulator::make_stream_data_frame: incorrect size (not 272)" << size;
         }
 
         return punctured;
@@ -310,7 +313,9 @@ public:
             packet_assembly[25] = 0x80 | ((packet_size+2)<<2); // sent packet size includes CRC
             packet_assembly[packet_size]   = crc_.get_bytes()[1];
             packet_assembly[packet_size+1] = crc_.get_bytes()[0];
-            std::cerr << "M17Modulator::make_packet_frame:" << std::hex << (int) crc_.get_bytes()[1] << ":" <<  (int) crc_.get_bytes()[0] << std::endl;
+            qDebug() << QString("modemm17::M17Modulator::make_packet_frame: %1:%2")
+                .arg((int) crc_.get_bytes()[1], 2, 16, QChar('0'))
+                .arg((int) crc_.get_bytes()[0], 2, 16, QChar('0'));
         }
         else
         {
@@ -359,7 +364,7 @@ public:
         auto size = puncture(encoded, punctured, P3);
 
         if (size != 368) {
-            std::cerr << "modemm17::M17Modulator::make_packet_frame: incorrect size (not 368)" << size;
+            qWarning() << "modemm17::M17Modulator::make_packet_frame: incorrect size (not 368)" << size;
         }
 
         interleaver.interleave(punctured);
@@ -372,7 +377,7 @@ public:
     {
         std::array<uint8_t, 25> data;   // 24.6125 bytes, 197 bits
 
-        // Generate the data.
+        // Generate the data (24*8 = 192 bits).
         for (size_t i = 0; i != data.size() - 1; ++i)
         {
             uint8_t byte = 0;
@@ -386,8 +391,8 @@ public:
             data[i] = byte;
         }
 
+        // Generate the data (last 5 bits).
         uint8_t byte = 0;
-
         for (int i = 0; i != 5; ++i)
         {
             byte <<= 1;
@@ -397,10 +402,12 @@ public:
         byte <<= 3;
         data[24] = byte;
 
+        // Convolutional encode
         std::array<uint8_t, 402> encoded;
         size_t index = 0;
         uint32_t memory = 0;
 
+        // 24*8 = 192 first bits
         for (size_t i = 0; i != data.size() - 1; ++i)
         {
             auto b = data[i];
@@ -415,8 +422,8 @@ public:
             }
         }
 
+        // last 5 bits
         auto b = data[24];
-
         for (size_t j = 0; j != 5; ++j)
         {
             uint32_t x = (b & 0x80) >> 7;
@@ -438,7 +445,7 @@ public:
         auto size = puncture(encoded, punctured, P2);
 
         if (size != 368) {
-            std::cerr << "modemm17::M17Modulator::make_bert_frame: incorrect size (not 368)" << size;
+            qWarning() << "modemm17::M17Modulator::make_bert_frame: incorrect size (not 368)" << size;
         }
 
         return punctured;

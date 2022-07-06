@@ -49,6 +49,8 @@ add_library(modems SHARED
 	${modems_SOURCES}
 )
 
-target_link_libraries(modems)
+target_link_libraries(modems
+    Qt5::Core
+)
 
 install(TARGETS modems DESTINATION ${INSTALL_LIB_DIR})

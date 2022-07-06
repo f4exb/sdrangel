@@ -2,6 +2,9 @@
 
 #pragma once
 
+#include <QDebug>
+#include <QString>
+
 #include "M17Randomizer.h"
 #include "PolynomialInterleaver.h"
 #include "Trellis.h"
@@ -22,15 +25,16 @@ namespace modemm17
 
 
 template <typename C, size_t N>
-void dump(const std::array<C,N>& data, char header = 'D')
+QString dump(const std::array<C,N>& data, char header = 'D')
 {
-    std::cerr << header << " = ";
+    QString s(header);
+    s += "=";
 
     for (auto c : data) {
-        std::cerr << std::hex << std::setw(2) << std::setfill('0') << (int) c << " ";
+        s += QString("%1 ").arg((int) c, 2, 16, QChar('0'));
     }
 
-    std::cerr << std::dec << std::endl;
+    return s;
 }
 
 struct M17FrameDecoder
@@ -153,8 +157,7 @@ struct M17FrameDecoder
         viterbi_cost = viterbi_.decode(depuncture_buffer.lsf, decode_buffer.lsf);
         to_byte_array(decode_buffer.lsf, output_buffer.lsf);
 
-        // std::cerr << "M17FrameDecoder::decode_lsf: vierbi:" << viterbi_cost << std::endl;
-        // dump(output_buffer.lsf);
+        // qDebug() << "modemm17::M17FrameDecoder::decode_lsf: vierbi:" << viterbi_cost <<dump(output_buffer.lsf);
 
         crc_.reset();
         for (auto c : output_buffer.lsf) crc_(c);
@@ -169,8 +172,7 @@ struct M17FrameDecoder
         }
         else
         {
-            std::cerr << "M17FrameDecoder::decode_lsf: bad CRC:" << std::endl;
-            dump(output_buffer.lsf);
+            qDebug() << "modemm17::M17FrameDecoder::decode_lsf: bad CRC:" << dump(output_buffer.lsf);
         }
 
         lich_segments = 0;
@@ -262,9 +264,10 @@ struct M17FrameDecoder
         return DecodeResult::INCOMPLETE;
     }
 
-    DecodeResult decode_bert(input_buffer_t&, int& viterbi_cost)
+    DecodeResult decode_bert(input_buffer_t& buffer, int& viterbi_cost)
     {
         depunctured_buffer_t depuncture_buffer;
+        depuncture(buffer, depuncture_buffer.bert, P2);
         viterbi_cost = viterbi_.decode(depuncture_buffer.bert, decode_buffer.bert);
         to_byte_array(decode_buffer.bert, output_buffer.bert);
 

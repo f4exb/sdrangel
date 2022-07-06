@@ -71,6 +71,7 @@ public:
         float& deviation,
         float& offset,
         int& status,
+        int& sync_word_type,
         float& clock,
         int& sampleIndex,
         int& syncIndex,
@@ -83,6 +84,7 @@ public:
         deviation = m_deviation;
         offset = m_offset;
         status = m_status;
+        sync_word_type = m_syncWordType;
         clock = m_clock;
         sampleIndex = m_sampleIndex;
         syncIndex = m_syncIndex;
@@ -112,16 +114,17 @@ private:
     M17DemodAudioInterpolatorFilter m_upsamplingFilter;
 
     // Diagnostics
-    bool m_dcd;        //!< Data Carrier Detect
-    float m_evm;       //!< Error Vector Magnitude in percent
-    float m_deviation; //!< Estimated deviation. Ideal = 1.0
-    float m_offset;    //!< Estimated frequency offset. Ideal = 0.0 practically limited to ~[-0.18, 0.18]
-    int m_status;      //!< Status
+    bool m_dcd;         //!< Data Carrier Detect
+    float m_evm;        //!< Error Vector Magnitude in percent
+    float m_deviation;  //!< Estimated deviation. Ideal = 1.0
+    float m_offset;     //!< Estimated frequency offset. Ideal = 0.0 practically limited to ~[-0.18, 0.18]
+    int m_status;       //!< Status
+    int m_syncWordType; //!< Sync word type
     float m_clock;
     int m_sampleIndex;
     int m_syncIndex;
     int m_clockIndex;
-    int m_viterbiCost; //!< [-1:128] ideally 0
+    int m_viterbiCost;  //!< [-1:128] ideally 0
 
     QString m_srcCall;
     QString m_destCall;
@@ -141,6 +144,7 @@ private:
         float deviation,
         float offset,
         int status,
+        int sync_word_type,
         float clock,
         int sample_index,
         int sync_index,

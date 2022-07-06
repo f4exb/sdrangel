@@ -1370,13 +1370,13 @@
              <rect>
               <x>203</x>
               <y>65</y>
-              <width>25</width>
+              <width>30</width>
               <height>28</height>
              </rect>
             </property>
             <property name="minimumSize">
              <size>
-              <width>25</width>
+              <width>30</width>
               <height>0</height>
              </size>
             </property>

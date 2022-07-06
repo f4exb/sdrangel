@@ -604,13 +604,26 @@ void M17DemodGUI::tick()
         float deviation;
         float offset;
         int status;
+        int sync_word_type;
         float clock;
         int sampleIndex;
         int syncIndex;
         int clockIndex;
         int viterbiCost;
 
-        m_m17Demod->getDiagnostics(dcd, evm, deviation, offset, status, clock, sampleIndex, syncIndex, clockIndex, viterbiCost);
+        m_m17Demod->getDiagnostics(
+            dcd,
+            evm,
+            deviation,
+            offset,
+            status,
+            sync_word_type,
+            clock,
+            sampleIndex,
+            syncIndex,
+            clockIndex,
+            viterbiCost
+        );
 
         if (dcd) {
             ui->dcdLabel->setStyleSheet("QLabel { background-color : green; }");
@@ -624,7 +637,7 @@ void M17DemodGUI::tick()
             ui->lockLabel->setStyleSheet("QLabel { background-color : green; }");
         }
 
-        ui->syncText->setText(getStatus(status, m_m17Demod->getStreamElsePacket(), m_m17Demod->getStdPacketProtocol()));
+        ui->syncText->setText(getStatus(status, sync_word_type, m_m17Demod->getStreamElsePacket(), m_m17Demod->getStdPacketProtocol()));
         ui->evmText->setText(tr("%1").arg(evm*100.0f, 3, 'f', 1));
         ui->deviationText->setText(tr("%1").arg(deviation/1.5f, 3, 'f', 2));
         ui->offsetText->setText(tr("%1").arg(offset/1.5f, 3, 'f', 2));
@@ -657,11 +670,11 @@ void M17DemodGUI::tick()
 	m_tickCount++;
 }
 
-QString M17DemodGUI::getStatus(int status, bool streamElsePacket, int packetProtocol)
+QString M17DemodGUI::getStatus(int status, int sync_word_type, bool streamElsePacket, int packetProtocol)
 {
     if (status == 0) {
         return "Unlocked";
-    } else if (status == 4) {
+    } else if ((status == 5) && (sync_word_type == 3)) {
         return "BERT";
     } else if (streamElsePacket) {
         return "Stream";

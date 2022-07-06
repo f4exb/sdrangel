@@ -37,7 +37,7 @@ struct M17_API M17Demodulator
 	using collelator_t = Correlator;
 	using sync_word_t = SyncWord<collelator_t>;
 	using callback_t = M17FrameDecoder::callback_t;
-	using diagnostic_callback_t = std::function<void(bool, float, float, float, int, float, int, int, int, int)>;
+	using diagnostic_callback_t = std::function<void(bool, float, float, float, int, int, float, int, int, int, int)>;
 
 	enum class DemodState {
         UNLOCKED,

@@ -102,6 +102,7 @@ void M17DemodProcessor::diagnostic_callback(
     float deviation,
     float offset,
     int status,
+    int sync_word_type,
     float clock,
     int sample_index,
     int sync_index,
@@ -116,6 +117,7 @@ void M17DemodProcessor::diagnostic_callback(
     m_this->m_deviation = deviation;
     m_this->m_offset = offset;
     m_this->m_status = status;
+    m_this->m_syncWordType = sync_word_type;
     m_this->m_clock = clock;
     m_this->m_sampleIndex = sample_index;
     m_this->m_syncIndex = sync_index;

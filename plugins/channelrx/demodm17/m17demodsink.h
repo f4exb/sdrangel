@@ -82,6 +82,7 @@ public:
         float& deviation,
         float& offset,
         int& status,
+        int& sync_word_type,
         float& clock,
         int& sampleIndex,
         int& syncIndex,
@@ -89,7 +90,19 @@ public:
         int& viterbiCost
     ) const
     {
-        m_m17DemodProcessor.getDiagnostics(dcd, evm, deviation, offset, status, clock, sampleIndex, syncIndex, clockIndex, viterbiCost);
+        m_m17DemodProcessor.getDiagnostics(
+            dcd,
+            evm,
+            deviation,
+            offset,
+            status,
+            sync_word_type,
+            clock,
+            sampleIndex,
+            syncIndex,
+            clockIndex,
+            viterbiCost
+        );
     }
 
     uint32_t getLSFCount() const { return m_m17DemodProcessor.getLSFCount(); }
