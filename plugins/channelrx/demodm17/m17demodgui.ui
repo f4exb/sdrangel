@@ -1673,35 +1673,10 @@
          <enum>QFrame::Sunken</enum>
         </property>
         <property name="text">
-         <string>0/1000000</string>
+         <string>0/0</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-       <widget class="QLabel" name="berLabel">
-        <property name="geometry">
-         <rect>
-          <x>230</x>
-          <y>10</y>
-          <width>30</width>
-          <height>28</height>
-         </rect>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>30</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Total BER</string>
-        </property>
-        <property name="text">
-         <string>BER</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
         </property>
        </widget>
        <widget class="QLabel" name="berRatio">
@@ -1709,7 +1684,7 @@
          <rect>
           <x>265</x>
           <y>10</y>
-          <width>85</width>
+          <width>70</width>
           <height>28</height>
          </rect>
         </property>
@@ -1775,6 +1750,101 @@
           <width>480</width>
           <height>165</height>
          </rect>
+        </property>
+       </widget>
+       <widget class="QLabel" name="berHistoryLabel">
+        <property name="geometry">
+         <rect>
+          <x>340</x>
+          <y>10</y>
+          <width>21</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>His</string>
+        </property>
+       </widget>
+       <widget class="QDial" name="berHistory">
+        <property name="geometry">
+         <rect>
+          <x>365</x>
+          <y>10</y>
+          <width>24</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>28</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Maximum BER history on the graph (seconds)</string>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>360</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>6</number>
+        </property>
+        <property name="sliderPosition">
+         <number>6</number>
+        </property>
+       </widget>
+       <widget class="QLabel" name="berHistoryText">
+        <property name="geometry">
+         <rect>
+          <x>395</x>
+          <y>10</y>
+          <width>31</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="toolTip">
+         <string>Maximum BER history on the graph (seconds)</string>
+        </property>
+        <property name="text">
+         <string>0000</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="berHistoryUnits">
+        <property name="geometry">
+         <rect>
+          <x>428</x>
+          <y>10</y>
+          <width>16</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>s</string>
+        </property>
+       </widget>
+       <widget class="ButtonSwitch" name="berButton">
+        <property name="geometry">
+         <rect>
+          <x>225</x>
+          <y>5</y>
+          <width>36</width>
+          <height>35</height>
+         </rect>
+        </property>
+        <property name="toolTip">
+         <string>Toggle BER or error values display on graph</string>
+        </property>
+        <property name="text">
+         <string>BER</string>
         </property>
        </widget>
       </widget>

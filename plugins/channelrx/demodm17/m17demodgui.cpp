@@ -300,6 +300,17 @@ void M17DemodGUI::on_curButton_toggled(bool checked)
     ui->totButton->blockSignals(false);
 }
 
+void M17DemodGUI::on_berHistory_valueChanged(int value)
+{
+    m_berHistory = value*20;
+    ui->berHistoryText->setText(tr("%1").arg(m_berHistory/2));
+}
+
+void M17DemodGUI::on_berButton_toggled(bool checked)
+{
+    m_showBERNumbersOrRates = !checked;
+}
+
 void M17DemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
@@ -379,7 +390,9 @@ M17DemodGUI::M17DemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_tickCount(0),
     m_lastBERErrors(0),
     m_lastBERBits(0),
-    m_showBERTotalOrCurrent(true)
+    m_showBERTotalOrCurrent(true),
+    m_showBERNumbersOrRates(true),
+    m_berHistory(120)
 {
 	setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/channelrx/demodm17/readme.md";
@@ -445,13 +458,16 @@ M17DemodGUI::M17DemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
     ui->dcdLabel->setPixmap(QIcon(":/carrier.png").pixmap(QSize(20, 20)));
     ui->lockLabel->setPixmap(QIcon(":/locked.png").pixmap(QSize(20, 20)));
+    ui->berHistoryText->setText(tr("%1").arg(m_berHistory/2));
+    ui->berHistory->setValue(m_berHistory/20);
 
     m_berChart.setTheme(QChart::ChartThemeDark);
     m_berChart.legend()->hide();
     ui->berChart->setChart(&m_berChart);
     ui->berChart->setRenderHint(QPainter::Antialiasing);
     m_berChart.addAxis(&m_berChartXAxis, Qt::AlignBottom);
-    m_berChart.addAxis(&m_berChartYAxis, Qt::AlignLeft);
+    QValueAxis *berChartYAxis = new QValueAxis();
+    m_berChart.addAxis(berChartYAxis, Qt::AlignLeft);
     m_berChart.layout()->setContentsMargins(0, 0, 0, 0);
     m_berChart.setMargins(QMargins(1, 1, 1, 1));
 
@@ -533,6 +549,9 @@ void M17DemodGUI::displaySettings()
 
     ui->totButton->setChecked(m_showBERTotalOrCurrent);
     ui->curButton->setChecked(!m_showBERTotalOrCurrent);
+
+    ui->berHistory->setValue(m_berHistory/20);
+    ui->berHistoryText->setText(tr("%1").arg(m_berHistory/2));
 
     updateIndexLabel();
 
@@ -705,6 +724,10 @@ void M17DemodGUI::tick()
             m_lastBERErrors = bertErrors;
             m_lastBERBits = bertBits;
 
+            while (m_berPoints.size() >= (int) m_berHistory) {
+                m_berPoints.pop_front();
+            }
+
             m_berPoints.append(BERPoint{
                 QDateTime::currentDateTime(),
                 bertErrors,
@@ -714,13 +737,19 @@ void M17DemodGUI::tick()
             });
             m_currentErrors.append(bertErrorsDelta);
 
-            uint32_t maxY;
             QLineSeries *series;
+            uint32_t min, max;
+            qreal fmin, fmax;
 
             if (m_showBERTotalOrCurrent)
             {
                 ui->berCounts->setText(tr("%1/%2").arg(bertErrors).arg(bertBits));
-                series = addBERSeries(true, maxY);
+
+                if (m_showBERNumbersOrRates) {
+                    series = addBERSeries(true, min, max);
+                } else {
+                    series = addBERSeriesRate(true, fmin, fmax);
+                }
 
                 if (bertBits > 0) {
                     ui->berRatio->setText(tr("%1").arg((double) bertErrors / (double) bertBits, 0, 'e', 2));
@@ -729,7 +758,12 @@ void M17DemodGUI::tick()
             else
             {
                 ui->berCounts->setText(tr("%1/%2").arg(bertErrorsDelta).arg(bertBitsDelta));
-                series = addBERSeries(false, maxY);
+
+                if (m_showBERNumbersOrRates) {
+                    series = addBERSeries(false, min, max);
+                } else {
+                    series = addBERSeriesRate(false, fmin, fmax);
+                }
 
                 if (bertBitsDelta > 0) {
                     ui->berRatio->setText(tr("%1").arg((double) bertErrorsDelta / (double) bertBitsDelta, 0, 'e', 2));
@@ -740,7 +774,8 @@ void M17DemodGUI::tick()
             {
                 m_berChart.removeAllSeries();
                 m_berChart.removeAxis(&m_berChartXAxis);
-                m_berChart.removeAxis(&m_berChartYAxis);
+                QAbstractAxis *berChartYAxis = m_berChart.axes(Qt::Vertical).at(0);
+                m_berChart.removeAxis(berChartYAxis);
 
                 m_berChart.addSeries(series);
 
@@ -749,9 +784,36 @@ void M17DemodGUI::tick()
                 m_berChart.addAxis(&m_berChartXAxis, Qt::AlignBottom);
                 series->attachAxis(&m_berChartXAxis);
 
-                m_berChartYAxis.setRange(0, maxY == 0 ? 1 : maxY);
-                m_berChart.addAxis(&m_berChartYAxis, Qt::AlignLeft);
-                series->attachAxis(&m_berChartYAxis);
+                if (m_showBERNumbersOrRates)
+                {
+                    berChartYAxis = new QValueAxis();
+
+                    if (min != 0) {
+                        ((QValueAxis*) berChartYAxis)->setMin(min);
+                    }
+
+                    if (max != 0) {
+                        ((QValueAxis*) berChartYAxis)->setMax(max);
+                    }
+                }
+                else
+                {
+                    berChartYAxis = new QLogValueAxis();
+                    ((QLogValueAxis*) berChartYAxis)->setLabelFormat("%.2e");
+                    ((QLogValueAxis*) berChartYAxis)->setBase(10.0);
+                    ((QLogValueAxis*) berChartYAxis)->setMinorTickCount(-1);
+
+                    if (fmin != 0) {
+                        ((QLogValueAxis*) berChartYAxis)->setMin(fmin);
+                    }
+
+                    if (fmax != 0) {
+                        ((QLogValueAxis*) berChartYAxis)->setMax(fmax);
+                    }
+                }
+
+                m_berChart.addAxis(berChartYAxis, Qt::AlignLeft);
+                series->attachAxis(berChartYAxis);
             }
         }
         else
@@ -795,7 +857,7 @@ QString M17DemodGUI::getStatus(int status, int sync_word_type, bool streamElsePa
     }
 }
 
-QLineSeries *M17DemodGUI::addBERSeries(bool total, uint32_t& maxVal)
+QLineSeries *M17DemodGUI::addBERSeries(bool total, uint32_t& min, uint32_t& max)
 {
     if (m_berPoints.size() < 2) {
         return nullptr;
@@ -803,10 +865,15 @@ QLineSeries *M17DemodGUI::addBERSeries(bool total, uint32_t& maxVal)
 
     QLineSeries *series = new QLineSeries();
 
-    if (!total) {
-        maxVal = *std::max_element(m_currentErrors.begin(), m_currentErrors.end());
-    } else {
-        maxVal = m_berPoints.back().m_totalErrors;
+    if (total)
+    {
+        min = m_berPoints.front().m_totalErrors;
+        max = m_berPoints.back().m_totalErrors;
+    }
+    else
+    {
+        min = *std::min_element(m_currentErrors.begin(), m_currentErrors.end());
+        max = *std::max_element(m_currentErrors.begin(), m_currentErrors.end());
     }
 
     for (auto berPoint : m_berPoints)
@@ -821,6 +888,45 @@ QLineSeries *M17DemodGUI::addBERSeries(bool total, uint32_t& maxVal)
         }
 
         series->append(x, y);
+    }
+
+    return series;
+}
+
+QLineSeries *M17DemodGUI::addBERSeriesRate(bool total, qreal& min, qreal& max)
+{
+    if (m_berPoints.size() < 2) {
+        return nullptr;
+    }
+
+    QLineSeries *series = new QLineSeries();
+    min = 0;
+    max = 0;
+
+    for (auto berPoint : m_berPoints)
+    {
+        qreal x = berPoint.m_dateTime.toMSecsSinceEpoch();
+
+        if (total)
+        {
+            if ((berPoint.m_totalErrors != 0) && (berPoint.m_totalBits != 0))
+            {
+                qreal y = ((qreal) berPoint.m_totalErrors) / ((qreal) berPoint.m_totalBits);
+                min = std::min(min, y);
+                max = std::max(max, y);
+                series->append(x, y);
+            }
+        }
+        else
+        {
+            if ((berPoint.m_currentErrors != 0) && (berPoint.m_currentBits != 0))
+            {
+                qreal y = ((qreal) berPoint.m_currentErrors) / ((qreal) berPoint.m_currentBits);
+                min = std::min(min, y);
+                max = std::max(max, y);
+                series->append(x, y);
+            }
+        }
     }
 
     return series;
@@ -845,6 +951,8 @@ void M17DemodGUI::makeUIConnections()
     QObject::connect(ui->aprsClearTable, &QPushButton::clicked, this, &M17DemodGUI::on_aprsClearTable_clicked);
     QObject::connect(ui->totButton, &ButtonSwitch::toggled, this, &M17DemodGUI::on_totButton_toggled);
     QObject::connect(ui->curButton, &ButtonSwitch::toggled, this, &M17DemodGUI::on_curButton_toggled);
+    QObject::connect(ui->berButton, &ButtonSwitch::toggled, this, &M17DemodGUI::on_berButton_toggled);
+    QObject::connect(ui->berHistory, &QDial::valueChanged, this, &M17DemodGUI::on_berHistory_valueChanged);
 }
 
 void M17DemodGUI::updateAbsoluteCenterFrequency()

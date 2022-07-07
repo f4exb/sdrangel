@@ -106,12 +106,13 @@ private:
     uint32_t m_lastBERErrors;
     uint32_t m_lastBERBits;
     bool m_showBERTotalOrCurrent;
+    bool m_showBERNumbersOrRates;
 
     QChart m_berChart;
     QDateTimeAxis m_berChartXAxis;
-    QValueAxis m_berChartYAxis;
     QList<BERPoint> m_berPoints;
     QList<uint32_t> m_currentErrors;
+    uint32_t m_berHistory;
 
 	float m_myLatitude;
 	float m_myLongitude;
@@ -132,7 +133,8 @@ private:
     void updateAbsoluteCenterFrequency();
     QString getStatus(int status, int sync_word_type, bool streamElsePacket, int packetProtocol);
     void packetReceived(QByteArray packet);
-    QLineSeries *addBERSeries(bool total, uint32_t& maxVal);
+    QLineSeries *addBERSeries(bool total, uint32_t& min, uint32_t& max);
+    QLineSeries *addBERSeriesRate(bool total, qreal& min, qreal& max);
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
@@ -154,6 +156,8 @@ private slots:
     void on_aprsClearTable_clicked();
     void on_totButton_toggled(bool checked);
     void on_curButton_toggled(bool checked);
+    void on_berButton_toggled(bool checked);
+    void on_berHistory_valueChanged(int value);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void on_viewStatusLog_clicked();
