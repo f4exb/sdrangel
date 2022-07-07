@@ -105,6 +105,10 @@ public:
         );
     }
 
+    void getBERT(uint32_t& bertErrors, uint32_t& bertBits) {
+        m_m17DemodProcessor.getBERT(bertErrors, bertBits);
+    }
+
     uint32_t getLSFCount() const { return m_m17DemodProcessor.getLSFCount(); }
     const QString& getSrcCall() const { return m_m17DemodProcessor.getSrcCall(); }
     const QString& getDestcCall() const { return m_m17DemodProcessor.getDestcCall(); }

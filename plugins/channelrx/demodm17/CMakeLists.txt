@@ -44,7 +44,7 @@ if(NOT SERVER_MODE)
         m17statustextdialog.h
     )
     set(TARGET_NAME demodm17)
-    set(TARGET_LIB "Qt5::Widgets")
+    set(TARGET_LIB "Qt5::Widgets" Qt5::Charts)
     set(TARGET_LIB_GUI "sdrgui")
     set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
 else()

@@ -1634,6 +1634,150 @@
         </property>
        </widget>
       </widget>
+      <widget class="QWidget" name="berTab">
+       <property name="toolTip">
+        <string>BER test data</string>
+       </property>
+       <attribute name="icon">
+        <iconset resource="../../../sdrgui/resources/res.qrc">
+         <normaloff>:/ruler.png</normaloff>:/ruler.png</iconset>
+       </attribute>
+       <attribute name="title">
+        <string/>
+       </attribute>
+       <attribute name="toolTip">
+        <string>BER test</string>
+       </attribute>
+       <widget class="QLabel" name="berCounts">
+        <property name="geometry">
+         <rect>
+          <x>80</x>
+          <y>10</y>
+          <width>140</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Errors/Bits counts</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Box</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
+        </property>
+        <property name="text">
+         <string>0/1000000</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="berLabel">
+        <property name="geometry">
+         <rect>
+          <x>230</x>
+          <y>10</y>
+          <width>30</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>30</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Total BER</string>
+        </property>
+        <property name="text">
+         <string>BER</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="berRatio">
+        <property name="geometry">
+         <rect>
+          <x>265</x>
+          <y>10</y>
+          <width>85</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>30</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Bit Error Rate</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Box</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
+        </property>
+        <property name="text">
+         <string>0.00e+00</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="ButtonSwitch" name="totButton">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>5</y>
+          <width>36</width>
+          <height>35</height>
+         </rect>
+        </property>
+        <property name="toolTip">
+         <string>Select total BER counts</string>
+        </property>
+        <property name="text">
+         <string>TOT</string>
+        </property>
+       </widget>
+       <widget class="ButtonSwitch" name="curButton">
+        <property name="geometry">
+         <rect>
+          <x>40</x>
+          <y>5</y>
+          <width>36</width>
+          <height>35</height>
+         </rect>
+        </property>
+        <property name="toolTip">
+         <string>Select current BER counts</string>
+        </property>
+        <property name="text">
+         <string>CUR</string>
+        </property>
+       </widget>
+       <widget class="QChartView" name="berChart">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>43</y>
+          <width>480</width>
+          <height>165</height>
+         </rect>
+        </property>
+       </widget>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -1668,6 +1812,11 @@
    <extends>QWidget</extends>
    <header>gui/tvscreen.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QChartView</class>
+   <extends>QGraphicsView</extends>
+   <header>QtCharts</header>
   </customwidget>
  </customwidgets>
  <resources>

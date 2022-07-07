@@ -103,6 +103,10 @@ public:
         );
     }
 
+    void getBERT(uint32_t& bertErrors, uint32_t& bertBits) {
+        m_sink.getBERT(bertErrors, bertBits);
+    }
+
     uint32_t getLSFCount() const { return m_sink.getLSFCount(); }
     const QString& getSrcCall() const { return m_sink.getSrcCall(); }
     const QString& getDestcCall() const { return m_sink.getDestcCall(); }

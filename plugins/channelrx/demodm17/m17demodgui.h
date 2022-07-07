@@ -20,6 +20,8 @@
 #define INCLUDE_M17DEMODGUI_H
 
 #include <QMenu>
+#include <QtCharts>
+#include <QDateTime>
 
 #include "channel/channelgui.h"
 #include "dsp/dsptypes.h"
@@ -72,6 +74,15 @@ protected:
     void resizeEvent(QResizeEvent* size);
 
 private:
+    struct BERPoint
+    {
+        QDateTime m_dateTime;
+        uint32_t m_totalErrors;
+        uint32_t m_totalBits;
+        uint32_t m_currentErrors;
+        uint32_t m_currentBits;
+    };
+
 	Ui::M17DemodGUI* ui;
 	PluginAPI* m_pluginAPI;
 	DeviceUISet* m_deviceUISet;
@@ -92,6 +103,15 @@ private:
     int  m_audioSampleRate;
     uint32_t m_lsfCount;
 	uint32_t m_tickCount;
+    uint32_t m_lastBERErrors;
+    uint32_t m_lastBERBits;
+    bool m_showBERTotalOrCurrent;
+
+    QChart m_berChart;
+    QDateTimeAxis m_berChartXAxis;
+    QValueAxis m_berChartYAxis;
+    QList<BERPoint> m_berPoints;
+    QList<uint32_t> m_currentErrors;
 
 	float m_myLatitude;
 	float m_myLongitude;
@@ -112,6 +132,7 @@ private:
     void updateAbsoluteCenterFrequency();
     QString getStatus(int status, int sync_word_type, bool streamElsePacket, int packetProtocol);
     void packetReceived(QByteArray packet);
+    QLineSeries *addBERSeries(bool total, uint32_t& maxVal);
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
@@ -131,6 +152,8 @@ private slots:
     void on_highPassFilter_toggled(bool checked);
     void on_audioMute_toggled(bool checked);
     void on_aprsClearTable_clicked();
+    void on_totButton_toggled(bool checked);
+    void on_curButton_toggled(bool checked);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void on_viewStatusLog_clicked();

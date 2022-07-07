@@ -92,6 +92,12 @@ public:
         viterbiCost = m_viterbiCost;
     }
 
+    void getBERT(uint32_t& bertErrors, uint32_t& bertBits)
+    {
+        bertErrors = m_prbs.errors();
+        bertBits = m_prbs.bits();
+    }
+
 private:
     std::vector<uint8_t> m_currentPacket;
     size_t m_packetFrameCounter;
