@@ -24,7 +24,7 @@
 #include <QFileDialog>
 
 #include <complex>
-
+#include <math.h>
 
 #include "device/deviceuiset.h"
 #include "dsp/scopevisxy.h"
@@ -719,8 +719,8 @@ void M17DemodGUI::tick()
         {
             uint32_t bertErrors, bertBits;
             m_m17Demod->getBERT(bertErrors, bertBits);
-            uint32_t bertErrorsDelta = bertErrors - m_lastBERErrors;
-            uint32_t bertBitsDelta = bertBits - m_lastBERBits;
+            uint32_t bertErrorsDelta = bertErrors >= m_lastBERErrors ? bertErrors - m_lastBERErrors : 0;
+            uint32_t bertBitsDelta = bertBits >= m_lastBERBits ? bertBits - m_lastBERBits : 0;
             m_lastBERErrors = bertErrors;
             m_lastBERBits = bertBits;
 
@@ -787,28 +787,38 @@ void M17DemodGUI::tick()
                 if (m_showBERNumbersOrRates)
                 {
                     berChartYAxis = new QValueAxis();
-
-                    if (min != 0) {
-                        ((QValueAxis*) berChartYAxis)->setMin(min);
-                    }
-
-                    if (max != 0) {
-                        ((QValueAxis*) berChartYAxis)->setMax(max);
-                    }
                 }
                 else
                 {
                     berChartYAxis = new QLogValueAxis();
-                    ((QLogValueAxis*) berChartYAxis)->setLabelFormat("%.2e");
+                    ((QLogValueAxis*) berChartYAxis)->setLabelFormat("%.0e");
                     ((QLogValueAxis*) berChartYAxis)->setBase(10.0);
                     ((QLogValueAxis*) berChartYAxis)->setMinorTickCount(-1);
 
-                    if (fmin != 0) {
-                        ((QLogValueAxis*) berChartYAxis)->setMin(fmin);
-                    }
+                    // make sure a major tick is always on the graph
+                    if ((fmin != 0) && (fmax != 0))
+                    {
+                        if (fmax < 10*fmin)
+                        {
+                            int lmin = log10(fmin);
+                            int lmax = log10(fmax);
 
-                    if (fmax != 0) {
-                        ((QLogValueAxis*) berChartYAxis)->setMax(fmax);
+                            if (lmin == lmax)
+                            {
+                                ((QLogValueAxis*) berChartYAxis)->setMin(fmin);
+                                ((QLogValueAxis*) berChartYAxis)->setMax(pow(10.0, lmin));
+                            }
+                            else
+                            {
+                                ((QLogValueAxis*) berChartYAxis)->setMin(fmin);
+                                ((QLogValueAxis*) berChartYAxis)->setMax(fmax);
+                            }
+                        }
+                        else
+                        {
+                            ((QLogValueAxis*) berChartYAxis)->setMin(fmin);
+                            ((QLogValueAxis*) berChartYAxis)->setMax(fmax);
+                        }
                     }
                 }
 
@@ -834,7 +844,7 @@ QString M17DemodGUI::getStatus(int status, int sync_word_type, bool streamElsePa
 {
     if (status == 0) {
         return "Unlocked";
-    } else if ((status == 5) && (sync_word_type == 3)) {
+    } else if (((status == 5) || (status == 4)) && (sync_word_type == 3)) {
         return "BERT";
     } else if (streamElsePacket) {
         return "Stream";
@@ -912,9 +922,14 @@ QLineSeries *M17DemodGUI::addBERSeriesRate(bool total, qreal& min, qreal& max)
             if ((berPoint.m_totalErrors != 0) && (berPoint.m_totalBits != 0))
             {
                 qreal y = ((qreal) berPoint.m_totalErrors) / ((qreal) berPoint.m_totalBits);
-                min = std::min(min, y);
-                max = std::max(max, y);
                 series->append(x, y);
+                max = std::max(max, y);
+
+                if (min == 0) {
+                    min = y;
+                } else {
+                    min = std::min(min, y);
+                }
             }
         }
         else
@@ -922,9 +937,14 @@ QLineSeries *M17DemodGUI::addBERSeriesRate(bool total, qreal& min, qreal& max)
             if ((berPoint.m_currentErrors != 0) && (berPoint.m_currentBits != 0))
             {
                 qreal y = ((qreal) berPoint.m_currentErrors) / ((qreal) berPoint.m_currentBits);
-                min = std::min(min, y);
-                max = std::max(max, y);
                 series->append(x, y);
+                max = std::max(max, y);
+
+                if (min == 0) {
+                    min = y;
+                } else {
+                    min = std::min(min, y);
+                }
             }
         }
     }
