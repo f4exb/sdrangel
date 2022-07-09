@@ -138,10 +138,6 @@ void M17DemodProcessor::diagnostic_callback(
         qDebug() << "M17DemodProcessor::diagnostic_callback: " << oss.str().c_str();
     }
 
-    if ((!dcd) && m_this->m_prbs.sync()) { // Seems like there should be a better way to do this.
-        m_this->m_prbs.reset();
-    }
-
     if (m_this->m_prbs.sync() && !quiet)
     {
         std::ostringstream oss;

@@ -1847,6 +1847,26 @@
          <string>BER</string>
         </property>
        </widget>
+       <widget class="QPushButton" name="berReset">
+        <property name="geometry">
+         <rect>
+          <x>440</x>
+          <y>10</y>
+          <width>28</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="toolTip">
+         <string>Reset BER (PRBS)</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
+        </property>
+       </widget>
       </widget>
      </widget>
     </item>

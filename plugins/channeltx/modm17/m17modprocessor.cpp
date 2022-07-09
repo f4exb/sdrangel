@@ -72,7 +72,7 @@ bool M17ModProcessor::handleMessage(const Message& cmd)
         if (notif.getInsertPosition())
         {
             if (m_insertPositionToggle) {
-                strData += "!" + formatAPRSPosition();
+                strData = "!" + formatAPRSPosition();
             } else {
                 strData = notif.getData();
             }

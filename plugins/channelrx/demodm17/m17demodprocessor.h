@@ -98,6 +98,10 @@ public:
         bertBits = m_prbs.bits();
     }
 
+    void resetPRBS() {
+        m_prbs.reset();
+    }
+
 private:
     std::vector<uint8_t> m_currentPacket;
     size_t m_packetFrameCounter;

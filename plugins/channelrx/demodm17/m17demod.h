@@ -246,6 +246,8 @@ public:
         m_basebandSink->getBERT(bertErrors, bertBits);
     }
 
+    void resetPRBS() { m_basebandSink->resetPRBS(); }
+
     uint32_t getLSFCount() const { return m_basebandSink->getLSFCount(); }
     const QString& getSrcCall() const { return m_basebandSink->getSrcCall(); }
     const QString& getDestcCall() const { return m_basebandSink->getDestcCall(); }

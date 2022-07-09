@@ -158,6 +158,7 @@ private slots:
     void on_curButton_toggled(bool checked);
     void on_berButton_toggled(bool checked);
     void on_berHistory_valueChanged(int value);
+    void on_berReset_clicked();
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void on_viewStatusLog_clicked();

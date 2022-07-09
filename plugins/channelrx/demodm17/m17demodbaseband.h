@@ -107,6 +107,8 @@ public:
         m_sink.getBERT(bertErrors, bertBits);
     }
 
+    void resetPRBS() { m_sink.resetPRBS(); }
+
     uint32_t getLSFCount() const { return m_sink.getLSFCount(); }
     const QString& getSrcCall() const { return m_sink.getSrcCall(); }
     const QString& getDestcCall() const { return m_sink.getDestcCall(); }

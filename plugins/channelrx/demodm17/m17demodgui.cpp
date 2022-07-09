@@ -311,6 +311,15 @@ void M17DemodGUI::on_berButton_toggled(bool checked)
     m_showBERNumbersOrRates = !checked;
 }
 
+void M17DemodGUI::on_berReset_clicked()
+{
+    m_m17Demod->resetPRBS();
+    m_lastBERErrors = 0;
+    m_lastBERBits = 0;
+    m_berPoints.clear();
+    m_currentErrors.clear();
+}
+
 void M17DemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
@@ -826,15 +835,6 @@ void M17DemodGUI::tick()
                 series->attachAxis(berChartYAxis);
             }
         }
-        else
-        {
-            // qDebug("M17DemodGUI::tick: BER reset: status: %d sync_word_type: %d", status, sync_word_type);
-            m_lastBERErrors = 0;
-            m_lastBERBits = 0;
-            m_berPoints.clear();
-            m_currentErrors.clear();
-        }
-
     }
 
 	m_tickCount++;
@@ -973,6 +973,7 @@ void M17DemodGUI::makeUIConnections()
     QObject::connect(ui->curButton, &ButtonSwitch::toggled, this, &M17DemodGUI::on_curButton_toggled);
     QObject::connect(ui->berButton, &ButtonSwitch::toggled, this, &M17DemodGUI::on_berButton_toggled);
     QObject::connect(ui->berHistory, &QDial::valueChanged, this, &M17DemodGUI::on_berHistory_valueChanged);
+    QObject::connect(ui->berReset, &QPushButton::clicked, this, &M17DemodGUI::on_berReset_clicked);
 }
 
 void M17DemodGUI::updateAbsoluteCenterFrequency()
