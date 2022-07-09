@@ -278,12 +278,17 @@ void ValueDialZ::paintEvent(QPaintEvent*)
         painter.drawRect(2 + m_hightlightedDigit * m_digitWidth, 1, m_digitWidth - 1, height() - 1);
     }
 
+    QColor secondaryForegroundColor = m_colorMapper.getSecondaryForegroundColor();
+    if (!isEnabled()) {
+        secondaryForegroundColor = secondaryForegroundColor.darker();
+    }
+
     if (m_animationState == 0)
     {
         for (int i = 0; i < m_text.length(); i++)
         {
             painter.setClipRect(1 + i * m_digitWidth, 1, m_digitWidth, m_digitHeight * 2);
-            painter.setPen(m_colorMapper.getSecondaryForegroundColor());
+            painter.setPen(secondaryForegroundColor);
             painter.drawText(QRect(1 + i * m_digitWidth, m_digitHeight * 0.6, m_digitWidth, m_digitHeight), Qt::AlignCenter, m_text.mid(i, 1));
 
             if ((m_text[i] != m_groupSeparator) && (m_text[i] != m_decSeparator))
@@ -299,7 +304,7 @@ void ValueDialZ::paintEvent(QPaintEvent*)
         if ((m_cursor >= 0) && (m_cursorState))
         {
             painter.setPen(Qt::NoPen);
-            painter.setBrush(m_colorMapper.getSecondaryForegroundColor());
+            painter.setBrush(secondaryForegroundColor);
             painter.drawRect(4 + m_cursor * m_digitWidth, 1 + m_digitHeight * 1.5, m_digitWidth - 5, m_digitHeight / 6);
         }
     }
@@ -310,7 +315,7 @@ void ValueDialZ::paintEvent(QPaintEvent*)
             if (m_text[i] == m_textNew[i])
             {
                 painter.setClipRect(1 + i * m_digitWidth, 1, m_digitWidth, m_digitHeight * 2);
-                painter.setPen(m_colorMapper.getSecondaryForegroundColor());
+                painter.setPen(secondaryForegroundColor);
                 painter.drawText(QRect(1 + i * m_digitWidth, m_digitHeight * 0.6, m_digitWidth, m_digitHeight), Qt::AlignCenter, m_text.mid(i, 1));
 
                 if ((m_text[i] != m_groupSeparator) && (m_text[i] != m_decSeparator))
@@ -324,7 +329,7 @@ void ValueDialZ::paintEvent(QPaintEvent*)
             {
                 int h = m_digitHeight * 0.6 + m_digitHeight * m_animationState / 2.0;
                 painter.setClipRect(1 + i * m_digitWidth, 1, m_digitWidth, m_digitHeight * 2);
-                painter.setPen(m_colorMapper.getSecondaryForegroundColor());
+                painter.setPen(secondaryForegroundColor);
                 painter.drawText(QRect(1 + i * m_digitWidth, h, m_digitWidth, m_digitHeight), Qt::AlignCenter, m_text.mid(i, 1));
 
                 if ((m_text[i] != m_groupSeparator) && (m_text[i] != m_decSeparator))
