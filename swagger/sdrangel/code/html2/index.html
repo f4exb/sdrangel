@@ -8351,7 +8351,7 @@ margin-bottom: 20px;
       "type" : "integer"
     }
   },
-  "description" : "NFMMod"
+  "description" : "M17Mod"
 };
             defs.M17ModSettings = {
   "properties" : {
@@ -8387,9 +8387,6 @@ margin-bottom: 20px;
     "title" : {
       "type" : "string"
     },
-    "audioDeviceName" : {
-      "type" : "string"
-    },
     "m17Mode" : {
       "type" : "integer",
       "description" : "M17Mode"
@@ -8401,6 +8398,19 @@ margin-bottom: 20px;
     "packetType" : {
       "type" : "integer",
       "description" : "PacketType"
+    },
+    "audioDeviceName" : {
+      "type" : "string"
+    },
+    "feedbackAudioDeviceName" : {
+      "type" : "string"
+    },
+    "feedbackVolumeFactor" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "feedbackAudioEnable" : {
+      "type" : "integer"
     },
     "streamIndex" : {
       "type" : "integer",
@@ -8420,6 +8430,42 @@ margin-bottom: 20px;
       "type" : "integer"
     },
     "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    },
+    "sourceCall" : {
+      "type" : "string"
+    },
+    "destCall" : {
+      "type" : "string"
+    },
+    "insertPosition" : {
+      "type" : "integer"
+    },
+    "can" : {
+      "type" : "integer"
+    },
+    "smsText" : {
+      "type" : "string"
+    },
+    "loopPacket" : {
+      "type" : "integer"
+    },
+    "loopPacketInterval" : {
+      "type" : "integer"
+    },
+    "aprsCallsign" : {
+      "type" : "string"
+    },
+    "aprsTo" : {
+      "type" : "string"
+    },
+    "aprsVia" : {
+      "type" : "string"
+    },
+    "aprsData" : {
+      "type" : "string"
+    },
+    "aprsInsertPosition" : {
       "type" : "integer"
     },
     "channelMarker" : {
@@ -56389,7 +56435,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2022-06-10T22:26:56.056+02:00
+              Generated 2022-07-09T11:05:50.499+02:00
             </div>
           </div>
       </div>

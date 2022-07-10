@@ -223,3 +223,123 @@ bool M17ModSettings::deserialize(const QByteArray& data)
     }
 }
 
+void M17ModSettings::applySettings(const QStringList& settingsKeys, const M17ModSettings& settings)
+{
+    if (settingsKeys.contains("inputFrequencyOffset")) {
+        m_inputFrequencyOffset = settings.m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("rfBandwidth")) {
+        m_rfBandwidth = settings.m_rfBandwidth;
+    }
+    if (settingsKeys.contains("fmDeviation")) {
+        m_fmDeviation = settings.m_fmDeviation;
+    }
+    if (settingsKeys.contains("toneFrequency")) {
+        m_toneFrequency = settings.m_toneFrequency;
+    }
+    if (settingsKeys.contains("volumeFactor")) {
+        m_volumeFactor = settings.m_volumeFactor;
+    }
+    if (settingsKeys.contains("channelMute")) {
+        m_channelMute = settings.m_channelMute;
+    }
+    if (settingsKeys.contains("playLoop")) {
+        m_playLoop = settings.m_playLoop;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("m17Mode")) {
+        m_m17Mode = settings.m_m17Mode;
+    }
+    if (settingsKeys.contains("audioType")) {
+        m_audioType = settings.m_audioType;
+    }
+    if (settingsKeys.contains("packetType")) {
+        m_packetType = settings.m_packetType;
+    }
+    if (settingsKeys.contains("audioDeviceName")) {
+        m_audioDeviceName = settings.m_audioDeviceName;
+    }
+    if (settingsKeys.contains("feedbackAudioDeviceName")) {
+        m_feedbackAudioDeviceName = settings.m_feedbackAudioDeviceName;
+    }
+    if (settingsKeys.contains("feedbackVolumeFactor")) {
+        m_feedbackVolumeFactor = settings.m_feedbackVolumeFactor;
+    }
+    if (settingsKeys.contains("feedbackAudioEnable")) {
+        m_feedbackAudioEnable = settings.m_feedbackAudioEnable;
+    }
+    if (settingsKeys.contains("streamIndex")) {
+        m_streamIndex = settings.m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex")) {
+        m_reverseAPIChannelIndex = settings.m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+    if (settingsKeys.contains("geometryBytes")) {
+        m_geometryBytes = settings.m_geometryBytes;
+    }
+    if (settingsKeys.contains("hidden")) {
+        m_hidden = settings.m_hidden;
+    }
+    if (settingsKeys.contains("sourceCall")) {
+        m_sourceCall = settings.m_sourceCall;
+    }
+    if (settingsKeys.contains("destCall")) {
+        m_destCall = settings.m_destCall;
+    }
+    if (settingsKeys.contains("insertPosition")) {
+        m_insertPosition = settings.m_insertPosition;
+    }
+    if (settingsKeys.contains("can")) {
+        m_can = settings.m_can;
+    }
+    if (settingsKeys.contains("smsText")) {
+        m_smsText = settings.m_smsText;
+    }
+    if (settingsKeys.contains("loopPacket")) {
+        m_loopPacket = settings.m_loopPacket;
+    }
+    if (settingsKeys.contains("loopPacketInterval")) {
+        m_loopPacketInterval = settings.m_loopPacketInterval;
+    }
+    if (settingsKeys.contains("aprsCallsign")) {
+        m_aprsCallsign = settings.m_aprsCallsign;
+    }
+    if (settingsKeys.contains("aprsTo")) {
+        m_aprsTo = settings.m_aprsTo;
+    }
+    if (settingsKeys.contains("aprsVia")) {
+        m_aprsVia = settings.m_aprsVia;
+    }
+    if (settingsKeys.contains("aprsData")) {
+        m_aprsData = settings.m_aprsData;
+    }
+    if (settingsKeys.contains("aprsInsertPosition")) {
+        m_aprsInsertPosition = settings.m_aprsInsertPosition;
+    }
+    if (settingsKeys.contains("channelMarker")) {
+        m_channelMarker = settings.m_channelMarker;
+    }
+    if (settingsKeys.contains("rollupState")) {
+        m_rollupState = settings.m_rollupState;
+    }
+}

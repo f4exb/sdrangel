@@ -24,8 +24,6 @@ M17ModSettings:
       type: integer
     title:
       type: string
-    audioDeviceName:
-      type: string
     m17Mode:
       type: integer
       description: M17Mode
@@ -35,6 +33,15 @@ M17ModSettings:
     packetType:
       type: integer
       description: PacketType
+    audioDeviceName:
+      type: string
+    feedbackAudioDeviceName:
+      type: string
+    feedbackVolumeFactor:
+      type: number
+      format: float
+    feedbackAudioEnable:
+      type: integer
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
@@ -49,13 +56,37 @@ M17ModSettings:
       type: integer
     reverseAPIChannelIndex:
       type: integer
+    sourceCall:
+      type: string
+    destCall:
+      type: string
+    insertPosition:
+      type: integer
+    can:
+      type: integer
+    smsText:
+      type: string
+    loopPacket:
+      type: integer
+    loopPacketInterval:
+      type: integer
+    aprsCallsign:
+      type: string
+    aprsTo:
+      type: string
+    aprsVia:
+      type: string
+    aprsData:
+      type: string
+    aprsInsertPosition:
+      type: integer
     channelMarker:
       $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
     rollupState:
       $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
 
 M17ModReport:
-  description: NFMMod
+  description: M17Mod
   properties:
     channelPowerDB:
       description: power transmitted in channel (dB)

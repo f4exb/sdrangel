@@ -69,7 +69,7 @@ M17Mod::M17Mod(DeviceAPI *deviceAPI) :
     m_basebandSource->setChannel(this);
     m_basebandSource->moveToThread(m_thread);
 
-    applySettings(m_settings, true);
+    applySettings(m_settings, QList<QString>(), true);
 
     m_deviceAPI->addChannelSource(this);
     m_deviceAPI->addChannelSourceAPI(this);
@@ -137,13 +137,14 @@ void M17Mod::pull(SampleVector::iterator& begin, unsigned int nbSamples)
 
 void M17Mod::setCenterFrequency(qint64 frequency)
 {
-    M17ModSettings settings = m_settings;
+    M17ModSettings settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings, false);
+    QList<QString> settingsKeys = QList<QString>{"inputFrequencyOffset"};
+    applySettings(settings, settingsKeys, false);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureM17Mod *msgToGUI = MsgConfigureM17Mod::create(settings, false);
+        MsgConfigureM17Mod *msgToGUI = MsgConfigureM17Mod::create(settings, settingsKeys, false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
@@ -154,8 +155,7 @@ bool M17Mod::handleMessage(const Message& cmd)
     {
         MsgConfigureM17Mod& cfg = (MsgConfigureM17Mod&) cmd;
         qDebug() << "M17Mod::handleMessage: MsgConfigureM17Mod";
-
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
 
         return true;
     }
@@ -291,9 +291,10 @@ void M17Mod::seekFileStream(int seekPercentage)
     }
 }
 
-void M17Mod::applySettings(const M17ModSettings& settings, bool force)
+void M17Mod::applySettings(const M17ModSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
     qDebug() << "M17Mod::applySettings:"
+            << " settingsKeys: " << settingsKeys
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
             << " m_rfBandwidth: " << settings.m_rfBandwidth
             << " m_fmDeviation: " << settings.m_fmDeviation
@@ -312,55 +313,12 @@ void M17Mod::applySettings(const M17ModSettings& settings, bool force)
             << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
             << " force: " << force;
 
-    QList<QString> reverseAPIKeys;
-
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
-        reverseAPIKeys.append("inputFrequencyOffset");
-    }
-    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force) {
-        reverseAPIKeys.append("fmDeviation");
-    }
-    if ((settings.m_volumeFactor != m_settings.m_volumeFactor) || force) {
-        reverseAPIKeys.append("volumeFactor");
-    }
-    if ((settings.m_channelMute != m_settings.m_channelMute) || force) {
-        reverseAPIKeys.append("channelMute");
-    }
-    if ((settings.m_playLoop != m_settings.m_playLoop) || force) {
-        reverseAPIKeys.append("playLoop");
-    }
-    if ((settings.m_audioType != m_settings.m_audioType) || force) {
-        reverseAPIKeys.append("audioType");
-    }
-    if ((settings.m_packetType != m_settings.m_packetType) || force) {
-        reverseAPIKeys.append("packetType");
-    }
-    if ((settings.m_m17Mode != m_settings.m_m17Mode) || force) {
-        reverseAPIKeys.append("m17Mode");
-    }
-    if((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
-        reverseAPIKeys.append("rfBandwidth");
-    }
-    if ((settings.m_toneFrequency != m_settings.m_toneFrequency) || force) {
-        reverseAPIKeys.append("toneFrequency");
-    }
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force) {
-        reverseAPIKeys.append("audioDeviceName");
-    }
-    if ((settings.m_feedbackAudioDeviceName != m_settings.m_feedbackAudioDeviceName) || force) {
-        reverseAPIKeys.append("feedbackAudioDeviceName");
-    }
-
-    if ((settings.m_loopPacketInterval != m_settings.m_loopPacketInterval) || force)
-    {
-        reverseAPIKeys.append("loopPacketInterval");
+    if (settingsKeys.contains("loopPacketInterval") || force) {
         m_loopPacketTimer.setInterval(settings.m_loopPacketInterval*1000);
     }
 
-    if ((settings.m_loopPacket != m_settings.m_loopPacket) || force)
+    if (settingsKeys.contains("loopPacket") || force)
     {
-        reverseAPIKeys.append("loopPacket");
-
         if (settings.m_loopPacket) {
             m_loopPacketTimer.start(settings.m_loopPacketInterval*1000);
         } else {
@@ -368,7 +326,7 @@ void M17Mod::applySettings(const M17ModSettings& settings, bool force)
         }
     }
 
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex"))
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -377,11 +335,9 @@ void M17Mod::applySettings(const M17ModSettings& settings, bool force)
             m_deviceAPI->addChannelSource(this, settings.m_streamIndex);
             m_deviceAPI->addChannelSourceAPI(this);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
-    M17ModBaseband::MsgConfigureM17ModBaseband *msg = M17ModBaseband::MsgConfigureM17ModBaseband::create(settings, force);
+    M17ModBaseband::MsgConfigureM17ModBaseband *msg = M17ModBaseband::MsgConfigureM17ModBaseband::create(settings, settingsKeys, force);
     m_basebandSource->getInputMessageQueue()->push(msg);
 
     if (settings.m_useReverseAPI)
@@ -391,17 +347,21 @@ void M17Mod::applySettings(const M17ModSettings& settings, bool force)
                 (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
                 (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
                 (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
     if (pipes.size() > 0) {
-        sendChannelSettings(pipes, reverseAPIKeys, settings, force);
+        sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QByteArray M17Mod::serialize() const
@@ -419,7 +379,7 @@ bool M17Mod::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureM17Mod *msg = MsgConfigureM17Mod::create(m_settings, true);
+    MsgConfigureM17Mod *msg = MsgConfigureM17Mod::create(m_settings, QList<QString>(), true);
     m_inputMessageQueue.push(msg);
 
     return success;
@@ -474,12 +434,12 @@ int M17Mod::webapiSettingsPutPatch(
     M17ModSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureM17Mod *msg = MsgConfigureM17Mod::create(settings, force);
+    MsgConfigureM17Mod *msg = MsgConfigureM17Mod::create(settings, channelSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureM17Mod *msgToGUI = MsgConfigureM17Mod::create(settings, force);
+        MsgConfigureM17Mod *msgToGUI = MsgConfigureM17Mod::create(settings, channelSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -493,14 +453,32 @@ void M17Mod::webapiUpdateChannelSettings(
     const QStringList& channelSettingsKeys,
     SWGSDRangel::SWGChannelSettings& response)
 {
-    if (channelSettingsKeys.contains("channelMute")) {
-        settings.m_channelMute = response.getM17ModSettings()->getChannelMute() != 0;
+    if (channelSettingsKeys.contains("inputFrequencyOffset")) {
+        settings.m_inputFrequencyOffset = response.getM17ModSettings()->getInputFrequencyOffset();
+    }
+    if (channelSettingsKeys.contains("rfBandwidth")) {
+        settings.m_rfBandwidth = response.getM17ModSettings()->getRfBandwidth();
     }
     if (channelSettingsKeys.contains("fmDeviation")) {
         settings.m_fmDeviation = response.getM17ModSettings()->getFmDeviation();
     }
-    if (channelSettingsKeys.contains("inputFrequencyOffset")) {
-        settings.m_inputFrequencyOffset = response.getM17ModSettings()->getInputFrequencyOffset();
+    if (channelSettingsKeys.contains("toneFrequency")) {
+        settings.m_toneFrequency = response.getM17ModSettings()->getToneFrequency();
+    }
+    if (channelSettingsKeys.contains("volumeFactor")) {
+        settings.m_volumeFactor = response.getM17ModSettings()->getVolumeFactor();
+    }
+    if (channelSettingsKeys.contains("channelMute")) {
+        settings.m_channelMute = response.getM17ModSettings()->getChannelMute() != 0;
+    }
+    if (channelSettingsKeys.contains("playLoop")) {
+        settings.m_playLoop = response.getM17ModSettings()->getPlayLoop() != 0;
+    }
+    if (channelSettingsKeys.contains("rgbColor")) {
+        settings.m_rgbColor = response.getM17ModSettings()->getRgbColor();
+    }
+    if (channelSettingsKeys.contains("title")) {
+        settings.m_title = *response.getM17ModSettings()->getTitle();
     }
     if (channelSettingsKeys.contains("m17Mode")) {
         settings.m_m17Mode = (M17ModSettings::M17Mode) response.getM17ModSettings()->getM17Mode();
@@ -511,23 +489,17 @@ void M17Mod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("packetType")) {
         settings.m_packetType = (M17ModSettings::PacketType) response.getM17ModSettings()->getPacketType();
     }
-    if (channelSettingsKeys.contains("playLoop")) {
-        settings.m_playLoop = response.getM17ModSettings()->getPlayLoop() != 0;
+    if (channelSettingsKeys.contains("audioDeviceName")) {
+        settings.m_audioDeviceName = *response.getM17ModSettings()->getAudioDeviceName();
     }
-    if (channelSettingsKeys.contains("rfBandwidth")) {
-        settings.m_rfBandwidth = response.getM17ModSettings()->getRfBandwidth();
+    if (channelSettingsKeys.contains("feedbackAudioDeviceName")) {
+        settings.m_feedbackAudioDeviceName = *response.getM17ModSettings()->getFeedbackAudioDeviceName();
     }
-    if (channelSettingsKeys.contains("rgbColor")) {
-        settings.m_rgbColor = response.getM17ModSettings()->getRgbColor();
+    if (channelSettingsKeys.contains("feedbackVolumeFactor")) {
+        settings.m_feedbackVolumeFactor = response.getM17ModSettings()->getFeedbackVolumeFactor();
     }
-    if (channelSettingsKeys.contains("title")) {
-        settings.m_title = *response.getM17ModSettings()->getTitle();
-    }
-    if (channelSettingsKeys.contains("toneFrequency")) {
-        settings.m_toneFrequency = response.getM17ModSettings()->getToneFrequency();
-    }
-    if (channelSettingsKeys.contains("volumeFactor")) {
-        settings.m_volumeFactor = response.getM17ModSettings()->getVolumeFactor();
+    if (channelSettingsKeys.contains("feedbackAudioEnable")) {
+        settings.m_feedbackAudioEnable = response.getM17ModSettings()->getFeedbackAudioEnable() != 0;
     }
     if (channelSettingsKeys.contains("streamIndex")) {
         settings.m_streamIndex = response.getM17ModSettings()->getStreamIndex();
@@ -546,6 +518,39 @@ void M17Mod::webapiUpdateChannelSettings(
     }
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getNfmModSettings()->getReverseApiChannelIndex();
+    }
+    if (channelSettingsKeys.contains("sourceCall")) {
+        settings.m_sourceCall = *response.getM17ModSettings()->getSourceCall();
+    }
+    if (channelSettingsKeys.contains("destCall")) {
+        settings.m_destCall = *response.getM17ModSettings()->getDestCall();
+    }
+    if (channelSettingsKeys.contains("insertPosition")) {
+        settings.m_insertPosition = response.getM17ModSettings()->getInsertPosition() != 0;
+    }
+    if (channelSettingsKeys.contains("can")) {
+        settings.m_can = response.getM17ModSettings()->getCan() % 256;
+    }
+    if (channelSettingsKeys.contains("smsText")) {
+        settings.m_smsText = *response.getM17ModSettings()->getSmsText();
+    }
+    if (channelSettingsKeys.contains("loopPacket")) {
+        settings.m_loopPacket = response.getM17ModSettings()->getLoopPacket() != 0;
+    }
+    if (channelSettingsKeys.contains("loopPacketInterval")) {
+        settings.m_loopPacketInterval = response.getM17ModSettings()->getLoopPacketInterval();
+    }
+    if (channelSettingsKeys.contains("aprsCallsign")) {
+        settings.m_aprsCallsign = *response.getM17ModSettings()->getAprsCallsign();
+    }
+    if (channelSettingsKeys.contains("aprsTo")) {
+        settings.m_aprsTo = *response.getM17ModSettings()->getAprsTo();
+    }
+    if (channelSettingsKeys.contains("aprsVia")) {
+        settings.m_aprsVia = *response.getM17ModSettings()->getAprsVia();
+    }
+    if (channelSettingsKeys.contains("aprsInsertPosition")) {
+        settings.m_aprsInsertPosition = response.getM17ModSettings()->getAprsInsertPosition() != 0;
     }
     if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
         settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getM17ModSettings()->getChannelMarker());
@@ -568,15 +573,12 @@ int M17Mod::webapiReportGet(
 
 void M17Mod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const M17ModSettings& settings)
 {
-    response.getM17ModSettings()->setChannelMute(settings.m_channelMute ? 1 : 0);
-    response.getM17ModSettings()->setFmDeviation(settings.m_fmDeviation);
     response.getM17ModSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
-    response.getM17ModSettings()->setM17Mode((int) settings.m_m17Mode);
-    response.getM17ModSettings()->setAudioType((int) settings.m_audioType);
-    response.getM17ModSettings()->setPacketType((int) settings.m_packetType);
-    response.getM17ModSettings()->setPlayLoop(settings.m_playLoop ? 1 : 0);
     response.getM17ModSettings()->setRfBandwidth(settings.m_rfBandwidth);
-    response.getM17ModSettings()->setRgbColor(settings.m_rgbColor);
+    response.getM17ModSettings()->setFmDeviation(settings.m_fmDeviation);
+    response.getM17ModSettings()->setToneFrequency(settings.m_toneFrequency);
+    response.getM17ModSettings()->setVolumeFactor(settings.m_volumeFactor);
+    response.getM17ModSettings()->setChannelMute(settings.m_channelMute ? 1 : 0);
 
     if (response.getM17ModSettings()->getTitle()) {
         *response.getM17ModSettings()->getTitle() = settings.m_title;
@@ -584,8 +586,10 @@ void M17Mod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
         response.getM17ModSettings()->setTitle(new QString(settings.m_title));
     }
 
-    response.getM17ModSettings()->setToneFrequency(settings.m_toneFrequency);
-    response.getM17ModSettings()->setVolumeFactor(settings.m_volumeFactor);
+    response.getM17ModSettings()->setRgbColor(settings.m_rgbColor);
+    response.getM17ModSettings()->setM17Mode((int) settings.m_m17Mode);
+    response.getM17ModSettings()->setAudioType((int) settings.m_audioType);
+    response.getM17ModSettings()->setPacketType((int) settings.m_packetType);
 
     if (response.getM17ModSettings()->getAudioDeviceName()) {
         *response.getM17ModSettings()->getAudioDeviceName() = settings.m_audioDeviceName;
@@ -593,6 +597,15 @@ void M17Mod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
         response.getM17ModSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
     }
 
+    if (response.getM17ModSettings()->getFeedbackAudioDeviceName()) {
+        *response.getM17ModSettings()->getFeedbackAudioDeviceName() = settings.m_audioDeviceName;
+    } else {
+        response.getM17ModSettings()->setFeedbackAudioDeviceName(new QString(settings.m_audioDeviceName));
+    }
+
+    response.getM17ModSettings()->setFeedbackVolumeFactor(settings.m_feedbackVolumeFactor);
+    response.getM17ModSettings()->setPlayLoop(settings.m_playLoop ? 1 : 0);
+    response.getM17ModSettings()->setStreamIndex(settings.m_streamIndex);
     response.getM17ModSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
     if (response.getM17ModSettings()->getReverseApiAddress()) {
@@ -604,6 +617,50 @@ void M17Mod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
     response.getM17ModSettings()->setReverseApiPort(settings.m_reverseAPIPort);
     response.getM17ModSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
     response.getM17ModSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+
+    if (response.getM17ModSettings()->getSourceCall()) {
+        *response.getM17ModSettings()->getSourceCall() = settings.m_sourceCall;
+    } else {
+        response.getM17ModSettings()->setSourceCall(new QString(settings.m_sourceCall));
+    }
+
+    if (response.getM17ModSettings()->getDestCall()) {
+        *response.getM17ModSettings()->getDestCall() = settings.m_destCall;
+    } else {
+        response.getM17ModSettings()->setDestCall(new QString(settings.m_destCall));
+    }
+
+    response.getM17ModSettings()->setInsertPosition(settings.m_insertPosition ? 1 : 0);
+    response.getM17ModSettings()->setCan(settings.m_can);
+
+    if (response.getM17ModSettings()->getSmsText()) {
+        *response.getM17ModSettings()->getSmsText() = settings.m_smsText;
+    } else {
+        response.getM17ModSettings()->setSmsText(new QString(settings.m_smsText));
+    }
+
+    response.getM17ModSettings()->setLoopPacket(settings.m_loopPacket ? 1 : 0);
+    response.getM17ModSettings()->setLoopPacketInterval(settings.m_loopPacketInterval);
+
+    if (response.getM17ModSettings()->getAprsCallsign()) {
+        *response.getM17ModSettings()->getAprsCallsign() = settings.m_aprsCallsign;
+    } else {
+        response.getM17ModSettings()->setAprsCallsign(new QString(settings.m_aprsCallsign));
+    }
+
+    if (response.getM17ModSettings()->getAprsTo()) {
+        *response.getM17ModSettings()->getAprsTo() = settings.m_aprsTo;
+    } else {
+        response.getM17ModSettings()->setAprsTo(new QString(settings.m_aprsTo));
+    }
+
+    if (response.getM17ModSettings()->getAprsVia()) {
+        *response.getM17ModSettings()->getAprsVia() = settings.m_aprsVia;
+    } else {
+        response.getM17ModSettings()->setAprsVia(new QString(settings.m_aprsVia));
+    }
+
+    response.getM17ModSettings()->setAprsInsertPosition(settings.m_aprsInsertPosition ? 1 : 0);
 
     if (settings.m_channelMarker)
     {
@@ -641,7 +698,7 @@ void M17Mod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
     response.getM17ModReport()->setChannelSampleRate(m_basebandSource->getChannelSampleRate());
 }
 
-void M17Mod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const M17ModSettings& settings, bool force)
+void M17Mod::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const M17ModSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -668,7 +725,7 @@ void M17Mod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, cons
 
 void M17Mod::sendChannelSettings(
     const QList<ObjectPipe*>& pipes,
-    QList<QString>& channelSettingsKeys,
+    const QList<QString>& channelSettingsKeys,
     const M17ModSettings& settings,
     bool force)
 {
@@ -692,7 +749,7 @@ void M17Mod::sendChannelSettings(
 }
 
 void M17Mod::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const M17ModSettings& settings,
         bool force
@@ -707,47 +764,89 @@ void M17Mod::webapiFormatChannelSettings(
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
-    if (channelSettingsKeys.contains("channelMute") || force) {
-        swgM17ModSettings->setChannelMute(settings.m_channelMute ? 1 : 0);
-    }
-    if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
+    if (channelSettingsKeys.contains("inputFrequencyOffset")) {
         swgM17ModSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     }
-    if (channelSettingsKeys.contains("m17Mode") || force) {
-        swgM17ModSettings->setM17Mode((int) settings.m_m17Mode);
-    }
-    if (channelSettingsKeys.contains("audioType") || force) {
-        swgM17ModSettings->setAudioType((int) settings.m_audioType);
-    }
-    if (channelSettingsKeys.contains("packetType") || force) {
-        swgM17ModSettings->setPacketType((int) settings.m_packetType);
-    }
-    if (channelSettingsKeys.contains("audioDeviceName") || force) {
-        swgM17ModSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
-    }
-    if (channelSettingsKeys.contains("playLoop") || force) {
-        swgM17ModSettings->setPlayLoop(settings.m_playLoop ? 1 : 0);
-    }
-    if (channelSettingsKeys.contains("fmDeviation") || force) {
-        swgM17ModSettings->setFmDeviation(settings.m_fmDeviation);
-    }
-    if (channelSettingsKeys.contains("rfBandwidth") || force) {
+    if (channelSettingsKeys.contains("rfBandwidth")) {
         swgM17ModSettings->setRfBandwidth(settings.m_rfBandwidth);
     }
-    if (channelSettingsKeys.contains("rgbColor") || force) {
-        swgM17ModSettings->setRgbColor(settings.m_rgbColor);
+    if (channelSettingsKeys.contains("fmDeviation")) {
+        swgM17ModSettings->setFmDeviation(settings.m_fmDeviation);
     }
-    if (channelSettingsKeys.contains("title") || force) {
-        swgM17ModSettings->setTitle(new QString(settings.m_title));
-    }
-    if (channelSettingsKeys.contains("toneFrequency") || force) {
+    if (channelSettingsKeys.contains("toneFrequency")) {
         swgM17ModSettings->setToneFrequency(settings.m_toneFrequency);
     }
-    if (channelSettingsKeys.contains("volumeFactor") || force) {
+    if (channelSettingsKeys.contains("volumeFactor")) {
         swgM17ModSettings->setVolumeFactor(settings.m_volumeFactor);
     }
-    if (channelSettingsKeys.contains("streamIndex") || force) {
+    if (channelSettingsKeys.contains("channelMute")) {
+        swgM17ModSettings->setChannelMute(settings.m_channelMute ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("playLoop")) {
+        swgM17ModSettings->setPlayLoop(settings.m_playLoop ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("rgbColor")) {
+        swgM17ModSettings->setRgbColor(settings.m_rgbColor);
+    }
+    if (channelSettingsKeys.contains("title")) {
+        swgM17ModSettings->setTitle(new QString(settings.m_title));
+    }
+    if (channelSettingsKeys.contains("m17Mode")) {
+        swgM17ModSettings->setM17Mode((int) settings.m_m17Mode);
+    }
+    if (channelSettingsKeys.contains("audioType")) {
+        swgM17ModSettings->setAudioType((int) settings.m_audioType);
+    }
+    if (channelSettingsKeys.contains("packetType")) {
+        swgM17ModSettings->setPacketType((int) settings.m_packetType);
+    }
+    if (channelSettingsKeys.contains("audioDeviceName")) {
+        swgM17ModSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+    }
+    if (channelSettingsKeys.contains("feedbackAudioDeviceName")) {
+        swgM17ModSettings->setFeedbackAudioDeviceName(new QString(settings.m_feedbackAudioDeviceName));
+    }
+    if (channelSettingsKeys.contains("feedbackVolumeFactor")) {
+        swgM17ModSettings->setFeedbackVolumeFactor(settings.m_feedbackVolumeFactor);
+    }
+    if (channelSettingsKeys.contains("feedbackAudioEnable")) {
+        swgM17ModSettings->setFeedbackAudioEnable(settings.m_feedbackAudioEnable ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("streamIndex")) {
         swgM17ModSettings->setStreamIndex(settings.m_streamIndex);
+    }
+    if (channelSettingsKeys.contains("sourceCall")) {
+        swgM17ModSettings->setSourceCall(new QString(settings.m_sourceCall));
+    }
+    if (channelSettingsKeys.contains("destCall")) {
+        swgM17ModSettings->setDestCall(new QString(settings.m_destCall));
+    }
+    if (channelSettingsKeys.contains("insertPosition")) {
+        swgM17ModSettings->setInsertPosition(settings.m_insertPosition ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("can")) {
+        swgM17ModSettings->setCan(settings.m_can);
+    }
+    if (channelSettingsKeys.contains("smsText")) {
+        swgM17ModSettings->setSmsText(new QString(settings.m_smsText));
+    }
+    if (channelSettingsKeys.contains("loopPacket")) {
+        swgM17ModSettings->setLoopPacket(settings.m_loopPacket ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("loopPacketInterval")) {
+        swgM17ModSettings->setLoopPacketInterval(settings.m_loopPacketInterval);
+    }
+    if (channelSettingsKeys.contains("aprsCallsign")) {
+        swgM17ModSettings->setAprsCallsign(new QString(settings.m_aprsCallsign));
+    }
+    if (channelSettingsKeys.contains("aprsTo")) {
+        swgM17ModSettings->setAprsTo(new QString(settings.m_aprsTo));
+    }
+    if (channelSettingsKeys.contains("aprsVia")) {
+        swgM17ModSettings->setAprsVia(new QString(settings.m_aprsVia));
+    }
+    if (channelSettingsKeys.contains("aprsInsertPosition")) {
+        swgM17ModSettings->setAprsInsertPosition(settings.m_aprsInsertPosition ? 1 : 0);
     }
 
     if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))

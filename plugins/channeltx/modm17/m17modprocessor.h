@@ -233,7 +233,6 @@ public:
 
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     M17ModFIFO *getBasebandFifo() { return &m_basebandFifo; }
-    void resetInsertPositionToggle() { m_insertPositionToggle = true; }
 
 private:
     MessageQueue m_inputMessageQueue;

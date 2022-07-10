@@ -99,6 +99,7 @@ struct M17ModSettings
     void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void applySettings(const QStringList& settingsKeys, const M17ModSettings& settings);
 };
 
 

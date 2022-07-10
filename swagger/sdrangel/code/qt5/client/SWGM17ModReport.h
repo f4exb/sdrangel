@@ -13,7 +13,7 @@
 /*
  * SWGM17ModReport.h
  *
- * NFMMod
+ * M17Mod
  */
 
 #ifndef SWGM17ModReport_H_

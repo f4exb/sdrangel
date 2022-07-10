@@ -67,7 +67,7 @@ public:
         peakLevel = m_peakLevelOut;
         numSamples = m_levelNbSamples;
     }
-    void applySettings(const M17ModSettings& settings, bool force = false);
+    void applySettings(const M17ModSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
 
     void sendPacket();

@@ -149,7 +149,7 @@ bool M17ModBaseband::handleMessage(const Message& cmd)
         MsgConfigureM17ModBaseband& cfg = (MsgConfigureM17ModBaseband&) cmd;
         qDebug() << "M17ModBaseband::handleMessage: MsgConfigureM17ModBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
 
         return true;
     }
@@ -171,9 +171,9 @@ bool M17ModBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void M17ModBaseband::applySettings(const M17ModSettings& settings, bool force)
+void M17ModBaseband::applySettings(const M17ModSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
+    if (settingsKeys.contains("inputFrequencyOffset") || force)
     {
         m_channelizer->setChannelization(m_source.getAudioSampleRate(), settings.m_inputFrequencyOffset);
         m_source.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
@@ -181,7 +181,7 @@ void M17ModBaseband::applySettings(const M17ModSettings& settings, bool force)
 
     }
 
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
+    if (settingsKeys.contains("audioDeviceName") || force)
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
@@ -196,7 +196,7 @@ void M17ModBaseband::applySettings(const M17ModSettings& settings, bool force)
         }
     }
 
-    if ((settings.m_audioType != m_settings.m_audioType) || force)
+    if (settingsKeys.contains("audioType") || force)
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
@@ -208,7 +208,7 @@ void M17ModBaseband::applySettings(const M17ModSettings& settings, bool force)
         }
     }
 
-    if ((settings.m_feedbackAudioDeviceName != m_settings.m_feedbackAudioDeviceName) || force)
+    if (settingsKeys.contains("feedbackAudioDeviceName") || force)
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_feedbackAudioDeviceName);
@@ -221,9 +221,13 @@ void M17ModBaseband::applySettings(const M17ModSettings& settings, bool force)
         }
     }
 
-    m_source.applySettings(settings, force);
+    m_source.applySettings(settings, settingsKeys, force);
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int M17ModBaseband::getChannelSampleRate() const

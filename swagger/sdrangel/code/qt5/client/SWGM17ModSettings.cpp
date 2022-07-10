@@ -46,14 +46,20 @@ SWGM17ModSettings::SWGM17ModSettings() {
     m_rgb_color_isSet = false;
     title = nullptr;
     m_title_isSet = false;
-    audio_device_name = nullptr;
-    m_audio_device_name_isSet = false;
     m17_mode = 0;
     m_m17_mode_isSet = false;
     audio_type = 0;
     m_audio_type_isSet = false;
     packet_type = 0;
     m_packet_type_isSet = false;
+    audio_device_name = nullptr;
+    m_audio_device_name_isSet = false;
+    feedback_audio_device_name = nullptr;
+    m_feedback_audio_device_name_isSet = false;
+    feedback_volume_factor = 0.0f;
+    m_feedback_volume_factor_isSet = false;
+    feedback_audio_enable = 0;
+    m_feedback_audio_enable_isSet = false;
     stream_index = 0;
     m_stream_index_isSet = false;
     use_reverse_api = 0;
@@ -66,6 +72,30 @@ SWGM17ModSettings::SWGM17ModSettings() {
     m_reverse_api_device_index_isSet = false;
     reverse_api_channel_index = 0;
     m_reverse_api_channel_index_isSet = false;
+    source_call = nullptr;
+    m_source_call_isSet = false;
+    dest_call = nullptr;
+    m_dest_call_isSet = false;
+    insert_position = 0;
+    m_insert_position_isSet = false;
+    can = 0;
+    m_can_isSet = false;
+    sms_text = nullptr;
+    m_sms_text_isSet = false;
+    loop_packet = 0;
+    m_loop_packet_isSet = false;
+    loop_packet_interval = 0;
+    m_loop_packet_interval_isSet = false;
+    aprs_callsign = nullptr;
+    m_aprs_callsign_isSet = false;
+    aprs_to = nullptr;
+    m_aprs_to_isSet = false;
+    aprs_via = nullptr;
+    m_aprs_via_isSet = false;
+    aprs_data = nullptr;
+    m_aprs_data_isSet = false;
+    aprs_insert_position = 0;
+    m_aprs_insert_position_isSet = false;
     channel_marker = nullptr;
     m_channel_marker_isSet = false;
     rollup_state = nullptr;
@@ -96,14 +126,20 @@ SWGM17ModSettings::init() {
     m_rgb_color_isSet = false;
     title = new QString("");
     m_title_isSet = false;
-    audio_device_name = new QString("");
-    m_audio_device_name_isSet = false;
     m17_mode = 0;
     m_m17_mode_isSet = false;
     audio_type = 0;
     m_audio_type_isSet = false;
     packet_type = 0;
     m_packet_type_isSet = false;
+    audio_device_name = new QString("");
+    m_audio_device_name_isSet = false;
+    feedback_audio_device_name = new QString("");
+    m_feedback_audio_device_name_isSet = false;
+    feedback_volume_factor = 0.0f;
+    m_feedback_volume_factor_isSet = false;
+    feedback_audio_enable = 0;
+    m_feedback_audio_enable_isSet = false;
     stream_index = 0;
     m_stream_index_isSet = false;
     use_reverse_api = 0;
@@ -116,6 +152,30 @@ SWGM17ModSettings::init() {
     m_reverse_api_device_index_isSet = false;
     reverse_api_channel_index = 0;
     m_reverse_api_channel_index_isSet = false;
+    source_call = new QString("");
+    m_source_call_isSet = false;
+    dest_call = new QString("");
+    m_dest_call_isSet = false;
+    insert_position = 0;
+    m_insert_position_isSet = false;
+    can = 0;
+    m_can_isSet = false;
+    sms_text = new QString("");
+    m_sms_text_isSet = false;
+    loop_packet = 0;
+    m_loop_packet_isSet = false;
+    loop_packet_interval = 0;
+    m_loop_packet_interval_isSet = false;
+    aprs_callsign = new QString("");
+    m_aprs_callsign_isSet = false;
+    aprs_to = new QString("");
+    m_aprs_to_isSet = false;
+    aprs_via = new QString("");
+    m_aprs_via_isSet = false;
+    aprs_data = new QString("");
+    m_aprs_data_isSet = false;
+    aprs_insert_position = 0;
+    m_aprs_insert_position_isSet = false;
     channel_marker = new SWGChannelMarker();
     m_channel_marker_isSet = false;
     rollup_state = new SWGRollupState();
@@ -135,10 +195,15 @@ SWGM17ModSettings::cleanup() {
     if(title != nullptr) { 
         delete title;
     }
+
+
+
     if(audio_device_name != nullptr) { 
         delete audio_device_name;
     }
-
+    if(feedback_audio_device_name != nullptr) { 
+        delete feedback_audio_device_name;
+    }
 
 
 
@@ -148,6 +213,32 @@ SWGM17ModSettings::cleanup() {
     }
 
 
+
+    if(source_call != nullptr) { 
+        delete source_call;
+    }
+    if(dest_call != nullptr) { 
+        delete dest_call;
+    }
+
+
+    if(sms_text != nullptr) { 
+        delete sms_text;
+    }
+
+
+    if(aprs_callsign != nullptr) { 
+        delete aprs_callsign;
+    }
+    if(aprs_to != nullptr) { 
+        delete aprs_to;
+    }
+    if(aprs_via != nullptr) { 
+        delete aprs_via;
+    }
+    if(aprs_data != nullptr) { 
+        delete aprs_data;
+    }
 
     if(channel_marker != nullptr) { 
         delete channel_marker;
@@ -186,13 +277,19 @@ SWGM17ModSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
     
-    ::SWGSDRangel::setValue(&audio_device_name, pJson["audioDeviceName"], "QString", "QString");
-    
     ::SWGSDRangel::setValue(&m17_mode, pJson["m17Mode"], "qint32", "");
     
     ::SWGSDRangel::setValue(&audio_type, pJson["audioType"], "qint32", "");
     
     ::SWGSDRangel::setValue(&packet_type, pJson["packetType"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&audio_device_name, pJson["audioDeviceName"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&feedback_audio_device_name, pJson["feedbackAudioDeviceName"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&feedback_volume_factor, pJson["feedbackVolumeFactor"], "float", "");
+    
+    ::SWGSDRangel::setValue(&feedback_audio_enable, pJson["feedbackAudioEnable"], "qint32", "");
     
     ::SWGSDRangel::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
     
@@ -205,6 +302,30 @@ SWGM17ModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&reverse_api_device_index, pJson["reverseAPIDeviceIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&reverse_api_channel_index, pJson["reverseAPIChannelIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&source_call, pJson["sourceCall"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&dest_call, pJson["destCall"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&insert_position, pJson["insertPosition"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&can, pJson["can"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&sms_text, pJson["smsText"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&loop_packet, pJson["loopPacket"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&loop_packet_interval, pJson["loopPacketInterval"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&aprs_callsign, pJson["aprsCallsign"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&aprs_to, pJson["aprsTo"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&aprs_via, pJson["aprsVia"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&aprs_data, pJson["aprsData"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&aprs_insert_position, pJson["aprsInsertPosition"], "qint32", "");
     
     ::SWGSDRangel::setValue(&channel_marker, pJson["channelMarker"], "SWGChannelMarker", "SWGChannelMarker");
     
@@ -253,9 +374,6 @@ SWGM17ModSettings::asJsonObject() {
     if(title != nullptr && *title != QString("")){
         toJsonValue(QString("title"), title, obj, QString("QString"));
     }
-    if(audio_device_name != nullptr && *audio_device_name != QString("")){
-        toJsonValue(QString("audioDeviceName"), audio_device_name, obj, QString("QString"));
-    }
     if(m_m17_mode_isSet){
         obj->insert("m17Mode", QJsonValue(m17_mode));
     }
@@ -264,6 +382,18 @@ SWGM17ModSettings::asJsonObject() {
     }
     if(m_packet_type_isSet){
         obj->insert("packetType", QJsonValue(packet_type));
+    }
+    if(audio_device_name != nullptr && *audio_device_name != QString("")){
+        toJsonValue(QString("audioDeviceName"), audio_device_name, obj, QString("QString"));
+    }
+    if(feedback_audio_device_name != nullptr && *feedback_audio_device_name != QString("")){
+        toJsonValue(QString("feedbackAudioDeviceName"), feedback_audio_device_name, obj, QString("QString"));
+    }
+    if(m_feedback_volume_factor_isSet){
+        obj->insert("feedbackVolumeFactor", QJsonValue(feedback_volume_factor));
+    }
+    if(m_feedback_audio_enable_isSet){
+        obj->insert("feedbackAudioEnable", QJsonValue(feedback_audio_enable));
     }
     if(m_stream_index_isSet){
         obj->insert("streamIndex", QJsonValue(stream_index));
@@ -282,6 +412,42 @@ SWGM17ModSettings::asJsonObject() {
     }
     if(m_reverse_api_channel_index_isSet){
         obj->insert("reverseAPIChannelIndex", QJsonValue(reverse_api_channel_index));
+    }
+    if(source_call != nullptr && *source_call != QString("")){
+        toJsonValue(QString("sourceCall"), source_call, obj, QString("QString"));
+    }
+    if(dest_call != nullptr && *dest_call != QString("")){
+        toJsonValue(QString("destCall"), dest_call, obj, QString("QString"));
+    }
+    if(m_insert_position_isSet){
+        obj->insert("insertPosition", QJsonValue(insert_position));
+    }
+    if(m_can_isSet){
+        obj->insert("can", QJsonValue(can));
+    }
+    if(sms_text != nullptr && *sms_text != QString("")){
+        toJsonValue(QString("smsText"), sms_text, obj, QString("QString"));
+    }
+    if(m_loop_packet_isSet){
+        obj->insert("loopPacket", QJsonValue(loop_packet));
+    }
+    if(m_loop_packet_interval_isSet){
+        obj->insert("loopPacketInterval", QJsonValue(loop_packet_interval));
+    }
+    if(aprs_callsign != nullptr && *aprs_callsign != QString("")){
+        toJsonValue(QString("aprsCallsign"), aprs_callsign, obj, QString("QString"));
+    }
+    if(aprs_to != nullptr && *aprs_to != QString("")){
+        toJsonValue(QString("aprsTo"), aprs_to, obj, QString("QString"));
+    }
+    if(aprs_via != nullptr && *aprs_via != QString("")){
+        toJsonValue(QString("aprsVia"), aprs_via, obj, QString("QString"));
+    }
+    if(aprs_data != nullptr && *aprs_data != QString("")){
+        toJsonValue(QString("aprsData"), aprs_data, obj, QString("QString"));
+    }
+    if(m_aprs_insert_position_isSet){
+        obj->insert("aprsInsertPosition", QJsonValue(aprs_insert_position));
     }
     if((channel_marker != nullptr) && (channel_marker->isSet())){
         toJsonValue(QString("channelMarker"), channel_marker, obj, QString("SWGChannelMarker"));
@@ -383,16 +549,6 @@ SWGM17ModSettings::setTitle(QString* title) {
     this->m_title_isSet = true;
 }
 
-QString*
-SWGM17ModSettings::getAudioDeviceName() {
-    return audio_device_name;
-}
-void
-SWGM17ModSettings::setAudioDeviceName(QString* audio_device_name) {
-    this->audio_device_name = audio_device_name;
-    this->m_audio_device_name_isSet = true;
-}
-
 qint32
 SWGM17ModSettings::getM17Mode() {
     return m17_mode;
@@ -421,6 +577,46 @@ void
 SWGM17ModSettings::setPacketType(qint32 packet_type) {
     this->packet_type = packet_type;
     this->m_packet_type_isSet = true;
+}
+
+QString*
+SWGM17ModSettings::getAudioDeviceName() {
+    return audio_device_name;
+}
+void
+SWGM17ModSettings::setAudioDeviceName(QString* audio_device_name) {
+    this->audio_device_name = audio_device_name;
+    this->m_audio_device_name_isSet = true;
+}
+
+QString*
+SWGM17ModSettings::getFeedbackAudioDeviceName() {
+    return feedback_audio_device_name;
+}
+void
+SWGM17ModSettings::setFeedbackAudioDeviceName(QString* feedback_audio_device_name) {
+    this->feedback_audio_device_name = feedback_audio_device_name;
+    this->m_feedback_audio_device_name_isSet = true;
+}
+
+float
+SWGM17ModSettings::getFeedbackVolumeFactor() {
+    return feedback_volume_factor;
+}
+void
+SWGM17ModSettings::setFeedbackVolumeFactor(float feedback_volume_factor) {
+    this->feedback_volume_factor = feedback_volume_factor;
+    this->m_feedback_volume_factor_isSet = true;
+}
+
+qint32
+SWGM17ModSettings::getFeedbackAudioEnable() {
+    return feedback_audio_enable;
+}
+void
+SWGM17ModSettings::setFeedbackAudioEnable(qint32 feedback_audio_enable) {
+    this->feedback_audio_enable = feedback_audio_enable;
+    this->m_feedback_audio_enable_isSet = true;
 }
 
 qint32
@@ -483,6 +679,126 @@ SWGM17ModSettings::setReverseApiChannelIndex(qint32 reverse_api_channel_index) {
     this->m_reverse_api_channel_index_isSet = true;
 }
 
+QString*
+SWGM17ModSettings::getSourceCall() {
+    return source_call;
+}
+void
+SWGM17ModSettings::setSourceCall(QString* source_call) {
+    this->source_call = source_call;
+    this->m_source_call_isSet = true;
+}
+
+QString*
+SWGM17ModSettings::getDestCall() {
+    return dest_call;
+}
+void
+SWGM17ModSettings::setDestCall(QString* dest_call) {
+    this->dest_call = dest_call;
+    this->m_dest_call_isSet = true;
+}
+
+qint32
+SWGM17ModSettings::getInsertPosition() {
+    return insert_position;
+}
+void
+SWGM17ModSettings::setInsertPosition(qint32 insert_position) {
+    this->insert_position = insert_position;
+    this->m_insert_position_isSet = true;
+}
+
+qint32
+SWGM17ModSettings::getCan() {
+    return can;
+}
+void
+SWGM17ModSettings::setCan(qint32 can) {
+    this->can = can;
+    this->m_can_isSet = true;
+}
+
+QString*
+SWGM17ModSettings::getSmsText() {
+    return sms_text;
+}
+void
+SWGM17ModSettings::setSmsText(QString* sms_text) {
+    this->sms_text = sms_text;
+    this->m_sms_text_isSet = true;
+}
+
+qint32
+SWGM17ModSettings::getLoopPacket() {
+    return loop_packet;
+}
+void
+SWGM17ModSettings::setLoopPacket(qint32 loop_packet) {
+    this->loop_packet = loop_packet;
+    this->m_loop_packet_isSet = true;
+}
+
+qint32
+SWGM17ModSettings::getLoopPacketInterval() {
+    return loop_packet_interval;
+}
+void
+SWGM17ModSettings::setLoopPacketInterval(qint32 loop_packet_interval) {
+    this->loop_packet_interval = loop_packet_interval;
+    this->m_loop_packet_interval_isSet = true;
+}
+
+QString*
+SWGM17ModSettings::getAprsCallsign() {
+    return aprs_callsign;
+}
+void
+SWGM17ModSettings::setAprsCallsign(QString* aprs_callsign) {
+    this->aprs_callsign = aprs_callsign;
+    this->m_aprs_callsign_isSet = true;
+}
+
+QString*
+SWGM17ModSettings::getAprsTo() {
+    return aprs_to;
+}
+void
+SWGM17ModSettings::setAprsTo(QString* aprs_to) {
+    this->aprs_to = aprs_to;
+    this->m_aprs_to_isSet = true;
+}
+
+QString*
+SWGM17ModSettings::getAprsVia() {
+    return aprs_via;
+}
+void
+SWGM17ModSettings::setAprsVia(QString* aprs_via) {
+    this->aprs_via = aprs_via;
+    this->m_aprs_via_isSet = true;
+}
+
+QString*
+SWGM17ModSettings::getAprsData() {
+    return aprs_data;
+}
+void
+SWGM17ModSettings::setAprsData(QString* aprs_data) {
+    this->aprs_data = aprs_data;
+    this->m_aprs_data_isSet = true;
+}
+
+qint32
+SWGM17ModSettings::getAprsInsertPosition() {
+    return aprs_insert_position;
+}
+void
+SWGM17ModSettings::setAprsInsertPosition(qint32 aprs_insert_position) {
+    this->aprs_insert_position = aprs_insert_position;
+    this->m_aprs_insert_position_isSet = true;
+}
+
 SWGChannelMarker*
 SWGM17ModSettings::getChannelMarker() {
     return channel_marker;
@@ -535,9 +851,6 @@ SWGM17ModSettings::isSet(){
         if(title && *title != QString("")){
             isObjectUpdated = true; break;
         }
-        if(audio_device_name && *audio_device_name != QString("")){
-            isObjectUpdated = true; break;
-        }
         if(m_m17_mode_isSet){
             isObjectUpdated = true; break;
         }
@@ -545,6 +858,18 @@ SWGM17ModSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_packet_type_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(audio_device_name && *audio_device_name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(feedback_audio_device_name && *feedback_audio_device_name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_feedback_volume_factor_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_feedback_audio_enable_isSet){
             isObjectUpdated = true; break;
         }
         if(m_stream_index_isSet){
@@ -563,6 +888,42 @@ SWGM17ModSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_reverse_api_channel_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(source_call && *source_call != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(dest_call && *dest_call != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_insert_position_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_can_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(sms_text && *sms_text != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_loop_packet_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_loop_packet_interval_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(aprs_callsign && *aprs_callsign != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(aprs_to && *aprs_to != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(aprs_via && *aprs_via != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(aprs_data && *aprs_data != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_aprs_insert_position_isSet){
             isObjectUpdated = true; break;
         }
         if(channel_marker && channel_marker->isSet()){

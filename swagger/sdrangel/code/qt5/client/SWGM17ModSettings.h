@@ -71,9 +71,6 @@ public:
     QString* getTitle();
     void setTitle(QString* title);
 
-    QString* getAudioDeviceName();
-    void setAudioDeviceName(QString* audio_device_name);
-
     qint32 getM17Mode();
     void setM17Mode(qint32 m17_mode);
 
@@ -82,6 +79,18 @@ public:
 
     qint32 getPacketType();
     void setPacketType(qint32 packet_type);
+
+    QString* getAudioDeviceName();
+    void setAudioDeviceName(QString* audio_device_name);
+
+    QString* getFeedbackAudioDeviceName();
+    void setFeedbackAudioDeviceName(QString* feedback_audio_device_name);
+
+    float getFeedbackVolumeFactor();
+    void setFeedbackVolumeFactor(float feedback_volume_factor);
+
+    qint32 getFeedbackAudioEnable();
+    void setFeedbackAudioEnable(qint32 feedback_audio_enable);
 
     qint32 getStreamIndex();
     void setStreamIndex(qint32 stream_index);
@@ -100,6 +109,42 @@ public:
 
     qint32 getReverseApiChannelIndex();
     void setReverseApiChannelIndex(qint32 reverse_api_channel_index);
+
+    QString* getSourceCall();
+    void setSourceCall(QString* source_call);
+
+    QString* getDestCall();
+    void setDestCall(QString* dest_call);
+
+    qint32 getInsertPosition();
+    void setInsertPosition(qint32 insert_position);
+
+    qint32 getCan();
+    void setCan(qint32 can);
+
+    QString* getSmsText();
+    void setSmsText(QString* sms_text);
+
+    qint32 getLoopPacket();
+    void setLoopPacket(qint32 loop_packet);
+
+    qint32 getLoopPacketInterval();
+    void setLoopPacketInterval(qint32 loop_packet_interval);
+
+    QString* getAprsCallsign();
+    void setAprsCallsign(QString* aprs_callsign);
+
+    QString* getAprsTo();
+    void setAprsTo(QString* aprs_to);
+
+    QString* getAprsVia();
+    void setAprsVia(QString* aprs_via);
+
+    QString* getAprsData();
+    void setAprsData(QString* aprs_data);
+
+    qint32 getAprsInsertPosition();
+    void setAprsInsertPosition(qint32 aprs_insert_position);
 
     SWGChannelMarker* getChannelMarker();
     void setChannelMarker(SWGChannelMarker* channel_marker);
@@ -138,9 +183,6 @@ private:
     QString* title;
     bool m_title_isSet;
 
-    QString* audio_device_name;
-    bool m_audio_device_name_isSet;
-
     qint32 m17_mode;
     bool m_m17_mode_isSet;
 
@@ -149,6 +191,18 @@ private:
 
     qint32 packet_type;
     bool m_packet_type_isSet;
+
+    QString* audio_device_name;
+    bool m_audio_device_name_isSet;
+
+    QString* feedback_audio_device_name;
+    bool m_feedback_audio_device_name_isSet;
+
+    float feedback_volume_factor;
+    bool m_feedback_volume_factor_isSet;
+
+    qint32 feedback_audio_enable;
+    bool m_feedback_audio_enable_isSet;
 
     qint32 stream_index;
     bool m_stream_index_isSet;
@@ -167,6 +221,42 @@ private:
 
     qint32 reverse_api_channel_index;
     bool m_reverse_api_channel_index_isSet;
+
+    QString* source_call;
+    bool m_source_call_isSet;
+
+    QString* dest_call;
+    bool m_dest_call_isSet;
+
+    qint32 insert_position;
+    bool m_insert_position_isSet;
+
+    qint32 can;
+    bool m_can_isSet;
+
+    QString* sms_text;
+    bool m_sms_text_isSet;
+
+    qint32 loop_packet;
+    bool m_loop_packet_isSet;
+
+    qint32 loop_packet_interval;
+    bool m_loop_packet_interval_isSet;
+
+    QString* aprs_callsign;
+    bool m_aprs_callsign_isSet;
+
+    QString* aprs_to;
+    bool m_aprs_to_isSet;
+
+    QString* aprs_via;
+    bool m_aprs_via_isSet;
+
+    QString* aprs_data;
+    bool m_aprs_data_isSet;
+
+    qint32 aprs_insert_position;
+    bool m_aprs_insert_position_isSet;
 
     SWGChannelMarker* channel_marker;
     bool m_channel_marker_isSet;

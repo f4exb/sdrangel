@@ -55,7 +55,7 @@ void M17ModGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applySettings(QList<QString>(), true);
 }
 
 QByteArray M17ModGUI::serialize() const
@@ -67,7 +67,7 @@ bool M17ModGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
-        applySettings(true);
+        applySettings(QList<QString>(), true);
         return true;
     } else {
         resetToDefaults();
@@ -129,7 +129,7 @@ void M17ModGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-	applySettings();
+	applySettings(QList<QString>{"inputFrequencyOffset"});
 }
 
 void M17ModGUI::handleSourceMessages()
@@ -150,7 +150,7 @@ void M17ModGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QList<QString>{"inputFrequencyOffset"});
 }
 
 void M17ModGUI::on_rfBW_valueChanged(int value)
@@ -159,28 +159,28 @@ void M17ModGUI::on_rfBW_valueChanged(int value)
 	m_settings.m_rfBandwidth = value * 100.0;
 	m_channelMarker.setBandwidth(m_settings.m_rfBandwidth);
 
-    applySettings();
+    applySettings(QList<QString>{"rfBandwidth"});
 }
 
 void M17ModGUI::on_fmDev_valueChanged(int value)
 {
 	ui->fmDevText->setText(QString("%1%2k").arg(QChar(0xB1, 0x00)).arg(value / 10.0, 0, 'f', 1));
 	m_settings.m_fmDeviation = value * 200.0;
-	applySettings();
+	applySettings(QList<QString>{"fmDeviation"});
 }
 
 void M17ModGUI::on_volume_valueChanged(int value)
 {
 	ui->volumeText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
 	m_settings.m_volumeFactor = value / 10.0;
-	applySettings();
+	applySettings(QList<QString>{"volumeFactor"});
 }
 
 void M17ModGUI::on_toneFrequency_valueChanged(int value)
 {
     ui->toneFrequencyText->setText(QString("%1k").arg(value / 100.0, 0, 'f', 2));
     m_settings.m_toneFrequency = value * 10.0;
-    applySettings();
+    applySettings(QList<QString>{"toneFrequency"});
 }
 
 void M17ModGUI::on_fmAudio_toggled(bool checked)
@@ -190,25 +190,25 @@ void M17ModGUI::on_fmAudio_toggled(bool checked)
     if ((checked) && (m_settings.m_m17Mode == M17ModSettings::M17Mode::M17ModeM17Audio))
     {
         m_settings.m_m17Mode = M17ModSettings::M17Mode::M17ModeFMAudio;
-        applySettings();
+        applySettings(QList<QString>{"m17Mode"});
     }
     else if ((!checked) && (m_settings.m_m17Mode == M17ModSettings::M17Mode::M17ModeFMAudio))
     {
         m_settings.m_m17Mode = M17ModSettings::M17Mode::M17ModeM17Audio;
-        applySettings();
+        applySettings(QList<QString>{"m17Mode"});
     }
 }
 
 void M17ModGUI::on_channelMute_toggled(bool checked)
 {
     m_settings.m_channelMute = checked;
-	applySettings();
+	applySettings(QList<QString>{"channelMute"});
 }
 
 void M17ModGUI::on_playLoop_toggled(bool checked)
 {
     m_settings.m_playLoop = checked;
-	applySettings();
+	applySettings(QList<QString>{"playLoop"});
 }
 
 void M17ModGUI::on_play_toggled(bool checked)
@@ -220,7 +220,7 @@ void M17ModGUI::on_play_toggled(bool checked)
             : M17ModSettings::M17Mode::M17ModeM17Audio
         : M17ModSettings::M17ModeNone;
     displayModes();
-    applySettings();
+    applySettings(QList<QString>{"audioType", "m17Mode"});
     ui->navTimeSlider->setEnabled(!checked);
     m_enableNavTime = !checked;
 }
@@ -229,7 +229,7 @@ void M17ModGUI::on_tone_toggled(bool checked)
 {
     m_settings.m_m17Mode = checked ? M17ModSettings::M17ModeFMTone : M17ModSettings::M17ModeNone;
     displayModes();
-    applySettings();
+    applySettings(QList<QString>{"m17Mode"});
 }
 
 void M17ModGUI::on_mic_toggled(bool checked)
@@ -241,20 +241,20 @@ void M17ModGUI::on_mic_toggled(bool checked)
             : M17ModSettings::M17Mode::M17ModeM17Audio
         : M17ModSettings::M17ModeNone;
     displayModes();
-    applySettings();
+    applySettings(QList<QString>{"audioType", "m17Mode"});
 }
 
 void M17ModGUI::on_feedbackEnable_toggled(bool checked)
 {
     m_settings.m_feedbackAudioEnable = checked;
-    applySettings();
+    applySettings(QList<QString>{"feedbackAudioEnable"});
 }
 
 void M17ModGUI::on_feedbackVolume_valueChanged(int value)
 {
     ui->feedbackVolumeText->setText(QString("%1").arg(value / 100.0, 0, 'f', 2));
     m_settings.m_feedbackVolumeFactor = value / 100.0;
-    applySettings();
+    applySettings(QList<QString>{"feedbackVolumeFactor"});
 }
 
 void M17ModGUI::on_navTimeSlider_valueChanged(int value)
@@ -289,14 +289,14 @@ void M17ModGUI::on_packetMode_toggled(bool checked)
 {
     m_settings.m_m17Mode = checked ? M17ModSettings::M17ModeM17Packet : M17ModSettings::M17ModeNone;
     displayModes();
-    applySettings();
+    applySettings(QList<QString>{"m17Mode"});
 }
 
 void M17ModGUI::on_bertMode_toggled(bool checked)
 {
     m_settings.m_m17Mode = checked ? M17ModSettings::M17ModeM17BERT : M17ModSettings::M17ModeNone;
     displayModes();
-    applySettings();
+    applySettings(QList<QString>{"m17Mode"});
 }
 
 void M17ModGUI::on_sendPacket_clicked(bool)
@@ -307,7 +307,7 @@ void M17ModGUI::on_sendPacket_clicked(bool)
 void M17ModGUI::on_loopPacket_toggled(bool checked)
 {
     m_settings.m_loopPacket = checked;
-    applySettings();
+    applySettings(QList<QString>{"loopPacket"});
 }
 
 void M17ModGUI::on_loopPacketInterval_valueChanged(int value)
@@ -315,73 +315,73 @@ void M17ModGUI::on_loopPacketInterval_valueChanged(int value)
     ui->loopPacketIntervalText->setText(tr("%1").arg(value));
     m_settings.m_loopPacketInterval = value;
     (void) value;
-    applySettings();
+    applySettings(QList<QString>{"loopPacketInterval"});
 }
 
 void M17ModGUI::on_packetDataWidget_currentChanged(int index)
 {
     m_settings.m_packetType = indexToPacketType(index);
-    applySettings();
+    applySettings(QList<QString>{"packetType"});
 }
 
 void M17ModGUI::on_source_editingFinished()
 {
     m_settings.m_sourceCall = ui->source->text();
-    applySettings();
+    applySettings(QList<QString>{"sourceCall"});
 }
 
 void M17ModGUI::on_destination_editingFinished()
 {
     m_settings.m_destCall = ui->destination->text();
-    applySettings();
+    applySettings(QList<QString>{"destCall"});
 }
 
 void M17ModGUI::on_insertPosition_toggled(bool checked)
 {
     m_settings.m_insertPosition = checked;
-    applySettings();
+    applySettings(QList<QString>{"insertPosition"});
 }
 
 void M17ModGUI::on_can_valueChanged(int value)
 {
     m_settings.m_can = value;
-    applySettings();
+    applySettings(QList<QString>{"can"});
 }
 
 void M17ModGUI::on_smsText_editingFinished()
 {
     m_settings.m_smsText = ui->smsText->toPlainText();
-    applySettings();
+    applySettings(QList<QString>{"smsText"});
 }
 
 void M17ModGUI::on_aprsFromText_editingFinished()
 {
     m_settings.m_aprsCallsign = ui->aprsFromText->text();
-    applySettings();
+    applySettings(QList<QString>{"aprsCallsign"});
 }
 
 void M17ModGUI::on_aprsTo_currentTextChanged(const QString &text)
 {
     m_settings.m_aprsTo = text;
-    applySettings();
+    applySettings(QList<QString>{"aprsTo"});
 }
 
 void M17ModGUI::on_aprsVia_currentTextChanged(const QString &text)
 {
     m_settings.m_aprsVia = text;
-    applySettings();
+    applySettings(QList<QString>{"aprsVia"});
 }
 
 void M17ModGUI::on_aprsData_editingFinished()
 {
     m_settings.m_aprsData = ui->aprsData->text();
-    applySettings();
+    applySettings(QList<QString>{"aprsData"});
 }
 
 void M17ModGUI::on_aprsInsertPosition_toggled(bool checked)
 {
     m_settings.m_aprsInsertPosition = checked;
-    applySettings();
+    applySettings(QList<QString>{"aprsInsertPosition"});
 }
 
 void M17ModGUI::configureFileName()
@@ -397,7 +397,6 @@ void M17ModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
 }
 
 void M17ModGUI::onMenuDialogCalled(const QPoint &p)
@@ -433,15 +432,26 @@ void M17ModGUI::onMenuDialogCalled(const QPoint &p)
         setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
+        QList<QString> settingsKeys({
+            "m_rgbColor",
+            "title",
+            "useReverseAPI",
+            "reverseAPIAddress",
+            "reverseAPIPort",
+            "reverseAPIDeviceIndex",
+            "reverseAPIChannelIndex"
+        });
+
         if (m_deviceUISet->m_deviceMIMOEngine)
         {
             m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
+            settingsKeys.append("streamIndex");
             m_channelMarker.clearStreamIndexes();
             m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(settingsKeys);
     }
 
     resetContextMenuType();
@@ -516,7 +526,7 @@ M17ModGUI::M17ModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
     displaySettings();
     makeUIConnections();
-    applySettings();
+    applySettings(QList<QString>{"channelMarker", "rollupState"});
 }
 
 M17ModGUI::~M17ModGUI()
@@ -529,11 +539,11 @@ void M17ModGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void M17ModGUI::applySettings(bool force)
+void M17ModGUI::applySettings(const QList<QString>& settingsKeys, bool force)
 {
 	if (m_doApplySettings)
 	{
-		M17Mod::MsgConfigureM17Mod *msg = M17Mod::MsgConfigureM17Mod::create(m_settings, force);
+		M17Mod::MsgConfigureM17Mod *msg = M17Mod::MsgConfigureM17Mod::create(m_settings, settingsKeys, force);
 		m_m17Mod->getInputMessageQueue()->push(msg);
 	}
 }
@@ -710,7 +720,7 @@ void M17ModGUI::audioSelect()
     if (audioSelect.m_selected)
     {
         m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
-        applySettings();
+        applySettings(QList<QString>{"audioDeviceName"});
     }
 }
 
@@ -723,7 +733,7 @@ void M17ModGUI::audioFeedbackSelect()
     if (audioSelect.m_selected)
     {
         m_settings.m_feedbackAudioDeviceName = audioSelect.m_audioDeviceName;
-        applySettings();
+        applySettings(QList<QString>{"feedbackAudioDeviceName"});
     }
 }
 

@@ -65,7 +65,7 @@ M17ModSource::M17ModSource() :
     m_processor->moveToThread(&m_processorThread);
     m_processorThread.start();
 
-    applySettings(m_settings, true);
+    applySettings(m_settings, QList<QString>(), true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 }
 
@@ -525,19 +525,19 @@ void M17ModSource::applyFeedbackAudioSampleRate(int sampleRate)
     m_feedbackAudioSampleRate = sampleRate;
 }
 
-void M17ModSource::applySettings(const M17ModSettings& settings, bool force)
+void M17ModSource::applySettings(const M17ModSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
+    if (settingsKeys.contains("rfBandwidth") || force)
     {
         m_settings.m_rfBandwidth = settings.m_rfBandwidth;
         applyAudioSampleRate(m_audioSampleRate);
     }
 
-    if ((settings.m_toneFrequency != m_settings.m_toneFrequency) || force) {
+    if (settingsKeys.contains("toneFrequency") || force) {
         m_toneNco.setFreq(settings.m_toneFrequency, m_audioSampleRate);
     }
 
-    if ((settings.m_audioType != m_settings.m_audioType) || force)
+    if (settingsKeys.contains("audioType") || force)
     {
         if (settings.m_audioType == M17ModSettings::AudioInput) {
             connect(&m_audioFifo, SIGNAL(dataReady()), this, SLOT(handleAudio()));
@@ -546,14 +546,11 @@ void M17ModSource::applySettings(const M17ModSettings& settings, bool force)
         }
     }
 
-    if ((settings.m_insertPosition != m_settings.m_insertPosition) || force)
-    {
-        if (settings.m_insertPosition) {
-            m_processor->resetInsertPositionToggle();
-        }
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
     }
-
-    m_settings = settings;
 }
 
 void M17ModSource::applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force)

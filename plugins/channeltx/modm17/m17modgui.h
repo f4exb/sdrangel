@@ -97,7 +97,7 @@ private:
     virtual ~M17ModGUI();
 
     void blockApplySettings(bool block);
-    void applySettings(bool force = false);
+    void applySettings(const QList<QString>& settingsKeys, bool force = false);
     void displaySettings();
     void displayModes();
     void updateWithStreamData();
