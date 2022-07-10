@@ -10,10 +10,10 @@ M17DemodSettings:
     fmDeviation:
       type: number
       format: float
-    demodGain:
+    volume:
       type: number
       format: float
-    volume:
+    demodGain:
       type: number
       format: float
     baudRate:
@@ -27,13 +27,9 @@ M17DemodSettings:
       type: integer
     syncOrConstellation:
       type: integer
-    pllLock:
-      type: integer
     rgbColor:
       type: integer
     title:
-      type: string
-    audioDeviceName:
       type: string
     highPassFilter:
       type: integer
@@ -45,6 +41,10 @@ M17DemodSettings:
       type: integer
     traceDecay:
       description: 0 to 255
+      type: integer
+    audioDeviceName:
+      type: string
+    statusLogEnabled:
       type: integer
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).

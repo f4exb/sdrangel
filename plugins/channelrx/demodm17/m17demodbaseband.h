@@ -39,20 +39,22 @@ public:
 
     public:
         const M17DemodSettings& getSettings() const { return m_settings; }
+        const QList<QString>& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureM17DemodBaseband* create(const M17DemodSettings& settings, bool force)
-        {
-            return new MsgConfigureM17DemodBaseband(settings, force);
+        static MsgConfigureM17DemodBaseband* create(const M17DemodSettings& settings, const QList<QString>& settingsKeys, bool force) {
+            return new MsgConfigureM17DemodBaseband(settings, settingsKeys, force);
         }
 
     private:
         M17DemodSettings m_settings;
+        QList<QString> m_settingsKeys;
         bool m_force;
 
-        MsgConfigureM17DemodBaseband(const M17DemodSettings& settings, bool force) :
+        MsgConfigureM17DemodBaseband(const M17DemodSettings& settings, const QList<QString>& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -128,7 +130,7 @@ private:
     QMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
-    void applySettings(const M17DemodSettings& settings, bool force = false);
+    void applySettings(const M17DemodSettings& settings, const QList<QString>& settingsKeys, bool force = false);
 
 private slots:
     void handleInputMessages();

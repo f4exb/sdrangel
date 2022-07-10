@@ -8257,11 +8257,11 @@ margin-bottom: 20px;
       "type" : "number",
       "format" : "float"
     },
-    "demodGain" : {
+    "volume" : {
       "type" : "number",
       "format" : "float"
     },
-    "volume" : {
+    "demodGain" : {
       "type" : "number",
       "format" : "float"
     },
@@ -8281,16 +8281,10 @@ margin-bottom: 20px;
     "syncOrConstellation" : {
       "type" : "integer"
     },
-    "pllLock" : {
-      "type" : "integer"
-    },
     "rgbColor" : {
       "type" : "integer"
     },
     "title" : {
-      "type" : "string"
-    },
-    "audioDeviceName" : {
       "type" : "string"
     },
     "highPassFilter" : {
@@ -8307,6 +8301,12 @@ margin-bottom: 20px;
     "traceDecay" : {
       "type" : "integer",
       "description" : "0 to 255"
+    },
+    "audioDeviceName" : {
+      "type" : "string"
+    },
+    "statusLogEnabled" : {
+      "type" : "integer"
     },
     "streamIndex" : {
       "type" : "integer",
@@ -56435,7 +56435,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2022-07-09T11:05:50.499+02:00
+              Generated 2022-07-10T10:00:03.872+02:00
             </div>
           </div>
       </div>

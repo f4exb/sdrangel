@@ -48,6 +48,7 @@ void M17DemodSettings::resetToDefaults()
     m_traceStroke = 100;
     m_traceDecay = 200;
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
+    m_statusLogEnabled = false;
     m_streamIndex = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
@@ -69,6 +70,7 @@ QByteArray M17DemodSettings::serialize() const
     s.writeS32(8, m_squelchGate);
     s.writeS32(9, m_volume*10.0);
     s.writeS32(11, m_baudRate);
+    s.writeBool(12, m_statusLogEnabled);
     s.writeBool(13, m_syncOrConstellation);
 
     if (m_channelMarker) {
@@ -127,7 +129,6 @@ bool M17DemodSettings::deserialize(const QByteArray& data)
         m_inputFrequencyOffset = tmp;
         d.readS32(2, &tmp, 125);
         m_rfBandwidth = tmp * 100.0;
-        d.readS32(3, &tmp, 125);
         d.readS32(4, &tmp, 50);
         m_fmDeviation = tmp * 100.0;
         d.readS32(5, &tmp, -40);
@@ -137,6 +138,7 @@ bool M17DemodSettings::deserialize(const QByteArray& data)
         d.readS32(9, &tmp, 20);
         m_volume = tmp / 10.0;
         d.readS32(11, &m_baudRate, 4800);
+        d.readBool(12, &m_statusLogEnabled, false);
         d.readBool(13, &m_syncOrConstellation, false);
         d.readString(18, &m_title, "M17 Demodulator");
         d.readBool(19, &m_highPassFilter, false);
@@ -183,3 +185,78 @@ bool M17DemodSettings::deserialize(const QByteArray& data)
     }
 }
 
+void M17DemodSettings::applySettings(const QStringList& settingsKeys, const M17DemodSettings& settings)
+{
+    if (settingsKeys.contains("inputFrequencyOffset")) {
+        m_inputFrequencyOffset = settings.m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("rfBandwidth")) {
+        m_rfBandwidth = settings.m_rfBandwidth;
+    }
+    if (settingsKeys.contains("fmDeviation")) {
+        m_fmDeviation = settings.m_fmDeviation;
+    }
+    if (settingsKeys.contains("squelch")) {
+        m_squelch = settings.m_squelch;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("squelchGate")) {
+        m_squelchGate = settings.m_squelchGate;
+    }
+    if (settingsKeys.contains("volume")) {
+        m_volume = settings.m_volume;
+    }
+    if (settingsKeys.contains("baudRate")) {
+        m_baudRate = settings.m_baudRate;
+    }
+    if (settingsKeys.contains("statusLogEnabled")) {
+        m_statusLogEnabled = settings.m_statusLogEnabled;
+    }
+    if (settingsKeys.contains("syncOrConstellation")) {
+        m_syncOrConstellation = settings.m_syncOrConstellation;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("highPassFilter")) {
+        m_highPassFilter = settings.m_highPassFilter;
+    }
+    if (settingsKeys.contains("audioDeviceName")) {
+        m_audioDeviceName = settings.m_audioDeviceName;
+    }
+    if (settingsKeys.contains("traceLengthMutliplier")) {
+        m_traceLengthMutliplier = settings.m_traceLengthMutliplier;
+    }
+    if (settingsKeys.contains("traceStroke")) {
+        m_traceStroke = settings.m_traceStroke;
+    }
+    if (settingsKeys.contains("traceDecay")) {
+        m_traceDecay = settings.m_traceDecay;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("audioMute")) {
+        m_audioMute = settings.m_audioMute;
+    }
+    if (settingsKeys.contains("streamIndex")) {
+        m_streamIndex = settings.m_streamIndex;
+    }
+    if (settingsKeys.contains("rollupState")) {
+        m_rollupState = settings.m_rollupState;
+    }
+    if (settingsKeys.contains("channelMarker")) {
+        m_channelMarker = settings.m_channelMarker;
+    }
+}

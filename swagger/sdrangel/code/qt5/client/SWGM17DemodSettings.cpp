@@ -34,10 +34,10 @@ SWGM17DemodSettings::SWGM17DemodSettings() {
     m_rf_bandwidth_isSet = false;
     fm_deviation = 0.0f;
     m_fm_deviation_isSet = false;
-    demod_gain = 0.0f;
-    m_demod_gain_isSet = false;
     volume = 0.0f;
     m_volume_isSet = false;
+    demod_gain = 0.0f;
+    m_demod_gain_isSet = false;
     baud_rate = 0;
     m_baud_rate_isSet = false;
     squelch_gate = 0;
@@ -48,14 +48,10 @@ SWGM17DemodSettings::SWGM17DemodSettings() {
     m_audio_mute_isSet = false;
     sync_or_constellation = 0;
     m_sync_or_constellation_isSet = false;
-    pll_lock = 0;
-    m_pll_lock_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = nullptr;
     m_title_isSet = false;
-    audio_device_name = nullptr;
-    m_audio_device_name_isSet = false;
     high_pass_filter = 0;
     m_high_pass_filter_isSet = false;
     trace_length_mutliplier = 0;
@@ -64,6 +60,10 @@ SWGM17DemodSettings::SWGM17DemodSettings() {
     m_trace_stroke_isSet = false;
     trace_decay = 0;
     m_trace_decay_isSet = false;
+    audio_device_name = nullptr;
+    m_audio_device_name_isSet = false;
+    status_log_enabled = 0;
+    m_status_log_enabled_isSet = false;
     stream_index = 0;
     m_stream_index_isSet = false;
     use_reverse_api = 0;
@@ -94,10 +94,10 @@ SWGM17DemodSettings::init() {
     m_rf_bandwidth_isSet = false;
     fm_deviation = 0.0f;
     m_fm_deviation_isSet = false;
-    demod_gain = 0.0f;
-    m_demod_gain_isSet = false;
     volume = 0.0f;
     m_volume_isSet = false;
+    demod_gain = 0.0f;
+    m_demod_gain_isSet = false;
     baud_rate = 0;
     m_baud_rate_isSet = false;
     squelch_gate = 0;
@@ -108,14 +108,10 @@ SWGM17DemodSettings::init() {
     m_audio_mute_isSet = false;
     sync_or_constellation = 0;
     m_sync_or_constellation_isSet = false;
-    pll_lock = 0;
-    m_pll_lock_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = new QString("");
     m_title_isSet = false;
-    audio_device_name = new QString("");
-    m_audio_device_name_isSet = false;
     high_pass_filter = 0;
     m_high_pass_filter_isSet = false;
     trace_length_mutliplier = 0;
@@ -124,6 +120,10 @@ SWGM17DemodSettings::init() {
     m_trace_stroke_isSet = false;
     trace_decay = 0;
     m_trace_decay_isSet = false;
+    audio_device_name = new QString("");
+    m_audio_device_name_isSet = false;
+    status_log_enabled = 0;
+    m_status_log_enabled_isSet = false;
     stream_index = 0;
     m_stream_index_isSet = false;
     use_reverse_api = 0;
@@ -155,16 +155,16 @@ SWGM17DemodSettings::cleanup() {
 
 
 
-
     if(title != nullptr) { 
         delete title;
     }
+
+
+
+
     if(audio_device_name != nullptr) { 
         delete audio_device_name;
     }
-
-
-
 
 
 
@@ -199,9 +199,9 @@ SWGM17DemodSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&fm_deviation, pJson["fmDeviation"], "float", "");
     
-    ::SWGSDRangel::setValue(&demod_gain, pJson["demodGain"], "float", "");
-    
     ::SWGSDRangel::setValue(&volume, pJson["volume"], "float", "");
+    
+    ::SWGSDRangel::setValue(&demod_gain, pJson["demodGain"], "float", "");
     
     ::SWGSDRangel::setValue(&baud_rate, pJson["baudRate"], "qint32", "");
     
@@ -213,13 +213,9 @@ SWGM17DemodSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&sync_or_constellation, pJson["syncOrConstellation"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&pll_lock, pJson["pllLock"], "qint32", "");
-    
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
-    
-    ::SWGSDRangel::setValue(&audio_device_name, pJson["audioDeviceName"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&high_pass_filter, pJson["highPassFilter"], "qint32", "");
     
@@ -228,6 +224,10 @@ SWGM17DemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&trace_stroke, pJson["traceStroke"], "qint32", "");
     
     ::SWGSDRangel::setValue(&trace_decay, pJson["traceDecay"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&audio_device_name, pJson["audioDeviceName"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&status_log_enabled, pJson["statusLogEnabled"], "qint32", "");
     
     ::SWGSDRangel::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
     
@@ -270,11 +270,11 @@ SWGM17DemodSettings::asJsonObject() {
     if(m_fm_deviation_isSet){
         obj->insert("fmDeviation", QJsonValue(fm_deviation));
     }
-    if(m_demod_gain_isSet){
-        obj->insert("demodGain", QJsonValue(demod_gain));
-    }
     if(m_volume_isSet){
         obj->insert("volume", QJsonValue(volume));
+    }
+    if(m_demod_gain_isSet){
+        obj->insert("demodGain", QJsonValue(demod_gain));
     }
     if(m_baud_rate_isSet){
         obj->insert("baudRate", QJsonValue(baud_rate));
@@ -291,17 +291,11 @@ SWGM17DemodSettings::asJsonObject() {
     if(m_sync_or_constellation_isSet){
         obj->insert("syncOrConstellation", QJsonValue(sync_or_constellation));
     }
-    if(m_pll_lock_isSet){
-        obj->insert("pllLock", QJsonValue(pll_lock));
-    }
     if(m_rgb_color_isSet){
         obj->insert("rgbColor", QJsonValue(rgb_color));
     }
     if(title != nullptr && *title != QString("")){
         toJsonValue(QString("title"), title, obj, QString("QString"));
-    }
-    if(audio_device_name != nullptr && *audio_device_name != QString("")){
-        toJsonValue(QString("audioDeviceName"), audio_device_name, obj, QString("QString"));
     }
     if(m_high_pass_filter_isSet){
         obj->insert("highPassFilter", QJsonValue(high_pass_filter));
@@ -314,6 +308,12 @@ SWGM17DemodSettings::asJsonObject() {
     }
     if(m_trace_decay_isSet){
         obj->insert("traceDecay", QJsonValue(trace_decay));
+    }
+    if(audio_device_name != nullptr && *audio_device_name != QString("")){
+        toJsonValue(QString("audioDeviceName"), audio_device_name, obj, QString("QString"));
+    }
+    if(m_status_log_enabled_isSet){
+        obj->insert("statusLogEnabled", QJsonValue(status_log_enabled));
     }
     if(m_stream_index_isSet){
         obj->insert("streamIndex", QJsonValue(stream_index));
@@ -374,16 +374,6 @@ SWGM17DemodSettings::setFmDeviation(float fm_deviation) {
 }
 
 float
-SWGM17DemodSettings::getDemodGain() {
-    return demod_gain;
-}
-void
-SWGM17DemodSettings::setDemodGain(float demod_gain) {
-    this->demod_gain = demod_gain;
-    this->m_demod_gain_isSet = true;
-}
-
-float
 SWGM17DemodSettings::getVolume() {
     return volume;
 }
@@ -391,6 +381,16 @@ void
 SWGM17DemodSettings::setVolume(float volume) {
     this->volume = volume;
     this->m_volume_isSet = true;
+}
+
+float
+SWGM17DemodSettings::getDemodGain() {
+    return demod_gain;
+}
+void
+SWGM17DemodSettings::setDemodGain(float demod_gain) {
+    this->demod_gain = demod_gain;
+    this->m_demod_gain_isSet = true;
 }
 
 qint32
@@ -444,16 +444,6 @@ SWGM17DemodSettings::setSyncOrConstellation(qint32 sync_or_constellation) {
 }
 
 qint32
-SWGM17DemodSettings::getPllLock() {
-    return pll_lock;
-}
-void
-SWGM17DemodSettings::setPllLock(qint32 pll_lock) {
-    this->pll_lock = pll_lock;
-    this->m_pll_lock_isSet = true;
-}
-
-qint32
 SWGM17DemodSettings::getRgbColor() {
     return rgb_color;
 }
@@ -471,16 +461,6 @@ void
 SWGM17DemodSettings::setTitle(QString* title) {
     this->title = title;
     this->m_title_isSet = true;
-}
-
-QString*
-SWGM17DemodSettings::getAudioDeviceName() {
-    return audio_device_name;
-}
-void
-SWGM17DemodSettings::setAudioDeviceName(QString* audio_device_name) {
-    this->audio_device_name = audio_device_name;
-    this->m_audio_device_name_isSet = true;
 }
 
 qint32
@@ -521,6 +501,26 @@ void
 SWGM17DemodSettings::setTraceDecay(qint32 trace_decay) {
     this->trace_decay = trace_decay;
     this->m_trace_decay_isSet = true;
+}
+
+QString*
+SWGM17DemodSettings::getAudioDeviceName() {
+    return audio_device_name;
+}
+void
+SWGM17DemodSettings::setAudioDeviceName(QString* audio_device_name) {
+    this->audio_device_name = audio_device_name;
+    this->m_audio_device_name_isSet = true;
+}
+
+qint32
+SWGM17DemodSettings::getStatusLogEnabled() {
+    return status_log_enabled;
+}
+void
+SWGM17DemodSettings::setStatusLogEnabled(qint32 status_log_enabled) {
+    this->status_log_enabled = status_log_enabled;
+    this->m_status_log_enabled_isSet = true;
 }
 
 qint32
@@ -617,10 +617,10 @@ SWGM17DemodSettings::isSet(){
         if(m_fm_deviation_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_demod_gain_isSet){
+        if(m_volume_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_volume_isSet){
+        if(m_demod_gain_isSet){
             isObjectUpdated = true; break;
         }
         if(m_baud_rate_isSet){
@@ -638,16 +638,10 @@ SWGM17DemodSettings::isSet(){
         if(m_sync_or_constellation_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_pll_lock_isSet){
-            isObjectUpdated = true; break;
-        }
         if(m_rgb_color_isSet){
             isObjectUpdated = true; break;
         }
         if(title && *title != QString("")){
-            isObjectUpdated = true; break;
-        }
-        if(audio_device_name && *audio_device_name != QString("")){
             isObjectUpdated = true; break;
         }
         if(m_high_pass_filter_isSet){
@@ -660,6 +654,12 @@ SWGM17DemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_trace_decay_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(audio_device_name && *audio_device_name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_status_log_enabled_isSet){
             isObjectUpdated = true; break;
         }
         if(m_stream_index_isSet){

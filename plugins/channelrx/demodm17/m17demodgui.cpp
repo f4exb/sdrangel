@@ -63,7 +63,7 @@ void M17DemodGUI::resetToDefaults()
 	blockApplySettings(true);
 	displaySettings();
 	blockApplySettings(false);
-	applySettings();
+	applySettings(QList<QString>(), true);
 }
 
 QByteArray M17DemodGUI::serialize() const
@@ -76,7 +76,7 @@ bool M17DemodGUI::deserialize(const QByteArray& data)
     if (m_settings.deserialize(data))
     {
         displaySettings();
-        applySettings(true);
+        applySettings(QList<QString>(), true);
         return true;
     }
     else
@@ -100,7 +100,13 @@ bool M17DemodGUI::handleMessage(const Message& message)
     {
         qDebug("M17DemodGUI::handleMessage: M17Demod::MsgConfigureM17Demod");
         const M17Demod::MsgConfigureM17Demod& cfg = (M17Demod::MsgConfigureM17Demod&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         m_channelMarker.updateSettings(static_cast<const ChannelMarker*>(m_settings.m_channelMarker));
         displaySettings();
@@ -124,13 +130,18 @@ bool M17DemodGUI::handleMessage(const Message& message)
         QString dateStr = dt.toString("HH:mm:ss");
         QTextCursor cursor = ui->smsLog->textCursor();
         cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
-        cursor.insertText(tr("=== %1 %2 to %3 ===\n%4\n")
+        QString s(tr("=== %1 %2 to %3 ===\n%4\n")
             .arg(dateStr)
             .arg(report.getSource())
             .arg(report.getDest())
             .arg(report.getSMS())
         );
+        cursor.insertText(s);
         ui->smsLog->verticalScrollBar()->setValue(ui->smsLog->verticalScrollBar()->maximum());
+
+        if (ui->activateStatusLog->isChecked()) {
+            m_m17StatusTextDialog.addLine(tr("SMS: %1").arg(report.getSMS()));
+        }
 
         return true;
     }
@@ -169,6 +180,19 @@ bool M17DemodGUI::handleMessage(const Message& message)
             ui->aprsPackets->scrollToBottom();
         }
 
+        if (ui->activateStatusLog->isChecked())
+        {
+            QString s(tr("APRS: %1 to %2 via %3 typ %4 pid %5: %6")
+                .arg(report.getFrom())
+                .arg(report.getTo())
+                .arg(report.getVia())
+                .arg(report.getType())
+                .arg(report.getPID())
+                .arg(report.getData())
+            );
+            m_m17StatusTextDialog.addLine(s);
+        }
+
         return true;
     }
     else
@@ -195,7 +219,7 @@ void M17DemodGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QList<QString>({"inputFrequencyOffset"}));
 }
 
 void M17DemodGUI::on_rfBW_valueChanged(int value)
@@ -203,33 +227,33 @@ void M17DemodGUI::on_rfBW_valueChanged(int value)
 	m_channelMarker.setBandwidth(value * 100);
 	m_settings.m_rfBandwidth = value * 100.0;
     ui->rfBWText->setText(QString("%1k").arg(value / 10.0, 0, 'f', 1));
-	applySettings();
+	applySettings(QList<QString>({"rfBandwidth"}));
 }
 
 void M17DemodGUI::on_fmDeviation_valueChanged(int value)
 {
     m_settings.m_fmDeviation = value * 100.0;
     ui->fmDeviationText->setText(QString("%1%2k").arg(QChar(0xB1, 0x00)).arg(value / 10.0, 0, 'f', 1));
-	applySettings();
+	applySettings(QList<QString>({"fmDeviation"}));
 }
 
 void M17DemodGUI::on_volume_valueChanged(int value)
 {
     m_settings.m_volume= value / 100.0;
     ui->volumeText->setText(QString("%1").arg(value / 100.0, 0, 'f', 2));
-    applySettings();
+    applySettings(QList<QString>({"volume"}));
 }
 
 void M17DemodGUI::on_baudRate_currentIndexChanged(int index)
 {
     m_settings.m_baudRate = M17DemodBaudRates::getRate(index);
-    applySettings();
+    applySettings(QList<QString>({"baudRate"}));
 }
 
 void M17DemodGUI::on_syncOrConstellation_toggled(bool checked)
 {
     m_settings.m_syncOrConstellation = checked;
-    applySettings();
+    applySettings(QList<QString>({"syncOrConstellation"}));
 }
 
 void M17DemodGUI::on_traceLength_valueChanged(int value)
@@ -257,26 +281,26 @@ void M17DemodGUI::on_squelchGate_valueChanged(int value)
 {
     m_settings.m_squelchGate = value;
     ui->squelchGateText->setText(QString("%1").arg(value * 10.0, 0, 'f', 0));
-	applySettings();
+	applySettings(QList<QString>({"squelchGate"}));
 }
 
 void M17DemodGUI::on_squelch_valueChanged(int value)
 {
 	ui->squelchText->setText(QString("%1").arg(value / 1.0, 0, 'f', 0));
 	m_settings.m_squelch = value;
-	applySettings();
+	applySettings(QList<QString>({"squelch"}));
 }
 
 void M17DemodGUI::on_audioMute_toggled(bool checked)
 {
     m_settings.m_audioMute = checked;
-    applySettings();
+    applySettings(QList<QString>({"audioMute"}));
 }
 
 void M17DemodGUI::on_highPassFilter_toggled(bool checked)
 {
     m_settings.m_highPassFilter = checked;
-    applySettings();
+    applySettings(QList<QString>({"highPassFilter"}));
 }
 
 void M17DemodGUI::on_aprsClearTable_clicked()
@@ -326,7 +350,6 @@ void M17DemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
 }
 
 void M17DemodGUI::onMenuDialogCalled(const QPoint &p)
@@ -362,15 +385,26 @@ void M17DemodGUI::onMenuDialogCalled(const QPoint &p)
         setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
+        QList<QString> settingsKeys({
+            "m_rgbColor",
+            "title",
+            "useReverseAPI",
+            "reverseAPIAddress",
+            "reverseAPIPort",
+            "reverseAPIDeviceIndex",
+            "reverseAPIChannelIndex"
+        });
+
         if (m_deviceUISet->m_deviceMIMOEngine)
         {
+            settingsKeys.append("streamIndex");
             m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
             m_channelMarker.clearStreamIndexes();
             m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(settingsKeys);
     }
 
     resetContextMenuType();
@@ -483,7 +517,7 @@ M17DemodGUI::M17DemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	updateMyPosition();
 	displaySettings();
     makeUIConnections();
-	applySettings(true);
+	applySettings(QList<QString>(), true);
 }
 
 M17DemodGUI::~M17DemodGUI()
@@ -569,13 +603,13 @@ void M17DemodGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void M17DemodGUI::applySettings(bool force)
+void M17DemodGUI::applySettings(const QList<QString>& settingsKeys, bool force)
 {
 	if (m_doApplySettings)
 	{
 		qDebug() << "M17DemodGUI::applySettings";
 
-        M17Demod::MsgConfigureM17Demod* message = M17Demod::MsgConfigureM17Demod::create( m_settings, force);
+        M17Demod::MsgConfigureM17Demod* message = M17Demod::MsgConfigureM17Demod::create( m_settings, settingsKeys, force);
         m_m17Demod->getInputMessageQueue()->push(message);
 	}
 }
@@ -601,7 +635,7 @@ void M17DemodGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySettings();
+    applySettings(QList<QString>({"inputFrequencyOffset"}));
 }
 
 void M17DemodGUI::channelMarkerHighlightedByCursor()
@@ -611,14 +645,13 @@ void M17DemodGUI::channelMarkerHighlightedByCursor()
 
 void M17DemodGUI::audioSelect()
 {
-    qDebug("M17DemodGUI::audioSelect");
     AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName);
     audioSelect.exec();
 
     if (audioSelect.m_selected)
     {
         m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
-        applySettings();
+        applySettings(QList<QString>({"audioDeviceName"}));
     }
 }
 

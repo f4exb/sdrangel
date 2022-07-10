@@ -65,7 +65,7 @@ M17Demod::M17Demod(DeviceAPI *deviceAPI) :
     m_basebandSink->setDemodInputMessageQueue(&m_inputMessageQueue);
     m_basebandSink->moveToThread(m_thread);
 
-    applySettings(m_settings, true);
+    applySettings(m_settings, QList<QString>(), true);
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
@@ -150,7 +150,7 @@ bool M17Demod::handleMessage(const Message& cmd)
     {
         MsgConfigureM17Demod& cfg = (MsgConfigureM17Demod&) cmd;
         qDebug("M17Demod::handleMessage: MsgConfigureM17Demod");
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
 
         return true;
     }
@@ -217,18 +217,19 @@ void M17Demod::setCenterFrequency(qint64 frequency)
 {
     M17DemodSettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings, false);
+    applySettings(settings, QList<QString>({"inputFrequencyOffset"}), false);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureM17Demod *msgToGUI = MsgConfigureM17Demod::create(settings, false);
+        MsgConfigureM17Demod *msgToGUI = MsgConfigureM17Demod::create(settings, QList<QString>({"inputFrequencyOffset"}), false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
 
-void M17Demod::applySettings(const M17DemodSettings& settings, bool force)
+void M17Demod::applySettings(const M17DemodSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
     qDebug() << "M17Demod::applySettings: "
+            << " settingsKeys: " << settingsKeys
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
             << " m_rfBandwidth: " << settings.m_rfBandwidth
             << " m_fmDeviation: " << settings.m_fmDeviation
@@ -246,46 +247,7 @@ void M17Demod::applySettings(const M17DemodSettings& settings, bool force)
             << " m_streamIndex: " << settings.m_streamIndex
             << " force: " << force;
 
-    QList<QString> reverseAPIKeys;
-
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
-        reverseAPIKeys.append("inputFrequencyOffset");
-    }
-    if ((settings.m_audioMute != m_settings.m_audioMute) || force) {
-        reverseAPIKeys.append("audioMute");
-    }
-    if ((settings.m_syncOrConstellation != m_settings.m_syncOrConstellation) || force) {
-        reverseAPIKeys.append("syncOrConstellation");
-    }
-    if ((settings.m_traceLengthMutliplier != m_settings.m_traceLengthMutliplier) || force) {
-        reverseAPIKeys.append("traceLengthMutliplier");
-    }
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
-        reverseAPIKeys.append("rfBandwidth");
-    }
-    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force) {
-        reverseAPIKeys.append("fmDeviation");
-    }
-    if ((settings.m_squelchGate != m_settings.m_squelchGate) || force) {
-        reverseAPIKeys.append("squelchGate");
-    }
-    if ((settings.m_squelch != m_settings.m_squelch) || force) {
-        reverseAPIKeys.append("squelch");
-    }
-    if ((settings.m_volume != m_settings.m_volume) || force) {
-        reverseAPIKeys.append("volume");
-    }
-    if ((settings.m_baudRate != m_settings.m_baudRate) || force) {
-        reverseAPIKeys.append("baudRate");
-    }
-    if ((settings.m_highPassFilter != m_settings.m_highPassFilter) || force) {
-        reverseAPIKeys.append("highPassFilter");
-    }
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force) {
-        reverseAPIKeys.append("audioDeviceName");
-    }
-
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex"))
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -294,31 +256,33 @@ void M17Demod::applySettings(const M17DemodSettings& settings, bool force)
             m_deviceAPI->addChannelSink(this, settings.m_streamIndex);
             m_deviceAPI->addChannelSinkAPI(this);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
-    M17DemodBaseband::MsgConfigureM17DemodBaseband *msg = M17DemodBaseband::MsgConfigureM17DemodBaseband::create(settings, force);
+    M17DemodBaseband::MsgConfigureM17DemodBaseband *msg = M17DemodBaseband::MsgConfigureM17DemodBaseband::create(settings, settingsKeys, force);
     m_basebandSink->getInputMessageQueue()->push(msg);
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("m_useReverseAPI"))
     {
         bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
                 (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
                 (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
                 (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
                 (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
     if (pipes.size() > 0) {
-        sendChannelSettings(pipes, reverseAPIKeys, settings, force);
+        sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QByteArray M17Demod::serialize() const
@@ -330,14 +294,14 @@ bool M17Demod::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureM17Demod *msg = MsgConfigureM17Demod::create(m_settings, true);
+        MsgConfigureM17Demod *msg = MsgConfigureM17Demod::create(m_settings, QList<QString>(), true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureM17Demod *msg = MsgConfigureM17Demod::create(m_settings, true);
+        MsgConfigureM17Demod *msg = MsgConfigureM17Demod::create(m_settings, QList<QString>(), true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -392,13 +356,13 @@ int M17Demod::webapiSettingsPutPatch(
     M17DemodSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureM17Demod *msg = MsgConfigureM17Demod::create(settings, force);
+    MsgConfigureM17Demod *msg = MsgConfigureM17Demod::create(settings, channelSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("M17Demod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureM17Demod *msgToGUI = MsgConfigureM17Demod::create(settings, force);
+        MsgConfigureM17Demod *msgToGUI = MsgConfigureM17Demod::create(settings, channelSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -444,6 +408,9 @@ void M17Demod::webapiUpdateChannelSettings(
     }
     if (channelSettingsKeys.contains("title")) {
         settings.m_title = *response.getM17DemodSettings()->getTitle();
+    }
+    if (channelSettingsKeys.contains("statusLogEnabled")) {
+        settings.m_statusLogEnabled = response.getM17DemodSettings()->getStatusLogEnabled() != 0;
     }
     if (channelSettingsKeys.contains("audioDeviceName")) {
         settings.m_audioDeviceName = *response.getM17DemodSettings()->getAudioDeviceName();
@@ -508,6 +475,7 @@ void M17Demod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     response.getM17DemodSettings()->setSquelch(settings.m_squelch);
     response.getM17DemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
     response.getM17DemodSettings()->setSyncOrConstellation(settings.m_syncOrConstellation ? 1 : 0);
+    response.getM17DemodSettings()->setStatusLogEnabled(settings.m_statusLogEnabled ? 1 : 0);
     response.getM17DemodSettings()->setRgbColor(settings.m_rgbColor);
 
     if (response.getM17DemodSettings()->getTitle()) {
@@ -580,7 +548,7 @@ void M17Demod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response
     response.getM17DemodReport()->setSquelch(m_basebandSink->getSquelchOpen() ? 1 : 0);
 }
 
-void M17Demod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const M17DemodSettings& settings, bool force)
+void M17Demod::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const M17DemodSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -607,7 +575,7 @@ void M17Demod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, co
 
 void M17Demod::sendChannelSettings(
     const QList<ObjectPipe*>& pipes,
-    QList<QString>& channelSettingsKeys,
+    const QList<QString>& channelSettingsKeys,
     const M17DemodSettings& settings,
     bool force)
 {
@@ -631,7 +599,7 @@ void M17Demod::sendChannelSettings(
 }
 
 void M17Demod::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const M17DemodSettings& settings,
         bool force
@@ -672,6 +640,9 @@ void M17Demod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("syncOrConstellation") || force) {
         swgM17DemodSettings->setSyncOrConstellation(settings.m_syncOrConstellation ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("statusLogEnabled") || force) {
+        swgM17DemodSettings->setStatusLogEnabled(settings.m_statusLogEnabled ? 1 : 0);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgM17DemodSettings->setRgbColor(settings.m_rgbColor);

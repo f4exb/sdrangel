@@ -124,7 +124,7 @@ private:
 	virtual ~M17DemodGUI();
 
 	void blockApplySettings(bool block);
-	void applySettings(bool force = false);
+	void applySettings(const QList<QString>& settingsKeys, bool force = false);
     void displaySettings();
     void updateAMBEFeaturesList();
 	void updateMyPosition();
@@ -159,9 +159,9 @@ private slots:
     void on_berButton_toggled(bool checked);
     void on_berHistory_valueChanged(int value);
     void on_berReset_clicked();
+    void on_viewStatusLog_clicked();
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
-    void on_viewStatusLog_clicked();
     void handleInputMessages();
     void audioSelect();
     void tick();

@@ -74,7 +74,7 @@ M17DemodSink::M17DemodSink() :
     m_magsqPeak = 0.0f;
     m_magsqCount = 0;
 
-	applySettings(m_settings, true);
+	applySettings(m_settings, QList<QString>(), true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 }
 
@@ -305,9 +305,10 @@ void M17DemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
 }
 
 
-void M17DemodSink::applySettings(const M17DemodSettings& settings, bool force)
+void M17DemodSink::applySettings(const M17DemodSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
     qDebug() << "M17DemodSink::applySettings: "
+            << " settingsKeys: " << settingsKeys
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
             << " m_rfBandwidth: " << settings.m_rfBandwidth
             << " m_fmDeviation: " << settings.m_fmDeviation
@@ -325,7 +326,7 @@ void M17DemodSink::applySettings(const M17DemodSettings& settings, bool force)
             << " m_streamIndex: " << settings.m_streamIndex
             << " force: " << force;
 
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
+    if (settingsKeys.contains("rfBandwidth") || force)
     {
         m_interpolator.create(16, m_channelSampleRate, (settings.m_rfBandwidth) / 2.2);
         m_interpolatorDistanceRemain = 0;
@@ -333,38 +334,42 @@ void M17DemodSink::applySettings(const M17DemodSettings& settings, bool force)
         //m_phaseDiscri.setFMScaling((float) settings.m_rfBandwidth / (float) settings.m_fmDeviation);
     }
 
-    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force) {
+    if (settingsKeys.contains("fmDeviation") || force) {
         m_phaseDiscri.setFMScaling(48000.0f / (2.0f*settings.m_fmDeviation));
     }
 
-    if ((settings.m_squelchGate != m_settings.m_squelchGate) || force)
+    if (settingsKeys.contains("squelchGate") || force)
     {
         m_squelchGate = 480 * settings.m_squelchGate; // gate is given in 10s of ms at 48000 Hz audio sample rate
         m_squelchCount = 0; // reset squelch open counter
     }
 
-    if ((settings.m_squelch != m_settings.m_squelch) || force) {
+    if (settingsKeys.contains("squelch") || force) {
         m_squelchLevel = std::pow(10.0, settings.m_squelch / 10.0); // input is a value in dB
     }
 
-    if ((settings.m_audioMute != m_settings.m_audioMute) || force) {
+    if (settingsKeys.contains("audioMute") || force) {
         m_m17DemodProcessor.setAudioMute(settings.m_audioMute);
     }
 
-    if ((settings.m_volume != m_settings.m_volume) || force) {
+    if (settingsKeys.contains("volume") || force) {
         m_m17DemodProcessor.setVolume(settings.m_volume);
     }
 
-    if ((settings.m_baudRate != m_settings.m_baudRate) || force)
+    if (settingsKeys.contains("baudRate") || force)
     {
-        // m_dsdDecoder.setBaudRate(settings.m_baudRate);
+        // m_dsdDecoder.setBaudRate(settings.m_baudRate); (future)
     }
 
-    if ((settings.m_highPassFilter != m_settings.m_highPassFilter) || force) {
+    if (settingsKeys.contains("highPassFilter") || force) {
         m_m17DemodProcessor.setHP(settings.m_highPassFilter);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void M17DemodSink::configureMyPosition(float myLatitude, float myLongitude)

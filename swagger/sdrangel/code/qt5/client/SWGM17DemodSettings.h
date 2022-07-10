@@ -53,11 +53,11 @@ public:
     float getFmDeviation();
     void setFmDeviation(float fm_deviation);
 
-    float getDemodGain();
-    void setDemodGain(float demod_gain);
-
     float getVolume();
     void setVolume(float volume);
+
+    float getDemodGain();
+    void setDemodGain(float demod_gain);
 
     qint32 getBaudRate();
     void setBaudRate(qint32 baud_rate);
@@ -74,17 +74,11 @@ public:
     qint32 getSyncOrConstellation();
     void setSyncOrConstellation(qint32 sync_or_constellation);
 
-    qint32 getPllLock();
-    void setPllLock(qint32 pll_lock);
-
     qint32 getRgbColor();
     void setRgbColor(qint32 rgb_color);
 
     QString* getTitle();
     void setTitle(QString* title);
-
-    QString* getAudioDeviceName();
-    void setAudioDeviceName(QString* audio_device_name);
 
     qint32 getHighPassFilter();
     void setHighPassFilter(qint32 high_pass_filter);
@@ -97,6 +91,12 @@ public:
 
     qint32 getTraceDecay();
     void setTraceDecay(qint32 trace_decay);
+
+    QString* getAudioDeviceName();
+    void setAudioDeviceName(QString* audio_device_name);
+
+    qint32 getStatusLogEnabled();
+    void setStatusLogEnabled(qint32 status_log_enabled);
 
     qint32 getStreamIndex();
     void setStreamIndex(qint32 stream_index);
@@ -135,11 +135,11 @@ private:
     float fm_deviation;
     bool m_fm_deviation_isSet;
 
-    float demod_gain;
-    bool m_demod_gain_isSet;
-
     float volume;
     bool m_volume_isSet;
+
+    float demod_gain;
+    bool m_demod_gain_isSet;
 
     qint32 baud_rate;
     bool m_baud_rate_isSet;
@@ -156,17 +156,11 @@ private:
     qint32 sync_or_constellation;
     bool m_sync_or_constellation_isSet;
 
-    qint32 pll_lock;
-    bool m_pll_lock_isSet;
-
     qint32 rgb_color;
     bool m_rgb_color_isSet;
 
     QString* title;
     bool m_title_isSet;
-
-    QString* audio_device_name;
-    bool m_audio_device_name_isSet;
 
     qint32 high_pass_filter;
     bool m_high_pass_filter_isSet;
@@ -179,6 +173,12 @@ private:
 
     qint32 trace_decay;
     bool m_trace_decay_isSet;
+
+    QString* audio_device_name;
+    bool m_audio_device_name_isSet;
+
+    qint32 status_log_enabled;
+    bool m_status_log_enabled_isSet;
 
     qint32 stream_index;
     bool m_stream_index_isSet;

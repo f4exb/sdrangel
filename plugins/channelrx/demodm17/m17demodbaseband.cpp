@@ -117,7 +117,7 @@ bool M17DemodBaseband::handleMessage(const Message& cmd)
         MsgConfigureM17DemodBaseband& cfg = (MsgConfigureM17DemodBaseband&) cmd;
         qDebug() << "M17DemodBaseband::handleMessage: MsgConfigureM17DemodBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
 
         return true;
     }
@@ -144,9 +144,9 @@ bool M17DemodBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void M17DemodBaseband::applySettings(const M17DemodSettings& settings, bool force)
+void M17DemodBaseband::applySettings(const M17DemodSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
+    if (settingsKeys.contains("inputFrequencyOffset") || force)
     {
         m_channelizer->setChannelization(48000, settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
@@ -158,7 +158,7 @@ void M17DemodBaseband::applySettings(const M17DemodSettings& settings, bool forc
         }
     }
 
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
+    if (settingsKeys.contains("audioDeviceName") || force)
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_audioDeviceName);
@@ -172,9 +172,13 @@ void M17DemodBaseband::applySettings(const M17DemodSettings& settings, bool forc
         }
     }
 
-    m_sink.applySettings(settings, force);
+    m_sink.applySettings(settings, settingsKeys, force);
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int M17DemodBaseband::getChannelSampleRate() const

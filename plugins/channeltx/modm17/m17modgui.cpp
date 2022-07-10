@@ -102,7 +102,13 @@ bool M17ModGUI::handleMessage(const Message& message)
     else if (M17Mod::MsgConfigureM17Mod::match(message))
     {
         const M17Mod::MsgConfigureM17Mod& cfg = (M17Mod::MsgConfigureM17Mod&) message;
-        m_settings = cfg.getSettings();
+
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
+
         blockApplySettings(true);
         m_channelMarker.updateSettings(static_cast<const ChannelMarker*>(m_settings.m_channelMarker));
         displaySettings();
