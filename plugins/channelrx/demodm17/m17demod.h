@@ -255,6 +255,8 @@ public:
     const QString& getSrcCall() const { return m_basebandSink->getSrcCall(); }
     const QString& getDestcCall() const { return m_basebandSink->getDestcCall(); }
     const QString& getTypeInfo() const { return m_basebandSink->getTypeInfo(); }
+    const std::array<uint8_t, 14>& getMeta() const { return m_basebandSink->getMeta(); }
+    bool getHasGNSS() const { return m_basebandSink->getHasGNSS(); }
     bool getStreamElsePacket() const { return m_basebandSink->getStreamElsePacket(); }
     uint16_t getCRC() const { return m_basebandSink->getCRC(); }
     int getStdPacketProtocol() const { return m_basebandSink->getStdPacketProtocol(); }

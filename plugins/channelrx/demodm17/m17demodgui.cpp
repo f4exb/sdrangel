@@ -744,6 +744,18 @@ void M17DemodGUI::tick()
             ui->typeText->setText(m_m17Demod->getTypeInfo());
             ui->crcText->setText(tr("%1").arg(m_m17Demod->getCRC(), 4, 16, QChar('0')));
 
+            if (m_m17Demod->getHasGNSS())
+            {
+                const MainSettings& mainSettings = MainCore::instance()->getSettings();
+                float lat, lon;
+                getLatLonFromGNSSMeta(m_m17Demod->getMeta(), lat, lon);
+                float qrb = distance(mainSettings.getLatitude(), mainSettings.getLongitude(), lat, lon);
+                float qtf = bearing(mainSettings.getLatitude(), mainSettings.getLongitude(), lat, lon);
+                qDebug("M17DemodGUI::tick: GNSS: lat: %f lon: %f", lat, lon);
+                ui->qrbText->setText(tr("%1").arg(qrb, 0, 'f', 1));
+                ui->qtfText->setText(tr("%1").arg(qtf, 0, 'f', 1));
+            }
+
             if (ui->activateStatusLog->isChecked() && (m_m17Demod->getLSFCount() != 0))
             {
                 QString s = tr("Src: %1 Dst: %2 Typ: %3 CRC: %4")
@@ -983,6 +995,46 @@ QLineSeries *M17DemodGUI::addBERSeriesRate(bool total, qreal& min, qreal& max)
     }
 
     return series;
+}
+
+void M17DemodGUI::getLatLonFromGNSSMeta(const std::array<uint8_t, 14>& meta, float& lat, float& lon)
+{
+    int latInt = meta[2];
+    int latFrac = (meta[3]<<8) + meta[4];
+    lat = latInt + latFrac / 65536.0f;
+    int lonInt = meta[5];
+    int lonFrac = (meta[6]<<8) + meta[7];
+    lon = lonInt + lonFrac / 65536.0f;
+    lat = (meta[8] & 1) == 1 ? -lat : lat;
+    lon = ((meta[8]>>1) & 1) == 1 ? -lon : lon;
+}
+
+float M17DemodGUI::bearing(float latFrom, float lonFrom, float latTo, float lonTo)
+{
+    double lat1 = latFrom * (M_PI / 180.0);
+    double lon1 = lonFrom * (M_PI / 180.0);
+    double lat2 = latTo * (M_PI / 180.0);
+    double lon2 = lonTo * (M_PI / 180.0);
+    double dLon = lon2 - lon1;
+    double y = sin(dLon) * cos(lat2);
+    double x = (cos(lat1)*sin(lat2)) -
+                (sin(lat1)*cos(lat2)*cos(dLon));
+    double bear_rad = atan2(y,x);
+
+    if (bear_rad > 0) {
+        return bear_rad * (180.0 / M_PI);
+    } else {
+        return 360.0 + (bear_rad * (180.0 / M_PI));
+    }
+}
+
+float M17DemodGUI::distance(float latFrom, float lonFrom, float latTo, float lonTo)
+{
+    double lat1 = latFrom * (M_PI / 180.0);
+    double lon1 = lonFrom * (M_PI / 180.0);
+    double lat2 = latTo * (M_PI / 180.0);
+    double lon2 = lonTo * (M_PI / 180.0);
+    return acos(sin(lat1)*sin(lat2) + cos(lat1)*cos(lat2)*cos(lon2-lon1)) * 6371.0;
 }
 
 void M17DemodGUI::makeUIConnections()

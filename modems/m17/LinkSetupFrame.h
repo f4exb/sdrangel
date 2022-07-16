@@ -4,6 +4,7 @@
 
 #include <array>
 #include <cstdint>
+#include <cmath>
 #include <string_view> // Don't have std::span in C++17.
 #include <stdexcept>
 #include <algorithm>
@@ -15,6 +16,7 @@ struct LinkSetupFrame
 {
     using call_t = std::array<char,10>;             // NUL-terminated C-string.
     using encoded_call_t = std::array<uint8_t, 6>;
+    using gnss_t = std::array<uint8_t, 14>;
     using frame_t = std::array<uint8_t, 30>;
 
     static constexpr encoded_call_t BROADCAST_ADDRESS = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
@@ -117,6 +119,53 @@ struct LinkSetupFrame
         }
 
         return result;
+    }
+
+    static gnss_t encode_gnss(float lat, float lon, float alt)
+    {
+        gnss_t result;
+        result.fill(0);
+        double lat_int, lat_frac;
+        double lon_int, lon_frac;
+        uint16_t lat_dec, lon_dec;
+
+        lat_frac = modf(lat, &lat_int);
+        lon_frac = modf(lon, &lon_int);
+
+        bool north = lat_int >= 0;
+        bool east = lon_int >= 0;
+
+        result[2] = (int) abs(lat_int);
+        lat_dec = abs(lat_frac) * 65536.0f;
+        result[3] = lat_dec >> 8;
+        result[4] = lat_dec & 0xFF;
+        result[5] = (int) abs(lon_int);
+        lon_dec = abs(lon_frac) * 65536.0f;
+        result[6] = lon_dec >> 8;
+        result[7] = lon_dec & 0xFF;
+        result[8] = (north ? 0 : 1) | ((east ? 0 : 1)<<1) | (1<<2);
+
+        uint16_t alt_enc = (alt * 3.28084f) + 1500;
+        result[9] = alt_enc >> 8;
+        result[10] = alt_enc & 0xFF;
+
+        return result;
+    }
+
+    static void decode_gnss(const gnss_t& gnss_enc, float& lat, float& lon, float& alt)
+    {
+        bool north = (gnss_enc[8] & 1) != 0;
+        bool east = (gnss_enc[8] & 2) != 0;
+        uint32_t lat_int = gnss_enc[2];
+        uint16_t lat_frac = (gnss_enc[3] << 8) + gnss_enc[4];
+        uint32_t lon_int = gnss_enc[5];
+        uint16_t lon_frac = (gnss_enc[6] << 8) + gnss_enc[7];
+        lat = lat_int + (lat_frac / 65536.0f);
+        lat = north ? lat : -lat;
+        lon = lon_int + (lon_frac / 65536.0f);
+        lat = east ? lon : -lon;
+        uint16_t alt_enc = (gnss_enc[9] << 8) + gnss_enc[10];
+        alt = (alt_enc - 1500) / 3.28084f;
     }
 
     LinkSetupFrame()

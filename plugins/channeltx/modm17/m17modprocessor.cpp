@@ -31,6 +31,8 @@ MESSAGE_CLASS_DEFINITION(M17ModProcessor::MsgStopAudio, Message)
 MESSAGE_CLASS_DEFINITION(M17ModProcessor::MsgStartBERT, Message)
 MESSAGE_CLASS_DEFINITION(M17ModProcessor::MsgSendBERTFrame, Message)
 MESSAGE_CLASS_DEFINITION(M17ModProcessor::MsgStopBERT, Message)
+MESSAGE_CLASS_DEFINITION(M17ModProcessor::MsgSetGNSS, Message)
+MESSAGE_CLASS_DEFINITION(M17ModProcessor::MsgStopGNSS, Message)
 
 M17ModProcessor::M17ModProcessor() :
     m_m17Modulator("MYCALL", ""),
@@ -129,6 +131,19 @@ bool M17ModProcessor::handleMessage(const Message& cmd)
         send_eot(); // EOT
         return true;
     }
+    else if (MsgSetGNSS::match(cmd))
+    {
+        qDebug("M17ModProcessor::handleMessage: MsgSetGNSS");
+        MsgSetGNSS& notif = (MsgSetGNSS&) cmd;
+        m_m17Modulator.set_gnss(notif.getLat(), notif.getLon(), notif.getAlt());
+        return true;
+    }
+    else if (MsgStopGNSS::match(cmd))
+    {
+        qDebug("M17ModProcessor::handleMessage: MsgStopGNSS");
+        m_m17Modulator.reset_gnss();
+        return true;
+    }
 
     return false;
 }
@@ -161,12 +176,13 @@ void M17ModProcessor::processPacket(const QString& sourceCall, const QString& de
     qDebug("M17ModProcessor::processPacket: %s to %s: %s", qPrintable(sourceCall), qPrintable(destCall), qPrintable(packetBytes));
     m_m17Modulator.source(sourceCall.toStdString());
     m_m17Modulator.dest(destCall.toStdString());
+    m_m17Modulator.can(can);
 
     send_preamble(); // preamble
 
     // LSF
     std::array<uint8_t, 30> lsf;
-    std::array<int8_t, 368> lsf_frame = modemm17::M17Modulator::make_lsf(lsf, sourceCall.toStdString(), destCall.toStdString(), can);
+    std::array<int8_t, 368> lsf_frame = m_m17Modulator.make_lsf(lsf);
     output_baseband(modemm17::M17Modulator::LSF_SYNC_WORD, lsf_frame);
 
     // Packets
@@ -205,7 +221,7 @@ void M17ModProcessor::audioStart(const QString& sourceCall, const QString& destC
 
     // LSF
     std::array<uint8_t, 30> lsf;
-    std::array<int8_t, 368> lsf_frame = modemm17::M17Modulator::make_lsf(lsf, sourceCall.toStdString(), destCall.toStdString(), can, true);
+    std::array<int8_t, 368> lsf_frame = m_m17Modulator.make_lsf(lsf, true);
     output_baseband(modemm17::M17Modulator::LSF_SYNC_WORD, lsf_frame);
 
     // Prepare LICH

@@ -546,6 +546,25 @@ void M17ModSource::applySettings(const M17ModSettings& settings, const QList<QSt
         }
     }
 
+    if (settingsKeys.contains("insertPosition") || force)
+    {
+        if (settings.m_insertPosition != m_settings.m_insertPosition)
+        {
+            if (settings.m_insertPosition)
+            {
+                const MainSettings& mainSettings = MainCore::instance()->getSettings();
+                M17ModProcessor::MsgSetGNSS *msg = M17ModProcessor::MsgSetGNSS::create(
+                    mainSettings.getLatitude(), mainSettings.getLongitude(), mainSettings.getAltitude());
+                m_processor->getInputMessageQueue()->push(msg);
+            }
+            else
+            {
+                M17ModProcessor::MsgStopGNSS *msg = M17ModProcessor::MsgStopGNSS::create();
+                m_processor->getInputMessageQueue()->push(msg);
+            }
+        }
+    }
+
     if (force) {
         m_settings = settings;
     } else {

@@ -49,6 +49,7 @@ M17DemodProcessor::M17DemodProcessor() :
     m_destCall = "";
     m_typeInfo = "";
     m_metadata.fill(0);
+    m_hasGNSS = false;
     m_crc = 0;
     m_lsfCount = 0;
     setUpsampling(6); // force upsampling of audio to 48k
@@ -172,6 +173,8 @@ bool M17DemodProcessor::decode_lsf(modemm17::M17FrameDecoder::lsf_buffer_t const
 
     uint16_t type = (lsf[12] << 8) | lsf[13];
     decode_type(type);
+
+    m_hasGNSS = ((lsf[13] >> 5) & 3) == 1;
 
     std::copy(lsf.begin()+14, lsf.begin()+28, m_metadata.begin());
     m_crc = (lsf[28] << 8) | lsf[29];

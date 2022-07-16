@@ -61,6 +61,8 @@ public:
     const QString& getSrcCall() const { return m_srcCall; }
     const QString& getDestcCall() const { return m_destCall; }
     const QString& getTypeInfo() const { return m_typeInfo; }
+    const std::array<uint8_t, 14>& getMeta() const { return m_metadata; }
+    bool getHasGNSS() const { return m_hasGNSS; }
     bool getStreamElsePacket() const { return m_streamElsePacket; }
     uint16_t getCRC() const { return m_crc; }
     StdPacketProtocol getStdPacketProtocol() const;
@@ -141,6 +143,7 @@ private:
     QString m_typeInfo;
     bool m_streamElsePacket;
     std::array<uint8_t, 14> m_metadata;
+    bool m_hasGNSS;
     uint16_t m_crc;
     uint32_t m_lsfCount; // Incremented each time a new LSF is decoded. Reset when lock is lost.
     StdPacketProtocol m_stdPacketProtocol;

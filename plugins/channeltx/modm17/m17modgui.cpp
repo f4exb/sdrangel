@@ -848,6 +848,7 @@ void M17ModGUI::makeUIConnections()
     QObject::connect(ui->source, &QLineEdit::editingFinished, this, &M17ModGUI::on_source_editingFinished);
     QObject::connect(ui->destination, &QLineEdit::editingFinished, this, &M17ModGUI::on_destination_editingFinished);
     QObject::connect(ui->can, QOverload<int>::of(&QSpinBox::valueChanged), this, &M17ModGUI::on_can_valueChanged);
+    QObject::connect(ui->insertPosition, &ButtonSwitch::toggled, this, &M17ModGUI::on_insertPosition_toggled);
 }
 
 void M17ModGUI::updateAbsoluteCenterFrequency()

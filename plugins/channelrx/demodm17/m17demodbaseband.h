@@ -115,6 +115,8 @@ public:
     const QString& getSrcCall() const { return m_sink.getSrcCall(); }
     const QString& getDestcCall() const { return m_sink.getDestcCall(); }
     const QString& getTypeInfo() const { return m_sink.getTypeInfo(); }
+    const std::array<uint8_t, 14>& getMeta() const {return m_sink.getMeta(); }
+    bool getHasGNSS() const { return m_sink.getHasGNSS(); }
     bool getStreamElsePacket() const { return m_sink.getStreamElsePacket(); }
     uint16_t getCRC() const { return m_sink.getCRC(); }
     int getStdPacketProtocol() const { return m_sink.getStdPacketProtocol(); }

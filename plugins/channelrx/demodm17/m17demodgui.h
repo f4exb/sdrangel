@@ -135,6 +135,9 @@ private:
     void packetReceived(QByteArray packet);
     QLineSeries *addBERSeries(bool total, uint32_t& min, uint32_t& max);
     QLineSeries *addBERSeriesRate(bool total, qreal& min, qreal& max);
+    static void getLatLonFromGNSSMeta(const std::array<uint8_t, 14>& meta, float& lat, float& lon);
+    static float bearing(float latFrom, float lonFrom, float latTo, float lonTo);
+    static float distance(float lat1, float lon1, float lat2, float lon2);
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);

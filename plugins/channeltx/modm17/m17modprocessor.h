@@ -228,6 +228,46 @@ public:
         { }
     };
 
+    class MsgSetGNSS : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        float getLat() const { return m_lat; }
+        float getLon() const { return m_lon; }
+        float getAlt() const { return m_alt; }
+
+        static MsgSetGNSS* create(float lat, float lon, float alt) {
+            return new MsgSetGNSS(lat, lon, alt);
+        }
+
+    private:
+        float m_lat;
+        float m_lon;
+        float m_alt;
+
+        MsgSetGNSS(float lat, float lon, float alt) :
+            Message(),
+            m_lat(lat),
+            m_lon(lon),
+            m_alt(alt)
+        { }
+    };
+
+    class MsgStopGNSS : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgStopGNSS* create() {
+            return new MsgStopGNSS();
+        }
+
+    private:
+
+        MsgStopGNSS() :
+            Message()
+        { }
+    };
+
     M17ModProcessor();
     ~M17ModProcessor();
 

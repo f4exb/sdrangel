@@ -114,7 +114,7 @@ public:
         return baseband;
     }
 
-    static std::array<int8_t, 368> make_lsf(lsf_t& lsf, const std::string& src, const std::string& dest, uint8_t can = 10, bool streamElsePacket = false)
+    std::array<int8_t, 368> make_lsf(lsf_t& lsf, bool streamElsePacket = false)
     {
         lsf.fill(0);
 
@@ -122,25 +122,21 @@ public:
         PolynomialInterleaver<45, 92, 368> interleaver;
         CRC16<0x5935, 0xFFFF> crc;
 
-        modemm17::LinkSetupFrame::call_t callsign;
-        callsign.fill(0);
-        std::copy(src.begin(), src.end(), callsign.begin());
-        auto encoded_src = modemm17::LinkSetupFrame::encode_callsign(callsign);
+        auto rit = std::copy(dest_.begin(), dest_.end(), lsf.begin());
+        std::copy(source_.begin(), source_.end(), rit);
 
-        modemm17::LinkSetupFrame::encoded_call_t encoded_dest = {0xff,0xff,0xff,0xff,0xff,0xff};
+        lsf[12] = can_ >> 1;
+        lsf[13] = (streamElsePacket ? 5 : 4) | ((can_ & 1) << 7);
 
-        if (!dest.empty())
+        if (gnss_on_)
         {
-            callsign.fill(0);
-            std::copy(dest.begin(), dest.end(), callsign.begin());
-            encoded_dest = modemm17::LinkSetupFrame::encode_callsign(callsign);
+            lsf[13] |= (1<<5);
+            std::copy(gnss_.begin(), gnss_.end(), &lsf[14]);
         }
-
-        auto rit = std::copy(encoded_dest.begin(), encoded_dest.end(), lsf.begin());
-        std::copy(encoded_src.begin(), encoded_src.end(), rit);
-
-        lsf[12] = can >> 1;
-        lsf[13] = (streamElsePacket ? 5 : 4) | ((can & 1) << 7);
+        else
+        {
+            lsf[13] |= (3<<5);
+        }
 
         crc.reset();
 
@@ -313,9 +309,6 @@ public:
             packet_assembly[25] = 0x80 | ((packet_size+2)<<2); // sent packet size includes CRC
             packet_assembly[packet_size]   = crc_.get_bytes()[1];
             packet_assembly[packet_size+1] = crc_.get_bytes()[0];
-            qDebug() << QString("modemm17::M17Modulator::make_packet_frame: %1:%2")
-                .arg((int) crc_.get_bytes()[1], 2, 16, QChar('0'))
-                .arg((int) crc_.get_bytes()[0], 2, 16, QChar('0'));
         }
         else
         {
@@ -465,7 +458,10 @@ public:
         dest_(encode_callsign(dest)),
         can_(10),
         rrc(makeFirFilter(rrc_taps))
-    { }
+    {
+        gnss_.fill(0);
+        gnss_on_ = false;
+    }
 
     /**
      * Set the source identifier (callsign) for the transmitter.
@@ -489,9 +485,29 @@ public:
         can_ = can & 0xF;
     }
 
+    /**
+    * Set GNSS data
+    */
+    void set_gnss(float lat, float lon, float alt)
+    {
+        gnss_ = LinkSetupFrame::encode_gnss(lat, lon, alt);
+        gnss_on_ = true;
+    }
+
+    /**
+    * Reset GNSS data
+    */
+    void reset_gnss()
+    {
+        gnss_.fill(0);
+        gnss_on_ = false;
+    }
+
 private:
     LinkSetupFrame::encoded_call_t source_;
     LinkSetupFrame::encoded_call_t dest_;
+    LinkSetupFrame::gnss_t gnss_;
+    bool gnss_on_;
     uint8_t can_;
     BaseFirFilter<150> rrc;
     static const std::array<float, 150> rrc_taps;

@@ -212,9 +212,7 @@ void M17Demodulator::do_lsf_sync()
 	{
 		sync_triggered = preamble_sync.triggered(correlator);
 
-		if (sync_triggered > 0.1)
-        {
-            qDebug() << "modemm17::M17Demodulator::do_lsf_sync: preamble:" << sync_triggered;
+		if (sync_triggered > 0.1) {
 			return;
 		}
 

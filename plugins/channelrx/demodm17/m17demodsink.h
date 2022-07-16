@@ -115,6 +115,8 @@ public:
     const QString& getSrcCall() const { return m_m17DemodProcessor.getSrcCall(); }
     const QString& getDestcCall() const { return m_m17DemodProcessor.getDestcCall(); }
     const QString& getTypeInfo() const { return m_m17DemodProcessor.getTypeInfo(); }
+    const std::array<uint8_t, 14>& getMeta() const { return m_m17DemodProcessor.getMeta(); }
+    bool getHasGNSS() const { return m_m17DemodProcessor.getHasGNSS(); }
     bool getStreamElsePacket() const { return m_m17DemodProcessor.getStreamElsePacket(); }
     uint16_t getCRC() const { return m_m17DemodProcessor.getCRC(); }
     int getStdPacketProtocol() const { return (int) m_m17DemodProcessor.getStdPacketProtocol(); }
