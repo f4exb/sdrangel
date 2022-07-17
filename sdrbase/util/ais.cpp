@@ -60,7 +60,11 @@ QString AISMessage::toNMEA(const QByteArray bytes)
             int c = 0;
             for (int j = 0; j < 6; j++)
             {
-                c = (c << 1) | ((bytes[i] >> (bits - 1)) & 0x1);
+                if (i < bytes.size()) {
+                    c = (c << 1) | ((bytes[i] >> (bits - 1)) & 0x1);
+                } else {
+                    c = (c << 1);
+                }
                 bits--;
                 if (bits == 0)
                 {
@@ -92,7 +96,7 @@ QString AISMessage::toNMEA(const QByteArray bytes)
         sentence++;
     }
 
-    return nmeaSentences.join("\n");
+    return nmeaSentences.join("\r\n").append("\r\n");   // NMEA-0183 requires CR and LF
 }
 
 QString AISMessage::toNMEA()
