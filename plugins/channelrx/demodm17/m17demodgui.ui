@@ -1030,9 +1030,6 @@
               <height>0</height>
              </size>
             </property>
-            <property name="toolTip">
-             <string>Carrier relative position (%) when synchronized</string>
-            </property>
             <property name="text">
              <string>Dev</string>
             </property>
@@ -1230,7 +1227,7 @@
              <number>1</number>
             </property>
             <property name="value">
-             <number>100</number>
+             <number>200</number>
             </property>
            </widget>
            <widget class="QLabel" name="traceStrokeText">
@@ -1360,9 +1357,6 @@
               <height>0</height>
              </size>
             </property>
-            <property name="toolTip">
-             <string>Carrier relative position (%) when synchronized</string>
-            </property>
             <property name="text">
              <string>EVM</string>
             </property>
@@ -1409,9 +1403,6 @@
               <width>25</width>
               <height>0</height>
              </size>
-            </property>
-            <property name="toolTip">
-             <string>Carrier relative position (%) when synchronized</string>
             </property>
             <property name="text">
              <string>Ofs</string>
@@ -1460,9 +1451,6 @@
               <height>0</height>
              </size>
             </property>
-            <property name="toolTip">
-             <string>Carrier relative position (%) when synchronized</string>
-            </property>
             <property name="text">
              <string>Vit</string>
             </property>
@@ -1510,9 +1498,6 @@
               <height>0</height>
              </size>
             </property>
-            <property name="toolTip">
-             <string>Carrier relative position (%) when synchronized</string>
-            </property>
             <property name="text">
              <string>Clk</string>
             </property>
@@ -1559,9 +1544,6 @@
               <width>25</width>
               <height>0</height>
              </size>
-            </property>
-            <property name="toolTip">
-             <string>Carrier relative position (%) when synchronized</string>
             </property>
             <property name="text">
              <string>Samp</string>
