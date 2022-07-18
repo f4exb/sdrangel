@@ -16,7 +16,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # configure version
 set(sdrangel_VERSION_MAJOR "7")
 set(sdrangel_VERSION_MINOR "5")
-set(sdrangel_VERSION_PATCH "0")
+set(sdrangel_VERSION_PATCH "1")
 set(sdrangel_VERSION_SUFFIX "")
 
 # SDRAngel cmake options
@@ -548,7 +548,10 @@ add_subdirectory(qrtplib)
 add_subdirectory(swagger)
 add_subdirectory(devices)
 add_subdirectory(sdrbench)
-add_subdirectory(modems)
+
+if (LINUX)
+    add_subdirectory(modems)
+endif()
 
 if (BUILD_GUI)
     add_subdirectory(sdrgui)

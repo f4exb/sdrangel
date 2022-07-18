@@ -1,3 +1,9 @@
+sdrangel (7.5.1-1) unstable; urgency=medium
+
+  * M17 is for Linux only
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Mon, 18 Jul 2022 13:22:31 +0200
+
 sdrangel (7.5.0-1) unstable; urgency=medium
 
   * M17 mode implementation (mod and demod plugins). Issue #1259

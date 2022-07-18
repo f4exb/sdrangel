@@ -63,6 +63,6 @@ if (ENABLE_CHANNELTX_MODFREEDV AND CODEC2_FOUND)
     add_subdirectory(modfreedv)
 endif()
 
-if (ENABLE_CHANNELTX_MODM17 AND CODEC2_FOUND)
+if (LINUX AND ENABLE_CHANNELTX_MODM17 AND CODEC2_FOUND)
     add_subdirectory(modm17)
 endif()

@@ -2,6 +2,8 @@
 
 <h2>Introduction</h2>
 
+This plugin is available only on Linux.
+
 This plugin demodulates and decodes transmissions made in the [M17 protocol](https://spec.m17project.org/) M17 is a fully Open Source and Open Source audio codec based project (Codec2) for FM based digital voice amateur radio. More information is available [here](https://m17project.org/)
 
 <h2>Main interface</h2>
