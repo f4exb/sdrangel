@@ -201,9 +201,6 @@ int main(int argc, char **argv)
 					code[(j + n) * CODE_LEN + i] = reinterpret_cast<ldpctool::code_type *>(simd + i)[n];
 		}
 
-		for (int i = 0; i < BLOCKS * CODE_LEN; ++i)
-			assert(!std::isnan(code[i]));
-
 		for (ssize_t pos = 0; pos < iosize;)
 		{
 			ssize_t nw = write(1, code + pos, iosize - pos);

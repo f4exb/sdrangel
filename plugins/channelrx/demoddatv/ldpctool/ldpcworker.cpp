@@ -140,9 +140,6 @@ void LDPCWorker::process(QByteArray data)
                     m_code[(j + n) * m_codeLen + i] = reinterpret_cast<ldpctool::code_type *>(m_simd + i)[n];
         }
 
-        for (int i = 0; i < BLOCKS * m_codeLen; ++i)
-            assert(!std::isnan(m_code[i]));
-
         m_mutexOut.lock();
         for (int j = 0; j < BLOCKS; j++)
         {
