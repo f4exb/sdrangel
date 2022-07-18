@@ -562,13 +562,6 @@
         </property>
        </spacer>
       </item>
-      <item>
-       <widget class="Line" name="line">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-      </item>
      </layout>
     </item>
     <item>
