@@ -30,7 +30,7 @@
 const PluginDescriptor M17DemodPlugin::m_pluginDescriptor = {
     M17Demod::m_channelId,
 	QStringLiteral("M17 Demodulator"),
-    QStringLiteral("7.4.0"),
+    QStringLiteral("7.5.0"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,

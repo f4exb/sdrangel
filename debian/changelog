@@ -1,3 +1,15 @@
+sdrangel (7.5.0-1) unstable; urgency=medium
+
+  * M17 mode implementation (mod and demod plugins). Issue #1259
+  * AIS: NMEA sentences must end with CR/LF. Issue #1333. PR #1342
+  * Darken ValueDials when disabled. PR #1331
+  * Map: Fix capitalisation of Radiosonde so settings are found. Fixes #1318. PR #1320
+  * USRP: Catch all exceptions from set_rx_agc. PR #1315
+  * GLScope and GLSpectrum removed extraneous call to cleanup method. Fixes #1295
+  * Update to sdrangel-windows-libraries with UHD 4.2.0. PR #1314
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Mon, 18 Jul 2022 09:36:28 +0200
+
 sdrangel (7.4.0-1) unstable; urgency=medium
 
   * 3D Spectrogram and OpenGL code fixes. PR #1291
