@@ -103,9 +103,15 @@ bool SDRPlayInput::openDevice()
         return false;
     }
 
-    if ((res = mirisdr_open(&m_dev, MIRISDR_HW_SDRPLAY, m_devNumber)) < 0)
+    if ((res = mirisdr_open(&m_dev, m_devNumber)) < 0)
     {
         qCritical("SDRPlayInput::openDevice: could not open SDRPlay #%d: %s", m_devNumber, strerror(errno));
+        return false;
+    }
+    
+    if ((res = mirisdr_set_hw_flavour(m_dev, MIRISDR_HW_SDRPLAY)) < 0)
+    {
+        qCritical("SDRPlayInput::openDevice: failed to set HW flavour: %s", strerror(errno));
         return false;
     }
 
