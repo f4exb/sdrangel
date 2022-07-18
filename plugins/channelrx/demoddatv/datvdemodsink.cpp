@@ -397,7 +397,6 @@ void DATVDemodSink::CleanUpDATVFramework()
         delete (leansdr::s2_fecdec<bool, leansdr::hard_sb>*) r_fecdec;
     }
 
-#ifdef LINUX
     if (r_fecdecsoft != nullptr) {
         delete (leansdr::s2_fecdec_soft<leansdr::llr_t,leansdr::llr_sb>*) r_fecdecsoft;
     }
@@ -405,7 +404,6 @@ void DATVDemodSink::CleanUpDATVFramework()
     if (r_fecdechelper != nullptr) {
         delete (leansdr::s2_fecdec_helper<leansdr::llr_t,leansdr::llr_sb>*) r_fecdechelper;
     }
-#endif
 
     if (p_deframer != nullptr) {
         delete (leansdr::s2_deframer*) p_deframer;
@@ -515,10 +513,8 @@ void DATVDemodSink::ResetDATVFrameworkPointers()
     p_bbframes = nullptr;
     p_s2_deinterleaver = nullptr;
     r_fecdec = nullptr;
-#ifdef LINUX
     r_fecdecsoft = nullptr;
     r_fecdechelper = nullptr;
-#endif
     p_deframer = nullptr;
     r_scope_symbols_dvbs2 = nullptr;
 }
@@ -1101,7 +1097,6 @@ void DATVDemodSink::InitDATVS2Framework()
     p_vbitcount= new leansdr::pipebuf<int>(m_objScheduler, "Bits processed", BUF_S2PACKETS);
     p_verrcount = new leansdr::pipebuf<int>(m_objScheduler, "Bits corrected", BUF_S2PACKETS);
 
-#ifdef LINUX
     bool commandFileValid = false;
 
     if (QFileInfo::exists(m_settings.m_softLDPCToolPath))
@@ -1110,7 +1105,7 @@ void DATVDemodSink::InitDATVS2Framework()
         commandFileValid = fileInfo.isExecutable();
     }
 
-    if (m_settings.m_softLDPC && commandFileValid)
+    if (m_settings.m_softLDPC /*&& commandFileValid*/)
     {
 #if 0
         // Doesn't work...
@@ -1178,25 +1173,6 @@ void DATVDemodSink::InitDATVS2Framework()
         leansdr::s2_fecdec<bool, leansdr::hard_sb> *fecdec = (leansdr::s2_fecdec<bool, leansdr::hard_sb> * ) r_fecdec;
         fecdec->bitflips=m_settings.m_maxBitflips;
     }
-#else
-    // Bit-flipping mode.
-    // Deinterleave into hard bits.
-    p_fecframes = new leansdr::pipebuf< leansdr::fecframe<leansdr::hard_sb> >(m_objScheduler, "FEC frames", BUF_FRAMES);
-    p_s2_deinterleaver = new leansdr::s2_deinterleaver<leansdr::llr_ss,leansdr::hard_sb>(
-        m_objScheduler,
-        *(leansdr::pipebuf< leansdr::plslot<leansdr::llr_ss> > *) p_slots_dvbs2,
-        *(leansdr::pipebuf< leansdr::fecframe<leansdr::hard_sb> > * ) p_fecframes
-    );
-    r_fecdec =  new leansdr::s2_fecdec<bool, leansdr::hard_sb>(
-        m_objScheduler,
-        *(leansdr::pipebuf< leansdr::fecframe<leansdr::hard_sb> > * ) p_fecframes,
-        *(leansdr::pipebuf<leansdr::bbframe> *) p_bbframes,
-        p_vbitcount,
-        p_verrcount
-    );
-    leansdr::s2_fecdec<bool, leansdr::hard_sb> *fecdec = (leansdr::s2_fecdec<bool, leansdr::hard_sb> * ) r_fecdec;
-    fecdec->bitflips=m_settings.m_maxBitflips;
-#endif
 
     // Deframe BB frames to TS packets
     p_lock = new leansdr::pipebuf<int> (m_objScheduler, "lock", BUF_SLOW);

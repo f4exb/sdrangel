@@ -7,7 +7,14 @@ Copyright 2019 <pabr@pabr.org>
 */
 
 #include <stdlib.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#else
+#include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
+#include <io.h>
+#include <malloc.h>
+#endif
 #include <iostream>
 #include <iomanip>
 #include <random>
@@ -20,6 +27,7 @@ Copyright 2019 <pabr@pabr.org>
 #include "testbench.h"
 #include "algorithms.h"
 #include "ldpc.h"
+
 
 #if 0
 #include "flooding_decoder.h"
@@ -129,7 +137,7 @@ int main(int argc, char **argv)
 
 	int BLOCKS = batch_size;
 	ldpctool::code_type *code = new ldpctool::code_type[BLOCKS * CODE_LEN];
-	void *aligned_buffer = aligned_alloc(sizeof(ldpctool::simd_type), sizeof(ldpctool::simd_type) * CODE_LEN);
+	void *aligned_buffer = ldpctool::LDPCUtil::aligned_malloc(sizeof(ldpctool::simd_type), sizeof(ldpctool::simd_type) * CODE_LEN);
 	ldpctool::simd_type *simd = reinterpret_cast<ldpctool::simd_type *>(aligned_buffer);
 
 	// Expect LLR values in int8_t format.
@@ -212,7 +220,7 @@ int main(int argc, char **argv)
 
 	delete ldpc;
 
-	free(aligned_buffer);
+	ldpctool::LDPCUtil::aligned_free(aligned_buffer);
 	delete[] code;
 
 	return 0;

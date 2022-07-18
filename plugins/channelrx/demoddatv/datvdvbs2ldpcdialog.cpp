@@ -58,7 +58,11 @@ void DatvDvbS2LdpcDialog::on_showFileDialog_clicked(bool checked)
 
     QFileDialog fileDialog(this, "Select LDPC tool");
     fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
+#ifdef _MSC_VER
+    fileDialog.setNameFilter("*.exe");
+#else
     fileDialog.setFilter(QDir::Executable | QDir::Files);
+#endif
     fileDialog.selectFile(m_fileName);
 
     if (fileDialog.exec() == QDialog::Accepted)

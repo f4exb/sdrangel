@@ -300,13 +300,8 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
 	CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
 	connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect()));
 
-#ifdef LINUX
     CRightClickEnabler *ldpcToolRightClickEnabler = new CRightClickEnabler(ui->softLDPC);
     connect(ldpcToolRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(ldpcToolSelect()));
-#else
-    ui->softLDPC->setEnabled(false);
-    ui->softLDPC->setStyleSheet("QCheckBox { color: gray }");
-#endif
 
     ui->playerIndicator->setStyleSheet("QLabel { background-color: gray; border-radius: 8px; }");
     ui->udpIndicator->setStyleSheet("QLabel { background-color: gray; border-radius: 8px; }");
@@ -377,7 +372,6 @@ void DATVDemodGUI::displaySettings()
         ui->maxBitflipsLabel->setStyleSheet("QLabel { color: white }");
     }
 
-#ifdef LINUX
     if (m_settings.m_standard == DATVDemodSettings::dvb_version::DVB_S)
     {
         ui->softLDPC->setEnabled(false);
@@ -388,7 +382,6 @@ void DATVDemodGUI::displaySettings()
         ui->softLDPC->setEnabled(true);
         ui->softLDPC->setStyleSheet("QCheckBox { color: white }");
     }
-#endif
 
     if (m_settings.m_standard == DATVDemodSettings::dvb_version::DVB_S)
     {
@@ -658,7 +651,6 @@ void DATVDemodGUI::on_cmbStandard_currentIndexChanged(int index)
         ui->maxBitflipsLabel->setStyleSheet("QLabel { color: white }");
     }
 
-#ifdef LINUX
     if (m_settings.m_standard == DATVDemodSettings::dvb_version::DVB_S)
     {
         ui->softLDPC->setEnabled(false);
@@ -669,7 +661,6 @@ void DATVDemodGUI::on_cmbStandard_currentIndexChanged(int index)
         ui->softLDPC->setEnabled(true);
         ui->softLDPC->setStyleSheet("QCheckBox { color: white }");
     }
-#endif
 
     if (m_settings.m_standard == DATVDemodSettings::dvb_version::DVB_S)
     {
@@ -710,18 +701,14 @@ void DATVDemodGUI::on_cmbFEC_currentIndexChanged(int arg1)
 
 void DATVDemodGUI::on_softLDPC_clicked()
 {
-#ifdef LINUX
     m_settings.m_softLDPC = ui->softLDPC->isChecked();
     applySettings();
-#endif
 }
 
 void DATVDemodGUI::on_maxBitflips_valueChanged(int value)
 {
-#ifdef LINUX
     m_settings.m_maxBitflips = value;
     applySettings();
-#endif
 }
 
 void DATVDemodGUI::on_chkViterbi_clicked()

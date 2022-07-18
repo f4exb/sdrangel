@@ -25,6 +25,7 @@ set(datv_SOURCES
 
 set(ldpc_SOURCES
     ldpctool/tables_handler.cpp
+    ldpctool/ldpcworker.cpp
 )
 
 set(datv_HEADERS
@@ -55,6 +56,7 @@ set(ldpc_HEADERS
     ldpctool/dvb_s2_tables.h
     ldpctool/dvb_s2x_tables.h
     ldpctool/dvb_t2_tables.h
+    ldpctool/ldpcworker.h
 )
 
 include_directories(
@@ -69,16 +71,10 @@ include_directories(
 set(TARGET_NAME demoddatv)
 set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
 
-if (LINUX)
-    add_library(${TARGET_NAME} SHARED
-        ${datv_SOURCES}
-        ${ldpc_SOURCES}
-    )
-else()
-    add_library(${TARGET_NAME} SHARED
-        ${datv_SOURCES}
-    )
-endif()
+add_library(${TARGET_NAME} SHARED
+    ${datv_SOURCES}
+    ${ldpc_SOURCES}
+)
 
 target_link_libraries(${TARGET_NAME}
     Qt5::Core
@@ -94,13 +90,11 @@ target_link_libraries(${TARGET_NAME}
     ${SWRESAMPLE_LIBRARIES}
 )
 
-if (LINUX)
-    add_executable(ldpctool
-        ldpctool/ldpc_tool.cpp
-        ldpctool/tables_handler.cpp
-    )
-    install(TARGETS ldpctool DESTINATION ${INSTALL_BIN_DIR})
-endif()
+add_executable(ldpctool
+    ldpctool/ldpc_tool.cpp
+    ldpctool/tables_handler.cpp
+)
+install(TARGETS ldpctool DESTINATION ${INSTALL_BIN_DIR})
 
 if(FFMPEG_EXTERNAL)
     add_dependencies(${TARGET_NAME} ffmpeg)
