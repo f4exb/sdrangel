@@ -1067,6 +1067,8 @@ if (WIN32 OR APPLE)
         if (WIN32)
             set(LIBRTLSDR_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/rtlsdr.lib" CACHE INTERNAL "")
             set(RTLSDR_LIBUSB_INCLUDE "${LIBUSB_INCLUDE_DIR}/libusb-1.0")
+            # Disable pkg-config to allow LIBUSB_INCLUDE_DIRS to be used
+            set(DISABLE_PKGCONFIG "-DCMAKE_DISABLE_FIND_PACKAGE_PkgConfig=ON")
         endif ()
         # needs pkgconfig and libusb
         ExternalProject_Add(rtlsdr
@@ -1080,6 +1082,7 @@ if (WIN32 OR APPLE)
                 -DLIBUSB_INCLUDE_DIRS=${RTLSDR_LIBUSB_INCLUDE}
                 -DTHREADS_PTHREADS_INCLUDE_DIR=${PTHREADS4W_INCLUDE_DIR}
                 -DTHREADS_PTHREADS_WIN32_LIBRARY=${PTHREADS4W_LIBRARIES}
+                ${DISABLE_PKGCONFIG}
                 BUILD_BYPRODUCTS "${LIBRTLSDR_LIBRARIES}"
                 BUILD_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR> --config $<CONFIG> -- rtlsdr
                 INSTALL_COMMAND ""
