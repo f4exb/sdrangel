@@ -72,3 +72,4 @@ endif()
 
 add_subdirectory(audioinput)
 add_subdirectory(kiwisdr)
+add_subdirectory(remotetcpinput)

@@ -92,6 +92,8 @@ SWGDeviceSettings::SWGDeviceSettings() {
     m_remote_output_settings_isSet = false;
     remote_input_settings = nullptr;
     m_remote_input_settings_isSet = false;
+    remote_tcp_input_settings = nullptr;
+    m_remote_tcp_input_settings_isSet = false;
     sdr_play_settings = nullptr;
     m_sdr_play_settings_isSet = false;
     sdr_play_v3_settings = nullptr;
@@ -190,6 +192,8 @@ SWGDeviceSettings::init() {
     m_remote_output_settings_isSet = false;
     remote_input_settings = new SWGRemoteInputSettings();
     m_remote_input_settings_isSet = false;
+    remote_tcp_input_settings = new SWGRemoteTCPInputSettings();
+    m_remote_tcp_input_settings_isSet = false;
     sdr_play_settings = new SWGSDRPlaySettings();
     m_sdr_play_settings_isSet = false;
     sdr_play_v3_settings = new SWGSDRPlayV3Settings();
@@ -312,6 +316,9 @@ SWGDeviceSettings::cleanup() {
     if(remote_input_settings != nullptr) { 
         delete remote_input_settings;
     }
+    if(remote_tcp_input_settings != nullptr) { 
+        delete remote_tcp_input_settings;
+    }
     if(sdr_play_settings != nullptr) { 
         delete sdr_play_settings;
     }
@@ -427,6 +434,8 @@ SWGDeviceSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&remote_output_settings, pJson["remoteOutputSettings"], "SWGRemoteOutputSettings", "SWGRemoteOutputSettings");
     
     ::SWGSDRangel::setValue(&remote_input_settings, pJson["remoteInputSettings"], "SWGRemoteInputSettings", "SWGRemoteInputSettings");
+    
+    ::SWGSDRangel::setValue(&remote_tcp_input_settings, pJson["remoteTCPInputSettings"], "SWGRemoteTCPInputSettings", "SWGRemoteTCPInputSettings");
     
     ::SWGSDRangel::setValue(&sdr_play_settings, pJson["sdrPlaySettings"], "SWGSDRPlaySettings", "SWGSDRPlaySettings");
     
@@ -565,6 +574,9 @@ SWGDeviceSettings::asJsonObject() {
     }
     if((remote_input_settings != nullptr) && (remote_input_settings->isSet())){
         toJsonValue(QString("remoteInputSettings"), remote_input_settings, obj, QString("SWGRemoteInputSettings"));
+    }
+    if((remote_tcp_input_settings != nullptr) && (remote_tcp_input_settings->isSet())){
+        toJsonValue(QString("remoteTCPInputSettings"), remote_tcp_input_settings, obj, QString("SWGRemoteTCPInputSettings"));
     }
     if((sdr_play_settings != nullptr) && (sdr_play_settings->isSet())){
         toJsonValue(QString("sdrPlaySettings"), sdr_play_settings, obj, QString("SWGSDRPlaySettings"));
@@ -929,6 +941,16 @@ SWGDeviceSettings::setRemoteInputSettings(SWGRemoteInputSettings* remote_input_s
     this->m_remote_input_settings_isSet = true;
 }
 
+SWGRemoteTCPInputSettings*
+SWGDeviceSettings::getRemoteTcpInputSettings() {
+    return remote_tcp_input_settings;
+}
+void
+SWGDeviceSettings::setRemoteTcpInputSettings(SWGRemoteTCPInputSettings* remote_tcp_input_settings) {
+    this->remote_tcp_input_settings = remote_tcp_input_settings;
+    this->m_remote_tcp_input_settings_isSet = true;
+}
+
 SWGSDRPlaySettings*
 SWGDeviceSettings::getSdrPlaySettings() {
     return sdr_play_settings;
@@ -1158,6 +1180,9 @@ SWGDeviceSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(remote_input_settings && remote_input_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(remote_tcp_input_settings && remote_tcp_input_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(sdr_play_settings && sdr_play_settings->isSet()){

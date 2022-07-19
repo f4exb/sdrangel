@@ -70,6 +70,8 @@ SWGDeviceReport::SWGDeviceReport() {
     m_remote_output_report_isSet = false;
     remote_input_report = nullptr;
     m_remote_input_report_isSet = false;
+    remote_tcp_input_report = nullptr;
+    m_remote_tcp_input_report_isSet = false;
     sdr_play_report = nullptr;
     m_sdr_play_report_isSet = false;
     sdr_play_v3_report = nullptr;
@@ -140,6 +142,8 @@ SWGDeviceReport::init() {
     m_remote_output_report_isSet = false;
     remote_input_report = new SWGRemoteInputReport();
     m_remote_input_report_isSet = false;
+    remote_tcp_input_report = new SWGRemoteTCPInputReport();
+    m_remote_tcp_input_report_isSet = false;
     sdr_play_report = new SWGSDRPlayReport();
     m_sdr_play_report_isSet = false;
     sdr_play_v3_report = new SWGSDRPlayV3Report();
@@ -225,6 +229,9 @@ SWGDeviceReport::cleanup() {
     if(remote_input_report != nullptr) { 
         delete remote_input_report;
     }
+    if(remote_tcp_input_report != nullptr) { 
+        delete remote_tcp_input_report;
+    }
     if(sdr_play_report != nullptr) { 
         delete sdr_play_report;
     }
@@ -309,6 +316,8 @@ SWGDeviceReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&remote_output_report, pJson["remoteOutputReport"], "SWGRemoteOutputReport", "SWGRemoteOutputReport");
     
     ::SWGSDRangel::setValue(&remote_input_report, pJson["remoteInputReport"], "SWGRemoteInputReport", "SWGRemoteInputReport");
+    
+    ::SWGSDRangel::setValue(&remote_tcp_input_report, pJson["remoteTCPInputReport"], "SWGRemoteTCPInputReport", "SWGRemoteTCPInputReport");
     
     ::SWGSDRangel::setValue(&sdr_play_report, pJson["sdrPlayReport"], "SWGSDRPlayReport", "SWGSDRPlayReport");
     
@@ -408,6 +417,9 @@ SWGDeviceReport::asJsonObject() {
     }
     if((remote_input_report != nullptr) && (remote_input_report->isSet())){
         toJsonValue(QString("remoteInputReport"), remote_input_report, obj, QString("SWGRemoteInputReport"));
+    }
+    if((remote_tcp_input_report != nullptr) && (remote_tcp_input_report->isSet())){
+        toJsonValue(QString("remoteTCPInputReport"), remote_tcp_input_report, obj, QString("SWGRemoteTCPInputReport"));
     }
     if((sdr_play_report != nullptr) && (sdr_play_report->isSet())){
         toJsonValue(QString("sdrPlayReport"), sdr_play_report, obj, QString("SWGSDRPlayReport"));
@@ -653,6 +665,16 @@ SWGDeviceReport::setRemoteInputReport(SWGRemoteInputReport* remote_input_report)
     this->m_remote_input_report_isSet = true;
 }
 
+SWGRemoteTCPInputReport*
+SWGDeviceReport::getRemoteTcpInputReport() {
+    return remote_tcp_input_report;
+}
+void
+SWGDeviceReport::setRemoteTcpInputReport(SWGRemoteTCPInputReport* remote_tcp_input_report) {
+    this->remote_tcp_input_report = remote_tcp_input_report;
+    this->m_remote_tcp_input_report_isSet = true;
+}
+
 SWGSDRPlayReport*
 SWGDeviceReport::getSdrPlayReport() {
     return sdr_play_report;
@@ -819,6 +841,9 @@ SWGDeviceReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(remote_input_report && remote_input_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(remote_tcp_input_report && remote_tcp_input_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(sdr_play_report && sdr_play_report->isSet()){

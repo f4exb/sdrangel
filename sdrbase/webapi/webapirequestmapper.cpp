@@ -4591,6 +4591,11 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->setRemoteSourceSettings(new SWGSDRangel::SWGRemoteSourceSettings());
             channelSettings->getRemoteSourceSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "RemoteTCPSinkSettings")
+        {
+            channelSettings->setRemoteTcpSinkSettings(new SWGSDRangel::SWGRemoteTCPSinkSettings());
+            channelSettings->getRemoteTcpSinkSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "SigMFFileSinkSettings")
         {
             channelSettings->setSigMfFileSinkSettings(new SWGSDRangel::SWGSigMFFileSinkSettings());
@@ -4970,6 +4975,11 @@ bool WebAPIRequestMapper::getDeviceSettings(
             deviceSettings->setRemoteInputSettings(new SWGSDRangel::SWGRemoteInputSettings());
             deviceSettings->getRemoteInputSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (deviceSettingsKey == "remoteTCPInputSettings")
+        {
+            deviceSettings->setRemoteTcpInputSettings(new SWGSDRangel::SWGRemoteTCPInputSettings());
+            deviceSettings->getRemoteTcpInputSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (deviceSettingsKey == "localInputSettings")
         {
             deviceSettings->setLocalInputSettings(new SWGSDRangel::SWGLocalInputSettings());
@@ -5286,6 +5296,7 @@ void WebAPIRequestMapper::resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& de
     deviceSettings.setRtlSdrSettings(nullptr);
     deviceSettings.setRemoteOutputSettings(nullptr);
     deviceSettings.setRemoteInputSettings(nullptr);
+    deviceSettings.setRemoteTcpInputSettings(nullptr);
     deviceSettings.setSdrPlaySettings(nullptr);
     deviceSettings.setSdrPlayV3Settings(nullptr);
     deviceSettings.setTestSourceSettings(nullptr);
@@ -5308,6 +5319,7 @@ void WebAPIRequestMapper::resetDeviceReport(SWGSDRangel::SWGDeviceReport& device
     deviceReport.setRtlSdrReport(nullptr);
     deviceReport.setRemoteOutputReport(nullptr);
     deviceReport.setRemoteInputReport(nullptr);
+    deviceReport.setRemoteTcpInputReport(nullptr);
     deviceReport.setSdrPlayReport(nullptr);
     deviceReport.setSdrPlayV3Report(nullptr);
     deviceReport.setUsrpOutputReport(nullptr);
@@ -5347,6 +5359,7 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setRadiosondeDemodSettings(nullptr);
     channelSettings.setRemoteSinkSettings(nullptr);
     channelSettings.setRemoteSourceSettings(nullptr);
+    channelSettings.setRemoteTcpSinkSettings(nullptr);
     channelSettings.setSsbDemodSettings(nullptr);
     channelSettings.setSsbModSettings(nullptr);
     channelSettings.setUdpSourceSettings(nullptr);

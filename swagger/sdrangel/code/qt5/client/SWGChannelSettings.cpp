@@ -116,6 +116,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_remote_sink_settings_isSet = false;
     remote_source_settings = nullptr;
     m_remote_source_settings_isSet = false;
+    remote_tcp_sink_settings = nullptr;
+    m_remote_tcp_sink_settings_isSet = false;
     sig_mf_file_sink_settings = nullptr;
     m_sig_mf_file_sink_settings_isSet = false;
     ssb_mod_settings = nullptr;
@@ -228,6 +230,8 @@ SWGChannelSettings::init() {
     m_remote_sink_settings_isSet = false;
     remote_source_settings = new SWGRemoteSourceSettings();
     m_remote_source_settings_isSet = false;
+    remote_tcp_sink_settings = new SWGRemoteTCPSinkSettings();
+    m_remote_tcp_sink_settings_isSet = false;
     sig_mf_file_sink_settings = new SWGSigMFFileSinkSettings();
     m_sig_mf_file_sink_settings_isSet = false;
     ssb_mod_settings = new SWGSSBModSettings();
@@ -374,6 +378,9 @@ SWGChannelSettings::cleanup() {
     if(remote_source_settings != nullptr) { 
         delete remote_source_settings;
     }
+    if(remote_tcp_sink_settings != nullptr) { 
+        delete remote_tcp_sink_settings;
+    }
     if(sig_mf_file_sink_settings != nullptr) { 
         delete sig_mf_file_sink_settings;
     }
@@ -498,6 +505,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&remote_sink_settings, pJson["RemoteSinkSettings"], "SWGRemoteSinkSettings", "SWGRemoteSinkSettings");
     
     ::SWGSDRangel::setValue(&remote_source_settings, pJson["RemoteSourceSettings"], "SWGRemoteSourceSettings", "SWGRemoteSourceSettings");
+    
+    ::SWGSDRangel::setValue(&remote_tcp_sink_settings, pJson["RemoteTCPSinkSettings"], "SWGRemoteTCPSinkSettings", "SWGRemoteTCPSinkSettings");
     
     ::SWGSDRangel::setValue(&sig_mf_file_sink_settings, pJson["SigMFFileSinkSettings"], "SWGSigMFFileSinkSettings", "SWGSigMFFileSinkSettings");
     
@@ -662,6 +671,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((remote_source_settings != nullptr) && (remote_source_settings->isSet())){
         toJsonValue(QString("RemoteSourceSettings"), remote_source_settings, obj, QString("SWGRemoteSourceSettings"));
+    }
+    if((remote_tcp_sink_settings != nullptr) && (remote_tcp_sink_settings->isSet())){
+        toJsonValue(QString("RemoteTCPSinkSettings"), remote_tcp_sink_settings, obj, QString("SWGRemoteTCPSinkSettings"));
     }
     if((sig_mf_file_sink_settings != nullptr) && (sig_mf_file_sink_settings->isSet())){
         toJsonValue(QString("SigMFFileSinkSettings"), sig_mf_file_sink_settings, obj, QString("SWGSigMFFileSinkSettings"));
@@ -1131,6 +1143,16 @@ SWGChannelSettings::setRemoteSourceSettings(SWGRemoteSourceSettings* remote_sour
     this->m_remote_source_settings_isSet = true;
 }
 
+SWGRemoteTCPSinkSettings*
+SWGChannelSettings::getRemoteTcpSinkSettings() {
+    return remote_tcp_sink_settings;
+}
+void
+SWGChannelSettings::setRemoteTcpSinkSettings(SWGRemoteTCPSinkSettings* remote_tcp_sink_settings) {
+    this->remote_tcp_sink_settings = remote_tcp_sink_settings;
+    this->m_remote_tcp_sink_settings_isSet = true;
+}
+
 SWGSigMFFileSinkSettings*
 SWGChannelSettings::getSigMfFileSinkSettings() {
     return sig_mf_file_sink_settings;
@@ -1346,6 +1368,9 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(remote_source_settings && remote_source_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(remote_tcp_sink_settings && remote_tcp_sink_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(sig_mf_file_sink_settings && sig_mf_file_sink_settings->isSet()){

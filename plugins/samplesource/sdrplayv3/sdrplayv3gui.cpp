@@ -56,7 +56,7 @@ SDRPlayV3Gui::SDRPlayV3Gui(DeviceUISet *deviceUISet, QWidget* parent) :
         ui->ifFrequency->addItem(QString::number(SDRPlayV3IF::getIF(i)/1000));
     }
 
-    ui->samplerate->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+    ui->samplerate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
     ui->samplerate->setValueRange(8, 2000000U, 10660000U);
 
     ui->bandwidth->clear();
@@ -326,11 +326,14 @@ void SDRPlayV3Gui::sendSettings()
 
 void SDRPlayV3Gui::updateHardware()
 {
-    qDebug() << "SDRPlayV3Gui::updateHardware";
-    SDRPlayV3Input::MsgConfigureSDRPlayV3* message = SDRPlayV3Input::MsgConfigureSDRPlayV3::create(m_settings, m_forceSettings);
-    m_sdrPlayV3Input->getInputMessageQueue()->push(message);
-    m_forceSettings = false;
-    m_updateTimer.stop();
+    if (m_doApplySettings)
+    {
+        qDebug() << "SDRPlayV3Gui::updateHardware";
+        SDRPlayV3Input::MsgConfigureSDRPlayV3* message = SDRPlayV3Input::MsgConfigureSDRPlayV3::create(m_settings, m_forceSettings);
+        m_sdrPlayV3Input->getInputMessageQueue()->push(message);
+        m_forceSettings = false;
+        m_updateTimer.stop();
+    }
 }
 
 void SDRPlayV3Gui::updateStatus()

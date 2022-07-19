@@ -1,0 +1,60 @@
+RemoteTCPInputSettings:
+  description: RemoteTCPInput
+  properties:
+    centerFrequency:
+      type: integer
+      format: int64
+    loPpmCorrection:
+      type: integer
+    dcBlock:
+      type: integer
+    iqCorrection:
+      type: integer
+    biasTee:
+      type: integer
+    directSampling:
+      type: integer
+    devSampleRate:
+      type: integer
+    log2Decim:
+      type: integer
+    gain:
+      type: integer
+    agc:
+      type: integer
+    rfBW:
+      type: integer
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    channelGain:
+      type: integer
+    channelSampleRate:
+      type: integer
+    channelDecimation:
+      type: integer
+    sampleBits:
+      type: integer
+    dataAddress:
+      type: string
+    dataPort:
+      type: integer
+    overrideRemoteSettings:
+      type: integer
+    preFill:
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+
+RemoteTCPInputReport:
+  description: RemoteTCPInput
+  properties:
+    sampleRate:
+      type: integer

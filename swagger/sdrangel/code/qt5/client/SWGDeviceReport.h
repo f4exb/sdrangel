@@ -40,6 +40,7 @@
 #include "SWGPlutoSdrOutputReport.h"
 #include "SWGRemoteInputReport.h"
 #include "SWGRemoteOutputReport.h"
+#include "SWGRemoteTCPInputReport.h"
 #include "SWGRtlSdrReport.h"
 #include "SWGSDRPlayReport.h"
 #include "SWGSDRPlayV3Report.h"
@@ -132,6 +133,9 @@ public:
 
     SWGRemoteInputReport* getRemoteInputReport();
     void setRemoteInputReport(SWGRemoteInputReport* remote_input_report);
+
+    SWGRemoteTCPInputReport* getRemoteTcpInputReport();
+    void setRemoteTcpInputReport(SWGRemoteTCPInputReport* remote_tcp_input_report);
 
     SWGSDRPlayReport* getSdrPlayReport();
     void setSdrPlayReport(SWGSDRPlayReport* sdr_play_report);
@@ -229,6 +233,9 @@ private:
 
     SWGRemoteInputReport* remote_input_report;
     bool m_remote_input_report_isSet;
+
+    SWGRemoteTCPInputReport* remote_tcp_input_report;
+    bool m_remote_tcp_input_report_isSet;
 
     SWGSDRPlayReport* sdr_play_report;
     bool m_sdr_play_report_isSet;

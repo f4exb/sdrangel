@@ -89,6 +89,10 @@ if (ENABLE_CHANNELRX_REMOTESINK AND CM256CC_FOUND AND (HAS_SSE3 OR HAS_NEON))
     add_subdirectory(remotesink)
 endif()
 
+if (ENABLE_CHANNELRX_REMOTETCPSINK)
+    add_subdirectory(remotetcpsink)
+endif()
+
 if (ENABLE_CHANNELRX_DEMODFREEDV AND CODEC2_FOUND)
     add_subdirectory(demodfreedv)
 endif()
