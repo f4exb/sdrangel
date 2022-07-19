@@ -54,13 +54,18 @@
 #include "ldpc.h"
 #include "sdr.h"
 
-#ifdef LINUX
 #include <signal.h>
+#ifdef LINUX
 #include <sys/wait.h>
+#endif
+#ifdef _MSC_VER
+#include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
+#endif
 #include "ldpctool/layered_decoder.h"
 #include "ldpctool/testbench.h"
 #include "ldpctool/algorithms.h"
-#endif
+#include "ldpctool/ldpcworker.h"
 
 namespace leansdr
 {
@@ -3041,8 +3046,6 @@ struct s2_fecdec : runnable
     pipewriter<int> *bitcount, *errcount;
 }; // s2_fecdec
 
-#ifdef LINUX
-
 // Soft LDPC decoder
 // Internally implemented LDPC tool. Replaces external LDPC decoder
 
@@ -3229,6 +3232,8 @@ private:
     int rd, wr, count;
     T q[SIZE];
 };
+
+#if defined(USE_LDPC_TOOL) && !defined(_MSC_VER)
 
 template <typename SOFTBIT, typename SOFTBYTE>
 struct s2_fecdec_helper : runnable
@@ -3610,7 +3615,280 @@ struct s2_fecdec_helper : runnable
     std::deque<int> errcount_q;
     pipewriter<int> *bitcount, *errcount;
 }; // s2_fecdec_helper
+
+#else // USE_LDPC_TOOL
+
+template <typename SOFTBIT, typename SOFTBYTE>
+struct s2_fecdec_helper : runnable
+{
+    int batch_size;
+    int nhelpers;
+    bool must_buffer;
+    int max_trials;
+
+    s2_fecdec_helper(
+        scheduler *sch,
+        pipebuf<fecframe<SOFTBYTE>> &_in,
+        pipebuf<bbframe> &_out,
+        const char *_command,
+        pipebuf<int> *_bitcount = nullptr,
+        pipebuf<int> *_errcount = nullptr
+    ) :
+        runnable(sch, "S2 fecdec io"),
+        batch_size(16),
+        nhelpers(1),
+        must_buffer(false),
+        max_trials(8),
+        in(_in),
+        out(_out),
+        bitcount(opt_writer(_bitcount, 1)),
+        errcount(opt_writer(_errcount, 1))
+    {
+        command = strdup(_command);
+
+        for (int mc = 0; mc < 32; ++mc) {
+            for (int sf = 0; sf < 2; ++sf) {
+                pools[mc][sf].procs = nullptr;
+            }
+        }
+    }
+
+    ~s2_fecdec_helper()
+    {
+        free(command);
+        killall(); // also deletes pools[mc][sf].procs if necessary
+    }
+
+    void run()
+    {
+        // Send work until all helpers block.
+        while (in.readable() >= 1 && !jobs.full())
+        {
+            if ((bbframe_q.size() != 0) && (out.writable() >= 1))
+            {
+                bbframe *pout = out.wr();
+                pout->pls = bbframe_q.front().pls;
+                std::copy(bbframe_q.front().bytes, bbframe_q.front().bytes + (58192 / 8), pout->bytes);
+                bbframe_q.pop_front();
+                out.written(1);
+            }
+
+            if ((bitcount_q.size() != 0) && opt_writable(bitcount, 1))
+            {
+                opt_write(bitcount, bitcount_q.front());
+                bitcount_q.pop_front();
+            }
+
+            if ((errcount_q.size() != 0) && opt_writable(errcount, 1))
+            {
+                opt_write(errcount, errcount_q.front());
+                errcount_q.pop_front();
+            }
+
+            if (!jobs.empty() && jobs.peek()->h->b_out) {
+                receive_frame(jobs.get());
+            }
+
+            send_frame(in.rd());
+            in.read(1);
+        }
+    }
+
+  private:
+    struct helper_instance
+    {
+        QThread *m_thread;
+        LDPCWorker *m_worker;
+        int batch_size;
+        int b_in;       // Jobs in input queue
+        int b_out;      // Jobs in output queue
+    };
+    struct pool
+    {
+        helper_instance *procs; // nullptr or [nprocs]
+        int nprocs;
+        int shift;
+    } pools[32][2]; // [modcod][sf]
+    struct helper_job
+    {
+        s2_pls pls;
+        helper_instance *h;
+    };
+
+    simplequeue<helper_job, 1024> jobs;
+
+    // Try to send a frame. Return false if helper was busy.
+    bool send_frame(fecframe<SOFTBYTE> *pin)
+    {
+        pool *p = get_pool(&pin->pls);
+
+        for (int j = 0; j < p->nprocs; ++j)
+        {
+            int i = (p->shift + j) % p->nprocs;
+            helper_instance *h = &p->procs[i];
+            int iosize = (pin->pls.framebits() / 8) * sizeof(SOFTBYTE);
+
+            if (h->m_worker->busy()) {
+                continue;
+            }
+
+            QByteArray data((char *)pin->bytes, iosize);
+            QMetaObject::invokeMethod(h->m_worker, "process", Qt::QueuedConnection, Q_ARG(QByteArray, data));
+
+            p->shift = i;
+            helper_job *job = jobs.put();
+            job->pls = pin->pls;
+            job->h = h;
+            ++h->b_in;
+
+            if (h->b_in >= h->batch_size)
+            {
+                h->b_in -= h->batch_size;
+                h->b_out += h->batch_size;
+            }
+
+            return true; // done sent to worker
+        }
+
+        fprintf(stderr, "s2_fecdec_helper::send_frame: WARNING: all %d workers were busy: modcod=%d sf=%d)\n",
+            p->nprocs, pin->pls.modcod, pin->pls.sf);
+        return false; // all workers were busy
+    }
+
+    // Return a pool of running helpers for a given modcod.
+    pool *get_pool(const s2_pls *pls)
+    {
+        pool *p = &pools[pls->modcod][pls->sf];
+
+        if (!p->procs)
+        {
+            fprintf(stderr, "s2_fecdec_helper::get_pool: allocate %d workers: modcod=%d sf=%d\n",
+                nhelpers, pls->modcod, pls->sf);
+            p->procs = new helper_instance[nhelpers];
+
+            for (int i = 0; i < nhelpers; ++i) {
+                spawn_helper(&p->procs[i], pls);
+            }
+
+            p->nprocs = nhelpers;
+            p->shift = 0;
+        }
+
+        return p;
+    }
+
+    void killall()
+    {
+        qDebug() << "s2_fecdec_helper::killall";
+
+        for (int i = 0; i < 32; i++) // all MODCODs
+        {
+            for (int j = 0; j < 2; j++) // long and short frames
+            {
+                pool *p = &pools[i][j];
+
+                if (p->procs)
+                {
+                    for (int i = 0; i < p->nprocs; ++i)
+                    {
+                        helper_instance *h = &p->procs[i];
+                        h->m_thread->quit();
+                        h->m_thread->wait();
+                        delete h->m_thread;
+                        h->m_thread = nullptr;
+                        delete h->m_worker;
+                        h->m_worker = nullptr;
+                    }
+
+                    delete p->procs;
+                    p->procs = nullptr;
+                    p->nprocs = 0;
+                }
+            } // long and short frames
+        } // all MODCODs
+    }
+
+    // Spawn a helper thread.
+    void spawn_helper(helper_instance *h, const s2_pls *pls)
+    {
+        qDebug() << "s2_fecdec_helper: Spawning LDPC thread: modcod=" << pls->modcod << " sf=" << pls->sf;
+        h->m_thread = new QThread();
+        h->m_worker = new LDPCWorker(pls->modcod, max_trials, batch_size, pls->sf);
+        h->m_worker->moveToThread(h->m_thread);
+        h->batch_size = batch_size;
+        h->b_in = h->b_out = 0;
+        h->m_thread->start();
+    }
+
+    // Receive a finished job.
+    void receive_frame(const helper_job *job)
+    {
+        // Read corrected frame from helper
+        const s2_pls *pls = &job->pls;
+        int iosize = (pls->framebits() / 8) * sizeof(ldpc_buf[0]);
+
+        // Blocking read - do we need to return faster?
+        // If so, call m_worker->dataAvailable()
+        QByteArray data = job->h->m_worker->data();
+        memcpy(ldpc_buf, data.data(), data.size());
+
+        --job->h->b_out;
+        // Decode BCH.
+        const modcod_info *mcinfo = check_modcod(job->pls.modcod);
+        const fec_info *fi = &fec_infos[job->pls.sf][mcinfo->rate];
+        uint8_t *hardbytes = softbytes_harden(ldpc_buf, fi->kldpc / 8, bch_buf);
+        size_t cwbytes = fi->kldpc / 8;
+        //size_t msgbytes = fi->Kbch / 8;
+        //size_t chkbytes = cwbytes - msgbytes;
+        bch_interface *bch = s2bch.bchs[job->pls.sf][mcinfo->rate];
+        int ncorr = bch->decode(hardbytes, cwbytes);
+
+        if (sch->debug2) {
+            fprintf(stderr, "BCHCORR = %d\n", ncorr);
+        }
+
+        bool corrupted = (ncorr < 0);
+        // Report VBER
+        bitcount_q.push_back(fi->Kbch);
+        //opt_write(bitcount, fi->Kbch);
+        errcount_q.push_front((ncorr >= 0) ? ncorr : fi->Kbch);
+        //opt_write(errcount, (ncorr >= 0) ? ncorr : fi->Kbch);
+#if 0
+      // TBD Some decoders want the bad packets.
+	if ( corrupted ) {
+	  fprintf(stderr, "Passing bad frame\n");
+	  corrupted = false;
+	}
 #endif
+        if (!corrupted)
+        {
+            // Descramble and output
+            bbframe_q.emplace_back();
+            //bbframe *pout = out.wr();
+            bbframe_q.back().pls = job->pls;
+            bbscrambling.transform(hardbytes, fi->Kbch / 8, bbframe_q.back().bytes);
+            //out.written(1);
+        }
+
+        if (sch->debug) {
+            fprintf(stderr, "%c", corrupted ? '!' : ncorr ? '.' : '_');
+        }
+    }
+
+    pipereader<fecframe<SOFTBYTE>> in;
+    pipewriter<bbframe> out;
+    char *command;
+    SOFTBYTE ldpc_buf[64800 / 8];
+    uint8_t bch_buf[64800 / 8]; // Temp storage for hardening before BCH
+    s2_bch_engines s2bch;
+    s2_bbscrambling bbscrambling;
+    std::deque<bbframe> bbframe_q;
+    std::deque<int> bitcount_q;
+    std::deque<int> errcount_q;
+    pipewriter<int> *bitcount, *errcount;
+}; // s2_fecdec_helper
+
+#endif // USE_LDPC_TOOL
 
 // S2 FRAMER
 // EN 302 307-1 section 5.1 Mode adaptation
@@ -3854,7 +4132,6 @@ private:
         {
 	        handle_ts(data, dfl, syncd, sync);
         }
-#ifdef LINUX
         else if (streamtype == 1)
         {
             if (fd_gse >= 0)
@@ -3874,7 +4151,6 @@ private:
                 fprintf(stderr, "Unrecognized bbframe\n");
             }
         }
-#endif
     }
 
     void handle_ts(uint8_t *data, uint16_t dfl, uint16_t syncd, uint8_t sync)

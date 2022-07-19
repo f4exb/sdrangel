@@ -27,6 +27,12 @@
 
 #include "datvdemodsettings.h"
 
+#ifdef _MSC_VER
+#define DEFAULT_LDPCTOOLPATH "C:/Program Files/SDRangel/ldpctool.exe"
+#else
+#define DEFAULT_LDPCTOOLPATH "/opt/install/sdrangel/bin/ldpctool"
+#endif
+
 DATVDemodSettings::DATVDemodSettings() :
     m_channelMarker(nullptr),
     m_rollupState(nullptr)
@@ -44,7 +50,7 @@ void DATVDemodSettings::resetToDefaults()
     m_modulation = BPSK;
     m_fec = FEC12;
     m_softLDPC = false;
-    m_softLDPCToolPath = "/opt/install/sdrangel/bin/ldpctool";
+    m_softLDPCToolPath = DEFAULT_LDPCTOOLPATH;
     m_softLDPCMaxTrials = 8;
     m_maxBitflips = 0;
     m_symbolRate = 250000;
@@ -208,7 +214,7 @@ bool DATVDemodSettings::deserialize(const QByteArray& data)
 
         d.readBool(32, &m_softLDPC, false);
         d.readS32(33, &m_maxBitflips, 0);
-        d.readString(34, &m_softLDPCToolPath, "/opt/install/sdrangel/bin/ldpctool");
+        d.readString(34, &m_softLDPCToolPath, DEFAULT_LDPCTOOLPATH);
         d.readS32(35, &tmp, 8);
         m_softLDPCMaxTrials = tmp < 1 ? 1 : tmp > m_softLDPCMaxMaxTrials ? m_softLDPCMaxMaxTrials : tmp;
         d.readBool(36, &m_playerEnable, true);

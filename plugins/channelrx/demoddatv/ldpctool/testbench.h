@@ -4,6 +4,8 @@ LDPC testbench
 Copyright 2018 Ahmet Inan <xdsopl@gmail.com>
 */
 
+#pragma once
+
 #include <cstdint>
 #include <complex>
 #include "simd.h"

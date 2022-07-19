@@ -8,9 +8,38 @@ Copyright 2018 Ahmet Inan <xdsopl@gmail.com>
 #define LAYERED_DECODER_HH
 
 #include <stdlib.h>
+#ifdef _MSC_VER
+#include <malloc.h>
+#endif
 #include "ldpc.h"
 
 namespace ldpctool {
+
+class LDPCUtil
+{
+public:
+#ifndef _MSC_VER
+    static void *aligned_malloc(size_t alignment, size_t size)
+    {
+        return aligned_alloc(alignment, size);
+    }
+
+    static void aligned_free(void *mem)
+    {
+        free(mem);
+    }
+#else
+    static void *aligned_malloc(size_t alignment, size_t size)
+    {
+        return _aligned_malloc(size, alignment);
+    }
+
+    static void aligned_free(void *mem)
+    {
+        _aligned_free(mem);
+    }
+#endif
+};
 
 template <typename TYPE, typename ALG>
 class LDPCDecoder
@@ -113,8 +142,8 @@ public:
 		}
 		LT = ldpc->links_total();
 		delete ldpc;
-		bnl = reinterpret_cast<TYPE *>(aligned_alloc(sizeof(TYPE), sizeof(TYPE) * LT));
-		pty = reinterpret_cast<TYPE *>(aligned_alloc(sizeof(TYPE), sizeof(TYPE) * R));
+		bnl = reinterpret_cast<TYPE *>(LDPCUtil::aligned_malloc(sizeof(TYPE), sizeof(TYPE) * LT));
+		pty = reinterpret_cast<TYPE *>(LDPCUtil::aligned_malloc(sizeof(TYPE), sizeof(TYPE) * R));
 		uint16_t *tmp = new uint16_t[R * CNL];
 		for (int i = 0; i < q; ++i)
 			for (int j = 0; j < M; ++j)
@@ -139,8 +168,8 @@ public:
 	~LDPCDecoder()
 	{
 		if (initialized) {
-			free(bnl);
-			free(pty);
+			LDPCUtil::aligned_free(bnl);
+			LDPCUtil::aligned_free(pty);
 			delete[] cnc;
 			delete[] pos;
 			delete[] inp;
