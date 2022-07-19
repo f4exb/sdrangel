@@ -70,6 +70,8 @@ SWGSDRPlayV3Settings::SWGSDRPlayV3Settings() {
     m_transverter_delta_frequency_isSet = false;
     iq_order = 0;
     m_iq_order_isSet = false;
+    bias_tee = 0;
+    m_bias_tee_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -128,6 +130,8 @@ SWGSDRPlayV3Settings::init() {
     m_transverter_delta_frequency_isSet = false;
     iq_order = 0;
     m_iq_order_isSet = false;
+    bias_tee = 0;
+    m_bias_tee_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -140,6 +144,7 @@ SWGSDRPlayV3Settings::init() {
 
 void
 SWGSDRPlayV3Settings::cleanup() {
+
 
 
 
@@ -221,6 +226,8 @@ SWGSDRPlayV3Settings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&transverter_delta_frequency, pJson["transverterDeltaFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&iq_order, pJson["iqOrder"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&bias_tee, pJson["biasTee"], "qint32", "");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -308,6 +315,9 @@ SWGSDRPlayV3Settings::asJsonObject() {
     }
     if(m_iq_order_isSet){
         obj->insert("iqOrder", QJsonValue(iq_order));
+    }
+    if(m_bias_tee_isSet){
+        obj->insert("biasTee", QJsonValue(bias_tee));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -536,6 +546,16 @@ SWGSDRPlayV3Settings::setIqOrder(qint32 iq_order) {
 }
 
 qint32
+SWGSDRPlayV3Settings::getBiasTee() {
+    return bias_tee;
+}
+void
+SWGSDRPlayV3Settings::setBiasTee(qint32 bias_tee) {
+    this->bias_tee = bias_tee;
+    this->m_bias_tee_isSet = true;
+}
+
+qint32
 SWGSDRPlayV3Settings::getUseReverseApi() {
     return use_reverse_api;
 }
@@ -641,6 +661,9 @@ SWGSDRPlayV3Settings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_iq_order_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_bias_tee_isSet){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){

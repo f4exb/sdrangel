@@ -96,6 +96,58 @@ bool ChannelWebAPIUtils::getDeviceSettings(unsigned int deviceIndex, SWGSDRangel
     return true;
 }
 
+bool ChannelWebAPIUtils::getDeviceReport(unsigned int deviceIndex, SWGSDRangel::SWGDeviceReport &deviceReport)
+{
+    QString errorResponse;
+    int httpRC;
+    DeviceSet *deviceSet;
+
+    // Get device report
+    std::vector<DeviceSet*> deviceSets = MainCore::instance()->getDeviceSets();
+    if (deviceIndex < deviceSets.size())
+    {
+        deviceSet = deviceSets[deviceIndex];
+        if (deviceSet->m_deviceSourceEngine)
+        {
+            deviceReport.setDeviceHwType(new QString(deviceSet->m_deviceAPI->getHardwareId()));
+            deviceReport.setDirection(0);
+            DeviceSampleSource *source = deviceSet->m_deviceAPI->getSampleSource();
+            httpRC = source->webapiReportGet(deviceReport, errorResponse);
+        }
+        else if (deviceSet->m_deviceSinkEngine)
+        {
+            deviceReport.setDeviceHwType(new QString(deviceSet->m_deviceAPI->getHardwareId()));
+            deviceReport.setDirection(1);
+            DeviceSampleSink *sink = deviceSet->m_deviceAPI->getSampleSink();
+            httpRC = sink->webapiReportGet(deviceReport, errorResponse);
+        }
+        else if (deviceSet->m_deviceMIMOEngine)
+        {
+            deviceReport.setDeviceHwType(new QString(deviceSet->m_deviceAPI->getHardwareId()));
+            deviceReport.setDirection(2);
+            DeviceSampleMIMO *mimo = deviceSet->m_deviceAPI->getSampleMIMO();
+            httpRC = mimo->webapiReportGet(deviceReport, errorResponse);
+        }
+        else
+        {
+            qDebug() << "ChannelWebAPIUtils::getDeviceReport: unknown device type " << deviceIndex;
+            return false;
+        }
+    }
+    else
+    {
+        qDebug() << "ChannelWebAPIUtils::getDeviceReport: no device " << deviceIndex;
+        return false;
+    }
+
+    if (httpRC/100 != 2)
+    {
+        qWarning("ChannelWebAPIUtils::getDeviceReport: get device report error %d: %s",
+            httpRC, qPrintable(errorResponse));
+        return false;
+    }
+}
+
 bool ChannelWebAPIUtils::getFeatureSettings(unsigned int featureSetIndex, unsigned int featureIndex, SWGSDRangel::SWGFeatureSettings &featureSettingsResponse, Feature *&feature)
 {
     QString errorResponse;
@@ -173,6 +225,16 @@ bool ChannelWebAPIUtils::getFeatureReport(unsigned int featureSetIndex, unsigned
     return true;
 }
 
+QString ChannelWebAPIUtils::getDeviceHardwareId(unsigned int deviceIndex)
+{
+    DeviceAPI *deviceAPI = MainCore::instance()->getDevice(deviceIndex);
+    if (deviceAPI) {
+        return deviceAPI->getHardwareId();
+    } else {
+        return QString();
+    }
+}
+
 // Get device center frequency
 bool ChannelWebAPIUtils::getCenterFrequency(unsigned int deviceIndex, double &frequencyInHz)
 {
@@ -237,6 +299,395 @@ bool ChannelWebAPIUtils::setCenterFrequency(unsigned int deviceIndex, double fre
     {
         return false;
     }
+}
+
+// Get local oscillator frequency correction
+bool ChannelWebAPIUtils::getLOPpmCorrection(unsigned int deviceIndex, int &ppmTenths)
+{
+    QString devId = ChannelWebAPIUtils::getDeviceHardwareId(deviceIndex);
+    if (devId == "RTLSDR") {
+        return ChannelWebAPIUtils::getDeviceSetting(deviceIndex, "loPpmCorrection", ppmTenths);
+    } else {
+        return ChannelWebAPIUtils::getDeviceSetting(deviceIndex, "LOppmTenths", ppmTenths);
+    }
+}
+
+// Set local oscillator frequency correction
+bool ChannelWebAPIUtils::setLOPpmCorrection(unsigned int deviceIndex, int ppmTenths)
+{
+    QString devId = ChannelWebAPIUtils::getDeviceHardwareId(deviceIndex);
+    if (devId == "RTLSDR") {
+        return ChannelWebAPIUtils::patchDeviceSetting(deviceIndex, "loPpmCorrection", ppmTenths);  // RTLSDR
+    } else {
+        return ChannelWebAPIUtils::patchDeviceSetting(deviceIndex, "LOppmTenths", ppmTenths);      // Airspy, AirspyHF. BladeRF2, FCDPro, HackRF, Metis, Perseus, Pluto, SDRPlay, SDRplayV3, SaopySDR
+    }
+}
+
+// Get device sample rate
+bool ChannelWebAPIUtils::getDevSampleRate(unsigned int deviceIndex, int &devSampleRate)
+{
+    QString devId = ChannelWebAPIUtils::getDeviceHardwareId(deviceIndex);
+    if (devId == "AirspyHF")
+    {
+        QList<int> rates;
+        int idx;
+        if (ChannelWebAPIUtils::getDeviceReportList(deviceIndex, "sampleRates", "rate", rates)
+            && ChannelWebAPIUtils::getDeviceSetting(deviceIndex, "devSampleRateIndex", idx))
+        {
+            if (idx < rates.size())
+            {
+                devSampleRate = rates[idx];
+                return true;
+            }
+        }
+        return false;
+    }
+    else
+    {
+        return ChannelWebAPIUtils::getDeviceSetting(deviceIndex, "devSampleRate", devSampleRate);
+    }
+}
+
+// Set device sample rate
+bool ChannelWebAPIUtils::setDevSampleRate(unsigned int deviceIndex, int devSampleRate)
+{
+    QString devId = ChannelWebAPIUtils::getDeviceHardwareId(deviceIndex);
+    if (devId == "AirspyHF")
+    {
+        QList<int> rates;
+        ChannelWebAPIUtils::getDeviceReportList(deviceIndex, "sampleRates", "rate", rates);
+        // Find first rate that is big enough. Higher rates are in list first
+        int idx = 0;
+        for (int i = rates.size() - 1; i >= 0; i--)
+        {
+            if (devSampleRate <= rates[i])
+            {
+                idx = i;
+                break;
+            }
+        }
+        return ChannelWebAPIUtils::patchDeviceSetting(deviceIndex, "devSampleRateIndex", idx);
+    }
+    else
+    {
+        return ChannelWebAPIUtils::patchDeviceSetting(deviceIndex, "devSampleRate", devSampleRate);
+    }
+}
+
+bool ChannelWebAPIUtils::getGain(unsigned int deviceIndex, int stage, int &gain)
+{
+    QString devId = ChannelWebAPIUtils::getDeviceHardwareId(deviceIndex);
+    bool error = true;
+    if ((devId == "Airspy"))
+    {
+        QStringList airspyStages = {"lnaGain", "mixerGain", "vgaGain"};
+        if (stage < airspyStages.size())
+        {
+            error = ChannelWebAPIUtils::getDeviceSetting(deviceIndex, airspyStages[stage], gain);
+            gain *= 10;
+        }
+    }
+    else if ((devId == "AirspyHF"))
+    {
+        if (stage == 0)
+        {
+            error = ChannelWebAPIUtils::getDeviceSetting(deviceIndex, "attenuatorSteps", gain);
+            gain *= 10 * 6;
+        }
+    }
+    else if ((devId == "BladeRF1"))
+    {
+        QStringList bladeRF1Stages = {"lnaGain", "vga1", "vga2"};
+        if (stage < bladeRF1Stages.size())
+        {
+            error = ChannelWebAPIUtils::getDeviceSetting(deviceIndex, bladeRF1Stages[stage], gain);
+            gain *= 10;
+        }
+    }
+    else if ((devId == "HackRF"))
+    {
+        QStringList hackRFStages = {"lnaGain", "vgaGain"};
+        if (stage < hackRFStages.size())
+        {
+            error = ChannelWebAPIUtils::getDeviceSetting(deviceIndex, hackRFStages[stage], gain);
+            gain *= 10;
+        }
+    }
+    else if ((devId == "FCDProPlus") || (devId == "KiwiSDR") || (devId == "LimeSDR") || (devId == "PlutoSDR") || (devId == "USRP") || (devId == "XTRX"))
+    {
+        if (stage == 0)
+        {
+            error = ChannelWebAPIUtils::getDeviceSetting(deviceIndex, "gain", gain);
+            gain *= 10;
+        }
+    }
+    else if ((devId == "SDRplayV3"))
+    {
+        QStringList sdrplayStages = {"lnaIndex", "ifGain"};
+        if (stage < sdrplayStages.size())
+        {
+            // FIXME: How to map to lnaIndex - gain can vary by SDR
+            error = ChannelWebAPIUtils::getDeviceSetting(deviceIndex, sdrplayStages[stage], gain);
+            gain *= 10;
+        }
+    }
+    else if ((devId == "RTLSDR"))
+    {
+        if (stage == 0)
+        {
+            error = ChannelWebAPIUtils::getDeviceSetting(deviceIndex, "gain", gain);
+        }
+    }
+    return error;
+}
+
+// Set gain for different stages in RF device
+// Gain is generally in 10ths of a dB
+// Stages should correspond with order in RemoteTCPInputGUI
+bool ChannelWebAPIUtils::setGain(unsigned int deviceIndex, int stage, int gain)
+{
+    QString devId = ChannelWebAPIUtils::getDeviceHardwareId(deviceIndex);
+    if (devId == "Airspy")
+    {
+        QStringList airspyStages = {"lnaGain", "mixerGain", "vgaGain"};
+        if (stage < airspyStages.size()) {
+            return ChannelWebAPIUtils::patchDeviceSetting(deviceIndex, airspyStages[stage], gain / 10);
+        }
+    }
+    else if (devId == "AirspyHF")
+    {
+        if (stage == 0) {
+            return ChannelWebAPIUtils::patchDeviceSetting(deviceIndex, "attenuatorSteps", gain / 10 / 6);
+        }
+    }
+    else if (devId == "BladeRF1")
+    {
+        QStringList bladeRF1Stages = {"lnaGain", "vga1", "vga2"};
+        if (stage < bladeRF1Stages.size()) {
+            return ChannelWebAPIUtils::patchDeviceSetting(deviceIndex, bladeRF1Stages[stage], gain / 10);
+        }
+    }
+    else if (devId == "HackRF")
+    {
+        QStringList hackRFStages = {"lnaGain", "vgaGain"};
+        if (stage < hackRFStages.size()) {
+            return ChannelWebAPIUtils::patchDeviceSetting(deviceIndex, hackRFStages[stage], gain / 10);
+        }
+    }
+    else if ((devId == "FCDProPlus") || (devId == "KiwiSDR") || (devId == "LimeSDR") || (devId == "PlutoSDR") || (devId == "USRP") || (devId == "XTRX"))
+    {
+        if (stage == 0) {
+            return ChannelWebAPIUtils::patchDeviceSetting(deviceIndex, "gain", gain / 10);
+        }
+    }
+    else if (devId == "SDRplayV3")
+    {
+        QStringList sdrplayStages = {"lnaIndex", "ifGain"};
+        if (stage < sdrplayStages.size())
+        {
+            // FIXME: How to map to lnaIndex - gain can vary by SDR
+            return ChannelWebAPIUtils::patchDeviceSetting(deviceIndex, sdrplayStages[stage], gain / 10);
+        }
+    }
+    else if ((devId == "RTLSDR"))
+    {
+        if (stage == 0) {
+            return ChannelWebAPIUtils::patchDeviceSetting(deviceIndex, "gain", gain);
+        }
+    }
+    return false;
+}
+
+bool ChannelWebAPIUtils::getAGC(unsigned int deviceIndex, int &enabled)
+{
+    QString devId = ChannelWebAPIUtils::getDeviceHardwareId(deviceIndex);
+    if ((devId == "Airspy"))
+    {
+        return ChannelWebAPIUtils::getDeviceSetting(deviceIndex, "lnaAGC", enabled); // What about mixerAGC?
+    }
+    else if ((devId == "AirspyHF") || (devId == "KiwiSDR"))
+    {
+        return ChannelWebAPIUtils::getDeviceSetting(deviceIndex, "useAGC", enabled);
+    }
+    else if ((devId == "LimeSDR") || (devId == "PlutoSDR") || (devId == "USRP") || (devId == "XTRX"))
+    {
+        bool error = ChannelWebAPIUtils::getDeviceSetting(deviceIndex, "gainMode", enabled);
+        enabled = !enabled;
+        return error;
+    }
+    else if (devId == "RTLSDR")
+    {
+        return ChannelWebAPIUtils::getDeviceSetting(deviceIndex, "agc", enabled);
+    }
+    else if (devId == "SDRplayV3")
+    {
+        return ChannelWebAPIUtils::getDeviceSetting(deviceIndex, "ifAGC", enabled);
+    }
+    return false;
+}
+
+bool ChannelWebAPIUtils::setAGC(unsigned int deviceIndex, bool enabled)
+{
+    QString devId = ChannelWebAPIUtils::getDeviceHardwareId(deviceIndex);
+    if ((devId == "Airspy"))
+    {
+        return ChannelWebAPIUtils::patchDeviceSetting(deviceIndex, "lnaAGC", enabled)
+            && ChannelWebAPIUtils::patchDeviceSetting(deviceIndex, "mixerAGC", enabled);
+    }
+    else if ((devId == "AirspyHF") || (devId == "KiwiSDR"))
+    {
+        return ChannelWebAPIUtils::patchDeviceSetting(deviceIndex, "useAGC", enabled);
+    }
+    else if ((devId == "LimeSDR") || (devId == "PlutoSDR") || (devId == "USRP") || (devId == "XTRX"))
+    {
+        return ChannelWebAPIUtils::patchDeviceSetting(deviceIndex, "gainMode", !enabled);
+    }
+    else if (devId == "RTLSDR")
+    {
+        return ChannelWebAPIUtils::patchDeviceSetting(deviceIndex, "agc", enabled);
+    }
+    else if (devId == "SDRplayV3")
+    {
+        return ChannelWebAPIUtils::patchDeviceSetting(deviceIndex, "ifAGC", enabled);
+    }
+    return false;
+}
+
+// Get RF bandwidth
+bool ChannelWebAPIUtils::getRFBandwidth(unsigned int deviceIndex, int &bw)
+{
+    QString devId = ChannelWebAPIUtils::getDeviceHardwareId(deviceIndex);
+    if (devId == "RTLSDR")
+    {
+        return ChannelWebAPIUtils::getDeviceSetting(deviceIndex, "rfBandwidth", bw);
+    }
+    else if ((devId == "BladeRF1") || (devId == "HackRF"))
+    {
+        return ChannelWebAPIUtils::getDeviceSetting(deviceIndex, "bandwidth", bw);
+    }
+    else if (devId == "SDRplayV3")
+    {
+        QList<int> bws;
+        int idx;
+
+        if (ChannelWebAPIUtils::getDeviceReportList(deviceIndex, "bandwidths", "bandwidth", bws)
+            && ChannelWebAPIUtils::getDeviceSetting(deviceIndex, "bandwidthIndex", idx))
+        {
+            if (idx < bws.size())
+            {
+                bw = bws[idx];
+                return true;
+            }
+        }
+        return false;
+    }
+    else
+    {
+        return ChannelWebAPIUtils::getDeviceSetting(deviceIndex, "lpfBW", bw);
+    }
+}
+
+// Set RF bandwidth
+bool ChannelWebAPIUtils::setRFBandwidth(unsigned int deviceIndex, int bw)
+{
+    QString devId = ChannelWebAPIUtils::getDeviceHardwareId(deviceIndex);
+    if (devId == "RTLSDR")
+    {
+        return ChannelWebAPIUtils::patchDeviceSetting(deviceIndex, "rfBandwidth", bw); // RTLSDR
+    }
+    else if ((devId == "BladeRF1") || (devId == "HackRF"))
+    {
+        return ChannelWebAPIUtils::patchDeviceSetting(deviceIndex, "bandwidth", bw);   // BladeRF1, HackRF
+    }
+    else if (devId == "SDRplayV3")
+    {
+        QList<int> bws;
+        ChannelWebAPIUtils::getDeviceReportList(deviceIndex, "bandwidths", "bandwidth", bws);
+        // Find first b/w that is big enough
+        int idx = 0;
+        for (int i = 0; i < bws.size(); i++)
+        {
+            if (bw <= bws[i]) {
+                break;
+            }
+            idx++;
+        }
+        return ChannelWebAPIUtils::patchDeviceSetting(deviceIndex, "bandwidthIndex", idx);
+    }
+    else
+    {
+        return ChannelWebAPIUtils::patchDeviceSetting(deviceIndex, "lpfBW", bw); // LimeSDR, PlutoSDR, USRP
+    }
+
+    // TODO: SDRPlay and SDRPlayV3 use bandwidthIndex
+}
+
+// Get software decimation
+bool ChannelWebAPIUtils::getSoftDecim(unsigned int deviceIndex, int &log2Decim)
+{
+    QString devId = ChannelWebAPIUtils::getDeviceHardwareId(deviceIndex);
+    if ((devId == "LimeSDR") || (devId == "USRP")) {
+        return ChannelWebAPIUtils::getDeviceSetting(deviceIndex, "log2SoftDecim", log2Decim);
+    } else {
+        return ChannelWebAPIUtils::getDeviceSetting(deviceIndex, "log2Decim", log2Decim);
+    }
+}
+
+// Set software decimation
+bool ChannelWebAPIUtils::setSoftDecim(unsigned int deviceIndex, int log2Decim)
+{
+    QString devId = ChannelWebAPIUtils::getDeviceHardwareId(deviceIndex);
+    if ((devId == "LimeSDR") || (devId == "USRP")) {
+        return ChannelWebAPIUtils::patchDeviceSetting(deviceIndex, "log2SoftDecim", log2Decim);  // LimeSDR, USRP
+    } else {
+        return ChannelWebAPIUtils::patchDeviceSetting(deviceIndex, "log2Decim", log2Decim);
+    }
+}
+
+// Get whether bias tee is enabled
+bool ChannelWebAPIUtils::getBiasTee(unsigned int deviceIndex, int &enabled)
+{
+    QString devId = ChannelWebAPIUtils::getDeviceHardwareId(deviceIndex);
+    if ((devId == "RTLSDR") || (devId == "BladeRF") || (devId == "SDRplayV3")) {
+        return ChannelWebAPIUtils::getDeviceSetting(deviceIndex, "biasTee", enabled);
+    } else {
+        return ChannelWebAPIUtils::getDeviceSetting(deviceIndex, "biasT", enabled);
+    }
+}
+
+// Set whether bias tee, if available, should be enabled
+bool ChannelWebAPIUtils::setBiasTee(unsigned int deviceIndex, bool enabled)
+{
+    QString devId = ChannelWebAPIUtils::getDeviceHardwareId(deviceIndex);
+    if ((devId == "RTLSDR") || (devId == "BladeRF") || (devId == "SDRplayV3")) {
+        return ChannelWebAPIUtils::patchDeviceSetting(deviceIndex, "biasTee", enabled);  // RTLSDR, BladeRF, SDRplayV3
+    } else {
+        return ChannelWebAPIUtils::patchDeviceSetting(deviceIndex, "biasT", enabled);    // Airspy, FCDProPlus, HackRF,
+    }
+}
+
+// Get whether DC offset removal is enabled
+bool ChannelWebAPIUtils::getDCOffsetRemoval(unsigned int deviceIndex, int &enabled)
+{
+    return ChannelWebAPIUtils::getDeviceSetting(deviceIndex, "dcBlock", enabled);
+}
+
+// Set whether DC offset removal should be enabled
+bool ChannelWebAPIUtils::setDCOffsetRemoval(unsigned int deviceIndex, bool enabled)
+{
+    return ChannelWebAPIUtils::patchDeviceSetting(deviceIndex, "dcBlock", enabled);
+}
+
+// Get whether IQ correction is enabled
+bool ChannelWebAPIUtils::getIQCorrection(unsigned int deviceIndex, int &enabled)
+{
+    return ChannelWebAPIUtils::getDeviceSetting(deviceIndex, "iqCorrection", enabled);
+}
+
+// Set whether IQ correction should be enabled
+bool ChannelWebAPIUtils::setIQCorrection(unsigned int deviceIndex, bool enabled)
+{
+    return ChannelWebAPIUtils::patchDeviceSetting(deviceIndex, "iqCorrection", enabled);
 }
 
 // Start acquisition
@@ -540,67 +991,45 @@ bool ChannelWebAPIUtils::getDeviceSetting(unsigned int deviceIndex, const QStrin
 bool ChannelWebAPIUtils::getDeviceReportValue(unsigned int deviceIndex, const QString &key, QString &value)
 {
     SWGSDRangel::SWGDeviceReport deviceReport;
-    QString errorResponse;
-    int httpRC;
-    DeviceSet *deviceSet;
 
-    // Get device report
-    std::vector<DeviceSet*> deviceSets = MainCore::instance()->getDeviceSets();
-    if (deviceIndex < deviceSets.size())
+    if (getDeviceReport(deviceIndex, deviceReport))
     {
-        deviceSet = deviceSets[deviceIndex];
-        if (deviceSet->m_deviceSourceEngine)
+        // Get value of requested key
+        QJsonObject *jsonObj = deviceReport.asJsonObject();
+        if (WebAPIUtils::getSubObjectString(*jsonObj, key, value))
         {
-            deviceReport.setDeviceHwType(new QString(deviceSet->m_deviceAPI->getHardwareId()));
-            deviceReport.setDirection(0);
-            DeviceSampleSource *source = deviceSet->m_deviceAPI->getSampleSource();
-            httpRC = source->webapiReportGet(deviceReport, errorResponse);
-        }
-        else if (deviceSet->m_deviceSinkEngine)
-        {
-            deviceReport.setDeviceHwType(new QString(deviceSet->m_deviceAPI->getHardwareId()));
-            deviceReport.setDirection(1);
-            DeviceSampleSink *sink = deviceSet->m_deviceAPI->getSampleSink();
-            httpRC = sink->webapiReportGet(deviceReport, errorResponse);
-        }
-        else if (deviceSet->m_deviceMIMOEngine)
-        {
-            deviceReport.setDeviceHwType(new QString(deviceSet->m_deviceAPI->getHardwareId()));
-            deviceReport.setDirection(2);
-            DeviceSampleMIMO *mimo = deviceSet->m_deviceAPI->getSampleMIMO();
-            httpRC = mimo->webapiReportGet(deviceReport, errorResponse);
+            // Done
+            return true;
         }
         else
         {
-            qDebug() << "ChannelWebAPIUtils::getDeviceReportValue: unknown device type " << deviceIndex;
+            qWarning("ChannelWebAPIUtils::getDeviceReportValue: no key %s in device report", qPrintable(key));
             return false;
         }
     }
-    else
-    {
-        qDebug() << "ChannelWebAPIUtils::getDeviceReportValue: no device " << deviceIndex;
-        return false;
-    }
+    return false;
+}
 
-    if (httpRC/100 != 2)
-    {
-        qWarning("ChannelWebAPIUtils::getDeviceReportValue: get device report error %d: %s",
-            httpRC, qPrintable(errorResponse));
-        return false;
-    }
+bool ChannelWebAPIUtils::getDeviceReportList(unsigned int deviceIndex, const QString &key, const QString &subKey, QList<int> &values)
+{
+    SWGSDRangel::SWGDeviceReport deviceReport;
 
-    // Get value of requested key
-    QJsonObject *jsonObj = deviceReport.asJsonObject();
-    if (WebAPIUtils::getSubObjectString(*jsonObj, key, value))
+    if (getDeviceReport(deviceIndex, deviceReport))
     {
-        // Done
-        return true;
+        // Get value of requested key
+        QJsonObject *jsonObj = deviceReport.asJsonObject();
+        if (WebAPIUtils::getSubObjectIntList(*jsonObj, key, subKey, values))
+        {
+            // Done
+            return true;
+        }
+        else
+        {
+            qWarning("ChannelWebAPIUtils::getDeviceReportList: no key %s in device report", qPrintable(key));
+            return false;
+        }
     }
-    else
-    {
-        qWarning("ChannelWebAPIUtils::getDeviceReportValue: no key %s in device report", qPrintable(key));
-        return false;
-    }
+    return false;
 }
 
 bool ChannelWebAPIUtils::patchDeviceSetting(unsigned int deviceIndex, const QString &setting, int value)

@@ -250,6 +250,9 @@
 #include "SWGRemoteSinkSettings.h"
 #include "SWGRemoteSourceReport.h"
 #include "SWGRemoteSourceSettings.h"
+#include "SWGRemoteTCPInputReport.h"
+#include "SWGRemoteTCPInputSettings.h"
+#include "SWGRemoteTCPSinkSettings.h"
 #include "SWGRigCtlServerActions.h"
 #include "SWGRigCtlServerReport.h"
 #include "SWGRigCtlServerSettings.h"
@@ -1516,6 +1519,21 @@ namespace SWGSDRangel {
     }
     if(QString("SWGRemoteSourceSettings").compare(type) == 0) {
       SWGRemoteSourceSettings *obj = new SWGRemoteSourceSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGRemoteTCPInputReport").compare(type) == 0) {
+      SWGRemoteTCPInputReport *obj = new SWGRemoteTCPInputReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGRemoteTCPInputSettings").compare(type) == 0) {
+      SWGRemoteTCPInputSettings *obj = new SWGRemoteTCPInputSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGRemoteTCPSinkSettings").compare(type) == 0) {
+      SWGRemoteTCPSinkSettings *obj = new SWGRemoteTCPSinkSettings();
       obj->init();
       return obj;
     }

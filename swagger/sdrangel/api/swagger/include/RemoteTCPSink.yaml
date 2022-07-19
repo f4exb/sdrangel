@@ -1,0 +1,42 @@
+RemoteTCPSinkSettings:
+  description: "Remote TCP channel sink settings"
+  properties:
+    channelSampleRate:
+      type: integer
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    gain:
+      type: integer
+    sampleBits:
+      type: integer
+    dataAddress:
+      description: "Receiving TCP data address"
+      type: string
+    dataPort:
+      description: "Receiving TCP data port"
+      type: integer
+    protocol:
+      type: integer
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+    channelMarker:
+      $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+    rollupState:
+      $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"

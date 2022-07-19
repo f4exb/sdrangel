@@ -63,6 +63,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelURIToSettingsKey = {
     {"sdrangel.channel.radioclock", "RadioClockSettings"},
     {"sdrangel.channel.radiosondedemod", "RadiosondeDemodSettings"},
     {"sdrangel.demod.remotesink", "RemoteSinkSettings"},
+    {"sdrangel.demod.remotetcpsink", "RemoteTCPSinkSettings"},
     {"sdrangel.channeltx.remotesource", "RemoteSourceSettings"},
     {"sdrangel.channeltx.modssb", "SSBModSettings"},
     {"sdrangel.channel.ssbdemod", "SSBDemodSettings"},
@@ -115,6 +116,7 @@ const QMap<QString, QString> WebAPIUtils::m_deviceIdToSettingsKey = {
     {"sdrangel.samplesink.plutosdr", "plutoSdrOutputSettings"},
     {"sdrangel.samplesource.rtlsdr", "rtlSdrSettings"},
     {"sdrangel.samplesource.remoteinput", "remoteInputSettings"},
+    {"sdrangel.samplesource.remotetcpinput", "remoteTCPInputSettings"},
     {"sdrangel.samplesink.remoteoutput", "remoteOutputSettings"},
     {"sdrangel.samplesource.sdrplay", "sdrPlaySettings"},
     {"sdrangel.samplesource.sdrplayv3", "sdrPlayV3Settings"},
@@ -170,6 +172,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelTypeToSettingsKey = {
     {"RadiosondeDemod", "RadiosondeDemodSettings"},
     {"RemoteSink", "RemoteSinkSettings"},
     {"RemoteSource", "RemoteSourceSettings"},
+    {"RemoteTCPSink", "RemoteTCPSinkSettings"},
     {"SSBMod", "SSBModSettings"},
     {"SSBDemod", "SSBDemodSettings"},
     {"UDPSink", "UDPSinkSettings"},
@@ -211,6 +214,7 @@ const QMap<QString, QString> WebAPIUtils::m_sourceDeviceHwIdToSettingsKey = {
     {"PlutoSDR", "plutoSdrInputSettings"},
     {"RTLSDR", "rtlSdrSettings"},
     {"RemoteInput", "remoteInputSettings"},
+    {"RemoteTCPInput", "remoteTCPInputSettings"},
     {"SDRplay1", "sdrPlaySettings"},
     {"SDRplayV3", "sdrPlayV3Settings"},
     {"SigMFFileInput", "sigMFFileInputSettings"},
@@ -504,6 +508,39 @@ bool WebAPIUtils::setSubObjectString(QJsonObject &json, const QString &key, cons
                 subObject[key] = value;
                 it.value() = subObject;
                 return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+// Get string list from within nested JSON object
+bool WebAPIUtils::getSubObjectIntList(const QJsonObject &json, const QString &key, const QString &subKey, QList<int> &values)
+{
+    for (QJsonObject::const_iterator  it = json.begin(); it != json.end(); it++)
+    {
+        QJsonValue jsonValue = it.value();
+
+        if (jsonValue.isObject())
+        {
+            QJsonObject subObject = jsonValue.toObject();
+
+            if (subObject.contains(key))
+            {
+                QJsonValue value = subObject[key];
+                if (value.isArray())
+                { 
+                    QJsonArray array = value.toArray();
+                    for (int i = 0; i < array.size(); i++)
+                    {
+                        QJsonObject element = array[i].toObject();
+                        if (element.contains(subKey)) {
+                            values.append(element[subKey].toInt());
+                        }
+                    } 
+                    return true;
+                }
             }
         }
     }

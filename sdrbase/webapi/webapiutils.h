@@ -51,6 +51,7 @@ public:
     static bool setSubObjectInt(QJsonObject &json, const QString &key, int value);
     static bool getSubObjectString(const QJsonObject &json, const QString &key, QString &value);
     static bool setSubObjectString(QJsonObject &json, const QString &key, const QString &value);
+    static bool getSubObjectIntList(const QJsonObject &json, const QString &key, const QString &subKey, QList<int> &values);
     static bool extractValue(const QJsonObject &json, const QString &key, QJsonValue &value);
     static bool extractArray(const QJsonObject &json, const QString &key, QJsonArray &value);
     static bool extractObject(const QJsonObject &json, const QString &key, QJsonObject &value);

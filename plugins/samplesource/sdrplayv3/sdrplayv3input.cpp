@@ -914,6 +914,9 @@ void SDRPlayV3Input::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("iqOrder")) {
         settings.m_iqOrder = response.getSdrPlayV3Settings()->getIqOrder() != 0;
     }
+    if (deviceSettingsKeys.contains("biasTee")) {
+        settings.m_biasTee = response.getSdrPlayV3Settings()->getBiasTee() != 0;
+    }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getSdrPlayV3Settings()->getUseReverseApi() != 0;
     }
@@ -951,6 +954,7 @@ void SDRPlayV3Input::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& 
     response.getSdrPlayV3Settings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
     response.getSdrPlayV3Settings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
     response.getSdrPlayV3Settings()->setIqOrder(settings.m_iqOrder ? 1 : 0);
+    response.getSdrPlayV3Settings()->setBiasTee(settings.m_biasTee ? 1 : 0);
 
     response.getSdrPlayV3Settings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
@@ -1089,6 +1093,9 @@ void SDRPlayV3Input::webapiReverseSendSettings(QList<QString>& deviceSettingsKey
     }
     if (deviceSettingsKeys.contains("iqOrder") || force) {
         swgSDRPlayV3Settings->setIqOrder(settings.m_iqOrder ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("biasTee") || force) {
+        swgSDRPlayV3Settings->setBiasTee(settings.m_biasTee ? 1 : 0);
     }
 
     QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")

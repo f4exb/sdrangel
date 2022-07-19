@@ -72,6 +72,8 @@ DeviceSettings:
       $ref: "http://swgserver:8081/api/swagger/include/RemoteOutput.yaml#/RemoteOutputSettings"
     remoteInputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/RemoteInput.yaml#/RemoteInputSettings"
+    remoteTCPInputSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/RemoteTCPInput.yaml#/RemoteTCPInputSettings"
     sdrPlaySettings:
       $ref: "http://swgserver:8081/api/swagger/include/SDRPlay.yaml#/SDRPlaySettings"
     sdrPlayV3Settings:

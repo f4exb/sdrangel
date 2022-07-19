@@ -50,6 +50,7 @@
 #include "SWGPlutoSdrOutputSettings.h"
 #include "SWGRemoteInputSettings.h"
 #include "SWGRemoteOutputSettings.h"
+#include "SWGRemoteTCPInputSettings.h"
 #include "SWGRtlSdrSettings.h"
 #include "SWGSDRPlaySettings.h"
 #include "SWGSDRPlayV3Settings.h"
@@ -179,6 +180,9 @@ public:
 
     SWGRemoteInputSettings* getRemoteInputSettings();
     void setRemoteInputSettings(SWGRemoteInputSettings* remote_input_settings);
+
+    SWGRemoteTCPInputSettings* getRemoteTcpInputSettings();
+    void setRemoteTcpInputSettings(SWGRemoteTCPInputSettings* remote_tcp_input_settings);
 
     SWGSDRPlaySettings* getSdrPlaySettings();
     void setSdrPlaySettings(SWGSDRPlaySettings* sdr_play_settings);
@@ -318,6 +322,9 @@ private:
 
     SWGRemoteInputSettings* remote_input_settings;
     bool m_remote_input_settings_isSet;
+
+    SWGRemoteTCPInputSettings* remote_tcp_input_settings;
+    bool m_remote_tcp_input_settings_isSet;
 
     SWGSDRPlaySettings* sdr_play_settings;
     bool m_sdr_play_settings_isSet;
