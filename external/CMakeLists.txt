@@ -21,7 +21,7 @@ set(PERSEUS_TAG afefa23e3140ac79d845acb68cf0beeb86d09028)
 set(MIRISDR_TAG "v2.0.0")
 
 set(PTHREADS4W_TAG "Version-2-11-0-release")
-set(RTLSDR_TAG be1d1206bfb6e6c41f7d91b20b77e20f929fa6a7)
+set(RTLSDR_TAG 5e73f90f1d85d8db2e583f3dbf1cff052d71d59b)
 set(RTLSDR_UDEV OFF)
 set(SOAPYSDR_TAG "soapy-sdr-0.7.1")
 set(SOAPYSDR_SDRPLAY_TAG "soapy-sdrplay-0.2.0")
@@ -1036,7 +1036,7 @@ if (LINUX)
                 PREFIX "${EXTERNAL_BUILD_LIBRARIES}/rtlsdr"
                 CMAKE_ARGS ${COMMON_CMAKE_ARGS} -DDETACH_KERNEL_DRIVER=ON -DINSTALL_UDEV_RULES=${RTLSDR_UDEV}
                 BUILD_BYPRODUCTS "${LIBRTLSDR_LIBRARIES}"
-                BUILD_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR> --config $<CONFIG> -- rtlsdr_shared
+                BUILD_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR> --config $<CONFIG> -- rtlsdr
                 INSTALL_COMMAND ""
                 TEST_COMMAND ""
                 )
@@ -1067,6 +1067,8 @@ if (WIN32 OR APPLE)
         if (WIN32)
             set(LIBRTLSDR_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/rtlsdr.lib" CACHE INTERNAL "")
             set(RTLSDR_LIBUSB_INCLUDE "${LIBUSB_INCLUDE_DIR}/libusb-1.0")
+            # Disable pkg-config to allow LIBUSB_INCLUDE_DIRS to be used
+            set(DISABLE_PKGCONFIG "-DCMAKE_DISABLE_FIND_PACKAGE_PkgConfig=ON")
         endif ()
         # needs pkgconfig and libusb
         ExternalProject_Add(rtlsdr
@@ -1077,11 +1079,12 @@ if (WIN32 OR APPLE)
                 CMAKE_ARGS ${COMMON_CMAKE_ARGS}
                 -DINSTALL_UDEV_RULES=${RTLSDR_UDEV}
                 -DLIBUSB_LIBRARIES=${LIBUSB_LIBRARIES}
-                -DLIBUSB_INCLUDE_DIR=${RTLSDR_LIBUSB_INCLUDE}
+                -DLIBUSB_INCLUDE_DIRS=${RTLSDR_LIBUSB_INCLUDE}
                 -DTHREADS_PTHREADS_INCLUDE_DIR=${PTHREADS4W_INCLUDE_DIR}
                 -DTHREADS_PTHREADS_WIN32_LIBRARY=${PTHREADS4W_LIBRARIES}
+                ${DISABLE_PKGCONFIG}
                 BUILD_BYPRODUCTS "${LIBRTLSDR_LIBRARIES}"
-                BUILD_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR> --config $<CONFIG> -- rtlsdr_shared
+                BUILD_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR> --config $<CONFIG> -- rtlsdr
                 INSTALL_COMMAND ""
                 TEST_COMMAND ""
                 )
