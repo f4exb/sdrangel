@@ -2,7 +2,7 @@
 
 <h2>Introduction</h2>
 
-This input sample source plugin gets its I/Q samples over the network via a TCP/IP connection from a server such as rtl_tcp, rsp_tcp or SDRangel's Remote TCP Channel Sink plugin.
+This input sample source plugin gets its I/Q samples over the network via a TCP/IP connection from a server such as rtl_tcp, rsp_tcp or SDRangel's [Remote TCP Channel Sink](../../channelrx/remotetcksink/readme.md) plugin.
 
 <h2>Interface</h2>
 
