@@ -3827,10 +3827,16 @@ struct s2_fecdec_helper : runnable
         const s2_pls *pls = &job->pls;
         int iosize = (pls->framebits() / 8) * sizeof(ldpc_buf[0]);
 
-        // Blocking read - do we need to return faster?
-        // If so, call m_worker->dataAvailable()
-        QByteArray data = job->h->m_worker->data();
-        memcpy(ldpc_buf, data.data(), data.size());
+        // Non blocking read - will do the next time if no adata is available
+        if (job->h->m_worker->dataAvailable())
+        {
+            QByteArray data = job->h->m_worker->data();
+            memcpy(ldpc_buf, data.data(), data.size());
+        }
+        else
+        {
+            return;
+        }
 
         --job->h->b_out;
         // Decode BCH.
