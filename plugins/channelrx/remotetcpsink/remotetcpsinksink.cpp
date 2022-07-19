@@ -494,7 +494,7 @@ void RemoteTCPSinkSink::processCommand()
     RemoteTCPSinkSettings settings = m_settings;
 
     quint8 cmd[5];
-    while (client && (client->bytesAvailable() >= sizeof(cmd)))
+    while (client && (client->bytesAvailable() >= (qint64)sizeof(cmd)))
     {
         int len = client->read((char *)cmd, sizeof(cmd));
         if (len == sizeof(cmd))

@@ -70,7 +70,7 @@ private:
     MessageQueue *m_messageQueueToChannel;
 
     int64_t m_channelFrequencyOffset;
-    uint32_t m_channelSampleRate;
+    int32_t m_channelSampleRate;
     uint32_t m_deviceIndex;
     uint32_t m_channelIndex;
     float m_linearGain;
