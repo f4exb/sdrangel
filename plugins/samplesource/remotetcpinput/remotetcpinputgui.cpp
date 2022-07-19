@@ -41,9 +41,9 @@ RemoteTCPInputGui::RemoteTCPInputGui(DeviceUISet *deviceUISet, QWidget* parent) 
     ui(new Ui::RemoteTCPInputGui),
     m_settings(),
     m_sampleSource(0),
+    m_lastEngineState(DeviceAPI::StNotStarted),
     m_sampleRate(0),
     m_centerFrequency(0),
-    m_lastEngineState(DeviceAPI::StNotStarted),
     m_doApplySettings(true),
     m_forceSettings(true),
     m_deviceGains(nullptr),
@@ -171,6 +171,7 @@ bool RemoteTCPInputGui::handleMessage(const Message& message)
         ui->outGauge->setMaximum((int)report.getOutSize());
         ui->outGauge->setValue((int)report.getOutBytesAvailable());
         ui->outBufferLenSecsText->setText(QString("%1s").arg(report.getOutSeconds(), 0, 'f', 2));
+        return true;
     }
     else if (RemoteTCPInputTCPHandler::MsgReportRemoteDevice::match(message))
     {
@@ -259,6 +260,7 @@ bool RemoteTCPInputGui::handleMessage(const Message& message)
         ui->decimation->setEnabled(sdra);
 
         displayGains();
+        return true;
     }
     else if (RemoteTCPInputTCPHandler::MsgReportConnection::match(message))
     {
@@ -274,6 +276,7 @@ bool RemoteTCPInputGui::handleMessage(const Message& message)
              m_connectionError = true;
              ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
         }
+        return true;
     }
     else
     {

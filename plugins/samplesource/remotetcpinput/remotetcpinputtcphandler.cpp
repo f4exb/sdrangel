@@ -437,7 +437,7 @@ void RemoteTCPInputTCPHandler::applySettings(const RemoteTCPInputSettings& setti
     {
         // Resize FIFO to give us 1 second
         // Can't do this while running
-        if (!m_running && settings.m_channelSampleRate > m_sampleFifo->size())
+        if (!m_running && settings.m_channelSampleRate > (qint32)m_sampleFifo->size())
         {
             qDebug() << "RemoteTCPInputTCPHandler::applySettings: Resizing sample FIFO from " << m_sampleFifo->size() << "to" << settings.m_channelSampleRate;
             m_sampleFifo->setSize(settings.m_channelSampleRate);
@@ -522,7 +522,7 @@ void RemoteTCPInputTCPHandler::dataReadyRead()
     if (!m_readMetaData)
     {
         quint8 metaData[RemoteTCPProtocol::m_sdraMetaDataSize];
-        if (m_dataSocket->bytesAvailable() >= sizeof(metaData))
+        if (m_dataSocket->bytesAvailable() >= (qint64)sizeof(metaData))
         {
             qint64 bytesRead = m_dataSocket->read((char *)&metaData[0], 4);
             if (bytesRead == 4)
@@ -539,7 +539,6 @@ void RemoteTCPInputTCPHandler::dataReadyRead()
                     bytesRead = m_dataSocket->read((char *)&metaData[4], RemoteTCPProtocol::m_rtl0MetaDataSize-4);
 
                     RemoteTCPProtocol::Device tuner = (RemoteTCPProtocol::Device)RemoteTCPProtocol::extractUInt32(&metaData[4]);
-                    quint32 gainStages = RemoteTCPProtocol::extractUInt32(&metaData[8]);
                     if (m_messageQueueToGUI) {
                         m_messageQueueToGUI->push(MsgReportRemoteDevice::create(tuner, protocol));
                     }
