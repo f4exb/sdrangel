@@ -219,7 +219,7 @@ void RemoteTCPSink::applySettings(const RemoteTCPSinkSettings& settings, bool fo
             << " m_dataAddress: " << settings.m_dataAddress
             << " m_dataPort: " << settings.m_dataPort
             << " m_protocol: " << settings.m_protocol
-            << " m_protocol: " << settings.m_streamIndex
+            << " m_streamIndex: " << settings.m_streamIndex
             << " force: " << force
             << " remoteChange: " << remoteChange;
 
