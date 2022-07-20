@@ -97,7 +97,7 @@ struct Fsk4Demod
         dt = ideal_dt - (phase_estimate * (lock ? lock_gain : unlock_gain));
         t += dt;
 
-        std::tuple<int, float> evm_result = symbol_evm(samples[1]);
+        symbol_evm(samples[1]);
         int symbol;
         float evm;
         std::tie(symbol, evm) = symbol_evm(samples[1]);

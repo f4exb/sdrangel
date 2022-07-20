@@ -16,7 +16,7 @@ namespace modemm17
 template <size_t N>
 struct SymbolEvm
 {
-    using filter_type = BaseIirFilter<float, N>;
+    using filter_type = BaseIirFilter<N>;
     using symbol_t = int;
     using result_type = std::tuple<symbol_t, float>;
 
@@ -42,7 +42,7 @@ struct SymbolEvm
         symbol_t symbol;
         float evm;
 
-        sample = std::min(3.0, std::max(-3.0, sample));
+        sample = std::min(3.0f, std::max(-3.0f, sample));
 
         if (sample > 2)
         {
@@ -65,7 +65,7 @@ struct SymbolEvm
             evm = (sample + 3) * 0.333333;
         }
 
-        if (erasure_limit_ and (abs(evm) > *erasure_limit_)) symbol = 0;
+        if (erasure_limit_ and (std::abs(evm) > erasure_limit_)) symbol = 0;
 
         evm_ = filter_(evm);
 
@@ -79,7 +79,7 @@ SymbolEvm<N> makeSymbolEvm(
     float erasure_limit = 0.0f
 )
 {
-    return std::move(SymbolEvm<float, N>(std::move(filter), erasure_limit));
+    return std::move(SymbolEvm<N>(std::move(filter), erasure_limit));
 }
 
 } // modemm17

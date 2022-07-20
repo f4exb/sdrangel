@@ -27,7 +27,7 @@ class SlidingDFT
     static constexpr float kth = float(Frequency) / float(SampleRate);
 
     // We'd like this to be static constexpr, but std::exp is not a constexpr.
-    const ComplexType coeff_;
+    ComplexType coeff_;
     std::array<float, N> samples_;
     ComplexType result_{0,0};
     size_t index_ = 0;

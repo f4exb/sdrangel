@@ -135,12 +135,12 @@ struct LinkSetupFrame
         bool north = lat_int >= 0;
         bool east = lon_int >= 0;
 
-        result[2] = (int) abs(lat_int);
-        lat_dec = abs(lat_frac) * 65536.0f;
+        result[2] = (int) std::abs(lat_int);
+        lat_dec = std::abs(lat_frac) * 65536.0f;
         result[3] = lat_dec >> 8;
         result[4] = lat_dec & 0xFF;
-        result[5] = (int) abs(lon_int);
-        lon_dec = abs(lon_frac) * 65536.0f;
+        result[5] = (int) std::abs(lon_int);
+        lon_dec = std::abs(lon_frac) * 65536.0f;
         result[6] = lon_dec >> 8;
         result[7] = lon_dec & 0xFF;
         result[8] = (north ? 0 : 1) | ((east ? 0 : 1)<<1) | (1<<2);

@@ -94,7 +94,7 @@ constexpr auto makeCost(Trellis_ trellis)
 template <typename Trellis_, size_t LLR_ = 2>
 struct Viterbi
 {
-    static_assert(LLR_ < 7);    // Need to be < 7 to avoid overflow errors.
+    static_assert(LLR_ < 7, "Need to be < 7 to avoid overflow errors");
 
     static constexpr size_t K = Trellis_::K;
     static constexpr size_t k = Trellis_::k;
@@ -162,7 +162,7 @@ struct Viterbi
     template <size_t IN, size_t OUT>
     size_t decode(std::array<int8_t, IN> const& in, std::array<uint8_t, OUT>& out)
     {
-        static_assert(sizeof(history_) >= IN / 2);
+        static_assert(sizeof(history_) >= IN / 2, "Invalid size");
 
         constexpr auto MAX_METRIC = std::numeric_limits<typename metrics_t::value_type>::max() / 2;
 

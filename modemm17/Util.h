@@ -146,9 +146,7 @@ auto llr(float sample)
 template <size_t M, typename T, size_t N, typename U, size_t IN>
 auto depunctured(std::array<T, N> puncture_matrix, std::array<U, IN> in)
 {
-    if (M % N != 0) {
-        return;
-    }
+    static_assert(M % N == 0, "M must be an integer multiple of N");
 
     std::array<U, M> result;
     size_t index = 0;
