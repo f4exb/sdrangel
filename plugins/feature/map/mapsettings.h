@@ -104,6 +104,9 @@ struct MapSettings
     QString m_cesiumIonAPIKey;
     QString m_antiAliasing;
 
+    bool m_displayMUF;          // Plot MUF contours
+    bool m_displayfoF2;         // Plot foF2 contours
+
     // Per source settings
     QHash<QString, MapItemSettings *> m_itemSettings;
 

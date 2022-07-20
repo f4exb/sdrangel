@@ -64,6 +64,8 @@ public:
     void setCameraReferenceFrame(bool eci);
     void setSunLight(bool useSunLight);
     void setAntiAliasing(const QString &antiAliasing);
+    void showMUF(bool show);
+    void showfoF2(bool show);
     void updateImage(const QString &name, float east, float west, float north, float south, float altitude, const QString &data);
     void removeImage(const QString &name);
     void removeAllImages();

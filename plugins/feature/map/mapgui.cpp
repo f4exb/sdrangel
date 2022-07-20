@@ -275,6 +275,7 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
 
     addRadioTimeTransmitters();
     addRadar();
+    addIonosonde();
 
     displaySettings();
     applySettings(true);
@@ -302,6 +303,7 @@ MapGUI::~MapGUI()
         m_webServer->close();
         delete m_webServer;
     }
+    delete m_giro;
     delete ui;
 }
 
@@ -450,6 +452,72 @@ void MapGUI::addRadar()
     radarMapItem.setLabelAltitudeOffset(4.5);
     radarMapItem.setAltitudeReference(1);
     update(m_map, &radarMapItem, "Radar");
+}
+
+// Ionosonde stations
+void MapGUI::addIonosonde()
+{
+    m_giro = GIRO::create();
+    if (m_giro)
+    {
+        connect(m_giro, &GIRO::dataUpdated, this, &MapGUI::giroDataUpdated);
+        connect(m_giro, &GIRO::mufUpdated, this, &MapGUI::mufUpdated);
+        connect(m_giro, &GIRO::foF2Updated, this, &MapGUI::foF2Updated);
+    }
+}
+
+void MapGUI::giroDataUpdated(const GIRO::GIROStationData& data)
+{
+    if (!data.m_station.isEmpty())
+    {
+        IonosondeStation *station = nullptr;
+        // See if we already have the station in our hash
+        if (!m_ionosondeStations.contains(data.m_station))
+        {
+            // Create new station
+            station = new IonosondeStation(data);
+            m_ionosondeStations.insert(data.m_station, station);
+        }
+        else
+        {
+            station = m_ionosondeStations.value(data.m_station);
+        }
+        station->update(data);
+
+        // Add/update map
+        SWGSDRangel::SWGMapItem ionosondeStationMapItem;
+        ionosondeStationMapItem.setName(new QString(station->m_name));
+        ionosondeStationMapItem.setLatitude(station->m_latitude);
+        ionosondeStationMapItem.setLongitude(station->m_longitude);
+        ionosondeStationMapItem.setAltitude(0.0);
+        ionosondeStationMapItem.setImage(new QString("ionosonde.png"));
+        ionosondeStationMapItem.setImageRotation(0);
+        ionosondeStationMapItem.setText(new QString(station->m_text));
+        ionosondeStationMapItem.setModel(new QString("antenna.glb"));
+        ionosondeStationMapItem.setFixedPosition(true);
+        ionosondeStationMapItem.setOrientation(0);
+        ionosondeStationMapItem.setLabel(new QString(station->m_label));
+        ionosondeStationMapItem.setLabelAltitudeOffset(4.5);
+        ionosondeStationMapItem.setAltitudeReference(1);
+        update(m_map, &ionosondeStationMapItem, "Ionosonde Stations");
+    }
+}
+
+void MapGUI::mufUpdated(const QJsonDocument& document)
+{
+    // Could possibly try render on 2D map, but contours
+    // that cross anti-meridian are not drawn properly
+    //${Qt5Location_PRIVATE_INCLUDE_DIRS}
+    //#include <QtLocation/private/qgeojson_p.h>
+    //QVariantList list = QGeoJson::importGeoJson(document);
+    m_webServer->addFile("/map/map/muf.geojson", document.toJson());
+    m_cesium->showMUF(m_settings.m_displayMUF);
+}
+
+void MapGUI::foF2Updated(const QJsonDocument& document)
+{
+    m_webServer->addFile("/map/map/fof2.geojson", document.toJson());
+    m_cesium->showfoF2(m_settings.m_displayfoF2);
 }
 
 static QString arrayToString(QJsonArray array)
@@ -841,7 +909,15 @@ void MapGUI::applyMap3DSettings(bool reloadMap)
         m_cesium->setCameraReferenceFrame(m_settings.m_eciCamera);
         m_cesium->setAntiAliasing(m_settings.m_antiAliasing);
         m_cesium->getDateTime();
+        m_cesium->showMUF(m_settings.m_displayMUF);
+        m_cesium->showfoF2(m_settings.m_displayfoF2);
     }
+    MapSettings::MapItemSettings *ionosondeItemSettings = getItemSettings("Ionosonde Stations");
+    if (ionosondeItemSettings) {
+        m_giro->getDataPeriodically(ionosondeItemSettings->m_enabled ? 2 : 0);
+    }
+    m_giro->getMUFPeriodically(m_settings.m_displayMUF ? 15 : 0);
+    m_giro->getfoF2Periodically(m_settings.m_displayfoF2 ? 15 : 0);
 }
 
 void MapGUI::init3DMap()
@@ -863,6 +939,9 @@ void MapGUI::init3DMap()
 
     // Set 3D view after loading initial objects
     m_cesium->setHomeView(stationLatitude, stationLongitude);
+
+    m_cesium->showMUF(m_settings.m_displayMUF);
+    m_cesium->showfoF2(m_settings.m_displayfoF2);
 }
 
 void MapGUI::displaySettings()
@@ -874,6 +953,8 @@ void MapGUI::displaySettings()
     ui->displayNames->setChecked(m_settings.m_displayNames);
     ui->displaySelectedGroundTracks->setChecked(m_settings.m_displaySelectedGroundTracks);
     ui->displayAllGroundTracks->setChecked(m_settings.m_displayAllGroundTracks);
+    ui->displayMUF->setChecked(m_settings.m_displayMUF);
+    ui->displayfoF2->setChecked(m_settings.m_displayfoF2);
     m_mapModel.setDisplayNames(m_settings.m_displayNames);
     m_mapModel.setDisplaySelectedGroundTracks(m_settings.m_displaySelectedGroundTracks);
     m_mapModel.setDisplayAllGroundTracks(m_settings.m_displayAllGroundTracks);
@@ -947,6 +1028,26 @@ void MapGUI::on_displayAllGroundTracks_clicked(bool checked)
 {
     m_settings.m_displayAllGroundTracks = checked;
     m_mapModel.setDisplayAllGroundTracks(checked);
+}
+
+void MapGUI::on_displayMUF_clicked(bool checked)
+{
+    m_settings.m_displayMUF = checked;
+    // Only call show if disabling, so we don't get two updates
+    // (as getMUFPeriodically results in a call to showMUF when the data is available)
+     m_giro->getMUFPeriodically(m_settings.m_displayMUF ? 15 : 0);
+    if (m_cesium && !m_settings.m_displayMUF) {
+        m_cesium->showMUF(m_settings.m_displayMUF);
+    }
+}
+
+void MapGUI::on_displayfoF2_clicked(bool checked)
+{
+    m_settings.m_displayfoF2 = checked;
+    m_giro->getfoF2Periodically(m_settings.m_displayfoF2 ? 15 : 0);
+    if (m_cesium && !m_settings.m_displayfoF2) {
+        m_cesium->showfoF2(m_settings.m_displayfoF2);
+    }
 }
 
 void MapGUI::on_find_returnPressed()
@@ -1234,6 +1335,8 @@ void MapGUI::makeUIConnections()
     QObject::connect(ui->displayNames, &ButtonSwitch::clicked, this, &MapGUI::on_displayNames_clicked);
     QObject::connect(ui->displayAllGroundTracks, &ButtonSwitch::clicked, this, &MapGUI::on_displayAllGroundTracks_clicked);
     QObject::connect(ui->displaySelectedGroundTracks, &ButtonSwitch::clicked, this, &MapGUI::on_displaySelectedGroundTracks_clicked);
+    QObject::connect(ui->displayMUF, &ButtonSwitch::clicked, this, &MapGUI::on_displayMUF_clicked);
+    QObject::connect(ui->displayfoF2, &ButtonSwitch::clicked, this, &MapGUI::on_displayfoF2_clicked);
     QObject::connect(ui->find, &QLineEdit::returnPressed, this, &MapGUI::on_find_returnPressed);
     QObject::connect(ui->maidenhead, &QToolButton::clicked, this, &MapGUI::on_maidenhead_clicked);
     QObject::connect(ui->deleteAll, &QToolButton::clicked, this, &MapGUI::on_deleteAll_clicked);

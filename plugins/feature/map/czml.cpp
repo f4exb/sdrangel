@@ -75,13 +75,8 @@ QJsonObject CZML::update(MapItem *mapItem, bool isTarget, bool isSelected)
 
     bool removeObj = false;
     bool fixedPosition = mapItem->m_fixedPosition;
-
-    float displayDistanceMax = std::numeric_limits<float>::max();
-    QString image = mapItem->m_image;
-    if ((image == "antenna.png") || (image == "antennaam.png") || (image == "antennadab.png") || (image == "antennafm.png") || (image == "antennatime.png")) {
-        displayDistanceMax = 1000000;
-    }
-    if (image == "") {
+    if (mapItem->m_image == "")
+    {
         // Need to remove this from the map
         removeObj = true;
     }
@@ -212,12 +207,6 @@ QJsonObject CZML::update(MapItem *mapItem, bool isTarget, bool isSelected)
         {"heightReference", heightReferences[mapItem->m_altitudeReference]},
         {"show", mapItem->m_itemSettings->m_enabled && mapItem->m_itemSettings->m_display3DPoint}
     };
-    // If clamping to ground, we need to disable depth test, so part of the point isn't clipped
-    // However, when the point isn't clamped to ground, we shouldn't use this, otherwise
-    // the point will become visible through the globe
-    if (mapItem->m_altitudeReference == 1) {
-        point.insert("disableDepthTestDistance", 100000000);
-    }
 
     // Model
     QJsonArray node0Cartesian {
@@ -276,8 +265,26 @@ QJsonObject CZML::update(MapItem *mapItem, bool isTarget, bool isSelected)
     };
 
     // Label
+
+    // Prevent labels from being too cluttered when zoomed out
+    // FIXME: These values should come from mapItem or mapItemSettings
+    float displayDistanceMax = std::numeric_limits<float>::max();
+    if ((mapItem->m_group == "Beacons") || (mapItem->m_group == "AM") || (mapItem->m_group == "FM") || (mapItem->m_group == "DAB")) {
+        displayDistanceMax = 1000000;
+    } else if ((mapItem->m_group == "Station") || (mapItem->m_group == "Radar") || (mapItem->m_group == "Radio Time Transmitters")) {
+        displayDistanceMax = 10000000;
+    } else if (mapItem->m_group == "Ionosonde Stations") {
+        displayDistanceMax = 30000000;
+    }
+
+    QJsonArray labelPixelOffsetScaleArray {
+        1000000, 20, 10000000, 5
+    };
+    QJsonObject labelPixelOffsetScaleObject {
+        {"nearFarScalar", labelPixelOffsetScaleArray}
+    };
     QJsonArray labelPixelOffsetArray {
-        20, 0
+        1, 0
     };
     QJsonObject labelPixelOffset {
         {"cartesian2", labelPixelOffsetArray}
@@ -302,14 +309,13 @@ QJsonObject CZML::update(MapItem *mapItem, bool isTarget, bool isSelected)
         {"show", m_settings->m_displayNames && mapItem->m_itemSettings->m_enabled && mapItem->m_itemSettings->m_display3DLabel},
         {"scale", mapItem->m_itemSettings->m_3DLabelScale},
         {"pixelOffset", labelPixelOffset},
+        {"pixelOffsetScaleByDistance", labelPixelOffsetScaleObject},
         {"eyeOffset", labelEyeOffset},
         {"verticalOrigin",  "BASELINE"},
         {"horizontalOrigin",  "LEFT"},
         {"heightReference", heightReferences[mapItem->m_altitudeReference]},
     };
-    if (displayDistanceMax != std::numeric_limits<float>::max())
-    {
-        label.insert("disableDepthTestDistance", 100000000.0);
+    if (displayDistanceMax != std::numeric_limits<float>::max()) {
         label.insert("distanceDisplayCondition", labelDistanceDisplayCondition);
     }
 
@@ -323,9 +329,6 @@ QJsonObject CZML::update(MapItem *mapItem, bool isTarget, bool isSelected)
         {"heightReference", heightReferences[mapItem->m_altitudeReference]},
         {"verticalOrigin", "BOTTOM"} // To stop it being cut in half when zoomed out
     };
-    if (mapItem->m_altitudeReference == 1) {
-        billboard.insert("disableDepthTestDistance", 100000000);
-    }
 
     QJsonObject obj {
         {"id", id}         // id must be unique

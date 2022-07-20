@@ -181,6 +181,7 @@ set(sdrbase_SOURCES
     util/fixedtraits.cpp
     util/fits.cpp
     util/flightinformation.cpp
+    util/giro.cpp
     util/golay2312.cpp
     util/httpdownloadmanager.cpp
     util/interpolation.cpp
@@ -395,6 +396,7 @@ set(sdrbase_HEADERS
     util/fixedtraits.h
     util/fits.h
     util/flightinformation.h
+    util/giro.h
     util/golay2312.h
     util/httpdownloadmanager.h
     util/incrementalarray.h

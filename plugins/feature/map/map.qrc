@@ -7,6 +7,7 @@
     <file>map/antennadab.png</file>
     <file>map/antennafm.png</file>
     <file>map/antennaam.png</file>
+    <file>map/ionosonde.png</file>
     <file>map/map3d.html</file>
   </qresource>
   <qresource prefix="/">

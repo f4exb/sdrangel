@@ -69,6 +69,11 @@ MapSettings::MapSettings() :
     m_itemSettings.insert("Radiosonde", new MapItemSettings("Radiosonde", QColor(102, 0, 102), false, 11, modelMinPixelSize));
     m_itemSettings.insert("Radio Time Transmitters", new MapItemSettings("Radio Time Transmitters", QColor(255, 0, 0), true, 8));
     m_itemSettings.insert("Radar", new MapItemSettings("Radar", QColor(255, 0, 0), true, 8));
+
+    MapItemSettings *ionosondeItemSettings = new MapItemSettings("Ionosonde Stations", QColor(255, 255, 0), true, 4);
+    ionosondeItemSettings->m_display2DIcon = false;
+    m_itemSettings.insert("Ionosonde Stations", ionosondeItemSettings);
+
     MapItemSettings *stationItemSettings = new MapItemSettings("Station", QColor(255, 0, 0), true, 11);
     stationItemSettings->m_display2DTrack = false;
     m_itemSettings.insert("Station", stationItemSettings);
@@ -110,6 +115,8 @@ void MapSettings::resetToDefaults()
     m_eciCamera = false;
     m_modelDir = HttpDownloadManager::downloadDir() + "/3d";
     m_antiAliasing = "None";
+    m_displayMUF = false;
+    m_displayfoF2 = false;
     m_workspaceIndex = 0;
 }
 
@@ -151,6 +158,9 @@ QByteArray MapSettings::serialize() const
     s.writeString(32, m_antiAliasing);
     s.writeS32(33, m_workspaceIndex);
     s.writeBlob(34, m_geometryBytes);
+
+    s.writeBool(35, m_displayMUF);
+    s.writeBool(36, m_displayfoF2);
 
     return s.final();
 }
@@ -223,6 +233,9 @@ bool MapSettings::deserialize(const QByteArray& data)
         d.readString(32, &m_antiAliasing, "None");
         d.readS32(33, &m_workspaceIndex, 0);
         d.readBlob(34, &m_geometryBytes);
+
+        d.readBool(35, &m_displayMUF, false);
+        d.readBool(36, &m_displayfoF2, false);
 
         return true;
     }

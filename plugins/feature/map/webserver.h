@@ -49,11 +49,14 @@ class WebServer : public QTcpServer
 
 private:
 
-    // Hash of a list of paths to substitude
+    // Hash of a list of paths to substitute
     QHash<QString, QString> m_pathSubstitutions;
 
     // Hash of path to a list of substitutions to make in the file
     QHash<QString, QList<Substitution *>*> m_substitutions;
+
+    // Hash of files held in memory
+    QHash<QString, QByteArray> m_files;
 
     // Hash of filename extension to MIME type information
     QHash<QString, MimeType *> m_mimeTypes;
@@ -64,6 +67,7 @@ public:
     void incomingConnection(qintptr socket) override;
     void addPathSubstitution(const QString &from, const QString &to);
     void addSubstitution(QString path, QString from, QString to);
+    void addFile(const QString &path, const QByteArray &data);
     QString substitute(QString path, QString html);
     void sendFile(QTcpSocket* socket, const QByteArray &data, MimeType *mimeType, const QString &path);
 
