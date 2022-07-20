@@ -1,4 +1,4 @@
-// Copyright 2020-2021 modemm17 LLC.
+// Copyright 2020-2021 Mobilinkd LLC.
 
 // make CXXFLAGS="$(pkg-config --cflags gtest) $(pkg-config --libs gtest) -I. -O3" tests/TrellisTest
 

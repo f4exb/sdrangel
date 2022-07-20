@@ -1,4 +1,4 @@
-// Copyright 2020 modemm17 LLC.
+// Copyright 2020 Mobilinkd LLC.
 
 #pragma once
 

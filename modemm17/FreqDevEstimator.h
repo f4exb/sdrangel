@@ -1,4 +1,4 @@
-// Copyright 2021 Rob Riggs <rob@modemm17.com>
+// Copyright 2021 Rob Riggs <rob@mobilinkd.com>
 // All rights reserved.
 
 #pragma once

@@ -1,11 +1,11 @@
-// Copyright 2020 modemm17 LLC.
+// Copyright 2020 Mobilinkd LLC.
 
 #pragma once
 
 #include <array>
 #include <cstdint>
 #include <cmath>
-#include <string_view> // Don't have std::span in C++17.
+// #include <string_view> // Don't have std::span in C++17.
 #include <stdexcept>
 #include <algorithm>
 
@@ -56,11 +56,11 @@ struct LinkSetupFrame
         for (auto c : callsign)
         {
             encoded *= 40;
-            if (c >= 'A' and c <= 'Z')
+            if ((c >= 'A') && (c <= 'Z'))
             {
                 encoded += c - 'A' + 1;
             }
-            else if (c >= '0' and c <= '9')
+            else if ((c >= '0') && (c <= '9'))
             {
                 encoded += c - '0' + 27;
             }
@@ -112,6 +112,7 @@ struct LinkSetupFrame
         // decode each base-40 digit and map them to the appriate character.
         result.fill(0);
         size_t index = 0;
+
         while (encoded)
         {
             result[index++] = callsign_map[encoded % 40];
