@@ -20,6 +20,7 @@
 
 #include <QObject>
 
+#include "dsp/dsptypes.h"
 #include "audio/audiocompressor.h"
 #include "M17Demodulator.h"
 #include "m17demodfilters.h"

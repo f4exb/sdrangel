@@ -48,11 +48,11 @@ void M17ModDecimator::initialize(
         mKernel[i] = 0;
     }
 
-    for (int i = 0; i < activeKernelSize; i++)
+    for (unsigned int i = 0; i < activeKernelSize; i++)
     {
         double y;
 
-        if (i == M/2) {
+        if (i == (unsigned int) M/2) {
             y = 2 * M_PI * Fc;
         } else {
             y = (sin(2 * M_PI * Fc * (i - M / 2)) / (i - M / 2) *
@@ -114,7 +114,7 @@ void M17ModDecimator::decimate(int16_t *in, int16_t *out, unsigned int outCount)
     for (unsigned int i = 0; i < outCount; i++)
     {
         // Insert mRatio input samples at cursor.
-        for (unsigned int j = 0; j < mRatio; j++) {
+        for (int j = 0; j < mRatio; j++) {
             *shiftp++ = *inp++;
         }
 
