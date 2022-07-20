@@ -181,7 +181,7 @@ When Ionosonde Stations are displayed, data is downloaded and displayed every 2 
 
 Each station is labelled on the maps as "MUF/foF2".
 
-MUF and foF2 can be displayed as countors:
+MUF and foF2 can be displayed as contours:
 
 ![MUF contours](../../../doc/img/Map_plugin_muf.png)
 
