@@ -97,7 +97,7 @@ if (ENABLE_CHANNELRX_DEMODFREEDV AND CODEC2_FOUND)
     add_subdirectory(demodfreedv)
 endif()
 
-if (ENABLE_CHANNELRX_DEMODM17 AND CODEC2_FOUND)
+if (LINUX AND ENABLE_CHANNELRX_DEMODM17 AND CODEC2_FOUND)
     add_subdirectory(demodm17)
 endif()
 
