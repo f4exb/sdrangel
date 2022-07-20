@@ -37,6 +37,7 @@ WebServer::WebServer(quint16 &port, QObject* parent) :
     m_mimeTypes.insert(".js", new MimeType("text/javascript"));
     m_mimeTypes.insert(".css", new MimeType("text/css"));
     m_mimeTypes.insert(".json", new MimeType("application/json"));
+    m_mimeTypes.insert(".geojson", new MimeType("application/geo+json"));
 }
 
 void WebServer::incomingConnection(qintptr socket)
@@ -86,6 +87,11 @@ QString WebServer::substitute(QString path, QString html)
         html = html.replace(s->m_from, s->m_to);
     }
     return html;
+}
+
+void WebServer::addFile(const QString &path, const QByteArray &data)
+{
+    m_files.insert(path, data);
 }
 
 void WebServer::sendFile(QTcpSocket* socket, const QByteArray &data, MimeType *mimeType, const QString &path)
@@ -163,9 +169,14 @@ void WebServer::readClient()
                 sendFile(socket, data, mimeType, path);
             }
 #endif
+            else if (m_files.contains(path))
+            {
+                // Path is a file held in memory
+                sendFile(socket, m_files.value(path).data(), mimeType, path);
+            }
             else
             {
-                // See if we can find a file
+                // See if we can find a file on disk
                 QFile file(path);
                 if (file.open(QIODevice::ReadOnly))
                 {

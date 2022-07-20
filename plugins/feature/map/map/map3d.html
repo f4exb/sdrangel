@@ -157,10 +157,39 @@
         geocoder: false,
         fullscreenButton: true,
         navigationHelpButton: false,
-        navigationInstructionsInitiallyVisible: false
+        navigationInstructionsInitiallyVisible: false,
+        terrainProviderViewModels: [] // User should adjust terrain via dialog, so depthTestAgainstTerrain doesn't get set
     });
+    viewer.scene.globe.depthTestAgainstTerrain = false; // So labels/points aren't clipped by terrain
     var buildings = undefined;
     const images = new Map();
+
+    var mufGeoJSONStream = null;
+    var foF2GeoJSONStream = null;
+
+    // Generate HTML for MUF contour info box from properties in GeoJSON
+    function describeMUF(properties, nameProperty) {
+        let html = "";
+        if (properties.hasOwnProperty("level-value")) {
+            const value = properties["level-value"];
+            if (Cesium.defined(value)) {
+                html = `<p>MUF: ${value} MHz<p>MUF (Maximum Usable Frequency) is the highest frequency that will reflect from the ionosphere on a 3000km path`;
+            }
+        }
+        return html;
+    }
+
+    // Generate HTML for foF2 contour info box from properties in GeoJSON
+    function describefoF2(properties, nameProperty) {
+        let html = "";
+        if (properties.hasOwnProperty("level-value")) {
+            const value = properties["level-value"];
+            if (Cesium.defined(value)) {
+                html = `<p>foF2: ${value} MHz<p>foF2 (F2 region critical frequency) is the highest frequency that will be reflected vertically from the F2 ionosphere region`;
+            }
+        }
+        return html;
+    }
 
     // Use CZML to stream data from Map plugin to Cesium
     var czmlStream = new Cesium.CzmlDataSource();
@@ -238,6 +267,7 @@
                 } else {
                     console.log(`Unknown terrain ${command.terrain}`);
                 }
+                viewer.scene.globe.depthTestAgainstTerrain = false; // So labels/points aren't clipped by terrain
             } else if (command.command == "setBuildings") {
                 if (command.buildings == "None") {
                     if (buildings !== undefined) {
@@ -273,6 +303,32 @@
                     viewer.scene.postProcessStages.fxaa.enabled = true;
                 } else {
                     viewer.scene.postProcessStages.fxaa.enabled = false;
+                }
+            } else if (command.command == "showMUF") {
+                if (mufGeoJSONStream != null) {
+                    viewer.dataSources.remove(mufGeoJSONStream, true);
+                    mufGeoJSONStream = null;
+                }
+                if (command.show == true) {
+                    viewer.dataSources.add(
+                        Cesium.GeoJsonDataSource.load(
+                            "muf.geojson",
+                            {describe: describeMUF}
+                        )
+                    ).then(function(dataSource) {mufGeoJSONStream = dataSource; });
+                }
+            } else if (command.command == "showfoF2") {
+                if (foF2GeoJSONStream != null) {
+                     viewer.dataSources.remove(foF2GeoJSONStream, true);
+                     foF2GeoJSONStream = null;
+                }
+                if (command.show == true) {
+                     viewer.dataSources.add(
+                        Cesium.GeoJsonDataSource.load(
+                            "fof2.geojson",
+                            {describe: describefoF2}
+                        )
+                    ).then(function(dataSource) {foF2GeoJSONStream = dataSource; });
                 }
             } else if (command.command == "updateImage") {
 
@@ -425,7 +481,6 @@
     socket.onopen = () => {
         reportClock();
     };
-
 
   </script>
  </div>

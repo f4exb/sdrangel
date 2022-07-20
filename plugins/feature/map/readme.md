@@ -11,10 +11,14 @@ On top of this, it can plot data from other plugins, such as:
 * Satellites from the Satellite Tracker,
 * Weather imagery from APT Demodulator,
 * The Sun, Moon and Stars from the Star Tracker,
-* Weather ballons from the RadioSonde feature,
+* Weather ballons from the RadioSonde feature.
+
+As well as other other data sources:
+
 * Beacons based on the IARU Region 1 beacon database and International Beacon Project,
 * Radio time transmitters,
-* GRAVES radar.
+* GRAVES radar,
+* Ionosonde station data.
 
 It can also create tracks showing the path aircraft, ships and APRS objects have taken, as well as predicted paths for satellites.
 
@@ -22,7 +26,7 @@ It can also create tracks showing the path aircraft, ships and APRS objects have
 
 ![3D Map feature](../../../doc/img/Map_plugin_apt.png)
 
-3D Models are not included with SDRangel. They must be downloaded by pressing the Download 3D Models button in the Display Settings dialog (11).
+3D Models are not included with SDRangel. They must be downloaded by pressing the Download 3D Models button in the Display Settings dialog (13).
 
 <h2>Interface</h2>
 
@@ -78,23 +82,33 @@ When clicked, opens the Radio Time Transmitters dialog.
 
 ![Radio Time transmitters dialog](../../../doc/img/Map_plugin_radiotime_dialog.png)
 
-<h3>7: Display Names</h3>
+<h3>7: Display MUF Contours</h3>
+
+When checked, contours will be downloaded and displayed on the 3D map, showing the MUF (Maximum Usable Frequency) for a 3000km path that reflects off the ionosphere.
+The contours will be updated every 15 minutes. The latest contour data will always be displayed, irrespective of the time set on the 3D Map.
+
+<h3>8: Display coF2 Contours</h3>
+
+When checked, contours will be downloaded and displayed on the 3D map, showing coF2 (F2 layer critical frequency), the maximum frequency at which radio waves will be reflected vertically from the F2 region of the ionosphere.
+The contours will be updated every 15 minutes. The latest contour data will always be displayed, irrespective of the time set on the 3D Map.
+
+<h3>8: Display Names</h3>
 
 When checked, names of objects are displayed in a bubble next to each object.
 
-<h3>8: Display tracks for selected object</h3>
+<h3>9: Display tracks for selected object</h3>
 
 When checked, displays the track (taken or predicted) for the selected object.
 
-<h3>9: Display tracks for all objects</h3>
+<h3>10: Display tracks for all objects</h3>
 
 When checked, displays the track (taken or predicted) for the all objects.
 
-<h3>10: Delete</h3>
+<h3>11: Delete</h3>
 
 When clicked, all items will be deleted from the map.
 
-<h3>11: Display settings</h3>
+<h3>12: Display settings</h3>
 
 When clicked, opens the Map Display Settings dialog:
 
@@ -154,6 +168,25 @@ The 2D map will only display the last reported positions for objects.
 The 3D map, however, has a timeline that allows replaying how objects have moved over time.
 To the right of the timeline is the fullscreen toggle button, which allows the 3D map to be displayed fullscreen.
 
+<h4>Ionosonde Stations</h4>
+
+When Ionosonde Stations are displayed, data is downloaded and displayed every 2 minutes. The data includes:
+
+* MUF - Maximum Usable Frequency in MHz for 3000km path.
+* M(D) - M-factor (~MUF/foF2) for 3000km path.
+* foF2 - F2 region critical frequency in MHz.
+* hmF2 - F2 region height in km.
+* foE - E region critical frequency in MHz.
+* TEC - Total Electron Content.
+
+Each station is labelled on the maps as "MUF/foF2".
+
+MUF and foF2 can be displayed as contours:
+
+![MUF contours](../../../doc/img/Map_plugin_muf.png)
+
+The contours can be clicked on which will display the data for that contour in the info box.
+
 <h2>Attribution</h2>
 
 IARU Region 1 beacon list used with permission from: https://iaru-r1-c5-beacons.org/  To add or update a beacon, see: https://iaru-r1-c5-beacons.org/index.php/beacon-update/
@@ -161,7 +194,10 @@ IARU Region 1 beacon list used with permission from: https://iaru-r1-c5-beacons.
 Mapping and geolocation services are by Open Street Map: https://www.openstreetmap.org/ esri: https://www.esri.com/
 Mapbox: https://www.mapbox.com/ Cesium: https://www.cesium.com Bing: https://www.bing.com/maps/
 
+Ionosonde data and MUF/coF2 contours from [KC2G](https://prop.kc2g.com/) with source data from [GIRO](https://giro.uml.edu/) and [NOAA NCEI](https://www.ngdc.noaa.gov/stp/iono/ionohome.html).
+
 Icons made by Google from Flaticon https://www.flaticon.com
+World icons created by turkkub from Flaticon https://www.flaticon.com
 
 3D models are by various artists under a variety of liceneses. See: https://github.com/srcejon/sdrangel-3d-models
 

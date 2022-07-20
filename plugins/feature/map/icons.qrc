@@ -3,5 +3,7 @@
     <file>icons/groundtracks.png</file>
     <file>icons/clock.png</file>
     <file>icons/ibp.png</file>
+    <file>icons/muf.png</file>
+    <file>icons/fof2.png</file>
   </qresource>
 </RCC>

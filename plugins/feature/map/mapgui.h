@@ -29,6 +29,7 @@
 
 #include "feature/featuregui.h"
 #include "util/messagequeue.h"
+#include "util/giro.h"
 #include "util/azel.h"
 #include "settings/rollupstate.h"
 
@@ -62,6 +63,68 @@ struct RadioTimeTransmitter {
     int m_power;            // In kW
 };
 
+struct IonosondeStation {
+    QString m_name;
+    float m_latitude;       // In degrees
+    float m_longitude;      // In degrees
+    QString m_text;
+    QString m_label;
+
+    IonosondeStation(const GIRO::GIROStationData& data) :
+        m_name(data.m_station)
+    {
+        update(data);
+    }
+
+    void update(const GIRO::GIROStationData& data)
+    {
+        m_latitude = data.m_latitude;
+        m_longitude = data.m_longitude;
+        QStringList text;
+        QStringList label;
+        text.append("Ionosonde Station");
+        text.append(QString("Name: %1").arg(m_name.split(",")[0]));
+        if (!isnan(data.m_mufd))
+        {
+            text.append(QString("MUF: %1 MHz").arg(data.m_mufd));
+            label.append(QString("%1").arg((int)round(data.m_mufd)));
+        }
+        else
+        {
+            label.append("-");
+        }
+        if (!isnan(data.m_md)) {
+            text.append(QString("M(D): %1").arg(data.m_md));
+        }
+        if (!isnan(data.m_foF2))
+        {
+            text.append(QString("foF2: %1 MHz").arg(data.m_foF2));
+            label.append(QString("%1").arg((int)round(data.m_foF2)));
+        }
+        else
+        {
+            label.append("-");
+        }
+        if (!isnan(data.m_hmF2)) {
+            text.append(QString("hmF2: %1 km").arg(data.m_hmF2));
+        }
+        if (!isnan(data.m_foE)) {
+            text.append(QString("foE: %1 MHz").arg(data.m_foE));
+        }
+        if (!isnan(data.m_tec)) {
+            text.append(QString("TEC: %1").arg(data.m_tec));
+        }
+        if (data.m_confidence >= 0) {
+            text.append(QString("Confidence: %1").arg(data.m_confidence));
+        }
+        if (data.m_dateTime.isValid()) {
+            text.append(data.m_dateTime.toString());
+        }
+        m_text = text.join("\n");
+        m_label = label.join("/");
+    }
+};
+
 class MapGUI : public FeatureGUI {
     Q_OBJECT
 public:
@@ -86,6 +149,7 @@ public:
     QList<RadioTimeTransmitter> getRadioTimeTransmitters() { return m_radioTimeTransmitters; }
     void addRadioTimeTransmitters();
     void addRadar();
+    void addIonosonde();
     void addDAB();
     void find(const QString& target);
     void track3D(const QString& target);
@@ -114,6 +178,8 @@ private:
     quint16 m_osmPort;
     OSMTemplateServer *m_templateServer;
     QTimer m_redrawMapTimer;
+    GIRO *m_giro;
+    QHash<QString, IonosondeStation *> m_ionosondeStations;
 
     CesiumInterface *m_cesium;
     WebServer *m_webServer;
@@ -149,6 +215,8 @@ private slots:
     void on_displayNames_clicked(bool checked=false);
     void on_displayAllGroundTracks_clicked(bool checked=false);
     void on_displaySelectedGroundTracks_clicked(bool checked=false);
+    void on_displayMUF_clicked(bool checked=false);
+    void on_displayfoF2_clicked(bool checked=false);
     void on_find_returnPressed();
     void on_maidenhead_clicked();
     void on_deleteAll_clicked();
@@ -162,6 +230,9 @@ private slots:
     virtual bool eventFilter(QObject *obj, QEvent *event);
     void fullScreenRequested(QWebEngineFullScreenRequest fullScreenRequest);
     void preferenceChanged(int elementType);
+    void giroDataUpdated(const GIRO::GIROStationData& data);
+    void mufUpdated(const QJsonDocument& document);
+    void foF2Updated(const QJsonDocument& document);
 
 };
 

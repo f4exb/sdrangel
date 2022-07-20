@@ -159,6 +159,24 @@ void CesiumInterface::setAntiAliasing(const QString &antiAliasing)
     send(obj);
 }
 
+void CesiumInterface::showMUF(bool show)
+{
+    QJsonObject obj {
+        {"command", "showMUF"},
+        {"show", show}
+    };
+    send(obj);
+}
+
+void CesiumInterface::showfoF2(bool show)
+{
+    QJsonObject obj {
+        {"command", "showfoF2"},
+        {"show", show}
+    };
+    send(obj);
+}
+
 void CesiumInterface::updateImage(const QString &name, float east, float west, float north, float south, float altitude, const QString &data)
 {
     QJsonObject obj {
