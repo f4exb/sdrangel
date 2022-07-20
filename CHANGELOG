@@ -1,3 +1,13 @@
+sdrangel (7.6.0-1) unstable; urgency=medium
+
+  * Remote TCP Input and Remote TCP Sink Plugins. Issue #456. PR #1350
+  * SDRPlayInput: upgrade libmirisdr-4 version to 2.0.0. PR #1344
+  * DATV Demod: Add support for LDPC on Windows. Issue #1342. PR #1345
+  * Externals: Update rtlsdr to latest version. Issue #1351. PR #1352
+  * Map: Add support for Ionosonde stations. PR #1354
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Wed, 20 Jul 2022 19:53:15 +0200
+
 sdrangel (7.5.1-1) unstable; urgency=medium
 
   * M17 is for Linux only
