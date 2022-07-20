@@ -18,7 +18,7 @@
 
 namespace modemm17 {
 
-struct M17_API Correlator
+struct MODEMM17_API Correlator
 {
 	static constexpr size_t SYMBOLS = 8;
 	static constexpr size_t SAMPLES_PER_SYMBOL = 10;

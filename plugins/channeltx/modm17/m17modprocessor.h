@@ -21,7 +21,7 @@
 #include <QObject>
 #include <QByteArray>
 
-#include "m17/M17Modulator.h"
+#include "M17Modulator.h"
 #include "dsp/dsptypes.h"
 #include "util/message.h"
 #include "util/messagequeue.h"

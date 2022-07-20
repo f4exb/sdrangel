@@ -81,7 +81,7 @@ constexpr array<T, N> sort(array<T, N> array)
 } // Golay24_detail
 
 
-struct M17_API Golay24
+struct MODEMM17_API Golay24
 {
     #pragma pack(push, 1)
     struct SyndromeMapEntry

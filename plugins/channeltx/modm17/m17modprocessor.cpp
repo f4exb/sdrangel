@@ -17,7 +17,7 @@
 
 #include <codec2/codec2.h>
 
-#include "m17/M17Modulator.h"
+#include "M17Modulator.h"
 #include "maincore.h"
 
 #include "m17modax25.h"

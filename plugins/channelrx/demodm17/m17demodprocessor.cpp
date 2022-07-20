@@ -25,7 +25,7 @@
 #include "audio/audiofifo.h"
 #include "util/ax25.h"
 
-#include "m17/ax25_frame.h"
+#include "ax25_frame.h"
 #include "m17demod.h"
 #include "m17demodprocessor.h"
 

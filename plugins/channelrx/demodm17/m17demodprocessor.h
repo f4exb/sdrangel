@@ -21,7 +21,7 @@
 #include <QObject>
 
 #include "audio/audiocompressor.h"
-#include "m17/M17Demodulator.h"
+#include "M17Demodulator.h"
 #include "m17demodfilters.h"
 
 class AudioFifo;

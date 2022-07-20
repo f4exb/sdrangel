@@ -29,7 +29,7 @@ set(modm17_HEADERS
 include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${CODEC2_INCLUDE_DIR}
-    ${CMAKE_SOURCE_DIR}/modems
+    ${CMAKE_SOURCE_DIR}/modemm17
 )
 
 if(NOT SERVER_MODE)
@@ -69,7 +69,7 @@ target_link_libraries(${TARGET_NAME}
 	${TARGET_LIB_GUI}
     swagger
     ${CODEC2_LIBRARIES}
-    modems
+    modemm17
 )
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

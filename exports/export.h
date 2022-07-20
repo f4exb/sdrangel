@@ -139,16 +139,16 @@
 #  define SDRBENCH_API
 #endif
 
-/* the 'M17_API' controls the import/export of 'm17' symbols
+/* the 'MODEMM17_API' controls the import/export of 'modemm17' symbols
  */
 #if !defined(sdrangel_STATIC)
-#  ifdef m17_EXPORTS
-#    define M17_API __SDR_EXPORT
+#  ifdef modemm17_EXPORTS
+#    define MODEMM17_API __SDR_EXPORT
 #  else
-#    define M17_API __SDR_IMPORT
+#    define MODEMM17_API __SDR_IMPORT
 #  endif
 #else
-#  define M17_API
+#  define MODEMM17_API
 #endif
 
 #endif /* __SDRANGEL_EXPORT_H */

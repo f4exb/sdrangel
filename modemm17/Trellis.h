@@ -14,7 +14,7 @@
 namespace modemm17
 {
 
-inline constexpr std::array<int8_t, 61> make_p1() {
+inline std::array<int8_t, 61> make_p1() {
     std::array<int8_t, 61> result{};
     for (size_t i = 0, j = 2; i != 61; ++i) {
         if (i == j) {
@@ -107,7 +107,7 @@ struct CostTable
     using cost_table_t = std::array<std::array<uint8_t, InputValues>, K>;
 
     template <typename Trellis_>
-    static constexpr cost_table_t makeCostTable(const Trellis_& trellis)
+    static constexpr cost_table_t makeCostTable()
     {
         cost_table_t result;
         for (size_t i = 0; i != K; ++i)
