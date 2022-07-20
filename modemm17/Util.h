@@ -18,18 +18,18 @@ namespace modemm17
 
 namespace detail {
 
-template<std::size_t...Is, class Tuple>
-constexpr std::bitset<sizeof...(Is)> make_bitset(std::index_sequence<Is...>, Tuple&& tuple)
-{
-    constexpr auto size = sizeof...(Is);
-    std::bitset<size> result;
-    using expand = int[];
-    for (size_t i = 0; i != size; ++i)
-    {
-        void(expand {0, result[Is] = std::get<Is>(tuple)...});
-    }
-    return result;
-}
+// template<std::size_t...Is, class Tuple>
+// constexpr std::bitset<sizeof...(Is)> make_bitset(std::index_sequence<Is...>, Tuple&& tuple)
+// {
+//     constexpr auto size = sizeof...(Is);
+//     std::bitset<size> result;
+//     using expand = int[];
+//     for (size_t i = 0; i != size; ++i)
+//     {
+//         void(expand {0, result[Is] = std::get<Is>(tuple)...});
+//     }
+//     return result;
+// }
 
 /**
  * This is the max value for the LLR based on size N.
@@ -104,12 +104,12 @@ constexpr std::array<std::tuple<float, std::tuple<int8_t, int8_t>>, llr_size<LLR
 
 }
 
-template<class...Bools>
-constexpr auto make_bitset(Bools&&...bools)
-{
-    return detail::make_bitset(std::make_index_sequence<sizeof...(Bools)>(),
-        std::make_tuple(bool(bools)...));
-}
+// template<class...Bools>
+// constexpr auto make_bitset(Bools&&...bools)
+// {
+//     return detail::make_bitset(std::make_index_sequence<sizeof...(Bools)>(),
+//         std::make_tuple(bool(bools)...));
+// }
 
 inline int from_4fsk(int symbol)
 {
@@ -144,7 +144,10 @@ auto llr(float sample)
 }
 
 template <size_t M, typename T, size_t N, typename U, size_t IN>
-auto depunctured(std::array<T, N> puncture_matrix, std::array<U, IN> in)
+std::array<U, M> depunctured(
+    std::array<T, N> puncture_matrix,
+    std::array<U, IN> in
+)
 {
     static_assert(M % N == 0, "M must be an integer multiple of N");
 
@@ -167,8 +170,11 @@ auto depunctured(std::array<T, N> puncture_matrix, std::array<U, IN> in)
 }
 
 template <size_t IN, size_t OUT, size_t P>
-size_t depuncture(const std::array<int8_t, IN>& in,
-    std::array<int8_t, OUT>& out, const std::array<int8_t, P>& p)
+size_t depuncture(
+    const std::array<int8_t, IN>& in,
+    std::array<int8_t, OUT>& out,
+    const std::array<int8_t, P>& p
+)
 {
     size_t index = 0;
     size_t pindex = 0;
@@ -191,8 +197,11 @@ size_t depuncture(const std::array<int8_t, IN>& in,
 
 
 template <typename T, size_t IN, typename U, size_t OUT, size_t P>
-size_t puncture(const std::array<T, IN>& in,
-    std::array<U, OUT>& out, const std::array<int8_t, P>& p)
+size_t puncture(
+    const std::array<T, IN>& in,
+    std::array<U, OUT>& out,
+    const std::array<int8_t, P>& p
+)
 {
     size_t index = 0;
     size_t pindex = 0;
@@ -211,7 +220,10 @@ size_t puncture(const std::array<T, IN>& in,
 }
 
 template <size_t N>
-constexpr bool get_bit_index(const std::array<uint8_t, N>& input, size_t index)
+constexpr bool get_bit_index(
+    const std::array<uint8_t, N>& input,
+    size_t index
+)
 {
     auto byte_index = index >> 3;
     assert(byte_index < N);
@@ -221,7 +233,10 @@ constexpr bool get_bit_index(const std::array<uint8_t, N>& input, size_t index)
 }
 
 template <size_t N>
-void set_bit_index(std::array<uint8_t, N>& input, size_t index)
+void set_bit_index(
+    std::array<uint8_t, N>& input,
+    size_t index
+)
 {
     auto byte_index = index >> 3;
     assert(byte_index < N);
@@ -230,7 +245,10 @@ void set_bit_index(std::array<uint8_t, N>& input, size_t index)
 }
 
 template <size_t N>
-void reset_bit_index(std::array<uint8_t, N>& input, size_t index)
+void reset_bit_index(
+    std::array<uint8_t, N>& input,
+    size_t index
+)
 {
     auto byte_index = index >> 3;
     assert(byte_index < N);
@@ -239,7 +257,11 @@ void reset_bit_index(std::array<uint8_t, N>& input, size_t index)
 }
 
 template <size_t N>
-void assign_bit_index(std::array<uint8_t, N>& input, size_t index, bool value)
+void assign_bit_index(
+    std::array<uint8_t, N>& input,
+    size_t index,
+    bool value
+)
 {
     if (value) set_bit_index(input, index);
     else reset_bit_index(input, index);
@@ -247,8 +269,11 @@ void assign_bit_index(std::array<uint8_t, N>& input, size_t index, bool value)
 
 
 template <size_t IN, size_t OUT, size_t P>
-size_t puncture_bytes(const std::array<uint8_t, IN>& in,
-    std::array<uint8_t, OUT>& out, const std::array<int8_t, P>& p)
+size_t puncture_bytes(
+    const std::array<uint8_t, IN>& in,
+    std::array<uint8_t, OUT>& out,
+    const std::array<int8_t, P>& p
+)
 {
     size_t index = 0;
     size_t pindex = 0;
@@ -298,7 +323,10 @@ constexpr auto to_byte_array(std::array<T, N> in)
 }
 
 template <typename T, size_t N>
-constexpr void to_byte_array(std::array<T, N> in, std::array<uint8_t, (N + 7) / 8>& out)
+constexpr void to_byte_array(
+    std::array<T, N> in,
+    std::array<uint8_t, (N + 7) / 8>& out
+)
 {
     size_t i = 0;
     size_t b = 0;

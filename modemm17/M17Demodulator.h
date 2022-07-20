@@ -15,7 +15,6 @@
 #include <algorithm>
 #include <array>
 #include <functional>
-#include <optional>
 #include <tuple>
 
 #include "export.h"

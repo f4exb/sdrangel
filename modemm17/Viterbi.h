@@ -160,7 +160,7 @@ struct Viterbi
      * @return path metric for estimating BER.
      */
     template <size_t IN, size_t OUT>
-    size_t decode(std::array<int8_t, IN> const& in, std::array<uint8_t, OUT>& out)
+    size_t decode(const std::array<int8_t, IN>& in, std::array<uint8_t, OUT>& out)
     {
         static_assert(sizeof(history_) >= IN / 2, "Invalid size");
 

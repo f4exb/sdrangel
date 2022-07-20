@@ -7,7 +7,6 @@
 #include <array>
 #include <algorithm>
 #include <numeric>
-#include <optional>
 #include <tuple>
 
 namespace modemm17

@@ -10,7 +10,6 @@
 #include <iomanip>
 #include <iostream>
 #include <iterator>
-#include <optional>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -168,8 +167,7 @@ private:
         {
             std::string repeater = frame.substr(index, ADDRESS_LENGTH);
             index += ADDRESS_LENGTH;
-            more = fixup_address(repeater)
-                and (index + ADDRESS_LENGTH) < frame.length();
+            more = fixup_address(repeater) && ((index + ADDRESS_LENGTH) < frame.length());
             result.push_back(repeater);
         }
 

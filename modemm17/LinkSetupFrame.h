@@ -5,7 +5,6 @@
 #include <array>
 #include <cstdint>
 #include <cmath>
-// #include <string_view> // Don't have std::span in C++17.
 #include <stdexcept>
 #include <algorithm>
 
