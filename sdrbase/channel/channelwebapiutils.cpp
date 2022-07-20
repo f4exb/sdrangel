@@ -146,6 +146,8 @@ bool ChannelWebAPIUtils::getDeviceReport(unsigned int deviceIndex, SWGSDRangel::
             httpRC, qPrintable(errorResponse));
         return false;
     }
+
+    return true;
 }
 
 bool ChannelWebAPIUtils::getFeatureSettings(unsigned int featureSetIndex, unsigned int featureIndex, SWGSDRangel::SWGFeatureSettings &featureSettingsResponse, Feature *&feature)
