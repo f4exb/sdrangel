@@ -87,7 +87,7 @@ signals:
     void foF2Updated(const QJsonDocument& doc);
 
 private:
-    bool GIRO::containsNonNull(const QJsonObject& obj, const QString &key) const;
+    bool containsNonNull(const QJsonObject& obj, const QString &key) const;
 
     QTimer m_dataTimer;             // Timer for periodic updates
     QTimer m_mufTimer;
