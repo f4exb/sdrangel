@@ -161,8 +161,8 @@ void DeviceUISet::freeChannels()
     for(int i = 0; i < m_channelInstanceRegistrations.count(); i++)
     {
         qDebug("DeviceUISet::freeChannels: destroying channel [%s]", qPrintable(m_channelInstanceRegistrations[i].m_channelAPI->getURI()));
-        m_channelInstanceRegistrations[i].m_channelAPI->destroy();
         m_channelInstanceRegistrations[i].m_gui->destroy();
+        m_channelInstanceRegistrations[i].m_channelAPI->destroy();
     }
 
     m_channelInstanceRegistrations.clear();
@@ -176,8 +176,8 @@ void DeviceUISet::deleteChannel(int channelIndex)
         qDebug("DeviceUISet::deleteChannel: delete channel [%s] at %d",
                 qPrintable(m_channelInstanceRegistrations[channelIndex].m_channelAPI->getURI()),
                 channelIndex);
-        m_channelInstanceRegistrations[channelIndex].m_channelAPI->destroy();
         m_channelInstanceRegistrations[channelIndex].m_gui->destroy();
+        m_channelInstanceRegistrations[channelIndex].m_channelAPI->destroy();
         m_channelInstanceRegistrations.removeAt(channelIndex);
     }
 
@@ -723,8 +723,14 @@ void DeviceUISet::handleChannelGUIClosing(ChannelGUI* channelGUI)
     {
         if (it->m_gui == channelGUI)
         {
-            m_deviceSet->removeChannelInstance(it->m_channelAPI);
-            it->m_channelAPI->destroy();
+            ChannelAPI *channelAPI = it->m_channelAPI;
+            m_deviceSet->removeChannelInstance(channelAPI);
+            QObject::connect(
+                channelGUI,
+                &ChannelGUI::destroyed,
+                this,
+                [this, channelAPI](){ this->handleDeleteChannel(channelAPI); }
+            );
             m_channelInstanceRegistrations.erase(it);
             break;
         }
@@ -734,6 +740,11 @@ void DeviceUISet::handleChannelGUIClosing(ChannelGUI* channelGUI)
     for (int i = 0; i < m_channelInstanceRegistrations.count(); i++) {
         m_channelInstanceRegistrations.at(i).m_gui->setIndex(i);
     }
+}
+
+void DeviceUISet::handleDeleteChannel(ChannelAPI *channelAPI)
+{
+    channelAPI->destroy();
 }
 
 int DeviceUISet::webapiSpectrumSettingsGet(SWGSDRangel::SWGGLSpectrum& response, QString& errorMessage) const
