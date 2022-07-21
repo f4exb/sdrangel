@@ -111,9 +111,9 @@ void GLShaderColorMap::initColorMapTextureImmutable(const QString &colorMapName)
 {
     if (!m_colorMapTexture)
     {
-        m_colorMapTexture = new QOpenGLTexture(QOpenGLTexture::Target1D);
+        m_colorMapTexture = new QOpenGLTexture(QOpenGLTexture::Target2D);
         m_colorMapTexture->setFormat(QOpenGLTexture::RGB32F);
-        m_colorMapTexture->setSize(256);
+        m_colorMapTexture->setSize(256, 1);
         m_colorMapTexture->allocateStorage();
         m_colorMapTexture->setMinificationFilter(QOpenGLTexture::Linear);
         m_colorMapTexture->setMagnificationFilter(QOpenGLTexture::Linear);
@@ -137,18 +137,18 @@ void GLShaderColorMap::initColorMapTextureMutable(const QString &colorMapName)
     }
 
     glGenTextures(1, &m_colorMapTextureId);
-    glBindTexture(GL_TEXTURE_1D, m_colorMapTextureId);
+    glBindTexture(GL_TEXTURE_2D, m_colorMapTextureId); // Use 2D texture as 1D not supported in OpenGL ES on ARM
     GLfloat *colorMap = (GLfloat *)ColorMap::getColorMap(colorMapName);
     if (colorMap) {
-        glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB, 256, 0, GL_RGB, GL_FLOAT, colorMap);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 256, 1, 0, GL_RGB, GL_FLOAT, colorMap);
     } else {
         qDebug() << "GLShaderColorMap::initColorMapTextureMutable: colorMap " << colorMapName << " not supported";
     }
 
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, QOpenGLTexture::Repeat);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, QOpenGLTexture::Repeat);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, QOpenGLTexture::Repeat);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, QOpenGLTexture::Repeat);
 }
 
 void GLShaderColorMap::drawSurfaceStrip(const QMatrix4x4& transformMatrix, GLfloat *vertices, int nbVertices, float scale, float alpha)
@@ -263,10 +263,10 @@ const QString GLShaderColorMap::m_vertexShaderSourceColorMap = QString(
 const QString GLShaderColorMap::m_fragmentShaderSourceColorMap2 = QString(
         "uniform float alpha;\n"
         "uniform float scale;\n"
-        "uniform highp sampler1D colorMap;\n"
+        "uniform highp sampler2D colorMap;\n"
         "varying float y;\n"
         "void main() {\n"
-        "    gl_FragColor = vec4(texture1D(colorMap, 1.0-(y/scale)).rgb, alpha);\n"
+        "    gl_FragColor = vec4(texture2D(colorMap, vec2(1.0-(y/scale), 0)).rgb, alpha);\n"
         "}\n"
         );
 
@@ -274,10 +274,10 @@ const QString GLShaderColorMap::m_fragmentShaderSourceColorMap = QString(
         "#version 330\n"
         "uniform float alpha;\n"
         "uniform float scale;\n"
-        "uniform sampler1D colorMap;\n"
+        "uniform sampler2D colorMap;\n"
         "in float y;\n"
         "out vec4 fragColor;\n"
         "void main() {\n"
-        "   fragColor = vec4(texture(colorMap, 1.0-(y/scale)).rgb, alpha);\n"
+        "   fragColor = vec4(texture(colorMap, vec2(1.0-(y/scale), 0)).rgb, alpha);\n"
         "}\n"
         );
