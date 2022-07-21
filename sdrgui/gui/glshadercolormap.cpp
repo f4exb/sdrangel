@@ -156,7 +156,11 @@ void GLShaderColorMap::drawSurfaceStrip(const QMatrix4x4& transformMatrix, GLflo
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     m_program->bind();
     m_program->setUniformValue(m_matrixLoc, transformMatrix);
-    m_colorMapTexture->bind();
+    if (m_useImmutableStorage) {
+        m_colorMapTexture->bind();
+    } else {
+        glBindTexture(GL_TEXTURE_2D, m_colorMapTextureId);
+    }
     m_program->setUniformValue(m_colorMapLoc, 0); // Texture unit 0 for color map
     m_program->setUniformValue(m_scaleLoc, scale);
     m_program->setUniformValue(m_alphaLoc, alpha);
@@ -242,7 +246,7 @@ bool GLShaderColorMap::useImmutableStorage()
 const QString GLShaderColorMap::m_vertexShaderSourceColorMap2 = QString(
         "uniform highp mat4 uMatrix;\n"
         "attribute highp vec4 vertex;\n"
-        "varying float y;\n"
+        "varying highp float y;\n"
         "void main() {\n"
         "    gl_Position = uMatrix * vertex;\n"
         "    y = vertex.y;\n"
@@ -261,10 +265,10 @@ const QString GLShaderColorMap::m_vertexShaderSourceColorMap = QString(
         );
 
 const QString GLShaderColorMap::m_fragmentShaderSourceColorMap2 = QString(
-        "uniform float alpha;\n"
-        "uniform float scale;\n"
+        "uniform highp float alpha;\n"
+        "uniform highp float scale;\n"
         "uniform highp sampler2D colorMap;\n"
-        "varying float y;\n"
+        "varying highp float y;\n"
         "void main() {\n"
         "    gl_FragColor = vec4(texture2D(colorMap, vec2(1.0-(y/scale), 0)).rgb, alpha);\n"
         "}\n"

@@ -288,6 +288,7 @@ void GLShaderSpectrogram::initTexture(const QImage& image)
         initTextureMutable(image);
     }
     initGrid(image.width());
+    m_limit = 1.4f*1.0f/(float)image.height();
 }
 
 void GLShaderSpectrogram::initTextureImmutable(const QImage& image)
@@ -419,7 +420,7 @@ void GLShaderSpectrogram::drawSurface(SpectrumSettings::SpectrogramStyle style, 
     program->setUniformValue(m_dataTextureLoc, 0);         // set uniform to texture unit?
     program->setUniformValue(m_colorMapLoc, 1);
 
-    program->setUniformValue(m_limitLoc, 1.4f*1.0f/(float)(m_texture->height()));
+    program->setUniformValue(m_limitLoc, m_limit);
 
     if (style == SpectrumSettings::Outline)
     {
@@ -721,11 +722,11 @@ void GLShaderSpectrogram::applyPerspective(QMatrix4x4 &matrix)
 const QString GLShaderSpectrogram::m_vertexShader2 = QString(
     "attribute vec2 coord2d;\n"
     "varying vec4 coord;\n"
-    "varying float lightDistance;\n"
+    "varying highp float lightDistance;\n"
     "uniform mat4 textureTransform;\n"
     "uniform mat4 vertexTransform;\n"
     "uniform sampler2D dataTexture;\n"
-    "uniform float limit;\n"
+    "uniform highp float limit;\n"
     "uniform vec3 lightPos;\n"
     "void main(void) {\n"
     "   coord = textureTransform * vec4(clamp(coord2d, limit, 1.0-limit), 0, 1);\n"
@@ -810,11 +811,11 @@ const QString GLShaderSpectrogram::m_fragmentShaderShaded = QString(
     );
 
 const QString GLShaderSpectrogram::m_fragmentShaderSimple2 = QString(
-    "varying vec4 coord;\n"
-    "uniform float brightness;\n"
+    "varying highp vec4 coord;\n"
+    "uniform highp float brightness;\n"
     "uniform sampler2D colorMap;\n"
     "void main(void) {\n"
-    "    float factor;\n"
+    "    highp float factor;\n"
     "    if (gl_FrontFacing)\n"
     "        factor = 1.0;\n"
     "    else\n"

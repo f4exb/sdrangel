@@ -81,6 +81,7 @@ private:
     unsigned int m_textureId;
     QOpenGLTexture *m_colorMapTexture;
     unsigned int m_colorMapTextureId;
+    float m_limit;
 
     QOpenGLShaderProgram *m_programForLocs;     // Which program the locations are for
     int m_coord2dLoc;
