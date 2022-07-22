@@ -36,7 +36,7 @@ Device start / stop button.
 
 In device sample rate input mode (7) this is the baseband I/Q sample rate in kS/s. This is the device sample rate (8) divided by the decimation factor (9).
 
-In baseband sample rate input mode (7) this is the device I/Q sample rate in kS/s. This is the baseband sample rate (8) multiplied bu the decimation factor (9)
+In baseband sample rate input mode (7) this is the device I/Q sample rate in kS/s. This is the baseband sample rate (8) multiplied by the decimation factor (9)
 
 <h3>2: Local Oscillator correction</h3>
 
