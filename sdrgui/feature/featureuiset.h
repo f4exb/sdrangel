@@ -85,6 +85,8 @@ private:
 
 private slots:
     void handleClosingFeatureGUI(FeatureGUI *featureGUI);
+    void handleDeleteFeature(Feature *feature);
+
 };
 
 #endif // SDRGUI_FEATURE_FEATUREUISET_H_

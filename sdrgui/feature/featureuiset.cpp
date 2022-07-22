@@ -66,8 +66,8 @@ void FeatureUISet::freeFeatures()
         qDebug("FeatureUISet::freeFeatures: destroying feature [%s]",
             qPrintable(m_featureInstanceRegistrations.at(i).m_feature->getURI())
         );
-        m_featureInstanceRegistrations.at(i).m_feature->destroy();
         m_featureInstanceRegistrations.at(i).m_gui->destroy();
+        m_featureInstanceRegistrations.at(i).m_feature->destroy();
     }
 
     m_featureInstanceRegistrations.clear();
@@ -82,8 +82,8 @@ void FeatureUISet::deleteFeature(int featureIndex)
             qPrintable(m_featureInstanceRegistrations.at(featureIndex).m_feature->getURI()),
             featureIndex
         );
-        m_featureInstanceRegistrations.at(featureIndex).m_feature->destroy();
         m_featureInstanceRegistrations.at(featureIndex).m_gui->destroy();
+        m_featureInstanceRegistrations.at(featureIndex).m_feature->destroy();
         m_featureInstanceRegistrations.removeAt(featureIndex);
         m_featureSet->removeFeatureInstanceAt(featureIndex);
     }
@@ -233,8 +233,14 @@ void FeatureUISet::handleClosingFeatureGUI(FeatureGUI *featureGUI)
     {
         if (it->m_gui == featureGUI)
         {
-            m_featureSet->removeFeatureInstance(it->m_feature);
-            it->m_feature->destroy();
+            Feature *feature = it->m_feature;
+            m_featureSet->removeFeatureInstance(feature);
+            QObject::connect(
+                featureGUI,
+                &FeatureGUI::destroyed,
+                this,
+                [this, feature](){ this->handleDeleteFeature(feature); }
+            );
             m_featureInstanceRegistrations.erase(it);
             break;
         }
@@ -244,4 +250,9 @@ void FeatureUISet::handleClosingFeatureGUI(FeatureGUI *featureGUI)
     for (int i = 0; i < m_featureInstanceRegistrations.count(); i++) {
         m_featureInstanceRegistrations.at(i).m_gui->setIndex(i);
     }
+}
+
+void FeatureUISet::handleDeleteFeature(Feature *feature)
+{
+    feature->destroy();
 }
