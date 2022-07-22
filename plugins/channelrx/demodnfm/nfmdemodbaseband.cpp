@@ -19,17 +19,16 @@
 
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
-#include "dsp/downchannelizer.h"
 
 #include "nfmdemodbaseband.h"
 
 MESSAGE_CLASS_DEFINITION(NFMDemodBaseband::MsgConfigureNFMDemodBaseband, Message)
 
 NFMDemodBaseband::NFMDemodBaseband() :
+    m_channelizer(&m_sink),
     m_mutex(QMutex::Recursive)
 {
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
-    m_channelizer = new DownChannelizer(&m_sink);
 
     qDebug("NFMDemodBaseband::NFMDemodBaseband");
     QObject::connect(
@@ -44,13 +43,18 @@ NFMDemodBaseband::NFMDemodBaseband() :
     m_sink.applyAudioSampleRate(DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate());
     m_channelSampleRate = 0;
 
-    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+    QObject::connect(
+        &m_inputMessageQueue,
+        &MessageQueue::messageEnqueued,
+        this,
+        &NFMDemodBaseband::handleInputMessages,
+        Qt::QueuedConnection
+    );
 }
 
 NFMDemodBaseband::~NFMDemodBaseband()
 {
     DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(m_sink.getAudioFifo());
-    delete m_channelizer;
 }
 
 void NFMDemodBaseband::reset()
@@ -85,12 +89,12 @@ void NFMDemodBaseband::handleData()
 
 		// first part of FIFO data
         if (part1begin != part1end) {
-            m_channelizer->feed(part1begin, part1end);
+            m_channelizer.feed(part1begin, part1end);
         }
 
 		// second part of FIFO data (used when block wraps around)
 		if(part2begin != part2end) {
-            m_channelizer->feed(part2begin, part2end);
+            m_channelizer.feed(part2begin, part2end);
         }
 
 		m_sampleFifo.readCommit((unsigned int) count);
@@ -127,13 +131,13 @@ bool NFMDemodBaseband::handleMessage(const Message& cmd)
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
         qDebug() << "NFMDemodBaseband::handleMessage: DSPSignalNotification: basebandSampleRate: " << notif.getSampleRate();
         m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(notif.getSampleRate()));
-        m_channelizer->setBasebandSampleRate(notif.getSampleRate());
-        m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+        m_channelizer.setBasebandSampleRate(notif.getSampleRate());
+        m_sink.applyChannelSettings(m_channelizer.getChannelSampleRate(), m_channelizer.getChannelFrequencyOffset());
 
-        if (m_channelSampleRate != m_channelizer->getChannelSampleRate())
+        if (m_channelSampleRate != m_channelizer.getChannelSampleRate())
         {
             m_sink.applyAudioSampleRate(m_sink.getAudioSampleRate()); // reapply when channel sample rate changes
-            m_channelSampleRate = m_channelizer->getChannelSampleRate();
+            m_channelSampleRate = m_channelizer.getChannelSampleRate();
         }
 
 		return true;
@@ -148,13 +152,13 @@ void NFMDemodBaseband::applySettings(const NFMDemodSettings& settings, bool forc
 {
     if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
     {
-        m_channelizer->setChannelization(m_sink.getAudioSampleRate(), settings.m_inputFrequencyOffset);
-        m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+        m_channelizer.setChannelization(m_sink.getAudioSampleRate(), settings.m_inputFrequencyOffset);
+        m_sink.applyChannelSettings(m_channelizer.getChannelSampleRate(), m_channelizer.getChannelFrequencyOffset());
 
-        if (m_channelSampleRate != m_channelizer->getChannelSampleRate())
+        if (m_channelSampleRate != m_channelizer.getChannelSampleRate())
         {
             m_sink.applyAudioSampleRate(m_sink.getAudioSampleRate()); // reapply when channel sample rate changes
-            m_channelSampleRate = m_channelizer->getChannelSampleRate();
+            m_channelSampleRate = m_channelizer.getChannelSampleRate();
         }
     }
 
@@ -169,8 +173,8 @@ void NFMDemodBaseband::applySettings(const NFMDemodSettings& settings, bool forc
 
         if (m_sink.getAudioSampleRate() != audioSampleRate)
         {
-            m_channelizer->setChannelization(audioSampleRate, settings.m_inputFrequencyOffset);
-            m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+            m_channelizer.setChannelization(audioSampleRate, settings.m_inputFrequencyOffset);
+            m_sink.applyChannelSettings(m_channelizer.getChannelSampleRate(), m_channelizer.getChannelFrequencyOffset());
             m_sink.applyAudioSampleRate(audioSampleRate);
         }
     }
@@ -182,12 +186,12 @@ void NFMDemodBaseband::applySettings(const NFMDemodSettings& settings, bool forc
 
 int NFMDemodBaseband::getChannelSampleRate() const
 {
-    return m_channelizer->getChannelSampleRate();
+    return m_channelizer.getChannelSampleRate();
 }
 
 
 void NFMDemodBaseband::setBasebandSampleRate(int sampleRate)
 {
-    m_channelizer->setBasebandSampleRate(sampleRate);
-    m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+    m_channelizer.setBasebandSampleRate(sampleRate);
+    m_sink.applyChannelSettings(m_channelizer.getChannelSampleRate(), m_channelizer.getChannelFrequencyOffset());
 }

@@ -53,21 +53,11 @@ const int NFMDemod::m_udpBlockSize = 512;
 NFMDemod::NFMDemod(DeviceAPI *devieAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(devieAPI),
+        m_running(false),
         m_basebandSampleRate(0)
 {
     qDebug("NFMDemod::NFMDemod");
 	setObjectName(m_channelId);
-
-    m_thread = new QThread(this);
-    m_basebandSink = new NFMDemodBaseband();
-    m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
-        .arg(m_channelId)
-        .arg(m_deviceAPI->getDeviceSetIndex())
-        .arg(getIndexInDeviceSet())
-    );
-    m_basebandSink->setChannel(this);
-    m_basebandSink->moveToThread(m_thread);
-
 	applySettings(m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
@@ -86,6 +76,8 @@ NFMDemod::NFMDemod(DeviceAPI *devieAPI) :
         this,
         &NFMDemod::handleIndexInDeviceSetChanged
     );
+
+    start();
 }
 
 NFMDemod::~NFMDemod()
@@ -99,8 +91,8 @@ NFMDemod::~NFMDemod()
     delete m_networkManager;
 	m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
-    delete m_basebandSink;
-    delete m_thread;
+
+    stop();
 }
 
 void NFMDemod::setDeviceAPI(DeviceAPI *deviceAPI)
@@ -128,20 +120,55 @@ void NFMDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 void NFMDemod::start()
 {
+    if (m_running) {
+        return;
+    }
+
     qDebug() << "NFMDemod::start";
+    m_thread = new QThread();
+    m_basebandSink = new NFMDemodBaseband();
+    m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
+        .arg(m_channelId)
+        .arg(m_deviceAPI->getDeviceSetIndex())
+        .arg(getIndexInDeviceSet())
+    );
+    m_basebandSink->setChannel(this);
+    m_basebandSink->moveToThread(m_thread);
+
+    QObject::connect(
+        m_thread,
+        &QThread::finished,
+        m_basebandSink,
+        &QObject::deleteLater
+    );
+    QObject::connect(
+        m_thread,
+        &QThread::finished,
+        m_thread,
+        &QThread::deleteLater
+    );
 
     if (m_basebandSampleRate != 0) {
         m_basebandSink->setBasebandSampleRate(m_basebandSampleRate);
     }
 
-    m_basebandSink->reset();
     m_thread->start();
+
+    NFMDemodBaseband::MsgConfigureNFMDemodBaseband *msg = NFMDemodBaseband::MsgConfigureNFMDemodBaseband::create(m_settings, true);
+    m_basebandSink->getInputMessageQueue()->push(msg);
+
+    m_running = true;
 }
 
 void NFMDemod::stop()
 {
+    if (!m_running) {
+        return;
+    }
+
     qDebug() << "NFMDemod::stop";
-	m_thread->exit();
+    m_running = false;
+	m_thread->quit();
 	m_thread->wait();
 }
 
@@ -158,12 +185,14 @@ bool NFMDemod::handleMessage(const Message& cmd)
 	}
 	else if (DSPSignalNotification::match(cmd))
 	{
+        qDebug() << "NFMDemod::handleMessage: DSPSignalNotification";
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
         m_basebandSampleRate = notif.getSampleRate();
-        // Forward to the sink
-        DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
-        qDebug() << "NFMDemod::handleMessage: DSPSignalNotification";
-        m_basebandSink->getInputMessageQueue()->push(rep);
+        // Forward to the sink if any
+        if (m_running) {
+            m_basebandSink->getInputMessageQueue()->push(new DSPSignalNotification(notif));
+        }
+
         // Forward to GUI if any
         if (getMessageQueueToGUI()) {
             getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
@@ -285,8 +314,11 @@ void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
         reverseAPIKeys.append("streamIndex");
     }
 
-    NFMDemodBaseband::MsgConfigureNFMDemodBaseband *msg = NFMDemodBaseband::MsgConfigureNFMDemodBaseband::create(settings, force);
-    m_basebandSink->getInputMessageQueue()->push(msg);
+    if (m_running)
+    {
+        NFMDemodBaseband::MsgConfigureNFMDemodBaseband *msg = NFMDemodBaseband::MsgConfigureNFMDemodBaseband::create(settings, force);
+        m_basebandSink->getInputMessageQueue()->push(msg);
+    }
 
     if (settings.m_useReverseAPI)
     {
@@ -557,19 +589,23 @@ void NFMDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response
 
     response.getNfmDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
     int nbCtcssToneFrequencies;
-    const Real *ctcssToneFrequencies = m_basebandSink->getCtcssToneSet(nbCtcssToneFrequencies);
-    response.getNfmDemodReport()->setCtcssTone(
-        m_settings.m_ctcssOn ?
-            m_settings.m_ctcssIndex < 0 ?
-                0
-                : m_settings.m_ctcssIndex < nbCtcssToneFrequencies ?
-                    ctcssToneFrequencies[m_settings.m_ctcssIndex-1]
-                    : 0
-            : 0
-    );
-    response.getNfmDemodReport()->setSquelch(m_basebandSink->getSquelchOpen() ? 1 : 0);
-    response.getNfmDemodReport()->setAudioSampleRate(m_basebandSink->getAudioSampleRate());
-    response.getNfmDemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
+
+    if (m_running)
+    {
+        const Real *ctcssToneFrequencies = m_basebandSink->getCtcssToneSet(nbCtcssToneFrequencies);
+        response.getNfmDemodReport()->setCtcssTone(
+            m_settings.m_ctcssOn ?
+                m_settings.m_ctcssIndex < 0 ?
+                    0
+                    : m_settings.m_ctcssIndex < nbCtcssToneFrequencies ?
+                        ctcssToneFrequencies[m_settings.m_ctcssIndex-1]
+                        : 0
+                : 0
+        );
+        response.getNfmDemodReport()->setSquelch(m_basebandSink->getSquelchOpen() ? 1 : 0);
+        response.getNfmDemodReport()->setAudioSampleRate(m_basebandSink->getAudioSampleRate());
+        response.getNfmDemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
+    }
 }
 
 void NFMDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const NFMDemodSettings& settings, bool force)
@@ -725,7 +761,7 @@ void NFMDemod::networkManagerFinished(QNetworkReply *reply)
 
 void NFMDemod::handleIndexInDeviceSetChanged(int index)
 {
-    if (index < 0) {
+    if (!m_running || (index < 0)) {
         return;
     }
 

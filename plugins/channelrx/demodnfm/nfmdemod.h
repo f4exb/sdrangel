@@ -138,6 +138,7 @@ private:
     DeviceAPI* m_deviceAPI;
     QThread *m_thread;
     NFMDemodBaseband* m_basebandSink;
+    bool m_running;
 	NFMDemodSettings m_settings;
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
 
