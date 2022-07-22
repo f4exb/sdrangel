@@ -240,9 +240,9 @@ void GLShaderSpectrogram::initColorMapTextureImmutable(const QString &colorMapNa
 {
     if (!m_colorMapTexture)
     {
-        m_colorMapTexture = new QOpenGLTexture(QOpenGLTexture::Target1D);
+        m_colorMapTexture = new QOpenGLTexture(QOpenGLTexture::Target2D);
         m_colorMapTexture->setFormat(QOpenGLTexture::RGB32F);
-        m_colorMapTexture->setSize(256);
+        m_colorMapTexture->setSize(256, 1);
         m_colorMapTexture->allocateStorage();
         m_colorMapTexture->setMinificationFilter(QOpenGLTexture::Linear);
         m_colorMapTexture->setMagnificationFilter(QOpenGLTexture::Linear);
@@ -266,18 +266,18 @@ void GLShaderSpectrogram::initColorMapTextureMutable(const QString &colorMapName
     }
 
     glGenTextures(1, &m_colorMapTextureId);
-    glBindTexture(GL_TEXTURE_1D, m_colorMapTextureId);
+    glBindTexture(GL_TEXTURE_2D, m_colorMapTextureId); // Use 2D texture as 1D not supported in OpenGL ES on ARM
     GLfloat *colorMap = (GLfloat *)ColorMap::getColorMap(colorMapName);
     if (colorMap) {
-        glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB, 256, 0, GL_RGB, GL_FLOAT, colorMap);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 256, 1, 0, GL_RGB, GL_FLOAT, colorMap);
     } else {
         qDebug() << "GLShaderSpectrogram::initColorMapTextureMutable: colorMap " << colorMapName << " not supported";
     }
 
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, QOpenGLTexture::Repeat);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, QOpenGLTexture::Repeat);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, QOpenGLTexture::Repeat);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, QOpenGLTexture::Repeat);
 }
 
 void GLShaderSpectrogram::initTexture(const QImage& image)
@@ -288,6 +288,7 @@ void GLShaderSpectrogram::initTexture(const QImage& image)
         initTextureMutable(image);
     }
     initGrid(image.width());
+    m_limit = 1.4f*1.0f/(float)image.height();
 }
 
 void GLShaderSpectrogram::initTextureImmutable(const QImage& image)
@@ -412,14 +413,14 @@ void GLShaderSpectrogram::drawSurface(SpectrumSettings::SpectrogramStyle style, 
     {
         glBindTexture(GL_TEXTURE_2D, m_textureId);
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_1D, m_colorMapTextureId);
+        glBindTexture(GL_TEXTURE_2D, m_colorMapTextureId);
         glActiveTexture(GL_TEXTURE0);
     }
 
     program->setUniformValue(m_dataTextureLoc, 0);         // set uniform to texture unit?
     program->setUniformValue(m_colorMapLoc, 1);
 
-    program->setUniformValue(m_limitLoc, 1.4f*1.0f/(float)(m_texture->height()));
+    program->setUniformValue(m_limitLoc, m_limit);
 
     if (style == SpectrumSettings::Outline)
     {
@@ -721,11 +722,11 @@ void GLShaderSpectrogram::applyPerspective(QMatrix4x4 &matrix)
 const QString GLShaderSpectrogram::m_vertexShader2 = QString(
     "attribute vec2 coord2d;\n"
     "varying vec4 coord;\n"
-    "varying float lightDistance;\n"
+    "varying highp float lightDistance;\n"
     "uniform mat4 textureTransform;\n"
     "uniform mat4 vertexTransform;\n"
     "uniform sampler2D dataTexture;\n"
-    "uniform float limit;\n"
+    "uniform highp float limit;\n"
     "uniform vec3 lightPos;\n"
     "void main(void) {\n"
     "   coord = textureTransform * vec4(clamp(coord2d, limit, 1.0-limit), 0, 1);\n"
@@ -786,7 +787,7 @@ const QString GLShaderSpectrogram::m_fragmentShaderShaded = QString(
     "in vec3 normal;\n"
     "in float lightDistance2;\n"
     "out vec4 fragColor;\n"
-    "uniform sampler1D colorMap;\n"
+    "uniform sampler2D colorMap;\n"
     "uniform vec3 lightDir;\n"
     "void main(void) {\n"
     "    float factor;\n"
@@ -796,9 +797,9 @@ const QString GLShaderSpectrogram::m_fragmentShaderShaded = QString(
     "        factor = 0.5;\n"
     "    float ambient = 0.4;\n"
     "    vec3 color;\n"
-    "    color.r = texture(colorMap, coord2.z).r;\n"
-    "    color.g = texture(colorMap, coord2.z).g;\n"
-    "    color.b = texture(colorMap, coord2.z).b;\n"
+    "    color.r = texture(colorMap, vec2(coord2.z, 0)).r;\n"
+    "    color.g = texture(colorMap, vec2(coord2.z, 0)).g;\n"
+    "    color.b = texture(colorMap, vec2(coord2.z, 0)).b;\n"
     "    float cosTheta = max(0.0, dot(normal, lightDir));\n"
     "    float d2 = max(1.0, lightDistance2*lightDistance2);\n"
     "    vec3 relection = (ambient * color + color * cosTheta / d2) * factor;\n"
@@ -810,18 +811,18 @@ const QString GLShaderSpectrogram::m_fragmentShaderShaded = QString(
     );
 
 const QString GLShaderSpectrogram::m_fragmentShaderSimple2 = QString(
-    "varying vec4 coord;\n"
-    "uniform float brightness;\n"
-    "uniform sampler1D colorMap;\n"
+    "varying highp vec4 coord;\n"
+    "uniform highp float brightness;\n"
+    "uniform sampler2D colorMap;\n"
     "void main(void) {\n"
-    "    float factor;\n"
+    "    highp float factor;\n"
     "    if (gl_FrontFacing)\n"
     "        factor = 1.0;\n"
     "    else\n"
     "        factor = 0.5;\n"
-    "    gl_FragColor[0] = texture1D(colorMap, coord.z).r * brightness * factor;\n"
-    "    gl_FragColor[1] = texture1D(colorMap, coord.z).g * brightness * factor;\n"
-    "    gl_FragColor[2] = texture1D(colorMap, coord.z).b * brightness * factor;\n"
+    "    gl_FragColor[0] = texture2D(colorMap, vec2(coord.z, 0)).r * brightness * factor;\n"
+    "    gl_FragColor[1] = texture2D(colorMap, vec2(coord.z, 0)).g * brightness * factor;\n"
+    "    gl_FragColor[2] = texture2D(colorMap, vec2(coord.z, 0)).b * brightness * factor;\n"
     "    gl_FragColor[3] = 1.0;\n"
     "}\n"
     );
@@ -831,16 +832,16 @@ const QString GLShaderSpectrogram::m_fragmentShaderSimple = QString(
     "in vec4 coord;\n"
     "out vec4 fragColor;\n"
     "uniform float brightness;\n"
-    "uniform sampler1D colorMap;\n"
+    "uniform sampler2D colorMap;\n"
     "void main(void) {\n"
     "    float factor;\n"
     "    if (gl_FrontFacing)\n"
     "        factor = 1.0;\n"
     "    else\n"
     "        factor = 0.5;\n"
-    "    fragColor[0] = texture(colorMap, coord.z).r * brightness * factor;\n"
-    "    fragColor[1] = texture(colorMap, coord.z).g * brightness * factor;\n"
-    "    fragColor[2] = texture(colorMap, coord.z).b * brightness * factor;\n"
+    "    fragColor[0] = texture(colorMap, vec2(coord.z, 0)).r * brightness * factor;\n"
+    "    fragColor[1] = texture(colorMap, vec2(coord.z, 0)).g * brightness * factor;\n"
+    "    fragColor[2] = texture(colorMap, vec2(coord.z, 0)).b * brightness * factor;\n"
     "    fragColor[3] = 1.0;\n"
     "}\n"
     );
