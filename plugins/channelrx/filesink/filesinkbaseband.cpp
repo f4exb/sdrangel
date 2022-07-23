@@ -45,7 +45,6 @@ FileSinkBaseband::~FileSinkBaseband()
     qDebug("FileSinkBaseband::~FileSinkBaseband");
     m_inputMessageQueue.clear();
     stopWork();
-    qDebug("FileSinkBaseband::~FileSinkBaseband: done");
 }
 
 void FileSinkBaseband::reset()

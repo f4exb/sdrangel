@@ -177,7 +177,6 @@ void FileSink::start()
     m_basebandSink->setMessageQueueToGUI(getMessageQueueToGUI());
     m_basebandSink->setDeviceHwId(m_deviceAPI->getHardwareId());
     m_basebandSink->setDeviceUId(m_deviceAPI->getDeviceUID());
-    m_basebandSink->startWork();
     m_thread->start();
 
     DSPSignalNotification *dspMsg = new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency);
