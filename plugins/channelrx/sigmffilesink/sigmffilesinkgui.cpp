@@ -221,6 +221,7 @@ SigMFFileSinkGUI::SigMFFileSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
 
 SigMFFileSinkGUI::~SigMFFileSinkGUI()
 {
+    m_sigMFFileSink->setMessageQueueToGUI(nullptr);
     delete ui;
 }
 
