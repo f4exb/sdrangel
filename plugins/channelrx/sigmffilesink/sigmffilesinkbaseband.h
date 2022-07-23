@@ -20,16 +20,16 @@
 
 #include <QObject>
 #include <QMutex>
-#include <QTimer>
 
 #include "dsp/samplesinkfifo.h"
+#include "dsp/downchannelizer.h"
 #include "util/message.h"
 #include "util/messagequeue.h"
 
 #include "sigmffilesinksink.h"
 #include "sigmffilesinksettings.h"
 
-class DownChannelizer;
+class QTimer;
 class SpectrumVis;
 
 class SigMFFileSinkBaseband : public QObject
@@ -84,12 +84,10 @@ public:
 
     void reset();
     void startWork();
-    void stopWork();
     void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
     int getChannelSampleRate() const;
     void setBasebandSampleRate(int sampleRate);
-    bool isRunning() const { return m_running; }
     void setSpectrumSink(SpectrumVis* spectrumSink) { m_spectrumSink = spectrumSink; m_sink.setSpectrumSink(spectrumSink); }
     uint64_t getMsCount() const { return m_sink.getMsCount(); }
     uint64_t getByteCount() const { return m_sink.getByteCount(); }
@@ -105,7 +103,7 @@ public:
 
 private:
     SampleSinkFifo m_sampleFifo;
-    DownChannelizer *m_channelizer;
+    DownChannelizer m_channelizer;
     SigMFFileSinkSink m_sink;
     SpectrumVis *m_spectrumSink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
@@ -115,10 +113,10 @@ private:
     float m_squelchLevel;
     bool m_squelchOpen;
     int64_t m_centerFrequency;
-    bool m_running;
     QMutex m_mutex;
-    QTimer m_timer;
+    QTimer *m_timer;
 
+    void stopWork();
     bool handleMessage(const Message& cmd);
     void applySettings(const SigMFFileSinkSettings& settings, bool force = false);
 

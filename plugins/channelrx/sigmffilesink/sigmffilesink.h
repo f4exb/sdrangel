@@ -19,7 +19,6 @@
 #define INCLUDE_SIGMFFILESINK_H_
 
 #include <QObject>
-#include <QThread>
 #include <QMutex>
 #include <QNetworkRequest>
 
@@ -31,6 +30,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
+class QThread;
 
 class DeviceAPI;
 class DeviceSampleSource;
@@ -159,8 +159,10 @@ public:
 
 private:
     DeviceAPI *m_deviceAPI;
-    QThread m_thread;
+    QThread *m_thread;
     SigMFFileSinkBaseband *m_basebandSink;
+    QMutex m_mutex;
+    bool m_running;
     SigMFFileSinkSettings m_settings;
     SpectrumVis m_spectrumVis;
 
