@@ -19,7 +19,6 @@
 #define INCLUDE_FILESINK_H_
 
 #include <QObject>
-#include <QThread>
 #include <QMutex>
 #include <QNetworkRequest>
 
@@ -31,6 +30,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
+class QThread;
 
 class DeviceAPI;
 class DeviceSampleSource;
@@ -159,8 +159,10 @@ public:
 
 private:
     DeviceAPI *m_deviceAPI;
-    QThread m_thread;
+    QThread *m_thread;
     FileSinkBaseband *m_basebandSink;
+    QMutex m_mutex;
+    bool m_running;
     FileSinkSettings m_settings;
     SpectrumVis m_spectrumVis;
 

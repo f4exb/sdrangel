@@ -22,6 +22,8 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QBuffer>
+#include <QThread>
+#include <QMutexLocker>
 
 #include "SWGChannelSettings.h"
 #include "SWGWorkspaceInfo.h"
@@ -52,16 +54,14 @@ const char* const FileSink::m_channelId = "FileSink";
 FileSink::FileSink(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
+        m_mutex(QMutex::Recursive),
+        m_running(false),
         m_spectrumVis(SDR_RX_SCALEF),
         m_centerFrequency(0),
         m_frequencyOffset(0),
         m_basebandSampleRate(48000)
 {
     setObjectName(m_channelId);
-
-    m_basebandSink = new FileSinkBaseband();
-    m_basebandSink->setSpectrumSink(&m_spectrumVis);
-    m_basebandSink->moveToThread(&m_thread);
 
     applySettings(m_settings, true);
 
@@ -81,10 +81,13 @@ FileSink::FileSink(DeviceAPI *deviceAPI) :
         this,
         &FileSink::handleIndexInDeviceSetChanged
     );
+
+    start();
 }
 
 FileSink::~FileSink()
 {
+    qDebug("FileSink::~FileSink");
     QObject::disconnect(
         m_networkManager,
         &QNetworkAccessManager::finished,
@@ -95,11 +98,7 @@ FileSink::~FileSink()
     m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
 
-    if (m_basebandSink->isRunning()) {
-        stop();
-    }
-
-    delete m_basebandSink;
+    stop();
 }
 
 void FileSink::setDeviceAPI(DeviceAPI *deviceAPI)
@@ -117,7 +116,10 @@ void FileSink::setDeviceAPI(DeviceAPI *deviceAPI)
 void FileSink::setMessageQueueToGUI(MessageQueue* queue)
 {
     ChannelAPI::setMessageQueueToGUI(queue);
-    m_basebandSink->setMessageQueueToGUI(queue);
+
+    if (m_running) {
+        m_basebandSink->setMessageQueueToGUI(queue);
+    }
 }
 
 uint32_t FileSink::getNumberOfDeviceStreams() const
@@ -128,18 +130,55 @@ uint32_t FileSink::getNumberOfDeviceStreams() const
 void FileSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
 {
     (void) firstOfBurst;
-    m_basebandSink->feed(begin, end);
+
+    if (m_running) {
+        m_basebandSink->feed(begin, end);
+    }
 }
 
 void FileSink::start()
 {
+    QMutexLocker m_lock(&m_mutex);
+
+    if (m_running) {
+        return;
+    }
+
 	qDebug("FileSink::start");
-    m_basebandSink->reset();
+    m_thread = new QThread();
+    m_basebandSink = new FileSinkBaseband();
+    m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
+        .arg(m_channelId)
+        .arg(m_deviceAPI->getDeviceSetIndex())
+        .arg(getIndexInDeviceSet())
+    );
+    m_basebandSink->setSpectrumSink(&m_spectrumVis);
+    m_basebandSink->moveToThread(m_thread);
+
+    QObject::connect(
+        m_thread,
+        &QThread::started,
+        m_basebandSink,
+        &FileSinkBaseband::startWork
+    );
+    QObject::connect(
+        m_thread,
+        &QThread::finished,
+        m_basebandSink,
+        &QObject::deleteLater
+    );
+    QObject::connect(
+        m_thread,
+        &QThread::finished,
+        m_thread,
+        &QThread::deleteLater
+    );
+
     m_basebandSink->setMessageQueueToGUI(getMessageQueueToGUI());
     m_basebandSink->setDeviceHwId(m_deviceAPI->getHardwareId());
     m_basebandSink->setDeviceUId(m_deviceAPI->getDeviceUID());
     m_basebandSink->startWork();
-    m_thread.start();
+    m_thread->start();
 
     DSPSignalNotification *dspMsg = new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency);
     m_basebandSink->getInputMessageQueue()->push(dspMsg);
@@ -152,14 +191,23 @@ void FileSink::start()
         MsgReportStartStop *msg = MsgReportStartStop::create(true);
         getMessageQueueToGUI()->push(msg);
     }
+
+    m_running = true;
 }
 
 void FileSink::stop()
 {
-    qDebug("FileSink::stop");
-    m_basebandSink->stopWork();
-	m_thread.exit();
-	m_thread.wait();
+    QMutexLocker m_lock(&m_mutex);
+
+    if (!m_running) {
+        return;
+    }
+
+    qDebug("FileSink::stop:");
+    m_running = false;
+
+	m_thread->quit();
+	m_thread->wait();
 
     if (getMessageQueueToGUI())
     {
@@ -180,8 +228,10 @@ bool FileSink::handleMessage(const Message& cmd)
 
         m_basebandSampleRate = cfg.getSampleRate();
         m_centerFrequency = cfg.getCenterFrequency();
-        DSPSignalNotification *notif = new DSPSignalNotification(cfg);
-        m_basebandSink->getInputMessageQueue()->push(notif);
+
+        if (m_running) {
+            m_basebandSink->getInputMessageQueue()->push(new DSPSignalNotification(cfg));
+        }
 
         if (getMessageQueueToGUI()) {
             getMessageQueueToGUI()->push(new DSPSignalNotification(cfg));
@@ -328,8 +378,11 @@ void FileSink::applySettings(const FileSinkSettings& settings, bool force)
         reverseAPIKeys.append("streamIndex");
     }
 
-    FileSinkBaseband::MsgConfigureFileSinkBaseband *msg = FileSinkBaseband::MsgConfigureFileSinkBaseband::create(settings, force);
-    m_basebandSink->getInputMessageQueue()->push(msg);
+    if (m_running)
+    {
+        FileSinkBaseband::MsgConfigureFileSinkBaseband *msg = FileSinkBaseband::MsgConfigureFileSinkBaseband::create(settings, force);
+        m_basebandSink->getInputMessageQueue()->push(msg);
+    }
 
     if ((settings.m_useReverseAPI) && (reverseAPIKeys.size() != 0))
     {
@@ -353,13 +406,16 @@ void FileSink::applySettings(const FileSinkSettings& settings, bool force)
 
 void FileSink::record(bool record)
 {
-    FileSinkBaseband::MsgConfigureFileSinkWork *msg = FileSinkBaseband::MsgConfigureFileSinkWork::create(record);
-    m_basebandSink->getInputMessageQueue()->push(msg);
+    if (m_running)
+    {
+        FileSinkBaseband::MsgConfigureFileSinkWork *msg = FileSinkBaseband::MsgConfigureFileSinkWork::create(record);
+        m_basebandSink->getInputMessageQueue()->push(msg);
+    }
 }
 
 uint64_t FileSink::getMsCount() const
 {
-    if (m_basebandSink) {
+    if (m_running) {
         return m_basebandSink->getMsCount();
     } else {
         return 0;
@@ -368,7 +424,7 @@ uint64_t FileSink::getMsCount() const
 
 uint64_t FileSink::getByteCount() const
 {
-    if (m_basebandSink) {
+    if (m_running) {
         return m_basebandSink->getByteCount();
     } else {
         return 0;
@@ -377,7 +433,7 @@ uint64_t FileSink::getByteCount() const
 
 unsigned int FileSink::getNbTracks() const
 {
-    if (m_basebandSink) {
+    if (m_running) {
         return m_basebandSink->getNbTracks();
     } else {
         return 0;
@@ -455,8 +511,11 @@ int FileSink::webapiActionsPost(
 
             if (!m_settings.m_squelchRecordingEnable)
             {
-                FileSinkBaseband::MsgConfigureFileSinkWork *msg = FileSinkBaseband::MsgConfigureFileSinkWork::create(record);
-                m_basebandSink->getInputMessageQueue()->push(msg);
+                if (m_running)
+                {
+                    FileSinkBaseband::MsgConfigureFileSinkWork *msg = FileSinkBaseband::MsgConfigureFileSinkWork::create(record);
+                    m_basebandSink->getInputMessageQueue()->push(msg);
+                }
 
                 if (getMessageQueueToGUI())
                 {
@@ -624,14 +683,18 @@ void FileSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
 
 void FileSink::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
-    response.getFileSinkReport()->setSpectrumSquelch(m_basebandSink->isSquelchOpen() ? 1 : 0);
-    response.getFileSinkReport()->setSpectrumMax(m_basebandSink->getSpecMax());
-    response.getFileSinkReport()->setSinkSampleRate(m_basebandSink->getSinkSampleRate());
     response.getFileSinkReport()->setRecordTimeMs(getMsCount());
     response.getFileSinkReport()->setRecordSize(getByteCount());
-    response.getFileSinkReport()->setRecording(m_basebandSink->isRecording() ? 1 : 0);
     response.getFileSinkReport()->setRecordCaptures(getNbTracks());
-    response.getFileSinkReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
+
+    if (m_running)
+    {
+        response.getFileSinkReport()->setSpectrumSquelch(m_basebandSink->isSquelchOpen() ? 1 : 0);
+        response.getFileSinkReport()->setSpectrumMax(m_basebandSink->getSpecMax());
+        response.getFileSinkReport()->setSinkSampleRate(m_basebandSink->getSinkSampleRate());
+        response.getFileSinkReport()->setRecording(m_basebandSink->isRecording() ? 1 : 0);
+        response.getFileSinkReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
+    }
 }
 
 void FileSink::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const FileSinkSettings& settings, bool force)
@@ -779,7 +842,7 @@ void FileSink::networkManagerFinished(QNetworkReply *reply)
 
 void FileSink::handleIndexInDeviceSetChanged(int index)
 {
-    if (index < 0) {
+    if (!m_running || (index < 0)) {
         return;
     }
 

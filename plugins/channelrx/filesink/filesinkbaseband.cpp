@@ -15,9 +15,9 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QTimer>
 #include <QDebug>
 
-#include "dsp/downchannelizer.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "dsp/spectrumvis.h"
@@ -30,24 +30,22 @@ MESSAGE_CLASS_DEFINITION(FileSinkBaseband::MsgConfigureFileSinkBaseband, Message
 MESSAGE_CLASS_DEFINITION(FileSinkBaseband::MsgConfigureFileSinkWork, Message)
 
 FileSinkBaseband::FileSinkBaseband() :
+    m_channelizer(&m_sink),
     m_specMax(0),
     m_squelchLevel(0),
     m_squelchOpen(false),
-    m_running(false),
     m_mutex(QMutex::Recursive)
 {
-    m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
-    m_channelizer = new DownChannelizer(&m_sink);
-
     qDebug("FileSinkBaseband::FileSinkBaseband");
-    connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
-    m_timer.start(200);
+    m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
 }
 
 FileSinkBaseband::~FileSinkBaseband()
 {
+    qDebug("FileSinkBaseband::~FileSinkBaseband");
     m_inputMessageQueue.clear();
-    delete m_channelizer;
+    stopWork();
+    qDebug("FileSinkBaseband::~FileSinkBaseband: done");
 }
 
 void FileSinkBaseband::reset()
@@ -60,6 +58,15 @@ void FileSinkBaseband::reset()
 void FileSinkBaseband::startWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
+    qDebug("FileSinkBaseband::startWork");
+    m_timer = new QTimer();
+    connect(
+        m_timer,
+        &QTimer::timeout,
+        this,
+        &FileSinkBaseband::tick
+    );
+    m_timer->start(200);
     QObject::connect(
         &m_sampleFifo,
         &SampleSinkFifo::dataReady,
@@ -67,22 +74,33 @@ void FileSinkBaseband::startWork()
         &FileSinkBaseband::handleData,
         Qt::QueuedConnection
     );
-    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-    m_running = true;
+    QObject::connect(
+        &m_inputMessageQueue,
+        &MessageQueue::messageEnqueued,
+        this,
+        &FileSinkBaseband::handleInputMessages
+    );
 }
 
 void FileSinkBaseband::stopWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
+    qDebug("FileSinkBaseband::stopWork");
+    m_timer->stop();
     m_sink.stopRecording();
-    disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+    QObject::disconnect(
+        &m_inputMessageQueue,
+        &MessageQueue::messageEnqueued,
+        this,
+        &FileSinkBaseband::handleInputMessages
+    );
     QObject::disconnect(
         &m_sampleFifo,
         &SampleSinkFifo::dataReady,
         this,
         &FileSinkBaseband::handleData
     );
-    m_running = false;
+    delete m_timer;
 }
 
 void FileSinkBaseband::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
@@ -105,12 +123,12 @@ void FileSinkBaseband::handleData()
 
 		// first part of FIFO data
         if (part1begin != part1end) {
-            m_channelizer->feed(part1begin, part1end);
+            m_channelizer.feed(part1begin, part1end);
         }
 
 		// second part of FIFO data (used when block wraps around)
 		if(part2begin != part2end) {
-            m_channelizer->feed(part2begin, part2end);
+            m_channelizer.feed(part2begin, part2end);
         }
 
 		m_sampleFifo.readCommit((unsigned int) count);
@@ -150,13 +168,13 @@ bool FileSinkBaseband::handleMessage(const Message& cmd)
             << " cnterFrequency: " << notif.getCenterFrequency();
         m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(notif.getSampleRate()));
         m_centerFrequency = notif.getCenterFrequency();
-        m_channelizer->setBasebandSampleRate(notif.getSampleRate());
-        int desiredSampleRate = m_channelizer->getBasebandSampleRate() / (1<<m_settings.m_log2Decim);
-        m_channelizer->setChannelization(desiredSampleRate, m_settings.m_inputFrequencyOffset);
+        m_channelizer.setBasebandSampleRate(notif.getSampleRate());
+        int desiredSampleRate = m_channelizer.getBasebandSampleRate() / (1<<m_settings.m_log2Decim);
+        m_channelizer.setChannelization(desiredSampleRate, m_settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(
-            m_channelizer->getChannelSampleRate(),
+            m_channelizer.getChannelSampleRate(),
             desiredSampleRate,
-            m_channelizer->getChannelFrequencyOffset(),
+            m_channelizer.getChannelFrequencyOffset(),
             m_centerFrequency + m_settings.m_inputFrequencyOffset);
 
 		return true;
@@ -193,12 +211,12 @@ void FileSinkBaseband::applySettings(const FileSinkSettings& settings, bool forc
     if ((settings.m_log2Decim != m_settings.m_log2Decim)
      || (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
     {
-        int desiredSampleRate = m_channelizer->getBasebandSampleRate() / (1<<settings.m_log2Decim);
-        m_channelizer->setChannelization(desiredSampleRate, settings.m_inputFrequencyOffset);
+        int desiredSampleRate = m_channelizer.getBasebandSampleRate() / (1<<settings.m_log2Decim);
+        m_channelizer.setChannelization(desiredSampleRate, settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(
-            m_channelizer->getChannelSampleRate(),
+            m_channelizer.getChannelSampleRate(),
             desiredSampleRate,
-            m_channelizer->getChannelFrequencyOffset(),
+            m_channelizer.getChannelFrequencyOffset(),
             m_centerFrequency + settings.m_inputFrequencyOffset);
     }
 
@@ -218,7 +236,7 @@ void FileSinkBaseband::applySettings(const FileSinkSettings& settings, bool forc
 
 int FileSinkBaseband::getChannelSampleRate() const
 {
-    return m_channelizer->getChannelSampleRate();
+    return m_channelizer.getChannelSampleRate();
 }
 
 void FileSinkBaseband::tick()
