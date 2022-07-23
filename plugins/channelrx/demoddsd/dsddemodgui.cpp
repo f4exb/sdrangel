@@ -272,6 +272,10 @@ void DSDDemodGUI::on_symbolPLLLock_toggled(bool checked)
 
 void DSDDemodGUI::on_ambeSupport_clicked(bool checked)
 {
+    if (ui->ambeFeatures->currentIndex() < 0) {
+        return;
+    }
+
     m_settings.m_connectAMBE = checked;
     m_settings.m_ambeFeatureIndex = m_availableAMBEFeatures[ui->ambeFeatures->currentIndex()].m_featureIndex;
     applySettings();
@@ -427,6 +431,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_settings.setRollupState(&m_rollupState);
 
 	updateMyPosition();
+    updateAMBEFeaturesList();
 	displaySettings();
     makeUIConnections();
 	applySettings(true);
@@ -510,19 +515,7 @@ void DSDDemodGUI::displaySettings()
     ui->traceDecayText->setText(QString("%1").arg(m_settings.m_traceDecay));
     m_scopeVisXY->setDecay(m_settings.m_traceDecay);
 
-    ui->ambeSupport->setChecked(m_settings.m_connectAMBE);
-
-    for (int i = 0; i < ui->ambeFeatures->count(); i++)
-    {
-        if (ui->ambeFeatures->itemData(i).toInt() == m_settings.m_ambeFeatureIndex)
-        {
-            ui->ambeFeatures->setCurrentIndex(i);
-            break;
-        }
-    }
-
     updateIndexLabel();
-
     getRollupContents()->restoreState(m_rollupState);
     updateAbsoluteCenterFrequency();
     blockApplySettings(false);
@@ -533,25 +526,40 @@ void DSDDemodGUI::updateAMBEFeaturesList()
     ui->ambeFeatures->blockSignals(true);
     ui->ambeSupport->blockSignals(true);
     ui->ambeFeatures->clear();
-    bool unsetAMBE = true;
+    ui->ambeSupport->setEnabled(m_availableAMBEFeatures.count() > 0);
+    int selectedFeatureIndex = -1;
+    bool unsetAMBE = false;
+
+    if (m_availableAMBEFeatures.count() == 0)
+    {
+        ui->ambeSupport->setChecked(false);
+        unsetAMBE = m_settings.m_connectAMBE;
+        m_settings.m_connectAMBE = false;
+    }
+    else
+    {
+        ui->ambeSupport->setChecked(m_settings.m_connectAMBE);
+    }
 
     for (int i = 0; i < m_availableAMBEFeatures.count(); i++)
     {
         ui->ambeFeatures->addItem(tr("F:%1").arg(m_availableAMBEFeatures[i].m_featureIndex), m_availableAMBEFeatures[i].m_featureIndex);
 
-        if (m_settings.m_ambeFeatureIndex == m_availableAMBEFeatures[i].m_featureIndex)
-        {
-            unsetAMBE = false;
-            ui->ambeFeatures->setCurrentIndex(i);
+        if (m_availableAMBEFeatures[i].m_featureIndex == m_settings.m_ambeFeatureIndex) {
+            selectedFeatureIndex = i;
         }
     }
 
-    if (unsetAMBE) {
-        ui->ambeSupport->setChecked(false);
+    if (selectedFeatureIndex > 0) {
+        ui->ambeFeatures->setCurrentIndex(selectedFeatureIndex);
     }
 
     ui->ambeSupport->blockSignals(false);
     ui->ambeFeatures->blockSignals(false);
+
+    if (unsetAMBE) {
+        applySettings();
+    }
 }
 
 void DSDDemodGUI::applySettings(bool force)
