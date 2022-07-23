@@ -19,18 +19,17 @@
 
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
-#include "dsp/downchannelizer.h"
 
 #include "dsddemodbaseband.h"
 
 MESSAGE_CLASS_DEFINITION(DSDDemodBaseband::MsgConfigureDSDDemodBaseband, Message)
 
 DSDDemodBaseband::DSDDemodBaseband() :
+    m_channelizer(&m_sink),
     m_mutex(QMutex::Recursive)
 {
     qDebug("DSDDemodBaseband::DSDDemodBaseband");
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
-    m_channelizer = new DownChannelizer(&m_sink);
 
     QObject::connect(
         &m_sampleFifo,
@@ -53,7 +52,6 @@ DSDDemodBaseband::~DSDDemodBaseband()
 {
     DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(m_sink.getAudioFifo1());
     DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(m_sink.getAudioFifo2());
-    delete m_channelizer;
 }
 
 void DSDDemodBaseband::reset()
@@ -88,12 +86,12 @@ void DSDDemodBaseband::handleData()
 
 		// first part of FIFO data
         if (part1begin != part1end) {
-            m_channelizer->feed(part1begin, part1end);
+            m_channelizer.feed(part1begin, part1end);
         }
 
 		// second part of FIFO data (used when block wraps around)
 		if(part2begin != part2end) {
-            m_channelizer->feed(part2begin, part2end);
+            m_channelizer.feed(part2begin, part2end);
         }
 
 		m_sampleFifo.readCommit((unsigned int) count);
@@ -130,13 +128,13 @@ bool DSDDemodBaseband::handleMessage(const Message& cmd)
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
         qDebug() << "DSDDemodBaseband::handleMessage: DSPSignalNotification: basebandSampleRate: " << notif.getSampleRate();
         m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(notif.getSampleRate()));
-        m_channelizer->setBasebandSampleRate(notif.getSampleRate());
-        m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+        m_channelizer.setBasebandSampleRate(notif.getSampleRate());
+        m_sink.applyChannelSettings(m_channelizer.getChannelSampleRate(), m_channelizer.getChannelFrequencyOffset());
 
-        if (m_channelSampleRate != m_channelizer->getChannelSampleRate())
+        if (m_channelSampleRate != m_channelizer.getChannelSampleRate())
         {
             m_sink.applyAudioSampleRate(m_sink.getAudioSampleRate()); // reapply when channel sample rate changes
-            m_channelSampleRate = m_channelizer->getChannelSampleRate();
+            m_channelSampleRate = m_channelizer.getChannelSampleRate();
         }
 
 		return true;
@@ -151,13 +149,13 @@ void DSDDemodBaseband::applySettings(const DSDDemodSettings& settings, bool forc
 {
     if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
     {
-        m_channelizer->setChannelization(48000, settings.m_inputFrequencyOffset);
-        m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+        m_channelizer.setChannelization(48000, settings.m_inputFrequencyOffset);
+        m_sink.applyChannelSettings(m_channelizer.getChannelSampleRate(), m_channelizer.getChannelFrequencyOffset());
 
-        if (m_channelSampleRate != m_channelizer->getChannelSampleRate())
+        if (m_channelSampleRate != m_channelizer.getChannelSampleRate())
         {
             m_sink.applyAudioSampleRate(m_sink.getAudioSampleRate()); // reapply when channel sample rate changes
-            m_channelSampleRate = m_channelizer->getChannelSampleRate();
+            m_channelSampleRate = m_channelizer.getChannelSampleRate();
         }
     }
 
@@ -184,12 +182,12 @@ void DSDDemodBaseband::applySettings(const DSDDemodSettings& settings, bool forc
 
 int DSDDemodBaseband::getChannelSampleRate() const
 {
-    return m_channelizer->getChannelSampleRate();
+    return m_channelizer.getChannelSampleRate();
 }
 
 
 void DSDDemodBaseband::setBasebandSampleRate(int sampleRate)
 {
-    m_channelizer->setBasebandSampleRate(sampleRate);
-    m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+    m_channelizer.setBasebandSampleRate(sampleRate);
+    m_sink.applyChannelSettings(m_channelizer.getChannelSampleRate(), m_channelizer.getChannelFrequencyOffset());
 }

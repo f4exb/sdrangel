@@ -27,6 +27,7 @@
 #include <QNetworkReply>
 #include <QBuffer>
 #include <QThread>
+#include <QMutexLocker>
 
 #include "SWGChannelSettings.h"
 #include "SWGWorkspaceInfo.h"
@@ -57,15 +58,12 @@ const int DSDDemod::m_udpBlockSize = 512;
 DSDDemod::DSDDemod(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
+        m_mutex(QMutex::Recursive),
+        m_running(false),
         m_basebandSampleRate(0)
 {
     qDebug("DSDDemod::DSDDemod");
 	setObjectName(m_channelId);
-
-    m_thread = new QThread(this);
-    m_basebandSink = new DSDDemodBaseband();
-    m_basebandSink->setChannel(this);
-    m_basebandSink->moveToThread(m_thread);
 
     applySettings(m_settings, true);
 
@@ -99,6 +97,7 @@ DSDDemod::DSDDemod(DeviceAPI *deviceAPI) :
     );
 
     scanAvailableAMBEFeatures();
+    start();
 }
 
 DSDDemod::~DSDDemod()
@@ -112,8 +111,8 @@ DSDDemod::~DSDDemod()
     delete m_networkManager;
 	m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
-    delete m_basebandSink;
-    delete m_thread;
+
+    stop();
 }
 
 void DSDDemod::setDeviceAPI(DeviceAPI *deviceAPI)
@@ -136,24 +135,66 @@ uint32_t DSDDemod::getNumberOfDeviceStreams() const
 void DSDDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
 {
     (void) firstOfBurst;
-    m_basebandSink->feed(begin, end);
+
+    if (m_running) {
+        m_basebandSink->feed(begin, end);
+    }
 }
 
 void DSDDemod::start()
 {
+    QMutexLocker m_lock(&m_mutex);
+
+    if (m_running) {
+        return;
+    }
+
     qDebug() << "DSDDemod::start";
+    m_thread = new QThread();
+    m_basebandSink = new DSDDemodBaseband();
+    m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
+        .arg(m_channelId)
+        .arg(m_deviceAPI->getDeviceSetIndex())
+        .arg(getIndexInDeviceSet())
+    );
+    m_basebandSink->setChannel(this);
+    m_basebandSink->moveToThread(m_thread);
+
+    QObject::connect(
+        m_thread,
+        &QThread::finished,
+        m_basebandSink,
+        &QObject::deleteLater
+    );
+    QObject::connect(
+        m_thread,
+        &QThread::finished,
+        m_thread,
+        &QThread::deleteLater
+    );
 
     if (m_basebandSampleRate != 0) {
         m_basebandSink->setBasebandSampleRate(m_basebandSampleRate);
     }
 
-    m_basebandSink->reset();
     m_thread->start();
+
+    DSDDemodBaseband::MsgConfigureDSDDemodBaseband *msg = DSDDemodBaseband::MsgConfigureDSDDemodBaseband::create(m_settings, true);
+    m_basebandSink->getInputMessageQueue()->push(msg);
+
+    m_running = true;
 }
 
 void DSDDemod::stop()
 {
+    QMutexLocker m_lock(&m_mutex);
+
+    if (!m_running) {
+        return;
+    }
+
     qDebug() << "DSDDemod::stop";
+    m_running = false;
 	m_thread->exit();
 	m_thread->wait();
 }
@@ -173,12 +214,13 @@ bool DSDDemod::handleMessage(const Message& cmd)
     }
     else if (DSPSignalNotification::match(cmd))
     {
+        qDebug() << "DSDDemod::handleMessage: DSPSignalNotification";
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
         m_basebandSampleRate = notif.getSampleRate();
         // Forward to the sink
-        DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
-        qDebug() << "DSDDemod::handleMessage: DSPSignalNotification";
-        m_basebandSink->getInputMessageQueue()->push(rep);
+        if (m_running) {
+            m_basebandSink->getInputMessageQueue()->push(new DSPSignalNotification(notif));
+        }
         // Forward to GUI if any
         if (getMessageQueueToGUI()) {
             getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
@@ -318,14 +360,16 @@ void DSDDemod::applySettings(const DSDDemodSettings& settings, bool force)
         {
             for (const auto& feature : m_availableAMBEFeatures)
             {
-                if (feature.m_featureIndex == settings.m_ambeFeatureIndex) {
+                if (m_running && (feature.m_featureIndex == settings.m_ambeFeatureIndex)) {
                     m_basebandSink->setAMBEFeature(feature.m_feature);
                 }
             }
         }
         else
         {
-            m_basebandSink->setAMBEFeature(nullptr);
+            if (m_running) {
+                m_basebandSink->setAMBEFeature(nullptr);
+            }
         }
     }
 
@@ -342,8 +386,11 @@ void DSDDemod::applySettings(const DSDDemodSettings& settings, bool force)
         reverseAPIKeys.append("streamIndex");
     }
 
-    DSDDemodBaseband::MsgConfigureDSDDemodBaseband *msg = DSDDemodBaseband::MsgConfigureDSDDemodBaseband::create(settings, force);
-    m_basebandSink->getInputMessageQueue()->push(msg);
+    if (m_running)
+    {
+        DSDDemodBaseband::MsgConfigureDSDDemodBaseband *msg = DSDDemodBaseband::MsgConfigureDSDDemodBaseband::create(settings, force);
+        m_basebandSink->getInputMessageQueue()->push(msg);
+    }
 
     if (settings.m_useReverseAPI)
     {
@@ -676,10 +723,14 @@ void DSDDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response
     int nbMagsqSamples;
     getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
 
+    if (m_running)
+    {
+        response.getDsdDemodReport()->setAudioSampleRate(m_basebandSink->getAudioSampleRate());
+        response.getDsdDemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
+        response.getDsdDemodReport()->setSquelch(m_basebandSink->getSquelchOpen() ? 1 : 0);
+    }
+
     response.getDsdDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
-    response.getDsdDemodReport()->setAudioSampleRate(m_basebandSink->getAudioSampleRate());
-    response.getDsdDemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
-    response.getDsdDemodReport()->setSquelch(m_basebandSink->getSquelchOpen() ? 1 : 0);
     response.getDsdDemodReport()->setPllLocked(getDecoder().getSymbolPLLLocked() ? 1 : 0);
     response.getDsdDemodReport()->setSlot1On(getDecoder().getVoice1On() ? 1 : 0);
     response.getDsdDemodReport()->setSlot2On(getDecoder().getVoice2On() ? 1 : 0);
@@ -871,7 +922,7 @@ void DSDDemod::networkManagerFinished(QNetworkReply *reply)
 
 void DSDDemod::handleIndexInDeviceSetChanged(int index)
 {
-    if (index < 0) {
+    if (!m_running || (index < 0)) {
         return;
     }
 
@@ -893,7 +944,7 @@ void DSDDemod::handleFeatureAdded(int featureSetIndex, Feature *feature)
     {
         m_availableAMBEFeatures[feature] = DSDDemodSettings::AvailableAMBEFeature{feature->getIndexInFeatureSet(), feature};
 
-        if (m_settings.m_connectAMBE && (m_settings.m_ambeFeatureIndex == feature->getIndexInFeatureSet())) {
+        if (m_running && m_settings.m_connectAMBE && (m_settings.m_ambeFeatureIndex == feature->getIndexInFeatureSet())) {
             m_basebandSink->setAMBEFeature(feature);
         }
 
@@ -912,7 +963,10 @@ void DSDDemod::handleFeatureRemoved(int featureSetIndex, Feature *feature)
         if (m_settings.m_ambeFeatureIndex == m_availableAMBEFeatures[feature].m_featureIndex)
         {
             m_settings.m_connectAMBE = false;
-            m_basebandSink->setAMBEFeature(nullptr);
+
+            if (m_running) {
+                m_basebandSink->setAMBEFeature(nullptr);
+            }
         }
 
         m_availableAMBEFeatures.remove(feature);

@@ -22,6 +22,7 @@
 #include <vector>
 
 #include <QNetworkRequest>
+#include <QMutex>
 
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelapi.h"
@@ -170,6 +171,8 @@ private:
 	DeviceAPI *m_deviceAPI;
     QThread *m_thread;
     DSDDemodBaseband *m_basebandSink;
+    QMutex m_mutex;
+    bool m_running;
 	DSDDemodSettings m_settings;
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
     QHash<Feature*, DSDDemodSettings::AvailableAMBEFeature> m_availableAMBEFeatures;
