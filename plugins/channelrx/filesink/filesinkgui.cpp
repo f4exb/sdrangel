@@ -235,6 +235,7 @@ FileSinkGUI::FileSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
 FileSinkGUI::~FileSinkGUI()
 {
+    m_fileSink->setMessageQueueToGUI(nullptr);
     delete ui;
 }
 
