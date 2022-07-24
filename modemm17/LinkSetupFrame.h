@@ -18,8 +18,8 @@ struct LinkSetupFrame
     using gnss_t = std::array<uint8_t, 14>;
     using frame_t = std::array<uint8_t, 30>;
 
-    static constexpr encoded_call_t BROADCAST_ADDRESS = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
-    static constexpr call_t BROADCAST_CALL = {'B', 'R', 'O', 'A', 'D', 'C', 'A', 'S', 'T', 0};
+    static const encoded_call_t BROADCAST_ADDRESS;
+    static const call_t BROADCAST_CALL;
 
     enum TxType { PACKET, STREAM };
     enum DataType { DT_RESERVED, DATA, VOICE, MIXED };

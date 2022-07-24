@@ -4,6 +4,7 @@ set(modemm17_SOURCES
     Correlator.cpp
     FreqDevEstimator.cpp
     Golay24.cpp
+    LinkSetupFrame.cpp
     M17Demodulator.cpp
     M17Modulator.cpp
 )
