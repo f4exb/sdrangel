@@ -20,6 +20,7 @@ def getInputOptions():
     parser.add_option("-c", "--channel", dest="channel_index", help="Index of DATV demod channel. Default 0", metavar="INT", type="int")
     parser.add_option("-f", "--frequency", dest="frequency", help="Device center frequency (kHz). Mandatory", metavar="INT", type="int")
     parser.add_option("-s", "--symbol-rate", dest="symbol_rate", help="Symbol rate (kS/s). Mandatory", metavar="INT", type="int")
+    parser.add_option("-n", "--no-decim", dest="no_decim", help="Do not change decimation", action="store_true")
 
     (options, args) = parser.parse_args()
 
@@ -115,11 +116,12 @@ def set_device(options):
         device_sr, device_decim = get_device_sr_and_decim(hwtype, device_settings)
         new_decim = calc_decim(device_sr, options.symbol_rate)
         print(f"sr: {device_sr} S/s decim: {device_decim} new decim: {1<<new_decim}")
-        change_decim(rj, new_decim)
+        if not options.no_decim:
+            change_decim(rj, new_decim)
         change_center_frequency(rj, options.frequency*1000)
         r = requests.patch(url=device_settings_url, json=rj)
         if r.status_code / 100 == 2:
-            print(f'set_device: changed {options.device_index}: frequency: {options.frequency} kHz log2Decim: {new_decim}')
+            print(f'set_device: changed #{options.device_index}: frequency: {options.frequency} kHz log2Decim: {new_decim} No decim: {options.no_decim}')
         else:
             raise RuntimeError(f'set_device: failed to change device {options.device_index} with error {r.status_code}')
     else:
