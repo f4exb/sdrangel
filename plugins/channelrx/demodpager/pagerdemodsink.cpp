@@ -370,8 +370,6 @@ void PagerDemodSink::decodeBatch()
 
 void PagerDemodSink::processOneSample(Complex &ci)
 {
-    Complex ca;
-
     // FM demodulation
     double magsqRaw;
     Real deviation;

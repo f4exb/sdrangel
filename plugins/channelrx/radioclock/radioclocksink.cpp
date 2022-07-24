@@ -796,8 +796,6 @@ void RadioClockSink::wwvb()
 
 void RadioClockSink::processOneSample(Complex &ci)
 {
-    Complex ca;
-
     // Calculate average and peak levels for level meter
     Real re = ci.real() / SDR_RX_SCALEF;
     Real im = ci.imag() / SDR_RX_SCALEF;

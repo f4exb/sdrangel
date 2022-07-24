@@ -119,8 +119,6 @@ void RadiosondeDemodSink::feed(const SampleVector::const_iterator& begin, const 
 
 void RadiosondeDemodSink::processOneSample(Complex &ci)
 {
-    Complex ca;
-
     // FM demodulation
     double magsqRaw;
     Real deviation;

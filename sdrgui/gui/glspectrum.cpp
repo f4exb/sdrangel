@@ -3337,6 +3337,8 @@ void GLSpectrum::mousePressEvent(QMouseEvent* event)
                     case SpectrumAnnotationMarker::ShowFull:
                         (*iMarker)->m_show = SpectrumAnnotationMarker::ShowTop;
                         break;
+                    case SpectrumAnnotationMarker::Hidden:
+                        break;
                     }
                     selected = true;
                 }
@@ -3836,13 +3838,13 @@ QString GLSpectrum::displayScaledF(float value, char type, int precision, bool s
     }
     else
     {
-        if (posValue < 1000) {
+        if (posValue < 1e3) {
             return tr("%1").arg(QString::number(value, type, precision));
-        } else if (posValue < 1000000) {
+        } else if (posValue < 1e6) {
             return tr("%1%2").arg(QString::number(value / 1000.0, type, precision)).arg(showMult ? "k" : "");
-        } else if (posValue < 1000000000) {
+        } else if (posValue < 1e9) {
             return tr("%1%2").arg(QString::number(value / 1000000.0, type, precision)).arg(showMult ? "M" : "");
-        } else if (posValue < 1000000000000) {
+        } else if (posValue < 1e12) {
             return tr("%1%2").arg(QString::number(value / 1000000000.0, type, precision)).arg(showMult ? "G" : "");
         } else {
             return tr("%1").arg(QString::number(value, 'e', precision));

@@ -441,7 +441,6 @@ private:
     int m_rotatorFeatureSetIndex;
     int m_rotatorFeatureIndex;
 
-    void (*sweepState)();
     float m_sweep1;     // Current sweep position
     float m_sweep2;
     float m_sweep1Stop;

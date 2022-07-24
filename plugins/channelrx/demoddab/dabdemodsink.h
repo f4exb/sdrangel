@@ -115,7 +115,6 @@ private:
     void *m_dab;
     DABDemodDevice m_device;
     audiodata m_ad;
-    packetdata m_pd;
     API_struct m_api;
 
     NCO m_nco;

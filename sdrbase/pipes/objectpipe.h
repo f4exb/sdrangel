@@ -27,8 +27,6 @@ class SDRBASE_API ObjectPipe : public QObject
     Q_OBJECT
 public:
     ObjectPipe();
-    ObjectPipe(const ObjectPipe&) = default;
-    ObjectPipe& operator=(const ObjectPipe&) = default;
 
     void setToBeDeleted(int reason, QObject *object);
     void unsetToBeDeleted();
