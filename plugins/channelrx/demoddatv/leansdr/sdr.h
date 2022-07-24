@@ -1715,16 +1715,16 @@ struct fast_qpsk_receiver : runnable
         for (unsigned long a = 0; a < 65536; ++a)
         {
             float f = 2 * M_PI * a / 65536;
-            lut_sincos[a].real() = 128 + cstln_amp * cosf(f);
-            lut_sincos[a].imag() = 128 + cstln_amp * sinf(f);
+            lut_sincos[a].real(128 + cstln_amp * cosf(f));
+            lut_sincos[a].imag(128 + cstln_amp * sinf(f));
         }
 
         for (int a = 0; a < RLUT_ANGLES; ++a)
         {
             for (int r = 0; r < 256; ++r)
             {
-                lut_rect[a][r].real() = (int)(128 + r * cos(2 * M_PI * a / RLUT_ANGLES));
-                lut_rect[a][r].imag() = (int)(128 + r * sin(2 * M_PI * a / RLUT_ANGLES));
+                lut_rect[a][r].real((int)(128 + r * cos(2 * M_PI * a / RLUT_ANGLES)));
+                lut_rect[a][r].imag((int)(128 + r * sin(2 * M_PI * a / RLUT_ANGLES)));
             }
         }
     }
