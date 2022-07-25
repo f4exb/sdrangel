@@ -26,6 +26,7 @@
 #include <QNetworkReply>
 #include <QBuffer>
 #include <QThread>
+#include <QMutexLocker>
 
 #include "SWGChannelSettings.h"
 #include "SWGWorkspaceInfo.h"
@@ -51,16 +52,12 @@ const char* const SSBDemod::m_channelId = "SSBDemod";
 SSBDemod::SSBDemod(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
+        m_mutex(QMutex::Recursive),
+        m_running(false),
         m_spectrumVis(SDR_RX_SCALEF),
         m_basebandSampleRate(0)
 {
 	setObjectName(m_channelId);
-
-    m_thread = new QThread(this);
-    m_basebandSink = new SSBDemodBaseband();
-    m_basebandSink->setSpectrumSink(&m_spectrumVis);
-    m_basebandSink->setChannel(this);
-    m_basebandSink->moveToThread(m_thread);
 
 	applySettings(m_settings, true);
 
@@ -80,6 +77,8 @@ SSBDemod::SSBDemod(DeviceAPI *deviceAPI) :
         this,
         &SSBDemod::handleIndexInDeviceSetChanged
     );
+
+    start();
 }
 
 SSBDemod::~SSBDemod()
@@ -93,8 +92,8 @@ SSBDemod::~SSBDemod()
     delete m_networkManager;
 	m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
-    delete m_basebandSink;
-    delete m_thread;
+
+    stop();
 }
 
 void SSBDemod::setDeviceAPI(DeviceAPI *deviceAPI)
@@ -117,24 +116,67 @@ uint32_t SSBDemod::getNumberOfDeviceStreams() const
 void SSBDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
     (void) positiveOnly;
-    m_basebandSink->feed(begin, end);
+
+    if (m_running) {
+        m_basebandSink->feed(begin, end);
+    }
 }
 
 void SSBDemod::start()
 {
+    QMutexLocker m_lock(&m_mutex);
+
+    if (m_running) {
+        return;
+    }
+
     qDebug() << "SSBDemod::start";
+    m_thread = new QThread();
+    m_basebandSink = new SSBDemodBaseband();
+    m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
+        .arg(m_channelId)
+        .arg(m_deviceAPI->getDeviceSetIndex())
+        .arg(getIndexInDeviceSet())
+    );
+    m_basebandSink->setSpectrumSink(&m_spectrumVis);
+    m_basebandSink->setChannel(this);
+    m_basebandSink->moveToThread(m_thread);
+
+    QObject::connect(
+        m_thread,
+        &QThread::finished,
+        m_basebandSink,
+        &QObject::deleteLater
+    );
+    QObject::connect(
+        m_thread,
+        &QThread::finished,
+        m_thread,
+        &QThread::deleteLater
+    );
 
     if (m_basebandSampleRate != 0) {
         m_basebandSink->setBasebandSampleRate(m_basebandSampleRate);
     }
 
-    m_basebandSink->reset();
     m_thread->start();
+
+    SSBDemodBaseband::MsgConfigureSSBDemodBaseband *msg = SSBDemodBaseband::MsgConfigureSSBDemodBaseband::create(m_settings, true);
+    m_basebandSink->getInputMessageQueue()->push(msg);
+
+    m_running = true;
 }
 
 void SSBDemod::stop()
 {
+    QMutexLocker m_lock(&m_mutex);
+
+    if (!m_running) {
+        return;
+    }
+
     qDebug() << "SSBDemod::stop";
+    m_running = false;
 	m_thread->exit();
 	m_thread->wait();
 }
@@ -152,12 +194,13 @@ bool SSBDemod::handleMessage(const Message& cmd)
     }
     else if (DSPSignalNotification::match(cmd))
     {
+        qDebug() << "SSBDemod::handleMessage: DSPSignalNotification";
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
         m_basebandSampleRate = notif.getSampleRate();
         // Forward to the sink
-        DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
-        qDebug() << "SSBDemod::handleMessage: DSPSignalNotification";
-        m_basebandSink->getInputMessageQueue()->push(rep);
+        if (m_running) {
+            m_basebandSink->getInputMessageQueue()->push(new DSPSignalNotification(notif));
+        }
         // Forwatd to GUI if any
         if (getMessageQueueToGUI()) {
             getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
@@ -297,8 +340,11 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
         m_spectrumVis.getInputMessageQueue()->push(msg);
     }
 
-    SSBDemodBaseband::MsgConfigureSSBDemodBaseband *msg = SSBDemodBaseband::MsgConfigureSSBDemodBaseband::create(settings, force);
-    m_basebandSink->getInputMessageQueue()->push(msg);
+    if (m_running)
+    {
+        SSBDemodBaseband::MsgConfigureSSBDemodBaseband *msg = SSBDemodBaseband::MsgConfigureSSBDemodBaseband::create(settings, force);
+        m_basebandSink->getInputMessageQueue()->push(msg);
+    }
 
     if (settings.m_useReverseAPI)
     {
@@ -608,9 +654,13 @@ void SSBDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response
     getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
 
     response.getSsbDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
-    response.getSsbDemodReport()->setSquelch(m_basebandSink->getAudioActive() ? 1 : 0);
-    response.getSsbDemodReport()->setAudioSampleRate(m_basebandSink->getAudioSampleRate());
-    response.getSsbDemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
+
+    if (m_running)
+    {
+        response.getSsbDemodReport()->setSquelch(m_basebandSink->getAudioActive() ? 1 : 0);
+        response.getSsbDemodReport()->setAudioSampleRate(m_basebandSink->getAudioSampleRate());
+        response.getSsbDemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
+    }
 }
 
 void SSBDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const SSBDemodSettings& settings, bool force)
@@ -787,7 +837,7 @@ void SSBDemod::networkManagerFinished(QNetworkReply *reply)
 
 void SSBDemod::handleIndexInDeviceSetChanged(int index)
 {
-    if (index < 0) {
+    if (!m_running || (index < 0)) {
         return;
     }
 

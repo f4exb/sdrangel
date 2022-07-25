@@ -22,12 +22,12 @@
 #include <QMutex>
 
 #include "dsp/samplesinkfifo.h"
+#include "dsp/downchannelizer.h"
 #include "util/message.h"
 #include "util/messagequeue.h"
 
 #include "ssbdemodsink.h"
 
-class DownChannelizer;
 class ChannelAPI;
 class SpectrumVis;
 
@@ -77,7 +77,7 @@ public:
 
 private:
     SampleSinkFifo m_sampleFifo;
-    DownChannelizer *m_channelizer;
+    DownChannelizer m_channelizer;
     SSBDemodSink m_sink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     SSBDemodSettings m_settings;
