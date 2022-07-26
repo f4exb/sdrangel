@@ -19,7 +19,7 @@ if(WIN32)
 endif()
 
 if(NOT MSVC)
-  add_compile_options(-Wall -Wextra -Wvla -Woverloaded-virtual -ffast-math -fno-finite-math-only -ftree-vectorize)
+  add_compile_options(-Wall -Wextra -Wvla -Woverloaded-virtual -Wno-inconsistent-missing-override -ffast-math -fno-finite-math-only -ftree-vectorize)
 endif()
 
 if (SANITIZE_ADDRESS)
