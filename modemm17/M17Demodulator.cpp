@@ -74,7 +74,7 @@ const std::array<float, 150> M17Demodulator::rrc_taps = std::array<float, 150>{
 
 void M17Demodulator::update_values(uint8_t index)
 {
-	correlator.apply([this,index](float t){dev.sample(t);}, index);
+	correlator.apply([this](float t){dev.sample(t);}, index);
 	dev.update();
 	sync_sample_index = index;
 }

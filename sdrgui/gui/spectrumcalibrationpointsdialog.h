@@ -26,7 +26,7 @@
 #include "dsp/spectrumcalibrationpoint.h"
 #include "export.h"
 
-class SpectrumHistogramMarker;
+struct SpectrumHistogramMarker;
 
 namespace Ui {
     class SpectrumCalibrationPointsDialog;
