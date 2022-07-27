@@ -31,12 +31,14 @@ DATVDemodBaseband::DATVDemodBaseband() :
 {
     qDebug("DATVDemodBaseband::DATVDemodBaseband");
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
-    m_channelizer = new DownChannelizer(&m_sink);
+    m_sink = new DATVDemodSink();
+    m_channelizer = new DownChannelizer(m_sink);
 }
 
 DATVDemodBaseband::~DATVDemodBaseband()
 {
     delete m_channelizer;
+    delete m_sink;
 }
 
 void DATVDemodBaseband::reset()
@@ -62,7 +64,7 @@ void DATVDemodBaseband::startWork()
 void DATVDemodBaseband::stopWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
-    m_sink.stopVideo();
+    m_sink->stopVideo();
     disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
     QObject::disconnect(
         &m_sampleFifo,
@@ -136,7 +138,7 @@ bool DATVDemodBaseband::handleMessage(const Message& cmd)
         qDebug() << "DATVDemodBaseband::handleMessage: DSPSignalNotification: basebandSampleRate: " << notif.getSampleRate();
         m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(notif.getSampleRate()));
         m_channelizer->setBasebandSampleRate(notif.getSampleRate());
-        m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+        m_sink->applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
 
 		return true;
     }
@@ -156,17 +158,17 @@ void DATVDemodBaseband::applySettings(const DATVDemodSettings& settings, bool fo
         unsigned int desiredSampleRate = 2 * settings.m_symbolRate; // m_channelizer->getBasebandSampleRate();
         m_channelizer->setChannelization(desiredSampleRate, settings.m_centerFrequency);
         m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(m_channelizer->getBasebandSampleRate()));
-        m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+        m_sink->applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
     }
 
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_audioDeviceName);
-        audioDeviceManager->addAudioSink(m_sink.getAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
+        audioDeviceManager->addAudioSink(m_sink->getAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
     }
 
-    m_sink.applySettings(settings, force);
+    m_sink->applySettings(settings, force);
     m_settings = settings;
 }
 
@@ -180,5 +182,5 @@ void DATVDemodBaseband::setBasebandSampleRate(int sampleRate)
 {
     qDebug("DATVDemodBaseband::setBasebandSampleRate: %d", sampleRate);
     m_channelizer->setBasebandSampleRate(sampleRate);
-    m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+    m_sink->applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
 }

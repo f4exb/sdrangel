@@ -25,6 +25,7 @@
 #include "util/message.h"
 #include "util/messagequeue.h"
 
+#include "datvdemodsettings.h"
 #include "datvdemodsink.h"
 
 class DownChannelizer;
@@ -64,39 +65,39 @@ public:
     void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
     int getChannelSampleRate() const;
-    double getMagSq() const { return m_sink.getMagSq(); }
-    void setTVScreen(TVScreen *tvScreen) { m_sink.setTVScreen(tvScreen); }
-    float getMERAvg() const { return m_sink.getMERAvg(); }
-    float getMERRMS() const { return m_sink.getMERRMS(); }
-    float getMERPeak() const { return m_sink.getMERPeak(); }
-    int getMERNbAvg() const { return m_sink.getMERNbAvg(); }
-    float getCNRAvg() const { return m_sink.getCNRAvg(); }
-    float getCNRRMS() const { return m_sink.getCNRRMS(); }
-    float getCNRPeak() const { return m_sink.getCNRPeak(); }
-    int getCNRNbAvg() const { return m_sink.getCNRNbAvg(); }
-    void setMessageQueueToGUI(MessageQueue *messageQueue) { m_sink.setMessageQueueToGUI(messageQueue); }
+    double getMagSq() const { return m_sink->getMagSq(); }
+    void setTVScreen(TVScreen *tvScreen) { m_sink->setTVScreen(tvScreen); }
+    float getMERAvg() const { return m_sink->getMERAvg(); }
+    float getMERRMS() const { return m_sink->getMERRMS(); }
+    float getMERPeak() const { return m_sink->getMERPeak(); }
+    int getMERNbAvg() const { return m_sink->getMERNbAvg(); }
+    float getCNRAvg() const { return m_sink->getCNRAvg(); }
+    float getCNRRMS() const { return m_sink->getCNRRMS(); }
+    float getCNRPeak() const { return m_sink->getCNRPeak(); }
+    int getCNRNbAvg() const { return m_sink->getCNRNbAvg(); }
+    void setMessageQueueToGUI(MessageQueue *messageQueue) { m_sink->setMessageQueueToGUI(messageQueue); }
     void setBasebandSampleRate(int sampleRate); //!< To be used when supporting thread is stopped
-    void SetVideoRender(DATVideoRender *objScreen) { m_sink.SetVideoRender(objScreen); }
-    DATVideostream *getVideoStream() { return m_sink.getVideoStream(); }
-    DATVUDPStream *getUDPStream() { return m_sink.getUDPStream(); }
-    bool audioActive() { return m_sink.audioActive(); }
-    bool audioDecodeOK() { return m_sink.audioDecodeOK(); }
-    bool videoActive() { return m_sink.videoActive(); }
-    bool videoDecodeOK() { return m_sink.videoDecodeOK(); }
-    bool udpRunning() { return m_sink.udpRunning(); }
-    bool playVideo() { return m_sink.playVideo(); }
+    void SetVideoRender(DATVideoRender *objScreen) { m_sink->SetVideoRender(objScreen); }
+    DATVideostream *getVideoStream() { return m_sink->getVideoStream(); }
+    DATVUDPStream *getUDPStream() { return m_sink->getUDPStream(); }
+    bool audioActive() { return m_sink->audioActive(); }
+    bool audioDecodeOK() { return m_sink->audioDecodeOK(); }
+    bool videoActive() { return m_sink->videoActive(); }
+    bool videoDecodeOK() { return m_sink->videoDecodeOK(); }
+    bool udpRunning() { return m_sink->udpRunning(); }
+    bool playVideo() { return m_sink->playVideo(); }
 
-    int getModcodModulation() const { return m_sink.getModcodModulation(); }
-    int getModcodCodeRate() const { return m_sink.getModcodCodeRate(); }
-    bool isCstlnSetByModcod() const { return m_sink.isCstlnSetByModcod(); }
+    int getModcodModulation() const { return m_sink->getModcodModulation(); }
+    int getModcodCodeRate() const { return m_sink->getModcodCodeRate(); }
+    bool isCstlnSetByModcod() const { return m_sink->isCstlnSetByModcod(); }
     bool isRunning() const { return m_running; }
     void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
-    void setAudioFifoLabel(const QString& label) { m_sink.setAudioFifoLabel(label); }
+    void setAudioFifoLabel(const QString& label) { m_sink->setAudioFifoLabel(label); }
 
 private:
     SampleSinkFifo m_sampleFifo;
     DownChannelizer *m_channelizer;
-    DATVDemodSink m_sink;
+    DATVDemodSink *m_sink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     DATVDemodSettings m_settings;
     bool m_running;
