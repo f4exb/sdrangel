@@ -321,7 +321,7 @@ bool M17DemodProcessor::decode_packet(modemm17::M17FrameDecoder::packet_buffer_t
             qDebug() << "M17DemodProcessor::decode_packet: last chunk size:" << packet_size << " packet size:" << m_currentPacket.size();
         }
 
-        modemm17::CRC16<0x5935, 0xFFFF> crc16;
+        modemm17::CRC16 crc16(0x5935, 0xFFFF);
         crc16.reset();
 
         for (std::vector<uint8_t>::const_iterator it = m_currentPacket.begin(); it != m_currentPacket.end() - 2; ++it) {

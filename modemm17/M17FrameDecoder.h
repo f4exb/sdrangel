@@ -45,7 +45,7 @@ struct M17FrameDecoder
     PolynomialInterleaver<45, 92, 368> interleaver_;
     Trellis<4,2> trellis_{makeTrellis<4, 2>({031,027})};
     Viterbi<decltype(trellis_), 4> viterbi_{trellis_};
-    CRC16<0x5935, 0xFFFF> crc_;
+    CRC16 crc_;
 
     enum class State { LSF, STREAM, BASIC_PACKET, FULL_PACKET, BERT };
     enum class SyncWordType { LSF, STREAM, PACKET, BERT };
@@ -106,6 +106,7 @@ struct M17FrameDecoder
     uint8_t lich_segments{0};       ///< one bit per received LICH fragment.
 
     M17FrameDecoder(callback_t callback) :
+        crc_(0x5935, 0xFFFF),
         callback_(callback)
     {}
 

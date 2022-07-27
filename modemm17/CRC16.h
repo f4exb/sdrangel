@@ -9,23 +9,28 @@
 namespace modemm17
 {
 
-template <uint16_t Poly = 0x5935, uint16_t Init = 0xFFFF>
 struct CRC16
 {
-    static constexpr uint16_t MASK = 0xFFFF;
-    static constexpr uint16_t LSB = 0x0001;
-    static constexpr uint16_t MSB = 0x8000;
+    static const uint16_t MASK = 0xFFFF;
+    static const uint16_t LSB = 0x0001;
+    static const uint16_t MSB = 0x8000;
 
-    uint16_t reg_ = Init;
+
+    CRC16(uint16_t poly = 0x5935, uint16_t init = 0xFFFF) :
+        poly_(poly),
+        init_(init)
+    {
+        reg_ = init_;
+    }
 
     void reset()
     {
-        reg_ = Init;
+        reg_ = init_;
 
         for (size_t i = 0; i != 16; ++i)
         {
             auto bit = reg_ & LSB;
-            if (bit) reg_ ^= Poly;
+            if (bit) reg_ ^= poly_;
             reg_ >>= 1;
             if (bit) reg_ |= MSB;
         }
@@ -44,7 +49,7 @@ struct CRC16
         {
             auto msb = reg & MSB;
             reg = ((reg << 1) & MASK) | ((byte >> (7 - i)) & LSB);
-            if (msb) reg ^= Poly;
+            if (msb) reg ^= poly_;
         }
         return reg & MASK;
     }
@@ -56,7 +61,7 @@ struct CRC16
         {
             auto msb = reg & MSB;
             reg = ((reg << 1) & MASK);
-            if (msb) reg ^= Poly;
+            if (msb) reg ^= poly_;
         }
         return reg;
     }
@@ -67,6 +72,11 @@ struct CRC16
         std::array<uint8_t, 2> result{uint8_t((crc >> 8) & 0xFF), uint8_t(crc & 0xFF)};
         return result;
     }
+
+private:
+    uint16_t poly_;
+    uint16_t init_;
+    uint16_t reg_;
 };
 
 } // modemm17

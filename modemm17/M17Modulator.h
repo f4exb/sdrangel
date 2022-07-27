@@ -51,7 +51,7 @@ public:
     static const std::array<uint8_t, 2> BERT_SYNC_WORD;
     static const std::array<uint8_t, 2> EOT_SYNC;
 
-    static constexpr int8_t bits_to_symbol(uint8_t bits)
+    static int8_t bits_to_symbol(uint8_t bits)
     {
         switch (bits)
         {
@@ -120,7 +120,7 @@ public:
 
         M17Randomizer<368> randomizer;
         PolynomialInterleaver<45, 92, 368> interleaver;
-        CRC16<0x5935, 0xFFFF> crc;
+        CRC16 crc(0x5935, 0xFFFF);
 
         auto rit = std::copy(dest_.begin(), dest_.end(), lsf.begin());
         std::copy(source_.begin(), source_.end(), rit);
@@ -457,7 +457,8 @@ public:
         source_(encode_callsign(source)),
         dest_(encode_callsign(dest)),
         can_(10),
-        rrc(makeFirFilter(rrc_taps))
+        rrc(makeFirFilter(rrc_taps)),
+        crc_(0x5935, 0xFFFF)
     {
         gnss_.fill(0);
         gnss_on_ = false;
@@ -511,7 +512,7 @@ private:
     uint8_t can_;
     BaseFirFilter<150> rrc;
     static const std::array<float, 150> rrc_taps;
-    CRC16<0x5935, 0xFFFF> crc_;
+    CRC16 crc_;
 
     static LinkSetupFrame::encoded_call_t encode_callsign(std::string callsign)
     {
