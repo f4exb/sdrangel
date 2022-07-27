@@ -13,13 +13,7 @@ namespace modemm17
 template <size_t N>
 struct BaseFirFilter : FilterBase<float>
 {
-	using array_t = std::array<float, N>;
-
-	const array_t& taps_;
-	array_t history_;
-	size_t pos_ = 0;
-
-	BaseFirFilter(const array_t& taps)
+	BaseFirFilter(const std::array<float, N>& taps)
 	: taps_(taps)
 	{
 		history_.fill(0.0);
@@ -47,6 +41,11 @@ struct BaseFirFilter : FilterBase<float>
 		history_.fill(0.0);
 		pos_ = 0;
 	}
+
+private:
+	const std::array<float, N>& taps_;
+	std::array<float, N> history_;
+	size_t pos_ = 0;
 };
 
 template <size_t N>
