@@ -48,7 +48,7 @@ struct MODEMM17_API M17Demodulator
     };
 
 	DataCarrierDetect<SAMPLE_RATE, 500> dcd{2500, 4000, 1.0, 4.0};
-	ClockRecovery<SAMPLE_RATE, SYMBOL_RATE> clock_recovery;
+	ClockRecovery clock_recovery;
 
 	sync_word_t preamble_sync{{+3, -3, +3, -3, +3, -3, +3, -3}, 29.f};
 	sync_word_t lsf_sync{     {+3, +3, +3, +3, -3, -3, +3, -3}, 32.f, -31.f};	// LSF or STREAM (inverted)
@@ -77,6 +77,7 @@ struct MODEMM17_API M17Demodulator
 	diagnostic_callback_t diagnostic_callback;
 
 	M17Demodulator(callback_t callback)	:
+        clock_recovery(SAMPLE_RATE, SYMBOL_RATE),
         decoder(callback),
         initializing_count_(1920)
 	{

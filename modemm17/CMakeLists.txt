@@ -1,6 +1,7 @@
 project(modemm17)
 
 set(modemm17_SOURCES
+    ClockRecovery.cpp
     Correlator.cpp
     FreqDevEstimator.cpp
     Golay24.cpp

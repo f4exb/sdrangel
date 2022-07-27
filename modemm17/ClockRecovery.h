@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include <array>
+#include <vector>
 #include <cstddef>
 #include <cstdint>
 #include <numeric>
@@ -37,16 +37,9 @@ namespace modemm17
  * @inv sample_index_ is in the interval [0, SAMPLES_PER_SYMBOL).
  * @inv clock_ is in the interval [0.9995, 1.0005]
  */
-template <size_t SampleRate, size_t SymbolRate>
 class ClockRecovery
 {
-    static constexpr size_t SAMPLES_PER_SYMBOL = SampleRate / SymbolRate;
-    static constexpr int8_t MAX_OFFSET = SAMPLES_PER_SYMBOL / 2;
-    static constexpr float dx = 1.0 / SAMPLES_PER_SYMBOL;
-    static constexpr float MAX_CLOCK = 1.0005;
-    static constexpr float MIN_CLOCK = 0.9995;
-
-    std::array<float, SAMPLES_PER_SYMBOL> estimates_;
+    std::vector<float> estimates_;
     size_t sample_count_ = 0;
     uint16_t frame_count_ = 0;
     uint8_t sample_index_ = 0;
@@ -76,7 +69,7 @@ class ClockRecovery
 
         // Find falling edge.
         bool is_positive = false;
-        for (size_t i = 0; i != SAMPLES_PER_SYMBOL; ++i)
+        for (size_t i = 0; i != samples_per_symbol_; ++i)
         {
             float phase = estimates_[i];
 
@@ -91,7 +84,7 @@ class ClockRecovery
             }
         }
 
-        sample_index_ = index == 0 ? SAMPLES_PER_SYMBOL - 1 : index - 1;
+        sample_index_ = index == 0 ? samples_per_symbol_ - 1 : index - 1;
     }
 
     /**
@@ -104,13 +97,13 @@ class ClockRecovery
         int8_t offset = sample_index_ - prev_sample_index_;
 
         // When in spec, the clock should drift by less than 1 sample per frame.
-        if (offset >= MAX_OFFSET)
+        if (offset >= max_offset_)
         {
-            offset -= SAMPLES_PER_SYMBOL;
+            offset -= samples_per_symbol_;
         }
-        else if (offset <= -MAX_OFFSET)
+        else if (offset <= -max_offset_)
         {
-            offset += SAMPLES_PER_SYMBOL;
+            offset += samples_per_symbol_;
         }
 
         return offset;
@@ -135,9 +128,15 @@ class ClockRecovery
     }
 
 public:
-    ClockRecovery()
+    ClockRecovery(size_t sampleRate, size_t symbolRate) :
+        sampleRate_(sampleRate),
+        symbolRate_(symbolRate)
     {
-        estimates_.fill(0);
+        samples_per_symbol_ = sampleRate_ / symbolRate_;
+        max_offset_ = samples_per_symbol_ / 2;
+        dx_ = 1.0 / samples_per_symbol_;
+        estimates_.resize(samples_per_symbol_);
+        std::fill(estimates_.begin(), estimates_.end(), 0);
     }
 
     /**
@@ -158,7 +157,7 @@ public:
 
         estimates_[index_] += dy;
         index_ += 1;
-        if (index_ == SAMPLES_PER_SYMBOL)
+        if (index_ == samples_per_symbol_)
         {
             index_ = 0;
         }
@@ -175,7 +174,7 @@ public:
         frame_count_ = 0;
         index_ = 0;
         sample_index_ = 0;
-        estimates_.fill(0);
+        std::fill(estimates_.begin(), estimates_.end(), 0);
     }
 
     /**
@@ -234,9 +233,18 @@ public:
 
         frame_count_ = std::min(0x1000, 1 + frame_count_);
         sample_count_ = 0;
-        estimates_.fill(0);
+        std::fill(estimates_.begin(), estimates_.end(), 0);
         return true;
     }
+private:
+    size_t sampleRate_;
+    size_t symbolRate_;
+    size_t samples_per_symbol_;
+    int8_t max_offset_;
+    float dx_;
+
+    static const float MAX_CLOCK;
+    static const float MIN_CLOCK;
 };
 
 } // modemm17
