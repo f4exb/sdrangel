@@ -12,25 +12,10 @@ namespace modemm17
 template <size_t N = 10>
 struct DeviationError
 {
-    using array_t = std::array<float, N>;
-
-    array_t minima_{0};
-    array_t maxima_{0};
-    size_t min_index_ = 0;
-    size_t max_index_ = 0;
-    bool min_rolled_ = false;
-    bool max_rolled_ = false;
-    size_t min_count_ = 0;
-    size_t max_count_ = 0;
-    float min_estimate_ = 0.0;
-    float max_estimate_ = 0.0;
-
-    const float ZERO = 0.0;
-
     DeviationError()
     {
-        minima_.fill(0.0);
-        maxima_.fill(0.0);
+        minima_.fill(0.0f);
+        maxima_.fill(0.0f);
     }
 
     float operator()(float sample)
@@ -86,10 +71,24 @@ struct DeviationError
             }
         }
 
-        auto deviation = max_estimate_ - min_estimate_;
-        auto deviation_error = std::min(6.0 / deviation, 100.0);
+        float deviation = max_estimate_ - min_estimate_;
+        float deviation_error = std::min(6.0f / deviation, 100.0f);
         return deviation_error;
     }
+
+private:
+    std::array<float, N> minima_;
+    std::array<float, N> maxima_;
+    size_t min_index_ = 0;
+    size_t max_index_ = 0;
+    bool min_rolled_ = false;
+    bool max_rolled_ = false;
+    size_t min_count_ = 0;
+    size_t max_count_ = 0;
+    float min_estimate_ = 0.0f;
+    float max_estimate_ = 0.0f;
+
+    const float ZERO = 0.0f;
 };
 
 } // modemm17
