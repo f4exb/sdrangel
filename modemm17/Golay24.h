@@ -22,7 +22,7 @@ namespace Golay24_detail
 // Need a constexpr sort.
 // https://stackoverflow.com/a/40030044/854133
 template<class T>
-constexpr void swap(T& l, T& r)
+static void swap(T& l, T& r)
 {
     T tmp = std::move(l);
     l = std::move(r);
@@ -52,7 +52,7 @@ struct array
 };
 
 template <typename T, size_t N>
-constexpr void sort_impl(array<T, N> &array, size_t left, size_t right)
+static void sort_impl(array<T, N> &array, size_t left, size_t right)
 {
     if (left < right)
     {
@@ -70,7 +70,7 @@ constexpr void sort_impl(array<T, N> &array, size_t left, size_t right)
 }
 
 template <typename T, size_t N>
-constexpr array<T, N> sort(array<T, N> array)
+static array<T, N> sort(array<T, N> array)
 {
     auto sorted = array;
     sort_impl(sorted, 0, N);
