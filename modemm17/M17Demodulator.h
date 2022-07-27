@@ -34,7 +34,7 @@ struct MODEMM17_API M17Demodulator
 	static const uint8_t MAX_MISSING_SYNC = 8;
 
 	using collelator_t = Correlator;
-	using sync_word_t = SyncWord<collelator_t>;
+	using sync_word_t = SyncWord;
 	using callback_t = M17FrameDecoder::callback_t;
 	using diagnostic_callback_t = std::function<void(bool, float, float, float, int, int, float, int, int, int, int)>;
 

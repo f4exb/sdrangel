@@ -20,10 +20,9 @@ namespace modemm17 {
 
 struct MODEMM17_API Correlator
 {
-	static constexpr size_t SYMBOLS = 8;
-	static constexpr size_t SAMPLES_PER_SYMBOL = 10;
+	static const size_t SYMBOLS = 8;
+	static const size_t SAMPLES_PER_SYMBOL = 10;
 
-	using value_type = float;
     using buffer_t = std::array<float, SYMBOLS * SAMPLES_PER_SYMBOL>;
     using sync_t = std::array<int8_t, SYMBOLS>;
     using sample_filter_t = BaseIirFilter<3>;
@@ -115,15 +114,10 @@ struct MODEMM17_API Correlator
     }
 };
 
-template <typename Correlator>
 struct SyncWord
 {
-	static constexpr size_t SYMBOLS = Correlator::SYMBOLS;
-	static constexpr size_t SAMPLES_PER_SYMBOL = Correlator::SAMPLES_PER_SYMBOL;
-	using value_type = typename Correlator::value_type;
-
-	using buffer_t = std::array<int8_t, SYMBOLS>;
-	using sample_buffer_t = std::array<value_type, SAMPLES_PER_SYMBOL>;
+	using buffer_t = std::array<int8_t, Correlator::SYMBOLS>;
+	using sample_buffer_t = std::array<float, Correlator::SAMPLES_PER_SYMBOL>;
 
 	buffer_t sync_word_;
 	sample_buffer_t samples_;
@@ -131,23 +125,23 @@ struct SyncWord
 	size_t timing_index_ = 0;
 	bool triggered_ = false;
 	int8_t updated_ = 0;
-	value_type magnitude_1_ = 1.;
-	value_type magnitude_2_ = -1.;
+	float magnitude_1_ = 1.0f;
+	float magnitude_2_ = -1.0f;
 
 	SyncWord(
         buffer_t&& sync_word,
-        value_type magnitude_1,
-        value_type magnitude_2 = std::numeric_limits<value_type>::lowest()
+        float magnitude_1,
+        float magnitude_2 = std::numeric_limits<float>::lowest()
     ) :
         sync_word_(std::move(sync_word)),
         magnitude_1_(magnitude_1),
         magnitude_2_(magnitude_2)
 	{}
 
-	value_type triggered(Correlator& correlator)
+	float triggered(Correlator& correlator)
 	{
-		value_type limit_1 = correlator.limit() * magnitude_1_;
-		value_type limit_2 = correlator.limit() * magnitude_2_;
+		float limit_1 = correlator.limit() * magnitude_1_;
+		float limit_2 = correlator.limit() * magnitude_2_;
 		auto value = correlator.correlate(sync_word_);
 
 		return (value > limit_1 || value < limit_2) ? value : 0.0;
@@ -157,7 +151,7 @@ struct SyncWord
 	{
 		auto value = triggered(correlator);
 
-		value_type peak_value = 0;
+		float peak_value = 0.0f;
 
 		if (value != 0)
 		{
