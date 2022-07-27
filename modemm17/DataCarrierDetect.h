@@ -28,10 +28,7 @@ namespace modemm17 {
 template <size_t SampleRate, size_t Accuracy = 1000>
 struct DataCarrierDetect
 {
-    using ComplexType = std::complex<float>;
-    using NDFT = NSlidingDFT<SampleRate, SampleRate / Accuracy, 2>;
-
-    NDFT dft_;
+    NSlidingDFT<SampleRate, SampleRate / Accuracy, 2> dft_;
     float ltrigger_;
     float htrigger_;
     float level_1 = 0.0;
@@ -40,9 +37,14 @@ struct DataCarrierDetect
     bool triggered_ = false;
 
     DataCarrierDetect(
-        size_t freq1, size_t freq2,
-        float ltrigger = 2.0, float htrigger = 5.0)
-    : dft_({freq1, freq2}), ltrigger_(ltrigger), htrigger_(htrigger)
+        size_t freq1,
+        size_t freq2,
+        float ltrigger = 2.0,
+        float htrigger = 5.0
+    ) :
+        dft_({freq1, freq2}),
+        ltrigger_(ltrigger),
+        htrigger_(htrigger)
     {
     }
 

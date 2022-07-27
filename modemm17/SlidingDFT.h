@@ -20,23 +20,14 @@ namespace modemm17
 template <size_t SampleRate, size_t Frequency, size_t Accuracy = 1000>
 class SlidingDFT
 {
+public:
     using ComplexType = std::complex<float>;
 
-    static constexpr size_t N = SampleRate / Accuracy;
-    static constexpr float pi2 = M_PI * 2.0;
-    static constexpr float kth = float(Frequency) / float(SampleRate);
-
-    // We'd like this to be static constexpr, but std::exp is not a constexpr.
-    ComplexType coeff_;
-    std::array<float, N> samples_;
-    ComplexType result_{0,0};
-    size_t index_ = 0;
-    size_t prev_index_ = N - 1;
-
-public:
     SlidingDFT()
     {
         samples_.fill(0);
+        float pi2 = M_PI * 2.0f;
+        float kth = float(Frequency) / float(SampleRate);
         coeff_ = std::exp(-ComplexType{0, 1} * pi2 * kth);
     }
 
@@ -44,7 +35,7 @@ public:
     {
         auto index = index_;
         index_ += 1;
-        if (index_ == N) index_ = 0;
+        if (index_ == (SampleRate / Accuracy)) index_ = 0;
 
         float delta = sample - samples_[index];
         ComplexType result = (result_ + delta) * coeff_;
@@ -53,6 +44,13 @@ public:
         prev_index_ = index;
         return result;
     }
+
+private:
+    ComplexType coeff_;
+    std::array<float, (SampleRate / Accuracy)> samples_;
+    ComplexType result_{0,0};
+    size_t index_ = 0;
+    size_t prev_index_ = (SampleRate / Accuracy) - 1;
 };
 
 /**
@@ -70,31 +68,8 @@ public:
 template <size_t SampleRate, size_t N, size_t K>
 class NSlidingDFT
 {
-    using ComplexType = std::complex<float>;
-
-    static constexpr float pi2 = M_PI * 2.0;
-
-    // We'd like this to be static constexpr, but std::exp is not a constexpr.
-    const std::array<ComplexType, K> coeff_;
-    std::array<float, N> samples_;
-    std::array<ComplexType, K> result_{0,0};
-    size_t index_ = 0;
-    size_t prev_index_ = N - 1;
-
-    static constexpr std::array<ComplexType, K>
-    make_coefficients(const std::array<size_t, K>& frequencies)
-    {
-        ComplexType j = ComplexType{0, 1};
-        std::array<ComplexType, K> result;
-        for (size_t i = 0; i != K; ++i)
-        {
-            float k = float(frequencies[i]) / float(SampleRate);
-            result[i] = std::exp(-j * pi2 * k);
-        }
-        return result;
-    }
-
 public:
+    using ComplexType = std::complex<float>;
     using result_type = std::array<ComplexType, K>;
 
     /**
@@ -129,6 +104,27 @@ public:
         }
         samples_[index] = sample;
         return result_;
+    }
+
+private:
+    const std::array<ComplexType, K> coeff_;
+    std::array<float, N> samples_;
+    std::array<ComplexType, K> result_{0,0};
+    size_t index_ = 0;
+    size_t prev_index_ = N - 1;
+
+    static constexpr std::array<ComplexType, K>
+    make_coefficients(const std::array<size_t, K>& frequencies)
+    {
+        ComplexType j = ComplexType{0, 1};
+        std::array<ComplexType, K> result;
+        float pi2 = M_PI * 2.0f;
+        for (size_t i = 0; i != K; ++i)
+        {
+            float k = float(frequencies[i]) / float(SampleRate);
+            result[i] = std::exp(-j * pi2 * k);
+        }
+        return result;
     }
 };
 
