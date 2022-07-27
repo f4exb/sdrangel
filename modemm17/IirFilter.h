@@ -13,12 +13,9 @@ namespace modemm17
 template <size_t N>
 struct BaseIirFilter : FilterBase<float>
 {
-	const std::array<float, N>& numerator_;
-	const std::array<float, N> denominator_;
-	std::array<float, N> history_{0};
-
-	BaseIirFilter(const std::array<float, N>& b, const std::array<float, N>& a)
-	: numerator_(b), denominator_(a)
+	BaseIirFilter(const std::array<float, N>& b, const std::array<float, N>& a) :
+        numerator_(b),
+        denominator_(a)
 	{
 		history_.fill(0.0);
 	}
@@ -40,11 +37,15 @@ struct BaseIirFilter : FilterBase<float>
 
 		return result;
 	}
+
+private:
+	const std::array<float, N>& numerator_;
+	const std::array<float, N> denominator_;
+	std::array<float, N> history_{0};
 };
 
 template <size_t N>
-BaseIirFilter<N> makeIirFilter(
-	const std::array<float, N>& b, const std::array<float, N>& a)
+BaseIirFilter<N> makeIirFilter(const std::array<float, N>& b, const std::array<float, N>& a)
 {
 	return std::move(BaseIirFilter<N>(b, a));
 }
