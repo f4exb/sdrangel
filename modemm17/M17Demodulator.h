@@ -27,14 +27,8 @@ struct MODEMM17_API M17Demodulator
 	static const uint16_t SYMBOL_RATE = 4800;
 	static const uint16_t SAMPLES_PER_SYMBOL = SAMPLE_RATE / SYMBOL_RATE;
 	static const uint16_t BLOCK_SIZE = 192;
-
-	static constexpr float sample_rate = SAMPLE_RATE;
-	static constexpr float symbol_rate = SYMBOL_RATE;
-
 	static const uint8_t MAX_MISSING_SYNC = 8;
 
-	using collelator_t = Correlator;
-	using sync_word_t = SyncWord;
 	using callback_t = M17FrameDecoder::callback_t;
 	using diagnostic_callback_t = std::function<void(bool, float, float, float, int, int, float, int, int, int, int)>;
 
@@ -50,9 +44,9 @@ struct MODEMM17_API M17Demodulator
 	DataCarrierDetect<SAMPLE_RATE, 500> dcd{2500, 4000, 1.0, 4.0};
 	ClockRecovery clock_recovery;
 
-	sync_word_t preamble_sync{{+3, -3, +3, -3, +3, -3, +3, -3}, 29.f};
-	sync_word_t lsf_sync{     {+3, +3, +3, +3, -3, -3, +3, -3}, 32.f, -31.f};	// LSF or STREAM (inverted)
-	sync_word_t packet_sync{  {+3, -3, +3, +3, -3, -3, -3, -3}, 31.f, -31.f};	// PACKET or BERT (inverted)
+	SyncWord preamble_sync{{+3, -3, +3, -3, +3, -3, +3, -3}, 29.f};
+	SyncWord lsf_sync{     {+3, +3, +3, +3, -3, -3, +3, -3}, 32.f, -31.f};	// LSF or STREAM (inverted)
+	SyncWord packet_sync{  {+3, -3, +3, +3, -3, -3, -3, -3}, 31.f, -31.f};	// PACKET or BERT (inverted)
 
 	FreqDevEstimator dev;
 	float idev;
@@ -117,7 +111,7 @@ struct MODEMM17_API M17Demodulator
 private:
     static const std::array<float, 150> rrc_taps;
     BaseFirFilter<rrc_taps.size()> demod_filter{rrc_taps};
-  	collelator_t correlator;
+  	Correlator correlator;
     int16_t initializing_count_;
 };
 

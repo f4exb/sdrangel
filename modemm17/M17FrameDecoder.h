@@ -39,7 +39,7 @@ QString dump(const std::array<C,N>& data, char header = 'D')
 
 struct M17FrameDecoder
 {
-    static constexpr size_t MAX_LICH_FRAGMENT = 5;
+    static const size_t MAX_LICH_FRAGMENT = 5;
 
     M17Randomizer<368> derandomize_;
     PolynomialInterleaver<45, 92, 368> interleaver_;

@@ -13,11 +13,6 @@ namespace modemm17
 template <size_t N = 368>
 struct M17Framer
 {
-    using buffer_t = std::array<int8_t, N>;
-
-    alignas(16) buffer_t buffer_;
-    size_t index_ = 0;
-
     M17Framer()
     {
         reset();
@@ -57,6 +52,10 @@ struct M17Framer
         buffer_.fill(0);
         index_ = 0;
     }
+
+private:
+    alignas(16) std::array<int8_t, N> buffer_;
+    size_t index_ = 0;
 };
 
 } // modemm17
