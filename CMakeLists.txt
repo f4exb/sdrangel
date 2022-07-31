@@ -550,7 +550,7 @@ add_subdirectory(swagger)
 add_subdirectory(devices)
 add_subdirectory(sdrbench)
 
-if (LINUX)
+if (not APPLE)
     add_subdirectory(modemm17)
 endif()
 
