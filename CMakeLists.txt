@@ -550,9 +550,7 @@ add_subdirectory(swagger)
 add_subdirectory(devices)
 add_subdirectory(sdrbench)
 
-if (not APPLE)
-    add_subdirectory(modemm17)
-endif()
+add_subdirectory(modemm17)
 
 if (BUILD_GUI)
     add_subdirectory(sdrgui)
