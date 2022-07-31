@@ -173,7 +173,7 @@ public:
         }
 
         std::array<int8_t, 368> punctured;
-        auto size = puncture(encoded, punctured, P1);
+        auto size = puncture<488, 368, 61>(encoded, punctured, P1);
 
         if (size != 368) {
             qWarning() << "modemm17::M17Modulator::make_lsf: incorrect size (not 368)" << size;
@@ -273,7 +273,7 @@ public:
         }
 
         std::array<int8_t, 272> punctured;
-        auto size = modemm17::puncture(encoded, punctured, modemm17::P2);
+        auto size = modemm17::puncture<296, 272, 12>(encoded, punctured, modemm17::P2);
 
         if (size != 272) {
             qWarning() << "modemm17::M17Modulator::make_stream_data_frame: incorrect size (not 272)" << size;
@@ -354,7 +354,7 @@ public:
         }
 
         std::array<int8_t, 368> punctured;
-        auto size = puncture(encoded, punctured, P3);
+        auto size = puncture<420, 368, 8>(encoded, punctured, P3);
 
         if (size != 368) {
             qWarning() << "modemm17::M17Modulator::make_packet_frame: incorrect size (not 368)" << size;
@@ -435,7 +435,7 @@ public:
         }
 
         std::array<int8_t, 368> punctured;
-        auto size = puncture(encoded, punctured, P2);
+        auto size = puncture<402, 368, 12>(encoded, punctured, P2);
 
         if (size != 368) {
             qWarning() << "modemm17::M17Modulator::make_bert_frame: incorrect size (not 368)" << size;

@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <cstdint>
 #include <cassert>
 #include <array>
 #include <bitset>
@@ -170,7 +171,7 @@ std::array<U, M> depunctured(
 }
 
 template <size_t IN, size_t OUT, size_t P>
-size_t depuncture(
+size_t depuncture( // FIXME: MSVC
     const std::array<int8_t, IN>& in,
     std::array<int8_t, OUT>& out,
     const std::array<int8_t, P>& p
@@ -190,16 +191,18 @@ size_t depuncture(
         {
             out[i] = in[index++];
         }
-        if (pindex == P) pindex = 0;
+        if (pindex == P) {
+            pindex = 0;
+        }
     }
     return bit_count;
 }
 
 
-template <typename T, size_t IN, typename U, size_t OUT, size_t P>
-size_t puncture(
-    const std::array<T, IN>& in,
-    std::array<U, OUT>& out,
+template <size_t IN, size_t OUT, size_t P>
+size_t puncture( // FIXME: MSVC
+    const std::array<uint8_t, IN>& in,
+    std::array<int8_t, OUT>& out,
     const std::array<int8_t, P>& p
 )
 {
@@ -265,30 +268,6 @@ void assign_bit_index(
 {
     if (value) set_bit_index(input, index);
     else reset_bit_index(input, index);
-}
-
-
-template <size_t IN, size_t OUT, size_t P>
-size_t puncture_bytes(
-    const std::array<uint8_t, IN>& in,
-    std::array<uint8_t, OUT>& out,
-    const std::array<int8_t, P>& p
-)
-{
-    size_t index = 0;
-    size_t pindex = 0;
-    size_t bit_count = 0;
-    for (size_t i = 0; i != IN * 8 && index != OUT * 8; ++i)
-    {
-        if (p[pindex++])
-        {
-            assign_bit_index(out, index++, get_bit_index(in, i));
-            bit_count++;
-        }
-
-        if (pindex == P) pindex = 0;
-    }
-    return bit_count;
 }
 
 /**
