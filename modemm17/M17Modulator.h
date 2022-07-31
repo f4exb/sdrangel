@@ -118,7 +118,7 @@ public:
     {
         lsf.fill(0);
 
-        M17Randomizer<368> randomizer;
+        M17Randomizer randomizer;
         PolynomialInterleaver<45, 92, 368> interleaver;
         CRC16 crc(0x5935, 0xFFFF);
 
@@ -289,7 +289,7 @@ public:
         const std::array<uint8_t, 25> packet
     )
     {
-        M17Randomizer<368> randomizer;
+        M17Randomizer randomizer;
         PolynomialInterleaver<45, 92, 368> interleaver;
 
         std::array<uint8_t, 26> packet_assembly;
@@ -446,7 +446,7 @@ public:
 
     static void interleave_and_randomize(std::array<int8_t, 368>& punctured)
     {
-        M17Randomizer<368> randomizer;
+        M17Randomizer randomizer;
         PolynomialInterleaver<45, 92, 368> interleaver;
 
         interleaver.interleave(punctured);

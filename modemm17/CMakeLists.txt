@@ -8,6 +8,7 @@ set(modemm17_SOURCES
     LinkSetupFrame.cpp
     M17Demodulator.cpp
     M17Modulator.cpp
+    M17Randomizer.cpp
 )
 
 set(modemm17_HEADERS
@@ -35,7 +36,6 @@ set(modemm17_HEADERS
     M17Synchronizer.h
     PhaseEstimator.h
     PolynomialInterleaver.h
-    queue.h
     SlidingDFT.h
     SymbolEvm.h
     Trellis.h

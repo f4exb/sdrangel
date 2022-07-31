@@ -21,24 +21,22 @@ template <size_t SampleRate, size_t Frequency, size_t Accuracy = 1000>
 class SlidingDFT
 {
 public:
-    using ComplexType = std::complex<float>;
-
     SlidingDFT()
     {
         samples_.fill(0);
         float pi2 = M_PI * 2.0f;
         float kth = float(Frequency) / float(SampleRate);
-        coeff_ = std::exp(-ComplexType{0, 1} * pi2 * kth);
+        coeff_ = std::exp(-std::complex<float>{0, 1} * pi2 * kth);
     }
 
-    ComplexType operator()(float sample)
+    std::complex<float> operator()(float sample)
     {
         auto index = index_;
         index_ += 1;
         if (index_ == (SampleRate / Accuracy)) index_ = 0;
 
         float delta = sample - samples_[index];
-        ComplexType result = (result_ + delta) * coeff_;
+        std::complex<float> result = (result_ + delta) * coeff_;
         result_ = result * float(0.999999999999999);
         samples_[index] = sample;
         prev_index_ = index;
@@ -46,9 +44,9 @@ public:
     }
 
 private:
-    ComplexType coeff_;
+    std::complex<float> coeff_;
     std::array<float, (SampleRate / Accuracy)> samples_;
-    ComplexType result_{0,0};
+    std::complex<float> result_{0,0};
     size_t index_ = 0;
     size_t prev_index_ = (SampleRate / Accuracy) - 1;
 };
@@ -69,8 +67,7 @@ template <size_t SampleRate, size_t N, size_t K>
 class NSlidingDFT
 {
 public:
-    using ComplexType = std::complex<float>;
-    using result_type = std::array<ComplexType, K>;
+    using result_type = std::array<std::complex<float>, K>;
 
     /**
      * Construct the DFT with an array of frequencies.  These frequencies
@@ -107,17 +104,17 @@ public:
     }
 
 private:
-    const std::array<ComplexType, K> coeff_;
+    const std::array<std::complex<float>, K> coeff_;
     std::array<float, N> samples_;
-    std::array<ComplexType, K> result_{0,0};
+    std::array<std::complex<float>, K> result_{0,0};
     size_t index_ = 0;
     size_t prev_index_ = N - 1;
 
-    static constexpr std::array<ComplexType, K>
+    static constexpr std::array<std::complex<float>, K>
     make_coefficients(const std::array<size_t, K>& frequencies)
     {
-        ComplexType j = ComplexType{0, 1};
-        std::array<ComplexType, K> result;
+        std::complex<float> j = std::complex<float>{0, 1};
+        std::array<std::complex<float>, K> result;
         float pi2 = M_PI * 2.0f;
         for (size_t i = 0; i != K; ++i)
         {

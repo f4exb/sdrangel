@@ -41,7 +41,7 @@ struct M17FrameDecoder
 {
     static const size_t MAX_LICH_FRAGMENT = 5;
 
-    M17Randomizer<368> derandomize_;
+    M17Randomizer derandomize_;
     PolynomialInterleaver<45, 92, 368> interleaver_;
     Trellis<4,2> trellis_{makeTrellis<4, 2>({031,027})};
     Viterbi<decltype(trellis_), 4> viterbi_{trellis_};
