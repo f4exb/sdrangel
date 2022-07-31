@@ -8,6 +8,8 @@
 #include <numeric>
 #include <cassert>
 
+#include "export.h"
+
 namespace modemm17
 {
 
@@ -37,7 +39,7 @@ namespace modemm17
  * @inv sample_index_ is in the interval [0, SAMPLES_PER_SYMBOL).
  * @inv clock_ is in the interval [0.9995, 1.0005]
  */
-class ClockRecovery
+class MODEMM17_API ClockRecovery
 {
     std::vector<float> estimates_;
     size_t sample_count_ = 0;

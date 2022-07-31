@@ -8,10 +8,12 @@
 #include <stdexcept>
 #include <algorithm>
 
+#include "export.h"
+
 namespace modemm17
 {
 
-struct LinkSetupFrame
+struct MODEMM17_API LinkSetupFrame
 {
     using call_t = std::array<char,10>;             // NUL-terminated C-string.
     using encoded_call_t = std::array<uint8_t, 6>;

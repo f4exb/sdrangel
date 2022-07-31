@@ -6,10 +6,11 @@
 #include <cstdint>
 #include <cstddef>
 
+#include "export.h"
 namespace modemm17
 {
 
-struct M17Randomizer
+struct MODEMM17_API M17Randomizer
 {
     std::array<int8_t, 368> dc_;
 

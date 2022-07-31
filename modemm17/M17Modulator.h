@@ -21,6 +21,8 @@
 #include <iostream>
 #include <memory>
 
+#include "export.h"
+
 namespace modemm17
 {
 
@@ -29,7 +31,7 @@ namespace modemm17
  * It is used to produce the various symbol sequences but modulation is handled at
  * upper level.
  */
-struct M17Modulator
+struct MODEMM17_API M17Modulator
 {
 public:
     using symbols_t = std::array<int8_t, 192>;      // One frame of symbols.
