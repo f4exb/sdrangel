@@ -91,11 +91,13 @@ constexpr auto makeCost(Trellis_ trellis)
  * Soft decision Viterbi algorithm based on the trellis and LLR size.
  *
  */
-template <typename Trellis_, size_t LLR_ = 2>
+template <typename Trellis_, size_t LLR_, size_t IN, size_t OUT>
 struct Viterbi
 {
     static_assert(LLR_ < 7, "Need to be < 7 to avoid overflow errors");
 
+    static constexpr size_t IN_ = IN;
+    static constexpr size_t OUT_ = OUT;
     static constexpr size_t K = Trellis_::K;
     static constexpr size_t k = Trellis_::k;
     static constexpr size_t n = Trellis_::n;
@@ -119,10 +121,10 @@ struct Viterbi
     // because of a static assertion in the decode() function.
     std::array<std::bitset<NumStates>, 244> history_;
 
-    Viterbi(Trellis_ trellis)
-    : cost_(makeCost<Trellis_, LLR_>(trellis))
-    , nextState_(makeNextState(trellis))
-    , prevState_(makePrevState(trellis))
+    Viterbi(Trellis_ trellis) :
+        cost_(makeCost<Trellis_, LLR_>(trellis)),
+        nextState_(makeNextState(trellis)),
+        prevState_(makePrevState(trellis))
     {}
 
     void calculate_path_metric(
@@ -159,8 +161,7 @@ struct Viterbi
      *
      * @return path metric for estimating BER.
      */
-    template <size_t IN, size_t OUT>
-    size_t decode(const std::array<int8_t, IN>& in, std::array<uint8_t, OUT>& out)
+    size_t decode(const std::array<int8_t, IN_>& in, std::array<uint8_t, OUT_>& out)
     {
         static_assert(sizeof(history_) >= IN / 2, "Invalid size");
 

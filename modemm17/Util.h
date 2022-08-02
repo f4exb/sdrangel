@@ -171,56 +171,62 @@ std::array<U, M> depunctured(
 }
 
 template <size_t IN, size_t OUT, size_t P>
-size_t depuncture( // FIXME: MSVC
-    const std::array<int8_t, IN>& in,
-    std::array<int8_t, OUT>& out,
-    const std::array<int8_t, P>& p
-)
+struct PunctureOps
 {
-    size_t index = 0;
-    size_t pindex = 0;
-    size_t bit_count = 0;
-    for (size_t i = 0; i != OUT && index < IN; ++i)
+    static constexpr size_t IN_ = IN;
+    static constexpr size_t OUT_ = OUT;
+    static constexpr size_t P_ = P;
+
+    size_t depuncture( // FIXME: MSVC
+        const std::array<int8_t, IN_>& in,
+        std::array<int8_t, OUT_>& out,
+        const std::array<int8_t, P_>& p
+    )
     {
-        if (!p[pindex++])
+        size_t index = 0;
+        size_t pindex = 0;
+        size_t bit_count = 0;
+        for (size_t i = 0; i != OUT && index < IN; ++i)
         {
-            out[i] = 0;
-            bit_count++;
+            if (!p[pindex++])
+            {
+                out[i] = 0;
+                bit_count++;
+            }
+            else
+            {
+                out[i] = in[index++];
+            }
+            if (pindex == P) {
+                pindex = 0;
+            }
         }
-        else
-        {
-            out[i] = in[index++];
-        }
-        if (pindex == P) {
-            pindex = 0;
-        }
+        return bit_count;
     }
-    return bit_count;
-}
 
-
-template <size_t IN, size_t OUT, size_t P>
-size_t puncture( // FIXME: MSVC
-    const std::array<uint8_t, IN>& in,
-    std::array<int8_t, OUT>& out,
-    const std::array<int8_t, P>& p
-)
-{
-    size_t index = 0;
-    size_t pindex = 0;
-    size_t bit_count = 0;
-    for (size_t i = 0; i != IN && index != OUT; ++i)
+    size_t puncture( // FIXME: MSVC
+        const std::array<uint8_t, IN_>& in,
+        std::array<int8_t, OUT_>& out,
+        const std::array<int8_t, P_>& p
+    )
     {
-        if (p[pindex++])
+        size_t index = 0;
+        size_t pindex = 0;
+        size_t bit_count = 0;
+        for (size_t i = 0; i != IN && index != OUT; ++i)
         {
-            out[index++] = in[i];
-            bit_count++;
-        }
+            if (p[pindex++])
+            {
+                out[index++] = in[i];
+                bit_count++;
+            }
 
-        if (pindex == P) pindex = 0;
+            if (pindex == P) pindex = 0;
+        }
+        return bit_count;
     }
-    return bit_count;
-}
+};
+
 
 template <size_t N>
 constexpr bool get_bit_index(

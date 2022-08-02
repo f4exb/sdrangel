@@ -44,7 +44,6 @@ struct M17FrameDecoder
     M17Randomizer derandomize_;
     PolynomialInterleaver<45, 92, 368> interleaver_;
     Trellis<4,2> trellis_{makeTrellis<4, 2>({031,027})};
-    Viterbi<decltype(trellis_), 4> viterbi_{trellis_};
     CRC16 crc_;
 
     enum class State { LSF, STREAM, BASIC_PACKET, FULL_PACKET, BERT };
@@ -154,8 +153,10 @@ struct M17FrameDecoder
     DecodeResult decode_lsf(input_buffer_t& buffer, int& viterbi_cost)
     {
         depunctured_buffer_t depuncture_buffer;
-        depuncture<368, 488, 61>(buffer, depuncture_buffer.lsf, P1);
-        viterbi_cost = viterbi_.decode(depuncture_buffer.lsf, decode_buffer.lsf);
+        PunctureOps<368, 488, 61> punct;
+        punct.depuncture(buffer, depuncture_buffer.lsf, P1);
+        Viterbi<decltype(trellis_), 4, 488, 240> viterbi_lsf{trellis_};
+        viterbi_cost = viterbi_lsf.decode(depuncture_buffer.lsf, decode_buffer.lsf);
         to_byte_array(decode_buffer.lsf, output_buffer.lsf);
 
         // qDebug() << "modemm17::M17FrameDecoder::decode_lsf: vierbi:" << viterbi_cost <<dump(output_buffer.lsf);
@@ -268,8 +269,10 @@ struct M17FrameDecoder
     DecodeResult decode_bert(input_buffer_t& buffer, int& viterbi_cost)
     {
         depunctured_buffer_t depuncture_buffer;
-        depuncture<368, 402, 12>(buffer, depuncture_buffer.bert, P2);
-        viterbi_cost = viterbi_.decode(depuncture_buffer.bert, decode_buffer.bert);
+        PunctureOps<368, 402, 12> punct;
+        punct.depuncture(buffer, depuncture_buffer.bert, P2);
+        Viterbi<decltype(trellis_), 4, 402, 197> viterbi_bert{trellis_};
+        viterbi_cost = viterbi_bert.decode(depuncture_buffer.bert, decode_buffer.bert);
         to_byte_array(decode_buffer.bert, output_buffer.bert);
 
         output_buffer.type = FrameType::BERT;
@@ -284,8 +287,10 @@ struct M17FrameDecoder
         std::copy(buffer.begin() + 96, buffer.end(), tmp.begin());
         depunctured_buffer_t depuncture_buffer;
 
-        depuncture<272, 296, 12>(tmp, depuncture_buffer.stream, P2);
-        viterbi_cost = viterbi_.decode(depuncture_buffer.stream, decode_buffer.stream);
+        PunctureOps<272, 296, 12> punct;
+        punct.depuncture(tmp, depuncture_buffer.stream, P2);
+        Viterbi<decltype(trellis_), 4, 296, 144> viterbi_stream{trellis_};
+        viterbi_cost = viterbi_stream.decode(depuncture_buffer.stream, decode_buffer.stream);
         to_byte_array(decode_buffer.stream, output_buffer.stream);
 
         if ((viterbi_cost < 60) && (output_buffer.stream[0] & 0x80))
@@ -311,8 +316,10 @@ struct M17FrameDecoder
     DecodeResult decode_packet(input_buffer_t& buffer, int& viterbi_cost, FrameType type)
     {
         depunctured_buffer_t depuncture_buffer;
-        depuncture<368, 420, 8>(buffer, depuncture_buffer.packet, P3);
-        viterbi_cost = viterbi_.decode(depuncture_buffer.packet, decode_buffer.packet);
+        PunctureOps<368, 420, 8> punct;
+        punct.depuncture(buffer, depuncture_buffer.packet, P3);
+        Viterbi<decltype(trellis_), 4, 420, 206> viterbi_packet{trellis_};
+        viterbi_cost = viterbi_packet.decode(depuncture_buffer.packet, decode_buffer.packet);
         to_byte_array(decode_buffer.packet, output_buffer.packet);
 
         output_buffer.type = type;
