@@ -88,12 +88,6 @@ struct NextStateTable
     }
 };
 
-template <size_t N>
-struct OutputTable
-{
-
-};
-
 /**
  * Compute a cost table for a Trellis of size K, for input n of N,
  * and LLR size of LLR bits + 1. (i.e. LLR = 1 allows 2 bits to
@@ -105,19 +99,6 @@ struct CostTable
     static constexpr int8_t Price = 1 << LLR;
     static constexpr size_t InputValues = 1 << N;
     using cost_table_t = std::array<std::array<uint8_t, InputValues>, K>;
-
-    template <typename Trellis_>
-    static constexpr cost_table_t makeCostTable()
-    {
-        cost_table_t result;
-        for (size_t i = 0; i != K; ++i)
-        {
-            for (size_t j = 0; j != InputValues; ++j)
-            {
-
-            }
-        }
-    }
 };
 
 
@@ -136,8 +117,8 @@ struct Trellis
 
     polynomials_t polynomials;
 
-    Trellis(polynomials_t polys)
-    : polynomials(polys)
+    Trellis(polynomials_t polys) :
+        polynomials(polys)
     {}
 };
 
