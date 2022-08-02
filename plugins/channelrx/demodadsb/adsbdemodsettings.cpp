@@ -92,7 +92,7 @@ void ADSBDemodSettings::resetToDefaults()
     m_logEnabled = false;
     m_airspaces = QStringList({"A", "D", "TMZ"});
     m_airspaceRange = 500.0f;
-#if QT_VERSION == QT_VERSION_CHECK(5, 15, 3)
+#if QT_VERSION == QT_VERSION_CHECK(5, 15, 3) || QT_VERSION == QT_VERSION_CHECK(5, 15, 4)
     m_mapProvider = "mapboxgl"; // osm maps do not work in Qt 5.15.3 - https://github.com/f4exb/sdrangel/issues/1169
 #else
     m_mapProvider = "osm";
