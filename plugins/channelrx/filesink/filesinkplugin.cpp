@@ -29,7 +29,7 @@
 const PluginDescriptor FileSinkPlugin::m_pluginDescriptor = {
     FileSink::m_channelId,
     QStringLiteral("File Sink"),
-    QStringLiteral("7.0.0"),
+    QStringLiteral("7.6.1"),
     QStringLiteral("(c) Edouard Griffiths, F4EXB"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,

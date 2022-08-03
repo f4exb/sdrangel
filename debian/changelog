@@ -1,3 +1,15 @@
+sdrangel (7.6.1-1) unstable; urgency=medium
+
+  * Fix map feature 5.15.4 check. PR #1370
+  * M17 library some code rework
+  * DATV demod: allocate DATVDemodSink dynamically
+  * New threading model for some plugins
+  * DSD demod GUI: fixes for non existent AMBE feature. Fixes #1334
+  * Corrected order of deletion of feature vs feature GUI. Fixes #1332
+  * Some OpenGL fixes. Issues #1351 #1359. PR #1361
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Wed, 03 Aug 2022 16:46:27 +02004
+
 sdrangel (7.6.0-1) unstable; urgency=medium
 
   * Remote TCP Input and Remote TCP Sink Plugins. Issue #456. PR #1350
