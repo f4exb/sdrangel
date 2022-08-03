@@ -19,19 +19,6 @@ namespace modemm17
 
 namespace detail {
 
-// template<std::size_t...Is, class Tuple>
-// constexpr std::bitset<sizeof...(Is)> make_bitset(std::index_sequence<Is...>, Tuple&& tuple)
-// {
-//     constexpr auto size = sizeof...(Is);
-//     std::bitset<size> result;
-//     using expand = int[];
-//     for (size_t i = 0; i != size; ++i)
-//     {
-//         void(expand {0, result[Is] = std::get<Is>(tuple)...});
-//     }
-//     return result;
-// }
-
 /**
  * This is the max value for the LLR based on size N.
  */
@@ -142,32 +129,6 @@ auto llr(float sample)
     if (it == symbol_map.end()) return std::get<1>(*symbol_map.rbegin());
 
     return std::get<1>(*it);
-}
-
-template <size_t M, typename T, size_t N, typename U, size_t IN>
-std::array<U, M> depunctured(
-    std::array<T, N> puncture_matrix,
-    std::array<U, IN> in
-)
-{
-    static_assert(M % N == 0, "M must be an integer multiple of N");
-
-    std::array<U, M> result;
-    size_t index = 0;
-    size_t pindex = 0;
-    for (size_t i = 0; i != M; ++i)
-    {
-        if (!puncture_matrix[pindex++])
-        {
-            result[i] = 0;
-        }
-        else
-        {
-            result[i] = in[index++];
-        }
-        if (pindex == N) pindex = 0;
-    }
-    return result;
 }
 
 template <size_t IN, size_t OUT, size_t P>
