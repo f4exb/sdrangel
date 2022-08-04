@@ -397,9 +397,11 @@ void DATVDemodSink::CleanUpDATVFramework()
         delete (leansdr::s2_fecdec<bool, leansdr::hard_sb>*) r_fecdec;
     }
 
+#if 0
     if (r_fecdecsoft != nullptr) {
         delete (leansdr::s2_fecdec_soft<leansdr::llr_t,leansdr::llr_sb>*) r_fecdecsoft;
     }
+#endif
 
     if (r_fecdechelper != nullptr) {
         delete (leansdr::s2_fecdec_helper<leansdr::llr_t,leansdr::llr_sb>*) r_fecdechelper;

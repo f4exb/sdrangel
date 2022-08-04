@@ -18,17 +18,22 @@ namespace ldpctool {
 class LDPCUtil
 {
 public:
-#ifndef _MSC_VER
+#if defined(__APPLE__)
+    // Recent versions of MacOS support aligned_alloc, but Mojave doesn't
     static void *aligned_malloc(size_t alignment, size_t size)
     {
-        return aligned_alloc(alignment, size);
+        void *p = nullptr;
+
+        posix_memalign(&p, alignment, size);
+
+        return p;
     }
 
     static void aligned_free(void *mem)
     {
         free(mem);
     }
-#else
+#elif defined(_MSC_VER)
     static void *aligned_malloc(size_t alignment, size_t size)
     {
         return _aligned_malloc(size, alignment);
@@ -37,6 +42,16 @@ public:
     static void aligned_free(void *mem)
     {
         _aligned_free(mem);
+    }
+#else
+    static void *aligned_malloc(size_t alignment, size_t size)
+    {
+        return aligned_alloc(alignment, size);
+    }
+
+    static void aligned_free(void *mem)
+    {
+        free(mem);
     }
 #endif
 };
