@@ -3046,6 +3046,8 @@ struct s2_fecdec : runnable
     pipewriter<int> *bitcount, *errcount;
 }; // s2_fecdec
 
+#ifdef LINUX
+
 // Soft LDPC decoder
 // Internally implemented LDPC tool. Replaces external LDPC decoder
 
@@ -3194,6 +3196,8 @@ private:
     s2_bch_engines s2bch;
     s2_bbscrambling bbscrambling;
 }; // s2_fecdec_soft
+
+#endif
 
 // External LDPC decoder
 // Spawns a user-specified command, FEC frames on stdin/stdout.

@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <cmath>
 #include <cstddef>
 #include <type_traits>
 #include <tuple>
