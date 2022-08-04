@@ -504,7 +504,7 @@ void GLScopeGUI::on_timeOfs_valueChanged(int value)
         ui->freerun->isChecked()
     );
 
-    if (value > 0)
+    if ((value > 0) && (ui->mem->value() == 0)) // switch from live to memory trace
     {
         ui->mem->setValue(1);
         ui->memText->setText("01");
