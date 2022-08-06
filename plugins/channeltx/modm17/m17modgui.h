@@ -115,7 +115,6 @@ private slots:
     void handleSourceMessages();
 
     void on_deltaFrequency_changed(qint64 value);
-    void on_channelSpacingApply_clicked();
     void on_rfBW_valueChanged(int value);
     void on_fmDev_valueChanged(int value);
     void on_toneFrequency_valueChanged(int value);
