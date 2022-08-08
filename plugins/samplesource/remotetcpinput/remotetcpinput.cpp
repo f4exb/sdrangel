@@ -152,7 +152,7 @@ int RemoteTCPInput::getSampleRate() const
 
 quint64 RemoteTCPInput::getCenterFrequency() const
 {
-    return m_settings.m_centerFrequency;
+    return m_settings.m_centerFrequency + m_settings.m_inputFrequencyOffset;
 }
 
 void RemoteTCPInput::setCenterFrequency(qint64 centerFrequency)
@@ -264,8 +264,10 @@ void RemoteTCPInput::applySettings(const RemoteTCPInputSettings& settings, bool 
     if ((m_settings.m_rfBW != settings.m_rfBW) || force) {
         reverseAPIKeys.append("rfBW");
     }
-    if ((m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset) || force) {
+    if ((m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset) || force)
+    {
         reverseAPIKeys.append("inputFrequencyOffset");
+        forwardChange = true;
     }
     if ((m_settings.m_channelGain != settings.m_channelGain) || force) {
         reverseAPIKeys.append("channelGain");
@@ -304,7 +306,7 @@ void RemoteTCPInput::applySettings(const RemoteTCPInputSettings& settings, bool 
 
     if (forwardChange && (settings.m_channelSampleRate != 0))
     {
-        DSPSignalNotification *notif = new DSPSignalNotification(settings.m_channelSampleRate, settings.m_centerFrequency);
+        DSPSignalNotification *notif = new DSPSignalNotification(settings.m_channelSampleRate, settings.m_centerFrequency + settings.m_inputFrequencyOffset);
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 
