@@ -447,8 +447,6 @@ void WFMModGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
 	{
-		setTitleColor(m_channelMarker.getColor());
-		ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 		WFMMod::MsgConfigureWFMMod *msgConf = WFMMod::MsgConfigureWFMMod::create(m_settings, force);
 		m_wfmMod->getInputMessageQueue()->push(msgConf);
 	}
