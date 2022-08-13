@@ -482,7 +482,7 @@ void SimplePTTGUI::applyPTT(bool tx)
 void SimplePTTGUI::audioSelect()
 {
     qDebug("SimplePTTGUI::audioSelect");
-    AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName);
+    AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName, true);
     audioSelect.exec();
 
     if (audioSelect.m_selected)

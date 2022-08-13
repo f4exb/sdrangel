@@ -33,7 +33,12 @@ namespace Ui {
 class SDRGUI_API AudioSelectDialog : public QDialog {
     Q_OBJECT
 public:
-    explicit AudioSelectDialog(const AudioDeviceManager* audioDeviceManager, const QString& deviceName, bool input = false, QWidget* parent = 0);
+    explicit AudioSelectDialog(
+        const AudioDeviceManager* audioDeviceManager,
+        const QString& deviceName,
+        bool input = false,
+        QWidget* parent = nullptr
+    );
     ~AudioSelectDialog();
 
     QString m_audioDeviceName;

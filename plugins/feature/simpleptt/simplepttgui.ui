@@ -240,7 +240,7 @@
       <item>
        <widget class="QSpinBox" name="voxHold">
         <property name="toolTip">
-         <string>Vox delay (ms)</string>
+         <string>Vox hold (ms)</string>
         </property>
         <property name="minimum">
          <number>500</number>
