@@ -100,7 +100,7 @@ option(ENABLE_CHANNELTX_REMOTESOURCE "Enable channeltx remotesource plugin" ON)
 option(ENABLE_CHANNELTX_FILESOURCE "Enable channeltx filesource plugin" ON)
 
 # Channel MIMO enablers
-option(ENABLE_CHANNELMIMO, "Enable channelmimo plugins" ON)
+option(ENABLE_CHANNELMIMO "Enable channelmimo plugins" ON)
 option(ENABLE_CHANNELMIMO_INTERFEROMETER "Enable channelmimo interferometer plugin" ON)
 option(ENABLE_CHANNELMIMO_DOA2 "Enable channelmimo doa2 plugin" ON)
 option(ENABLE_CHANNELMIMO_BEAMSTEERINGCWMOD "Enable channelmimo beamsteeringcwmod plugin" ON)
