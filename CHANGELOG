@@ -1,3 +1,16 @@
+sdrangel (7.6.2-1) unstable; urgency=medium
+
+  * MacOS build fixes. PR #1374
+  * ChannelAnalyzer: apply fix for #892 only if the current trace mode is live. Fixes #1375
+  * Call find_package for OpenCV on Windows for modatv. PR #1382. Fixes #1366
+  * M17 mod: removed unwanted method declaration. Fixes #1380
+  * RemoteTCPInput: Use input frequency offset when calculating local centre frequency. PR #1383. Fixes #1377
+  * WFM mod: fixed bug in WFMGUI::applySettings. Fixes #1387
+  * SimplePTT: fixed list of audio devices for VOX displaying output instead of input devices
+  * Removed stray comma in CmakeLists.txt. Complements #1310. Fixes #1388
+
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sun, 14 Aug 2022 09:49:13 +0200
+
 sdrangel (7.6.1-1) unstable; urgency=medium
 
   * Fix map feature 5.15.4 check. PR #1370
@@ -8,7 +21,7 @@ sdrangel (7.6.1-1) unstable; urgency=medium
   * Corrected order of deletion of feature vs feature GUI. Fixes #1332
   * Some OpenGL fixes. Issues #1351 #1359. PR #1361
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Wed, 03 Aug 2022 16:46:27 +02004
+  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Wed, 03 Aug 2022 16:46:27 +0200
 
 sdrangel (7.6.0-1) unstable; urgency=medium
 
