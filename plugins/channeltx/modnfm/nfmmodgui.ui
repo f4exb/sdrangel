@@ -590,6 +590,16 @@
        </widget>
       </item>
       <item>
+       <widget class="ButtonSwitch" name="compressor">
+        <property name="toolTip">
+         <string>Audio input compressor on/off</string>
+        </property>
+        <property name="text">
+         <string>CMP</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="Line" name="line_3">
         <property name="orientation">
          <enum>Qt::Vertical</enum>

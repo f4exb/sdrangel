@@ -279,6 +279,12 @@ void NFMModGUI::on_mic_toggled(bool checked)
     applySettings();
 }
 
+void NFMModGUI::on_compressor_toggled(bool checked)
+{
+    m_settings.m_compressorEnable = checked;
+    applySettings();
+}
+
 void NFMModGUI::on_feedbackEnable_toggled(bool checked)
 {
     m_settings.m_feedbackAudioEnable = checked;
@@ -581,6 +587,7 @@ void NFMModGUI::displaySettings()
     ui->dcsCode->setText(tr("%1").arg(m_settings.m_dcsCode, 3, 8, QLatin1Char('0')));
     ui->dcsPositive->setChecked(m_settings.m_dcsPositive);
     ui->bpf->setChecked(m_settings.m_bpfOn);
+    ui->compressor->setChecked(m_settings.m_compressorEnable);
 
     ui->channelMute->setChecked(m_settings.m_channelMute);
     ui->playLoop->setChecked(m_settings.m_playLoop);
@@ -729,6 +736,7 @@ void NFMModGUI::makeUIConnections()
     QObject::connect(ui->tone, &ButtonSwitch::toggled, this, &NFMModGUI::on_tone_toggled);
     QObject::connect(ui->morseKeyer, &ButtonSwitch::toggled, this, &NFMModGUI::on_morseKeyer_toggled);
     QObject::connect(ui->mic, &ButtonSwitch::toggled, this, &NFMModGUI::on_mic_toggled);
+    QObject::connect(ui->compressor, &ButtonSwitch::toggled, this, &NFMModGUI::on_compressor_toggled);
     QObject::connect(ui->play, &ButtonSwitch::toggled, this, &NFMModGUI::on_play_toggled);
     QObject::connect(ui->playLoop, &ButtonSwitch::toggled, this, &NFMModGUI::on_playLoop_toggled);
     QObject::connect(ui->navTimeSlider, &QSlider::valueChanged, this, &NFMModGUI::on_navTimeSlider_valueChanged);

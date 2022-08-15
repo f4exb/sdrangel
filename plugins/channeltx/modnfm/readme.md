@@ -122,7 +122,7 @@ You should aim at keeping the peak value below 100% using the volume control
 
 <h3>10: Input source control</h3>
 
-![Modulator input source control GUI](../../../doc/img/ModControls.png)
+![Modulator input source control GUI](../../../doc/img/NFMMod_plugin_input.png)
 
 <h4>10.1: Tone input select</h4>
 
@@ -141,6 +141,10 @@ Adjusts the tone frequency from 0.1 to 2.5 kHz in 0.01 kHz steps
 Left click to switch to the audio input. You must switch it off to make other inputs available.
 
 Right click to select audio input device. See [audio management documentation](../../../sdrgui/audio.md) for details.
+
+<h4>10.5: Audio input compression</h4>
+
+Toggles the compressor for the audio input.
 
 <h3>11: Audio feedback</h3>
 

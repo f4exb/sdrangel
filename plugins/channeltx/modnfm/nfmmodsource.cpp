@@ -55,6 +55,16 @@ NFMModSource::NFMModSource() :
 
 	m_magsq = 0.0;
 
+    m_audioCompressor.initSimple(
+        m_audioSampleRate,
+        -8,    // pregain (dB)
+        -20,   // threshold (dB)
+        20,    // knee (dB)
+        15,    // ratio (dB)
+        0.003, // attack (s)
+        0.25   // release (s)
+    );
+
     applySettings(m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 }
@@ -242,7 +252,16 @@ void NFMModSource::pullAF(Real& sample)
     case NFMModSettings::NFMModInputAudio:
         if (m_audioBufferFill < m_audioBuffer.size())
         {
-            sample = ((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r) / 65536.0f) * m_settings.m_volumeFactor;
+            if (m_settings.m_compressorEnable)
+            {
+                sample = ((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r) / 3276.8f);
+                sample = clamp<float>(m_audioCompressor.compress(sample), -1.0f, 1.0f) * m_settings.m_volumeFactor * 3.0f;
+            }
+            else
+            {
+                sample = ((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r) / 3276.8f) * m_settings.m_volumeFactor;
+            }
+
             m_audioBufferFill++;
         }
         else
@@ -365,6 +384,8 @@ void NFMModSource::applyAudioSampleRate(int sampleRate)
     m_cwKeyer.setSampleRate(sampleRate);
     m_cwKeyer.reset();
     m_preemphasisFilter.configure(m_preemphasis*sampleRate);
+    m_audioCompressor.m_rate = sampleRate;
+    m_audioCompressor.initState();
     m_audioSampleRate = sampleRate;
     applyFeedbackAudioSampleRate(m_feedbackAudioSampleRate);
 

@@ -63,6 +63,7 @@ struct NFMModSettings
     QString m_feedbackAudioDeviceName; //!< This is the audio device you send the audio samples to for audio feedback
     float m_feedbackVolumeFactor;
     bool m_feedbackAudioEnable;
+    bool m_compressorEnable;
     int m_streamIndex;
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;

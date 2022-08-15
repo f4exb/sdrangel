@@ -34,6 +34,7 @@
 #include "util/movingaverage.h"
 #include "dsp/cwkeyer.h"
 #include "audio/audiofifo.h"
+#include "audio/audiocompressorsnd.h"
 
 #include "nfmmodsettings.h"
 #include "nfmmoddcs.h"
@@ -123,6 +124,8 @@ private:
 
     std::ifstream *m_ifstream;
     CWKeyer m_cwKeyer;
+
+    AudioCompressorSnd m_audioCompressor;
 
     QMutex m_mutex;
 
