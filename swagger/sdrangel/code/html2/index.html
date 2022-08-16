@@ -3624,6 +3624,9 @@ margin-bottom: 20px;
     "RemoteSourceSettings" : {
       "$ref" : "#/definitions/RemoteSourceSettings"
     },
+    "RemoteTCPSinkSettings" : {
+      "$ref" : "#/definitions/RemoteTCPSinkSettings"
+    },
     "SigMFFileSinkSettings" : {
       "$ref" : "#/definitions/SigMFFileSinkSettings"
     },
@@ -5020,6 +5023,9 @@ margin-bottom: 20px;
     "remoteInputReport" : {
       "$ref" : "#/definitions/RemoteInputReport"
     },
+    "remoteTCPInputReport" : {
+      "$ref" : "#/definitions/RemoteTCPInputReport"
+    },
     "sdrPlayReport" : {
       "$ref" : "#/definitions/SDRPlayReport"
     },
@@ -5195,6 +5201,9 @@ margin-bottom: 20px;
     },
     "remoteInputSettings" : {
       "$ref" : "#/definitions/RemoteInputSettings"
+    },
+    "remoteTCPInputSettings" : {
+      "$ref" : "#/definitions/RemoteTCPInputSettings"
     },
     "sdrPlaySettings" : {
       "$ref" : "#/definitions/SDRPlaySettings"
@@ -11319,6 +11328,155 @@ margin-bottom: 20px;
   },
   "description" : "Remote channel source settings"
 };
+            defs.RemoteTCPInputReport = {
+  "properties" : {
+    "sampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "RemoteTCPInput"
+};
+            defs.RemoteTCPInputSettings = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "loPpmCorrection" : {
+      "type" : "integer"
+    },
+    "dcBlock" : {
+      "type" : "integer"
+    },
+    "iqCorrection" : {
+      "type" : "integer"
+    },
+    "biasTee" : {
+      "type" : "integer"
+    },
+    "directSampling" : {
+      "type" : "integer"
+    },
+    "devSampleRate" : {
+      "type" : "integer"
+    },
+    "log2Decim" : {
+      "type" : "integer"
+    },
+    "gain" : {
+      "type" : "integer"
+    },
+    "agc" : {
+      "type" : "integer"
+    },
+    "rfBW" : {
+      "type" : "integer"
+    },
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "channelGain" : {
+      "type" : "integer"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    },
+    "channelDecimation" : {
+      "type" : "integer"
+    },
+    "sampleBits" : {
+      "type" : "integer"
+    },
+    "dataAddress" : {
+      "type" : "string"
+    },
+    "dataPort" : {
+      "type" : "integer"
+    },
+    "overrideRemoteSettings" : {
+      "type" : "integer"
+    },
+    "preFill" : {
+      "type" : "integer"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "RemoteTCPInput"
+};
+            defs.RemoteTCPSinkSettings = {
+  "properties" : {
+    "channelSampleRate" : {
+      "type" : "integer"
+    },
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "gain" : {
+      "type" : "integer"
+    },
+    "sampleBits" : {
+      "type" : "integer"
+    },
+    "dataAddress" : {
+      "type" : "string",
+      "description" : "Receiving TCP data address"
+    },
+    "dataPort" : {
+      "type" : "integer",
+      "description" : "Receiving TCP data port"
+    },
+    "protocol" : {
+      "type" : "integer"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    },
+    "channelMarker" : {
+      "$ref" : "#/definitions/ChannelMarker"
+    },
+    "rollupState" : {
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "Remote TCP channel sink settings"
+};
             defs.RigCtlServerActions = {
   "properties" : {
     "run" : {
@@ -11679,6 +11837,10 @@ margin-bottom: 20px;
     "iqOrder" : {
       "type" : "integer",
       "description" : "IQ samples order\n  * 0 - Q then I (swapped)\n  * 1 - I then Q (straight)\n"
+    },
+    "biasTee" : {
+      "type" : "integer",
+      "description" : "Bias tee\n  * 0 - inactive\n  * 1 - active\n"
     },
     "useReverseAPI" : {
       "type" : "integer",
@@ -56435,7 +56597,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2022-07-10T10:00:03.872+02:00
+              Generated 2022-08-16T14:53:35.735+02:00
             </div>
           </div>
       </div>

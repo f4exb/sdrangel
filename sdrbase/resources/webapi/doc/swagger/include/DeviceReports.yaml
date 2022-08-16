@@ -49,6 +49,8 @@ DeviceReport:
       $ref: "/doc/swagger/include/RemoteOutput.yaml#/RemoteOutputReport"
     remoteInputReport:
       $ref: "/doc/swagger/include/RemoteInput.yaml#/RemoteInputReport"
+    remoteTCPInputReport:
+      $ref: "/doc/swagger/include/RemoteTCPInput.yaml#/RemoteTCPInputReport"
     sdrPlayReport:
       $ref: "/doc/swagger/include/SDRPlay.yaml#/SDRPlayReport"
     sdrPlayV3Report:

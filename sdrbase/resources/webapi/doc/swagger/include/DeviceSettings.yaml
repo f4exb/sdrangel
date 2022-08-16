@@ -72,6 +72,8 @@ DeviceSettings:
       $ref: "/doc/swagger/include/RemoteOutput.yaml#/RemoteOutputSettings"
     remoteInputSettings:
       $ref: "/doc/swagger/include/RemoteInput.yaml#/RemoteInputSettings"
+    remoteTCPInputSettings:
+      $ref: "/doc/swagger/include/RemoteTCPInput.yaml#/RemoteTCPInputSettings"
     sdrPlaySettings:
       $ref: "/doc/swagger/include/SDRPlay.yaml#/SDRPlaySettings"
     sdrPlayV3Settings:
