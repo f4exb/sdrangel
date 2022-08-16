@@ -22,17 +22,12 @@ base_url = "http://127.0.0.1:8091/sdrangel"
 class Instance:
     def __init__(self):
         self.devicesets = []
-        self.featuresets = []
+        self.features = []
 
     def add_deviceset(self, json_data):
         ds = DeviceSet(len(self.devicesets), json_data["direction"], json_data["deviceHwType"], json_data)
         self.devicesets.append(ds)
         return ds
-
-    def add_featureset(self, json_data):
-        fs = FeatureSet(len(self.featuresets))
-        self.featuresets.append(fs)
-        return fs
 
     def add_deviceset_item(self, direction):
         return {
@@ -42,12 +37,21 @@ class Instance:
             "msg": f"Add device set"
         }
 
-    def add_featureset_item(self):
-        return {
-            "endpoint": "/featureset",
-            "method": "POST",
-            "msg": f"Add feature set"
-        }
+    def add_feature(self, json_data):
+        feat = Feature(len(self.features), json_data["featureType"], json_data)
+        self.features.append(feat)
+        return feat
+
+    def delete_all_features_items(self):
+        nb_features = len(self.features)
+        items = []
+        for i_feat in reversed(range(nb_features)):
+            items.append({
+                "endpoint": f"/featureset/{self.index}/feature/{i_feat}",
+                "method": "DELETE",
+                "msg": f"Delete feature at index {i_feat} in feature set {self.index}"
+            })
+        return items
 
     def get_config_items(self):
         items = []
@@ -59,11 +63,9 @@ class Instance:
                 items.append(channel.add_channel_item())
                 items.append(channel.set_channel_item())
             items.append(deviceset.set_spectrum_item())
-        for i_fs, featureset in enumerate(self.featuresets):
-            items.append(self.add_featureset_item())
-            for feature in featureset.features:
-                items.append(feature.add_feature_item())
-                items.append(feature.set_feature_item())
+        for feature in self.features:
+            items.append(feature.add_feature_item())
+            items.append(feature.set_feature_item())
         return items
 
 # ======================================================================
@@ -150,52 +152,30 @@ class Channel:
             "msg": f"Setup channel {self.type} at {self.index} in device set {self.ds_index}"
         }
 
-# ======================================================================
-class FeatureSet:
-    def __init__(self, index):
-        self.index = index
-        self.features = []
-
-    def add_feature(self, json_data):
-        feat = Feature(self.index, len(self.features), json_data["featureType"], json_data)
-        self.features.append(feat)
-        return feat
-
-    def delete_all_features_items(self):
-        nb_features = len(self.features)
-        items = []
-        for i_feat in reversed(range(nb_features)):
-            items.append({
-                "endpoint": f"/featureset/{self.index}/feature/{i_feat}",
-                "method": "DELETE",
-                "msg": f"Delete feature at index {i_feat} in feature set {self.index}"
-            })
-        return items
 
 # ======================================================================
 class Feature:
-    def __init__(self, fs_index, index, type, settings):
-        self.fs_index = fs_index
+    def __init__(self, index, type, settings):
         self.index = index
         self.type = type
         self.feature_settings = settings
 
     def add_feature_item(self):
         return {
-            "endpoint": f"/featureset/{self.fs_index}/feature",
+            "endpoint": f"/featureset/feature",
             "method": "POST",
             "payload": {
                 "featureType": self.type
             },
-            "msg": f"Add feature {self.type} in feature set index {self.fs_index}"
+            "msg": f"Add feature {self.type} in feature set"
         }
 
     def set_feature_item(self):
         return {
-            "endpoint": f"/featureset/{self.fs_index}/feature/{self.index}/settings",
+            "endpoint": f"/featureset/feature/{self.index}/settings",
             "method": "PUT",
             "payload": self.feature_settings,
-            "msg": f"Setup feature {self.type} at {self.index} in feature set {self.fs_index}"
+            "msg": f"Setup feature {self.type} at {self.index} in feature set"
         }
 
 
@@ -235,16 +215,11 @@ def dump():
                     r_spec = requests.get(url=f"{base_url}/deviceset/{i_deviceset}/spectrum/settings")
                     if r_spec.status_code // 100 == 2:
                         ds.set_spectrum_settings(r_spec.json())
-        nb_featuresets = r.json()["featuresetlist"]["featuresetcount"]
-        for i_featureset in range(nb_featuresets):
-            r_fs = requests.get(url=f"{base_url}/featureset/{i_featureset}")
-            if r_fs.status_code // 100 == 2:
-                nb_features = r_fs.json()["featurecount"]
-                fs = instance.add_featureset(r_fs.json())
-                for i_feature in range(nb_features):
-                    r_feat = requests.get(url=f"{base_url}/featureset/{i_featureset}/feature/{i_feature}/settings")
-                    if r_feat.status_code // 100 == 2:
-                        fs.add_feature(r_feat.json())
+        nb_features = r.json()["featureset"]["featurecount"]
+        for i_feature in range(nb_features):
+            r_feat = requests.get(url=f"{base_url}/featureset/feature/{i_feature}/settings")
+            if r_feat.status_code // 100 == 2:
+                instance.add_feature(r_feat.json())
     return instance
 
 
