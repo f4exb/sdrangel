@@ -5092,6 +5092,11 @@ bool WebAPIRequestMapper::getFeatureSettings(
             featureSettings->setGs232ControllerSettings(new SWGSDRangel::SWGGS232ControllerSettings());
             featureSettings->getGs232ControllerSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (featureSettingsKey == "LimeRFESettings")
+        {
+            featureSettings->setLimeRfeSettings(new SWGSDRangel::SWGLimeRFESettings());
+            featureSettings->getLimeRfeSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (featureSettingsKey == "MapSettings")
         {
             featureSettings->setMapSettings(new SWGSDRangel::SWGMapSettings());
