@@ -226,7 +226,13 @@ void SimplePTTWorker::updateHardware()
     SWGSDRangel::SWGErrorResponse error;
     m_updateTimer.stop();
     m_mutex.unlock();
-    turnDevice(true);
+    bool success = turnDevice(true);
+
+    if (success && m_msgQueueToGUI)
+    {
+        SimplePTTReport::MsgRadioState *msg = SimplePTTReport::MsgRadioState::create(m_tx ? SimplePTTReport::RadioTx : SimplePTTReport::RadioRx);
+        m_msgQueueToGUI->push(msg);
+    }
 }
 
 bool SimplePTTWorker::turnDevice(bool on)
