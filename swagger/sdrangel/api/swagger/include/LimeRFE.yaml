@@ -172,3 +172,15 @@ LimeRFEActions:
         Open or close device
           * 0 - Close device
           * 1 - Open device
+    setRx:
+      type: integer
+      description: >
+        Set Rx om or off
+          * 0 - Rx off
+          * 1 - Rx on
+    setTx:
+      type: integer
+      description: >
+        Set Tx om or off
+          * 0 - Tx off
+          * 1 - Tx on

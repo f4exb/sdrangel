@@ -302,13 +302,16 @@ int LimeRFE::setRx(bool rxOn)
         }
     }
 
-    qDebug("LimeRFE::setRx: switch %s mode: %d", rxOn ? "on" : "off", mode);
     int rc = RFE_Mode(m_rfeDevice, mode);
 
-    if (rc == 0) {
+    if (rc == 0)
+    {
         m_rxOn = rxOn;
-    } else {
-        qInfo("LimeRFE::setRx: %s", getError(rc).c_str());
+        qDebug("LimeRFE::setRx: switch %s mode: %d", rxOn ? "on" : "off", mode);
+    }
+    else
+    {
+        qInfo("LimeRFE::setRx %s: %s", rxOn ? "on" : "off", getError(rc).c_str());
     }
 
     return rc;
@@ -337,13 +340,16 @@ int LimeRFE::setTx(bool txOn)
         }
     }
 
-    qDebug("LimeRFE::setTx: switch %s mode: %d", txOn ? "on" : "off", mode);
     int rc = RFE_Mode(m_rfeDevice, mode);
 
-    if (rc == 0) {
+    if (rc == 0)
+    {
         m_txOn = txOn;
-    } else {
-        qInfo("LimeRFE::setTx: %s", getError(rc).c_str());
+        qDebug("LimeRFE::setTx: switch %s mode: %d", txOn ? "on" : "off", mode);
+    }
+    else
+    {
+        qInfo("LimeRFE::setTx %s: %s", txOn ? "on" : "off", getError(rc).c_str());
     }
 
     return rc;
@@ -903,6 +909,46 @@ int LimeRFE::webapiActionsPost(
         {
             closeDevice();
             unknownAction = false;
+        }
+
+        if (featureActionsKeys.contains("setRx"))
+        {
+            int rc = setRx(swgLimeRFEActions->getSetRx() != 0);
+            unknownAction = false;
+
+            if (rc == 0)
+            {
+                if (getMessageQueueToGUI())
+                {
+                    MsgReportSetRx *msg = MsgReportSetRx::create(swgLimeRFEActions->getSetRx() != 0);
+                    getMessageQueueToGUI()->push(msg);
+                }
+            }
+            else
+            {
+                errorMessage = QString("Cannot switch Rx");
+                return 500;
+            }
+        }
+
+        if (featureActionsKeys.contains("setTx"))
+        {
+            int rc = setTx(swgLimeRFEActions->getSetTx() != 0);
+            unknownAction = false;
+
+            if (rc == 0)
+            {
+                if (getMessageQueueToGUI())
+                {
+                    MsgReportSetTx *msg = MsgReportSetTx::create(swgLimeRFEActions->getSetTx() != 0);
+                    getMessageQueueToGUI()->push(msg);
+                }
+            }
+            else
+            {
+                errorMessage = QString("Cannot switch Tx");
+                return 500;
+            }
         }
 
         if (unknownAction)

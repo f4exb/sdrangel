@@ -40,6 +40,10 @@ SWGLimeRFEActions::SWGLimeRFEActions() {
     m_from_to_settings_isSet = false;
     open_close_device = 0;
     m_open_close_device_isSet = false;
+    set_rx = 0;
+    m_set_rx_isSet = false;
+    set_tx = 0;
+    m_set_tx_isSet = false;
 }
 
 SWGLimeRFEActions::~SWGLimeRFEActions() {
@@ -60,10 +64,16 @@ SWGLimeRFEActions::init() {
     m_from_to_settings_isSet = false;
     open_close_device = 0;
     m_open_close_device_isSet = false;
+    set_rx = 0;
+    m_set_rx_isSet = false;
+    set_tx = 0;
+    m_set_tx_isSet = false;
 }
 
 void
 SWGLimeRFEActions::cleanup() {
+
+
 
 
 
@@ -94,6 +104,10 @@ SWGLimeRFEActions::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&from_to_settings, pJson["fromToSettings"], "qint32", "");
     
     ::SWGSDRangel::setValue(&open_close_device, pJson["openCloseDevice"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&set_rx, pJson["setRx"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&set_tx, pJson["setTx"], "qint32", "");
     
 }
 
@@ -128,6 +142,12 @@ SWGLimeRFEActions::asJsonObject() {
     }
     if(m_open_close_device_isSet){
         obj->insert("openCloseDevice", QJsonValue(open_close_device));
+    }
+    if(m_set_rx_isSet){
+        obj->insert("setRx", QJsonValue(set_rx));
+    }
+    if(m_set_tx_isSet){
+        obj->insert("setTx", QJsonValue(set_tx));
     }
 
     return obj;
@@ -193,6 +213,26 @@ SWGLimeRFEActions::setOpenCloseDevice(qint32 open_close_device) {
     this->m_open_close_device_isSet = true;
 }
 
+qint32
+SWGLimeRFEActions::getSetRx() {
+    return set_rx;
+}
+void
+SWGLimeRFEActions::setSetRx(qint32 set_rx) {
+    this->set_rx = set_rx;
+    this->m_set_rx_isSet = true;
+}
+
+qint32
+SWGLimeRFEActions::getSetTx() {
+    return set_tx;
+}
+void
+SWGLimeRFEActions::setSetTx(qint32 set_tx) {
+    this->set_tx = set_tx;
+    this->m_set_tx_isSet = true;
+}
+
 
 bool
 SWGLimeRFEActions::isSet(){
@@ -214,6 +254,12 @@ SWGLimeRFEActions::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_open_close_device_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_set_rx_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_set_tx_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

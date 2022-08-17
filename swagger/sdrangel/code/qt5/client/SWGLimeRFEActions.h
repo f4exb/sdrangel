@@ -59,6 +59,12 @@ public:
     qint32 getOpenCloseDevice();
     void setOpenCloseDevice(qint32 open_close_device);
 
+    qint32 getSetRx();
+    void setSetRx(qint32 set_rx);
+
+    qint32 getSetTx();
+    void setSetTx(qint32 set_tx);
+
 
     virtual bool isSet() override;
 
@@ -80,6 +86,12 @@ private:
 
     qint32 open_close_device;
     bool m_open_close_device_isSet;
+
+    qint32 set_rx;
+    bool m_set_rx_isSet;
+
+    qint32 set_tx;
+    bool m_set_tx_isSet;
 
 };
 
