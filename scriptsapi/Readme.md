@@ -32,31 +32,19 @@ Normal sequence of operations:
   - In SDRangel connect the Frequency Tracker plugin by clicking on the grey square at the left of the top bar of the Frequency Tracker GUI. It opens the channel settings dialog. Check the 'Reverse API' box. Next to this box is the address and port at which the channel will be connected. If you use the defaults for `freqtracking.py` you may leave it as it is else you have to adjust it to the address and port of `freqtracking.py` (options `-A` and `-P`).
   - In the same manner connect the channel you want to be controlled by `freqtracking.py`. You may connect any number of channels like this. When a channel is removed `freqtracking.py` will automatically remove it from its list at the first attempt to synchronize that will fail.
 
-<h2>ptt_active.py</h2>
+<h2>ptt_feature.py</h2>
 
-PTT (Push To Talk) actively listening system. For a pair of given device set indexes it actively listens to start and stop commands on the corresponding devices to switch over to the other
+Control a PTT feature and optionally a LimeRFE feature in coordination.
 
 Options are:
 
   - `-h` or `--help` show help message and exit
-  - `-A` or `--address` listening IP address. Default `0.0.0.0` (all interfaces)
-  - `-P` or `--port` listening port. Default `8000`
-  - `-p` or `--port-sdr` SDRangel instance REST API listening port. Default `8091`
-  - `-l` or `--link` Pair of indexes of the device sets to link. Default `0 1`
-  - `-d` or `--delay` Switch over delay in seconds. Default `1`
-  - `-f` or `--freq-sync` Synchronize devices center frequencies
+  - `-a` or `--address` address and port of SDRangel instance API. Default: 127.0.0.1:8091
+  - `-p` or `--ptt-index` PTT feature index. Mandatory
+  - `-l` or `--limerfe-index` LimeRFE feature index. Optional if present synchronizes the PTT and LimeRFE features
+  - `-t` or `--transmit` Switch to transmission if not present switches to reception
 
-Normal sequence of operations:
-
-In this example we have a Rx device on index 0 and a Tx device on index 1. All settings are assumed to be the default settings.
-
-  - Start `ptt_active.py` in a terminal
-  - On the Rx device right click on the start/stop button and activate reverse API at address `127.0.0.1` port `8000` (default)
-  - On the Tx device right click on the start/stop button and activate reverse API at address `127.0.0.1` port `8000` (default)
-  - Start the Rx or Tx device
-  - Stop the running device (Rx or Tx) this will switch over automatically to the other
-
-Important: you should initiate switch over by stopping the active device and not by starting the other.
+In order for it to work properly you should start your SDRangel instance in reception mode with Rx and PTT feature running and set to control the desired Rx and Tx devices.
 
 <h2>qo100_datv.py</h2>
 
@@ -80,7 +68,6 @@ Dumps an instance setup to a sequence of commands in a JSON file that can be use
   - Deviceset main spectrum settings
   - Deviceset channels instantiations
   - Deviceset channels settings
-  - Featureset instantiations
   - Featureset features instantiations
   - Featureset features settings
 
@@ -102,7 +89,6 @@ Options are:
   - `-a` or `--address` address and port of SDRangel instance. Default is `127.0.0.1:8091`
   - `-j` or `--json-file` JSON file containing description of API commands
   - `-i` or `--init` Initialize instance before running script. This is useful when running a sequence of initialization commands
-  - `-1` or `--ignore-first-posts`. Ignore first deviceset or featureset post in sequence. This is useful when running a sequence of initialization commands for a GUI instance
 
 Each command in the JSON file is a JSON document with the following keys:
 
