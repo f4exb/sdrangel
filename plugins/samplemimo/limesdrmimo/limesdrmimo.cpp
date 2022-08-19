@@ -181,7 +181,7 @@ bool LimeSDRMIMO::setupRxStream(unsigned int channel)
 
     // set up the stream
     m_rxStreams[channel].channel =  channel | LMS_ALIGN_CH_PHASE; // channel number
-    m_rxStreams[channel].fifoSize = 10 * 1024 * 1024;             // fifo size in samples (SR / 10 take ~5MS/s)
+    m_rxStreams[channel].fifoSize = 1024 * 256;               // fifo size in samples
     m_rxStreams[channel].throughputVsLatency = 0.5;           // optimize for min latency
     m_rxStreams[channel].isTx = false;                        // RX channel
     m_rxStreams[channel].dataFmt = lms_stream_t::LMS_FMT_I12; // 12-bit integers
@@ -220,7 +220,7 @@ bool LimeSDRMIMO::setupTxStream(unsigned int channel)
 
     // set up the stream
     m_txStreams[channel].channel = channel | LMS_ALIGN_CH_PHASE; // channel number
-    m_txStreams[channel].fifoSize = 1024 * 1024;              // fifo size in samples (SR / 10 take ~5MS/s)
+    m_txStreams[channel].fifoSize = 1024 * 256;               // fifo size in samples
     m_txStreams[channel].throughputVsLatency = 0.5;           // optimize for min latency
     m_txStreams[channel].isTx = true;                         // TX channel
     m_txStreams[channel].dataFmt = lms_stream_t::LMS_FMT_I12; // 12-bit integers
