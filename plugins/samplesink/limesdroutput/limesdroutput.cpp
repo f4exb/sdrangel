@@ -1066,11 +1066,12 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
 
         if (doCalibration)
         {
+            double bw = std::min((double)m_settings.m_devSampleRate, 2500000.0); // Min supported calibration bandwidth is 2.5MHz
             if (LMS_Calibrate(m_deviceShared.m_deviceParams->getDevice(),
                     LMS_CH_TX,
                     m_deviceShared.m_channel,
-                    m_settings.m_devSampleRate,
-                    0) < 0)
+                    bw,
+                    0) != 0)
             {
                 qCritical("LimeSDROutput::applySettings: calibration failed on Tx channel %d", m_deviceShared.m_channel);
             }

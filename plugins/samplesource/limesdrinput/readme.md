@@ -24,6 +24,8 @@ The top and bottom bars of the device window are described [here](../../../sdrgu
 
 This is the center frequency of reception in kHz.
 
+The NCO must be enabled with a negative value in order to set this below 30MHz.
+
 <h4>1.2: Start/Stop</h4>
 
 Device start / stop button.
@@ -132,6 +134,8 @@ The LMS7002M uses the same clock for both the ADCs and DACs therefore this sampl
 <h4>7.1: Rx hardware filter bandwidth</h4>
 
 This is the Rx hardware filter bandwidth in kHz in the LMS7002M device for the given channel. Boundaries are updated automatically but generally are from 1.4 to 130 MHz in 1 kHz steps. Use the wheels to adjust the value. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
+
+The filter is centered at the LO frequency, so if using the NCO to achieve frequencies below 30MHz, the filter bandwidth needs to be set wide enough for not only your desired signal but the offset from the 30MHz LO as well.
 
 <h4>7.2: TSP FIR filter toggle</h4>
 
