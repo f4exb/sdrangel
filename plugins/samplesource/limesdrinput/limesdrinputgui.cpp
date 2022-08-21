@@ -262,8 +262,10 @@ void LimeSDRInputGUI::updateFrequencyLimits()
     m_limeSDRInput->getLORange(minF, maxF);
     qint64 minLimit = minF/1000 + deltaFrequency;
     qint64 maxLimit = maxF/1000 + deltaFrequency;
+    // Min freq is 30MHz - NCO must be used to go below this
+    qint64 minFreq = m_settings.m_ncoEnable ? 30000 + m_settings.m_ncoFrequency/1000 : 30000;
 
-    minLimit = minLimit < 0 ? 0 : minLimit > 9999999 ? 9999999 : minLimit;
+    minLimit = minLimit < minFreq ? minFreq : minLimit > 9999999 ? 9999999 : minLimit;
     maxLimit = maxLimit < 0 ? 0 : maxLimit > 9999999 ? 9999999 : maxLimit;
 
     qDebug("LimeSDRInputGUI::updateFrequencyLimits: delta: %lld min: %lld max: %lld", deltaFrequency, minLimit, maxLimit);
@@ -548,6 +550,7 @@ void LimeSDRInputGUI::on_centerFrequency_changed(quint64 value)
 void LimeSDRInputGUI::on_ncoFrequency_changed(qint64 value)
 {
     m_settings.m_ncoFrequency = value;
+    updateFrequencyLimits();
     setCenterFrequencyDisplay();
     sendSettings();
 }
@@ -555,6 +558,7 @@ void LimeSDRInputGUI::on_ncoFrequency_changed(qint64 value)
 void LimeSDRInputGUI::on_ncoEnable_toggled(bool checked)
 {
     m_settings.m_ncoEnable = checked;
+    updateFrequencyLimits();
     setCenterFrequencyDisplay();
     sendSettings();
 }

@@ -1227,11 +1227,12 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
 
         if (doCalibration)
         {
+            double bw = std::min((double)m_settings.m_devSampleRate, 2500000.0); // Min supported calibration bandwidth is 2.5MHz
             if (LMS_Calibrate(m_deviceShared.m_deviceParams->getDevice(),
                     LMS_CH_RX,
                     m_deviceShared.m_channel,
-                    m_settings.m_devSampleRate,
-                    0) < 0)
+                    bw,
+                    0) != 0)
             {
                 qCritical("LimeSDRInput::applySettings: calibration failed on Rx channel %d", m_deviceShared.m_channel);
             }
