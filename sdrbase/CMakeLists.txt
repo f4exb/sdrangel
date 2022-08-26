@@ -191,6 +191,7 @@ set(sdrbase_SOURCES
     util/messagequeue.cpp
     util/morse.cpp
     util/openaip.cpp
+    util/osndb.cpp
     util/planespotters.cpp
     util/png.cpp
     util/prettyprint.cpp
@@ -409,6 +410,7 @@ set(sdrbase_HEADERS
     util/morse.h
     util/movingaverage.h
     util/openaip.h
+    util/osndb.h
     util/planespotters.h
     util/png.h
     util/prettyprint.h

@@ -46,6 +46,11 @@ public:
         return metres * 3.28084f;
     }
 
+    static inline int metresToIntegerFeet(float metres)
+    {
+        return (int)std::round(metresToFeet(metres));
+    }
+
     static inline float nauticalMilesToMetres(float nauticalMiles)
     {
         return nauticalMiles * 1855.0f;
@@ -74,6 +79,11 @@ public:
     static int knotsToIntegerMPH(float knots)
     {
         return (int)std::round(knotsToMPH(knots));
+    }
+
+    static float knotsToMetresPerSecond(float knots)
+    {
+        return knots * 0.514444f;
     }
 
     static float kmpsToKPH(float kps)

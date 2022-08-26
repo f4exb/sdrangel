@@ -42,6 +42,7 @@
 #include "channel/channelwebapiutils.h"
 #include "feature/featurewebapiutils.h"
 #include "plugin/pluginapi.h"
+#include "util/crc.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "util/units.h"
@@ -63,8 +64,69 @@
 #include "adsb.h"
 #include "adsbosmtemplateserver.h"
 
-const char *Aircraft::m_speedTypeNames[] = {
-    "GS", "TAS", "IAS"
+const char ADSBDemodGUI::m_idMap[] = "#ABCDEFGHIJKLMNOPQRSTUVWXYZ##### ############-##0123456789######";
+
+const QString ADSBDemodGUI::m_categorySetA[] = {
+    QStringLiteral("None"),
+    QStringLiteral("Light"),
+    QStringLiteral("Small"),
+    QStringLiteral("Large"),
+    QStringLiteral("High vortex"),
+    QStringLiteral("Heavy"),
+    QStringLiteral("High performance"),
+    QStringLiteral("Rotorcraft")
+};
+
+const QString ADSBDemodGUI::m_categorySetB[] = {
+    QStringLiteral("None"),
+    QStringLiteral("Glider/sailplane"),
+    QStringLiteral("Lighter-than-air"),
+    QStringLiteral("Parachutist"),
+    QStringLiteral("Ultralight"),
+    QStringLiteral("Reserved"),
+    QStringLiteral("UAV"),
+    QStringLiteral("Space vehicle")
+};
+
+const QString ADSBDemodGUI::m_categorySetC[] = {
+    QStringLiteral("None"),
+    QStringLiteral("Emergency vehicle"),
+    QStringLiteral("Service vehicle"),
+    QStringLiteral("Ground obstruction"),
+    QStringLiteral("Cluster obstacle"),
+    QStringLiteral("Line obstacle"),
+    QStringLiteral("Reserved"),
+    QStringLiteral("Reserved")
+};
+
+const QString ADSBDemodGUI::m_emergencyStatus[] = {
+    QStringLiteral("No emergency"),
+    QStringLiteral("General emergency"),
+    QStringLiteral("Lifeguard/Medical"),
+    QStringLiteral("Minimum fuel"),
+    QStringLiteral("No communications"),
+    QStringLiteral("Unlawful interference"),
+    QStringLiteral("Downed aircraft"),
+    QStringLiteral("Reserved")
+};
+
+const QString ADSBDemodGUI::m_flightStatuses[] = {
+    QStringLiteral("Airbourne"),
+    QStringLiteral("On-ground"),
+    QStringLiteral("Alert, airboune"),
+    QStringLiteral("Alert, on-ground"),
+    QStringLiteral("Alert, SPI"),
+    QStringLiteral("SPI"),
+    QStringLiteral("Reserved"),
+    QStringLiteral("Not assigned")
+};
+
+const QString ADSBDemodGUI::m_hazardSeverity[] = {
+    "NIL", "Light", "Moderate", "Severe"
+};
+
+const QString ADSBDemodGUI::m_fomSources[] = {
+    "Invalid", "INS", "GNSS", "DME/DME", "DME/VOR", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved", "Reserved"
 };
 
 ADSBDemodGUI* ADSBDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
@@ -227,12 +289,12 @@ QString Aircraft::getText(bool all) const
                 }
             }
         }
-        if (m_speedValid)
+        if (m_groundspeedValid)
         {
             if (m_gui->useSIUints()) {
-                list.append(QString("%1: %2 (kph)").arg(m_speedTypeNames[m_speedType]).arg(Units::knotsToIntegerKPH(m_speed)));
+                list.append(QString("GS: %1 (kph)").arg(Units::knotsToIntegerKPH(m_groundspeed)));
             } else {
-                list.append(QString("%1: %2 (kn)").arg(m_speedTypeNames[m_speedType]).arg(m_speed));
+                list.append(QString("GS: %1 (kn)").arg(m_groundspeed));
             }
         }
         if (m_verticalRateValid)
@@ -768,8 +830,8 @@ void ADSBDemodGUI::sendToMap(Aircraft *aircraft, QList<SWGSDRangel::SWGMapAnimat
             {
                 swgMapItem->setOrientation(1);
                 swgMapItem->setHeading(aircraft->m_heading);
-                swgMapItem->setPitch(aircraft->m_pitch);
-                swgMapItem->setRoll(aircraft->m_roll);
+                swgMapItem->setPitch(aircraft->m_pitchEst);
+                swgMapItem->setRoll(aircraft->m_rollEst);
                 swgMapItem->setOrientationDateTime(new QString(aircraft->m_positionDateTime.toString(Qt::ISODateWithMs)));
             }
             else
@@ -786,100 +848,6 @@ void ADSBDemodGUI::sendToMap(Aircraft *aircraft, QList<SWGSDRangel::SWGMapAnimat
             MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_adsbDemod, swgMapItem);
             messageQueue->push(msg);
         }
-    }
-}
-
-QString ADSBDemodGUI::getAirlineIconPath(const QString &operatorICAO)
-{
-    QString endPath = QString("/airlinelogos/%1.bmp").arg(operatorICAO);
-    // Try in user directory first, so they can customise
-    QString userIconPath = getDataDir() + endPath;
-    QFile file(userIconPath);
-    if (file.exists())
-    {
-        return userIconPath;
-    }
-    else
-    {
-        // Try in resources
-        QString resourceIconPath = ":" + endPath;
-        QResource resource(resourceIconPath);
-        if (resource.isValid())
-        {
-            return resourceIconPath;
-        }
-    }
-    return QString();
-}
-
-// Try to find an airline logo based on ICAO
-QIcon *ADSBDemodGUI::getAirlineIcon(const QString &operatorICAO)
-{
-    if (m_airlineIcons.contains(operatorICAO))
-    {
-        return m_airlineIcons.value(operatorICAO);
-    }
-    else
-    {
-        QIcon *icon = nullptr;
-        QString path = getAirlineIconPath(operatorICAO);
-        if (!path.isEmpty())
-        {
-            icon = new QIcon(path);
-            m_airlineIcons.insert(operatorICAO, icon);
-        }
-        else
-        {
-            if (!m_airlineMissingIcons.contains(operatorICAO))
-            {
-                qDebug() << "ADSBDemodGUI: No airline logo for " << operatorICAO;
-                m_airlineMissingIcons.insert(operatorICAO, true);
-            }
-        }
-        return icon;
-    }
-}
-
-QString ADSBDemodGUI::getFlagIconPath(const QString &country)
-{
-    QString endPath = QString("/flags/%1.bmp").arg(country);
-    // Try in user directory first, so they can customise
-    QString userIconPath = getDataDir() + endPath;
-    QFile file(userIconPath);
-    if (file.exists())
-    {
-        return userIconPath;
-    }
-    else
-    {
-        // Try in resources
-        QString resourceIconPath = ":" + endPath;
-        QResource resource(resourceIconPath);
-        if (resource.isValid())
-        {
-            return resourceIconPath;
-        }
-    }
-    return QString();
-}
-
-// Try to find an flag logo based on a country
-QIcon *ADSBDemodGUI::getFlagIcon(const QString &country)
-{
-    if (m_flagIcons.contains(country))
-    {
-        return m_flagIcons.value(country);
-    }
-    else
-    {
-        QIcon *icon = nullptr;
-        QString path = getFlagIconPath(country);
-        if (!path.isEmpty())
-        {
-            icon = new QIcon(path);
-            m_flagIcons.insert(country, icon);
-        }
-        return icon;
     }
 }
 
@@ -910,7 +878,6 @@ Aircraft *ADSBDemodGUI::getAircraft(int icao, bool &newAircraft)
         ui->adsbData->setItem(row, ADSB_COL_MODEL, aircraft->m_modelItem);
         ui->adsbData->setItem(row, ADSB_COL_AIRLINE, aircraft->m_airlineItem);
         ui->adsbData->setItem(row, ADSB_COL_ALTITUDE, aircraft->m_altitudeItem);
-        ui->adsbData->setItem(row, ADSB_COL_SPEED, aircraft->m_speedItem);
         ui->adsbData->setItem(row, ADSB_COL_HEADING, aircraft->m_headingItem);
         ui->adsbData->setItem(row, ADSB_COL_VERTICALRATE, aircraft->m_verticalRateItem);
         ui->adsbData->setItem(row, ADSB_COL_RANGE, aircraft->m_rangeItem);
@@ -939,6 +906,26 @@ Aircraft *ADSBDemodGUI::getAircraft(int icao, bool &newAircraft)
         ui->adsbData->setItem(row, ADSB_COL_STA, aircraft->m_staItem);
         ui->adsbData->setItem(row, ADSB_COL_ETA, aircraft->m_etaItem);
         ui->adsbData->setItem(row, ADSB_COL_ATA, aircraft->m_ataItem);
+        ui->adsbData->setItem(row, ADSB_COL_SEL_ALTITUDE, aircraft->m_selAltitudeItem);
+        ui->adsbData->setItem(row, ADSB_COL_SEL_HEADING, aircraft->m_selHeadingItem);
+        ui->adsbData->setItem(row, ADSB_COL_BARO, aircraft->m_baroItem);
+        ui->adsbData->setItem(row, ADSB_COL_AP, aircraft->m_apItem);
+        ui->adsbData->setItem(row, ADSB_COL_V_MODE, aircraft->m_vModeItem);
+        ui->adsbData->setItem(row, ADSB_COL_L_MODE, aircraft->m_lModeItem);
+        ui->adsbData->setItem(row, ADSB_COL_ROLL, aircraft->m_rollItem);
+        ui->adsbData->setItem(row, ADSB_COL_GROUND_SPEED, aircraft->m_groundspeedItem);
+        ui->adsbData->setItem(row, ADSB_COL_TURNRATE, aircraft->m_turnRateItem);
+        ui->adsbData->setItem(row, ADSB_COL_TRUE_AIRSPEED, aircraft->m_trueAirspeedItem);
+        ui->adsbData->setItem(row, ADSB_COL_INDICATED_AIRSPEED, aircraft->m_indicatedAirspeedItem);
+        ui->adsbData->setItem(row, ADSB_COL_MACH, aircraft->m_machItem);
+        ui->adsbData->setItem(row, ADSB_COL_HEADWIND, aircraft->m_headwindItem);
+        ui->adsbData->setItem(row, ADSB_COL_EST_AIR_TEMP, aircraft->m_estAirTempItem);
+        ui->adsbData->setItem(row, ADSB_COL_WIND_SPEED, aircraft->m_windSpeedItem);
+        ui->adsbData->setItem(row, ADSB_COL_WIND_DIR, aircraft->m_windDirItem);
+        ui->adsbData->setItem(row, ADSB_COL_STATIC_PRESSURE, aircraft->m_staticPressureItem);
+        ui->adsbData->setItem(row, ADSB_COL_STATIC_AIR_TEMP, aircraft->m_staticAirTempItem);
+        ui->adsbData->setItem(row, ADSB_COL_HUMIDITY, aircraft->m_humidityItem);
+        ui->adsbData->setItem(row, ADSB_COL_TIS_B, aircraft->m_tisBItem);
         // Look aircraft up in database
         if (m_aircraftInfo != nullptr)
         {
@@ -955,11 +942,11 @@ Aircraft *ADSBDemodGUI::getAircraft(int icao, bool &newAircraft)
                 QIcon *icon = nullptr;
                 if (aircraft->m_aircraftInfo->m_operatorICAO.size() > 0)
                 {
-                    aircraft->m_airlineIconURL = getAirlineIconPath(aircraft->m_aircraftInfo->m_operatorICAO);
+                    aircraft->m_airlineIconURL = AircraftInformation::getAirlineIconPath(aircraft->m_aircraftInfo->m_operatorICAO);
                     if (aircraft->m_airlineIconURL.startsWith(':')) {
                         aircraft->m_airlineIconURL = "qrc://" + aircraft->m_airlineIconURL.mid(1);
                     }
-                    icon = getAirlineIcon(aircraft->m_aircraftInfo->m_operatorICAO);
+                    icon = AircraftInformation::getAirlineIcon(aircraft->m_aircraftInfo->m_operatorICAO);
                     if (icon != nullptr)
                     {
                         aircraft->m_airlineItem->setSizeHint(QSize(85, 20));
@@ -974,49 +961,16 @@ Aircraft *ADSBDemodGUI::getAircraft(int icao, bool &newAircraft)
                         aircraft->m_airlineItem->setText(aircraft->m_aircraftInfo->m_owner);
                 }
                 // Try loading a flag based on registration
-                if ((aircraft->m_aircraftInfo->m_registration.size() > 0) && (m_prefixMap != nullptr))
+                if (aircraft->m_aircraftInfo->m_registration.size() > 0)
                 {
-                    QString flag;
-                    int idx = aircraft->m_aircraftInfo->m_registration.indexOf('-');
-                    if (idx >= 0)
-                    {
-                        QString prefix;
-
-                        // Some countries use AA-A - try these first as first letters are common
-                        prefix = aircraft->m_aircraftInfo->m_registration.left(idx + 2);
-                        if (m_prefixMap->contains(prefix))
-                            flag = m_prefixMap->value(prefix);
-                        else
-                        {
-                            // Try letters before '-'
-                            prefix = aircraft->m_aircraftInfo->m_registration.left(idx);
-                            if (m_prefixMap->contains(prefix))
-                                flag = m_prefixMap->value(prefix);
-                        }
-                    }
-                    else
-                    {
-                        // No '-' Could be one of a few countries or military.
-                        // See: https://en.wikipedia.org/wiki/List_of_aircraft_registration_prefixes
-                        if (aircraft->m_aircraftInfo->m_registration.startsWith("N")) {
-                            flag = m_prefixMap->value("N"); // US
-                        } else if (aircraft->m_aircraftInfo->m_registration.startsWith("JA")) {
-                            flag = m_prefixMap->value("JA"); // Japan
-                        } else if (aircraft->m_aircraftInfo->m_registration.startsWith("HL")) {
-                            flag = m_prefixMap->value("HL"); // Korea
-                        } else if (aircraft->m_aircraftInfo->m_registration.startsWith("YV")) {
-                            flag = m_prefixMap->value("YV"); // Venezuela
-                        } else if ((m_militaryMap != nullptr) && (m_militaryMap->contains(aircraft->m_aircraftInfo->m_operator))) {
-                            flag = m_militaryMap->value(aircraft->m_aircraftInfo->m_operator);
-                        }
-                    }
+                    QString flag = aircraft->m_aircraftInfo->getFlag();
                     if (flag != "")
                     {
-                        aircraft->m_flagIconURL = getFlagIconPath(flag);
+                        aircraft->m_flagIconURL = AircraftInformation::getFlagIconPath(flag);
                         if (aircraft->m_flagIconURL.startsWith(':')) {
                             aircraft->m_flagIconURL = "qrc://" + aircraft->m_flagIconURL.mid(1);
                         }
-                        icon = getFlagIcon(flag);
+                        icon = AircraftInformation::getFlagIcon(flag);
                         if (icon != nullptr)
                         {
                             aircraft->m_countryItem->setSizeHint(QSize(40, 20));
@@ -1049,71 +1003,122 @@ Aircraft *ADSBDemodGUI::getAircraft(int icao, bool &newAircraft)
     return aircraft;
 }
 
+// Try to map callsign to flight number
+void ADSBDemodGUI::callsignToFlight(Aircraft *aircraft)
+{
+    if (!aircraft->m_callsign.isEmpty())
+    {
+        QRegularExpression flightNoExp("^[A-Z]{2,3}[0-9]{1,4}$");
+        // Airlines line BA add a single charater suffix that can be stripped
+        // If the suffix is two characters, then it typically means a digit
+        // has been replaced which I don't know how to guess
+        // E.g Easyjet might use callsign EZY67JQ for flight EZY6267
+        // BA use BAW90BG for BA890
+        QRegularExpression suffixedFlightNoExp("^([A-Z]{2,3})([0-9]{1,4})[A-Z]?$");
+        QRegularExpressionMatch suffixMatch;
+
+        if (flightNoExp.match(aircraft->m_callsign).hasMatch())
+        {
+            aircraft->m_flight = aircraft->m_callsign;
+        }
+        else if ((suffixMatch = suffixedFlightNoExp.match(aircraft->m_callsign)).hasMatch())
+        {
+            aircraft->m_flight = QString("%1%2").arg(suffixMatch.captured(1)).arg(suffixMatch.captured(2));
+        }
+        else
+        {
+            // Don't guess, to save wasting API calls
+            aircraft->m_flight = "";
+        }
+    }
+    else
+    {
+        aircraft->m_flight = "";
+    }
+}
+
+// ADS-B and Mode-S selected altitudes have slightly different precision, so values can jump around a bit
+// And we end up with altitudes such as 38008 rather than 38000
+// To remove this, we round to nearest 50 feet
+int ADSBDemodGUI::roundTo50Feet(int alt)
+{
+    return ((alt + 25) / 50) * 50;
+}
+
+// Estimate outside air temperature (static temperature) from Mach number and true airspeed, assuming dry air
+bool ADSBDemodGUI::calcAirTemp(Aircraft *aircraft)
+{
+    if (aircraft->m_machValid && aircraft->m_trueAirspeedValid)
+    {
+        // Calculate speed of sound
+        float c = Units::knotsToMetresPerSecond(aircraft->m_trueAirspeed) / aircraft->m_mach;
+
+        // Calculate temperature, given the speed of sound
+        float a = c / 331.3f;
+        float T = (a * a - 1.0f) * 273.15f;
+
+        aircraft->m_estAirTempItem->setData(Qt::DisplayRole, (int)std::round(T));
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 void ADSBDemodGUI::handleADSB(
     const QByteArray data,
     const QDateTime dateTime,
     float correlation,
     float correlationOnes,
+    unsigned crc,
     bool updateModel)
 {
-    const char idMap[] = "#ABCDEFGHIJKLMNOPQRSTUVWXYZ##### ############-##0123456789######";
-    const QString categorySetA[] = {
-        QStringLiteral("None"),
-        QStringLiteral("Light"),
-        QStringLiteral("Small"),
-        QStringLiteral("Large"),
-        QStringLiteral("High vortex"),
-        QStringLiteral("Heavy"),
-        QStringLiteral("High performance"),
-        QStringLiteral("Rotorcraft")
-    };
-    const QString categorySetB[] = {
-        QStringLiteral("None"),
-        QStringLiteral("Glider/sailplane"),
-        QStringLiteral("Lighter-than-air"),
-        QStringLiteral("Parachutist"),
-        QStringLiteral("Ultralight"),
-        QStringLiteral("Reserved"),
-        QStringLiteral("UAV"),
-        QStringLiteral("Space vehicle")
-    };
-    const QString categorySetC[] = {
-        QStringLiteral("None"),
-        QStringLiteral("Emergency vehicle"),
-        QStringLiteral("Service vehicle"),
-        QStringLiteral("Ground obstruction"),
-        QStringLiteral("Cluster obstacle"),
-        QStringLiteral("Line obstacle"),
-        QStringLiteral("Reserved"),
-        QStringLiteral("Reserved")
-    };
-    const QString emergencyStatus[] = {
-        QStringLiteral("No emergency"),
-        QStringLiteral("General emergency"),
-        QStringLiteral("Lifeguard/Medical"),
-        QStringLiteral("Minimum fuel"),
-        QStringLiteral("No communications"),
-        QStringLiteral("Unlawful interference"),
-        QStringLiteral("Downed aircraft"),
-        QStringLiteral("Reserved")
-    };
-
     bool newAircraft = false;
     bool updatedCallsign = false;
     bool resetAnimation = false;
 
     int df = (data[0] >> 3) & ADS_B_DF_MASK; // Downlink format
     int ca = data[0] & 0x7; // Capability
-    unsigned icao = ((data[1] & 0xff) << 16) | ((data[2] & 0xff) << 8) | (data[3] & 0xff); // ICAO aircraft address
-    int tc = (data[4] >> 3) & 0x1f; // Type code
+    unsigned icao;
+    Aircraft *aircraft;
 
-    Aircraft *aircraft = getAircraft(icao, newAircraft);
+    if ((df == 4) || (df == 5) || (df == 20) || (df == 21))
+    {
+        // Extract ICAO from parity
+        int bytes = data.length();
+        unsigned parity = (data[bytes-3] << 16) | (data[bytes-2] << 8) | data[bytes-1];
+        icao = (parity ^ crc) & 0xffffff;
+        if (m_aircraft.contains(icao))
+        {
+            //qDebug() << "Mode-S from known aircraft - DF " << df << " ICAO " << Qt::hex << icao;
+            aircraft = getAircraft(icao, newAircraft);
+        }
+        else
+        {
+            // Ignore if not from a known aircraft, as its likely not to be a valid packet
+            //qDebug() << "Skiping Mode-S from unknown aircraft - DF " << df << " ICAO " << Qt::hex << icao;
+            return;
+        }
+    }
+    else
+    {
+        icao = ((data[1] & 0xff) << 16) | ((data[2] & 0xff) << 8) | (data[3] & 0xff); // ICAO aircraft address
+        aircraft = getAircraft(icao, newAircraft);
+    }
+    int tc = (data[4] >> 3) & 0x1f; // Type code
 
     aircraft->m_time = dateTime;
     QTime time = dateTime.time();
     aircraft->m_timeItem->setText(QString("%1:%2:%3").arg(time.hour(), 2, 10, QLatin1Char('0')).arg(time.minute(), 2, 10, QLatin1Char('0')).arg(time.second(), 2, 10, QLatin1Char('0')));
     aircraft->m_adsbFrameCount++;
     aircraft->m_adsbFrameCountItem->setData(Qt::DisplayRole, aircraft->m_adsbFrameCount);
+    if (df == 18)
+    {
+        aircraft->m_tisBFrameCount++;
+        aircraft->m_tisBItem->setData(Qt::DisplayRole, aircraft->m_tisBFrameCount);
+    }
 
     if (correlation < aircraft->m_minCorrelation)
         aircraft->m_minCorrelation = correlation;
@@ -1131,20 +1136,21 @@ void ADSBDemodGUI::handleADSB(
         .arg(CalcDb::dbPower(m_correlationOnesAvg.instantAverage()), 3, 'f', 1));
 
     // ADS-B, non-transponder ADS-B or TIS-B rebroadcast of ADS-B (ADS-R)
-    if ((df == 17) || ((df == 18) && ((ca == 0) || (ca == 1) || (ca == 6))))
+    if ((df == 17) || ((df == 18) && (ca != 4)))
     {
+
         if ((tc >= 1) && ((tc <= 4)))
         {
-            // Aircraft identification
+            // Aircraft identification - BDS 0,8
             int ec = data[4] & 0x7;   // Emitter category
 
             QString prevEmitterCategory = aircraft->m_emitterCategory;
             if (tc == 4) {
-                aircraft->m_emitterCategory = categorySetA[ec];
+                aircraft->m_emitterCategory = m_categorySetA[ec];
             } else if (tc == 3) {
-                aircraft->m_emitterCategory = categorySetB[ec];
+                aircraft->m_emitterCategory = m_categorySetB[ec];
             } else if (tc == 2) {
-                aircraft->m_emitterCategory = categorySetC[ec];
+                aircraft->m_emitterCategory = m_categorySetC[ec];
             } else {
                 aircraft->m_emitterCategory = QStringLiteral("Reserved");
             }
@@ -1163,44 +1169,16 @@ void ADSBDemodGUI::handleADSB(
             c[7] = (data[10] & 0x3f);
             // Map to ASCII
             for (int i = 0; i < 8; i++)
-                callsign[i] = idMap[c[i]];
+                callsign[i] = m_idMap[c[i]];
             callsign[8] = '\0';
             QString callsignTrimmed = QString(callsign).trimmed();
 
             updatedCallsign = aircraft->m_callsign != callsignTrimmed;
-
-            aircraft->m_callsign = callsignTrimmed;
-            aircraft->m_callsignItem->setText(aircraft->m_callsign);
-
-            // Attempt to map callsign to flight number
-            if (!aircraft->m_callsign.isEmpty())
+            if (updatedCallsign)
             {
-                QRegularExpression flightNoExp("^[A-Z]{2,3}[0-9]{1,4}$");
-                // Airlines line BA add a single charater suffix that can be stripped
-                // If the suffix is two characters, then it typically means a digit
-                // has been replaced which I don't know how to guess
-                // E.g Easyjet might use callsign EZY67JQ for flight EZY6267
-                // BA use BAW90BG for BA890
-                QRegularExpression suffixedFlightNoExp("^([A-Z]{2,3})([0-9]{1,4})[A-Z]?$");
-                QRegularExpressionMatch suffixMatch;
-
-                if (flightNoExp.match(aircraft->m_callsign).hasMatch())
-                {
-                    aircraft->m_flight = aircraft->m_callsign;
-                }
-                else if ((suffixMatch = suffixedFlightNoExp.match(aircraft->m_callsign)).hasMatch())
-                {
-                    aircraft->m_flight = QString("%1%2").arg(suffixMatch.captured(1)).arg(suffixMatch.captured(2));
-                }
-                else
-                {
-                    // Don't guess, to save wasting API calls
-                    aircraft->m_flight = "";
-                }
-            }
-            else
-            {
-                aircraft->m_flight = "";
+                aircraft->m_callsign = callsignTrimmed;
+                aircraft->m_callsignItem->setText(aircraft->m_callsign);
+                callsignToFlight(aircraft);
             }
 
             // Select 3D model based on category, if we don't already have one based on ICAO
@@ -1230,7 +1208,7 @@ void ADSBDemodGUI::handleADSB(
 
             if (aircraft->m_onSurface)
             {
-                // Surface position
+                // Surface position - BDS 0,6
 
                 // There are a few airports that are below 0 MSL
                 // https://en.wikipedia.org/wiki/List_of_lowest_airports
@@ -1244,15 +1222,15 @@ void ADSBDemodGUI::handleADSB(
                 if (movement == 0)
                 {
                     // No information available
-                    aircraft->m_speedValid = false;
-                    aircraft->m_speedItem->setData(Qt::DisplayRole, "");
+                    aircraft->m_groundspeedValid = false;
+                    aircraft->m_groundspeedItem->setData(Qt::DisplayRole, "");
                 }
                 else if (movement == 1)
                 {
                     // Aircraft stopped
-                    aircraft->m_speedValid = true;
-                    aircraft->m_speedItem->setData(Qt::DisplayRole, 0);
-                    aircraft->m_speed = 0.0;
+                    aircraft->m_groundspeedValid = true;
+                    aircraft->m_groundspeedItem->setData(Qt::DisplayRole, 0);
+                    aircraft->m_groundspeed = 0.0;
                 }
                 else if ((movement >= 2) && (movement <= 123))
                 {
@@ -1294,15 +1272,14 @@ void ADSBDemodGUI::handleADSB(
                         step = 5.0f;
                         adjust = 109;
                     }
-                    aircraft->m_speed = base + (movement - adjust) * step;
-                    aircraft->m_speedType = Aircraft::GS;
-                    aircraft->m_speedValid = true;
-                    aircraft->m_speedItem->setData(Qt::DisplayRole, m_settings.m_siUnits ? Units::knotsToIntegerKPH(aircraft->m_speed) : (int)std::round(aircraft->m_speed));
+                    aircraft->m_groundspeed = base + (movement - adjust) * step;
+                    aircraft->m_groundspeedValid = true;
+                    aircraft->m_groundspeedItem->setData(Qt::DisplayRole, m_settings.m_siUnits ? Units::knotsToIntegerKPH(aircraft->m_groundspeed) : (int)std::round(aircraft->m_groundspeed));
                 }
                 else if (movement == 124)
                 {
-                    aircraft->m_speedValid = true;
-                    aircraft->m_speedItem->setData(Qt::DisplayRole, m_settings.m_siUnits ? 324 : 175); // Actually greater than this
+                    aircraft->m_groundspeedValid = true;
+                    aircraft->m_groundspeedItem->setData(Qt::DisplayRole, m_settings.m_siUnits ? 324 : 175); // Actually greater than this
                 }
 
                 int groundTrackStatus = (data[5] >> 3) & 1;
@@ -1327,30 +1304,7 @@ void ADSBDemodGUI::handleADSB(
                 }
                 else
                 {
-                    // https://en.wikipedia.org/wiki/Gillham_code
-                    int c1 = (n >> 10) & 1;
-                    int a1 = (n >> 9) & 1;
-                    int c2 = (n >> 8) & 1;
-                    int a2 = (n >> 7) & 1;
-                    int c4 = (n >> 6) & 1;
-                    int a4 = (n >> 5) & 1;
-                    int b1 = (n >> 4) & 1;
-                    int b2 = (n >> 3) & 1;
-                    int d2 = (n >> 2) & 1;
-                    int b4 = (n >> 1) & 1;
-                    int d4 = n & 1;
-
-                    int n500 = grayToBinary((d2 << 7) | (d4 << 6) | (a1 << 5) | (a2 << 4) | (a4 << 3) | (b1 << 2) | (b2 << 1) | b4, 4);
-                    int n100 = grayToBinary((c1 << 2) | (c2 << 1) | c4, 3) - 1;
-
-                    if (n100 == 6) {
-                        n100 = 4;
-                    }
-                    if (n500 %2 != 0) {
-                        n100 = 4 - n100;
-                    }
-
-                    alt_ft = -1200 + n500*500 + n100*100;
+                    alt_ft = gillhamToFeet(n);
                 }
 
                 aircraft->m_altitude = alt_ft;
@@ -1499,7 +1453,7 @@ void ADSBDemodGUI::handleADSB(
         }
         else if (tc == 19)
         {
-            // Airbourne velocity
+            // Airbourne velocity - BDS 0,9
             int st = data[4] & 0x7;   // Subtype
             if ((st == 1) || (st == 2))
             {
@@ -1530,19 +1484,18 @@ void ADSBDemodGUI::handleADSB(
                     h += 360.0;
                 }
 
-                aircraft->m_heading = h;
+                aircraft->m_heading = h; // This is actually track, rather than heading
                 aircraft->m_headingValid = true;
                 aircraft->m_headingDateTime = dateTime;
-                aircraft->m_speed = v;
-                aircraft->m_speedType = Aircraft::GS;
-                aircraft->m_speedValid = true;
+                aircraft->m_groundspeed = v;
+                aircraft->m_groundspeedValid = true;
                 aircraft->m_headingItem->setData(Qt::DisplayRole, std::round(aircraft->m_heading));
-                aircraft->m_speedItem->setData(Qt::DisplayRole, m_settings.m_siUnits ? Units::knotsToIntegerKPH(aircraft->m_speed) : aircraft->m_speed);
+                aircraft->m_groundspeedItem->setData(Qt::DisplayRole,m_settings.m_siUnits ? Units::knotsToIntegerKPH(aircraft->m_groundspeed) : aircraft->m_groundspeed);
                 aircraft->m_orientationDateTime = dateTime;
             }
             else
             {
-                // Airspeed
+                // Airspeed (only likely to get this if an aircraft is unable to determine it's position)
                 int s_hdg = (data[5] >> 2) & 1; // Heading status
                 int hdg =  ((data[5] & 0x3) << 8) | (data[6] & 0xff); // Heading
                 if (s_hdg)
@@ -1557,11 +1510,20 @@ void ADSBDemodGUI::handleADSB(
                 int as_t = (data[7] >> 7) & 1; // Airspeed type
                 int as = ((data[7] & 0x7f) << 3) | ((data[8] >> 5) & 0x7); // Airspeed
 
-                aircraft->m_speed = as;
-                aircraft->m_speedType = as_t ? Aircraft::IAS : Aircraft::TAS;
-                aircraft->m_speedValid = true;
-                aircraft->m_speedItem->setData(Qt::DisplayRole, m_settings.m_siUnits ? Units::knotsToIntegerKPH(aircraft->m_speed) : aircraft->m_speed);
+                if (as_t == 1)
+                {
+                    aircraft->m_trueAirspeed = as;
+                    aircraft->m_trueAirspeedValid = true;
+                    aircraft->m_trueAirspeedItem->setData(Qt::DisplayRole, m_settings.m_siUnits ? Units::knotsToIntegerKPH(aircraft->m_trueAirspeed) : aircraft->m_trueAirspeed);
+                }
+                else
+                {
+                    aircraft->m_indicatedAirspeed = as;
+                    aircraft->m_indicatedAirspeedValid = true;
+                    aircraft->m_indicatedAirspeedItem->setData(Qt::DisplayRole, m_settings.m_siUnits ? Units::knotsToIntegerKPH(aircraft->m_indicatedAirspeed) : aircraft->m_indicatedAirspeed);
+                }
             }
+            //int vr_source = (data[8] >> 4) & 1; // Source of vertical rate GNSS=0 Baro=1
             int s_vr = (data[8] >> 3) & 1; // Vertical rate sign
             int vr = ((data[8] & 0x7) << 6) | ((data[9] >> 2) & 0x3f); // Vertical rate
             aircraft->m_verticalRate = (vr-1)*64*(s_vr?-1:1);
@@ -1573,20 +1535,15 @@ void ADSBDemodGUI::handleADSB(
         }
         else if (tc == 28)
         {
-            // Aircraft status
+            // Aircraft status - BDS 6,1
             int st = data[4] & 0x7;   // Subtype
             if (st == 1)
             {
                 int es = (data[5] >> 5) & 0x7; // Emergency state
                 int modeA =  ((data[5] << 8) & 0x1f00) | (data[6] & 0xff); // Mode-A code (squawk)
-                aircraft->m_status = emergencyStatus[es];
+                aircraft->m_status = m_emergencyStatus[es];
                 aircraft->m_statusItem->setText(aircraft->m_status);
-                int a, b, c, d;
-                c = ((modeA >> 12) & 1) | ((modeA >> (10-1)) & 0x2) | ((modeA >> (8-2)) & 0x4);
-                a = ((modeA >> 11) & 1) | ((modeA >> (9-1)) & 0x2) | ((modeA >> (7-2)) & 0x4);
-                b = ((modeA >> 5) & 1) | ((modeA >> (3-1)) & 0x2) | ((modeA << (1)) & 0x4);
-                d = ((modeA >> 4) & 1) | ((modeA >> (2-1)) & 0x2) | ((modeA << (2)) & 0x4);
-                aircraft->m_squawk = a*1000 + b*100 + c*10 + d;
+                aircraft->m_squawk = squawkDecode(modeA);
                 if (modeA & 0x40)
                     aircraft->m_squawkItem->setText(QString("%1 IDENT").arg(aircraft->m_squawk, 4, 10, QLatin1Char('0')));
                 else
@@ -1600,6 +1557,76 @@ void ADSBDemodGUI::handleADSB(
         else if (tc == 29)
         {
             // Target state and status
+            bool selAltitudeType = (data[5] >> 7) & 0x1;
+            int selAltitudeFix = ((data[5] & 0x7f) << 4) | ((data[6] >> 4) & 0xf);
+            if (selAltitudeFix != 0)
+            {
+                int selAltitude = (selAltitudeFix - 1) * 32; // Ft
+                aircraft->m_selAltitude = selAltitude;
+                aircraft->m_selAltitudeValid = true;
+                if (m_settings.m_siUnits) {
+                    aircraft->m_selAltitudeItem->setData(Qt::DisplayRole, Units::feetToIntegerMetres(aircraft->m_selAltitude));
+                } else {
+                    aircraft->m_selAltitudeItem->setData(Qt::DisplayRole, roundTo50Feet(aircraft->m_selAltitude));
+                }
+            }
+            int baroFix = ((data[6] & 0xf) << 5) | ((data[7] >> 3) & 0x1f);
+            if (baroFix != 0)
+            {
+                float baro = (baroFix - 1) * 0.8f + 800.0f; // mb
+                aircraft->m_baro = baro;
+                aircraft->m_baroValid = true;
+                aircraft->m_baroItem->setData(Qt::DisplayRole, std::round(aircraft->m_baro));
+            }
+            bool selHeadingValid = (data[7] >> 2) & 0x1;
+            if (selHeadingValid)
+            {
+                int selHeadingFix = ((data[7] & 0x3) << 7) | ((data[8] >> 1) & 0x7f);
+                selHeadingFix = (selHeadingFix << 23) >> 23;
+                float selHeading = selHeadingFix * 180.0f / 256.0f;
+                if (selHeading < 0.0f) {
+                    selHeading += 360.0f;
+                }
+                aircraft->m_selHeading = selHeading;
+                aircraft->m_selHeadingValid = true;
+                aircraft->m_selHeadingItem->setData(Qt::DisplayRole, std::round(aircraft->m_selHeading));
+            }
+
+            bool modeValid = (data[9] >> 1) & 0x1;
+            if (modeValid)
+            {
+                bool autoPilot = data[9] & 0x1;
+                bool vnavMode = (data[10] >> 7) & 0x1;
+                bool altHoldMode = (data[10] >> 6) & 0x1;
+                bool approachMode = (data[10] >> 4) & 0x1;
+                bool lnavMode = (data[10] >> 2) & 0x1;
+
+                aircraft->m_apItem->setText(autoPilot ? QChar(0x2713) : QChar(0x2717)); // Tick or cross
+
+                QString vMode = "";
+                if (vnavMode) {
+                    vMode = vMode + "VNAV ";
+                }
+                if (altHoldMode) {
+                    vMode = vMode + "HOLD ";
+                }
+                if (approachMode) {
+                    vMode = vMode + "APP ";
+                }
+                vMode = vMode.trimmed();
+                aircraft->m_vModeItem->setText(vMode);
+
+                QString lMode = "";
+                if (lnavMode) {
+                    lMode = lMode + "LNAV ";
+                }
+                if (approachMode) {
+                    lMode = lMode + "APP ";
+                }
+                lMode = lMode.trimmed();
+                aircraft->m_lModeItem->setText(lMode);
+            }
+
         }
         else if (tc == 31)
         {
@@ -1633,8 +1660,17 @@ void ADSBDemodGUI::handleADSB(
     }
     else if (df == 18)
     {
-        // TIS-B
-        qDebug() << "TIS B message cf=" << ca << " icao: " << icao;
+        // TIS-B that doesn't match ADS-B formats, such as TIS-B management
+        qDebug() << "TIS B message cf=" << ca << " icao: " << QString::number(icao, 16);
+    }
+    else if ((df == 4) || (df == 5))
+    {
+        decodeModeS(data, dateTime, df, aircraft);
+    }
+    else if ((df == 20) || (df == 21))
+    {
+        decodeModeS(data, dateTime, df, aircraft);
+        decodeCommB(data, dateTime, df, aircraft, updatedCallsign);
     }
 
     // Check to see if we need to emit a notification about this aircraft
@@ -1643,6 +1679,968 @@ void ADSBDemodGUI::handleADSB(
     // Update text below photo if it's likely to have changed
     if ((aircraft == m_highlightAircraft) && (newAircraft || updatedCallsign)) {
         updatePhotoText(aircraft);
+    }
+}
+
+void ADSBDemodGUI::decodeModeS(const QByteArray data, const QDateTime dateTime, int df, Aircraft *aircraft)
+{
+    bool wasOnSurface = aircraft->m_onSurface;
+    bool takenOff = false;
+
+    int flightStatus = data[0] & 0x7;
+    if ((flightStatus == 0) || (flightStatus == 2))
+    {
+        takenOff = wasOnSurface;
+        aircraft->m_onSurface = false;
+    }
+    else if ((flightStatus == 1) || (flightStatus == 3))
+    {
+        aircraft->m_onSurface = true;
+    }
+    if (wasOnSurface != aircraft->m_onSurface)
+    {
+        // Can't mix CPR values used on surface and those that are airbourne
+        aircraft->m_cprValid[0] = false;
+        aircraft->m_cprValid[1] = false;
+    }
+    //qDebug() << "Flight Status " << m_flightStatuses[flightStatus];
+
+    int altitude = 0;   // Altitude in feet
+
+    if ((df == 4) || (df == 20))
+    {
+        int altitudeCode = ((data[2] & 0x1f) << 8) | (data[3] & 0xff);
+        if (altitudeCode & 0x40) // M bit indicates metres
+        {
+            int altitudeMetres = ((altitudeCode & 0x1f80) >> 1) | (altitudeCode & 0x3f);
+            altitude = Units::metresToFeet(altitudeMetres);
+        }
+        else
+        {
+            // Remove M and Q bits
+            int altitudeFix = ((altitudeCode & 0x1f80) >> 2) | ((altitudeCode & 0x20) >> 1) | (altitudeCode & 0xf);
+
+            // Convert to feet
+            if (altitudeCode & 0x10) {
+                altitude = altitudeFix * 25 - 1000;
+            } else {
+                altitude = gillhamToFeet(altitudeFix);
+            }
+        }
+
+        aircraft->m_altitude = altitude;
+        aircraft->m_altitudeValid = true;
+        aircraft->m_altitudeGNSS = false;
+        aircraft->m_altitudeItem->setData(Qt::DisplayRole, m_settings.m_siUnits ? Units::feetToIntegerMetres(aircraft->m_altitude) : aircraft->m_altitude);
+
+         // Assume runway elevation is at first reported airboune altitude
+        if (takenOff)
+        {
+            aircraft->m_runwayAltitude = aircraft->m_altitude;
+            aircraft->m_runwayAltitudeValid = true;
+        }
+    }
+    else if ((df == 5) || (df == 21))
+    {
+        // Squawk ident code
+        int identCode = ((data[2] & 0x1f) << 8) | (data[3] & 0xff);
+        int squawk = squawkDecode(identCode);
+
+        if (squawk != aircraft->m_squawk)
+        {
+            aircraft->m_squawk = squawk;
+            if (identCode & 0x40) {
+                aircraft->m_squawkItem->setText(QString("%1 IDENT").arg(aircraft->m_squawk, 4, 10, QLatin1Char('0')));
+            } else {
+                aircraft->m_squawkItem->setText(QString("%1").arg(aircraft->m_squawk, 4, 10, QLatin1Char('0')));
+            }
+        }
+    }
+}
+
+void ADSBDemodGUI::decodeCommB(const QByteArray data, const QDateTime dateTime, int df, Aircraft *aircraft, bool &updatedCallsign)
+{
+    // We only see downlink messages, so do not know the data format, so have to decode all posibilities
+    // and then see which have legal values and values that are consistent with ADS-B data
+
+    // All IFR aircraft should support ELS (Elementary Surveillance) which includes BDS 1,0 1,7 2,0 3,0
+    // Large aircraft are also required to support EHS (Enhanced Surveillance) which adds BDS 4,0 5,0 6,0
+    // There is also MRAR (Meteorological Routine Air Report) BDS 4,4 4,5, but only a small % of aircraft support this
+    // See: https://www.icao.int/APAC/Documents/edocs/Mode%20S%20DAPs%20Implementation%20and%20Operations%20Guidance%20Document3.0.pdf
+
+    // I've implemented a few extra BDSes, but these are rarely seen.
+    // Figure 2 in "Mode S Transponder Comm-B Capabilities in Current Operational Aircraft" gives a breakdown of what capabilities are reported by BDS 1,7:
+    // https://www.researchgate.net/publication/346521949_Mode_S_Transponder_Comm-B_Capabilities_in_Current_Operational_Aircraft/link/5fc60b794585152e9be8571c/download
+
+    // Skip messages that are all zeros
+    if (data[4] || data[5] || data[6] || data[7] || data[8] || data[9] || data[10])
+    {
+
+        const int maxWind = 250; // Maximum expected head/tail wind in knts
+        const int maxSpeedDiff = 50; // Maximum speed difference we allow before we assume message is inconsistent
+        const int maxAlt = 46000; // Maximum expected altitude for commercial jet
+        const float maxHeadingDiff = 20.0f; // Maximum difference in heading/track
+
+        // BDS 1,0 - ELS
+
+        bool bds_1_0 = (data[4] == 0x10) && ((data[5] & 0x7c) == 0x00);
+
+        // BDS 1,7 - Common usage GICB capability report - ELS
+
+        bool cap_0_5 = (data[4] >> 7) & 0x1;
+        bool cap_0_6 = (data[4] >> 6) & 0x1;
+        bool cap_0_7 = (data[4] >> 5) & 0x1;
+        bool cap_0_8 = (data[4] >> 4) & 0x1;
+        bool cap_0_9 = (data[4] >> 3) & 0x1;
+        bool cap_0_a = (data[4] >> 2) & 0x1;
+        bool cap_2_0 = (data[4] >> 1) & 0x1;
+        bool cap_2_1 = (data[4] >> 0) & 0x1;
+
+        bool cap_4_0 = (data[5] >> 7) & 0x1;
+        bool cap_4_1 = (data[5] >> 6) & 0x1;
+        bool cap_4_2 = (data[5] >> 5) & 0x1;
+        bool cap_4_3 = (data[5] >> 4) & 0x1;
+        bool cap_4_4 = (data[5] >> 3) & 0x1;
+        bool cap_4_5 = (data[5] >> 2) & 0x1;
+        bool cap_4_8 = (data[5] >> 1) & 0x1;
+        bool cap_5_0 = (data[5] >> 0) & 0x1;
+
+        bool cap_5_1 = (data[6] >> 7) & 0x1;
+        bool cap_5_2 = (data[6] >> 6) & 0x1;
+        bool cap_5_3 = (data[6] >> 5) & 0x1;
+        bool cap_5_4 = (data[6] >> 4) & 0x1;
+        bool cap_5_5 = (data[6] >> 3) & 0x1;
+        bool cap_5_6 = (data[6] >> 2) & 0x1;
+        bool cap_5_f = (data[6] >> 1) & 0x1;
+        bool cap_6_0 = (data[6] >> 0) & 0x1;
+
+        QStringList caps;
+        if (cap_0_5) {
+            caps.append("0,5");
+        }
+        if (cap_0_6) {
+            caps.append("0,6");
+        }
+        if (cap_0_7) {
+            caps.append("0,7");
+        }
+        if (cap_0_8) {
+            caps.append("0,8");
+        }
+        if (cap_0_9) {
+            caps.append("0,9");
+        }
+        if (cap_0_a) {
+            caps.append("0,A");
+        }
+        if (cap_2_0) {
+            caps.append("2,0");
+        }
+        if (cap_2_1) {
+            caps.append("2,1");
+        }
+        if (cap_4_0) {
+            caps.append("4,0");
+        }
+        if (cap_4_1) {
+            caps.append("4,1");
+        }
+        if (cap_4_2) {
+            caps.append("4,2");
+        }
+        if (cap_4_3) {
+            caps.append("4,3");
+        }
+        if (cap_4_4) {
+            caps.append("4,4");
+        }
+        if (cap_4_5) {
+            caps.append("4,5");
+        }
+        if (cap_4_8) {
+            caps.append("4,8");
+        }
+        if (cap_5_0) {
+            caps.append("5,0");
+        }
+        if (cap_5_1) {
+            caps.append("5,1");
+        }
+        if (cap_5_2) {
+            caps.append("5,2");
+        }
+        if (cap_5_3) {
+            caps.append("5,3");
+        }
+        if (cap_5_4) {
+            caps.append("5,4");
+        }
+        if (cap_5_5) {
+            caps.append("5,5");
+        }
+        if (cap_5_6) {
+            caps.append("5,6");
+        }
+        if (cap_5_f) {
+            caps.append("5,F");
+        }
+        if (cap_5_5) {
+            caps.append("6,0");
+        }
+
+        bool bds_1_7 = cap_2_0 && (data[7] == 0x0) && (data[8] == 0x0) && (data[9] == 0x0) && (data[10] == 0x0);
+
+        // BDS 1,8 1,9 1,A 1,B 1,C 1,D 1,E 1,F Mode S specific services
+
+        // Apart from 1,C and 1,F these can have any bits set/clear and specify BDS code capabilities
+        // Don't decode for now
+
+        // BDS 2,0 - Aircraft identification - ELS
+
+        // Flight/callsign - Extract 8 6-bit characters from 6 8-bit bytes, MSB first
+        unsigned char c[9];
+        char callsign[9];
+        c[0] = (data[5] >> 2) & 0x3f; // 6
+        c[1] = ((data[5] & 0x3) << 4) | ((data[6] & 0xf0) >> 4);  // 2+4
+        c[2] = ((data[6] & 0xf) << 2) | ((data[7] & 0xc0) >> 6);  // 4+2
+        c[3] = (data[7] & 0x3f); // 6
+        c[4] = (data[8] >> 2) & 0x3f;
+        c[5] = ((data[8] & 0x3) << 4) | ((data[9] & 0xf0) >> 4);
+        c[6] = ((data[9] & 0xf) << 2) | ((data[10] & 0xc0) >> 6);
+        c[7] = (data[10] & 0x3f);
+        // Map to ASCII
+        for (int i = 0; i < 8; i++) {
+            callsign[i] = m_idMap[c[i]];
+        }
+        callsign[8] = '\0';
+        QString callsignTrimmed = QString(callsign).trimmed();
+        bool invalidCallsign = QString(callsign).contains('#');
+        bool bds_2_0 = (data[4] == 0x20) && !invalidCallsign;
+
+        // BDS 2,1 - Aircraft and airline registration markings
+
+        bool aircraftRegistrationStatus = (data[4] >> 7) & 0x1;
+        char aircraftRegistration[8];
+        c[0] = (data[4] >> 1) & 0x3f;
+        c[1] = ((data[4] & 0x1) << 5) | ((data[5] >> 3) & 0x1f);
+        c[2] = ((data[5] & 0x7) << 3) | ((data[6] >> 5) & 0x7);
+        c[3] = ((data[6] & 0x1f) << 1) | ((data[7] >> 7) & 0x1);
+        c[4] = ((data[7] >> 1) & 0x1f);
+        c[5] = ((data[7] & 0x1) >> 3) | ((data[8] >> 3) & 0x1f);
+        c[6] = ((data[8] & 0x7) << 3) | ((data[9] >> 5) & 0x7);
+        // Map to ASCII
+        for (int i = 0; i < 7; i++) {
+            aircraftRegistration[i] = m_idMap[c[i]];
+        }
+        aircraftRegistration[7] = '\0';
+        QString aircraftRegistrationString = QString(aircraftRegistration).trimmed();
+        bool aircraftRegistrationInvalid = QString(aircraftRegistrationString).contains('#');
+        bool aircraftRegistrationInconsistent = !aircraftRegistrationStatus && (c[0] || c[1] || c[2] || c[3] || c[4] || c[5] || c[6]);
+
+        bool airlineRegistrationStatus = (data[9] >> 4) & 0x1;
+        char airlineRegistration[3];
+        c[0] = ((data[9] & 0xf) << 2) | ((data[10] >> 6) & 0x3);
+        c[1] = data[10] & 0x3f;
+        // Map to ASCII
+        for (int i = 0; i < 2; i++) {
+            airlineRegistration[i] = m_idMap[c[i]];
+        }
+        airlineRegistration[2] = '\0';
+        QString airlineRegistrationString = QString(airlineRegistration).trimmed();
+        bool airlineRegistrationInvalid = QString(airlineRegistrationStatus).contains('#') || !QChar::isLetter(c[0]) || !QChar::isLetter(c[1]);
+        bool airlineRegistrationInconsistent = !airlineRegistrationStatus && (c[0] || c[1]);
+
+        bool bds_2_1 = !aircraftRegistrationInvalid && !aircraftRegistrationInconsistent && !airlineRegistrationInvalid && !airlineRegistrationInconsistent;
+
+        // BDS 3,0 - ACAS active resolution advisory - ELS
+
+        int acas = data[6] & 0x7f;
+        int threatType = (data[7] >> 2) & 0x3;
+        bool bds_3_0 = (data[4] == 0x30) && (acas < 48) && (threatType != 3);
+
+        // BDS 4,0 - Selected vertical information - EHS
+
+        bool mcpSelectedAltStatus = (data[4] >> 7) & 0x1;
+        int mcpSelectedAltFix = ((data[4] & 0x7f) << 5) | ((data[5] >> 3) & 0x1f);
+        int mcpSelectedAlt = mcpSelectedAltFix * 16; // ft
+        bool mcpSelectedAltInconsistent = (mcpSelectedAlt > maxAlt) || (!mcpSelectedAltStatus && (mcpSelectedAltFix != 0));
+
+        bool fmsSelectedAltStatus = (data[5] >> 2) & 0x1;
+        int fmsSelectedAltFix = ((data[5] & 0x3) << 10) | ((data[6] & 0xff) << 2) || (data[7] >> 6) & 0x3;
+        int fmsSelectedAlt = fmsSelectedAltFix * 16; // ft
+        bool fmsSelectedAltInconsistent = (fmsSelectedAlt > maxAlt) || (!fmsSelectedAltStatus && (fmsSelectedAltFix != 0));
+
+        bool baroSettingStatus = (data[7] >> 5) & 0x1;
+        int baroSettingFix = ((data[7] & 0x1f) << 7) | ((data[8] >> 1) & 0x7f);
+        float baroSetting = baroSettingFix * 0.1f + 800.0f; // mb
+        bool baroSettingIncosistent = !baroSettingStatus && (baroSettingFix != 0);
+
+        bool modeStatus = data[9] & 0x1;
+        bool vnavMode = (data[10] >> 7) & 0x1;
+        bool altHoldMode = (data[10] >> 6) & 0x1;
+        bool approachMode = (data[10] >> 5) & 0x1;
+        bool modeInconsistent = !modeStatus && (vnavMode || altHoldMode || approachMode);
+
+        bool targetAltSourceStatus = (data[10] >> 2) & 0x1;
+        int targetAltSource = data[10] & 0x3;
+        bool targetAltSourceInconsistent = !targetAltSourceStatus && (targetAltSource != 0);
+
+        bool bds_4_0 = ((data[8] & 0x01) == 0x0) && ((data[9] & 0xfe) == 0x0) && ((data[10] & 0x18) == 0x0)
+                    && !mcpSelectedAltInconsistent && !fmsSelectedAltInconsistent && !baroSettingIncosistent && !modeInconsistent && !targetAltSourceInconsistent;
+
+        // BDS 4,1 - Next waypoint
+
+        bool waypointStatus = (data[4] >> 7) & 0x1;
+        char waypoint[10];
+        c[0] = (data[4] >> 1) & 0x3f;
+        c[1] = ((data[4] & 0x1) << 5) | ((data[5] >> 3) & 0x1f);
+        c[2] = ((data[5] & 0x7) << 3) | ((data[6] >> 5) & 0x7);
+        c[3] = ((data[6] & 0x1f) << 1) | ((data[7] >> 7) & 0x1);
+        c[4] = ((data[7] >> 1) & 0x1f);
+        c[5] = ((data[7] & 0x1) >> 3) | ((data[8] >> 3) & 0x1f);
+        c[6] = ((data[8] & 0x7) << 3) | ((data[9] >> 5) & 0x7);
+        c[7] = ((data[9] & 0x1f) << 1) | ((data[10] >> 7) & 0x1);
+        c[8] = ((data[10] >> 1) & 0x3f);
+        // Map to ASCII
+        for (int i = 0; i < 9; i++) {
+            waypoint[i] = m_idMap[c[i]];
+        }
+        waypoint[9] = '\0';
+        QString waypointString = QString(waypoint).trimmed();
+        bool waypointInvalid = QString(waypointString).contains('#');
+        bool waypointInconsistent =   (waypointString.size() != 5) // Most navaid waypoints are 5 characters, and this prevents some incorrect matches, but is it correct? Need examples.
+                                   || (!waypointStatus && (c[0] || c[1] || c[2] || c[3] || c[4] || c[5] || c[6] || c[7] || c[8]));
+
+        bool bds_4_1 = !waypointInvalid && !waypointInconsistent;
+
+        // BDS 4,4 - Meteorological routine air report - MRAR - (Appendix E suggests a slightly different format in the future)
+
+        int fomSource = (data[4] >> 4) & 0xf;
+        bool fomSourceInconsistent = fomSource > 4;
+
+        bool windSpeedStatus = (data[4] >> 3) & 0x1;
+        int windSpeedFix = ((data[4] & 0x7) << 6) | ((data[5] >> 2) & 0x3f);
+        int windSpeed = windSpeedFix; // knots
+        int windDirectionFix = ((data[5] & 0x3) << 6) | ((data[6] >> 2) & 0x3f);
+        int windDirection = windDirectionFix * 180.0f / 256.0f; // Degreees
+        bool windSpeedInconsistent = (windSpeed > 250.0f) || (!windSpeedStatus && ((windSpeedFix != 0) || (windDirectionFix != 0)));
+
+        int staticAirTemperatureFix = ((data[6] & 0x1) << 10) | ((data[7] & 0xff) << 2) | ((data[8] >> 6) & 0x3);
+        staticAirTemperatureFix = (staticAirTemperatureFix << 21) >> 21;
+        float staticAirTemperature = staticAirTemperatureFix * 0.25f;
+        bool staticAirTemperatureInconsistent = (staticAirTemperature < -80.0f) || (staticAirTemperature > 60.0f);
+
+        bool averageStaticPressureStatus = (data[8] >> 5) & 0x1;
+        int averageStaticPressureFix = ((data[8] & 0x1f) << 6) | ((data[9] >> 2) & 0x3f);
+        int averageStaticPressure = averageStaticPressureFix; // hPa
+        bool averageStaticPressureInconsistent = !averageStaticPressureStatus && (averageStaticPressureFix != 0);
+
+        bool turbulenceStatus = (data[9] >> 1) & 0x1;
+        int turbulence = ((data[9] & 0x1) << 1) | ((data[10] >> 7) & 0x1);
+        bool turbulenceInconsistent = !turbulenceStatus && (turbulence != 0);
+
+        bool humidityStatus = (data[10] >> 6) & 0x1;
+        int humidityFix = data[10] & 0x3f;
+        float humidity = humidityFix * 100.0f / 64.0f; // %
+        bool humidityInconsistent = (humidity > 100.0) || (!humidityStatus && (humidityFix != 0));
+
+        // Occasionally get frames: 20000000000000 or 08000000000000 - these seem unlikely to be BDS 4,4
+        bool noMetData = ((data[4] == 0x20) || (data[4] == 0x08)) && !(data[5] || data[6] || data[7] || data[8] || data[9] || data[10]);
+
+        bool bds_4_4 = !noMetData && !fomSourceInconsistent && !windSpeedInconsistent && !staticAirTemperatureInconsistent && !averageStaticPressureInconsistent && !turbulenceInconsistent && !humidityInconsistent;
+
+        // BDS 4,5 - Meteorological hazard report - MRAR - (Appendix E suggests a slightly different format in the future)
+
+        bool hazardTurbulenceStatus = (data[4] >> 7) & 0x1;
+        int hazardTurbulence = (data[4] >> 5) & 0x3;
+        bool hazardTurbulenceInconsistent = !hazardTurbulenceStatus && (hazardTurbulence != 0);
+
+        bool hazardWindShearStatus = (data[4] >> 4) & 0x1;
+        int hazardWindShear = (data[4] >> 2) & 0x3;
+        bool hazardWindShearInconsistent = !hazardWindShearStatus && (hazardWindShear != 0);
+
+        bool hazardMicroburstStatus = (data[4] >> 1) & 0x1;
+        int hazardMicroburst = ((data[4] & 0x1) << 1) || ((data[5] >> 7) & 0x1);
+        bool hazardMicroburstInconsistent = !hazardMicroburstStatus && (hazardMicroburst != 0);
+
+        bool hazardIcingStatus = (data[5] >> 6) & 0x1;
+        int hazardIcing = ((data[5] >> 4) & 0x3);
+        bool hazardIcingInconsistent = !hazardIcingStatus && (hazardIcing != 0);
+
+        bool hazardWakeVortexStatus = (data[5] >> 3) & 0x1;
+        int hazardWakeVortex = ((data[5] >> 1) & 0x3);
+        bool hazardWakeVortexInconsistent = !hazardWakeVortexStatus && (hazardWakeVortex != 0);
+
+        bool hazardStaticAirTemperatureStatus = data[5] & 0x1;
+        int hazardStaticAirTemperatureFix = ((data[6] & 0xff) << 2) | ((data[7] >> 6) & 0x3);
+        hazardStaticAirTemperatureFix = (hazardStaticAirTemperatureFix << 22) >> 22;
+        float hazardStaticAirTemperature = hazardStaticAirTemperatureFix * 0.25f; // deg C
+        bool hazardStaticAirTemperatureInconsistent = (hazardStaticAirTemperature < -80.0f) || (hazardStaticAirTemperature > 60.0f) || (!hazardStaticAirTemperatureStatus && (hazardStaticAirTemperatureFix != 0));
+
+        bool hazardAverageStaticPressureStatus = (data[7] >> 5) & 0x1;
+        int hazardAverageStaticPressureFix = ((data[7] & 0x1f) << 6) | ((data[8] >> 2) & 0x3f);
+        int hazardAverageStaticPressure = hazardAverageStaticPressureFix; // hPa
+        bool hazardAverageStaticPressureInconsistent = !hazardAverageStaticPressureStatus && (hazardAverageStaticPressureFix != 0);
+
+        bool hazardRadioHeightStatus = (data[8] >> 1) & 0x1;
+        int hazardRadioHeightFix = ((data[8] & 0x1) << 11) | ((data[9] & 0xff) << 3) | ((data[10] >> 5) & 0x7);
+        int hazardRadioHeight = hazardRadioHeightFix * 16; // Ft
+        bool hazardRadioHeightInconsistent = (hazardRadioHeight > maxAlt) || (!aircraft->m_onSurface && (hazardRadioHeight == 0)) || (!hazardRadioHeightStatus && (hazardRadioHeightFix != 0));
+
+        bool hazardReserveredInconsistent = (data[10] & 0x1f) != 0;
+
+        bool harzardIcingTempInconsistent = hazardIcingStatus && hazardStaticAirTemperatureStatus && (hazardIcing != 0) && ((hazardStaticAirTemperature >= 20.0f) || (hazardStaticAirTemperature <= -40.0f));
+
+        bool bds_4_5 = !hazardTurbulenceInconsistent && !hazardWindShearInconsistent && !hazardMicroburstInconsistent && !hazardIcingInconsistent
+                    && !hazardWakeVortexInconsistent && !hazardStaticAirTemperatureInconsistent && !hazardAverageStaticPressureInconsistent
+                    && !hazardRadioHeightInconsistent && !hazardReserveredInconsistent && !harzardIcingTempInconsistent;
+
+        // BDS 5,0 - Track and turn report - EHS
+
+        bool rollAngleStatus = (data[4] >> 7) & 0x1;
+        int rollAngleFix = ((data[4] & 0x7f) << 3) | ((data[5] >> 5) & 0x7);
+        rollAngleFix = (rollAngleFix << 22) >> 22;
+        float rollAngle = rollAngleFix * (45.0f/256.0f);
+        bool rollAngleInvalid = (rollAngle < -50.0f) || (rollAngle > 50.0f); // More than 50 deg bank unlikely for airliners
+        bool rollAngleInconsistent = ((abs(rollAngle) >= 1.0f) && aircraft->m_onSurface) || (!rollAngleStatus && (rollAngleFix != 0));
+
+        bool trueTrackAngleStatus = (data[5] >> 4) & 0x1;
+        int trueTrackAngleFix = ((data[5] & 0xf) << 7) | ((data[6] >> 1) & 0x7f);
+        trueTrackAngleFix = (trueTrackAngleFix << 21) >> 21;
+        float trueTrackAngle = trueTrackAngleFix * (90.0f/512.0f);
+        if (trueTrackAngle < 0.0f) {
+            trueTrackAngle += 360.0f;
+        }
+        bool trueTrackAngleInconsistent =  (aircraft->m_headingValid && (abs(trueTrackAngle - aircraft->m_heading) > maxHeadingDiff))
+                                        || (!trueTrackAngleStatus && (trueTrackAngleFix != 0));
+
+        bool groundSpeedStatus = data[6] & 0x1;
+        int groundSpeedFix = ((data[7] & 0xff) << 2) | ((data[8] >> 6) & 0x3);
+        int groundSpeed = groundSpeedFix * 2;
+        bool groundSpeedInconsistent =    ((groundSpeed > 800) && (aircraft->m_emitterCategory != "High performance"))
+                                       || (aircraft->m_groundspeedValid && (abs(aircraft->m_groundspeed - groundSpeed) > maxSpeedDiff))
+                                       || (!groundSpeedStatus && (groundSpeedFix != 0));
+
+        bool trackAngleRateStatus = (data[8] >> 5) & 0x1;
+        int trackAngleRateFix = ((data[8] & 0x1f) << 5) | ((data[9] >> 3) & 0x1f);
+        trackAngleRateFix = (trackAngleRateFix << 22) >> 22;
+        float trackAngleRate = trackAngleRateFix * (8.0f/256.0f);
+        bool trackAngleRateInconsistent = !trackAngleRateStatus && (trackAngleRateFix != 0);
+
+        bool trueAirspeedStatus = (data[9] >> 2) & 0x1;
+        int trueAirspeedFix = ((data[9] & 0x3) << 8) | (data[10] & 0xff);
+        int trueAirspeed = trueAirspeedFix * 2;
+        bool trueAirspeedInconsistent =    ((trueAirspeed > 575) && (aircraft->m_emitterCategory != "High performance"))
+                                        || (aircraft->m_groundspeedValid && (abs(aircraft->m_groundspeed - trueAirspeed) > maxWind+maxSpeedDiff))
+                                        || (!trueAirspeedStatus && (trueAirspeedFix != 0));
+
+        bool headwindStatus = groundSpeedStatus && trueAirspeedStatus;
+        int headwind = trueAirspeed - groundSpeed;
+        bool headwindInconsistent = abs(headwind) > maxWind;
+
+        bool bds_5_0 = !rollAngleInvalid && (!rollAngleInconsistent && !trueTrackAngleInconsistent && !groundSpeedInconsistent && !trackAngleRateInconsistent && !trueAirspeedInconsistent && !headwindInconsistent);
+
+        // BDS 5,1 - Position report coarse
+
+        bool positionValid = (data[4] >> 7) & 0x1;
+
+        int latitudeFix = ((data[4] & 0x3f) << 13) | ((data[5] & 0xff) << 5) | ((data[6] >> 3) & 0x1f);
+        latitudeFix = (latitudeFix << 12) >> 12;
+        float latitude = latitudeFix * (360.0f / 1048576.0f);
+
+        int longitudeFix = ((data[6] & 0x7) << 17) | ((data[7] & 0xff) << 9) | ((data[8] & 0xff) << 1) | ((data[9] >> 7) & 0x1);
+        longitudeFix = (longitudeFix << 12) >> 12;
+        float longitude = longitudeFix * (360.0f / 1048576.0f);
+
+        bool positionInconsistent = !aircraft->m_positionValid
+                                || (positionValid && aircraft->m_positionValid && ((abs(latitude - aircraft->m_latitude > 2.0f)) || (abs(longitude - aircraft->m_longitude) > 2.0f)))
+                                || (!positionValid && ((latitudeFix != 0) || (longitudeFix != 0)));
+
+        int pressureAltFix = ((data[9] & 0x7f) << 8) | (data[10] & 0xff);
+        pressureAltFix = (pressureAltFix << 17) >> 17;
+        int pressureAlt = pressureAltFix * 8;
+        bool pressureAltInconsistent = (pressureAlt > 50000) || (pressureAlt < -1000) || (positionValid && aircraft->m_altitudeValid && (abs(pressureAlt - aircraft->m_altitude) > 2000))
+                                    || (!positionValid && (pressureAltFix != 0));
+
+        bool bds_5_1 = !positionInconsistent && !pressureAltInconsistent;
+
+        // BDS 5,3 - Air-referenced state vector
+
+        bool arMagHeadingStatus = (data[4] >> 7) & 1;
+        int arMagHeadingFix = ((data[4] & 0x7f) << 4) | ((data[5] >> 4) & 0xf);
+        float arMagHeading = arMagHeadingFix * 90.0f / 512.0f;
+        bool arMagHeadingInconsistent =    (aircraft->m_headingValid && arMagHeadingStatus && (abs(aircraft->m_heading - arMagHeading) > maxHeadingDiff))
+                                        || (!arMagHeadingStatus && (arMagHeadingFix != 0));
+
+        bool arIndicatedAirspeedStatus = (data[5] >> 3) & 0x1;
+        int arIndicatedAirspeedFix = ((data[5] & 0x7) << 7) | ((data[6] >> 1) & 0x7f);
+        int arIndicatedAirspeed = arIndicatedAirspeedFix; // knots
+        bool arIndicatedAirspeedInconsistent =    ((arIndicatedAirspeed > 550) && (aircraft->m_emitterCategory != "High performance"))
+                                               || (aircraft->m_groundspeedValid && (abs(aircraft->m_groundspeed - arIndicatedAirspeed) > maxWind+maxSpeedDiff))
+                                               || (aircraft->m_indicatedAirspeedValid && (abs(aircraft->m_indicatedAirspeed - arIndicatedAirspeed) > maxSpeedDiff))
+                                               || (arIndicatedAirspeedStatus && (arIndicatedAirspeed < 100) && !aircraft->m_onSurface && (aircraft->m_emitterCategory != "Light"))
+                                               || (!arIndicatedAirspeedStatus && (arIndicatedAirspeedFix != 0));
+
+        bool arMachStatus = data[6] & 0x1;
+        int arMachFix = ((data[7] & 0xff) << 1) | ((data[8] >> 7) & 0x1);
+        float arMach = arMachFix * 0.008f;
+        bool arMachInconsistent =  ((arMach >= 1.0f) && (aircraft->m_emitterCategory != "High performance"))
+                                || (!arMachStatus && (arMachFix != 0));
+
+        bool arTrueAirspeedStatus = (data[8] >> 6) & 0x1;
+        int arTureAirspeedFix = ((data[8] & 0x3f) << 6) | ((data[9] >> 2) & 0x3f);
+        float arTrueAirspeed = arTureAirspeedFix * 0.5f; // knots
+        bool arTrueAirspeedInconsistent =   ((arTrueAirspeed > 550) && (aircraft->m_emitterCategory != "High performance"))
+                                         || (aircraft->m_groundspeedValid && (abs(aircraft->m_groundspeed - arTrueAirspeed) > maxWind+maxSpeedDiff))
+                                         || (aircraft->m_trueAirspeedValid && (abs(aircraft->m_trueAirspeed - arTrueAirspeed) > maxSpeedDiff))
+                                         || (arTrueAirspeedStatus && (arTureAirspeedFix < 100) && !aircraft->m_onSurface && (aircraft->m_emitterCategory != "Light"))
+                                         || (!arTrueAirspeedStatus && (arTureAirspeedFix != 0));
+
+        bool arAltitudeRateStatus = (data[9] >> 1) & 0x1;
+        int arAltitudeRateFix = ((data[9] & 0x1) << 8) | (data[10] & 0xff);
+        int arAltitudeRate = arAltitudeRateFix * 64; // Ft/min
+        bool arAltitudeRateInconsistent = (abs(arAltitudeRate) > 6000) || (!arAltitudeRateStatus && (arAltitudeRateFix != 0));
+
+        bool bds_5_3 = !arMagHeadingInconsistent && !arIndicatedAirspeedInconsistent && !arMachInconsistent && !arTrueAirspeedInconsistent;
+
+        // BDS 6,0 - Heading and speed report - EHS
+
+        bool magHeadingStatus = (data[4] >> 7) & 1;
+        int magHeadingFix = ((data[4] & 0x7f) << 4) | ((data[6] >> 4) & 0xf);
+        magHeadingFix = (magHeadingFix << 21) >> 21;
+        float magHeading = magHeadingFix * (90.0f / 512.0f);
+        if (magHeading < 0.0f) {
+            magHeading += 360.f;
+        }
+        bool magHeadingInconsistent =    (aircraft->m_headingValid && magHeadingStatus && (abs(aircraft->m_heading - magHeading) > maxHeadingDiff))
+                                      || (!magHeadingStatus && (magHeadingFix != 0));
+
+        bool indicatedAirspeedStatus = (data[5] >> 3) & 0x1;
+        int indicatedAirspeedFix = ((data[5] & 0x7) << 7) | ((data[6] >> 1) & 0x7f);
+        int indicatedAirspeed = indicatedAirspeedFix;
+        bool indicatedAirspeedInconsistent =   ((indicatedAirspeed > 550) && (aircraft->m_emitterCategory != "High performance"))
+                                            || (aircraft->m_groundspeedValid && (abs(aircraft->m_groundspeed - indicatedAirspeed) > maxWind+maxSpeedDiff))
+                                            || (aircraft->m_indicatedAirspeedValid && (abs(aircraft->m_indicatedAirspeed - indicatedAirspeed) > maxSpeedDiff))
+                                            || (indicatedAirspeedStatus && (indicatedAirspeed < 100) && !aircraft->m_onSurface && (aircraft->m_emitterCategory != "Light"))
+                                            || (!indicatedAirspeedStatus && (indicatedAirspeedFix != 0));
+
+        bool machStatus = data[6] & 0x1;
+        int machFix = ((data[7] & 0xff) << 2) | ((data[8] >> 6) & 0x3);
+        float mach = machFix * 2.048f / 512.0f;
+        bool machInconsistent = ((mach >= 1.0f) && (aircraft->m_emitterCategory != "High performance"))
+                                || (!machStatus && (machFix != 0));
+
+        bool baroAltRateStatus = (data[8] >> 5) & 0x1;
+        int baroAltRateFix = ((data[8] & 0x1f) << 5) | ((data[9] >> 3) & 0x1f);
+        baroAltRateFix = (baroAltRateFix << 22) >> 22;
+        int baroAltRate = baroAltRateFix * 32; // ft/min
+        bool baroAltRateInconsistent = (abs(baroAltRate) > 6000) || (aircraft->m_verticalRateValid && abs(baroAltRate - aircraft->m_verticalRate) > 2000)
+                                    || (!baroAltRateStatus && (baroAltRateFix != 0));
+
+        bool verticalVelStatus = (data[9] >> 2) & 0x1;
+        int verticalVelFix = ((data[9] & 0x3) << 8) | (data[10] & 0xff);
+        verticalVelFix = (verticalVelFix << 22) >> 22;
+        int verticalVel = verticalVelFix * 32; // ft/min
+        bool verticalVelInconsistent = (abs(verticalVel) > 6000) || (aircraft->m_verticalRateValid && abs(verticalVel - aircraft->m_verticalRate) > 2000)
+                                    || (!verticalVelStatus && (verticalVelFix != 0));
+
+        bool bds_6_0 = !magHeadingInconsistent & !indicatedAirspeedInconsistent & !machInconsistent && !baroAltRateInconsistent && !verticalVelInconsistent;
+
+        int possibleMatches = bds_1_0 + bds_1_7 + bds_2_0 + bds_2_1 + bds_3_0 + bds_4_0 + bds_4_1 + bds_4_4 + bds_4_5 + bds_5_0 + bds_5_1 + bds_5_3 + bds_6_0;
+
+        if (possibleMatches == 1)
+        {
+            if (bds_1_7)
+            {
+                // Some of these bits are dynamic, so can't assume that because a bit isn't set,
+                // that message is not ever supported
+                aircraft->m_bdsCapabilitiesValid = true;
+                aircraft->m_bdsCapabilities[0][5] |= cap_0_5;
+                aircraft->m_bdsCapabilities[0][6] |= cap_0_6;
+                aircraft->m_bdsCapabilities[0][7] |= cap_0_7;
+                aircraft->m_bdsCapabilities[0][8] |= cap_0_8;
+                aircraft->m_bdsCapabilities[0][9] |= cap_0_9;
+                aircraft->m_bdsCapabilities[0][10] |= cap_0_a;
+                aircraft->m_bdsCapabilities[2][0] |= cap_2_0;
+                aircraft->m_bdsCapabilities[2][1] |= cap_2_1;
+                aircraft->m_bdsCapabilities[4][0] |= cap_4_0;
+                aircraft->m_bdsCapabilities[4][1] |= cap_4_1;
+                aircraft->m_bdsCapabilities[4][2] |= cap_4_2;
+                aircraft->m_bdsCapabilities[4][3] |= cap_4_3;
+                aircraft->m_bdsCapabilities[4][4] |= cap_4_4;
+                aircraft->m_bdsCapabilities[4][8] |= cap_4_8;
+                aircraft->m_bdsCapabilities[5][0] |= cap_5_0;
+                aircraft->m_bdsCapabilities[5][1] |= cap_5_1;
+                aircraft->m_bdsCapabilities[5][2] |= cap_5_2;
+                aircraft->m_bdsCapabilities[5][3] |= cap_5_4;
+                aircraft->m_bdsCapabilities[5][4] |= cap_5_5;
+                aircraft->m_bdsCapabilities[5][5] |= cap_5_6;
+                aircraft->m_bdsCapabilities[5][6] |= cap_5_6;
+                aircraft->m_bdsCapabilities[5][15] |= cap_5_f;
+                aircraft->m_bdsCapabilities[6][0] |= cap_6_0;
+            }
+            if (bds_2_0)
+            {
+                updatedCallsign = aircraft->m_callsign != callsignTrimmed;
+                if (updatedCallsign)
+                {
+                    aircraft->m_callsign = callsignTrimmed;
+                    aircraft->m_callsignItem->setText(aircraft->m_callsign);
+                    callsignToFlight(aircraft);
+                }
+            }
+            if (bds_2_1)
+            {
+                qDebug() << "BDS 2,1 - "
+                        << "ICAO:" << aircraft->m_icaoHex
+                        << "aircraftRegistration:" << aircraftRegistrationString
+                        << "airlineRegistration:" << airlineRegistrationString
+                        << "m_bdsCapabilities[2][1]: " << aircraft->m_bdsCapabilities[2][1]
+                        << "m_bdsCapabilitiesValid: " << aircraft->m_bdsCapabilitiesValid;
+
+                if (!aircraftRegistrationString.isEmpty()) {
+                    aircraft->m_registrationItem->setText(aircraftRegistrationString);
+                }
+            }
+            if (bds_4_0)
+            {
+                // Could use targetAltSource here, but yet to see it set to anything other than unknown
+                if (mcpSelectedAltStatus)
+                {
+                    aircraft->m_selAltitude = mcpSelectedAlt;
+                    aircraft->m_selAltitudeValid = true;
+                    if (m_settings.m_siUnits) {
+                        aircraft->m_selAltitudeItem->setData(Qt::DisplayRole, Units::feetToIntegerMetres(aircraft->m_selAltitude));
+                    } else {
+                        aircraft->m_selAltitudeItem->setData(Qt::DisplayRole, roundTo50Feet(aircraft->m_selAltitude));
+                    }
+                }
+                else if (fmsSelectedAltStatus)
+                {
+                    aircraft->m_selAltitude = fmsSelectedAlt;
+                    aircraft->m_selAltitudeValid = true;
+                    if (m_settings.m_siUnits) {
+                        aircraft->m_selAltitudeItem->setData(Qt::DisplayRole, Units::feetToIntegerMetres(aircraft->m_selAltitude));
+                    } else {
+                        aircraft->m_selAltitudeItem->setData(Qt::DisplayRole, roundTo50Feet(aircraft->m_selAltitude));
+                    }
+                }
+                else
+                {
+                    aircraft->m_selAltitude = 0;
+                    aircraft->m_selAltitudeValid = false;
+                    aircraft->m_selAltitudeItem->setText("");
+                }
+
+                if (baroSettingStatus)
+                {
+                    aircraft->m_baro = baroSetting;
+                    aircraft->m_baroValid = true;
+                    aircraft->m_baroItem->setData(Qt::DisplayRole, std::round(aircraft->m_baro));
+                }
+
+                if (modeStatus)
+                {
+                    QString mode = "";
+                    if (vnavMode) {
+                        mode = mode + "VNAV ";
+                    }
+                    if (altHoldMode) {
+                        mode = mode + "HOLD ";
+                    }
+                    if (approachMode) {
+                        mode = mode + "APP ";
+                    }
+                    mode = mode.trimmed();
+                    aircraft->m_vModeItem->setText(mode);
+                }
+            }
+            if (bds_4_1)
+            {
+                qDebug() << "BDS 4,1 - "
+                        << "ICAO:" << aircraft->m_icaoHex
+                        << "waypoint:" << waypointString
+                        << "m_bdsCapabilities[4][1]: " << aircraft->m_bdsCapabilities[4][1]
+                        << "m_bdsCapabilitiesValid: " << aircraft->m_bdsCapabilitiesValid;
+            }
+            if (bds_4_4)
+            {
+                if (fomSource != 0) // Ignore FOM "invalid"
+                {
+                    if (windSpeedStatus)
+                    {
+                        if (m_settings.m_siUnits) {
+                            aircraft->m_groundspeedItem->setData(Qt::DisplayRole, Units::knotsToIntegerKPH(aircraft->m_groundspeed));
+                        } else {
+                            aircraft->m_windSpeedItem->setData(Qt::DisplayRole, windSpeed);
+                        }
+                        aircraft->m_windDirItem->setData(Qt::DisplayRole, windDirection);
+                        // Not clear if air temp depends on the previous status bit
+                        aircraft->m_staticAirTempItem->setData(Qt::DisplayRole, (int)std::round(staticAirTemperature));
+                    }
+                    if (averageStaticPressureStatus) {
+                        aircraft->m_staticPressureItem->setData(Qt::DisplayRole, averageStaticPressure);
+                    }
+                    if (humidityStatus) {
+                        aircraft->m_humidityItem->setData(Qt::DisplayRole, (int)std::round(humidity));
+                    }
+                }
+            }
+            if (bds_4_5)
+            {
+                qDebug() << "BDS 4,5 - "
+                        << "ICAO:" << aircraft->m_icaoHex
+                        << "hazardTurbulence:" << m_hazardSeverity[hazardTurbulence]
+                        << "hazardWindShear:" << m_hazardSeverity[hazardWindShear]
+                        << "hazardMicroburst:" << m_hazardSeverity[hazardMicroburst]
+                        << "hazardIcing:" << m_hazardSeverity[hazardIcing]
+                        << "hazardWakeVortex:" << m_hazardSeverity[hazardWakeVortex]
+                        << "hazardStaticAirTemperature:" << hazardStaticAirTemperature << "C"
+                        << "hazardAverageStaticPressure:" << hazardAverageStaticPressure << "hPA"
+                        << "hazardRadioHeight:" << hazardRadioHeight << "ft"
+                        << "(Aircraft Alt: " << aircraft->m_altitude << "ft)"
+                        << "m_bdsCapabilities[4][5]: " << aircraft->m_bdsCapabilities[4][5]
+                        << "m_bdsCapabilitiesValid: " << aircraft->m_bdsCapabilitiesValid;
+                        ;
+            }
+            if (bds_5_0)
+            {
+                if (rollAngleStatus)
+                {
+                    aircraft->m_roll = rollAngle;
+                    aircraft->m_rollValid = true;
+                    aircraft->m_rollItem->setData(Qt::DisplayRole, std::round(aircraft->m_roll));
+                }
+                if (trueTrackAngleStatus)
+                {
+                    aircraft->m_heading = trueTrackAngle;
+                    aircraft->m_headingValid = true;
+                    aircraft->m_headingDateTime = dateTime;
+                    aircraft->m_headingItem->setData(Qt::DisplayRole, std::round(aircraft->m_heading));
+                    aircraft->m_orientationDateTime = dateTime;
+                }
+                if (groundSpeedStatus)
+                {
+                    aircraft->m_groundspeed = groundSpeed;
+                    aircraft->m_groundspeedValid = true;
+                    if (m_settings.m_siUnits) {
+                        aircraft->m_groundspeedItem->setData(Qt::DisplayRole, Units::knotsToIntegerKPH(aircraft->m_groundspeed));
+                    } else {
+                        aircraft->m_groundspeedItem->setData(Qt::DisplayRole, aircraft->m_groundspeed);
+                    }
+                }
+                if (trackAngleRateStatus)
+                {
+                    aircraft->m_turnRate = trackAngleRate;
+                    aircraft->m_turnRateValid = true;
+                    aircraft->m_turnRateItem->setData(Qt::DisplayRole, std::round(aircraft->m_turnRate*10.0f)/10.0f);
+                }
+                if (trueAirspeedStatus)
+                {
+                    aircraft->m_trueAirspeed = trueAirspeed;
+                    aircraft->m_trueAirspeedValid = true;
+                    if (m_settings.m_siUnits) {
+                        aircraft->m_trueAirspeedItem->setData(Qt::DisplayRole, Units::knotsToIntegerKPH(aircraft->m_trueAirspeed));
+                    } else {
+                        aircraft->m_trueAirspeedItem->setData(Qt::DisplayRole, aircraft->m_trueAirspeed);
+                    }
+                }
+                if (headwindStatus)
+                {
+                    if (m_settings.m_siUnits) {
+                        aircraft->m_headwindItem->setData(Qt::DisplayRole, Units::knotsToIntegerKPH(headwind));
+                    } else {
+                        aircraft->m_headwindItem->setData(Qt::DisplayRole, headwind);
+                    }
+                }
+            }
+            if (bds_5_1)
+            {
+                // Position is specified as "coarse" - is it worth using?
+                qDebug() << "BDS 5,1 - "
+                        << "ICAO:" << aircraft->m_icaoHex
+                        << "latitude:" << latitude << "(ADS-B:" << aircraft->m_latitude << ") "
+                        << "longitude:" << longitude  << "(ADS-B:" << aircraft->m_longitude << ") "
+                        << "pressureAlt:" << pressureAlt  << "(ADS-B:" << aircraft->m_altitude << ")"
+                        << "m_bdsCapabilities[5][1]: " << aircraft->m_bdsCapabilities[5][1]
+                        << "m_bdsCapabilitiesValid: " << aircraft->m_bdsCapabilitiesValid;
+                        ;
+            }
+            if (bds_5_3)
+            {
+                qDebug() << "BDS 5,3 - "
+                        << "ICAO:" << aircraft->m_icaoHex
+                        << "arMagHeading:" << arMagHeading << "(ADS-B:" << aircraft->m_heading << ") "
+                        << "arIndicatedAirspeed:" << arIndicatedAirspeed << "knts" << "(ADS-B GS: " << aircraft->m_groundspeed << ") "
+                        << "arMach:" << arMach
+                        << "arTrueAirspeed:" << arTrueAirspeed << "knts"
+                        << "arAltitudeRate:" << arAltitudeRate << "ft/min"
+                        << "m_bdsCapabilities[5][3]: " << aircraft->m_bdsCapabilities[5][3]
+                        << "m_bdsCapabilitiesValid: " << aircraft->m_bdsCapabilitiesValid;
+                        ;
+            }
+            if (bds_6_0)
+            {
+                if (indicatedAirspeedStatus)
+                {
+                    aircraft->m_indicatedAirspeed = indicatedAirspeed;
+                    aircraft->m_indicatedAirspeedValid = true;
+                    if (m_settings.m_siUnits) {
+                        aircraft->m_indicatedAirspeedItem->setData(Qt::DisplayRole, Units::knotsToIntegerKPH(aircraft->m_indicatedAirspeed));
+                    } else {
+                        aircraft->m_indicatedAirspeedItem->setData(Qt::DisplayRole, aircraft->m_indicatedAirspeed);
+                    }
+                }
+                if (machStatus)
+                {
+                    aircraft->m_mach = mach;
+                    aircraft->m_machValid = true;
+                    aircraft->m_machItem->setData(Qt::DisplayRole, aircraft->m_mach);
+                }
+                if (verticalVelStatus)
+                {
+                    aircraft->m_verticalRate = verticalVel;
+                    aircraft->m_verticalRateValid = true;
+                    if (m_settings.m_siUnits) {
+                        aircraft->m_verticalRateItem->setData(Qt::DisplayRole, Units::feetPerMinToIntegerMetresPerSecond(aircraft->m_verticalRate));
+                    } else {
+                        aircraft->m_verticalRateItem->setData(Qt::DisplayRole, aircraft->m_verticalRate);
+                    }
+                }
+            }
+
+            if (bds_5_0 || bds_6_0) {
+                calcAirTemp(aircraft);
+            }
+        }
+        else if (false) // Enable to debug multiple matching frames
+        {
+            qDebug() << "DF" << df
+                    << "matches" << possibleMatches
+                    << "bds_1_0" << bds_1_0
+                    << "bds_1_7" << bds_1_7
+                    << "bds_2_0" << bds_2_0
+                    << "bds_2_1" << bds_2_1
+                    << "bds_3_0" << bds_3_0
+                    << "bds_4_0" << bds_4_0
+                    << "bds_4_1" << bds_4_1
+                    << "bds_4_4" << bds_4_4
+                    << "bds_4_5" << bds_4_5
+                    << "bds_5_0" << bds_5_0
+                    << "bds_5_1" << bds_5_1
+                    << "bds_5_3" << bds_5_3
+                    << "bds_6_0" << bds_6_0
+                    ;
+
+            qDebug() << data.toHex();
+
+            qDebug() << (bds_1_0 ? "+" : "-")
+                     << "BDS 1,0 - ";
+            qDebug() << (bds_1_7 ? "+" : "-")
+                     << "BDS 1,7 - "
+                     << "ICAO:" << aircraft->m_icaoHex
+                     << "BDS:" << caps.join(" ");
+            qDebug() << (bds_2_0 ? "+" : "-")
+                     << "BDS 2,0 - "
+                     << "ICAO:" << aircraft->m_icaoHex
+                     << "Callsign:" << callsignTrimmed;
+            qDebug() << (bds_2_1 ? "+" : "-")
+                     << "BDS 2,1 - "
+                     << "ICAO:" << aircraft->m_icaoHex
+                     << "aircraftRegistration:" << aircraftRegistrationString
+                     << "airlineRegistration:" << airlineRegistrationString
+                     << "m_bdsCapabilities[2][1]: " << aircraft->m_bdsCapabilities[2][1]
+                     << "m_bdsCapabilitiesValid: " << aircraft->m_bdsCapabilitiesValid;
+            qDebug() << (bds_3_0 ? "+" : "-")
+                     << "BDS 3,0 - ";
+            qDebug() << (bds_4_0 ? "+" : "-")
+                     << "BDS 4,0 - "
+                     << "ICAO:" << aircraft->m_icaoHex
+                     << "mcpSelectedAlt:" << mcpSelectedAlt << "ft"
+                     << "fmsSelectedAlt:" << fmsSelectedAlt << "ft"
+                     << "baroSetting:" << (baroSettingStatus ? QString::number(baroSetting) : "invalid") << (baroSettingStatus ? "mb" : "")
+                     << "vnav: " << vnavMode
+                     << "altHold: " << altHoldMode
+                     << "approach: " << approachMode
+                     << "targetAltSource:" << targetAltSource
+                     << "m_bdsCapabilities[4][0]: " << aircraft->m_bdsCapabilities[4][0]
+                     << "m_bdsCapabilitiesValid: " << aircraft->m_bdsCapabilitiesValid;
+            qDebug() << (bds_4_1 ? "+" : "-")
+                     << "BDS 4,1 - "
+                     << "ICAO:" << aircraft->m_icaoHex
+                     << "waypoint:" << waypointString
+                     << "m_bdsCapabilities[4][1]: " << aircraft->m_bdsCapabilities[4][1]
+                     << "m_bdsCapabilitiesValid: " << aircraft->m_bdsCapabilitiesValid;
+            qDebug() << (bds_4_4 ? "+" : "-")
+                     << "BDS 4,4 - "
+                     << "ICAO:" << aircraft->m_icaoHex
+                     << "fomSource:" << m_fomSources[fomSource]
+                     << "windSpeed:" << windSpeed << "knts"
+                     << "windDirection:" << windDirection << "deg"
+                     << "staticAirTemperature:" << staticAirTemperature << "C"
+                     << "averageStaticPressure:" << averageStaticPressure << "hPa"
+                     << "turbulence:" << turbulence
+                     << "humidity:" << humidity << "%"
+                     << "m_bdsCapabilities[4][4]: " << aircraft->m_bdsCapabilities[4][4]
+                     << "m_bdsCapabilitiesValid: " << aircraft->m_bdsCapabilitiesValid;
+            qDebug() << (bds_4_5 ? "+" : "-")
+                     << "BDS 4,5 - "
+                     << "ICAO:" << aircraft->m_icaoHex
+                     << "hazardTurbulence:" << m_hazardSeverity[hazardTurbulence]
+                     << "hazardWindShear:" << m_hazardSeverity[hazardWindShear]
+                     << "hazardMicroburst:" << m_hazardSeverity[hazardMicroburst]
+                     << "hazardIcing:" << m_hazardSeverity[hazardIcing]
+                     << "hazardWakeVortex:" << m_hazardSeverity[hazardWakeVortex]
+                     << "hazardStaticAirTemperature:" << hazardStaticAirTemperature << "C"
+                     << "hazardAverageStaticPressure:" << hazardAverageStaticPressure << "hPA"
+                     << "hazardRadioHeight:" << hazardRadioHeight << "ft"
+                     << "m_bdsCapabilities[4][5]: " << aircraft->m_bdsCapabilities[4][5]
+                     << "m_bdsCapabilitiesValid: " << aircraft->m_bdsCapabilitiesValid;
+            qDebug() << (bds_5_0 ? "+" : "-")
+                     << "BDS 5,0 - "
+                     << "ICAO:" << aircraft->m_icaoHex
+                     << "rollAngle:" << rollAngle
+                     << "trueTrackAngle:" << trueTrackAngle
+                     << "trackAngleRate: " << trackAngleRate
+                     << "groundSpeed:" << groundSpeed
+                     << "trueAirspeed:" << trueAirspeed
+                     << "headwind:" << headwind
+                     << "(ADS-B GS: " << aircraft->m_groundspeed << ")"
+                     << "(ADS-B TAS: " << aircraft->m_trueAirspeed << ")"
+                     << "(ADS-B heading:" << aircraft->m_heading << ")"
+                     << "m_bdsCapabilities[5][0]: " << aircraft->m_bdsCapabilities[5][0]
+                     << "m_bdsCapabilitiesValid: " << aircraft->m_bdsCapabilitiesValid;
+            qDebug() << (bds_5_1 ? "+" : "-")
+                     << "BDS 5,1 - "
+                     << "ICAO:" << aircraft->m_icaoHex
+                     << "latitude:" << latitude << "(ADS-B:" << aircraft->m_latitude << ") "
+                     << "longitude:" << longitude  << "(ADS-B:" << aircraft->m_longitude << ") "
+                     << "pressureAlt:" << pressureAlt  << "(ADS-B:" << aircraft->m_altitude << ")"
+                     << "m_bdsCapabilities[5][1]: " << aircraft->m_bdsCapabilities[5][1]
+                     << "m_bdsCapabilitiesValid: " << aircraft->m_bdsCapabilitiesValid;
+            qDebug() << (bds_5_3 ? "+" : "-")
+                     << "BDS 5,3 - "
+                     << "ICAO:" << aircraft->m_icaoHex
+                     << "arMagHeading:" << arMagHeading << "(ADS-B:" << aircraft->m_heading << ") "
+                     << "arIndicatedAirspeed:" << arIndicatedAirspeed << "knts" << "(ADS-B GS: " << aircraft->m_groundspeed << ") "
+                     << "arMach:" << arMach
+                     << "arTrueAirspeed:" << arTrueAirspeed << "knts"
+                     << "arAltitudeRate:" << arAltitudeRate << "ft/min"
+                     << "arMagHeadingInconsistent" << arMagHeadingInconsistent << "arIndicatedAirspeedInconsistent" << arIndicatedAirspeedInconsistent << "arMachInconsistent" << arMachInconsistent << "arTrueAirspeedInconsistent" << arTrueAirspeedInconsistent
+                     << "m_bdsCapabilities[5][3]: " << aircraft->m_bdsCapabilities[5][3]
+                     << "m_bdsCapabilitiesValid: " << aircraft->m_bdsCapabilitiesValid;
+            qDebug() << (bds_6_0 ? "+" : "-")
+                     << "BDS 6,0 - "
+                     << "ICAO:" << aircraft->m_icaoHex
+                     << "magHeading:" << magHeading << "(ADS-B:" << aircraft->m_heading << ") "
+                     << "indicatedAirspeed:" << indicatedAirspeed << "knts" << "(ADS-B GS: " << aircraft->m_groundspeed << ") "
+                     << "mach:" << mach
+                     << "baroAltRate:" << baroAltRate << "ft/min"
+                     << "verticalVel:" << verticalVel << "ft/min"
+                     << "magHeadingInconsistent " << magHeadingInconsistent << "indicatedAirspeedInconsistent" << indicatedAirspeedInconsistent << "machInconsistent" << machInconsistent << "baroAltRateInconsistent" << baroAltRateInconsistent << "verticalVelInconsistent" << verticalVelInconsistent
+                     << "m_bdsCapabilities[6][0]: " << aircraft->m_bdsCapabilities[6][0]
+                     << "m_bdsCapabilitiesValid: " << aircraft->m_bdsCapabilitiesValid;
+        }
     }
 }
 
@@ -1664,8 +2662,8 @@ QList<SWGSDRangel::SWGMapAnimation *> * ADSBDemodGUI::animate(QDateTime dateTime
     // during take-off
     if (   aircraft->m_onSurface
         && !aircraft->m_gearDown
-        && (   (aircraft->m_speedValid && (aircraft->m_speed < 80))
-            || !aircraft->m_speedValid
+        && (   (aircraft->m_groundspeedValid && (aircraft->m_groundspeed < 80))
+            || !aircraft->m_groundspeedValid
            )
        )
     {
@@ -1677,9 +2675,9 @@ QList<SWGSDRangel::SWGMapAnimation *> * ADSBDemodGUI::animate(QDateTime dateTime
     }
 
     // Flaps when on the surface
-    if (aircraft->m_onSurface && aircraft->m_speedValid)
+    if (aircraft->m_onSurface && aircraft->m_groundspeedValid)
     {
-        if ((aircraft->m_speed <= 20) && (aircraft->m_flaps != 0.0))
+        if ((aircraft->m_groundspeed <= 20) && (aircraft->m_flaps != 0.0))
         {
             // No flaps when stationary / taxiing
             if (debug) {
@@ -1689,7 +2687,7 @@ QList<SWGSDRangel::SWGMapAnimation *> * ADSBDemodGUI::animate(QDateTime dateTime
             animations->append(slatsAnimation(dateTime, true));
             aircraft->m_flaps = 0.0;
         }
-        else if ((aircraft->m_speed >= 30) && (aircraft->m_flaps < 0.25))
+        else if ((aircraft->m_groundspeed >= 30) && (aircraft->m_flaps < 0.25))
         {
             // Flaps for takeoff
             if (debug) {
@@ -1712,7 +2710,7 @@ QList<SWGSDRangel::SWGMapAnimation *> * ADSBDemodGUI::animate(QDateTime dateTime
         if (debug) {
             qDebug() << "Pitch up " << aircraft->m_icaoHex;
         }
-        aircraft->m_pitch = 5.0;
+        aircraft->m_pitchEst = 5.0;
     }
 
     // Retract landing gear after take-off
@@ -1729,7 +2727,7 @@ QList<SWGSDRangel::SWGMapAnimation *> * ADSBDemodGUI::animate(QDateTime dateTime
                     << " Alt " << (aircraft->m_runwayAltitudeValid && (aircraft->m_altitude > (aircraft->m_runwayAltitude + gearUpAltitude)))
                     <<  "m_altitude " << aircraft->m_altitude   << " aircraft->m_runwayAltitude " << aircraft->m_runwayAltitude;
         }
-        aircraft->m_pitch = 10.0;
+        aircraft->m_pitchEst = 10.0;
         animations->append(gearAnimation(dateTime.addSecs(2), true));
         aircraft->m_gearDown = false;
     }
@@ -1739,7 +2737,7 @@ QList<SWGSDRangel::SWGMapAnimation *> * ADSBDemodGUI::animate(QDateTime dateTime
         && (aircraft->m_runwayAltitudeValid && (aircraft->m_altitude > (aircraft->m_runwayAltitude + accelerationHeight)))
        )
     {
-        aircraft->m_pitch = 5.0;
+        aircraft->m_pitchEst = 5.0;
     }
 
     // Retract flaps/slats after take-off
@@ -1747,13 +2745,13 @@ QList<SWGSDRangel::SWGMapAnimation *> * ADSBDemodGUI::animate(QDateTime dateTime
     // And before max speed for flaps is reached (215knt for A320, 255KIAS for 777)
     if (   (aircraft->m_flaps > 0.0)
         && (   (aircraft->m_runwayAltitudeValid && (aircraft->m_altitude > (aircraft->m_runwayAltitude + flapsRetractAltitude)))
-            || (aircraft->m_speedValid && (aircraft->m_speed > flapsCleanSpeed))
+            || (aircraft->m_groundspeedValid && (aircraft->m_groundspeed > flapsCleanSpeed))
            )
        )
     {
         if (debug) {
             qDebug() << "Retract flaps " << aircraft->m_icaoHex
-                    << " Spd " << (aircraft->m_speedValid && (aircraft->m_speed > flapsCleanSpeed))
+                    << " Spd " << (aircraft->m_groundspeedValid && (aircraft->m_groundspeed > flapsCleanSpeed))
                     << " Alt " << (aircraft->m_runwayAltitudeValid && (aircraft->m_altitude > (aircraft->m_runwayAltitude + flapsRetractAltitude)));
         }
         animations->append(flapsAnimation(dateTime, aircraft->m_flaps, 0.0));
@@ -1770,10 +2768,10 @@ QList<SWGSDRangel::SWGMapAnimation *> * ADSBDemodGUI::animate(QDateTime dateTime
     if (!aircraft->m_onSurface
         && !aircraft->m_runwayAltitudeValid
         && (aircraft->m_verticalRateValid && (aircraft->m_verticalRate < 0))
-        && aircraft->m_speedValid
+        && aircraft->m_groundspeedValid
        )
     {
-        if ((aircraft->m_speed < flapsCleanSpeed) && (aircraft->m_flaps < 0.25))
+        if ((aircraft->m_groundspeed < flapsCleanSpeed) && (aircraft->m_flaps < 0.25))
         {
             // Extend flaps for approach
             if (debug) {
@@ -1782,7 +2780,7 @@ QList<SWGSDRangel::SWGMapAnimation *> * ADSBDemodGUI::animate(QDateTime dateTime
             animations->append(flapsAnimation(dateTime, aircraft->m_flaps, 0.25));
             //animations->append(slatsAnimation(dateTime, false));
             aircraft->m_flaps = 0.25;
-            aircraft->m_pitch = 1.0;
+            aircraft->m_pitchEst = 1.0;
         }
     }
 
@@ -1792,7 +2790,7 @@ QList<SWGSDRangel::SWGMapAnimation *> * ADSBDemodGUI::animate(QDateTime dateTime
         && !aircraft->m_onSurface
         && !aircraft->m_runwayAltitudeValid
         && (aircraft->m_verticalRateValid && (aircraft->m_verticalRate < 0))
-        && (aircraft->m_speedValid && (aircraft->m_speed < gearDownSpeed))
+        && (aircraft->m_groundspeedValid && (aircraft->m_groundspeed < gearDownSpeed))
        )
     {
         if (debug) {
@@ -1804,7 +2802,7 @@ QList<SWGSDRangel::SWGMapAnimation *> * ADSBDemodGUI::animate(QDateTime dateTime
         animations->append(flapsAnimation(dateTime.addSecs(16), 0.5, 1.0));
         aircraft->m_gearDown = true;
         aircraft->m_flaps = 1.0;
-        aircraft->m_pitch = 3.0;
+        aircraft->m_pitchEst = 3.0;
     }
 
     // Engine control
@@ -1832,7 +2830,7 @@ QList<SWGSDRangel::SWGMapAnimation *> * ADSBDemodGUI::animate(QDateTime dateTime
     else
     {
         // Propellors
-        if (!aircraft->m_engineStarted && aircraft->m_speedValid && (aircraft->m_speed > 0))
+        if (!aircraft->m_engineStarted && aircraft->m_groundspeedValid && (aircraft->m_groundspeed > 0))
         {
             if (debug) {
                 qDebug() << "Start engines " << aircraft->m_icaoHex;
@@ -1841,7 +2839,7 @@ QList<SWGSDRangel::SWGMapAnimation *> * ADSBDemodGUI::animate(QDateTime dateTime
             animations->append(engineAnimation(dateTime, 2, false));
             aircraft->m_engineStarted = true;
         }
-        else if (aircraft->m_engineStarted && aircraft->m_speedValid && (aircraft->m_speed == 0))
+        else if (aircraft->m_engineStarted && aircraft->m_groundspeedValid && (aircraft->m_groundspeed == 0))
         {
             if (debug) {
                 qDebug() << "Stop engines " << aircraft->m_icaoHex;
@@ -1857,26 +2855,26 @@ QList<SWGSDRangel::SWGMapAnimation *> * ADSBDemodGUI::animate(QDateTime dateTime
     {
         // Check speed so we don't set pitch to 0 immediately on touch-down
         // Should probably record time of touch-down and reduce over time
-        if (aircraft->m_speedValid)
+        if (aircraft->m_groundspeedValid)
         {
-            if (aircraft->m_speed < 80) {
-                aircraft->m_pitch = 0.0;
-            } else if ((aircraft->m_speed < 130) && (aircraft->m_pitch >= 2)) {
-                aircraft->m_pitch = 1;
+            if (aircraft->m_groundspeed < 80) {
+                aircraft->m_pitchEst = 0.0;
+            } else if ((aircraft->m_groundspeed < 130) && (aircraft->m_pitchEst >= 2)) {
+                aircraft->m_pitchEst = 1;
             }
         }
     }
     else if ((aircraft->m_flaps < 0.25) && aircraft->m_verticalRateValid)
     {
         // In climb/descent
-        aircraft->m_pitch = std::abs(aircraft->m_verticalRate / 400.0);
+        aircraft->m_pitchEst = std::abs(aircraft->m_verticalRate / 400.0);
     }
 
     // Estimate some roll
     if (aircraft->m_onSurface
         || (aircraft->m_runwayAltitudeValid && (aircraft->m_altitude < (aircraft->m_runwayAltitude + accelerationHeight))))
     {
-        aircraft->m_roll = 0.0;
+        aircraft->m_rollEst = 0.0;
     }
     else if (aircraft->m_headingValid)
     {
@@ -1891,7 +2889,7 @@ QList<SWGSDRangel::SWGMapAnimation *> * ADSBDemodGUI::animate(QDateTime dateTime
                  //qDebug() << "Heading Diff " << headingDiff << " msecs " << msecs << " roll " << roll;
                  roll = std::min(roll, 15.0f);
                  roll = std::max(roll, -15.0f);
-                 aircraft->m_roll = roll;
+                 aircraft->m_rollEst = roll;
              }
         }
         aircraft->m_prevHeadingDateTime = aircraft->m_headingDateTime;
@@ -2033,7 +3031,7 @@ void ADSBDemodGUI::checkDynamicNotification(Aircraft *aircraft)
         {
             if (   (m_settings.m_notificationSettings[i]->m_matchColumn == ADSB_COL_CALLSIGN)
                 || (m_settings.m_notificationSettings[i]->m_matchColumn == ADSB_COL_ALTITUDE)
-                || (m_settings.m_notificationSettings[i]->m_matchColumn == ADSB_COL_SPEED)
+                || (m_settings.m_notificationSettings[i]->m_matchColumn == ADSB_COL_GROUND_SPEED)
                 || (m_settings.m_notificationSettings[i]->m_matchColumn == ADSB_COL_RANGE)
                 || (m_settings.m_notificationSettings[i]->m_matchColumn == ADSB_COL_CATEGORY)
                 || (m_settings.m_notificationSettings[i]->m_matchColumn == ADSB_COL_STATUS)
@@ -2049,8 +3047,8 @@ void ADSBDemodGUI::checkDynamicNotification(Aircraft *aircraft)
                 case ADSB_COL_ALTITUDE:
                     match = aircraft->m_altitudeItem->data(Qt::DisplayRole).toString();
                     break;
-                case ADSB_COL_SPEED:
-                    match = aircraft->m_speedItem->data(Qt::DisplayRole).toString();
+                case ADSB_COL_GROUND_SPEED:
+                    match = aircraft->m_groundspeedItem->data(Qt::DisplayRole).toString();
                     break;
                 case ADSB_COL_RANGE:
                     match = aircraft->m_rangeItem->data(Qt::DisplayRole).toString();
@@ -2118,11 +3116,18 @@ QString ADSBDemodGUI::subAircraftString(Aircraft *aircraft, const QString &strin
     s = s.replace("${icao}", aircraft->m_icaoItem->data(Qt::DisplayRole).toString());
     s = s.replace("${callsign}", aircraft->m_callsignItem->data(Qt::DisplayRole).toString());
     s = s.replace("${aircraft}", aircraft->m_modelItem->data(Qt::DisplayRole).toString());
-    s = s.replace("${latitude}", aircraft->m_latitudeItem->data(Qt::DisplayRole).toString());
-    s = s.replace("${longitude}", aircraft->m_longitudeItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${speed}", aircraft->m_groundspeedItem->data(Qt::DisplayRole).toString()); // For backwards compatibility
+    s = s.replace("${gs}", aircraft->m_groundspeedItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${tas}", aircraft->m_trueAirspeedItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${ias}", aircraft->m_indicatedAirspeedItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${mach}", aircraft->m_machItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${selAltitude}", aircraft->m_selAltitudeItem->data(Qt::DisplayRole).toString());
     s = s.replace("${altitude}", aircraft->m_altitudeItem->data(Qt::DisplayRole).toString());
-    s = s.replace("${speed}", aircraft->m_speedItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${verticalRate}", aircraft->m_verticalRateItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${selHeading}", aircraft->m_selHeadingItem->data(Qt::DisplayRole).toString());
     s = s.replace("${heading}", aircraft->m_headingItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${turnRate}", aircraft->m_turnRateItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${roll}", aircraft->m_rollItem->data(Qt::DisplayRole).toString());
     s = s.replace("${range}", aircraft->m_rangeItem->data(Qt::DisplayRole).toString());
     s = s.replace("${azel}", aircraft->m_azElItem->data(Qt::DisplayRole).toString());
     s = s.replace("${category}", aircraft->m_emitterCategoryItem->data(Qt::DisplayRole).toString());
@@ -2132,6 +3137,18 @@ QString ADSBDemodGUI::subAircraftString(Aircraft *aircraft, const QString &strin
     s = s.replace("${manufacturer}", aircraft->m_manufacturerNameItem->data(Qt::DisplayRole).toString());
     s = s.replace("${owner}", aircraft->m_ownerItem->data(Qt::DisplayRole).toString());
     s = s.replace("${operator}", aircraft->m_operatorICAOItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${ap}", aircraft->m_apItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${vMode}", aircraft->m_vModeItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${lMode}", aircraft->m_lModeItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${baro}", aircraft->m_baroItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${headwind}", aircraft->m_headwindItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${windSpeed}", aircraft->m_windSpeedItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${windDirection}", aircraft->m_windDirItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${staticPressure}", aircraft->m_staticPressureItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${staticAirTemperature}", aircraft->m_staticAirTempItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${humidity}", aircraft->m_humidityItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${latitude}", aircraft->m_latitudeItem->data(Qt::DisplayRole).toString());
+    s = s.replace("${longitude}", aircraft->m_longitudeItem->data(Qt::DisplayRole).toString());
     s = s.replace("${rssi}", aircraft->m_rssiItem->data(Qt::DisplayRole).toString());
     s = s.replace("${flightstatus}", aircraft->m_flightStatusItem->data(Qt::DisplayRole).toString());
     s = s.replace("${departure}", aircraft->m_depItem->data(Qt::DisplayRole).toString());
@@ -2174,6 +3191,7 @@ bool ADSBDemodGUI::handleMessage(const Message& message)
             report.getDateTime(),
             report.getPreambleCorrelation(),
             report.getCorrelationOnes(),
+            report.getCRC(),
             true);
         return true;
     }
@@ -2565,7 +3583,7 @@ void ADSBDemodGUI::on_getOSNDB_clicked()
     // Don't try to download while already in progress
     if (m_progressDialog == nullptr)
     {
-        QString osnDBFilename = getOSNDBZipFilename();
+        QString osnDBFilename = AircraftInformation::getOSNDBZipFilename();
         if (confirmDownload(osnDBFilename))
         {
             // Download Opensky network database to a file
@@ -2640,21 +3658,6 @@ QString ADSBDemodGUI::getAirportFrequenciesDBFilename()
     return getDataDir() + "/airportFrequenciesDatabase.csv";
 }
 
-QString ADSBDemodGUI::getOSNDBZipFilename()
-{
-    return getDataDir() + "/aircraftDatabase.zip";
-}
-
-QString ADSBDemodGUI::getOSNDBFilename()
-{
-    return getDataDir() + "/aircraftDatabase.csv";
-}
-
-QString ADSBDemodGUI::getFastDBFilename()
-{
-    return getDataDir() + "/aircraftDatabaseFast.csv";
-}
-
 qint64 ADSBDemodGUI::fileAgeInDays(QString filename)
 {
     QFile file(filename);
@@ -2713,14 +3716,14 @@ void ADSBDemodGUI::downloadFinished(const QString& filename, bool success)
     bool closeDialog = true;
     if (success)
     {
-        if (filename == getOSNDBZipFilename())
+        if (filename == AircraftInformation::getOSNDBZipFilename())
         {
             // Extract .csv file from .zip file
             QZipReader reader(filename);
             QByteArray database = reader.fileData("media/data/samples/metadata/aircraftDatabase.csv");
             if (database.size() > 0)
             {
-                QFile file(getOSNDBFilename());
+                QFile file(AircraftInformation::getOSNDBFilename());
                 if (file.open(QIODevice::WriteOnly))
                 {
                     file.write(database);
@@ -2738,10 +3741,10 @@ void ADSBDemodGUI::downloadFinished(const QString& filename, bool success)
                     qWarning() << "ADSBDemodGUI::downloadFinished - Failed to extract files from " << filename;
                 }
             }
-            readOSNDB(getOSNDBFilename());
+            readOSNDB(AircraftInformation::getOSNDBFilename());
             // Convert to condensed format for faster loading later
             m_progressDialog->setLabelText("Processing.");
-            AircraftInformation::writeFastDB(getFastDBFilename(), m_aircraftInfo);
+            AircraftInformation::writeFastDB(AircraftInformation::getFastDBFilename(), m_aircraftInfo);
         }
         else if (filename == getAirportDBFilename())
         {
@@ -2974,12 +3977,12 @@ void ADSBDemodGUI::get3DModelBasedOnCategory(Aircraft *aircraft)
 
     if (!aircraft->m_emitterCategory.compare("Heavy"))
     {
-        QStringList heavy = {"B744", "B77W", "B788", "A388"};
+        static const QStringList heavy = {"B744", "B77W", "B788", "A388"};
         aircraftType = heavy[m_random.bounded(heavy.size())];
     }
     else if (!aircraft->m_emitterCategory.compare("Large"))
     {
-        QStringList large = {"A319", "A320", "A321", "B737", "B738", "B739"};
+        static const QStringList large = {"A319", "A320", "A321", "B737", "B738", "B739"};
         aircraftType = large[m_random.bounded(large.size())];
     }
     else if (!aircraft->m_emitterCategory.compare("Small"))
@@ -3064,7 +4067,7 @@ void ADSBDemodGUI::update3DModels()
 {
     // Look for all aircraft gltfs in 3d directory
     QString modelDir = getDataDir() + "/3d";
-    QStringList subDirs = {"BB_Airbus_png", "BB_Boeing_png", "BB_Jets_png", "BB_Props_png", "BB_GA_png", "BB_Mil_png", "BB_Heli_png"};
+    static const QStringList subDirs = {"BB_Airbus_png", "BB_Boeing_png", "BB_Jets_png", "BB_Props_png", "BB_GA_png", "BB_Mil_png", "BB_Heli_png"};
 
     for (auto subDir : subDirs)
     {
@@ -3825,20 +4828,18 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     ui->flightDetails->setVisible(false);
     ui->aircraftDetails->setVisible(false);
 
+    AircraftInformation::init();
+
     // Read aircraft information database, if it has previously been downloaded
-    if (!readFastDB(getFastDBFilename()))
+    if (!readFastDB(AircraftInformation::getFastDBFilename()))
     {
-        if (readOSNDB(getOSNDBFilename()))
-            AircraftInformation::writeFastDB(getFastDBFilename(), m_aircraftInfo);
+        if (readOSNDB(AircraftInformation::getOSNDBFilename()))
+            AircraftInformation::writeFastDB(AircraftInformation::getFastDBFilename(), m_aircraftInfo);
     }
     // Read airport information database, if it has previously been downloaded
     m_airportInfo = AirportInformation::readAirportsDB(getAirportDBFilename());
     if (m_airportInfo != nullptr)
         AirportInformation::readFrequenciesDB(getAirportFrequenciesDBFilename(), m_airportInfo);
-    // Read registration prefix to country map
-    m_prefixMap = CSV::hash(":/flags/regprefixmap.csv");
-    // Read operator air force to military map
-    m_militaryMap = CSV::hash(":/flags/militarymap.csv");
 
     connect(&m_openAIP, &OpenAIP::downloadingURL, this, &ADSBDemodGUI::downloadingURL);
     connect(&m_openAIP, &OpenAIP::downloadError, this, &ADSBDemodGUI::downloadError);
@@ -3930,8 +4931,6 @@ ADSBDemodGUI::~ADSBDemodGUI()
     if (m_aircraftInfo) {
         qDeleteAll(*m_aircraftInfo);
     }
-    qDeleteAll(m_airlineIcons);
-    qDeleteAll(m_flagIcons);
     if (m_flightInformation)
     {
         disconnect(m_flightInformation, &FlightInformation::flightUpdated, this, &ADSBDemodGUI::flightInformationUpdated);
@@ -4016,14 +5015,24 @@ void ADSBDemodGUI::displaySettings()
     if (m_settings.m_siUnits)
     {
         ui->adsbData->horizontalHeaderItem(ADSB_COL_ALTITUDE)->setText("Alt (m)");
-        ui->adsbData->horizontalHeaderItem(ADSB_COL_SPEED)->setText("Spd (kph)");
         ui->adsbData->horizontalHeaderItem(ADSB_COL_VERTICALRATE)->setText("VR (m/s)");
+        ui->adsbData->horizontalHeaderItem(ADSB_COL_SEL_ALTITUDE)->setText("Sel Alt (m)");
+        ui->adsbData->horizontalHeaderItem(ADSB_COL_GROUND_SPEED)->setText("GS (kph)");
+        ui->adsbData->horizontalHeaderItem(ADSB_COL_TRUE_AIRSPEED)->setText("TAS (kph)");
+        ui->adsbData->horizontalHeaderItem(ADSB_COL_INDICATED_AIRSPEED)->setText("IAS (kph)");
+        ui->adsbData->horizontalHeaderItem(ADSB_COL_HEADWIND)->setText("H Wnd (kph)");
+        ui->adsbData->horizontalHeaderItem(ADSB_COL_WIND_SPEED)->setText("Wnd (kph)");
     }
     else
     {
         ui->adsbData->horizontalHeaderItem(ADSB_COL_ALTITUDE)->setText("Alt (ft)");
-        ui->adsbData->horizontalHeaderItem(ADSB_COL_SPEED)->setText("Spd (kn)");
         ui->adsbData->horizontalHeaderItem(ADSB_COL_VERTICALRATE)->setText("VR (ft/m)");
+        ui->adsbData->horizontalHeaderItem(ADSB_COL_SEL_ALTITUDE)->setText("Sel Alt (ft)");
+        ui->adsbData->horizontalHeaderItem(ADSB_COL_GROUND_SPEED)->setText("GS (kn)");
+        ui->adsbData->horizontalHeaderItem(ADSB_COL_TRUE_AIRSPEED)->setText("TAS (kn)");
+        ui->adsbData->horizontalHeaderItem(ADSB_COL_INDICATED_AIRSPEED)->setText("IAS (kn)");
+        ui->adsbData->horizontalHeaderItem(ADSB_COL_HEADWIND)->setText("H Wnd (kn)");
+        ui->adsbData->horizontalHeaderItem(ADSB_COL_WIND_SPEED)->setText("Wnd (kn)");
     }
 
     // Order and size columns
@@ -4156,11 +5165,10 @@ void ADSBDemodGUI::resizeTable()
     int row = ui->adsbData->rowCount();
     ui->adsbData->setRowCount(row + 1);
     ui->adsbData->setItem(row, ADSB_COL_ICAO, new QTableWidgetItem("ICAO ID"));
-    ui->adsbData->setItem(row, ADSB_COL_CALLSIGN, new QTableWidgetItem("Callsign"));
+    ui->adsbData->setItem(row, ADSB_COL_CALLSIGN, new QTableWidgetItem("Callsign-"));
     ui->adsbData->setItem(row, ADSB_COL_MODEL, new QTableWidgetItem("Aircraft12345"));
     ui->adsbData->setItem(row, ADSB_COL_AIRLINE, new QTableWidgetItem("airbrigdecargo1"));
     ui->adsbData->setItem(row, ADSB_COL_ALTITUDE, new QTableWidgetItem("Alt (ft)"));
-    ui->adsbData->setItem(row, ADSB_COL_SPEED, new QTableWidgetItem("Spd (kn)"));
     ui->adsbData->setItem(row, ADSB_COL_HEADING, new QTableWidgetItem("Hd (o)"));
     ui->adsbData->setItem(row, ADSB_COL_VERTICALRATE, new QTableWidgetItem("VR (ft/m)"));
     ui->adsbData->setItem(row, ADSB_COL_RANGE, new QTableWidgetItem("D (km)"));
@@ -4189,6 +5197,23 @@ void ADSBDemodGUI::resizeTable()
     ui->adsbData->setItem(row, ADSB_COL_STA, new QTableWidgetItem("12:00 +1"));
     ui->adsbData->setItem(row, ADSB_COL_ETA, new QTableWidgetItem("12:00 +1"));
     ui->adsbData->setItem(row, ADSB_COL_ATA, new QTableWidgetItem("12:00 +1"));
+    ui->adsbData->setItem(row, ADSB_COL_SEL_ALTITUDE, new QTableWidgetItem("Sel Alt (ft)"));
+    ui->adsbData->setItem(row, ADSB_COL_SEL_HEADING, new QTableWidgetItem("Sel Hd (o)"));
+    ui->adsbData->setItem(row, ADSB_COL_BARO, new QTableWidgetItem("Baro (mb)"));
+    ui->adsbData->setItem(row, ADSB_COL_AP, new QTableWidgetItem("AP"));
+    ui->adsbData->setItem(row, ADSB_COL_V_MODE, new QTableWidgetItem("V Mode"));
+    ui->adsbData->setItem(row, ADSB_COL_L_MODE, new QTableWidgetItem("L Mode"));
+    ui->adsbData->setItem(row, ADSB_COL_TRUE_AIRSPEED, new QTableWidgetItem("TAS (kn)"));
+    ui->adsbData->setItem(row, ADSB_COL_INDICATED_AIRSPEED, new QTableWidgetItem("IAS (kn)"));
+    ui->adsbData->setItem(row, ADSB_COL_MACH, new QTableWidgetItem("0.999"));
+    ui->adsbData->setItem(row, ADSB_COL_HEADWIND, new QTableWidgetItem("H Wnd (kn)"));
+    ui->adsbData->setItem(row, ADSB_COL_EST_AIR_TEMP, new QTableWidgetItem("OAT (C)"));
+    ui->adsbData->setItem(row, ADSB_COL_WIND_SPEED, new QTableWidgetItem("Wnd (kn)"));
+    ui->adsbData->setItem(row, ADSB_COL_WIND_DIR, new QTableWidgetItem("Wnd (o)"));
+    ui->adsbData->setItem(row, ADSB_COL_STATIC_PRESSURE, new QTableWidgetItem("P (hPa)"));
+    ui->adsbData->setItem(row, ADSB_COL_STATIC_AIR_TEMP, new QTableWidgetItem("T (C)"));
+    ui->adsbData->setItem(row, ADSB_COL_HUMIDITY, new QTableWidgetItem("U (%)"));
+    ui->adsbData->setItem(row, ADSB_COL_TIS_B, new QTableWidgetItem("TIS-B"));
     ui->adsbData->resizeColumnsToContents();
     ui->adsbData->setRowCount(row);
 }
@@ -4279,7 +5304,7 @@ void ADSBDemodGUI::aircraftPhoto(const PlaneSpottersPhoto *photo)
 {
     // Make sure the photo is for the currently highlighted aircraft, as it may
     // have taken a while to download
-    if (!photo->m_pixmap.isNull() && m_highlightAircraft && (m_highlightAircraft->m_icaoItem->text() == photo->m_icao))
+    if (!photo->m_pixmap.isNull() && m_highlightAircraft && (m_highlightAircraft->m_icaoItem->text() == photo->m_id))
     {
         ui->photo->setPixmap(photo->m_pixmap);
         ui->photo->setToolTip(QString("Photographer: %1").arg(photo->m_photographer)); // Required by terms of use
@@ -4359,8 +5384,10 @@ void ADSBDemodGUI::on_logOpen_clicked()
                     dialog.show();
                     QApplication::processEvents();
                     int count = 0;
+                    int countOtherDF = 0;
                     bool cancelled = false;
                     QStringList cols;
+                    crcadsb crc;
                     while (!cancelled && CSV::readRow(in, &cols))
                     {
                         if (cols.size() > maxCol)
@@ -4368,16 +5395,32 @@ void ADSBDemodGUI::on_logOpen_clicked()
                             QDateTime dateTime = QDateTime::currentDateTime(); // So they aren't removed immediately as too old
                             QByteArray bytes = QByteArray::fromHex(cols[dataCol].toLatin1());
                             float correlation = cols[correlationCol].toFloat();
-                            handleADSB(bytes, dateTime, correlation, correlation, false);
-                            if ((count > 0) && (count % 100000 == 0))
+                            int df = (bytes[0] >> 3) & ADS_B_DF_MASK; // Downlink format
+                            if ((df == 4) || (df == 5) || (df == 17) || (df == 18) || (df == 20) || (df == 21))
                             {
-                                dialog.setText(QString("Reading ADS-B data\n%1").arg(count));
-                                QApplication::processEvents();
-                                if (dialog.clickedButton()) {
-                                    cancelled = true;
+                                int crcCalc = 0;
+                                if ((df == 4) || (df == 5) || (df == 20) || (df == 21))  // handleADSB requires calculated CRC for Mode-S frames
+                                {
+                                    crc.init();
+                                    crc.calculate((const uint8_t *)bytes.data(), bytes.size()-3);
+                                    crcCalc = crc.get();
                                 }
+                                //qDebug() << "bytes.szie " << bytes.size() << " crc " << Qt::hex <<  crcCalc;
+                                handleADSB(bytes, dateTime, correlation, correlation, crcCalc, false);
+                                if ((count > 0) && (count % 10000 == 0))
+                                {
+                                    dialog.setText(QString("Reading ADS-B data\n%1 (Skipped %2)").arg(count).arg(countOtherDF));
+                                    QApplication::processEvents();
+                                    if (dialog.clickedButton()) {
+                                        cancelled = true;
+                                    }
+                                }
+                                count++;
                             }
-                            count++;
+                            else
+                            {
+                                countOtherDF++;
+                            }
                         }
                     }
                     m_aircraftModel.allAircraftUpdated();
@@ -4439,6 +5482,44 @@ void ADSBDemodGUI::downloadNavAidsFinished()
         delete m_progressDialog;
         m_progressDialog = nullptr;
     }
+}
+
+int ADSBDemodGUI::squawkDecode(int modeA) const
+{
+    int a, b, c, d;
+    c = ((modeA >> 12) & 1) | ((modeA >> (10-1)) & 0x2) | ((modeA >> (8-2)) & 0x4);
+    a = ((modeA >> 11) & 1) | ((modeA >> (9-1)) & 0x2) | ((modeA >> (7-2)) & 0x4);
+    b = ((modeA >> 5) & 1) | ((modeA >> (3-1)) & 0x2) | ((modeA << (1)) & 0x4);
+    d = ((modeA >> 4) & 1) | ((modeA >> (2-1)) & 0x2) | ((modeA << (2)) & 0x4);
+    return a*1000 + b*100 + c*10 + d;
+}
+
+// https://en.wikipedia.org/wiki/Gillham_code
+int ADSBDemodGUI::gillhamToFeet(int n) const
+{
+    int c1 = (n >> 10) & 1;
+    int a1 = (n >> 9) & 1;
+    int c2 = (n >> 8) & 1;
+    int a2 = (n >> 7) & 1;
+    int c4 = (n >> 6) & 1;
+    int a4 = (n >> 5) & 1;
+    int b1 = (n >> 4) & 1;
+    int b2 = (n >> 3) & 1;
+    int d2 = (n >> 2) & 1;
+    int b4 = (n >> 1) & 1;
+    int d4 = n & 1;
+
+    int n500 = grayToBinary((d2 << 7) | (d4 << 6) | (a1 << 5) | (a2 << 4) | (a4 << 3) | (b1 << 2) | (b2 << 1) | b4, 4);
+    int n100 = grayToBinary((c1 << 2) | (c2 << 1) | c4, 3) - 1;
+
+    if (n100 == 6) {
+        n100 = 4;
+    }
+    if (n500 %2 != 0) {
+        n100 = 4 - n100;
+    }
+
+    return -1200 + n500*500 + n100*100;
 }
 
 int ADSBDemodGUI::grayToBinary(int gray, int bits) const
@@ -4605,15 +5686,19 @@ void ADSBDemodGUI::handleImportReply(QNetworkReply* reply)
                                 aircraft->m_altitudeGNSS = false;
                                 aircraft->m_altitudeItem->setData(Qt::DisplayRole, aircraft->m_altitude);
                             }
+                            if (!state[5].isNull() && !state[6].isNull() && !state[7].isNull())
+                            {
+                                QGeoCoordinate coord(aircraft->m_latitude, aircraft->m_longitude, aircraft->m_altitude);
+                                aircraft->m_coordinates.push_back(QVariant::fromValue(coord));
+                            }
                             aircraft->m_positionDateTime = timePosition;
                         }
                         aircraft->m_onSurface = state[8].toBool(false);
                         if (!state[9].isNull())
                         {
-                            aircraft->m_speed = (int)state[9].toDouble();
-                            aircraft->m_speedItem->setData(Qt::DisplayRole, aircraft->m_speed);
-                            aircraft->m_speedValid = true;
-                            aircraft->m_speedType = Aircraft::GS;
+                            aircraft->m_groundspeed = (int)state[9].toDouble();
+                            aircraft->m_groundspeedItem->setData(Qt::DisplayRole, aircraft->m_groundspeed);
+                            aircraft->m_groundspeedValid = true;
                         }
                         if (!state[10].isNull())
                         {

@@ -205,7 +205,8 @@ void ADSBDemodSinkWorker::run()
                             QByteArray((char*)data, sizeof(data)),
                             preambleCorrelation * m_correlationScale,
                             preambleCorrelationOnes / samplesPerChip,
-                            rxDateTime(firstIdx, readBuffer));
+                            rxDateTime(firstIdx, readBuffer),
+                            m_crc.get());
                         m_sink->getMessageQueueToGUI()->push(msg);
                     }
                     // Pass to worker to feed to other servers
@@ -215,7 +216,8 @@ void ADSBDemodSinkWorker::run()
                             QByteArray((char*)data, sizeof(data)),
                             preambleCorrelation * m_correlationScale,
                             preambleCorrelationOnes / samplesPerChip,
-                            rxDateTime(firstIdx, readBuffer));
+                            rxDateTime(firstIdx, readBuffer),
+                            m_crc.get());
                         m_sink->getMessageQueueToWorker()->push(msg);
                     }
                 }
@@ -240,22 +242,37 @@ void ADSBDemodSinkWorker::run()
                     int crc = m_crc.get();
                     // For DF11, the last 7 bits may have an address/interogration indentifier (II)
                     // XORed in, so we ignore those bits
-                    if ((parity == crc) || ((df == 11) && (parity & 0xffff80) == (crc & 0xffff80)))
+                    // DF4 / DF5 / DF20 / DF21 have full address XORed in to parity. GUI will check if valid
+                    if ((parity == crc) || ((df == 11) && (parity & 0xffff80) == (crc & 0xffff80)) || (df == 4) || (df == 5) || (df == 20) || (df == 21))
                     {
                         m_demodStats.m_modesFrames++;
-                        // Pass to worker to feed to other servers
-                        if (m_sink->getMessageQueueToWorker())
+                        // Pass to GUI
+                        if (m_sink->getMessageQueueToGUI())
                         {
                             ADSBDemodReport::MsgReportADSB *msg = ADSBDemodReport::MsgReportADSB::create(
                                 QByteArray((char*)data, sizeof(data)),
                                 preambleCorrelation * m_correlationScale,
                                 preambleCorrelationOnes / samplesPerChip,
-                                rxDateTime(firstIdx, readBuffer));
+                                rxDateTime(firstIdx, readBuffer),
+                                m_crc.get());
+                            m_sink->getMessageQueueToGUI()->push(msg);
+                        }
+                        // Pass to worker to feed to other servers
+                        if (m_sink->getMessageQueueToWorker() && (parity == crc))
+                        {
+                            ADSBDemodReport::MsgReportADSB *msg = ADSBDemodReport::MsgReportADSB::create(
+                                QByteArray((char*)data, sizeof(data)),
+                                preambleCorrelation * m_correlationScale,
+                                preambleCorrelationOnes / samplesPerChip,
+                                rxDateTime(firstIdx, readBuffer),
+                                m_crc.get());
                             m_sink->getMessageQueueToWorker()->push(msg);
                         }
                     }
                     else
+                    {
                         m_demodStats.m_crcFails++;
+                    }
                 }
                 else
                     m_demodStats.m_typeFails++;

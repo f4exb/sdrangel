@@ -2,11 +2,9 @@
 
 <h2>Introduction</h2>
 
-The top and bottom bars of the device window are described [here](../../../sdrgui/device/readme.md)
+The ADS-B demodulator plugin can be used to receive and display ADS-B and Mode-S frames broadcast by aircraft. These contain information about an aircraft, such as position, altitude, heading and speed, broadcast by aircraft on 1090MHz. ADS-B and Mode-S frames have a chip rate of 2Mchip/s, so the baseband sample rate should be set to 2MSa/s or greater.
 
-The ADS-B demodulator plugin can be used to receive and display ADS-B aircraft information. This is information about an aircraft, such as position, altitude, heading and speed, broadcast by aircraft on 1090MHz, in the 1090ES (Extended Squitter) format. 1090ES frames have a chip rate of 2Mchip/s, so the baseband sample rate should be set to be greater than 2MSa/s.
-
-As well as displaying information received via ADS-B, the plugin can also combine information from a number of databases to display more information about the aircraft and flight, airports and weather.
+As well as displaying information received via ADS-B and Mode-S, the plugin can also combine information from a number of databases to display more information about the aircraft and flight, airports and weather.
 
 ![ADS-B Demodulator plugin GUI](../../../doc/img/ADSBDemod_plugin.png)
 
@@ -42,13 +40,11 @@ This is the bandwidth in MHz of the channel signal before demodulation.
 
 This specifies the channel sample rate the demodulator uses. Values of 2M-12MSa/s are supported, 2MSa/s steps. Ideally, this should be set to the same value as the baseband sample rate (the sample rate received from the radio). If it is different from the baseband sample rate, interpolation or decimation will be performed as needed to match the rates. However, interpolation currently requires a significant amount of processing power and may result in dropped samples.
 
-2 MSa/s should give decent decodes. Higher rates may be experienced with if your hardware allows it (radio device and processing power). However the higher the rate the more processing power required.
+2 MSa/s should give decent decodes. Higher rates may be experimented with if your hardware allows it (radio device and processing power). However the higher the rate the more processing power required.
 
-Higher channel sample rates may help decode more frames, but will require more processing power.
+<h3>6: S - Demodulate Mode-S frames</h3>
 
-<h3>6: S - Demodulate all Mode-S frames</h3>
-
-Checking the S button will enable demodulation of all Mode-S frames, not just ADS-B. Mode-S frames will not effect the data displayed in the table or map, but can be feed to aggregators.
+Checking the S button will enable demodulation of Mode-S ELS (Elementary Surveillance), EHS (Enhanced Surveillance) and MRAR (Meteorological Routine Air Report) frames.
 
 <h3>7: FP - Correlate Against Full Preamable</h3>
 
@@ -182,11 +178,18 @@ In the Speech and Command strings, variables can be used to substitute in data f
 * ${icao},
 * ${callsign}
 * ${aircraft}
-* ${latitude}
-* ${longitude}
+* ${verticalRate}
+* ${gs}
+* ${tas}
+* ${is}
+* ${mach}
+* ${selAltitude}
 * ${altitude}
-* ${speed}
+* $(verticalRate}
+* ${selHeading}
 * ${heading}
+* ${turnRate}
+* ${roll}
 * ${range}
 * ${azel}
 * ${category}
@@ -196,6 +199,18 @@ In the Speech and Command strings, variables can be used to substitute in data f
 * ${manufacturer}
 * ${owner}
 * ${operator}
+* ${ap}
+* ${vMode}
+* ${lMode}
+* ${baro}
+* ${headwind}
+* ${windSpeed}
+* ${windDirection}
+* ${staticPressure}
+* ${staticAirTemperature}
+* ${humidity}
+* ${latitude}
+* ${longitude}
 * ${rssi}
 * ${flightstatus}
 * ${departure}
@@ -225,32 +240,52 @@ Specify the SDRangel device set that will be have its centre frequency set when 
 
 <h3>ADS-B Data</h3>
 
-The table displays the decoded ADS-B data for each aircraft along side data available for the aircraft from the Opensky Network database (DB) and aviationstack (API). The data is not all able to be transmitted in a single ADS-B frame, so the table displays an amalgamation of the latest received data of each type.
+The table displays the decoded ADS-B and Mode-S data for each aircraft along side data available for the aircraft from the Opensky Network database (DB) and aviationstack (API). The data is not all able to be transmitted in a single ADS-B frame, so the table displays an amalgamation of the latest received data of each type.
 
 ![ADS-B Demodulator Data](../../../doc/img/ADSBDemod_plugin_table.png)
 
 * ICAO ID - 24-bit hexadecimal ICAO aircraft address. This is unique for each aircraft. (ADS-B)
-* Callsign - Aircraft callsign (which is sometimes also the flight number). (ADS-B)
+* Callsign - Aircraft callsign (which is sometimes also the flight number). (ADS-B / Mode-S)
 * Aircraft - The aircraft model. (DB)
 * Airline - The logo of the operator of the aircraft (or owner if no operator known). (DB)
-* Altitude (Alt) - Altitude in feet or metres. (ADS-B)
-* Speed (Spd) - Speed (either ground speed, indicated airspeed, or true airspeed) in knots or kph. (ADS-B)
-* Heading (Hd) - The direction the aircraft is heading, in degrees. (ADS-B)
-* Vertical rate (VR) - The vertical climb rate (or descent rate if negative) in feet/minute or m/s. (ADS-B)
-* Distance (D) - The distance to the aircraft from the receiving antenna in kilometres. The location of the receiving antenna is set under the Preferences > My Position menu.
+* Country - The flag of the country the aircraft is registered in. (DB)
+* GS - Groundspeed in knots or kilometers per hour. (Mode-S)
+* TAS - True airspeed in knots or kilometers per hour. (Mode-S)
+* IAS - Indicated airspeed in knots or kilometers per hour. (Mode-S)
+* Mach - Mach number. (Mode-S)
+* Sel Alt - Selected altitude (as set on MCP/FCU or by FMS) in feet or metres. (ADS-B / Mode-S)
+* Alt - Altitude in feet or metres. (ADS-B / Mode-S)
+* VR - The vertical climb rate (or descent rate if negative) in feet/minute or m/s. (ADS-B / Mode-S)
+* Sel Hd - Selected heading (as set on MCP/FCU or by FMS) in degrees. (ADS-B / Mode-S)
+* Hd - The aircraft heading or track, in degrees. (ADS-B / Mode-S)
+* TR - Turn rate in degrees per second. (Mode-S)
+* Roll - Roll angle in degrees. Positive is right wing down. (Mode-S)
+* D - The distance to the aircraft from the receiving antenna in kilometres. The location of the receiving antenna is set under the Preferences > My Position menu.
 * Az/El - The azimuth and elevation angles to the aircraft from the receiving antenna in degrees. These values can be sent to a rotator controller Feature plugin to track the aircraft.
-* Latitude (Lat) - Vertical position coordinate, in decimal degrees. (ADS-B)
-* Longitude (Lon) - Horizontal position coordinate, in decimal degrees. (ADS-B)
 * Category (Cat) - The vehicle category, such as Light, Large, Heavy or Rotorcraft. (ADS-B)
 * Status - The status of the flight, including if there is an emergency. (ADS-B)
-* Squawk - The squawk code (Mode-A transponder code). (ADS-B)
+* Squawk - The squawk code (Mode-A transponder code). (ADS-B / Mode-S)
 * Registration (Reg) - The registration number of the aircraft. (DB)
-* Country - The flag of the country the aircraft is registered in. (DB)
 * Registered - The date when the aircraft was registered. (DB)
 * Manufacturer - The manufacturer of the aircraft. (DB)
 * Owner - The owner of the aircraft. (DB)
-* Updated - The local time at which the last ADS-B message was received.
-* RX Frames - A count of the number of ADS-B frames received from this aircraft.
+* Operator - The operator ICAO. (DB)
+* AP - Whether autopilot is enabled. (ADS-B)
+* V Mode - Vertical navigation mode. This may be VNAV (Vertical navigation), HOLD (Altitude hold) or APP (Approach). (ADS-B / Mode-S)
+* L Mode - Lateral navigation mode. This may be LNAV (Lateral navigation) or APP (Approach). (ADS-B)
+* Baro - Baro setting in mb. (ADS-B / Mode-S)
+* H Wnd - Headwind in knots or kilometers per hour. Negative values indicate a tailwind. (Derived from Mode-S)
+* OAT - Outside air temperature in degrees Celsuis, estimated from Mach and TAS. (Derived from Mode-S)
+* Wnd - Wind speed in knots or kilometers per hour. (Mode-S)
+* Wnd - Wind direction in degrees. (Mode-S)
+* P - Average static air pressure in hectopascals. (Mode-S)
+* T - Static air temperature in degrees Celsuis. (Mode-S)
+* U - Humidity in percent. (Mode-S)
+* Latitude (Lat) - Vertical position coordinate, in decimal degrees. North positive. (ADS-B)
+* Longitude (Lon) - Horizontal position coordinate, in decimal degrees. East positive. (ADS-B)
+* Updated - The local time at which the last message was received. (ADS-B / Mode-S)
+* RX Frames - A count of the number of frames received from this aircraft. (ADS-B / Mode-S)
+* TIS-B - A count of the number of TIS-B frames for this aircraft. (ADS-B)
 * Correlation - Displays the minimum, average and maximum of the preamable correlation in dB for each received frame. These values can be used to help select a threshold setting. This correlation value is the ratio between the presence and absence of the signal corresponding to the "ones" and the "zeros" of the sync word adjusted by the bits ratio. It can be interpreted as a SNR estimation.
 * RSSI - This Received Signal Strength Indicator is based on the signal power during correlation estimation. This is the power sum during the expected presence of the signal i.e. the "ones" of the sync word.
 * Flight status - scheduled, active, landed, cancelled, incident or diverted. (API)

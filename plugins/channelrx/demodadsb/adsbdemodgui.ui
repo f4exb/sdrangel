@@ -875,6 +875,54 @@
           </column>
           <column>
            <property name="text">
+            <string>Country</string>
+           </property>
+           <property name="toolTip">
+            <string>Country of registration</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>GS (kn)</string>
+           </property>
+           <property name="toolTip">
+            <string>Groundspeed in knots or kilometers per hour</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>TAS (kn)</string>
+           </property>
+           <property name="toolTip">
+            <string>True airpeed in knots or kilometers per hour</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>IAS (kn)</string>
+           </property>
+           <property name="toolTip">
+            <string>Indicated airspeed in knots or kilometers per hour</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Mach</string>
+           </property>
+           <property name="toolTip">
+            <string>Mach number</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Sel Alt (ft)</string>
+           </property>
+           <property name="toolTip">
+            <string>Selected altitude in feet or metres (As set on MCP/FCU or by FMS)</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
             <string>Alt (ft)</string>
            </property>
            <property name="toolTip">
@@ -883,10 +931,18 @@
           </column>
           <column>
            <property name="text">
-            <string>Spd (kn)</string>
+            <string>VR (ft/m)</string>
            </property>
            <property name="toolTip">
-            <string>Speed in knots or kilometres per hour</string>
+            <string>Vertical climb rate in feet per minute or metres per second</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Sel Hd (°)</string>
+           </property>
+           <property name="toolTip">
+            <string>Selected heading in degrees (As set on MCP/FCU or by FMS)</string>
            </property>
           </column>
           <column>
@@ -894,15 +950,23 @@
             <string>Hd (°)</string>
            </property>
            <property name="toolTip">
-            <string>Aircraft heading in degrees</string>
+            <string>Aircraft heading / track in degrees</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>VR (ft/m)</string>
+            <string>TR (°/s)</string>
            </property>
            <property name="toolTip">
-            <string>Vertical climb rate in feet per minute or metres per second</string>
+            <string>Turn rate in degrees per second</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Roll (°)</string>
+           </property>
+           <property name="toolTip">
+            <string>Roll angle in degrees</string>
            </property>
           </column>
           <column>
@@ -919,22 +983,6 @@
            </property>
            <property name="toolTip">
             <string>Azimuth and elevation to aircraft from My Position. Double click to set as target.</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Lat (°)</string>
-           </property>
-           <property name="toolTip">
-            <string extracomment="Double click to centre the map on this aircraft">Latitude in degrees postive towards the North</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Lon (°)</string>
-           </property>
-           <property name="toolTip">
-            <string extracomment="Double click to centre the map on this aircraft">Longitude in degrees. Positive towards the East</string>
            </property>
           </column>
           <column>
@@ -971,14 +1019,6 @@
           </column>
           <column>
            <property name="text">
-            <string>Country</string>
-           </property>
-           <property name="toolTip">
-            <string>Country of registration</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
             <string>Registered</string>
            </property>
            <property name="toolTip">
@@ -1011,6 +1051,110 @@
           </column>
           <column>
            <property name="text">
+            <string>AP</string>
+           </property>
+           <property name="toolTip">
+            <string>Autopilot enabled</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>V Mode</string>
+           </property>
+           <property name="toolTip">
+            <string>MCP/FCU vertical mode</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>L Mode</string>
+           </property>
+           <property name="toolTip">
+            <string>MCP/FCU lateral mode</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Baro (mb)</string>
+           </property>
+           <property name="toolTip">
+            <string>Barometer setting in millibars</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>H Wnd (kn)</string>
+           </property>
+           <property name="toolTip">
+            <string>Headwind in knots or kilometers per hour</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>OAT (C)</string>
+           </property>
+           <property name="toolTip">
+            <string>Outside air temperature in degrees Celsuis estimated from Mach and TAS</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Wnd (kn)</string>
+           </property>
+           <property name="toolTip">
+            <string>Wind speed in knots</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Wnd (°)</string>
+           </property>
+           <property name="toolTip">
+            <string>Wind direction in degrees</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>P (hPa)</string>
+           </property>
+           <property name="toolTip">
+            <string>Static air pressure in hectopascals</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>T (C)</string>
+           </property>
+           <property name="toolTip">
+            <string>Static air temperature in degrees Celsuis</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>U (%)</string>
+           </property>
+           <property name="toolTip">
+            <string>Humidity in percent</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Lat (°)</string>
+           </property>
+           <property name="toolTip">
+            <string extracomment="Double click to centre the map on this aircraft">Latitude in degrees postive towards the North</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Lon (°)</string>
+           </property>
+           <property name="toolTip">
+            <string extracomment="Double click to centre the map on this aircraft">Longitude in degrees. Positive towards the East</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
             <string>Updated</string>
            </property>
            <property name="toolTip">
@@ -1023,6 +1167,14 @@
            </property>
            <property name="toolTip">
             <string>Number of ADS-B frames received from this aircraft</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>TIS-B</string>
+           </property>
+           <property name="toolTip">
+            <string>Number of TIS-B frames received with this aircrafts ICAO</string>
            </property>
           </column>
           <column>
