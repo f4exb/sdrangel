@@ -38,13 +38,11 @@ class SDRBASE_API PlaneSpottersPhoto : public QObject {
     };
 
 public:
-    QString m_icao;
     QString m_id;
     Thumbnail m_thumbnail;
     Thumbnail m_largeThumbnail;
     QString m_link;
-    QString m_photographer
-;
+    QString m_photographer;
     QPixmap m_pixmap;
 };
 
@@ -61,6 +59,7 @@ public:
 
 
     void getAircraftPhoto(const QString& icao);
+    void getAircraftPhotoByRegistration(const QString& registration);
 
 signals:
     void aircraftPhoto(const PlaneSpottersPhoto *photo);  // Called when photo is available.

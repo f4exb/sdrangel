@@ -39,15 +39,17 @@ public:
         QDateTime getDateTime() const { return m_dateTime; }
         float getPreambleCorrelation() const { return m_preambleCorrelation; }
         float getCorrelationOnes() const { return m_correlationOnes; }
+        unsigned getCRC() const { return m_crc; }
 
         static MsgReportADSB* create(
             QByteArray data,
             float preambleCorrelation,
             float correlationOnes,
-            QDateTime dateTime
+            QDateTime dateTime,
+            unsigned crc
         )
         {
-            return new MsgReportADSB(data, preambleCorrelation, correlationOnes, dateTime);
+            return new MsgReportADSB(data, preambleCorrelation, correlationOnes, dateTime, crc);
         }
 
     private:
@@ -55,18 +57,21 @@ public:
         QDateTime m_dateTime;
         float m_preambleCorrelation;
         float m_correlationOnes;
+        unsigned m_crc;
 
         MsgReportADSB(
             QByteArray data,
             float preambleCorrelation,
             float correlationOnes,
-            QDateTime dateTime
+            QDateTime dateTime,
+            unsigned crc
         ) :
             Message(),
             m_data(data),
             m_dateTime(dateTime),
             m_preambleCorrelation(preambleCorrelation),
-            m_correlationOnes(correlationOnes)
+            m_correlationOnes(correlationOnes),
+            m_crc(crc)
         {
         }
     };

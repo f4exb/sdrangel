@@ -76,6 +76,7 @@ private:
     Real m_correlationThresholdLinear;
     Real m_correlationScale;
     crcadsb m_crc;                      //!< Have as member to avoid recomputing LUT
+    QHash<int, bool> m_icaos;           //!< ICAO addresses that have been received
 
     QDateTime rxDateTime(int firstIdx, int readBuffer) const;
 

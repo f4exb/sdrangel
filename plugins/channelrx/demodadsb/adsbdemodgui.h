@@ -48,7 +48,7 @@
 
 #include "adsbdemodsettings.h"
 #include "ourairportsdb.h"
-#include "osndb.h"
+#include "util/osndb.h"
 
 class PluginAPI;
 class DeviceUISet;
@@ -85,7 +85,7 @@ public:
     }
 };
 
-// Data about an aircraft extracted from an ADS-B frames
+// Data about an aircraft extracted from ADS-B and Mode-S frames
 struct Aircraft {
     int m_icao;                 // 24-bit ICAO aircraft address
     QString m_icaoHex;
@@ -96,14 +96,7 @@ struct Aircraft {
     int m_altitude;             // Altitude in feet
     bool m_onSurface;           // Indicates if on surface or airbourne
     bool m_altitudeGNSS;        // Altitude is GNSS HAE (Height above WGS-84 ellipsoid) rather than barometric alitute (relative to 29.92 Hg)
-    int m_speed;                // Speed in knots
-    enum SpeedType {
-        GS,                     // Ground speed
-        TAS,                    // True air speed
-        IAS                     // Indicated air speed
-    } m_speedType;
-    static const char *m_speedTypeNames[];
-    float m_heading;            // Heading in degrees
+    float m_heading;            // Heading or track in degrees
     int m_verticalRate;         // Vertical climb rate in ft/min
     QString m_emitterCategory;  // Aircraft type
     QString m_status;           // Aircraft status
@@ -113,11 +106,32 @@ struct Aircraft {
     Real m_elevation;           // Elevation from station to aicraft
     QDateTime m_time;           // When last updated
 
+    int m_selAltitude;          // Selected altitude in MCP/FCU or FMS in feet
+    int m_selHeading;           // Selected heading in MCP/FCU in degrees
+    int m_baro;                 // Aircraft baro setting in mb (Mode-S)
+    float m_roll;               // In degrees
+    int m_groundspeed;          // In knots
+    float m_turnRate;           // In degrees per second
+    int m_trueAirspeed;         // In knots
+    int m_indicatedAirspeed;    // In knots
+    float m_mach;               // Mach number
+
+    bool m_bdsCapabilities[16][16]; // BDS capabilities are indicaited by BDS 1.7
+
     bool m_positionValid;       // Indicates if we have valid data for the above fields
     bool m_altitudeValid;
-    bool m_speedValid;
     bool m_headingValid;
     bool m_verticalRateValid;
+    bool m_selAltitudeValid;
+    bool m_selHeadingValid;
+    bool m_baroValid;
+    bool m_rollValid;
+    bool m_groundspeedValid;
+    bool m_turnRateValid;
+    bool m_trueAirspeedValid;
+    bool m_indicatedAirspeedValid;
+    bool m_machValid;
+    bool m_bdsCapabilitiesValid;
 
     // State for calculating position using two CPR frames
     bool m_cprValid[2];
@@ -126,6 +140,7 @@ struct Aircraft {
     QDateTime m_cprTime[2];
 
     int m_adsbFrameCount;       // Number of ADS-B frames for this aircraft
+    int m_tisBFrameCount;
     float m_minCorrelation;
     float m_maxCorrelation;
     float m_correlation;
@@ -158,8 +173,8 @@ struct Aircraft {
     QDateTime m_headingDateTime;
     QDateTime m_prevHeadingDateTime;
     int m_prevHeading;
-    float m_pitch;              // Estimated pitch based on vertical rate
-    float m_roll;               // Estimated roll based on rate of change in heading
+    float m_pitchEst;           // Estimated pitch based on vertical rate
+    float m_rollEst;            // Estimated roll based on rate of change in heading
 
     bool m_notified;            // Set when a notification has been made for this aircraft, so we don't repeat it
 
@@ -171,7 +186,6 @@ struct Aircraft {
     QTableWidgetItem *m_latitudeItem;
     QTableWidgetItem *m_longitudeItem;
     QTableWidgetItem *m_altitudeItem;
-    QTableWidgetItem *m_speedItem;
     QTableWidgetItem *m_headingItem;
     QTableWidgetItem *m_verticalRateItem;
     CustomDoubleTableWidgetItem *m_rangeItem;
@@ -198,6 +212,26 @@ struct Aircraft {
     QTableWidgetItem *m_staItem;
     QTableWidgetItem *m_etaItem;
     QTableWidgetItem *m_ataItem;
+    QTableWidgetItem *m_selAltitudeItem;
+    QTableWidgetItem *m_selHeadingItem;
+    QTableWidgetItem *m_baroItem;
+    QTableWidgetItem *m_apItem;
+    QTableWidgetItem *m_vModeItem;
+    QTableWidgetItem *m_lModeItem;
+    QTableWidgetItem *m_rollItem;
+    QTableWidgetItem *m_groundspeedItem;
+    QTableWidgetItem *m_turnRateItem;
+    QTableWidgetItem *m_trueAirspeedItem;
+    QTableWidgetItem *m_indicatedAirspeedItem;
+    QTableWidgetItem *m_machItem;
+    QTableWidgetItem *m_headwindItem;
+    QTableWidgetItem *m_estAirTempItem;
+    QTableWidgetItem *m_windSpeedItem;
+    QTableWidgetItem *m_windDirItem;
+    QTableWidgetItem *m_staticPressureItem;
+    QTableWidgetItem *m_staticAirTempItem;
+    QTableWidgetItem *m_humidityItem;
+    QTableWidgetItem *m_tisBItem;
 
     Aircraft(ADSBDemodGUI *gui) :
         m_icao(0),
@@ -206,18 +240,35 @@ struct Aircraft {
         m_altitude(0),
         m_onSurface(false),
         m_altitudeGNSS(false),
-        m_speed(0),
-        m_speedType(GS),
         m_heading(0),
         m_verticalRate(0),
         m_azimuth(0),
         m_elevation(0),
+        m_selAltitude(0),
+        m_selHeading(0),
+        m_baro(0),
+        m_roll(0.0f),
+        m_groundspeed(0),
+        m_turnRate(0.0f),
+        m_trueAirspeed(0),
+        m_indicatedAirspeed(0),
+        m_mach(0.0f),
         m_positionValid(false),
         m_altitudeValid(false),
-        m_speedValid(false),
         m_headingValid(false),
         m_verticalRateValid(false),
+        m_selAltitudeValid(false),
+        m_selHeadingValid(false),
+        m_baroValid(false),
+        m_rollValid(false),
+        m_groundspeedValid(false),
+        m_turnRateValid(false),
+        m_trueAirspeedValid(false),
+        m_indicatedAirspeedValid(false),
+        m_machValid(false),
+        m_bdsCapabilitiesValid(false),
         m_adsbFrameCount(0),
+        m_tisBFrameCount(0),
         m_minCorrelation(INFINITY),
         m_maxCorrelation(-INFINITY),
         m_correlation(0.0f),
@@ -234,13 +285,17 @@ struct Aircraft {
         m_flaps(0.0),
         m_rotorStarted(false),
         m_engineStarted(false),
-        m_pitch(0.0),
-        m_roll(0.0),
+        m_pitchEst(0.0),
+        m_rollEst(0.0),
         m_notified(false)
     {
-        for (int i = 0; i < 2; i++)
-        {
+        for (int i = 0; i < 2; i++) {
             m_cprValid[i] = false;
+        }
+        for (int i = 0; i < 16; i++) {
+            for (int j = 0; j < 16; j++) {
+                m_bdsCapabilities[i][j] = false;
+            }
         }
         // These are deleted by QTableWidget
         m_icaoItem = new QTableWidgetItem();
@@ -248,7 +303,6 @@ struct Aircraft {
         m_modelItem = new QTableWidgetItem();
         m_airlineItem = new QTableWidgetItem();
         m_altitudeItem = new QTableWidgetItem();
-        m_speedItem = new QTableWidgetItem();
         m_headingItem = new QTableWidgetItem();
         m_verticalRateItem = new QTableWidgetItem();
         m_rangeItem = new CustomDoubleTableWidgetItem();
@@ -277,6 +331,26 @@ struct Aircraft {
         m_staItem = new QTableWidgetItem();
         m_etaItem = new QTableWidgetItem();
         m_ataItem = new QTableWidgetItem();
+        m_selAltitudeItem = new QTableWidgetItem();
+        m_selHeadingItem = new QTableWidgetItem();
+        m_baroItem = new QTableWidgetItem();
+        m_apItem = new QTableWidgetItem();
+        m_vModeItem = new QTableWidgetItem();
+        m_lModeItem = new QTableWidgetItem();
+        m_rollItem = new QTableWidgetItem();
+        m_groundspeedItem = new QTableWidgetItem();
+        m_turnRateItem = new QTableWidgetItem();
+        m_trueAirspeedItem = new QTableWidgetItem();
+        m_indicatedAirspeedItem = new QTableWidgetItem();
+        m_machItem = new QTableWidgetItem();
+        m_headwindItem = new QTableWidgetItem();
+        m_estAirTempItem = new QTableWidgetItem();
+        m_windSpeedItem = new QTableWidgetItem();
+        m_windDirItem = new QTableWidgetItem();
+        m_staticPressureItem = new QTableWidgetItem();
+        m_staticAirTempItem = new QTableWidgetItem();
+        m_humidityItem = new QTableWidgetItem();
+        m_tisBItem = new QTableWidgetItem();
     }
 
     QString getImage() const;
@@ -826,11 +900,6 @@ private:
     AirportModel m_airportModel;
     AirspaceModel m_airspaceModel;
     NavAidModel m_navAidModel;
-    QHash<QString, QIcon *> m_airlineIcons; // Hashed on airline ICAO
-    QHash<QString, bool> m_airlineMissingIcons; // Hash containing which ICAOs we don't have icons for
-    QHash<QString, QIcon *> m_flagIcons;    // Hashed on country
-    QHash<QString, QString> *m_prefixMap;   // Registration to country (flag name)
-    QHash<QString, QString> *m_militaryMap;   // Operator airforce to military (flag name)
     QList<Airspace *> m_airspaces;
     QList<NavAid *> m_navAids;
 
@@ -867,6 +936,15 @@ private:
     QTimer m_redrawMapTimer;
     QNetworkAccessManager *m_networkManager;
 
+    static const char m_idMap[];
+    static const QString m_categorySetA[];
+    static const QString m_categorySetB[];
+    static const QString m_categorySetC[];
+    static const QString m_emergencyStatus[];
+    static const QString m_flightStatuses[];
+    static const QString m_hazardSeverity[];
+    static const QString m_fomSources[];
+
     explicit ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
     virtual ~ADSBDemodGUI();
 
@@ -881,12 +959,18 @@ private:
     bool updateLocalPosition(Aircraft *aircraft, double latitude, double longitude, bool surfacePosition);
     void sendToMap(Aircraft *aircraft, QList<SWGSDRangel::SWGMapAnimation *> *animations);
     Aircraft *getAircraft(int icao, bool &newAircraft);
+    void callsignToFlight(Aircraft *aircraft);
+    int roundTo50Feet(int alt);
+    bool calcAirTemp(Aircraft *aircraft);
     void handleADSB(
         const QByteArray data,
         const QDateTime dateTime,
         float correlation,
         float correlationOnes,
+        unsigned crc,
         bool updateModel);
+    void decodeModeS(const QByteArray data, int df, Aircraft *aircraft);
+    void decodeCommB(const QByteArray data, const QDateTime dateTime, int df, Aircraft *aircraft, bool &updatedCallsign);
     QList<SWGSDRangel::SWGMapAnimation *> *animate(QDateTime dateTime, Aircraft *aircraft);
     SWGSDRangel::SWGMapAnimation *gearAnimation(QDateTime startDateTime, bool up);
     SWGSDRangel::SWGMapAnimation *flapsAnimation(QDateTime startDateTime, float currentFlaps, float flaps);
@@ -915,10 +999,6 @@ private:
     void updateAirports();
     void updateAirspaces();
     void updateNavAids();
-    QString getAirlineIconPath(const QString &operatorICAO);
-    QIcon *getAirlineIcon(const QString &operatorICAO);
-    QString getFlagIconPath(const QString &country);
-    QIcon *getFlagIcon(const QString &country);
     void updateDeviceSetList();
     QAction *createCheckableItem(QString& text, int idx, bool checked);
     Aircraft* findAircraftByFlight(const QString& flight);
@@ -929,6 +1009,8 @@ private:
     void updatePhotoText(Aircraft *aircraft);
     void updatePhotoFlightInformation(Aircraft *aircraft);
     void findOnChannelMap(Aircraft *aircraft);
+    int squawkDecode(int code) const;
+    int gillhamToFeet(int n) const;
     int grayToBinary(int gray, int bits) const;
     void redrawMap();
     void applyImportSettings();

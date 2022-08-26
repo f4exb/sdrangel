@@ -76,7 +76,7 @@ void ADSBDemodSettings::resetToDefaults()
     m_tableFontSize = 9;
     m_displayDemodStats = false;
     m_correlateFullPreamble = true;
-    m_demodModeS = false;
+    m_demodModeS = true;
     m_deviceIndex = -1;
     m_autoResizeTableColumns = false;
     m_interpolatorPhaseSteps = 4;      // Higher than these two values will struggle to run in real-time
@@ -264,7 +264,7 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         d.readS32(26, &m_tableFontSize, 9);
         d.readBool(27, &m_displayDemodStats, false);
         d.readBool(28, &m_correlateFullPreamble, true);
-        d.readBool(29, &m_demodModeS, false);
+        d.readBool(29, &m_demodModeS, true);
         d.readBool(30, &m_autoResizeTableColumns, false);
         d.readS32(31, &m_interpolatorPhaseSteps, 4);
         d.readFloat(32, &m_interpolatorTapsPerPhase, 3.5f);

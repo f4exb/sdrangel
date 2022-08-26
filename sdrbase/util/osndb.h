@@ -24,15 +24,20 @@
 #include <QHash>
 #include <QList>
 #include <QDebug>
+#include <QIcon>
+#include <QMutex>
+#include <QStandardPaths>
+#include <QResource>
 
 #include <stdio.h>
 #include <string.h>
 
 #include "util/csv.h"
+#include "export.h"
 
 #define OSNDB_URL "https://opensky-network.org/datasets/metadata/aircraftDatabase.zip"
 
-struct AircraftInformation {
+struct SDRBASE_API AircraftInformation {
 
     int m_icao;
     QString m_registration;
@@ -42,6 +47,23 @@ struct AircraftInformation {
     QString m_operator;
     QString m_operatorICAO;
     QString m_registered;
+
+    static QHash<QString, QIcon *> m_airlineIcons; // Hashed on airline ICAO
+    static QHash<QString, bool> m_airlineMissingIcons; // Hash containing which ICAOs we don't have icons for
+    static QHash<QString, QIcon *> m_flagIcons;    // Hashed on country
+    static QHash<QString, QString> *m_prefixMap;   // Registration to country (flag name)
+    static QHash<QString, QString> *m_militaryMap;   // Operator airforce to military (flag name)
+    static QMutex m_mutex;
+
+    static void init()
+    {
+        QMutexLocker locker(&m_mutex);
+
+        // Read registration prefix to country map
+        m_prefixMap = CSV::hash(":/flags/regprefixmap.csv");
+        // Read operator air force to military map
+        m_militaryMap = CSV::hash(":/flags/militarymap.csv");
+    }
 
     // Read OpenSky Network CSV file
     // This is large and contains lots of data we don't want, so we convert to
@@ -219,6 +241,20 @@ struct AircraftInformation {
         return aircraftInfo;
     }
 
+    // Create hash table using registration as key
+    static QHash<QString, AircraftInformation *> *registrationHash(const QHash<int, AircraftInformation *> *in)
+    {
+        QHash<QString, AircraftInformation *> *out = new QHash<QString, AircraftInformation *>();
+        QHashIterator<int, AircraftInformation *> i(*in);
+        while (i.hasNext())
+        {
+            i.next();
+            AircraftInformation *info = i.value();
+            out->insert(info->m_registration, info);
+        }
+        return out;
+    }
+
     // Write a reduced size and validated version of the DB, so it loads quicker
     static bool writeFastDB(const QString &filename, QHash<int, AircraftInformation *> *aircraftInfo)
     {
@@ -311,6 +347,169 @@ struct AircraftInformation {
         qDebug() << "AircraftInformation::readFastDB - read " << cnt << " aircraft";
 
         return aircraftInfo;
+    }
+
+    // Get flag based on registration
+    QString getFlag() const
+    {
+        QString flag;
+        if (m_prefixMap)
+        {
+            int idx = m_registration.indexOf('-');
+            if (idx >= 0)
+            {
+                QString prefix;
+
+                // Some countries use AA-A - try these first as first letters are common
+                prefix = m_registration.left(idx + 2);
+                if (m_prefixMap->contains(prefix))
+                {
+                    flag = m_prefixMap->value(prefix);
+                }
+                else
+                {
+                    // Try letters before '-'
+                    prefix = m_registration.left(idx);
+                    if (m_prefixMap->contains(prefix)) {
+                        flag = m_prefixMap->value(prefix);
+                    }
+                }
+            }
+            else
+            {
+                // No '-' Could be one of a few countries or military.
+                // See: https://en.wikipedia.org/wiki/List_of_aircraft_registration_prefixes
+                if (m_registration.startsWith("N")) {
+                    flag = m_prefixMap->value("N"); // US
+                } else if (m_registration.startsWith("JA")) {
+                    flag = m_prefixMap->value("JA"); // Japan
+                } else if (m_registration.startsWith("HL")) {
+                    flag = m_prefixMap->value("HL"); // Korea
+                } else if (m_registration.startsWith("YV")) {
+                    flag = m_prefixMap->value("YV"); // Venezuela
+                } else if ((m_militaryMap != nullptr) && (m_militaryMap->contains(m_operator))) {
+                    flag = m_militaryMap->value(m_operator);
+                }
+            }
+        }
+        return flag;
+    }
+
+    static QString getOSNDBZipFilename()
+    {
+        return getDataDir() + "/aircraftDatabase.zip";
+    }
+
+    static QString getOSNDBFilename()
+    {
+        return getDataDir() + "/aircraftDatabase.csv";
+    }
+
+    static QString getFastDBFilename()
+    {
+        return getDataDir() + "/aircraftDatabaseFast.csv";
+    }
+
+    static QString getDataDir()
+    {
+        // Get directory to store app data in (aircraft & airport databases and user-definable icons)
+        QStringList locations = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation);
+        // First dir is writable
+        return locations[0];
+    }
+
+    static QString getAirlineIconPath(const QString &operatorICAO)
+    {
+        QString endPath = QString("/airlinelogos/%1.bmp").arg(operatorICAO);
+        // Try in user directory first, so they can customise
+        QString userIconPath = getDataDir() + endPath;
+        QFile file(userIconPath);
+        if (file.exists())
+        {
+            return userIconPath;
+        }
+        else
+        {
+            // Try in resources
+            QString resourceIconPath = ":" + endPath;
+            QResource resource(resourceIconPath);
+            if (resource.isValid())
+            {
+                return resourceIconPath;
+            }
+        }
+        return QString();
+    }
+
+    // Try to find an airline logo based on ICAO
+    static QIcon *getAirlineIcon(const QString &operatorICAO)
+    {
+        if (m_airlineIcons.contains(operatorICAO))
+        {
+            return m_airlineIcons.value(operatorICAO);
+        }
+        else
+        {
+            QIcon *icon = nullptr;
+            QString path = getAirlineIconPath(operatorICAO);
+            if (!path.isEmpty())
+            {
+                icon = new QIcon(path);
+                m_airlineIcons.insert(operatorICAO, icon);
+            }
+            else
+            {
+                if (!m_airlineMissingIcons.contains(operatorICAO))
+                {
+                    qDebug() << "ADSBDemodGUI: No airline logo for " << operatorICAO;
+                    m_airlineMissingIcons.insert(operatorICAO, true);
+                }
+            }
+            return icon;
+        }
+    }
+
+    static QString getFlagIconPath(const QString &country)
+    {
+        QString endPath = QString("/flags/%1.bmp").arg(country);
+        // Try in user directory first, so they can customise
+        QString userIconPath = getDataDir() + endPath;
+        QFile file(userIconPath);
+        if (file.exists())
+        {
+            return userIconPath;
+        }
+        else
+        {
+            // Try in resources
+            QString resourceIconPath = ":" + endPath;
+            QResource resource(resourceIconPath);
+            if (resource.isValid())
+            {
+                return resourceIconPath;
+            }
+        }
+        return QString();
+    }
+
+    // Try to find an flag logo based on a country
+    static QIcon *getFlagIcon(const QString &country)
+    {
+        if (m_flagIcons.contains(country))
+        {
+            return m_flagIcons.value(country);
+        }
+        else
+        {
+            QIcon *icon = nullptr;
+            QString path = getFlagIconPath(country);
+            if (!path.isEmpty())
+            {
+                icon = new QIcon(path);
+                m_flagIcons.insert(country, icon);
+            }
+            return icon;
+        }
     }
 
 };

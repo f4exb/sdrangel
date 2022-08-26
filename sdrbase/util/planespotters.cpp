@@ -57,11 +57,33 @@ void PlaneSpotters::getAircraftPhoto(const QString& icao)
     {
         // Create a new photo hash table entry
         PlaneSpottersPhoto *photo = new PlaneSpottersPhoto();
-        photo->m_icao = icao;
+        photo->m_id = icao;
         m_photos.insert(icao, photo);
 
         // Fetch from network
         QUrl url(QString("https://api.planespotters.net/pub/photos/hex/%1").arg(icao));
+        QNetworkRequest request(url);
+        request.setRawHeader("User-Agent", "SDRangel/1.0"); // Get 403 error without this
+        request.setOriginatingObject(photo);
+        m_networkManager->get(request);
+    }
+}
+
+void PlaneSpotters::getAircraftPhotoByRegistration(const QString& registration)
+{
+    if (m_photos.contains(registration))
+    {
+        emit aircraftPhoto(m_photos[registration]);
+    }
+    else
+    {
+        // Create a new photo hash table entry
+        PlaneSpottersPhoto *photo = new PlaneSpottersPhoto();
+        photo->m_id = registration;
+        m_photos.insert(registration, photo);
+
+        // Fetch from network
+        QUrl url(QString("https://api.planespotters.net/pub/photos/reg/%1").arg(registration));
         QNetworkRequest request(url);
         request.setRawHeader("User-Agent", "SDRangel/1.0"); // Get 403 error without this
         request.setOriginatingObject(photo);
@@ -75,7 +97,7 @@ void PlaneSpotters::handleReply(QNetworkReply* reply)
     {
         if (!reply->error())
         {
-            if (reply->url().path().startsWith("/pub/photos/hex")) {
+            if (reply->url().path().startsWith("/pub/photos/hex") || reply->url().path().startsWith("/pub/photos/reg")) {
                 parseJson((PlaneSpottersPhoto *)reply->request().originatingObject(), reply->readAll());
             } else {
                 parsePhoto((PlaneSpottersPhoto *)reply->request().originatingObject(), reply->readAll());
@@ -95,7 +117,9 @@ void PlaneSpotters::handleReply(QNetworkReply* reply)
 
 void PlaneSpotters::parsePhoto(PlaneSpottersPhoto *photo, QByteArray bytes)
 {
-    photo->m_pixmap.loadFromData(bytes);
+    if (!photo->m_pixmap.loadFromData(bytes)) {
+        qDebug() << "PlaneSpotters::parsePhoto: Failed to loadFromData - " << bytes.size() << "bytes of data" ;
+    }
     emit aircraftPhoto(photo);
 }
 
