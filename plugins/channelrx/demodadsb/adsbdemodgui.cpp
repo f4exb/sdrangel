@@ -1557,7 +1557,7 @@ void ADSBDemodGUI::handleADSB(
         else if (tc == 29)
         {
             // Target state and status
-            bool selAltitudeType = (data[5] >> 7) & 0x1;
+            //bool selAltitudeType = (data[5] >> 7) & 0x1;
             int selAltitudeFix = ((data[5] & 0x7f) << 4) | ((data[6] >> 4) & 0xf);
             if (selAltitudeFix != 0)
             {
@@ -1665,11 +1665,11 @@ void ADSBDemodGUI::handleADSB(
     }
     else if ((df == 4) || (df == 5))
     {
-        decodeModeS(data, dateTime, df, aircraft);
+        decodeModeS(data, df, aircraft);
     }
     else if ((df == 20) || (df == 21))
     {
-        decodeModeS(data, dateTime, df, aircraft);
+        decodeModeS(data, df, aircraft);
         decodeCommB(data, dateTime, df, aircraft, updatedCallsign);
     }
 
@@ -1682,7 +1682,7 @@ void ADSBDemodGUI::handleADSB(
     }
 }
 
-void ADSBDemodGUI::decodeModeS(const QByteArray data, const QDateTime dateTime, int df, Aircraft *aircraft)
+void ADSBDemodGUI::decodeModeS(const QByteArray data, int df, Aircraft *aircraft)
 {
     bool wasOnSurface = aircraft->m_onSurface;
     bool takenOff = false;
@@ -2060,7 +2060,7 @@ void ADSBDemodGUI::decodeCommB(const QByteArray data, const QDateTime dateTime, 
         bool hazardWindShearInconsistent = !hazardWindShearStatus && (hazardWindShear != 0);
 
         bool hazardMicroburstStatus = (data[4] >> 1) & 0x1;
-        int hazardMicroburst = ((data[4] & 0x1) << 1) || ((data[5] >> 7) & 0x1);
+        int hazardMicroburst = ((data[4] & 0x1) << 1) | ((data[5] >> 7) & 0x1);
         bool hazardMicroburstInconsistent = !hazardMicroburstStatus && (hazardMicroburst != 0);
 
         bool hazardIcingStatus = (data[5] >> 6) & 0x1;
@@ -2201,7 +2201,7 @@ void ADSBDemodGUI::decodeCommB(const QByteArray data, const QDateTime dateTime, 
         int arAltitudeRate = arAltitudeRateFix * 64; // Ft/min
         bool arAltitudeRateInconsistent = (abs(arAltitudeRate) > 6000) || (!arAltitudeRateStatus && (arAltitudeRateFix != 0));
 
-        bool bds_5_3 = !arMagHeadingInconsistent && !arIndicatedAirspeedInconsistent && !arMachInconsistent && !arTrueAirspeedInconsistent;
+        bool bds_5_3 = !arMagHeadingInconsistent && !arIndicatedAirspeedInconsistent && !arMachInconsistent && !arTrueAirspeedInconsistent && !arAltitudeRateInconsistent;
 
         // BDS 6,0 - Heading and speed report - EHS
 

@@ -969,7 +969,7 @@ private:
         float correlationOnes,
         unsigned crc,
         bool updateModel);
-    void decodeModeS(const QByteArray data, const QDateTime dateTime, int df, Aircraft *aircraft);
+    void decodeModeS(const QByteArray data, int df, Aircraft *aircraft);
     void decodeCommB(const QByteArray data, const QDateTime dateTime, int df, Aircraft *aircraft, bool &updatedCallsign);
     QList<SWGSDRangel::SWGMapAnimation *> *animate(QDateTime dateTime, Aircraft *aircraft);
     SWGSDRangel::SWGMapAnimation *gearAnimation(QDateTime startDateTime, bool up);

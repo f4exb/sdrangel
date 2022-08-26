@@ -195,6 +195,9 @@ void ADSBDemodSinkWorker::run()
                 {
                     // Got a valid frame
                     m_demodStats.m_adsbFrames++;
+                    // Get 24-bit ICAO and save in hash of ICAOs that have been seen
+                    unsigned icao = ((data[1] & 0xff) << 16) | ((data[2] & 0xff) << 8) | (data[3] & 0xff);
+                    m_icaos.insert(icao, true);
                     // Don't try to re-demodulate the same frame
                     // We could possibly allow a partial overlap here
                     readIdx += (ADS_B_ES_BITS+ADS_B_PREAMBLE_BITS)*ADS_B_CHIPS_PER_BIT*samplesPerChip - 1;
@@ -228,26 +231,39 @@ void ADSBDemodSinkWorker::run()
             {
                 int bytes;
 
-                m_crc.init();
-                if ((df == 0) || (df == 4) || (df == 5) || (df == 11))
+                // Determine number of bytes in frame depending on downlink format
+                if ((df == 0) || (df == 4) || (df == 5) || (df == 11)) {
                     bytes = 56/8;
-                else if ((df == 16) || (df == 20) || (df == 21) || (df >= 24))
+                } else if ((df == 16) || (df == 20) || (df == 21) || (df >= 24)) {
                     bytes = 112/8;
-                else
+                } else {
                     bytes = 0;
+                }
                 if (bytes > 0)
                 {
+                    // Extract received parity
                     int parity = (data[bytes-3] << 16) | (data[bytes-2] << 8) | data[bytes-1];
+                    // Calculate CRC on received frame
+                    m_crc.init();
                     m_crc.calculate(data, bytes-3);
                     int crc = m_crc.get();
+                    // DF4 / DF5 / DF20 / DF21 have ICAO address XORed in to parity.
+                    // Extract ICAO from parity and see if it matches an aircraft we've already
+                    // received an ADS-B frame from
+                    if ((df == 4) || (df == 5) || (df == 20) || (df == 21))
+                    {
+                        unsigned icao = (parity ^ crc) & 0xffffff;
+                        if (m_icaos.contains(icao)) {
+                            crc ^= icao;
+                        }
+                    }
                     // For DF11, the last 7 bits may have an address/interogration indentifier (II)
                     // XORed in, so we ignore those bits
-                    // DF4 / DF5 / DF20 / DF21 have full address XORed in to parity. GUI will check if valid
-                    if ((parity == crc) || ((df == 11) && (parity & 0xffff80) == (crc & 0xffff80)) || (df == 4) || (df == 5) || (df == 20) || (df == 21))
+                    if ((parity == crc) || ((df == 11) && ((parity & 0xffff80) == (crc & 0xffff80))))
                     {
                         m_demodStats.m_modesFrames++;
-                        // Pass to GUI
-                        if (m_sink->getMessageQueueToGUI())
+                        // Pass to GUI (only pass formats it can decode)
+                        if (m_sink->getMessageQueueToGUI() && ((df == 4) || (df == 5) || (df == 20) || (df == 21)))
                         {
                             ADSBDemodReport::MsgReportADSB *msg = ADSBDemodReport::MsgReportADSB::create(
                                 QByteArray((char*)data, sizeof(data)),
@@ -258,7 +274,7 @@ void ADSBDemodSinkWorker::run()
                             m_sink->getMessageQueueToGUI()->push(msg);
                         }
                         // Pass to worker to feed to other servers
-                        if (m_sink->getMessageQueueToWorker() && (parity == crc))
+                        if (m_sink->getMessageQueueToWorker())
                         {
                             ADSBDemodReport::MsgReportADSB *msg = ADSBDemodReport::MsgReportADSB::create(
                                 QByteArray((char*)data, sizeof(data)),
